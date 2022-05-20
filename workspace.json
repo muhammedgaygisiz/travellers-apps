@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "prices": "apps/prices",
-    "prices-e2e": "apps/prices-e2e"
+    "prices-e2e": "apps/prices-e2e",
+    "prices-home-feature": "libs/prices/home/feature"
   }
 }

@@ -13,8 +13,23 @@
         "polyfills": "apps/prices/src/polyfills.ts",
         "tsConfig": "apps/prices/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
-        "assets": ["apps/prices/src/favicon.ico", "apps/prices/src/assets"],
-        "styles": ["apps/prices/src/styles.scss"],
+        "assets": [
+          "apps/prices/src/favicon.ico", 
+          {
+            "glob": "**/*",
+            "input": "apps/prices/src/assets",
+            "output": "assets"
+          },
+          {
+            "glob": "**/*.svg",
+            "input": "node_modules/ionicons/dist/ionicons/svg",
+            "output": "./svg"
+          }
+        ],
+        "styles": [
+          "apps/prices/src/theme/variables.scss",
+          "apps/prices/src/global.scss"
+        ],
         "scripts": []
       },
       "configurations": {

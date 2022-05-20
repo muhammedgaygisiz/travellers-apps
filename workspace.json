@@ -4,6 +4,7 @@
   "projects": {
     "prices": "apps/prices",
     "prices-e2e": "apps/prices-e2e",
-    "prices-home-feature": "libs/prices/home/feature"
+    "prices-home-feature": "libs/prices/home/feature",
+    "prices-shell-feature": "libs/prices/shell/feature"
   }
 }

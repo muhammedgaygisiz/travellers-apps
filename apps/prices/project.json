@@ -14,7 +14,7 @@
         "tsConfig": "apps/prices/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
-          "apps/prices/src/favicon.ico", 
+          "apps/prices/src/favicon.ico",
           {
             "glob": "**/*",
             "input": "apps/prices/src/assets",

@@ -1,0 +1,25 @@
+{
+  "projectType": "library",
+  "sourceRoot": "libs/prices/home/feature/src",
+  "prefix": "travellers-apps",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/prices/home/feature"],
+      "options": {
+        "jestConfig": "libs/prices/home/feature/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/prices/home/feature/**/*.ts",
+          "libs/prices/home/feature/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

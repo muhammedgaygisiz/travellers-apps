@@ -1,0 +1,5 @@
+name: Travellers Apps CI
+
+on:
+  push:
+    branches: [*]

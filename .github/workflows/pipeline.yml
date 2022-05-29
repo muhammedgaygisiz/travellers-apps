@@ -1,0 +1,39 @@
+name: Travellers Apps CI
+
+on:
+  push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with: 
+          node-version: 16.x
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      # - run: npm test
+      #   continue-on-error: true
+      - name: Preview of Pull Request
+        if: github.event.pull_request.base.ref == 'develop'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRICES_BEC89 }}'
+          projectId: prices-bec89
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels
+      - name: Publish App to Firebase
+        if: github.ref == 'refs/heads/develop'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRICES_BEC89 }}'
+          channelId: live
+          projectId: prices-bec89
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels

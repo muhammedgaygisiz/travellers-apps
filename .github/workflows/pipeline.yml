@@ -16,8 +16,8 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
-      - run: npm test
-        continue-on-error: true
+      # - run: npm test
+      #   continue-on-error: true
       - name: Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0

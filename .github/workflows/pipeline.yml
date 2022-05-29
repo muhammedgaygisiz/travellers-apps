@@ -1,7 +1,10 @@
 name: Travellers Apps CI
 
 on:
-  push
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   build:

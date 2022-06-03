@@ -19,6 +19,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
+      - run: npm run build:storybook:prices
       # - run: npm test
       #   continue-on-error: true
       - name: Preview of Pull Request
@@ -28,6 +29,7 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRICES_BEC89 }}'
           projectId: prices-bec89
+          target: app
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
       - name: Publish App to Firebase
@@ -38,5 +40,27 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRICES_BEC89 }}'
           channelId: live
           projectId: prices-bec89
+          target: app
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels
+      - name: Storybook Preview of Pull Request
+        if: github.event.pull_request.base.ref == 'develop'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRICES_BEC89 }}'
+          projectId: prices-bec89
+          target: storybook
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels
+      - name: Publish Storybook to Firebase
+        if: github.ref == 'refs/heads/develop'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRICES_BEC89 }}'
+          channelId: live
+          projectId: prices-bec89
+          target: storybook
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels

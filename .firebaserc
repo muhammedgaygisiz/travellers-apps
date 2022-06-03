@@ -1,5 +1,15 @@
 {
-  "projects": {
-    "default": "prices-bec89"
+  "projects": {},
+  "targets": {
+    "prices-bec89": {
+      "hosting": {
+        "app": [
+          "prices-bec89"
+        ],
+        "storybook": [
+          "storybook-e0333"
+        ]
+      }
+    }
   }
 }

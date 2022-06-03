@@ -1,5 +1,7 @@
 {
-    "hosting": {
+    "hosting": [{
+      "target": "app",
+      "site": "prices-bec89",
       "public": "dist/apps/prices",
       "ignore": [
         "firebase.json",
@@ -12,5 +14,5 @@
           "destination": "/index.html"
         }
       ]
-    }
+    }]
   }

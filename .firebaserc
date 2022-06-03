@@ -1,0 +1,12 @@
+{
+  "projects": {},
+  "targets": {
+    "prices-bec89": {
+      "hosting": {
+        "app": [
+          "prices-bec89"
+        ]
+      }
+    }
+  }
+}

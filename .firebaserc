@@ -5,6 +5,9 @@
       "hosting": {
         "app": [
           "prices-bec89"
+        ],
+        "storybook": [
+          "storybook-e0333"
         ]
       }
     }

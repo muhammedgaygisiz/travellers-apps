@@ -1,0 +1,25 @@
+{
+  "projectType": "library",
+  "sourceRoot": "libs/prices/footer-tool-bar/feature/src",
+  "prefix": "ta",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/prices/footer-tool-bar/feature"],
+      "options": {
+        "jestConfig": "libs/prices/footer-tool-bar/feature/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/prices/footer-tool-bar/feature/**/*.ts",
+          "libs/prices/footer-tool-bar/feature/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

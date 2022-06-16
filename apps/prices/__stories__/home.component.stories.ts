@@ -17,6 +17,13 @@ export default {
 
 const Template: Story<HomeComponent> = (args: HomeComponent) => ({
   props: args,
+  template: `
+    <ion-app>
+      <ion-content>
+        <ta-home></ta-home>
+      </ion-content>
+    </ion-app>
+  `
 });
 
 export const Primary = Template.bind({});

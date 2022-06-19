@@ -118,7 +118,11 @@
         "outputDir": "dist/storybook/prices",
         "configDir": "apps/prices/.storybook",
         "browserTarget": "prices:build",
-        "compodoc": false
+        "compodoc": false,
+        "styles": [
+          "apps/prices/src/global.scss",
+          "apps/prices/src/theme/variables.scss"
+        ]
       },
       "configurations": {
         "ci": {

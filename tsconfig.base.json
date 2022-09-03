@@ -29,7 +29,8 @@
       ],
       "@travellers-apps/prices/shell/feature": [
         "libs/prices/shell/feature/src/index.ts"
-      ]
+      ],
+      "@travellers-apps/utils-common": ["libs/utils-common/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

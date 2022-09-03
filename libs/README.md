@@ -13,3 +13,8 @@ To create a feature use following command
 To add a component to the feature use following command
 
 `npm run nx -- g c card --project=prices-card-feature`
+
+
+For a plain library without framework specifics use following command
+
+`npm run nx -- g @nrwl/workspace:lib utils-common`

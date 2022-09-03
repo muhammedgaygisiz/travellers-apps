@@ -5,7 +5,7 @@ import {getIonicConfig} from "@travellers-apps/utils-common";
 import {PageFeatureModule} from "@travellers-apps/prices/page/feature";
 
 export default {
-  title: 'Page Component',
+  title: 'Components/Page',
   component: PageComponent,
   decorators: [
     moduleMetadata({

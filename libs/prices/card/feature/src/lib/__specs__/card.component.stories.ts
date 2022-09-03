@@ -5,7 +5,7 @@ import {CardFeatureModule} from "@travellers-apps/prices/card/feature";
 import {getIonicConfig} from "@travellers-apps/utils-common";
 
 export default {
-  title: 'Card Component',
+  title: 'Components/Card',
   component: CardComponent,
   decorators: [
     moduleMetadata({

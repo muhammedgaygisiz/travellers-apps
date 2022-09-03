@@ -6,9 +6,9 @@
 
   <ion-card-content>
     <div>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/Aroma_%28apple%29.jpg"/>
-      <h2>Apples</h2>
-      <h1>€ 0,20</h1>
+      <img [src]="entry?.src"/>
+      <h2>{{entry?.name}}</h2>
+      <h1>{{entry?.price | currency}}</h1>
     </div>
   </ion-card-content>
 </ion-card>

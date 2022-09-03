@@ -5,7 +5,7 @@ import {CardFeatureModule} from "@travellers-apps/prices/card/feature";
 import {getIonicConfig} from "@travellers-apps/utils-common";
 
 export default {
-  title: 'Card Component',
+  title: 'Components/Card',
   component: CardComponent,
   decorators: [
     moduleMetadata({
@@ -22,4 +22,10 @@ const Template: Story<CardComponent> = (args: CardComponent) => ({
 });
 
 export const Primary = Template.bind({});
-Primary.args = {};
+Primary.args = {
+  entry: {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/9/9e/Autumn_Red_peaches.jpg',
+    name: 'Peaches',
+    price: 0.2,
+  }
+};

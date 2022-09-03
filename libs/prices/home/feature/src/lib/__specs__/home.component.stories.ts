@@ -4,9 +4,10 @@ import {
   HomeComponent,
   HomeComponentModule,
 } from '@travellers-apps/prices/home/feature';
+import {dummyEntries} from "../dummies";
 
 export default {
-  title: 'Home Component',
+  title: 'Pages/Home',
   component: HomeComponent,
   decorators: [
     moduleMetadata({
@@ -20,4 +21,6 @@ const Template: Story<HomeComponent> = (args: HomeComponent) => ({
 });
 
 export const Primary = Template.bind({});
-Primary.args = {};
+Primary.args = {
+  mostSearchedEntries: dummyEntries
+};

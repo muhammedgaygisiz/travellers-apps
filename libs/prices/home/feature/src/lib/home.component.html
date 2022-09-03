@@ -1,5 +1,5 @@
 <ta-page>
-    <ta-card></ta-card>
-    <ta-card></ta-card>
-    <ta-card></ta-card>
+  <ng-container *ngFor="let entry of mostSearchedEntries">
+    <ta-card [entry]="entry"></ta-card>
+  </ng-container>
 </ta-page>

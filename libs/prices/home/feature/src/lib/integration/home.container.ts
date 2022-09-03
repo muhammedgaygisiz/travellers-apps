@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component} from "@angular/core";
-import {Observable, of} from "rxjs";
-import {dummyEntries} from "./dummies";
+import {Observable} from "rxjs";
+import {HomeService} from "./home.service";
 
 @Component({
   template: `
@@ -11,5 +11,10 @@ import {dummyEntries} from "./dummies";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeContainer {
-  mostSearchedEntries$: Observable<{}[]> = of(dummyEntries);
+  constructor(
+    private readonly homeService: HomeService
+  ) {
+  }
+
+  public mostSearchedEntries$: Observable<{}[]> = this.homeService.mostSearched$;
 }

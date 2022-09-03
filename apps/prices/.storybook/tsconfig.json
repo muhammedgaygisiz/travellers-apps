@@ -5,5 +5,10 @@
   },
 
   "exclude": ["../**/*.spec.ts"],
-  "include": ["../src/**/*", "../__stories__/**/*", "*.js"]
+  "include": [
+    "../src/**/*",
+    "../__stories__/**/*",
+    "*.js",
+    "../../../libs/prices/**/*.stories.*"
+  ]
 }

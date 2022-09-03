@@ -15,18 +15,19 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@travellers-apps/prices/footer-tool-bar/feature": [
-        "libs/prices/footer-tool-bar/feature/src/index.ts"
-      ],
-      "@travellers-apps/prices/header-tool-bar/feature": [
-        "libs/prices/header-tool-bar/feature/src/index.ts"
+      "@travellers-apps/prices/card/feature": [
+        "libs/prices/card/feature/src/index.ts"
       ],
       "@travellers-apps/prices/home/feature": [
         "libs/prices/home/feature/src/index.ts"
       ],
+      "@travellers-apps/prices/page/feature": [
+        "libs/prices/page/feature/src/index.ts"
+      ],
       "@travellers-apps/prices/shell/feature": [
         "libs/prices/shell/feature/src/index.ts"
-      ]
+      ],
+      "@travellers-apps/utils-common": ["libs/utils-common/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

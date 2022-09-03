@@ -3,10 +3,11 @@
   "version": 2,
   "projects": {
     "prices": "apps/prices",
+    "prices-card-feature": "libs/prices/card/feature",
     "prices-e2e": "apps/prices-e2e",
-    "prices-footer-tool-bar-feature": "libs/prices/footer-tool-bar/feature",
-    "prices-header-tool-bar-feature": "libs/prices/header-tool-bar/feature",
     "prices-home-feature": "libs/prices/home/feature",
-    "prices-shell-feature": "libs/prices/shell/feature"
+    "prices-page-feature": "libs/prices/page/feature",
+    "prices-shell-feature": "libs/prices/shell/feature",
+    "utils-common": "libs/utils-common"
   }
 }

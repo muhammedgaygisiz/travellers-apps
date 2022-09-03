@@ -4,6 +4,7 @@ import {StoreModule} from "@ngrx/store";
 import {EffectsModule} from "@ngrx/effects";
 import {StoreDevtoolsModule} from "@ngrx/store-devtools";
 
+// TODO: Find out how to use environment in module imports
 // StoreModule.forRoot(
 //   {},
 //   {

@@ -1,38 +1,28 @@
-import {NgModule} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {ModuleWithProviders} from '@angular/core';
 import {StoreModule} from "@ngrx/store";
 import {EffectsModule} from "@ngrx/effects";
 import {StoreDevtoolsModule} from "@ngrx/store-devtools";
+import {StoreRootModule} from "@ngrx/store/src/store_module";
 
-// TODO: Find out how to use environment in module imports
-// StoreModule.forRoot(
-//   {},
-//   {
-//     metaReducers: !environment.production ? [] : [],
-//     runtimeChecks: {
-//       strictActionImmutability: true,
-//       strictStateImmutability: true,
-//     },
-//   }
-// ),
-// EffectsModule.forRoot([]),
-// !environment.production ? StoreDevtoolsModule.instrument() : [],
+type Environment = { production: boolean };
 
-@NgModule({
-  imports: [
-    CommonModule,
-    StoreModule.forRoot(
-      {},
-      {
-        metaReducers: [],
-        runtimeChecks: {
-          strictActionImmutability: true,
-          strictStateImmutability: true,
+type ModuleForStore = ModuleWithProviders<StoreRootModule> | any[];
+
+export class PricesStoreModule {
+  static forRoot(environment: Environment): ModuleForStore[] {
+    return [
+      StoreModule.forRoot(
+        {},
+        {
+          metaReducers: !environment.production ? [] : [],
+          runtimeChecks: {
+            strictActionImmutability: true,
+            strictStateImmutability: true,
+          },
         }
-      }
-    ),
-    EffectsModule.forRoot([]),
-    StoreDevtoolsModule.instrument()
-  ],
-})
-export class PricesStoreModule { }
+      ),
+      EffectsModule.forRoot([]),
+      !environment.production ? StoreDevtoolsModule.instrument() : [],
+    ];
+  }
+}

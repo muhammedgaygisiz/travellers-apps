@@ -27,6 +27,9 @@
       "@travellers-apps/prices/shell/feature": [
         "libs/prices/shell/feature/src/index.ts"
       ],
+      "@travellers-apps/prices/store/feature": [
+        "libs/prices/store/feature/src/index.ts"
+      ],
       "@travellers-apps/utils-common": ["libs/utils-common/src/index.ts"]
     }
   },

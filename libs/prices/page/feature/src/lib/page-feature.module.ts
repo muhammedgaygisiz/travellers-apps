@@ -8,4 +8,4 @@ import {IonicModule} from "@ionic/angular";
   declarations: [PageComponent],
   exports: [PageComponent]
 })
-export class PricesPageFeatureModule {}
+export class PageFeatureModule {}

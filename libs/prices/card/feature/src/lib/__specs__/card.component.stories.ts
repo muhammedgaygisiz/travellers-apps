@@ -1,4 +1,4 @@
-import {CardComponent} from "../../../libs/prices/card/feature/src/lib/card.component";
+import {CardComponent} from "../card.component";
 import {Meta, moduleMetadata, Story} from "@storybook/angular";
 import {IonicModule} from "@ionic/angular";
 import {CardFeatureModule} from "@travellers-apps/prices/card/feature";

@@ -22,4 +22,10 @@ const Template: Story<CardComponent> = (args: CardComponent) => ({
 });
 
 export const Primary = Template.bind({});
-Primary.args = {};
+Primary.args = {
+  entry: {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/9/9e/Autumn_Red_peaches.jpg',
+    name: 'Peaches',
+    price: 0.2,
+  }
+};

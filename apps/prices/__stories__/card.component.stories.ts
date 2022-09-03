@@ -1,8 +1,8 @@
 import {CardComponent} from "../../../libs/prices/card/feature/src/lib/card.component";
 import {Meta, moduleMetadata, Story} from "@storybook/angular";
 import {IonicModule} from "@ionic/angular";
-import {ionicConfig} from "./utils/commons";
 import {CardFeatureModule} from "@travellers-apps/prices/card/feature";
+import {getIonicConfig} from "@travellers-apps/utils-common";
 
 export default {
   title: 'Card Component',
@@ -10,7 +10,7 @@ export default {
   decorators: [
     moduleMetadata({
       imports: [
-        IonicModule.forRoot(ionicConfig),
+        IonicModule.forRoot(getIonicConfig()),
         CardFeatureModule
       ]
     })

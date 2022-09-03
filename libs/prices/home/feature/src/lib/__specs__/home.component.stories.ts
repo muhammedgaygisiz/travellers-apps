@@ -1,10 +1,10 @@
 import { IonicModule } from '@ionic/angular';
 import { Meta, moduleMetadata, Story } from '@storybook/angular';
 import {
-  HomeComponent,
   HomeComponentModule,
 } from '@travellers-apps/prices/home/feature';
 import {dummyEntries} from "../dummies";
+import {HomeComponent} from "../components";
 
 export default {
   title: 'Pages/Home',

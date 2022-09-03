@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { HomeComponentRoutingModule } from './home-routing.module';
-import { HomeComponent } from './components/home.component';
+import { HomeComponent } from './components';
 import {CardFeatureModule} from "@travellers-apps/prices/card/feature";
 import {PageFeatureModule} from "@travellers-apps/prices/page/feature";
-import {HomeContainer} from "./integration/home.container";
+import {HomeContainer} from "./integration";
 
 @NgModule({
   imports: [

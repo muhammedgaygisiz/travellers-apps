@@ -12,4 +12,4 @@ To create a feature use following command
 
 To add a component to the feature use following command
 
-`npm run nx -- g c prices/card/feature/card`
+`npm run nx -- g c card --project=prices-card-feature`

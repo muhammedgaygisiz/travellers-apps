@@ -15,6 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@travellers-apps/prices/card/feature": [
+        "libs/prices/card/feature/src/index.ts"
+      ],
       "@travellers-apps/prices/footer-tool-bar/feature": [
         "libs/prices/footer-tool-bar/feature/src/index.ts"
       ],

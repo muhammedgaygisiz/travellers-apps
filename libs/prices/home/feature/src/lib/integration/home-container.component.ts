@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component} from "@angular/core";
 import {Observable} from "rxjs";
 import {HomeService} from "./home.service";
+import {MostSearchedItem} from "../store/model";
 
 @Component({
   template: `
@@ -16,5 +17,5 @@ export class HomeContainerComponent {
   ) {
   }
 
-  public mostSearchedEntries$: Observable<never[]> = this.homeService.mostSearched$;
+  public mostSearchedEntries$: Observable<MostSearchedItem[]> = this.homeService.mostSearched$;
 }

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Store} from "@ngrx/store";
-import {fromMostSearched} from "../store";
+import {fromMostSearched} from "@travellers-apps/prices/store/feature";
 
 @Injectable({
   providedIn: 'root'

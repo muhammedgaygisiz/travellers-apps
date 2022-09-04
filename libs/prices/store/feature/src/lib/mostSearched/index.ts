@@ -1,11 +1,12 @@
-import {featureKey} from "./key";
+import {key} from "./key";
+import { MostSearchedItem } from "./model";
 import {reducer} from "./reducer";
 import {selectAllItems} from "./selectors";
 
 const fromMostSearched = {
-  featureKey,
+  key,
   reducer,
   selectAllItems
-};
+}
 
-export {fromMostSearched};
+export {fromMostSearched, MostSearchedItem};

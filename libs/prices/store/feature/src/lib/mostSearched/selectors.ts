@@ -1,9 +1,9 @@
 import {createFeatureSelector, createSelector} from "@ngrx/store";
-import {featureKey} from "./key";
+import {key} from "./key";
 import {adapter} from "./adapter";
 import {State} from "./state";
 
-const mostSearchedState = createFeatureSelector<State>(featureKey);
+const mostSearchedState = createFeatureSelector<State>(key);
 
 const {selectAll} = adapter.getSelectors();
 

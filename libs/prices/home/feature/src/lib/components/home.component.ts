@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {MostSearchedItem} from "../store/model";
+import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
 
 @Component({
   selector: 'ta-home',

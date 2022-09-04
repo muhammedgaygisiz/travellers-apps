@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component} from "@angular/core";
 import {Observable} from "rxjs";
 import {HomeService} from "./home.service";
-import {MostSearchedItem} from "../store/model";
+import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
 
 @Component({
   template: `

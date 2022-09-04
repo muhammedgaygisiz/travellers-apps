@@ -16,5 +16,5 @@ export class HomeContainerComponent {
   ) {
   }
 
-  public mostSearchedEntries$: Observable<any> = this.homeService.mostSearched$;
+  public mostSearchedEntries$: Observable<never[]> = this.homeService.mostSearched$;
 }

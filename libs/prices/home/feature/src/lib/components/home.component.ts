@@ -9,5 +9,5 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 export class HomeComponent {
 
   @Input()
-  mostSearchedEntries: {}[] | null = [];
+  mostSearchedEntries: never[] | null = [];
 }

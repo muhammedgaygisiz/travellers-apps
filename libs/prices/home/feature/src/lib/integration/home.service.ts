@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
 import {Store} from "@ngrx/store";
-import {fromMostSearchedEntries} from "@travellers-apps/prices/store/feature";
+import {of} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
 })
 export class HomeService {
-  mostSearched$ = this.store.select(fromMostSearchedEntries.mostSearchedState);
+  mostSearched$ = of([]);
 
   constructor(
     private store: Store

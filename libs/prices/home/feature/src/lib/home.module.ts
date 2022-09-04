@@ -5,7 +5,7 @@ import { HomeComponentRoutingModule } from './home-routing.module';
 import { HomeComponent } from './components';
 import {CardFeatureModule} from "@travellers-apps/prices/card/feature";
 import {PageFeatureModule} from "@travellers-apps/prices/page/feature";
-import {HomeContainer} from "./integration";
+import {HomeContainerComponent} from "./integration";
 
 @NgModule({
   imports: [
@@ -15,7 +15,7 @@ import {HomeContainer} from "./integration";
     CardFeatureModule,
     PageFeatureModule,
   ],
-  declarations: [HomeComponent, HomeContainer],
+  declarations: [HomeComponent, HomeContainerComponent],
   exports: [HomeComponent],
 })
 export class HomeComponentModule {}

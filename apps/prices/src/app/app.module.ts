@@ -4,13 +4,14 @@ import { PricesShellModule } from '@travellers-apps/prices/shell/feature';
 import { AppComponent } from './app.component';
 import { getIonicConfig } from '@travellers-apps/utils-common';
 import {PricesStoreModule} from '@travellers-apps/prices/store/feature';
+import {environment} from "../environments/environment";
 
 @NgModule({
   declarations: [AppComponent],
   imports: [
     IonicModule.forRoot(getIonicConfig()),
     PricesShellModule,
-    PricesStoreModule,
+    PricesStoreModule.forRoot(environment),
   ],
   bootstrap: [AppComponent],
 })

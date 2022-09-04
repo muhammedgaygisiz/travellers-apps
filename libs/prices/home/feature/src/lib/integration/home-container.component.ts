@@ -10,11 +10,11 @@ import {HomeService} from "./home.service";
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeContainer {
+export class HomeContainerComponent {
   constructor(
     private readonly homeService: HomeService
   ) {
   }
 
-  public mostSearchedEntries$: Observable<{}[]> = this.homeService.mostSearched$;
+  public mostSearchedEntries$: Observable<any> = this.homeService.mostSearched$;
 }

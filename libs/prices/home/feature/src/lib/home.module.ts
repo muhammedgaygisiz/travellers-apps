@@ -5,7 +5,7 @@ import { HomeComponentRoutingModule } from './home-routing.module';
 import { HomeComponent } from './components';
 import {CardFeatureModule} from "@travellers-apps/prices/card/feature";
 import {PageFeatureModule} from "@travellers-apps/prices/page/feature";
-import {HomeContainerComponent} from "./integration";
+import { HomeContainerComponent } from './integration';
 
 @NgModule({
   imports: [

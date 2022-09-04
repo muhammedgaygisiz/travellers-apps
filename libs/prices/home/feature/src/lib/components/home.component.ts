@@ -1,4 +1,5 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
 
 @Component({
   selector: 'ta-home',
@@ -9,5 +10,5 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 export class HomeComponent {
 
   @Input()
-  mostSearchedEntries: {}[] | null = [];
+  mostSearchedEntries: MostSearchedItem[] | null = [];
 }

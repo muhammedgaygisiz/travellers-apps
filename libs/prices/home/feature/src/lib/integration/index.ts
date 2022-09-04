@@ -1,1 +1,3 @@
-export {HomeContainerComponent} from "./home-container.component";
+import {HomeContainerComponent} from "./home-container.component";
+
+export {HomeContainerComponent};

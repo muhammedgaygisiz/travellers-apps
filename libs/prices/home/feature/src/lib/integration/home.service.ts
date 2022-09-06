@@ -11,4 +11,8 @@ export class HomeService {
   constructor(
     private store: Store
   ) { }
+
+  loadMostSearchedEntries() {
+    this.store.dispatch(fromMostSearched.loadItems())
+  }
 }

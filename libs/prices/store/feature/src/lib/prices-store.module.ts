@@ -1,9 +1,10 @@
 import {ModuleWithProviders} from '@angular/core';
-import {ActionReducer, createReducer, MetaReducer, StoreModule} from "@ngrx/store";
+import {ActionReducer, MetaReducer, StoreModule} from "@ngrx/store";
 import {EffectsModule} from "@ngrx/effects";
 import {StoreDevtoolsModule} from "@ngrx/store-devtools";
 import {StoreRootModule} from "@ngrx/store/src/store_module";
 import {fromMostSearched} from "./mostSearched";
+import {MostSearchedItemsEffects} from "./mostSearched/effects";
 
 type Environment = { production: boolean };
 
@@ -38,6 +39,7 @@ export class PricesStoreModule {
       ),
       StoreModule.forFeature(fromMostSearched.key, fromMostSearched.reducer),
       EffectsModule.forRoot([]),
+      EffectsModule.forFeature([MostSearchedItemsEffects]),
       !environment.production ? StoreDevtoolsModule.instrument() : [],
     ];
   }

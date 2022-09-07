@@ -1,6 +1,5 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
-import {NavController} from "@ionic/angular";
 
 @Component({
   selector: 'ta-home',
@@ -12,10 +11,7 @@ export class HomeComponent {
   @Input()
   mostSearchedEntries: MostSearchedItem[] | null = [];
 
-  constructor(private readonly navController: NavController) {
-  }
+  @Output()
+  public addItemClick: EventEmitter<void> = new EventEmitter();
 
-  public onAddItemClick() {
-    this.navController.navigateForward(['/add-item']);
-  }
 }

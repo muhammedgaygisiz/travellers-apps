@@ -1,4 +1,4 @@
-<ta-page (addItemClick)="onAddItemClick()">
+<ta-page (addItemClick)="addItemClick.emit()">
   <ng-container *ngFor="let entry of mostSearchedEntries">
     <ta-card [entry]="entry"></ta-card>
   </ng-container>

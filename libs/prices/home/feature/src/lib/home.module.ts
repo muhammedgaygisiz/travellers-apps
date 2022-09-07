@@ -15,7 +15,10 @@ import { HomeContainerComponent } from './integration';
     CardFeatureModule,
     PageFeatureModule,
   ],
-  declarations: [HomeComponent, HomeContainerComponent],
+  declarations: [
+    HomeComponent,
+    HomeContainerComponent
+  ],
   exports: [HomeComponent],
 })
 export class HomeComponentModule {}

@@ -27,7 +27,7 @@ export class HomeContainerComponent implements OnInit {
     this.homeService.loadMostSearchedEntries();
   }
 
-  public onAddItemClick() {
-    this.navController.navigateForward(['/add-item']);
+  public async onAddItemClick() {
+    await this.navController.navigateForward(['/add-item']);
   }
 }

@@ -10,6 +10,13 @@ const routes: Routes = [
       ),
   },
   {
+    path: 'add-item',
+    loadChildren: () =>
+      import('@travellers-apps/prices/add-item/feature').then(
+        (m) => m.AddItemModule
+      ),
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',

@@ -5,4 +5,5 @@ export const getIonicConfig = (): IonicConfig => ({
   spinner: 'crescent',
   mode: 'ios',
   backButtonIcon: 'arrow-back-outline',
+  animated: true,
 });

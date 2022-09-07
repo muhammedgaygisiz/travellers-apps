@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
 
 @Component({
@@ -8,7 +8,10 @@ import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
-
   @Input()
   mostSearchedEntries: MostSearchedItem[] | null = [];
+
+  @Output()
+  public addItemClick: EventEmitter<void> = new EventEmitter();
+
 }

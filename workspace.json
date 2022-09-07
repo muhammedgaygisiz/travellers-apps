@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "prices": "apps/prices",
+    "prices-add-item-feature": "libs/prices/add-item/feature",
     "prices-card-feature": "libs/prices/card/feature",
     "prices-e2e": "apps/prices-e2e",
     "prices-home-feature": "libs/prices/home/feature",

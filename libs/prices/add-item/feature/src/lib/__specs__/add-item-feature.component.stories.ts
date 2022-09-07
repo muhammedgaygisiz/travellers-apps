@@ -1,12 +1,18 @@
 import {Meta, moduleMetadata, Story} from "@storybook/angular";
-import {AddItemComponent} from "../add-item.component";
+import {AddItemComponent} from "../components/add-item.component";
+import {getIonicConfig} from "@travellers-apps/utils-common";
+import {IonicModule} from "@ionic/angular";
+import {AddItemModule} from "@travellers-apps/prices/add-item/feature";
 
 export default {
   title: 'Pages/Add Item',
   component: AddItemComponent,
   decorators: [
     moduleMetadata({
-
+      imports: [
+        IonicModule.forRoot(getIonicConfig()),
+        AddItemModule,
+      ]
     })
   ]
 } as Meta<AddItemComponent>;

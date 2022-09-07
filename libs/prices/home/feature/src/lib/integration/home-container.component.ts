@@ -6,7 +6,8 @@ import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
 @Component({
   template: `
     <ta-home
-        [mostSearchedEntries]="mostSearchedEntries$ | async"
+      class="ion-page"
+      [mostSearchedEntries]="mostSearchedEntries$ | async"
     ></ta-home>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

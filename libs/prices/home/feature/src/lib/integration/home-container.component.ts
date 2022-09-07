@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component} from "@angular/core";
+import {ChangeDetectionStrategy, Component, OnInit} from "@angular/core";
 import {Observable} from "rxjs";
 import {HomeService} from "./home.service";
 import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
@@ -11,11 +11,15 @@ import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeContainerComponent {
+export class HomeContainerComponent implements OnInit{
   constructor(
     private readonly homeService: HomeService
   ) {
   }
 
   public mostSearchedEntries$: Observable<MostSearchedItem[]> = this.homeService.mostSearched$;
+
+  ngOnInit() {
+    this.homeService.loadMostSearchedEntries();
+  }
 }

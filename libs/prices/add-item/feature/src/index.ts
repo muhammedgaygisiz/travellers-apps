@@ -1,1 +1,1 @@
-export * from './lib/prices-add-item-feature.module';
+export * from './lib/add-item-feature.module';

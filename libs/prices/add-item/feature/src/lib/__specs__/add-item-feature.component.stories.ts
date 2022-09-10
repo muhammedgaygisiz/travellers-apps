@@ -3,6 +3,7 @@ import {AddItemComponent} from "../components/add-item.component";
 import {getIonicConfig} from "@travellers-apps/utils-common";
 import {IonicModule} from "@ionic/angular";
 import {AddItemModule} from "@travellers-apps/prices/add-item/feature";
+import {RouterTestingModule} from "@angular/router/testing";
 
 export default {
   title: 'Pages/Add Item',
@@ -12,6 +13,7 @@ export default {
       imports: [
         IonicModule.forRoot(getIonicConfig()),
         AddItemModule,
+        RouterTestingModule,
       ]
     })
   ]

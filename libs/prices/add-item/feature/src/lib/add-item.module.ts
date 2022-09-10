@@ -4,6 +4,7 @@ import {IonicModule} from "@ionic/angular";
 import {PageFeatureModule} from "@travellers-apps/prices/page/feature";
 import {AddItemRoutingModule} from "./add-item-routing.module";
 import {AddItemComponent} from "./components/add-item.component";
+import { AddItemContainerComponent } from './integration/add-item-container.component';
 
 @NgModule({
   imports: [
@@ -12,7 +13,10 @@ import {AddItemComponent} from "./components/add-item.component";
     AddItemRoutingModule,
     PageFeatureModule
   ],
-  declarations: [AddItemComponent],
+  declarations: [
+    AddItemComponent,
+    AddItemContainerComponent,
+  ],
   exports: [AddItemComponent]
 })
 export class AddItemModule {}

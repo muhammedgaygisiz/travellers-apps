@@ -1,6 +1,13 @@
 <div class="ion-page">
   <ion-header>
     <ion-toolbar>
+      <ion-buttons slot="start" *ngIf="enableBackButton">
+        <ion-back-button
+          defaultHref="/home"
+          color="white"
+        ></ion-back-button>
+      </ion-buttons>
+
       <ion-title>
         <ion-icon name="pricetag-outline"></ion-icon>
         Prices

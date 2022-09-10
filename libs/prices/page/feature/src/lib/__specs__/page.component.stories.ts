@@ -3,6 +3,7 @@ import {Meta, moduleMetadata, Story} from "@storybook/angular";
 import {IonicModule} from "@ionic/angular";
 import {getIonicConfig} from "@travellers-apps/utils-common";
 import {PageFeatureModule} from "@travellers-apps/prices/page/feature";
+import {RouterTestingModule} from "@angular/router/testing";
 
 export default {
   title: 'Components/Page',
@@ -12,6 +13,7 @@ export default {
       imports: [
         IonicModule.forRoot(getIonicConfig()),
         PageFeatureModule,
+        RouterTestingModule
       ]
     })
   ]
@@ -20,11 +22,13 @@ export default {
 const Template: Story<PageComponent> = (args: PageComponent) => ({
   props: args,
   template: `
-      <ta-page>
+      <ta-page [enableBackButton]="enableBackButton">
         <p>Some dummy content</p>
       </ta-page>
   `
 });
 
 export const Primary = Template.bind({});
-Primary.args = {};
+Primary.args = {
+  enableBackButton: false
+};

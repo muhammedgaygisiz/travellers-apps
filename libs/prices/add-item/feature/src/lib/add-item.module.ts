@@ -5,13 +5,15 @@ import {PageFeatureModule} from "@travellers-apps/prices/page/feature";
 import {AddItemRoutingModule} from "./add-item-routing.module";
 import {AddItemComponent} from "./components/add-item.component";
 import { AddItemContainerComponent } from './integration/add-item-container.component';
+import {ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
   imports: [
     CommonModule,
     IonicModule,
     AddItemRoutingModule,
-    PageFeatureModule
+    PageFeatureModule,
+    ReactiveFormsModule,
   ],
   declarations: [
     AddItemComponent,

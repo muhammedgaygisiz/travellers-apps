@@ -1,3 +1,62 @@
 <ta-page [enableBackButton]="true">
-  Content of add item page
+  <div class="ion-padding">
+    <form [formGroup]="priceFormGroup">
+
+      <ion-item lines="full">
+        <ion-label position="floating">Product Name</ion-label>
+        <ion-input
+          type="text"
+          formControlName="productName"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item lines="full">
+        <ion-label position="floating">Price</ion-label>
+        <ion-input
+          type="text"
+          formControlName="price"
+          value=""
+        ></ion-input>
+      </ion-item>
+
+      <ion-item lines="full">
+        <ion-label position="floating">Location</ion-label>
+        <ion-input
+          type="text"
+          formControlName="location"
+        ></ion-input>
+      </ion-item>
+
+      <ion-button
+        class="ion-margin-top"
+        expand="block"
+        [disabled]="!priceFormGroup.valid"
+        (click)="save.emit(priceFormGroup.value)"
+      >Save</ion-button>
+
+      <div class="ion-margin-top">
+        <ion-text
+          class="ion-padding"
+          color="danger"
+          *ngIf="!priceFormGroup.controls['productName'].pristine && !priceFormGroup.controls['productName'].valid"
+        >
+          Product Name is required.
+        </ion-text>
+        <ion-text
+          class="ion-padding"
+          color="danger"
+          *ngIf="!priceFormGroup.controls['price'].pristine && !priceFormGroup.controls['price'].valid"
+        >
+          Price is required.
+        </ion-text>
+        <ion-text
+          class="ion-padding"
+          color="danger"
+          *ngIf="!priceFormGroup.controls['location'].pristine && !priceFormGroup.controls['location'].valid"
+        >
+          Location is required.
+        </ion-text>
+      </div>
+    </form>
+  </div>
 </ta-page>

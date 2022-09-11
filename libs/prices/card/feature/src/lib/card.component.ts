@@ -1,4 +1,5 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
 
 @Component({
   selector: 'ta-card',
@@ -8,8 +9,5 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 })
 export class CardComponent {
   @Input()
-  public entry: any;
-
-  constructor() {}
-
+  public entry: MostSearchedItem | null = null;
 }

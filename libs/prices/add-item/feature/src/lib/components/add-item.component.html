@@ -32,30 +32,37 @@
         expand="block"
         [disabled]="!priceFormGroup.valid"
         (click)="save.emit(priceFormGroup.value)"
-      >Save</ion-button>
+      >Save
+      </ion-button>
 
       <div class="ion-margin-top">
-        <ion-text
-          class="ion-padding"
-          color="danger"
-          *ngIf="!priceFormGroup.controls['productName'].pristine && !priceFormGroup.controls['productName'].valid"
-        >
-          Product Name is required.
-        </ion-text>
-        <ion-text
-          class="ion-padding"
-          color="danger"
-          *ngIf="!priceFormGroup.controls['price'].pristine && !priceFormGroup.controls['price'].valid"
-        >
-          Price is required.
-        </ion-text>
-        <ion-text
-          class="ion-padding"
-          color="danger"
-          *ngIf="!priceFormGroup.controls['location'].pristine && !priceFormGroup.controls['location'].valid"
-        >
-          Location is required.
-        </ion-text>
+        <div>
+          <ion-text
+            class="ion-padding"
+            color="danger"
+            *ngIf="!priceFormGroup.controls['productName'].pristine && !priceFormGroup.controls['productName'].valid"
+          >
+            Product Name is required.
+          </ion-text>
+        </div>
+        <div>
+          <ion-text
+            class="ion-padding"
+            color="danger"
+            *ngIf="!priceFormGroup.controls['price'].pristine && !priceFormGroup.controls['price'].valid"
+          >
+            Price is required.
+          </ion-text>
+        </div>
+        <div>
+          <ion-text
+            class="ion-padding"
+            color="danger"
+            *ngIf="!priceFormGroup.controls['location'].pristine && !priceFormGroup.controls['location'].valid"
+          >
+            Location is required.
+          </ion-text>
+        </div>
       </div>
     </form>
   </div>

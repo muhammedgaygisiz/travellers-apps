@@ -19,8 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-  build:
-    needs: checkout
+  setup-node:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +28,19 @@ jobs:
         with:
           node-version: 16.x
           cache: 'npm'
+
+  install-npm-dependencies:
+    needs: [checkout, setup-node]
+    runs-on: ubuntu-latest
+
+    steps:
       - run: npm ci
+
+  build:
+    needs: install-npm-dependencies
+    runs-on: ubuntu-latest
+
+    steps:
       - run: npm run nx -- affected --target=build
       - run: npm run nx -- affected --target=build-storybook
       # - run: npm test

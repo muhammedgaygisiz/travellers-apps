@@ -18,8 +18,8 @@ jobs:
           node-version: 16.x
           cache: 'npm'
       - run: npm ci
-      - run: npm run nx -- affected:build
-      - run: npm run build:storybook:prices
+      - run: npm run nx -- affected:build --base=origin/develop
+      - run: npm run nx -- affected:build-storybook --base=origin/develop
       # - run: npm test
       #   continue-on-error: true
       - name: Preview of Pull Request

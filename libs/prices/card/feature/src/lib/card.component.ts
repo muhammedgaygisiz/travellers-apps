@@ -1,5 +1,7 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { MostSearchedItem } from '@travellers-apps/prices/store/feature';
+
+console.log('Some log!');
 
 @Component({
   selector: 'ta-card',

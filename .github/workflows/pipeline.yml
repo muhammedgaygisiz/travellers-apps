@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ develop ]
 
+env:
+  NX_BASE=origin/develop
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,7 +23,7 @@ jobs:
           node-version: 16.x
           cache: 'npm'
       - run: npm ci
-      - run: npm run nx -- affected --target=build --base=develop --head=${GITHUB_REF##*/}
+      - run: npm run nx -- affected --target=build
       - run: npm run build:storybook:prices
       # - run: npm test
       #   continue-on-error: true

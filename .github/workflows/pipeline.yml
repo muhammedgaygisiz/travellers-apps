@@ -20,6 +20,7 @@ jobs:
           fetch-depth: 0
 
   setup-node:
+    needs: checkout
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +31,7 @@ jobs:
           cache: 'npm'
 
   install-npm-dependencies:
-    needs: [checkout, setup-node]
+    needs: [setup-node]
     runs-on: ubuntu-latest
 
     steps:

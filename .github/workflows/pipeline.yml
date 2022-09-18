@@ -7,7 +7,7 @@ on:
     branches: [ develop ]
 
 env:
-  NX_BASE: origin/develop
+  NX_BASE: develop
 
 jobs:
   build:

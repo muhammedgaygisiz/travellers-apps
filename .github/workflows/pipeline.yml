@@ -26,7 +26,6 @@ jobs:
       - run: npm ci
 
   build:
-    needs: install-npm-dependencies
     runs-on: ubuntu-latest
 
     steps:

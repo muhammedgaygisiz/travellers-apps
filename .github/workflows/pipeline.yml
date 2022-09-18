@@ -10,7 +10,7 @@ env:
   NX_BASE: origin/develop
 
 jobs:
-  build-app:
+  build-prices:
     runs-on: ubuntu-latest
 
     steps:

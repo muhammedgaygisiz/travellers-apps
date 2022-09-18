@@ -10,7 +10,7 @@ env:
   NX_BASE: origin/develop
 
 jobs:
-  build:
+  build-app:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +25,6 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run nx -- affected --target=build
-      - run: npm run nx -- affected --target=build-storybook
       # - run: npm test
       #   continue-on-error: true
       - name: Preview of Pull Request
@@ -49,6 +48,24 @@ jobs:
           target: app
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
+
+  build-storybook:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run nx -- affected --target=build-storybook
+      # - run: npm test
+      #   continue-on-error: true
       - name: Storybook Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0

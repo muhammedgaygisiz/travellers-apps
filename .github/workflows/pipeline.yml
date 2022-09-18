@@ -18,8 +18,8 @@ jobs:
           node-version: 16.x
           cache: 'npm'
       - run: npm ci
-      - run: npm run nx -- affected:build --base=develop
-      - run: npm run nx -- affected:build-storybook --base=develop
+      - run: npm run nx -- affected --target=build --base=origin/develop --head=${GITHUB_REF##*/}
+      - run: npm run build:storybook:prices
       # - run: npm test
       #   continue-on-error: true
       - name: Preview of Pull Request

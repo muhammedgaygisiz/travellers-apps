@@ -41,6 +41,8 @@ jobs:
           ls -l node_modules/.cache
           ls -l node_modules/.cache/nx
       - run: npm run nx -- affected --target=build
+        if: steps.cache.outputs.cache-hit == 'true'
+      - run: npm run nx -- build prices
         if: steps.cache.outputs.cache-hit != 'true'
       # - run: npm test
       #   continue-on-error: true

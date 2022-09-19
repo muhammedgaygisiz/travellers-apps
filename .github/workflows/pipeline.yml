@@ -21,12 +21,11 @@ jobs:
           node-version: 16.x
           cache: 'npm'
       - name: Cache Nx
-        id: cache
+        id: nx-cache
         uses: actions/cache@v2
         with:
           path: node_modules/.cache/nx
           key: cache-nx-${{ hashFiles('package-lock') }}-${{ github.sha }}
-          restore-keys: cache-nx-${{ hashFiles('package-lock') }}-${{ github.sha }}
       - run: |
           echo "CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}"
       - name: Derive appropriate SHAs for base and head for `nx affected` commands

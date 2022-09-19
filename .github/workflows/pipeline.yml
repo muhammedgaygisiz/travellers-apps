@@ -21,7 +21,7 @@ jobs:
           node-version: 16.x
           cache: 'npm'
       - name: Cache Nx
-        id: nx-cache
+        id: nxcache
         uses: actions/cache@v2
         with:
           path: node_modules/.cache/nx
@@ -42,7 +42,7 @@ jobs:
           ls -l node_modules/.cache
           ls -l node_modules/.cache/nx
       - run: |
-          echo "CACHE_HIT: ${{ steps.nx-cache.outputs.cache-hit }}"
+          echo "CACHE_HIT: ${{ steps.nxcache.outputs.cache-hit }}"
       - run: npm run nx -- affected --target=build
         if: steps.nx-cache.outputs.cache-hit == 'true'
       - run: npm run nx -- build prices
@@ -87,7 +87,7 @@ jobs:
           node-version: 16.x
           cache: 'npm'
       - name: Cache Nx
-        id: nx-cache
+        id: nxcache
         uses: actions/cache@v2
         with:
           path: node_modules/.cache/nx
@@ -99,9 +99,9 @@ jobs:
           main-branch-name: 'develop'
       - run: npm ci
       - run: npm run nx -- affected --target=build-storybook
-        if: steps.nx-cache.outputs.cache-hit == 'true'
+        if: steps.nxcache.outputs.cache-hit == 'true'
       - run: npm run nx -- build-storybook prices
-        if: steps.nx-cache.outputs.cache-hit == 'false'
+        if: steps.nxcache.outputs.cache-hit == 'false'
       # - run: npm test
       #   continue-on-error: true
       - name: Storybook Preview of Pull Request

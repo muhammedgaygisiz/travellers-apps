@@ -86,12 +86,22 @@ jobs:
         with:
           node-version: 16.x
           cache: 'npm'
+      - name: Cache Nx
+        id: nx-cache
+        uses: actions/cache@v2
+        with:
+          path: node_modules/.cache/nx
+          key: cache-nx-storybook-${{ hashFiles('package.lock') }}-${{ github.sha }}
+          restore-keys: cache-nx-storybook-${{ hashFiles('package.lock') }}
       - name: Derive appropriate SHAs for base and head for `nx affected` commands
         uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'develop'
       - run: npm ci
       - run: npm run nx -- affected --target=build-storybook
+        if: steps.nx-cache.outputs.cache-hit == 'true'
+      - run: npm run nx -- build-storybook prices
+        if: steps.nx-cache.outputs.cache-hit == 'false'
       # - run: npm test
       #   continue-on-error: true
       - name: Storybook Preview of Pull Request

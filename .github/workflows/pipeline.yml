@@ -29,7 +29,7 @@ jobs:
         with:
           main-branch-name: 'develop'
       - run: npm ci
-      - run: npm run nx -- build prices
+      - run: npm run nx -- affected
       #- run: npm run nx -- affected --target=build
       - name: Preview of Pull Request
         continue-on-error: true

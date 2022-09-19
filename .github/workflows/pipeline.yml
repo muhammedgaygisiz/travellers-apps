@@ -29,6 +29,8 @@ jobs:
           echo "HEAD: ${{ env.NX_HEAD }}"
           ls -l
       - run: npm ci
+      - run: |
+          ls -l
       - run: npm run nx -- affected --target=build
       # - run: npm test
       #   continue-on-error: true

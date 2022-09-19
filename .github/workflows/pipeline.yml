@@ -27,13 +27,13 @@ jobs:
           path: node_modules/.cache/nx
           key: cache-nx-${{ hashFiles('package-lock') }}-${{ github.sha }}
           restore-keys: cache-nx-${{ hashFiles('package-lock') }}-${{ github.sha }}
+      - run: |
+          echo "CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}"
       - name: Derive appropriate SHAs for base and head for `nx affected` commands
         uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'develop'
       - run: npm ci
-      - run: |
-          echo "CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}"
       - run: npm run nx -- affected --target=build
         if: steps.cache.outputs.cache-hit == 'true'
       - run: npm run nx -- build prices

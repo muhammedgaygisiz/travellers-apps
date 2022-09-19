@@ -23,7 +23,12 @@ jobs:
         with:
           node-version: 16.x
           cache: 'npm'
-      - uses: nrwl/nx-set-shas@v3
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v3
+
+      - run: |
+          echo "BASE: ${{ env.NX_BASE }}"
+          echo "HEAD: ${{ env.NX_HEAD }}"
       - run: npm ci
       - run: npm run nx -- affected --target=build
       # - run: npm test

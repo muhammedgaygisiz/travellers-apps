@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: 16.x
           cache: 'npm'
+      - uses: nrwl/nx-set-shas@v3
       - run: npm ci
       - run: npm run nx -- affected --target=build
       # - run: npm test

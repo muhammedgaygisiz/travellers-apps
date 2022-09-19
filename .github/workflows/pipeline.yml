@@ -21,6 +21,7 @@ jobs:
           node-version: 16.x
           cache: 'npm'
       - name: Cache Nx
+        id: nx-cache
         uses: actions/cache@v2
         with:
           path: node_modules/.cache/nx
@@ -43,9 +44,9 @@ jobs:
       - run: |
           echo "CACHE_HIT: ${{ cache-hit }}"
       - run: npm run nx -- affected --target=build
-        if: steps.cache.outputs.cache-hit == 'true'
+        if: steps.nx-cache.outputs.cache-hit == 'true'
       - run: npm run nx -- build prices
-        if: steps.cache.outputs.cache-hit == 'false'
+        if: steps.nx-cache.outputs.cache-hit == 'false'
       # - run: npm test
       #   continue-on-error: true
       - name: Preview of Pull Request

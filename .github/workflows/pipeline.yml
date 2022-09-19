@@ -31,6 +31,7 @@ jobs:
       - run: npm ci
       - run: npm run nx -- build prices
       - run: npm run nx -- affected --target=build
+      - run: ls -l node_modules
       - name: Preview of Pull Request
         continue-on-error: true
         if: github.event.pull_request.base.ref == 'develop'

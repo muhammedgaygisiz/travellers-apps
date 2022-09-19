@@ -105,6 +105,7 @@ jobs:
       # - run: npm test
       #   continue-on-error: true
       - name: Storybook Preview of Pull Request
+        continue-on-error: true
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -115,6 +116,7 @@ jobs:
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
       - name: Publish Storybook to Firebase
+        continue-on-error: true
         if: github.ref == 'refs/heads/develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

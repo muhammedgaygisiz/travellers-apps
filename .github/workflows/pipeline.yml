@@ -35,9 +35,9 @@ jobs:
       - run: |
           echo "CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}"
       - run: npm run nx -- affected --target=build
-        if: steps.nx-cache.outputs.cache-hit == 'true'
+        if: steps.cache.outputs.cache-hit == 'true'
       - run: npm run nx -- build prices
-        if: steps.nx-cache.outputs.cache-hit == 'false'
+        if: steps.cache.outputs.cache-hit == 'false'
       # - run: npm test
       #   continue-on-error: true
       - name: Preview of Pull Request

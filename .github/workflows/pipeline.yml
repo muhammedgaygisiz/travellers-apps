@@ -29,7 +29,6 @@ jobs:
         with:
           main-branch-name: 'develop'
       - run: npm ci
-      - run: npm run nx -- build prices
       - run: npm run nx -- affected --target=build
       - run: ls -l node_modules
       - name: Preview of Pull Request

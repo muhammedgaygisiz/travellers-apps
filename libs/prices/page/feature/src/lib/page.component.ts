@@ -1,4 +1,10 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 
 @Component({
   selector: 'ta-page',
@@ -10,8 +16,9 @@ export class PageComponent {
   @Input()
   enableBackButton = false;
 
+  @Input()
+  enableAddButton = true;
+
   @Output()
   public addItemClick: EventEmitter<void> = new EventEmitter();
-
-  constructor() {}
 }

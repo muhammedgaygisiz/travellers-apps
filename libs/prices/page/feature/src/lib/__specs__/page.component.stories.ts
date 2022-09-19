@@ -1,9 +1,9 @@
-import {PageComponent} from "../page.component";
-import {Meta, moduleMetadata, Story} from "@storybook/angular";
-import {IonicModule} from "@ionic/angular";
-import {getIonicConfig} from "@travellers-apps/utils-common";
-import {PageFeatureModule} from "@travellers-apps/prices/page/feature";
-import {RouterTestingModule} from "@angular/router/testing";
+import { PageComponent } from '../page.component';
+import { Meta, moduleMetadata, Story } from '@storybook/angular';
+import { IonicModule } from '@ionic/angular';
+import { getIonicConfig } from '@travellers-apps/utils-common';
+import { PageFeatureModule } from '../page-feature.module';
+import { RouterTestingModule } from '@angular/router/testing';
 
 export default {
   title: 'Components/Page',
@@ -13,22 +13,26 @@ export default {
       imports: [
         IonicModule.forRoot(getIonicConfig()),
         PageFeatureModule,
-        RouterTestingModule
-      ]
-    })
-  ]
+        RouterTestingModule,
+      ],
+    }),
+  ],
 } as Meta<PageComponent>;
 
 const Template: Story<PageComponent> = (args: PageComponent) => ({
   props: args,
   template: `
-      <ta-page [enableBackButton]="enableBackButton">
+      <ta-page
+        [enableBackButton]="enableBackButton"
+        [enableAddButton]="enableAddButton"
+      >
         <p>Some dummy content</p>
       </ta-page>
-  `
+  `,
 });
 
 export const Primary = Template.bind({});
 Primary.args = {
-  enableBackButton: false
+  enableBackButton: false,
+  enableAddButton: true,
 };

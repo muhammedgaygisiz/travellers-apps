@@ -20,6 +20,12 @@ jobs:
         with:
           node-version: 16.x
           cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@v2
+        with:
+          path: node_modules/.cache/nx
+          key: cache-nx-${{ hashFiles('package.lock') }}-${{ github.sha }}
+          restore-keys: cache-nx-${{ hashFiles('package.lock') }}
       - name: Derive appropriate SHAs for base and head for `nx affected` commands
         uses: nrwl/nx-set-shas@v3
         with:

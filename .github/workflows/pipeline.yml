@@ -40,6 +40,8 @@ jobs:
           ls -l node_modules
           ls -l node_modules/.cache
           ls -l node_modules/.cache/nx
+      - run: |
+          echo "CACHE_HIT: ${{ cache-hit }}"
       - run: npm run nx -- affected --target=build
         if: steps.cache.outputs.cache-hit == 'true'
       - run: npm run nx -- build prices

@@ -6,8 +6,9 @@ on:
   pull_request:
     branches: [ develop ]
 
-env:
-  NX_BASE: origin/develop
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-prices:
@@ -23,10 +24,12 @@ jobs:
         with:
           node-version: 16.x
           cache: 'npm'
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: 'develop'
       - run: npm ci
       - run: npm run nx -- affected --target=build
-      # - run: npm test
-      #   continue-on-error: true
       - name: Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -62,10 +65,12 @@ jobs:
         with:
           node-version: 16.x
           cache: 'npm'
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: 'develop'
       - run: npm ci
       - run: npm run nx -- affected --target=build-storybook
-      # - run: npm test
-      #   continue-on-error: true
       - name: Storybook Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0

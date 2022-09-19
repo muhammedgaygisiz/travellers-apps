@@ -50,6 +50,7 @@
     "@nrwl/eslint-plugin-nx": "14.7.3",
     "@nrwl/jest": "14.7.3",
     "@nrwl/linter": "14.7.3",
+    "@nrwl/nx-cloud": "^14.6.2",
     "@nrwl/storybook": "14.7.3",
     "@nrwl/workspace": "14.7.3",
     "@storybook/addon-essentials": "~6.4.12",

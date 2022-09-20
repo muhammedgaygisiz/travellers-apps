@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-prices:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +30,7 @@ jobs:
           main-branch-name: 'develop'
       - run: npm ci
       - run: npm run nx -- affected --target=build
+      - run: npm run nx -- affected --target=build-storybook
       - name: Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -69,8 +70,6 @@ jobs:
         uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'develop'
-      - run: npm ci
-      - run: npm run nx -- affected --target=build-storybook
       - name: Storybook Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0

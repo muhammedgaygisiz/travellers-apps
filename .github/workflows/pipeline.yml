@@ -34,6 +34,7 @@ jobs:
       - run: npm ci
       - run: npm run nx -- affected --target=build
       - run: npm run nx -- affected --target=build-storybook
+
       - name: Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -44,6 +45,7 @@ jobs:
           target: app
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
+
       - name: Publish App to Firebase
         if: github.ref == 'refs/heads/develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -56,23 +58,6 @@ jobs:
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
-  build-storybook:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-          cache: 'npm'
-      - name: Derive appropriate SHAs for base and head for `nx affected` commands
-        uses: nrwl/nx-set-shas@v3
-        with:
-          main-branch-name: 'develop'
       - name: Storybook Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -83,6 +68,7 @@ jobs:
           target: storybook
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
+
       - name: Publish Storybook to Firebase
         if: github.ref == 'refs/heads/develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -94,3 +80,4 @@ jobs:
           target: storybook
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
+

@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ develop ]
 
+env:
+  NX_BRANCH: ${{ github.ref_name }}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true

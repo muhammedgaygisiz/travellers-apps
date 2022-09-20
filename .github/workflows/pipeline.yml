@@ -11,36 +11,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-app:
     runs-on: ubuntu-latest
 
     steps:
-      - name: PR Branch Name
-        id: vars
-        uses: mdecoleman/pr-branch-name@1.2.0
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set Branch Name for nx cloud
-        run: echo "NX_BRANCH=${{ steps.vars.outputs.branch }}" >> $GITHUB_ENV
-      - run: echo ${{env.NX_BRANCH}}
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
           cache: 'npm'
-      - name: Derive appropriate SHAs for base and head for `nx affected` commands
-        uses: nrwl/nx-set-shas@v3
-        with:
-          main-branch-name: 'develop'
-      - run: npm ci
-      - run: npm run nx -- affected --target=build
-      - run: npm run nx -- build-storybook --project=prices --skip-nx-cache
 
-      - name: Preview of Pull Request
+      - run: npm ci
+
+      - run: npm run nx -- build prices
+
+      - name: Prices Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -51,7 +39,7 @@ jobs:
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
-      - name: Publish App to Firebase
+      - name: Prices Publish to Firebase
         if: github.ref == 'refs/heads/develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -62,6 +50,23 @@ jobs:
           target: app
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
+
+  build-storybook:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm run nx -- build-storybook prices
 
       - name: Storybook Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
@@ -74,7 +79,7 @@ jobs:
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
-      - name: Publish Storybook to Firebase
+      - name: Storybook Publish to Firebase
         if: github.ref == 'refs/heads/develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

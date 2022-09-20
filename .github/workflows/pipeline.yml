@@ -38,7 +38,7 @@ jobs:
           main-branch-name: 'develop'
       - run: npm ci
       - run: npm run nx -- affected --target=build
-      - run: npm run nx -- affected --target build-storybook
+      - run: npm run nx -- build-storybook --project=prices --skip-nx-prices
 
       - name: Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'

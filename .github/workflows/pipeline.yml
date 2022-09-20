@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ develop ]
 
-env:
-  NX_BRANCH: ${{ github.ref_name }}
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
@@ -18,7 +15,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: echo ${{github.ref_name}} - ${{github.ref}}
+      - name: PR Branch Name
+        id: vars
+        uses: mdecoleman/pr-branch-name@1.2.0
+      - name: Set Branch Name for nx cloud
+        run: echo "NX_BRANCH=${{ steps.vars.outputs.branch }}" >> $GITHUB_ENV
+      - run: echo ${{NX_BRANCH}}
       - name: Checkout repository
         uses: actions/checkout@v3
         with:

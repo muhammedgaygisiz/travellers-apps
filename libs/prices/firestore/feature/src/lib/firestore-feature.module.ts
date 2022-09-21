@@ -9,6 +9,6 @@ import { Environment, ModuleForStore } from '@travellers-apps/utils-common';
 })
 export class FirestoreFeatureModule {
   static forRoot(environment: Environment): ModuleForStore[] {
-    return [AngularFireModule.initializeApp(environment.firebaseConfig)];
+    return [AngularFireModule.initializeApp(environment.firebaseConfig || {})];
   }
 }

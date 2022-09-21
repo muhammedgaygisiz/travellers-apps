@@ -1,3 +1,5 @@
+[![Travellers Apps CI](https://github.com/muhammedgaygisiz/travellers-apps/actions/workflows/pipeline.yml/badge.svg)](https://github.com/muhammedgaygisiz/travellers-apps/actions/workflows/pipeline.yml)
+
 # TravellersApps
 
 - [Demo](https://prices-bec89.web.app)

@@ -1,1 +1,2 @@
-export * from './lib/prices-firestore-feature.module';
+export * from './lib/firestore-feature.module';
+export { MostSearchedService } from './lib/most-searched.service';

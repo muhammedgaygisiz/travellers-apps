@@ -1,5 +1,5 @@
 export interface MostSearchedItem {
-  id: string,
+  id: string;
   src: string;
   name: string;
   price: number;

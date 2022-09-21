@@ -1,5 +1,11 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {MostSearchedItem} from "@travellers-apps/prices/store/feature";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
+import { MostSearchedItem } from '@travellers-apps/utils-common';
 
 @Component({
   selector: 'ta-home',
@@ -13,5 +19,4 @@ export class HomeComponent {
 
   @Output()
   public addItemClick: EventEmitter<void> = new EventEmitter();
-
 }

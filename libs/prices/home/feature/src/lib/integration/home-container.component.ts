@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HomeService } from './home.service';
-import { MostSearchedItem } from '@travellers-apps/prices/store/feature';
 import { NavController } from '@ionic/angular';
+import { MostSearchedItem } from '@travellers-apps/utils-common';
 
 @Component({
   template: `

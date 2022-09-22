@@ -6,13 +6,6 @@ on:
   pull_request:
     branches: [ develop ]
 
-env:
-  NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
-  NX_APP_AUTH_DOMAIN: ${{ secrets.NX_APP_AUTH_DOMAIN }}
-  NX_APP_PROJECT_ID: ${{ secrets.NX_APP_PROJECT_ID }}
-  NX_APP_STORAGE_BUCKET: ${{ secrets.NX_APP_STORAGE_BUCKET }}
-  NX_APP_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_MESSAGING_SENDER_ID }}
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
@@ -36,6 +29,12 @@ jobs:
 
       - name: Build Prices App
         run: npm run nx -- build prices
+        env:
+          NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
+          NX_APP_AUTH_DOMAIN: ${{ secrets.NX_APP_AUTH_DOMAIN }}
+          NX_APP_PROJECT_ID: ${{ secrets.NX_APP_PROJECT_ID }}
+          NX_APP_STORAGE_BUCKET: ${{ secrets.NX_APP_STORAGE_BUCKET }}
+          NX_APP_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_MESSAGING_SENDER_ID }}
 
       - name: Prices Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'

@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "nx": "nx",
+    "loki": "loki",
     "start": "nx serve",
     "build": "nx build",
     "test": "nx test",
@@ -74,6 +75,7 @@
     "jest-environment-jsdom": "28.1.1",
     "jest-preset-angular": "12.2.2",
     "lint-staged": "^13.0.3",
+    "loki": "^0.30.3",
     "nx": "14.7.3",
     "prettier": "2.7.1",
     "ts-jest": "28.0.8",

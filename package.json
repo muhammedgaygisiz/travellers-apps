@@ -12,7 +12,8 @@
     "start:prices": "nx serve prices",
     "start:storybook:prices": "nx run prices:storybook",
     "build:storybook:prices": "nx run prices:build-storybook",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "loki:test:prices": "loki --requireReferernce --reactUri file:./dist/storybook/prices --reference=apps/prices/.loki/reference --difference=reference=apps/prices/.loki/difference --output=apps/prices/.loki/current"
   },
   "private": true,
   "dependencies": {

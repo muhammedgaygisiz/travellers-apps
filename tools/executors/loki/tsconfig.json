@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.tools.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": ".",
+    "sourceMap": false,
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules"]
+}

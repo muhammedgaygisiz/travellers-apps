@@ -133,6 +133,9 @@
           "quiet": true
         }
       }
+    },
+    "loki": {
+      "executor": "./tools/executors/loki:loki"
     }
   },
   "tags": []

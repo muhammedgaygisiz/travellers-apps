@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { itemsLoaded, loadItems } from './actions';
-import { catchError, EMPTY, map, mergeMap, Observable, of, tap } from 'rxjs';
+import { catchError, EMPTY, map, mergeMap, Observable } from 'rxjs';
 import { MostSearchedService } from '@travellers-apps/prices/firestore/feature';
 import { MostSearchedItem } from '@travellers-apps/utils-common';
 

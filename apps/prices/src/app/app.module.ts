@@ -13,7 +13,13 @@ import { FirestoreFeatureModule } from '@travellers-apps/prices/firestore/featur
     IonicModule.forRoot(getIonicConfig()),
     PricesShellModule,
     PricesStoreModule.forRoot(environment),
-    FirestoreFeatureModule.forRoot(environment),
+    FirestoreFeatureModule.forRoot({
+      apiKey: process.env['NX_APP_API_KEY'],
+      authDomain: process.env['NX_APP_AUTH_DOMAIN'],
+      projectId: process.env['NX_APP_PROJECT_ID'],
+      storageBucket: process.env['NX_APP_STORAGE_BUCKET'],
+      messagingSenderId: process.env['NX_APP_MESSAGINX_SENDER_ID'],
+    }),
   ],
   bootstrap: [AppComponent],
 })

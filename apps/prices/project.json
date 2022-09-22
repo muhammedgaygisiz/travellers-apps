@@ -5,9 +5,12 @@
   "prefix": "travellers-apps",
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:browser",
+      "executor": "@nrwl/angular:webpack-browser",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "customWebpackConfig": {
+          "path": "apps/prices/webpack.config.js"
+        },
         "outputPath": "dist/apps/prices",
         "index": "apps/prices/src/index.html",
         "main": "apps/prices/src/main.ts",
@@ -67,7 +70,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@nrwl/angular:webpack-server",
       "configurations": {
         "production": {
           "browserTarget": "prices:build:production"

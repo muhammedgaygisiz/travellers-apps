@@ -33,7 +33,8 @@ jobs:
           NX_APP_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_MESSAGING_SENDER_ID }}
         run: npm ci
 
-      - run: npm run nx -- build prices
+      - name: Build Prices App
+        run: npm run nx -- build prices
 
       - name: Prices Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'

@@ -24,13 +24,16 @@ jobs:
           node-version: 16.x
           cache: 'npm'
 
+      - name: Create .env
+        run: |
+          touch apps/prices/.env
+          echo NX_APP_API_KEY=${{ secrets.NX_APP_API_KEY }} >> apps/prices/.env
+          echo NX_APP_AUTH_DOMAIN=${{ secrets.NX_APP_AUTH_DOMAIN }} >> apps/prices/.env
+          echo NX_APP_PROJECT_ID=${{ secrets.NX_APP_PROJECT_ID }} >> apps/prices/.env
+          echo NX_APP_STORAGE_BUCKET=${{ secrets.NX_APP_STORAGE_BUCKET }} >> apps/prices/.env
+          echo NX_APP_MESSAGING_SENDER_ID=${{ secrets.NX_APP_MESSAGING_SENDER_ID }} >> apps/prices/.env
+
       - name: NPM Dependencies
-        env:
-          NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
-          NX_APP_AUTH_DOMAIN: ${{ secrets.NX_APP_AUTH_DOMAIN }}
-          NX_APP_PROJECT_ID: ${{ secrets.NX_APP_PROJECT_ID }}
-          NX_APP_STORAGE_BUCKET: ${{ secrets.NX_APP_STORAGE_BUCKET }}
-          NX_APP_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_MESSAGING_SENDER_ID }}
         run: npm ci
 
       - name: Build Prices App

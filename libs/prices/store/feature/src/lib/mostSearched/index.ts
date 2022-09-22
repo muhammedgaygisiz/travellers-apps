@@ -1,14 +1,13 @@
-import {key} from "./key";
-import { MostSearchedItem } from "./model";
-import {reducer} from "./reducer";
-import {selectAllItems} from "./selectors";
-import {loadItems} from "./actions";
+import { key } from './key';
+import { reducer } from './reducer';
+import { selectAllItems } from './selectors';
+import { loadItems } from './actions';
 
 const fromMostSearched = {
   key,
   reducer,
   selectAllItems,
-  loadItems
-}
+  loadItems,
+};
 
-export {fromMostSearched, MostSearchedItem};
+export { fromMostSearched };

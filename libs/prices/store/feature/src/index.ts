@@ -1,3 +1,3 @@
 export * from './lib/prices-store.module';
 
-export {fromMostSearched, MostSearchedItem} from "./lib/mostSearched";
+export { fromMostSearched } from './lib/mostSearched';

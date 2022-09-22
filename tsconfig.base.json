@@ -21,6 +21,9 @@
       "@travellers-apps/prices/card/feature": [
         "libs/prices/card/feature/src/index.ts"
       ],
+      "@travellers-apps/prices/firestore/feature": [
+        "libs/prices/firestore/feature/src/index.ts"
+      ],
       "@travellers-apps/prices/home/feature": [
         "libs/prices/home/feature/src/index.ts"
       ],

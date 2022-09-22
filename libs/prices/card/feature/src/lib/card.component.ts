@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { MostSearchedItem } from '@travellers-apps/prices/store/feature';
+import { MostSearchedItem } from '@travellers-apps/utils-common';
 
 @Component({
   selector: 'ta-card',

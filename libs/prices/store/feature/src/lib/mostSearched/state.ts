@@ -1,4 +1,4 @@
-import {EntityState} from "@ngrx/entity";
-import {MostSearchedItem} from "./model";
+import { EntityState } from '@ngrx/entity';
+import { MostSearchedItem } from '@travellers-apps/utils-common';
 
-export interface State extends EntityState<MostSearchedItem> {};
+export type State = EntityState<MostSearchedItem>

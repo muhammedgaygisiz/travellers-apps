@@ -6,6 +6,7 @@
     "prices-add-item-feature": "libs/prices/add-item/feature",
     "prices-card-feature": "libs/prices/card/feature",
     "prices-e2e": "apps/prices-e2e",
+    "prices-firestore-feature": "libs/prices/firestore/feature",
     "prices-home-feature": "libs/prices/home/feature",
     "prices-page-feature": "libs/prices/page/feature",
     "prices-shell-feature": "libs/prices/shell/feature",

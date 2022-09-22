@@ -1,14 +1,9 @@
-import {ModuleWithProviders} from '@angular/core';
-import {ActionReducer, MetaReducer, StoreModule} from "@ngrx/store";
-import {EffectsModule} from "@ngrx/effects";
-import {StoreDevtoolsModule} from "@ngrx/store-devtools";
-import {StoreRootModule} from "@ngrx/store/src/store_module";
-import {fromMostSearched} from "./mostSearched";
-import {MostSearchedItemsEffects} from "./mostSearched/effects";
-
-type Environment = { production: boolean };
-
-type ModuleForStore = ModuleWithProviders<StoreRootModule> | any[];
+import { ActionReducer, MetaReducer, StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { fromMostSearched } from './mostSearched';
+import { MostSearchedItemsEffects } from './mostSearched/effects';
+import { Environment, ModuleForStore } from '@travellers-apps/utils-common';
 
 const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
   return (state, action) => {
@@ -16,7 +11,7 @@ const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
     console.log('action', action);
 
     return reducer(state, action);
-  }
+  };
 };
 
 // Developers can think of meta-reducers as hooks into the action->reducer pipeline.

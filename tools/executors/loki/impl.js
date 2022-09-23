@@ -152,7 +152,6 @@ var executorFn = function (_options, _context) {
     return __generator(this, function (_a) {
       command = ['loki'];
       project = getProjectJsonContent(_context);
-      console.log('project', project);
       workspaceRoot = ''.concat(_context.root);
       appRoot = project.root;
       projectRoot = ''.concat(workspaceRoot, '/').concat(appRoot);

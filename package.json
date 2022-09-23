@@ -14,7 +14,7 @@
     "build:storybook:prices": "nx run prices:build-storybook",
     "prepare": "husky install",
     "loki:test:prices": "loki --requireReferernce --reactUri file:./dist/storybook/prices --reference=apps/prices/.loki/reference --difference=reference=apps/prices/.loki/difference --output=apps/prices/.loki/current",
-    "compile:loki:executor": "tsc --project tools/executors/loki/tsconfig.json"
+    "compile:loki:executor": "tsc --project tools/executors/loki/tsconfig.executor.json"
   },
   "private": true,
   "dependencies": {

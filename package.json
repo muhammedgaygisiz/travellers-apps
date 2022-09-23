@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "nx": "nx",
+    "loki": "loki",
     "start": "nx serve",
     "build": "nx build",
     "test": "nx test",
@@ -11,7 +12,8 @@
     "start:prices": "nx serve prices",
     "start:storybook:prices": "nx run prices:storybook",
     "build:storybook:prices": "nx run prices:build-storybook",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "loki:test:prices": "loki --requireReferernce --reactUri file:./dist/storybook/prices --reference=apps/prices/.loki/reference --difference=reference=apps/prices/.loki/difference --output=apps/prices/.loki/current"
   },
   "private": true,
   "dependencies": {
@@ -74,6 +76,7 @@
     "jest-environment-jsdom": "28.1.1",
     "jest-preset-angular": "12.2.2",
     "lint-staged": "^13.0.3",
+    "loki": "^0.30.3",
     "nx": "14.7.3",
     "prettier": "2.7.1",
     "ts-jest": "28.0.8",

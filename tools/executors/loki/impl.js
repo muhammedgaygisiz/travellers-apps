@@ -1,182 +1,37 @@
 'use strict';
-var __awaiter =
-  (this && this.__awaiter) ||
-  function (thisArg, _arguments, P, generator) {
-    function adopt(value) {
-      return value instanceof P
-        ? value
-        : new P(function (resolve) {
-            resolve(value);
-          });
-    }
-    return new (P || (P = Promise))(function (resolve, reject) {
-      function fulfilled(value) {
-        try {
-          step(generator.next(value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-      function rejected(value) {
-        try {
-          step(generator['throw'](value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-      function step(result) {
-        result.done
-          ? resolve(result.value)
-          : adopt(result.value).then(fulfilled, rejected);
-      }
-      step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-  };
-var __generator =
-  (this && this.__generator) ||
-  function (thisArg, body) {
-    var _ = {
-        label: 0,
-        sent: function () {
-          if (t[0] & 1) throw t[1];
-          return t[1];
-        },
-        trys: [],
-        ops: [],
-      },
-      f,
-      y,
-      t,
-      g;
-    return (
-      (g = { next: verb(0), throw: verb(1), return: verb(2) }),
-      typeof Symbol === 'function' &&
-        (g[Symbol.iterator] = function () {
-          return this;
-        }),
-      g
-    );
-    function verb(n) {
-      return function (v) {
-        return step([n, v]);
-      };
-    }
-    function step(op) {
-      if (f) throw new TypeError('Generator is already executing.');
-      while (_)
-        try {
-          if (
-            ((f = 1),
-            y &&
-              (t =
-                op[0] & 2
-                  ? y['return']
-                  : op[0]
-                  ? y['throw'] || ((t = y['return']) && t.call(y), 0)
-                  : y.next) &&
-              !(t = t.call(y, op[1])).done)
-          )
-            return t;
-          if (((y = 0), t)) op = [op[0] & 2, t.value];
-          switch (op[0]) {
-            case 0:
-            case 1:
-              t = op;
-              break;
-            case 4:
-              _.label++;
-              return { value: op[1], done: false };
-            case 5:
-              _.label++;
-              y = op[1];
-              op = [0];
-              continue;
-            case 7:
-              op = _.ops.pop();
-              _.trys.pop();
-              continue;
-            default:
-              if (
-                !((t = _.trys), (t = t.length > 0 && t[t.length - 1])) &&
-                (op[0] === 6 || op[0] === 2)
-              ) {
-                _ = 0;
-                continue;
-              }
-              if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) {
-                _.label = op[1];
-                break;
-              }
-              if (op[0] === 6 && _.label < t[1]) {
-                _.label = t[1];
-                t = op;
-                break;
-              }
-              if (t && _.label < t[2]) {
-                _.label = t[2];
-                _.ops.push(op);
-                break;
-              }
-              if (t[2]) _.ops.pop();
-              _.trys.pop();
-              continue;
-          }
-          op = body.call(thisArg, _);
-        } catch (e) {
-          op = [6, e];
-          y = 0;
-        } finally {
-          f = t = 0;
-        }
-      if (op[0] & 5) throw op[1];
-      return { value: op[0] ? op[1] : void 0, done: true };
-    }
-  };
 Object.defineProperty(exports, '__esModule', { value: true });
-var fs_1 = require('fs');
-var child_process_1 = require('child_process');
-var getProjectJsonContent = function (_context) {
-  var projectName = _context.projectName;
+const child_process_1 = require('child_process');
+const getProjectJsonContent = (_context) => {
+  const projectName = _context.projectName;
   return _context.workspace.projects[projectName];
 };
-var executorFn = function (_options, _context) {
-  return __awaiter(void 0, void 0, void 0, function () {
-    var command,
-      project,
-      workspaceRoot,
-      appRoot,
-      projectRoot,
-      BUILD_STORYBOOK_TARGET,
-      buildStorybookOutput,
-      storybookBuild;
-    return __generator(this, function (_a) {
-      command = ['loki'];
-      project = getProjectJsonContent(_context);
-      workspaceRoot = ''.concat(_context.root);
-      appRoot = project.root;
-      projectRoot = ''.concat(workspaceRoot, '/').concat(appRoot);
-      // Copy current package.json to projectRoot for Capacitor commands to work
-      (0,
-      fs_1.copyFileSync)('package.json', ''.concat(projectRoot, '/package.json'));
-      command.push('--requireReferernce');
-      command.push('--reactUri');
-      BUILD_STORYBOOK_TARGET = 'build-storybook';
-      buildStorybookOutput =
-        project.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
-      storybookBuild = ''
-        .concat(workspaceRoot, '/')
-        .concat(buildStorybookOutput);
-      command.push('file:'.concat(storybookBuild));
-      command.push('--reference='.concat(appRoot, '/.loki/reference'));
-      command.push('--difference='.concat(appRoot, '/.loki/difference'));
-      command.push('--output='.concat(appRoot, '/.loki/current'));
-      // execute the command
-      (0, child_process_1.execSync)(command.join(' ').trim(), {
-        stdio: 'inherit',
-        cwd: ''.concat(projectRoot),
-      });
-      return [2 /*return*/, Promise.resolve({ success: true })];
-    });
+const executorFn = async (_options, _context) => {
+  const command = ['loki'];
+  const project = getProjectJsonContent(_context);
+  const workspaceRoot = `${_context.root}`;
+  const appRoot = project.root;
+  const projectRoot = `${workspaceRoot}/${appRoot}`;
+  // Copy current package.json to projectRoot for Capacitor commands to work
+  // copyFileSync('package.json', `${projectRoot}/package.json`);
+  command.push('--requireReferernce');
+  command.push('--reactUri');
+  const BUILD_STORYBOOK_TARGET = 'build-storybook';
+  const buildStorybookOutput =
+    project.targets &&
+    project.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
+  const storybookBuild = `${workspaceRoot}/${buildStorybookOutput}`;
+  command.push(`file:${storybookBuild}`);
+  console.log('#mo', appRoot);
+  command.push(`--reference=../../${appRoot}/.loki/reference`);
+  command.push(`--difference=../../${appRoot}/.loki/difference`);
+  command.push(`--output=../../${appRoot}/.loki/current`);
+  // execute the command
+  const cmd = command.join(' ').trim();
+  console.log(cmd);
+  (0, child_process_1.execSync)(cmd, {
+    stdio: 'inherit',
+    cwd: `${projectRoot}`,
   });
+  return Promise.resolve({ success: true });
 };
 exports.default = executorFn;

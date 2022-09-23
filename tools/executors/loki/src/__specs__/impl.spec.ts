@@ -9,6 +9,7 @@ describe('loki nx executor', () => {
         '--difference=../../apps/prices/.loki/difference ' +
         '--output=../../apps/prices/.loki/current';
 
+      const result = '';
       expect(result).toBe(expected);
     });
   });

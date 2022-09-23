@@ -1,9 +1,4 @@
-import {
-  ExecutorContext,
-  ProjectConfiguration,
-  TargetConfiguration,
-} from '@nrwl/devkit';
-import { copyFileSync } from 'fs';
+import { ExecutorContext } from '@nrwl/devkit';
 import { execSync } from 'child_process';
 
 interface Schema {}
@@ -13,20 +8,12 @@ const getProjectJsonContent = (_context: ExecutorContext) => {
   return _context.workspace.projects[projectName!];
 };
 
-const executorFn = async (
-  _options: Schema,
-  _context: ExecutorContext
-): Promise<{ success: boolean }> => {
+export const buildCommand = (_context: ExecutorContext) => {
   const command = ['loki'];
 
   const project = getProjectJsonContent(_context);
-
   const workspaceRoot = `${_context.root}`;
   const appRoot = project.root;
-  const projectRoot = `${workspaceRoot}/${appRoot}`;
-
-  // Copy current package.json to projectRoot for Capacitor commands to work
-  // copyFileSync('package.json', `${projectRoot}/package.json`);
 
   command.push('--requireReferernce');
   command.push('--reactUri');
@@ -38,14 +25,29 @@ const executorFn = async (
   const storybookBuild = `${workspaceRoot}/${buildStorybookOutput}`;
   command.push(`file:${storybookBuild}`);
 
-  console.log('#mo', appRoot);
   command.push(`--reference=../../${appRoot}/.loki/reference`);
   command.push(`--difference=../../${appRoot}/.loki/difference`);
   command.push(`--output=../../${appRoot}/.loki/current`);
 
   // execute the command
   const cmd = command.join(' ').trim();
-  console.log(cmd);
+  return cmd;
+};
+
+const getProjectRoot = (_context: ExecutorContext) => {
+  const workspaceRoot = `${_context.root}`;
+  const project = getProjectJsonContent(_context);
+  const appRoot = project.root;
+  return `${workspaceRoot}/${appRoot}`;
+};
+
+const executorFn = async (
+  _options: Schema,
+  _context: ExecutorContext
+): Promise<{ success: boolean }> => {
+  const projectRoot = getProjectRoot(_context);
+  const cmd = buildCommand(_context);
+
   execSync(cmd, {
     stdio: 'inherit',
     cwd: `${projectRoot}`,

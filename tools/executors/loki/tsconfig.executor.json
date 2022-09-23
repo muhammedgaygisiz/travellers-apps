@@ -12,6 +12,7 @@
     "**/*.spec.ts",
     "**/*.stories.ts",
     "**/*.stories.js",
-    "jest.config.ts"
+    "jest.config.ts",
+    "src/test-setup.ts"
   ]
 }

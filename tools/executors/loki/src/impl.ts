@@ -1,5 +1,6 @@
 import { ExecutorContext } from '@nrwl/devkit';
 import { execSync } from 'child_process';
+import { copyFileSync, rmSync } from 'fs';
 
 interface Schema {}
 
@@ -30,8 +31,7 @@ export const buildCommand = (_context: ExecutorContext) => {
   command.push(`--output=../../${appRoot}/.loki/current`);
 
   // execute the command
-  const cmd = command.join(' ').trim();
-  return cmd;
+  return command.join(' ').trim();
 };
 
 const getProjectRoot = (_context: ExecutorContext) => {
@@ -41,17 +41,28 @@ const getProjectRoot = (_context: ExecutorContext) => {
   return `${workspaceRoot}/${appRoot}`;
 };
 
+function cleanUp(projectRoot: string) {
+  rmSync(`${projectRoot}/package.json`);
+  rmSync(`${projectRoot}/node_modules`, { recursive: true, force: true });
+}
+
 const executorFn = async (
   _options: Schema,
   _context: ExecutorContext
 ): Promise<{ success: boolean }> => {
   const projectRoot = getProjectRoot(_context);
+
+  // Copy current package.json to projectRoot for Capacitor commands to work
+  copyFileSync('package.json', `${projectRoot}/package.json`);
+
   const cmd = buildCommand(_context);
 
   execSync(cmd, {
     stdio: 'inherit',
     cwd: `${projectRoot}`,
   });
+
+  cleanUp(projectRoot);
 
   return Promise.resolve({ success: true });
 };

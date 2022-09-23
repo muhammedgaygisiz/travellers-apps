@@ -133,20 +133,44 @@ var __generator =
     }
   };
 Object.defineProperty(exports, '__esModule', { value: true });
-var child_process_1 = require('child_process');
 var fs_1 = require('fs');
+var child_process_1 = require('child_process');
+var getProjectJsonContent = function (_context) {
+  var projectName = _context.projectName;
+  return _context.workspace.projects[projectName];
+};
 var executorFn = function (_options, _context) {
   return __awaiter(void 0, void 0, void 0, function () {
-    var command, projectName, project, workspaceRoot, projectRoot;
+    var command,
+      project,
+      workspaceRoot,
+      appRoot,
+      projectRoot,
+      BUILD_STORYBOOK_TARGET,
+      buildStorybookOutput,
+      storybookBuild;
     return __generator(this, function (_a) {
       command = ['loki'];
-      projectName = _context.projectName;
-      project = _context.workspace.projects[projectName];
+      project = getProjectJsonContent(_context);
+      console.log('project', project);
       workspaceRoot = ''.concat(_context.root);
-      projectRoot = ''.concat(workspaceRoot, '/').concat(project.root);
+      appRoot = project.root;
+      projectRoot = ''.concat(workspaceRoot, '/').concat(appRoot);
       // Copy current package.json to projectRoot for Capacitor commands to work
       (0,
       fs_1.copyFileSync)('package.json', ''.concat(projectRoot, '/package.json'));
+      command.push('--requireReferernce');
+      command.push('--reactUri');
+      BUILD_STORYBOOK_TARGET = 'build-storybook';
+      buildStorybookOutput =
+        project.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
+      storybookBuild = ''
+        .concat(workspaceRoot, '/')
+        .concat(buildStorybookOutput);
+      command.push('file:'.concat(storybookBuild));
+      command.push('--reference='.concat(appRoot, '/.loki/reference'));
+      command.push('--difference='.concat(appRoot, '/.loki/difference'));
+      command.push('--output='.concat(appRoot, '/.loki/current'));
       // execute the command
       (0, child_process_1.execSync)(command.join(' ').trim(), {
         stdio: 'inherit',

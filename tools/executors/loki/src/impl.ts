@@ -1,6 +1,6 @@
-import { ExecutorContext } from '@nrwl/devkit';
+import { ExecutorContext, ProjectConfiguration } from '@nrwl/devkit';
 import { execSync } from 'child_process';
-import { copyFileSync, rmSync } from 'fs';
+import { copyFileSync, existsSync, rmSync } from 'fs';
 
 const BUILD_STORYBOOK_TARGET = 'build-storybook';
 
@@ -22,6 +22,10 @@ const getBuildStorybookOutput = (_context: ExecutorContext) => {
     project.targets &&
     project.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
   return `${_context.root}/${buildStorybookOutputDir}`;
+};
+
+const checkExists = (buildStorybookOutput: string): boolean => {
+  return existsSync(buildStorybookOutput);
 };
 
 export const buildCommand = (_context: ExecutorContext, _options: Schema) => {
@@ -50,10 +54,30 @@ const cleanUp = (projectRoot: string) => {
   rmSync(`${projectRoot}/node_modules`, { recursive: true, force: true });
 };
 
+const checkPrerequisites = (_context: ExecutorContext): boolean => {
+  const buildStorybookOutput = getBuildStorybookOutput(_context);
+  const buildStorybookOutputExists = checkExists(buildStorybookOutput);
+  if (!buildStorybookOutputExists) {
+    console.log(
+      `No build storybook found for project, please build storybook first (nx build-storybook ${_context.projectName})`
+    );
+
+    return false;
+  }
+
+  return true;
+};
+
 const executorFn = async (
   _options: Schema,
   _context: ExecutorContext
 ): Promise<{ success: boolean }> => {
+  const prerequisitesFullfilled = checkPrerequisites(_context);
+
+  if (!prerequisitesFullfilled) {
+    return Promise.resolve({ success: false });
+  }
+
   const projectRoot = getProjectRoot(_context);
 
   // Copy current package.json to projectRoot for loki commands to work

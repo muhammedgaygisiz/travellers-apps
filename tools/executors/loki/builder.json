@@ -1,0 +1,9 @@
+{
+  "builders": {
+    "loki": {
+      "implementation": "./impl",
+      "schema": "./schema.json",
+      "description": "The Loki command-line interface (CLI) tool is used to run Loki apps in Nx.dev."
+    }
+  }
+}

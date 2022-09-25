@@ -11,6 +11,7 @@
     "prices-page-feature": "libs/prices/page/feature",
     "prices-shell-feature": "libs/prices/shell/feature",
     "prices-store-feature": "libs/prices/store/feature",
-    "utils-common": "libs/utils-common"
+    "utils-common": "libs/utils-common",
+    "executor-loki": "tools/executors/loki"
   }
 }

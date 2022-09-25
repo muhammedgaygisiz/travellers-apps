@@ -76,6 +76,8 @@ jobs:
 
       - run: npm run nx -- build-storybook prices
 
+      - run: npm run nx -- loki prices
+
       - name: Storybook Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0

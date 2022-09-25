@@ -133,6 +133,14 @@
           "quiet": true
         }
       }
+    },
+    "loki": {
+      "executor": "./tools/executors/loki:loki",
+      "options": {
+        "reference": "apps/prices/.loki/reference",
+        "difference": "apps/prices/.loki/difference",
+        "output": "apps/prices/.loki/current"
+      }
     }
   },
   "tags": []

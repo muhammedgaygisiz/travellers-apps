@@ -1,14 +1,3 @@
 <ion-card>
-  <ion-card-header>
-    <ion-card-subtitle>MOST SEARCHED IN</ion-card-subtitle>
-    <ion-card-title>Marrakech</ion-card-title>
-  </ion-card-header>
-
-  <ion-card-content>
-    <div>
-      <img [src]="entry?.src"/>
-      <h2>{{entry?.name}}</h2>
-      <h1>{{entry?.price | currency}}</h1>
-    </div>
-  </ion-card-content>
+  <ng-content></ng-content>
 </ion-card>

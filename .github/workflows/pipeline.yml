@@ -80,7 +80,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run nx -- build-storybook prices
+      - run: npm run nx -- build-storybook prices --configuration=ci
 
       - run: npm run nx -- loki prices
 

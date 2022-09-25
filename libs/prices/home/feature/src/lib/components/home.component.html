@@ -1,5 +1,18 @@
 <ta-page (addItemClick)="addItemClick.emit()">
   <ng-container *ngFor="let entry of mostSearchedEntries">
-    <ta-card [entry]="entry"></ta-card>
+    <ta-card>
+      <ion-card-header>
+        <ion-card-subtitle>MOST SEARCHED IN</ion-card-subtitle>
+        <ion-card-title>Marrakech</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div>
+          <img [src]="entry?.src" />
+          <h2>{{ entry?.name }}</h2>
+          <h1>{{ entry?.price | currency }}</h1>
+        </div>
+      </ion-card-content>
+    </ta-card>
   </ng-container>
 </ta-page>

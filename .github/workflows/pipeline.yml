@@ -74,7 +74,8 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run nx -- build-storybook prices
+      # Check if the ci option can be set via env variables
+      - run: npm run nx -- build-storybook prices --configuration=ci
 
       - run: npm run nx -- loki prices
 

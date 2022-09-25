@@ -1,4 +1,4 @@
-import { ExecutorContext, ProjectConfiguration } from '@nrwl/devkit';
+import { ExecutorContext } from '@nrwl/devkit';
 import { execSync } from 'child_process';
 import { copyFileSync, existsSync, rmSync } from 'fs';
 
@@ -8,6 +8,7 @@ interface Schema {
   reference: string;
   difference: string;
   output: string;
+  update: boolean;
 }
 
 const getProjectJsonContent = (_context: ExecutorContext) => {
@@ -24,14 +25,16 @@ const getBuildStorybookOutput = (_context: ExecutorContext) => {
   return `${_context.root}/${buildStorybookOutputDir}`;
 };
 
-const checkExists = (buildStorybookOutput: string): boolean => {
-  return existsSync(buildStorybookOutput);
-};
+const checkExists = (buildStorybookOutput: string): boolean =>
+  existsSync(buildStorybookOutput);
 
 export const buildCommand = (_context: ExecutorContext, _options: Schema) => {
   const command = ['loki'];
 
-  command.push('--requireReference');
+  if (!_options.update) {
+    command.push('--requireReference');
+  }
+
   command.push('--reactUri');
 
   const buildStorybookOutput = getBuildStorybookOutput(_context);
@@ -92,10 +95,11 @@ const executorFn = async (
     });
   } catch (e) {
     console.error('An error occured', e);
-  } finally {
     cleanUp(projectRoot);
+    return Promise.resolve({ success: false });
   }
 
+  cleanUp(projectRoot);
   return Promise.resolve({ success: true });
 };
 

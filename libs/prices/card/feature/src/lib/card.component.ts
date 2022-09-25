@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { MostSearchedItem } from '@travellers-apps/utils-common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'ta-card',
@@ -7,7 +6,4 @@ import { MostSearchedItem } from '@travellers-apps/utils-common';
   styleUrls: ['./card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CardComponent {
-  @Input()
-  public entry: MostSearchedItem | null = null;
-}
+export class CardComponent {}

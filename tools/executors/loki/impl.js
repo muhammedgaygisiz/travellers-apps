@@ -15,13 +15,14 @@ const getBuildStorybookOutput = (_context) => {
     project.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
   return `${_context.root}/${buildStorybookOutputDir}`;
 };
-const checkExists = (buildStorybookOutput) => {
-  return (0, fs_1.existsSync)(buildStorybookOutput);
-};
+const checkExists = (buildStorybookOutput) =>
+  (0, fs_1.existsSync)(buildStorybookOutput);
 const buildCommand = (_context, _options) => {
   const command = ['loki'];
-  command.push('--requireReference');
-  command.push('--reactUri');
+  if (!_options.update) {
+    command.push('--requireReference');
+    command.push('--reactUri');
+  }
   const buildStorybookOutput = getBuildStorybookOutput(_context);
   command.push(`file:${buildStorybookOutput}`);
   command.push(`--reference=../../${_options.reference}`);
@@ -68,9 +69,10 @@ const executorFn = async (_options, _context) => {
     });
   } catch (e) {
     console.error('An error occured', e);
-  } finally {
     cleanUp(projectRoot);
+    return Promise.resolve({ success: false });
   }
+  cleanUp(projectRoot);
   return Promise.resolve({ success: true });
 };
 exports.default = executorFn;

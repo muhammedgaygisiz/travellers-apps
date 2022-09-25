@@ -21,8 +21,8 @@ const buildCommand = (_context, _options) => {
   const command = ['loki'];
   if (!_options.update) {
     command.push('--requireReference');
-    command.push('--reactUri');
   }
+  command.push('--reactUri');
   const buildStorybookOutput = getBuildStorybookOutput(_context);
   command.push(`file:${buildStorybookOutput}`);
   command.push(`--reference=../../${_options.reference}`);

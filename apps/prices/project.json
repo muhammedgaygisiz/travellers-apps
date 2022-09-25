@@ -140,6 +140,11 @@
         "reference": "apps/prices/.loki/reference",
         "difference": "apps/prices/.loki/difference",
         "output": "apps/prices/.loki/current"
+      },
+      "configurations": {
+        "approve": {
+          "update": true
+        }
       }
     }
   },

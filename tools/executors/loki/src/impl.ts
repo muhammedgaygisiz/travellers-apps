@@ -33,8 +33,9 @@ export const buildCommand = (_context: ExecutorContext, _options: Schema) => {
 
   if (!_options.update) {
     command.push('--requireReference');
-    command.push('--reactUri');
   }
+
+  command.push('--reactUri');
 
   const buildStorybookOutput = getBuildStorybookOutput(_context);
   command.push(`file:${buildStorybookOutput}`);

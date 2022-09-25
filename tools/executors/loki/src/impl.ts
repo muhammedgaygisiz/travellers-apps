@@ -2,6 +2,8 @@ import { ExecutorContext } from '@nrwl/devkit';
 import { execSync } from 'child_process';
 import { copyFileSync, rmSync } from 'fs';
 
+const BUILD_STORYBOOK_TARGET = 'build-storybook';
+
 interface Schema {
   reference: string;
   difference: string;
@@ -13,35 +15,34 @@ const getProjectJsonContent = (_context: ExecutorContext) => {
   return _context.workspace.projects[projectName!];
 };
 
+const getBuildStorybookOutput = (_context: ExecutorContext) => {
+  const project = getProjectJsonContent(_context);
+
+  const buildStorybookOutputDir =
+    project.targets &&
+    project.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
+  return `${_context.root}/${buildStorybookOutputDir}`;
+};
+
 export const buildCommand = (_context: ExecutorContext, _options: Schema) => {
   const command = ['loki'];
-
-  const project = getProjectJsonContent(_context);
-  const workspaceRoot = `${_context.root}`;
 
   command.push('--requireReference');
   command.push('--reactUri');
 
-  const BUILD_STORYBOOK_TARGET = 'build-storybook';
-  const buildStorybookOutput =
-    project.targets &&
-    project.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
-  const storybookBuild = `${workspaceRoot}/${buildStorybookOutput}`;
-  command.push(`file:${storybookBuild}`);
+  const buildStorybookOutput = getBuildStorybookOutput(_context);
+  command.push(`file:${buildStorybookOutput}`);
 
   command.push(`--reference=../../${_options.reference}`);
   command.push(`--difference=../../${_options.difference}`);
   command.push(`--output=../../${_options.output}`);
 
-  // execute the command
   return command.join(' ').trim();
 };
 
 const getProjectRoot = (_context: ExecutorContext) => {
-  const workspaceRoot = `${_context.root}`;
   const project = getProjectJsonContent(_context);
-  const appRoot = project.root;
-  return `${workspaceRoot}/${appRoot}`;
+  return `${_context.root}/${project.root}`;
 };
 
 const cleanUp = (projectRoot: string) => {
@@ -55,7 +56,7 @@ const executorFn = async (
 ): Promise<{ success: boolean }> => {
   const projectRoot = getProjectRoot(_context);
 
-  // Copy current package.json to projectRoot for Capacitor commands to work
+  // Copy current package.json to projectRoot for loki commands to work
   copyFileSync('package.json', `${projectRoot}/package.json`);
 
   const cmd = buildCommand(_context, _options);

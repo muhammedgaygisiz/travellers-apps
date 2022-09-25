@@ -18,7 +18,6 @@ export const buildCommand = (_context: ExecutorContext, _options: Schema) => {
 
   const project = getProjectJsonContent(_context);
   const workspaceRoot = `${_context.root}`;
-  const appRoot = project.root;
 
   command.push('--requireReference');
   command.push('--reactUri');
@@ -45,10 +44,10 @@ const getProjectRoot = (_context: ExecutorContext) => {
   return `${workspaceRoot}/${appRoot}`;
 };
 
-function cleanUp(projectRoot: string) {
+const cleanUp = (projectRoot: string) => {
   rmSync(`${projectRoot}/package.json`);
   rmSync(`${projectRoot}/node_modules`, { recursive: true, force: true });
-}
+};
 
 const executorFn = async (
   _options: Schema,
@@ -61,12 +60,16 @@ const executorFn = async (
 
   const cmd = buildCommand(_context, _options);
 
-  execSync(cmd, {
-    stdio: 'inherit',
-    cwd: `${projectRoot}`,
-  });
-
-  cleanUp(projectRoot);
+  try {
+    execSync(cmd, {
+      stdio: 'inherit',
+      cwd: `${projectRoot}`,
+    });
+  } catch (e) {
+    console.error('An error occured', e);
+  } finally {
+    cleanUp(projectRoot);
+  }
 
   return Promise.resolve({ success: true });
 };

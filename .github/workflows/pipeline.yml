@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  CI: true
+
 jobs:
   build-app:
     runs-on: ubuntu-latest
@@ -26,6 +29,9 @@ jobs:
 
       - name: NPM Dependencies
         run: npm ci
+
+      - name: Run Unit Tests
+        run: npm run nx -- test prices
 
       - name: Build Prices App
         run: npm run nx -- build prices
@@ -74,7 +80,6 @@ jobs:
 
       - run: npm ci
 
-      # Check if the ci option can be set via env variables
       - run: npm run nx -- build-storybook prices --configuration=ci
 
       - run: npm run nx -- loki prices

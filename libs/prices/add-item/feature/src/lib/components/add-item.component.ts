@@ -1,11 +1,16 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Output} from "@angular/core";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {Price} from "../api/price";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Output,
+} from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Price } from '../api/price';
 
 @Component({
   selector: 'ta-add-item',
   templateUrl: './add-item.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddItemComponent {
   @Output()
@@ -14,6 +19,7 @@ export class AddItemComponent {
   public priceFormGroup: FormGroup = new FormGroup<Price>({
     productName: new FormControl<string>('', [Validators.required]),
     price: new FormControl<number>(0, [Validators.required]),
-    location: new FormControl<string>('', [Validators.required])
+    src: new FormControl<string>('', [Validators.required]),
+    location: new FormControl<string>('', [Validators.required]),
   });
 }

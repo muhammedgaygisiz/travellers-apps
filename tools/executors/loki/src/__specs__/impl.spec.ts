@@ -38,6 +38,7 @@ describe('loki nx executor', () => {
           reference: 'apps/prices/.loki/reference',
           difference: 'apps/prices/.loki/difference',
           output: 'apps/prices/.loki/current',
+          update: false,
         }
       );
 

@@ -33,6 +33,9 @@ jobs:
       - name: Run Unit Tests
         run: npm run nx -- test prices
 
+      - name: Run Linter
+        run: npm run nx -- lint prices
+
       - name: Build Prices App
         run: npm run nx -- build prices
         env:

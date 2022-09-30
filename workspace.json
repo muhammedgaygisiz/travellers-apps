@@ -2,8 +2,10 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "executor-loki": "tools/executors/loki",
     "prices": "apps/prices",
     "prices-add-item-feature": "libs/prices/add-item/feature",
+    "prices-auth-featurer": "libs/prices/auth/featurer",
     "prices-card-feature": "libs/prices/card/feature",
     "prices-e2e": "apps/prices-e2e",
     "prices-firestore-feature": "libs/prices/firestore/feature",
@@ -11,7 +13,6 @@
     "prices-page-feature": "libs/prices/page/feature",
     "prices-shell-feature": "libs/prices/shell/feature",
     "prices-store-feature": "libs/prices/store/feature",
-    "utils-common": "libs/utils-common",
-    "executor-loki": "tools/executors/loki"
+    "utils-common": "libs/utils-common"
   }
 }

@@ -13,7 +13,10 @@
     "start:storybook:prices": "nx run prices:storybook",
     "build:storybook:prices": "nx run prices:build-storybook",
     "prepare": "husky install",
-    "compile:loki:executor": "tsc --project tools/executors/loki/tsconfig.executor.json"
+    "compile:loki:executor": "tsc --project tools/executors/loki/tsconfig.executor.json",
+    "cap:sync": "cap sync",
+    "cap:run:ios": "cap run ios",
+    "cap:run:android": "cap run android"
   },
   "private": true,
   "dependencies": {

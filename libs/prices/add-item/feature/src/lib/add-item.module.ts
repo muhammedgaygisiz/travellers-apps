@@ -1,11 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {IonicModule} from "@ionic/angular";
-import {PageFeatureModule} from "@travellers-apps/prices/page/feature";
-import {AddItemRoutingModule} from "./add-item-routing.module";
-import {AddItemComponent} from "./components/add-item.component";
+import { IonicModule } from '@ionic/angular';
+import { PageFeatureModule } from '@travellers-apps/prices/page/feature';
+import { AddItemRoutingModule } from './add-item-routing.module';
+import { AddItemComponent } from './components/add-item.component';
 import { AddItemContainerComponent } from './integration/add-item-container.component';
-import {ReactiveFormsModule} from "@angular/forms";
+import { ReactiveFormsModule } from '@angular/forms';
+import { CardFeatureModule } from '@travellers-apps/prices/card/feature';
 
 @NgModule({
   imports: [
@@ -14,11 +15,9 @@ import {ReactiveFormsModule} from "@angular/forms";
     AddItemRoutingModule,
     PageFeatureModule,
     ReactiveFormsModule,
+    CardFeatureModule,
   ],
-  declarations: [
-    AddItemComponent,
-    AddItemContainerComponent,
-  ],
-  exports: [AddItemComponent]
+  declarations: [AddItemComponent, AddItemContainerComponent],
+  exports: [AddItemComponent],
 })
 export class AddItemModule {}

@@ -10,6 +10,7 @@ import { Price } from '../api/price';
 @Component({
   selector: 'ta-add-item',
   templateUrl: './add-item.component.html',
+  styleUrls: ['./add-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddItemComponent {

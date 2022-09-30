@@ -45,6 +45,9 @@ jobs:
           NX_APP_STORAGE_BUCKET: ${{ secrets.NX_APP_STORAGE_BUCKET }}
           NX_APP_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_MESSAGING_SENDER_ID }}
 
+      - name: Capacitor Sync
+        run: npm run cap:sync
+
       - name: Prices Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
         uses: FirebaseExtended/action-hosting-deploy@v0

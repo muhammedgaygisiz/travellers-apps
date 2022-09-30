@@ -18,8 +18,8 @@
       "@travellers-apps/prices/add-item/feature": [
         "libs/prices/add-item/feature/src/index.ts"
       ],
-      "@travellers-apps/prices/auth/featurer": [
-        "libs/prices/auth/featurer/src/index.ts"
+      "@travellers-apps/prices/auth/feature": [
+        "libs/prices/auth/feature/src/index.ts"
       ],
       "@travellers-apps/prices/card/feature": [
         "libs/prices/card/feature/src/index.ts"

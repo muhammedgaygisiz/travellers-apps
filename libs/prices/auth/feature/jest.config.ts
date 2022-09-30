@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'prices-auth-featurer',
+  displayName: 'prices-auth-feature',
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
@@ -9,7 +9,7 @@ export default {
       stringifyContentPathRegex: '\\.(html|svg)$',
     },
   },
-  coverageDirectory: '../../../../coverage/libs/prices/auth/featurer',
+  coverageDirectory: '../../../../coverage/libs/prices/auth/feature',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
   },

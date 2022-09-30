@@ -1,14 +1,14 @@
 {
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "libs/prices/auth/featurer/src",
+  "sourceRoot": "libs/prices/auth/feature/src",
   "prefix": "travellers-apps",
   "targets": {
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/prices/auth/featurer"],
+      "outputs": ["coverage/libs/prices/auth/feature"],
       "options": {
-        "jestConfig": "libs/prices/auth/featurer/jest.config.ts",
+        "jestConfig": "libs/prices/auth/feature/jest.config.ts",
         "passWithNoTests": true
       }
     },
@@ -16,8 +16,8 @@
       "executor": "@nrwl/linter:eslint",
       "options": {
         "lintFilePatterns": [
-          "libs/prices/auth/featurer/**/*.ts",
-          "libs/prices/auth/featurer/**/*.html"
+          "libs/prices/auth/feature/**/*.ts",
+          "libs/prices/auth/feature/**/*.html"
         ]
       }
     }

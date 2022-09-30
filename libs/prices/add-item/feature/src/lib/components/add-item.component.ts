@@ -15,7 +15,7 @@ import { Price } from '../api/price';
 })
 export class AddItemComponent {
   @Output()
-  public save: EventEmitter<Price> = new EventEmitter<Price>();
+  public save: EventEmitter<Price> = new EventEmitter();
 
   public priceFormGroup: FormGroup = new FormGroup<Price>({
     productName: new FormControl<string>('', [Validators.required]),

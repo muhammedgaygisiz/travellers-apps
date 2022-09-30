@@ -1,1 +1,25 @@
-<p>auth works!</p>
+<ta-page>
+  <ta-card>
+    <div class="ion-padding">
+      <form [formGroup]="authFormGroup">
+        <ion-item lines="full">
+          <ion-label position="floating">Username</ion-label>
+          <ion-input type="text" formControlName="username"></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Password</ion-label>
+          <ion-input type="password" formControlName="password"></ion-input>
+        </ion-item>
+
+        <ion-button
+          class="ion-margin-top"
+          expand="block"
+          [disabled]="!authFormGroup.valid"
+          (click)="submitAuth.emit(authFormGroup.value)"
+          >Save
+        </ion-button>
+      </form>
+    </div>
+  </ta-card>
+</ta-page>

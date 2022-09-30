@@ -1,1 +1,1 @@
-export * from './lib/prices-auth-feature.module';
+export * from './lib/auth.module';

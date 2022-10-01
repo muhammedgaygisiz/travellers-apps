@@ -19,6 +19,32 @@
           (click)="submitAuth.emit(authFormGroup.value)"
           >Save
         </ion-button>
+
+        <ion-item class="ion-margin-top password-hint" lines="full">
+          <ion-text><b>Password must contain the following:</b></ion-text>
+        </ion-item>
+
+        <ion-item class="password-hint" lines="full">
+          <ion-icon color="danger" name="close-outline"></ion-icon>
+          <ion-text color="danger">A <b>lower</b> case letter</ion-text>
+        </ion-item>
+
+        <ion-item class="password-hint" lines="full">
+          <ion-icon color="danger" name="close-outline"></ion-icon>
+          <ion-text color="danger"
+            >A <b>capital</b> (uppercase) letter</ion-text
+          >
+        </ion-item>
+
+        <ion-item class="password-hint" lines="full">
+          <ion-icon color="danger" name="close-outline"></ion-icon>
+          <ion-text color="danger">A <b>number</b></ion-text>
+        </ion-item>
+
+        <ion-item class="password-hint" lines="full">
+          <ion-icon color="danger" name="close-outline"></ion-icon>
+          <ion-text color="danger">Minimum <b>8 caracters</b></ion-text>
+        </ion-item>
       </form>
     </div>
   </ta-card>

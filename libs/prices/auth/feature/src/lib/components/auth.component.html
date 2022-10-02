@@ -25,25 +25,41 @@
         </ion-item>
 
         <ion-item class="password-hint" lines="full">
-          <ion-icon color="danger" name="close-outline"></ion-icon>
-          <ion-text color="danger">A <b>lower</b> case letter</ion-text>
+          <ion-icon
+            color="{{ hasLowerCaseLetter$ | async }}"
+            name="close-outline"
+          ></ion-icon>
+          <ion-text color="{{ hasLowerCaseLetter$ | async }}"
+            >A <b>lower</b> case letter</ion-text
+          >
         </ion-item>
 
         <ion-item class="password-hint" lines="full">
-          <ion-icon color="danger" name="close-outline"></ion-icon>
-          <ion-text color="danger"
+          <ion-icon
+            color="{{ hasUpperCaseLetter$ | async }}"
+            name="close-outline"
+          ></ion-icon>
+          <ion-text color="{{ hasUpperCaseLetter$ | async }}"
             >A <b>capital</b> (uppercase) letter</ion-text
           >
         </ion-item>
 
         <ion-item class="password-hint" lines="full">
-          <ion-icon color="danger" name="close-outline"></ion-icon>
-          <ion-text color="danger">A <b>number</b></ion-text>
+          <ion-icon
+            color="{{ hasNumber$ | async }}"
+            name="close-outline"
+          ></ion-icon>
+          <ion-text color="{{ hasNumber$ | async }}">A <b>number</b></ion-text>
         </ion-item>
 
         <ion-item class="password-hint" lines="full">
-          <ion-icon color="danger" name="close-outline"></ion-icon>
-          <ion-text color="danger">Minimum <b>8 caracters</b></ion-text>
+          <ion-icon
+            color="{{ hasLength8 | async }}"
+            name="close-outline"
+          ></ion-icon>
+          <ion-text color="{{ hasLength8 | async }}"
+            >Minimum <b>8 caracters</b></ion-text
+          >
         </ion-item>
       </form>
     </div>

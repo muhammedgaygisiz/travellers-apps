@@ -19,4 +19,7 @@ export class HomeComponent {
 
   @Output()
   public addItemClick: EventEmitter<void> = new EventEmitter();
+
+  @Output()
+  loginClick: EventEmitter<void> = new EventEmitter();
 }

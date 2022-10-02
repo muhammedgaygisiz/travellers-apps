@@ -10,13 +10,17 @@ import { MostSearchedItem } from '@travellers-apps/utils-common';
       class="ion-page"
       [mostSearchedEntries]="mostSearchedEntries$ | async"
       (addItemClick)="onAddItemClick()"
+      (loginClick)="onLoginClick()"
     ></ta-home>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeContainerComponent implements OnInit {
+  //TODO: Check later why parameters hit eslint error -.-
   constructor(
+    // eslint-disable-next-line no-unused-vars
     private readonly homeService: HomeService,
+    // eslint-disable-next-line no-unused-vars
     private readonly navController: NavController
   ) {}
 
@@ -29,5 +33,9 @@ export class HomeContainerComponent implements OnInit {
 
   public async onAddItemClick() {
     await this.navController.navigateForward(['/add-item']);
+  }
+
+  public async onLoginClick() {
+    await this.navController.navigateForward(['/login']);
   }
 }

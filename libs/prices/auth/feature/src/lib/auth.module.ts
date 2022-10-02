@@ -5,16 +5,19 @@ import { PageFeatureModule } from '@travellers-apps/prices/page/feature';
 import { CardFeatureModule } from '@travellers-apps/prices/card/feature';
 import { ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
+import { AuthRoutingModule } from './auth-routing.module';
+import { AuthContainerComponent } from './integration/auth-container.component';
 
 @NgModule({
   imports: [
     CommonModule,
+    IonicModule,
     PageFeatureModule,
     CardFeatureModule,
     ReactiveFormsModule,
-    IonicModule,
+    AuthRoutingModule,
   ],
-  declarations: [AuthComponent],
+  declarations: [AuthComponent, AuthContainerComponent],
   exports: [AuthComponent],
 })
 export class AuthModule {}

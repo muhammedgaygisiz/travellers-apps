@@ -21,4 +21,7 @@ export class PageComponent {
 
   @Output()
   public addItemClick: EventEmitter<void> = new EventEmitter();
+
+  @Output()
+  public loginClick: EventEmitter<void> = new EventEmitter();
 }

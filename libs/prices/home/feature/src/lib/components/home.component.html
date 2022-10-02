@@ -1,4 +1,4 @@
-<ta-page (addItemClick)="addItemClick.emit()">
+<ta-page (addItemClick)="addItemClick.emit()" (loginClick)="loginClick.emit()">
   <ng-container *ngFor="let entry of mostSearchedEntries">
     <ta-card>
       <ion-card-header>

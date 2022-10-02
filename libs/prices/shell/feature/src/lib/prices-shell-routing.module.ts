@@ -17,6 +17,11 @@ const routes: Routes = [
       ),
   },
   {
+    path: 'login',
+    loadChildren: () =>
+      import('@travellers-apps/prices/auth/feature').then((m) => m.AuthModule),
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',

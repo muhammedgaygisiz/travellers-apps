@@ -10,11 +10,12 @@ import { Price } from '../api/price';
 @Component({
   selector: 'ta-add-item',
   templateUrl: './add-item.component.html',
+  styleUrls: ['./add-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddItemComponent {
   @Output()
-  public save: EventEmitter<Price> = new EventEmitter<Price>();
+  public save: EventEmitter<Price> = new EventEmitter();
 
   public priceFormGroup: FormGroup = new FormGroup<Price>({
     productName: new FormControl<string>('', [Validators.required]),

@@ -1,0 +1,67 @@
+<ta-page>
+  <ta-card>
+    <div class="ion-padding">
+      <form [formGroup]="authFormGroup">
+        <ion-item lines="full">
+          <ion-label position="floating">Username</ion-label>
+          <ion-input type="text" formControlName="username"></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Password</ion-label>
+          <ion-input type="password" formControlName="password"></ion-input>
+        </ion-item>
+
+        <ion-button
+          class="ion-margin-top"
+          expand="block"
+          [disabled]="!authFormGroup.valid"
+          (click)="submitAuth.emit(authFormGroup.value)"
+          >Save
+        </ion-button>
+
+        <ion-item class="ion-margin-top password-hint" lines="full">
+          <ion-text><b>Password must contain the following:</b></ion-text>
+        </ion-item>
+
+        <ion-item class="password-hint" lines="full">
+          <ion-icon
+            color="{{ hasLowerCaseLetter$ | async }}"
+            name="close-outline"
+          ></ion-icon>
+          <ion-text color="{{ hasLowerCaseLetter$ | async }}"
+            >A <b>lower</b> case letter</ion-text
+          >
+        </ion-item>
+
+        <ion-item class="password-hint" lines="full">
+          <ion-icon
+            color="{{ hasUpperCaseLetter$ | async }}"
+            name="close-outline"
+          ></ion-icon>
+          <ion-text color="{{ hasUpperCaseLetter$ | async }}"
+            >A <b>capital</b> (uppercase) letter</ion-text
+          >
+        </ion-item>
+
+        <ion-item class="password-hint" lines="full">
+          <ion-icon
+            color="{{ hasNumber$ | async }}"
+            name="close-outline"
+          ></ion-icon>
+          <ion-text color="{{ hasNumber$ | async }}">A <b>number</b></ion-text>
+        </ion-item>
+
+        <ion-item class="password-hint" lines="full">
+          <ion-icon
+            color="{{ hasLength8 | async }}"
+            name="close-outline"
+          ></ion-icon>
+          <ion-text color="{{ hasLength8 | async }}"
+            >Minimum <b>8 caracters</b></ion-text
+          >
+        </ion-item>
+      </form>
+    </div>
+  </ta-card>
+</ta-page>

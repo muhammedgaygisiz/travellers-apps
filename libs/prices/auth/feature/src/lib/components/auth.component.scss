@@ -1,0 +1,7 @@
+ion-item {
+  --background: var(--background);
+
+  &.password-hint {
+    font-size: 14px;
+  }
+}

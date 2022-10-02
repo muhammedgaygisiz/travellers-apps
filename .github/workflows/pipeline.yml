@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Run Unit Tests
-        run: npm run nx -- test prices
+        run: npm run nx -- run-many --target=test
 
       - name: Run Linter
         run: npm run nx -- lint prices

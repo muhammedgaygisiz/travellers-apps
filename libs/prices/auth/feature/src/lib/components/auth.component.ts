@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthCredentials } from '../api/auth-credentials';
-import { map, shareReplay, tap } from 'rxjs';
+import { map, shareReplay } from 'rxjs';
 
 const lowerCase = /[a-z]/;
 const upperCase = /[A-Z]/;
@@ -23,8 +23,7 @@ export class AuthComponent {
   });
 
   private password$ = this.authFormGroup.controls['password'].valueChanges.pipe(
-    shareReplay(),
-    tap((password) => console.log('#mo', password))
+    shareReplay()
   );
 
   public hasLowerCaseLetter$ = this.password$.pipe(

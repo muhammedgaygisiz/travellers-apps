@@ -26,38 +26,40 @@
 
         <ion-item class="password-hint" lines="full">
           <ion-icon
-            color="{{ hasLowerCaseLetter$ | async }}"
-            name="close-outline"
+            color="{{ hasLowerCaseLetterColor$ | async }}"
+            name="{{ (hasLowerCaseLetterIcon$ | async) ?? 'close-outline' }}"
           ></ion-icon>
-          <ion-text color="{{ hasLowerCaseLetter$ | async }}"
+          <ion-text color="{{ hasLowerCaseLetterColor$ | async }}"
             >A <b>lower</b> case letter</ion-text
           >
         </ion-item>
 
         <ion-item class="password-hint" lines="full">
           <ion-icon
-            color="{{ hasUpperCaseLetter$ | async }}"
-            name="close-outline"
+            color="{{ hasUpperCaseLetterColor$ | async }}"
+            name="{{ (hasUpperCaseLetterIcon$ | async) ?? 'close-outline' }}"
           ></ion-icon>
-          <ion-text color="{{ hasUpperCaseLetter$ | async }}"
+          <ion-text color="{{ hasUpperCaseLetterColor$ | async }}"
             >A <b>capital</b> (uppercase) letter</ion-text
           >
         </ion-item>
 
         <ion-item class="password-hint" lines="full">
           <ion-icon
-            color="{{ hasNumber$ | async }}"
-            name="close-outline"
+            color="{{ hasNumberColor$ | async }}"
+            name="{{ (hasNumberIcon$ | async) ?? 'close-outline' }}"
           ></ion-icon>
-          <ion-text color="{{ hasNumber$ | async }}">A <b>number</b></ion-text>
+          <ion-text color="{{ hasNumberColor$ | async }}"
+            >A <b>number</b></ion-text
+          >
         </ion-item>
 
         <ion-item class="password-hint" lines="full">
           <ion-icon
-            color="{{ hasLength8 | async }}"
-            name="close-outline"
+            color="{{ hasLength8Color$ | async }}"
+            name="{{ (hasLength8Icon$ | async) ?? 'close-outline' }}"
           ></ion-icon>
-          <ion-text color="{{ hasLength8 | async }}"
+          <ion-text color="{{ hasLength8Color$ | async }}"
             >Minimum <b>8 caracters</b></ion-text
           >
         </ion-item>

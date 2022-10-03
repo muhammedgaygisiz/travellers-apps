@@ -26,44 +26,79 @@ export class AuthComponent {
     shareReplay()
   );
 
-  public hasLowerCaseLetter$ = this.password$.pipe(
-    map((password) => this.test(password).forPattern(lowerCase))
-  );
-
-  public hasUpperCaseLetter$ = this.password$.pipe(
+  private hasUpperCaseLetter$ = this.password$.pipe(
     map((password) => this.test(password).forPattern(upperCase))
   );
 
-  public hasNumber$ = this.password$.pipe(
+  private hasLowerCaseLetter$ = this.password$.pipe(
+    map((password) => this.test(password).forPattern(lowerCase))
+  );
+
+  private hasNumber$ = this.password$.pipe(
     map((password) => this.test(password).forPattern(digit))
   );
 
-  public hasLength8 = this.password$.pipe(
+  private hasLength8$ = this.password$.pipe(
     map((password) => this.test(password).forLength(minLength))
   );
+
+  public hasLowerCaseLetterColor$ = this.hasLowerCaseLetter$.pipe(
+    map((hasLowerCaseLetter) => this.calculateColor(hasLowerCaseLetter))
+  );
+
+  public hasLowerCaseLetterIcon$ = this.hasLowerCaseLetter$.pipe(
+    map((hasLowerCaseLetter) => this.calculateIcon(hasLowerCaseLetter))
+  );
+
+  public hasUpperCaseLetterColor$ = this.hasUpperCaseLetter$.pipe(
+    map((hasUpperCaseLetter) => this.calculateColor(hasUpperCaseLetter))
+  );
+
+  public hasUpperCaseLetterIcon$ = this.hasUpperCaseLetter$.pipe(
+    map((hasUpperCaseLetter) => this.calculateIcon(hasUpperCaseLetter))
+  );
+
+  public hasNumberColor$ = this.hasNumber$.pipe(
+    map((hasNumber) => this.calculateColor(hasNumber))
+  );
+
+  public hasNumberIcon$ = this.hasNumber$.pipe(
+    map((hasNumber) => this.calculateIcon(hasNumber))
+  );
+
+  public hasLength8Color$ = this.hasLength8$.pipe(
+    map((hasLength8) => this.calculateColor(hasLength8))
+  );
+
+  public hasLength8Icon$ = this.hasLength8$.pipe(
+    map((hasLength8) => this.calculateIcon(hasLength8))
+  );
+
+  private calculateColor(hasLowerCaseLetter: null | boolean) {
+    if (hasLowerCaseLetter === null) {
+      return '';
+    }
+
+    return hasLowerCaseLetter ? 'success' : 'danger';
+  }
 
   private test(password: string) {
     return {
       forPattern: (pattern: RegExp) => {
-        return this.calculateColor(password, () => pattern.test(password));
+        return this.isFulfilled(password, () => pattern.test(password));
       },
       forLength: (length: number) => {
-        return this.calculateColor(password, () => password.length >= length);
+        return this.isFulfilled(password, () => password.length >= length);
       },
     };
   }
 
-  calculateColor(password: string, condition: () => boolean) {
+  private isFulfilled(password: string, condition: () => boolean) {
     if (!password) {
-      return '';
+      return null;
     }
 
-    const conditionFulfilled = condition();
-    if (conditionFulfilled) {
-      return 'success';
-    }
-
-    return 'danger';
+    return condition();
   }
 
   private getPasswordValidator() {
@@ -74,5 +109,9 @@ export class AuthComponent {
       Validators.pattern(digit),
       Validators.minLength(minLength),
     ]);
+  }
+
+  private calculateIcon(conditionFulfilled: null | boolean) {
+    return conditionFulfilled ? 'checkmark-outline' : 'close-outline';
   }
 }

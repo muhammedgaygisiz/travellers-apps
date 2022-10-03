@@ -24,7 +24,7 @@ const Template: Story<PageComponent> = (args: PageComponent) => ({
   template: `
       <ta-page
         [enableBackButton]="enableBackButton"
-        [enableAddButton]="enableAddButton"
+        [isAuthenticated]="isAuthenticated"
       >
         <p>Some dummy content</p>
       </ta-page>
@@ -34,5 +34,5 @@ const Template: Story<PageComponent> = (args: PageComponent) => ({
 export const Primary = Template.bind({});
 Primary.args = {
   enableBackButton: false,
-  enableAddButton: true,
+  isAuthenticated: true,
 };

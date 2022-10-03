@@ -1,14 +1,42 @@
 <div class="ion-page">
   <ion-header>
     <ion-toolbar>
-      <ion-buttons slot="start" *ngIf="enableBackButton">
-        <ion-back-button defaultHref="/home" color="white"></ion-back-button>
+      <ion-buttons slot="start">
+        <ion-back-button
+          *ngIf="enableBackButton"
+          defaultHref="/home"
+          color="white"
+        ></ion-back-button>
       </ion-buttons>
 
       <ion-title>
         <ion-icon name="pricetag-outline"></ion-icon>
         Prices
       </ion-title>
+
+      <ion-buttons slot="end">
+        <ion-button
+          (click)="loginClick.emit()"
+          *ngIf="!hideAuthButton && !isAuthenticated"
+        >
+          <ion-icon
+            color="dark"
+            slot="icon-only"
+            name="log-in-outline"
+          ></ion-icon>
+        </ion-button>
+
+        <ion-button
+          (click)="logoutClick.emit()"
+          *ngIf="!hideAuthButton && isAuthenticated"
+        >
+          <ion-icon
+            color="dark"
+            slot="icon-only"
+            name="log-out-outline"
+          ></ion-icon>
+        </ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
@@ -21,7 +49,7 @@
       vertical="bottom"
       horizontal="center"
       slot="fixed"
-      *ngIf="enableAddButton"
+      *ngIf="isAuthenticated"
     >
       <ion-fab-button color="light" (click)="addItemClick.emit()">
         <ion-icon name="add"></ion-icon>

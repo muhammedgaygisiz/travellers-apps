@@ -17,6 +17,15 @@ export class HomeComponent {
   @Input()
   mostSearchedEntries: MostSearchedItem[] | null = [];
 
+  @Input()
+  isAuthenticated: boolean | null = false;
+
   @Output()
   public addItemClick: EventEmitter<void> = new EventEmitter();
+
+  @Output()
+  loginClick: EventEmitter<void> = new EventEmitter();
+
+  @Output()
+  logoutClick: EventEmitter<void> = new EventEmitter();
 }

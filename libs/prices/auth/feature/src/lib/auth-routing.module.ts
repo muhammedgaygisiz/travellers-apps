@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AddItemContainerComponent } from './integration/add-item-container.component';
+import { AuthContainerComponent } from './integration/auth-container.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: AddItemContainerComponent,
+    component: AuthContainerComponent,
   },
 ];
 
@@ -13,4 +13,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class AddItemRoutingModule {}
+export class AuthRoutingModule {}

@@ -19,6 +19,9 @@ export class PageComponent {
   @Input()
   isAuthenticated: boolean | null = false;
 
+  @Input()
+  hideAuthButton = false;
+
   @Output()
   public addItemClick: EventEmitter<void> = new EventEmitter();
 

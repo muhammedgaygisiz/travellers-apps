@@ -17,6 +17,9 @@ export class HomeComponent {
   @Input()
   mostSearchedEntries: MostSearchedItem[] | null = [];
 
+  @Input()
+  isAuthenticated: boolean | null = false;
+
   @Output()
   public addItemClick: EventEmitter<void> = new EventEmitter();
 

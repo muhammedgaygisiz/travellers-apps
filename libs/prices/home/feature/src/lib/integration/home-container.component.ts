@@ -9,6 +9,7 @@ import { MostSearchedItem } from '@travellers-apps/utils-common';
     <ta-home
       class="ion-page"
       [mostSearchedEntries]="mostSearchedEntries$ | async"
+      [isAuthenticated]="isAuthenticated$ | async"
       (addItemClick)="onAddItemClick()"
       (loginClick)="onLoginClick()"
     ></ta-home>
@@ -26,6 +27,9 @@ export class HomeContainerComponent implements OnInit {
 
   public mostSearchedEntries$: Observable<MostSearchedItem[]> =
     this.homeService.mostSearched$;
+
+  public isAuthenticated$: Observable<boolean | null> =
+    this.homeService.isAuthenticated$;
 
   ngOnInit() {
     this.homeService.loadMostSearchedEntries();

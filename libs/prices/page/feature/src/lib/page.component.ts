@@ -17,7 +17,7 @@ export class PageComponent {
   enableBackButton = false;
 
   @Input()
-  enableAddButton = true;
+  enableAddButton: boolean | null = true;
 
   @Output()
   public addItemClick: EventEmitter<void> = new EventEmitter();

@@ -18,7 +18,11 @@ export class HomeService {
     private store: Store
   ) {}
 
-  loadMostSearchedEntries() {
+  public loadMostSearchedEntries(): void {
     this.store.dispatch(fromMostSearched.loadItems());
+  }
+
+  public logout(): void {
+    this.store.dispatch(fromAuth.logout());
   }
 }

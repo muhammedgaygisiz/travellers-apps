@@ -5,13 +5,28 @@ import {
   ofType,
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
-import { login, loginSucceeded, notAuthenticated } from './actions';
-import { catchError, EMPTY, map, mergeMap, Observable, tap } from 'rxjs';
+import {
+  login,
+  loginSucceeded,
+  logout,
+  logoutSucceeded,
+  notAuthenticated,
+} from './actions';
+import {
+  catchError,
+  EMPTY,
+  exhaustMap,
+  map,
+  mergeMap,
+  Observable,
+  tap,
+} from 'rxjs';
 import { AuthService } from '@travellers-apps/prices/firestore/feature';
 import firebase from 'firebase/compat';
 import UserCredential = firebase.auth.UserCredential;
 import { AuthCredentials } from '@travellers-apps/utils-common';
 import User = firebase.User;
+import { NavController } from '@ionic/angular';
 
 @Injectable()
 export class AuthEffects {
@@ -42,14 +57,20 @@ export class AuthEffects {
             authCreds
           ) as Observable<UserCredential>
         ).pipe(
-          // eslint-disable-next-line no-unused-vars
-          map((_) => {
-            return loginSucceeded();
-          }),
-          tap(() => {
-            console.log('#mo', authCreds);
-            localStorage.setItem('username', authCreds.username);
-          }),
+          map(() => loginSucceeded()),
+          tap(() => this.navController.back()),
+          catchError(() => EMPTY)
+        )
+      )
+    )
+  );
+
+  logoutEffect$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(logout.type),
+      exhaustMap(() =>
+        this.authService.logout().pipe(
+          map(() => logoutSucceeded()),
           catchError(() => EMPTY)
         )
       )
@@ -60,6 +81,8 @@ export class AuthEffects {
     // eslint-disable-next-line no-unused-vars
     private readonly actions$: Actions,
     // eslint-disable-next-line no-unused-vars
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    // eslint-disable-next-line no-unused-vars
+    private readonly navController: NavController
   ) {}
 }

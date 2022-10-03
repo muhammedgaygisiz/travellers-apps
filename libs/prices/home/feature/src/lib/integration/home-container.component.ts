@@ -12,6 +12,7 @@ import { MostSearchedItem } from '@travellers-apps/utils-common';
       [isAuthenticated]="isAuthenticated$ | async"
       (addItemClick)="onAddItemClick()"
       (loginClick)="onLoginClick()"
+      (logoutClick)="onLogoutClick()"
     ></ta-home>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,5 +42,9 @@ export class HomeContainerComponent implements OnInit {
 
   public async onLoginClick() {
     await this.navController.navigateForward(['/login']);
+  }
+
+  public async onLogoutClick() {
+    this.homeService.logout();
   }
 }

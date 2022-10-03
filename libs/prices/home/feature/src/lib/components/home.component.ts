@@ -25,4 +25,7 @@ export class HomeComponent {
 
   @Output()
   loginClick: EventEmitter<void> = new EventEmitter();
+
+  @Output()
+  logoutClick: EventEmitter<void> = new EventEmitter();
 }

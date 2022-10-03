@@ -28,4 +28,8 @@ export class AuthService {
       )
     );
   }
+
+  public logout() {
+    return from(this.afa.signOut());
+  }
 }

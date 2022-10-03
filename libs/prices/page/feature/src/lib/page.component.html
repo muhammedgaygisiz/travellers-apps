@@ -15,11 +15,19 @@
       </ion-title>
 
       <ion-buttons slot="end">
-        <ion-button (click)="loginClick.emit()">
+        <ion-button (click)="loginClick.emit()" *ngIf="!isAuthenticated">
           <ion-icon
             color="dark"
             slot="icon-only"
             name="log-in-outline"
+          ></ion-icon>
+        </ion-button>
+
+        <ion-button (click)="logoutClick.emit()" *ngIf="isAuthenticated">
+          <ion-icon
+            color="dark"
+            slot="icon-only"
+            name="log-out-outline"
           ></ion-icon>
         </ion-button>
       </ion-buttons>
@@ -35,7 +43,7 @@
       vertical="bottom"
       horizontal="center"
       slot="fixed"
-      *ngIf="enableAddButton"
+      *ngIf="isAuthenticated"
     >
       <ion-fab-button color="light" (click)="addItemClick.emit()">
         <ion-icon name="add"></ion-icon>

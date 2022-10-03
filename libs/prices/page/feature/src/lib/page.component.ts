@@ -17,11 +17,14 @@ export class PageComponent {
   enableBackButton = false;
 
   @Input()
-  enableAddButton: boolean | null = true;
+  isAuthenticated: boolean | null = false;
 
   @Output()
   public addItemClick: EventEmitter<void> = new EventEmitter();
 
   @Output()
   public loginClick: EventEmitter<void> = new EventEmitter();
+
+  @Output()
+  public logoutClick: EventEmitter<void> = new EventEmitter();
 }

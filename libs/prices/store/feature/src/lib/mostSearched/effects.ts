@@ -28,7 +28,9 @@ export class MostSearchedItemsEffects {
   );
 
   constructor(
+    // eslint-disable-next-line no-unused-vars
     private readonly actions$: Actions,
+    // eslint-disable-next-line no-unused-vars
     private readonly mostSearchedService: MostSearchedService
   ) {}
 }

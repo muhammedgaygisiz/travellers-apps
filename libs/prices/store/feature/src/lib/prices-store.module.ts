@@ -4,6 +4,8 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { fromMostSearched } from './mostSearched';
 import { MostSearchedItemsEffects } from './mostSearched/effects';
 import { Environment, ModuleForStore } from '@travellers-apps/utils-common';
+import { AuthEffects } from './auth/effects';
+import { fromAuth } from './auth';
 
 const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
   return (state, action) => {
@@ -33,8 +35,9 @@ export class PricesStoreModule {
         }
       ),
       StoreModule.forFeature(fromMostSearched.key, fromMostSearched.reducer),
+      StoreModule.forFeature(fromAuth.key, fromAuth.reducer),
       EffectsModule.forRoot([]),
-      EffectsModule.forFeature([MostSearchedItemsEffects]),
+      EffectsModule.forFeature([MostSearchedItemsEffects, AuthEffects]),
       !environment.production ? StoreDevtoolsModule.instrument() : [],
     ];
   }

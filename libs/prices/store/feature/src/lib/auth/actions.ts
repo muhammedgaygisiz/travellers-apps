@@ -5,3 +5,5 @@ export const login = createAction(
   '[Auth Page] Login',
   props<{ authCreds: AuthCredentials }>()
 );
+
+export const loginSucceeded = createAction('[Auth API] Login successful');

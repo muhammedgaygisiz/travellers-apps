@@ -1,4 +1,4 @@
-import { Observable, of, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { MostSearchedItem } from '@travellers-apps/utils-common';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
@@ -11,5 +11,8 @@ export class MostSearchedService {
     .collection<MostSearchedItem>('most-searched-items')
     .valueChanges();
 
-  constructor(private readonly afs: AngularFirestore) {}
+  constructor(
+    // eslint-disable-next-line no-unused-vars
+    private readonly afs: AngularFirestore
+  ) {}
 }

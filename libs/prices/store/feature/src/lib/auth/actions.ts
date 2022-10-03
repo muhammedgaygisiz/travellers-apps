@@ -7,3 +7,4 @@ export const login = createAction(
 );
 
 export const loginSucceeded = createAction('[Auth API] Login successful');
+export const notAuthenticated = createAction('[Auth API] Not logged in');

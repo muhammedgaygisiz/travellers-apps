@@ -14,6 +14,10 @@ export class AuthService {
     private readonly afa: AngularFireAuth
   ) {}
 
+  public isLoggedIn$() {
+    return this.afa.authState;
+  }
+
   public loginWithUsernameAndPassword$(
     authCreds: AuthCredentials
   ): Observable<UserCredential> {

@@ -36,8 +36,8 @@ export class PricesStoreModule {
       ),
       StoreModule.forFeature(fromMostSearched.key, fromMostSearched.reducer),
       StoreModule.forFeature(fromAuth.key, fromAuth.reducer),
-      EffectsModule.forRoot([]),
-      EffectsModule.forFeature([MostSearchedItemsEffects, AuthEffects]),
+      EffectsModule.forRoot([AuthEffects]),
+      EffectsModule.forFeature([MostSearchedItemsEffects]),
       !environment.production ? StoreDevtoolsModule.instrument() : [],
     ];
   }

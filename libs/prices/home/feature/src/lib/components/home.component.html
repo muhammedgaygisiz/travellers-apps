@@ -4,6 +4,17 @@
   (loginClick)="loginClick.emit()"
   (logoutClick)="logoutClick.emit()"
 >
+  <ta-card class="location">
+    <ion-card-header>
+      <ion-card-subtitle>
+        <h5>You are in:</h5>
+      </ion-card-subtitle>
+      <ion-card-title>
+        <b>Marrakech</b>
+        <ion-icon name="location-outline"></ion-icon>
+      </ion-card-title>
+    </ion-card-header>
+  </ta-card>
   <ng-container *ngFor="let entry of mostSearchedEntries">
     <ta-card>
       <ion-card-header>

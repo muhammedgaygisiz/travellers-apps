@@ -1,0 +1,19 @@
+.location {
+  h5 {
+    font-size: 14px;
+  }
+
+  font-size: 16px;
+
+  ion-card-title {
+    display: flex;
+    b {
+      display: inline-flex;
+      margin-right: 8px;
+      flex-grow: 1;
+    }
+
+    ion-icon {
+    }
+  }
+}

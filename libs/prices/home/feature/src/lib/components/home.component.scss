@@ -5,15 +5,19 @@
 
   font-size: 16px;
 
-  ion-card-title {
-    display: flex;
-    b {
-      display: inline-flex;
-      margin-right: 8px;
-      flex-grow: 1;
-    }
+  ion-card-header {
+    padding-top: 8px;
 
-    ion-icon {
+    ion-card-title {
+      display: flex;
+      b {
+        display: inline-flex;
+        margin-right: 8px;
+        flex-grow: 1;
+      }
+
+      ion-icon {
+      }
     }
   }
 }

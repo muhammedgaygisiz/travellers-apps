@@ -10,6 +10,7 @@ import { MostSearchedItem } from '@travellers-apps/utils-common';
       class="ion-page"
       [mostSearchedEntries]="mostSearchedEntries$ | async"
       [isAuthenticated]="isAuthenticated$ | async"
+      [location]="location$ | async"
       (addItemClick)="onAddItemClick()"
       (loginClick)="onLoginClick()"
       (logoutClick)="onLogoutClick()"
@@ -25,6 +26,8 @@ export class HomeContainerComponent implements OnInit {
     // eslint-disable-next-line no-unused-vars
     private readonly navController: NavController
   ) {}
+
+  public location$: Observable<string | null> = this.homeService.location$;
 
   public mostSearchedEntries$: Observable<MostSearchedItem[]> =
     this.homeService.mostSearched$;

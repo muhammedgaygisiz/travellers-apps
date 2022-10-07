@@ -12,21 +12,14 @@ import {
   logoutSucceeded,
   notAuthenticated,
 } from './actions';
-import {
-  catchError,
-  EMPTY,
-  exhaustMap,
-  map,
-  mergeMap,
-  Observable,
-  tap,
-} from 'rxjs';
+import { catchError, EMPTY, exhaustMap, map, mergeMap, tap } from 'rxjs';
 import { AuthService } from '@travellers-apps/prices/firestore/feature';
 import firebase from 'firebase/compat';
-import UserCredential = firebase.auth.UserCredential;
 import { AuthCredentials } from '@travellers-apps/utils-common';
 import User = firebase.User;
 import { NavController } from '@ionic/angular';
+
+type AuthCreds = { authCreds: AuthCredentials };
 
 @Injectable()
 export class AuthEffects {
@@ -34,15 +27,7 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
       mergeMap(() =>
-        (this.authService.isLoggedIn$() as Observable<User | null>).pipe(
-          map((user) => {
-            if (user) {
-              return loginSucceeded();
-            }
-
-            return notAuthenticated();
-          })
-        )
+        this.authService.isLoggedIn$().pipe(map((user) => this.getAction(user)))
       )
     )
   );
@@ -50,12 +35,8 @@ export class AuthEffects {
   loginEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(login.type),
-      mergeMap(({ authCreds }: { authCreds: AuthCredentials }) =>
-        (
-          this.authService.loginWithUsernameAndPassword$(
-            authCreds
-          ) as Observable<UserCredential>
-        ).pipe(
+      mergeMap(({ authCreds }: AuthCreds) =>
+        this.login$(authCreds).pipe(
           map(() => loginSucceeded()),
           tap(() => this.navController.back()),
           catchError(() => EMPTY)
@@ -84,4 +65,12 @@ export class AuthEffects {
     // eslint-disable-next-line no-unused-vars
     private readonly navController: NavController
   ) {}
+
+  private login$(authCreds: AuthCredentials) {
+    return this.authService.loginWithUsernameAndPassword$(authCreds);
+  }
+
+  private getAction(user: User | null) {
+    return user ? loginSucceeded() : notAuthenticated();
+  }
 }

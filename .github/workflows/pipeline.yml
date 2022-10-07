@@ -44,6 +44,7 @@ jobs:
           NX_APP_PROJECT_ID: ${{ secrets.NX_APP_PROJECT_ID }}
           NX_APP_STORAGE_BUCKET: ${{ secrets.NX_APP_STORAGE_BUCKET }}
           NX_APP_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_MESSAGING_SENDER_ID }}
+          NX_APP_GEOAPIFY_API_KEY: ${{ secrets.NX_APP_GEOAPIFY_API_KEY }}
 
       - name: Capacitor Sync
         run: npm run cap:sync

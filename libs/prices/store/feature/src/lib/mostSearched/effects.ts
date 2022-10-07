@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { itemsLoaded, loadItems } from './actions';
-import { catchError, EMPTY, map, mergeMap, Observable } from 'rxjs';
+import { catchError, EMPTY, map, mergeMap } from 'rxjs';
 import { MostSearchedService } from '@travellers-apps/prices/firestore/feature';
 import { MostSearchedItem } from '@travellers-apps/utils-common';
 
@@ -11,15 +11,9 @@ export class MostSearchedItemsEffects {
     this.actions$.pipe(
       ofType(loadItems.type),
       mergeMap(() =>
-        (
-          this.mostSearchedService.allMostSearchedItems$ as Observable<
-            MostSearchedItem[]
-          >
-        ).pipe(
+        this.mostSearchedService.allMostSearchedItems$.pipe(
           map((mostSearchedEntries) =>
-            itemsLoaded({
-              items: mostSearchedEntries,
-            })
+            this.toItemsLoadedAction(mostSearchedEntries)
           ),
           catchError(() => EMPTY)
         )
@@ -33,4 +27,10 @@ export class MostSearchedItemsEffects {
     // eslint-disable-next-line no-unused-vars
     private readonly mostSearchedService: MostSearchedService
   ) {}
+
+  private toItemsLoadedAction(mostSearchedEntries: MostSearchedItem[]) {
+    return itemsLoaded({
+      items: mostSearchedEntries,
+    });
+  }
 }

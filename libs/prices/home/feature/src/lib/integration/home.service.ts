@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   fromAuth,
+  fromLocation,
   fromMostSearched,
 } from '@travellers-apps/prices/store/feature';
 
@@ -13,9 +14,11 @@ export class HomeService {
 
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
 
+  location$ = this.store.select(fromLocation.selectLocation);
+
   constructor(
     // eslint-disable-next-line no-unused-vars
-    private store: Store
+    private readonly store: Store
   ) {}
 
   public loadMostSearchedEntries(): void {

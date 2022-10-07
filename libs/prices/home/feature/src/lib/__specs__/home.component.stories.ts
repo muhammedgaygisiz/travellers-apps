@@ -21,6 +21,7 @@ const Template: Story<HomeComponent> = (args: HomeComponent) => ({
 export const Primary = Template.bind({});
 Primary.args = {
   isAuthenticated: true,
+  location: 'Marrakech',
   mostSearchedEntries: [
     {
       id: '1',

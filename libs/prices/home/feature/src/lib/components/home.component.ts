@@ -20,6 +20,9 @@ export class HomeComponent {
   @Input()
   isAuthenticated: boolean | null = false;
 
+  @Input()
+  location: string | null = '';
+
   @Output()
   public addItemClick: EventEmitter<void> = new EventEmitter();
 

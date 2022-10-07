@@ -1,15 +1,15 @@
 {
-  "name": "prices-store-feature",
+  "name": "prices-geoapify-feature",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "libs/prices/store/feature/src",
+  "sourceRoot": "libs/prices/geoapify/feature/src",
   "prefix": "travellers-apps",
   "targets": {
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/prices/store/feature"],
+      "outputs": ["coverage/libs/prices/geoapify/feature"],
       "options": {
-        "jestConfig": "libs/prices/store/feature/jest.config.ts",
+        "jestConfig": "libs/prices/geoapify/feature/jest.config.ts",
         "passWithNoTests": true
       }
     },
@@ -17,8 +17,8 @@
       "executor": "@nrwl/linter:eslint",
       "options": {
         "lintFilePatterns": [
-          "libs/prices/store/feature/**/*.ts",
-          "libs/prices/store/feature/**/*.html"
+          "libs/prices/geoapify/feature/**/*.ts",
+          "libs/prices/geoapify/feature/**/*.html"
         ]
       }
     }

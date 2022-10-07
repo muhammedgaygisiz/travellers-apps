@@ -1,4 +1,5 @@
 {
+  "name": "prices-firestore-feature",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/prices/firestore/feature/src",

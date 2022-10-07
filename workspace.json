@@ -9,6 +9,7 @@
     "prices-card-feature": "libs/prices/card/feature",
     "prices-e2e": "apps/prices-e2e",
     "prices-firestore-feature": "libs/prices/firestore/feature",
+    "prices-geoapify-feature": "libs/prices/geoapify/feature",
     "prices-home-feature": "libs/prices/home/feature",
     "prices-page-feature": "libs/prices/page/feature",
     "prices-shell-feature": "libs/prices/shell/feature",

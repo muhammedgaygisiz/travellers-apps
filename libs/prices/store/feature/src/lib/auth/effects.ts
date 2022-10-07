@@ -33,7 +33,6 @@ export class AuthEffects {
   checkAuthStatus$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
-      tap(() => console.log('#mo effects init')),
       mergeMap(() =>
         (this.authService.isLoggedIn$() as Observable<User | null>).pipe(
           map((user) => {

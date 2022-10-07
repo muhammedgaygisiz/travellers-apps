@@ -6,6 +6,8 @@ import { MostSearchedItemsEffects } from './mostSearched/effects';
 import { Environment, ModuleForStore } from '@travellers-apps/utils-common';
 import { AuthEffects } from './auth/effects';
 import { fromAuth } from './auth';
+import { fromLocation } from './location';
+import { LocationEffects } from './location/effects';
 
 const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
   return (state, action) => {
@@ -34,10 +36,11 @@ export class PricesStoreModule {
           },
         }
       ),
+      EffectsModule.forRoot([AuthEffects]),
+      EffectsModule.forFeature([MostSearchedItemsEffects, LocationEffects]),
       StoreModule.forFeature(fromMostSearched.key, fromMostSearched.reducer),
       StoreModule.forFeature(fromAuth.key, fromAuth.reducer),
-      EffectsModule.forRoot([AuthEffects]),
-      EffectsModule.forFeature([MostSearchedItemsEffects]),
+      StoreModule.forFeature(fromLocation.key, fromLocation.reducer),
       !environment.production ? StoreDevtoolsModule.instrument() : [],
     ];
   }

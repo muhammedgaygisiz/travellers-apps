@@ -4,13 +4,13 @@
   (loginClick)="loginClick.emit()"
   (logoutClick)="logoutClick.emit()"
 >
-  <ta-card class="location">
+  <ta-card class="location" *ngIf="location">
     <ion-card-header>
       <ion-card-subtitle>
         <h5>You are in:</h5>
       </ion-card-subtitle>
       <ion-card-title>
-        <b>Marrakech</b>
+        <b>{{ location }}</b>
         <ion-icon name="location-outline"></ion-icon>
       </ion-card-title>
     </ion-card-header>

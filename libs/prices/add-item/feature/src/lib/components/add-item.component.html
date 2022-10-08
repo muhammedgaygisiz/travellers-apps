@@ -18,7 +18,11 @@
 
         <ion-item lines="full">
           <ion-label position="floating">Location</ion-label>
-          <ion-input type="text" formControlName="location"></ion-input>
+          <ion-input
+            type="text"
+            formControlName="location"
+            [value]="location"
+          ></ion-input>
         </ion-item>
 
         <ion-item lines="full">

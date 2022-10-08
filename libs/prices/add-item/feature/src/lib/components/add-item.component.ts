@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
+  Input,
+  OnChanges,
   Output,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -13,7 +15,10 @@ import { Price } from '../api/price';
   styleUrls: ['./add-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddItemComponent {
+export class AddItemComponent implements OnChanges {
+  @Input()
+  public location: string | null = '';
+
   @Output()
   public save: EventEmitter<Price> = new EventEmitter();
 
@@ -23,4 +28,8 @@ export class AddItemComponent {
     src: new FormControl<string>('', [Validators.required]),
     location: new FormControl<string>('', [Validators.required]),
   });
+
+  public ngOnChanges() {
+    this.priceFormGroup.controls['location'].patchValue(this.location);
+  }
 }

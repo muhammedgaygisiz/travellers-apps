@@ -2,11 +2,12 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthCredentials } from '../api/auth-credentials';
 import { map, shareReplay } from 'rxjs';
-
-const lowerCase = /[a-z]/;
-const upperCase = /[A-Z]/;
-const digit = /[0-9]/;
-const minLength = 8;
+import {
+  digit,
+  lowerCase,
+  minLength,
+  upperCase,
+} from '@travellers-apps/utils-common';
 
 @Component({
   selector: 'ta-auth',

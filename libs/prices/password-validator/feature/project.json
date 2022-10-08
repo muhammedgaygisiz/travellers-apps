@@ -1,0 +1,27 @@
+{
+  "name": "prices-password-validator-feature",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/prices/password-validator/feature/src",
+  "prefix": "travellers-apps",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/prices/password-validator/feature"],
+      "options": {
+        "jestConfig": "libs/prices/password-validator/feature/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/prices/password-validator/feature/**/*.ts",
+          "libs/prices/password-validator/feature/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

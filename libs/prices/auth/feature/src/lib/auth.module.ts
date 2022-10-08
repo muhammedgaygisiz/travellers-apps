@@ -7,7 +7,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { AuthRoutingModule } from './auth-routing.module';
 import { AuthContainerComponent } from './integration/auth-container.component';
-import { PasswordValidatorModule } from '@travellers-apps/prices/password-validator/feature';
 
 @NgModule({
   imports: [
@@ -17,7 +16,6 @@ import { PasswordValidatorModule } from '@travellers-apps/prices/password-valida
     CardFeatureModule,
     ReactiveFormsModule,
     AuthRoutingModule,
-    PasswordValidatorModule,
   ],
   declarations: [AuthComponent, AuthContainerComponent],
   exports: [AuthComponent],

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PasswordValidatorComponent } from '../component/password-validator.component';
+import { PasswordValidatorModule } from '../password-validator.module';
 
 describe('PasswordValidatorComponent', () => {
   let component: PasswordValidatorComponent;
@@ -8,7 +9,7 @@ describe('PasswordValidatorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [PasswordValidatorComponent],
+      imports: [PasswordValidatorModule],
     }).compileComponents();
   });
 

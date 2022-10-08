@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PasswordValidatorComponent } from './password-validator.component';
+import { PasswordValidatorComponent } from '../component/password-validator.component';
 
 describe('PasswordValidatorComponent', () => {
   let component: PasswordValidatorComponent;

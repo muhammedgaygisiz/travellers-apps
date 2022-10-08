@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PasswordValidatorComponent } from './password-validator/password-validator.component';
+import { PasswordValidatorComponent } from './component/password-validator.component';
 import { IonicModule } from '@ionic/angular';
 
 @NgModule({

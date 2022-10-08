@@ -24,4 +24,6 @@ const Template: Story<AddItemComponent> = (args: AddItemComponent) => ({
 });
 
 export const Primary = Template.bind({});
-Primary.args = {};
+Primary.args = {
+  location: 'Bern',
+};

@@ -34,7 +34,7 @@ jobs:
         run: npm run nx -- run-many --target=test
 
       - name: Run Linter
-        run: npm run nx -- lint prices
+        run: npm run nx -- run-many --target=lint
 
       - name: Build Prices App
         run: npm run nx -- build prices

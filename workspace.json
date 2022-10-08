@@ -12,6 +12,7 @@
     "prices-geoapify-feature": "libs/prices/geoapify/feature",
     "prices-home-feature": "libs/prices/home/feature",
     "prices-page-feature": "libs/prices/page/feature",
+    "prices-password-validator-feature": "libs/prices/password-validator/feature",
     "prices-shell-feature": "libs/prices/shell/feature",
     "prices-store-feature": "libs/prices/store/feature",
     "utils-common": "libs/utils-common"

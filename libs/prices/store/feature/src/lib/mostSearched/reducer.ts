@@ -4,5 +4,5 @@ import { itemsLoaded } from './actions';
 
 export const reducer = createReducer(
   initialState,
-  on(itemsLoaded, (state, { items }) => adapter.upsertMany(items, state))
+  on(itemsLoaded, (state, { items }) => adapter.setAll(items, state))
 );

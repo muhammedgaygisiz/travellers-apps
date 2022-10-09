@@ -7,7 +7,7 @@ import {
   Output,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Price } from '../api/price';
+import { AddItem } from '../api/add-item';
 
 @Component({
   selector: 'ta-add-item',
@@ -20,9 +20,9 @@ export class AddItemComponent implements OnChanges {
   public location: string | null = '';
 
   @Output()
-  public save: EventEmitter<Price> = new EventEmitter();
+  public save: EventEmitter<AddItem> = new EventEmitter();
 
-  public priceFormGroup: FormGroup = new FormGroup<Price>({
+  public priceFormGroup: FormGroup = new FormGroup<AddItem>({
     productName: new FormControl<string>('', [Validators.required]),
     price: new FormControl<number>(0, [Validators.required]),
     src: new FormControl<string>('', [Validators.required]),

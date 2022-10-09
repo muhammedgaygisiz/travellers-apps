@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Price } from '../api/price';
 import { AddItemService } from './add-item.service';
+import { AddItem } from '../api/add-item';
 
 @Component({
   template: `
     <ta-add-item
       class="ion-page"
       [location]="location$ | async"
-      (save)="log($event)"
+      (save)="saveItem($event)"
     ></ta-add-item>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,7 +20,7 @@ export class AddItemContainerComponent {
     private readonly addItemService: AddItemService
   ) {}
 
-  public log(event: Price) {
-    console.log('#mo', event);
+  public saveItem(addItem: AddItem) {
+    this.addItemService.saveItem(addItem);
   }
 }

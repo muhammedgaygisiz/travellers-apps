@@ -3,4 +3,5 @@ export interface MostSearchedItem {
   src: string;
   name: string;
   price: number;
+  location: string;
 }

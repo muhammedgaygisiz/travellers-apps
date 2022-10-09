@@ -16,11 +16,11 @@
     </ion-card-header>
   </ta-card>
 
-  <ng-container *ngFor="let entry of mostSearchedEntries">
+  <ng-container *ngFor="let entry of mostSearchedEntries; trackBy: by">
     <ta-card>
       <ion-card-header>
         <ion-card-subtitle>MOST SEARCHED IN</ion-card-subtitle>
-        <ion-card-title>Marrakech</ion-card-title>
+        <ion-card-title>{{ entry.location }}</ion-card-title>
       </ion-card-header>
 
       <ion-card-content>

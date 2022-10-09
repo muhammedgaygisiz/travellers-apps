@@ -31,4 +31,8 @@ export class HomeComponent {
 
   @Output()
   logoutClick: EventEmitter<void> = new EventEmitter();
+
+  by(index: number) {
+    return index;
+  }
 }

@@ -1,14 +1,10 @@
-import {createFeatureSelector, createSelector} from "@ngrx/store";
-import {key} from "./key";
-import {adapter} from "./adapter";
-import {State} from "./state";
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { key } from './key';
+import { adapter } from './adapter';
+import { State } from './state';
 
 const mostSearchedState = createFeatureSelector<State>(key);
 
-const {selectAll} = adapter.getSelectors();
+const { selectAll } = adapter.getSelectors();
 
-export const selectAllItems = createSelector(
-  mostSearchedState,
-  selectAll,
-);
-
+export const selectAllItems = createSelector(mostSearchedState, selectAll);

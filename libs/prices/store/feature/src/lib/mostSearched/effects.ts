@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { itemsLoaded, loadItems, saveItem } from './actions';
@@ -40,19 +41,10 @@ export class MostSearchedItemsEffects {
       this.actions$.pipe(
         ofType(saveItem.type),
         withLatestFrom(this.isAuthenticated$),
-        // eslint-disable-next-line no-unused-vars
-        tap(async ([_, isAuthenticated]) => {
-          if (!isAuthenticated) {
-            const toast = await this.toastController.create({
-              message: 'You have to be logged in',
-              duration: 1500,
-              position: 'bottom',
-            });
-
-            await toast.present();
-          }
-        }),
-        // eslint-disable-next-line no-unused-vars
+        tap(
+          async ([_, isAuthenticated]) =>
+            await this.showUnauthorizedToast(isAuthenticated)
+        ),
         filter(([_, isAuthenticated]) => isAuthenticated),
         switchMap(([{ item }]) =>
           this.mostSearchedService.saveMostSearchedItem$(item)
@@ -62,6 +54,18 @@ export class MostSearchedItemsEffects {
       ),
     { dispatch: false }
   );
+
+  private async showUnauthorizedToast(isAuthenticated: boolean) {
+    if (!isAuthenticated) {
+      const toast = await this.toastController.create({
+        message: 'You have to be logged in',
+        duration: 1500,
+        position: 'bottom',
+      });
+
+      await toast.present();
+    }
+  }
 
   constructor(
     // eslint-disable-next-line no-unused-vars

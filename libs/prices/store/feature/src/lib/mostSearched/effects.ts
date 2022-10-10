@@ -18,8 +18,6 @@ import { NavController, ToastController } from '@ionic/angular';
 import { fromAuth } from '../auth/index';
 import { Store } from '@ngrx/store';
 
-// This is some dummy change
-
 @Injectable()
 export class MostSearchedItemsEffects {
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);

@@ -1,13 +1,26 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { itemsLoaded, loadItems, saveItem } from './actions';
-import { catchError, EMPTY, map, mergeMap, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  EMPTY,
+  filter,
+  map,
+  mergeMap,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 import { MostSearchedService } from '@travellers-apps/prices/firestore/feature';
 import { MostSearchedItem } from '@travellers-apps/utils-common';
-import { NavController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular';
+import { fromAuth } from '../auth/index';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class MostSearchedItemsEffects {
+  isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
+
   loadMostSearchedItemsEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadItems.type),
@@ -26,10 +39,26 @@ export class MostSearchedItemsEffects {
     () =>
       this.actions$.pipe(
         ofType(saveItem.type),
-        switchMap(({ item }) =>
+        withLatestFrom(this.isAuthenticated$),
+        // eslint-disable-next-line no-unused-vars
+        tap(async ([_, isAuthenticated]) => {
+          if (!isAuthenticated) {
+            const toast = await this.toastController.create({
+              message: 'You have to be logged in',
+              duration: 1500,
+              position: 'bottom',
+            });
+
+            await toast.present();
+          }
+        }),
+        // eslint-disable-next-line no-unused-vars
+        filter(([_, isAuthenticated]) => isAuthenticated),
+        switchMap(([{ item }]) =>
           this.mostSearchedService.saveMostSearchedItem$(item)
         ),
-        tap(() => this.navController.back())
+        tap(() => this.navController.back()),
+        catchError(() => EMPTY)
       ),
     { dispatch: false }
   );
@@ -40,7 +69,11 @@ export class MostSearchedItemsEffects {
     // eslint-disable-next-line no-unused-vars
     private readonly mostSearchedService: MostSearchedService,
     // eslint-disable-next-line no-unused-vars
-    private readonly navController: NavController
+    private readonly navController: NavController,
+    // eslint-disable-next-line no-unused-vars
+    private readonly store: Store,
+    // eslint-disable-next-line no-unused-vars
+    private toastController: ToastController
   ) {}
 
   private toItemsLoadedAction(mostSearchedEntries: MostSearchedItem[]) {

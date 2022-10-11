@@ -1,10 +1,6 @@
 import { Action, createReducer, on } from '@ngrx/store';
 import { loginFailed, loginSucceeded, notAuthenticated } from './actions';
-
-export interface AuthResult {
-  authenticated: boolean;
-  authenticationFailed: boolean;
-}
+import { AuthResult } from './auth-result.model';
 
 export const reducer = createReducer<AuthResult, Action>(
   {

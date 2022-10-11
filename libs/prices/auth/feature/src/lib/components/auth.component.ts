@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { AuthCredentials } from '../api/auth-credentials';
+import { AuthCredentialFields } from '../api/auth-credential-fields';
 import {
+  AuthCredentials,
   digit,
   lowerCase,
   minLength,
@@ -20,7 +21,7 @@ export class AuthComponent {
   @Output()
   public submitAuth: EventEmitter<AuthCredentials> = new EventEmitter();
 
-  public authFormGroup: FormGroup = new FormGroup<AuthCredentials>({
+  public authFormGroup: FormGroup = new FormGroup<AuthCredentialFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),
     password: new FormControl<string>('', this.getPasswordValidator()),
   });

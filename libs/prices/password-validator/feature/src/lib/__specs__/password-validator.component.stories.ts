@@ -6,7 +6,7 @@ import { PasswordValidatorComponent } from '../component/password-validator.comp
 import { of } from 'rxjs';
 
 export default {
-  title: 'Components/Password Validtor',
+  title: 'Components/Password Validator',
   component: PasswordValidatorComponent,
   decorators: [
     moduleMetadata({

@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AddItem } from '../api/add-item';
+import { Price } from '@travellers-apps/utils-common';
 
 @Component({
   selector: 'ta-add-item',
@@ -20,7 +21,7 @@ export class AddItemComponent implements OnChanges {
   public location: string | null = '';
 
   @Output()
-  public save: EventEmitter<AddItem> = new EventEmitter();
+  public save: EventEmitter<Price> = new EventEmitter();
 
   public priceFormGroup: FormGroup = new FormGroup<AddItem>({
     productName: new FormControl<string>('', [Validators.required]),

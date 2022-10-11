@@ -4,7 +4,7 @@ import {
   fromMostSearched,
 } from '@travellers-apps/prices/store/feature';
 import { Store } from '@ngrx/store';
-import { AddItem } from '../api/add-item';
+import { Price } from '@travellers-apps/utils-common';
 
 @Injectable({
   providedIn: 'root',
@@ -17,15 +17,10 @@ export class AddItemService {
     private readonly store: Store
   ) {}
 
-  saveItem(addItem: AddItem) {
+  saveItem(price: Price) {
     this.store.dispatch(
       fromMostSearched.saveItem({
-        item: {
-          productName: addItem.productName as unknown as string,
-          price: addItem.price as unknown as number,
-          src: addItem.src as unknown as string,
-          location: addItem.location as unknown as string,
-        },
+        item: price,
       })
     );
   }

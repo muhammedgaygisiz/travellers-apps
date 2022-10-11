@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AddItemService } from './add-item.service';
-import { AddItem } from '../api/add-item';
+import { Price } from '@travellers-apps/utils-common';
 
 @Component({
   template: `
@@ -20,7 +20,7 @@ export class AddItemContainerComponent {
     private readonly addItemService: AddItemService
   ) {}
 
-  public saveItem(addItem: AddItem) {
-    this.addItemService.saveItem(addItem);
+  public saveItem(price: Price) {
+    this.addItemService.saveItem(price);
   }
 }

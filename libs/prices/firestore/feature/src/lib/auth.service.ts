@@ -22,10 +22,7 @@ export class AuthService {
     authCreds: AuthCredentials
   ): Observable<UserCredential> {
     return from(
-      this.afa.signInWithEmailAndPassword(
-        authCreds.username,
-        authCreds.password
-      )
+      this.afa.signInWithEmailAndPassword(authCreds.email, authCreds.password)
     );
   }
 

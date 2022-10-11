@@ -8,6 +8,8 @@ export const login = createAction(
 
 export const loginSucceeded = createAction('[Auth API] Login successful');
 
+export const loginFailed = createAction('[Auth API] Login failed');
+
 export const logoutSucceeded = createAction('[Auth API] Logout successful');
 
 export const notAuthenticated = createAction('[Auth API] Not logged in');

@@ -7,12 +7,13 @@ import {
 } from '@ngrx/effects';
 import {
   login,
+  loginFailed,
   loginSucceeded,
   logout,
   logoutSucceeded,
   notAuthenticated,
 } from './actions';
-import { catchError, EMPTY, exhaustMap, map, mergeMap, tap } from 'rxjs';
+import { catchError, EMPTY, exhaustMap, map, mergeMap, of, tap } from 'rxjs';
 import { AuthService } from '@travellers-apps/prices/firestore/feature';
 import firebase from 'firebase/compat';
 import { AuthCredentials } from '@travellers-apps/utils-common';
@@ -39,7 +40,7 @@ export class AuthEffects {
         this.login$(authCreds).pipe(
           map(() => loginSucceeded()),
           tap(() => this.navController.back()),
-          catchError(() => EMPTY)
+          catchError(() => of(loginFailed()))
         )
       )
     )

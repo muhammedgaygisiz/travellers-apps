@@ -1,9 +1,15 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
+import { AuthResult } from './auth-result.model';
 
-const authState = createFeatureSelector<boolean>(key);
+const authState = createFeatureSelector<AuthResult>(key);
 
 export const selectIsAuthenticated = createSelector(
   authState,
-  (isAuthenticated) => isAuthenticated
+  (authState) => authState.authenticated
+);
+
+export const selectLoginFailed = createSelector(
+  authState,
+  (authState) => authState.authenticationFailed
 );

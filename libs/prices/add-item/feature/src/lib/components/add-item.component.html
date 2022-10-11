@@ -13,7 +13,12 @@
 
         <ion-item lines="full">
           <ion-label position="floating">Price</ion-label>
-          <ion-input type="text" formControlName="price" value=""></ion-input>
+          <ion-input
+            type="number"
+            formControlName="price"
+            value=""
+            inputmode="decimal"
+          ></ion-input>
         </ion-item>
 
         <ion-item lines="full">
@@ -60,7 +65,7 @@
                 !priceFormGroup.controls['price'].valid
               "
             >
-              Price is required.
+              Price is required and must be a decimal.
             </ion-text>
           </div>
           <div>

@@ -1,7 +1,7 @@
 import { login, logout } from './actions';
 import { key } from './key';
 import { reducer } from './reducer';
-import { selectIsAuthenticated } from './selectors';
+import { selectIsAuthenticated, selectLoginFailed } from './selectors';
 
 const fromAuth = {
   key,
@@ -9,6 +9,7 @@ const fromAuth = {
   login,
   logout,
   selectIsAuthenticated,
+  selectLoginFailed,
 };
 
 export { fromAuth };

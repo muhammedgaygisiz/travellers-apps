@@ -7,8 +7,12 @@
     <div class="ion-padding">
       <form [formGroup]="authFormGroup">
         <ion-item lines="full">
-          <ion-label position="floating">Username</ion-label>
-          <ion-input type="text" formControlName="username"></ion-input>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input
+            autocomplete="email"
+            inputmode="email"
+            formControlName="email"
+          ></ion-input>
         </ion-item>
 
         <ion-item lines="full">
@@ -23,6 +27,12 @@
           (click)="submitAuth.emit(authFormGroup.value)"
           >Save
         </ion-button>
+
+        <div class="ion-margin-top" *ngIf="loginFailed">
+          <ion-text color="danger"
+            >Something went wrong. Please try again.</ion-text
+          >
+        </div>
       </form>
     </div>
   </ta-card>

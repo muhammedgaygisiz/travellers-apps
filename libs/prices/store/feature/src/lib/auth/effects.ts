@@ -40,11 +40,7 @@ export class AuthEffects {
         this.login$(authCreds).pipe(
           map(() => loginSucceeded()),
           tap(() => this.navController.back()),
-          catchError((err) => {
-            console.log('#mo ', err.code);
-            console.log('#mo ', err.message);
-            return of(loginFailed());
-          })
+          catchError(() => of(loginFailed()))
         )
       )
     )

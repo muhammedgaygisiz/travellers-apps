@@ -80,8 +80,33 @@
               Location is required.
             </ion-text>
           </div>
+          <div>
+            <ion-text
+              class="ion-padding"
+              color="danger"
+              *ngIf="
+                priceFormGroup.controls['src'].errors?.['errorOnLoad']
+                && !(priceFormGroup.controls['src'].status !== 'PENDING')
+              "
+            >
+              Could not load image from '{{
+                priceFormGroup.controls['src'].value
+              }}'
+            </ion-text>
+          </div>
         </div>
       </form>
+    </div>
+  </ta-card>
+  <ta-card>
+    <div
+      class="ion-margin"
+      *ngIf="
+        priceFormGroup.controls['src'].status === 'PENDING' ||
+        priceFormGroup.controls['src'].status === 'VALID'
+      "
+    >
+      <img loading="lazy" [src]="priceFormGroup.controls['src'].value" />
     </div>
   </ta-card>
 </ta-page>

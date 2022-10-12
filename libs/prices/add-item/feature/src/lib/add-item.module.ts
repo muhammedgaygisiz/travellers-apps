@@ -7,6 +7,7 @@ import { AddItemComponent } from './components/add-item.component';
 import { AddItemContainerComponent } from './integration/add-item-container.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CardFeatureModule } from '@travellers-apps/prices/card/feature';
+import { ImageUrlValidator } from './async-validators/image-url.validator';
 
 @NgModule({
   imports: [
@@ -17,6 +18,7 @@ import { CardFeatureModule } from '@travellers-apps/prices/card/feature';
     ReactiveFormsModule,
     CardFeatureModule,
   ],
+  providers: [ImageUrlValidator],
   declarations: [AddItemComponent, AddItemContainerComponent],
   exports: [AddItemComponent],
 })

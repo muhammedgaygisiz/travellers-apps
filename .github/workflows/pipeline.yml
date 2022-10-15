@@ -115,6 +115,8 @@ jobs:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
   e2e-test:
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

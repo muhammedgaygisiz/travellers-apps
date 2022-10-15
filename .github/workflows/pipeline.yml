@@ -40,7 +40,7 @@ jobs:
         uses: cypress-io/github-action@v4.2.0
         with:
           install: false
-          start: npm run nx -- e2e prices-e2e --configurations=production
+          command: npm run nx -- e2e prices-e2e --configurations=production
         env:
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
           CYPRESS_USER_NAME: ${{ secrets.CYPRESS_USER_NAME }}

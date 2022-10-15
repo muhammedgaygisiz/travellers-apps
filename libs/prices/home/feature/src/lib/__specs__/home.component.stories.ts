@@ -1,15 +1,13 @@
 import { IonicModule } from '@ionic/angular';
 import { Meta, moduleMetadata, Story } from '@storybook/angular';
-import { HomeComponentModule } from '../home.module';
 import { HomeComponent } from '../components';
 import { getIonicConfig } from '@travellers-apps/utils-common';
 
 export default {
   title: 'Pages/Home',
-  component: HomeComponent,
   decorators: [
     moduleMetadata({
-      imports: [IonicModule.forRoot(getIonicConfig()), HomeComponentModule],
+      imports: [IonicModule.forRoot(getIonicConfig()), HomeComponent],
     }),
   ],
 } as Meta<HomeComponent>;

@@ -44,7 +44,7 @@ jobs:
           wait-on: http://localhost:4200
           wait-on-timeout: 120
           working-directory: apps/prices-e2e
-          record: true
+          record: false
           parallel: true
         env:
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}

@@ -132,9 +132,10 @@ jobs:
         with:
           install: true
           command: |
-            DEBUG=cypress:network:connect npm run nx -- e2e prices-e2e --configurations=production
+            npm run nx -- e2e prices-e2e --configurations=production
         env:
           # pass GitHub token to detect new build vs re-run build
+          DEBUG: cypress:network:connect
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CYPRESS_password: ${{ secrets.CYPRESS_PASSWORD }}
           CYPRESS_username: ${{ secrets.CYPRESS_USER_NAME }}

@@ -32,7 +32,7 @@ Cypress.Commands.add('gotoLogin', () => {
 });
 
 Cypress.Commands.add('waitTillLocationCardIsVisible', () => {
-  cy.get('[data-cy=location-card]', { timeout: 10_000 }).should('be.visible');
+  cy.get('[data-cy=location-card]', { timeout: 15_000 }).should('be.visible');
 });
 
 Cypress.Commands.add('logout', () => {

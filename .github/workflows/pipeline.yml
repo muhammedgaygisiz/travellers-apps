@@ -136,4 +136,5 @@ jobs:
         env:
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
           CYPRESS_USER_NAME: ${{ secrets.CYPRESS_USER_NAME }}
+          NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
 

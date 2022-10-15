@@ -10,9 +10,9 @@ const redirectUnauthorizedToHome = () => redirectUnauthorizedTo(['home']);
 const routes: Routes = [
   {
     path: 'home',
-    loadChildren: () =>
+    loadComponent: () =>
       import('@travellers-apps/prices/home/feature').then(
-        (m) => m.HomeComponentModule
+        (m) => m.HomeContainerComponent
       ),
   },
   {

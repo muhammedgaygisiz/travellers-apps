@@ -2,8 +2,11 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HomeService } from './home.service';
 import { MostSearchedItem } from '@travellers-apps/utils-common';
+import { HomeComponent } from '../components';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
+  standalone: true,
   template: `
     <ta-home
       class="ion-page"
@@ -16,6 +19,7 @@ import { MostSearchedItem } from '@travellers-apps/utils-common';
     ></ta-home>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HomeComponent, AsyncPipe],
 })
 export class HomeContainerComponent implements OnInit {
   //TODO: Check later why parameters hit eslint error -.-

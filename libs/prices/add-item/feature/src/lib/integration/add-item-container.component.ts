@@ -1,8 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AddItemService } from './add-item.service';
 import { Price } from '@travellers-apps/utils-common';
+import { AsyncPipe } from '@angular/common';
+import { AddItemComponent } from '../components/add-item.component';
 
 @Component({
+  standalone: true,
   template: `
     <ta-add-item
       class="ion-page"
@@ -11,6 +14,7 @@ import { Price } from '@travellers-apps/utils-common';
     ></ta-add-item>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [AsyncPipe, AddItemComponent],
 })
 export class AddItemContainerComponent {
   public location$ = this.addItemService.location$;

@@ -17,9 +17,9 @@ const routes: Routes = [
   },
   {
     path: 'add-item',
-    loadChildren: () =>
+    loadComponent: () =>
       import('@travellers-apps/prices/add-item/feature').then(
-        (m) => m.AddItemModule
+        (m) => m.AddItemContainerComponent
       ),
     canActivate: [AngularFireAuthGuard],
     data: {

@@ -129,14 +129,13 @@ jobs:
 
       - name: Run E2E Tests
         uses: cypress-io/github-action@v4.2.0
-        env:
-          # pass GitHub token to detect new build vs re-run build
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
-          CYPRESS_USER_NAME: ${{ secrets.CYPRESS_USER_NAME }}
-          NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
         with:
           install: true
           command: |
             npm run nx -- e2e prices-e2e --configurations=production
+          env: CYPRESS_PASSWORD=${{ secrets.CYPRESS_PASSWORD }},CYPRESS_USER_NAME=${{ secrets.CYPRESS_USER_NAME }}
+        env:
+          # pass GitHub token to detect new build vs re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
 

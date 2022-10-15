@@ -43,7 +43,7 @@ jobs:
           start: npm run nx -- e2e prices-e2e
           wait-on: http://localhost:4200
           wait-on-timeout: 120
-          working-directory: apps/e2e
+          working-directory: apps/prices-e2e
           record: true
           parallel: true
         env:

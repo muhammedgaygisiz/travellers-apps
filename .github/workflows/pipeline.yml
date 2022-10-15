@@ -37,6 +37,7 @@ jobs:
         run: npm run nx -- run-many --target=lint
 
       - name: Run E2E Tests
+        uses: cypress-io/github-action@v4.2.0
         run: npm run nx -- e2e prices-e2e --configurations=production
         env:
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}

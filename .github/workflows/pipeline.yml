@@ -40,7 +40,7 @@ jobs:
         uses: cypress-io/github-action@v4.2.0
         with:
           install: false
-          start: npm run nx -- e2e prices-e2e
+          start: npm run nx -- e2e prices-e2e --configurations=production
           wait-on: http://localhost:4200
           wait-on-timeout: 120
           working-directory: apps/prices-e2e

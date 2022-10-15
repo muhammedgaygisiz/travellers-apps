@@ -16,7 +16,7 @@ describe('Login', () => {
 
   it('should login', () => {
     cy.gotoLogin();
-    cy.login(Cypress.env('CYPRESS_USER_NAME'), Cypress.env('CYPRESS_PASSWORD'));
+    cy.login(Cypress.env('username'), Cypress.env('password'));
 
     cy.waitTillLocationCardIsVisible();
     cy.logout();

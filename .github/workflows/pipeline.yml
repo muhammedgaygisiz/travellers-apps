@@ -46,6 +46,12 @@ jobs:
           NX_APP_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_MESSAGING_SENDER_ID }}
           NX_APP_GEOAPIFY_API_KEY: ${{ secrets.NX_APP_GEOAPIFY_API_KEY }}
 
+      - name: E2E Tests
+        run: npm run nx -- e2e prices-e2e
+        env:
+          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+          CYPRESS_USER_NAME: ${{ secrets.CYPRESS_USER_NAME }}
+
       - name: Capacitor Sync
         run: npm run cap:sync
 

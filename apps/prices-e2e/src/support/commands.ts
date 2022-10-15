@@ -21,8 +21,12 @@ declare namespace Cypress {
 }
 
 Cypress.Commands.add('login', (email, password) => {
+  if (typeof password !== 'string' || !password) {
+    throw new Error('Missing password value, set using CYPRESS_PASSWORD=...');
+  }
+
   cy.get('[data-cy=email]').type(email);
-  cy.get('[data-cy=password]').type(password);
+  cy.get('[data-cy=password]').type(password, { log: false });
 
   cy.get('[data-cy=submit]').click();
 });

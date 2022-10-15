@@ -4,7 +4,7 @@
   (loginClick)="loginClick.emit()"
   (logoutClick)="logoutClick.emit()"
 >
-  <ta-card class="location" *ngIf="location">
+  <ta-card class="location" *ngIf="location" data-cy="location-card">
     <ion-card-header>
       <ion-card-subtitle>
         <h5>You are in:</h5>

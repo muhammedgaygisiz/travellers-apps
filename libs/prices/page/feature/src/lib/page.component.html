@@ -18,6 +18,7 @@
         <ion-button
           (click)="loginClick.emit()"
           *ngIf="!hideAuthButton && !isAuthenticated"
+          data-cy="btn-login"
         >
           <ion-icon
             color="dark"
@@ -29,6 +30,7 @@
         <ion-button
           (click)="logoutClick.emit()"
           *ngIf="!hideAuthButton && isAuthenticated"
+          data-cy="btn-logout"
         >
           <ion-icon
             color="dark"

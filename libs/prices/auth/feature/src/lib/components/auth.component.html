@@ -12,12 +12,17 @@
             autocomplete="email"
             inputmode="email"
             formControlName="email"
+            data-cy="email"
           ></ion-input>
         </ion-item>
 
         <ion-item lines="full">
           <ion-label position="floating">Password</ion-label>
-          <ion-input type="password" formControlName="password"></ion-input>
+          <ion-input
+            type="password"
+            formControlName="password"
+            data-cy="password"
+          ></ion-input>
         </ion-item>
 
         <ion-button
@@ -25,6 +30,7 @@
           expand="block"
           [disabled]="!authFormGroup.valid"
           (click)="submitAuth.emit(authFormGroup.value)"
+          data-cy="submit"
           >Save
         </ion-button>
 

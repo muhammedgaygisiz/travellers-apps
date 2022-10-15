@@ -4,7 +4,7 @@
   "targets": {
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/tools/executor-loki"],
+      "outputs": ["{workspaceRoot}/coverage/tools/executor-loki"],
       "options": {
         "jestConfig": "tools/executors/loki/jest.config.ts",
         "passWithNoTests": true

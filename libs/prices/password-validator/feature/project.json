@@ -7,7 +7,9 @@
   "targets": {
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/prices/password-validator/feature"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/prices/password-validator/feature"
+      ],
       "options": {
         "jestConfig": "libs/prices/password-validator/feature/jest.config.ts",
         "passWithNoTests": true

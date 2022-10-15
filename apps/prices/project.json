@@ -71,7 +71,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nrwl/angular:webpack-server",
+      "executor": "@nrwl/angular:webpack-dev-server",
       "configurations": {
         "production": {
           "browserTarget": "prices:build:production"
@@ -96,7 +96,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/prices"],
+      "outputs": ["{workspaceRoot}/coverage/apps/prices"],
       "options": {
         "jestConfig": "apps/prices/jest.config.ts",
         "passWithNoTests": true

@@ -133,4 +133,7 @@ jobs:
           install: true
           command: |
             npm run nx -- e2e prices-e2e --configurations=production
+        env:
+          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+          CYPRESS_USER_NAME: ${{ secrets.CYPRESS_USER_NAME }}
 

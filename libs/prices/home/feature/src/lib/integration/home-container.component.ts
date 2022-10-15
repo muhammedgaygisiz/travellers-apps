@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HomeService } from './home.service';
-import { NavController } from '@ionic/angular';
 import { MostSearchedItem } from '@travellers-apps/utils-common';
 
 @Component({
@@ -22,9 +21,7 @@ export class HomeContainerComponent implements OnInit {
   //TODO: Check later why parameters hit eslint error -.-
   constructor(
     // eslint-disable-next-line no-unused-vars
-    private readonly homeService: HomeService,
-    // eslint-disable-next-line no-unused-vars
-    private readonly navController: NavController
+    private readonly homeService: HomeService
   ) {}
 
   public location$: Observable<string | null> = this.homeService.location$;
@@ -40,11 +37,11 @@ export class HomeContainerComponent implements OnInit {
   }
 
   public async onAddItemClick() {
-    await this.navController.navigateForward(['/add-item']);
+    await this.homeService.onAddItemClick();
   }
 
   public async onLoginClick() {
-    await this.navController.navigateForward(['/login']);
+    await this.homeService.onLoginClick();
   }
 
   public async onLogoutClick() {

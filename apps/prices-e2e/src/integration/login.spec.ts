@@ -15,6 +15,12 @@ describe('Login', () => {
   );
 
   it('should login', () => {
+    cy.intercept(
+      'GET',
+      'https://api.geoapify.com/v1/geocode/reverse?lat=46.944091&lon=7.4293561&apiKey=e3876c88034043d6a7f63e27423d3ea3',
+      { fixture: 'location.json' }
+    );
+
     cy.gotoLogin();
     cy.login(Cypress.env('username'), Cypress.env('password'));
 

@@ -36,6 +36,12 @@ jobs:
       - name: Run Linter
         run: npm run nx -- run-many --target=lint
 
+      - name: Run E2E Tests
+        run: npm run nx -- e2e prices-e2e --configurations=production
+        env:
+          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+          CYPRESS_USER_NAME: ${{ secrets.CYPRESS_USER_NAME }}
+
       - name: Build Prices App
         run: npm run nx -- build prices
         env:
@@ -45,12 +51,6 @@ jobs:
           NX_APP_STORAGE_BUCKET: ${{ secrets.NX_APP_STORAGE_BUCKET }}
           NX_APP_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_MESSAGING_SENDER_ID }}
           NX_APP_GEOAPIFY_API_KEY: ${{ secrets.NX_APP_GEOAPIFY_API_KEY }}
-
-      - name: E2E Tests
-        run: npm run nx -- e2e prices-e2e
-        env:
-          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
-          CYPRESS_USER_NAME: ${{ secrets.CYPRESS_USER_NAME }}
 
       - name: Capacitor Sync
         run: npm run cap:sync

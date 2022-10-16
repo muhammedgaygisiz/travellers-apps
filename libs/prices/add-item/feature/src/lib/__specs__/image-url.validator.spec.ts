@@ -26,7 +26,7 @@ const testScheduler: TestScheduler = new TestScheduler((actual, expected) => {
 });
 
 describe('ImageUrlValidator', () => {
-  describe('given an image url validator object and a control', () => {
+  describe('given an image url validator object, a control', () => {
     const imageUrlValidator = new ImageUrlValidator();
     const someControl = (url: string) =>
       ({

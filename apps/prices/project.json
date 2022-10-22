@@ -35,7 +35,9 @@
           "apps/prices/src/theme/variables.scss",
           "apps/prices/src/global.scss"
         ],
-        "scripts": []
+        "scripts": [],
+        "serviceWorker": true,
+        "ngswConfigPath": "apps/prices/ngsw-config.json"
       },
       "configurations": {
         "production": {

@@ -21,7 +21,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "travellers-apps",
+            "prefix": "ta",
             "style": "kebab-case"
           }
         ]

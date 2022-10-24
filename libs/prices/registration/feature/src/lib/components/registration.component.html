@@ -1,0 +1,43 @@
+<ta-page [enableBackButton]="true" [hideAuthButton]="true">
+  <ta-card>
+    <div class="ion-padding">
+      <form [formGroup]="registrationFormGroup">
+        <ion-item lines="full">
+          <ion-label position="floating">Email</ion-label>
+          <ion-input
+            autocomplete="email"
+            inputmode="email"
+            formControlName="email"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Password</ion-label>
+          <ion-input type="password" formControlName="password"></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="floating">Reenter Password</ion-label>
+          <ion-input type="password"></ion-input>
+        </ion-item>
+
+        <ion-button
+          class="ion-margin-top"
+          expand="block"
+          [disabled]="!registrationFormGroup.valid"
+          (click)="submitRgistration.emit(registrationFormGroup.value)"
+          data-cy="submit"
+          >Save
+        </ion-button>
+      </form>
+    </div>
+  </ta-card>
+
+  <ta-card>
+    <div class="ion-padding">
+      <ta-password-validator
+        [password$]="registrationFormGroup.controls['password'].valueChanges"
+      ></ta-password-validator>
+    </div>
+  </ta-card>
+</ta-page>

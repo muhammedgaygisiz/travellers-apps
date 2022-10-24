@@ -1,1 +1,1 @@
-export * from './lib/prices-registration-feature.module';
+export * from './lib/registration.module';

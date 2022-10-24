@@ -8,6 +8,7 @@
     "start": "nx serve",
     "build": "nx build",
     "test": "nx test",
+    "pwa-asset-generator": "pwa-asset-generator",
     "postinstall": "ngcc --properties es2020 browser module main",
     "start:prices": "nx serve prices",
     "start:storybook:prices": "nx run prices:storybook",
@@ -17,7 +18,8 @@
     "prices:loki:approve": "nx loki prices --configuration=approve",
     "cap:sync": "cap sync",
     "cap:run:ios": "cap run ios",
-    "cap:run:android": "cap run android"
+    "cap:run:android": "cap run android",
+    "pwa-asset-generator:generate:proces": "pwa-asset-generator apps/prices/src/logo.svg -i apps/prices/src/index.html --favicon -m apps/prices/src/manifest.webmanifest apps/prices/src/assets/icons"
   },
   "private": true,
   "dependencies": {
@@ -96,6 +98,7 @@
     "loki": "0.30.3",
     "nx": "15.0.0",
     "prettier": "2.7.1",
+    "pwa-asset-generator": "6.2.0",
     "ts-jest": "28.0.8",
     "ts-node": "10.9.1",
     "typescript": "4.8.4",

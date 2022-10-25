@@ -18,6 +18,9 @@ export class AuthComponent {
 
   public authFormGroup: FormGroup = new FormGroup<AuthCredentialFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),
-    password: new FormControl<string>('', getPasswordValidators()),
+    password: new FormControl<string>(
+      '',
+      Validators.compose(getPasswordValidators())
+    ),
   });
 }

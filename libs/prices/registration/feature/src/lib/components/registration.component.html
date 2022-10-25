@@ -17,8 +17,11 @@
         </ion-item>
 
         <ion-item lines="full">
-          <ion-label position="floating">Reenter Password</ion-label>
-          <ion-input type="password"></ion-input>
+          <ion-label position="floating">Confirm Password</ion-label>
+          <ion-input
+            type="password"
+            formControlName="passwordConfirm"
+          ></ion-input>
         </ion-item>
 
         <ion-button
@@ -29,6 +32,13 @@
           data-cy="submit"
           >Save
         </ion-button>
+
+        <div
+          class="ion-margin-top"
+          *ngIf="registrationFormGroup.errors?.mismatch"
+        >
+          <ion-text color="danger"> Password does not match. </ion-text>
+        </div>
       </form>
     </div>
   </ta-card>

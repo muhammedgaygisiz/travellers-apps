@@ -8,6 +8,7 @@ import { AuthCredentials } from '@travellers-apps/utils-common';
     class="ion-page"
     [loginFailed]="loginFailed$ | async"
     (submitAuth)="login($event)"
+    (signup)="gotoSignup()"
   ></ta-auth>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -19,5 +20,9 @@ export class AuthContainerComponent {
 
   public login(authCreds: AuthCredentials) {
     this.authService.login(authCreds);
+  }
+
+  public async gotoSignup() {
+    await this.authService.gotoSignUp();
   }
 }

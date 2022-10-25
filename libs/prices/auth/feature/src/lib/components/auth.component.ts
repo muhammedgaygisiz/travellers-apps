@@ -1,13 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthCredentialFields } from '../api/auth-credential-fields';
-import {
-  AuthCredentials,
-  digit,
-  lowerCase,
-  minLength,
-  upperCase,
-} from '@travellers-apps/utils-common';
+import { AuthCredentials } from '@travellers-apps/utils-common';
+import { getPasswordValidators } from '@travellers-apps/prices/password-validator/feature';
 
 @Component({
   selector: 'ta-auth',
@@ -23,16 +18,9 @@ export class AuthComponent {
 
   public authFormGroup: FormGroup = new FormGroup<AuthCredentialFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),
-    password: new FormControl<string>('', this.getPasswordValidator()),
+    password: new FormControl<string>(
+      '',
+      Validators.compose(getPasswordValidators())
+    ),
   });
-
-  private getPasswordValidator() {
-    return Validators.compose([
-      Validators.required,
-      Validators.pattern(lowerCase),
-      Validators.pattern(upperCase),
-      Validators.pattern(digit),
-      Validators.minLength(minLength),
-    ]);
-  }
 }

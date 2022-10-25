@@ -39,6 +39,9 @@
       "@travellers-apps/prices/password-validator/feature": [
         "libs/prices/password-validator/feature/src/index.ts"
       ],
+      "@travellers-apps/prices/registration/feature": [
+        "libs/prices/registration/feature/src/index.ts"
+      ],
       "@travellers-apps/prices/shell/feature": [
         "libs/prices/shell/feature/src/index.ts"
       ],

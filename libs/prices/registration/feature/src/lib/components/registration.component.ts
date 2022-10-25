@@ -1,13 +1,8 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import {
-  AuthCredentials,
-  digit,
-  lowerCase,
-  minLength,
-  upperCase,
-} from '@travellers-apps/utils-common';
+import { AuthCredentials } from '@travellers-apps/utils-common';
 import { RegistrationFields } from '../api/registration-fields';
+import { getPasswordValidators } from '@travellers-apps/prices/password-validator/feature';
 
 @Component({
   selector: 'ta-registration',
@@ -20,17 +15,6 @@ export class RegistrationComponent {
 
   public registrationFormGroup: FormGroup = new FormGroup<RegistrationFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),
-    password: new FormControl<string>('', this.getPasswordValidator()),
+    password: new FormControl<string>('', getPasswordValidators()),
   });
-
-  //TODO: Move this to PasswordValidator Component
-  private getPasswordValidator() {
-    return Validators.compose([
-      Validators.required,
-      Validators.pattern(lowerCase),
-      Validators.pattern(upperCase),
-      Validators.pattern(digit),
-      Validators.minLength(minLength),
-    ]);
-  }
 }

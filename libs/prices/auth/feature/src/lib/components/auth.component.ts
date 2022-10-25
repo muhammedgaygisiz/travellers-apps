@@ -16,6 +16,9 @@ export class AuthComponent {
   @Output()
   public submitAuth: EventEmitter<AuthCredentials> = new EventEmitter();
 
+  @Output()
+  public signup: EventEmitter<void> = new EventEmitter();
+
   public authFormGroup: FormGroup = new FormGroup<AuthCredentialFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),
     password: new FormControl<string>(

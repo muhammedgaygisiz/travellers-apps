@@ -14,7 +14,7 @@ import {
 })
 export class RegistrationComponent {
   @Output()
-  submitRgistration: EventEmitter<AuthCredentials> = new EventEmitter();
+  submitRegistration: EventEmitter<AuthCredentials> = new EventEmitter();
 
   public registrationFormGroup: FormGroup = new FormGroup<RegistrationFields>(
     {
@@ -31,6 +31,9 @@ export class RegistrationComponent {
         Validators.compose(getPasswordValidators())
       ),
     },
-    { validators: passwordMatchValidator, updateOn: 'blur' }
+    {
+      validators: passwordMatchValidator,
+      updateOn: 'change',
+    }
   );
 }

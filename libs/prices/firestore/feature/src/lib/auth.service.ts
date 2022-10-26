@@ -29,4 +29,15 @@ export class AuthService {
   public logout() {
     return from(this.afa.signOut());
   }
+
+  public registerWithUsernameAndPassword$(
+    registration: AuthCredentials
+  ): Observable<UserCredential> {
+    return from(
+      this.afa.createUserWithEmailAndPassword(
+        registration.email,
+        registration.password
+      )
+    );
+  }
 }

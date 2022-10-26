@@ -42,4 +42,20 @@
       </form>
     </div>
   </ta-card>
+
+  <ta-card>
+    <div class="ion-margin">
+      <ion-text>If you don't have an account already sign up now.</ion-text>
+
+      <ion-button
+        fill="outline"
+        class="ion-margin-top"
+        expand="block"
+        (click)="signup.emit()"
+        data-cy="signup"
+      >
+        Sign up
+      </ion-button>
+    </div>
+  </ta-card>
 </ta-page>

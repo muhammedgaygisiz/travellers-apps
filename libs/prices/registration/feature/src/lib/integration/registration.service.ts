@@ -7,6 +7,8 @@ import { fromAuth } from '@travellers-apps/prices/store/feature';
   providedIn: 'root',
 })
 export class RegistrationService {
+  errorCode$ = this.store.select(fromAuth.selectRegistrationErrorCode);
+
   constructor(
     // eslint-disable-next-line no-unused-vars
     private readonly store: Store
@@ -14,5 +16,9 @@ export class RegistrationService {
 
   public register(registration: AuthCredentials): void {
     this.store.dispatch(fromAuth.register({ registration }));
+  }
+
+  confirmError() {
+    this.store.dispatch(fromAuth.confirmRegistrationErrorMessage());
   }
 }

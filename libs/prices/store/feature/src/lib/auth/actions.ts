@@ -29,3 +29,7 @@ export const registrationFailed = createAction(
   '[Auth API] Registration failed',
   props<{ code: string }>()
 );
+
+export const confirmRegistrationErrorMessage = createAction(
+  '[Registration Page] Confirm error message'
+);

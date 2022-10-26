@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthCredentials } from '@travellers-apps/utils-common';
 import { RegistrationFields } from '../api/registration-fields';
@@ -6,15 +14,29 @@ import {
   getPasswordValidators,
   passwordMatchValidator,
 } from '@travellers-apps/prices/password-validator/feature';
+import { AuthErrorCode } from '@firebase/auth/dist/node/src/core/errors';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'ta-registration',
   templateUrl: './registration.component.html',
   styleUrls: ['./registration.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RegistrationComponent {
+export class RegistrationComponent implements OnChanges {
+  @Input()
+  public registrationError: string | null = '';
+
   @Output()
-  submitRegistration: EventEmitter<AuthCredentials> = new EventEmitter();
+  public submitRegistration: EventEmitter<AuthCredentials> = new EventEmitter();
+
+  @Output()
+  public errorConfirm: EventEmitter<void> = new EventEmitter();
+
+  constructor(
+    // eslint-disable-next-line no-unused-vars
+    private readonly toastController: ToastController
+  ) {}
 
   public registrationFormGroup: FormGroup = new FormGroup<RegistrationFields>(
     {
@@ -36,4 +58,31 @@ export class RegistrationComponent {
       updateOn: 'change',
     }
   );
+
+  public async ngOnChanges(changes: SimpleChanges): Promise<void> {
+    const receivedRegistrationError = changes['registrationError'].currentValue;
+    if (receivedRegistrationError?.indexOf(AuthErrorCode.EMAIL_EXISTS) > -1) {
+      await this.showRegistrationErrorMessage();
+    }
+  }
+
+  private async showRegistrationErrorMessage() {
+    const toast = await this.toastController.create({
+      message: 'Email already in use.',
+      position: 'bottom',
+      buttons: [
+        {
+          text: 'OK',
+          role: 'confirm',
+          handler: this.onConfirmToast.bind(this),
+        },
+      ],
+    });
+
+    await toast.present();
+  }
+
+  private onConfirmToast() {
+    this.errorConfirm.emit();
+  }
 }

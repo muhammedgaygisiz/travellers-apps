@@ -1,4 +1,4 @@
-import { login, logout } from './actions';
+import { login, logout, register } from './actions';
 import { key } from './key';
 import { reducer } from './reducer';
 import { selectIsAuthenticated, selectLoginFailed } from './selectors';
@@ -8,6 +8,7 @@ const fromAuth = {
   reducer,
   login,
   logout,
+  register,
   selectIsAuthenticated,
   selectLoginFailed,
 };

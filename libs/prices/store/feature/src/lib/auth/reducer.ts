@@ -1,11 +1,17 @@
 import { Action, createReducer, on } from '@ngrx/store';
-import { loginFailed, loginSucceeded, notAuthenticated } from './actions';
+import {
+  loginFailed,
+  loginSucceeded,
+  notAuthenticated,
+  registrationFailed,
+} from './actions';
 import { AuthResult } from './auth-result.model';
 
 export const reducer = createReducer<AuthResult, Action>(
   {
     authenticated: false,
     authenticationFailed: false,
+    errorCode: null,
   },
   on(loginSucceeded, (state) => ({
     ...state,
@@ -21,5 +27,10 @@ export const reducer = createReducer<AuthResult, Action>(
     ...state,
     authenticationFailed: true,
     authenticated: false,
+  })),
+  on(registrationFailed, (state, { code }) => ({
+    ...state,
+    registrationFailed: true,
+    errorCode: code,
   }))
 );

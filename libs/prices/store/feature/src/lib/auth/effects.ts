@@ -12,6 +12,9 @@ import {
   logout,
   logoutSucceeded,
   notAuthenticated,
+  register,
+  registrationFailed,
+  registrationSucceeded,
 } from './actions';
 import { catchError, EMPTY, exhaustMap, map, mergeMap, of, tap } from 'rxjs';
 import { AuthService } from '@travellers-apps/prices/firestore/feature';
@@ -58,6 +61,21 @@ export class AuthEffects {
     )
   );
 
+  registrationEffect$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(register.type),
+      mergeMap(({ registration }) =>
+        this.register$(registration).pipe(
+          map(() => registrationSucceeded()),
+          tap(() => this.navController.back()),
+          catchError((err) => {
+            return of(registrationFailed({ code: err.code }));
+          })
+        )
+      )
+    )
+  );
+
   constructor(
     // eslint-disable-next-line no-unused-vars
     private readonly actions$: Actions,
@@ -69,6 +87,10 @@ export class AuthEffects {
 
   private login$(authCreds: AuthCredentials) {
     return this.authService.loginWithUsernameAndPassword$(authCreds);
+  }
+
+  private register$(registration: AuthCredentials) {
+    return this.authService.registerWithUsernameAndPassword$(registration);
   }
 
   private getAction(user: User | null) {

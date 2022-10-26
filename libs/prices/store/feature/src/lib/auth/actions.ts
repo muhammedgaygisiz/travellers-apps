@@ -20,3 +20,12 @@ export const register = createAction(
   '[Registration Page] Register',
   props<{ registration: AuthCredentials }>()
 );
+
+export const registrationSucceeded = createAction(
+  '[Auth API] Registration successful'
+);
+
+export const registrationFailed = createAction(
+  '[Auth API] Registration failed',
+  props<{ code: string }>()
+);

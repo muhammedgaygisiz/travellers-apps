@@ -19,7 +19,8 @@
     "cap:sync": "cap sync",
     "cap:run:ios": "cap run ios",
     "cap:run:android": "cap run android",
-    "pwa-asset-generator:generate:proces": "pwa-asset-generator apps/prices/src/logo.svg -i apps/prices/src/index.html --favicon -m apps/prices/src/manifest.webmanifest apps/prices/src/assets/icons"
+    "pwa-asset-generator:generate:proces": "pwa-asset-generator apps/prices/src/logo.svg -i apps/prices/src/index.html --favicon -m apps/prices/src/manifest.webmanifest apps/prices/src/assets/icons",
+    "commitizen": "commitizen"
   },
   "private": true,
   "dependencies": {
@@ -85,7 +86,9 @@
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "5.39.0",
     "@typescript-eslint/parser": "5.39.0",
+    "commitizen": "4.2.5",
     "cypress": "9.1.0",
+    "cz-conventional-changelog": "3.3.0",
     "eslint": "8.15.0",
     "eslint-config-prettier": "8.1.0",
     "eslint-plugin-cypress": "2.10.3",

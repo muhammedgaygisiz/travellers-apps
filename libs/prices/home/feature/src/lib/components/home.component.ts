@@ -3,9 +3,14 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnChanges,
   Output,
+  SimpleChanges,
 } from '@angular/core';
 import { MostSearchedItem } from '@travellers-apps/utils-common';
+import Filter from '../model/filter';
+import addLocationFilter from '../utils/add-location-filter';
+import getFilteredPrices from '../utils/get-filtered-prices';
 
 @Component({
   selector: 'ta-home',
@@ -13,7 +18,7 @@ import { MostSearchedItem } from '@travellers-apps/utils-common';
   styleUrls: ['./home.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent {
+export class HomeComponent implements OnChanges {
   @Input()
   mostSearchedEntries: MostSearchedItem[] | null = [];
 
@@ -24,7 +29,7 @@ export class HomeComponent {
   location: string | null = '';
 
   @Output()
-  public addItemClick: EventEmitter<void> = new EventEmitter();
+  addItemClick: EventEmitter<void> = new EventEmitter();
 
   @Output()
   loginClick: EventEmitter<void> = new EventEmitter();
@@ -32,7 +37,40 @@ export class HomeComponent {
   @Output()
   logoutClick: EventEmitter<void> = new EventEmitter();
 
+  filters: Filter[] = [];
+  filteredPrices: MostSearchedItem[] | null | undefined = [];
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const hasLocation = !!changes['location']?.currentValue;
+
+    if (hasLocation) {
+      this.filters = addLocationFilter(this.filters, this.location);
+    }
+
+    this.applyFilters();
+  }
+
   by(index: number) {
     return index;
+  }
+
+  private applyFilters() {
+    this.filteredPrices = this.mostSearchedEntries;
+
+    const hasFilters = this.filters?.length > 0;
+    if (hasFilters) {
+      this.filteredPrices = getFilteredPrices(
+        this.mostSearchedEntries,
+        this.filters
+      );
+    }
+  }
+
+  onDeleteFilter(filter: Filter) {
+    this.filters = this.filters.filter((curr) => {
+      return curr.type !== filter.type && curr.value !== filter.value;
+    });
+
+    this.applyFilters();
   }
 }

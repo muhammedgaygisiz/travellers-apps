@@ -66,7 +66,7 @@ const checkPrerequisites = (_context: ExecutorContext): boolean => {
   const buildStorybookOutputExists = checkExists(buildStorybookOutput);
   if (!buildStorybookOutputExists) {
     console.log(
-      `No build storybook found for project, please build storybook first (nx build-storybook ${_context.projectName})`
+      `No built storybook found for project, please build storybook first (nx build-storybook ${_context.projectName})`
     );
 
     return false;

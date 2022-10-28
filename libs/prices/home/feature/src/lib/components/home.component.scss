@@ -8,16 +8,7 @@
   ion-card-header {
     padding-top: 8px;
 
-    ion-card-title {
-      display: flex;
-      b {
-        display: inline-flex;
-        margin-right: 8px;
-        flex-grow: 1;
-      }
-
-      ion-icon {
-      }
-    }
+    display: inline-flex;
+    align-items: center;
   }
 }

@@ -31,7 +31,16 @@ jobs:
         run: npm ci
 
       - name: Run Unit Tests
-        run: npm run nx -- run-many --target=test
+        run: npm run nx -- run-many --target=test --coverage --coverageReporters=cobertura
+
+      - uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          files: ./coverage/apps/prices/cobertura-coverage.xml # optional
+          flags: unittests # optional
+          name: codecov-umbrella # optional
+          fail_ci_if_error: false # optional (default = false)
+          verbose: false # optional (default = false)
 
       - name: Run Linter
         run: npm run nx -- run-many --target=lint

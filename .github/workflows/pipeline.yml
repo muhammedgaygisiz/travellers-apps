@@ -37,6 +37,19 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           directory: ./coverage # optional
+          files: ./coverage/apps/prices/cobertura-coverage.xml,
+            libs/utils-common/cobertura-coverage.xml,
+            libs/prices/add-item/feature/cobertura-coverage.xml,
+            libs/prices/auth/feature/cobertura-coverage.xml,
+            libs/prices/card/feature/cobertura-coverage.xml,
+            libs/prices/firestore/feature/cobertura-coverage.xml,
+            libs/prices/geoapify/feature/cobertura-coverage.xml,
+            libs/prices/home/feature/cobertura-coverage.xml,
+            libs/prices/page/feature/cobertura-coverage.xml,
+            libs/prices/password-validator/feature/cobertura-coverage.xml,
+            libs/prices/registration/feature/cobertura-coverage.xml,
+            libs/prices/shell/feature/cobertura-coverage.xml,
+            libs/prices/store/feature/cobertura-coverage.xml # optional
           flags: unittests # optional
           name: codecov-umbrella # optional
           fail_ci_if_error: false # optional (default = false)

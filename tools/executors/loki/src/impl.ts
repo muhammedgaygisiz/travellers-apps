@@ -36,7 +36,7 @@ export const buildCommand = (_context: ExecutorContext, _options: Schema) => {
   }
 
   if (_options.update) {
-    command.push('update');
+    command.push('approve');
   }
 
   command.push('--reactUri');

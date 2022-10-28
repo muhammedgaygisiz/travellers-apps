@@ -23,7 +23,7 @@ const buildCommand = (_context, _options) => {
     command.push('--requireReference');
   }
   if (_options.update) {
-    command.push('update');
+    command.push('approve');
   }
   command.push('--reactUri');
   const buildStorybookOutput = getBuildStorybookOutput(_context);

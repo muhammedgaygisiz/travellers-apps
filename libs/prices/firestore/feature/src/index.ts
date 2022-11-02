@@ -1,3 +1,3 @@
 export * from './lib/firestore-feature.module';
-export { MostSearchedService } from './lib/most-searched.service';
+export { PricesService } from './lib/prices.service';
 export { AuthService } from './lib/auth.service';

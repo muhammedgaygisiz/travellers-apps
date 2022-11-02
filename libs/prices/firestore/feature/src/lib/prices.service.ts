@@ -7,12 +7,14 @@ import {
 } from '@angular/fire/compat/firestore';
 import { v4 as uuidV4 } from 'uuid';
 
+const PRICES_COLLECTION = 'prices';
+
 @Injectable({
   providedIn: 'root',
 })
-export class MostSearchedService {
+export class PricesService {
   public allMostSearchedItems$: Observable<MostSearchedItem[]> = this.afs
-    .collection<MostSearchedItem>('most-searched-items')
+    .collection<MostSearchedItem>(PRICES_COLLECTION)
     .valueChanges();
 
   constructor(
@@ -22,7 +24,7 @@ export class MostSearchedService {
 
   saveMostSearchedItem$(item: Price): Observable<DocumentReference> {
     return from(
-      this.afs.collection<MostSearchedItem>('most-searched-items').add({
+      this.afs.collection<MostSearchedItem>(PRICES_COLLECTION).add({
         id: uuidV4(),
         src: item.src,
         name: item.productName,

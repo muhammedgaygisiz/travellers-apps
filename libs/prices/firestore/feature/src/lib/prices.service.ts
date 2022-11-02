@@ -12,7 +12,7 @@ const PRICES_COLLECTION = 'prices';
 @Injectable({
   providedIn: 'root',
 })
-export class MostSearchedService {
+export class PricesService {
   public allMostSearchedItems$: Observable<MostSearchedItem[]> = this.afs
     .collection<MostSearchedItem>(PRICES_COLLECTION)
     .valueChanges();

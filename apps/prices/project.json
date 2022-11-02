@@ -20,6 +20,7 @@
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/prices/src/favicon.ico",
+          "apps/prices/src/manifest.webmanifest",
           {
             "glob": "**/*",
             "input": "apps/prices/src/assets",

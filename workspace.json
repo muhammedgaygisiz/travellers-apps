@@ -3,6 +3,8 @@
   "version": 2,
   "projects": {
     "executor-loki": "tools/executors/loki",
+    "kosaml": "apps/kosaml",
+    "kosaml-e2e": "apps/kosaml-e2e",
     "prices": "apps/prices",
     "prices-add-item-feature": "libs/prices/add-item/feature",
     "prices-auth-feature": "libs/prices/auth/feature",

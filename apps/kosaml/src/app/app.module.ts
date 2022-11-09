@@ -2,17 +2,10 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { KosamlShellModule } from '@travellers-apps/kosaml/shell/feature';
 import { AppComponent } from './app.component';
-import { NxWelcomeComponent } from './nx-welcome.component';
-import { RouterModule } from '@angular/router';
-import { appRoutes } from './app.routes';
 
 @NgModule({
-  declarations: [AppComponent, NxWelcomeComponent],
-  imports: [
-    BrowserModule,
-    KosamlShellModule,
-    RouterModule.forRoot(appRoutes, { initialNavigation: 'enabledBlocking' }),
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule, KosamlShellModule],
   providers: [],
   bootstrap: [AppComponent],
 })

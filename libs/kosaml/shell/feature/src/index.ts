@@ -1,1 +1,1 @@
-export * from './lib/kosaml-shell-feature.module';
+export * from './lib/kosaml-shell.module';

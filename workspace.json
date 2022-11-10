@@ -4,8 +4,12 @@
   "projects": {
     "executor-loki": "tools/executors/loki",
     "kosaml": "apps/kosaml",
+    "kosaml-auth-feature": "libs/kosaml/auth/feature",
     "kosaml-e2e": "apps/kosaml-e2e",
     "kosaml-shell-feature": "libs/kosaml/shell/feature",
+    "kosaml-site-feature": "libs/kosaml/site/feature",
+    "kosaml-task-scenario-feature": "libs/kosaml/task-scenario/feature",
+    "kosaml-use-scenario-feature": "libs/kosaml/use-scenario/feature",
     "prices": "apps/prices",
     "prices-add-item-feature": "libs/prices/add-item/feature",
     "prices-auth-feature": "libs/prices/auth/feature",

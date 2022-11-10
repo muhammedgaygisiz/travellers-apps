@@ -15,8 +15,20 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@travellers-apps/kosaml/auth/feature": [
+        "libs/kosaml/auth/feature/src/index.ts"
+      ],
       "@travellers-apps/kosaml/shell/feature": [
         "libs/kosaml/shell/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/site/feature": [
+        "libs/kosaml/site/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/task-scenario/feature": [
+        "libs/kosaml/task-scenario/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/use-scenario/feature": [
+        "libs/kosaml/use-scenario/feature/src/index.ts"
       ],
       "@travellers-apps/prices/add-item/feature": [
         "libs/prices/add-item/feature/src/index.ts"

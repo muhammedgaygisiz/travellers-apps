@@ -19,6 +19,9 @@ export class AuthComponent {
   @Output()
   public signup: EventEmitter<void> = new EventEmitter();
 
+  @Output()
+  public submitSignupWithGoogle: EventEmitter<void> = new EventEmitter();
+
   public authFormGroup: FormGroup = new FormGroup<AuthCredentialFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),
     password: new FormControl<string>(
@@ -26,4 +29,8 @@ export class AuthComponent {
       Validators.compose(getPasswordValidators())
     ),
   });
+
+  onGoogleSignUp() {
+    this.submitSignupWithGoogle.emit();
+  }
 }

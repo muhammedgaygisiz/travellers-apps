@@ -5,10 +5,6 @@ import { from, Observable } from 'rxjs';
 import firebase from 'firebase/compat/app';
 import UserCredential = firebase.auth.UserCredential;
 
-/**
- * for google auth example check link
- * https://github.com/firebase/quickstart-js/blob/master/auth/google-redirect.html
- */
 @Injectable({
   providedIn: 'root',
 })

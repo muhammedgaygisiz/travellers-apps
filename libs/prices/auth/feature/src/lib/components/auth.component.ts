@@ -30,7 +30,7 @@ export class AuthComponent {
     ),
   });
 
-  onGoogleSignUp() {
+  public onGoogleSignUp() {
     this.submitSignupWithGoogle.emit();
   }
 }

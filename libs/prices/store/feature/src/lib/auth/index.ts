@@ -3,6 +3,7 @@ import {
   login,
   logout,
   register,
+  loginWithGoogleAccount,
 } from './actions';
 import { key } from './key';
 import { reducer } from './reducer';
@@ -18,6 +19,7 @@ const fromAuth = {
   login,
   logout,
   register,
+  loginWithGoogleAccount,
   confirmRegistrationErrorMessage,
   selectIsAuthenticated,
   selectLoginFailed,

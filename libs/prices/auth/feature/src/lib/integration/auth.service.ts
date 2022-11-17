@@ -27,4 +27,8 @@ export class AuthService {
   public async gotoSignUp() {
     await this.navController.navigateForward(['/registration']);
   }
+
+  public loginWithGoogleAccount() {
+    this.store.dispatch(fromAuth.loginWithGoogleAccount());
+  }
 }

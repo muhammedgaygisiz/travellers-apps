@@ -13,6 +13,7 @@ import {
   logoutSucceeded,
   notAuthenticated,
   register,
+  loginWithGoogleAccount,
   registrationFailed,
   registrationSucceeded,
 } from './actions';
@@ -42,7 +43,6 @@ export class AuthEffects {
       mergeMap(({ authCreds }: AuthCreds) =>
         this.login$(authCreds).pipe(
           map(() => loginSucceeded()),
-          tap(() => this.navController.back()),
           catchError(() => of(loginFailed()))
         )
       )
@@ -76,6 +76,30 @@ export class AuthEffects {
     )
   );
 
+  loginWithGoogleAccountEffect$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(loginWithGoogleAccount.type),
+      mergeMap(() =>
+        this.registerWithGoogleAccount$().pipe(
+          map(() => registrationSucceeded()),
+          tap(() => this.navController.navigateBack(['/'])),
+          catchError((err) => {
+            return of(registrationFailed({ code: err.code }));
+          })
+        )
+      )
+    )
+  );
+
+  successFulLogin$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(loginSucceeded.type),
+        tap(() => this.navController.navigateBack(['/']))
+      ),
+    { dispatch: false }
+  );
+
   constructor(
     // eslint-disable-next-line no-unused-vars
     private readonly actions$: Actions,
@@ -91,6 +115,10 @@ export class AuthEffects {
 
   private register$(registration: AuthCredentials) {
     return this.authService.registerWithUsernameAndPassword$(registration);
+  }
+
+  private registerWithGoogleAccount$() {
+    return this.authService.registerWithGoogleAccount$();
   }
 
   private getAction(user: User | null) {

@@ -7,6 +7,7 @@
     "kosaml-auth-feature": "libs/kosaml/auth/feature",
     "kosaml-card-feature": "libs/kosaml/card/feature",
     "kosaml-e2e": "apps/kosaml-e2e",
+    "kosaml-page-feature": "libs/kosaml/page/feature",
     "kosaml-scenario-feature": "libs/kosaml/scenario/feature",
     "kosaml-shell-feature": "libs/kosaml/shell/feature",
     "kosaml-site-feature": "libs/kosaml/site/feature",

@@ -18,11 +18,11 @@ import { MatMenuModule } from '@angular/material/menu';
   imports: [
     CommonModule,
     MatToolbarModule,
+    MatButtonModule,
     MatIconModule,
     RouterModule,
     MatSidenavModule,
     MatTreeModule,
-    MatButtonModule,
     MatMenuModule,
   ],
   declarations: [

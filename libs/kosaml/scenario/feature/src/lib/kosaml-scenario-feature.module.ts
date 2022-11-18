@@ -11,12 +11,12 @@ import { MatCardModule } from '@angular/material/card';
 @NgModule({
   imports: [
     CommonModule,
+    KosamlCardFeatureModule,
     ReactiveFormsModule,
     MatFormFieldModule,
-    MatButtonModule,
     MatInputModule,
-    KosamlCardFeatureModule,
     MatCardModule,
+    MatButtonModule,
   ],
   declarations: [ScenarioComponent],
   exports: [ScenarioComponent],

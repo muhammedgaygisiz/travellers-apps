@@ -1,0 +1,21 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav
+    #sidenav
+    class="sidenav"
+    fixedInViewport
+    [fixedTopGap]="marginTop"
+    [attr.role]="isProjectBarOpen ? 'navigation' : 'dialog'"
+    [mode]="isProjectBarOpen ? 'side' : 'over'"
+    [opened]="isProjectBarOpen"
+    position="start"
+  >
+    <mat-toolbar>EXPLORER</mat-toolbar>
+    <kosaml-project [project]="project"></kosaml-project>
+    <div
+      class="right border"
+      (mousedown)="onMouseDown($event)"
+      (window:mouseup)="onMouseUp()"
+      (window:mousemove)="onMouseMove($event)"
+    ></div>
+  </mat-sidenav>
+</mat-sidenav-container>

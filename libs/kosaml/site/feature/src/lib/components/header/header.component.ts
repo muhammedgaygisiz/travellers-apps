@@ -9,7 +9,7 @@ export class HeaderComponent {
   title = 'kosaml';
 
   @Input()
-  isAuthenticated = false;
+  isAuthenticated = true;
 
   @Output()
   toggleProjectBar = new EventEmitter();

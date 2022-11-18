@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadingSpinnerComponent should compile 1`] = `
+<kosaml-loading-spinner>
+  <kosaml-card>
+    <div
+      style="text-align: center;"
+    >
+      <div
+        class="fb-item"
+      >
+        <div
+          class="first-section-wrapper"
+        >
+          <div
+            class="gravatar"
+          >
+            <ngx-skeleton-loader
+              appearance="circle"
+            />
+          </div>
+          <div
+            class="gravatar-title"
+          >
+            <div>
+              <ngx-skeleton-loader />
+            </div>
+            <div>
+              <ngx-skeleton-loader />
+            </div>
+          </div>
+        </div>
+        <div
+          class="second-section-wrapper"
+        >
+          <div
+            class="wrapper"
+          >
+            <ngx-skeleton-loader />
+          </div>
+          <div
+            class="wrapper"
+          >
+            <ngx-skeleton-loader />
+          </div>
+          <div
+            class="wrapper"
+          >
+            <ngx-skeleton-loader />
+          </div>
+        </div>
+      </div>
+    </div>
+  </kosaml-card>
+</kosaml-loading-spinner>
+`;

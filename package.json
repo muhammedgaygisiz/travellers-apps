@@ -53,6 +53,7 @@
     "rxjs": "7.5.0",
     "tslib": "2.3.0",
     "uuid": "^9.0.0",
+    "uuidv4": "6.2.13",
     "zone.js": "0.11.4"
   },
   "devDependencies": {
@@ -102,6 +103,7 @@
     "jest-preset-angular": "12.2.2",
     "lint-staged": "13.0.3",
     "loki": "0.30.3",
+    "ngx-skeleton-loader": "^6.0.0",
     "nx": "15.0.13",
     "prettier": "2.7.1",
     "pwa-asset-generator": "6.2.0",

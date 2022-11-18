@@ -18,6 +18,12 @@
       "@travellers-apps/kosaml/auth/feature": [
         "libs/kosaml/auth/feature/src/index.ts"
       ],
+      "@travellers-apps/kosaml/card/feature": [
+        "libs/kosaml/card/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/scenario/feature": [
+        "libs/kosaml/scenario/feature/src/index.ts"
+      ],
       "@travellers-apps/kosaml/shell/feature": [
         "libs/kosaml/shell/feature/src/index.ts"
       ],

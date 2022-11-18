@@ -33,6 +33,9 @@
       "@travellers-apps/kosaml/site/feature": [
         "libs/kosaml/site/feature/src/index.ts"
       ],
+      "@travellers-apps/kosaml/store/feature": [
+        "libs/kosaml/store/feature/src/index.ts"
+      ],
       "@travellers-apps/kosaml/task-scenario/feature": [
         "libs/kosaml/task-scenario/feature/src/index.ts"
       ],

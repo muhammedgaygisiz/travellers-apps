@@ -11,6 +11,7 @@
     "kosaml-scenario-feature": "libs/kosaml/scenario/feature",
     "kosaml-shell-feature": "libs/kosaml/shell/feature",
     "kosaml-site-feature": "libs/kosaml/site/feature",
+    "kosaml-store-feature": "libs/kosaml/store/feature",
     "kosaml-task-scenario-feature": "libs/kosaml/task-scenario/feature",
     "kosaml-use-scenario-feature": "libs/kosaml/use-scenario/feature",
     "prices": "apps/prices",

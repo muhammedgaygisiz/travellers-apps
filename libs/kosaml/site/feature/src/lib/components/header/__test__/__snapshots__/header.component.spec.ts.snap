@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HeaderComponent should compile 1`] = `
+<kosaml-header
+  title={[Function String]}
+  toggleProjectBar={[Function EventEmitter]}
+  toggleToolBar={[Function EventEmitter]}
+>
+  <mat-toolbar
+    color="primary"
+  >
+    
+    <span>
+      KOSAML
+    </span>
+    
+  </mat-toolbar>
+</kosaml-header>
+`;

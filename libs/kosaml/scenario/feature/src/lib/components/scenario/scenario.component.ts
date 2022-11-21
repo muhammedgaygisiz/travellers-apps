@@ -61,14 +61,14 @@ export class ScenarioComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log(changes);
+    console.log('#mo', changes);
     this.setFormFields(this.model);
   }
 
   setFormFields(model: any) {
     if (this.model) {
-      this.titleFormControl.setValue(model.title);
-      this.descriptionFormControl.setValue(model.description);
+      this.titleFormControl.patchValue(model.title);
+      this.descriptionFormControl.patchValue(model.description);
     }
   }
 

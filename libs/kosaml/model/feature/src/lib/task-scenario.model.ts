@@ -1,3 +1,3 @@
 import { Scenario } from './scenario.model';
 
-export type TaskScenario = Scenario
+export type TaskScenario = Scenario;

@@ -11,7 +11,7 @@
     <mat-icon class="type-icon" [attr.aria-label]="node.type + 'icon'">
       {{ node.type === 'file' ? 'description' : 'folder' }}
     </mat-icon>
-    <a [routerLink]="">{{ node.name }}</a>
+    <a [routerLink]="node.link">{{ node.name }}</a>
   </mat-tree-node>
 
   <mat-tree-node

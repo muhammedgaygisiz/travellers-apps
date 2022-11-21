@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { select, Store } from '@ngrx/store';
+import { fromTaskScenarios } from '@travellers-apps/kosaml/store/feature';
 
 @Component({
   selector: 'kosaml-edit-task-scenario-page',
@@ -18,7 +20,14 @@ import { Subscription } from 'rxjs';
 export class EditTaskScenarioPageComponent {
   selectSubscription?: Subscription;
 
-  // selectedTaskScenario$: Observable<any> = this.store.pipe();
+  selectedTaskScenario$ = this.store.pipe(
+    select(fromTaskScenarios.selectSelectedTaskScenario)
+  );
+
+  constructor(
+    // eslint-disable-next-line no-unused-vars
+    private readonly store: Store
+  ) {}
 
   // ngOnInit() {
   // this.selectSubscription = this.route.params.pipe(

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { FileNode } from '../../model/filenode.model';
+import { FileNode } from '@travellers-apps/kosaml/store/feature';
 
 @Component({
   selector: 'kosaml-body',
@@ -11,7 +11,7 @@ export class BodyComponent {
   isAuthenticated?: boolean = true;
 
   @Input()
-  isProjectBarOpen?: boolean;
+  isProjectBarOpen: boolean | null = false;
 
   @Input()
   isToolBarOpen?: boolean;

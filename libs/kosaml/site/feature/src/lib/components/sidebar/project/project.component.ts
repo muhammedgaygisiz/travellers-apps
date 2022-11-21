@@ -5,7 +5,7 @@ import {
   MatTreeFlattener,
 } from '@angular/material/tree';
 import { of as observableOf } from 'rxjs';
-import { FileNode } from '../../../model/filenode.model';
+import { FileNode } from '@travellers-apps/kosaml/store/feature';
 
 /**
  * Flattened tree node that has been created from a FileNode through the flattener. Flattened

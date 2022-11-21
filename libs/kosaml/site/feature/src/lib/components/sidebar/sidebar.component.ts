@@ -1,20 +1,14 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  Input,
-  ViewChild,
-} from '@angular/core';
-import { FileNode } from '../../model/filenode.model';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { FileNode } from '@travellers-apps/kosaml/store/feature';
 
 @Component({
   selector: 'kosaml-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
 })
-export class SidebarComponent implements AfterViewInit {
+export class SidebarComponent {
   @Input()
-  isProjectBarOpen?: boolean;
+  isProjectBarOpen: boolean | null = false;
 
   @Input()
   isToolBarOpen?: boolean;
@@ -35,20 +29,11 @@ export class SidebarComponent implements AfterViewInit {
   startingWidth?: number;
   isResizing?: boolean = false;
 
-  // constructor(
-  //  private sidebarWidthService: SidebarWidthService
-  // ) { }
-
-  ngAfterViewInit() {
-    console.log('');
-    //this.setNewWidth(this.width);
-  }
-
   onMouseDown(event: any) {
     this.isResizing = true;
 
     this.xOffset = event.pageX;
-    // this.startingWidth = this.matSideNav.nativeElement.clientWidth;
+    this.startingWidth = this.matSideNav?.nativeElement.clientWidth;
 
     this.setMouseCursorToResize();
 
@@ -58,7 +43,8 @@ export class SidebarComponent implements AfterViewInit {
   onMouseUp() {
     if (this.isResizing) {
       this.isResizing = false;
-      // his.sidebarWidthService.storeSidebarWidth(this.getWidth());
+      // this.sidebarWidthService.storeSidebarWidth(this.getWidth());
+      // dispatch action from here to save final width in store
       this.resetMouseCursor();
     }
   }
@@ -66,10 +52,19 @@ export class SidebarComponent implements AfterViewInit {
   onMouseMove(event: any) {
     event.preventDefault();
 
-    if (this.isResizing) {
-      // this.setNewWidth(event.pageX - this.xOffset + this.startingWidth)
-      // this.sidebarWidthService.next(this.getWidth())
+    if (!this.isResizing) {
+      return;
     }
+
+    if (!this.xOffset) {
+      return;
+    }
+
+    if (!this.startingWidth) {
+      return;
+    }
+
+    this.setNewWidth(event.pageX - this.xOffset + this.startingWidth);
   }
 
   private resetMouseCursor() {
@@ -81,9 +76,11 @@ export class SidebarComponent implements AfterViewInit {
   }
 
   private setNewWidth(newWidth: number) {
-    console.log(newWidth);
-    // this.matSideNav.nativeElement.style.width =
-    //   `${newWidth}px`;
+    if (!this.matSideNav) {
+      return;
+    }
+
+    this.matSideNav.nativeElement.style.width = `${newWidth}px`;
   }
 
   private getWidth() {

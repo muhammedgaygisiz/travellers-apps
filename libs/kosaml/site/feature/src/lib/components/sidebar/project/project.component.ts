@@ -4,8 +4,9 @@ import {
   MatTreeFlatDataSource,
   MatTreeFlattener,
 } from '@angular/material/tree';
-import { of as observableOf } from 'rxjs';
 import { FileNode } from '@travellers-apps/kosaml/store/feature';
+import { DataSource } from '@angular/cdk/collections';
+import { Observable } from 'rxjs';
 
 /**
  * Flattened tree node that has been created from a FileNode through the flattener. Flattened
@@ -25,38 +26,39 @@ export interface FlatTreeNode {
 })
 export class ProjectComponent implements OnChanges {
   /** The TreeControl controls the expand/collapse state of tree nodes.  */
-  treeControl: FlatTreeControl<FlatTreeNode>;
+  treeControl: FlatTreeControl<FlatTreeNode> = new FlatTreeControl(
+    this.getLevel,
+    this.isExpandable
+  );
 
   /** The TreeFlattener is used to generate the flat list of items from hierarchical data. */
-  treeFlattener?: MatTreeFlattener<FileNode, FlatTreeNode>;
+  treeFlattener: MatTreeFlattener<FileNode, FlatTreeNode> =
+    new MatTreeFlattener<FileNode, FlatTreeNode>(
+      this.transformer,
+      this.getLevel,
+      this.isExpandable,
+      this.getChildren
+    );
 
   /** The MatTreeFlatDataSource connects the control and flattener to provide data. */
-  dataSource?: MatTreeFlatDataSource<FileNode, FlatTreeNode>;
+  dataSource:
+    | DataSource<FlatTreeNode>
+    | FlatTreeNode[]
+    | Observable<FlatTreeNode[]> = new MatTreeFlatDataSource(
+    this.treeControl,
+    this.treeFlattener
+  );
 
   @Input()
-  project?: FileNode[];
-
-  constructor() {
-    // this.treeFlattener = new MatTreeFlattener(
-    //   this.transformer,
-    //   this.getLevel,
-    //   this.isExpandable,
-    //   this.getChildren,
-    // );
-
-    this.treeControl = new FlatTreeControl(this.getLevel, this.isExpandable);
-    // this.dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
-  }
-
-  // ngOnInit() {
-  // this.dataSource.data = this.project;
-  // this.treeControl.expandAll();
-  // }
+  project: FileNode[] | null = [];
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['project']) {
-      // this.dataSource.data = changes['project'].currentValue;
-      // this.treeControl.expandAll();
+      const data = changes['project'].currentValue;
+      this.dataSource = data;
+      this.treeControl.dataNodes = data;
+
+      this.treeControl.expandAll();
     }
   }
 
@@ -82,12 +84,12 @@ export class ProjectComponent implements OnChanges {
   }
 
   /** Get whether the node has children or not. */
-  hasChild(index: number, node: FlatTreeNode) {
-    return node.expandable;
+  hasChild(index: number, node: FileNode) {
+    return !!node.children;
   }
 
   /** Get the children for the node. */
   getChildren(node: FileNode) {
-    return observableOf(node.children);
+    return node.children;
   }
 }

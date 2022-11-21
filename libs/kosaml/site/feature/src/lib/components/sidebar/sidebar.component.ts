@@ -14,7 +14,7 @@ export class SidebarComponent {
   isToolBarOpen?: boolean;
 
   @Input()
-  project?: FileNode[];
+  project: FileNode[] | null = [];
 
   @Input()
   marginTop: number = 40 + 36;

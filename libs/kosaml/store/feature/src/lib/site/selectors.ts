@@ -8,3 +8,8 @@ export const selectIsProjectBarOpen = createSelector(
   siteState,
   (state) => state.isProjectBarOpen
 );
+
+export const selectProjectStructure = createSelector(
+  siteState,
+  (state) => state.projectStructure
+);

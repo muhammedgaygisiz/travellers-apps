@@ -2,7 +2,7 @@
 export interface FileNode {
   name: string;
   type: string;
-  children?: FileNode[];
+  children?: FileNode[] | null;
   link?: string;
 }
 

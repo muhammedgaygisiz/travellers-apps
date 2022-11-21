@@ -17,7 +17,7 @@ export class BodyComponent {
   isToolBarOpen?: boolean;
 
   @Input()
-  project?: FileNode[];
+  project: FileNode[] | null = [];
 
   onLogout() {
     console.log('');

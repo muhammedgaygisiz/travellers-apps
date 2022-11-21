@@ -45,6 +45,7 @@ export class ProjectComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['project']) {
       this.dataSource.data = changes['project'].currentValue;
+      this.treeControl.expandAll();
     }
   }
 

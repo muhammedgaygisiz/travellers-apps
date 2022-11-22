@@ -15,6 +15,7 @@ export const dummyStructure = [
           {
             name: 'View updates and request resource',
             type: 'file',
+            link: '../task-scenarios/2',
           },
         ],
       },
@@ -25,11 +26,12 @@ export const dummyStructure = [
           {
             name: 'Search and request resource',
             type: 'file',
-            link: '../use-scenarios',
+            link: '../use-scenarios/1',
           },
           {
             name: 'View updates and request resource',
             type: 'file',
+            link: '../use-scenarios/2',
           },
         ],
       },

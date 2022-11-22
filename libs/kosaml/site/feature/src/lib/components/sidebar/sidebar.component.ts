@@ -84,6 +84,6 @@ export class SidebarComponent {
   }
 
   private getWidth() {
-    // return this.matSideNav.nativeElement.style.width;
+    return this.matSideNav?.nativeElement.style.width;
   }
 }

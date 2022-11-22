@@ -1,18 +1,18 @@
 import { createReducer, on } from '@ngrx/store';
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
-import { TaskScenario } from '@travellers-apps/kosaml/model/feature';
-import { selectTaskScenario } from './actions';
+import { UseScenario } from '@travellers-apps/kosaml/model/feature';
+import { selectUseScenario } from './actions';
 
-export const selectedTaskScenarioId = (ts: TaskScenario) => ts?.id || '';
+export const selectedUseScenarioId = (us: UseScenario) => us?.id || '';
 
-export const adapter: EntityAdapter<TaskScenario> =
-  createEntityAdapter<TaskScenario>({
-    selectId: selectedTaskScenarioId,
+export const adapter: EntityAdapter<UseScenario> =
+  createEntityAdapter<UseScenario>({
+    selectId: selectedUseScenarioId,
   });
 
 export const initialState = adapter.getInitialState({
   // additional entity state properties
-  selectedTaskScenarioId: '',
+  selectedUseScenarioId: '',
 });
 
 const initialStateWithDummy = adapter.upsertMany(
@@ -20,12 +20,12 @@ const initialStateWithDummy = adapter.upsertMany(
     {
       description: 'Lorem ipsum',
       id: '1',
-      title: 'Task Scenario 1',
+      title: 'Use Scenario 1',
     },
     {
       description: 'Lorem ipsum',
       id: '2',
-      title: 'Task Scenario 2',
+      title: 'Use Scenario 2',
     },
   ],
   initialState
@@ -33,8 +33,8 @@ const initialStateWithDummy = adapter.upsertMany(
 
 export const reducer = createReducer(
   initialStateWithDummy,
-  on(selectTaskScenario, (state, { id }) => ({
+  on(selectUseScenario, (state, { id }) => ({
     ...state,
-    selectedTaskScenarioId: id,
+    selectedUseScenarioId: id,
   }))
 );

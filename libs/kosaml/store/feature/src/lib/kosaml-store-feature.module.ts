@@ -5,6 +5,7 @@ import { ActionReducer, MetaReducer, StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { fromSite } from './site';
 import { fromTaskScenarios } from './taskScenarios';
+import { fromUseScenarios } from './useScenarios';
 
 const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
   return (state, action) => {
@@ -38,6 +39,7 @@ export class KosamlStoreFeatureModule {
       ),
       StoreModule.forFeature(fromSite.key, fromSite.reducer),
       StoreModule.forFeature(fromTaskScenarios.key, fromTaskScenarios.reducer),
+      StoreModule.forFeature(fromUseScenarios.key, fromUseScenarios.reducer),
       !environment.production ? StoreDevtoolsModule.instrument() : [],
     ];
   }

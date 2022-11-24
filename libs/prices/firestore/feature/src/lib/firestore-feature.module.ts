@@ -10,11 +10,6 @@ import { FirebaseOptions } from 'firebase/app';
 })
 export class FirestoreFeatureModule {
   static forRoot(firebaseOptions: FirebaseOptions): ModuleForStore[] {
-    return [
-      AngularFireModule.initializeApp(firebaseOptions || {}),
-      AngularFirestoreModule.enablePersistence({
-        synchronizeTabs: false,
-      }),
-    ];
+    return [AngularFireModule.initializeApp(firebaseOptions || {})];
   }
 }

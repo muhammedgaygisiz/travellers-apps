@@ -43,7 +43,7 @@ export class AuthService {
 
   public registerWithGoogleAccount$() {
     return from(
-      this.afa.signInWithRedirect(new firebase.auth.GoogleAuthProvider())
+      this.afa.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     );
   }
 }

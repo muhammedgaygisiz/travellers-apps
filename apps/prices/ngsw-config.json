@@ -25,6 +25,22 @@
           "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
         ]
       }
+    },
+    {
+      "name": "icons",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/svg/pricetag-outline.svg",
+          "/svg/log-in-outline.svg",
+          "/svg/logo-google.svg",
+          "/svg/logo-apple.svg",
+          "/svg/logo-facebook.svg",
+          "/svg/arrow-back-outline.svg",
+          "/svg/filter-outline.svg"
+        ]
+      }
     }
   ]
 }

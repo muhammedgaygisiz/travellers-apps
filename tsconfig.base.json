@@ -15,6 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@travellers-apps/common/networkstatus/feature": [
+        "libs/common/networkstatus/feature/src/index.ts"
+      ],
       "@travellers-apps/prices/add-item/feature": [
         "libs/prices/add-item/feature/src/index.ts"
       ],

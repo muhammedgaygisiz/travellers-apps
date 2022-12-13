@@ -8,6 +8,7 @@
     "kosaml-auth-feature": "libs/kosaml/auth/feature",
     "kosaml-card-feature": "libs/kosaml/card/feature",
     "kosaml-e2e": "apps/kosaml-e2e",
+    "kosaml-essential-use-case-feature": "libs/kosaml/essential-use-case/feature",
     "kosaml-model-feature": "libs/kosaml/model/feature",
     "kosaml-page-feature": "libs/kosaml/page/feature",
     "kosaml-scenario-feature": "libs/kosaml/scenario/feature",

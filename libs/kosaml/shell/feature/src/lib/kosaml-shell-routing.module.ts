@@ -31,6 +31,13 @@ const routes: Routes = [
         (module) => module.UseScenarioModule
       ),
   },
+  {
+    path: 'essential-use-cases',
+    loadChildren: () =>
+      import('@travellers-apps/kosaml/essential-use-case/feature').then(
+        (module) => module.EssentialUseCaseModule
+      ),
+  },
 ];
 
 @NgModule({

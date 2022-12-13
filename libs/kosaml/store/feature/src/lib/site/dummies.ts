@@ -42,10 +42,12 @@ export const dummyStructure = [
           {
             name: 'Search and request resource',
             type: 'file',
+            link: '../essential-use-cases/1',
           },
           {
             name: 'View updates and request resource',
             type: 'file',
+            link: '../essential-use-cases/2',
           },
         ],
       },

@@ -1,1 +1,1 @@
-export * from './lib/kosaml-essential-use-case-feature.module';
+export * from './lib/essential-use-case.module';

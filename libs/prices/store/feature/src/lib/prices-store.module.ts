@@ -7,7 +7,10 @@ import { Environment, ModuleForStore } from '@travellers-apps/utils-common';
 import { AuthEffects } from './auth/effects';
 import { fromAuth } from './auth';
 import { fromLocation } from './location';
+import { fromNetworkStatus } from './networkStatus';
 import { LocationEffects } from './location/effects';
+import { NetworkEffects } from './networkStatus/effects';
+import { CommonNetworkstatusFeatureModule } from '@travellers-apps/common/networkstatus/feature';
 
 const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
   return (state, action) => {
@@ -36,12 +39,14 @@ export class PricesStoreModule {
           },
         }
       ),
-      EffectsModule.forRoot([AuthEffects]),
+      EffectsModule.forRoot([AuthEffects, NetworkEffects]),
       EffectsModule.forFeature([MostSearchedItemsEffects, LocationEffects]),
       StoreModule.forFeature(fromMostSearched.key, fromMostSearched.reducer),
       StoreModule.forFeature(fromAuth.key, fromAuth.reducer),
       StoreModule.forFeature(fromLocation.key, fromLocation.reducer),
+      StoreModule.forFeature(fromNetworkStatus.key, fromNetworkStatus.reducer),
       !environment.production ? StoreDevtoolsModule.instrument() : [],
+      [CommonNetworkstatusFeatureModule],
     ];
   }
 }

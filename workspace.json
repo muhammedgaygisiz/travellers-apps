@@ -2,6 +2,7 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "common-networkstatus-feature": "libs/common/networkstatus/feature",
     "executor-loki": "tools/executors/loki",
     "kosaml": "apps/kosaml",
     "kosaml-auth-feature": "libs/kosaml/auth/feature",

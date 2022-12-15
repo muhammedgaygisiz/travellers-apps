@@ -1,6 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
-import { SharedModule } from '../../shared.module';
 import { PageComponent } from './page.component';
 
 describe('PageComponent', () => {
@@ -9,7 +8,7 @@ describe('PageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [StoreModule.forRoot({}), SharedModule],
+      imports: [StoreModule.forRoot({})],
     }).compileComponents();
   }));
 

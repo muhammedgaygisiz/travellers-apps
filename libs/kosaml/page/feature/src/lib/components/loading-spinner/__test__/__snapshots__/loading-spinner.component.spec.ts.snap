@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LoadingSpinnerComponent should compile 1`] = `
-<kosaml-loading-spinner>
+<kosaml-loading-spinner
+  __ngContext__="0"
+>
   <kosaml-card>
     <div
       style="text-align: center;"

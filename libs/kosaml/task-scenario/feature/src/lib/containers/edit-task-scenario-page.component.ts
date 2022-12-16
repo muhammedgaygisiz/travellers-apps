@@ -1,11 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { map, Subscription, tap } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { fromTaskScenarios } from '@travellers-apps/kosaml/store/feature';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'kosaml-edit-task-scenario-page',
   template: `
     <kosaml-page>
       <h1 class="mat-display-1">Task Scenario</h1>
@@ -16,14 +15,22 @@ import { ActivatedRoute } from '@angular/router';
         (deleteScenario)="onDeleteScenario($event)"
       ></kosaml-scenario>
     </kosaml-page>
+    <ng-container *ngIf="currentSelected$ | async"></ng-container>
   `,
   styles: [],
 })
-export class EditTaskScenarioPageComponent implements OnInit {
+export class EditTaskScenarioPageComponent {
   selectSubscription?: Subscription;
 
   selectedTaskScenario$ = this.store.pipe(
     select(fromTaskScenarios.selectSelectedTaskScenario)
+  );
+
+  currentSelected$ = this.route.params.pipe(
+    map((params) => params['id']),
+    tap((id) =>
+      this.store.dispatch(fromTaskScenarios.selectTaskScenario({ id }))
+    )
   );
 
   constructor(
@@ -32,21 +39,6 @@ export class EditTaskScenarioPageComponent implements OnInit {
     // eslint-disable-next-line no-unused-vars
     private readonly route: ActivatedRoute
   ) {}
-
-  ngOnInit() {
-    this.selectSubscription = this.route.params
-      .pipe(
-        map((params) => params['id']),
-        tap((id) =>
-          this.store.dispatch(fromTaskScenarios.selectTaskScenario({ id }))
-        )
-      )
-      .subscribe();
-  }
-
-  // ngOnDestroy() {
-  //   this.selectSubscription.unsubscribe();
-  // }
 
   onSaveScenario(scenario: any) {
     console.log(scenario);

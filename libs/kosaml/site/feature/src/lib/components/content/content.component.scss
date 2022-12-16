@@ -1,4 +1,6 @@
 .basic-container {
-  padding: 30px;
   background-color: white;
+
+  width: calc(100% - 320px);
+  float: right;
 }

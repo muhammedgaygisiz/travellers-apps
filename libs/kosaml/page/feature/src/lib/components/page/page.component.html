@@ -1,4 +1,4 @@
-<div [ngStyle]="{ width: width + 'px' }">
+<div>
   <ng-content></ng-content>
-  <kosaml-loading-spinner></kosaml-loading-spinner>
+  <kosaml-loading-spinner *ngIf="isLoading"></kosaml-loading-spinner>
 </div>

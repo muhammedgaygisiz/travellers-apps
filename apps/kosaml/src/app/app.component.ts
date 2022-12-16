@@ -6,17 +6,12 @@ import { fromSite } from '@travellers-apps/kosaml/store/feature';
   selector: 'travellers-apps-root',
   template: `
     <kosaml-header (toggleProjectBar)="onToggleProjectBar()"></kosaml-header>
-    <kosaml-body
-      [isProjectBarOpen]="isProjectBarOpen$ | async"
-      [project]="project$ | async"
-    ></kosaml-body>
+    <kosaml-body [project]="project$ | async"></kosaml-body>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   title = 'kosaml';
-
-  isProjectBarOpen$ = this.store.pipe(select(fromSite.selectIsProjectBarOpen));
 
   project$ = this.store.pipe(select(fromSite.selectProjectStructure));
 

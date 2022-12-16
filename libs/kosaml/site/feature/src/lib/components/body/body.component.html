@@ -2,11 +2,5 @@
   *ngIf="isAuthenticated"
   (logout)="onLogout()"
 ></kosaml-menu-bar>
-<kosaml-sidebar
-  *ngIf="isAuthenticated"
-  [isProjectBarOpen]="isProjectBarOpen"
-  [isToolBarOpen]="isToolBarOpen"
-  [project]="project"
->
-</kosaml-sidebar>
+<kosaml-sidebar *ngIf="isAuthenticated" [project]="project"> </kosaml-sidebar>
 <kosaml-content></kosaml-content>

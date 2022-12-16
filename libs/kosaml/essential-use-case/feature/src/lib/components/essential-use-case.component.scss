@@ -1,0 +1,16 @@
+table {
+  width: 560px;
+  border: 1px solid black;
+}
+
+.mat-header-cell,
+.mat-cell {
+  text-align: center;
+  border: 1px solid black;
+}
+
+th,
+td {
+  width: 280px;
+  padding: 8px !important;
+}

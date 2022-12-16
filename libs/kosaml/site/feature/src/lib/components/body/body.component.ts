@@ -11,12 +11,6 @@ export class BodyComponent {
   isAuthenticated?: boolean = true;
 
   @Input()
-  isProjectBarOpen: boolean | null = false;
-
-  @Input()
-  isToolBarOpen?: boolean;
-
-  @Input()
   project: FileNode[] | null = [];
 
   onLogout() {

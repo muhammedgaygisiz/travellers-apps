@@ -4,18 +4,13 @@
     class="sidenav"
     fixedInViewport
     [fixedTopGap]="marginTop"
-    [attr.role]="isProjectBarOpen ? 'navigation' : 'dialog'"
-    [mode]="isProjectBarOpen ? 'side' : 'over'"
-    [opened]="isProjectBarOpen"
+    [attr.role]="'navigation'"
+    [mode]="'over'"
+    opened="true"
     position="start"
   >
     <mat-toolbar>EXPLORER</mat-toolbar>
     <kosaml-project [project]="project"></kosaml-project>
-    <div
-      class="right border"
-      (mousedown)="onMouseDown($event)"
-      (window:mouseup)="onMouseUp()"
-      (window:mousemove)="onMouseMove($event)"
-    ></div>
+    <div class="right border"></div>
   </mat-sidenav>
 </mat-sidenav-container>

@@ -10,7 +10,7 @@ export default {
     },
   },
   coverageDirectory:
-    '../../../../coverage/libs/kosaml/essential-use-case/feature',
+    '../../../../coverage/libs/kosaml/conceptual-design/essential-use-case/feature',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
   },

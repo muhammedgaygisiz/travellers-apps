@@ -34,9 +34,9 @@ const routes: Routes = [
   {
     path: 'essential-use-cases',
     loadChildren: () =>
-      import('@travellers-apps/kosaml/essential-use-case/feature').then(
-        (module) => module.EssentialUseCaseModule
-      ),
+      import(
+        '@travellers-apps/kosaml/conceptual-design/essential-use-case/feature'
+      ).then((module) => module.EssentialUseCaseModule),
   },
 ];
 

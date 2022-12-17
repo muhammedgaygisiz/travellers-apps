@@ -1,14 +1,14 @@
-import { Component } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import { fromEssentialUseCases } from '@travellers-apps/kosaml/store/feature';
-import { ActivatedRoute } from '@angular/router';
-import { map, tap } from 'rxjs';
 import { ConceptualDesignUseCaseTypes } from '@travellers-apps/kosaml/conceptual-design/base/use-case/feature';
+import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { select, Store } from '@ngrx/store';
+import { map, tap } from 'rxjs';
+import { fromConcreteUseCases } from '@travellers-apps/kosaml/store/feature';
 
 @Component({
   template: `
     <kosaml-page>
-      <h1 class="mat-display-1">Essential Use Case</h1>
+      <h1 class="mat-display-1">Concrete Use Case</h1>
       <kosaml-cp-base-use-case
         [type]="type"
         [dataSource]="dataSource$"
@@ -17,17 +17,17 @@ import { ConceptualDesignUseCaseTypes } from '@travellers-apps/kosaml/conceptual
     <ng-container *ngIf="currentSelected$ | async"></ng-container>
   `,
 })
-export class EssentialUseCasePageComponent {
-  type = ConceptualDesignUseCaseTypes.ESSENTIAL;
+export class ConcreteUseCasePageComponent {
+  type = ConceptualDesignUseCaseTypes.CONCRETE;
 
   dataSource$ = this.store.pipe(
-    select(fromEssentialUseCases.selectSelectedEssentialUseCase)
+    select(fromConcreteUseCases.selectSelectedConcreteUseCase)
   );
 
   currentSelected$ = this.route.params.pipe(
     map((params) => params['id']),
     tap((id) =>
-      this.store.dispatch(fromEssentialUseCases.selectEssentialUseCase({ id }))
+      this.store.dispatch(fromConcreteUseCases.selectConcreteUseCase({ id }))
     )
   );
 

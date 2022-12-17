@@ -1,1 +1,1 @@
-export * from './lib/concrete-use-case-feature.module';
+export * from './lib/concrete-use-case.module';

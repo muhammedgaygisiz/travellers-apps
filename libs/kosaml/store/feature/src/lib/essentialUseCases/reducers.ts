@@ -1,7 +1,7 @@
 import { createReducer, on } from '@ngrx/store';
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { EssentialUseCase } from '@travellers-apps/kosaml/model/feature';
-import { selectEssentialUseScenario } from './actions';
+import { selectEssentialUseCase } from './actions';
 
 export const selectEssentialUseCaseId = (euc: EssentialUseCase) =>
   euc?.id || '';
@@ -41,7 +41,7 @@ const initialStateWithDummy = adapter.upsertMany(
 
 export const reducer = createReducer(
   initialStateWithDummy,
-  on(selectEssentialUseScenario, (state, { id }) => ({
+  on(selectEssentialUseCase, (state, { id }) => ({
     ...state,
     selectedEssentialUseCaseId: id,
   }))

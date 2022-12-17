@@ -58,10 +58,12 @@ export const dummyStructure = [
           {
             name: 'Search and request CD-ROM',
             type: 'file',
+            link: '../concrete-use-cases/1',
           },
           {
             name: 'View updates and request book',
             type: 'file',
+            link: '../concrete-use-cases/2',
           },
         ],
       },

@@ -7,6 +7,7 @@ import { fromSite } from './site';
 import { fromTaskScenarios } from './taskScenarios';
 import { fromUseScenarios } from './useScenarios';
 import { fromEssentialUseCases } from './essentialUseCases';
+import { fromConcreteUseCases } from './concreteUseCases';
 
 const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
   return (state, action) => {
@@ -44,6 +45,10 @@ export class KosamlStoreFeatureModule {
       StoreModule.forFeature(
         fromEssentialUseCases.key,
         fromEssentialUseCases.reducer
+      ),
+      StoreModule.forFeature(
+        fromConcreteUseCases.key,
+        fromConcreteUseCases.reducer
       ),
       !environment.production ? StoreDevtoolsModule.instrument() : [],
     ];

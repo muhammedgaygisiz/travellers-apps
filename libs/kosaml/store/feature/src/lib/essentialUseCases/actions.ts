@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 
-export const selectEssentialUseScenario = createAction(
+export const selectEssentialUseCase = createAction(
   '[View EssentialUseCase Page] Select EssentialUseCase',
   props<{ id: string }>()
 );

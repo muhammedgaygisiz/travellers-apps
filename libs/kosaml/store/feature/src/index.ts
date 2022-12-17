@@ -1,3 +1,4 @@
+export { fromConcreteUseCases } from './lib/concreteUseCases';
 export { fromEssentialUseCases } from './lib/essentialUseCases';
 export { fromSite } from './lib/site';
 export { fromTaskScenarios } from './lib/taskScenarios';

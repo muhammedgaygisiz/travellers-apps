@@ -42,4 +42,24 @@ EssentialUseCase.args = {
 export const ConcreteUseCase = Template.bind({});
 ConcreteUseCase.args = {
   type: ConceptualDesignUseCaseTypes.CONCRETE,
+  dataSource: [
+    {
+      userAction: `The academic enters one or more of the search parameters
+          for the CD-ROM: title, year and platform`,
+      systemResponse: 'The system displays the search results',
+    },
+    {
+      userAction: 'The academic selects a search result',
+      systemResponse: `The system displays the full details of the CD-ROM
+          and the contact details for its owner who is a research student`,
+    },
+    {
+      userAction: 'The academic choses the e-mail address',
+      systemResponse: `The system displays a message area`,
+    },
+    {
+      userAction: 'The academic writes and sends the e-mail request',
+      systemResponse: `The system confirms the sending of the request`,
+    },
+  ],
 };

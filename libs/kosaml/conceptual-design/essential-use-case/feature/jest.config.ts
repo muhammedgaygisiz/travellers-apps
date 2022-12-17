@@ -1,7 +1,7 @@
 /* eslint-disable */
 export default {
   displayName: 'kosaml-essential-use-case-feature',
-  preset: '../../../../jest.preset.js',
+  preset: '../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
     'ts-jest': {
@@ -10,7 +10,7 @@ export default {
     },
   },
   coverageDirectory:
-    '../../../../coverage/libs/kosaml/conceptual-design/essential-use-case/feature',
+    '../../../../../coverage/libs/kosaml/conceptual-design/essential-use-case/feature',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
   },

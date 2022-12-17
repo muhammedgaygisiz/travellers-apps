@@ -1,12 +1,12 @@
 import { moduleMetadata } from '@storybook/angular';
-import { SharedModule } from '../../..';
 import { CardComponent } from '../card.component';
+import { KosamlCardFeatureModule } from '../kosaml-card-feature.module';
 
 export default {
-  title: 'Card',
+  title: 'Kosaml/Base/Card',
   decorators: [
     moduleMetadata({
-      imports: [SharedModule],
+      imports: [KosamlCardFeatureModule],
     }),
   ],
 };

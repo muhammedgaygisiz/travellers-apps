@@ -1,26 +1,14 @@
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatTreeModule } from '@angular/material/tree';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
 import { moduleMetadata } from '@storybook/angular';
-import { SharedModule } from 'src/app/shared';
-import { ProjectComponent } from '../project/project.component';
 import { SidebarComponent } from '../sidebar.component';
+import { SiteModule } from '../../../site.module';
 
 export default {
-  title: 'Sidebar',
+  title: 'Kosaml/Layout/Sidebar',
   decorators: [
     moduleMetadata({
-      declarations: [ProjectComponent],
-      imports: [
-        BrowserAnimationsModule,
-        SharedModule,
-        RouterTestingModule,
-        MatTreeModule,
-        MatSidenavModule,
-        StoreModule.forRoot({}),
-      ],
+      imports: [BrowserAnimationsModule, RouterTestingModule, SiteModule],
     }),
   ],
 };

@@ -1,14 +1,17 @@
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { moduleMetadata } from '@storybook/angular';
-import { SharedModule } from 'src/app/shared/shared.module';
-import { ScenarioComponent } from '../..';
 import { action } from '@storybook/addon-actions';
+import { ScenarioComponent } from '../scenario.component';
+import { KosamlConceptualDesignBaseScenarioFeatureModule } from '../../../kosaml-conceptual-design-base-scenario-feature.module';
 
 export default {
-  title: 'Scenario',
+  title: 'Conceptual Desing/Base/Scenario',
   decorators: [
     moduleMetadata({
-      imports: [BrowserAnimationsModule, SharedModule],
+      imports: [
+        BrowserAnimationsModule,
+        KosamlConceptualDesignBaseScenarioFeatureModule,
+      ],
     }),
   ],
 };

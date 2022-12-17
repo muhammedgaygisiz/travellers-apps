@@ -33,6 +33,6 @@ import { MatMenuModule } from '@angular/material/menu';
     ProjectComponent,
     MenuBarComponent,
   ],
-  exports: [HeaderComponent, BodyComponent],
+  exports: [HeaderComponent, BodyComponent, MenuBarComponent, SidebarComponent],
 })
 export class SiteModule {}

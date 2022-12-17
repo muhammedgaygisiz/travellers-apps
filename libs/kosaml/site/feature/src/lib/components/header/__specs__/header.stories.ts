@@ -1,12 +1,12 @@
 import { moduleMetadata } from '@storybook/angular';
-import { SharedModule } from 'src/app/shared';
 import { HeaderComponent } from '../header.component';
+import { SiteModule } from '../../../site.module';
 
 export default {
-  title: 'Header',
+  title: 'Kosaml/Layout/Header',
   decorators: [
     moduleMetadata({
-      imports: [SharedModule],
+      imports: [SiteModule],
     }),
   ],
 };

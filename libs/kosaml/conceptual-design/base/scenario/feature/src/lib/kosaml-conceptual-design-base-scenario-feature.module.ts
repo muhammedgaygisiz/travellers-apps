@@ -21,4 +21,4 @@ import { MatCardModule } from '@angular/material/card';
   declarations: [ScenarioComponent],
   exports: [ScenarioComponent],
 })
-export class KosamlConceptualDesignScenarioFeatureModule {}
+export class KosamlConceptualDesignBaseScenarioFeatureModule {}

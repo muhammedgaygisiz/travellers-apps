@@ -24,17 +24,17 @@
       "@travellers-apps/kosaml/card/feature": [
         "libs/kosaml/card/feature/src/index.ts"
       ],
+      "@travellers-apps/kosaml/conceptual-design/base/scenario/feature": [
+        "libs/kosaml/conceptual-design/base/scenario/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/conceptual-design/base/use-case/feature": [
+        "libs/kosaml/conceptual-design/base/use-case/feature/src/index.ts"
+      ],
       "@travellers-apps/kosaml/conceptual-design/essential-use-case/feature": [
         "libs/kosaml/conceptual-design/essential-use-case/feature/src/index.ts"
       ],
-      "@travellers-apps/kosaml/conceptual-design/scenario/feature": [
-        "libs/kosaml/conceptual-design/scenario/feature/src/index.ts"
-      ],
       "@travellers-apps/kosaml/conceptual-design/task-scenario/feature": [
         "libs/kosaml/conceptual-design/task-scenario/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/conceptual-design/use-case/feature": [
-        "libs/kosaml/conceptual-design/use-case/feature/src/index.ts"
       ],
       "@travellers-apps/kosaml/conceptual-design/use-scenario/feature": [
         "libs/kosaml/conceptual-design/use-scenario/feature/src/index.ts"

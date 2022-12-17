@@ -1,7 +1,7 @@
 /* eslint-disable */
 export default {
-  displayName: 'kosaml-conceptual-design-scenario-feature',
-  preset: '../../../../../jest.preset.js',
+  displayName: 'kosaml-conceptual-design-base-use-case-feature',
+  preset: '../../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
     'ts-jest': {
@@ -10,7 +10,7 @@ export default {
     },
   },
   coverageDirectory:
-    '../../../../../coverage/libs/kosaml/conceptual-design/scenario/feature',
+    '../../../../../../coverage/libs/kosaml/conceptual-design/base/use-case/feature',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
   },

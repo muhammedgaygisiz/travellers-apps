@@ -38,6 +38,13 @@ const routes: Routes = [
         '@travellers-apps/kosaml/conceptual-design/essential-use-case/feature'
       ).then((module) => module.EssentialUseCaseModule),
   },
+  {
+    path: 'concrete-use-cases',
+    loadChildren: () =>
+      import(
+        '@travellers-apps/kosaml/conceptual-design/concrete-use-case/feature'
+      ).then((module) => module.ConcreteUseCaseModule),
+  },
 ];
 
 @NgModule({

@@ -1,6 +1,6 @@
 {
-  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "name": "kosaml-conceptual-design-base-use-case-feature",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/kosaml/conceptual-design/base/use-case/feature/src",
   "prefix": "travellers-apps",

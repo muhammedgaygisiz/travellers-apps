@@ -30,6 +30,9 @@
       "@travellers-apps/kosaml/conceptual-design/base/use-case/feature": [
         "libs/kosaml/conceptual-design/base/use-case/feature/src/index.ts"
       ],
+      "@travellers-apps/kosaml/conceptual-design/concrete-use-case/feature": [
+        "libs/kosaml/conceptual-design/concrete-use-case/feature/src/index.ts"
+      ],
       "@travellers-apps/kosaml/conceptual-design/essential-use-case/feature": [
         "libs/kosaml/conceptual-design/essential-use-case/feature/src/index.ts"
       ],

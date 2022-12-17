@@ -1,15 +1,15 @@
 {
-  "name": "kosaml-conceptual-design-use-scenario-feature",
+  "name": "kosaml-conceptual-design-concrete-use-case-feature",
   "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "libs/kosaml/conceptual-design/use-scenario/feature/src",
+  "sourceRoot": "libs/kosaml/conceptual-design/concrete-use-case/feature/src",
   "prefix": "travellers-apps",
   "targets": {
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "libs/kosaml/conceptual-design/use-scenario/feature/jest.config.ts",
+        "jestConfig": "libs/kosaml/conceptual-design/concrete-use-case/feature/jest.config.ts",
         "passWithNoTests": true
       }
     },
@@ -17,8 +17,8 @@
       "executor": "@nrwl/linter:eslint",
       "options": {
         "lintFilePatterns": [
-          "libs/kosaml/conceptual-design/use-scenario/feature/**/*.ts",
-          "libs/kosaml/conceptual-design/use-scenario/feature/**/*.html"
+          "libs/kosaml/conceptual-design/concrete-use-case/feature/**/*.ts",
+          "libs/kosaml/conceptual-design/concrete-use-case/feature/**/*.html"
         ]
       }
     }

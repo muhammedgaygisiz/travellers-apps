@@ -24,6 +24,9 @@
       "@travellers-apps/kosaml/card/feature": [
         "libs/kosaml/card/feature/src/index.ts"
       ],
+      "@travellers-apps/kosaml/conceptual-design/use-case/feature": [
+        "libs/kosaml/conceptual-design/use-case/feature/src/index.ts"
+      ],
       "@travellers-apps/kosaml/essential-use-case/feature": [
         "libs/kosaml/essential-use-case/feature/src/index.ts"
       ],

@@ -21,7 +21,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "travellers-apps",
+            "prefix": "kosaml",
             "style": "kebab-case"
           }
         ]

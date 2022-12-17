@@ -5,7 +5,7 @@ import { ScenarioComponent } from '../scenario.component';
 import { KosamlConceptualDesignBaseScenarioFeatureModule } from '../../../kosaml-conceptual-design-base-scenario-feature.module';
 
 export default {
-  title: 'Conceptual Desing/Base/Scenario',
+  title: 'Conceptual Design/Base/Scenario',
   decorators: [
     moduleMetadata({
       imports: [

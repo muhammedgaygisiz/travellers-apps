@@ -20,16 +20,16 @@ const routes: Routes = [
   {
     path: 'task-scenarios',
     loadChildren: () =>
-      import('@travellers-apps/kosaml/task-scenario/feature').then(
-        (module) => module.TaskScenarioModule
-      ),
+      import(
+        '@travellers-apps/kosaml/conceptual-design/task-scenario/feature'
+      ).then((module) => module.TaskScenarioModule),
   },
   {
     path: 'use-scenarios',
     loadChildren: () =>
-      import('@travellers-apps/kosaml/use-scenario/feature').then(
-        (module) => module.UseScenarioModule
-      ),
+      import(
+        '@travellers-apps/kosaml/conceptual-design/use-scenario/feature'
+      ).then((module) => module.UseScenarioModule),
   },
   {
     path: 'essential-use-cases',

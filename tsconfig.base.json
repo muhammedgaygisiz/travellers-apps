@@ -27,17 +27,23 @@
       "@travellers-apps/kosaml/conceptual-design/essential-use-case/feature": [
         "libs/kosaml/conceptual-design/essential-use-case/feature/src/index.ts"
       ],
+      "@travellers-apps/kosaml/conceptual-design/scenario/feature": [
+        "libs/kosaml/conceptual-design/scenario/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/conceptual-design/task-scenario/feature": [
+        "libs/kosaml/conceptual-design/task-scenario/feature/src/index.ts"
+      ],
       "@travellers-apps/kosaml/conceptual-design/use-case/feature": [
         "libs/kosaml/conceptual-design/use-case/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/conceptual-design/use-scenario/feature": [
+        "libs/kosaml/conceptual-design/use-scenario/feature/src/index.ts"
       ],
       "@travellers-apps/kosaml/model/feature": [
         "libs/kosaml/model/feature/src/index.ts"
       ],
       "@travellers-apps/kosaml/page/feature": [
         "libs/kosaml/page/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/scenario/feature": [
-        "libs/kosaml/scenario/feature/src/index.ts"
       ],
       "@travellers-apps/kosaml/shell/feature": [
         "libs/kosaml/shell/feature/src/index.ts"
@@ -47,12 +53,6 @@
       ],
       "@travellers-apps/kosaml/store/feature": [
         "libs/kosaml/store/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/task-scenario/feature": [
-        "libs/kosaml/task-scenario/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/use-scenario/feature": [
-        "libs/kosaml/use-scenario/feature/src/index.ts"
       ],
       "@travellers-apps/prices/add-item/feature": [
         "libs/prices/add-item/feature/src/index.ts"

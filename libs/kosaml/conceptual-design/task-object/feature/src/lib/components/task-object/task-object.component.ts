@@ -1,9 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 @Component({
   selector: 'kosaml-task-object',
   templateUrl: './task-object.component.html',
   styleUrls: ['./task-object.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskObjectComponent {
   @Input()
@@ -12,6 +13,7 @@ export class TaskObjectComponent {
   displayedColumns?: string[] = ['taskObject', 'attributes', 'actions'];
 
   getColumnName(column: string) {
+    console.log('#mo', column);
     if (column === 'taskObject') {
       return 'Task object';
     }

@@ -14,5 +14,6 @@ import { TaskObjectComponent } from './components/task-object/task-object.compon
     KosamlPageFeatureModule,
     MatTableModule,
   ],
+  exports: [TaskObjectComponent],
 })
 export class TaskObjectModule {}

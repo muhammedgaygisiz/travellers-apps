@@ -12,8 +12,4 @@ export class BodyComponent {
 
   @Input()
   project: FileNode[] | null = [];
-
-  onLogout() {
-    console.log('');
-  }
 }

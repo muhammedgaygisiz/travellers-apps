@@ -14,14 +14,7 @@ export class HeaderComponent {
   @Output()
   toggleProjectBar = new EventEmitter();
 
-  @Output()
-  toggleToolBar = new EventEmitter();
-
   onToggleProjectBar() {
     this.toggleProjectBar.emit();
-  }
-
-  onToggleToolBar() {
-    this.toggleToolBar.emit();
   }
 }

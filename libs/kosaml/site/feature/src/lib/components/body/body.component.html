@@ -1,6 +1,3 @@
-<kosaml-menu-bar
-  *ngIf="isAuthenticated"
-  (logout)="onLogout()"
-></kosaml-menu-bar>
+<kosaml-menu-bar *ngIf="isAuthenticated"></kosaml-menu-bar>
 <kosaml-sidebar *ngIf="isAuthenticated" [project]="project"> </kosaml-sidebar>
 <kosaml-content></kosaml-content>

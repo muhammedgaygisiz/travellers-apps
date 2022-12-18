@@ -11,6 +11,7 @@
     "kosaml-conceptual-design-base-use-case-feature": "libs/kosaml/conceptual-design/base/use-case/feature",
     "kosaml-conceptual-design-concrete-use-case-feature": "libs/kosaml/conceptual-design/concrete-use-case/feature",
     "kosaml-conceptual-design-essential-use-case-feature": "libs/kosaml/conceptual-design/essential-use-case/feature",
+    "kosaml-conceptual-design-task-object-feature": "libs/kosaml/conceptual-design/task-object/feature",
     "kosaml-conceptual-design-task-scenario-feature": "libs/kosaml/conceptual-design/task-scenario/feature",
     "kosaml-conceptual-design-use-scenario-feature": "libs/kosaml/conceptual-design/use-scenario/feature",
     "kosaml-e2e": "apps/kosaml-e2e",

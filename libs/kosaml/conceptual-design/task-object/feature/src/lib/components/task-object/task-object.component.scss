@@ -6,7 +6,15 @@ table {
   .mat-cell {
     border: 1px solid black;
 
-    width: 280px;
+    width: 240px;
     padding: 8px !important;
+
+    ul {
+      padding: 0;
+
+      li {
+        list-style-type: none;
+      }
+    }
   }
 }

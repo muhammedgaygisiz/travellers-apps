@@ -45,6 +45,13 @@ const routes: Routes = [
         '@travellers-apps/kosaml/conceptual-design/concrete-use-case/feature'
       ).then((module) => module.ConcreteUseCaseModule),
   },
+  {
+    path: 'task-objects',
+    loadChildren: () =>
+      import(
+        '@travellers-apps/kosaml/conceptual-design/task-object/feature'
+      ).then((module) => module.TaskObjectModule),
+  },
 ];
 
 @NgModule({

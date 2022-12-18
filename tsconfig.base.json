@@ -36,6 +36,9 @@
       "@travellers-apps/kosaml/conceptual-design/essential-use-case/feature": [
         "libs/kosaml/conceptual-design/essential-use-case/feature/src/index.ts"
       ],
+      "@travellers-apps/kosaml/conceptual-design/task-object/feature": [
+        "libs/kosaml/conceptual-design/task-object/feature/src/index.ts"
+      ],
       "@travellers-apps/kosaml/conceptual-design/task-scenario/feature": [
         "libs/kosaml/conceptual-design/task-scenario/feature/src/index.ts"
       ],

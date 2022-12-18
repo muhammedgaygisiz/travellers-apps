@@ -13,7 +13,7 @@ export class CpBaseUseCaseComponent implements OnInit {
   @Input()
   dataSource: any;
 
-  displayedColumns: any;
+  displayedColumns?: string[];
 
   ngOnInit() {
     this.displayedColumns = this.initializeDisplayedColumns(this.type);

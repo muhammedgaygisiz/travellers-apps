@@ -71,8 +71,16 @@ export const dummyStructure = [
         name: 'Task Objects',
         type: 'folder',
         children: [
-          { name: 'CD-ROM', type: 'file' },
-          { name: 'Academic', type: 'file' },
+          {
+            name: 'CD-ROM',
+            type: 'file',
+            link: '../task-objects/1',
+          },
+          {
+            name: 'Academic',
+            type: 'file',
+            link: '../task-objects/2',
+          },
         ],
       },
       {

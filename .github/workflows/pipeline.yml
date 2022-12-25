@@ -363,7 +363,7 @@ jobs:
   kosaml-rest:
     runs-on: ubuntu-latest
     needs:
-      - install-dependencies
+      - kosaml-tests
 
     steps:
       - name: Checkout repository

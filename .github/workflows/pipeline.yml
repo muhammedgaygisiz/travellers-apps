@@ -30,6 +30,15 @@ jobs:
       - name: NPM Dependencies
         run: npm ci
 
+  prices-tests:
+    runs-on: ubuntu-latest
+    needs:
+      - install-dependencies
+
+    steps:
+      - name: Run Unit Tests
+        run: npm run nx -- affected --target=test
+
   prices-build-app:
     runs-on: ubuntu-latest
     needs:

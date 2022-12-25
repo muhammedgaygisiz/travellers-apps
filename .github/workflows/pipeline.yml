@@ -14,7 +14,7 @@ env:
   CI: true
 
 jobs:
-  build-app:
+  prices-build-app:
     runs-on: ubuntu-latest
 
     steps:
@@ -94,7 +94,7 @@ jobs:
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
-  build-storybook:
+  prices-build-storybook:
     runs-on: ubuntu-latest
 
     steps:
@@ -136,7 +136,7 @@ jobs:
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
-  e2e-test:
+  prices-e2e-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -161,4 +161,73 @@ jobs:
           CYPRESS_password: ${{ secrets.CYPRESS_PASSWORD }}
           CYPRESS_username: ${{ secrets.CYPRESS_USER_NAME }}
           NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
+
+
+
+  kosaml-build-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - name: NPM Dependencies
+        run: npm ci
+
+      - name: Run Unit Tests
+        run: npm run nx -- run-many --target=test --coverage --coverageReporters=cobertura
+
+      - uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          directory: ./coverage # optional
+          files: ./coverage/apps/prices/cobertura-coverage.xml,
+            libs/utils-common/cobertura-coverage.xml,
+            libs/prices/add-item/feature/cobertura-coverage.xml,
+            libs/prices/auth/feature/cobertura-coverage.xml,
+            libs/prices/card/feature/cobertura-coverage.xml,
+            libs/prices/firestore/feature/cobertura-coverage.xml,
+            libs/prices/geoapify/feature/cobertura-coverage.xml,
+            libs/prices/home/feature/cobertura-coverage.xml,
+            libs/prices/page/feature/cobertura-coverage.xml,
+            libs/prices/password-validator/feature/cobertura-coverage.xml,
+            libs/prices/registration/feature/cobertura-coverage.xml,
+            libs/prices/shell/feature/cobertura-coverage.xml,
+            libs/prices/store/feature/cobertura-coverage.xml # optional
+          flags: unittests # optional
+          name: codecov-umbrella # optional
+          fail_ci_if_error: false # optional (default = false)
+          verbose: false # optional (default = false)
+
+      - name: Run Linter
+        run: npm run nx -- run-many --target=lint
+
+      - name: Build Kosaml App
+        run: npm run nx -- build kosaml
+
+
+  kosaml-build-storybook:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm run nx -- build-storybook kosaml --configuration=ci
+
+      - run: npm run nx -- loki kosaml
 

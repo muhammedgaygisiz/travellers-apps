@@ -16,6 +16,7 @@
     "prepare": "husky install",
     "compile:loki:executor": "tsc --project tools/executors/loki/tsconfig.executor.json",
     "prices:loki:approve": "nx loki prices --configuration=approve",
+    "kosaml:loki:approve": "nx loki kosaml --configuration=approve",
     "cap:sync": "cap sync",
     "cap:run:ios": "cap run ios",
     "cap:run:android": "cap run android",

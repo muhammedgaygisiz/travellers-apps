@@ -115,6 +115,19 @@
           "quiet": true
         }
       }
+    },
+    "loki": {
+      "executor": "./tools/executors/loki:loki",
+      "options": {
+        "reference": "apps/kosaml/.loki/reference",
+        "difference": "apps/kosaml/.loki/difference",
+        "output": "apps/kosaml/.loki/current"
+      },
+      "configurations": {
+        "approve": {
+          "update": true
+        }
+      }
     }
   },
   "tags": []

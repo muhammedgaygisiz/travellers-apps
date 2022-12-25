@@ -18,15 +18,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - uses: actions/cache/restore@v3
         id: cache
         with:
-          key: ${{ hashFiles('package-lock.json') }}
           path: node_modules
-
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        if: steps.cache.outputs.cache-hit != 'true'
+          key: ${{ hashFiles('package-lock.json') }}
 
       - name: Use Node.js
         uses: actions/setup-node@v3

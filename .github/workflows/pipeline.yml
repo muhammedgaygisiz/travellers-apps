@@ -45,6 +45,9 @@ jobs:
           node-version: 16.x
           cache: 'npm'
 
+      - name: NPM Dependencies
+        run: npm ci
+
       - name: Run Unit Tests
         run: npm run nx -- affected --target=test
 
@@ -65,9 +68,6 @@ jobs:
 
       - name: NPM Dependencies
         run: npm ci
-
-      - name: Run Unit Tests
-        run: npm run nx -- run-many --target=test --coverage --coverageReporters=cobertura
 
       - uses: codecov/codecov-action@v3
         with:

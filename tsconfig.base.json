@@ -18,6 +18,48 @@
       "@travellers-apps/common/networkstatus/feature": [
         "libs/common/networkstatus/feature/src/index.ts"
       ],
+      "@travellers-apps/kosaml/auth/feature": [
+        "libs/kosaml/auth/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/card/feature": [
+        "libs/kosaml/card/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/conceptual-design/base/scenario/feature": [
+        "libs/kosaml/conceptual-design/base/scenario/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/conceptual-design/base/use-case/feature": [
+        "libs/kosaml/conceptual-design/base/use-case/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/conceptual-design/concrete-use-case/feature": [
+        "libs/kosaml/conceptual-design/concrete-use-case/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/conceptual-design/essential-use-case/feature": [
+        "libs/kosaml/conceptual-design/essential-use-case/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/conceptual-design/task-object/feature": [
+        "libs/kosaml/conceptual-design/task-object/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/conceptual-design/task-scenario/feature": [
+        "libs/kosaml/conceptual-design/task-scenario/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/conceptual-design/use-scenario/feature": [
+        "libs/kosaml/conceptual-design/use-scenario/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/model/feature": [
+        "libs/kosaml/model/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/page/feature": [
+        "libs/kosaml/page/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/shell/feature": [
+        "libs/kosaml/shell/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/site/feature": [
+        "libs/kosaml/site/feature/src/index.ts"
+      ],
+      "@travellers-apps/kosaml/store/feature": [
+        "libs/kosaml/store/feature/src/index.ts"
+      ],
       "@travellers-apps/prices/add-item/feature": [
         "libs/prices/add-item/feature/src/index.ts"
       ],

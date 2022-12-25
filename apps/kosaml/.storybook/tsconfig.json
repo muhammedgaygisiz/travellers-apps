@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "emitDecoratorMetadata": true
+  },
+
+  "files": ["../src/polyfills.ts"],
+  "exclude": ["../**/*.spec.ts"],
+  "include": [
+    "../src/**/*",
+    "../__stories__/**/*",
+    "*.js",
+    "../../../libs/kosaml/**/*.stories.*"
+  ]
+}

@@ -1,0 +1,40 @@
+<kosaml-card>
+  <form
+    [formGroup]="scenarioForm"
+    class="formFieldContainer"
+    (ngSubmit)="onSubmit()"
+  >
+    <mat-form-field>
+      <input
+        matInput
+        placeholder="Title"
+        name="title"
+        formControlName="title"
+        [errorStateMatcher]="matcher"
+      />
+      <mat-error *ngIf="titleFormControl.hasError('required')">
+        Field is required
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <textarea
+        matInput
+        name="description"
+        formControlName="description"
+        rows="12"
+      ></textarea>
+    </mat-form-field>
+    <mat-card-actions align="end" class="manuelCardActionsStyle">
+      <button
+        mat-button
+        type="button"
+        *ngIf="showDeleteButton"
+        (click)="onDelete()"
+      >
+        DELETE
+      </button>
+      <button mat-button type="submit">SAVE</button>
+    </mat-card-actions>
+  </form>
+</kosaml-card>

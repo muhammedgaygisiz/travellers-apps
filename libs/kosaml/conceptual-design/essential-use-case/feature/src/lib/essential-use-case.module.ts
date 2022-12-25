@@ -1,0 +1,19 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { EssentialUseCaseRoutingModule } from './essential-use-case-routing.module';
+import { EssentialUseCasePageComponent } from './containers/essential-use-case-page.component';
+import { KosamlPageFeatureModule } from '@travellers-apps/kosaml/page/feature';
+import { MatTableModule } from '@angular/material/table';
+import { KosamlConceptualDesignBaseUseCaseFeatureModule } from '@travellers-apps/kosaml/conceptual-design/base/use-case/feature';
+
+@NgModule({
+  declarations: [EssentialUseCasePageComponent],
+  imports: [
+    CommonModule,
+    EssentialUseCaseRoutingModule,
+    KosamlPageFeatureModule,
+    MatTableModule,
+    KosamlConceptualDesignBaseUseCaseFeatureModule,
+  ],
+})
+export class EssentialUseCaseModule {}

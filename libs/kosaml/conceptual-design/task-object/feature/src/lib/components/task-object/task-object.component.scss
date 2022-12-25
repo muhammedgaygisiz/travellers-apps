@@ -1,0 +1,22 @@
+table {
+  width: 560px;
+  border: 1px solid black;
+
+  .mat-header-cell,
+  .mat-cell {
+    border: 1px solid black;
+
+    width: 240px;
+    padding: 8px !important;
+
+    vertical-align: baseline;
+
+    ul {
+      padding: 0;
+
+      li {
+        list-style-type: none;
+      }
+    }
+  }
+}

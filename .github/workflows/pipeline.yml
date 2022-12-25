@@ -25,7 +25,7 @@ jobs:
         id: cache
         with:
           path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -43,30 +43,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
-
-  prices-tests:
-    runs-on: ubuntu-latest
-    needs:
-      - install-dependencies
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-          cache: 'npm'
-
-      - uses: actions/cache/restore@v3
-        with:
-          path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
-
-      - name: Run Unit Tests
-        run: npm run nx -- run-many --target=test --projects=prices*  --coverage --coverageReporters=cobertura
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
   prices-lint:
     runs-on: ubuntu-latest
@@ -86,10 +63,33 @@ jobs:
       - uses: actions/cache/restore@v3
         with:
           path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Run Linter
         run: npm run nx -- run-many --target=lint --projects=prices*
+
+  prices-tests:
+    runs-on: ubuntu-latest
+    needs:
+      - install-dependencies
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Run Unit Tests
+        run: npm run nx -- run-many --target=test --projects=prices*  --coverage --coverageReporters=cobertura
 
   prices-build-storybook:
     runs-on: ubuntu-latest
@@ -110,7 +110,7 @@ jobs:
       - uses: actions/cache/restore@v3
         with:
           path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - run: npm run nx -- build-storybook prices --configuration=ci
 
@@ -118,7 +118,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: dist/storybook/prices
-          key: ${{ hashFiles('**/prices/**/*.stories.*') }}
+          key: prices-storybook-${{ hashFiles('**/prices/**/*.stories.*') }}
 
       - name: Storybook Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
@@ -161,12 +161,12 @@ jobs:
       - uses: actions/cache/restore@v3
         with:
           path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - uses: actions/cache/restore@v3
         with:
           path: dist/storybook/prices
-          key: ${{ hashFiles('**/prices/**/*.stories.*') }}
+          key: prices-storybook-${{ hashFiles('**/prices/**/*.stories.*') }}
 
       - run: npm run nx -- loki prices
 
@@ -219,7 +219,7 @@ jobs:
       - uses: actions/cache/restore@v3
         with:
           path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Build Prices App
         run: npm run nx -- build prices
@@ -318,7 +318,7 @@ jobs:
       - uses: actions/cache/restore@v3
         with:
           path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Run Unit Tests
         run: npm run nx -- run-many --target=test --projects=kosaml*  --coverage --coverageReporters=cobertura
@@ -341,7 +341,7 @@ jobs:
       - uses: actions/cache/restore@v3
         with:
           path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Run Linter
         run: npm run nx -- run-many --target=lint --projects=kosaml*
@@ -364,7 +364,7 @@ jobs:
       - uses: actions/cache/restore@v3
         with:
           path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Build Prices App
         run: npm run nx -- build kosaml
@@ -387,9 +387,40 @@ jobs:
       - uses: actions/cache/restore@v3
         with:
           path: node_modules
-          key: ${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - run: npm run nx -- build-storybook kosaml --configuration=ci
+
+      - name: Cache Storybook Build
+        uses: actions/cache@v3
+        with:
+          path: dist/storybook/prices
+          key: kosaml-storybook-${{ hashFiles('**/kosaml/**/*.stories.*') }}
+
+  kosaml-loki:
+    runs-on: ubuntu-latest
+    needs:
+      - kosaml-build-storybook
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: dist/storybook/prices
+          key: kosaml-storybook-${{ hashFiles('**/kosaml/**/*.stories.*') }}
 
       - run: npm run nx -- loki kosaml
 

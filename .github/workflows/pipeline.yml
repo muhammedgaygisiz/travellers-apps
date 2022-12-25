@@ -41,7 +41,6 @@ jobs:
       - name: Cache NPM Dependencies
         uses: actions/cache@v3
         if: steps.cache.outputs.cache-hit != 'true'
-        id: cache-dependencies
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
@@ -62,7 +61,6 @@ jobs:
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
-        id: cache
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
@@ -86,7 +84,6 @@ jobs:
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
-        id: cache
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
@@ -111,7 +108,6 @@ jobs:
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
-        id: cache
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
@@ -120,7 +116,6 @@ jobs:
 
       - name: Cache Storybook Build
         uses: actions/cache@v3
-        id: cache-prices-storybook-build
         with:
           path: dist/storybook/prices
           key: ${{ hashFiles('**/prices/**/*.stories.*') }}
@@ -164,13 +159,11 @@ jobs:
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
-        id: cache
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
 
       - uses: actions/cache/restore@v3
-        id: cache
         with:
           path: node_modules
           key: ${{ hashFiles('**/prices/**/*.stories.*') }}
@@ -224,7 +217,6 @@ jobs:
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
-        id: cache
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
@@ -324,7 +316,6 @@ jobs:
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
-        id: cache
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
@@ -348,7 +339,6 @@ jobs:
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
-        id: cache
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
@@ -372,7 +362,6 @@ jobs:
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
-        id: cache
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
@@ -396,7 +385,6 @@ jobs:
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
-        id: cache
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}

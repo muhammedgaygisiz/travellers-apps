@@ -146,7 +146,7 @@ jobs:
   prices-loki:
     runs-on: ubuntu-latest
     needs:
-      - install-dependencies
+      - prices-build-storybook
 
     steps:
       - name: Checkout repository

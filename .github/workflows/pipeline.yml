@@ -21,8 +21,8 @@ jobs:
       - uses: actions/cache/restore@v3
         id: cache
         with:
-          path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
+          path: node_modules
 
       - name: Checkout repository
         uses: actions/checkout@v3

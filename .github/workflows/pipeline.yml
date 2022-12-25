@@ -27,12 +27,20 @@ jobs:
           node-version: 16.x
           cache: 'npm'
 
+      - uses: actions/cache/restore@v3
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ hashFiles('package-lock.json') }}
+
       - name: NPM Dependencies
         run: npm ci
+        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Cache NPM Dependencies
-        id: cache-dependencies
         uses: actions/cache@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        id: cache-dependencies
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}

@@ -45,11 +45,12 @@ jobs:
           node-version: 16.x
           cache: 'npm'
 
+      # TODO: Use ci result from previous job
       - name: NPM Dependencies
         run: npm ci
 
       - name: Run Unit Tests
-        run: npm run nx -- affected --target=test
+        run: npm run nx -- run-many --target=test --projects=prices*
 
   prices-build-app:
     runs-on: ubuntu-latest

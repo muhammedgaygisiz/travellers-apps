@@ -59,7 +59,7 @@ jobs:
           key: ${{ hashFiles('package-lock.json') }}
 
       - name: Run Unit Tests
-        run: npm run nx -- run-many --target=test --projects=prices*
+        run: npm run nx -- run-many --target=test --projects=prices*  --coverage --coverageReporters=cobertura
 
   prices-lint:
     runs-on: ubuntu-latest
@@ -146,7 +146,7 @@ jobs:
           NX_APP_GEOAPIFY_API_KEY: ${{ secrets.NX_APP_GEOAPIFY_API_KEY }}
 
 
-  prices-build-app:
+  prices-rest:
     runs-on: ubuntu-latest
     needs:
       - install-dependencies
@@ -257,9 +257,79 @@ jobs:
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
+  kosaml-tests:
+    runs-on: ubuntu-latest
+    needs:
+      - install-dependencies
 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  kosaml-build-app:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ hashFiles('package-lock.json') }}
+
+      - name: Run Unit Tests
+        run: npm run nx -- run-many --target=test --projects=kosaml*  --coverage --coverageReporters=cobertura
+
+  kosaml-lint:
+    runs-on: ubuntu-latest
+    needs:
+      - install-dependencies
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ hashFiles('package-lock.json') }}
+
+      - name: Run Linter
+        run: npm run nx -- run-many --target=lint --projects=kosaml*
+
+  kosaml-build:
+    runs-on: ubuntu-latest
+    needs:
+      - kosaml-lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ hashFiles('package-lock.json') }}
+
+      - name: Build Prices App
+        run: npm run nx -- build kosaml
+
+  kosaml-rest:
     runs-on: ubuntu-latest
     needs:
       - install-dependencies
@@ -276,9 +346,6 @@ jobs:
 
       - name: NPM Dependencies
         run: npm ci
-
-      - name: Run Unit Tests
-        run: npm run nx -- run-many --target=test --coverage --coverageReporters=cobertura
 
       - uses: codecov/codecov-action@v3
         with:
@@ -301,9 +368,6 @@ jobs:
           name: codecov-umbrella # optional
           fail_ci_if_error: false # optional (default = false)
           verbose: false # optional (default = false)
-
-      - name: Run Linter
-        run: npm run nx -- run-many --target=lint
 
       - name: Build Kosaml App
         run: npm run nx -- build kosaml

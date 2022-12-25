@@ -338,7 +338,7 @@ jobs:
   kosaml-build-storybook:
     runs-on: ubuntu-latest
     needs:
-      - install-dependencies
+      - kosaml-build
 
     steps:
       - name: Checkout repository

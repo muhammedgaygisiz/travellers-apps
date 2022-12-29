@@ -224,7 +224,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - prices-e2e-test
-      - prices-lint
 
     steps:
       - name: Checkout repository
@@ -251,6 +250,40 @@ jobs:
           NX_APP_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_MESSAGING_SENDER_ID }}
           NX_APP_GEOAPIFY_API_KEY: ${{ secrets.NX_APP_GEOAPIFY_API_KEY }}
 
+      - name: Cache Prices Build
+        uses: actions/cache@v3
+        with:
+          path: dist/apps/prices
+          key: prices-build-${{ hashFiles('**/prices/**') }}
+
+  prices-cap-sync:
+    runs-on: ubuntu-latest
+    needs:
+      - prices-build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: dist/apps/prices
+          key: prices-build-${{ hashFiles('**/prices/**') }}
+
+      - name: Capacitor Sync
+        run: npm run cap:sync
+
   prices-rest:
     runs-on: ubuntu-latest
     needs:
@@ -268,9 +301,6 @@ jobs:
 
       - name: NPM Dependencies
         run: npm ci
-
-      - name: Capacitor Sync
-        run: npm run cap:sync
 
       - name: Prices Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'

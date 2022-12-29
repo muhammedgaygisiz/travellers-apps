@@ -98,7 +98,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           directory: ./coverage # optional
           files: ./coverage/apps/prices/cobertura-coverage.xml,
-            # libs/utils-common/cobertura-coverage.xml,
             libs/prices/add-item/feature/cobertura-coverage.xml,
             libs/prices/auth/feature/cobertura-coverage.xml,
             libs/prices/card/feature/cobertura-coverage.xml,

@@ -234,8 +234,7 @@ jobs:
   prices-rest:
     runs-on: ubuntu-latest
     needs:
-      - install-dependencies
-      - prices-tests
+      - prices-build
 
     steps:
       - name: Checkout repository
@@ -349,7 +348,7 @@ jobs:
   kosaml-build-storybook:
     runs-on: ubuntu-latest
     needs:
-      - kosaml-build
+      - kosaml-tests
 
     steps:
       - name: Checkout repository
@@ -373,29 +372,6 @@ jobs:
         with:
           path: dist/storybook/prices
           key: kosaml-storybook-${{ hashFiles('**/kosaml/**/*.stories.*') }}
-
-  kosaml-build:
-    runs-on: ubuntu-latest
-    needs:
-      - kosaml-tests
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-          cache: 'npm'
-
-      - uses: actions/cache/restore@v3
-        with:
-          path: node_modules
-          key: node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Build Prices App
-        run: npm run nx -- build kosaml
 
   kosaml-loki:
     runs-on: ubuntu-latest
@@ -424,10 +400,34 @@ jobs:
 
       - run: npm run nx -- loki kosaml
 
+  kosaml-build:
+    runs-on: ubuntu-latest
+    needs:
+      - kosaml-loki
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Build Prices App
+        run: npm run nx -- build kosaml
+
+
   kosaml-rest:
     runs-on: ubuntu-latest
     needs:
-      - kosaml-tests
+      - kosaml-build
 
     steps:
       - name: Checkout repository

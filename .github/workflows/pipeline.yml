@@ -66,7 +66,7 @@ jobs:
           key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Run Linter
-        run: npm run nx -- run-many --target=lint --projects=prices*
+        run: npm run nx -- run-many --target=lint --projects="prices*"
 
   prices-tests:
     runs-on: ubuntu-latest
@@ -89,7 +89,7 @@ jobs:
           key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Run Unit Tests
-        run: npm run nx -- run-many --target=test --projects=prices*  --coverage --coverageReporters=cobertura
+        run: npm run nx -- run-many --target=test --projects="prices*"  --coverage --coverageReporters=cobertura
 
   prices-build-storybook:
     runs-on: ubuntu-latest
@@ -317,7 +317,7 @@ jobs:
           key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Run Linter
-        run: npm run nx -- run-many --target=lint --projects=kosaml*
+        run: npm run nx -- run-many --target=lint --projects="kosaml*"
 
   kosaml-tests:
     runs-on: ubuntu-latest
@@ -340,7 +340,7 @@ jobs:
           key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Run Unit Tests
-        run: npm run nx -- run-many --target=test --projects=kosaml*  --coverage --coverageReporters=cobertura
+        run: npm run nx -- run-many --target=test --projects="kosaml*"  --coverage --coverageReporters=cobertura
 
   kosaml-build:
     runs-on: ubuntu-latest

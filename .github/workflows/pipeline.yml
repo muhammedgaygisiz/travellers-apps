@@ -394,7 +394,7 @@ jobs:
 
       - uses: actions/cache/restore@v3
         with:
-          path: dist/storybook/prices
+          path: dist/storybook/kosaml
           key: kosaml-storybook-${{ hashFiles('**/kosaml/**/*.stories.*') }}
 
       - run: npm run nx -- loki kosaml
@@ -421,7 +421,6 @@ jobs:
 
       - name: Build Prices App
         run: npm run nx -- build kosaml
-
 
   kosaml-rest:
     runs-on: ubuntu-latest

@@ -21,6 +21,11 @@
           "libs/prices/store/feature/**/*.html"
         ]
       }
+    },
+    "build": {
+      "options": {
+        "tsConfig": "libs/prices/store/feature/tsconfig.lib.json"
+      }
     }
   },
   "tags": []

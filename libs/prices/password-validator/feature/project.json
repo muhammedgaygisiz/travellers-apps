@@ -23,6 +23,11 @@
           "libs/prices/password-validator/feature/**/*.html"
         ]
       }
+    },
+    "build": {
+      "options": {
+        "tsConfig": "libs/prices/password-validator/feature/tsconfig.lib.json"
+      }
     }
   },
   "tags": []

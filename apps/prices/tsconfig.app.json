@@ -3,8 +3,9 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "types": ["node"],
-    "target": "es2020",
-    "allowSyntheticDefaultImports": true
+    "target": "ES2022",
+    "allowSyntheticDefaultImports": true,
+    "useDefineForClassFields": false
   },
   "files": ["src/main.ts", "src/polyfills.ts"],
   "include": ["src/**/*.d.ts"],

@@ -23,6 +23,11 @@
       "options": {
         "lintFilePatterns": ["apps/kosaml-e2e/**/*.{js,ts}"]
       }
+    },
+    "build": {
+      "options": {
+        "tsConfig": "apps/kosaml-e2e/tsconfig.json"
+      }
     }
   },
   "tags": [],

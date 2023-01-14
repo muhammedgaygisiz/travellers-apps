@@ -21,6 +21,11 @@
           "libs/prices/firestore/feature/**/*.html"
         ]
       }
+    },
+    "build": {
+      "options": {
+        "tsConfig": "libs/prices/firestore/feature/tsconfig.lib.json"
+      }
     }
   },
   "tags": []

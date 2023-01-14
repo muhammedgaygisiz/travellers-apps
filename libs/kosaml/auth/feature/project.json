@@ -21,6 +21,11 @@
           "libs/kosaml/auth/feature/**/*.html"
         ]
       }
+    },
+    "build": {
+      "options": {
+        "tsConfig": "libs/kosaml/auth/feature/tsconfig.lib.json"
+      }
     }
   },
   "tags": []

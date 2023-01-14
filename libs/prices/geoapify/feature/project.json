@@ -21,6 +21,11 @@
           "libs/prices/geoapify/feature/**/*.html"
         ]
       }
+    },
+    "build": {
+      "options": {
+        "tsConfig": "libs/prices/geoapify/feature/tsconfig.lib.json"
+      }
     }
   },
   "tags": []

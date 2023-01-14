@@ -21,6 +21,11 @@
           "libs/common/networkstatus/feature/**/*.html"
         ]
       }
+    },
+    "build": {
+      "options": {
+        "tsConfig": "libs/common/networkstatus/feature/tsconfig.lib.json"
+      }
     }
   },
   "tags": []

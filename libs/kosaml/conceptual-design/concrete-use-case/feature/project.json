@@ -21,6 +21,11 @@
           "libs/kosaml/conceptual-design/concrete-use-case/feature/**/*.html"
         ]
       }
+    },
+    "build": {
+      "options": {
+        "tsConfig": "libs/kosaml/conceptual-design/concrete-use-case/feature/tsconfig.lib.json"
+      }
     }
   },
   "tags": []

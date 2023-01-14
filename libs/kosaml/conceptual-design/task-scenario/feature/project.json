@@ -21,6 +21,11 @@
           "libs/kosaml/conceptual-design/task-scenario/feature/**/*.html"
         ]
       }
+    },
+    "build": {
+      "options": {
+        "tsConfig": "libs/kosaml/conceptual-design/task-scenario/feature/tsconfig.lib.json"
+      }
     }
   },
   "tags": []

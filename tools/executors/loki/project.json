@@ -9,6 +9,11 @@
         "jestConfig": "tools/executors/loki/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "build": {
+      "options": {
+        "tsConfig": "tools/executors/loki/tsconfig.executor.json"
+      }
     }
   }
 }

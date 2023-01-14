@@ -284,7 +284,7 @@ jobs:
       - name: Capacitor Sync
         run: npm run cap:sync
 
-  prices-rest:
+  prices-deploy:
     runs-on: ubuntu-latest
     needs:
       - prices-cap-sync
@@ -299,8 +299,15 @@ jobs:
           node-version: 16.x
           cache: 'npm'
 
-      - name: NPM Dependencies
-        run: npm ci
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: dist/apps/prices
+          key: prices-build-${{ hashFiles('package-lock.json') }}
 
       - name: Prices Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'

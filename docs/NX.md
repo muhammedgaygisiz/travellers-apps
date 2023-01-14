@@ -80,7 +80,7 @@ Visit the [Nx Documentation](https://nx.dev) to learn more.
 ## Update nx
 
 ```
- npm run nx -- migrate
+ npm run nx -- migrate @nrwl/workspace@latest
 ```
 
 ```

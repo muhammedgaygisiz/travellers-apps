@@ -1,3 +1,6 @@
+<!-- Pattern to force cd combined with reactive form groups -->
+<ng-container *ngIf="priceFormGroup.statusChanges | async"></ng-container>
+
 <ta-page
   [enableBackButton]="true"
   [isAuthenticated]="false"

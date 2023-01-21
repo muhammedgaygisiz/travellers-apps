@@ -1,1 +1,1 @@
-export * from './lib/add-item.module';
+export * from './lib/integration/add-item-container.component';

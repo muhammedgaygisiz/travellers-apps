@@ -10,16 +10,16 @@ const redirectUnauthorizedToHome = () => redirectUnauthorizedTo(['home']);
 const routes: Routes = [
   {
     path: 'home',
-    loadChildren: () =>
+    loadComponent: () =>
       import('@travellers-apps/prices/home/feature').then(
-        (m) => m.HomeComponentModule
+        (m) => m.HomeContainerComponent
       ),
   },
   {
     path: 'add-item',
-    loadChildren: () =>
+    loadComponent: () =>
       import('@travellers-apps/prices/add-item/feature').then(
-        (m) => m.AddItemModule
+        (m) => m.AddItemContainerComponent
       ),
     canActivate: [AngularFireAuthGuard],
     data: {

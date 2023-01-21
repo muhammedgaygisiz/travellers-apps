@@ -6,16 +6,35 @@ import {
   OnChanges,
   Output,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { AddItem } from '../api/add-item';
 import { Price } from '@travellers-apps/utils-common';
 import { ImageUrlValidator } from '../async-validators/image-url.validator';
+import { PageFeatureModule } from '@travellers-apps/prices/page/feature';
+import { CardFeatureModule } from '@travellers-apps/prices/card/feature';
+import { IonicModule } from '@ionic/angular';
+import { AsyncPipe, NgIf } from '@angular/common';
 
 @Component({
+  standalone: true,
   selector: 'ta-add-item',
   templateUrl: './add-item.component.html',
   styleUrls: ['./add-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    PageFeatureModule,
+    CardFeatureModule,
+    ReactiveFormsModule,
+    IonicModule,
+    NgIf,
+    AsyncPipe,
+  ],
+  providers: [ImageUrlValidator],
 })
 export class AddItemComponent implements OnChanges {
   @Input()

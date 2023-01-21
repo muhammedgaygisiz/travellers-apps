@@ -21,11 +21,6 @@
           "libs/kosaml/conceptual-design/use-scenario/feature/**/*.html"
         ]
       }
-    },
-    "build": {
-      "options": {
-        "tsConfig": "libs/kosaml/conceptual-design/use-scenario/feature/tsconfig.lib.json"
-      }
     }
   },
   "tags": []

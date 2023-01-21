@@ -21,11 +21,6 @@
           "libs/kosaml/conceptual-design/task-object/feature/**/*.html"
         ]
       }
-    },
-    "build": {
-      "options": {
-        "tsConfig": "libs/kosaml/conceptual-design/task-object/feature/tsconfig.lib.json"
-      }
     }
   },
   "tags": []

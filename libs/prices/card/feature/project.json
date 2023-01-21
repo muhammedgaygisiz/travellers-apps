@@ -21,11 +21,6 @@
           "libs/prices/card/feature/**/*.html"
         ]
       }
-    },
-    "build": {
-      "options": {
-        "tsConfig": "libs/prices/card/feature/tsconfig.lib.json"
-      }
     }
   },
   "tags": []

@@ -21,11 +21,6 @@
           "libs/prices/auth/feature/**/*.html"
         ]
       }
-    },
-    "build": {
-      "options": {
-        "tsConfig": "libs/prices/auth/feature/tsconfig.lib.json"
-      }
     }
   },
   "tags": []

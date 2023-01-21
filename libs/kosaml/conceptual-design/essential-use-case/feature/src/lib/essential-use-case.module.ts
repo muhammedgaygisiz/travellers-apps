@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { EssentialUseCaseRoutingModule } from './essential-use-case-routing.module';
 import { EssentialUseCasePageComponent } from './containers/essential-use-case-page.component';
 import { KosamlPageFeatureModule } from '@travellers-apps/kosaml/page/feature';
-import { MatTableModule } from '@angular/material/table';
+import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
 import { KosamlConceptualDesignBaseUseCaseFeatureModule } from '@travellers-apps/kosaml/conceptual-design/base/use-case/feature';
 
 @NgModule({

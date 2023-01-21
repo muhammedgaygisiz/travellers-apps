@@ -1,6 +1,7 @@
 import { ExecutorContext } from '@nrwl/devkit';
 import { execSync } from 'child_process';
 import { copyFileSync, existsSync, rmSync } from 'fs';
+import { convertNxExecutor } from 'nx/src/executors/utils/convert-nx-executor';
 
 const BUILD_STORYBOOK_TARGET = 'build-storybook';
 
@@ -13,15 +14,15 @@ interface Schema {
 
 const getProjectJsonContent = (_context: ExecutorContext) => {
   const projectName = _context.projectName;
-  return _context.workspace.projects[projectName!];
+  return _context.workspace?.projects[projectName!];
 };
 
 const getBuildStorybookOutput = (_context: ExecutorContext) => {
   const project = getProjectJsonContent(_context);
 
   const buildStorybookOutputDir =
-    project.targets &&
-    project.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
+    project?.targets &&
+    project?.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
   return `${_context.root}/${buildStorybookOutputDir}`;
 };
 
@@ -53,7 +54,7 @@ export const buildCommand = (_context: ExecutorContext, _options: Schema) => {
 
 const getProjectRoot = (_context: ExecutorContext) => {
   const project = getProjectJsonContent(_context);
-  return `${_context.root}/${project.root}`;
+  return `${_context.root}/${project?.root}`;
 };
 
 const cleanUp = (projectRoot: string) => {
@@ -107,4 +108,4 @@ const executorFn = async (
   return Promise.resolve({ success: true });
 };
 
-export default executorFn;
+export default convertNxExecutor(executorFn);

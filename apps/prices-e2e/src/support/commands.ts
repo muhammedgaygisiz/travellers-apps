@@ -11,24 +11,34 @@
 // eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace Cypress {
   // eslint-disable-next-line no-unused-vars
-  interface Chainable<Subject> {
+  interface Chainable {
     // eslint-disable-next-line no-unused-vars
     login(email: string, password: string): void;
+    gotoLogin(): void;
+    waitTillLocationCardIsVisible(): void;
+    logout(): void;
   }
 }
-//
-// -- This is a parent command --
+
 Cypress.Commands.add('login', (email, password) => {
-  console.log('Custom command example: Login', email, password);
+  if (typeof password !== 'string' || !password) {
+    throw new Error('Missing password value, set using CYPRESS_PASSWORD=...');
+  }
+
+  cy.get('[data-cy=email]').type(email);
+  cy.get('[data-cy=password]').type(password, { log: false });
+
+  cy.get('[data-cy=submit]').click();
 });
-//
-// -- This is a child command --
-// Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('gotoLogin', () => {
+  cy.get('[data-cy=btn-login]').click();
+});
+
+Cypress.Commands.add('waitTillLocationCardIsVisible', () => {
+  cy.get('[data-cy=location-card]', { timeout: 20_000 }).should('be.visible');
+});
+
+Cypress.Commands.add('logout', () => {
+  cy.get('[data-cy=btn-logout]').click();
+});

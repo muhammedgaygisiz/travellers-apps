@@ -16,11 +16,15 @@ const Template: Story<HomeComponent> = (args: HomeComponent) => ({
   props: args,
 });
 
+/**
+ * Since storybook does not call ngOnChanges, where the calculation of
+ * filteredPrices and filters takes place, we set the attributes directly
+ * here.
+ */
 export const Primary = Template.bind({});
 Primary.args = {
   isAuthenticated: true,
-  location: 'Marrakech',
-  mostSearchedEntries: [
+  filteredPrices: [
     {
       id: '1',
       src: 'https://upload.wikimedia.org/wikipedia/commons/6/69/Aroma_%28apple%29.jpg',
@@ -41,6 +45,12 @@ Primary.args = {
       name: 'Peaches',
       price: 0.2,
       location: 'Marrakech',
+    },
+  ],
+  filters: [
+    {
+      type: 'location',
+      value: 'Marrakech',
     },
   ],
 };

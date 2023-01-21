@@ -4,19 +4,33 @@
   (loginClick)="loginClick.emit()"
   (logoutClick)="logoutClick.emit()"
 >
-  <ta-card class="location" *ngIf="location">
+  <ta-card class="location" data-cy="location-card">
     <ion-card-header>
       <ion-card-subtitle>
-        <h5>You are in:</h5>
+        <h5>Filters:</h5>
       </ion-card-subtitle>
-      <ion-card-title>
-        <b>{{ location }}</b>
-        <ion-icon name="location-outline"></ion-icon>
-      </ion-card-title>
+
+      <ion-chip *ngFor="let filter of filters">
+        <ion-icon
+          name="{{ filter.type | filterIcon }}"
+          color="primary"
+        ></ion-icon>
+        <ion-label>{{ filter.value }}</ion-label>
+        <ion-icon
+          name="close"
+          color="primary"
+          (click)="onDeleteFilter(filter)"
+        ></ion-icon>
+      </ion-chip>
+
+      <ion-chip>
+        <ion-icon name="filter-outline" color="primary"></ion-icon>
+        <ion-label>Add</ion-label>
+      </ion-chip>
     </ion-card-header>
   </ta-card>
 
-  <ng-container *ngFor="let entry of mostSearchedEntries; trackBy: by">
+  <ng-container *ngFor="let entry of filteredPrices; trackBy: by">
     <ta-card>
       <ion-card-header>
         <ion-card-subtitle>MOST SEARCHED IN</ion-card-subtitle>

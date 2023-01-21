@@ -12,7 +12,7 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
-import { MostSearchedService } from '@travellers-apps/prices/firestore/feature';
+import { PricesService } from '@travellers-apps/prices/firestore/feature';
 import { MostSearchedItem } from '@travellers-apps/utils-common';
 import { NavController, ToastController } from '@ionic/angular';
 import { fromAuth } from '../auth/index';
@@ -71,7 +71,7 @@ export class MostSearchedItemsEffects {
     // eslint-disable-next-line no-unused-vars
     private readonly actions$: Actions,
     // eslint-disable-next-line no-unused-vars
-    private readonly mostSearchedService: MostSearchedService,
+    private readonly mostSearchedService: PricesService,
     // eslint-disable-next-line no-unused-vars
     private readonly navController: NavController,
     // eslint-disable-next-line no-unused-vars

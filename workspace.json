@@ -2,7 +2,24 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "common-networkstatus-feature": "libs/common/networkstatus/feature",
     "executor-loki": "tools/executors/loki",
+    "kosaml": "apps/kosaml",
+    "kosaml-auth-feature": "libs/kosaml/auth/feature",
+    "kosaml-card-feature": "libs/kosaml/card/feature",
+    "kosaml-conceptual-design-base-scenario-feature": "libs/kosaml/conceptual-design/base/scenario/feature",
+    "kosaml-conceptual-design-base-use-case-feature": "libs/kosaml/conceptual-design/base/use-case/feature",
+    "kosaml-conceptual-design-concrete-use-case-feature": "libs/kosaml/conceptual-design/concrete-use-case/feature",
+    "kosaml-conceptual-design-essential-use-case-feature": "libs/kosaml/conceptual-design/essential-use-case/feature",
+    "kosaml-conceptual-design-task-object-feature": "libs/kosaml/conceptual-design/task-object/feature",
+    "kosaml-conceptual-design-task-scenario-feature": "libs/kosaml/conceptual-design/task-scenario/feature",
+    "kosaml-conceptual-design-use-scenario-feature": "libs/kosaml/conceptual-design/use-scenario/feature",
+    "kosaml-e2e": "apps/kosaml-e2e",
+    "kosaml-model-feature": "libs/kosaml/model/feature",
+    "kosaml-page-feature": "libs/kosaml/page/feature",
+    "kosaml-shell-feature": "libs/kosaml/shell/feature",
+    "kosaml-site-feature": "libs/kosaml/site/feature",
+    "kosaml-store-feature": "libs/kosaml/store/feature",
     "prices": "apps/prices",
     "prices-add-item-feature": "libs/prices/add-item/feature",
     "prices-auth-feature": "libs/prices/auth/feature",
@@ -13,8 +30,10 @@
     "prices-home-feature": "libs/prices/home/feature",
     "prices-page-feature": "libs/prices/page/feature",
     "prices-password-validator-feature": "libs/prices/password-validator/feature",
+    "prices-registration-feature": "libs/prices/registration/feature",
     "prices-shell-feature": "libs/prices/shell/feature",
     "prices-store-feature": "libs/prices/store/feature",
     "utils-common": "libs/utils-common"
-  }
+  },
+  "defaultProject": "prices"
 }

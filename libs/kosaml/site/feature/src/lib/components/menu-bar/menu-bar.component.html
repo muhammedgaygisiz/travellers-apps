@@ -1,0 +1,18 @@
+<mat-toolbar>
+  <button mat-button [matMenuTriggerFor]="new">File</button>
+
+  <mat-menu #new="matMenu">
+    <button mat-menu-item [matMenuTriggerFor]="newMenu">New</button>
+  </mat-menu>
+
+  <mat-menu #newMenu="matMenu">
+    <button mat-menu-item routerLink="../task-scenarios/new">
+      Task Scenario
+    </button>
+    <button mat-menu-item routerLink="../use-scenarios/new">
+      Use Scenario
+    </button>
+  </mat-menu>
+
+  <span class="spacer"></span>
+</mat-toolbar>

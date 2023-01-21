@@ -5,26 +5,13 @@ import {
   fromLocation,
   fromMostSearched,
 } from '@travellers-apps/prices/store/feature';
-import { map, mergeMap } from 'rxjs';
 import { NavController } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HomeService {
-  mostSearched$ = this.store.select(fromMostSearched.selectAllItems).pipe(
-    mergeMap((allItems) =>
-      this.location$.pipe(
-        map((location) => {
-          if (location) {
-            return allItems.filter((item) => item.location === location);
-          }
-
-          return allItems;
-        })
-      )
-    )
-  );
+  mostSearched$ = this.store.select(fromMostSearched.selectAllItems);
 
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
 

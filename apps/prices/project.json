@@ -20,6 +20,7 @@
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/prices/src/favicon.ico",
+          "apps/prices/src/manifest.webmanifest",
           {
             "glob": "**/*",
             "input": "apps/prices/src/assets",
@@ -35,7 +36,9 @@
           "apps/prices/src/theme/variables.scss",
           "apps/prices/src/global.scss"
         ],
-        "scripts": []
+        "scripts": [],
+        "serviceWorker": true,
+        "ngswConfigPath": "apps/prices/ngsw-config.json"
       },
       "configurations": {
         "production": {
@@ -71,7 +74,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nrwl/angular:webpack-server",
+      "executor": "@nrwl/angular:webpack-dev-server",
       "configurations": {
         "production": {
           "browserTarget": "prices:build:production"
@@ -96,7 +99,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/prices"],
+      "outputs": ["{workspaceRoot}/coverage/apps/prices"],
       "options": {
         "jestConfig": "apps/prices/jest.config.ts",
         "passWithNoTests": true

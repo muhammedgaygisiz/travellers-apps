@@ -13,3 +13,8 @@ export const selectLoginFailed = createSelector(
   authState,
   (authState) => authState.authenticationFailed
 );
+
+export const selectRegistrationErrorCode = createSelector(
+  authState,
+  (authState) => authState.errorCode
+);

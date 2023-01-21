@@ -7,6 +7,7 @@ import { PricesStoreModule } from '@travellers-apps/prices/store/feature';
 import { environment } from '../environments/environment';
 import { FirestoreFeatureModule } from '@travellers-apps/prices/firestore/feature';
 import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [AppComponent],
@@ -20,6 +21,12 @@ import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
       projectId: process.env['NX_APP_PROJECT_ID'],
       storageBucket: process.env['NX_APP_STORAGE_BUCKET'],
       messagingSenderId: process.env['NX_APP_MESSAGINX_SENDER_ID'],
+    }),
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: environment.production,
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000',
     }),
   ],
   providers: [Geolocation],

@@ -7,7 +7,7 @@
   "targets": {
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/prices/shell/feature"],
+      "outputs": ["{workspaceRoot}/coverage/libs/prices/shell/feature"],
       "options": {
         "jestConfig": "libs/prices/shell/feature/jest.config.ts",
         "passWithNoTests": true

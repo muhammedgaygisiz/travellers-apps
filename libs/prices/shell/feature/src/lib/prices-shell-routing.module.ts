@@ -32,6 +32,13 @@ const routes: Routes = [
       import('@travellers-apps/prices/auth/feature').then((m) => m.AuthModule),
   },
   {
+    path: 'registration',
+    loadChildren: () =>
+      import('@travellers-apps/prices/registration/feature').then(
+        (m) => m.RegistrationModule
+      ),
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',

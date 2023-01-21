@@ -1,0 +1,16 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav
+    #sidenav
+    class="sidenav"
+    fixedInViewport
+    [fixedTopGap]="marginTop"
+    [attr.role]="'navigation'"
+    [mode]="'over'"
+    opened="true"
+    position="start"
+  >
+    <mat-toolbar>EXPLORER</mat-toolbar>
+    <kosaml-project [project]="project"></kosaml-project>
+    <div class="right border"></div>
+  </mat-sidenav>
+</mat-sidenav-container>

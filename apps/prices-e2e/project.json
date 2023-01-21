@@ -23,11 +23,6 @@
       "options": {
         "lintFilePatterns": ["apps/prices-e2e/**/*.{js,ts}"]
       }
-    },
-    "build": {
-      "options": {
-        "tsConfig": "apps/prices-e2e/tsconfig.json"
-      }
     }
   },
   "tags": [],

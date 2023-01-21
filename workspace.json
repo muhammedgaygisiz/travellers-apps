@@ -34,5 +34,6 @@
     "prices-shell-feature": "libs/prices/shell/feature",
     "prices-store-feature": "libs/prices/store/feature",
     "utils-common": "libs/utils-common"
-  }
+  },
+  "defaultProject": "prices"
 }

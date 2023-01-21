@@ -21,11 +21,6 @@
           "libs/kosaml/store/feature/**/*.html"
         ]
       }
-    },
-    "build": {
-      "options": {
-        "tsConfig": "libs/kosaml/store/feature/tsconfig.lib.json"
-      }
     }
   },
   "tags": []

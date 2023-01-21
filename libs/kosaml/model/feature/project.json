@@ -18,11 +18,6 @@
         "jestConfig": "libs/kosaml/model/feature/jest.config.ts",
         "passWithNoTests": true
       }
-    },
-    "build": {
-      "options": {
-        "tsConfig": "libs/kosaml/model/feature/tsconfig.lib.json"
-      }
     }
   },
   "tags": []

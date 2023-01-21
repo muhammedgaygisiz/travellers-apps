@@ -21,11 +21,6 @@
           "libs/kosaml/card/feature/**/*.html"
         ]
       }
-    },
-    "build": {
-      "options": {
-        "tsConfig": "libs/kosaml/card/feature/tsconfig.lib.json"
-      }
     }
   },
   "tags": []

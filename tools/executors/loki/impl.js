@@ -3,16 +3,17 @@ Object.defineProperty(exports, '__esModule', { value: true });
 exports.buildCommand = void 0;
 const child_process_1 = require('child_process');
 const fs_1 = require('fs');
+const convert_nx_executor_1 = require('nx/src/executors/utils/convert-nx-executor');
 const BUILD_STORYBOOK_TARGET = 'build-storybook';
 const getProjectJsonContent = (_context) => {
   const projectName = _context.projectName;
-  return _context.workspace.projects[projectName];
+  return _context.workspace?.projects[projectName];
 };
 const getBuildStorybookOutput = (_context) => {
   const project = getProjectJsonContent(_context);
   const buildStorybookOutputDir =
-    project.targets &&
-    project.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
+    project?.targets &&
+    project?.targets[BUILD_STORYBOOK_TARGET].options.outputDir;
   return `${_context.root}/${buildStorybookOutputDir}`;
 };
 const checkExists = (buildStorybookOutput) =>
@@ -36,7 +37,7 @@ const buildCommand = (_context, _options) => {
 exports.buildCommand = buildCommand;
 const getProjectRoot = (_context) => {
   const project = getProjectJsonContent(_context);
-  return `${_context.root}/${project.root}`;
+  return `${_context.root}/${project?.root}`;
 };
 const cleanUp = (projectRoot) => {
   (0, fs_1.rmSync)(`${projectRoot}/package.json`);
@@ -78,4 +79,4 @@ const executorFn = async (_options, _context) => {
   cleanUp(projectRoot);
   return Promise.resolve({ success: true });
 };
-exports.default = executorFn;
+exports.default = (0, convert_nx_executor_1.convertNxExecutor)(executorFn);

@@ -1,6 +1,7 @@
 import { ExecutorContext } from '@nrwl/devkit';
 import { execSync } from 'child_process';
 import { copyFileSync, existsSync, rmSync } from 'fs';
+import { convertNxExecutor } from 'nx/src/executors/utils/convert-nx-executor';
 
 const BUILD_STORYBOOK_TARGET = 'build-storybook';
 
@@ -107,4 +108,4 @@ const executorFn = async (
   return Promise.resolve({ success: true });
 };
 
-export default executorFn;
+export default convertNxExecutor(executorFn);

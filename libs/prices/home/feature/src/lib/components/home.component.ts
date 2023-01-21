@@ -15,6 +15,7 @@ import { PageFeatureModule } from '@travellers-apps/prices/page/feature';
 import { CardFeatureModule } from '@travellers-apps/prices/card/feature';
 import { IonicModule } from '@ionic/angular';
 import { CurrencyPipe, NgForOf, NgIf } from '@angular/common';
+import { FilterIconPipe } from '../pipes/filter-icon.pipe';
 
 @Component({
   standalone: true,
@@ -29,6 +30,7 @@ import { CurrencyPipe, NgForOf, NgIf } from '@angular/common';
     NgForOf,
     CurrencyPipe,
     NgIf,
+    FilterIconPipe,
   ],
 })
 export class HomeComponent implements OnChanges {

@@ -11,6 +11,7 @@ const calculateFilterIcon = memoize((value: string) => {
 
 @Pipe({
   name: 'filterIcon',
+  standalone: true,
 })
 export class FilterIconPipe implements PipeTransform {
   transform(value: string) {

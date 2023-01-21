@@ -6,13 +6,10 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 export default {
   title: 'Pages/Add Item',
+  component: AddItemComponent,
   decorators: [
     moduleMetadata({
-      imports: [
-        IonicModule.forRoot(getIonicConfig()),
-        AddItemComponent,
-        RouterTestingModule,
-      ],
+      imports: [IonicModule.forRoot(getIonicConfig()), RouterTestingModule],
     }),
   ],
 } as Meta<AddItemComponent>;

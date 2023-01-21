@@ -5,9 +5,10 @@ import { getIonicConfig } from '@travellers-apps/utils-common';
 
 export default {
   title: 'Pages/Home',
+  component: HomeComponent,
   decorators: [
     moduleMetadata({
-      imports: [IonicModule.forRoot(getIonicConfig()), HomeComponent],
+      imports: [IonicModule.forRoot(getIonicConfig())],
     }),
   ],
 } as Meta<HomeComponent>;

@@ -29,7 +29,7 @@ const routes: Routes = [
     loadChildren: () =>
       import(
         '@travellers-apps/kosaml/conceptual-design/use-scenario/feature'
-      ).then((module) => module.UseScenarioModule),
+      ).then((module) => module.ROUTES),
   },
   {
     path: 'essential-use-cases',

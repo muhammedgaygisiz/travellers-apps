@@ -1,1 +1,1 @@
-export * from './lib/use-scenario.module';
+export * from './lib/use-scenarios.routes';

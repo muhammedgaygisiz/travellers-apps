@@ -43,7 +43,7 @@ const routes: Routes = [
     loadChildren: () =>
       import(
         '@travellers-apps/kosaml/conceptual-design/concrete-use-case/feature'
-      ).then((module) => module.ConcreteUseCaseModule),
+      ).then((m) => m.ROUTES),
   },
   {
     path: 'task-objects',

@@ -4,7 +4,7 @@ import { EssentialUseCaseRoutingModule } from './essential-use-case-routing.modu
 import { EssentialUseCasePageComponent } from './containers/essential-use-case-page.component';
 import { KosamlPageFeatureModule } from '@travellers-apps/kosaml/page/feature';
 import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
-import { KosamlConceptualDesignBaseUseCaseFeatureModule } from '@travellers-apps/kosaml/conceptual-design/base/use-case/feature';
+import { CpBaseUseCaseComponent } from '@travellers-apps/kosaml/conceptual-design/base/use-case/feature';
 
 @NgModule({
   declarations: [EssentialUseCasePageComponent],
@@ -13,7 +13,7 @@ import { KosamlConceptualDesignBaseUseCaseFeatureModule } from '@travellers-apps
     EssentialUseCaseRoutingModule,
     KosamlPageFeatureModule,
     MatTableModule,
-    KosamlConceptualDesignBaseUseCaseFeatureModule,
+    CpBaseUseCaseComponent,
   ],
 })
 export class EssentialUseCaseModule {}

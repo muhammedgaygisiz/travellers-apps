@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { fromTaskObjects } from '@travellers-apps/kosaml/store/feature';
 import { select, Store } from '@ngrx/store';
@@ -17,6 +17,9 @@ import { map, tap } from 'rxjs';
   `,
 })
 export class TaskObjectPageComponent {
+  private readonly store = inject(Store);
+  private readonly route = inject(ActivatedRoute);
+
   dataSource$ = this.store.pipe(
     select(fromTaskObjects.selectSelectedTaskObject),
     tap((res) => console.log('#mo', res))
@@ -26,11 +29,4 @@ export class TaskObjectPageComponent {
     map((params) => params['id']),
     tap((id) => this.store.dispatch(fromTaskObjects.selectTaskObject({ id })))
   );
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly store: Store,
-    // eslint-disable-next-line no-unused-vars
-    private readonly route: ActivatedRoute
-  ) {}
 }

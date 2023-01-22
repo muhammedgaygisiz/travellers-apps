@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { PageComponent } from './components/page/page.component';
 import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
-import { KosamlCardFeatureModule } from '@travellers-apps/kosaml/card/feature';
+import { CardComponent } from '@travellers-apps/kosaml/card/feature';
 
 @NgModule({
-  imports: [CommonModule, NgxSkeletonLoaderModule, KosamlCardFeatureModule],
+  imports: [CommonModule, NgxSkeletonLoaderModule, CardComponent],
   declarations: [PageComponent, LoadingSpinnerComponent],
   exports: [PageComponent, LoadingSpinnerComponent],
 })

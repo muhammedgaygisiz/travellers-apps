@@ -1,16 +1,14 @@
-import { moduleMetadata } from '@storybook/angular';
 import { CardComponent } from '../card.component';
-import { KosamlCardFeatureModule } from '../kosaml-card-feature.module';
 
 export default {
   title: 'Kosaml/Base/Card',
-  decorators: [
-    moduleMetadata({
-      imports: [KosamlCardFeatureModule],
-    }),
-  ],
+  component: CardComponent,
 };
 
-export const emptyCard = () => ({
-  component: CardComponent,
+export const emptyCard = () => ({});
+
+export const cardWithContent = () => ({
+  template: `
+    <kosaml-card>Some content</kosaml-card>
+  `,
 });

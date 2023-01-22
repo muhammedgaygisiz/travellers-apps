@@ -22,7 +22,7 @@ const routes: Routes = [
     loadChildren: () =>
       import(
         '@travellers-apps/kosaml/conceptual-design/task-scenario/feature'
-      ).then((module) => module.TaskScenarioModule),
+      ).then((module) => module.ROUTES),
   },
   {
     path: 'use-scenarios',

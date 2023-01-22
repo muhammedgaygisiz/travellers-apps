@@ -1,9 +1,8 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { EditTaskScenarioPageComponent } from './containers/edit-task-scenario-page.component';
 import { NewTaskScenarioPageComponent } from './containers/new-task-scenario-page.component';
 
-const routes: Routes = [
+export const ROUTES: Routes = [
   {
     path: 'new',
     component: NewTaskScenarioPageComponent,
@@ -13,9 +12,3 @@ const routes: Routes = [
     component: EditTaskScenarioPageComponent,
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class TaskScenariosRoutingModule {}

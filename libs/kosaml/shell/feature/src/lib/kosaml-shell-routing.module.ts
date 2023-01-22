@@ -14,7 +14,7 @@ const routes: Routes = [
     path: 'project',
     loadChildren: () =>
       import('@travellers-apps/kosaml/site/feature').then(
-        (module) => module.SiteModule
+        (module) => module.ROUTES
       ),
   },
   {

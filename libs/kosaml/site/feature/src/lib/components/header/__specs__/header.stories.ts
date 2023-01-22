@@ -1,14 +1,8 @@
-import { moduleMetadata } from '@storybook/angular';
 import { HeaderComponent } from '../header.component';
-import { SiteModule } from '../../../site.module';
 
 export default {
   title: 'Kosaml/Layout/Header',
-  decorators: [
-    moduleMetadata({
-      imports: [SiteModule],
-    }),
-  ],
+  component: HeaderComponent,
 };
 
 export const unauthorizedHeader = () => ({

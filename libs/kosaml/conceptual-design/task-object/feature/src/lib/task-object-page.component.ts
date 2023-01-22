@@ -3,8 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { fromTaskObjects } from '@travellers-apps/kosaml/store/feature';
 import { select, Store } from '@ngrx/store';
 import { map, tap } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { KosamlPageFeatureModule } from '@travellers-apps/kosaml/page/feature';
+import { TaskObjectComponent } from './components/task-object/task-object.component';
 
 @Component({
+  standalone: true,
   template: `
     <kosaml-page>
       <h1 class="mat-display-1">Task Object</h1>
@@ -15,6 +19,7 @@ import { map, tap } from 'rxjs';
     </kosaml-page>
     <ng-container *ngIf="currentSelected$ | async"></ng-container>
   `,
+  imports: [CommonModule, KosamlPageFeatureModule, TaskObjectComponent],
 })
 export class TaskObjectPageComponent {
   private readonly store = inject(Store);

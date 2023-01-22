@@ -50,7 +50,7 @@ const routes: Routes = [
     loadChildren: () =>
       import(
         '@travellers-apps/kosaml/conceptual-design/task-object/feature'
-      ).then((module) => module.TaskObjectModule),
+      ).then((module) => module.ROUTES),
   },
 ];
 

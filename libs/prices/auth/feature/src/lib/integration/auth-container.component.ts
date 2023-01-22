@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AuthService } from './auth.service';
 import { Observable } from 'rxjs';
 import { AuthCredentials } from '@travellers-apps/utils-common';
@@ -14,10 +14,9 @@ import { AuthCredentials } from '@travellers-apps/utils-common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthContainerComponent {
-  loginFailed$: Observable<boolean> = this.authService.loginFailed$;
+  private readonly authService = inject(AuthService);
 
-  // eslint-disable-next-line no-unused-vars
-  constructor(private readonly authService: AuthService) {}
+  loginFailed$: Observable<boolean> = this.authService.loginFailed$;
 
   public login(authCreds: AuthCredentials) {
     this.authService.login(authCreds);

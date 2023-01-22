@@ -1,7 +1,6 @@
-import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', redirectTo: '/project', pathMatch: 'full' },
   {
     path: 'auth',
@@ -53,12 +52,3 @@ const routes: Routes = [
       ).then((module) => module.ROUTES),
   },
 ];
-
-@NgModule({
-  imports: [
-    RouterModule.forRoot(routes, {
-      preloadingStrategy: PreloadAllModules,
-    }),
-  ],
-})
-export class KosamlShellRoutingModule {}

@@ -36,7 +36,7 @@ const routes: Routes = [
     loadChildren: () =>
       import(
         '@travellers-apps/kosaml/conceptual-design/essential-use-case/feature'
-      ).then((module) => module.EssentialUseCaseModule),
+      ).then((module) => module.ROUTES),
   },
   {
     path: 'concrete-use-cases',

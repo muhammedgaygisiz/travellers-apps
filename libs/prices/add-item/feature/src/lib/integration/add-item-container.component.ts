@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AddItemService } from './add-item.service';
 import { Price } from '@travellers-apps/utils-common';
 import { AsyncPipe } from '@angular/common';
@@ -17,12 +17,9 @@ import { AddItemComponent } from '../components/add-item.component';
   imports: [AsyncPipe, AddItemComponent],
 })
 export class AddItemContainerComponent {
-  public location$ = this.addItemService.location$;
+  private readonly addItemService = inject(AddItemService);
 
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly addItemService: AddItemService
-  ) {}
+  public location$ = this.addItemService.location$;
 
   public saveItem(price: Price) {
     this.addItemService.saveItem(price);

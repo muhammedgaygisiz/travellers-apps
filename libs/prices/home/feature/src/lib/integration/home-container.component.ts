@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { Observable } from 'rxjs';
 import { HomeService } from './home.service';
 import { MostSearchedItem } from '@travellers-apps/utils-common';
@@ -22,11 +27,7 @@ import { AsyncPipe } from '@angular/common';
   imports: [HomeComponent, AsyncPipe],
 })
 export class HomeContainerComponent implements OnInit {
-  //TODO: Check later why parameters hit eslint error -.-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly homeService: HomeService
-  ) {}
+  private readonly homeService = inject(HomeService);
 
   public location$: Observable<string | null> = this.homeService.location$;
 

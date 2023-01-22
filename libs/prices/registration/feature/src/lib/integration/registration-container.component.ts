@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AuthCredentials } from '@travellers-apps/utils-common';
 import { RegistrationService } from './registration.service';
 
@@ -15,12 +15,9 @@ import { RegistrationService } from './registration.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegistrationContainerComponent {
-  public registrationError$ = this.registrationService.errorCode$;
+  private readonly registrationService = inject(RegistrationService);
 
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly registrationService: RegistrationService
-  ) {}
+  public registrationError$ = this.registrationService.errorCode$;
 
   onSubmit(registration: AuthCredentials) {
     this.registrationService.register(registration);

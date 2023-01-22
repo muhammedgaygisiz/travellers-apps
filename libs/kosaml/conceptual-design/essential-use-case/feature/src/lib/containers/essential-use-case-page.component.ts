@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { fromEssentialUseCases } from '@travellers-apps/kosaml/store/feature';
 import { ActivatedRoute } from '@angular/router';
@@ -18,6 +18,9 @@ import { ConceptualDesignUseCaseTypes } from '@travellers-apps/kosaml/conceptual
   `,
 })
 export class EssentialUseCasePageComponent {
+  private readonly store = inject(Store);
+  private readonly route = inject(ActivatedRoute);
+
   type = ConceptualDesignUseCaseTypes.ESSENTIAL;
 
   dataSource$ = this.store.pipe(
@@ -30,11 +33,4 @@ export class EssentialUseCasePageComponent {
       this.store.dispatch(fromEssentialUseCases.selectEssentialUseCase({ id }))
     )
   );
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly store: Store,
-    // eslint-disable-next-line no-unused-vars
-    private readonly route: ActivatedRoute
-  ) {}
 }

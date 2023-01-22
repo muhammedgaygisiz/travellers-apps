@@ -3,7 +3,7 @@ import { map, tap } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { fromUseScenarios } from '@travellers-apps/kosaml/store/feature';
 import { ActivatedRoute } from '@angular/router';
-import { KosamlPageFeatureModule } from '@travellers-apps/kosaml/page/feature';
+import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/base/scenario/feature';
 import { AsyncPipe, NgIf } from '@angular/common';
 
@@ -21,7 +21,7 @@ import { AsyncPipe, NgIf } from '@angular/common';
     </kosaml-page>
     <ng-container *ngIf="currentSelected$ | async"></ng-container>
   `,
-  imports: [KosamlPageFeatureModule, ScenarioComponent, AsyncPipe, NgIf],
+  imports: [PageComponent, ScenarioComponent, AsyncPipe, NgIf],
 })
 export class UseScenarioPageComponent {
   private readonly store = inject(Store);

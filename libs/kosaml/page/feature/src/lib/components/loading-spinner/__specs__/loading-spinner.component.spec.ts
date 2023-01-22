@@ -11,7 +11,6 @@ describe('LoadingSpinnerComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ReactiveFormsModule],
-      declarations: [LoadingSpinnerComponent],
       schemas: [NO_ERRORS_SCHEMA],
     });
 

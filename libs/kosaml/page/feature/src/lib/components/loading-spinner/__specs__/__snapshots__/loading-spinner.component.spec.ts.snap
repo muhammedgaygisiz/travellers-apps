@@ -5,54 +5,134 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
   __ngContext__="0"
 >
   <kosaml-card>
-    <div
-      style="text-align: center;"
+    <mat-card
+      class="mat-mdc-card mdc-card card"
     >
-      <div
-        class="fb-item"
+      <mat-card-content
+        class="mat-mdc-card-content"
       >
         <div
-          class="first-section-wrapper"
+          style="text-align: center;"
         >
           <div
-            class="gravatar"
+            class="fb-item"
           >
-            <ngx-skeleton-loader
-              appearance="circle"
-            />
-          </div>
-          <div
-            class="gravatar-title"
-          >
-            <div>
-              <ngx-skeleton-loader />
+            <div
+              class="first-section-wrapper"
+            >
+              <div
+                class="gravatar"
+              >
+                <ngx-skeleton-loader
+                  appearance="circle"
+                >
+                  <span
+                    aria-busy="true"
+                    aria-label="loading"
+                    aria-valuemax="100"
+                    aria-valuemin="0"
+                    aria-valuetext="Loading..."
+                    class="skeleton-loader circle progress"
+                    role="progressbar"
+                    style="width: 80px; height: 80px;"
+                    tabindex="0"
+                  />
+                </ngx-skeleton-loader>
+              </div>
+              <div
+                class="gravatar-title"
+              >
+                <div>
+                  <ngx-skeleton-loader>
+                    <span
+                      aria-busy="true"
+                      aria-label="loading"
+                      aria-valuemax="100"
+                      aria-valuemin="0"
+                      aria-valuetext="Loading..."
+                      class="skeleton-loader progress"
+                      role="progressbar"
+                      style="width: 200px; border-radius: 0; height: 15px; margin-bottom: 10px;"
+                      tabindex="0"
+                    />
+                  </ngx-skeleton-loader>
+                </div>
+                <div>
+                  <ngx-skeleton-loader>
+                    <span
+                      aria-busy="true"
+                      aria-label="loading"
+                      aria-valuemax="100"
+                      aria-valuemin="0"
+                      aria-valuetext="Loading..."
+                      class="skeleton-loader progress"
+                      role="progressbar"
+                      style="width: 170px; border-radius: 0; height: 15px;"
+                      tabindex="0"
+                    />
+                  </ngx-skeleton-loader>
+                </div>
+              </div>
             </div>
-            <div>
-              <ngx-skeleton-loader />
+            <div
+              class="second-section-wrapper"
+            >
+              <div
+                class="wrapper"
+              >
+                <ngx-skeleton-loader>
+                  <span
+                    aria-busy="true"
+                    aria-label="loading"
+                    aria-valuemax="100"
+                    aria-valuemin="0"
+                    aria-valuetext="Loading..."
+                    class="skeleton-loader progress"
+                    role="progressbar"
+                    style="width: 80%; border-radius: 0; height: 15px; margin-bottom: 10px;"
+                    tabindex="0"
+                  />
+                </ngx-skeleton-loader>
+              </div>
+              <div
+                class="wrapper"
+              >
+                <ngx-skeleton-loader>
+                  <span
+                    aria-busy="true"
+                    aria-label="loading"
+                    aria-valuemax="100"
+                    aria-valuemin="0"
+                    aria-valuetext="Loading..."
+                    class="skeleton-loader progress"
+                    role="progressbar"
+                    style="width: 90%; border-radius: 0; height: 15px; margin-bottom: 10px;"
+                    tabindex="0"
+                  />
+                </ngx-skeleton-loader>
+              </div>
+              <div
+                class="wrapper"
+              >
+                <ngx-skeleton-loader>
+                  <span
+                    aria-busy="true"
+                    aria-label="loading"
+                    aria-valuemax="100"
+                    aria-valuemin="0"
+                    aria-valuetext="Loading..."
+                    class="skeleton-loader progress"
+                    role="progressbar"
+                    style="width: 60%; border-radius: 0; height: 15px; margin-bottom: 10px;"
+                    tabindex="0"
+                  />
+                </ngx-skeleton-loader>
+              </div>
             </div>
           </div>
         </div>
-        <div
-          class="second-section-wrapper"
-        >
-          <div
-            class="wrapper"
-          >
-            <ngx-skeleton-loader />
-          </div>
-          <div
-            class="wrapper"
-          >
-            <ngx-skeleton-loader />
-          </div>
-          <div
-            class="wrapper"
-          >
-            <ngx-skeleton-loader />
-          </div>
-        </div>
-      </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
   </kosaml-card>
 </kosaml-loading-spinner>
 `;

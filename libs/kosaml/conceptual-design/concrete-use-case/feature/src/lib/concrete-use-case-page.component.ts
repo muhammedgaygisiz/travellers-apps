@@ -8,7 +8,7 @@ import { select, Store } from '@ngrx/store';
 import { map, tap } from 'rxjs';
 import { fromConcreteUseCases } from '@travellers-apps/kosaml/store/feature';
 import { CommonModule } from '@angular/common';
-import { KosamlPageFeatureModule } from '@travellers-apps/kosaml/page/feature';
+import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 
 @Component({
   standalone: true,
@@ -22,7 +22,7 @@ import { KosamlPageFeatureModule } from '@travellers-apps/kosaml/page/feature';
     </kosaml-page>
     <ng-container *ngIf="currentSelected$ | async"></ng-container>
   `,
-  imports: [CommonModule, KosamlPageFeatureModule, CpBaseUseCaseComponent],
+  imports: [CommonModule, PageComponent, CpBaseUseCaseComponent],
 })
 export class ConcreteUseCasePageComponent {
   private readonly store = inject(Store);

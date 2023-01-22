@@ -4,7 +4,7 @@ import { fromTaskObjects } from '@travellers-apps/kosaml/store/feature';
 import { select, Store } from '@ngrx/store';
 import { map, tap } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { KosamlPageFeatureModule } from '@travellers-apps/kosaml/page/feature';
+import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { TaskObjectComponent } from './components/task-object/task-object.component';
 
 @Component({
@@ -19,7 +19,7 @@ import { TaskObjectComponent } from './components/task-object/task-object.compon
     </kosaml-page>
     <ng-container *ngIf="currentSelected$ | async"></ng-container>
   `,
-  imports: [CommonModule, KosamlPageFeatureModule, TaskObjectComponent],
+  imports: [CommonModule, PageComponent, TaskObjectComponent],
 })
 export class TaskObjectPageComponent {
   private readonly store = inject(Store);

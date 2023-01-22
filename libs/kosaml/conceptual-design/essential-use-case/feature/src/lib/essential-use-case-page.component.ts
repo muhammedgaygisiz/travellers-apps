@@ -8,7 +8,7 @@ import {
   CpBaseUseCaseComponent,
 } from '@travellers-apps/kosaml/conceptual-design/base/use-case/feature';
 import { CommonModule } from '@angular/common';
-import { KosamlPageFeatureModule } from '@travellers-apps/kosaml/page/feature';
+import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
 
 @Component({
@@ -25,7 +25,7 @@ import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy
   `,
   imports: [
     CommonModule,
-    KosamlPageFeatureModule,
+    PageComponent,
     MatTableModule,
     CpBaseUseCaseComponent,
   ],

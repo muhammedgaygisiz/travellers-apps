@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { KosamlPageFeatureModule } from '@travellers-apps/kosaml/page/feature';
+import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/base/scenario/feature';
 
 @Component({
@@ -14,7 +14,7 @@ import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/bas
     </kosaml-page>
   `,
   styles: [],
-  imports: [KosamlPageFeatureModule, ScenarioComponent],
+  imports: [PageComponent, ScenarioComponent],
 })
 export class NewUseScenarioPageComponent {
   onSaveScenario(scenario: any) {

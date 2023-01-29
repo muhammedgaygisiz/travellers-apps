@@ -2,7 +2,6 @@ import { PageComponent } from '../page.component';
 import { Meta, moduleMetadata, Story } from '@storybook/angular';
 import { IonicModule } from '@ionic/angular';
 import { getIonicConfig } from '@travellers-apps/utils-common';
-import { PageFeatureModule } from '../page-feature.module';
 import { RouterTestingModule } from '@angular/router/testing';
 
 export default {
@@ -10,11 +9,7 @@ export default {
   component: PageComponent,
   decorators: [
     moduleMetadata({
-      imports: [
-        IonicModule.forRoot(getIonicConfig()),
-        PageFeatureModule,
-        RouterTestingModule,
-      ],
+      imports: [IonicModule.forRoot(getIonicConfig()), RouterTestingModule],
     }),
   ],
 } as Meta<PageComponent>;

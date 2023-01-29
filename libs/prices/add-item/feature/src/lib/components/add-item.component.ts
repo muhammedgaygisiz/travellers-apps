@@ -15,10 +15,10 @@ import {
 import { AddItem } from '../api/add-item';
 import { Price } from '@travellers-apps/utils-common';
 import { ImageUrlValidator } from '../async-validators/image-url.validator';
-import { PageFeatureModule } from '@travellers-apps/prices/page/feature';
 import { IonicModule } from '@ionic/angular';
 import { AsyncPipe, NgIf } from '@angular/common';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
+import { PageComponent } from '@travellers-apps/prices/page/feature';
 
 @Component({
   standalone: true,
@@ -27,12 +27,12 @@ import { CardComponent } from '@travellers-apps/prices/card/feature';
   styleUrls: ['./add-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    PageFeatureModule,
     ReactiveFormsModule,
     IonicModule,
     NgIf,
     AsyncPipe,
     CardComponent,
+    PageComponent,
   ],
   providers: [ImageUrlValidator],
 })

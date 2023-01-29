@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
+import { NgForOf, NgIf } from '@angular/common';
 
 @Component({
+  standalone: true,
   selector: 'kosaml-task-object',
   templateUrl: './task-object.component.html',
   styleUrls: ['./task-object.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatTableModule, NgIf, NgForOf],
 })
 export class TaskObjectComponent {
   @Input()

@@ -1,1 +1,1 @@
-export * from './lib/kosaml-conceptual-design-base-scenario-feature.module';
+export * from './lib/components/scenario/scenario.component';

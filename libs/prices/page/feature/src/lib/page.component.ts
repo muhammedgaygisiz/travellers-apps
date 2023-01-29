@@ -5,12 +5,16 @@ import {
   Input,
   Output,
 } from '@angular/core';
+import { IonicModule } from '@ionic/angular';
+import { NgIf } from '@angular/common';
 
 @Component({
+  standalone: true,
   selector: 'ta-page',
   templateUrl: './page.component.html',
   styleUrls: ['./page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IonicModule, NgIf],
 })
 export class PageComponent {
   @Input()

@@ -1,1 +1,1 @@
-export * from './lib/essential-use-case.module';
+export * from './lib/essential-use-case.routes';

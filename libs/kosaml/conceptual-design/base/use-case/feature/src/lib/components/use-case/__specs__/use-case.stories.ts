@@ -1,16 +1,10 @@
 import { CpBaseUseCaseComponent } from '../cp-base-use-case.component';
-import { Meta, moduleMetadata, Story } from '@storybook/angular';
-import { KosamlConceptualDesignBaseUseCaseFeatureModule } from '../../../kosaml-conceptual-design-base-use-case-feature.module';
+import { Meta, Story } from '@storybook/angular';
 import { ConceptualDesignUseCaseTypes } from '../api/types';
 
 export default {
   title: 'Conceptual Design/Base/Use Case',
   component: CpBaseUseCaseComponent,
-  decorators: [
-    moduleMetadata({
-      imports: [KosamlConceptualDesignBaseUseCaseFeatureModule],
-    }),
-  ],
 } as Meta<CpBaseUseCaseComponent>;
 
 const Template: Story<CpBaseUseCaseComponent> = (

@@ -1,1 +1,1 @@
-export * from './lib/concrete-use-case.module';
+export * from './lib/concrete-use-case.routes';

@@ -1,1 +1,1 @@
-export * from './lib/task-scenario.module';
+export * from './lib/task-scenarios.routes';

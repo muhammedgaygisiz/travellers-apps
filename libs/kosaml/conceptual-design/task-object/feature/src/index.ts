@@ -1,1 +1,1 @@
-export * from './lib/task-object.module';
+export * from './lib/task-object.routes';

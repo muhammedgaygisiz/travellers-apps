@@ -14,12 +14,16 @@ import {
 import calculateIcon, { IconName } from '../utils/calculate-icon';
 import hasLength from '../utils/has-length';
 import calculateColor, { ClassName } from '../utils/calculate-color';
+import { IonicModule } from '@ionic/angular';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
+  standalone: true,
   selector: 'ta-password-validator',
   templateUrl: './password-validator.component.html',
   styleUrls: ['./password-validator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IonicModule, AsyncPipe],
 })
 export class PasswordValidatorComponent implements OnChanges {
   @Input()

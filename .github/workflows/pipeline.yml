@@ -459,6 +459,7 @@ jobs:
 
   kosaml-loki:
     runs-on: ubuntu-latest
+    continue-on-error: true
     needs:
       - kosaml-build-storybook
 

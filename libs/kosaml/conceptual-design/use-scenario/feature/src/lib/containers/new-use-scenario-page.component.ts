@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
+import { PageComponent } from '@travellers-apps/kosaml/page/feature';
+import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/base/scenario/feature';
 
 @Component({
+  standalone: true,
   selector: 'kosaml-edit-task-scenario-page',
   template: `
     <kosaml-page>
@@ -11,6 +14,7 @@ import { Component } from '@angular/core';
     </kosaml-page>
   `,
   styles: [],
+  imports: [PageComponent, ScenarioComponent],
 })
 export class NewUseScenarioPageComponent {
   onSaveScenario(scenario: any) {

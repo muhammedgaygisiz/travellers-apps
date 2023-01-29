@@ -7,21 +7,40 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { AuthCredentials } from '@travellers-apps/utils-common';
 import { RegistrationFields } from '../api/registration-fields';
 import {
   getPasswordValidators,
   passwordMatchValidator,
+  PasswordValidatorComponent,
 } from '@travellers-apps/prices/password-validator/feature';
 import { AuthErrorCode } from '@firebase/auth/dist/node/src/core/errors';
-import { ToastController } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
+import { AsyncPipe, NgIf } from '@angular/common';
+import { PageComponent } from '@travellers-apps/prices/page/feature';
+import { CardComponent } from '@travellers-apps/prices/card/feature';
 
 @Component({
+  standalone: true,
   selector: 'ta-registration',
   templateUrl: './registration.component.html',
   styleUrls: ['./registration.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    NgIf,
+    AsyncPipe,
+    PageComponent,
+    CardComponent,
+    IonicModule,
+    ReactiveFormsModule,
+    PasswordValidatorComponent,
+  ],
 })
 export class RegistrationComponent implements OnChanges {
   @Input()

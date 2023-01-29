@@ -1,1 +1,1 @@
-export * from './lib/kosaml-card-feature.module';
+export * from './lib/card.component';

@@ -1,15 +1,9 @@
 import { TaskObjectComponent } from '../task-object.component';
-import { Meta, moduleMetadata, Story } from '@storybook/angular';
-import { TaskObjectModule } from '../../../task-object.module';
+import { Meta, Story } from '@storybook/angular';
 
 export default {
   title: 'Conceptual Design/Task Object',
   component: TaskObjectComponent,
-  decorators: [
-    moduleMetadata({
-      imports: [TaskObjectModule],
-    }),
-  ],
 } as Meta<TaskObjectComponent>;
 
 const Template: Story<TaskObjectComponent> = (args: TaskObjectComponent) => ({

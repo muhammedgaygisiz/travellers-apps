@@ -1,1 +1,1 @@
-export * from './lib/page-feature.module';
+export * from './lib/page.component';

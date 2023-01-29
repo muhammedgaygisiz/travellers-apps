@@ -3,9 +3,16 @@ import { select, Store } from '@ngrx/store';
 import { fromEssentialUseCases } from '@travellers-apps/kosaml/store/feature';
 import { ActivatedRoute } from '@angular/router';
 import { map, tap } from 'rxjs';
-import { ConceptualDesignUseCaseTypes } from '@travellers-apps/kosaml/conceptual-design/base/use-case/feature';
+import {
+  ConceptualDesignUseCaseTypes,
+  CpBaseUseCaseComponent,
+} from '@travellers-apps/kosaml/conceptual-design/base/use-case/feature';
+import { CommonModule } from '@angular/common';
+import { PageComponent } from '@travellers-apps/kosaml/page/feature';
+import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
 
 @Component({
+  standalone: true,
   template: `
     <kosaml-page>
       <h1 class="mat-display-1">Essential Use Case</h1>
@@ -16,6 +23,12 @@ import { ConceptualDesignUseCaseTypes } from '@travellers-apps/kosaml/conceptual
     </kosaml-page>
     <ng-container *ngIf="currentSelected$ | async"></ng-container>
   `,
+  imports: [
+    CommonModule,
+    PageComponent,
+    MatTableModule,
+    CpBaseUseCaseComponent,
+  ],
 })
 export class EssentialUseCasePageComponent {
   private readonly store = inject(Store);

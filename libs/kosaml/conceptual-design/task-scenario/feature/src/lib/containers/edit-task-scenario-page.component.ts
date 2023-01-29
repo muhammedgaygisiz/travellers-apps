@@ -1,10 +1,14 @@
-import { Component } from '@angular/core';
-import { map, Subscription, tap } from 'rxjs';
+import { Component, inject } from '@angular/core';
+import { map, tap } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { fromTaskScenarios } from '@travellers-apps/kosaml/store/feature';
 import { ActivatedRoute } from '@angular/router';
+import { PageComponent } from '@travellers-apps/kosaml/page/feature';
+import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/base/scenario/feature';
+import { AsyncPipe, NgIf } from '@angular/common';
 
 @Component({
+  standalone: true,
   template: `
     <kosaml-page>
       <h1 class="mat-display-1">Task Scenario</h1>
@@ -17,10 +21,11 @@ import { ActivatedRoute } from '@angular/router';
     </kosaml-page>
     <ng-container *ngIf="currentSelected$ | async"></ng-container>
   `,
-  styles: [],
+  imports: [PageComponent, ScenarioComponent, AsyncPipe, NgIf],
 })
 export class EditTaskScenarioPageComponent {
-  selectSubscription?: Subscription;
+  private readonly store = inject(Store);
+  private readonly route = inject(ActivatedRoute);
 
   selectedTaskScenario$ = this.store.pipe(
     select(fromTaskScenarios.selectSelectedTaskScenario)
@@ -32,13 +37,6 @@ export class EditTaskScenarioPageComponent {
       this.store.dispatch(fromTaskScenarios.selectTaskScenario({ id }))
     )
   );
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly store: Store,
-    // eslint-disable-next-line no-unused-vars
-    private readonly route: ActivatedRoute
-  ) {}
 
   onSaveScenario(scenario: any) {
     console.log(scenario);

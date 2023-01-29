@@ -1,10 +1,19 @@
 import { FlatTreeControl } from '@angular/cdk/tree';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import {
   MatTreeFlatDataSource,
   MatTreeFlattener,
+  MatTreeModule,
 } from '@angular/material/tree';
 import { FileNode } from '@travellers-apps/kosaml/store/feature';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface FlatTreeNode {
   name: string;
@@ -14,9 +23,12 @@ export interface FlatTreeNode {
 }
 
 @Component({
+  standalone: true,
   selector: 'kosaml-project',
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
+  imports: [MatTreeModule, RouterLinkActive, MatIconModule, RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectComponent implements OnChanges {
   @Input()

@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import {
   AngularFireAuthGuard,
   redirectUnauthorizedTo,
@@ -7,7 +6,7 @@ import {
 
 const redirectUnauthorizedToHome = () => redirectUnauthorizedTo(['home']);
 
-const routes: Routes = [
+export const ROUTES: Routes = [
   {
     path: 'home',
     loadComponent: () =>
@@ -29,13 +28,13 @@ const routes: Routes = [
   {
     path: 'login',
     loadChildren: () =>
-      import('@travellers-apps/prices/auth/feature').then((m) => m.AuthModule),
+      import('@travellers-apps/prices/auth/feature').then((m) => m.ROUTES),
   },
   {
     path: 'registration',
     loadChildren: () =>
       import('@travellers-apps/prices/registration/feature').then(
-        (m) => m.RegistrationModule
+        (m) => m.ROUTES
       ),
   },
   {
@@ -44,11 +43,3 @@ const routes: Routes = [
     pathMatch: 'full',
   },
 ];
-
-@NgModule({
-  imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules }),
-  ],
-  exports: [RouterModule],
-})
-export class PricesShellRoutingModule {}

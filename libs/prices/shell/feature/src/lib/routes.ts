@@ -28,7 +28,7 @@ export const ROUTES: Routes = [
   {
     path: 'login',
     loadChildren: () =>
-      import('@travellers-apps/prices/auth/feature').then((m) => m.AuthModule),
+      import('@travellers-apps/prices/auth/feature').then((m) => m.ROUTES),
   },
   {
     path: 'registration',

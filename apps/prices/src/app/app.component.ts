@@ -3,8 +3,10 @@ import {
   Component,
   EnvironmentInjector,
 } from '@angular/core';
+import { IonicModule } from '@ionic/angular';
 
 @Component({
+  standalone: true,
   selector: 'travellers-apps-root',
   template: `
     <ion-app>
@@ -14,6 +16,7 @@ import {
     </ion-app>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IonicModule],
 })
 export class AppComponent {
   title = 'prices';

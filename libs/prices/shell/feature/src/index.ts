@@ -1,1 +1,1 @@
-export * from './lib/prices-shell.module';
+export { providePricesShell } from './lib/providePricesShell';

@@ -1,7 +1,6 @@
 import { Meta, moduleMetadata, Story } from '@storybook/angular';
 import { IonicModule } from '@ionic/angular';
 import { getIonicConfig } from '@travellers-apps/utils-common';
-import { PasswordValidatorModule } from '../password-validator.module';
 import { PasswordValidatorComponent } from '../component/password-validator.component';
 import { of } from 'rxjs';
 
@@ -10,7 +9,7 @@ export default {
   component: PasswordValidatorComponent,
   decorators: [
     moduleMetadata({
-      imports: [IonicModule.forRoot(getIonicConfig()), PasswordValidatorModule],
+      imports: [IonicModule.forRoot(getIonicConfig())],
     }),
   ],
 } as Meta<PasswordValidatorComponent>;

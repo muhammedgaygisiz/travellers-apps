@@ -2,14 +2,13 @@ import { RegistrationComponent } from '../components/registration.component';
 import { Meta, moduleMetadata, Story } from '@storybook/angular';
 import { IonicModule } from '@ionic/angular';
 import { getIonicConfig } from '@travellers-apps/utils-common';
-import { RegistrationModule } from '../registration.module';
 
 export default {
   title: 'Pages/Registration',
   component: RegistrationComponent,
   decorators: [
     moduleMetadata({
-      imports: [IonicModule.forRoot(getIonicConfig()), RegistrationModule],
+      imports: [IonicModule.forRoot(getIonicConfig())],
     }),
   ],
 } as Meta<RegistrationComponent>;

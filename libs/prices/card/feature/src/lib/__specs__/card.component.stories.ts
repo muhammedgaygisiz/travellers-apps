@@ -1,7 +1,6 @@
 import { CardComponent } from '../card.component';
 import { Meta, moduleMetadata, Story } from '@storybook/angular';
 import { IonicModule } from '@ionic/angular';
-import { CardFeatureModule } from '../card-feature.module';
 import { getIonicConfig } from '@travellers-apps/utils-common';
 
 export default {
@@ -9,7 +8,7 @@ export default {
   component: CardComponent,
   decorators: [
     moduleMetadata({
-      imports: [IonicModule.forRoot(getIonicConfig()), CardFeatureModule],
+      imports: [IonicModule.forRoot(getIonicConfig())],
     }),
   ],
 } as Meta<CardComponent>;

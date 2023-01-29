@@ -2,14 +2,13 @@ import { AuthComponent } from '../components/auth.component';
 import { Meta, moduleMetadata, Story } from '@storybook/angular';
 import { IonicModule } from '@ionic/angular';
 import { getIonicConfig } from '@travellers-apps/utils-common';
-import { AuthModule } from '../auth.module';
 
 export default {
   title: 'Pages/Auth',
   component: AuthComponent,
   decorators: [
     moduleMetadata({
-      imports: [IonicModule.forRoot(getIonicConfig()), AuthModule],
+      imports: [IonicModule.forRoot(getIonicConfig())],
     }),
   ],
 } as Meta<AuthComponent>;

@@ -34,7 +34,7 @@ export const ROUTES: Routes = [
     path: 'registration',
     loadChildren: () =>
       import('@travellers-apps/prices/registration/feature').then(
-        (m) => m.RegistrationModule
+        (m) => m.ROUTES
       ),
   },
   {

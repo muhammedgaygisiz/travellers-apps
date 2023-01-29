@@ -1,8 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AuthCredentials } from '@travellers-apps/utils-common';
 import { RegistrationService } from './registration.service';
+import { RegistrationComponent } from '../components/registration.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
+  standalone: true,
   template: `
     <ta-registration
       class="ion-page"
@@ -13,6 +16,7 @@ import { RegistrationService } from './registration.service';
     </ta-registration>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RegistrationComponent, AsyncPipe],
 })
 export class RegistrationContainerComponent {
   private readonly registrationService = inject(RegistrationService);

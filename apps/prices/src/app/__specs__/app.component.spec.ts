@@ -1,14 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from '../app.component';
-import { IonicModule } from '@ionic/angular';
-import { getIonicConfig } from '@travellers-apps/utils-common';
 import { RouterTestingModule } from '@angular/router/testing';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [IonicModule.forRoot(getIonicConfig()), RouterTestingModule],
-      declarations: [AppComponent],
+      imports: [RouterTestingModule],
     }).compileComponents();
   });
 

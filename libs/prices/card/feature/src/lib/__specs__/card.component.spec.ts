@@ -1,17 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CardComponent } from '../card.component';
-import { CardFeatureModule } from '../card-feature.module';
 
 describe('CardComponent', () => {
   let component: CardComponent;
   let fixture: ComponentFixture<CardComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [CardFeatureModule],
-    }).compileComponents();
-  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardComponent);

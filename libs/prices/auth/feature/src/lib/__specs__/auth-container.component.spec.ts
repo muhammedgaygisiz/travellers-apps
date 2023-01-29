@@ -1,6 +1,5 @@
 import { AuthContainerComponent } from '../integration/auth-container.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AuthModule } from '../auth.module';
 import { provideMockStore } from '@ngrx/store/testing';
 import { AuthService } from '../integration/auth.service';
 
@@ -12,7 +11,6 @@ describe('AuthContainerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AuthModule],
       providers: [
         provideMockStore({}),
         {

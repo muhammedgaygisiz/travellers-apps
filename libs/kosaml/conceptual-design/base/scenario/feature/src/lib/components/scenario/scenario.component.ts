@@ -17,10 +17,9 @@ import { uuid } from 'uuidv4';
 import { KosamlErrorMatcher } from './KosamlErrorMatcher';
 import { CommonModule } from '@angular/common';
 import { CardComponent } from '@travellers-apps/kosaml/card/feature';
-import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field';
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
-import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card';
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   standalone: true,
@@ -31,10 +30,9 @@ import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/lega
     CommonModule,
     CardComponent,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatCardModule,
     MatButtonModule,
+    MatInputModule,
   ],
 })
 export class ScenarioComponent implements OnInit, OnChanges {

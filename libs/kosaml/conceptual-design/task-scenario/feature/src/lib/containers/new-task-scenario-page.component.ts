@@ -6,7 +6,7 @@ import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/bas
   standalone: true,
   template: `
     <kosaml-page>
-      <h1 class="mat-display-1">New Task Scenario</h1>
+      <h1 class="mat-headline-4">New Task Scenario</h1>
       <kosaml-scenario
         (saveScenario)="onSaveScenario($event)"
       ></kosaml-scenario>

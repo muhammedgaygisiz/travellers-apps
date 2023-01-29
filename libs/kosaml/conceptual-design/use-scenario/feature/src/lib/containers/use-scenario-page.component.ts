@@ -11,7 +11,7 @@ import { AsyncPipe, NgIf } from '@angular/common';
   standalone: true,
   template: `
     <kosaml-page>
-      <h1 class="mat-display-1">Use Scenario</h1>
+      <h1 class="mat-headline-4">Use Scenario</h1>
       <kosaml-scenario
         [model]="selectedUseScenario$ | async"
         (saveScenario)="onSaveScenario($event)"

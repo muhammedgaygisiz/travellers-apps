@@ -33,5 +33,4 @@ export const providePricesStoreFeatures = (environment: Environment) => [
   provideState(fromLocation.key, fromLocation.reducer),
   provideState(fromNetworkStatus.key, fromNetworkStatus.reducer),
   !environment.production ? provideStoreDevtools() : [],
-  // TODO: We need to register the NetworkStatusService in root!
 ];

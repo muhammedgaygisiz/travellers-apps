@@ -1,8 +1,5 @@
-// Developers can think of meta-reducers as hooks into the action->reducer pipeline.
-// Meta-reducers allow developers to pre-process actions before normal reducers are invoked.
-// see https://ngrx.io/guide/store/metareducers
 import { Action, ActionReducer, MetaReducer } from '@ngrx/store';
-import { Environment } from '@travellers-apps/utils-common';
+import { Environment } from './environment';
 
 const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
   return (state, action) => {

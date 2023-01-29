@@ -1,6 +1,5 @@
 import { provideState, provideStore } from '@ngrx/store';
-import { Environment } from '@travellers-apps/utils-common';
-import { getMetaReducers } from './getMetaReducers';
+import { Environment, getMetaReducers } from '@travellers-apps/utils-common';
 import { fromSite } from './site';
 import { fromTaskScenarios } from './taskScenarios';
 import { fromUseScenarios } from './useScenarios';

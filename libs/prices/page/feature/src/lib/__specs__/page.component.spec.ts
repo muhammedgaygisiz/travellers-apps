@@ -6,12 +6,6 @@ describe('PageComponent', () => {
   let component: PageComponent;
   let fixture: ComponentFixture<PageComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [],
-    }).compileComponents();
-  });
-
   beforeEach(() => {
     fixture = TestBed.createComponent(PageComponent);
     component = fixture.componentInstance;

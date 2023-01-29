@@ -30,7 +30,6 @@ import { PageComponent } from '@travellers-apps/prices/page/feature';
     NgIf,
     FilterIconPipe,
     CardComponent,
-    CardComponent,
     PageComponent,
   ],
 })

@@ -484,6 +484,13 @@ jobs:
 
       - run: npm run nx -- loki kosaml
 
+      - name: Upload Loki Diffs
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: kosaml-loki-diffs
+          path: apps/kosaml/.loki/difference
+
   kosaml-build:
     runs-on: ubuntu-latest
     needs:

@@ -11,7 +11,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-// import { uuid } from 'uuidv4';
+import { v4 as uuid } from 'uuid';
 import { KosamlErrorMatcher } from './KosamlErrorMatcher';
 import { CommonModule } from '@angular/common';
 import { CardComponent } from '@travellers-apps/kosaml/card/feature';
@@ -59,11 +59,10 @@ export class ScenarioComponent implements OnChanges {
       return;
     }
 
-    // const title = this.scenarioForm.value.title;
-    // const description = this.scenarioForm.value.description || '';
+    const title = this.scenarioForm.value.title;
+    const description = this.scenarioForm.value.description || '';
 
-    // TODO: Fix this!
-    // this.saveScenario.emit({title, description, id: uuid()});
+    this.saveScenario.emit({ title, description, id: uuid() });
 
     this.scenarioForm.reset();
   }

@@ -79,7 +79,7 @@
         "lintFilePatterns": [
           "apps/kosaml/**/*.ts",
           "apps/kosaml/**/*.html",
-          "apps/prices/.storybook/*.js"
+          "apps/kosaml/.storybook/*.js"
         ]
       }
     },

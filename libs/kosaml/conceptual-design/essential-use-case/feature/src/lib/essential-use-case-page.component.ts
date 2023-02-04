@@ -9,13 +9,13 @@ import {
 } from '@travellers-apps/kosaml/conceptual-design/base/use-case/feature';
 import { CommonModule } from '@angular/common';
 import { PageComponent } from '@travellers-apps/kosaml/page/feature';
-import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
+import { MatTableModule } from '@angular/material/table';
 
 @Component({
   standalone: true,
   template: `
     <kosaml-page>
-      <h1 class="mat-display-1">Essential Use Case</h1>
+      <h1 class="mat-headline-4">Essential Use Case</h1>
       <kosaml-cp-base-use-case
         [type]="type"
         [dataSource]="dataSource$"

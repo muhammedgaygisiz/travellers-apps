@@ -459,7 +459,6 @@ jobs:
 
   kosaml-loki:
     runs-on: ubuntu-latest
-    continue-on-error: true
     needs:
       - kosaml-build-storybook
 
@@ -484,6 +483,13 @@ jobs:
           key: kosaml-storybook-${{ hashFiles('**/kosaml/**/*.stories.*') }}
 
       - run: npm run nx -- loki kosaml
+
+      - name: Upload Loki Diffs
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: kosaml-loki-currents
+          path: apps/kosaml/.loki/current
 
   kosaml-build:
     runs-on: ubuntu-latest

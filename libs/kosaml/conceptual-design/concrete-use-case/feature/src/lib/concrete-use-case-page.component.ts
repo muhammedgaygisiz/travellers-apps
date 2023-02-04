@@ -14,7 +14,7 @@ import { PageComponent } from '@travellers-apps/kosaml/page/feature';
   standalone: true,
   template: `
     <kosaml-page>
-      <h1 class="mat-display-1">Concrete Use Case</h1>
+      <h1 class="mat-headline-4">Concrete Use Case</h1>
       <kosaml-cp-base-use-case
         [type]="type"
         [dataSource]="dataSource$"

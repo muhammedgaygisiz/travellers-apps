@@ -11,7 +11,7 @@ import { TaskObjectComponent } from './components/task-object/task-object.compon
   standalone: true,
   template: `
     <kosaml-page>
-      <h1 class="mat-display-1">Task Object</h1>
+      <h1 class="mat-headline-4">Task Object</h1>
 
       <kosaml-task-object
         [dataSource]="dataSource$ | async"

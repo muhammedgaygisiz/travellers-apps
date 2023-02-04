@@ -2,7 +2,9 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "emitDecoratorMetadata": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
+    "useDefineForClassFields": false
   },
   "exclude": ["../**/*.spec.ts", "jest.config.ts"],
   "include": [

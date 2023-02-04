@@ -14,6 +14,7 @@ import {
 import { FileNode } from '@travellers-apps/kosaml/store/feature';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 export interface FlatTreeNode {
   name: string;
@@ -27,7 +28,13 @@ export interface FlatTreeNode {
   selector: 'kosaml-project',
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
-  imports: [MatTreeModule, RouterLinkActive, MatIconModule, RouterLink],
+  imports: [
+    MatTreeModule,
+    RouterLinkActive,
+    MatButtonModule,
+    RouterLink,
+    MatIconModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectComponent implements OnChanges {

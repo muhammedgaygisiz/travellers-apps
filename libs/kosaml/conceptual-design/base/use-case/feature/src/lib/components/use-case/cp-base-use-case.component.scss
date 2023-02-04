@@ -1,9 +1,10 @@
 table {
-  width: 560px;
+  min-width: 560px;
+  max-width: 560px;
   border: 1px solid black;
 
-  .mat-header-cell,
-  .mat-cell {
+  .mat-mdc-header-cell,
+  .mat-mdc-cell {
     border: 1px solid black;
 
     width: 280px;

@@ -17,10 +17,10 @@ import { uuid } from 'uuidv4';
 import { KosamlErrorMatcher } from './KosamlErrorMatcher';
 import { CommonModule } from '@angular/common';
 import { CardComponent } from '@travellers-apps/kosaml/card/feature';
-import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field';
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
-import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card';
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { Scenario } from '@travellers-apps/kosaml/model/feature';
 
 @Component({
   standalone: true,
@@ -31,21 +31,20 @@ import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/lega
     CommonModule,
     CardComponent,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatCardModule,
     MatButtonModule,
+    MatInputModule,
   ],
 })
 export class ScenarioComponent implements OnInit, OnChanges {
   @Input()
-  model: any;
+  model?: Scenario | null;
 
   @Input()
   showDeleteButton?: boolean;
 
   @Output()
-  saveScenario = new EventEmitter<any>();
+  saveScenario = new EventEmitter<Scenario>();
 
   @Output()
   deleteScenario = new EventEmitter<string>();
@@ -65,7 +64,9 @@ export class ScenarioComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    this.setFormFields(this.model);
+    if (this.model) {
+      this.setFormFields(this.model);
+    }
   }
 
   onSubmit() {
@@ -83,10 +84,13 @@ export class ScenarioComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log('#mo', changes);
-    this.setFormFields(this.model);
+
+    if (this.model) {
+      this.setFormFields(this.model);
+    }
   }
 
-  setFormFields(model: any) {
+  setFormFields(model: Scenario) {
     if (this.model) {
       this.titleFormControl.patchValue(model.title);
       this.descriptionFormControl.patchValue(model.description);

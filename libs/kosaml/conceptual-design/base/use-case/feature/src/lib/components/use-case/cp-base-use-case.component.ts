@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ConceptualDesignUseCaseTypes } from './api/types';
 import { CommonModule } from '@angular/common';
-import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
+import { MatTableModule } from '@angular/material/table';
 
 @Component({
   standalone: true,

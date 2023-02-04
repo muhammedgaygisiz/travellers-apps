@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { NgIf, UpperCasePipe } from '@angular/common';
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({

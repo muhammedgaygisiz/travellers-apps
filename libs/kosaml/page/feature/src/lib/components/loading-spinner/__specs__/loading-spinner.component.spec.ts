@@ -5,8 +5,6 @@ import { LoadingSpinnerComponent } from '../loading-spinner.component';
 
 describe('LoadingSpinnerComponent', () => {
   let fixture: ComponentFixture<LoadingSpinnerComponent>;
-  // eslint-disable-next-line no-unused-vars
-  let component: LoadingSpinnerComponent;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -15,7 +13,6 @@ describe('LoadingSpinnerComponent', () => {
     });
 
     fixture = TestBed.createComponent(LoadingSpinnerComponent);
-    component = fixture.componentInstance;
   });
 
   it('should compile', () => {

@@ -7,7 +7,7 @@ import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/bas
   selector: 'kosaml-edit-task-scenario-page',
   template: `
     <kosaml-page>
-      <h1 class="mat-display-1">New Use Scenario</h1>
+      <h1 class="mat-headline-4">New Use Scenario</h1>
       <kosaml-scenario
         (saveScenario)="onSaveScenario($event)"
       ></kosaml-scenario>

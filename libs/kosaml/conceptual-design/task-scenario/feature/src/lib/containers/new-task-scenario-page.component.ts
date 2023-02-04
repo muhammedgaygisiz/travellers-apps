@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/base/scenario/feature';
 
@@ -14,6 +14,7 @@ import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/bas
   `,
   styles: [],
   imports: [PageComponent, ScenarioComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewTaskScenarioPageComponent {
   onSaveScenario(scenario: any) {

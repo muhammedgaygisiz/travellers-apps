@@ -26,7 +26,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                 <ngx-skeleton-loader
                   appearance="circle"
                 >
-                  <span
+                  <div
                     aria-busy="true"
                     aria-label="loading"
                     aria-valuemax="100"
@@ -36,7 +36,8 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     role="progressbar"
                     style="width: 80px; height: 80px;"
                     tabindex="0"
-                  />
+                  >
+                  </div>
                 </ngx-skeleton-loader>
               </div>
               <div
@@ -44,7 +45,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
               >
                 <div>
                   <ngx-skeleton-loader>
-                    <span
+                    <div
                       aria-busy="true"
                       aria-label="loading"
                       aria-valuemax="100"
@@ -54,12 +55,13 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                       role="progressbar"
                       style="width: 200px; border-radius: 0; height: 15px; margin-bottom: 10px;"
                       tabindex="0"
-                    />
+                    >
+                    </div>
                   </ngx-skeleton-loader>
                 </div>
                 <div>
                   <ngx-skeleton-loader>
-                    <span
+                    <div
                       aria-busy="true"
                       aria-label="loading"
                       aria-valuemax="100"
@@ -69,7 +71,8 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                       role="progressbar"
                       style="width: 170px; border-radius: 0; height: 15px;"
                       tabindex="0"
-                    />
+                    >
+                    </div>
                   </ngx-skeleton-loader>
                 </div>
               </div>
@@ -81,7 +84,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                 class="wrapper"
               >
                 <ngx-skeleton-loader>
-                  <span
+                  <div
                     aria-busy="true"
                     aria-label="loading"
                     aria-valuemax="100"
@@ -91,14 +94,15 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     role="progressbar"
                     style="width: 80%; border-radius: 0; height: 15px; margin-bottom: 10px;"
                     tabindex="0"
-                  />
+                  >
+                  </div>
                 </ngx-skeleton-loader>
               </div>
               <div
                 class="wrapper"
               >
                 <ngx-skeleton-loader>
-                  <span
+                  <div
                     aria-busy="true"
                     aria-label="loading"
                     aria-valuemax="100"
@@ -108,14 +112,15 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     role="progressbar"
                     style="width: 90%; border-radius: 0; height: 15px; margin-bottom: 10px;"
                     tabindex="0"
-                  />
+                  >
+                  </div>
                 </ngx-skeleton-loader>
               </div>
               <div
                 class="wrapper"
               >
                 <ngx-skeleton-loader>
-                  <span
+                  <div
                     aria-busy="true"
                     aria-label="loading"
                     aria-valuemax="100"
@@ -125,7 +130,8 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     role="progressbar"
                     style="width: 60%; border-radius: 0; height: 15px; margin-bottom: 10px;"
                     tabindex="0"
-                  />
+                  >
+                  </div>
                 </ngx-skeleton-loader>
               </div>
             </div>

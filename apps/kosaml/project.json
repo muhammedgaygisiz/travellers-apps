@@ -76,7 +76,11 @@
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["apps/kosaml/**/*.ts", "apps/kosaml/**/*.html"]
+        "lintFilePatterns": [
+          "apps/kosaml/**/*.ts",
+          "apps/kosaml/**/*.html",
+          "apps/kosaml/.storybook/*.js"
+        ]
       }
     },
     "test": {

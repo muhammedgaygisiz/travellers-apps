@@ -32,6 +32,10 @@
       "files": ["*.js", "*.jsx"],
       "extends": ["plugin:@nrwl/nx/javascript"],
       "rules": {}
+    },
+    {
+      "files": ["*.stories.*", "main.js"],
+      "extends": ["plugin:storybook/recommended"]
     }
   ]
 }

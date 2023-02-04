@@ -38,7 +38,7 @@ import { Scenario } from '@travellers-apps/kosaml/model/feature';
 })
 export class ScenarioComponent implements OnInit, OnChanges {
   @Input()
-  model?: Scenario;
+  model?: Scenario | null;
 
   @Input()
   showDeleteButton?: boolean;

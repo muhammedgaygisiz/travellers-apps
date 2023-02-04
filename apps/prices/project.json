@@ -94,7 +94,11 @@
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["apps/prices/**/*.ts", "apps/prices/**/*.html"]
+        "lintFilePatterns": [
+          "apps/prices/**/*.ts",
+          "apps/prices/**/*.html",
+          "apps/prices/.storybook/*.js"
+        ]
       }
     },
     "test": {

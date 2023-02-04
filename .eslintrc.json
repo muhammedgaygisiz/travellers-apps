@@ -34,7 +34,7 @@
       "rules": {}
     },
     {
-      "files": ["*.stories.*"],
+      "files": ["*.stories.*", "main.js"],
       "extends": ["plugin:storybook/recommended"]
     }
   ]

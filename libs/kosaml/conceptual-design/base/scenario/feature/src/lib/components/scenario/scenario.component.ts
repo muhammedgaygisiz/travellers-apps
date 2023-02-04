@@ -20,6 +20,7 @@ import { CardComponent } from '@travellers-apps/kosaml/card/feature';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { Scenario } from '@travellers-apps/kosaml/model/feature';
 
 @Component({
   standalone: true,
@@ -37,13 +38,13 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class ScenarioComponent implements OnInit, OnChanges {
   @Input()
-  model: any;
+  model?: Scenario;
 
   @Input()
   showDeleteButton?: boolean;
 
   @Output()
-  saveScenario = new EventEmitter<any>();
+  saveScenario = new EventEmitter<Scenario>();
 
   @Output()
   deleteScenario = new EventEmitter<string>();
@@ -63,7 +64,9 @@ export class ScenarioComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    this.setFormFields(this.model);
+    if (this.model) {
+      this.setFormFields(this.model);
+    }
   }
 
   onSubmit() {
@@ -81,10 +84,13 @@ export class ScenarioComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log('#mo', changes);
-    this.setFormFields(this.model);
+
+    if (this.model) {
+      this.setFormFields(this.model);
+    }
   }
 
-  setFormFields(model: any) {
+  setFormFields(model: Scenario) {
     if (this.model) {
       this.titleFormControl.patchValue(model.title);
       this.descriptionFormControl.patchValue(model.description);

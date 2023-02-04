@@ -488,7 +488,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: kosaml-loki-diffs
+          name: kosaml-loki-currents
           path: apps/kosaml/.loki/current
 
   kosaml-build:

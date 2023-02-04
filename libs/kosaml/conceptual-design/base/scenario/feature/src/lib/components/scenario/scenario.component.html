@@ -13,7 +13,7 @@
         formControlName="title"
         [errorStateMatcher]="matcher"
       />
-      <mat-error *ngIf="titleFormControl.hasError('required')">
+      <mat-error *ngIf="scenarioForm.controls['title'].hasError('required')">
         Field is required
       </mat-error>
     </mat-form-field>

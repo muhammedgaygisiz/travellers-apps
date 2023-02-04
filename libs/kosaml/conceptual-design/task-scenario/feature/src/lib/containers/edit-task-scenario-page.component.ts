@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { map, tap } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { fromTaskScenarios } from '@travellers-apps/kosaml/store/feature';
@@ -15,14 +15,15 @@ import { Scenario } from '@travellers-apps/kosaml/model/feature';
       <h1 class="mat-headline-4">Task Scenario</h1>
       <kosaml-scenario
         [model]="selectedTaskScenario$ | async"
-        (saveScenario)="onSaveScenario($event)"
         [showDeleteButton]="true"
+        (saveScenario)="onSaveScenario($event)"
         (deleteScenario)="onDeleteScenario($event)"
       ></kosaml-scenario>
     </kosaml-page>
     <ng-container *ngIf="currentSelected$ | async"></ng-container>
   `,
   imports: [PageComponent, ScenarioComponent, AsyncPipe, NgIf],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditTaskScenarioPageComponent {
   private readonly store = inject(Store);

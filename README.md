@@ -11,3 +11,4 @@
 # Table of Content
 
 1. [NX](docs/NX.md)
+2. [Weekly Reads](docs/weekly_reads.md)

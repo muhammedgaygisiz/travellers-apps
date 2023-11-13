@@ -5,6 +5,6 @@ export default {
   component: LoadingSpinnerComponent,
 };
 
-export const loadingSpinner = () => ({
+export const LoadingSpinner = () => ({
   component: LoadingSpinnerComponent,
 });

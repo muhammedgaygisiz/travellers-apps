@@ -12,7 +12,7 @@ export default {
   ],
 };
 
-export const emptySidebar = () => ({
+export const EmptySidebar = () => ({
   component: SidebarComponent,
   props: {
     project: [

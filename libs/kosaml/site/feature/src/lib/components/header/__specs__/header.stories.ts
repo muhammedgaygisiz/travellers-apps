@@ -5,11 +5,11 @@ export default {
   component: HeaderComponent,
 };
 
-export const unauthorizedHeader = () => ({
+export const UnauthorizedHeader = () => ({
   component: HeaderComponent,
 });
 
-export const authorizedHeader = () => ({
+export const AuthorizedHeader = () => ({
   component: HeaderComponent,
   props: {
     isAuthenticated: true,

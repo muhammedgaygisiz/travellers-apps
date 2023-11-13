@@ -9,10 +9,10 @@ module.exports = {
 
   framework: {
     name: '@storybook/angular',
-    options: {}
+    options: {},
   },
 
   docs: {
-    autodocs: true
-  }
+    autodocs: true,
+  },
 };

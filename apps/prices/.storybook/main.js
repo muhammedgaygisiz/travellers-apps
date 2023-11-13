@@ -11,7 +11,7 @@ module.exports = {
   addons: [
     '@storybook/addon-essentials',
     ...rootMain.addons,
-    '@storybook/addon-mdx-gfm'
+    '@storybook/addon-mdx-gfm',
   ],
   features: {
     previewMdx2: true,

@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LoadingSpinnerComponent should compile 1`] = `
-<kosaml-loading-spinner
-  __ngContext__="0"
->
+<kosaml-loading-spinner>
   <kosaml-card>
     <mat-card
       class="mat-mdc-card mdc-card card"

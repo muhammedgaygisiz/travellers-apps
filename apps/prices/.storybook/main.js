@@ -9,7 +9,7 @@ module.exports = {
     ...rootMain.stories,
     '../../../libs/prices/**/__specs__/**/*.stories.@(js|jsx|ts|tsx|mdx)',
   ],
-  addons: [...rootMain.addons],
+  addons: ['@storybook/addon-essentials', ...rootMain.addons],
   features: {
     previewMdx2: true,
   },

@@ -6,7 +6,7 @@
   "prefix": "travellers-apps",
   "targets": {
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": [
         "{workspaceRoot}/coverage/libs/prices/password-validator/feature"
       ],
@@ -16,7 +16,7 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "options": {
         "lintFilePatterns": [
           "libs/prices/password-validator/feature/**/*.ts",

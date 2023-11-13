@@ -19,7 +19,7 @@ Below are our core plugins:
 - Web (no framework frontends)
   - `npm install --save-dev @nrwl/web`
 - [Angular](https://angular.io)
-  - `npm install --save-dev @nrwl/angular`
+  - `npm install --save-dev @nx/angular`
 - [Nest](https://nestjs.com)
   - `npm install --save-dev @nrwl/nest`
 - [Express](https://expressjs.com)

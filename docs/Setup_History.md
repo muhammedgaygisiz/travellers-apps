@@ -6,4 +6,4 @@ npm install --save-dev @nxtend/ionic-angular@13
 
 npm install --save-dev @nxtend/capacitor
 
-npm i --save @nrwl/angular
+npm i --save @nx/angular

@@ -109,7 +109,7 @@
     "jest-environment-jsdom": "28.1.1",
     "jest-preset-angular": "12.2.3",
     "lint-staged": "13.1.0",
-    "loki": "0.31.0",
+    "loki": "0.33.0",
     "ngx-skeleton-loader": "7.0.0",
     "nx": "15.6.3",
     "prettier": "2.8.3",
@@ -120,3 +120,4 @@
     "webpack": "5.64.0"
   }
 }
+

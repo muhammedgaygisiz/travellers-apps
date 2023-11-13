@@ -22,7 +22,8 @@
     "cap:run:android": "cap run android",
     "pwa-asset-generator:generate:proces": "pwa-asset-generator apps/prices/src/logo.svg -i apps/prices/src/index.html --favicon -m apps/prices/src/manifest.webmanifest apps/prices/src/assets/icons",
     "commitizen": "commitizen",
-    "husky": "husky"
+    "husky": "husky",
+    "commit": "cz"
   },
   "private": true,
   "dependencies": {

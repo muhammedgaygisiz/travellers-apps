@@ -13,11 +13,11 @@ export default {
   ],
 };
 
-export const emptyScenario = () => ({
+export const EmptyScenario = () => ({
   component: ScenarioComponent,
 });
 
-export const filledScenario = () => ({
+export const FilledScenario = () => ({
   component: ScenarioComponent,
   props: {
     model: {
@@ -27,7 +27,7 @@ export const filledScenario = () => ({
   },
 });
 
-export const scenarioWithDeleteButton = () => ({
+export const ScenarioWithDeleteButton = () => ({
   component: ScenarioComponent,
   props: {
     model: {

@@ -69,6 +69,8 @@
     "@angular/language-service": "15.1.0",
     "@angular/pwa": "15.1.0",
     "@capacitor/cli": "4.6.2",
+    "@commitlint/cli": "17.7.1",
+    "@commitlint/config-nx-scopes": "18.4.0",
     "@ionic/angular-toolkit": "6.1.0",
     "@mdx-js/react": "2.3.0",
     "@ngrx/schematics": "15.1.0",

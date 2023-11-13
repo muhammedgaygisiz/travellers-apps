@@ -489,7 +489,7 @@ jobs:
         if: failure()
         with:
           name: kosaml-loki-currents
-          path: apps/kosaml/.loki/current
+          path: apps/kosaml/.loki/difference
 
   kosaml-build:
     runs-on: ubuntu-latest

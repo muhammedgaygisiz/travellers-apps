@@ -1,4 +1,3 @@
-// import {TestScheduler} from "rxjs/internal/testing/TestScheduler";
 import { AuthService } from '../integration/auth.service';
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';

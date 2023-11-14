@@ -2,6 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AuthComponent } from '../components/auth.component';
 import { EventEmitter } from '@angular/core';
 import Mock = jest.Mock;
+import { addNecessaryIcons } from '@travellers-apps/utils-common';
+
+addNecessaryIcons();
 
 describe('AuthComponent', () => {
   let component: AuthComponent;

@@ -1,28 +1,26 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  EnvironmentInjector,
+    ChangeDetectionStrategy,
+    Component,
+    EnvironmentInjector,
 } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonApp, IonRouterOutlet } from "@ionic/angular/standalone";
 
 @Component({
-  standalone: true,
-  selector: 'travellers-apps-root',
-  template: `
+    standalone: true,
+    selector: 'travellers-apps-root',
+    template: `
     <ion-app>
-      <ion-router-outlet
-        [environmentInjector]="environmentInjector"
-      ></ion-router-outlet>
+      <ion-router-outlet />
     </ion-app>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonicModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
-  title = 'prices';
+    title = 'prices';
 
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    public readonly environmentInjector: EnvironmentInjector
-  ) {}
+    constructor(
+        // eslint-disable-next-line no-unused-vars
+        public readonly environmentInjector: EnvironmentInjector
+    ) { }
 }

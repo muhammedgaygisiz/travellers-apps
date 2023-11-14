@@ -1,5 +1,5 @@
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { moduleMetadata } from '@storybook/angular';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { applicationConfig } from '@storybook/angular';
 import { action } from '@storybook/addon-actions';
 import { ScenarioComponent } from '../scenario.component';
 
@@ -7,8 +7,8 @@ export default {
   title: 'Conceptual Design/Base/Scenario',
   component: ScenarioComponent,
   decorators: [
-    moduleMetadata({
-      imports: [NoopAnimationsModule],
+    applicationConfig({
+      providers: [provideNoopAnimations()],
     }),
   ],
 };

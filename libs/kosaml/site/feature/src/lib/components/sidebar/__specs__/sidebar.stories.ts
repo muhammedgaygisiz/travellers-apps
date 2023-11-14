@@ -1,13 +1,19 @@
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { moduleMetadata } from '@storybook/angular';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { applicationConfig } from '@storybook/angular';
 import { SidebarComponent } from '../sidebar.component';
+import { provideRouter } from '@angular/router';
+import { provideLocationMocks } from '@angular/common/testing';
 
 export default {
   title: 'Kosaml/Layout/Sidebar',
+  component: SidebarComponent,
   decorators: [
-    moduleMetadata({
-      imports: [BrowserAnimationsModule, RouterTestingModule],
+    applicationConfig({
+      providers: [
+        provideAnimations(),
+        provideLocationMocks(),
+        provideRouter([]),
+      ],
     }),
   ],
 };

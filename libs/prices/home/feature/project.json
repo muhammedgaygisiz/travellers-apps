@@ -20,6 +20,17 @@
           "libs/prices/home/feature/**/*.html"
         ]
       }
+    },
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/prices/home/feature/**/*.css",
+          "libs/prices/home/feature/**/*.scss"
+        ],
+        "formatter": "compact"
+      }
     }
   },
   "tags": []

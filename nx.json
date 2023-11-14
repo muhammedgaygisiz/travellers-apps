@@ -39,6 +39,13 @@
           "codeCoverage": true
         }
       }
+    },
+    "stylelint": {
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.stylelintrc(.(json|yml|yaml|js))?"
+      ],
+      "cache": true
     }
   },
   "namedInputs": {
@@ -52,7 +59,8 @@
       "!{projectRoot}/.storybook/**/*",
       "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
       "!{projectRoot}/tsconfig.storybook.json",
-      "!{projectRoot}/src/test-setup.[jt]s"
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/.stylelintrc(.(json|yml|yaml|js))?"
     ],
     "sharedGlobals": []
   },

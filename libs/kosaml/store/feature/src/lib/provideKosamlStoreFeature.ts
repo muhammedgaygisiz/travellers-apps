@@ -25,5 +25,5 @@ export const provideKosamlStoreFeature = (environment: Environment) => [
   provideState(fromEssentialUseCases.key, fromEssentialUseCases.reducer),
   provideState(fromConcreteUseCases.key, fromConcreteUseCases.reducer),
   provideState(fromTaskObjects.key, fromTaskObjects.reducer),
-  !environment.production ? provideStoreDevtools() : [],
+  !environment.production ? provideStoreDevtools({ connectInZone: true }) : [],
 ];

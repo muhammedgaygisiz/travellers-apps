@@ -31,7 +31,7 @@
     "@angular/common": "17.0.2",
     "@angular/compiler": "17.0.2",
     "@angular/core": "17.0.2",
-    "@angular/fire": "7.5.0",
+    "@angular/fire": "16.0.0",
     "@angular/forms": "17.0.2",
     "@angular/material": "17.0.0",
     "@angular/platform-browser": "17.0.2",
@@ -118,5 +118,11 @@
     "@nx/jest": "17.1.2",
     "@nx/angular": "17.1.2",
     "@nx/eslint": "17.1.2"
+  },
+  "overrides": {
+    "@angular-devkit/build-angular": {
+      "jest": "29.4.3",
+      "jest-environment-jsdom": "29.4.3"
+    }
   }
 }

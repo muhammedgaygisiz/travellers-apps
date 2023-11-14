@@ -15,6 +15,7 @@ export class CpBaseUseCaseComponent implements OnInit {
   type?: ConceptualDesignUseCaseTypes;
 
   @Input()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dataSource: any;
 
   displayedColumns?: string[];

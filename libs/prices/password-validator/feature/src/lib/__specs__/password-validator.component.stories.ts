@@ -1,15 +1,20 @@
-import { Meta, moduleMetadata, Story } from '@storybook/angular';
-import { IonicModule } from '@ionic/angular';
-import { getIonicConfig } from '@travellers-apps/utils-common';
+import { applicationConfig, Meta, Story } from '@storybook/angular';
+import {
+  addNecessaryIcons,
+  getIonicConfig,
+} from '@travellers-apps/utils-common';
 import { PasswordValidatorComponent } from '../component/password-validator.component';
 import { of } from 'rxjs';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+
+addNecessaryIcons();
 
 export default {
   title: 'Components/Password Validator',
   component: PasswordValidatorComponent,
   decorators: [
-    moduleMetadata({
-      imports: [IonicModule.forRoot(getIonicConfig())],
+    applicationConfig({
+      providers: [provideIonicAngular(getIonicConfig())],
     }),
   ],
 } as Meta<PasswordValidatorComponent>;
@@ -20,7 +25,7 @@ const Template: Story<PasswordValidatorProps> = ({ password }) => ({
     password$: of(password),
   },
   template: `
-    <ta-password-validator [password$]="password$"></ta-password-validator>
+    <ta-password-validator [password$]="password$"/>
   `,
 });
 

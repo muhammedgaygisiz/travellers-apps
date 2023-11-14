@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/base/scenario/feature';
+import { Scenario } from '@travellers-apps/kosaml/model/feature';
 
 @Component({
   standalone: true,
@@ -18,7 +19,7 @@ import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/bas
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewUseScenarioPageComponent {
-  onSaveScenario(scenario: any) {
+  onSaveScenario(scenario: Scenario) {
     console.log(scenario);
   }
 }

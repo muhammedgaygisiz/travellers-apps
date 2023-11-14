@@ -21,10 +21,16 @@ import {
   PasswordValidatorComponent,
 } from '@travellers-apps/prices/password-validator/feature';
 import { AuthErrorCode } from '@firebase/auth/dist/node/src/core/errors';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 import { AsyncPipe, NgIf } from '@angular/common';
 import { PageComponent } from '@travellers-apps/prices/page/feature';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
+import {
+  IonButton,
+  IonInput,
+  IonItem,
+  IonText,
+} from '@ionic/angular/standalone';
 
 @Component({
   standalone: true,
@@ -37,9 +43,12 @@ import { CardComponent } from '@travellers-apps/prices/card/feature';
     AsyncPipe,
     PageComponent,
     CardComponent,
-    IonicModule,
     ReactiveFormsModule,
     PasswordValidatorComponent,
+    IonItem,
+    IonInput,
+    IonButton,
+    IonText,
   ],
 })
 export class RegistrationComponent implements OnChanges {

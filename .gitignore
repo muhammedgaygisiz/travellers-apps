@@ -41,3 +41,5 @@ Thumbs.db
 .angular
 *.env
 **cypress.env.json
+
+.nx/cache

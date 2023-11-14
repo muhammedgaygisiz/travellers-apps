@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
+  inject,
   Input,
   OnChanges,
   Output,
@@ -15,10 +16,16 @@ import {
 import { AddItem } from '../api/add-item';
 import { Price } from '@travellers-apps/utils-common';
 import { ImageUrlValidator } from '../async-validators/image-url.validator';
-import { IonicModule } from '@ionic/angular';
 import { AsyncPipe, NgIf } from '@angular/common';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
 import { PageComponent } from '@travellers-apps/prices/page/feature';
+import {
+  IonButton,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonText,
+} from '@ionic/angular/standalone';
 
 @Component({
   standalone: true,
@@ -28,11 +35,15 @@ import { PageComponent } from '@travellers-apps/prices/page/feature';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
-    IonicModule,
     NgIf,
     AsyncPipe,
     CardComponent,
     PageComponent,
+    IonItem,
+    IonLabel,
+    IonInput,
+    IonButton,
+    IonText,
   ],
   providers: [ImageUrlValidator],
 })
@@ -42,6 +53,8 @@ export class AddItemComponent implements OnChanges {
 
   @Output()
   public save: EventEmitter<Price> = new EventEmitter();
+
+  private readonly imageUrlValidator = inject(ImageUrlValidator);
 
   public priceFormGroup: FormGroup = new FormGroup<AddItem>({
     productName: new FormControl<string>('', [Validators.required]),
@@ -55,11 +68,6 @@ export class AddItemComponent implements OnChanges {
     }),
     location: new FormControl<string>('', [Validators.required]),
   });
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly imageUrlValidator: ImageUrlValidator
-  ) {}
 
   public ngOnChanges() {
     this.priceFormGroup.controls['location'].patchValue(this.location);

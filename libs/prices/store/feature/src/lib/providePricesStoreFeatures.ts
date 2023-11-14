@@ -32,5 +32,5 @@ export const providePricesStoreFeatures = (environment: Environment) => [
   provideState(fromAuth.key, fromAuth.reducer),
   provideState(fromLocation.key, fromLocation.reducer),
   provideState(fromNetworkStatus.key, fromNetworkStatus.reducer),
-  !environment.production ? provideStoreDevtools() : [],
+  !environment.production ? provideStoreDevtools({ connectInZone: true }) : [],
 ];

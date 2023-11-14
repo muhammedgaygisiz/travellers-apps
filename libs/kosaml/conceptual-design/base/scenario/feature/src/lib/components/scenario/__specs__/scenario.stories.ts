@@ -1,4 +1,4 @@
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { moduleMetadata } from '@storybook/angular';
 import { action } from '@storybook/addon-actions';
 import { ScenarioComponent } from '../scenario.component';
@@ -8,16 +8,16 @@ export default {
   component: ScenarioComponent,
   decorators: [
     moduleMetadata({
-      imports: [BrowserAnimationsModule],
+      imports: [NoopAnimationsModule],
     }),
   ],
 };
 
-export const emptyScenario = () => ({
+export const EmptyScenario = () => ({
   component: ScenarioComponent,
 });
 
-export const filledScenario = () => ({
+export const FilledScenario = () => ({
   component: ScenarioComponent,
   props: {
     model: {
@@ -27,7 +27,7 @@ export const filledScenario = () => ({
   },
 });
 
-export const scenarioWithDeleteButton = () => ({
+export const ScenarioWithDeleteButton = () => ({
   component: ScenarioComponent,
   props: {
     model: {

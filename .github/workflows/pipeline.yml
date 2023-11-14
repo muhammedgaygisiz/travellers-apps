@@ -31,7 +31,7 @@ jobs:
         uses: actions/setup-node@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          node-version: 16.x
+          node-version: 18.x
           cache: 'npm'
 
       - name: NPM Dependencies
@@ -144,6 +144,7 @@ jobs:
 
   prices-loki:
     runs-on: ubuntu-latest
+    continue-on-error: true
     needs:
       - prices-build-storybook
 
@@ -168,6 +169,13 @@ jobs:
           key: prices-storybook-${{ hashFiles('**/prices/**/*.stories.*') }}
 
       - run: npm run nx -- loki prices
+
+      - name: Upload Prices Diffs
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: prices-loki-diffs
+          path: apps/prices/.loki/difference
 
   prices-deploy-storybook:
     runs-on: ubuntu-latest
@@ -459,6 +467,7 @@ jobs:
 
   kosaml-loki:
     runs-on: ubuntu-latest
+    continue-on-error: true
     needs:
       - kosaml-build-storybook
 
@@ -488,8 +497,8 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: kosaml-loki-currents
-          path: apps/kosaml/.loki/current
+          name: kosaml-loki-diffs
+          path: apps/kosaml/.loki/difference
 
   kosaml-build:
     runs-on: ubuntu-latest

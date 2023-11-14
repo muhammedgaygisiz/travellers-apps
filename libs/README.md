@@ -9,7 +9,7 @@ To create a feature use following command
 
 `npm run nx -- g lib prices/card/feature`
 
-When nx cli asks for a generator to use, pick `@nrwl/angular:library`.
+When nx cli asks for a generator to use, pick `@nx/angular:library`.
 
 To add a component to the feature use following command
 
@@ -17,4 +17,4 @@ To add a component to the feature use following command
 
 For a plain library without framework specifics use following command
 
-`npm run nx -- g @nrwl/workspace:lib utils-common`
+`npm run nx -- g @nx/workspace:lib utils-common`

@@ -13,6 +13,6 @@ export default {
   ],
 };
 
-export const menubar = () => ({
+export const Menubar = () => ({
   component: MenuBarComponent,
 });

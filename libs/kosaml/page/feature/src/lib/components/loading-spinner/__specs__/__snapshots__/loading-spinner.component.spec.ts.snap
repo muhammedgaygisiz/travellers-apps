@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LoadingSpinnerComponent should compile 1`] = `
-<kosaml-loading-spinner
-  __ngContext__="0"
->
+<kosaml-loading-spinner>
   <kosaml-card>
     <mat-card
       class="mat-mdc-card mdc-card card"
@@ -35,7 +33,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     class="skeleton-loader circle progress"
                     role="progressbar"
                     style="width: 80px; height: 80px;"
-                    tabindex="0"
+                    tabindex="-1"
                   >
                   </div>
                 </ngx-skeleton-loader>
@@ -54,7 +52,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                       class="skeleton-loader progress"
                       role="progressbar"
                       style="width: 200px; border-radius: 0; height: 15px; margin-bottom: 10px;"
-                      tabindex="0"
+                      tabindex="-1"
                     >
                     </div>
                   </ngx-skeleton-loader>
@@ -70,7 +68,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                       class="skeleton-loader progress"
                       role="progressbar"
                       style="width: 170px; border-radius: 0; height: 15px;"
-                      tabindex="0"
+                      tabindex="-1"
                     >
                     </div>
                   </ngx-skeleton-loader>
@@ -93,7 +91,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     class="skeleton-loader progress"
                     role="progressbar"
                     style="width: 80%; border-radius: 0; height: 15px; margin-bottom: 10px;"
-                    tabindex="0"
+                    tabindex="-1"
                   >
                   </div>
                 </ngx-skeleton-loader>
@@ -111,7 +109,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     class="skeleton-loader progress"
                     role="progressbar"
                     style="width: 90%; border-radius: 0; height: 15px; margin-bottom: 10px;"
-                    tabindex="0"
+                    tabindex="-1"
                   >
                   </div>
                 </ngx-skeleton-loader>
@@ -129,7 +127,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     class="skeleton-loader progress"
                     role="progressbar"
                     style="width: 60%; border-radius: 0; height: 15px; margin-bottom: 10px;"
-                    tabindex="0"
+                    tabindex="-1"
                   >
                   </div>
                 </ngx-skeleton-loader>

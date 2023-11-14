@@ -6,9 +6,9 @@
     "target": "ES2022",
     "useDefineForClassFields": false
   },
+  "files": ["../src/polyfills.ts"],
   "exclude": ["../**/*.spec.ts", "jest.config.ts"],
   "include": [
-    "../src/**/*",
     "../__stories__/**/*",
     "*.js",
     "../../../libs/prices/**/*.stories.*"

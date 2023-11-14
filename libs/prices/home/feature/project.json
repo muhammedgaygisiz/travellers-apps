@@ -6,15 +6,14 @@
   "prefix": "travellers-apps",
   "targets": {
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/prices/home/feature"],
       "options": {
-        "jestConfig": "libs/prices/home/feature/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/prices/home/feature/jest.config.ts"
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
           "libs/prices/home/feature/**/*.ts",

@@ -12,6 +12,7 @@ import { NgForOf, NgIf } from '@angular/common';
 })
 export class TaskObjectComponent {
   @Input()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dataSource: any;
 
   displayedColumns?: string[] = ['taskObject', 'attributes', 'actions'];

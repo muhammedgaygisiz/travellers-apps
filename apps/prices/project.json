@@ -6,7 +6,7 @@
   "prefix": "travellers-apps",
   "targets": {
     "build": {
-      "executor": "@nrwl/angular:webpack-browser",
+      "executor": "@nx/angular:webpack-browser",
       "outputs": ["{options.outputPath}"],
       "options": {
         "customWebpackConfig": {
@@ -25,11 +25,6 @@
             "glob": "**/*",
             "input": "apps/prices/src/assets",
             "output": "assets"
-          },
-          {
-            "glob": "**/*.svg",
-            "input": "node_modules/ionicons/dist/ionicons/svg",
-            "output": "./svg"
           }
         ],
         "styles": [
@@ -46,7 +41,7 @@
             {
               "type": "initial",
               "maximumWarning": "500kb",
-              "maximumError": "1.5mb"
+              "maximumError": "1.8mb"
             },
             {
               "type": "anyComponentStyle",
@@ -74,13 +69,13 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nrwl/angular:webpack-dev-server",
+      "executor": "@nx/angular:webpack-dev-server",
       "configurations": {
         "production": {
-          "browserTarget": "prices:build:production"
+          "buildTarget": "prices:build:production"
         },
         "development": {
-          "browserTarget": "prices:build:development"
+          "buildTarget": "prices:build:development"
         }
       },
       "defaultConfiguration": "development"
@@ -88,11 +83,11 @@
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
-        "browserTarget": "prices:build"
+        "buildTarget": "prices:build"
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
           "apps/prices/**/*.ts",
@@ -102,11 +97,10 @@
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/apps/prices"],
       "options": {
-        "jestConfig": "apps/prices/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/prices/jest.config.ts"
       }
     },
     "storybook": {

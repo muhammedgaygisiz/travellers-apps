@@ -14,8 +14,8 @@ import {
 import calculateIcon, { IconName } from '../utils/calculate-icon';
 import hasLength from '../utils/has-length';
 import calculateColor, { ClassName } from '../utils/calculate-color';
-import { IonicModule } from '@ionic/angular';
 import { AsyncPipe } from '@angular/common';
+import { IonIcon, IonItem, IonText } from '@ionic/angular/standalone';
 
 @Component({
   standalone: true,
@@ -23,7 +23,7 @@ import { AsyncPipe } from '@angular/common';
   templateUrl: './password-validator.component.html',
   styleUrls: ['./password-validator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonicModule, AsyncPipe],
+  imports: [AsyncPipe, IonItem, IonText, IonIcon],
 })
 export class PasswordValidatorComponent implements OnChanges {
   @Input()

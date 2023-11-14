@@ -1,3 +1,4 @@
+export { addNecessaryIcons } from './lib/add-necessary-icons';
 export * from './lib/get-ionic-config';
 export { Environment } from './lib/environment';
 export { ModuleForStore } from './lib/module-for-store';

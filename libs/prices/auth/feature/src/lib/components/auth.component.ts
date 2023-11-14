@@ -10,8 +10,14 @@ import { AuthCredentials } from '@travellers-apps/utils-common';
 import { getPasswordValidators } from '@travellers-apps/prices/password-validator/feature';
 import { PageComponent } from '@travellers-apps/prices/page/feature';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
-import { IonicModule } from '@ionic/angular';
 import { NgIf } from '@angular/common';
+import {
+  IonButton,
+  IonIcon,
+  IonInput,
+  IonItem,
+  IonText,
+} from '@ionic/angular/standalone';
 
 @Component({
   standalone: true,
@@ -21,9 +27,13 @@ import { NgIf } from '@angular/common';
   imports: [
     PageComponent,
     CardComponent,
-    IonicModule,
     ReactiveFormsModule,
     NgIf,
+    IonButton,
+    IonIcon,
+    IonItem,
+    IonInput,
+    IonText,
   ],
 })
 export class AuthComponent {

@@ -1,14 +1,14 @@
 import { CardComponent } from '../card.component';
-import { Meta, moduleMetadata, Story } from '@storybook/angular';
-import { IonicModule } from '@ionic/angular';
+import { applicationConfig, Meta, Story } from '@storybook/angular';
 import { getIonicConfig } from '@travellers-apps/utils-common';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 
 export default {
   title: 'Components/Card',
   component: CardComponent,
   decorators: [
-    moduleMetadata({
-      imports: [IonicModule.forRoot(getIonicConfig())],
+    applicationConfig({
+      providers: [provideIonicAngular(getIonicConfig())],
     }),
   ],
 } as Meta<CardComponent>;

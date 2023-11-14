@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/base/scenario/feature';
 import { AsyncPipe, NgIf } from '@angular/common';
+import { Scenario } from '@travellers-apps/kosaml/model/feature';
 
 @Component({
   standalone: true,
@@ -37,14 +38,14 @@ export class UseScenarioPageComponent {
     tap((id) => this.store.dispatch(fromUseScenarios.selectUseScenario({ id })))
   );
 
-  onSaveScenario(scenario: any) {
+  onSaveScenario(scenario: Scenario) {
     console.log(scenario);
     // this.store.dispatch(UseScenarioActions.addUseScenario({ useScenario: scenario }));
 
     // this.router.navigate(['./project']);
   }
 
-  onDeleteScenario(id: any) {
+  onDeleteScenario(id: string) {
     console.log(id);
 
     //this.store.dispatch(UseScenarioActions.deleteUseScenario({ id }));

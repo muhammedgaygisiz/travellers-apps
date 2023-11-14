@@ -10,32 +10,38 @@
     <div class="ion-padding">
       <form [formGroup]="priceFormGroup">
         <ion-item lines="full">
-          <ion-label position="floating">Product Name</ion-label>
-          <ion-input type="text" formControlName="productName"></ion-input>
+          <ion-input
+            type="text"
+            formControlName="productName"
+            label="Product Name"
+          />
         </ion-item>
 
         <ion-item lines="full">
-          <ion-label position="floating">Price</ion-label>
           <ion-input
             type="number"
             formControlName="price"
             value=""
             inputmode="decimal"
+            label="Price"
           ></ion-input>
         </ion-item>
 
         <ion-item lines="full">
-          <ion-label position="floating">Location</ion-label>
           <ion-input
             type="text"
             formControlName="location"
             [value]="location"
+            label="Location"
           ></ion-input>
         </ion-item>
 
         <ion-item lines="full">
-          <ion-label position="floating">Image Source</ion-label>
-          <ion-input type="text" formControlName="src"></ion-input>
+          <ion-input
+            type="text"
+            formControlName="src"
+            label="Image Source"
+          ></ion-input>
         </ion-item>
 
         <ion-button

@@ -6,10 +6,13 @@ module.exports = {
   core: { ...rootMain.core, builder: 'webpack5' },
 
   stories: [
-    ...rootMain.stories,
     '../../../libs/prices/**/__specs__/**/*.stories.@(js|jsx|ts|tsx|mdx)',
   ],
-  addons: [...rootMain.addons],
+  addons: [
+    '@storybook/addon-essentials',
+    ...rootMain.addons,
+    '@storybook/addon-mdx-gfm',
+  ],
   features: {
     previewMdx2: true,
   },

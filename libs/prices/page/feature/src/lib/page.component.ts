@@ -5,7 +5,19 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import {
+  IonBackButton,
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonFab,
+  IonFabButton,
+  IonFooter,
+  IonHeader,
+  IonIcon,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/angular/standalone';
 import { NgIf } from '@angular/common';
 
 @Component({
@@ -14,7 +26,20 @@ import { NgIf } from '@angular/common';
   templateUrl: './page.component.html',
   styleUrls: ['./page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonicModule, NgIf],
+  imports: [
+    IonIcon,
+    IonHeader,
+    IonToolbar,
+    IonButtons,
+    IonBackButton,
+    IonTitle,
+    IonButton,
+    IonContent,
+    IonFab,
+    IonFabButton,
+    IonFooter,
+    NgIf,
+  ],
 })
 export class PageComponent {
   @Input()

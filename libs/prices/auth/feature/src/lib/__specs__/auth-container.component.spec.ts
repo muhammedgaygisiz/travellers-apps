@@ -2,6 +2,9 @@ import { AuthContainerComponent } from '../integration/auth-container.component'
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { AuthService } from '../integration/auth.service';
+import { addNecessaryIcons } from '@travellers-apps/utils-common';
+
+addNecessaryIcons();
 
 describe('AuthContainerComponent', () => {
   let component: AuthContainerComponent;

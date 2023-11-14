@@ -1,15 +1,19 @@
 import { PageComponent } from '../page.component';
-import { Meta, moduleMetadata, Story } from '@storybook/angular';
-import { IonicModule } from '@ionic/angular';
-import { getIonicConfig } from '@travellers-apps/utils-common';
-import { RouterTestingModule } from '@angular/router/testing';
+import { applicationConfig, Meta, Story } from '@storybook/angular';
+import {
+  addNecessaryIcons,
+  getIonicConfig,
+} from '@travellers-apps/utils-common';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+
+addNecessaryIcons();
 
 export default {
   title: 'Components/Page',
   component: PageComponent,
   decorators: [
-    moduleMetadata({
-      imports: [IonicModule.forRoot(getIonicConfig()), RouterTestingModule],
+    applicationConfig({
+      providers: [provideIonicAngular(getIonicConfig())],
     }),
   ],
 } as Meta<PageComponent>;

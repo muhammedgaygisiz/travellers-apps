@@ -1,15 +1,20 @@
-import { Meta, moduleMetadata, Story } from '@storybook/angular';
+import { applicationConfig, Meta, Story } from '@storybook/angular';
 import { AddItemComponent } from '../components/add-item.component';
-import { getIonicConfig } from '@travellers-apps/utils-common';
-import { IonicModule } from '@ionic/angular';
-import { RouterTestingModule } from '@angular/router/testing';
+import {
+  addNecessaryIcons,
+  getIonicConfig,
+} from '@travellers-apps/utils-common';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+import { provideAnimations } from '@angular/platform-browser/animations';
+
+addNecessaryIcons();
 
 export default {
   title: 'Pages/Add Item',
   component: AddItemComponent,
   decorators: [
-    moduleMetadata({
-      imports: [IonicModule.forRoot(getIonicConfig()), RouterTestingModule],
+    applicationConfig({
+      providers: [provideAnimations(), provideIonicAngular(getIonicConfig())],
     }),
   ],
 } as Meta<AddItemComponent>;

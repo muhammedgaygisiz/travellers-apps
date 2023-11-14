@@ -1,9 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EnvironmentInjector,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { addNecessaryIcons } from '@travellers-apps/utils-common';
 
 @Component({
   standalone: true,
@@ -19,8 +16,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 export class AppComponent {
   title = 'prices';
 
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    public readonly environmentInjector: EnvironmentInjector
-  ) {}
+  constructor() {
+    addNecessaryIcons();
+  }
 }

@@ -11,11 +11,19 @@ import { MostSearchedItem } from '@travellers-apps/utils-common';
 import Filter from '../model/filter';
 import addLocationFilter from '../utils/add-location-filter';
 import getFilteredPrices from '../utils/get-filtered-prices';
-import { IonicModule } from '@ionic/angular';
 import { CurrencyPipe, NgForOf, NgIf } from '@angular/common';
 import { FilterIconPipe } from '../pipes/filter-icon.pipe';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
 import { PageComponent } from '@travellers-apps/prices/page/feature';
+import {
+  IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonChip,
+  IonIcon,
+  IonLabel,
+} from '@ionic/angular/standalone';
 
 @Component({
   standalone: true,
@@ -24,13 +32,19 @@ import { PageComponent } from '@travellers-apps/prices/page/feature';
   styleUrls: ['./home.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    IonicModule,
     NgForOf,
     CurrencyPipe,
     NgIf,
     FilterIconPipe,
     CardComponent,
     PageComponent,
+    IonCardHeader,
+    IonCardSubtitle,
+    IonChip,
+    IonLabel,
+    IonIcon,
+    IonCardTitle,
+    IonCardContent,
   ],
 })
 export class HomeComponent implements OnChanges {

@@ -7,25 +7,28 @@
     <div class="ion-padding">
       <form [formGroup]="registrationFormGroup">
         <ion-item lines="full">
-          <ion-label position="floating">Email</ion-label>
           <ion-input
             autocomplete="email"
             inputmode="email"
             formControlName="email"
-          ></ion-input>
+            label="Email"
+          />
         </ion-item>
 
         <ion-item lines="full">
-          <ion-label position="floating">Password</ion-label>
-          <ion-input type="password" formControlName="password"></ion-input>
+          <ion-input
+            type="password"
+            formControlName="password"
+            label="Password"
+          />
         </ion-item>
 
         <ion-item lines="full">
-          <ion-label position="floating">Confirm Password</ion-label>
           <ion-input
             type="password"
             formControlName="passwordConfirm"
-          ></ion-input>
+            label="Confirm Password"
+          />
         </ion-item>
 
         <ion-button
@@ -34,14 +37,15 @@
           [disabled]="!registrationFormGroup.valid"
           (click)="submitRegistration.emit(registrationFormGroup.value)"
           data-cy="submit"
-          >Save
+        >
+          Save
         </ion-button>
 
         <div
           class="ion-margin-top"
           *ngIf="registrationFormGroup.errors?.['mismatch']"
         >
-          <ion-text color="danger"> Password does not match. </ion-text>
+          <ion-text color="danger"> Password does not match.</ion-text>
         </div>
       </form>
     </div>

@@ -25,22 +25,22 @@
 
       <form [formGroup]="authFormGroup">
         <ion-item lines="full">
-          <ion-label position="floating">Email</ion-label>
           <ion-input
             autocomplete="email"
             inputmode="email"
             formControlName="email"
             data-cy="email"
-          ></ion-input>
+            label="Email"
+          />
         </ion-item>
 
         <ion-item lines="full">
-          <ion-label position="floating">Password</ion-label>
           <ion-input
             type="password"
             formControlName="password"
             data-cy="password"
-          ></ion-input>
+            label="Password"
+          />
         </ion-item>
 
         <ion-button

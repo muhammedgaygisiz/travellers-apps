@@ -31,9 +31,7 @@
       "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
-        "files": [
-
-        ]
+        "files": []
       }
     }
   ]

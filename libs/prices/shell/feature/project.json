@@ -9,12 +9,11 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/prices/shell/feature"],
       "options": {
-        "jestConfig": "libs/prices/shell/feature/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/prices/shell/feature/jest.config.ts"
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
           "libs/prices/shell/feature/**/*.ts",

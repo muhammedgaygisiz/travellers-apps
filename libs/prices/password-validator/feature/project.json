@@ -11,12 +11,11 @@
         "{workspaceRoot}/coverage/libs/prices/password-validator/feature"
       ],
       "options": {
-        "jestConfig": "libs/prices/password-validator/feature/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/prices/password-validator/feature/jest.config.ts"
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
           "libs/prices/password-validator/feature/**/*.ts",

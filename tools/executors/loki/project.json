@@ -6,8 +6,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/tools/executor-loki"],
       "options": {
-        "jestConfig": "tools/executors/loki/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "tools/executors/loki/jest.config.ts"
       }
     }
   }

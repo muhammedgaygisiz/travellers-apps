@@ -41,11 +41,11 @@ export class MostSearchedItemsEffects {
       this.actions$.pipe(
         ofType(saveItem.type),
         withLatestFrom(this.isAuthenticated$),
-        tap(
-          async ([_, isAuthenticated]) =>
-            await this.showUnauthorizedToast(isAuthenticated)
-        ),
-        filter(([_, isAuthenticated]) => isAuthenticated),
+        tap(async (result) => {
+          const isAuthenticated = result[1];
+          return await this.showUnauthorizedToast(isAuthenticated);
+        }),
+        filter((result) => result[1]),
         switchMap(([{ item }]) =>
           this.mostSearchedService.saveMostSearchedItem$(item)
         ),

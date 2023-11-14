@@ -7,8 +7,8 @@ describe('Login', () => {
             coords: {
               latitude: 46.944091,
               longitude: 7.4293561,
-            } as any,
-          } as any);
+            },
+          } as unknown as GeolocationPosition);
         };
       },
     })

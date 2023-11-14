@@ -170,6 +170,13 @@ jobs:
 
       - run: npm run nx -- loki prices
 
+      - name: Upload Prices Diffs
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: prices-loki-diffs
+          path: apps/prices/.loki/difference
+
   prices-deploy-storybook:
     runs-on: ubuntu-latest
     needs:
@@ -490,7 +497,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: kosaml-loki-currents
+          name: kosaml-loki-diffs
           path: apps/kosaml/.loki/difference
 
   kosaml-build:

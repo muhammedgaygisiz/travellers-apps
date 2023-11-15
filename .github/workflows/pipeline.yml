@@ -45,7 +45,78 @@ jobs:
           path: node_modules
           key: node-modules-${{ hashFiles('package-lock.json') }}
 
+#Common
+
+  common-lint:
+    runs-on: ubuntu-latest
+    needs:
+      - install-dependencies
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Run Linter
+        run: npm run nx -- run-many --target=lint --projects=\"common*\"
+
+#Utils
+
+  utils-lint:
+    runs-on: ubuntu-latest
+    needs:
+      - install-dependencies
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Run Linter
+        run: npm run nx -- run-many --target=lint --projects=\"utils*\"
+
 #Prices
+
+  prices-stylelint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Run Stylelint
+        run: npm run nx -- run-many --target=stylelint --projects=\"prices*\"
 
   prices-lint:
     runs-on: ubuntu-latest
@@ -366,6 +437,27 @@ jobs:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
 # KOSAML
+
+  kosaml-stylelint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Run Stylelint
+        run: npm run nx -- run-many --target=stylelint --projects=\"kosaml*\"
 
   kosaml-lint:
     runs-on: ubuntu-latest

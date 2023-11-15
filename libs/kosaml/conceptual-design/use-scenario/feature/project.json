@@ -20,6 +20,17 @@
           "libs/kosaml/conceptual-design/use-scenario/feature/**/*.html"
         ]
       }
+    },
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/kosaml/conceptual-design/use-scenario/feature/**/*.css",
+          "libs/kosaml/conceptual-design/use-scenario/feature/**/*.scss"
+        ],
+        "formatter": "compact"
+      }
     }
   },
   "tags": []

@@ -20,6 +20,17 @@
           "libs/prices/card/feature/**/*.html"
         ]
       }
+    },
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/prices/card/feature/**/*.css",
+          "libs/prices/card/feature/**/*.scss"
+        ],
+        "formatter": "compact"
+      }
     }
   },
   "tags": []

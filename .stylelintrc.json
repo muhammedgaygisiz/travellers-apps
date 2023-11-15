@@ -10,6 +10,101 @@
       "files": ["**/*.scss"],
       "extends": ["stylelint-config-standard-scss"],
       "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
+    },
+    {
+      "files": ["**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"],
+      "rules": {}
     }
   ],
   "rules": {}

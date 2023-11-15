@@ -20,6 +20,17 @@
           "libs/kosaml/page/feature/**/*.html"
         ]
       }
+    },
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/kosaml/page/feature/**/*.css",
+          "libs/kosaml/page/feature/**/*.scss"
+        ],
+        "formatter": "compact"
+      }
     }
   },
   "tags": []

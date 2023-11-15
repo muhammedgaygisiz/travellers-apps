@@ -148,6 +148,14 @@
           "update": true
         }
       }
+    },
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/prices/**/*.css", "apps/prices/**/*.scss"],
+        "formatter": "compact"
+      }
     }
   },
   "tags": []

@@ -20,6 +20,17 @@
           "libs/kosaml/conceptual-design/base/use-case/feature/**/*.html"
         ]
       }
+    },
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/kosaml/conceptual-design/base/use-case/feature/**/*.css",
+          "libs/kosaml/conceptual-design/base/use-case/feature/**/*.scss"
+        ],
+        "formatter": "compact"
+      }
     }
   },
   "tags": []

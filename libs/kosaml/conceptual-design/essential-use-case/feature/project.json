@@ -20,6 +20,17 @@
           "libs/kosaml/conceptual-design/essential-use-case/feature/**/*.html"
         ]
       }
+    },
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/kosaml/conceptual-design/essential-use-case/feature/**/*.css",
+          "libs/kosaml/conceptual-design/essential-use-case/feature/**/*.scss"
+        ],
+        "formatter": "compact"
+      }
     }
   },
   "tags": []

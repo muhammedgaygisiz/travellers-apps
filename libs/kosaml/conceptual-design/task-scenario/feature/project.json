@@ -20,6 +20,17 @@
           "libs/kosaml/conceptual-design/task-scenario/feature/**/*.html"
         ]
       }
+    },
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/kosaml/conceptual-design/task-scenario/feature/**/*.css",
+          "libs/kosaml/conceptual-design/task-scenario/feature/**/*.scss"
+        ],
+        "formatter": "compact"
+      }
     }
   },
   "tags": []

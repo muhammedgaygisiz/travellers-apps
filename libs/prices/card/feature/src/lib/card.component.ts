@@ -5,7 +5,6 @@ import { IonCard } from '@ionic/angular/standalone';
   standalone: true,
   selector: 'ta-card',
   templateUrl: './card.component.html',
-  styleUrls: ['./card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonCard],
 })

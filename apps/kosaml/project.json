@@ -125,7 +125,7 @@
         "reference": "apps/kosaml/.loki/reference",
         "difference": "apps/kosaml/.loki/difference",
         "output": "apps/kosaml/.loki/current",
-        "chromeTolerance": 0.1
+        "chromeTolerance": 0.05
       },
       "configurations": {
         "approve": {

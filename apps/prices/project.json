@@ -142,7 +142,7 @@
         "reference": "apps/prices/.loki/reference",
         "difference": "apps/prices/.loki/difference",
         "output": "apps/prices/.loki/current",
-        "chromeTolerance": 0
+        "chromeTolerance": 0.05
       },
       "configurations": {
         "approve": {

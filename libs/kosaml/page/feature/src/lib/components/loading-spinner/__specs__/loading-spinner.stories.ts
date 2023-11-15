@@ -1,16 +1,19 @@
 import { LoadingSpinnerComponent } from '../loading-spinner.component';
-import { moduleMetadata } from '@storybook/angular';
+import { applicationConfig } from '@storybook/angular';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
+import { importProvidersFrom } from '@angular/core';
 
 export default {
   title: 'Kosaml/Base/Loading Spinner',
   component: LoadingSpinnerComponent,
   decorators: [
-    moduleMetadata({
-      imports: [
-        NgxSkeletonLoaderModule.forRoot({
-          animation: false,
-        }),
+    applicationConfig({
+      providers: [
+        importProvidersFrom([
+          NgxSkeletonLoaderModule.forRoot({
+            animation: false,
+          }),
+        ]),
       ],
     }),
   ],

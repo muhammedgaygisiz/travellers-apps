@@ -3,6 +3,11 @@
   margin-right: 5px;
 }
 
+a {
+  color: #757576;
+  text-decoration: none;
+}
+
 .mat-tree-node {
   min-height: 32px;
   font-size: 12px;
@@ -30,9 +35,4 @@
       color: #3f51b5;
     }
   }
-}
-
-a {
-  color: #757576;
-  text-decoration: none;
 }

@@ -10,6 +10,7 @@ interface Schema {
   difference: string;
   output: string;
   update: boolean;
+  chromeTolerance: number;
 }
 
 const getProjectJsonContent = (_context: ExecutorContext) => {
@@ -48,6 +49,7 @@ export const buildCommand = (_context: ExecutorContext, _options: Schema) => {
   command.push(`--reference=../../${_options.reference}`);
   command.push(`--difference=../../${_options.difference}`);
   command.push(`--output=../../${_options.output}`);
+  command.push(`--chromeTolerance=../../${_options.chromeTolerance}`);
 
   return command.join(' ').trim();
 };

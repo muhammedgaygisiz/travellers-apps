@@ -1,14 +1,13 @@
-import { moduleMetadata } from '@storybook/angular';
+import { applicationConfig } from '@storybook/angular';
 import { MenuBarComponent } from '../menu-bar.component';
-import { RouterTestingModule } from '@angular/router/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 export default {
   title: 'Kosaml/Layout/Menu Bar',
   component: MenuBarComponent,
   decorators: [
-    moduleMetadata({
-      imports: [BrowserAnimationsModule, RouterTestingModule],
+    applicationConfig({
+      providers: [provideAnimations()],
     }),
   ],
 };

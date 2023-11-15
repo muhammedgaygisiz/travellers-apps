@@ -124,12 +124,21 @@
       "options": {
         "reference": "apps/kosaml/.loki/reference",
         "difference": "apps/kosaml/.loki/difference",
-        "output": "apps/kosaml/.loki/current"
+        "output": "apps/kosaml/.loki/current",
+        "chromeTolerance": 0.000005
       },
       "configurations": {
         "approve": {
           "update": true
         }
+      }
+    },
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/kosaml/**/*.css", "apps/kosaml/**/*.scss"],
+        "formatter": "compact"
       }
     }
   },

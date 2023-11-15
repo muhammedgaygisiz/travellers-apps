@@ -24,7 +24,6 @@ import { NgIf } from '@angular/common';
   standalone: true,
   selector: 'ta-page',
   templateUrl: './page.component.html',
-  styleUrls: ['./page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     IonIcon,

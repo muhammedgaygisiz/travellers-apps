@@ -18,7 +18,6 @@ export class TaskObjectComponent {
   displayedColumns?: string[] = ['taskObject', 'attributes', 'actions'];
 
   getColumnName(column: string) {
-    console.log('#mo', column);
     if (column === 'taskObject') {
       return 'Task object';
     }

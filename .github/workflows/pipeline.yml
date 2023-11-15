@@ -45,7 +45,82 @@ jobs:
           path: node_modules
           key: node-modules-${{ hashFiles('package-lock.json') }}
 
+#Common
+
+  common-lint:
+    runs-on: ubuntu-latest
+    needs:
+      - install-dependencies
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Run Linter
+        run: npm run nx -- run-many --target=lint --projects=\"common*\"
+
+#Utils
+
+  utils-lint:
+    runs-on: ubuntu-latest
+    needs:
+      - install-dependencies
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Run Linter
+        run: npm run nx -- run-many --target=lint --projects=\"utils*\"
+
 #Prices
+
+  prices-stylelint:
+    runs-on: ubuntu-latest
+    needs:
+      - common-lint
+      - utils-lint
+      - prices-lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Run Stylelint
+        run: npm run nx -- run-many --target=stylelint --projects=\"prices*\"
 
   prices-lint:
     runs-on: ubuntu-latest
@@ -73,7 +148,7 @@ jobs:
   prices-tests:
     runs-on: ubuntu-latest
     needs:
-      - prices-lint
+      - prices-stylelint
 
     steps:
       - name: Checkout repository
@@ -257,6 +332,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - prices-e2e-test
+      - common-lint
+      - utils-lint
 
     steps:
       - name: Checkout repository
@@ -367,6 +444,31 @@ jobs:
 
 # KOSAML
 
+  kosaml-stylelint:
+    runs-on: ubuntu-latest
+    needs:
+      - common-lint
+      - utils-lint
+      - kosaml-lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Run Stylelint
+        run: npm run nx -- run-many --target=stylelint --projects=\"kosaml*\"
+
   kosaml-lint:
     runs-on: ubuntu-latest
     needs:
@@ -393,7 +495,7 @@ jobs:
   kosaml-tests:
     runs-on: ubuntu-latest
     needs:
-      - kosaml-lint
+      - kosaml-stylelint
 
     steps:
       - name: Checkout repository
@@ -504,6 +606,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - kosaml-loki
+      - common-lint
+      - utils-lint
 
     steps:
       - name: Checkout repository

@@ -125,7 +125,7 @@ jobs:
   prices-lint:
     runs-on: ubuntu-latest
     needs:
-      - prices-stylelint
+      - install-dependencies
 
     steps:
       - name: Checkout repository
@@ -472,7 +472,7 @@ jobs:
   kosaml-lint:
     runs-on: ubuntu-latest
     needs:
-      - kosaml-stylelint
+      - install-dependencies
 
     steps:
       - name: Checkout repository

@@ -8,7 +8,7 @@ import { fromConcreteUseCases } from './concreteUseCases';
 import { fromTaskObjects } from './taskObjects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 
-export const provideKosamlStoreFeature = (environment: Environment) => [
+export const provideKosamlStore = (environment: Environment) => [
   provideStore(
     {},
     {

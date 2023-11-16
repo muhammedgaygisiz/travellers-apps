@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ConceptualDesignUseCaseTypes } from './api/types';
-import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 
 @Component({
@@ -8,7 +7,7 @@ import { MatTableModule } from '@angular/material/table';
   selector: 'kosaml-cp-base-use-case',
   templateUrl: './cp-base-use-case.component.html',
   styleUrls: ['./cp-base-use-case.component.scss'],
-  imports: [CommonModule, MatTableModule],
+  imports: [MatTableModule],
 })
 export class CpBaseUseCaseComponent implements OnInit {
   @Input()

@@ -6,7 +6,7 @@ import {
   Output,
 } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { NgIf, UpperCasePipe } from '@angular/common';
+import { UpperCasePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -15,13 +15,7 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'kosaml-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  imports: [
-    MatToolbarModule,
-    NgIf,
-    MatButtonModule,
-    MatIconModule,
-    UpperCasePipe,
-  ],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, UpperCasePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {

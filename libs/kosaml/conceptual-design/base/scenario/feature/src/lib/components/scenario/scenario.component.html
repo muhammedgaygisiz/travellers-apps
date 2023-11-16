@@ -13,9 +13,9 @@
         formControlName="title"
         [errorStateMatcher]="matcher"
       />
-      <mat-error *ngIf="scenarioForm.controls['title'].hasError('required')">
-        Field is required
-      </mat-error>
+      @if (scenarioForm.controls['title'].hasError('required')) {
+      <mat-error> Field is required </mat-error>
+      }
     </mat-form-field>
     <mat-form-field>
       <mat-label>Description</mat-label>
@@ -28,14 +28,7 @@
     </mat-form-field>
     <mat-card-actions align="end" class="manuel-card-actions-style">
       @if (showDeleteButton) {
-      <button
-        mat-button
-        type="button"
-        *ngIf="showDeleteButton"
-        (click)="onDelete()"
-      >
-        DELETE
-      </button>
+      <button mat-button type="button" (click)="onDelete()">DELETE</button>
       }
       <button mat-button type="submit">SAVE</button>
     </mat-card-actions>

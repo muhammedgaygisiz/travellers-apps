@@ -8,9 +8,7 @@ import { Scenario } from '@travellers-apps/kosaml/model/feature';
   template: `
     <kosaml-page>
       <h1 class="mat-headline-4">New Task Scenario</h1>
-      <kosaml-scenario
-        (saveScenario)="onSaveScenario($event)"
-      ></kosaml-scenario>
+      <kosaml-scenario (saveScenario)="onSaveScenario($event)" />
     </kosaml-page>
   `,
   styles: [],

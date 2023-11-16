@@ -1,3 +1,6 @@
-<kosaml-menu-bar *ngIf="isAuthenticated" />
-<kosaml-sidebar *ngIf="isAuthenticated" [project]="project" />
+@if (isAuthenticated) {
+<kosaml-menu-bar />
+} @if (isAuthenticated) {
+<kosaml-sidebar [project]="project" />
+}
 <kosaml-content />

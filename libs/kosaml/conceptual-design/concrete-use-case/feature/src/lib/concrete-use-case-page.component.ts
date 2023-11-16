@@ -7,7 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { map, tap } from 'rxjs';
 import { fromConcreteUseCases } from '@travellers-apps/kosaml/store/feature';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 
 @Component({
@@ -15,14 +15,11 @@ import { PageComponent } from '@travellers-apps/kosaml/page/feature';
   template: `
     <kosaml-page>
       <h1 class="mat-headline-4">Concrete Use Case</h1>
-      <kosaml-cp-base-use-case
-        [type]="type"
-        [dataSource]="dataSource$"
-      ></kosaml-cp-base-use-case>
+      <kosaml-cp-base-use-case [type]="type" [dataSource]="dataSource$" />
     </kosaml-page>
-    <ng-container *ngIf="currentSelected$ | async"></ng-container>
+    @if (currentSelected$ | async) {}
   `,
-  imports: [CommonModule, PageComponent, CpBaseUseCaseComponent],
+  imports: [PageComponent, CpBaseUseCaseComponent, AsyncPipe],
 })
 export class ConcreteUseCasePageComponent {
   private readonly store = inject(Store);

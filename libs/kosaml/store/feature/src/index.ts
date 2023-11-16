@@ -6,4 +6,4 @@ export { fromUseScenarios } from './lib/useScenarios';
 export { fromTaskObjects } from './lib/taskObjects';
 export { FileNode } from './lib/site/model';
 
-export { provideKosamlStoreFeature } from './lib/provideKosamlStoreFeature';
+export { provideKosamlStore } from './lib/provide-kosaml-store';

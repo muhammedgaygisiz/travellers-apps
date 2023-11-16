@@ -11,8 +11,8 @@ import { AsyncPipe } from '@angular/common';
   standalone: true,
   selector: 'travellers-apps-root',
   template: `
-    <kosaml-header (toggleProjectBar)="onToggleProjectBar()"></kosaml-header>
-    <kosaml-body [project]="project$ | async"></kosaml-body>
+    <kosaml-header (toggleProjectBar)="onToggleProjectBar()" />
+    <kosaml-body [project]="project$ | async" />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HeaderComponent, BodyComponent, AsyncPipe],

@@ -1,12 +1,13 @@
 <mat-toolbar color="primary">
+  @if (isAuthenticated) {
   <button
-    *ngIf="isAuthenticated"
     type="button"
     aria-label="Toggle sidenav"
     mat-icon-button
     (click)="onToggleProjectBar()"
   >
-    <mat-icon aria-label="Side nav toggle icon" fontIcon="menu"></mat-icon>
+    <mat-icon aria-label="Side nav toggle icon" fontIcon="menu" />
   </button>
+  }
   <span>{{ title | uppercase }}</span>
 </mat-toolbar>

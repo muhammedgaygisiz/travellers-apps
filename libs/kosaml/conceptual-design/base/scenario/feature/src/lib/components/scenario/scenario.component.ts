@@ -13,7 +13,6 @@ import {
 } from '@angular/forms';
 import { v4 as uuid } from 'uuid';
 import { KosamlErrorMatcher } from './KosamlErrorMatcher';
-import { CommonModule } from '@angular/common';
 import { CardComponent } from '@travellers-apps/kosaml/card/feature';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,7 +25,6 @@ import { Scenario } from '@travellers-apps/kosaml/model/feature';
   templateUrl: './scenario.component.html',
   styleUrls: ['./scenario.component.scss'],
   imports: [
-    CommonModule,
     CardComponent,
     ReactiveFormsModule,
     MatCardModule,

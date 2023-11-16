@@ -1,7 +1,7 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePricesShell } from '@travellers-apps/prices/shell/feature';
-import { providePricesStoreFeatures } from '@travellers-apps/prices/store/feature';
+import { providePricesStore } from '@travellers-apps/prices/store/feature';
 import { environment } from '../environments/environment';
 import { importProvidersFrom } from '@angular/core';
 import { ServiceWorkerModule } from '@angular/service-worker';
@@ -23,7 +23,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimations(),
     providePricesShell(),
-    providePricesStoreFeatures(environment),
+    providePricesStore(environment),
     importProvidersFrom(
       ServiceWorkerModule.register('ngsw-worker.js', {
         enabled: environment.production,

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
+  inject,
   Input,
   OnChanges,
   Output,
@@ -22,7 +23,7 @@ import {
 } from '@travellers-apps/prices/password-validator/feature';
 import { AuthErrorCode } from '@firebase/auth/dist/node/src/core/errors';
 import { ToastController } from '@ionic/angular';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { PageComponent } from '@travellers-apps/prices/page/feature';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
 import {
@@ -39,7 +40,6 @@ import {
   styleUrls: ['./registration.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    NgIf,
     AsyncPipe,
     PageComponent,
     CardComponent,
@@ -61,10 +61,7 @@ export class RegistrationComponent implements OnChanges {
   @Output()
   public errorConfirm: EventEmitter<void> = new EventEmitter();
 
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly toastController: ToastController
-  ) {}
+  private readonly toastController = inject(ToastController);
 
   public registrationFormGroup: FormGroup = new FormGroup<RegistrationFields>(
     {

@@ -11,7 +11,7 @@ import { NetworkEffects } from './networkStatus/effects';
 import { MostSearchedItemsEffects } from './mostSearched/effects';
 import { LocationEffects } from './location/effects';
 
-export const providePricesStoreFeatures = (environment: Environment) => [
+export const providePricesStore = (environment: Environment) => [
   provideStore(
     {},
     {

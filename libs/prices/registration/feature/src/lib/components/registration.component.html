@@ -1,6 +1,4 @@
-<ng-container
-  *ngIf="registrationFormGroup.statusChanges | async"
-></ng-container>
+@if (registrationFormGroup.statusChanges | async) {}
 
 <ta-page [enableBackButton]="true" [hideAuthButton]="true">
   <ta-card>
@@ -44,12 +42,11 @@
           Save
         </ion-button>
 
-        <div
-          class="ion-margin-top"
-          *ngIf="registrationFormGroup.errors?.['mismatch']"
-        >
+        @if (registrationFormGroup.errors?.['mismatch']) {
+        <div class="ion-margin-top">
           <ion-text color="danger"> Password does not match.</ion-text>
         </div>
+        }
       </form>
     </div>
   </ta-card>
@@ -58,7 +55,7 @@
     <div class="ion-padding">
       <ta-password-validator
         [password$]="registrationFormGroup.controls['password'].valueChanges"
-      ></ta-password-validator>
+      />
     </div>
   </ta-card>
 </ta-page>

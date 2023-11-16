@@ -27,6 +27,7 @@
       ></textarea>
     </mat-form-field>
     <mat-card-actions align="end" class="manuel-card-actions-style">
+      @if (showDeleteButton) {
       <button
         mat-button
         type="button"
@@ -35,6 +36,7 @@
       >
         DELETE
       </button>
+      }
       <button mat-button type="submit">SAVE</button>
     </mat-card-actions>
   </form>

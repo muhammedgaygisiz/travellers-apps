@@ -5,7 +5,7 @@ import { providePricesStore } from '@travellers-apps/prices/store/feature';
 import { environment } from '../environments/environment';
 import { importProvidersFrom } from '@angular/core';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { provideFirestoreFeatures } from '@travellers-apps/prices/firestore/feature';
+import { provideFirestore } from '@travellers-apps/prices/firestore/feature';
 import { provideNetworkStatus } from '@travellers-apps/common/networkstatus/feature';
 import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
 import { provideIonicAngular } from '@ionic/angular/standalone';
@@ -32,7 +32,7 @@ export const appConfig: ApplicationConfig = {
         registrationStrategy: 'registerWhenStable:30000',
       })
     ),
-    importProvidersFrom(provideFirestoreFeatures(firebaseOptions)),
+    importProvidersFrom(provideFirestore(firebaseOptions)),
     provideNetworkStatus(),
     Geolocation,
     provideIonicAngular(getIonicConfig()),

@@ -38,7 +38,7 @@
 
     <ion-card-content>
       <div>
-        <img loading="lazy" [src]="entry?.src" />
+        <img loading="eager" [src]="entry?.src" alt="image" />
         <h2>{{ entry?.name }}</h2>
         <h1>{{ entry?.price | currency }}</h1>
       </div>

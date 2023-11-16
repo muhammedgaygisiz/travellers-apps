@@ -31,8 +31,8 @@ const Template: Story<CardComponent> = (args: CardComponent) => ({
   template: `
     <ta-card>
       <ion-card-header>
-        <ion-card-subtitle>MOST SEARCHED IN</ion-card-subtitle>
         <ion-card-title>Marrakech</ion-card-title>
+        <ion-card-subtitle>MOST SEARCHED IN</ion-card-subtitle>
       </ion-card-header>
 
       <ion-card-content>

@@ -10,40 +10,39 @@
         <h5>Filters:</h5>
       </ion-card-subtitle>
 
-      <ion-chip *ngFor="let filter of filters">
-        <ion-icon
-          name="{{ filter.type | filterIcon }}"
-          color="primary"
-        ></ion-icon>
+      @for (filter of filters;track $index) {
+      <ion-chip>
+        <ion-icon name="{{ filter.type | filterIcon }}" color="primary" />
         <ion-label>{{ filter.value }}</ion-label>
         <ion-icon
           name="close"
           color="primary"
           (click)="onDeleteFilter(filter)"
-        ></ion-icon>
+        />
       </ion-chip>
+      }
 
       <ion-chip>
-        <ion-icon name="filter-outline" color="primary"></ion-icon>
+        <ion-icon name="filter-outline" color="primary" />
         <ion-label>Add</ion-label>
       </ion-chip>
     </ion-card-header>
   </ta-card>
 
-  <ng-container *ngFor="let entry of filteredPrices; trackBy: by">
-    <ta-card>
-      <ion-card-header>
-        <ion-card-subtitle>MOST SEARCHED IN</ion-card-subtitle>
-        <ion-card-title>{{ entry.location }}</ion-card-title>
-      </ion-card-header>
+  @for (entry of filteredPrices;track $index) {
+  <ta-card>
+    <ion-card-header>
+      <ion-card-subtitle>MOST SEARCHED IN</ion-card-subtitle>
+      <ion-card-title>{{ entry.location }}</ion-card-title>
+    </ion-card-header>
 
-      <ion-card-content>
-        <div>
-          <img loading="lazy" [src]="entry?.src" />
-          <h2>{{ entry?.name }}</h2>
-          <h1>{{ entry?.price | currency }}</h1>
-        </div>
-      </ion-card-content>
-    </ta-card>
-  </ng-container>
+    <ion-card-content>
+      <div>
+        <img loading="lazy" [src]="entry?.src" />
+        <h2>{{ entry?.name }}</h2>
+        <h1>{{ entry?.price | currency }}</h1>
+      </div>
+    </ion-card-content>
+  </ta-card>
+  }
 </ta-page>

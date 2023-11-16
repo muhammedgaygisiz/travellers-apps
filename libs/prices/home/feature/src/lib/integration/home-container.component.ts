@@ -21,7 +21,7 @@ import { AsyncPipe } from '@angular/common';
       (addItemClick)="onAddItemClick()"
       (loginClick)="onLoginClick()"
       (logoutClick)="onLogoutClick()"
-    ></ta-home>
+    />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HomeComponent, AsyncPipe],

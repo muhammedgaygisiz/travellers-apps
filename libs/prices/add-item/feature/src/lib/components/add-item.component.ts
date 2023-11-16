@@ -16,7 +16,7 @@ import {
 import { AddItem } from '../api/add-item';
 import { Price } from '@travellers-apps/utils-common';
 import { ImageUrlValidator } from '../async-validators/image-url.validator';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
 import { PageComponent } from '@travellers-apps/prices/page/feature';
 import {
@@ -35,7 +35,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
-    NgIf,
     AsyncPipe,
     CardComponent,
     PageComponent,

@@ -2,11 +2,9 @@
   <ion-header>
     <ion-toolbar>
       <ion-buttons slot="start">
-        <ion-back-button
-          *ngIf="enableBackButton"
-          defaultHref="/home"
-          color="white"
-        ></ion-back-button>
+        @if (enableBackButton) {
+        <ion-back-button defaultHref="/home" color="white" />
+        }
       </ion-buttons>
 
       <ion-title>
@@ -15,29 +13,15 @@
       </ion-title>
 
       <ion-buttons slot="end">
-        <ion-button
-          (click)="loginClick.emit()"
-          *ngIf="!hideAuthButton && !isAuthenticated"
-          data-cy="btn-login"
-        >
-          <ion-icon
-            color="dark"
-            slot="icon-only"
-            name="log-in-outline"
-          ></ion-icon>
+        @if (!hideAuthButton && !isAuthenticated) {
+        <ion-button data-cy="btn-login" (click)="loginClick.emit()">
+          <ion-icon color="dark" slot="icon-only" name="log-in-outline" />
         </ion-button>
-
-        <ion-button
-          (click)="logoutClick.emit()"
-          *ngIf="!hideAuthButton && isAuthenticated"
-          data-cy="btn-logout"
-        >
-          <ion-icon
-            color="dark"
-            slot="icon-only"
-            name="log-out-outline"
-          ></ion-icon>
+        } @if (!hideAuthButton && isAuthenticated) {
+        <ion-button data-cy="btn-logout" (click)="logoutClick.emit()">
+          <ion-icon color="dark" slot="icon-only" name="log-out-outline" />
         </ion-button>
+        }
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -47,19 +31,16 @@
   </ion-content>
 
   <ng-container>
-    <ion-fab
-      vertical="bottom"
-      horizontal="center"
-      slot="fixed"
-      *ngIf="isAuthenticated"
-    >
+    @if (isAuthenticated) {
+    <ion-fab vertical="bottom" horizontal="center" slot="fixed">
       <ion-fab-button color="light" (click)="addItemClick.emit()">
         <ion-icon name="add" />
       </ion-fab-button>
     </ion-fab>
+    }
 
     <ion-footer>
-      <ion-toolbar></ion-toolbar>
+      <ion-toolbar />
     </ion-footer>
   </ng-container>
 </div>

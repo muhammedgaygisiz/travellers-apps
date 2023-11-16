@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { from, map, Observable, of, switchMap } from 'rxjs';
 import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
 import { Coordinates } from '@awesome-cordova-plugins/geolocation';
@@ -8,14 +8,11 @@ import { fromFetch } from 'rxjs/internal/observable/dom/fetch';
   providedIn: 'root',
 })
 export class LocationService {
+  private readonly geolocation = inject(Geolocation);
+
   getLocation$: Observable<string> = from(this.getLocation()).pipe(
     switchMap((geolocation) => this.getCityForCoordinates(geolocation.coords))
   );
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly geolocation: Geolocation
-  ) {}
 
   private getLocation() {
     return this.geolocation.getCurrentPosition();

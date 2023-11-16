@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   fromLocation,
   fromMostSearched,
@@ -10,12 +10,9 @@ import { Price } from '@travellers-apps/utils-common';
   providedIn: 'root',
 })
 export class AddItemService {
-  location$ = this.store.select(fromLocation.selectLocation);
+  private readonly store = inject(Store);
 
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly store: Store
-  ) {}
+  location$ = this.store.select(fromLocation.selectLocation);
 
   saveItem(price: Price) {
     this.store.dispatch(

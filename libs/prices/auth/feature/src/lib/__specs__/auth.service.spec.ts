@@ -11,7 +11,7 @@ describe('AuthService', () => {
       providers: [provideMockStore({ initialState })],
     }).compileComponents();
 
-    service = TestBed.inject<AuthService>(AuthService);
+    service = TestBed.inject(AuthService);
   });
 
   it('should create', () => {

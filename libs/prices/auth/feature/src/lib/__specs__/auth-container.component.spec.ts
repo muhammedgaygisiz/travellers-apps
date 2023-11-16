@@ -37,7 +37,7 @@ describe('AuthContainerComponent', () => {
   });
 
   describe('when onSignupWithGoogle is called', () => {
-    it('should call loginWithGoogleAccount in auth service', function () {
+    it('should call loginWithGoogleAccount in auth service', () => {
       component.onSignupWithGoogle();
 
       expect(loginWithGoogleAccountMock).toBeCalledTimes(1);

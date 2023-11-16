@@ -13,7 +13,7 @@ import { AuthComponent } from '../components/auth.component';
     (submitAuth)="login($event)"
     (signup)="gotoSignup()"
     (submitSignupWithGoogle)="onSignupWithGoogle()"
-  ></ta-auth>`,
+  />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AsyncPipe, AuthComponent],
 })

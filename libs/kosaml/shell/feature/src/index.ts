@@ -1,1 +1,1 @@
-export * from './lib/provideKosamlShell';
+export * from './lib/provide-kosaml-shell';

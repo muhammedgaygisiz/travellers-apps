@@ -1,5 +1,5 @@
 <!-- Pattern to force cd combined with reactive form groups -->
-<ng-container *ngIf="priceFormGroup.statusChanges | async"></ng-container>
+@if (priceFormGroup.statusChanges | async) {}
 
 <ta-page
   [enableBackButton]="true"
@@ -58,68 +58,53 @@
 
         <div class="ion-margin-top">
           <div>
-            <ion-text
-              class="ion-padding"
-              color="danger"
-              *ngIf="
-                !priceFormGroup.controls['productName'].pristine &&
-                !priceFormGroup.controls['productName'].valid
-              "
-            >
+            @if (!priceFormGroup.controls['productName'].pristine &&
+            !priceFormGroup.controls['productName'].valid) {
+            <ion-text class="ion-padding" color="danger">
               Product Name is required.
             </ion-text>
+            }
           </div>
           <div>
-            <ion-text
-              class="ion-padding"
-              color="danger"
-              *ngIf="
-                !priceFormGroup.controls['price'].pristine &&
-                !priceFormGroup.controls['price'].valid
-              "
-            >
+            @if (!priceFormGroup.controls['price'].pristine &&
+            !priceFormGroup.controls['price'].valid) {
+            <ion-text class="ion-padding" color="danger">
               Price is required and must be a decimal.
             </ion-text>
+            }
           </div>
           <div>
-            <ion-text
-              class="ion-padding"
-              color="danger"
-              *ngIf="
-                !priceFormGroup.controls['location'].pristine &&
-                !priceFormGroup.controls['location'].valid
-              "
-            >
+            @if (!priceFormGroup.controls['location'].pristine &&
+            !priceFormGroup.controls['location'].valid) {
+            <ion-text class="ion-padding" color="danger">
               Location is required.
             </ion-text>
+            }
           </div>
           <div>
-            <ion-text
-              class="ion-padding"
-              color="danger"
-              *ngIf="
-                priceFormGroup.controls['src'].errors?.['errorOnLoad']
-                && !(priceFormGroup.controls['src'].status !== 'PENDING')
-              "
-            >
+            @if (priceFormGroup.controls['src'].errors?.['errorOnLoad'] &&
+            !(priceFormGroup.controls['src'].status !== 'PENDING')) {
+            <ion-text class="ion-padding" color="danger">
               Could not load image from '{{
                 priceFormGroup.controls['src'].value
               }}'
             </ion-text>
+            }
           </div>
         </div>
       </form>
     </div>
   </ta-card>
   <ta-card>
-    <div
-      class="ion-margin"
-      *ngIf="
-        priceFormGroup.controls['src'].status === 'PENDING' ||
-        priceFormGroup.controls['src'].status === 'VALID'
-      "
-    >
-      <img loading="lazy" [src]="priceFormGroup.controls['src'].value" />
+    @if (priceFormGroup.controls['src'].status === 'PENDING' ||
+    priceFormGroup.controls['src'].status === 'VALID') {
+    <div class="ion-margin">
+      <img
+        loading="eager"
+        [src]="priceFormGroup.controls['src'].value"
+        alt="image"
+      />
     </div>
+    }
   </ta-card>
 </ta-page>

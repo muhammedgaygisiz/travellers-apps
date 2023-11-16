@@ -3,9 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { fromTaskObjects } from '@travellers-apps/kosaml/store/feature';
 import { select, Store } from '@ngrx/store';
 import { map, tap } from 'rxjs';
-import { CommonModule } from '@angular/common';
 import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { TaskObjectComponent } from './components/task-object/task-object.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -13,13 +13,11 @@ import { TaskObjectComponent } from './components/task-object/task-object.compon
     <kosaml-page>
       <h1 class="mat-headline-4">Task Object</h1>
 
-      <kosaml-task-object
-        [dataSource]="dataSource$ | async"
-      ></kosaml-task-object>
+      <kosaml-task-object [dataSource]="dataSource$ | async" />
     </kosaml-page>
-    <ng-container *ngIf="currentSelected$ | async"></ng-container>
+    @if (currentSelected$ | async) {}
   `,
-  imports: [CommonModule, PageComponent, TaskObjectComponent],
+  imports: [PageComponent, TaskObjectComponent, AsyncPipe],
 })
 export class TaskObjectPageComponent {
   private readonly store = inject(Store);

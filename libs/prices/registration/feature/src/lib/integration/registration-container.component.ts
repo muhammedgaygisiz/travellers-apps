@@ -12,8 +12,7 @@ import { AsyncPipe } from '@angular/common';
       [registrationError]="registrationError$ | async"
       (submitRegistration)="onSubmit($event)"
       (errorConfirm)="onErrorConfirm()"
-    >
-    </ta-registration>
+    />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RegistrationComponent, AsyncPipe],

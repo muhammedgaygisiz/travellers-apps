@@ -7,7 +7,7 @@ import {
   ConceptualDesignUseCaseTypes,
   CpBaseUseCaseComponent,
 } from '@travellers-apps/kosaml/conceptual-design/base/use-case/feature';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { MatTableModule } from '@angular/material/table';
 
@@ -16,19 +16,11 @@ import { MatTableModule } from '@angular/material/table';
   template: `
     <kosaml-page>
       <h1 class="mat-headline-4">Essential Use Case</h1>
-      <kosaml-cp-base-use-case
-        [type]="type"
-        [dataSource]="dataSource$"
-      ></kosaml-cp-base-use-case>
+      <kosaml-cp-base-use-case [type]="type" [dataSource]="dataSource$" />
     </kosaml-page>
-    <ng-container *ngIf="currentSelected$ | async"></ng-container>
+    @if (currentSelected$ | async) { }
   `,
-  imports: [
-    CommonModule,
-    PageComponent,
-    MatTableModule,
-    CpBaseUseCaseComponent,
-  ],
+  imports: [PageComponent, MatTableModule, CpBaseUseCaseComponent, AsyncPipe],
 })
 export class EssentialUseCasePageComponent {
   private readonly store = inject(Store);

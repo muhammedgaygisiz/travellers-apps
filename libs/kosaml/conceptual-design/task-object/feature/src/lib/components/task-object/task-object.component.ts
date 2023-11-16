@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
-import { NgForOf, NgIf } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -8,7 +7,7 @@ import { NgForOf, NgIf } from '@angular/common';
   templateUrl: './task-object.component.html',
   styleUrls: ['./task-object.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatTableModule, NgIf, NgForOf],
+  imports: [MatTableModule],
 })
 export class TaskObjectComponent {
   @Input()

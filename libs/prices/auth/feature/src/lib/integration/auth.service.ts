@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { fromAuth } from '@travellers-apps/prices/store/feature';
 import { Observable } from 'rxjs';
@@ -9,16 +9,12 @@ import { NavController } from '@ionic/angular';
   providedIn: 'root',
 })
 export class AuthService {
+  private store = inject(Store);
+  private navController = inject(NavController);
+
   public loginFailed$: Observable<boolean> = this.store.select(
     fromAuth.selectLoginFailed
   );
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private store: Store,
-    // eslint-disable-next-line no-unused-vars
-    private navController: NavController
-  ) {}
 
   public login(authCreds: AuthCredentials): void {
     this.store.dispatch(fromAuth.login({ authCreds }));

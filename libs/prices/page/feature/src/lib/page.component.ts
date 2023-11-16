@@ -18,7 +18,6 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { NgIf } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -37,7 +36,6 @@ import { NgIf } from '@angular/common';
     IonFab,
     IonFabButton,
     IonFooter,
-    NgIf,
   ],
 })
 export class PageComponent {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   fromAuth,
@@ -11,18 +11,14 @@ import { NavController } from '@ionic/angular';
   providedIn: 'root',
 })
 export class HomeService {
+  private readonly store = inject(Store);
+  private readonly navController = inject(NavController);
+
   mostSearched$ = this.store.select(fromMostSearched.selectAllItems);
 
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
 
   location$ = this.store.select(fromLocation.selectLocation);
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly store: Store,
-    // eslint-disable-next-line no-unused-vars
-    private readonly navController: NavController
-  ) {}
 
   public loadMostSearchedEntries(): void {
     this.store.dispatch(fromMostSearched.loadItems());

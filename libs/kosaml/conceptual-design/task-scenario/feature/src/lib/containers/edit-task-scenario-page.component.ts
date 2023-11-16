@@ -5,7 +5,7 @@ import { fromTaskScenarios } from '@travellers-apps/kosaml/store/feature';
 import { ActivatedRoute } from '@angular/router';
 import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/base/scenario/feature';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { Scenario } from '@travellers-apps/kosaml/model/feature';
 
 @Component({
@@ -18,11 +18,11 @@ import { Scenario } from '@travellers-apps/kosaml/model/feature';
         [showDeleteButton]="true"
         (saveScenario)="onSaveScenario($event)"
         (deleteScenario)="onDeleteScenario($event)"
-      ></kosaml-scenario>
+      />
     </kosaml-page>
-    <ng-container *ngIf="currentSelected$ | async"></ng-container>
+    @if (currentSelected$ | async) {}
   `,
-  imports: [PageComponent, ScenarioComponent, AsyncPipe, NgIf],
+  imports: [PageComponent, ScenarioComponent, AsyncPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditTaskScenarioPageComponent {

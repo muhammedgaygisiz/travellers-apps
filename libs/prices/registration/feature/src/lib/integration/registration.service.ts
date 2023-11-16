@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { AuthCredentials } from '@travellers-apps/utils-common';
 import { Store } from '@ngrx/store';
 import { fromAuth } from '@travellers-apps/prices/store/feature';
@@ -7,12 +7,9 @@ import { fromAuth } from '@travellers-apps/prices/store/feature';
   providedIn: 'root',
 })
 export class RegistrationService {
-  errorCode$ = this.store.select(fromAuth.selectRegistrationErrorCode);
+  private readonly store = inject(Store);
 
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly store: Store
-  ) {}
+  errorCode$ = this.store.select(fromAuth.selectRegistrationErrorCode);
 
   public register(registration: AuthCredentials): void {
     this.store.dispatch(fromAuth.register({ registration }));

@@ -1,5 +1,5 @@
 import { from, Observable } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MostSearchedItem, Price } from '@travellers-apps/utils-common';
 import {
   AngularFirestore,
@@ -13,14 +13,11 @@ const PRICES_COLLECTION = 'prices';
   providedIn: 'root',
 })
 export class PricesService {
+  private readonly afs = inject(AngularFirestore);
+
   public allMostSearchedItems$: Observable<MostSearchedItem[]> = this.afs
     .collection<MostSearchedItem>(PRICES_COLLECTION)
     .valueChanges();
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly afs: AngularFirestore
-  ) {}
 
   saveMostSearchedItem$(item: Price): Observable<DocumentReference> {
     return from(

@@ -11,7 +11,7 @@ import { AddItemComponent } from '../components/add-item.component';
       class="ion-page"
       [location]="location$ | async"
       (save)="saveItem($event)"
-    ></ta-add-item>
+    />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AsyncPipe, AddItemComponent],

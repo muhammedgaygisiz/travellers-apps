@@ -10,7 +10,6 @@ import { AuthCredentials } from '@travellers-apps/utils-common';
 import { getPasswordValidators } from '@travellers-apps/prices/password-validator/feature';
 import { PageComponent } from '@travellers-apps/prices/page/feature';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
-import { NgIf } from '@angular/common';
 import {
   IonButton,
   IonIcon,
@@ -28,7 +27,6 @@ import {
     PageComponent,
     CardComponent,
     ReactiveFormsModule,
-    NgIf,
     IonButton,
     IonIcon,
     IonItem,

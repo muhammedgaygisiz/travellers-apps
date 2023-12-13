@@ -1,8 +1,5 @@
 import { Routes } from '@angular/router';
-import {
-  AngularFireAuthGuard,
-  redirectUnauthorizedTo,
-} from '@angular/fire/compat/auth-guard';
+import { redirectUnauthorizedTo, AuthGuard } from '@angular/fire/auth-guard';
 
 const redirectUnauthorizedToHome = () => redirectUnauthorizedTo(['home']);
 
@@ -20,7 +17,7 @@ export const ROUTES: Routes = [
       import('@travellers-apps/prices/add-item/feature').then(
         (m) => m.AddItemContainerComponent
       ),
-    canActivate: [AngularFireAuthGuard],
+    canActivate: [AuthGuard],
     data: {
       authGuardPipe: redirectUnauthorizedToHome,
     },

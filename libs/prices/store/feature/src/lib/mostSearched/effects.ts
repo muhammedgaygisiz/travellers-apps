@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { itemsLoaded, loadItems, saveItem } from './actions';
 import {
@@ -7,7 +6,6 @@ import {
   EMPTY,
   filter,
   map,
-  mergeMap,
   switchMap,
   tap,
   withLatestFrom,
@@ -20,12 +18,18 @@ import { Store } from '@ngrx/store';
 
 @Injectable()
 export class MostSearchedItemsEffects {
+  private readonly actions$ = inject(Actions);
+  private readonly mostSearchedService = inject(PricesService);
+  private readonly navController = inject(NavController);
+  private readonly store = inject(Store);
+  private readonly toastController = inject(ToastController);
+
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
 
   loadMostSearchedItemsEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadItems.type),
-      mergeMap(() =>
+      switchMap(() =>
         this.mostSearchedService.allMostSearchedItems$.pipe(
           map((mostSearchedEntries) =>
             this.toItemsLoadedAction(mostSearchedEntries)
@@ -66,19 +70,6 @@ export class MostSearchedItemsEffects {
       await toast.present();
     }
   }
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly actions$: Actions,
-    // eslint-disable-next-line no-unused-vars
-    private readonly mostSearchedService: PricesService,
-    // eslint-disable-next-line no-unused-vars
-    private readonly navController: NavController,
-    // eslint-disable-next-line no-unused-vars
-    private readonly store: Store,
-    // eslint-disable-next-line no-unused-vars
-    private toastController: ToastController
-  ) {}
 
   private toItemsLoadedAction(mostSearchedEntries: MostSearchedItem[]) {
     return itemsLoaded({

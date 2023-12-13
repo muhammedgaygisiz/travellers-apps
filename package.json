@@ -49,7 +49,7 @@
     "@ngrx/router-store": "17.0.1",
     "@ngrx/store": "17.0.1",
     "cordova-plugin-geolocation": "5.0.0",
-    "firebase": "10.6.0",
+    "firebase": "10.7.1",
     "memoizee": "0.4.15",
     "rxjs": "7.8.1",
     "tslib": "2.3.0",

@@ -74,14 +74,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "options": {
-        "lintFilePatterns": [
-          "apps/kosaml/**/*.ts",
-          "apps/kosaml/**/*.html",
-          "apps/kosaml/.storybook/*.js"
-        ]
-      }
+      "executor": "@nx/eslint:lint"
     },
     "test": {
       "executor": "@nx/jest:jest",

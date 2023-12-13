@@ -13,13 +13,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/kosaml/conceptual-design/base/use-case/feature/**/*.ts",
-          "libs/kosaml/conceptual-design/base/use-case/feature/**/*.html"
-        ]
-      }
+      "executor": "@nx/eslint:lint"
     },
     "stylelint": {
       "executor": "nx-stylelint:lint",

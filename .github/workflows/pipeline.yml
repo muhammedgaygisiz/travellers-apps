@@ -12,6 +12,7 @@ concurrency:
 
 env:
   CI: true
+  NODE_VERSION: 18.x
 
 jobs:
   install-dependencies:
@@ -31,7 +32,7 @@ jobs:
         uses: actions/setup-node@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          node-version: 18.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - name: NPM Dependencies
@@ -59,7 +60,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -84,7 +85,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -111,7 +112,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -134,7 +135,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -157,7 +158,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -201,7 +202,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -230,7 +231,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -264,7 +265,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -312,7 +313,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - name: Run E2E Tests
@@ -342,7 +343,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -378,7 +379,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -406,7 +407,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -458,7 +459,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -481,7 +482,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -504,7 +505,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -551,7 +552,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -580,7 +581,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3
@@ -616,7 +617,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: env.NODE_VERSION
           cache: 'npm'
 
       - uses: actions/cache/restore@v3

@@ -29,7 +29,7 @@
     </ion-card-header>
   </ta-card>
 
-  @for (entry of filteredPrices;track $index) {
+  @for (entry of filteredPrices; track $index) {
   <ta-card>
     <ion-card-header>
       <ion-card-subtitle>MOST SEARCHED IN</ion-card-subtitle>
@@ -43,6 +43,13 @@
         <h1>{{ entry?.price | currency }}</h1>
       </div>
     </ion-card-content>
+  </ta-card>
+  } @empty {
+  <ta-card>
+    <ion-card-header>
+      <ion-card-title>{{ location }} </ion-card-title>
+      <ion-card-subtitle>No Prices in </ion-card-subtitle>
+    </ion-card-header>
   </ta-card>
   }
 </ta-page>

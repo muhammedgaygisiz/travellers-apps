@@ -1,10 +1,12 @@
-import { from, Observable } from 'rxjs';
 import { inject, Injectable } from '@angular/core';
-import { MostSearchedItem, Price } from '@travellers-apps/utils-common';
 import {
-  AngularFirestore,
-  DocumentReference,
-} from '@angular/fire/compat/firestore';
+  addDoc,
+  collection,
+  collectionData,
+  Firestore,
+} from '@angular/fire/firestore';
+import { from, Observable } from 'rxjs';
+import { MostSearchedItem, Price } from '@travellers-apps/utils-common';
 import { v4 as uuidV4 } from 'uuid';
 
 const PRICES_COLLECTION = 'prices';
@@ -13,15 +15,16 @@ const PRICES_COLLECTION = 'prices';
   providedIn: 'root',
 })
 export class PricesService {
-  private readonly afs = inject(AngularFirestore);
+  private readonly afs = inject(Firestore);
+  private pricesCollection = collection(this.afs, PRICES_COLLECTION);
 
-  public allMostSearchedItems$: Observable<MostSearchedItem[]> = this.afs
-    .collection<MostSearchedItem>(PRICES_COLLECTION)
-    .valueChanges();
+  public allMostSearchedItems$ = collectionData(
+    this.pricesCollection
+  ) as Observable<MostSearchedItem[]>;
 
-  saveMostSearchedItem$(item: Price): Observable<DocumentReference> {
+  saveMostSearchedItem$(item: Price) {
     return from(
-      this.afs.collection<MostSearchedItem>(PRICES_COLLECTION).add({
+      addDoc(this.pricesCollection, {
         id: uuidV4(),
         src: item.src,
         name: item.productName,

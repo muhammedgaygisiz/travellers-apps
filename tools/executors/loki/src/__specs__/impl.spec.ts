@@ -10,7 +10,8 @@ describe('loki nx executor', () => {
         '--reactUri file:/Users/muhammedgaygisiz/DEV/travellers-apps/dist/storybook/prices ' +
         '--reference=../../apps/prices/.loki/reference ' +
         '--difference=../../apps/prices/.loki/difference ' +
-        '--output=../../apps/prices/.loki/current';
+        '--output=../../apps/prices/.loki/current ' +
+        '--chromeTolerance=0';
 
       const projectName = 'prices';
       const BUILD_STORYBOOK_TARGET = 'build-storybook';
@@ -39,6 +40,7 @@ describe('loki nx executor', () => {
           difference: 'apps/prices/.loki/difference',
           output: 'apps/prices/.loki/current',
           update: false,
+          chromeTolerance: 0,
         }
       );
 

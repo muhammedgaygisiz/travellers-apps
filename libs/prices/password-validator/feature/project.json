@@ -15,13 +15,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/prices/password-validator/feature/**/*.ts",
-          "libs/prices/password-validator/feature/**/*.html"
-        ]
-      }
+      "executor": "@nx/eslint:lint"
     },
     "stylelint": {
       "executor": "nx-stylelint:lint",

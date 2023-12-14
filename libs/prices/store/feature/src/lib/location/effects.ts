@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { loginSucceeded } from '../auth/actions';
 import { catchError, EMPTY, map, mergeMap } from 'rxjs';
@@ -7,6 +7,9 @@ import { locationLoaded } from './actions';
 
 @Injectable()
 export class LocationEffects {
+  private readonly actions$ = inject(Actions);
+  private readonly locationService = inject(LocationService);
+
   loadLocationEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loginSucceeded.type),
@@ -18,11 +21,4 @@ export class LocationEffects {
       )
     )
   );
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly actions$: Actions,
-    // eslint-disable-next-line no-unused-vars
-    private readonly locationService: LocationService
-  ) {}
 }

@@ -1,10 +1,16 @@
-import { AngularFireModule } from '@angular/fire/compat';
-import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
-import { FirebaseOptions } from 'firebase/app';
+import {
+  FirebaseOptions,
+  initializeApp,
+  provideFirebaseApp,
+} from '@angular/fire/app';
+import {
+  getFirestore,
+  provideFirestore as provFireStore,
+} from '@angular/fire/firestore';
+import { getAuth, provideAuth } from '@angular/fire/auth';
 
 export const provideFirestore = (firebaseOptions: FirebaseOptions) => [
-  AngularFireModule.initializeApp(firebaseOptions || {}),
-  AngularFirestoreModule.enablePersistence({
-    synchronizeTabs: false,
-  }),
+  provideFirebaseApp(() => initializeApp(firebaseOptions || {})),
+  provFireStore(() => getFirestore()),
+  provideAuth(() => getAuth()),
 ];

@@ -13,13 +13,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/prices/add-item/feature/**/*.ts",
-          "libs/prices/add-item/feature/**/*.html"
-        ]
-      }
+      "executor": "@nx/eslint:lint"
     },
     "stylelint": {
       "executor": "nx-stylelint:lint",

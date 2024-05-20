@@ -12,7 +12,7 @@
     "start:prices": "nx serve prices",
     "start:storybook:prices": "nx run prices:storybook",
     "build:storybook:prices": "nx run prices:build-storybook",
-    "prepare": "husky install",
+    "prepare": "husky",
     "compile:loki:executor": "tsc --project tools/executors/loki/tsconfig.executor.json",
     "prices:loki:approve": "nx loki prices --configuration=approve",
     "kosaml:loki:approve": "nx loki kosaml --configuration=approve",

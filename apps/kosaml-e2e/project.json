@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/kosaml-e2e/src",
   "projectType": "application",
+  "tags": [],
+  "implicitDependencies": ["kosaml"],
   "targets": {
     "e2e": {
       "executor": "@nx/cypress:cypress",
@@ -18,10 +20,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "executor": "@nx/eslint:lint"
     }
-  },
-  "tags": [],
-  "implicitDependencies": ["kosaml"]
+  }
 }

@@ -4,6 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/prices/password-validator/feature/src",
   "prefix": "travellers-apps",
+  "tags": [],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",
@@ -28,6 +29,5 @@
         "formatter": "compact"
       }
     }
-  },
-  "tags": []
+  }
 }

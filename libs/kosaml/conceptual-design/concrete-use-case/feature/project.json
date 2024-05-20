@@ -4,6 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/kosaml/conceptual-design/concrete-use-case/feature/src",
   "prefix": "travellers-apps",
+  "tags": [],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",
@@ -26,6 +27,5 @@
         "formatter": "compact"
       }
     }
-  },
-  "tags": []
+  }
 }

@@ -1,9 +1,9 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePricesShell } from '@travellers-apps/prices/shell/feature';
 import { providePricesStore } from '@travellers-apps/prices/store/feature';
 import { environment } from '../environments/environment';
-import { ServiceWorkerModule } from '@angular/service-worker';
+import { provideServiceWorker } from '@angular/service-worker';
 import { provideFirestore } from '@travellers-apps/prices/firestore/feature';
 import { provideNetworkStatus } from '@travellers-apps/common/networkstatus/feature';
 import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
@@ -25,15 +25,13 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     providePricesShell(),
     providePricesStore(environment),
-    importProvidersFrom(
-      ServiceWorkerModule.register('ngsw-worker.js', {
-        enabled: environment.production,
-        // Register the ServiceWorker as soon as the application is stable
-        // or after 30 seconds (whichever comes first).
-        registrationStrategy: 'registerWhenStable:30000',
-      })
-    ),
-    importProvidersFrom(provideFirestore(firebaseOptions)),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: environment.production,
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
+    provideFirestore(firebaseOptions),
     provideNetworkStatus(),
     Geolocation,
     provideIonicAngular(getIonicConfig()),

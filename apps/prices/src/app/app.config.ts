@@ -1,15 +1,16 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePricesShell } from '@travellers-apps/prices/shell/feature';
 import { providePricesStore } from '@travellers-apps/prices/store/feature';
 import { environment } from '../environments/environment';
-import { importProvidersFrom } from '@angular/core';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { provideFirestore } from '@travellers-apps/prices/firestore/feature';
 import { provideNetworkStatus } from '@travellers-apps/common/networkstatus/feature';
 import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from '@travellers-apps/utils-common';
+import { provideLocalization } from '@travellers-apps/prices/localization';
+import { provideHttpClient } from '@angular/common/http';
 
 const firebaseOptions = {
   apiKey: process.env['NX_APP_API_KEY'],
@@ -36,5 +37,7 @@ export const appConfig: ApplicationConfig = {
     provideNetworkStatus(),
     Geolocation,
     provideIonicAngular(getIonicConfig()),
+    provideHttpClient(),
+    provideLocalization(),
   ],
 };

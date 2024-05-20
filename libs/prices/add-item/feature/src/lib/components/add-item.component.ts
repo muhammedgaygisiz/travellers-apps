@@ -26,6 +26,7 @@ import {
   IonLabel,
   IonText,
 } from '@ionic/angular/standalone';
+import { TranslatePipe } from '@travellers-apps/prices/localization';
 
 @Component({
   standalone: true,
@@ -43,6 +44,7 @@ import {
     IonInput,
     IonButton,
     IonText,
+    TranslatePipe,
   ],
   providers: [ImageUrlValidator],
 })

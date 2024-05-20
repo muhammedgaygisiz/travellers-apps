@@ -14,3 +14,5 @@ To update the loki reference images run `nx run prices:loki:approve`.
 There is also a test for the executor, that should make sure that
 the executor builds the right command. To run the test the command
 `nx test executor-loki` can be utilized.
+
+[//]: # 'Test'

@@ -1,0 +1,8 @@
+{
+  "add-item": {
+    "product-name": "Produktname",
+    "price": "Preis",
+    "location": "Ort",
+    "image-source": "Bild-Link"
+  }
+}

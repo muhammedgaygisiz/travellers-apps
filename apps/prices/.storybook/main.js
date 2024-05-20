@@ -16,6 +16,12 @@ module.exports = {
   features: {
     previewMdx2: true,
   },
+  staticDirs: [
+    {
+      from: '../src/assets/i18n',
+      to: '/assets/i18n',
+    },
+  ],
   webpackFinal: async (config, { configType }) => {
     // apply any global webpack configs that might have been specified in .storybook/main.js
     if (rootMain.webpackFinal) {

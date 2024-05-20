@@ -13,7 +13,7 @@
           <ion-input
             type="text"
             formControlName="productName"
-            label="Product Name"
+            [label]="'add-item.product-name' | translate"
             labelPlacement="floating"
           />
         </ion-item>
@@ -24,9 +24,9 @@
             formControlName="price"
             value=""
             inputmode="decimal"
-            label="Price"
+            [label]="'add-item.price' | translate"
             labelPlacement="floating"
-          ></ion-input>
+          />
         </ion-item>
 
         <ion-item lines="full">
@@ -34,18 +34,18 @@
             type="text"
             formControlName="location"
             [value]="location"
-            label="Location"
+            [label]="'add-item.location' | translate"
             labelPlacement="floating"
-          ></ion-input>
+          />
         </ion-item>
 
         <ion-item lines="full">
           <ion-input
             type="text"
             formControlName="src"
-            label="Image Source"
+            [label]="'add-item.image-source' | translate"
             labelPlacement="floating"
-          ></ion-input>
+          />
         </ion-item>
 
         <ion-button
@@ -53,7 +53,8 @@
           expand="block"
           [disabled]="!priceFormGroup.valid"
           (click)="save.emit(priceFormGroup.value)"
-          >Save
+        >
+          Save
         </ion-button>
 
         <div class="ion-margin-top">

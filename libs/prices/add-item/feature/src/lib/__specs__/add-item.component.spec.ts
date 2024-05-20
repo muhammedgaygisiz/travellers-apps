@@ -4,6 +4,8 @@ import { addNecessaryIcons } from '@travellers-apps/utils-common';
 
 addNecessaryIcons();
 
+jest.mock('@travellers-apps/prices/localization');
+
 describe('AddItemComponent', () => {
   let component: AddItemComponent;
   let fixture: ComponentFixture<AddItemComponent>;

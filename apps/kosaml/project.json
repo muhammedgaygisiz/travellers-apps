@@ -4,6 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/kosaml/src",
   "prefix": "travellers-apps",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser",
@@ -134,6 +135,5 @@
         "formatter": "compact"
       }
     }
-  },
-  "tags": []
+  }
 }

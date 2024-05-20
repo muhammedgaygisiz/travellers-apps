@@ -21,7 +21,7 @@ import {
   passwordMatchValidator,
   PasswordValidatorComponent,
 } from '@travellers-apps/prices/password-validator/feature';
-import { AuthErrorCode } from '@firebase/auth/dist/node/src/core/errors';
+import { AuthErrorCodes } from 'firebase/auth';
 import { ToastController } from '@ionic/angular';
 import { AsyncPipe } from '@angular/common';
 import { PageComponent } from '@travellers-apps/prices/page/feature';
@@ -86,7 +86,7 @@ export class RegistrationComponent implements OnChanges {
 
   public async ngOnChanges(changes: SimpleChanges): Promise<void> {
     const receivedRegistrationError = changes['registrationError'].currentValue;
-    if (receivedRegistrationError?.indexOf(AuthErrorCode.EMAIL_EXISTS) > -1) {
+    if (receivedRegistrationError?.indexOf(AuthErrorCodes.EMAIL_EXISTS) > -1) {
       await this.showRegistrationErrorMessage();
     }
   }

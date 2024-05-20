@@ -4,6 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/prices/src",
   "prefix": "travellers-apps",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/angular:webpack-browser",
@@ -151,6 +152,5 @@
         "formatter": "compact"
       }
     }
-  },
-  "tags": []
+  }
 }

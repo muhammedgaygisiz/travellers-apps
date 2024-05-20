@@ -78,6 +78,9 @@
       "@travellers-apps/prices/home/feature": [
         "libs/prices/home/feature/src/index.ts"
       ],
+      "@travellers-apps/prices/localization": [
+        "libs/prices/localization/src/index.ts"
+      ],
       "@travellers-apps/prices/page/feature": [
         "libs/prices/page/feature/src/index.ts"
       ],
@@ -93,10 +96,7 @@
       "@travellers-apps/prices/store/feature": [
         "libs/prices/store/feature/src/index.ts"
       ],
-      "@travellers-apps/utils-common": ["libs/utils-common/src/index.ts"],
-      "@travellers-apps/prices/localization": [
-        "libs/prices/localization/src/index.ts"
-      ]
+      "@travellers-apps/utils-common": ["libs/utils-common/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

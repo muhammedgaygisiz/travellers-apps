@@ -1,8 +1,5 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "affected": {
-    "defaultBase": "main"
-  },
   "targetDefaults": {
     "build": {
       "dependsOn": ["^build"],
@@ -11,10 +8,6 @@
     },
     "e2e": {
       "inputs": ["default", "^production"],
-      "cache": true
-    },
-    "lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
       "cache": true
     },
     "build-storybook": {
@@ -45,6 +38,10 @@
         "default",
         "{workspaceRoot}/.stylelintrc(.(json|yml|yaml|js))?"
       ],
+      "cache": true
+    },
+    "@nx/eslint:lint": {
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
       "cache": true
     }
   },
@@ -79,5 +76,7 @@
       "style": "scss"
     }
   },
-  "defaultProject": "prices"
+  "defaultProject": "prices",
+  "useInferencePlugins": false,
+  "defaultBase": "main"
 }

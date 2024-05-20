@@ -1,3 +1,4 @@
+const path = require('path');
 const nxPreset = require('@nx/jest/preset').default;
 
 module.exports = {
@@ -12,4 +13,5 @@ module.exports = {
    * More info: https://jestjs.io/docs/upgrading-to-jest29#snapshot-format
    */
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
+  roots: ['<rootDir>', path.resolve(__dirname, './__mocks__')],
 };

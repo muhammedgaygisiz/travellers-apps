@@ -32,6 +32,8 @@ Cypress.Commands.add('login', (email, password) => {
 });
 
 Cypress.Commands.add('gotoLogin', () => {
+  cy.get('ta-home [data-cy=btn-menu]').click();
+  cy.get('[data-cy=menu-list]').should('be.visible');
   cy.get('[data-cy=btn-login]').click();
 });
 
@@ -40,5 +42,7 @@ Cypress.Commands.add('waitTillLocationCardIsVisible', () => {
 });
 
 Cypress.Commands.add('logout', () => {
+  cy.get('ta-home [data-cy=btn-menu]').click();
+  cy.get('[data-cy=menu-list]').should('be.visible');
   cy.get('[data-cy=btn-logout]').click();
 });

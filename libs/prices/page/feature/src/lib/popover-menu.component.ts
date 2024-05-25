@@ -17,7 +17,7 @@ import { SupportedLang } from '@travellers-apps/prices/localization';
 @Component({
   selector: 'ta-popover-menu',
   template: `
-    <ion-list lines="none">
+    <ion-list lines="none" data-cy="menu-list">
       <ion-item-group>
         <ion-item-divider>
           <ion-icon color="dark" name="language-outline" slot="start" />
@@ -55,12 +55,22 @@ import { SupportedLang } from '@travellers-apps/prices/localization';
       </ion-item-group>
 
       @if(!hideAuthButton) { @if (!isAuthenticated) {
-      <ion-item [button]="true" [detail]="false" (click)="loginClick.emit()">
+      <ion-item
+        data-cy="btn-login"
+        [button]="true"
+        [detail]="false"
+        (click)="loginClick.emit()"
+      >
         <ion-icon color="dark" name="log-in-outline" slot="start" />
         Login
       </ion-item>
       } @else {
-      <ion-item [button]="true" [detail]="false" (click)="logoutClick.emit()">
+      <ion-item
+        data-cy="btn-logout"
+        [button]="true"
+        [detail]="false"
+        (click)="logoutClick.emit()"
+      >
         <ion-icon color="dark" name="log-out-outline" slot="start" />
         Logout
       </ion-item>

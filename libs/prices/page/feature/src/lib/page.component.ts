@@ -17,7 +17,9 @@ import {
   IonIcon,
   IonTitle,
   IonToolbar,
+  PopoverController,
 } from '@ionic/angular/standalone';
+import { PopoverMenuComponent } from './popover-menu.component';
 
 @Component({
   standalone: true,
@@ -36,6 +38,7 @@ import {
     IonFab,
     IonFabButton,
     IonFooter,
+    PopoverMenuComponent,
   ],
 })
 export class PageComponent {
@@ -56,4 +59,23 @@ export class PageComponent {
 
   @Output()
   public logoutClick: EventEmitter<void> = new EventEmitter();
+
+  // eslint-disable-next-line no-unused-vars
+  constructor(public popoverController: PopoverController) {}
+
+  async showMenuPopover($event: MouseEvent) {
+    const popover = await this.popoverController.create({
+      component: PopoverMenuComponent,
+      event: $event,
+      dismissOnSelect: true,
+      componentProps: {
+        isAuthenticated: this.isAuthenticated,
+        hideAuthButton: this.hideAuthButton,
+        loginClick: this.loginClick,
+        logoutClick: this.logoutClick,
+      },
+    });
+
+    await popover.present();
+  }
 }

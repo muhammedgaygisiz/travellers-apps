@@ -14,7 +14,6 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { AuthCredentials } from '@travellers-apps/utils-common';
 import { RegistrationFields } from '../api/registration-fields';
 import {
   getPasswordValidators,
@@ -32,6 +31,7 @@ import {
   IonItem,
   IonText,
 } from '@ionic/angular/standalone';
+import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Component({
   standalone: true,

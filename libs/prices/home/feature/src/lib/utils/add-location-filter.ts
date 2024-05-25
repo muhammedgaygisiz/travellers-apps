@@ -1,4 +1,4 @@
-import Filter from '../model/filter';
+import Filter from '../api/filter';
 
 const addLocationFilter = (filters: Filter[], location: string | null) => [
   ...filters,

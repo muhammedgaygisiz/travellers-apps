@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { AuthCredentials } from '@travellers-apps/utils-common';
+import { AuthCredentials } from '../api/auth-credentials.model';
 
 export const login = createAction(
   '[Auth Page] Login',

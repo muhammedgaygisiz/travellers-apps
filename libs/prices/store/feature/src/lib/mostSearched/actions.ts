@@ -1,5 +1,6 @@
 import { createAction, props } from '@ngrx/store';
-import { MostSearchedItem, Price } from '@travellers-apps/utils-common';
+import { MostSearchedItem } from '../api/most-searched-item.model';
+import { Price } from '../api/price.model';
 
 export const loadItems = createAction('[Home Page] Load Most Searched Items');
 

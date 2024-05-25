@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AuthCredentials } from '@travellers-apps/utils-common';
 import { RegistrationService } from './registration.service';
 import { RegistrationComponent } from '../components/registration.component';
 import { AsyncPipe } from '@angular/common';
+import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Component({
   standalone: true,

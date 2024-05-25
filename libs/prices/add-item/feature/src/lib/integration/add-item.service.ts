@@ -4,7 +4,7 @@ import {
   fromMostSearched,
 } from '@travellers-apps/prices/store/feature';
 import { Store } from '@ngrx/store';
-import { Price } from '@travellers-apps/utils-common';
+import { Price } from '../api/price.model';
 
 @Injectable({
   providedIn: 'root',

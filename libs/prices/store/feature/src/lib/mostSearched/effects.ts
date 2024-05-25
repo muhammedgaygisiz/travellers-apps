@@ -11,10 +11,10 @@ import {
   withLatestFrom,
 } from 'rxjs';
 import { PricesService } from '@travellers-apps/prices/firestore/feature';
-import { MostSearchedItem } from '@travellers-apps/utils-common';
 import { NavController, ToastController } from '@ionic/angular';
 import { fromAuth } from '../auth/index';
 import { Store } from '@ngrx/store';
+import { MostSearchedItem } from '../api/most-searched-item.model';
 
 @Injectable()
 export class MostSearchedItemsEffects {

@@ -6,7 +6,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { AuthCredentialFields } from '../api/auth-credential-fields';
-import { AuthCredentials } from '@travellers-apps/utils-common';
 import { getPasswordValidators } from '@travellers-apps/prices/password-validator/feature';
 import { PageComponent } from '@travellers-apps/prices/page/feature';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
@@ -17,6 +16,7 @@ import {
   IonItem,
   IonText,
 } from '@ionic/angular/standalone';
+import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Component({
   standalone: true,

@@ -1,4 +1,4 @@
 import { EntityState } from '@ngrx/entity';
-import { MostSearchedItem } from '@travellers-apps/utils-common';
+import { MostSearchedItem } from '../api/most-searched-item.model';
 
-export type State = EntityState<MostSearchedItem>
+export type State = EntityState<MostSearchedItem>;

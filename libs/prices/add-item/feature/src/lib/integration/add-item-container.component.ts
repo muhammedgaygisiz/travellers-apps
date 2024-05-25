@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AddItemService } from './add-item.service';
-import { Price } from '@travellers-apps/utils-common';
 import { AsyncPipe } from '@angular/common';
 import { AddItemComponent } from '../components/add-item.component';
+import { Price } from '../api/price.model';
 
 @Component({
   standalone: true,

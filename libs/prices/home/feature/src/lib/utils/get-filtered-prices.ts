@@ -1,5 +1,5 @@
-import { MostSearchedItem } from '@travellers-apps/utils-common';
-import Filter from '../model/filter';
+import Filter from '../api/filter';
+import { MostSearchedItem } from '../api/most-searched-item.model';
 
 const getFilteredPrices = (
   mostSearchedEntries: MostSearchedItem[] | null,

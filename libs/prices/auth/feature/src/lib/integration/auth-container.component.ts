@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AuthService } from './auth.service';
 import { Observable } from 'rxjs';
-import { AuthCredentials } from '@travellers-apps/utils-common';
 import { AsyncPipe } from '@angular/common';
 import { AuthComponent } from '../components/auth.component';
+import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Component({
   standalone: true,

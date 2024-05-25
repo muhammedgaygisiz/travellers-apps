@@ -19,9 +19,9 @@ import {
 } from './actions';
 import { catchError, EMPTY, exhaustMap, map, mergeMap, of, tap } from 'rxjs';
 import { AuthService } from '@travellers-apps/prices/firestore/feature';
-import { AuthCredentials } from '@travellers-apps/utils-common';
 import { User } from '@angular/fire/auth';
 import { NavController } from '@ionic/angular';
+import { AuthCredentials } from '../api/auth-credentials.model';
 
 type AuthCreds = { authCreds: AuthCredentials };
 

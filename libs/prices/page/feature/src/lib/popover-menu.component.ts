@@ -12,6 +12,7 @@ import {
   IonItemGroup,
   IonList,
 } from '@ionic/angular/standalone';
+import { SupportedLang } from '@travellers-apps/prices/localization';
 
 @Component({
   selector: 'ta-popover-menu',
@@ -23,19 +24,31 @@ import {
           Language
         </ion-item-divider>
 
-        <ion-item [detail]="false">
+        <ion-item
+          [detail]="false"
+          (click)="languageChangeClick.emit(SupportedLang.EN)"
+        >
           <ion-icon src="gb.svg" slot="start"></ion-icon>
           English
         </ion-item>
-        <ion-item [detail]="false">
+        <ion-item
+          [detail]="false"
+          (click)="languageChangeClick.emit(SupportedLang.FR)"
+        >
           <ion-icon src="fr.svg" slot="start"></ion-icon>
           Français
         </ion-item>
-        <ion-item [detail]="false">
+        <ion-item
+          [detail]="false"
+          (click)="languageChangeClick.emit(SupportedLang.DE)"
+        >
           <ion-icon src="de.svg" slot="start"></ion-icon>
           Deutsch
         </ion-item>
-        <ion-item [detail]="false">
+        <ion-item
+          [detail]="false"
+          (click)="languageChangeClick.emit(SupportedLang.TR)"
+        >
           <ion-icon src="tr.svg" slot="start"></ion-icon>
           Türkçe
         </ion-item>
@@ -66,8 +79,13 @@ export class PopoverMenuComponent {
   hideAuthButton = false;
 
   @Output()
-  public loginClick: EventEmitter<void> = new EventEmitter();
+  public loginClick = new EventEmitter();
 
   @Output()
-  public logoutClick: EventEmitter<void> = new EventEmitter();
+  public logoutClick = new EventEmitter();
+
+  @Output()
+  public languageChangeClick = new EventEmitter<SupportedLang>();
+
+  protected readonly SupportedLang = SupportedLang;
 }

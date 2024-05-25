@@ -36,6 +36,6 @@ export const appConfig: ApplicationConfig = {
     Geolocation,
     provideIonicAngular(getIonicConfig()),
     provideHttpClient(),
-    provideLocalization(),
+    provideLocalization(environment.i18n),
   ],
 };

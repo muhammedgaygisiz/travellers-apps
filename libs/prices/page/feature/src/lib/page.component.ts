@@ -20,6 +20,7 @@ import {
   PopoverController,
 } from '@ionic/angular/standalone';
 import { PopoverMenuComponent } from './popover-menu.component';
+import { AngularDelegate } from '@ionic/angular';
 
 @Component({
   standalone: true,
@@ -38,8 +39,8 @@ import { PopoverMenuComponent } from './popover-menu.component';
     IonFab,
     IonFabButton,
     IonFooter,
-    PopoverMenuComponent,
   ],
+  providers: [PopoverController, AngularDelegate],
 })
 export class PageComponent {
   @Input()

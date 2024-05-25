@@ -40,7 +40,7 @@ describe('AuthContainerComponent', () => {
     it('should call loginWithGoogleAccount in auth service', () => {
       component.onSignupWithGoogle();
 
-      expect(loginWithGoogleAccountMock).toBeCalledTimes(1);
+      expect(loginWithGoogleAccountMock).toHaveBeenCalledTimes(1);
     });
   });
 });

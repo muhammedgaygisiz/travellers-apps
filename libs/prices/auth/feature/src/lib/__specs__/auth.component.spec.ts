@@ -35,6 +35,6 @@ describe('AuthComponent', () => {
     component.onGoogleSignUp();
     fixture.detectChanges();
 
-    expect(submitSignupWithGoogleEmitter).toBeCalledTimes(1);
+    expect(submitSignupWithGoogleEmitter).toHaveBeenCalledTimes(1);
   });
 });

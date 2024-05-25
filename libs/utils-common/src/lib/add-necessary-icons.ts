@@ -13,6 +13,8 @@ import {
   logoFacebook,
   closeOutline,
   checkmarkOutline,
+  menuOutline,
+  languageOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -30,5 +32,7 @@ export const addNecessaryIcons = () => {
     logoFacebook,
     closeOutline,
     checkmarkOutline,
+    menuOutline,
+    languageOutline,
   });
 };

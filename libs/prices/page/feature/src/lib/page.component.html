@@ -13,15 +13,9 @@
       </ion-title>
 
       <ion-buttons slot="end">
-        @if (!hideAuthButton && !isAuthenticated) {
-        <ion-button data-cy="btn-login" (click)="loginClick.emit()">
-          <ion-icon color="dark" slot="icon-only" name="log-in-outline" />
+        <ion-button data-cy="btn-menu" (click)="showMenuPopover($event)">
+          <ion-icon color="dark" slot="icon-only" name="menu-outline" />
         </ion-button>
-        } @if (!hideAuthButton && isAuthenticated) {
-        <ion-button data-cy="btn-logout" (click)="logoutClick.emit()">
-          <ion-icon color="dark" slot="icon-only" name="log-out-outline" />
-        </ion-button>
-        }
       </ion-buttons>
     </ion-toolbar>
   </ion-header>

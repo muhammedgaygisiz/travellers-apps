@@ -51,6 +51,7 @@
     "@ngrx/store": "17.2.0",
     "cordova-plugin-geolocation": "5.0.0",
     "firebase": "10.12.0",
+    "flag-icons": "7.2.2",
     "memoizee": "0.4.15",
     "rxjs": "7.8.1",
     "tslib": "2.3.0",

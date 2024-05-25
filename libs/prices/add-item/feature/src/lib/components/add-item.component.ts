@@ -25,7 +25,10 @@ import {
   IonLabel,
   IonText,
 } from '@ionic/angular/standalone';
-import { TranslatePipe } from '@travellers-apps/prices/localization';
+import {
+  SupportedLang,
+  TranslatePipe,
+} from '@travellers-apps/prices/localization';
 import { Price } from '../api/price.model';
 
 @Component({
@@ -54,6 +57,9 @@ export class AddItemComponent implements OnChanges {
 
   @Output()
   public save: EventEmitter<Price> = new EventEmitter();
+
+  @Output()
+  languageChangeClick = new EventEmitter<SupportedLang>();
 
   private readonly imageUrlValidator = inject(ImageUrlValidator);
 

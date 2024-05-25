@@ -1,4 +1,8 @@
 {
+  "home": {
+    "filters": "Filter",
+    "add": "Hinzufügen"
+  },
   "add-item": {
     "product-name": "Produktname",
     "price": "Preis",

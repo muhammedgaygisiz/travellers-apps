@@ -17,15 +17,19 @@ import { TranslatePipe } from './translate.pipe';
 import { SupportedLang } from './model/supported-lang';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
+import localeEn from '@angular/common/locales/en';
 
 registerLocaleData(localeDe);
+registerLocaleData(localeEn);
 
 const PROVIDERS: Provider[] = [TranslateService, TranslocoPipe, TranslatePipe];
 
-export const provideLocalization = (i18n?: {
+interface LocalizationParams {
   locales: SupportedLang[];
   defaultLang: SupportedLang;
-}) =>
+}
+
+export const provideLocalization = (i18n?: LocalizationParams) =>
   makeEnvironmentProviders([
     provideTranslocoLoader(TranslocoHttpLoader),
     provideTransloco({

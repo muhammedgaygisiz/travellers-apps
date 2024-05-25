@@ -1,0 +1,12 @@
+{
+  "home": {
+    "filters": "Filtres",
+    "add": "Ajouter"
+  },
+  "add-item": {
+    "product-name": "Non du produit",
+    "price": "Prix",
+    "location": "Emplacement",
+    "image-source": "Image-Link"
+  }
+}

@@ -9,6 +9,7 @@ import { HomeService } from './home.service';
 import { HomeComponent } from '../components';
 import { AsyncPipe } from '@angular/common';
 import { MostSearchedItem } from '../api/most-searched-item.model';
+import { SupportedLang } from '@travellers-apps/prices/localization';
 
 @Component({
   standalone: true,
@@ -21,6 +22,7 @@ import { MostSearchedItem } from '../api/most-searched-item.model';
       (addItemClick)="onAddItemClick()"
       (loginClick)="onLoginClick()"
       (logoutClick)="onLogoutClick()"
+      (languageChangeClick)="onLanguageChangeClick($event)"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,7 +51,11 @@ export class HomeContainerComponent implements OnInit {
     await this.homeService.onLoginClick();
   }
 
-  public async onLogoutClick() {
+  public onLogoutClick() {
     this.homeService.logout();
+  }
+
+  public onLanguageChangeClick(event: SupportedLang) {
+    this.homeService.changeLanguage(event);
   }
 }

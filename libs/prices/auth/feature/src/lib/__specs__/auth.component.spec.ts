@@ -6,6 +6,8 @@ import { addNecessaryIcons } from '@travellers-apps/utils-common';
 
 addNecessaryIcons();
 
+jest.mock('@travellers-apps/prices/localization');
+
 describe('AuthComponent', () => {
   let component: AuthComponent;
   let fixture: ComponentFixture<AuthComponent>;

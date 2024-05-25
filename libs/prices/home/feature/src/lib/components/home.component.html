@@ -3,11 +3,12 @@
   (addItemClick)="addItemClick.emit()"
   (loginClick)="loginClick.emit()"
   (logoutClick)="logoutClick.emit()"
+  (languageChangeClick)="languageChangeClick.emit($event)"
 >
   <ta-card class="location" data-cy="location-card">
     <ion-card-header>
       <ion-card-subtitle>
-        <h5>Filters:</h5>
+        <h5>{{ 'home.filters' | translate }}:</h5>
       </ion-card-subtitle>
 
       @for (filter of filters;track $index) {
@@ -24,7 +25,7 @@
 
       <ion-chip>
         <ion-icon name="filter-outline" color="primary" />
-        <ion-label>Add</ion-label>
+        <ion-label>{{ 'home.add' | translate }}</ion-label>
       </ion-chip>
     </ion-card-header>
   </ta-card>

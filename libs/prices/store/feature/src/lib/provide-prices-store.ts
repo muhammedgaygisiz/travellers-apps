@@ -10,6 +10,7 @@ import { AuthEffects } from './auth/effects';
 import { NetworkEffects } from './networkStatus/effects';
 import { MostSearchedItemsEffects } from './mostSearched/effects';
 import { LocationEffects } from './location/effects';
+import { LocalizationEffects } from './localization/effects';
 
 export const providePricesStore = (environment: Environment) => [
   provideStore(
@@ -27,6 +28,7 @@ export const providePricesStore = (environment: Environment) => [
     NetworkEffects,
     MostSearchedItemsEffects,
     LocationEffects,
+    LocalizationEffects,
   ]),
   provideState(fromMostSearched.key, fromMostSearched.reducer),
   provideState(fromAuth.key, fromAuth.reducer),

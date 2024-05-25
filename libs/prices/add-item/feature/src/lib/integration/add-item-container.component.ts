@@ -3,6 +3,7 @@ import { AddItemService } from './add-item.service';
 import { AsyncPipe } from '@angular/common';
 import { AddItemComponent } from '../components/add-item.component';
 import { Price } from '../api/price.model';
+import { SupportedLang } from '@travellers-apps/prices/localization';
 
 @Component({
   standalone: true,
@@ -11,6 +12,7 @@ import { Price } from '../api/price.model';
       class="ion-page"
       [location]="location$ | async"
       (save)="saveItem($event)"
+      (languageChangeClick)="changeLanguage($event)"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,5 +25,9 @@ export class AddItemContainerComponent {
 
   public saveItem(price: Price) {
     this.addItemService.saveItem(price);
+  }
+
+  changeLanguage(event: SupportedLang) {
+    this.addItemService.changeLanguage(event);
   }
 }

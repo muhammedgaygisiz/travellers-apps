@@ -17,7 +17,11 @@ import {
   IonIcon,
   IonTitle,
   IonToolbar,
+  PopoverController,
 } from '@ionic/angular/standalone';
+import { PopoverMenuComponent } from './popover-menu.component';
+import { AngularDelegate } from '@ionic/angular';
+import { SupportedLang } from '@travellers-apps/prices/localization';
 
 @Component({
   standalone: true,
@@ -37,6 +41,7 @@ import {
     IonFabButton,
     IonFooter,
   ],
+  providers: [PopoverController, AngularDelegate],
 })
 export class PageComponent {
   @Input()
@@ -49,11 +54,34 @@ export class PageComponent {
   hideAuthButton = false;
 
   @Output()
-  public addItemClick: EventEmitter<void> = new EventEmitter();
+  public addItemClick = new EventEmitter();
 
   @Output()
-  public loginClick: EventEmitter<void> = new EventEmitter();
+  public loginClick = new EventEmitter();
 
   @Output()
-  public logoutClick: EventEmitter<void> = new EventEmitter();
+  public logoutClick = new EventEmitter();
+
+  @Output()
+  public languageChangeClick = new EventEmitter<SupportedLang>();
+
+  // eslint-disable-next-line no-unused-vars
+  constructor(public popoverController: PopoverController) {}
+
+  async showMenuPopover($event: MouseEvent) {
+    const popover = await this.popoverController.create({
+      component: PopoverMenuComponent,
+      event: $event,
+      dismissOnSelect: true,
+      componentProps: {
+        isAuthenticated: this.isAuthenticated,
+        hideAuthButton: this.hideAuthButton,
+        loginClick: this.loginClick,
+        logoutClick: this.logoutClick,
+        languageChangeClick: this.languageChangeClick,
+      },
+    });
+
+    await popover.present();
+  }
 }

@@ -24,6 +24,10 @@ import {
   IonLabel,
 } from '@ionic/angular/standalone';
 import { MostSearchedItem } from '../api/most-searched-item.model';
+import {
+  SupportedLang,
+  TranslatePipe,
+} from '@travellers-apps/prices/localization';
 
 @Component({
   standalone: true,
@@ -44,6 +48,7 @@ import { MostSearchedItem } from '../api/most-searched-item.model';
     IonCardTitle,
     IonCardContent,
     NgOptimizedImage,
+    TranslatePipe,
   ],
 })
 export class HomeComponent implements OnChanges {
@@ -57,13 +62,16 @@ export class HomeComponent implements OnChanges {
   location: string | null = '';
 
   @Output()
-  addItemClick: EventEmitter<void> = new EventEmitter();
+  addItemClick = new EventEmitter();
 
   @Output()
-  loginClick: EventEmitter<void> = new EventEmitter();
+  loginClick = new EventEmitter();
 
   @Output()
-  logoutClick: EventEmitter<void> = new EventEmitter();
+  logoutClick = new EventEmitter();
+
+  @Output()
+  languageChangeClick = new EventEmitter<SupportedLang>();
 
   filters: Filter[] = [];
   filteredPrices: MostSearchedItem[] | null | undefined = [];

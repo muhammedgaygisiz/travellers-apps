@@ -3,6 +3,8 @@ import { AddItemService } from '../integration/add-item.service';
 import { provideMockStore } from '@ngrx/store/testing';
 import { TestBed } from '@angular/core/testing';
 
+jest.mock('@travellers-apps/prices/localization');
+
 const assertDeepEqual = (actual: [], expected: []) => {
   expect(actual).toEqual(expected);
 };

@@ -1,4 +1,4 @@
-import { TranslocoPipe, TranslocoService } from '@ngneat/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   ChangeDetectorRef,
   OnDestroy,

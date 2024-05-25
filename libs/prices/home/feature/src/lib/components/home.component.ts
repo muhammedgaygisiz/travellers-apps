@@ -7,8 +7,7 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
-import { MostSearchedItem } from '@travellers-apps/utils-common';
-import Filter from '../model/filter';
+import Filter from '../api/filter';
 import addLocationFilter from '../utils/add-location-filter';
 import getFilteredPrices from '../utils/get-filtered-prices';
 import { CurrencyPipe, NgOptimizedImage } from '@angular/common';
@@ -24,6 +23,7 @@ import {
   IonIcon,
   IonLabel,
 } from '@ionic/angular/standalone';
+import { MostSearchedItem } from '../api/most-searched-item.model';
 
 @Component({
   standalone: true,

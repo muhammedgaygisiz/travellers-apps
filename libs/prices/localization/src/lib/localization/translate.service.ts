@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { getBrowserLang, TranslocoService } from '@ngneat/transloco';
+import { getBrowserLang, TranslocoService } from '@jsverse/transloco';
 import { SupportedLang } from './model/supported-lang';
 
 @Injectable()

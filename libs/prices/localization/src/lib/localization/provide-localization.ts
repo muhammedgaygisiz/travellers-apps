@@ -11,7 +11,7 @@ import {
   provideTranslocoLoader,
   translocoConfig,
   TranslocoPipe,
-} from '@ngneat/transloco';
+} from '@jsverse/transloco';
 import { TranslateService } from './translate.service';
 import { TranslatePipe } from './translate.pipe';
 import { SupportedLang } from './model/supported-lang';

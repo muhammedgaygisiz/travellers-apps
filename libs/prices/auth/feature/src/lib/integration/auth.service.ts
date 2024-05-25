@@ -2,8 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { fromAuth } from '@travellers-apps/prices/store/feature';
 import { Observable } from 'rxjs';
-import { AuthCredentials } from '@travellers-apps/utils-common';
 import { NavController } from '@ionic/angular';
+import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Injectable({
   providedIn: 'root',

@@ -6,9 +6,9 @@ import {
 } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HomeService } from './home.service';
-import { MostSearchedItem } from '@travellers-apps/utils-common';
 import { HomeComponent } from '../components';
 import { AsyncPipe } from '@angular/common';
+import { MostSearchedItem } from '../api/most-searched-item.model';
 
 @Component({
   standalone: true,

@@ -1,5 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-import { AuthCredentials } from '@travellers-apps/utils-common';
 import { from } from 'rxjs';
 import {
   Auth,
@@ -10,6 +9,7 @@ import {
   signOut,
   GoogleAuthProvider,
 } from '@angular/fire/auth';
+import { AuthCredentials } from './api/auth-credentials.model';
 
 @Injectable({
   providedIn: 'root',

@@ -14,7 +14,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { AddItem } from '../api/add-item';
-import { Price } from '@travellers-apps/utils-common';
 import { ImageUrlValidator } from '../async-validators/image-url.validator';
 import { AsyncPipe } from '@angular/common';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
@@ -27,6 +26,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { TranslatePipe } from '@travellers-apps/prices/localization';
+import { Price } from '../api/price.model';
 
 @Component({
   standalone: true,

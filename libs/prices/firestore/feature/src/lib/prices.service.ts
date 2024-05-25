@@ -6,8 +6,9 @@ import {
   Firestore,
 } from '@angular/fire/firestore';
 import { from, Observable } from 'rxjs';
-import { MostSearchedItem, Price } from '@travellers-apps/utils-common';
 import { v4 as uuidV4 } from 'uuid';
+import { MostSearchedItem } from './api/most-searched-item.model';
+import { Price } from './api/price.model';
 
 const PRICES_COLLECTION = 'prices';
 

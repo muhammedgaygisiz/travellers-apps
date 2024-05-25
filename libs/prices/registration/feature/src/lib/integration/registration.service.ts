@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { AuthCredentials } from '@travellers-apps/utils-common';
 import { Store } from '@ngrx/store';
 import { fromAuth } from '@travellers-apps/prices/store/feature';
+import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Injectable({
   providedIn: 'root',

@@ -27,7 +27,7 @@ export class PricesService {
     return from(
       addDoc(this.pricesCollection, {
         id: uuidV4(),
-        src: item.src,
+        image: item.image,
         name: item.productName,
         price: item.price,
         location: item.location,

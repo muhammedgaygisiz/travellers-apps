@@ -84,7 +84,9 @@ export class AddItemComponent implements OnChanges {
     productName: new FormControl<string>('', [Validators.required]),
     price: new FormControl<number>(0, [Validators.required]),
     location: new FormControl<string>('', [Validators.required]),
-    image: new FormControl('', [Validators.required]),
+    image: new FormControl<string | ArrayBuffer | null>('', [
+      Validators.required,
+    ]),
   });
 
   public ngOnChanges(changes: SimpleChanges) {

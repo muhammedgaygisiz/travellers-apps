@@ -42,6 +42,20 @@ import { SupportedLang } from '@travellers-apps/prices/localization';
     IonFooter,
   ],
   providers: [PopoverController, AngularDelegate],
+  styles: `
+    .outer-content-container {
+      width: 100%;
+      height: 100%;
+
+      display: flex;
+      justify-content: center;
+
+      .inner-content-container {
+        max-width: 720px;
+        width: 100%;
+      }
+    }
+  `,
 })
 export class PageComponent {
   @Input()

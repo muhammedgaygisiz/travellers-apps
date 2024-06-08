@@ -1,6 +1,6 @@
 export interface Price {
   productName: string;
   price: number;
-  src: string;
+  image: string | ArrayBuffer | null;
   location: string;
 }

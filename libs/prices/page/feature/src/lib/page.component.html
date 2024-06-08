@@ -21,7 +21,11 @@
   </ion-header>
 
   <ion-content>
-    <ng-content></ng-content>
+    <div class="outer-content-container">
+      <div class="inner-content-container">
+        <ng-content></ng-content>
+      </div>
+    </div>
   </ion-content>
 
   <ng-container>

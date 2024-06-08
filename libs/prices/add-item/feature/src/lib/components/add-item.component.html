@@ -1,5 +1,5 @@
 <!-- Pattern to force cd combined with reactive form groups -->
-@if (priceFormGroup.statusChanges | async) {}
+@if (priceFormGroup.statusChanges | async) { }
 
 <ta-page
   [enableBackButton]="true"
@@ -40,14 +40,15 @@
           />
         </ion-item>
 
-        <ion-item lines="full">
-          <ion-input
-            type="text"
-            formControlName="src"
-            [label]="'add-item.image-source' | translate"
-            labelPlacement="floating"
-          />
-        </ion-item>
+        <ion-button
+          class="ion-margin-top image-button"
+          expand="block"
+          (click)="triggerImageUpload()"
+        >
+          {{ 'add-item.image' | translate }}
+        </ion-button>
+
+        <input type="file" #fileUploader (change)="onSelect($event)" />
 
         <ion-button
           class="ion-margin-top"
@@ -84,11 +85,11 @@
             }
           </div>
           <div>
-            @if (priceFormGroup.controls['src'].errors?.['errorOnLoad'] &&
-            !(priceFormGroup.controls['src'].status !== 'PENDING')) {
+            @if (priceFormGroup.controls['image'].errors?.['errorOnLoad'] &&
+            !(priceFormGroup.controls['image'].status !== 'PENDING')) {
             <ion-text class="ion-padding" color="danger">
               Could not load image from '{{
-                priceFormGroup.controls['src'].value
+                priceFormGroup.controls['image'].value
               }}'
             </ion-text>
             }
@@ -97,16 +98,13 @@
       </form>
     </div>
   </ta-card>
+  @if (onload$ | async) {
   <ta-card>
-    @if (priceFormGroup.controls['src'].status === 'PENDING' ||
-    priceFormGroup.controls['src'].status === 'VALID') {
+    @if (imagePreview) {
     <div class="ion-margin">
-      <img
-        loading="eager"
-        [src]="priceFormGroup.controls['src'].value"
-        alt="image"
-      />
+      <img [src]="imagePreview" alt="image" />
     </div>
     }
   </ta-card>
+  }
 </ta-page>

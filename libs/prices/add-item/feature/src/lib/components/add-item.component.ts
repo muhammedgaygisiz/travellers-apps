@@ -1,11 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   EventEmitter,
-  inject,
   Input,
   OnChanges,
   Output,
+  SimpleChanges,
+  ViewChild,
 } from '@angular/core';
 import {
   FormControl,
@@ -30,6 +32,7 @@ import {
   TranslatePipe,
 } from '@travellers-apps/prices/localization';
 import { Price } from '../api/price.model';
+import { fromEvent, tap } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -52,6 +55,9 @@ import { Price } from '../api/price.model';
   providers: [ImageUrlValidator],
 })
 export class AddItemComponent implements OnChanges {
+  @ViewChild('fileUploader', { static: true })
+  fileUploader?: ElementRef<HTMLElement>;
+
   @Input()
   public location: string | null = '';
 
@@ -61,22 +67,43 @@ export class AddItemComponent implements OnChanges {
   @Output()
   languageChangeClick = new EventEmitter<SupportedLang>();
 
-  private readonly imageUrlValidator = inject(ImageUrlValidator);
+  imagePreview?: string | ArrayBuffer | null;
+  reader = new FileReader();
+  onload$ = fromEvent(this.reader, 'load').pipe(
+    tap(() => {
+      const imageBlob = this.reader.result;
+
+      this.priceFormGroup.patchValue({ image: imageBlob });
+      this.priceFormGroup.get('image')?.updateValueAndValidity();
+
+      this.imagePreview = imageBlob;
+    })
+  );
 
   public priceFormGroup: FormGroup = new FormGroup<AddItem>({
     productName: new FormControl<string>('', [Validators.required]),
     price: new FormControl<number>(0, [Validators.required]),
-    src: new FormControl<string>('', {
-      validators: [Validators.required],
-      asyncValidators: this.imageUrlValidator.validate.bind(
-        this.imageUrlValidator
-      ),
-      updateOn: 'blur',
-    }),
     location: new FormControl<string>('', [Validators.required]),
+    image: new FormControl<string | ArrayBuffer | null>('', [
+      Validators.required,
+    ]),
   });
 
-  public ngOnChanges() {
-    this.priceFormGroup.controls['location'].patchValue(this.location);
+  public ngOnChanges(changes: SimpleChanges) {
+    if (changes['location']) {
+      this.priceFormGroup.controls['location'].patchValue(this.location);
+    }
+  }
+
+  onSelect({ target }: Event) {
+    const file = (target as HTMLInputElement).files?.[0];
+
+    if (file) {
+      this.reader.readAsDataURL(file);
+    }
+  }
+
+  triggerImageUpload() {
+    this.fileUploader?.nativeElement.click();
   }
 }

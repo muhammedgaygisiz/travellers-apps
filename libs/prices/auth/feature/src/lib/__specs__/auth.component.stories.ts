@@ -1,5 +1,5 @@
 import { AuthComponent } from '../components/auth.component';
-import { applicationConfig, Meta, Story } from '@storybook/angular';
+import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import {
   addNecessaryIcons,
   getIonicConfig,
@@ -18,9 +18,5 @@ export default {
   ],
 } as Meta<AuthComponent>;
 
-const Template: Story<AuthComponent> = (args: AuthComponent) => ({
-  props: args,
-});
-
-export const Primary = Template.bind({});
-Primary.args = {};
+type Story = StoryObj<AuthComponent>;
+export const Primary: Story = {};

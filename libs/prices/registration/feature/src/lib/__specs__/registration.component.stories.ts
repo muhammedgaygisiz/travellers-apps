@@ -1,5 +1,5 @@
 import { RegistrationComponent } from '../components/registration.component';
-import { applicationConfig, Meta, Story } from '@storybook/angular';
+import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import {
   addNecessaryIcons,
   getIonicConfig,
@@ -18,11 +18,6 @@ export default {
   ],
 } as Meta<RegistrationComponent>;
 
-const Template: Story<RegistrationComponent> = (
-  args: RegistrationComponent
-) => ({
-  props: args,
-});
+type Story = StoryObj<RegistrationComponent>;
 
-export const Primary = Template.bind({});
-Primary.args = {};
+export const Primary: Story = {};

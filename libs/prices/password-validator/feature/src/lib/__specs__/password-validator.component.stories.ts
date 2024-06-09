@@ -1,4 +1,9 @@
-import { applicationConfig, Meta, Story } from '@storybook/angular';
+import {
+  applicationConfig,
+  argsToTemplate,
+  Meta,
+  StoryObj,
+} from '@storybook/angular';
 import {
   addNecessaryIcons,
   getIonicConfig,
@@ -17,19 +22,17 @@ export default {
       providers: [provideIonicAngular(getIonicConfig())],
     }),
   ],
+  render: (args) => ({
+    props: {
+      ...args,
+    },
+    template: `<ta-password-validator ${argsToTemplate(args)}/>`,
+  }),
 } as Meta<PasswordValidatorComponent>;
 
-type PasswordValidatorProps = { password: string };
-const Template: Story<PasswordValidatorProps> = ({ password }) => ({
-  props: {
-    password$: of(password),
+type Story = StoryObj<PasswordValidatorComponent>;
+export const Primary: Story = {
+  args: {
+    password$: of('Abcd2100'),
   },
-  template: `
-    <ta-password-validator [password$]="password$"/>
-  `,
-});
-
-export const Primary = Template.bind({});
-Primary.args = {
-  password: 'Abcd2100',
 };

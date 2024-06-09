@@ -1,4 +1,4 @@
-import { applicationConfig, Meta, Story } from '@storybook/angular';
+import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { HomeComponent } from '../components';
 import {
   addNecessaryIcons,
@@ -17,33 +17,32 @@ export default {
       providers: [provideIonicAngular(getIonicConfig())],
     }),
   ],
+  render: (args) => ({
+    props: {
+      ...args,
+    },
+  }),
 } as Meta<HomeComponent>;
 
-const Template: Story<HomeComponent> = (args: HomeComponent) => ({
-  props: args,
-});
+type Story = StoryObj<HomeComponent>;
 
-/**
- * Since storybook does not call ngOnChanges, where the calculation of
- * filteredPrices and filters takes place, we set the attributes directly
- * here.
- */
-export const Primary = Template.bind({});
-
-Primary.args = {
-  isAuthenticated: true,
-  filteredPrices: PRICES,
-  filters: FILTERS,
+export const Primary: Story = {
+  args: {
+    isAuthenticated: true,
+    filteredPrices: PRICES,
+    filters: FILTERS,
+  },
 };
 
-export const Empty = Template.bind({});
-Empty.args = {
-  isAuthenticated: true,
-  filters: [
-    {
-      type: 'location',
-      value: 'Cologne',
-    },
-  ],
-  location: 'Cologne',
+export const Empty: Story = {
+  args: {
+    isAuthenticated: true,
+    filters: [
+      {
+        type: 'location',
+        value: 'Cologne',
+      },
+    ],
+    location: 'Cologne',
+  },
 };

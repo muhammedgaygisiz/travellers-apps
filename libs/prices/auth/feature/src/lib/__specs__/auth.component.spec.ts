@@ -2,7 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AuthComponent } from '../components/auth.component';
 import { EventEmitter } from '@angular/core';
 import Mock = jest.Mock;
-import { addNecessaryIcons } from '@travellers-apps/utils-common';
+import {
+  addNecessaryIcons,
+  getIonicConfig,
+} from '@travellers-apps/utils-common';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
 
@@ -14,6 +18,9 @@ describe('AuthComponent', () => {
   let submitSignupWithGoogleEmitter: Mock;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideIonicAngular(getIonicConfig())],
+    });
     fixture = TestBed.createComponent(AuthComponent);
     component = fixture.componentInstance;
 

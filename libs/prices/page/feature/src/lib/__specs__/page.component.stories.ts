@@ -1,5 +1,10 @@
 import { PageComponent } from '../page.component';
-import { applicationConfig, Meta, Story } from '@storybook/angular';
+import {
+  applicationConfig,
+  argsToTemplate,
+  Meta,
+  StoryObj,
+} from '@storybook/angular';
 import {
   addNecessaryIcons,
   getIonicConfig,
@@ -16,22 +21,22 @@ export default {
       providers: [provideIonicAngular(getIonicConfig())],
     }),
   ],
-} as Meta<PageComponent>;
-
-const Template: Story<PageComponent> = (args: PageComponent) => ({
-  props: args,
-  template: `
-      <ta-page
-        [enableBackButton]="enableBackButton"
-        [isAuthenticated]="isAuthenticated"
-      >
+  render: (args) => ({
+    props: {
+      ...args,
+    },
+    template: `
+    <ta-page ${argsToTemplate(args)}>
         <p>Some dummy content</p>
       </ta-page>
-  `,
-});
+`,
+  }),
+} as Meta<PageComponent>;
 
-export const Primary = Template.bind({});
-Primary.args = {
-  enableBackButton: false,
-  isAuthenticated: true,
+type Story = StoryObj<PageComponent>;
+export const Primary: Story = {
+  args: {
+    enableBackButton: false,
+    isAuthenticated: true,
+  },
 };

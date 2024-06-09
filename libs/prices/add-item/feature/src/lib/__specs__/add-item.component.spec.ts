@@ -1,6 +1,10 @@
 import { AddItemComponent } from '../components/add-item.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { addNecessaryIcons } from '@travellers-apps/utils-common';
+import {
+  addNecessaryIcons,
+  getIonicConfig,
+} from '@travellers-apps/utils-common';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
 
@@ -11,6 +15,9 @@ describe('AddItemComponent', () => {
   let fixture: ComponentFixture<AddItemComponent>;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideIonicAngular(getIonicConfig())],
+    });
     fixture = TestBed.createComponent(AddItemComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -1,6 +1,7 @@
-const rootMain = require('../../../.storybook/main');
+/* eslint-disable @nx/enforce-module-boundaries */
+import rootMain from '../../../.storybook/main';
 
-module.exports = {
+const config = {
   ...rootMain,
 
   core: { ...rootMain.core, builder: 'webpack5' },
@@ -18,3 +19,5 @@ module.exports = {
     return config;
   },
 };
+
+export default config;

@@ -1,14 +1,8 @@
-import {Meta, Story, Canvas} from '@storybook/addon-docs';
+import {Story, Meta} from '@storybook/blocks'
 
-<Meta title="Benutzerhandbuch" parameters={{
-  viewport: {
-    disable: true
-  },
-  previewTabs: {
-    docs: {hidden: true}
-  },
+import * as CheckboxStories from '../../card/feature/src/lib/__specs__/card.component.stories';
 
-}}/>
+<Meta title="Benutzerhandbuch" />
 
 # Benutzerhandbuch
 
@@ -16,9 +10,7 @@ This page is an example for an user manuel written in storybook mdx.
 
 ## Embedded story
 
-<Canvas>
-  <Story id="pages-home--primary" inline={true}></Story>
-</Canvas>
+<Story of={CheckboxStories.Primary} inline={true} />
 
 This is an example for an embedded story.
 

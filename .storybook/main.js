@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   // uncomment the property below if you want to apply some webpack config globally
   // webpackFinal: async (config, { configType }) => {
   //   // Make whatever fine-grained changes you need that should apply to all storybook configs
@@ -16,3 +16,5 @@ module.exports = {
     autodocs: true,
   },
 };
+
+export default config;

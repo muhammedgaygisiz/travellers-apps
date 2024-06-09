@@ -6,6 +6,8 @@ import {
 } from '@travellers-apps/utils-common';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { FILTERS, PRICES } from './data';
+import { provideLocalization } from '@travellers-apps/prices/localization';
+import { provideHttpClient } from '@angular/common/http';
 
 addNecessaryIcons();
 
@@ -14,7 +16,11 @@ export default {
   component: HomeComponent,
   decorators: [
     applicationConfig({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        provideLocalization(),
+        provideHttpClient(),
+      ],
     }),
   ],
   render: (args) => ({

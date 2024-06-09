@@ -1,12 +1,13 @@
-const rootMain = require('../../../.storybook/main');
+import rootMain from '../../../.storybook/main';
 
-module.exports = {
+const config = {
   ...rootMain,
 
   core: { ...rootMain.core, builder: 'webpack5' },
 
   stories: [
     '../../../libs/prices/**/__specs__/**/*.stories.@(js|jsx|ts|tsx|mdx)',
+    '../../../libs/prices/**/__specs__/**/*.mdx',
   ],
   addons: [
     '@storybook/addon-essentials',
@@ -33,3 +34,5 @@ module.exports = {
     return config;
   },
 };
+
+export default config;

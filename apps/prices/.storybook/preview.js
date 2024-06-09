@@ -1,9 +1,13 @@
 import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
 
-export const parameters = {
-  layout: 'fullscreen',
-  viewport: {
-    viewports: INITIAL_VIEWPORTS,
-    defaultViewport: 'iphonese2',
+const preview = {
+  parameters: {
+    layout: 'fullscreen',
+    viewport: {
+      viewports: INITIAL_VIEWPORTS,
+      defaultViewport: 'iphonese2',
+    },
   },
 };
+
+export default preview;

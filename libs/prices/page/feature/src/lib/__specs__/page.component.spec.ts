@@ -1,7 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PageComponent } from '../page.component';
-import { addNecessaryIcons } from '@travellers-apps/utils-common';
+import {
+  addNecessaryIcons,
+  getIonicConfig,
+} from '@travellers-apps/utils-common';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
 
@@ -12,6 +16,9 @@ describe('PageComponent', () => {
   let fixture: ComponentFixture<PageComponent>;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideIonicAngular(getIonicConfig())],
+    });
     fixture = TestBed.createComponent(PageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -2,7 +2,11 @@ import { AuthContainerComponent } from '../integration/auth-container.component'
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { AuthService } from '../integration/auth.service';
-import { addNecessaryIcons } from '@travellers-apps/utils-common';
+import {
+  addNecessaryIcons,
+  getIonicConfig,
+} from '@travellers-apps/utils-common';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
 
@@ -17,6 +21,7 @@ describe('AuthContainerComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
+        provideIonicAngular(getIonicConfig()),
         provideMockStore({}),
         {
           provide: AuthService,

@@ -43,3 +43,4 @@ Thumbs.db
 **cypress.env.json
 
 .nx/cache
+.nx/workspace-data

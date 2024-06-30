@@ -8,7 +8,7 @@ import {
 import { AuthCredentialFields } from '../api/auth-credential-fields';
 import { getPasswordValidators } from '@travellers-apps/prices/password-validator/feature';
 import { PageComponent } from 'common/ui/page';
-import { CardComponent } from '@travellers-apps/prices/card/feature';
+import { CardComponent } from 'common/ui/card';
 import {
   IonButton,
   IonIcon,

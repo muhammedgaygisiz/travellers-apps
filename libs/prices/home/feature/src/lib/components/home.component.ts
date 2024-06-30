@@ -12,7 +12,7 @@ import addLocationFilter from '../utils/add-location-filter';
 import getFilteredPrices from '../utils/get-filtered-prices';
 import { CurrencyPipe, NgOptimizedImage } from '@angular/common';
 import { FilterIconPipe } from '../pipes/filter-icon.pipe';
-import { CardComponent } from '@travellers-apps/prices/card/feature';
+import { CardComponent } from 'common/ui/card';
 import { PageComponent } from 'common/ui/page';
 import {
   IonCardContent,

@@ -1,5 +1,5 @@
 <ta-page
-  [isAuthenticated]="isAuthenticated"
+  [showAddButton]="isAuthenticated"
   (addItemClick)="addItemClick.emit()"
   (loginClick)="loginClick.emit()"
   (logoutClick)="logoutClick.emit()"

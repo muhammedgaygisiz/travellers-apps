@@ -24,7 +24,7 @@ import { AuthErrorCodes } from 'firebase/auth';
 import { ToastController } from '@ionic/angular';
 import { AsyncPipe } from '@angular/common';
 import { PageComponent } from 'common/ui/page';
-import { CardComponent } from '@travellers-apps/prices/card/feature';
+import { CardComponent } from 'common/ui/card';
 import {
   IonButton,
   IonInput,

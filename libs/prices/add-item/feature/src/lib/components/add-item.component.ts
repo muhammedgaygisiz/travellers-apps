@@ -18,7 +18,7 @@ import {
 import { AddItem } from '../api/add-item';
 import { ImageUrlValidator } from '../async-validators/image-url.validator';
 import { AsyncPipe } from '@angular/common';
-import { CardComponent } from '@travellers-apps/prices/card/feature';
+import { CardComponent } from 'common/ui/card';
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,

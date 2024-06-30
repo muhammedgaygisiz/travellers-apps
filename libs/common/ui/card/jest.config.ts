@@ -1,10 +1,10 @@
 /* eslint-disable */
 export default {
-  displayName: 'prices-card-feature',
+  displayName: 'common-ui-card',
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {},
-  coverageDirectory: '../../../../coverage/libs/prices/card/feature',
+  coverageDirectory: '../../../../coverage/libs/common/ui/card',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

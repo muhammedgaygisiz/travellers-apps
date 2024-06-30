@@ -1,0 +1,29 @@
+{
+  "name": "finances-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/finances-e2e/src",
+  "tags": [],
+  "implicitDependencies": ["finances"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/finances-e2e/cypress.config.ts",
+        "testingType": "e2e",
+        "devServerTarget": "finances:serve:development"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "finances:serve:production"
+        },
+        "ci": {
+          "devServerTarget": "finances:serve-static"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

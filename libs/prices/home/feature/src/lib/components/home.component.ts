@@ -13,7 +13,7 @@ import getFilteredPrices from '../utils/get-filtered-prices';
 import { CurrencyPipe, NgOptimizedImage } from '@angular/common';
 import { FilterIconPipe } from '../pipes/filter-icon.pipe';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
-import { PageComponent } from '@travellers-apps/prices/page/feature';
+import { PageComponent } from 'common/ui/page';
 import {
   IonCardContent,
   IonCardHeader,

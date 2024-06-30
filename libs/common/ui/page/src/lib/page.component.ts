@@ -49,10 +49,13 @@ export class PageComponent {
   enableBackButton = false;
 
   @Input()
-  isAuthenticated: boolean | null = false;
+  showAddButton: boolean | null = false;
 
   @Input()
   hideAuthButton = false;
+
+  @Input()
+  title = 'Prices';
 
   @Output()
   public addItemClick = new EventEmitter();
@@ -75,7 +78,7 @@ export class PageComponent {
       event: $event,
       dismissOnSelect: true,
       componentProps: {
-        isAuthenticated: this.isAuthenticated,
+        isAuthenticated: this.showAddButton,
         hideAuthButton: this.hideAuthButton,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,

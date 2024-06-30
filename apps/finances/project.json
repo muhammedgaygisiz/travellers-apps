@@ -20,9 +20,17 @@
           {
             "glob": "**/*",
             "input": "apps/finances/public"
+          },
+          {
+            "input": "node_modules/flag-icons/flags/4x3",
+            "glob": "**/*",
+            "output": "assets"
           }
         ],
-        "styles": ["apps/finances/src/styles.scss"],
+        "styles": [
+          "apps/finances/src/theme/variables.scss",
+          "apps/finances/src/global.scss"
+        ],
         "scripts": []
       },
       "configurations": {

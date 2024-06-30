@@ -9,7 +9,7 @@
 
       <ion-title>
         <ion-icon name="pricetag-outline" />
-        Prices
+        {{ title }}
       </ion-title>
 
       <ion-buttons slot="end">
@@ -29,7 +29,7 @@
   </ion-content>
 
   <ng-container>
-    @if (isAuthenticated) {
+    @if (showAddButton) {
     <ion-fab vertical="bottom" horizontal="center" slot="fixed">
       <ion-fab-button color="light" (click)="addItemClick.emit()">
         <ion-icon name="add" />

@@ -1,10 +1,10 @@
 /* eslint-disable */
 export default {
-  displayName: 'prices-page-feature',
+  displayName: 'common-ui-page',
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {},
-  coverageDirectory: '../../../../coverage/libs/prices/page/feature',
+  coverageDirectory: '../../../../coverage/libs/common/ui/page',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

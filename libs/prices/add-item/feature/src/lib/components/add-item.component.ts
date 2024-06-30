@@ -19,7 +19,7 @@ import { AddItem } from '../api/add-item';
 import { ImageUrlValidator } from '../async-validators/image-url.validator';
 import { AsyncPipe } from '@angular/common';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
-import { PageComponent } from '@travellers-apps/prices/page/feature';
+import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
   IonInput,

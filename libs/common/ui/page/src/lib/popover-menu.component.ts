@@ -28,28 +28,28 @@ import { SupportedLang } from '@travellers-apps/prices/localization';
           [detail]="false"
           (click)="languageChangeClick.emit(SupportedLang.EN)"
         >
-          <ion-icon src="gb.svg" slot="start"></ion-icon>
+          <ion-icon src="assets/gb.svg" slot="start"></ion-icon>
           English
         </ion-item>
         <ion-item
           [detail]="false"
           (click)="languageChangeClick.emit(SupportedLang.FR)"
         >
-          <ion-icon src="fr.svg" slot="start"></ion-icon>
+          <ion-icon src="assets/fr.svg" slot="start"></ion-icon>
           Français
         </ion-item>
         <ion-item
           [detail]="false"
           (click)="languageChangeClick.emit(SupportedLang.DE)"
         >
-          <ion-icon src="de.svg" slot="start"></ion-icon>
+          <ion-icon src="assets/de.svg" slot="start"></ion-icon>
           Deutsch
         </ion-item>
         <ion-item
           [detail]="false"
           (click)="languageChangeClick.emit(SupportedLang.TR)"
         >
-          <ion-icon src="tr.svg" slot="start"></ion-icon>
+          <ion-icon src="assets/tr.svg" slot="start"></ion-icon>
           Türkçe
         </ion-item>
       </ion-item-group>

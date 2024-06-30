@@ -7,7 +7,7 @@ import {
 } from '@angular/forms';
 import { AuthCredentialFields } from '../api/auth-credential-fields';
 import { getPasswordValidators } from '@travellers-apps/prices/password-validator/feature';
-import { PageComponent } from '@travellers-apps/prices/page/feature';
+import { PageComponent } from 'common/ui/page';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
 import {
   IonButton,

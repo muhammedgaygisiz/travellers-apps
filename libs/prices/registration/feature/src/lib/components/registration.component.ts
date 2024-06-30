@@ -23,7 +23,7 @@ import {
 import { AuthErrorCodes } from 'firebase/auth';
 import { ToastController } from '@ionic/angular';
 import { AsyncPipe } from '@angular/common';
-import { PageComponent } from '@travellers-apps/prices/page/feature';
+import { PageComponent } from 'common/ui/page';
 import { CardComponent } from '@travellers-apps/prices/card/feature';
 import {
   IonButton,

@@ -7,6 +7,8 @@ import {
   IonCardSubtitle,
   IonCardTitle,
   IonItem,
+  IonItemDivider,
+  IonItemGroup,
   IonLabel,
   IonList,
   IonNote,
@@ -28,6 +30,8 @@ import {
     IonItem,
     IonLabel,
     IonNote,
+    IonItemGroup,
+    IonItemDivider,
   ],
 })
 export class DashboardComponent {}

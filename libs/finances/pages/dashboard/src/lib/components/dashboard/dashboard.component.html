@@ -2,30 +2,46 @@
   <ta-card>
     <div class="ion-padding">
       <ion-card-header>
-        <ion-card-title>500 $</ion-card-title>
+        <ion-card-title>600 $</ion-card-title>
         <ion-card-subtitle>Ihr Vermögen</ion-card-subtitle>
       </ion-card-header>
     </div>
+
     <div>
       <ion-card-content>
-        <ion-list>
+        <ion-item-group>
+          <ion-item-divider>
+            <ion-label> ING </ion-label>
+          </ion-item-divider>
+
           <ion-item [button]="true">
-            <ion-label>Bankkonto ING (DE1234567890)</ion-label>
+            <ion-label>Bankkonto (DE1234567890)</ion-label>
             <ion-note slot="end">100 $</ion-note>
           </ion-item>
           <ion-item [button]="true">
-            <ion-label>Tagesgeldkonto ING (DE9876543210)</ion-label>
+            <ion-label>Tagesgeldkonto (DE9876543210)</ion-label>
             <ion-note slot="end">50 $</ion-note>
           </ion-item>
           <ion-item [button]="true">
-            <ion-label>Kreditkarte ING (45638729344545)</ion-label>
+            <ion-label>Kreditkarte (45638729344545)</ion-label>
             <ion-note slot="end">150 $</ion-note>
           </ion-item>
           <ion-item [button]="true">
-            <ion-label>Depot ING (56780088)</ion-label>
+            <ion-label>Depot (56780088)</ion-label>
             <ion-note slot="end">200 $</ion-note>
           </ion-item>
-        </ion-list>
+        </ion-item-group>
+
+        <ion-item-group class="ion-margin-top">
+          <ion-item-divider>
+            <ion-label> Postfinance </ion-label>
+          </ion-item-divider>
+
+          <ion-item [button]="true">
+            <ion-label>Bankkonto (CH1234567890)</ion-label>
+            <ion-note slot="end">100 $</ion-note>
+          </ion-item>
+        </ion-item-group>
       </ion-card-content>
     </div>
   </ta-card>

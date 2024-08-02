@@ -1,0 +1,44 @@
+<div class="ion-page">
+  <ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        @if (enableBackButton) {
+        <ion-back-button defaultHref="/home" color="white" />
+        }
+      </ion-buttons>
+
+      <ion-title>
+        <ion-icon name="pricetag-outline" />
+        {{ title }}
+      </ion-title>
+
+      <ion-buttons slot="end">
+        <ion-button data-cy="btn-menu" (click)="showMenuPopover($event)">
+          <ion-icon color="dark" slot="icon-only" name="menu-outline" />
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+    <div class="outer-content-container">
+      <div class="inner-content-container">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  </ion-content>
+
+  <ng-container>
+    @if (showAddButton) {
+    <ion-fab vertical="bottom" horizontal="center" slot="fixed">
+      <ion-fab-button color="light" (click)="addItemClick.emit()">
+        <ion-icon name="add" />
+      </ion-fab-button>
+    </ion-fab>
+    }
+
+    <ion-footer>
+      <ion-toolbar />
+    </ion-footer>
+  </ng-container>
+</div>

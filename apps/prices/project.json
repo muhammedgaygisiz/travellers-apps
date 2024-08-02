@@ -26,6 +26,11 @@
             "glob": "**/*",
             "input": "apps/prices/src/assets",
             "output": "assets"
+          },
+          {
+            "input": "node_modules/flag-icons/flags/4x3",
+            "glob": "**/*",
+            "output": "assets"
           }
         ],
         "styles": [

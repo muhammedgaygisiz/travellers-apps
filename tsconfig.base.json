@@ -66,9 +66,6 @@
       "@travellers-apps/prices/auth/feature": [
         "libs/prices/auth/feature/src/index.ts"
       ],
-      "@travellers-apps/prices/card/feature": [
-        "libs/prices/card/feature/src/index.ts"
-      ],
       "@travellers-apps/prices/firestore/feature": [
         "libs/prices/firestore/feature/src/index.ts"
       ],
@@ -80,9 +77,6 @@
       ],
       "@travellers-apps/prices/localization": [
         "libs/prices/localization/src/index.ts"
-      ],
-      "@travellers-apps/prices/page/feature": [
-        "libs/prices/page/feature/src/index.ts"
       ],
       "@travellers-apps/prices/password-validator/feature": [
         "libs/prices/password-validator/feature/src/index.ts"
@@ -96,7 +90,13 @@
       "@travellers-apps/prices/store/feature": [
         "libs/prices/store/feature/src/index.ts"
       ],
-      "@travellers-apps/utils-common": ["libs/utils-common/src/index.ts"]
+      "@travellers-apps/utils-common": ["libs/utils-common/src/index.ts"],
+      "common/ui/card": ["libs/common/ui/card/src/index.ts"],
+      "common/ui/page": ["libs/common/ui/page/src/index.ts"],
+      "finances/pages/dashboard": [
+        "libs/finances/pages/dashboard/src/index.ts"
+      ],
+      "finances/shell": ["libs/finances/shell/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

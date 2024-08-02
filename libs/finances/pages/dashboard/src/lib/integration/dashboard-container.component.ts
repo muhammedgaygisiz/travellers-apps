@@ -1,10 +1,16 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DashboardComponent } from '../components/dashboard/dashboard.component';
+import { DashboardService } from './dashboard.service';
 
 @Component({
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<finances-dashboard />`,
+  template: `<finances-dashboard [banks]="service.banks()" />`,
   imports: [DashboardComponent],
+  selector: 'finances-dashboard-container',
 })
-export class DashboardContainerComponent {}
+export class DashboardContainerComponent {
+  service = inject(DashboardService);
+
+  banks = this.service.banks;
+}

@@ -9,7 +9,7 @@
 
     <div>
       <ion-card-content>
-        @for (bank of banks; track bank.id; let index = $index) {
+        @for (bank of banks(); track bank.id; let index = $index) {
         <finances-bank [bank]="bank" />
         }
       </ion-card-content>

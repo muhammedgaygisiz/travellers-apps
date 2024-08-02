@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import {
   IonItem,
   IonItemDivider,
@@ -16,6 +16,5 @@ import { Bank } from '../../model/bank';
   imports: [IonItem, IonItemDivider, IonItemGroup, IonLabel, IonNote],
 })
 export class BankComponent {
-  @Input()
-  bank!: Bank;
+  bank = input.required<Bank>();
 }

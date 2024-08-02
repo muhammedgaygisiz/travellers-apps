@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
@@ -15,7 +15,7 @@ import {
 } from '@ionic/angular/standalone';
 import { BankComponent } from '../bank/bank.component';
 import { NgClass } from '@angular/common';
-import { BANKS } from '../../integration/banks';
+import { Bank } from '../../model/bank';
 
 @Component({
   standalone: true,
@@ -40,11 +40,5 @@ import { BANKS } from '../../integration/banks';
   ],
 })
 export class DashboardComponent {
-  banks = BANKS;
-
-  counter = signal(0);
-
-  increment() {
-    this.counter.set(this.counter() + 1);
-  }
+  banks = input.required<Bank[]>();
 }

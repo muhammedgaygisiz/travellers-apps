@@ -1,11 +1,11 @@
-export interface Account {
+export type Account = {
   number: string;
   type: 'Bankkonto' | 'Tagesgeldkonto' | 'Kreditkarte' | 'Depot';
   balance: number;
-}
+};
 
-export interface Bank {
+export type Bank = {
   id: number;
   name: string;
   accounts: Account[];
-}
+};

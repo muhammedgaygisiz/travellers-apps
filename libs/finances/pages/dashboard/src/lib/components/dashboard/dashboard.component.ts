@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
@@ -13,6 +13,9 @@ import {
   IonList,
   IonNote,
 } from '@ionic/angular/standalone';
+import { BankComponent } from '../bank/bank.component';
+import { NgClass } from '@angular/common';
+import { BANKS } from '../../integration/banks';
 
 @Component({
   standalone: true,
@@ -32,6 +35,16 @@ import {
     IonNote,
     IonItemGroup,
     IonItemDivider,
+    BankComponent,
+    NgClass,
   ],
 })
-export class DashboardComponent {}
+export class DashboardComponent {
+  banks = BANKS;
+
+  counter = signal(0);
+
+  increment() {
+    this.counter.set(this.counter() + 1);
+  }
+}

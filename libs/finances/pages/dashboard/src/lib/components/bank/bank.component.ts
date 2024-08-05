@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import {
   IonItem,
   IonItemDivider,
@@ -17,4 +22,6 @@ import { Bank } from '../../model/bank';
 })
 export class BankComponent {
   bank = input.required<Bank>();
+
+  openAccountDetails = output<string>();
 }

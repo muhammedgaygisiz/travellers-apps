@@ -5,7 +5,7 @@
   </ion-item-divider>
 
   @for (account of bank.accounts; track account.number) {
-  <ion-item [button]="true">
+  <ion-item [button]="true" (click)="openAccountDetails.emit(account.number)">
     <ion-label>{{ account.type }} ({{ account.number }})</ion-label>
     <ion-note slot="end">{{ account.balance }} $</ion-note>
   </ion-item>

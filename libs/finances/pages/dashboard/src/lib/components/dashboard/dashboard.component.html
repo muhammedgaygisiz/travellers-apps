@@ -10,7 +10,10 @@
     <div>
       <ion-card-content>
         @for (bank of banks(); track bank.id; let index = $index) {
-        <finances-bank [bank]="bank" />
+        <finances-bank
+          [bank]="bank"
+          (openAccountDetails)="openAccountDetails.emit($event)"
+        />
         }
       </ion-card-content>
     </div>

@@ -5,7 +5,10 @@ import { DashboardService } from './dashboard.service';
 @Component({
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<finances-dashboard [banks]="service.banks()" />`,
+  template: `<finances-dashboard
+    [banks]="service.banks()"
+    (openAccountDetails)="service.openAccountDetails($event)"
+  />`,
   imports: [DashboardComponent],
   selector: 'finances-dashboard-container',
 })

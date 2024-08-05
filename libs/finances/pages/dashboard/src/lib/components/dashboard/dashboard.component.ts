@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
@@ -41,4 +46,6 @@ import { Bank } from '../../model/bank';
 })
 export class DashboardComponent {
   banks = input.required<Bank[]>();
+
+  openAccountDetails = output<string>();
 }

@@ -11,7 +11,7 @@ import {
   IonLabel,
   IonNote,
 } from '@ionic/angular/standalone';
-import { Bank } from '../../model/bank';
+import { Bank } from 'finances/store';
 
 @Component({
   standalone: true,

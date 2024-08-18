@@ -20,7 +20,7 @@ import {
 } from '@ionic/angular/standalone';
 import { BankComponent } from '../bank/bank.component';
 import { NgClass } from '@angular/common';
-import { Bank } from '../../model/bank';
+import { Bank } from 'finances/store';
 
 @Component({
   standalone: true,
@@ -45,7 +45,7 @@ import { Bank } from '../../model/bank';
   ],
 })
 export class DashboardComponent {
-  banks = input.required<Bank[]>();
+  banks = input<Bank[]>();
 
   openAccountDetails = output<string>();
 }

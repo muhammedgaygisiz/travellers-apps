@@ -88,4 +88,21 @@ export class PageComponent {
 
     await popover.present();
   }
+
+  async showAddPopover($event: MouseEvent) {
+    const popover = await this.popoverController.create({
+      component: PopoverMenuComponent, // TODO: Define Add Popup Component
+      event: $event,
+      dismissOnSelect: true,
+      componentProps: {
+        isAuthenticated: this.showAddButton,
+        hideAuthButton: this.hideAuthButton,
+        loginClick: this.loginClick,
+        logoutClick: this.logoutClick,
+        languageChangeClick: this.languageChangeClick,
+      },
+    });
+
+    await popover.present();
+  }
 }

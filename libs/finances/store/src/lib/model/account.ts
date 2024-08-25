@@ -2,5 +2,5 @@ export type Account = {
   number: string;
   type: 'Bankkonto' | 'Tagesgeldkonto' | 'Kreditkarte' | 'Depot';
   balance: number;
-  bank: string;
+  bank?: string;
 };

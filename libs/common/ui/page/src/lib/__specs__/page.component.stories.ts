@@ -37,6 +37,5 @@ type Story = StoryObj<PageComponent>;
 export const Primary: Story = {
   args: {
     enableBackButton: false,
-    isAuthenticated: true,
   },
 };

@@ -96,7 +96,8 @@
       "finances/pages/dashboard": [
         "libs/finances/pages/dashboard/src/index.ts"
       ],
-      "finances/shell": ["libs/finances/shell/src/index.ts"]
+      "finances/shell": ["libs/finances/shell/src/index.ts"],
+      "finances/store": ["libs/finances/store/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -8,6 +8,7 @@ const config = {
 
   stories: [
     '../../../libs/prices/**/__specs__/**/*.stories.@(js|jsx|ts|tsx|mdx)',
+    '../../../libs/common/**/__specs__/**/*.stories.@(js|jsx|ts|tsx|mdx)',
     '../../../libs/prices/**/__specs__/**/*.mdx',
   ],
   addons: [

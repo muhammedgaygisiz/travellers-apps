@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
@@ -13,6 +18,9 @@ import {
   IonList,
   IonNote,
 } from '@ionic/angular/standalone';
+import { BankComponent } from '../bank/bank.component';
+import { NgClass } from '@angular/common';
+import { Bank } from 'finances/store';
 
 @Component({
   standalone: true,
@@ -32,6 +40,12 @@ import {
     IonNote,
     IonItemGroup,
     IonItemDivider,
+    BankComponent,
+    NgClass,
   ],
 })
-export class DashboardComponent {}
+export class DashboardComponent {
+  banks = input<Bank[]>();
+
+  openAccountDetails = output<string>();
+}

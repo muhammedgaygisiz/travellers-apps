@@ -7,16 +7,14 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/angular:webpack-browser",
+      "executor": "@nx/angular:browser-esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "customWebpackConfig": {
-          "path": "apps/prices/webpack.config.js"
-        },
+        "plugins": ["apps/prices/env-var-plugin.js"],
         "outputPath": "dist/apps/prices",
         "index": "apps/prices/src/index.html",
         "main": "apps/prices/src/main.ts",
-        "polyfills": "apps/prices/src/polyfills.ts",
+        "polyfills": ["zone.js"],
         "tsConfig": "apps/prices/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -66,7 +64,6 @@
         "development": {
           "buildOptimizer": false,
           "optimization": false,
-          "vendorChunk": true,
           "extractLicenses": false,
           "sourceMap": true,
           "namedChunks": true

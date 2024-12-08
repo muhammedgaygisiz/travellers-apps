@@ -12,3 +12,9 @@
 
 1. [NX](docs/NX.md)
 2. [Weekly Reads](docs/weekly_reads.md)
+
+# Quick References
+
+Report useful version numbers (to copy into the Nx issue template)
+
+`nx report`

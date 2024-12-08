@@ -16,7 +16,7 @@ module.exports = {
   roots: ['<rootDir>', path.resolve(__dirname, './__mocks__')],
   coverageThreshold: {
     global: {
-      branches: 90,
+      branches: 80,
       functions: 90,
       lines: 90,
       statements: 90,

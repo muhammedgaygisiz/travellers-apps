@@ -86,10 +86,6 @@ export class HomeComponent implements OnChanges {
     this.applyFilters();
   }
 
-  by(index: number) {
-    return index;
-  }
-
   private applyFilters() {
     this.filteredPrices = this.mostSearchedEntries;
 

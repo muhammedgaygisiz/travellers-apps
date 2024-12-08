@@ -7,6 +7,7 @@ import {
   getIonicConfig,
 } from '@travellers-apps/utils-common';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { provideRouter } from '@angular/router';
 
 addNecessaryIcons();
 
@@ -15,22 +16,18 @@ jest.mock('@travellers-apps/prices/localization');
 describe('AuthContainerComponent', () => {
   let component: AuthContainerComponent;
   let fixture: ComponentFixture<AuthContainerComponent>;
+  let service: AuthService;
 
-  const loginWithGoogleAccountMock = jest.fn();
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(getIonicConfig()),
         provideMockStore({}),
-        {
-          provide: AuthService,
-          useValue: {
-            loginWithGoogleAccount: loginWithGoogleAccountMock,
-          },
-        },
+        provideRouter([{ path: 'registration', redirectTo: '' }]),
       ],
     }).compileComponents();
+
+    service = TestBed.inject(AuthService);
   });
 
   beforeEach(() => {
@@ -45,9 +42,39 @@ describe('AuthContainerComponent', () => {
 
   describe('when onSignupWithGoogle is called', () => {
     it('should call loginWithGoogleAccount in auth service', () => {
+      const loginWithGoogleAccountMock = jest.spyOn(
+        service,
+        'loginWithGoogleAccount'
+      );
+
       component.onSignupWithGoogle();
 
       expect(loginWithGoogleAccountMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('login', () => {
+    it('should call login in service', () => {
+      const loginSpy = jest.spyOn(service, 'login');
+
+      const authCreds = {
+        email: 'email',
+        password: 'password',
+      };
+
+      component.login(authCreds);
+
+      expect(loginSpy).toHaveBeenCalledWith(authCreds);
+    });
+  });
+
+  describe('gotoSignup', () => {
+    it('should call gotoSignUp in service', async () => {
+      const gotoSignUpSpy = jest.spyOn(service, 'gotoSignUp');
+
+      await component.gotoSignup();
+
+      expect(gotoSignUpSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

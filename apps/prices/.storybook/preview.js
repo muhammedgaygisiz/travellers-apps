@@ -8,6 +8,8 @@ const preview = {
       defaultViewport: 'iphonese2',
     },
   },
+
+  tags: ['autodocs'],
 };
 
 export default preview;

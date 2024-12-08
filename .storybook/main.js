@@ -5,7 +5,7 @@ const config = {
   //   // Return the altered config
   //   return config;
   // },
-  addons: ['@storybook/addon-docs'],
+  addons: ['@storybook/addon-docs', '@chromatic-com/storybook'],
 
   framework: {
     name: '@storybook/angular',

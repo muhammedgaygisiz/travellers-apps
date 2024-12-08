@@ -15,4 +15,14 @@ describe('PasswordValidatorComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  describe('ngOnChanges', () => {
+    it('should call initStreams', () => {
+      const initStreamsSpy = jest.spyOn(component as any, 'initStreams');
+
+      component.ngOnChanges();
+
+      expect(initStreamsSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

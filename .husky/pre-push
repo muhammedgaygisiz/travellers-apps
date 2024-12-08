@@ -1,1 +1,1 @@
-npm t
+nx affected --base=develop -t test --parallel --coverage --coverageReporters=text

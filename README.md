@@ -18,3 +18,60 @@
 Report useful version numbers (to copy into the Nx issue template)
 
 `nx report`
+
+# Update dependencies
+
+First create a new branch wherein the update can be done without risking
+any breaks or incompatibilities. The pipeline should be able to check this
+for the different apps in the workspace.
+
+To update the nrwl cli you have to run following command with `<version>`
+specifying to which version of nx to migrate.
+
+```
+npm run nx -- migrate <version>
+```
+
+The list of versions can be found [here](https://github.com/nrwl/nx/releases)
+(Release notes).
+
+After running the command the dependencies in `package.json` will be updated.
+nx will also update Angular, Typescript, Ngrx, Jest, Cypress and Storybook.
+
+It is also possible that nx creates a `migrations.json` file, which should not be
+checked in or at least should be deleted before the branch is merged into develop.
+
+Next run `npm i` to install the new dependencies and run the migrations with
+the following command.
+
+```
+npm run nx -- migrate --run-migrations
+```
+
+Not all dependencies are managed by nx (e.g. ngx-mat-select-search). They can be
+updated by nx, though. `nx migrate` can be seen as a synonym to `ng update`. To update
+a dependency the command
+
+```
+npm run nx -- migrate my-dependency@x.y.z
+```
+
+can be utilized. Please be aware that after the command `npm install` has to be
+executed and a quick check of the app and specifically of the components which could
+be affected is recommended.
+
+At the end of the process `npm dedupe` can be executed to tidy up the dependency graph.
+
+# Show npm dependency tree
+
+Dependencies
+
+```
+npm list
+```
+
+With transitive dependencies
+
+```
+npm list --all
+```

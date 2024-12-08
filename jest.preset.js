@@ -14,4 +14,9 @@ module.exports = {
    */
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
   roots: ['<rootDir>', path.resolve(__dirname, './__mocks__')],
+  coverageThreshold: {
+    global: {
+      lines: 80,
+    },
+  },
 };

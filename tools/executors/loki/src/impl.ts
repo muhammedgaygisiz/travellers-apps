@@ -27,7 +27,7 @@ const getBuildStorybookOutput = (_context: ExecutorContext) => {
   return `${_context.root}/${buildStorybookOutputDir}`;
 };
 
-const checkExists = (buildStorybookOutput: string): boolean =>
+export const checkExists = (buildStorybookOutput: string): boolean =>
   existsSync(buildStorybookOutput);
 
 export const buildCommand = (_context: ExecutorContext, _options: Schema) => {
@@ -54,17 +54,17 @@ export const buildCommand = (_context: ExecutorContext, _options: Schema) => {
   return command.join(' ').trim();
 };
 
-const getProjectRoot = (_context: ExecutorContext) => {
+export const getProjectRoot = (_context: ExecutorContext) => {
   const project = getProjectJsonContent(_context);
   return `${_context.root}/${project?.root}`;
 };
 
-const cleanUp = (projectRoot: string) => {
+export const cleanUp = (projectRoot: string) => {
   rmSync(`${projectRoot}/package.json`);
   rmSync(`${projectRoot}/node_modules`, { recursive: true, force: true });
 };
 
-const checkPrerequisites = (_context: ExecutorContext): boolean => {
+export const checkPrerequisites = (_context: ExecutorContext): boolean => {
   const buildStorybookOutput = getBuildStorybookOutput(_context);
   const buildStorybookOutputExists = checkExists(buildStorybookOutput);
   if (!buildStorybookOutputExists) {
@@ -78,7 +78,7 @@ const checkPrerequisites = (_context: ExecutorContext): boolean => {
   return true;
 };
 
-const executorFn = async (
+export const executorFn = async (
   _options: Schema,
   _context: ExecutorContext
 ): Promise<{ success: boolean }> => {

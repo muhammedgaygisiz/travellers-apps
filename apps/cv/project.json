@@ -13,7 +13,7 @@
         "outputPath": "dist/apps/cv",
         "index": "apps/cv/src/index.html",
         "browser": "apps/cv/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": [],
         "tsConfig": "apps/cv/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [

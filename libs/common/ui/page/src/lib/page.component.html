@@ -2,14 +2,14 @@
   <ion-header>
     <ion-toolbar>
       <ion-buttons slot="start">
-        @if (enableBackButton) {
+        @if (enableBackButton()) {
         <ion-back-button defaultHref="/home" color="white" />
         }
       </ion-buttons>
 
       <ion-title>
         <ion-icon name="pricetag-outline" />
-        {{ title }}
+        {{ title() }}
       </ion-title>
 
       <ion-buttons slot="end">
@@ -29,7 +29,7 @@
   </ion-content>
 
   <ng-container>
-    @if (showAddButton) {
+    @if (showAddButton()) {
     <ion-fab vertical="bottom" horizontal="center" slot="fixed">
       <ion-fab-button color="light" (click)="showAddPopover($event)">
         <ion-icon name="add" />

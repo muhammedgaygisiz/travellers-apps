@@ -1,9 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  input,
+  output,
 } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { UpperCasePipe } from '@angular/common';
@@ -21,11 +20,9 @@ import { MatIconModule } from '@angular/material/icon';
 export class HeaderComponent {
   title = 'kosaml';
 
-  @Input()
-  isAuthenticated = true;
+  isAuthenticated = input(true);
 
-  @Output()
-  toggleProjectBar = new EventEmitter();
+  toggleProjectBar = output();
 
   onToggleProjectBar() {
     this.toggleProjectBar.emit();

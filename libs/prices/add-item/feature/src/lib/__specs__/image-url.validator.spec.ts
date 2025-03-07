@@ -37,9 +37,7 @@ describe('ImageUrlValidator', () => {
       const someValidImageUrl = validImageUrl;
 
       it('should return null', () => {
-        testScheduler.run((helpers) => {
-          const { expectObservable } = helpers;
-
+        testScheduler.run(({ expectObservable }) => {
           const validate = imageUrlValidator.validate(
             someControl(someValidImageUrl)
           ) as Observable<ValidationErrors | null>;
@@ -53,9 +51,7 @@ describe('ImageUrlValidator', () => {
       const someInvalidImageUrl = invalidImageUrl;
 
       it('should return error object', () => {
-        testScheduler.run((helpers) => {
-          const { expectObservable, cold } = helpers;
-
+        testScheduler.run(({ expectObservable, cold }) => {
           const validate = imageUrlValidator.validate(
             someControl(someInvalidImageUrl)
           ) as Observable<ValidationErrors | null>;

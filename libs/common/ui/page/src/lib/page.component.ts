@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  inject,
+  input,
+  output,
 } from '@angular/core';
 import {
   IonBackButton,
@@ -45,32 +45,23 @@ import { SupportedLang } from '@travellers-apps/prices/localization';
   styleUrl: './page.component.scss',
 })
 export class PageComponent {
-  @Input()
-  enableBackButton = false;
+  enableBackButton = input(false);
 
-  @Input()
-  showAddButton: boolean | null = false;
+  showAddButton = input<boolean | null>(false);
 
-  @Input()
-  hideAuthButton = false;
+  hideAuthButton = input(false);
 
-  @Input()
-  title = 'Prices';
+  title = input('Prices');
 
-  @Output()
-  public addItemClick = new EventEmitter();
+  public addItemClick = output();
 
-  @Output()
-  public loginClick = new EventEmitter();
+  public loginClick = output();
 
-  @Output()
-  public logoutClick = new EventEmitter();
+  public logoutClick = output();
 
-  @Output()
-  public languageChangeClick = new EventEmitter<SupportedLang>();
+  public languageChangeClick = output<SupportedLang>();
 
-  // eslint-disable-next-line no-unused-vars
-  constructor(public popoverController: PopoverController) {}
+  popoverController = inject(PopoverController);
 
   async showMenuPopover($event: MouseEvent) {
     const popover = await this.popoverController.create({
@@ -78,8 +69,8 @@ export class PageComponent {
       event: $event,
       dismissOnSelect: true,
       componentProps: {
-        isAuthenticated: this.showAddButton,
-        hideAuthButton: this.hideAuthButton,
+        isAuthenticated: this.showAddButton(),
+        hideAuthButton: this.hideAuthButton(),
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,
@@ -95,8 +86,8 @@ export class PageComponent {
       event: $event,
       dismissOnSelect: true,
       componentProps: {
-        isAuthenticated: this.showAddButton,
-        hideAuthButton: this.hideAuthButton,
+        isAuthenticated: this.showAddButton(),
+        hideAuthButton: this.hideAuthButton(),
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,

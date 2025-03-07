@@ -21,12 +21,19 @@ $base-width: 20%;
       .wrapper {
         width: 80%;
         display: flex;
+        align-items: center;
 
         padding: 2rem 0;
       }
 
-      nav {
+      button {
         margin-left: auto;
+        background-color: transparent;
+        border: 0 solid #f5f5f5;
+
+        img {
+          width: 1.5rem;
+        }
       }
     }
 
@@ -56,13 +63,7 @@ $base-width: 20%;
         }
 
         img {
-          @media (max-width: 768px) {
-            width: 80%;
-          }
-
-          @media (min-width: 768px) {
-            width: 40%;
-          }
+          width: 70%;
         }
       }
 
@@ -78,6 +79,12 @@ $base-width: 20%;
 
         @media (min-width: 768px) {
           width: 40%;
+        }
+
+        h1 {
+          @media (max-width: 768px) {
+            font-size: 1.6rem;
+          }
         }
       }
     }

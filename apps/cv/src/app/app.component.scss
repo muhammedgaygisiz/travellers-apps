@@ -1,0 +1,136 @@
+@mixin glass-box {
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(7.9px);
+  -webkit-backdrop-filter: blur(7.9px);
+  border: 1px solid rgba(255, 255, 255, 0.64);
+}
+
+$base-width: 20%;
+
+:host {
+  .container {
+    padding: 0 0.4rem;
+
+    header {
+      display: flex;
+      justify-content: center;
+
+      .wrapper {
+        width: 80%;
+        display: flex;
+
+        padding: 2rem 0;
+      }
+
+      nav {
+        margin-left: auto;
+      }
+    }
+
+    .content {
+      display: flex;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      @media (min-width: 768px) {
+        flex-direction: row-reverse;
+        justify-content: space-evenly;
+      }
+
+      align-items: center;
+
+      .profile-image {
+        display: flex;
+        justify-content: center;
+
+        margin-bottom: 2rem;
+
+        @media (min-width: 768px) {
+          width: 50%;
+        }
+
+        img {
+          @media (max-width: 768px) {
+            width: 80%;
+          }
+
+          @media (min-width: 768px) {
+            width: 40%;
+          }
+        }
+      }
+
+      .text-container {
+        text-align: center;
+        line-height: 2;
+
+        font-weight: 600;
+
+        @media (max-width: 768px) {
+          width: 80%;
+        }
+
+        @media (min-width: 768px) {
+          width: 40%;
+        }
+      }
+    }
+  }
+
+  min-height: 100%;
+
+  display: flex;
+  justify-content: center;
+
+  .year-container {
+    display: flex;
+    flex-direction: column;
+
+    width: $base-width;
+    margin-right: 24px;
+    margin-top: 32px;
+
+    .year-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      margin-bottom: 24px;
+      height: 48px;
+
+      @include glass-box;
+    }
+  }
+
+  .line {
+    border: 1px #f5f5f5 solid;
+  }
+
+  .jobs-container {
+    display: flex;
+    flex-direction: column;
+
+    width: $base-width * 2;
+    margin-left: 24px;
+    margin-top: 32px;
+
+    .job-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      color: #f5f5f5;
+
+      margin-bottom: 24px;
+      padding: 8px;
+
+      @include glass-box;
+    }
+  }
+}

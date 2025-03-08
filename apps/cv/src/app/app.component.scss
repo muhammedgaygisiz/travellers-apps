@@ -70,18 +70,14 @@ $breakpoint-md: 768px;
 
         img {
           width: $base-width * 3.5;
-          border-radius: 50%; // Make the image round
-
-          transition: opacity 0.5s ease-in-out; // Add transition for opacity
-
-          opacity: 0.8; // Initial opacity
-          &:hover {
-            opacity: 1; // Full opacity on hover
-          }
+          border-radius: 50%;
+          opacity: 0.6;
         }
       }
 
       .text-container {
+        width: $base-width-double;
+
         text-align: center;
         line-height: 2;
 
@@ -90,7 +86,7 @@ $breakpoint-md: 768px;
         @media (max-width: $breakpoint-md) {
           width: 80%;
         }
-        width: $base-width-double;
+
         @media (min-width: $breakpoint-md) {
           width: $base-width * 2;
         }
@@ -98,6 +94,44 @@ $breakpoint-md: 768px;
         h1 {
           @media (max-width: $breakpoint-md) {
             font-size: 1.6rem;
+          }
+        }
+      }
+
+      .badge-container {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+
+        .technology-box {
+          padding: 0.6rem;
+          margin: 1rem 0;
+
+          @include glass-box;
+        }
+      }
+
+      .projects-container {
+        width: 80%;
+
+        h2 {
+          text-align: center;
+        }
+
+        .table {
+          .row {
+            display: flex;
+            justify-content: space-evenly;
+            margin-bottom: 0.6rem;
+
+            :first-child {
+              text-align: right;
+            }
+
+            div {
+              width: 46%;
+            }
           }
         }
       }

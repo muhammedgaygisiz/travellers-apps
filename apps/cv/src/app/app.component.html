@@ -19,7 +19,7 @@
       <hr />
       <p>Master of Science</p>
       <p>9.5 years of experience</p>
-      <hr />
+      <br />
       <p class="sub-text">
         Dedicated to creating user-oriented, high-quality software through
         continuous collaboration and efficient processes. Skilled in analyzing
@@ -27,6 +27,43 @@
         communicator, valuing teamwork and empathy to deliver optimal results.
       </p>
       <p>Always up to date with the latest industry trends and technologies.</p>
+      <hr />
+    </div>
+
+    <div class="badge-container">
+      <div class="row">
+        <div class="technology-box"><span>Angular: 5,5 years</span></div>
+        <div class="technology-box"><span>React: 2 years</span></div>
+      </div>
+      <div class="row">
+        <div class="technology-box"><span>Spring: 3 years</span></div>
+        <div class="technology-box"><span>REST: 4,5 years</span></div>
+      </div>
+    </div>
+
+    <div class="projects-container">
+      <hr />
+      <h2>Projects</h2>
+      <div class="table">
+        @for (project of projects; track project.id) {
+        <div class="row">
+          <div>
+            <span
+              >{{ project.from | date : 'MMMM yyyy' }} -
+              {{ project.to | date : 'MMMM yyyy' }}
+            </span>
+            <br />
+            <span>{{ project | duration }}</span>
+          </div>
+          <div>
+            <span>{{ project.company }}</span>
+            <br />
+            <span>{{ project.role }}</span>
+          </div>
+        </div>
+        <hr />
+        }
+      </div>
     </div>
 
     <!--

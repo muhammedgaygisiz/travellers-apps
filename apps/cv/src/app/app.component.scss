@@ -39,6 +39,7 @@ $base-width: 20%;
 
     .content {
       display: flex;
+      padding-bottom: 3rem;
 
       @media (max-width: 768px) {
         flex-direction: column;

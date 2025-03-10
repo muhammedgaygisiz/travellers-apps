@@ -21,13 +21,15 @@ export class DurationPipe implements PipeTransform {
     const durationInMonth = yearDifference * 12 + monthDifference;
 
     if (durationInMonth > 12) {
+      const withMonth = durationInMonth % 12 > 0;
+
       return `${formatNumber(
         durationInMonth / 12,
         this.localeId,
-        '1.1-1'
+        withMonth ? '1.1-1' : '1.0'
       )} years`;
     }
 
-    return `${formatNumber(durationInMonth, this.localeId, '1.1-1')} month`;
+    return `${formatNumber(durationInMonth, this.localeId, '1.0')} month`;
   }
 }

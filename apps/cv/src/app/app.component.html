@@ -61,6 +61,11 @@
             <span>{{ project.role }}</span>
           </div>
         </div>
+        <div class="paragraphs">
+          @for (p of project.paragraph; track $index) {
+          <p>{{ p }}</p>
+          }
+        </div>
         <hr />
         }
       </div>

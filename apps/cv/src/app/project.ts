@@ -6,4 +6,6 @@ export interface Project {
   company: string;
   role: string;
   description: string;
+
+  paragraph?: string[];
 }

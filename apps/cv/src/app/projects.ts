@@ -1,0 +1,167 @@
+import {
+  AUGUST_2005,
+  DEZEMBER_2016,
+  DEZEMBER_2019,
+  DEZEMBER_2021,
+  FEBRUAR_2015,
+  FEBRUAR_2017,
+  FEBRUAR_2020,
+  FEBRUARY_2013,
+  JANUAR_2013,
+  JANUAR_2022,
+  JUNE_2008,
+  JUNI_2022,
+  MAERZ_2015,
+  NOW,
+  OKTOBER_2010,
+  OKTOBER_2022,
+  SEPTEMBER_2022,
+} from './dates';
+
+export const APU = {
+  id: 1,
+  from: OKTOBER_2022,
+  to: NOW,
+  description: '',
+  company: 'akros AG',
+  role: 'Frontend-Entwickler',
+
+  paragraph: [
+    `
+        As a frontend software developer, I focus on building scalable and maintainable Angular applications.
+        The main task has been rewriting an existing Angular application with the latest version and best practices
+        to ensure long-term stability and ease of maintenance. Since the application is used by users in an dangerous
+        environment, it was essential to ensure seamless functionality even without an internet connection. To achieve
+        this, I used IndexedDB for local storage and set the application up as a progressive web application. To enhance
+        modularity and code sharing, the app was introduced in an Nx monorepo. I also introduced NgRx for
+        predictable state management and restructured components following the single-responsibility principle,
+        using presentational and smart components. Further libraries like storybook for presentational components and
+        oblador/loki for visual regression testing came along the line.
+    `,
+    `
+        To provide seamless authentication, I implemented single sign-on (SSO) with the help of a Spring Boot
+        application. The authentication system integrates Azure as the active directory and SAP as the business backend,
+        utilizing the SAML OBO-Auth flow to securely manage authentication and authorization across systems.
+    `,
+    `
+        Beyond development, I optimized the deployment pipeline to ensure efficient and reliable software delivery.
+        I led the migration of the application's deployment from SAP HANA Cloud to OpenShift. I set up Tekton for
+        continuous integration and ArgoCD for continuous deployment. Sonarqube was integrated in the pipeline
+        to ensure the high software quality.
+    `,
+    `
+        To support monitoring, proactive issue detection, and debugging, I integrated Instana into the application.
+        This enables real-time insights into application performance and system health, making it easier to identify
+        and resolve issues quickly, ensuring a smooth and reliable user experience.
+    `,
+  ],
+};
+
+export const PERFOOD = {
+  id: 1,
+  from: JUNI_2022,
+  to: SEPTEMBER_2022,
+  description: '',
+  company: 'perfood GmbH',
+  role: 'Frontend-Entwickler',
+
+  paragraph: [
+    `I developed Ionic-based Angular components and implemented NestJS-based backend services. To improve UI consistency and reusability, I introduced Storybook for component documentation. Additionally, I began establishing a clear separation between presentational and smart components to enhance maintainability and scalability. My work focused on creating modular and efficient solutions within a structured development process.`,
+  ],
+};
+
+export const TRIP = {
+  id: 1,
+  from: JANUAR_2022,
+  to: JUNI_2022,
+  description: '',
+  company: 'Career break and travel',
+  role: 'Cologne - Marrakech',
+};
+
+export const TIMS = {
+  id: 1,
+  from: FEBRUAR_2020,
+  to: DEZEMBER_2021,
+  description: '',
+  company: 'akros AG',
+  role: 'Frontend-Entwickler und UX-Designer',
+
+  paragraph: [
+    `
+      As a Senior Software Engineer from February
+      2020 to December 2021, I specialized in modern
+      frontend technologies and UI architecture.
+      My work focused on Angular development,
+      where I built and optimized applications while
+      modernizing the UI tech stack from Angular 8 to 12,
+      incorporating tools like Storybook, Jest, Cypress,
+      Loki, and Nx. I introduced a structured component architecture
+      by implementing container and presentational components.
+    `,
+    `
+      To enhance maintainability and scalability, I moved
+      business logic from UI components to Angular services
+      and introduced NgRx for state management.
+      Additionally, I developed a reusable UI component
+      library to standardize the frontend ecosystem. I also
+      consolidated multiple Angular applications, unifying
+      their appearance and dependencies within an Nx monorepo,
+      improving code sharing and maintainability. My role also
+      involved IoT-specific performance optimization and the
+      implementation of UI build pipelines using MS Azure and Jenkins.
+    `,
+    `
+      Beyond development, I contributed as a technical leader, coaching
+      a React team, mentoring junior developers, and supervising
+      apprentices. My expertise in clean architecture, performance
+      optimization, and modern development practices played a key
+      role in advancing frontend projects.
+    `,
+  ],
+};
+
+export const AXA = {
+  id: 1,
+  from: FEBRUAR_2017,
+  to: DEZEMBER_2019,
+  description: '',
+  company: 'Axa Konzern AG',
+  role: 'Softwareentwickler',
+};
+
+export const NLI = {
+  id: 1,
+  from: MAERZ_2015,
+  to: DEZEMBER_2016,
+  description: '',
+  company: 'Next Level Integration GmbH',
+  role: 'Berater, Entwickler und Projektleiter',
+};
+
+export const NLI_WERKSTUDENT = {
+  id: 1,
+  from: JANUAR_2013,
+  to: FEBRUAR_2015,
+  description: '',
+  company: 'Next Level Integration GmbH',
+  role: 'Berater, Entwickler und Projektleiter',
+};
+
+export const FH = {
+  id: 1,
+  from: OKTOBER_2010,
+  to: FEBRUARY_2013,
+  description: '',
+  company: 'Fachhochschule Köln',
+  role: 'Studentische/Wissenschaftliche Aushilfskraft',
+};
+
+export const AUSBILDUNG = {
+  id: 1,
+  from: AUGUST_2005,
+  to: JUNE_2008,
+  description: '',
+  company: 'IGMG e.V.',
+  role: 'Auszubildender in der Software-Entwicklung',
+};

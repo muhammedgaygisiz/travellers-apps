@@ -2,9 +2,9 @@
   <header>
     <div class="wrapper">
       <div class="title">Mo</div>
-      <button type="button">
+      <!--<button type="button">
         <img src="assets/burger-menu.svg" alt="Menu" />
-      </button>
+      </button>-->
     </div>
   </header>
 
@@ -48,8 +48,8 @@
         @for (project of projects; track project.id) {
         <div class="row">
           <div>
-            <span
-              >{{ project.from | date : 'MMMM yyyy' }} -
+            <span class="time-range">
+              {{ project.from | date : 'MMMM yyyy' }} -
               {{ project.to | date : 'MMMM yyyy' }}
             </span>
             <br />

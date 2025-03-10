@@ -131,6 +131,11 @@ $breakpoint-md: 768px;
 
             div {
               width: 46%;
+
+              .time-range {
+                display: inline-block;
+                margin-bottom: 0.6rem;
+              }
             }
           }
 

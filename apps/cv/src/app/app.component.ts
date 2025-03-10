@@ -3,17 +3,7 @@ import { RouterModule } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { DurationPipe } from './duration.pipe';
 import { Project } from './project';
-import {
-  APU,
-  AUSBILDUNG,
-  AXA,
-  FH,
-  NLI,
-  NLI_WERKSTUDENT,
-  PERFOOD,
-  TIMS,
-  TRIP,
-} from './projects';
+import { APU, AUSBILDUNG, AXA, FH, NLI, PERFOOD, TIMS, TRIP } from './projects';
 
 @Component({
   standalone: true,
@@ -23,15 +13,5 @@ import {
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  projects: Project[] = [
-    APU,
-    PERFOOD,
-    TRIP,
-    TIMS,
-    AXA,
-    NLI,
-    NLI_WERKSTUDENT,
-    FH,
-    AUSBILDUNG,
-  ];
+  projects: Project[] = [APU, PERFOOD, TRIP, TIMS, AXA, NLI, FH, AUSBILDUNG];
 }

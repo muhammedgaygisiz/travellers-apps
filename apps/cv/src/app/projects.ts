@@ -3,7 +3,6 @@ import {
   DEZEMBER_2016,
   DEZEMBER_2019,
   DEZEMBER_2021,
-  FEBRUAR_2015,
   FEBRUAR_2017,
   FEBRUAR_2020,
   FEBRUARY_2013,
@@ -11,7 +10,6 @@ import {
   JANUAR_2022,
   JUNE_2008,
   JUNI_2022,
-  MAERZ_2015,
   NOW,
   OKTOBER_2010,
   OKTOBER_2022,
@@ -128,24 +126,45 @@ export const AXA = {
   description: '',
   company: 'Axa Konzern AG',
   role: 'Softwareentwickler',
+  paragraph: [
+    `
+      I focused on developing and maintaining modern web applications
+      using React, Express.js, TypeScript, and Node.js as part of the
+      latest generation of end-customer tariff calculators. My work involved
+      implementing new features, optimizing performance, and ensuring
+      maintainability. Additionally, I contributed ideas for improving
+      the build pipeline, DevOps processes, and cloud integration,
+      developing prototypes and supporting ongoing projects.
+      I also provided technical consultation to Product Owners when needed.
+    `,
+  ],
 };
 
 export const NLI = {
   id: 1,
-  from: MAERZ_2015,
+  from: JANUAR_2013,
   to: DEZEMBER_2016,
   description: '',
   company: 'Next Level Integration GmbH',
   role: 'Berater, Entwickler und Projektleiter',
-};
 
-export const NLI_WERKSTUDENT = {
-  id: 1,
-  from: JANUAR_2013,
-  to: FEBRUAR_2015,
-  description: '',
-  company: 'Next Level Integration GmbH',
-  role: 'Berater, Entwickler und Projektleiter',
+  paragraph: [
+    `
+      I worked on developing tariff customer portals
+      for energy providers, primarily using AngularJS and
+      Java, as well as ExtJS and Java. My responsibilities
+      included gathering customer requirements, estimating
+      effort, and providing technical consulting to ensure
+      the successful implementation of functional requirements.
+    `,
+    `
+      In addition to development, I contributed to improving
+      internal development processes, supported release management,
+      and assisted Product Owners. I also played a key role in
+      onboarding and mentoring new team members, ensuring smooth
+      knowledge transfer and team efficiency.
+    `,
+  ],
 };
 
 export const FH = {
@@ -153,8 +172,25 @@ export const FH = {
   from: OKTOBER_2010,
   to: FEBRUARY_2013,
   description: '',
-  company: 'Fachhochschule Köln',
-  role: 'Studentische/Wissenschaftliche Aushilfskraft',
+  company: 'Cologne University of Applied Sciences',
+  role: 'Student Assistant / Research Assistant',
+
+  paragraph: [
+    `
+      As a student assistant in the Modeling of Application Systems
+      course, I supported teaching activities and assisted students
+      in understanding UML-based system modeling. The course followed
+      a systematic methodology, transforming models from use case
+      diagrams to class diagrams and either sequence diagrams or
+      activity diagrams.
+    `,
+    `
+      My master's thesis expanded on this approach by integrating the
+      systematic UML modeling methodology with the methodology of
+      interaction design, bridging structured system development with
+      user-centered design principles.
+    `,
+  ],
 };
 
 export const AUSBILDUNG = {
@@ -163,5 +199,14 @@ export const AUSBILDUNG = {
   to: JUNE_2008,
   description: '',
   company: 'IGMG e.V.',
-  role: 'Auszubildender in der Software-Entwicklung',
+  role: 'Apprentice in Software Development',
+
+  paragraph: [
+    `
+      During my apprenticeship, I developed an HR management tool
+      using .NET technologies, primarily C# and ASP.NET. This experience
+      provided me with an initial foundation in backend development
+      and enterprise software solutions.
+    `,
+  ],
 };

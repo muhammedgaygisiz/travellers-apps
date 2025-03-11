@@ -12,6 +12,8 @@ $base-width: 20%;
 $base-width-double: $base-width * 2;
 $breakpoint-md: 768px;
 
+$breakpoint-lg: 992px;
+
 :host {
   min-height: 100%;
 
@@ -50,9 +52,17 @@ $breakpoint-md: 768px;
         justify-content: space-between;
       }
 
-      @media (min-width: $breakpoint-md) {
-        flex-direction: row-reverse;
+      @media (min-width: $breakpoint-md) and (max-width: $breakpoint-lg) {
+        flex-direction: column;
         justify-content: space-evenly;
+      }
+
+      @media (min-width: $breakpoint-lg) {
+        display: grid;
+        grid-template:
+          [row1-start] auto [row1-end row2-start] auto [row2-end]
+          /
+          [column1-start] 50% [column1-end column2-start] 50% [column2-end];
       }
 
       align-items: center;
@@ -66,6 +76,11 @@ $breakpoint-md: 768px;
 
         @media (min-width: $breakpoint-md) {
           width: $base-width * 2.5;
+        }
+
+        @media (min-width: $breakpoint-lg) {
+          grid-column-start: 2;
+          width: $base-width-double * 2;
         }
 
         img {
@@ -88,7 +103,14 @@ $breakpoint-md: 768px;
         }
 
         @media (min-width: $breakpoint-md) {
-          width: $base-width * 2;
+          width: $base-width * 3;
+        }
+
+        @media (min-width: $breakpoint-lg) {
+          grid-row-start: 1;
+          justify-self: center;
+
+          width: $base-width-double * 2;
         }
 
         h1 {
@@ -110,11 +132,30 @@ $breakpoint-md: 768px;
 
           @include glass-box;
         }
+
+        @media (min-width: $breakpoint-lg) {
+          grid-column-start: 1;
+          grid-column-end: span 3;
+
+          justify-content: center;
+
+          .row {
+            margin: 0 2rem;
+          }
+        }
       }
 
       .projects-container,
       .education-container {
         width: 80%;
+
+        @media (min-width: $breakpoint-lg) {
+          width: 60%;
+          grid-column-start: 1;
+          grid-column-end: span 4;
+
+          justify-self: center;
+        }
 
         h2 {
           text-align: center;

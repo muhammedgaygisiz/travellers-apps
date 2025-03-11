@@ -66,6 +66,28 @@
           <p>{{ p }}</p>
           }
         </div>
+        }
+      </div>
+    </div>
+
+    <div class="education-container">
+      <hr />
+      <h2>Edution</h2>
+      <div class="table">
+        @for (edution of educations; track edution.id) {
+        <div class="row">
+          <div>
+            <span class="time-range">
+              {{ edution.from }} -
+              {{ edution.to }}
+            </span>
+          </div>
+          <div>
+            <span>{{ edution.institution }}</span>
+            <br />
+            <span>{{ edution.degree }}</span>
+          </div>
+        </div>
         <hr />
         }
       </div>

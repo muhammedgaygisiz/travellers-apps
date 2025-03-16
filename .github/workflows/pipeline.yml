@@ -106,7 +106,8 @@ jobs:
 
   common-lint:
     runs-on: ubuntu-latest
-    needs: setup
+    needs:
+      - install-dependencies
 
     steps:
       - name: Checkout repository

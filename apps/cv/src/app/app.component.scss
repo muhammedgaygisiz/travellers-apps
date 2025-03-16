@@ -1,0 +1,295 @@
+@mixin glass-box {
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(7.9px);
+  -webkit-backdrop-filter: blur(7.9px);
+  border: 1px solid rgba(255, 255, 255, 0.64);
+}
+
+$base-width: 20%;
+$base-width-double: $base-width * 2;
+
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1300px;
+$breakpoint-xxl: 1990px;
+
+:host {
+  min-height: 100%;
+
+  .container {
+    padding: 0 0.4rem;
+
+    header {
+      display: flex;
+      justify-content: center;
+
+      .wrapper {
+        width: $base-width * 4;
+        display: flex;
+        align-items: center;
+
+        padding: 2rem 0;
+      }
+
+      button {
+        margin-left: auto;
+        background-color: transparent;
+        border: 0;
+
+        img {
+          width: 1.5rem;
+        }
+      }
+    }
+
+    .content {
+      display: flex;
+      padding-bottom: 3rem;
+
+      @media (max-width: $breakpoint-md) {
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      @media (min-width: $breakpoint-md) and (max-width: $breakpoint-lg) {
+        flex-direction: column;
+        justify-content: space-evenly;
+      }
+
+      @media (min-width: $breakpoint-lg) {
+        display: grid;
+        grid-template:
+          [row1-start] auto [row1-end row2-start] auto [row2-end]
+          /
+          [column1-start] 50% [column1-end column2-start] 50% [column2-end];
+      }
+
+      align-items: center;
+
+      .profile-image {
+        display: flex;
+        justify-content: center;
+
+        margin-bottom: 2rem;
+        width: $base-width-double * 1.25;
+
+        @media (min-width: $breakpoint-md) {
+          width: $base-width * 2.5;
+        }
+
+        @media (min-width: $breakpoint-lg) {
+          grid-column-start: 2;
+
+          display: flex;
+          align-items: center;
+          width: 100%;
+          height: 90vh;
+        }
+
+        @media (min-width: $breakpoint-xxl) {
+          max-height: 1200px;
+        }
+
+        img {
+          width: $base-width * 3.5;
+          border-radius: 50%;
+          opacity: 0.6;
+
+          @media (min-width: $breakpoint-lg) {
+            height: fit-content;
+          }
+        }
+      }
+
+      .text-container {
+        width: $base-width-double;
+
+        text-align: center;
+        line-height: 2;
+
+        font-weight: 600;
+
+        @media (max-width: $breakpoint-md) {
+          width: 80%;
+        }
+
+        @media (min-width: $breakpoint-md) {
+          width: $base-width * 3;
+          font-size: 3vw;
+        }
+
+        @media (min-width: $breakpoint-lg) {
+          grid-row-start: 1;
+          justify-self: center;
+
+          width: $base-width-double * 2;
+          font-size: 2vw;
+        }
+
+        @media (min-width: $breakpoint-xl) {
+          font-size: 1.5vw;
+        }
+
+        @media (min-width: $breakpoint-xxl) {
+          max-height: 1200px;
+          font-size: 1vw;
+        }
+
+        h1 {
+          @media (max-width: $breakpoint-md) {
+            font-size: 1.6rem;
+          }
+        }
+      }
+
+      .badge-container {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+
+        .technology-box {
+          padding: 0.6rem;
+          margin: 1rem 0;
+
+          @include glass-box;
+        }
+
+        @media (min-width: $breakpoint-lg) {
+          grid-column-start: 1;
+          grid-column-end: span 3;
+
+          justify-content: center;
+
+          .row {
+            margin: 0 2rem;
+          }
+        }
+      }
+
+      .projects-container {
+        .row {
+          @include glass-box();
+          padding: 0.4rem;
+        }
+
+        .company {
+        }
+
+        .role {
+          font-size: x-large;
+        }
+      }
+
+      .projects-container,
+      .education-container {
+        width: 80%;
+
+        @media (min-width: $breakpoint-md) {
+          font-size: 3vw;
+        }
+
+        @media (min-width: $breakpoint-lg) {
+          width: 60%;
+          grid-column-start: 1;
+          grid-column-end: span 4;
+
+          justify-self: center;
+
+          font-size: 2vw;
+        }
+
+        @media (min-width: $breakpoint-xl) {
+          font-size: 1.5vw;
+        }
+
+        @media (min-width: $breakpoint-xxl) {
+          font-size: 1vw;
+        }
+
+        h2 {
+          text-align: center;
+        }
+
+        .table {
+          .row {
+            display: flex;
+            justify-content: space-evenly;
+            margin-bottom: 0.6rem;
+
+            :first-child {
+              text-align: right;
+            }
+
+            div {
+              width: 46%;
+
+              .time-range {
+                display: inline-block;
+                margin-bottom: 0.6rem;
+              }
+            }
+          }
+
+          .paragraphs {
+            margin-bottom: 3rem;
+            text-align: center;
+            line-height: 2;
+          }
+        }
+      }
+    }
+  }
+
+  display: flex;
+  justify-content: center;
+
+  .year-container {
+    display: flex;
+    flex-direction: column;
+
+    width: $base-width;
+    margin-right: 24px;
+    margin-top: 32px;
+
+    .year-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      margin-bottom: 24px;
+      height: 48px;
+
+      @include glass-box;
+    }
+  }
+
+  .line {
+    border: 1px #f5f5f5 solid;
+  }
+
+  .jobs-container {
+    display: flex;
+    flex-direction: column;
+
+    width: $base-width * 2;
+    margin-left: 24px;
+    margin-top: 32px;
+
+    .job-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      color: #f5f5f5;
+
+      margin-bottom: 24px;
+      padding: 8px;
+
+      @include glass-box;
+    }
+  }
+}

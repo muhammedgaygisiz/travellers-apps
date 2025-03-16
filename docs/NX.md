@@ -87,6 +87,19 @@ Visit the [Nx Documentation](https://nx.dev) to learn more.
  npm run nx -- migrate --run-migrations=migrations.json
 ```
 
+## Usage of plugins
+
+```
+ > npm run nx list @angular/pwa
+
+ GENERATORS
+
+ ng-add : Update an application with PWA defaults.
+ pwa : Update an application with PWA defaults.
+
+ > npm run nx g @angular/pwa:ng-add --project <project-name>
+```
+
 ## ☁ Nx Cloud
 
 ### Distributed Computation Caching & Distributed Task Execution

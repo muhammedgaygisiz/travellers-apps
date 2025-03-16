@@ -1,12 +1,21 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from '../app.component';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { fromSite } from '@travellers-apps/kosaml/store/feature';
 
 describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  let fixture: ComponentFixture<AppComponent>;
+  let component: AppComponent;
+  let store: MockStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       providers: [provideMockStore()],
     }).compileComponents();
+
+    store = TestBed.inject(MockStore);
+    fixture = TestBed.createComponent(AppComponent);
+    component = fixture.debugElement.componentInstance;
   });
 
   it('should create the app', () => {
@@ -19,5 +28,16 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app.title).toEqual('kosaml');
+  });
+
+  describe('onToggleProjectBar', () => {
+    it('should dispatch toggleProjectBar', () => {
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+      component.onToggleProjectBar();
+
+      expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      expect(dispatchSpy).toHaveBeenCalledWith(fromSite.toggleProjectBar());
+    });
   });
 });

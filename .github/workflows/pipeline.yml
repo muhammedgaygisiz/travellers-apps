@@ -14,7 +14,7 @@ env:
   CI: true
 
 jobs:
-  install-dependencies:
+  setup:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,6 +26,12 @@ jobs:
         with:
           path: node_modules
           key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - uses: actions/cache/restore@v4
+        id: nx-cache
+        with:
+          path: .nx/cache
+          key: nx-cache-${{ hashFiles('package-lock.json') }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -50,17 +56,11 @@ jobs:
   common-lint:
     runs-on: ubuntu-latest
     needs:
-      - install-dependencies
+      - setup
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -75,17 +75,11 @@ jobs:
   utils-lint:
     runs-on: ubuntu-latest
     needs:
-      - install-dependencies
+      - setup
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -108,12 +102,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
-
       - uses: actions/cache/restore@v4
         with:
           path: node_modules
@@ -125,17 +113,11 @@ jobs:
   prices-lint:
     runs-on: ubuntu-latest
     needs:
-      - install-dependencies
+      - setup
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -153,12 +135,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -198,12 +174,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
-
       - uses: actions/cache/restore@v4
         with:
           path: node_modules
@@ -226,12 +196,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -260,12 +224,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -309,12 +267,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
-
       - name: Run E2E Tests
         uses: cypress-io/github-action@v4.2.0
         with:
@@ -332,18 +284,10 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - prices-e2e-test
-      - common-lint
-      - utils-lint
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -375,12 +319,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
-
       - uses: actions/cache/restore@v4
         with:
           path: node_modules
@@ -402,12 +340,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -455,12 +387,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
-
       - uses: actions/cache/restore@v4
         with:
           path: node_modules
@@ -472,17 +398,11 @@ jobs:
   kosaml-lint:
     runs-on: ubuntu-latest
     needs:
-      - install-dependencies
+      - setup
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -500,12 +420,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -548,12 +462,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
-
       - uses: actions/cache/restore@v4
         with:
           path: node_modules
@@ -576,12 +484,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
 
       - uses: actions/cache/restore@v4
         with:
@@ -613,12 +515,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
-
       - uses: actions/cache/restore@v4
         with:
           path: node_modules
@@ -626,6 +522,73 @@ jobs:
 
       - name: Build Prices App
         run: npm run nx -- build kosaml
+
+# CV
+
+  cv-build:
+    runs-on: ubuntu-latest
+    needs:
+      - setup
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Build CV App
+        run: npm run nx -- build cv
+
+      - name: Cache CV Build
+        uses: actions/cache@v4
+        with:
+          path: dist/apps/cv/browser
+          key: cv-build-${{ hashFiles('package-lock.json') }}
+
+  cv-deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - cv-build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: dist/apps/cv/browser
+          key: cv-build-${{ hashFiles('package-lock.json') }}
+
+      - name: CV Preview of Pull Request
+        if: github.event.pull_request.base.ref == 'develop'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CV_5F65D }}'
+          projectId: my-cv-5f65d
+          target: cv
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels
+
+      - name: Prices Publish to Firebase
+        if: github.ref == 'refs/heads/develop'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CV_5F65D }}'
+          channelId: live
+          projectId: my-cv-5f65d
+          target: cv
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels
 
 
 

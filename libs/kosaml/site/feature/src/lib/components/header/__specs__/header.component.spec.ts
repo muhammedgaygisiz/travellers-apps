@@ -22,4 +22,14 @@ describe('HeaderComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  describe('onToggleProjectBar', () => {
+    it('should emit toggle project bar', () => {
+      const emitSpy = jest.spyOn(component.toggleProjectBar, 'emit');
+
+      component.onToggleProjectBar();
+
+      expect(emitSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

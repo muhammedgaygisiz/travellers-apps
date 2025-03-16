@@ -10,6 +10,13 @@
           "storybook-e0333"
         ]
       }
-    }
+    },
+    "my-cv-5f65d": {
+      "hosting": {
+        "cv": [
+          "my-cv-5f65d"
+        ]
+      }
+     }
   }
 }

@@ -10,9 +10,11 @@
 
 $base-width: 20%;
 $base-width-double: $base-width * 2;
-$breakpoint-md: 768px;
 
+$breakpoint-md: 768px;
 $breakpoint-lg: 992px;
+$breakpoint-xl: 1300px;
+$breakpoint-xxl: 1990px;
 
 :host {
   min-height: 100%;
@@ -80,13 +82,25 @@ $breakpoint-lg: 992px;
 
         @media (min-width: $breakpoint-lg) {
           grid-column-start: 2;
-          width: $base-width-double * 2;
+
+          display: flex;
+          align-items: center;
+          width: 100%;
+          height: 90vh;
+        }
+
+        @media (min-width: $breakpoint-xxl) {
+          max-height: 1200px;
         }
 
         img {
           width: $base-width * 3.5;
           border-radius: 50%;
           opacity: 0.6;
+
+          @media (min-width: $breakpoint-lg) {
+            height: fit-content;
+          }
         }
       }
 
@@ -104,6 +118,7 @@ $breakpoint-lg: 992px;
 
         @media (min-width: $breakpoint-md) {
           width: $base-width * 3;
+          font-size: 3vw;
         }
 
         @media (min-width: $breakpoint-lg) {
@@ -111,6 +126,16 @@ $breakpoint-lg: 992px;
           justify-self: center;
 
           width: $base-width-double * 2;
+          font-size: 2vw;
+        }
+
+        @media (min-width: $breakpoint-xl) {
+          font-size: 1.5vw;
+        }
+
+        @media (min-width: $breakpoint-xxl) {
+          max-height: 1200px;
+          font-size: 1vw;
         }
 
         h1 {
@@ -149,12 +174,26 @@ $breakpoint-lg: 992px;
       .education-container {
         width: 80%;
 
+        @media (min-width: $breakpoint-md) {
+          font-size: 3vw;
+        }
+
         @media (min-width: $breakpoint-lg) {
           width: 60%;
           grid-column-start: 1;
           grid-column-end: span 4;
 
           justify-self: center;
+
+          font-size: 2vw;
+        }
+
+        @media (min-width: $breakpoint-xl) {
+          font-size: 1.5vw;
+        }
+
+        @media (min-width: $breakpoint-xxl) {
+          font-size: 1vw;
         }
 
         h2 {

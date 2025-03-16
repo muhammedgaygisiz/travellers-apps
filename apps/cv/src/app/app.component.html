@@ -1,7 +1,7 @@
 <div class="container">
   <header>
     <div class="wrapper">
-      <div class="title">Mo</div>
+      <div class="title">#Mo</div>
       <!--<button type="button">
         <img src="assets/burger-menu.svg" alt="Menu" />
       </button>-->
@@ -18,7 +18,7 @@
       <h1>Muhammed Gaygisiz</h1>
       <hr />
       <p>Master of Science</p>
-      <p>9.5 years of experience</p>
+      <p>{{ projects | duration }} of experience</p>
       <br />
       <p class="sub-text">
         Dedicated to creating user-oriented, high-quality software through
@@ -53,7 +53,7 @@
               {{ project.to | date : 'MMMM yyyy' }}
             </span>
             <br />
-            <span>{{ project | duration }}</span>
+            <span>{{ [project] | duration }}</span>
           </div>
           <div>
             <span>{{ project.company }}</span>

@@ -75,6 +75,8 @@ export const TRIP = {
   description: '',
   company: 'Career break and travel',
   role: 'Cologne - Marrakech',
+
+  exclude: true,
 };
 
 export const TIMS = {
@@ -175,6 +177,7 @@ export const FH = {
   company: 'Cologne University of Applied Sciences',
   role: 'Student Assistant / Research Assistant',
 
+  exclude: true,
   paragraph: [
     `
       As a student assistant in the Modeling of Application Systems
@@ -201,6 +204,7 @@ export const AUSBILDUNG = {
   company: 'IGMG e.V.',
   role: 'Apprentice in Software Development',
 
+  exclude: true,
   paragraph: [
     `
       During my apprenticeship, I developed an HR management tool

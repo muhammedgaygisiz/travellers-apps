@@ -3,6 +3,8 @@ export interface Project {
   from: Date;
   to: Date;
 
+  exclude?: boolean;
+
   company: string;
   role: string;
   description: string;

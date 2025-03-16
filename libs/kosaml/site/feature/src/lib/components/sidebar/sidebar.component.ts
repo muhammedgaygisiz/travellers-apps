@@ -11,7 +11,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { ProjectComponent } from './project/project.component';
 
 @Component({
-  standalone: true,
   selector: 'kosaml-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],

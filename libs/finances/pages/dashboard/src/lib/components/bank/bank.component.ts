@@ -14,7 +14,6 @@ import {
 import { Bank } from 'finances/store';
 
 @Component({
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'finances-bank',
   templateUrl: './bank.component.html',

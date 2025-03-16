@@ -30,7 +30,6 @@ import {
 } from '@travellers-apps/prices/localization';
 
 @Component({
-  standalone: true,
   selector: 'ta-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],

@@ -5,7 +5,6 @@ import { DashboardStore } from './dashboard.store';
 import { DashboardService } from './dashboard.service';
 
 @Component({
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: ` @if (service.banks$ | async) {}
     <finances-dashboard [banks]="store.banks()" />`,

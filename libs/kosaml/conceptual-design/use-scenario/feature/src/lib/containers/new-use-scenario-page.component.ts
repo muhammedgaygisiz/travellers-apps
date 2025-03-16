@@ -4,7 +4,6 @@ import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/bas
 import { Scenario } from '@travellers-apps/kosaml/model/feature';
 
 @Component({
-  standalone: true,
   selector: 'kosaml-edit-task-scenario-page',
   template: `
     <kosaml-page>

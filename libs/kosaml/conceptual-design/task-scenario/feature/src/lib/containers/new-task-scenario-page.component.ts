@@ -4,7 +4,6 @@ import { ScenarioComponent } from '@travellers-apps/kosaml/conceptual-design/bas
 import { Scenario } from '@travellers-apps/kosaml/model/feature';
 
 @Component({
-  standalone: true,
   template: `
     <kosaml-page>
       <h1 class="mat-headline-4">New Task Scenario</h1>

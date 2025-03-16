@@ -40,7 +40,6 @@ const APPRENTICE: Edution = {
 };
 
 @Component({
-  standalone: true,
   imports: [RouterModule, DatePipe, DurationPipe, DecimalPipe],
   selector: 'app-root',
   templateUrl: './app.component.html',

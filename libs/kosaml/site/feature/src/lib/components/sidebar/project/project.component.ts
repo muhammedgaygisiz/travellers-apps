@@ -24,7 +24,6 @@ export interface FlatTreeNode {
 }
 
 @Component({
-  standalone: true,
   selector: 'kosaml-project',
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],

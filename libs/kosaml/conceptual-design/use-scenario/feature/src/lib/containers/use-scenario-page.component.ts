@@ -9,7 +9,6 @@ import { AsyncPipe } from '@angular/common';
 import { Scenario } from '@travellers-apps/kosaml/model/feature';
 
 @Component({
-  standalone: true,
   template: `
     <kosaml-page>
       <h1 class="mat-headline-4">Use Scenario</h1>

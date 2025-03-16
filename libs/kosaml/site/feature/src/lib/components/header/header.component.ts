@@ -10,7 +10,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  standalone: true,
   selector: 'kosaml-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],

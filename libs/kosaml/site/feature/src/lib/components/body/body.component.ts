@@ -5,7 +5,6 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
 import { MenuBarComponent } from '../menu-bar/menu-bar.component';
 
 @Component({
-  standalone: true,
   selector: 'kosaml-body',
   templateUrl: './body.component.html',
   styleUrls: ['./body.component.scss'],

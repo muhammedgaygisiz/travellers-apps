@@ -12,7 +12,6 @@ import { MostSearchedItem } from '../api/most-searched-item.model';
 import { SupportedLang } from '@travellers-apps/prices/localization';
 
 @Component({
-  standalone: true,
   template: `
     <ta-home
       class="ion-page"

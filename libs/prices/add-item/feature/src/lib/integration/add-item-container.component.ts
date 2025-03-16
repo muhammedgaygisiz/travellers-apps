@@ -6,7 +6,6 @@ import { Price } from '../api/price.model';
 import { SupportedLang } from '@travellers-apps/prices/localization';
 
 @Component({
-  standalone: true,
   template: `
     <ta-add-item
       class="ion-page"

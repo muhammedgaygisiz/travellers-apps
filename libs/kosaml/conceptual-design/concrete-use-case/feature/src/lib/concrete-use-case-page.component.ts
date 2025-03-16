@@ -11,7 +11,6 @@ import { AsyncPipe } from '@angular/common';
 import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 
 @Component({
-  standalone: true,
   template: `
     <kosaml-page>
       <h1 class="mat-headline-4">Concrete Use Case</h1>

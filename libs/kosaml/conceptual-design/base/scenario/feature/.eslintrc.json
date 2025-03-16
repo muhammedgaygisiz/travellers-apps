@@ -24,7 +24,8 @@
             "prefix": "kosaml",
             "style": "kebab-case"
           }
-        ]
+        ],
+        "@angular-eslint/prefer-standalone": "off"
       }
     },
     {

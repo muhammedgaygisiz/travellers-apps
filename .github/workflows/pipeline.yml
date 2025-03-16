@@ -14,6 +14,35 @@ env:
   CI: true
 
 jobs:
+  # Reusable job for Node.js setup, checkout and caching
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      # Creates a map of outputs. Outputs are available to all downstream jobs
+      # that depends on this job
+      node_modules_cache: ${{ steps.cache.outputs.cache-hit }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Cache node_modules
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runenr.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          # Fallback key format: if exact match is not found, any cache start with restore-keys
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm install
+
   install-dependencies:
     runs-on: ubuntu-latest
 

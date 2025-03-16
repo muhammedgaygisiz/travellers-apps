@@ -24,7 +24,6 @@ import {
   IonButton,
   IonInput,
   IonItem,
-  IonLabel,
   IonText,
 } from '@ionic/angular/standalone';
 import {
@@ -45,7 +44,6 @@ import { fromEvent, tap } from 'rxjs';
     CardComponent,
     PageComponent,
     IonItem,
-    IonLabel,
     IonInput,
     IonButton,
     IonText,

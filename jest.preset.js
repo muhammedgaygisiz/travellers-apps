@@ -14,6 +14,7 @@ module.exports = {
    */
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
   roots: ['<rootDir>', path.resolve(__dirname, './__mocks__')],
+  setupFilesAfterEnv: [path.resolve(__dirname, './__mocks__/fetch.js')],
   coverageThreshold: {
     global: {
       branches: 80,

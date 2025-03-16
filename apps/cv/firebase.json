@@ -2,7 +2,7 @@
   "hosting": [
     {
       "target": "app",
-      "public": "dist/apps/cv/browser",
+      "public": "../dist/apps/cv/browser",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {

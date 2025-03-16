@@ -80,7 +80,7 @@ describe('loki nx executor', () => {
             },
           },
         },
-      } as ExecutorContext);
+      } as unknown as ExecutorContext);
 
       expect(result).toEqual('context_root/project_root');
     });
@@ -124,7 +124,7 @@ describe('loki nx executor', () => {
               },
             },
           },
-        });
+        } as unknown as ExecutorContext);
 
         expect(result).toEqual(false);
       });
@@ -154,7 +154,7 @@ describe('loki nx executor', () => {
               },
             },
           },
-        });
+        } as unknown as ExecutorContext);
 
         expect(result).toEqual(true);
       });
@@ -178,7 +178,7 @@ describe('loki nx executor', () => {
             root: 'root',
             cwd: 'cwd',
             isVerbose: false,
-          }
+          } as unknown as ExecutorContext
         );
 
         expect(result).toEqual({ success: false });
@@ -222,7 +222,7 @@ describe('loki nx executor', () => {
                 },
               },
             },
-          }
+          } as unknown as ExecutorContext
         );
 
         expect(result).toEqual({ success: true });

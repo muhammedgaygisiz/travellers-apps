@@ -15,7 +15,7 @@ interface Schema {
 
 const getProjectJsonContent = (_context: ExecutorContext) => {
   const projectName = _context.projectName;
-  return _context.workspace?.projects[projectName!];
+  return (_context as any).workspace?.projects[projectName!];
 };
 
 const getBuildStorybookOutput = (_context: ExecutorContext) => {

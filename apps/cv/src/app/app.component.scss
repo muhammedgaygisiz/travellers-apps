@@ -170,6 +170,20 @@ $breakpoint-xxl: 1990px;
         }
       }
 
+      .projects-container {
+        .row {
+          @include glass-box();
+          padding: 0.4rem;
+        }
+
+        .company {
+        }
+
+        .role {
+          font-size: x-large;
+        }
+      }
+
       .projects-container,
       .education-container {
         width: 80%;

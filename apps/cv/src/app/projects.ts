@@ -22,7 +22,7 @@ export const APU = {
   to: NOW,
   description: '',
   company: 'akros AG',
-  role: 'Frontend-Entwickler',
+  role: 'Frontend Dev',
 
   paragraph: [
     `
@@ -61,7 +61,7 @@ export const PERFOOD = {
   to: SEPTEMBER_2022,
   description: '',
   company: 'perfood GmbH',
-  role: 'Frontend-Entwickler',
+  role: 'Frontend Dev',
 
   paragraph: [
     `I developed Ionic-based Angular components and implemented NestJS-based backend services. To improve UI consistency and reusability, I introduced Storybook for component documentation. Additionally, I began establishing a clear separation between presentational and smart components to enhance maintainability and scalability. My work focused on creating modular and efficient solutions within a structured development process.`,
@@ -73,8 +73,8 @@ export const TRIP = {
   from: JANUAR_2022,
   to: JUNI_2022,
   description: '',
-  company: 'Career break and travel',
-  role: 'Cologne - Marrakech',
+  company: 'Career break',
+  role: 'Traveler',
 
   exclude: true,
 };
@@ -85,7 +85,7 @@ export const TIMS = {
   to: DEZEMBER_2021,
   description: '',
   company: 'akros AG',
-  role: 'Frontend-Entwickler und UX-Designer',
+  role: 'Frontend Dev and UX Designer',
 
   paragraph: [
     `
@@ -127,7 +127,7 @@ export const AXA = {
   to: DEZEMBER_2019,
   description: '',
   company: 'Axa Konzern AG',
-  role: 'Softwareentwickler',
+  role: 'Full Stack Dev',
   paragraph: [
     `
       I focused on developing and maintaining modern web applications
@@ -148,7 +148,7 @@ export const NLI = {
   to: DEZEMBER_2016,
   description: '',
   company: 'Next Level Integration GmbH',
-  role: 'Berater, Entwickler und Projektleiter',
+  role: 'Consultant, Dev und Project Manager',
 
   paragraph: [
     `

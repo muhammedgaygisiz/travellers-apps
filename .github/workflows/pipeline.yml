@@ -627,5 +627,24 @@ jobs:
       - name: Build Prices App
         run: npm run nx -- build kosaml
 
+# CV
+
+  cv-build:
+    runs-on: ubuntu-latest
+    needs:
+      - setup
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Build CV App
+        run: npm run nx -- build cv
+
 
 

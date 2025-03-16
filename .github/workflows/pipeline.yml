@@ -574,7 +574,7 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CV_5F65D }}'
           projectId: my-cv-5f65d
-          target: app
+          target: cv
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 

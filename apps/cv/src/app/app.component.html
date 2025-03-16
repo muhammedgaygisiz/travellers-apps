@@ -1,1 +1,109 @@
-<div>CV</div>
+<div class="container">
+  <header>
+    <div class="wrapper">
+      <div class="title">#Mo</div>
+      <!--<button type="button">
+        <img src="assets/burger-menu.svg" alt="Menu" />
+      </button>-->
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="profile-image">
+      <img src="assets/profile.jpeg" alt="Photo" />
+    </div>
+
+    <div class="text-container">
+      <span>Senior Frontend Software Engineer</span>
+      <h1>Muhammed Gaygisiz</h1>
+      <hr />
+      <p>Master of Science</p>
+      <p>{{ projects | duration }} of experience</p>
+      <br />
+      <p class="sub-text">
+        Dedicated to creating user-oriented, high-quality software through
+        continuous collaboration and efficient processes. Skilled in analyzing
+        complex tasks and designing goal-oriented solutions. Strong
+        communicator, valuing teamwork and empathy to deliver optimal results.
+      </p>
+      <p>Always up to date with the latest industry trends and technologies.</p>
+      <hr />
+    </div>
+
+    <div class="badge-container">
+      <div class="row">
+        <div class="technology-box"><span>Angular: 5,5 years</span></div>
+        <div class="technology-box"><span>React: 2 years</span></div>
+      </div>
+      <div class="row">
+        <div class="technology-box"><span>Spring: 3 years</span></div>
+        <div class="technology-box"><span>REST: 4,5 years</span></div>
+      </div>
+    </div>
+
+    <div class="projects-container">
+      <hr />
+      <h2>Projects</h2>
+      <div class="table">
+        @for (project of projects; track project.id) {
+        <div class="row">
+          <div>
+            <span class="time-range">
+              {{ project.from | date : 'MMMM yyyy' }} -
+              {{ project.to | date : 'MMMM yyyy' }}
+            </span>
+            <br />
+            <span>{{ [project] | duration }}</span>
+          </div>
+          <div>
+            <span class="company">{{ project.company }}</span>
+            <br />
+            <span class="role">{{ project.role }}</span>
+          </div>
+        </div>
+        <div class="paragraphs">
+          @for (p of project.paragraph; track $index) {
+          <p>{{ p }}</p>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="education-container">
+      <hr />
+      <h2>Edution</h2>
+      <div class="table">
+        @for (edution of educations; track edution.id) {
+        <div class="row">
+          <div>
+            <span class="time-range">
+              {{ edution.from }} -
+              {{ edution.to }}
+            </span>
+          </div>
+          <div>
+            <span>{{ edution.institution }}</span>
+            <br />
+            <span>{{ edution.degree }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!--
+    <div class="year-container">
+      @for(year of years; track year) {
+        <div class="year-box">{{year}}</div>
+      }
+    </div>
+
+    <div class="line"></div>
+
+    <div class="jobs-container">
+      <div class="job-box">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec massa lorem, consectetur consectetur sem in, volutpat vulputate lacus. Aliquam sed nisl lectus. Praesent vitae ex in augue ullamcorper suscipit sed id tortor. Vivamus pellentesque ligula ex, at laoreet elit placerat sed. Aenean congue sapien id pretium ultrices. Ut a libero a lacus gravida placerat nec tincidunt augue. Etiam semper, tortor et vehicula egestas, purus velit fringilla nunc, nec mattis neque enim iaculis ligula. Sed dapibus eu dolor eget tristique. Nullam ultricies erat eu pellentesque viverra. Cras quis sem dignissim, lobortis massa eu, scelerisque odio. Donec vestibulum, arcu vel fermentum aliquet, nisl mi pharetra nisl, a bibendum eros erat eu nunc. Pellentesque eleifend pulvinar mauris, quis commodo lacus tristique sed. Mauris congue enim a lorem accumsan, vitae porta ante bibendum. Cras dignissim, quam id molestie convallis, nibh nulla luctus sem, et ornare nisl nisi eget erat.</div>
+    </div>
+    -->
+  </div>
+</div>

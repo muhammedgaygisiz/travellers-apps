@@ -1,0 +1,13 @@
+{
+  "projects": {},
+  "targets": {
+    "my-cv-5f65d": {
+      "hosting": {
+        "app": [
+          "my-cv-5f65d"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

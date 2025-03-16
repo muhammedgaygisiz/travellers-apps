@@ -21,17 +21,6 @@
           "destination": "/index.html"
         }
       ]
-    },
-    {
-      "target": "cv",
-      "public": "dist/apps/cv/browser",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
     }
   ]
 }

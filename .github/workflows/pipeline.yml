@@ -545,7 +545,7 @@ jobs:
       - name: Cache CV Build
         uses: actions/cache@v4
         with:
-          path: dist/apps/cv
+          path: dist/apps/cv/browser
           key: cv-build-${{ hashFiles('package-lock.json') }}
 
   cv-deploy:

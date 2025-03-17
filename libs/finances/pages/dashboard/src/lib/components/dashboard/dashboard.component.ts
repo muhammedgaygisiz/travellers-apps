@@ -23,7 +23,6 @@ import { NgClass } from '@angular/common';
 import { Bank } from 'finances/store';
 
 @Component({
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'finances-dashboard',
   templateUrl: './dashboard.component.html',

@@ -34,7 +34,6 @@ import {
 import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Component({
-  standalone: true,
   selector: 'ta-registration',
   templateUrl: './registration.component.html',
   styleUrls: ['./registration.component.scss'],

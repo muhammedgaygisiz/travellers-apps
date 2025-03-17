@@ -18,7 +18,6 @@ import { AsyncPipe } from '@angular/common';
 import { IonIcon, IonItem, IonText } from '@ionic/angular/standalone';
 
 @Component({
-  standalone: true,
   selector: 'ta-password-validator',
   templateUrl: './password-validator.component.html',
   styleUrls: ['./password-validator.component.scss'],

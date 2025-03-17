@@ -12,7 +12,6 @@ import { PageComponent } from '@travellers-apps/kosaml/page/feature';
 import { MatTableModule } from '@angular/material/table';
 
 @Component({
-  standalone: true,
   template: `
     <kosaml-page>
       <h1 class="mat-headline-4">Essential Use Case</h1>

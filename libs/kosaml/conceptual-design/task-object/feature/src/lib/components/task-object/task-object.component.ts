@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 
 @Component({
-  standalone: true,
   selector: 'kosaml-task-object',
   templateUrl: './task-object.component.html',
   styleUrls: ['./task-object.component.scss'],

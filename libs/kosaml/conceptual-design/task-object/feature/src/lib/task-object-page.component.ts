@@ -8,7 +8,6 @@ import { TaskObjectComponent } from './components/task-object/task-object.compon
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  standalone: true,
   template: `
     <kosaml-page>
       <h1 class="mat-headline-4">Task Object</h1>

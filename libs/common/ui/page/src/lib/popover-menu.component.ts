@@ -77,7 +77,6 @@ import { SupportedLang } from '@travellers-apps/prices/localization';
       } }
     </ion-list>
   `,
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonList, IonItem, IonIcon, IonItemGroup, IonItemDivider],
 })

@@ -5,7 +5,6 @@ import { AsyncPipe } from '@angular/common';
 import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Component({
-  standalone: true,
   template: `
     <ta-registration
       class="ion-page"

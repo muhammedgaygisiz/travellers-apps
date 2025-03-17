@@ -3,7 +3,6 @@ import { ConceptualDesignUseCaseTypes } from './api/types';
 import { MatTableModule } from '@angular/material/table';
 
 @Component({
-  standalone: true,
   selector: 'kosaml-cp-base-use-case',
   templateUrl: './cp-base-use-case.component.html',
   styleUrls: ['./cp-base-use-case.component.scss'],

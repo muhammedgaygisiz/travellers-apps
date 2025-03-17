@@ -3,7 +3,6 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addNecessaryIcons } from '@travellers-apps/utils-common';
 
 @Component({
-  standalone: true,
   selector: 'travellers-apps-root',
   template: `
     <ion-app>

@@ -19,7 +19,6 @@ import {
 import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Component({
-  standalone: true,
   selector: 'ta-auth',
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss'],

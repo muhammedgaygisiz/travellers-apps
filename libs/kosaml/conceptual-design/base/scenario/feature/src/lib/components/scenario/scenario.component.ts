@@ -20,7 +20,6 @@ import { MatInputModule } from '@angular/material/input';
 import { Scenario } from '@travellers-apps/kosaml/model/feature';
 
 @Component({
-  standalone: true,
   selector: 'kosaml-scenario',
   templateUrl: './scenario.component.html',
   styleUrls: ['./scenario.component.scss'],

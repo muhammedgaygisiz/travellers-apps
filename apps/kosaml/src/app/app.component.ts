@@ -8,7 +8,6 @@ import {
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  standalone: true,
   selector: 'travellers-apps-root',
   template: `
     <kosaml-header (toggleProjectBar)="onToggleProjectBar()" />

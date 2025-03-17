@@ -3,14 +3,11 @@ import {
   initializeApp,
   provideFirebaseApp,
 } from '@angular/fire/app';
-import {
-  getFirestore,
-  provideFirestore as provFireStore,
-} from '@angular/fire/firestore';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 
-export const provideFirestore = (firebaseOptions: FirebaseOptions) => [
+export const providePricesFirestore = (firebaseOptions: FirebaseOptions) => [
   provideFirebaseApp(() => initializeApp(firebaseOptions || {})),
-  provFireStore(() => getFirestore()),
+  provideFirestore(() => getFirestore()),
   provideAuth(() => getAuth()),
 ];

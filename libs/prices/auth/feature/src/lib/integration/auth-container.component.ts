@@ -6,7 +6,6 @@ import { AuthComponent } from '../components/auth.component';
 import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Component({
-  standalone: true,
   template: ` <ta-auth
     class="ion-page"
     [loginFailed]="loginFailed$ | async"

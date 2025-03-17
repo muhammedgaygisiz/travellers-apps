@@ -24,7 +24,6 @@ import { AngularDelegate } from '@ionic/angular';
 import { SupportedLang } from '@travellers-apps/prices/localization';
 
 @Component({
-  standalone: true,
   selector: 'ta-page',
   templateUrl: './page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

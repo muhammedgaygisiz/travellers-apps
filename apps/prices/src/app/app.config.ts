@@ -4,7 +4,7 @@ import { providePricesShell } from '@travellers-apps/prices/shell/feature';
 import { providePricesStore } from '@travellers-apps/prices/store/feature';
 import { environment } from '../environments/environment';
 import { provideServiceWorker } from '@angular/service-worker';
-import { provideFirestore } from '@travellers-apps/prices/firestore/feature';
+import { providePricesFirestore } from '@travellers-apps/prices/firestore/feature';
 import { provideNetworkStatus } from '@travellers-apps/common/networkstatus/feature';
 import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
 import { provideIonicAngular } from '@ionic/angular/standalone';
@@ -31,7 +31,7 @@ export const appConfig: ApplicationConfig = {
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000',
     }),
-    provideFirestore(firebaseOptions),
+    providePricesFirestore(firebaseOptions),
     provideNetworkStatus(),
     Geolocation,
     provideIonicAngular(getIonicConfig()),

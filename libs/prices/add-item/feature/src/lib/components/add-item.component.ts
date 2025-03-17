@@ -24,7 +24,6 @@ import {
   IonButton,
   IonInput,
   IonItem,
-  IonLabel,
   IonText,
 } from '@ionic/angular/standalone';
 import {
@@ -35,7 +34,6 @@ import { Price } from '../api/price.model';
 import { fromEvent, tap } from 'rxjs';
 
 @Component({
-  standalone: true,
   selector: 'ta-add-item',
   templateUrl: './add-item.component.html',
   styleUrls: ['./add-item.component.scss'],
@@ -46,7 +44,6 @@ import { fromEvent, tap } from 'rxjs';
     CardComponent,
     PageComponent,
     IonItem,
-    IonLabel,
     IonInput,
     IonButton,
     IonText,

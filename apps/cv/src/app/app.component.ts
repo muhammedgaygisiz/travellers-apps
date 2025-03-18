@@ -5,7 +5,7 @@ import { DurationPipe } from './duration.pipe';
 import { Project } from './project';
 import { APU, AUSBILDUNG, AXA, FH, NLI, PERFOOD, TIMS, TRIP } from './projects';
 
-interface Edution {
+interface Education {
   id: number;
   from: number;
   to: number;
@@ -14,7 +14,7 @@ interface Edution {
   degree: string;
 }
 
-const MASTER: Edution = {
+const MASTER: Education = {
   id: 1,
   from: 2011,
   to: 2015,
@@ -22,7 +22,7 @@ const MASTER: Edution = {
   program: 'Software Engineering',
   degree: 'Master of Science',
 };
-const BACHELOR: Edution = {
+const BACHELOR: Education = {
   id: 2,
   from: 2008,
   to: 2011,
@@ -30,7 +30,7 @@ const BACHELOR: Edution = {
   program: 'Business Informatics and General Informatics',
   degree: 'Bachelor of Science',
 };
-const APPRENTICE: Edution = {
+const APPRENTICE: Education = {
   id: 3,
   from: 2005,
   to: 2008,
@@ -48,5 +48,5 @@ const APPRENTICE: Edution = {
 export class AppComponent {
   projects: Project[] = [APU, PERFOOD, TRIP, TIMS, AXA, NLI, FH, AUSBILDUNG];
 
-  educations: Edution[] = [MASTER, BACHELOR, APPRENTICE];
+  educations: Education[] = [MASTER, BACHELOR, APPRENTICE];
 }

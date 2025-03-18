@@ -578,7 +578,7 @@ jobs:
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
-      - name: Prices Publish to Firebase
+      - name: CV Publish to Firebase
         if: github.ref == 'refs/heads/develop'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

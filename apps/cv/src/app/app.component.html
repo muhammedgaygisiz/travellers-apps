@@ -72,20 +72,20 @@
 
     <div class="education-container">
       <hr />
-      <h2>Edution</h2>
+      <h2>Education</h2>
       <div class="table">
-        @for (edution of educations; track edution.id) {
+        @for (education of educations; track education.id) {
         <div class="row">
           <div>
             <span class="time-range">
-              {{ edution.from }} -
-              {{ edution.to }}
+              {{ education.from }} -
+              {{ education.to }}
             </span>
           </div>
           <div>
-            <span>{{ edution.institution }}</span>
+            <span>{{ education.institution }}</span>
             <br />
-            <span>{{ edution.degree }}</span>
+            <span>{{ education.degree }}</span>
           </div>
         </div>
         }

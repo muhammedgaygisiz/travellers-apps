@@ -126,6 +126,7 @@
     "ngx-skeleton-loader": "10.0.0",
     "nx": "20.6.0",
     "nx-cloud": "19.1.0",
+    "nx-loki": "^1.0.2",
     "nx-stylelint": "17.1.5",
     "prettier": "2.8.3",
     "pwa-asset-generator": "6.4.0",
@@ -136,10 +137,5 @@
     "ts-node": "10.9.1",
     "typescript": "5.7.3",
     "webpack": "5.91.0"
-  },
-  "overrides": {
-    "loki": {
-      "@storybook/react": "7"
-    }
   }
 }

@@ -94,6 +94,10 @@
         "testStorybookTargetName": "test-storybook",
         "staticStorybookTargetName": "static-storybook"
       }
+    },
+    {
+      "plugin": "nx-loki",
+      "options": {}
     }
   ]
 }

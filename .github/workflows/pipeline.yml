@@ -5,6 +5,18 @@ on:
     branches: [ develop ]
   pull_request:
     branches: [ develop ]
+  workflow_dispatch:
+    inputs:
+      nx_daemon-reset:
+        description: 'Include NX Daemon Reset'
+        required: false
+        default: 'false'
+        type: boolean
+      nx_verbose_logging:
+        description: 'Include NX Daemon Reset'
+        required: false
+        default: 'false'
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -13,6 +25,7 @@ concurrency:
 env:
   CI: true
   NX_DAEMON: false
+  NX_VERBOSE_LOGGING: ${{ github.event.inputs.nx_verbose_logging }}
 
 jobs:
   setup:
@@ -38,6 +51,10 @@ jobs:
       - name: NPM Dependencies
         run: npm ci
         if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Reset NX Daemon
+        if: github.event.inputs.nx_daemon-reset == 'true'
+        run: npm run nx -- reset
 
       - name: Cache NPM Dependencies
         uses: actions/cache@v4

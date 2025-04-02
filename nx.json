@@ -85,10 +85,5 @@
   "useInferencePlugins": false,
   "defaultBase": "main",
   "useLegacyCache": true,
-  "plugins": [
-    {
-      "plugin": "nx-loki",
-      "options": {}
-    }
-  ]
+  "plugins": []
 }

@@ -12,11 +12,6 @@ const config: StorybookConfig = {
     '@storybook/addon-mdx-gfm',
     '@chromatic-com/storybook',
   ],
-
-  features: {
-    previewMdx2: true,
-  },
-
   staticDirs: [
     {
       from: '../src/assets/i18n',

@@ -5,6 +5,7 @@
   },
   "exclude": ["../**/*.spec.ts"],
   "include": [
+    "../src/**/*",
     "../__stories__/**/*",
     "../../../libs/kosaml/**/*.stories.*",
     "*.ts",

@@ -5,6 +5,7 @@
   },
   "exclude": ["../**/*.spec.ts", "jest.config.ts"],
   "include": [
+    "../src/**/*",
     "../__stories__/**/*",
     "../../../libs/prices/**/*.stories.*",
     "../../../libs/common/**/*.stories.*",

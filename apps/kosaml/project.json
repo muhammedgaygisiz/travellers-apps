@@ -113,20 +113,6 @@
         }
       }
     },
-    "loki": {
-      "executor": "./tools/executors/loki:loki",
-      "options": {
-        "reference": "apps/kosaml/.loki/reference",
-        "difference": "apps/kosaml/.loki/difference",
-        "output": "apps/kosaml/.loki/current",
-        "chromeTolerance": 0.000005
-      },
-      "configurations": {
-        "approve": {
-          "update": true
-        }
-      }
-    },
     "stylelint": {
       "executor": "nx-stylelint:lint",
       "outputs": ["{options.outputFile}"],

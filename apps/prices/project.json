@@ -132,20 +132,6 @@
         }
       }
     },
-    "loki": {
-      "executor": "./tools/executors/loki:loki",
-      "options": {
-        "reference": "apps/prices/.loki/reference",
-        "difference": "apps/prices/.loki/difference",
-        "output": "apps/prices/.loki/current",
-        "chromeTolerance": 0.000005
-      },
-      "configurations": {
-        "approve": {
-          "update": true
-        }
-      }
-    },
     "stylelint": {
       "executor": "nx-stylelint:lint",
       "outputs": ["{options.outputFile}"],

@@ -74,7 +74,7 @@
     "@angular/language-service": "19.2.2",
     "@angular/pwa": "19.2.3",
     "@capacitor/cli": "6.0.0",
-    "@chromatic-com/storybook": "^3.2.2",
+    "@chromatic-com/storybook": "^3.2.6",
     "@commitlint/cli": "19.3.0",
     "@commitlint/config-nx-scopes": "19.3.1",
     "@ionic/angular-toolkit": "11.0.1",

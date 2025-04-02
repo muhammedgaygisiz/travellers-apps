@@ -2,11 +2,14 @@ import type { StorybookConfig } from '@storybook/angular';
 
 const config: StorybookConfig = {
   stories: ['../../../libs/kosaml/**/__specs__/**/*.stories.@(js|jsx|ts|tsx)'],
-  addons: [],
+  addons: ['@chromatic-com/storybook'],
+
   framework: {
     name: '@storybook/angular',
     options: {},
   },
+
+  docs: {},
 };
 
 export default config;

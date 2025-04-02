@@ -1,16 +1,14 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "emitDecoratorMetadata": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2022",
-    "useDefineForClassFields": false
+    "emitDecoratorMetadata": true
   },
   "exclude": ["../**/*.spec.ts", "jest.config.ts"],
   "include": [
     "../__stories__/**/*",
-    "*.js",
     "../../../libs/prices/**/*.stories.*",
-    "../../../libs/common/**/*.stories.*"
+    "../../../libs/common/**/*.stories.*",
+    "*.ts",
+    "*.js"
   ]
 }

@@ -84,5 +84,11 @@
   "defaultProject": "prices",
   "useInferencePlugins": false,
   "defaultBase": "main",
-  "useLegacyCache": true
+  "useLegacyCache": true,
+  "plugins": [
+    {
+      "plugin": "nx-loki",
+      "options": {}
+    }
+  ]
 }

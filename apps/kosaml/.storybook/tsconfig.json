@@ -1,15 +1,14 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "emitDecoratorMetadata": true,
-    "target": "ES2022",
-    "useDefineForClassFields": false
+    "emitDecoratorMetadata": true
   },
-  "files": ["../src/polyfills.ts"],
   "exclude": ["../**/*.spec.ts"],
   "include": [
+    "../src/**/*",
     "../__stories__/**/*",
-    "*.js",
-    "../../../libs/kosaml/**/*.stories.*"
+    "../../../libs/kosaml/**/*.stories.*",
+    "*.ts",
+    "*.js"
   ]
 }

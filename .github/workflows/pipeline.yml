@@ -12,6 +12,7 @@ concurrency:
 
 env:
   CI: true
+  NX_DAEMON: false
 
 jobs:
   setup:

@@ -13,7 +13,7 @@ on:
         default: 'false'
         type: boolean
       nx_verbose_logging:
-        description: 'Include NX Daemon Reset'
+        description: 'NX Verbose Logging'
         required: false
         default: 'false'
         type: boolean

@@ -4,10 +4,7 @@ const config: StorybookConfig = {
   stories: ['../../../libs/kosaml/**/__specs__/**/*.stories.@(js|jsx|ts|tsx)'],
   addons: ['@chromatic-com/storybook'],
 
-  framework: {
-    name: '@storybook/angular',
-    options: {},
-  },
+  framework: '@storybook/angular',
 
   docs: {},
 };

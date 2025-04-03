@@ -19,10 +19,7 @@ const config: StorybookConfig = {
     },
   ],
 
-  framework: {
-    name: '@storybook/angular',
-    options: {},
-  },
+  framework: '@storybook/angular',
 
   docs: {},
 };

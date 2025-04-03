@@ -26,6 +26,7 @@ env:
   CI: true
   NX_DAEMON: false
   NX_VERBOSE_LOGGING: ${{ github.event.inputs.nx_verbose_logging }}
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
   setup:

@@ -92,6 +92,7 @@
     "@nx/storybook": "20.7.0",
     "@nx/web": "20.7.0",
     "@nx/workspace": "20.7.0",
+    "@nxext/capacitor": "^20.1.0",
     "@schematics/angular": "19.2.3",
     "@storybook/addon-essentials": "8.4.7",
     "@storybook/addon-mdx-gfm": "8.4.7",

@@ -97,7 +97,9 @@
     },
     {
       "plugin": "nx-loki",
-      "options": {}
+      "options": {
+        "chromeRetries": 5
+      }
     }
   ]
 }

@@ -6,10 +6,7 @@
       "inputs": ["production", "^production"],
       "cache": true
     },
-    "e2e": {
-      "inputs": ["default", "^production"],
-      "cache": true
-    },
+    "e2e": { "inputs": ["default", "^production"], "cache": true },
     "build-storybook": {
       "inputs": [
         "default",
@@ -23,15 +20,8 @@
     "@nx/jest:jest": {
       "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
       "cache": true,
-      "options": {
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
-      }
+      "options": { "passWithNoTests": true },
+      "configurations": { "ci": { "ci": true, "codeCoverage": true } }
     },
     "stylelint": {
       "inputs": [
@@ -73,13 +63,8 @@
       "style": "scss",
       "unitTestRunner": "jest"
     },
-    "@nx/angular:library": {
-      "linter": "eslint",
-      "unitTestRunner": "jest"
-    },
-    "@nx/angular:component": {
-      "style": "scss"
-    }
+    "@nx/angular:library": { "linter": "eslint", "unitTestRunner": "jest" },
+    "@nx/angular:component": { "style": "scss" }
   },
   "defaultProject": "prices",
   "useInferencePlugins": false,
@@ -95,11 +80,7 @@
         "staticStorybookTargetName": "static-storybook"
       }
     },
-    {
-      "plugin": "nx-loki",
-      "options": {
-        "chromeRetries": 5
-      }
-    }
-  ]
+    { "plugin": "nx-loki", "options": { "chromeRetries": 5 } }
+  ],
+  "nxCloudId": "67eed3c4666d0960f371eb74"
 }

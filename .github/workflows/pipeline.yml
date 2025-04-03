@@ -219,7 +219,7 @@ jobs:
           path: dist/storybook/prices
           key: prices-storybook-${{ hashFiles('**/prices/**/*.stories.*') }}
 
-      - run: npm run nx -- loki prices
+      - run: npm run nx -- test-loki prices
 
       - name: Upload Prices Diffs
         uses: actions/upload-artifact@v4
@@ -507,7 +507,7 @@ jobs:
           path: dist/storybook/kosaml
           key: kosaml-storybook-${{ hashFiles('**/kosaml/**/*.stories.*') }}
 
-      - run: npm run nx -- loki kosaml
+      - run: npm run nx -- test-loki kosaml
 
       - name: Upload Loki Diffs
         uses: actions/upload-artifact@v4

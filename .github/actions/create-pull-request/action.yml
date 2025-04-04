@@ -15,6 +15,6 @@ runs:
     - name: Create Pull Request
       shell: bash
       run: |
-        gh pr create --base main --head ${{ inputs.branch_name }} --title "chore: update loki references" --body ""
+        gh pr create --base develop --head ${{ inputs.branch_name }} --title "chore: update loki references" --body ""
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}

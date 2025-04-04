@@ -1,0 +1,12 @@
+name: "Push branch"
+description: "Pushes a branch"
+runs:
+  using: "composite"
+  steps:
+    - name: Push branch
+      shell: bash
+      run: |
+        RELEASE_BRANCH="update-loki-references"
+        git push -u origin $RELEASE_BRANCH
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

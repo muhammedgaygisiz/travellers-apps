@@ -1,0 +1,10 @@
+name: "Create pull request"
+description: "Creates a pull request"
+runs:
+  using: "composite"
+  steps:
+    - name: Create Pull Request
+      shell: bash
+      run: |
+        RELEASE_BRANCH="update-loki-references"
+        gh pr create --base main --head $RELEASE_BRANCH --title "chore: update loki references" --body ""

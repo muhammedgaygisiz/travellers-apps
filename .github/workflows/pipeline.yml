@@ -49,7 +49,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Run Linter
-        run: npm run nx -- run-many --target=lint --projects=\"common*\"
+        run: npm run nx -- affected -t lint --base=develop --head=HEAD
 
 #Utils
 

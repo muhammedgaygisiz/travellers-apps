@@ -33,7 +33,7 @@ jobs:
             npm run nx -- run-many --target=update-loki --all
 
             git add .
-            git commit -m --allow-empty "chore: update loki references"
+            git commit --allow-empty -m "chore: update loki references"
 
         - name: Push branch
           uses: ./.github/actions/push-branch

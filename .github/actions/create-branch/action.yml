@@ -13,8 +13,8 @@ runs:
       shell: bash
       run: |
         # Fetch latest main branch
-        git checkout main
-        git pull origin main
+        git checkout develop
+        git pull origin develop
 
         RELEASE_BRANCH="release-${{ github.event.inputs.release_version }}"
         git checkout -b $RELEASE_BRANCH

@@ -52,7 +52,7 @@ jobs:
   stylelint:
     runs-on: ubuntu-latest
     needs:
-      - setup
+      - lint
 
     steps:
       - name: Checkout repository

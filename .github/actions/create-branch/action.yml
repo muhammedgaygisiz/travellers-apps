@@ -1,5 +1,11 @@
 name: "Create release branch"
 description: "Creates a release branch"
+
+inputs:
+  branch_name:
+    description: "Name of the branch to create"
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -16,6 +22,5 @@ runs:
         git checkout develop
         git pull origin develop
 
-        RELEASE_BRANCH="release-${{ github.event.inputs.release_version }}"
-        git checkout -b $RELEASE_BRANCH
+        git checkout -b ${{ inputs.branch_name }}
         git status # Verify the branch creation

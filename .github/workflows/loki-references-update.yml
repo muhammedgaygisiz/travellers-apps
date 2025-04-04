@@ -9,6 +9,7 @@ concurrency:
 
 env:
   CI: true
+  BRANCH_NAME: update-loki-references
 
 jobs:
   setup:
@@ -20,6 +21,8 @@ jobs:
 
         - name: Create branch
           uses: ./.github/actions/create-branch
+          with:
+            branch_name: ${{ env.BRANCH_NAME }}
 
         - name: Setup action
           uses: ./.github/actions/setup
@@ -29,7 +32,10 @@ jobs:
 
         - name: Push branch
           uses: ./.github/actions/push-branch
+          with:
+            branch_name: ${{ env.BRANCH_NAME }}
 
         - name: Create pull request
           uses: ./.github/actions/create-pull-request
-
+          with:
+            branch_name: ${{ env.BRANCH_NAME }}

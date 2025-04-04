@@ -34,8 +34,10 @@ jobs:
           uses: ./.github/actions/push-branch
           with:
             branch_name: ${{ env.BRANCH_NAME }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
         - name: Create pull request
           uses: ./.github/actions/create-pull-request
           with:
             branch_name: ${{ env.BRANCH_NAME }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

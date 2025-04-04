@@ -5,6 +5,9 @@ inputs:
   branch_name:
     description: "Name of the branch to create"
     required: true
+  GITHUB_TOKEN:
+    description: "GitHub token for authentication"
+    required: true
 
 runs:
   using: "composite"
@@ -13,3 +16,5 @@ runs:
       shell: bash
       run: |
         gh pr create --base main --head ${{ inputs.branch_name }} --title "chore: update loki references" --body ""
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}

@@ -16,7 +16,7 @@
     "compile:loki:executor": "tsc --project tools/executors/loki/tsconfig.executor.json",
     "prices:loki:approve": "nx loki prices --configuration=approve",
     "kosaml:loki:approve": "nx loki kosaml --configuration=approve",
-    "cap:sync": "cap sync",
+    "cap:sync": "nx run prices-ios:sync",
     "cap:run:ios": "cap run ios",
     "cap:run:android": "cap run android",
     "pwa-asset-generator:generate:proces": "pwa-asset-generator apps/prices/src/logo.svg -i apps/prices/src/index.html --favicon -m apps/prices/src/manifest.webmanifest apps/prices/src/assets/icons",

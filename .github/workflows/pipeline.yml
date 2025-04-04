@@ -49,12 +49,10 @@ jobs:
       - name: Run Linter
         run: npm run nx -- affected -t lint --base=develop --head=HEAD
 
-#Prices
-
-  prices-stylelint:
+  stylelint:
     runs-on: ubuntu-latest
     needs:
-      - lint
+      - setup
 
     steps:
       - name: Checkout repository
@@ -64,12 +62,14 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Run Stylelint
-        run: npm run nx -- run-many --target=stylelint --projects=\"prices*\"
+        run: npm run nx -- affected -t stylelint --base=develop --head=HEAD
+
+#Prices
 
   prices-tests:
     runs-on: ubuntu-latest
     needs:
-      - prices-stylelint
+      - stylelint
 
     steps:
       - name: Checkout repository
@@ -300,21 +300,6 @@ jobs:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
 # KOSAML
-
-  kosaml-stylelint:
-    runs-on: ubuntu-latest
-    needs:
-      - lint
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - name: Run Stylelint
-        run: npm run nx -- run-many --target=stylelint --projects=\"kosaml*\"
 
   kosaml-tests:
     runs-on: ubuntu-latest

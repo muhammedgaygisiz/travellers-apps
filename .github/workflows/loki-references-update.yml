@@ -32,16 +32,27 @@ jobs:
           run: |
             npm run nx -- run-many --target=update-loki --all
 
-            git add .
-            git commit --allow-empty -m "chore: update loki references"
+            HAS_CHANGES=$( [[ -n "$(git status --porcelain)" ]] && echo "true" || echo "false" )
+
+            if ["$HAS_CHANGES" = "true"]; then
+              git add .
+              git commit -m "chore: update loki references"
+
+              echo "HAS_CHANGES=true" >> $GITHUB_ENV
+            else
+              echo "No changes to commit"
+              echo "HAS_CHANGES=false" >> $GITHUB_ENV
+            fi
 
         - name: Push branch
+          if: env.HAS_CHANGES == 'true'
           uses: ./.github/actions/push-branch
           with:
             branch_name: ${{ env.BRANCH_NAME }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
         - name: Create pull request
+          if: env.HAS_CHANGES == 'true'
           uses: ./.github/actions/create-pull-request
           with:
             branch_name: ${{ env.BRANCH_NAME }}

@@ -1,0 +1,10 @@
+name: "Restore dependencies"
+description: "Restores dependencies"
+runs:
+  using: "composite"
+  steps:
+    - name: Restore cache
+      uses: actions/cache/restore@v4
+      with:
+        path: node_modules
+        key: node-modules-${{ hashFiles('package-lock.json') }}

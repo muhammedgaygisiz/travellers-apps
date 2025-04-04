@@ -1,0 +1,22 @@
+name: Loki References Update
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+
+        - name: Setup action
+          uses: ./.github/actions/setup

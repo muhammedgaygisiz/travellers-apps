@@ -34,9 +34,7 @@ jobs:
       - name: Setup action
         uses: ./.github/actions/setup
 
-#Common
-
-  common-lint:
+  lint:
     runs-on: ubuntu-latest
     needs:
       - setup
@@ -51,31 +49,12 @@ jobs:
       - name: Run Linter
         run: npm run nx -- affected -t lint --base=develop --head=HEAD
 
-#Utils
-
-  utils-lint:
-    runs-on: ubuntu-latest
-    needs:
-      - setup
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - name: Run Linter
-        run: npm run nx -- run-many --target=lint --projects=\"utils*\"
-
 #Prices
 
   prices-stylelint:
     runs-on: ubuntu-latest
     needs:
-      - common-lint
-      - utils-lint
-      - prices-lint
+      - lint
 
     steps:
       - name: Checkout repository
@@ -86,21 +65,6 @@ jobs:
 
       - name: Run Stylelint
         run: npm run nx -- run-many --target=stylelint --projects=\"prices*\"
-
-  prices-lint:
-    runs-on: ubuntu-latest
-    needs:
-      - setup
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - name: Run Linter
-        run: npm run nx -- run-many --target=lint --projects=\"prices*\"
 
   prices-tests:
     runs-on: ubuntu-latest
@@ -340,9 +304,7 @@ jobs:
   kosaml-stylelint:
     runs-on: ubuntu-latest
     needs:
-      - common-lint
-      - utils-lint
-      - kosaml-lint
+      - lint
 
     steps:
       - name: Checkout repository
@@ -353,21 +315,6 @@ jobs:
 
       - name: Run Stylelint
         run: npm run nx -- run-many --target=stylelint --projects=\"kosaml*\"
-
-  kosaml-lint:
-    runs-on: ubuntu-latest
-    needs:
-      - setup
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - name: Run Linter
-        run: npm run nx -- run-many --target=lint --projects="kosaml*"
 
   kosaml-tests:
     runs-on: ubuntu-latest
@@ -459,8 +406,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - kosaml-loki
-      - common-lint
-      - utils-lint
+      - lint
 
     steps:
       - name: Checkout repository

@@ -21,3 +21,6 @@ jobs:
         - name: Setup action
           uses: ./.github/actions/setup
 
+        - name: Generate Loki References
+          run: npm run nx -- run-many --target=update-loki --all
+

@@ -1,0 +1,7 @@
+{
+  "name": "finances-ios",
+  "devDependencies": {
+    "@capacitor/cli": "../../node_modules/@capacitor/cli",
+    "@capacitor/ios": "../../node_modules/@capacitor/ios"
+  }
+}

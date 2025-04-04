@@ -18,9 +18,18 @@ jobs:
         - name: Checkout repository
           uses: actions/checkout@v2
 
+        - name: Create branch
+          uses: ./.github/actions/create-branch
+
         - name: Setup action
           uses: ./.github/actions/setup
 
         - name: Generate Loki References
           run: npm run nx -- run-many --target=update-loki --all
+
+        - name: Push branch
+          uses: ./.github/actions/push-branch
+
+        - name: Create pull request
+          uses: ./.github/actions/create-pull-request
 

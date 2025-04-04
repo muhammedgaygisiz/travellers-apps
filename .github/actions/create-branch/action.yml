@@ -1,0 +1,21 @@
+name: "Create release branch"
+description: "Creates a release branch"
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Git user
+      shell: bash
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+    - name: Create release branch
+      shell: bash
+      run: |
+        # Fetch latest main branch
+        git checkout main
+        git pull origin main
+
+        RELEASE_BRANCH="release-${{ github.event.inputs.release_version }}"
+        git checkout -b $RELEASE_BRANCH
+        git status # Verify the branch creation

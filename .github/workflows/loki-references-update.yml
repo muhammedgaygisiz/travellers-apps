@@ -28,7 +28,12 @@ jobs:
           uses: ./.github/actions/setup
 
         - name: Generate Loki References
-          run: npm run nx -- run-many --target=update-loki --all
+          shell: bash
+          run: |
+            npm run nx -- run-many --target=update-loki --all
+
+            git add .
+            git commit -m "chore: update loki references"
 
         - name: Push branch
           uses: ./.github/actions/push-branch

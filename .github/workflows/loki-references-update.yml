@@ -12,7 +12,7 @@ env:
   BRANCH_NAME: update-loki-references
 
 jobs:
-  setup:
+  update-loki-references:
     runs-on: ubuntu-latest
 
     steps:

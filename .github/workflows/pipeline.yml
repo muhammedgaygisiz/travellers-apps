@@ -45,10 +45,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: actions/cache/restore@v4
-        with:
-          path: node_modules
-          key: node-modules-${{ hashFiles('package-lock.json') }}
+      - name: "Restore Cache"
+        uses: ./.github/actions/restore-cache
 
       - name: Run Linter
         run: npm run nx -- run-many --target=lint --projects=\"common*\"

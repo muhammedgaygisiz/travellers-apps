@@ -41,17 +41,4 @@ describe('PageComponent', () => {
       expect(popoverControllerCreateSpy).toHaveBeenCalledTimes(1);
     });
   });
-
-  describe('showAddPopover', () => {
-    it('should show menu popover', async () => {
-      const popoverControllerCreateSpy = jest.spyOn(
-        component.popoverController,
-        'create'
-      );
-
-      await component.showAddPopover({} as MouseEvent);
-
-      expect(popoverControllerCreateSpy).toHaveBeenCalledTimes(1);
-    });
-  });
 });

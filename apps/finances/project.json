@@ -26,6 +26,11 @@
             "input": "node_modules/flag-icons/flags/4x3",
             "glob": "**/*",
             "output": "assets"
+          },
+          {
+            "input": "node_modules/bootstrap-icons/icons",
+            "glob": "**/*",
+            "output": "assets"
           }
         ],
         "styles": [

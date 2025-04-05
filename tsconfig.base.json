@@ -91,6 +91,7 @@
         "libs/prices/store/feature/src/index.ts"
       ],
       "@travellers-apps/utils-common": ["libs/utils-common/src/index.ts"],
+      "add-popover-menu": ["libs/finances/ui/add-popover-menu/src/index.ts"],
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
       "finances/pages/dashboard": [

@@ -53,6 +53,7 @@
     "@ngrx/signals": "19.0.1",
     "@ngrx/store": "19.0.1",
     "@storybook/addon-interactions": "8.4.7",
+    "bootstrap-icons": "1.11.3",
     "cordova-plugin-geolocation": "5.0.0",
     "dexie": "4.0.11",
     "firebase": "11.4.0",

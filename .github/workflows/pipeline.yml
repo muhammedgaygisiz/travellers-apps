@@ -47,7 +47,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Run Linter
-        run: npm run nx -- affected -t lint --base=develop --head=HEAD
+        run: npm run nx -- affected -t lint --base=origin/develop
 
   stylelint:
     runs-on: ubuntu-latest

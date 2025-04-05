@@ -6,6 +6,7 @@ import {
   getIonicConfig,
 } from '@travellers-apps/utils-common';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { provideExperimentalZonelessChangeDetection } from '@angular/core';
 
 addNecessaryIcons();
 
@@ -15,14 +16,15 @@ describe('PageComponent', () => {
   let component: PageComponent;
   let fixture: ComponentFixture<PageComponent>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideExperimentalZonelessChangeDetection(),
+        provideIonicAngular(getIonicConfig()),
+      ],
     });
     fixture = TestBed.createComponent(PageComponent);
     component = fixture.componentInstance;
-
-    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -31,10 +33,9 @@ describe('PageComponent', () => {
 
   describe('showMenuPopover', () => {
     it('should show menu popover', async () => {
-      const popoverControllerCreateSpy = jest.spyOn(
-        component.popoverController,
-        'create'
-      );
+      const popoverControllerCreateSpy = jest
+        .spyOn(component.popoverController, 'create')
+        .mockReturnValue({ present: jest.fn() } as any);
 
       await component.showMenuPopover({} as MouseEvent);
 

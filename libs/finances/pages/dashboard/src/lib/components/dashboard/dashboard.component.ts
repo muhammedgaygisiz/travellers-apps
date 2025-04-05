@@ -11,15 +11,8 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
-  IonItem,
-  IonItemDivider,
-  IonItemGroup,
-  IonLabel,
-  IonList,
-  IonNote,
 } from '@ionic/angular/standalone';
 import { BankComponent } from '../bank/bank.component';
-import { NgClass } from '@angular/common';
 import { Bank } from 'finances/store';
 
 @Component({
@@ -33,14 +26,7 @@ import { Bank } from 'finances/store';
     IonCardTitle,
     IonCardSubtitle,
     IonCardContent,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonNote,
-    IonItemGroup,
-    IonItemDivider,
     BankComponent,
-    NgClass,
   ],
 })
 export class DashboardComponent {

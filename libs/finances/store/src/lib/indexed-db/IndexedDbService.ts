@@ -23,4 +23,8 @@ export class IndexedDbService extends Dexie {
       accounts: 'number',
     });
   }
+
+  putAccounts(accounts: Account[]) {
+    this.accounts.bulkPut(accounts);
+  }
 }

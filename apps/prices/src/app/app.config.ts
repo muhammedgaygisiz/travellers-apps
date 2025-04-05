@@ -4,13 +4,13 @@ import { providePricesShell } from '@travellers-apps/prices/shell/feature';
 import { providePricesStore } from '@travellers-apps/prices/store/feature';
 import { environment } from '../environments/environment';
 import { provideServiceWorker } from '@angular/service-worker';
-import { providePricesFirestore } from '@travellers-apps/prices/firestore/feature';
 import { provideNetworkStatus } from '@travellers-apps/common/networkstatus/feature';
 import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from '@travellers-apps/utils-common';
 import { provideLocalization } from '@travellers-apps/prices/localization';
 import { provideHttpClient } from '@angular/common/http';
+import { provideTaFirestore } from 'ta-firestore';
 
 const firebaseOptions = {
   apiKey: process.env['NX_APP_API_KEY'],
@@ -31,7 +31,7 @@ export const appConfig: ApplicationConfig = {
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000',
     }),
-    providePricesFirestore(firebaseOptions),
+    provideTaFirestore(firebaseOptions),
     provideNetworkStatus(),
     Geolocation,
     provideIonicAngular(getIonicConfig()),

@@ -62,7 +62,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Run Stylelint
-        run: npm run nx -- affected -t stylelint --base=develop --head=HEAD
+        run: npm run nx -- affected -t stylelint --base=origin/develop
 
 #Prices
 

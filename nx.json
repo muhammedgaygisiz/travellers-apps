@@ -83,7 +83,7 @@
   },
   "defaultProject": "prices",
   "useInferencePlugins": false,
-  "defaultBase": "main",
+  "defaultBase": "develop",
   "useLegacyCache": true,
   "plugins": [
     {

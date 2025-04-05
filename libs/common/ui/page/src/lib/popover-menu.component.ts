@@ -86,9 +86,9 @@ export class PopoverMenuComponent {
 
   hideAuthButton = input<boolean | null>(false);
 
-  public loginClick = output();
+  loginClick = output();
 
-  public logoutClick = output();
+  logoutClick = output();
 
-  public languageChangeClick = output<SupportedLang>();
+  languageChangeClick = output<SupportedLang>();
 }

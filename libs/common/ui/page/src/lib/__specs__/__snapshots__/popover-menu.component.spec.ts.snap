@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PopoverMenuComponent should emit loginClick when login button is clicked 1`] = `
+DebugElement {
+  "nativeNode": <div
+    id="root2"
+  >
+    <ion-list
+      data-cy="menu-list"
+      lines="none"
+    >
+      <ion-item-group>
+        <ion-item-divider>
+          <ion-icon
+            color="dark"
+            name="language-outline"
+            slot="start"
+          />
+           Language 
+        </ion-item-divider>
+        <ion-item>
+          <ion-icon
+            slot="start"
+            src="assets/gb.svg"
+          />
+           English 
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            slot="start"
+            src="assets/fr.svg"
+          />
+           Français 
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            slot="start"
+            src="assets/de.svg"
+          />
+           Deutsch 
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            slot="start"
+            src="assets/tr.svg"
+          />
+           Türkçe 
+        </ion-item>
+      </ion-item-group>
+      <ion-item
+        class="item-has-start-slot"
+        data-cy="btn-login"
+      >
+        <ion-icon
+          color="dark"
+          name="log-in-outline"
+          slot="start"
+        />
+         Login 
+      </ion-item>
+      
+      
+      
+    </ion-list>
+  </div>,
+}
+`;

@@ -70,8 +70,8 @@ export class PageComponent {
       event: $event,
       dismissOnSelect: true,
       componentProps: {
-        isAuthenticated: this.showAddButton(),
-        hideAuthButton: this.hideAuthButton(),
+        isAuthenticated: this.showAddButton,
+        hideAuthButton: this.hideAuthButton,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,

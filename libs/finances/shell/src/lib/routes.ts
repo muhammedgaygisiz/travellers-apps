@@ -1,11 +1,19 @@
 import { Routes } from '@angular/router';
+import { Page } from 'pages';
 
 export const ROUTES: Routes = [
   {
-    path: 'dashboard',
+    path: Page.DASHBOARD,
     loadComponent: () =>
       import('finances/pages/dashboard').then(
-        (m) => m.DashboardContainerComponent,
+        (m) => m.DashboardContainerComponent
+      ),
+  },
+  {
+    path: Page.ADD_BANK,
+    loadComponent: () =>
+      import('finances/pages/add-bank').then(
+        (m) => m.AddBankContainerComponent
       ),
   },
   {

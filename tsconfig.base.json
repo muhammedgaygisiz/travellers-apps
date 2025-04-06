@@ -94,12 +94,14 @@
       "add-popover-menu": ["libs/finances/ui/add-popover-menu/src/index.ts"],
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
+      "finances/pages/add-bank": ["libs/finances/pages/add-bank/src/index.ts"],
       "finances/pages/dashboard": [
         "libs/finances/pages/dashboard/src/index.ts"
       ],
       "finances/shell": ["libs/finances/shell/src/index.ts"],
       "finances/store": ["libs/finances/store/src/index.ts"],
       "firestore": ["libs/finances/firestore/src/index.ts"],
+      "pages": ["libs/finances/pages/pages/src/index.ts"],
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"]
     }
   },

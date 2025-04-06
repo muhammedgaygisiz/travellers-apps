@@ -1,4 +1,7 @@
-import { ApplicationConfig } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideExperimentalZonelessChangeDetection,
+} from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePricesShell } from '@travellers-apps/prices/shell/feature';
 import { providePricesStore } from '@travellers-apps/prices/store/feature';
@@ -22,6 +25,7 @@ const firebaseOptions = {
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideExperimentalZonelessChangeDetection(),
     provideAnimations(),
     providePricesShell(),
     providePricesStore(environment),

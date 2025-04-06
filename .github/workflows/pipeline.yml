@@ -23,7 +23,6 @@ env:
   NX_VERBOSE_LOGGING: ${{ github.event.inputs.nx_verbose_logging }}
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
   NX_BASE: develop
-  NX_BRANCH: ${{ github.head_ref }}
 
 jobs:
   setup:

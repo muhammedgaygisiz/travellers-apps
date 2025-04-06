@@ -5,20 +5,37 @@ import {
   ofType,
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
-import { map, switchMap } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs';
 import { IndexedDbService } from '../indexed-db/IndexedDbService';
-import { loadedAccountsFromIndexedDb } from './actions';
+import { loadedAccountsFromFirestore } from './actions';
+import { FinancesFirestoreService } from 'firestore';
+import { Store } from '@ngrx/store';
+import { accounts } from './selectors';
 
 @Injectable()
 export class AccountsEffect {
   private readonly actions$ = inject(Actions);
   private readonly indexedDbService = inject(IndexedDbService);
+  private readonly financesFirestoreService = inject(FinancesFirestoreService);
 
-  syncAccountsStore$ = createEffect(() => {
+  private readonly store = inject(Store);
+
+  getAccountsFromFinancesFirestore$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
-      switchMap(() => this.indexedDbService.accounts$),
-      map((accounts) => loadedAccountsFromIndexedDb({ accounts }))
+      switchMap(() => this.financesFirestoreService.allAccounts$),
+      map((accounts) => loadedAccountsFromFirestore({ accounts }))
     );
   });
+
+  saveAccountsToIndexedDb$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(ROOT_EFFECTS_INIT),
+        switchMap(() => this.store.select(accounts)),
+        tap((accounts) => this.indexedDbService.putAccounts(accounts))
+      );
+    },
+    { dispatch: false }
+  );
 }

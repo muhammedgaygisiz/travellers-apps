@@ -23,4 +23,14 @@ export class IndexedDbService extends Dexie {
       accounts: 'number',
     });
   }
+
+  putAccounts(accounts: Account[]) {
+    this.accounts.clear();
+    this.accounts.bulkPut(accounts);
+  }
+
+  putBanks(banks: Bank[]) {
+    this.banks.clear();
+    this.banks.bulkPut(banks);
+  }
 }

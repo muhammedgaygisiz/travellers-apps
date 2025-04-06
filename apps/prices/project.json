@@ -14,7 +14,7 @@
         "outputPath": "dist/apps/prices",
         "index": "apps/prices/src/index.html",
         "main": "apps/prices/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": [],
         "tsConfig": "apps/prices/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [

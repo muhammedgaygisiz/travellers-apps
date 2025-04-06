@@ -8,7 +8,7 @@
   "targets": {
     "build": {
       "options": {
-        "outputPath": "dist/apps/apu-mobile"
+        "outputPath": "dist/apps/prices"
       }
     },
     "cap": {

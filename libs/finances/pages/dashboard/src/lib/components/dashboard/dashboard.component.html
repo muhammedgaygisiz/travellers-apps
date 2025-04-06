@@ -1,21 +1,21 @@
-<ta-page title="Finances" [showAddButton]="true">
+<ta-page
+  title="Finances"
+  [showAddButton]="true"
+  (showAddPopover)="showAddPopover($event)"
+>
   <ta-card>
-    <div class="ion-padding">
-      <ion-card-header>
-        <ion-card-title>600 $</ion-card-title>
-        <ion-card-subtitle>Ihr Vermögen</ion-card-subtitle>
-      </ion-card-header>
-    </div>
+    <ion-card-header>
+      <ion-card-title>600 $</ion-card-title>
+      <ion-card-subtitle>Ihr Vermögen</ion-card-subtitle>
+    </ion-card-header>
 
-    <div>
-      <ion-card-content>
-        @for (bank of banks(); track bank.id; let index = $index) {
-        <finances-bank
-          [bank]="bank"
-          (openAccountDetails)="openAccountDetails.emit($event)"
-        />
-        }
-      </ion-card-content>
-    </div>
+    <ion-card-content>
+      @for (bank of banks(); track bank.id; let index = $index) {
+      <finances-bank
+        [bank]="bank"
+        (openAccountDetails)="openAccountDetails.emit($event)"
+      />
+      }
+    </ion-card-content>
   </ta-card>
 </ta-page>

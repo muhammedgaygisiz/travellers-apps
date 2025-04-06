@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   input,
   output,
 } from '@angular/core';
@@ -11,16 +12,11 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
-  IonItem,
-  IonItemDivider,
-  IonItemGroup,
-  IonLabel,
-  IonList,
-  IonNote,
+  PopoverController,
 } from '@ionic/angular/standalone';
 import { BankComponent } from '../bank/bank.component';
-import { NgClass } from '@angular/common';
 import { Bank } from 'finances/store';
+import { AddPopoverMenuComponent } from 'add-popover-menu';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,18 +29,23 @@ import { Bank } from 'finances/store';
     IonCardTitle,
     IonCardSubtitle,
     IonCardContent,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonNote,
-    IonItemGroup,
-    IonItemDivider,
     BankComponent,
-    NgClass,
   ],
 })
 export class DashboardComponent {
   banks = input<Bank[]>();
+  popoverController = inject(PopoverController);
 
   openAccountDetails = output<string>();
+
+  async showAddPopover($event: MouseEvent) {
+    const popover = await this.popoverController.create({
+      component: AddPopoverMenuComponent,
+      event: $event,
+      dismissOnSelect: true,
+      componentProps: {},
+    });
+
+    await popover.present();
+  }
 }

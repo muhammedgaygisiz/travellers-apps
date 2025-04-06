@@ -7,13 +7,14 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:application",
+      "executor": "@nx/angular:browser-esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "plugins": ["apps/prices/env-var-plugin.js"],
         "outputPath": "dist/apps/finances",
         "index": "apps/finances/src/index.html",
-        "browser": "apps/finances/src/main.ts",
-        "polyfills": ["zone.js"],
+        "main": "apps/finances/src/main.ts",
+        "polyfills": [],
         "tsConfig": "apps/finances/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -23,6 +24,11 @@
           },
           {
             "input": "node_modules/flag-icons/flags/4x3",
+            "glob": "**/*",
+            "output": "assets"
+          },
+          {
+            "input": "node_modules/bootstrap-icons/icons",
             "glob": "**/*",
             "output": "assets"
           }
@@ -39,7 +45,7 @@
             {
               "type": "initial",
               "maximumWarning": "500kb",
-              "maximumError": "1mb"
+              "maximumError": "1.8mb"
             },
             {
               "type": "anyComponentStyle",
@@ -58,7 +64,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@nx/angular:dev-server",
       "configurations": {
         "production": {
           "buildTarget": "finances:build:production"

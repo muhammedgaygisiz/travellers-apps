@@ -19,9 +19,9 @@ import {
   IonToolbar,
   PopoverController,
 } from '@ionic/angular/standalone';
-import { PopoverMenuComponent } from './popover-menu.component';
 import { AngularDelegate } from '@ionic/angular';
 import { SupportedLang } from '@travellers-apps/prices/localization';
+import { PopoverMenuComponent } from './popover-menu.component';
 
 @Component({
   selector: 'ta-page',
@@ -60,6 +60,8 @@ export class PageComponent {
 
   public languageChangeClick = output<SupportedLang>();
 
+  public showAddPopover = output<MouseEvent>();
+
   popoverController = inject(PopoverController);
 
   async showMenuPopover($event: MouseEvent) {
@@ -68,25 +70,8 @@ export class PageComponent {
       event: $event,
       dismissOnSelect: true,
       componentProps: {
-        isAuthenticated: this.showAddButton(),
-        hideAuthButton: this.hideAuthButton(),
-        loginClick: this.loginClick,
-        logoutClick: this.logoutClick,
-        languageChangeClick: this.languageChangeClick,
-      },
-    });
-
-    await popover.present();
-  }
-
-  async showAddPopover($event: MouseEvent) {
-    const popover = await this.popoverController.create({
-      component: PopoverMenuComponent, // TODO: Define Add Popup Component
-      event: $event,
-      dismissOnSelect: true,
-      componentProps: {
-        isAuthenticated: this.showAddButton(),
-        hideAuthButton: this.hideAuthButton(),
+        isAuthenticated: this.showAddButton,
+        hideAuthButton: this.hideAuthButton,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,

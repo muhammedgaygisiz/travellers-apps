@@ -1,10 +1,10 @@
 import { createReducer, on } from '@ngrx/store';
 import { adapter, initialState } from './adapter';
-import { loadedBanksFromIndexedDb } from './actions';
+import { loadedBanksFromFirestore, loadedBanksFromIndexedDb } from './actions';
 
 export const reducer = createReducer(
   initialState,
-  on(loadedBanksFromIndexedDb, (state, { banks }) => {
-    return adapter.upsertMany(banks, state);
-  })
+  on(loadedBanksFromIndexedDb, loadedBanksFromFirestore, (state, { banks }) =>
+    adapter.upsertMany(banks, state)
+  )
 );

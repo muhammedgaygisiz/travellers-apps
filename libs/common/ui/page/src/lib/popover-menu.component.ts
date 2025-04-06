@@ -1,9 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  input,
+  output,
 } from '@angular/core';
 import {
   IonIcon,
@@ -54,7 +53,7 @@ import { SupportedLang } from '@travellers-apps/prices/localization';
         </ion-item>
       </ion-item-group>
 
-      @if(!hideAuthButton) { @if (!isAuthenticated) {
+      @if (!hideAuthButton()) { @if (!isAuthenticated()) {
       <ion-item
         data-cy="btn-login"
         [button]="true"
@@ -81,20 +80,15 @@ import { SupportedLang } from '@travellers-apps/prices/localization';
   imports: [IonList, IonItem, IonIcon, IonItemGroup, IonItemDivider],
 })
 export class PopoverMenuComponent {
-  @Input()
-  isAuthenticated: boolean | null = false;
-
-  @Input()
-  hideAuthButton = false;
-
-  @Output()
-  public loginClick = new EventEmitter();
-
-  @Output()
-  public logoutClick = new EventEmitter();
-
-  @Output()
-  public languageChangeClick = new EventEmitter<SupportedLang>();
-
   protected readonly SupportedLang = SupportedLang;
+
+  isAuthenticated = input<boolean | null>(false);
+
+  hideAuthButton = input<boolean | null>(false);
+
+  loginClick = output();
+
+  logoutClick = output();
+
+  languageChangeClick = output<SupportedLang>();
 }

@@ -5,20 +5,37 @@ import {
   ofType,
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
-import { map, switchMap } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs';
 import { IndexedDbService } from '../indexed-db/IndexedDbService';
-import { loadedBanksFromIndexedDb } from './actions';
+import { loadedBanksFromFirestore } from './actions';
+import { FinancesFirestoreService } from 'firestore';
+import { Store } from '@ngrx/store';
+import { banks } from './selectors';
 
 @Injectable()
 export class BanksEffect {
   private readonly actions$ = inject(Actions);
   private readonly indexedDbService = inject(IndexedDbService);
+  private readonly financesFirestoreService = inject(FinancesFirestoreService);
 
-  syncBankStore$ = createEffect(() => {
+  private readonly store = inject(Store);
+
+  getBanksFromFinancesStore$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
-      switchMap(() => this.indexedDbService.banks$),
-      map((banks) => loadedBanksFromIndexedDb({ banks }))
+      switchMap(() => this.financesFirestoreService.allBanks$),
+      map((banks) => loadedBanksFromFirestore({ banks }))
     );
   });
+
+  saveBanksToIndexedDb$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(ROOT_EFFECTS_INIT),
+        switchMap(() => this.store.select(banks)),
+        tap((banks) => this.indexedDbService.putBanks(banks))
+      );
+    },
+    { dispatch: false }
+  );
 }

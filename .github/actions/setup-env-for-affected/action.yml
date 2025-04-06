@@ -6,6 +6,8 @@ runs:
     - name: Derive appropriate SHAs for base and head for `nx affected` commands
       uses: nrwl/nx-set-shas@v4
 
-    - run: |
-      echo "BASE: ${{ env.NX_BASE }}"
-      echo "HEAD: ${{ env.NX_HEAD }}"
+    - name: Set up environment variables for affected
+      shell: bash
+      run: |
+        echo "BASE: ${{ env.NX_BASE }}"
+        echo "HEAD: ${{ env.NX_HEAD }}"

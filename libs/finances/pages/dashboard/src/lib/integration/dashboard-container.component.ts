@@ -6,9 +6,12 @@ import { DashboardService } from './dashboard.service';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: ` @if (service.banks()) {}
-    <finances-dashboard [banks]="store.banks()" />`,
+    <finances-dashboard
+      [banks]="store.banks()"
+      (addMenuItemClicked)="service.onAddMenuItemClicked($event)"
+    />`,
   imports: [DashboardComponent],
-  selector: 'finances-dashboard-container',
+  selector: 'finances-dashboard-integration',
 })
 export class DashboardContainerComponent {
   store = inject(DashboardStore);

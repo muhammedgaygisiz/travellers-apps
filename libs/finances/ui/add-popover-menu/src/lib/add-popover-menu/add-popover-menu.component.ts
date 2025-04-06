@@ -23,17 +23,14 @@ import { SupportedLang } from '@travellers-apps/prices/localization';
           Hinzufügen
         </ion-item-divider>
 
-        <ion-item
-          [detail]="false"
-          (click)="languageChangeClick.emit(SupportedLang.EN)"
-        >
-          <ion-icon src="assets/bank.svg" slot="start"></ion-icon>
+        <ion-item [detail]="false" (click)="menuItemClicked.emit('add-bank')">
+          <ion-icon src="assets/bank.svg" slot="start" />
           Bank hinzufügen
         </ion-item>
 
         <ion-item
           [detail]="false"
-          (click)="languageChangeClick.emit(SupportedLang.EN)"
+          (click)="menuItemClicked.emit('add-account')"
         >
           <ion-icon src="assets/cash-coin.svg" slot="start"></ion-icon>
           Konto hinzufügen
@@ -51,9 +48,9 @@ export class AddPopoverMenuComponent {
 
   hideAuthButton = input<boolean | null>(false);
 
-  public loginClick = output();
+  loginClick = output();
 
-  public logoutClick = output();
+  logoutClick = output();
 
-  public languageChangeClick = output<SupportedLang>();
+  menuItemClicked = output<string>();
 }

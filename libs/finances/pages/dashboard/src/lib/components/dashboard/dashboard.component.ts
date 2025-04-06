@@ -33,19 +33,30 @@ import { AddPopoverMenuComponent } from 'add-popover-menu';
   ],
 })
 export class DashboardComponent {
-  banks = input<Bank[]>();
   popoverController = inject(PopoverController);
 
+  banks = input<Bank[]>();
+
   openAccountDetails = output<string>();
+
+  addMenuItemClicked = output<string>();
 
   async showAddPopover($event: MouseEvent) {
     const popover = await this.popoverController.create({
       component: AddPopoverMenuComponent,
       event: $event,
       dismissOnSelect: true,
-      componentProps: {},
+      componentProps: {
+        menuItemClicked: this.addMenuItemClicked,
+      },
     });
 
     await popover.present();
   }
+
+  onMenuItemClicked = async (menuItem: string) => {
+    await this.popoverController.dismiss();
+
+    console.log(menuItem);
+  };
 }

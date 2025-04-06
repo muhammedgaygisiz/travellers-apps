@@ -13,6 +13,11 @@ on:
         default: 'false'
         type: boolean
 
+# Needed for nx-set-shas when run on the main branch
+permissions:
+  actions: read
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
@@ -23,7 +28,6 @@ env:
   NX_VERBOSE_LOGGING: ${{ github.event.inputs.nx_verbose_logging }}
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
   NX_BASE: develop
-  NX_BRANCH: ${{ github.head_ref }}
 
 jobs:
   setup:
@@ -52,6 +56,9 @@ jobs:
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
 
+      - name: "Setup env"
+        uses: ./.github/actions/setup-env-for-affected
+
       - name: Run Linter
         run: npm run nx -- affected -t lint
 
@@ -68,6 +75,9 @@ jobs:
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
+
+      - name: "Setup env"
+        uses: ./.github/actions/setup-env-for-affected
 
       - name: Run Stylelint
         run: npm run nx -- affected -t stylelint

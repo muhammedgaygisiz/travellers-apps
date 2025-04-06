@@ -22,6 +22,8 @@ env:
   NX_DAEMON: false
   NX_VERBOSE_LOGGING: ${{ github.event.inputs.nx_verbose_logging }}
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+  NX_BASE: develop
+  NX_BRANCH: ${{ github.head_ref }}
 
 jobs:
   setup:
@@ -51,7 +53,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Run Linter
-        run: npm run nx -- affected -t lint --base=develop
+        run: npm run nx -- affected -t lint
 
   stylelint:
     runs-on: ubuntu-latest
@@ -61,12 +63,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
 
       - name: Run Stylelint
-        run: npm run nx -- affected -t stylelint --base=develop
+        run: npm run nx -- affected -t stylelint
 
 #Prices
 
@@ -78,6 +82,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -114,6 +120,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -135,6 +143,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -161,6 +171,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -201,6 +213,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Run E2E Tests
         uses: cypress-io/github-action@v4.2.0
@@ -223,6 +237,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -251,6 +267,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -271,6 +289,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -313,6 +333,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -352,6 +374,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -373,6 +397,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -400,6 +426,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -417,6 +445,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
@@ -438,6 +468,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache

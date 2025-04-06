@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Setup action
         uses: ./.github/actions/setup
@@ -42,12 +44,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
 
       - name: Run Linter
-        run: npm run nx -- affected -t lint --base=origin/develop
+        run: npm run nx -- affected -t lint --base=develop
 
   stylelint:
     runs-on: ubuntu-latest
@@ -62,7 +66,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Run Stylelint
-        run: npm run nx -- affected -t stylelint --base=origin/develop
+        run: npm run nx -- affected -t stylelint --base=develop
 
 #Prices
 

@@ -14,7 +14,10 @@
             "depConstraints": [
               {
                 "sourceTag": "type:finances:app",
-                "onlyDependOnLibsWithTags": ["type:finances:shell"]
+                "onlyDependOnLibsWithTags": [
+                  "type:finances:shell",
+                  "common:utils"
+                ]
               },
               {
                 "sourceTag": "type:finances:shell",

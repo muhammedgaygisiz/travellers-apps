@@ -1,0 +1,11 @@
+name: "Setup env vars for nx affected"
+description: "Setup env vars for affected according to nx documentation"
+runs:
+  using: "composite"
+  steps:
+    - name: Derive appropriate SHAs for base and head for `nx affected` commands
+      uses: nrwl/nx-set-shas@v4
+
+    - run: |
+      echo "BASE: ${{ env.NX_BASE }}"
+      echo "HEAD: ${{ env.NX_HEAD }}"

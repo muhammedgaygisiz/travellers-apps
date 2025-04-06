@@ -73,6 +73,9 @@ jobs:
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
 
+      - name: "Setup env"
+        uses: ./.github/actions/setup-env-for-affected
+
       - name: Run Stylelint
         run: npm run nx -- affected -t stylelint
 

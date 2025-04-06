@@ -24,3 +24,12 @@ runs:
       with:
         path: node_modules
         key: node-modules-${{ hashFiles('package-lock.json') }}
+
+    - name: Derive appropriate SHAs for base and head for `nx affected` commands
+      uses: nrwl/nx-set-shas@v4
+
+    - name: Set up environment variables needed by `nx affected` command
+      shell: bash
+      run: |
+        echo "BASE: ${{ env.NX_BASE }}"
+        echo "HEAD: ${{ env.NX_HEAD }}"

@@ -9,7 +9,7 @@ import { HomeService } from './home.service';
 import { HomeComponent } from '../components';
 import { AsyncPipe } from '@angular/common';
 import { MostSearchedItem } from '../api/most-searched-item.model';
-import { SupportedLang } from '@travellers-apps/prices/localization';
+import { SupportedLang } from 'localization';
 
 @Component({
   template: `

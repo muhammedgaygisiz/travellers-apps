@@ -26,10 +26,7 @@ import {
   IonItem,
   IonText,
 } from '@ionic/angular/standalone';
-import {
-  SupportedLang,
-  TranslatePipe,
-} from '@travellers-apps/prices/localization';
+import { SupportedLang, TranslatePipe } from 'localization';
 import { Price } from '../api/price.model';
 import { fromEvent, tap } from 'rxjs';
 

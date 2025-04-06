@@ -10,7 +10,7 @@ import { provideExperimentalZonelessChangeDetection } from '@angular/core';
 
 addNecessaryIcons();
 
-jest.mock('@travellers-apps/prices/localization');
+jest.mock('localization');
 
 describe('PageComponent', () => {
   let component: PageComponent;

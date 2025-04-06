@@ -5,10 +5,10 @@ import {
   Input,
   ViewChild,
 } from '@angular/core';
-import { FileNode } from '@travellers-apps/kosaml/store/feature';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ProjectComponent } from './project/project.component';
+import { FileNode } from '@travellers-apps/kosaml/model/feature';
 
 @Component({
   selector: 'kosaml-sidebar',

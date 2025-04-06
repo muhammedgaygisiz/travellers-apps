@@ -6,9 +6,9 @@ import {
   fromLocalization,
   fromMostSearched,
 } from '@travellers-apps/prices/store/feature';
-import { SupportedLang } from '@travellers-apps/prices/localization';
+import { SupportedLang } from 'localization';
 
-jest.mock('@travellers-apps/prices/localization');
+jest.mock('localization');
 
 const assertDeepEqual = (actual: [], expected: []) => {
   expect(actual).toEqual(expected);

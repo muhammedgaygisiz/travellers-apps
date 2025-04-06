@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { SupportedLang } from '@travellers-apps/prices/localization';
+import { SupportedLang } from 'localization';
 
 export const changeLanguage = createAction(
   '[Localization] Change language',

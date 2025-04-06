@@ -20,7 +20,7 @@ import {
   PopoverController,
 } from '@ionic/angular/standalone';
 import { AngularDelegate } from '@ionic/angular';
-import { SupportedLang } from '@travellers-apps/prices/localization';
+import { SupportedLang } from 'localization';
 import { PopoverMenuComponent } from './popover-menu.component';
 
 @Component({

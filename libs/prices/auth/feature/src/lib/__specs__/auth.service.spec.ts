@@ -5,7 +5,7 @@ import { fromAuth } from '@travellers-apps/prices/store/feature';
 import { NavController } from '@ionic/angular';
 import { provideRouter } from '@angular/router';
 
-jest.mock('@travellers-apps/prices/localization');
+jest.mock('localization');
 
 describe('AuthService', () => {
   let service: AuthService;

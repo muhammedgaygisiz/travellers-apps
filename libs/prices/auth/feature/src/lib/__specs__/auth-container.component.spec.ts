@@ -11,7 +11,7 @@ import { provideRouter } from '@angular/router';
 
 addNecessaryIcons();
 
-jest.mock('@travellers-apps/prices/localization');
+jest.mock('localization');
 
 describe('AuthContainerComponent', () => {
   let component: AuthContainerComponent;

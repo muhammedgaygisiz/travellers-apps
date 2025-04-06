@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { changeLanguage } from './actions';
 import { tap } from 'rxjs';
-import { TranslateService } from '@travellers-apps/prices/localization';
+import { TranslateService } from 'localization';
 
 @Injectable()
 export class LocalizationEffects {

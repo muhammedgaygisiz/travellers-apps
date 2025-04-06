@@ -24,10 +24,7 @@ import {
   IonLabel,
 } from '@ionic/angular/standalone';
 import { MostSearchedItem } from '../api/most-searched-item.model';
-import {
-  SupportedLang,
-  TranslatePipe,
-} from '@travellers-apps/prices/localization';
+import { SupportedLang, TranslatePipe } from 'localization';
 
 @Component({
   selector: 'ta-home',

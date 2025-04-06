@@ -11,7 +11,7 @@ import {
   IonItemGroup,
   IonList,
 } from '@ionic/angular/standalone';
-import { SupportedLang } from '@travellers-apps/prices/localization';
+import { SupportedLang } from 'localization';
 
 @Component({
   selector: 'ta-add-popover-menu',

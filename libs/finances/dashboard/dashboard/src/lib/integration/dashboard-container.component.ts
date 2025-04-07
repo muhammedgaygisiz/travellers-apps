@@ -7,7 +7,8 @@ import { DashboardService } from './dashboard.service';
   template: `
     <finances-dashboard
       [banks]="service.banks()"
-      (addMenuItemClicked)="service.onAddMenuItemClicked($event)"
+      (openAccountDetails)="service.onOpenAccountDetails($event)"
+      (addMenuItemClicked)="service.onAddMenuItemClicked()"
     />
   `,
   imports: [DashboardComponent],

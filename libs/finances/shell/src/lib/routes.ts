@@ -17,9 +17,16 @@ export const ROUTES: Routes = [
       ),
   },
   {
-    path: Page.ACCOUNT,
+    path: `${Page.ACCOUNT}/:iban`,
     loadComponent: () =>
       import('finances/pages/account').then((m) => m.AccountContainerComponent),
+  },
+  {
+    path: `:iban/${Page.PAYMENT}`,
+    loadComponent: () =>
+      import('finances/pages/add-payment').then(
+        (m) => m.AddPaymentContainerComponent
+      ),
   },
   {
     path: '',

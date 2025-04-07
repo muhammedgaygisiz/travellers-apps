@@ -13,6 +13,12 @@ import {
 } from '@ionic/angular/standalone';
 import { SupportedLang } from 'localization';
 
+interface Item {
+  text: string;
+  icon: string;
+  value: string;
+}
+
 @Component({
   selector: 'ta-add-popover-menu',
   template: `
@@ -23,18 +29,12 @@ import { SupportedLang } from 'localization';
           Hinzufügen
         </ion-item-divider>
 
-        <ion-item [detail]="false" (click)="menuItemClicked.emit('add-bank')">
-          <ion-icon src="assets/bank.svg" slot="start" />
-          Bank hinzufügen
+        @for (item of items(); let idx = $index; track idx) {
+        <ion-item [detail]="false" (click)="menuItemClicked.emit(item.value)">
+          <ion-icon src="{{ item.icon }}" slot="start" />
+          {{ item.text }}
         </ion-item>
-
-        <ion-item
-          [detail]="false"
-          (click)="menuItemClicked.emit('add-account')"
-        >
-          <ion-icon src="assets/cash-coin.svg" slot="start"></ion-icon>
-          Konto hinzufügen
-        </ion-item>
+        }
       </ion-item-group>
     </ion-list>
   `,
@@ -47,6 +47,8 @@ export class AddPopoverMenuComponent {
   isAuthenticated = input<boolean | null>(false);
 
   hideAuthButton = input<boolean | null>(false);
+
+  items = input<Item[]>([]);
 
   loginClick = output();
 

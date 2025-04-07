@@ -4,6 +4,7 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
@@ -48,6 +49,18 @@ export class DashboardComponent {
       dismissOnSelect: true,
       componentProps: {
         menuItemClicked: this.addMenuItemClicked,
+        items: signal([
+          {
+            value: 'add-bank',
+            icon: 'assets/bank.svg',
+            text: 'Bank hinzufügen',
+          },
+          {
+            value: 'add-account',
+            icon: 'assets/cash-coin.svg',
+            text: 'Konto hinzufügen',
+          },
+        ]),
       },
     });
 

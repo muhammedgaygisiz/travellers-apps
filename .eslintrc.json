@@ -41,7 +41,8 @@
                 "sourceTag": "type:finances:data-access",
                 "onlyDependOnLibsWithTags": [
                   "type:finances:store",
-                  "type:finances:backend-api"
+                  "type:finances:backend-api",
+                  "common:utils"
                 ]
               },
               {

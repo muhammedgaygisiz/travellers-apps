@@ -12,6 +12,7 @@ import { v4 as uuidV4 } from 'uuid';
 
 const BANKS_COLLECTION = 'banks';
 const ACCOUNTS_COLLECTION = 'accounts';
+const PAYMENTS_COLLECTION = 'payments';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +22,7 @@ export class FinancesFirestoreService {
 
   private banksCollection = collection(this.afs, BANKS_COLLECTION);
   private accountsCollection = collection(this.afs, ACCOUNTS_COLLECTION);
+  private paymentsCollection = collection(this.afs, PAYMENTS_COLLECTION);
 
   public allAccounts$ = collectionData(this.accountsCollection) as Observable<
     Account[]
@@ -37,7 +39,11 @@ export class FinancesFirestoreService {
     tap((banks) => console.log('Banks collection emitted:', banks)) // Add logging here
   );
 
-  async saveNewBank(newBank: { name: string }) {
-    await addDoc(this.banksCollection, { ...newBank, id: uuidV4() });
+  saveNewBank(newBank: { name: string }) {
+    addDoc(this.banksCollection, { ...newBank, id: uuidV4() });
+  }
+
+  saveNewPayment(newPayment: { amount: number; iban: string }) {
+    addDoc(this.paymentsCollection, { ...newPayment, id: uuidV4() });
   }
 }

@@ -1,5 +1,5 @@
 import { Environment } from '@travellers-apps/utils-common';
-import { SupportedLang } from '@travellers-apps/prices/localization';
+import { SupportedLang } from 'localization';
 
 export const environment: Environment = {
   production: true,

@@ -3,7 +3,7 @@ import { AddItemService } from './add-item.service';
 import { AsyncPipe } from '@angular/common';
 import { AddItemComponent } from '../components/add-item.component';
 import { Price } from '../api/price.model';
-import { SupportedLang } from '@travellers-apps/prices/localization';
+import { SupportedLang } from 'localization';
 
 @Component({
   template: `

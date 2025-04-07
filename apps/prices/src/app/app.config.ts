@@ -11,7 +11,7 @@ import { provideNetworkStatus } from '@travellers-apps/common/networkstatus/feat
 import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from '@travellers-apps/utils-common';
-import { provideLocalization } from '@travellers-apps/prices/localization';
+import { provideLocalization } from 'localization';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTaFirestore } from 'ta-firestore';
 

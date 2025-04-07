@@ -7,7 +7,7 @@ import {
   fromLocalization,
 } from '@travellers-apps/prices/store/feature';
 import { NavController } from '@ionic/angular';
-import { SupportedLang } from '@travellers-apps/prices/localization';
+import { SupportedLang } from 'localization';
 
 @Injectable({
   providedIn: 'root',

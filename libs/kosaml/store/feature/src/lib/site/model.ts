@@ -1,10 +1,4 @@
-/** File node data with possible child nodes. */
-export interface FileNode {
-  name: string;
-  type: string;
-  children?: FileNode[] | null;
-  link?: string;
-}
+import { FileNode } from '@travellers-apps/kosaml/model/feature';
 
 export interface SiteState {
   isProjectBarOpen: boolean;

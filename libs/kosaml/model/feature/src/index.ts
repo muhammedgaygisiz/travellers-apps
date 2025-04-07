@@ -1,3 +1,5 @@
+export { FileNode } from './lib/file-node';
+
 export { EssentialUseCaseRows } from './lib/essential-use-case.model';
 export { ConcreteUseCaseRows } from './lib/concrete-use-case.model';
 export { Scenario } from './lib/scenario.model';

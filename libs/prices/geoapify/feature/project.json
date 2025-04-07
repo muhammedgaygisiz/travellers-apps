@@ -4,7 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/prices/geoapify/feature/src",
   "prefix": "travellers-apps",
-  "tags": [],
+  "tags": ["common:utils"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

@@ -11,10 +11,10 @@ import {
   MatTreeFlattener,
   MatTreeModule,
 } from '@angular/material/tree';
-import { FileNode } from '@travellers-apps/kosaml/store/feature';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { FileNode } from '@travellers-apps/kosaml/model/feature';
 
 export interface FlatTreeNode {
   name: string;

@@ -1,7 +1,7 @@
 import { Account } from './account';
 
-export type Bank = {
+export interface Bank {
   id: string;
   name: string;
   accounts?: Account[];
-};
+}

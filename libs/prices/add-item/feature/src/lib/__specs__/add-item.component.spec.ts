@@ -11,7 +11,7 @@ import { of } from 'rxjs';
 
 addNecessaryIcons();
 
-jest.mock('@travellers-apps/prices/localization');
+jest.mock('localization');
 jest.spyOn(rxjs, 'fromEvent').mockReturnValue(of({}));
 
 const assertDeepEqual = (actual: any, expected: any): void => {

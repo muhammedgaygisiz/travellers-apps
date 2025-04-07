@@ -29,8 +29,8 @@ export class IndexedDbService extends Dexie {
     this.accounts.bulkPut(accounts);
   }
 
-  putBanks(banks: Bank[]) {
-    this.banks.clear();
-    this.banks.bulkPut(banks);
+  async putBanks(banks: Bank[]) {
+    await this.banks.clear();
+    await this.banks.bulkPut(banks);
   }
 }

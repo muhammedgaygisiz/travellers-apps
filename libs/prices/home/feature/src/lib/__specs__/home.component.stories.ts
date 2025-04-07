@@ -6,7 +6,7 @@ import {
 } from '@travellers-apps/utils-common';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { FILTERS, PRICES } from './data';
-import { provideLocalization } from '@travellers-apps/prices/localization';
+import { provideLocalization } from 'localization';
 import { provideHttpClient } from '@angular/common/http';
 
 addNecessaryIcons();

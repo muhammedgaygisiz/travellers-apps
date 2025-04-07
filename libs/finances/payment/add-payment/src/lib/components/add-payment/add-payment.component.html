@@ -1,0 +1,29 @@
+<ta-page title="Add Payment" [showAddButton]="false">
+  <ta-card>
+    <ion-card-header>
+      <ion-card-subtitle> Payment Details </ion-card-subtitle>
+    </ion-card-header>
+
+    <div class="ion-padding">
+      <form [formGroup]="addPaymentFormGroup">
+        <ion-item lines="full">
+          <ion-input
+            formControlName="amount"
+            inputmode="number"
+            label="Amount"
+            labelReplacement="floating"
+          />
+        </ion-item>
+
+        <ion-button
+          class="ion-margin-top"
+          expand="block"
+          [disabled]="!addPaymentFormGroup.valid"
+          (click)="submitNewPayment.emit(addPaymentFormGroup.value)"
+        >
+          Save
+        </ion-button>
+      </form>
+    </div>
+  </ta-card>
+</ta-page>

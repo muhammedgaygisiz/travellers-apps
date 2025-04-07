@@ -5,7 +5,7 @@ import {
   ComponentRef,
   provideExperimentalZonelessChangeDetection,
 } from '@angular/core';
-import { SupportedLang } from '@travellers-apps/prices/localization';
+import { SupportedLang } from 'localization';
 import { addNecessaryIcons } from '@travellers-apps/utils-common';
 
 addNecessaryIcons();

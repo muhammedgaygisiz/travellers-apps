@@ -6,7 +6,7 @@ import {
 } from '@travellers-apps/prices/store/feature';
 import { Store } from '@ngrx/store';
 import { Price } from '../api/price.model';
-import { SupportedLang } from '@travellers-apps/prices/localization';
+import { SupportedLang } from 'localization';
 
 @Injectable({
   providedIn: 'root',

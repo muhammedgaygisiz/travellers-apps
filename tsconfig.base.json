@@ -75,9 +75,6 @@
       "@travellers-apps/prices/home/feature": [
         "libs/prices/home/feature/src/index.ts"
       ],
-      "@travellers-apps/prices/localization": [
-        "libs/prices/localization/src/index.ts"
-      ],
       "@travellers-apps/prices/password-validator/feature": [
         "libs/prices/password-validator/feature/src/index.ts"
       ],
@@ -94,13 +91,31 @@
       "add-popover-menu": ["libs/finances/ui/add-popover-menu/src/index.ts"],
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
-      "finances/pages/add-bank": ["libs/finances/pages/add-bank/src/index.ts"],
+      "data-access-utils": ["libs/common/data-access-utils/src/index.ts"],
+      "finances/account/data-access": [
+        "libs/finances/account/data-access/src/index.ts"
+      ],
+      "finances/bank/data-access": [
+        "libs/finances/bank/data-access/src/index.ts"
+      ],
+      "finances/dashboard/data-access": [
+        "libs/finances/dashboard/data-access/src/index.ts"
+      ],
+      "finances/pages/account": ["libs/finances/account/account/src/index.ts"],
+      "finances/pages/add-bank": ["libs/finances/bank/add-bank/src/index.ts"],
+      "finances/pages/add-payment": [
+        "libs/finances/payment/add-payment/src/index.ts"
+      ],
       "finances/pages/dashboard": [
-        "libs/finances/pages/dashboard/src/index.ts"
+        "libs/finances/dashboard/dashboard/src/index.ts"
+      ],
+      "finances/payment/data-access": [
+        "libs/finances/payment/data-access/src/index.ts"
       ],
       "finances/shell": ["libs/finances/shell/src/index.ts"],
       "finances/store": ["libs/finances/store/src/index.ts"],
       "firestore": ["libs/finances/firestore/src/index.ts"],
+      "localization": ["libs/common/localization/src/index.ts"],
       "pages": ["libs/finances/pages/pages/src/index.ts"],
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"]
     }

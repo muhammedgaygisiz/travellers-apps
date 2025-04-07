@@ -4,7 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/prices/src",
   "prefix": "travellers-apps",
-  "tags": [],
+  "tags": ["type:prices:app"],
   "targets": {
     "build": {
       "executor": "@nx/angular:browser-esbuild",

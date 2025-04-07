@@ -10,7 +10,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
 
-jest.mock('@travellers-apps/prices/localization');
+jest.mock('localization');
 
 describe('AuthComponent', () => {
   let component: AuthComponent;

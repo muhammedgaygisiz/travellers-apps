@@ -14,10 +14,9 @@ export const banks = createSelector(slice, selectAll);
 export const banksWithAccounts = createSelector(
   banks,
   accounts,
-  (banks, accounts) => {
-    return banks.map((bank) => ({
+  (banks, accounts) =>
+    banks.map((bank) => ({
       ...bank,
       accounts: accounts.filter((account) => account.bank === bank.id),
-    }));
-  }
+    }))
 );

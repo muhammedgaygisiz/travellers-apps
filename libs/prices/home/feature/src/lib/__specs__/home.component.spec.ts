@@ -10,7 +10,7 @@ import { SimpleChange } from '@angular/core';
 
 addNecessaryIcons();
 
-jest.mock('@travellers-apps/prices/localization');
+jest.mock('localization');
 
 describe('HomeComponent', () => {
   let component: HomeComponent;

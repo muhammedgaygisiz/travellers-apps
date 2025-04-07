@@ -5,7 +5,7 @@ import {
   ofType,
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
-import { map, switchMap, tap } from 'rxjs';
+import { debounceTime, map, switchMap, tap } from 'rxjs';
 import { IndexedDbService } from '../indexed-db/IndexedDbService';
 import { loadedBanksFromFirestore } from './actions';
 import { FinancesFirestoreService } from 'firestore';
@@ -33,7 +33,10 @@ export class BanksEffect {
       return this.actions$.pipe(
         ofType(ROOT_EFFECTS_INIT),
         switchMap(() => this.store.select(banks)),
-        tap((banks) => this.indexedDbService.putBanks(banks))
+        debounceTime(200),
+        tap((banks) => {
+          this.indexedDbService.putBanks(banks);
+        })
       );
     },
     { dispatch: false }

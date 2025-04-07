@@ -1,5 +1,5 @@
 {
-  "name": "data-access",
+  "name": "finances-dashboard-data-access",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/finances/dashboard/data-access/src",
   "prefix": "lib",

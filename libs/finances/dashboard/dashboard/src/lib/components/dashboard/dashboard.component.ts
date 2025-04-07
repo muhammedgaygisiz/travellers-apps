@@ -15,7 +15,7 @@ import {
   PopoverController,
 } from '@ionic/angular/standalone';
 import { BankComponent } from '../bank/bank.component';
-import { Bank } from 'data-access';
+import { Bank } from 'finances/dashboard/data-access';
 import { AddPopoverMenuComponent } from 'add-popover-menu';
 
 @Component({

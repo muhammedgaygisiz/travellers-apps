@@ -10,6 +10,6 @@ export const reducer = createReducer(
   on(
     loadedAccountsFromIndexedDb,
     loadedAccountsFromFirestore,
-    (state, { accounts }) => adapter.upsertMany(accounts, state)
+    (state, { accounts }) => adapter.upsertMany(accounts, initialState)
   )
 );

@@ -29,7 +29,6 @@ export const DashboardStore = signalStore(
     loadBanks: rxMethod(
       pipe(
         tap((banks: Bank[]) => {
-          console.log('Load Banks', banks);
           patchState(store, { banks });
         })
       )

@@ -1,7 +1,7 @@
 {
-  "name": "finances-add-bank",
+  "name": "account",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/finances/bank/add-bank/src",
+  "sourceRoot": "libs/finances/account/account/src",
   "prefix": "lib",
   "projectType": "library",
   "tags": ["type:finances:feature"],
@@ -10,7 +10,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "libs/finances/bank/add-bank/jest.config.ts"
+        "jestConfig": "libs/finances/account/account/jest.config.ts"
       }
     },
     "lint": {

@@ -1,13 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { NavController } from '@ionic/angular';
 import { Page } from 'pages';
-import { DashboardStore } from 'data-access';
+import { DashboardStore } from 'finances/dashboard/data-access';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  store = inject(Store);
-  dashboardStore = inject(DashboardStore);
+  private readonly dashboardStore = inject(DashboardStore);
   private readonly navController = inject(NavController);
 
   banks = this.dashboardStore.banks;

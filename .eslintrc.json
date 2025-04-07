@@ -39,7 +39,10 @@
               },
               {
                 "sourceTag": "type:finances:data-access",
-                "onlyDependOnLibsWithTags": ["type:finances:store"]
+                "onlyDependOnLibsWithTags": [
+                  "type:finances:store",
+                  "type:finances:backend-api"
+                ]
               },
               {
                 "sourceTag": "type:finances:store",

@@ -11,7 +11,7 @@ import {
   IonLabel,
   IonNote,
 } from '@ionic/angular/standalone';
-import { Bank } from 'data-access';
+import { Bank } from 'finances/dashboard/data-access';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

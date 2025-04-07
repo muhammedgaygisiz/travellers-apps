@@ -17,6 +17,11 @@ export const ROUTES: Routes = [
       ),
   },
   {
+    path: Page.ACCOUNT,
+    loadComponent: () =>
+      import('finances/pages/account').then((m) => m.AccountContainerComponent),
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full',

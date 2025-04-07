@@ -1,9 +1,16 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Bank } from '../api/bank';
+import { BankService } from 'finances/bank/data-access';
+import { NavController } from '@ionic/angular';
 
 @Injectable({ providedIn: 'root' })
 export class AddBankService {
-  saveNewBank($event: Bank) {
-    console.log('saveNewBank', $event);
+  private readonly bankService = inject(BankService);
+  private readonly navController = inject(NavController);
+
+  saveNewBank(newBank: Bank) {
+    this.bankService.saveNewBank(newBank);
+
+    this.navController.back();
   }
 }

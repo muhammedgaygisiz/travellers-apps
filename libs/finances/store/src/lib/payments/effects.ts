@@ -5,36 +5,36 @@ import {
   ofType,
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
-import { map, switchMap, tap } from 'rxjs';
 import { IndexedDbService } from '../utils/indexed-db/IndexedDbService';
-import { loadedBanksFromFirestore } from './actions';
 import { FinancesFirestoreService } from 'firestore';
+import { map, switchMap, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { banks } from './selectors';
+import { loadedPaymentsFromFirestore } from './actions';
+import { payments } from './selectors';
 
 @Injectable()
-export class BanksEffect {
+export class PaymentEffects {
   private readonly actions$ = inject(Actions);
   private readonly indexedDbService = inject(IndexedDbService);
   private readonly financesFirestoreService = inject(FinancesFirestoreService);
 
   private readonly store = inject(Store);
 
-  getBanksFromFinancesStore$ = createEffect(() => {
+  getPaymentsFromFinancesStore$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
-      switchMap(() => this.financesFirestoreService.allBanks$),
-      map((banks) => loadedBanksFromFirestore({ banks }))
+      switchMap(() => this.financesFirestoreService.allPayments$),
+      map((payments) => loadedPaymentsFromFirestore({ payments }))
     );
   });
 
-  saveBanksToIndexedDb$ = createEffect(
+  savePaymentsToIndexedDb$ = createEffect(
     () => {
       return this.actions$.pipe(
         ofType(ROOT_EFFECTS_INIT),
-        switchMap(() => this.store.select(banks)),
-        tap((banks) => {
-          this.indexedDbService.putBanks(banks);
+        switchMap(() => this.store.select(payments)),
+        tap((payments) => {
+          this.indexedDbService.putPayments(payments);
         })
       );
     },

@@ -6,6 +6,8 @@ import { fromAccount } from './accounts';
 import { provideEffects } from '@ngrx/effects';
 import { BanksEffect } from './banks/effects';
 import { AccountsEffect } from './accounts/effects';
+import { PaymentEffects } from './payments/effects';
+import { fromPayments } from './payments';
 
 export const provideFinancesStore = (environment: Environment) => [
   provideStore(
@@ -18,8 +20,9 @@ export const provideFinancesStore = (environment: Environment) => [
       },
     }
   ),
-  provideEffects(BanksEffect, AccountsEffect),
+  provideEffects(BanksEffect, AccountsEffect, PaymentEffects),
   provideState(fromBank.key, fromBank.reducer),
   provideState(fromAccount.key, fromAccount.reducer),
+  provideState(fromPayments.key, fromPayments.reducer),
   !environment.production ? provideStoreDevtools({ connectInZone: true }) : [],
 ];

@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
 import { adapter } from './adapter';
 import { EntityState } from '@ngrx/entity';
-import { Bank } from '../model/bank';
+import { Bank } from '../utils/model/bank';
 import { accounts } from '../accounts/selectors';
 
 const slice = createFeatureSelector<EntityState<Bank>>(key);

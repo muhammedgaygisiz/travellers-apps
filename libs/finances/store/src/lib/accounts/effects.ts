@@ -6,7 +6,7 @@ import {
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
 import { map, switchMap, tap } from 'rxjs';
-import { IndexedDbService } from '../indexed-db/IndexedDbService';
+import { IndexedDbService } from '../utils/indexed-db/IndexedDbService';
 import { loadedAccountsFromFirestore } from './actions';
 import { FinancesFirestoreService } from 'firestore';
 import { Store } from '@ngrx/store';

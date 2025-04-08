@@ -5,10 +5,12 @@ import {
   collectionData,
   Firestore,
 } from '@angular/fire/firestore';
-import { debounceTime, filter, map, Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Account } from './model/account';
 import { Bank } from './model/bank';
 import { v4 as uuidV4 } from 'uuid';
+import { firebaseDebounceFilterAndLog } from './utils/firebase-debounce-filter-and-log';
+import { Payment } from './model/payment';
 
 const BANKS_COLLECTION = 'banks';
 const ACCOUNTS_COLLECTION = 'accounts';
@@ -20,23 +22,38 @@ const PAYMENTS_COLLECTION = 'payments';
 export class FinancesFirestoreService {
   private readonly afs = inject(Firestore);
 
-  private banksCollection = collection(this.afs, BANKS_COLLECTION);
-  private accountsCollection = collection(this.afs, ACCOUNTS_COLLECTION);
-  private paymentsCollection = collection(this.afs, PAYMENTS_COLLECTION);
+  private readonly banksCollection = collection(this.afs, BANKS_COLLECTION);
+  private readonly accountsCollection = collection(
+    this.afs,
+    ACCOUNTS_COLLECTION
+  );
+  private readonly paymentsCollection = collection(
+    this.afs,
+    PAYMENTS_COLLECTION
+  );
 
-  public allAccounts$ = collectionData(this.accountsCollection) as Observable<
-    Account[]
-  >;
+  private readonly accountsChannel$ = collectionData(
+    this.accountsCollection
+  ) as Observable<Account[]>;
 
-  public allBanks$ = (
-    collectionData(this.banksCollection) as Observable<Bank[]>
-  ).pipe(
-    debounceTime(200),
-    filter((banks) => banks.some((bank) => bank.id)),
-    map((banks) =>
-      banks.filter((res) => res.id).sort((a, b) => a.name.localeCompare(b.name))
-    ),
-    tap((banks) => console.log('Banks collection emitted:', banks)) // Add logging here
+  private readonly banksChannel$ = collectionData(
+    this.banksCollection
+  ) as Observable<Bank[]>;
+
+  private readonly paymentsChannel$ = collectionData(
+    this.paymentsCollection
+  ) as Observable<Payment[]>;
+
+  public allAccounts$ = this.accountsChannel$.pipe(
+    firebaseDebounceFilterAndLog<Account>('number')
+  );
+
+  public allBanks$ = this.banksChannel$.pipe(
+    firebaseDebounceFilterAndLog<Bank>('id')
+  );
+
+  public allPayments$ = this.paymentsChannel$.pipe(
+    firebaseDebounceFilterAndLog<Payment>('id')
   );
 
   saveNewBank(newBank: { name: string }) {

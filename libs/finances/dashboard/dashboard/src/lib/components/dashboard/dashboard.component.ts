@@ -9,7 +9,6 @@ import {
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
-  IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
@@ -29,7 +28,6 @@ import { AddPopoverMenuComponent } from 'add-popover-menu';
     IonCardHeader,
     IonCardTitle,
     IonCardSubtitle,
-    IonCardContent,
     BankComponent,
   ],
 })

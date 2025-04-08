@@ -1,3 +1,5 @@
-export interface Payment {
+export type Payment = {
   id: string;
-}
+
+  amount: number;
+};

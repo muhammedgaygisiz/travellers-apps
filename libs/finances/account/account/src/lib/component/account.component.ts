@@ -2,9 +2,13 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
+  IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonItem,
+  IonItemGroup,
+  IonLabel,
   PopoverController,
 } from '@ionic/angular/standalone';
 import { Account } from 'finances/account/data-access';
@@ -19,6 +23,10 @@ import { AddPopoverMenuComponent } from 'add-popover-menu';
     IonCardHeader,
     IonCardSubtitle,
     IonCardTitle,
+    IonCardContent,
+    IonItemGroup,
+    IonItem,
+    IonLabel,
   ],
 })
 export class AccountComponent {

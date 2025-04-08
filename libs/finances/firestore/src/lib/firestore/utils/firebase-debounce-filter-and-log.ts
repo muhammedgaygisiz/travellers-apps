@@ -9,7 +9,8 @@ import {
 } from 'rxjs';
 
 export const firebaseDebounceFilterAndLog = <T>(
-  id: keyof T
+  id: keyof T,
+  typeName?: string
 ): UnaryFunction<Observable<T[]>, Observable<T[]>> => {
   return pipe(
     debounceTime<T[]>(200),
@@ -19,6 +20,10 @@ export const firebaseDebounceFilterAndLog = <T>(
         .filter((res) => res[id])
         .sort((a, b) => `${a[id]}`.localeCompare(`${b[id]}`))
     ),
-    tap((results) => console.log('Accounts collection received:', results))
+    tap((results) =>
+      typeName
+        ? console.log(`${typeName} collection received:`, results)
+        : console.log('Collection received:', results)
+    )
   );
 };

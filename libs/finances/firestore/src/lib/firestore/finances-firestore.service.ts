@@ -45,15 +45,15 @@ export class FinancesFirestoreService {
   ) as Observable<Payment[]>;
 
   public allAccounts$ = this.accountsChannel$.pipe(
-    firebaseDebounceFilterAndLog<Account>('number')
+    firebaseDebounceFilterAndLog<Account>('number', ACCOUNTS_COLLECTION)
   );
 
   public allBanks$ = this.banksChannel$.pipe(
-    firebaseDebounceFilterAndLog<Bank>('id')
+    firebaseDebounceFilterAndLog<Bank>('id', BANKS_COLLECTION)
   );
 
   public allPayments$ = this.paymentsChannel$.pipe(
-    firebaseDebounceFilterAndLog<Payment>('id')
+    firebaseDebounceFilterAndLog<Payment>('id', PAYMENTS_COLLECTION)
   );
 
   saveNewBank(newBank: { name: string }) {

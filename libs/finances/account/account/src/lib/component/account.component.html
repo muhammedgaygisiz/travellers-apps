@@ -1,4 +1,8 @@
-<ta-page [showAddButton]="true" (showAddPopover)="showAddPopover($event)">
+<ta-page
+  [enableBackButton]="true"
+  [showAddButton]="true"
+  (showAddPopover)="showAddPopover($event)"
+>
   <ta-card>
     <ion-card-header>
       <ion-card-title>{{ account()?.balance }} $</ion-card-title>

@@ -10,7 +10,7 @@
       "executor": "@nx/angular:browser-esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "plugins": ["apps/prices/env-var-plugin.js"],
+        "plugins": ["apps/finances/env-var-plugin.js"],
         "outputPath": "dist/apps/finances",
         "index": "apps/finances/src/index.html",
         "main": "apps/finances/src/main.ts",
@@ -18,9 +18,16 @@
         "tsConfig": "apps/finances/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
+          "apps/finances/src/favicon.ico",
+          "apps/finances/src/manifest.webmanifest",
           {
             "glob": "**/*",
             "input": "apps/finances/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "apps/finances/src/assets",
+            "output": "assets"
           },
           {
             "input": "node_modules/flag-icons/flags/4x3",
@@ -37,7 +44,9 @@
           "apps/finances/src/theme/variables.scss",
           "apps/finances/src/global.scss"
         ],
-        "scripts": []
+        "scripts": [],
+        "serviceWorker": true,
+        "ngswConfigPath": "apps/finances/ngsw-config.json"
       },
       "configurations": {
         "production": {

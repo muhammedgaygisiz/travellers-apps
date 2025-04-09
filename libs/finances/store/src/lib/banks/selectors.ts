@@ -3,7 +3,7 @@ import { key } from './key';
 import { adapter } from './adapter';
 import { EntityState } from '@ngrx/entity';
 import { Bank } from '../utils/model/bank';
-import { accounts } from '../accounts/selectors';
+import { accountsWithPayments } from '../accounts/selectors';
 
 const slice = createFeatureSelector<EntityState<Bank>>(key);
 
@@ -13,10 +13,17 @@ export const banks = createSelector(slice, selectAll);
 
 export const banksWithAccounts = createSelector(
   banks,
-  accounts,
+  accountsWithPayments,
   (banks, accounts) =>
     banks.map((bank) => ({
       ...bank,
-      accounts: accounts.filter((account) => account.bank === bank.id),
+      accounts: accounts
+        .filter((account) => account.bank === bank.id)
+        .map((account) => ({
+          ...account,
+          balance: account.payments
+            .map((payment) => +payment.amount)
+            .reduce((a, b) => a + b, 0),
+        })),
     }))
 );

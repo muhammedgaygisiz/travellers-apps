@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { AccountStore } from 'finances/account/data-access';
+import { AccountStore, Payment } from 'finances/account/data-access';
 import { Page } from 'pages';
 import { NavController } from '@ionic/angular';
 
@@ -14,6 +14,18 @@ export class AccountService {
 
     if (account) {
       this.navController.navigateForward([account.number, Page.PAYMENT]);
+    }
+  }
+
+  onPaymentClicked(payment: Payment) {
+    const account = this.store.account();
+
+    if (account) {
+      this.navController.navigateForward([
+        account.number,
+        Page.PAYMENT,
+        payment.id,
+      ]);
     }
   }
 }

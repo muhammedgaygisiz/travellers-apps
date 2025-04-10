@@ -61,7 +61,6 @@ export class PageComponent {
   public languageChangeClick = output<SupportedLang>();
 
   public showAddPopover = output<MouseEvent>();
-
   popoverController = inject(PopoverController);
 
   async showMenuPopover($event: MouseEvent) {

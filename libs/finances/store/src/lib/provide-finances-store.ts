@@ -8,10 +8,11 @@ import { BanksEffect } from './banks/effects';
 import { AccountsEffect } from './accounts/effects';
 import { PaymentEffects } from './payments/effects';
 import { fromPayments } from './payments';
+import { provideRouterStore, routerReducer } from '@ngrx/router-store';
 
 export const provideFinancesStore = (environment: Environment) => [
   provideStore(
-    {},
+    { router: routerReducer },
     {
       metaReducers: getMetaReducers(environment),
       runtimeChecks: {
@@ -21,6 +22,7 @@ export const provideFinancesStore = (environment: Environment) => [
     }
   ),
   provideEffects(BanksEffect, AccountsEffect, PaymentEffects),
+  provideRouterStore(),
   provideState(fromBank.key, fromBank.reducer),
   provideState(fromAccount.key, fromAccount.reducer),
   provideState(fromPayments.key, fromPayments.reducer),

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   output,
 } from '@angular/core';
@@ -8,6 +9,7 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
+  IonCardTitle,
   IonItem,
   IonItemGroup,
   IonLabel,
@@ -29,10 +31,20 @@ import { CardComponent } from 'common/ui/card';
     IonCardHeader,
     IonCardSubtitle,
     IonCardContent,
+    IonCardTitle,
   ],
 })
 export class BankComponent {
   bank = input.required<Bank>();
 
   openAccountDetails = output<string>();
+
+  totalAmount = computed<string | null>(() => {
+    const accounts = this.bank().accounts;
+
+    const totalAmount = accounts
+      ?.map((account) => account.balance)
+      .reduce((a, b) => a + b, 0);
+    return `${totalAmount}`;
+  });
 }

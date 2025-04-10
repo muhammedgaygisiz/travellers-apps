@@ -1,4 +1,5 @@
 <ta-page
+  title="Finances"
   [enableBackButton]="true"
   [showAddButton]="true"
   (showAddPopover)="showAddPopover($event)"
@@ -12,7 +13,7 @@
     <ion-card-content>
       <ion-item-group>
         @for (payment of account()?.payments; track payment.id) {
-        <ion-item lines="full">
+        <ion-item lines="full" (click)="paymentClicked.emit(payment)">
           <ion-label>{{ payment.amount }} $</ion-label>
         </ion-item>
         }

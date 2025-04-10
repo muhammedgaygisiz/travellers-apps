@@ -13,6 +13,7 @@ import { AccountService } from './account.service';
     <finances-account
       [account]="service.store.account()"
       (addMenuItemClicked)="service.onAddMenuItemClicked()"
+      (paymentClicked)="service.onPaymentClicked($event)"
     />
   `,
   imports: [AccountComponent],

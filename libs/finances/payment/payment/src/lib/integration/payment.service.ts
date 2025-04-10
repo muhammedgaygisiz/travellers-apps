@@ -4,13 +4,22 @@ import { Payment } from '../api/payment';
 import { NavController } from '@ionic/angular';
 
 @Injectable({ providedIn: 'root' })
-export class AddPaymentService {
-  private paymentDataAccessService = inject(PaymentDataAccessService);
+export class PaymentService {
+  service = inject(PaymentDataAccessService);
+
   private readonly navController = inject(NavController);
 
+  payment = this.service.payment;
+
   saveNewPayment(newPayment: Payment) {
-    const iban = this.paymentDataAccessService.iban();
-    this.paymentDataAccessService.saveNewPayment({ ...newPayment, iban });
+    this.service.saveNewPayment(newPayment);
+
+    this.navController.back();
+  }
+
+  savePayment(payment: Payment) {
+    const currentPayment = this.payment();
+    this.service.savePayment(payment, currentPayment?.id);
 
     this.navController.back();
   }

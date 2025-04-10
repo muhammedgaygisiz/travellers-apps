@@ -4,6 +4,10 @@ import {
   collection,
   collectionData,
   Firestore,
+  getDocs,
+  query,
+  updateDoc,
+  where,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Account } from './model/account';
@@ -62,5 +66,21 @@ export class FinancesFirestoreService {
 
   saveNewPayment(newPayment: { amount: number; iban: string }) {
     addDoc(this.paymentsCollection, { ...newPayment, id: uuidV4() });
+  }
+
+  async savePayment(payment: any, id: string | undefined) {
+    const querySnapshot = await getDocs(
+      query(this.paymentsCollection, where('id', '==', id))
+    );
+
+    if (!querySnapshot.empty) {
+      const docRef = querySnapshot.docs[0].ref;
+
+      await updateDoc(docRef, { ...payment });
+
+      return;
+    }
+
+    console.error('No payment found with the given ID:', id);
   }
 }

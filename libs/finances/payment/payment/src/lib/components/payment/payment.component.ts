@@ -1,4 +1,4 @@
-import { Component, output } from '@angular/core';
+import { Component, effect, input, output } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -21,9 +21,9 @@ interface PaymentForm {
 }
 
 @Component({
-  selector: 'finances-add-payment',
-  templateUrl: './add-payment.component.html',
-  styleUrl: './add-payment.component.scss',
+  selector: 'finances-payment',
+  templateUrl: './payment.component.html',
+  styleUrl: './payment.component.scss',
   imports: [
     PageComponent,
     CardComponent,
@@ -35,10 +35,17 @@ interface PaymentForm {
     IonButton,
   ],
 })
-export class AddPaymentComponent {
-  submitNewPayment = output<Payment>();
+export class PaymentComponent {
+  payment = input<Payment>();
 
-  addPaymentFormGroup: FormGroup = new FormGroup<PaymentForm>({
+  submitPayment = output<Payment>();
+
+  paymentEffect = effect(() => {
+    const payment = this.payment();
+
+    this.paymentFormGroup.patchValue({ ...payment });
+  });
+  paymentFormGroup: FormGroup = new FormGroup<PaymentForm>({
     amount: new FormControl<number>(0, Validators.required),
   });
 }

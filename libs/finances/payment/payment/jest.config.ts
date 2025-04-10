@@ -1,8 +1,8 @@
 export default {
-  displayName: 'add-payment',
+  displayName: 'payment',
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../../coverage/libs/finances/payment/add-payment',
+  coverageDirectory: '../../../../coverage/libs/finances/payment/payment',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

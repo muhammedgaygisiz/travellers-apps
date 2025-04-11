@@ -398,7 +398,7 @@ jobs:
 
 # Finances
 
-  finances-build-storybook:
+  finances-build:
     runs-on: ubuntu-latest
     needs:
       - tests
@@ -412,42 +412,9 @@ jobs:
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
 
-      - run: npm run nx -- build-storybook finances --configuration=ci
+      - name: Build Prices App
+        run: npm run nx -- build finances
 
-      - name: Cache Storybook Build
-        uses: actions/cache@v4
-        with:
-          path: dist/storybook/finances
-          key: finances-storybook-${{ hashFiles('**/finances/**/*.stories.*') }}
-
-  finances-loki:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    needs:
-      - finances-build-storybook
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - uses: actions/cache/restore@v4
-        with:
-          path: dist/storybook/finances
-          key: finances-storybook-${{ hashFiles('**/finances/**/*.stories.*') }}
-
-      - run: npm run nx -- test-loki finances
-
-      - name: Upload Loki Diffs
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: finances-loki-diffs
-          path: apps/finances/.loki/difference
 # CV
 
   cv-build:

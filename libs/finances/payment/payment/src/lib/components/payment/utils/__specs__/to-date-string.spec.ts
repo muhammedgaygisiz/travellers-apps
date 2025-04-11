@@ -1,4 +1,4 @@
-import { toDateString } from './to-date-string';
+import { toDateString } from '../to-date-string';
 
 describe('toDateString', () => {
   it('should format a Date object correctly', () => {

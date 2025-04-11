@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { DurationPipe } from './duration.pipe';
 import { Project } from './project';
 import { APU, AUSBILDUNG, AXA, FH, NLI, PERFOOD, TIMS, TRIP } from './projects';
@@ -40,7 +40,7 @@ const APPRENTICE: Education = {
 };
 
 @Component({
-  imports: [RouterModule, DatePipe, DurationPipe, DecimalPipe],
+  imports: [RouterModule, DatePipe, DurationPipe],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

@@ -15,11 +15,20 @@
           />
         </ion-item>
 
+        <ion-item lines="full">
+          <ion-input
+            formControlName="date"
+            label="Date"
+            labelReplacement="floating"
+            (click)="openDatePicker($event)"
+          />
+        </ion-item>
+
         <ion-button
           class="ion-margin-top"
           expand="block"
           [disabled]="!paymentFormGroup.valid"
-          (click)="submitPayment.emit(paymentFormGroup.value)"
+          (click)="onSubmitClick()"
         >
           Save
         </ion-button>

@@ -80,5 +80,7 @@ describe('AddPaymentComponent', () => {
       amount: 100,
       date: mockDate,
     });
+
+    jest.restoreAllMocks();
   });
 });

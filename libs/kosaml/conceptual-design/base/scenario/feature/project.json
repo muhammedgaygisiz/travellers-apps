@@ -4,7 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/kosaml/conceptual-design/base/scenario/feature/src",
   "prefix": "travellers-apps",
-  "tags": ["scope:kosaml", "type:feature"],
+  "tags": ["scope:kosaml", "type:ui"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

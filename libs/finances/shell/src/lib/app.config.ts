@@ -5,9 +5,9 @@ import {
 import { provideFinancesShell } from './provide-finances-shell';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { Environment, getIonicConfig } from '@travellers-apps/utils-common';
-import { provideFinancesStore } from 'finances/store';
 import { provideTaFirestore } from 'ta-firestore';
 import { provideServiceWorker } from '@angular/service-worker';
+import { provideFinancesStore } from 'finances/store';
 
 const firebaseOptions = {
   apiKey: process.env['NX_APP_API_KEY'],

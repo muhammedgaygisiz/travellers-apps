@@ -4,7 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/kosaml/src",
   "prefix": "travellers-apps",
-  "tags": ["type:kosaml:app"],
+  "tags": ["scope:finances", "type:app"],
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser",

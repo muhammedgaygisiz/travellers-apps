@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/finances/src",
-  "tags": ["type:finances:app"],
+  "tags": ["scope:finances", "type:app"],
   "targets": {
     "build": {
       "executor": "@nx/angular:browser-esbuild",

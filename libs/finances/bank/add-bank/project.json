@@ -4,7 +4,7 @@
   "sourceRoot": "libs/finances/bank/add-bank/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["type:finances:feature"],
+  "tags": ["scope:finances", "type:feature"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

@@ -3,7 +3,7 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/common/data-access-utils/src",
   "projectType": "library",
-  "tags": ["common:utils"],
+  "tags": ["scope:common"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",

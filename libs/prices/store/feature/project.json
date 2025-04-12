@@ -4,7 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/prices/store/feature/src",
   "prefix": "travellers-apps",
-  "tags": ["type:prices:store"],
+  "tags": ["scope:prices", "type:store"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

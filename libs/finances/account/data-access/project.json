@@ -4,7 +4,7 @@
   "sourceRoot": "libs/finances/account/data-access/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["type:finances:data-access", "type:data-access", "scope:finances"],
+  "tags": ["type:data-access", "scope:finances"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

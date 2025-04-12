@@ -4,7 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/prices/firestore/feature/src",
   "prefix": "travellers-apps",
-  "tags": ["type:prices:backend-api"],
+  "tags": ["scope:prices", "type:api"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

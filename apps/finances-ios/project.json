@@ -4,7 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/finances-ios",
   "prefix": "finances-ios",
-  "tags": [],
+  "tags": ["scope:finances"],
   "targets": {
     "build": {
       "options": {

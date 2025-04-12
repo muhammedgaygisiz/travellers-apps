@@ -7,12 +7,8 @@ import {
   viewChild,
 } from '@angular/core';
 import * as d3 from 'd3';
-
-interface ChartData {
-  date: any;
-  amount: number;
-  balance?: number; // Cumulative balance
-}
+import { withPaddedData } from './utils/with-padded-data';
+import { ChartData } from './api/chart-data';
 
 const COLORS = {
   success: '#2dd36f', // Ionic default success color
@@ -29,6 +25,7 @@ const COLORS = {
 })
 export class ChartComponent {
   private readonly chart = viewChild<ElementRef>('chart');
+
   data = input<ChartData[]>([]);
 
   createChartEffect = effect(() => {
@@ -55,25 +52,7 @@ export class ChartComponent {
   });
 
   private createChart(chartElement: HTMLElement, currentData: ChartData[]) {
-    const paddedData = [...currentData];
-    if (currentData.length > 0) {
-      const firstDay = currentData[0];
-      const lastDay = currentData[currentData.length - 1];
-
-      // Add day before
-      paddedData.unshift({
-        date: new Date(firstDay.date.getTime() - 86400000), // subtract 1 day in milliseconds
-        amount: 0,
-        balance: 0,
-      });
-
-      // Add day after
-      paddedData.push({
-        date: new Date(lastDay.date.getTime() + 86400000), // add 1 day in milliseconds
-        amount: 0,
-        balance: lastDay.balance,
-      });
-    }
+    const paddedData = withPaddedData(currentData);
 
     d3.select(chartElement).selectAll('*').remove();
 

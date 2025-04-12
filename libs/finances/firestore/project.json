@@ -4,7 +4,7 @@
   "sourceRoot": "libs/finances/firestore/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["type:finances:backend-api"],
+  "tags": ["scope:finances", "type:api"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

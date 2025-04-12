@@ -3,7 +3,7 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/kosaml/model/feature/src",
   "projectType": "library",
-  "tags": ["type:kosaml:model"],
+  "tags": ["scope:kosaml", "type:model"],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"

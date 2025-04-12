@@ -21,8 +21,20 @@
                 ]
               },
               {
+                "sourceTag": "type:store",
+                "onlyDependOnLibsWithTags": [
+                  "scope:common",
+                  "type:api",
+                  "type:model"
+                ]
+              },
+              {
                 "sourceTag": "scope:common",
                 "onlyDependOnLibsWithTags": ["scope:common"]
+              },
+              {
+                "sourceTag": "type:ui",
+                "onlyDependOnLibsWithTags": ["type:ui"]
               }
             ]
           }

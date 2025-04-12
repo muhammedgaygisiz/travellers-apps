@@ -89,6 +89,7 @@
       ],
       "@travellers-apps/utils-common": ["libs/utils-common/src/index.ts"],
       "add-popover-menu": ["libs/finances/ui/add-popover-menu/src/index.ts"],
+      "chart": ["libs/common/ui/chart/src/index.ts"],
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
       "data-access-utils": ["libs/common/data-access-utils/src/index.ts"],
@@ -103,10 +104,10 @@
       ],
       "finances/pages/account": ["libs/finances/account/account/src/index.ts"],
       "finances/pages/add-bank": ["libs/finances/bank/add-bank/src/index.ts"],
-      "finances/pages/payment": ["libs/finances/payment/payment/src/index.ts"],
       "finances/pages/dashboard": [
         "libs/finances/dashboard/dashboard/src/index.ts"
       ],
+      "finances/pages/payment": ["libs/finances/payment/payment/src/index.ts"],
       "finances/payment/data-access": [
         "libs/finances/payment/data-access/src/index.ts"
       ],

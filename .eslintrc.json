@@ -13,6 +13,14 @@
             "allow": [],
             "depConstraints": [
               {
+                "sourceTag": "type:feature",
+                "onlyDependOnLibsWithTags": [
+                  "type:ui",
+                  "type:store",
+                  "type:data-access"
+                ]
+              },
+              {
                 "sourceTag": "type:finances:app",
                 "onlyDependOnLibsWithTags": [
                   "type:finances:shell",

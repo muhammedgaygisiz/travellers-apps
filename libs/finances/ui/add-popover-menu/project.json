@@ -4,7 +4,7 @@
   "sourceRoot": "libs/finances/ui/add-popover-menu/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["type:finances:ui"],
+  "tags": ["type:finances:ui", "type:ui"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

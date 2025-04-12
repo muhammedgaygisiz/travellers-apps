@@ -4,7 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/common/ui/card/src",
   "prefix": "travellers-apps",
-  "tags": ["common:utils"],
+  "tags": ["common:utils", "type:ui"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

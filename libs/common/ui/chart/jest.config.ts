@@ -12,6 +12,9 @@ export default {
       },
     ],
   },
+  moduleNameMapper: {
+    d3: 'node_modules/d3/dist/d3.min.js',
+  },
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',

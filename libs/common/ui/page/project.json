@@ -4,7 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/common/ui/page/src",
   "prefix": "travellers-apps",
-  "tags": ["common:utils", "type:ui"],
+  "tags": ["type:ui", "scope:common", "framework:ionic"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

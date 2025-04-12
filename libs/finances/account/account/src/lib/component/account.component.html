@@ -1,8 +1,23 @@
-<ta-page [showAddButton]="true" (showAddPopover)="showAddPopover($event)">
+<ta-page
+  title="Finances"
+  [enableBackButton]="true"
+  [showAddButton]="true"
+  (showAddPopover)="showAddPopover($event)"
+>
   <ta-card>
     <ion-card-header>
       <ion-card-title>{{ account()?.balance }} $</ion-card-title>
-      <ion-card-subtitle> Account Details </ion-card-subtitle>
+      <ion-card-subtitle> Account Details</ion-card-subtitle>
     </ion-card-header>
+
+    <ion-card-content>
+      <ion-item-group>
+        @for (payment of account()?.payments; track payment.id) {
+        <ion-item lines="full" (click)="paymentClicked.emit(payment)">
+          <ion-label>{{ payment.amount }} $</ion-label>
+        </ion-item>
+        }
+      </ion-item-group>
+    </ion-card-content>
   </ta-card>
 </ta-page>

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   output,
@@ -9,7 +10,6 @@ import {
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
-  IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
@@ -29,7 +29,6 @@ import { AddPopoverMenuComponent } from 'add-popover-menu';
     IonCardHeader,
     IonCardTitle,
     IonCardSubtitle,
-    IonCardContent,
     BankComponent,
   ],
 })
@@ -41,6 +40,21 @@ export class DashboardComponent {
   openAccountDetails = output<string>();
 
   addMenuItemClicked = output<string>();
+
+  totalAmount = computed<string | null>(() => {
+    const banks = this.banks();
+    if (!banks) {
+      return '0';
+    }
+
+    const totalBalance = banks
+      ?.map((bank) => bank.accounts || [])
+      .reduce((a = [], b = []) => [...a, ...b], [])
+      .map((account) => account.balance)
+      .reduce((a, b) => a + b, 0);
+
+    return `${totalBalance}`;
+  });
 
   async showAddPopover($event: MouseEvent) {
     const popover = await this.popoverController.create({
@@ -66,7 +80,6 @@ export class DashboardComponent {
 
     await popover.present();
   }
-
   onMenuItemClicked = async (menuItem: string) => {
     await this.popoverController.dismiss();
 

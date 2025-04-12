@@ -103,9 +103,7 @@
       ],
       "finances/pages/account": ["libs/finances/account/account/src/index.ts"],
       "finances/pages/add-bank": ["libs/finances/bank/add-bank/src/index.ts"],
-      "finances/pages/add-payment": [
-        "libs/finances/payment/add-payment/src/index.ts"
-      ],
+      "finances/pages/payment": ["libs/finances/payment/payment/src/index.ts"],
       "finances/pages/dashboard": [
         "libs/finances/dashboard/dashboard/src/index.ts"
       ],

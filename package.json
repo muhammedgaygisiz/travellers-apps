@@ -19,7 +19,9 @@
     "cap:sync": "nx run prices-ios:sync",
     "cap:run:ios": "cap run ios",
     "cap:run:android": "cap run android",
-    "pwa-asset-generator:generate:proces": "pwa-asset-generator apps/prices/src/logo.svg -i apps/prices/src/index.html --favicon -m apps/prices/src/manifest.webmanifest apps/prices/src/assets/icons",
+    "pwa-asset-generator:generate:prices": "pwa-asset-generator apps/prices/src/logo.svg -i apps/prices/src/index.html --favicon -m apps/prices/src/manifest.webmanifest apps/prices/src/assets/icons",
+    "pwa-asset-generator:generate:finances": "pwa-asset-generator apps/finances/src/logo.svg -i apps/finances/src/index.html --favicon -m apps/finances/src/manifest.webmanifest apps/finances/src/assets/icons",
+    "ios-asset-generator:generate-ios:finances": "capacitor-assets generate --ios --iosProject apps/finances-ios/ios/App --assetPath apps/finances/src --iconBackgroundColor '#eeeeee' --iconBackgroundColorDark '#222222' --splashBackgroundColor '#eeeeee' --splashBackgroundColorDark '#111111'",
     "commitizen": "commitizen",
     "husky": "husky",
     "commit": "cz"
@@ -76,6 +78,7 @@
     "@angular/compiler-cli": "19.2.4",
     "@angular/language-service": "19.2.4",
     "@angular/pwa": "19.2.3",
+    "@capacitor/assets": "3.0.5",
     "@capacitor/cli": "6.0.0",
     "@chromatic-com/storybook": "^3.2.6",
     "@commitlint/cli": "19.3.0",

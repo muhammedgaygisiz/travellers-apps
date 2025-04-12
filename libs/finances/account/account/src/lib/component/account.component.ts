@@ -2,12 +2,16 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
+  IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonItem,
+  IonItemGroup,
+  IonLabel,
   PopoverController,
 } from '@ionic/angular/standalone';
-import { Account } from 'finances/account/data-access';
+import { Account, Payment } from 'finances/account/data-access';
 import { AddPopoverMenuComponent } from 'add-popover-menu';
 
 @Component({
@@ -19,6 +23,10 @@ import { AddPopoverMenuComponent } from 'add-popover-menu';
     IonCardHeader,
     IonCardSubtitle,
     IonCardTitle,
+    IonCardContent,
+    IonItemGroup,
+    IonItem,
+    IonLabel,
   ],
 })
 export class AccountComponent {
@@ -27,6 +35,8 @@ export class AccountComponent {
   account = input<Account | null | undefined>();
 
   addMenuItemClicked = output<string>();
+
+  paymentClicked = output<Payment>();
 
   async showAddPopover($event: MouseEvent) {
     const popover = await this.popoverController.create({

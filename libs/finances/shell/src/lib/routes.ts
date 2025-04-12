@@ -24,8 +24,15 @@ export const ROUTES: Routes = [
   {
     path: `:iban/${Page.PAYMENT}`,
     loadComponent: () =>
-      import('finances/pages/add-payment').then(
+      import('finances/pages/payment').then(
         (m) => m.AddPaymentContainerComponent
+      ),
+  },
+  {
+    path: `:iban/${Page.PAYMENT}/:paymentId`,
+    loadComponent: () =>
+      import('finances/pages/payment').then(
+        (m) => m.EditPaymentContainerComponent
       ),
   },
   {

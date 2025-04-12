@@ -1,14 +1,23 @@
 @if (bank(); as bank) {
-<ion-item-group class="ion-margin-top">
-  <ion-item-divider>
-    <ion-label> {{ bank.name }} </ion-label>
-  </ion-item-divider>
+<ta-card>
+  <ion-card-header>
+    <ion-card-title>{{ totalAmount() }} $</ion-card-title>
+    <ion-card-subtitle> {{ bank.name }}</ion-card-subtitle>
+  </ion-card-header>
 
-  @for (account of bank.accounts; track account.number) {
-  <ion-item [button]="true" (click)="openAccountDetails.emit(account.number)">
-    <ion-label>{{ account.type }} ({{ account.number }})</ion-label>
-    <ion-note slot="end">{{ account.balance }} $</ion-note>
-  </ion-item>
-  }
-</ion-item-group>
+  <ion-card-content>
+    <ion-item-group class="ion-margin-top">
+      @for (account of bank.accounts; track account.number) {
+      <ion-item
+        lines="full"
+        [button]="true"
+        (click)="openAccountDetails.emit(account.number)"
+      >
+        <ion-label>{{ account.type }} ({{ account.number }})</ion-label>
+        <ion-note slot="end">{{ account.balance }} $</ion-note>
+      </ion-item>
+      }
+    </ion-item-group>
+  </ion-card-content>
+</ta-card>
 }

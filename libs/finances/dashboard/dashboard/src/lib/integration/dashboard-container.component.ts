@@ -6,7 +6,7 @@ import { DashboardService } from './dashboard.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <finances-dashboard
-      [banks]="service.banks()"
+      [banks]="service.store.banks()"
       (openAccountDetails)="service.onOpenAccountDetails($event)"
       (addMenuItemClicked)="service.onAddMenuItemClicked()"
     />

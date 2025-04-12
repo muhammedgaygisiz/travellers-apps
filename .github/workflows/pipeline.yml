@@ -82,9 +82,8 @@ jobs:
       - name: Run Stylelint
         run: npm run nx -- affected -t stylelint
 
-#Prices
 
-  prices-tests:
+  tests:
     runs-on: ubuntu-latest
     needs:
       - stylelint
@@ -98,34 +97,27 @@ jobs:
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
 
+      - name: "Setup env"
+        uses: ./.github/actions/setup-env-for-affected
+
       - name: Run Unit Tests
-        run: npm run nx -- run-many --target=test --projects="prices*"  --coverage --coverageReporters=cobertura
+        run: npm run nx -- affected -t test --coverage --coverageReporters=cobertura
 
       - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           directory: ./coverage # optional
-          files: ./coverage/apps/prices/cobertura-coverage.xml,
-            libs/prices/add-item/feature/cobertura-coverage.xml,
-            libs/prices/auth/feature/cobertura-coverage.xml,
-            libs/prices/card/feature/cobertura-coverage.xml,
-            libs/prices/firestore/feature/cobertura-coverage.xml,
-            libs/prices/geoapify/feature/cobertura-coverage.xml,
-            libs/prices/home/feature/cobertura-coverage.xml,
-            libs/prices/page/feature/cobertura-coverage.xml,
-            libs/prices/password-validator/feature/cobertura-coverage.xml,
-            libs/prices/registration/feature/cobertura-coverage.xml,
-            libs/prices/shell/feature/cobertura-coverage.xml,
-            libs/prices/store/feature/cobertura-coverage.xml # optional
           flags: unittests # optional
           name: codecov-umbrella # optional
           fail_ci_if_error: false # optional (default = false)
           verbose: false # optional (default = false)
 
+  #Prices
+
   prices-build-storybook:
     runs-on: ubuntu-latest
     needs:
-      - prices-tests
+      - tests
 
     steps:
       - name: Checkout repository
@@ -335,51 +327,10 @@ jobs:
 
 # KOSAML
 
-  kosaml-tests:
-    runs-on: ubuntu-latest
-    needs:
-      - stylelint
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - name: Run Unit Tests
-        run: npm run nx -- run-many --target=test --projects="kosaml*"  --coverage --coverageReporters=cobertura
-
-      - uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-          directory: ./coverage # optional
-          files: ./coverage/apps/kosaml/cobertura-coverage.xml,
-            libs/kosaml/auth/feature/cobertura-coverage.xml,
-            libs/kosaml/card/feature/cobertura-coverage.xml,
-            libs/kosaml/conceptual-design/base/scenario/feature/cobertura-coverage.xml,
-            libs/kosaml/conceptual-design/base/use-case/feature/cobertura-coverage.xml,
-            libs/kosaml/conceptual-design/concrete-use-case/feature/cobertura-coverage.xml,
-            libs/kosaml/conceptual-design/essential-use-case/feature/cobertura-coverage.xml,
-            libs/kosaml/conceptual-design/task-object/feature/cobertura-coverage.xml,
-            libs/kosaml/conceptual-design/task-scenario/feature/cobertura-coverage.xml,
-            libs/kosaml/conceptual-design/use-scenario/feature/cobertura-coverage.xml,
-            libs/kosaml/model/feature/cobertura-coverage.xml,
-            libs/kosaml/page/feature/cobertura-coverage.xml,
-            libs/kosaml/shell/feature/cobertura-coverage.xml,
-            libs/kosaml/site/feature/cobertura-coverage.xml,
-            libs/kosaml/store/feature/cobertura-coverage.xml,
-          flags: unittests # optional
-          name: codecov-umbrella # optional
-          fail_ci_if_error: false # optional (default = false)
-          verbose: false # optional (default = false)
-
   kosaml-build-storybook:
     runs-on: ubuntu-latest
     needs:
-      - kosaml-tests
+      - tests
 
     steps:
       - name: Checkout repository
@@ -444,6 +395,25 @@ jobs:
 
       - name: Build Prices App
         run: npm run nx -- build kosaml
+
+# Finances
+
+  finances-build:
+    runs-on: ubuntu-latest
+    needs:
+      - tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+
+      - name: "Restore Cache"
+        uses: ./.github/actions/restore-cache
+
+      - name: Build Prices App
+        run: npm run nx -- build finances
 
 # CV
 

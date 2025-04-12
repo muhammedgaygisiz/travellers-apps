@@ -44,6 +44,8 @@ import { PopoverMenuComponent } from './popover-menu.component';
   styleUrl: './page.component.scss',
 })
 export class PageComponent {
+  popoverController = inject(PopoverController);
+
   enableBackButton = input(false);
 
   showAddButton = input<boolean | null>(false);
@@ -61,8 +63,6 @@ export class PageComponent {
   public languageChangeClick = output<SupportedLang>();
 
   public showAddPopover = output<MouseEvent>();
-
-  popoverController = inject(PopoverController);
 
   async showMenuPopover($event: MouseEvent) {
     const popover = await this.popoverController.create({

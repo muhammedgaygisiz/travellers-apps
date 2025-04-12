@@ -1,16 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { NavController } from '@ionic/angular';
 import { Page } from 'pages';
-import { DashboardDataAccessService } from 'finances/dashboard/data-access';
+import { DashboardStore } from 'finances/dashboard/data-access';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private readonly dashboardDataAccessService = inject(
-    DashboardDataAccessService
-  );
-  private readonly navController = inject(NavController);
+  store = inject(DashboardStore);
 
-  banks = this.dashboardDataAccessService.banks;
+  private readonly navController = inject(NavController);
 
   onAddMenuItemClicked() {
     this.navController.navigateForward([Page.ADD_BANK]);

@@ -1,15 +1,22 @@
 import { inject, Injectable } from '@angular/core';
 import { FinancesFirestoreService } from 'firestore';
-import { PaymentStore } from './payment.store';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { StoreService } from 'finances/store';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentDataAccessService {
-  private readonly paymentStore = inject(PaymentStore);
   private readonly financesFirestoreService = inject(FinancesFirestoreService);
+  private readonly storeService = inject(StoreService);
 
-  iban = this.paymentStore.iban;
+  payment = toSignal(this.storeService.selectedPayment$);
+  iban = toSignal(this.storeService.iban$);
 
-  saveNewPayment(newPayment: { amount: number; iban: string }) {
-    this.financesFirestoreService.saveNewPayment(newPayment);
+  saveNewPayment(newPayment: { amount: number }) {
+    const iban = this.iban();
+    this.financesFirestoreService.saveNewPayment({ ...newPayment, iban });
+  }
+
+  savePayment(payment: any, id: string | undefined) {
+    this.financesFirestoreService.savePayment(payment, id);
   }
 }

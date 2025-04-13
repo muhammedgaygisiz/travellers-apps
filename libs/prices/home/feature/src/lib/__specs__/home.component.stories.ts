@@ -1,6 +1,6 @@
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { HomeComponent } from '../components';
-import { addNecessaryIcons, getIonicConfig } from 'utils';
+import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { FILTERS, PRICES } from './data';
 import { provideLocalization } from 'localization';
@@ -17,6 +17,7 @@ export default {
         provideIonicAngular(getIonicConfig()),
         provideLocalization(),
         provideHttpClient(),
+        { provide: APP_TITLE, useValue: 'Prices' },
       ],
     }),
   ],

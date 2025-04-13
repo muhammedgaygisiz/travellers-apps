@@ -1,5 +1,5 @@
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
-import { addNecessaryIcons, getIonicConfig } from 'utils';
+import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { RegistrationComponent } from '../../../components/registration/registration.component';
 
@@ -10,7 +10,10 @@ export default {
   component: RegistrationComponent,
   decorators: [
     applicationConfig({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: APP_TITLE, useValue: 'Prices' },
+      ],
     }),
   ],
 } as Meta<RegistrationComponent>;

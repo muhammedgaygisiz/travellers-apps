@@ -1,3 +1,4 @@
+/* eslint-disable */
 /// <reference types="cypress" />
 
 // ***********************************************
@@ -10,11 +11,8 @@
 // https://on.cypress.io/custom-commands
 // ***********************************************
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace Cypress {
-  // eslint-disable-next-line no-unused-vars
   interface Chainable<Subject> {
-    // eslint-disable-next-line no-unused-vars
     login(email: string, password: string): void;
   }
 }

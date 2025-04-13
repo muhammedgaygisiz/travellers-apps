@@ -1,21 +1,20 @@
 import { inject, Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { fromAuth } from '@travellers-apps/prices/store/feature';
 import { Credentials } from '../../api/credentials.model';
+import { STORE_SERVICE } from 'utils';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RegistrationService {
-  private readonly store = inject(Store);
+  private store = inject(STORE_SERVICE);
 
-  errorCode$ = this.store.select(fromAuth.selectRegistrationErrorCode);
+  public registrationError = this.store.registrationError;
 
   public register(registration: Credentials): void {
-    this.store.dispatch(fromAuth.register({ registration }));
+    this.store.register(registration);
   }
 
   confirmError() {
-    this.store.dispatch(fromAuth.confirmRegistrationErrorMessage());
+    this.store.confirmError();
   }
 }

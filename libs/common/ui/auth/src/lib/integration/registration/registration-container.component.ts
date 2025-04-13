@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RegistrationService } from './registration.service';
-import { AsyncPipe } from '@angular/common';
 import { RegistrationComponent } from '../../components/registration/registration.component';
 import { Credentials } from '../../api/credentials.model';
 
@@ -8,24 +7,24 @@ import { Credentials } from '../../api/credentials.model';
   template: `
     <ta-registration
       class="ion-page"
-      [registrationError]="registrationError$ | async"
+      [registrationError]="registrationError()"
       (submitRegistration)="onSubmit($event)"
       (errorConfirm)="onErrorConfirm()"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RegistrationComponent, AsyncPipe],
+  imports: [RegistrationComponent],
 })
 export class RegistrationContainerComponent {
-  private readonly registrationService = inject(RegistrationService);
+  private readonly service = inject(RegistrationService);
 
-  public registrationError$ = this.registrationService.errorCode$;
+  registrationError = this.service.registrationError;
 
   onSubmit(registration: Credentials): void {
-    this.registrationService.register(registration);
+    this.service.register(registration);
   }
 
   onErrorConfirm() {
-    this.registrationService.confirmError();
+    this.service.confirmError();
   }
 }

@@ -21,6 +21,6 @@ export class LoginService {
   }
 
   public loginWithGoogleAccount() {
-    this.store.loginWithGoogleAccount()
+    this.store.loginWithGoogleAccount();
   }
 }

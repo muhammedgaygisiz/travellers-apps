@@ -1,9 +1,6 @@
 import { AddItemComponent } from '../components/add-item.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  addNecessaryIcons,
-  getIonicConfig,
-} from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TestScheduler } from 'rxjs/internal/testing/TestScheduler';
 import * as rxjs from 'rxjs';

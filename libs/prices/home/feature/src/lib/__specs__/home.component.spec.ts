@@ -1,10 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HomeComponent } from '../components';
-import {
-  addNecessaryIcons,
-  getIonicConfig,
-} from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { SimpleChange } from '@angular/core';
 

@@ -9,12 +9,11 @@ import { StoreService } from 'utils';
 export class PricesStoreService implements StoreService {
   private readonly store = inject(Store);
 
-  loginFailed = toSignal(
-    this.store.select(selectLoginFailed),
-    { initialValue: false }
-  )
+  loginFailed = toSignal(this.store.select(selectLoginFailed), {
+    initialValue: false,
+  });
 
-  login(authCreds: {email: string; password: string;}): void {
+  login(authCreds: { email: string; password: string }): void {
     this.store.dispatch(login({ authCreds }));
   }
 

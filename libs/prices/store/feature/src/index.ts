@@ -1,4 +1,3 @@
-
 export * from './lib/provide-prices-store';
 
 export { fromMostSearched } from './lib/mostSearched';

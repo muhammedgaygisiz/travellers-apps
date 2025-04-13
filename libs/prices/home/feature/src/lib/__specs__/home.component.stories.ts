@@ -1,9 +1,6 @@
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { HomeComponent } from '../components';
-import {
-  addNecessaryIcons,
-  getIonicConfig,
-} from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { FILTERS, PRICES } from './data';
 import { provideLocalization } from 'localization';

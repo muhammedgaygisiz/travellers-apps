@@ -6,7 +6,7 @@ interface Login {
 }
 
 export interface StoreService {
-  loginFailed: Signal<boolean>
+  loginFailed: Signal<boolean>;
 
   loginWithGoogleAccount(): void;
   // eslint-disable-next-line no-unused-vars

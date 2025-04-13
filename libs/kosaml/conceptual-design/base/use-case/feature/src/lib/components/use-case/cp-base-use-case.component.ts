@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, input } from '@angular/core';
 import { ConceptualDesignUseCaseTypes } from './api/types';
 import { MatTableModule } from '@angular/material/table';
 
@@ -9,17 +9,14 @@ import { MatTableModule } from '@angular/material/table';
   imports: [MatTableModule],
 })
 export class CpBaseUseCaseComponent implements OnInit {
-  @Input()
-  type?: ConceptualDesignUseCaseTypes;
+  readonly type = input<ConceptualDesignUseCaseTypes>();
 
-  @Input()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dataSource: any;
+  readonly dataSource = input<any>();
 
   displayedColumns?: string[];
 
   ngOnInit() {
-    this.displayedColumns = this.initializeDisplayedColumns(this.type);
+    this.displayedColumns = this.initializeDisplayedColumns(this.type());
   }
 
   private initializeDisplayedColumns(

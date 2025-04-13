@@ -1,8 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
   OnChanges,
+  input,
 } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { digit, lowerCase, minLength, upperCase } from 'utils';
@@ -20,8 +20,7 @@ import { IonIcon, IonItem, IonText } from '@ionic/angular/standalone';
   imports: [AsyncPipe, IonItem, IonText, IonIcon],
 })
 export class PasswordValidatorComponent implements OnChanges {
-  @Input()
-  public password$?: Observable<string | null>;
+  public readonly password$ = input<Observable<string | null>>();
 
   private hasUpperCaseLetter$?: Observable<boolean | null>;
   private hasLowerCaseLetter$?: Observable<boolean | null>;
@@ -41,21 +40,22 @@ export class PasswordValidatorComponent implements OnChanges {
   }
 
   private initStreams() {
-    this.hasUpperCaseLetter$ = this.password$?.pipe(
+    const password$ = this.password$();
+    this.hasUpperCaseLetter$ = password$?.pipe(
       map((password) => this.test(password).forPattern(upperCase))
     );
 
-    this.hasLowerCaseLetter$ = this.password$?.pipe(
+    this.hasLowerCaseLetter$ = password$?.pipe(
       map((password) => {
         return this.test(password).forPattern(lowerCase);
       })
     );
 
-    this.hasNumber$ = this.password$?.pipe(
+    this.hasNumber$ = password$?.pipe(
       map((password) => this.test(password).forPattern(digit))
     );
 
-    this.hasLength8$ = this.password$?.pipe(
+    this.hasLength8$ = password$?.pipe(
       map((password) => this.test(password).forLength(minLength))
     );
 

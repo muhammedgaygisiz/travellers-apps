@@ -2,8 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  Input,
   ViewChild,
+  input,
 } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -18,11 +18,9 @@ import { FileNode } from '@travellers-apps/kosaml/model/feature';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {
-  @Input()
-  project: FileNode[] | null = [];
+  readonly project = input<FileNode[] | null>([]);
 
-  @Input()
-  marginTop: number = 40 + 36;
+  readonly marginTop = input<number>(40 + 36);
 
   @ViewChild('sidenav', { static: true, read: ElementRef })
   matSideNav?: ElementRef;

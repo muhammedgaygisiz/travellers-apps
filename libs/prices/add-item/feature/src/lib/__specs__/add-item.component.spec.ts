@@ -93,7 +93,7 @@ describe('AddItemComponent', () => {
   describe('triggerImageUpload', () => {
     it('should trigger file uploader click', () => {
       const clickSpy = jest.spyOn(
-        component.fileUploader!.nativeElement,
+        component.fileUploader()!.nativeElement,
         'click'
       );
 

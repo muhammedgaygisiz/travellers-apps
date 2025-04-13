@@ -4,9 +4,9 @@ import {
   ElementRef,
   OnChanges,
   SimpleChanges,
-  ViewChild,
   input,
   output,
+  viewChild,
 } from '@angular/core';
 import {
   FormControl,
@@ -48,8 +48,7 @@ import { fromEvent, tap } from 'rxjs';
   providers: [ImageUrlValidator],
 })
 export class AddItemComponent implements OnChanges {
-  @ViewChild('fileUploader', { static: true })
-  fileUploader?: ElementRef<HTMLElement>;
+  readonly fileUploader = viewChild<ElementRef<HTMLElement>>('fileUploader');
 
   public readonly location = input<string | null>('');
 
@@ -94,6 +93,6 @@ export class AddItemComponent implements OnChanges {
   }
 
   triggerImageUpload() {
-    this.fileUploader?.nativeElement.click();
+    this.fileUploader()?.nativeElement.click();
   }
 }

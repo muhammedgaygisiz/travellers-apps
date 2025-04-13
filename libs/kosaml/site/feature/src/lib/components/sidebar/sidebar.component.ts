@@ -2,8 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  ViewChild,
   input,
+  viewChild,
 } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -22,6 +22,5 @@ export class SidebarComponent {
 
   readonly marginTop = input<number>(40 + 36);
 
-  @ViewChild('sidenav', { static: true, read: ElementRef })
-  matSideNav?: ElementRef;
+  readonly matSideNav = viewChild('sidenav', { read: ElementRef });
 }

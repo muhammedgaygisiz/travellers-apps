@@ -1,4 +1,4 @@
-import { AuthComponent } from '../components/auth.component';
+import { LoginComponent } from '../components/login.component';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import {
   addNecessaryIcons,
@@ -10,13 +10,13 @@ addNecessaryIcons();
 
 export default {
   title: 'Pages/Auth',
-  component: AuthComponent,
+  component: LoginComponent,
   decorators: [
     applicationConfig({
       providers: [provideIonicAngular(getIonicConfig())],
     }),
   ],
-} as Meta<AuthComponent>;
+} as Meta<LoginComponent>;
 
-type Story = StoryObj<AuthComponent>;
+type Story = StoryObj<LoginComponent>;
 export const Primary: Story = {};

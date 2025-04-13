@@ -63,9 +63,6 @@
       "@travellers-apps/prices/add-item/feature": [
         "libs/prices/add-item/feature/src/index.ts"
       ],
-      "@travellers-apps/prices/auth/feature": [
-        "libs/prices/auth/feature/src/index.ts"
-      ],
       "@travellers-apps/prices/firestore/feature": [
         "libs/prices/firestore/feature/src/index.ts"
       ],
@@ -116,7 +113,8 @@
       "firestore": ["libs/finances/firestore/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
       "pages": ["libs/finances/pages/pages/src/index.ts"],
-      "ta-firestore": ["libs/common/ta-firestore/src/index.ts"]
+      "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
+      "login": ["libs/common/ui/login/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

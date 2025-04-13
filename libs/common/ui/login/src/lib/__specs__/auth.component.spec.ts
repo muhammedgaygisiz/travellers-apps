@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AuthComponent } from '../components/auth.component';
+import { LoginComponent } from '../components/login.component';
 import { EventEmitter } from '@angular/core';
 import Mock = jest.Mock;
 import {
@@ -13,15 +13,15 @@ addNecessaryIcons();
 jest.mock('localization');
 
 describe('AuthComponent', () => {
-  let component: AuthComponent;
-  let fixture: ComponentFixture<AuthComponent>;
+  let component: LoginComponent;
+  let fixture: ComponentFixture<LoginComponent>;
   let submitSignupWithGoogleEmitter: Mock;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideIonicAngular(getIonicConfig())],
     });
-    fixture = TestBed.createComponent(AuthComponent);
+    fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
 
     submitSignupWithGoogleEmitter = jest.fn();

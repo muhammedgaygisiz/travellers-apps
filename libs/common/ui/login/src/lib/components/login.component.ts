@@ -19,9 +19,9 @@ import {
 import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Component({
-  selector: 'ta-auth',
-  templateUrl: './auth.component.html',
-  styleUrls: ['./auth.component.scss'],
+  selector: 'ta-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
   imports: [
     PageComponent,
     CardComponent,
@@ -33,7 +33,7 @@ import { AuthCredentials } from '../api/auth-credentials.model';
     IonText,
   ],
 })
-export class AuthComponent {
+export class LoginComponent {
   @Input()
   loginFailed: boolean | null = false;
 

@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AuthService } from './auth.service';
 import { Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
-import { AuthComponent } from '../components/auth.component';
+import { LoginComponent } from '../components/login.component';
 import { AuthCredentials } from '../api/auth-credentials.model';
 
 @Component({
-  template: ` <ta-auth
+  template: ` <ta-login
     class="ion-page"
     [loginFailed]="loginFailed$ | async"
     (submitAuth)="login($event)"
@@ -14,7 +14,7 @@ import { AuthCredentials } from '../api/auth-credentials.model';
     (submitSignupWithGoogle)="onSignupWithGoogle()"
   />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AsyncPipe, AuthComponent],
+  imports: [AsyncPipe, LoginComponent],
 })
 export class AuthContainerComponent {
   private readonly authService = inject(AuthService);

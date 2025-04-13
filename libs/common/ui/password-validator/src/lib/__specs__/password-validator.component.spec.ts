@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PasswordValidatorComponent } from '../component/password-validator.component';
 import { TestScheduler } from 'rxjs/internal/testing/TestScheduler';
 import { EMPTY, of } from 'rxjs';
+import { ComponentRef } from '@angular/core';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -11,12 +12,14 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 describe('PasswordValidatorComponent', () => {
   let component: PasswordValidatorComponent;
   let fixture: ComponentFixture<PasswordValidatorComponent>;
+  let componentRef: ComponentRef<PasswordValidatorComponent>;
 
   let scheduler: TestScheduler;
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PasswordValidatorComponent);
     component = fixture.componentInstance;
+    componentRef = fixture.componentRef;
     fixture.detectChanges();
 
     scheduler = new TestScheduler(assertDeepEqual);
@@ -40,7 +43,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given an lower case letter', () => {
       it('should return class name success', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('abc');
+          componentRef.setInput('password$', of('abc'));
           component.ngOnChanges();
 
           expectObservable(component.hasLowerCaseLetterColor$ || EMPTY).toBe(
@@ -54,7 +57,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given no lower case letter', () => {
       it('should return class name danger', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('ABC');
+          componentRef.setInput('password$', of('ABC'));
           component.ngOnChanges();
 
           expectObservable(component.hasLowerCaseLetterColor$ || EMPTY).toBe(
@@ -68,7 +71,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given null', () => {
       it('should return empty string', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of(null);
+          componentRef.setInput('password$', of(null));
           component.ngOnChanges();
 
           expectObservable(component.hasLowerCaseLetterColor$ || EMPTY).toBe(
@@ -84,7 +87,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given an lower case letter', () => {
       it('should return checkmark-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('abc');
+          componentRef.setInput('password$', of('abc'));
           component.ngOnChanges();
 
           expectObservable(component.hasLowerCaseLetterIcon$ || EMPTY).toBe(
@@ -98,7 +101,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given no lower case letter', () => {
       it('should return close-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('ABC');
+          componentRef.setInput('password$', of('ABC'));
           component.ngOnChanges();
 
           expectObservable(component.hasLowerCaseLetterIcon$ || EMPTY).toBe(
@@ -112,7 +115,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given null', () => {
       it('should return close-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of(null);
+          componentRef.setInput('password$', of(null));
           component.ngOnChanges();
 
           expectObservable(component.hasLowerCaseLetterIcon$ || EMPTY).toBe(
@@ -128,7 +131,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given an upper case letter', () => {
       it('should return class name success', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('ABC');
+          componentRef.setInput('password$', of('ABC'));
           component.ngOnChanges();
 
           expectObservable(component.hasUpperCaseLetterColor$ || EMPTY).toBe(
@@ -142,7 +145,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given no upper case letter', () => {
       it('should return class name danger', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('abc');
+          componentRef.setInput('password$', of('abc'));
           component.ngOnChanges();
 
           expectObservable(component.hasUpperCaseLetterColor$ || EMPTY).toBe(
@@ -156,7 +159,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given null', () => {
       it('should return empty string', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of(null);
+          componentRef.setInput('password$', of(null));
           component.ngOnChanges();
 
           expectObservable(component.hasUpperCaseLetterColor$ || EMPTY).toBe(
@@ -172,7 +175,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given an upper case letter', () => {
       it('should return checkmark-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('ABC');
+          componentRef.setInput('password$', of('ABC'));
           component.ngOnChanges();
 
           expectObservable(component.hasUpperCaseLetterIcon$ || EMPTY).toBe(
@@ -186,7 +189,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given no upper case letter', () => {
       it('should return close-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('abc');
+          componentRef.setInput('password$', of('abc'));
           component.ngOnChanges();
 
           expectObservable(component.hasUpperCaseLetterIcon$ || EMPTY).toBe(
@@ -200,7 +203,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given null', () => {
       it('should return close-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of(null);
+          componentRef.setInput('password$', of(null));
           component.ngOnChanges();
 
           expectObservable(component.hasUpperCaseLetterIcon$ || EMPTY).toBe(
@@ -216,7 +219,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given a number', () => {
       it('should return success', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('a1');
+          componentRef.setInput('password$', of('a1'));
           component.ngOnChanges();
 
           expectObservable(component.hasNumberColor$ || EMPTY).toBe('(a|)', {
@@ -229,7 +232,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given no number', () => {
       it('should return danger', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('aa');
+          componentRef.setInput('password$', of('aa'));
           component.ngOnChanges();
 
           expectObservable(component.hasNumberColor$ || EMPTY).toBe('(a|)', {
@@ -242,7 +245,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given null', () => {
       it('should return empty string', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of(null);
+          componentRef.setInput('password$', of(null));
           component.ngOnChanges();
 
           expectObservable(component.hasNumberColor$ || EMPTY).toBe('(a|)', {
@@ -257,7 +260,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given a number', () => {
       it('should return checkmark-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('a1');
+          componentRef.setInput('password$', of('a1'));
           component.ngOnChanges();
 
           expectObservable(component.hasNumberIcon$ || EMPTY).toBe('(a|)', {
@@ -270,7 +273,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given no number', () => {
       it('should return close-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('aa');
+          componentRef.setInput('password$', of('aa'));
           component.ngOnChanges();
 
           expectObservable(component.hasNumberIcon$ || EMPTY).toBe('(a|)', {
@@ -283,7 +286,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given null', () => {
       it('should return close-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of(null);
+          componentRef.setInput('password$', of(null));
           component.ngOnChanges();
 
           expectObservable(component.hasNumberIcon$ || EMPTY).toBe('(a|)', {
@@ -298,7 +301,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given with length > 8', () => {
       it('should return success', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('123456789');
+          componentRef.setInput('password$', of('123456789'));
           component.ngOnChanges();
 
           expectObservable(component.hasLength8Color$ || EMPTY).toBe('(a|)', {
@@ -311,7 +314,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given no number', () => {
       it('should return danger', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('aa');
+          componentRef.setInput('password$', of('aa'));
           component.ngOnChanges();
 
           expectObservable(component.hasLength8Color$ || EMPTY).toBe('(a|)', {
@@ -324,7 +327,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given null', () => {
       it('should return empty string', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of(null);
+          componentRef.setInput('password$', of(null));
           component.ngOnChanges();
 
           expectObservable(component.hasLength8Color$ || EMPTY).toBe('(a|)', {
@@ -339,7 +342,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given with length > 8', () => {
       it('should return checkmark-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('123456789');
+          componentRef.setInput('password$', of('123456789'));
           component.ngOnChanges();
 
           expectObservable(component.hasLength8Icon$ || EMPTY).toBe('(a|)', {
@@ -352,7 +355,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given no number', () => {
       it('should return close-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of('aa');
+          componentRef.setInput('password$', of('aa'));
           component.ngOnChanges();
 
           expectObservable(component.hasLength8Icon$ || EMPTY).toBe('(a|)', {
@@ -365,7 +368,7 @@ describe('PasswordValidatorComponent', () => {
     describe('given null', () => {
       it('should return close-outline', () => {
         scheduler.run(({ expectObservable }) => {
-          component.password$ = of(null);
+          componentRef.setInput('password$', of(null));
           component.ngOnChanges();
 
           expectObservable(component.hasLength8Icon$ || EMPTY).toBe('(a|)', {

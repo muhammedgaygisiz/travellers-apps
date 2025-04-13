@@ -61,7 +61,7 @@ export class PageComponent {
   appTitle = computed(() => {
     const title = this.title();
 
-    if(title) {
+    if (title) {
       return title;
     }
 

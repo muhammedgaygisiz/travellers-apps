@@ -16,5 +16,5 @@ export const providePricesShell = () => [
     useClass: IonicRouteStrategy,
   },
   { provide: STORE_SERVICE, useClass: PricesStoreService },
-  { provide: APP_TITLE, useValue: 'Prices' }
+  { provide: APP_TITLE, useValue: 'Prices' },
 ];

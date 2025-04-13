@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   output,
@@ -22,6 +23,7 @@ import {
 import { AngularDelegate } from '@ionic/angular';
 import { SupportedLang } from 'localization';
 import { PopoverMenuComponent } from './popover-menu.component';
+import { APP_TITLE } from 'utils';
 
 @Component({
   selector: 'ta-page',
@@ -44,6 +46,8 @@ import { PopoverMenuComponent } from './popover-menu.component';
   styleUrl: './page.component.scss',
 })
 export class PageComponent {
+  appTitleToken = inject(APP_TITLE);
+
   popoverController = inject(PopoverController);
 
   enableBackButton = input(false);
@@ -52,7 +56,17 @@ export class PageComponent {
 
   hideAuthButton = input(false);
 
-  title = input('Prices');
+  title = input('');
+
+  appTitle = computed(() => {
+    const title = this.title();
+
+    if(title) {
+      return title;
+    }
+
+    return this.appTitleToken;
+  });
 
   public addItemClick = output();
 

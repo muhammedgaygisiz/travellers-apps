@@ -6,7 +6,7 @@ import {
 } from '@angular/router';
 import { ROUTES } from './routes';
 import { IonicRouteStrategy } from '@ionic/angular';
-import { STORE_SERVICE } from 'utils';
+import { APP_TITLE, STORE_SERVICE } from 'utils';
 import { FinancesStoreService } from 'finances/store';
 
 export const provideFinancesShell = () => [
@@ -16,4 +16,5 @@ export const provideFinancesShell = () => [
     useClass: IonicRouteStrategy,
   },
   { provide: STORE_SERVICE, useClass: FinancesStoreService },
+  { provide: APP_TITLE, useValue: 'Finances' },
 ];

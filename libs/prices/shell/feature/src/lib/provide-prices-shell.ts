@@ -6,7 +6,7 @@ import {
 } from '@angular/router';
 import { ROUTES } from './routes';
 import { IonicRouteStrategy } from '@ionic/angular';
-import { STORE_SERVICE } from 'utils';
+import { APP_TITLE, STORE_SERVICE } from 'utils';
 import { PricesStoreService } from '@travellers-apps/prices/store/feature';
 
 export const providePricesShell = () => [
@@ -16,4 +16,5 @@ export const providePricesShell = () => [
     useClass: IonicRouteStrategy,
   },
   { provide: STORE_SERVICE, useClass: PricesStoreService },
+  { provide: APP_TITLE, useValue: 'Prices' }
 ];

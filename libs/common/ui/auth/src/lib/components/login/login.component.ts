@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -40,14 +40,11 @@ interface AuthCredentialFields {
 export class LoginComponent {
   readonly loginFailed = input(false);
 
-  @Output()
-  public submitAuth: EventEmitter<Credentials> = new EventEmitter();
+  public readonly submitAuth = output<Credentials>();
 
-  @Output()
-  public signup: EventEmitter<void> = new EventEmitter();
+  public readonly signup = output();
 
-  @Output()
-  public submitSignupWithGoogle: EventEmitter<void> = new EventEmitter();
+  public readonly submitSignupWithGoogle = output();
 
   public authFormGroup: FormGroup = new FormGroup<AuthCredentialFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),

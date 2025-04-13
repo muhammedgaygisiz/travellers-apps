@@ -1,10 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  OnChanges,
-  Output,
-  input,
-} from '@angular/core';
+import { Component, OnChanges, input, output } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -36,11 +30,9 @@ export class ScenarioComponent implements OnChanges {
 
   readonly showDeleteButton = input<boolean>();
 
-  @Output()
-  saveScenario = new EventEmitter<Scenario>();
+  readonly saveScenario = output<Scenario>();
 
-  @Output()
-  deleteScenario = new EventEmitter<string>();
+  readonly deleteScenario = output<string>();
 
   scenarioForm: FormGroup = new FormGroup({
     title: new FormControl(null, [Validators.required]),
@@ -80,6 +72,6 @@ export class ScenarioComponent implements OnChanges {
       id = model.id;
     }
 
-    this.deleteScenario.next(id);
+    this.deleteScenario.emit(id);
   }
 }

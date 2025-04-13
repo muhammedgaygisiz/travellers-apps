@@ -1,11 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   OnChanges,
-  Output,
   SimpleChanges,
   input,
+  output,
 } from '@angular/core';
 import Filter from '../api/filter';
 import addLocationFilter from '../utils/add-location-filter';
@@ -53,17 +52,13 @@ export class HomeComponent implements OnChanges {
 
   readonly location = input<string | null>('');
 
-  @Output()
-  addItemClick = new EventEmitter();
+  readonly addItemClick = output();
 
-  @Output()
-  loginClick = new EventEmitter();
+  readonly loginClick = output();
 
-  @Output()
-  logoutClick = new EventEmitter();
+  readonly logoutClick = output();
 
-  @Output()
-  languageChangeClick = new EventEmitter<SupportedLang>();
+  readonly languageChangeClick = output<SupportedLang>();
 
   filters: Filter[] = [];
   filteredPrices: MostSearchedItem[] | null | undefined = [];

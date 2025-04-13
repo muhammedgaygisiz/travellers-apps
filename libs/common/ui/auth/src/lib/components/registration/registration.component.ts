@@ -1,12 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   inject,
   OnChanges,
-  Output,
   SimpleChanges,
   input,
+  output,
 } from '@angular/core';
 import {
   FormControl,
@@ -58,11 +57,9 @@ interface RegistrationFields {
 export class RegistrationComponent implements OnChanges {
   public readonly registrationError = input<string | null>('');
 
-  @Output()
-  public submitRegistration: EventEmitter<Credentials> = new EventEmitter();
+  public readonly submitRegistration = output<Credentials>();
 
-  @Output()
-  public errorConfirm: EventEmitter<void> = new EventEmitter();
+  public readonly errorConfirm = output();
 
   private readonly toastController = inject(ToastController);
 

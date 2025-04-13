@@ -2,12 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   OnChanges,
-  Output,
   SimpleChanges,
   ViewChild,
   input,
+  output,
 } from '@angular/core';
 import {
   FormControl,
@@ -54,11 +53,9 @@ export class AddItemComponent implements OnChanges {
 
   public readonly location = input<string | null>('');
 
-  @Output()
-  public save: EventEmitter<Price> = new EventEmitter();
+  public readonly save = output<Price>();
 
-  @Output()
-  languageChangeClick = new EventEmitter<SupportedLang>();
+  readonly languageChangeClick = output<SupportedLang>();
 
   imagePreview?: string | ArrayBuffer | null;
   reader = new FileReader();

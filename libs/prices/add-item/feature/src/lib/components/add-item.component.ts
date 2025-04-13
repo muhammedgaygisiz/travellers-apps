@@ -2,12 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
-  Input,
   OnChanges,
-  Output,
   SimpleChanges,
-  ViewChild,
+  input,
+  output,
+  viewChild,
 } from '@angular/core';
 import {
   FormControl,
@@ -49,17 +48,13 @@ import { fromEvent, tap } from 'rxjs';
   providers: [ImageUrlValidator],
 })
 export class AddItemComponent implements OnChanges {
-  @ViewChild('fileUploader', { static: true })
-  fileUploader?: ElementRef<HTMLElement>;
+  readonly fileUploader = viewChild<ElementRef<HTMLElement>>('fileUploader');
 
-  @Input()
-  public location: string | null = '';
+  public readonly location = input<string | null>('');
 
-  @Output()
-  public save: EventEmitter<Price> = new EventEmitter();
+  public readonly save = output<Price>();
 
-  @Output()
-  languageChangeClick = new EventEmitter<SupportedLang>();
+  readonly languageChangeClick = output<SupportedLang>();
 
   imagePreview?: string | ArrayBuffer | null;
   reader = new FileReader();
@@ -85,7 +80,7 @@ export class AddItemComponent implements OnChanges {
 
   public ngOnChanges(changes: SimpleChanges) {
     if (changes['location']) {
-      this.priceFormGroup.controls['location'].patchValue(this.location);
+      this.priceFormGroup.controls['location'].patchValue(this.location());
     }
   }
 
@@ -98,6 +93,6 @@ export class AddItemComponent implements OnChanges {
   }
 
   triggerImageUpload() {
-    this.fileUploader?.nativeElement.click();
+    this.fileUploader()?.nativeElement.click();
   }
 }

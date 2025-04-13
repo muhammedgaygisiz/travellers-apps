@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 
 @Component({
@@ -9,9 +9,7 @@ import { MatTableModule } from '@angular/material/table';
   imports: [MatTableModule],
 })
 export class TaskObjectComponent {
-  @Input()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dataSource: any;
+  readonly dataSource = input<any>();
 
   displayedColumns?: string[] = ['taskObject', 'attributes', 'actions'];
 

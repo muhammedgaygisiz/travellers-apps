@@ -2,9 +2,9 @@ import { FlatTreeControl } from '@angular/cdk/tree';
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
   OnChanges,
   SimpleChanges,
+  input,
 } from '@angular/core';
 import {
   MatTreeFlatDataSource,
@@ -37,8 +37,7 @@ export interface FlatTreeNode {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectComponent implements OnChanges {
-  @Input()
-  project: FileNode[] | null = [];
+  readonly project = input<FileNode[] | null>([]);
 
   treeControl = new FlatTreeControl<FlatTreeNode>(
     (node) => node.level,
@@ -68,7 +67,7 @@ export class ProjectComponent implements OnChanges {
   }
 
   constructor() {
-    this.dataSource.data = this.project ?? [];
+    this.dataSource.data = this.project() ?? [];
   }
 
   hasChild = (_: number, node: FlatTreeNode) => node.expandable;

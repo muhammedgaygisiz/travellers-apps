@@ -1,0 +1,83 @@
+<ta-page
+  [enableBackButton]="true"
+  [showAddButton]="false"
+  [hideAuthButton]="true"
+>
+  <ta-card>
+    <div class="ion-padding">
+      <div class="ion-margin-top ion-margin-bottom separator">
+        Sign in with your
+      </div>
+
+      <div class="registration-options">
+        <ion-button fill="outline" (click)="onGoogleSignUp()">
+          <ion-icon name="logo-google" />
+        </ion-button>
+        <ion-button fill="outline">
+          <ion-icon name="logo-apple" />
+        </ion-button>
+        <ion-button fill="outline">
+          <ion-icon name="logo-facebook" />
+        </ion-button>
+      </div>
+
+      <div class="ion-margin-top separator">Account or with your Email</div>
+
+      <form [formGroup]="authFormGroup">
+        <ion-item lines="full">
+          <ion-input
+            autocomplete="email"
+            inputmode="email"
+            formControlName="email"
+            data-cy="email"
+            label="Email"
+            labelPlacement="floating"
+          />
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-input
+            type="password"
+            formControlName="password"
+            data-cy="password"
+            label="Password"
+            labelPlacement="floating"
+          />
+        </ion-item>
+
+        <ion-button
+          class="ion-margin-top"
+          expand="block"
+          [disabled]="!authFormGroup.valid"
+          (click)="submitAuth.emit(authFormGroup.value)"
+          data-cy="submit"
+          >Save
+        </ion-button>
+
+        @if (loginFailed()) {
+        <div class="ion-margin-top">
+          <ion-text color="danger">
+            Something went wrong. Please try again.
+          </ion-text>
+        </div>
+        }
+      </form>
+    </div>
+  </ta-card>
+
+  <ta-card>
+    <div class="ion-margin">
+      <ion-text>If you don't have an account already sign up now.</ion-text>
+
+      <ion-button
+        fill="outline"
+        class="ion-margin-top"
+        expand="block"
+        (click)="signup.emit()"
+        data-cy="signup"
+      >
+        Sign up
+      </ion-button>
+    </div>
+  </ta-card>
+</ta-page>

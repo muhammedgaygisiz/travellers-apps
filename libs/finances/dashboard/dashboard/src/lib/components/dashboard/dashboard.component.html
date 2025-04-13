@@ -1,8 +1,4 @@
-<ta-page
-  title="Finances"
-  [showAddButton]="true"
-  (showAddPopover)="showAddPopover($event)"
->
+<ta-page [showAddButton]="true" (showAddPopover)="showAddPopover($event)">
   <ta-card>
     <ion-card-header>
       <ion-card-title>{{ totalAmount() }} $</ion-card-title>
@@ -10,7 +6,7 @@
     </ion-card-header>
 
     <ion-card-content>
-      <ta-chart [data]="chartData()"></ta-chart>
+      <ta-chart [data]="chartData()" />
     </ion-card-content>
   </ta-card>
 

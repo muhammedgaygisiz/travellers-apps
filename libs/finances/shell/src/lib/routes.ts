@@ -1,13 +1,21 @@
 import { Routes } from '@angular/router';
 import { Page } from 'pages';
+import { withAuthRoutes } from 'auth';
+import { AuthGuard, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 
-export const ROUTES: Routes = [
+const redirectUnauthorizedToHome = () => redirectUnauthorizedTo(['login']);
+
+export const ROUTES: Routes = withAuthRoutes([
   {
     path: Page.DASHBOARD,
     loadComponent: () =>
       import('finances/pages/dashboard').then(
         (m) => m.DashboardContainerComponent
       ),
+    canActivate: [AuthGuard],
+    data: {
+      authGuardPipe: redirectUnauthorizedToHome,
+    },
   },
   {
     path: Page.ADD_BANK,
@@ -40,4 +48,4 @@ export const ROUTES: Routes = [
     redirectTo: 'dashboard',
     pathMatch: 'full',
   },
-];
+]);

@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { provideFinancesShell } from './provide-finances-shell';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { Environment, getIonicConfig } from '@travellers-apps/utils-common';
+import { Environment, getIonicConfig } from 'utils';
 import { provideTaFirestore } from 'ta-firestore';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideFinancesStore } from 'finances/store';

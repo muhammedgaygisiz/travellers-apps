@@ -6,7 +6,7 @@ import {
   withProps,
   withState,
 } from '@ngrx/signals';
-import { Bank, StoreService } from 'finances/store';
+import { Bank, FinancesStoreService } from 'finances/store';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap } from 'rxjs';
 import { inject } from '@angular/core';
@@ -23,7 +23,7 @@ export const DashboardStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
   withProps(() => ({
-    _globalStore: inject(StoreService),
+    _globalStore: inject(FinancesStoreService),
   })),
   withMethods((store) => ({
     loadBanks: rxMethod(

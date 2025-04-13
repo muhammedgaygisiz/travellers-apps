@@ -1,6 +1,6 @@
-@if (isAuthenticated) {
+@if (isAuthenticated()) {
 <kosaml-menu-bar />
-} @if (isAuthenticated) {
-<kosaml-sidebar [project]="project" />
+} @if (isAuthenticated()) {
+<kosaml-sidebar [project]="project()" />
 }
 <kosaml-content />

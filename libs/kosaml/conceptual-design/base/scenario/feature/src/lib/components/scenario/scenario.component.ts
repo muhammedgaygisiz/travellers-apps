@@ -1,10 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-} from '@angular/core';
+import { Component, OnChanges, input, output } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -32,17 +26,13 @@ import { Scenario } from '@travellers-apps/kosaml/model/feature';
   ],
 })
 export class ScenarioComponent implements OnChanges {
-  @Input()
-  model?: Scenario | null;
+  readonly model = input<Scenario | null>();
 
-  @Input()
-  showDeleteButton?: boolean;
+  readonly showDeleteButton = input<boolean>();
 
-  @Output()
-  saveScenario = new EventEmitter<Scenario>();
+  readonly saveScenario = output<Scenario>();
 
-  @Output()
-  deleteScenario = new EventEmitter<string>();
+  readonly deleteScenario = output<string>();
 
   scenarioForm: FormGroup = new FormGroup({
     title: new FormControl(null, [Validators.required]),
@@ -65,7 +55,7 @@ export class ScenarioComponent implements OnChanges {
   }
 
   ngOnChanges() {
-    this.setFormFields(this.model);
+    this.setFormFields(this.model());
   }
 
   setFormFields(model: Scenario | undefined | null) {
@@ -77,10 +67,11 @@ export class ScenarioComponent implements OnChanges {
   onDelete() {
     let id = '';
 
-    if (this.model?.id) {
-      id = this.model.id;
+    const model = this.model();
+    if (model?.id) {
+      id = model.id;
     }
 
-    this.deleteScenario.next(id);
+    this.deleteScenario.emit(id);
   }
 }

@@ -19,7 +19,7 @@ describe('LoadingSpinnerComponent', () => {
     fixture.detectChanges();
 
     /**
-     * The login form is a presentational component, as it
+     * The auth form is a presentational component, as it
      * only derives its state from inputs and communicates
      * externally through outputs. We can use snapshot
      * tests to validate the presentation state of this component

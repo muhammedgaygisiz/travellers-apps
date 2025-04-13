@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   Actions,
   createEffect,
@@ -11,6 +11,9 @@ import { NetworkStatusService } from '@travellers-apps/common/networkstatus/feat
 
 @Injectable()
 export class NetworkEffects {
+  private readonly actions$ = inject(Actions);
+  private readonly networkStatusService = inject(NetworkStatusService);
+
   checkNetworkStatus$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
@@ -18,13 +21,6 @@ export class NetworkEffects {
       map((isOnline) => this.getAction(isOnline))
     )
   );
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly actions$: Actions,
-    // eslint-disable-next-line no-unused-vars
-    private readonly networkStatusService: NetworkStatusService
-  ) {}
 
   private getAction(isOnline: boolean) {
     return networkStatusChanged({ isOnline });

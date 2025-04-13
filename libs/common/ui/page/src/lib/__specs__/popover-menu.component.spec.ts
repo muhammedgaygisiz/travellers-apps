@@ -6,7 +6,7 @@ import {
   provideExperimentalZonelessChangeDetection,
 } from '@angular/core';
 import { SupportedLang } from 'localization';
-import { addNecessaryIcons } from '@travellers-apps/utils-common';
+import { addNecessaryIcons } from 'utils';
 
 addNecessaryIcons();
 
@@ -52,7 +52,7 @@ describe('PopoverMenuComponent', () => {
     expect(languageChangeClickEmitSpy).toHaveBeenCalledWith(SupportedLang.EN);
   });
 
-  it('should emit loginClick when login button is clicked', () => {
+  it('should emit loginClick when auth button is clicked', () => {
     componentRef.setInput('hideAuthButton', false);
     componentRef.setInput('isAuthenticated', false);
 
@@ -82,11 +82,11 @@ describe('PopoverMenuComponent', () => {
     expect(component.logoutClick.emit).toHaveBeenCalled();
   });
 
-  it('should not show login/logout button when hideAuthButton is true', () => {
+  it('should not show auth/logout button when hideAuthButton is true', () => {
     componentRef.setInput('hideAuthButton', true);
 
     const loginButton = fixture.debugElement.query(
-      By.css('[data-cy="btn-login"]')
+      By.css('[data-cy="btn-auth"]')
     );
     const logoutButton = fixture.debugElement.query(
       By.css('[data-cy="btn-logout"]')

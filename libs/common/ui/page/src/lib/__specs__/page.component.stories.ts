@@ -5,10 +5,7 @@ import {
   Meta,
   StoryObj,
 } from '@storybook/angular';
-import {
-  addNecessaryIcons,
-  getIonicConfig,
-} from '@travellers-apps/utils-common';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();

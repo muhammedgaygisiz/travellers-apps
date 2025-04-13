@@ -1,11 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
   OnChanges,
-  Output,
   SimpleChanges,
+  input,
+  output,
 } from '@angular/core';
 import Filter from '../api/filter';
 import addLocationFilter from '../utils/add-location-filter';
@@ -47,26 +46,19 @@ import { SupportedLang, TranslatePipe } from 'localization';
   ],
 })
 export class HomeComponent implements OnChanges {
-  @Input()
-  mostSearchedEntries: MostSearchedItem[] | null = [];
+  readonly mostSearchedEntries = input<MostSearchedItem[] | null>([]);
 
-  @Input()
-  isAuthenticated: boolean | null = false;
+  readonly isAuthenticated = input<boolean | null>(false);
 
-  @Input()
-  location: string | null = '';
+  readonly location = input<string | null>('');
 
-  @Output()
-  addItemClick = new EventEmitter();
+  readonly addItemClick = output();
 
-  @Output()
-  loginClick = new EventEmitter();
+  readonly loginClick = output();
 
-  @Output()
-  logoutClick = new EventEmitter();
+  readonly logoutClick = output();
 
-  @Output()
-  languageChangeClick = new EventEmitter<SupportedLang>();
+  readonly languageChangeClick = output<SupportedLang>();
 
   filters: Filter[] = [];
   filteredPrices: MostSearchedItem[] | null | undefined = [];
@@ -75,19 +67,19 @@ export class HomeComponent implements OnChanges {
     const hasLocation = !!changes['location']?.currentValue;
 
     if (hasLocation) {
-      this.filters = addLocationFilter(this.filters, this.location);
+      this.filters = addLocationFilter(this.filters, this.location());
     }
 
     this.applyFilters();
   }
 
   private applyFilters() {
-    this.filteredPrices = this.mostSearchedEntries;
+    this.filteredPrices = this.mostSearchedEntries();
 
     const hasFilters = this.filters?.length > 0;
     if (hasFilters) {
       this.filteredPrices = getFilteredPrices(
-        this.mostSearchedEntries,
+        this.mostSearchedEntries(),
         this.filters
       );
     }

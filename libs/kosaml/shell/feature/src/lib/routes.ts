@@ -3,13 +3,6 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   { path: '', redirectTo: '/project', pathMatch: 'full' },
   {
-    path: 'auth',
-    loadChildren: () =>
-      import('@travellers-apps/kosaml/auth/feature').then(
-        (module) => module.AuthModule
-      ),
-  },
-  {
     path: 'project',
     loadChildren: () =>
       import('@travellers-apps/kosaml/site/feature').then(

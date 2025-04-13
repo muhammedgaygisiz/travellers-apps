@@ -7,8 +7,8 @@ describe('HeaderComponent', () => {
   // eslint-disable-next-line no-unused-vars
   let component: HeaderComponent;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   });

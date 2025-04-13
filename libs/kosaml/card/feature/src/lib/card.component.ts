@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 
 @Component({
@@ -8,6 +8,5 @@ import { MatCardModule } from '@angular/material/card';
   imports: [MatCardModule],
 })
 export class CardComponent {
-  @Input()
-  showSaveButton?: boolean;
+  readonly showSaveButton = input<boolean>();
 }

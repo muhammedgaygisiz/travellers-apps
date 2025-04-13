@@ -1,12 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HomeComponent } from '../components';
-import {
-  addNecessaryIcons,
-  getIonicConfig,
-} from '@travellers-apps/utils-common';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { SimpleChange } from '@angular/core';
+import { ComponentRef, SimpleChange } from '@angular/core';
 
 addNecessaryIcons();
 
@@ -15,6 +12,7 @@ jest.mock('localization');
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
+  let componentRef: ComponentRef<HomeComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -22,6 +20,7 @@ describe('HomeComponent', () => {
     });
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
+    componentRef = fixture.componentRef;
     fixture.detectChanges();
   });
 
@@ -32,7 +31,7 @@ describe('HomeComponent', () => {
   describe('ngOnChanges', () => {
     describe('given changed location', () => {
       it('should have location filter', () => {
-        component.location = 'Köln';
+        componentRef.setInput('location', 'Köln');
         component.ngOnChanges({
           location: { currentValue: 'Köln' } as SimpleChange,
         });

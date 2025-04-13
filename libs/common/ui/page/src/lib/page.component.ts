@@ -46,7 +46,7 @@ import { APP_TITLE } from 'utils';
   styleUrl: './page.component.scss',
 })
 export class PageComponent {
-  appTitleToken = inject(APP_TITLE);
+  appTitleToken = inject(APP_TITLE, { optional: true });
 
   popoverController = inject(PopoverController);
 

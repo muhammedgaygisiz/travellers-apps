@@ -1,7 +1,7 @@
-import { RegistrationComponent } from '../components/registration.component';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { RegistrationComponent } from '../../../components/registration/registration.component';
 
 addNecessaryIcons();
 

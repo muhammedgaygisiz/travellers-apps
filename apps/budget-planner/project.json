@@ -4,16 +4,17 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/budget-planner/src",
-  "tags": [],
+  "tags": ["scope:budget-planner", "type:app"],
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:application",
+      "executor": "@nx/angular:browser-esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "plugins": ["apps/finances/env-var-plugin.js"],
         "outputPath": "dist/apps/budget-planner",
         "index": "apps/budget-planner/src/index.html",
-        "browser": "apps/budget-planner/src/main.ts",
-        "polyfills": ["zone.js"],
+        "main": "apps/budget-planner/src/main.ts",
+        "polyfills": [],
         "tsConfig": "apps/budget-planner/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -50,7 +51,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@nx/angular:dev-server",
       "configurations": {
         "production": {
           "buildTarget": "budget-planner:build:production"

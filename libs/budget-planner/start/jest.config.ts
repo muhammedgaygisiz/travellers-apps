@@ -1,8 +1,8 @@
 export default {
-  displayName: 'budget-planner',
-  preset: '../../jest.preset.js',
+  displayName: 'start',
+  preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../coverage/apps/budget-planner',
+  coverageDirectory: '../../../coverage/libs/budget-planner/start',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',
@@ -12,9 +12,7 @@ export default {
       },
     ],
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@ionic/core|ionicons|@ionic/angular|@stencil/core))',
-  ],
+  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',

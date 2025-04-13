@@ -27,28 +27,28 @@ import { SupportedLang } from 'localization';
           [detail]="false"
           (click)="languageChangeClick.emit(SupportedLang.EN)"
         >
-          <ion-icon src="assets/gb.svg" slot="start"></ion-icon>
+          <ion-icon src="assets/gb.svg" slot="start" />
           English
         </ion-item>
         <ion-item
           [detail]="false"
           (click)="languageChangeClick.emit(SupportedLang.FR)"
         >
-          <ion-icon src="assets/fr.svg" slot="start"></ion-icon>
+          <ion-icon src="assets/fr.svg" slot="start" />
           Français
         </ion-item>
         <ion-item
           [detail]="false"
           (click)="languageChangeClick.emit(SupportedLang.DE)"
         >
-          <ion-icon src="assets/de.svg" slot="start"></ion-icon>
+          <ion-icon src="assets/de.svg" slot="start" />
           Deutsch
         </ion-item>
         <ion-item
           [detail]="false"
           (click)="languageChangeClick.emit(SupportedLang.TR)"
         >
-          <ion-icon src="assets/tr.svg" slot="start"></ion-icon>
+          <ion-icon src="assets/tr.svg" slot="start" />
           Türkçe
         </ion-item>
       </ion-item-group>

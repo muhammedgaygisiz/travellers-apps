@@ -5,6 +5,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TestScheduler } from 'rxjs/internal/testing/TestScheduler';
 import * as rxjs from 'rxjs';
 import { of } from 'rxjs';
+import { ComponentRef } from '@angular/core';
 
 addNecessaryIcons();
 
@@ -21,6 +22,7 @@ describe('AddItemComponent', () => {
   let component: AddItemComponent;
   let fixture: ComponentFixture<AddItemComponent>;
   let scheduler: TestScheduler;
+  let componentRef: ComponentRef<AddItemComponent>;
 
   beforeEach(() => {
     scheduler = new TestScheduler(assertDeepEqual);
@@ -28,7 +30,9 @@ describe('AddItemComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideIonicAngular(getIonicConfig())],
     });
+
     fixture = TestBed.createComponent(AddItemComponent);
+    componentRef = fixture.componentRef;
     component = fixture.componentInstance;
     component.reader = {
       result: IMAGE_BLOB,
@@ -58,7 +62,7 @@ describe('AddItemComponent', () => {
   describe('ngOnChanges', () => {
     it('should patch location form control', () => {
       const LOCATION = 'Köln';
-      component.location = LOCATION;
+      componentRef.setInput('location', LOCATION);
       component.ngOnChanges({
         location: {
           previousValue: undefined,

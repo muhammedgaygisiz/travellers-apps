@@ -18,9 +18,6 @@
       "@travellers-apps/common/networkstatus/feature": [
         "libs/common/networkstatus/feature/src/index.ts"
       ],
-      "@travellers-apps/kosaml/auth/feature": [
-        "libs/kosaml/auth/feature/src/index.ts"
-      ],
       "@travellers-apps/kosaml/card/feature": [
         "libs/kosaml/card/feature/src/index.ts"
       ],

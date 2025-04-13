@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Output, input } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -38,8 +38,7 @@ interface AuthCredentialFields {
   ],
 })
 export class LoginComponent {
-  @Input()
-  loginFailed = false;
+  readonly loginFailed = input(false);
 
   @Output()
   public submitAuth: EventEmitter<Credentials> = new EventEmitter();

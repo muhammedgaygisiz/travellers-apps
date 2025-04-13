@@ -8,7 +8,7 @@ import {
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap } from 'rxjs';
-import { Account, Payment, StoreService } from 'finances/store';
+import { Account, Payment, FinancesStoreService } from 'finances/store';
 import { inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { getCurrentRouteParams } from 'data-access-utils';
@@ -29,7 +29,7 @@ export const AccountStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
   withProps(() => ({
-    _globalStore: inject(StoreService),
+    _globalStore: inject(FinancesStoreService),
     _activatedRoute: inject(ActivatedRoute),
   })),
   withMethods((store) => ({

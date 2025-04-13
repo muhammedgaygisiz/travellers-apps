@@ -1,12 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { FinancesFirestoreService } from 'firestore';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { StoreService } from 'finances/store';
+import { FinancesStoreService } from 'finances/store';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentDataAccessService {
   private readonly financesFirestoreService = inject(FinancesFirestoreService);
-  private readonly storeService = inject(StoreService);
+  private readonly storeService = inject(FinancesStoreService);
 
   payment = toSignal(this.storeService.selectedPayment$);
   iban = toSignal(this.storeService.iban$);

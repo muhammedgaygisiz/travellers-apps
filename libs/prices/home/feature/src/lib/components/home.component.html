@@ -1,5 +1,5 @@
 <ta-page
-  [showAddButton]="isAuthenticated"
+  [showAddButton]="isAuthenticated()"
   (addItemClick)="addItemClick.emit()"
   (loginClick)="loginClick.emit()"
   (logoutClick)="logoutClick.emit()"
@@ -48,7 +48,7 @@
   } @empty {
   <ta-card>
     <ion-card-header>
-      <ion-card-title>{{ location }} </ion-card-title>
+      <ion-card-title>{{ location() }} </ion-card-title>
       <ion-card-subtitle>No Prices in </ion-card-subtitle>
     </ion-card-header>
   </ta-card>

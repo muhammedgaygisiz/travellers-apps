@@ -3,10 +3,10 @@ import {
   Component,
   EventEmitter,
   inject,
-  Input,
   OnChanges,
   Output,
   SimpleChanges,
+  input,
 } from '@angular/core';
 import {
   FormControl,
@@ -56,8 +56,7 @@ interface RegistrationFields {
   ],
 })
 export class RegistrationComponent implements OnChanges {
-  @Input()
-  public registrationError: string | null = '';
+  public readonly registrationError = input<string | null>('');
 
   @Output()
   public submitRegistration: EventEmitter<Credentials> = new EventEmitter();

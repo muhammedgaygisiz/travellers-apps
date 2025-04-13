@@ -54,7 +54,7 @@
           >Save
         </ion-button>
 
-        @if (loginFailed) {
+        @if (loginFailed()) {
         <div class="ion-margin-top">
           <ion-text color="danger">
             Something went wrong. Please try again.

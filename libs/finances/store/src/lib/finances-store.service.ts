@@ -8,7 +8,7 @@ import { ibanFromParams } from './router/selectors';
 @Injectable({
   providedIn: 'root',
 })
-export class StoreService {
+export class FinancesStoreService {
   store = inject(Store);
 
   banks$ = this.store.select(banksWithAccounts);

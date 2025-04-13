@@ -3,11 +3,11 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Input,
   OnChanges,
   Output,
   SimpleChanges,
   ViewChild,
+  input,
 } from '@angular/core';
 import {
   FormControl,
@@ -52,8 +52,7 @@ export class AddItemComponent implements OnChanges {
   @ViewChild('fileUploader', { static: true })
   fileUploader?: ElementRef<HTMLElement>;
 
-  @Input()
-  public location: string | null = '';
+  public readonly location = input<string | null>('');
 
   @Output()
   public save: EventEmitter<Price> = new EventEmitter();
@@ -85,7 +84,7 @@ export class AddItemComponent implements OnChanges {
 
   public ngOnChanges(changes: SimpleChanges) {
     if (changes['location']) {
-      this.priceFormGroup.controls['location'].patchValue(this.location);
+      this.priceFormGroup.controls['location'].patchValue(this.location());
     }
   }
 

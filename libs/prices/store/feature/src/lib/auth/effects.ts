@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   Actions,
   createEffect,
@@ -9,11 +9,11 @@ import {
   login,
   loginFailed,
   loginSucceeded,
+  loginWithGoogleAccount,
   logout,
   logoutSucceeded,
   notAuthenticated,
   register,
-  loginWithGoogleAccount,
   registrationFailed,
   registrationSucceeded,
 } from './actions';
@@ -27,6 +27,10 @@ type AuthCreds = { authCreds: AuthCredentials };
 
 @Injectable()
 export class AuthEffects {
+  private readonly actions$ = inject(Actions);
+  private readonly authService = inject(AuthService);
+  private readonly navController = inject(NavController);
+
   checkAuthStatus$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
@@ -98,15 +102,6 @@ export class AuthEffects {
       ),
     { dispatch: false }
   );
-
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly actions$: Actions,
-    // eslint-disable-next-line no-unused-vars
-    private readonly authService: AuthService,
-    // eslint-disable-next-line no-unused-vars
-    private readonly navController: NavController
-  ) {}
 
   private login$(authCreds: AuthCredentials) {
     return this.authService.loginWithUsernameAndPassword$(authCreds);

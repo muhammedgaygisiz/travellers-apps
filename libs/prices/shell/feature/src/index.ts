@@ -1,5 +1,5 @@
 export { providePricesShell } from './lib/provide-prices-shell';
-export { Environment } from '@travellers-apps/utils-common';
+export { Environment } from 'utils';
 export { SupportedLang } from 'localization';
-export { addNecessaryIcons } from '@travellers-apps/utils-common';
+export { addNecessaryIcons } from 'utils';
 export { appConfig } from './lib/app.config';

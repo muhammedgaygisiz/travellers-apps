@@ -5,12 +5,7 @@ import {
   OnChanges,
 } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import {
-  digit,
-  lowerCase,
-  minLength,
-  upperCase,
-} from '@travellers-apps/utils-common';
+import { digit, lowerCase, minLength, upperCase } from 'utils';
 import calculateIcon, { IconName } from '../utils/calculate-icon';
 import hasLength from '../utils/has-length';
 import calculateColor, { ClassName } from '../utils/calculate-color';

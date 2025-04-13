@@ -1,16 +1,16 @@
-import { AuthService } from '../integration/auth.service';
 import { TestBed } from '@angular/core/testing';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { fromAuth } from '@travellers-apps/prices/store/feature';
+import { provideMockStore } from '@ngrx/store/testing';
 import { NavController } from '@ionic/angular';
 import { provideRouter } from '@angular/router';
+import { LoginService } from '../login.service';
+import { STORE_SERVICE, StoreService } from 'utils';
 
 jest.mock('localization');
 
-describe('AuthService', () => {
-  let service: AuthService;
-  let store: MockStore;
+describe('LoginService', () => {
+  let service: LoginService;
   let navController: NavController;
+  let store: StoreService;
 
   beforeEach(() => {
     const initialState = {};
@@ -18,11 +18,18 @@ describe('AuthService', () => {
       providers: [
         provideMockStore({ initialState }),
         provideRouter([{ path: 'registration', redirectTo: '' }]),
+        {
+          provide: STORE_SERVICE,
+          useValue: {
+            login: jest.fn(),
+            loginWithGoogleAccount: jest.fn(),
+          },
+        },
       ],
     }).compileComponents();
 
-    service = TestBed.inject(AuthService);
-    store = TestBed.inject(MockStore);
+    service = TestBed.inject(LoginService);
+    store = TestBed.inject(STORE_SERVICE);
     navController = TestBed.inject(NavController);
   });
 
@@ -32,7 +39,7 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should dispatch auth action', () => {
-      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      const loginSpy = jest.spyOn(store, 'login');
 
       const authCreds = {
         email: 'email',
@@ -40,7 +47,7 @@ describe('AuthService', () => {
       };
       service.login(authCreds);
 
-      expect(dispatchSpy).toHaveBeenCalledWith(fromAuth.login({ authCreds }));
+      expect(loginSpy).toHaveBeenCalledWith(authCreds);
     });
   });
 
@@ -55,13 +62,11 @@ describe('AuthService', () => {
 
   describe('loginWithGoogleAccount', () => {
     it('should dispatch loginWithGoogleAccount action', () => {
-      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      const loginWithGoogleSpy = jest.spyOn(store, 'loginWithGoogleAccount');
 
       service.loginWithGoogleAccount();
 
-      expect(dispatchSpy).toHaveBeenCalledWith(
-        fromAuth.loginWithGoogleAccount()
-      );
+      expect(loginWithGoogleSpy).toHaveBeenCalled();
     });
   });
 });

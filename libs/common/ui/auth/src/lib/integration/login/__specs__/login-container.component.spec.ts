@@ -1,22 +1,22 @@
-import { AuthContainerComponent } from '../integration/auth-container.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { AuthService } from '../integration/auth.service';
 import {
   addNecessaryIcons,
   getIonicConfig,
-} from '@travellers-apps/utils-common';
+} from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
+import { LoginContainerComponent } from '../login-container.component';
+import { LoginService } from '../login.service';
 
 addNecessaryIcons();
 
 jest.mock('localization');
 
 describe('LoginContainerComponent', () => {
-  let component: AuthContainerComponent;
-  let fixture: ComponentFixture<AuthContainerComponent>;
-  let service: AuthService;
+  let component: LoginContainerComponent;
+  let fixture: ComponentFixture<LoginContainerComponent>;
+  let service: LoginService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -27,11 +27,11 @@ describe('LoginContainerComponent', () => {
       ],
     }).compileComponents();
 
-    service = TestBed.inject(AuthService);
+    service = TestBed.inject(LoginService);
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(AuthContainerComponent);
+    fixture = TestBed.createComponent(LoginContainerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

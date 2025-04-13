@@ -3,7 +3,7 @@ import { AddItemComponent } from '../components/add-item.component';
 import {
   addNecessaryIcons,
   getIonicConfig,
-} from '@travellers-apps/utils-common';
+} from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideLocalization } from 'localization';

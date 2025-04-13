@@ -9,7 +9,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { provideNetworkStatus } from '@travellers-apps/common/networkstatus/feature';
 import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { Environment, getIonicConfig } from '@travellers-apps/utils-common';
+import { Environment, getIonicConfig } from 'utils';
 import { provideLocalization } from 'localization';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTaFirestore } from 'ta-firestore';

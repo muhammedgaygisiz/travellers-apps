@@ -8,7 +8,7 @@ import {
 import {
   addNecessaryIcons,
   getIonicConfig,
-} from '@travellers-apps/utils-common';
+} from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();

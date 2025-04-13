@@ -2,17 +2,15 @@
   "name": "prices-password-validator-feature",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "libs/prices/password-validator/feature/src",
+  "sourceRoot": "libs/common/ui/password-validator/src",
   "prefix": "travellers-apps",
-  "tags": ["scope:prices", "type:ui"],
+  "tags": ["scope:common", "type:ui", "framework:ionic"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/libs/prices/password-validator/feature"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/libs/common/ui/password-validator"],
       "options": {
-        "jestConfig": "libs/prices/password-validator/feature/jest.config.ts"
+        "jestConfig": "libs/common/ui/password-validator/jest.config.ts"
       }
     },
     "lint": {
@@ -23,8 +21,8 @@
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
-          "libs/prices/password-validator/feature/**/*.css",
-          "libs/prices/password-validator/feature/**/*.scss"
+          "libs/common/ui/password-validator/**/*.css",
+          "libs/common/ui/password-validator/**/*.scss"
         ],
         "formatter": "compact"
       }

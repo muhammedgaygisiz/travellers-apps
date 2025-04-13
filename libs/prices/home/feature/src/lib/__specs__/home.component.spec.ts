@@ -4,7 +4,7 @@ import { HomeComponent } from '../components';
 import {
   addNecessaryIcons,
   getIonicConfig,
-} from '@travellers-apps/utils-common';
+} from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { SimpleChange } from '@angular/core';
 

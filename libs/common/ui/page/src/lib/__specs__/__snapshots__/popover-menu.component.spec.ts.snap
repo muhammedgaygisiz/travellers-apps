@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PopoverMenuComponent should emit loginClick when login button is clicked 1`] = `
+exports[`PopoverMenuComponent should emit loginClick when auth button is clicked 1`] = `
 DebugElement {
   "nativeNode": <div
     id="root2"

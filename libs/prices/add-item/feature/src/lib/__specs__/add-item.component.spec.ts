@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   addNecessaryIcons,
   getIonicConfig,
-} from '@travellers-apps/utils-common';
+} from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TestScheduler } from 'rxjs/internal/testing/TestScheduler';
 import * as rxjs from 'rxjs';

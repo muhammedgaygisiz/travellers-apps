@@ -6,7 +6,7 @@ import {
   provideExperimentalZonelessChangeDetection,
 } from '@angular/core';
 import { SupportedLang } from 'localization';
-import { addNecessaryIcons } from '@travellers-apps/utils-common';
+import { addNecessaryIcons } from 'utils';
 
 addNecessaryIcons();
 
@@ -62,7 +62,7 @@ describe('PopoverMenuComponent', () => {
 
     jest.spyOn(component.loginClick, 'emit');
     const loginButton = fixture.debugElement.query(
-      By.css('[data-cy="btn-auth"]')
+      By.css('[data-cy="btn-login"]')
     );
 
     loginButton.triggerEventHandler('click', null);

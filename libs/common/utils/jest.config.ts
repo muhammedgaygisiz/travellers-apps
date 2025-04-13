@@ -1,7 +1,7 @@
 /* eslint-disable */
 export default {
   displayName: 'utils-common',
-  preset: '../../jest.preset.js',
+  preset: '../../../jest.preset.js',
   globals: {},
   transform: {
     '^.+\\.[tj]sx?$': [
@@ -12,5 +12,5 @@ export default {
     ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/libs/utils-common',
+  coverageDirectory: '../../../coverage/libs/common/utils',
 };

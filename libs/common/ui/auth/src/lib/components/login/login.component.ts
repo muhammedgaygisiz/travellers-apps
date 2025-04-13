@@ -39,7 +39,7 @@ interface AuthCredentialFields {
 })
 export class LoginComponent {
   @Input()
-  loginFailed: boolean | null = false;
+  loginFailed: boolean = false;
 
   @Output()
   public submitAuth: EventEmitter<Credentials> = new EventEmitter();

@@ -1,5 +1,5 @@
 import { provideState, provideStore } from '@ngrx/store';
-import { Environment, getMetaReducers } from '@travellers-apps/utils-common';
+import { Environment, getMetaReducers } from 'utils';
 import { fromMostSearched } from './mostSearched';
 import { fromAuth } from './auth';
 import { fromLocation } from './location';

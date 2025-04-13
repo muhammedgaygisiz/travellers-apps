@@ -1,6 +1,6 @@
 import { CardComponent } from '../card.component';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
-import { getIonicConfig } from '@travellers-apps/utils-common';
+import { getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
 export default {

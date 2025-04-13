@@ -4,7 +4,7 @@ import { PageComponent } from '../page.component';
 import {
   addNecessaryIcons,
   getIonicConfig,
-} from '@travellers-apps/utils-common';
+} from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { provideExperimentalZonelessChangeDetection } from '@angular/core';
 

@@ -4,13 +4,13 @@
   "projectType": "library",
   "sourceRoot": "libs/common/ui/login/src",
   "prefix": "travellers-apps",
-  "tags": ["scope:prices", "type:feature"],
+  "tags": ["type:ui", "scope:common", "framework:ionic"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/common/ui/login"],
+      "outputs": ["{workspaceRoot}/coverage/libs/common/ui/auth"],
       "options": {
-        "jestConfig": "libs/common/ui/login/jest.config.ts"
+        "jestConfig": "libs/common/ui/auth/jest.config.ts"
       }
     },
     "lint": {
@@ -21,8 +21,8 @@
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
-          "libs/common/ui/login/**/*.css",
-          "libs/common/ui/login/**/*.scss"
+          "libs/common/ui/auth/**/*.css",
+          "libs/common/ui/auth/**/*.scss"
         ],
         "formatter": "compact"
       }

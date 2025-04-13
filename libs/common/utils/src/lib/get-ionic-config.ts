@@ -1,4 +1,4 @@
-import {IonicConfig} from "@ionic/core";
+import { IonicConfig } from '@ionic/core';
 
 export const getIonicConfig = (): IonicConfig => ({
   backButtonText: '',

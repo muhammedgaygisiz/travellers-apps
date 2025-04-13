@@ -3,3 +3,4 @@ export * from './lib/get-ionic-config';
 export { Environment } from './lib/environment';
 export * from './lib/consts';
 export { getMetaReducers } from './lib/get-meta-reducers';
+export { STORE_SERVICE, StoreService } from './lib/store.service';

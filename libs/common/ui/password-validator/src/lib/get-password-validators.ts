@@ -1,10 +1,5 @@
 import { Validators } from '@angular/forms';
-import {
-  digit,
-  lowerCase,
-  minLength,
-  upperCase,
-} from '@travellers-apps/utils-common';
+import { digit, lowerCase, minLength, upperCase } from 'utils';
 
 const getPasswordValidators = () => [
   Validators.required,

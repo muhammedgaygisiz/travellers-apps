@@ -1,23 +1,19 @@
 import { inject, Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { fromAuth } from '@travellers-apps/prices/store/feature';
-import { Observable } from 'rxjs';
 import { NavController } from '@ionic/angular';
 import { Credentials } from '../../api/credentials.model';
+import { STORE_SERVICE } from 'utils';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LoginService {
-  private store = inject(Store);
+  private store = inject(STORE_SERVICE);
   private navController = inject(NavController);
 
-  public loginFailed$: Observable<boolean> = this.store.select(
-    fromAuth.selectLoginFailed
-  );
+  public loginFailed = this.store.loginFailed;
 
   public login(authCreds: Credentials): void {
-    this.store.dispatch(fromAuth.login({ authCreds }));
+    this.store.login(authCreds);
   }
 
   public async gotoSignUp() {
@@ -25,6 +21,6 @@ export class LoginService {
   }
 
   public loginWithGoogleAccount() {
-    this.store.dispatch(fromAuth.loginWithGoogleAccount());
+    this.store.loginWithGoogleAccount()
   }
 }

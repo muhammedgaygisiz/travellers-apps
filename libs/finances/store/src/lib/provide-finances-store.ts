@@ -1,4 +1,4 @@
-import { Environment, getMetaReducers } from '@travellers-apps/utils-common';
+import { Environment, getMetaReducers } from 'utils';
 import { provideState, provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { fromBank } from './banks';

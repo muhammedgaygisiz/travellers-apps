@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'prices-auth-feature',
+  displayName: 'common-ui-auth',
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {},

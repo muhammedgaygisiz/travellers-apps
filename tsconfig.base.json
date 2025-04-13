@@ -73,7 +73,7 @@
         "libs/prices/home/feature/src/index.ts"
       ],
       "@travellers-apps/prices/password-validator/feature": [
-        "libs/prices/password-validator/feature/src/index.ts"
+        "libs/common/ui/password-validator/src/index.ts"
       ],
       "@travellers-apps/prices/shell/feature": [
         "libs/prices/shell/feature/src/index.ts"
@@ -81,8 +81,8 @@
       "@travellers-apps/prices/store/feature": [
         "libs/prices/store/feature/src/index.ts"
       ],
-      "@travellers-apps/utils-common": ["libs/utils-common/src/index.ts"],
       "add-popover-menu": ["libs/finances/ui/add-popover-menu/src/index.ts"],
+      "auth": ["libs/common/ui/auth/src/index.ts"],
       "chart": ["libs/common/ui/chart/src/index.ts"],
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
@@ -109,9 +109,9 @@
       "finances/store": ["libs/finances/store/src/index.ts"],
       "firestore": ["libs/finances/firestore/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
-      "auth": ["libs/common/ui/auth/src/index.ts"],
       "pages": ["libs/finances/pages/pages/src/index.ts"],
-      "ta-firestore": ["libs/common/ta-firestore/src/index.ts"]
+      "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
+      "utils": ["libs/common/utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,10 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideMockStore } from '@ngrx/store/testing';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { provideRouter } from '@angular/router';
 import { LoginContainerComponent } from '../login-container.component';
 import { LoginService } from '../login.service';
+import { signal } from '@angular/core';
 
 addNecessaryIcons();
 
@@ -19,10 +18,17 @@ describe('LoginContainerComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(getIonicConfig()),
-        provideMockStore({}),
-        provideRouter([{ path: 'registration', redirectTo: '' }]),
+        {
+          provide: LoginService,
+          useValue: {
+            loginFailed: signal(false),
+            loginWithGoogleAccount: jest.fn(),
+            login: jest.fn(),
+            gotoSignUp: jest.fn(),
+          },
+        },
       ],
-    }).compileComponents();
+    });
 
     service = TestBed.inject(LoginService);
   });

@@ -1,0 +1,31 @@
+{
+  "name": "auth",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/common/ui/login/src",
+  "prefix": "travellers-apps",
+  "tags": ["scope:prices", "type:feature"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/common/ui/login"],
+      "options": {
+        "jestConfig": "libs/common/ui/login/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/common/ui/login/**/*.css",
+          "libs/common/ui/login/**/*.scss"
+        ],
+        "formatter": "compact"
+      }
+    }
+  }
+}

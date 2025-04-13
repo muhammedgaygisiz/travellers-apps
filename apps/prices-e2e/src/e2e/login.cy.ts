@@ -14,7 +14,7 @@ describe('Login', () => {
     })
   );
 
-  it('should login', () => {
+  it('should auth', () => {
     cy.intercept(
       'GET',
       'https://api.geoapify.com/v1/geocode/reverse?lat=46.944091&lon=7.4293561&apiKey=*',

@@ -75,9 +75,6 @@
       "@travellers-apps/prices/password-validator/feature": [
         "libs/prices/password-validator/feature/src/index.ts"
       ],
-      "@travellers-apps/prices/registration/feature": [
-        "libs/prices/registration/feature/src/index.ts"
-      ],
       "@travellers-apps/prices/shell/feature": [
         "libs/prices/shell/feature/src/index.ts"
       ],
@@ -112,9 +109,9 @@
       "finances/store": ["libs/finances/store/src/index.ts"],
       "firestore": ["libs/finances/firestore/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
+      "auth": ["libs/common/ui/auth/src/index.ts"],
       "pages": ["libs/finances/pages/pages/src/index.ts"],
-      "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
-      "login": ["libs/common/ui/login/src/index.ts"]
+      "ta-firestore": ["libs/common/ta-firestore/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
 import { redirectUnauthorizedTo, AuthGuard } from '@angular/fire/auth-guard';
+import { withAuthRoutes } from 'auth';
 
 const redirectUnauthorizedToHome = () => redirectUnauthorizedTo(['home']);
 
-export const ROUTES: Routes = [
+export const ROUTES: Routes = withAuthRoutes([
   {
     path: 'home',
     loadComponent: () =>
@@ -23,19 +24,8 @@ export const ROUTES: Routes = [
     },
   },
   {
-    path: 'login',
-    loadChildren: () => import('login').then((m) => m.ROUTES),
-  },
-  {
-    path: 'registration',
-    loadChildren: () =>
-      import('@travellers-apps/prices/registration/feature').then(
-        (m) => m.ROUTES
-      ),
-  },
-  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',
   },
-];
+]);

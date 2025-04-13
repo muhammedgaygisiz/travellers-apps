@@ -1,5 +1,7 @@
-import { Environment } from '@travellers-apps/utils-common';
-import { SupportedLang } from 'localization';
+import {
+  Environment,
+  SupportedLang,
+} from '@travellers-apps/prices/shell/feature';
 
 export const environment: Environment = {
   production: true,

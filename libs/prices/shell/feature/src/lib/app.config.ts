@@ -3,14 +3,13 @@ import {
   provideExperimentalZonelessChangeDetection,
 } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { providePricesShell } from '@travellers-apps/prices/shell/feature';
+import { providePricesShell } from './provide-prices-shell';
 import { providePricesStore } from '@travellers-apps/prices/store/feature';
-import { environment } from '../environments/environment';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideNetworkStatus } from '@travellers-apps/common/networkstatus/feature';
 import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { getIonicConfig } from '@travellers-apps/utils-common';
+import { Environment, getIonicConfig } from '@travellers-apps/utils-common';
 import { provideLocalization } from 'localization';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTaFirestore } from 'ta-firestore';
@@ -23,7 +22,7 @@ const firebaseOptions = {
   messagingSenderId: process.env['NX_APP_MESSAGINX_SENDER_ID'],
 };
 
-export const appConfig: ApplicationConfig = {
+export const appConfig = (environment: Environment): ApplicationConfig => ({
   providers: [
     provideExperimentalZonelessChangeDetection(),
     provideAnimations(),
@@ -42,4 +41,4 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     provideLocalization(environment.i18n),
   ],
-};
+});

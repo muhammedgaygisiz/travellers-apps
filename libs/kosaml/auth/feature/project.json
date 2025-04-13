@@ -4,7 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/kosaml/auth/feature/src",
   "prefix": "travellers-apps",
-  "tags": ["type:kosaml:feature"],
+  "tags": ["scope:kosaml", "type:feature"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { fromSite } from '@travellers-apps/kosaml/store/feature';
+
+import { AsyncPipe } from '@angular/common';
 import {
   BodyComponent,
+  fromSite,
   HeaderComponent,
-} from '@travellers-apps/kosaml/site/feature';
-import { AsyncPipe } from '@angular/common';
+} from '@travellers-apps/kosaml/shell/feature';
 
 @Component({
   selector: 'travellers-apps-root',

@@ -4,7 +4,7 @@
   "sourceRoot": "libs/finances/store/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["type:finances:store"],
+  "tags": ["scope:finances", "type:store"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

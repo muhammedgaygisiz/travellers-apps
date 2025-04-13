@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
-import { addNecessaryIcons } from '@travellers-apps/utils-common';
+import { addNecessaryIcons } from '@travellers-apps/prices/shell/feature';
 
 @Component({
   selector: 'travellers-apps-root',

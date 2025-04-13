@@ -1,0 +1,24 @@
+{
+  "name": "chart",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/common/ui/chart/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["type:ui", "framework:d3"],
+  "dependencies": {
+    "d3": "7.9.0",
+    "@types/d3": "7.4.3"
+  },
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/common/ui/chart/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

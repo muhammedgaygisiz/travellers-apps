@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from '../app.component';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { fromSite } from '@travellers-apps/kosaml/store/feature';
+import { fromSite } from '@travellers-apps/kosaml/shell/feature';
 
 describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;

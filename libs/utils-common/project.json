@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/utils-common/src",
   "projectType": "library",
-  "tags": ["common:utils"],
+  "tags": ["scope:common", "framework:ionic"],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"

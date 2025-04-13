@@ -13,121 +13,79 @@
             "allow": [],
             "depConstraints": [
               {
-                "sourceTag": "type:finances:app",
+                "sourceTag": "type:app",
+                "onlyDependOnLibsWithTags": ["type:shell"]
+              },
+              {
+                "sourceTag": "type:shell",
                 "onlyDependOnLibsWithTags": [
-                  "type:finances:shell",
-                  "common:utils"
+                  "type:feature",
+                  "type:store",
+                  "scope:common",
+                  "type:model"
                 ]
               },
               {
-                "sourceTag": "type:finances:shell",
+                "sourceTag": "type:feature",
                 "onlyDependOnLibsWithTags": [
-                  "type:finances:feature",
-                  "type:finances:common:utils",
-                  "common:utils",
-                  "type:finances:store"
+                  "type:ui",
+                  "type:data-access",
+                  "type:model",
+                  "type:store",
+                  "scope:common"
                 ]
               },
               {
-                "sourceTag": "type:finances:feature",
+                "sourceTag": "type:data-access",
                 "onlyDependOnLibsWithTags": [
-                  "type:finances:data-access",
-                  "type:finances:common:utils",
-                  "type:finances:ui",
-                  "common:utils"
+                  "type:store",
+                  "scope:common",
+                  "type:api"
                 ]
               },
               {
-                "sourceTag": "type:finances:data-access",
+                "sourceTag": "type:store",
                 "onlyDependOnLibsWithTags": [
-                  "type:finances:store",
-                  "type:finances:backend-api",
-                  "common:utils"
+                  "scope:common",
+                  "type:api",
+                  "type:model"
                 ]
               },
               {
-                "sourceTag": "type:finances:store",
+                "sourceTag": "scope:common",
+                "onlyDependOnLibsWithTags": ["scope:common"]
+              },
+              {
+                "sourceTag": "type:ui",
                 "onlyDependOnLibsWithTags": [
-                  "common:utils",
-                  "type:finances:backend-api"
+                  "type:ui",
+                  "scope:common",
+                  "type:model"
                 ]
               },
               {
-                "sourceTag": "type:finances:ui",
-                "onlyDependOnLibsWithTags": ["common:utils"]
-              },
-              {
-                "sourceTag": "common:utils",
-                "onlyDependOnLibsWithTags": ["common:utils"]
-              },
-              {
-                "sourceTag": "type:kosaml:app",
+                "sourceTag": "scope:finances",
                 "onlyDependOnLibsWithTags": [
-                  "type:kosaml:shell",
-                  "type:kosaml:feature",
-                  "type:kosaml:store",
-                  "type:kosaml:common:feature"
+                  "scope:finances",
+                  "scope:common",
+                  "type:ui"
                 ]
               },
               {
-                "sourceTag": "type:kosaml:shell",
+                "sourceTag": "scope:kosaml",
                 "onlyDependOnLibsWithTags": [
-                  "type:kosaml:feature",
-                  "type:kosaml:common:feature"
+                  "scope:kosaml",
+                  "scope:common",
+                  "type:ui"
                 ]
               },
               {
-                "sourceTag": "type:kosaml:feature",
+                "sourceTag": "scope:prices",
                 "onlyDependOnLibsWithTags": [
-                  "type:kosaml:model",
-                  "type:kosaml:common:feature",
-                  "type:kosaml:store"
+                  "scope:prices",
+                  "scope:common",
+                  "type:ui"
                 ]
-              },
-              {
-                "sourceTag": "type:kosaml:common:feature",
-                "onlyDependOnLibsWithTags": [
-                  "type:kosaml:common:feature",
-                  "type:kosaml:model"
-                ]
-              },
-              {
-                "sourceTag": "type:kosaml:store",
-                "onlyDependOnLibsWithTags": [
-                  "type:kosaml:model",
-                  "common:utils"
-                ]
-              },
-              {
-                "sourceTag": "type:prices:app",
-                "onlyDependOnLibsWithTags": [
-                  "type:prices:shell",
-                  "common:utils",
-                  "type:prices:store"
-                ]
-              },
-              {
-                "sourceTag": "type:prices:shell",
-                "onlyDependOnLibsWithTags": ["type:prices:feature"]
-              },
-              {
-                "sourceTag": "type:prices:feature",
-                "onlyDependOnLibsWithTags": [
-                  "type:prices:store",
-                  "common:utils",
-                  "type:prices:ui"
-                ]
-              },
-              {
-                "sourceTag": "type:prices:store",
-                "onlyDependOnLibsWithTags": [
-                  "common:utils",
-                  "type:prices:backend-api"
-                ]
-              },
-              {
-                "sourceTag": "type:prices:ui",
-                "onlyDependOnLibsWithTags": ["common:utils"]
               }
             ]
           }

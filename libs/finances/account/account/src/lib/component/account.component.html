@@ -1,3 +1,5 @@
+@let payments = account()?.payments;
+
 <ta-page
   title="Finances"
   [enableBackButton]="true"
@@ -12,7 +14,7 @@
 
     <ion-card-content>
       <ion-item-group>
-        @for (payment of account()?.payments; track payment.id) {
+        @for (payment of payments; track payment.id) {
         <ion-item lines="full" (click)="paymentClicked.emit(payment)">
           <ion-label>{{ payment.amount }} $</ion-label>
         </ion-item>
@@ -20,4 +22,12 @@
       </ion-item-group>
     </ion-card-content>
   </ta-card>
+
+  @if (payments) {
+  <ta-card>
+    <ion-card-content>
+      <ta-chart [data]="payments"></ta-chart>
+    </ion-card-content>
+  </ta-card>
+  }
 </ta-page>

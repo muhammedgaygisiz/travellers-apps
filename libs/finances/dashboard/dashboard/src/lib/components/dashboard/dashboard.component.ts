@@ -10,6 +10,7 @@ import {
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
+  IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
@@ -18,6 +19,8 @@ import {
 import { BankComponent } from '../bank/bank.component';
 import { Bank } from 'finances/dashboard/data-access';
 import { AddPopoverMenuComponent } from 'add-popover-menu';
+import { ChartComponent } from 'chart';
+import { Account } from 'finances/store';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,12 +33,14 @@ import { AddPopoverMenuComponent } from 'add-popover-menu';
     IonCardTitle,
     IonCardSubtitle,
     BankComponent,
+    IonCardContent,
+    ChartComponent,
   ],
 })
 export class DashboardComponent {
   popoverController = inject(PopoverController);
 
-  banks = input<Bank[]>();
+  banks = input<Bank[]>([]);
 
   openAccountDetails = output<string>();
 
@@ -54,6 +59,19 @@ export class DashboardComponent {
       .reduce((a, b) => a + b, 0);
 
     return `${totalBalance}`;
+  });
+
+  chartData = computed(() => {
+    const banks = this.banks();
+    return banks
+      .reduce(
+        (accounts, bank) => [...accounts, ...(bank.accounts || [])],
+        [] as Account[]
+      )
+      .reduce(
+        (payments, account) => [...payments, ...(account.payments || [])],
+        [] as any[]
+      );
   });
 
   async showAddPopover($event: MouseEvent) {

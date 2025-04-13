@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/kosaml-e2e/src",
   "projectType": "application",
-  "tags": [],
+  "tags": ["scope:kosaml"],
   "implicitDependencies": ["kosaml"],
   "targets": {
     "e2e": {

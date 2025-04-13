@@ -4,7 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/prices/password-validator/feature/src",
   "prefix": "travellers-apps",
-  "tags": ["type:prices:ui"],
+  "tags": ["scope:prices", "type:ui"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

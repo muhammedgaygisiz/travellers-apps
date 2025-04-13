@@ -4,7 +4,7 @@
   "sourceRoot": "libs/common/localization/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["common:utils"],
+  "tags": ["scope:common"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

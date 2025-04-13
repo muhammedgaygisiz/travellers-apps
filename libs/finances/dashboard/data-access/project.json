@@ -4,7 +4,7 @@
   "sourceRoot": "libs/finances/dashboard/data-access/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["type:finances:data-access"],
+  "tags": ["type:data-access", "scope:finances"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

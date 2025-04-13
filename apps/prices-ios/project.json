@@ -4,7 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/prices-ios",
   "prefix": "prices-ios",
-  "tags": [],
+  "tags": ["scope:prices"],
   "targets": {
     "build": {
       "options": {

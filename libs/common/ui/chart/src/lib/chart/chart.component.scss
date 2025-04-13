@@ -1,0 +1,10 @@
+// libs/common/ui/chart/src/lib/components/chart/chart.component.scss
+.chart-container {
+  width: 100%;
+  height: 300px;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}

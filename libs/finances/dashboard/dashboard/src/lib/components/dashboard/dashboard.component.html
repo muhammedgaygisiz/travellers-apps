@@ -8,6 +8,10 @@
       <ion-card-title>{{ totalAmount() }} $</ion-card-title>
       <ion-card-subtitle>Ihr Vermögen</ion-card-subtitle>
     </ion-card-header>
+
+    <ion-card-content>
+      <ta-chart [data]="chartData()"></ta-chart>
+    </ion-card-content>
   </ta-card>
 
   @for (bank of banks(); track bank.id; let index = $index) {

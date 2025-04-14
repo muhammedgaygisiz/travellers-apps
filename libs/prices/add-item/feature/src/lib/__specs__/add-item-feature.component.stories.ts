@@ -1,6 +1,6 @@
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { AddItemComponent } from '../components/add-item.component';
-import { addNecessaryIcons, getIonicConfig } from 'utils';
+import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideLocalization } from 'localization';
@@ -18,6 +18,7 @@ const meta: Meta<AddItemComponent> = {
         provideIonicAngular(getIonicConfig()),
         provideLocalization(),
         provideHttpClient(),
+        { provide: APP_TITLE, useValue: 'Prices' },
       ],
     }),
   ],

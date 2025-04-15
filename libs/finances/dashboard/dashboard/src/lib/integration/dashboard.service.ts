@@ -16,4 +16,8 @@ export class DashboardService {
   onOpenAccountDetails(iban: string) {
     this.navController.navigateForward([Page.ACCOUNT, iban]);
   }
+
+  onLogoutClicked() {
+    this.store.logout();
+  }
 }

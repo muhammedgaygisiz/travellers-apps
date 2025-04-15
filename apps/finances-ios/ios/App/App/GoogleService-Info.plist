@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>384443459367-20tm0e0hiiit8l6re64ff1se6ov92d2v.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.384443459367-20tm0e0hiiit8l6re64ff1se6ov92d2v</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAOj_ptDaGPk8eHY_5krcQJqHaywgHuj-s</string>
+	<key>GCM_SENDER_ID</key>
+	<string>384443459367</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.travellers.finances</string>
+	<key>PROJECT_ID</key>
+	<string>finances-878be</string>
+	<key>STORAGE_BUCKET</key>
+	<string>finances-878be.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:384443459367:ios:98f7566d96208712d26b02</string>
+</dict>
+</plist>

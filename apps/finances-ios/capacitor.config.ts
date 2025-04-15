@@ -4,9 +4,13 @@ const config: CapacitorConfig = {
   appId: 'com.travellers.finances',
   appName: 'Finances',
   webDir: '../../dist/apps/finances',
-  bundledWebRuntime: false,
   server: {
     androidScheme: 'https',
+  },
+  plugins: {
+    FirebaseAuthentication: {
+      skipNativeAuth: false,
+    },
   },
 };
 

@@ -47,7 +47,10 @@ export class AuthEffects {
       mergeMap(({ authCreds }: AuthCreds) =>
         this.login$(authCreds).pipe(
           map(() => loginSucceeded()),
-          catchError(() => of(loginFailed()))
+          catchError((err) => {
+            console.log('#mo', err);
+            return of(loginFailed());
+          })
         )
       )
     )

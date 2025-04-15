@@ -46,6 +46,8 @@ export class DashboardComponent {
 
   addMenuItemClicked = output<string>();
 
+  logoutClicked = output();
+
   totalAmount = computed<string | null>(() => {
     const banks = this.banks();
     if (!banks) {
@@ -98,9 +100,14 @@ export class DashboardComponent {
 
     await popover.present();
   }
+
   onMenuItemClicked = async (menuItem: string) => {
     await this.popoverController.dismiss();
 
     console.log(menuItem);
   };
+
+  onLogoutClick() {
+    this.logoutClicked.emit();
+  }
 }

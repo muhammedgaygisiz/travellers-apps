@@ -48,4 +48,8 @@ export class FinancesStoreService implements StoreService {
   confirmError(): void {
     throw new Error('Method not implemented.');
   }
+
+  logout(): void {
+    this.store.dispatch(fromAuth.logout());
+  }
 }

@@ -1,15 +1,15 @@
 import { inject, Injectable } from '@angular/core';
-import { from } from 'rxjs';
+import { from, tap } from 'rxjs';
 import {
   Auth,
   authState,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
+  GoogleAuthProvider,
   signInWithRedirect,
   signOut,
-  GoogleAuthProvider,
 } from '@angular/fire/auth';
 import { AuthCredentials } from './api/auth-credentials.model';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 
 @Injectable({
   providedIn: 'root',
@@ -23,8 +23,8 @@ export class AuthService {
 
   public loginWithUsernameAndPassword$(authCreds: AuthCredentials) {
     return from(
-      signInWithEmailAndPassword(this.auth, authCreds.email, authCreds.password)
-    );
+      FirebaseAuthentication.signInWithEmailAndPassword({ ...authCreds })
+    ).pipe(tap((res) => console.log('#mo', res)));
   }
 
   public logout() {

@@ -1,4 +1,8 @@
-<ta-page [showAddButton]="true" (showAddPopover)="showAddPopover($event)">
+<ta-page
+  [showAddButton]="true"
+  (showAddPopover)="showAddPopover($event)"
+  (logoutClick)="onLogoutClick()"
+>
   <ta-card>
     <ion-card-header>
       <ion-card-title>{{ totalAmount() }} $</ion-card-title>

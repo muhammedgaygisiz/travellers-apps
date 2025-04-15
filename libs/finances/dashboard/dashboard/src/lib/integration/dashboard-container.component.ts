@@ -9,6 +9,7 @@ import { DashboardService } from './dashboard.service';
       [banks]="service.store.banks()"
       (openAccountDetails)="service.onOpenAccountDetails($event)"
       (addMenuItemClicked)="service.onAddMenuItemClicked()"
+      (logoutClicked)="service.onLogoutClicked()"
     />
   `,
   imports: [DashboardComponent],

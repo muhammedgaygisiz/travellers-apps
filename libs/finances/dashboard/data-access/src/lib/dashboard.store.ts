@@ -26,6 +26,9 @@ export const DashboardStore = signalStore(
     _globalStore: inject(FinancesStoreService),
   })),
   withMethods((store) => ({
+    logout() {
+      store._globalStore.logout();
+    },
     loadBanks: rxMethod(
       pipe(
         tap((banks: Bank[]) => {

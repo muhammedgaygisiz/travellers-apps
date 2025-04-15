@@ -5,8 +5,11 @@ import {
 } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getAuth, provideAuth } from '@angular/fire/auth';
+import { EnvironmentProviders } from '@angular/core';
 
-export const provideTaFirestore = (firebaseOptions: FirebaseOptions) => [
+export const provideFirestoreUtils = (
+  firebaseOptions: FirebaseOptions
+): EnvironmentProviders[] => [
   provideFirebaseApp(() => initializeApp(firebaseOptions || {})),
   provideFirestore(() => getFirestore()),
   provideAuth(() => getAuth()),

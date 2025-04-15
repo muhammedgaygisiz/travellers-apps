@@ -6,10 +6,10 @@ import {
 } from '@angular/router';
 import { ROUTES } from './routes';
 import { IonicRouteStrategy } from '@ionic/angular';
-import { APP_TITLE, STORE_SERVICE } from 'utils';
-import { FinancesStoreService } from 'finances/store';
+import { APP_TITLE, Environment, STORE_SERVICE } from 'utils';
+import { FinancesStoreService, provideFinancesStore } from 'finances/store';
 
-export const provideFinancesShell = () => [
+export const provideFinancesShell = (environment: Environment) => [
   provideRouter(ROUTES, withPreloading(PreloadAllModules)),
   {
     provide: RouteReuseStrategy,
@@ -17,4 +17,5 @@ export const provideFinancesShell = () => [
   },
   { provide: STORE_SERVICE, useClass: FinancesStoreService },
   { provide: APP_TITLE, useValue: 'Finances' },
+  provideFinancesStore(environment),
 ];

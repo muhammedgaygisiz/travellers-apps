@@ -1,29 +1,25 @@
 import {
   confirmRegistrationErrorMessage,
   login,
+  loginSucceeded,
+  loginWithGoogleAccount,
   logout,
   register,
-  loginWithGoogleAccount,
 } from './actions';
-import { key } from './key';
-import { reducer } from './reducer';
 import {
   selectIsAuthenticated,
   selectLoginFailed,
   selectRegistrationErrorCode,
 } from './selectors';
 
-const fromAuth = {
-  key,
-  reducer,
-  login,
-  logout,
-  register,
-  loginWithGoogleAccount,
-  confirmRegistrationErrorMessage,
-  selectIsAuthenticated,
-  selectLoginFailed,
+export const fromAuth = {
   selectRegistrationErrorCode,
+  selectLoginFailed,
+  register,
+  confirmRegistrationErrorMessage,
+  login,
+  loginWithGoogleAccount,
+  selectIsAuthenticated,
+  loginSucceeded,
+  logout,
 };
-
-export { fromAuth };

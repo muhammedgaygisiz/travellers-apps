@@ -6,10 +6,13 @@ import {
 } from '@angular/router';
 import { ROUTES } from './routes';
 import { IonicRouteStrategy } from '@ionic/angular';
-import { APP_TITLE, STORE_SERVICE } from 'utils';
-import { PricesStoreService } from '@travellers-apps/prices/store/feature';
+import { APP_TITLE, Environment, STORE_SERVICE } from 'utils';
+import {
+  PricesStoreService,
+  providePricesStore,
+} from '@travellers-apps/prices/store/feature';
 
-export const providePricesShell = () => [
+export const providePricesShell = (environment: Environment) => [
   provideRouter(ROUTES, withPreloading(PreloadAllModules)),
   {
     provide: RouteReuseStrategy,
@@ -17,4 +20,5 @@ export const providePricesShell = () => [
   },
   { provide: STORE_SERVICE, useClass: PricesStoreService },
   { provide: APP_TITLE, useValue: 'Prices' },
+  providePricesStore(environment),
 ];

@@ -18,10 +18,11 @@ import {
   registrationSucceeded,
 } from './actions';
 import { catchError, EMPTY, exhaustMap, map, mergeMap, of, tap } from 'rxjs';
-import { AuthService } from '@travellers-apps/prices/firestore/feature';
+
 import { User } from '@angular/fire/auth';
 import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
+import { AuthService } from '../auth.service';
 
 type AuthCreds = { authCreds: AuthCredentials };
 

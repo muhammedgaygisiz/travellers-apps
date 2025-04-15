@@ -5,21 +5,11 @@ import {
 import { provideFinancesShell } from './provide-finances-shell';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { Environment, getIonicConfig } from 'utils';
-import { provideTaFirestore } from 'ta-firestore';
 import { provideServiceWorker } from '@angular/service-worker';
-import { provideFinancesStore } from 'finances/store';
-
-const firebaseOptions = {
-  apiKey: process.env['NX_APP_API_KEY'],
-  authDomain: process.env['NX_APP_AUTH_DOMAIN'],
-  projectId: process.env['NX_APP_PROJECT_ID'],
-  storageBucket: process.env['NX_APP_STORAGE_BUCKET'],
-  messagingSenderId: process.env['NX_APP_MESSAGINX_SENDER_ID'],
-};
 
 export const appConfig = (environment: Environment): ApplicationConfig => ({
   providers: [
-    provideFinancesShell(),
+    provideFinancesShell(environment),
     provideExperimentalZonelessChangeDetection(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: environment.production,
@@ -28,7 +18,5 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
       registrationStrategy: 'registerWhenStable:30000',
     }),
     provideIonicAngular(getIonicConfig()),
-    provideFinancesStore(environment),
-    provideTaFirestore(firebaseOptions),
   ],
 });

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { loginSucceeded } from '../auth/actions';
+import { fromAuth } from 'ta-firestore';
 import { catchError, EMPTY, map, mergeMap } from 'rxjs';
 import { LocationService } from '@travellers-apps/prices/geoapify/feature';
 import { locationLoaded } from './actions';
@@ -12,7 +12,7 @@ export class LocationEffects {
 
   loadLocationEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(loginSucceeded.type),
+      ofType(fromAuth.loginSucceeded.type),
       mergeMap(() =>
         this.locationService.getLocation$.pipe(
           map((location) => locationLoaded({ location })),

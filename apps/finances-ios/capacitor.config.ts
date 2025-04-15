@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.travellers.finances',
-  appName: 'Travellers Finances',
+  appName: 'Finances',
   webDir: '../../dist/apps/finances',
   bundledWebRuntime: false,
   server: {

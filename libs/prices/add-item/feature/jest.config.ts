@@ -1,4 +1,12 @@
-/* eslint-disable */
+const NODE_MODULES_TO_IGNORE = [
+  '.*.mjs$',
+  'ionicons',
+  '@ionic',
+  '@ionic',
+  '@stencil',
+  '@capacitor',
+].join('|');
+
 export default {
   displayName: 'prices-add-item-feature',
   preset: '../../../../jest.preset.js',
@@ -11,12 +19,11 @@ export default {
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
         stringifyContentPathRegex: '\\.(html|svg)$',
+        isolatedModules: true,
       },
     ],
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@ionic/core|ionicons|@ionic/angular|@stencil/core))',
-  ],
+  transformIgnorePatterns: [`node_modules/(?!(${NODE_MODULES_TO_IGNORE}))`],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',

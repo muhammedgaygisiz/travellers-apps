@@ -9,7 +9,11 @@ import { AccountsEffect } from './accounts/effects';
 import { PaymentEffects } from './payments/effects';
 import { fromPayments } from './payments';
 import { provideRouterStore, routerReducer } from '@ngrx/router-store';
-import { provideFirestoreState, provideFirestoreUtils } from 'ta-firestore';
+import {
+  AuthEffects,
+  provideFirestoreState,
+  provideFirestoreUtils,
+} from 'ta-firestore';
 
 const firebaseOptions = {
   apiKey: process.env['NX_APP_API_KEY'],
@@ -30,7 +34,7 @@ export const provideFinancesStore = (environment: Environment) => [
       },
     }
   ),
-  provideEffects(BanksEffect, AccountsEffect, PaymentEffects),
+  provideEffects(BanksEffect, AccountsEffect, PaymentEffects, AuthEffects),
   provideRouterStore(),
   provideFirestoreState(),
   provideState(fromBank.key, fromBank.reducer),

@@ -17,9 +17,17 @@ import {
   registrationFailed,
   registrationSucceeded,
 } from './actions';
-import { catchError, EMPTY, exhaustMap, map, mergeMap, of, tap } from 'rxjs';
+import {
+  catchError,
+  EMPTY,
+  exhaustMap,
+  map,
+  mergeMap,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 
-import { User } from '@angular/fire/auth';
 import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
@@ -35,8 +43,12 @@ export class AuthEffects {
   checkAuthStatus$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
-      mergeMap(() =>
-        this.authService.isLoggedIn$().pipe(map((user) => this.getAction(user)))
+      switchMap(() =>
+        this.authService.isLoggedIn$().pipe(
+          map((isLoggedIn) => {
+            return this.getAction(isLoggedIn);
+          })
+        )
       )
     )
   );
@@ -101,8 +113,18 @@ export class AuthEffects {
   successFulLogin$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(loginSucceeded.type),
-        tap(() => this.navController.navigateBack(['/']))
+        ofType(loginSucceeded.type, logoutSucceeded.type),
+        switchMap(() => {
+          return this.authService.isLoggedIn$().pipe(
+            tap((isLoggedIn) => {
+              if (isLoggedIn) {
+                this.navController.navigateRoot(['/']);
+              } else {
+                this.navController.navigateRoot(['/login']);
+              }
+            })
+          );
+        })
       ),
     { dispatch: false }
   );
@@ -119,7 +141,7 @@ export class AuthEffects {
     return this.authService.registerWithGoogleAccount$();
   }
 
-  private getAction(user: User | null) {
-    return user ? loginSucceeded() : notAuthenticated();
+  private getAction(isLoggedIn: boolean) {
+    return isLoggedIn ? loginSucceeded() : notAuthenticated();
   }
 }

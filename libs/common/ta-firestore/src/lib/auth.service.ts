@@ -1,12 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import { from, tap } from 'rxjs';
+import { from, map, tap } from 'rxjs';
 import {
   Auth,
-  authState,
   createUserWithEmailAndPassword,
+  getAuth,
   GoogleAuthProvider,
   signInWithRedirect,
-  signOut,
 } from '@angular/fire/auth';
 import { AuthCredentials } from './api/auth-credentials.model';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
@@ -18,17 +17,23 @@ export class AuthService {
   private readonly auth = inject(Auth);
 
   public isLoggedIn$() {
-    return authState(this.auth);
+    return from(FirebaseAuthentication.getCurrentUser()).pipe(
+      map((user) => !!user.user)
+    );
   }
 
   public loginWithUsernameAndPassword$(authCreds: AuthCredentials) {
     return from(
       FirebaseAuthentication.signInWithEmailAndPassword({ ...authCreds })
-    ).pipe(tap((res) => console.log('#mo', res)));
+    );
   }
 
   public logout() {
-    return from(signOut(this.auth));
+    return from(FirebaseAuthentication.signOut()).pipe(
+      tap(async () => {
+        await getAuth().signOut();
+      })
+    );
   }
 
   public registerWithUsernameAndPassword$(registration: AuthCredentials) {

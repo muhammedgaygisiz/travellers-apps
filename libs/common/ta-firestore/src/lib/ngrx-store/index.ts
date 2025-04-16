@@ -5,6 +5,7 @@ import {
   loginWithGoogleAccount,
   logout,
   register,
+  logoutSucceeded,
 } from './actions';
 import {
   selectIsAuthenticated,
@@ -22,4 +23,5 @@ export const fromAuth = {
   selectIsAuthenticated,
   loginSucceeded,
   logout,
+  logoutSucceeded,
 };

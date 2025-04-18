@@ -15,7 +15,12 @@ export const toDateString = (date: any) => {
   const hasToDateFunction = typeof date.toDate === 'function';
   const isString = typeof date === 'string';
   if (isString && date) {
-    return format(date);
+    try {
+      return format(date);
+    } catch (error) {
+      console.error('Error formatting date string:', error);
+      return '';
+    }
   }
 
   if (!isDate && !hasToDateFunction) {

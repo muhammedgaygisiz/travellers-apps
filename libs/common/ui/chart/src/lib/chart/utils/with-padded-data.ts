@@ -1,16 +1,22 @@
 import { ChartData } from '../api/chart-data';
 
+const DAY_IN_MILLIS = 86400000;
+
 const dayBefore = (firstDay: any) => {
+  const date = new Date(firstDay.date);
+
   return {
-    date: new Date(firstDay.date.getTime() - 86400000), // subtract 1 day in milliseconds
+    date: new Date(date.getTime() - DAY_IN_MILLIS),
     amount: 0,
     balance: 0,
   };
 };
 
 const addDayAfter = (lastDay: any) => {
+  const date = new Date(lastDay.date);
+
   return {
-    date: new Date(lastDay.date.getTime() + 86400000), // add 1 day in milliseconds
+    date: new Date(date.getTime() + DAY_IN_MILLIS),
     amount: 0,
     balance: lastDay.balance,
   };

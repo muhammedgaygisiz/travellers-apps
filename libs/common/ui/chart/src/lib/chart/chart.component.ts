@@ -27,7 +27,6 @@ const toDate = (a: any) => (a.toDate ? a.toDate() : new Date(a));
 })
 export class ChartComponent {
   private readonly chart = viewChild<ElementRef>('chart');
-
   data = input<ChartData[]>([]);
 
   createChartEffect = effect(() => {
@@ -35,31 +34,31 @@ export class ChartComponent {
     const payments = this.data();
 
     if (chartElement && payments) {
-      const sortedData = payments
-        .sort((a, b) => {
-          console.log('#mo', a, b);
-          const firstDate = toDate(a.date);
-          const secondDate = toDate(b.date);
-          return firstDate - secondDate;
-        })
-        .map((payment) => ({
-          ...payment,
-          date: toDate(payment.date),
-          balance: 0,
-        }));
-
-      let balance = 0;
-      sortedData.forEach((item) => {
-        balance += +item.amount;
-        item.balance = balance;
-      });
-
-      this.createChart(chartElement.nativeElement, sortedData);
+      this.createChart(chartElement.nativeElement, payments);
     }
   });
 
   private createChart(chartElement: HTMLElement, currentData: ChartData[]) {
-    const paddedData = withPaddedData(currentData);
+    const sortedData = currentData
+      .sort((a, b) => {
+        console.log('#mo', a, b);
+        const firstDate = toDate(a.date);
+        const secondDate = toDate(b.date);
+        return firstDate - secondDate;
+      })
+      .map((payment) => ({
+        ...payment,
+        date: toDate(payment.date),
+        balance: 0,
+      }));
+
+    let balance = 0;
+    sortedData.forEach((item) => {
+      balance += +item.amount;
+      item.balance = balance;
+    });
+
+    const paddedData = withPaddedData(sortedData);
 
     d3.select(chartElement).selectAll('*').remove();
 

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { from, map, tap } from 'rxjs';
+import { BehaviorSubject, from, map, tap } from 'rxjs';
 import {
   Auth,
   createUserWithEmailAndPassword,
@@ -8,19 +8,29 @@ import {
   signInWithRedirect,
 } from '@angular/fire/auth';
 import { AuthCredentials } from './api/auth-credentials.model';
-import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import {
+  AuthStateChange,
+  FirebaseAuthentication,
+} from '@capacitor-firebase/authentication';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly auth = inject(Auth);
+  private readonly authStateChange$ =
+    new BehaviorSubject<AuthStateChange | null>(null);
 
-  public isLoggedIn$() {
-    return from(FirebaseAuthentication.getCurrentUser()).pipe(
-      map((user) => !!user.user)
-    );
+  initilize() {
+    FirebaseAuthentication.addListener('authStateChange', (result) => {
+      console.log('Auth state changed:', result);
+      this.authStateChange$.next(result);
+    });
   }
+
+  isLoggedIn$ = this.authStateChange$.pipe(
+    map((authState) => !!authState?.user)
+  );
 
   public loginWithUsernameAndPassword$(authCreds: AuthCredentials) {
     return from(

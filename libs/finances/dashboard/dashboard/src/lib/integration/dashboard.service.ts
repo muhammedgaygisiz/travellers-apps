@@ -1,13 +1,14 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Signal } from '@angular/core';
 import { NavController } from '@ionic/angular';
 import { Page } from 'pages';
-import { DashboardStore } from 'finances/dashboard/data-access';
+import { DashboardDataAccessService } from 'finances/dashboard/data-access';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  store = inject(DashboardStore);
-
+  private readonly service = inject(DashboardDataAccessService);
   private readonly navController = inject(NavController);
+
+  banks = this.service.banks as Signal<any>;
 
   onAddMenuItemClicked() {
     this.navController.navigateForward([Page.ADD_BANK]);
@@ -18,6 +19,6 @@ export class DashboardService {
   }
 
   onLogoutClicked() {
-    this.store.logout();
+    this.service.logout();
   }
 }

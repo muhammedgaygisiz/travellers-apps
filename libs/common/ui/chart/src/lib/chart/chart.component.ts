@@ -15,6 +15,8 @@ const COLORS = {
   primary: '#3880ff', // Ionic default primary color
 };
 
+const toDate = (a: any) => (a.toDate ? a.toDate() : new Date(a));
+
 @Component({
   selector: 'ta-chart',
   template: ` <div class="chart-container">
@@ -34,10 +36,15 @@ export class ChartComponent {
 
     if (chartElement && payments) {
       const sortedData = payments
-        .sort((a, b) => a.date.toDate().getTime() - b.date.toDate().getTime())
+        .sort((a, b) => {
+          console.log('#mo', a, b);
+          const firstDate = toDate(a.date);
+          const secondDate = toDate(b.date);
+          return firstDate - secondDate;
+        })
         .map((payment) => ({
           ...payment,
-          date: payment.date.toDate(),
+          date: toDate(payment.date),
           balance: 0,
         }));
 

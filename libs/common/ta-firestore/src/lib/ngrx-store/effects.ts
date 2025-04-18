@@ -40,11 +40,15 @@ export class AuthEffects {
   private readonly authService = inject(AuthService);
   private readonly navController = inject(NavController);
 
+  constructor() {
+    this.authService.initilize();
+  }
+
   checkAuthStatus$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
       switchMap(() =>
-        this.authService.isLoggedIn$().pipe(
+        this.authService.isLoggedIn$.pipe(
           map((isLoggedIn) => {
             return this.getAction(isLoggedIn);
           })
@@ -113,17 +117,20 @@ export class AuthEffects {
   successFulLogin$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(loginSucceeded.type, logoutSucceeded.type),
-        switchMap(() => {
-          return this.authService.isLoggedIn$().pipe(
-            tap((isLoggedIn) => {
-              if (isLoggedIn) {
-                this.navController.navigateRoot(['/']);
-              } else {
-                this.navController.navigateRoot(['/login']);
-              }
-            })
-          );
+        ofType(loginSucceeded.type),
+        tap(() => {
+          this.navController.navigateRoot(['/']);
+        })
+      ),
+    { dispatch: false }
+  );
+
+  successFulLogout$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(logoutSucceeded.type),
+        tap(() => {
+          this.navController.navigateRoot(['/login']);
         })
       ),
     { dispatch: false }

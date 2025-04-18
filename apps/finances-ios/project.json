@@ -70,6 +70,9 @@
         },
         "android": {
           "cmd": "run android"
+        },
+        "ios-dev": {
+          "cmd": "run ios -l --host 192.168.0.103 --port 4200 --target=D3A60284-5E49-4BCD-8417-B651A142B4F2"
         }
       }
     },
@@ -99,6 +102,16 @@
         "android": {
           "cmd": "update android"
         }
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run finances:serve --configuration=development --host=0.0.0.0",
+          "nx run finances-ios:run --configuration=ios-dev"
+        ],
+        "parallel": true
       }
     }
   }

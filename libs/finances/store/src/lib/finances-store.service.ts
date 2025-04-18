@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { banksWithAccounts } from './banks/selectors';
 import { accounts } from './accounts/selectors';
 import { payments, selectedPayment } from './payments/selectors';
+import { saveNewPayment, savePayment } from './payments/actions';
 import { ibanFromParams } from './router/selectors';
 import { StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
@@ -51,5 +52,15 @@ export class FinancesStoreService implements StoreService {
 
   logout(): void {
     this.store.dispatch(fromAuth.logout());
+  }
+
+  saveNewPayment(payment: { amount: number; iban: any }) {
+    this.store.dispatch(saveNewPayment({ payment }));
+  }
+
+  async savePayment(payment: any, id: string | undefined) {
+    if (id) {
+      this.store.dispatch(savePayment({ payment, id }));
+    }
   }
 }

@@ -3,6 +3,7 @@
   "devDependencies": {
     "@capacitor/cli": "../../node_modules/@capacitor/cli",
     "@capacitor/ios": "../../node_modules/@capacitor/ios",
-    "@capacitor-firebase/authentication": "../../node_modules/@capacitor-firebase/authentication"
+    "@capacitor-firebase/authentication": "../../node_modules/@capacitor-firebase/authentication",
+    "@capacitor-firebase/firestore": "../../node_modules/@capacitor-firebase/firestore"
   }
 }

@@ -2,7 +2,7 @@ export default {
   displayName: 'firestore',
   preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../coverage/libs/finances/firestore',
+  coverageDirectory: '../../../coverage/libs/finances/api',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

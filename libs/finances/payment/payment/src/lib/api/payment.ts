@@ -1,5 +1,5 @@
 export interface Payment {
   amount: number;
 
-  date: any;
+  date: string;
 }

@@ -106,7 +106,7 @@
       ],
       "finances/shell": ["libs/finances/shell/src/index.ts"],
       "finances/store": ["libs/finances/store/src/index.ts"],
-      "firestore": ["libs/finances/firestore/src/index.ts"],
+      "finances/api": ["libs/finances/api/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
       "new-trip": ["libs/budget-planner/new-trip/src/index.ts"],
       "pages": ["libs/finances/pages/pages/src/index.ts"],

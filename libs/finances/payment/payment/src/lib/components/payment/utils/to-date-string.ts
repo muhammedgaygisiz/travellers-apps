@@ -5,20 +5,25 @@ export const toDateString = (date: any) => {
     return '';
   }
 
-  const hasToDateFunction = typeof date.toDate === 'function';
+  const format = (d: any) => formatDate(d, 'dd.MM.yyyy', 'en-US');
+
   const isDate = date instanceof Date;
+  if (isDate) {
+    return format(date);
+  }
+
+  const hasToDateFunction = typeof date.toDate === 'function';
+  const isString = typeof date === 'string';
+  if (isString && date) {
+    return format(date);
+  }
+
   if (!isDate && !hasToDateFunction) {
     return '';
   }
 
-  const format = (d: any) => formatDate(d, 'dd.MM.yyyy', 'en-US');
-
   if (date?.toDate) {
     return format(date?.toDate());
-  }
-
-  if (date) {
-    return format(date);
   }
 
   return '';

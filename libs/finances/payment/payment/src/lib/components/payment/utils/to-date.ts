@@ -9,5 +9,15 @@ export const toDate = (date: string): string => {
   const month = parseInt(parts[1], 10) - 1; // Months are zero-based
   const year = parseInt(parts[2], 10);
 
-  return new Date(Date.UTC(year, month, day)).toISOString();
+  const utcDate = new Date(Date.UTC(year, month, day));
+
+  if (
+    utcDate.getUTCDate() !== day ||
+    utcDate.getUTCMonth() !== month ||
+    utcDate.getUTCFullYear() !== year
+  ) {
+    throw new Error('Invalid date format. Expected format: dd.MM.yyyy');
+  }
+
+  return utcDate.toISOString();
 };

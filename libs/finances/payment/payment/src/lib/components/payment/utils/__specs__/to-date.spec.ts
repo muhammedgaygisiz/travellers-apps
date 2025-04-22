@@ -28,4 +28,11 @@ describe('toDate', () => {
       'Invalid date format. Expected format: dd.MM.yyyy'
     );
   });
+
+  it('should throw an error for invalid day/month combination', () => {
+    // Testing April 31st (April only has 30 days)
+    expect(() => toDate('31.4.2023')).toThrow(
+      'Invalid date format. Expected format: dd.MM.yyyy'
+    );
+  });
 });

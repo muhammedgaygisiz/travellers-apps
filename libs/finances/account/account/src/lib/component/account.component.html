@@ -16,6 +16,7 @@
         @for (payment of payments; track payment.id) {
         <ion-item lines="full" (click)="paymentClicked.emit(payment)">
           <ion-label>{{ payment.amount }} $</ion-label>
+          <ion-note slot="end">{{ payment.date | date }}</ion-note>
         </ion-item>
         }
       </ion-item-group>

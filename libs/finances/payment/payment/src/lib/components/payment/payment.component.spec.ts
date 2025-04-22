@@ -2,6 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PaymentComponent } from './payment.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { ComponentRef } from '@angular/core';
+import * as toDateModule from './utils/to-date';
+
+jest.mock('./utils/to-date', () => ({
+  // eslint-disable-next-line no-unused-vars
+  toDate: jest.fn((date: string) => '2023-01-01T00:00:00.000Z'),
+}));
 
 describe('AddPaymentComponent', () => {
   let component: PaymentComponent;
@@ -71,17 +77,13 @@ describe('AddPaymentComponent', () => {
     const emitSpy = jest.spyOn(component.submitPayment, 'emit');
     component.paymentFormGroup.setValue({ amount: 100, date: '01.01.2023' });
 
-    const dateOutput = '2022-12-31T23:00:00.000Z';
-    const mockDate = new Date(dateOutput);
-    jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
-
     component.onSubmitClick();
 
     expect(emitSpy).toHaveBeenCalledWith({
       amount: 100,
-      date: dateOutput,
+      date: '2023-01-01T00:00:00.000Z',
     });
 
-    jest.restoreAllMocks();
+    expect(toDateModule.toDate).toHaveBeenCalledWith('01.01.2023');
   });
 });

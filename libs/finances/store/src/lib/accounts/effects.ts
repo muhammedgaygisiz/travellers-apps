@@ -8,7 +8,7 @@ import {
 import { map, switchMap, tap } from 'rxjs';
 import { IndexedDbService } from '../utils/indexed-db/IndexedDbService';
 import { loadedAccountsFromFirestore } from './actions';
-import { FinancesFirestoreService } from 'firestore';
+import { FinancesApiService } from 'finances/api';
 import { Store } from '@ngrx/store';
 import { accounts } from './selectors';
 
@@ -16,8 +16,7 @@ import { accounts } from './selectors';
 export class AccountsEffect {
   private readonly actions$ = inject(Actions);
   private readonly indexedDbService = inject(IndexedDbService);
-  private readonly financesFirestoreService = inject(FinancesFirestoreService);
-
+  private readonly financesFirestoreService = inject(FinancesApiService);
   private readonly store = inject(Store);
 
   getAccountsFromFinancesFirestore$ = createEffect(() => {

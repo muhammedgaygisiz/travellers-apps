@@ -14,7 +14,10 @@ module.exports = {
    */
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
   roots: ['<rootDir>', path.resolve(__dirname, './__mocks__')],
-  setupFilesAfterEnv: [path.resolve(__dirname, './__mocks__/fetch.js')],
+  setupFilesAfterEnv: [
+    path.resolve(__dirname, './__mocks__/fetch.js'),
+    path.resolve(__dirname, './__mocks__/resize-observer.js'),
+  ],
   coverageThreshold: {
     global: {
       branches: 80,

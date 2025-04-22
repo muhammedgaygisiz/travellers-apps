@@ -12,7 +12,7 @@ import {
 } from 'rxjs';
 import { PricesService } from '@travellers-apps/prices/firestore/feature';
 import { NavController, ToastController } from '@ionic/angular';
-import { fromAuth } from '../auth/index';
+import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
 import { MostSearchedItem } from '../api/most-searched-item.model';
 

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { fromAuth } from 'ta-firestore';
 import {
-  fromAuth,
   fromLocation,
   fromMostSearched,
   fromLocalization,

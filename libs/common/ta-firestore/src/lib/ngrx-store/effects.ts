@@ -17,11 +17,20 @@ import {
   registrationFailed,
   registrationSucceeded,
 } from './actions';
-import { catchError, EMPTY, exhaustMap, map, mergeMap, of, tap } from 'rxjs';
-import { AuthService } from '@travellers-apps/prices/firestore/feature';
-import { User } from '@angular/fire/auth';
+import {
+  catchError,
+  EMPTY,
+  exhaustMap,
+  map,
+  mergeMap,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
+
 import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
+import { AuthService } from '../auth.service';
 
 type AuthCreds = { authCreds: AuthCredentials };
 
@@ -31,11 +40,19 @@ export class AuthEffects {
   private readonly authService = inject(AuthService);
   private readonly navController = inject(NavController);
 
+  constructor() {
+    this.authService.initilize();
+  }
+
   checkAuthStatus$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
-      mergeMap(() =>
-        this.authService.isLoggedIn$().pipe(map((user) => this.getAction(user)))
+      switchMap(() =>
+        this.authService.isLoggedIn$.pipe(
+          map((isLoggedIn) => {
+            return this.getAction(isLoggedIn);
+          })
+        )
       )
     )
   );
@@ -46,7 +63,10 @@ export class AuthEffects {
       mergeMap(({ authCreds }: AuthCreds) =>
         this.login$(authCreds).pipe(
           map(() => loginSucceeded()),
-          catchError(() => of(loginFailed()))
+          catchError((err) => {
+            console.log('#mo', err);
+            return of(loginFailed());
+          })
         )
       )
     )
@@ -98,7 +118,20 @@ export class AuthEffects {
     () =>
       this.actions$.pipe(
         ofType(loginSucceeded.type),
-        tap(() => this.navController.navigateBack(['/']))
+        tap(() => {
+          this.navController.navigateRoot(['/']);
+        })
+      ),
+    { dispatch: false }
+  );
+
+  successFulLogout$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(logoutSucceeded.type),
+        tap(() => {
+          this.navController.navigateRoot(['/login']);
+        })
       ),
     { dispatch: false }
   );
@@ -115,7 +148,7 @@ export class AuthEffects {
     return this.authService.registerWithGoogleAccount$();
   }
 
-  private getAction(user: User | null) {
-    return user ? loginSucceeded() : notAuthenticated();
+  private getAction(isLoggedIn: boolean) {
+    return isLoggedIn ? loginSucceeded() : notAuthenticated();
   }
 }

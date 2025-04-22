@@ -32,7 +32,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     aria-valuetext="Loading..."
                     class="skeleton-loader circle progress"
                     role="progressbar"
-                    style="width: 80px; height: 80px;"
+                    style="height: 80px; width: 80px;"
                     tabindex="-1"
                   >
                   </div>
@@ -51,7 +51,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                       aria-valuetext="Loading..."
                       class="skeleton-loader progress"
                       role="progressbar"
-                      style="width: 200px; border-radius: 0; height: 15px; margin-bottom: 10px;"
+                      style="border-radius: 0; height: 15px; margin-bottom: 10px; width: 200px;"
                       tabindex="-1"
                     >
                     </div>
@@ -67,7 +67,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                       aria-valuetext="Loading..."
                       class="skeleton-loader progress"
                       role="progressbar"
-                      style="width: 170px; border-radius: 0; height: 15px;"
+                      style="border-radius: 0; height: 15px; width: 170px;"
                       tabindex="-1"
                     >
                     </div>
@@ -90,7 +90,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     aria-valuetext="Loading..."
                     class="skeleton-loader progress"
                     role="progressbar"
-                    style="width: 80%; border-radius: 0; height: 15px; margin-bottom: 10px;"
+                    style="border-radius: 0; height: 15px; margin-bottom: 10px; width: 80%;"
                     tabindex="-1"
                   >
                   </div>
@@ -108,7 +108,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     aria-valuetext="Loading..."
                     class="skeleton-loader progress"
                     role="progressbar"
-                    style="width: 90%; border-radius: 0; height: 15px; margin-bottom: 10px;"
+                    style="border-radius: 0; height: 15px; margin-bottom: 10px; width: 90%;"
                     tabindex="-1"
                   >
                   </div>
@@ -126,7 +126,7 @@ exports[`LoadingSpinnerComponent should compile 1`] = `
                     aria-valuetext="Loading..."
                     class="skeleton-loader progress"
                     role="progressbar"
-                    style="width: 60%; border-radius: 0; height: 15px; margin-bottom: 10px;"
+                    style="border-radius: 0; height: 15px; margin-bottom: 10px; width: 60%;"
                     tabindex="-1"
                   >
                   </div>

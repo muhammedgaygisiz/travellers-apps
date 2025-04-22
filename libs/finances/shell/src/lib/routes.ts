@@ -1,9 +1,7 @@
 import { Routes } from '@angular/router';
 import { Page } from 'pages';
 import { withAuthRoutes } from 'auth';
-import { AuthGuard, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
-
-const redirectUnauthorizedToHome = () => redirectUnauthorizedTo(['login']);
+import { authGuard } from 'ta-firestore';
 
 export const ROUTES: Routes = withAuthRoutes([
   {
@@ -12,10 +10,7 @@ export const ROUTES: Routes = withAuthRoutes([
       import('finances/pages/dashboard').then(
         (m) => m.DashboardContainerComponent
       ),
-    canActivate: [AuthGuard],
-    data: {
-      authGuardPipe: redirectUnauthorizedToHome,
-    },
+    canActivate: [authGuard],
   },
   {
     path: Page.ADD_BANK,
@@ -23,6 +18,7 @@ export const ROUTES: Routes = withAuthRoutes([
       import('finances/pages/add-bank').then(
         (m) => m.AddBankContainerComponent
       ),
+    canActivate: [authGuard],
   },
   {
     path: `${Page.ACCOUNT}/:iban`,
@@ -35,6 +31,7 @@ export const ROUTES: Routes = withAuthRoutes([
       import('finances/pages/payment').then(
         (m) => m.AddPaymentContainerComponent
       ),
+    canActivate: [authGuard],
   },
   {
     path: `:iban/${Page.PAYMENT}/:paymentId`,
@@ -42,6 +39,7 @@ export const ROUTES: Routes = withAuthRoutes([
       import('finances/pages/payment').then(
         (m) => m.EditPaymentContainerComponent
       ),
+    canActivate: [authGuard],
   },
   {
     path: '',

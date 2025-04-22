@@ -1,17 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import {
-  selectLoginFailed,
-  selectRegistrationErrorCode,
-} from './auth/selectors';
-import {
-  confirmRegistrationErrorMessage,
-  login,
-  loginWithGoogleAccount,
-  register,
-} from './auth/actions';
 import { StoreService } from 'utils';
+import { fromAuth } from 'ta-firestore';
 
 interface Login {
   email: string;
@@ -22,27 +13,30 @@ interface Login {
 export class PricesStoreService implements StoreService {
   private readonly store = inject(Store);
 
-  registrationError = toSignal(this.store.select(selectRegistrationErrorCode), {
-    initialValue: '',
-  });
+  registrationError = toSignal(
+    this.store.select(fromAuth.selectRegistrationErrorCode),
+    {
+      initialValue: '',
+    }
+  );
 
-  loginFailed = toSignal(this.store.select(selectLoginFailed), {
+  loginFailed = toSignal(this.store.select(fromAuth.selectLoginFailed), {
     initialValue: false,
   });
 
   register(registration: Login): void {
-    this.store.dispatch(register({ registration }));
+    this.store.dispatch(fromAuth.register({ registration }));
   }
 
   confirmError(): void {
-    this.store.dispatch(confirmRegistrationErrorMessage());
+    this.store.dispatch(fromAuth.confirmRegistrationErrorMessage());
   }
 
   login(authCreds: { email: string; password: string }): void {
-    this.store.dispatch(login({ authCreds }));
+    this.store.dispatch(fromAuth.login({ authCreds }));
   }
 
   loginWithGoogleAccount() {
-    this.store.dispatch(loginWithGoogleAccount());
+    this.store.dispatch(fromAuth.loginWithGoogleAccount());
   }
 }

@@ -3,6 +3,7 @@ import { adapter, initialState } from './adapter';
 import {
   loadedPaymentsFromFirestore,
   loadedPaymentsFromIndexedDb,
+  updatedPayment,
 } from './actions';
 
 export const reducer = createReducer(
@@ -11,5 +12,8 @@ export const reducer = createReducer(
     loadedPaymentsFromFirestore,
     loadedPaymentsFromIndexedDb,
     (state, { payments }) => adapter.upsertMany(payments, initialState)
-  )
+  ),
+  on(updatedPayment, (state, { payment }) => {
+    return adapter.upsertOne(payment, state);
+  })
 );

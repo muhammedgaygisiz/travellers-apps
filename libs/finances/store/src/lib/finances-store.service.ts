@@ -3,8 +3,11 @@ import { Store } from '@ngrx/store';
 import { banksWithAccounts } from './banks/selectors';
 import { accounts } from './accounts/selectors';
 import { payments, selectedPayment } from './payments/selectors';
+import { saveNewPayment, savePayment } from './payments/actions';
 import { ibanFromParams } from './router/selectors';
 import { StoreService } from 'utils';
+import { fromAuth } from 'ta-firestore';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 interface Login {
   email: string;
@@ -17,8 +20,11 @@ interface Login {
 export class FinancesStoreService implements StoreService {
   store = inject(Store);
 
-  loginFailed = signal(false);
   registrationError = signal('');
+
+  loginFailed = toSignal(this.store.select(fromAuth.selectLoginFailed), {
+    initialValue: false,
+  });
 
   banks$ = this.store.select(banksWithAccounts);
   accounts$ = this.store.select(accounts);
@@ -32,16 +38,29 @@ export class FinancesStoreService implements StoreService {
     throw new Error('Method not implemented.');
   }
 
-  // eslint-disable-next-line no-unused-vars
   login(authCreds: Login): void {
-    // throw new Error('Method not implemented.');
+    this.store.dispatch(fromAuth.login({ authCreds }));
   }
-  // eslint-disable-next-line no-unused-vars
+
   register(registration: Login): void {
-    // this.store.dispatch(register({ registration }));
+    this.store.dispatch(fromAuth.register({ registration }));
   }
 
   confirmError(): void {
-    // this.store.dispatch(confirmRegistrationErrorMessage());
+    throw new Error('Method not implemented.');
+  }
+
+  logout(): void {
+    this.store.dispatch(fromAuth.logout());
+  }
+
+  saveNewPayment(payment: { amount: number; iban: any }) {
+    this.store.dispatch(saveNewPayment({ payment }));
+  }
+
+  async savePayment(payment: any, id: string | undefined) {
+    if (id) {
+      this.store.dispatch(savePayment({ payment, id }));
+    }
   }
 }

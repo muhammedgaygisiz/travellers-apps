@@ -3,5 +3,5 @@ export interface Payment {
   iban: string;
 
   amount: number;
-  date: any;
+  date: string;
 }

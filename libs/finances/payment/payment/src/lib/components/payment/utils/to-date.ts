@@ -9,5 +9,5 @@ export const toDate = (date: string): string => {
   const month = parseInt(parts[1], 10) - 1; // Months are zero-based
   const year = parseInt(parts[2], 10);
 
-  return new Date(year, month, day, 0, 0, 0).toISOString();
+  return new Date(Date.UTC(year, month, day)).toISOString();
 };

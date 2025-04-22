@@ -21,7 +21,7 @@
     "cap:run:android": "cap run android",
     "pwa-asset-generator:generate:prices": "pwa-asset-generator apps/prices/src/logo.svg -i apps/prices/src/index.html --favicon -m apps/prices/src/manifest.webmanifest apps/prices/src/assets/icons",
     "pwa-asset-generator:generate:finances": "pwa-asset-generator apps/finances/src/logo.svg -i apps/finances/src/index.html --favicon -m apps/finances/src/manifest.webmanifest apps/finances/src/assets/icons",
-    "ios-asset-generator:generate-ios:finances": "capacitor-assets generate --ios --iosProject apps/finances-ios/ios/App --assetPath apps/finances/src --iconBackgroundColor '#eeeeee' --iconBackgroundColorDark '#222222' --splashBackgroundColor '#eeeeee' --splashBackgroundColorDark '#111111'",
+    "ios-asset-generator:generate-ios:finances": "capacitor-assets generate --ios --iosProject apps/finances-ios/ios/App --assetPath apps/finances-ios/assets --iconBackgroundColor '#eeeeee' --iconBackgroundColorDark '#222222' --splashBackgroundColor '#eeeeee' --splashBackgroundColorDark '#111111' --logoSplashTargetWidth '1366'",
     "commitizen": "commitizen",
     "husky": "husky",
     "commit": "cz"

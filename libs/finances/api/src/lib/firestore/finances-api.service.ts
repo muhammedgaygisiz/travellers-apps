@@ -5,6 +5,7 @@ import { Bank } from './model/bank';
 import { Payment } from './model/payment';
 import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { v4 as uuidV4 } from 'uuid';
 
 const BANKS_COLLECTION = 'banks';
 const ACCOUNTS_COLLECTION = 'accounts';
@@ -72,9 +73,14 @@ export class FinancesApiService {
     // addDoc(this.banksCollection, { ...newBank, id: uuidV4() });
   }
 
-  // eslint-disable-next-line no-unused-vars
   saveNewPayment(newPayment: { amount: number; iban: string }) {
-    // addDoc(this.paymentsCollection, { ...newPayment, id: uuidV4() });
+    FirebaseFirestore.addDocument({
+      reference: PAYMENTS_COLLECTION,
+      data: {
+        ...newPayment,
+        id: uuidV4(),
+      },
+    });
   }
 
   async savePayment(payment: any, id: string | undefined) {
@@ -96,14 +102,9 @@ export class FinancesApiService {
     if (querySnapshot.snapshots.length) {
       const docRef = querySnapshot.snapshots[0].path;
 
-      const withConvertedDate = {
-        ...payment,
-        date: payment.date.toISOString(),
-      };
-
       await FirebaseFirestore.updateDocument({
         reference: docRef,
-        data: withConvertedDate,
+        data: payment,
       });
 
       return;

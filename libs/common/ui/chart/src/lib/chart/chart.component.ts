@@ -19,7 +19,11 @@ const COLORS = {
 @Component({
   selector: 'ta-chart',
   template: ` <div class="chart-container">
+    @if (data().length) {
     <svg #chart></svg>
+    } @else {
+    <div class="no-payments">No payments</div>
+    }
   </div>`,
   styleUrl: './chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

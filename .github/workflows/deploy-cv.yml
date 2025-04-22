@@ -17,8 +17,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Setup action
         uses: ./.github/actions/setup

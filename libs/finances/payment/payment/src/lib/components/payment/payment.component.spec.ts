@@ -71,14 +71,15 @@ describe('AddPaymentComponent', () => {
     const emitSpy = jest.spyOn(component.submitPayment, 'emit');
     component.paymentFormGroup.setValue({ amount: 100, date: '01.01.2023' });
 
-    const mockDate = new Date('2022-12-31T23:00:00.000Z');
+    const dateOutput = '2022-12-31T23:00:00.000Z';
+    const mockDate = new Date(dateOutput);
     jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
 
     component.onSubmitClick();
 
     expect(emitSpy).toHaveBeenCalledWith({
       amount: 100,
-      date: mockDate,
+      date: dateOutput,
     });
 
     jest.restoreAllMocks();

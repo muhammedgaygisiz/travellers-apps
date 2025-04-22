@@ -3,12 +3,12 @@ import { toDate } from '../to-date';
 describe('toDate', () => {
   it('should convert a valid date string to a Date object', () => {
     const result = toDate('25.12.2023');
-    expect(result).toEqual(new Date(2023, 11, 25)); // Months are zero-based
+    expect(result).toEqual('2023-12-24T23:00:00.000Z');
   });
 
   it('should handle single-digit day and month correctly', () => {
     const result = toDate('5.7.2023');
-    expect(result).toEqual(new Date(2023, 6, 5)); // Months are zero-based
+    expect(result).toEqual('2023-07-04T22:00:00.000Z');
   });
 
   it('should throw an error for an invalid date string', () => {

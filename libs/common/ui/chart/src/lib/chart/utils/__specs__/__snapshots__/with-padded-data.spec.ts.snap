@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`withPaddedData should pad multiple data points correctly 1`] = `
+Array [
+  Object {
+    "amount": 0,
+    "balance": 0,
+    "date": 2025-04-21T08:07:00.903Z,
+  },
+  Object {
+    "amount": 100,
+    "balance": 100,
+    "date": "2025-04-22T08:07:00.903Z",
+  },
+  Object {
+    "amount": 50,
+    "balance": 150,
+    "date": "2025-04-23T08:07:00.903Z",
+  },
+  Object {
+    "amount": 0,
+    "balance": 150,
+    "date": 2025-04-24T08:07:00.903Z,
+  },
+]
+`;
+
+exports[`withPaddedData should pad single data point with day before and after 1`] = `
+Array [
+  Object {
+    "amount": 0,
+    "balance": 0,
+    "date": 2025-04-21T08:07:00.902Z,
+  },
+  Object {
+    "amount": 100,
+    "balance": 100,
+    "date": "2025-04-22T08:07:00.902Z",
+  },
+  Object {
+    "amount": 0,
+    "balance": 100,
+    "date": 2025-04-23T08:07:00.902Z,
+  },
+]
+`;

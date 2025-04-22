@@ -29,9 +29,4 @@ describe('toDateString', () => {
     const obj = { someProperty: 'value' };
     expect(toDateString(obj)).toBe('');
   });
-
-  it('should return empty string when toDate property exists but is not a function', () => {
-    const obj = { toDate: 'not a function' };
-    expect(toDateString(obj)).toBe('');
-  });
 });

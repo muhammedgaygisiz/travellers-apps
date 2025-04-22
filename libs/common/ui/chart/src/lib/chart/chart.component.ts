@@ -4,18 +4,17 @@ import {
   effect,
   ElementRef,
   input,
+  OnDestroy,
   viewChild,
 } from '@angular/core';
 import * as d3 from 'd3';
-import { withPaddedData } from './utils/with-padded-data';
 import { ChartData } from './api/chart-data';
+import { prepareData } from './utils/prepare-data';
 
 const COLORS = {
   success: '#2dd36f', // Ionic default success color
   primary: '#3880ff', // Ionic default primary color
 };
-
-const toDate = (a: any) => (a.toDate ? a.toDate() : new Date(a));
 
 @Component({
   selector: 'ta-chart',
@@ -25,57 +24,62 @@ const toDate = (a: any) => (a.toDate ? a.toDate() : new Date(a));
   styleUrl: './chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChartComponent {
+export class ChartComponent implements OnDestroy {
   private readonly chart = viewChild<ElementRef>('chart');
   data = input<ChartData[]>([]);
+
+  private readonly resizeObserver = new ResizeObserver(() => {
+    const chartElement = this.chart();
+    const chartData = this.data();
+
+    if (chartElement?.nativeElement && chartData.length) {
+      this.createChart(chartElement.nativeElement, chartData);
+    }
+  });
+
+  ngOnDestroy() {
+    this.resizeObserver.disconnect();
+  }
 
   createChartEffect = effect(() => {
     const chartElement = this.chart();
     const payments = this.data();
 
     if (chartElement && payments) {
+      const container = chartElement.nativeElement.parentElement;
+      this.resizeObserver.observe(container);
       this.createChart(chartElement.nativeElement, payments);
     }
   });
 
   private createChart(chartElement: HTMLElement, currentData: ChartData[]) {
-    const sortedData = currentData
-      .sort((a, b) => {
-        console.log('#mo', a, b);
-        const firstDate = toDate(a.date);
-        const secondDate = toDate(b.date);
-        return firstDate - secondDate;
-      })
-      .map((payment) => ({
-        ...payment,
-        date: toDate(payment.date),
-        balance: 0,
-      }));
+    const preparedData = prepareData(currentData);
 
-    let balance = 0;
-    sortedData.forEach((item) => {
-      balance += +item.amount;
-      item.balance = balance;
-    });
+    const container = chartElement.parentElement;
 
-    const paddedData = withPaddedData(sortedData);
+    if (!container) return;
+
+    // Get container dimensions
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+
+    const margin = { top: 20, right: 30, bottom: 30, left: 50 };
+
+    const width = containerWidth - margin.left - margin.right;
+    const height = containerHeight - margin.top - margin.bottom;
 
     d3.select(chartElement).selectAll('*').remove();
 
-    const margin = { top: 20, right: 30, bottom: 30, left: 50 };
-    const width = 600 - margin.left - margin.right;
-    const height = 300 - margin.top - margin.bottom;
-
     const svg = d3
       .select(chartElement)
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
+      .attr('width', containerWidth)
+      .attr('height', containerHeight)
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
     const x = d3
       .scaleTime()
-      .domain(d3.extent(paddedData, (d) => d.date) as [Date, Date])
+      .domain(d3.extent(preparedData, (d) => d.date) as [Date, Date])
       .range([0, width]);
 
     const xAxis = d3
@@ -86,8 +90,8 @@ export class ChartComponent {
     const y = d3
       .scaleLinear()
       .domain([
-        Math.min(0, d3.min(paddedData, (d) => d.balance) || 0),
-        Math.max(0, d3.max(paddedData, (d) => d.balance) || 0),
+        Math.min(0, d3.min(preparedData, (d) => d.balance) || 0),
+        Math.max(0, d3.max(preparedData, (d) => d.balance) || 0),
       ])
       .range([height, 0]);
 
@@ -105,13 +109,13 @@ export class ChartComponent {
     today.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
 
     // Filter data correctly
-    const actualData = paddedData.filter((d) => {
+    const actualData = preparedData.filter((d) => {
       const date = new Date(d.date);
       date.setHours(0, 0, 0, 0);
       return date <= today;
     });
 
-    const futureData = paddedData.filter((d) => {
+    const futureData = preparedData.filter((d) => {
       const date = new Date(d.date);
       date.setHours(0, 0, 0, 0);
       return date >= today; // Changed from > to >= to include today's point
@@ -141,7 +145,7 @@ export class ChartComponent {
     // Add data points
     svg
       .selectAll('circle')
-      .data(paddedData)
+      .data(preparedData)
       .enter()
       .append('circle')
       .attr('cx', (d) => x(d.date))

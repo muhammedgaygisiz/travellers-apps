@@ -21,15 +21,19 @@ export class AuthService {
   private readonly authStateChange$ =
     new BehaviorSubject<AuthStateChange | null>(null);
 
-  initilize() {
+  async initilize() {
+    const currentUser = await FirebaseAuthentication.getCurrentUser();
+    this.authStateChange$.next(currentUser);
+
     FirebaseAuthentication.addListener('authStateChange', (result) => {
-      console.log('Auth state changed:', result);
       this.authStateChange$.next(result);
     });
   }
 
   isLoggedIn$ = this.authStateChange$.pipe(
-    map((authState) => !!authState?.user)
+    map((authState) => {
+      return !!authState?.user;
+    })
   );
 
   public loginWithUsernameAndPassword$(authCreds: AuthCredentials) {

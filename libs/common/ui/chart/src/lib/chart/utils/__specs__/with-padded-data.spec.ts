@@ -1,6 +1,17 @@
 import { withPaddedData } from '../with-padded-data';
 
 describe('withPaddedData', () => {
+  const mockDate = new Date('2024-03-15T12:00:00Z');
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(mockDate);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should return empty array for empty input', () => {
     expect(withPaddedData([])).toEqual([]);
   });

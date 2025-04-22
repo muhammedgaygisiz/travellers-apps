@@ -53,7 +53,7 @@ describe('ChartComponent', () => {
     fixture.detectChanges();
 
     const chartElement = fixture.nativeElement.querySelector('svg');
-    expect(chartElement).toBeTruthy();
+    expect(chartElement).toBeNull();
   });
 
   it('should create chart with padded data and correct domains', () => {

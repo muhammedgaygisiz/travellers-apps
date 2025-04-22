@@ -5,3 +5,5 @@ export * from './lib/consts';
 export { getMetaReducers } from './lib/get-meta-reducers';
 export { STORE_SERVICE, StoreService } from './lib/store.service';
 export { APP_TITLE } from './lib/app-title-token';
+export { toDate } from './lib/to-date';
+export { byDate } from './lib/by-date';

@@ -9,11 +9,13 @@ import {
   IonItem,
   IonItemGroup,
   IonLabel,
+  IonNote,
   PopoverController,
 } from '@ionic/angular/standalone';
 import { Account, Payment } from 'finances/account/data-access';
 import { AddPopoverMenuComponent } from 'add-popover-menu';
 import { ChartComponent } from 'chart';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'finances-account',
@@ -29,6 +31,8 @@ import { ChartComponent } from 'chart';
     IonItem,
     IonLabel,
     ChartComponent,
+    IonNote,
+    DatePipe,
   ],
 })
 export class AccountComponent {

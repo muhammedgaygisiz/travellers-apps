@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { filter, from, map, switchMap } from 'rxjs';
+import { BehaviorSubject, filter, switchMap } from 'rxjs';
 import { Account } from './model/account';
 import { Bank } from './model/bank';
 import { Payment } from './model/payment';
@@ -16,61 +16,55 @@ const PAYMENTS_COLLECTION = 'payments';
 export class FinancesApiService {
   private readonly authService = inject(AuthService);
 
-  private readonly accountsChannel$ = from(
-    FirebaseFirestore.getCollection({
-      reference: ACCOUNTS_COLLECTION,
-    })
-  );
+  private readonly paymentsChannel$ = new BehaviorSubject<Payment[]>([]);
+  private readonly banksChannel$ = new BehaviorSubject<Bank[]>([]);
+  private readonly accountsChannel$ = new BehaviorSubject<Account[]>([]);
 
-  private readonly banksChannel$ = from(
-    FirebaseFirestore.getCollection({
-      reference: BANKS_COLLECTION,
-    })
-  );
+  constructor() {
+    FirebaseFirestore.addCollectionSnapshotListener(
+      {
+        reference: PAYMENTS_COLLECTION,
+      },
+      (docs) => {
+        const payments = docs?.snapshots.map((doc: any) => doc.data) || [];
+        this.paymentsChannel$.next(payments as unknown as Payment[]);
+      }
+    );
 
-  private readonly paymentsChannel$ = from(
-    FirebaseFirestore.getCollection({
-      reference: PAYMENTS_COLLECTION,
-    })
-  );
+    FirebaseFirestore.addCollectionSnapshotListener(
+      {
+        reference: BANKS_COLLECTION,
+      },
+      (docs) => {
+        const banks = docs?.snapshots.map((doc: any) => doc.data) || [];
+        this.banksChannel$.next(banks as unknown as Bank[]);
+      }
+    );
+
+    FirebaseFirestore.addCollectionSnapshotListener(
+      {
+        reference: ACCOUNTS_COLLECTION,
+      },
+      (docs) => {
+        const accounts = docs?.snapshots.map((doc: any) => doc.data) || [];
+        this.accountsChannel$.next(accounts as unknown as Account[]);
+      }
+    );
+  }
 
   public allAccounts$ = this.authService.isLoggedIn$.pipe(
     filter((isLoggedIn) => isLoggedIn),
-    switchMap(() =>
-      this.accountsChannel$.pipe(
-        map(
-          (res) =>
-            res.snapshots.map(
-              (snapshot) => snapshot.data
-            ) as unknown as Account[]
-        )
-      )
-    )
+    switchMap(() => this.accountsChannel$)
   );
 
   public allBanks$ = this.authService.isLoggedIn$.pipe(
     filter((isLoggedIn) => isLoggedIn),
-    switchMap(() =>
-      this.banksChannel$.pipe(
-        map(
-          (res) =>
-            res.snapshots.map((snapshot) => snapshot.data) as unknown as Bank[]
-        )
-      )
-    )
+    switchMap(() => this.banksChannel$)
   );
 
   public allPayments$ = this.authService.isLoggedIn$.pipe(
     filter((isLoggedIn) => isLoggedIn),
-    switchMap(() =>
-      this.paymentsChannel$.pipe(
-        map((res) => {
-          return res.snapshots.map(
-            (snapshot) => snapshot.data
-          ) as unknown as Payment[];
-        })
-      )
-    )
+    switchMap(() => this.paymentsChannel$)
   );
 
   // eslint-disable-next-line no-unused-vars

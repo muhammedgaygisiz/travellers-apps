@@ -1,4 +1,4 @@
-import { toDate } from './to-date';
+import { toDate } from 'utils';
 
 export const sanitizeDate = (payment: any) => ({
   ...payment,

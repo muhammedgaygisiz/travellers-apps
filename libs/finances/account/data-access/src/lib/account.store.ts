@@ -12,6 +12,7 @@ import { Account, Payment, FinancesStoreService } from 'finances/store';
 import { inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { getCurrentRouteParams } from 'data-access-utils';
+import { byDate } from 'utils';
 
 type AccountState = {
   filter: string | undefined;
@@ -59,9 +60,9 @@ export const AccountStore = signalStore(
         tap((payments: any[]) => {
           const account = store.account();
           if (account) {
-            const paymentsForAccount = payments.filter(
-              (payment) => payment.iban === account.number
-            );
+            const paymentsForAccount = payments
+              .filter((payment) => payment.iban === account.number)
+              .sort(byDate);
 
             patchState(store, {
               account: {

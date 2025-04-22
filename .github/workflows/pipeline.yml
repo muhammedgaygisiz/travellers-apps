@@ -82,7 +82,6 @@ jobs:
       - name: Run Stylelint
         run: npm run nx -- affected -t stylelint
 
-
   tests:
     runs-on: ubuntu-latest
     needs:
@@ -112,9 +111,7 @@ jobs:
           fail_ci_if_error: false # optional (default = false)
           verbose: false # optional (default = false)
 
-  #Prices
-
-  prices-build-storybook:
+  build-storybooks:
     runs-on: ubuntu-latest
     needs:
       - tests
@@ -128,19 +125,21 @@ jobs:
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
 
-      - run: npm run nx -- build-storybook prices --configuration=ci
+      - run: npm run nx -- affected -t build-storybook --configuration=ci
 
-      - name: Cache Storybook Build
+      - name: Cache Storybook Builds
         uses: actions/cache@v4
         with:
-          path: dist/storybook/prices
-          key: prices-storybook-${{ hashFiles('**/prices/**/*.stories.*') }}
+          path: dist/storybook
+          key: prices-storybook-${{ hashFiles('**/**/*.stories.*') }}
+
+  #Prices
 
   prices-loki:
     runs-on: ubuntu-latest
     continue-on-error: true
     needs:
-      - prices-build-storybook
+      - build-storybooks
 
     steps:
       - name: Checkout repository
@@ -243,33 +242,11 @@ jobs:
 
 # KOSAML
 
-  kosaml-build-storybook:
-    runs-on: ubuntu-latest
-    needs:
-      - tests
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - run: npm run nx -- build-storybook kosaml --configuration=ci
-
-      - name: Cache Storybook Build
-        uses: actions/cache@v4
-        with:
-          path: dist/storybook/kosaml
-          key: kosaml-storybook-${{ hashFiles('**/kosaml/**/*.stories.*') }}
-
   kosaml-loki:
     runs-on: ubuntu-latest
     continue-on-error: true
     needs:
-      - kosaml-build-storybook
+      - build-storybooks
 
     steps:
       - name: Checkout repository

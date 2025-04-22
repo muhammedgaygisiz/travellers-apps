@@ -24,4 +24,14 @@ describe('toDateString', () => {
   it('should return an empty string for invalid input', () => {
     expect(toDateString('invalid' as any)).toBe('');
   });
+
+  it('should return empty string for non-Date object without toDate method', () => {
+    const obj = { someProperty: 'value' };
+    expect(toDateString(obj)).toBe('');
+  });
+
+  it('should return empty string when toDate property exists but is not a function', () => {
+    const obj = { toDate: 'not a function' };
+    expect(toDateString(obj)).toBe('');
+  });
 });

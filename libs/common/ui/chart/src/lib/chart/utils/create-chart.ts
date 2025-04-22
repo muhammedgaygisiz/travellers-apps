@@ -21,7 +21,7 @@ export const createChart = (
   const containerWidth = container.clientWidth;
   const containerHeight = container.clientHeight;
 
-  const margin = { top: 20, right: 30, bottom: 30, left: 50 };
+  const margin = { top: 20, right: 30, bottom: 60, left: 50 };
 
   const width = containerWidth - margin.left - margin.right;
   const height = containerHeight - margin.top - margin.bottom;
@@ -45,6 +45,8 @@ export const createChart = (
     .ticks(5)
     .tickFormat((d: any) => d3.timeFormat('%d.%m.%Y')(d));
 
+  const currentBalance = preparedData[preparedData.length - 1]?.balance || 0;
+
   const y = d3
     .scaleLinear()
     .domain([
@@ -53,7 +55,18 @@ export const createChart = (
     ])
     .range([height, 0]);
 
-  const yAxis = d3.axisLeft(y).ticks(5);
+  const yAxis = d3
+    .axisLeft(y)
+    .tickValues([
+      ...d3.ticks(
+        Math.min(0, d3.min(preparedData, (d) => d.balance) || 0),
+        Math.max(0, d3.max(preparedData, (d) => d.balance) || 0),
+        5
+      ),
+      currentBalance, // Add current balance to ticks
+    ])
+    .tickFormat((d) => (d === currentBalance ? `${d} €` : d.toString()))
+    .ticks(5);
 
   // Draw balance line
   const line = d3
@@ -62,7 +75,6 @@ export const createChart = (
     .y((d) => y(d.balance!))
     .curve(d3.curveStepAfter);
 
-  // Inside createChart method
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
 
@@ -111,6 +123,21 @@ export const createChart = (
     .attr('r', 4)
     .attr('fill', COLORS.primary);
 
-  svg.append('g').attr('transform', `translate(0,${height})`).call(xAxis);
-  svg.append('g').call(yAxis);
+  svg
+    .append('g')
+    .attr('transform', `translate(0,${height})`)
+    .call(xAxis)
+    .selectAll('text')
+    .style('text-anchor', 'end')
+    .attr('dx', '-.8em')
+    .attr('dy', '.15em')
+    .attr('transform', 'rotate(-45)');
+
+  svg
+    .append('g')
+    .call(yAxis)
+    .selectAll('.tick text')
+    .attr('fill', (d) =>
+      d === currentBalance ? COLORS.primary : 'currentColor'
+    );
 };

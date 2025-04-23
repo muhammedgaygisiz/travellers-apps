@@ -60,9 +60,7 @@
       "@travellers-apps/prices/add-item/feature": [
         "libs/prices/add-item/feature/src/index.ts"
       ],
-      "@travellers-apps/prices/firestore/feature": [
-        "libs/prices/firestore/feature/src/index.ts"
-      ],
+      "prices/api": ["libs/prices/api/src/index.ts"],
       "@travellers-apps/prices/geoapify/feature": [
         "libs/prices/geoapify/feature/src/index.ts"
       ],
@@ -89,6 +87,7 @@
       "finances/account/data-access": [
         "libs/finances/account/data-access/src/index.ts"
       ],
+      "finances/api": ["libs/finances/api/src/index.ts"],
       "finances/bank/data-access": [
         "libs/finances/bank/data-access/src/index.ts"
       ],
@@ -106,7 +105,6 @@
       ],
       "finances/shell": ["libs/finances/shell/src/index.ts"],
       "finances/store": ["libs/finances/store/src/index.ts"],
-      "finances/api": ["libs/finances/api/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
       "new-trip": ["libs/budget-planner/new-trip/src/index.ts"],
       "pages": ["libs/finances/pages/pages/src/index.ts"],

@@ -1,10 +1,10 @@
 /* eslint-disable */
 export default {
   displayName: 'prices-firestore-feature',
-  preset: '../../../../jest.preset.js',
+  preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {},
-  coverageDirectory: '../../../../coverage/libs/prices/firestore/feature',
+  coverageDirectory: '../../../coverage/libs/prices/api',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

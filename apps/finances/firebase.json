@@ -1,0 +1,15 @@
+{
+  "hosting": [
+    {
+      "target": "app",
+      "public": "../dist/apps/finances",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "projects": {},
+  "targets": {
+    "finances-878be": {
+      "hosting": {
+        "app": [
+          "finances-878be"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

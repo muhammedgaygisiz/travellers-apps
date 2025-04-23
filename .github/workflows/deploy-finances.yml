@@ -23,6 +23,12 @@ jobs:
 
       - name: Build Finances App
         run: npm run nx -- build finances
+        env:
+          NX_APP_FINANCES_API_KEY: ${{ secrets.NX_APP_FINANCES_API_KEY }}
+          NX_APP_FINANCES_AUTH_DOMAIN: ${{ secrets.NX_APP_FINANCES_AUTH_DOMAIN }}
+          NX_APP_FINANCES_PROJECT_ID: ${{ secrets.NX_APP_FINANCES_PROJECT_ID }}
+          NX_APP_FINANCES_STORAGE_BUCKET: ${{ secrets.NX_APP_FINANCES_STORAGE_BUCKET }}
+          NX_APP_FINANCES_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_FINANCES_MESSAGING_SENDER_ID }}
 
       - name: Finances Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'

@@ -134,11 +134,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: dist/storybook
-          key: prices-storybook-${{ hashFiles('**/**/*.stories.*') }}
+          key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
 
-  #Prices
-
-  prices-loki:
+  loki:
     runs-on: ubuntu-latest
     continue-on-error: true
     needs:
@@ -153,24 +151,29 @@ jobs:
       - name: "Restore Cache"
         uses: ./.github/actions/restore-cache
 
+      - name: "Setup env"
+        uses: ./.github/actions/setup-env-for-affected
+
       - uses: actions/cache/restore@v4
         with:
           path: dist/storybook/prices
-          key: prices-storybook-${{ hashFiles('**/prices/**/*.stories.*') }}
+          key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
 
-      - run: npm run nx -- test-loki prices
+      - run: npm run nx -- affected -t test-loki
 
       - name: Upload Prices Diffs
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: prices-loki-diffs
-          path: apps/prices/.loki/difference
+          name: loki-diffs
+          path: apps/**/.loki/difference
+
+  #Prices
 
   prices-e2e-test:
     runs-on: ubuntu-latest
     needs:
-      - prices-loki
+      - loki
 
     steps:
       - name: Checkout repository
@@ -245,40 +248,10 @@ jobs:
 
 # KOSAML
 
-  kosaml-loki:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    needs:
-      - build-storybooks
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - uses: actions/cache/restore@v4
-        with:
-          path: dist/storybook/kosaml
-          key: kosaml-storybook-${{ hashFiles('**/kosaml/**/*.stories.*') }}
-
-      - run: npm run nx -- test-loki kosaml
-
-      - name: Upload Loki Diffs
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: kosaml-loki-diffs
-          path: apps/kosaml/.loki/difference
-
   kosaml-build:
     runs-on: ubuntu-latest
     needs:
-      - kosaml-loki
-      - lint
+      - loki
 
     steps:
       - name: Checkout repository

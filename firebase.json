@@ -32,6 +32,17 @@
           "destination": "/index.html"
         }
       ]
+    },
+    {
+      "target": "finances",
+      "public": "dist/apps/finances",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
     }
   ]
 }

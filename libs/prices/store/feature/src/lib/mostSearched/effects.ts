@@ -10,7 +10,7 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
-import { PricesService } from '@travellers-apps/prices/firestore/feature';
+import { PricesApiService } from 'prices/api';
 import { NavController, ToastController } from '@ionic/angular';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
@@ -19,7 +19,7 @@ import { MostSearchedItem } from '../api/most-searched-item.model';
 @Injectable()
 export class MostSearchedItemsEffects {
   private readonly actions$ = inject(Actions);
-  private readonly mostSearchedService = inject(PricesService);
+  private readonly apiService = inject(PricesApiService);
   private readonly navController = inject(NavController);
   private readonly store = inject(Store);
   private readonly toastController = inject(ToastController);
@@ -30,7 +30,7 @@ export class MostSearchedItemsEffects {
     this.actions$.pipe(
       ofType(loadItems.type),
       switchMap(() =>
-        this.mostSearchedService.allMostSearchedItems$.pipe(
+        this.apiService.allMostSearchedItems$.pipe(
           map((mostSearchedEntries) =>
             this.toItemsLoadedAction(mostSearchedEntries)
           ),
@@ -50,9 +50,7 @@ export class MostSearchedItemsEffects {
           return await this.showUnauthorizedToast(isAuthenticated);
         }),
         filter((result) => result[1]),
-        switchMap(([{ item }]) =>
-          this.mostSearchedService.saveMostSearchedItem$(item)
-        ),
+        switchMap(([{ item }]) => this.apiService.saveMostSearchedItem$(item)),
         tap(() => this.navController.back()),
         catchError(() => EMPTY)
       ),

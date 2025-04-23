@@ -15,7 +15,7 @@ const PRICES_COLLECTION = 'prices';
 @Injectable({
   providedIn: 'root',
 })
-export class PricesService {
+export class PricesApiService {
   private readonly afs = inject(Firestore);
   private pricesCollection = collection(this.afs, PRICES_COLLECTION);
 

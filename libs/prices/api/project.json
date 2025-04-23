@@ -1,16 +1,16 @@
 {
   "name": "prices-firestore-feature",
-  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "libs/prices/firestore/feature/src",
+  "sourceRoot": "libs/prices/api/src",
   "prefix": "travellers-apps",
   "tags": ["scope:prices", "type:api"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/prices/firestore/feature"],
+      "outputs": ["{workspaceRoot}/coverage/libs/prices/api"],
       "options": {
-        "jestConfig": "libs/prices/firestore/feature/jest.config.ts"
+        "jestConfig": "libs/prices/api/jest.config.ts"
       }
     },
     "lint": {

@@ -16,11 +16,11 @@ import {
 } from 'ta-firestore';
 
 const firebaseOptions = {
-  apiKey: process.env['NX_APP_API_KEY'],
-  authDomain: process.env['NX_APP_AUTH_DOMAIN'],
-  projectId: process.env['NX_APP_PROJECT_ID'],
-  storageBucket: process.env['NX_APP_STORAGE_BUCKET'],
-  messagingSenderId: process.env['NX_APP_MESSAGINX_SENDER_ID'],
+  apiKey: process.env['NX_APP_FINANCES_API_KEY'],
+  authDomain: process.env['NX_APP_FINANCES_AUTH_DOMAIN'],
+  projectId: process.env['NX_APP_FINANCES_PROJECT_ID'],
+  storageBucket: process.env['NX_APP_FINANCES_STORAGE_BUCKET'],
+  messagingSenderId: process.env['NX_APP_FINANCES_MESSAGINX_SENDER_ID'],
 };
 
 export const provideFinancesStore = (environment: Environment) => [

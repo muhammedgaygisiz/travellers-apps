@@ -11,6 +11,7 @@ import { loadedAccountsFromFirestore } from './actions';
 import { FinancesApiService } from 'finances/api';
 import { Store } from '@ngrx/store';
 import { accounts } from './selectors';
+import { fromAuth } from 'ta-firestore';
 
 @Injectable()
 export class AccountsEffect {
@@ -18,6 +19,18 @@ export class AccountsEffect {
   private readonly indexedDbService = inject(IndexedDbService);
   private readonly financesFirestoreService = inject(FinancesApiService);
   private readonly store = inject(Store);
+
+  logoutEffect$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(fromAuth.logoutSucceeded),
+        tap(async () => {
+          this.indexedDbService.clearAccountsInIndexedDb();
+          await this.financesFirestoreService.stopAccountsListener();
+        })
+      ),
+    { dispatch: false }
+  );
 
   getAccountsFromFinancesFirestore$ = createEffect(() => {
     return this.actions$.pipe(

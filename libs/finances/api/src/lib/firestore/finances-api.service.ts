@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, filter, switchMap } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, switchMap } from 'rxjs';
 import { Account } from './model/account';
 import { Bank } from './model/bank';
 import { Payment } from './model/payment';
@@ -21,52 +21,39 @@ export class FinancesApiService {
   private readonly banksChannel$ = new BehaviorSubject<Bank[]>([]);
   private readonly accountsChannel$ = new BehaviorSubject<Account[]>([]);
 
-  constructor() {
-    FirebaseFirestore.addCollectionSnapshotListener(
-      {
-        reference: PAYMENTS_COLLECTION,
-      },
-      (docs) => {
-        const payments = docs?.snapshots.map((doc: any) => doc.data) || [];
-        this.paymentsChannel$.next(payments as unknown as Payment[]);
-      }
-    );
-
-    FirebaseFirestore.addCollectionSnapshotListener(
-      {
-        reference: BANKS_COLLECTION,
-      },
-      (docs) => {
-        const banks = docs?.snapshots.map((doc: any) => doc.data) || [];
-        this.banksChannel$.next(banks as unknown as Bank[]);
-      }
-    );
-
-    FirebaseFirestore.addCollectionSnapshotListener(
-      {
-        reference: ACCOUNTS_COLLECTION,
-      },
-      (docs) => {
-        const accounts = docs?.snapshots.map((doc: any) => doc.data) || [];
-        this.accountsChannel$.next(accounts as unknown as Account[]);
-      }
-    );
-  }
-
   public allAccounts$ = this.authService.isLoggedIn$.pipe(
     filter((isLoggedIn) => isLoggedIn),
-    switchMap(() => this.accountsChannel$)
+    debounceTime(500),
+    switchMap(() => {
+      this.startAccountListener();
+
+      return this.accountsChannel$;
+    })
   );
 
   public allBanks$ = this.authService.isLoggedIn$.pipe(
     filter((isLoggedIn) => isLoggedIn),
-    switchMap(() => this.banksChannel$)
+    debounceTime(500),
+    switchMap(() => {
+      this.startBanksListener();
+
+      return this.banksChannel$;
+    })
   );
 
   public allPayments$ = this.authService.isLoggedIn$.pipe(
     filter((isLoggedIn) => isLoggedIn),
-    switchMap(() => this.paymentsChannel$)
+    debounceTime(500),
+    switchMap(() => {
+      this.startPaymentsListener();
+
+      return this.paymentsChannel$;
+    })
   );
+
+  private banksCallbackId = '';
+  private accountsCallbackId = '';
+  private paymentsCallbackId = '';
 
   // eslint-disable-next-line no-unused-vars
   saveNewBank(newBank: { name: string }) {
@@ -134,5 +121,74 @@ export class FinancesApiService {
     }
 
     return undefined;
+  }
+
+  private async startPaymentsListener() {
+    console.log('#mo Fetching payments from Firestore');
+
+    this.paymentsCallbackId =
+      await FirebaseFirestore.addCollectionSnapshotListener(
+        {
+          reference: PAYMENTS_COLLECTION,
+        },
+        (docs) => {
+          console.log('#mo Fetched payments from Firestore', docs);
+
+          const payments = docs?.snapshots.map((doc: any) => doc.data) || [];
+          this.paymentsChannel$.next(payments as unknown as Payment[]);
+        }
+      );
+  }
+
+  private async startBanksListener() {
+    console.log('#mo Fetching banks from Firestore');
+
+    this.banksCallbackId =
+      await FirebaseFirestore.addCollectionSnapshotListener(
+        {
+          reference: BANKS_COLLECTION,
+        },
+        (docs) => {
+          console.log('#mo Fetched banks from Firestore', docs);
+
+          const banks = docs?.snapshots.map((doc: any) => doc.data) || [];
+          this.banksChannel$.next(banks as unknown as Bank[]);
+        }
+      );
+  }
+
+  private async startAccountListener() {
+    console.log('#mo Fetching accounts from Firestore');
+
+    this.accountsCallbackId =
+      await FirebaseFirestore.addCollectionSnapshotListener(
+        {
+          reference: ACCOUNTS_COLLECTION,
+        },
+        (docs) => {
+          console.log('#mo Fetched accounts from Firestore', docs);
+
+          const accounts = docs?.snapshots.map((doc: any) => doc.data) || [];
+          this.accountsChannel$.next(accounts as unknown as Account[]);
+        }
+      );
+  }
+
+  async stopBanksListener() {
+    await FirebaseFirestore.removeSnapshotListener({
+      callbackId: this.banksCallbackId,
+    });
+  }
+
+  async stopAccountsListener() {
+    await FirebaseFirestore.removeSnapshotListener({
+      callbackId: this.accountsCallbackId,
+    });
+  }
+
+  async stopPaymentsListener() {
+    await FirebaseFirestore.removeSnapshotListener({
+      callbackId: this.paymentsCallbackId,
+    });
   }
 }

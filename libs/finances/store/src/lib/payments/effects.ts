@@ -16,6 +16,7 @@ import {
   updatedPayment,
 } from './actions';
 import { payments } from './selectors';
+import { fromAuth } from 'ta-firestore';
 
 @Injectable()
 export class PaymentEffects {
@@ -24,6 +25,18 @@ export class PaymentEffects {
   private readonly api = inject(FinancesApiService);
 
   private readonly store = inject(Store);
+
+  logoutEffect$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(fromAuth.logoutSucceeded),
+        tap(async () => {
+          this.indexedDbService.clearPaymentsInIndexedDb();
+          await this.api.stopPaymentsListener();
+        })
+      ),
+    { dispatch: false }
+  );
 
   getPaymentsFromFinancesStore$ = createEffect(() => {
     return this.actions$.pipe(

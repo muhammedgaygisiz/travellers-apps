@@ -48,4 +48,16 @@ export class IndexedDbService extends Dexie {
     this.payments.clear();
     this.payments.bulkPut(payments);
   }
+
+  clearBanksInIndexedDb() {
+    this.banks.clear();
+  }
+
+  clearAccountsInIndexedDb() {
+    this.accounts.clear();
+  }
+
+  clearPaymentsInIndexedDb() {
+    this.payments.clear();
+  }
 }

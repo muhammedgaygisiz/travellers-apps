@@ -60,7 +60,6 @@
       "@travellers-apps/prices/add-item/feature": [
         "libs/prices/add-item/feature/src/index.ts"
       ],
-      "prices/api": ["libs/prices/api/src/index.ts"],
       "@travellers-apps/prices/geoapify/feature": [
         "libs/prices/geoapify/feature/src/index.ts"
       ],
@@ -108,6 +107,7 @@
       "localization": ["libs/common/localization/src/index.ts"],
       "new-trip": ["libs/budget-planner/new-trip/src/index.ts"],
       "pages": ["libs/finances/pages/pages/src/index.ts"],
+      "prices/api": ["libs/prices/api/src/index.ts"],
       "start": ["libs/budget-planner/start/src/index.ts"],
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
       "trip-dashboard": ["libs/budget-planner/trip-dashboard/src/index.ts"],

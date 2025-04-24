@@ -4,16 +4,17 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/bite-tribe/src",
-  "tags": [],
+  "tags": ["scope:bite-tribe", "type:app"],
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:application",
+      "executor": "@nx/angular:browser-esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "plugins": ["apps/bite-tribe/env-var-plugin.js"],
         "outputPath": "dist/apps/bite-tribe",
         "index": "apps/bite-tribe/src/index.html",
-        "browser": "apps/bite-tribe/src/main.ts",
-        "polyfills": ["zone.js"],
+        "main": "apps/bite-tribe/src/main.ts",
+        "polyfills": [],
         "tsConfig": "apps/bite-tribe/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -22,7 +23,10 @@
             "input": "apps/bite-tribe/public"
           }
         ],
-        "styles": ["apps/bite-tribe/src/styles.scss"],
+        "styles": [
+          "apps/bite-tribe/src/theme/variables.scss",
+          "apps/bite-tribe/src/global.scss"
+        ],
         "scripts": []
       },
       "configurations": {
@@ -50,7 +54,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@nx/angular:dev-server",
       "configurations": {
         "production": {
           "buildTarget": "bite-tribe:build:production"

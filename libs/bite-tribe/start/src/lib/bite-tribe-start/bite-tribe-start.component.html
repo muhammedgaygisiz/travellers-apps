@@ -1,23 +1,25 @@
-<ion-content class="ion-padding" [style.--background]="'#FFFBEF'">
-  <div class="ion-text-center">
-    <img src="assets/bite-tribe-logo.png" alt="BiteTribe Logo" class="logo" />
-    <h1 class="company-name">BiteTribe</h1>
-    <h2 class="tagline">Find it. Try it. Share it.</h2>
-  </div>
+<ion-content class="ion-padding">
+  <div class="container">
+    <div class="ion-text-center logo-text-container">
+      <img src="assets/bite-tribe-logo.png" alt="BiteTribe Logo" class="logo" />
+      <span class="company-name">BiteTribe</span>
+      <span class="tagline">Find it. Try it. Share it.</span>
+    </div>
 
-  <div class="ion-padding-top buttons-container">
-    <ion-button expand="block" color="primary" routerLink="/auth/login">
-      Log In
-    </ion-button>
+    <div class="ion-padding-top buttons-container">
+      <ion-button expand="block" color="primary" routerLink="/auth/login">
+        Log In
+      </ion-button>
 
-    <ion-button
-      expand="block"
-      fill="outline"
-      color="primary"
-      routerLink="/auth/signup"
-      class="ion-margin-top"
-    >
-      Sign Up
-    </ion-button>
+      <ion-button
+        expand="block"
+        fill="outline"
+        color="primary"
+        routerLink="/auth/signup"
+        class="ion-margin-top"
+      >
+        Sign Up
+      </ion-button>
+    </div>
   </div>
 </ion-content>

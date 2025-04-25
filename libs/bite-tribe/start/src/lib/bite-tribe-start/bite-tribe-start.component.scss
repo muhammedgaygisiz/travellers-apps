@@ -1,7 +1,5 @@
 :host {
   ion-content {
-    --background: #fffbef;
-
     .container {
       max-width: 300px;
       margin: 160px auto 20px;
@@ -26,7 +24,6 @@
 
           align-self: end;
 
-          color: #003b5c;
           font-size: 2.75rem;
           font-weight: bold;
           text-align: left;
@@ -36,22 +33,9 @@
           grid-column: 2;
           grid-row: 2;
 
-          color: #c25b02;
+          color: var(--ion-color-secondary);
           font-size: 1rem;
           text-align: left;
-        }
-      }
-
-      .buttons-container {
-        ion-button {
-          --background: #003b5c;
-          --color: white;
-
-          &[fill='outline'] {
-            --background: transparent;
-            --color: #003b5c;
-            --border-color: #003b5c;
-          }
         }
       }
     }

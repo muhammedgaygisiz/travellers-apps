@@ -19,9 +19,8 @@ export class BiteTribeStoreService implements StoreService {
     this.store?.dispatch(fromAuth.login({ authCreds }));
   }
 
-  // eslint-disable-next-line no-unused-vars
-  register(authCreds: Login): void {
-    throw new Error('Method not implemented.');
+  register(registration: Login): void {
+    this.store?.dispatch(fromAuth.register({ registration }));
   }
 
   confirmError(): void {

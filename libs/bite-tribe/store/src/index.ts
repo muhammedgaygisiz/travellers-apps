@@ -1,1 +1,1 @@
-export { BiteTribeStoreService } from './lib/bite-tribe-store.service';
+export { provideBiteTribeStore } from './lib/provide-bite-tribe-store';

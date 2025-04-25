@@ -1,0 +1,38 @@
+:host {
+  ion-content {
+    --background: #fffbef;
+  }
+
+  .ion-text-center {
+  }
+
+  .logo {
+    max-width: 200px;
+    margin: 60px auto 20px;
+  }
+
+  .company-name {
+    color: #003b5c;
+  }
+
+  .tagline {
+    color: #c25b02;
+    margin-bottom: 60px;
+  }
+
+  .buttons-container {
+    max-width: 300px;
+    margin: 0 auto;
+
+    ion-button {
+      --background: #003b5c;
+      --color: white;
+
+      &[fill='outline'] {
+        --background: transparent;
+        --color: #003b5c;
+        --border-color: #003b5c;
+      }
+    }
+  }
+}

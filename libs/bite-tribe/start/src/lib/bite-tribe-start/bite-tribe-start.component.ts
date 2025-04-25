@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { IonButton, IonContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'lib-bite-tribe-start',
-  imports: [CommonModule],
   templateUrl: './bite-tribe-start.component.html',
-  styleUrl: './bite-tribe-start.component.css',
+  styleUrl: './bite-tribe-start.component.scss',
+  imports: [IonContent, IonButton],
 })
 export class BiteTribeStartComponent {}

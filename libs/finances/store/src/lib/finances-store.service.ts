@@ -5,14 +5,9 @@ import { accounts } from './accounts/selectors';
 import { payments, selectedPayment } from './payments/selectors';
 import { saveNewPayment, savePayment } from './payments/actions';
 import { ibanFromParams } from './router/selectors';
-import { StoreService } from 'utils';
+import { StoreService, Login } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { toSignal } from '@angular/core/rxjs-interop';
-
-interface Login {
-  email: string;
-  password: string;
-}
 
 @Injectable({
   providedIn: 'root',

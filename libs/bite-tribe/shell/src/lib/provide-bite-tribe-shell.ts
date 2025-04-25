@@ -6,7 +6,8 @@ import {
 } from '@angular/router';
 import { ROUTES } from './routes';
 import { IonicRouteStrategy } from '@ionic/angular';
-import { APP_TITLE, Environment } from 'utils';
+import { APP_TITLE, Environment, STORE_SERVICE } from 'utils';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 
 export const provideBiteTribeShell = (
   // eslint-disable-next-line no-unused-vars
@@ -17,6 +18,7 @@ export const provideBiteTribeShell = (
     provide: RouteReuseStrategy,
     useClass: IonicRouteStrategy,
   },
+  { provide: STORE_SERVICE, useClass: BiteTribeStoreService },
   { provide: APP_TITLE, useValue: 'Bite Tribe' },
   // provideBiteTribeStore(environment),
 ];

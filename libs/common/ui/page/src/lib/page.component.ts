@@ -58,6 +58,8 @@ export class PageComponent {
 
   title = input('');
 
+  showFooter = input(true);
+
   appTitle = computed(() => {
     const title = this.title();
 

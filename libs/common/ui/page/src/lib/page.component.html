@@ -1,9 +1,9 @@
 <div class="ion-page">
   <ion-header>
-    <ion-toolbar>
+    <ion-toolbar color="primary">
       <ion-buttons slot="start">
         @if (enableBackButton()) {
-        <ion-back-button defaultHref="/" color="white" />
+        <ion-back-button defaultHref="/" />
         }
       </ion-buttons>
 
@@ -14,7 +14,7 @@
 
       <ion-buttons slot="end">
         <ion-button data-cy="btn-menu" (click)="showMenuPopover($event)">
-          <ion-icon color="dark" slot="icon-only" name="menu-outline" />
+          <ion-icon slot="icon-only" name="menu-outline" />
         </ion-button>
       </ion-buttons>
     </ion-toolbar>
@@ -35,10 +35,10 @@
         <ion-icon name="add" />
       </ion-fab-button>
     </ion-fab>
-    }
-
+    } @if(showFooter()) {
     <ion-footer>
       <ion-toolbar />
     </ion-footer>
+    }
   </ng-container>
 </div>

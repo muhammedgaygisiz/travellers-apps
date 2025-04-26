@@ -3,21 +3,33 @@
   [showFooter]="false"
   [enableBackButton]="true"
 >
+  @if (isWeb()) {
+  <input
+    type="file"
+    #fileUploader
+    class="ion-hide"
+    (change)="onFileSelected($event)"
+  />
+  }
+
   <ion-content class="ion-padding">
     <h1>Create Bite</h1>
 
-    <ion-card class="image-placeholder">
+    <ion-card class="image-placeholder" (click)="onImageUploadClick()">
       <ion-card-content>
+        @if (showImage()) {
+        <img [src]="service.imageBase64()" />
+        } @else { @if(isWeb()) {
         <ion-icon name="image-outline" size="large" />
+        } @else {
+        <ion-icon name="camera-outline" size="large" />
+        } }
       </ion-card-content>
     </ion-card>
 
     <ion-list lines="full" class="ion-padding-top">
       <ion-item>
         <ion-input label="Dish Name"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input label="Location"></ion-input>
       </ion-item>
       <ion-item>
         <ion-input label="Price"></ion-input>

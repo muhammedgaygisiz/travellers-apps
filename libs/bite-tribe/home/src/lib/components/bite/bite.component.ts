@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
   IonCard,
   IonCardContent,
@@ -18,5 +18,6 @@ import {
     IonCardSubtitle,
     IonCardTitle,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteComponent {}

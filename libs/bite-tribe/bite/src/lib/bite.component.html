@@ -14,36 +14,39 @@
 
   <ion-content class="ion-padding">
     <h1>Create Bite</h1>
+    <img [src]="imageBase64()" />
+    <form [formGroup]="biteFormGroup">
+      @if(!showImage()) {
+      <ion-card class="image-placeholder" (click)="onImageUploadClick()">
+        <ion-card-content>
+          @if (isWeb()) {
+          <ion-icon name="image-outline" size="large" />
+          } @else {
+          <ion-icon name="camera-outline" size="large" />
+          }
+        </ion-card-content>
+      </ion-card>
+      }
 
-    <ion-card class="image-placeholder" (click)="onImageUploadClick()">
-      <ion-card-content>
-        @if (showImage()) {
-        <img [src]="service.imageBase64()" />
-        } @else { @if(isWeb()) {
-        <ion-icon name="image-outline" size="large" />
-        } @else {
-        <ion-icon name="camera-outline" size="large" />
-        } }
-      </ion-card-content>
-    </ion-card>
+      <ion-list lines="full" class="ion-padding-top">
+        <ion-item>
+          <ion-input label="Dish Name" formControlName="name"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Price" formControlName="price"></ion-input>
+        </ion-item>
+      </ion-list>
 
-    <ion-list lines="full" class="ion-padding-top">
-      <ion-item>
-        <ion-input label="Dish Name"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input label="Price"></ion-input>
-      </ion-item>
-    </ion-list>
-
-    <ion-button
-      expand="block"
-      color="primary"
-      routerLink="/home"
-      routerDirection="back"
-      class="ion-margin-top"
-    >
-      Post
-    </ion-button>
+      <ion-button
+        expand="block"
+        color="primary"
+        routerDirection="back"
+        class="ion-margin-top"
+        [disabled]="isInvalid()"
+        (click)="saveNewBite()"
+      >
+        Post
+      </ion-button>
+    </form>
   </ion-content>
 </ta-page>

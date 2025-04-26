@@ -4,6 +4,8 @@ import {
   computed,
   ElementRef,
   inject,
+  output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
@@ -17,8 +19,12 @@ import {
   IonItem,
   IonList,
 } from '@ionic/angular/standalone';
-import { RouterLink } from '@angular/router';
 import { BiteService } from './bite.service';
+import { Platform } from '@ionic/angular';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'bt-bite',
@@ -31,8 +37,8 @@ import { BiteService } from './bite.service';
     IonItem,
     IonInput,
     IonButton,
-    RouterLink,
     IonContent,
+    ReactiveFormsModule,
   ],
   templateUrl: './bite.component.html',
   styleUrl: './bite.component.scss',
@@ -40,22 +46,41 @@ import { BiteService } from './bite.service';
 })
 export class BiteTribeBiteComponent {
   readonly service = inject(BiteService);
+  private readonly platform = inject(Platform);
+  private readonly formBuilder = inject(FormBuilder);
+
+  submitNewBite = output<typeof this.biteFormGroup.value>();
+
   private readonly fileUpload =
     viewChild<ElementRef<HTMLInputElement>>('fileUploader');
 
-  isWeb = this.service.isWeb;
-  showImage = computed(() => {
-    const img = this.service.imageBase64();
+  isWeb = signal(!this.platform.is('hybrid'));
 
-    if (img === null) {
-      return false;
-    }
-
-    return true;
+  biteFormGroup = this.formBuilder.group({
+    image: ['', Validators.required],
+    name: ['', Validators.required],
+    price: [null, Validators.required],
   });
 
+  imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);
+
+  showImage = computed(() => {
+    const img = this.imageBase64();
+
+    return !!img;
+  });
+
+  isInvalid = toSignal(
+    this.biteFormGroup.valueChanges.pipe(
+      map(() => {
+        return !this.biteFormGroup.valid;
+      })
+    ),
+    { initialValue: !this.biteFormGroup.valid }
+  );
+
   onImageUploadClick() {
-    if (!this.service.imageBase64()) {
+    if (!this.imageBase64()) {
       if (this.isWeb()) {
         const fileUpload = this.fileUpload();
 
@@ -69,7 +94,35 @@ export class BiteTribeBiteComponent {
         return;
       }
 
-      this.service.takePhoto();
+      this.takePhoto();
+    }
+  }
+
+  async takePhoto() {
+    if (this.platform.is('hybrid')) {
+      await this.takePictureOnNative();
+      return;
+    }
+  }
+
+  private async takePictureOnNative() {
+    try {
+      await Camera.requestPermissions();
+      await Camera.requestPermissions();
+
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: true,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+      });
+
+      this.biteFormGroup.controls['image'].patchValue(
+        `data:image/${image.format};base64,${image.base64String}`
+      );
+    } catch (e) {
+      console.error('Error taking photo:', e);
+      throw e;
     }
   }
 
@@ -78,10 +131,19 @@ export class BiteTribeBiteComponent {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        this.service.saveImageFromFileUpload(reader.result as string);
-        // Handle the base64 image
+        this.biteFormGroup.controls['image'].patchValue(
+          reader.result as string
+        );
       };
       reader.readAsDataURL(file);
+    }
+  }
+
+  saveNewBite() {
+    if (this.biteFormGroup.valid) {
+      const newBite = this.biteFormGroup.value;
+      console.log('#mo', newBite);
+      this.submitNewBite.emit(newBite);
     }
   }
 }

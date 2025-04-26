@@ -60,6 +60,8 @@ export class PageComponent {
 
   showFooter = input(true);
 
+  showHeaderMenu = input(true);
+
   appTitle = computed(() => {
     const title = this.title();
 

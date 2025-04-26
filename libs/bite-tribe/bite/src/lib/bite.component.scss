@@ -1,0 +1,16 @@
+:host {
+  .image-placeholder {
+    background-color: #f1ead9;
+    border: 2px dashed #ccc;
+    height: 200px;
+    margin: 0;
+
+    ion-card-content {
+      height: 100%;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}

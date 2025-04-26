@@ -15,6 +15,7 @@ import {
   checkmarkOutline,
   menuOutline,
   languageOutline,
+  imageOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -34,5 +35,6 @@ export const addNecessaryIcons = () => {
     checkmarkOutline,
     menuOutline,
     languageOutline,
+    imageOutline,
   });
 };

@@ -6,7 +6,6 @@ import {
   inject,
   viewChild,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
@@ -24,7 +23,6 @@ import { BiteService } from './bite.service';
 @Component({
   selector: 'bt-bite',
   imports: [
-    CommonModule,
     PageComponent,
     IonCard,
     IonIcon,

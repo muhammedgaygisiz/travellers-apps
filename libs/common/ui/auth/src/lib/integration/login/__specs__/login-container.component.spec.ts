@@ -1,39 +1,33 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { addNecessaryIcons, getIonicConfig } from 'utils';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import { signal } from '@angular/core';
 import { LoginContainerComponent } from '../login-container.component';
 import { LoginService } from '../login.service';
-import { signal } from '@angular/core';
-
-addNecessaryIcons();
-
-jest.mock('localization');
+import { provideIonicAngular } from '@ionic/angular/standalone';
+import { getIonicConfig } from 'utils';
 
 describe('LoginContainerComponent', () => {
   let component: LoginContainerComponent;
   let fixture: ComponentFixture<LoginContainerComponent>;
-  let service: LoginService;
+  let mockLoginService: jest.Mocked<LoginService>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    mockLoginService = {
+      loginFailed: signal(false),
+      login: jest.fn(),
+      gotoSignUp: jest.fn(),
+      loginWithGoogleAccount: jest.fn(),
+    };
+
+    await TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(getIonicConfig()),
         {
           provide: LoginService,
-          useValue: {
-            loginFailed: signal(false),
-            loginWithGoogleAccount: jest.fn(),
-            login: jest.fn(),
-            gotoSignUp: jest.fn(),
-          },
+          useValue: mockLoginService,
         },
       ],
-    });
+    }).compileComponents();
 
-    service = TestBed.inject(LoginService);
-  });
-
-  beforeEach(() => {
     fixture = TestBed.createComponent(LoginContainerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -43,41 +37,42 @@ describe('LoginContainerComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('when onSignupWithGoogle is called', () => {
-    it('should call loginWithGoogleAccount in auth service', () => {
-      const loginWithGoogleAccountMock = jest.spyOn(
-        service,
-        'loginWithGoogleAccount'
-      );
-
-      component.onSignupWithGoogle();
-
-      expect(loginWithGoogleAccountMock).toHaveBeenCalledTimes(1);
-    });
+  it('should initialize with loginFailed as false', () => {
+    expect(component.loginFailed()).toBeFalsy();
   });
 
-  describe('login', () => {
-    it('should call auth in service', () => {
-      const loginSpy = jest.spyOn(service, 'login');
-
-      const authCreds = {
-        email: 'email',
-        password: 'password',
-      };
-
-      component.login(authCreds);
-
-      expect(loginSpy).toHaveBeenCalledWith(authCreds);
-    });
+  it('should reflect changes in loginFailed signal', () => {
+    mockLoginService.loginFailed.set(true);
+    expect(component.loginFailed()).toBeTruthy();
   });
 
-  describe('gotoSignup', () => {
-    it('should call gotoSignUp in service', async () => {
-      const gotoSignUpSpy = jest.spyOn(service, 'gotoSignUp');
+  it('should call login on service when login is called', () => {
+    const credentials = { email: 'test@test.com', password: 'password' };
+    component.login(credentials);
+    expect(mockLoginService.login).toHaveBeenCalledWith(credentials);
+  });
 
-      await component.gotoSignup();
+  it('should call gotoSignUp on service when gotoSignup is called', async () => {
+    await component.gotoSignup();
+    expect(mockLoginService.gotoSignUp).toHaveBeenCalled();
+  });
 
-      expect(gotoSignUpSpy).toHaveBeenCalledTimes(1);
-    });
+  it('should call loginWithGoogleAccount on service when onSignupWithGoogle is called', () => {
+    component.onSignupWithGoogle();
+    expect(mockLoginService.loginWithGoogleAccount).toHaveBeenCalled();
+  });
+
+  it('should handle optional service injection', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [provideIonicAngular(getIonicConfig())],
+    }).compileComponents();
+
+    const fixtureWithoutService = TestBed.createComponent(
+      LoginContainerComponent
+    );
+    const componentWithoutService = fixtureWithoutService.componentInstance;
+
+    expect(componentWithoutService.loginFailed()).toBeTruthy();
   });
 });

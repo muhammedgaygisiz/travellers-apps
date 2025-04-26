@@ -3,8 +3,9 @@ import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { AuthEffects, provideFirestoreUtils } from 'ta-firestore';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
-import { routerReducer } from '@ngrx/router-store';
+import { provideRouterStore, routerReducer } from '@ngrx/router-store';
 import { BiteTribeStoreService } from './bite-tribe-store.service';
+import { RouterEffects } from './router/effects';
 
 // eslint-disable-next-line no-unused-vars
 const firebaseOptions = {
@@ -28,6 +29,7 @@ export const provideBiteTribeStore = (environment: Environment) => [
     }
   ),
   !environment.production ? provideStoreDevtools() : [],
-  provideEffects(AuthEffects),
+  provideRouterStore(),
+  provideEffects(AuthEffects, RouterEffects),
   provideFirestoreUtils(firebaseOptions),
 ];

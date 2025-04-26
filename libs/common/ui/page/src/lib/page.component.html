@@ -33,7 +33,7 @@
   <ng-container>
     @if (showAddButton()) {
     <ion-fab vertical="bottom" horizontal="center" slot="fixed">
-      <ion-fab-button color="light" (click)="showAddPopover.emit($event)">
+      <ion-fab-button color="light" (click)="addButtonClick.emit($event)">
         <ion-icon name="add" />
       </ion-fab-button>
     </ion-fab>

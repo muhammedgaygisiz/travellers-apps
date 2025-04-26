@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { IonChip, IonContent } from '@ionic/angular/standalone';
+import { IonChip, IonContent, NavController } from '@ionic/angular/standalone';
 import { BiteComponent } from './components/bite/bite.component';
 
 @Component({
@@ -9,4 +9,10 @@ import { BiteComponent } from './components/bite/bite.component';
   styleUrl: './home.component.scss',
   imports: [PageComponent, IonContent, IonChip, BiteComponent],
 })
-export class BiteTribeHomeComponent {}
+export class BiteTribeHomeComponent {
+  private readonly navController = inject(NavController);
+
+  onAddButtonClicked() {
+    this.navController.navigateForward(['new-bite']);
+  }
+}

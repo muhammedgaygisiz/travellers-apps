@@ -80,7 +80,7 @@ export class PageComponent {
 
   public languageChangeClick = output<SupportedLang>();
 
-  public showAddPopover = output<MouseEvent>();
+  public addButtonClick = output<MouseEvent>();
 
   async showMenuPopover($event: MouseEvent) {
     const popover = await this.popoverController.create({

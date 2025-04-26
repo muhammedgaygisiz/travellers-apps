@@ -15,6 +15,12 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: 'new-bite',
+    loadComponent: () =>
+      import('bite-tribe/bite').then((m) => m.BiteTribeBiteComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: '',
     redirectTo: 'start',
     pathMatch: 'full',

@@ -4,7 +4,6 @@ import {
   computed,
   ElementRef,
   inject,
-  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -48,8 +47,6 @@ export class BiteTribeBiteComponent {
   readonly service = inject(BiteService);
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
-
-  submitNewBite = output<typeof this.biteFormGroup.value>();
 
   private readonly fileUpload =
     viewChild<ElementRef<HTMLInputElement>>('fileUploader');
@@ -142,8 +139,7 @@ export class BiteTribeBiteComponent {
   saveNewBite() {
     if (this.biteFormGroup.valid) {
       const newBite = this.biteFormGroup.value;
-      console.log('#mo', newBite);
-      this.submitNewBite.emit(newBite);
+      this.service.submitNewBite(newBite);
     }
   }
 }

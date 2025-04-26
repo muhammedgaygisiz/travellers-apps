@@ -1,7 +1,24 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
-import { Store } from '@ngrx/store';
+import { createAction, props, Store } from '@ngrx/store';
+import { saveNewBite } from './bite/actions';
+
+const unknownEntity = createAction(
+  '[Unknown Entity]',
+  props<{ docType: string }>()
+);
+
+const getActionByDocType = (docType: string, entity: any) => {
+  switch (docType) {
+    case 'bite': {
+      return saveNewBite({ bite: entity });
+    }
+    default: {
+      return unknownEntity({ docType });
+    }
+  }
+};
 
 @Injectable()
 export class BiteTribeStoreService implements StoreService {
@@ -25,5 +42,9 @@ export class BiteTribeStoreService implements StoreService {
 
   confirmError(): void {
     throw new Error('Method not implemented.');
+  }
+
+  save(entity: any, docType: string): void {
+    this.store?.dispatch(getActionByDocType(docType, entity));
   }
 }

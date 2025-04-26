@@ -9,10 +9,7 @@ import { IonicRouteStrategy } from '@ionic/angular';
 import { APP_TITLE, Environment } from 'utils';
 import { provideBiteTribeStore } from 'bite-tribe/store';
 
-export const provideBiteTribeShell = (
-  // eslint-disable-next-line no-unused-vars
-  environment: Environment
-) => [
+export const provideBiteTribeShell = (environment: Environment) => [
   provideRouter(ROUTES, withPreloading(PreloadAllModules)),
   {
     provide: RouteReuseStrategy,

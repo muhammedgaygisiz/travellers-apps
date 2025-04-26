@@ -64,7 +64,7 @@ export class PaymentEffects {
     () => {
       return this.actions$.pipe(
         ofType(saveNewPayment),
-        map(({ payment }) => {
+        tap(({ payment }) => {
           this.api.saveNewPayment(payment);
         })
       );

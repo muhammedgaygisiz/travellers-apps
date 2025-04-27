@@ -38,7 +38,7 @@ export class PaymentEffects {
     { dispatch: false }
   );
 
-  getPaymentsFromFinancesStore$ = createEffect(() => {
+  getPaymentsFromApi$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
       switchMap(() => this.api.allPayments$),

@@ -1,7 +1,7 @@
 {
   "name": "bite-tribe/home",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/bite-tribe/home/src",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe/home/page/src",
   "prefix": "lib",
   "projectType": "library",
   "tags": ["scope:bite-tribe", "type:store"],
@@ -10,7 +10,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "libs/bite-tribe/home/jest.config.ts"
+        "jestConfig": "libs/bite-tribe/home/page/jest.config.ts"
       }
     },
     "lint": {

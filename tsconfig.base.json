@@ -79,7 +79,10 @@
       "auth": ["libs/common/ui/auth/src/index.ts"],
       "bite-tribe/api": ["libs/bite-tribe/api/src/index.ts"],
       "bite-tribe/bite": ["libs/bite-tribe/bite/src/index.ts"],
-      "bite-tribe/home": ["libs/bite-tribe/home/src/index.ts"],
+      "bite-tribe/home": ["libs/bite-tribe/home/page/src/index.ts"],
+      "bite-tribe/home-data-access": [
+        "libs/bite-tribe/home/data-access/src/index.ts"
+      ],
       "bite-tribe/shell": ["libs/bite-tribe/shell/src/index.ts"],
       "bite-tribe/start": ["libs/bite-tribe/start/src/index.ts"],
       "bite-tribe/store": ["libs/bite-tribe/store/src/index.ts"],

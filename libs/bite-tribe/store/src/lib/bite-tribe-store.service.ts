@@ -2,7 +2,8 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
-import { saveNewBite } from './bite/actions';
+import { saveNewBite } from './bites/actions';
+import { bites } from './bites/selectors';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -20,13 +21,16 @@ const getActionByDocType = (docType: string, entity: any) => {
   }
 };
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class BiteTribeStoreService implements StoreService {
-  store = inject(Store, { optional: true });
+  store = inject(Store);
 
   loginFailed = signal(false);
-
   registrationError = signal('Not implemented yet.');
+
+  bites$ = this.store.select(bites);
 
   loginWithGoogleAccount(): void {
     throw new Error('Method not implemented.');

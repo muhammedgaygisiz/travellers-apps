@@ -1,15 +1,12 @@
 <ion-card>
   <div class="card-content">
     <div class="card-image">
-      <img
-        alt="Silhouette of mountains"
-        src="https://ionicframework.com/docs/img/demos/card-media.png"
-      />
+      <img alt="Dish" [src]="bite()?.image" />
     </div>
     <div class="card-details">
       <ion-card-header>
         <ion-card-subtitle>Mo's Burger</ion-card-subtitle>
-        <ion-card-title>Corner Burger</ion-card-title>
+        <ion-card-title>{{ bite()?.name }}</ion-card-title>
       </ion-card-header>
 
       <ion-card-content> 0.5 km </ion-card-content>

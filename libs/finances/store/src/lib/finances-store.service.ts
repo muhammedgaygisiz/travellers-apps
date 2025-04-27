@@ -58,4 +58,9 @@ export class FinancesStoreService implements StoreService {
       this.store.dispatch(savePayment({ payment, id }));
     }
   }
+
+  // eslint-disable-next-line no-unused-vars
+  save(entity: any, docType: string): void {
+    throw new Error('Method not implemented.');
+  }
 }

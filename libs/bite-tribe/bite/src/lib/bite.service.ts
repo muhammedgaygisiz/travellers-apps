@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { STORE_SERVICE } from 'utils';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 
 type Bite = Partial<{
   image: string | null;
@@ -9,7 +9,7 @@ type Bite = Partial<{
 
 @Injectable({ providedIn: 'root' })
 export class BiteService {
-  storeService = inject(STORE_SERVICE);
+  storeService = inject(BiteTribeStoreService);
 
   submitNewBite(newBite: Bite) {
     this.storeService.save(newBite, 'bite');

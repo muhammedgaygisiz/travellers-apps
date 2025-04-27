@@ -1,28 +1,18 @@
-const NODE_MODULES_TO_IGNORE = [
-  '.*.mjs$',
-  'ionicons',
-  '@ionic',
-  '@ionic',
-  '@stencil',
-  '@capacitor',
-].join('|');
-
 export default {
-  displayName: 'bite-tribe/home',
-  preset: '../../../jest.preset.js',
+  displayName: 'bite-tribe/home-data-access',
+  preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../coverage/libs/bite-tribe/home',
+  coverageDirectory: '../../../../coverage/libs/bite-tribe/home/data-access',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
         stringifyContentPathRegex: '\\.(html|svg)$',
-        isolatedModules: true,
       },
     ],
   },
-  transformIgnorePatterns: [`node_modules/(?!(${NODE_MODULES_TO_IGNORE}))`],
+  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',

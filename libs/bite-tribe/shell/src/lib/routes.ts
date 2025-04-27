@@ -11,7 +11,7 @@ export const ROUTES: Routes = withAuthRoutes([
   {
     path: 'home',
     loadComponent: () =>
-      import('bite-tribe/home').then((m) => m.BiteTribeHomeComponent),
+      import('bite-tribe/home').then((m) => m.HomeContainerComponent),
     canActivate: [authGuard],
   },
   {

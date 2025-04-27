@@ -15,9 +15,6 @@ export interface StoreService {
   register(registration: Login): void;
 
   confirmError(): void;
-
-  // eslint-disable-next-line no-unused-vars
-  save(entity: any, docType: string): void;
 }
 
 export const STORE_SERVICE = new InjectionToken<StoreService>('store-service');

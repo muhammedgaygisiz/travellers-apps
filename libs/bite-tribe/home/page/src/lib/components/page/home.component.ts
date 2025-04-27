@@ -1,7 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+} from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonChip, IonContent, NavController } from '@ionic/angular/standalone';
-import { BiteComponent } from './components/bite/bite.component';
+import { BiteComponent } from '../bite/bite.component';
 
 @Component({
   selector: 'bt-home',
@@ -12,6 +17,8 @@ import { BiteComponent } from './components/bite/bite.component';
 })
 export class BiteTribeHomeComponent {
   private readonly navController = inject(NavController);
+
+  bites = input<any[]>();
 
   onAddButtonClicked() {
     this.navController.navigateForward(['new-bite']);

@@ -12,6 +12,8 @@
       <ion-chip>Vegan</ion-chip>
     </div>
 
-    <bt-bite />
+    @for (bite of bites(); track bite.id) {
+    <bt-bite [bite]="bite" />
+    }
   </ion-content>
 </ta-page>

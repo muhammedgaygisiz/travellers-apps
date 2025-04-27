@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import {
   IonCard,
   IonCardContent,
@@ -20,4 +20,9 @@ import {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BiteComponent {}
+export class BiteComponent {
+  bite = input<{
+    name: string;
+    image: string;
+  }>();
+}

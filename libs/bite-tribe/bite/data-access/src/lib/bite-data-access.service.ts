@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { Geolocation } from '@capacitor/geolocation';
+import { GeoPoint } from 'firebase/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
@@ -11,10 +12,10 @@ export class BiteDataAccessService {
 
     const enrichedBite = {
       ...newBite,
-      position: {
-        _latitude: currentPosition.coords.latitude,
-        _longitude: currentPosition.coords.longitude,
-      },
+      position: new GeoPoint(
+        currentPosition.coords.latitude,
+        currentPosition.coords.longitude
+      ),
     };
 
     this.storeService.save(enrichedBite, 'bite');

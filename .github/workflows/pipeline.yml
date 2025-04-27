@@ -67,7 +67,7 @@ jobs:
         uses: ./.github/actions/setup-env-for-affected
 
       - name: Run Linter
-        run: npm run nx -- affected -t lint
+        run: npm run nx -- affected -t lint ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
 
   stylelint:
     runs-on: ubuntu-latest
@@ -89,7 +89,7 @@ jobs:
         uses: ./.github/actions/setup-env-for-affected
 
       - name: Run Stylelint
-        run: npm run nx -- affected -t stylelint
+        run: npm run nx -- affected -t stylelint ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
 
   tests:
     runs-on: ubuntu-latest
@@ -111,7 +111,7 @@ jobs:
         uses: ./.github/actions/setup-env-for-affected
 
       - name: Run Unit Tests
-        run: npm run nx -- affected -t test --coverage --coverageReporters=cobertura
+        run: npm run nx -- affected -t test --coverage --coverageReporters=cobertura  ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
 
       - uses: codecov/codecov-action@v4
         with:
@@ -141,7 +141,7 @@ jobs:
       - name: "Setup env"
         uses: ./.github/actions/setup-env-for-affected
 
-      - run: npm run nx -- affected -t build-storybook --configuration=ci
+      - run: npm run nx -- affected -t build-storybook --configuration=ci  ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
 
       - name: Cache Storybook Builds
         uses: actions/cache@v4
@@ -174,7 +174,7 @@ jobs:
           path: dist/storybook/prices
           key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
 
-      - run: npm run nx -- affected -t test-loki
+      - run: npm run nx -- affected -t test-loki  ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
 
       - name: Upload Prices Diffs
         uses: actions/upload-artifact@v4
@@ -203,7 +203,7 @@ jobs:
         with:
           install: true
           command: |
-            npm run nx -- e2e prices-e2e --configurations=production
+            npm run nx -- e2e prices-e2e --configurations=production  ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
         env:
           # pass GitHub token to detect new build vs re-run build
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -228,7 +228,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Build Prices App
-        run: npm run nx -- build prices
+        run: npm run nx -- build prices ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
         env:
           NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
           NX_APP_AUTH_DOMAIN: ${{ secrets.NX_APP_AUTH_DOMAIN }}
@@ -265,7 +265,7 @@ jobs:
           key: prices-build-${{ hashFiles('package-lock.json') }}
 
       - name: Capacitor Sync
-        run: npm run cap:sync
+        run: npm run cap:sync ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
 
 # KOSAML
 
@@ -286,7 +286,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Build Prices App
-        run: npm run nx -- build kosaml
+        run: npm run nx -- build kosaml ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
 
 # Finances
 
@@ -307,7 +307,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Build Prices App
-        run: npm run nx -- build finances
+        run: npm run nx -- build finances ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
 
 # Finances
 
@@ -328,7 +328,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Build Bite Tribe App
-        run: npm run nx -- build bite-tribe
+        run: npm run nx -- build bite-tribe ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
 
 # CV
 
@@ -349,7 +349,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Build CV App
-        run: npm run nx -- build cv
+        run: npm run nx -- build cv ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
 
       - name: Cache CV Build
         uses: actions/cache@v4

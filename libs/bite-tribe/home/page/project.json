@@ -4,7 +4,7 @@
   "sourceRoot": "libs/bite-tribe/home/page/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["scope:bite-tribe", "type:store"],
+  "tags": ["scope:bite-tribe", "type:feature"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

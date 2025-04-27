@@ -6,7 +6,7 @@ import {
 } from '@angular/router';
 import { ROUTES } from './routes';
 import { IonicRouteStrategy } from '@ionic/angular';
-import { APP_TITLE, Environment } from 'utils';
+import { APP_ICON, APP_TITLE, Environment } from 'utils';
 import { provideBiteTribeStore } from 'bite-tribe/store';
 
 export const provideBiteTribeShell = (environment: Environment) => [
@@ -16,5 +16,6 @@ export const provideBiteTribeShell = (environment: Environment) => [
     useClass: IonicRouteStrategy,
   },
   { provide: APP_TITLE, useValue: 'Bite Tribe' },
+  { provide: APP_ICON, useValue: 'location-outline' },
   provideBiteTribeStore(environment),
 ];

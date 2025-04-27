@@ -23,7 +23,7 @@ import {
 import { AngularDelegate } from '@ionic/angular';
 import { SupportedLang } from 'localization';
 import { PopoverMenuComponent } from './popover-menu.component';
-import { APP_TITLE } from 'utils';
+import { APP_TITLE, APP_ICON } from 'utils';
 
 @Component({
   selector: 'ta-page',
@@ -47,6 +47,7 @@ import { APP_TITLE } from 'utils';
 })
 export class PageComponent {
   appTitleToken = inject(APP_TITLE, { optional: true });
+  appIconToken = inject(APP_ICON, { optional: true });
 
   popoverController = inject(PopoverController);
 
@@ -57,6 +58,8 @@ export class PageComponent {
   hideAuthButton = input(false);
 
   title = input('');
+
+  icon = input('pricetag-outline');
 
   showFooter = input(true);
 
@@ -70,6 +73,19 @@ export class PageComponent {
     }
 
     return this.appTitleToken;
+  });
+
+  appIcon = computed(() => {
+    if (this.appIconToken) {
+      return this.appIconToken;
+    }
+
+    const icon = this.icon();
+    if (icon) {
+      return icon;
+    }
+
+    return '';
   });
 
   public addItemClick = output();

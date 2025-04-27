@@ -1,0 +1,15 @@
+<ion-card>
+  <div class="card-content">
+    <div class="card-image">
+      <img alt="Dish" [src]="bite()?.image" />
+    </div>
+    <div class="card-details">
+      <ion-card-header>
+        <ion-card-subtitle>{{ bite()?.place }}</ion-card-subtitle>
+        <ion-card-title>{{ bite()?.name }}</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>0.5 km</ion-card-content>
+    </div>
+  </div>
+</ion-card>

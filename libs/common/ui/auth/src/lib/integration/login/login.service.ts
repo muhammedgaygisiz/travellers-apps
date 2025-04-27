@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { NavController } from '@ionic/angular';
 import { Credentials } from '../../api/credentials.model';
 import { STORE_SERVICE } from 'utils';
@@ -7,13 +7,19 @@ import { STORE_SERVICE } from 'utils';
   providedIn: 'root',
 })
 export class LoginService {
-  private store = inject(STORE_SERVICE);
+  private store = inject(STORE_SERVICE, { optional: true });
   private navController = inject(NavController);
 
-  public loginFailed = this.store.loginFailed;
+  public loginFailed = computed(() => {
+    if (this.store) {
+      return this.store.loginFailed();
+    }
+
+    return true;
+  });
 
   public login(authCreds: Credentials): void {
-    this.store.login(authCreds);
+    this.store?.login(authCreds);
   }
 
   public async gotoSignUp() {
@@ -21,6 +27,6 @@ export class LoginService {
   }
 
   public loginWithGoogleAccount() {
-    this.store.loginWithGoogleAccount();
+    this.store?.loginWithGoogleAccount();
   }
 }

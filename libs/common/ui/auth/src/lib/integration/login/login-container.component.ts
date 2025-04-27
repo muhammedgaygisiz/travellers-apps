@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { LoginService } from './login.service';
 import { LoginComponent } from '../../components/login/login.component';
 import { Credentials } from '../../api/credentials.model';
@@ -15,19 +20,25 @@ import { Credentials } from '../../api/credentials.model';
   imports: [LoginComponent],
 })
 export class LoginContainerComponent {
-  private readonly authService = inject(LoginService);
+  private readonly loginService = inject(LoginService, { optional: true });
 
-  loginFailed = this.authService.loginFailed;
+  loginFailed = computed(() => {
+    if (this.loginService) {
+      return this.loginService.loginFailed();
+    }
+
+    return false;
+  });
 
   public login(authCreds: Credentials) {
-    this.authService.login(authCreds);
+    this.loginService?.login(authCreds);
   }
 
   public async gotoSignup() {
-    await this.authService.gotoSignUp();
+    await this.loginService?.gotoSignUp();
   }
 
   onSignupWithGoogle() {
-    this.authService.loginWithGoogleAccount();
+    this.loginService?.loginWithGoogleAccount();
   }
 }

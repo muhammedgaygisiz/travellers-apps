@@ -2,11 +2,12 @@
   [enableBackButton]="true"
   [showAddButton]="false"
   [hideAuthButton]="true"
+  [showFooter]="false"
 >
   <ta-card>
     <div class="ion-padding">
       <div class="ion-margin-top ion-margin-bottom separator">
-        Sign in with your
+        <ion-text color="primary"> Sign in with your </ion-text>
       </div>
 
       <div class="registration-options">
@@ -21,7 +22,9 @@
         </ion-button>
       </div>
 
-      <div class="ion-margin-top separator">Account or with your Email</div>
+      <div class="ion-margin-top separator">
+        <ion-text color="primary"> Account or with your Email </ion-text>
+      </div>
 
       <form [formGroup]="authFormGroup">
         <ion-item lines="full">
@@ -51,7 +54,7 @@
           [disabled]="!authFormGroup.valid"
           (click)="submitAuth.emit(authFormGroup.value)"
           data-cy="submit"
-          >Save
+          >Log In
         </ion-button>
 
         @if (loginFailed()) {
@@ -67,7 +70,9 @@
 
   <ta-card>
     <div class="ion-margin">
-      <ion-text>If you don't have an account already sign up now.</ion-text>
+      <ion-text color="primary">
+        If you don't have an account already sign up now.
+      </ion-text>
 
       <ion-button
         fill="outline"

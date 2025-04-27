@@ -1,0 +1,36 @@
+$deep_navy: #00365f;
+$cream: #fcf7f0;
+$warm_orange: #c45b2b;
+$dark_charcoal: #2e2e2e;
+$pure_white: #fff;
+
+$background: #fffbef;
+
+:root {
+  /**  Application colors **/
+  // https://ionicframework.com/docs/theming/themes#application-colors
+  --ion-background-color: #{$background};
+  --ion-background-color-rgb: 255, 251, 239;
+
+  --ion-tab-bar-background: #{$background};
+  --ion-tab-bar-background-rgb: 255, 251, 239;
+
+  --ion-text-color: #{$deep_navy};
+  --ion-text-color-rgb: 0, 54, 95;
+
+  /**  Colors **/
+  // https://ionicframework.com/docs/theming/color-generator
+  --ion-color-primary: #{$deep_navy};
+  --ion-color-primary-rgb: 0, 54, 95;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #003054;
+  --ion-color-primary-tint: #1a4a6f;
+
+  --ion-color-secondary: #{$warm_orange};
+  --ion-color-secondary-rgb: 196, 91, 43;
+  --ion-color-secondary-contrast: #000000;
+  --ion-color-secondary-contrast-rgb: 0, 0, 0;
+  --ion-color-secondary-shade: #ac5026;
+  --ion-color-secondary-tint: #ca6b40;
+}

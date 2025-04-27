@@ -1,12 +1,9 @@
 import { InjectionToken, Signal } from '@angular/core';
-
-interface Login {
-  email: string;
-  password: string;
-}
+import { Login } from './login';
 
 export interface StoreService {
   loginFailed: Signal<boolean>;
+
   registrationError: Signal<string | null>;
 
   loginWithGoogleAccount(): void;

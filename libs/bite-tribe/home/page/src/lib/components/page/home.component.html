@@ -1,0 +1,25 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showAddButton]="true"
+  (addButtonClick)="onAddButtonClicked()"
+>
+  <ion-content class="ion-padding">
+    <h1>Bites</h1>
+
+    <div class="chip-container">
+      <ion-chip>Map View</ion-chip>
+      <ion-chip>Nearby</ion-chip>
+      <ion-chip>Vegan</ion-chip>
+    </div>
+
+    @if (!bites()?.length) {
+    <ion-card>
+      <ion-card-content>
+        <ion-text color="primary"> No bites found. Be the first one. </ion-text>
+      </ion-card-content>
+    </ion-card>
+    } @for (bite of bites(); track bite.id) {
+    <bt-bite [bite]="bite" />
+    }
+  </ion-content>
+</ta-page>

@@ -6,4 +6,6 @@ export const getIonicConfig = (): IonicConfig => ({
   mode: 'ios',
   backButtonIcon: 'arrow-back-outline',
   animated: true,
+  scrollPadding: false,
+  scrollAssist: false,
 });

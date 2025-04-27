@@ -7,7 +7,6 @@ const NODE_MODULES_TO_IGNORE = [
   '@capacitor',
 ].join('|');
 
-/* eslint-disable */
 export default {
   displayName: 'common-ui-page',
   preset: '../../../../jest.preset.js',

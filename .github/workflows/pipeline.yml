@@ -12,6 +12,10 @@ on:
         required: false
         default: 'false'
         type: boolean
+      skip_remote_cache:
+        description: "Skip Nx remote cache?"
+        required: false
+        default: 'true'
 
 # Needed for nx-set-shas when run on the main branch
 permissions:
@@ -44,6 +48,8 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - setup
 
@@ -64,6 +70,8 @@ jobs:
 
   stylelint:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - lint
 
@@ -84,6 +92,8 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - stylelint
 
@@ -113,6 +123,8 @@ jobs:
 
   build-storybooks:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - tests
 
@@ -138,6 +150,8 @@ jobs:
 
   loki:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     continue-on-error: true
     needs:
       - build-storybooks
@@ -172,6 +186,8 @@ jobs:
 
   prices-e2e-test:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - loki
 
@@ -196,6 +212,8 @@ jobs:
 
   prices-build:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - prices-e2e-test
 
@@ -226,6 +244,8 @@ jobs:
 
   prices-cap-sync:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - prices-build
 
@@ -250,6 +270,8 @@ jobs:
 
   kosaml-build:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - loki
 
@@ -269,6 +291,8 @@ jobs:
 
   finances-build:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - tests
 
@@ -284,10 +308,33 @@ jobs:
       - name: Build Prices App
         run: npm run nx -- build finances
 
+# Finances
+
+  bite-tribe-build:
+    runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
+    needs:
+      - tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+
+      - name: "Restore Cache"
+        uses: ./.github/actions/restore-cache
+
+      - name: Build Bite Tribe App
+        run: npm run nx -- build bite-tribe
+
 # CV
 
   cv-build:
     runs-on: ubuntu-latest
+    env:
+      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - setup
 

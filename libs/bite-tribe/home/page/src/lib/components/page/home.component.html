@@ -12,7 +12,13 @@
       <ion-chip>Vegan</ion-chip>
     </div>
 
-    @for (bite of bites(); track bite.id) {
+    @if (!bites()?.length) {
+    <ion-card>
+      <ion-card-content>
+        <ion-text color="primary"> No bites found. Be the first one. </ion-text>
+      </ion-card-content>
+    </ion-card>
+    } @for (bite of bites(); track bite.id) {
     <bt-bite [bite]="bite" />
     }
   </ion-content>

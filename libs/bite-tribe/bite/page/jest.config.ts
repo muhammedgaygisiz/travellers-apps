@@ -9,9 +9,9 @@ const NODE_MODULES_TO_IGNORE = [
 
 export default {
   displayName: 'bite-tribe/bite',
-  preset: '../../../jest.preset.js',
+  preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../coverage/libs/bite-tribe/bite',
+  coverageDirectory: '../../../../coverage/libs/bite-tribe/bite/page',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

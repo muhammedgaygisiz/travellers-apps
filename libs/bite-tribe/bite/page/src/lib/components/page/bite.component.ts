@@ -4,6 +4,7 @@ import {
   computed,
   ElementRef,
   inject,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -18,7 +19,6 @@ import {
   IonItem,
   IonList,
 } from '@ionic/angular/standalone';
-import { BiteService } from './bite.service';
 import { Platform } from '@ionic/angular';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -44,9 +44,10 @@ import { map } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteTribeBiteComponent {
-  readonly service = inject(BiteService);
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
+
+  submitNewBite = output<typeof this.biteFormGroup.value>();
 
   private readonly fileUpload =
     viewChild<ElementRef<HTMLInputElement>>('fileUploader');
@@ -56,6 +57,7 @@ export class BiteTribeBiteComponent {
   biteFormGroup = this.formBuilder.group({
     image: ['', Validators.required],
     name: ['', Validators.required],
+    place: ['', Validators.required],
     price: [null, Validators.required],
   });
 
@@ -139,7 +141,7 @@ export class BiteTribeBiteComponent {
   saveNewBite() {
     if (this.biteFormGroup.valid) {
       const newBite = this.biteFormGroup.value;
-      this.service.submitNewBite(newBite);
+      this.submitNewBite.emit(newBite);
     }
   }
 }

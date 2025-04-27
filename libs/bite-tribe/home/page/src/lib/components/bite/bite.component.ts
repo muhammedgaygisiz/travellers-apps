@@ -24,5 +24,6 @@ export class BiteComponent {
   bite = input<{
     name: string;
     image: string;
+    place: string;
   }>();
 }

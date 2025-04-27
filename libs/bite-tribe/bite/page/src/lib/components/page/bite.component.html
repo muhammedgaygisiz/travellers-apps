@@ -14,7 +14,9 @@
 
   <ion-content class="ion-padding">
     <h1>Create Bite</h1>
+
     <img [src]="imageBase64()" />
+
     <form [formGroup]="biteFormGroup">
       @if(!showImage()) {
       <ion-card class="image-placeholder" (click)="onImageUploadClick()">
@@ -31,6 +33,9 @@
       <ion-list lines="full" class="ion-padding-top">
         <ion-item>
           <ion-input label="Dish Name" formControlName="name"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Place Name" formControlName="place"></ion-input>
         </ion-item>
         <ion-item>
           <ion-input label="Price" formControlName="price"></ion-input>

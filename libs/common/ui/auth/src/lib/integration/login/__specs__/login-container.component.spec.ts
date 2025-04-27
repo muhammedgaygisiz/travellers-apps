@@ -10,15 +10,15 @@ describe('LoginContainerComponent', () => {
   let fixture: ComponentFixture<LoginContainerComponent>;
   let mockLoginService: jest.Mocked<LoginService>;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     mockLoginService = {
-      loginFailed: signal(false),
+      loginFailed: signal(false) as unknown as any,
       login: jest.fn(),
       gotoSignUp: jest.fn(),
       loginWithGoogleAccount: jest.fn(),
-    };
+    } as unknown as jest.Mocked<LoginService>;
 
-    await TestBed.configureTestingModule({
+    TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(getIonicConfig()),
         {
@@ -52,6 +52,17 @@ describe('LoginContainerComponent', () => {
     expect(mockLoginService.login).toHaveBeenCalledWith(credentials);
   });
 
+  it('should not call login on service when service is not given', () => {
+    const credentials = { email: 'test@test.com', password: 'password' };
+    const loginService = component['loginService'];
+    component['loginService'] = null;
+
+    component.login(credentials);
+    expect(mockLoginService.login).not.toHaveBeenCalled();
+
+    component['loginService'] = loginService;
+  });
+
   it('should call gotoSignUp on service when gotoSignup is called', async () => {
     await component.gotoSignup();
     expect(mockLoginService.gotoSignUp).toHaveBeenCalled();
@@ -72,7 +83,8 @@ describe('LoginContainerComponent', () => {
       LoginContainerComponent
     );
     const componentWithoutService = fixtureWithoutService.componentInstance;
+    componentWithoutService['loginService'] = null;
 
-    expect(componentWithoutService.loginFailed()).toBeTruthy();
+    expect(componentWithoutService.loginFailed()).toBeFalsy();
   });
 });

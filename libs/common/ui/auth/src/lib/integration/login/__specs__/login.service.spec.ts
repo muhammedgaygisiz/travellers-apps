@@ -23,6 +23,7 @@ describe('LoginService', () => {
           useValue: {
             login: jest.fn(),
             loginWithGoogleAccount: jest.fn(),
+            loginFailed: jest.fn(),
           },
         },
       ],
@@ -35,6 +36,27 @@ describe('LoginService', () => {
 
   it('should create', () => {
     expect(service).toBeTruthy();
+  });
+
+  describe('loginFailed', () => {
+    describe('given no store', () => {
+      it('should return true', () => {
+        const store = service['store'];
+        service['store'] = null;
+
+        const result = service.loginFailed();
+        expect(result).toBeTruthy();
+
+        service['store'] = store;
+      });
+    });
+
+    describe('given store', () => {
+      it('should call loginFailed from store', () => {
+        const result = service.loginFailed();
+        expect(result).toBeFalsy();
+      });
+    });
   });
 
   describe('login', () => {

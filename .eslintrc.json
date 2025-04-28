@@ -86,6 +86,14 @@
                   "scope:common",
                   "type:ui"
                 ]
+              },
+              {
+                "sourceTag": "scope:bite-tribe",
+                "onlyDependOnLibsWithTags": [
+                  "scope:bite-tribe",
+                  "scope:common",
+                  "type:ui"
+                ]
               }
             ]
           }

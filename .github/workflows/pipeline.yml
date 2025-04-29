@@ -12,11 +12,6 @@ on:
         required: false
         default: 'false'
         type: boolean
-      skip_remote_cache:
-        description: "Skip Nx remote cache?"
-        required: false
-        default: 'true'
-        type: boolean
 
 # Needed for nx-set-shas when run on the main branch
 permissions:
@@ -31,7 +26,6 @@ env:
   CI: true
   NX_DAEMON: false
   NX_VERBOSE_LOGGING: ${{ github.event.inputs.nx_verbose_logging }}
-  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
   NX_BASE: develop
 
 jobs:
@@ -49,8 +43,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - setup
 
@@ -67,12 +59,10 @@ jobs:
         uses: ./.github/actions/setup-env-for-affected
 
       - name: Run Linter
-        run: npm run nx -- affected -t lint ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+        run: npm run nx -- affected -t lint
 
   stylelint:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - lint
 
@@ -89,12 +79,10 @@ jobs:
         uses: ./.github/actions/setup-env-for-affected
 
       - name: Run Stylelint
-        run: npm run nx -- affected -t stylelint ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+        run: npm run nx -- affected -t stylelint
 
   tests:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - stylelint
 
@@ -111,7 +99,7 @@ jobs:
         uses: ./.github/actions/setup-env-for-affected
 
       - name: Run Unit Tests
-        run: npm run nx -- affected -t test --coverage --coverageReporters=cobertura  ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+        run: npm run nx -- affected -t test --coverage --coverageReporters=cobertura
 
       - uses: codecov/codecov-action@v4
         with:
@@ -124,8 +112,6 @@ jobs:
 
   build-storybooks:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - tests
 
@@ -141,7 +127,7 @@ jobs:
       - name: "Setup env"
         uses: ./.github/actions/setup-env-for-affected
 
-      - run: npm run nx -- affected -t build-storybook --configuration=ci  ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+      - run: npm run nx -- affected -t build-storybook --configuration=ci
 
       - name: Cache Storybook Builds
         uses: actions/cache@v4
@@ -151,8 +137,6 @@ jobs:
 
   loki:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     continue-on-error: true
     needs:
       - build-storybooks
@@ -174,7 +158,7 @@ jobs:
           path: dist/storybook/prices
           key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
 
-      - run: npm run nx -- affected -t test-loki  ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+      - run: npm run nx -- affected -t test-loki
 
       - name: Upload Prices Diffs
         uses: actions/upload-artifact@v4
@@ -187,8 +171,6 @@ jobs:
 
   prices-e2e-test:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - loki
 
@@ -203,7 +185,7 @@ jobs:
         with:
           install: true
           command: |
-            npm run nx -- e2e prices-e2e --configurations=production  ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+            npm run nx -- e2e prices-e2e --configurations=production
         env:
           # pass GitHub token to detect new build vs re-run build
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -213,8 +195,6 @@ jobs:
 
   prices-build:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - prices-e2e-test
 
@@ -228,7 +208,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Build Prices App
-        run: npm run nx -- build prices ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+        run: npm run nx -- build prices
         env:
           NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
           NX_APP_AUTH_DOMAIN: ${{ secrets.NX_APP_AUTH_DOMAIN }}
@@ -245,8 +225,6 @@ jobs:
 
   prices-cap-sync:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - prices-build
 
@@ -265,14 +243,12 @@ jobs:
           key: prices-build-${{ hashFiles('package-lock.json') }}
 
       - name: Capacitor Sync
-        run: npm run cap:sync ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+        run: npm run cap:sync
 
 # KOSAML
 
   kosaml-build:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - loki
 
@@ -286,14 +262,12 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Build Prices App
-        run: npm run nx -- build kosaml ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+        run: npm run nx -- build kosaml
 
 # Finances
 
   finances-build:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - tests
 
@@ -307,14 +281,12 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Build Prices App
-        run: npm run nx -- build finances ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+        run: npm run nx -- build finances
 
 # Finances
 
   bite-tribe-build:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - tests
 
@@ -328,14 +300,12 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Build Bite Tribe App
-        run: npm run nx -- build bite-tribe ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+        run: npm run nx -- build bite-tribe
 
 # CV
 
   cv-build:
     runs-on: ubuntu-latest
-    env:
-      NX_SKIP_REMOTE_CACHE: ${{ github.event.inputs.skip_remote_cache }}
     needs:
       - setup
 
@@ -349,7 +319,7 @@ jobs:
         uses: ./.github/actions/restore-cache
 
       - name: Build CV App
-        run: npm run nx -- build cv ${{ github.event.inputs.skip_remote_cache == 'true' && '--no-cloud' || '' }}
+        run: npm run nx -- build cv
 
       - name: Cache CV Build
         uses: actions/cache@v4

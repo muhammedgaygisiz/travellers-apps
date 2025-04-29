@@ -108,7 +108,6 @@
     },
     "@nxext/capacitor/plugin"
   ],
-  "nxCloudId": "67eed3c4666d0960f371eb74",
   "pluginsConfig": {
     "@nx/js": {
       "projectsAffectedByDependencyUpdates": "auto"

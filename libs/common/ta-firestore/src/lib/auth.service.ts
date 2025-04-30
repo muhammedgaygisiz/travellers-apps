@@ -4,8 +4,6 @@ import {
   Auth,
   createUserWithEmailAndPassword,
   getAuth,
-  GoogleAuthProvider,
-  signInWithRedirect,
 } from '@angular/fire/auth';
 import { AuthCredentials } from './api/auth-credentials.model';
 import {
@@ -61,6 +59,6 @@ export class AuthService {
   }
 
   public registerWithGoogleAccount$() {
-    return from(signInWithRedirect(this.auth, new GoogleAuthProvider()));
+    return from(FirebaseAuthentication.signInWithGoogle({ mode: 'redirect' }));
   }
 }

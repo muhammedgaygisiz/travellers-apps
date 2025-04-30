@@ -43,6 +43,17 @@
           "destination": "/index.html"
         }
       ]
+    },
+    {
+      "target": "bite-tribe",
+      "public": "dist/apps/bite-tribe",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
     }
   ]
 }

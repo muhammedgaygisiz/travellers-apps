@@ -24,6 +24,13 @@
           "finances-878be"
         ]
       }
-     }
+   },
+    "bite-tribe": {
+      "hosting": {
+        "bite-tribe": [
+          "bite-tribe"
+        ]
+      }
+   }
   }
 }

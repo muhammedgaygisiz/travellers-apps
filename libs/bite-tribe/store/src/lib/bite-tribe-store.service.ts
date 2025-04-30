@@ -33,7 +33,7 @@ export class BiteTribeStoreService implements StoreService {
   bites$ = this.store.select(bites);
 
   loginWithGoogleAccount(): void {
-    throw new Error('Method not implemented.');
+    this.store.dispatch(fromAuth.loginWithGoogleAccount());
   }
 
   login(authCreds: Login): void {

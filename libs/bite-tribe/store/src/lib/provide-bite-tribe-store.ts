@@ -9,7 +9,6 @@ import { RouterEffects } from './router/effects';
 import { BiteEffects } from './bites/effects';
 import { fromBites } from './bites';
 
-// eslint-disable-next-line no-unused-vars
 const firebaseOptions = {
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
   authDomain: process.env['NX_APP_BITE_TRIBE_AUTH_DOMAIN'],

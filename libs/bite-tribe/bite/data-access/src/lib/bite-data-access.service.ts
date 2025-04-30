@@ -44,7 +44,7 @@ export class BiteDataAccessService {
     });
   }
 
-  private async getGeoLocationFromWebPlatform() {
+  private async getGeoLocationFromWebPlatform(): Promise<GeolocationPosition> {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject(new Error('Geolocation is not supported'));

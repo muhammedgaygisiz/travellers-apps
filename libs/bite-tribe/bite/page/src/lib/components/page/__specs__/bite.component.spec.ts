@@ -6,8 +6,10 @@ import { getIonicConfig } from 'utils';
 import { provideRouter } from '@angular/router';
 import { Camera } from '@capacitor/camera';
 import { signal } from '@angular/core';
+import * as compressFileModuleMock from '../utils/compress-file';
 
 jest.mock('@capacitor/camera');
+jest.mock('../utils/compress-file');
 
 describe('BiteTribeBiteComponent', () => {
   let component: BiteTribeBiteComponent;
@@ -104,7 +106,7 @@ describe('BiteTribeBiteComponent', () => {
   });
 
   describe('Image handling', () => {
-    it('should handle file selection on web', () => {
+    it('should handle file selection on web', async () => {
       const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
       const event = { target: { files: [file] } } as unknown as Event;
 
@@ -125,7 +127,11 @@ describe('BiteTribeBiteComponent', () => {
 
       global.FileReader = jest.fn(() => mockFileReader) as any;
 
-      component.onFileSelected(event);
+      jest
+        .spyOn(compressFileModuleMock, 'compressFile')
+        .mockReturnValue(Promise.resolve(file));
+
+      await component.onFileSelected(event);
       expect(component.biteFormGroup.controls['image'].value).toBe(
         'data:image/jpeg;base64,test'
       );

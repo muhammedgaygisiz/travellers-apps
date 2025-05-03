@@ -24,6 +24,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { compressFile } from './utils/compress-file';
 
 @Component({
   selector: 'bt-bite',
@@ -125,16 +126,18 @@ export class BiteTribeBiteComponent {
     }
   }
 
-  onFileSelected(event: Event) {
+  async onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
+      const compressedFile = await compressFile(file);
+
       const reader = new FileReader();
       reader.onload = () => {
         this.biteFormGroup.controls['image'].patchValue(
           reader.result as string
         );
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressedFile);
     }
   }
 

@@ -83,9 +83,9 @@ export class DetailsPage {
     }
 
     const formValue = this.newTagsFormGroup.value;
-    const newTags = formValue.tags || '';
+    const newTags = formValue.tags;
 
-    this.submitNewTags.emit(newTags);
+    this.submitNewTags.emit(newTags!);
 
     this.newTagsFormGroup.reset();
   }

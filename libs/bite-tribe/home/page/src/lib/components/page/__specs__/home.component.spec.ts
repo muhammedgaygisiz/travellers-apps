@@ -4,6 +4,7 @@ import { getIonicConfig } from 'utils';
 import { NavController } from '@ionic/angular/standalone';
 import { BiteTribeHomeComponent } from '../home.component';
 import { ComponentRef } from '@angular/core';
+import { Bite } from 'model';
 
 describe('BiteTribeHomeComponent', () => {
   let component: BiteTribeHomeComponent;
@@ -55,5 +56,13 @@ describe('BiteTribeHomeComponent', () => {
     component.onAddButtonClicked();
 
     expect(navSpy).toHaveBeenCalledWith(['new-bite']);
+  });
+
+  it('should navigate to bite page on bite click', () => {
+    const navSpy = jest.spyOn(navController, 'navigateForward');
+
+    component.onBiteClick({ id: '5' } as Bite);
+
+    expect(navSpy).toHaveBeenCalledWith(['bite', '5']);
   });
 });

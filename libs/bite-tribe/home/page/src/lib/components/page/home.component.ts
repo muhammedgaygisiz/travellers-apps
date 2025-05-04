@@ -14,6 +14,7 @@ import {
   NavController,
 } from '@ionic/angular/standalone';
 import { BiteComponent } from '../bite/bite.component';
+import { Bite } from 'model';
 
 @Component({
   selector: 'bt-home',
@@ -37,5 +38,9 @@ export class BiteTribeHomeComponent {
 
   onAddButtonClicked() {
     this.navController.navigateForward(['new-bite']);
+  }
+
+  onBiteClick(bite: Bite) {
+    this.navController.navigateForward(['bite', bite.id]);
   }
 }

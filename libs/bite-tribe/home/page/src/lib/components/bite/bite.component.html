@@ -1,12 +1,13 @@
-<ion-card>
+@let biteData = bite();
+<ion-card (click)="biteClick.emit(biteData)">
   <div class="card-content">
     <div class="card-image">
-      <img alt="Dish" [src]="bite()?.image" />
+      <img alt="Dish" [src]="biteData?.image" />
     </div>
     <div class="card-details">
       <ion-card-header>
-        <ion-card-subtitle>{{ bite()?.place }}</ion-card-subtitle>
-        <ion-card-title>{{ bite()?.name }}</ion-card-title>
+        <ion-card-subtitle>{{ biteData?.place }}</ion-card-subtitle>
+        <ion-card-title>{{ biteData?.name }}</ion-card-title>
       </ion-card-header>
 
       <ion-card-content>0.5 km</ion-card-content>

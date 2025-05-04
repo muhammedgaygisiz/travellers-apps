@@ -1,0 +1,54 @@
+@let biteData = bite();
+
+<ta-page
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+  [enableBackButton]="true"
+>
+  <ion-content class="ion-padding">
+    <ion-img [src]="biteData?.image" class="dish-image" />
+
+    <h1>{{ biteData?.name }}</h1>
+
+    <div class="fields ion-margin-bottom">
+      <span>{{ biteData?.place }} · 0.5 m</span>
+      @if (biteData?.price) {
+      <span class="price">{{ biteData?.price | currency }}</span>
+      }
+    </div>
+
+    <div class="ion-margin-bottom">
+      @for (tag of biteData?.tags; track tag) {
+      <ion-chip>#{{ tag }}</ion-chip>
+      }
+    </div>
+
+    <ion-item lines="full">
+      <ion-input label="New tags" class="tag-input" />
+    </ion-item>
+
+    <ion-list lines="full">
+      <ion-list-header lines="none">
+        <ion-label>Reviews</ion-label>
+      </ion-list-header>
+
+      @for (review of reviews(); track review.id) {
+      <ion-item lines="full">
+        <ion-label>
+          <h2>{{ review.author }}</h2>
+          <p>{{ review.comment }}</p>
+          <ion-note>{{ review.date }} ago</ion-note>
+        </ion-label>
+      </ion-item>
+      }
+    </ion-list>
+
+    <ion-item lines="full">
+      <ion-textarea label="Write a review" rows="3"></ion-textarea>
+    </ion-item>
+
+    <ion-button expand="block" color="primary" class="ion-margin">
+      Post
+    </ion-button>
+  </ion-content>
+</ta-page>

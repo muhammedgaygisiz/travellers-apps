@@ -164,7 +164,7 @@ describe('BiteTribeBiteComponent', () => {
   describe('onImageUploadClick', () => {
     it('should trigger file input click on web platform when no image', () => {
       const mockFileInput = { nativeElement: { click: jest.fn() } };
-      component['fileUpload'] = signal(mockFileInput);
+      (component as any)['fileUpload'] = signal(mockFileInput);
 
       component.onImageUploadClick();
 
@@ -173,7 +173,7 @@ describe('BiteTribeBiteComponent', () => {
 
     it('should not trigger file input click on web platform when image exists', () => {
       const mockFileInput = { nativeElement: { click: jest.fn() } };
-      component['fileUpload'] = signal(mockFileInput);
+      (component as any)['fileUpload'] = signal(mockFileInput);
 
       component.biteFormGroup.controls['image'].patchValue(
         'data:image/jpeg;base64,test'
@@ -194,7 +194,7 @@ describe('BiteTribeBiteComponent', () => {
 
     it('should log error when file upload element not found on web', () => {
       const consoleSpy = jest.spyOn(console, 'error');
-      component['fileUpload'] = signal(null);
+      (component as any)['fileUpload'] = signal(null);
 
       component.onImageUploadClick();
 

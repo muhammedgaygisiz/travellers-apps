@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import {
   IonCard,
   IonCardContent,
@@ -6,6 +11,7 @@ import {
   IonCardSubtitle,
   IonCardTitle,
 } from '@ionic/angular/standalone';
+import { Bite } from 'model';
 
 @Component({
   selector: 'bt-bite',
@@ -21,9 +27,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteComponent {
-  bite = input<{
-    name: string;
-    image: string;
-    place: string;
-  }>();
+  bite = input.required<Bite>();
+
+  biteClick = output<Bite>();
 }

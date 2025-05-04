@@ -32,7 +32,7 @@ export class BiteTribeApiService {
       await FirebaseFirestore.addCollectionSnapshotListener(
         { reference: BITE_COLLECTION },
         (docs) => {
-          console.log('#mo Fetched banks from Firestore', docs);
+          console.log('#mo Fetched bites from Firestore', docs);
 
           const bites =
             docs?.snapshots.map((doc) => ({

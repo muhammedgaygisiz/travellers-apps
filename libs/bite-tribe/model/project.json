@@ -1,0 +1,9 @@
+{
+  "name": "model",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe/model/src",
+  "projectType": "library",
+  "tags": ["type:model", "scope:bite-tribe"],
+  "// targets": "to see all targets run: nx show project model --web",
+  "targets": {}
+}

@@ -82,6 +82,10 @@
       "bite-tribe/bite-data-access": [
         "libs/bite-tribe/bite/data-access/src/index.ts"
       ],
+      "bite-tribe/details": ["libs/bite-tribe/details/page/src/index.ts"],
+      "bite-tribe/details-data-access": [
+        "libs/bite-tribe/details/data-access/src/index.ts"
+      ],
       "bite-tribe/home": ["libs/bite-tribe/home/page/src/index.ts"],
       "bite-tribe/home-data-access": [
         "libs/bite-tribe/home/data-access/src/index.ts"
@@ -115,6 +119,7 @@
       "finances/shell": ["libs/finances/shell/src/index.ts"],
       "finances/store": ["libs/finances/store/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
+      "model": ["libs/bite-tribe/model/src/index.ts"],
       "pages": ["libs/finances/pages/src/index.ts"],
       "prices/api": ["libs/prices/api/src/index.ts"],
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],

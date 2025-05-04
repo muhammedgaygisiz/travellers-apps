@@ -3,7 +3,7 @@ import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
 import { saveNewBite } from './bites/actions';
-import { bites } from './bites/selectors';
+import { bites, bite } from './bites/selectors';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -31,6 +31,7 @@ export class BiteTribeStoreService implements StoreService {
   registrationError = signal('Not implemented yet.');
 
   bites$ = this.store.select(bites);
+  bite$ = this.store.select(bite);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());

@@ -5,7 +5,7 @@ import {
   ofType,
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
-import { loadedBitesFromApi, saveNewBite } from './actions';
+import { loadedBitesFromApi, saveNewBite, saveTags } from './actions';
 import { map, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 
@@ -28,6 +28,18 @@ export class BiteEffects {
         ofType(saveNewBite),
         tap(({ bite }) => {
           this.api.saveNewBite(bite);
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  saveTagsToExistingBite$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(saveTags),
+        tap((payload) => {
+          this.api.saveTagsToExistingBite(payload);
         })
       );
     },

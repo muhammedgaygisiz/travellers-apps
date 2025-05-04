@@ -3,7 +3,12 @@ import { DetailsPage } from '../components/details-page/details.page';
 import { DetailsService } from './details.service';
 
 @Component({
-  template: ` <details-page [bite]="service.bite()" /> `,
+  template: `
+    <details-page
+      [bite]="service.bite()"
+      (submitNewTags)="service.saveNewTags($event)"
+    />
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DetailsPage],
 })

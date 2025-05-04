@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
-import { saveNewBite } from './bites/actions';
+import { saveNewBite, saveTags } from './bites/actions';
 import { bites, bite } from './bites/selectors';
 
 const unknownEntity = createAction(
@@ -51,5 +51,14 @@ export class BiteTribeStoreService implements StoreService {
 
   save(entity: any, docType: string): void {
     this.store?.dispatch(getActionByDocType(docType, entity));
+  }
+
+  saveTags(newTagsArray: string[], id: string) {
+    this.store.dispatch(
+      saveTags({
+        newTags: newTagsArray,
+        id,
+      })
+    );
   }
 }

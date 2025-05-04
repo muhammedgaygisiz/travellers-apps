@@ -54,6 +54,7 @@ describe('BitePage', () => {
       image: 'data:image/jpeg;base64,test',
       name: 'Test Burger',
       place: 'Test Place',
+      tags: 'fish healthy',
       price: 9.99,
     };
 
@@ -66,6 +67,7 @@ describe('BitePage', () => {
       image: 'data:image/jpeg;base64,test',
       name: 'Test Burger',
       place: 'Test Place',
+      tags: 'fish healthy',
       price: 9.99,
     };
 

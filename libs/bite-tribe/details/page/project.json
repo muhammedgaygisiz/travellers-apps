@@ -1,5 +1,5 @@
 {
-  "name": "details",
+  "name": "bite-tribe/details",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/bite-tribe/details/page/src",
   "prefix": "lib",

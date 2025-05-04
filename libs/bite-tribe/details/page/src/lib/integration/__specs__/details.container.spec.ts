@@ -1,14 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DetailsContainer } from './details.container';
+import { DetailsContainer } from '../details.container';
+import { DetailsService } from '../details.service';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+import { signal } from '@angular/core';
 
 describe('DetailsComponent', () => {
   let component: DetailsContainer;
   let fixture: ComponentFixture<DetailsContainer>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [DetailsContainer],
-    }).compileComponents();
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideIonicAngular(),
+        { provide: DetailsService, useValue: { bite: signal(undefined) } },
+      ],
+    });
 
     fixture = TestBed.createComponent(DetailsContainer);
     component = fixture.componentInstance;

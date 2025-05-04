@@ -6,4 +6,8 @@ export class DetailsService {
   dataAccess = inject(DetailsDataAccessService);
 
   bite = this.dataAccess.bite;
+
+  saveNewTags(newTags: string) {
+    this.dataAccess.saveNewTags(newTags);
+  }
 }

@@ -19,13 +19,25 @@
 
     <div class="ion-margin-bottom">
       @for (tag of biteData?.tags; track tag) {
-      <ion-chip>#{{ tag }}</ion-chip>
+      <ion-chip>{{ tag }}</ion-chip>
       }
     </div>
 
     <ion-item lines="full">
-      <ion-input label="New tags" class="tag-input" />
+      <form [formGroup]="newTagsFormGroup">
+        <ion-input label="New tags" class="tag-input" formControlName="tags" />
+      </form>
     </ion-item>
+
+    <ion-button
+      expand="block"
+      color="primary"
+      class="ion-margin"
+      [disabled]="isTagsFieldInvalid()"
+      (click)="saveTags()"
+    >
+      Save tags
+    </ion-button>
 
     <ion-list lines="full">
       <ion-list-header lines="none">

@@ -10,12 +10,16 @@ describe('DetailsService', () => {
   beforeEach(() => {
     mockDataAccessService = {
       bite: signal('mockBiteData'),
+      saveNewTags: jest.fn(),
     } as any;
 
     TestBed.configureTestingModule({
       providers: [
         DetailsService,
-        { provide: DetailsDataAccessService, useValue: mockDataAccessService },
+        {
+          provide: DetailsDataAccessService,
+          useValue: mockDataAccessService,
+        },
       ],
     });
 
@@ -28,5 +32,17 @@ describe('DetailsService', () => {
 
   it('should have bite data from DetailsDataAccessService', () => {
     expect(service.bite()).toBe('mockBiteData');
+  });
+
+  it('should call dataAccess.saveNewTags with provided tags', () => {
+    // Arrange
+    const tags = 'italian, spicy';
+
+    // Act
+    service.saveNewTags(tags);
+
+    // Assert
+    expect(mockDataAccessService.saveNewTags).toHaveBeenCalledWith(tags);
+    expect(mockDataAccessService.saveNewTags).toHaveBeenCalledTimes(1);
   });
 });

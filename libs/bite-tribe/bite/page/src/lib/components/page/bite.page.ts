@@ -40,11 +40,12 @@ import { compressFile } from './utils/compress-file';
     IonContent,
     ReactiveFormsModule,
   ],
-  templateUrl: './bite.component.html',
-  styleUrl: './bite.component.scss',
+  templateUrl: './bite.page.html',
+  styleUrl: './bite.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BiteTribeBiteComponent {
+// eslint-disable-next-line @angular-eslint/component-class-suffix
+export class BitePage {
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
 
@@ -60,6 +61,7 @@ export class BiteTribeBiteComponent {
     name: ['', Validators.required],
     place: ['', Validators.required],
     price: [null, Validators.required],
+    tags: ['', Validators.required],
   });
 
   imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);

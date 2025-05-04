@@ -8,3 +8,4 @@ export { APP_TITLE, APP_ICON } from './lib/app-tokens';
 export { toDate } from './lib/to-date';
 export { byDate } from './lib/by-date';
 export { Login } from './lib/login';
+export { splitTags } from './lib/split-tags';

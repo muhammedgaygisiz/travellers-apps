@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BiteTribeBiteComponent } from '../bite.component';
+import { BitePage } from '../bite.page';
 import { Platform } from '@ionic/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
@@ -11,9 +11,9 @@ import * as compressFileModuleMock from '../utils/compress-file';
 jest.mock('@capacitor/camera');
 jest.mock('../utils/compress-file');
 
-describe('BiteTribeBiteComponent', () => {
-  let component: BiteTribeBiteComponent;
-  let fixture: ComponentFixture<BiteTribeBiteComponent>;
+describe('BitePage', () => {
+  let component: BitePage;
+  let fixture: ComponentFixture<BitePage>;
   let platformMock: Partial<Platform>;
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('BiteTribeBiteComponent', () => {
       ],
     });
 
-    fixture = TestBed.createComponent(BiteTribeBiteComponent);
+    fixture = TestBed.createComponent(BitePage);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -54,6 +54,7 @@ describe('BiteTribeBiteComponent', () => {
       image: 'data:image/jpeg;base64,test',
       name: 'Test Burger',
       place: 'Test Place',
+      tags: 'fish healthy',
       price: 9.99,
     };
 
@@ -66,6 +67,7 @@ describe('BiteTribeBiteComponent', () => {
       image: 'data:image/jpeg;base64,test',
       name: 'Test Burger',
       place: 'Test Place',
+      tags: 'fish healthy',
       price: 9.99,
     };
 
@@ -98,7 +100,7 @@ describe('BiteTribeBiteComponent', () => {
 
     it('should handle native platform', () => {
       (platformMock.is as jest.Mock).mockReturnValue(true);
-      fixture = TestBed.createComponent(BiteTribeBiteComponent);
+      fixture = TestBed.createComponent(BitePage);
       component = fixture.componentInstance;
 
       expect(component.isWeb()).toBe(false);

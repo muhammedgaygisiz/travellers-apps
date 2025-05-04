@@ -53,4 +53,28 @@ export class BiteTribeApiService {
       },
     });
   }
+
+  async saveTagsToExistingBite(payload: { newTags: string[]; id: string }) {
+    try {
+      // First get the current document
+      const doc = await FirebaseFirestore.getDocument({
+        reference: `${BITE_COLLECTION}/${payload.id}`,
+      });
+
+      const data = doc.snapshot.data;
+      // Combine existing and new tags, removing duplicates
+      const existingTags = data && (data['tags'] || []);
+      const uniqueTags = [...new Set([...existingTags, ...payload.newTags])];
+
+      // Update the document with merged tags
+      await FirebaseFirestore.updateDocument({
+        reference: `${BITE_COLLECTION}/${payload.id}`,
+        data: {
+          tags: uniqueTags,
+        },
+      });
+    } catch (error) {
+      console.error('Error updating tags:', error);
+    }
+  }
 }

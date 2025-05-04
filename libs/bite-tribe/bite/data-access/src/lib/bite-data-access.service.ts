@@ -3,6 +3,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { Geolocation } from '@capacitor/geolocation';
 import { GeoPoint } from 'firebase/firestore';
 import { Platform } from '@ionic/angular';
+import { splitTags } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
@@ -14,6 +15,7 @@ export class BiteDataAccessService {
 
     const enrichedBite = {
       ...newBite,
+      tags: splitTags(newBite.tags),
       position: new GeoPoint(
         currentPosition.coords.latitude,
         currentPosition.coords.longitude

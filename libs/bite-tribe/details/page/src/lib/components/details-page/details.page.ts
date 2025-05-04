@@ -83,11 +83,7 @@ export class DetailsPage {
     }
 
     const formValue = this.newTagsFormGroup.value;
-    const newTags = formValue.tags;
-
-    if (!newTags) {
-      return;
-    }
+    const newTags = formValue.tags || '';
 
     this.submitNewTags.emit(newTags);
 

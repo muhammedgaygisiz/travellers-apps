@@ -6,4 +6,36 @@
     flex-direction: row;
     justify-content: space-between;
   }
+
+  .review {
+    ion-label {
+      .review-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+
+        h2 {
+          font-weight: bold;
+          margin-bottom: 4px;
+
+          max-width: 120px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        p {
+          margin: 0;
+          font-size: 16px;
+        }
+      }
+
+      ion-note {
+        font-size: 14px;
+        margin-top: 4px;
+        display: block;
+      }
+    }
+  }
 }

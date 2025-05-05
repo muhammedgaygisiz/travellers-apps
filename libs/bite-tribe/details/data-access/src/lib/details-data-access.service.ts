@@ -10,6 +10,7 @@ export class DetailsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
   bite = toSignal(this.storeService.bite$);
+  reviews = toSignal(this.storeService.reviews$, { initialValue: [] as any });
 
   saveNewTags(newTags: string) {
     const currentBite = this.bite();
@@ -21,5 +22,9 @@ export class DetailsDataAccessService {
 
       return;
     }
+  }
+
+  saveNewReview(newReview: { review: string; biteId: string }) {
+    this.storeService.saveReview(newReview);
   }
 }

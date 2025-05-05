@@ -18,12 +18,14 @@ import {
   IonList,
   IonListHeader,
   IonNote,
+  IonText,
   IonTextarea,
 } from '@ionic/angular/standalone';
 import { CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { TimeAgoPipe } from './pipes/time-ago.pipe';
 
 @Component({
   selector: 'details-page',
@@ -45,6 +47,8 @@ import { map } from 'rxjs';
     IonTextarea,
     IonButton,
     ReactiveFormsModule,
+    TimeAgoPipe,
+    IonText,
   ],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
@@ -55,17 +59,23 @@ export class DetailsPage {
     {
       id: '1',
       author: 'Jacob',
-      comment: 'Really tasty and flavourful',
-      date: '2 days', // '2025-04-21T00:00:00.000Z',
+      review: 'Really tasty and flavourful',
+      createdAt: '2 days', // '2025-04-21T00:00:00.000Z',
+      biteId: '',
     },
   ]);
 
   submitNewTags = output<string>();
+  submitNewReview = output<{ review: string; biteId: string }>();
 
   private readonly formBuilder = inject(FormBuilder);
 
   newTagsFormGroup = this.formBuilder.nonNullable.group({
     tags: ['', Validators.required],
+  });
+
+  reviewFormGroup = this.formBuilder.nonNullable.group({
+    review: ['', Validators.required],
   });
 
   isTagsFieldInvalid = toSignal(
@@ -75,6 +85,15 @@ export class DetailsPage {
       })
     ),
     { initialValue: !this.newTagsFormGroup.valid }
+  );
+
+  isReviewFieldInvalid = toSignal(
+    this.reviewFormGroup.valueChanges.pipe(
+      map(() => {
+        return !this.reviewFormGroup.valid;
+      })
+    ),
+    { initialValue: !this.reviewFormGroup.valid }
   );
 
   saveTags() {
@@ -88,5 +107,27 @@ export class DetailsPage {
     this.submitNewTags.emit(newTags!);
 
     this.newTagsFormGroup.reset();
+  }
+
+  saveReview() {
+    if (!this.reviewFormGroup.valid) {
+      return;
+    }
+
+    const formValue = this.reviewFormGroup.value;
+    const newReview = formValue.review;
+
+    const id = this.bite()?.id;
+
+    if (!id) {
+      return;
+    }
+
+    this.submitNewReview.emit({
+      review: newReview || '',
+      biteId: id,
+    });
+
+    this.reviewFormGroup.reset();
   }
 }

@@ -6,8 +6,13 @@ export class DetailsService {
   dataAccess = inject(DetailsDataAccessService);
 
   bite = this.dataAccess.bite;
+  reviews = this.dataAccess.reviews;
 
   saveNewTags(newTags: string) {
     this.dataAccess.saveNewTags(newTags);
+  }
+
+  saveReview(newReview: { review: string; biteId: string }) {
+    this.dataAccess.saveNewReview(newReview);
   }
 }

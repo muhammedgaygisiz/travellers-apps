@@ -4,6 +4,7 @@ import { BehaviorSubject, debounceTime, filter, switchMap } from 'rxjs';
 import { AuthService } from 'ta-firestore';
 
 const BITE_COLLECTION = 'bites';
+const REVIEW_COLLECTION = 'reviews';
 
 @Injectable({
   providedIn: 'root',
@@ -12,8 +13,10 @@ export class BiteTribeApiService {
   private readonly authService = inject(AuthService);
 
   private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly reviewsChannel$ = new BehaviorSubject<any[]>([]);
 
   private bitesCallbackId = '';
+  private reviewsCallbackId = '';
 
   public allBites$ = this.authService.isLoggedIn$.pipe(
     filter((isLoggedIn) => isLoggedIn),
@@ -76,5 +79,67 @@ export class BiteTribeApiService {
     } catch (error) {
       console.error('Error updating tags:', error);
     }
+  }
+
+  async saveNewReview(payload: { review: string; biteId: string }) {
+    const authState = await this.authService.authState();
+    const user = authState?.user;
+
+    const addDocumentResult = await FirebaseFirestore.addDocument({
+      reference: REVIEW_COLLECTION,
+      data: {
+        review: payload.review,
+        biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
+        createdAt: new Date().toISOString(),
+        author: user?.uid || '',
+      },
+    });
+
+    console.log('#mo', addDocumentResult);
+  }
+
+  reviewsByBiteId(biteId: string) {
+    return this.authService.isLoggedIn$.pipe(
+      filter((isLoggedIn) => isLoggedIn),
+      debounceTime(500),
+      switchMap(() => {
+        this.startReviewListener(biteId);
+
+        return this.reviewsChannel$;
+      })
+    );
+  }
+
+  private async startReviewListener(biteId: string) {
+    console.log('#mo Fetching reviews from Firestore');
+
+    this.reviewsCallbackId =
+      await FirebaseFirestore.addCollectionSnapshotListener(
+        {
+          reference: REVIEW_COLLECTION,
+          compositeFilter: {
+            type: 'and',
+            queryConstraints: [
+              {
+                type: 'where',
+                fieldPath: 'biteId',
+                opStr: '==',
+                value: `/${BITE_COLLECTION}/${biteId}`,
+              },
+            ],
+          },
+        },
+        (docs) => {
+          console.log('#mo Fetched reviews from Firestore', docs);
+
+          const reviews =
+            docs?.snapshots.map((doc) => ({
+              ...doc.data,
+              id: doc.id,
+            })) || [];
+
+          this.reviewsChannel$.next(reviews);
+        }
+      );
   }
 }

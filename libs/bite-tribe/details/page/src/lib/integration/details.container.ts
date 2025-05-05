@@ -6,7 +6,9 @@ import { DetailsService } from './details.service';
   template: `
     <details-page
       [bite]="service.bite()"
+      [reviews]="service.reviews()"
       (submitNewTags)="service.saveNewTags($event)"
+      (submitNewReview)="service.saveReview($event)"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

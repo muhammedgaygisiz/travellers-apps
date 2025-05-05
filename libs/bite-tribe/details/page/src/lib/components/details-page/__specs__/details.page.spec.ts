@@ -32,14 +32,7 @@ describe('DetailsPage', () => {
   });
 
   it('should initialize with default reviews', () => {
-    expect(component.reviews()).toEqual([
-      {
-        id: '1',
-        author: 'Jacob',
-        comment: 'Really tasty and flavourful',
-        date: '2 days',
-      },
-    ]);
+    expect(component.reviews()).toMatchSnapshot();
   });
 
   describe('Tags Form', () => {

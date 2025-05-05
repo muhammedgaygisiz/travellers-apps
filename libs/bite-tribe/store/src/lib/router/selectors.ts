@@ -1,6 +1,8 @@
 import * as fromRouter from '@ngrx/router-store';
-import { createRouterSelector } from '@ngrx/router-store';
+import { createSelector } from '@ngrx/store';
 
-export const routerSlice = createRouterSelector();
+const { selectRouteParams } = fromRouter.getRouterSelectors();
 
-export const { selectRouteParams } = fromRouter.getRouterSelectors();
+export const biteId = createSelector(selectRouteParams, (params) => {
+  return params?.['id'];
+});

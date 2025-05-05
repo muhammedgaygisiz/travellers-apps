@@ -12,7 +12,13 @@ describe('DetailsComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(),
-        { provide: DetailsService, useValue: { bite: signal(undefined) } },
+        {
+          provide: DetailsService,
+          useValue: {
+            bite: signal(undefined),
+            reviews: signal(undefined),
+          },
+        },
       ],
     });
 

@@ -3,7 +3,9 @@ import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
 import { saveNewBite, saveTags } from './bites/actions';
+import { saveNewReview } from './reviews/actions';
 import { bites, bite } from './bites/selectors';
+import { reviews } from './reviews/selectors';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -32,6 +34,7 @@ export class BiteTribeStoreService implements StoreService {
 
   bites$ = this.store.select(bites);
   bite$ = this.store.select(bite);
+  reviews$ = this.store.select(reviews);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
@@ -60,5 +63,9 @@ export class BiteTribeStoreService implements StoreService {
         id,
       })
     );
+  }
+
+  saveReview(newReview: { review: string; biteId: string }) {
+    this.store.dispatch(saveNewReview(newReview));
   }
 }

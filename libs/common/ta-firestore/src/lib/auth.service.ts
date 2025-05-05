@@ -10,6 +10,7 @@ import {
   AuthStateChange,
   FirebaseAuthentication,
 } from '@capacitor-firebase/authentication';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +19,8 @@ export class AuthService {
   private readonly auth = inject(Auth);
   private readonly authStateChange$ =
     new BehaviorSubject<AuthStateChange | null>(null);
+
+  authState = toSignal(this.authStateChange$);
 
   async initilize() {
     const currentUser = await FirebaseAuthentication.getCurrentUser();

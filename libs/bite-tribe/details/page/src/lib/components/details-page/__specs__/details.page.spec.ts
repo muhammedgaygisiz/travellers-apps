@@ -32,14 +32,7 @@ describe('DetailsPage', () => {
   });
 
   it('should initialize with default reviews', () => {
-    expect(component.reviews()).toEqual([
-      {
-        id: '1',
-        author: 'Jacob',
-        comment: 'Really tasty and flavourful',
-        date: '2 days',
-      },
-    ]);
+    expect(component.reviews()).toMatchSnapshot();
   });
 
   describe('Tags Form', () => {
@@ -106,6 +99,65 @@ describe('DetailsPage', () => {
       const content = fixture.debugElement.nativeElement.textContent;
       expect(content).toContain('Pizza');
       expect(content).toContain('Italian Restaurant');
+    });
+  });
+
+  describe('Review Form', () => {
+    it('should initialize with empty review field', () => {
+      expect(component.reviewFormGroup.get('review')?.value).toBe('');
+    });
+
+    it('should be invalid when review field is empty', () => {
+      component.reviewFormGroup.patchValue({ review: '' });
+      expect(component.isReviewFieldInvalid()).toBe(true);
+    });
+
+    it('should be valid when review field has value', () => {
+      component.reviewFormGroup.patchValue({ review: 'Great food!' });
+      expect(component.isReviewFieldInvalid()).toBe(false);
+    });
+
+    it('should emit review and reset form on saveReview when bite exists', () => {
+      // Arrange
+      const mockBite = { id: '123', name: 'Pizza' };
+      const emitSpy = jest.spyOn(component.submitNewReview, 'emit');
+      componentRef.setInput('bite', mockBite);
+      component.reviewFormGroup.patchValue({ review: 'Great food!' });
+
+      // Act
+      component.saveReview();
+
+      // Assert
+      expect(emitSpy).toHaveBeenCalledWith({
+        review: 'Great food!',
+        biteId: '123',
+      });
+      expect(component.reviewFormGroup.get('review')?.value).toBe('');
+    });
+
+    it('should not emit review when form is invalid', () => {
+      // Arrange
+      const emitSpy = jest.spyOn(component.submitNewReview, 'emit');
+      component.reviewFormGroup.patchValue({ review: '' });
+
+      // Act
+      component.saveReview();
+
+      // Assert
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not emit review when bite id is missing', () => {
+      // Arrange
+      const emitSpy = jest.spyOn(component.submitNewReview, 'emit');
+      componentRef.setInput('bite', undefined);
+      component.reviewFormGroup.patchValue({ review: 'Great food!' });
+
+      // Act
+      component.saveReview();
+
+      // Assert
+      expect(emitSpy).not.toHaveBeenCalled();
     });
   });
 });

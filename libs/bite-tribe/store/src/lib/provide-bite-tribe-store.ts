@@ -8,6 +8,8 @@ import { BiteTribeStoreService } from './bite-tribe-store.service';
 import { RouterEffects } from './router/effects';
 import { BiteEffects } from './bites/effects';
 import { fromBites } from './bites';
+import { ReviewEffects } from './reviews/effects';
+import { fromReviews } from './reviews';
 
 const firebaseOptions = {
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
@@ -31,7 +33,8 @@ export const provideBiteTribeStore = (environment: Environment) => [
   ),
   !environment.production ? provideStoreDevtools() : [],
   provideRouterStore(),
-  provideEffects(AuthEffects, RouterEffects, BiteEffects),
+  provideEffects(AuthEffects, RouterEffects, BiteEffects, ReviewEffects),
   provideState(fromBites.key, fromBites.reducer),
+  provideState(fromReviews.key, fromReviews.reducer),
   provideFirestoreUtils(firebaseOptions),
 ];

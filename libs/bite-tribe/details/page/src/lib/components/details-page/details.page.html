@@ -45,21 +45,35 @@
       </ion-list-header>
 
       @for (review of reviews(); track review.id) {
-      <ion-item lines="full">
+      <ion-item lines="full" class="review">
         <ion-label>
-          <h2>{{ review.author }}</h2>
-          <p>{{ review.comment }}</p>
-          <ion-note>{{ review.date }} ago</ion-note>
+          <div class="review-row">
+            <h2>{{ review.author }}</h2>
+            <ion-text><p>{{ review.review }}</p></ion-text>
+          </div>
+          <ion-note>{{ review.createdAt | timeAgo }}</ion-note>
         </ion-label>
       </ion-item>
       }
     </ion-list>
 
-    <ion-item lines="full">
-      <ion-textarea label="Write a review" rows="3"></ion-textarea>
+    <ion-item lines="full" class="ion-margin-top">
+      <form [formGroup]="reviewFormGroup">
+        <ion-textarea
+          label="Write a review"
+          rows="3"
+          formControlName="review"
+        />
+      </form>
     </ion-item>
 
-    <ion-button expand="block" color="primary" class="ion-margin">
+    <ion-button
+      expand="block"
+      color="primary"
+      class="ion-margin"
+      [disabled]="isReviewFieldInvalid()"
+      (click)="saveReview()"
+    >
       Post
     </ion-button>
   </ion-content>

@@ -13,7 +13,7 @@ import {
   IonText,
   NavController,
 } from '@ionic/angular/standalone';
-import { BiteComponent } from '../bite/bite.component';
+import { BitePage } from '../bite/bite-page.component';
 import { Bite } from 'model';
 
 @Component({
@@ -24,7 +24,7 @@ import { Bite } from 'model';
     PageComponent,
     IonContent,
     IonChip,
-    BiteComponent,
+    BitePage,
     IonCard,
     IonCardContent,
     IonText,

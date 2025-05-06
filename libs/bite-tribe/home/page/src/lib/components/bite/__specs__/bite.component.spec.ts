@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { BiteComponent } from '../bite.component';
+import { BitePage } from '../bite-page.component';
 import { ComponentRef } from '@angular/core';
 
 describe('BiteComponent', () => {
-  let component: BiteComponent;
-  let fixture: ComponentFixture<BiteComponent>;
-  let componentRef: ComponentRef<BiteComponent>;
+  let component: BitePage;
+  let fixture: ComponentFixture<BitePage>;
+  let componentRef: ComponentRef<BitePage>;
 
   const mockBite = {
     name: 'Test Burger',
@@ -15,7 +15,7 @@ describe('BiteComponent', () => {
   };
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(BiteComponent);
+    fixture = TestBed.createComponent(BitePage);
     componentRef = fixture.componentRef;
     component = fixture.componentInstance;
     componentRef.setInput('bite', mockBite);

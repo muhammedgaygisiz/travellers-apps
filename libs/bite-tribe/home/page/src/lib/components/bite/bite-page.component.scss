@@ -1,4 +1,16 @@
 :host {
+  .container {
+    position: relative;
+
+    .like-container {
+      position: absolute;
+      z-index: 1;
+
+      bottom: 1rem;
+      right: 2rem;
+    }
+  }
+
   .card-content {
     display: flex;
     align-items: stretch;

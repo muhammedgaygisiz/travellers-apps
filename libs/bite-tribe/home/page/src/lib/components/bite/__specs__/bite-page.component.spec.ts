@@ -1,12 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { BiteComponent } from '../bite.component';
+import { BitePage } from '../bite-page.component';
 import { ComponentRef } from '@angular/core';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 
-describe('BiteComponent', () => {
-  let component: BiteComponent;
-  let fixture: ComponentFixture<BiteComponent>;
-  let componentRef: ComponentRef<BiteComponent>;
+describe('BitePage', () => {
+  let component: BitePage;
+  let fixture: ComponentFixture<BitePage>;
+  let componentRef: ComponentRef<BitePage>;
 
   const mockBite = {
     name: 'Test Burger',
@@ -15,7 +16,10 @@ describe('BiteComponent', () => {
   };
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(BiteComponent);
+    TestBed.configureTestingModule({
+      providers: [provideIonicAngular()],
+    });
+    fixture = TestBed.createComponent(BitePage);
     componentRef = fixture.componentRef;
     component = fixture.componentInstance;
     componentRef.setInput('bite', mockBite);
@@ -46,13 +50,13 @@ describe('BiteComponent', () => {
   it('should handle null bite input', () => {
     componentRef.setInput('bite', null);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toBe('0.5 km');
+    expect(fixture.nativeElement.textContent).toBe('0.5 km👍');
   });
 
   it('should handle undefined bite input', () => {
     componentRef.setInput('bite', undefined);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toBe('0.5 km');
+    expect(fixture.nativeElement.textContent).toBe('0.5 km👍');
   });
 
   it('should update view when bite input changes', () => {

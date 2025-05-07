@@ -6,7 +6,7 @@ import {
 } from '@angular/router';
 import { ROUTES } from './routes';
 import { IonicRouteStrategy } from '@ionic/angular';
-import { APP_ICON, APP_TITLE, Environment } from 'utils';
+import { AFTER_LOGOUT_PAGE, APP_ICON, APP_TITLE, Environment } from 'utils';
 import { provideBiteTribeStore } from 'bite-tribe/store';
 
 export const provideBiteTribeShell = (environment: Environment) => [
@@ -17,5 +17,6 @@ export const provideBiteTribeShell = (environment: Environment) => [
   },
   { provide: APP_TITLE, useValue: 'Bite Tribe' },
   { provide: APP_ICON, useValue: 'location-outline' },
+  { provide: AFTER_LOGOUT_PAGE, useValue: '/start' },
   provideBiteTribeStore(environment),
 ];

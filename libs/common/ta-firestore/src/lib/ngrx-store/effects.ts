@@ -31,6 +31,7 @@ import {
 import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
+import { AFTER_LOGOUT_PAGE } from 'utils';
 
 type AuthCreds = { authCreds: AuthCredentials };
 
@@ -39,6 +40,10 @@ export class AuthEffects {
   private readonly actions$ = inject(Actions);
   private readonly authService = inject(AuthService);
   private readonly navController = inject(NavController);
+
+  private readonly pageAfterLogout = inject(AFTER_LOGOUT_PAGE, {
+    optional: true,
+  });
 
   constructor() {
     this.authService.initilize();
@@ -130,7 +135,12 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(logoutSucceeded.type),
         tap(() => {
-          this.navController.navigateRoot(['/start']);
+          if (this.pageAfterLogout) {
+            this.navController.navigateRoot([this.pageAfterLogout]);
+            return;
+          }
+
+          this.navController.navigateRoot(['/login']);
         })
       ),
     { dispatch: false }

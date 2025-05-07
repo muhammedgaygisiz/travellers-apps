@@ -18,28 +18,36 @@ DebugElement {
           />
            Language 
         </ion-item-divider>
-        <ion-item>
+        <ion-item
+          class="item-has-start-slot"
+        >
           <ion-icon
             slot="start"
             src="assets/gb.svg"
           />
            English 
         </ion-item>
-        <ion-item>
+        <ion-item
+          class="item-has-start-slot"
+        >
           <ion-icon
             slot="start"
             src="assets/fr.svg"
           />
            Français 
         </ion-item>
-        <ion-item>
+        <ion-item
+          class="item-has-start-slot"
+        >
           <ion-icon
             slot="start"
             src="assets/de.svg"
           />
            Deutsch 
         </ion-item>
-        <ion-item>
+        <ion-item
+          class="item-has-start-slot"
+        >
           <ion-icon
             slot="start"
             src="assets/tr.svg"
@@ -47,6 +55,7 @@ DebugElement {
            Türkçe 
         </ion-item>
       </ion-item-group>
+      
       <ion-item
         class="item-has-start-slot"
         data-cy="btn-login"

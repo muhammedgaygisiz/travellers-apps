@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, from, map, tap } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, from, map, tap } from 'rxjs';
 import {
   Auth,
   createUserWithEmailAndPassword,
@@ -34,7 +34,8 @@ export class AuthService {
   isLoggedIn$ = this.authStateChange$.pipe(
     map((authState) => {
       return !!authState?.user;
-    })
+    }),
+    distinctUntilChanged()
   );
 
   public loginWithUsernameAndPassword$(authCreds: AuthCredentials) {

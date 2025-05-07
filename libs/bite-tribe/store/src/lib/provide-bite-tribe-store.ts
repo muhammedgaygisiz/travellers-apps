@@ -1,7 +1,11 @@
 import { Environment, getMetaReducers, STORE_SERVICE } from 'utils';
 import { provideState, provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
-import { AuthEffects, provideFirestoreUtils } from 'ta-firestore';
+import {
+  AuthEffects,
+  provideFirestoreState,
+  provideFirestoreUtils,
+} from 'ta-firestore';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideRouterStore, routerReducer } from '@ngrx/router-store';
 import { BiteTribeStoreService } from './bite-tribe-store.service';
@@ -31,8 +35,14 @@ export const provideBiteTribeStore = (environment: Environment) => [
       },
     }
   ),
-  !environment.production ? provideStoreDevtools() : [],
+  !environment.production
+    ? provideStoreDevtools({
+        trace: true,
+        traceLimit: 10,
+      })
+    : [],
   provideRouterStore(),
+  provideFirestoreState(),
   provideEffects(AuthEffects, RouterEffects, BiteEffects, ReviewEffects),
   provideState(fromBites.key, fromBites.reducer),
   provideState(fromReviews.key, fromReviews.reducer),

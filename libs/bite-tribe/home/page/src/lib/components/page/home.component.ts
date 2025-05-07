@@ -3,6 +3,7 @@ import {
   Component,
   inject,
   input,
+  output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -35,6 +36,8 @@ export class BiteTribeHomeComponent {
   private readonly navController = inject(NavController);
 
   bites = input<any[]>();
+
+  readonly logoutClick = output();
 
   onAddButtonClicked() {
     this.navController.navigateForward(['new-bite']);

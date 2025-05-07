@@ -1,6 +1,10 @@
-@if (registrationFormGroup.statusChanges | async) {}
+@if (registrationFormGroup.statusChanges | async) { }
 
-<ta-page [enableBackButton]="true" [hideAuthButton]="true">
+<ta-page
+  [showHeaderMenu]="false"
+  [enableBackButton]="true"
+  [hideAuthButton]="true"
+>
   <ta-card>
     <div class="ion-padding">
       <form [formGroup]="registrationFormGroup">
@@ -20,7 +24,9 @@
             formControlName="password"
             label="Password"
             labelPlacement="floating"
-          />
+          >
+            <ion-input-password-toggle slot="end" />
+          </ion-input>
         </ion-item>
 
         <ion-item lines="full">
@@ -29,7 +35,9 @@
             formControlName="passwordConfirm"
             label="Confirm Password"
             labelPlacement="floating"
-          />
+          >
+            <ion-input-password-toggle slot="end" />
+          </ion-input>
         </ion-item>
 
         <ion-button

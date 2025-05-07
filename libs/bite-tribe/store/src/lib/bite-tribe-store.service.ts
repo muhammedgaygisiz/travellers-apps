@@ -6,6 +6,7 @@ import { saveNewBite, saveTags } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bites, bite } from './bites/selectors';
 import { reviews } from './reviews/selectors';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -29,7 +30,10 @@ const getActionByDocType = (docType: string, entity: any) => {
 export class BiteTribeStoreService implements StoreService {
   store = inject(Store);
 
-  loginFailed = signal(false);
+  loginFailed = toSignal(this.store.select(fromAuth.selectLoginFailed), {
+    initialValue: false,
+  });
+
   registrationError = signal('Not implemented yet.');
 
   bites$ = this.store.select(bites);
@@ -67,5 +71,9 @@ export class BiteTribeStoreService implements StoreService {
 
   saveReview(newReview: { review: string; biteId: string }) {
     this.store.dispatch(saveNewReview(newReview));
+  }
+
+  logout() {
+    this.store?.dispatch(fromAuth.logout());
   }
 }

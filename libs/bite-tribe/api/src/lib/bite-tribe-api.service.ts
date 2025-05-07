@@ -1,10 +1,19 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BehaviorSubject, debounceTime, filter, switchMap } from 'rxjs';
+import { BehaviorSubject, pipe, skipWhile, switchMap, tap } from 'rxjs';
 import { AuthService } from 'ta-firestore';
 
 const BITE_COLLECTION = 'bites';
 const REVIEW_COLLECTION = 'reviews';
+
+const clearListeners = () =>
+  pipe(
+    tap((isLoggedIn) => {
+      if (!isLoggedIn) {
+        FirebaseFirestore.removeAllListeners();
+      }
+    })
+  );
 
 @Injectable({
   providedIn: 'root',
@@ -15,13 +24,11 @@ export class BiteTribeApiService {
   private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
   private readonly reviewsChannel$ = new BehaviorSubject<any[]>([]);
 
-  private bitesCallbackId = '';
-  private reviewsCallbackId = '';
-
   public allBites$ = this.authService.isLoggedIn$.pipe(
-    filter((isLoggedIn) => isLoggedIn),
-    debounceTime(500),
+    clearListeners(),
+    skipWhile((isLoggedIn) => !isLoggedIn),
     switchMap(() => {
+      console.log('#mo - Start Listener for Bites');
       this.startBitesListener();
 
       return this.bitesChannel$;
@@ -31,21 +38,20 @@ export class BiteTribeApiService {
   private async startBitesListener() {
     console.log('#mo Fetching bites from Firestore');
 
-    this.bitesCallbackId =
-      await FirebaseFirestore.addCollectionSnapshotListener(
-        { reference: BITE_COLLECTION },
-        (docs) => {
-          console.log('#mo Fetched bites from Firestore', docs);
+    await FirebaseFirestore.addCollectionSnapshotListener(
+      { reference: BITE_COLLECTION },
+      (docs) => {
+        console.log('#mo Fetched bites from Firestore', docs);
 
-          const bites =
-            docs?.snapshots.map((doc) => ({
-              ...doc.data,
-              id: doc.id,
-            })) || [];
+        const bites =
+          docs?.snapshots.map((doc) => ({
+            ...doc.data,
+            id: doc.id,
+          })) || [];
 
-          this.bitesChannel$.next(bites);
-        }
-      );
+        this.bitesChannel$.next(bites);
+      }
+    );
   }
 
   saveNewBite(bite: any) {
@@ -100,9 +106,10 @@ export class BiteTribeApiService {
 
   reviewsByBiteId(biteId: string) {
     return this.authService.isLoggedIn$.pipe(
-      filter((isLoggedIn) => isLoggedIn),
-      debounceTime(500),
+      clearListeners(),
+      skipWhile((isLoggedIn) => !isLoggedIn),
       switchMap(() => {
+        console.log('#mo - Start Listener for Reviews');
         this.startReviewListener(biteId);
 
         return this.reviewsChannel$;
@@ -113,33 +120,32 @@ export class BiteTribeApiService {
   private async startReviewListener(biteId: string) {
     console.log('#mo Fetching reviews from Firestore');
 
-    this.reviewsCallbackId =
-      await FirebaseFirestore.addCollectionSnapshotListener(
-        {
-          reference: REVIEW_COLLECTION,
-          compositeFilter: {
-            type: 'and',
-            queryConstraints: [
-              {
-                type: 'where',
-                fieldPath: 'biteId',
-                opStr: '==',
-                value: `/${BITE_COLLECTION}/${biteId}`,
-              },
-            ],
-          },
+    await FirebaseFirestore.addCollectionSnapshotListener(
+      {
+        reference: REVIEW_COLLECTION,
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            {
+              type: 'where',
+              fieldPath: 'biteId',
+              opStr: '==',
+              value: `/${BITE_COLLECTION}/${biteId}`,
+            },
+          ],
         },
-        (docs) => {
-          console.log('#mo Fetched reviews from Firestore', docs);
+      },
+      (docs) => {
+        console.log('#mo Fetched reviews from Firestore', docs);
 
-          const reviews =
-            docs?.snapshots.map((doc) => ({
-              ...doc.data,
-              id: doc.id,
-            })) || [];
+        const reviews =
+          docs?.snapshots.map((doc) => ({
+            ...doc.data,
+            id: doc.id,
+          })) || [];
 
-          this.reviewsChannel$.next(reviews);
-        }
-      );
+        this.reviewsChannel$.next(reviews);
+      }
+    );
   }
 }

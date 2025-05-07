@@ -17,6 +17,7 @@ import { SupportedLang } from 'localization';
   selector: 'ta-popover-menu',
   template: `
     <ion-list lines="none" data-cy="menu-list">
+      @if (showLanguages()) {
       <ion-item-group>
         <ion-item-divider>
           <ion-icon color="dark" name="language-outline" slot="start" />
@@ -52,8 +53,7 @@ import { SupportedLang } from 'localization';
           Türkçe
         </ion-item>
       </ion-item-group>
-
-      @if (!hideAuthButton()) { @if (!isAuthenticated()) {
+      } @if (!hideAuthButton()) { @if (!isAuthenticated()) {
       <ion-item
         data-cy="btn-login"
         [button]="true"
@@ -85,6 +85,8 @@ export class PopoverMenuComponent {
   isAuthenticated = input<boolean | null>(false);
 
   hideAuthButton = input<boolean | null>(false);
+
+  showLanguages = input<boolean | null>(true);
 
   loginClick = output();
 

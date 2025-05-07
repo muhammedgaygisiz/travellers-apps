@@ -1,6 +1,8 @@
 <ta-page
-  [showHeaderMenu]="false"
+  [showHeaderMenu]="true"
+  [showLanguages]="false"
   [showAddButton]="true"
+  (logoutClick)="logoutClick.emit()"
   (addButtonClick)="onAddButtonClicked()"
 >
   <ion-content class="ion-padding">

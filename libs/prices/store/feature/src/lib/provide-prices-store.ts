@@ -9,7 +9,11 @@ import { NetworkEffects } from './networkStatus/effects';
 import { MostSearchedItemsEffects } from './mostSearched/effects';
 import { LocationEffects } from './location/effects';
 import { LocalizationEffects } from './localization/effects';
-import { provideFirestoreState, provideFirestoreUtils } from 'ta-firestore';
+import {
+  AuthEffects,
+  provideFirestoreState,
+  provideFirestoreUtils,
+} from 'ta-firestore';
 import { provideNetworkStatus } from '@travellers-apps/common/networkstatus/feature';
 
 const firebaseOptions = {
@@ -32,6 +36,7 @@ export const providePricesStore = (environment: Environment) => [
     }
   ),
   provideEffects([
+    AuthEffects,
     NetworkEffects,
     MostSearchedItemsEffects,
     LocationEffects,

@@ -43,6 +43,9 @@ describe('PopoverMenuComponent', () => {
   });
 
   it('should emit languageChangeClick with SupportedLang.EN when English item is clicked', () => {
+    componentRef.setInput('showLanguages', true);
+    fixture.detectChanges();
+
     const englishItem = fixture.debugElement.query(
       By.css('ion-item:nth-child(2)')
     );

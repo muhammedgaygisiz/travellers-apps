@@ -35,8 +35,7 @@ export class AuthService {
     map((authState) => {
       return !!authState?.user;
     }),
-    distinctUntilChanged(),
-    tap((isLoggedIn) => console.log('#mo ', isLoggedIn))
+    distinctUntilChanged()
   );
 
   public loginWithUsernameAndPassword$(authCreds: AuthCredentials) {

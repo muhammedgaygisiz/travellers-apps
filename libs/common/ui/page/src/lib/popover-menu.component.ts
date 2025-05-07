@@ -86,7 +86,7 @@ export class PopoverMenuComponent {
 
   hideAuthButton = input<boolean | null>(false);
 
-  showLanguages = input<boolean | null>(false);
+  showLanguages = input<boolean | null>(true);
 
   loginClick = output();
 

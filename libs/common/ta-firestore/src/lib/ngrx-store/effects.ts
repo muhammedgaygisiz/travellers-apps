@@ -90,7 +90,7 @@ export class AuthEffects {
       mergeMap(({ registration }) =>
         this.register$(registration).pipe(
           map(() => registrationSucceeded()),
-          tap(() => this.navController.back()),
+          tap(() => this.navController.navigateBack(['/login'])),
           catchError((err) => {
             return of(registrationFailed({ code: err.code }));
           })
@@ -130,7 +130,7 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(logoutSucceeded.type),
         tap(() => {
-          this.navController.navigateRoot(['/login']);
+          this.navController.navigateRoot(['/start']);
         })
       ),
     { dispatch: false }

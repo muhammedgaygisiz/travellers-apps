@@ -4,7 +4,13 @@ import { HomeService } from './home.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: ` <bt-home [bites]="service.bites()" /> `,
+  template: `
+    <bt-home
+      class="ion-page"
+      [bites]="service.bites()"
+      (logoutClick)="service.logout()"
+    />
+  `,
   imports: [BiteTribeHomeComponent],
 })
 export class HomeContainerComponent {

@@ -7,4 +7,8 @@ export class HomeDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
   bites = toSignal(this.storeService.bites$, { initialValue: [] as any });
+
+  logout() {
+    this.storeService.logout();
+  }
 }

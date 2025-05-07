@@ -5,6 +5,7 @@ import { DetailsService } from './details.service';
 @Component({
   template: `
     <details-page
+      class="ion-page"
       [bite]="service.bite()"
       [reviews]="service.reviews()"
       (submitNewTags)="service.saveNewTags($event)"

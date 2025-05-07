@@ -26,6 +26,7 @@ import { CardComponent } from 'common/ui/card';
 import {
   IonButton,
   IonInput,
+  IonInputPasswordToggle,
   IonItem,
   IonText,
 } from '@ionic/angular/standalone';
@@ -52,6 +53,7 @@ interface RegistrationFields {
     IonInput,
     IonButton,
     IonText,
+    IonInputPasswordToggle,
   ],
 })
 export class RegistrationComponent implements OnChanges {

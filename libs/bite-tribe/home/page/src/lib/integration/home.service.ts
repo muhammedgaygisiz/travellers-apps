@@ -8,4 +8,8 @@ export class HomeService {
   dataAccess = inject(HomeDataAccessService);
 
   bites = this.dataAccess.bites;
+
+  logout() {
+    this.dataAccess.logout();
+  }
 }

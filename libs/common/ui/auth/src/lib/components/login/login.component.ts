@@ -12,6 +12,7 @@ import {
   IonButton,
   IonIcon,
   IonInput,
+  IonInputPasswordToggle,
   IonItem,
   IonText,
 } from '@ionic/angular/standalone';
@@ -35,6 +36,7 @@ interface AuthCredentialFields {
     IonItem,
     IonInput,
     IonText,
+    IonInputPasswordToggle,
   ],
 })
 export class LoginComponent {

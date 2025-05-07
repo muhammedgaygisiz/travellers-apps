@@ -57,6 +57,8 @@ export class PageComponent {
 
   hideAuthButton = input(false);
 
+  showLanguages = input(true);
+
   title = input('');
 
   icon = input('pricetag-outline');
@@ -106,6 +108,7 @@ export class PageComponent {
       componentProps: {
         isAuthenticated: this.showAddButton,
         hideAuthButton: this.hideAuthButton,
+        showLanguages: this.showLanguages,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,

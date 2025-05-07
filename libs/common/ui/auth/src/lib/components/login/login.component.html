@@ -1,4 +1,5 @@
 <ta-page
+  [showHeaderMenu]="false"
   [enableBackButton]="true"
   [showAddButton]="false"
   [hideAuthButton]="true"
@@ -45,7 +46,9 @@
             data-cy="password"
             label="Password"
             labelPlacement="floating"
-          />
+          >
+            <ion-input-password-toggle slot="end" />
+          </ion-input>
         </ion-item>
 
         <ion-button

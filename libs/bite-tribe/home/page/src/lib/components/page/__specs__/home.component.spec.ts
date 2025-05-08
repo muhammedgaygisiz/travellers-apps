@@ -61,7 +61,7 @@ describe('BiteTribeHomeComponent', () => {
   it('should navigate to bite page on bite click', () => {
     const navSpy = jest.spyOn(navController, 'navigateForward');
 
-    component.onBiteClick({ id: '5' } as Bite);
+    component.onBiteClicked({ id: '5' } as Bite);
 
     expect(navSpy).toHaveBeenCalledWith(['bite', '5']);
   });

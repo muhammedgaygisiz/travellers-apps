@@ -10,9 +10,11 @@ export class CalcClassPipe implements PipeTransform {
     userId: string | undefined,
     likeType: string
   ): string {
-    const foundLike = bite?.likes?.find((like) => like.userId === userId);
+    const foundLike = bite?.likes?.find(
+      (like) => like.userId === userId && like.likeType === likeType
+    );
 
-    if (foundLike && foundLike.likeType === likeType) {
+    if (foundLike) {
       return 'liked';
     }
 

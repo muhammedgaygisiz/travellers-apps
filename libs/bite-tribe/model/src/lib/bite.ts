@@ -5,6 +5,11 @@ export interface Bite {
   place: string;
   price: number;
 
+  likes?: [];
+  thumbup: number;
+  drooling: number;
+  mindblown: number;
+
   distance?: string;
   tags?: string[];
 }

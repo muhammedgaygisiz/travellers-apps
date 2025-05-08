@@ -88,8 +88,7 @@ export class BiteTribeApiService {
   }
 
   async saveNewReview(payload: { review: string; biteId: string }) {
-    const authState = await this.authService.authState();
-    const user = authState?.user;
+    const user = await this.getUser();
 
     const addDocumentResult = await FirebaseFirestore.addDocument({
       reference: REVIEW_COLLECTION,
@@ -147,5 +146,42 @@ export class BiteTribeApiService {
         this.reviewsChannel$.next(reviews);
       }
     );
+  }
+
+  async saveLike(like: {
+    likeType: string;
+    biteId: string;
+    createdAt: string;
+  }) {
+    try {
+      const doc = await FirebaseFirestore.getDocument({
+        reference: `${BITE_COLLECTION}/${like.biteId}`,
+      });
+
+      const data = doc.snapshot.data;
+      const currentCountByLikeType = data && (data[like.likeType] || 0);
+      const increasedCountByLikeType = currentCountByLikeType + 1;
+
+      const user = await this.getUser();
+      const currentLikes = data && (data['likes'] || []);
+
+      // eslint-disable-next-line no-unused-vars
+      const { biteId, ...likeToSave } = like;
+
+      await FirebaseFirestore.updateDocument({
+        reference: `${BITE_COLLECTION}/${like.biteId}`,
+        data: {
+          [like.likeType]: increasedCountByLikeType,
+          likes: [...currentLikes, { ...likeToSave, userId: user?.uid }],
+        },
+      });
+    } catch (error) {
+      console.error('Error saving like:', error);
+    }
+  }
+
+  private async getUser() {
+    const authState = await this.authService.authState();
+    return authState?.user;
   }
 }

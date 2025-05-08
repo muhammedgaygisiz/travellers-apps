@@ -54,7 +54,7 @@ export class BitePage {
     const bite = this.bite();
     const userId = this.userId();
 
-    const foundLike = bite.likes?.find((like) => like.userId === userId);
+    const foundLike = bite?.likes?.find((like) => like.userId === userId);
 
     if (foundLike) {
       return 'liked';

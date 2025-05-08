@@ -5,6 +5,8 @@ import { NavController } from '@ionic/angular/standalone';
 import { BiteTribeHomeComponent } from '../home.component';
 import { ComponentRef } from '@angular/core';
 import { Bite } from 'model';
+import { addIcons } from 'ionicons';
+import { add, menuOutline } from 'ionicons/icons';
 
 describe('BiteTribeHomeComponent', () => {
   let component: BiteTribeHomeComponent;
@@ -22,6 +24,11 @@ describe('BiteTribeHomeComponent', () => {
         provideIonicAngular(getIonicConfig()),
         { provide: NavController, useValue: navController },
       ],
+    });
+
+    addIcons({
+      menuOutline,
+      add,
     });
 
     fixture = TestBed.createComponent(BiteTribeHomeComponent);

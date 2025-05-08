@@ -39,11 +39,13 @@ export class BiteTribeHomeComponent {
 
   readonly logoutClick = output();
 
+  readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
+
   onAddButtonClicked() {
     this.navController.navigateForward(['new-bite']);
   }
 
-  onBiteClick(bite: Bite) {
+  onBiteClicked(bite: Bite) {
     this.navController.navigateForward(['bite', bite.id]);
   }
 }

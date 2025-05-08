@@ -19,6 +19,14 @@
     </ion-card>
   </div>
   <div class="like-container">
-    <ion-chip color="medium" (click)="openLikeOptions($event)">👍</ion-chip>
+    <ion-chip color="medium" (click)="openLikeOptions($event)">
+      @let numberLikes = biteData | countLikes;
+      <ion-label class="{{ numberLikes ? 'ion-margin-end' : '' }}"
+        >👍</ion-label
+      >
+      @if(numberLikes) {
+      <ion-badge color="primary">{{ numberLikes }}</ion-badge>
+      }
+    </ion-chip>
   </div>
 </div>

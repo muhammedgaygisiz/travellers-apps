@@ -21,7 +21,11 @@
       </ion-card-content>
     </ion-card>
     } @for (bite of bites(); track bite.id) {
-    <bt-bite [bite]="bite" (biteClick)="onBiteClick($event)" />
+    <bt-bite
+      [bite]="bite"
+      (biteClick)="onBiteClicked($event)"
+      (likeButtonClick)="likeButtonClick.emit($event)"
+    />
     }
   </ion-content>
 </ta-page>

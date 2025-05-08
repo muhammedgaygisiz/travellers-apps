@@ -14,3 +14,12 @@ export const saveTags = createAction(
   '[BITES] Save new tags',
   props<{ newTags: string[]; id: string }>()
 );
+
+export const saveLike = createAction(
+  '[BITES] Save like',
+  props<{
+    createdAt: string;
+    likeType: string;
+    biteId: string;
+  }>()
+);

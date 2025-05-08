@@ -6,16 +6,19 @@ import {
   output,
 } from '@angular/core';
 import {
+  IonBadge,
   IonCard,
   IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
   IonChip,
+  IonLabel,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { PopoverController } from '@ionic/angular';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
+import { CountLikesPipe } from './pipes/count-likes.pipe';
 
 @Component({
   selector: 'bt-bite',
@@ -28,6 +31,9 @@ import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/li
     IonCardSubtitle,
     IonCardTitle,
     IonChip,
+    IonBadge,
+    IonLabel,
+    CountLikesPipe,
   ],
   providers: [PopoverController],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,11 +46,17 @@ export class BitePage {
 
   biteClick = output<Bite>();
 
+  likeButtonClick = output<{ likeType: string; biteId: string }>();
+
   async openLikeOptions($event: MouseEvent) {
     const popover = await this.popoverController.create({
       component: LikeOptionsPopoverMenuComponent,
       event: $event,
       dismissOnSelect: true,
+      componentProps: {
+        bite: this.bite,
+        likeButtonClick: this.likeButtonClick,
+      },
     });
 
     await popover.present();

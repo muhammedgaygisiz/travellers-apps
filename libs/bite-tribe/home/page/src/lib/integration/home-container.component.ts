@@ -9,6 +9,7 @@ import { HomeService } from './home.service';
       class="ion-page"
       [bites]="service.bites()"
       (logoutClick)="service.logout()"
+      (likeButtonClick)="service.likeButtonClicked($event)"
     />
   `,
   imports: [BiteTribeHomeComponent],

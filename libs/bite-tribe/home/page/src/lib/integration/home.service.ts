@@ -12,4 +12,8 @@ export class HomeService {
   logout() {
     this.dataAccess.logout();
   }
+
+  likeButtonClicked(likeClick: { likeType: string; biteId: string }) {
+    this.dataAccess.submitLikeClick(likeClick);
+  }
 }

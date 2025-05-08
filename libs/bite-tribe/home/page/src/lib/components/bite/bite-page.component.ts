@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   output,
@@ -43,10 +44,24 @@ export class BitePage {
   popoverController = inject(PopoverController);
 
   bite = input.required<Bite>();
+  userId = input<string>();
 
   biteClick = output<Bite>();
 
   likeButtonClick = output<{ likeType: string; biteId: string }>();
+
+  calcClass = computed(() => {
+    const bite = this.bite();
+    const userId = this.userId();
+
+    const foundLike = bite?.likes?.find((like) => like.userId === userId);
+
+    if (foundLike) {
+      return 'liked';
+    }
+
+    return '';
+  });
 
   async openLikeOptions($event: MouseEvent) {
     const popover = await this.popoverController.create({
@@ -55,6 +70,7 @@ export class BitePage {
       dismissOnSelect: true,
       componentProps: {
         bite: this.bite,
+        userId: this.userId,
         likeButtonClick: this.likeButtonClick,
       },
     });

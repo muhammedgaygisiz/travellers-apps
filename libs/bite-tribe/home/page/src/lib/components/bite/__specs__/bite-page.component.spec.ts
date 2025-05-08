@@ -3,12 +3,13 @@ import { By } from '@angular/platform-browser';
 import { BitePage } from '../bite-page.component';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { PopoverController } from '@ionic/angular';
+import { LikeOptionsPopoverMenuComponent } from '../../like-options-popover-menu/like-options-popover-menu.component';
 
 describe('BitePage', () => {
   let component: BitePage;
   let fixture: ComponentFixture<BitePage>;
   let componentRef: ComponentRef<BitePage>;
-
   const mockBite = {
     name: 'Test Burger',
     image: 'test-image.jpg',
@@ -17,9 +18,11 @@ describe('BitePage', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular()],
+      providers: [provideIonicAngular(), PopoverController],
     });
+
     fixture = TestBed.createComponent(BitePage);
+
     componentRef = fixture.componentRef;
     component = fixture.componentInstance;
     componentRef.setInput('bite', mockBite);
@@ -80,5 +83,58 @@ describe('BitePage', () => {
       updatedBite.place
     );
     expect(imageElement.nativeElement.src).toContain(updatedBite.image);
+  });
+
+  describe('calcClass', () => {
+    it('should return "liked" when user has liked the bite', () => {
+      const biteWithLike = {
+        ...mockBite,
+        likes: [{ userId: 'user123', likeType: 'thumbup' }],
+      };
+      componentRef.setInput('bite', biteWithLike);
+      componentRef.setInput('userId', 'user123');
+      fixture.detectChanges();
+
+      expect(component.calcClass()).toBe('liked');
+    });
+
+    it('should return empty string when user has not liked the bite', () => {
+      const biteWithOtherLike = {
+        ...mockBite,
+        likes: [{ userId: 'otherUser', likeType: 'thumbup' }],
+      };
+      componentRef.setInput('bite', biteWithOtherLike);
+      componentRef.setInput('userId', 'user123');
+      fixture.detectChanges();
+
+      expect(component.calcClass()).toBe('');
+    });
+  });
+
+  describe('openLikeOptions', () => {
+    it('should create and present popover with correct props', async () => {
+      // Arrange
+      const mockEvent = new MouseEvent('click');
+      const createSpy = jest.spyOn(component['popoverController'], 'create');
+      const mockPopover = { present: jest.fn() };
+      createSpy.mockResolvedValue(mockPopover as any);
+
+      // Act
+      await component.openLikeOptions(mockEvent);
+
+      // Assert
+      expect(createSpy).toHaveBeenCalledTimes(1);
+      expect(createSpy).toHaveBeenCalledWith({
+        component: LikeOptionsPopoverMenuComponent,
+        event: mockEvent,
+        dismissOnSelect: true,
+        componentProps: {
+          bite: component.bite,
+          userId: component.userId,
+          likeButtonClick: component.likeButtonClick,
+        },
+      });
+      expect(mockPopover.present).toHaveBeenCalled();
+    });
   });
 });

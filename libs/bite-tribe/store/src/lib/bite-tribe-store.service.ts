@@ -40,6 +40,8 @@ export class BiteTribeStoreService implements StoreService {
   bite$ = this.store.select(bite);
   reviews$ = this.store.select(reviews);
 
+  userId = this.store.select(fromAuth.selectUserId);
+
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
   }

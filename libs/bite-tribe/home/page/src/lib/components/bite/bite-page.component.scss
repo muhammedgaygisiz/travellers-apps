@@ -8,6 +8,10 @@
 
       bottom: 1rem;
       right: 2rem;
+
+      ion-chip.liked {
+        background-color: var(--ion-color-primary);
+      }
     }
   }
 

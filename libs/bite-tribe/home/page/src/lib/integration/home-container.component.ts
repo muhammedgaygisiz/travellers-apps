@@ -8,6 +8,7 @@ import { HomeService } from './home.service';
     <bt-home
       class="ion-page"
       [bites]="service.bites()"
+      [userId]="service.userId()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
     />

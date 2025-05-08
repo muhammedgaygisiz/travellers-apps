@@ -18,3 +18,8 @@ export const selectRegistrationErrorCode = createSelector(
   authState,
   (authState) => authState.errorCode
 );
+
+export const selectUserId = createSelector(
+  authState,
+  (authState) => authState.user.uid
+);

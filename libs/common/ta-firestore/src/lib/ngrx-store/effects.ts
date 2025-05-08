@@ -16,6 +16,7 @@ import {
   register,
   registrationFailed,
   registrationSucceeded,
+  loadedUser,
 } from './actions';
 import {
   catchError,
@@ -59,6 +60,16 @@ export class AuthEffects {
           })
         )
       )
+    )
+  );
+
+  loadUser$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(loginSucceeded),
+      switchMap(() => this.authService.authStateChange$),
+      map((authStateChange) => {
+        return loadedUser({ user: authStateChange?.user });
+      })
     )
   );
 

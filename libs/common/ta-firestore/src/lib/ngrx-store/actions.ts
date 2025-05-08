@@ -8,6 +8,11 @@ export const login = createAction(
 
 export const loginSucceeded = createAction('[Auth API] Login successful');
 
+export const loadedUser = createAction(
+  '[Auth API] Loaded user',
+  props<{ user: any }>()
+);
+
 export const loginFailed = createAction('[Auth API] Login failed');
 
 export const logoutSucceeded = createAction('[Auth API] Logout successful');

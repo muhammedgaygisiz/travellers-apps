@@ -23,6 +23,7 @@
     } @for (bite of bites(); track bite.id) {
     <bt-bite
       [bite]="bite"
+      [userId]="userId()"
       (biteClick)="onBiteClicked($event)"
       (likeButtonClick)="likeButtonClick.emit($event)"
     />

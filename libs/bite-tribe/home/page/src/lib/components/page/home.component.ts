@@ -36,6 +36,7 @@ export class BiteTribeHomeComponent {
   private readonly navController = inject(NavController);
 
   bites = input<any[]>();
+  userId = input<string>();
 
   readonly logoutClick = output();
 

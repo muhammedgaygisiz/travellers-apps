@@ -1,6 +1,7 @@
 import { Action, createReducer, on } from '@ngrx/store';
 import {
   confirmRegistrationErrorMessage,
+  loadedUser,
   loginFailed,
   loginSucceeded,
   notAuthenticated,
@@ -18,6 +19,10 @@ export const reducer = createReducer<AuthResult, Action>(
     ...state,
     authenticationFailed: false,
     authenticated: true,
+  })),
+  on(loadedUser, (state, { user }) => ({
+    ...state,
+    user,
   })),
   on(notAuthenticated, (state) => ({
     ...state,

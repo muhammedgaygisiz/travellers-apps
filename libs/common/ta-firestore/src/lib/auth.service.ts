@@ -17,8 +17,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class AuthService {
   private readonly auth = inject(Auth);
-  private readonly authStateChange$ =
-    new BehaviorSubject<AuthStateChange | null>(null);
+  authStateChange$ = new BehaviorSubject<AuthStateChange | null>(null);
 
   authState = toSignal(this.authStateChange$);
 

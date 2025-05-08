@@ -5,7 +5,7 @@ export interface Bite {
   place: string;
   price: number;
 
-  likes?: [];
+  likes?: any[];
   thumbup: number;
   drooling: number;
   mindblown: number;

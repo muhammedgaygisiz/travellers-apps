@@ -6,6 +6,6 @@ import { Bite } from 'model';
 })
 export class CountLikesPipe implements PipeTransform {
   transform(bite: Bite): number {
-    return bite.likes?.length || 0;
+    return bite?.likes?.length || 0;
   }
 }

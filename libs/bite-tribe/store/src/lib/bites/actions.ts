@@ -23,3 +23,8 @@ export const saveLike = createAction(
     biteId: string;
   }>()
 );
+
+export const removeLike = createAction(
+  '[BITES] Remove like',
+  props<{ like: { likeType: string; biteId: string } }>()
+);

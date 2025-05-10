@@ -184,4 +184,35 @@ export class BiteTribeApiService {
     const authState = await this.authService.authState();
     return authState?.user;
   }
+
+  async removeLike(like: any) {
+    try {
+      const doc = await FirebaseFirestore.getDocument({
+        reference: `${BITE_COLLECTION}/${like.biteId}`,
+      });
+
+      const data = doc.snapshot.data;
+      const currentCountByLikeType = data && (data[like.likeType] || 0);
+      const decreasedCountByLikeType = currentCountByLikeType - 1;
+
+      const user = await this.getUser();
+      const currentLikes = data && (data['likes'] || []);
+
+      const filteredLiked = currentLikes.filter(
+        (curr: any) =>
+          curr.userId !== user?.uid ||
+          (curr.userId === user?.uid && curr.likeType !== like.likeType)
+      );
+
+      await FirebaseFirestore.updateDocument({
+        reference: `${BITE_COLLECTION}/${like.biteId}`,
+        data: {
+          [like.likeType]: decreasedCountByLikeType,
+          likes: [...filteredLiked],
+        },
+      });
+    } catch (e) {
+      console.error('Error removing like:', e);
+    }
+  }
 }

@@ -5,7 +5,13 @@ import {
   ofType,
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
-import { loadedBitesFromApi, saveLike, saveNewBite, saveTags } from './actions';
+import {
+  loadedBitesFromApi,
+  removeLike,
+  saveLike,
+  saveNewBite,
+  saveTags,
+} from './actions';
 import { map, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 
@@ -53,6 +59,18 @@ export class BiteEffects {
         // eslint-disable-next-line no-unused-vars
         tap(({ type, ...like }) => {
           this.api.saveLike(like);
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  removeLikeFromBite$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(removeLike),
+        tap((like) => {
+          this.api.removeLike(like.like);
         })
       );
     },

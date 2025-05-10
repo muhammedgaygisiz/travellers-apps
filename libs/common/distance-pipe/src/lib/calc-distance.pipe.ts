@@ -28,7 +28,7 @@ const haversineDistance = (
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  return (R * c).toFixed(2);
 };
 
 @Pipe({
@@ -39,14 +39,18 @@ export class CalcDistancePipe implements PipeTransform {
     point: GeoPoint | null | undefined,
     currentPosition: any | null
   ): string {
-    return (
-      haversineDistance(
-        point?.latitude,
-        point?.longitude,
-        currentPosition?.coords.latitude,
-        currentPosition?.coords.longitude,
-        'km'
-      ).toFixed(2) + ' km'
+    const distanceInKm = haversineDistance(
+      point?.latitude,
+      point?.longitude,
+      currentPosition?.coords.latitude,
+      currentPosition?.coords.longitude,
+      'km'
     );
+
+    if (distanceInKm === '0.00' || distanceInKm === 'NaN') {
+      return '-';
+    }
+
+    return `${distanceInKm} km`;
   }
 }

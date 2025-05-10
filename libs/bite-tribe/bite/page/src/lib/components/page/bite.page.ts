@@ -61,7 +61,7 @@ export class BitePage {
     name: ['', Validators.required],
     place: ['', Validators.required],
     price: [null, Validators.required],
-    tags: ['', Validators.required],
+    tags: [''],
   });
 
   imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);

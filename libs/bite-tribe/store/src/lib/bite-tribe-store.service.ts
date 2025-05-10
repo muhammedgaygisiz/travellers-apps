@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
-import { saveNewBite, saveTags, saveLike } from './bites/actions';
+import { saveNewBite, saveTags, saveLike, removeLike } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bites, bite } from './bites/selectors';
 import { reviews } from './reviews/selectors';
@@ -86,5 +86,9 @@ export class BiteTribeStoreService implements StoreService {
         createdAt: new Date().toISOString(),
       })
     );
+  }
+
+  removeLike(event: { likeType: string; biteId: string }) {
+    this.store?.dispatch(removeLike({ like: event }));
   }
 }

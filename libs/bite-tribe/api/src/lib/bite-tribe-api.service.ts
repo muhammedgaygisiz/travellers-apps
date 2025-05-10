@@ -22,6 +22,7 @@ export class BiteTribeApiService {
   private readonly authService = inject(AuthService);
 
   private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
+  likesChannel$ = new BehaviorSubject<any[]>([]);
   private readonly reviewsChannel$ = new BehaviorSubject<any[]>([]);
 
   public allBites$ = this.authService.isLoggedIn$.pipe(
@@ -40,16 +41,37 @@ export class BiteTribeApiService {
 
     await FirebaseFirestore.addCollectionSnapshotListener(
       { reference: BITE_COLLECTION },
-      (docs) => {
-        console.log('#mo Fetched bites from Firestore', docs);
+      async (biteDocs) => {
+        console.log('#mo Fetched bites from Firestore', biteDocs);
 
         const bites =
-          docs?.snapshots.map((doc) => ({
+          biteDocs?.snapshots.map((doc) => ({
             ...doc.data,
             id: doc.id,
+            likes: [],
           })) || [];
 
+        bites.forEach((bite) => this.startLikesListener(bite));
+
         this.bitesChannel$.next(bites);
+      }
+    );
+  }
+
+  private startLikesListener(bite: {
+    [p: string]: any;
+    id: string;
+    likes: any[];
+  }) {
+    FirebaseFirestore.addCollectionSnapshotListener(
+      { reference: `${BITE_COLLECTION}/${bite.id}/likes` },
+      (likeDocs: any) => {
+        const likes =
+          likeDocs?.snapshots.map((likeDoc: any) => ({
+            ...likeDoc.data,
+          })) || [];
+
+        this.likesChannel$.next(likes);
       }
     );
   }
@@ -154,25 +176,13 @@ export class BiteTribeApiService {
     createdAt: string;
   }) {
     try {
-      const doc = await FirebaseFirestore.getDocument({
-        reference: `${BITE_COLLECTION}/${like.biteId}`,
-      });
-
-      const data = doc.snapshot.data;
-      const currentCountByLikeType = data && (data[like.likeType] || 0);
-      const increasedCountByLikeType = currentCountByLikeType + 1;
-
       const user = await this.getUser();
-      const currentLikes = data && (data['likes'] || []);
 
-      // eslint-disable-next-line no-unused-vars
-      const { biteId, ...likeToSave } = like;
-
-      await FirebaseFirestore.updateDocument({
-        reference: `${BITE_COLLECTION}/${like.biteId}`,
+      FirebaseFirestore.setDocument({
+        reference: `${BITE_COLLECTION}/${like.biteId}/likes/${user?.uid}`,
         data: {
-          [like.likeType]: increasedCountByLikeType,
-          likes: [...currentLikes, { ...likeToSave, userId: user?.uid }],
+          ...like,
+          userId: user?.uid,
         },
       });
     } catch (error) {
@@ -183,5 +193,20 @@ export class BiteTribeApiService {
   private async getUser() {
     const authState = await this.authService.authState();
     return authState?.user;
+  }
+
+  async removeLike(like: any) {
+    try {
+      const user = await this.getUser();
+      const uid = user?.uid;
+
+      await FirebaseFirestore.deleteDocument({
+        reference: `${BITE_COLLECTION}/${like.biteId}/likes/${uid}`,
+      });
+
+      return { ...like, userId: uid };
+    } catch (e) {
+      console.error('Error removing like:', e);
+    }
   }
 }

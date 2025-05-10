@@ -40,7 +40,8 @@
                 "onlyDependOnLibsWithTags": [
                   "type:store",
                   "scope:common",
-                  "type:api"
+                  "type:api",
+                  "type:model"
                 ]
               },
               {

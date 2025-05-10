@@ -14,6 +14,7 @@ import { BiteEffects } from './bites/effects';
 import { fromBites } from './bites';
 import { ReviewEffects } from './reviews/effects';
 import { fromReviews } from './reviews';
+import { fromLikes } from './likes';
 
 const firebaseOptions = {
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
@@ -46,5 +47,6 @@ export const provideBiteTribeStore = (environment: Environment) => [
   provideEffects(AuthEffects, RouterEffects, BiteEffects, ReviewEffects),
   provideState(fromBites.key, fromBites.reducer),
   provideState(fromReviews.key, fromReviews.reducer),
+  provideState(fromLikes.key, fromLikes.reducer),
   provideFirestoreUtils(firebaseOptions),
 ];

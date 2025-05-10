@@ -6,6 +6,7 @@ import {
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
 import {
+  deletedLike,
   loadedBitesFromApi,
   removeLike,
   saveLike,
@@ -14,6 +15,7 @@ import {
 } from './actions';
 import { map, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { loadedLikesFromApi } from '../likes/actions';
 
 @Injectable()
 export class BiteEffects {
@@ -25,6 +27,14 @@ export class BiteEffects {
       ofType(ROOT_EFFECTS_INIT),
       switchMap(() => this.api.allBites$),
       map((bites) => loadedBitesFromApi({ bites }))
+    );
+  });
+
+  loadLikesFromApi$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(ROOT_EFFECTS_INIT),
+      switchMap(() => this.api.likesChannel$),
+      map((likes) => loadedLikesFromApi({ likes }))
     );
   });
 
@@ -65,15 +75,14 @@ export class BiteEffects {
     { dispatch: false }
   );
 
-  removeLikeFromBite$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(removeLike),
-        tap((like) => {
-          this.api.removeLike(like.like);
-        })
-      );
-    },
-    { dispatch: false }
-  );
+  removeLikeFromBite$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(removeLike),
+      switchMap(async (like) => {
+        const likeToBeDeleted = await this.api.removeLike(like.like);
+
+        return deletedLike({ like: likeToBeDeleted });
+      })
+    );
+  });
 }

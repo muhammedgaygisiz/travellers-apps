@@ -19,7 +19,9 @@ export class HomeDataAccessService {
     const userId = this.userId();
 
     const bite = bites?.find((bite) => bite.id === likeType.biteId);
-    const likeFromUser = bite?.likes?.find((like) => like.userId === userId);
+    const likeFromUser = bite?.likes?.find(
+      (like) => like.userId === userId && like.likeType === likeType.likeType
+    );
 
     if (likeFromUser) {
       this.storeService.removeLike(likeType);

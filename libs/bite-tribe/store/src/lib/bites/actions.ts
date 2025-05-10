@@ -24,6 +24,17 @@ export const saveLike = createAction(
   }>()
 );
 
+export const deletedLike = createAction(
+  '[BITES] Deleted like',
+  props<{
+    like: {
+      likeType: string;
+      biteId: string;
+      userId: string;
+    };
+  }>()
+);
+
 export const removeLike = createAction(
   '[BITES] Remove like',
   props<{ like: { likeType: string; biteId: string } }>()

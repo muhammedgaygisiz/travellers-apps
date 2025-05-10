@@ -24,6 +24,7 @@
     <bt-bite
       [bite]="bite"
       [userId]="userId()"
+      [currentPosition]="currentPosition()"
       (biteClick)="onBiteClicked($event)"
       (likeButtonClick)="likeButtonClick.emit($event)"
     />

@@ -20,6 +20,7 @@ import { Bite } from 'model';
 import { PopoverController } from '@ionic/angular';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
 import { CountLikesPipe } from './pipes/count-likes.pipe';
+import { CalcDistancePipe } from 'distance-pipe';
 
 @Component({
   selector: 'bt-bite',
@@ -35,6 +36,7 @@ import { CountLikesPipe } from './pipes/count-likes.pipe';
     IonBadge,
     IonLabel,
     CountLikesPipe,
+    CalcDistancePipe,
   ],
   providers: [PopoverController],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,6 +47,7 @@ export class BitePage {
 
   bite = input.required<Bite>();
   userId = input<string>();
+  currentPosition = input();
 
   biteClick = output<Bite>();
 

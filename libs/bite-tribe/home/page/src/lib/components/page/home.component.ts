@@ -37,6 +37,7 @@ export class BiteTribeHomeComponent {
 
   bites = input<any[]>();
   userId = input<string>();
+  currentPosition = input();
 
   readonly logoutClick = output();
 

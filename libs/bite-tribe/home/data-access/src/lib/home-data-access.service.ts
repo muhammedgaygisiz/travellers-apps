@@ -2,10 +2,14 @@ import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Bite } from 'model';
+import { Platform } from '@ionic/angular';
+import { getCurrentPosition } from 'geolocation';
+import { from } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class HomeDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly platform = inject(Platform);
 
   bites = toSignal(this.storeService.bites$, { initialValue: [] as Bite[] });
   userId = toSignal(this.storeService.userId, { initialValue: '' });
@@ -29,5 +33,11 @@ export class HomeDataAccessService {
     }
 
     this.storeService.submitLikeClick(likeType);
+  }
+
+  currentPosition() {
+    return toSignal(from(getCurrentPosition(this.platform)), {
+      initialValue: null,
+    });
   }
 }

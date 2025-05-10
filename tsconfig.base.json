@@ -97,6 +97,7 @@
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
       "data-access-utils": ["libs/common/data-access-utils/src/index.ts"],
+      "distance-pipe": ["libs/common/distance-pipe/src/index.ts"],
       "finances/account/data-access": [
         "libs/finances/account/data-access/src/index.ts"
       ],
@@ -118,6 +119,7 @@
       ],
       "finances/shell": ["libs/finances/shell/src/index.ts"],
       "finances/store": ["libs/finances/store/src/index.ts"],
+      "geolocation": ["libs/common/geolocation/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
       "model": ["libs/bite-tribe/model/src/index.ts"],
       "pages": ["libs/finances/pages/src/index.ts"],

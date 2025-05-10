@@ -1,15 +1,18 @@
+import firebase from 'firebase/compat';
+import GeoPoint = firebase.firestore.GeoPoint;
+
 export interface Bite {
   id: string;
   name: string;
   image: string;
   place: string;
   price: number;
+  position: GeoPoint;
 
   likes?: any[];
   thumbup: number;
   drooling: number;
   mindblown: number;
 
-  distance?: string;
   tags?: string[];
 }

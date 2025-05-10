@@ -17,6 +17,7 @@ describe('DetailsComponent', () => {
           useValue: {
             bite: signal(undefined),
             reviews: signal(undefined),
+            currentPosition: signal(undefined),
           },
         },
       ],

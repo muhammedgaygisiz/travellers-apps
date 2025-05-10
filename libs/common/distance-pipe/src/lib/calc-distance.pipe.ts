@@ -39,7 +39,6 @@ export class CalcDistancePipe implements PipeTransform {
     point: GeoPoint | null | undefined,
     currentPosition: any | null
   ): string {
-    console.log('#mo point', point, ' currentPosition', currentPosition);
     return (
       haversineDistance(
         point?.latitude,

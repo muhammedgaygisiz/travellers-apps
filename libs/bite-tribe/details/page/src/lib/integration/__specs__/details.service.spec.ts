@@ -11,6 +11,7 @@ describe('DetailsService', () => {
     mockDataAccessService = {
       bite: signal('mockBiteData'),
       saveNewTags: jest.fn(),
+      currentPosition: jest.fn(),
     } as any;
 
     TestBed.configureTestingModule({

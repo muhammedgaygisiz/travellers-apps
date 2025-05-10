@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { Geolocation } from '@capacitor/geolocation';
 import { GeoPoint } from 'firebase/firestore';
 import { Platform } from '@ionic/angular';
 import { splitTags } from 'utils';
+import { getCurrentPosition } from 'geolocation';
 
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
@@ -11,7 +11,7 @@ export class BiteDataAccessService {
   private readonly platform = inject(Platform);
 
   async submitNewBite(newBite: any) {
-    const currentPosition = await this.getCurrentPosition();
+    const currentPosition = await getCurrentPosition(this.platform);
 
     const enrichedBite = {
       ...newBite,
@@ -23,43 +23,5 @@ export class BiteDataAccessService {
     };
 
     this.storeService.save(enrichedBite, 'bite');
-  }
-
-  private async getCurrentPosition() {
-    if (this.platform.is('capacitor')) {
-      return await this.getGeoLocationFromNativePlatform();
-    }
-
-    return await this.getGeoLocationFromWebPlatform();
-  }
-
-  private async getGeoLocationFromNativePlatform() {
-    const permissionStatus = await Geolocation.checkPermissions();
-
-    if (permissionStatus.location !== 'granted') {
-      await Geolocation.requestPermissions();
-    }
-
-    return await Geolocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 5000,
-    });
-  }
-
-  private async getGeoLocationFromWebPlatform(): Promise<GeolocationPosition> {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported'));
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => resolve(position),
-        (error) => reject(error),
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-        }
-      );
-    });
   }
 }

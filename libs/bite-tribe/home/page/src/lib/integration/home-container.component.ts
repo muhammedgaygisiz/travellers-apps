@@ -9,6 +9,7 @@ import { HomeService } from './home.service';
       class="ion-page"
       [bites]="service.bites()"
       [userId]="service.userId()"
+      [currentPosition]="service.currentPosition()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
     />

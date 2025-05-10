@@ -7,6 +7,7 @@ export class DetailsService {
 
   bite = this.dataAccess.bite;
   reviews = this.dataAccess.reviews;
+  currentPosition = this.dataAccess.currentPosition();
 
   saveNewTags(newTags: string) {
     this.dataAccess.saveNewTags(newTags);

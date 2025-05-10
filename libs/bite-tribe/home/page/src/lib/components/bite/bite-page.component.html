@@ -13,7 +13,9 @@
             <ion-card-title>{{ biteData?.name }}</ion-card-title>
           </ion-card-header>
 
-          <ion-card-content>0.5 km</ion-card-content>
+          <ion-card-content>{{
+            biteData.position | calcDistance : currentPosition()
+          }}</ion-card-content>
         </div>
       </div>
     </ion-card>

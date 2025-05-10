@@ -8,6 +8,7 @@ import { DetailsService } from './details.service';
       class="ion-page"
       [bite]="service.bite()"
       [reviews]="service.reviews()"
+      [currentPosition]="service.currentPosition()"
       (submitNewTags)="service.saveNewTags($event)"
       (submitNewReview)="service.saveReview($event)"
     />

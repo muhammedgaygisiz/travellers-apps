@@ -14,8 +14,8 @@ import {
   IonText,
   NavController,
 } from '@ionic/angular/standalone';
-import { BitePage } from '../bite/bite-page.component';
 import { Bite } from 'model';
+import { BiteComponent } from '../bite/bite.component';
 
 @Component({
   selector: 'bt-home',
@@ -25,7 +25,7 @@ import { Bite } from 'model';
     PageComponent,
     IonContent,
     IonChip,
-    BitePage,
+    BiteComponent,
     IonCard,
     IonCardContent,
     IonText,
@@ -37,7 +37,6 @@ export class BiteTribeHomeComponent {
 
   bites = input<any[]>();
   userId = input<string>();
-  currentPosition = input();
 
   readonly logoutClick = output();
 

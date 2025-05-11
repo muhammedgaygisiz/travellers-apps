@@ -2,9 +2,9 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
-import { saveNewBite, saveTags, saveLike, removeLike } from './bites/actions';
+import { removeLike, saveLike, saveNewBite, saveTags } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
-import { bites, bite } from './bites/selectors';
+import { bite, bites } from './bites/selectors';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 

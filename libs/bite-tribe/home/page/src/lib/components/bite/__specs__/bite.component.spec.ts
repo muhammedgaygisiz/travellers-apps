@@ -1,15 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { BitePage } from '../bite-page.component';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { PopoverController } from '@ionic/angular';
 import { LikeOptionsPopoverMenuComponent } from '../../like-options-popover-menu/like-options-popover-menu.component';
+import { BiteComponent } from '../bite.component';
 
 describe('BitePage', () => {
-  let component: BitePage;
-  let fixture: ComponentFixture<BitePage>;
-  let componentRef: ComponentRef<BitePage>;
+  let component: BiteComponent;
+  let fixture: ComponentFixture<BiteComponent>;
+  let componentRef: ComponentRef<BiteComponent>;
   const mockBite = {
     name: 'Test Burger',
     image: 'test-image.jpg',
@@ -21,7 +21,7 @@ describe('BitePage', () => {
       providers: [provideIonicAngular(), PopoverController],
     });
 
-    fixture = TestBed.createComponent(BitePage);
+    fixture = TestBed.createComponent(BiteComponent);
 
     componentRef = fixture.componentRef;
     component = fixture.componentInstance;
@@ -53,13 +53,13 @@ describe('BitePage', () => {
   it('should handle null bite input', () => {
     componentRef.setInput('bite', null);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toBe('-👍');
+    expect(fixture.nativeElement.textContent).toBe(' - 👍');
   });
 
   it('should handle undefined bite input', () => {
     componentRef.setInput('bite', undefined);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toBe('-👍');
+    expect(fixture.nativeElement.textContent).toBe(' - 👍');
   });
 
   it('should update view when bite input changes', () => {

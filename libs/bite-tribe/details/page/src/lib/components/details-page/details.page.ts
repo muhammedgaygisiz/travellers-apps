@@ -26,7 +26,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
-import { CalcDistancePipe } from 'distance-pipe';
+import { ToMetricPipe } from 'distance-pipe';
 
 @Component({
   selector: 'details-page',
@@ -50,7 +50,7 @@ import { CalcDistancePipe } from 'distance-pipe';
     ReactiveFormsModule,
     TimeAgoPipe,
     IonText,
-    CalcDistancePipe,
+    ToMetricPipe,
   ],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
@@ -66,8 +66,6 @@ export class DetailsPage {
       biteId: '',
     },
   ]);
-
-  currentPosition = input();
 
   submitNewTags = output<string>();
   submitNewReview = output<{ review: string; biteId: string }>();

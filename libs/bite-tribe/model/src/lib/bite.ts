@@ -8,6 +8,7 @@ export interface Bite {
   place: string;
   price: number;
   position: GeoPoint;
+  distance?: string;
 
   likes?: any[];
   thumbup: number;

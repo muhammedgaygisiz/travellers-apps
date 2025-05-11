@@ -4,6 +4,8 @@ import { LoginContainerComponent } from '../login-container.component';
 import { LoginService } from '../login.service';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
+import { addIcons } from 'ionicons';
+import { logoApple, logoFacebook, logoGoogle } from 'ionicons/icons';
 
 describe('LoginContainerComponent', () => {
   let component: LoginContainerComponent;
@@ -16,6 +18,8 @@ describe('LoginContainerComponent', () => {
       login: jest.fn(),
       gotoSignUp: jest.fn(),
       loginWithGoogleAccount: jest.fn(),
+      loginWithAppleAccount: jest.fn(),
+      loginWithFacebookAccount: jest.fn(),
     } as unknown as jest.Mocked<LoginService>;
 
     TestBed.configureTestingModule({
@@ -27,6 +31,12 @@ describe('LoginContainerComponent', () => {
         },
       ],
     }).compileComponents();
+
+    addIcons({
+      logoGoogle,
+      logoApple,
+      logoFacebook,
+    });
 
     fixture = TestBed.createComponent(LoginContainerComponent);
     component = fixture.componentInstance;
@@ -71,6 +81,16 @@ describe('LoginContainerComponent', () => {
   it('should call loginWithGoogleAccount on service when onSignupWithGoogle is called', () => {
     component.onSignupWithGoogle();
     expect(mockLoginService.loginWithGoogleAccount).toHaveBeenCalled();
+  });
+
+  it('should call loginWithAppleAccount on service when onSignupWithApple is called', () => {
+    component.onSignupWithApple();
+    expect(mockLoginService.loginWithAppleAccount).toHaveBeenCalled();
+  });
+
+  it('should call loginWithFacebookAccount on service when onSignupWithFacebook is called', () => {
+    component.onSignupWithFacebook();
+    expect(mockLoginService.loginWithFacebookAccount).toHaveBeenCalled();
   });
 
   it('should handle optional service injection', () => {

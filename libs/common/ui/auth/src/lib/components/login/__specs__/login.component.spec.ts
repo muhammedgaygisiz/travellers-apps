@@ -34,4 +34,24 @@ describe('LoginComponent', () => {
 
     expect(submitSignupWithGoogleEmitSpy).toHaveBeenCalledTimes(1);
   });
+
+  it('should emit submitSignupWithApple on button click', () => {
+    const submitSignupWithAppleEmitSpy = jest.spyOn(
+      component.submitSignupWithApple,
+      'emit'
+    );
+    component.onAppleSignUp();
+
+    expect(submitSignupWithAppleEmitSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should emit submitSignupWithFacebook on button click', () => {
+    const submitSignupWithFacebookEmitSpy = jest.spyOn(
+      component.submitSignupWithFacebook,
+      'emit'
+    );
+    component.onFacebookSignUp();
+
+    expect(submitSignupWithFacebookEmitSpy).toHaveBeenCalledTimes(1);
+  });
 });

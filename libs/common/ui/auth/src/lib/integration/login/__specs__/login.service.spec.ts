@@ -23,6 +23,8 @@ describe('LoginService', () => {
           useValue: {
             login: jest.fn(),
             loginWithGoogleAccount: jest.fn(),
+            loginWithAppleAccount: jest.fn(),
+            loginWithFacebookAccount: jest.fn(),
             loginFailed: jest.fn(),
           },
         },
@@ -89,6 +91,29 @@ describe('LoginService', () => {
       service.loginWithGoogleAccount();
 
       expect(loginWithGoogleSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('loginWithAppleAccount', () => {
+    it('should dispatch loginWithAppleAccount action', () => {
+      const loginWithAppleSpy = jest.spyOn(store, 'loginWithAppleAccount');
+
+      service.loginWithAppleAccount();
+
+      expect(loginWithAppleSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('loginWithFacebookAccount', () => {
+    it('should dispatch loginWithFacebookAccount action', () => {
+      const loginWithFacebookSpy = jest.spyOn(
+        store,
+        'loginWithFacebookAccount'
+      );
+
+      service.loginWithFacebookAccount();
+
+      expect(loginWithFacebookSpy).toHaveBeenCalled();
     });
   });
 });

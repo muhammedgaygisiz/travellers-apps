@@ -33,6 +33,14 @@ export class FinancesStoreService implements StoreService {
     throw new Error('Method not implemented.');
   }
 
+  loginWithAppleAccount(): void {
+    throw new Error('Method not implemented.');
+  }
+
+  loginWithFacebookAccount(): void {
+    throw new Error('Method not implemented.');
+  }
+
   login(authCreds: Login): void {
     this.store.dispatch(fromAuth.login({ authCreds }));
   }

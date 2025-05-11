@@ -39,4 +39,12 @@ export class PricesStoreService implements StoreService {
   loginWithGoogleAccount() {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
   }
+
+  loginWithAppleAccount(): void {
+    throw new Error('Method not implemented.');
+  }
+
+  loginWithFacebookAccount(): void {
+    throw new Error('Method not implemented.');
+  }
 }

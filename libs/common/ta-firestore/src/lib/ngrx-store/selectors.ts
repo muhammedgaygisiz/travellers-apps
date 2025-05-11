@@ -21,5 +21,5 @@ export const selectRegistrationErrorCode = createSelector(
 
 export const selectUserId = createSelector(
   authState,
-  (authState) => authState.user.uid
+  (authState) => authState.user?.uid
 );

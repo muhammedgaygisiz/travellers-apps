@@ -6,9 +6,12 @@ import {
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
 import {
+  loadedUser,
   login,
   loginFailed,
   loginSucceeded,
+  loginWithAppleAccount,
+  loginWithFacebookAccount,
   loginWithGoogleAccount,
   logout,
   logoutSucceeded,
@@ -16,7 +19,6 @@ import {
   register,
   registrationFailed,
   registrationSucceeded,
-  loadedUser,
 } from './actions';
 import {
   catchError,
@@ -32,7 +34,7 @@ import {
 import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
-import { AFTER_LOGOUT_PAGE } from 'utils';
+import { AFTER_LOGIN_PAGE, AFTER_LOGOUT_PAGE } from 'utils';
 
 type AuthCreds = { authCreds: AuthCredentials };
 
@@ -43,6 +45,9 @@ export class AuthEffects {
   private readonly navController = inject(NavController);
 
   private readonly pageAfterLogout = inject(AFTER_LOGOUT_PAGE, {
+    optional: true,
+  });
+  private readonly pageAfterLogin = inject(AFTER_LOGIN_PAGE, {
     optional: true,
   });
 
@@ -56,7 +61,7 @@ export class AuthEffects {
       switchMap(() =>
         this.authService.isLoggedIn$.pipe(
           map((isLoggedIn) => {
-            return this.getAction(isLoggedIn);
+            return isLoggedIn ? loginSucceeded() : notAuthenticated();
           })
         )
       )
@@ -75,12 +80,12 @@ export class AuthEffects {
 
   loginEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(login.type),
+      ofType(login),
       mergeMap(({ authCreds }: AuthCreds) =>
         this.login$(authCreds).pipe(
           map(() => loginSucceeded()),
           catchError((err) => {
-            console.log('#mo', err);
+            console.log('#mo error login: ', err);
             return of(loginFailed());
           })
         )
@@ -102,7 +107,7 @@ export class AuthEffects {
 
   registrationEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(register.type),
+      ofType(register),
       mergeMap(({ registration }) =>
         this.register$(registration).pipe(
           map(() => registrationSucceeded()),
@@ -120,7 +125,46 @@ export class AuthEffects {
       ofType(loginWithGoogleAccount.type),
       mergeMap(() =>
         this.registerWithGoogleAccount$().pipe(
-          map(() => registrationSucceeded()),
+          map((result) => {
+            console.log('#mo signInResult', result);
+            return loginSucceeded();
+          }),
+          tap(() => this.navController.navigateBack(['/'])),
+          catchError((err) => {
+            return of(registrationFailed({ code: err.code }));
+          })
+        )
+      )
+    )
+  );
+
+  loginWithAppleAccountEffect$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(loginWithAppleAccount),
+      mergeMap(() =>
+        this.registerWithAppleAccount$().pipe(
+          map((result) => {
+            console.log('#mo signInResult', result);
+            return loginSucceeded();
+          }),
+          tap(() => this.navController.navigateBack(['/'])),
+          catchError((err) => {
+            return of(registrationFailed({ code: err.code }));
+          })
+        )
+      )
+    )
+  );
+
+  loginWithFacebookAccountEffect$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(loginWithFacebookAccount),
+      mergeMap(() =>
+        this.registerWithFacebookAccount$().pipe(
+          map((result) => {
+            console.log('#mo signInResult', result);
+            return loginSucceeded();
+          }),
           tap(() => this.navController.navigateBack(['/'])),
           catchError((err) => {
             return of(registrationFailed({ code: err.code }));
@@ -133,8 +177,14 @@ export class AuthEffects {
   successFulLogin$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(loginSucceeded.type),
+        ofType(loginSucceeded),
         tap(() => {
+          console.log('#mo auth signInSuccessful');
+          if (this.pageAfterLogin) {
+            this.navController.navigateBack([this.pageAfterLogin]);
+            return;
+          }
+
           this.navController.navigateRoot(['/']);
         })
       ),
@@ -169,7 +219,11 @@ export class AuthEffects {
     return this.authService.registerWithGoogleAccount$();
   }
 
-  private getAction(isLoggedIn: boolean) {
-    return isLoggedIn ? loginSucceeded() : notAuthenticated();
+  private registerWithAppleAccount$() {
+    return this.authService.registerWithAppleAccount$();
+  }
+
+  private registerWithFacebookAccount$() {
+    return this.authService.registerWithFacebookAccount$();
   }
 }

@@ -47,6 +47,8 @@ export class LoginComponent {
   public readonly signup = output();
 
   public readonly submitSignupWithGoogle = output();
+  public readonly submitSignupWithApple = output();
+  public readonly submitSignupWithFacebook = output();
 
   public authFormGroup: FormGroup = new FormGroup<AuthCredentialFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),
@@ -58,5 +60,13 @@ export class LoginComponent {
 
   public onGoogleSignUp() {
     this.submitSignupWithGoogle.emit();
+  }
+
+  public onAppleSignUp() {
+    this.submitSignupWithApple.emit();
+  }
+
+  public onFacebookSignUp() {
+    this.submitSignupWithFacebook.emit();
   }
 }

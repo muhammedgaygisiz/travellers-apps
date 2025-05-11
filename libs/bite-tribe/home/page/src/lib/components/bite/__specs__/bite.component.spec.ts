@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { BiteComponent } from '../bite-page.component';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { PopoverController } from '@ionic/angular';
 import { LikeOptionsPopoverMenuComponent } from '../../like-options-popover-menu/like-options-popover-menu.component';
+import { BiteComponent } from '../bite.component';
 
 describe('BitePage', () => {
   let component: BiteComponent;

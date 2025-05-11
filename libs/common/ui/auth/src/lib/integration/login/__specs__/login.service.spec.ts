@@ -116,4 +116,30 @@ describe('LoginService', () => {
       expect(loginWithFacebookSpy).toHaveBeenCalled();
     });
   });
+
+  describe('when store is not available', () => {
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideRouter([{ path: 'registration', redirectTo: '' }]),
+          { provide: STORE_SERVICE, useValue: null },
+        ],
+      }).compileComponents();
+
+      service = TestBed.inject(LoginService);
+      navController = TestBed.inject(NavController);
+    });
+
+    it('should handle login without error', () => {
+      const authCreds = { email: 'email', password: 'password' };
+      expect(() => service.login(authCreds)).not.toThrow();
+    });
+
+    it('should handle social logins without error', () => {
+      expect(() => service.loginWithGoogleAccount()).not.toThrow();
+      expect(() => service.loginWithAppleAccount()).not.toThrow();
+      expect(() => service.loginWithFacebookAccount()).not.toThrow();
+    });
+  });
 });

@@ -3,11 +3,8 @@
     position: relative;
 
     .like-container {
-      position: absolute;
-      z-index: 1;
-
-      bottom: 1rem;
-      right: 2rem;
+      display: flex;
+      justify-content: flex-end;
 
       ion-chip.liked {
         background-color: var(--ion-color-primary);
@@ -32,5 +29,14 @@
 
   .card-details {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    ion-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
   }
 }

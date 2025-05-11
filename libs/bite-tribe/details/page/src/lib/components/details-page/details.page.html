@@ -11,10 +11,7 @@
     <h1>{{ biteData?.name }}</h1>
 
     <div class="fields ion-margin-bottom">
-      <span
-        >{{ biteData?.place }} · {{ biteData?.position |
-        calcDistance:currentPosition() }}</span
-      >
+      <span>{{ biteData?.place }} · {{ biteData?.distance | toMetric }} </span>
       @if (biteData?.price) {
       <span class="price">{{ biteData?.price | currency }}</span>
       }

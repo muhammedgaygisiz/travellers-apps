@@ -14,7 +14,7 @@
           </ion-card-header>
 
           <ion-card-content>{{
-            biteData?.position | calcDistance : currentPosition()
+            biteData?.distance | toMetric
           }}</ion-card-content>
         </div>
       </div>

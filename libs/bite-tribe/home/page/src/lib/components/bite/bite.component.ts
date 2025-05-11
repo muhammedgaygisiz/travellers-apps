@@ -20,12 +20,12 @@ import { Bite } from 'model';
 import { PopoverController } from '@ionic/angular';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
 import { CountLikesPipe } from './pipes/count-likes.pipe';
-import { CalcDistancePipe } from 'distance-pipe';
+import { ToMetricPipe } from 'distance-pipe';
 
 @Component({
   selector: 'bt-bite',
-  templateUrl: './bite-page.component.html',
-  styleUrls: ['./bite-page.component.scss'],
+  templateUrl: './bite.component.html',
+  styleUrls: ['./bite.component.scss'],
   imports: [
     IonCard,
     IonCardContent,
@@ -36,18 +36,17 @@ import { CalcDistancePipe } from 'distance-pipe';
     IonBadge,
     IonLabel,
     CountLikesPipe,
-    CalcDistancePipe,
+    ToMetricPipe,
   ],
   providers: [PopoverController],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
-export class BitePage {
+export class BiteComponent {
   popoverController = inject(PopoverController);
 
   bite = input.required<Bite>();
   userId = input<string>();
-  currentPosition = input();
 
   biteClick = output<Bite>();
 

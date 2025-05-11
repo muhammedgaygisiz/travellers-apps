@@ -9,7 +9,6 @@ export class HomeService {
 
   bites = this.dataAccess.bites;
   userId = this.dataAccess.userId;
-  currentPosition = this.dataAccess.currentPosition();
 
   logout() {
     this.dataAccess.logout();

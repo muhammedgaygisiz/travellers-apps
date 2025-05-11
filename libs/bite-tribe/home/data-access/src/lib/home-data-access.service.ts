@@ -3,8 +3,6 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Bite } from 'model';
 import { Platform } from '@ionic/angular';
-import { getCurrentPosition } from 'geolocation';
-import { from } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class HomeDataAccessService {
@@ -33,11 +31,5 @@ export class HomeDataAccessService {
     }
 
     this.storeService.submitLikeClick(likeType);
-  }
-
-  currentPosition() {
-    return toSignal(from(getCurrentPosition(this.platform)), {
-      initialValue: null,
-    });
   }
 }

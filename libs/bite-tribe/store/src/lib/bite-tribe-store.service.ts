@@ -46,6 +46,14 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
   }
 
+  loginWithAppleAccount(): void {
+    this.store.dispatch(fromAuth.loginWithAppleAccount());
+  }
+
+  loginWithFacebookAccount(): void {
+    this.store.dispatch(fromAuth.loginWithFacebookAccount());
+  }
+
   login(authCreds: Login): void {
     this.store?.dispatch(fromAuth.login({ authCreds }));
   }

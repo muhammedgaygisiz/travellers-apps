@@ -7,6 +7,8 @@ export interface StoreService {
   registrationError: Signal<string | null>;
 
   loginWithGoogleAccount(): void;
+  loginWithAppleAccount(): void;
+  loginWithFacebookAccount(): void;
 
   // eslint-disable-next-line no-unused-vars
   login(authCreds: Login): void;

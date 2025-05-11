@@ -30,6 +30,14 @@ export const loginWithGoogleAccount = createAction(
   '[Registration Page] Login With Google Account'
 );
 
+export const loginWithAppleAccount = createAction(
+  '[Registration Page] Login With Apple Account'
+);
+
+export const loginWithFacebookAccount = createAction(
+  '[Registration Page] Login With Facebook Account'
+);
+
 export const registrationSucceeded = createAction(
   '[Auth API] Registration successful'
 );

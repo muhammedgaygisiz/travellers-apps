@@ -29,4 +29,12 @@ export class LoginService {
   public loginWithGoogleAccount() {
     this.store?.loginWithGoogleAccount();
   }
+
+  public loginWithAppleAccount() {
+    this.store?.loginWithAppleAccount();
+  }
+
+  public loginWithFacebookAccount() {
+    this.store?.loginWithFacebookAccount();
+  }
 }

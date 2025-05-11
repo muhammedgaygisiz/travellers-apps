@@ -62,6 +62,14 @@ export class AuthService {
   }
 
   public registerWithGoogleAccount$() {
-    return from(FirebaseAuthentication.signInWithGoogle({ mode: 'redirect' }));
+    return from(FirebaseAuthentication.signInWithGoogle({ mode: 'popup' }));
+  }
+
+  public registerWithAppleAccount$() {
+    return from(FirebaseAuthentication.signInWithApple({ mode: 'popup' }));
+  }
+
+  public registerWithFacebookAccount$() {
+    return from(FirebaseAuthentication.signInWithFacebook({ mode: 'popup' }));
   }
 }

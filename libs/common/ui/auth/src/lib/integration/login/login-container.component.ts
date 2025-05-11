@@ -15,6 +15,8 @@ import { Credentials } from '../../api/credentials.model';
     (submitAuth)="login($event)"
     (signup)="gotoSignup()"
     (submitSignupWithGoogle)="onSignupWithGoogle()"
+    (submitSignupWithApple)="onSignupWithApple()"
+    (submitSignupWithFacebook)="onSignupWithFacebook()"
   />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [LoginComponent],
@@ -40,5 +42,13 @@ export class LoginContainerComponent {
 
   onSignupWithGoogle() {
     this.loginService?.loginWithGoogleAccount();
+  }
+
+  onSignupWithApple() {
+    this.loginService?.loginWithAppleAccount();
+  }
+
+  onSignupWithFacebook() {
+    this.loginService?.loginWithFacebookAccount();
   }
 }

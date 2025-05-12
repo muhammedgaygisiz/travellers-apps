@@ -17,6 +17,7 @@ describe('BitePage', () => {
   let component: BitePage;
   let fixture: ComponentFixture<BitePage>;
   let platformMock: Partial<Platform>;
+  let originalConsoleError: typeof console.error;
 
   beforeEach(() => {
     platformMock = {
@@ -27,15 +28,12 @@ describe('BitePage', () => {
       } as any,
     };
 
-    // Save and mock console.error
-    const originalConsoleError = console.error;
+    // Save original console.error and mock it
+    originalConsoleError = console.error;
     jest.spyOn(console, 'error').mockImplementation(() => {
-      console.log('error was thrown in test');
+      console.log('error was thrown in test suite');
     });
 
-    afterEach(() => {
-      console.error = originalConsoleError; // Restore original console.error
-    });
     addIcons({
       imageOutline,
     });
@@ -54,6 +52,10 @@ describe('BitePage', () => {
     fixture = TestBed.createComponent(BitePage);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    console.error = originalConsoleError; // Restore original console.error
   });
 
   it('should create', () => {

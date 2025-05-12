@@ -27,6 +27,11 @@ describe('BitePage', () => {
       } as any,
     };
 
+    // Mock console.error
+    jest.spyOn(console, 'error').mockImplementation(() => {
+      console.log('error was thrown in test');
+    });
+
     addIcons({
       imageOutline,
     });
@@ -62,6 +67,7 @@ describe('BitePage', () => {
       place: 'Test Place',
       tags: 'fish healthy',
       price: 9.99,
+      currency: 'EUR',
     };
 
     component.biteFormGroup.patchValue(validBite as any);
@@ -75,6 +81,7 @@ describe('BitePage', () => {
       place: 'Test Place',
       tags: 'fish healthy',
       price: 9.99,
+      currency: 'EUR',
     };
 
     const emitSpy = jest.spyOn(component.submitNewBite, 'emit');

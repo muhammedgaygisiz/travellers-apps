@@ -9,7 +9,11 @@
         </div>
         <div class="card-details">
           <ion-card-header>
-            <ion-card-subtitle>{{ biteData?.place }}</ion-card-subtitle>
+            <ion-card-subtitle
+              class="restaurant-name"
+              (click)="restaurantClick.emit(biteData)"
+              >{{ biteData?.place }}</ion-card-subtitle
+            >
             <ion-card-title
               class="bite-name ion-padding-bottom"
               (click)="biteClick.emit(biteData)"

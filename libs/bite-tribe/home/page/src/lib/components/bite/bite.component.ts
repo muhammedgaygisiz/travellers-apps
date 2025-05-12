@@ -49,6 +49,7 @@ export class BiteComponent {
   userId = input<string>();
 
   biteClick = output<Bite>();
+  restaurantClick = output<Bite>();
 
   likeButtonClick = output<{ likeType: string; biteId: string }>();
 

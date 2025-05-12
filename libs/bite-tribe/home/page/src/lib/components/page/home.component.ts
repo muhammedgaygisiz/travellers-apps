@@ -49,4 +49,11 @@ export class BiteTribeHomeComponent {
   onBiteClicked(bite: Bite) {
     this.navController.navigateForward(['bite', bite.id]);
   }
+
+  onRestaurantClicked(bite: Bite) {
+    this.navController.navigateForward([
+      'restaurant',
+      encodeURIComponent(bite.place),
+    ]);
+  }
 }

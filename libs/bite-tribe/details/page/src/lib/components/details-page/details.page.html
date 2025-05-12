@@ -13,7 +13,9 @@
     <div class="fields ion-margin-bottom">
       <span>{{ biteData?.place }} · {{ biteData?.distance | toMetric }} </span>
       @if (biteData?.price) {
-      <span class="price">{{ biteData?.price | currency }}</span>
+      <span class="price"
+        >{{ biteData?.price | currency:(biteData?.currency || 'USD') }}</span
+      >
       }
     </div>
 

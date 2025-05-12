@@ -7,6 +7,7 @@ export interface Bite {
   image: string;
   place: string;
   price: number;
+  currency?: string;
   position: GeoPoint;
   distance?: string;
 

@@ -39,6 +39,12 @@
         </ion-item>
         <ion-item>
           <ion-input label="Price" formControlName="price"></ion-input>
+          <ion-select formControlName="currency" interface="popover">
+            <ion-select-option value="EUR">EUR</ion-select-option>
+            <ion-select-option value="USD">USD</ion-select-option>
+            <ion-select-option value="THB">THB</ion-select-option>
+            <ion-select-option value="CHF">CHF</ion-select-option>
+          </ion-select>
         </ion-item>
         <ion-item>
           <ion-input label="Tags" formControlName="tags"></ion-input>

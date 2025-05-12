@@ -2,7 +2,7 @@
 
 <div class="container">
   <div class="bite-container">
-    <ion-card (click)="biteClick.emit(biteData)">
+    <ion-card>
       <div class="card-content">
         <div class="card-image">
           <img alt="Dish" [src]="biteData?.image" />
@@ -10,7 +10,11 @@
         <div class="card-details">
           <ion-card-header>
             <ion-card-subtitle>{{ biteData?.place }}</ion-card-subtitle>
-            <ion-card-title>{{ biteData?.name }}</ion-card-title>
+            <ion-card-title
+              class="bite-name ion-padding-bottom"
+              (click)="biteClick.emit(biteData)"
+              >{{ biteData?.name }}
+            </ion-card-title>
           </ion-card-header>
 
           <ion-card-content>
@@ -22,9 +26,9 @@
               >
                 @let numberLikes = biteData | countLikes;
                 <ion-label class="{{ numberLikes ? 'ion-margin-end' : '' }}"
-                  >👍</ion-label
-                >
-                @if(numberLikes) {
+                  >👍
+                </ion-label>
+                @if (numberLikes) {
                 <ion-badge>{{ numberLikes }}</ion-badge>
                 }
               </ion-chip>

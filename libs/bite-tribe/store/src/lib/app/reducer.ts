@@ -4,9 +4,12 @@ import { loadedGpsPosition } from './actions';
 export const reducer = createReducer<{ position?: any }>(
   {},
   on(loadedGpsPosition, (state, { position }) => {
+    const { coords } = position;
+    const { latitude, longitude } = coords;
+
     return {
       ...state,
-      position: position.coords,
+      position: { latitude, longitude },
     };
   })
 );

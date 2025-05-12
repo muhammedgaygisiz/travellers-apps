@@ -18,6 +18,8 @@ import {
   IonInput,
   IonItem,
   IonList,
+  IonSelect,
+  IonSelectOption,
 } from '@ionic/angular/standalone';
 import { Platform } from '@ionic/angular';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -39,6 +41,8 @@ import { compressFile } from './utils/compress-file';
     IonButton,
     IonContent,
     ReactiveFormsModule,
+    IonSelect,
+    IonSelectOption,
   ],
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',
@@ -61,6 +65,7 @@ export class BitePage {
     name: ['', Validators.required],
     place: ['', Validators.required],
     price: [null, Validators.required],
+    currency: ['EUR', Validators.required],
     tags: [''],
   });
 

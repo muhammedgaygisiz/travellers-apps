@@ -17,6 +17,7 @@ describe('BitePage', () => {
   let component: BitePage;
   let fixture: ComponentFixture<BitePage>;
   let platformMock: Partial<Platform>;
+  let originalConsoleError: typeof console.error;
 
   beforeEach(() => {
     platformMock = {
@@ -26,6 +27,12 @@ describe('BitePage', () => {
         subscribeWithPriority: () => {},
       } as any,
     };
+
+    // Save original console.error and mock it
+    originalConsoleError = console.error;
+    jest.spyOn(console, 'error').mockImplementation(() => {
+      console.log('error was thrown in test suite');
+    });
 
     addIcons({
       imageOutline,
@@ -47,6 +54,10 @@ describe('BitePage', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    console.error = originalConsoleError; // Restore original console.error
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -62,6 +73,7 @@ describe('BitePage', () => {
       place: 'Test Place',
       tags: 'fish healthy',
       price: 9.99,
+      currency: 'EUR',
     };
 
     component.biteFormGroup.patchValue(validBite as any);
@@ -75,6 +87,7 @@ describe('BitePage', () => {
       place: 'Test Place',
       tags: 'fish healthy',
       price: 9.99,
+      currency: 'EUR',
     };
 
     const emitSpy = jest.spyOn(component.submitNewBite, 'emit');

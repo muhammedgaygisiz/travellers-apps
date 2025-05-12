@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class ToMetricPipe implements PipeTransform {
   transform(distance: string | undefined): string {
-    if (!distance || distance === '0.00' || distance === 'NaN') {
+    if (!distance || distance === 'NaN') {
       return '-';
     }
 

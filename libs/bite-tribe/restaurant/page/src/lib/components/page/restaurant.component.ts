@@ -25,7 +25,7 @@ export class RestaurantComponent {
     const bite = this.bite();
     const restaurant = this.restaurant();
 
-    return restaurant?.name || bite?.name;
+    return restaurant?.name || bite?.place;
   });
 
   placeDistance = computed(() => {

@@ -27,11 +27,15 @@ describe('BitePage', () => {
       } as any,
     };
 
-    // Mock console.error
+    // Save and mock console.error
+    const originalConsoleError = console.error;
     jest.spyOn(console, 'error').mockImplementation(() => {
       console.log('error was thrown in test');
     });
 
+    afterEach(() => {
+      console.error = originalConsoleError; // Restore original console.error
+    });
     addIcons({
       imageOutline,
     });

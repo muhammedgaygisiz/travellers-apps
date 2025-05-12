@@ -5,78 +5,86 @@
   [showFooter]="false"
   [enableBackButton]="true"
 >
-  <ion-content class="ion-padding">
+  <ion-content>
     <ion-img [src]="biteData?.image" class="dish-image" />
 
-    <h1>{{ biteData?.name }}</h1>
+    <div class="ion-padding">
+      <h1>{{ biteData?.name }}</h1>
 
-    <div class="fields ion-margin-bottom">
-      <span>{{ biteData?.place }} · {{ biteData?.distance | toMetric }} </span>
-      @if (biteData?.price) {
-      <span class="price"
-        >{{ biteData?.price | currency:(biteData?.currency || 'USD') }}</span
-      >
-      }
-    </div>
+      <div class="fields ion-margin-bottom">
+        <span
+          >{{ biteData?.place }} · {{ biteData?.distance | toMetric }}
+        </span>
+        @if (biteData?.price) {
+        <span class="price"
+          >{{ biteData?.price | currency:(biteData?.currency || 'USD') }}</span
+        >
+        }
+      </div>
 
-    <div class="ion-margin-bottom">
-      @for (tag of biteData?.tags; track tag) {
-      <ion-chip>{{ tag }}</ion-chip>
-      }
-    </div>
+      <div class="ion-margin-bottom">
+        @for (tag of biteData?.tags; track tag) {
+        <ion-chip>{{ tag }}</ion-chip>
+        }
+      </div>
 
-    <ion-item lines="full">
-      <form [formGroup]="newTagsFormGroup">
-        <ion-input label="New tags" class="tag-input" formControlName="tags" />
-      </form>
-    </ion-item>
-
-    <ion-button
-      expand="block"
-      color="primary"
-      class="ion-margin"
-      [disabled]="isTagsFieldInvalid()"
-      (click)="saveTags()"
-    >
-      Save tags
-    </ion-button>
-
-    <ion-list lines="full">
-      <ion-list-header lines="none">
-        <ion-label>Reviews</ion-label>
-      </ion-list-header>
-
-      @for (review of reviews(); track review.id) {
-      <ion-item lines="full" class="review">
-        <ion-label>
-          <div class="review-row">
-            <h2>{{ review.author }}</h2>
-            <ion-text><p>{{ review.review }}</p></ion-text>
-          </div>
-          <ion-note>{{ review.createdAt | timeAgo }}</ion-note>
-        </ion-label>
+      <ion-item lines="full">
+        <form [formGroup]="newTagsFormGroup">
+          <ion-input
+            label="New tags"
+            class="tag-input"
+            formControlName="tags"
+          />
+        </form>
       </ion-item>
-      }
-    </ion-list>
 
-    <ion-item lines="full" class="ion-margin-top">
-      <form [formGroup]="reviewFormGroup">
-        <ion-textarea
-          label="Write a review"
-          rows="3"
-          formControlName="review"
-        />
-      </form>
-    </ion-item>
+      <ion-button
+        expand="block"
+        color="primary"
+        class="ion-margin"
+        [disabled]="isTagsFieldInvalid()"
+        (click)="saveTags()"
+      >
+        Save tags
+      </ion-button>
 
-    <ion-button
-      expand="block"
-      color="primary"
-      class="ion-margin"
-      [disabled]="isReviewFieldInvalid()"
-      (click)="saveReview()"
-    >
-      Post
-    </ion-button>
+      <ion-list lines="full">
+        <ion-list-header lines="none">
+          <ion-label>Reviews</ion-label>
+        </ion-list-header>
+
+        @for (review of reviews(); track review.id) {
+        <ion-item lines="full" class="review">
+          <ion-label>
+            <div class="review-row">
+              <h2>{{ review.author }}</h2>
+              <ion-text><p>{{ review.review }}</p></ion-text>
+            </div>
+            <ion-note>{{ review.createdAt | timeAgo }}</ion-note>
+          </ion-label>
+        </ion-item>
+        }
+      </ion-list>
+
+      <ion-item lines="full" class="ion-margin-top">
+        <form [formGroup]="reviewFormGroup">
+          <ion-textarea
+            label="Write a review"
+            rows="3"
+            formControlName="review"
+          />
+        </form>
+      </ion-item>
+
+      <ion-button
+        expand="block"
+        color="primary"
+        class="ion-margin"
+        [disabled]="isReviewFieldInvalid()"
+        (click)="saveReview()"
+      >
+        Post
+      </ion-button>
+    </div>
   </ion-content>
 </ta-page>

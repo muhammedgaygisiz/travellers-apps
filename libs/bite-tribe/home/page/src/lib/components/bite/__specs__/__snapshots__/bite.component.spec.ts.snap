@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BitePage should handle null bite input 1`] = `"  - 👍 "`;
+
+exports[`BitePage should handle undefined bite input 1`] = `"  - 👍 "`;

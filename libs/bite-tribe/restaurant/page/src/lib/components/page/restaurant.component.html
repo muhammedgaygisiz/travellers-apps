@@ -1,0 +1,16 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showLanguages]="false"
+  [showAddButton]="false"
+  [enableBackButton]="true"
+>
+  <ion-content>
+    <ion-img [src]="restaurant()?.image" class="place-image" />
+
+    <div class="ion-padding">
+      <h1>{{ placeName() }}</h1>
+
+      {{ placeDistance() | toMetric }}
+    </div>
+  </ion-content>
+</ta-page>

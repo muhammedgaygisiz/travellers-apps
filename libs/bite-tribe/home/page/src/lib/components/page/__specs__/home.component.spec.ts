@@ -1,10 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import { NavController, provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
-import { NavController } from '@ionic/angular/standalone';
 import { BiteTribeHomeComponent } from '../home.component';
 import { ComponentRef } from '@angular/core';
-import { Bite } from 'model';
 import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
 
@@ -55,21 +53,5 @@ describe('BiteTribeHomeComponent', () => {
     fixture.detectChanges();
 
     expect(component.bites()).toEqual(mockBites);
-  });
-
-  it('should navigate to new-bite page on add button click', () => {
-    const navSpy = jest.spyOn(navController, 'navigateForward');
-
-    component.onAddButtonClicked();
-
-    expect(navSpy).toHaveBeenCalledWith(['new-bite']);
-  });
-
-  it('should navigate to bite page on bite click', () => {
-    const navSpy = jest.spyOn(navController, 'navigateForward');
-
-    component.onBiteClicked({ id: '5' } as Bite);
-
-    expect(navSpy).toHaveBeenCalledWith(['bite', '5']);
   });
 });

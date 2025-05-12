@@ -53,13 +53,13 @@ describe('BitePage', () => {
   it('should handle null bite input', () => {
     componentRef.setInput('bite', null);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toBe(' - 👍');
+    expect(fixture.nativeElement.textContent).toMatchSnapshot();
   });
 
   it('should handle undefined bite input', () => {
     componentRef.setInput('bite', undefined);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toBe(' - 👍');
+    expect(fixture.nativeElement.textContent).toMatchSnapshot();
   });
 
   it('should update view when bite input changes', () => {

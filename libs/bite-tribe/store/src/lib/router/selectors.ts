@@ -3,6 +3,12 @@ import { createSelector } from '@ngrx/store';
 
 const { selectRouteParams } = fromRouter.getRouterSelectors();
 
-export const biteId = createSelector(selectRouteParams, (params) => {
-  return params?.['id'];
-});
+export const biteId = createSelector(
+  selectRouteParams,
+  (params) => params?.['biteId']
+);
+
+export const restaurantId = createSelector(
+  selectRouteParams,
+  (params) => params?.['restaurantId']
+);

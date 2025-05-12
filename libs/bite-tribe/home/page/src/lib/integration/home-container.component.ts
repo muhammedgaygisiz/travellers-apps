@@ -11,6 +11,9 @@ import { HomeService } from './home.service';
       [userId]="service.userId()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
+      (biteClick)="service.biteClicked($event)"
+      (restaurantClick)="service.restaurantClicked($event)"
+      (addButtonClick)="service.onAddButtonClicked()"
     />
   `,
   imports: [BiteTribeHomeComponent],

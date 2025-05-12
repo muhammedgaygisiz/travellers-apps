@@ -3,7 +3,7 @@
   [showLanguages]="false"
   [showAddButton]="true"
   (logoutClick)="logoutClick.emit()"
-  (addButtonClick)="onAddButtonClicked()"
+  (addButtonClick)="addButtonClick.emit()"
 >
   <ion-content class="ion-padding">
     <h1>Bites</h1>
@@ -24,8 +24,8 @@
     <bt-bite
       [bite]="bite"
       [userId]="userId()"
-      (biteClick)="onBiteClicked($event)"
-      (restaurantClick)="onRestaurantClicked($event)"
+      (biteClick)="biteClick.emit($event)"
+      (restaurantClick)="restaurantClick.emit($event)"
       (likeButtonClick)="likeButtonClick.emit($event)"
     />
     }

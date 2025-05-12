@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject,
   input,
   output,
 } from '@angular/core';
@@ -12,7 +11,6 @@ import {
   IonChip,
   IonContent,
   IonText,
-  NavController,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { BiteComponent } from '../bite/bite.component';
@@ -33,27 +31,13 @@ import { BiteComponent } from '../bite/bite.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteTribeHomeComponent {
-  private readonly navController = inject(NavController);
-
   bites = input<any[]>();
   userId = input<string>();
 
   readonly logoutClick = output();
+  readonly addButtonClick = output();
 
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
-
-  onAddButtonClicked() {
-    this.navController.navigateForward(['new-bite']);
-  }
-
-  onBiteClicked(bite: Bite) {
-    this.navController.navigateForward(['bite', bite.id]);
-  }
-
-  onRestaurantClicked(bite: Bite) {
-    this.navController.navigateForward([
-      'restaurant',
-      encodeURIComponent(bite.place),
-    ]);
-  }
+  readonly biteClick = output<Bite>();
+  readonly restaurantClick = output<Bite>();
 }

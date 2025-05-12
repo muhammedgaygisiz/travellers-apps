@@ -5,6 +5,7 @@ import { createAction, props, Store } from '@ngrx/store';
 import { removeLike, saveLike, saveNewBite, saveTags } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bite, bites } from './bites/selectors';
+import { restaurant } from './restaurant/selectors';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -38,6 +39,7 @@ export class BiteTribeStoreService implements StoreService {
 
   bites$ = this.store.select(bites);
   bite$ = this.store.select(bite);
+  restaurant$ = this.store.select(restaurant);
   reviews$ = this.store.select(reviews);
 
   userId = this.store.select(fromAuth.selectUserId);

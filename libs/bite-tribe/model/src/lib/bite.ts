@@ -10,6 +10,7 @@ export interface Bite {
   currency?: string;
   position: GeoPoint;
   distance?: string;
+  restaurantId?: string;
 
   likes?: any[];
   thumbup: number;

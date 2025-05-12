@@ -4,7 +4,13 @@ import { RestaurantService } from './restaurant.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: ` <restaurant class="ion-page"></restaurant> `,
+  template: `
+    <restaurant
+      class="ion-page"
+      [bite]="service.bite()"
+      [restaurant]="service.restaurant()"
+    />
+  `,
   imports: [RestaurantComponent],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix

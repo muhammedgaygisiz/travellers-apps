@@ -1,10 +1,20 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BehaviorSubject, pipe, skipWhile, switchMap, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  EMPTY,
+  from,
+  pipe,
+  skipWhile,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { AuthService } from 'ta-firestore';
+import { Restaurant } from 'model';
 
 const BITE_COLLECTION = 'bites';
 const REVIEW_COLLECTION = 'reviews';
+const RESTAURANT_COLLECTION = 'restaurants';
 
 const clearListeners = () =>
   pipe(
@@ -125,19 +135,6 @@ export class BiteTribeApiService {
     console.log('#mo', addDocumentResult);
   }
 
-  reviewsByBiteId(biteId: string) {
-    return this.authService.isLoggedIn$.pipe(
-      clearListeners(),
-      skipWhile((isLoggedIn) => !isLoggedIn),
-      switchMap(() => {
-        console.log('#mo - Start Listener for Reviews');
-        this.startReviewListener(biteId);
-
-        return this.reviewsChannel$;
-      })
-    );
-  }
-
   private async startReviewListener(biteId: string) {
     console.log('#mo Fetching reviews from Firestore');
 
@@ -208,5 +205,45 @@ export class BiteTribeApiService {
     } catch (e) {
       console.error('Error removing like:', e);
     }
+  }
+
+  reviewsByBiteId(biteId: string) {
+    return this.authService.isLoggedIn$.pipe(
+      clearListeners(),
+      skipWhile((isLoggedIn) => !isLoggedIn),
+      switchMap(() => {
+        console.log('#mo - Start Listener for Reviews');
+        this.startReviewListener(biteId);
+
+        return this.reviewsChannel$;
+      })
+    );
+  }
+
+  loadRestaurant(restaurantId: string) {
+    return this.authService.isLoggedIn$.pipe(
+      clearListeners(),
+      skipWhile((isLoggedIn) => !isLoggedIn),
+      switchMap(() => {
+        console.log('#mo - Start Listener for Restaurant');
+        if (restaurantId) {
+          return from(this.getRestaurantById(restaurantId));
+        }
+
+        return EMPTY;
+      })
+    );
+  }
+
+  private async getRestaurantById(restaurantId: string) {
+    const doc = await FirebaseFirestore.getDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+    });
+
+    const data = doc.snapshot.data;
+    return {
+      id: data?.['id'] || restaurantId,
+      ...data,
+    } as Restaurant;
   }
 }

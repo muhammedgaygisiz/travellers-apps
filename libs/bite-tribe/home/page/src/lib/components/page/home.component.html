@@ -2,8 +2,10 @@
   [showHeaderMenu]="true"
   [showLanguages]="false"
   [showAddButton]="true"
+  [showSettingsButton]="true"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
+  (gotoSettings)="gotoSettings.emit()"
 >
   <ion-content class="ion-padding">
     <h1>Bites</h1>

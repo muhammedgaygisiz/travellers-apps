@@ -14,6 +14,7 @@ import { HomeService } from './home.service';
       (biteClick)="service.biteClicked($event)"
       (restaurantClick)="service.restaurantClicked($event)"
       (addButtonClick)="service.onAddButtonClicked()"
+      (gotoSettings)="service.onGotoSettingsClick()"
     />
   `,
   imports: [BiteTribeHomeComponent],

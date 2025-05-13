@@ -64,6 +64,10 @@ import { SupportedLang } from 'localization';
         Login
       </ion-item>
       } @else {
+      <ion-item (click)="gotoSettings.emit()">
+        <ion-icon color="dark" name="settings-outline" slot="start" />
+        Settings
+      </ion-item>
       <ion-item
         data-cy="btn-logout"
         [button]="true"
@@ -88,9 +92,13 @@ export class PopoverMenuComponent {
 
   showLanguages = input<boolean | null>(true);
 
+  showSettingsButton = input<boolean | null>(false);
+
   loginClick = output();
 
   logoutClick = output();
+
+  gotoSettings = output();
 
   languageChangeClick = output<SupportedLang>();
 }

@@ -17,6 +17,7 @@ import {
   languageOutline,
   imageOutline,
   cameraOutline,
+  settingsOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -38,5 +39,6 @@ export const addNecessaryIcons = () => {
     languageOutline,
     imageOutline,
     cameraOutline,
+    settingsOutline,
   });
 };

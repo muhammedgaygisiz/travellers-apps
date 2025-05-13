@@ -50,4 +50,8 @@ export class HomeService {
   onAddButtonClicked() {
     this.navController.navigateForward(['new-bite']);
   }
+
+  onGotoSettingsClick() {
+    this.navController.navigateForward(['settings']);
+  }
 }

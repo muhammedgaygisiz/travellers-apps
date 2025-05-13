@@ -43,6 +43,7 @@ export class BiteTribeStoreService implements StoreService {
   reviews$ = this.store.select(reviews);
 
   userId = this.store.select(fromAuth.selectUserId);
+  user$ = this.store.select(fromAuth.selectUser);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());

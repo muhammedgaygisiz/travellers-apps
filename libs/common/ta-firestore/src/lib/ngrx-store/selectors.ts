@@ -23,3 +23,8 @@ export const selectUserId = createSelector(
   authState,
   (authState) => authState.user?.uid
 );
+
+export const selectUser = createSelector(
+  authState,
+  (authState) => authState.user
+);

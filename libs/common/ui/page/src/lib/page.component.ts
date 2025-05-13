@@ -67,6 +67,8 @@ export class PageComponent {
 
   showHeaderMenu = input(true);
 
+  showSettingsButton = input(false);
+
   appTitle = computed(() => {
     const title = this.title();
 
@@ -98,6 +100,8 @@ export class PageComponent {
 
   public languageChangeClick = output<SupportedLang>();
 
+  public gotoSettings = output();
+
   public addButtonClick = output<MouseEvent>();
 
   async showMenuPopover($event: MouseEvent) {
@@ -109,9 +113,11 @@ export class PageComponent {
         isAuthenticated: this.showAddButton,
         hideAuthButton: this.hideAuthButton,
         showLanguages: this.showLanguages,
+        showSettingsButton: this.showSettingsButton,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,
+        gotoSettings: this.gotoSettings,
       },
     });
 

@@ -13,6 +13,7 @@ import {
   selectIsAuthenticated,
   selectLoginFailed,
   selectRegistrationErrorCode,
+  selectUser,
   selectUserId,
 } from './selectors';
 
@@ -30,4 +31,5 @@ export const fromAuth = {
   logout,
   logoutSucceeded,
   selectUserId,
+  selectUser,
 };

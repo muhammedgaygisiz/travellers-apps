@@ -15,6 +15,7 @@ import {
   IonSelectOption,
   IonToggle,
 } from '@ionic/angular/standalone';
+import { User } from 'model';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -36,16 +37,15 @@ import {
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export class PageSettings {
-  user = input<any>();
+  user = input<User>();
 
   userImage = computed(() => {
     const user = this.user();
 
     const photoUrl =
-      user.photoUrl ||
-      user.providerData.find((provider: any) => provider.photoUrl)?.photoUrl;
+      user?.photoUrl ||
+      user?.providerData.find((provider: any) => provider.photoUrl)?.photoUrl;
 
-    console.log('#mo photoUrl', photoUrl);
     return photoUrl;
   });
 }

@@ -8,5 +8,5 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class SettingsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
-  user = toSignal(this.storeService.user$, { initialValue: {} });
+  user = toSignal(this.storeService.user$);
 }

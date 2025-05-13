@@ -28,12 +28,13 @@
                 class="{{ calcClass() }}"
                 (click)="openLikeOptions($event)"
               >
-                @let numberLikes = biteData | countLikes;
-                <ion-label class="{{ numberLikes ? 'ion-margin-end' : '' }}"
-                  >👍
-                </ion-label>
-                @if (numberLikes) {
-                <ion-badge>{{ numberLikes }}</ion-badge>
+                @if (biteData?.likes?.length) { @for (emoji of getLikeEmojis();
+                track emoji) {
+                <ion-label class="ion-margin-end">{{ emoji }}</ion-label>
+                }
+                <ion-badge>{{ biteData.likes?.length }}</ion-badge>
+                } @else {
+                <ion-label>👍</ion-label>
                 }
               </ion-chip>
             </div>

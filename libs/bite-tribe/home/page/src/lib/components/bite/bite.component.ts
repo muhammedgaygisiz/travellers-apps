@@ -19,7 +19,6 @@ import {
 import { Bite } from 'model';
 import { PopoverController } from '@ionic/angular';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
-import { CountLikesPipe } from './pipes/count-likes.pipe';
 import { ToMetricPipe } from 'distance-pipe';
 
 @Component({
@@ -35,7 +34,6 @@ import { ToMetricPipe } from 'distance-pipe';
     IonChip,
     IonBadge,
     IonLabel,
-    CountLikesPipe,
     ToMetricPipe,
   ],
   providers: [PopoverController],
@@ -66,6 +64,19 @@ export class BiteComponent {
     return '';
   });
 
+  getLikeEmojis = computed(() => {
+    const bite = this.bite();
+    if (!bite?.likes) return [];
+
+    const emojiMap: Record<string, string> = {
+      thumbup: '👍',
+      drooling: '🤤',
+      mindblown: '🤯',
+    };
+
+    return [...new Set(bite.likes.map((like) => emojiMap[like.likeType]))];
+  });
+
   async openLikeOptions($event: MouseEvent) {
     const popover = await this.popoverController.create({
       component: LikeOptionsPopoverMenuComponent,
@@ -76,6 +87,10 @@ export class BiteComponent {
         userId: this.userId,
         likeButtonClick: this.likeButtonClick,
       },
+      cssClass: 'like-options-popover',
+      alignment: 'center',
+      size: 'auto',
+      arrow: true,
     });
 
     await popover.present();

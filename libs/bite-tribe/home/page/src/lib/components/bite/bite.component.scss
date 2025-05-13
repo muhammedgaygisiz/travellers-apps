@@ -52,3 +52,17 @@
     color: var(--ion-color-secondary);
   }
 }
+
+// Global styles for popover
+::ng-deep .like-options-popover {
+  --width: auto;
+  --min-width: 250px;
+  --max-width: 90vw;
+  --height: auto;
+  --offset-y: 0px;
+
+  .popover-content {
+    margin: 0;
+    padding: 8px;
+  }
+}

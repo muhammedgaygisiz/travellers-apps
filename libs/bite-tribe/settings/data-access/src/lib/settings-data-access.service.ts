@@ -10,6 +10,7 @@ export class SettingsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
   user = toSignal(this.storeService.user$);
+  settings = toSignal(this.storeService.settings$);
 
   saveSettings(settings: Settings) {
     this.storeService.saveSettings(settings);

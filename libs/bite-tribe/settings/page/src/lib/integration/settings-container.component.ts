@@ -7,6 +7,7 @@ import { SettingsService } from './settings.service';
     <settings
       class="ion-page"
       [user]="service.user()"
+      [settings]="service.settings()"
       (submitSettings)="service.saveSettings($event)"
     />
   `,

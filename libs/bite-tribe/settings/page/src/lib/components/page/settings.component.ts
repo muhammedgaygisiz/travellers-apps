@@ -1,4 +1,5 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -45,20 +46,30 @@ import { map } from 'rxjs';
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export class PageSettings {
-  submitSettings = output<Settings>();
+  user = input<User>();
+  settings = input<Settings>();
 
   private readonly formBuilder = inject(FormBuilder);
+
+  settingsForm = this.formBuilder.nonNullable.group({
+    pushNotifications: [false, Validators.required],
+    emailUpdates: [true, Validators.required],
+    theme: ['light', Validators.required],
+    currency: ['EUR', Validators.required],
+  });
+
+  settingsEffect = afterRenderEffect(() => {
+    const settings = this.settings();
+    if (settings) {
+      this.settingsForm.setValue(settings);
+    }
+  });
+
+  submitSettings = output<Settings>();
 
   private systemTheme = signal(
     window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   );
-
-  settingsForm = this.formBuilder.nonNullable.group({
-    pushNotifications: [false, Validators.required],
-    emailUpdates: [false, Validators.required],
-    theme: ['light', Validators.required],
-    currency: ['EUR', Validators.required],
-  });
 
   isFormInvalid = toSignal(
     this.settingsForm.valueChanges.pipe(
@@ -83,8 +94,6 @@ export class PageSettings {
 
     this.settingsForm.patchValue({ theme: systemTheme });
   });
-
-  user = input<User>();
 
   userImage = computed(() => {
     const user = this.user();

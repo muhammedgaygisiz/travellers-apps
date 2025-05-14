@@ -3,4 +3,5 @@ export interface Settings {
   emailUpdates: boolean;
   theme: 'light' | 'dark';
   currency: string;
+  updatedAt?: string;
 }

@@ -61,7 +61,9 @@ export class PageSettings {
   settingsEffect = afterRenderEffect(() => {
     const settings = this.settings();
     if (settings) {
-      this.settingsForm.setValue(settings);
+      // eslint-disable-next-line no-unused-vars
+      const { updatedAt, ...rest } = settings;
+      this.settingsForm.setValue(rest);
     }
   });
 

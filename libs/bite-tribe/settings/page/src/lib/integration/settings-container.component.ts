@@ -3,7 +3,13 @@ import { PageSettings } from '../components/page/settings.component';
 import { SettingsService } from './settings.service';
 
 @Component({
-  template: ` <settings class="ion-page" [user]="service.user()" /> `,
+  template: `
+    <settings
+      class="ion-page"
+      [user]="service.user()"
+      (submitSettings)="service.saveSettings($event)"
+    />
+  `,
   imports: [PageSettings],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

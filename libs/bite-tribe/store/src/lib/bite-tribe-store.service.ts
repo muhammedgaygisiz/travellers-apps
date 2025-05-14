@@ -6,8 +6,10 @@ import { removeLike, saveLike, saveNewBite, saveTags } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bite, bites } from './bites/selectors';
 import { restaurant } from './restaurant/selectors';
+import { saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Settings } from 'model';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -82,10 +84,6 @@ export class BiteTribeStoreService implements StoreService {
     );
   }
 
-  saveReview(newReview: { review: string; biteId: string }) {
-    this.store.dispatch(saveNewReview(newReview));
-  }
-
   logout() {
     this.store?.dispatch(fromAuth.logout());
   }
@@ -101,5 +99,13 @@ export class BiteTribeStoreService implements StoreService {
 
   removeLike(event: { likeType: string; biteId: string }) {
     this.store?.dispatch(removeLike({ like: event }));
+  }
+
+  saveSettings(settings: Settings) {
+    this.store.dispatch(saveSettings({ settings }));
+  }
+
+  saveReview(newReview: { review: string; biteId: string }) {
+    this.store.dispatch(saveNewReview(newReview));
   }
 }

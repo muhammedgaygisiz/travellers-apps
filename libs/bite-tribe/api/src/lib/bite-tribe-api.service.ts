@@ -15,6 +15,7 @@ import { Restaurant } from 'model';
 const BITE_COLLECTION = 'bites';
 const REVIEW_COLLECTION = 'reviews';
 const RESTAURANT_COLLECTION = 'restaurants';
+const SETTINGS_COLLECTION = 'settings';
 
 const clearListeners = () =>
   pipe(
@@ -117,22 +118,6 @@ export class BiteTribeApiService {
     } catch (error) {
       console.error('Error updating tags:', error);
     }
-  }
-
-  async saveNewReview(payload: { review: string; biteId: string }) {
-    const user = await this.getUser();
-
-    const addDocumentResult = await FirebaseFirestore.addDocument({
-      reference: REVIEW_COLLECTION,
-      data: {
-        review: payload.review,
-        biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
-        createdAt: new Date().toISOString(),
-        author: user?.uid || '',
-      },
-    });
-
-    console.log('#mo', addDocumentResult);
   }
 
   private async startReviewListener(biteId: string) {
@@ -245,5 +230,43 @@ export class BiteTribeApiService {
       id: data?.['id'] || restaurantId,
       ...data,
     } as Restaurant;
+  }
+
+  async saveNewReview(payload: { review: string; biteId: string }) {
+    const user = await this.getUser();
+
+    const addDocumentResult = await FirebaseFirestore.addDocument({
+      reference: REVIEW_COLLECTION,
+      data: {
+        review: payload.review,
+        biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
+        createdAt: new Date().toISOString(),
+        author: user?.uid || '',
+      },
+    });
+
+    console.log('#mo', addDocumentResult);
+  }
+
+  async saveSettings(settings: any) {
+    try {
+      const user = await this.getUser();
+      if (!user?.uid) {
+        throw new Error('No user logged in');
+      }
+
+      const updateDocumentResult = await FirebaseFirestore.setDocument({
+        reference: `${SETTINGS_COLLECTION}/${user.uid}`,
+        data: {
+          ...settings,
+          updatedAt: new Date().toISOString(),
+        },
+      });
+
+      console.log('#mo', updateDocumentResult);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      throw error;
+    }
   }
 }

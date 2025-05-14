@@ -22,12 +22,12 @@ export const restaurant = createSelector(
       (restaurant) => restaurant.id === id
     );
 
-    if (foundRestaurant) {
+    if (foundRestaurant && gpsPosition) {
       return {
         ...foundRestaurant,
         distance: haversineDistance(
-          foundRestaurant.position.latitude,
-          foundRestaurant.position.longitude,
+          foundRestaurant.position?.latitude,
+          foundRestaurant.position?.longitude,
           gpsPosition?.latitude,
           gpsPosition?.longitude,
           'km'

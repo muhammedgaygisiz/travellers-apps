@@ -61,7 +61,6 @@ DebugElement {
         data-cy="btn-login"
       >
         <ion-icon
-          color="dark"
           name="log-in-outline"
           slot="start"
         />

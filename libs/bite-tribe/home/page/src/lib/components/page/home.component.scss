@@ -5,17 +5,24 @@
     gap: 24px;
   }
 
-  .filters-column {
-    position: sticky;
-    top: 0;
-    height: fit-content;
+  @media (min-width: 768px) {
+    .filters-column {
+      position: sticky;
+      top: 0;
+      height: fit-content;
+    }
   }
 
   .bites-grid {
     grid-column: 2 / span 2;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    align-items: center;
+
+    bt-bite {
+      display: block;
+      height: fit-content; // Ensure the component takes only needed height
+    }
   }
 
   @media (max-width: 768px) {
@@ -29,7 +36,7 @@
 
     .chip-container {
       display: flex;
-      margin-bottom: 16px;
+      margin-bottom: 1rem;
       flex-wrap: wrap;
     }
   }

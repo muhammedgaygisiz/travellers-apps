@@ -1,13 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DetailsPage should initialize with default reviews 1`] = `
-Array [
-  Object {
-    "author": "Jacob",
-    "biteId": "",
-    "createdAt": "2 days",
-    "id": "1",
-    "review": "Really tasty and flavourful",
-  },
-]
-`;
+exports[`DetailsPage should initialize with default reviews 1`] = `Array []`;

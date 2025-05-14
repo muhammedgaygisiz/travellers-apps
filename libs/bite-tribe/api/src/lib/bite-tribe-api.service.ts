@@ -10,11 +10,12 @@ import {
   tap,
 } from 'rxjs';
 import { AuthService } from 'ta-firestore';
-import { Restaurant } from 'model';
+import { Restaurant, Settings } from 'model';
 
 const BITE_COLLECTION = 'bites';
 const REVIEW_COLLECTION = 'reviews';
 const RESTAURANT_COLLECTION = 'restaurants';
+const SETTINGS_COLLECTION = 'settings';
 
 const clearListeners = () =>
   pipe(
@@ -34,6 +35,9 @@ export class BiteTribeApiService {
   private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
   likesChannel$ = new BehaviorSubject<any[]>([]);
   private readonly reviewsChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly settingsChannel$ = new BehaviorSubject<Settings>(
+    {} as Settings
+  );
 
   public allBites$ = this.authService.isLoggedIn$.pipe(
     clearListeners(),
@@ -43,6 +47,16 @@ export class BiteTribeApiService {
       this.startBitesListener();
 
       return this.bitesChannel$;
+    })
+  );
+
+  public settings$ = this.authService.isLoggedIn$.pipe(
+    skipWhile((isLoggedIn) => !isLoggedIn),
+    switchMap(() => {
+      console.log('#mo - Start Listener for Settings');
+      this.startSettingsListener();
+
+      return this.settingsChannel$;
     })
   );
 
@@ -119,22 +133,6 @@ export class BiteTribeApiService {
     }
   }
 
-  async saveNewReview(payload: { review: string; biteId: string }) {
-    const user = await this.getUser();
-
-    const addDocumentResult = await FirebaseFirestore.addDocument({
-      reference: REVIEW_COLLECTION,
-      data: {
-        review: payload.review,
-        biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
-        createdAt: new Date().toISOString(),
-        author: user?.uid || '',
-      },
-    });
-
-    console.log('#mo', addDocumentResult);
-  }
-
   private async startReviewListener(biteId: string) {
     console.log('#mo Fetching reviews from Firestore');
 
@@ -163,6 +161,20 @@ export class BiteTribeApiService {
           })) || [];
 
         this.reviewsChannel$.next(reviews);
+      }
+    );
+  }
+
+  private async startSettingsListener() {
+    const user = await this.getUser();
+
+    await FirebaseFirestore.addDocumentSnapshotListener(
+      { reference: `${SETTINGS_COLLECTION}/${user?.uid}` },
+      async (settingsDoc) => {
+        console.log('#mo Fetched settings from Firestore', settingsDoc);
+
+        const settings = settingsDoc?.snapshot.data as any;
+        this.settingsChannel$.next(settings);
       }
     );
   }
@@ -245,5 +257,42 @@ export class BiteTribeApiService {
       id: data?.['id'] || restaurantId,
       ...data,
     } as Restaurant;
+  }
+
+  async saveNewReview(payload: { review: string; biteId: string }) {
+    const user = await this.getUser();
+
+    const addDocumentResult = await FirebaseFirestore.addDocument({
+      reference: REVIEW_COLLECTION,
+      data: {
+        review: payload.review,
+        biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
+        createdAt: new Date().toISOString(),
+        author: user?.uid || '',
+      },
+    });
+
+    console.log('#mo', addDocumentResult);
+  }
+  async saveSettings(settings: any) {
+    try {
+      const user = await this.getUser();
+      if (!user?.uid) {
+        throw new Error('No user logged in');
+      }
+
+      const updateDocumentResult = await FirebaseFirestore.setDocument({
+        reference: `${SETTINGS_COLLECTION}/${user.uid}`,
+        data: {
+          ...settings,
+          updatedAt: new Date().toISOString(),
+        },
+      });
+
+      console.log('#mo', updateDocumentResult);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      throw error;
+    }
   }
 }

@@ -32,6 +32,11 @@ export class RestaurantComponent {
     const bite = this.bite();
     const restaurant = this.restaurant();
 
-    return restaurant?.distance || bite?.distance;
+    const restaurantDistance = restaurant?.distance;
+    if (restaurantDistance && restaurantDistance !== 'NaN') {
+      return restaurantDistance;
+    }
+
+    return bite?.distance;
   });
 }

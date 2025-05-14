@@ -60,12 +60,12 @@ import { SupportedLang } from 'localization';
         [detail]="false"
         (click)="loginClick.emit()"
       >
-        <ion-icon color="dark" name="log-in-outline" slot="start" />
+        <ion-icon name="log-in-outline" slot="start" />
         Login
       </ion-item>
       } @else {
       <ion-item (click)="gotoSettings.emit()">
-        <ion-icon color="dark" name="settings-outline" slot="start" />
+        <ion-icon name="settings-outline" slot="start" />
         Settings
       </ion-item>
       <ion-item
@@ -74,7 +74,7 @@ import { SupportedLang } from 'localization';
         [detail]="false"
         (click)="logoutClick.emit()"
       >
-        <ion-icon color="dark" name="log-out-outline" slot="start" />
+        <ion-icon name="log-out-outline" slot="start" />
         Logout
       </ion-item>
       } }

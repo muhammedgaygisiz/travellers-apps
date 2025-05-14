@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { loadedGpsPosition } from './actions';
+import { loadedGpsPosition, loadedSettingsFromApi } from './actions';
 
 export const reducer = createReducer<{ position?: any }>(
   {},
@@ -10,6 +10,12 @@ export const reducer = createReducer<{ position?: any }>(
     return {
       ...state,
       position: { latitude, longitude },
+    };
+  }),
+  on(loadedSettingsFromApi, (state, { settings }) => {
+    return {
+      ...state,
+      settings,
     };
   })
 );

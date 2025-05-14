@@ -57,15 +57,7 @@ import { ToMetricPipe } from 'distance-pipe';
 export class DetailsPage {
   bite = input<Bite>();
 
-  reviews = input<Review[]>([
-    {
-      id: '1',
-      author: 'Jacob',
-      review: 'Really tasty and flavourful',
-      createdAt: '2 days', // '2025-04-21T00:00:00.000Z',
-      biteId: '',
-    },
-  ]);
+  reviews = input<Review[]>([]);
 
   submitNewTags = output<string>();
   submitNewReview = output<{ review: string; biteId: string }>();

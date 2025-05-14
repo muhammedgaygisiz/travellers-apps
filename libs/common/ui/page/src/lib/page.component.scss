@@ -5,7 +5,10 @@
   justify-content: center;
 
   .inner-content-container {
-    max-width: 720px;
     width: 100%;
+
+    @media (width <= 768px) {
+      max-width: 720px;
+    }
   }
 }

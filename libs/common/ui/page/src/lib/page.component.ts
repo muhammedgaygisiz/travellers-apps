@@ -69,6 +69,8 @@ export class PageComponent {
 
   showSettingsButton = input(false);
 
+  fullWidth = input(false);
+
   appTitle = computed(() => {
     const title = this.title();
 

@@ -5,10 +5,17 @@
   justify-content: center;
 
   .inner-content-container {
-    width: 100%;
-
-    @media (width <= 768px) {
+    &.mobile-style {
       max-width: 720px;
+      width: 100%;
+    }
+
+    &.full-width {
+      width: 100%;
+
+      @media (width <= 768px) {
+        max-width: 720px;
+      }
     }
   }
 }

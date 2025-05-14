@@ -24,7 +24,11 @@
 
   <ion-content>
     <div class="outer-content-container">
-      <div class="inner-content-container">
+      <div
+        class="inner-content-container {{
+          fullWidth() ? 'full-width' : 'mobile-style'
+        }}"
+      >
         <ng-content></ng-content>
       </div>
     </div>

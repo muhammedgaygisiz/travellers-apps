@@ -10,7 +10,7 @@ import {
   tap,
 } from 'rxjs';
 import { AuthService } from 'ta-firestore';
-import { Restaurant } from 'model';
+import { Restaurant, Settings } from 'model';
 
 const BITE_COLLECTION = 'bites';
 const REVIEW_COLLECTION = 'reviews';
@@ -35,6 +35,9 @@ export class BiteTribeApiService {
   private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
   likesChannel$ = new BehaviorSubject<any[]>([]);
   private readonly reviewsChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly settingsChannel$ = new BehaviorSubject<Settings>(
+    {} as Settings
+  );
 
   public allBites$ = this.authService.isLoggedIn$.pipe(
     clearListeners(),
@@ -44,6 +47,16 @@ export class BiteTribeApiService {
       this.startBitesListener();
 
       return this.bitesChannel$;
+    })
+  );
+
+  public settings$ = this.authService.isLoggedIn$.pipe(
+    skipWhile((isLoggedIn) => !isLoggedIn),
+    switchMap(() => {
+      console.log('#mo - Start Listener for Settings');
+      this.startSettingsListener();
+
+      return this.settingsChannel$;
     })
   );
 
@@ -152,6 +165,20 @@ export class BiteTribeApiService {
     );
   }
 
+  private async startSettingsListener() {
+    const user = await this.getUser();
+
+    await FirebaseFirestore.addDocumentSnapshotListener(
+      { reference: `${SETTINGS_COLLECTION}/${user?.uid}` },
+      async (settingsDoc) => {
+        console.log('#mo Fetched settings from Firestore', settingsDoc);
+
+        const settings = settingsDoc?.snapshot.data as any;
+        this.settingsChannel$.next(settings);
+      }
+    );
+  }
+
   async saveLike(like: {
     likeType: string;
     biteId: string;
@@ -247,7 +274,6 @@ export class BiteTribeApiService {
 
     console.log('#mo', addDocumentResult);
   }
-
   async saveSettings(settings: any) {
     try {
       const user = await this.getUser();

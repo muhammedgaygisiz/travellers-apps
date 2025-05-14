@@ -10,3 +10,8 @@ export const saveSettings = createAction(
   '[APP] Save settings',
   props<{ settings: Settings }>()
 );
+
+export const loadedSettingsFromApi = createAction(
+  '[APP] Loaded settings from API',
+  props<{ settings: Settings }>()
+);

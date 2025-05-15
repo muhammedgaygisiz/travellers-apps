@@ -268,7 +268,8 @@ export class BiteTribeApiService {
         review: payload.review,
         biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
         createdAt: new Date().toISOString(),
-        author: user?.uid || '',
+        authorId: user?.uid || '',
+        author: user?.displayName || '',
       },
     });
 

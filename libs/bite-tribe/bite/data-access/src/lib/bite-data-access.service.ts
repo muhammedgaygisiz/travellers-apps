@@ -4,11 +4,14 @@ import { GeoPoint } from 'firebase/firestore';
 import { Platform } from '@ionic/angular';
 import { splitTags } from 'utils';
 import { getCurrentPosition } from 'geolocation';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly platform = inject(Platform);
+
+  currency = toSignal(this.storeService.currencyFromSettings$);
 
   async submitNewBite(newBite: any) {
     const currentPosition = await getCurrentPosition(this.platform);

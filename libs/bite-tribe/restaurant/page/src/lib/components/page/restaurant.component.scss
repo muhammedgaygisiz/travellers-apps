@@ -4,4 +4,64 @@
     object-fit: cover;
     width: 100%;
   }
+
+  .menu-container {
+    margin-top: 2rem;
+  }
+
+  .menu-category {
+    margin-bottom: 2rem;
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--ion-color-medium);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+
+    .item-details {
+      flex: 1;
+
+      h3 {
+        font-size: 1.1rem;
+        margin: 0;
+      }
+
+      p {
+        color: var(--ion-color-medium);
+        font-size: 0.9rem;
+        margin: 0.25rem 0;
+      }
+    }
+
+    .price-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+
+      .price {
+        font-weight: bold;
+        white-space: nowrap;
+        margin-bottom: 0.5rem;
+      }
+
+      ion-button {
+        --padding-start: 0;
+        --padding-end: 0;
+        margin: 0;
+      }
+    }
+  }
 }

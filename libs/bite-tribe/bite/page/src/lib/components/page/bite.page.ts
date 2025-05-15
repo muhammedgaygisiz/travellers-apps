@@ -2,8 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
+  input,
   output,
   signal,
   viewChild,
@@ -53,12 +55,22 @@ export class BitePage {
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
 
+  currency = input<string>();
+
   submitNewBite = output<typeof this.biteFormGroup.value>();
 
   private readonly fileUpload =
     viewChild<ElementRef<HTMLInputElement>>('fileUploader');
 
   isWeb = signal(!this.platform.is('hybrid'));
+
+  currencyInitFromInputEffect = effect(() => {
+    const currency = this.currency();
+
+    if (currency) {
+      this.biteFormGroup.controls['currency'].patchValue(currency);
+    }
+  });
 
   biteFormGroup = this.formBuilder.group({
     image: ['', Validators.required],

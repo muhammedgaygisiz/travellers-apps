@@ -13,6 +13,8 @@ export class BiteService {
   private readonly dataAccess = inject(BiteDataAccessService);
   private readonly navController = inject(NavController);
 
+  currency = this.dataAccess.currency;
+
   submitNewBite(newBite: Bite) {
     this.dataAccess.submitNewBite(newBite);
 

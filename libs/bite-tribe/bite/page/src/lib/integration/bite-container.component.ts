@@ -4,7 +4,10 @@ import { BitePage } from '../components/page/bite.page';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: ` <bt-bite (submitNewBite)="service.submitNewBite($event)" />`,
+  template: ` <bt-bite
+    [currency]="service.currency()"
+    (submitNewBite)="service.submitNewBite($event)"
+  />`,
   imports: [BitePage],
 })
 export class BiteContainerComponent {

@@ -12,8 +12,8 @@
             <ion-card-subtitle
               class="restaurant-name"
               (click)="restaurantClick.emit(biteData)"
-              >{{ biteData?.place }}</ion-card-subtitle
-            >
+              >{{ biteData?.place }}
+            </ion-card-subtitle>
             <ion-card-title
               class="bite-name ion-padding-bottom"
               (click)="biteClick.emit(biteData)"
@@ -30,7 +30,7 @@
               >
                 @if (biteData?.likes?.length) { @for (emoji of getLikeEmojis();
                 track emoji) {
-                <ion-label class="ion-margin-end">{{ emoji }}</ion-label>
+                <ion-label class="like">{{ emoji }}</ion-label>
                 }
                 <ion-badge>{{ biteData.likes?.length }}</ion-badge>
                 } @else {

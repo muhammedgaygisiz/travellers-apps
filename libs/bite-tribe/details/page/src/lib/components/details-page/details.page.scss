@@ -7,6 +7,10 @@
     justify-content: space-between;
   }
 
+  ion-list-header {
+    color: var(--ion-primary-color);
+  }
+
   .review {
     ion-label {
       .review-row {

@@ -4,7 +4,7 @@ import { routerNavigatedAction } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { map, skipWhile, switchMap } from 'rxjs';
 import { restaurantId } from '../router/selectors';
-import { loadedRestaurant } from './actions';
+import { loadedRestaurant, noRestaurantFound } from './actions';
 import { BiteTribeApiService } from 'bite-tribe/api';
 
 @Injectable()
@@ -22,7 +22,12 @@ export class RestaurantEffects {
           switchMap((restaurantId) => {
             return this.api.loadRestaurant(restaurantId);
           }),
-          map((restaurant) => loadedRestaurant({ restaurant }))
+          map((restaurant) => {
+            if (!restaurant) {
+              return noRestaurantFound();
+            }
+            return loadedRestaurant({ restaurant });
+          })
         )
       )
     );

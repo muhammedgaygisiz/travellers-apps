@@ -10,7 +10,7 @@ import { saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Settings } from 'model';
-import { settings } from './app/selectors';
+import { currency, settings } from './app/selectors';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -44,6 +44,7 @@ export class BiteTribeStoreService implements StoreService {
   bite$ = this.store.select(bite);
   restaurant$ = this.store.select(restaurant);
   reviews$ = this.store.select(reviews);
+  currencyFromSettings$ = this.store.select(currency);
 
   userId = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);

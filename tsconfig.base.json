@@ -77,6 +77,9 @@
       ],
       "add-popover-menu": ["libs/finances/ui/add-popover-menu/src/index.ts"],
       "auth": ["libs/common/ui/auth/src/index.ts"],
+      "bite-tribe-business/shell": [
+        "libs/bite-tribe-business/shell/src/index.ts"
+      ],
       "bite-tribe/api": ["libs/bite-tribe/api/src/index.ts"],
       "bite-tribe/bite": ["libs/bite-tribe/bite/page/src/index.ts"],
       "bite-tribe/bite-data-access": [

@@ -10,12 +10,13 @@ import {
   tap,
 } from 'rxjs';
 import { AuthService } from 'ta-firestore';
-import { Restaurant, Settings } from 'model';
+import { Menu, Restaurant, Settings } from 'model';
 
 const BITE_COLLECTION = 'bites';
 const REVIEW_COLLECTION = 'reviews';
 const RESTAURANT_COLLECTION = 'restaurants';
 const SETTINGS_COLLECTION = 'settings';
+const MENU_COLLECTION = 'menus';
 
 const clearListeners = () =>
   pipe(
@@ -311,6 +312,7 @@ export class BiteTribeApiService {
 
     console.log('#mo', addDocumentResult);
   }
+
   async saveSettings(settings: any) {
     try {
       const user = await this.getUser();
@@ -330,6 +332,42 @@ export class BiteTribeApiService {
     } catch (error) {
       console.error('Error saving settings:', error);
       throw error;
+    }
+  }
+
+  loadMenu(menuId: string) {
+    return this.authService.isLoggedIn$.pipe(
+      clearListeners(),
+      skipWhile((isLoggedIn) => !isLoggedIn),
+      switchMap(() => {
+        console.log('#mo - Start Listener for Menu');
+        if (menuId) {
+          return from(this.getMenuById(menuId));
+        }
+
+        return EMPTY;
+      })
+    );
+  }
+
+  private async getMenuById(menuId: string) {
+    try {
+      const doc = await FirebaseFirestore.getDocument({
+        reference: `${MENU_COLLECTION}/${menuId}`,
+      });
+
+      if (doc.snapshot.data) {
+        const data = doc.snapshot.data;
+        return {
+          id: data?.['id'] || menuId,
+          ...data,
+        } as Menu;
+      }
+
+      return undefined;
+    } catch (error) {
+      console.error('Error fetching menu:', error);
+      return undefined;
     }
   }
 }

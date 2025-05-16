@@ -1,7 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import { adapter, initialState } from './adapter';
-import { loadedLikesFromApi } from './actions';
-import { deletedLike } from '../bites/actions';
+import { loadedLikesFromApi, deletedLike } from './actions';
 
 export const reducer = createReducer(
   initialState,

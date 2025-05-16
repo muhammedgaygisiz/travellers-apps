@@ -18,6 +18,8 @@ import {
   imageOutline,
   cameraOutline,
   settingsOutline,
+  restaurantOutline,
+  downloadOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -40,5 +42,7 @@ export const addNecessaryIcons = () => {
     imageOutline,
     cameraOutline,
     settingsOutline,
+    restaurantOutline,
+    downloadOutline,
   });
 };

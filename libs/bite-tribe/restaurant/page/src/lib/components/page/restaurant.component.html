@@ -6,40 +6,32 @@
   [showFooter]="false"
 >
   <ion-content>
+    @defer { @if (restaurant()?.image) {
     <ion-img [src]="restaurant()?.image" class="place-image" />
+    } @else {
+    <ion-img
+      [src]="'assets/placeholder-restaurant.png'"
+      class="full-size-image"
+    />
+    } } @placeholder (minimum 1000ms) {
+    <div class="image-loading-placeholder">
+      <ion-icon name="download-outline" color="primary" />
+    </div>
+    }
 
     <div class="ion-padding">
-      <h1>{{ placeName() }}</h1>
+      <div class="header-container">
+        <h1>{{ placeName() }}</h1>
 
-      {{ placeDistance() | toMetric }}
-
-      <div class="menu-container">
-        @for (category of menu().categories; track category.title) {
-        <div class="menu-category">
-          <h2>{{ category.title }}</h2>
-          @if (category.subtitle) {
-          <p class="subtitle">{{ category.subtitle }}</p>
-          } @for (item of category.items; track item.name) {
-          <div class="menu-item">
-            <div class="item-details">
-              <h3>{{ item.name }}</h3>
-              <p>{{ item.description }}</p>
-            </div>
-            <div class="price-actions">
-              <div class="price">{{ item.price }}€</div>
-              <ion-button
-                size="small"
-                fill="clear"
-                (click)="createBiteClick.emit(item)"
-              >
-                Create Bite
-              </ion-button>
-            </div>
-          </div>
-          }
-        </div>
+        @if (restaurant()) {
+        <ion-button fill="clear" (click)="showMenuClick.emit(restaurant())">
+          <ion-icon slot="start" name="restaurant-outline"></ion-icon>
+          Menu
+        </ion-button>
         }
       </div>
+
+      {{ placeDistance() | toMetric }}
     </div>
   </ion-content>
 </ta-page>

@@ -12,3 +12,8 @@ export const restaurantId = createSelector(
   selectRouteParams,
   (params) => params?.['restaurantId']
 );
+
+export const menuId = createSelector(
+  selectRouteParams,
+  (params) => params?.['menuId']
+);

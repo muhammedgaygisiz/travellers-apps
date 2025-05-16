@@ -22,5 +22,6 @@ interface Category {
 }
 
 export interface Menu {
+  id: string;
   categories: Category[];
 }

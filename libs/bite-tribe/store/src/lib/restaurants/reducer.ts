@@ -1,10 +1,10 @@
 import { createReducer, on } from '@ngrx/store';
 import { adapter, initialState } from './adapter';
-import { loadedRestaurant } from './actions';
+import { loadedRestaurantFromApi } from './actions';
 
 export const reducer = createReducer(
   initialState,
-  on(loadedRestaurant, (state, { restaurant }) => {
+  on(loadedRestaurantFromApi, (state, { restaurant }) => {
     return adapter.upsertOne(restaurant, state);
   })
 );

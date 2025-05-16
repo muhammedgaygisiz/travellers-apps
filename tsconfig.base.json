@@ -90,6 +90,10 @@
       "bite-tribe/home-data-access": [
         "libs/bite-tribe/home/data-access/src/index.ts"
       ],
+      "bite-tribe/menu": ["libs/bite-tribe/menu/page/src/index.ts"],
+      "bite-tribe/menu-data-access": [
+        "libs/bite-tribe/menu/data-access/src/index.ts"
+      ],
       "bite-tribe/restaurant": ["libs/bite-tribe/restaurant/page/src/index.ts"],
       "bite-tribe/restaurant-data-access": [
         "libs/bite-tribe/restaurant/data-access/src/index.ts"

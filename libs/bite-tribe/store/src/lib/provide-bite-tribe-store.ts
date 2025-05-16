@@ -16,9 +16,12 @@ import { ReviewEffects } from './reviews/effects';
 import { fromReviews } from './reviews';
 import { fromLikes } from './likes';
 import { fromApp } from './app';
-import { fromRestaurants } from './restaurant';
+import { fromRestaurants } from './restaurants';
+import { fromMenus } from './menus';
 import { AppEffect } from './app/effects';
-import { RestaurantEffects } from './restaurant/effects';
+import { RestaurantEffects } from './restaurants/effects';
+import { LikeEffects } from './likes/effects';
+import { MenuEffects } from './menus/effects';
 
 const firebaseOptions = {
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
@@ -52,14 +55,17 @@ export const provideBiteTribeStore = (environment: Environment) => [
     AuthEffects,
     RouterEffects,
     BiteEffects,
+    LikeEffects,
     ReviewEffects,
     AppEffect,
-    RestaurantEffects
+    RestaurantEffects,
+    MenuEffects
   ),
   provideState(fromBites.key, fromBites.reducer),
   provideState(fromReviews.key, fromReviews.reducer),
   provideState(fromLikes.key, fromLikes.reducer),
   provideState(fromApp.key, fromApp.reducer),
   provideState(fromRestaurants.key, fromRestaurants.reducer),
+  provideState(fromMenus.key, fromMenus.reducer),
   provideFirestoreUtils(firebaseOptions),
 ];

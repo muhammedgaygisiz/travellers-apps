@@ -1,11 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { routerNavigatedAction } from '@ngrx/router-store';
-import { Store } from '@ngrx/store';
-import { map, skipWhile, switchMap } from 'rxjs';
-import { restaurantId } from '../router/selectors';
-import { loadedRestaurant, noRestaurantFound } from './actions';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { routerNavigatedAction } from '@ngrx/router-store';
+import { map, skipWhile, switchMap } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { restaurantId } from '../router/selectors';
+import { loadedRestaurantFromApi, noRestaurantFound } from './actions';
 
 @Injectable()
 export class RestaurantEffects {
@@ -26,7 +26,7 @@ export class RestaurantEffects {
             if (!restaurant) {
               return noRestaurantFound();
             }
-            return loadedRestaurant({ restaurant });
+            return loadedRestaurantFromApi({ restaurant });
           })
         )
       )

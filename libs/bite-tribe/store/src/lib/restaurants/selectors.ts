@@ -3,7 +3,7 @@ import { key } from './key';
 import { EntityState } from '@ngrx/entity';
 import { Restaurant } from 'model';
 import { restaurantId } from '../router/selectors';
-import { adapter } from '../restaurant/adapter';
+import { adapter } from './adapter';
 import { gpsPosition } from '../app/selectors';
 import { haversineDistance } from 'distance-pipe';
 

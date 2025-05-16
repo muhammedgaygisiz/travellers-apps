@@ -5,17 +5,9 @@ import {
   ofType,
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
-import {
-  deletedLike,
-  loadedBitesFromApi,
-  removeLike,
-  saveLike,
-  saveNewBite,
-  saveTags,
-} from './actions';
+import { loadedBitesFromApi, saveNewBite, saveTags } from './actions';
 import { map, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { loadedLikesFromApi } from '../likes/actions';
 
 @Injectable()
 export class BiteEffects {
@@ -27,14 +19,6 @@ export class BiteEffects {
       ofType(ROOT_EFFECTS_INIT),
       switchMap(() => this.api.allBites$),
       map((bites) => loadedBitesFromApi({ bites }))
-    );
-  });
-
-  loadLikesFromApi$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(ROOT_EFFECTS_INIT),
-      switchMap(() => this.api.likesChannel$),
-      map((likes) => loadedLikesFromApi({ likes }))
     );
   });
 
@@ -61,28 +45,4 @@ export class BiteEffects {
     },
     { dispatch: false }
   );
-
-  saveLikeToBite$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(saveLike),
-        // eslint-disable-next-line no-unused-vars
-        tap(({ type, ...like }) => {
-          this.api.saveLike(like);
-        })
-      );
-    },
-    { dispatch: false }
-  );
-
-  removeLikeFromBite$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(removeLike),
-      switchMap(async (like) => {
-        const likeToBeDeleted = await this.api.removeLike(like.like);
-
-        return deletedLike({ like: likeToBeDeleted });
-      })
-    );
-  });
 }

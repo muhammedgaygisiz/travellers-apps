@@ -30,6 +30,7 @@ export class HomeService {
       // eslint-disable-next-line no-unused-vars
       const [empty, collectionName, restaurantId] =
         bite.restaurantId.split('/');
+
       this.navController.navigateForward([
         'bite',
         bite.id,

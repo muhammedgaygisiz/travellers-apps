@@ -1,0 +1,10 @@
+{
+  "name": "bite-tribe",
+  "dependencies": {
+    "@capacitor/ios": "../../node_modules/@capacitor/ios",
+    "@capacitor/android": "../../node_modules/@capacitor/android"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}

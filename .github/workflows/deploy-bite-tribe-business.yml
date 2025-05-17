@@ -1,4 +1,4 @@
-name: Deploy Bite Tribe
+name: Deploy Bite Tribe Business
 
 on:
   workflow_dispatch:

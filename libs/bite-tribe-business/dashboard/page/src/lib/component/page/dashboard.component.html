@@ -13,9 +13,20 @@
         <h1>Restaurants</h1>
       </div>
 
-      <div class="second-column">Second</div>
-
-      <div class="third-column">Third</div>
+      <div class="restaurants-grid">
+        @if (!restaurants()?.length) {
+        <ion-card>
+          <ion-card-content>
+            <ion-text color="primary"> No restaurants found. </ion-text>
+          </ion-card-content>
+        </ion-card>
+        } @for (restaurant of restaurants(); track restaurant.id) {
+        <bt-restaurant
+          restaurant="restaurant"
+          (restaurantClick)="restaurantClick.emit($event)"
+        />
+        }
+      </div>
     </div>
   </ion-content>
 </ta-page>

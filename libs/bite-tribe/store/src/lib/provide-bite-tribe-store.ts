@@ -23,13 +23,15 @@ import { RestaurantEffects } from './restaurants/effects';
 import { LikeEffects } from './likes/effects';
 import { MenuEffects } from './menus/effects';
 
-const firebaseOptions = {
+const firebaseOptions = (environment: Environment) => ({
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
-  authDomain: process.env['NX_APP_BITE_TRIBE_AUTH_DOMAIN'],
+  authDomain: environment.isBusiness
+    ? process.env['NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN']
+    : process.env['NX_APP_BITE_TRIBE_AUTH_DOMAIN'],
   projectId: process.env['NX_APP_BITE_TRIBE_PROJECT_ID'],
   storageBucket: process.env['NX_APP_BITE_TRIBE_STORAGE_BUCKET'],
   messagingSenderId: process.env['NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID'],
-};
+});
 
 export const provideBiteTribeStore = (environment: Environment) => [
   { provide: STORE_SERVICE, useClass: BiteTribeStoreService },
@@ -76,5 +78,5 @@ export const provideBiteTribeStore = (environment: Environment) => [
   provideState(fromApp.key, fromApp.reducer),
   provideState(fromRestaurants.key, fromRestaurants.reducer),
   provideState(fromMenus.key, fromMenus.reducer),
-  provideFirestoreUtils(firebaseOptions),
+  provideFirestoreUtils(firebaseOptions(environment)),
 ];

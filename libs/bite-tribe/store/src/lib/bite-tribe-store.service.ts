@@ -5,7 +5,7 @@ import { createAction, props, Store } from '@ngrx/store';
 import { saveNewBite, saveTags } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bite, bites } from './bites/selectors';
-import { restaurant } from './restaurants/selectors';
+import { restaurant, restaurants } from './restaurants/selectors';
 import { menu } from './menus/selectors';
 import { saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
@@ -45,6 +45,7 @@ export class BiteTribeStoreService implements StoreService {
   bites$ = this.store.select(bites);
   bite$ = this.store.select(bite);
   restaurant$ = this.store.select(restaurant);
+  restaurants$ = this.store.select(restaurants);
   menu$ = this.store.select(menu);
   reviews$ = this.store.select(reviews);
   currencyFromSettings$ = this.store.select(currency);

@@ -13,27 +13,24 @@ const { selectAll } = adapter.getSelectors();
 
 const allRestaurants = createSelector(slice, selectAll);
 
-const getRestaurant = (restaurants: Restaurant[], id: string) => {
-  const foundRestaurantById = restaurants.find((restaurant) => {
-    if (id) {
-      return restaurant.id.toLowerCase().includes(id.toLowerCase());
-    }
-
-    return false;
-  });
-
-  if (foundRestaurantById) {
-    return foundRestaurantById;
+export const restaurants = createSelector(
+  allRestaurants,
+  gpsPosition,
+  (restaurants, gpsPosition) => {
+    return restaurants.map((restaurant) => {
+      return {
+        ...restaurant,
+        distance: haversineDistance(
+          restaurant.position.latitude,
+          restaurant.position.longitude,
+          gpsPosition?.latitude,
+          gpsPosition?.longitude,
+          'km'
+        ),
+      } as Restaurant;
+    });
   }
-
-  const restaurantName = decodeURIComponent(id);
-  return restaurants.find((restaurant) => {
-    return (
-      restaurant.name.toLowerCase().includes(restaurantName.toLowerCase()) ||
-      restaurantName.toLowerCase().includes(restaurant.name.toLowerCase())
-    );
-  });
-};
+);
 
 export const restaurant = createSelector(
   restaurantId,
@@ -58,3 +55,25 @@ export const restaurant = createSelector(
     return undefined;
   }
 );
+
+const getRestaurant = (restaurants: Restaurant[], id: string) => {
+  const foundRestaurantById = restaurants.find((restaurant) => {
+    if (id) {
+      return restaurant.id.toLowerCase().includes(id.toLowerCase());
+    }
+
+    return false;
+  });
+
+  if (foundRestaurantById) {
+    return foundRestaurantById;
+  }
+
+  const restaurantName = decodeURIComponent(id);
+  return restaurants.find((restaurant) => {
+    return (
+      restaurant.name.toLowerCase().includes(restaurantName.toLowerCase()) ||
+      restaurantName.toLowerCase().includes(restaurant.name.toLowerCase())
+    );
+  });
+};

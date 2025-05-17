@@ -29,6 +29,9 @@
       "hosting": {
         "bite-tribe": [
           "bite-tribe"
+        ],
+        "bite-tribe-business": [
+          "bite-tribe-business"
         ]
       }
    }

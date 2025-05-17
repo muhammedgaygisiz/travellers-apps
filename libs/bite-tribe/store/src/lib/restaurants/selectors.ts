@@ -6,6 +6,7 @@ import { restaurantId } from '../router/selectors';
 import { adapter } from './adapter';
 import { gpsPosition } from '../app/selectors';
 import { haversineDistance } from 'distance-pipe';
+import { bites } from '../bites/selectors';
 
 const slice = createFeatureSelector<EntityState<Restaurant>>(key);
 
@@ -16,8 +17,9 @@ const allRestaurants = createSelector(slice, selectAll);
 export const restaurants = createSelector(
   allRestaurants,
   gpsPosition,
-  (restaurants, gpsPosition) => {
-    return restaurants.map((restaurant) => {
+  bites,
+  (restaurants, gpsPosition, bites) => {
+    const savedRestaurants = restaurants.map((restaurant) => {
       return {
         ...restaurant,
         distance: haversineDistance(
@@ -29,6 +31,35 @@ export const restaurants = createSelector(
         ),
       } as Restaurant;
     });
+
+    const unsavedRestaurants =
+      bites
+        .filter((bite) => !bite.restaurantId)
+        .reduce((uniqueRestaurants, bite) => {
+          const existingRestaurant = uniqueRestaurants.find(
+            (r) => r.name === bite.place
+          );
+
+          if (existingRestaurant && existingRestaurant.biteIds) {
+            existingRestaurant.biteIds.push(bite.id);
+          } else {
+            uniqueRestaurants.push({
+              name: bite.place,
+              distance: haversineDistance(
+                bite.position.latitude,
+                bite.position.longitude,
+                gpsPosition?.latitude,
+                gpsPosition?.longitude,
+                'km'
+              ),
+              unsaved: true,
+              biteIds: [bite.id], // Include the bite ID
+            } as Restaurant);
+          }
+          return uniqueRestaurants;
+        }, [] as Restaurant[]) || [];
+
+    return [...savedRestaurants, ...unsavedRestaurants];
   }
 );
 

@@ -22,7 +22,7 @@
         </ion-card>
         } @for (restaurant of restaurants(); track restaurant.id) {
         <bt-restaurant
-          restaurant="restaurant"
+          [restaurant]="restaurant"
           (restaurantClick)="restaurantClick.emit($event)"
         />
         }

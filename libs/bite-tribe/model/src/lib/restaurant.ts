@@ -9,4 +9,7 @@ export interface Restaurant {
   position: GeoPoint;
 
   menuId?: string;
+
+  unsaved?: boolean;
+  biteIds?: string[];
 }

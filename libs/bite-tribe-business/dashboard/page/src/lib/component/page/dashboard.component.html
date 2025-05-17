@@ -1,0 +1,21 @@
+<ta-page
+  [showHeaderMenu]="true"
+  [showLanguages]="false"
+  [showAddButton]="false"
+  [showSettingsButton]="true"
+  [fullWidth]="true"
+  (logoutClick)="logoutClick.emit()"
+  (gotoSettings)="gotoSettings.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="desktop-layout">
+      <div class="first-column">
+        <h1>Restaurants</h1>
+      </div>
+
+      <div class="second-column">Second</div>
+
+      <div class="third-column">Third</div>
+    </div>
+  </ion-content>
+</ta-page>

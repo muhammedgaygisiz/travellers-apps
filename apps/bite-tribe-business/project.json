@@ -60,7 +60,8 @@
           "buildTarget": "bite-tribe-business:build:production"
         },
         "development": {
-          "buildTarget": "bite-tribe-business:build:development"
+          "buildTarget": "bite-tribe-business:build:development",
+          "port": 4201
         }
       },
       "defaultConfiguration": "development"

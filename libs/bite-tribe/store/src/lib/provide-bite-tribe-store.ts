@@ -52,7 +52,7 @@ export const provideBiteTribeStore = (environment: Environment) => [
   provideRouterStore(),
   provideFirestoreState(),
   environment.isBusiness
-    ? provideEffects(AuthEffects)
+    ? provideEffects(AuthEffects, RouterEffects, RestaurantEffects, MenuEffects)
     : provideEffects(
         AuthEffects,
         RouterEffects,

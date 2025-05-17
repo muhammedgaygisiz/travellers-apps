@@ -34,11 +34,13 @@ export class BiteTribeApiService {
   private readonly authService = inject(AuthService);
 
   private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
-  likesChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly restaurantsChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly menusChannel$ = new BehaviorSubject<any[]>([]);
   private readonly reviewsChannel$ = new BehaviorSubject<any[]>([]);
   private readonly settingsChannel$ = new BehaviorSubject<Settings>(
     {} as Settings
   );
+  likesChannel$ = new BehaviorSubject<any[]>([]);
 
   public allBites$ = this.authService.isLoggedIn$.pipe(
     clearListeners(),
@@ -50,6 +52,66 @@ export class BiteTribeApiService {
       return this.bitesChannel$;
     })
   );
+
+  public allRestaurants$ = this.authService.isLoggedIn$.pipe(
+    clearListeners(),
+    skipWhile((isLoggedIn) => !isLoggedIn),
+    switchMap(() => {
+      console.log('#mo - Start Listener for Restaurants');
+      this.startRestaurantsListener();
+
+      return this.restaurantsChannel$;
+    })
+  );
+
+  private async startRestaurantsListener() {
+    console.log('#mo Fetching bites from Firestore');
+
+    await FirebaseFirestore.addCollectionSnapshotListener(
+      { reference: RESTAURANT_COLLECTION },
+      async (restaurantsDocs) => {
+        console.log('#mo Fetched restaurants from Firestore', restaurantsDocs);
+
+        const restaurants =
+          restaurantsDocs?.snapshots.map((doc) => ({
+            ...doc.data,
+            id: doc.id,
+          })) || [];
+
+        this.restaurantsChannel$.next(restaurants);
+      }
+    );
+  }
+
+  public allMenus$ = this.authService.isLoggedIn$.pipe(
+    clearListeners(),
+    skipWhile((isLoggedIn) => !isLoggedIn),
+    switchMap(() => {
+      console.log('#mo - Start Listener for Menus');
+      this.startMenusListener();
+
+      return this.menusChannel$;
+    })
+  );
+
+  private async startMenusListener() {
+    console.log('#mo Fetching menus from Firestore');
+
+    await FirebaseFirestore.addCollectionSnapshotListener(
+      { reference: MENU_COLLECTION },
+      async (menusDocs) => {
+        console.log('#mo Fetched menus from Firestore', menusDocs);
+
+        const menus =
+          menusDocs?.snapshots.map((doc) => ({
+            ...doc.data,
+            id: doc.id,
+          })) || [];
+
+        this.menusChannel$.next(menus);
+      }
+    );
+  }
 
   public settings$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),

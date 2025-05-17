@@ -8,4 +8,8 @@ export class DashboardService {
   dataAccess = inject(DashboardDataAccessService);
 
   restaurants = this.dataAccess.restaurants;
+
+  logout() {
+    this.dataAccess.logout();
+  }
 }

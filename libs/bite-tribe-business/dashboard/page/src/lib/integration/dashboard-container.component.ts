@@ -9,6 +9,7 @@ import { DashboardService } from './dashboard.service';
     <bt-business-dashboard
       class="ion-page"
       [restaurants]="service.restaurants()"
+      (logoutClick)="service.logout()"
     />
   `,
 })

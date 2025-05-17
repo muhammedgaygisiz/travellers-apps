@@ -12,4 +12,8 @@ export class DashboardDataAccessService {
   restaurants = toSignal(this.storeService.restaurants$, {
     initialValue: [] as Restaurant[],
   });
+
+  logout() {
+    this.storeService.logout();
+  }
 }

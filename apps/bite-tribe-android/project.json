@@ -1,9 +1,9 @@
 {
-  "name": "bite-tribe-ios",
+  "name": "bite-tribe-android",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "apps/bite-tribe-ios",
-  "prefix": "bite-tribe-ios",
+  "sourceRoot": "apps/bite-tribe-android",
+  "prefix": "bite-tribe-android",
   "tags": ["scope:bite-tribe"],
   "targets": {
     "build": {
@@ -37,8 +37,8 @@
         "cmd": "copy"
       },
       "configurations": {
-        "ios": {
-          "cmd": "copy ios"
+        "android": {
+          "cmd": "copy android"
         }
       }
     },
@@ -48,8 +48,8 @@
         "cmd": "open"
       },
       "configurations": {
-        "ios": {
-          "cmd": "open ios"
+        "android": {
+          "cmd": "open android"
         }
       }
     },
@@ -59,8 +59,8 @@
         "cmd": "run"
       },
       "configurations": {
-        "ios": {
-          "cmd": "run ios"
+        "android": {
+          "cmd": "run android"
         }
       }
     },
@@ -70,8 +70,8 @@
         "cmd": "sync"
       },
       "configurations": {
-        "ios": {
-          "cmd": "sync ios"
+        "android": {
+          "cmd": "sync android"
         }
       }
     },
@@ -81,8 +81,8 @@
         "cmd": "update"
       },
       "configurations": {
-        "ios": {
-          "cmd": "update ios"
+        "android": {
+          "cmd": "update android"
         }
       }
     }

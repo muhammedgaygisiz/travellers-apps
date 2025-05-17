@@ -1,7 +1,6 @@
 {
-  "name": "bite-tribe",
+  "name": "bite-tribe-ios",
   "dependencies": {
-    "@capacitor/ios": "../../node_modules/@capacitor/ios",
     "@capacitor/android": "../../node_modules/@capacitor/android"
   },
   "devDependencies": {

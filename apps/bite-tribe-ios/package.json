@@ -1,0 +1,9 @@
+{
+  "name": "bite-tribe-ios",
+  "dependencies": {
+    "@capacitor/ios": "../../node_modules/@capacitor/ios"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}

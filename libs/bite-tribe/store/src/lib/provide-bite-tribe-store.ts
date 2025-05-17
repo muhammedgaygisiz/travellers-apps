@@ -51,16 +51,25 @@ export const provideBiteTribeStore = (environment: Environment) => [
     : [],
   provideRouterStore(),
   provideFirestoreState(),
-  provideEffects(
-    AuthEffects,
-    RouterEffects,
-    BiteEffects,
-    LikeEffects,
-    ReviewEffects,
-    AppEffect,
-    RestaurantEffects,
-    MenuEffects
-  ),
+  environment.isBusiness
+    ? provideEffects(
+        AuthEffects,
+        RouterEffects,
+        RestaurantEffects,
+        MenuEffects,
+        AppEffect,
+        BiteEffects
+      )
+    : provideEffects(
+        AuthEffects,
+        RouterEffects,
+        BiteEffects,
+        LikeEffects,
+        ReviewEffects,
+        AppEffect,
+        RestaurantEffects,
+        MenuEffects
+      ),
   provideState(fromBites.key, fromBites.reducer),
   provideState(fromReviews.key, fromReviews.reducer),
   provideState(fromLikes.key, fromLikes.reducer),

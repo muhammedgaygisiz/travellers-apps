@@ -1,0 +1,95 @@
+{
+  "name": "bite-tribe-business",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/bite-tribe-business/src",
+  "tags": ["scope:bite-tribe-business", "type:app"],
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:browser-esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "plugins": ["apps/bite-tribe/env-var-plugin.js"],
+        "outputPath": "dist/apps/bite-tribe-business",
+        "index": "apps/bite-tribe-business/src/index.html",
+        "main": "apps/bite-tribe-business/src/main.ts",
+        "polyfills": [],
+        "tsConfig": "apps/bite-tribe-business/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/bite-tribe-business/public"
+          }
+        ],
+        "styles": [
+          "apps/bite-tribe-business/src/theme/variables.scss",
+          "apps/bite-tribe-business/src/global.scss"
+        ],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1.8mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@nx/angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "bite-tribe-business:build:production"
+        },
+        "development": {
+          "buildTarget": "bite-tribe-business:build:development",
+          "port": 4201
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "bite-tribe-business:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/bite-tribe-business/jest.config.ts"
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "bite-tribe-business:build",
+        "port": 4200,
+        "staticFilePath": "dist/apps/bite-tribe-business/browser",
+        "spa": true
+      }
+    }
+  }
+}

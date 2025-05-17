@@ -1,0 +1,35 @@
+@let restaurantData = restaurant();
+
+<div class="container">
+  <div class="restaurant-container">
+    <ion-card>
+      <div class="card-content">
+        @if (restaurantData?.image) {
+        <div class="card-image">
+          <img [src]="restaurantData?.image" alt="Restaurant" />
+        </div>
+        }
+        <div class="card-details">
+          <ion-card-header>
+            <ion-card-title>
+              {{ restaurantData?.name }}
+            </ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            {{ restaurantData?.distance | toMetric }}
+          </ion-card-content>
+
+          @if (restaurantData.unsaved) {
+          <ion-button
+            fill="clear"
+            (click)="createRestaurant.emit(restaurantData)"
+          >
+            Create
+          </ion-button>
+          }
+        </div>
+      </div>
+    </ion-card>
+  </div>
+</div>

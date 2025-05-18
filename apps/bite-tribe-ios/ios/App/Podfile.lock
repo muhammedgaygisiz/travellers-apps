@@ -1159,6 +1159,8 @@ PODS:
   - BoringSSL-GRPC/Interface (0.0.36)
   - Capacitor (7.2.0):
     - CapacitorCordova
+  - CapacitorCamera (7.0.1):
+    - Capacitor
   - CapacitorCordova (7.2.0)
   - CapacitorFirebaseAuthentication (7.1.0):
     - Capacitor
@@ -1347,6 +1349,7 @@ PODS:
 
 DEPENDENCIES:
   - "Capacitor (from `../../../../node_modules/@capacitor/ios`)"
+  - "CapacitorCamera (from `../../../../node_modules/@capacitor/camera`)"
   - "CapacitorCordova (from `../../../../node_modules/@capacitor/ios`)"
   - "CapacitorFirebaseAuthentication (from `../../../../node_modules/@capacitor-firebase/authentication`)"
   - "CapacitorFirebaseAuthentication/Google (from `../../../../node_modules/@capacitor-firebase/authentication`)"
@@ -1381,6 +1384,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Capacitor:
     :path: "../../../../node_modules/@capacitor/ios"
+  CapacitorCamera:
+    :path: "../../../../node_modules/@capacitor/camera"
   CapacitorCordova:
     :path: "../../../../node_modules/@capacitor/ios"
   CapacitorFirebaseAuthentication:
@@ -1395,6 +1400,7 @@ SPEC CHECKSUMS:
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   BoringSSL-GRPC: ca6a8e5d04812fce8ffd6437810c2d46f925eaeb
   Capacitor: 106e7a4205f4618d582b886a975657c61179138d
+  CapacitorCamera: eb8687d8687fed853598ec9460d94bcd5e16babe
   CapacitorCordova: 5967b9ba03915ef1d585469d6e31f31dc49be96f
   CapacitorFirebaseAuthentication: 9aa0fcf60b1c98e173e13f22a2fcc2cab42c7377
   CapacitorFirebaseFirestore: 362521abdb88faccfc1844536764974db364bff1
@@ -1419,6 +1425,6 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
 
-PODFILE CHECKSUM: c11843fe3912557763bb6d320b25b73ef9af4c0e
+PODFILE CHECKSUM: 7e2c2a7ad6b313a578011234079dae16cd49ac4f
 
 COCOAPODS: 1.15.2

@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { GeoPoint } from 'firebase/firestore';
 import { Platform } from '@ionic/angular';
 import { splitTags } from 'utils';
 import { getCurrentPosition } from 'geolocation';
@@ -19,10 +18,10 @@ export class BiteDataAccessService {
     const enrichedBite = {
       ...newBite,
       tags: splitTags(newBite.tags),
-      position: new GeoPoint(
-        currentPosition.coords.latitude,
-        currentPosition.coords.longitude
-      ),
+      position: {
+        latitude: currentPosition.coords.latitude,
+        longitude: currentPosition.coords.longitude,
+      },
     };
 
     this.storeService.save(enrichedBite, 'bite');

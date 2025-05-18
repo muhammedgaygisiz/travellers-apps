@@ -1,5 +1,4 @@
-import firebase from 'firebase/compat';
-import GeoPoint = firebase.firestore.GeoPoint;
+import { Geopoint } from './geopoint';
 
 export interface Bite {
   id: string;
@@ -8,7 +7,7 @@ export interface Bite {
   place: string;
   price: number;
   currency?: string;
-  position: GeoPoint;
+  position: Geopoint;
   distance?: string;
   restaurantId?: string;
 

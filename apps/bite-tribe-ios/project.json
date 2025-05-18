@@ -61,6 +61,9 @@
       "configurations": {
         "ios": {
           "cmd": "run ios"
+        },
+        "ios-dev": {
+          "cmd": "run ios -l --host 172.20.10.2 --port 4200 --target=D3A60284-5E49-4BCD-8417-B651A142B4F2"
         }
       }
     },
@@ -84,6 +87,16 @@
         "ios": {
           "cmd": "update ios"
         }
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run bite-tribe:serve --configuration=development --host=0.0.0.0",
+          "nx run bite-tribe-ios:run --configuration=ios-dev"
+        ],
+        "parallel": true
       }
     }
   }

@@ -1,9 +1,10 @@
 {
   "name": "bite-tribe-ios",
-  "dependencies": {
-    "@capacitor/ios": "../../node_modules/@capacitor/ios"
-  },
   "devDependencies": {
-    "@capacitor/cli": "^6.0.0"
+    "@capacitor/cli": "../../node_modules/@capacitor/cli",
+    "@capacitor/ios": "../../node_modules/@capacitor/ios",
+    "@capacitor-firebase/authentication": "../../node_modules/@capacitor-firebase/authentication",
+    "@capacitor-firebase/firestore": "../../node_modules/@capacitor-firebase/firestore",
+    "@capacitor/geolocation": "../../node_modules/@capacitor/geolocation"
   }
 }

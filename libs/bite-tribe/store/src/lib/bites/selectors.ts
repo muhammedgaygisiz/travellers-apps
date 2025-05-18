@@ -29,8 +29,8 @@ export const bites = createSelector(
           ...bite,
           likes: likes.filter((like) => bite.id === like.biteId) || [],
           distance: haversineDistance(
-            bite.position.latitude,
-            bite.position.longitude,
+            bite.position?.latitude,
+            bite.position?.longitude,
             gpsPosition?.latitude,
             gpsPosition?.longitude,
             'km'

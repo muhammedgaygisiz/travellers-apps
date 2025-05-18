@@ -2,10 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>iteTribe uses your location to help you tag where you enjoyed a meal and discover nearby bites.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>iteTribe uses your location to help you tag where you enjoyed a meal and discover nearby bites.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>BiteTribe</string>
+	<string>BiteTribe</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

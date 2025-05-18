@@ -46,8 +46,8 @@ export const restaurants = createSelector(
             uniqueRestaurants.push({
               name: bite.place,
               distance: haversineDistance(
-                bite.position.latitude,
-                bite.position.longitude,
+                bite.position?.latitude,
+                bite.position?.longitude,
                 gpsPosition?.latitude,
                 gpsPosition?.longitude,
                 'km'

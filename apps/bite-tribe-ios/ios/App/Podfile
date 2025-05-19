@@ -21,6 +21,7 @@ target 'App' do
   capacitor_pods
   # Add your Pods here
   pod 'CapacitorFirebaseAuthentication/Google', :path => '../../../../node_modules/@capacitor-firebase/authentication'
+  pod 'CapacitorFirebaseAnalytics/Analytics', :path => '../../../../node_modules/@capacitor-firebase/analytics'
 end
 
 post_install do |installer|

@@ -11,6 +11,7 @@ import {
   FirebaseAuthentication,
 } from '@capacitor-firebase/authentication';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Injectable({
   providedIn: 'root',
@@ -32,6 +33,12 @@ export class AuthService {
 
   isLoggedIn$ = this.authStateChange$.pipe(
     map((authState) => {
+      if (authState && authState.user) {
+        FirebaseAnalytics.setUserId({
+          userId: authState.user.uid,
+        });
+      }
+
       return !!authState?.user;
     }),
     distinctUntilChanged()

@@ -29,6 +29,8 @@ jobs:
           NX_APP_BITE_TRIBE_PROJECT_ID: ${{ secrets.NX_APP_BITE_TRIBE_PROJECT_ID }}
           NX_APP_BITE_TRIBE_STORAGE_BUCKET: ${{ secrets.NX_APP_BITE_TRIBE_STORAGE_BUCKET }}
           NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID }}
+          NX_APP_BITE_TRIBE_MEASSUREMENT_ID: ${{ secrets.NX_APP_BITE_TRIBE_MEASSUREMENT_ID }}
+          NX_APP_BITE_TRIBE_APP_ID: ${{ secrets.NX_APP_BITE_TRIBE_APP_ID }}
 
       - name: Bite Tribe Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'

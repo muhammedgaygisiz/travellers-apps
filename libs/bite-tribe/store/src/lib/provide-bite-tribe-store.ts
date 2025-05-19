@@ -3,6 +3,7 @@ import { provideState, provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import {
   AuthEffects,
+  provideFirestoreAnalytics,
   provideFirestoreState,
   provideFirestoreUtils,
 } from 'ta-firestore';
@@ -22,8 +23,9 @@ import { AppEffect } from './app/effects';
 import { RestaurantEffects } from './restaurants/effects';
 import { LikeEffects } from './likes/effects';
 import { MenuEffects } from './menus/effects';
+import { FirebaseOptions } from '@angular/fire/app';
 
-const firebaseOptions = (environment: Environment) => ({
+const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
   authDomain: environment.isBusiness
     ? process.env['NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN']
@@ -31,6 +33,8 @@ const firebaseOptions = (environment: Environment) => ({
   projectId: process.env['NX_APP_BITE_TRIBE_PROJECT_ID'],
   storageBucket: process.env['NX_APP_BITE_TRIBE_STORAGE_BUCKET'],
   messagingSenderId: process.env['NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID'],
+  measurementId: process.env['NX_APP_BITE_TRIBE_MEASSUREMENT_ID'],
+  appId: process.env['NX_APP_BITE_TRIBE_APP_ID'],
 });
 
 export const provideBiteTribeStore = (environment: Environment) => [
@@ -78,5 +82,6 @@ export const provideBiteTribeStore = (environment: Environment) => [
   provideState(fromApp.key, fromApp.reducer),
   provideState(fromRestaurants.key, fromRestaurants.reducer),
   provideState(fromMenus.key, fromMenus.reducer),
-  provideFirestoreUtils(firebaseOptions(environment)),
+  provideFirestoreUtils(toFirebaseOptions(environment)),
+  provideFirestoreAnalytics(),
 ];

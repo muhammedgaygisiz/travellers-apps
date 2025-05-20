@@ -11,7 +11,9 @@ import { addIcons } from 'ionicons';
 import { imageOutline } from 'ionicons/icons';
 
 jest.mock('@capacitor/camera');
-jest.mock('../utils/compress-file');
+jest.mock('image-compression', () => ({
+  compressFile: jest.fn(),
+}));
 
 describe('BitePage', () => {
   let component: BitePage;

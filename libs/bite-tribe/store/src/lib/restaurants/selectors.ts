@@ -1,14 +1,14 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
-import { EntityState } from '@ngrx/entity';
 import { Restaurant } from 'model';
 import { restaurantId } from '../router/selectors';
-import { adapter } from './adapter';
+import { adapter, RestaurantState } from './adapter';
 import { gpsPosition } from '../app/selectors';
 import { haversineDistance } from 'distance-pipe';
 import { bites } from '../bites/selectors';
+import { getRestaurant } from './utils/get-restaurant';
 
-const slice = createFeatureSelector<EntityState<Restaurant>>(key);
+const slice = createFeatureSelector<RestaurantState>(key);
 
 const { selectAll } = adapter.getSelectors();
 
@@ -37,7 +37,7 @@ export const restaurants = createSelector(
         .filter((bite) => !bite.restaurantId)
         .reduce((uniqueRestaurants, bite) => {
           const existingRestaurant = uniqueRestaurants.find(
-            (r) => r.name === bite.place
+            (r) => r.name.trim() === bite.place.trim()
           );
 
           if (existingRestaurant && existingRestaurant.biteIds) {
@@ -87,24 +87,22 @@ export const restaurant = createSelector(
   }
 );
 
-const getRestaurant = (restaurants: Restaurant[], id: string) => {
-  const foundRestaurantById = restaurants.find((restaurant) => {
-    if (id) {
-      return restaurant.id.toLowerCase().includes(id.toLowerCase());
-    }
+const selectedRestaurantToCreate = createSelector(
+  slice,
+  (slice) => slice.restaurantToCreate
+);
 
-    return false;
-  });
-
-  if (foundRestaurantById) {
-    return foundRestaurantById;
-  }
-
-  const restaurantName = decodeURIComponent(id);
-  return restaurants.find((restaurant) => {
-    return (
-      restaurant.name.toLowerCase().includes(restaurantName.toLowerCase()) ||
-      restaurantName.toLowerCase().includes(restaurant.name.toLowerCase())
+export const restaurantToCreate = createSelector(
+  selectedRestaurantToCreate,
+  bites,
+  (restaurantToCreate, bites) => {
+    const bitesOfRestaurant = restaurantToCreate.biteIds?.map((biteId) =>
+      bites.find((b) => b.id === biteId)
     );
-  });
-};
+
+    return {
+      ...restaurantToCreate,
+      bites: bitesOfRestaurant,
+    } as Restaurant;
+  }
+);

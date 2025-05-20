@@ -13,19 +13,29 @@ import {
 import { EnvironmentProviders } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { getApp } from 'firebase/app';
+import { provideFirestoreAnalytics } from './analytics/provide-firestore-analytics';
 
 export const provideFirestoreUtils = (
-  firebaseOptions: FirebaseOptions
-): EnvironmentProviders[] => [
-  provideFirebaseApp(() => initializeApp(firebaseOptions || {})),
-  provideFirestore(() => getFirestore()),
-  provideAuth(() => {
-    if (Capacitor.isNativePlatform()) {
-      return initializeAuth(getApp(), {
-        persistence: indexedDBLocalPersistence,
-      });
-    }
+  firebaseOptions: FirebaseOptions,
+  withAnalytics?: boolean
+): EnvironmentProviders[] => {
+  const providersWithoutAnalytics = [
+    provideFirebaseApp(() => initializeApp(firebaseOptions || {})),
+    provideFirestore(() => getFirestore()),
+    provideAuth(() => {
+      if (Capacitor.isNativePlatform()) {
+        return initializeAuth(getApp(), {
+          persistence: indexedDBLocalPersistence,
+        });
+      }
 
-    return getAuth();
-  }),
-];
+      return getAuth();
+    }),
+  ];
+
+  if (!withAnalytics) {
+    return providersWithoutAnalytics;
+  }
+
+  return [...providersWithoutAnalytics, provideFirestoreAnalytics()];
+};

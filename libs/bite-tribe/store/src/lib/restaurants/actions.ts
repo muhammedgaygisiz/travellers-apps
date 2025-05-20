@@ -14,3 +14,8 @@ export const loadedRestaurantFromApi = createAction(
 export const noRestaurantFound = createAction(
   '[RESTAURANTS] No restaurant found'
 );
+
+export const setRestaurantToCreate = createAction(
+  '[RESTAURANTS] Set restaurant to create',
+  props<{ restaurant: Restaurant }>()
+);

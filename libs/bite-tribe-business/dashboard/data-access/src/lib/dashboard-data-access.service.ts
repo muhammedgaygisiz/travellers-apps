@@ -16,4 +16,8 @@ export class DashboardDataAccessService {
   logout() {
     this.storeService.logout();
   }
+
+  selectRestaurantToCreate(restaurant: Restaurant) {
+    this.storeService.selectRestaurantToCreate(restaurant);
+  }
 }

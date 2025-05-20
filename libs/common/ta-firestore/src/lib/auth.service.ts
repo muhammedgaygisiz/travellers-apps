@@ -33,7 +33,11 @@ export class AuthService {
 
   isLoggedIn$ = this.authStateChange$.pipe(
     map((authState) => {
-      if (authState && authState.user) {
+      if (
+        authState &&
+        authState.user &&
+        !process.env['NX_APP_BITE_TRIBE_IS_BUSINESS']
+      ) {
         FirebaseAnalytics.setUserId({
           userId: authState.user.uid,
         });

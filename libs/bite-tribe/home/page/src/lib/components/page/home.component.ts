@@ -13,7 +13,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
-import { BiteComponent } from '../bite/bite.component';
+import { BiteComponent } from 'bite-tribe-common/bite';
 
 @Component({
   selector: 'bt-home',

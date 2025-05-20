@@ -6,7 +6,7 @@ import { getIonicConfig } from 'utils';
 import { provideRouter } from '@angular/router';
 import { Camera } from '@capacitor/camera';
 import { signal } from '@angular/core';
-import * as compressFileModuleMock from '../utils/compress-file';
+import * as compressFileModuleMock from 'image-compression';
 import { addIcons } from 'ionicons';
 import { imageOutline } from 'ionicons/icons';
 

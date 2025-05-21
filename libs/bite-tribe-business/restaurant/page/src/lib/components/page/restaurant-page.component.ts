@@ -57,16 +57,28 @@ export class RestaurantPageComponent {
   restaurantFormGroup = this.formBuilder.group({
     image: ['', Validators.required],
     name: ['', Validators.required],
-    latitude: ['', Validators.required],
-    longitude: ['', Validators.required],
+    latitude: [0, Validators.required],
+    longitude: [0, Validators.required],
   });
 
   prefillEffect = effect(() => {
     const restaurant = this.restaurant();
+    const firstBite = restaurant?.bites?.[0];
 
     if (restaurant?.name) {
       this.restaurantFormGroup.controls['name'].patchValue(restaurant.name);
-      return;
+    }
+
+    if (firstBite) {
+      this.restaurantFormGroup.controls['latitude'].patchValue(
+        firstBite.position.latitude
+      );
+      this.restaurantFormGroup.controls['latitude'].disable(); // Set to readonly
+
+      this.restaurantFormGroup.controls['longitude'].patchValue(
+        firstBite.position.longitude
+      );
+      this.restaurantFormGroup.controls['longitude'].disable(); // Set to readonly
     }
   });
 

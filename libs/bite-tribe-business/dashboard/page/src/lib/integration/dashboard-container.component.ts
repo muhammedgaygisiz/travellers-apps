@@ -10,6 +10,7 @@ import { DashboardService } from './dashboard.service';
       class="ion-page"
       [restaurants]="service.restaurants()"
       (logoutClick)="service.logout()"
+      (createRestaurantClick)="service.onCreateRestaurantClick($event)"
     />
   `,
 })

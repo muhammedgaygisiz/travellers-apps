@@ -28,7 +28,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { compressFile } from './utils/compress-file';
+import { compressFile } from 'image-compression';
 
 @Component({
   selector: 'bt-bite',

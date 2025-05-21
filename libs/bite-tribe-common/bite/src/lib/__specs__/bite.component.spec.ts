@@ -2,10 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BiteComponent } from '../bite.component';
 import { ToMetricPipe } from 'distance-pipe';
 import { PopoverController } from '@ionic/angular';
-import { LikeOptionsPopoverMenuComponent } from '../../like-options-popover-menu/like-options-popover-menu.component';
 import { Bite } from 'model';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
 
 describe('BiteComponent', () => {
   let component: BiteComponent;

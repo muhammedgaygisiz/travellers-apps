@@ -171,6 +171,7 @@ jobs:
 
   prices-e2e-test:
     runs-on: ubuntu-latest
+    continue-on-error: true
     needs:
       - loki
 

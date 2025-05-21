@@ -1,4 +1,5 @@
 import { Geopoint } from './geopoint';
+import { Bite } from './bite';
 
 export interface Restaurant {
   id: string;
@@ -11,4 +12,5 @@ export interface Restaurant {
 
   unsaved?: boolean;
   biteIds?: string[];
+  bites?: Bite[];
 }

@@ -7,13 +7,14 @@ import {
 } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { map, skipWhile, switchMap } from 'rxjs';
+import { map, skipWhile, switchMap, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { restaurantId } from '../router/selectors';
 import {
   loadedRestaurantFromApi,
   noRestaurantFound,
   loadedRestaurantsFromApi,
+  saveNewRestaurant,
 } from './actions';
 
 @Injectable()
@@ -49,4 +50,16 @@ export class RestaurantEffects {
       )
     );
   });
+
+  saveNewRestaurantToFirestore$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(saveNewRestaurant),
+        tap(({ restaurant }) => {
+          this.api.saveNewRestaurant(restaurant);
+        })
+      );
+    },
+    { dispatch: false }
+  );
 }

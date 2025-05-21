@@ -6,12 +6,14 @@ import { getIonicConfig } from 'utils';
 import { provideRouter } from '@angular/router';
 import { Camera } from '@capacitor/camera';
 import { signal } from '@angular/core';
-import * as compressFileModuleMock from '../utils/compress-file';
+import * as compressFileModuleMock from 'image-compression';
 import { addIcons } from 'ionicons';
 import { imageOutline } from 'ionicons/icons';
 
 jest.mock('@capacitor/camera');
-jest.mock('../utils/compress-file');
+jest.mock('image-compression', () => ({
+  compressFile: jest.fn(),
+}));
 
 describe('BitePage', () => {
   let component: BitePage;

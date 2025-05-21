@@ -18,10 +18,11 @@ import {
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { PopoverController } from '@ionic/angular';
-import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
+import { LikeOptionsPopoverMenuComponent } from './like-options-popover-menu/like-options-popover-menu.component';
 import { ToMetricPipe } from 'distance-pipe';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bt-bite',
   templateUrl: './bite.component.html',
   styleUrls: ['./bite.component.scss'],

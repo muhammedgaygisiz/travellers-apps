@@ -5,14 +5,22 @@ import { createAction, props, Store } from '@ngrx/store';
 import { saveNewBite, saveTags } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bite, bites } from './bites/selectors';
-import { restaurant, restaurants } from './restaurants/selectors';
+import {
+  restaurant,
+  restaurants,
+  restaurantToCreate,
+} from './restaurants/selectors';
 import { menu } from './menus/selectors';
 import { saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Settings } from 'model';
+import { Restaurant, Settings } from 'model';
 import { currency, settings } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
+import {
+  setRestaurantToCreate,
+  saveNewRestaurant,
+} from './restaurants/actions';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -23,6 +31,9 @@ const getActionByDocType = (docType: string, entity: any) => {
   switch (docType) {
     case 'bite': {
       return saveNewBite({ bite: entity });
+    }
+    case 'restaurant': {
+      return saveNewRestaurant({ restaurant: entity });
     }
     default: {
       return unknownEntity({ docType });
@@ -49,6 +60,7 @@ export class BiteTribeStoreService implements StoreService {
   menu$ = this.store.select(menu);
   reviews$ = this.store.select(reviews);
   currencyFromSettings$ = this.store.select(currency);
+  restaurantToCreate$ = this.store.select(restaurantToCreate);
 
   userId = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
@@ -114,5 +126,9 @@ export class BiteTribeStoreService implements StoreService {
 
   saveReview(newReview: { review: string; biteId: string }) {
     this.store.dispatch(saveNewReview(newReview));
+  }
+
+  selectRestaurantToCreate(restaurant: Restaurant) {
+    this.store.dispatch(setRestaurantToCreate({ restaurant }));
   }
 }

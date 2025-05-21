@@ -83,9 +83,16 @@
       "bite-tribe-business/dashboard-data-access": [
         "libs/bite-tribe-business/dashboard/data-access/src/index.ts"
       ],
+      "bite-tribe-business/restaurant": [
+        "libs/bite-tribe-business/restaurant/page/src/index.ts"
+      ],
+      "bite-tribe-business/restaurant-data-access": [
+        "libs/bite-tribe-business/restaurant/data-access/src/index.ts"
+      ],
       "bite-tribe-business/shell": [
         "libs/bite-tribe-business/shell/src/index.ts"
       ],
+      "bite-tribe-common/bite": ["libs/bite-tribe-common/bite/src/index.ts"],
       "bite-tribe/api": ["libs/bite-tribe/api/src/index.ts"],
       "bite-tribe/bite": ["libs/bite-tribe/bite/page/src/index.ts"],
       "bite-tribe/bite-data-access": [
@@ -141,6 +148,7 @@
       "finances/shell": ["libs/finances/shell/src/index.ts"],
       "finances/store": ["libs/finances/store/src/index.ts"],
       "geolocation": ["libs/common/geolocation/src/index.ts"],
+      "image-compression": ["libs/common/image-compression/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
       "model": ["libs/bite-tribe/model/src/index.ts"],
       "pages": ["libs/finances/pages/src/index.ts"],

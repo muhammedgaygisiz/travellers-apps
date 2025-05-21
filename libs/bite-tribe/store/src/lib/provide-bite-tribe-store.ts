@@ -3,7 +3,6 @@ import { provideState, provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import {
   AuthEffects,
-  provideFirestoreAnalytics,
   provideFirestoreState,
   provideFirestoreUtils,
 } from 'ta-firestore';
@@ -82,6 +81,8 @@ export const provideBiteTribeStore = (environment: Environment) => [
   provideState(fromApp.key, fromApp.reducer),
   provideState(fromRestaurants.key, fromRestaurants.reducer),
   provideState(fromMenus.key, fromMenus.reducer),
-  provideFirestoreUtils(toFirebaseOptions(environment)),
-  provideFirestoreAnalytics(),
+  provideFirestoreUtils(
+    toFirebaseOptions(environment),
+    !environment.isBusiness
+  ),
 ];

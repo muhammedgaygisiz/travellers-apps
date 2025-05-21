@@ -11,3 +11,8 @@
 input[type='number'] {
   @include no-number-arrows;
 }
+
+.link-title {
+  text-decoration: underline;
+  cursor: pointer;
+}

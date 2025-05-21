@@ -104,4 +104,53 @@ describe('compress-file', () => {
     // Assert
     expect(result).toEqual({});
   });
+
+  it('should create a canvas element when compressing', () => {
+    // Arrange
+    const mockFile = new File(['mock-image'], 'test.jpg', {
+      type: 'image/jpeg',
+    });
+
+    // Act
+    compressFile(mockFile);
+
+    // Assert
+    expect(global.document.createElement).toHaveBeenCalledWith('canvas');
+  });
+
+  it('should handle toBlob callback correctly', async () => {
+    // Arrange
+    const mockFile = new File(['mock-image'], 'test.jpg', {
+      type: 'image/jpeg',
+    });
+    const mockImage = {
+      width: 4096,
+      height: 3072,
+      onload: null as any,
+      onerror: null as any,
+    };
+
+    global.Image = jest.fn(() => mockImage) as any;
+
+    const mockCanvas = {
+      getContext: jest.fn(() => ({
+        drawImage: jest.fn(),
+      })),
+      toBlob: jest.fn((callback) => callback(new Blob(['mock-blob']))),
+    };
+
+    global.document.createElement = jest.fn((tagName) => {
+      if (tagName === 'canvas') return mockCanvas as any;
+      return {} as any;
+    });
+
+    // Act
+    const compressionPromise = compressFile(mockFile);
+    mockImage.onload();
+    const result = await compressionPromise;
+
+    // Assert
+    expect(mockCanvas.toBlob).toHaveBeenCalled();
+    expect(result).toBeInstanceOf(File);
+  });
 });

@@ -17,7 +17,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Restaurant, Settings } from 'model';
 import { currency, settings } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
-import { setRestaurantToCreate } from './restaurants/actions';
+import {
+  setRestaurantToCreate,
+  saveNewRestaurant,
+} from './restaurants/actions';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -28,6 +31,9 @@ const getActionByDocType = (docType: string, entity: any) => {
   switch (docType) {
     case 'bite': {
       return saveNewBite({ bite: entity });
+    }
+    case 'restaurant': {
+      return saveNewRestaurant({ restaurant: entity });
     }
     default: {
       return unknownEntity({ docType });

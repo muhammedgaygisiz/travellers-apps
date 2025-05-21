@@ -52,7 +52,7 @@ export class RestaurantPageComponent {
 
   private readonly formBuilder = inject(FormBuilder);
 
-  submitNewRestaurant = output<typeof this.restaurantFormGroup.value>();
+  submitNewRestaurant = output<Restaurant>();
 
   restaurantFormGroup = this.formBuilder.group({
     image: ['', Validators.required],
@@ -73,12 +73,10 @@ export class RestaurantPageComponent {
       this.restaurantFormGroup.controls['latitude'].patchValue(
         firstBite.position.latitude
       );
-      this.restaurantFormGroup.controls['latitude'].disable(); // Set to readonly
 
       this.restaurantFormGroup.controls['longitude'].patchValue(
         firstBite.position.longitude
       );
-      this.restaurantFormGroup.controls['longitude'].disable(); // Set to readonly
     }
   });
 
@@ -137,7 +135,17 @@ export class RestaurantPageComponent {
   saveNewRestaurant() {
     if (this.restaurantFormGroup.valid) {
       const newRestaurant = this.restaurantFormGroup.value;
-      this.submitNewRestaurant.emit(newRestaurant);
+      const biteIds = this.restaurant()?.biteIds || [];
+
+      const { latitude, longitude, ...rest } = newRestaurant;
+      this.submitNewRestaurant.emit({
+        ...rest,
+        position: {
+          latitude: latitude,
+          longitude: longitude,
+        },
+        biteIds,
+      } as Restaurant);
     }
   }
 }

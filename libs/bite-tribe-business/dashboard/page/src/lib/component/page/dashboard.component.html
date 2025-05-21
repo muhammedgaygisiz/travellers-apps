@@ -20,7 +20,8 @@
             <ion-text color="primary"> No restaurants found. </ion-text>
           </ion-card-content>
         </ion-card>
-        } @for (restaurant of restaurants(); track restaurant.id) {
+        } @for (restaurant of restaurants(); let index = $index; track
+        restaurant.id || index) {
         <bt-restaurant
           [restaurant]="restaurant"
           (restaurantClick)="restaurantClick.emit($event)"

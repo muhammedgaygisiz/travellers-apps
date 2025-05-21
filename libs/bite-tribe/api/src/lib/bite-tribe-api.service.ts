@@ -432,4 +432,49 @@ export class BiteTribeApiService {
       return undefined;
     }
   }
+
+  async saveNewRestaurant(restaurant: Restaurant) {
+    console.log('Restaurant to be saved: ', restaurant);
+    const { biteIds, ...restaurantToBeSaved } = restaurant;
+
+    // Add the new restaurant
+    const addRestaurantResult = await FirebaseFirestore.addDocument({
+      reference: RESTAURANT_COLLECTION,
+      data: {
+        ...restaurantToBeSaved,
+      },
+    });
+
+    const newRestaurantId = addRestaurantResult.reference.id;
+
+    // Add a new menu for the restaurant
+    const addMenuResult = await FirebaseFirestore.addDocument({
+      reference: MENU_COLLECTION,
+      data: {
+        categories: [],
+      },
+    });
+
+    // Update the restaurant with the menu ID
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${newRestaurantId}`,
+      data: {
+        menuId: `/menus/${addMenuResult.reference.id}`,
+      },
+    });
+
+    // Update the bites with the new restaurant ID
+    if (biteIds && biteIds.length > 0) {
+      await Promise.all(
+        biteIds.map((biteId) =>
+          FirebaseFirestore.updateDocument({
+            reference: `${BITE_COLLECTION}/${biteId}`,
+            data: {
+              restaurantId: `/restaurants/${newRestaurantId}`,
+            },
+          })
+        )
+      );
+    }
+  }
 }

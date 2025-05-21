@@ -11,7 +11,10 @@
         }
         <div class="card-details">
           <ion-card-header>
-            <ion-card-title class="link-title">
+            <ion-card-title
+              class="link-title"
+              (click)="restaurantClick.emit(restaurantData)"
+            >
               {{ restaurantData?.name }}
             </ion-card-title>
           </ion-card-header>

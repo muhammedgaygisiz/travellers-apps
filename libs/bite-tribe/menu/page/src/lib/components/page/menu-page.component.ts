@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -22,6 +23,8 @@ export class MenuPage {
   bite = input<Bite>();
   restaurant = input<Restaurant>();
   menu = input<Menu>();
+
+  editMode = input(false, { transform: booleanAttribute });
 
   placeName = computed(() => {
     const bite = this.bite();

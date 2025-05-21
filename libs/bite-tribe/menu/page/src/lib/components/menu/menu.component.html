@@ -1,9 +1,13 @@
 <div class="menu-container">
-  @for (category of menu()?.categories; track category.title) {
+  @if (menu()?.categories?.length) { @for (category of menu()?.categories; track
+  category.title) {
   <div class="menu-category">
     <h2>{{ category.title }}</h2>
     @if (category.subtitle) {
     <p class="subtitle">{{ category.subtitle }}</p>
+    } @if (editMode()) {
+    <ion-input placeholder="Edit title" />
+    <ion-input placeholder="Edit subtitle" />
     } @for (item of category.items; track item.name) {
     <div class="menu-item">
       <div class="item-details">
@@ -21,6 +25,25 @@
         </ion-button>
       </div>
     </div>
+    } @if (editMode()) {
+    <div class="add-item">
+      <ion-input placeholder="Item name" />
+      <ion-input placeholder="Item description" />
+      <ion-input placeholder="Item price" type="number" />
+      <ion-button>Add Item</ion-button>
+    </div>
+    }
+  </div>
+  } } @else {
+  <div class="menu-placeholder">
+    <p>No item here yet, start by adding a category now.</p>
+
+    @if (shouldShowAddCategory()) {
+    <add-category />
+    } @if( editMode() && !shouldShowAddCategory()) {
+    <ion-button (click)="showAddCategory()" class="ion-margin-top"
+      >Add Category</ion-button
+    >
     }
   </div>
   }

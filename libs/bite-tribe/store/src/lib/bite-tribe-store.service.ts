@@ -11,10 +11,11 @@ import {
   restaurantToCreate,
 } from './restaurants/selectors';
 import { menu } from './menus/selectors';
+import { saveMenu } from './menus/actions';
 import { saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Restaurant, Settings } from 'model';
+import { Menu, Restaurant, Settings } from 'model';
 import { currency, settings } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -130,5 +131,9 @@ export class BiteTribeStoreService implements StoreService {
 
   selectRestaurantToCreate(restaurant: Restaurant) {
     this.store.dispatch(setRestaurantToCreate({ restaurant }));
+  }
+
+  saveMenu(menu: Menu) {
+    this.store.dispatch(saveMenu({ menu }));
   }
 }

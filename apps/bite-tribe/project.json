@@ -27,6 +27,9 @@
           "apps/bite-tribe/src/theme/variables.scss",
           "apps/bite-tribe/src/global.scss"
         ],
+        "stylePreprocessorOptions": {
+          "includePaths": ["libs/bite-tribe-common/styles"]
+        },
         "scripts": []
       },
       "configurations": {

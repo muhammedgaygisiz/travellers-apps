@@ -12,3 +12,8 @@ export const loadedMenuFromApi = createAction(
 );
 
 export const noMenuFound = createAction('[MENUS] No restaurant found');
+
+export const saveMenu = createAction(
+  '[MENUS] Save menu',
+  props<{ menu: Menu }>()
+);

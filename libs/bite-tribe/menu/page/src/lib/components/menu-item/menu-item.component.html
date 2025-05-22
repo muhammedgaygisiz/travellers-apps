@@ -1,0 +1,16 @@
+@let itemData = item();
+
+<div class="menu-item">
+  <div class="item-details">
+    <h3>{{ itemData?.name }}</h3>
+    <p>{{ itemData?.description }}</p>
+  </div>
+  <div class="price-actions">
+    <div class="price">{{ itemData?.price }}€</div>
+    @if(!editMode()) {
+    <ion-button size="small" fill="clear" (click)="onCreateBiteClick(itemData)">
+      Create Bite
+    </ion-button>
+    }
+  </div>
+</div>

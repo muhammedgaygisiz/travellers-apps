@@ -11,6 +11,7 @@ import { DashboardService } from './dashboard.service';
       [restaurants]="service.restaurants()"
       (logoutClick)="service.logout()"
       (createRestaurantClick)="service.onCreateRestaurantClick($event)"
+      (restaurantClick)="service.restaurantClicked($event)"
     />
   `,
 })

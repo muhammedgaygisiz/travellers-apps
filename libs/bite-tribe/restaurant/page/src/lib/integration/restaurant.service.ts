@@ -17,16 +17,44 @@ export class RestaurantService {
     const bite = this.bite();
     if (bite && restaurant?.menuId) {
       // eslint-disable-next-line no-unused-vars
+      const menuId = this.getMenuId(restaurant);
+
+      if (menuId) {
+        this.navController.navigateForward([
+          'bite',
+          bite.id,
+          'restaurant',
+          restaurant.id,
+          'menu',
+          menuId,
+        ]);
+
+        return;
+      }
+    }
+
+    if (restaurant?.menuId) {
+      const menuId = this.getMenuId(restaurant);
+
+      if (menuId) {
+        this.navController.navigateForward([
+          'restaurant',
+          restaurant.id,
+          'menu',
+          menuId,
+        ]);
+      }
+    }
+  }
+
+  private getMenuId(restaurant: Restaurant) {
+    if (restaurant?.menuId) {
+      // eslint-disable-next-line no-unused-vars
       const [empty, collectionName, menuId] = restaurant.menuId.split('/');
 
-      this.navController.navigateForward([
-        'bite',
-        bite.id,
-        'restaurant',
-        restaurant.id,
-        'menu',
-        menuId,
-      ]);
+      return menuId;
     }
+
+    return undefined;
   }
 }

@@ -37,6 +37,7 @@ export class HomeService {
         'restaurant',
         restaurantId,
       ]);
+
       return;
     }
 

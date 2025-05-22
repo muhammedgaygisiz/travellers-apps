@@ -8,6 +8,11 @@
   }
 }
 
+@mixin light-border {
+  border: 1px solid var(--ion-color-primary);
+  border-radius: 1rem;
+}
+
 input[type='number'] {
   @include no-number-arrows;
 }

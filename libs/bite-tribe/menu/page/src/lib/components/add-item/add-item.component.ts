@@ -26,6 +26,8 @@ import { MenuItem } from 'model';
 export class AddItemComponent {
   addItem = output<MenuItem>();
 
+  cancelAddItem = output();
+
   private readonly formBuilder = inject(FormBuilder);
 
   newItemForm = this.formBuilder.group({

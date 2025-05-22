@@ -91,4 +91,8 @@ export class MenuComponent {
       return currMenu;
     });
   }
+
+  onCancelAddCategory() {
+    this.presentShowAddCategory.set(false);
+  }
 }

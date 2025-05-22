@@ -11,12 +11,13 @@ import { IonButton } from '@ionic/angular/standalone';
 import { Category, MenuItem } from 'model';
 import { NgTemplateOutlet } from '@angular/common';
 import { AddItemComponent } from '../add-item/add-item.component';
+import { MenuItemComponent } from '../menu-item/menu-item.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './category.component.html',
   styleUrl: './category.component.scss',
-  imports: [IonButton, NgTemplateOutlet, AddItemComponent],
+  imports: [IonButton, NgTemplateOutlet, AddItemComponent, MenuItemComponent],
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'category',
 })
@@ -54,5 +55,9 @@ export class CategoryComponent {
 
   showAddItem() {
     this.presentShowAddItem.set(true);
+  }
+
+  onCancelAddItem() {
+    this.presentShowAddItem.set(false);
   }
 }

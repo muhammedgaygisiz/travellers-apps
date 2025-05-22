@@ -26,6 +26,8 @@ import { Category } from 'model';
 export class AddCategoryComponent {
   addCategory = output<Category>();
 
+  cancelAddCategory = output();
+
   private readonly formBuilder = inject(FormBuilder);
 
   newCategoryForm = this.formBuilder.group({

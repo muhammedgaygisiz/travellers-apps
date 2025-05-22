@@ -26,7 +26,10 @@
 
 <ng-template #addCategory>
   @if (shouldShowAddCategory()) {
-  <add-category (addCategory)="onAddCategory($event)" />
+  <add-category
+    (addCategory)="onAddCategory($event)"
+    (cancelAddCategory)="onCancelAddCategory()"
+  />
   } @if (editMode() && !shouldShowAddCategory()) {
   <ion-button (click)="showAddCategory()"> Add Category </ion-button>
   }

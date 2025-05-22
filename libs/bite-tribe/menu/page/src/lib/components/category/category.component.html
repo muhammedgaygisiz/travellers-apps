@@ -1,29 +1,12 @@
 @let categoryData = linkedCategory();
 
-<div class="menu-category">
+<div class="menu-category ion-padding">
   <h2>{{ categoryData?.title }}</h2>
   @if (categoryData?.subtitle) {
   <p class="subtitle">{{ categoryData?.subtitle }}</p>
   } @if(categoryData?.items?.length) { @for (item of categoryData?.items; track
   item.name) {
-  <div class="menu-item">
-    <div class="item-details">
-      <h3>{{ item.name }}</h3>
-      <p>{{ item.description }}</p>
-    </div>
-    <div class="price-actions">
-      <div class="price">{{ item.price }}€</div>
-      @if(!editMode()) {
-      <ion-button
-        size="small"
-        fill="clear"
-        (click)="createBiteClick.emit(item)"
-      >
-        Create Bite
-      </ion-button>
-      }
-    </div>
-  </div>
+  <menu-item [item]="item" [editMode]="editMode()" />
   }
 
   <ng-container [ngTemplateOutlet]="addItem" />
@@ -38,7 +21,7 @@
 
 <ng-template #addItem>
   @if(shouldShowAddItem()) {
-  <add-item (addItem)="onAddItem($event)" />
+  <add-item (addItem)="onAddItem($event)" (cancelAddItem)="onCancelAddItem()" />
   } @if(editMode() && !shouldShowAddItem()) {
   <ion-button (click)="showAddItem()" class="ion-margin-top">
     Add Item

@@ -13,38 +13,39 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { Category } from 'model';
+import { MenuItem } from 'model';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './add-category.component.html',
-  styleUrl: './add-category.component.scss',
+  templateUrl: './add-item.component.html',
+  styleUrl: './add-item.component.scss',
   imports: [IonButton, IonInput, IonList, IonItem, ReactiveFormsModule],
   // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'add-category',
+  selector: 'add-item',
 })
-export class AddCategoryComponent {
-  addCategory = output<Category>();
+export class AddItemComponent {
+  addItem = output<MenuItem>();
 
   private readonly formBuilder = inject(FormBuilder);
 
-  newCategoryForm = this.formBuilder.group({
-    title: ['', Validators.required],
-    subtitle: [''],
+  newItemForm = this.formBuilder.group({
+    name: ['', Validators.required],
+    description: [''],
+    price: [0, [Validators.required, Validators.min(0)]],
   });
 
   isInvalid = toSignal(
-    this.newCategoryForm.valueChanges.pipe(
+    this.newItemForm.valueChanges.pipe(
       map(() => {
-        return !this.newCategoryForm.valid;
+        return !this.newItemForm.valid;
       })
     ),
-    { initialValue: !this.newCategoryForm.valid }
+    { initialValue: !this.newItemForm.valid }
   );
 
   onAddCategory() {
-    if (this.newCategoryForm.valid) {
-      this.addCategory.emit(this.newCategoryForm.value as Category);
+    if (this.newItemForm.valid) {
+      this.addItem.emit(this.newItemForm.value as MenuItem);
     }
   }
 }

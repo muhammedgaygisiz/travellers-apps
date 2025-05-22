@@ -1,50 +1,33 @@
+@let menuData = linkedMenu();
+
 <div class="menu-container">
-  @if (menu()?.categories?.length) { @for (category of menu()?.categories; track
-  category.title) {
-  <div class="menu-category">
-    <h2>{{ category.title }}</h2>
-    @if (category.subtitle) {
-    <p class="subtitle">{{ category.subtitle }}</p>
-    } @if (editMode()) {
-    <ion-input placeholder="Edit title" />
-    <ion-input placeholder="Edit subtitle" />
-    } @for (item of category.items; track item.name) {
-    <div class="menu-item">
-      <div class="item-details">
-        <h3>{{ item.name }}</h3>
-        <p>{{ item.description }}</p>
-      </div>
-      <div class="price-actions">
-        <div class="price">{{ item.price }}€</div>
-        <ion-button
-          size="small"
-          fill="clear"
-          (click)="createBiteClick.emit(item)"
-        >
-          Create Bite
-        </ion-button>
-      </div>
-    </div>
-    } @if (editMode()) {
-    <div class="add-item">
-      <ion-input placeholder="Item name" />
-      <ion-input placeholder="Item description" />
-      <ion-input placeholder="Item price" type="number" />
-      <ion-button>Add Item</ion-button>
-    </div>
-    }
-  </div>
-  } } @else {
+  @if (menuData?.categories?.length) { @for (category of menuData?.categories;
+  track category.title) {
+  <category
+    [category]="category"
+    [editMode]="editMode()"
+    (addItemToCategory)="onAddItemToCategory($event)"
+  />
+  }
+
+  <ng-container [ngTemplateOutlet]="addCategory" />
+  } @else {
   <div class="menu-placeholder">
     <p>No item here yet, start by adding a category now.</p>
 
-    @if (shouldShowAddCategory()) {
-    <add-category />
-    } @if( editMode() && !shouldShowAddCategory()) {
-    <ion-button (click)="showAddCategory()" class="ion-margin-top"
-      >Add Category</ion-button
-    >
-    }
+    <ng-container [ngTemplateOutlet]="addCategory" />
+  </div>
+  } @if(editMode()) {
+  <div class="save-menu-button-container">
+    <ion-button class="ion-margin-top" (click)="onSave()">Save Menu</ion-button>
   </div>
   }
 </div>
+
+<ng-template #addCategory>
+  @if (shouldShowAddCategory()) {
+  <add-category (addCategory)="onAddCategory($event)" />
+  } @if (editMode() && !shouldShowAddCategory()) {
+  <ion-button (click)="showAddCategory()"> Add Category </ion-button>
+  }
+</ng-template>

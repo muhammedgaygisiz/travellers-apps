@@ -9,6 +9,7 @@ import { MenuService } from './menu.service';
       editMode
       [restaurant]="service.restaurant()"
       [menu]="service.menu()"
+      (saveMenu)="service.saveMenu($event)"
     />
   `,
   imports: [MenuPage],

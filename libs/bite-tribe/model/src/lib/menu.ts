@@ -9,7 +9,7 @@ interface ExtraItem {
   price: number;
 }
 
-interface Category {
+export interface Category {
   title: string;
   subtitle?: string;
 

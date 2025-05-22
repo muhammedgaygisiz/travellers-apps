@@ -7,10 +7,15 @@ import {
 } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { map, skipWhile, switchMap } from 'rxjs';
+import { map, skipWhile, switchMap, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { menuId } from '../router/selectors';
-import { loadedMenuFromApi, noMenuFound, loadedMenusFromApi } from './actions';
+import {
+  loadedMenuFromApi,
+  noMenuFound,
+  loadedMenusFromApi,
+  saveMenu,
+} from './actions';
 
 @Injectable()
 export class MenuEffects {
@@ -46,4 +51,16 @@ export class MenuEffects {
       )
     );
   });
+
+  saveMenuToFirestore$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(saveMenu),
+        tap(({ menu }) => {
+          this.api.saveMenu(menu);
+        })
+      );
+    },
+    { dispatch: false }
+  );
 }

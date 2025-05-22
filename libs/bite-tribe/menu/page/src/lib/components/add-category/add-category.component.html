@@ -1,10 +1,18 @@
 <ion-list>
-  <ion-item>
-    <ion-input label="Title" />
-  </ion-item>
-  <ion-item>
-    <ion-input label="Subtitle" />
-  </ion-item>
+  <form [formGroup]="newCategoryForm">
+    <ion-item>
+      <ion-input label="Title" formControlName="title" />
+    </ion-item>
+    <ion-item>
+      <ion-input label="Subtitle" formControlName="subtitle" />
+    </ion-item>
+  </form>
 
-  <ion-button expand="block" class="ion-margin-top">Add Category</ion-button>
+  <ion-button
+    class="ion-margin-top"
+    [disabled]="isInvalid()"
+    (click)="onAddCategory()"
+  >
+    Add Category
+  </ion-button>
 </ion-list>

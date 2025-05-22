@@ -1,0 +1,47 @@
+@let categoryData = linkedCategory();
+
+<div class="menu-category">
+  <h2>{{ categoryData?.title }}</h2>
+  @if (categoryData?.subtitle) {
+  <p class="subtitle">{{ categoryData?.subtitle }}</p>
+  } @if(categoryData?.items?.length) { @for (item of categoryData?.items; track
+  item.name) {
+  <div class="menu-item">
+    <div class="item-details">
+      <h3>{{ item.name }}</h3>
+      <p>{{ item.description }}</p>
+    </div>
+    <div class="price-actions">
+      <div class="price">{{ item.price }}€</div>
+      @if(!editMode()) {
+      <ion-button
+        size="small"
+        fill="clear"
+        (click)="createBiteClick.emit(item)"
+      >
+        Create Bite
+      </ion-button>
+      }
+    </div>
+  </div>
+  }
+
+  <ng-container [ngTemplateOutlet]="addItem" />
+  } @else {
+  <div class="menu-placeholder">
+    <p>No items in this category yet.</p>
+  </div>
+
+  <ng-container [ngTemplateOutlet]="addItem" />
+  }
+</div>
+
+<ng-template #addItem>
+  @if(shouldShowAddItem()) {
+  <add-item (addItem)="onAddItem($event)" />
+  } @if(editMode() && !shouldShowAddItem()) {
+  <ion-button (click)="showAddItem()" class="ion-margin-top">
+    Add Item
+  </ion-button>
+  }
+</ng-template>

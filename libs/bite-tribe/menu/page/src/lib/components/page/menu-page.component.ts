@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   input,
+  output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonContent, IonImg } from '@ionic/angular/standalone';
@@ -25,6 +26,8 @@ export class MenuPage {
   menu = input<Menu>();
 
   editMode = input(false, { transform: booleanAttribute });
+
+  saveMenu = output<Menu>();
 
   placeName = computed(() => {
     const bite = this.bite();

@@ -477,4 +477,13 @@ export class BiteTribeApiService {
       );
     }
   }
+
+  async saveMenu(menu: Menu) {
+    await FirebaseFirestore.updateDocument({
+      reference: `${MENU_COLLECTION}/${menu.id}`,
+      data: {
+        categories: menu.categories,
+      },
+    });
+  }
 }

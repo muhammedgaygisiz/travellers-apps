@@ -1,11 +1,13 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
-  OnInit,
   effect,
+  ElementRef,
   input,
+  OnDestroy,
   output,
+  viewChild,
 } from '@angular/core';
 import * as L from 'leaflet';
 
@@ -37,58 +39,63 @@ L.Marker.prototype.options.icon = iconDefault;
   styleUrl: './map.component.scss',
   templateUrl: './map.component.html',
 })
-export class MapComponent implements OnInit, OnDestroy {
+export class MapComponent implements OnDestroy {
   position = input<{ latitude: number; longitude: number }>();
   positionSelected = output<Position>();
 
   private map!: L.Map;
   private marker: L.Marker | null = null;
 
-  positionChangeEffect = effect(() => {
-    const newPosition = this.position();
+  private readonly mapChild = viewChild<ElementRef>('map');
 
-    if (newPosition) {
-      this.updateMarker(newPosition);
-      this.map.setView([newPosition.latitude, newPosition.longitude], 13);
+  createMapEffect = afterRenderEffect(() => {
+    const mapElement = this.mapChild();
+
+    if (mapElement && !this.map) {
+      this.map = L.map(mapElement.nativeElement);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors',
+      }).addTo(this.map);
+
+      const newPosition = this.position();
+      if (newPosition) {
+        this.updateMarker(newPosition);
+        this.map.setView([newPosition.latitude, newPosition.longitude], 15);
+      } else {
+        this.map.setView([0, 0], 2);
+      }
+
+      // this.map.on('click', (e: L.LeafletMouseEvent) => {
+      //   const position: Position = {
+      //     latitude: e.latlng.lat,
+      //     longitude: e.latlng.lng,
+      //   };
+      //   this.updateMarker(position);
+      //   this.positionSelected.emit(position);
+      // });
+
+      // Force a map redraw
+      setTimeout(() => {
+        this.map.invalidateSize();
+      }, 0);
     }
   });
 
-  ngOnInit() {
-    this.initializeMap();
-  }
+  setPositionEffect = effect(() => {
+    const newPosition = this.position();
+
+    if (this.map && newPosition) {
+      this.updateMarker(newPosition);
+      this.map.setView([newPosition.latitude, newPosition.longitude], 15);
+    }
+  });
 
   ngOnDestroy() {
     if (this.map) {
       this.map.remove();
     }
-  }
-
-  private initializeMap() {
-    this.map = L.map('map').setView([0, 0], 2);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap contributors',
-    }).addTo(this.map);
-
-    // Set initial view and zoom if position is available
-    const initialPosition = this.position();
-    if (initialPosition) {
-      this.updateMarker(initialPosition);
-      this.centerMap(initialPosition);
-    } else {
-      this.map.setView([0, 0], 2);
-    }
-
-    // Add click handler to the map
-    this.map.on('click', (e: L.LeafletMouseEvent) => {
-      const position: Position = {
-        latitude: e.latlng.lat,
-        longitude: e.latlng.lng,
-      };
-      this.updateMarker(position);
-      this.positionSelected.emit(position);
-    });
   }
 
   private updateMarker(position: Position) {
@@ -98,9 +105,5 @@ export class MapComponent implements OnInit, OnDestroy {
     this.marker = L.marker([position.latitude, position.longitude]).addTo(
       this.map
     );
-  }
-
-  private centerMap(position: Position) {
-    this.map.setView([position.latitude, position.longitude], 15);
   }
 }

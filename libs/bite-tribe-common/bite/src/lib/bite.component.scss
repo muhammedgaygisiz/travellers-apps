@@ -22,7 +22,7 @@
   }
 
   .card-image {
-    flex: 0 0 150px;
+    flex: 0 0 50%;
 
     img {
       width: 100%;
@@ -32,7 +32,8 @@
   }
 
   .card-details {
-    flex: 1;
+    flex: 0 0 50%;
+
     display: flex;
     flex-direction: column;
 
@@ -41,6 +42,12 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+    }
+  }
+
+  .bite-title {
+    @media (max-width: 768px) {
+      font-size: 1.25rem;
     }
   }
 

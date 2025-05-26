@@ -18,6 +18,12 @@
         "tsConfig": "apps/bite-tribe/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
+          "apps/bite-tribe/src/manifest.webmanifest",
+          {
+            "input": "node_modules/leaflet/dist/images",
+            "glob": "**/*",
+            "output": "assets/leaflet"
+          },
           {
             "glob": "**/*",
             "input": "apps/bite-tribe/public"
@@ -30,7 +36,9 @@
         "stylePreprocessorOptions": {
           "includePaths": ["libs/bite-tribe-common/styles"]
         },
-        "scripts": []
+        "scripts": [],
+        "serviceWorker": true,
+        "ngswConfigPath": "apps/bite-tribe/ngsw-config.json"
       },
       "configurations": {
         "production": {
@@ -89,7 +97,7 @@
       "options": {
         "buildTarget": "bite-tribe:build",
         "port": 4200,
-        "staticFilePath": "dist/apps/bite-tribe/browser",
+        "staticFilePath": "dist/apps/bite-tribe",
         "spa": true
       }
     }

@@ -5,7 +5,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { provideRouter } from '@angular/router';
 import { Camera } from '@capacitor/camera';
-import { signal } from '@angular/core';
+import { ComponentRef, signal } from '@angular/core';
 import * as compressFileModuleMock from 'image-compression';
 import { addIcons } from 'ionicons';
 import { imageOutline } from 'ionicons/icons';
@@ -17,6 +17,7 @@ jest.mock('image-compression', () => ({
 
 describe('BitePage', () => {
   let component: BitePage;
+  let componentRef: ComponentRef<BitePage>;
   let fixture: ComponentFixture<BitePage>;
   let platformMock: Partial<Platform>;
   let originalConsoleError: typeof console.error;
@@ -53,6 +54,7 @@ describe('BitePage', () => {
 
     fixture = TestBed.createComponent(BitePage);
     component = fixture.componentInstance;
+    componentRef = fixture.componentRef;
     fixture.detectChanges();
   });
 
@@ -90,6 +92,8 @@ describe('BitePage', () => {
       tags: 'fish healthy',
       price: 9.99,
       currency: 'EUR',
+      latitude: 0,
+      longitude: 0,
     };
 
     const emitSpy = jest.spyOn(component.submitNewBite, 'emit');
@@ -222,6 +226,59 @@ describe('BitePage', () => {
       component.onImageUploadClick();
 
       expect(consoleSpy).toHaveBeenCalledWith('File upload element not found');
+    });
+  });
+
+  describe('Initialization effects', () => {
+    it('should set currency when input is provided', () => {
+      const testCurrency = 'USD';
+      componentRef.setInput('currency', testCurrency);
+      fixture.detectChanges();
+
+      expect(component.biteFormGroup.controls['currency'].value).toBe(
+        testCurrency
+      );
+    });
+
+    it('should set position when input is provided', () => {
+      const testPosition = { latitude: 42, longitude: 24 };
+      componentRef.setInput('position', testPosition);
+      fixture.detectChanges();
+
+      expect(component.biteFormGroup.controls['latitude'].value).toBe(
+        testPosition.latitude
+      );
+      expect(component.biteFormGroup.controls['longitude'].value).toBe(
+        testPosition.longitude
+      );
+    });
+  });
+
+  describe('clearImage', () => {
+    it('should reset image control and clear file input value', () => {
+      // Setup
+      const mockFileInput = { nativeElement: { value: 'test' } };
+      (component as any)['fileUpload'] = signal(mockFileInput);
+      component.biteFormGroup.controls['image'].patchValue('test-image');
+
+      // Act
+      component.clearImage();
+
+      // Assert
+      expect(component.biteFormGroup.controls['image'].value).toBe(null);
+      expect(mockFileInput.nativeElement.value).toBe('');
+    });
+
+    it('should handle clearing image when file input is not available', () => {
+      // Setup
+      (component as any)['fileUpload'] = signal(null);
+      component.biteFormGroup.controls['image'].patchValue('test-image');
+
+      // Act
+      component.clearImage();
+
+      // Assert
+      expect(component.biteFormGroup.controls['image'].value).toBe(null);
     });
   });
 });

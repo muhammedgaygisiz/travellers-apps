@@ -7,7 +7,7 @@ import { HomeService } from './home.service';
   template: `
     <bt-home
       class="ion-page"
-      [bites]="service.bites()"
+      [bites]="service.myBites()"
       [userId]="service.userId()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
@@ -20,6 +20,6 @@ import { HomeService } from './home.service';
   `,
   imports: [BiteTribeHomeComponent],
 })
-export class HomeContainerComponent {
+export class MyBitesContainerComponent {
   service = inject(HomeService);
 }

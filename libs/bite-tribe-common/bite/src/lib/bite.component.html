@@ -17,7 +17,10 @@
             <ion-card-title
               class="link-title ion-padding-bottom"
               (click)="biteClick.emit(biteData)"
-              >{{ biteData?.name }}
+            >
+              <span class="bite-title">
+                {{ biteData?.name }}
+              </span>
             </ion-card-title>
           </ion-card-header>
 

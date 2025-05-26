@@ -12,14 +12,17 @@
       <h1>{{ biteData?.name }}</h1>
 
       <div class="fields ion-margin-bottom">
-        <span
-          >{{ biteData?.place }} · {{ biteData?.distance | toMetric }}
-        </span>
+        <span>{{ biteData?.place }} · {{ biteData?.distance | toMetric }}</span>
+
         @if (biteData?.price) {
-        <span class="price"
-          >{{ biteData?.price | currency:(biteData?.currency || 'USD') }}</span
-        >
+        <span class="price">
+          {{ biteData?.price | currency:(biteData?.currency || 'USD') }}
+        </span>
         }
+      </div>
+
+      <div class="ion-margin-bottom">
+        <bt-map [position]="biteData?.position" />
       </div>
 
       <div class="ion-margin-bottom">

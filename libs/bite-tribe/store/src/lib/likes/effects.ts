@@ -6,9 +6,13 @@ import {
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
 import { map, switchMap, tap } from 'rxjs';
-import { loadedLikesFromApi } from './actions';
+import {
+  deletedLike,
+  loadedLikesFromApi,
+  removeLike,
+  saveLike,
+} from './actions';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { saveLike, deletedLike, removeLike } from './actions';
 
 @Injectable()
 export class LikeEffects {
@@ -18,7 +22,7 @@ export class LikeEffects {
   loadLikesFromApi$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(ROOT_EFFECTS_INIT),
-      switchMap(() => this.api.likesChannel$),
+      switchMap(() => this.api.allLikes$),
       map((likes) => loadedLikesFromApi({ likes }))
     );
   });

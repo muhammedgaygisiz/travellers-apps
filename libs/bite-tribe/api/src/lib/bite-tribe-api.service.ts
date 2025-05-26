@@ -2,8 +2,11 @@ import { inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import {
   BehaviorSubject,
+  bufferTime,
   EMPTY,
+  filter,
   from,
+  map,
   pipe,
   skipWhile,
   switchMap,
@@ -59,7 +62,17 @@ export class BiteTribeApiService {
     switchMap(() => {
       console.log('#mo - Start Listener for Likes');
 
-      return this.likesChannel$;
+      return this.likesChannel$.pipe(
+        bufferTime(1000),
+        filter((likes) => !!likes.length),
+        map((bufferedLikes) => {
+          console.log(bufferedLikes);
+
+          return bufferedLikes.length
+            ? bufferedLikes.reduce((acc, item) => [...acc, ...item], [])
+            : [];
+        })
+      );
     })
   );
 
@@ -168,7 +181,9 @@ export class BiteTribeApiService {
             ...likeDoc.data,
           })) || [];
 
-        this.likesChannel$.next(likes);
+        if (likes.length) {
+          this.likesChannel$.next(likes);
+        }
       }
     );
   }

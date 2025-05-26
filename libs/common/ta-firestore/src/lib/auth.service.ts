@@ -26,18 +26,14 @@ export class AuthService {
     const currentUser = await FirebaseAuthentication.getCurrentUser();
     this.authStateChange$.next(currentUser);
 
-    FirebaseAuthentication.addListener('authStateChange', (result) => {
+    await FirebaseAuthentication.addListener('authStateChange', (result) => {
       this.authStateChange$.next(result);
     });
   }
 
   isLoggedIn$ = this.authStateChange$.pipe(
     map((authState) => {
-      if (
-        authState &&
-        authState.user &&
-        !process.env['NX_APP_BITE_TRIBE_IS_BUSINESS']
-      ) {
+      if (authState?.user && !process.env['NX_APP_BITE_TRIBE_IS_BUSINESS']) {
         FirebaseAnalytics.setUserId({
           userId: authState.user.uid,
         });

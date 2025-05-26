@@ -3,13 +3,15 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  effect,
+  input,
   output,
 } from '@angular/core';
 import * as L from 'leaflet';
 
 export interface Position {
-  lat: number;
-  lng: number;
+  latitude: number;
+  longitude: number;
 }
 
 // Fix for marker icons
@@ -36,10 +38,20 @@ L.Marker.prototype.options.icon = iconDefault;
   templateUrl: './map.component.html',
 })
 export class MapComponent implements OnInit, OnDestroy {
+  position = input<{ latitude: number; longitude: number }>();
   positionSelected = output<Position>();
 
   private map!: L.Map;
   private marker: L.Marker | null = null;
+
+  positionChangeEffect = effect(() => {
+    const newPosition = this.position();
+
+    if (newPosition) {
+      this.updateMarker(newPosition);
+      this.map.setView([newPosition.latitude, newPosition.longitude], 13);
+    }
+  });
 
   ngOnInit() {
     this.initializeMap();
@@ -59,11 +71,20 @@ export class MapComponent implements OnInit, OnDestroy {
       attribution: '© OpenStreetMap contributors',
     }).addTo(this.map);
 
+    // Set initial view and zoom if position is available
+    const initialPosition = this.position();
+    if (initialPosition) {
+      this.updateMarker(initialPosition);
+      this.centerMap(initialPosition);
+    } else {
+      this.map.setView([0, 0], 2);
+    }
+
     // Add click handler to the map
     this.map.on('click', (e: L.LeafletMouseEvent) => {
       const position: Position = {
-        lat: e.latlng.lat,
-        lng: e.latlng.lng,
+        latitude: e.latlng.lat,
+        longitude: e.latlng.lng,
       };
       this.updateMarker(position);
       this.positionSelected.emit(position);
@@ -74,6 +95,12 @@ export class MapComponent implements OnInit, OnDestroy {
     if (this.marker) {
       this.map.removeLayer(this.marker);
     }
-    this.marker = L.marker([position.lat, position.lng]).addTo(this.map);
+    this.marker = L.marker([position.latitude, position.longitude]).addTo(
+      this.map
+    );
+  }
+
+  private centerMap(position: Position) {
+    this.map.setView([position.latitude, position.longitude], 15);
   }
 }

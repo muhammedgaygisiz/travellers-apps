@@ -20,6 +20,11 @@
         "assets": [
           "apps/bite-tribe/src/manifest.webmanifest",
           {
+            "input": "node_modules/leaflet/dist/images",
+            "glob": "**/*",
+            "output": "assets/leaflet"
+          },
+          {
             "glob": "**/*",
             "input": "apps/bite-tribe/public"
           }

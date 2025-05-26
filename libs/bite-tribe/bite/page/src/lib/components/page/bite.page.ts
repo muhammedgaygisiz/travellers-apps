@@ -29,6 +29,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { compressFile } from 'image-compression';
+import { MapComponent } from 'bite-tribe-common/map';
 
 @Component({
   selector: 'bt-bite',
@@ -45,6 +46,7 @@ import { compressFile } from 'image-compression';
     ReactiveFormsModule,
     IonSelect,
     IonSelectOption,
+    MapComponent,
   ],
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',

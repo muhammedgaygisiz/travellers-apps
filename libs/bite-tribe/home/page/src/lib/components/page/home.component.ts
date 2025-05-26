@@ -32,13 +32,15 @@ import { BiteComponent } from 'bite-tribe-common/bite';
 })
 export class BiteTribeHomeComponent {
   bites = input<any[]>();
+  enableBackButton = input<boolean>(false);
   userId = input<string>();
+  title = input('Bites');
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
   readonly gotoSettings = output();
-  readonly gotoMyBites = output();
 
+  readonly gotoMyBites = output();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();

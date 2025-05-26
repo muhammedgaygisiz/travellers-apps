@@ -7,6 +7,8 @@ import { HomeService } from './home.service';
   template: `
     <bt-home
       class="ion-page"
+      title="My Bites"
+      [enableBackButton]="true"
       [bites]="service.myBites()"
       [userId]="service.userId()"
       (logoutClick)="service.logout()"

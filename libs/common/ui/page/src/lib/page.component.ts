@@ -69,6 +69,8 @@ export class PageComponent {
 
   showSettingsButton = input(false);
 
+  showMyBites = input(false);
+
   fullWidth = input(false);
 
   appTitle = computed(() => {
@@ -104,6 +106,8 @@ export class PageComponent {
 
   public gotoSettings = output();
 
+  public gotoMyBites = output();
+
   public addButtonClick = output<MouseEvent>();
 
   async showMenuPopover($event: MouseEvent) {
@@ -116,10 +120,12 @@ export class PageComponent {
         hideAuthButton: this.hideAuthButton,
         showLanguages: this.showLanguages,
         showSettingsButton: this.showSettingsButton,
+        showMyBites: this.showMyBites,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,
         gotoSettings: this.gotoSettings,
+        gotoMyBites: this.gotoMyBites,
       },
     });
 

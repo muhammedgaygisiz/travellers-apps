@@ -11,6 +11,7 @@ export class BiteDataAccessService {
   private readonly platform = inject(Platform);
 
   currency = toSignal(this.storeService.currencyFromSettings$);
+  position = toSignal(this.storeService.position$);
 
   async submitNewBite(newBite: any) {
     const currentPosition = await getCurrentPosition(this.platform);

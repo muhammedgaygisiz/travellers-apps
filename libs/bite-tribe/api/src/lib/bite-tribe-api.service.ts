@@ -188,11 +188,14 @@ export class BiteTribeApiService {
     );
   }
 
-  saveNewBite(bite: any) {
+  async saveNewBite(bite: any) {
+    const user = await this.getUser();
+
     FirebaseFirestore.addDocument({
       reference: BITE_COLLECTION,
       data: {
         ...bite,
+        userId: user?.uid || '',
       },
     });
   }

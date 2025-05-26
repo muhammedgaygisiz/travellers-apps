@@ -56,6 +56,7 @@ export class BitePage {
   private readonly formBuilder = inject(FormBuilder);
 
   currency = input<string>();
+  position = input<{ latitude: number; longitude: number }>();
 
   submitNewBite = output<typeof this.biteFormGroup.value>();
 
@@ -72,6 +73,15 @@ export class BitePage {
     }
   });
 
+  positionInitFromInputEffect = effect(() => {
+    const position = this.position();
+
+    if (position) {
+      this.biteFormGroup.controls['latitude'].patchValue(position.latitude);
+      this.biteFormGroup.controls['longitude'].patchValue(position.longitude);
+    }
+  });
+
   biteFormGroup = this.formBuilder.group({
     image: ['', Validators.required],
     name: ['', Validators.required],
@@ -79,6 +89,8 @@ export class BitePage {
     price: [null, Validators.required],
     currency: ['EUR', Validators.required],
     tags: [''],
+    latitude: [0, Validators.required],
+    longitude: [0, Validators.required],
   });
 
   imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);
@@ -164,6 +176,14 @@ export class BitePage {
     if (this.biteFormGroup.valid) {
       const newBite = this.biteFormGroup.value;
       this.submitNewBite.emit(newBite);
+    }
+  }
+
+  clearImage() {
+    this.biteFormGroup.controls['image'].reset();
+    const fileUpload = this.fileUpload();
+    if (fileUpload) {
+      fileUpload.nativeElement.value = '';
     }
   }
 }

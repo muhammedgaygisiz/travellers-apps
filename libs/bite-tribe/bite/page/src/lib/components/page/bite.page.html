@@ -16,6 +16,11 @@
     <h1>Create Bite</h1>
 
     <img [src]="imageBase64()" />
+    @if(showImage()) {
+    <div class="ion-text-end">
+      <ion-button fill="clear" (click)="clearImage()">Delete</ion-button>
+    </div>
+    }
 
     <form [formGroup]="biteFormGroup">
       @if(!showImage()) {
@@ -48,6 +53,12 @@
         </ion-item>
         <ion-item>
           <ion-input label="Tags" formControlName="tags" />
+        </ion-item>
+        <ion-item>
+          <ion-input label="Latitude" readonly formControlName="latitude" />
+        </ion-item>
+        <ion-item>
+          <ion-input label="Longitude" readonly formControlName="longitude" />
         </ion-item>
       </ion-list>
 

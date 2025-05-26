@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { Bite } from 'model';
 import { NavController } from '@ionic/angular/standalone';
@@ -12,6 +12,13 @@ export class HomeService {
 
   bites = this.dataAccess.bites;
   userId = this.dataAccess.userId;
+
+  myBites = computed(() => {
+    const bites = this.dataAccess.bites();
+    const userId = this.dataAccess.userId();
+
+    return bites.filter((bite) => bite.userId === userId);
+  });
 
   logout() {
     this.dataAccess.logout();
@@ -55,5 +62,9 @@ export class HomeService {
 
   onGotoSettingsClick() {
     this.navController.navigateForward(['settings']);
+  }
+
+  onGotoMyBitesClick() {
+    this.navController.navigateForward(['my-bites']);
   }
 }

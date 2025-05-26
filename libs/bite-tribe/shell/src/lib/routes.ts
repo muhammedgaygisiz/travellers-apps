@@ -44,6 +44,12 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: 'my-bites',
+    loadComponent: () =>
+      import('bite-tribe/home').then((m) => m.MyBitesContainerComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: '',
     redirectTo: 'start',
     pathMatch: 'full',

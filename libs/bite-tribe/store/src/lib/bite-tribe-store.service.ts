@@ -16,7 +16,7 @@ import { saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Menu, Restaurant, Settings } from 'model';
-import { currency, settings } from './app/selectors';
+import { currency, gpsPosition, settings } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
   setRestaurantToCreate,
@@ -66,6 +66,7 @@ export class BiteTribeStoreService implements StoreService {
   userId = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
   settings$ = this.store.select(settings);
+  position$ = this.store.select(gpsPosition);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());

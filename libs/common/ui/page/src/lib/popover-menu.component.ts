@@ -63,7 +63,12 @@ import { SupportedLang } from 'localization';
         <ion-icon name="log-in-outline" slot="start" />
         Login
       </ion-item>
-      } @else {
+      } @else { @if (showMyBites()) {
+      <ion-item (click)="gotoMyBites.emit()">
+        <ion-icon name="pizza-outline" slot="start" />
+        My Bites
+      </ion-item>
+      }
       <ion-item (click)="gotoSettings.emit()">
         <ion-icon name="settings-outline" slot="start" />
         Settings
@@ -94,11 +99,15 @@ export class PopoverMenuComponent {
 
   showSettingsButton = input<boolean | null>(false);
 
+  showMyBites = input<boolean | null>(false);
+
   loginClick = output();
 
   logoutClick = output();
 
   gotoSettings = output();
+
+  gotoMyBites = output();
 
   languageChangeClick = output<SupportedLang>();
 }

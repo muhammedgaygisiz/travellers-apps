@@ -6,6 +6,7 @@ import { BitePage } from '../components/page/bite.page';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: ` <bt-bite
     [currency]="service.currency()"
+    [position]="service.position()"
     (submitNewBite)="service.submitNewBite($event)"
   />`,
   imports: [BitePage],

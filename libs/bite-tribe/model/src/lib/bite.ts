@@ -1,6 +1,7 @@
 import { Geopoint } from './geopoint';
 
 export interface Bite {
+  userId?: string;
   id: string;
   name: string;
   image: string;

@@ -40,7 +40,7 @@ export class BiteTribeApiService {
   private readonly settingsChannel$ = new BehaviorSubject<Settings>(
     {} as Settings
   );
-  likesChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly likesChannel$ = new BehaviorSubject<any[]>([]);
 
   public allBites$ = this.authService.isLoggedIn$.pipe(
     clearListeners(),
@@ -50,6 +50,16 @@ export class BiteTribeApiService {
       this.startBitesListener();
 
       return this.bitesChannel$;
+    })
+  );
+
+  public allLikes$ = this.authService.isLoggedIn$.pipe(
+    clearListeners(),
+    skipWhile((isLoggedIn) => !isLoggedIn),
+    switchMap(() => {
+      console.log('#mo - Start Listener for Likes');
+
+      return this.likesChannel$;
     })
   );
 

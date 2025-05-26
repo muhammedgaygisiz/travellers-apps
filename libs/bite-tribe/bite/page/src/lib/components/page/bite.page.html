@@ -54,15 +54,11 @@
         <ion-item>
           <ion-input label="Tags" formControlName="tags" />
         </ion-item>
-        <ion-item>
-          <ion-input label="Latitude" readonly formControlName="latitude" />
-        </ion-item>
-        <ion-item>
-          <ion-input label="Longitude" readonly formControlName="longitude" />
-        </ion-item>
       </ion-list>
 
-      <bt-map [position]="position()" />
+      <div class="ion-padding-top">
+        <bt-map [position]="position()" />
+      </div>
 
       <ion-button
         expand="block"

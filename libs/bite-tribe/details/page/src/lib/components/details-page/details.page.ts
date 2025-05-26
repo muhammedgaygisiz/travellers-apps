@@ -27,6 +27,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
 import { ToMetricPipe } from 'distance-pipe';
+import { MapComponent } from 'bite-tribe-common/map';
 
 @Component({
   selector: 'details-page',
@@ -51,6 +52,7 @@ import { ToMetricPipe } from 'distance-pipe';
     TimeAgoPipe,
     IonText,
     ToMetricPipe,
+    MapComponent,
   ],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix

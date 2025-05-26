@@ -90,6 +90,8 @@ describe('BitePage', () => {
       tags: 'fish healthy',
       price: 9.99,
       currency: 'EUR',
+      latitude: 0,
+      longitude: 0,
     };
 
     const emitSpy = jest.spyOn(component.submitNewBite, 'emit');

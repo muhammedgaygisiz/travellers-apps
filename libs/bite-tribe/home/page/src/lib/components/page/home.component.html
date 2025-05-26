@@ -5,6 +5,7 @@
   [showSettingsButton]="true"
   [showMyBites]="true"
   [fullWidth]="true"
+  [enableBackButton]="enableBackButton()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
   (gotoSettings)="gotoSettings.emit()"
@@ -13,7 +14,7 @@
   <ion-content class="ion-padding">
     <div class="desktop-layout">
       <div class="filters-column">
-        <h1>Bites</h1>
+        <h1>{{ title() }}</h1>
 
         <div class="chip-container">
           <ion-chip>Map View</ion-chip>

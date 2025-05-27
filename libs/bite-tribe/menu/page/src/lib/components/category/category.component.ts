@@ -31,6 +31,7 @@ export class CategoryComponent {
   addItemToCategory = output<{
     item: MenuItem;
     category: Category;
+    isVariant?: boolean;
   }>();
 
   presentShowAddItem = signal(false);
@@ -44,12 +45,12 @@ export class CategoryComponent {
 
   createBiteClick = output<MenuItem>();
 
-  onAddItem(item: MenuItem) {
+  onAddItem(item: MenuItem, isVariant?: boolean) {
     this.presentShowAddItem.set(false);
 
     const category = this.linkedCategory();
     if (category) {
-      this.addItemToCategory.emit({ item, category });
+      this.addItemToCategory.emit({ item, category, isVariant });
     }
   }
 
@@ -59,5 +60,9 @@ export class CategoryComponent {
 
   onCancelAddItem() {
     this.presentShowAddItem.set(false);
+  }
+
+  onAddVariant(menuItem: MenuItem) {
+    this.onAddItem(menuItem, true);
   }
 }

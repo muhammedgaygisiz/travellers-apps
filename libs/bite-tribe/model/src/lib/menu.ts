@@ -1,7 +1,10 @@
 export interface MenuItem {
   name: string;
   description: string;
+  ingredients?: string;
+  notes?: string;
   price: number;
+  variants?: MenuItem[];
 }
 
 interface ExtraItem {

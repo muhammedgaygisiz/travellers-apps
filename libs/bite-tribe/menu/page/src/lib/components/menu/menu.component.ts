@@ -70,17 +70,37 @@ export class MenuComponent {
     }
   }
 
-  onAddItemToCategory($event: { item: MenuItem; category: Category }) {
+  onAddItemToCategory($event: {
+    item: MenuItem;
+    category: Category;
+    isVariant?: boolean;
+  }) {
     this.linkedMenu.update((currMenu) => {
       if (currMenu) {
         return {
           ...currMenu,
           categories: currMenu.categories.map((category) => {
             if (category.title === $event.category.title) {
+              if (!$event.isVariant) {
+                return {
+                  ...category,
+                  items: [...(category.items || []), $event.item],
+                } as Category;
+              }
+
               return {
                 ...category,
-                items: [...(category.items || []), $event.item],
-              } as Category;
+                items: category.items.map((item) => {
+                  if (item.name === $event.item.name) {
+                    return {
+                      ...item,
+                      variants: [...($event.item.variants || [])],
+                    } as MenuItem;
+                  }
+
+                  return item;
+                }),
+              };
             }
 
             return category;

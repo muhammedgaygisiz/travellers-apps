@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BitePage } from '../bite.page';
 import { Platform } from '@ionic/angular';
@@ -8,7 +9,12 @@ import { Camera } from '@capacitor/camera';
 import { ComponentRef, signal } from '@angular/core';
 import * as compressFileModuleMock from 'image-compression';
 import { addIcons } from 'ionicons';
-import { imageOutline } from 'ionicons/icons';
+import {
+  arrowBackOutline,
+  imageOutline,
+  pricetagOutline,
+} from 'ionicons/icons';
+import * as exifUtils from '../utils/get-exif-data';
 
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
@@ -26,7 +32,6 @@ describe('BitePage', () => {
     platformMock = {
       is: jest.fn((key: string) => key === 'web'),
       backButton: {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
         subscribeWithPriority: () => {},
       } as any,
     };
@@ -39,6 +44,8 @@ describe('BitePage', () => {
 
     addIcons({
       imageOutline,
+      pricetagOutline,
+      arrowBackOutline,
     });
 
     Camera.getPhoto = jest.fn();
@@ -281,6 +288,78 @@ describe('BitePage', () => {
 
       // Assert
       expect(component.biteFormGroup.controls['image'].value).toBe(null);
+    });
+  });
+
+  describe('getGpsPositionFromFile', () => {
+    let getExifDataSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      getExifDataSpy = jest.spyOn(exifUtils, 'getExifData');
+    });
+
+    afterEach(() => {
+      getExifDataSpy.mockRestore();
+    });
+
+    it('should update form and positionToUse when EXIF data is found', async () => {
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      getExifDataSpy.mockResolvedValue({ latitude: 12.34, longitude: 56.78 });
+
+      const bitePage = component;
+      await (bitePage as any).getGpsPositionFromFile(file);
+
+      expect(
+        bitePage.biteFormGroup.controls['position'].controls['latitude'].value
+      ).toBe(12.34);
+      expect(
+        bitePage.biteFormGroup.controls['position'].controls['longitude'].value
+      ).toBe(56.78);
+      expect(bitePage.positionToUse()).toEqual({
+        latitude: 12.34,
+        longitude: 56.78,
+      });
+    });
+
+    it('should not update form when EXIF data is missing', async () => {
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      getExifDataSpy.mockResolvedValue({});
+
+      const bitePage = component;
+      bitePage.biteFormGroup.controls['position'].controls[
+        'latitude'
+      ].patchValue(1);
+      bitePage.biteFormGroup.controls['position'].controls[
+        'longitude'
+      ].patchValue(2);
+
+      await (bitePage as any).getGpsPositionFromFile(file);
+
+      expect(
+        bitePage.biteFormGroup.controls['position'].controls['latitude'].value
+      ).toBe(1);
+      expect(
+        bitePage.biteFormGroup.controls['position'].controls['longitude'].value
+      ).toBe(2);
+    });
+
+    it('should warn if getExifData throws', async () => {
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      getExifDataSpy.mockRejectedValue(new Error('fail'));
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await (component as any).getGpsPositionFromFile(file);
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Error reading GPS position from file:',
+        expect.any(Error)
+      );
+      warnSpy.mockRestore();
+    });
+
+    it('should do nothing if file is undefined', async () => {
+      await (component as any).getGpsPositionFromFile(undefined);
+      expect(getExifDataSpy).not.toHaveBeenCalled();
     });
   });
 });

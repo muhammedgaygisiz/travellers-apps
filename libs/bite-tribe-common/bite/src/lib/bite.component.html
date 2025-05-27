@@ -31,6 +31,10 @@
               [userId]="userId()"
               (likeButtonClick)="likeButtonClick.emit($event)"
             />
+
+            @if(showEditButton()) {
+            <ion-button>Edit</ion-button>
+            }
           </ion-card-content>
         </div>
       </div>

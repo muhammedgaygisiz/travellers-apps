@@ -6,6 +6,7 @@ import {
   output,
 } from '@angular/core';
 import {
+  IonButton,
   IonCard,
   IonCardContent,
   IonCardHeader,
@@ -30,6 +31,7 @@ import { LikesComponent } from './likes/likes.component';
     IonCardTitle,
     ToMetricPipe,
     LikesComponent,
+    IonButton,
   ],
   providers: [PopoverController],
   changeDetection: ChangeDetectionStrategy.OnPush,

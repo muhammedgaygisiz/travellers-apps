@@ -3,11 +3,31 @@
 <div class="menu-item">
   <div class="item-details">
     <h3>{{ itemData?.name }}</h3>
+
     <p>{{ itemData?.description }}</p>
+
+    @if (itemData?.ingredients) {
+    <p>{{ itemData?.ingredients }}</p>
+    } @if (itemData?.notes) {
+    <p>{{ itemData?.notes }}</p>
+    } @if(shouldShowAddVariant()) {
+    <add-item (addItem)="onAddVariant($event)" />
+    } @if(itemData?.variants?.length) {
+    <div class="ion-margin-top">
+      @for(variant of itemData?.variants; track $index) {
+      <menu-item [item]="variant" [editMode]="editMode()" isVariant />
+      }
+    </div>
+    } @if (!isVariant() && editMode()) {
+    <ion-button class="ion-margin-top" (click)="onAddVariantClick()">
+      Add Variant
+    </ion-button>
+    }
   </div>
   <div class="price-actions">
+    @if (itemData?.price !== 0) {
     <div class="price">{{ itemData?.price }}€</div>
-    @if(!editMode()) {
+    } @if (shouldShowCreateBite()) {
     <ion-button size="small" fill="clear" (click)="onCreateBiteClick(itemData)">
       Create Bite
     </ion-button>

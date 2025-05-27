@@ -33,6 +33,8 @@ export class AddItemComponent {
   newItemForm = this.formBuilder.group({
     name: ['', Validators.required],
     description: [''],
+    ingredients: [''],
+    notes: [''],
     price: [0, [Validators.required, Validators.min(0)]],
   });
 

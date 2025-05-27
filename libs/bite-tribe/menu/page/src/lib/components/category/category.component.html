@@ -4,9 +4,13 @@
   <h2>{{ categoryData?.title }}</h2>
   @if (categoryData?.subtitle) {
   <p class="subtitle">{{ categoryData?.subtitle }}</p>
-  } @if(categoryData?.items?.length) { @for (item of categoryData?.items; track
+  } @if (categoryData?.items?.length) { @for (item of categoryData?.items; track
   item.name) {
-  <menu-item [item]="item" [editMode]="editMode()" />
+  <menu-item
+    [item]="item"
+    [editMode]="editMode()"
+    (addedVariant)="onAddVariant($event)"
+  />
   }
 
   <ng-container [ngTemplateOutlet]="addItem" />
@@ -20,9 +24,9 @@
 </div>
 
 <ng-template #addItem>
-  @if(shouldShowAddItem()) {
+  @if (shouldShowAddItem()) {
   <add-item (addItem)="onAddItem($event)" (cancelAddItem)="onCancelAddItem()" />
-  } @if(editMode() && !shouldShowAddItem()) {
+  } @if (editMode() && !shouldShowAddItem()) {
   <ion-button (click)="showAddItem()" class="ion-margin-top">
     Add Item
   </ion-button>

@@ -26,21 +26,11 @@
 
           <ion-card-content>
             {{ biteData?.distance | toMetric }}
-            <div class="like-container ion-padding-top">
-              <ion-chip
-                class="{{ calcClass() }}"
-                (click)="openLikeOptions($event)"
-              >
-                @if (biteData?.likes?.length) { @for (emoji of getLikeEmojis();
-                track emoji) {
-                <ion-label class="like">{{ emoji }}</ion-label>
-                }
-                <ion-badge>{{ biteData.likes?.length }}</ion-badge>
-                } @else {
-                <ion-label>👍</ion-label>
-                }
-              </ion-chip>
-            </div>
+            <bt-likes
+              [bite]="biteData"
+              [userId]="userId()"
+              (likeButtonClick)="likeButtonClick.emit($event)"
+            />
           </ion-card-content>
         </div>
       </div>

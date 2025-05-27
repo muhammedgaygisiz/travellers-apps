@@ -177,7 +177,7 @@ export class BitePage {
   async onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
 
-    this.getGpsPositionFromFile(file);
+    await this.getGpsPositionFromFile(file);
 
     if (file) {
       const compressedFile = await compressFile(file);

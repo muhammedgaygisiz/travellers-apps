@@ -66,6 +66,7 @@
     "cordova-plugin-geolocation": "5.0.0",
     "d3": "7.9.0",
     "dexie": "4.0.11",
+    "exif-js": "github:exif-js/exif-js",
     "firebase": "11.6.0",
     "flag-icons": "7.3.2",
     "leaflet": "^1.9.4",

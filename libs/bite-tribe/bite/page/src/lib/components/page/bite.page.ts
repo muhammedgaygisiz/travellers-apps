@@ -6,6 +6,7 @@ import {
   ElementRef,
   inject,
   input,
+  linkedSignal,
   output,
   signal,
   viewChild,
@@ -30,6 +31,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { compressFile } from 'image-compression';
 import { MapComponent } from 'bite-tribe-common/map';
+import EXIF from 'exif-js';
 
 @Component({
   selector: 'bt-bite',
@@ -60,6 +62,10 @@ export class BitePage {
   currency = input<string>();
   position = input<{ latitude: number; longitude: number }>();
 
+  positionToUse = linkedSignal(() => {
+    return this.position();
+  });
+
   submitNewBite = output<typeof this.biteFormGroup.value>();
 
   private readonly fileUpload =
@@ -76,11 +82,15 @@ export class BitePage {
   });
 
   positionInitFromInputEffect = effect(() => {
-    const position = this.position();
+    const position = this.positionToUse();
 
     if (position) {
-      this.biteFormGroup.controls['latitude'].patchValue(position.latitude);
-      this.biteFormGroup.controls['longitude'].patchValue(position.longitude);
+      this.biteFormGroup.controls['position'].controls['latitude'].patchValue(
+        position.latitude
+      );
+      this.biteFormGroup.controls['position'].controls['longitude'].patchValue(
+        position.longitude
+      );
     }
   });
 
@@ -91,8 +101,10 @@ export class BitePage {
     price: [null, Validators.required],
     currency: ['EUR', Validators.required],
     tags: [''],
-    latitude: [0, Validators.required],
-    longitude: [0, Validators.required],
+    position: this.formBuilder.group({
+      latitude: [0, Validators.required],
+      longitude: [0, Validators.required],
+    }),
   });
 
   imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);
@@ -164,6 +176,9 @@ export class BitePage {
 
   async onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
+
+    this.getGpsPositionFromFile(file);
+
     if (file) {
       const compressedFile = await compressFile(file);
 
@@ -190,5 +205,69 @@ export class BitePage {
     if (fileUpload) {
       fileUpload.nativeElement.value = '';
     }
+  }
+
+  private async getGpsPositionFromFile(file: File | undefined) {
+    if (file) {
+      try {
+        const exifData = await this.getExifData(file);
+
+        if (exifData?.latitude && exifData?.longitude) {
+          this.biteFormGroup.controls['position'].controls[
+            'latitude'
+          ].patchValue(exifData.latitude);
+          this.biteFormGroup.controls['position'].controls[
+            'longitude'
+          ].patchValue(exifData.longitude);
+
+          this.positionToUse.set({
+            latitude: exifData.latitude,
+            longitude: exifData.longitude,
+          });
+        }
+      } catch (e) {
+        console.warn('Error reading GPS position from file:', e);
+      }
+    }
+  }
+
+  private async getExifData(
+    file: File
+  ): Promise<{ latitude: number; longitude: number }> {
+    return new Promise((resolve, reject) => {
+      type EXIFThis = {
+        exifData: {
+          GPSLatitude?: number[];
+          GPSLatitudeRef?: string;
+          GPSLongitude?: number[];
+          GPSLongitudeRef?: string;
+        };
+      };
+
+      // eslint-disable-next-line no-unused-vars
+      EXIF.getData(file as unknown as string, function (this: EXIFThis) {
+        // Use regular function to maintain proper 'this' context
+        try {
+          const lat = EXIF.getTag(this, 'GPSLatitude');
+          const latRef = EXIF.getTag(this, 'GPSLatitudeRef');
+          const long = EXIF.getTag(this, 'GPSLongitude');
+          const longRef = EXIF.getTag(this, 'GPSLongitudeRef');
+
+          if (lat && latRef && long && longRef) {
+            // Define convertDMSToDD inline to avoid 'this' binding issues
+            const convertDMSToDD = (dms: number[]): number =>
+              dms[0] + dms[1] / 60 + dms[2] / 3600;
+
+            const latitude = (latRef === 'N' ? 1 : -1) * convertDMSToDD(lat);
+            const longitude = (longRef === 'E' ? 1 : -1) * convertDMSToDD(long);
+            resolve({ latitude, longitude });
+          } else {
+            resolve({ latitude: 0, longitude: 0 }); // Provide default values instead of rejecting
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
   }
 }

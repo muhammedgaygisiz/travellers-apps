@@ -31,7 +31,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { compressFile } from 'image-compression';
 import { MapComponent } from 'bite-tribe-common/map';
-import EXIF from 'exif-js';
+import { getExifData } from './utils/get-exif-data';
 
 @Component({
   selector: 'bt-bite',
@@ -210,7 +210,7 @@ export class BitePage {
   private async getGpsPositionFromFile(file: File | undefined) {
     if (file) {
       try {
-        const exifData = await this.getExifData(file);
+        const exifData = await getExifData(file);
 
         if (exifData?.latitude && exifData?.longitude) {
           this.biteFormGroup.controls['position'].controls[
@@ -229,45 +229,5 @@ export class BitePage {
         console.warn('Error reading GPS position from file:', e);
       }
     }
-  }
-
-  private async getExifData(
-    file: File
-  ): Promise<{ latitude: number; longitude: number }> {
-    return new Promise((resolve, reject) => {
-      type EXIFThis = {
-        exifData: {
-          GPSLatitude?: number[];
-          GPSLatitudeRef?: string;
-          GPSLongitude?: number[];
-          GPSLongitudeRef?: string;
-        };
-      };
-
-      // eslint-disable-next-line no-unused-vars
-      EXIF.getData(file as unknown as string, function (this: EXIFThis) {
-        // Use regular function to maintain proper 'this' context
-        try {
-          const lat = EXIF.getTag(this, 'GPSLatitude');
-          const latRef = EXIF.getTag(this, 'GPSLatitudeRef');
-          const long = EXIF.getTag(this, 'GPSLongitude');
-          const longRef = EXIF.getTag(this, 'GPSLongitudeRef');
-
-          if (lat && latRef && long && longRef) {
-            // Define convertDMSToDD inline to avoid 'this' binding issues
-            const convertDMSToDD = (dms: number[]): number =>
-              dms[0] + dms[1] / 60 + dms[2] / 3600;
-
-            const latitude = (latRef === 'N' ? 1 : -1) * convertDMSToDD(lat);
-            const longitude = (longRef === 'E' ? 1 : -1) * convertDMSToDD(long);
-            resolve({ latitude, longitude });
-          } else {
-            resolve({ latitude: 0, longitude: 0 }); // Provide default values instead of rejecting
-          }
-        } catch (error) {
-          reject(error);
-        }
-      });
-    });
   }
 }

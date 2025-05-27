@@ -11,6 +11,7 @@ import { HomeService } from './home.service';
       [enableBackButton]="true"
       [bites]="service.myBites()"
       [userId]="service.userId()"
+      editableBites
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"

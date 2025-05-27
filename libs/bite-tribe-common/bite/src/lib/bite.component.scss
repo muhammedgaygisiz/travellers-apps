@@ -1,19 +1,6 @@
 :host {
   .container {
     position: relative;
-
-    .like-container {
-      display: flex;
-      justify-content: flex-end;
-
-      ion-chip.liked {
-        background-color: var(--ion-color-primary);
-      }
-
-      ion-label.like {
-        margin-right: 8px;
-      }
-    }
   }
 
   .card-content {

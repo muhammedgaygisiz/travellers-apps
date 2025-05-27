@@ -6,6 +6,7 @@ import {
   ElementRef,
   inject,
   input,
+  linkedSignal,
   output,
   signal,
   viewChild,
@@ -30,6 +31,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { compressFile } from 'image-compression';
 import { MapComponent } from 'bite-tribe-common/map';
+import { getExifData } from './utils/get-exif-data';
 
 @Component({
   selector: 'bt-bite',
@@ -60,6 +62,10 @@ export class BitePage {
   currency = input<string>();
   position = input<{ latitude: number; longitude: number }>();
 
+  positionToUse = linkedSignal(() => {
+    return this.position();
+  });
+
   submitNewBite = output<typeof this.biteFormGroup.value>();
 
   private readonly fileUpload =
@@ -76,11 +82,15 @@ export class BitePage {
   });
 
   positionInitFromInputEffect = effect(() => {
-    const position = this.position();
+    const position = this.positionToUse();
 
     if (position) {
-      this.biteFormGroup.controls['latitude'].patchValue(position.latitude);
-      this.biteFormGroup.controls['longitude'].patchValue(position.longitude);
+      this.biteFormGroup.controls['position'].controls['latitude'].patchValue(
+        position.latitude
+      );
+      this.biteFormGroup.controls['position'].controls['longitude'].patchValue(
+        position.longitude
+      );
     }
   });
 
@@ -91,8 +101,10 @@ export class BitePage {
     price: [null, Validators.required],
     currency: ['EUR', Validators.required],
     tags: [''],
-    latitude: [0, Validators.required],
-    longitude: [0, Validators.required],
+    position: this.formBuilder.group({
+      latitude: [0, Validators.required],
+      longitude: [0, Validators.required],
+    }),
   });
 
   imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);
@@ -115,20 +127,24 @@ export class BitePage {
   onImageUploadClick() {
     if (!this.imageBase64()) {
       if (this.isWeb()) {
-        const fileUpload = this.fileUpload();
-
-        if (!fileUpload) {
-          console.error('File upload element not found');
-          return;
-        }
-
-        fileUpload.nativeElement.click();
-
-        return;
+        this.clickOnFileUploader();
       }
 
       this.takePhoto();
     }
+  }
+
+  private clickOnFileUploader() {
+    const fileUpload = this.fileUpload();
+
+    if (!fileUpload) {
+      console.error('File upload element not found');
+      return;
+    }
+
+    fileUpload.nativeElement.click();
+
+    return;
   }
 
   async takePhoto() {
@@ -141,13 +157,12 @@ export class BitePage {
   private async takePictureOnNative() {
     try {
       await Camera.requestPermissions();
-      await Camera.requestPermissions();
 
       const image = await Camera.getPhoto({
         quality: 90,
         allowEditing: true,
         resultType: CameraResultType.Base64,
-        source: CameraSource.Camera,
+        source: CameraSource.Prompt,
       });
 
       this.biteFormGroup.controls['image'].patchValue(
@@ -161,6 +176,9 @@ export class BitePage {
 
   async onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
+
+    await this.getGpsPositionFromFile(file);
+
     if (file) {
       const compressedFile = await compressFile(file);
 
@@ -186,6 +204,30 @@ export class BitePage {
     const fileUpload = this.fileUpload();
     if (fileUpload) {
       fileUpload.nativeElement.value = '';
+    }
+  }
+
+  private async getGpsPositionFromFile(file: File | undefined) {
+    if (file) {
+      try {
+        const exifData = await getExifData(file);
+
+        if (exifData?.latitude && exifData?.longitude) {
+          this.biteFormGroup.controls['position'].controls[
+            'latitude'
+          ].patchValue(exifData.latitude);
+          this.biteFormGroup.controls['position'].controls[
+            'longitude'
+          ].patchValue(exifData.longitude);
+
+          this.positionToUse.set({
+            latitude: exifData.latitude,
+            longitude: exifData.longitude,
+          });
+        }
+      } catch (e) {
+        console.warn('Error reading GPS position from file:', e);
+      }
     }
   }
 }

@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   input,
@@ -35,6 +36,8 @@ export class BiteTribeHomeComponent {
   enableBackButton = input<boolean>(false);
   userId = input<string>();
   title = input('Bites');
+
+  editableBites = input(false, { transform: booleanAttribute });
 
   readonly logoutClick = output();
   readonly addButtonClick = output();

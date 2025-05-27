@@ -115,20 +115,24 @@ export class BitePage {
   onImageUploadClick() {
     if (!this.imageBase64()) {
       if (this.isWeb()) {
-        const fileUpload = this.fileUpload();
-
-        if (!fileUpload) {
-          console.error('File upload element not found');
-          return;
-        }
-
-        fileUpload.nativeElement.click();
-
-        return;
+        this.clickOnFileUploader();
       }
 
       this.takePhoto();
     }
+  }
+
+  private clickOnFileUploader() {
+    const fileUpload = this.fileUpload();
+
+    if (!fileUpload) {
+      console.error('File upload element not found');
+      return;
+    }
+
+    fileUpload.nativeElement.click();
+
+    return;
   }
 
   async takePhoto() {
@@ -141,13 +145,12 @@ export class BitePage {
   private async takePictureOnNative() {
     try {
       await Camera.requestPermissions();
-      await Camera.requestPermissions();
 
       const image = await Camera.getPhoto({
         quality: 90,
         allowEditing: true,
         resultType: CameraResultType.Base64,
-        source: CameraSource.Camera,
+        source: CameraSource.Prompt,
       });
 
       this.biteFormGroup.controls['image'].patchValue(

@@ -92,8 +92,10 @@ describe('BitePage', () => {
       tags: 'fish healthy',
       price: 9.99,
       currency: 'EUR',
-      latitude: 0,
-      longitude: 0,
+      position: {
+        latitude: 0,
+        longitude: 0,
+      },
     };
 
     const emitSpy = jest.spyOn(component.submitNewBite, 'emit');
@@ -245,12 +247,12 @@ describe('BitePage', () => {
       componentRef.setInput('position', testPosition);
       fixture.detectChanges();
 
-      expect(component.biteFormGroup.controls['latitude'].value).toBe(
-        testPosition.latitude
-      );
-      expect(component.biteFormGroup.controls['longitude'].value).toBe(
-        testPosition.longitude
-      );
+      expect(
+        component.biteFormGroup.controls['position'].controls['latitude'].value
+      ).toBe(testPosition.latitude);
+      expect(
+        component.biteFormGroup.controls['position'].controls['longitude'].value
+      ).toBe(testPosition.longitude);
     });
   });
 

@@ -19,6 +19,7 @@ import * as exifUtils from '../utils/get-exif-data-from-file';
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
   compressFile: jest.fn(),
+  compressPhoto: jest.fn(),
 }));
 
 describe('BitePage', () => {
@@ -295,7 +296,7 @@ describe('BitePage', () => {
     });
   });
 
-  describe('getGpsPositionFromFile', () => {
+  describe('patchPositionFromFile', () => {
     let getExifDataSpy: jest.SpyInstance;
 
     beforeEach(() => {
@@ -311,7 +312,7 @@ describe('BitePage', () => {
       getExifDataSpy.mockResolvedValue({ latitude: 12.34, longitude: 56.78 });
 
       const bitePage = component;
-      await (bitePage as any).getGpsPositionFromFile(file);
+      await (bitePage as any).patchPositionFromFile(file);
 
       expect(
         bitePage.biteFormGroup.controls['position'].controls['latitude'].value
@@ -337,7 +338,7 @@ describe('BitePage', () => {
         'longitude'
       ].patchValue(2);
 
-      await (bitePage as any).getGpsPositionFromFile(file);
+      await (bitePage as any).patchPositionFromFile(file);
 
       expect(
         bitePage.biteFormGroup.controls['position'].controls['latitude'].value
@@ -352,7 +353,7 @@ describe('BitePage', () => {
       getExifDataSpy.mockRejectedValue(new Error('fail'));
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
-      await (component as any).getGpsPositionFromFile(file);
+      await (component as any).patchPositionFromFile(file);
 
       expect(warnSpy).toHaveBeenCalledWith(
         'Error reading GPS position from file:',
@@ -362,7 +363,7 @@ describe('BitePage', () => {
     });
 
     it('should do nothing if file is undefined', async () => {
-      await (component as any).getGpsPositionFromFile(undefined);
+      await (component as any).patchPositionFromFile(undefined);
       expect(getExifDataSpy).not.toHaveBeenCalled();
     });
   });

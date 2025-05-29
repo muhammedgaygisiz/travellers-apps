@@ -79,4 +79,29 @@ describe('getExifDataFromFile', () => {
     await expect(getExifDataFromFile(mockFile)).rejects.toThrow('EXIF error');
     expect(EXIF.getData).toHaveBeenCalled();
   });
+
+  it('should return fallback position if getTag throws inside getData', async () => {
+    const exifDataMock = {
+      GPSLatitude: [40, 30, 0],
+      GPSLatitudeRef: 'N',
+      GPSLongitude: [74, 0, 0],
+      GPSLongitudeRef: 'E',
+    };
+
+    (EXIF.getTag as jest.Mock).mockImplementation(() => {
+      throw new Error('getTag error');
+    });
+
+    (EXIF.getData as jest.Mock).mockImplementation(
+      (_file: File, cb: (this: { exifData: typeof exifDataMock }) => void) => {
+        cb.call({ exifData: exifDataMock });
+      }
+    );
+
+    const result = await getExifDataFromFile(mockFile, {
+      latitude: 123,
+      longitude: 456,
+    });
+    expect(result).toEqual({ latitude: 123, longitude: 456 });
+  });
 });

@@ -134,6 +134,7 @@ export class BitePage {
 
   noGpsPosition = computed(() => {
     this.imageBase64();
+
     const imageControl = this.biteFormGroup.controls['image'];
     const positionControl = this.biteFormGroup.controls['position'];
 

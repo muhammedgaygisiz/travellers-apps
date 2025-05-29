@@ -362,4 +362,65 @@ describe('BitePage', () => {
       expect(getExifDataSpy).not.toHaveBeenCalled();
     });
   });
+
+  describe('noGpsPosition signal', () => {
+    it('should be true if image is valid but position is invalid', () => {
+      component.biteFormGroup.controls['image'].patchValue(
+        'data:image/jpeg;base64,test'
+      );
+      component.biteFormGroup.controls['position'].reset();
+
+      expect(component.noGpsPosition()).toBe(true);
+    });
+
+    it('should be true if position is invalid', () => {
+      component.biteFormGroup.controls['position'].reset();
+
+      expect(component.noGpsPosition()).toBe(true);
+    });
+
+    it('should be false if position is valid', () => {
+      component.biteFormGroup.controls['image'].patchValue(
+        'data:image/jpeg;base64,test'
+      );
+      component.biteFormGroup.controls['position'].controls[
+        'latitude'
+      ].patchValue(10);
+      component.biteFormGroup.controls['position'].controls[
+        'longitude'
+      ].patchValue(20);
+
+      expect(component.noGpsPosition()).toBe(false);
+    });
+  });
+
+  describe('getGpsErrorMessage signal', () => {
+    it('should return message if image is chosen but no position', () => {
+      component.biteFormGroup.controls['image'].patchValue(
+        'data:image/jpeg;base64,test'
+      );
+      // Simulate no position
+      component.positionToUse.set(undefined as any);
+
+      expect(component.getGpsErrorMessage()).toContain(
+        'No GPS position found in the image'
+      );
+    });
+
+    it('should return message if no image and no position', () => {
+      component.biteFormGroup.controls['image'].reset();
+      component.positionToUse.set(undefined as any);
+
+      expect(component.getGpsErrorMessage()).toContain(
+        'Please choose a GPS position'
+      );
+    });
+
+    it('should return empty string if position exists', () => {
+      componentRef.setInput('position', { latitude: 10, longitude: 20 });
+      component.positionToUse.set({ latitude: 10, longitude: 20 });
+
+      expect(component.getGpsErrorMessage()).toBe('');
+    });
+  });
 });

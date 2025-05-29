@@ -23,6 +23,7 @@ import {
   IonList,
   IonSelect,
   IonSelectOption,
+  IonText,
 } from '@ionic/angular/standalone';
 import { Platform } from '@ionic/angular';
 import {
@@ -55,6 +56,7 @@ import { getExifDataFromPhoto } from './utils/get-exif-data-from-photo';
     IonSelect,
     IonSelectOption,
     MapComponent,
+    IonText,
   ],
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',
@@ -108,8 +110,8 @@ export class BitePage {
     currency: ['EUR', Validators.required],
     tags: [''],
     position: this.formBuilder.group({
-      latitude: [0, Validators.required],
-      longitude: [0, Validators.required],
+      latitude: [this.position()?.latitude, Validators.required],
+      longitude: [this.position()?.longitude, Validators.required],
     }),
   });
 
@@ -129,6 +131,33 @@ export class BitePage {
     ),
     { initialValue: !this.biteFormGroup.valid }
   );
+
+  noGpsPosition = computed(() => {
+    this.imageBase64();
+    const imageControl = this.biteFormGroup.controls['image'];
+    const positionControl = this.biteFormGroup.controls['position'];
+
+    if (imageControl.valid && !positionControl.valid) {
+      return true;
+    }
+
+    return !positionControl.valid;
+  });
+
+  getGpsErrorMessage = computed(() => {
+    const position = this.position();
+    const chosenImage = this.imageBase64();
+
+    if (chosenImage && !position) {
+      return 'No GPS position found in the image. Please choose a GPS position from the map or enable GPS position.';
+    }
+
+    if (!chosenImage && !position) {
+      return 'Please choose a GPS position from the map or enable GPS position.';
+    }
+
+    return '';
+  });
 
   onImageUploadClick() {
     if (!this.imageBase64()) {
@@ -210,6 +239,8 @@ export class BitePage {
 
   clearImage() {
     this.biteFormGroup.controls['image'].reset();
+    this.biteFormGroup.controls['position'].reset();
+    this.positionToUse.set(this.position());
     const fileUpload = this.fileUpload();
     if (fileUpload) {
       fileUpload.nativeElement.value = '';

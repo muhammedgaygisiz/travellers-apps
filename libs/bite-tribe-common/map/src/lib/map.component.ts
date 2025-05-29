@@ -89,6 +89,16 @@ export class MapComponent implements OnDestroy {
     if (this.map && newPosition) {
       this.updateMarker(newPosition);
       this.map.setView([newPosition.latitude, newPosition.longitude], 15);
+
+      return;
+    }
+
+    if (this.map && !newPosition) {
+      this.map.setView([0, 0], 2);
+      if (this.marker) {
+        this.map.removeLayer(this.marker);
+        this.marker = null;
+      }
     }
   });
 

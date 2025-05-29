@@ -6,6 +6,11 @@ export const loadedGpsPosition = createAction(
   props<{ position: any }>()
 );
 
+export const errorLoadingGpsPosition = createAction(
+  '[APP] Error loading GPS position',
+  props<{ error: any }>()
+);
+
 export const saveSettings = createAction(
   '[APP] Save settings',
   props<{ settings: Settings }>()

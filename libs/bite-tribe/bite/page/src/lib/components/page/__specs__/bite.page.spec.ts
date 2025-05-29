@@ -14,7 +14,7 @@ import {
   imageOutline,
   pricetagOutline,
 } from 'ionicons/icons';
-import * as exifUtils from '../utils/get-exif-data';
+import * as exifUtils from '../utils/get-exif-data-from-file';
 
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
@@ -295,7 +295,7 @@ describe('BitePage', () => {
     let getExifDataSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      getExifDataSpy = jest.spyOn(exifUtils, 'getExifData');
+      getExifDataSpy = jest.spyOn(exifUtils, 'getExifDataFromFile');
     });
 
     afterEach(() => {

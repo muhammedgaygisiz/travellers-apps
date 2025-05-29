@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { getExifData } from '../get-exif-data';
+import { getExifDataFromFile } from '../get-exif-data-from-file';
 import * as EXIF from 'exif-js';
 
 jest.mock('exif-js', () => ({
@@ -7,7 +7,7 @@ jest.mock('exif-js', () => ({
   getTag: jest.fn(),
 }));
 
-describe('getExifData', () => {
+describe('getExifDataFromFile', () => {
   const mockFile = new File([''], 'test.jpg', { type: 'image/jpeg' });
 
   afterEach(() => {
@@ -41,7 +41,7 @@ describe('getExifData', () => {
       }
     );
 
-    const result = await getExifData(mockFile);
+    const result = await getExifDataFromFile(mockFile);
     expect(result).toEqual({
       latitude: 40.5,
       longitude: 74,
@@ -65,7 +65,7 @@ describe('getExifData', () => {
       }
     );
 
-    const result = await getExifData(mockFile);
+    const result = await getExifDataFromFile(mockFile);
     expect(result).toEqual({ latitude: 0, longitude: 0 });
     expect(EXIF.getData).toHaveBeenCalled();
   });
@@ -76,7 +76,7 @@ describe('getExifData', () => {
       throw error;
     });
 
-    await expect(getExifData(mockFile)).rejects.toThrow('EXIF error');
+    await expect(getExifDataFromFile(mockFile)).rejects.toThrow('EXIF error');
     expect(EXIF.getData).toHaveBeenCalled();
   });
 });

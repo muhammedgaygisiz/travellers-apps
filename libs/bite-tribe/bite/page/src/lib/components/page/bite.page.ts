@@ -25,13 +25,19 @@ import {
   IonSelectOption,
 } from '@ionic/angular/standalone';
 import { Platform } from '@ionic/angular';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import {
+  Camera,
+  CameraResultType,
+  CameraSource,
+  Photo,
+} from '@capacitor/camera';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { compressFile } from 'image-compression';
 import { MapComponent } from 'bite-tribe-common/map';
-import { getExifData } from './utils/get-exif-data';
+import { getExifDataFromFile } from './utils/get-exif-data-from-file';
+import { getExifDataFromPhoto } from './utils/get-exif-data-from-photo';
 
 @Component({
   selector: 'bt-bite',
@@ -158,15 +164,18 @@ export class BitePage {
     try {
       await Camera.requestPermissions();
 
-      const image = await Camera.getPhoto({
+      const photo = await Camera.getPhoto({
         quality: 90,
         allowEditing: true,
         resultType: CameraResultType.Base64,
         source: CameraSource.Prompt,
       });
 
+      // Get the gps position from the image
+      this.getGpsPositionFromPhoto(photo);
+
       this.biteFormGroup.controls['image'].patchValue(
-        `data:image/${image.format};base64,${image.base64String}`
+        `data:image/${photo.format};base64,${photo.base64String}`
       );
     } catch (e) {
       console.error('Error taking photo:', e);
@@ -210,24 +219,43 @@ export class BitePage {
   private async getGpsPositionFromFile(file: File | undefined) {
     if (file) {
       try {
-        const exifData = await getExifData(file);
+        const exifData = await getExifDataFromFile(file, this.position());
 
-        if (exifData?.latitude && exifData?.longitude) {
-          this.biteFormGroup.controls['position'].controls[
-            'latitude'
-          ].patchValue(exifData.latitude);
-          this.biteFormGroup.controls['position'].controls[
-            'longitude'
-          ].patchValue(exifData.longitude);
-
-          this.positionToUse.set({
-            latitude: exifData.latitude,
-            longitude: exifData.longitude,
-          });
-        }
+        this.setPositionFromExifData(exifData);
       } catch (e) {
         console.warn('Error reading GPS position from file:', e);
       }
+    }
+  }
+
+  private getGpsPositionFromPhoto(photo: Photo) {
+    if (photo) {
+      try {
+        const exifData = getExifDataFromPhoto(photo, this.position());
+
+        this.setPositionFromExifData(exifData);
+      } catch (e) {
+        console.warn('Error reading GPS position from photo:', e);
+      }
+    }
+  }
+
+  private setPositionFromExifData(exifData: {
+    latitude: number;
+    longitude: number;
+  }) {
+    if (exifData?.latitude && exifData?.longitude) {
+      this.biteFormGroup.controls['position'].controls['latitude'].patchValue(
+        exifData.latitude
+      );
+      this.biteFormGroup.controls['position'].controls['longitude'].patchValue(
+        exifData.longitude
+      );
+
+      this.positionToUse.set({
+        latitude: exifData.latitude,
+        longitude: exifData.longitude,
+      });
     }
   }
 }

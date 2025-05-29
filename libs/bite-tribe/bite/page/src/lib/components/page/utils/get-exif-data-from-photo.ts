@@ -8,7 +8,7 @@ export const getExifDataFromPhoto = (
   }
 ): { latitude: number; longitude: number } => {
   if (!photo || !photo.exif) {
-    return { latitude: 0, longitude: 0 };
+    return fallbackPosition;
   }
 
   const exif: any = photo.exif;

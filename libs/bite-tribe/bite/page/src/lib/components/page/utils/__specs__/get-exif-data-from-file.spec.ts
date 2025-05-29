@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { getExifData } from '../get-exif-data';
+import { getExifDataFromFile } from '../get-exif-data-from-file';
 import * as EXIF from 'exif-js';
 
 jest.mock('exif-js', () => ({
@@ -7,7 +7,7 @@ jest.mock('exif-js', () => ({
   getTag: jest.fn(),
 }));
 
-describe('getExifData', () => {
+describe('getExifDataFromFile', () => {
   const mockFile = new File([''], 'test.jpg', { type: 'image/jpeg' });
 
   afterEach(() => {
@@ -41,7 +41,7 @@ describe('getExifData', () => {
       }
     );
 
-    const result = await getExifData(mockFile);
+    const result = await getExifDataFromFile(mockFile);
     expect(result).toEqual({
       latitude: 40.5,
       longitude: 74,
@@ -65,7 +65,7 @@ describe('getExifData', () => {
       }
     );
 
-    const result = await getExifData(mockFile);
+    const result = await getExifDataFromFile(mockFile);
     expect(result).toEqual({ latitude: 0, longitude: 0 });
     expect(EXIF.getData).toHaveBeenCalled();
   });
@@ -76,7 +76,33 @@ describe('getExifData', () => {
       throw error;
     });
 
-    await expect(getExifData(mockFile)).rejects.toThrow('EXIF error');
+    const result = await getExifDataFromFile(mockFile);
+    expect(result).toEqual({ latitude: 0, longitude: 0 });
     expect(EXIF.getData).toHaveBeenCalled();
+  });
+
+  it('should return fallback position if getTag throws inside getData', async () => {
+    const exifDataMock = {
+      GPSLatitude: [40, 30, 0],
+      GPSLatitudeRef: 'N',
+      GPSLongitude: [74, 0, 0],
+      GPSLongitudeRef: 'E',
+    };
+
+    (EXIF.getTag as jest.Mock).mockImplementation(() => {
+      throw new Error('getTag error');
+    });
+
+    (EXIF.getData as jest.Mock).mockImplementation(
+      (_file: File, cb: (this: { exifData: typeof exifDataMock }) => void) => {
+        cb.call({ exifData: exifDataMock });
+      }
+    );
+
+    const result = await getExifDataFromFile(mockFile, {
+      latitude: 123,
+      longitude: 456,
+    });
+    expect(result).toEqual({ latitude: 123, longitude: 456 });
   });
 });

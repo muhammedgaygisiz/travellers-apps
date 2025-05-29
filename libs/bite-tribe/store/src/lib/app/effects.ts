@@ -6,12 +6,13 @@ import {
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
 import {
+  errorLoadingGpsPosition,
   loadedGpsPosition,
   loadedSettingsFromApi,
   saveSettings,
 } from './actions';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { debounceTime, filter, from, map, switchMap, take, tap } from 'rxjs';
+import { catchError, filter, from, map, of, switchMap, take, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -40,12 +41,17 @@ export class AppEffect {
   getCurrentPosition$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(routerNavigatedAction),
-      debounceTime(500),
       filter(
         ({ payload }) => !IGNORED_PAGES_FOR_GPS.includes(payload.event.url)
       ),
       switchMap(() => from(getCurrentPosition(this.platform)).pipe(take(1))),
-      map((currentPosition) => loadedGpsPosition({ position: currentPosition }))
+      map((currentPosition) =>
+        loadedGpsPosition({ position: currentPosition })
+      ),
+      catchError((error) => {
+        console.log(error);
+        return of(errorLoadingGpsPosition({ error }));
+      })
     );
   });
 

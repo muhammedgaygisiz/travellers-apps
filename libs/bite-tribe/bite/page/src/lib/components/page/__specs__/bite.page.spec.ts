@@ -14,7 +14,7 @@ import {
   imageOutline,
   pricetagOutline,
 } from 'ionicons/icons';
-import * as exifUtils from '../utils/get-exif-data';
+import * as exifUtils from '../utils/get-exif-data-from-file';
 
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
@@ -85,6 +85,10 @@ describe('BitePage', () => {
       tags: 'fish healthy',
       price: 9.99,
       currency: 'EUR',
+      position: {
+        latitude: 10,
+        longitude: 20,
+      },
     };
 
     component.biteFormGroup.patchValue(validBite as any);
@@ -295,7 +299,7 @@ describe('BitePage', () => {
     let getExifDataSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      getExifDataSpy = jest.spyOn(exifUtils, 'getExifData');
+      getExifDataSpy = jest.spyOn(exifUtils, 'getExifDataFromFile');
     });
 
     afterEach(() => {
@@ -360,6 +364,67 @@ describe('BitePage', () => {
     it('should do nothing if file is undefined', async () => {
       await (component as any).getGpsPositionFromFile(undefined);
       expect(getExifDataSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('noGpsPosition signal', () => {
+    it('should be true if image is valid but position is invalid', () => {
+      component.biteFormGroup.controls['image'].patchValue(
+        'data:image/jpeg;base64,test'
+      );
+      component.biteFormGroup.controls['position'].reset();
+
+      expect(component.noGpsPosition()).toBe(true);
+    });
+
+    it('should be true if position is invalid', () => {
+      component.biteFormGroup.controls['position'].reset();
+
+      expect(component.noGpsPosition()).toBe(true);
+    });
+
+    it('should be false if position is valid', () => {
+      component.biteFormGroup.controls['image'].patchValue(
+        'data:image/jpeg;base64,test'
+      );
+      component.biteFormGroup.controls['position'].controls[
+        'latitude'
+      ].patchValue(10);
+      component.biteFormGroup.controls['position'].controls[
+        'longitude'
+      ].patchValue(20);
+
+      expect(component.noGpsPosition()).toBe(false);
+    });
+  });
+
+  describe('getGpsErrorMessage signal', () => {
+    it('should return message if image is chosen but no position', () => {
+      component.biteFormGroup.controls['image'].patchValue(
+        'data:image/jpeg;base64,test'
+      );
+      // Simulate no position
+      component.positionToUse.set(undefined as any);
+
+      expect(component.getGpsErrorMessage()).toContain(
+        'No GPS position found in the image'
+      );
+    });
+
+    it('should return message if no image and no position', () => {
+      component.biteFormGroup.controls['image'].reset();
+      component.positionToUse.set(undefined as any);
+
+      expect(component.getGpsErrorMessage()).toContain(
+        'Please choose a GPS position'
+      );
+    });
+
+    it('should return empty string if position exists', () => {
+      componentRef.setInput('position', { latitude: 10, longitude: 20 });
+      component.positionToUse.set({ latitude: 10, longitude: 20 });
+
+      expect(component.getGpsErrorMessage()).toBe('');
     });
   });
 });

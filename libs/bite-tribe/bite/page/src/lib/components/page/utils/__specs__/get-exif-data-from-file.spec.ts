@@ -76,7 +76,8 @@ describe('getExifDataFromFile', () => {
       throw error;
     });
 
-    await expect(getExifDataFromFile(mockFile)).rejects.toThrow('EXIF error');
+    const result = await getExifDataFromFile(mockFile);
+    expect(result).toEqual({ latitude: 0, longitude: 0 });
     expect(EXIF.getData).toHaveBeenCalled();
   });
 

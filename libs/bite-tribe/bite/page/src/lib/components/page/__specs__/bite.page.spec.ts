@@ -85,6 +85,10 @@ describe('BitePage', () => {
       tags: 'fish healthy',
       price: 9.99,
       currency: 'EUR',
+      position: {
+        latitude: 10,
+        longitude: 20,
+      },
     };
 
     component.biteFormGroup.patchValue(validBite as any);

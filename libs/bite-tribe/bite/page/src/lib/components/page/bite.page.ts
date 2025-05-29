@@ -208,7 +208,7 @@ export class BitePage {
   async onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
 
-    await this.patchGpsPositionFromFile(file);
+    await this.patchPositionFromFile(file);
 
     if (file) {
       const compressedFile = await compressFile(file);
@@ -234,7 +234,7 @@ export class BitePage {
     }
   }
 
-  private async patchGpsPositionFromFile(file: File | undefined) {
+  private async patchPositionFromFile(file: File | undefined) {
     if (file) {
       try {
         const exifData = await getExifDataFromFile(file, this.position());

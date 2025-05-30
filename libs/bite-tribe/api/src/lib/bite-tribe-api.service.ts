@@ -200,6 +200,15 @@ export class BiteTribeApiService {
     });
   }
 
+  async saveEditedBite(bite: any) {
+    FirebaseFirestore.updateDocument({
+      reference: `${BITE_COLLECTION}/${bite.id}`,
+      data: {
+        ...bite,
+      },
+    });
+  }
+
   async saveTagsToExistingBite(payload: { newTags: string[]; id: string }) {
     try {
       // First get the current document

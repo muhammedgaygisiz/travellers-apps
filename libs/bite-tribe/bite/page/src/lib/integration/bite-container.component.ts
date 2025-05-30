@@ -8,7 +8,7 @@ import { BitePage } from '../components/page/bite.page';
     class="ion-page"
     [currency]="service.currency()"
     [position]="service.position()"
-    (submitNewBite)="service.submitNewBite($event)"
+    (submitBite)="service.submitNewBite($event)"
   />`,
   imports: [BitePage],
 })

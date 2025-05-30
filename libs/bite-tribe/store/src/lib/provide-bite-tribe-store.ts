@@ -1,5 +1,5 @@
 import { Environment, getMetaReducers, STORE_SERVICE } from 'utils';
-import { provideState, provideStore } from '@ngrx/store';
+import { Action, provideState, provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import {
   AuthEffects,
@@ -23,6 +23,7 @@ import { RestaurantEffects } from './restaurants/effects';
 import { LikeEffects } from './likes/effects';
 import { MenuEffects } from './menus/effects';
 import { FirebaseOptions } from '@angular/fire/app';
+import { loadedBitesFromApi } from './bites/actions';
 
 const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
@@ -35,6 +36,61 @@ const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   measurementId: process.env['NX_APP_BITE_TRIBE_MEASSUREMENT_ID'],
   appId: process.env['NX_APP_BITE_TRIBE_APP_ID'],
 });
+
+const actionSanitizer = (action: Action) => {
+  if (
+    action.type === loadedBitesFromApi.type &&
+    (action as any).bites.length > 0
+  ) {
+    return {
+      ...action,
+      bites: (action as any).bites.map((bite: any) => ({
+        ...bite,
+        image: bite.image ? '...' : null, // Sanitize image data
+      })),
+    };
+  }
+
+  return action;
+};
+
+const stateSanitizer = (state: any) => {
+  let sanitizedState = { ...state };
+
+  if (state.bites?.ids.length > 0) {
+    sanitizedState = {
+      ...state,
+      bites: {
+        ...state.bites,
+        entities: state.bites.ids.map((id: string) => {
+          const bite = state.bites.entities[id];
+          return {
+            ...bite,
+            image: bite.image ? '...' : bite.image, // Sanitize image data
+          };
+        }),
+      },
+    };
+  }
+
+  if (state.restaurants?.ids.length > 0) {
+    sanitizedState = {
+      ...state,
+      restaurants: {
+        ...state.restaurants,
+        entities: state.restaurants.ids.map((id: string) => {
+          const restaurant = state.restaurants.entities[id];
+          return {
+            ...restaurant,
+            image: restaurant.image ? '...' : restaurant.image, // Sanitize image data
+          };
+        }),
+      },
+    };
+  }
+
+  return sanitizedState;
+};
 
 export const provideBiteTribeStore = (environment: Environment) => [
   { provide: STORE_SERVICE, useClass: BiteTribeStoreService },
@@ -50,6 +106,8 @@ export const provideBiteTribeStore = (environment: Environment) => [
   ),
   !environment.production
     ? provideStoreDevtools({
+        actionSanitizer,
+        stateSanitizer,
         trace: true,
         traceLimit: 10,
       })

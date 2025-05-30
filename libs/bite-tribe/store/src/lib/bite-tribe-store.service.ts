@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
-import { saveNewBite, saveTags } from './bites/actions';
+import { saveNewBite, saveTags, saveExistingBite } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bite, bites } from './bites/selectors';
 import {
@@ -31,6 +31,10 @@ const unknownEntity = createAction(
 const getActionByDocType = (docType: string, entity: any) => {
   switch (docType) {
     case 'bite': {
+      if (entity.id) {
+        return saveExistingBite({ bite: entity });
+      }
+
       return saveNewBite({ bite: entity });
     }
     case 'restaurant': {

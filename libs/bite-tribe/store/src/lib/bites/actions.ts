@@ -10,6 +10,11 @@ export const saveNewBite = createAction(
   props<{ bite: any }>()
 );
 
+export const saveExistingBite = createAction(
+  '[BITES] Save existing bite',
+  props<{ bite: any }>()
+);
+
 export const saveTags = createAction(
   '[BITES] Save new tags',
   props<{ newTags: string[]; id: string }>()

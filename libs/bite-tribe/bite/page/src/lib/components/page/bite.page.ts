@@ -24,8 +24,10 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
-import { BiteDirective } from './bite.directive';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
+import { Bite } from 'model';
+
+const toTagsString = (tags: string[] | undefined = []) => tags?.join(' ');
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -47,33 +49,48 @@ import { ImageUploadComponent } from '../image-upload/image-upload.component';
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [
-    {
-      directive: BiteDirective,
-    },
-  ],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
-export class BitePage extends BiteDirective {
+export class BitePage {
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
+
+  bite = input<Bite>();
 
   currency = input<string>();
 
   position = input<{ latitude: number; longitude: number }>();
 
-  submitNewBite = output<typeof this.biteFormGroup.value>();
+  submitBite = output<typeof this.biteFormGroup.value>();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
   biteFormGroup = this.formBuilder.group({
+    id: [''],
     image: ['', Validators.required],
     name: ['', Validators.required],
     place: ['', Validators.required],
-    price: [null, Validators.required],
+    price: [null as number | null, Validators.required],
     currency: ['EUR', Validators.required],
     tags: [''],
     position: [this.position(), Validators.required],
+  });
+
+  biteInitFromInputEffect = effect(() => {
+    const bite = this.bite();
+
+    if (bite) {
+      this.biteFormGroup.patchValue({
+        id: bite.id,
+        image: bite.image,
+        name: bite.name,
+        place: bite.place,
+        price: bite.price,
+        currency: bite.currency,
+        tags: toTagsString(bite.tags),
+        position: bite.position,
+      });
+    }
   });
 
   currencyInitFromInputEffect = effect(() => {
@@ -127,10 +144,10 @@ export class BitePage extends BiteDirective {
     return '';
   });
 
-  saveNewBite() {
+  saveBite() {
     if (this.biteFormGroup.valid) {
       const newBite = this.biteFormGroup.value;
-      this.submitNewBite.emit(newBite);
+      this.submitBite.emit(newBite);
     }
   }
 

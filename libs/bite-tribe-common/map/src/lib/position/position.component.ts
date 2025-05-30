@@ -6,7 +6,9 @@ import { Geopoint } from 'model';
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'position',
-  template: ` <bt-map [position]="value()" /> `,
+  template: `
+    <bt-map [position]="value()" (positionSelected)="setValue($event)" />
+  `,
   imports: [MapComponent],
   providers: [
     {
@@ -21,7 +23,7 @@ export class PositionComponent implements ControlValueAccessor {
   disabled = signal<boolean | null>(null);
 
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-empty-function
-  _onChange: (value: string | null) => void = () => {};
+  _onChange: (value: Geopoint | null) => void = () => {};
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   _onTouch: () => void = () => {};
 
@@ -43,5 +45,11 @@ export class PositionComponent implements ControlValueAccessor {
   // eslint-disable-next-line no-unused-vars
   setDisabledState?(isDisabled: boolean): void {
     this.disabled.set(isDisabled);
+  }
+
+  setValue(position: Geopoint) {
+    this.value.set(position);
+    this._onChange(position);
+    this._onTouch();
   }
 }

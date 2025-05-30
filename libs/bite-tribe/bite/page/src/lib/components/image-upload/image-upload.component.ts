@@ -163,6 +163,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
     reader.onload = () => {
       this.value.set(reader.result as string);
       this._onChange(reader.result as string);
+      this._onTouch();
     };
     reader.readAsDataURL(compressedPhoto);
   }

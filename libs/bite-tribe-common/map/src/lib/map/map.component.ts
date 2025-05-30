@@ -12,11 +12,6 @@ import {
 import * as L from 'leaflet';
 import { Geopoint } from 'model';
 
-export interface Position {
-  latitude: number;
-  longitude: number;
-}
-
 // Fix for marker icons
 const iconRetinaUrl = 'assets/leaflet/marker-icon-2x.png';
 const iconUrl = 'assets/leaflet/marker-icon.png';
@@ -42,7 +37,7 @@ L.Marker.prototype.options.icon = iconDefault;
 })
 export class MapComponent implements OnDestroy {
   position = input<Geopoint | null | undefined>();
-  positionSelected = output<Position>();
+  positionSelected = output<Geopoint>();
 
   private map!: L.Map;
   private marker: L.Marker | null = null;
@@ -68,14 +63,14 @@ export class MapComponent implements OnDestroy {
         this.map.setView([0, 0], 2);
       }
 
-      // this.map.on('click', (e: L.LeafletMouseEvent) => {
-      //   const position: Position = {
-      //     latitude: e.latlng.lat,
-      //     longitude: e.latlng.lng,
-      //   };
-      //   this.updateMarker(position);
-      //   this.positionSelected.emit(position);
-      // });
+      this.map.on('click', (e: L.LeafletMouseEvent) => {
+        const position: Geopoint = {
+          latitude: e.latlng.lat,
+          longitude: e.latlng.lng,
+        };
+        this.updateMarker(position);
+        this.positionSelected.emit(position);
+      });
 
       // Force a map redraw
       setTimeout(() => {
@@ -109,7 +104,7 @@ export class MapComponent implements OnDestroy {
     }
   }
 
-  private updateMarker(position: Position) {
+  private updateMarker(position: Geopoint) {
     if (this.marker) {
       this.map.removeLayer(this.marker);
     }

@@ -5,6 +5,7 @@ import { BitePage } from '../components/page/bite.page';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: ` <bite
+    class="ion-page"
     [currency]="service.currency()"
     [position]="service.position()"
     (submitNewBite)="service.submitNewBite($event)"

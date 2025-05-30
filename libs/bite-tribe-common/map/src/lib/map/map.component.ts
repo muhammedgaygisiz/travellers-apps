@@ -1,5 +1,6 @@
 import {
   afterRenderEffect,
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   effect,
@@ -37,6 +38,7 @@ L.Marker.prototype.options.icon = iconDefault;
 })
 export class MapComponent implements OnDestroy {
   position = input<Geopoint | null | undefined>();
+  readonly = input(false, { transform: booleanAttribute });
   positionSelected = output<Geopoint>();
 
   private map!: L.Map;
@@ -63,14 +65,16 @@ export class MapComponent implements OnDestroy {
         this.map.setView([0, 0], 2);
       }
 
-      this.map.on('click', (e: L.LeafletMouseEvent) => {
-        const position: Geopoint = {
-          latitude: e.latlng.lat,
-          longitude: e.latlng.lng,
-        };
-        this.updateMarker(position);
-        this.positionSelected.emit(position);
-      });
+      if (!this.readonly()) {
+        this.map.on('click', (e: L.LeafletMouseEvent) => {
+          const position: Geopoint = {
+            latitude: e.latlng.lat,
+            longitude: e.latlng.lng,
+          };
+          this.updateMarker(position);
+          this.positionSelected.emit(position);
+        });
+      }
 
       // Force a map redraw
       setTimeout(() => {
@@ -84,7 +88,11 @@ export class MapComponent implements OnDestroy {
 
     if (this.map && newPosition) {
       this.updateMarker(newPosition);
-      this.map.setView([newPosition.latitude, newPosition.longitude], 15);
+      const currentZoom = this.map.getZoom();
+      this.map.setView(
+        [newPosition.latitude, newPosition.longitude],
+        currentZoom
+      );
 
       return;
     }

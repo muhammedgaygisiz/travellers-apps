@@ -27,6 +27,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { compressFile, compressPhoto } from 'image-compression';
 import { getExifDataFromFile } from '../page/utils/get-exif-data-from-file';
 import { getExifDataFromPhoto } from '../page/utils/get-exif-data-from-photo';
+import { Geopoint } from 'model';
 
 const photoOptions = {
   quality: 90,
@@ -53,9 +54,9 @@ const photoOptions = {
 export class ImageUploadComponent implements ControlValueAccessor {
   private readonly platform = inject(Platform);
 
-  position = input<{ latitude: number; longitude: number }>();
+  position = input<Geopoint>();
 
-  positionFromImage = output<{ latitude: number; longitude: number }>();
+  positionFromImage = output<Geopoint>();
 
   private readonly fileUpload =
     viewChild<ElementRef<HTMLInputElement>>('fileUploader');

@@ -35,7 +35,7 @@
       </ion-list>
 
       <div class="ion-padding-top">
-        <bt-map [position]="positionToUse()" />
+        <position formControlName="position" />
         @if (noGpsPosition()) {
         <ion-text color="danger">
           <p>{{ getGpsErrorMessage() }}</p>

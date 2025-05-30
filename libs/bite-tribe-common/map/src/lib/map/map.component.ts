@@ -10,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import * as L from 'leaflet';
+import { Geopoint } from 'model';
 
 export interface Position {
   latitude: number;
@@ -40,7 +41,7 @@ L.Marker.prototype.options.icon = iconDefault;
   templateUrl: './map.component.html',
 })
 export class MapComponent implements OnDestroy {
-  position = input<{ latitude: number; longitude: number }>();
+  position = input<Geopoint | null | undefined>();
   positionSelected = output<Position>();
 
   private map!: L.Map;

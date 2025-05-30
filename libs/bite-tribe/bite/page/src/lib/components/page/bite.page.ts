@@ -5,7 +5,6 @@ import {
   effect,
   inject,
   input,
-  linkedSignal,
   output,
   signal,
 } from '@angular/core';
@@ -24,7 +23,7 @@ import { Platform } from '@ionic/angular';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { MapComponent } from 'bite-tribe-common/map';
+import { PositionComponent } from 'bite-tribe-common/map';
 import { BiteDirective } from './bite.directive';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
 
@@ -41,9 +40,9 @@ import { ImageUploadComponent } from '../image-upload/image-upload.component';
     ReactiveFormsModule,
     IonSelect,
     IonSelectOption,
-    MapComponent,
     IonText,
     ImageUploadComponent,
+    PositionComponent,
   ],
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',
@@ -63,8 +62,6 @@ export class BitePage extends BiteDirective {
 
   position = input<{ latitude: number; longitude: number }>();
 
-  positionToUse = linkedSignal(() => this.position());
-
   submitNewBite = output<typeof this.biteFormGroup.value>();
 
   isWeb = signal(!this.platform.is('hybrid'));
@@ -76,10 +73,7 @@ export class BitePage extends BiteDirective {
     price: [null, Validators.required],
     currency: ['EUR', Validators.required],
     tags: [''],
-    position: this.formBuilder.group({
-      latitude: [this.position()?.latitude, Validators.required],
-      longitude: [this.position()?.longitude, Validators.required],
-    }),
+    position: [this.position(), Validators.required],
   });
 
   currencyInitFromInputEffect = effect(() => {
@@ -91,15 +85,10 @@ export class BitePage extends BiteDirective {
   });
 
   positionInitFromInputEffect = effect(() => {
-    const position = this.positionToUse();
+    const position = this.position();
 
     if (position) {
-      this.biteFormGroup.controls['position'].controls['latitude'].patchValue(
-        position.latitude
-      );
-      this.biteFormGroup.controls['position'].controls['longitude'].patchValue(
-        position.longitude
-      );
+      this.biteFormGroup.controls['position'].patchValue(position);
     }
   });
 
@@ -146,18 +135,8 @@ export class BitePage extends BiteDirective {
   }
 
   onPositionFromImage(position: { latitude: number; longitude: number }) {
-    if (position?.latitude && position?.longitude) {
-      this.biteFormGroup.controls['position'].controls['latitude'].patchValue(
-        position.latitude
-      );
-      this.biteFormGroup.controls['position'].controls['longitude'].patchValue(
-        position.longitude
-      );
-
-      this.positionToUse.set({
-        latitude: position.latitude,
-        longitude: position.longitude,
-      });
+    if (position) {
+      this.biteFormGroup.controls['position'].patchValue(position);
     }
   }
 }

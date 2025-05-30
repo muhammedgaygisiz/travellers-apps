@@ -89,6 +89,10 @@ export class ImageUploadComponent implements ControlValueAccessor {
     this.disabled.set(isDisabled);
   }
 
+  onImageUploadClick() {
+    this.isWeb() ? this.clickOnFileUploader() : this.getImageFromNative();
+  }
+
   async onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
 
@@ -97,30 +101,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
     if (file) {
       const compressedFile = await compressFile(file);
 
-      this.patchImageInForm(compressedFile);
-    }
-  }
-
-  onImageUploadClick() {
-    if (this.isWeb()) {
-      this.clickOnFileUploader();
-      return;
-    }
-
-    this.takePhoto();
-  }
-
-  clearImage() {
-    this.value.set(null);
-    this._onChange(null);
-
-    const fallbackPosition = this.position();
-    if (fallbackPosition) {
-      this.positionFromImage.emit(fallbackPosition);
-    }
-    const fileUpload = this.fileUpload();
-    if (fileUpload) {
-      fileUpload.nativeElement.value = '';
+      this.setValueAndTriggerChange(compressedFile);
     }
   }
 
@@ -133,35 +114,26 @@ export class ImageUploadComponent implements ControlValueAccessor {
     }
 
     fileUpload.nativeElement.click();
-
-    return;
   }
 
-  private async takePhoto() {
-    if (this.platform.is('hybrid')) {
-      await this.takePictureOnNative();
-      return;
-    }
-  }
-
-  private async takePictureOnNative() {
+  private async getImageFromNative() {
     try {
       await Camera.requestPermissions();
 
       const photo = await Camera.getPhoto(photoOptions);
 
-      this.patchPositionFromPhoto(photo);
+      this.readAndEmitPositionFrom(photo);
 
       const compressedPhoto = await compressPhoto(photo);
 
-      this.patchImageInForm(compressedPhoto);
+      this.setValueAndTriggerChange(compressedPhoto);
     } catch (e) {
       console.error('Error taking photo:', e);
       throw e;
     }
   }
 
-  private patchPositionFromPhoto(photo: Photo) {
+  private readAndEmitPositionFrom(photo: Photo) {
     if (photo) {
       try {
         const exifData = getExifDataFromPhoto(photo, this.position());
@@ -185,12 +157,26 @@ export class ImageUploadComponent implements ControlValueAccessor {
     }
   }
 
-  private patchImageInForm(compressedPhoto: File) {
+  private setValueAndTriggerChange(compressedPhoto: File) {
     const reader = new FileReader();
     reader.onload = () => {
       this.value.set(reader.result as string);
       this._onChange(reader.result as string);
     };
     reader.readAsDataURL(compressedPhoto);
+  }
+
+  clearImage() {
+    this.value.set(null);
+    this._onChange(null);
+
+    const fallbackPosition = this.position();
+    if (fallbackPosition) {
+      this.positionFromImage.emit(fallbackPosition);
+    }
+    const fileUpload = this.fileUpload();
+    if (fileUpload) {
+      fileUpload.nativeElement.value = '';
+    }
   }
 }

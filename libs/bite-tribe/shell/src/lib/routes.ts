@@ -16,14 +16,19 @@ export const ROUTES: Routes = withAuthRoutes([
   },
   {
     path: 'new-bite',
-    loadComponent: () =>
-      import('bite-tribe/bite').then((m) => m.BiteContainerComponent),
+    loadComponent: () => import('bite-tribe/bite').then((m) => m.BiteContainer),
     canActivate: [authGuard],
   },
   {
     path: `bite/:biteId`,
     loadComponent: () =>
       import('bite-tribe/details').then((m) => m.DetailsContainer),
+    canActivate: [authGuard],
+  },
+  {
+    path: `bite/:biteId/edit`,
+    loadComponent: () =>
+      import('bite-tribe/bite').then((m) => m.EditBiteContainer),
     canActivate: [authGuard],
   },
   {

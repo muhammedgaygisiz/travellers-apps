@@ -1,3 +1,5 @@
+@let restaurantData = restaurant();
+
 <ta-page
   [showHeaderMenu]="false"
   [showLanguages]="false"
@@ -6,8 +8,8 @@
   [showFooter]="false"
 >
   <ion-content>
-    @defer { @if (restaurant()?.image) {
-    <ion-img [src]="restaurant()?.image" class="place-image" />
+    @defer { @if (restaurantData?.image) {
+    <ion-img [src]="restaurantData?.image" class="place-image" />
     } @else {
     <ion-img
       [src]="'assets/placeholder-restaurant.png'"
@@ -23,8 +25,8 @@
       <div class="header-container">
         <h1>{{ placeName() }}</h1>
 
-        @if (restaurant()) {
-        <ion-button fill="clear" (click)="showMenuClick.emit(restaurant())">
+        @if (restaurantData) {
+        <ion-button fill="clear" (click)="showMenuClick.emit(restaurantData)">
           <ion-icon slot="start" name="restaurant-outline"></ion-icon>
           Menu
         </ion-button>
@@ -32,6 +34,10 @@
       </div>
 
       {{ placeDistance() | toMetric }}
+
+      <div class="ion-margin-top">
+        <bt-map [position]="position()" readonly />
+      </div>
     </div>
   </ion-content>
 </ta-page>

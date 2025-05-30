@@ -1,0 +1,23 @@
+@if (isWeb()) {
+<input
+  type="file"
+  #fileUploader
+  class="ion-hide"
+  (change)="onFileSelected($event)"
+/>
+} @if(showImage()) {
+<img [src]="value()" />
+<div class="ion-text-end">
+  <ion-button fill="clear" (click)="clearImage()">Delete</ion-button>
+</div>
+} @else {
+<ion-card class="image-placeholder" (click)="onImageUploadClick()">
+  <ion-card-content>
+    @if (isWeb()) {
+    <ion-icon name="image-outline" size="large" />
+    } @else {
+    <ion-icon name="camera-outline" size="large" />
+    }
+  </ion-card-content>
+</ion-card>
+}

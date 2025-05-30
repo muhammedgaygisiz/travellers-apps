@@ -7,6 +7,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class BiteDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
+  bite = toSignal(this.storeService.bite$);
   currency = toSignal(this.storeService.currencyFromSettings$);
   position = toSignal(this.storeService.position$);
 
@@ -14,6 +15,15 @@ export class BiteDataAccessService {
     const enrichedBite = {
       ...newBite,
       tags: splitTags(newBite.tags),
+    };
+
+    this.storeService.save(enrichedBite, 'bite');
+  }
+
+  async submitEditedBite(editedBite: any) {
+    const enrichedBite = {
+      ...editedBite,
+      tags: splitTags(editedBite.tags),
     };
 
     this.storeService.save(enrichedBite, 'bite');

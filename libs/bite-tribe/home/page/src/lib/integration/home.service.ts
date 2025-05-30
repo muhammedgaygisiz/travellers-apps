@@ -67,4 +67,8 @@ export class HomeService {
   onGotoMyBitesClick() {
     this.navController.navigateForward(['my-bites']);
   }
+
+  onGotoEditClick(biteToEdit: Bite) {
+    this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
+  }
 }

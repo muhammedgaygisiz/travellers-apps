@@ -6,15 +6,13 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { provideRouter } from '@angular/router';
 import { Camera } from '@capacitor/camera';
-import { ComponentRef, signal } from '@angular/core';
-import * as compressFileModuleMock from 'image-compression';
+import { ComponentRef } from '@angular/core';
 import { addIcons } from 'ionicons';
 import {
   arrowBackOutline,
   imageOutline,
   pricetagOutline,
 } from 'ionicons/icons';
-import * as exifUtils from '../utils/get-exif-data-from-file';
 
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
@@ -80,6 +78,7 @@ describe('BitePage', () => {
 
   it('should validate required fields', () => {
     const validBite = {
+      id: '',
       image: 'data:image/jpeg;base64,test',
       name: 'Test Burger',
       place: 'Test Place',
@@ -96,8 +95,9 @@ describe('BitePage', () => {
     expect(component.isInvalid()).toBe(false);
   });
 
-  it('should emit form value on saveNewBite when valid', () => {
+  it('should emit form value on saveBite when valid', () => {
     const validBite = {
+      id: '',
       image: 'data:image/jpeg;base64,test',
       name: 'Test Burger',
       place: 'Test Place',
@@ -110,26 +110,17 @@ describe('BitePage', () => {
       },
     };
 
-    const emitSpy = jest.spyOn(component.submitNewBite, 'emit');
+    const emitSpy = jest.spyOn(component.submitBite, 'emit');
     component.biteFormGroup.patchValue(validBite as any);
-    component.saveNewBite();
+    component.saveBite();
 
     expect(emitSpy).toHaveBeenCalledWith(validBite);
   });
 
-  it('should not emit form value on saveNewBite when invalid', () => {
-    const emitSpy = jest.spyOn(component.submitNewBite, 'emit');
-    component.saveNewBite();
+  it('should not emit form value on saveBite when invalid', () => {
+    const emitSpy = jest.spyOn(component.submitBite, 'emit');
+    component.saveBite();
     expect(emitSpy).not.toHaveBeenCalled();
-  });
-
-  it('should update showImage computed value when image changes', () => {
-    expect(component.showImage()).toBe(false);
-
-    component.biteFormGroup.controls['image'].patchValue(
-      'data:image/jpeg;base64,test'
-    );
-    expect(component.showImage()).toBe(true);
   });
 
   describe('Platform specific behavior', () => {
@@ -146,106 +137,44 @@ describe('BitePage', () => {
     });
   });
 
-  describe('Image handling', () => {
-    it('should handle file selection on web', async () => {
-      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      const event = { target: { files: [file] } } as unknown as Event;
-
-      // Mock FileReader
-      const result = 'data:image/jpeg;base64,test';
-
-      const mockFileReader = {
-        // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-empty-function
-        onload: (param: any) => {},
-        // eslint-disable-next-line no-unused-vars
-        readAsDataURL: function (file: Blob) {
-          if (this.onload) {
-            this.onload({ target: { result } });
-          }
-        },
-        result,
-      };
-
-      global.FileReader = jest.fn(() => mockFileReader) as any;
-
-      jest
-        .spyOn(compressFileModuleMock, 'compressFile')
-        .mockReturnValue(Promise.resolve(file));
-
-      await component.onFileSelected(event);
-      expect(component.biteFormGroup.controls['image'].value).toBe(
-        'data:image/jpeg;base64,test'
-      );
-    });
-
-    it('should handle camera capture on native', async () => {
-      (platformMock.is as jest.Mock).mockReturnValue(true);
-      const mockPhoto = {
-        base64String: 'test',
-        format: 'jpeg',
-      };
-      (Camera.getPhoto as jest.Mock).mockResolvedValue(mockPhoto);
-
-      await component.takePhoto();
-      expect(component.biteFormGroup.controls['image'].value).toBe(
-        'data:image/jpeg;base64,test'
-      );
-    });
-
-    it('should handle camera errors', async () => {
-      (platformMock.is as jest.Mock).mockReturnValue(true);
-      (Camera.getPhoto as jest.Mock).mockRejectedValue(
-        new Error('Camera error')
-      );
-
-      await expect(component.takePhoto()).rejects.toThrow('Camera error');
-    });
-  });
-
-  describe('onImageUploadClick', () => {
-    it('should trigger file input click on web platform when no image', () => {
-      const mockFileInput = { nativeElement: { click: jest.fn() } };
-      (component as any)['fileUpload'] = signal(mockFileInput);
-
-      component.onImageUploadClick();
-
-      expect(mockFileInput.nativeElement.click).toHaveBeenCalled();
-    });
-
-    it('should not trigger file input click on web platform when image exists', () => {
-      const mockFileInput = { nativeElement: { click: jest.fn() } };
-      (component as any)['fileUpload'] = signal(mockFileInput);
-
-      component.biteFormGroup.controls['image'].patchValue(
-        'data:image/jpeg;base64,test'
-      );
-      component.onImageUploadClick();
-
-      expect(mockFileInput.nativeElement.click).not.toHaveBeenCalled();
-    });
-
-    it('should trigger takePhoto on native platform when no image', async () => {
-      component.isWeb = signal(false);
-      const takePhotoSpy = jest.spyOn(component, 'takePhoto');
-
-      await component.onImageUploadClick();
-
-      expect(takePhotoSpy).toHaveBeenCalled();
-    });
-
-    it('should log error when file upload element not found on web', () => {
-      const consoleSpy = jest.spyOn(console, 'error');
-      (component as any)['fileUpload'] = signal(null);
-
-      component.onImageUploadClick();
-
-      expect(consoleSpy).toHaveBeenCalledWith('File upload element not found');
-    });
-  });
-
   describe('Initialization effects', () => {
+    it('should set bite when input is provided', () => {
+      const testBite = {
+        id: '1',
+        image: 'test.jpg',
+        name: 'Test Bite',
+        place: 'Test Place',
+        price: 10,
+        currency: 'USD',
+        tags: ['test', 'food'],
+        position: { latitude: 42, longitude: 24 },
+      };
+
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      componentRef.setInput('bite', testBite);
+
+      fixture.detectChanges();
+
+      expect(component.biteFormGroup.getRawValue()).toEqual({
+        id: '1',
+        image: 'test.jpg',
+        name: 'Test Bite',
+        place: 'Test Place',
+        price: 10,
+        currency: 'USD',
+        tags: 'test food',
+        position: { latitude: 42, longitude: 24 },
+      });
+    });
+
     it('should set currency when input is provided', () => {
       const testCurrency = 'USD';
+
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
       componentRef.setInput('currency', testCurrency);
       fixture.detectChanges();
 
@@ -256,115 +185,16 @@ describe('BitePage', () => {
 
     it('should set position when input is provided', () => {
       const testPosition = { latitude: 42, longitude: 24 };
+
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
       componentRef.setInput('position', testPosition);
       fixture.detectChanges();
 
-      expect(
-        component.biteFormGroup.controls['position'].controls['latitude'].value
-      ).toBe(testPosition.latitude);
-      expect(
-        component.biteFormGroup.controls['position'].controls['longitude'].value
-      ).toBe(testPosition.longitude);
-    });
-  });
-
-  describe('clearImage', () => {
-    it('should reset image control and clear file input value', () => {
-      // Setup
-      const mockFileInput = { nativeElement: { value: 'test' } };
-      (component as any)['fileUpload'] = signal(mockFileInput);
-      component.biteFormGroup.controls['image'].patchValue('test-image');
-
-      // Act
-      component.clearImage();
-
-      // Assert
-      expect(component.biteFormGroup.controls['image'].value).toBe(null);
-      expect(mockFileInput.nativeElement.value).toBe('');
-    });
-
-    it('should handle clearing image when file input is not available', () => {
-      // Setup
-      (component as any)['fileUpload'] = signal(null);
-      component.biteFormGroup.controls['image'].patchValue('test-image');
-
-      // Act
-      component.clearImage();
-
-      // Assert
-      expect(component.biteFormGroup.controls['image'].value).toBe(null);
-    });
-  });
-
-  describe('patchPositionFromFile', () => {
-    let getExifDataSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      getExifDataSpy = jest.spyOn(exifUtils, 'getExifDataFromFile');
-    });
-
-    afterEach(() => {
-      getExifDataSpy.mockRestore();
-    });
-
-    it('should update form and positionToUse when EXIF data is found', async () => {
-      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      getExifDataSpy.mockResolvedValue({ latitude: 12.34, longitude: 56.78 });
-
-      const bitePage = component;
-      await (bitePage as any).patchPositionFromFile(file);
-
-      expect(
-        bitePage.biteFormGroup.controls['position'].controls['latitude'].value
-      ).toBe(12.34);
-      expect(
-        bitePage.biteFormGroup.controls['position'].controls['longitude'].value
-      ).toBe(56.78);
-      expect(bitePage.positionToUse()).toEqual({
-        latitude: 12.34,
-        longitude: 56.78,
-      });
-    });
-
-    it('should not update form when EXIF data is missing', async () => {
-      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      getExifDataSpy.mockResolvedValue({});
-
-      const bitePage = component;
-      bitePage.biteFormGroup.controls['position'].controls[
-        'latitude'
-      ].patchValue(1);
-      bitePage.biteFormGroup.controls['position'].controls[
-        'longitude'
-      ].patchValue(2);
-
-      await (bitePage as any).patchPositionFromFile(file);
-
-      expect(
-        bitePage.biteFormGroup.controls['position'].controls['latitude'].value
-      ).toBe(1);
-      expect(
-        bitePage.biteFormGroup.controls['position'].controls['longitude'].value
-      ).toBe(2);
-    });
-
-    it('should warn if getExifData throws', async () => {
-      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      getExifDataSpy.mockRejectedValue(new Error('fail'));
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-      await (component as any).patchPositionFromFile(file);
-
-      expect(warnSpy).toHaveBeenCalledWith(
-        'Error reading GPS position from file:',
-        expect.any(Error)
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        testPosition
       );
-      warnSpy.mockRestore();
-    });
-
-    it('should do nothing if file is undefined', async () => {
-      await (component as any).patchPositionFromFile(undefined);
-      expect(getExifDataSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -388,12 +218,10 @@ describe('BitePage', () => {
       component.biteFormGroup.controls['image'].patchValue(
         'data:image/jpeg;base64,test'
       );
-      component.biteFormGroup.controls['position'].controls[
-        'latitude'
-      ].patchValue(10);
-      component.biteFormGroup.controls['position'].controls[
-        'longitude'
-      ].patchValue(20);
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
 
       expect(component.noGpsPosition()).toBe(false);
     });
@@ -405,7 +233,7 @@ describe('BitePage', () => {
         'data:image/jpeg;base64,test'
       );
       // Simulate no position
-      component.positionToUse.set(undefined as any);
+      componentRef.setInput('position', undefined as any);
 
       expect(component.getGpsErrorMessage()).toContain(
         'No GPS position found in the image'
@@ -414,7 +242,7 @@ describe('BitePage', () => {
 
     it('should return message if no image and no position', () => {
       component.biteFormGroup.controls['image'].reset();
-      component.positionToUse.set(undefined as any);
+      componentRef.setInput('position', undefined as any);
 
       expect(component.getGpsErrorMessage()).toContain(
         'Please choose a GPS position'
@@ -423,7 +251,6 @@ describe('BitePage', () => {
 
     it('should return empty string if position exists', () => {
       componentRef.setInput('position', { latitude: 10, longitude: 20 });
-      component.positionToUse.set({ latitude: 10, longitude: 20 });
 
       expect(component.getGpsErrorMessage()).toBe('');
     });

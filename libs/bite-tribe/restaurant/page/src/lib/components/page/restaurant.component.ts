@@ -14,6 +14,7 @@ import {
 } from '@ionic/angular/standalone';
 import { Bite, Menu, MenuItem, Restaurant } from 'model';
 import { ToMetricPipe } from 'distance-pipe';
+import { MapComponent } from 'bite-tribe-common/map';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -27,6 +28,7 @@ import { ToMetricPipe } from 'distance-pipe';
     ToMetricPipe,
     IonButton,
     IonIcon,
+    MapComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -55,5 +57,12 @@ export class RestaurantComponent {
     }
 
     return bite?.distance;
+  });
+
+  position = computed(() => {
+    const bite = this.bite();
+    const restaurant = this.restaurant();
+
+    return restaurant?.position || bite?.position || null;
   });
 }

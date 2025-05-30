@@ -4,3 +4,4 @@ export * from './lib/restaurant';
 export * from './lib/user';
 export * from './lib/settings';
 export * from './lib/menu';
+export * from './lib/geopoint';

@@ -55,6 +55,8 @@ export class BitePage {
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
 
+  title = input<string>('Create Bite');
+
   bite = input<Bite>();
 
   currency = input<string>();

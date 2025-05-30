@@ -6,6 +6,7 @@ import { BiteService } from './bite.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <bite
+      title="Edit Bite"
       [bite]="service.bite()"
       (submitBite)="service.submitEditedBite($event)"
     />

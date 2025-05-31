@@ -13,9 +13,10 @@ export const bitesByRestaurant = createSelector(
     }
 
     if (restaurant) {
+      const normalizedRestaurantName = restaurant?.name.toLowerCase().trim();
+
       return bites.filter((bite) => {
         const normalizedBitePlace = bite.place.toLowerCase().trim();
-        const normalizedRestaurantName = restaurant?.name.toLowerCase().trim();
 
         return (
           bite.restaurantId?.includes(restaurant.id) ||
@@ -27,12 +28,12 @@ export const bitesByRestaurant = createSelector(
 
     if (restaurantId) {
       const restaurantIdOrName = decodeURIComponent(restaurantId);
+      const normalizedRestaurantIdOrName = restaurantIdOrName
+        .toLowerCase()
+        .trim();
+
       return bites.filter((bite) => {
         const normalizedBitePlace = bite.place.toLowerCase().trim();
-        const normalizedRestaurantIdOrName = restaurantIdOrName
-          .toLowerCase()
-          .trim();
-
         return normalizedBitePlace === normalizedRestaurantIdOrName;
       });
     }

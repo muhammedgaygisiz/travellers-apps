@@ -19,6 +19,11 @@
         "inlineStyleLanguage": "scss",
         "assets": [
           {
+            "input": "node_modules/leaflet/dist/images",
+            "glob": "**/*",
+            "output": "assets/leaflet"
+          },
+          {
             "glob": "**/*",
             "input": "apps/bite-tribe-business/public"
           }

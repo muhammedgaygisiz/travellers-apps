@@ -15,6 +15,7 @@ import {
 import { Bite, Menu, MenuItem, Restaurant } from 'model';
 import { ToMetricPipe } from 'distance-pipe';
 import { MapComponent } from 'bite-tribe-common/map';
+import { BiteComponent } from 'bite-tribe-common/bite';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -29,11 +30,14 @@ import { MapComponent } from 'bite-tribe-common/map';
     IonButton,
     IonIcon,
     MapComponent,
+    BiteComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RestaurantComponent {
   bite = input<Bite>();
+  bites = input<Bite[]>();
+  userId = input<string>();
   restaurant = input<Restaurant>();
   menu = input<Menu>();
 

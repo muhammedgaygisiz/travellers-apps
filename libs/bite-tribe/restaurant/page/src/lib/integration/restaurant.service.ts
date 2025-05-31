@@ -11,6 +11,8 @@ export class RestaurantService {
   private readonly navController = inject(NavController);
 
   bite = this.dataAccess.bite;
+  bites = this.dataAccess.bites;
+  userId = this.dataAccess.userId;
   restaurant = this.dataAccess.restaurant;
 
   navigateToMenu(restaurant: Restaurant | undefined) {

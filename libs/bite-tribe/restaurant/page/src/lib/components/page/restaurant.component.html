@@ -21,22 +21,30 @@
     </div>
     }
 
-    <div class="ion-padding">
-      <div class="header-container">
-        <h1>{{ placeName() }}</h1>
+    <div>
+      <div class="ion-padding">
+        <div class="header-container">
+          <h1>{{ placeName() }}</h1>
 
-        @if (restaurantData) {
-        <ion-button fill="clear" (click)="showMenuClick.emit(restaurantData)">
-          <ion-icon slot="start" name="restaurant-outline"></ion-icon>
-          Menu
-        </ion-button>
-        }
+          @if (restaurantData) {
+          <ion-button fill="clear" (click)="showMenuClick.emit(restaurantData)">
+            <ion-icon slot="start" name="restaurant-outline"></ion-icon>
+            Menu
+          </ion-button>
+          }
+        </div>
+
+        {{ placeDistance() | toMetric }}
+
+        <div class="ion-margin-top">
+          <bt-map [position]="position()" readonly />
+        </div>
       </div>
 
-      {{ placeDistance() | toMetric }}
-
-      <div class="ion-margin-top">
-        <bt-map [position]="position()" readonly />
+      <div>
+        @for (bite of bites(); track bite.id) {
+        <bt-bite [bite]="bite" [userId]="userId()" />
+        }
       </div>
     </div>
   </ion-content>

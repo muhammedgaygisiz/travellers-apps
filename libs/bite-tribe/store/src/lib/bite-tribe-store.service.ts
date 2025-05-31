@@ -4,7 +4,7 @@ import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
 import { saveNewBite, saveTags, saveExistingBite } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
-import { bite, bites } from './bites/selectors';
+import { bite, bites, bitesByRestaurant } from './bites/selectors';
 import {
   restaurant,
   restaurants,
@@ -60,6 +60,7 @@ export class BiteTribeStoreService implements StoreService {
 
   bites$ = this.store.select(bites);
   bite$ = this.store.select(bite);
+  bitesByRestaurant$ = this.store.select(bitesByRestaurant);
   restaurant$ = this.store.select(restaurant);
   restaurants$ = this.store.select(restaurants);
   menu$ = this.store.select(menu);
@@ -67,7 +68,7 @@ export class BiteTribeStoreService implements StoreService {
   currencyFromSettings$ = this.store.select(currency);
   restaurantToCreate$ = this.store.select(restaurantToCreate);
 
-  userId = this.store.select(fromAuth.selectUserId);
+  userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
   settings$ = this.store.select(settings);
   position$ = this.store.select(gpsPosition);

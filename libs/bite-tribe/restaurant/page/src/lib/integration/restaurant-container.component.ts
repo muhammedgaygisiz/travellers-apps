@@ -12,6 +12,7 @@ import { RestaurantService } from './restaurant.service';
       [userId]="service.userId()"
       [restaurant]="service.restaurant()"
       (showMenuClick)="service.navigateToMenu($event)"
+      (biteClick)="service.biteClicked($event)"
     />
   `,
   imports: [RestaurantComponent],

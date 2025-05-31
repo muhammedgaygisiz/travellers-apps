@@ -22,7 +22,7 @@ import {
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Restaurant } from 'model';
+import { Bite, Restaurant } from 'model';
 import { map } from 'rxjs';
 import { compressFile } from 'image-compression';
 import { BiteComponent } from 'bite-tribe-common/bite';
@@ -53,6 +53,7 @@ export class RestaurantPageComponent {
   private readonly formBuilder = inject(FormBuilder);
 
   submitNewRestaurant = output<Restaurant>();
+  readonly biteClick = output<Bite>();
 
   restaurantFormGroup = this.formBuilder.group({
     image: ['', Validators.required],

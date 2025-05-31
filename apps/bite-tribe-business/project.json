@@ -26,6 +26,10 @@
           {
             "glob": "**/*",
             "input": "apps/bite-tribe-business/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "libs/bite-tribe-common/assets"
           }
         ],
         "styles": [

@@ -43,6 +43,7 @@ export class RestaurantComponent {
 
   createBiteClick = output<MenuItem>();
   showMenuClick = output<Restaurant | undefined>();
+  readonly biteClick = output<Bite>();
 
   placeName = computed(() => {
     const bite = this.bite();

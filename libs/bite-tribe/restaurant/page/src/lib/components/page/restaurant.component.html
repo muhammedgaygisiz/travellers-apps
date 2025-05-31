@@ -11,10 +11,7 @@
     @defer { @if (restaurantData?.image) {
     <ion-img [src]="restaurantData?.image" class="place-image" />
     } @else {
-    <ion-img
-      [src]="'assets/placeholder-restaurant.png'"
-      class="full-size-image"
-    />
+    <ion-img [src]="'placeholder-restaurant.png'" class="full-size-image" />
     } } @placeholder (minimum 1000ms) {
     <div class="image-loading-placeholder">
       <ion-icon name="download-outline" color="primary" />
@@ -43,7 +40,11 @@
 
       <div>
         @for (bite of bites(); track bite.id) {
-        <bt-bite [bite]="bite" [userId]="userId()" />
+        <bt-bite
+          [bite]="bite"
+          [userId]="userId()"
+          (biteClick)="biteClick.emit($event)"
+        />
         }
       </div>
     </div>

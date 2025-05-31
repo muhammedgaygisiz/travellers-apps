@@ -25,6 +25,18 @@ export class DashboardService {
   restaurantClicked(restaurant: Restaurant) {
     const restaurantId = restaurant.id;
 
-    this.navController.navigateForward(['restaurant', restaurantId]);
+    if (restaurantId) {
+      this.navController.navigateForward(['restaurant', restaurantId]);
+      return;
+    }
+
+    const restaurantName = restaurant.name;
+    if (restaurantName) {
+      this.navController.navigateForward([
+        'restaurant',
+        encodeURIComponent(restaurantName),
+      ]);
+      return;
+    }
   }
 }

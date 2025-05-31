@@ -4,7 +4,7 @@ import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
 import { saveNewBite, saveTags, saveExistingBite } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
-import { bite, bites, bitesByRestaurant } from './bites/selectors';
+import { bite, bites } from './bites/selectors';
 import {
   restaurant,
   restaurants,
@@ -22,6 +22,7 @@ import {
   setRestaurantToCreate,
   saveNewRestaurant,
 } from './restaurants/actions';
+import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',

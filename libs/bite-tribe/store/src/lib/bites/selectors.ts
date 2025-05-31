@@ -3,7 +3,7 @@ import { key } from './key';
 import { adapter } from './adapter';
 import { EntityState } from '@ngrx/entity';
 import { Bite } from 'model';
-import { biteId, restaurantId } from '../router/selectors';
+import { biteId } from '../router/selectors';
 import { likes } from '../likes/selectors';
 import { gpsPosition } from '../app/selectors';
 import { haversineDistance } from 'distance-pipe';
@@ -43,15 +43,4 @@ export const bites = createSelector(
 
 export const bite = createSelector(biteId, bites, (id, bites) =>
   bites.find((bite) => bite.id === id)
-);
-
-export const bitesByRestaurant = createSelector(
-  bites,
-  restaurantId,
-  (bites, restaurantId) =>
-    bites.filter(
-      (bite) =>
-        bite.restaurantId === restaurantId ||
-        bite.place.trim() === restaurantId?.trim()
-    )
 );

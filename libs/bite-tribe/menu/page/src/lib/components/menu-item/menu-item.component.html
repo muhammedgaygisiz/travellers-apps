@@ -26,7 +26,7 @@
   </div>
   <div class="price-actions">
     @if (itemData?.price !== 0) {
-    <div class="price">{{ itemData?.price }}€</div>
+    <div class="price">{{ itemData?.price }} €</div>
     } @if (shouldShowCreateBite()) {
     <ion-button size="small" fill="clear" (click)="onCreateBiteClick(itemData)">
       Create Bite

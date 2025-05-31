@@ -10,6 +10,7 @@ export class BiteDataAccessService {
   bite = toSignal(this.storeService.bite$);
   currency = toSignal(this.storeService.currencyFromSettings$);
   position = toSignal(this.storeService.position$);
+  cachedBite = toSignal(this.storeService.cachedBite$);
 
   async submitNewBite(newBite: any) {
     const enrichedBite = {

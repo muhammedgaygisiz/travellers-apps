@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { MenuDataAccessService } from 'bite-tribe/menu-data-access';
-import { Menu } from 'model';
+import { Bite, Menu, MenuItem } from 'model';
 import { NavController } from '@ionic/angular';
 
 @Injectable({
@@ -18,5 +18,24 @@ export class MenuService {
     this.dataAccess.saveMenu(menu);
 
     this.navController.back();
+  }
+
+  prepareBiteFromMenuItem(menuItem: MenuItem) {
+    const restaurant = this.restaurant();
+
+    // TODO: Take currency from menu item when available
+    const biteToBeCreated: Partial<Bite> = {
+      currency: 'EUR',
+      image: '',
+      name: menuItem.name,
+      place: restaurant?.name || '',
+      position: restaurant?.position || { latitude: 0, longitude: 0 },
+      price: menuItem.price,
+      userId: '',
+    };
+
+    this.dataAccess.prepareBiteFromMenuItem(biteToBeCreated);
+
+    this.navController.navigateForward(['new-bite']);
   }
 }

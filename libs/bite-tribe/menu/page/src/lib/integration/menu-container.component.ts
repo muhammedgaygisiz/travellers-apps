@@ -9,6 +9,7 @@ import { MenuService } from './menu.service';
       [bite]="service.bite()"
       [restaurant]="service.restaurant()"
       [menu]="service.menu()"
+      (createBiteClick)="service.prepareBiteFromMenuItem($event)"
     />
   `,
   imports: [MenuPage],

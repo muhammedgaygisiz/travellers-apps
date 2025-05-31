@@ -104,10 +104,16 @@ export class BitePage {
   });
 
   positionInitFromInputEffect = effect(() => {
+    const bite = this.bite();
     const position = this.position();
 
-    if (position) {
+    if (!bite && position) {
       this.biteFormGroup.controls['position'].patchValue(position);
+      return;
+    }
+
+    if (bite) {
+      return;
     }
   });
 

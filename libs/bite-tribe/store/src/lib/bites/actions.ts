@@ -19,3 +19,8 @@ export const saveTags = createAction(
   '[BITES] Save new tags',
   props<{ newTags: string[]; id: string }>()
 );
+
+export const cacheBite = createAction(
+  '[BITES] Cache bite',
+  props<{ bite: any }>()
+);

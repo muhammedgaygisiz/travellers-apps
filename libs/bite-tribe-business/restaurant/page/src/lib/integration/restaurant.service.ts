@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
-import { Restaurant } from 'model';
+import { Bite, Restaurant } from 'model';
 import { NavController } from '@ionic/angular';
 
 @Injectable({ providedIn: 'root' })
@@ -14,5 +14,9 @@ export class RestaurantService {
     this.dataAccess.submitNewRestaurant(restaurant);
 
     this.navController.navigateBack(['dashboard']);
+  }
+
+  biteClicked(bite: Bite) {
+    this.navController.navigateForward(['bite', bite.id]);
   }
 }

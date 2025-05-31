@@ -22,6 +22,7 @@ import {
   setRestaurantToCreate,
   saveNewRestaurant,
 } from './restaurants/actions';
+import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -60,6 +61,7 @@ export class BiteTribeStoreService implements StoreService {
 
   bites$ = this.store.select(bites);
   bite$ = this.store.select(bite);
+  bitesByRestaurant$ = this.store.select(bitesByRestaurant);
   restaurant$ = this.store.select(restaurant);
   restaurants$ = this.store.select(restaurants);
   menu$ = this.store.select(menu);
@@ -67,7 +69,7 @@ export class BiteTribeStoreService implements StoreService {
   currencyFromSettings$ = this.store.select(currency);
   restaurantToCreate$ = this.store.select(restaurantToCreate);
 
-  userId = this.store.select(fromAuth.selectUserId);
+  userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
   settings$ = this.store.select(settings);
   position$ = this.store.select(gpsPosition);

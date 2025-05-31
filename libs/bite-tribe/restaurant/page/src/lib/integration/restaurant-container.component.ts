@@ -8,8 +8,11 @@ import { RestaurantService } from './restaurant.service';
     <restaurant
       class="ion-page"
       [bite]="service.bite()"
+      [bites]="service.bites()"
+      [userId]="service.userId()"
       [restaurant]="service.restaurant()"
       (showMenuClick)="service.navigateToMenu($event)"
+      (biteClick)="service.biteClicked($event)"
     />
   `,
   imports: [RestaurantComponent],

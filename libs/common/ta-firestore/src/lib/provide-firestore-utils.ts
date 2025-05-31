@@ -3,12 +3,18 @@ import {
   initializeApp,
   provideFirebaseApp,
 } from '@angular/fire/app';
-import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import {
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  provideFirestore,
+} from '@angular/fire/firestore';
 import {
   getAuth,
+  indexedDBLocalPersistence,
   initializeAuth,
   provideAuth,
-  indexedDBLocalPersistence,
 } from '@angular/fire/auth';
 import { EnvironmentProviders } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
@@ -20,7 +26,15 @@ export const provideFirestoreUtils = (
   withAnalytics?: boolean
 ): EnvironmentProviders[] => {
   const providersWithoutAnalytics = [
-    provideFirebaseApp(() => initializeApp(firebaseOptions || {})),
+    provideFirebaseApp(() => {
+      const firebaseApp = initializeApp(firebaseOptions || {});
+      initializeFirestore(firebaseApp, {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager(),
+        }),
+      });
+      return firebaseApp;
+    }),
     provideFirestore(() => getFirestore()),
     provideAuth(() => {
       if (Capacitor.isNativePlatform()) {

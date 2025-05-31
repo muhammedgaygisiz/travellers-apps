@@ -9,6 +9,7 @@ import { RestaurantService } from './restaurant.service';
     <restaurant-page
       [restaurant]="service.restaurantToCreate()"
       (submitNewRestaurant)="service.submitNewRestaurant($event)"
+      (biteClick)="service.biteClicked($event)"
     />
   `,
 })

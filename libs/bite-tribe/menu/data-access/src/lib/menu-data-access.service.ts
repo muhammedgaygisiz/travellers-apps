@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Menu } from 'model';
+import { Bite, Menu } from 'model';
 
 @Injectable({
   providedIn: 'root',
@@ -15,5 +15,9 @@ export class MenuDataAccessService {
 
   saveMenu(menu: Menu) {
     this.storeService.saveMenu(menu);
+  }
+
+  prepareBiteFromMenuItem(biteToBeCreated: Partial<Bite>) {
+    this.storeService.prepareBiteFromMenuItem(biteToBeCreated);
   }
 }

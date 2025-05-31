@@ -10,6 +10,7 @@ export class BiteService {
   bite = this.dataAccess.bite;
   currency = this.dataAccess.currency;
   position = this.dataAccess.position;
+  cachedBite = this.dataAccess.cachedBite;
 
   submitNewBite(newBite: any) {
     this.dataAccess.submitNewBite(newBite);

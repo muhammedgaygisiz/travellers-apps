@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonContent, IonImg } from '@ionic/angular/standalone';
-import { Bite, Menu, Restaurant } from 'model';
+import { Bite, Menu, MenuItem, Restaurant } from 'model';
 import { MenuComponent } from '../menu/menu.component';
 
 @Component({
@@ -28,6 +28,7 @@ export class MenuPage {
   editMode = input(false, { transform: booleanAttribute });
 
   saveMenu = output<Menu>();
+  createBiteClick = output<MenuItem>();
 
   placeName = computed(() => {
     const bite = this.bite();

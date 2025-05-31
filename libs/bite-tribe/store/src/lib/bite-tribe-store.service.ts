@@ -2,9 +2,14 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
-import { saveNewBite, saveTags, saveExistingBite } from './bites/actions';
+import {
+  saveNewBite,
+  saveTags,
+  saveExistingBite,
+  cacheBite,
+} from './bites/actions';
 import { saveNewReview } from './reviews/actions';
-import { bite, bites } from './bites/selectors';
+import { bite, bites, cachedBite } from './bites/selectors';
 import {
   restaurant,
   restaurants,
@@ -15,7 +20,7 @@ import { saveMenu } from './menus/actions';
 import { saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Menu, Restaurant, Settings } from 'model';
+import { Bite, Menu, Restaurant, Settings } from 'model';
 import { currency, gpsPosition, settings } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -73,6 +78,7 @@ export class BiteTribeStoreService implements StoreService {
   user$ = this.store.select(fromAuth.selectUser);
   settings$ = this.store.select(settings);
   position$ = this.store.select(gpsPosition);
+  cachedBite$ = this.store.select(cachedBite);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
@@ -142,5 +148,9 @@ export class BiteTribeStoreService implements StoreService {
 
   saveMenu(menu: Menu) {
     this.store.dispatch(saveMenu({ menu }));
+  }
+
+  prepareBiteFromMenuItem(bite: Partial<Bite>) {
+    this.store.dispatch(cacheBite({ bite }));
   }
 }

@@ -15,6 +15,7 @@
         [editMode]="editMode()"
         [menu]="menu()"
         (saveMenu)="saveMenu.emit($event)"
+        (createBiteClick)="createBiteClick.emit($event)"
       />
     </div>
   </ion-content>

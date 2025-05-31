@@ -50,7 +50,7 @@
 
       @let bites = restaurant()?.bites || []; @for (bite of bites; track
       bite.id) {
-      <bt-bite [bite]="bite" />
+      <bt-bite [bite]="bite" (biteClick)="biteClick.emit($event)" />
       }
 
       <ion-button

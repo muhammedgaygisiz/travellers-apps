@@ -27,6 +27,10 @@
           {
             "glob": "**/*",
             "input": "apps/bite-tribe/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "libs/bite-tribe-common/assets"
           }
         ],
         "styles": [

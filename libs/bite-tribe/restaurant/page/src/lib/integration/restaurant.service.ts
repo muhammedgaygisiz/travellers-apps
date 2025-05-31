@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
-import { Restaurant } from 'model';
+import { Bite, Restaurant } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 
 @Injectable({
@@ -11,6 +11,8 @@ export class RestaurantService {
   private readonly navController = inject(NavController);
 
   bite = this.dataAccess.bite;
+  bites = this.dataAccess.bites;
+  userId = this.dataAccess.userId;
   restaurant = this.dataAccess.restaurant;
 
   navigateToMenu(restaurant: Restaurant | undefined) {
@@ -56,5 +58,9 @@ export class RestaurantService {
     }
 
     return undefined;
+  }
+
+  biteClicked(bite: Bite) {
+    this.navController.navigateForward(['bite', bite.id]);
   }
 }

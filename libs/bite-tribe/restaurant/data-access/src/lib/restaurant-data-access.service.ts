@@ -7,5 +7,7 @@ export class RestaurantDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
   bite = toSignal(this.storeService.bite$);
+  bites = toSignal(this.storeService.bitesByRestaurant$);
+  userId = toSignal(this.storeService.userId$);
   restaurant = toSignal(this.storeService.restaurant$);
 }

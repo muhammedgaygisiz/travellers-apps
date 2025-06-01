@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Restaurant } from 'model';
+import { Link, Restaurant } from 'model';
 
 export const loadedRestaurantsFromApi = createAction(
   '[RESTAURANTS] Loaded from API',
@@ -23,4 +23,9 @@ export const setRestaurantToCreate = createAction(
 export const saveNewRestaurant = createAction(
   '[RESTAURANTS] Save new restaurant',
   props<{ restaurant: Restaurant }>()
+);
+
+export const saveSocialMediaLinksForRestaurant = createAction(
+  '[RESTAURANTS] Save social media links for restaurant',
+  props<{ restaurantId: string; links: Link[] }>()
 );

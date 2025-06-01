@@ -523,4 +523,13 @@ export class BiteTribeApiService {
       },
     });
   }
+
+  async saveSocialMediaLinksForRestaurant(restaurantId: any, links: any) {
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        socialMediaLinks: links,
+      },
+    });
+  }
 }

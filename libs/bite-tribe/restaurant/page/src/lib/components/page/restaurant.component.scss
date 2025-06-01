@@ -29,9 +29,9 @@
     align-items: center;
     background-color: var(--ion-card-background);
     place-items: center;
-  }
 
-  .image-loading-placeholder ion-icon {
-    font-size: 48px; // Icon size
+    ion-icon {
+      font-size: 48px; // Icon size
+    }
   }
 }

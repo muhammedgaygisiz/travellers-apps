@@ -20,12 +20,13 @@ import { saveMenu } from './menus/actions';
 import { saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Bite, Menu, Restaurant, Settings } from 'model';
+import { Bite, Link, Menu, Restaurant, Settings } from 'model';
 import { currency, gpsPosition, settings } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
   setRestaurantToCreate,
   saveNewRestaurant,
+  saveSocialMediaLinksForRestaurant,
 } from './restaurants/actions';
 import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
 
@@ -152,5 +153,14 @@ export class BiteTribeStoreService implements StoreService {
 
   prepareBiteFromMenuItem(bite: Partial<Bite>) {
     this.store.dispatch(cacheBite({ bite }));
+  }
+
+  saveSocialMediaLinks(restaurantId: string, links: Link[]) {
+    this.store.dispatch(
+      saveSocialMediaLinksForRestaurant({
+        restaurantId,
+        links,
+      })
+    );
   }
 }

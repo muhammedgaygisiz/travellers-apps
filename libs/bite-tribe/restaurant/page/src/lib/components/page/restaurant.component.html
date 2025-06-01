@@ -18,35 +18,91 @@
     </div>
     }
 
-    <div>
-      <div class="ion-padding">
-        <div class="header-container">
-          <h1>{{ placeName() }}</h1>
+    <div class="ion-padding">
+      <div class="header-container">
+        <h1>{{ placeName() }}</h1>
 
-          @if (restaurantData) {
-          <ion-button fill="clear" (click)="showMenuClick.emit(restaurantData)">
-            <ion-icon slot="start" name="restaurant-outline"></ion-icon>
-            Menu
-          </ion-button>
-          }
-        </div>
-
-        {{ placeDistance() | toMetric }}
-
-        <div class="ion-margin-top">
-          <bt-map [position]="position()" readonly />
-        </div>
-      </div>
-
-      <div>
-        @for (bite of bites(); track bite.id) {
-        <bt-bite
-          [bite]="bite"
-          [userId]="userId()"
-          (biteClick)="biteClick.emit($event)"
-        />
+        @if (restaurantData) {
+        <ion-button fill="clear" (click)="showMenuClick.emit(restaurantData)">
+          <ion-icon slot="start" name="restaurant-outline" />
+          Menu
+        </ion-button>
         }
       </div>
+
+      {{ placeDistance() | toMetric }}
+
+      @if(editMode()) {
+      <div class="ion-margin-top" [formGroup]="socialMediaForm">
+        @if(links.length === 0) {
+        <ion-text>No Social Media Links</ion-text>
+        }
+
+        <ion-list lines="full" formArrayName="links">
+          @for (socialMedia of links.controls; track $index; let i = $index) {
+          <ion-item [formGroupName]="i">
+            <ion-select
+              class="ion-margin-end"
+              placeholder="Social Network"
+              interface="popover"
+              formControlName="network"
+            >
+              <ion-select-option value="facebook">Facebook</ion-select-option>
+              <ion-select-option value="instagram">Instagram</ion-select-option>
+              <ion-select-option value="twitter">Twitter</ion-select-option>
+              <ion-select-option value="linkedin">LinkedIn</ion-select-option>
+              <ion-select-option value="website">Website</ion-select-option>
+            </ion-select>
+            <ion-input placeholder="Link" formControlName="url"></ion-input>
+          </ion-item>
+          }
+
+          <ion-button class="ion-margin-top" (click)="addSocialMedia()"
+            >Add Link</ion-button
+          >
+        </ion-list>
+
+        @if(links.length) {
+        <ion-button
+          class="ion-margin-top"
+          [disabled]="isInvalid()"
+          (click)="saveSocialMediaLinks()"
+          >Save</ion-button
+        >
+        }
+      </div>
+      } @else {
+      <div class="ion-margin-top">
+        @if (restaurantData?.socialMediaLinks?.length) {
+        <ion-list lines="full">
+          @for (link of restaurantData?.socialMediaLinks; track link.network) {
+          <ion-item>
+            <ion-icon slot="start" [name]="'logo-' + link.network" />
+            <ion-label>
+              <a [href]="link.url | ensureProtocol" target="_blank">{{
+                link.network | titlecase
+              }}</a>
+            </ion-label>
+          </ion-item>
+          }
+        </ion-list>
+        }
+      </div>
+      }
+
+      <div class="ion-margin-top">
+        <bt-map [position]="position()" readonly />
+      </div>
+    </div>
+
+    <div>
+      @for (bite of bites(); track bite.id) {
+      <bt-bite
+        [bite]="bite"
+        [userId]="userId()"
+        (biteClick)="biteClick.emit($event)"
+      />
+      }
     </div>
   </ion-content>
 </ta-page>

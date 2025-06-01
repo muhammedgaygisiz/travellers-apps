@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
-import { Bite, Restaurant } from 'model';
+import { Bite, Link, Restaurant } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 
 @Injectable({
@@ -62,5 +62,12 @@ export class RestaurantService {
 
   biteClicked(bite: Bite) {
     this.navController.navigateForward(['bite', bite.id]);
+  }
+
+  submitSocialMediaLinks({ links }: Partial<{ links: Link[] }>) {
+    const restaurant = this.restaurant();
+    if (restaurant && links) {
+      this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
+    }
   }
 }

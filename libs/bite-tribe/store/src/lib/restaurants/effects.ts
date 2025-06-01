@@ -15,6 +15,7 @@ import {
   noRestaurantFound,
   loadedRestaurantsFromApi,
   saveNewRestaurant,
+  saveSocialMediaLinksForRestaurant,
 } from './actions';
 
 @Injectable()
@@ -57,6 +58,18 @@ export class RestaurantEffects {
         ofType(saveNewRestaurant),
         tap(({ restaurant }) => {
           this.api.saveNewRestaurant(restaurant);
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  saveSocialMediaLinksToFirestore$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(saveSocialMediaLinksForRestaurant),
+        tap(({ restaurantId, links }) => {
+          this.api.saveSocialMediaLinksForRestaurant(restaurantId, links);
         })
       );
     },

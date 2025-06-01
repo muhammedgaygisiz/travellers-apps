@@ -1,5 +1,6 @@
 import { Geopoint } from './geopoint';
 import { Bite } from './bite';
+import { Link } from './link';
 
 export interface Restaurant {
   id: string;
@@ -13,4 +14,6 @@ export interface Restaurant {
   unsaved?: boolean;
   biteIds?: string[];
   bites?: Bite[];
+
+  socialMediaLinks?: Link[];
 }

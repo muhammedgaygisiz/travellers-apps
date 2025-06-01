@@ -91,7 +91,7 @@ export class RestaurantComponent {
     const restaurant = this.restaurant();
     const socialMediaLinks = restaurant?.socialMediaLinks;
     if (socialMediaLinks) {
-      this.links.controls = [];
+      this.links.clear();
 
       for (const socialMediaLink of socialMediaLinks) {
         this.links.push(

@@ -85,7 +85,7 @@ export class AuthEffects {
         this.login$(authCreds).pipe(
           map(() => loginSucceeded()),
           catchError((err) => {
-            console.log('#mo error login: ', err);
+            console.debug('#mo error login: ', err);
             return of(loginFailed());
           })
         )
@@ -126,7 +126,7 @@ export class AuthEffects {
       mergeMap(() =>
         this.registerWithGoogleAccount$().pipe(
           map((result) => {
-            console.log('#mo signInResult', result);
+            console.debug('#mo signInResult', result);
             return loginSucceeded();
           }),
           tap(() => this.navController.navigateBack(['/'])),
@@ -144,7 +144,7 @@ export class AuthEffects {
       mergeMap(() =>
         this.registerWithAppleAccount$().pipe(
           map((result) => {
-            console.log('#mo signInResult', result);
+            console.debug('#mo signInResult', result);
             return loginSucceeded();
           }),
           tap(() => this.navController.navigateBack(['/'])),
@@ -162,7 +162,7 @@ export class AuthEffects {
       mergeMap(() =>
         this.registerWithFacebookAccount$().pipe(
           map((result) => {
-            console.log('#mo signInResult', result);
+            console.debug('#mo signInResult', result);
             return loginSucceeded();
           }),
           tap(() => this.navController.navigateBack(['/'])),
@@ -179,7 +179,7 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(loginSucceeded),
         tap(() => {
-          console.log('#mo auth signInSuccessful');
+          console.debug('#mo auth signInSuccessful');
           if (this.pageAfterLogin) {
             this.navController.navigateBack([this.pageAfterLogin]);
             return;

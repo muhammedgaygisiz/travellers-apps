@@ -7,7 +7,14 @@ import {
   provideFirestoreUtils,
 } from 'ta-firestore';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
-import { provideRouterStore, routerReducer } from '@ngrx/router-store';
+import {
+  provideRouterStore,
+  routerCancelAction,
+  routerNavigatedAction,
+  routerNavigationAction,
+  routerReducer,
+  routerRequestAction,
+} from '@ngrx/router-store';
 import { BiteTribeStoreService } from './bite-tribe-store.service';
 import { RouterEffects } from './router/effects';
 import { BiteEffects } from './bites/effects';
@@ -24,6 +31,7 @@ import { LikeEffects } from './likes/effects';
 import { MenuEffects } from './menus/effects';
 import { FirebaseOptions } from '@angular/fire/app';
 import { loadedBitesFromApi } from './bites/actions';
+import { loadedRestaurantsFromApi } from './restaurants/actions';
 
 const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
@@ -38,15 +46,29 @@ const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
 });
 
 const actionSanitizer = (action: Action) => {
-  if (
-    action.type === loadedBitesFromApi.type &&
-    (action as any).bites.length > 0
-  ) {
+  const isLoadedBitesWithData =
+    action.type === loadedBitesFromApi.type && (action as any).bites.length > 0;
+
+  if (isLoadedBitesWithData) {
     return {
       ...action,
       bites: (action as any).bites.map((bite: any) => ({
         ...bite,
-        image: bite.image ? '...' : null, // Sanitize image data
+        image: bite.image ? '...' : null,
+      })),
+    };
+  }
+
+  const isLoadedRestaurantsWithData =
+    action.type === loadedRestaurantsFromApi.type &&
+    (action as any).restaurants.length > 0;
+
+  if (isLoadedRestaurantsWithData) {
+    return {
+      ...action,
+      restaurants: (action as any).restaurants.map((restaurant: any) => ({
+        ...restaurant,
+        image: restaurant.image ? '...' : null,
       })),
     };
   }
@@ -71,6 +93,8 @@ const stateSanitizer = (state: any) => {
         }),
       },
     };
+
+    return sanitizedState;
   }
 
   if (state.restaurants?.ids.length > 0) {
@@ -87,6 +111,8 @@ const stateSanitizer = (state: any) => {
         }),
       },
     };
+
+    return sanitizedState;
   }
 
   return sanitizedState;
@@ -108,8 +134,12 @@ export const provideBiteTribeStore = (environment: Environment) => [
     ? provideStoreDevtools({
         actionSanitizer,
         stateSanitizer,
-        trace: true,
-        traceLimit: 10,
+        actionsBlocklist: [
+          routerRequestAction.type,
+          routerNavigationAction.type,
+          routerCancelAction.type,
+          routerNavigatedAction.type,
+        ],
       })
     : [],
   provideRouterStore(),

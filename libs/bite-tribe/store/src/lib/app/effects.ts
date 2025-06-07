@@ -12,7 +12,7 @@ import {
   saveSettings,
 } from './actions';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { catchError, filter, from, map, of, switchMap, take, tap } from 'rxjs';
+import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -22,6 +22,7 @@ const IGNORED_PAGES_FOR_GPS = [
   '/login',
   '/registration',
   '/settings',
+  '/bite/',
 ];
 
 @Injectable()
@@ -44,7 +45,7 @@ export class AppEffect {
       filter(
         ({ payload }) => !IGNORED_PAGES_FOR_GPS.includes(payload.event.url)
       ),
-      switchMap(() => from(getCurrentPosition(this.platform)).pipe(take(1))),
+      switchMap(() => getCurrentPosition(this.platform)),
       map((currentPosition) =>
         loadedGpsPosition({ position: currentPosition })
       ),

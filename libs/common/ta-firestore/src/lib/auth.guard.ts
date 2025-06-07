@@ -10,7 +10,7 @@ export const authGuard: CanActivateFn = () => {
 
   return authService.isLoggedIn$.pipe(
     tap((isLoggedIn) => {
-      console.log('#mo auth isLoggedIn', isLoggedIn);
+      console.debug('#mo auth isLoggedIn', isLoggedIn);
       if (!isLoggedIn) {
         navController.navigateRoot(['login']);
       }

@@ -1,3 +1,12 @@
+ion-card,
+ion-searchbar,
+ion-button,
+ion-header,
+ion-footer {
+  box-shadow: none !important;
+  --box-shadow: none !important;
+}
+
 @mixin no-number-arrows {
   appearance: textfield;
 

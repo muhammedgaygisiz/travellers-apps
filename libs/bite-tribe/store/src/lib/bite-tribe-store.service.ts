@@ -3,10 +3,10 @@ import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
 import {
+  cacheBite,
+  saveExistingBite,
   saveNewBite,
   saveTags,
-  saveExistingBite,
-  cacheBite,
 } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bite, bites, cachedBite } from './bites/selectors';
@@ -24,9 +24,9 @@ import { Bite, Link, Menu, Restaurant, Settings } from 'model';
 import { currency, gpsPosition, settings } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
-  setRestaurantToCreate,
   saveNewRestaurant,
   saveSocialMediaLinksForRestaurant,
+  setRestaurantToCreate,
 } from './restaurants/actions';
 import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
 

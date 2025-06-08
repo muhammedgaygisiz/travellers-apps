@@ -1,43 +1,40 @@
 @let biteData = bite();
 
-<div class="container">
-  <div class="bite-container">
-    <ion-card>
-      <div class="card-content">
-        <div class="card-image">
-          <img alt="Dish" [src]="biteData?.image" />
-        </div>
-        <div class="card-details">
-          <ion-card-header>
-            <ion-card-subtitle
-              class="restaurant-name"
-              (click)="restaurantClick.emit(biteData)"
-              >{{ biteData?.place }}
-            </ion-card-subtitle>
-            <ion-card-title
-              class="link-title ion-padding-bottom"
-              (click)="biteClick.emit(biteData)"
-            >
-              <span class="bite-title">
-                {{ biteData?.name }}
-              </span>
-            </ion-card-title>
-          </ion-card-header>
+<ion-card>
+  <div class="card-content">
+    <div class="card-image">
+      <img alt="Dish" [src]="biteData?.image | toBlobUrl" loading="lazy" />
+    </div>
+    <div class="card-details">
+      <ion-card-header>
+        <ion-card-subtitle
+          class="restaurant-name"
+          (click)="restaurantClick.emit(biteData)"
+          >{{ biteData?.place }}
+        </ion-card-subtitle>
 
-          <ion-card-content>
-            {{ biteData?.distance | toMetric }}
-            @if(!showEditButton()) {
-            <bt-likes
-              [bite]="biteData"
-              [userId]="userId()"
-              (likeButtonClick)="likeButtonClick.emit($event)"
-            />
-            } @if (showEditButton()) {
-            <ion-button (click)="gotoEdit.emit(biteData)">Edit</ion-button>
-            }
-          </ion-card-content>
-        </div>
-      </div>
-    </ion-card>
+        <ion-card-title
+          class="link-title ion-padding-bottom"
+          (click)="biteClick.emit(biteData)"
+        >
+          <span class="bite-title">
+            {{ biteData?.name }}
+          </span>
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        {{ biteData?.distance | toMetric }}
+        @if (!showEditButton()) {
+        <bt-likes
+          [bite]="biteData"
+          [userId]="userId()"
+          (likeButtonClick)="likeButtonClick.emit($event)"
+        />
+        } @if (showEditButton()) {
+        <ion-button (click)="gotoEdit.emit(biteData)">Edit</ion-button>
+        }
+      </ion-card-content>
+    </div>
   </div>
-</div>
+</ion-card>

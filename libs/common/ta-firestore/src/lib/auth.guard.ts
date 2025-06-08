@@ -1,18 +1,17 @@
-import { CanActivateFn } from '@angular/router';
+import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from './auth.service';
-import { tap } from 'rxjs';
-import { NavController } from '@ionic/angular';
+import { map } from 'rxjs';
 
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
-  const navController = inject(NavController);
+  const router = inject(Router);
 
-  return authService.isLoggedIn$.pipe(
-    tap((isLoggedIn) => {
-      console.log('#mo auth isLoggedIn', isLoggedIn);
-      if (!isLoggedIn) {
-        navController.navigateRoot(['login']);
+  return authService.authStateChange$.pipe(
+    map((authState) => {
+      // console.debug('#mo auth authState', authState);
+      if (!authState) {
+        return router.parseUrl('/start');
       }
 
       return true;

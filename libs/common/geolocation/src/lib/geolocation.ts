@@ -1,5 +1,6 @@
 import { Platform } from '@ionic/angular';
 import { Geolocation } from '@capacitor/geolocation';
+import { from, Observable } from 'rxjs';
 
 const getGeoLocationFromWebPlatform = (): Promise<GeolocationPosition> => {
   return new Promise((resolve, reject) => {
@@ -31,10 +32,10 @@ const getGeoLocationFromNativePlatform = async () => {
   });
 };
 
-export const getCurrentPosition = (platform: Platform) => {
+export const getCurrentPosition = (platform: Platform): Observable<any> => {
   if (platform.is('capacitor')) {
-    return getGeoLocationFromNativePlatform();
+    return from(getGeoLocationFromNativePlatform());
   }
 
-  return getGeoLocationFromWebPlatform();
+  return from(getGeoLocationFromWebPlatform());
 };

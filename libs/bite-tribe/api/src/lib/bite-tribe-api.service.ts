@@ -1,34 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import {
-  BehaviorSubject,
-  bufferTime,
-  EMPTY,
-  filter,
-  from,
-  map,
-  pipe,
-  skipWhile,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { BehaviorSubject, EMPTY, from, skipWhile, switchMap } from 'rxjs';
 import { AuthService } from 'ta-firestore';
 import { Menu, Restaurant, Settings } from 'model';
 
 const BITE_COLLECTION = 'bites';
+const LIKES_COLLECTION_GROUP = 'likes';
 const REVIEW_COLLECTION = 'reviews';
 const RESTAURANT_COLLECTION = 'restaurants';
 const SETTINGS_COLLECTION = 'settings';
 const MENU_COLLECTION = 'menus';
-
-const clearListeners = () =>
-  pipe(
-    tap((isLoggedIn) => {
-      if (!isLoggedIn) {
-        FirebaseFirestore.removeAllListeners();
-      }
-    })
-  );
 
 @Injectable({
   providedIn: 'root',
@@ -46,10 +27,9 @@ export class BiteTribeApiService {
   private readonly likesChannel$ = new BehaviorSubject<any[]>([]);
 
   public allBites$ = this.authService.isLoggedIn$.pipe(
-    clearListeners(),
     skipWhile((isLoggedIn) => !isLoggedIn),
     switchMap(() => {
-      console.log('#mo - Start Listener for Bites');
+      // console.debug('#mo - Start Listener for Bites');
       this.startBitesListener();
 
       return this.bitesChannel$;
@@ -57,30 +37,19 @@ export class BiteTribeApiService {
   );
 
   public allLikes$ = this.authService.isLoggedIn$.pipe(
-    clearListeners(),
     skipWhile((isLoggedIn) => !isLoggedIn),
     switchMap(() => {
-      console.log('#mo - Start Listener for Likes');
+      // console.debug('#mo - Start Listener for Likes');
+      this.startLikesListener();
 
-      return this.likesChannel$.pipe(
-        bufferTime(1000),
-        filter((likes) => !!likes.length),
-        map((bufferedLikes) => {
-          console.log(bufferedLikes);
-
-          return bufferedLikes.length
-            ? bufferedLikes.reduce((acc, item) => [...acc, ...item], [])
-            : [];
-        })
-      );
+      return this.likesChannel$;
     })
   );
 
   public allRestaurants$ = this.authService.isLoggedIn$.pipe(
-    clearListeners(),
     skipWhile((isLoggedIn) => !isLoggedIn),
     switchMap(() => {
-      console.log('#mo - Start Listener for Restaurants');
+      // console.debug('#mo - Start Listener for Restaurants');
       this.startRestaurantsListener();
 
       return this.restaurantsChannel$;
@@ -88,12 +57,15 @@ export class BiteTribeApiService {
   );
 
   private async startRestaurantsListener() {
-    console.log('#mo Fetching bites from Firestore');
+    // console.debug('#mo Fetching bites from Firestore');
 
     await FirebaseFirestore.addCollectionSnapshotListener(
       { reference: RESTAURANT_COLLECTION },
       async (restaurantsDocs) => {
-        console.log('#mo Fetched restaurants from Firestore', restaurantsDocs);
+        // console.debug(
+        //   '#mo Fetched restaurants from Firestore',
+        //   restaurantsDocs
+        // );
 
         const restaurants =
           restaurantsDocs?.snapshots.map((doc) => ({
@@ -107,10 +79,9 @@ export class BiteTribeApiService {
   }
 
   public allMenus$ = this.authService.isLoggedIn$.pipe(
-    clearListeners(),
     skipWhile((isLoggedIn) => !isLoggedIn),
     switchMap(() => {
-      console.log('#mo - Start Listener for Menus');
+      // console.debug('#mo - Start Listener for Menus');
       this.startMenusListener();
 
       return this.menusChannel$;
@@ -118,12 +89,12 @@ export class BiteTribeApiService {
   );
 
   private async startMenusListener() {
-    console.log('#mo Fetching menus from Firestore');
+    // console.debug('#mo Fetching menus from Firestore');
 
     await FirebaseFirestore.addCollectionSnapshotListener(
       { reference: MENU_COLLECTION },
       async (menusDocs) => {
-        console.log('#mo Fetched menus from Firestore', menusDocs);
+        // console.debug('#mo Fetched menus from Firestore', menusDocs);
 
         const menus =
           menusDocs?.snapshots.map((doc) => ({
@@ -139,7 +110,7 @@ export class BiteTribeApiService {
   public settings$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),
     switchMap(() => {
-      console.log('#mo - Start Listener for Settings');
+      // console.debug('#mo - Start Listener for Settings');
       this.startSettingsListener();
 
       return this.settingsChannel$;
@@ -147,12 +118,12 @@ export class BiteTribeApiService {
   );
 
   private async startBitesListener() {
-    console.log('#mo Fetching bites from Firestore');
+    // console.debug('#mo Fetching bites from Firestore');
 
     await FirebaseFirestore.addCollectionSnapshotListener(
       { reference: BITE_COLLECTION },
       async (biteDocs) => {
-        console.log('#mo Fetched bites from Firestore', biteDocs);
+        // console.debug('#mo Fetched bites from Firestore', biteDocs);
 
         const bites =
           biteDocs?.snapshots.map((doc) => ({
@@ -161,20 +132,16 @@ export class BiteTribeApiService {
             likes: [],
           })) || [];
 
-        bites.forEach((bite) => this.startLikesListener(bite));
+        // bites.forEach((bite) => this.startLikesListener(bite));
 
         this.bitesChannel$.next(bites);
       }
     );
   }
 
-  private startLikesListener(bite: {
-    [p: string]: any;
-    id: string;
-    likes: any[];
-  }) {
-    FirebaseFirestore.addCollectionSnapshotListener(
-      { reference: `${BITE_COLLECTION}/${bite.id}/likes` },
+  private startLikesListener() {
+    FirebaseFirestore.addCollectionGroupSnapshotListener(
+      { reference: `${LIKES_COLLECTION_GROUP}` },
       (likeDocs: any) => {
         const likes =
           likeDocs?.snapshots.map((likeDoc: any) => ({
@@ -234,7 +201,7 @@ export class BiteTribeApiService {
   }
 
   private async startReviewListener(biteId: string) {
-    console.log('#mo Fetching reviews from Firestore');
+    // console.debug('#mo Fetching reviews from Firestore');
 
     await FirebaseFirestore.addCollectionSnapshotListener(
       {
@@ -252,7 +219,7 @@ export class BiteTribeApiService {
         },
       },
       (docs) => {
-        console.log('#mo Fetched reviews from Firestore', docs);
+        // console.debug('#mo Fetched reviews from Firestore', docs);
 
         const reviews =
           docs?.snapshots.map((doc) => ({
@@ -271,7 +238,7 @@ export class BiteTribeApiService {
     await FirebaseFirestore.addDocumentSnapshotListener(
       { reference: `${SETTINGS_COLLECTION}/${user?.uid}` },
       async (settingsDoc) => {
-        console.log('#mo Fetched settings from Firestore', settingsDoc);
+        // console.debug('#mo Fetched settings from Firestore', settingsDoc);
 
         const settings = settingsDoc?.snapshot.data as any;
         this.settingsChannel$.next(settings);
@@ -321,10 +288,9 @@ export class BiteTribeApiService {
 
   reviewsByBiteId(biteId: string) {
     return this.authService.isLoggedIn$.pipe(
-      clearListeners(),
       skipWhile((isLoggedIn) => !isLoggedIn),
       switchMap(() => {
-        console.log('#mo - Start Listener for Reviews');
+        // console.debug('#mo - Start Listener for Reviews');
         this.startReviewListener(biteId);
 
         return this.reviewsChannel$;
@@ -334,10 +300,9 @@ export class BiteTribeApiService {
 
   loadRestaurant(restaurantId: string) {
     return this.authService.isLoggedIn$.pipe(
-      clearListeners(),
       skipWhile((isLoggedIn) => !isLoggedIn),
       switchMap(() => {
-        console.log('#mo - Start Listener for Restaurant');
+        // console.debug('#mo - Start Listener for Restaurant');
         if (restaurantId) {
           return from(this.getRestaurantById(restaurantId));
         }
@@ -398,7 +363,7 @@ export class BiteTribeApiService {
   async saveNewReview(payload: { review: string; biteId: string }) {
     const user = await this.getUser();
 
-    const addDocumentResult = await FirebaseFirestore.addDocument({
+    await FirebaseFirestore.addDocument({
       reference: REVIEW_COLLECTION,
       data: {
         review: payload.review,
@@ -409,7 +374,7 @@ export class BiteTribeApiService {
       },
     });
 
-    console.log('#mo', addDocumentResult);
+    // console.debug('#mo', addDocumentResult);
   }
 
   async saveSettings(settings: any) {
@@ -419,7 +384,7 @@ export class BiteTribeApiService {
         throw new Error('No user logged in');
       }
 
-      const updateDocumentResult = await FirebaseFirestore.setDocument({
+      await FirebaseFirestore.setDocument({
         reference: `${SETTINGS_COLLECTION}/${user.uid}`,
         data: {
           ...settings,
@@ -427,7 +392,7 @@ export class BiteTribeApiService {
         },
       });
 
-      console.log('#mo', updateDocumentResult);
+      // console.debug('#mo', updateDocumentResult);
     } catch (error) {
       console.error('Error saving settings:', error);
       throw error;
@@ -436,10 +401,9 @@ export class BiteTribeApiService {
 
   loadMenu(menuId: string) {
     return this.authService.isLoggedIn$.pipe(
-      clearListeners(),
       skipWhile((isLoggedIn) => !isLoggedIn),
       switchMap(() => {
-        console.log('#mo - Start Listener for Menu');
+        // console.debug('#mo - Start Listener for Menu');
         if (menuId) {
           return from(this.getMenuById(menuId));
         }
@@ -471,7 +435,7 @@ export class BiteTribeApiService {
   }
 
   async saveNewRestaurant(restaurant: Restaurant) {
-    console.log('Restaurant to be saved: ', restaurant);
+    // console.debug('Restaurant to be saved: ', restaurant);
     const { biteIds, ...restaurantToBeSaved } = restaurant;
 
     // Add the new restaurant

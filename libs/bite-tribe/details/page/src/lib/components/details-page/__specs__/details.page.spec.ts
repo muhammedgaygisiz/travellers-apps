@@ -4,7 +4,15 @@ import { PageComponent } from 'common/ui/page';
 import { By } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
+import { ToBlobUrlPipe } from 'image-compression';
+
+@Pipe({ name: 'toBlobUrl' })
+class MockToBlobUrlPipe implements PipeTransform {
+  transform(value: string) {
+    return value;
+  }
+}
 
 describe('DetailsPage', () => {
   let component: DetailsPage;
@@ -19,7 +27,12 @@ describe('DetailsPage', () => {
         PageComponent,
         DetailsPage,
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(DetailsPage, {
+        remove: { imports: [ToBlobUrlPipe] },
+        add: { imports: [MockToBlobUrlPipe] },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(DetailsPage);
     component = fixture.componentInstance;
@@ -93,8 +106,8 @@ describe('DetailsPage', () => {
       fixture.detectChanges();
 
       // Assert
-      const img = fixture.debugElement.query(By.css('ion-img'));
-      expect(img.attributes['ng-reflect-src']).toBe('test.jpg');
+      const img = fixture.debugElement.query(By.css('img'));
+      expect(img.attributes['src']).toBe('test.jpg');
 
       const content = fixture.debugElement.nativeElement.textContent;
       expect(content).toContain('Pizza');

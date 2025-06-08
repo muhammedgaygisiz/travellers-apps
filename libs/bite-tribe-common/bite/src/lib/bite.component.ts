@@ -17,6 +17,7 @@ import { Bite } from 'model';
 import { PopoverController } from '@ionic/angular';
 import { ToMetricPipe } from 'distance-pipe';
 import { LikesComponent } from './likes/likes.component';
+import { ToBlobUrlPipe } from 'image-compression';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -32,6 +33,7 @@ import { LikesComponent } from './likes/likes.component';
     ToMetricPipe,
     LikesComponent,
     IonButton,
+    ToBlobUrlPipe,
   ],
   providers: [PopoverController],
   changeDetection: ChangeDetectionStrategy.OnPush,

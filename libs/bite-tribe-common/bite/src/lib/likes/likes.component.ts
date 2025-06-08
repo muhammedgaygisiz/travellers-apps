@@ -11,6 +11,12 @@ import { Bite } from 'model';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
 import { PopoverController } from '@ionic/angular';
 
+const emojiMap: Record<string, string> = {
+  thumbup: '👍',
+  drooling: '🤤',
+  mindblown: '🤯',
+};
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -45,13 +51,7 @@ export class LikesComponent {
     const bite = this.bite();
     if (!bite?.likes) return [];
 
-    const emojiMap: Record<string, string> = {
-      thumbup: '👍',
-      drooling: '🤤',
-      mindblown: '🤯',
-    };
-
-    return [...new Set(bite.likes.map((like) => emojiMap[like.likeType]))];
+    return bite.likes.map((like) => emojiMap[like.likeType]);
   });
 
   async openLikeOptions($event: MouseEvent) {

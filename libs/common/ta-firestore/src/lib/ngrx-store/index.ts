@@ -8,6 +8,7 @@ import {
   logout,
   register,
   logoutSucceeded,
+  loadedUser,
 } from './actions';
 import {
   selectIsAuthenticated,
@@ -32,4 +33,5 @@ export const fromAuth = {
   logoutSucceeded,
   selectUserId,
   selectUser,
+  loadedUser,
 };

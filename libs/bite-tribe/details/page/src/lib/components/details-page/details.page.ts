@@ -11,7 +11,6 @@ import {
   IonButton,
   IonChip,
   IonContent,
-  IonImg,
   IonInput,
   IonItem,
   IonLabel,
@@ -28,6 +27,7 @@ import { map } from 'rxjs';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
 import { ToMetricPipe } from 'distance-pipe';
 import { MapComponent } from 'bite-tribe-common/map';
+import { ToBlobUrlPipe } from 'image-compression';
 
 @Component({
   selector: 'details-page',
@@ -37,7 +37,6 @@ import { MapComponent } from 'bite-tribe-common/map';
   imports: [
     PageComponent,
     IonContent,
-    IonImg,
     CurrencyPipe,
     IonChip,
     IonList,
@@ -53,6 +52,7 @@ import { MapComponent } from 'bite-tribe-common/map';
     IonText,
     ToMetricPipe,
     MapComponent,
+    ToBlobUrlPipe,
   ],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix

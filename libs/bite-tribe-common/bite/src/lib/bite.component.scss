@@ -1,46 +1,49 @@
 :host {
-  .container {
-    position: relative;
-  }
+  ion-card {
+    margin-top: 0;
 
-  .card-content {
-    display: flex;
-    align-items: stretch;
-  }
-
-  .card-image {
-    flex: 0 0 50%;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    ::ng-deep {
+      margin-right: 0;
+      margin-left: 0;
     }
-  }
 
-  .card-details {
-    flex: 0 0 50%;
-
-    display: flex;
-    flex-direction: column;
-
-    ion-card-content {
-      flex: 1;
+    .card-content {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-  }
+      align-items: stretch;
 
-  .bite-title {
-    @media (max-width: 768px) {
-      font-size: 1.25rem;
-    }
-  }
+      .card-image {
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
 
-  .restaurant-name {
-    text-decoration: underline;
-    cursor: pointer;
+      .card-details {
+        flex: 0 0 50%;
+
+        display: flex;
+        flex-direction: column;
+
+        ion-card-subtitle.restaurant-name {
+          text-decoration: underline;
+          cursor: pointer;
+        }
+
+        span.bite-title {
+          @media (max-width: 768px) {
+            font-size: 1.25rem;
+          }
+        }
+
+        ion-card-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+      }
+    }
   }
 }
 

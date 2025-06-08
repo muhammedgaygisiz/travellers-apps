@@ -179,7 +179,7 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(loginSucceeded),
         tap(() => {
-          console.debug('#mo auth signInSuccessful');
+          // console.debug('#mo auth signInSuccessful');
           if (this.pageAfterLogin) {
             this.navController.navigateBack([this.pageAfterLogin]);
             return;

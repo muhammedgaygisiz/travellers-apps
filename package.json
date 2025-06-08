@@ -31,6 +31,7 @@
   "dependencies": {
     "@angular/animations": "19.2.4",
     "@angular/cdk": "19.2.3",
+    "@angular/cdk-experimental": "19.2.3",
     "@angular/common": "19.2.4",
     "@angular/compiler": "19.2.4",
     "@angular/core": "19.2.4",

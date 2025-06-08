@@ -2,7 +2,6 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
-  inject,
   input,
   output,
 } from '@angular/core';
@@ -16,9 +15,8 @@ import {
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
-import { ScrollingModule, ViewportRuler } from '@angular/cdk/scrolling';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CdkAutoSizeVirtualScroll } from '@angular/cdk-experimental/scrolling';
-import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'bt-home',
@@ -34,13 +32,10 @@ import { AsyncPipe } from '@angular/common';
     IonText,
     ScrollingModule,
     CdkAutoSizeVirtualScroll,
-    AsyncPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteTribeHomeComponent {
-  viewportRuler = inject(ViewportRuler);
-
   bites = input<any[]>();
   enableBackButton = input<boolean>(false);
   userId = input<string>();

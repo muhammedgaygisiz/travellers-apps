@@ -6,7 +6,11 @@
   [enableBackButton]="true"
 >
   <ion-content>
-    <ion-img [src]="biteData?.image" class="dish-image" />
+    <img
+      [src]="biteData?.image | toBlobUrl"
+      class="dish-image"
+      loading="lazy"
+    />
 
     <div class="ion-padding">
       <h1>{{ biteData?.name }}</h1>

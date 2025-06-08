@@ -51,7 +51,7 @@ export class LikesComponent {
     const bite = this.bite();
     if (!bite?.likes) return [];
 
-    return bite.likes.map((like) => emojiMap[like.likeType]);
+    return [...new Set(bite.likes.map((like) => emojiMap[like.likeType]))];
   });
 
   async openLikeOptions($event: MouseEvent) {

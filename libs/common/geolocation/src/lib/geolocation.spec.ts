@@ -1,6 +1,7 @@
 import { Platform } from '@ionic/angular';
 import { Geolocation } from '@capacitor/geolocation';
 import { getCurrentPosition } from './geolocation';
+import { lastValueFrom } from 'rxjs';
 
 jest.mock('@capacitor/geolocation');
 
@@ -42,7 +43,7 @@ describe('Geolocation Service', () => {
         mockPosition
       );
 
-      const result = await getCurrentPosition(platform);
+      const result = await lastValueFrom(getCurrentPosition(platform));
 
       expect(platform.is).toHaveBeenCalledWith('capacitor');
       expect(Geolocation.checkPermissions).toHaveBeenCalled();
@@ -81,7 +82,7 @@ describe('Geolocation Service', () => {
         .spyOn(global, 'navigator', 'get')
         .mockReturnValue(mockNavigator as any);
 
-      const result = await getCurrentPosition(platform);
+      const result = await lastValueFrom(getCurrentPosition(platform));
 
       expect(platform.is).toHaveBeenCalledWith('capacitor');
       expect(mockNavigator.geolocation.getCurrentPosition).toHaveBeenCalled();
@@ -92,7 +93,7 @@ describe('Geolocation Service', () => {
       (platform.is as jest.Mock).mockReturnValue(false);
       jest.spyOn(global, 'navigator', 'get').mockReturnValue({} as any);
 
-      await expect(getCurrentPosition(platform)).rejects.toThrow(
+      await expect(lastValueFrom(getCurrentPosition(platform))).rejects.toThrow(
         'Geolocation is not supported'
       );
     });

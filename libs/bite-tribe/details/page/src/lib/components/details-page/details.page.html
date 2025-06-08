@@ -30,9 +30,13 @@
       </div>
 
       <div class="ion-margin-bottom">
-        @for (tag of biteData?.tags; track tag) {
-        <ion-chip>{{ tag }}</ion-chip>
-        }
+        <ion-button fill="outline" shape="round">
+          <ion-icon slot="icon-only" name="add-outline" />
+        </ion-button>
+      </div>
+
+      <div class="ion-margin-bottom">
+        <tags [tags]="biteData?.tags" />
       </div>
 
       <ion-item lines="full">

@@ -9,8 +9,8 @@ import { PageComponent } from 'common/ui/page';
 import { Bite, Review } from 'model';
 import {
   IonButton,
-  IonChip,
   IonContent,
+  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
@@ -28,6 +28,7 @@ import { TimeAgoPipe } from './pipes/time-ago.pipe';
 import { ToMetricPipe } from 'distance-pipe';
 import { MapComponent } from 'bite-tribe-common/map';
 import { ToBlobUrlPipe } from 'image-compression';
+import { TagsComponent } from '../tags/tags.component';
 
 @Component({
   selector: 'details-page',
@@ -38,7 +39,6 @@ import { ToBlobUrlPipe } from 'image-compression';
     PageComponent,
     IonContent,
     CurrencyPipe,
-    IonChip,
     IonList,
     IonListHeader,
     IonLabel,
@@ -53,6 +53,8 @@ import { ToBlobUrlPipe } from 'image-compression';
     ToMetricPipe,
     MapComponent,
     ToBlobUrlPipe,
+    TagsComponent,
+    IonIcon,
   ],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix

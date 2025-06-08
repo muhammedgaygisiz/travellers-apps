@@ -21,6 +21,7 @@ import {
   restaurantOutline,
   downloadOutline,
   pizzaOutline,
+  addOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -46,5 +47,6 @@ export const addNecessaryIcons = () => {
     restaurantOutline,
     downloadOutline,
     pizzaOutline,
+    addOutline,
   });
 };

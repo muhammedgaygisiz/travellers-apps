@@ -1,10 +1,11 @@
 <ta-page
   [showHeaderMenu]="true"
   [showLanguages]="false"
-  [showAddButton]="true"
+  [showAddButton]="showAddButton()"
   [showSettingsButton]="true"
   [showMyBites]="true"
   [enableBackButton]="enableBackButton()"
+  [showFooter]="showFooter()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
   (gotoSettings)="gotoSettings.emit()"

@@ -41,6 +41,8 @@ export class BiteTribeHomeComponent {
   userId = input<string>();
   title = input('Bites');
   editableBites = input(false, { transform: booleanAttribute });
+  showFooter = input(true);
+  showAddButton = input(true);
 
   readonly logoutClick = output();
   readonly addButtonClick = output();

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { DetailsService } from '../details.service';
 import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
 import { signal } from '@angular/core';
-import { Bite, Bucketlist } from 'model';
+import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
 
 describe('DetailsService', () => {
   let service: DetailsService;
@@ -238,8 +238,8 @@ describe('DetailsService', () => {
       });
       service = TestBed.inject(DetailsService);
 
-      const params = {
-        bucketListId: 'list123',
+      const params: RemoveBiteFromBucketlistParams = {
+        bucketlistId: 'list123',
         biteId: 'bite123',
       };
 

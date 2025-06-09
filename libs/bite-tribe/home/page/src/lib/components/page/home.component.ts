@@ -15,8 +15,6 @@ import {
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
-import { ScrollingModule } from '@angular/cdk/scrolling';
-import { CdkAutoSizeVirtualScroll } from '@angular/cdk-experimental/scrolling';
 
 @Component({
   selector: 'bt-home',
@@ -30,8 +28,6 @@ import { CdkAutoSizeVirtualScroll } from '@angular/cdk-experimental/scrolling';
     IonCard,
     IonCardContent,
     IonText,
-    ScrollingModule,
-    CdkAutoSizeVirtualScroll,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

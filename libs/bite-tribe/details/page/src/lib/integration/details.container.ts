@@ -11,7 +11,8 @@ import { DetailsService } from './details.service';
       [bucketlists]="service.bucketlists()"
       (submitNewTags)="service.saveNewTags($event)"
       (submitNewReview)="service.saveReview($event)"
-      (selectList)="service.selectList($event)"
+      (selectList)="service.addBiteToSelectedBucketList($event)"
+      (newList)="service.saveBiteToBucketListWithNewList($event)"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

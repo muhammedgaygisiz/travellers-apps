@@ -35,4 +35,11 @@ export class DetailsDataAccessService {
   saveToBucketList(saveToBucketListEvent: SaveToBucketListParams) {
     this.storeService.saveToBucketList(saveToBucketListEvent);
   }
+
+  createAndSaveToBucketList(param: {
+    bucketListName: string;
+    biteId: string | undefined;
+  }) {
+    this.storeService.createAndSaveToBucketList(param);
+  }
 }

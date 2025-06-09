@@ -22,6 +22,7 @@ import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
+  CreateAndSaveToBucketListParams,
   Link,
   Menu,
   Restaurant,
@@ -36,7 +37,10 @@ import {
   setRestaurantToCreate,
 } from './restaurants/actions';
 import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
-import { saveBiteIdToBucketList } from './bucketlists/actions';
+import {
+  createAndSaveBiteIdToBucketList,
+  saveBiteIdToBucketList,
+} from './bucketlists/actions';
 import { bucketlists } from './bucketlists/selectors';
 
 const unknownEntity = createAction(
@@ -176,5 +180,9 @@ export class BiteTribeStoreService implements StoreService {
 
   saveToBucketList(saveToBucketlistParams: SaveToBucketListParams) {
     this.store.dispatch(saveBiteIdToBucketList(saveToBucketlistParams));
+  }
+
+  createAndSaveToBucketList(params: CreateAndSaveToBucketListParams) {
+    this.store.dispatch(createAndSaveBiteIdToBucketList(params));
   }
 }

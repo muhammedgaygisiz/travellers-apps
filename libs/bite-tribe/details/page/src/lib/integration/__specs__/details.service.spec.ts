@@ -71,7 +71,7 @@ describe('DetailsService', () => {
     expect(mockDataAccessService.saveNewReview).toHaveBeenCalledTimes(1);
   });
 
-  describe('selectList', () => {
+  describe('addBiteToSelectedBucketList', () => {
     const mockBucketlist: Bucketlist = {
       id: 'list123',
       name: 'My List',
@@ -102,7 +102,7 @@ describe('DetailsService', () => {
       service = TestBed.inject(DetailsService);
 
       // Act
-      service.selectList(mockBucketlist);
+      service.addBiteToSelectedBucketList(mockBucketlist);
 
       // Assert
       expect(mockDataAccessService.saveToBucketList).toHaveBeenCalledWith({
@@ -131,7 +131,7 @@ describe('DetailsService', () => {
       service = TestBed.inject(DetailsService);
 
       // Act
-      service.selectList(mockBucketlist);
+      service.addBiteToSelectedBucketList(mockBucketlist);
 
       // Assert
       expect(mockDataAccessService.saveToBucketList).toHaveBeenCalledWith({

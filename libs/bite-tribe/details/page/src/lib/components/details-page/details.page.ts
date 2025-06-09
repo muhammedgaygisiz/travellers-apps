@@ -137,8 +137,8 @@ export class DetailsPage {
     this.reviewFormGroup.reset();
   }
 
-  onNewList() {
-    console.log('onNewList called');
+  onNewList(newListName: string) {
+    this.newList.emit(newListName);
   }
 
   async showBucketListsSelection($event: MouseEvent) {

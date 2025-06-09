@@ -7,4 +7,5 @@ export * from './lib/menu';
 export * from './lib/geopoint';
 export * from './lib/link';
 export * from './lib/save-to-bucket-list-params';
+export * from './lib/create-and-save-to-bucket-list-params';
 export * from './lib/bucketlist';

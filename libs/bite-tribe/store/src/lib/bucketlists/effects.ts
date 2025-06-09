@@ -6,7 +6,11 @@ import {
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { saveBiteIdToBucketList, loadedBucketlistsFromApi } from './actions';
+import {
+  saveBiteIdToBucketList,
+  loadedBucketlistsFromApi,
+  createAndSaveBiteIdToBucketList,
+} from './actions';
 import { map, switchMap, tap } from 'rxjs';
 
 @Injectable()
@@ -28,6 +32,18 @@ export class BucketListEffect {
         ofType(saveBiteIdToBucketList),
         tap((params) => {
           return this.api.saveBiteIdToBucketList(params);
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  createBucketlistAndSaveBiteIdToBucketListEffect$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(createAndSaveBiteIdToBucketList),
+        tap((params) => {
+          return this.api.createBucketListAndSaveBiteIdToBucketList(params);
         })
       );
     },

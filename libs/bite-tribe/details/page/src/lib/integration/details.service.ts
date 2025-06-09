@@ -18,11 +18,20 @@ export class DetailsService {
     this.dataAccess.saveNewReview(newReview);
   }
 
-  selectList(list: Bucketlist) {
+  addBiteToSelectedBucketList(list: Bucketlist) {
     const currBite = this.bite();
 
     this.dataAccess.saveToBucketList({
       bucketListId: list.id,
+      biteId: currBite?.id,
+    });
+  }
+
+  saveBiteToBucketListWithNewList(newListName: string) {
+    const currBite = this.bite();
+
+    this.dataAccess.createAndSaveToBucketList({
+      bucketListName: newListName,
       biteId: currBite?.id,
     });
   }

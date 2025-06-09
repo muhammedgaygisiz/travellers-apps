@@ -2,7 +2,13 @@ import { inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BehaviorSubject, EMPTY, from, skipWhile, switchMap } from 'rxjs';
 import { AuthService } from 'ta-firestore';
-import { Menu, Restaurant, SaveToBucketListParams, Settings } from 'model';
+import {
+  CreateAndSaveToBucketListParams,
+  Menu,
+  Restaurant,
+  SaveToBucketListParams,
+  Settings,
+} from 'model';
 
 const BITE_COLLECTION = 'bites';
 const BUCKETLIST_COLLECTION = 'bucketlists';
@@ -543,5 +549,20 @@ export class BiteTribeApiService {
         },
       });
     }
+  }
+
+  async createBucketListAndSaveBiteIdToBucketList(
+    params: CreateAndSaveToBucketListParams
+  ) {
+    const user = await this.getUser();
+
+    FirebaseFirestore.addDocument({
+      reference: BUCKETLIST_COLLECTION,
+      data: {
+        userId: user?.uid || '',
+        name: params.bucketListName,
+        biteIds: params.biteId ? [params.biteId] : [],
+      },
+    });
   }
 }

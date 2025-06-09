@@ -136,8 +136,23 @@ export class BiteTribeApiService {
   );
 
   private async startBucketlistsListener() {
+    const user = await this.getUser();
+
     await FirebaseFirestore.addCollectionSnapshotListener(
-      { reference: BUCKETLIST_COLLECTION },
+      {
+        reference: BUCKETLIST_COLLECTION,
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            {
+              type: 'where',
+              fieldPath: 'userId',
+              opStr: '==',
+              value: user?.uid,
+            },
+          ],
+        },
+      },
       async (bucketlistDocs) => {
         const bucketlists =
           bucketlistDocs?.snapshots.map((doc) => ({

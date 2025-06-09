@@ -71,6 +71,8 @@ export class PageComponent {
 
   showMyBites = input(false);
 
+  showMyBucketlists = input(false);
+
   fullWidth = input(false);
 
   appTitle = computed(() => {
@@ -121,6 +123,7 @@ export class PageComponent {
         showLanguages: this.showLanguages,
         showSettingsButton: this.showSettingsButton,
         showMyBites: this.showMyBites,
+        showMyBucketlists: this.showMyBucketlists,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,

@@ -12,6 +12,7 @@ import { DetailsService } from './details.service';
       (submitNewTags)="service.saveNewTags($event)"
       (submitNewReview)="service.saveReview($event)"
       (selectList)="service.addBiteToSelectedBucketList($event)"
+      (removeBiteFromBucketlist)="service.removeBiteFromBucketlist($event)"
       (newList)="service.saveBiteToBucketListWithNewList($event)"
     />
   `,

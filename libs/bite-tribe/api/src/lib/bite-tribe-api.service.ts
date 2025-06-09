@@ -5,6 +5,7 @@ import { AuthService } from 'ta-firestore';
 import {
   CreateAndSaveToBucketListParams,
   Menu,
+  RemoveBiteFromBucketlistParams,
   Restaurant,
   SaveToBucketListParams,
   Settings,
@@ -562,6 +563,26 @@ export class BiteTribeApiService {
         userId: user?.uid || '',
         name: params.bucketListName,
         biteIds: params.biteId ? [params.biteId] : [],
+      },
+    });
+  }
+
+  async removeBiteFromBucketlist({
+    bucketlistId,
+    biteId,
+  }: RemoveBiteFromBucketlistParams) {
+    const bucketListDoc = await FirebaseFirestore.getDocument({
+      reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
+    });
+
+    const newBiteIdListInBucketList = bucketListDoc?.snapshot?.data?.[
+      'biteIds'
+    ]?.filter((currBiteId: string) => currBiteId !== biteId);
+
+    FirebaseFirestore.updateDocument({
+      reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
+      data: {
+        biteIds: newBiteIdListInBucketList,
       },
     });
   }

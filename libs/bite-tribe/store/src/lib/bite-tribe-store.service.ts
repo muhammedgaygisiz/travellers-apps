@@ -25,6 +25,7 @@ import {
   CreateAndSaveToBucketListParams,
   Link,
   Menu,
+  RemoveBiteFromBucketlistParams,
   Restaurant,
   SaveToBucketListParams,
   Settings,
@@ -40,6 +41,7 @@ import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
 import {
   createAndSaveBiteIdToBucketList,
   saveBiteIdToBucketList,
+  removeBiteFromBucketlist,
 } from './bucketlists/actions';
 import { bucketlists } from './bucketlists/selectors';
 
@@ -184,5 +186,9 @@ export class BiteTribeStoreService implements StoreService {
 
   createAndSaveToBucketList(params: CreateAndSaveToBucketListParams) {
     this.store.dispatch(createAndSaveBiteIdToBucketList(params));
+  }
+
+  removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams) {
+    this.store.dispatch(removeBiteFromBucketlist(params));
   }
 }

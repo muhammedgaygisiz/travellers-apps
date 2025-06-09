@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
-import { Bucketlist } from 'model';
+import { Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -34,5 +34,9 @@ export class DetailsService {
       bucketListName: newListName,
       biteId: currBite?.id,
     });
+  }
+
+  removeBiteFromBucketlist($event: RemoveBiteFromBucketlistParams) {
+    this.dataAccess.removeBiteFromBucketlist($event);
   }
 }

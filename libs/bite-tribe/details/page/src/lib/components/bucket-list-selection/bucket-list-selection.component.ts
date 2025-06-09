@@ -11,7 +11,7 @@ import {
   IonItem,
   IonList,
 } from '@ionic/angular/standalone';
-import { Bite, Bucketlist } from 'model';
+import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
 import { IsInPipe } from '../../pipes/is-in.pipe';
 
 @Component({
@@ -19,7 +19,7 @@ import { IsInPipe } from '../../pipes/is-in.pipe';
     <ion-content class="ion-no-padding">
       <ion-list lines="none">
         @for (bucketList of bucketLists(); track bucketList) {
-        <ion-item [detail]="false" (click)="selectList.emit(bucketList)">
+        <ion-item [detail]="false" (click)="onBucketlistSelected(bucketList)">
           <ion-icon slot="start" [name]="bite() | isIn : bucketList" />
           {{ bucketList.name }}
         </ion-item>
@@ -48,6 +48,8 @@ export class BucketListSelectionComponent {
   // eslint-disable-next-line @typescript-eslint/no-empty-function,no-unused-vars
   onNewList = (newListName: string) => {};
 
+  removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
+
   public saveButton = [
     {
       text: 'Save',
@@ -65,5 +67,18 @@ export class BucketListSelectionComponent {
   onAlertDidDismiss($event: any) {
     const newListName = $event[0];
     this.onNewList(newListName);
+  }
+
+  onBucketlistSelected(bucketList: Bucketlist) {
+    const bite = this.bite();
+    if (bite && bucketList.biteIds.includes(bite.id)) {
+      this.removeBiteFromBucketlist.emit({
+        bucketlistId: bucketList.id,
+        biteId: bite.id,
+      });
+      return;
+    }
+
+    this.selectList.emit(bucketList);
   }
 }

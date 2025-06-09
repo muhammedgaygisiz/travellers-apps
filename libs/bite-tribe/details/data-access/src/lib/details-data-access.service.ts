@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { splitTags } from 'utils';
-import { SaveToBucketListParams } from 'model';
+import { RemoveBiteFromBucketlistParams, SaveToBucketListParams } from 'model';
 
 @Injectable({
   providedIn: 'root',
@@ -41,5 +41,9 @@ export class DetailsDataAccessService {
     biteId: string | undefined;
   }) {
     this.storeService.createAndSaveToBucketList(param);
+  }
+
+  removeBiteFromBucketlist($event: RemoveBiteFromBucketlistParams) {
+    this.storeService.removeBiteFromBucketlist($event);
   }
 }

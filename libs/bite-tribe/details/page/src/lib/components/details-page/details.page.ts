@@ -6,7 +6,12 @@ import {
   output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { Bite, Bucketlist, Review } from 'model';
+import {
+  Bite,
+  Bucketlist,
+  RemoveBiteFromBucketlistParams,
+  Review,
+} from 'model';
 import {
   IonButton,
   IonContent,
@@ -70,6 +75,7 @@ export class DetailsPage {
 
   submitNewTags = output<string>();
   selectList = output<Bucketlist>();
+  removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
   newList = output<string>();
   submitNewReview = output<{ review: string; biteId: string }>();
 
@@ -152,6 +158,7 @@ export class DetailsPage {
         bucketLists: this.bucketlists,
         bite: this.bite,
         selectList: this.selectList,
+        removeBiteFromBucketlist: this.removeBiteFromBucketlist,
         onNewList: this.onNewList.bind(this),
       },
     });

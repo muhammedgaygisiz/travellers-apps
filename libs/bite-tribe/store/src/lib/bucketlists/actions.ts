@@ -1,5 +1,9 @@
 import { createAction, props } from '@ngrx/store';
-import { CreateAndSaveToBucketListParams, SaveToBucketListParams } from 'model';
+import {
+  CreateAndSaveToBucketListParams,
+  RemoveBiteFromBucketlistParams,
+  SaveToBucketListParams,
+} from 'model';
 
 export const loadedBucketlistsFromApi = createAction(
   '[BUCKETLISTS] Loaded from API',
@@ -14,4 +18,9 @@ export const saveBiteIdToBucketList = createAction(
 export const createAndSaveBiteIdToBucketList = createAction(
   '[BUCKETLISTS] Create bucketlist and save bite to it',
   props<CreateAndSaveToBucketListParams>()
+);
+
+export const removeBiteFromBucketlist = createAction(
+  '[BUCKETLISTS] Remove bite from bucketlist',
+  props<RemoveBiteFromBucketlistParams>()
 );

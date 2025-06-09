@@ -19,7 +19,7 @@ export const restaurants = createSelector(
   gpsPosition,
   bites,
   (restaurants, gpsPosition, bites) => {
-    const savedRestaurants = restaurants.map((restaurant) => {
+    const savedRestaurantsWithDistances = restaurants.map((restaurant) => {
       return {
         ...restaurant,
         distance: haversineDistance(
@@ -31,6 +31,10 @@ export const restaurants = createSelector(
         ),
       } as Restaurant;
     });
+
+    const savedRestaurantNames = savedRestaurantsWithDistances.map(
+      (restaurant) => restaurant.name
+    );
 
     const unsavedRestaurants =
       bites
@@ -57,9 +61,12 @@ export const restaurants = createSelector(
             } as Restaurant);
           }
           return uniqueRestaurants;
-        }, [] as Restaurant[]) || [];
+        }, [] as Restaurant[])
+        .filter(
+          (restaurant) => !savedRestaurantNames.includes(restaurant.name.trim())
+        ) || [];
 
-    return [...savedRestaurants, ...unsavedRestaurants];
+    return [...savedRestaurantsWithDistances, ...unsavedRestaurants];
   }
 );
 

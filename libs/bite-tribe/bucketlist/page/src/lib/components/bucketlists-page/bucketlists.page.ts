@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { Bucketlist } from 'model';
 import {
@@ -31,4 +36,6 @@ import { CountPipe } from '../../pipes/count.pipe';
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export class BucketlistsPage {
   bucketlists = input<Bucketlist[]>([]);
+
+  gotoBucketlistDetails = output<string>();
 }

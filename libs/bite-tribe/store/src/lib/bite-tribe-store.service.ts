@@ -43,7 +43,7 @@ import {
   saveBiteIdToBucketList,
   removeBiteFromBucketlist,
 } from './bucketlists/actions';
-import { bucketlists } from './bucketlists/selectors';
+import { bucketlists, selectedBucketlist } from './bucketlists/selectors';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -96,6 +96,7 @@ export class BiteTribeStoreService implements StoreService {
   settings$ = this.store.select(settings);
   position$ = this.store.select(gpsPosition);
   cachedBite$ = this.store.select(cachedBite);
+  selectedBucketlist$ = this.store.select(selectedBucketlist);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());

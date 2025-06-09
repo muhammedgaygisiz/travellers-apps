@@ -7,14 +7,12 @@ import { HomeService } from './home.service';
   template: `
     <bt-home
       class="ion-page"
-      title="My Bites"
+      [title]="service.selectedBucketlistTitle()"
       [showFooter]="false"
       [showAddButton]="false"
       [enableBackButton]="true"
-      [bites]="service.myBites()"
+      [bites]="service.bitesBySelectedBucketlist()"
       [userId]="service.userId()"
-      [showHeaderMenu]="false"
-      editableBites
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
@@ -27,6 +25,6 @@ import { HomeService } from './home.service';
   `,
   imports: [BiteTribeHomeComponent],
 })
-export class MyBitesContainerComponent {
+export class BucketlistContainerComponent {
   service = inject(HomeService);
 }

@@ -17,3 +17,8 @@ export const menuId = createSelector(
   selectRouteParams,
   (params) => params?.['menuId']
 );
+
+export const bucketlistId = createSelector(
+  selectRouteParams,
+  (params) => params?.['bucketlistId']
+);

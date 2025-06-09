@@ -20,6 +20,27 @@ export class HomeService {
     return bites.filter((bite) => bite.userId === userId);
   });
 
+  selectedBucketlist = this.dataAccess.selectedBucketlist;
+
+  bitesBySelectedBucketlist = computed(() => {
+    const bites = this.dataAccess.bites();
+    const selectedBucketlist = this.selectedBucketlist();
+
+    if (!selectedBucketlist) {
+      return [];
+    }
+
+    return bites.filter((bite) =>
+      selectedBucketlist.biteIds?.includes(bite.id)
+    );
+  });
+
+  selectedBucketlistTitle = computed(() => {
+    const selectedBucketlist = this.selectedBucketlist();
+
+    return selectedBucketlist?.name || 'My Bucketlist';
+  });
+
   logout() {
     this.dataAccess.logout();
   }

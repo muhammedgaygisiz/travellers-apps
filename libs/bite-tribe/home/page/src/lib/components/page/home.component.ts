@@ -43,6 +43,7 @@ export class BiteTribeHomeComponent {
   editableBites = input(false, { transform: booleanAttribute });
   showFooter = input(true);
   showAddButton = input(true);
+  showHeaderMenu = input(true);
 
   readonly logoutClick = output();
   readonly addButtonClick = output();

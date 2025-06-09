@@ -8,7 +8,10 @@
 
     <ion-list lines="full">
       @for (bucketlist of bucketlists(); track bucketlist.id) {
-      <ion-item [button]="true">
+      <ion-item
+        [button]="true"
+        (click)="gotoBucketlistDetails.emit(bucketlist.id)"
+      >
         <ion-icon name="bookmark" slot="start" />
         <ion-label>{{bucketlist.name}}</ion-label>
         <ion-badge>{{bucketlist.biteIds | count}}</ion-badge>

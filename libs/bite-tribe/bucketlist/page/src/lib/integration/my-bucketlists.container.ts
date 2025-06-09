@@ -4,7 +4,11 @@ import { BucketlistsService } from './bucketlists.service';
 
 @Component({
   template: `
-    <bucketlists-page class="ion-page" [bucketlists]="service.bucketlists()" />
+    <bucketlists-page
+      class="ion-page"
+      [bucketlists]="service.bucketlists()"
+      (gotoBucketlistDetails)="service.gotoBucketlistDetails($event)"
+    />
   `,
   imports: [BucketlistsPage],
   changeDetection: ChangeDetectionStrategy.OnPush,

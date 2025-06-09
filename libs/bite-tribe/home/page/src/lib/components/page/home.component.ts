@@ -50,8 +50,4 @@ export class BiteTribeHomeComponent {
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();
   readonly gotoEdit = output<Bite>();
-
-  trackByBite(index: number, bite: Bite): string {
-    return bite.id;
-  }
 }

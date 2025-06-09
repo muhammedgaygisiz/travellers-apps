@@ -27,12 +27,15 @@
         {{ biteData?.distance | toMetric }}
         @if (!showEditButton()) {
         <bt-likes
+          class="ion-margin-top"
           [bite]="biteData"
           [userId]="userId()"
           (likeButtonClick)="likeButtonClick.emit($event)"
         />
         } @if (showEditButton()) {
-        <ion-button (click)="gotoEdit.emit(biteData)">Edit</ion-button>
+        <ion-button class="ion-margin-top" (click)="gotoEdit.emit(biteData)"
+          >Edit
+        </ion-button>
         }
       </ion-card-content>
     </div>

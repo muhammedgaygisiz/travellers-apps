@@ -37,6 +37,7 @@ import { ToBlobUrlPipe } from 'image-compression';
 import { TagsComponent } from '../tags/tags.component';
 import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';
 import { IsInPipe } from '../../pipes/is-in-any.pipe';
+import { LikesComponent } from 'bite-tribe-common/bite';
 
 @Component({
   selector: 'details-page',
@@ -65,6 +66,7 @@ import { IsInPipe } from '../../pipes/is-in-any.pipe';
     IonIcon,
     IsInPipe,
     IsInPipe,
+    LikesComponent,
   ],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
@@ -72,12 +74,14 @@ export class DetailsPage {
   bite = input<Bite>();
   reviews = input<Review[]>([]);
   bucketlists = input<Bucketlist[]>([]);
+  userId = input<string>();
 
   submitNewTags = output<string>();
   selectList = output<Bucketlist>();
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
   newList = output<string>();
   submitNewReview = output<{ review: string; biteId: string }>();
+  likeButtonClick = output<{ likeType: string; biteId: string }>();
 
   private readonly formBuilder = inject(FormBuilder);
   popoverController = inject(PopoverController);

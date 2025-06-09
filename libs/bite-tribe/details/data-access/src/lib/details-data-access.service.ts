@@ -15,6 +15,7 @@ export class DetailsDataAccessService {
   bucketlists = toSignal(this.storeService.bucketlists$, {
     initialValue: [] as any,
   });
+  userId = toSignal(this.storeService.userId$, { initialValue: '' });
 
   saveNewTags(newTags: string) {
     const currentBite = this.bite();
@@ -45,5 +46,21 @@ export class DetailsDataAccessService {
 
   removeBiteFromBucketlist($event: RemoveBiteFromBucketlistParams) {
     this.storeService.removeBiteFromBucketlist($event);
+  }
+
+  submitLikeClick(likeType: { likeType: string; biteId: string }) {
+    const bite = this.bite();
+    const userId = this.userId();
+
+    const likeFromUser = bite?.likes?.find(
+      (like) => like.userId === userId && like.likeType === likeType.likeType
+    );
+
+    if (likeFromUser) {
+      this.storeService.removeLike(likeType);
+      return;
+    }
+
+    this.storeService.submitLikeClick(likeType);
   }
 }

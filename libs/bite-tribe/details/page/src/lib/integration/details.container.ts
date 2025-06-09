@@ -9,11 +9,13 @@ import { DetailsService } from './details.service';
       [bite]="service.bite()"
       [reviews]="service.reviews()"
       [bucketlists]="service.bucketlists()"
+      [userId]="service.userId()"
       (submitNewTags)="service.saveNewTags($event)"
       (submitNewReview)="service.saveReview($event)"
       (selectList)="service.addBiteToSelectedBucketList($event)"
       (removeBiteFromBucketlist)="service.removeBiteFromBucketlist($event)"
       (newList)="service.saveBiteToBucketListWithNewList($event)"
+      (likeButtonClick)="service.likeButtonClicked($event)"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

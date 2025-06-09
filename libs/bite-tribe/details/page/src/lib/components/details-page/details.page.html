@@ -29,17 +29,28 @@
         <bt-map [position]="biteData?.position" readonly />
       </div>
 
-      <div class="ion-margin-bottom ion-text-end">
-        <ion-button
-          fill="outline"
-          shape="round"
-          (click)="showBucketListsSelection($event)"
-        >
-          <ion-icon
-            slot="icon-only"
-            [name]="biteData | isInAny: bucketlists()"
+      <div class="ion-margin-bottom like-and-bucketlist-bar">
+        @if(biteData) {
+        <div class="ion-text-start">
+          <bt-likes
+            [bite]="biteData"
+            [userId]="userId()"
+            (likeButtonClick)="likeButtonClick.emit($event)"
           />
-        </ion-button>
+        </div>
+        }
+        <div class="ion-text-end">
+          <ion-button
+            fill="outline"
+            shape="round"
+            (click)="showBucketListsSelection($event)"
+          >
+            <ion-icon
+              slot="icon-only"
+              [name]="biteData | isInAny: bucketlists()"
+            />
+          </ion-button>
+        </div>
       </div>
 
       <div class="ion-margin-bottom">

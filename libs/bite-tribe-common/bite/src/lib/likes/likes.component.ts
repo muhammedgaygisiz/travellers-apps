@@ -24,6 +24,7 @@ const emojiMap: Record<string, string> = {
   templateUrl: './likes.component.html',
   styleUrl: './likes.component.scss',
   imports: [IonBadge, IonChip, IonLabel],
+  providers: [PopoverController],
 })
 export class LikesComponent {
   popoverController = inject(PopoverController);

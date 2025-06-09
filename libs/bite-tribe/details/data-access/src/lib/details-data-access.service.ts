@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { splitTags } from 'utils';
+import { RemoveBiteFromBucketlistParams, SaveToBucketListParams } from 'model';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,9 @@ export class DetailsDataAccessService {
 
   bite = toSignal(this.storeService.bite$);
   reviews = toSignal(this.storeService.reviews$, { initialValue: [] as any });
+  bucketlists = toSignal(this.storeService.bucketlists$, {
+    initialValue: [] as any,
+  });
 
   saveNewTags(newTags: string) {
     const currentBite = this.bite();
@@ -26,5 +30,20 @@ export class DetailsDataAccessService {
 
   saveNewReview(newReview: { review: string; biteId: string }) {
     this.storeService.saveReview(newReview);
+  }
+
+  saveToBucketList(saveToBucketListEvent: SaveToBucketListParams) {
+    this.storeService.saveToBucketList(saveToBucketListEvent);
+  }
+
+  createAndSaveToBucketList(param: {
+    bucketListName: string;
+    biteId: string | undefined;
+  }) {
+    this.storeService.createAndSaveToBucketList(param);
+  }
+
+  removeBiteFromBucketlist($event: RemoveBiteFromBucketlistParams) {
+    this.storeService.removeBiteFromBucketlist($event);
   }
 }

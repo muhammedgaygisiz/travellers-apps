@@ -29,10 +29,21 @@
         <bt-map [position]="biteData?.position" readonly />
       </div>
 
+      <div class="ion-margin-bottom ion-text-end">
+        <ion-button
+          fill="outline"
+          shape="round"
+          (click)="showBucketListsSelection($event)"
+        >
+          <ion-icon
+            slot="icon-only"
+            [name]="biteData | isInAny: bucketlists()"
+          />
+        </ion-button>
+      </div>
+
       <div class="ion-margin-bottom">
-        @for (tag of biteData?.tags; track tag) {
-        <ion-chip>{{ tag }}</ion-chip>
-        }
+        <tags [tags]="biteData?.tags" />
       </div>
 
       <ion-item lines="full">

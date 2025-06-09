@@ -55,6 +55,20 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: 'my-bucketlists',
+    loadComponent: () =>
+      import('bite-tribe/bucketlist').then(
+        (m) => m.MyBucketlistsContainerComponent
+      ),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'my-bucketlists/:bucketlistId',
+    loadComponent: () =>
+      import('bite-tribe/home').then((m) => m.BucketlistContainerComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: '',
     redirectTo: 'start',
     pathMatch: 'full',

@@ -16,6 +16,7 @@ import { HomeService } from './home.service';
       (addButtonClick)="service.onAddButtonClicked()"
       (gotoSettings)="service.onGotoSettingsClick()"
       (gotoMyBites)="service.onGotoMyBitesClick()"
+      (gotoMyBucketlists)="service.onGotoMyBucketlists()"
     />
   `,
   imports: [BiteTribeHomeComponent],

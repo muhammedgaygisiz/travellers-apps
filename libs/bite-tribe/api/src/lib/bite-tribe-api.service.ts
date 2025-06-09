@@ -2,9 +2,17 @@ import { inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BehaviorSubject, EMPTY, from, skipWhile, switchMap } from 'rxjs';
 import { AuthService } from 'ta-firestore';
-import { Menu, Restaurant, Settings } from 'model';
+import {
+  CreateAndSaveToBucketListParams,
+  Menu,
+  RemoveBiteFromBucketlistParams,
+  Restaurant,
+  SaveToBucketListParams,
+  Settings,
+} from 'model';
 
 const BITE_COLLECTION = 'bites';
+const BUCKETLIST_COLLECTION = 'bucketlists';
 const LIKES_COLLECTION_GROUP = 'likes';
 const REVIEW_COLLECTION = 'reviews';
 const RESTAURANT_COLLECTION = 'restaurants';
@@ -18,6 +26,7 @@ export class BiteTribeApiService {
   private readonly authService = inject(AuthService);
 
   private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly bucketlistsChannel$ = new BehaviorSubject<any[]>([]);
   private readonly restaurantsChannel$ = new BehaviorSubject<any[]>([]);
   private readonly menusChannel$ = new BehaviorSubject<any[]>([]);
   private readonly reviewsChannel$ = new BehaviorSubject<any[]>([]);
@@ -25,6 +34,15 @@ export class BiteTribeApiService {
     {} as Settings
   );
   private readonly likesChannel$ = new BehaviorSubject<any[]>([]);
+
+  public allBucketlists$ = this.authService.isLoggedIn$.pipe(
+    skipWhile((isLoggedIn) => !isLoggedIn),
+    switchMap(() => {
+      this.startBucketlistsListener();
+
+      return this.bucketlistsChannel$;
+    })
+  );
 
   public allBites$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),
@@ -116,6 +134,36 @@ export class BiteTribeApiService {
       return this.settingsChannel$;
     })
   );
+
+  private async startBucketlistsListener() {
+    const user = await this.getUser();
+
+    await FirebaseFirestore.addCollectionSnapshotListener(
+      {
+        reference: BUCKETLIST_COLLECTION,
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            {
+              type: 'where',
+              fieldPath: 'userId',
+              opStr: '==',
+              value: user?.uid,
+            },
+          ],
+        },
+      },
+      async (bucketlistDocs) => {
+        const bucketlists =
+          bucketlistDocs?.snapshots.map((doc) => ({
+            ...doc.data,
+            id: doc.id,
+          })) || [];
+
+        this.bucketlistsChannel$.next(bucketlists);
+      }
+    );
+  }
 
   private async startBitesListener() {
     // console.debug('#mo Fetching bites from Firestore');
@@ -493,6 +541,63 @@ export class BiteTribeApiService {
       reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
       data: {
         socialMediaLinks: links,
+      },
+    });
+  }
+
+  async saveBiteIdToBucketList({
+    bucketListId,
+    biteId,
+  }: SaveToBucketListParams) {
+    const bucketListDoc = await FirebaseFirestore.getDocument({
+      reference: `${BUCKETLIST_COLLECTION}/${bucketListId}`,
+    });
+
+    if (bucketListDoc?.snapshot?.data) {
+      const uniqueBiteIds = [
+        ...new Set([...(bucketListDoc.snapshot.data['biteIds'] || []), biteId]),
+      ];
+
+      FirebaseFirestore.updateDocument({
+        reference: bucketListDoc.snapshot.path,
+        data: {
+          biteIds: uniqueBiteIds,
+        },
+      });
+    }
+  }
+
+  async createBucketListAndSaveBiteIdToBucketList(
+    params: CreateAndSaveToBucketListParams
+  ) {
+    const user = await this.getUser();
+
+    FirebaseFirestore.addDocument({
+      reference: BUCKETLIST_COLLECTION,
+      data: {
+        userId: user?.uid || '',
+        name: params.bucketListName,
+        biteIds: params.biteId ? [params.biteId] : [],
+      },
+    });
+  }
+
+  async removeBiteFromBucketlist({
+    bucketlistId,
+    biteId,
+  }: RemoveBiteFromBucketlistParams) {
+    const bucketListDoc = await FirebaseFirestore.getDocument({
+      reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
+    });
+
+    const newBiteIdListInBucketList = bucketListDoc?.snapshot?.data?.[
+      'biteIds'
+    ]?.filter((currBiteId: string) => currBiteId !== biteId);
+
+    FirebaseFirestore.updateDocument({
+      reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
+      data: {
+        biteIds: newBiteIdListInBucketList,
       },
     });
   }

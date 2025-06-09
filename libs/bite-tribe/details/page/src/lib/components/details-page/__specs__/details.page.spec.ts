@@ -3,9 +3,13 @@ import { DetailsPage } from '../details.page';
 import { PageComponent } from 'common/ui/page';
 import { By } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import {
+  PopoverController,
+  provideIonicAngular,
+} from '@ionic/angular/standalone';
 import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
 import { ToBlobUrlPipe } from 'image-compression';
+import { addNecessaryIcons } from 'utils';
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
@@ -13,6 +17,8 @@ class MockToBlobUrlPipe implements PipeTransform {
     return value;
   }
 }
+
+addNecessaryIcons();
 
 describe('DetailsPage', () => {
   let component: DetailsPage;
@@ -171,6 +177,42 @@ describe('DetailsPage', () => {
 
       // Assert
       expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Bucket List Selection', () => {
+    it('should create and present popover with correct configuration', async () => {
+      const mockEvent = new MouseEvent('click');
+      const mockBucketlists = [{ id: '1', name: 'List 1' }];
+      const mockBite = { id: '1', name: 'Bite 1' };
+
+      componentRef.setInput('bucketlists', mockBucketlists);
+      componentRef.setInput('bite', mockBite);
+
+      const popoverControllerMock = {
+        create: jest.fn(),
+      } as unknown as PopoverController;
+      const presentSpy = jest.fn();
+      (popoverControllerMock.create as jest.Mock).mockReturnValue({
+        present: presentSpy,
+      });
+
+      component['popoverController'] = popoverControllerMock;
+      await component.showBucketListsSelection(mockEvent);
+
+      expect(popoverControllerMock.create).toHaveBeenCalled();
+      expect(presentSpy).toHaveBeenCalled();
+    });
+
+    it('should bind the correct context to onNewList in popover', async () => {
+      const mockEvent = new MouseEvent('click');
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      const boundOnNewList = jest.spyOn(component.onNewList, 'bind');
+
+      await component.showBucketListsSelection(mockEvent);
+
+      expect(boundOnNewList).toHaveBeenCalledWith(component);
     });
   });
 });

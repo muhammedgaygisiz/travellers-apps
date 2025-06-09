@@ -18,6 +18,7 @@ describe('DetailsComponent', () => {
             bite: signal(undefined),
             reviews: signal(undefined),
             currentPosition: signal(undefined),
+            bucketlists: signal(undefined),
           },
         },
       ],

@@ -9,6 +9,9 @@ export class HomeDataAccessService {
 
   bites = toSignal(this.storeService.bites$, { initialValue: [] as Bite[] });
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
+  selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
+    requireSync: true,
+  });
 
   logout() {
     this.storeService.logout();

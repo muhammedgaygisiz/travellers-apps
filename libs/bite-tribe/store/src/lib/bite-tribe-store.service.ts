@@ -20,7 +20,16 @@ import { saveMenu } from './menus/actions';
 import { saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Bite, Link, Menu, Restaurant, Settings } from 'model';
+import {
+  Bite,
+  CreateAndSaveToBucketListParams,
+  Link,
+  Menu,
+  RemoveBiteFromBucketlistParams,
+  Restaurant,
+  SaveToBucketListParams,
+  Settings,
+} from 'model';
 import { currency, gpsPosition, settings } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -29,6 +38,12 @@ import {
   setRestaurantToCreate,
 } from './restaurants/actions';
 import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
+import {
+  createAndSaveBiteIdToBucketList,
+  saveBiteIdToBucketList,
+  removeBiteFromBucketlist,
+} from './bucketlists/actions';
+import { bucketlists, selectedBucketlist } from './bucketlists/selectors';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -72,6 +87,7 @@ export class BiteTribeStoreService implements StoreService {
   restaurants$ = this.store.select(restaurants);
   menu$ = this.store.select(menu);
   reviews$ = this.store.select(reviews);
+  bucketlists$ = this.store.select(bucketlists);
   currencyFromSettings$ = this.store.select(currency);
   restaurantToCreate$ = this.store.select(restaurantToCreate);
 
@@ -80,6 +96,7 @@ export class BiteTribeStoreService implements StoreService {
   settings$ = this.store.select(settings);
   position$ = this.store.select(gpsPosition);
   cachedBite$ = this.store.select(cachedBite);
+  selectedBucketlist$ = this.store.select(selectedBucketlist);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
@@ -162,5 +179,17 @@ export class BiteTribeStoreService implements StoreService {
         links,
       })
     );
+  }
+
+  saveToBucketList(saveToBucketlistParams: SaveToBucketListParams) {
+    this.store.dispatch(saveBiteIdToBucketList(saveToBucketlistParams));
+  }
+
+  createAndSaveToBucketList(params: CreateAndSaveToBucketListParams) {
+    this.store.dispatch(createAndSaveBiteIdToBucketList(params));
+  }
+
+  removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams) {
+    this.store.dispatch(removeBiteFromBucketlist(params));
   }
 }

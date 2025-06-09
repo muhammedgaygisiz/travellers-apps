@@ -1,13 +1,16 @@
 <ta-page
-  [showHeaderMenu]="true"
+  [showHeaderMenu]="showHeaderMenu()"
   [showLanguages]="false"
-  [showAddButton]="true"
+  [showAddButton]="showAddButton()"
   [showSettingsButton]="true"
   [showMyBites]="true"
+  [showMyBucketlists]="true"
   [enableBackButton]="enableBackButton()"
+  [showFooter]="showFooter()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
   (gotoSettings)="gotoSettings.emit()"
+  (gotoMyBucketlists)="gotoMyBucketlists.emit()"
   (gotoMyBites)="gotoMyBites.emit()"
 >
   <ion-content class="ion-padding">
@@ -25,19 +28,16 @@
         <ion-text color="primary"> No bites found. Be the first one. </ion-text>
       </ion-card-content>
     </ion-card>
+    } @for (bite of bites(); track bite.id) {
+    <bt-bite
+      [bite]="bite"
+      [userId]="userId()"
+      [showEditButton]="editableBites()"
+      (biteClick)="biteClick.emit($event)"
+      (restaurantClick)="restaurantClick.emit($event)"
+      (likeButtonClick)="likeButtonClick.emit($event)"
+      (gotoEdit)="gotoEdit.emit($event)"
+    />
     }
-
-    <cdk-virtual-scroll-viewport autosize minBufferPx="900" maxBufferPx="1800">
-      <bt-bite
-        *cdkVirtualFor="let bite of bites(); trackBy: trackByBite"
-        [bite]="bite"
-        [userId]="userId()"
-        [showEditButton]="editableBites()"
-        (biteClick)="biteClick.emit($event)"
-        (restaurantClick)="restaurantClick.emit($event)"
-        (likeButtonClick)="likeButtonClick.emit($event)"
-        (gotoEdit)="gotoEdit.emit($event)"
-      />
-    </cdk-virtual-scroll-viewport>
   </ion-content>
 </ta-page>

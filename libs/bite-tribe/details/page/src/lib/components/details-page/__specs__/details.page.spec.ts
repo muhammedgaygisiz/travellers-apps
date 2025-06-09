@@ -9,6 +9,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
 import { ToBlobUrlPipe } from 'image-compression';
+import { addNecessaryIcons } from 'utils';
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
@@ -16,6 +17,8 @@ class MockToBlobUrlPipe implements PipeTransform {
     return value;
   }
 }
+
+addNecessaryIcons();
 
 describe('DetailsPage', () => {
   let component: DetailsPage;

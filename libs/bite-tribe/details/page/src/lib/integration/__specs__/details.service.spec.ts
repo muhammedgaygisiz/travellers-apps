@@ -141,4 +141,118 @@ describe('DetailsService', () => {
       expect(mockDataAccessService.saveToBucketList).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('saveBiteToBucketListWithNewList', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      TestBed.resetTestingModule();
+    });
+
+    it('should call dataAccess.createAndSaveToBucketList with correct parameters when bite exists', () => {
+      // Arrange
+      mockDataAccessService = {
+        bite: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
+        createAndSaveToBucketList: jest.fn(),
+      } as any;
+
+      TestBed.configureTestingModule({
+        providers: [
+          DetailsService,
+          {
+            provide: DetailsDataAccessService,
+            useValue: mockDataAccessService,
+          },
+        ],
+      });
+      service = TestBed.inject(DetailsService);
+
+      // Act
+      service.saveBiteToBucketListWithNewList('My New List');
+
+      // Assert
+      expect(
+        mockDataAccessService.createAndSaveToBucketList
+      ).toHaveBeenCalledWith({
+        bucketListName: 'My New List',
+        biteId: 'bite123',
+      });
+      expect(
+        mockDataAccessService.createAndSaveToBucketList
+      ).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle undefined bite gracefully', () => {
+      // Arrange
+      mockDataAccessService = {
+        bite: signal(undefined),
+        createAndSaveToBucketList: jest.fn(),
+      } as any;
+
+      TestBed.configureTestingModule({
+        providers: [
+          DetailsService,
+          {
+            provide: DetailsDataAccessService,
+            useValue: mockDataAccessService,
+          },
+        ],
+      });
+      service = TestBed.inject(DetailsService);
+
+      // Act
+      service.saveBiteToBucketListWithNewList('My New List');
+
+      // Assert
+      expect(
+        mockDataAccessService.createAndSaveToBucketList
+      ).toHaveBeenCalledWith({
+        bucketListName: 'My New List',
+        biteId: undefined,
+      });
+      expect(
+        mockDataAccessService.createAndSaveToBucketList
+      ).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('removeBiteFromBucketlist', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      TestBed.resetTestingModule();
+    });
+
+    it('should call dataAccess.removeBiteFromBucketlist with correct parameters', () => {
+      // Arrange
+      mockDataAccessService = {
+        removeBiteFromBucketlist: jest.fn(),
+      } as any;
+
+      TestBed.configureTestingModule({
+        providers: [
+          DetailsService,
+          {
+            provide: DetailsDataAccessService,
+            useValue: mockDataAccessService,
+          },
+        ],
+      });
+      service = TestBed.inject(DetailsService);
+
+      const params = {
+        bucketListId: 'list123',
+        biteId: 'bite123',
+      };
+
+      // Act
+      service.removeBiteFromBucketlist(params);
+
+      // Assert
+      expect(
+        mockDataAccessService.removeBiteFromBucketlist
+      ).toHaveBeenCalledWith(params);
+      expect(
+        mockDataAccessService.removeBiteFromBucketlist
+      ).toHaveBeenCalledTimes(1);
+    });
+  });
 });

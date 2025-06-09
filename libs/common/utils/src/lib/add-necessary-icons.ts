@@ -22,6 +22,9 @@ import {
   downloadOutline,
   pizzaOutline,
   addOutline,
+  addCircleOutline,
+  bookmarkOutline,
+  bookmark,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -48,5 +51,8 @@ export const addNecessaryIcons = () => {
     downloadOutline,
     pizzaOutline,
     addOutline,
+    addCircleOutline,
+    bookmarkOutline,
+    bookmark,
   });
 };

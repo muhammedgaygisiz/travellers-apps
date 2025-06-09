@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
+import { Bucketlist } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -7,6 +8,7 @@ export class DetailsService {
 
   bite = this.dataAccess.bite;
   reviews = this.dataAccess.reviews;
+  bucketlists = this.dataAccess.bucketlists;
 
   saveNewTags(newTags: string) {
     this.dataAccess.saveNewTags(newTags);
@@ -14,5 +16,14 @@ export class DetailsService {
 
   saveReview(newReview: { review: string; biteId: string }) {
     this.dataAccess.saveNewReview(newReview);
+  }
+
+  selectList(list: Bucketlist) {
+    const currBite = this.bite();
+
+    this.dataAccess.saveToBucketList({
+      bucketListId: list.id,
+      biteId: currBite?.id,
+    });
   }
 }

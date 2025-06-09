@@ -32,6 +32,8 @@ import { MenuEffects } from './menus/effects';
 import { FirebaseOptions } from '@angular/fire/app';
 import { loadedBitesFromApi } from './bites/actions';
 import { loadedRestaurantsFromApi } from './restaurants/actions';
+import { BucketListEffect } from './bucketlists/effects';
+import { fromBucketlists } from './bucketlists';
 
 const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
@@ -161,7 +163,8 @@ export const provideBiteTribeStore = (environment: Environment) => [
         ReviewEffects,
         AppEffect,
         RestaurantEffects,
-        MenuEffects
+        MenuEffects,
+        BucketListEffect
       ),
   provideState(fromBites.key, fromBites.reducer),
   provideState(fromReviews.key, fromReviews.reducer),
@@ -169,6 +172,7 @@ export const provideBiteTribeStore = (environment: Environment) => [
   provideState(fromApp.key, fromApp.reducer),
   provideState(fromRestaurants.key, fromRestaurants.reducer),
   provideState(fromMenus.key, fromMenus.reducer),
+  provideState(fromBucketlists.key, fromBucketlists.reducer),
   provideFirestoreUtils(
     toFirebaseOptions(environment),
     !environment.isBusiness

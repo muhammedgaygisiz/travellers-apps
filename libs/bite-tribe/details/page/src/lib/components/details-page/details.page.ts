@@ -6,7 +6,7 @@ import {
   output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { Bite, Review } from 'model';
+import { Bite, Bucketlist, Review } from 'model';
 import {
   IonButton,
   IonContent,
@@ -19,6 +19,7 @@ import {
   IonNote,
   IonText,
   IonTextarea,
+  PopoverController,
 } from '@ionic/angular/standalone';
 import { CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -29,6 +30,8 @@ import { ToMetricPipe } from 'distance-pipe';
 import { MapComponent } from 'bite-tribe-common/map';
 import { ToBlobUrlPipe } from 'image-compression';
 import { TagsComponent } from '../tags/tags.component';
+import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';
+import { IsInPipe } from '../../pipes/is-in-any.pipe';
 
 @Component({
   selector: 'details-page',
@@ -55,18 +58,23 @@ import { TagsComponent } from '../tags/tags.component';
     ToBlobUrlPipe,
     TagsComponent,
     IonIcon,
+    IsInPipe,
+    IsInPipe,
   ],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export class DetailsPage {
   bite = input<Bite>();
-
   reviews = input<Review[]>([]);
+  bucketlists = input<Bucketlist[]>([]);
 
   submitNewTags = output<string>();
+  selectList = output<Bucketlist>();
+  newList = output<string>();
   submitNewReview = output<{ review: string; biteId: string }>();
 
   private readonly formBuilder = inject(FormBuilder);
+  popoverController = inject(PopoverController);
 
   newTagsFormGroup = this.formBuilder.nonNullable.group({
     tags: ['', Validators.required],
@@ -127,5 +135,27 @@ export class DetailsPage {
     });
 
     this.reviewFormGroup.reset();
+  }
+
+  onNewList() {
+    console.log('onNewList called');
+  }
+
+  async showBucketListsSelection($event: MouseEvent) {
+    const popover = await this.popoverController.create({
+      component: BucketListSelectionComponent,
+      event: $event,
+      dismissOnSelect: true,
+      cssClass: 'bucket-list-popover',
+      alignment: 'center',
+      componentProps: {
+        bucketLists: this.bucketlists,
+        bite: this.bite,
+        selectList: this.selectList,
+        onNewList: this.onNewList.bind(this),
+      },
+    });
+
+    await popover.present();
   }
 }

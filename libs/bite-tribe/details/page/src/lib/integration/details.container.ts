@@ -8,8 +8,10 @@ import { DetailsService } from './details.service';
       class="ion-page"
       [bite]="service.bite()"
       [reviews]="service.reviews()"
+      [bucketlists]="service.bucketlists()"
       (submitNewTags)="service.saveNewTags($event)"
       (submitNewReview)="service.saveReview($event)"
+      (selectList)="service.selectList($event)"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

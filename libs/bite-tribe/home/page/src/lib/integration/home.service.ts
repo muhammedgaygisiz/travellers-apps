@@ -68,6 +68,10 @@ export class HomeService {
     this.navController.navigateForward(['my-bites']);
   }
 
+  onGotoMyBucketlists() {
+    this.navController.navigateForward(['my-bucketlists']);
+  }
+
   onGotoEditClick(biteToEdit: Bite) {
     this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
   }

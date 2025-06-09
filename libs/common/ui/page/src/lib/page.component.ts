@@ -67,6 +67,7 @@ export class PageComponent {
 
   showHeaderMenu = input(true);
 
+  // TODO: Convert to input with list of menu items to be shown
   showSettingsButton = input(false);
 
   showMyBites = input(false);
@@ -110,6 +111,8 @@ export class PageComponent {
 
   public gotoMyBites = output();
 
+  public gotoMyBucketlists = output();
+
   public addButtonClick = output<MouseEvent>();
 
   async showMenuPopover($event: MouseEvent) {
@@ -129,6 +132,7 @@ export class PageComponent {
         languageChangeClick: this.languageChangeClick,
         gotoSettings: this.gotoSettings,
         gotoMyBites: this.gotoMyBites,
+        gotoMyBucketlists: this.gotoMyBucketlists,
       },
     });
 

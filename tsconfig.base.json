@@ -99,6 +99,10 @@
       "bite-tribe/bite-data-access": [
         "libs/bite-tribe/bite/data-access/src/index.ts"
       ],
+      "bite-tribe/bucketlist": ["libs/bite-tribe/bucketlist/page/src/index.ts"],
+      "bite-tribe/bucketlist-data-access": [
+        "libs/bite-tribe/bucketlist/data-access/src/index.ts"
+      ],
       "bite-tribe/details": ["libs/bite-tribe/details/page/src/index.ts"],
       "bite-tribe/details-data-access": [
         "libs/bite-tribe/details/data-access/src/index.ts"

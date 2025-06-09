@@ -9,7 +9,7 @@
     <form [formGroup]="biteFormGroup">
       <image-upload
         formControlName="image"
-        [position]="this.position()"
+        [position]="this.fallbackPosition()"
         (positionFromImage)="onPositionFromImage($event)"
       />
 

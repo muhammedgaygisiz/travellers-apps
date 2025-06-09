@@ -73,11 +73,12 @@ import { SupportedLang } from 'localization';
         <ion-icon name="bookmark-outline" slot="start" />
         My Bucket lists
       </ion-item>
-      }
+      } @if(showSettingsButton()) {
       <ion-item (click)="gotoSettings.emit()">
         <ion-icon name="settings-outline" slot="start" />
         Settings
       </ion-item>
+      }
       <ion-item
         data-cy="btn-logout"
         [button]="true"

@@ -31,6 +31,7 @@ import { Restaurant } from 'model';
 })
 export class DashboardComponent {
   restaurants = input<Restaurant[]>();
+  isAuthenticated = input(false);
 
   readonly logoutClick = output();
 

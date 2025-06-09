@@ -41,7 +41,8 @@ export const restaurants = createSelector(
         .filter((bite) => !bite.restaurantId)
         .reduce((uniqueRestaurants, bite) => {
           const existingRestaurant = uniqueRestaurants.find(
-            (r) => r.name.trim() === bite.place.trim()
+            (r) =>
+              r.name.toLowerCase().trim() === bite.place.toLowerCase().trim()
           );
 
           if (existingRestaurant && existingRestaurant.biteIds) {

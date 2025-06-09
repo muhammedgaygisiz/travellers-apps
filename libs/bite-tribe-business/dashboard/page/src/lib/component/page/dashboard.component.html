@@ -1,9 +1,11 @@
 <ta-page
   [showHeaderMenu]="true"
   [showLanguages]="false"
-  [showAddButton]="true"
-  [showSettingsButton]="true"
+  [showAddButton]="false"
+  [showFooter]="false"
+  [showSettingsButton]="false"
   [fullWidth]="true"
+  [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
   (gotoSettings)="gotoSettings.emit()"
 >

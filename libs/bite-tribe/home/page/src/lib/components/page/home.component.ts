@@ -38,6 +38,7 @@ export class BiteTribeHomeComponent {
   title = input('Bites');
   editableBites = input(false, { transform: booleanAttribute });
   showFooter = input(true);
+  isAuthenticated = input(false);
   showAddButton = input(true);
   showHeaderMenu = input(true);
 

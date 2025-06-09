@@ -2,15 +2,22 @@ import { TestBed } from '@angular/core/testing';
 import { DetailsService } from '../details.service';
 import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
 import { signal } from '@angular/core';
+import { Bite, Bucketlist } from 'model';
 
 describe('DetailsService', () => {
   let service: DetailsService;
   let mockDataAccessService: jest.Mocked<DetailsDataAccessService>;
+  const mockBite: Bite = {
+    id: 'bite123',
+    name: 'Test Bite',
+  } as Bite;
 
   beforeEach(() => {
     mockDataAccessService = {
-      bite: signal('mockBiteData'),
+      bite: signal(mockBite),
       saveNewTags: jest.fn(),
+      saveNewReview: jest.fn(),
+      saveToBucketList: jest.fn(),
       currentPosition: jest.fn(),
     } as any;
 
@@ -32,7 +39,7 @@ describe('DetailsService', () => {
   });
 
   it('should have bite data from DetailsDataAccessService', () => {
-    expect(service.bite()).toBe('mockBiteData');
+    expect(service.bite()).toEqual(mockBite);
   });
 
   it('should call dataAccess.saveNewTags with provided tags', () => {
@@ -45,5 +52,93 @@ describe('DetailsService', () => {
     // Assert
     expect(mockDataAccessService.saveNewTags).toHaveBeenCalledWith(tags);
     expect(mockDataAccessService.saveNewTags).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call dataAccess.saveNewReview with provided review data', () => {
+    // Arrange
+    const reviewData = {
+      review: 'Great food!',
+      biteId: 'bite123',
+    };
+
+    // Act
+    service.saveReview(reviewData);
+
+    // Assert
+    expect(mockDataAccessService.saveNewReview).toHaveBeenCalledWith(
+      reviewData
+    );
+    expect(mockDataAccessService.saveNewReview).toHaveBeenCalledTimes(1);
+  });
+
+  describe('selectList', () => {
+    const mockBucketlist: Bucketlist = {
+      id: 'list123',
+      name: 'My List',
+    } as Bucketlist;
+
+    beforeEach(() => {
+      // Reset mocks between tests
+      jest.clearAllMocks();
+      TestBed.resetTestingModule();
+    });
+
+    it('should call dataAccess.saveToBucketList with correct parameters when bite exists', () => {
+      // Arrange
+      mockDataAccessService = {
+        bite: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
+        saveToBucketList: jest.fn(),
+      } as any;
+
+      TestBed.configureTestingModule({
+        providers: [
+          DetailsService,
+          {
+            provide: DetailsDataAccessService,
+            useValue: mockDataAccessService,
+          },
+        ],
+      });
+      service = TestBed.inject(DetailsService);
+
+      // Act
+      service.selectList(mockBucketlist);
+
+      // Assert
+      expect(mockDataAccessService.saveToBucketList).toHaveBeenCalledWith({
+        bucketListId: 'list123',
+        biteId: 'bite123',
+      });
+      expect(mockDataAccessService.saveToBucketList).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle undefined bite gracefully', () => {
+      // Arrange
+      mockDataAccessService = {
+        bite: signal(undefined),
+        saveToBucketList: jest.fn(),
+      } as any;
+
+      TestBed.configureTestingModule({
+        providers: [
+          DetailsService,
+          {
+            provide: DetailsDataAccessService,
+            useValue: mockDataAccessService,
+          },
+        ],
+      });
+      service = TestBed.inject(DetailsService);
+
+      // Act
+      service.selectList(mockBucketlist);
+
+      // Assert
+      expect(mockDataAccessService.saveToBucketList).toHaveBeenCalledWith({
+        bucketListId: 'list123',
+        biteId: undefined,
+      });
+      expect(mockDataAccessService.saveToBucketList).toHaveBeenCalledTimes(1);
+    });
   });
 });

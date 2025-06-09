@@ -203,6 +203,8 @@ describe('DetailsPage', () => {
 
     it('should bind the correct context to onNewList in popover', async () => {
       const mockEvent = new MouseEvent('click');
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       const boundOnNewList = jest.spyOn(component.onNewList, 'bind');
 
       await component.showBucketListsSelection(mockEvent);

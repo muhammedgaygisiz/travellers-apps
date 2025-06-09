@@ -12,6 +12,7 @@ export class HomeService {
 
   bites = this.dataAccess.bites;
   userId = this.dataAccess.userId;
+  isAuthenticated = this.dataAccess.isAuthenticated;
 
   myBites = computed(() => {
     const bites = this.dataAccess.bites();

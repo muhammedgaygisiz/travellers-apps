@@ -14,7 +14,6 @@ import {
   IonCardTitle,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
-import { PopoverController } from '@ionic/angular';
 import { ToMetricPipe } from 'distance-pipe';
 import { LikesComponent } from './likes/likes.component';
 import { ToBlobUrlPipe } from 'image-compression';
@@ -35,7 +34,6 @@ import { ToBlobUrlPipe } from 'image-compression';
     IonButton,
     ToBlobUrlPipe,
   ],
-  providers: [PopoverController],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix

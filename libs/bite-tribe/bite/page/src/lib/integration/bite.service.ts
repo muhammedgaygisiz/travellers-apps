@@ -13,7 +13,10 @@ export class BiteService {
   cachedBite = this.dataAccess.cachedBite;
 
   submitNewBite(newBite: any) {
-    this.dataAccess.submitNewBite(newBite);
+    // eslint-disable-next-line no-unused-vars
+    const { id, ...biteData } = newBite;
+
+    this.dataAccess.submitNewBite(biteData);
 
     this.navController.navigateBack(['home']);
   }

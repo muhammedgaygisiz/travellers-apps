@@ -12,6 +12,9 @@ export class HomeDataAccessService {
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     requireSync: true,
   });
+  isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
+    initialValue: false,
+  });
 
   logout() {
     this.storeService.logout();

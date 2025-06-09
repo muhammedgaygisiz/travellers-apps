@@ -57,6 +57,8 @@ export class PageComponent {
 
   hideAuthButton = input(false);
 
+  isAuthenticated = input(false);
+
   showLanguages = input(true);
 
   title = input('');
@@ -121,7 +123,7 @@ export class PageComponent {
       event: $event,
       dismissOnSelect: true,
       componentProps: {
-        isAuthenticated: this.showAddButton,
+        isAuthenticated: this.isAuthenticated,
         hideAuthButton: this.hideAuthButton,
         showLanguages: this.showLanguages,
         showSettingsButton: this.showSettingsButton,

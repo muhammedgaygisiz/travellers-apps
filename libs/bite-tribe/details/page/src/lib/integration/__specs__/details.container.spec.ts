@@ -19,6 +19,7 @@ describe('DetailsComponent', () => {
             reviews: signal(undefined),
             currentPosition: signal(undefined),
             bucketlists: signal(undefined),
+            userId: signal(undefined),
           },
         },
       ],

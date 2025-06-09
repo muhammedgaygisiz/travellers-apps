@@ -97,6 +97,7 @@ export class BiteTribeStoreService implements StoreService {
   position$ = this.store.select(gpsPosition);
   cachedBite$ = this.store.select(cachedBite);
   selectedBucketlist$ = this.store.select(selectedBucketlist);
+  isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());

@@ -1,9 +1,9 @@
 import { LikesComponent } from '../likes.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { PopoverController } from '@ionic/angular';
 import { ComponentRef } from '@angular/core';
 import { Bite } from 'model';
 import { LikeOptionsPopoverMenuComponent } from '../../like-options-popover-menu/like-options-popover-menu.component';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 
 const mockBite: Bite = {
   id: 'bite1',
@@ -29,22 +29,10 @@ describe('LikesComponent', () => {
   let component: LikesComponent;
   let componentRef: ComponentRef<LikesComponent>;
   let fixture: ComponentFixture<LikesComponent>;
-  let popoverControllerMock: jest.Mocked<PopoverController>;
-  let popoverMock: any;
 
   beforeEach(() => {
-    popoverMock = {
-      present: jest.fn(),
-    };
-
-    popoverControllerMock = {
-      create: jest.fn().mockResolvedValue(popoverMock),
-    } as unknown as jest.Mocked<PopoverController>;
-
     TestBed.configureTestingModule({
-      providers: [
-        { provide: PopoverController, useValue: popoverControllerMock },
-      ],
+      providers: [provideIonicAngular()],
     });
 
     fixture = TestBed.createComponent(LikesComponent);

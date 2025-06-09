@@ -7,6 +7,7 @@
   [showMyBucketlists]="true"
   [enableBackButton]="enableBackButton()"
   [showFooter]="showFooter()"
+  [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
   (gotoSettings)="gotoSettings.emit()"
@@ -25,7 +26,7 @@
     @if (!bites()?.length) {
     <ion-card>
       <ion-card-content>
-        <ion-text color="primary"> No bites found. Be the first one. </ion-text>
+        <ion-text color="primary"> No bites found. Be the first one.</ion-text>
       </ion-card-content>
     </ion-card>
     } @for (bite of bites(); track bite.id) {

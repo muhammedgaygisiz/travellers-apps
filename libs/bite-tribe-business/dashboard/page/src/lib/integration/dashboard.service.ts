@@ -11,6 +11,7 @@ export class DashboardService {
   private readonly navController = inject(NavController);
 
   restaurants = this.dataAccess.restaurants;
+  isAuthenticated = this.dataAccess.isAuthenticated;
 
   logout() {
     this.dataAccess.logout();

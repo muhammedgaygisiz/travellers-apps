@@ -9,6 +9,7 @@ export class DetailsService {
   bite = this.dataAccess.bite;
   reviews = this.dataAccess.reviews;
   bucketlists = this.dataAccess.bucketlists;
+  userId = this.dataAccess.userId;
 
   saveNewTags(newTags: string) {
     this.dataAccess.saveNewTags(newTags);
@@ -38,5 +39,9 @@ export class DetailsService {
 
   removeBiteFromBucketlist($event: RemoveBiteFromBucketlistParams) {
     this.dataAccess.removeBiteFromBucketlist($event);
+  }
+
+  likeButtonClicked(likeClick: { likeType: string; biteId: string }) {
+    this.dataAccess.submitLikeClick(likeClick);
   }
 }

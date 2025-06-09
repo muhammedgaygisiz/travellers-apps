@@ -7,6 +7,12 @@
     justify-content: space-between;
   }
 
+  .like-and-bucketlist-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
   ion-list-header {
     color: var(--ion-primary-color);
   }

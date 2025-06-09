@@ -9,6 +9,7 @@ import { DashboardService } from './dashboard.service';
     <bt-business-dashboard
       class="ion-page"
       [restaurants]="service.restaurants()"
+      [isAuthenticated]="service.isAuthenticated()"
       (logoutClick)="service.logout()"
       (createRestaurantClick)="service.onCreateRestaurantClick($event)"
       (restaurantClick)="service.restaurantClicked($event)"

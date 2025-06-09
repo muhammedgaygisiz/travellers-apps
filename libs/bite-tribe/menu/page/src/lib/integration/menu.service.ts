@@ -32,6 +32,7 @@ export class MenuService {
       position: restaurant?.position || { latitude: 0, longitude: 0 },
       price: menuItem.price,
       userId: '',
+      restaurantId: restaurant?.id,
     };
 
     this.dataAccess.prepareBiteFromMenuItem(biteToBeCreated);

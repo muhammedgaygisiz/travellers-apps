@@ -104,6 +104,7 @@ describe('BitePage', () => {
       tags: 'fish healthy',
       price: 9.99,
       currency: 'EUR',
+      restaurantId: '',
       position: {
         latitude: 0,
         longitude: 0,

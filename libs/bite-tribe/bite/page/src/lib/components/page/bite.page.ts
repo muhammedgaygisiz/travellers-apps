@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   input,
+  linkedSignal,
   output,
   signal,
 } from '@angular/core';
@@ -63,12 +64,17 @@ export class BitePage {
 
   position = input<{ latitude: number; longitude: number }>();
 
+  fallbackPosition = linkedSignal(() => {
+    return this.position();
+  });
+
   submitBite = output<typeof this.biteFormGroup.value>();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
   biteFormGroup = this.formBuilder.group({
     id: [''],
+    restaurantId: [''],
     image: ['', Validators.required],
     name: ['', Validators.required],
     place: ['', Validators.required],
@@ -91,7 +97,12 @@ export class BitePage {
         currency: bite.currency,
         tags: toTagsString(bite.tags),
         position: bite.position,
+        restaurantId: bite.restaurantId,
       });
+    }
+
+    if (bite?.position) {
+      this.fallbackPosition.set(bite.position);
     }
   });
 

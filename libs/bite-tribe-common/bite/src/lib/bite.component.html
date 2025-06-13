@@ -33,9 +33,17 @@
           (likeButtonClick)="likeButtonClick.emit($event)"
         />
         } @if (showEditButton()) {
-        <ion-button class="ion-margin-top" (click)="gotoEdit.emit(biteData)"
-          >Edit
-        </ion-button>
+        <div class="bite-actions">
+          <ion-button (click)="gotoEdit.emit(biteData)"> Edit </ion-button>
+          <ion-button
+            color="danger"
+            fill="outline"
+            expand="block"
+            (click)="onDeleteBiteClick(biteData)"
+          >
+            Delete
+          </ion-button>
+        </div>
         }
       </ion-card-content>
     </div>

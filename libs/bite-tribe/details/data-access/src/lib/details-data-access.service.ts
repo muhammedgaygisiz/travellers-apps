@@ -16,6 +16,9 @@ export class DetailsDataAccessService {
     initialValue: [] as any,
   });
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
+  isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
+    initialValue: false,
+  });
 
   saveNewTags(newTags: string) {
     const currentBite = this.bite();
@@ -62,5 +65,9 @@ export class DetailsDataAccessService {
     }
 
     this.storeService.submitLikeClick(likeType);
+  }
+
+  logout() {
+    this.storeService.logout();
   }
 }

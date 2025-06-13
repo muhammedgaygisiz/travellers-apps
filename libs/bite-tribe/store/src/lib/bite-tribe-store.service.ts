@@ -7,6 +7,7 @@ import {
   saveExistingBite,
   saveNewBite,
   saveTags,
+  deleteBite,
 } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bite, bites, cachedBite } from './bites/selectors';
@@ -42,6 +43,7 @@ import {
   createAndSaveBiteIdToBucketList,
   saveBiteIdToBucketList,
   removeBiteFromBucketlist,
+  createBucketList,
 } from './bucketlists/actions';
 import { bucketlists, selectedBucketlist } from './bucketlists/selectors';
 
@@ -192,5 +194,13 @@ export class BiteTribeStoreService implements StoreService {
 
   removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams) {
     this.store.dispatch(removeBiteFromBucketlist(params));
+  }
+
+  submitDeleteBite(bite: Bite) {
+    this.store.dispatch(deleteBite({ bite }));
+  }
+
+  createBucketList(bucketlistName: string) {
+    this.store.dispatch(createBucketList({ bucketlistName }));
   }
 }

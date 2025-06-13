@@ -3,23 +3,54 @@ import { DetailsService } from '../details.service';
 import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
 import { signal } from '@angular/core';
 import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
+import { NavController } from '@ionic/angular/standalone';
+
+const mockBite: Bite = {
+  id: 'bite123',
+  name: 'Test Bite',
+} as Bite;
+
+const createMockDataAccess = (overrides = {}) => {
+  const base = {
+    bite: signal(mockBite),
+    reviews: signal([]),
+    bucketlists: signal([]),
+    userId: signal('user1'),
+    isAuthenticated: signal(true),
+    saveNewTags: jest.fn(),
+    saveNewReview: jest.fn(),
+    saveToBucketList: jest.fn(),
+    createAndSaveToBucketList: jest.fn(),
+    removeBiteFromBucketlist: jest.fn(),
+    submitLikeClick: jest.fn(),
+    currentPosition: jest.fn(),
+    logout: jest.fn(),
+  };
+  return { ...base, ...overrides };
+};
+
+const createNavControllerMock = () => ({
+  navigateForward: jest.fn().mockResolvedValue(true),
+  navigateBack: jest.fn().mockResolvedValue(true),
+  navigateRoot: jest.fn().mockResolvedValue(true),
+  back: jest.fn(),
+  pop: jest.fn().mockResolvedValue(true),
+  getRouteId: jest.fn(),
+  isTransitioning: jest.fn(),
+  consumeTransition: jest.fn(),
+  setDirection: jest.fn(),
+  setTopOutlet: jest.fn(),
+});
 
 describe('DetailsService', () => {
   let service: DetailsService;
-  let mockDataAccessService: jest.Mocked<DetailsDataAccessService>;
-  const mockBite: Bite = {
-    id: 'bite123',
-    name: 'Test Bite',
-  } as Bite;
+  let mockDataAccessService: Partial<DetailsDataAccessService>;
+  let mockNavController: Partial<NavController>;
 
   beforeEach(() => {
-    mockDataAccessService = {
-      bite: signal(mockBite),
-      saveNewTags: jest.fn(),
-      saveNewReview: jest.fn(),
-      saveToBucketList: jest.fn(),
-      currentPosition: jest.fn(),
-    } as any;
+    TestBed.resetTestingModule();
+    mockDataAccessService = createMockDataAccess();
+    mockNavController = createNavControllerMock();
 
     TestBed.configureTestingModule({
       providers: [
@@ -27,6 +58,10 @@ describe('DetailsService', () => {
         {
           provide: DetailsDataAccessService,
           useValue: mockDataAccessService,
+        },
+        {
+          provide: NavController,
+          useValue: mockNavController,
         },
       ],
     });
@@ -253,6 +288,49 @@ describe('DetailsService', () => {
       expect(
         mockDataAccessService.removeBiteFromBucketlist
       ).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('likeButtonClicked', () => {
+    it('should call dataAccess.submitLikeClick with correct parameters', () => {
+      const likeClick = { likeType: 'like', biteId: 'bite123' };
+      service.likeButtonClicked(likeClick);
+
+      expect(mockDataAccessService.submitLikeClick).toHaveBeenCalledWith(
+        likeClick
+      );
+      expect(mockDataAccessService.submitLikeClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('logout', () => {
+    it('should call dataAccess.logout', () => {
+      service.logout();
+      expect(mockDataAccessService.logout).toHaveBeenCalled();
+      expect(mockDataAccessService.logout).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('navigation methods', () => {
+    it('should navigate to settings page', () => {
+      service.onGotoSettingsClick();
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'settings',
+      ]);
+    });
+
+    it('should navigate to my bites page', () => {
+      service.onGotoMyBitesClick();
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'my-bites',
+      ]);
+    });
+
+    it('should navigate to my bucketlists page', () => {
+      service.onGotoMyBucketlists();
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'my-bucketlists',
+      ]);
     });
   });
 });

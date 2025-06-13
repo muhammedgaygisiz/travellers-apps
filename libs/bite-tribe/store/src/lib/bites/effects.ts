@@ -6,6 +6,7 @@ import {
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
 import {
+  deleteBite,
   loadedBitesFromApi,
   saveExistingBite,
   saveNewBite,
@@ -57,6 +58,18 @@ export class BiteEffects {
         ofType(saveTags),
         tap((payload) => {
           this.api.saveTagsToExistingBite(payload);
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  deleteBite$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(deleteBite),
+        tap(({ bite }) => {
+          this.api.deleteBite(bite);
         })
       );
     },

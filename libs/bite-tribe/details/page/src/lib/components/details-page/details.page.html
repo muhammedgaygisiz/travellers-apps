@@ -1,9 +1,18 @@
 @let biteData = bite();
 
 <ta-page
-  [showHeaderMenu]="false"
+  [showHeaderMenu]="true"
+  [showLanguages]="false"
+  [showSettingsButton]="true"
+  [showMyBites]="true"
+  [showMyBucketlists]="true"
   [showFooter]="false"
+  [isAuthenticated]="isAuthenticated()"
   [enableBackButton]="true"
+  (logoutClick)="logoutClick.emit()"
+  (gotoSettings)="gotoSettings.emit()"
+  (gotoMyBucketlists)="gotoMyBucketlists.emit()"
+  (gotoMyBites)="gotoMyBites.emit()"
 >
   <ion-content>
     <img
@@ -23,10 +32,6 @@
           {{ biteData?.price | currency:(biteData?.currency || 'USD') }}
         </span>
         }
-      </div>
-
-      <div class="ion-margin-bottom">
-        <bt-map [position]="biteData?.position" readonly />
       </div>
 
       <div class="ion-margin-bottom like-and-bucketlist-bar">
@@ -51,6 +56,10 @@
             />
           </ion-button>
         </div>
+      </div>
+
+      <div class="ion-margin-bottom">
+        <bt-map [position]="biteData?.position" readonly />
       </div>
 
       <div class="ion-margin-bottom">

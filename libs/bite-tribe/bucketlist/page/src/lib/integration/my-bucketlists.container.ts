@@ -8,6 +8,7 @@ import { BucketlistsService } from './bucketlists.service';
       class="ion-page"
       [bucketlists]="service.bucketlists()"
       (gotoBucketlistDetails)="service.gotoBucketlistDetails($event)"
+      (newList)="service.createAndSaveToBucketList($event)"
     />
   `,
   imports: [BucketlistsPage],

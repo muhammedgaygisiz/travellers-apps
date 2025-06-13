@@ -25,10 +25,6 @@
         }
       </div>
 
-      <div class="ion-margin-bottom">
-        <bt-map [position]="biteData?.position" readonly />
-      </div>
-
       <div class="ion-margin-bottom like-and-bucketlist-bar">
         @if(biteData) {
         <div class="ion-text-start">
@@ -51,6 +47,10 @@
             />
           </ion-button>
         </div>
+      </div>
+
+      <div class="ion-margin-bottom">
+        <bt-map [position]="biteData?.position" readonly />
       </div>
 
       <div class="ion-margin-bottom">

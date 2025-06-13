@@ -40,3 +40,12 @@ input[type='number'] {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.cdk-overlay-container {
+  z-index: 1000 !important;
+  background: rgba(0, 0, 0, 0.32);
+
+  .cdk-over-panel {
+    background-color: var(--ion-color-primary);
+  }
+}

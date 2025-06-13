@@ -54,6 +54,10 @@ export class HomeService {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
+  onDeleteBiteClick(bite: Bite) {
+    this.dataAccess.deleteBite(bite);
+  }
+
   restaurantClicked(bite: Bite) {
     if (bite.restaurantId) {
       // eslint-disable-next-line no-unused-vars

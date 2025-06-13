@@ -36,4 +36,8 @@ export class HomeDataAccessService {
 
     this.storeService.submitLikeClick(likeType);
   }
+
+  deleteBite(bite: Bite) {
+    this.storeService.submitDelectBite(bite);
+  }
 }

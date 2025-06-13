@@ -601,4 +601,12 @@ export class BiteTribeApiService {
       },
     });
   }
+
+  deleteBite(bite: any) {
+    if (bite.id) {
+      FirebaseFirestore.deleteDocument({
+        reference: `${BITE_COLLECTION}/${bite.id}`,
+      });
+    }
+  }
 }

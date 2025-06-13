@@ -24,3 +24,8 @@ export const cacheBite = createAction(
   '[BITES] Cache bite',
   props<{ bite: any }>()
 );
+
+export const deleteBite = createAction(
+  '[BITES] Delete bite',
+  props<{ bite: any }>()
+);

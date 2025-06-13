@@ -43,6 +43,19 @@
           justify-content: space-between;
         }
       }
+
+      .bite-actions {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        width: 100%;
+
+        > ion-button {
+          flex: 1;
+          margin: 0 4px;
+        }
+      }
     }
   }
 }

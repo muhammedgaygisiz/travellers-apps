@@ -1,9 +1,18 @@
 @let biteData = bite();
 
 <ta-page
-  [showHeaderMenu]="false"
+  [showHeaderMenu]="true"
+  [showLanguages]="false"
+  [showSettingsButton]="true"
+  [showMyBites]="true"
+  [showMyBucketlists]="true"
   [showFooter]="false"
+  [isAuthenticated]="isAuthenticated()"
   [enableBackButton]="true"
+  (logoutClick)="logoutClick.emit()"
+  (gotoSettings)="gotoSettings.emit()"
+  (gotoMyBucketlists)="gotoMyBucketlists.emit()"
+  (gotoMyBites)="gotoMyBites.emit()"
 >
   <ion-content>
     <img

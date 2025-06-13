@@ -75,6 +75,7 @@ export class DetailsPage {
   reviews = input<Review[]>([]);
   bucketlists = input<Bucketlist[]>([]);
   userId = input<string>();
+  isAuthenticated = input(false);
 
   submitNewTags = output<string>();
   selectList = output<Bucketlist>();
@@ -82,6 +83,10 @@ export class DetailsPage {
   newList = output<string>();
   submitNewReview = output<{ review: string; biteId: string }>();
   likeButtonClick = output<{ likeType: string; biteId: string }>();
+  readonly logoutClick = output();
+  readonly gotoSettings = output();
+  readonly gotoMyBites = output();
+  readonly gotoMyBucketlists = output();
 
   private readonly formBuilder = inject(FormBuilder);
   popoverController = inject(PopoverController);

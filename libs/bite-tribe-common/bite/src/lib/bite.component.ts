@@ -64,10 +64,7 @@ export class BiteComponent {
       .subscribe((result) => {
         if (result === 'confirm') {
           this.deleteBite.emit(biteData);
-          return;
         }
-
-        return;
       });
   }
 }

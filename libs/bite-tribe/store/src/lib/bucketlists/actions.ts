@@ -20,6 +20,11 @@ export const createAndSaveBiteIdToBucketList = createAction(
   props<CreateAndSaveToBucketListParams>()
 );
 
+export const createBucketList = createAction(
+  '[BUCKETLISTS] Create bucketlist',
+  props<{ bucketlistName: string }>()
+);
+
 export const removeBiteFromBucketlist = createAction(
   '[BUCKETLISTS] Remove bite from bucketlist',
   props<RemoveBiteFromBucketlistParams>()

@@ -11,6 +11,7 @@ import {
   loadedBucketlistsFromApi,
   createAndSaveBiteIdToBucketList,
   removeBiteFromBucketlist,
+  createBucketList,
 } from './actions';
 import { map, switchMap, tap } from 'rxjs';
 
@@ -57,6 +58,18 @@ export class BucketListEffect {
         ofType(removeBiteFromBucketlist),
         tap((params) => {
           return this.api.removeBiteFromBucketlist(params);
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  createBucketlistEffect$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(createBucketList),
+        tap(({ bucketlistName }) => {
+          return this.api.createBucketList(bucketlistName);
         })
       );
     },

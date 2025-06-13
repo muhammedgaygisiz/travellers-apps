@@ -10,4 +10,8 @@ export class BucketlistsDataAccessService {
   bucketlists = toSignal(this.storeService.bucketlists$, {
     initialValue: [] as Bucketlist[],
   });
+
+  createAndSaveToBucketList(bucketListName: string) {
+    this.storeService.createBucketList(bucketListName);
+  }
 }

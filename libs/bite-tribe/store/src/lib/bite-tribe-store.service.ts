@@ -43,6 +43,7 @@ import {
   createAndSaveBiteIdToBucketList,
   saveBiteIdToBucketList,
   removeBiteFromBucketlist,
+  createBucketList,
 } from './bucketlists/actions';
 import { bucketlists, selectedBucketlist } from './bucketlists/selectors';
 
@@ -195,7 +196,11 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(removeBiteFromBucketlist(params));
   }
 
-  submitDelectBite(bite: Bite) {
+  submitDeleteBite(bite: Bite) {
     this.store.dispatch(deleteBite({ bite }));
+  }
+
+  createBucketList(bucketlistName: string) {
+    this.store.dispatch(createBucketList({ bucketlistName }));
   }
 }

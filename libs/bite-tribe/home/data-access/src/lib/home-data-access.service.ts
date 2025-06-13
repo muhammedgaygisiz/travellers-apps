@@ -38,6 +38,6 @@ export class HomeDataAccessService {
   }
 
   deleteBite(bite: Bite) {
-    this.storeService.submitDelectBite(bite);
+    this.storeService.submitDeleteBite(bite);
   }
 }

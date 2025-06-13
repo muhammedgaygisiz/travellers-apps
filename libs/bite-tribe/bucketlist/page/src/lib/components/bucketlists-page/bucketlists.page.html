@@ -18,5 +18,17 @@
       </ion-item>
       }
     </ion-list>
+
+    <div class="ion-margin-top ion-text-end end-of-page actions">
+      <ion-button expand="block" id="preset-new-list-alert"
+        >Create new bucket list</ion-button
+      >
+      <ion-alert
+        trigger="preset-new-list-alert"
+        header="Please enter a name for your new list"
+        [inputs]="newListInputs"
+        [buttons]="saveButton"
+      />
+    </div>
   </ion-content>
 </ta-page>

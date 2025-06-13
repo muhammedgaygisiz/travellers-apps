@@ -7,7 +7,9 @@ import {
 import { PageComponent } from 'common/ui/page';
 import { Bucketlist } from 'model';
 import {
+  IonAlert,
   IonBadge,
+  IonButton,
   IonContent,
   IonIcon,
   IonItem,
@@ -31,6 +33,8 @@ import { CountPipe } from '../../pipes/count.pipe';
     IonIcon,
     CountPipe,
     IonBadge,
+    IonButton,
+    IonAlert,
   ],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
@@ -38,4 +42,25 @@ export class BucketlistsPage {
   bucketlists = input<Bucketlist[]>([]);
 
   gotoBucketlistDetails = output<string>();
+  newList = output<string>();
+
+  public newListInputs = [
+    {
+      placeholder: 'Name',
+    },
+  ];
+
+  public saveButton = [
+    {
+      text: 'Save',
+      handler: this.onNewList.bind(this),
+    },
+    'Cancel',
+  ];
+
+  onNewList(alertResult: string) {
+    const newListName = alertResult[0];
+
+    this.newList.emit(newListName);
+  }
 }

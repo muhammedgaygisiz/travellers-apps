@@ -609,4 +609,16 @@ export class BiteTribeApiService {
       });
     }
   }
+
+  async createBucketList(bucketlistName: string) {
+    const user = await this.getUser();
+
+    FirebaseFirestore.addDocument({
+      reference: BUCKETLIST_COLLECTION,
+      data: {
+        userId: user?.uid || '',
+        name: bucketlistName,
+      },
+    });
+  }
 }

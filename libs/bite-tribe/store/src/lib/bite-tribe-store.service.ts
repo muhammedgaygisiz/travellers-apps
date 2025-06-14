@@ -10,7 +10,7 @@ import {
   deleteBite,
 } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
-import { bite, bites, cachedBite } from './bites/selectors';
+import { bite, bites, cachedBite, biteCreator } from './bites/selectors';
 import {
   restaurant,
   restaurants,
@@ -18,7 +18,7 @@ import {
 } from './restaurants/selectors';
 import { menu } from './menus/selectors';
 import { saveMenu } from './menus/actions';
-import { saveSettings } from './app/actions';
+import { goPublic, saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -100,6 +100,7 @@ export class BiteTribeStoreService implements StoreService {
   cachedBite$ = this.store.select(cachedBite);
   selectedBucketlist$ = this.store.select(selectedBucketlist);
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
+  biteCreator$ = this.store.select(biteCreator);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
@@ -202,5 +203,9 @@ export class BiteTribeStoreService implements StoreService {
 
   createBucketList(bucketlistName: string) {
     this.store.dispatch(createBucketList({ bucketlistName }));
+  }
+
+  goPublic() {
+    this.store.dispatch(goPublic());
   }
 }

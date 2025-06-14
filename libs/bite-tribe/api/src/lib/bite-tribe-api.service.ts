@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BehaviorSubject, EMPTY, from, skipWhile, switchMap } from 'rxjs';
+import { BehaviorSubject, EMPTY, from, of, skipWhile, switchMap } from 'rxjs';
 import { AuthService } from 'ta-firestore';
 import {
+  Bite,
   CreateAndSaveToBucketListParams,
   Menu,
   RemoveBiteFromBucketlistParams,
@@ -13,6 +14,7 @@ import {
 
 const BITE_COLLECTION = 'bites';
 const BUCKETLIST_COLLECTION = 'bucketlists';
+const USERS_COLLECTION = 'users';
 const LIKES_COLLECTION_GROUP = 'likes';
 const REVIEW_COLLECTION = 'reviews';
 const RESTAURANT_COLLECTION = 'restaurants';
@@ -620,5 +622,35 @@ export class BiteTribeApiService {
         name: bucketlistName,
       },
     });
+  }
+
+  async saveUser() {
+    const user = await this.getUser();
+
+    const photoUrl = ((user as any)?.providerData as any[]).find(
+      (data) => data.photoUrl.length
+    )?.photoUrl;
+
+    FirebaseFirestore.setDocument({
+      reference: `${USERS_COLLECTION}/${user?.uid}`,
+      data: {
+        userId: user?.uid || '',
+        displayName: user?.displayName || '',
+        email: user?.email || '',
+        photoUrl: photoUrl || '',
+      },
+    });
+  }
+
+  getUserByBiteId(bite: Bite | undefined) {
+    if (!bite?.userId) {
+      return of();
+    }
+
+    return from(
+      FirebaseFirestore.getDocument({
+        reference: `${USERS_COLLECTION}/${bite.userId}`,
+      })
+    );
   }
 }

@@ -1,9 +1,20 @@
+@use 'globals';
+
 :host {
   .profile-image {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    margin-right: 16px;
+    @include globals.profile-image;
+  }
+
+  .go-public-button-container {
+    display: flex;
+    justify-content: stretch;
+
+    width: 100%;
+
+    ion-button {
+      flex: 1;
+      margin-top: 16px;
+    }
   }
 
   .button-container {

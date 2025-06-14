@@ -15,4 +15,8 @@ export class SettingsDataAccessService {
   saveSettings(settings: Settings) {
     this.storeService.saveSettings(settings);
   }
+
+  goPublic() {
+    this.storeService.goPublic();
+  }
 }

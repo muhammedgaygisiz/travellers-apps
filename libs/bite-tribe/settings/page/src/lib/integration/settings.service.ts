@@ -18,4 +18,8 @@ export class SettingsService {
 
     this.navController.navigateBack(['home']);
   }
+
+  goPublic() {
+    this.dataAccess.goPublic();
+  }
 }

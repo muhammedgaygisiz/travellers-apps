@@ -11,6 +11,7 @@ import { DetailsService } from './details.service';
       [bucketlists]="service.bucketlists()"
       [userId]="service.userId()"
       [isAuthenticated]="service.isAuthenticated()"
+      [biteCreator]="service.biteCreator()"
       (submitNewTags)="service.saveNewTags($event)"
       (submitNewReview)="service.saveReview($event)"
       (selectList)="service.addBiteToSelectedBucketList($event)"

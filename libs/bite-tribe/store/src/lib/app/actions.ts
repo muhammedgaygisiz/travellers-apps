@@ -20,3 +20,5 @@ export const loadedSettingsFromApi = createAction(
   '[APP] Loaded settings from API',
   props<{ settings: Settings }>()
 );
+
+export const goPublic = createAction('[APP] Go public');

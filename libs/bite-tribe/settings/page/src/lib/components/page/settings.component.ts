@@ -49,6 +49,8 @@ export class PageSettings {
   user = input<User>();
   settings = input<Settings>();
 
+  goPublic = output();
+
   private readonly formBuilder = inject(FormBuilder);
 
   settingsForm = this.formBuilder.nonNullable.group({

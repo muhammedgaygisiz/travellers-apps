@@ -22,6 +22,17 @@
     />
 
     <div class="ion-padding">
+      @let biteCreatorData = biteCreator(); @if (biteCreatorData) {
+      <div class="bite-creator-container">
+        <img
+          [src]="biteCreatorData.photoUrl"
+          alt="Bite Creator"
+          class="profile-image"
+        />
+        <ion-label> {{ biteCreatorData.displayName }} </ion-label>
+      </div>
+      }
+
       <h1>{{ biteData?.name }}</h1>
 
       <div class="fields ion-margin-bottom">

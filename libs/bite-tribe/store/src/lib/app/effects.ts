@@ -7,6 +7,7 @@ import {
 } from '@ngrx/effects';
 import {
   errorLoadingGpsPosition,
+  goPublic,
   loadedGpsPosition,
   loadedSettingsFromApi,
   saveSettings,
@@ -51,6 +52,18 @@ export class AppEffect {
         ofType(saveSettings),
         tap(({ settings }) => {
           this.api.saveSettings(settings);
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  goPublicEffect$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(goPublic),
+        tap(() => {
+          this.api.saveUser();
         })
       );
     },

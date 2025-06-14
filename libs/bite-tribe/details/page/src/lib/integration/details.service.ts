@@ -13,6 +13,7 @@ export class DetailsService {
   bucketlists = this.dataAccess.bucketlists;
   userId = this.dataAccess.userId;
   isAuthenticated = this.dataAccess.isAuthenticated;
+  biteCreator = this.dataAccess.biteCreator;
 
   saveNewTags(newTags: string) {
     this.dataAccess.saveNewTags(newTags);

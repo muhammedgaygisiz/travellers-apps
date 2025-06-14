@@ -9,6 +9,7 @@
         <!-- Profile Section -->
         <section class="settings-section">
           <h2>Profile</h2>
+
           <ion-item>
             <img [src]="userImage()" alt="Profile" class="profile-image" />
             <ion-label>
@@ -20,6 +21,7 @@
               />
             </ion-label>
           </ion-item>
+
           <ion-item>
             <ion-label>
               <h3>Email</h3>
@@ -67,14 +69,18 @@
           </ion-item>
         </section>
 
+        <div class="ion-margin-top ion-text-end go-public-button-container">
+          <ion-button (click)="goPublic.emit()">Go public</ion-button>
+        </div>
+
         <!-- Action Buttons -->
         <div class="button-container">
           <ion-button fill="outline" color="medium">Log Out</ion-button>
           <ion-button
             [disabled]="isFormInvalid() || isFormPristine()"
             (click)="saveSettings()"
-            >Save Changes</ion-button
-          >
+            >Save Changes
+          </ion-button>
         </div>
       </form>
     </div>

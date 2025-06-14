@@ -9,6 +9,7 @@ import { SettingsService } from './settings.service';
       [user]="service.user()"
       [settings]="service.settings()"
       (submitSettings)="service.saveSettings($event)"
+      (goPublic)="service.goPublic()"
     />
   `,
   imports: [PageSettings],

@@ -29,3 +29,12 @@ export const deleteBite = createAction(
   '[BITES] Delete bite',
   props<{ bite: any }>()
 );
+
+export const loadedBiteCreator = createAction(
+  '[BITES] Loaded bite creator',
+  props<{ biteCreator: any }>()
+);
+
+export const noPublicCreatorForBite = createAction(
+  '[BITES] No public creator for bite'
+);

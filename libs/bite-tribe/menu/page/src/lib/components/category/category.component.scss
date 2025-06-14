@@ -5,6 +5,16 @@
     margin-bottom: 2rem;
     @include globals.light-border;
 
+    .reorder-container {
+      @include globals.reorder-container;
+
+      menu-item {
+        width: 100%;
+        margin-left: 1rem;
+        margin-top: 2rem;
+      }
+    }
+
     h2 {
       font-size: 1.5rem;
       margin-bottom: 0.5rem;

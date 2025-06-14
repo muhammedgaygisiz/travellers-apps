@@ -32,6 +32,16 @@ ion-alert {
   border-radius: 1rem;
 }
 
+@mixin reorder-container {
+  display: flex;
+  flex-direction: row;
+
+  div.reorder-anchor {
+    display: flex;
+    align-items: center;
+  }
+}
+
 input[type='number'] {
   @include no-number-arrows;
 }

@@ -1,15 +1,11 @@
+@use 'globals';
+
 :host {
   .menu-container {
     margin-top: 2rem;
 
     .reorder-container {
-      display: flex;
-      flex-direction: row;
-
-      div.reorder-anchor {
-        display: flex;
-        align-items: center;
-      }
+      @include globals.reorder-container;
 
       category {
         width: 100%;

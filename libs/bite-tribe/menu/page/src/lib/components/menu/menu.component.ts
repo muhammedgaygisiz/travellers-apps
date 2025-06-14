@@ -138,7 +138,7 @@ export class MenuComponent {
     const toIndex = event.detail.to;
 
     this.linkedMenu.update((menu) => {
-      if (menu && menu.categories) {
+      if (menu?.categories) {
         // Create a copy of the categories array
         const updatedCategories = [...menu.categories];
 
@@ -167,5 +167,22 @@ export class MenuComponent {
 
     // Complete the reorder operation
     event.detail.complete();
+  }
+
+  updateCategory(categoryWithNewOrderOfItems: Category) {
+    this.linkedMenu.update((menu) => {
+      if (menu?.categories) {
+        return {
+          ...menu,
+          categories: menu.categories.map((cat) =>
+            cat.title === categoryWithNewOrderOfItems.title
+              ? categoryWithNewOrderOfItems
+              : cat
+          ),
+        };
+      }
+
+      return menu;
+    });
   }
 }

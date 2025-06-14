@@ -4,24 +4,25 @@
   @if (menuData?.categories?.length) {
   <ion-reorder-group
     [disabled]="!editMode()"
-    (ionItemReorder)="handleReorder($any($event))"
+    (ionItemReorder)="handleReorder($event)"
   >
     @for (category of menuData?.categories; track category.title) {
-    <ion-reorder>
-      <div class="{{ editMode() ? 'reorder-container' : 'menu-item' }}">
-        @if (editMode()) {
-        <div class="reorder-anchor">
+    <div class="{{ editMode() ? 'reorder-container' : 'menu-item' }}">
+      @if (editMode()) {
+      <div class="reorder-anchor">
+        <ion-reorder>
           <ion-icon name="menu" size="large" />
-        </div>
-        }
-        <category
-          [category]="category"
-          [editMode]="editMode()"
-          (addItemToCategory)="onAddItemToCategory($event)"
-          (createBiteClick)="createBiteClick.emit($event)"
-        />
+        </ion-reorder>
       </div>
-    </ion-reorder>
+      }
+      <category
+        [category]="category"
+        [editMode]="editMode()"
+        (addItemToCategory)="onAddItemToCategory($event)"
+        (createBiteClick)="createBiteClick.emit($event)"
+        (orderingInCategoryChanged)="updateCategory($event)"
+      />
+    </div>
     }
   </ion-reorder-group>
 

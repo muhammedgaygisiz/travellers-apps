@@ -25,6 +25,7 @@ import {
   addCircleOutline,
   bookmarkOutline,
   bookmark,
+  menu,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -54,5 +55,6 @@ export const addNecessaryIcons = () => {
     addCircleOutline,
     bookmarkOutline,
     bookmark,
+    menu,
   });
 };

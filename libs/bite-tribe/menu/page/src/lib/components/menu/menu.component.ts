@@ -11,6 +11,7 @@ import {
 import { Category, Menu, MenuItem } from 'model';
 import {
   IonButton,
+  IonIcon,
   IonReorder,
   IonReorderGroup,
 } from '@ionic/angular/standalone';
@@ -32,6 +33,7 @@ import { ItemReorderEventDetail } from '@ionic/angular';
     NgTemplateOutlet,
     IonReorderGroup,
     IonReorder,
+    IonIcon,
   ],
 })
 export class MenuComponent {

@@ -8,15 +8,23 @@
   >
     @for (category of menuData?.categories; track category.title) {
     <ion-reorder>
-      <category
-        [category]="category"
-        [editMode]="editMode()"
-        (addItemToCategory)="onAddItemToCategory($event)"
-        (createBiteClick)="createBiteClick.emit($event)"
-      />
+      <div class="{{ editMode() ? 'reorder-container' : 'menu-item' }}">
+        @if (editMode()) {
+        <div class="reorder-anchor">
+          <ion-icon name="menu" size="large" />
+        </div>
+        }
+        <category
+          [category]="category"
+          [editMode]="editMode()"
+          (addItemToCategory)="onAddItemToCategory($event)"
+          (createBiteClick)="createBiteClick.emit($event)"
+        />
+      </div>
     </ion-reorder>
     }
   </ion-reorder-group>
+
   <ng-container [ngTemplateOutlet]="addCategory" />
   } @else {
   <div class="menu-placeholder">
@@ -38,6 +46,8 @@
     (cancelAddCategory)="onCancelAddCategory()"
   />
   } @if (editMode() && !shouldShowAddCategory()) {
-  <ion-button (click)="showAddCategory()"> Add Category</ion-button>
+  <div class="ion-text-end">
+    <ion-button (click)="showAddCategory()"> Add Category</ion-button>
+  </div>
   }
 </ng-template>

@@ -1,6 +1,17 @@
+@use 'globals';
+
 :host {
   .menu-container {
     margin-top: 2rem;
+
+    .reorder-container {
+      @include globals.reorder-container;
+
+      category {
+        width: 100%;
+        margin-left: 1rem;
+      }
+    }
 
     .save-menu-button-container {
       padding-top: 3rem;

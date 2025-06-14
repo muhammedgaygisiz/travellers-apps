@@ -1,15 +1,30 @@
 @let menuData = linkedMenu();
 
 <div class="menu-container">
-  @if (menuData?.categories?.length) { @for (category of menuData?.categories;
-  track category.title) {
-  <category
-    [category]="category"
-    [editMode]="editMode()"
-    (addItemToCategory)="onAddItemToCategory($event)"
-    (createBiteClick)="createBiteClick.emit($event)"
-  />
-  }
+  @if (menuData?.categories?.length) {
+  <ion-reorder-group
+    [disabled]="!editMode()"
+    (ionItemReorder)="handleReorder($event)"
+  >
+    @for (category of menuData?.categories; track category.title) {
+    <div class="{{ editMode() ? 'reorder-container' : 'menu-item' }}">
+      @if (editMode()) {
+      <div class="reorder-anchor">
+        <ion-reorder>
+          <ion-icon name="menu" size="large" />
+        </ion-reorder>
+      </div>
+      }
+      <category
+        [category]="category"
+        [editMode]="editMode()"
+        (addItemToCategory)="onAddItemToCategory($event)"
+        (createBiteClick)="createBiteClick.emit($event)"
+        (orderingInCategoryChanged)="updateCategory($event)"
+      />
+    </div>
+    }
+  </ion-reorder-group>
 
   <ng-container [ngTemplateOutlet]="addCategory" />
   } @else {
@@ -18,7 +33,7 @@
 
     <ng-container [ngTemplateOutlet]="addCategory" />
   </div>
-  } @if(editMode()) {
+  } @if (editMode()) {
   <div class="save-menu-button-container">
     <ion-button class="ion-margin-top" (click)="onSave()">Save Menu</ion-button>
   </div>
@@ -32,6 +47,8 @@
     (cancelAddCategory)="onCancelAddCategory()"
   />
   } @if (editMode() && !shouldShowAddCategory()) {
-  <ion-button (click)="showAddCategory()"> Add Category </ion-button>
+  <div class="ion-text-end">
+    <ion-button (click)="showAddCategory()"> Add Category</ion-button>
+  </div>
   }
 </ng-template>

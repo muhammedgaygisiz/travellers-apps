@@ -9,10 +9,16 @@ import {
   signal,
 } from '@angular/core';
 import { Category, Menu, MenuItem } from 'model';
-import { IonButton } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonIcon,
+  IonReorder,
+  IonReorderGroup,
+} from '@ionic/angular/standalone';
 import { AddCategoryComponent } from '../add-category/add-category.component';
 import { CategoryComponent } from '../category/category.component';
 import { NgTemplateOutlet } from '@angular/common';
+import { ItemReorderEventDetail } from '@ionic/angular';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -25,6 +31,9 @@ import { NgTemplateOutlet } from '@angular/common';
     AddCategoryComponent,
     CategoryComponent,
     NgTemplateOutlet,
+    IonReorderGroup,
+    IonReorder,
+    IonIcon,
   ],
 })
 export class MenuComponent {
@@ -55,9 +64,17 @@ export class MenuComponent {
     this.presentShowAddCategory.set(false);
 
     this.linkedMenu.update((curr) => {
+      const categories = curr?.categories || [];
+
+      // Set the index for the new category to be after the last existing category
+      const newCategory = {
+        ...category,
+        index: categories.length,
+      };
+
       return {
         ...curr,
-        categories: [...(curr?.categories || []), category],
+        categories: [...categories, newCategory],
       } as Menu;
     });
   }
@@ -114,5 +131,58 @@ export class MenuComponent {
 
   onCancelAddCategory() {
     this.presentShowAddCategory.set(false);
+  }
+
+  handleReorder(event: CustomEvent<ItemReorderEventDetail>) {
+    const fromIndex = event.detail.from;
+    const toIndex = event.detail.to;
+
+    this.linkedMenu.update((menu) => {
+      if (menu?.categories) {
+        // Create a copy of the categories array
+        const updatedCategories = [...menu.categories];
+
+        // Remove the item from the original position
+        const [movedCategory] = updatedCategories.splice(fromIndex, 1);
+
+        // Insert the item at the destination position
+        updatedCategories.splice(toIndex, 0, movedCategory);
+
+        // Update the index property of each category based on its new position
+        const categoriesWithUpdatedIndices = updatedCategories.map(
+          (category, idx) => ({
+            ...category,
+            index: idx,
+          })
+        );
+
+        // Return the updated menu with reordered categories and updated indices
+        return {
+          ...menu,
+          categories: categoriesWithUpdatedIndices,
+        };
+      }
+      return menu;
+    });
+
+    // Complete the reorder operation
+    event.detail.complete();
+  }
+
+  updateCategory(categoryWithNewOrderOfItems: Category) {
+    this.linkedMenu.update((menu) => {
+      if (menu?.categories) {
+        return {
+          ...menu,
+          categories: menu.categories.map((cat) =>
+            cat.title === categoryWithNewOrderOfItems.title
+              ? categoryWithNewOrderOfItems
+              : cat
+          ),
+        };
+      }
+
+      return menu;
+    });
   }
 }

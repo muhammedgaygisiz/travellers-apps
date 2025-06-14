@@ -1,16 +1,22 @@
 @let menuData = linkedMenu();
 
 <div class="menu-container">
-  @if (menuData?.categories?.length) { @for (category of menuData?.categories;
-  track category.title) {
-  <category
-    [category]="category"
-    [editMode]="editMode()"
-    (addItemToCategory)="onAddItemToCategory($event)"
-    (createBiteClick)="createBiteClick.emit($event)"
-  />
-  }
-
+  @if (menuData?.categories?.length) {
+  <ion-reorder-group
+    [disabled]="!editMode()"
+    (ionItemReorder)="handleReorder($any($event))"
+  >
+    @for (category of menuData?.categories; track category.title) {
+    <ion-reorder>
+      <category
+        [category]="category"
+        [editMode]="editMode()"
+        (addItemToCategory)="onAddItemToCategory($event)"
+        (createBiteClick)="createBiteClick.emit($event)"
+      />
+    </ion-reorder>
+    }
+  </ion-reorder-group>
   <ng-container [ngTemplateOutlet]="addCategory" />
   } @else {
   <div class="menu-placeholder">
@@ -18,7 +24,7 @@
 
     <ng-container [ngTemplateOutlet]="addCategory" />
   </div>
-  } @if(editMode()) {
+  } @if (editMode()) {
   <div class="save-menu-button-container">
     <ion-button class="ion-margin-top" (click)="onSave()">Save Menu</ion-button>
   </div>
@@ -32,6 +38,6 @@
     (cancelAddCategory)="onCancelAddCategory()"
   />
   } @if (editMode() && !shouldShowAddCategory()) {
-  <ion-button (click)="showAddCategory()"> Add Category </ion-button>
+  <ion-button (click)="showAddCategory()"> Add Category</ion-button>
   }
 </ng-template>

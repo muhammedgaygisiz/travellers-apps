@@ -7,9 +7,12 @@ import {
 } from '@ngrx/effects';
 import {
   errorLoadingGpsPosition,
+  goPrivate,
+  goPublic,
   loadedGpsPosition,
   loadedSettingsFromApi,
   saveSettings,
+  setIsPublicProfile,
 } from './actions';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
@@ -28,6 +31,16 @@ export class AppEffect {
       ofType(ROOT_EFFECTS_INIT),
       switchMap(() => this.api.settings$),
       map((settings) => loadedSettingsFromApi({ settings }))
+    );
+  });
+
+  loadPublicProfile$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(fromAuth.loadedUser),
+      switchMap(() => this.api.publicProfile$),
+      map((isPublicProfile) =>
+        setIsPublicProfile({ isPublic: isPublicProfile })
+      )
     );
   });
 
@@ -51,6 +64,30 @@ export class AppEffect {
         ofType(saveSettings),
         tap(({ settings }) => {
           this.api.saveSettings(settings);
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  goPublicEffect$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(goPublic),
+        tap(() => {
+          this.api.saveUser();
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  goPrivateEffect$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(goPrivate),
+        tap(() => {
+          this.api.deleteUser();
         })
       );
     },

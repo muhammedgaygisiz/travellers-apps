@@ -19,6 +19,7 @@ export class DetailsDataAccessService {
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
   });
+  biteCreator = toSignal(this.storeService.biteCreator$);
 
   saveNewTags(newTags: string) {
     const currentBite = this.bite();

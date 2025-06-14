@@ -48,6 +48,10 @@ import { map } from 'rxjs';
 export class PageSettings {
   user = input<User>();
   settings = input<Settings>();
+  isPublicProfile = input<boolean>();
+
+  goPublic = output();
+  goPrivate = output();
 
   private readonly formBuilder = inject(FormBuilder);
 

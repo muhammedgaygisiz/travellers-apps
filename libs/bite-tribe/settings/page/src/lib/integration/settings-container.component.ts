@@ -8,7 +8,10 @@ import { SettingsService } from './settings.service';
       class="ion-page"
       [user]="service.user()"
       [settings]="service.settings()"
+      [isPublicProfile]="service.isPublicProfile()"
       (submitSettings)="service.saveSettings($event)"
+      (goPublic)="service.goPublic()"
+      (goPrivate)="service.goPrivate()"
     />
   `,
   imports: [PageSettings],

@@ -1,17 +1,25 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
-import { adapter, BiteState } from './adapter';
-import { Bite } from 'model';
+import { adapter } from './adapter';
+import { Bite, PublicUser } from 'model';
 import { biteId } from '../router/selectors';
 import { likes } from '../likes/selectors';
 import { gpsPosition } from '../app/selectors';
 import { haversineDistance } from 'distance-pipe';
+import { EntityState } from '@ngrx/entity';
 
-const slice = createFeatureSelector<BiteState>(key);
+const slice = createFeatureSelector<
+  EntityState<any> & {
+    cachedBite?: Bite;
+    biteCreator?: PublicUser;
+  }
+>(key);
 
 const { selectAll } = adapter.getSelectors();
 
 export const cachedBite = createSelector(slice, (state) => state?.cachedBite);
+
+export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
 
 const allBites = createSelector(slice, selectAll);
 

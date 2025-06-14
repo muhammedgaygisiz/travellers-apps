@@ -11,8 +11,17 @@ export class SettingsDataAccessService {
 
   user = toSignal(this.storeService.user$);
   settings = toSignal(this.storeService.settings$);
+  isPublicProfile = toSignal(this.storeService.isPublicProfile$);
 
   saveSettings(settings: Settings) {
     this.storeService.saveSettings(settings);
+  }
+
+  goPublic() {
+    this.storeService.goPublic();
+  }
+
+  goPrivate() {
+    this.storeService.goPrivate();
   }
 }

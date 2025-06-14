@@ -9,6 +9,7 @@ import { PageComponent } from 'common/ui/page';
 import {
   Bite,
   Bucketlist,
+  PublicUser,
   RemoveBiteFromBucketlistParams,
   Review,
 } from 'model';
@@ -76,6 +77,7 @@ export class DetailsPage {
   bucketlists = input<Bucketlist[]>([]);
   userId = input<string>();
   isAuthenticated = input(false);
+  biteCreator = input<PublicUser>();
 
   submitNewTags = output<string>();
   selectList = output<Bucketlist>();

@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BehaviorSubject, EMPTY, from, skipWhile, switchMap } from 'rxjs';
+import { BehaviorSubject, EMPTY, from, of, skipWhile, switchMap } from 'rxjs';
 import { AuthService } from 'ta-firestore';
 import {
+  Bite,
   CreateAndSaveToBucketListParams,
   Menu,
   RemoveBiteFromBucketlistParams,
@@ -13,6 +14,7 @@ import {
 
 const BITE_COLLECTION = 'bites';
 const BUCKETLIST_COLLECTION = 'bucketlists';
+const USERS_COLLECTION = 'users';
 const LIKES_COLLECTION_GROUP = 'likes';
 const REVIEW_COLLECTION = 'reviews';
 const RESTAURANT_COLLECTION = 'restaurants';
@@ -34,6 +36,17 @@ export class BiteTribeApiService {
     {} as Settings
   );
   private readonly likesChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly profileChannel$ = new BehaviorSubject<any>(false);
+
+  public publicProfile$ = this.authService.isLoggedIn$.pipe(
+    skipWhile((isLoggedIn) => !isLoggedIn),
+    switchMap(() => {
+      // console.debug('#mo - Start Listener for Public Profile');
+      this.startProfileListener();
+
+      return this.profileChannel$;
+    })
+  );
 
   public allBucketlists$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),
@@ -183,22 +196,6 @@ export class BiteTribeApiService {
         // bites.forEach((bite) => this.startLikesListener(bite));
 
         this.bitesChannel$.next(bites);
-      }
-    );
-  }
-
-  private startLikesListener() {
-    FirebaseFirestore.addCollectionGroupSnapshotListener(
-      { reference: `${LIKES_COLLECTION_GROUP}` },
-      (likeDocs: any) => {
-        const likes =
-          likeDocs?.snapshots.map((likeDoc: any) => ({
-            ...likeDoc.data,
-          })) || [];
-
-        if (likes.length) {
-          this.likesChannel$.next(likes);
-        }
       }
     );
   }
@@ -620,5 +617,87 @@ export class BiteTribeApiService {
         name: bucketlistName,
       },
     });
+  }
+
+  async saveUser() {
+    const user = await this.getUser();
+
+    const photoUrl = ((user as any)?.providerData as any[]).find(
+      (data) => data.photoUrl.length
+    )?.photoUrl;
+
+    FirebaseFirestore.setDocument({
+      reference: `${USERS_COLLECTION}/${user?.uid}`,
+      data: {
+        userId: user?.uid || '',
+        displayName: user?.displayName || '',
+        email: user?.email || '',
+        photoUrl: photoUrl || '',
+      },
+    });
+  }
+
+  async deleteUser() {
+    const user = await this.getUser();
+
+    FirebaseFirestore.deleteDocument({
+      reference: `${USERS_COLLECTION}/${user?.uid}`,
+    });
+  }
+
+  getUserByBiteId(bite: Bite | undefined) {
+    if (!bite?.userId) {
+      return of();
+    }
+
+    return from(
+      FirebaseFirestore.getDocument({
+        reference: `${USERS_COLLECTION}/${bite.userId}`,
+      })
+    );
+  }
+
+  private startLikesListener() {
+    FirebaseFirestore.addCollectionGroupSnapshotListener(
+      { reference: `${LIKES_COLLECTION_GROUP}` },
+      (likeDocs: any) => {
+        const likes =
+          likeDocs?.snapshots.map((likeDoc: any) => ({
+            ...likeDoc.data,
+          })) || [];
+
+        if (likes.length) {
+          this.likesChannel$.next(likes);
+        }
+      }
+    );
+  }
+
+  private async startProfileListener() {
+    const user = await this.getUser();
+
+    FirebaseFirestore.addCollectionSnapshotListener(
+      {
+        reference: `${USERS_COLLECTION}`,
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            {
+              type: 'where',
+              fieldPath: 'userId',
+              opStr: '==',
+              value: user?.uid || '',
+            },
+          ],
+        },
+      },
+      (publicProfileDoc: any) => {
+        const isPublicProfile = publicProfileDoc?.snapshots?.length > 0;
+
+        this.profileChannel$.next(isPublicProfile);
+      }
+    );
+
+    return this.profileChannel$;
   }
 }

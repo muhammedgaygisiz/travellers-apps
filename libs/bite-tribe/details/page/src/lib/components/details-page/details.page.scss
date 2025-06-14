@@ -1,4 +1,16 @@
+@use 'globals';
+
 :host {
+  .bite-creator-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .profile-image {
+      @include globals.profile-image;
+    }
+  }
+
   .fields {
     width: 100%;
 

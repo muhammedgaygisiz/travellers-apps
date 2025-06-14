@@ -18,7 +18,7 @@ import {
 } from './restaurants/selectors';
 import { menu } from './menus/selectors';
 import { saveMenu } from './menus/actions';
-import { goPublic, saveSettings } from './app/actions';
+import { goPrivate, goPublic, saveSettings } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -31,7 +31,12 @@ import {
   SaveToBucketListParams,
   Settings,
 } from 'model';
-import { currency, gpsPosition, settings } from './app/selectors';
+import {
+  currency,
+  gpsPosition,
+  isPublicProfile,
+  settings,
+} from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
   saveNewRestaurant,
@@ -96,6 +101,7 @@ export class BiteTribeStoreService implements StoreService {
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
   settings$ = this.store.select(settings);
+  isPublicProfile$ = this.store.select(isPublicProfile);
   position$ = this.store.select(gpsPosition);
   cachedBite$ = this.store.select(cachedBite);
   selectedBucketlist$ = this.store.select(selectedBucketlist);
@@ -207,5 +213,9 @@ export class BiteTribeStoreService implements StoreService {
 
   goPublic() {
     this.store.dispatch(goPublic());
+  }
+
+  goPrivate() {
+    this.store.dispatch(goPrivate());
   }
 }

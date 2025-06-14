@@ -21,4 +21,10 @@ export const loadedSettingsFromApi = createAction(
   props<{ settings: Settings }>()
 );
 
+export const setIsPublicProfile = createAction(
+  '[APP] Set is public profile',
+  props<{ isPublic: boolean }>()
+);
+
 export const goPublic = createAction('[APP] Go public');
+export const goPrivate = createAction('[APP] Go private');

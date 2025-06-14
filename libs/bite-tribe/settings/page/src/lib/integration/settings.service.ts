@@ -12,6 +12,7 @@ export class SettingsService {
 
   user = this.dataAccess.user;
   settings = this.dataAccess.settings;
+  isPublicProfile = this.dataAccess.isPublicProfile;
 
   saveSettings(settings: Settings) {
     this.dataAccess.saveSettings(settings);
@@ -21,5 +22,9 @@ export class SettingsService {
 
   goPublic() {
     this.dataAccess.goPublic();
+  }
+
+  goPrivate() {
+    this.dataAccess.goPrivate();
   }
 }

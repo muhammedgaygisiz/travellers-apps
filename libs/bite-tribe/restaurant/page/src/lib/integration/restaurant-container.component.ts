@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RestaurantComponent } from '../components/page/restaurant.component';
 import { RestaurantService } from './restaurant.service';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,4 +21,10 @@ import { RestaurantService } from './restaurant.service';
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export class RestaurantContainer {
   service = inject(RestaurantService);
+
+  ionViewDidEnter() {
+    FirebaseAnalytics.setCurrentScreen({
+      screenName: 'Restaurant',
+    });
+  }
 }

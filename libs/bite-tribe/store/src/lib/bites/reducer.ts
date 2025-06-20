@@ -7,9 +7,11 @@ import {
   noPublicCreatorForBite,
   saveNewBite,
 } from './actions';
+import { fromAuth } from 'ta-firestore';
 
 export const reducer = createReducer(
   initialState,
+  on(fromAuth.logoutSucceeded, (state) => adapter.removeAll(state)),
   on(loadedBitesFromApi, (state, { bites }) =>
     adapter.upsertMany(bites, initialState)
   ),

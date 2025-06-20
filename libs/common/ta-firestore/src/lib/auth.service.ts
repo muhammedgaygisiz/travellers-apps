@@ -19,6 +19,10 @@ import {
 } from '@capacitor-firebase/authentication';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { getApp } from 'firebase/app';
+import { getFirestore, terminate } from '@angular/fire/firestore';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { Capacitor } from '@capacitor/core';
 
 @Injectable({
   providedIn: 'root',
@@ -62,6 +66,15 @@ export class AuthService {
     return from(FirebaseAuthentication.signOut()).pipe(
       tap(async () => {
         await getAuth().signOut();
+        const firebaseApp = getApp();
+        const firestore = getFirestore(firebaseApp);
+
+        await FirebaseFirestore.removeAllListeners();
+        await terminate(firestore);
+
+        if (!Capacitor.isNativePlatform()) {
+          await FirebaseFirestore.clearPersistence();
+        }
       })
     );
   }

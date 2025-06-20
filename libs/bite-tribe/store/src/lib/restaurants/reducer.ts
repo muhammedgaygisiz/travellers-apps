@@ -5,9 +5,11 @@ import {
   loadedRestaurantsFromApi,
   setRestaurantToCreate,
 } from './actions';
+import { fromAuth } from 'ta-firestore';
 
 export const reducer = createReducer(
   initialState,
+  on(fromAuth.logoutSucceeded, (state) => adapter.removeAll(state)),
   on(loadedRestaurantsFromApi, (state, { restaurants }) => {
     return adapter.upsertMany(restaurants, initialState);
   }),

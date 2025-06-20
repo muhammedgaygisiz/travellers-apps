@@ -142,6 +142,7 @@ export const provideBiteTribeStore = (environment: Environment) => [
           routerCancelAction.type,
           routerNavigatedAction.type,
         ],
+        trace: true,
       })
     : [],
   provideRouterStore(),

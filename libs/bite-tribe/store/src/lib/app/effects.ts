@@ -14,7 +14,7 @@ import {
   saveSettings,
   setIsPublicProfile,
 } from './actions';
-import { catchError, map, of, switchMap, tap } from 'rxjs';
+import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -37,6 +37,7 @@ export class AppEffect {
   loadPublicProfile$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.loadedUser),
+      filter((payload) => !!payload.user),
       switchMap(() => this.api.publicProfile$),
       map((isPublicProfile) =>
         setIsPublicProfile({ isPublic: isPublicProfile })
@@ -47,6 +48,7 @@ export class AppEffect {
   getCurrentPosition$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.loadedUser),
+      filter((payload) => !!payload.user),
       switchMap(() => getCurrentPosition(this.platform)),
       map((currentPosition) =>
         loadedGpsPosition({ position: currentPosition })

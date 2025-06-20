@@ -5,6 +5,7 @@ import {
   EMPTY,
   from,
   of,
+  skip,
   skipWhile,
   Subject,
   switchMap,
@@ -64,7 +65,7 @@ export class BiteTribeApiService {
         this.stopListener(this.profileCallbackId);
       }
 
-      return this.profileChannel$.pipe(takeUntil(this.stopped$));
+      return this.profileChannel$.pipe(skip(1), takeUntil(this.stopped$));
     })
   );
 
@@ -77,7 +78,7 @@ export class BiteTribeApiService {
         this.stopListener(this.bucketlistCallbackId);
       }
 
-      return this.bucketlistsChannel$.pipe(takeUntil(this.stopped$));
+      return this.bucketlistsChannel$.pipe(skip(1), takeUntil(this.stopped$));
     })
   );
 
@@ -90,7 +91,7 @@ export class BiteTribeApiService {
         this.stopListener(this.bitesCallbackId);
       }
 
-      return this.bitesChannel$.pipe(takeUntil(this.stopped$));
+      return this.bitesChannel$.pipe(skip(1), takeUntil(this.stopped$));
     })
   );
 
@@ -103,7 +104,7 @@ export class BiteTribeApiService {
         this.stopListener(this.likesCallbackId);
       }
 
-      return this.likesChannel$.pipe(takeUntil(this.stopped$));
+      return this.likesChannel$.pipe(skip(1), takeUntil(this.stopped$));
     })
   );
 
@@ -116,7 +117,7 @@ export class BiteTribeApiService {
         this.stopListener(this.restaurantsCallbackId);
       }
 
-      return this.restaurantsChannel$.pipe(takeUntil(this.stopped$));
+      return this.restaurantsChannel$.pipe(skip(1), takeUntil(this.stopped$));
     })
   );
 
@@ -129,7 +130,7 @@ export class BiteTribeApiService {
         this.stopListener(this.menuCallbackId);
       }
 
-      return this.menusChannel$.pipe(takeUntil(this.stopped$));
+      return this.menusChannel$.pipe(skip(1), takeUntil(this.stopped$));
     })
   );
 
@@ -156,7 +157,7 @@ export class BiteTribeApiService {
       // console.debug('#mo - Start Listener for Settings');
       this.startSettingsListener();
 
-      return this.settingsChannel$.pipe(takeUntil(this.stopped$));
+      return this.settingsChannel$.pipe(skip(1), takeUntil(this.stopped$));
     })
   );
 

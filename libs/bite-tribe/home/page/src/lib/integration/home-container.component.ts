@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { BiteTribeHomeComponent } from '../components/page/home.component';
 import { HomeService } from './home.service';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,4 +27,10 @@ import { HomeService } from './home.service';
 })
 export class HomeContainerComponent {
   service = inject(HomeService);
+
+  ionViewDidEnter() {
+    FirebaseAnalytics.setCurrentScreen({
+      screenName: 'Home',
+    });
+  }
 }

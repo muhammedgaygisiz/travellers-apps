@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { BucketlistsPage } from '../components/bucketlists-page/bucketlists.page';
 import { BucketlistsService } from './bucketlists.service';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
   template: `
@@ -16,4 +17,10 @@ import { BucketlistsService } from './bucketlists.service';
 })
 export class MyBucketlistsContainerComponent {
   service = inject(BucketlistsService);
+
+  ionViewDidEnter() {
+    FirebaseAnalytics.setCurrentScreen({
+      screenName: 'My Bucketlists',
+    });
+  }
 }

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { BiteService } from './bite.service';
 import { BitePage } from '../components/page/bite.page';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,4 +17,10 @@ import { BitePage } from '../components/page/bite.page';
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export class BiteContainer {
   service = inject(BiteService);
+
+  ionViewDidEnter() {
+    FirebaseAnalytics.setCurrentScreen({
+      screenName: 'New Bite',
+    });
+  }
 }

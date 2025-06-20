@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { IonButton, IonContent } from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
   selector: 'lib-bite-tribe-start',
@@ -8,4 +9,10 @@ import { RouterLink } from '@angular/router';
   styleUrl: './bite-tribe-start.component.scss',
   imports: [IonContent, IonButton, RouterLink],
 })
-export class BiteTribeStartComponent {}
+export class BiteTribeStartComponent {
+  ionViewDidEnter() {
+    FirebaseAnalytics.setCurrentScreen({
+      screenName: 'Start',
+    });
+  }
+}

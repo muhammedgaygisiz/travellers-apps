@@ -34,6 +34,7 @@ import {
 import {
   currency,
   gpsPosition,
+  isBitesLoading,
   isPublicProfile,
   settings,
 } from './app/selectors';
@@ -107,6 +108,7 @@ export class BiteTribeStoreService implements StoreService {
   selectedBucketlist$ = this.store.select(selectedBucketlist);
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
   biteCreator$ = this.store.select(biteCreator);
+  isBitesLoading$ = this.store.select(isBitesLoading);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());

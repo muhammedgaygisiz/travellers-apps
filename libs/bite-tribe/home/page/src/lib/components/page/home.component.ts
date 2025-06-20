@@ -11,10 +11,12 @@ import {
   IonCardContent,
   IonChip,
   IonContent,
+  IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
+import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'bt-home',
@@ -28,6 +30,8 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonCard,
     IonCardContent,
     IonText,
+    IonSpinner,
+    NgTemplateOutlet,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -41,6 +45,8 @@ export class BiteTribeHomeComponent {
   isAuthenticated = input(false);
   showAddButton = input(true);
   showHeaderMenu = input(true);
+  showSpinner = input<boolean>(false);
+  isBitesLoading = input<boolean | undefined>();
 
   readonly logoutClick = output();
   readonly addButtonClick = output();

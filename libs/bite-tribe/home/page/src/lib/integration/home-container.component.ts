@@ -10,6 +10,8 @@ import { HomeService } from './home.service';
       [bites]="service.bites()"
       [userId]="service.userId()"
       [isAuthenticated]="service.isAuthenticated()"
+      [showSpinner]="true"
+      [isBitesLoading]="service.isBitesLoading()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"

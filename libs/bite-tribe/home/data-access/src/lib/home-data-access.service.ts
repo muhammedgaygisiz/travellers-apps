@@ -15,6 +15,9 @@ export class HomeDataAccessService {
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
   });
+  isBitesLoading = toSignal(this.storeService.isBitesLoading$, {
+    initialValue: true,
+  });
 
   logout() {
     this.storeService.logout();

@@ -36,7 +36,12 @@
       <h1>{{ biteData?.name }}</h1>
 
       <div class="fields ion-margin-bottom">
-        <span>{{ biteData?.place }} · {{ biteData?.distance | toMetric }}</span>
+        <span
+          ><span class="link" (click)="onRestaurantClick(biteData)"
+            >{{ biteData?.place }}</span
+          >
+          · {{ biteData?.distance | toMetric }}</span
+        >
 
         @if (biteData?.price) {
         <span class="price">

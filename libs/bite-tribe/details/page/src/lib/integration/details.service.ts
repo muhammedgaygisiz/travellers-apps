@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
-import { Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
+import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 
 @Injectable({ providedIn: 'root' })
@@ -63,5 +63,29 @@ export class DetailsService {
 
   onGotoMyBucketlists() {
     this.navController.navigateForward(['my-bucketlists']);
+  }
+
+  onRestaurantClick(bite: Bite) {
+    if (bite.restaurantId) {
+      // eslint-disable-next-line no-unused-vars
+      const [empty, collectionName, restaurantId] =
+        bite.restaurantId.split('/');
+
+      this.navController.navigateForward([
+        'bite',
+        bite.id,
+        'restaurant',
+        restaurantId,
+      ]);
+
+      return;
+    }
+
+    this.navController.navigateForward([
+      'bite',
+      bite.id,
+      'restaurant',
+      encodeURIComponent(bite.place),
+    ]);
   }
 }

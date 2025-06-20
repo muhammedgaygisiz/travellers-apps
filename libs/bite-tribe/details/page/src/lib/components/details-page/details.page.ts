@@ -89,6 +89,7 @@ export class DetailsPage {
   readonly gotoSettings = output();
   readonly gotoMyBites = output();
   readonly gotoMyBucketlists = output();
+  readonly restaurantClick = output<Bite>();
 
   private readonly formBuilder = inject(FormBuilder);
   popoverController = inject(PopoverController);
@@ -175,5 +176,11 @@ export class DetailsPage {
     });
 
     await popover.present();
+  }
+
+  onRestaurantClick(biteData: Bite | undefined) {
+    if (biteData) {
+      this.restaurantClick.emit(biteData);
+    }
   }
 }

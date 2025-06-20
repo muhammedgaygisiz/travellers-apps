@@ -49,6 +49,11 @@ ion-alert {
   margin-right: 16px;
 }
 
+@mixin link {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 input[type='number'] {
   @include no-number-arrows;
 }

@@ -4,6 +4,7 @@ import {
   loadedUser,
   loginFailed,
   loginSucceeded,
+  logoutSucceeded,
   notAuthenticated,
   registrationFailed,
 } from './actions';
@@ -42,6 +43,11 @@ export const reducer = createReducer<AuthResult, Action>(
   on(confirmRegistrationErrorMessage, (state) => ({
     ...state,
     registrationFailed: false,
+    errorCode: null,
+  })),
+  on(logoutSucceeded, () => ({
+    authenticated: false,
+    authenticationFailed: false,
     errorCode: null,
   }))
 );

@@ -1,6 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BehaviorSubject, EMPTY, from, of, skipWhile, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  EMPTY,
+  from,
+  of,
+  skipWhile,
+  Subject,
+  switchMap,
+  takeUntil,
+} from 'rxjs';
 import { AuthService } from 'ta-firestore';
 import {
   Bite,
@@ -27,6 +36,7 @@ const MENU_COLLECTION = 'menus';
 export class BiteTribeApiService {
   private readonly authService = inject(AuthService);
 
+  private readonly stopped$ = new Subject<void>();
   private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
   private readonly bucketlistsChannel$ = new BehaviorSubject<any[]>([]);
   private readonly restaurantsChannel$ = new BehaviorSubject<any[]>([]);
@@ -38,91 +48,93 @@ export class BiteTribeApiService {
   private readonly likesChannel$ = new BehaviorSubject<any[]>([]);
   private readonly profileChannel$ = new BehaviorSubject<any>(false);
 
+  profileCallbackId = '';
+  bucketlistCallbackId = '';
+  bitesCallbackId = '';
+  likesCallbackId = '';
+  restaurantsCallbackId = '';
+  menuCallbackId = '';
+
   public publicProfile$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap(() => {
-      // console.debug('#mo - Start Listener for Public Profile');
-      this.startProfileListener();
+    switchMap((isLoggedIn) => {
+      if (isLoggedIn) {
+        this.startProfileListener();
+      } else {
+        this.stopListener(this.profileCallbackId);
+      }
 
-      return this.profileChannel$;
+      return this.profileChannel$.pipe(takeUntil(this.stopped$));
     })
   );
 
   public allBucketlists$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap(() => {
-      this.startBucketlistsListener();
+    switchMap((isLoggedIn) => {
+      if (isLoggedIn) {
+        this.startBucketlistsListener();
+      } else {
+        this.stopListener(this.bucketlistCallbackId);
+      }
 
-      return this.bucketlistsChannel$;
+      return this.bucketlistsChannel$.pipe(takeUntil(this.stopped$));
     })
   );
 
   public allBites$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap(() => {
-      // console.debug('#mo - Start Listener for Bites');
-      this.startBitesListener();
+    switchMap((isLoggedIn) => {
+      if (isLoggedIn) {
+        this.startBitesListener();
+      } else {
+        this.stopListener(this.bitesCallbackId);
+      }
 
-      return this.bitesChannel$;
+      return this.bitesChannel$.pipe(takeUntil(this.stopped$));
     })
   );
 
   public allLikes$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap(() => {
-      // console.debug('#mo - Start Listener for Likes');
-      this.startLikesListener();
+    switchMap((isLoggedIn) => {
+      if (isLoggedIn) {
+        this.startLikesListener();
+      } else {
+        this.stopListener(this.likesCallbackId);
+      }
 
-      return this.likesChannel$;
+      return this.likesChannel$.pipe(takeUntil(this.stopped$));
     })
   );
 
   public allRestaurants$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap(() => {
-      // console.debug('#mo - Start Listener for Restaurants');
-      this.startRestaurantsListener();
+    switchMap((isLoggedIn) => {
+      if (isLoggedIn) {
+        this.startRestaurantsListener();
+      } else {
+        this.stopListener(this.restaurantsCallbackId);
+      }
 
-      return this.restaurantsChannel$;
+      return this.restaurantsChannel$.pipe(takeUntil(this.stopped$));
     })
   );
 
-  private async startRestaurantsListener() {
-    // console.debug('#mo Fetching bites from Firestore');
-
-    await FirebaseFirestore.addCollectionSnapshotListener(
-      { reference: RESTAURANT_COLLECTION },
-      async (restaurantsDocs) => {
-        // console.debug(
-        //   '#mo Fetched restaurants from Firestore',
-        //   restaurantsDocs
-        // );
-
-        const restaurants =
-          restaurantsDocs?.snapshots.map((doc) => ({
-            ...doc.data,
-            id: doc.id,
-          })) || [];
-
-        this.restaurantsChannel$.next(restaurants);
-      }
-    );
-  }
-
   public allMenus$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap(() => {
-      // console.debug('#mo - Start Listener for Menus');
-      this.startMenusListener();
+    switchMap((isLoggedIn) => {
+      if (isLoggedIn) {
+        this.startMenusListener();
+      } else {
+        this.stopListener(this.menuCallbackId);
+      }
 
-      return this.menusChannel$;
+      return this.menusChannel$.pipe(takeUntil(this.stopped$));
     })
   );
 
   private async startMenusListener() {
-    // console.debug('#mo Fetching menus from Firestore');
-
-    await FirebaseFirestore.addCollectionSnapshotListener(
+    this.menuCallbackId = await FirebaseFirestore.addCollectionSnapshotListener(
       { reference: MENU_COLLECTION },
       async (menusDocs) => {
         // console.debug('#mo Fetched menus from Firestore', menusDocs);
@@ -144,60 +156,60 @@ export class BiteTribeApiService {
       // console.debug('#mo - Start Listener for Settings');
       this.startSettingsListener();
 
-      return this.settingsChannel$;
+      return this.settingsChannel$.pipe(takeUntil(this.stopped$));
     })
   );
 
   private async startBucketlistsListener() {
     const user = await this.getUser();
 
-    await FirebaseFirestore.addCollectionSnapshotListener(
-      {
-        reference: BUCKETLIST_COLLECTION,
-        compositeFilter: {
-          type: 'and',
-          queryConstraints: [
-            {
-              type: 'where',
-              fieldPath: 'userId',
-              opStr: '==',
-              value: user?.uid,
-            },
-          ],
+    this.bucketlistCallbackId =
+      await FirebaseFirestore.addCollectionSnapshotListener(
+        {
+          reference: BUCKETLIST_COLLECTION,
+          compositeFilter: {
+            type: 'and',
+            queryConstraints: [
+              {
+                type: 'where',
+                fieldPath: 'userId',
+                opStr: '==',
+                value: user?.uid,
+              },
+            ],
+          },
         },
-      },
-      async (bucketlistDocs) => {
-        const bucketlists =
-          bucketlistDocs?.snapshots.map((doc) => ({
-            ...doc.data,
-            id: doc.id,
-          })) || [];
+        async (bucketlistDocs) => {
+          const bucketlists =
+            bucketlistDocs?.snapshots.map((doc) => ({
+              ...doc.data,
+              id: doc.id,
+            })) || [];
 
-        this.bucketlistsChannel$.next(bucketlists);
-      }
-    );
+          this.bucketlistsChannel$.next(bucketlists);
+        }
+      );
   }
 
   private async startBitesListener() {
-    // console.debug('#mo Fetching bites from Firestore');
+    this.bitesCallbackId =
+      await FirebaseFirestore.addCollectionSnapshotListener(
+        { reference: BITE_COLLECTION },
+        async (biteDocs) => {
+          // console.debug('#mo Fetched bites from Firestore', biteDocs);
 
-    await FirebaseFirestore.addCollectionSnapshotListener(
-      { reference: BITE_COLLECTION },
-      async (biteDocs) => {
-        // console.debug('#mo Fetched bites from Firestore', biteDocs);
+          const bites =
+            biteDocs?.snapshots.map((doc) => ({
+              ...doc.data,
+              id: doc.id,
+              likes: [],
+            })) || [];
 
-        const bites =
-          biteDocs?.snapshots.map((doc) => ({
-            ...doc.data,
-            id: doc.id,
-            likes: [],
-          })) || [];
+          // bites.forEach((bite) => this.startLikesListener(bite));
 
-        // bites.forEach((bite) => this.startLikesListener(bite));
-
-        this.bitesChannel$.next(bites);
-      }
-    );
+          this.bitesChannel$.next(bites);
+        }
+      );
   }
 
   async saveNewBite(bite: any) {
@@ -657,47 +669,77 @@ export class BiteTribeApiService {
     );
   }
 
-  private startLikesListener() {
-    FirebaseFirestore.addCollectionGroupSnapshotListener(
-      { reference: `${LIKES_COLLECTION_GROUP}` },
-      (likeDocs: any) => {
-        const likes =
-          likeDocs?.snapshots.map((likeDoc: any) => ({
-            ...likeDoc.data,
-          })) || [];
+  private async startLikesListener() {
+    this.likesCallbackId =
+      await FirebaseFirestore.addCollectionGroupSnapshotListener(
+        { reference: `${LIKES_COLLECTION_GROUP}` },
+        (likeDocs: any) => {
+          const likes =
+            likeDocs?.snapshots.map((likeDoc: any) => ({
+              ...likeDoc.data,
+            })) || [];
 
-        if (likes.length) {
-          this.likesChannel$.next(likes);
+          if (likes.length) {
+            this.likesChannel$.next(likes);
+          }
         }
-      }
-    );
+      );
   }
 
   private async startProfileListener() {
     const user = await this.getUser();
 
-    FirebaseFirestore.addCollectionSnapshotListener(
-      {
-        reference: `${USERS_COLLECTION}`,
-        compositeFilter: {
-          type: 'and',
-          queryConstraints: [
-            {
-              type: 'where',
-              fieldPath: 'userId',
-              opStr: '==',
-              value: user?.uid || '',
-            },
-          ],
+    this.profileCallbackId =
+      await FirebaseFirestore.addCollectionSnapshotListener(
+        {
+          reference: `${USERS_COLLECTION}`,
+          compositeFilter: {
+            type: 'and',
+            queryConstraints: [
+              {
+                type: 'where',
+                fieldPath: 'userId',
+                opStr: '==',
+                value: user?.uid || '',
+              },
+            ],
+          },
         },
-      },
-      (publicProfileDoc: any) => {
-        const isPublicProfile = publicProfileDoc?.snapshots?.length > 0;
+        (publicProfileDoc: any) => {
+          const isPublicProfile = publicProfileDoc?.snapshots?.length > 0;
 
-        this.profileChannel$.next(isPublicProfile);
-      }
-    );
+          this.profileChannel$.next(isPublicProfile);
+        }
+      );
 
     return this.profileChannel$;
+  }
+
+  private async startRestaurantsListener() {
+    this.restaurantsCallbackId =
+      await FirebaseFirestore.addCollectionSnapshotListener(
+        { reference: RESTAURANT_COLLECTION },
+        async (restaurantsDocs) => {
+          // console.debug(
+          //   '#mo Fetched restaurants from Firestore',
+          //   restaurantsDocs
+          // );
+
+          const restaurants =
+            restaurantsDocs?.snapshots.map((doc) => ({
+              ...doc.data,
+              id: doc.id,
+            })) || [];
+
+          this.restaurantsChannel$.next(restaurants);
+        }
+      );
+  }
+
+  private async stopListener(callbackId: string) {
+    this.stopped$.next();
+    if (callbackId) {
+      await FirebaseFirestore.removeSnapshotListener({ callbackId });
+    }
   }
 }

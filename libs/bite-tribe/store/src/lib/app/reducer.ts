@@ -4,11 +4,13 @@ import {
   loadedSettingsFromApi,
   setIsPublicProfile,
 } from './actions';
+import { fromAuth } from 'ta-firestore';
 
 export const reducer = createReducer<{
   position?: any;
 }>(
   {},
+  on(fromAuth.logoutSucceeded, () => ({})),
   on(loadedGpsPosition, (state, { position }) => {
     const { coords } = position;
     const { latitude, longitude } = coords;

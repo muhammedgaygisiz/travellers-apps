@@ -1,7 +1,7 @@
 import { Action, ActionReducer, MetaReducer } from '@ngrx/store';
 import { Environment } from './environment';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any,no-unused-vars
 const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
   return (state, action) => {
     // console.debug('state', state);
@@ -11,7 +11,7 @@ const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
   };
 };
 
-const metaReducers: MetaReducer[] = [debug];
+const metaReducers: MetaReducer[] = [];
 
 export const getMetaReducers = (
   environment: Environment

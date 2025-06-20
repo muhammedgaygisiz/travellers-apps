@@ -68,9 +68,9 @@ export class AuthService {
         await getAuth().signOut();
         const firebaseApp = getApp();
         const firestore = getFirestore(firebaseApp);
-        await terminate(firestore);
 
         await FirebaseFirestore.removeAllListeners();
+        await terminate(firestore);
 
         if (!Capacitor.isNativePlatform()) {
           await FirebaseFirestore.clearPersistence();

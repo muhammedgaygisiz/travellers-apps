@@ -29,7 +29,7 @@
           alt="Bite Creator"
           class="profile-image"
         />
-        <ion-label> {{ biteCreatorData.displayName }} </ion-label>
+        <ion-label> {{ biteCreatorData.displayName }}</ion-label>
       </div>
       }
 
@@ -60,7 +60,7 @@
       </div>
 
       <div class="ion-margin-bottom like-and-bucketlist-bar">
-        @if(biteData) {
+        @if (biteData) {
         <div class="ion-text-start">
           <bt-likes
             [bite]="biteData"
@@ -84,8 +84,8 @@
       </div>
 
       <div class="ion-margin-bottom">
-        @if(biteData?.position) {
-        <bt-map [positions]="[biteData?.position]" readonly />
+        @if (biteData?.position) {
+        <bt-map [positions]="[biteData?.position!]" readonly />
         }
       </div>
 

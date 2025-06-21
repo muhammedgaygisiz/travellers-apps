@@ -3,6 +3,9 @@ import { DetailsContainer } from '../details.container';
 import { DetailsService } from '../details.service';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
+import { addNecessaryIcons } from 'utils';
+
+addNecessaryIcons();
 
 describe('DetailsComponent', () => {
   let component: DetailsContainer;

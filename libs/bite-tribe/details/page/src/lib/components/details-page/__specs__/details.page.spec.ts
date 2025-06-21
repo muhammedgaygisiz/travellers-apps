@@ -4,12 +4,16 @@ import { PageComponent } from 'common/ui/page';
 import { By } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 import {
+  AlertController,
   PopoverController,
   provideIonicAngular,
 } from '@ionic/angular/standalone';
 import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
 import { ToBlobUrlPipe } from 'image-compression';
 import { addNecessaryIcons } from 'utils';
+import { AppLauncher } from '@capacitor/app-launcher';
+import { Platform } from '@ionic/angular';
+import { Bite } from 'model';
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
@@ -20,10 +24,19 @@ class MockToBlobUrlPipe implements PipeTransform {
 
 addNecessaryIcons();
 
+// Properly mock the AppLauncher module
+jest.mock('@capacitor/app-launcher', () => ({
+  AppLauncher: {
+    canOpenUrl: jest.fn(),
+  },
+}));
+
 describe('DetailsPage', () => {
   let component: DetailsPage;
   let fixture: ComponentFixture<DetailsPage>;
   let componentRef: ComponentRef<DetailsPage>;
+  let platform: Platform;
+  let alertController: AlertController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -43,6 +56,8 @@ describe('DetailsPage', () => {
     fixture = TestBed.createComponent(DetailsPage);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
+    platform = TestBed.inject(Platform);
+    alertController = TestBed.inject(AlertController);
     fixture.detectChanges();
   });
 
@@ -213,6 +228,263 @@ describe('DetailsPage', () => {
       await component.showBucketListsSelection(mockEvent);
 
       expect(boundOnNewList).toHaveBeenCalledWith(component);
+    });
+  });
+
+  describe('openNavigation', () => {
+    let windowOpenSpy: jest.SpyInstance;
+
+    const mockBite = {
+      id: '1',
+      name: 'Test Bite',
+      position: { latitude: 10, longitude: 20 },
+    };
+
+    beforeEach(() => {
+      windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+      componentRef.setInput('bite', mockBite);
+      fixture.detectChanges();
+    });
+
+    afterEach(() => {
+      windowOpenSpy.mockRestore();
+      jest.clearAllMocks();
+    });
+
+    it('should not open navigation if bite has no position', async () => {
+      componentRef.setInput('bite', { ...mockBite, position: undefined });
+      fixture.detectChanges();
+
+      await component.openNavigation();
+
+      expect(window.open).not.toHaveBeenCalled();
+    });
+
+    describe('on iOS', () => {
+      beforeEach(() => {
+        jest.spyOn(platform, 'is').mockImplementation((p) => p === 'ios');
+      });
+
+      it('should show alert to choose app if Google Maps is installed', async () => {
+        (AppLauncher.canOpenUrl as jest.Mock).mockResolvedValue({
+          value: true,
+        });
+        const alert = { present: jest.fn() } as any;
+        const createSpy = jest
+          .spyOn(alertController, 'create')
+          .mockResolvedValue(alert);
+
+        await component.openNavigation();
+
+        expect(createSpy).toHaveBeenCalled();
+        expect(alert.present).toHaveBeenCalled();
+        expect(window.open).not.toHaveBeenCalled();
+      });
+
+      it('should open Apple Maps if Google Maps is not installed', async () => {
+        (AppLauncher.canOpenUrl as jest.Mock).mockResolvedValue({
+          value: false,
+        });
+        await component.openNavigation();
+        expect(window.open).toHaveBeenCalledWith(
+          'maps://?daddr=10,20',
+          '_system'
+        );
+      });
+
+      it('should open Apple Maps if checking for Google Maps fails', async () => {
+        (AppLauncher.canOpenUrl as jest.Mock).mockRejectedValue(
+          new Error('some error')
+        );
+        await component.openNavigation();
+        expect(window.open).toHaveBeenCalledWith(
+          'maps://?daddr=10,20',
+          '_system'
+        );
+      });
+    });
+
+    describe('on Android', () => {
+      beforeEach(() => {
+        jest.spyOn(platform, 'is').mockImplementation((p) => p === 'android');
+      });
+
+      it('should open geo intent', async () => {
+        await component.openNavigation();
+        const expectedUrl = `geo:0,0?q=10,20(${encodeURIComponent(
+          mockBite.name
+        )})`;
+        expect(window.open).toHaveBeenCalledWith(expectedUrl, '_system');
+      });
+    });
+
+    describe('on Web', () => {
+      beforeEach(() => {
+        jest.spyOn(platform, 'is').mockImplementation(() => false);
+      });
+
+      it('should open Google Maps in a new tab', async () => {
+        await component.openNavigation();
+        const expectedUrl =
+          'https://www.google.com/maps/dir/?api=1&destination=10,20';
+        expect(window.open).toHaveBeenCalledWith(expectedUrl, '_blank');
+      });
+    });
+  });
+
+  describe('Restaurant Click', () => {
+    it('should emit restaurant click event when bite data is provided', () => {
+      const mockBite = { id: '123', name: 'Test Restaurant' } as Bite;
+      const emitSpy = jest.spyOn(component.restaurantClick, 'emit');
+
+      component.onRestaurantClick(mockBite);
+
+      expect(emitSpy).toHaveBeenCalledWith(mockBite);
+    });
+
+    it('should not emit restaurant click event when bite data is undefined', () => {
+      const emitSpy = jest.spyOn(component.restaurantClick, 'emit');
+
+      component.onRestaurantClick(undefined);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Navigation buttons on iOS', () => {
+    let windowOpenSpy: jest.SpyInstance;
+    const mockBite = {
+      id: '1',
+      name: 'Test Bite',
+      position: { latitude: 10, longitude: 20 },
+    };
+
+    beforeEach(() => {
+      windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+      jest.spyOn(platform, 'is').mockImplementation((p) => p === 'ios');
+    });
+
+    afterEach(() => {
+      windowOpenSpy.mockRestore();
+    });
+
+    it('should open Apple Maps when Apple Maps button is clicked', async () => {
+      (AppLauncher.canOpenUrl as jest.Mock).mockResolvedValue({ value: true });
+
+      // We need to extract the handler function from the alert controller
+      componentRef.setInput('bite', mockBite);
+
+      // Mock alert controller to capture the buttons
+      let capturedButtons: any[] = [];
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation((options: any) => {
+          capturedButtons = options.buttons;
+          return Promise.resolve({
+            present: jest.fn(),
+          } as any);
+        });
+
+      // Start navigation flow to trigger alert creation
+      await component.openNavigation();
+
+      // Find Apple Maps button
+      const appleMapsButton = capturedButtons.find(
+        (btn) => btn.text === 'Apple Maps'
+      );
+      expect(appleMapsButton).toBeDefined();
+
+      // Call the handler
+      appleMapsButton.handler();
+
+      // Check if window.open was called with correct URL
+      expect(window.open).toHaveBeenCalledWith(
+        'maps://?daddr=10,20',
+        '_system'
+      );
+    });
+
+    it('should open Google Maps when Google Maps button is clicked', async () => {
+      (AppLauncher.canOpenUrl as jest.Mock).mockResolvedValue({ value: true });
+      componentRef.setInput('bite', mockBite);
+
+      // Mock alert controller to capture the buttons
+      let capturedButtons: any[] = [];
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation((options: any) => {
+          capturedButtons = options.buttons;
+          return Promise.resolve({
+            present: jest.fn(),
+          } as any);
+        });
+
+      await component.openNavigation();
+
+      const googleMapsButton = capturedButtons.find(
+        (btn) => btn.text === 'Google Maps'
+      );
+      expect(googleMapsButton).toBeDefined();
+
+      googleMapsButton.handler();
+
+      expect(window.open).toHaveBeenCalledWith(
+        'comgooglemaps://?daddr=10,20&directionsmode=driving',
+        '_system'
+      );
+    });
+  });
+
+  describe('Navigation outputs', () => {
+    it('should emit logoutClick event', () => {
+      const emitSpy = jest.spyOn(component.logoutClick, 'emit');
+
+      // Trigger the event
+      component.logoutClick.emit();
+
+      expect(emitSpy).toHaveBeenCalled();
+    });
+
+    it('should emit gotoSettings event', () => {
+      const emitSpy = jest.spyOn(component.gotoSettings, 'emit');
+
+      component.gotoSettings.emit();
+
+      expect(emitSpy).toHaveBeenCalled();
+    });
+
+    it('should emit gotoMyBites event', () => {
+      const emitSpy = jest.spyOn(component.gotoMyBites, 'emit');
+
+      component.gotoMyBites.emit();
+
+      expect(emitSpy).toHaveBeenCalled();
+    });
+
+    it('should emit gotoMyBucketlists event', () => {
+      const emitSpy = jest.spyOn(component.gotoMyBucketlists, 'emit');
+
+      component.gotoMyBucketlists.emit();
+
+      expect(emitSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('isGoogleMapsInstalled', () => {
+    it('should return true when Google Maps is installed', async () => {
+      (AppLauncher.canOpenUrl as jest.Mock).mockResolvedValue({ value: true });
+
+      const result = await component['isGoogleMapsInstalled']();
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when Google Maps is not installed', async () => {
+      (AppLauncher.canOpenUrl as jest.Mock).mockResolvedValue({ value: false });
+
+      const result = await component['isGoogleMapsInstalled']();
+
+      expect(result).toBe(false);
     });
   });
 });

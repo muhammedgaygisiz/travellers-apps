@@ -64,5 +64,10 @@
 	<string>This app needs access to your photo library so you can select and share food photos.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+    <array>
+    	<string>maps</string>
+      <string>comgooglemaps</string>
+    </array>
 </dict>
 </plist>

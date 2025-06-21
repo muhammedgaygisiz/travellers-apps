@@ -11,6 +11,16 @@
     }
   }
 
+  .title-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .navigate {
+      cursor: pointer;
+    }
+  }
+
   .fields {
     width: 100%;
 

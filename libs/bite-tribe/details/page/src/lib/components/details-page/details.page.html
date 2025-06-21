@@ -33,15 +33,24 @@
       </div>
       }
 
-      <h1>{{ biteData?.name }}</h1>
+      <div class="title-container">
+        <h1>{{ biteData?.name }}</h1>
+        <ion-icon
+          name="navigate-outline"
+          color="primary"
+          size="large"
+          class="ion-margin-start navigate"
+          (click)="openNavigation()"
+        />
+      </div>
 
       <div class="fields ion-margin-bottom">
-        <span
-          ><span class="link" (click)="onRestaurantClick(biteData)"
-            >{{ biteData?.place }}</span
-          >
-          · {{ biteData?.distance | toMetric }}</span
-        >
+        <span>
+          <span class="link" (click)="onRestaurantClick(biteData)">
+            {{ biteData?.place }}
+          </span>
+          · {{ biteData?.distance | toMetric }}
+        </span>
 
         @if (biteData?.price) {
         <span class="price">

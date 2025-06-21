@@ -26,6 +26,7 @@ import {
   bookmarkOutline,
   bookmark,
   menu,
+  navigateOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -56,5 +57,6 @@ export const addNecessaryIcons = () => {
     bookmarkOutline,
     bookmark,
     menu,
+    navigateOutline,
   });
 };

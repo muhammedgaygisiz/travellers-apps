@@ -58,4 +58,5 @@ export class BiteTribeHomeComponent {
   readonly restaurantClick = output<Bite>();
   readonly gotoEdit = output<Bite>();
   readonly deleteBite = output<Bite>();
+  readonly openMapView = output();
 }

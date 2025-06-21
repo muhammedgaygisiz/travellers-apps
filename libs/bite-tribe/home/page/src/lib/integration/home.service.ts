@@ -102,4 +102,8 @@ export class HomeService {
   onGotoEditClick(biteToEdit: Bite) {
     this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
   }
+
+  openMapView() {
+    this.navController.navigateForward(['home', 'map-view']);
+  }
 }

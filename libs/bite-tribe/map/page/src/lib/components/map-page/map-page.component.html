@@ -1,0 +1,18 @@
+<ta-page
+  [showHeaderMenu]="true"
+  [showLanguages]="false"
+  [showSettingsButton]="true"
+  [showMyBites]="true"
+  [showMyBucketlists]="true"
+  [showFooter]="false"
+  [isAuthenticated]="isAuthenticated()"
+  [enableBackButton]="true"
+  (logoutClick)="logoutClick.emit()"
+  (gotoSettings)="gotoSettings.emit()"
+  (gotoMyBucketlists)="gotoMyBucketlists.emit()"
+  (gotoMyBites)="gotoMyBites.emit()"
+>
+  <ion-content [fullscreen]="true">
+    <bt-map readonly [position]="position()" />
+  </ion-content>
+</ta-page>

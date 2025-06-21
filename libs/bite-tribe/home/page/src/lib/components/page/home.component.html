@@ -18,7 +18,7 @@
     <h1>{{ title() }}</h1>
 
     <div class="chip-container">
-      <ion-chip>Map View</ion-chip>
+      <ion-chip (click)="openMapView.emit()">Map View</ion-chip>
       <ion-chip>Nearby</ion-chip>
       <ion-chip>Vegan</ion-chip>
     </div>

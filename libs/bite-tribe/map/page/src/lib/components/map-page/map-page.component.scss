@@ -1,0 +1,26 @@
+:host {
+  ::ng-deep .outer-content-container {
+    position: relative;
+
+    display: block;
+    height: 100%;
+    width: 100%;
+
+    .inner-content-container {
+      position: absolute;
+      inset: 0;
+      max-width: unset !important;
+    }
+  }
+
+  bt-map {
+    height: 100%;
+    width: 100%;
+
+    ::ng-deep .map-container {
+      height: 100%;
+      width: 100%;
+      border-radius: 0;
+    }
+  }
+}

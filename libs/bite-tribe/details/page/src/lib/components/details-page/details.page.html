@@ -84,7 +84,9 @@
       </div>
 
       <div class="ion-margin-bottom">
-        <bt-map [positions]="[biteData?.position!]" readonly />
+        @if(biteData?.position) {
+        <bt-map [positions]="[biteData?.position]" readonly />
+        }
       </div>
 
       <div class="ion-margin-bottom">

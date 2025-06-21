@@ -21,7 +21,7 @@ export class MapPageComponent {
   readonly gotoMyBucketlists = output();
   readonly gotoMyBites = output();
 
-  position = computed(() => {
+  positions = computed(() => {
     const bites = this.bites();
 
     return bites?.map((bite) => {

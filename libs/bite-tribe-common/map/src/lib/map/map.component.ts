@@ -30,6 +30,15 @@ const iconDefault = L.icon({
 });
 L.Marker.prototype.options.icon = iconDefault;
 
+const withNoWrapOptionToPreventWorldRepetition: L.MapOptions = {
+  worldCopyJump: true, // Better behavior when panning across the date line
+  maxBounds: [
+    [-90, -180],
+    [90, 180],
+  ], // Restrict view to one world
+  maxBoundsViscosity: 1.0, // How much to constrain the map to maxBounds (1.0 = fully constrained)
+};
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -42,10 +51,10 @@ export class MapComponent implements OnDestroy {
   readonly = input(false, { transform: booleanAttribute });
   positionSelected = output<Geopoint>();
 
-  // Compute if the map should be readonly based on positions length or explicit readonly input
   isReadonly = computed(() => {
     const positionsList = this.positions();
-    return this.readonly() || (positionsList && positionsList.length > 1);
+    const moreThenOnePosition = positionsList && positionsList.length > 1;
+    return this.readonly() || moreThenOnePosition;
   });
 
   private map!: L.Map;
@@ -57,15 +66,10 @@ export class MapComponent implements OnDestroy {
     const mapElement = this.mapChild();
 
     if (mapElement && !this.map) {
-      // Configure map with noWrap option to prevent repetition of world map
-      this.map = L.map(mapElement.nativeElement, {
-        worldCopyJump: true, // Better behavior when panning across the date line
-        maxBounds: [
-          [-90, -180],
-          [90, 180],
-        ], // Restrict view to one world
-        maxBoundsViscosity: 1.0, // How much to constrain the map to maxBounds (1.0 = fully constrained)
-      });
+      this.map = L.map(
+        mapElement.nativeElement,
+        withNoWrapOptionToPreventWorldRepetition
+      );
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -77,9 +81,7 @@ export class MapComponent implements OnDestroy {
       if (positionsList && positionsList.length > 0) {
         this.updateMarkers(positionsList);
 
-        // Always start by focusing on the first position in the list
-        const firstPosition = positionsList[0];
-        this.map.setView([firstPosition.latitude, firstPosition.longitude], 15);
+        this.startWithFirstPositionInList(positionsList);
 
         // If there are multiple positions, fit bounds after a short delay
         if (positionsList.length > 1) {
@@ -103,12 +105,20 @@ export class MapComponent implements OnDestroy {
         });
       }
 
-      // Force a map redraw
-      setTimeout(() => {
-        this.map.invalidateSize();
-      }, 0);
+      this.forceMapRedraw();
     }
   });
+
+  private forceMapRedraw() {
+    setTimeout(() => {
+      this.map.invalidateSize();
+    }, 0);
+  }
+
+  private startWithFirstPositionInList(positionsList: Geopoint[]) {
+    const firstPosition = positionsList[0];
+    this.map.setView([firstPosition.latitude, firstPosition.longitude], 15);
+  }
 
   setPositionsEffect = effect(() => {
     const positionsList = this.positions();

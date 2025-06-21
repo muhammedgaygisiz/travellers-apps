@@ -14,6 +14,7 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonText,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { ToMetricPipe } from 'distance-pipe';
@@ -38,6 +39,7 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
     LikesComponent,
     IonButton,
     ToBlobUrlPipe,
+    IonText,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

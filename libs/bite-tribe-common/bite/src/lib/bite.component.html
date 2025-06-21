@@ -24,7 +24,7 @@
       </ion-card-header>
 
       <ion-card-content>
-        {{ biteData?.distance | toMetric }}
+        <ion-text color="primary">{{ biteData?.distance | toMetric }}</ion-text>
         @if (!showEditButton()) {
         <bt-likes
           class="ion-margin-top"

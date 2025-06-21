@@ -4,6 +4,7 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -26,6 +27,7 @@ import {
   IonText,
   IonTextarea,
   PopoverController,
+  AlertController,
 } from '@ionic/angular/standalone';
 import { CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -39,6 +41,8 @@ import { TagsComponent } from '../tags/tags.component';
 import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';
 import { IsInPipe } from '../../pipes/is-in-any.pipe';
 import { LikesComponent } from 'bite-tribe-common/bite';
+import { Platform } from '@ionic/angular';
+import { AppLauncher } from '@capacitor/app-launcher';
 
 @Component({
   selector: 'details-page',
@@ -93,6 +97,10 @@ export class DetailsPage {
 
   private readonly formBuilder = inject(FormBuilder);
   popoverController = inject(PopoverController);
+  private readonly platform = inject(Platform);
+  private readonly alertController = inject(AlertController);
+
+  isWeb = signal(!this.platform.is('hybrid'));
 
   newTagsFormGroup = this.formBuilder.nonNullable.group({
     tags: ['', Validators.required],
@@ -182,5 +190,79 @@ export class DetailsPage {
     if (biteData) {
       this.restaurantClick.emit(biteData);
     }
+  }
+
+  private async isGoogleMapsInstalled(): Promise<boolean> {
+    const result = await AppLauncher.canOpenUrl({ url: 'comgooglemaps://' });
+    return result.value;
+  }
+
+  async openNavigation() {
+    const biteData = this.bite();
+    if (!biteData?.position) {
+      return;
+    }
+
+    const { latitude, longitude } = biteData.position;
+    const destination = `${latitude},${longitude}`;
+    let url: string;
+    let target = '_system';
+
+    if (this.platform.is('ios')) {
+      // Check if Google Maps app is installed on iOS
+      try {
+        // First create the URLs for both map applications
+        const appleMapsUrl = `maps://?daddr=${destination}`;
+        const googleMapsUrl = `comgooglemaps://?daddr=${destination}&directionsmode=driving`;
+
+        // Use Capacitor's App plugin to check if Google Maps is available
+        // For web preview or if Capacitor isn't available, this will throw an error
+        // and we'll default to Apple Maps
+        const isGoogleMapsInstalled = await this.isGoogleMapsInstalled();
+        if (isGoogleMapsInstalled) {
+          // If Google Maps is installed, let the user choose using Ionic AlertController
+          const alert = await this.alertController.create({
+            header: 'Choose Navigation App',
+            buttons: [
+              {
+                text: 'Cancel',
+                role: 'cancel',
+              },
+              {
+                text: 'Apple Maps',
+                handler: () => {
+                  window.open(appleMapsUrl, target);
+                },
+              },
+              {
+                text: 'Google Maps',
+                handler: () => {
+                  window.open(googleMapsUrl, target);
+                },
+              },
+            ],
+          });
+
+          await alert.present();
+          return;
+        }
+
+        // Default to Apple Maps if Google Maps isn't available or we can't check
+        url = appleMapsUrl;
+      } catch (e) {
+        // If there's an error checking, fall back to Apple Maps
+        url = `maps://?daddr=${destination}`;
+      }
+    } else if (this.platform.is('android')) {
+      // The 'geo:' scheme on Android will prompt the user with a chooser.
+      const label = encodeURIComponent(biteData.name || 'Destination');
+      url = `geo:0,0?q=${destination}(${label})`;
+    } else {
+      // Fallback for web browsers.
+      url = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+      target = '_blank';
+    }
+
+    window.open(url, target);
   }
 }

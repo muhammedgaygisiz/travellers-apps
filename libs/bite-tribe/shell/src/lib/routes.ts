@@ -15,6 +15,12 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: 'home/map-view',
+    loadComponent: () =>
+      import('bite-tribe/map').then((m) => m.HomeMapContainerComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'new-bite',
     loadComponent: () => import('bite-tribe/bite').then((m) => m.BiteContainer),
     canActivate: [authGuard],

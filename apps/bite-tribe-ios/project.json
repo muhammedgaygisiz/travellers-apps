@@ -63,7 +63,7 @@
           "cmd": "run ios"
         },
         "ios-dev": {
-          "cmd": "run ios -l --host 169.254.238.217 --port 4200"
+          "cmd": "run ios -l --host 0.0.0.0 --port 4200"
         }
       }
     },

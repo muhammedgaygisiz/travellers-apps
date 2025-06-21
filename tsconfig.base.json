@@ -111,6 +111,10 @@
       "bite-tribe/home-data-access": [
         "libs/bite-tribe/home/data-access/src/index.ts"
       ],
+      "bite-tribe/map": ["libs/bite-tribe/map/page/src/index.ts"],
+      "bite-tribe/map-data-access": [
+        "libs/bite-tribe/map/data-access/src/index.ts"
+      ],
       "bite-tribe/menu": ["libs/bite-tribe/menu/page/src/index.ts"],
       "bite-tribe/menu-data-access": [
         "libs/bite-tribe/menu/data-access/src/index.ts"

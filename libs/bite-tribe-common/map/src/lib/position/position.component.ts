@@ -7,7 +7,9 @@ import { Geopoint } from 'model';
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'position',
   template: `
-    <bt-map [position]="value()" (positionSelected)="setValue($event)" />
+    @if(value()) {
+    <bt-map [positions]="[value()!]" (positionSelected)="setValue($event)" />
+    }
   `,
   imports: [MapComponent],
   providers: [

@@ -3,6 +3,7 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   ElementRef,
   input,
@@ -29,6 +30,15 @@ const iconDefault = L.icon({
 });
 L.Marker.prototype.options.icon = iconDefault;
 
+const withNoWrapOptionToPreventWorldRepetition: L.MapOptions = {
+  worldCopyJump: true, // Better behavior when panning across the date line
+  maxBounds: [
+    [-90, -180],
+    [90, 180],
+  ], // Restrict view to one world
+  maxBoundsViscosity: 1.0, // How much to constrain the map to maxBounds (1.0 = fully constrained)
+};
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -37,12 +47,18 @@ L.Marker.prototype.options.icon = iconDefault;
   templateUrl: './map.component.html',
 })
 export class MapComponent implements OnDestroy {
-  position = input<Geopoint | null | undefined>();
+  positions = input<Geopoint[] | null | undefined>([]);
   readonly = input(false, { transform: booleanAttribute });
   positionSelected = output<Geopoint>();
 
+  isReadonly = computed(() => {
+    const positionsList = this.positions();
+    const moreThenOnePosition = positionsList && positionsList.length > 1;
+    return this.readonly() || moreThenOnePosition;
+  });
+
   private map!: L.Map;
-  private marker: L.Marker | null = null;
+  private markers: L.Marker[] = [];
 
   private readonly mapChild = viewChild<ElementRef>('map');
 
@@ -50,59 +66,94 @@ export class MapComponent implements OnDestroy {
     const mapElement = this.mapChild();
 
     if (mapElement && !this.map) {
-      this.map = L.map(mapElement.nativeElement);
+      this.map = L.map(
+        mapElement.nativeElement,
+        withNoWrapOptionToPreventWorldRepetition
+      );
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap contributors',
+        noWrap: true, // Prevents tile layer from wrapping around horizontally
       }).addTo(this.map);
 
-      const newPosition = this.position();
-      if (newPosition) {
-        this.updateMarker(newPosition);
-        this.map.setView([newPosition.latitude, newPosition.longitude], 15);
+      const positionsList = this.positions();
+      if (positionsList && positionsList.length > 0) {
+        this.updateMarkers(positionsList);
+
+        this.startWithFirstPositionInList(positionsList);
+
+        // If there are multiple positions, fit bounds after a short delay
+        if (positionsList.length > 1) {
+          setTimeout(() => {
+            this.fitMapToMarkers();
+          }, 100);
+        }
       } else {
         this.map.setView([0, 0], 2);
       }
 
-      if (!this.readonly()) {
+      if (!this.isReadonly()) {
         this.map.on('click', (e: L.LeafletMouseEvent) => {
           const position: Geopoint = {
             latitude: e.latlng.lat,
             longitude: e.latlng.lng,
           };
-          this.updateMarker(position);
+          // Replace all markers with the clicked position
+          this.updateMarkers([position]);
           this.positionSelected.emit(position);
         });
       }
 
-      // Force a map redraw
-      setTimeout(() => {
-        this.map.invalidateSize();
-      }, 0);
+      this.forceMapRedraw();
     }
   });
 
-  setPositionEffect = effect(() => {
-    const newPosition = this.position();
+  private forceMapRedraw() {
+    setTimeout(() => {
+      this.map.invalidateSize();
+    }, 0);
+  }
 
-    if (this.map && newPosition) {
-      this.updateMarker(newPosition);
-      const currentZoom = this.map.getZoom();
-      this.map.setView(
-        [newPosition.latitude, newPosition.longitude],
-        currentZoom
-      );
+  private startWithFirstPositionInList(positionsList: Geopoint[]) {
+    const firstPosition = positionsList[0];
+    this.map.setView([firstPosition.latitude, firstPosition.longitude], 15);
+  }
 
+  setPositionsEffect = effect(() => {
+    const positionsList = this.positions();
+
+    if (!this.map) return;
+
+    if (positionsList && positionsList.length > 0) {
+      this.updateMarkers(positionsList);
+
+      // Always focus on the first position first
+      const firstPosition = positionsList[0];
+
+      if (positionsList.length === 1) {
+        // Single position case - zoom to it
+        const currentZoom = this.map.getZoom();
+        this.map.setView(
+          [firstPosition.latitude, firstPosition.longitude],
+          currentZoom || 15
+        );
+      } else {
+        // First focus on the first position briefly
+        this.map.setView([firstPosition.latitude, firstPosition.longitude], 15);
+
+        // Then fit all markers after a short delay
+        setTimeout(() => {
+          this.fitMapToMarkers();
+        }, 100);
+      }
       return;
     }
 
-    if (this.map && !newPosition) {
+    // No positions available
+    if (this.map && (!positionsList || positionsList.length === 0)) {
       this.map.setView([0, 0], 2);
-      if (this.marker) {
-        this.map.removeLayer(this.marker);
-        this.marker = null;
-      }
+      this.clearMarkers();
     }
   });
 
@@ -112,12 +163,52 @@ export class MapComponent implements OnDestroy {
     }
   }
 
-  private updateMarker(position: Geopoint) {
-    if (this.marker) {
-      this.map.removeLayer(this.marker);
+  private updateMarkers(positions: Geopoint[]) {
+    this.clearMarkers();
+
+    positions.forEach((position) => {
+      const marker = L.marker([position.latitude, position.longitude]).addTo(
+        this.map
+      );
+      this.markers.push(marker);
+    });
+  }
+
+  private clearMarkers() {
+    if (this.markers.length > 0) {
+      this.markers.forEach((marker) => {
+        this.map.removeLayer(marker);
+      });
+      this.markers = [];
     }
-    this.marker = L.marker([position.latitude, position.longitude]).addTo(
-      this.map
-    );
+  }
+
+  private fitMapToMarkers() {
+    if (this.markers.length > 1) {
+      const positionsList = this.positions();
+      if (positionsList) {
+        const bounds = L.latLngBounds(
+          positionsList.map((p) => [p.latitude, p.longitude] as L.LatLngTuple)
+        );
+
+        // Handle case where markers are on opposite sides of the world
+        if (bounds.getWest() < -90 && bounds.getEast() > 90) {
+          // Adjust bounds to prevent wrapping
+          const normalizedPositions = positionsList.map((p) => {
+            // Normalize longitude to -180 to 180
+            let lng = p.longitude;
+            while (lng > 180) lng -= 360;
+            while (lng < -180) lng += 360;
+            return [p.latitude, lng] as L.LatLngTuple;
+          });
+
+          const newBounds = L.latLngBounds(normalizedPositions);
+          this.map.fitBounds(newBounds, { padding: [50, 50] });
+        } else {
+          // Standard case
+          this.map.fitBounds(bounds, { padding: [50, 50] });
+        }
+      }
+    }
   }
 }

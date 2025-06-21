@@ -2,6 +2,7 @@ import { Component, computed, input, output } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonContent } from '@ionic/angular/standalone';
 import { MapComponent } from 'bite-tribe-common/map';
+import { Geopoint } from 'model';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -23,6 +24,8 @@ export class MapPageComponent {
   position = computed(() => {
     const bites = this.bites();
 
-    return bites?.length ? bites[0].position : null;
+    return bites?.map((bite) => {
+      return bite.position as Geopoint;
+    });
   });
 }

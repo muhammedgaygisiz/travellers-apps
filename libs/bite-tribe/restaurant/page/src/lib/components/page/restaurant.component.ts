@@ -140,7 +140,15 @@ export class RestaurantComponent {
     const bite = this.bite();
     const restaurant = this.restaurant();
 
-    return restaurant?.position || bite?.position || null;
+    if (restaurant?.position) {
+      return [restaurant?.position];
+    }
+
+    if (bite?.position) {
+      return [bite?.position];
+    }
+
+    return null;
   });
 
   addSocialMedia() {

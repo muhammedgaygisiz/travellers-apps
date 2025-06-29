@@ -1,10 +1,10 @@
-import { Settings } from 'model';
+import { PublicUser, Settings } from 'model';
 
 export type AppSlice = {
   position?: any;
   settings: Settings;
-  isPublicProfile: boolean;
   loading?: {
     home?: boolean;
   };
+  profile?: PublicUser;
 };

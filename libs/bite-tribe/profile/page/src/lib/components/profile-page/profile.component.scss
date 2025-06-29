@@ -1,0 +1,52 @@
+:host {
+  .profile-container {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+
+    .profile-avatar {
+      display: flex;
+      width: 100%;
+      height: fit-content;
+      justify-content: center;
+
+      img {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+      }
+    }
+
+    .profile-name {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .profile-location {
+      color: gray;
+      margin-top: 8px;
+    }
+
+    .follow-button {
+      min-width: 120px;
+    }
+
+    .about-section,
+    .bites-section {
+      text-align: left;
+      margin-top: 1.5rem;
+    }
+
+    .about-section h2,
+    .bites-section h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+  }
+}

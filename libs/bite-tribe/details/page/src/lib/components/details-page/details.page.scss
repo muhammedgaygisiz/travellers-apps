@@ -6,6 +6,10 @@
     flex-direction: row;
     align-items: center;
 
+    .link {
+      @include globals.link;
+    }
+
     .profile-image {
       @include globals.profile-image;
     }
@@ -27,10 +31,6 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-
-    .link {
-      @include globals.link;
-    }
   }
 
   .like-and-bucketlist-bar {

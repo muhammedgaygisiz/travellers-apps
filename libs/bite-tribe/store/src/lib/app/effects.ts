@@ -11,8 +11,9 @@ import {
   goPublic,
   loadedGpsPosition,
   loadedSettingsFromApi,
+  savePublicProfile,
   saveSettings,
-  setIsPublicProfile,
+  setPublicProfile,
 } from './actions';
 import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
@@ -39,9 +40,7 @@ export class AppEffect {
       ofType(fromAuth.loadedUser),
       filter((payload) => !!payload.user),
       switchMap(() => this.api.publicProfile$),
-      map((isPublicProfile) =>
-        setIsPublicProfile({ isPublic: isPublicProfile })
-      )
+      map((profile) => setPublicProfile({ profile }))
     );
   });
 
@@ -78,6 +77,18 @@ export class AppEffect {
         ofType(goPublic),
         tap(() => {
           this.api.saveUser();
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  saveProfileToFirestore$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(savePublicProfile),
+        tap(({ publicUser }) => {
+          this.api.updateUser(publicUser);
         })
       );
     },

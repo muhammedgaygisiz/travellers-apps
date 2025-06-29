@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Settings } from 'model';
+import { PublicUser, Settings } from 'model';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +12,7 @@ export class SettingsDataAccessService {
   user = toSignal(this.storeService.user$);
   settings = toSignal(this.storeService.settings$);
   isPublicProfile = toSignal(this.storeService.isPublicProfile$);
+  publicUser = toSignal(this.storeService.publicUser$);
 
   saveSettings(settings: Settings) {
     this.storeService.saveSettings(settings);
@@ -23,5 +24,9 @@ export class SettingsDataAccessService {
 
   goPrivate() {
     this.storeService.goPrivate();
+  }
+
+  savePublicProfile(publicUser: PublicUser) {
+    this.storeService.savePublicProfile(publicUser);
   }
 }

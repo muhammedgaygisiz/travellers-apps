@@ -17,6 +17,7 @@ import {
   Bite,
   CreateAndSaveToBucketListParams,
   Menu,
+  PublicUser,
   RemoveBiteFromBucketlistParams,
   Restaurant,
   SaveToBucketListParams,
@@ -49,7 +50,7 @@ export class BiteTribeApiService {
     {} as Settings
   );
   private readonly likesChannel$ = new BehaviorSubject<any[]>([]);
-  private readonly profileChannel$ = new BehaviorSubject<any>(false);
+  private readonly profileChannel$ = new BehaviorSubject<any>(null);
 
   profileCallbackId = '';
   bucketlistCallbackId = '';
@@ -708,6 +709,24 @@ export class BiteTribeApiService {
     }
   }
 
+  async updateUser(publicUser: PublicUser) {
+    try {
+      FirebaseFirestore.updateDocument({
+        reference: `${USERS_COLLECTION}/${publicUser.userId}`,
+        data: {
+          displayName: publicUser.displayName,
+          email: publicUser.email,
+          photoUrl: publicUser.photoUrl,
+          city: publicUser.city || '',
+          about: publicUser.about || '',
+        },
+      });
+    } catch (error) {
+      console.error('Error updating public user:', error);
+      this.errorHandler.handleError(error);
+    }
+  }
+
   async deleteUser() {
     const user = await this.getUser();
 
@@ -773,7 +792,13 @@ export class BiteTribeApiService {
         (publicProfileDoc: any) => {
           const isPublicProfile = publicProfileDoc?.snapshots?.length > 0;
 
-          this.profileChannel$.next(isPublicProfile);
+          if (isPublicProfile) {
+            const publicProfile = publicProfileDoc.snapshots[0].data;
+            this.profileChannel$.next({
+              ...publicProfile,
+              id: publicProfileDoc.snapshots[0].id,
+            });
+          }
         }
       );
 

@@ -8,7 +8,7 @@ export const gpsPosition = createSelector(slice, (slice) => slice?.position);
 export const settings = createSelector(slice, (slice) => slice?.settings);
 export const isPublicProfile = createSelector(
   slice,
-  (slice) => slice?.isPublicProfile
+  (slice) => !!slice?.profile
 );
 export const currency = createSelector(slice, (slice) => {
   return slice?.settings?.currency;
@@ -17,3 +17,5 @@ export const currency = createSelector(slice, (slice) => {
 export const isBitesLoading = createSelector(slice, (slice) => {
   return slice?.loading?.home;
 });
+
+export const publicUser = createSelector(slice, (slice) => slice?.profile);

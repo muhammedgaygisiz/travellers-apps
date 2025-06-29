@@ -17,7 +17,8 @@
               <ion-input
                 [value]="user()?.displayName || ''"
                 placeholder="Enter display name"
-                readonly
+                [readonly]="!isPublicProfile()"
+                formControlName="displayName"
               />
             </ion-label>
           </ion-item>
@@ -28,6 +29,18 @@
               <ion-input [value]="user()?.email || ''" readonly />
             </ion-label>
           </ion-item>
+
+          @if(isPublicProfile()) {
+          <ion-item>
+            <ion-label>
+              <h3>City</h3>
+              <ion-input
+                [value]="publicUser()?.city || ''"
+                formControlName="city"
+              />
+            </ion-label>
+          </ion-item>
+          }
         </section>
 
         <!-- Settings Section -->

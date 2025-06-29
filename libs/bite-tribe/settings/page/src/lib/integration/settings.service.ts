@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { SettingsDataAccessService } from 'bite-tribe/settings-data-access';
-import { Settings } from 'model';
+import { PublicUser, Settings } from 'model';
 import { NavController } from '@ionic/angular';
 
 @Injectable({
@@ -11,6 +11,7 @@ export class SettingsService {
   private readonly navController = inject(NavController);
 
   user = this.dataAccess.user;
+  publicUser = this.dataAccess.publicUser;
   settings = this.dataAccess.settings;
   isPublicProfile = this.dataAccess.isPublicProfile;
 
@@ -26,5 +27,9 @@ export class SettingsService {
 
   goPrivate() {
     this.dataAccess.goPrivate();
+  }
+
+  saveProfile(publicUser: PublicUser) {
+    this.dataAccess.savePublicProfile(publicUser);
   }
 }

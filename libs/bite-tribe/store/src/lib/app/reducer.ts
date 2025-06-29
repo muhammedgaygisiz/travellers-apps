@@ -1,5 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import {
+  goPrivate,
   loadedGpsPosition,
   loadedSettingsFromApi,
   setPublicProfile,
@@ -51,5 +52,9 @@ export const reducer = createReducer<AppSlice>(
       ...state,
       profile,
     };
-  })
+  }),
+  on(goPrivate, (state) => ({
+    ...state,
+    profile: undefined,
+  }))
 );

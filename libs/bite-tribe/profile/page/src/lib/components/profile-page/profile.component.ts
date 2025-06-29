@@ -1,11 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { IonAvatar, IonButton, IonContent } from '@ionic/angular/standalone';
+import {
+  IonAvatar,
+  IonBadge,
+  IonButton,
+  IonContent,
+} from '@ionic/angular/standalone';
 import { Bite, PublicUser } from 'model';
 import { NgIf } from '@angular/common';
 import { BiteComponent } from 'bite-tribe-common/bite';
@@ -23,6 +29,7 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonButton,
     NgIf,
     BiteComponent,
+    IonBadge,
   ],
 })
 export class ProfileComponent {
@@ -38,4 +45,10 @@ export class ProfileComponent {
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
+
+  biteCount = computed(() => {
+    const bites = this.bites();
+
+    return bites ? bites.length : 0;
+  });
 }

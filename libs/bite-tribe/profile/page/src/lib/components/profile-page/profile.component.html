@@ -23,13 +23,23 @@
         />
       </ion-avatar>
 
-      <h1 class="profile-name">{{ biteCreatorData?.displayName }}</h1>
+      <h1 class="profile-name">
+        {{ biteCreatorData?.displayName }}
+
+        @if(biteCount() > 10) {
+        <ion-badge color="primary" class="bite-badge"
+          >{{ biteCount() }} Bites</ion-badge
+        >
+        }
+      </h1>
 
       <p class="profile-location">
         {{ biteCreatorData?.city || 'No profile location' }}
       </p>
 
-      <ion-button fill="outline" class="follow-button">Follow</ion-button>
+      <ion-button fill="outline" class="follow-button" disabled
+        >Follow</ion-button
+      >
 
       <div class="about-section">
         <h2>About</h2>

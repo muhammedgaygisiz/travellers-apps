@@ -18,12 +18,18 @@
     }
 
     .profile-name {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+
       font-size: 1.25rem;
       font-weight: bold;
     }
 
     .profile-location {
       color: gray;
+      margin-top: 8px;
     }
 
     .follow-button {

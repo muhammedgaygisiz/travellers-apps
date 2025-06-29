@@ -15,7 +15,7 @@
             <ion-label>
               <h3>Display Name</h3>
               <ion-input
-                [value]="user()?.displayName || ''"
+                [value]="displayName()"
                 placeholder="Enter display name"
                 [readonly]="!isPublicProfile()"
                 formControlName="displayName"

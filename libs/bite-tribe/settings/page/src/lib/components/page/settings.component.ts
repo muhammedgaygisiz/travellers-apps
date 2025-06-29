@@ -80,7 +80,12 @@ export class PageSettings {
     const publicUser = this.publicUser();
     if (isPublicProfile && publicUser) {
       this.settingsForm.patchValue(publicUser);
+    } else {
+      this.settingsForm.get('city')?.reset();
     }
+
+    const displayName = this.displayName();
+    this.settingsForm.patchValue({ displayName });
   });
 
   private systemTheme = signal(
@@ -119,6 +124,13 @@ export class PageSettings {
       user?.providerData.find((provider: any) => provider.photoUrl)?.photoUrl;
 
     return photoUrl;
+  });
+
+  displayName = computed(() => {
+    const user = this.user();
+    const publicUser = this.publicUser();
+
+    return publicUser?.displayName || user?.displayName || 'Anonymous';
   });
 
   constructor() {

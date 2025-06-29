@@ -1,1 +1,1 @@
-export * from './lib/bite-tribe/profile-data-access/bite-tribe/profile-data-access.component';
+export * from './lib/profile-data-access.service';

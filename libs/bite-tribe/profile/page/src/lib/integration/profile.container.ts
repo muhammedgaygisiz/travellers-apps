@@ -3,7 +3,16 @@ import { ProfileService } from './profile.service';
 import { ProfileComponent } from '../components/profile-page/profile.component';
 
 @Component({
-  template: ` <profile-page /> `,
+  template: `
+    <profile-page
+      class="ion-page"
+      [isAuthenticated]="service.isAuthenticated()"
+      (logoutClick)="service.logout()"
+      (gotoSettings)="service.gotoSettings()"
+      (gotoMyBucketlists)="service.gotoMyBucketlists()"
+      (gotoMyBites)="service.gotoMyBites()"
+    />
+  `,
   imports: [ProfileComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

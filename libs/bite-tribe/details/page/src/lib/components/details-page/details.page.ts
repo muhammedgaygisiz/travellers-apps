@@ -94,6 +94,7 @@ export class DetailsPage {
   readonly gotoMyBites = output();
   readonly gotoMyBucketlists = output();
   readonly restaurantClick = output<Bite>();
+  readonly goToProfile = output<PublicUser>();
 
   private readonly formBuilder = inject(FormBuilder);
   popoverController = inject(PopoverController);

@@ -18,13 +18,16 @@
           (click)="biteClick.emit(biteData)"
         >
           <span class="bite-title">
-            {{ biteData?.name }}
+            {{ biteData?.name | withFirstLetterUpperCase }}
           </span>
         </ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
-        <ion-text color="primary">{{ biteData?.distance | toMetric }}</ion-text>
+        <ion-text
+          color="primary {{ showEditButton() ? 'ion-margin-bottom' : '' }}"
+          >{{ biteData?.distance | toMetric }}</ion-text
+        >
         @if (!showEditButton()) {
         <bt-likes
           class="ion-margin-top"

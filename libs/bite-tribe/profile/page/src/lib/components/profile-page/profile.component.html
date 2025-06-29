@@ -1,0 +1,71 @@
+@let biteCreatorData = biteCreator();
+
+<ta-page
+  [showHeaderMenu]="true"
+  [showLanguages]="false"
+  [showSettingsButton]="true"
+  [showMyBites]="true"
+  [showMyBucketlists]="true"
+  [showFooter]="false"
+  [isAuthenticated]="isAuthenticated()"
+  [enableBackButton]="true"
+  (logoutClick)="logoutClick.emit()"
+  (gotoSettings)="gotoSettings.emit()"
+  (gotoMyBucketlists)="gotoMyBucketlists.emit()"
+  (gotoMyBites)="gotoMyBites.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="profile-container">
+      <ion-avatar class="profile-avatar">
+        <img
+          [src]="biteCreatorData?.photoUrl"
+          [alt]="biteCreatorData?.displayName"
+        />
+      </ion-avatar>
+
+      <h1 class="profile-name">
+        {{ biteCreatorData?.displayName }}
+
+        @if(biteCount() > 10) {
+        <ion-badge color="primary" class="bite-badge"
+          >{{ biteCount() }} Bites</ion-badge
+        >
+        }
+      </h1>
+
+      <p class="profile-location">
+        {{ biteCreatorData?.city || 'No location' }}
+      </p>
+
+      <ion-button fill="outline" class="follow-button" disabled
+        >Follow</ion-button
+      >
+
+      <div class="about-section">
+        <h2>About</h2>
+        <p>
+          {{ biteCreatorData?.about || 'No description available.' }}
+        </p>
+      </div>
+
+      <div class="bites-section">
+        <h2>Bites</h2>
+
+        @for (bite of bites(); track bite.id) {
+        <bt-bite
+          [bite]="bite"
+          [showEditButton]="false"
+          (biteClick)="biteClick.emit($event)"
+          (restaurantClick)="restaurantClick.emit($event)"
+          (likeButtonClick)="likeButtonClick.emit($event)"
+        />
+        }
+      </div>
+    </div>
+
+    <!-- Show a message when no user data is available -->
+    <div class="no-profile" *ngIf="!biteCreatorData">
+      <p class="no-profile-message">User profile not available.</p>
+    </div>
+  </ion-content>
+</ta-page>

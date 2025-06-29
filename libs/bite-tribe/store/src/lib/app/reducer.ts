@@ -1,16 +1,17 @@
 import { createReducer, on } from '@ngrx/store';
 import {
   errorLoadingGpsPosition,
+  goPrivate,
   loadedGpsPosition,
   loadedSettingsFromApi,
-  setIsPublicProfile,
+  setPublicProfile,
 } from './actions';
 import { AppSlice } from './app-slice.model';
 import { loadedBitesFromApi } from '../bites/actions';
 import { fromAuth } from 'ta-firestore';
 
 const initialState = {
-  isPublicProfile: false,
+  profile: undefined,
   settings: {
     pushNotifications: false,
     emailUpdates: false,
@@ -51,10 +52,14 @@ export const reducer = createReducer<AppSlice>(
       settings,
     };
   }),
-  on(setIsPublicProfile, (state, { isPublic }) => {
+  on(setPublicProfile, (state, { profile }) => {
     return {
       ...state,
-      isPublicProfile: isPublic,
+      profile,
     };
-  })
+  }),
+  on(goPrivate, (state) => ({
+    ...state,
+    profile: undefined,
+  }))
 );

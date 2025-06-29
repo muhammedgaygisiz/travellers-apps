@@ -20,7 +20,7 @@ import {
   IonSelectOption,
   IonToggle,
 } from '@ionic/angular/standalone';
-import { Settings, User } from 'model';
+import { PublicUser, Settings, User } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -47,11 +47,14 @@ import { map } from 'rxjs';
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export class PageSettings {
   user = input<User>();
+  publicUser = input<PublicUser>();
   settings = input<Settings>();
   isPublicProfile = input<boolean>();
 
   goPublic = output();
   goPrivate = output();
+  submitSettings = output<Settings>();
+  submitPublicUser = output<PublicUser>();
 
   private readonly formBuilder = inject(FormBuilder);
 
@@ -60,18 +63,30 @@ export class PageSettings {
     emailUpdates: [true, Validators.required],
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
+    city: [''],
+    displayName: [''],
   });
 
   settingsEffect = afterRenderEffect(() => {
     const settings = this.settings();
+
     if (settings) {
       // eslint-disable-next-line no-unused-vars
       const { updatedAt, ...rest } = settings;
-      this.settingsForm.setValue(rest);
+      this.settingsForm.patchValue(rest);
     }
-  });
 
-  submitSettings = output<Settings>();
+    const isPublicProfile = this.isPublicProfile();
+    const publicUser = this.publicUser();
+    if (isPublicProfile && publicUser) {
+      this.settingsForm.patchValue(publicUser);
+    } else {
+      this.settingsForm.get('city')?.reset();
+    }
+
+    const displayName = this.displayName();
+    this.settingsForm.patchValue({ displayName });
+  });
 
   private systemTheme = signal(
     window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -111,6 +126,13 @@ export class PageSettings {
     return photoUrl;
   });
 
+  displayName = computed(() => {
+    const user = this.user();
+    const publicUser = this.publicUser();
+
+    return publicUser?.displayName || user?.displayName || 'Anonymous';
+  });
+
   constructor() {
     // Watch for system theme changes
     window
@@ -125,7 +147,16 @@ export class PageSettings {
       return;
     }
 
-    const newSettings = this.settingsForm.value;
+    const { city, displayName, ...newSettings } = this.settingsForm.value;
+
+    const publicUser = this.publicUser();
+    if (this.isPublicProfile() && publicUser) {
+      this.submitPublicUser.emit({
+        ...publicUser,
+        city,
+        displayName: displayName ? displayName : publicUser.displayName,
+      });
+    }
 
     this.submitSettings.emit({
       ...newSettings,

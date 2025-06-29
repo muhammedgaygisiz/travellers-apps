@@ -18,7 +18,12 @@ import {
 } from './restaurants/selectors';
 import { menu } from './menus/selectors';
 import { saveMenu } from './menus/actions';
-import { goPrivate, goPublic, saveSettings } from './app/actions';
+import {
+  goPrivate,
+  goPublic,
+  savePublicProfile,
+  saveSettings,
+} from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -26,6 +31,7 @@ import {
   CreateAndSaveToBucketListParams,
   Link,
   Menu,
+  PublicUser,
   RemoveBiteFromBucketlistParams,
   Restaurant,
   SaveToBucketListParams,
@@ -37,6 +43,7 @@ import {
   isBitesLoading,
   isPublicProfile,
   settings,
+  publicUser,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -103,6 +110,7 @@ export class BiteTribeStoreService implements StoreService {
   user$ = this.store.select(fromAuth.selectUser);
   settings$ = this.store.select(settings);
   isPublicProfile$ = this.store.select(isPublicProfile);
+  publicUser$ = this.store.select(publicUser);
   position$ = this.store.select(gpsPosition);
   cachedBite$ = this.store.select(cachedBite);
   selectedBucketlist$ = this.store.select(selectedBucketlist);
@@ -166,6 +174,10 @@ export class BiteTribeStoreService implements StoreService {
 
   saveSettings(settings: Settings) {
     this.store.dispatch(saveSettings({ settings }));
+  }
+
+  savePublicProfile(publicUser: PublicUser) {
+    this.store.dispatch(savePublicProfile({ publicUser }));
   }
 
   saveReview(newReview: { review: string; biteId: string }) {

@@ -23,6 +23,7 @@ import { ToBlobUrlPipe } from 'image-compression';
 import { Dialog } from '@angular/cdk/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
+import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -40,6 +41,7 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
     IonButton,
     ToBlobUrlPipe,
     IonText,
+    WithFirstLetterUpperCasePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

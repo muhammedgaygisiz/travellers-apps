@@ -1,6 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
-import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
+import {
+  Bite,
+  Bucketlist,
+  PublicUser,
+  RemoveBiteFromBucketlistParams,
+} from 'model';
 import { NavController } from '@ionic/angular/standalone';
 
 @Injectable({ providedIn: 'root' })
@@ -87,5 +92,9 @@ export class DetailsService {
       'restaurant',
       encodeURIComponent(bite.place),
     ]);
+  }
+
+  onGoToProfileClick(publicUser: PublicUser) {
+    this.navController.navigateForward(['profile', publicUser.userId]);
   }
 }

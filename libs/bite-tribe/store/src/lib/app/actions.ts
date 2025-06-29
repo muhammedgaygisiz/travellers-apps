@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Settings } from 'model';
+import { PublicUser, Settings } from 'model';
 
 export const fetchGpsPosition = createAction('[APP] Fetch GPS position');
 
@@ -18,14 +18,19 @@ export const saveSettings = createAction(
   props<{ settings: Settings }>()
 );
 
+export const savePublicProfile = createAction(
+  '[APP] Save public profile',
+  props<{ publicUser: PublicUser }>()
+);
+
 export const loadedSettingsFromApi = createAction(
   '[APP] Loaded settings from API',
   props<{ settings: Settings }>()
 );
 
-export const setIsPublicProfile = createAction(
-  '[APP] Set is public profile',
-  props<{ isPublic: boolean }>()
+export const setPublicProfile = createAction(
+  '[APP] Set public profile',
+  props<{ profile: PublicUser }>()
 );
 
 export const goPublic = createAction('[APP] Go public');

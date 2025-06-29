@@ -18,7 +18,7 @@
           (click)="biteClick.emit(biteData)"
         >
           <span class="bite-title">
-            {{ biteData?.name }}
+            {{ biteData?.name | withFirstLetterUpperCase }}
           </span>
         </ion-card-title>
       </ion-card-header>

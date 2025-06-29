@@ -7,6 +7,7 @@ import { ProfileComponent } from '../components/profile-page/profile.component';
     <profile-page
       class="ion-page"
       [isAuthenticated]="service.isAuthenticated()"
+      [biteCreator]="service.biteCreator()"
       (logoutClick)="service.logout()"
       (gotoSettings)="service.gotoSettings()"
       (gotoMyBucketlists)="service.gotoMyBucketlists()"

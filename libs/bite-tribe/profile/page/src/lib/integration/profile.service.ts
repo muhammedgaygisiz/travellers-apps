@@ -8,6 +8,7 @@ export class ProfileService {
   private readonly navController = inject(NavController);
 
   isAuthenticated = this.dataAccess.isAuthenticated;
+  biteCreator = this.dataAccess.biteCreator;
 
   logout() {
     this.dataAccess.logout();

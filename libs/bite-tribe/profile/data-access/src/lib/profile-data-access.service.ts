@@ -10,6 +10,8 @@ export class ProfileDataAccessService {
     initialValue: false,
   });
 
+  biteCreator = toSignal(this.storeService.biteCreator$);
+
   logout() {
     this.storeService.logout();
   }

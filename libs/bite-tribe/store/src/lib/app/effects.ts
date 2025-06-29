@@ -72,7 +72,7 @@ export class AppEffect {
               loadedGpsPosition({ position: currentPosition })
             ),
             catchError((error) => {
-              console.log(error);
+              console.error(error);
               this.alertController
                 .create({
                   header: 'GPS Position missing',

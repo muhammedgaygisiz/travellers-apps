@@ -1,0 +1,13 @@
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ProfileService } from './profile.service';
+import { ProfileComponent } from '../components/profile-page/profile.component';
+
+@Component({
+  template: ` <profile-page /> `,
+  imports: [ProfileComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+// eslint-disable-next-line @angular-eslint/component-class-suffix
+export class ProfileContainer {
+  service = inject(ProfileService);
+}

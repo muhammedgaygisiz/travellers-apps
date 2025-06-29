@@ -27,10 +27,28 @@ nx serve bite-tribe
 
 # Howto setup a new page
 
-- Create a page library:
+- Create a page library with `<page-name>` the name of the page you want to create:
+
+```
+nx g @nx/angular:lib libs/bite-tribe/<page-name>/page --name=bite-tribe/<page-name> --tags=scope:bite-tribe,type:feature
+
+nx g @nx/angular:lib libs/bite-tribe/<page-name>/data-access --name=bite-tribe/<page-name>-data-access --tags=scope:bite-tribe,type:data-access
 
 ```
 
+- Delete the content of the folder `src/lib` under the generated libraries
+
+- Under the page's `lib` folder create the folders `integration` and `components`
+
+- In the `integration` folder
+
+  - create a typescript module with the name: `<page-name>.container.ts`.
+  - In the index.ts file of the page library export the container component
+  - It will be an angular component with the template inlined and no styling
+  - Create another typescript module with the name `<page-name>.service.ts`
+  - In the `routes.ts` file of the bite-tribe app, add the route for the new page with the new page's container component
+
+- Under the page's data-access library, create a typescript module with the name: `<page-name>-data-access.service.ts`
 
 # TravellersApps
 
@@ -113,6 +131,8 @@ With transitive dependencies
 ```
 
 npm list --all
+
+```
 
 ```
 

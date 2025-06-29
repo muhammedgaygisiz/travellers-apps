@@ -6,8 +6,9 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonAvatar, IonButton, IonContent } from '@ionic/angular/standalone';
-import { PublicUser } from 'model';
+import { Bite, PublicUser } from 'model';
 import { NgIf } from '@angular/common';
+import { BiteComponent } from 'bite-tribe-common/bite';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -15,14 +16,26 @@ import { NgIf } from '@angular/common';
   templateUrl: 'profile.component.html',
   styleUrl: 'profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageComponent, IonContent, IonAvatar, IonButton, NgIf],
+  imports: [
+    PageComponent,
+    IonContent,
+    IonAvatar,
+    IonButton,
+    NgIf,
+    BiteComponent,
+  ],
 })
 export class ProfileComponent {
   isAuthenticated = input(false);
   biteCreator = input<PublicUser>();
+  bites = input<any[]>();
 
   readonly logoutClick = output();
   readonly gotoSettings = output();
   readonly gotoMyBucketlists = output();
   readonly gotoMyBites = output();
+
+  readonly biteClick = output<Bite>();
+  readonly restaurantClick = output<Bite>();
+  readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
 }

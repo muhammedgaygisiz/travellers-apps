@@ -8,6 +8,7 @@ import { ProfileComponent } from '../components/profile-page/profile.component';
       class="ion-page"
       [isAuthenticated]="service.isAuthenticated()"
       [biteCreator]="service.biteCreator()"
+      [bites]="service.bitesByUser()"
       (logoutClick)="service.logout()"
       (gotoSettings)="service.gotoSettings()"
       (gotoMyBucketlists)="service.gotoMyBucketlists()"

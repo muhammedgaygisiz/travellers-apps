@@ -29,7 +29,7 @@
         {{ biteCreatorData?.city || 'No profile location' }}
       </p>
 
-      <ion-button expand="block" class="follow-button">Follow</ion-button>
+      <ion-button fill="outline" class="follow-button">Follow</ion-button>
 
       <div class="about-section">
         <h2>About</h2>
@@ -40,6 +40,16 @@
 
       <div class="bites-section">
         <h2>Bites</h2>
+
+        @for (bite of bites(); track bite.id) {
+        <bt-bite
+          [bite]="bite"
+          [showEditButton]="false"
+          (biteClick)="biteClick.emit($event)"
+          (restaurantClick)="restaurantClick.emit($event)"
+          (likeButtonClick)="likeButtonClick.emit($event)"
+        />
+        }
       </div>
     </div>
 

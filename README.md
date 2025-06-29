@@ -2,6 +2,29 @@
 [![codecov](https://codecov.io/github/muhammedgaygisiz/travellers-apps/branch/develop/graph/badge.svg?token=QGA8MS6VXF)](https://codecov.io/github/muhammedgaygisiz/travellers-apps)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
+# Bite Tribe
+
+# Prerequisites
+
+- [Node.js](https://nodejs.org/en/download/) (LTS version)
+- [NPM](https://www.npmjs.com/get-npm) (comes with Node.js)
+
+- Install dependencies:
+
+```
+npm install
+```
+
+- Get the .env file from one of the developers and copy it to the root of the app `apps/bite-tribe/.env`
+
+# Run the application locally:
+
+```
+nx serve bite-tribe
+```
+
+- The application will be available at [http://localhost:4200](http://localhost:4200)
+
 # TravellersApps
 
 - [Demo](https://prices-bec89.web.app)

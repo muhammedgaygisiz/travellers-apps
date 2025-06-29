@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MapService } from './map.service';
 
 import { MapPageComponent } from '../components/map-page/map-page.component';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,4 +20,10 @@ import { MapPageComponent } from '../components/map-page/map-page.component';
 })
 export class HomeMapContainerComponent {
   service = inject(MapService);
+
+  ionViewDidEnter() {
+    FirebaseAnalytics.setCurrentScreen({
+      screenName: 'Map',
+    });
+  }
 }

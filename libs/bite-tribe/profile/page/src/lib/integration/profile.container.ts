@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ProfileService } from './profile.service';
 import { ProfileComponent } from '../components/profile-page/profile.component';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
   template: `
@@ -21,4 +22,10 @@ import { ProfileComponent } from '../components/profile-page/profile.component';
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export class ProfileContainer {
   service = inject(ProfileService);
+
+  ionViewDidEnter() {
+    FirebaseAnalytics.setCurrentScreen({
+      screenName: 'My Profile',
+    });
+  }
 }

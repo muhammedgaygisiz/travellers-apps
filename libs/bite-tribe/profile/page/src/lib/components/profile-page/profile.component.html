@@ -1,3 +1,5 @@
+@let biteCreatorData = biteCreator();
+
 <ta-page
   [showHeaderMenu]="true"
   [showLanguages]="false"
@@ -15,26 +17,35 @@
   <ion-content class="ion-padding">
     <div class="profile-container">
       <ion-avatar class="profile-avatar">
-        <img src="assets/images/users/lisa.jpg" alt="Lisa Davis" />
+        <img
+          [src]="biteCreatorData?.photoUrl"
+          [alt]="biteCreatorData?.displayName"
+        />
       </ion-avatar>
 
-      <h1 class="profile-name">Lisa Davis</h1>
+      <h1 class="profile-name">{{ biteCreatorData?.displayName }}</h1>
 
-      <p class="profile-location">San Francisco, CA</p>
+      <p class="profile-location">
+        {{ biteCreatorData?.city || 'No profile location' }}
+      </p>
 
       <ion-button expand="block" class="follow-button">Follow</ion-button>
 
       <div class="about-section">
         <h2>About</h2>
         <p>
-          Home cook and food enthusiast. Love exploring new recipes and sharing
-          meals with friends.
+          {{ biteCreatorData?.about || 'No description available.' }}
         </p>
       </div>
 
-      <div class="meals-section">
-        <h2>10 Meals</h2>
+      <div class="bites-section">
+        <h2>Bites</h2>
       </div>
+    </div>
+
+    <!-- Show a message when no user data is available -->
+    <div class="no-profile" *ngIf="!biteCreatorData">
+      <p class="no-profile-message">User profile not available.</p>
     </div>
   </ion-content>
 </ta-page>

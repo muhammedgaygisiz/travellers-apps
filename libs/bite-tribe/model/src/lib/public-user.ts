@@ -3,4 +3,6 @@ export interface PublicUser {
   email: string;
   photoUrl: string;
   userId: string;
+  city?: string;
+  about?: string;
 }

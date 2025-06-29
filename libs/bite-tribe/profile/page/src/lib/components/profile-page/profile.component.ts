@@ -7,6 +7,7 @@ import {
 import { PageComponent } from 'common/ui/page';
 import { IonAvatar, IonButton, IonContent } from '@ionic/angular/standalone';
 import { PublicUser } from 'model';
+import { NgIf } from '@angular/common';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -14,7 +15,7 @@ import { PublicUser } from 'model';
   templateUrl: 'profile.component.html',
   styleUrl: 'profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageComponent, IonContent, IonAvatar, IonButton],
+  imports: [PageComponent, IonContent, IonAvatar, IonButton, NgIf],
 })
 export class ProfileComponent {
   isAuthenticated = input(false);

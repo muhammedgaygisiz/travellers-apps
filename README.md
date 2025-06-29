@@ -25,6 +25,13 @@ nx serve bite-tribe
 
 - The application will be available at [http://localhost:4200](http://localhost:4200)
 
+# Howto setup a new page
+
+- Create a page library:
+
+```
+
+
 # TravellersApps
 
 - [Demo](https://prices-bec89.web.app)
@@ -52,7 +59,9 @@ To update the nrwl cli you have to run following command with `<version>`
 specifying to which version of nx to migrate.
 
 ```
+
 npm run nx -- migrate <version>
+
 ```
 
 The list of versions can be found [here](https://github.com/nrwl/nx/releases)
@@ -68,7 +77,9 @@ Next run `npm i` to install the new dependencies and run the migrations with
 the following command.
 
 ```
+
 npm run nx -- migrate --run-migrations
+
 ```
 
 Not all dependencies are managed by nx (e.g. ngx-mat-select-search). They can be
@@ -76,7 +87,9 @@ updated by nx, though. `nx migrate` can be seen as a synonym to `ng update`. To 
 a dependency the command
 
 ```
+
 npm run nx -- migrate my-dependency@x.y.z
+
 ```
 
 can be utilized. Please be aware that after the command `npm install` has to be
@@ -90,11 +103,17 @@ At the end of the process `npm dedupe` can be executed to tidy up the dependency
 Dependencies
 
 ```
+
 npm list
+
 ```
 
 With transitive dependencies
 
 ```
+
 npm list --all
+
+```
+
 ```

@@ -29,7 +29,9 @@
           alt="Bite Creator"
           class="profile-image"
         />
-        <ion-label> {{ biteCreatorData.displayName }}</ion-label>
+        <ion-label (click)="goToProfile.emit(biteCreatorData)">
+          <span class="link">{{ biteCreatorData.displayName }}</span>
+        </ion-label>
       </div>
       }
 

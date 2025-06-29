@@ -1,7 +1,8 @@
-import { inject, Injectable } from '@angular/core';
+import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import {
   BehaviorSubject,
+  catchError,
   EMPTY,
   from,
   of,
@@ -36,6 +37,7 @@ const MENU_COLLECTION = 'menus';
 })
 export class BiteTribeApiService {
   private readonly authService = inject(AuthService);
+  private readonly errorHandler = inject(ErrorHandler);
 
   private readonly stopped$ = new Subject<void>();
   private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
@@ -214,24 +216,34 @@ export class BiteTribeApiService {
   }
 
   async saveNewBite(bite: any) {
-    const user = await this.getUser();
+    try {
+      const user = await this.getUser();
 
-    FirebaseFirestore.addDocument({
-      reference: BITE_COLLECTION,
-      data: {
-        ...bite,
-        userId: user?.uid || '',
-      },
-    });
+      FirebaseFirestore.addDocument({
+        reference: BITE_COLLECTION,
+        data: {
+          ...bite,
+          userId: user?.uid || '',
+        },
+      });
+    } catch (error) {
+      console.error('Error saving new bite:', error);
+      this.errorHandler.handleError(error);
+    }
   }
 
   async saveEditedBite(bite: any) {
-    FirebaseFirestore.updateDocument({
-      reference: `${BITE_COLLECTION}/${bite.id}`,
-      data: {
-        ...bite,
-      },
-    });
+    try {
+      FirebaseFirestore.updateDocument({
+        reference: `${BITE_COLLECTION}/${bite.id}`,
+        data: {
+          ...bite,
+        },
+      });
+    } catch (error) {
+      console.error('Error saving edited bite:', error);
+      this.errorHandler.handleError(error);
+    }
   }
 
   async saveTagsToExistingBite(payload: { newTags: string[]; id: string }) {
@@ -255,6 +267,7 @@ export class BiteTribeApiService {
       });
     } catch (error) {
       console.error('Error updating tags:', error);
+      this.errorHandler.handleError(error);
     }
   }
 
@@ -341,6 +354,7 @@ export class BiteTribeApiService {
       return { ...like, userId: uid };
     } catch (e) {
       console.error('Error removing like:', e);
+      this.errorHandler.handleError(e);
     }
   }
 
@@ -419,20 +433,23 @@ export class BiteTribeApiService {
   }
 
   async saveNewReview(payload: { review: string; biteId: string }) {
-    const user = await this.getUser();
+    try {
+      const user = await this.getUser();
 
-    await FirebaseFirestore.addDocument({
-      reference: REVIEW_COLLECTION,
-      data: {
-        review: payload.review,
-        biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
-        createdAt: new Date().toISOString(),
-        authorId: user?.uid || '',
-        author: user?.displayName || '',
-      },
-    });
-
-    // console.debug('#mo', addDocumentResult);
+      await FirebaseFirestore.addDocument({
+        reference: REVIEW_COLLECTION,
+        data: {
+          review: payload.review,
+          biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
+          createdAt: new Date().toISOString(),
+          authorId: user?.uid || '',
+          author: user?.displayName || '',
+        },
+      });
+    } catch (error) {
+      console.error('Error saving new review:', error);
+      this.errorHandler.handleError(error);
+    }
   }
 
   async saveSettings(settings: any) {
@@ -453,6 +470,7 @@ export class BiteTribeApiService {
       // console.debug('#mo', updateDocumentResult);
     } catch (error) {
       console.error('Error saving settings:', error);
+      this.errorHandler.handleError(error);
       throw error;
     }
   }
@@ -463,7 +481,13 @@ export class BiteTribeApiService {
       switchMap(() => {
         // console.debug('#mo - Start Listener for Menu');
         if (menuId) {
-          return from(this.getMenuById(menuId));
+          return from(this.getMenuById(menuId)).pipe(
+            catchError((err) => {
+              console.error('Error fetching menu:', err);
+              this.errorHandler.handleError(err);
+              return EMPTY;
+            })
+          );
         }
 
         return EMPTY;
@@ -559,95 +583,129 @@ export class BiteTribeApiService {
     bucketListId,
     biteId,
   }: SaveToBucketListParams) {
-    const bucketListDoc = await FirebaseFirestore.getDocument({
-      reference: `${BUCKETLIST_COLLECTION}/${bucketListId}`,
-    });
-
-    if (bucketListDoc?.snapshot?.data) {
-      const uniqueBiteIds = [
-        ...new Set([...(bucketListDoc.snapshot.data['biteIds'] || []), biteId]),
-      ];
-
-      FirebaseFirestore.updateDocument({
-        reference: bucketListDoc.snapshot.path,
-        data: {
-          biteIds: uniqueBiteIds,
-        },
+    try {
+      const bucketListDoc = await FirebaseFirestore.getDocument({
+        reference: `${BUCKETLIST_COLLECTION}/${bucketListId}`,
       });
+
+      if (bucketListDoc?.snapshot?.data) {
+        const uniqueBiteIds = [
+          ...new Set([
+            ...(bucketListDoc.snapshot.data['biteIds'] || []),
+            biteId,
+          ]),
+        ];
+
+        FirebaseFirestore.updateDocument({
+          reference: bucketListDoc.snapshot.path,
+          data: {
+            biteIds: uniqueBiteIds,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error saving bite ID to bucket list:', error);
+      this.errorHandler.handleError(error);
     }
   }
 
   async createBucketListAndSaveBiteIdToBucketList(
     params: CreateAndSaveToBucketListParams
   ) {
-    const user = await this.getUser();
+    try {
+      const user = await this.getUser();
 
-    FirebaseFirestore.addDocument({
-      reference: BUCKETLIST_COLLECTION,
-      data: {
-        userId: user?.uid || '',
-        name: params.bucketListName,
-        biteIds: params.biteId ? [params.biteId] : [],
-      },
-    });
+      FirebaseFirestore.addDocument({
+        reference: BUCKETLIST_COLLECTION,
+        data: {
+          userId: user?.uid || '',
+          name: params.bucketListName,
+          biteIds: params.biteId ? [params.biteId] : [],
+        },
+      });
+    } catch (error) {
+      console.error('Error creating bucket list and saving bite ID:', error);
+      this.errorHandler.handleError(error);
+    }
   }
 
   async removeBiteFromBucketlist({
     bucketlistId,
     biteId,
   }: RemoveBiteFromBucketlistParams) {
-    const bucketListDoc = await FirebaseFirestore.getDocument({
-      reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
-    });
+    try {
+      const bucketListDoc = await FirebaseFirestore.getDocument({
+        reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
+      });
 
-    const newBiteIdListInBucketList = bucketListDoc?.snapshot?.data?.[
-      'biteIds'
-    ]?.filter((currBiteId: string) => currBiteId !== biteId);
+      const newBiteIdListInBucketList = bucketListDoc?.snapshot?.data?.[
+        'biteIds'
+      ]?.filter((currBiteId: string) => currBiteId !== biteId);
 
-    FirebaseFirestore.updateDocument({
-      reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
-      data: {
-        biteIds: newBiteIdListInBucketList,
-      },
-    });
+      FirebaseFirestore.updateDocument({
+        reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
+        data: {
+          biteIds: newBiteIdListInBucketList,
+        },
+      });
+    } catch (error) {
+      console.error('Error removing bite from bucket list:', error);
+      this.errorHandler.handleError(error);
+    }
   }
 
   deleteBite(bite: any) {
-    if (bite.id) {
-      FirebaseFirestore.deleteDocument({
-        reference: `${BITE_COLLECTION}/${bite.id}`,
-      });
+    try {
+      if (bite.id) {
+        FirebaseFirestore.deleteDocument({
+          reference: `${BITE_COLLECTION}/${bite.id}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting bite:', error);
+      this.errorHandler.handleError(error);
     }
   }
 
   async createBucketList(bucketlistName: string) {
-    const user = await this.getUser();
+    try {
+      const user = await this.getUser();
 
-    FirebaseFirestore.addDocument({
-      reference: BUCKETLIST_COLLECTION,
-      data: {
-        userId: user?.uid || '',
-        name: bucketlistName,
-      },
-    });
+      FirebaseFirestore.addDocument({
+        reference: BUCKETLIST_COLLECTION,
+        data: {
+          userId: user?.uid || '',
+          name: bucketlistName,
+        },
+      });
+    } catch (error) {
+      console.error('Error creating bucket list:', error);
+      this.errorHandler.handleError(error);
+    }
   }
 
   async saveUser() {
-    const user = await this.getUser();
+    try {
+      const user = await this.getUser();
 
-    const photoUrl = ((user as any)?.providerData as any[]).find(
-      (data) => data.photoUrl.length
-    )?.photoUrl;
+      const photoUrl = ((user as any)?.providerData as any[]).find(
+        (data) => data.photoUrl?.length
+      )?.photoUrl;
 
-    FirebaseFirestore.setDocument({
-      reference: `${USERS_COLLECTION}/${user?.uid}`,
-      data: {
-        userId: user?.uid || '',
-        displayName: user?.displayName || '',
-        email: user?.email || '',
-        photoUrl: photoUrl || '',
-      },
-    });
+      FirebaseFirestore.setDocument({
+        reference: `${USERS_COLLECTION}/${user?.uid}`,
+        data: {
+          userId: user?.uid || '',
+          displayName: user?.displayName || '',
+          email: user?.email || '',
+          photoUrl: photoUrl || '',
+        },
+      });
+    } catch (error) {
+      console.error('Error saving user:', error);
+
+      this.errorHandler.handleError(error);
+    }
   }
 
   async deleteUser() {
@@ -666,6 +724,12 @@ export class BiteTribeApiService {
     return from(
       FirebaseFirestore.getDocument({
         reference: `${USERS_COLLECTION}/${bite.userId}`,
+      })
+    ).pipe(
+      catchError((error) => {
+        console.error('Error fetching user by bite ID:', error);
+        this.errorHandler.handleError(error);
+        throw new Error(error);
       })
     );
   }

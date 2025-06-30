@@ -9,6 +9,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <bt-home
       class="ion-page"
       [bites]="service.bites()"
+      [allTags]="service.allTags()"
+      [selectedFilters]="service.homeFilters()"
       [userId]="service.userId()"
       [isAuthenticated]="service.isAuthenticated()"
       [showSpinner]="true"
@@ -22,6 +24,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoMyBucketlists)="service.onGotoMyBucketlists()"
       (openMapView)="service.openMapView()"
+      (filtersApplied)="service.setHomeFilters($event)"
+      (filtersCleared)="service.clearHomeFilters()"
+      (filterRemoved)="service.removeHomeFilter($event)"
     />
   `,
   imports: [BiteTribeHomeComponent],

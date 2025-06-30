@@ -10,7 +10,7 @@ import {
   deleteBite,
 } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
-import { bite, bites, cachedBite, biteCreator } from './bites/selectors';
+import { bite, bites, cachedBite, biteCreator, allTags } from './bites/selectors';
 import {
   restaurant,
   restaurants,
@@ -23,6 +23,8 @@ import {
   goPublic,
   savePublicProfile,
   saveSettings,
+  setHomeFilters,
+  clearHomeFilters,
 } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -44,6 +46,7 @@ import {
   isPublicProfile,
   settings,
   publicUser,
+  homeFilters,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -97,6 +100,7 @@ export class BiteTribeStoreService implements StoreService {
 
   bites$ = this.store.select(bites);
   bite$ = this.store.select(bite);
+  allTags$ = this.store.select(allTags);
   bitesByRestaurant$ = this.store.select(bitesByRestaurant);
   restaurant$ = this.store.select(restaurant);
   restaurants$ = this.store.select(restaurants);
@@ -117,6 +121,7 @@ export class BiteTribeStoreService implements StoreService {
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
   biteCreator$ = this.store.select(biteCreator);
   isBitesLoading$ = this.store.select(isBitesLoading);
+  homeFilters$ = this.store.select(homeFilters);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
@@ -231,5 +236,13 @@ export class BiteTribeStoreService implements StoreService {
 
   goPrivate() {
     this.store.dispatch(goPrivate());
+  }
+
+  setHomeFilters(filters: string[]) {
+    this.store.dispatch(setHomeFilters({ filters }));
+  }
+
+  clearHomeFilters() {
+    this.store.dispatch(clearHomeFilters());
   }
 }

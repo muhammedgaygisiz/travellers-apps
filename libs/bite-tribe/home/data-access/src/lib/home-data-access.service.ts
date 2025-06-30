@@ -8,6 +8,8 @@ export class HomeDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
   bites = toSignal(this.storeService.bites$, { initialValue: [] as Bite[] });
+  allTags = toSignal(this.storeService.allTags$, { initialValue: [] as string[] });
+  homeFilters = toSignal(this.storeService.homeFilters$, { initialValue: [] as string[] });
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     requireSync: true,
@@ -42,5 +44,19 @@ export class HomeDataAccessService {
 
   deleteBite(bite: Bite) {
     this.storeService.submitDeleteBite(bite);
+  }
+
+  setHomeFilters(filters: string[]) {
+    this.storeService.setHomeFilters(filters);
+  }
+
+  clearHomeFilters() {
+    this.storeService.clearHomeFilters();
+  }
+
+  removeHomeFilter(filterToRemove: string) {
+    const currentFilters = this.homeFilters();
+    const updatedFilters = currentFilters.filter(filter => filter !== filterToRemove);
+    this.storeService.setHomeFilters(updatedFilters);
   }
 }

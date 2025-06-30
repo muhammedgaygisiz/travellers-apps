@@ -27,6 +27,18 @@
           <span>({{ selectedFilters().length }})</span>
         }
       </ion-chip>
+      
+      <!-- Display selected filter chips with minus buttons -->
+      @for (filter of selectedFilters(); track filter) {
+        <ion-chip>
+          <span>{{ filter }}</span>
+          <ion-icon 
+            name="close" 
+            (click)="removeFilter(filter)"
+            style="margin-left: 4px; cursor: pointer;"
+          />
+        </ion-chip>
+      }
     </div>
 
     <ng-container

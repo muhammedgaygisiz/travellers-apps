@@ -19,3 +19,5 @@ export const isBitesLoading = createSelector(slice, (slice) => {
 });
 
 export const publicUser = createSelector(slice, (slice) => slice?.profile);
+
+export const homeFilters = createSelector(slice, (slice) => slice?.homeFilters || []);

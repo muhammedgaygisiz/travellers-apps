@@ -6,7 +6,6 @@ import {
   inject,
   input,
   output,
-  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -44,6 +43,8 @@ import { CustomFilterModalComponent } from '../custom-filter-modal/custom-filter
 })
 export class BiteTribeHomeComponent {
   bites = input<any[]>();
+  allTags = input<string[]>([]);
+  selectedFilters = input<string[]>([]);
   enableBackButton = input<boolean>(false);
   userId = input<string>();
   title = input('Bites');
@@ -66,42 +67,14 @@ export class BiteTribeHomeComponent {
   readonly gotoEdit = output<Bite>();
   readonly deleteBite = output<Bite>();
   readonly openMapView = output();
+  readonly filtersApplied = output<string[]>();
+  readonly filtersCleared = output<void>();
+  readonly filterRemoved = output<string>();
 
   private readonly popoverController = inject(PopoverController);
 
-  selectedFilters = signal<string[]>([]);
-
-  // Compute all unique tags from bites
-  allTags = computed(() => {
-    const bites = this.bites() || [];
-    const tagsSet = new Set<string>();
-    
-    bites.forEach(bite => {
-      if (bite.tags && Array.isArray(bite.tags)) {
-        bite.tags.forEach((tag: string) => tagsSet.add(tag));
-      }
-    });
-    
-    return Array.from(tagsSet).sort();
-  });
-
-  // Filter bites based on selected filters
-  filteredBites = computed(() => {
-    const bites = this.bites() || [];
-    const filters = this.selectedFilters();
-    
-    if (filters.length === 0) {
-      return bites;
-    }
-    
-    return bites.filter(bite => {
-      if (!bite.tags || !Array.isArray(bite.tags)) {
-        return false;
-      }
-      
-      return filters.some(filter => bite.tags.includes(filter));
-    });
-  });
+  // Bites are already filtered by the store, just pass through
+  filteredBites = computed(() => this.bites() || []);
 
   async openCustomFilterModal($event: MouseEvent) {
     const popover = await this.popoverController.create({
@@ -112,17 +85,22 @@ export class BiteTribeHomeComponent {
       alignment: 'center',
       componentProps: {
         existingTags: this.allTags,
+        selectedFilters: this.selectedFilters,
         filtersApplied: (filters: string[]) => {
-          this.selectedFilters.set(filters);
+          this.filtersApplied.emit(filters);
           popover.dismiss();
         },
         filtersCleared: () => {
-          this.selectedFilters.set([]);
+          this.filtersCleared.emit();
           popover.dismiss();
         },
       },
     });
 
     await popover.present();
+  }
+
+  removeFilter(filter: string) {
+    this.filterRemoved.emit(filter);
   }
 }

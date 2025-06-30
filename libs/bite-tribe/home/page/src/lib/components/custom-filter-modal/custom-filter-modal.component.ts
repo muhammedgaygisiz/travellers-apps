@@ -4,24 +4,24 @@ import {
   computed,
   input,
   output,
-  signal,
+  signal, OnInit,
 } from '@angular/core';
 import {
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonList,
-  IonInput,
   IonButton,
   IonCheckbox,
+  IonContent,
+  IonIcon,
+  IonInput,
+  IonItem,
   IonLabel,
+  IonList,
 } from '@ionic/angular/standalone';
 
 @Component({
   template: `
     <ion-content class="ion-padding">
       <h3>Filter by Tags</h3>
-      
+
       <!-- Custom tag input and actions at the top -->
       <ion-list>
         <h4>Add Custom Tag</h4>
@@ -32,9 +32,9 @@ import {
             (ionInput)="onCustomTagInputChange($event)"
             (keydown.enter)="addCustomTag()"
           />
-          <ion-button 
-            slot="end" 
-            fill="clear" 
+          <ion-button
+            slot="end"
+            fill="clear"
             (click)="addCustomTag()"
             [disabled]="!customTagInput().trim()"
           >
@@ -45,38 +45,37 @@ import {
 
       <!-- Action buttons -->
       <div class="ion-padding-top">
-        <ion-button 
-          expand="block" 
+        <ion-button
+          expand="block"
           (click)="applyFilters()"
           [disabled]="selectedTags().length === 0"
         >
           Apply Filters ({{ selectedTags().length }})
         </ion-button>
-        <ion-button 
-          expand="block" 
-          fill="outline" 
-          (click)="clearFilters()"
-        >
+        <ion-button expand="block" fill="outline" (click)="clearFilters()">
           Clear All
         </ion-button>
       </div>
-      
+
       <!-- Existing tags section (filtered by search input) -->
       <ion-list lines="none">
         <h4>Available Tags</h4>
         @for (tag of filteredTags(); track tag) {
         <ion-item>
-          <ion-checkbox 
-            slot="start" 
+          <ion-checkbox
+            slot="start"
             [checked]="selectedTags().includes(tag)"
             (ionChange)="toggleTag(tag)"
           />
           <ion-label>{{ tag }}</ion-label>
         </ion-item>
-        }
-        @if (filteredTags().length === 0 && customTagInput().trim()) {
+        } @if (filteredTags().length === 0 && customTagInput().trim()) {
         <ion-item>
-          <ion-label>No matching tags found. Press enter or + to add "{{ customTagInput().trim() }}" as custom tag.</ion-label>
+          <ion-label
+            >No matching tags found. Press enter or + to add "{{
+              customTagInput().trim()
+            }}" as custom tag.</ion-label
+          >
         </ion-item>
         }
       </ion-list>
@@ -94,10 +93,10 @@ import {
     IonLabel,
   ],
 })
-export class CustomFilterModalComponent {
+export class CustomFilterModalComponent implements OnInit {
   existingTags = input<string[]>([]);
   selectedFilters = input<string[]>([]);
-  
+
   filtersApplied = output<string[]>();
   filtersCleared = output<void>();
 
@@ -113,20 +112,18 @@ export class CustomFilterModalComponent {
   filteredTags = computed(() => {
     const searchTerm = this.customTagInput().toLowerCase().trim();
     const allTags = this.existingTags();
-    
+
     if (!searchTerm) {
       return allTags;
     }
-    
-    return allTags.filter(tag => 
-      tag.toLowerCase().includes(searchTerm)
-    );
+
+    return allTags.filter((tag) => tag.toLowerCase().includes(searchTerm));
   });
 
   toggleTag(tag: string) {
     const currentTags = this.selectedTags();
     if (currentTags.includes(tag)) {
-      this.selectedTags.set(currentTags.filter(t => t !== tag));
+      this.selectedTags.set(currentTags.filter((t) => t !== tag));
     } else {
       this.selectedTags.set([...currentTags, tag]);
     }

@@ -1,6 +1,8 @@
 import { createAction, props } from '@ngrx/store';
 import { PublicUser, Settings } from 'model';
 
+export const fetchGpsPosition = createAction('[APP] Fetch GPS position');
+
 export const loadedGpsPosition = createAction(
   '[APP] Loaded GPS position',
   props<{ position: any }>()

@@ -1,5 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import {
+  errorLoadingGpsPosition,
   goPrivate,
   loadedGpsPosition,
   loadedSettingsFromApi,
@@ -41,6 +42,10 @@ export const reducer = createReducer<AppSlice>(
       position: { latitude, longitude },
     };
   }),
+  on(errorLoadingGpsPosition, (state) => ({
+    ...state,
+    position: undefined,
+  })),
   on(loadedSettingsFromApi, (state, { settings }) => {
     return {
       ...state,

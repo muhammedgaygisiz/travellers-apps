@@ -10,6 +10,6 @@ export class IsInPipe implements PipeTransform {
       return 'bookmark-outline';
     }
 
-    return list.biteIds.includes(bite.id) ? 'bookmark' : 'bookmark-outline';
+    return list.biteIds?.includes(bite.id) ? 'bookmark' : 'bookmark-outline';
   }
 }

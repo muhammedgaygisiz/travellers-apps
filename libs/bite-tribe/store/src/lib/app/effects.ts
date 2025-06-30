@@ -7,6 +7,7 @@ import {
 } from '@ngrx/effects';
 import {
   errorLoadingGpsPosition,
+  fetchGpsPosition,
   goPrivate,
   goPublic,
   loadedGpsPosition,
@@ -17,15 +18,26 @@ import {
 } from './actions';
 import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
-import { Platform } from '@ionic/angular';
+import { AlertController, Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class AppEffect {
   private readonly actions$ = inject(Actions);
   private readonly platform = inject(Platform);
   private readonly api = inject(BiteTribeApiService);
+  private readonly alertController = inject(AlertController);
+  private readonly store = inject(Store);
+
+  private readonly RETRY_GPS_BUTTON = {
+    text: 'Retry',
+    role: 'cancel',
+    handler: () => {
+      this.store.dispatch(fetchGpsPosition());
+    },
+  };
 
   loadSettingsFromApi$ = createEffect(() => {
     return this.actions$.pipe(
@@ -44,20 +56,39 @@ export class AppEffect {
     );
   });
 
-  getCurrentPosition$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(fromAuth.loadedUser),
-      filter((payload) => !!payload.user),
-      switchMap(() => getCurrentPosition(this.platform)),
-      map((currentPosition) =>
-        loadedGpsPosition({ position: currentPosition })
-      ),
-      catchError((error) => {
-        console.log(error);
-        return of(errorLoadingGpsPosition({ error }));
-      })
-    );
-  });
+  fetchGpsPosition$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(fromAuth.loadedUser, fetchGpsPosition),
+        filter((payload) => {
+          if (payload.type === fromAuth.loadedUser.type) {
+            return !!payload.user;
+          }
+          return true;
+        }),
+        switchMap(() =>
+          getCurrentPosition(this.platform).pipe(
+            map((currentPosition) =>
+              loadedGpsPosition({ position: currentPosition })
+            ),
+            catchError((error) => {
+              console.error(error);
+              this.alertController
+                .create({
+                  header: 'GPS Position missing',
+                  subHeader:
+                    'Your GPS position could not be determined. Please check your device settings, then retry.',
+                  buttons: [this.RETRY_GPS_BUTTON],
+                })
+                .then((alert) => alert.present());
+              return of(errorLoadingGpsPosition({ error }));
+            })
+          )
+        )
+      );
+    },
+    { useEffectsErrorHandler: true }
+  );
 
   saveSettingsToFirestore$ = createEffect(
     () => {

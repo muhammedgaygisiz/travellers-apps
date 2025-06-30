@@ -1,8 +1,54 @@
-import { errorLoadingGpsPosition } from '../actions';
+import {
+  errorLoadingGpsPosition,
+  goPrivate,
+  loadedGpsPosition,
+  loadedSettingsFromApi,
+  setPublicProfile,
+} from '../actions';
 import { reducer } from '../reducer';
 import { AppSlice } from '../app-slice.model';
+import { PublicUser, Settings } from 'model';
+import { loadedBitesFromApi } from '../../bites/actions';
 
 describe('App Reducer', () => {
+  describe('loadedBitesFromApi', () => {
+    it('should set loading:home to false', () => {
+      const INITIAL_STATE = { loading: { home: true } } as AppSlice;
+      const NEW_STATE = {
+        loading: {
+          home: false,
+        },
+      } as AppSlice;
+
+      const loadedBitesFromApiAction = loadedBitesFromApi({ bites: [] });
+
+      expect(reducer(INITIAL_STATE, loadedBitesFromApiAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('loadedGpsPosition', () => {
+    it('should set provided position', () => {
+      const POSITION_MOCK = {
+        latitude: 1,
+        longitude: 2,
+      };
+      const INITIAL_STATE = {} as AppSlice;
+      const NEW_STATE = {
+        position: POSITION_MOCK,
+      } as AppSlice;
+
+      const loadedGpsPositionAction = loadedGpsPosition({
+        position: { coords: POSITION_MOCK },
+      });
+
+      expect(reducer(INITIAL_STATE, loadedGpsPositionAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
   describe('errorLoadingGpsPosition', () => {
     it('should set position to undefined', () => {
       const INITIAL_STATE = {
@@ -17,6 +63,60 @@ describe('App Reducer', () => {
       });
 
       expect(reducer(INITIAL_STATE, errorLoadingGpsPositionAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('loadedSettingsFromApi', () => {
+    it('should set settings', () => {
+      const SETTINGS_MOCK = { pushNotifications: true } as Settings;
+      const INITIAL_STATE = {} as AppSlice;
+      const NEW_STATE = {
+        settings: SETTINGS_MOCK,
+      } as AppSlice;
+
+      const loadedSettingsFromApiAction = loadedSettingsFromApi({
+        settings: SETTINGS_MOCK,
+      });
+
+      expect(reducer(INITIAL_STATE, loadedSettingsFromApiAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('setPublicProfile', () => {
+    it('should set public profile', () => {
+      const PUBLIC_PROFILE_MOCK = { displayName: 'test' } as PublicUser;
+      const INITIAL_STATE = {} as AppSlice;
+      const NEW_STATE = {
+        profile: PUBLIC_PROFILE_MOCK,
+      } as AppSlice;
+
+      const setPublicProfileAction = setPublicProfile({
+        profile: PUBLIC_PROFILE_MOCK,
+      });
+
+      expect(reducer(INITIAL_STATE, setPublicProfileAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('goPrivate', () => {
+    it('should set profile to undefined', () => {
+      const PUBLIC_PROFILE_MOCK = { displayName: 'test' } as PublicUser;
+      const INITIAL_STATE = {
+        profile: PUBLIC_PROFILE_MOCK,
+      } as AppSlice;
+      const NEW_STATE = {
+        profile: undefined,
+      } as AppSlice;
+
+      const goPrivateAction = goPrivate();
+
+      expect(reducer(INITIAL_STATE, goPrivateAction)).toEqual({
         ...NEW_STATE,
       });
     });

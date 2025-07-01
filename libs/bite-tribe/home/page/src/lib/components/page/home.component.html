@@ -19,25 +19,24 @@
 
     <div class="chip-container">
       <ion-chip (click)="openMapView.emit()">Map View</ion-chip>
-      <ion-chip>Nearby</ion-chip>
-      <ion-chip>Vegan</ion-chip>
+      <ion-chip disabled>Nearby</ion-chip>
       <ion-chip (click)="openCustomFilterModal($event)">
-        <ion-icon name="add" />
+        <ion-icon name="add" class="add-filter" />
         @if (selectedFilters().length > 0) {
-          <span>({{ selectedFilters().length }})</span>
+        <span>({{ selectedFilters().length }})</span>
         }
       </ion-chip>
-      
+
       <!-- Display selected filter chips with minus buttons -->
       @for (filter of selectedFilters(); track filter) {
-        <ion-chip>
-          <span>{{ filter }}</span>
-          <ion-icon 
-            name="close" 
-            (click)="removeFilter(filter)"
-            style="margin-left: 4px; cursor: pointer;"
-          />
-        </ion-chip>
+      <ion-chip>
+        <span>{{ filter }}</span>
+        <ion-icon
+          name="close"
+          (click)="removeFilter(filter)"
+          style="margin-left: 4px; cursor: pointer"
+        />
+      </ion-chip>
       }
     </div>
 

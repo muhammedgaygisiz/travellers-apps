@@ -1,0 +1,76 @@
+<ion-content class="custom-filter-container ion-padding">
+  <h3>Filter by Tags</h3>
+
+  <!-- Custom tag input and actions at the top -->
+  <ion-list lines="full">
+    <ion-item>
+      <ion-input
+        [value]="customTagInput()"
+        placeholder="Search or enter custom tag"
+        (ionInput)="onCustomTagInputChange($event)"
+        (keydown.enter)="addCustomTag()"
+      />
+      <ion-button
+        slot="end"
+        fill="clear"
+        (click)="addCustomTag()"
+        [disabled]="!customTagInput().trim()"
+      >
+        <ion-icon name="add" />
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- Action buttons -->
+  <div class="ion-padding-top">
+    <ion-button
+      expand="block"
+      (click)="applyFilters()"
+      [disabled]="selectedTags().length === 0"
+    >
+      Apply Filters ({{ selectedTags().length }})
+    </ion-button>
+    <ion-button expand="block" fill="outline" (click)="clearFilters()">
+      Clear All
+    </ion-button>
+  </div>
+
+  <!-- Existing tags section (filtered by search input) -->
+  <ion-list lines="none">
+    <h4>Selected Tags</h4>
+    @for (tag of selectedTags(); track tag) {
+    <ion-item>
+      <ion-checkbox
+        slot="start"
+        [checked]="true"
+        (ionChange)="toggleTag(tag)"
+      />
+      <ion-label>{{ tag }}</ion-label>
+    </ion-item>
+    } @empty {
+    <ion-item>
+      <ion-label> No tags selected. </ion-label>
+    </ion-item>
+    }
+    <h4>Available Tags</h4>
+    @for (tag of filteredTags(); track tag) { @if
+    (!selectedTags().includes(tag)) {
+    <ion-item>
+      <ion-checkbox
+        slot="start"
+        [checked]="false"
+        (ionChange)="toggleTag(tag)"
+      />
+      <ion-label>{{ tag }}</ion-label>
+    </ion-item>
+    } } @if (filteredTags().length === 0 && customTagInput().trim()) {
+    <ion-item>
+      <ion-label>
+        No matching tags found. Press enter or + to add "{{
+          customTagInput().trim()
+        }}" as custom tag.
+      </ion-label>
+    </ion-item>
+    }
+  </ion-list>
+</ion-content>

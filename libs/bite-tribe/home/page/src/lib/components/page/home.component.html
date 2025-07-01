@@ -19,8 +19,25 @@
 
     <div class="chip-container">
       <ion-chip (click)="openMapView.emit()">Map View</ion-chip>
-      <ion-chip>Nearby</ion-chip>
-      <ion-chip>Vegan</ion-chip>
+      <ion-chip disabled>Nearby</ion-chip>
+      <ion-chip (click)="openCustomFilterModal()">
+        <ion-icon name="add" class="add-filter" />
+        @if (selectedFilters().length > 0) {
+        <span>({{ selectedFilters().length }})</span>
+        }
+      </ion-chip>
+
+      <!-- Display selected filter chips with minus buttons -->
+      @for (filter of selectedFilters(); track filter) {
+      <ion-chip>
+        <span>{{ filter }}</span>
+        <ion-icon
+          name="close"
+          (click)="removeFilter(filter)"
+          style="margin-left: 4px; cursor: pointer"
+        />
+      </ion-chip>
+      }
     </div>
 
     <ng-container
@@ -42,13 +59,13 @@
 </ng-template>
 
 <ng-template #withoutLoadingTemplate>
-  @if (!bites()?.length) {
+  @if (!filteredBites().length) {
   <ion-card>
     <ion-card-content>
       <ion-text color="primary"> No bites found. Be the first one.</ion-text>
     </ion-card-content>
   </ion-card>
-  } @for (bite of bites(); track bite.id) {
+  } @for (bite of filteredBites(); track bite.id) {
   <bt-bite
     [bite]="bite"
     [userId]="userId()"

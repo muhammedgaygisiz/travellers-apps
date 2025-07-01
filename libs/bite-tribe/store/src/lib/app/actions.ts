@@ -35,3 +35,10 @@ export const setPublicProfile = createAction(
 
 export const goPublic = createAction('[APP] Go public');
 export const goPrivate = createAction('[APP] Go private');
+
+export const setHomeFilters = createAction(
+  '[APP] Set home filters',
+  props<{ filters: string[] }>()
+);
+
+export const clearHomeFilters = createAction('[APP] Clear home filters');

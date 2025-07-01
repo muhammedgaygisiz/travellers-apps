@@ -2,6 +2,9 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
+  DestroyRef,
+  inject,
   input,
   output,
 } from '@angular/core';
@@ -11,12 +14,16 @@ import {
   IonCardContent,
   IonChip,
   IonContent,
+  IonIcon,
   IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
+import { CustomFilterModalComponent } from '../custom-filter-modal/custom-filter-modal.component';
+import { Dialog } from '@angular/cdk/dialog';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'bt-home',
@@ -32,11 +39,14 @@ import { NgTemplateOutlet } from '@angular/common';
     IonText,
     IonSpinner,
     NgTemplateOutlet,
+    IonIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteTribeHomeComponent {
   bites = input<any[]>();
+  allTags = input<string[]>([]);
+  selectedFilters = input<string[]>([]);
   enableBackButton = input<boolean>(false);
   userId = input<string>();
   title = input('Bites');
@@ -59,4 +69,38 @@ export class BiteTribeHomeComponent {
   readonly gotoEdit = output<Bite>();
   readonly deleteBite = output<Bite>();
   readonly openMapView = output();
+  readonly filtersApplied = output<string[]>();
+  readonly filtersCleared = output<void>();
+  readonly filterRemoved = output<string>();
+
+  dialog = inject(Dialog);
+  private readonly destroyRef = inject(DestroyRef);
+
+  // Bites are already filtered by the store, just pass through
+  filteredBites = computed(() => this.bites() || []);
+
+  async openCustomFilterModal() {
+    const dialogRef = this.dialog.open(CustomFilterModalComponent, {
+      data: {
+        existingTags: this.allTags(),
+        selectedFilters: this.selectedFilters(),
+      },
+    });
+
+    dialogRef.closed
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result: any) => {
+        if (result.clearFilters) {
+          this.filtersCleared.emit();
+        }
+
+        if (result.selectedTags) {
+          this.filtersApplied.emit(result.selectedTags);
+        }
+      });
+  }
+
+  removeFilter(filter: string) {
+    this.filterRemoved.emit(filter);
+  }
 }

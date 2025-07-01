@@ -11,6 +11,8 @@ export class HomeService {
   private readonly navController = inject(NavController);
 
   bites = this.dataAccess.bites;
+  allTags = this.dataAccess.allTags;
+  homeFilters = this.dataAccess.homeFilters;
   userId = this.dataAccess.userId;
   isAuthenticated = this.dataAccess.isAuthenticated;
   isBitesLoading = this.dataAccess.isBitesLoading;
@@ -105,5 +107,17 @@ export class HomeService {
 
   openMapView() {
     this.navController.navigateForward(['home', 'map-view']);
+  }
+
+  setHomeFilters(filters: string[]) {
+    this.dataAccess.setHomeFilters(filters);
+  }
+
+  clearHomeFilters() {
+    this.dataAccess.clearHomeFilters();
+  }
+
+  removeHomeFilter(filterToRemove: string) {
+    this.dataAccess.removeHomeFilter(filterToRemove);
   }
 }

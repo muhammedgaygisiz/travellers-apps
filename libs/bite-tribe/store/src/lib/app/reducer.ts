@@ -5,6 +5,8 @@ import {
   loadedGpsPosition,
   loadedSettingsFromApi,
   setPublicProfile,
+  setHomeFilters,
+  clearHomeFilters,
 } from './actions';
 import { AppSlice } from './app-slice.model';
 import { loadedBitesFromApi } from '../bites/actions';
@@ -21,6 +23,7 @@ const initialState = {
   loading: {
     home: true,
   },
+  homeFilters: [],
 } as AppSlice;
 
 export const reducer = createReducer<AppSlice>(
@@ -61,5 +64,13 @@ export const reducer = createReducer<AppSlice>(
   on(goPrivate, (state) => ({
     ...state,
     profile: undefined,
+  })),
+  on(setHomeFilters, (state, { filters }) => ({
+    ...state,
+    homeFilters: filters,
+  })),
+  on(clearHomeFilters, (state) => ({
+    ...state,
+    homeFilters: [],
   }))
 );

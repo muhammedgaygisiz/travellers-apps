@@ -7,4 +7,5 @@ export type AppSlice = {
     home?: boolean;
   };
   profile?: PublicUser;
+  homeFilters?: string[];
 };

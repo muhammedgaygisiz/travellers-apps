@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   input,
   output,
@@ -13,15 +14,16 @@ import {
   IonCardContent,
   IonChip,
   IonContent,
+  IonIcon,
   IonSpinner,
   IonText,
-  IonIcon,
-  PopoverController,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
 import { CustomFilterModalComponent } from '../custom-filter-modal/custom-filter-modal.component';
+import { Dialog } from '@angular/cdk/dialog';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'bt-home',
@@ -71,33 +73,31 @@ export class BiteTribeHomeComponent {
   readonly filtersCleared = output<void>();
   readonly filterRemoved = output<string>();
 
-  private readonly popoverController = inject(PopoverController);
+  dialog = inject(Dialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   // Bites are already filtered by the store, just pass through
   filteredBites = computed(() => this.bites() || []);
 
-  async openCustomFilterModal($event: MouseEvent) {
-    const popover = await this.popoverController.create({
-      component: CustomFilterModalComponent,
-      event: $event,
-      dismissOnSelect: false,
-      cssClass: 'custom-filter-popover',
-      alignment: 'center',
-      componentProps: {
-        existingTags: this.allTags,
-        selectedFilters: this.selectedFilters,
-        filtersApplied: (filters: string[]) => {
-          this.filtersApplied.emit(filters);
-          popover.dismiss();
-        },
-        filtersCleared: () => {
-          this.filtersCleared.emit();
-          popover.dismiss();
-        },
+  async openCustomFilterModal() {
+    const dialogRef = this.dialog.open(CustomFilterModalComponent, {
+      data: {
+        existingTags: this.allTags(),
+        selectedFilters: this.selectedFilters(),
       },
     });
 
-    await popover.present();
+    dialogRef.closed
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result: any) => {
+        if (result.clearFilters) {
+          this.filtersCleared.emit();
+        }
+
+        if (result.selectedTags) {
+          this.filtersApplied.emit(result.selectedTags);
+        }
+      });
   }
 
   removeFilter(filter: string) {

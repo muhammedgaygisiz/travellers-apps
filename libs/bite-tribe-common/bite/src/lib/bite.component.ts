@@ -19,7 +19,6 @@ import {
 import { Bite } from 'model';
 import { ToMetricPipe } from 'distance-pipe';
 import { LikesComponent } from './likes/likes.component';
-import { ToBlobUrlPipe } from 'image-compression';
 import { Dialog } from '@angular/cdk/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
@@ -39,7 +38,6 @@ import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-ca
     ToMetricPipe,
     LikesComponent,
     IonButton,
-    ToBlobUrlPipe,
     IonText,
     WithFirstLetterUpperCasePipe,
   ],

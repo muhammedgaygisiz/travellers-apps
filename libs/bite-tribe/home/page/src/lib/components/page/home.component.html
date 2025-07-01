@@ -20,7 +20,7 @@
     <div class="chip-container">
       <ion-chip (click)="openMapView.emit()">Map View</ion-chip>
       <ion-chip disabled>Nearby</ion-chip>
-      <ion-chip (click)="openCustomFilterModal($event)">
+      <ion-chip (click)="openCustomFilterModal()">
         <ion-icon name="add" class="add-filter" />
         @if (selectedFilters().length > 0) {
         <span>({{ selectedFilters().length }})</span>

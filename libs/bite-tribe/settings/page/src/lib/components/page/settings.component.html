@@ -84,7 +84,9 @@
 
         <div class="ion-margin-top ion-text-end go-public-button-container">
           @if (isPublicProfile()) {
-          <ion-button (click)="goPrivate.emit()">Return to private</ion-button>
+          <ion-button (click)="onReturnToPrivate()"
+            >Return to private</ion-button
+          >
           } @else {
           <ion-button (click)="goPublic.emit()">Go public</ion-button>
           }

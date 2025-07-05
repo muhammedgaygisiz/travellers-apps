@@ -27,6 +27,7 @@ import {
   bookmark,
   menu,
   navigateOutline,
+  chevronUpOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -58,5 +59,6 @@ export const addNecessaryIcons = () => {
     bookmark,
     menu,
     navigateOutline,
+    chevronUpOutline,
   });
 };

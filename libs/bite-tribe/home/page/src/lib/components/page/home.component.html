@@ -15,6 +15,12 @@
   (gotoMyBites)="gotoMyBites.emit()"
 >
   <ion-content class="ion-padding">
+    @if(moreThen5Bites()) {
+    <ion-button slot="fixed" (click)="scrollToTop()">
+      <ion-icon name="chevron-up-outline" />
+    </ion-button>
+    }
+
     <h1>{{ title() }}</h1>
 
     <div class="chip-container">

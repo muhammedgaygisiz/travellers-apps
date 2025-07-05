@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConfirmDialogComponent } from '../confirm-dialog.component';
-import { DialogRef } from '@angular/cdk/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { IonButton } from '@ionic/angular/standalone';
 
 describe('ConfirmDialogComponent', () => {
@@ -20,6 +20,15 @@ describe('ConfirmDialogComponent', () => {
           provide: DialogRef,
           useValue: mockDialogRef,
         },
+        {
+          provide: DIALOG_DATA,
+          useValue: {
+            title: 'Delete Bite',
+            message: 'Are you sure you want to delete this bite?',
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+          },
+        },
       ],
     }).compileComponents();
 
@@ -34,7 +43,9 @@ describe('ConfirmDialogComponent', () => {
 
   it('should render confirmation message', () => {
     const heading = fixture.nativeElement.querySelector('h2');
-    expect(heading.textContent).toContain(
+    expect(heading.textContent).toContain('Delete Bite');
+    const message = fixture.nativeElement.querySelector('ion-text');
+    expect(message.textContent).toContain(
       'Are you sure you want to delete this bite?'
     );
   });
@@ -46,11 +57,17 @@ describe('ConfirmDialogComponent', () => {
     expect(buttons[1].textContent.trim()).toBe('No');
   });
 
+  it('should not render message if not provided', () => {
+    component.data.message = '';
+    fixture.detectChanges();
+    const message = fixture.nativeElement.querySelector('ion-text');
+    expect(message).toBeNull();
+  });
+
   describe('button interactions', () => {
     it('should close dialog with "confirm" when confirm button is clicked', () => {
       const confirmButton = fixture.nativeElement.querySelector('ion-button');
       confirmButton.click();
-
       expect(mockDialogRef.close).toHaveBeenCalledWith('confirm');
       expect(mockDialogRef.close).toHaveBeenCalledTimes(1);
     });
@@ -59,7 +76,6 @@ describe('ConfirmDialogComponent', () => {
       const buttons = fixture.nativeElement.querySelectorAll('ion-button');
       const cancelButton = buttons[1];
       cancelButton.click();
-
       expect(mockDialogRef.close).toHaveBeenCalledWith('cancel');
       expect(mockDialogRef.close).toHaveBeenCalledTimes(1);
     });

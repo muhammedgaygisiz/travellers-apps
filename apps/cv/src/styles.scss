@@ -17,3 +17,8 @@ body {
 
   min-width: 370px;
 }
+
+/* Remove outline for non-keyboard :focus */
+.cdk-dialog-container.focus-visible {
+  outline: none;
+}

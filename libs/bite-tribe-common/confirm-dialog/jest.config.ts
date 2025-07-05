@@ -7,10 +7,10 @@ const NODE_MODULES_TO_IGNORE = [
 ].join('|');
 
 export default {
-  displayName: 'details',
-  preset: '../../../../jest.preset.js',
+  displayName: 'bite-tribe-common/confirm-dialog',
+  preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../../coverage/libs/bite-tribe/details/page',
+  coverageDirectory: '../../../coverage/libs/bite-tribe-common/confirm-dialog',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

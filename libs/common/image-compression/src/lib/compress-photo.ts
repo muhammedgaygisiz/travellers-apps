@@ -1,19 +1,6 @@
 import { Photo } from '@capacitor/camera';
 import { compressWithCanvas } from './compress-with-canvas';
-
-function base64ToFile(base64: string | undefined = '', format: string): File {
-  const arr = base64.split(',');
-  const mime = arr[0].match(/:(.*?);/)?.[1] || '';
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-
-  return new File([u8arr], `file.${format}`, { type: mime });
-}
+import { base64ToFile } from './base64-to-file';
 
 const toFile = (photo: Photo) => {
   return base64ToFile(
@@ -22,25 +9,59 @@ const toFile = (photo: Photo) => {
   );
 };
 
-export const compressPhoto = (
+const MAX_SIZE_BYTES = 800 * 1024; // 800 KB
+const MAX_ITERATIONS = 10;
+
+export const compressPhoto = async (
   photo: Photo,
   maxWidth = 2048,
   maxHeight = 2048
 ): Promise<File> => {
-  const file = toFile(photo);
+  let file = toFile(photo);
+  let quality = 0.7;
+  let width = maxWidth;
+  let height = maxHeight;
+  let iterations = 0;
 
-  return new Promise((resolve) => {
-    const blobURL = URL.createObjectURL(file);
+  while (iterations < MAX_ITERATIONS) {
+    const blobUrl = URL.createObjectURL(file);
     const img = new Image();
-    img.src = blobURL;
+    img.src = blobUrl;
 
-    img.onload = () =>
-      compressWithCanvas(img, file, maxWidth, maxHeight, resolve as any);
+    try {
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+      });
 
-    img.onerror = () => {
-      console.log('shit happens');
+      const currentQuality = Math.max(0.1, quality);
+      file = await new Promise((resolve) => {
+        compressWithCanvas(
+          img,
+          file.name,
+          width,
+          height,
+          resolve as any,
+          currentQuality
+        );
+      });
 
-      return resolve({} as any);
-    };
-  });
+      if (
+        file.size <= MAX_SIZE_BYTES ||
+        (width < 512 && height < 512 && quality <= 0.1)
+      ) {
+        break;
+      }
+
+      // Reduce quality and dimensions for next iteration
+      quality = Math.max(0.1, quality - 0.1);
+      width = Math.floor(width * 0.9);
+      height = Math.floor(height * 0.9);
+      iterations++;
+    } finally {
+      URL.revokeObjectURL(blobUrl);
+    }
+  }
+
+  return file;
 };

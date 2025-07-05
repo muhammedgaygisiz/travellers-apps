@@ -48,6 +48,32 @@ nx g @nx/angular:lib libs/bite-tribe/<page-name>/data-access --name=bite-tribe/<
   - Create another typescript module with the name `<page-name>.service.ts`
   - In the `routes.ts` file of the bite-tribe app, add the route for the new page with the new page's container component
 
+- In `jest.config.js` of the page library, add the following:
+
+```ts
+const NODE_MODULES_TO_IGNORE = [
+  '.*.mjs$',
+  'ionicons',
+  '@ionic',
+  '@ionic',
+  '@stencil',
+  '@capacitor',
+].join('|');
+
+...
+transform: {
+  '^.+\\.(ts|mjs|js|html)$': [
+    'jest-preset-angular',
+    {
+      tsconfig: '<rootDir>/tsconfig.spec.json',
+      stringifyContentPathRegex: '\\.(html|svg)$',
+      isolatedModules: true,  // <-- add this line
+    },
+  transformIgnorePatterns: [`node_modules/(?!(${NODE_MODULES_TO_IGNORE}))`], //  <-- modify this line
+...
+
+```
+
 - Under the page's data-access library, create a typescript module with the name: `<page-name>-data-access.service.ts`
 
 # TravellersApps

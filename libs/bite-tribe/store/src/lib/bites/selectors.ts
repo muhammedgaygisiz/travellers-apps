@@ -4,9 +4,11 @@ import { adapter } from './adapter';
 import { Bite, PublicUser } from 'model';
 import { biteId } from '../router/selectors';
 import { likes } from '../likes/selectors';
-import { gpsPosition, homeFilters } from '../app/selectors';
+import { gpsPosition, homeFilters, settings } from '../app/selectors';
 import { haversineDistance } from 'distance-pipe';
 import { EntityState } from '@ngrx/entity';
+import { handleNearbyFilter } from './utils/handle-nearby-filter';
+import { handleTagFilters } from './utils/handle-tag-filters';
 
 const slice = createFeatureSelector<
   EntityState<any> & {
@@ -53,43 +55,41 @@ const bitesWithMetadata = createSelector(
 export const bites = createSelector(
   bitesWithMetadata,
   homeFilters,
-  (bites, filters) => {
+  settings,
+  gpsPosition,
+  (bites, filters, appSettings, gpsPosition) => {
     if (!filters.length) {
       return bites;
     }
-    
-    return bites.filter(bite => {
-      if (!bite.tags || !Array.isArray(bite.tags)) {
-        return false;
-      }
-      
-      // Clean tags by removing # symbols for comparison
-      const cleanTags = bite.tags.map((tag: string) => tag.replace(/^#/, ''));
-      return filters.some(filter => cleanTags.includes(filter));
-    });
+
+    const filteredBitesByNearby = handleNearbyFilter(
+      filters,
+      gpsPosition,
+      appSettings,
+      bites
+    );
+
+    return handleTagFilters(filters, filteredBitesByNearby);
   }
 );
 
-export const allTags = createSelector(
-  bitesWithMetadata,
-  (bites) => {
-    const tagsSet = new Set<string>();
-    
-    bites.forEach(bite => {
-      if (bite.tags && Array.isArray(bite.tags)) {
-        bite.tags.forEach((tag: string) => {
-          // Remove # symbol from tags
-          const cleanTag = tag.replace(/^#/, '');
-          if (cleanTag) {
-            tagsSet.add(cleanTag);
-          }
-        });
-      }
-    });
-    
-    return Array.from(tagsSet).sort();
-  }
-);
+export const allTags = createSelector(bitesWithMetadata, (bites) => {
+  const tagsSet = new Set<string>();
+
+  bites.forEach((bite) => {
+    if (bite.tags && Array.isArray(bite.tags)) {
+      bite.tags.forEach((tag: string) => {
+        // Remove all # symbols from tags
+        const cleanTag = tag.replace(/#/g, '');
+        if (cleanTag) {
+          tagsSet.add(cleanTag);
+        }
+      });
+    }
+  });
+
+  return Array.from(tagsSet).sort();
+});
 
 export const bite = createSelector(biteId, bites, (id, bites) =>
   bites.find((bite) => bite.id === id)

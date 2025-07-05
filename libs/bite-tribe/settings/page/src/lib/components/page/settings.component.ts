@@ -68,6 +68,7 @@ export class PageSettings {
     emailUpdates: [{ value: false, disabled: true }, Validators.required],
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
+    nearby: [2000, [Validators.required, Validators.min(1)]],
     city: [''],
     displayName: [''],
   });
@@ -169,6 +170,7 @@ export class PageSettings {
       emailUpdates: !!newSettings.emailUpdates,
       theme: (newSettings.theme || this.systemTheme()) as 'light' | 'dark',
       currency: newSettings.currency || 'EUR',
+      nearby: newSettings.nearby || 50,
     });
   }
 

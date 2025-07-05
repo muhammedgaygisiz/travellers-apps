@@ -5,6 +5,10 @@
     @include globals.profile-image;
   }
 
+  .nearby-value {
+    text-align: end;
+  }
+
   .go-public-button-container {
     display: flex;
     justify-content: stretch;

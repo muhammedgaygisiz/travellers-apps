@@ -8,8 +8,12 @@ export class HomeDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
   bites = toSignal(this.storeService.bites$, { initialValue: [] as Bite[] });
-  allTags = toSignal(this.storeService.allTags$, { initialValue: [] as string[] });
-  homeFilters = toSignal(this.storeService.homeFilters$, { initialValue: [] as string[] });
+  allTags = toSignal(this.storeService.allTags$, {
+    initialValue: [] as string[],
+  });
+  homeFilters = toSignal(this.storeService.homeFilters$, {
+    initialValue: [] as string[],
+  });
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     requireSync: true,
@@ -56,7 +60,24 @@ export class HomeDataAccessService {
 
   removeHomeFilter(filterToRemove: string) {
     const currentFilters = this.homeFilters();
-    const updatedFilters = currentFilters.filter(filter => filter !== filterToRemove);
+    const updatedFilters = currentFilters.filter(
+      (filter) => filter !== filterToRemove
+    );
     this.storeService.setHomeFilters(updatedFilters);
+  }
+
+  toggleNearbyFilter() {
+    const currentFilters = this.homeFilters();
+    const hasNearbyFilter = currentFilters.includes('nearby');
+
+    if (hasNearbyFilter) {
+      const updatedFilters = currentFilters.filter(
+        (filter) => filter !== 'nearby'
+      );
+      this.storeService.setHomeFilters(updatedFilters);
+    } else {
+      const updatedFilters = [...currentFilters, 'nearby'];
+      this.storeService.setHomeFilters(updatedFilters);
+    }
   }
 }

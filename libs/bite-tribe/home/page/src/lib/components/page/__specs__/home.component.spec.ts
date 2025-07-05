@@ -102,4 +102,25 @@ describe('BiteTribeHomeComponent', () => {
     component.scrollToTop();
     expect(scrollToTopMock).toHaveBeenCalledWith(300);
   });
+
+  it('should compute isNearbyFilterActive correctly', () => {
+    // Test when nearby filter is not active
+    componentRef.setInput('selectedFilters', ['tag1', 'tag2']);
+    fixture.detectChanges();
+    expect(component.isNearbyFilterActive()).toBe(false);
+
+    // Test when nearby filter is active
+    componentRef.setInput('selectedFilters', ['tag1', 'nearby', 'tag2']);
+    fixture.detectChanges();
+    expect(component.isNearbyFilterActive()).toBe(true);
+  });
+
+  it('should emit nearbyFilterToggled when toggleNearbyFilter is called', () => {
+    const nearbyFilterToggledSpy = jest.spyOn(
+      component.nearbyFilterToggled,
+      'emit'
+    );
+    component.toggleNearbyFilter();
+    expect(nearbyFilterToggledSpy).toHaveBeenCalled();
+  });
 });

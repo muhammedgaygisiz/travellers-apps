@@ -120,4 +120,8 @@ export class HomeService {
   removeHomeFilter(filterToRemove: string) {
     this.dataAccess.removeHomeFilter(filterToRemove);
   }
+
+  toggleNearbyFilter() {
+    this.dataAccess.toggleNearbyFilter();
+  }
 }

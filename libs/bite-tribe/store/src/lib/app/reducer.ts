@@ -19,6 +19,7 @@ const initialState = {
     emailUpdates: false,
     theme: 'light',
     currency: 'EUR',
+    nearby: 2000,
   },
   loading: {
     home: true,

@@ -68,6 +68,7 @@ export class PageSettings {
     emailUpdates: [{ value: false, disabled: true }, Validators.required],
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
+    nearby: [50, [Validators.required, Validators.min(1)]],
     city: [''],
     displayName: [''],
   });

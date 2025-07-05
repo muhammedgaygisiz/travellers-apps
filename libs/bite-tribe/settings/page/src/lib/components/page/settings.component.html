@@ -80,6 +80,16 @@
               <ion-select-option value="CHF">CHF</ion-select-option>
             </ion-select>
           </ion-item>
+          <ion-item>
+            <ion-label>Nearby Distance (meters)</ion-label>
+            <ion-input
+              slot="end"
+              type="number"
+              min="1"
+              formControlName="nearby"
+              placeholder="50"
+            />
+          </ion-item>
         </section>
 
         <div class="ion-margin-top ion-text-end go-public-button-container">

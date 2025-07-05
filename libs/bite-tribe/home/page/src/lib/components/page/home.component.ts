@@ -75,6 +75,7 @@ export class BiteTribeHomeComponent {
   readonly filtersApplied = output<string[]>();
   readonly filtersCleared = output<void>();
   readonly filterRemoved = output<string>();
+  readonly nearbyFilterToggled = output<void>();
 
   ionContent = viewChild(IonContent);
 
@@ -88,6 +89,14 @@ export class BiteTribeHomeComponent {
     const bites = this.bites();
     return bites && bites?.length > 5;
   });
+
+  isNearbyFilterActive = computed(() => {
+    return this.selectedFilters().includes('nearby');
+  });
+
+  toggleNearbyFilter() {
+    this.nearbyFilterToggled.emit();
+  }
 
   async openCustomFilterModal() {
     const dialogRef = this.dialog.open(CustomFilterModalComponent, {

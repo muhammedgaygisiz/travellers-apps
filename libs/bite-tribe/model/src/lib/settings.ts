@@ -3,5 +3,6 @@ export interface Settings {
   emailUpdates: boolean;
   theme: 'light' | 'dark';
   currency: string;
+  nearby: number;
   updatedAt?: string;
 }

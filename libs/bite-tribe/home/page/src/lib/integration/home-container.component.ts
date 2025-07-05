@@ -27,6 +27,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (filtersApplied)="service.setHomeFilters($event)"
       (filtersCleared)="service.clearHomeFilters()"
       (filterRemoved)="service.removeHomeFilter($event)"
+      (nearbyFilterToggled)="service.toggleNearbyFilter()"
     />
   `,
   imports: [BiteTribeHomeComponent],

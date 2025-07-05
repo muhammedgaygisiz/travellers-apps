@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NavController, provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { BiteTribeHomeComponent } from '../home.component';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, signal } from '@angular/core';
 import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
@@ -85,5 +85,21 @@ describe('BiteTribeHomeComponent', () => {
     component.openCustomFilterModal();
     closedSubject.next({ selectedTags: ['tag1', 'tag2'] });
     expect(filtersAppliedSpy).toHaveBeenCalledWith(['tag1', 'tag2']);
+  });
+
+  it('should emit filterRemoved when removeFilter is called', () => {
+    const filterRemovedSpy = jest.spyOn(component.filterRemoved, 'emit');
+    component.removeFilter('test-filter');
+    expect(filterRemovedSpy).toHaveBeenCalledWith('test-filter');
+  });
+
+  it('should call scrollToTop on ionContent when scrollToTop is called', () => {
+    const scrollToTopMock = jest.fn();
+    component.ionContent = signal({
+      scrollToTop: scrollToTopMock,
+    } as any) as any;
+
+    component.scrollToTop();
+    expect(scrollToTopMock).toHaveBeenCalledWith(300);
   });
 });

@@ -76,7 +76,7 @@ export class BiteTribeHomeComponent {
   readonly filtersCleared = output<void>();
   readonly filterRemoved = output<string>();
 
-  private readonly ionContent = viewChild(IonContent);
+  ionContent = viewChild(IonContent);
 
   dialog = inject(Dialog);
   private readonly destroyRef = inject(DestroyRef);

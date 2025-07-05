@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   input,
@@ -22,8 +23,10 @@ import {
 } from '@ionic/angular/standalone';
 import { PublicUser, Settings, User } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { Dialog } from '@angular/cdk/dialog';
+import { ConfirmDialogComponent } from 'bite-tribe-common/confirm-dialog';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -57,10 +60,12 @@ export class PageSettings {
   submitPublicUser = output<PublicUser>();
 
   private readonly formBuilder = inject(FormBuilder);
+  private readonly dialog = inject(Dialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   settingsForm = this.formBuilder.nonNullable.group({
-    pushNotifications: [false, Validators.required],
-    emailUpdates: [true, Validators.required],
+    pushNotifications: [{ value: false, disabled: true }, Validators.required],
+    emailUpdates: [{ value: false, disabled: true }, Validators.required],
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
     city: [''],
@@ -165,5 +170,25 @@ export class PageSettings {
       theme: (newSettings.theme || this.systemTheme()) as 'light' | 'dark',
       currency: newSettings.currency || 'EUR',
     });
+  }
+
+  onReturnToPrivate() {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Return to Private Profile',
+        message:
+          'Are you sure you want to return to a private profile? Your public profile will be hidden.',
+        confirmButtonText: 'Yes, go private',
+        cancelButtonText: 'No, keep public',
+      },
+    });
+
+    dialogRef.closed
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (result === 'confirm') {
+          this.goPrivate.emit();
+        }
+      });
   }
 }

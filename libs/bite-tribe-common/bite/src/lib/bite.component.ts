@@ -21,8 +21,8 @@ import { ToMetricPipe } from 'distance-pipe';
 import { LikesComponent } from './likes/likes.component';
 import { Dialog } from '@angular/cdk/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
+import { ConfirmDialogComponent } from 'bite-tribe-common/confirm-dialog';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -59,7 +59,14 @@ export class BiteComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   async onDeleteBiteClick(biteData: Bite) {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent);
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Delete Bite',
+        message: 'Are you sure you want to delete this bite?',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+      },
+    });
 
     dialogRef.closed
       .pipe(takeUntilDestroyed(this.destroyRef))

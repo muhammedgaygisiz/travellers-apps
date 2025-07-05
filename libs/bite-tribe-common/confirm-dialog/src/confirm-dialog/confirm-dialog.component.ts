@@ -1,23 +1,31 @@
 import { Component, inject } from '@angular/core';
-import { IonButton } from '@ionic/angular/standalone';
-import { DialogRef } from '@angular/cdk/dialog';
+import { IonButton, IonText } from '@ionic/angular/standalone';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 
 @Component({
   template: `
     <div class="confirmation-dialog ion-padding">
-      <h2>Are you sure you want to delete this bite?</h2>
+      <h2>{{ data.title }}</h2>
+
+      @if (data.message) {
+      <ion-text>{{ data.message }}</ion-text>
+      }
 
       <div class="confirmation-dialog-actions">
-        <ion-button (click)="onConfirm()"> Yes </ion-button>
-        <ion-button (click)="onCancel()"> No </ion-button>
+        <ion-button (click)="onConfirm()">
+          {{ data.confirmButtonText }}
+        </ion-button>
+        <ion-button (click)="onCancel()">
+          {{ data.cancelButtonText }}
+        </ion-button>
       </div>
     </div>
   `,
-  imports: [IonButton],
+  imports: [IonButton, IonText],
   styles: `
     .confirmation-dialog {
       width: min(274px, 480px);
-      height: 220px;
+      height: fit-content;
       border: 3px solid var(--ion-color-primary);
       background-color: var(--ion-card-background);
       border-radius: 8px;
@@ -40,6 +48,12 @@ import { DialogRef } from '@angular/cdk/dialog';
 })
 export class ConfirmDialogComponent {
   dialogRef = inject(DialogRef<string>);
+  data: {
+    title: string;
+    message: string;
+    confirmButtonText: string;
+    cancelButtonText: string;
+  } = inject(DIALOG_DATA);
 
   onConfirm() {
     this.dialogRef.close('confirm');

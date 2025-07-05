@@ -1,7 +1,8 @@
 :host {
   ion-button[slot='fixed'] {
-    bottom: 10px;
+    position: fixed;
     left: 10px;
+    bottom: 56px;
   }
 
   .chip-container {

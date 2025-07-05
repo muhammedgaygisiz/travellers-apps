@@ -67,11 +67,12 @@ export const bites = createSelector(
     if (hasNearbyFilter && gpsPosition && appSettings?.nearby) {
       const nearbyDistanceInKm = appSettings.nearby / 1000; // Convert meters to kilometers
       filteredBites = filteredBites.filter((bite) => {
-        return (
-          bite.distance !== undefined &&
-          typeof bite.distance === 'number' &&
-          bite.distance <= nearbyDistanceInKm
-        );
+        if (bite.distance) {
+          const distance = parseFloat(bite.distance);
+          return distance <= nearbyDistanceInKm;
+        }
+
+        return true;
       });
     }
 

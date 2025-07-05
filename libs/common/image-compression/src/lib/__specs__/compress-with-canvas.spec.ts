@@ -36,7 +36,14 @@ describe('compressWithCanvas', () => {
       resizeRetainingAspectRatio: mockResize,
     }));
 
-    compressWithCanvas(mockImage, { name: 'test.jpg' }, 800, 600, jest.fn());
+    compressWithCanvas(
+      mockImage,
+      { name: 'test.jpg' },
+      800,
+      600,
+      jest.fn(),
+      0.7
+    );
 
     expect(global.URL.revokeObjectURL).toHaveBeenCalledWith(mockImage.src);
     expect(mockCanvas.width).toBe(800);
@@ -48,20 +55,34 @@ describe('compressWithCanvas', () => {
     const mockBlob = new Blob(['mock-content'], { type: 'image/jpeg' });
     mockCanvas.toBlob = jest.fn((callback) => callback(mockBlob));
 
-    compressWithCanvas(mockImage, { name: 'test.jpg' }, 800, 600, (result) => {
-      expect(result).toBeInstanceOf(File);
-      expect((result as any).name).toBe('test.jpg');
-      expect((result as any).type).toBe('image/jpeg');
-      done();
-    });
+    compressWithCanvas(
+      mockImage,
+      { name: 'test.jpg' },
+      800,
+      600,
+      (result) => {
+        expect(result).toBeInstanceOf(File);
+        expect((result as any).name).toBe('test.jpg');
+        expect((result as any).type).toBe('image/jpeg');
+        done();
+      },
+      0.7
+    );
   });
 
   it('should resolve with an empty object when toBlob fails', (done) => {
     mockCanvas.toBlob = jest.fn((callback) => callback(null));
 
-    compressWithCanvas(mockImage, { name: 'test.jpg' }, 800, 600, (result) => {
-      expect(result).toEqual({});
-      done();
-    });
+    compressWithCanvas(
+      mockImage,
+      { name: 'test.jpg' },
+      800,
+      600,
+      (result) => {
+        expect(result).toEqual({});
+        done();
+      },
+      0.7
+    );
   });
 });

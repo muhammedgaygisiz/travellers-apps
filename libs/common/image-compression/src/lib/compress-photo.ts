@@ -43,26 +43,30 @@ export const compressPhoto = async (
     const img = new Image();
     img.src = blobUrl;
 
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve();
-      img.onerror = reject;
-    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+      });
 
-    file = await new Promise((resolve) => {
-      compressWithCanvas(img, file, width, height, resolve as any, quality);
-    });
+      file = await new Promise((resolve) => {
+        compressWithCanvas(img, file, width, height, resolve as any, quality);
+      });
 
-    if (
-      file.size <= MAX_SIZE_BYTES ||
-      (width < 512 && height < 512 && quality <= 0.5)
-    ) {
-      break;
+      if (
+        file.size <= MAX_SIZE_BYTES ||
+        (width < 512 && height < 512 && quality <= 0.5)
+      ) {
+        break;
+      }
+
+      // Reduce quality and dimensions for next iteration
+      quality -= 0.1;
+      width = Math.floor(width * 0.9);
+      height = Math.floor(height * 0.9);
+    } finally {
+      URL.revokeObjectURL(blobUrl);
     }
-
-    // Reduce quality and dimensions for next iteration
-    quality -= 0.1;
-    width = Math.floor(width * 0.9);
-    height = Math.floor(height * 0.9);
   }
 
   return file;

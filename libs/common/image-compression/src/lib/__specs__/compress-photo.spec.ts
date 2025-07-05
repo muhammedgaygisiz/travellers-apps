@@ -151,4 +151,52 @@ describe('compressPhoto', () => {
     };
     await expect(compressPhoto(invalidPhoto)).rejects.toThrow();
   });
+
+  it('should handle multiple compression iterations for large images', async () => {
+    // Track blob sizes to simulate gradual compression
+    const blobSizes = [1000 * 1024, 900 * 1024, 700 * 1024];
+    let blobCallCount = 0;
+
+    // Mock a large file that needs multiple compression iterations
+    const mockCanvas = {
+      getContext: jest.fn(() => ({
+        drawImage: jest.fn(),
+      })),
+      width: 100,
+      height: 100,
+      toBlob: jest.fn((callback) => {
+        const size = blobSizes[blobCallCount] || 400 * 1024; // Use 400KB for any additional calls
+        callback(new Blob(['x'.repeat(size)], { type: 'image/jpeg' }));
+        blobCallCount++;
+      }),
+    } as unknown as HTMLCanvasElement;
+
+    // Override createElement to use our custom canvas
+    jest
+      .spyOn(document, 'createElement')
+      .mockImplementation((tagName: string) => {
+        if (tagName === 'canvas') {
+          return mockCanvas;
+        }
+        return document.createElement(tagName);
+      });
+
+    const largePhoto: Photo = {
+      base64String:
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wIAAgMBApUAAAAASUVORK5CYII=',
+      format: 'jpeg',
+      path: 'test/path/large.jpg',
+      webPath: 'test/web/path/large.jpg',
+      exif: {},
+      saved: true,
+    } as Photo;
+
+    const compressedFile = await compressPhoto(largePhoto, 1024, 768);
+    expect(compressedFile).toBeInstanceOf(File);
+    expect(compressedFile.size).toBeLessThanOrEqual(800 * 1024);
+    expect(compressedFile.type).toBe('image/jpeg');
+    expect(blobCallCount).toBe(3); // Verify we went through exactly 3 compression iterations
+    // URL.revokeObjectURL is called twice per iteration: once for image load, once for canvas
+    expect(global.URL.revokeObjectURL).toHaveBeenCalledTimes(6);
+  });
 });

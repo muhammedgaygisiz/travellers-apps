@@ -6,10 +6,10 @@ export const compressWithCanvas = (
   maxWidth: number,
   maxHeight: number,
   // eslint-disable-next-line no-unused-vars
-  resolve: (value: File | PromiseLike<File>) => void
+  resolve: (value: File | PromiseLike<File>) => void,
+  quality: number
 ): void => {
   const MIME_TYPE = 'image/jpeg';
-  const QUALITY = 0.7;
 
   URL.revokeObjectURL(img.src);
   const [newWidth, newHeight] = resizeRetainingAspectRatio(
@@ -33,6 +33,6 @@ export const compressWithCanvas = (
       return resolve({} as any);
     },
     MIME_TYPE,
-    QUALITY
+    quality
   );
 };

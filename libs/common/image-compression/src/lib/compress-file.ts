@@ -11,7 +11,7 @@ export const compressFile = (
     img.src = blobURL;
 
     img.onload = () =>
-      compressWithCanvas(img, file, maxWidth, maxHeight, resolve as any);
+      compressWithCanvas(img, file, maxWidth, maxHeight, resolve as any, 0.7);
 
     img.onerror = () => {
       console.log('shit happens');

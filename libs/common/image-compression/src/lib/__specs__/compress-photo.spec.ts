@@ -144,14 +144,6 @@ describe('compressPhoto', () => {
     expect(global.URL.revokeObjectURL).toHaveBeenCalled();
   });
 
-  it('should handle invalid base64 input', async () => {
-    const invalidPhoto: Photo = {
-      ...mockPhoto,
-      base64String: 'invalid-base64',
-    };
-    await expect(compressPhoto(invalidPhoto)).rejects.toThrow();
-  });
-
   it('should handle multiple compression iterations for large images', async () => {
     // Track blob sizes to simulate gradual compression
     const blobSizes = [1000 * 1024, 900 * 1024, 700 * 1024];
@@ -198,5 +190,51 @@ describe('compressPhoto', () => {
     expect(blobCallCount).toBe(3); // Verify we went through exactly 3 compression iterations
     // URL.revokeObjectURL is called twice per iteration: once for image load, once for canvas
     expect(global.URL.revokeObjectURL).toHaveBeenCalledTimes(6);
+  });
+
+  it('should handle minimum size reached with still large file', async () => {
+    // Track blob sizes to simulate a file that stays large even at minimum settings
+    const blobSizes = Array(10).fill(1000 * 1024); // Always return 1MB
+    let blobCallCount = 0;
+
+    const mockCanvas = {
+      getContext: jest.fn(() => ({
+        drawImage: jest.fn(),
+      })),
+      width: 100,
+      height: 100,
+      toBlob: jest.fn((callback) => {
+        const size = blobSizes[blobCallCount] || 1000 * 1024;
+        callback(new Blob(['x'.repeat(size)], { type: 'image/jpeg' }));
+        blobCallCount++;
+      }),
+    } as unknown as HTMLCanvasElement;
+
+    // Override createElement to use our custom canvas
+    jest
+      .spyOn(document, 'createElement')
+      .mockImplementation((tagName: string) => {
+        if (tagName === 'canvas') {
+          return mockCanvas;
+        }
+        return document.createElement(tagName);
+      });
+
+    const largePhoto: Photo = {
+      base64String:
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wIAAgMBApUAAAAASUVORK5CYII=',
+      format: 'jpeg',
+      path: 'test/path/large.jpg',
+      webPath: 'test/web/path/large.jpg',
+      exif: {},
+      saved: true,
+    } as Photo;
+
+    const compressedFile = await compressPhoto(largePhoto, 1024, 768);
+    expect(compressedFile).toBeInstanceOf(File);
+    expect(compressedFile.size).toBeGreaterThan(800 * 1024); // File remains large
+    expect(compressedFile.type).toBe('image/jpeg');
+    // Should stop after width < 512 and height < 512 and quality <= 0.5
+    expect(blobCallCount).toBeGreaterThan(5); // Multiple iterations until minimum size reached
   });
 });

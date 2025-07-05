@@ -7,6 +7,8 @@ import { likes } from '../likes/selectors';
 import { gpsPosition, homeFilters, settings } from '../app/selectors';
 import { haversineDistance } from 'distance-pipe';
 import { EntityState } from '@ngrx/entity';
+import { handleNearbyFilter } from './utils/handle-nearby-filter';
+import { handleTagFilters } from './utils/handle-tag-filters';
 
 const slice = createFeatureSelector<
   EntityState<any> & {
@@ -60,37 +62,14 @@ export const bites = createSelector(
       return bites;
     }
 
-    let filteredBites = bites;
+    const filteredBitesByNearby = handleNearbyFilter(
+      filters,
+      gpsPosition,
+      appSettings,
+      bites
+    );
 
-    // Handle nearby filter
-    const hasNearbyFilter = filters.includes('nearby');
-    if (hasNearbyFilter && gpsPosition && appSettings?.nearby) {
-      const nearbyDistanceInKm = appSettings.nearby / 1000; // Convert meters to kilometers
-      filteredBites = filteredBites.filter((bite) => {
-        if (bite.distance) {
-          const distance = parseFloat(bite.distance);
-          return distance <= nearbyDistanceInKm;
-        }
-
-        return true;
-      });
-    }
-
-    // Handle tag filters
-    const tagFilters = filters.filter((filter) => filter !== 'nearby');
-    if (tagFilters.length > 0) {
-      filteredBites = filteredBites.filter((bite) => {
-        if (!bite.tags || !Array.isArray(bite.tags)) {
-          return false;
-        }
-
-        // Clean tags by removing # symbols for comparison
-        const cleanTags = bite.tags.map((tag: string) => tag.replace(/^#/, ''));
-        return tagFilters.some((filter) => cleanTags.includes(filter));
-      });
-    }
-
-    return filteredBites;
+    return handleTagFilters(filters, filteredBitesByNearby);
   }
 );
 
@@ -100,8 +79,8 @@ export const allTags = createSelector(bitesWithMetadata, (bites) => {
   bites.forEach((bite) => {
     if (bite.tags && Array.isArray(bite.tags)) {
       bite.tags.forEach((tag: string) => {
-        // Remove # symbol from tags
-        const cleanTag = tag.replace(/^#/, '');
+        // Remove all # symbols from tags
+        const cleanTag = tag.replace(/#/g, '');
         if (cleanTag) {
           tagsSet.add(cleanTag);
         }

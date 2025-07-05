@@ -25,7 +25,7 @@ export class ProfileService {
   }
 
   gotoMyBucketlists() {
-    this.navController.navigateForward(['my-bites']);
+    this.navController.navigateForward(['my-bucketlists']);
   }
 
   gotoMyBites() {

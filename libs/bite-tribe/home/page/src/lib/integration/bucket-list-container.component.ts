@@ -8,12 +8,13 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   template: `
     <bt-home
       class="ion-page"
+      [bites]="service.bitesBySelectedBucketlist()"
       [title]="service.selectedBucketlistTitle()"
       [showFooter]="false"
-      [showAddButton]="false"
       [enableBackButton]="true"
-      [bites]="service.bitesBySelectedBucketlist()"
       [userId]="service.userId()"
+      [isAuthenticated]="service.isAuthenticated()"
+      [showAddButton]="false"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"

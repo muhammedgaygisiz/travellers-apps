@@ -170,6 +170,7 @@ export class PageSettings {
       emailUpdates: !!newSettings.emailUpdates,
       theme: (newSettings.theme || this.systemTheme()) as 'light' | 'dark',
       currency: newSettings.currency || 'EUR',
+      nearby: newSettings.nearby || 50,
     });
   }
 

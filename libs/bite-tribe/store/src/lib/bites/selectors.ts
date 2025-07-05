@@ -68,7 +68,9 @@ export const bites = createSelector(
       const nearbyDistanceInKm = appSettings.nearby / 1000; // Convert meters to kilometers
       filteredBites = filteredBites.filter((bite) => {
         return (
-          bite.distance !== undefined && bite.distance <= nearbyDistanceInKm
+          bite.distance !== undefined &&
+          typeof bite.distance === 'number' &&
+          bite.distance <= nearbyDistanceInKm
         );
       });
     }

@@ -7,9 +7,11 @@ import {
   inject,
   input,
   output,
+  viewChild,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
+  IonButton,
   IonCard,
   IonCardContent,
   IonChip,
@@ -40,6 +42,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     IonSpinner,
     NgTemplateOutlet,
     IonIcon,
+    IonButton,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -73,11 +76,18 @@ export class BiteTribeHomeComponent {
   readonly filtersCleared = output<void>();
   readonly filterRemoved = output<string>();
 
+  private readonly ionContent = viewChild(IonContent);
+
   dialog = inject(Dialog);
   private readonly destroyRef = inject(DestroyRef);
 
   // Bites are already filtered by the store, just pass through
   filteredBites = computed(() => this.bites() || []);
+
+  moreThen5Bites = computed(() => {
+    const bites = this.bites();
+    return bites && bites?.length > 5;
+  });
 
   async openCustomFilterModal() {
     const dialogRef = this.dialog.open(CustomFilterModalComponent, {
@@ -102,5 +112,13 @@ export class BiteTribeHomeComponent {
 
   removeFilter(filter: string) {
     this.filterRemoved.emit(filter);
+  }
+
+  scrollToTop() {
+    const ionContent = this.ionContent();
+
+    if (ionContent) {
+      ionContent.scrollToTop(300);
+    }
   }
 }

@@ -36,14 +36,7 @@ describe('compressWithCanvas', () => {
       resizeRetainingAspectRatio: mockResize,
     }));
 
-    compressWithCanvas(
-      mockImage,
-      { name: 'test.jpg' },
-      800,
-      600,
-      jest.fn(),
-      0.7
-    );
+    compressWithCanvas(mockImage, 'test.jpg', 800, 600, jest.fn(), 0.7);
 
     expect(global.URL.revokeObjectURL).toHaveBeenCalledWith(mockImage.src);
     expect(mockCanvas.width).toBe(800);
@@ -57,7 +50,7 @@ describe('compressWithCanvas', () => {
 
     compressWithCanvas(
       mockImage,
-      { name: 'test.jpg' },
+      'test.jpg',
       800,
       600,
       (result) => {
@@ -75,7 +68,7 @@ describe('compressWithCanvas', () => {
 
     compressWithCanvas(
       mockImage,
-      { name: 'test.jpg' },
+      'test.jpg',
       800,
       600,
       (result) => {

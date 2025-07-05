@@ -1,21 +1,31 @@
-.outer-content-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
+:host {
+  ion-back-button {
+    --icon-margin-start: 1rem;
+  }
 
-  .inner-content-container {
-    &.mobile-style {
-      max-width: 720px;
-      width: 100%;
-    }
+  .outer-content-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
 
-    &.full-width {
-      width: 100%;
-
-      @media (width <= 768px) {
+    .inner-content-container {
+      &.mobile-style {
         max-width: 720px;
+        width: 100%;
+      }
+
+      &.full-width {
+        width: 100%;
+
+        @media (width <= 768px) {
+          max-width: 720px;
+        }
       }
     }
+  }
+
+  ion-fab {
+    margin-bottom: var(--ion-safe-area-bottom, 0);
   }
 }

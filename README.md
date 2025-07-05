@@ -55,7 +55,6 @@ const NODE_MODULES_TO_IGNORE = [
   '.*.mjs$',
   'ionicons',
   '@ionic',
-  '@ionic',
   '@stencil',
   '@capacitor',
 ].join('|');

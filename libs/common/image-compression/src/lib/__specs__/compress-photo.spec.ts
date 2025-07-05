@@ -237,4 +237,61 @@ describe('compressPhoto', () => {
     // Should stop after width < 512 and height < 512 and quality <= 0.5
     expect(blobCallCount).toBeGreaterThan(5); // Multiple iterations until minimum size reached
   });
+
+  it('should respect maximum iteration limit of 10', async () => {
+    // Track blob sizes to simulate a file that never gets small enough
+    const blobSizes = Array(15).fill(1000 * 1024); // Always return 1MB, array bigger than max iterations
+    let blobCallCount = 0;
+
+    const mockCanvas = {
+      getContext: jest.fn(() => ({
+        drawImage: jest.fn(),
+      })),
+      width: 100,
+      height: 100,
+      toBlob: jest.fn((callback) => {
+        const size = blobSizes[blobCallCount] || 1000 * 1024;
+        callback(new Blob(['x'.repeat(size)], { type: 'image/jpeg' }));
+        blobCallCount++;
+      }),
+    } as unknown as HTMLCanvasElement;
+
+    // Override createElement to use our custom canvas
+    jest
+      .spyOn(document, 'createElement')
+      .mockImplementation((tagName: string) => {
+        if (tagName === 'canvas') {
+          return mockCanvas;
+        }
+        return document.createElement(tagName);
+      });
+
+    const largePhoto: Photo = {
+      ...mockPhoto,
+      format: 'jpeg',
+      path: 'test/path/large.jpg',
+      webPath: 'test/web/path/large.jpg',
+    };
+
+    const compressedFile = await compressPhoto(largePhoto, 2048, 2048);
+    expect(compressedFile).toBeInstanceOf(File);
+    expect(compressedFile.size).toBeGreaterThan(800 * 1024); // File remains large
+    expect(compressedFile.type).toBe('image/jpeg');
+    expect(blobCallCount).toBe(10); // Should stop after exactly 10 iterations
+    expect(global.URL.revokeObjectURL).toHaveBeenCalledTimes(20); // 2 calls per iteration (load + compress)
+
+    // Verify final dimensions and quality
+    const finalWidth = Math.floor(2048 * Math.pow(0.9, 10)); // Initial width after 10 iterations
+    const finalHeight = Math.floor(2048 * Math.pow(0.9, 10)); // Initial height after 10 iterations
+    const finalQuality = Math.max(0.1, 0.7 - 0.1 * 10); // Initial quality (0.7) minus 0.1 per iteration, but not below 0.1
+
+    // The dimensions should be reduced but still positive
+    expect(finalWidth).toBeGreaterThan(0);
+    expect(finalHeight).toBeGreaterThan(0);
+    expect(finalWidth).toBeLessThan(2048);
+    expect(finalHeight).toBeLessThan(2048);
+
+    // Quality should never go below 0.1
+    expect(finalQuality).toBe(0.1);
+  });
 });

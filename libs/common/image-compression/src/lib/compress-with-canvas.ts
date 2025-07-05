@@ -2,7 +2,7 @@ import { resizeRetainingAspectRatio } from './resize-retaining-aspect-ratio';
 
 export const compressWithCanvas = (
   img: HTMLImageElement,
-  file: any,
+  fileName: string,
   maxWidth: number,
   maxHeight: number,
   // eslint-disable-next-line no-unused-vars
@@ -27,7 +27,7 @@ export const compressWithCanvas = (
   canvas.toBlob(
     (blob) => {
       if (blob) {
-        newFile = new File([blob], file.name, { type: MIME_TYPE });
+        newFile = new File([blob], fileName, { type: MIME_TYPE });
         return resolve(newFile);
       }
       return resolve({} as any);

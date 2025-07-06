@@ -10,12 +10,17 @@
       [allowMoveImage]="true"
       [hideResizeSquares]="false"
       [aspectRatio]="3 / 4"
-      [autoCrop]="false"
       backgroundColor="black"
       output="blob"
       format="png"
       (imageCropped)="onImageCropped($event)"
       (loadImageFailed)="onLoadImageFailed()"
     />
+    <ion-button
+      class="ion-margin-top"
+      expand="block"
+      (click)="emitCroppedImage()"
+      >{{ crop() }}</ion-button
+    >
   </ion-content>
 </ta-page>

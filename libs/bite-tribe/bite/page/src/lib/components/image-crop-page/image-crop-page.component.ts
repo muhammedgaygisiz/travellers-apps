@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { PageComponent } from 'common/ui/page';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonButton, IonContent } from '@ionic/angular/standalone';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,7 +15,7 @@ import { IonContent } from '@ionic/angular/standalone';
   selector: 'image-crop-page',
   templateUrl: './image-crop-page.component.html',
   styleUrl: './image-crop-page.component.scss',
-  imports: [ImageCropperComponent, PageComponent, IonContent],
+  imports: [ImageCropperComponent, PageComponent, IonContent, IonButton],
   styles: `
     :host {
       height: 100%;
@@ -31,32 +31,38 @@ export class ImageCropPageComponent {
 
   title = input<string>('Crop image');
 
+  crop = input<string>('Crop');
+
   croppedImage = output<string>();
+
+  currentCropBlob: Blob | null | undefined;
 
   imageFile = computed((): File => {
     const image = this.image() || '';
     return this.dataURLtoFile(image) as File;
   });
 
-  async onImageCropped(event: ImageCroppedEvent) {
-    if (!event.blob) {
+  onLoadImageFailed() {
+    console.error('Image load failed.');
+  }
+
+  onImageCropped(imageCroppedEvent: ImageCroppedEvent) {
+    this.currentCropBlob = imageCroppedEvent.blob;
+  }
+
+  async emitCroppedImage() {
+    if (!this.currentCropBlob) {
       this.onLoadImageFailed();
       return;
     }
 
-    const croppedFile = new File([event.blob], 'image.png', {
-      type: event.blob.type,
+    const croppedFile = new File([this.currentCropBlob], 'image.png', {
+      type: this.currentCropBlob.type,
     });
 
     const reader = new FileReader();
-    reader.onload = () => {
-      this.croppedImage.emit(reader.result as string);
-    };
+    reader.onload = () => this.croppedImage.emit(reader.result as string);
     reader.readAsDataURL(croppedFile);
-  }
-
-  onLoadImageFailed() {
-    console.error('Image load failed.');
   }
 
   dataURLtoFile(dataurl: string) {

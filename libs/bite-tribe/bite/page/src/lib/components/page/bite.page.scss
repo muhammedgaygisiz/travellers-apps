@@ -1,2 +1,27 @@
 :host {
+  hr {
+    background-color: var(--color);
+
+    &.sams-favorite-hr {
+      margin-bottom: 0;
+    }
+  }
+
+  .price {
+    display: flex;
+    flex-direction: row;
+
+    ion-input {
+      flex: 1;
+    }
+
+    ion-select {
+      justify-content: flex-end;
+      width: fit-content;
+    }
+  }
+
+  ion-note {
+    font-size: 0.8rem;
+  }
 }

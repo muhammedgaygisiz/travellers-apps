@@ -10,8 +10,8 @@ import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'image-crop',
-  templateUrl: './image-crop.component.html',
+  selector: 'image-crop-page',
+  templateUrl: './image-crop-page.component.html',
   imports: [ImageCropperComponent],
   styles: `
     :host {
@@ -23,7 +23,7 @@ import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
     }
   `,
 })
-export class ImageCropComponent {
+export class ImageCropPageComponent {
   image = input<string>();
 
   croppedImage = output<string>();

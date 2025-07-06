@@ -1,16 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { BiteService } from './bite.service';
-import { ImageCropComponent } from '../components/image-crop/image-crop.component';
+import { ImageCropPageComponent } from '../components/image-crop-page/image-crop-page.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <image-crop
+    <image-crop-page
       [image]="service.editingBite()?.image"
       (croppedImage)="service.setEditedImage($event)"
     />
   `,
-  imports: [ImageCropComponent],
+  imports: [ImageCropPageComponent],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export class ImageCropContainer {

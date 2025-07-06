@@ -11,7 +11,6 @@ export class BiteDataAccessService {
   currency = toSignal(this.storeService.currencyFromSettings$);
   position = toSignal(this.storeService.position$);
   cachedBite = toSignal(this.storeService.cachedBite$);
-  editingBite = toSignal(this.storeService.editingBite$);
 
   async submitNewBite(newBite: any) {
     const enrichedBite = {
@@ -29,13 +28,5 @@ export class BiteDataAccessService {
     };
 
     this.storeService.save(enrichedBite, 'bite');
-  }
-
-  setEditedImage(image: string) {
-    const enrichedBite = {
-      ...this.editingBite(),
-      image,
-    };
-    this.storeService.saveEditingBite(enrichedBite);
   }
 }

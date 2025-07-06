@@ -22,8 +22,6 @@ const { selectAll } = adapter.getSelectors();
 
 export const cachedBite = createSelector(slice, (state) => state?.cachedBite);
 
-export const editingBite = createSelector(slice, (state) => state?.editingBite);
-
 export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
 
 const allBites = createSelector(slice, selectAll);

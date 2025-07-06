@@ -4,7 +4,6 @@ import {
   loadedBiteCreator,
   loadedBitesFromApi,
   noPublicCreatorForBite,
-  saveEditingBite,
   saveExistingBite,
   saveNewBite,
   saveTags,
@@ -21,10 +20,6 @@ describe('Bites - Actions', () => {
 
   it('should have saveExistingBite action', () => {
     expect(saveExistingBite).toBeDefined();
-  });
-
-  it('should have saveEditingBite action', () => {
-    expect(saveEditingBite).toBeDefined();
   });
 
   it('should have saveTags action', () => {

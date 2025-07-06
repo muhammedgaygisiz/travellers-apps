@@ -49,12 +49,10 @@ export class BiteService {
 
   setEditedImage(image: string) {
     this.originalImage.set(image);
-    this.dataAccess.setEditedImage(image);
   }
 
   setCroppedImage(image: string) {
     this.croppedImage.set(image);
-    this.dataAccess.setEditedImage(image);
     this.navController.back();
   }
 }

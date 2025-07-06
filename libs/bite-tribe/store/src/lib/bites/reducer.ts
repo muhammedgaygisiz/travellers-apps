@@ -5,7 +5,6 @@ import {
   loadedBiteCreator,
   loadedBitesFromApi,
   noPublicCreatorForBite,
-  saveEditingBite,
   saveNewBite,
 } from './actions';
 import { fromAuth } from 'ta-firestore';
@@ -26,12 +25,6 @@ export const reducer = createReducer(
     return {
       ...state,
       cachedBite: undefined,
-    };
-  }),
-  on(saveEditingBite, (state, { bite }) => {
-    return {
-      ...state,
-      editingBite: bite,
     };
   }),
   on(loadedBiteCreator, (state, { biteCreator }) => {

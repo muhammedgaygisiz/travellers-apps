@@ -4,19 +4,18 @@ import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
 import {
   cacheBite,
+  deleteBite,
   saveExistingBite,
   saveNewBite,
   saveTags,
-  deleteBite,
 } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import {
+  allTags,
   bite,
+  biteCreator,
   bites,
   cachedBite,
-  biteCreator,
-  editingBite,
-  allTags,
 } from './bites/selectors';
 import {
   restaurant,
@@ -26,12 +25,12 @@ import {
 import { menu } from './menus/selectors';
 import { saveMenu } from './menus/actions';
 import {
+  clearHomeFilters,
   goPrivate,
   goPublic,
   savePublicProfile,
   saveSettings,
   setHomeFilters,
-  clearHomeFilters,
 } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -49,11 +48,11 @@ import {
 import {
   currency,
   gpsPosition,
+  homeFilters,
   isBitesLoading,
   isPublicProfile,
-  settings,
   publicUser,
-  homeFilters,
+  settings,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -64,13 +63,11 @@ import {
 import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
 import {
   createAndSaveBiteIdToBucketList,
-  saveBiteIdToBucketList,
-  removeBiteFromBucketlist,
   createBucketList,
+  removeBiteFromBucketlist,
+  saveBiteIdToBucketList,
 } from './bucketlists/actions';
 import { bucketlists, selectedBucketlist } from './bucketlists/selectors';
-import { fromBites } from './bites';
-import { tap } from 'rxjs';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -126,9 +123,6 @@ export class BiteTribeStoreService implements StoreService {
   publicUser$ = this.store.select(publicUser);
   position$ = this.store.select(gpsPosition);
   cachedBite$ = this.store.select(cachedBite);
-  editingBite$ = this.store
-    .select(editingBite)
-    .pipe(tap((a) => console.log('editingBite', a)));
   selectedBucketlist$ = this.store.select(selectedBucketlist);
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
   biteCreator$ = this.store.select(biteCreator);
@@ -161,10 +155,6 @@ export class BiteTribeStoreService implements StoreService {
 
   save(entity: any, docType: string): void {
     this.store?.dispatch(getActionByDocType(docType, entity));
-  }
-
-  saveEditingBite(bite: Partial<Bite>): void {
-    this.store?.dispatch(fromBites.saveEditingBite({ bite }));
   }
 
   saveTags(newTagsArray: string[], id: string) {

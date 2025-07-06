@@ -10,7 +10,14 @@ import {
   deleteBite,
 } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
-import { bite, bites, cachedBite, biteCreator, allTags } from './bites/selectors';
+import {
+  bite,
+  bites,
+  cachedBite,
+  biteCreator,
+  editingBite,
+  allTags,
+} from './bites/selectors';
 import {
   restaurant,
   restaurants,
@@ -62,6 +69,7 @@ import {
   createBucketList,
 } from './bucketlists/actions';
 import { bucketlists, selectedBucketlist } from './bucketlists/selectors';
+import { fromBites } from './bites';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -117,6 +125,7 @@ export class BiteTribeStoreService implements StoreService {
   publicUser$ = this.store.select(publicUser);
   position$ = this.store.select(gpsPosition);
   cachedBite$ = this.store.select(cachedBite);
+  editingBite$ = this.store.select(editingBite);
   selectedBucketlist$ = this.store.select(selectedBucketlist);
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
   biteCreator$ = this.store.select(biteCreator);
@@ -149,6 +158,10 @@ export class BiteTribeStoreService implements StoreService {
 
   save(entity: any, docType: string): void {
     this.store?.dispatch(getActionByDocType(docType, entity));
+  }
+
+  saveEditingBite(bite: Partial<Bite>): void {
+    this.store?.dispatch(fromBites.saveEditingBite({ bite }));
   }
 
   saveTags(newTagsArray: string[], id: string) {

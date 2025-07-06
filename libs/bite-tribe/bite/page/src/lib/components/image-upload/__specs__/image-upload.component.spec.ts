@@ -4,10 +4,11 @@ import { compressFile, compressPhoto } from 'image-compression';
 import { getExifDataFromFile } from '../../page/utils/get-exif-data-from-file';
 import { getExifDataFromPhoto } from '../../page/utils/get-exif-data-from-photo';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Platform } from '@ionic/angular';
+import { NavController, Platform } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { imageOutline } from 'ionicons/icons';
 import { signal } from '@angular/core';
+import SpyInstance = jest.SpyInstance;
 
 jest.mock('@capacitor/camera', () => ({
   Camera: {
@@ -32,18 +33,22 @@ type MockFileReader = {
   result: string;
   EMPTY: 0;
   LOADING: 1;
-  DONE: 2
+  DONE: 2;
 };
 
 describe('ImageUploadComponent', () => {
   let component: ImageUploadComponent;
   let fixture: ComponentFixture<ImageUploadComponent>;
   let platformMock: Partial<Platform>;
+  let navControllerMock: Partial<NavController>;
   let mockEmit: jest.Mock;
 
   beforeEach(async () => {
     platformMock = {
       is: jest.fn((key: string) => key === 'web'),
+    };
+    navControllerMock = {
+      navigateForward: jest.fn(),
     };
 
     addIcons({ imageOutline });
@@ -51,8 +56,9 @@ describe('ImageUploadComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ImageUploadComponent],
       providers: [
-        { provide: Platform, useValue: platformMock }
-      ]
+        { provide: Platform, useValue: platformMock },
+        { provide: NavController, useValue: navControllerMock },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ImageUploadComponent);
@@ -60,13 +66,15 @@ describe('ImageUploadComponent', () => {
     mockEmit = jest.fn();
 
     // Mock the output event emitter
-    jest.spyOn(component.positionFromImage, 'emit').mockImplementation(mockEmit);
+    jest
+      .spyOn(component.positionFromImage, 'emit')
+      .mockImplementation(mockEmit);
 
     // Mock the viewChild fileUpload
     Object.defineProperty(component, 'fileUpload', {
       value: () => ({
-        nativeElement: { click: jest.fn(), value: '' }
-      })
+        nativeElement: { click: jest.fn(), value: '' },
+      }),
     });
 
     component.value.set(null);
@@ -75,7 +83,10 @@ describe('ImageUploadComponent', () => {
   });
 
   it('should call clickOnFileUploader on web', () => {
-    const spy = jest.spyOn(component as unknown as { clickOnFileUploader: () => void }, 'clickOnFileUploader');
+    const spy = jest.spyOn(
+      component as unknown as { clickOnFileUploader: () => void },
+      'clickOnFileUploader'
+    );
     component.onImageUploadClick();
     expect(spy).toHaveBeenCalled();
   });
@@ -95,11 +106,13 @@ describe('ImageUploadComponent', () => {
     );
 
     // Setup other required mocks
-    jest.spyOn(component.positionFromImage, 'emit').mockImplementation(mockEmit);
+    jest
+      .spyOn(component.positionFromImage, 'emit')
+      .mockImplementation(mockEmit);
     Object.defineProperty(component, 'fileUpload', {
       value: () => ({
-        nativeElement: { click: jest.fn(), value: '' }
-      })
+        nativeElement: { click: jest.fn(), value: '' },
+      }),
     });
 
     fixture.detectChanges();
@@ -113,7 +126,10 @@ describe('ImageUploadComponent', () => {
 
   it('should emit position from file on file select', async () => {
     const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-    (getExifDataFromFile as jest.Mock).mockResolvedValue({ latitude: 1, longitude: 2 });
+    (getExifDataFromFile as jest.Mock).mockResolvedValue({
+      latitude: 1,
+      longitude: 2,
+    });
     (compressFile as jest.Mock).mockResolvedValue(file);
 
     const event = {
@@ -128,7 +144,7 @@ describe('ImageUploadComponent', () => {
       result: 'data:image/jpeg;base64,abc',
       EMPTY: 0,
       LOADING: 1,
-      DONE: 2
+      DONE: 2,
     };
 
     // @ts-expect-error - Mocking FileReader
@@ -144,8 +160,13 @@ describe('ImageUploadComponent', () => {
 
     (Camera.requestPermissions as jest.Mock).mockResolvedValue(undefined);
     (Camera.getPhoto as jest.Mock).mockResolvedValue(photo);
-    (getExifDataFromPhoto as jest.Mock).mockReturnValue({ latitude: 3, longitude: 4 });
-    (compressPhoto as jest.Mock).mockResolvedValue(new File(['dummy'], 'test.jpg', { type: 'image/jpeg' }));
+    (getExifDataFromPhoto as jest.Mock).mockReturnValue({
+      latitude: 3,
+      longitude: 4,
+    });
+    (compressPhoto as jest.Mock).mockResolvedValue(
+      new File(['dummy'], 'test.jpg', { type: 'image/jpeg' })
+    );
 
     // Mock FileReader
     const mockFileReader: MockFileReader = {
@@ -154,13 +175,15 @@ describe('ImageUploadComponent', () => {
       result: 'data:image/jpeg;base64,abc',
       EMPTY: 0,
       LOADING: 1,
-      DONE: 2
+      DONE: 2,
     };
 
     // @ts-expect-error - Mocking FileReader
     global.FileReader = jest.fn(() => mockFileReader);
 
-    const privateComponent = component as unknown as { getImageFromNative: () => Promise<void> };
+    const privateComponent = component as unknown as {
+      getImageFromNative: () => Promise<void>;
+    };
     await privateComponent.getImageFromNative();
 
     expect(Camera.requestPermissions).toHaveBeenCalled();
@@ -183,14 +206,14 @@ describe('ImageUploadComponent', () => {
       result: 'data:image/jpeg;base64,abc',
       EMPTY: 0,
       LOADING: 1,
-      DONE: 2
+      DONE: 2,
     };
 
     // @ts-expect-error - Mocking FileReader
     global.FileReader = jest.fn(() => mockFileReader);
 
     // eslint-disable-next-line no-unused-vars
-    const privateComponent = component as unknown as { setValueAndTriggerChange(_: File): void };
+    const privateComponent = component as any;
     privateComponent.setValueAndTriggerChange(testFile);
 
     // Simulate FileReader onload
@@ -214,9 +237,24 @@ describe('ImageUploadComponent', () => {
   it('should clear file input value on clearImage', () => {
     const fileUpload = { nativeElement: { value: 'something' } };
     Object.defineProperty(component, 'fileUpload', {
-      value: () => fileUpload
+      value: () => fileUpload,
     });
     component.clearImage();
     expect(fileUpload.nativeElement.value).toBe('');
+  });
+
+  describe('cropImage', () => {
+    let navigateForwardSpy: SpyInstance;
+
+    beforeEach(() => {
+      navigateForwardSpy = jest
+        .spyOn(navControllerMock, 'navigateForward')
+        .mockImplementation();
+    });
+
+    it('should navigate forward to image-crop', () => {
+      component.cropImage();
+      expect(navigateForwardSpy).toHaveBeenCalledWith(['image-crop']);
+    });
   });
 });

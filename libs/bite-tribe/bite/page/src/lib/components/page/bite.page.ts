@@ -23,7 +23,7 @@ import {
 import { Platform } from '@ionic/angular';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { filter, distinctUntilChanged, map } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
 import { Bite } from 'model';
@@ -69,6 +69,8 @@ export class BitePage {
   });
 
   submitBite = output<typeof this.biteFormGroup.value>();
+
+  setUploadedImage = output<string>();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -133,6 +135,14 @@ export class BitePage {
     { initialValue: !this.biteFormGroup.valid }
   );
 
+  watchUploadedImageChange = toSignal(
+    this.biteFormGroup.valueChanges.pipe(
+      distinctUntilChanged(),
+      filter((bite) => !!bite.image && bite.image !== ''),
+      map(() => this.emitUploadedImage())
+    )
+  );
+
   imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);
 
   noGpsPosition = computed(() => {
@@ -162,6 +172,11 @@ export class BitePage {
 
     return '';
   });
+
+  emitUploadedImage() {
+    const croppedImage = this.biteFormGroup.value.image;
+    this.setUploadedImage.emit(croppedImage || '');
+  }
 
   saveBite() {
     if (this.biteFormGroup.valid) {

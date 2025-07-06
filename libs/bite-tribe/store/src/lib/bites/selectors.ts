@@ -13,6 +13,7 @@ import { handleTagFilters } from './utils/handle-tag-filters';
 const slice = createFeatureSelector<
   EntityState<any> & {
     cachedBite?: Bite;
+    editingBite?: Bite;
     biteCreator?: PublicUser;
   }
 >(key);
@@ -20,6 +21,8 @@ const slice = createFeatureSelector<
 const { selectAll } = adapter.getSelectors();
 
 export const cachedBite = createSelector(slice, (state) => state?.cachedBite);
+
+export const editingBite = createSelector(slice, (state) => state?.editingBite);
 
 export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
 

@@ -1,10 +1,11 @@
+{{ emitUploadedImage() }}
 <ta-page
   [showHeaderMenu]="false"
   [showFooter]="false"
   [enableBackButton]="true"
 >
   <ion-content class="ion-padding">
-    <h1>{{title()}}</h1>
+    <h1>{{ title() }}</h1>
 
     <form [formGroup]="biteFormGroup">
       <image-upload

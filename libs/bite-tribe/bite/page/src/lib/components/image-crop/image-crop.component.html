@@ -1,0 +1,10 @@
+<image-cropper
+  class="h-100"
+  [imageFile]="imageFile()"
+  [allowMoveImage]="true"
+  [hideResizeSquares]="false"
+  output="blob"
+  format="png"
+  (imageCropped)="onImageCropped($event)"
+  (loadImageFailed)="onLoadImageFailed()"
+/>

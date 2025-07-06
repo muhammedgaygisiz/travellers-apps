@@ -11,6 +11,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     [currency]="service.currency()"
     [position]="service.position()"
     (submitBite)="service.submitNewBite($event)"
+    (setUploadedImage)="service.setEditedImage($event)"
   />`,
   imports: [BitePage],
 })

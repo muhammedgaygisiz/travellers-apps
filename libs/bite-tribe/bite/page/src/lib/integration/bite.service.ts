@@ -11,6 +11,7 @@ export class BiteService {
   currency = this.dataAccess.currency;
   position = this.dataAccess.position;
   cachedBite = this.dataAccess.cachedBite;
+  editingBite = this.dataAccess.editingBite;
 
   submitNewBite(newBite: any) {
     // eslint-disable-next-line no-unused-vars
@@ -25,5 +26,9 @@ export class BiteService {
     this.dataAccess.submitEditedBite(editedBite);
 
     this.navController.navigateBack(['my-bites']);
+  }
+
+  setEditedImage(image: string) {
+    this.dataAccess.setEditedImage(image);
   }
 }

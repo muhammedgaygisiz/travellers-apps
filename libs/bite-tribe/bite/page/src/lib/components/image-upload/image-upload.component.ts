@@ -22,7 +22,7 @@ import {
   CameraSource,
   Photo,
 } from '@capacitor/camera';
-import { Platform } from '@ionic/angular';
+import { NavController, Platform } from '@ionic/angular';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { compressFile, compressPhoto } from 'image-compression';
 import { getExifDataFromFile } from '../page/utils/get-exif-data-from-file';
@@ -53,6 +53,7 @@ const photoOptions = {
 })
 export class ImageUploadComponent implements ControlValueAccessor {
   private readonly platform = inject(Platform);
+  private readonly navController = inject(NavController);
 
   position = input<Geopoint>();
 
@@ -68,6 +69,8 @@ export class ImageUploadComponent implements ControlValueAccessor {
   disabled = signal<boolean | null>(null);
 
   showImage = computed(() => !!this.value());
+
+  imageFile?: File;
 
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-empty-function
   _onChange: (value: string | null) => void = () => {};
@@ -103,6 +106,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
       const compressedFile = await compressFile(file);
 
       this.setValueAndTriggerChange(compressedFile);
+      this.imageFile = compressedFile;
     }
   }
 
@@ -166,6 +170,10 @@ export class ImageUploadComponent implements ControlValueAccessor {
       this._onTouch();
     };
     reader.readAsDataURL(compressedPhoto);
+  }
+
+  cropImage() {
+    this.navController.navigateForward(['image-crop']);
   }
 
   clearImage() {

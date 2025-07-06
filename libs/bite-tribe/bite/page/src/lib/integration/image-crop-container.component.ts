@@ -7,6 +7,7 @@ import { ImageCropPageComponent } from '../components/image-crop-page/image-crop
   template: `
     <image-crop-page
       [image]="service.editingBite()?.image"
+      title="Crop image"
       (croppedImage)="service.setEditedImage($event)"
     />
   `,

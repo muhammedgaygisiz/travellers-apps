@@ -6,13 +6,16 @@ import {
   output,
 } from '@angular/core';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
+import { PageComponent } from 'common/ui/page';
+import { IonContent } from '@ionic/angular/standalone';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'image-crop-page',
   templateUrl: './image-crop-page.component.html',
-  imports: [ImageCropperComponent],
+  styleUrl: './image-crop-page.component.scss',
+  imports: [ImageCropperComponent, PageComponent, IonContent],
   styles: `
     :host {
       height: 100%;
@@ -25,6 +28,8 @@ import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 })
 export class ImageCropPageComponent {
   image = input<string>();
+
+  title = input<string>('Crop image');
 
   croppedImage = output<string>();
 

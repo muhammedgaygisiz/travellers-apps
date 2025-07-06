@@ -70,6 +70,7 @@ import {
 } from './bucketlists/actions';
 import { bucketlists, selectedBucketlist } from './bucketlists/selectors';
 import { fromBites } from './bites';
+import { tap } from 'rxjs';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -125,7 +126,9 @@ export class BiteTribeStoreService implements StoreService {
   publicUser$ = this.store.select(publicUser);
   position$ = this.store.select(gpsPosition);
   cachedBite$ = this.store.select(cachedBite);
-  editingBite$ = this.store.select(editingBite);
+  editingBite$ = this.store
+    .select(editingBite)
+    .pipe(tap((a) => console.log('editingBite', a)));
   selectedBucketlist$ = this.store.select(selectedBucketlist);
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
   biteCreator$ = this.store.select(biteCreator);

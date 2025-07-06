@@ -23,7 +23,7 @@ import {
 import { Platform } from '@ionic/angular';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, distinctUntilChanged, map } from 'rxjs';
+import { map } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
 import { Bite } from 'model';
@@ -60,6 +60,8 @@ export class BitePage {
 
   bite = input<Bite>();
 
+  image = input<string>('');
+
   currency = input<string>();
 
   position = input<{ latitude: number; longitude: number }>();
@@ -71,6 +73,8 @@ export class BitePage {
   submitBite = output<typeof this.biteFormGroup.value>();
 
   setUploadedImage = output<string>();
+
+  startCropImage = output<string | null>();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -88,11 +92,12 @@ export class BitePage {
 
   biteInitFromInputEffect = effect(() => {
     const bite = this.bite();
+    const image = this.image();
 
     if (bite) {
       this.biteFormGroup.patchValue({
         id: bite.id,
-        image: bite.image,
+        image: image || bite.image,
         name: bite.name,
         place: bite.place,
         price: bite.price,
@@ -100,6 +105,12 @@ export class BitePage {
         tags: toTagsString(bite.tags),
         position: bite.position,
         restaurantId: bite.restaurantId,
+      });
+    }
+
+    if (image) {
+      this.biteFormGroup.patchValue({
+        image: image,
       });
     }
 
@@ -135,14 +146,6 @@ export class BitePage {
     { initialValue: !this.biteFormGroup.valid }
   );
 
-  watchUploadedImageChange = toSignal(
-    this.biteFormGroup.valueChanges.pipe(
-      distinctUntilChanged(),
-      filter((bite) => !!bite.image && bite.image !== ''),
-      map(() => this.emitUploadedImage())
-    )
-  );
-
   imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);
 
   noGpsPosition = computed(() => {
@@ -174,8 +177,10 @@ export class BitePage {
   });
 
   emitUploadedImage() {
-    const croppedImage = this.biteFormGroup.value.image;
-    this.setUploadedImage.emit(croppedImage || '');
+    const uploadedImage = this.biteFormGroup.value.image;
+    if (uploadedImage) {
+      this.setUploadedImage.emit(uploadedImage || '');
+    }
   }
 
   saveBite() {
@@ -189,5 +194,9 @@ export class BitePage {
     if (position) {
       this.biteFormGroup.controls['position'].patchValue(position);
     }
+  }
+
+  emitStartCropImage(a: any) {
+    this.startCropImage.emit(a);
   }
 }

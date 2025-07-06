@@ -70,6 +70,8 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   showImage = computed(() => !!this.value());
 
+  startCropImage = output<string | null>();
+
   imageFile?: File;
 
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-empty-function
@@ -163,6 +165,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   private setValueAndTriggerChange(compressedPhoto: File) {
+    console.log('Setting value and trigger change', compressedPhoto);
     const reader = new FileReader();
     reader.onload = () => {
       this.value.set(reader.result as string);
@@ -173,7 +176,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   cropImage() {
-    this.navController.navigateForward(['image-crop']);
+    this.startCropImage.emit(this.value());
   }
 
   clearImage() {

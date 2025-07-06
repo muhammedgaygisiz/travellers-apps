@@ -6,10 +6,10 @@ import { ImageCropPageComponent } from '../components/image-crop-page/image-crop
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <image-crop-page
-      [image]="service.editingBite()?.image"
+      [image]="service.originalImage()"
       title="Crop image"
       crop="Crop"
-      (croppedImage)="service.setEditedImage($event)"
+      (croppedImage)="service.setCroppedImage($event)"
     />
   `,
   imports: [ImageCropPageComponent],

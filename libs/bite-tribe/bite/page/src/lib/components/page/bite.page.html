@@ -1,4 +1,3 @@
-{{ emitUploadedImage() }}
 <ta-page
   [showHeaderMenu]="false"
   [showFooter]="false"
@@ -12,6 +11,7 @@
         formControlName="image"
         [position]="this.fallbackPosition()"
         (positionFromImage)="onPositionFromImage($event)"
+        (startCropImage)="emitStartCropImage($event)"
       />
 
       <ion-list lines="full" class="ion-padding-top">

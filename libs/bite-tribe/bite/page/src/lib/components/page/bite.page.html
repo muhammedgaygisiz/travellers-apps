@@ -4,7 +4,7 @@
   [enableBackButton]="true"
 >
   <ion-content class="ion-padding">
-    <h1>{{title()}}</h1>
+    <h1>{{ title() }}</h1>
 
     <form [formGroup]="biteFormGroup">
       <image-upload
@@ -13,15 +13,25 @@
         (positionFromImage)="onPositionFromImage($event)"
       />
 
-      <ion-list lines="full" class="ion-padding-top">
-        <ion-item>
-          <ion-input label="Dish Name" formControlName="name" />
-        </ion-item>
-        <ion-item>
-          <ion-input label="Place Name" formControlName="place" />
-        </ion-item>
-        <ion-item>
-          <ion-input label="Price" formControlName="price" />
+      <ion-input
+        label="Dish Name"
+        formControlName="name"
+        fill="solid"
+        class="ion-margin-top"
+      />
+      <hr />
+
+      <ion-input label="Place Name" formControlName="place" />
+      <hr />
+
+      <div>
+        <div class="price">
+          <ion-input
+            label="Price"
+            formControlName="price"
+            inputmode="numeric"
+          />
+
           <ion-select formControlName="currency" interface="popover">
             <ion-select-option value="EUR">EUR</ion-select-option>
             <ion-select-option value="USD">USD</ion-select-option>
@@ -29,11 +39,12 @@
             <ion-select-option value="CHF">CHF</ion-select-option>
             <ion-select-option value="GBP">GBP</ion-select-option>
           </ion-select>
-        </ion-item>
-        <ion-item>
-          <ion-input label="Tags" formControlName="tags" />
-        </ion-item>
-      </ion-list>
+        </div>
+        <hr class="sams-favorite-hr" />
+        <ion-note>Enter the price in the valid format (e.g. 12.34).</ion-note>
+      </div>
+
+      <ion-input label="Tags" formControlName="tags" />
 
       <div class="ion-padding-top">
         <position formControlName="position" />

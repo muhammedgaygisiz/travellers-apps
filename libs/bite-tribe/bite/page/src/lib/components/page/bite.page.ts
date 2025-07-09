@@ -14,8 +14,7 @@ import {
   IonButton,
   IonContent,
   IonInput,
-  IonItem,
-  IonList,
+  IonNote,
   IonSelect,
   IonSelectOption,
   IonText,
@@ -27,6 +26,7 @@ import { map } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
 import { Bite } from 'model';
+import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 
 const toTagsString = (tags: string[] | undefined = []) => tags?.join(' ');
 
@@ -35,8 +35,6 @@ const toTagsString = (tags: string[] | undefined = []) => tags?.join(' ');
   selector: 'bite',
   imports: [
     PageComponent,
-    IonList,
-    IonItem,
     IonInput,
     IonButton,
     IonContent,
@@ -46,6 +44,7 @@ const toTagsString = (tags: string[] | undefined = []) => tags?.join(' ');
     IonText,
     ImageUploadComponent,
     PositionComponent,
+    IonNote,
   ],
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',
@@ -78,7 +77,10 @@ export class BitePage {
     image: ['', Validators.required],
     name: ['', Validators.required],
     place: ['', Validators.required],
-    price: [null as number | null, Validators.required],
+    price: [
+      null as number | null,
+      [Validators.required, FloatNumberDotNotationValidator()],
+    ],
     currency: ['EUR', Validators.required],
     tags: [''],
     position: [this.position(), Validators.required],

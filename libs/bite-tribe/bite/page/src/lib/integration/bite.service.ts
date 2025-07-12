@@ -42,13 +42,9 @@ export class BiteService {
 
   startCropImage(image: string | null) {
     if (image) {
-      this.setEditedImage(image);
+      this.originalImage.set(image);
       this.navController.navigateForward(['image-crop']);
     }
-  }
-
-  setEditedImage(image: string) {
-    this.originalImage.set(image);
   }
 
   setCroppedImage(image: string) {

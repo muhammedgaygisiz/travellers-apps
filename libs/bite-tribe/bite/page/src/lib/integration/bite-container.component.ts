@@ -13,7 +13,6 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     [image]="service.imageToDisplay() || ''"
     (startCropImage)="service.startCropImage($event)"
     (submitBite)="service.submitNewBite($event)"
-    (setUploadedImage)="service.setEditedImage($event)"
   />`,
   imports: [BitePage],
 })

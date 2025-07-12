@@ -13,7 +13,6 @@ import {
   imageOutline,
   pricetagOutline,
 } from 'ionicons/icons';
-import SpyInstance = jest.SpyInstance;
 
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
@@ -94,30 +93,6 @@ describe('BitePage', () => {
 
     component.biteFormGroup.patchValue(validBite as any);
     expect(component.isInvalid()).toBe(false);
-  });
-
-  describe('watchUploadedImageChange signal', () => {
-    let emitSpy: SpyInstance;
-    beforeEach(() => {
-      emitSpy = jest.spyOn(component, 'emitUploadedImage');
-    });
-
-    it('should call emitUploadedImage when image is set', () => {
-      component.biteFormGroup.controls['image'].setValue(
-        'data:image/jpeg;base64,test'
-      );
-      expect(emitSpy).toHaveBeenCalled();
-    });
-
-    it('should not call emitUploadedImage when image is empty', () => {
-      component.biteFormGroup.controls['image'].setValue('');
-      expect(emitSpy).not.toHaveBeenCalled();
-    });
-
-    it('should not call emitUploadedImage when image is undefined', () => {
-      component.biteFormGroup.controls['image'].setValue(undefined as any);
-      expect(emitSpy).not.toHaveBeenCalled();
-    });
   });
 
   it('should emit form value on saveBite when valid', () => {
@@ -279,37 +254,6 @@ describe('BitePage', () => {
       componentRef.setInput('position', { latitude: 10, longitude: 20 });
 
       expect(component.getGpsErrorMessage()).toBe('');
-    });
-  });
-
-  describe('emitUploadedImage', () => {
-    let emitSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      emitSpy = jest.spyOn(component.setUploadedImage, 'emit');
-    });
-
-    it('should emit the image value from the form', () => {
-      const testImage = 'data:image/jpeg;base64,testimage';
-
-      component.biteFormGroup.controls['image'].setValue(testImage);
-      component.emitUploadedImage();
-
-      expect(emitSpy).toHaveBeenCalledWith(testImage);
-    });
-
-    it('should emit empty string when image value is null', () => {
-      component.biteFormGroup.controls['image'].setValue(null);
-      component.emitUploadedImage();
-
-      expect(emitSpy).toHaveBeenCalledWith('');
-    });
-
-    it('should emit empty string when image value is undefined', () => {
-      component.biteFormGroup.controls['image'].setValue(undefined as any);
-      component.emitUploadedImage();
-
-      expect(emitSpy).toHaveBeenCalledWith('');
     });
   });
 });

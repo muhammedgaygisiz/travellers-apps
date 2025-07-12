@@ -8,7 +8,9 @@ import { NavController, Platform } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { imageOutline } from 'ionicons/icons';
 import { signal } from '@angular/core';
-import SpyInstance = jest.SpyInstance;
+import { addNecessaryIcons } from 'utils';
+
+addNecessaryIcons();
 
 jest.mock('@capacitor/camera', () => ({
   Camera: {
@@ -244,17 +246,16 @@ describe('ImageUploadComponent', () => {
   });
 
   describe('cropImage', () => {
-    let navigateForwardSpy: SpyInstance;
+    let startCropImageEmit = jest.SpyInstance;
 
     beforeEach(() => {
-      navigateForwardSpy = jest
-        .spyOn(navControllerMock, 'navigateForward')
-        .mockImplementation();
+      component.value = signal('image-crop');
+      startCropImageEmit = jest.spyOn(component.startCropImage, 'emit');
     });
 
     it('should navigate forward to image-crop', () => {
       component.cropImage();
-      expect(navigateForwardSpy).toHaveBeenCalledWith(['image-crop']);
+      expect(startCropImageEmit).toHaveBeenCalledWith('image-crop');
     });
   });
 });

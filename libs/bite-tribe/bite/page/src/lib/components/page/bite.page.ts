@@ -72,8 +72,6 @@ export class BitePage {
 
   submitBite = output<typeof this.biteFormGroup.value>();
 
-  setUploadedImage = output<string>();
-
   startCropImage = output<string | null>();
 
   isWeb = signal(!this.platform.is('hybrid'));
@@ -175,13 +173,6 @@ export class BitePage {
 
     return '';
   });
-
-  emitUploadedImage() {
-    const uploadedImage = this.biteFormGroup.value.image;
-    if (uploadedImage) {
-      this.setUploadedImage.emit(uploadedImage || '');
-    }
-  }
 
   saveBite() {
     if (this.biteFormGroup.valid) {

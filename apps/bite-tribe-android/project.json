@@ -17,46 +17,22 @@
         "cmd": "--help"
       }
     },
-    "add": {
-      "executor": "@nxext/capacitor:cap",
-      "options": {
-        "cmd": "add"
-      },
-      "configurations": {
-        "ios": {
-          "cmd": "add ios"
-        },
-        "android": {
-          "cmd": "add android"
-        }
-      }
-    },
     "copy": {
       "executor": "@nxext/capacitor:cap",
       "options": {
-        "cmd": "copy"
-      },
-      "configurations": {
-        "android": {
-          "cmd": "copy android"
-        }
+        "cmd": "copy android"
       }
     },
     "open": {
       "executor": "@nxext/capacitor:cap",
       "options": {
-        "cmd": "open"
-      },
-      "configurations": {
-        "android": {
-          "cmd": "open android"
-        }
+        "cmd": "open android"
       }
     },
     "run": {
       "executor": "@nxext/capacitor:cap",
       "options": {
-        "cmd": "run"
+        "cmd": "run android"
       },
       "configurations": {
         "android": {
@@ -67,23 +43,13 @@
     "sync": {
       "executor": "@nxext/capacitor:cap",
       "options": {
-        "cmd": "sync"
-      },
-      "configurations": {
-        "android": {
-          "cmd": "sync android"
-        }
+        "cmd": "sync android"
       }
     },
     "update": {
       "executor": "@nxext/capacitor:cap",
       "options": {
-        "cmd": "update"
-      },
-      "configurations": {
-        "android": {
-          "cmd": "update android"
-        }
+        "cmd": "update android"
       }
     }
   }

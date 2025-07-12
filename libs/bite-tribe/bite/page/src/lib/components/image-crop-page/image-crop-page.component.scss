@@ -1,0 +1,7 @@
+@use 'globals';
+
+:host {
+  image-cropper {
+    --cropper-overlay-color: var(--ion-background-color);
+  }
+}

@@ -11,6 +11,7 @@
         formControlName="image"
         [position]="this.fallbackPosition()"
         (positionFromImage)="onPositionFromImage($event)"
+        (startCropImage)="emitStartCropImage($event)"
       />
 
       <ion-input

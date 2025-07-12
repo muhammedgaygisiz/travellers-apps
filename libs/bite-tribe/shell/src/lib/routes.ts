@@ -26,6 +26,12 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: 'image-crop',
+    loadComponent: () =>
+      import('bite-tribe/bite').then((m) => m.ImageCropContainer),
+    canActivate: [authGuard],
+  },
+  {
     path: `bite/:biteId`,
     loadComponent: () =>
       import('bite-tribe/details').then((m) => m.DetailsContainer),

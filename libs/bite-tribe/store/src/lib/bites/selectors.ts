@@ -13,6 +13,7 @@ import { handleTagFilters } from './utils/handle-tag-filters';
 const slice = createFeatureSelector<
   EntityState<any> & {
     cachedBite?: Bite;
+    editingBite?: Bite;
     biteCreator?: PublicUser;
   }
 >(key);

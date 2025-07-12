@@ -1,0 +1,26 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+  [enableBackButton]="true"
+>
+  <ion-content class="ion-padding">
+    <h1>{{ title() }}</h1>
+    <image-cropper
+      [imageFile]="imageFile()"
+      [allowMoveImage]="true"
+      [hideResizeSquares]="false"
+      [aspectRatio]="3 / 4"
+      backgroundColor="black"
+      output="blob"
+      format="jpeg"
+      (imageCropped)="onImageCropped($event)"
+      (loadImageFailed)="onLoadImageFailed()"
+    />
+    <ion-button
+      class="ion-margin-top"
+      expand="block"
+      (click)="emitCroppedImage()"
+      >{{ crop() }}</ion-button
+    >
+  </ion-content>
+</ta-page>

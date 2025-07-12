@@ -22,7 +22,7 @@ import {
   CameraSource,
   Photo,
 } from '@capacitor/camera';
-import { Platform } from '@ionic/angular';
+import { NavController, Platform } from '@ionic/angular';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { compressFile, compressPhoto } from 'image-compression';
 import { getExifDataFromFile } from '../page/utils/get-exif-data-from-file';
@@ -31,7 +31,7 @@ import { Geopoint } from 'model';
 
 const photoOptions = {
   quality: 90,
-  allowEditing: true,
+  allowEditing: false,
   resultType: CameraResultType.Base64,
   source: CameraSource.Prompt,
 };
@@ -53,6 +53,7 @@ const photoOptions = {
 })
 export class ImageUploadComponent implements ControlValueAccessor {
   private readonly platform = inject(Platform);
+  private readonly navController = inject(NavController);
 
   position = input<Geopoint>();
 
@@ -68,6 +69,10 @@ export class ImageUploadComponent implements ControlValueAccessor {
   disabled = signal<boolean | null>(null);
 
   showImage = computed(() => !!this.value());
+
+  startCropImage = output<string | null>();
+
+  imageFile?: File;
 
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-empty-function
   _onChange: (value: string | null) => void = () => {};
@@ -103,6 +108,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
       const compressedFile = await compressFile(file);
 
       this.setValueAndTriggerChange(compressedFile);
+      this.imageFile = compressedFile;
     }
   }
 
@@ -159,6 +165,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   private setValueAndTriggerChange(compressedPhoto: File) {
+    console.log('Setting value and trigger change', compressedPhoto);
     const reader = new FileReader();
     reader.onload = () => {
       this.value.set(reader.result as string);
@@ -166,6 +173,10 @@ export class ImageUploadComponent implements ControlValueAccessor {
       this._onTouch();
     };
     reader.readAsDataURL(compressedPhoto);
+  }
+
+  cropImage() {
+    this.startCropImage.emit(this.value());
   }
 
   clearImage() {

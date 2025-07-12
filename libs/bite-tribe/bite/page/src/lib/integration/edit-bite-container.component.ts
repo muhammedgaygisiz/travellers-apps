@@ -9,6 +9,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <bite
       title="Edit Bite"
       [bite]="service.bite()"
+      [image]="service.imageToDisplay() || ''"
+      (startCropImage)="service.startCropImage($event)"
       (submitBite)="service.submitEditedBite($event)"
     />
   `,

@@ -8,6 +8,7 @@
 } @if(showImage()) {
 <img [src]="value()" />
 <div class="ion-text-end">
+  <ion-button fill="clear" (click)="cropImage()">Crop</ion-button>
   <ion-button fill="clear" (click)="clearImage()">Delete</ion-button>
 </div>
 } @else {

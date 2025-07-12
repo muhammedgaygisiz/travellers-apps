@@ -10,6 +10,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     [bite]="service.cachedBite()"
     [currency]="service.currency()"
     [position]="service.position()"
+    [image]="service.imageToDisplay() || ''"
+    (startCropImage)="service.startCropImage($event)"
     (submitBite)="service.submitNewBite($event)"
   />`,
   imports: [BitePage],

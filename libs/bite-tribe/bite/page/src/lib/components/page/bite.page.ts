@@ -59,6 +59,8 @@ export class BitePage {
 
   bite = input<Bite>();
 
+  image = input<string>('');
+
   currency = input<string>();
 
   position = input<{ latitude: number; longitude: number }>();
@@ -68,6 +70,8 @@ export class BitePage {
   });
 
   submitBite = output<typeof this.biteFormGroup.value>();
+
+  startCropImage = output<string | null>();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -88,11 +92,12 @@ export class BitePage {
 
   biteInitFromInputEffect = effect(() => {
     const bite = this.bite();
+    const image = this.image();
 
     if (bite) {
       this.biteFormGroup.patchValue({
         id: bite.id,
-        image: bite.image,
+        image: image || bite.image,
         name: bite.name,
         place: bite.place,
         price: bite.price,
@@ -100,6 +105,12 @@ export class BitePage {
         tags: toTagsString(bite.tags),
         position: bite.position,
         restaurantId: bite.restaurantId,
+      });
+    }
+
+    if (image) {
+      this.biteFormGroup.patchValue({
+        image: image,
       });
     }
 
@@ -176,5 +187,9 @@ export class BitePage {
     if (position) {
       this.biteFormGroup.controls['position'].patchValue(position);
     }
+  }
+
+  emitStartCropImage(a: any) {
+    this.startCropImage.emit(a);
   }
 }

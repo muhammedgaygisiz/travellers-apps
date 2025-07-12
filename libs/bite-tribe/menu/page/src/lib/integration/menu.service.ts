@@ -26,7 +26,6 @@ export class MenuService {
     // TODO: Take currency from menu item when available
     const biteToBeCreated: Partial<Bite> = {
       currency: 'EUR',
-      image: '',
       name: menuItem.name,
       place: restaurant?.name || '',
       position: restaurant?.position || { latitude: 0, longitude: 0 },

@@ -10,7 +10,7 @@ export class IsInPipe implements PipeTransform {
       return 'add-outline';
     }
 
-    return lists.some((list) => list.biteIds.includes(bite.id))
+    return lists.some((list) => list.biteIds?.includes(bite.id))
       ? 'bookmark'
       : 'add-outline';
   }

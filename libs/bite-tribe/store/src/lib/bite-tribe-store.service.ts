@@ -4,13 +4,19 @@ import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
 import {
   cacheBite,
+  deleteBite,
   saveExistingBite,
   saveNewBite,
   saveTags,
-  deleteBite,
 } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
-import { bite, bites, cachedBite, biteCreator, allTags } from './bites/selectors';
+import {
+  allTags,
+  bite,
+  biteCreator,
+  bites,
+  cachedBite,
+} from './bites/selectors';
 import {
   restaurant,
   restaurants,
@@ -19,12 +25,12 @@ import {
 import { menu } from './menus/selectors';
 import { saveMenu } from './menus/actions';
 import {
+  clearHomeFilters,
   goPrivate,
   goPublic,
   savePublicProfile,
   saveSettings,
   setHomeFilters,
-  clearHomeFilters,
 } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -42,11 +48,11 @@ import {
 import {
   currency,
   gpsPosition,
+  homeFilters,
   isBitesLoading,
   isPublicProfile,
-  settings,
   publicUser,
-  homeFilters,
+  settings,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -57,9 +63,9 @@ import {
 import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
 import {
   createAndSaveBiteIdToBucketList,
-  saveBiteIdToBucketList,
-  removeBiteFromBucketlist,
   createBucketList,
+  removeBiteFromBucketlist,
+  saveBiteIdToBucketList,
 } from './bucketlists/actions';
 import { bucketlists, selectedBucketlist } from './bucketlists/selectors';
 

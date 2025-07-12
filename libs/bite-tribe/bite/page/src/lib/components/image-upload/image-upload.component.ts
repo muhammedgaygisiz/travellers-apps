@@ -31,7 +31,7 @@ import { Geopoint } from 'model';
 
 const photoOptions = {
   quality: 90,
-  allowEditing: true,
+  allowEditing: false,
   resultType: CameraResultType.Base64,
   source: CameraSource.Prompt,
 };

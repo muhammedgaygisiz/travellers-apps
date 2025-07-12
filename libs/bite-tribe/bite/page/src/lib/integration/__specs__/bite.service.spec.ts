@@ -9,6 +9,7 @@ const Mock = {
   setEditedImage: jest.fn(),
   submitEditedBite: jest.fn(),
   submitNewBite: jest.fn(),
+  navigateForward: jest.fn(),
 };
 
 describe('BiteService', () => {
@@ -25,17 +26,34 @@ describe('BiteService', () => {
     service = TestBed.inject<BiteService>(BiteService);
   });
 
-  describe('setEditedImage', () => {
-    let setEditedImageSpy: SpyInstance;
+  describe('startCropImage', () => {
+    let startCropImageSpy: SpyInstance;
 
     beforeEach(() => {
-      setEditedImageSpy = jest.spyOn(service, 'setEditedImage');
+      startCropImageSpy = jest.spyOn(service, 'startCropImage');
     });
 
-    it('should set edited image', () => {
+    it('should setup crop-image', () => {
       const mockImage = 'mockImage.jpg';
-      service.setEditedImage(mockImage);
-      expect(setEditedImageSpy).toHaveBeenCalledWith(mockImage);
+      service.startCropImage(mockImage);
+      expect(startCropImageSpy).toHaveBeenCalledWith(mockImage);
+    });
+
+    it('should navigate to image-crop', () => {
+      const mockImage = 'mockImage.jpg';
+      service.startCropImage(mockImage);
+      expect(Mock.navigateForward).toHaveBeenCalledWith(['image-crop']);
+    });
+
+    it('should set originalImage signal', () => {
+      const mockImage = 'mockImage.jpg';
+      service.startCropImage(mockImage);
+      expect(service.originalImage()).toBe(mockImage);
+    });
+
+    it('should not set originalImage signal if image is null', () => {
+      service.startCropImage(null);
+      expect(service.originalImage()).toBe('');
     });
   });
 });

@@ -11,6 +11,7 @@ import {
   IonBadge,
   IonButton,
   IonContent,
+  IonIcon,
 } from '@ionic/angular/standalone';
 import { Bite, PublicUser } from 'model';
 import { NgIf } from '@angular/common';
@@ -30,6 +31,7 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     NgIf,
     BiteComponent,
     IonBadge,
+    IonIcon,
   ],
 })
 export class ProfileComponent {

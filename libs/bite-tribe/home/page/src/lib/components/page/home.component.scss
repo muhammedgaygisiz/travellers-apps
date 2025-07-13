@@ -2,7 +2,7 @@
   ion-button[slot='fixed'] {
     position: fixed;
     left: 10px;
-    bottom: 56px;
+    bottom: calc(var(--ion-safe-area-bottom, 0) + 56px);
   }
 
   .chip-container {

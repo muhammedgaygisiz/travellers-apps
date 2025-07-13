@@ -16,12 +16,16 @@
 >
   <ion-content class="ion-padding">
     <div class="profile-container">
+      @if(biteCreatorData?.photoUrl) {
       <ion-avatar class="profile-avatar">
         <img
           [src]="biteCreatorData?.photoUrl"
           [alt]="biteCreatorData?.displayName"
         />
       </ion-avatar>
+      } @else {
+      <ion-icon name="person-circle-outline" class="profile-image" />
+      }
 
       <h1 class="profile-name">
         {{ biteCreatorData?.displayName }}

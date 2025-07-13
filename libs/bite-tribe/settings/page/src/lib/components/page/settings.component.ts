@@ -14,6 +14,7 @@ import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
   IonContent,
+  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
@@ -44,6 +45,7 @@ import { ConfirmDialogComponent } from 'bite-tribe-common/confirm-dialog';
     IonSelectOption,
     IonInput,
     ReactiveFormsModule,
+    IonIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -82,12 +84,9 @@ export class PageSettings {
       this.settingsForm.patchValue(rest);
     }
 
-    const isPublicProfile = this.isPublicProfile();
     const publicUser = this.publicUser();
-    if (isPublicProfile && publicUser) {
+    if (publicUser) {
       this.settingsForm.patchValue(publicUser);
-    } else {
-      this.settingsForm.get('city')?.reset();
     }
 
     const displayName = this.displayName();
@@ -156,7 +155,7 @@ export class PageSettings {
     const { city, displayName, ...newSettings } = this.settingsForm.value;
 
     const publicUser = this.publicUser();
-    if (this.isPublicProfile() && publicUser) {
+    if (publicUser) {
       this.submitPublicUser.emit({
         ...publicUser,
         city,

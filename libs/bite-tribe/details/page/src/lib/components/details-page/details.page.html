@@ -24,11 +24,15 @@
     <div class="ion-padding">
       @let biteCreatorData = biteCreator(); @if (biteCreatorData) {
       <div class="bite-creator-container">
+        @if(biteCreatorData.photoUrl) {
         <img
           [src]="biteCreatorData.photoUrl"
           alt="Bite Creator"
           class="profile-image"
         />
+        } @else {
+        <ion-icon name="person-circle-outline" class="profile-image" />
+        }
         <ion-label (click)="goToProfile.emit(biteCreatorData)">
           <span class="link">{{ biteCreatorData.displayName }}</span>
         </ion-label>

@@ -102,6 +102,19 @@ export class AppEffect {
     { dispatch: false }
   );
 
+  saveUserAfterLogin$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(fromAuth.loadedUser),
+        filter((payload) => !!payload.user),
+        tap(() => {
+          this.api.saveUserIfNotExisting();
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
   goPublicEffect$ = createEffect(
     () => {
       return this.actions$.pipe(

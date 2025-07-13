@@ -128,10 +128,14 @@ export class BiteTribeApiService {
   }
 
   saveUser() {
-    this.profileApiService.saveUser();
+    this.profileApiService.saveUser(true);
   }
 
   saveSettings(settings: Settings) {
     this.settingsApiService.saveSettings(settings);
+  }
+
+  saveUserIfNotExisting() {
+    this.profileApiService.saveUserIfNotExisting();
   }
 }

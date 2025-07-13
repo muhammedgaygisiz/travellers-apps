@@ -5,4 +5,5 @@ export interface PublicUser {
   userId: string;
   city?: string;
   about?: string;
+  public?: boolean;
 }

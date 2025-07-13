@@ -86,7 +86,7 @@ export class ProfileApiService {
     }
   }
 
-  async saveUser() {
+  async saveUser(isPublic: boolean) {
     try {
       const user = await this.getUser();
 
@@ -101,6 +101,7 @@ export class ProfileApiService {
           displayName: user?.displayName || '',
           email: user?.email || '',
           photoUrl: photoUrl || '',
+          public: isPublic,
         },
       });
     } catch (error) {
@@ -120,6 +121,7 @@ export class ProfileApiService {
           photoUrl: publicUser.photoUrl,
           city: publicUser.city || '',
           about: publicUser.about || '',
+          public: true,
         },
       });
     } catch (error) {
@@ -131,8 +133,11 @@ export class ProfileApiService {
   async deleteUser() {
     const user = await this.getUser();
 
-    FirebaseFirestore.deleteDocument({
+    FirebaseFirestore.updateDocument({
       reference: `${USERS_COLLECTION}/${user?.uid}`,
+      data: {
+        public: false,
+      },
     });
   }
 
@@ -152,5 +157,34 @@ export class ProfileApiService {
         throw new Error(error);
       })
     );
+  }
+
+  async saveUserIfNotExisting() {
+    const user = await this.getUser();
+
+    const userFromDB = await FirebaseFirestore.getDocument({
+      reference: `${USERS_COLLECTION}/${user?.uid}`,
+    });
+
+    const userInDb = userFromDB?.snapshot.data;
+
+    if (!userInDb) {
+      await this.saveUser(false);
+    }
+
+    if (userInDb && userInDb['public'] === undefined) {
+      await this.setUserPublicFlag(user?.uid);
+    }
+  }
+
+  private async setUserPublicFlag(uid: string | undefined) {
+    if (uid) {
+      FirebaseFirestore.updateDocument({
+        reference: `${USERS_COLLECTION}/${uid}`,
+        data: {
+          public: true,
+        },
+      });
+    }
   }
 }

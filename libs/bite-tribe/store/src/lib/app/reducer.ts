@@ -37,6 +37,13 @@ export const reducer = createReducer<AppSlice>(
       home: false,
     },
   })),
+  on(fromAuth.loginSucceeded, (state) => ({
+    ...state,
+    loading: {
+      ...state.loading,
+      home: true,
+    },
+  })),
   on(loadedGpsPosition, (state, { position }) => {
     const { coords } = position;
     const { latitude, longitude } = coords;

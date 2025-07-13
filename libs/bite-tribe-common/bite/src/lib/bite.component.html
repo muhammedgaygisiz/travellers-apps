@@ -3,7 +3,12 @@
 <ion-card>
   <div class="card-content">
     <div class="card-image">
-      <img alt="Dish" [src]="biteData?.image" loading="lazy" />
+      <img
+        alt="Dish"
+        [src]="biteData?.image"
+        loading="lazy"
+        (click)="biteClick.emit(biteData)"
+      />
     </div>
     <div class="card-details">
       <ion-card-header>

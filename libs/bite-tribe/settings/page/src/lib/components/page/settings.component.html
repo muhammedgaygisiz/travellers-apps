@@ -11,7 +11,11 @@
           <h2>Profile</h2>
 
           <ion-item>
+            @if(userImage()) {
             <img [src]="userImage()" alt="Profile" class="profile-image" />
+            } @else {
+            <ion-icon name="person-circle-outline" class="profile-image" />
+            }
             <ion-label>
               <h3>Display Name</h3>
               <ion-input
@@ -30,7 +34,6 @@
             </ion-label>
           </ion-item>
 
-          @if(isPublicProfile()) {
           <ion-item>
             <ion-label>
               <h3>City</h3>
@@ -40,7 +43,16 @@
               />
             </ion-label>
           </ion-item>
-          }
+
+          <div class="ion-margin-top ion-text-end go-public-button-container">
+            @if (isPublicProfile()) {
+            <ion-button (click)="onReturnToPrivate()"
+              >Return to private</ion-button
+            >
+            } @else {
+            <ion-button (click)="goPublic.emit()">Go public</ion-button>
+            }
+          </div>
         </section>
 
         <!-- Settings Section -->
@@ -93,16 +105,6 @@
             />
           </ion-item>
         </section>
-
-        <div class="ion-margin-top ion-text-end go-public-button-container">
-          @if (isPublicProfile()) {
-          <ion-button (click)="onReturnToPrivate()"
-            >Return to private</ion-button
-          >
-          } @else {
-          <ion-button (click)="goPublic.emit()">Go public</ion-button>
-          }
-        </div>
 
         <!-- Action Buttons -->
         <div class="button-container">

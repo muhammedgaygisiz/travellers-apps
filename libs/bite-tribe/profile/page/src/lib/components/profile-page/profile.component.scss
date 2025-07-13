@@ -1,8 +1,18 @@
+@use 'globals';
+
 :host {
   .profile-container {
-    max-width: 400px;
     margin: 0 auto;
     text-align: center;
+
+    .profile-image {
+      @include globals.profile-image;
+
+      width: 96px;
+      height: 96px;
+      justify-content: center;
+      margin-right: 0;
+    }
 
     .profile-avatar {
       display: flex;

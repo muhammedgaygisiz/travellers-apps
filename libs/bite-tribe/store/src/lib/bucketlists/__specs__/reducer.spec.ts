@@ -10,7 +10,7 @@ describe('Bucketlists Reducer', () => {
       const INITIAL_STATE = {
         ids: ['id'],
         entities: {
-          ['id']: { id: 'id' } as any,
+          id: { id: 'id' } as any,
         },
       } as EntityState<Bucketlist>;
       const NEW_STATE = { ids: [], entities: {} } as EntityState<Bucketlist>;
@@ -32,7 +32,7 @@ describe('Bucketlists Reducer', () => {
       const NEW_STATE = {
         ids: ['id'],
         entities: {
-          ['id']: { id: 'id' } as any,
+          id: { id: 'id' } as any,
         },
       } as EntityState<Bucketlist>;
 

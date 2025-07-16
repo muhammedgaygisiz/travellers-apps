@@ -83,14 +83,14 @@
             <ion-select
               slot="end"
               placeholder="EUR"
-              interface="popover"
+              interface="modal"
               formControlName="currency"
             >
-              <ion-select-option value="EUR">EUR</ion-select-option>
-              <ion-select-option value="USD">USD</ion-select-option>
-              <ion-select-option value="THB">THB</ion-select-option>
-              <ion-select-option value="CHF">CHF</ion-select-option>
-              <ion-select-option value="GBP">GBP</ion-select-option>
+              @for(currency of currencies; track currency.code) {
+              <ion-select-option [value]="currency.code">{{
+                currency.name
+              }}</ion-select-option>
+              }
             </ion-select>
           </ion-item>
           <ion-item>

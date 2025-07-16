@@ -27,6 +27,7 @@ import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
 import { Bite } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
+import { currencyCodes } from 'utils';
 
 const toTagsString = (tags: string[] | undefined = []) => tags?.join(' ');
 
@@ -74,6 +75,8 @@ export class BitePage {
   startCropImage = output<string | null>();
 
   isWeb = signal(!this.platform.is('hybrid'));
+
+  currencies = currencyCodes;
 
   biteFormGroup = this.formBuilder.group({
     id: [''],

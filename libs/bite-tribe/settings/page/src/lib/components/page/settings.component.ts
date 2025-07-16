@@ -28,6 +28,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { Dialog } from '@angular/cdk/dialog';
 import { ConfirmDialogComponent } from 'bite-tribe-common/confirm-dialog';
+import { currencyCodes } from 'utils';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -64,6 +65,7 @@ export class PageSettings {
   private readonly formBuilder = inject(FormBuilder);
   private readonly dialog = inject(Dialog);
   private readonly destroyRef = inject(DestroyRef);
+  currencies = currencyCodes;
 
   settingsForm = this.formBuilder.nonNullable.group({
     pushNotifications: [{ value: false, disabled: true }, Validators.required],

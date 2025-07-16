@@ -1,3 +1,5 @@
+export { currencyCodes } from './lib/currencies';
+
 export { addNecessaryIcons } from './lib/add-necessary-icons';
 export * from './lib/get-ionic-config';
 export { Environment } from './lib/environment';

@@ -30,15 +30,15 @@
           <ion-input
             label="Price"
             formControlName="price"
-            inputmode="numeric"
+            inputmode="decimal"
           />
 
-          <ion-select formControlName="currency" interface="popover">
-            <ion-select-option value="EUR">EUR</ion-select-option>
-            <ion-select-option value="USD">USD</ion-select-option>
-            <ion-select-option value="THB">THB</ion-select-option>
-            <ion-select-option value="CHF">CHF</ion-select-option>
-            <ion-select-option value="GBP">GBP</ion-select-option>
+          <ion-select formControlName="currency" interface="modal">
+            @for(currency of currencies; track currency.code) {
+            <ion-select-option [value]="currency.code"
+              >{{ currency.name }}</ion-select-option
+            >
+            }
           </ion-select>
         </div>
         <hr class="sams-favorite-hr" />
@@ -46,6 +46,7 @@
       </div>
 
       <ion-input label="Tags" formControlName="tags" />
+      <hr class="sams-favorite-hr" />
 
       <div class="ion-padding-top">
         <position formControlName="position" />

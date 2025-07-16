@@ -171,7 +171,7 @@ export const currencyCodes = [
     name_plural: 'Botswanan pulas',
   },
   {
-    symbol: 'BYR',
+    symbol: 'BYN',
     name: 'Belarusian Ruble',
     symbol_native: 'BYR',
     decimal_digits: 0,
@@ -434,7 +434,7 @@ export const currencyCodes = [
   {
     symbol: 'Rs',
     name: 'Indian Rupee',
-    symbol_native: 'টকা',
+    symbol_native: '₹',
     decimal_digits: 2,
     rounding: 0,
     code: 'INR',
@@ -1004,7 +1004,7 @@ export const currencyCodes = [
     symbol_native: 'Bs.F.',
     decimal_digits: 2,
     rounding: 0,
-    code: 'VEF',
+    code: 'VES',
     name_plural: 'Venezuelan bolívars',
   },
   {

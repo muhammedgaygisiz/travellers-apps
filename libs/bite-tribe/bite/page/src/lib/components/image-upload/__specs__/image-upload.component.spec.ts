@@ -246,7 +246,7 @@ describe('ImageUploadComponent', () => {
   });
 
   describe('cropImage', () => {
-    let startCropImageEmit = jest.SpyInstance;
+    let startCropImageEmit: jest.SpyInstance;
 
     beforeEach(() => {
       component.value = signal('image-crop');
@@ -256,6 +256,33 @@ describe('ImageUploadComponent', () => {
     it('should navigate forward to image-crop', () => {
       component.cropImage();
       expect(startCropImageEmit).toHaveBeenCalledWith('image-crop');
+    });
+  });
+
+  describe('onDragOver', () => {
+    it('should prevent default and set isDragging to true', () => {
+      const event = { preventDefault: jest.fn() } as unknown as DragEvent;
+      component.onDragOver(event);
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(component.isDragging()).toBe(true);
+    });
+  });
+
+  describe('onDragLeave', () => {
+    it('should prevent default and set isDragging to false', () => {
+      const event = { preventDefault: jest.fn() } as unknown as DragEvent;
+      component.onDragLeave(event);
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(component.isDragging()).toBe(false);
+    });
+  });
+
+  describe('onDrop', () => {
+    it('should prevent default and set isDragging to false', () => {
+      const event = { preventDefault: jest.fn() } as unknown as DragEvent;
+      component.onDrop(event);
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(component.isDragging()).toBe(false);
     });
   });
 });

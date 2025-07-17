@@ -1,3 +1,9 @@
+<div class="ion-margin-bottom">
+  <ion-note class="hint">
+    <b> Click into the box to upload or take a photo. </b>
+  </ion-note>
+</div>
+
 @if (isWeb()) {
 <input
   type="file"
@@ -5,20 +11,36 @@
   class="ion-hide"
   (change)="onFileSelected($event)"
 />
-} @if(showImage()) {
+} @if (showImage()) {
 <img [src]="value()" />
 <div class="ion-text-end">
   <ion-button fill="clear" (click)="cropImage()">Crop</ion-button>
   <ion-button fill="clear" (click)="clearImage()">Delete</ion-button>
 </div>
 } @else {
-<ion-card class="image-placeholder" (click)="onImageUploadClick()">
+<ion-card
+  class="image-placeholder"
+  (click)="onImageUploadClick()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+>
   <ion-card-content>
-    @if (isWeb()) {
+    @if (isDragging()) {
+    <div class="drag-overlay">
+      <ion-icon name="hand-right-outline" size="large" />
+      <p>
+        <b
+          >Drag & drop is not supported.<br />Click to upload or take a
+          photo.</b
+        >
+      </p>
+    </div>
+    } @else { @if (isWeb()) {
     <ion-icon name="image-outline" size="large" />
     } @else {
     <ion-icon name="camera-outline" size="large" />
-    }
+    } }
   </ion-card-content>
 </ion-card>
 }

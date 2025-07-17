@@ -1,9 +1,11 @@
 import { Restaurant } from 'model';
+import { normalize } from 'utils';
 
 export const getRestaurant = (restaurants: Restaurant[], id: string) => {
   const foundRestaurantById = restaurants.find((restaurant) => {
+    const normalizedRestaurantId = normalize(restaurant.id);
     if (id) {
-      return restaurant.id.toLowerCase().includes(id.toLowerCase());
+      return normalizedRestaurantId.includes(normalize(id));
     }
 
     return false;

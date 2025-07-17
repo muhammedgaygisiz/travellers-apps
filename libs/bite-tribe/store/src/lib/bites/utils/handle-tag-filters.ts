@@ -10,7 +10,10 @@ export const handleTagFilters = (filters: string[], filteredBites: Bite[]) => {
 
       // Clean tags by removing # symbols for comparison
       const cleanTags = bite.tags.map((tag: string) => tag.replace('#', ''));
-      return tagFilters.some((filter) => cleanTags.includes(filter));
+
+      return tagFilters.some((filter) =>
+        cleanTags.includes(filter.toLowerCase())
+      );
     });
   }
   return filteredBites;

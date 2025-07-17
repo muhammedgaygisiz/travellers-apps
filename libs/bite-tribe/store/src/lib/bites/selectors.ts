@@ -5,7 +5,7 @@ import { Bite, PublicUser } from 'model';
 import { biteId } from '../router/selectors';
 import { likes } from '../likes/selectors';
 import { gpsPosition, homeFilters, settings } from '../app/selectors';
-import { haversineDistance } from 'distance-pipe';
+import { haversineDistance } from 'utils';
 import { EntityState } from '@ngrx/entity';
 import { handleNearbyFilter } from './utils/handle-nearby-filter';
 import { handleTagFilters } from './utils/handle-tag-filters';
@@ -83,7 +83,7 @@ export const allTags = createSelector(bitesWithMetadata, (bites) => {
         // Remove all # symbols from tags
         const cleanTag = tag.replace(/#/g, '');
         if (cleanTag) {
-          tagsSet.add(cleanTag);
+          tagsSet.add(cleanTag.toLowerCase());
         }
       });
     }

@@ -1,41 +1,63 @@
 import { createSelector } from '@ngrx/store';
 import { restaurant } from '../restaurants/selectors';
-import { bites } from './selectors';
+import { bite, bites } from './selectors';
 import { restaurantId } from '../router/selectors';
+import { normalize } from 'utils';
+import { getBitesByRestaurantName } from './utils/get-bites-by-restaurant-name';
+import { getBitesByRestaurantIdOrName } from './utils/get-bites-by-restaurant-id-or-name';
+import { getCloseBites } from './utils/get-close-bites';
+import { Bite } from 'model';
 
 export const bitesByRestaurant = createSelector(
   bites,
   restaurantId,
   restaurant,
-  (bites, restaurantId, restaurant) => {
-    if (!restaurant && !restaurantId) {
+  bite,
+  (bites, restaurantIdOrName, restaurant, sourceBite): Bite[] => {
+    if (!restaurant && !restaurantIdOrName) {
       return [];
     }
 
+    const possiblyCloseBites = getCloseBites(sourceBite, bites);
+
     if (restaurant) {
-      const normalizedRestaurantName = restaurant?.name.toLowerCase().trim();
+      const normalizedRestaurantName = normalize(restaurant?.name);
 
-      return bites.filter((bite) => {
-        const normalizedBitePlace = bite.place.toLowerCase().trim();
+      const bitesByRestaurant = getBitesByRestaurantName(
+        normalizedRestaurantName,
+        possiblyCloseBites,
+        restaurant.id
+      );
 
-        return (
-          bite.restaurantId?.includes(restaurant.id) ||
-          normalizedBitePlace.includes(normalizedRestaurantName) ||
-          normalizedRestaurantName?.includes(normalizedBitePlace)
-        );
-      });
+      if (
+        sourceBite &&
+        !bitesByRestaurant.find((bite) => bite.id === sourceBite?.id)
+      ) {
+        return [sourceBite, ...bitesByRestaurant];
+      }
+
+      return bitesByRestaurant;
     }
 
-    if (restaurantId) {
-      const restaurantIdOrName = decodeURIComponent(restaurantId);
-      const normalizedRestaurantIdOrName = restaurantIdOrName
-        .toLowerCase()
-        .trim();
+    if (restaurantIdOrName) {
+      const decodedRestaurantIdOrName = decodeURIComponent(restaurantIdOrName);
+      const normalizedRestaurantIdOrName = normalize(decodedRestaurantIdOrName);
 
-      return bites.filter((bite) => {
-        const normalizedBitePlace = bite.place.toLowerCase().trim();
-        return normalizedBitePlace === normalizedRestaurantIdOrName;
-      });
+      const bitesByRestaurantIdOrName = getBitesByRestaurantIdOrName(
+        normalizedRestaurantIdOrName,
+        possiblyCloseBites
+      );
+
+      if (
+        sourceBite &&
+        !bitesByRestaurantIdOrName.find(
+          (bite: Bite) => bite.id === sourceBite?.id
+        )
+      ) {
+        return [sourceBite, ...bitesByRestaurantIdOrName];
+      }
+
+      return bitesByRestaurantIdOrName;
     }
 
     return [];

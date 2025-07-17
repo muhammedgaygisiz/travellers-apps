@@ -4,7 +4,7 @@ import { Restaurant } from 'model';
 import { restaurantId } from '../router/selectors';
 import { adapter, RestaurantState } from './adapter';
 import { gpsPosition } from '../app/selectors';
-import { haversineDistance } from 'distance-pipe';
+import { haversineDistance } from 'utils';
 import { bites } from '../bites/selectors';
 import { getRestaurant } from './utils/get-restaurant';
 

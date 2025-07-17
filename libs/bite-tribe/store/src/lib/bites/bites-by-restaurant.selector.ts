@@ -13,7 +13,7 @@ export const bitesByRestaurant = createSelector(
   restaurantId,
   restaurant,
   bite,
-  (bites, restaurantIdOrName, restaurant, sourceBite) => {
+  (bites, restaurantIdOrName, restaurant, sourceBite): Bite[] => {
     if (!restaurant && !restaurantIdOrName) {
       return [];
     }
@@ -29,7 +29,10 @@ export const bitesByRestaurant = createSelector(
         restaurant.id
       );
 
-      if (!bitesByRestaurant.find((bite) => bite.id === sourceBite?.id)) {
+      if (
+        sourceBite &&
+        !bitesByRestaurant.find((bite) => bite.id === sourceBite?.id)
+      ) {
         return [sourceBite, ...bitesByRestaurant];
       }
 
@@ -46,6 +49,7 @@ export const bitesByRestaurant = createSelector(
       );
 
       if (
+        sourceBite &&
         !bitesByRestaurantIdOrName.find(
           (bite: Bite) => bite.id === sourceBite?.id
         )

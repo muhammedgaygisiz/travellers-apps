@@ -1,5 +1,6 @@
 export { normalize } from './lib/normalize';
 export { currencyCodes } from './lib/currencies';
+export { getSimilarityScore } from './lib/get-similarity-score';
 
 export { addNecessaryIcons } from './lib/add-necessary-icons';
 export * from './lib/get-ionic-config';

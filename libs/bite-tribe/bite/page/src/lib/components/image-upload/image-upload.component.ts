@@ -15,6 +15,7 @@ import {
   IonCard,
   IonCardContent,
   IonIcon,
+  IonNote,
 } from '@ionic/angular/standalone';
 import {
   Camera,
@@ -42,7 +43,7 @@ const photoOptions = {
   selector: 'image-upload',
   templateUrl: './image-upload.component.html',
   styleUrl: './image-upload.component.scss',
-  imports: [IonCard, IonCardContent, IonIcon, IonButton],
+  imports: [IonCard, IonCardContent, IonIcon, IonButton, IonNote],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -191,5 +192,24 @@ export class ImageUploadComponent implements ControlValueAccessor {
     if (fileUpload) {
       fileUpload.nativeElement.value = '';
     }
+  }
+
+  // Drag&Drop prevention
+
+  isDragging = signal(false);
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    this.isDragging.set(true);
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    this.isDragging.set(false);
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    this.isDragging.set(false);
   }
 }

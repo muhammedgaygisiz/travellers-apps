@@ -1,7 +1,12 @@
 :host {
+  .hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
   .image-placeholder {
     background-color: #f1ead9;
-    border: 2px dashed #ccc;
     height: 200px;
     margin: 0;
 
@@ -12,6 +17,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
+
+      .drag-overlay {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
 
       img {
         width: 100%;

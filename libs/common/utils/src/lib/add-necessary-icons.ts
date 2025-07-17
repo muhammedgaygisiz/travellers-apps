@@ -29,6 +29,8 @@ import {
   navigateOutline,
   chevronUpOutline,
   personCircleOutline,
+  handRightOutline,
+  informationCircleOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -62,5 +64,7 @@ export const addNecessaryIcons = () => {
     navigateOutline,
     chevronUpOutline,
     personCircleOutline,
+    handRightOutline,
+    informationCircleOutline,
   });
 };

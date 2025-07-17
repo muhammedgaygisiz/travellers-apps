@@ -1,35 +1,59 @@
 import { createSelector } from '@ngrx/store';
 import { restaurant } from '../restaurants/selectors';
-import { bites } from './selectors';
+import { bite, bites } from './selectors';
 import { restaurantId } from '../router/selectors';
 import { normalize } from 'utils';
 import { getBitesByRestaurantName } from './utils/get-bites-by-restaurant-name';
 import { getBitesByRestaurantIdOrName } from './utils/get-bites-by-restaurant-id-or-name';
+import { getCloseBites } from './utils/get-close-bites';
+import { Bite } from 'model';
 
 export const bitesByRestaurant = createSelector(
   bites,
   restaurantId,
   restaurant,
-  (bites, restaurantId, restaurant) => {
-    if (!restaurant && !restaurantId) {
+  bite,
+  (bites, restaurantIdOrName, restaurant, sourceBite) => {
+    if (!restaurant && !restaurantIdOrName) {
       return [];
     }
+
+    const possiblyCloseBites = getCloseBites(sourceBite, bites);
 
     if (restaurant) {
       const normalizedRestaurantName = normalize(restaurant?.name);
 
-      return getBitesByRestaurantName(
+      const bitesByRestaurant = getBitesByRestaurantName(
         normalizedRestaurantName,
-        bites,
+        possiblyCloseBites,
         restaurant.id
       );
+
+      if (!bitesByRestaurant.find((bite) => bite.id === sourceBite?.id)) {
+        return [sourceBite, ...bitesByRestaurant];
+      }
+
+      return bitesByRestaurant;
     }
 
-    if (restaurantId) {
-      const restaurantIdOrName = decodeURIComponent(restaurantId);
-      const normalizedRestaurantIdOrName = normalize(restaurantIdOrName);
+    if (restaurantIdOrName) {
+      const decodedRestaurantIdOrName = decodeURIComponent(restaurantIdOrName);
+      const normalizedRestaurantIdOrName = normalize(decodedRestaurantIdOrName);
 
-      return getBitesByRestaurantIdOrName(normalizedRestaurantIdOrName, bites);
+      const bitesByRestaurantIdOrName = getBitesByRestaurantIdOrName(
+        normalizedRestaurantIdOrName,
+        possiblyCloseBites
+      );
+
+      if (
+        !bitesByRestaurantIdOrName.find(
+          (bite: Bite) => bite.id === sourceBite?.id
+        )
+      ) {
+        return [sourceBite, ...bitesByRestaurantIdOrName];
+      }
+
+      return bitesByRestaurantIdOrName;
     }
 
     return [];

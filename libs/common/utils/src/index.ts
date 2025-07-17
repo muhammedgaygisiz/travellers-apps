@@ -1,3 +1,4 @@
+export { normalize } from './lib/normalize';
 export { currencyCodes } from './lib/currencies';
 
 export { addNecessaryIcons } from './lib/add-necessary-icons';

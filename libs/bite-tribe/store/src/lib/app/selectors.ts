@@ -22,5 +22,5 @@ export const publicUser = createSelector(slice, (slice) => slice?.profile);
 
 export const homeFilters = createSelector(
   slice,
-  (slice) => slice?.homeFilters || []
+  (slice) => slice?.homeFilters?.map((filter) => filter.toLowerCase()) || []
 );

@@ -83,7 +83,7 @@ export const allTags = createSelector(bitesWithMetadata, (bites) => {
         // Remove all # symbols from tags
         const cleanTag = tag.replace(/#/g, '');
         if (cleanTag) {
-          tagsSet.add(cleanTag);
+          tagsSet.add(cleanTag.toLowerCase());
         }
       });
     }

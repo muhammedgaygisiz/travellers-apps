@@ -14,6 +14,9 @@ export class MapDataAccessService {
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
   });
+  selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
+    requireSync: true,
+  });
 
   logout() {
     this.storeService.logout();

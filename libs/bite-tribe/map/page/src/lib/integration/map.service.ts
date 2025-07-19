@@ -16,6 +16,8 @@ export class MapService {
   });
   isAuthenticated = this.dataAccess.isAuthenticated;
 
+  selectedBucketlist = this.dataAccess.selectedBucketlist;
+
   logout() {
     this.dataAccess.logout();
   }
@@ -31,4 +33,17 @@ export class MapService {
   onGotoMyBucketlists() {
     this.navController.navigateForward(['my-bucketlists']);
   }
+
+  bitesBySelectedBucketlist = computed(() => {
+    const bites = this.dataAccess.bites();
+    const selectedBucketlist = this.selectedBucketlist();
+
+    if (!selectedBucketlist) {
+      return [];
+    }
+
+    return bites.filter((bite) =>
+      selectedBucketlist.biteIds?.includes(bite.id)
+    );
+  });
 }

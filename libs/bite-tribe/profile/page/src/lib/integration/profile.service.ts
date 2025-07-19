@@ -41,4 +41,28 @@ export class ProfileService {
   biteClicked(bite: Bite) {
     this.navController.navigateForward(['bite', bite.id]);
   }
+
+  restaurantClicked(bite: Bite) {
+    if (bite.restaurantId) {
+      // eslint-disable-next-line no-unused-vars
+      const [empty, collectionName, restaurantId] =
+        bite.restaurantId.split('/');
+
+      this.navController.navigateForward([
+        'bite',
+        bite.id,
+        'restaurant',
+        restaurantId,
+      ]);
+
+      return;
+    }
+
+    this.navController.navigateForward([
+      'bite',
+      bite.id,
+      'restaurant',
+      encodeURIComponent(bite.place),
+    ]);
+  }
 }

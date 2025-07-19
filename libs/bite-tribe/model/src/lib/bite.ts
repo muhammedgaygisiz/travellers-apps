@@ -1,4 +1,5 @@
 import { Geopoint } from './geopoint';
+import { Like } from './like';
 
 export interface Bite {
   userId?: string;
@@ -19,5 +20,5 @@ export interface Bite {
 
   //derived attribute
   distance?: string;
-  likes?: any[];
+  likes?: Like[];
 }

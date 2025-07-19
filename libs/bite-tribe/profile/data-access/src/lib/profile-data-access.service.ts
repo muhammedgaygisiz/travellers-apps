@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { Bite } from 'model';
+import { Bite, Like } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileDataAccessService {
@@ -25,7 +25,7 @@ export class ProfileDataAccessService {
 
     const bite = bites?.find((bite) => bite.id === likeType.biteId);
     const likeFromUser = bite?.likes?.find(
-      (like: any) =>
+      (like: Like) =>
         like.userId === userId && like.likeType === likeType.likeType
     );
 

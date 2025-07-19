@@ -17,6 +17,7 @@ import {
   IonList,
 } from '@ionic/angular/standalone';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { getSimilarityScore, normalize } from 'utils';
 
 @Component({
   templateUrl: './custom-filter-modal.component.html',
@@ -56,14 +57,21 @@ export class CustomFilterModalComponent implements OnInit {
 
   // Filter tags based on search input
   filteredTags = computed(() => {
-    const searchTerm = this.customTagInput().toLowerCase().trim();
+    const rawSearchTerm = this.customTagInput();
+    const searchTerm = normalize(rawSearchTerm);
     const allTags = this.data.existingTags;
 
     if (!searchTerm) {
       return allTags;
     }
 
-    return allTags.filter((tag) => tag.toLowerCase().includes(searchTerm));
+    return allTags.filter((rawTag) => {
+      const tag = normalize(rawTag);
+
+      const similarityScore = getSimilarityScore(tag, searchTerm);
+
+      return tag.includes(searchTerm) || similarityScore.length > 0;
+    });
   });
 
   toggleTag(tag: string) {

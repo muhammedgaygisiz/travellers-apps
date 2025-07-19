@@ -8,6 +8,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   imports: [MapPageComponent],
   template: `
     <map-page
+      class="ion-page"
       [bites]="service.myBites()"
       [isAuthenticated]="service.isAuthenticated()"
       (logoutClick)="service.logout()"

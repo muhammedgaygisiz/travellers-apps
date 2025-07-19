@@ -35,7 +35,8 @@ export class HomeDataAccessService {
 
     const bite = bites?.find((bite) => bite.id === likeType.biteId);
     const likeFromUser = bite?.likes?.find(
-      (like) => like.userId === userId && like.likeType === likeType.likeType
+      (like: any) =>
+        like.userId === userId && like.likeType === likeType.likeType
     );
 
     if (likeFromUser) {

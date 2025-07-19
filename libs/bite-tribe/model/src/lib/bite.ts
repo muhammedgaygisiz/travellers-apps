@@ -9,13 +9,15 @@ export interface Bite {
   price: number;
   currency?: string;
   position: Geopoint;
-  distance?: string;
   restaurantId?: string;
-
-  likes?: any[];
-  thumbup: number;
-  drooling: number;
-  mindblown: number;
-
   tags?: string[];
+
+  createdAt?: string;
+  createdAtTimestamp?: number;
+  updatedAt?: string;
+  updatedAtTimestamp?: number;
+
+  //derived attribute
+  distance?: string;
+  likes?: any[];
 }

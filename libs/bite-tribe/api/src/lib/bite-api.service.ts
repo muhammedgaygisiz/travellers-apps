@@ -72,6 +72,8 @@ export class BiteApiService {
         data: {
           ...bite,
           userId: user?.uid || '',
+          createdAt: new Date().toISOString(),
+          createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
       });
     } catch (error) {
@@ -91,6 +93,8 @@ export class BiteApiService {
         reference: `${BITE_COLLECTION}/${bite.id}`,
         data: {
           ...bite,
+          updatedAt: new Date().toISOString(),
+          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
       });
     } catch (error) {
@@ -116,6 +120,8 @@ export class BiteApiService {
         reference: `${BITE_COLLECTION}/${payload.id}`,
         data: {
           tags: uniqueTags,
+          updatedAt: new Date().toISOString(),
+          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
       });
     } catch (error) {

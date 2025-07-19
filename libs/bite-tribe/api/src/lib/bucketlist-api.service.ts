@@ -104,6 +104,8 @@ export class BucketlistApiService {
           reference: bucketListDoc.snapshot.path,
           data: {
             biteIds: uniqueBiteIds,
+            updatedAt: new Date().toISOString(),
+            updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
           },
         });
       }
@@ -125,6 +127,8 @@ export class BucketlistApiService {
           userId: user?.uid || '',
           name: params.bucketListName,
           biteIds: params.biteId ? [params.biteId] : [],
+          createdAt: new Date().toISOString(),
+          createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
       });
     } catch (error) {
@@ -150,6 +154,8 @@ export class BucketlistApiService {
         reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
         data: {
           biteIds: newBiteIdListInBucketList,
+          updatedAt: new Date().toISOString(),
+          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
       });
     } catch (error) {
@@ -167,6 +173,8 @@ export class BucketlistApiService {
         data: {
           userId: user?.uid || '',
           name: bucketlistName,
+          createdAt: new Date().toISOString(),
+          createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
       });
     } catch (error) {

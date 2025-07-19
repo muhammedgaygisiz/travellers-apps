@@ -10,10 +10,14 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isAuthenticated]="service.isAuthenticated()"
       [biteCreator]="service.biteCreator()"
       [bites]="service.bitesByUser()"
+      [userId]="service.userId()"
+      (biteClick)="service.biteClicked($event)"
+      (restaurantClick)="service.restaurantClicked($event)"
       (logoutClick)="service.logout()"
       (gotoSettings)="service.gotoSettings()"
       (gotoMyBucketlists)="service.gotoMyBucketlists()"
       (gotoMyBites)="service.gotoMyBites()"
+      (likeButtonClick)="service.likeButtonClicked($event)"
     />
   `,
   imports: [ProfileComponent],

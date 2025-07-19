@@ -109,6 +109,8 @@ export class MenuApiService {
       reference: `${MENU_COLLECTION}/${menu.id}`,
       data: {
         categories: menu.categories,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
     });
   }

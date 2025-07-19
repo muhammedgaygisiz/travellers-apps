@@ -6,4 +6,9 @@ export interface PublicUser {
   city?: string;
   about?: string;
   public?: boolean;
+
+  createdAt?: string;
+  createdAtTimestamp?: number;
+  updatedAt?: string;
+  updatedAtTimestamp?: number;
 }

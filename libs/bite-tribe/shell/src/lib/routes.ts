@@ -67,6 +67,12 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: 'my-bites/map-view',
+    loadComponent: () =>
+      import('bite-tribe/map').then((m) => m.MyBitesMapContainerComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'my-bucketlists',
     loadComponent: () =>
       import('bite-tribe/bucketlist').then(
@@ -78,6 +84,12 @@ export const ROUTES: Routes = withAuthRoutes([
     path: 'my-bucketlists/:bucketlistId',
     loadComponent: () =>
       import('bite-tribe/home').then((m) => m.BucketlistContainerComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'my-bucketlists/:bucketlistId/map-view',
+    loadComponent: () =>
+      import('bite-tribe/map').then((m) => m.BucketListMapContainerComponent),
     canActivate: [authGuard],
   },
   {

@@ -139,6 +139,8 @@ export class RestaurantApiService {
       reference: RESTAURANT_COLLECTION,
       data: {
         ...restaurantToBeSaved,
+        createdAt: new Date().toISOString(),
+        createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
     });
 
@@ -149,6 +151,8 @@ export class RestaurantApiService {
       reference: MENU_COLLECTION,
       data: {
         categories: [],
+        createdAt: new Date().toISOString(),
+        createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
     });
 
@@ -157,6 +161,8 @@ export class RestaurantApiService {
       reference: `${RESTAURANT_COLLECTION}/${newRestaurantId}`,
       data: {
         menuId: `/menus/${addMenuResult.reference.id}`,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
     });
 
@@ -168,6 +174,8 @@ export class RestaurantApiService {
             reference: `${BITE_COLLECTION}/${biteId}`,
             data: {
               restaurantId: `/restaurants/${newRestaurantId}`,
+              updatedAt: new Date().toISOString(),
+              updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
             },
           })
         )
@@ -180,6 +188,8 @@ export class RestaurantApiService {
       reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
       data: {
         socialMediaLinks: links,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
     });
   }

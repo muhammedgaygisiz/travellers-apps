@@ -78,6 +78,7 @@ export class RestaurantComponent {
   readonly showMenuClick = output<Restaurant | undefined>();
   readonly biteClick = output<Bite>();
   readonly submitSocialMediaLinks = output<Partial<{ links: Link[] }>>();
+  readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
 
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),

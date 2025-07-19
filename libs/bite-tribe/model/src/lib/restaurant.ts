@@ -16,4 +16,9 @@ export interface Restaurant {
   bites?: Bite[];
 
   socialMediaLinks?: Link[];
+
+  createdAt?: string;
+  createdAtTimestamp?: number;
+  updatedAt?: string;
+  updatedAtTimestamp?: number;
 }

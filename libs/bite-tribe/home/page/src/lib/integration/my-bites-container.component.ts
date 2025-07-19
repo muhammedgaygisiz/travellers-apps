@@ -25,6 +25,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoEdit)="service.onGotoEditClick($event)"
       (deleteBite)="service.onDeleteBiteClick($event)"
+      (openMapView)="service.openMapView('my-bites')"
     />
   `,
   imports: [BiteTribeHomeComponent],

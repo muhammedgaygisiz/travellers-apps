@@ -23,6 +23,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoSettings)="service.onGotoSettingsClick()"
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoEdit)="service.onGotoEditClick($event)"
+      (openMapView)="service.openMapView('my-bucketlists')"
     />
   `,
   imports: [BiteTribeHomeComponent],

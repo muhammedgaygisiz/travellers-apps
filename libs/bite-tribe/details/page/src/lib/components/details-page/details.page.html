@@ -24,7 +24,7 @@
     <div class="ion-padding">
       @let biteCreatorData = biteCreator(); @if (biteCreatorData) {
       <div class="bite-creator-container">
-        @if(biteCreatorData.photoUrl) {
+        @if (biteCreatorData.photoUrl) {
         <img
           [src]="biteCreatorData.photoUrl"
           alt="Bite Creator"
@@ -34,7 +34,9 @@
         <ion-icon name="person-circle-outline" class="profile-image" />
         }
         <ion-label (click)="goToProfile.emit(biteCreatorData)">
-          <span class="link">{{ biteCreatorData.displayName }}</span>
+          <span class="link"
+            >{{ biteCreatorData.displayName || 'Anonymous' }}</span
+          >
         </ion-label>
       </div>
       }
@@ -50,7 +52,7 @@
         />
       </div>
 
-      <div class="fields ion-margin-bottom">
+      <div class="restaurant-distance-price fields ion-margin-bottom">
         <span>
           <span class="link" (click)="onRestaurantClick(biteData)">
             {{ biteData?.place }}
@@ -65,7 +67,11 @@
         }
       </div>
 
-      <div class="ion-margin-bottom like-and-bucketlist-bar">
+      <div class="age-bar ion-margin-bottom">
+        <span>{{ biteData?.createdAt | timeAgo }}</span>
+      </div>
+
+      <div class="like-and-bucketlist-bar ion-margin-bottom">
         @if (biteData) {
         <div class="ion-text-start">
           <bt-likes
@@ -89,13 +95,13 @@
         </div>
       </div>
 
-      <div class="ion-margin-bottom">
+      <div class="map ion-margin-bottom">
         @if (biteData?.position) {
         <bt-map [positions]="[biteData?.position!]" readonly />
         }
       </div>
 
-      <div class="ion-margin-bottom">
+      <div class="tags ion-margin-bottom">
         <tags [tags]="biteData?.tags" />
       </div>
 
@@ -131,7 +137,7 @@
               <h2>{{ review.author }}</h2>
               <ion-text><p>{{ review.review }}</p></ion-text>
             </div>
-            <ion-note>{{ review.createdAt | timeAgo }}</ion-note>
+            <ion-note>{{ review?.createdAt | timeAgo }}</ion-note>
           </ion-label>
         </ion-item>
         }

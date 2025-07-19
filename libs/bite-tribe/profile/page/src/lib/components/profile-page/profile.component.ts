@@ -38,6 +38,7 @@ export class ProfileComponent {
   isAuthenticated = input(false);
   biteCreator = input<PublicUser>();
   bites = input<any[]>();
+  userId = input<string>();
 
   readonly logoutClick = output();
   readonly gotoSettings = output();

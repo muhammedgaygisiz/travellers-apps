@@ -70,4 +70,8 @@ export class RestaurantService {
       this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
     }
   }
+
+  likeButtonClicked(likeClick: { likeType: string; biteId: string }) {
+    this.dataAccess.submitLikeClick(likeClick);
+  }
 }

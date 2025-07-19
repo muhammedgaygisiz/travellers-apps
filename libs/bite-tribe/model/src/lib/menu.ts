@@ -27,4 +27,9 @@ export interface Category {
 export interface Menu {
   id: string;
   categories: Category[];
+
+  createdAt?: string;
+  createdAtTimestamp?: number;
+  updatedAt?: string;
+  updatedAtTimestamp?: number;
 }

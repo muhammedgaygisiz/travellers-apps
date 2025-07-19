@@ -1,6 +1,7 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
+import { Bite } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -9,6 +10,7 @@ export class ProfileService {
 
   isAuthenticated = this.dataAccess.isAuthenticated;
   biteCreator = this.dataAccess.biteCreator;
+  userId = this.dataAccess.userId;
   bitesByUser = computed(() => {
     const bites = this.dataAccess.bites();
     const userId = this.dataAccess.biteCreator()?.userId;
@@ -30,5 +32,37 @@ export class ProfileService {
 
   gotoMyBites() {
     this.navController.navigateForward(['my-bites']);
+  }
+
+  likeButtonClicked(likeClick: { likeType: string; biteId: string }) {
+    this.dataAccess.submitLikeClick(likeClick);
+  }
+
+  biteClicked(bite: Bite) {
+    this.navController.navigateForward(['bite', bite.id]);
+  }
+
+  restaurantClicked(bite: Bite) {
+    if (bite.restaurantId) {
+      // eslint-disable-next-line no-unused-vars
+      const [empty, collectionName, restaurantId] =
+        bite.restaurantId.split('/');
+
+      this.navController.navigateForward([
+        'bite',
+        bite.id,
+        'restaurant',
+        restaurantId,
+      ]);
+
+      return;
+    }
+
+    this.navController.navigateForward([
+      'bite',
+      bite.id,
+      'restaurant',
+      encodeURIComponent(bite.place),
+    ]);
   }
 }

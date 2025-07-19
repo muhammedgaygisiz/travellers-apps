@@ -69,6 +69,7 @@ export class ReviewApiService {
           review: payload.review,
           biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
           createdAt: new Date().toISOString(),
+          createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
           authorId: user?.uid || '',
           author: user?.displayName || '',
         },

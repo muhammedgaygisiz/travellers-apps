@@ -1,14 +1,17 @@
 @use 'globals';
 
 :host {
+  .bite-creator-container,
+  .restaurant-distance-price {
+    .link {
+      @include globals.link;
+    }
+  }
+
   .bite-creator-container {
     display: flex;
     flex-direction: row;
     align-items: center;
-
-    .link {
-      @include globals.link;
-    }
 
     .profile-image {
       @include globals.profile-image;

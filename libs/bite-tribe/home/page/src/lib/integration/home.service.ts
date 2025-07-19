@@ -105,8 +105,19 @@ export class HomeService {
     this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
   }
 
-  openMapView() {
-    this.navController.navigateForward(['home', 'map-view']);
+  openMapView(mainPage: string) {
+    if (mainPage === 'my-bucketlists') {
+      const selectedBucketlist = this.selectedBucketlist();
+
+      this.navController.navigateForward([
+        mainPage,
+        selectedBucketlist?.id,
+        'map-view',
+      ]);
+      return;
+    }
+
+    this.navController.navigateForward([mainPage, 'map-view']);
   }
 
   setHomeFilters(filters: string[]) {

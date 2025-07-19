@@ -102,6 +102,8 @@ export class ProfileApiService {
           email: user?.email || '',
           photoUrl: photoUrl || '',
           public: isPublic,
+          createdAt: new Date().toISOString(),
+          createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
       });
     } catch (error) {
@@ -122,6 +124,8 @@ export class ProfileApiService {
           city: publicUser.city || '',
           about: publicUser.about || '',
           public: true,
+          updatedAt: new Date().toISOString(),
+          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
       });
     } catch (error) {
@@ -137,6 +141,8 @@ export class ProfileApiService {
       reference: `${USERS_COLLECTION}/${user?.uid}`,
       data: {
         public: false,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
     });
   }
@@ -183,6 +189,8 @@ export class ProfileApiService {
         reference: `${USERS_COLLECTION}/${uid}`,
         data: {
           public: true,
+          updatedAt: new Date().toISOString(),
+          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
       });
     }

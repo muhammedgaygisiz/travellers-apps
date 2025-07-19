@@ -23,7 +23,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoSettings)="service.onGotoSettingsClick()"
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoMyBucketlists)="service.onGotoMyBucketlists()"
-      (openMapView)="service.openMapView()"
+      (openMapView)="service.openMapView('home')"
       (filtersApplied)="service.setHomeFilters($event)"
       (filtersCleared)="service.clearHomeFilters()"
       (filterRemoved)="service.removeHomeFilter($event)"

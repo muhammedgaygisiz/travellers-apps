@@ -105,8 +105,8 @@ export class HomeService {
     this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
   }
 
-  openMapView() {
-    this.navController.navigateForward(['home', 'map-view']);
+  openMapView(mainPage: string) {
+    this.navController.navigateForward([mainPage, 'map-view']);
   }
 
   setHomeFilters(filters: string[]) {

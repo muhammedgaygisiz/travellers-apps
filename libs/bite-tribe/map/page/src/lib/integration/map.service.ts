@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { NavController } from '@ionic/angular/standalone';
 
@@ -8,6 +8,12 @@ export class MapService {
   private readonly navController = inject(NavController);
 
   bites = this.dataAccess.bites;
+  myBites = computed(() => {
+    const bites = this.dataAccess.bites();
+    const userId = this.dataAccess.userId();
+
+    return bites.filter((bite) => bite.userId === userId);
+  });
   isAuthenticated = this.dataAccess.isAuthenticated;
 
   logout() {

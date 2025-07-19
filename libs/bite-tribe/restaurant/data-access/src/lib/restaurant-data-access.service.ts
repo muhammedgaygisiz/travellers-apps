@@ -15,4 +15,22 @@ export class RestaurantDataAccessService {
   submitSocialMediaLinks(restaurantId: string, links: Link[]) {
     this.storeService.saveSocialMediaLinks(restaurantId, links);
   }
+
+  submitLikeClick(likeType: { likeType: string; biteId: string }) {
+    const bites = this.bites();
+    const userId = this.userId();
+
+    const bite = bites?.find((bite) => bite.id === likeType.biteId);
+    const likeFromUser = bite?.likes?.find(
+      (like: any) =>
+        like.userId === userId && like.likeType === likeType.likeType
+    );
+
+    if (likeFromUser) {
+      this.storeService.removeLike(likeType);
+      return;
+    }
+
+    this.storeService.submitLikeClick(likeType);
+  }
 }

@@ -13,8 +13,27 @@ export class ProfileDataAccessService {
   bites = toSignal(this.storeService.bites$, { initialValue: [] as Bite[] });
 
   biteCreator = toSignal(this.storeService.biteCreator$);
+  userId = toSignal(this.storeService.userId$, { initialValue: '' });
 
   logout() {
     this.storeService.logout();
+  }
+
+  submitLikeClick(likeType: { likeType: string; biteId: string }) {
+    const bites = this.bites();
+    const userId = this.userId();
+
+    const bite = bites?.find((bite) => bite.id === likeType.biteId);
+    const likeFromUser = bite?.likes?.find(
+      (like: any) =>
+        like.userId === userId && like.likeType === likeType.likeType
+    );
+
+    if (likeFromUser) {
+      this.storeService.removeLike(likeType);
+      return;
+    }
+
+    this.storeService.submitLikeClick(likeType);
   }
 }

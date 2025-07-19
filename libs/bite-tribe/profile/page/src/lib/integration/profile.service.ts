@@ -9,6 +9,7 @@ export class ProfileService {
 
   isAuthenticated = this.dataAccess.isAuthenticated;
   biteCreator = this.dataAccess.biteCreator;
+  userId = this.dataAccess.userId;
   bitesByUser = computed(() => {
     const bites = this.dataAccess.bites();
     const userId = this.dataAccess.biteCreator()?.userId;
@@ -30,5 +31,9 @@ export class ProfileService {
 
   gotoMyBites() {
     this.navController.navigateForward(['my-bites']);
+  }
+
+  likeButtonClicked(likeClick: { likeType: string; biteId: string }) {
+    this.dataAccess.submitLikeClick(likeClick);
   }
 }

@@ -100,7 +100,7 @@ export class BucketlistApiService {
           ]),
         ];
 
-        FirebaseFirestore.updateDocument({
+        await FirebaseFirestore.updateDocument({
           reference: bucketListDoc.snapshot.path,
           data: {
             biteIds: uniqueBiteIds,
@@ -121,7 +121,7 @@ export class BucketlistApiService {
     try {
       const user = await this.getUser();
 
-      FirebaseFirestore.addDocument({
+      await FirebaseFirestore.addDocument({
         reference: BUCKETLIST_COLLECTION,
         data: {
           userId: user?.uid || '',
@@ -150,7 +150,7 @@ export class BucketlistApiService {
         'biteIds'
       ]?.filter((currBiteId: string) => currBiteId !== biteId);
 
-      FirebaseFirestore.updateDocument({
+      await FirebaseFirestore.updateDocument({
         reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
         data: {
           biteIds: newBiteIdListInBucketList,
@@ -168,7 +168,7 @@ export class BucketlistApiService {
     try {
       const user = await this.getUser();
 
-      FirebaseFirestore.addDocument({
+      await FirebaseFirestore.addDocument({
         reference: BUCKETLIST_COLLECTION,
         data: {
           userId: user?.uid || '',

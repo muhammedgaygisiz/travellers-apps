@@ -68,7 +68,7 @@ export class LikeApiService {
     try {
       const user = await this.getUser();
 
-      FirebaseFirestore.setDocument({
+      await FirebaseFirestore.setDocument({
         reference: `${BITE_COLLECTION}/${like.biteId}/likes/${user?.uid}`,
         data: {
           ...like,

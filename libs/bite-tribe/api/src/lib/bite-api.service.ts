@@ -67,7 +67,7 @@ export class BiteApiService {
     try {
       const user = await this.getUser();
 
-      FirebaseFirestore.addDocument({
+      await FirebaseFirestore.addDocument({
         reference: BITE_COLLECTION,
         data: {
           ...bite,
@@ -89,7 +89,7 @@ export class BiteApiService {
 
   async saveEditedBite(bite: any) {
     try {
-      FirebaseFirestore.updateDocument({
+      await FirebaseFirestore.updateDocument({
         reference: `${BITE_COLLECTION}/${bite.id}`,
         data: {
           ...bite,
@@ -130,10 +130,10 @@ export class BiteApiService {
     }
   }
 
-  deleteBite(bite: any) {
+  async deleteBite(bite: any) {
     try {
       if (bite.id) {
-        FirebaseFirestore.deleteDocument({
+        await FirebaseFirestore.deleteDocument({
           reference: `${BITE_COLLECTION}/${bite.id}`,
         });
       }

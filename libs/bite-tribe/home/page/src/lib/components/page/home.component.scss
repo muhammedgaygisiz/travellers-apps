@@ -5,6 +5,11 @@
     bottom: calc(var(--ion-safe-area-bottom, 0) + 56px);
   }
 
+  .filter-sort-container {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .chip-container {
     display: flex;
     margin-bottom: 1rem;
@@ -12,6 +17,10 @@
 
     .add-filter {
       margin: 0;
+    }
+
+    ion-chip {
+      cursor: pointer;
     }
   }
 

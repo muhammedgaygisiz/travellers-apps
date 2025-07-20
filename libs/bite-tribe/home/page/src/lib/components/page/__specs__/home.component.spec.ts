@@ -123,4 +123,26 @@ describe('BiteTribeHomeComponent', () => {
     component.toggleNearbyFilter();
     expect(nearbyFilterToggledSpy).toHaveBeenCalled();
   });
+
+  describe('selectedSortingLabel', () => {
+    it('should return "Distance" when selectedSorting is "distance"', () => {
+      componentRef.setInput('selectedSorting', 'distance');
+      expect(component.selectedSortingLabel()).toBe('Distance');
+    });
+
+    it('should return "Likes" when selectedSorting is "likes"', () => {
+      componentRef.setInput('selectedSorting', 'likes');
+      expect(component.selectedSortingLabel()).toBe('Likes');
+    });
+
+    it('should return "Creation date" when selectedSorting is "date"', () => {
+      componentRef.setInput('selectedSorting', 'date');
+      expect(component.selectedSortingLabel()).toBe('Creation date');
+    });
+
+    it('should return "Distance" when selectedSorting is unknown', () => {
+      componentRef.setInput('selectedSorting', 'randomValue');
+      expect(component.selectedSortingLabel()).toBe('Distance');
+    });
+  });
 });

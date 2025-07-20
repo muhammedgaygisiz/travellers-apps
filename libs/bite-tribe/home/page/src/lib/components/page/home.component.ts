@@ -17,6 +17,10 @@ import {
   IonChip,
   IonContent,
   IonIcon,
+  IonItem,
+  IonList,
+  IonSelect,
+  IonSelectOption,
   IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
@@ -43,6 +47,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     NgTemplateOutlet,
     IonIcon,
     IonButton,
+    IonList,
+    IonItem,
+    IonSelect,
+    IonSelectOption,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -60,6 +68,7 @@ export class BiteTribeHomeComponent {
   showHeaderMenu = input(true);
   showSpinner = input<boolean>(false);
   isBitesLoading = input<boolean | undefined>();
+  selectedSorting = input<string>('distance');
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -92,6 +101,20 @@ export class BiteTribeHomeComponent {
 
   isNearbyFilterActive = computed(() => {
     return this.selectedFilters().includes('nearby');
+  });
+
+  selectedSortingLabel = computed(() => {
+    const selectedSorting = this.selectedSorting();
+    switch (selectedSorting) {
+      case 'distance':
+        return 'Distance';
+      case 'likes':
+        return 'Likes';
+      case 'date':
+        return 'Creation date';
+      default:
+        return 'Distance';
+    }
   });
 
   toggleNearbyFilter() {
@@ -129,5 +152,9 @@ export class BiteTribeHomeComponent {
     if (ionContent) {
       ionContent.scrollToTop(300);
     }
+  }
+
+  showSort() {
+    // todo
   }
 }

@@ -1,7 +1,10 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { Bite } from 'model';
 import { NavController } from '@ionic/angular/standalone';
+import { sortBitesByLikes } from '../utils/sort-bites-by-likes';
+import { sortBitesByDistance } from '../utils/sort-bites-by-distance';
+import { sortBitesByCreatedAt } from '../utils/sort-bites-by-created-at';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +27,8 @@ export class HomeService {
     return bites.filter((bite) => bite.userId === userId);
   });
 
+  sorting = signal('distance');
+
   selectedBucketlist = this.dataAccess.selectedBucketlist;
 
   bitesBySelectedBucketlist = computed(() => {
@@ -43,6 +48,29 @@ export class HomeService {
     const selectedBucketlist = this.selectedBucketlist();
 
     return selectedBucketlist?.name || 'My Bucketlist';
+  });
+
+  sortedBites = computed((): Bite[] => {
+    const bites = this.bites();
+    const sorting = this.sorting();
+
+    if (!bites?.length || !sorting) {
+      return bites;
+    }
+
+    if (sorting === 'distance') {
+      return sortBitesByDistance(bites);
+    }
+
+    if (sorting === 'likes') {
+      return sortBitesByLikes(bites);
+    }
+
+    if (sorting === 'createdAt') {
+      return sortBitesByCreatedAt(bites);
+    }
+
+    return bites;
   });
 
   logout() {
@@ -134,5 +162,9 @@ export class HomeService {
 
   toggleNearbyFilter() {
     this.dataAccess.toggleNearbyFilter();
+  }
+
+  sortingChange(value: string) {
+    this.sorting.set(value);
   }
 }

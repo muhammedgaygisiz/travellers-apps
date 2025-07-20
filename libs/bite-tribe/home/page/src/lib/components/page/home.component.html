@@ -54,9 +54,15 @@
 
       <ion-list>
         <ion-item>
-          <ion-select label="Sort by" [placeholder]="selectedSortingLabel()">
+          <ion-select
+            label="Sort by"
+            [placeholder]="sortingLabel()"
+            (ionChange)="emitSortingChange($event)"
+          >
             <ion-select-option value="distance">Distance</ion-select-option>
-            <ion-select-option value="date">Creation date</ion-select-option>
+            <ion-select-option value="createdAt"
+              >Creation date</ion-select-option
+            >
             <ion-select-option value="likes">Likes</ion-select-option>
           </ion-select>
         </ion-item>

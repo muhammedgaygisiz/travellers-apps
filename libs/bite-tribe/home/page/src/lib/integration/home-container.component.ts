@@ -8,13 +8,14 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   template: `
     <bt-home
       class="ion-page"
-      [bites]="service.bites()"
+      [bites]="service.sortedBites()"
       [allTags]="service.allTags()"
       [selectedFilters]="service.homeFilters()"
       [userId]="service.userId()"
       [isAuthenticated]="service.isAuthenticated()"
       [showSpinner]="true"
       [isBitesLoading]="service.isBitesLoading()"
+      [sorting]="service.sorting()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
@@ -28,6 +29,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (filtersCleared)="service.clearHomeFilters()"
       (filterRemoved)="service.removeHomeFilter($event)"
       (nearbyFilterToggled)="service.toggleNearbyFilter()"
+      (sortingChange)="service.sortingChange($event)"
     />
   `,
   imports: [BiteTribeHomeComponent],

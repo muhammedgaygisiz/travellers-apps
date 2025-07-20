@@ -8,6 +8,7 @@ import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
 import { Subject } from 'rxjs';
 import { CustomFilterModalComponent } from '../../custom-filter-modal/custom-filter-modal.component';
+import SpyInstance = jest.SpyInstance;
 
 describe('BiteTribeHomeComponent', () => {
   let component: BiteTribeHomeComponent;
@@ -126,23 +127,43 @@ describe('BiteTribeHomeComponent', () => {
 
   describe('selectedSortingLabel', () => {
     it('should return "Distance" when selectedSorting is "distance"', () => {
-      componentRef.setInput('selectedSorting', 'distance');
-      expect(component.selectedSortingLabel()).toBe('Distance');
+      componentRef.setInput('sorting', 'distance');
+      expect(component.sortingLabel()).toBe('Distance');
     });
 
     it('should return "Likes" when selectedSorting is "likes"', () => {
-      componentRef.setInput('selectedSorting', 'likes');
-      expect(component.selectedSortingLabel()).toBe('Likes');
+      componentRef.setInput('sorting', 'likes');
+      expect(component.sortingLabel()).toBe('Likes');
     });
 
     it('should return "Creation date" when selectedSorting is "date"', () => {
-      componentRef.setInput('selectedSorting', 'date');
-      expect(component.selectedSortingLabel()).toBe('Creation date');
+      componentRef.setInput('sorting', 'createdAt');
+      expect(component.sortingLabel()).toBe('Creation date');
     });
 
     it('should return "Distance" when selectedSorting is unknown', () => {
-      componentRef.setInput('selectedSorting', 'randomValue');
-      expect(component.selectedSortingLabel()).toBe('Distance');
+      componentRef.setInput('sorting', 'randomValue');
+      expect(component.sortingLabel()).toBe('Distance');
+    });
+  });
+
+  describe('emitSortingChange', () => {
+    let sortingChangeSpy: SpyInstance;
+
+    beforeEach(() => {
+      sortingChangeSpy = jest.spyOn(component.sortingChange, 'emit');
+    });
+
+    it('should emit sortingChange with the new value', () => {
+      const event = { detail: { value: 'likes' } };
+      component.emitSortingChange(event);
+      expect(sortingChangeSpy).toHaveBeenCalledWith('likes');
+    });
+
+    it('should not emit sortingChange if event.detail is undefined', () => {
+      const event = { detail: undefined };
+      component.emitSortingChange(event as any);
+      expect(sortingChangeSpy).not.toHaveBeenCalled();
     });
   });
 });

@@ -68,7 +68,7 @@ export class BiteTribeHomeComponent {
   showHeaderMenu = input(true);
   showSpinner = input<boolean>(false);
   isBitesLoading = input<boolean | undefined>();
-  selectedSorting = input<string>('distance');
+  sorting = input<string>('distance');
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -85,6 +85,7 @@ export class BiteTribeHomeComponent {
   readonly filtersCleared = output<void>();
   readonly filterRemoved = output<string>();
   readonly nearbyFilterToggled = output<void>();
+  readonly sortingChange = output<string>();
 
   ionContent = viewChild(IonContent);
 
@@ -103,14 +104,14 @@ export class BiteTribeHomeComponent {
     return this.selectedFilters().includes('nearby');
   });
 
-  selectedSortingLabel = computed(() => {
-    const selectedSorting = this.selectedSorting();
-    switch (selectedSorting) {
+  sortingLabel = computed(() => {
+    const sorting = this.sorting();
+    switch (sorting) {
       case 'distance':
         return 'Distance';
       case 'likes':
         return 'Likes';
-      case 'date':
+      case 'createdAt':
         return 'Creation date';
       default:
         return 'Distance';
@@ -154,7 +155,9 @@ export class BiteTribeHomeComponent {
     }
   }
 
-  showSort() {
-    // todo
+  emitSortingChange(event: { detail: { value: string } }) {
+    if (event.detail) {
+      this.sortingChange.emit(event.detail.value);
+    }
   }
 }

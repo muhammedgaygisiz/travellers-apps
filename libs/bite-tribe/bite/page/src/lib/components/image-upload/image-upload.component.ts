@@ -23,7 +23,7 @@ import {
   CameraSource,
   Photo,
 } from '@capacitor/camera';
-import { NavController, Platform } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { compressFile, compressPhoto } from 'image-compression';
 import { getExifDataFromFile } from '../page/utils/get-exif-data-from-file';
@@ -54,7 +54,6 @@ const photoOptions = {
 })
 export class ImageUploadComponent implements ControlValueAccessor {
   private readonly platform = inject(Platform);
-  private readonly navController = inject(NavController);
 
   position = input<Geopoint>();
 

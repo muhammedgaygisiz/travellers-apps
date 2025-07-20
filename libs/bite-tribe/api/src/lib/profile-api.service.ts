@@ -94,7 +94,7 @@ export class ProfileApiService {
         (data) => data.photoUrl?.length
       )?.photoUrl;
 
-      FirebaseFirestore.setDocument({
+      await FirebaseFirestore.setDocument({
         reference: `${USERS_COLLECTION}/${user?.uid}`,
         data: {
           userId: user?.uid || '',
@@ -115,7 +115,7 @@ export class ProfileApiService {
 
   async updateUser(publicUser: PublicUser) {
     try {
-      FirebaseFirestore.updateDocument({
+      await FirebaseFirestore.updateDocument({
         reference: `${USERS_COLLECTION}/${publicUser.userId}`,
         data: {
           displayName: publicUser.displayName,
@@ -137,14 +137,19 @@ export class ProfileApiService {
   async deleteUser() {
     const user = await this.getUser();
 
-    FirebaseFirestore.updateDocument({
-      reference: `${USERS_COLLECTION}/${user?.uid}`,
-      data: {
-        public: false,
-        updatedAt: new Date().toISOString(),
-        updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-      },
-    });
+    try {
+      await FirebaseFirestore.updateDocument({
+        reference: `${USERS_COLLECTION}/${user?.uid}`,
+        data: {
+          public: false,
+          updatedAt: new Date().toISOString(),
+          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
+        },
+      });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      this.errorHandler.handleError(error);
+    }
   }
 
   getUserByBiteId(bite: Bite | undefined) {
@@ -184,15 +189,20 @@ export class ProfileApiService {
   }
 
   private async setUserPublicFlag(uid: string | undefined) {
-    if (uid) {
-      FirebaseFirestore.updateDocument({
-        reference: `${USERS_COLLECTION}/${uid}`,
-        data: {
-          public: true,
-          updatedAt: new Date().toISOString(),
-          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-        },
-      });
+    try {
+      if (uid) {
+        await FirebaseFirestore.updateDocument({
+          reference: `${USERS_COLLECTION}/${uid}`,
+          data: {
+            public: true,
+            updatedAt: new Date().toISOString(),
+            updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error updating public user:', error);
+      this.errorHandler.handleError(error);
     }
   }
 }

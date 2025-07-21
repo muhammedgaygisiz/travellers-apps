@@ -1,8 +1,9 @@
-export const sortBitesByLikes = (bites: any[]): any[] => {
+import { Bite } from 'model';
+
+export const sortBitesByLikes = (bites: Bite[]): Bite[] => {
   return bites.sort((a, b) => {
-    if (!a || !b || a.likes == null || b.likes == null) {
-      return -1;
-    }
-    return b.likes.length - a.likes.length;
+    const likesA = a?.likes?.length ?? 0;
+    const likesB = b?.likes?.length ?? 0;
+    return likesB - likesA;
   });
 };

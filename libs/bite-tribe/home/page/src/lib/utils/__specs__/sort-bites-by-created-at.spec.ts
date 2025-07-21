@@ -1,11 +1,12 @@
+import { Bite } from 'model';
 import { sortBitesByCreatedAt } from '../sort-bites-by-created-at';
 
 describe('sortBitesByCreatedAt', () => {
   it('should sort bites by createdAt in descending order', () => {
     const bites = [
-      { id: 1, createdAt: '2023-10-01T12:00:00Z' },
-      { id: 2, createdAt: '2023-10-02T12:00:00Z' },
-      { id: 3, createdAt: '2023-09-30T12:00:00Z' },
+      { id: 1, createdAt: '2023-10-01T12:00:00Z' } as unknown as Bite,
+      { id: 2, createdAt: '2023-10-02T12:00:00Z' } as unknown as Bite,
+      { id: 3, createdAt: '2023-09-30T12:00:00Z' } as unknown as Bite,
     ];
 
     const sortedBites = sortBitesByCreatedAt(bites);
@@ -17,9 +18,9 @@ describe('sortBitesByCreatedAt', () => {
 
   it('should handle bites with missing createdAt', () => {
     const bites = [
-      { id: 1, createdAt: '2023-10-01T12:00:00Z' },
-      { id: 2 },
-      { id: 3, createdAt: '2023-09-30T12:00:00Z' },
+      { id: 1, createdAt: '2023-10-01T12:00:00Z' } as unknown as Bite,
+      { id: 2 } as unknown as Bite,
+      { id: 3, createdAt: '2023-09-30T12:00:00Z' } as unknown as Bite,
     ];
 
     const sortedBites = sortBitesByCreatedAt(bites);

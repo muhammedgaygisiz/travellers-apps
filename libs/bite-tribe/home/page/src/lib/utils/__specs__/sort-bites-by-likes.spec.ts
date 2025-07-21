@@ -1,11 +1,12 @@
 import { sortBitesByLikes } from '../sort-bites-by-likes';
+import { Bite } from 'model';
 
 describe('sortBitesByLikes', () => {
   it('should sort bites by likes in descending order', () => {
     const bites = [
-      { id: 1, likes: ['user1', 'user2'] },
-      { id: 2, likes: ['user1'] },
-      { id: 3, likes: ['user1', 'user2', 'user3'] },
+      { id: 1, likes: ['user1', 'user2'] } as unknown as Bite,
+      { id: 2, likes: ['user1'] } as unknown as Bite,
+      { id: 3, likes: ['user1', 'user2', 'user3'] } as unknown as Bite,
     ];
 
     const sortedBites = sortBitesByLikes(bites);
@@ -17,9 +18,9 @@ describe('sortBitesByLikes', () => {
 
   it('should handle bites with no likes', () => {
     const bites = [
-      { id: 1, likes: ['user1'] },
-      { id: 2, likes: [] },
-      { id: 3, likes: ['user1', 'user2'] },
+      { id: 1, likes: ['user1'] } as unknown as Bite,
+      { id: 2, likes: [] } as unknown as Bite,
+      { id: 3, likes: ['user1', 'user2'] } as unknown as Bite,
     ];
 
     const sortedBites = sortBitesByLikes(bites);

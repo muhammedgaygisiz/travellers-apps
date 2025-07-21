@@ -1,11 +1,12 @@
 import { sortBitesByDistance } from '../sort-bites-by-distance';
+import { Bite } from 'model';
 
 describe('sortBitesByDistance', () => {
   it('should sort bites by distance in ascending order', () => {
     const bites = [
-      { id: 1, distance: 10 },
-      { id: 2, distance: 5 },
-      { id: 3, distance: 20 },
+      { id: 1, distance: 10 } as unknown as Bite,
+      { id: 2, distance: 5 } as unknown as Bite,
+      { id: 3, distance: 20 } as unknown as Bite,
     ];
 
     const sortedBites = sortBitesByDistance(bites);
@@ -16,7 +17,11 @@ describe('sortBitesByDistance', () => {
   });
 
   it('should handle bites with missing distance', () => {
-    const bites = [{ id: 1, distance: 10 }, { id: 2 }, { id: 3, distance: 20 }];
+    const bites = [
+      { id: 1, distance: 10 } as unknown as Bite,
+      { id: 2 } as unknown as Bite,
+      { id: 3, distance: 20 } as unknown as Bite,
+    ];
 
     const sortedBites = sortBitesByDistance(bites);
 

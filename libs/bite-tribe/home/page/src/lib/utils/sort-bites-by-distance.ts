@@ -1,4 +1,6 @@
-export const sortBitesByDistance = (bites: any[]): any[] => {
+import { Bite } from 'model';
+
+export const sortBitesByDistance = (bites: Bite[]): Bite[] => {
   return bites.sort((a, b) => {
     if (!a || !b) {
       return 1;
@@ -12,6 +14,6 @@ export const sortBitesByDistance = (bites: any[]): any[] => {
     if (!a.distance && !b.distance) {
       return 1;
     }
-    return +a.distance - +b.distance;
+    return Number(a.distance) - Number(b.distance);
   });
 };

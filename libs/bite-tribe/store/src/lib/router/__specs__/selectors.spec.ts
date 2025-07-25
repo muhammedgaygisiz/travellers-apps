@@ -23,6 +23,12 @@ describe('Router Selectors', () => {
       const result = fromSelectors.biteId.projector(params);
       expect(result).toBeUndefined();
     });
+
+    it('should return undefined when params is undefined', () => {
+      const params = undefined as any;
+      const result = fromSelectors.biteId.projector(params);
+      expect(result).toBeUndefined();
+    });
   });
 
   describe('restaurantId', () => {
@@ -34,6 +40,12 @@ describe('Router Selectors', () => {
 
     it('should return undefined when restaurantId is not in params', () => {
       const params = {};
+      const result = fromSelectors.restaurantId.projector(params);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when params is undefined', () => {
+      const params = undefined as any;
       const result = fromSelectors.restaurantId.projector(params);
       expect(result).toBeUndefined();
     });
@@ -51,6 +63,12 @@ describe('Router Selectors', () => {
       const result = fromSelectors.menuId.projector(params);
       expect(result).toBeUndefined();
     });
+
+    it('should return undefined when params is undefined', () => {
+      const params = undefined as any;
+      const result = fromSelectors.menuId.projector(params);
+      expect(result).toBeUndefined();
+    });
   });
 
   describe('bucketlistId', () => {
@@ -62,6 +80,12 @@ describe('Router Selectors', () => {
 
     it('should return undefined when bucketlistId is not in params', () => {
       const params = {};
+      const result = fromSelectors.bucketlistId.projector(params);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when params is undefined', () => {
+      const params = undefined as any;
       const result = fromSelectors.bucketlistId.projector(params);
       expect(result).toBeUndefined();
     });

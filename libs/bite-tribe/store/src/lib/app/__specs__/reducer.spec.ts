@@ -4,6 +4,8 @@ import {
   loadedGpsPosition,
   loadedSettingsFromApi,
   setPublicProfile,
+  setHomeFilters,
+  clearHomeFilters,
 } from '../actions';
 import { reducer } from '../reducer';
 import { AppSlice } from '../app-slice.model';
@@ -117,6 +119,74 @@ describe('App Reducer', () => {
       const goPrivateAction = goPrivate();
 
       expect(reducer(INITIAL_STATE, goPrivateAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('setHomeFilters', () => {
+    it('should set home filters', () => {
+      const INITIAL_STATE = {
+        homeFilters: [],
+      } as unknown as AppSlice;
+      const NEW_STATE = {
+        homeFilters: ['#food', '#drink'],
+      } as AppSlice;
+
+      const setHomeFiltersAction = setHomeFilters({
+        filters: ['#food', '#drink'],
+      });
+
+      expect(reducer(INITIAL_STATE, setHomeFiltersAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+
+    it('should override existing home filters', () => {
+      const INITIAL_STATE = {
+        homeFilters: ['#old', '#filters'],
+      } as AppSlice;
+      const NEW_STATE = {
+        homeFilters: ['#new', '#filters'],
+      } as AppSlice;
+
+      const setHomeFiltersAction = setHomeFilters({
+        filters: ['#new', '#filters'],
+      });
+
+      expect(reducer(INITIAL_STATE, setHomeFiltersAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('clearHomeFilters', () => {
+    it('should clear all home filters', () => {
+      const INITIAL_STATE = {
+        homeFilters: ['#food', '#drink', '#coffee'],
+      } as AppSlice;
+      const NEW_STATE = {
+        homeFilters: [],
+      } as unknown as AppSlice;
+
+      const clearHomeFiltersAction = clearHomeFilters();
+
+      expect(reducer(INITIAL_STATE, clearHomeFiltersAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+
+    it('should handle clearing already empty filters', () => {
+      const INITIAL_STATE = {
+        homeFilters: [],
+      } as unknown as AppSlice;
+      const NEW_STATE = {
+        homeFilters: [],
+      } as unknown as AppSlice;
+
+      const clearHomeFiltersAction = clearHomeFilters();
+
+      expect(reducer(INITIAL_STATE, clearHomeFiltersAction)).toEqual({
         ...NEW_STATE,
       });
     });

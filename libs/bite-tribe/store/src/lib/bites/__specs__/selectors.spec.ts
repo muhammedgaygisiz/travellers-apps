@@ -55,12 +55,38 @@ describe('Bites Selectors', () => {
       const result = fromSelectors.cachedBite.projector(initialState);
       expect(result).toEqual(mockBite1);
     });
+
+    it('should return undefined if cached bite does not exist', () => {
+      const result = fromSelectors.cachedBite.projector({
+        ...initialState,
+        cachedBite: undefined,
+      });
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined if slice is undefined', () => {
+      const result = fromSelectors.cachedBite.projector(undefined as any);
+      expect(result).toBeUndefined();
+    });
   });
 
   describe('biteCreator', () => {
     it('should return the bite creator', () => {
       const result = fromSelectors.biteCreator.projector(initialState);
       expect(result).toEqual(mockUser);
+    });
+
+    it('should return undefined if bite creator does not exist', () => {
+      const result = fromSelectors.biteCreator.projector({
+        ...initialState,
+        biteCreator: undefined,
+      });
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined if slice is undefined', () => {
+      const result = fromSelectors.biteCreator.projector(undefined as any);
+      expect(result).toBeUndefined();
     });
   });
 

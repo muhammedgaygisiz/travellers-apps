@@ -6,8 +6,9 @@ const slice = createFeatureSelector<AppSlice>(key);
 
 export const gpsPosition = createSelector(slice, (slice) => slice?.position);
 export const settings = createSelector(slice, (slice) => slice?.settings);
-export const isPublicProfile = createSelector(slice, (slice) =>
-  slice?.profile ? true : false
+export const isPublicProfile = createSelector(
+  slice,
+  (slice) => !!slice?.profile
 );
 export const currency = createSelector(slice, (slice) => {
   return slice?.settings?.currency;

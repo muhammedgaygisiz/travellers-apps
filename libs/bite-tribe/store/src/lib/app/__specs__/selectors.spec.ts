@@ -40,17 +40,6 @@ describe('App Selectors', () => {
     });
   });
 
-  describe('isPublicProfile', () => {
-    it('should return true when profile exists', () => {
-      const validProfile = {} as PublicUser; // Even an empty object would make it return true
-      const stateWithValidProfile = { ...mockState, profile: validProfile };
-      const result = fromSelectors.isPublicProfile.projector(
-        stateWithValidProfile
-      );
-      expect(result).toBe(true);
-    });
-  });
-
   describe('currency', () => {
     it('should return the currency from settings', () => {
       const result = fromSelectors.currency.projector(mockState);

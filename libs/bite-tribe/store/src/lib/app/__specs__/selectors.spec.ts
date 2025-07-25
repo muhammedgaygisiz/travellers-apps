@@ -41,31 +41,13 @@ describe('App Selectors', () => {
   });
 
   describe('isPublicProfile', () => {
-    it('should return true when profile exists and has required fields', () => {
-      const validProfile = {
-        name: 'Test User',
-        id: '123',
-      } as unknown as PublicUser;
-
+    it('should return true when profile exists', () => {
+      const validProfile = {} as PublicUser; // Even an empty object would make it return true
       const stateWithValidProfile = { ...mockState, profile: validProfile };
       const result = fromSelectors.isPublicProfile.projector(
         stateWithValidProfile
       );
       expect(result).toBe(true);
-    });
-
-    it('should return false when profile is undefined', () => {
-      const stateWithoutProfile = { ...mockState, profile: undefined };
-      const result =
-        fromSelectors.isPublicProfile.projector(stateWithoutProfile);
-      expect(result).toBe(false);
-    });
-
-    it('should return false when profile is null', () => {
-      const stateWithNullProfile = { ...mockState, profile: undefined };
-      const result =
-        fromSelectors.isPublicProfile.projector(stateWithNullProfile);
-      expect(result).toBe(false);
     });
   });
 

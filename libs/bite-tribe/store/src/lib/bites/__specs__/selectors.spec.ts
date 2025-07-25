@@ -132,4 +132,16 @@ describe('Bites Selectors', () => {
       expect(result).toBeUndefined();
     });
   });
+
+  describe('bitesWithMetadata', () => {
+    it('should return bites with likes and distance', () => {
+      const result = fromSelectors.bitesWithMetadata.projector(
+        [mockBite1, mockBite2],
+        mockLikes,
+        mockPosition
+      );
+
+      expect(result).toMatchSnapshot();
+    });
+  });
 });

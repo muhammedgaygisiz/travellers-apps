@@ -45,3 +45,73 @@ Array [
   },
 ]
 `;
+
+exports[`Bites Selectors bitesWithMetadata should return bites without likes 1`] = `
+Array [
+  Object {
+    "distance": "0.00",
+    "id": "1",
+    "likes": Array [],
+    "name": "Test Bite 1",
+    "place": "Test Place 1",
+    "position": Object {
+      "latitude": 48.2082,
+      "longitude": 16.3738,
+    },
+    "tags": Array [
+      "#food",
+      "#vienna",
+    ],
+  },
+  Object {
+    "distance": "0.01",
+    "id": "2",
+    "likes": Array [],
+    "name": "Test Bite 2",
+    "place": "Test Place 2",
+    "position": Object {
+      "latitude": 48.2083,
+      "longitude": 16.3739,
+    },
+    "tags": Array [
+      "#drink",
+      "#coffee",
+    ],
+  },
+]
+`;
+
+exports[`Bites Selectors bitesWithMetadata should return bites without likes if no matching likes 1`] = `
+Array [
+  Object {
+    "distance": "0.00",
+    "id": "1",
+    "likes": Array [],
+    "name": "Test Bite 1",
+    "place": "Test Place 1",
+    "position": Object {
+      "latitude": 48.2082,
+      "longitude": 16.3738,
+    },
+    "tags": Array [
+      "#food",
+      "#vienna",
+    ],
+  },
+  Object {
+    "distance": "0.01",
+    "id": "2",
+    "likes": Array [],
+    "name": "Test Bite 2",
+    "place": "Test Place 2",
+    "position": Object {
+      "latitude": 48.2083,
+      "longitude": 16.3739,
+    },
+    "tags": Array [
+      "#drink",
+      "#coffee",
+    ],
+  },
+]
+`;

@@ -169,5 +169,25 @@ describe('Bites Selectors', () => {
 
       expect(result).toMatchSnapshot();
     });
+
+    it('should return bites without likes', () => {
+      const result = fromSelectors.bitesWithMetadata.projector(
+        [mockBite1, mockBite2],
+        [],
+        mockPosition
+      );
+
+      expect(result).toMatchSnapshot();
+    });
+
+    it('should return bites without likes if no matching likes', () => {
+      const result = fromSelectors.bitesWithMetadata.projector(
+        [mockBite1, mockBite2],
+        [{ id: 'like1', biteId: '5', userId: 'user1' }],
+        mockPosition
+      );
+
+      expect(result).toMatchSnapshot();
+    });
   });
 });

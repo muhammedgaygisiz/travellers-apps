@@ -120,4 +120,20 @@ describe('StarRatingComponent', () => {
       expect(mockFn).toHaveBeenCalled();
     });
   });
+
+  describe('getRating', () => {
+    it('should return value if set', () => {
+      component.value.set(4);
+      expect(component.getRating()).toBe(4);
+    });
+
+    it('should return rating input if value is not set', () => {
+      compRef.setInput('rating', 3);
+      expect(component.getRating()).toBe(3);
+    });
+
+    it('should return 0 if neither value nor rating input is set', () => {
+      expect(component.getRating()).toBe(0);
+    });
+  });
 });

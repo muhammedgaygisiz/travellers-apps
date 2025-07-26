@@ -46,6 +46,18 @@ export class StarRatingComponent implements ControlValueAccessor {
       .map((_, i) => i + 1);
   });
 
+  getRating = computed(() => {
+    const value = this.value();
+
+    if (value) {
+      return value;
+    }
+
+    const rating = this.rating();
+
+    return rating ? rating : 0;
+  });
+
   onRate(rating: number) {
     if (this.readOnly()) {
       return;

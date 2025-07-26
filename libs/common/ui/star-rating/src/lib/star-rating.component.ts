@@ -3,12 +3,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  forwardRef,
   input,
   output,
   signal,
 } from '@angular/core';
 import { IonIcon } from '@ionic/angular/standalone';
 import { IsFilledPipe } from './pipes/is-filled.pipe';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -17,8 +19,15 @@ import { IsFilledPipe } from './pipes/is-filled.pipe';
   styleUrl: './star-rating.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonIcon, IsFilledPipe],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => StarRatingComponent),
+      multi: true,
+    },
+  ],
 })
-export class StarRatingComponent {
+export class StarRatingComponent implements ControlValueAccessor {
   rating = input<number | undefined>(0);
 
   max = input(5);
@@ -43,6 +52,13 @@ export class StarRatingComponent {
     }
 
     this.rated.emit(rating);
+    this.setValueAndTriggerChange(rating);
+  }
+
+  setValueAndTriggerChange(rating: number) {
+    this.writeValue(rating);
+    this._onChange(rating);
+    this._onTouch();
   }
 
   onHover(index: number) {
@@ -51,5 +67,24 @@ export class StarRatingComponent {
 
   onLeave() {
     this.hoveredIndex.set(-1);
+  }
+
+  value = signal<string | null>(null);
+
+  writeValue(obj: any): void {
+    this.value.set(obj);
+  }
+
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-empty-function
+  _onChange: (value: number | null) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  _onTouch: () => void = () => {};
+
+  registerOnChange(fn: any): void {
+    this._onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this._onTouch = fn;
   }
 }

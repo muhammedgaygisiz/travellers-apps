@@ -1,7 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StarRatingComponent } from '../star-rating.component';
-import { IonIcon } from '@ionic/angular/standalone';
-import { IsFilled } from '../pipes/is-filled.pipe';
 import { ComponentRef } from '@angular/core';
 
 describe('StarRatingComponent', () => {
@@ -11,7 +9,7 @@ describe('StarRatingComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StarRatingComponent, IonIcon, IsFilled],
+      imports: [StarRatingComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(StarRatingComponent);

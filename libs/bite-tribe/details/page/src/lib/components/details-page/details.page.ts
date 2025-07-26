@@ -43,6 +43,7 @@ import { IsInPipe } from '../../pipes/is-in-any.pipe';
 import { LikesComponent } from 'bite-tribe-common/bite';
 import { Platform } from '@ionic/angular';
 import { AppLauncher } from '@capacitor/app-launcher';
+import { StarRatingComponent } from 'common/ui/star-rating';
 
 @Component({
   selector: 'details-page',
@@ -72,6 +73,7 @@ import { AppLauncher } from '@capacitor/app-launcher';
     IsInPipe,
     IsInPipe,
     LikesComponent,
+    StarRatingComponent,
   ],
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix

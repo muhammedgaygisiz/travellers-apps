@@ -1,0 +1,14 @@
+<div class="star-rating">
+  @let stars = getStars(); @for (star of stars; let i = $index; track i) {
+  <ion-icon
+    [name]="
+      (i + 1 | isFilled : hoveredIndex() : rating()) ? 'star' : 'star-outline'
+    "
+    size="large"
+    (click)="onRate(i + 1)"
+    (mouseover)="onHover(i + 1)"
+    (mouseleave)="onLeave()"
+    [class.read-only]="readOnly()"
+  />
+  }
+</div>

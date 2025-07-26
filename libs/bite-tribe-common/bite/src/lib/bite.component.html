@@ -29,10 +29,16 @@
       </ion-card-header>
 
       <ion-card-content>
+        @if (biteData?.rating) {
+        <div class="ion-margin-vertical">
+          <star-rating [rating]="biteData?.rating" readOnly />
+        </div>
+        }
+
         <ion-text
           color="primary {{ showEditButton() ? 'ion-margin-bottom' : '' }}"
-          >{{ biteData?.distance | toMetric }}</ion-text
-        >
+          >{{ biteData?.distance | toMetric }}
+        </ion-text>
         @if (!showEditButton()) {
         <bt-likes
           class="ion-margin-top"
@@ -42,7 +48,7 @@
         />
         } @if (showEditButton()) {
         <div class="bite-actions">
-          <ion-button (click)="gotoEdit.emit(biteData)"> Edit </ion-button>
+          <ion-button (click)="gotoEdit.emit(biteData)"> Edit</ion-button>
           <ion-button
             color="danger"
             fill="outline"

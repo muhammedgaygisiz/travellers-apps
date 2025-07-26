@@ -103,6 +103,7 @@ describe('BitePage', () => {
       place: 'Test Place',
       tags: 'fish healthy',
       price: 9.99,
+      rating: 0,
       currency: 'EUR',
       restaurantId: '',
       position: {
@@ -164,6 +165,7 @@ describe('BitePage', () => {
         name: 'Test Bite',
         place: 'Test Place',
         price: 10,
+        rating: 0,
         currency: 'USD',
         tags: 'test food',
         position: { latitude: 42, longitude: 24 },

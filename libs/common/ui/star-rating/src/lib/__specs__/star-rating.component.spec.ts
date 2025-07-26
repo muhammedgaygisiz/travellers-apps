@@ -7,11 +7,7 @@ describe('StarRatingComponent', () => {
   let fixture: ComponentFixture<StarRatingComponent>;
   let compRef: ComponentRef<StarRatingComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [StarRatingComponent],
-    }).compileComponents();
-
+  beforeEach(() => {
     fixture = TestBed.createComponent(StarRatingComponent);
     component = fixture.componentInstance;
     compRef = fixture.componentRef;

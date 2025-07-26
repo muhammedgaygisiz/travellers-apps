@@ -102,4 +102,22 @@ describe('StarRatingComponent', () => {
       expect(component.readOnly()).toBe(true);
     });
   });
+
+  describe('registerOnChange', () => {
+    it('should register onChange callback', () => {
+      const mockFn = jest.fn();
+      component.registerOnChange(mockFn);
+      component._onChange(5);
+      expect(mockFn).toHaveBeenCalledWith(5);
+    });
+  });
+
+  describe('registerOnTouched', () => {
+    it('should register onTouch callback', () => {
+      const mockFn = jest.fn();
+      component.registerOnTouched(mockFn);
+      component._onTouch();
+      expect(mockFn).toHaveBeenCalled();
+    });
+  });
 });

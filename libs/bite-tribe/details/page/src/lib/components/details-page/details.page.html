@@ -41,7 +41,7 @@
       </div>
       }
 
-      <div class="title-container">
+      <div class="title-container ion-margin-bottom">
         <h1>{{ biteData?.name }}</h1>
         <ion-icon
           name="navigate-outline"
@@ -50,6 +50,10 @@
           class="ion-margin-start navigate"
           (click)="openNavigation()"
         />
+      </div>
+
+      <div class="star-rating ion-margin-bottom">
+        <star-rating readOnly [rating]="biteData?.rating" />
       </div>
 
       <div class="restaurant-distance-price fields ion-margin-bottom">
@@ -69,10 +73,6 @@
 
       <div class="age-bar ion-margin-bottom">
         <span>{{ biteData?.createdAt | timeAgo }}</span>
-      </div>
-
-      <div class="star-rating ion-margin-bottom">
-        <star-rating />
       </div>
 
       <div class="like-and-bucketlist-bar ion-margin-bottom">

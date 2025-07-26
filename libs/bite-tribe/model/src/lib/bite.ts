@@ -12,6 +12,7 @@ export interface Bite {
   position: Geopoint;
   restaurantId?: string;
   tags?: string[];
+  rating?: number;
 
   createdAt?: string;
   createdAtTimestamp?: number;

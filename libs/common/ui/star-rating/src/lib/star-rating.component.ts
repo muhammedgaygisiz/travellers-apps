@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -7,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { IonIcon } from '@ionic/angular/standalone';
-import { IsFilled } from './pipes/is-filled.pipe';
+import { IsFilledPipe } from './pipes/is-filled.pipe';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -15,12 +16,14 @@ import { IsFilled } from './pipes/is-filled.pipe';
   templateUrl: './star-rating.component.html',
   styleUrl: './star-rating.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonIcon, IsFilled],
+  imports: [IonIcon, IsFilledPipe],
 })
 export class StarRatingComponent {
-  rating = input(0);
+  rating = input<number | undefined>(0);
+
   max = input(5);
-  readOnly = input(false);
+
+  readOnly = input(false, { transform: booleanAttribute });
 
   rated = output<number>();
 

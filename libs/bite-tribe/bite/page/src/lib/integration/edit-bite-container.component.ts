@@ -7,6 +7,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <bite
+      class="ion-page"
       title="Edit Bite"
       [bite]="service.bite()"
       [image]="service.imageToDisplay() || ''"

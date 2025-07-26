@@ -110,7 +110,7 @@ export class BitePage {
         currency: bite.currency,
         tags: toTagsString(bite.tags),
         position: bite.position,
-        restaurantId: bite.restaurantId,
+        restaurantId: bite.restaurantId || '',
       });
     }
 

@@ -7,6 +7,6 @@ export class IsFilledPipe implements PipeTransform {
     hoveredIndex: number,
     rating: number | undefined = 0
   ): boolean {
-    return index <= (hoveredIndex !== -1 ? hoveredIndex : rating);
+    return index <= (hoveredIndex !== -1 ? hoveredIndex : rating ?? 0);
   }
 }

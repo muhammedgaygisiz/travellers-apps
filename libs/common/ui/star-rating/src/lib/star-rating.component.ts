@@ -69,7 +69,7 @@ export class StarRatingComponent implements ControlValueAccessor {
     this.hoveredIndex.set(-1);
   }
 
-  value = signal<string | null>(null);
+  value = signal<number | null>(null);
 
   writeValue(obj: any): void {
     this.value.set(obj);

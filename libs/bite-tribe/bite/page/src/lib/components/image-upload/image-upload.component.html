@@ -1,10 +1,10 @@
+@if(!value()) {
 <div class="ion-margin-bottom">
   <ion-note class="hint">
     <b> Click into the box to upload or take a photo. </b>
   </ion-note>
 </div>
-
-@if (isWeb()) {
+} @if (isWeb()) {
 <input
   type="file"
   #fileUploader

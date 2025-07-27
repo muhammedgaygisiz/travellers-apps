@@ -30,7 +30,7 @@ const byDistance = (a: any, b: any) => {
   return a.distance - b.distance;
 };
 
-const bitesWithMetadata = createSelector(
+export const bitesWithMetadata = createSelector(
   allBites,
   likes,
   gpsPosition,

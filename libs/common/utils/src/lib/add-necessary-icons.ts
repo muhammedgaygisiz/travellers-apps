@@ -31,6 +31,8 @@ import {
   personCircleOutline,
   handRightOutline,
   informationCircleOutline,
+  star,
+  starOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -66,5 +68,7 @@ export const addNecessaryIcons = () => {
     personCircleOutline,
     handRightOutline,
     informationCircleOutline,
+    star,
+    starOutline,
   });
 };

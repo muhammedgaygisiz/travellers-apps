@@ -23,6 +23,7 @@ import { Dialog } from '@angular/cdk/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { ConfirmDialogComponent } from 'bite-tribe-common/confirm-dialog';
+import { StarRatingComponent } from 'common/ui/star-rating';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -40,6 +41,7 @@ import { ConfirmDialogComponent } from 'bite-tribe-common/confirm-dialog';
     IonButton,
     IonText,
     WithFirstLetterUpperCasePipe,
+    StarRatingComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -7,7 +7,6 @@ import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
 import { Subject } from 'rxjs';
-import { CustomFilterModalComponent } from '../../custom-filter-modal/custom-filter-modal.component';
 import SpyInstance = jest.SpyInstance;
 
 describe('BiteTribeHomeComponent', () => {
@@ -15,7 +14,6 @@ describe('BiteTribeHomeComponent', () => {
   let fixture: ComponentFixture<BiteTribeHomeComponent>;
   let navController: NavController;
   let componentRef: ComponentRef<BiteTribeHomeComponent>;
-  let dialogOpenSpy: jest.SpyInstance;
   let closedSubject: Subject<any>;
 
   beforeEach(() => {
@@ -47,7 +45,6 @@ describe('BiteTribeHomeComponent', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
     fixture.detectChanges();
-    dialogOpenSpy = jest.spyOn(dialogMock, 'open');
   });
 
   it('should create', () => {
@@ -68,24 +65,6 @@ describe('BiteTribeHomeComponent', () => {
     fixture.detectChanges();
 
     expect(component.bites()).toEqual(mockBites);
-  });
-
-  it('should open custom filter modal and emit filtersCleared', () => {
-    const filtersClearedSpy = jest.spyOn(component.filtersCleared, 'emit');
-    component.openCustomFilterModal();
-    expect(dialogOpenSpy).toHaveBeenCalledWith(
-      CustomFilterModalComponent,
-      expect.any(Object)
-    );
-    closedSubject.next({ clearFilters: true });
-    expect(filtersClearedSpy).toHaveBeenCalled();
-  });
-
-  it('should open custom filter modal and emit filtersApplied', () => {
-    const filtersAppliedSpy = jest.spyOn(component.filtersApplied, 'emit');
-    component.openCustomFilterModal();
-    closedSubject.next({ selectedTags: ['tag1', 'tag2'] });
-    expect(filtersAppliedSpy).toHaveBeenCalledWith(['tag1', 'tag2']);
   });
 
   it('should emit filterRemoved when removeFilter is called', () => {

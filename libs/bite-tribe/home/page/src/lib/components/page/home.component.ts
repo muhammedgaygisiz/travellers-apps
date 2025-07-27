@@ -3,8 +3,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
-  inject,
   input,
   output,
   viewChild,
@@ -27,9 +25,6 @@ import {
 import { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
-import { CustomFilterModalComponent } from '../custom-filter-modal/custom-filter-modal.component';
-import { Dialog } from '@angular/cdk/dialog';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TypeaheadComponent } from '../typeahead/type-ahead.component';
 
 @Component({
@@ -91,9 +86,6 @@ export class BiteTribeHomeComponent {
 
   ionContent = viewChild(IonContent);
 
-  dialog = inject(Dialog);
-  private readonly destroyRef = inject(DestroyRef);
-
   // Bites are already filtered by the store, just pass through
   filteredBites = computed(() => this.bites() || []);
 
@@ -122,27 +114,6 @@ export class BiteTribeHomeComponent {
 
   toggleNearbyFilter() {
     this.nearbyFilterToggled.emit();
-  }
-
-  async openCustomFilterModal() {
-    const dialogRef = this.dialog.open(CustomFilterModalComponent, {
-      data: {
-        existingTags: this.allTags(),
-        selectedFilters: this.selectedFilters(),
-      },
-    });
-
-    dialogRef.closed
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result: any) => {
-        if (result.clearFilters) {
-          this.filtersCleared.emit();
-        }
-
-        if (result.selectedTags) {
-          this.filtersApplied.emit(result.selectedTags);
-        }
-      });
   }
 
   tagsSelectionChanged(tagsSelection: any, modal: IonModal) {

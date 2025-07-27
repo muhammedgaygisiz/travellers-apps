@@ -15,7 +15,7 @@
   (gotoMyBites)="gotoMyBites.emit()"
 >
   <ion-content class="ion-padding">
-    @if(moreThen5Bites()) {
+    @if (moreThen5Bites()) {
     <ion-button slot="fixed" (click)="scrollToTop()">
       <ion-icon name="chevron-up-outline" />
     </ion-button>
@@ -23,34 +23,52 @@
 
     <h1>{{ title() }}</h1>
 
-    <div class="chip-container">
-      <ion-chip (click)="openMapView.emit()">Map View</ion-chip>
-      <ion-chip
-        [color]="isNearbyFilterActive() ? 'primary' : undefined"
-        (click)="toggleNearbyFilter()"
-      >
-        Nearby
-      </ion-chip>
-      <ion-chip (click)="openCustomFilterModal()">
-        <ion-icon name="add" class="add-filter" />
-        @if (selectedFilters().length > 0) {
-        <span>({{ selectedFilters().length }})</span>
+    <div class="filter-sort-container">
+      <div class="chip-container">
+        <ion-chip (click)="openMapView.emit()">Map View</ion-chip>
+        <ion-chip
+          [color]="isNearbyFilterActive() ? 'primary' : undefined"
+          (click)="toggleNearbyFilter()"
+        >
+          Nearby
+        </ion-chip>
+        <ion-chip (click)="openCustomFilterModal()">
+          <ion-icon name="add" class="add-filter" />
+          @if (selectedFilters().length > 0) {
+          <span>({{ selectedFilters().length }})</span>
+          }
+        </ion-chip>
+
+        <!-- Display selected filter chips with minus buttons -->
+        @for (filter of selectedFilters(); track filter) {
+        <ion-chip>
+          <span>{{ filter }}</span>
+          <ion-icon
+            name="close"
+            (click)="removeFilter(filter)"
+            style="margin-left: 4px; cursor: pointer"
+          />
+        </ion-chip>
         }
-      </ion-chip>
+      </div>
 
-      <!-- Display selected filter chips with minus buttons -->
-      @for (filter of selectedFilters(); track filter) {
-      <ion-chip>
-        <span>{{ filter }}</span>
-        <ion-icon
-          name="close"
-          (click)="removeFilter(filter)"
-          style="margin-left: 4px; cursor: pointer"
-        />
-      </ion-chip>
-      }
+      <ion-list>
+        <ion-item>
+          <ion-select
+            label="Sort by"
+            [placeholder]="sortingLabel()"
+            (ionChange)="emitSortingChange($event)"
+          >
+            <ion-select-option value="distance">Distance</ion-select-option>
+            <ion-select-option value="createdAt"
+              >Creation date</ion-select-option
+            >
+            <ion-select-option value="likes">Likes</ion-select-option>
+            <ion-select-option value="rating">Rating</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
     </div>
-
     <ng-container
       *ngTemplateOutlet="
         showSpinner() ? withLoadingTemplate : withoutLoadingTemplate

@@ -9,6 +9,8 @@ ion-footer {
 
 ion-alert {
   .alert-wrapper {
+    background-color: var(--ion-background-color) !important;
+
     .alert-head {
       h2 {
         color: var(--ion-color-primary);

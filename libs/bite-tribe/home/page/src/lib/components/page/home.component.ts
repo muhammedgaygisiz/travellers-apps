@@ -117,7 +117,7 @@ export class BiteTribeHomeComponent {
     return selectedFilters.length + (distance ? 1 : 0);
   });
 
-  tagsSelectionChanged(tagsSelection: string[], modal: IonModal) {
+  tagsSelectionChanged(tagsSelection: string[] | undefined, modal: IonModal) {
     modal.dismiss();
 
     if (tagsSelection) {

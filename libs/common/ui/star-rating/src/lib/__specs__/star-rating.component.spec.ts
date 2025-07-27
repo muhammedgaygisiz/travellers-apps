@@ -18,25 +18,6 @@ describe('StarRatingComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('getStars', () => {
-    it('should generate correct array of stars based on max input', () => {
-      compRef.setInput('max', 3);
-      const stars = component.getStars();
-      expect(stars).toEqual([1, 2, 3]);
-    });
-
-    it('should update stars array when max changes', () => {
-      compRef.setInput('max', 4);
-      let stars = component.getStars();
-      expect(stars).toEqual([1, 2, 3, 4]);
-
-      compRef.setInput('max', 3);
-
-      stars = component.getStars();
-      expect(stars).toEqual([1, 2, 3]);
-    });
-  });
-
   describe('onRate', () => {
     it('should emit rated event when not readonly', () => {
       const ratedSpy = jest.spyOn(component.rated, 'emit');
@@ -88,17 +69,14 @@ describe('StarRatingComponent', () => {
   describe('inputs', () => {
     it('should initialize with default values', () => {
       expect(component.rating()).toBe(0);
-      expect(component.max()).toBe(5);
       expect(component.readOnly()).toBe(false);
     });
 
     it('should update input values', () => {
       compRef.setInput('rating', 3);
-      compRef.setInput('max', 10);
       compRef.setInput('readOnly', true);
 
       expect(component.rating()).toBe(3);
-      expect(component.max()).toBe(10);
       expect(component.readOnly()).toBe(true);
     });
   });

@@ -1,4 +1,4 @@
-import { Bite, Geopoint, PublicUser, Settings } from 'model';
+import { Bite, Geopoint, PublicUser } from 'model';
 import * as fromSelectors from '../selectors';
 import { EntityState } from '@ngrx/entity';
 
@@ -95,13 +95,13 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ];
+      ] as any[];
 
       const result = fromSelectors.bites.projector(
         bitesWithMetadata,
         [], // no filters
-        {} as Settings,
-        mockPosition // GPS position
+        mockPosition, // mock GPS position
+        undefined
       );
 
       expect(result).toEqual(bitesWithMetadata);
@@ -111,13 +111,13 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ];
+      ] as any[];
 
       const result = fromSelectors.bites.projector(
         bitesWithMetadata,
         ['food'], // filter by food tag
-        {} as Settings,
-        mockPosition
+        mockPosition,
+        undefined
       );
 
       expect(result).toHaveLength(1);
@@ -130,7 +130,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ];
+      ] as any[];
 
       const result = fromSelectors.allTags.projector(bitesWithMetadata);
       expect(result).toEqual(['coffee', 'drink', 'food', 'vienna']);
@@ -142,7 +142,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ];
+      ] as any[];
 
       const result = fromSelectors.bite.projector('1', bitesWithMetadata);
       expect(result).toEqual(bitesWithMetadata[0]);
@@ -152,7 +152,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ];
+      ] as any[];
 
       const result = fromSelectors.bite.projector('3', bitesWithMetadata);
       expect(result).toBeUndefined();

@@ -4,12 +4,7 @@ import { adapter } from './adapter';
 import { Bite, PublicUser } from 'model';
 import { biteId } from '../router/selectors';
 import { likes } from '../likes/selectors';
-import {
-  gpsPosition,
-  homeDistance,
-  homeFilters,
-  settings,
-} from '../app/selectors';
+import { gpsPosition, homeDistance, homeFilters } from '../app/selectors';
 import { haversineDistance } from 'utils';
 import { EntityState } from '@ngrx/entity';
 import { handleNearbyFilter } from './utils/handle-nearby-filter';
@@ -61,10 +56,9 @@ export const bitesWithMetadata = createSelector(
 export const bites = createSelector(
   bitesWithMetadata,
   homeFilters,
-  settings,
   gpsPosition,
   homeDistance,
-  (bites, filters, appSettings, gpsPosition, homeDistance) => {
+  (bites, filters, gpsPosition, homeDistance) => {
     if (!filters.length && !homeDistance) {
       return bites;
     }
@@ -72,7 +66,6 @@ export const bites = createSelector(
     const filteredBitesByNearby = handleNearbyFilter(
       homeDistance,
       gpsPosition,
-      appSettings,
       bites
     );
 

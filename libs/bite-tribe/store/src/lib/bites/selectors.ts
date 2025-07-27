@@ -9,6 +9,7 @@ import { haversineDistance } from 'utils';
 import { EntityState } from '@ngrx/entity';
 import { handleNearbyFilter } from './utils/handle-nearby-filter';
 import { handleTagFilters } from './utils/handle-tag-filters';
+import { getLikesForBite } from './utils/get-likes-for-bite';
 
 const slice = createFeatureSelector<
   EntityState<any> & {
@@ -39,7 +40,7 @@ export const bitesWithMetadata = createSelector(
       .map((bite) => {
         return {
           ...bite,
-          likes: likes.filter((like) => bite.id === like.biteId) || [],
+          likes: getLikesForBite(likes, bite),
           distance: haversineDistance(
             bite.position?.latitude,
             bite.position?.longitude,

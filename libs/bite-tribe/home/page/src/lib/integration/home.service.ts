@@ -5,6 +5,7 @@ import { NavController } from '@ionic/angular/standalone';
 import { sortBitesByLikes } from '../utils/sort-bites-by-likes';
 import { sortBitesByDistance } from '../utils/sort-bites-by-distance';
 import { sortBitesByCreatedAt } from '../utils/sort-bites-by-created-at';
+import { sortBitesByRating } from '../utils/sort-bites-by-rating';
 
 @Injectable({
   providedIn: 'root',
@@ -68,6 +69,10 @@ export class HomeService {
 
     if (sorting === 'createdAt') {
       return sortBitesByCreatedAt(bites);
+    }
+
+    if (sorting === 'rating') {
+      return sortBitesByRating(bites);
     }
 
     return bites;

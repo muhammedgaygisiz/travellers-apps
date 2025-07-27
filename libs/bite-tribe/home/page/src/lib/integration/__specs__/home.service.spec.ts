@@ -20,6 +20,11 @@ jest.mock('../../utils/sort-bites-by-created-at', () => ({
   sortBitesByCreatedAt: (): void => sortBitesByCreatedAtMock(),
 }));
 
+const sortBitesByRatingMock = jest.fn();
+jest.mock('../../utils/sort-bites-by-rating', () => ({
+  sortBitesByRating: (): void => sortBitesByRatingMock(),
+}));
+
 class Mock {
   bites = () => [];
   allTags = () => [];
@@ -172,13 +177,35 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.sorting.set('likes');
         const bites = [
-          { id: '1', likes: 2 },
-          { id: '2', likes: 5 },
+          { id: '1', likes: [{ userId: 'user1' }, { userId: 'user2' }] },
+          {
+            id: '2',
+            likes: [
+              { userId: 'user1' },
+              { userId: 'user2' },
+              { userId: 'user3' },
+            ],
+          },
         ];
         bitesSpy.mockReturnValue(bites);
 
         service.sortedBites();
         expect(sortBitesByLikesMock).toHaveBeenCalledTimes(1);
+      }
+    ));
+
+    it('should return bites sorted by likes when sorting is "rating"', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.sorting.set('rating');
+        const bites = [
+          { id: '1', rating: 2 },
+          { id: '2', rating: 5 },
+        ];
+        bitesSpy.mockReturnValue(bites);
+
+        service.sortedBites();
+        expect(sortBitesByRatingMock).toHaveBeenCalledTimes(1);
       }
     ));
 
@@ -399,6 +426,22 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.openMapView('home');
         expect(navigateForwardSpy).toHaveBeenCalledWith(['home', 'map-view']);
+      }
+    ));
+  });
+
+  describe('sortingChange', () => {
+    let sortingSpy: SpyInstance;
+
+    beforeEach(inject([HomeService], (service: HomeService) => {
+      sortingSpy = jest.spyOn(service.sorting, 'set').mockImplementation();
+    }));
+
+    it('should set the sorting value', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.sortingChange('distance');
+        expect(sortingSpy).toHaveBeenCalledWith('distance');
       }
     ));
   });

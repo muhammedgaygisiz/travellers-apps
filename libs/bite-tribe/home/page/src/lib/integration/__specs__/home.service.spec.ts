@@ -445,4 +445,55 @@ describe('HomeService', () => {
       }
     ));
   });
+
+  describe('myBites', () => {
+    let bitesSpy: SpyInstance;
+
+    beforeEach(() => {
+      bitesSpy = jest.spyOn(homeDataAccessService, 'bites').mockReturnValue([]);
+    });
+
+    it('should return bites for the current user', inject(
+      [HomeService],
+      (service: HomeService) => {
+        const bites = [
+          { id: '1', userId: 'test-user-id' },
+          { id: '2', userId: 'other-user-id' },
+        ];
+        bitesSpy.mockReturnValue(bites);
+
+        const result = service.myBites();
+        expect(result).toEqual([bites[0]]);
+      }
+    ));
+  });
+
+  describe('selectedBucketlistTitle', () => {
+    let selectedBucketlistSpy: SpyInstance;
+
+    beforeEach(() => {
+      selectedBucketlistSpy = jest
+        .spyOn(homeDataAccessService, 'selectedBucketlist')
+        .mockReturnValue(null as any);
+    });
+
+    it('should return My Bucketlist string if selectedBucketlist is null', inject(
+      [HomeService],
+      (service: HomeService) => {
+        const result = service.selectedBucketlistTitle();
+        expect(result).toBe('My Bucketlist');
+      }
+    ));
+
+    it('should return title of the selected bucketlist', inject(
+      [HomeService],
+      (service: HomeService) => {
+        const bucketlist = { title: 'My Bucketlist' } as any;
+        selectedBucketlistSpy.mockReturnValue(bucketlist);
+
+        const result = service.selectedBucketlistTitle();
+        expect(result).toBe(bucketlist.title);
+      }
+    ));
+  });
 });

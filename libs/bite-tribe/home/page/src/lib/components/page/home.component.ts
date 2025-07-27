@@ -25,7 +25,7 @@ import {
 import { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
-import { TypeaheadComponent } from '../typeahead/type-ahead.component';
+import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
 
 @Component({
   selector: 'bt-home',

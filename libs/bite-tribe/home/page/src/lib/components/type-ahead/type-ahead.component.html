@@ -8,12 +8,27 @@
       <ion-button (click)="confirmChanges()">Done</ion-button>
     </ion-buttons>
   </ion-toolbar>
-  <ion-toolbar>
-    <ion-searchbar (ionInput)="searchbarInput($event)"></ion-searchbar>
-  </ion-toolbar>
 </ion-header>
 
 <ion-content>
+  <ion-list [inset]="true">
+    <ion-item>
+      <ion-input
+        label="Distance"
+        fill="solid"
+        placeholder="meters"
+        [clearInput]="true"
+        type="number"
+        inputmode="decimal"
+      />
+    </ion-item>
+    <ion-item class="ion-margin-top">
+      <ion-range label="Price" [pin]="true" [max]="77" />
+    </ion-item>
+  </ion-list>
+
+  <ion-searchbar (ionInput)="searchbarInput($event)" />
+
   <ion-list id="modal-list" [inset]="true">
     @for (item of filteredItems; track item) {
     <ion-item>
@@ -21,8 +36,9 @@
         [value]="item"
         [checked]="isChecked(item)"
         (ionChange)="checkboxChange($event)"
-        >{{ item }}</ion-checkbox
       >
+        {{ item }}
+      </ion-checkbox>
     </ion-item>
     }
   </ion-list>

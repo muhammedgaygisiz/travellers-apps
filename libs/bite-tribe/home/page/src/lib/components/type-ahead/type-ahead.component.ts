@@ -13,8 +13,10 @@ import {
   IonCheckbox,
   IonContent,
   IonHeader,
+  IonInput,
   IonItem,
   IonList,
+  IonRange,
   IonSearchbar,
   IonTitle,
   IonToolbar,
@@ -23,8 +25,9 @@ import { getSimilarityScore, normalize } from 'utils';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'app-typeahead',
-  templateUrl: 'typeahead.component.html',
+  selector: 'app-type-ahead',
+  templateUrl: 'type-ahead.component.html',
+  styleUrl: 'type-ahead.component.scss',
   imports: [
     IonButton,
     IonButtons,
@@ -36,6 +39,8 @@ import { getSimilarityScore, normalize } from 'utils';
     IonSearchbar,
     IonTitle,
     IonToolbar,
+    IonInput,
+    IonRange,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

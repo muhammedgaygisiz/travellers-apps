@@ -11,14 +11,14 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
+  IonBadge,
   IonButton,
   IonCard,
   IonCardContent,
   IonChip,
   IonContent,
   IonIcon,
-  IonItem,
-  IonList,
+  IonModal,
   IonSelect,
   IonSelectOption,
   IonSpinner,
@@ -30,6 +30,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { CustomFilterModalComponent } from '../custom-filter-modal/custom-filter-modal.component';
 import { Dialog } from '@angular/cdk/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TypeaheadComponent } from '../typeahead/type-ahead.component';
 
 @Component({
   selector: 'bt-home',
@@ -47,10 +48,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     NgTemplateOutlet,
     IonIcon,
     IonButton,
-    IonList,
-    IonItem,
     IonSelect,
     IonSelectOption,
+    IonModal,
+    TypeaheadComponent,
+    IonBadge,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -141,6 +143,14 @@ export class BiteTribeHomeComponent {
           this.filtersApplied.emit(result.selectedTags);
         }
       });
+  }
+
+  tagsSelectionChanged(tagsSelection: any, modal: IonModal) {
+    modal.dismiss();
+
+    if (tagsSelection) {
+      this.filtersApplied.emit(tagsSelection);
+    }
   }
 
   removeFilter(filter: string) {

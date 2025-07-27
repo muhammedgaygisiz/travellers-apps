@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-button (click)="cancelChanges()">Cancel</ion-button>
     </ion-buttons>
-    <ion-title>{{ title }}</ion-title>
+    <ion-title>{{ title() }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="confirmChanges()">Done</ion-button>
     </ion-buttons>
@@ -30,7 +30,7 @@
   <ion-searchbar (ionInput)="searchbarInput($event)" />
 
   <ion-list id="modal-list" [inset]="true">
-    @for (item of filteredItems; track item) {
+    @for (item of filteredItems(); track item) {
     <ion-item>
       <ion-checkbox
         [value]="item"

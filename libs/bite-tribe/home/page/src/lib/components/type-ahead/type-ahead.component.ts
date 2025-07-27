@@ -1,11 +1,11 @@
 import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
   ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  output,
+  signal,
 } from '@angular/core';
-import type { OnInit } from '@angular/core';
 
 import {
   IonButton,
@@ -44,71 +44,66 @@ import { getSimilarityScore, normalize } from 'utils';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TypeaheadComponent implements OnInit {
-  @Input() items: any[] = [];
-  @Input() selectedItems: string[] = [];
-  @Input() title = 'Select Items';
+export class TypeaheadComponent {
+  items = input<string[]>([]);
 
-  @Output() selectionCancel = new EventEmitter<void>();
-  @Output() selectionChange = new EventEmitter<string[]>();
+  selectedItems = input<string[]>([]);
 
-  filteredItems: string[] = [];
-  workingSelectedValues: string[] = [];
+  title = input('Select Items');
 
-  ngOnInit() {
-    this.filteredItems = [...this.items];
-    this.workingSelectedValues = [...this.selectedItems];
-  }
+  selectionCancel = output<void>();
+  selectionChange = output<string[]>();
 
-  cancelChanges() {
-    this.selectionCancel.emit();
-  }
+  rawSearchTerm = signal('');
 
-  confirmChanges() {
-    this.selectionChange.emit(this.workingSelectedValues);
-  }
+  filteredItems = computed(() => {
+    const items = this.items();
+    const rawSearchTerm = this.rawSearchTerm();
 
-  searchbarInput(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    this.filterList(inputElement.value);
-  }
-
-  /**
-   * Update the rendered view with
-   * the provided search query. If no
-   * query is provided, all data
-   * will be rendered.
-   */
-  filterList(rawSearchTerm: string | undefined) {
     if (!rawSearchTerm) {
-      this.filteredItems = this.items;
-      return;
+      return items;
     }
 
     const searchTerm = normalize(rawSearchTerm);
-    const allTags = this.items;
+    const allTags = this.items();
 
-    this.filteredItems = allTags.filter((rawTag) => {
+    return allTags.filter((rawTag) => {
       const tag = normalize(rawTag);
 
       const similarityScore = getSimilarityScore(tag, searchTerm);
 
       return tag.includes(searchTerm) || similarityScore.length > 0;
     });
+  });
+
+  workingSelectedValues = signal<string[]>([]);
+
+  cancelChanges() {
+    this.selectionCancel.emit();
+  }
+
+  confirmChanges() {
+    this.selectionChange.emit(this.workingSelectedValues());
+  }
+
+  searchbarInput(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+
+    this.rawSearchTerm.set(inputElement.value);
   }
 
   isChecked(value: string): boolean {
-    return this.workingSelectedValues.includes(value);
+    return this.workingSelectedValues().includes(value);
   }
 
   checkboxChange(event: CustomEvent<{ checked: boolean; value: string }>) {
     const { checked, value } = event.detail;
 
     if (checked) {
-      this.workingSelectedValues = [...this.workingSelectedValues, value];
+      this.workingSelectedValues.update((curr) => [...curr, value]);
     } else {
-      this.workingSelectedValues = this.workingSelectedValues.filter(
-        (item) => item !== value
+      this.workingSelectedValues.update((curr) =>
+        curr.filter((item) => item !== value)
       );
     }
   }

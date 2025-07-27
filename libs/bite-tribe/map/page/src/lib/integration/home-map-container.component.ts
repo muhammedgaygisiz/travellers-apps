@@ -5,6 +5,8 @@ import { MapPageComponent } from '../components/map-page/map-page.component';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: 'home-map-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MapPageComponent],
   template: `

@@ -4,6 +4,8 @@ import { MapService } from './map.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: 'my-bites-map-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MapPageComponent],
   template: `

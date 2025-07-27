@@ -7,6 +7,8 @@ import {
   setPublicProfile,
   setHomeFilters,
   clearHomeFilters,
+  setHomeNearbyFilter,
+  clearHomeNearbyFilter,
 } from './actions';
 import { AppSlice } from './app-slice.model';
 import { loadedBitesFromApi } from '../bites/actions';
@@ -80,5 +82,13 @@ export const reducer = createReducer<AppSlice>(
   on(clearHomeFilters, (state) => ({
     ...state,
     homeFilters: [],
+  })),
+  on(setHomeNearbyFilter, (state, { distance }) => ({
+    ...state,
+    homeDistance: distance,
+  })),
+  on(clearHomeNearbyFilter, (state) => ({
+    ...state,
+    homeDistance: undefined,
   }))
 );

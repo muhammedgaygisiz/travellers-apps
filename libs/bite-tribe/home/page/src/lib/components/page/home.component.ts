@@ -66,6 +66,7 @@ export class BiteTribeHomeComponent {
   showSpinner = input<boolean>(false);
   isBitesLoading = input<boolean | undefined>();
   sorting = input<string>('distance');
+  distance = input<number>();
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -81,8 +82,9 @@ export class BiteTribeHomeComponent {
   readonly filtersApplied = output<string[]>();
   readonly filtersCleared = output<void>();
   readonly filterRemoved = output<string>();
-  readonly nearbyFilterToggled = output<void>();
+  readonly nearbyFilter = output<number>();
   readonly sortingChange = output<string>();
+  readonly clearNearbyFilter = output<void>();
 
   ionContent = viewChild(IonContent);
 
@@ -92,10 +94,6 @@ export class BiteTribeHomeComponent {
   moreThen5Bites = computed(() => {
     const bites = this.bites();
     return bites && bites?.length > 5;
-  });
-
-  isNearbyFilterActive = computed(() => {
-    return this.selectedFilters().includes('nearby');
   });
 
   sortingLabel = computed(() => {
@@ -112,16 +110,30 @@ export class BiteTribeHomeComponent {
     }
   });
 
-  toggleNearbyFilter() {
-    this.nearbyFilterToggled.emit();
-  }
+  numberOfFilters = computed(() => {
+    const selectedFilters = this.selectedFilters();
+    const distance = this.distance();
 
-  tagsSelectionChanged(tagsSelection: any, modal: IonModal) {
+    return selectedFilters.length + (distance ? 1 : 0);
+  });
+
+  tagsSelectionChanged(tagsSelection: string[], modal: IonModal) {
     modal.dismiss();
 
     if (tagsSelection) {
       this.filtersApplied.emit(tagsSelection);
     }
+  }
+
+  distanceChanged(distance: string, modal: IonModal) {
+    modal.dismiss();
+
+    if (distance) {
+      this.nearbyFilter.emit(+distance);
+      return;
+    }
+
+    this.clearNearbyFilter.emit();
   }
 
   removeFilter(filter: string) {

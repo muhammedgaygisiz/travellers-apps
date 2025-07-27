@@ -8,4 +8,5 @@ export type AppSlice = {
   };
   profile?: PublicUser;
   homeFilters?: string[];
+  homeDistance?: number;
 };

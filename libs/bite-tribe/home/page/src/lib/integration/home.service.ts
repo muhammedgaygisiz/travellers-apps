@@ -32,6 +32,8 @@ export class HomeService {
 
   selectedBucketlist = this.dataAccess.selectedBucketlist;
 
+  homeDistance = this.dataAccess.homeDistance;
+
   bitesBySelectedBucketlist = computed(() => {
     const bites = this.dataAccess.bites();
     const selectedBucketlist = this.selectedBucketlist();
@@ -165,11 +167,15 @@ export class HomeService {
     this.dataAccess.removeHomeFilter(filterToRemove);
   }
 
-  toggleNearbyFilter() {
-    this.dataAccess.toggleNearbyFilter();
+  applyNearbyFilter(distance: number) {
+    this.dataAccess.setNearbyFilter(distance);
   }
 
   sortingChange(value: string) {
     this.sorting.set(value);
+  }
+
+  clearNearbyFilter() {
+    this.dataAccess.clearNearbyFiltere();
   }
 }

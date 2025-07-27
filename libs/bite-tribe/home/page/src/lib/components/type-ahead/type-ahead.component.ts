@@ -2,7 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
+  linkedSignal,
   output,
   signal,
 } from '@angular/core';
@@ -22,6 +24,7 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { getSimilarityScore, normalize } from 'utils';
+import { IsCheckedPipe } from './pipes/is-checked.pipe';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -41,6 +44,7 @@ import { getSimilarityScore, normalize } from 'utils';
     IonToolbar,
     IonInput,
     IonRange,
+    IsCheckedPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -51,10 +55,22 @@ export class TypeaheadComponent {
 
   title = input('Select Items');
 
+  distance = input<number>();
+
   selectionCancel = output<void>();
   selectionChange = output<string[]>();
+  distanceChange = output<string>();
 
   rawSearchTerm = signal('');
+  distanceValue = linkedSignal(() => {
+    const distance = this.distance();
+
+    if (distance) {
+      return `${distance}`;
+    }
+
+    return '';
+  });
 
   filteredItems = computed(() => {
     const items = this.items();
@@ -78,12 +94,19 @@ export class TypeaheadComponent {
 
   workingSelectedValues = signal<string[]>([]);
 
+  initWorkingSelectedValues = effect(() => {
+    const selectedItems = this.selectedItems();
+
+    this.workingSelectedValues.set(selectedItems);
+  });
+
   cancelChanges() {
     this.selectionCancel.emit();
   }
 
   confirmChanges() {
     this.selectionChange.emit(this.workingSelectedValues());
+    this.distanceChange.emit(this.distanceValue());
   }
 
   searchbarInput(event: Event) {
@@ -106,5 +129,11 @@ export class TypeaheadComponent {
         curr.filter((item) => item !== value)
       );
     }
+  }
+
+  distanceInput(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+
+    this.distanceValue.set(inputElement.value);
   }
 }

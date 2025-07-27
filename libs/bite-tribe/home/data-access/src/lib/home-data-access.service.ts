@@ -24,6 +24,7 @@ export class HomeDataAccessService {
   isBitesLoading = toSignal(this.storeService.isBitesLoading$, {
     initialValue: true,
   });
+  homeDistance = toSignal(this.storeService.homeDistance$);
 
   logout() {
     this.storeService.logout();
@@ -67,18 +68,11 @@ export class HomeDataAccessService {
     this.storeService.setHomeFilters(updatedFilters);
   }
 
-  toggleNearbyFilter() {
-    const currentFilters = this.homeFilters();
-    const hasNearbyFilter = currentFilters.includes('nearby');
+  setNearbyFilter(distance: number) {
+    this.storeService.setHomeNewbyFilter(distance);
+  }
 
-    if (hasNearbyFilter) {
-      const updatedFilters = currentFilters.filter(
-        (filter) => filter !== 'nearby'
-      );
-      this.storeService.setHomeFilters(updatedFilters);
-    } else {
-      const updatedFilters = [...currentFilters, 'nearby'];
-      this.storeService.setHomeFilters(updatedFilters);
-    }
+  clearNearbyFiltere() {
+    this.storeService.cleaerNearbyFilter();
   }
 }

@@ -16,6 +16,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [showSpinner]="true"
       [isBitesLoading]="service.isBitesLoading()"
       [sorting]="service.sorting()"
+      [distance]="service.homeDistance()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
@@ -28,8 +29,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (filtersApplied)="service.setHomeFilters($event)"
       (filtersCleared)="service.clearHomeFilters()"
       (filterRemoved)="service.removeHomeFilter($event)"
-      (nearbyFilterToggled)="service.toggleNearbyFilter()"
+      (nearbyFilter)="service.applyNearbyFilter($event)"
       (sortingChange)="service.sortingChange($event)"
+      (clearNearbyFilter)="service.clearNearbyFilter()"
     />
   `,
   imports: [BiteTribeHomeComponent],

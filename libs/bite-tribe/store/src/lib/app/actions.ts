@@ -42,3 +42,12 @@ export const setHomeFilters = createAction(
 );
 
 export const clearHomeFilters = createAction('[APP] Clear home filters');
+
+export const setHomeNearbyFilter = createAction(
+  '[APP] Set home nearby filter',
+  props<{ distance: number }>()
+);
+
+export const clearHomeNearbyFilter = createAction(
+  '[APP] Clear home nearby filter'
+);

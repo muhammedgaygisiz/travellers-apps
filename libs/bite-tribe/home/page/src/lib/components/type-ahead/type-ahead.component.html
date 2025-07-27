@@ -20,6 +20,8 @@
         [clearInput]="true"
         type="number"
         inputmode="decimal"
+        (ionInput)="distanceInput($event)"
+        [value]="distance()"
       />
     </ion-item>
     <ion-item class="ion-margin-top">
@@ -34,7 +36,7 @@
     <ion-item>
       <ion-checkbox
         [value]="item"
-        [checked]="isChecked(item)"
+        [checked]="item | isChecked : workingSelectedValues()"
         (ionChange)="checkboxChange($event)"
       >
         {{ item }}

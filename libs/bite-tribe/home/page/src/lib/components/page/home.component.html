@@ -26,25 +26,6 @@
     <div class="chip-sort-filter-container">
       <div class="chip-container">
         <ion-chip (click)="openMapView.emit()">Map View</ion-chip>
-
-        <ion-chip
-          [color]="isNearbyFilterActive() ? 'primary' : undefined"
-          (click)="toggleNearbyFilter()"
-        >
-          Nearby
-        </ion-chip>
-
-        <!-- Display selected filter chips with minus buttons -->
-        @for (filter of selectedFilters(); track filter) {
-        <ion-chip>
-          <span>{{ filter }}</span>
-          <ion-icon
-            name="close"
-            (click)="removeFilter(filter)"
-            style="margin-left: 4px; cursor: pointer"
-          />
-        </ion-chip>
-        }
       </div>
 
       <div class="sort-container ion-margin-end">
@@ -65,8 +46,8 @@
       <div class="filter-container">
         <ion-chip id="select-tags">
           <ion-icon name="filter" class="add-filter" />
-          @if (selectedFilters().length > 0) {
-          <ion-badge color="danger">{{ selectedFilters().length }}</ion-badge>
+          @if (selectedFilters().length > 0 || distance()) {
+          <ion-badge color="danger">{{ numberOfFilters() }}</ion-badge>
           }
         </ion-chip>
       </div>
@@ -86,7 +67,9 @@
       title="Tags"
       [items]="allTags()"
       [selectedItems]="selectedFilters()"
+      [distance]="distance()"
       (selectionChange)="tagsSelectionChanged($event, modal)"
+      (distanceChange)="distanceChanged($event, modal)"
       (selectionCancel)="modal.dismiss()"
     />
   </ng-template>

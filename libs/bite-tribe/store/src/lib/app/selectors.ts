@@ -24,3 +24,8 @@ export const homeFilters = createSelector(
   slice,
   (slice) => slice?.homeFilters?.map((filter) => filter.toLowerCase()) || []
 );
+
+export const homeDistance = createSelector(
+  slice,
+  (slice) => slice?.homeDistance
+);

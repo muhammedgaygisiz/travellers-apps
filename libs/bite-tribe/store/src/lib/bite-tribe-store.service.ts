@@ -26,11 +26,13 @@ import { menu } from './menus/selectors';
 import { saveMenu } from './menus/actions';
 import {
   clearHomeFilters,
+  clearHomeNearbyFilter,
   goPrivate,
   goPublic,
   savePublicProfile,
   saveSettings,
   setHomeFilters,
+  setHomeNearbyFilter,
 } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -48,6 +50,7 @@ import {
 import {
   currency,
   gpsPosition,
+  homeDistance,
   homeFilters,
   isBitesLoading,
   isPublicProfile,
@@ -128,6 +131,7 @@ export class BiteTribeStoreService implements StoreService {
   biteCreator$ = this.store.select(biteCreator);
   isBitesLoading$ = this.store.select(isBitesLoading);
   homeFilters$ = this.store.select(homeFilters);
+  homeDistance$ = this.store.select(homeDistance);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
@@ -250,5 +254,13 @@ export class BiteTribeStoreService implements StoreService {
 
   clearHomeFilters() {
     this.store.dispatch(clearHomeFilters());
+  }
+
+  setHomeNewbyFilter(distance: number) {
+    this.store.dispatch(setHomeNearbyFilter({ distance }));
+  }
+
+  cleaerNearbyFilter() {
+    this.store.dispatch(clearHomeNearbyFilter());
   }
 }

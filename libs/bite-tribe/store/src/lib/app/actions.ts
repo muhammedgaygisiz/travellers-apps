@@ -51,3 +51,8 @@ export const setHomeNearbyFilter = createAction(
 export const clearHomeNearbyFilter = createAction(
   '[APP] Clear home nearby filter'
 );
+
+export const loadedExchangeRatesFromApi = createAction(
+  '[APP] Loaded exchange rates from API',
+  props<{ exchangeRates: Record<string, number> }>()
+);

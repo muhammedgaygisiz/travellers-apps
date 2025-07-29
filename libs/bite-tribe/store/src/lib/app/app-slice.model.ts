@@ -9,4 +9,5 @@ export type AppSlice = {
   profile?: PublicUser;
   homeFilters?: string[];
   homeDistance?: number;
+  exchangeRates: Record<string, number>;
 };

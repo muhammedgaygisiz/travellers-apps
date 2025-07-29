@@ -29,3 +29,8 @@ export const homeDistance = createSelector(
   slice,
   (slice) => slice?.homeDistance
 );
+
+export const exchangeRates = createSelector(
+  slice,
+  (slice) => slice?.exchangeRates
+);

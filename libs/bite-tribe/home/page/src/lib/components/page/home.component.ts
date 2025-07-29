@@ -105,6 +105,8 @@ export class BiteTribeHomeComponent {
         return 'Likes';
       case 'createdAt':
         return 'Creation date';
+      case 'price':
+        return 'Price';
       default:
         return 'Distance';
     }

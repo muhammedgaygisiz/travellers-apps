@@ -25,6 +25,9 @@ export class HomeDataAccessService {
     initialValue: true,
   });
   homeDistance = toSignal(this.storeService.homeDistance$);
+  exchangeRates = toSignal(this.storeService.exchangeRates$, {
+    initialValue: {},
+  });
 
   logout() {
     this.storeService.logout();

@@ -6,6 +6,7 @@ import { sortBitesByLikes } from '../utils/sort-bites-by-likes';
 import { sortBitesByDistance } from '../utils/sort-bites-by-distance';
 import { sortBitesByCreatedAt } from '../utils/sort-bites-by-created-at';
 import { sortBitesByRating } from '../utils/sort-bites-by-rating';
+import { sortBitesByPrice } from '../utils/sort-bites-by-price';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +21,7 @@ export class HomeService {
   userId = this.dataAccess.userId;
   isAuthenticated = this.dataAccess.isAuthenticated;
   isBitesLoading = this.dataAccess.isBitesLoading;
+  private exchangeRates = this.dataAccess.exchangeRates;
 
   myBites = computed(() => {
     const bites = this.dataAccess.bites();
@@ -56,6 +58,7 @@ export class HomeService {
   sortedBites = computed((): Bite[] => {
     const bites = this.bites();
     const sorting = this.sorting();
+    const exchangeRates = this.exchangeRates();
 
     if (!bites?.length || !sorting) {
       return bites;
@@ -75,6 +78,10 @@ export class HomeService {
 
     if (sorting === 'rating') {
       return sortBitesByRating(bites);
+    }
+
+    if (sorting === 'price') {
+      return sortBitesByPrice(bites, exchangeRates);
     }
 
     return bites;

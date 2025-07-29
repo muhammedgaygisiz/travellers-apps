@@ -56,6 +56,7 @@ import {
   isPublicProfile,
   publicUser,
   settings,
+  exchangeRates,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -118,6 +119,7 @@ export class BiteTribeStoreService implements StoreService {
   bucketlists$ = this.store.select(bucketlists);
   currencyFromSettings$ = this.store.select(currency);
   restaurantToCreate$ = this.store.select(restaurantToCreate);
+  exchangeRates$ = this.store.select(exchangeRates);
 
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);

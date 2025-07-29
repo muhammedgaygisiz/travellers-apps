@@ -18,19 +18,21 @@ import { BucketlistApiService } from './bucketlist-api.service';
 import { ProfileApiService } from './profile-api.service';
 import { BiteApiService } from './bite-api.service';
 import { SettingsApiService } from './settings-api.service';
+import { ExchangeRatesApiService } from './exchange-rates-api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BiteTribeApiService {
-  reviewApiService = inject(ReviewApiService);
-  restaurantApiService = inject(RestaurantApiService);
-  menuApiService = inject(MenuApiService);
-  likeApiService = inject(LikeApiService);
-  bucketlistApiService = inject(BucketlistApiService);
-  profileApiService = inject(ProfileApiService);
-  biteApiService = inject(BiteApiService);
-  settingsApiService = inject(SettingsApiService);
+  private readonly reviewApiService = inject(ReviewApiService);
+  private readonly restaurantApiService = inject(RestaurantApiService);
+  private readonly menuApiService = inject(MenuApiService);
+  private readonly likeApiService = inject(LikeApiService);
+  private readonly bucketlistApiService = inject(BucketlistApiService);
+  private readonly profileApiService = inject(ProfileApiService);
+  private readonly biteApiService = inject(BiteApiService);
+  private readonly settingsApiService = inject(SettingsApiService);
+  private readonly exchangeRatesApiService = inject(ExchangeRatesApiService);
 
   allRestaurants$ = this.restaurantApiService.allRestaurants$;
   allMenus$ = this.menuApiService.allMenus$;
@@ -39,6 +41,10 @@ export class BiteTribeApiService {
   allBites$ = this.biteApiService.allBites$;
   publicProfile$ = this.profileApiService.publicProfile$;
   settings$ = this.settingsApiService.settings$;
+
+  getExchangeRates() {
+    return this.exchangeRatesApiService.getExchangeRates();
+  }
 
   saveNewReview(payload: { review: string; biteId: string }) {
     this.reviewApiService.saveNewReview(payload);

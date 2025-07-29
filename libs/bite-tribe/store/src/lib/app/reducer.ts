@@ -9,6 +9,7 @@ import {
   clearHomeFilters,
   setHomeNearbyFilter,
   clearHomeNearbyFilter,
+  loadedExchangeRatesFromApi,
 } from './actions';
 import { AppSlice } from './app-slice.model';
 import { loadedBitesFromApi } from '../bites/actions';
@@ -27,6 +28,7 @@ const initialState = {
     home: true,
   },
   homeFilters: [],
+  exchangeRates: { EUR: 1 },
 } as AppSlice;
 
 export const reducer = createReducer<AppSlice>(
@@ -90,5 +92,9 @@ export const reducer = createReducer<AppSlice>(
   on(clearHomeNearbyFilter, (state) => ({
     ...state,
     homeDistance: undefined,
+  })),
+  on(loadedExchangeRatesFromApi, (state, { exchangeRates }) => ({
+    ...state,
+    exchangeRates,
   }))
 );

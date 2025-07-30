@@ -37,6 +37,7 @@ class Mock {
   logout = () => null;
   submitLikeClick = () => null;
   deleteBite = () => null;
+  exchangeRates = () => null;
 }
 
 describe('HomeService', () => {

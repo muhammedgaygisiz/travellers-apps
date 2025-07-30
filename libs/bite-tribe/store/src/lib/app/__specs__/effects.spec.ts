@@ -18,7 +18,6 @@ import {
 import { AppEffect } from '../effects';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { rootEffectsInit } from '@ngrx/effects';
 import { PublicUser, Settings } from 'model';
 import SpyInstance = jest.SpyInstance;
 
@@ -69,7 +68,7 @@ describe('AppEffect', () => {
   describe('loadSettingsFromApi$', () => {
     it('should load settings from API on ROOT_EFFECTS_INIT', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: rootEffectsInit });
+        actions$ = cold('a', { a: fromAuth.loadedUser });
 
         const expected = 'a';
         const output = {

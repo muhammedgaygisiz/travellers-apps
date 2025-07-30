@@ -29,7 +29,11 @@ describe('TypeaheadComponent', () => {
     const selectionChangeSpy = jest.spyOn(component.selectionChange, 'emit');
     component.workingSelectedValues.set(['apple']);
     component.confirmChanges();
-    expect(selectionChangeSpy).toHaveBeenCalledWith(['apple']);
+    expect(selectionChangeSpy).toHaveBeenCalledWith({
+      distanceFilter: '',
+      priceFilter: 0,
+      tagFilters: ['apple'],
+    });
   });
 
   it('should emit selectionCancel on cancelChanges', () => {

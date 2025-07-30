@@ -67,12 +67,6 @@ describe('BiteTribeHomeComponent', () => {
     expect(component.bites()).toEqual(mockBites);
   });
 
-  it('should emit filterRemoved when removeFilter is called', () => {
-    const filterRemovedSpy = jest.spyOn(component.filterRemoved, 'emit');
-    component.removeFilter('test-filter');
-    expect(filterRemovedSpy).toHaveBeenCalledWith('test-filter');
-  });
-
   it('should call scrollToTop on ionContent when scrollToTop is called', () => {
     const scrollToTopMock = jest.fn();
     component.ionContent = signal({
@@ -139,56 +133,6 @@ describe('BiteTribeHomeComponent', () => {
       componentRef.setInput('selectedFilters', []);
       componentRef.setInput('distance', '');
       expect(component.numberOfFilters()).toBe(0);
-    });
-  });
-
-  describe('tagsSelectionChanged', () => {
-    let modalDismissSpy: SpyInstance;
-    let filtersAppliedSpy: SpyInstance;
-
-    beforeEach(() => {
-      modalDismissSpy = jest.fn();
-      filtersAppliedSpy = jest.spyOn(component.filtersApplied, 'emit');
-    });
-
-    it('should dismiss the modal and emit filtersApplied with selected tags', () => {
-      const tagsSelection = ['tag1', 'tag2'];
-      component.tagsSelectionChanged(tagsSelection, {
-        dismiss: modalDismissSpy,
-      } as any);
-      expect(modalDismissSpy).toHaveBeenCalled();
-      expect(filtersAppliedSpy).toHaveBeenCalledWith(tagsSelection);
-    });
-
-    it('should not emit filtersApplied if tagsSelection is empty', () => {
-      component.tagsSelectionChanged(undefined, {
-        dismiss: modalDismissSpy,
-      } as any);
-      expect(filtersAppliedSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('distanceChanged', () => {
-    let modalDismissSpy: SpyInstance;
-    let nearbyFilterSpy: SpyInstance;
-    let clearNearbyFilterSpy: SpyInstance;
-
-    beforeEach(() => {
-      modalDismissSpy = jest.fn();
-      nearbyFilterSpy = jest.spyOn(component.nearbyFilter, 'emit');
-      clearNearbyFilterSpy = jest.spyOn(component.clearNearbyFilter, 'emit');
-    });
-
-    it('should emit nearbyFilter with distance when distance is provided', () => {
-      component.distanceChanged('10', { dismiss: modalDismissSpy } as any);
-      expect(modalDismissSpy).toHaveBeenCalled();
-      expect(nearbyFilterSpy).toHaveBeenCalledWith(10);
-    });
-
-    it('should emit clearNearbyFilter when distance is not provided', () => {
-      component.distanceChanged('', { dismiss: modalDismissSpy } as any);
-      expect(modalDismissSpy).toHaveBeenCalled();
-      expect(clearNearbyFilterSpy).toHaveBeenCalled();
     });
   });
 });

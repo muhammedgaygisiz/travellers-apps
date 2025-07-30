@@ -130,11 +130,17 @@ describe('App Reducer', () => {
         homeFilters: [],
       } as unknown as AppSlice;
       const NEW_STATE = {
+        homeDistance: 0,
         homeFilters: ['#food', '#drink'],
+        maxPriceFilter: 0,
       } as AppSlice;
 
       const setHomeFiltersAction = setHomeFilters({
-        filters: ['#food', '#drink'],
+        filters: {
+          tagFilters: ['#food', '#drink'],
+          distanceFilter: '',
+          priceFilter: 0,
+        },
       });
 
       expect(reducer(INITIAL_STATE, setHomeFiltersAction)).toEqual({
@@ -147,11 +153,17 @@ describe('App Reducer', () => {
         homeFilters: ['#old', '#filters'],
       } as AppSlice;
       const NEW_STATE = {
+        homeDistance: 0,
         homeFilters: ['#new', '#filters'],
+        maxPriceFilter: 0,
       } as AppSlice;
 
       const setHomeFiltersAction = setHomeFilters({
-        filters: ['#new', '#filters'],
+        filters: {
+          tagFilters: ['#new', '#filters'],
+          distanceFilter: '',
+          priceFilter: 0,
+        },
       });
 
       expect(reducer(INITIAL_STATE, setHomeFiltersAction)).toEqual({
@@ -167,6 +179,7 @@ describe('App Reducer', () => {
       } as AppSlice;
       const NEW_STATE = {
         homeFilters: [],
+        maxPriceFilter: 0,
       } as unknown as AppSlice;
 
       const clearHomeFiltersAction = clearHomeFilters();
@@ -182,6 +195,7 @@ describe('App Reducer', () => {
       } as unknown as AppSlice;
       const NEW_STATE = {
         homeFilters: [],
+        maxPriceFilter: 0,
       } as unknown as AppSlice;
 
       const clearHomeFiltersAction = clearHomeFilters();

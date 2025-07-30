@@ -26,13 +26,11 @@ import { menu } from './menus/selectors';
 import { saveMenu } from './menus/actions';
 import {
   clearHomeFilters,
-  clearHomeNearbyFilter,
   goPrivate,
   goPublic,
   savePublicProfile,
   saveSettings,
   setHomeFilters,
-  setHomeNearbyFilter,
 } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -57,6 +55,8 @@ import {
   publicUser,
   settings,
   exchangeRates,
+  preferedCurrency,
+  maxPriceHome,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -120,6 +120,8 @@ export class BiteTribeStoreService implements StoreService {
   currencyFromSettings$ = this.store.select(currency);
   restaurantToCreate$ = this.store.select(restaurantToCreate);
   exchangeRates$ = this.store.select(exchangeRates);
+  preferedCurrency$ = this.store.select(preferedCurrency);
+  maxPriceHome$ = this.store.select(maxPriceHome);
 
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
@@ -250,19 +252,15 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(goPrivate());
   }
 
-  setHomeFilters(filters: string[]) {
+  setHomeFilters(filters: {
+    tagFilters: string[];
+    distanceFilter: string;
+    priceFilter: number;
+  }) {
     this.store.dispatch(setHomeFilters({ filters }));
   }
 
   clearHomeFilters() {
     this.store.dispatch(clearHomeFilters());
-  }
-
-  setHomeNewbyFilter(distance: number) {
-    this.store.dispatch(setHomeNearbyFilter({ distance }));
-  }
-
-  cleaerNearbyFilter() {
-    this.store.dispatch(clearHomeNearbyFilter());
   }
 }

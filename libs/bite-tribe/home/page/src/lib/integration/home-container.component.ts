@@ -17,6 +17,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isBitesLoading]="service.isBitesLoading()"
       [sorting]="service.sorting()"
       [distance]="service.homeDistance()"
+      [preferedCurrency]="service.preferedCurrency()"
+      [maxPriceFilter]="service.maxPriceHome()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
@@ -26,12 +28,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoMyBucketlists)="service.onGotoMyBucketlists()"
       (openMapView)="service.openMapView('home')"
-      (filtersApplied)="service.setHomeFilters($event)"
-      (filtersCleared)="service.clearHomeFilters()"
-      (filterRemoved)="service.removeHomeFilter($event)"
-      (nearbyFilter)="service.applyNearbyFilter($event)"
       (sortingChange)="service.sortingChange($event)"
-      (clearNearbyFilter)="service.clearNearbyFilter()"
+      (filtersChanged)="service.filtersChanged($event)"
     />
   `,
   imports: [BiteTribeHomeComponent],

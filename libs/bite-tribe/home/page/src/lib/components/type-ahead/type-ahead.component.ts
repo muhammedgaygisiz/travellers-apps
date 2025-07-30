@@ -57,9 +57,16 @@ export class TypeaheadComponent {
 
   distance = input<number>();
 
+  currency = input('EUR');
+
+  price = input(0);
+
   selectionCancel = output<void>();
-  selectionChange = output<string[]>();
-  distanceChange = output<string>();
+  selectionChange = output<{
+    tagFilters: string[];
+    distanceFilter: string;
+    priceFilter: number;
+  }>();
 
   rawSearchTerm = signal('');
   distanceValue = linkedSignal(() => {
@@ -70,6 +77,16 @@ export class TypeaheadComponent {
     }
 
     return '';
+  });
+
+  priceValue = linkedSignal(() => {
+    const price = this.price();
+
+    if (price) {
+      return price;
+    }
+
+    return 0;
   });
 
   filteredItems = computed(() => {
@@ -105,8 +122,11 @@ export class TypeaheadComponent {
   }
 
   confirmChanges() {
-    this.selectionChange.emit(this.workingSelectedValues());
-    this.distanceChange.emit(this.distanceValue());
+    this.selectionChange.emit({
+      tagFilters: this.workingSelectedValues(),
+      distanceFilter: this.distanceValue(),
+      priceFilter: this.priceValue(),
+    });
   }
 
   searchbarInput(event: Event) {
@@ -135,5 +155,11 @@ export class TypeaheadComponent {
     const inputElement = event.target as HTMLInputElement;
 
     this.distanceValue.set(inputElement.value);
+  }
+
+  priceInput(event: CustomEvent) {
+    const inputElement = event.target as HTMLInputElement;
+
+    this.priceValue.set(+inputElement.value);
   }
 }

@@ -4,12 +4,20 @@ import { adapter } from './adapter';
 import { Bite, PublicUser } from 'model';
 import { biteId } from '../router/selectors';
 import { likes } from '../likes/selectors';
-import { gpsPosition, homeDistance, homeFilters } from '../app/selectors';
+import {
+  exchangeRates,
+  gpsPosition,
+  homeDistance,
+  homeFilters,
+  homeMaxPriceFilter,
+  preferedCurrency,
+} from '../app/selectors';
 import { haversineDistance } from 'utils';
 import { EntityState } from '@ngrx/entity';
 import { handleNearbyFilter } from './utils/handle-nearby-filter';
 import { handleTagFilters } from './utils/handle-tag-filters';
 import { getLikesForBite } from './utils/get-likes-for-bite';
+import { handleMaxPriceFilter } from './utils/handle-max-price-filter';
 
 const slice = createFeatureSelector<
   EntityState<any> & {
@@ -57,17 +65,35 @@ export const bitesWithMetadata = createSelector(
 export const bites = createSelector(
   bitesWithMetadata,
   homeFilters,
+  homeMaxPriceFilter,
+  preferedCurrency,
   gpsPosition,
   homeDistance,
-  (bites, filters, gpsPosition, homeDistance) => {
-    if (!filters.length && !homeDistance) {
+  exchangeRates,
+  (
+    bites,
+    filters,
+    maxPriceInPreferedCurrency,
+    preferedCurrency,
+    gpsPosition,
+    homeDistance,
+    exchangeRates
+  ) => {
+    if (!filters.length && !homeDistance && maxPriceInPreferedCurrency === 0) {
       return bites;
     }
+
+    const filteredBitesByMaxPrice = handleMaxPriceFilter(
+      maxPriceInPreferedCurrency,
+      exchangeRates,
+      bites,
+      preferedCurrency
+    );
 
     const filteredBitesByNearby = handleNearbyFilter(
       homeDistance,
       gpsPosition,
-      bites
+      filteredBitesByMaxPrice
     );
 
     return handleTagFilters(filters, filteredBitesByNearby);

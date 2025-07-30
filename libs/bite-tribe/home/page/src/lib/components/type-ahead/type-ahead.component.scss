@@ -1,2 +1,17 @@
 :host {
+  ion-range {
+    &::part(pin) {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      transform: scale(1.01);
+
+      top: -20px;
+
+      min-width: 28px;
+      height: 28px;
+      transition: transform 120ms ease, background 120ms ease;
+    }
+  }
 }

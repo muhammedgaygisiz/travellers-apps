@@ -38,19 +38,16 @@ export const goPrivate = createAction('[APP] Go private');
 
 export const setHomeFilters = createAction(
   '[APP] Set home filters',
-  props<{ filters: string[] }>()
+  props<{
+    filters: {
+      tagFilters: string[];
+      distanceFilter: string;
+      priceFilter: number;
+    };
+  }>()
 );
 
 export const clearHomeFilters = createAction('[APP] Clear home filters');
-
-export const setHomeNearbyFilter = createAction(
-  '[APP] Set home nearby filter',
-  props<{ distance: number }>()
-);
-
-export const clearHomeNearbyFilter = createAction(
-  '[APP] Clear home nearby filter'
-);
 
 export const loadedExchangeRatesFromApi = createAction(
   '[APP] Loaded exchange rates from API',

@@ -2,6 +2,7 @@ export { normalize } from './lib/normalize';
 export { currencyCodes } from './lib/currencies';
 export { getSimilarityScore } from './lib/get-similarity-score';
 export { haversineDistance } from './lib/haversine-distance';
+export { getNormalizedPriceInEur } from './lib/get-normalized-price-in-eur';
 
 export { addNecessaryIcons } from './lib/add-necessary-icons';
 export * from './lib/get-ionic-config';

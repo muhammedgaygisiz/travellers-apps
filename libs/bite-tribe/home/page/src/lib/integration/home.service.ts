@@ -36,6 +36,10 @@ export class HomeService {
 
   homeDistance = this.dataAccess.homeDistance;
 
+  preferedCurrency = this.dataAccess.preferedCurrency;
+
+  maxPriceHome = this.dataAccess.maxPriceHome;
+
   bitesBySelectedBucketlist = computed(() => {
     const bites = this.dataAccess.bites();
     const selectedBucketlist = this.selectedBucketlist();
@@ -162,27 +166,15 @@ export class HomeService {
     this.navController.navigateForward([mainPage, 'map-view']);
   }
 
-  setHomeFilters(filters: string[]) {
-    this.dataAccess.setHomeFilters(filters);
-  }
-
-  clearHomeFilters() {
-    this.dataAccess.clearHomeFilters();
-  }
-
-  removeHomeFilter(filterToRemove: string) {
-    this.dataAccess.removeHomeFilter(filterToRemove);
-  }
-
-  applyNearbyFilter(distance: number) {
-    this.dataAccess.setNearbyFilter(distance);
-  }
-
   sortingChange(value: string) {
     this.sorting.set(value);
   }
 
-  clearNearbyFilter() {
-    this.dataAccess.clearNearbyFiltere();
+  filtersChanged(filters: {
+    tagFilters: string[];
+    distanceFilter: string;
+    priceFilter: number;
+  }) {
+    this.dataAccess.setFilters(filters);
   }
 }

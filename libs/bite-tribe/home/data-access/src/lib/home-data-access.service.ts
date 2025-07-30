@@ -28,6 +28,10 @@ export class HomeDataAccessService {
   exchangeRates = toSignal(this.storeService.exchangeRates$, {
     initialValue: {},
   });
+  preferedCurrency = toSignal(this.storeService.preferedCurrency$, {
+    initialValue: 'EUR',
+  });
+  maxPriceHome = toSignal(this.storeService.maxPriceHome$, { initialValue: 0 });
 
   logout() {
     this.storeService.logout();
@@ -55,27 +59,11 @@ export class HomeDataAccessService {
     this.storeService.submitDeleteBite(bite);
   }
 
-  setHomeFilters(filters: string[]) {
+  setFilters(filters: {
+    tagFilters: string[];
+    distanceFilter: string;
+    priceFilter: number;
+  }) {
     this.storeService.setHomeFilters(filters);
-  }
-
-  clearHomeFilters() {
-    this.storeService.clearHomeFilters();
-  }
-
-  removeHomeFilter(filterToRemove: string) {
-    const currentFilters = this.homeFilters();
-    const updatedFilters = currentFilters.filter(
-      (filter) => filter !== filterToRemove
-    );
-    this.storeService.setHomeFilters(updatedFilters);
-  }
-
-  setNearbyFilter(distance: number) {
-    this.storeService.setHomeNewbyFilter(distance);
-  }
-
-  clearNearbyFiltere() {
-    this.storeService.cleaerNearbyFilter();
   }
 }

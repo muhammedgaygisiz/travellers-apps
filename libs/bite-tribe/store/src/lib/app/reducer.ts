@@ -7,15 +7,13 @@ import {
   setPublicProfile,
   setHomeFilters,
   clearHomeFilters,
-  setHomeNearbyFilter,
-  clearHomeNearbyFilter,
   loadedExchangeRatesFromApi,
 } from './actions';
 import { AppSlice } from './app-slice.model';
 import { loadedBitesFromApi } from '../bites/actions';
 import { fromAuth } from 'ta-firestore';
 
-const initialState = {
+const initialState: AppSlice = {
   profile: undefined,
   settings: {
     pushNotifications: false,
@@ -29,7 +27,8 @@ const initialState = {
   },
   homeFilters: [],
   exchangeRates: { EUR: 1 },
-} as AppSlice;
+  maxPriceFilter: 0,
+};
 
 export const reducer = createReducer<AppSlice>(
   initialState,
@@ -79,19 +78,15 @@ export const reducer = createReducer<AppSlice>(
   })),
   on(setHomeFilters, (state, { filters }) => ({
     ...state,
-    homeFilters: filters,
+    homeFilters: filters.tagFilters,
+    maxPriceFilter: filters.priceFilter,
+    homeDistance: +filters.distanceFilter,
   })),
   on(clearHomeFilters, (state) => ({
     ...state,
     homeFilters: [],
-  })),
-  on(setHomeNearbyFilter, (state, { distance }) => ({
-    ...state,
-    homeDistance: distance,
-  })),
-  on(clearHomeNearbyFilter, (state) => ({
-    ...state,
-    homeDistance: undefined,
+    maxPriceFilter: 0,
+    distanceFilter: undefined,
   })),
   on(loadedExchangeRatesFromApi, (state, { exchangeRates }) => ({
     ...state,

@@ -67,6 +67,8 @@ export class BiteTribeHomeComponent {
   isBitesLoading = input<boolean | undefined>();
   sorting = input<string>('distance');
   distance = input<number>();
+  maxPriceFilter = input<number>(0);
+  preferedCurrency = input('EUR');
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -79,12 +81,12 @@ export class BiteTribeHomeComponent {
   readonly gotoEdit = output<Bite>();
   readonly deleteBite = output<Bite>();
   readonly openMapView = output();
-  readonly filtersApplied = output<string[]>();
-  readonly filtersCleared = output<void>();
-  readonly filterRemoved = output<string>();
-  readonly nearbyFilter = output<number>();
+  readonly filtersChanged = output<{
+    tagFilters: string[];
+    distanceFilter: string;
+    priceFilter: number;
+  }>();
   readonly sortingChange = output<string>();
-  readonly clearNearbyFilter = output<void>();
 
   ionContent = viewChild(IonContent);
 
@@ -115,31 +117,26 @@ export class BiteTribeHomeComponent {
   numberOfFilters = computed(() => {
     const selectedFilters = this.selectedFilters();
     const distance = this.distance();
+    const priceFilter = this.maxPriceFilter();
 
-    return selectedFilters.length + (distance ? 1 : 0);
+    return (
+      selectedFilters.length + (distance ? 1 : 0) + (priceFilter > 0 ? 1 : 0)
+    );
   });
 
-  tagsSelectionChanged(tagsSelection: string[] | undefined, modal: IonModal) {
+  onFilterChange(
+    filterSelection: {
+      tagFilters: string[];
+      distanceFilter: string;
+      priceFilter: number;
+    },
+    modal: IonModal
+  ) {
     modal.dismiss();
 
-    if (tagsSelection) {
-      this.filtersApplied.emit(tagsSelection);
+    if (filterSelection) {
+      this.filtersChanged.emit(filterSelection);
     }
-  }
-
-  distanceChanged(distance: string, modal: IonModal) {
-    modal.dismiss();
-
-    if (distance) {
-      this.nearbyFilter.emit(+distance);
-      return;
-    }
-
-    this.clearNearbyFilter.emit();
-  }
-
-  removeFilter(filter: string) {
-    this.filterRemoved.emit(filter);
   }
 
   scrollToTop() {

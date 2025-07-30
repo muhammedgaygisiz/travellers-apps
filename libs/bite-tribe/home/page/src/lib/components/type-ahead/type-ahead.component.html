@@ -11,7 +11,7 @@
 </ion-header>
 
 <ion-content>
-  <ion-list [inset]="true">
+  <ion-list [inset]="true" class="distance-and-price-list">
     <ion-item>
       <ion-input
         label="Distance"
@@ -25,7 +25,15 @@
       />
     </ion-item>
     <ion-item class="ion-margin-top">
-      <ion-range label="Price" [pin]="true" [max]="77" />
+      <ion-range
+        labelPlacement="fixed"
+        label="Price ({{ currency() }})"
+        pin="true"
+        [min]="0"
+        [max]="250"
+        (ionChange)="priceInput($event)"
+        [value]="price()"
+      />
     </ion-item>
   </ion-list>
 

@@ -97,6 +97,11 @@ describe('BiteTribeHomeComponent', () => {
       componentRef.setInput('sorting', 'randomValue');
       expect(component.sortingLabel()).toBe('Distance');
     });
+
+    it('should return "Price" when selectedSorting is "price"', () => {
+      componentRef.setInput('sorting', 'price');
+      expect(component.sortingLabel()).toBe('Price');
+    });
   });
 
   describe('emitSortingChange', () => {
@@ -133,6 +138,30 @@ describe('BiteTribeHomeComponent', () => {
       componentRef.setInput('selectedFilters', []);
       componentRef.setInput('distance', '');
       expect(component.numberOfFilters()).toBe(0);
+    });
+  });
+
+  describe('onFilterChange', () => {
+    let modal: any;
+
+    beforeEach(() => {
+      modal = {
+        dismiss: jest.fn(),
+      };
+    });
+
+    it('should dismiss the modal and emit filter changes', () => {
+      const filterSelection = {
+        tagFilters: ['filter1'],
+        distanceFilter: '10',
+        priceFilter: 20,
+      };
+
+      const filtersChangedSpy = jest.spyOn(component.filtersChanged, 'emit');
+
+      component.onFilterChange(filterSelection, modal);
+      expect(modal.dismiss).toHaveBeenCalled();
+      expect(filtersChangedSpy).toHaveBeenCalledWith(filterSelection);
     });
   });
 });

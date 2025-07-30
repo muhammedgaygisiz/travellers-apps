@@ -40,6 +40,7 @@ const Mock = {
   saveUser: jest.fn(),
   updateUser: jest.fn(),
   deleteUser: jest.fn(),
+  saveUserIfNotExisting: jest.fn(),
 };
 
 describe('AppEffect', () => {
@@ -220,6 +221,28 @@ describe('AppEffect', () => {
       });
 
       expect(deleteUserSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('saveUserAfterLogin$', () => {
+    let saveUserIfNotExistingSpy: SpyInstance;
+
+    beforeEach(() => {
+      saveUserIfNotExistingSpy = jest
+        .spyOn(apiService, 'saveUserIfNotExisting')
+        .mockImplementation();
+    });
+
+    it('should save user if not existing on loadedUser', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: fromAuth.loadedUser({ user: {} }),
+        });
+
+        expectObservable(effects.saveUserAfterLogin$);
+      });
+
+      expect(saveUserIfNotExistingSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

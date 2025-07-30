@@ -100,8 +100,11 @@ describe('Bites Selectors', () => {
       const result = fromSelectors.bites.projector(
         bitesWithMetadata,
         [], // no filters
+        0, // no max price
+        'EUR', // preferred currency
         mockPosition, // mock GPS position
-        undefined
+        undefined,
+        {} // no exchange rates
       );
 
       expect(result).toEqual(bitesWithMetadata);
@@ -116,8 +119,11 @@ describe('Bites Selectors', () => {
       const result = fromSelectors.bites.projector(
         bitesWithMetadata,
         ['food'], // filter by food tag
+        0, // no max price
+        'EUR', // preferred currency
         mockPosition,
-        undefined
+        undefined,
+        {} // no exchange rates
       );
 
       expect(result).toHaveLength(1);
@@ -185,6 +191,16 @@ describe('Bites Selectors', () => {
         [mockBite1, mockBite2],
         [{ id: 'like1', biteId: '5', userId: 'user1' }],
         mockPosition
+      );
+
+      expect(result).toMatchSnapshot();
+    });
+
+    it('should return bites no distance if no position', () => {
+      const result = fromSelectors.bitesWithMetadata.projector(
+        [mockBite1, mockBite2],
+        mockLikes,
+        undefined
       );
 
       expect(result).toMatchSnapshot();

@@ -19,6 +19,7 @@ import {
   mybites,
   bitesBySelectedBucketlist,
   sortedHomeBites,
+  bitesByUser,
 } from './bites/selectors';
 import {
   restaurant,
@@ -122,6 +123,7 @@ export class BiteTribeStoreService implements StoreService {
   homeSorting$ = this.store.select(homeSorting);
   bite$ = this.store.select(bite);
   mybites$ = this.store.select(mybites);
+  bitesByUser$ = this.store.select(bitesByUser);
   bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);
   allTags$ = this.store.select(allTags);
   bitesByRestaurant$ = this.store.select(bitesByRestaurant);

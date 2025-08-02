@@ -216,3 +216,11 @@ export const sortedHomeBites = createSelector(
     return bites;
   }
 );
+
+export const bitesByUser = createSelector(
+  bitesWithMetadata,
+  biteCreator,
+  (bites, biteCreator) => {
+    return bites.filter((bite) => bite.userId === biteCreator?.userId);
+  }
+);

@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancelChanges()">Cancel</ion-button>
+    </ion-buttons>
+    <ion-title>{{ title() }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="confirmChanges()">Done</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list [inset]="true" class="distance-and-price-list">
+    <ion-item>
+      <ion-input
+        label="Distance"
+        fill="solid"
+        placeholder="meters"
+        [clearInput]="true"
+        type="number"
+        inputmode="decimal"
+        (ionInput)="distanceInput($event)"
+        [value]="distance()"
+      />
+    </ion-item>
+    <ion-item class="ion-margin-top">
+      <ion-range
+        labelPlacement="fixed"
+        label="Price ({{ currency() }})"
+        pin="true"
+        [min]="0"
+        [max]="250"
+        (ionChange)="priceInput($event)"
+        [value]="price()"
+      />
+    </ion-item>
+  </ion-list>
+
+  <ion-list id="modal-list" [inset]="true" class="ion-margin-bottom">
+    <h4>Selected Tags</h4>
+    @for (tag of workingSelectedValues(); track tag) {
+    <ion-item>
+      <ion-checkbox
+        [value]="tag"
+        [checked]="true"
+        (ionChange)="checkboxChange($event)"
+      >
+        {{ tag }}
+      </ion-checkbox>
+    </ion-item>
+    } @empty {
+    <ion-item>
+      <ion-label>No tags selected.</ion-label>
+    </ion-item>
+    }
+  </ion-list>
+
+  <ion-searchbar
+    (ionInput)="searchbarInput($event)"
+    placeholder="Search in available tags"
+  />
+
+  <ion-list id="modal-list" [inset]="true">
+    <h4 class="available-tags-title">Available Tags</h4>
+    @for (item of filteredItems(); track item) { @if (!(item | isChecked :
+    workingSelectedValues())) {
+    <ion-item>
+      <ion-checkbox [value]="item" (ionChange)="checkboxChange($event)">
+        {{ item }}
+      </ion-checkbox>
+    </ion-item>
+    } }
+  </ion-list>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons slot="end">
+      <ion-button (click)="clearAllFilters()">Clear all filters</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

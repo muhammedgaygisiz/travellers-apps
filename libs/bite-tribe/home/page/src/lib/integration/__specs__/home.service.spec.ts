@@ -5,28 +5,10 @@ import { NavController } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import SpyInstance = jest.SpyInstance;
 
-const sortBitesByDistanceMock = jest.fn();
-jest.mock('../../utils/sort-bites-by-distance', () => ({
-  sortBitesByDistance: (): void => sortBitesByDistanceMock(),
-}));
-
-const sortBitesByLikesMock = jest.fn();
-jest.mock('../../utils/sort-bites-by-likes', () => ({
-  sortBitesByLikes: (): void => sortBitesByLikesMock(),
-}));
-
-const sortBitesByCreatedAtMock = jest.fn();
-jest.mock('../../utils/sort-bites-by-created-at', () => ({
-  sortBitesByCreatedAt: (): void => sortBitesByCreatedAtMock(),
-}));
-
-const sortBitesByRatingMock = jest.fn();
-jest.mock('../../utils/sort-bites-by-rating', () => ({
-  sortBitesByRating: (): void => sortBitesByRatingMock(),
-}));
-
 class Mock {
-  bites = () => [];
+  sortedHomeBites = () => [];
+  myBites = () => [];
+  bitesBySelectedBucketlist = () => [];
   allTags = () => [];
   homeFilters = () => [];
   userId = () => 'test-user-id';
@@ -37,6 +19,9 @@ class Mock {
   logout = () => null;
   submitLikeClick = () => null;
   deleteBite = () => null;
+  exchangeRates = () => null;
+  setHomeSorting = () => null;
+  selectedBucketlistTitle = () => null;
 }
 
 describe('HomeService', () => {
@@ -62,165 +47,11 @@ describe('HomeService', () => {
   ));
 
   describe('bitesBySelectedBucketlist', () => {
-    let bitesSpy: SpyInstance;
-    let selectedBucketlistSpy: SpyInstance;
-
-    beforeEach(() => {
-      bitesSpy = jest.spyOn(homeDataAccessService, 'bites').mockReturnValue([]);
-      selectedBucketlistSpy = jest
-        .spyOn(homeDataAccessService, 'selectedBucketlist')
-        .mockReturnValue(null as any);
-    });
-
-    it('should return empty array if selectedBucketlist is null', inject(
+    it('should return empty array if selectedBucketlist is empty array', inject(
       [HomeService],
       (service: HomeService) => {
         const result = service.bitesBySelectedBucketlist();
         expect(result).toEqual([]);
-      }
-    ));
-
-    it('should return bites filtered by selectedBucketlist', inject(
-      [HomeService],
-      (service: HomeService) => {
-        const bites = [
-          { id: '1', userId: 'test-user-id' },
-          { id: '2', userId: 'other-user-id' },
-        ];
-        bitesSpy.mockReturnValue(bites);
-        selectedBucketlistSpy.mockReturnValue({
-          biteIds: ['1'],
-        } as any);
-
-        const result = service.bitesBySelectedBucketlist();
-        expect(result).toEqual([bites[0]]);
-      }
-    ));
-  });
-
-  describe('sortedBites', () => {
-    let bitesSpy: SpyInstance;
-
-    beforeEach(() => {
-      bitesSpy = jest.spyOn(homeDataAccessService, 'bites').mockReturnValue([]);
-    });
-
-    it('should return bites as provided if sorting is missing', inject(
-      [HomeService],
-      (service: HomeService) => {
-        service.sorting.set(undefined as any);
-        const bites = [
-          { id: '1', distance: 10 },
-          { id: '2', distance: 5 },
-        ];
-
-        bitesSpy.mockReturnValue(bites);
-
-        const result = service.sortedBites();
-        expect(result).toEqual(bites);
-        expect(sortBitesByDistanceMock).not.toHaveBeenCalled();
-        expect(sortBitesByDistanceMock).not.toHaveBeenCalled();
-        expect(sortBitesByDistanceMock).not.toHaveBeenCalled();
-      }
-    ));
-
-    it('should return bites as provided if bites are missing', inject(
-      [HomeService],
-      (service: HomeService) => {
-        service.sorting.set('distance');
-        const bites = undefined as any;
-
-        bitesSpy.mockReturnValue(bites);
-
-        const result = service.sortedBites();
-        expect(result).toEqual(bites);
-        expect(sortBitesByDistanceMock).not.toHaveBeenCalled();
-        expect(sortBitesByDistanceMock).not.toHaveBeenCalled();
-        expect(sortBitesByDistanceMock).not.toHaveBeenCalled();
-      }
-    ));
-
-    it('should return bites as provided if sorting is unknown', inject(
-      [HomeService],
-      (service: HomeService) => {
-        service.sorting.set('test');
-        const bites = undefined as any;
-
-        bitesSpy.mockReturnValue(bites);
-
-        const result = service.sortedBites();
-        expect(result).toEqual(bites);
-        expect(sortBitesByDistanceMock).not.toHaveBeenCalled();
-        expect(sortBitesByDistanceMock).not.toHaveBeenCalled();
-        expect(sortBitesByDistanceMock).not.toHaveBeenCalled();
-      }
-    ));
-
-    it('should return bites sorted by distance when sorting is "distance"', inject(
-      [HomeService],
-      (service: HomeService) => {
-        service.sorting.set('distance');
-        const bites = [
-          { id: '1', distance: 10 },
-          { id: '2', distance: 5 },
-        ];
-
-        bitesSpy.mockReturnValue(bites);
-
-        service.sortedBites();
-        expect(sortBitesByDistanceMock).toHaveBeenCalledTimes(1);
-      }
-    ));
-
-    it('should return bites sorted by likes when sorting is "likes"', inject(
-      [HomeService],
-      (service: HomeService) => {
-        service.sorting.set('likes');
-        const bites = [
-          { id: '1', likes: [{ userId: 'user1' }, { userId: 'user2' }] },
-          {
-            id: '2',
-            likes: [
-              { userId: 'user1' },
-              { userId: 'user2' },
-              { userId: 'user3' },
-            ],
-          },
-        ];
-        bitesSpy.mockReturnValue(bites);
-
-        service.sortedBites();
-        expect(sortBitesByLikesMock).toHaveBeenCalledTimes(1);
-      }
-    ));
-
-    it('should return bites sorted by likes when sorting is "rating"', inject(
-      [HomeService],
-      (service: HomeService) => {
-        service.sorting.set('rating');
-        const bites = [
-          { id: '1', rating: 2 },
-          { id: '2', rating: 5 },
-        ];
-        bitesSpy.mockReturnValue(bites);
-
-        service.sortedBites();
-        expect(sortBitesByRatingMock).toHaveBeenCalledTimes(1);
-      }
-    ));
-
-    it('should return bites sorted by createdAt when sorting is "createdAt"', inject(
-      [HomeService],
-      (service: HomeService) => {
-        service.sorting.set('createdAt');
-        const bites = [
-          { id: '1', createdAt: new Date(2023, 0, 1) },
-          { id: '2', createdAt: new Date(2023, 0, 2) },
-        ];
-        bitesSpy.mockReturnValue(bites);
-
-        service.sortedBites();
-        expect(sortBitesByCreatedAtMock).toHaveBeenCalledTimes(1);
       }
     ));
   });
@@ -431,17 +262,69 @@ describe('HomeService', () => {
   });
 
   describe('sortingChange', () => {
-    let sortingSpy: SpyInstance;
+    let setHomeSortingSpy: SpyInstance;
 
-    beforeEach(inject([HomeService], (service: HomeService) => {
-      sortingSpy = jest.spyOn(service.sorting, 'set').mockImplementation();
-    }));
+    beforeEach(() => {
+      setHomeSortingSpy = jest.spyOn(homeDataAccessService, 'setHomeSorting');
+    });
 
-    it('should set the sorting value', inject(
+    it('should call setHomeSorting', inject(
       [HomeService],
       (service: HomeService) => {
         service.sortingChange('distance');
-        expect(sortingSpy).toHaveBeenCalledWith('distance');
+
+        expect(setHomeSortingSpy).toHaveBeenCalledWith('distance');
+      }
+    ));
+  });
+
+  describe('myBites', () => {
+    let myBitesSpy: SpyInstance;
+
+    beforeEach(() => {
+      myBitesSpy = jest
+        .spyOn(homeDataAccessService, 'myBites')
+        .mockReturnValue([]);
+    });
+
+    it('should return bites for the current user', inject(
+      [HomeService],
+      (service: HomeService) => {
+        const bites = [{ id: '1', userId: 'test-user-id' }];
+        myBitesSpy.mockReturnValue(bites);
+
+        const result = service.myBites();
+        expect(result).toEqual([bites[0]]);
+      }
+    ));
+  });
+
+  describe('selectedBucketlistTitle', () => {
+    let selectedBucketlistSpy: SpyInstance;
+
+    beforeEach(() => {
+      selectedBucketlistSpy = jest
+        .spyOn(homeDataAccessService, 'selectedBucketlistTitle')
+        .mockReturnValue(null as any);
+    });
+
+    it('should return My Bucketlist string if selectedBucketlist is null', inject(
+      [HomeService],
+      (service: HomeService) => {
+        selectedBucketlistSpy.mockReturnValue('My Bucketlist');
+        const result = service.selectedBucketlistTitle();
+        expect(result).toBe('My Bucketlist');
+      }
+    ));
+
+    it('should return title of the selected bucketlist', inject(
+      [HomeService],
+      (service: HomeService) => {
+        const bucketlistTitle = 'My Bucketlist';
+        selectedBucketlistSpy.mockReturnValue(bucketlistTitle);
+
+        const result = service.selectedBucketlistTitle();
+        expect(result).toBe(bucketlistTitle);
       }
     ));
   });

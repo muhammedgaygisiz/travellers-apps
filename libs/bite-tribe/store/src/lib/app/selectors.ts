@@ -24,3 +24,31 @@ export const homeFilters = createSelector(
   slice,
   (slice) => slice?.homeFilters?.map((filter) => filter.toLowerCase()) || []
 );
+
+export const homeMaxPriceFilter = createSelector(
+  slice,
+  (slice) => slice?.maxPriceFilter || 0
+);
+
+export const homeDistance = createSelector(
+  slice,
+  (slice) => slice?.homeDistance
+);
+
+export const exchangeRates = createSelector(
+  slice,
+  (slice) => slice?.exchangeRates
+);
+
+export const preferredCurrency = createSelector(
+  settings,
+  (settings) => settings?.currency || 'EUR'
+);
+
+export const maxPriceHome = createSelector(slice, (slice) => {
+  return slice?.maxPriceFilter || 0;
+});
+
+export const homeSorting = createSelector(slice, (slice) => {
+  return slice?.homeSorting || 'distance';
+});

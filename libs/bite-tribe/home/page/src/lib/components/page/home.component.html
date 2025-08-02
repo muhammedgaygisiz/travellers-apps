@@ -23,51 +23,35 @@
 
     <h1>{{ title() }}</h1>
 
-    <div class="filter-sort-container">
+    <div class="chip-sort-filter-container">
       <div class="chip-container">
         <ion-chip (click)="openMapView.emit()">Map View</ion-chip>
-        <ion-chip
-          [color]="isNearbyFilterActive() ? 'primary' : undefined"
-          (click)="toggleNearbyFilter()"
-        >
-          Nearby
-        </ion-chip>
-        <ion-chip (click)="openCustomFilterModal()">
-          <ion-icon name="add" class="add-filter" />
-          @if (selectedFilters().length > 0) {
-          <span>({{ selectedFilters().length }})</span>
-          }
-        </ion-chip>
-
-        <!-- Display selected filter chips with minus buttons -->
-        @for (filter of selectedFilters(); track filter) {
-        <ion-chip>
-          <span>{{ filter }}</span>
-          <ion-icon
-            name="close"
-            (click)="removeFilter(filter)"
-            style="margin-left: 4px; cursor: pointer"
-          />
-        </ion-chip>
-        }
       </div>
 
-      <ion-list>
-        <ion-item>
-          <ion-select
-            label="Sort by"
-            [placeholder]="sortingLabel()"
-            (ionChange)="emitSortingChange($event)"
-          >
-            <ion-select-option value="distance">Distance</ion-select-option>
-            <ion-select-option value="createdAt"
-              >Creation date</ion-select-option
-            >
-            <ion-select-option value="likes">Likes</ion-select-option>
-            <ion-select-option value="rating">Rating</ion-select-option>
-          </ion-select>
-        </ion-item>
-      </ion-list>
+      <div class="sort-container ion-margin-end">
+        <ion-icon name="funnel-outline" class="ion-margin-end" />
+        <ion-select
+          [placeholder]="sortingLabel()"
+          (ionChange)="emitSortingChange($event)"
+        >
+          <ion-select-option value="distance">Distance</ion-select-option>
+          <ion-select-option value="createdAt"
+            >Creation date
+          </ion-select-option>
+          <ion-select-option value="likes">Likes</ion-select-option>
+          <ion-select-option value="rating">Rating</ion-select-option>
+          <ion-select-option value="price">Price</ion-select-option>
+        </ion-select>
+      </div>
+
+      <div class="filter-container">
+        <ion-chip id="select-tags">
+          <ion-icon name="filter" class="add-filter" />
+          @if (selectedFilters().length > 0 || distance()) {
+          <ion-badge color="danger">{{ numberOfFilters() }}</ion-badge>
+          }
+        </ion-chip>
+      </div>
     </div>
     <ng-container
       *ngTemplateOutlet="
@@ -76,6 +60,23 @@
     />
   </ion-content>
 </ta-page>
+
+<ion-modal trigger="select-tags" #modal>
+  <ng-template>
+    <app-type-ahead
+      class="ion-page"
+      title="Filters"
+      [items]="allTags()"
+      [selectedItems]="selectedFilters()"
+      [distance]="distance()"
+      [currency]="preferedCurrency()"
+      [price]="maxPriceFilter()"
+      (selectionChange)="onFilterChange($event, modal)"
+      (selectionCancel)="modal.dismiss()"
+      (clearFilters)="onFiltersClear(modal)"
+    />
+  </ng-template>
+</ion-modal>
 
 <ng-template #withLoadingTemplate>
   @defer (when !isBitesLoading()) {

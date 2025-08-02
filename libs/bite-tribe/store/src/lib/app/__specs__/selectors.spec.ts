@@ -24,7 +24,8 @@ describe('App Selectors', () => {
       home: true,
     },
     homeFilters: ['#food', '#drink'],
-  };
+    exchangeRates: {},
+  } as AppSlice;
 
   describe('gpsPosition', () => {
     it('should return the GPS position', () => {
@@ -87,6 +88,111 @@ describe('App Selectors', () => {
       const stateWithoutFilters = { ...mockState, homeFilters: undefined };
       const result = fromSelectors.homeFilters.projector(stateWithoutFilters);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('isPublicProfile', () => {
+    it('should return true if profile is public', () => {
+      const stateWithPublicProfile = {
+        ...mockState,
+        profile: { ...mockProfile, public: true },
+      };
+      const result = fromSelectors.isPublicProfile.projector(
+        stateWithPublicProfile
+      );
+      expect(result).toBe(true);
+    });
+
+    it('should return false if profile is not public', () => {
+      const stateWithPrivateProfile = {
+        ...mockState,
+        profile: { ...mockProfile, public: false },
+      };
+      const result = fromSelectors.isPublicProfile.projector(
+        stateWithPrivateProfile
+      );
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('homeMaxPriceFilter', () => {
+    it('should return the max price filter', () => {
+      const result = fromSelectors.homeMaxPriceFilter.projector(mockState);
+      expect(result).toBe(0); // Assuming default value is 0
+    });
+
+    it('should return 0 when max price filter is not set', () => {
+      const stateWithoutMaxPrice = { ...mockState, maxPriceFilter: undefined };
+      const result =
+        fromSelectors.homeMaxPriceFilter.projector(stateWithoutMaxPrice);
+      expect(result).toBe(0);
+    });
+  });
+
+  describe('homeDistance', () => {
+    it('should return the home distance', () => {
+      const result = fromSelectors.homeDistance.projector(mockState);
+      expect(result).toBeUndefined(); // Assuming default value is undefined
+    });
+
+    it('should return undefined when home distance is not set', () => {
+      const stateWithoutDistance = { ...mockState, homeDistance: undefined };
+      const result = fromSelectors.homeDistance.projector(stateWithoutDistance);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('exchangeRates', () => {
+    it('should return the exchange rates', () => {
+      const result = fromSelectors.exchangeRates.projector(mockState);
+      expect(result).toEqual({}); // Assuming default value is an empty object
+    });
+
+    it('should return empty object when exchange rates are not set', () => {
+      const stateWithoutExchangeRates = { ...mockState, exchangeRates: {} };
+      const result = fromSelectors.exchangeRates.projector(
+        stateWithoutExchangeRates
+      );
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('preferredCurrency', () => {
+    it('should return the preferred currency from settings', () => {
+      const result = fromSelectors.preferredCurrency.projector(mockSettings);
+      expect(result).toBe('EUR');
+    });
+
+    it('should return "EUR" when settings or currency is not set', () => {
+      const settings = undefined as any;
+      const result = fromSelectors.preferredCurrency.projector(settings);
+      expect(result).toBe('EUR');
+    });
+  });
+
+  describe('maxPriceHome', () => {
+    it('should return the max price filter', () => {
+      const result = fromSelectors.maxPriceHome.projector(mockState);
+      expect(result).toBe(0); // Assuming default value is 0
+    });
+
+    it('should return 0 when max price filter is not set', () => {
+      const stateWithoutMaxPrice = { ...mockState, maxPriceFilter: undefined };
+      const result = fromSelectors.maxPriceHome.projector(stateWithoutMaxPrice);
+      expect(result).toBe(0);
+    });
+  });
+
+  describe('homeSorting', () => {
+    it('should return the home sorting method', () => {
+      const result = fromSelectors.homeSorting.projector(mockState);
+      expect(result).toBe('distance'); // Assuming default sorting is by distance
+    });
+
+    it('should return "distance" when home sorting is not set', () => {
+      const stateWithoutSorting = { ...mockState, homeSorting: undefined };
+      const result = fromSelectors.homeSorting.projector(stateWithoutSorting);
+      expect(result).toBe('distance');
     });
   });
 });

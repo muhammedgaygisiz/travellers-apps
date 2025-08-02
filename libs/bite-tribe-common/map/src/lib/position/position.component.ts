@@ -1,4 +1,9 @@
-import { Component, forwardRef, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  forwardRef,
+  signal,
+} from '@angular/core';
 import { MapComponent } from '../map/map.component';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Geopoint } from 'model';
@@ -19,6 +24,7 @@ import { Geopoint } from 'model';
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PositionComponent implements ControlValueAccessor {
   value = signal<Geopoint | null>(null);

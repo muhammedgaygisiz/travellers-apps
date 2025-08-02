@@ -3,22 +3,20 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
-  inject,
   input,
   output,
   viewChild,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
+  IonBadge,
   IonButton,
   IonCard,
   IonCardContent,
   IonChip,
   IonContent,
   IonIcon,
-  IonItem,
-  IonList,
+  IonModal,
   IonSelect,
   IonSelectOption,
   IonSpinner,
@@ -27,9 +25,7 @@ import {
 import { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
-import { CustomFilterModalComponent } from '../custom-filter-modal/custom-filter-modal.component';
-import { Dialog } from '@angular/cdk/dialog';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
 
 @Component({
   selector: 'bt-home',
@@ -47,10 +43,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     NgTemplateOutlet,
     IonIcon,
     IonButton,
-    IonList,
-    IonItem,
     IonSelect,
     IonSelectOption,
+    IonModal,
+    TypeaheadComponent,
+    IonBadge,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -69,6 +66,9 @@ export class BiteTribeHomeComponent {
   showSpinner = input<boolean>(false);
   isBitesLoading = input<boolean | undefined>();
   sorting = input<string>('distance');
+  distance = input<number>();
+  maxPriceFilter = input<number>(0);
+  preferedCurrency = input('EUR');
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -81,16 +81,15 @@ export class BiteTribeHomeComponent {
   readonly gotoEdit = output<Bite>();
   readonly deleteBite = output<Bite>();
   readonly openMapView = output();
-  readonly filtersApplied = output<string[]>();
-  readonly filtersCleared = output<void>();
-  readonly filterRemoved = output<string>();
-  readonly nearbyFilterToggled = output<void>();
+  readonly filtersChanged = output<{
+    tagFilters: string[];
+    distanceFilter: string;
+    priceFilter: number;
+  }>();
   readonly sortingChange = output<string>();
+  readonly filterCleared = output<void>();
 
   ionContent = viewChild(IonContent);
-
-  dialog = inject(Dialog);
-  private readonly destroyRef = inject(DestroyRef);
 
   // Bites are already filtered by the store, just pass through
   filteredBites = computed(() => this.bites() || []);
@@ -98,10 +97,6 @@ export class BiteTribeHomeComponent {
   moreThen5Bites = computed(() => {
     const bites = this.bites();
     return bites && bites?.length > 5;
-  });
-
-  isNearbyFilterActive = computed(() => {
-    return this.selectedFilters().includes('nearby');
   });
 
   sortingLabel = computed(() => {
@@ -113,38 +108,36 @@ export class BiteTribeHomeComponent {
         return 'Likes';
       case 'createdAt':
         return 'Creation date';
+      case 'price':
+        return 'Price';
       default:
         return 'Distance';
     }
   });
 
-  toggleNearbyFilter() {
-    this.nearbyFilterToggled.emit();
-  }
+  numberOfFilters = computed(() => {
+    const selectedFilters = this.selectedFilters();
+    const distance = this.distance();
+    const priceFilter = this.maxPriceFilter();
 
-  async openCustomFilterModal() {
-    const dialogRef = this.dialog.open(CustomFilterModalComponent, {
-      data: {
-        existingTags: this.allTags(),
-        selectedFilters: this.selectedFilters(),
-      },
-    });
+    return (
+      selectedFilters.length + (distance ? 1 : 0) + (priceFilter > 0 ? 1 : 0)
+    );
+  });
 
-    dialogRef.closed
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result: any) => {
-        if (result.clearFilters) {
-          this.filtersCleared.emit();
-        }
+  onFilterChange(
+    filterSelection: {
+      tagFilters: string[];
+      distanceFilter: string;
+      priceFilter: number;
+    },
+    modal: IonModal
+  ) {
+    modal.dismiss();
 
-        if (result.selectedTags) {
-          this.filtersApplied.emit(result.selectedTags);
-        }
-      });
-  }
-
-  removeFilter(filter: string) {
-    this.filterRemoved.emit(filter);
+    if (filterSelection) {
+      this.filtersChanged.emit(filterSelection);
+    }
   }
 
   scrollToTop() {
@@ -159,5 +152,10 @@ export class BiteTribeHomeComponent {
     if (event.detail) {
       this.sortingChange.emit(event.detail.value);
     }
+  }
+
+  onFiltersClear(modal: IonModal) {
+    modal.dismiss();
+    this.filterCleared.emit();
   }
 }

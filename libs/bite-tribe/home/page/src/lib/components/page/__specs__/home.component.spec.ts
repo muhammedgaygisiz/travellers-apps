@@ -7,7 +7,6 @@ import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
 import { Subject } from 'rxjs';
-import { CustomFilterModalComponent } from '../../custom-filter-modal/custom-filter-modal.component';
 import SpyInstance = jest.SpyInstance;
 
 describe('BiteTribeHomeComponent', () => {
@@ -15,7 +14,6 @@ describe('BiteTribeHomeComponent', () => {
   let fixture: ComponentFixture<BiteTribeHomeComponent>;
   let navController: NavController;
   let componentRef: ComponentRef<BiteTribeHomeComponent>;
-  let dialogOpenSpy: jest.SpyInstance;
   let closedSubject: Subject<any>;
 
   beforeEach(() => {
@@ -47,7 +45,6 @@ describe('BiteTribeHomeComponent', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
     fixture.detectChanges();
-    dialogOpenSpy = jest.spyOn(dialogMock, 'open');
   });
 
   it('should create', () => {
@@ -70,30 +67,6 @@ describe('BiteTribeHomeComponent', () => {
     expect(component.bites()).toEqual(mockBites);
   });
 
-  it('should open custom filter modal and emit filtersCleared', () => {
-    const filtersClearedSpy = jest.spyOn(component.filtersCleared, 'emit');
-    component.openCustomFilterModal();
-    expect(dialogOpenSpy).toHaveBeenCalledWith(
-      CustomFilterModalComponent,
-      expect.any(Object)
-    );
-    closedSubject.next({ clearFilters: true });
-    expect(filtersClearedSpy).toHaveBeenCalled();
-  });
-
-  it('should open custom filter modal and emit filtersApplied', () => {
-    const filtersAppliedSpy = jest.spyOn(component.filtersApplied, 'emit');
-    component.openCustomFilterModal();
-    closedSubject.next({ selectedTags: ['tag1', 'tag2'] });
-    expect(filtersAppliedSpy).toHaveBeenCalledWith(['tag1', 'tag2']);
-  });
-
-  it('should emit filterRemoved when removeFilter is called', () => {
-    const filterRemovedSpy = jest.spyOn(component.filterRemoved, 'emit');
-    component.removeFilter('test-filter');
-    expect(filterRemovedSpy).toHaveBeenCalledWith('test-filter');
-  });
-
   it('should call scrollToTop on ionContent when scrollToTop is called', () => {
     const scrollToTopMock = jest.fn();
     component.ionContent = signal({
@@ -102,27 +75,6 @@ describe('BiteTribeHomeComponent', () => {
 
     component.scrollToTop();
     expect(scrollToTopMock).toHaveBeenCalledWith(300);
-  });
-
-  it('should compute isNearbyFilterActive correctly', () => {
-    // Test when nearby filter is not active
-    componentRef.setInput('selectedFilters', ['tag1', 'tag2']);
-    fixture.detectChanges();
-    expect(component.isNearbyFilterActive()).toBe(false);
-
-    // Test when nearby filter is active
-    componentRef.setInput('selectedFilters', ['tag1', 'nearby', 'tag2']);
-    fixture.detectChanges();
-    expect(component.isNearbyFilterActive()).toBe(true);
-  });
-
-  it('should emit nearbyFilterToggled when toggleNearbyFilter is called', () => {
-    const nearbyFilterToggledSpy = jest.spyOn(
-      component.nearbyFilterToggled,
-      'emit'
-    );
-    component.toggleNearbyFilter();
-    expect(nearbyFilterToggledSpy).toHaveBeenCalled();
   });
 
   describe('selectedSortingLabel', () => {
@@ -145,6 +97,11 @@ describe('BiteTribeHomeComponent', () => {
       componentRef.setInput('sorting', 'randomValue');
       expect(component.sortingLabel()).toBe('Distance');
     });
+
+    it('should return "Price" when selectedSorting is "price"', () => {
+      componentRef.setInput('sorting', 'price');
+      expect(component.sortingLabel()).toBe('Price');
+    });
   });
 
   describe('emitSortingChange', () => {
@@ -164,6 +121,47 @@ describe('BiteTribeHomeComponent', () => {
       const event = { detail: undefined };
       component.emitSortingChange(event as any);
       expect(sortingChangeSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('numberOfFilters', () => {
+    it('should return the correct number of filters', () => {
+      componentRef.setInput('selectedFilters', ['filter1', 'filter2']);
+      componentRef.setInput('distance', '5');
+      expect(component.numberOfFilters()).toBe(3); // 2 filters + 1 distance filter
+
+      componentRef.setInput('distance', '');
+      expect(component.numberOfFilters()).toBe(2); // Only the two selected filters
+    });
+
+    it('should return 0 when no filters are applied', () => {
+      componentRef.setInput('selectedFilters', []);
+      componentRef.setInput('distance', '');
+      expect(component.numberOfFilters()).toBe(0);
+    });
+  });
+
+  describe('onFilterChange', () => {
+    let modal: any;
+
+    beforeEach(() => {
+      modal = {
+        dismiss: jest.fn(),
+      };
+    });
+
+    it('should dismiss the modal and emit filter changes', () => {
+      const filterSelection = {
+        tagFilters: ['filter1'],
+        distanceFilter: '10',
+        priceFilter: 20,
+      };
+
+      const filtersChangedSpy = jest.spyOn(component.filtersChanged, 'emit');
+
+      component.onFilterChange(filterSelection, modal);
+      expect(modal.dismiss).toHaveBeenCalled();
+      expect(filtersChangedSpy).toHaveBeenCalledWith(filterSelection);
     });
   });
 });

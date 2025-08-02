@@ -7,7 +7,19 @@ import { Bite, Like } from 'model';
 export class HomeDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
-  bites = toSignal(this.storeService.bites$, { initialValue: [] as Bite[] });
+  sortedHomeBites = toSignal(this.storeService.sortedHomeBites$, {
+    initialValue: [] as Bite[],
+  });
+  sorting = toSignal(this.storeService.homeSorting$, {
+    initialValue: 'distance',
+  });
+  myBites = toSignal(this.storeService.mybites$, {
+    initialValue: [] as Bite[],
+  });
+  bitesBySelectedBucketlist = toSignal(
+    this.storeService.bitesBySelectedBucketlist$,
+    { initialValue: [] as Bite[] }
+  );
   allTags = toSignal(this.storeService.allTags$, {
     initialValue: [] as string[],
   });
@@ -18,22 +30,36 @@ export class HomeDataAccessService {
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     requireSync: true,
   });
+  selectedBucketlistTitle = toSignal(
+    this.storeService.selectedBucketlistTitle$,
+    {
+      requireSync: true,
+    }
+  );
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
   });
   isBitesLoading = toSignal(this.storeService.isBitesLoading$, {
     initialValue: true,
   });
+  homeDistance = toSignal(this.storeService.homeDistance$);
+  exchangeRates = toSignal(this.storeService.exchangeRates$, {
+    initialValue: {},
+  });
+  preferedCurrency = toSignal(this.storeService.preferedCurrency$, {
+    initialValue: 'EUR',
+  });
+  maxPriceHome = toSignal(this.storeService.maxPriceHome$, { initialValue: 0 });
 
   logout() {
     this.storeService.logout();
   }
 
   submitLikeClick(likeType: { likeType: string; biteId: string }) {
-    const bites = this.bites();
+    const bites = this.sortedHomeBites();
     const userId = this.userId();
 
-    const bite = bites?.find((bite) => bite.id === likeType.biteId);
+    const bite = bites?.find((bite: Bite) => bite.id === likeType.biteId);
     const likeFromUser = bite?.likes?.find(
       (like: Like) =>
         like.userId === userId && like.likeType === likeType.likeType
@@ -51,34 +77,19 @@ export class HomeDataAccessService {
     this.storeService.submitDeleteBite(bite);
   }
 
-  setHomeFilters(filters: string[]) {
+  setHomeSorting(sorting: string) {
+    this.storeService.setHomeSorting(sorting);
+  }
+
+  setFilters(filters: {
+    tagFilters: string[];
+    distanceFilter: string;
+    priceFilter: number;
+  }) {
     this.storeService.setHomeFilters(filters);
   }
 
-  clearHomeFilters() {
+  clearFilters() {
     this.storeService.clearHomeFilters();
-  }
-
-  removeHomeFilter(filterToRemove: string) {
-    const currentFilters = this.homeFilters();
-    const updatedFilters = currentFilters.filter(
-      (filter) => filter !== filterToRemove
-    );
-    this.storeService.setHomeFilters(updatedFilters);
-  }
-
-  toggleNearbyFilter() {
-    const currentFilters = this.homeFilters();
-    const hasNearbyFilter = currentFilters.includes('nearby');
-
-    if (hasNearbyFilter) {
-      const updatedFilters = currentFilters.filter(
-        (filter) => filter !== 'nearby'
-      );
-      this.storeService.setHomeFilters(updatedFilters);
-    } else {
-      const updatedFilters = [...currentFilters, 'nearby'];
-      this.storeService.setHomeFilters(updatedFilters);
-    }
   }
 }

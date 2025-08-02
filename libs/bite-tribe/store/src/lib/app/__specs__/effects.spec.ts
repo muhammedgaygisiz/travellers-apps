@@ -9,6 +9,7 @@ import {
   fetchGpsPosition,
   goPrivate,
   goPublic,
+  loadedExchangeRatesFromApi,
   loadedGpsPosition,
   loadedSettingsFromApi,
   savePublicProfile,
@@ -18,7 +19,6 @@ import {
 import { AppEffect } from '../effects';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { rootEffectsInit } from '@ngrx/effects';
 import { PublicUser, Settings } from 'model';
 import SpyInstance = jest.SpyInstance;
 
@@ -41,6 +41,8 @@ const Mock = {
   saveUser: jest.fn(),
   updateUser: jest.fn(),
   deleteUser: jest.fn(),
+  saveUserIfNotExisting: jest.fn(),
+  getExchangeRates: jest.fn(),
 };
 
 describe('AppEffect', () => {
@@ -69,7 +71,7 @@ describe('AppEffect', () => {
   describe('loadSettingsFromApi$', () => {
     it('should load settings from API on ROOT_EFFECTS_INIT', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: rootEffectsInit });
+        actions$ = cold('a', { a: fromAuth.loadedUser });
 
         const expected = 'a';
         const output = {
@@ -221,6 +223,54 @@ describe('AppEffect', () => {
       });
 
       expect(deleteUserSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('saveUserAfterLogin$', () => {
+    let saveUserIfNotExistingSpy: SpyInstance;
+
+    beforeEach(() => {
+      saveUserIfNotExistingSpy = jest
+        .spyOn(apiService, 'saveUserIfNotExisting')
+        .mockImplementation();
+    });
+
+    it('should save user if not existing on loadedUser', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: fromAuth.loadedUser({ user: {} }),
+        });
+
+        expectObservable(effects.saveUserAfterLogin$);
+      });
+
+      expect(saveUserIfNotExistingSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('loadExchangeRatesFromApi$', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(apiService, 'getExchangeRates')
+        .mockReturnValue(of({ USD: 1, EUR: 0.85 }) as any);
+    });
+
+    it('should load exchange rates from API on fromAuth.loadedUser', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', { a: fromAuth.loadedUser({ user: {} }) });
+
+        const expected = 'a';
+        const output = {
+          a: loadedExchangeRatesFromApi({
+            exchangeRates: { USD: 1, EUR: 0.85 },
+          }),
+        };
+
+        expectObservable(effects.loadExchangeRatesFromApi$).toBe(
+          expected,
+          output
+        );
+      });
     });
   });
 });

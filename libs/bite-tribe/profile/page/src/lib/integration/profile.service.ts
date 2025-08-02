@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { Bite } from 'model';
@@ -11,12 +11,7 @@ export class ProfileService {
   isAuthenticated = this.dataAccess.isAuthenticated;
   biteCreator = this.dataAccess.biteCreator;
   userId = this.dataAccess.userId;
-  bitesByUser = computed(() => {
-    const bites = this.dataAccess.bites();
-    const userId = this.dataAccess.biteCreator()?.userId;
-
-    return bites.filter((bite) => bite.userId === userId);
-  });
+  bitesByUser = this.dataAccess.bitesByUser;
 
   logout() {
     this.dataAccess.logout();

@@ -33,6 +33,8 @@ import {
   informationCircleOutline,
   star,
   starOutline,
+  filter,
+  funnelOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -70,5 +72,7 @@ export const addNecessaryIcons = () => {
     informationCircleOutline,
     star,
     starOutline,
+    filter,
+    funnelOutline,
   });
 };

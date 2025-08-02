@@ -1,0 +1,25 @@
+import { Bite } from 'model';
+import { getBitePriceInPreferredCurrency } from './get-bite-price-in-preferred-currency';
+
+export const handleMaxPriceFilter = (
+  maxPriceInPreferedCurrency: number,
+  exchangeRates: Record<string, number>,
+  bites: Bite[],
+  preferredCurrency = 'EUR'
+): Bite[] => {
+  const hasMaxPriceFilter = maxPriceInPreferedCurrency > 0;
+
+  if (hasMaxPriceFilter) {
+    return bites.filter((bite) => {
+      const bitePriceInPreferredCurrency = getBitePriceInPreferredCurrency(
+        bite,
+        exchangeRates,
+        preferredCurrency
+      );
+
+      return bitePriceInPreferredCurrency <= maxPriceInPreferedCurrency;
+    });
+  }
+
+  return bites;
+};

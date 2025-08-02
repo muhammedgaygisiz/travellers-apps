@@ -1,16 +1,56 @@
 <div class="star-rating">
-  @let stars = getStars(); @for (star of stars; let i = $index; track i) {
   <ion-icon
     [name]="
-      (i + 1 | isFilled : hoveredIndex() : getRating())
-        ? 'star'
-        : 'star-outline'
+      (1 | isFilled : hoveredIndex() : getRating()) ? 'star' : 'star-outline'
     "
     size="large"
-    (click)="onRate(i + 1)"
-    (mouseover)="onHover(i + 1)"
+    (click)="onRate(1)"
+    (mouseover)="onHover(1)"
     (mouseleave)="onLeave()"
     [class.read-only]="readOnly()"
   />
-  }
+
+  <ion-icon
+    [name]="
+      (2 | isFilled : hoveredIndex() : getRating()) ? 'star' : 'star-outline'
+    "
+    size="large"
+    (click)="onRate(2)"
+    (mouseover)="onHover(2)"
+    (mouseleave)="onLeave()"
+    [class.read-only]="readOnly()"
+  />
+
+  <ion-icon
+    [name]="
+      (3 | isFilled : hoveredIndex() : getRating()) ? 'star' : 'star-outline'
+    "
+    size="large"
+    (click)="onRate(3)"
+    (mouseover)="onHover(3)"
+    (mouseleave)="onLeave()"
+    [class.read-only]="readOnly()"
+  />
+
+  <ion-icon
+    [name]="
+      (4 | isFilled : hoveredIndex() : getRating()) ? 'star' : 'star-outline'
+    "
+    size="large"
+    (click)="onRate(4)"
+    (mouseover)="onHover(4)"
+    (mouseleave)="onLeave()"
+    [class.read-only]="readOnly()"
+  />
+
+  <ion-icon
+    [name]="
+      (5 | isFilled : hoveredIndex() : getRating()) ? 'star' : 'star-outline'
+    "
+    size="large"
+    (click)="onRate(5)"
+    (mouseover)="onHover(5)"
+    (mouseleave)="onLeave()"
+    [class.read-only]="readOnly()"
+  />
 </div>

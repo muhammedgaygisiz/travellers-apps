@@ -1,10 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  Actions,
-  createEffect,
-  ofType,
-  ROOT_EFFECTS_INIT,
-} from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   errorLoadingGpsPosition,
   fetchGpsPosition,
@@ -15,8 +10,9 @@ import {
   savePublicProfile,
   saveSettings,
   setPublicProfile,
+  loadedExchangeRatesFromApi,
 } from './actions';
-import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
+import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { AlertController, Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -41,9 +37,23 @@ export class AppEffect {
 
   loadSettingsFromApi$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(ROOT_EFFECTS_INIT),
+      ofType(fromAuth.loadedUser),
       switchMap(() => this.api.settings$),
       map((settings) => loadedSettingsFromApi({ settings }))
+    );
+  });
+
+  loadExchangeRatesFromApi$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(fromAuth.loadedUser),
+      filter((payload) => !!payload.user),
+      switchMap(() =>
+        from(this.api.getExchangeRates()).pipe(
+          map((exchangeRates) => {
+            return loadedExchangeRatesFromApi({ exchangeRates });
+          })
+        )
+      )
     );
   });
 

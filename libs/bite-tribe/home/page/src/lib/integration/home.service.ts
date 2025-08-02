@@ -1,11 +1,7 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { Bite } from 'model';
 import { NavController } from '@ionic/angular/standalone';
-import { sortBitesByLikes } from '../utils/sort-bites-by-likes';
-import { sortBitesByDistance } from '../utils/sort-bites-by-distance';
-import { sortBitesByCreatedAt } from '../utils/sort-bites-by-created-at';
-import { sortBitesByRating } from '../utils/sort-bites-by-rating';
 
 @Injectable({
   providedIn: 'root',
@@ -14,69 +10,25 @@ export class HomeService {
   dataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
 
-  bites = this.dataAccess.bites;
+  sortedHomeBites = this.dataAccess.sortedHomeBites;
+  sorting = this.dataAccess.sorting;
+  myBites = this.dataAccess.myBites;
+  bitesBySelectedBucketlist = this.dataAccess.bitesBySelectedBucketlist;
   allTags = this.dataAccess.allTags;
   homeFilters = this.dataAccess.homeFilters;
   userId = this.dataAccess.userId;
   isAuthenticated = this.dataAccess.isAuthenticated;
   isBitesLoading = this.dataAccess.isBitesLoading;
 
-  myBites = computed(() => {
-    const bites = this.dataAccess.bites();
-    const userId = this.dataAccess.userId();
-
-    return bites.filter((bite) => bite.userId === userId);
-  });
-
-  sorting = signal('distance');
-
   selectedBucketlist = this.dataAccess.selectedBucketlist;
 
-  bitesBySelectedBucketlist = computed(() => {
-    const bites = this.dataAccess.bites();
-    const selectedBucketlist = this.selectedBucketlist();
+  homeDistance = this.dataAccess.homeDistance;
 
-    if (!selectedBucketlist) {
-      return [];
-    }
+  preferedCurrency = this.dataAccess.preferedCurrency;
 
-    return bites.filter((bite) =>
-      selectedBucketlist.biteIds?.includes(bite.id)
-    );
-  });
+  maxPriceHome = this.dataAccess.maxPriceHome;
 
-  selectedBucketlistTitle = computed(() => {
-    const selectedBucketlist = this.selectedBucketlist();
-
-    return selectedBucketlist?.name || 'My Bucketlist';
-  });
-
-  sortedBites = computed((): Bite[] => {
-    const bites = this.bites();
-    const sorting = this.sorting();
-
-    if (!bites?.length || !sorting) {
-      return bites;
-    }
-
-    if (sorting === 'distance') {
-      return sortBitesByDistance(bites);
-    }
-
-    if (sorting === 'likes') {
-      return sortBitesByLikes(bites);
-    }
-
-    if (sorting === 'createdAt') {
-      return sortBitesByCreatedAt(bites);
-    }
-
-    if (sorting === 'rating') {
-      return sortBitesByRating(bites);
-    }
-
-    return bites;
-  });
+  selectedBucketlistTitle = this.dataAccess.selectedBucketlistTitle;
 
   logout() {
     this.dataAccess.logout();
@@ -153,23 +105,19 @@ export class HomeService {
     this.navController.navigateForward([mainPage, 'map-view']);
   }
 
-  setHomeFilters(filters: string[]) {
-    this.dataAccess.setHomeFilters(filters);
-  }
-
-  clearHomeFilters() {
-    this.dataAccess.clearHomeFilters();
-  }
-
-  removeHomeFilter(filterToRemove: string) {
-    this.dataAccess.removeHomeFilter(filterToRemove);
-  }
-
-  toggleNearbyFilter() {
-    this.dataAccess.toggleNearbyFilter();
-  }
-
   sortingChange(value: string) {
-    this.sorting.set(value);
+    this.dataAccess.setHomeSorting(value);
+  }
+
+  filtersChanged(filters: {
+    tagFilters: string[];
+    distanceFilter: string;
+    priceFilter: number;
+  }) {
+    this.dataAccess.setFilters(filters);
+  }
+
+  filtersCleared() {
+    this.dataAccess.clearFilters();
   }
 }

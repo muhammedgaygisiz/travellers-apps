@@ -30,21 +30,11 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 export class StarRatingComponent implements ControlValueAccessor {
   rating = input<number | undefined>(0);
 
-  max = input(5);
-
   readOnly = input(false, { transform: booleanAttribute });
 
   rated = output<number>();
 
   hoveredIndex = signal(-1);
-
-  getStars = computed(() => {
-    const max = this.max();
-
-    return Array(max)
-      .fill(0)
-      .map((_, i) => i + 1);
-  });
 
   getRating = computed(() => {
     const value = this.value();

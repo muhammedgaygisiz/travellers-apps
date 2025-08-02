@@ -16,6 +16,10 @@ import {
   biteCreator,
   bites,
   cachedBite,
+  mybites,
+  bitesBySelectedBucketlist,
+  sortedHomeBites,
+  bitesByUser,
 } from './bites/selectors';
 import {
   restaurant,
@@ -31,6 +35,7 @@ import {
   savePublicProfile,
   saveSettings,
   setHomeFilters,
+  setHomeSorting,
 } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -48,11 +53,16 @@ import {
 import {
   currency,
   gpsPosition,
+  homeDistance,
   homeFilters,
   isBitesLoading,
   isPublicProfile,
   publicUser,
   settings,
+  exchangeRates,
+  preferredCurrency,
+  maxPriceHome,
+  homeSorting,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -67,7 +77,11 @@ import {
   removeBiteFromBucketlist,
   saveBiteIdToBucketList,
 } from './bucketlists/actions';
-import { bucketlists, selectedBucketlist } from './bucketlists/selectors';
+import {
+  bucketlists,
+  selectedBucketlist,
+  selectedBucketlistTitle,
+} from './bucketlists/selectors';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -105,7 +119,12 @@ export class BiteTribeStoreService implements StoreService {
   registrationError = signal('Not implemented yet.');
 
   bites$ = this.store.select(bites);
+  sortedHomeBites$ = this.store.select(sortedHomeBites);
+  homeSorting$ = this.store.select(homeSorting);
   bite$ = this.store.select(bite);
+  mybites$ = this.store.select(mybites);
+  bitesByUser$ = this.store.select(bitesByUser);
+  bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);
   allTags$ = this.store.select(allTags);
   bitesByRestaurant$ = this.store.select(bitesByRestaurant);
   restaurant$ = this.store.select(restaurant);
@@ -115,6 +134,9 @@ export class BiteTribeStoreService implements StoreService {
   bucketlists$ = this.store.select(bucketlists);
   currencyFromSettings$ = this.store.select(currency);
   restaurantToCreate$ = this.store.select(restaurantToCreate);
+  exchangeRates$ = this.store.select(exchangeRates);
+  preferedCurrency$ = this.store.select(preferredCurrency);
+  maxPriceHome$ = this.store.select(maxPriceHome);
 
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
@@ -124,10 +146,12 @@ export class BiteTribeStoreService implements StoreService {
   position$ = this.store.select(gpsPosition);
   cachedBite$ = this.store.select(cachedBite);
   selectedBucketlist$ = this.store.select(selectedBucketlist);
+  selectedBucketlistTitle$ = this.store.select(selectedBucketlistTitle);
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
   biteCreator$ = this.store.select(biteCreator);
   isBitesLoading$ = this.store.select(isBitesLoading);
   homeFilters$ = this.store.select(homeFilters);
+  homeDistance$ = this.store.select(homeDistance);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
@@ -244,7 +268,15 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(goPrivate());
   }
 
-  setHomeFilters(filters: string[]) {
+  setHomeSorting(sorting: string) {
+    this.store.dispatch(setHomeSorting({ sorting }));
+  }
+
+  setHomeFilters(filters: {
+    tagFilters: string[];
+    distanceFilter: string;
+    priceFilter: number;
+  }) {
     this.store.dispatch(setHomeFilters({ filters }));
   }
 

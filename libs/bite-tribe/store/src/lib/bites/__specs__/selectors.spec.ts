@@ -1,4 +1,4 @@
-import { Bite, Geopoint, PublicUser, Settings } from 'model';
+import { Bite, Bucketlist, Geopoint, PublicUser } from 'model';
 import * as fromSelectors from '../selectors';
 import { EntityState } from '@ngrx/entity';
 
@@ -95,13 +95,16 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ];
+      ] as any[];
 
       const result = fromSelectors.bites.projector(
         bitesWithMetadata,
         [], // no filters
-        {} as Settings,
-        mockPosition // GPS position
+        0, // no max price
+        'EUR', // preferred currency
+        mockPosition, // mock GPS position
+        undefined,
+        {} // no exchange rates
       );
 
       expect(result).toEqual(bitesWithMetadata);
@@ -111,17 +114,78 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ];
+      ] as any[];
 
       const result = fromSelectors.bites.projector(
         bitesWithMetadata,
         ['food'], // filter by food tag
-        {} as Settings,
-        mockPosition
+        0, // no max price
+        'EUR', // preferred currency
+        mockPosition,
+        undefined,
+        {} // no exchange rates
       );
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('1');
+    });
+
+    it('should filter bites by max price', () => {
+      const bitesWithMetadata = [
+        { ...mockBite1, likes: mockLikes, distance: '0', price: 10 },
+        { ...mockBite2, likes: [], distance: '0.01', price: 20 },
+      ] as any[];
+
+      const result = fromSelectors.bites.projector(
+        bitesWithMetadata,
+        [], // no tags filter
+        15, // max price
+        'EUR', // preferred currency
+        mockPosition,
+        undefined,
+        {} // no exchange rates
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('1');
+    });
+
+    it('should sort bites by distance', () => {
+      const bitesWithMetadata = [
+        { ...mockBite2, likes: [], distance: '0' },
+        { ...mockBite1, likes: mockLikes, distance: '0.01' },
+      ] as any[];
+
+      const result = fromSelectors.bites.projector(
+        bitesWithMetadata,
+        [], // no filters
+        0, // no max price
+        'EUR', // preferred currency
+        mockPosition,
+        undefined,
+        {} // no exchange rates
+      );
+
+      expect(result[0].id).toBe('2'); // closest bite first
+    });
+
+    it('should handle no gps position gracefully', () => {
+      const bitesWithMetadata = [
+        { ...mockBite1, likes: mockLikes, distance: '0' },
+        { ...mockBite2, likes: [], distance: '0.01' },
+      ] as any[];
+
+      const result = fromSelectors.bites.projector(
+        bitesWithMetadata,
+        [], // no filters
+        0, // no max price
+        'EUR', // preferred currency
+        undefined, // no GPS position
+        undefined,
+        {} // no exchange rates
+      );
+
+      expect(result).toEqual(bitesWithMetadata);
     });
   });
 
@@ -130,7 +194,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ];
+      ] as any[];
 
       const result = fromSelectors.allTags.projector(bitesWithMetadata);
       expect(result).toEqual(['coffee', 'drink', 'food', 'vienna']);
@@ -142,19 +206,32 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ];
+      ] as any[];
 
-      const result = fromSelectors.bite.projector('1', bitesWithMetadata);
-      expect(result).toEqual(bitesWithMetadata[0]);
+      const result = fromSelectors.bite.projector(
+        '1',
+        bitesWithMetadata,
+        {},
+        'EUR'
+      );
+      expect(result).toEqual({
+        ...bitesWithMetadata[0],
+        priceInPreferredCurrencySymbol: 'EUR',
+      });
     });
 
     it('should return undefined for non-existing bite id', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ];
+      ] as any[];
 
-      const result = fromSelectors.bite.projector('3', bitesWithMetadata);
+      const result = fromSelectors.bite.projector(
+        '3',
+        bitesWithMetadata,
+        {},
+        'EUR'
+      );
       expect(result).toBeUndefined();
     });
   });
@@ -188,6 +265,139 @@ describe('Bites Selectors', () => {
       );
 
       expect(result).toMatchSnapshot();
+    });
+
+    it('should return bites no distance if no position', () => {
+      const result = fromSelectors.bitesWithMetadata.projector(
+        [mockBite1, mockBite2],
+        mockLikes,
+        undefined
+      );
+
+      expect(result).toMatchSnapshot();
+    });
+  });
+
+  describe('bitesBySelectedBucketlist', () => {
+    const mockBucketlist = {
+      id: 'bucketlist1',
+      biteIds: ['1'],
+    } as Bucketlist;
+
+    it('should return bites in the selected bucketlist', () => {
+      const bitesWithMetadata = [
+        { ...mockBite1, likes: mockLikes, distance: '0' },
+        { ...mockBite2, likes: [], distance: '0.01' },
+      ] as any[];
+
+      const result = fromSelectors.bitesBySelectedBucketlist.projector(
+        bitesWithMetadata,
+        mockBucketlist
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('1');
+    });
+
+    it('should return empty array if no bucketlist is selected', () => {
+      const bitesWithMetadata = [
+        { ...mockBite1, likes: mockLikes, distance: '0' },
+        { ...mockBite2, likes: [], distance: '0.01' },
+      ] as any[];
+
+      const result = fromSelectors.bitesBySelectedBucketlist.projector(
+        bitesWithMetadata,
+        undefined
+      );
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('mybites', () => {
+    it('should return bites created by the user', () => {
+      const bitesWithMetadata = [
+        { ...mockBite1, likes: mockLikes, distance: '0', userId: 'User-1' },
+        { ...mockBite2, likes: [], distance: '0.01', userId: 'User-1' },
+      ] as any[];
+
+      const result = fromSelectors.mybites.projector(
+        bitesWithMetadata,
+        'User-1'
+      );
+
+      expect(result).toHaveLength(2);
+      expect(result[0].id).toBe('1');
+      expect(result[1].id).toBe('2');
+    });
+
+    it('should return empty array if no bites created by the user', () => {
+      const bitesWithMetadata = [
+        { ...mockBite1, likes: mockLikes, distance: '0' },
+        { ...mockBite2, likes: [], distance: '0.01' },
+      ] as any[];
+
+      const result = fromSelectors.mybites.projector(
+        bitesWithMetadata,
+        'Another User'
+      );
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('sortedHomeBites', () => {
+    it('should return bites sorted by distance', () => {
+      const bitesWithMetadata = [
+        { ...mockBite2, likes: [], distance: '0' },
+        { ...mockBite1, likes: mockLikes, distance: '0.01' },
+      ] as any[];
+
+      const result = fromSelectors.sortedHomeBites.projector(
+        bitesWithMetadata,
+        'other-sorting',
+        {}
+      );
+
+      expect(result[0].id).toBe('2'); // closest bite first
+    });
+
+    it('should return empty array if no bites exist', () => {
+      const result = fromSelectors.sortedHomeBites.projector(
+        [],
+        'distance',
+        {}
+      );
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('bitesByUser', () => {
+    it('should return bites created by a specific user', () => {
+      const bitesWithMetadata = [
+        { ...mockBite1, likes: mockLikes, distance: '0', userId: 'User-1' },
+        { ...mockBite2, likes: [], distance: '0.01', userId: 'User-2' },
+      ] as any[];
+
+      const result = fromSelectors.bitesByUser.projector(bitesWithMetadata, {
+        userId: 'User-1',
+      } as PublicUser);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('1');
+    });
+
+    it('should return empty array if no bites created by the user', () => {
+      const bitesWithMetadata = [
+        { ...mockBite1, likes: mockLikes, distance: '0' },
+        { ...mockBite2, likes: [], distance: '0.01' },
+      ] as any[];
+
+      const result = fromSelectors.bitesByUser.projector(bitesWithMetadata, {
+        userId: 'Another User',
+      } as PublicUser);
+
+      expect(result).toEqual([]);
     });
   });
 });

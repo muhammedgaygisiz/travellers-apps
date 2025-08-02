@@ -1,5 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Bites Selectors bitesWithMetadata should return bites no distance if no position 1`] = `
+Array [
+  Object {
+    "distance": undefined,
+    "id": "1",
+    "likes": Array [
+      Object {
+        "biteId": "1",
+        "id": "like1",
+        "userId": "user1",
+      },
+      Object {
+        "biteId": "1",
+        "id": "like2",
+        "userId": "user2",
+      },
+    ],
+    "name": "Test Bite 1",
+    "place": "Test Place 1",
+    "position": Object {
+      "latitude": 48.2082,
+      "longitude": 16.3738,
+    },
+    "tags": Array [
+      "#food",
+      "#vienna",
+    ],
+  },
+  Object {
+    "distance": undefined,
+    "id": "2",
+    "likes": Array [],
+    "name": "Test Bite 2",
+    "place": "Test Place 2",
+    "position": Object {
+      "latitude": 48.2083,
+      "longitude": 16.3739,
+    },
+    "tags": Array [
+      "#drink",
+      "#coffee",
+    ],
+  },
+]
+`;
+
 exports[`Bites Selectors bitesWithMetadata should return bites with likes and distance 1`] = `
 Array [
   Object {

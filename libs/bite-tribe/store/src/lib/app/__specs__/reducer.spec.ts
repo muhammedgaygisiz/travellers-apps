@@ -6,13 +6,69 @@ import {
   setPublicProfile,
   setHomeFilters,
   clearHomeFilters,
+  loadedExchangeRatesFromApi,
+  setHomeSorting,
 } from '../actions';
 import { reducer } from '../reducer';
 import { AppSlice } from '../app-slice.model';
 import { PublicUser, Settings } from 'model';
 import { loadedBitesFromApi } from '../../bites/actions';
+import { fromAuth } from 'ta-firestore';
 
 describe('App Reducer', () => {
+  describe('fromAuth.logoutSucceeded', () => {
+    it('should reset the state to initial values', () => {
+      const INITIAL_STATE: AppSlice = {
+        profile: { displayName: 'Test User' } as PublicUser,
+        settings: { pushNotifications: true } as Settings,
+        loading: { home: true },
+        homeFilters: ['#food'],
+        homeSorting: 'distance',
+        exchangeRates: { EUR: 1 },
+        maxPriceFilter: 0,
+      };
+
+      const NEW_STATE = {
+        profile: undefined,
+        settings: {
+          pushNotifications: false,
+          emailUpdates: false,
+          theme: 'light',
+          currency: 'EUR',
+          nearby: 2000,
+        },
+        loading: { home: true },
+        homeFilters: [],
+        homeSorting: 'distance',
+        exchangeRates: { EUR: 1 },
+        maxPriceFilter: 0,
+      } as AppSlice;
+
+      const logoutAction = fromAuth.logoutSucceeded();
+
+      expect(reducer(INITIAL_STATE, logoutAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('fromAuth.loginSucceeded', () => {
+    it('should set loading:home to true', () => {
+      const INITIAL_STATE = { loading: { home: false } } as AppSlice;
+      const NEW_STATE = {
+        loading: {
+          home: true,
+        },
+      } as AppSlice;
+
+      const loginAction = fromAuth.loginSucceeded();
+
+      expect(reducer(INITIAL_STATE, loginAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
   describe('loadedBitesFromApi', () => {
     it('should set loading:home to false', () => {
       const INITIAL_STATE = { loading: { home: true } } as AppSlice;
@@ -130,11 +186,17 @@ describe('App Reducer', () => {
         homeFilters: [],
       } as unknown as AppSlice;
       const NEW_STATE = {
+        homeDistance: 0,
         homeFilters: ['#food', '#drink'],
+        maxPriceFilter: 0,
       } as AppSlice;
 
       const setHomeFiltersAction = setHomeFilters({
-        filters: ['#food', '#drink'],
+        filters: {
+          tagFilters: ['#food', '#drink'],
+          distanceFilter: '',
+          priceFilter: 0,
+        },
       });
 
       expect(reducer(INITIAL_STATE, setHomeFiltersAction)).toEqual({
@@ -147,11 +209,17 @@ describe('App Reducer', () => {
         homeFilters: ['#old', '#filters'],
       } as AppSlice;
       const NEW_STATE = {
+        homeDistance: 0,
         homeFilters: ['#new', '#filters'],
+        maxPriceFilter: 0,
       } as AppSlice;
 
       const setHomeFiltersAction = setHomeFilters({
-        filters: ['#new', '#filters'],
+        filters: {
+          tagFilters: ['#new', '#filters'],
+          distanceFilter: '',
+          priceFilter: 0,
+        },
       });
 
       expect(reducer(INITIAL_STATE, setHomeFiltersAction)).toEqual({
@@ -167,6 +235,7 @@ describe('App Reducer', () => {
       } as AppSlice;
       const NEW_STATE = {
         homeFilters: [],
+        maxPriceFilter: 0,
       } as unknown as AppSlice;
 
       const clearHomeFiltersAction = clearHomeFilters();
@@ -182,11 +251,49 @@ describe('App Reducer', () => {
       } as unknown as AppSlice;
       const NEW_STATE = {
         homeFilters: [],
+        maxPriceFilter: 0,
       } as unknown as AppSlice;
 
       const clearHomeFiltersAction = clearHomeFilters();
 
       expect(reducer(INITIAL_STATE, clearHomeFiltersAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('loadedExchangeRatesFromApi', () => {
+    it('should set exchange rates', () => {
+      const EXCHANGE_RATES_MOCK = { EUR: 1.2, USD: 1.1 };
+      const INITIAL_STATE = {} as AppSlice;
+      const NEW_STATE = {
+        exchangeRates: EXCHANGE_RATES_MOCK,
+      } as unknown as AppSlice;
+
+      const loadedExchangeRatesFromApiAction = loadedExchangeRatesFromApi({
+        exchangeRates: EXCHANGE_RATES_MOCK,
+      });
+
+      expect(reducer(INITIAL_STATE, loadedExchangeRatesFromApiAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('setHomeSorting', () => {
+    it('should set home sorting', () => {
+      const INITIAL_STATE = {
+        homeSorting: 'distance',
+      } as AppSlice;
+      const NEW_STATE = {
+        homeSorting: 'price',
+      } as AppSlice;
+
+      const setHomeSortingAction = setHomeSorting({
+        sorting: 'price',
+      });
+
+      expect(reducer(INITIAL_STATE, setHomeSortingAction)).toEqual({
         ...NEW_STATE,
       });
     });

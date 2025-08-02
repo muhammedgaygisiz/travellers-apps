@@ -40,7 +40,7 @@ export const exchangeRates = createSelector(
   (slice) => slice?.exchangeRates
 );
 
-export const preferedCurrency = createSelector(
+export const preferredCurrency = createSelector(
   settings,
   (settings) => settings?.currency || 'EUR'
 );

@@ -60,7 +60,7 @@ import {
   publicUser,
   settings,
   exchangeRates,
-  preferedCurrency,
+  preferredCurrency,
   maxPriceHome,
   homeSorting,
 } from './app/selectors';
@@ -135,7 +135,7 @@ export class BiteTribeStoreService implements StoreService {
   currencyFromSettings$ = this.store.select(currency);
   restaurantToCreate$ = this.store.select(restaurantToCreate);
   exchangeRates$ = this.store.select(exchangeRates);
-  preferedCurrency$ = this.store.select(preferedCurrency);
+  preferedCurrency$ = this.store.select(preferredCurrency);
   maxPriceHome$ = this.store.select(maxPriceHome);
 
   userId$ = this.store.select(fromAuth.selectUserId);

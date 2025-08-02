@@ -45,4 +45,16 @@ describe('handleMaxPriceFilter', () => {
       { price: 90, currency: 'GBP' }, // within limit after conversion
     ]);
   });
+
+  it('should handle if no preferred currency is provided', () => {
+    const bites = [
+      { price: 100, currency: 'EUR' } as Bite,
+      { price: 121, currency: 'USD' } as Bite,
+      { price: 100, currency: 'GBP' } as Bite,
+    ];
+
+    const result = handleMaxPriceFilter(100, exchangeRates, bites);
+
+    expect(result).toEqual([{ price: 100, currency: 'EUR' }]);
+  });
 });

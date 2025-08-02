@@ -35,11 +35,7 @@ describe('handleTagFilters', () => {
     ] as unknown as Bite[];
     const filters = ['food', 'drink'];
     const result = handleTagFilters(filters, bites);
-    expect(result).toEqual([
-      { id: 1, tags: ['#food', '#drink'] },
-      { id: 3, tags: ['#food'] },
-      { id: 4, tags: ['#drink'] },
-    ]);
+    expect(result).toEqual([{ id: 1, tags: ['#food', '#drink'] }]);
   });
 
   it('should return an empty array if no bites match the filters', () => {

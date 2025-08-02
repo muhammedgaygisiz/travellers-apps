@@ -9,6 +9,7 @@ import {
   fetchGpsPosition,
   goPrivate,
   goPublic,
+  loadedExchangeRatesFromApi,
   loadedGpsPosition,
   loadedSettingsFromApi,
   savePublicProfile,
@@ -41,6 +42,7 @@ const Mock = {
   updateUser: jest.fn(),
   deleteUser: jest.fn(),
   saveUserIfNotExisting: jest.fn(),
+  getExchangeRates: jest.fn(),
 };
 
 describe('AppEffect', () => {
@@ -243,6 +245,32 @@ describe('AppEffect', () => {
       });
 
       expect(saveUserIfNotExistingSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('loadExchangeRatesFromApi$', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(apiService, 'getExchangeRates')
+        .mockReturnValue(of({ USD: 1, EUR: 0.85 }) as any);
+    });
+
+    it('should load exchange rates from API on fromAuth.loadedUser', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', { a: fromAuth.loadedUser({ user: {} }) });
+
+        const expected = 'a';
+        const output = {
+          a: loadedExchangeRatesFromApi({
+            exchangeRates: { USD: 1, EUR: 0.85 },
+          }),
+        };
+
+        expectObservable(effects.loadExchangeRatesFromApi$).toBe(
+          expected,
+          output
+        );
+      });
     });
   });
 });

@@ -11,7 +11,7 @@ import {
   homeFilters,
   homeMaxPriceFilter,
   homeSorting,
-  preferedCurrency,
+  preferredCurrency,
 } from '../app/selectors';
 import { haversineDistance } from 'utils';
 import { EntityState } from '@ngrx/entity';
@@ -75,7 +75,7 @@ export const bites = createSelector(
   bitesWithMetadata,
   homeFilters,
   homeMaxPriceFilter,
-  preferedCurrency,
+  preferredCurrency,
   gpsPosition,
   homeDistance,
   exchangeRates,
@@ -83,7 +83,7 @@ export const bites = createSelector(
     bites,
     filters,
     maxPriceInPreferedCurrency,
-    preferedCurrency,
+    preferredCurrency,
     gpsPosition,
     homeDistance,
     exchangeRates
@@ -96,7 +96,7 @@ export const bites = createSelector(
       maxPriceInPreferedCurrency,
       exchangeRates,
       bites,
-      preferedCurrency
+      preferredCurrency
     );
 
     const filteredBitesByNearby = handleNearbyFilter(
@@ -131,13 +131,13 @@ export const bite = createSelector(
   biteId,
   bitesWithMetadata,
   exchangeRates,
-  preferedCurrency,
-  (id, bites, exchangeRates, preferedCurrency) => {
+  preferredCurrency,
+  (id, bites, exchangeRates, preferredCurrency) => {
     const bite = bites.find((bite) => bite.id === id);
     return enrichByPriceInPreferredCurrency(
       bite,
       exchangeRates,
-      preferedCurrency
+      preferredCurrency
     );
   }
 );

@@ -1,83 +1,60 @@
-import { TestScheduler } from 'rxjs/internal/testing/TestScheduler';
-import { TestBed } from '@angular/core/testing';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { bucketlists, selectedBucketlist } from '../selectors';
+import * as fromSelectors from '../selectors';
+import { EntityState } from '@ngrx/entity';
 import { Bucketlist } from 'model';
-import { bucketlistId } from '../../router/selectors';
-
-const assertDeepEqual = (actual: any, expected: any): void => {
-  expect(actual).toEqual(expected);
-};
-
-const BUCKETLIST_MOCK = { id: 'id' } as Bucketlist;
 
 describe('Bucketlists - selectors', () => {
-  let scheduler: TestScheduler;
-  let store: MockStore;
+  const BUCKETLIST_1 = { id: '1', name: 'Bucketlist 1' } as Bucketlist;
+  const BUCKETLIST_2 = { id: '2', name: 'Bucketlist 2' } as Bucketlist;
+  const initialState: EntityState<Bucketlist> = {
+    ids: ['1', '2'],
+    entities: {
+      '1': BUCKETLIST_1,
+      '2': BUCKETLIST_2,
+    },
+  };
 
-  describe('given a valid setup store', () => {
-    beforeEach(() => {
-      scheduler = new TestScheduler(assertDeepEqual);
-      TestBed.configureTestingModule({
-        providers: [
-          provideMockStore({
-            initialState: {
-              bucketlists: {
-                ids: ['id'],
-                entities: { id: BUCKETLIST_MOCK },
-              },
-            },
-          }),
-        ],
-      });
+  describe('bucketlists', () => {
+    it('should return the bucketlists', () => {
+      const result = fromSelectors.bucketlists.projector(initialState);
+      expect(result).toEqual([BUCKETLIST_1, BUCKETLIST_2]);
+    });
+  });
 
-      store = TestBed.inject(MockStore);
+  describe('selectedBucketlist', () => {
+    it('should return the selected bucketlist by id', () => {
+      const result = fromSelectors.selectedBucketlist.projector('1', [
+        BUCKETLIST_1,
+      ]);
+      expect(result).toEqual(initialState.entities['1']);
     });
 
-    it('should return bucketlists slice', () => {
-      scheduler.run(({ expectObservable }) => {
-        const result$ = store.select(bucketlists);
-
-        const expected = 'a';
-        const output = {
-          a: [BUCKETLIST_MOCK],
-        };
-
-        expectObservable(result$).toBe(expected, output);
-      });
+    it('should return undefined if bucketlist does not exist', () => {
+      const result = fromSelectors.selectedBucketlist.projector(
+        initialState,
+        []
+      );
+      expect(result).toBeUndefined();
     });
 
-    describe('selectedBucketlist', () => {
-      beforeEach(() => {
-        store.overrideSelector(bucketlistId, 'id');
-      });
+    it('should return undefined if slice is undefined', () => {
+      const result = fromSelectors.selectedBucketlist.projector(
+        undefined as any,
+        [BUCKETLIST_1]
+      );
+      expect(result).toBeUndefined();
+    });
+  });
 
-      it('should return selected bucketlist', () => {
-        scheduler.run(({ expectObservable }) => {
-          const result$ = store.select(selectedBucketlist);
+  describe('selectedBucketlistTitle', () => {
+    it('should return the title of the selected bucketlist', () => {
+      const result =
+        fromSelectors.selectedBucketlistTitle.projector(BUCKETLIST_1);
+      expect(result).toEqual(BUCKETLIST_1.name);
+    });
 
-          const expected = 'a';
-          const output = {
-            a: BUCKETLIST_MOCK,
-          };
-
-          expectObservable(result$).toBe(expected, output);
-        });
-      });
-
-      it('should return undefined for no selected bucketlist', () => {
-        store.overrideSelector(bucketlistId, undefined);
-        scheduler.run(({ expectObservable }) => {
-          const result$ = store.select(selectedBucketlist);
-
-          const expected = 'a';
-          const output = {
-            a: undefined,
-          };
-
-          expectObservable(result$).toBe(expected, output);
-        });
-      });
+    it('should return fallback title if bucketlist does not exist', () => {
+      const result = fromSelectors.selectedBucketlistTitle.projector(undefined);
+      expect(result).toEqual('My Bucketlist');
     });
   });
 });

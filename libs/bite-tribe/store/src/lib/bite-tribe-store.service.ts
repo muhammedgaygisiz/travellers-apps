@@ -18,6 +18,7 @@ import {
   cachedBite,
   mybites,
   bitesBySelectedBucketlist,
+  sortedHomeBites,
 } from './bites/selectors';
 import {
   restaurant,
@@ -33,6 +34,7 @@ import {
   savePublicProfile,
   saveSettings,
   setHomeFilters,
+  setHomeSorting,
 } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -59,6 +61,7 @@ import {
   exchangeRates,
   preferedCurrency,
   maxPriceHome,
+  homeSorting,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -115,6 +118,8 @@ export class BiteTribeStoreService implements StoreService {
   registrationError = signal('Not implemented yet.');
 
   bites$ = this.store.select(bites);
+  sortedHomeBites$ = this.store.select(sortedHomeBites);
+  homeSorting$ = this.store.select(homeSorting);
   bite$ = this.store.select(bite);
   mybites$ = this.store.select(mybites);
   bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);
@@ -259,6 +264,10 @@ export class BiteTribeStoreService implements StoreService {
 
   goPrivate() {
     this.store.dispatch(goPrivate());
+  }
+
+  setHomeSorting(sorting: string) {
+    this.store.dispatch(setHomeSorting({ sorting }));
   }
 
   setHomeFilters(filters: {

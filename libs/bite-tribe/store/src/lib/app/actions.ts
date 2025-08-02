@@ -47,6 +47,11 @@ export const setHomeFilters = createAction(
   }>()
 );
 
+export const setHomeSorting = createAction(
+  '[APP] Set home sorting',
+  props<{ sorting: string }>()
+);
+
 export const clearHomeFilters = createAction('[APP] Clear home filters');
 
 export const loadedExchangeRatesFromApi = createAction(

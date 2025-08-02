@@ -8,7 +8,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   template: `
     <bt-home
       class="ion-page"
-      [bites]="service.sortedBites()"
+      [bites]="service.sortedHomeBites()"
       [allTags]="service.allTags()"
       [selectedFilters]="service.homeFilters()"
       [userId]="service.userId()"

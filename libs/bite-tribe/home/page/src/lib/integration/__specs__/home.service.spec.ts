@@ -4,26 +4,37 @@ import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import SpyInstance = jest.SpyInstance;
-
 const sortBitesByDistanceMock = jest.fn();
-jest.mock('../../utils/sort-bites-by-distance', () => ({
-  sortBitesByDistance: (): void => sortBitesByDistanceMock(),
-}));
+jest.mock(
+  '../../../../../../store/src/lib/bites/utils/sort-bites-by-distance',
+  () => ({
+    sortBitesByDistance: (): void => sortBitesByDistanceMock(),
+  })
+);
 
 const sortBitesByLikesMock = jest.fn();
-jest.mock('../../utils/sort-bites-by-likes', () => ({
-  sortBitesByLikes: (): void => sortBitesByLikesMock(),
-}));
+jest.mock(
+  '../../../../../../store/src/lib/bites/utils/sort-bites-by-likes',
+  () => ({
+    sortBitesByLikes: (): void => sortBitesByLikesMock(),
+  })
+);
 
 const sortBitesByCreatedAtMock = jest.fn();
-jest.mock('../../utils/sort-bites-by-created-at', () => ({
-  sortBitesByCreatedAt: (): void => sortBitesByCreatedAtMock(),
-}));
+jest.mock(
+  '../../../../../../store/src/lib/bites/utils/sort-bites-by-created-at',
+  () => ({
+    sortBitesByCreatedAt: (): void => sortBitesByCreatedAtMock(),
+  })
+);
 
 const sortBitesByRatingMock = jest.fn();
-jest.mock('../../utils/sort-bites-by-rating', () => ({
-  sortBitesByRating: (): void => sortBitesByRatingMock(),
-}));
+jest.mock(
+  '../../../../../../store/src/lib/bites/utils/sort-bites-by-rating',
+  () => ({
+    sortBitesByRating: (): void => sortBitesByRatingMock(),
+  })
+);
 
 class Mock {
   bites = () => [];

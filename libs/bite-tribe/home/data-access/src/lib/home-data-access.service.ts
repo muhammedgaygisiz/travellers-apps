@@ -7,7 +7,12 @@ import { Bite, Like } from 'model';
 export class HomeDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
-  bites = toSignal(this.storeService.bites$, { initialValue: [] as Bite[] });
+  sortedHomeBites = toSignal(this.storeService.sortedHomeBites$, {
+    initialValue: [] as Bite[],
+  });
+  sorting = toSignal(this.storeService.homeSorting$, {
+    initialValue: 'distance',
+  });
   myBites = toSignal(this.storeService.mybites$, {
     initialValue: [] as Bite[],
   });
@@ -51,10 +56,10 @@ export class HomeDataAccessService {
   }
 
   submitLikeClick(likeType: { likeType: string; biteId: string }) {
-    const bites = this.bites();
+    const bites = this.sortedHomeBites();
     const userId = this.userId();
 
-    const bite = bites?.find((bite) => bite.id === likeType.biteId);
+    const bite = bites?.find((bite: Bite) => bite.id === likeType.biteId);
     const likeFromUser = bite?.likes?.find(
       (like: Like) =>
         like.userId === userId && like.likeType === likeType.likeType
@@ -70,6 +75,10 @@ export class HomeDataAccessService {
 
   deleteBite(bite: Bite) {
     this.storeService.submitDeleteBite(bite);
+  }
+
+  setHomeSorting(sorting: string) {
+    this.storeService.setHomeSorting(sorting);
   }
 
   setFilters(filters: {

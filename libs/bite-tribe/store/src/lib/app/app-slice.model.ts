@@ -11,4 +11,5 @@ export type AppSlice = {
   homeDistance?: number;
   exchangeRates: Record<string, number>;
   maxPriceFilter?: number;
+  homeSorting?: string;
 };

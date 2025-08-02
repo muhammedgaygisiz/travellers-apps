@@ -8,6 +8,7 @@ import {
   setHomeFilters,
   clearHomeFilters,
   loadedExchangeRatesFromApi,
+  setHomeSorting,
 } from './actions';
 import { AppSlice } from './app-slice.model';
 import { loadedBitesFromApi } from '../bites/actions';
@@ -26,6 +27,7 @@ const initialState: AppSlice = {
     home: true,
   },
   homeFilters: [],
+  homeSorting: 'distance',
   exchangeRates: { EUR: 1 },
   maxPriceFilter: 0,
 };
@@ -91,5 +93,9 @@ export const reducer = createReducer<AppSlice>(
   on(loadedExchangeRatesFromApi, (state, { exchangeRates }) => ({
     ...state,
     exchangeRates,
+  })),
+  on(setHomeSorting, (state, { sorting }) => ({
+    ...state,
+    homeSorting: sorting,
   }))
 );

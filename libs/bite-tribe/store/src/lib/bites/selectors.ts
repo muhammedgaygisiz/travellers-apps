@@ -11,6 +11,7 @@ import {
   homeFilters,
   homeMaxPriceFilter,
   preferedCurrency,
+  homeSorting,
 } from '../app/selectors';
 import { haversineDistance } from 'utils';
 import { EntityState } from '@ngrx/entity';
@@ -21,6 +22,11 @@ import { handleMaxPriceFilter } from './utils/handle-max-price-filter';
 import { getBitePriceInPreferredCurrency } from './utils/get-bite-price-in-preferred-currency';
 import { fromAuth } from 'ta-firestore';
 import { selectedBucketlist } from '../bucketlists/selectors';
+import { sortBitesByDistance } from './utils/sort-bites-by-distance';
+import { sortBitesByLikes } from './utils/sort-bites-by-likes';
+import { sortBitesByCreatedAt } from './utils/sort-bites-by-created-at';
+import { sortBitesByRating } from './utils/sort-bites-by-rating';
+import { sortBitesByPrice } from './utils/sort-bites-by-price';
 
 const slice = createFeatureSelector<
   EntityState<Bite> & {
@@ -175,5 +181,38 @@ export const bitesBySelectedBucketlist = createSelector(
     return bites.filter((bite) =>
       selectedBucketlist.biteIds?.includes(bite.id)
     );
+  }
+);
+
+export const sortedHomeBites = createSelector(
+  bitesWithMetadata,
+  homeSorting,
+  exchangeRates,
+  (bites, sorting, exchangeRates) => {
+    if (!bites?.length || !sorting) {
+      return bites;
+    }
+
+    if (sorting === 'distance') {
+      return sortBitesByDistance(bites);
+    }
+
+    if (sorting === 'likes') {
+      return sortBitesByLikes(bites);
+    }
+
+    if (sorting === 'createdAt') {
+      return sortBitesByCreatedAt(bites);
+    }
+
+    if (sorting === 'rating') {
+      return sortBitesByRating(bites);
+    }
+
+    if (sorting === 'price') {
+      return sortBitesByPrice(bites, exchangeRates);
+    }
+
+    return bites;
   }
 );

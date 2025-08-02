@@ -48,3 +48,7 @@ export const preferedCurrency = createSelector(
 export const maxPriceHome = createSelector(slice, (slice) => {
   return slice?.maxPriceFilter || 0;
 });
+
+export const homeSorting = createSelector(slice, (slice) => {
+  return slice?.homeSorting || 'distance';
+});

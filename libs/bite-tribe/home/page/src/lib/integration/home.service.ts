@@ -116,4 +116,8 @@ export class HomeService {
   }) {
     this.dataAccess.setFilters(filters);
   }
+
+  filtersCleared() {
+    this.dataAccess.clearFilters();
+  }
 }

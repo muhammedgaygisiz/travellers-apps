@@ -87,6 +87,7 @@ export class BiteTribeHomeComponent {
     priceFilter: number;
   }>();
   readonly sortingChange = output<string>();
+  readonly filterCleared = output<void>();
 
   ionContent = viewChild(IonContent);
 
@@ -151,5 +152,10 @@ export class BiteTribeHomeComponent {
     if (event.detail) {
       this.sortingChange.emit(event.detail.value);
     }
+  }
+
+  onFiltersClear(modal: IonModal) {
+    modal.dismiss();
+    this.filterCleared.emit();
   }
 }

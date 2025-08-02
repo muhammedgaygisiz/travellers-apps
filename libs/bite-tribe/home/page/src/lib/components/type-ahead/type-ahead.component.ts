@@ -14,6 +14,7 @@ import {
   IonButtons,
   IonCheckbox,
   IonContent,
+  IonFooter,
   IonHeader,
   IonInput,
   IonItem,
@@ -47,6 +48,7 @@ import { IsCheckedPipe } from './pipes/is-checked.pipe';
     IonRange,
     IsCheckedPipe,
     IonLabel,
+    IonFooter,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -69,6 +71,8 @@ export class TypeaheadComponent {
     distanceFilter: string;
     priceFilter: number;
   }>();
+
+  clearFilters = output<void>();
 
   rawSearchTerm = signal('');
   distanceValue = linkedSignal(() => {
@@ -121,6 +125,10 @@ export class TypeaheadComponent {
 
   cancelChanges() {
     this.selectionCancel.emit();
+  }
+
+  clearAllFilters() {
+    this.clearFilters.emit();
   }
 
   confirmChanges() {

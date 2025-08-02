@@ -62,7 +62,7 @@
   />
 
   <ion-list id="modal-list" [inset]="true">
-    <h4>Available Tags</h4>
+    <h4 class="available-tags-title">Available Tags</h4>
     @for (item of filteredItems(); track item) { @if (!(item | isChecked :
     workingSelectedValues())) {
     <ion-item>
@@ -73,3 +73,11 @@
     } }
   </ion-list>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons slot="end">
+      <ion-button (click)="clearAllFilters()">Clear all filters</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

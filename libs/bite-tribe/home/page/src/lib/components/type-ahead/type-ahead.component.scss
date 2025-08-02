@@ -1,4 +1,8 @@
 :host {
+  .available-tags-title {
+    margin-top: 0;
+  }
+
   ion-range {
     &::part(pin) {
       display: inline-flex;

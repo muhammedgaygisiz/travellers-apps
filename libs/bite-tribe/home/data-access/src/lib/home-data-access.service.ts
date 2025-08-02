@@ -88,4 +88,8 @@ export class HomeDataAccessService {
   }) {
     this.storeService.setHomeFilters(filters);
   }
+
+  clearFilters() {
+    this.storeService.clearHomeFilters();
+  }
 }

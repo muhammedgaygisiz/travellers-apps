@@ -30,6 +30,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (openMapView)="service.openMapView('home')"
       (sortingChange)="service.sortingChange($event)"
       (filtersChanged)="service.filtersChanged($event)"
+      (filterCleared)="service.filtersCleared()"
     />
   `,
   imports: [BiteTribeHomeComponent],

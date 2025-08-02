@@ -88,7 +88,7 @@ export const reducer = createReducer<AppSlice>(
     ...state,
     homeFilters: [],
     maxPriceFilter: 0,
-    distanceFilter: undefined,
+    homeDistance: undefined,
   })),
   on(loadedExchangeRatesFromApi, (state, { exchangeRates }) => ({
     ...state,

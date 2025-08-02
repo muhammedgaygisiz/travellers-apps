@@ -65,7 +65,7 @@
   <ng-template>
     <app-type-ahead
       class="ion-page"
-      title="Tags"
+      title="Filters"
       [items]="allTags()"
       [selectedItems]="selectedFilters()"
       [distance]="distance()"
@@ -73,6 +73,7 @@
       [price]="maxPriceFilter()"
       (selectionChange)="onFilterChange($event, modal)"
       (selectionCancel)="modal.dismiss()"
+      (clearFilters)="onFiltersClear(modal)"
     />
   </ng-template>
 </ion-modal>

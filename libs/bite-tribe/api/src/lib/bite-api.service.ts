@@ -9,6 +9,7 @@ import {
 } from 'rxjs';
 import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { Bite } from 'model';
 
 export const BITE_COLLECTION = 'bites';
 
@@ -49,8 +50,6 @@ export class BiteApiService {
               likes: [],
             })) || [];
 
-          // bites.forEach((bite) => this.startLikesListener(bite));
-
           this.bitesChannel$.next(bites);
         }
       );
@@ -63,9 +62,9 @@ export class BiteApiService {
     }
   }
 
-  async saveNewBite(bite: any) {
+  async saveNewBite(bite: Bite) {
     try {
-      const user = await this.getUser();
+      const user = this.getUser();
 
       await FirebaseFirestore.addDocument({
         reference: BITE_COLLECTION,
@@ -82,12 +81,12 @@ export class BiteApiService {
     }
   }
 
-  private async getUser() {
-    const authState = await this.authService.authState();
+  private getUser() {
+    const authState = this.authService.authState();
     return authState?.user;
   }
 
-  async saveEditedBite(bite: any) {
+  async saveEditedBite(bite: Bite) {
     try {
       await FirebaseFirestore.updateDocument({
         reference: `${BITE_COLLECTION}/${bite.id}`,

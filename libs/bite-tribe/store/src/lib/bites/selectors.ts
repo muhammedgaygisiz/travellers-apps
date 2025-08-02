@@ -18,9 +18,10 @@ import { handleNearbyFilter } from './utils/handle-nearby-filter';
 import { handleTagFilters } from './utils/handle-tag-filters';
 import { getLikesForBite } from './utils/get-likes-for-bite';
 import { handleMaxPriceFilter } from './utils/handle-max-price-filter';
+import { getBitePriceInPreferredCurrency } from './utils/get-bite-price-in-preferred-currency';
 
 const slice = createFeatureSelector<
-  EntityState<any> & {
+  EntityState<Bite> & {
     cachedBite?: Bite;
     editingBite?: Bite;
     biteCreator?: PublicUser;
@@ -118,6 +119,37 @@ export const allTags = createSelector(bitesWithMetadata, (bites) => {
   return Array.from(tagsSet).sort();
 });
 
-export const bite = createSelector(biteId, bites, (id, bites) =>
-  bites.find((bite) => bite.id === id)
+const enrichByPriceInPreferredCurrency = (
+  bite: Bite | undefined,
+  exchangeRates: Record<string, number>,
+  preferedCurrency: string
+): Bite | undefined => {
+  if (!bite) {
+    return undefined;
+  }
+
+  return {
+    ...bite,
+    priceInPreferredCurrency: getBitePriceInPreferredCurrency(
+      bite,
+      exchangeRates,
+      preferedCurrency
+    ),
+    priceInPreferredCurrencySymbol: preferedCurrency,
+  };
+};
+
+export const bite = createSelector(
+  biteId,
+  bites,
+  exchangeRates,
+  preferedCurrency,
+  (id, bites, exchangeRates, preferedCurrency) => {
+    const bite = bites.find((bite) => bite.id === id);
+    return enrichByPriceInPreferredCurrency(
+      bite,
+      exchangeRates,
+      preferedCurrency
+    );
+  }
 );

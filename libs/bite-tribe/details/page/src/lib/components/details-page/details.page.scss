@@ -28,6 +28,15 @@
     }
   }
 
+  .restaurant-distance-price {
+    .price-column {
+      display: flex;
+      flex-direction: column;
+
+      gap: 0.5rem;
+    }
+  }
+
   .fields {
     width: 100%;
 

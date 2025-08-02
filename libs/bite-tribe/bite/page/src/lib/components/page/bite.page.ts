@@ -111,6 +111,7 @@ export class BitePage {
         tags: toTagsString(bite.tags),
         position: bite.position,
         restaurantId: bite.restaurantId || '',
+        rating: bite.rating || 0,
       });
     }
 

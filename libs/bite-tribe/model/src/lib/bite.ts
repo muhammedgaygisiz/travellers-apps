@@ -22,4 +22,6 @@ export interface Bite {
   //derived attribute
   distance?: string;
   likes?: Like[];
+  priceInPreferredCurrency?: number;
+  priceInPreferredCurrencySymbol?: string;
 }

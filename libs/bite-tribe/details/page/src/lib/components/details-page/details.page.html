@@ -64,11 +64,19 @@
           · {{ biteData?.distance | toMetric }}
         </span>
 
-        @if (biteData?.price) {
-        <span class="price">
-          {{ biteData?.price | currency:(biteData?.currency || 'USD') }}
-        </span>
-        }
+        <div class="price-column">
+          @if (biteData?.priceInPreferredCurrency && biteData?.currency !==
+          biteData?.priceInPreferredCurrencySymbol) {
+          <span class="price">
+            {{ biteData?.priceInPreferredCurrency |
+            currency:(biteData?.priceInPreferredCurrencySymbol || 'USD') }}
+          </span>
+          } @if (biteData?.price) {
+          <span class="price">
+            {{ biteData?.price | currency:(biteData?.currency || 'USD') }}
+          </span>
+          }
+        </div>
       </div>
 
       <div class="age-bar ion-margin-bottom">

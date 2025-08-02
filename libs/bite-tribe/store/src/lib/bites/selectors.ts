@@ -82,18 +82,18 @@ export const bites = createSelector(
   (
     bites,
     filters,
-    maxPriceInPreferedCurrency,
+    maxPriceInPreferredCurrency,
     preferredCurrency,
     gpsPosition,
     homeDistance,
     exchangeRates
   ) => {
-    if (!filters.length && !homeDistance && maxPriceInPreferedCurrency === 0) {
+    if (!filters.length && !homeDistance && maxPriceInPreferredCurrency === 0) {
       return bites;
     }
 
-    const filteredBitesByMaxPrice = handleMaxPriceFilter(
-      maxPriceInPreferedCurrency,
+    const priceFilteredBites = handleMaxPriceFilter(
+      maxPriceInPreferredCurrency,
       exchangeRates,
       bites,
       preferredCurrency
@@ -102,7 +102,7 @@ export const bites = createSelector(
     const filteredBitesByNearby = handleNearbyFilter(
       homeDistance,
       gpsPosition,
-      filteredBitesByMaxPrice
+      priceFilteredBites
     );
 
     return handleTagFilters(filters, filteredBitesByNearby);

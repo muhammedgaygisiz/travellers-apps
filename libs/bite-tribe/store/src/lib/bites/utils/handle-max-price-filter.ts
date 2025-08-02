@@ -5,19 +5,19 @@ export const handleMaxPriceFilter = (
   maxPriceInPreferedCurrency: number,
   exchangeRates: Record<string, number>,
   bites: Bite[],
-  preferedCurrency = 'EUR'
+  preferredCurrency = 'EUR'
 ): Bite[] => {
   const hasMaxPriceFilter = maxPriceInPreferedCurrency > 0;
 
   if (hasMaxPriceFilter) {
     return bites.filter((bite) => {
-      const bitePriceInPreferedCurrency = getBitePriceInPreferredCurrency(
+      const bitePriceInPreferredCurrency = getBitePriceInPreferredCurrency(
         bite,
         exchangeRates,
-        preferedCurrency
+        preferredCurrency
       );
 
-      return bitePriceInPreferedCurrency <= maxPriceInPreferedCurrency;
+      return bitePriceInPreferredCurrency <= maxPriceInPreferedCurrency;
     });
   }
 

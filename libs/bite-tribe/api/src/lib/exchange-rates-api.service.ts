@@ -3,9 +3,6 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 export const EXCHANGERATES = 'meta/exchangeRates';
 
-// eslint-disable-next-line no-unused-vars
-const exchangeRates = {};
-
 @Injectable({ providedIn: 'root' })
 export class ExchangeRatesApiService {
   async getExchangeRates() {

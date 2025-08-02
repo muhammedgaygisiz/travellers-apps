@@ -16,7 +16,7 @@ describe('sortBitesByCreatedAt', () => {
     expect(sortedBites[2].id).toBe(3);
   });
 
-  it('should handle bites with missing createdAt with second missing missing createdAt', () => {
+  it('should handle bites with missing createdAt when second has missing createdAt', () => {
     const bites = [
       { id: 1, createdAt: '2023-10-01T12:00:00Z' } as unknown as Bite,
       { id: 2 } as unknown as Bite,
@@ -30,7 +30,7 @@ describe('sortBitesByCreatedAt', () => {
     expect(sortedBites[2].id).toBe(2);
   });
 
-  it('should handle bites with missing createdAt with first missing missing createdAt', () => {
+  it('should handle bites with missing createdAt when first has missing createdAt', () => {
     const bites = [
       { id: 1 } as unknown as Bite,
       { id: 2, createdAt: '2023-10-01T12:00:00Z' } as unknown as Bite,
@@ -63,7 +63,7 @@ describe('sortBitesByCreatedAt', () => {
     expect(sortedBites[2].id).toBe(3);
   });
 
-  it('should handle errorneous bites gracefully', () => {
+  it('should handle erroneous bites gracefully', () => {
     const bites = [undefined as unknown as Bite, undefined as unknown as Bite];
 
     const sortedBites = sortBitesByCreatedAt(bites);

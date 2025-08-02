@@ -16,6 +16,8 @@ import {
   biteCreator,
   bites,
   cachedBite,
+  mybites,
+  bitesBySelectedBucketlist,
 } from './bites/selectors';
 import {
   restaurant,
@@ -71,7 +73,11 @@ import {
   removeBiteFromBucketlist,
   saveBiteIdToBucketList,
 } from './bucketlists/actions';
-import { bucketlists, selectedBucketlist } from './bucketlists/selectors';
+import {
+  bucketlists,
+  selectedBucketlist,
+  selectedBucketlistTitle,
+} from './bucketlists/selectors';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -110,6 +116,8 @@ export class BiteTribeStoreService implements StoreService {
 
   bites$ = this.store.select(bites);
   bite$ = this.store.select(bite);
+  mybites$ = this.store.select(mybites);
+  bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);
   allTags$ = this.store.select(allTags);
   bitesByRestaurant$ = this.store.select(bitesByRestaurant);
   restaurant$ = this.store.select(restaurant);
@@ -131,6 +139,7 @@ export class BiteTribeStoreService implements StoreService {
   position$ = this.store.select(gpsPosition);
   cachedBite$ = this.store.select(cachedBite);
   selectedBucketlist$ = this.store.select(selectedBucketlist);
+  selectedBucketlistTitle$ = this.store.select(selectedBucketlistTitle);
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
   biteCreator$ = this.store.select(biteCreator);
   isBitesLoading$ = this.store.select(isBitesLoading);

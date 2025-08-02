@@ -16,3 +16,8 @@ export const selectedBucketlist = createSelector(
   bucketlists,
   (id, bucketlists) => bucketlists.find((bucketlist) => bucketlist.id === id)
 );
+
+export const selectedBucketlistTitle = createSelector(
+  selectedBucketlist,
+  (bucketlist) => bucketlist?.name || 'My Bucketlist'
+);

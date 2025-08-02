@@ -19,6 +19,8 @@ import { handleTagFilters } from './utils/handle-tag-filters';
 import { getLikesForBite } from './utils/get-likes-for-bite';
 import { handleMaxPriceFilter } from './utils/handle-max-price-filter';
 import { getBitePriceInPreferredCurrency } from './utils/get-bite-price-in-preferred-currency';
+import { fromAuth } from 'ta-firestore';
+import { selectedBucketlist } from '../bucketlists/selectors';
 
 const slice = createFeatureSelector<
   EntityState<Bite> & {
@@ -141,7 +143,7 @@ const enrichByPriceInPreferredCurrency = (
 
 export const bite = createSelector(
   biteId,
-  bites,
+  bitesWithMetadata,
   exchangeRates,
   preferedCurrency,
   (id, bites, exchangeRates, preferedCurrency) => {
@@ -150,6 +152,28 @@ export const bite = createSelector(
       bite,
       exchangeRates,
       preferedCurrency
+    );
+  }
+);
+
+export const mybites = createSelector(
+  bitesWithMetadata,
+  fromAuth.selectUserId,
+  (bites, userId) => {
+    return bites.filter((bite) => bite.userId === userId);
+  }
+);
+
+export const bitesBySelectedBucketlist = createSelector(
+  bitesWithMetadata,
+  selectedBucketlist,
+  (bites, selectedBucketlist) => {
+    if (!selectedBucketlist) {
+      return [];
+    }
+
+    return bites.filter((bite) =>
+      selectedBucketlist.biteIds?.includes(bite.id)
     );
   }
 );

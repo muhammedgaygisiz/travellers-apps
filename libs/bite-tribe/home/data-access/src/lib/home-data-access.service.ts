@@ -8,6 +8,13 @@ export class HomeDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
   bites = toSignal(this.storeService.bites$, { initialValue: [] as Bite[] });
+  myBites = toSignal(this.storeService.mybites$, {
+    initialValue: [] as Bite[],
+  });
+  bitesBySelectedBucketlist = toSignal(
+    this.storeService.bitesBySelectedBucketlist$,
+    { initialValue: [] as Bite[] }
+  );
   allTags = toSignal(this.storeService.allTags$, {
     initialValue: [] as string[],
   });
@@ -18,6 +25,12 @@ export class HomeDataAccessService {
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     requireSync: true,
   });
+  selectedBucketlistTitle = toSignal(
+    this.storeService.selectedBucketlistTitle$,
+    {
+      requireSync: true,
+    }
+  );
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
   });

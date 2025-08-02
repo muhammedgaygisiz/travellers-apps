@@ -16,19 +16,14 @@ export class HomeService {
   private readonly navController = inject(NavController);
 
   bites = this.dataAccess.bites;
+  myBites = this.dataAccess.myBites;
+  bitesBySelectedBucketlist = this.dataAccess.bitesBySelectedBucketlist;
   allTags = this.dataAccess.allTags;
   homeFilters = this.dataAccess.homeFilters;
   userId = this.dataAccess.userId;
   isAuthenticated = this.dataAccess.isAuthenticated;
   isBitesLoading = this.dataAccess.isBitesLoading;
   private exchangeRates = this.dataAccess.exchangeRates;
-
-  myBites = computed(() => {
-    const bites = this.dataAccess.bites();
-    const userId = this.dataAccess.userId();
-
-    return bites.filter((bite) => bite.userId === userId);
-  });
 
   sorting = signal('distance');
 
@@ -40,24 +35,7 @@ export class HomeService {
 
   maxPriceHome = this.dataAccess.maxPriceHome;
 
-  bitesBySelectedBucketlist = computed(() => {
-    const bites = this.dataAccess.bites();
-    const selectedBucketlist = this.selectedBucketlist();
-
-    if (!selectedBucketlist) {
-      return [];
-    }
-
-    return bites.filter((bite) =>
-      selectedBucketlist.biteIds?.includes(bite.id)
-    );
-  });
-
-  selectedBucketlistTitle = computed(() => {
-    const selectedBucketlist = this.selectedBucketlist();
-
-    return selectedBucketlist?.name || 'My Bucketlist';
-  });
+  selectedBucketlistTitle = this.dataAccess.selectedBucketlistTitle;
 
   sortedBites = computed((): Bite[] => {
     //TODO: Move this logic to selector

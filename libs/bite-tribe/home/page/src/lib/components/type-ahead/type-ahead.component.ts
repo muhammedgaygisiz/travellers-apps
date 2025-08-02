@@ -17,6 +17,7 @@ import {
   IonHeader,
   IonInput,
   IonItem,
+  IonLabel,
   IonList,
   IonRange,
   IonSearchbar,
@@ -45,6 +46,7 @@ import { IsCheckedPipe } from './pipes/is-checked.pipe';
     IonInput,
     IonRange,
     IsCheckedPipe,
+    IonLabel,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

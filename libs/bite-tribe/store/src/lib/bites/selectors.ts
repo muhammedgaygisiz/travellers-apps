@@ -10,8 +10,8 @@ import {
   homeDistance,
   homeFilters,
   homeMaxPriceFilter,
-  preferedCurrency,
   homeSorting,
+  preferedCurrency,
 } from '../app/selectors';
 import { haversineDistance } from 'utils';
 import { EntityState } from '@ngrx/entity';
@@ -19,7 +19,6 @@ import { handleNearbyFilter } from './utils/handle-nearby-filter';
 import { handleTagFilters } from './utils/handle-tag-filters';
 import { getLikesForBite } from './utils/get-likes-for-bite';
 import { handleMaxPriceFilter } from './utils/handle-max-price-filter';
-import { getBitePriceInPreferredCurrency } from './utils/get-bite-price-in-preferred-currency';
 import { fromAuth } from 'ta-firestore';
 import { selectedBucketlist } from '../bucketlists/selectors';
 import { sortBitesByDistance } from './utils/sort-bites-by-distance';
@@ -27,6 +26,7 @@ import { sortBitesByLikes } from './utils/sort-bites-by-likes';
 import { sortBitesByCreatedAt } from './utils/sort-bites-by-created-at';
 import { sortBitesByRating } from './utils/sort-bites-by-rating';
 import { sortBitesByPrice } from './utils/sort-bites-by-price';
+import { enrichByPriceInPreferredCurrency } from './utils/enrich-by-price-in-preferred-currency';
 
 const slice = createFeatureSelector<
   EntityState<Bite> & {
@@ -127,26 +127,6 @@ export const allTags = createSelector(bitesWithMetadata, (bites) => {
   return Array.from(tagsSet).sort();
 });
 
-const enrichByPriceInPreferredCurrency = (
-  bite: Bite | undefined,
-  exchangeRates: Record<string, number>,
-  preferedCurrency: string
-): Bite | undefined => {
-  if (!bite) {
-    return undefined;
-  }
-
-  return {
-    ...bite,
-    priceInPreferredCurrency: getBitePriceInPreferredCurrency(
-      bite,
-      exchangeRates,
-      preferedCurrency
-    ),
-    priceInPreferredCurrencySymbol: preferedCurrency,
-  };
-};
-
 export const bite = createSelector(
   biteId,
   bitesWithMetadata,
@@ -185,7 +165,7 @@ export const bitesBySelectedBucketlist = createSelector(
 );
 
 export const sortedHomeBites = createSelector(
-  bitesWithMetadata,
+  bites,
   homeSorting,
   exchangeRates,
   (bites, sorting, exchangeRates) => {

@@ -37,19 +37,39 @@
     </ion-item>
   </ion-list>
 
-  <ion-searchbar (ionInput)="searchbarInput($event)" />
-
-  <ion-list id="modal-list" [inset]="true">
-    @for (item of filteredItems(); track item) {
+  <ion-list id="modal-list" [inset]="true" class="ion-margin-bottom">
+    <h4>Selected Tags</h4>
+    @for (tag of workingSelectedValues(); track tag) {
     <ion-item>
       <ion-checkbox
-        [value]="item"
-        [checked]="item | isChecked : workingSelectedValues()"
+        [value]="tag"
+        [checked]="true"
         (ionChange)="checkboxChange($event)"
       >
+        {{ tag }}
+      </ion-checkbox>
+    </ion-item>
+    } @empty {
+    <ion-item>
+      <ion-label>No tags selected.</ion-label>
+    </ion-item>
+    }
+  </ion-list>
+
+  <ion-searchbar
+    (ionInput)="searchbarInput($event)"
+    placeholder="Search in available tags"
+  />
+
+  <ion-list id="modal-list" [inset]="true">
+    <h4>Available Tags</h4>
+    @for (item of filteredItems(); track item) { @if (!(item | isChecked :
+    workingSelectedValues())) {
+    <ion-item>
+      <ion-checkbox [value]="item" (ionChange)="checkboxChange($event)">
         {{ item }}
       </ion-checkbox>
     </ion-item>
-    }
+    } }
   </ion-list>
 </ion-content>

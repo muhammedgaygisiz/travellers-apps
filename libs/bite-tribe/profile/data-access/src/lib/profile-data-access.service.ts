@@ -10,8 +10,13 @@ export class ProfileDataAccessService {
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
   });
-  bites = toSignal(this.storeService.bites$, { initialValue: [] as Bite[] });
+  bitesByUser = toSignal(this.storeService.mybites$, {
+    initialValue: [] as Bite[],
+  });
 
+  private bites = toSignal(this.storeService.bites$, {
+    initialValue: [] as Bite[],
+  });
   biteCreator = toSignal(this.storeService.biteCreator$);
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
 

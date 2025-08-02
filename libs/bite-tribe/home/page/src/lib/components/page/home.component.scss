@@ -8,8 +8,19 @@
   .chip-sort-filter-container {
     display: flex;
     flex-direction: row;
+    margin-bottom: 1rem;
+
+    .sort-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
 
     .filter-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
       .add-filter {
         margin: 0;
       }
@@ -28,7 +39,6 @@
 
   .chip-container {
     display: flex;
-    margin-bottom: 1rem;
     flex-wrap: wrap;
     flex: 1;
 

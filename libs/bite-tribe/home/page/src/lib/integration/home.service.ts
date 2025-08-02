@@ -60,6 +60,11 @@ export class HomeService {
   });
 
   sortedBites = computed((): Bite[] => {
+    //TODO: Move this logic to selector
+    //We will have to distinguish between bites for home, bucketlist and my bites
+    //My bites will be sorted by createdAt (latest) while others will be sorted by distance by default
+    //and will have own filtering and sorting settings
+
     const bites = this.bites();
     const sorting = this.sorting();
     const exchangeRates = this.exchangeRates();

@@ -34,6 +34,7 @@ import {
   star,
   starOutline,
   filter,
+  funnelOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = () => {
@@ -72,5 +73,6 @@ export const addNecessaryIcons = () => {
     star,
     starOutline,
     filter,
+    funnelOutline,
   });
 };

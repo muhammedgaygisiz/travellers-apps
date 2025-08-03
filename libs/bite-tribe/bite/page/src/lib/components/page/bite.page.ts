@@ -29,8 +29,7 @@ import { Bite } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { currencyCodes } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
-
-const toTagsString = (tags: string[] | undefined = []) => tags?.join(' ');
+import { TagsInputComponent } from '../tags-input/tags-input.component';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -48,6 +47,7 @@ const toTagsString = (tags: string[] | undefined = []) => tags?.join(' ');
     PositionComponent,
     IonNote,
     StarRatingComponent,
+    TagsInputComponent,
   ],
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',
@@ -91,7 +91,7 @@ export class BitePage {
       [Validators.required, FloatNumberDotNotationValidator()],
     ],
     currency: ['EUR', Validators.required],
-    tags: [''],
+    tags: [[] as string[]],
     position: [this.position(), Validators.required],
     rating: [0, [Validators.min(0), Validators.max(5)]],
   });
@@ -108,7 +108,7 @@ export class BitePage {
         place: bite.place,
         price: bite.price,
         currency: bite.currency,
-        tags: toTagsString(bite.tags),
+        tags: bite.tags || [],
         position: bite.position,
         restaurantId: bite.restaurantId || '',
       });

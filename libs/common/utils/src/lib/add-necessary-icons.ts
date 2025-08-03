@@ -2,6 +2,7 @@ import { addIcons } from 'ionicons';
 import {
   add,
   close,
+  closeCircle,
   filterOutline,
   locationOutline,
   logInOutline,
@@ -43,6 +44,7 @@ export const addNecessaryIcons = () => {
     logOutOutline,
     add,
     close,
+    closeCircle,
     locationOutline,
     arrowBackOutline,
     logoGoogle,

@@ -168,7 +168,7 @@ describe('BitePage', () => {
         rating: 0,
         currency: 'USD',
         restaurantId: '',
-        tags: 'test food',
+        tags: ['test', 'food'],
         position: { latitude: 42, longitude: 24 },
       });
     });

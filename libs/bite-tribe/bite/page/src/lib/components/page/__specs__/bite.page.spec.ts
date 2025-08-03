@@ -259,4 +259,12 @@ describe('BitePage', () => {
       expect(component.getGpsErrorMessage()).toBe('');
     });
   });
+
+  describe('setTags', () => {
+    it('should set tags in the form group', () => {
+      const tags = ['tag1', 'tag2'];
+      component.setTags(tags);
+      expect(component.biteFormGroup.controls['tags'].value).toEqual(tags);
+    });
+  });
 });

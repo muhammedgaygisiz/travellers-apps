@@ -51,7 +51,7 @@
 
       <bt-tags-input
         [tags]="biteFormGroup.get('tags')?.value || []"
-        (tagChanges)="biteFormGroup.get('tags')?.setValue($event)"
+        (tagChanges)="setTags($event)"
       />
       <hr class="sams-favorite-hr" />
 

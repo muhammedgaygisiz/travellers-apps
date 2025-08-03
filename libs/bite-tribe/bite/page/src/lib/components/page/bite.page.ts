@@ -198,4 +198,11 @@ export class BitePage {
   emitStartCropImage(a: any) {
     this.startCropImage.emit(a);
   }
+
+  setTags(tags: string[]) {
+    const tagsControl = this.biteFormGroup.get('tags');
+    if (tagsControl) {
+      tagsControl.setValue(tags);
+    }
+  }
 }

@@ -16,6 +16,7 @@ const REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES = /^\s*$/;
 @Component({
   selector: 'bt-tags-input',
   templateUrl: './tags-input.component.html',
+  styleUrl: './tags-input.component.scss',
   imports: [
     IonInput,
     IonChip,

@@ -1,0 +1,19 @@
+:host {
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+
+    label {
+      align-content: center;
+      margin-right: 2rem;
+    }
+
+    ion-chip:last-of-type {
+      margin-right: 1rem;
+    }
+
+    ion-input {
+      flex: 1;
+    }
+  }
+}

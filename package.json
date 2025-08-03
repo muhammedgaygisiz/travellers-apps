@@ -36,7 +36,7 @@
     "@angular/common": "20.1.4",
     "@angular/compiler": "20.1.4",
     "@angular/core": "20.1.4",
-    "@angular/fire": "19.0.0",
+    "@angular/fire": "20.0.1",
     "@angular/forms": "20.1.4",
     "@angular/material": "20.1.4",
     "@angular/platform-browser": "20.1.4",
@@ -181,7 +181,8 @@
       "@angular-devkit/build-angular": "20.1.4"
     },
     "@angular-devkit/build-angular": {
-      "typescript": "5.8.3"
+      "typescript": "5.8.3",
+      "jest": "30.0.5"
     }
   }
 }

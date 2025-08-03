@@ -22,11 +22,6 @@ export class BiteDataAccessService {
   }
 
   async submitEditedBite(editedBite: any) {
-    const enrichedBite = {
-      ...editedBite,
-      tags: splitTags(editedBite.tags),
-    };
-
-    this.storeService.save(enrichedBite, 'bite');
+    this.storeService.save(editedBite, 'bite');
   }
 }

@@ -63,7 +63,6 @@
     "@ngrx/router-store": "20.0.0",
     "@ngrx/signals": "20.0.0",
     "@ngrx/store": "20.0.0",
-    "@storybook/addon-interactions": "8.6.12",
     "@types/leaflet": "^1.9.18",
     "bootstrap-icons": "1.13.1",
     "cordova-plugin-geolocation": "5.0.0",
@@ -115,7 +114,6 @@
     "@nxext/capacitor": "21.0.0",
     "@rxjs-insights/devtools": "0.5.1",
     "@schematics/angular": "20.1.4",
-    "@storybook/addon-essentials": "8.6.12",
     "@storybook/addon-mdx-gfm": "8.6.12",
     "@storybook/angular": "9.1.0",
     "@storybook/blocks": "8.6.12",
@@ -146,6 +144,7 @@
     "jest-environment-jsdom": "30.0.5",
     "jest-environment-node": "29.7.0",
     "jest-preset-angular": "15.0.0",
+    "jest-util": "30.0.5",
     "jsonc-eslint-parser": "^2.1.0",
     "lint-staged": "16.1.4",
     "loki": "0.35.1",
@@ -162,8 +161,7 @@
     "ts-jest": "29.4.1",
     "ts-node": "10.9.1",
     "typescript": "5.8.3",
-    "webpack": "5.91.0",
-    "jest-util": "30.0.5"
+    "webpack": "5.91.0"
   },
   "overrides": {
     "@angular-devkit/build-angular": {

@@ -164,20 +164,5 @@
     "typescript": "5.8.3",
     "webpack": "5.91.0",
     "jest-util": "30.0.5"
-  },
-  "overrides": {
-    "@commitlint/config-nx-scopes": {
-      "nx": "21.3.11"
-    },
-    "@nx/angular": {
-      "@angular-devkit/build-angular": "20.1.4"
-    },
-    "@storybook/angular": {
-      "@angular-devkit/build-angular": "20.1.4"
-    },
-    "@angular-devkit/build-angular": {
-      "typescript": "5.8.3",
-      "jest": "30.0.5"
-    }
   }
 }

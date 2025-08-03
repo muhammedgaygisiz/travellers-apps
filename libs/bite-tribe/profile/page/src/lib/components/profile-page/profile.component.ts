@@ -14,7 +14,7 @@ import {
   IonIcon,
 } from '@ionic/angular/standalone';
 import { Bite, PublicUser } from 'model';
-import { NgIf } from '@angular/common';
+
 import { BiteComponent } from 'bite-tribe-common/bite';
 
 @Component({
@@ -28,11 +28,10 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonContent,
     IonAvatar,
     IonButton,
-    NgIf,
     BiteComponent,
     IonBadge,
-    IonIcon,
-  ],
+    IonIcon
+],
 })
 export class ProfileComponent {
   isAuthenticated = input(false);

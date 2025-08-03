@@ -4,7 +4,7 @@
   "sourceRoot": "libs/common/ui/tags/src",
   "prefix": "bt",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:common", "type:ui", "framework:ionic"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

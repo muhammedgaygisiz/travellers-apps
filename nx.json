@@ -89,7 +89,6 @@
   "defaultProject": "prices",
   "useInferencePlugins": false,
   "defaultBase": "develop",
-  "useLegacyCache": true,
   "plugins": [
     {
       "plugin": "@nx/storybook/plugin",

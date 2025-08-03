@@ -88,7 +88,7 @@
     "@angular-eslint/eslint-plugin": "20.1.1",
     "@angular-eslint/eslint-plugin-template": "20.1.1",
     "@angular-eslint/template-parser": "20.1.1",
-    "@angular/cli": "~20.1.0",
+    "@angular/cli": "20.1.0",
     "@angular/compiler-cli": "20.1.4",
     "@angular/language-service": "20.1.4",
     "@angular/pwa": "20.1.4",
@@ -169,7 +169,7 @@
       "jest-environment-jsdom": "30.0.5"
     },
     "@angular/pwa": {
-      "@angular/cli": "20.0.0"
+      "@angular/cli": "20.1.0"
     },
     "@capacitor-firebase/analytics": {
       "firebase": "12.0.0"
@@ -186,13 +186,10 @@
     "@chromatic-com/storybook": {
       "storybook": "9.1.0"
     },
-    "@storybook/addon-essentials": {
-      "storybook": "9.1.0"
-    },
-    "@storybook/addon-interactions": {
-      "storybook": "9.1.0"
-    },
     "@storybook/addon-mdx-gfm": {
+      "storybook": "9.1.0"
+    },
+    "@storybook/blocks": {
       "storybook": "9.1.0"
     },
     "@storybook/core-server": {

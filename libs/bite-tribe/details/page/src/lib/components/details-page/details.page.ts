@@ -68,10 +68,8 @@ import { TagsInputComponent } from 'common/ui/tags';
     ToBlobUrlPipe,
     IonIcon,
     IsInPipe,
-    IsInPipe,
     LikesComponent,
     StarRatingComponent,
-    TagsInputComponent,
     TagsInputComponent,
   ],
 })

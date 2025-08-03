@@ -71,7 +71,7 @@
     "dexie": "4.0.11",
     "exif-js": "github:exif-js/exif-js",
     "fast-fuzzy": "1.12.0",
-    "firebase": "11.6.0",
+    "firebase": "12.0.0",
     "flag-icons": "7.5.0",
     "leaflet": "^1.9.4",
     "memoizee": "0.4.17",

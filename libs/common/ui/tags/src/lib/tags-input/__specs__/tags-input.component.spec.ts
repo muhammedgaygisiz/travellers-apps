@@ -47,6 +47,12 @@ describe('TagsInputComponent', () => {
       component.inputChange('   ');
       expect(emitSpy).not.toHaveBeenCalled();
     });
+
+    it('should not emit tagChanges if tag already exists', () => {
+      componentRef.setInput('tags', ['existing']);
+      component.inputChange('existing');
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('clearInput', () => {

@@ -51,7 +51,9 @@ export class TagsInputComponent implements OnInit {
   }
 
   inputChange(value: string): void {
-    if (!REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES.test(value)) {
+    const isValidTag = !REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES.test(value);
+    const isUniqueTag = !this.tags().includes(value);
+    if (isValidTag && isUniqueTag) {
       this.tagChanges.emit([...this.tags(), value]);
     }
     this.clearInput();

@@ -26,6 +26,7 @@ const REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES = /^\s*$/;
   ],
 })
 export class TagsInputComponent implements OnInit {
+  readonly = input<boolean>(false);
   tags = input<string[]>([]);
   tagChanges = output<string[]>();
 

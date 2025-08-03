@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { splitTags } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({ providedIn: 'root' })
@@ -12,16 +11,7 @@ export class BiteDataAccessService {
   position = toSignal(this.storeService.position$);
   cachedBite = toSignal(this.storeService.cachedBite$);
 
-  async submitNewBite(newBite: any) {
-    const enrichedBite = {
-      ...newBite,
-      tags: splitTags(newBite.tags),
-    };
-
-    this.storeService.save(enrichedBite, 'bite');
-  }
-
-  async submitEditedBite(editedBite: any) {
-    this.storeService.save(editedBite, 'bite');
+  async submitBite(bite: any) {
+    this.storeService.save(bite, 'bite');
   }
 }

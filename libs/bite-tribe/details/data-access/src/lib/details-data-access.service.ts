@@ -1,7 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { splitTags } from 'utils';
 import { RemoveBiteFromBucketlistParams, SaveToBucketListParams } from 'model';
 
 @Injectable({
@@ -21,13 +20,11 @@ export class DetailsDataAccessService {
   });
   biteCreator = toSignal(this.storeService.biteCreator$);
 
-  saveNewTags(newTags: string) {
+  saveNewTags(newTags: string[]) {
     const currentBite = this.bite();
 
     if (currentBite) {
-      const newTagsArray = splitTags(newTags);
-
-      this.storeService.saveTags(newTagsArray, currentBite.id);
+      this.storeService.saveTags(newTags, currentBite.id);
 
       return;
     }

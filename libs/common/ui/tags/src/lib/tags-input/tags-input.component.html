@@ -1,10 +1,13 @@
 {{ tagInputValueChanges$ | async }}
+@let readonlyData = readonly(); @if (!readonlyData) {
 <ng-container [formGroup]="formGroup">
   <ion-input label="Tags" formControlName="tagInput" />
 </ng-container>
-@for (tag of tags(); track tag) {
+} @for (tag of tags(); track tag) {
 <ion-chip>
   <ion-label>{{ tag }}</ion-label>
+  @if (!readonlyData) {
   <ion-icon name="close-circle" (click)="removeTag(tag)"></ion-icon>
+  }
 </ion-chip>
 }

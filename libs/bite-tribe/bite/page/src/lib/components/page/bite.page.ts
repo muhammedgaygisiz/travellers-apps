@@ -29,7 +29,7 @@ import { Bite } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { currencyCodes } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
-import { TagsInputComponent } from '../tags-input/tags-input.component';
+import { TagsInputComponent } from 'common/ui/tags';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector

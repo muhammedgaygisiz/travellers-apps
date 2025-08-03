@@ -105,29 +105,7 @@
         }
       </div>
 
-      <div class="tags ion-margin-bottom">
-        <tags [tags]="biteData?.tags" />
-      </div>
-
-      <ion-item lines="full">
-        <form [formGroup]="newTagsFormGroup">
-          <ion-input
-            label="New tags"
-            class="tag-input"
-            formControlName="tags"
-          />
-        </form>
-      </ion-item>
-
-      <ion-button
-        expand="block"
-        color="primary"
-        class="ion-margin"
-        [disabled]="isTagsFieldInvalid()"
-        (click)="saveTags()"
-      >
-        Save tags
-      </ion-button>
+      <bt-tags-input [readonly]="true" [tags]="biteData?.tags || []" />
 
       <ion-list lines="full">
         <ion-list-header lines="none">

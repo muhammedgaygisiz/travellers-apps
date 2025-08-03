@@ -69,47 +69,6 @@ describe('DetailsPage', () => {
     expect(component.reviews()).toMatchSnapshot();
   });
 
-  describe('Tags Form', () => {
-    it('should initialize with empty tags field', () => {
-      expect(component.newTagsFormGroup.get('tags')?.value).toBe('');
-    });
-
-    it('should be invalid when tags field is empty', () => {
-      component.newTagsFormGroup.patchValue({ tags: '' });
-      expect(component.isTagsFieldInvalid()).toBe(true);
-    });
-
-    it('should be valid when tags field has value', () => {
-      component.newTagsFormGroup.patchValue({ tags: 'italian spicy' });
-      expect(component.isTagsFieldInvalid()).toBe(false);
-    });
-
-    it('should emit tags and reset form on saveTags', () => {
-      // Arrange
-      const emitSpy = jest.spyOn(component.submitNewTags, 'emit');
-      component.newTagsFormGroup.patchValue({ tags: 'italian spicy' });
-
-      // Act
-      component.saveTags();
-
-      // Assert
-      expect(emitSpy).toHaveBeenCalledWith('italian spicy');
-      expect(component.newTagsFormGroup.get('tags')?.value).toBe('');
-    });
-
-    it('should not emit tags when form is invalid', () => {
-      // Arrange
-      const emitSpy = jest.spyOn(component.submitNewTags, 'emit');
-      component.newTagsFormGroup.patchValue({ tags: '' });
-
-      // Act
-      component.saveTags();
-
-      // Assert
-      expect(emitSpy).not.toHaveBeenCalled();
-    });
-  });
-
   describe('Bite Display', () => {
     it('should display bite details when bite input is provided', () => {
       // Arrange

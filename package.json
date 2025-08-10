@@ -80,6 +80,7 @@
     "zone.js": "0.15.1"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "20.1.5",
     "@angular-devkit/core": "20.1.5",
     "@angular-devkit/schematics": "20.1.5",
     "@angular/build": "20.1.5",
@@ -118,6 +119,7 @@
     "@types/memoizee": "0.4.12",
     "@types/node": "18.16.9",
     "@types/uuid": "10.0.0",
+    "@typescript-eslint/parser": "8.39.0",
     "@typescript-eslint/utils": "8.39.0",
     "angular-eslint": "20.1.1",
     "commitizen": "4.3.1",
@@ -152,5 +154,20 @@
     "tslib": "2.8.1",
     "typescript": "5.8.3",
     "typescript-eslint": "8.39.0"
+  },
+  "overrides": {
+    "@angular-devkit/build-angular": {
+      "jest": "30.0.5",
+      "jest-environment-jsdom": "30.0.5"
+    },
+    "@capacitor-firebase/analytics": {
+      "firebase": "12.1.0"
+    },
+    "@capacitor-firebase/authentication": {
+      "firebase": "12.1.0"
+    },
+    "@capacitor-firebase/firestore": {
+      "firebase": "12.1.0"
+    }
   }
 }

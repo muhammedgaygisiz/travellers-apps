@@ -4,6 +4,7 @@ import {
   distinctUntilChanged,
   from,
   map,
+  Observable,
   shareReplay,
   tap,
 } from 'rxjs';
@@ -16,6 +17,7 @@ import { AuthCredentials } from './api/auth-credentials.model';
 import {
   AuthStateChange,
   FirebaseAuthentication,
+  SignInResult,
 } from '@capacitor-firebase/authentication';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -33,7 +35,7 @@ export class AuthService {
 
   authState = toSignal(this.authStateChange$);
 
-  async initilize() {
+  async initilize(): Promise<void> {
     const currentUser = await FirebaseAuthentication.getCurrentUser();
     this.authStateChange$.next(currentUser);
 
@@ -56,13 +58,15 @@ export class AuthService {
     shareReplay(1)
   );
 
-  public loginWithUsernameAndPassword$(authCreds: AuthCredentials) {
+  public loginWithUsernameAndPassword$(
+    authCreds: AuthCredentials
+  ): Observable<SignInResult> {
     return from(
       FirebaseAuthentication.signInWithEmailAndPassword({ ...authCreds })
     );
   }
 
-  public logout() {
+  public logout(): Observable<void> {
     return from(FirebaseAuthentication.signOut()).pipe(
       tap(async () => {
         await getAuth().signOut();
@@ -79,7 +83,9 @@ export class AuthService {
     );
   }
 
-  public registerWithUsernameAndPassword$(registration: AuthCredentials) {
+  public registerWithUsernameAndPassword$(
+    registration: AuthCredentials
+  ): Observable<any> {
     return from(
       createUserWithEmailAndPassword(
         this.auth,
@@ -89,15 +95,15 @@ export class AuthService {
     );
   }
 
-  public registerWithGoogleAccount$() {
+  public registerWithGoogleAccount$(): Observable<SignInResult> {
     return from(FirebaseAuthentication.signInWithGoogle({ mode: 'popup' }));
   }
 
-  public registerWithAppleAccount$() {
+  public registerWithAppleAccount$(): Observable<SignInResult> {
     return from(FirebaseAuthentication.signInWithApple({ mode: 'popup' }));
   }
 
-  public registerWithFacebookAccount$() {
+  public registerWithFacebookAccount$(): Observable<SignInResult> {
     return from(FirebaseAuthentication.signInWithFacebook({ mode: 'popup' }));
   }
 }

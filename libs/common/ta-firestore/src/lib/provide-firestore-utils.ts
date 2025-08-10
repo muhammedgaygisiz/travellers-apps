@@ -1,11 +1,6 @@
-import {
-  FirebaseOptions,
-  initializeApp,
-  provideFirebaseApp,
-} from '@angular/fire/app';
+import { FirebaseOptions, provideFirebaseApp } from '@angular/fire/app';
 import {
   getFirestore,
-  initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
   provideFirestore,
@@ -18,7 +13,8 @@ import {
 } from '@angular/fire/auth';
 import { EnvironmentProviders } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
-import { getApp } from 'firebase/app';
+import { initializeApp, getApp } from 'firebase/app';
+import { initializeFirestore } from 'firebase/firestore';
 import { provideFirestoreAnalytics } from './analytics/provide-firestore-analytics';
 
 export const provideFirestoreUtils = (
@@ -28,11 +24,13 @@ export const provideFirestoreUtils = (
   const providersWithoutAnalytics = [
     provideFirebaseApp(() => {
       const firebaseApp = initializeApp(firebaseOptions || {});
+
       initializeFirestore(firebaseApp, {
         localCache: persistentLocalCache({
           tabManager: persistentMultipleTabManager(),
         }),
       });
+
       return firebaseApp;
     }),
     provideFirestore(() => getFirestore()),
@@ -43,7 +41,7 @@ export const provideFirestoreUtils = (
         });
       }
 
-      return getAuth();
+      return getAuth(getApp());
     }),
   ];
 

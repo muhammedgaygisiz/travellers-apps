@@ -79,7 +79,7 @@ describe('DetailsService', () => {
 
   it('should call dataAccess.saveNewTags with provided tags', () => {
     // Arrange
-    const tags = 'italian, spicy';
+    const tags = ['italian', 'spicy'];
 
     // Act
     service.saveNewTags(tags);

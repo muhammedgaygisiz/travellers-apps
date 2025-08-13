@@ -29,13 +29,13 @@ export class BiteService {
     // eslint-disable-next-line no-unused-vars
     const { id, ...biteData } = newBite;
 
-    this.dataAccess.submitNewBite(biteData);
+    this.dataAccess.submitBite(biteData);
 
     this.navController.navigateBack(['home']);
   }
 
   submitEditedBite(editedBite: any) {
-    this.dataAccess.submitEditedBite(editedBite);
+    this.dataAccess.submitBite(editedBite);
 
     this.navController.navigateBack(['my-bites']);
   }

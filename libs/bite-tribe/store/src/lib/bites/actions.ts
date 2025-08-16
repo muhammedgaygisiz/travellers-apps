@@ -1,5 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 
+export const reloadBites = createAction('[BITES] Reload from API');
+
 export const loadedBitesFromApi = createAction(
   '[BITES] Loaded from API',
   props<{ bites: any }>()

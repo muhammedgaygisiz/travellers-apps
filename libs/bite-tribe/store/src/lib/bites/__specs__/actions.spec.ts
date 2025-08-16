@@ -4,12 +4,17 @@ import {
   loadedBiteCreator,
   loadedBitesFromApi,
   noPublicCreatorForBite,
+  reloadBites,
   saveExistingBite,
   saveNewBite,
   saveTags,
 } from '../actions';
 
 describe('Bites - Actions', () => {
+  it('should have reloadBites action', () => {
+    expect(reloadBites).toBeDefined();
+  });
+
   it('should have loadedBitesFromApi action', () => {
     expect(loadedBitesFromApi).toBeDefined();
   });

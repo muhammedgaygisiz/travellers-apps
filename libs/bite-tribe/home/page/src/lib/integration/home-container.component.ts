@@ -19,6 +19,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [distance]="service.homeDistance()"
       [preferedCurrency]="service.preferedCurrency()"
       [maxPriceFilter]="service.maxPriceHome()"
+      [isReloadingBites]="service.isReloadingBites()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
@@ -31,6 +32,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (sortingChange)="service.sortingChange($event)"
       (filtersChanged)="service.filtersChanged($event)"
       (filterCleared)="service.filtersCleared()"
+      (refresh)="service.refresh()"
     />
   `,
   imports: [BiteTribeHomeComponent],

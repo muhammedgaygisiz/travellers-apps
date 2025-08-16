@@ -50,6 +50,9 @@ export class HomeDataAccessService {
     initialValue: 'EUR',
   });
   maxPriceHome = toSignal(this.storeService.maxPriceHome$, { initialValue: 0 });
+  isReloadingBites = toSignal(this.storeService.isReloadingBites$, {
+    initialValue: false,
+  });
 
   logout() {
     this.storeService.logout();
@@ -91,5 +94,9 @@ export class HomeDataAccessService {
 
   clearFilters() {
     this.storeService.clearHomeFilters();
+  }
+
+  reloadHomeBites() {
+    this.storeService.reloadBites();
   }
 }

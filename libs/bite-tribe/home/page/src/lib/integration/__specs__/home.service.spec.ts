@@ -22,6 +22,7 @@ class Mock {
   exchangeRates = () => null;
   setHomeSorting = () => null;
   selectedBucketlistTitle = () => null;
+  reloadHomeBites = () => null;
 }
 
 describe('HomeService', () => {
@@ -327,5 +328,18 @@ describe('HomeService', () => {
         expect(result).toBe(bucketlistTitle);
       }
     ));
+  });
+
+  describe('refresh', () => {
+    let reloadHomeBitesSpy: SpyInstance;
+
+    beforeEach(() => {
+      reloadHomeBitesSpy = jest.spyOn(homeDataAccessService, 'reloadHomeBites');
+    });
+
+    it('should emit refresh', inject([HomeService], (service: HomeService) => {
+      service.refresh();
+      expect(reloadHomeBitesSpy).toHaveBeenCalledTimes(1);
+    }));
   });
 });

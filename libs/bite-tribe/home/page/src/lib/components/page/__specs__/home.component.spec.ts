@@ -77,6 +77,31 @@ describe('BiteTribeHomeComponent', () => {
     expect(scrollToTopMock).toHaveBeenCalledWith(300);
   });
 
+  describe('onBiteRefresh', () => {
+    let completeSpy: SpyInstance;
+    beforeEach(() => {
+      componentRef.setInput('isReloadingBites', false);
+      component.refreshEvent = { target: { complete: jest.fn() } } as any;
+      completeSpy = jest
+        .spyOn(component.refreshEvent.target, 'complete')
+        .mockImplementation();
+    });
+
+    it('should not complete the refresh event if event is not defined', () => {
+      component.refreshEvent = undefined;
+
+      fixture.detectChanges();
+      expect(completeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not complete the refresh event if refresh is still ongoing', () => {
+      componentRef.setInput('isReloadingBites', true);
+
+      fixture.detectChanges();
+      expect(completeSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('selectedSortingLabel', () => {
     it('should return "Distance" when selectedSorting is "distance"', () => {
       componentRef.setInput('sorting', 'distance');

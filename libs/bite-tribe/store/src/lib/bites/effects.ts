@@ -10,6 +10,7 @@ import {
   loadedBiteCreator,
   loadedBitesFromApi,
   noPublicCreatorForBite,
+  reloadBites,
   saveExistingBite,
   saveNewBite,
   saveTags,
@@ -31,7 +32,7 @@ export class BiteEffects {
 
   loadBitesFromApi$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(ROOT_EFFECTS_INIT),
+      ofType(ROOT_EFFECTS_INIT, reloadBites),
       switchMap(() => this.api.allBites$),
       map((bites) => loadedBitesFromApi({ bites }))
     );

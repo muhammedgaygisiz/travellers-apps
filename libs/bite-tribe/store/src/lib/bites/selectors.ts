@@ -33,6 +33,7 @@ const slice = createFeatureSelector<
     cachedBite?: Bite;
     editingBite?: Bite;
     biteCreator?: PublicUser;
+    reloading?: boolean;
   }
 >(key);
 
@@ -41,6 +42,11 @@ const { selectAll } = adapter.getSelectors();
 export const cachedBite = createSelector(slice, (state) => state?.cachedBite);
 
 export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
+
+export const isReloadingBites = createSelector(
+  slice,
+  (state) => state?.reloading
+);
 
 const allBites = createSelector(slice, selectAll);
 

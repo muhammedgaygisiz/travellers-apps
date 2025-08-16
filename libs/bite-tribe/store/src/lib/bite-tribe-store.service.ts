@@ -20,6 +20,7 @@ import {
   bitesBySelectedBucketlist,
   sortedHomeBites,
   bitesByUser,
+  isReloadingBites,
 } from './bites/selectors';
 import {
   restaurant,
@@ -82,6 +83,7 @@ import {
   selectedBucketlist,
   selectedBucketlistTitle,
 } from './bucketlists/selectors';
+import { fromBites } from './bites';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -137,6 +139,7 @@ export class BiteTribeStoreService implements StoreService {
   exchangeRates$ = this.store.select(exchangeRates);
   preferedCurrency$ = this.store.select(preferredCurrency);
   maxPriceHome$ = this.store.select(maxPriceHome);
+  isReloadingBites$ = this.store.select(isReloadingBites);
 
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
@@ -282,5 +285,9 @@ export class BiteTribeStoreService implements StoreService {
 
   clearHomeFilters() {
     this.store.dispatch(clearHomeFilters());
+  }
+
+  reloadBites() {
+    this.store.dispatch(fromBites.reloadBites());
   }
 }

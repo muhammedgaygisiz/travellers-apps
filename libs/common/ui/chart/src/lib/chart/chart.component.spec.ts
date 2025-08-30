@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChartComponent } from './chart.component';
-import { Timestamp } from '@angular/fire/firestore';
 import { ComponentRef } from '@angular/core';
 import { ChartData } from './api/chart-data';
 
@@ -8,22 +7,20 @@ describe('ChartComponent', () => {
   let component: ChartComponent;
   let fixture: ComponentFixture<ChartComponent>;
   let componentRef: ComponentRef<ChartComponent>;
-  // eslint-disable-next-line no-unused-vars
   let resizeObserverCallback: (entries: ResizeObserverEntry[]) => void;
 
   beforeEach(() => {
     // Mock ResizeObserver with callback capture
     global.ResizeObserver = class MockResizeObserver {
-      // eslint-disable-next-line no-unused-vars
       constructor(callback: (entries: ResizeObserverEntry[]) => void) {
         resizeObserverCallback = callback;
       }
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      observe() {}
+      observe(): void {}
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      unobserve() {}
+      unobserve(): void {}
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      disconnect() {}
+      disconnect(): void {}
     } as any;
 
     fixture = TestBed.createComponent(ChartComponent);
@@ -37,8 +34,8 @@ describe('ChartComponent', () => {
 
   it('should sort and process data with balances', () => {
     const mockData = [
-      { date: Timestamp.fromDate(new Date('2024-03-02')), amount: 100 },
-      { date: Timestamp.fromDate(new Date('2024-03-01')), amount: 50 },
+      { date: new Date('2024-03-02'), amount: 100 },
+      { date: new Date('2024-03-01'), amount: 50 },
     ];
 
     componentRef.setInput('data', mockData);
@@ -63,11 +60,11 @@ describe('ChartComponent', () => {
 
     const mockData = [
       {
-        date: Timestamp.fromDate(today),
+        date: today,
         amount: 100,
       },
       {
-        date: Timestamp.fromDate(tomorrow),
+        date: tomorrow,
         amount: 50,
       },
     ];
@@ -81,8 +78,8 @@ describe('ChartComponent', () => {
 
   it('should handle negative balances', () => {
     const mockData = [
-      { date: Timestamp.fromDate(new Date()), amount: -100 },
-      { date: Timestamp.fromDate(new Date()), amount: -50 },
+      { date: new Date(), amount: -100 },
+      { date: new Date(), amount: -50 },
     ];
 
     componentRef.setInput('data', mockData);
@@ -102,7 +99,7 @@ describe('ChartComponent', () => {
   });
 
   it('should handle resize observer callback with data', () => {
-    const mockData = [{ date: Timestamp.fromDate(new Date()), amount: 100 }];
+    const mockData = [{ date: new Date(), amount: 100 }];
     componentRef.setInput('data', mockData);
     fixture.detectChanges();
 

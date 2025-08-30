@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BitePage } from '../bite.page';
 import { Platform } from '@ionic/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideRouter } from '@angular/router';
 import { Camera } from '@capacitor/camera';
 import { ComponentRef } from '@angular/core';
@@ -19,6 +19,8 @@ jest.mock('image-compression', () => ({
   compressFile: jest.fn(),
   compressPhoto: jest.fn(),
 }));
+jest.mock('localization');
+addNecessaryIcons();
 
 describe('BitePage', () => {
   let component: BitePage;

@@ -37,7 +37,7 @@ import {
   funnelOutline,
 } from 'ionicons/icons';
 
-export const addNecessaryIcons = () => {
+export const addNecessaryIcons = (): void => {
   addIcons({
     pricetagOutline,
     filterOutline,

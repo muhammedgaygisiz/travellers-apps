@@ -39,7 +39,6 @@ const photoOptions = {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'image-upload',
   templateUrl: './image-upload.component.html',
   styleUrl: './image-upload.component.scss',
@@ -74,7 +73,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   imageFile?: File;
 
-  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   _onChange: (value: string | null) => void = () => {};
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   _onTouch: () => void = () => {};
@@ -95,11 +94,18 @@ export class ImageUploadComponent implements ControlValueAccessor {
     this.disabled.set(isDisabled);
   }
 
-  onImageUploadClick() {
-    this.isWeb() ? this.clickOnFileUploader() : this.getImageFromNative();
+  onImageUploadClick(): void {
+    const isWeb = this.isWeb();
+
+    if (isWeb) {
+      this.clickOnFileUploader();
+      return;
+    }
+
+    this.getImageFromNative();
   }
 
-  async onFileSelected(event: Event) {
+  async onFileSelected(event: Event): Promise<void> {
     const file = (event.target as HTMLInputElement).files?.[0];
 
     await this.patchPositionFromFile(file);
@@ -112,7 +118,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
     }
   }
 
-  private clickOnFileUploader() {
+  private clickOnFileUploader(): void {
     const fileUpload = this.fileUpload();
 
     if (!fileUpload) {
@@ -123,7 +129,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
     fileUpload.nativeElement.click();
   }
 
-  private async getImageFromNative() {
+  private async getImageFromNative(): Promise<void> {
     try {
       await Camera.requestPermissions();
 
@@ -140,7 +146,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
     }
   }
 
-  private readAndEmitPositionFrom(photo: Photo) {
+  private readAndEmitPositionFrom(photo: Photo): void {
     if (photo) {
       try {
         const exifData = getExifDataFromPhoto(photo, this.position());
@@ -152,7 +158,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
     }
   }
 
-  private async patchPositionFromFile(file: File | undefined) {
+  private async patchPositionFromFile(file: File | undefined): Promise<void> {
     if (file) {
       try {
         const exifData = await getExifDataFromFile(file, this.position());
@@ -164,10 +170,10 @@ export class ImageUploadComponent implements ControlValueAccessor {
     }
   }
 
-  private setValueAndTriggerChange(compressedPhoto: File) {
+  private setValueAndTriggerChange(compressedPhoto: File): void {
     console.log('Setting value and trigger change', compressedPhoto);
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = (): void => {
       this.value.set(reader.result as string);
       this._onChange(reader.result as string);
       this._onTouch();
@@ -175,11 +181,11 @@ export class ImageUploadComponent implements ControlValueAccessor {
     reader.readAsDataURL(compressedPhoto);
   }
 
-  cropImage() {
+  cropImage(): void {
     this.startCropImage.emit(this.value());
   }
 
-  clearImage() {
+  clearImage(): void {
     this.value.set(null);
     this._onChange(null);
 
@@ -197,17 +203,17 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   isDragging = signal(false);
 
-  onDragOver(event: DragEvent) {
+  onDragOver(event: DragEvent): void {
     event.preventDefault();
     this.isDragging.set(true);
   }
 
-  onDragLeave(event: DragEvent) {
+  onDragLeave(event: DragEvent): void {
     event.preventDefault();
     this.isDragging.set(false);
   }
 
-  onDrop(event: DragEvent) {
+  onDrop(event: DragEvent): void {
     event.preventDefault();
     this.isDragging.set(false);
   }

@@ -39,7 +39,7 @@ export class PasswordValidatorComponent implements OnChanges {
     this.initStreams();
   }
 
-  private initStreams() {
+  private initStreams(): void {
     const password$ = this.password$();
     this.hasUpperCaseLetter$ = password$?.pipe(
       map((password) => this.test(password).forPattern(upperCase))
@@ -92,7 +92,7 @@ export class PasswordValidatorComponent implements OnChanges {
     );
   }
 
-  private test(password: string | null) {
+  private test(password: string | null): any {
     return {
       forPattern: (pattern: RegExp): boolean | null => {
         if (!password) {
@@ -111,7 +111,10 @@ export class PasswordValidatorComponent implements OnChanges {
     };
   }
 
-  private isFulfilled(password: string, condition: () => boolean) {
+  private isFulfilled(
+    password: string,
+    condition: () => boolean
+  ): boolean | null {
     if (!password) {
       return null;
     }

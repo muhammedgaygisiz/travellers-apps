@@ -1,13 +1,13 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`PopoverMenuComponent should emit loginClick when auth button is clicked 1`] = `
 DebugElement {
-  "nativeNode": <div
-    id="root2"
-  >
+  "nativeNode": <div>
     <ion-list
+      class="undefined list-undefined list-lines-none list-undefined-lines-none hydrated"
       data-cy="menu-list"
       lines="none"
+      role="list"
     >
       <ion-item-group>
         <ion-item-divider>

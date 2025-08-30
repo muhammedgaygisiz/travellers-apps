@@ -3,10 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PageComponent } from '../page.component';
 import { addNecessaryIcons, APP_ICON, APP_TITLE, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import {
-  ComponentRef,
-  provideExperimentalZonelessChangeDetection,
-} from '@angular/core';
+import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 
 addNecessaryIcons();
 
@@ -20,7 +17,7 @@ describe('PageComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideExperimentalZonelessChangeDetection(),
+        provideZonelessChangeDetection(),
         provideIonicAngular(getIonicConfig()),
       ],
     });
@@ -58,7 +55,7 @@ describe('PageComponent', () => {
         TestBed.resetTestingModule();
         TestBed.configureTestingModule({
           providers: [
-            provideExperimentalZonelessChangeDetection(),
+            provideZonelessChangeDetection(),
             provideIonicAngular(getIonicConfig()),
             { provide: APP_TITLE, useValue: mockAppTitle },
           ],
@@ -86,7 +83,7 @@ describe('PageComponent', () => {
         TestBed.resetTestingModule();
         TestBed.configureTestingModule({
           providers: [
-            provideExperimentalZonelessChangeDetection(),
+            provideZonelessChangeDetection(),
             provideIonicAngular(getIonicConfig()),
             { provide: APP_ICON, useValue: mockAppIcon },
           ],

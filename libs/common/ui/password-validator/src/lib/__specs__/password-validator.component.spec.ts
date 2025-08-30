@@ -4,6 +4,10 @@ import { PasswordValidatorComponent } from '../component/password-validator.comp
 import { TestScheduler } from 'rxjs/internal/testing/TestScheduler';
 import { EMPTY, of } from 'rxjs';
 import { ComponentRef } from '@angular/core';
+import { addNecessaryIcons } from 'utils';
+
+jest.mock('memoizee');
+addNecessaryIcons();
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);

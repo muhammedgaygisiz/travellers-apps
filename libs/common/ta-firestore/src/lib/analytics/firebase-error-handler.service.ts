@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
-
+import { FIREBASE_ANALYTICS } from './provide-firestore-analytics';
+import { logEvent } from 'firebase/analytics';
 @Injectable()
 export class FirebaseErrorHandlerService {
-  analytics = inject(Analytics);
+  analytics = inject(FIREBASE_ANALYTICS);
 
   handleError(error: any): void {
     const message = error?.message || error?.toString() || 'Unknown error';

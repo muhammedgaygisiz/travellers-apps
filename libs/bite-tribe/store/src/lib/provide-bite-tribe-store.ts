@@ -29,7 +29,7 @@ import { AppEffect } from './app/effects';
 import { RestaurantEffects } from './restaurants/effects';
 import { LikeEffects } from './likes/effects';
 import { MenuEffects } from './menus/effects';
-import { FirebaseOptions } from '@angular/fire/app';
+import { FirebaseOptions } from 'firebase/app';
 import { loadedBitesFromApi } from './bites/actions';
 import { loadedRestaurantsFromApi } from './restaurants/actions';
 import { BucketListEffect } from './bucketlists/effects';
@@ -47,7 +47,7 @@ const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   appId: process.env['NX_APP_BITE_TRIBE_APP_ID'],
 });
 
-const actionSanitizer = (action: Action) => {
+const actionSanitizer: any = (action: Action) => {
   const isLoadedBitesWithData =
     action.type === loadedBitesFromApi.type && (action as any).bites.length > 0;
 
@@ -78,7 +78,7 @@ const actionSanitizer = (action: Action) => {
   return action;
 };
 
-const stateSanitizer = (state: any) => {
+const stateSanitizer: any = (state: any) => {
   let sanitizedState = { ...state };
 
   if (state.bites?.ids.length > 0) {
@@ -120,7 +120,7 @@ const stateSanitizer = (state: any) => {
   return sanitizedState;
 };
 
-export const provideBiteTribeStore = (environment: Environment) => [
+export const provideBiteTribeStore = (environment: Environment): any => [
   { provide: STORE_SERVICE, useClass: BiteTribeStoreService },
   provideStore(
     { router: routerReducer },

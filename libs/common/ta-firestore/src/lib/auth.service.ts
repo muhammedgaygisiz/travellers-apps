@@ -8,11 +8,6 @@ import {
   shareReplay,
   tap,
 } from 'rxjs';
-import {
-  Auth,
-  createUserWithEmailAndPassword,
-  getAuth,
-} from '@angular/fire/auth';
 import { AuthCredentials } from './api/auth-credentials.model';
 import {
   AuthStateChange,
@@ -21,16 +16,18 @@ import {
 } from '@capacitor-firebase/authentication';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
-import { getApp } from 'firebase/app';
-import { getFirestore, terminate } from '@angular/fire/firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Capacitor } from '@capacitor/core';
+import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from './provide-firestore-utils';
+import { terminate } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly auth = inject(Auth);
+  private readonly auth = inject(FIREBASE_AUTH);
+  private readonly firestore = inject(FIREBASE_FIRESTORE);
   authStateChange$ = new BehaviorSubject<AuthStateChange | null>(null);
 
   authState = toSignal(this.authStateChange$);
@@ -69,12 +66,10 @@ export class AuthService {
   public logout(): Observable<void> {
     return from(FirebaseAuthentication.signOut()).pipe(
       tap(async () => {
-        await getAuth().signOut();
-        const firebaseApp = getApp();
-        const firestore = getFirestore(firebaseApp);
+        await this.auth.signOut();
 
         await FirebaseFirestore.removeAllListeners();
-        await terminate(firestore);
+        await terminate(this.firestore);
 
         if (!Capacitor.isNativePlatform()) {
           await FirebaseFirestore.clearPersistence();

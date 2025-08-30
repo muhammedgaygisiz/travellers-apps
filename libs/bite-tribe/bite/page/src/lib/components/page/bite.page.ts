@@ -30,10 +30,10 @@ import { FloatNumberDotNotationValidator } from '../../validators/float-number-d
 import { currencyCodes } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
 
-const toTagsString = (tags: string[] | undefined = []) => tags?.join(' ');
+const toTagsString = (tags: string[] | undefined = []): string =>
+  tags?.join(' ');
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bite',
   imports: [
     PageComponent,
@@ -53,7 +53,6 @@ const toTagsString = (tags: string[] | undefined = []) => tags?.join(' ');
   styleUrl: './bite.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class BitePage {
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
@@ -183,20 +182,20 @@ export class BitePage {
     return '';
   });
 
-  saveBite() {
+  saveBite(): void {
     if (this.biteFormGroup.valid) {
       const newBite = this.biteFormGroup.value;
       this.submitBite.emit(newBite);
     }
   }
 
-  onPositionFromImage(position: { latitude: number; longitude: number }) {
+  onPositionFromImage(position: { latitude: number; longitude: number }): void {
     if (position) {
       this.biteFormGroup.controls['position'].patchValue(position);
     }
   }
 
-  emitStartCropImage(a: any) {
+  emitStartCropImage(a: any): void {
     this.startCropImage.emit(a);
   }
 }

@@ -26,7 +26,6 @@ import { ConfirmDialogComponent } from 'bite-tribe-common/confirm-dialog';
 import { StarRatingComponent } from 'common/ui/star-rating';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bt-bite',
   templateUrl: './bite.component.html',
   styleUrls: ['./bite.component.scss'],
@@ -45,7 +44,6 @@ import { StarRatingComponent } from 'common/ui/star-rating';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class BiteComponent {
   bite = input.required<Bite>();
   userId = input<string>();
@@ -60,7 +58,7 @@ export class BiteComponent {
   dialog = inject(Dialog);
   private readonly destroyRef = inject(DestroyRef);
 
-  async onDeleteBiteClick(biteData: Bite) {
+  async onDeleteBiteClick(biteData: Bite): Promise<void> {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Delete Bite',

@@ -70,10 +70,14 @@ export class HomeComponent implements OnChanges {
       this.filters = addLocationFilter(this.filters, this.location());
     }
 
+    if (!hasLocation) {
+      this.filters = this.filters.filter((f) => f.type !== 'location');
+    }
+
     this.applyFilters();
   }
 
-  private applyFilters() {
+  private applyFilters(): void {
     this.filteredPrices = this.mostSearchedEntries();
 
     const hasFilters = this.filters?.length > 0;
@@ -85,7 +89,7 @@ export class HomeComponent implements OnChanges {
     }
   }
 
-  onDeleteFilter(filter: Filter) {
+  onDeleteFilter(filter: Filter): void {
     this.filters = this.filters.filter((curr) => {
       return curr.type !== filter.type && curr.value !== filter.value;
     });

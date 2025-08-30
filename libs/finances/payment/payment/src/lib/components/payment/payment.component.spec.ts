@@ -4,8 +4,10 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { ComponentRef } from '@angular/core';
 import * as toDateModule from './utils/to-date';
 
+jest.mock('localization');
+
 jest.mock('./utils/to-date', () => ({
-  // eslint-disable-next-line no-unused-vars
+   
   toDate: jest.fn((date: string) => '2023-01-01T00:00:00.000Z'),
 }));
 

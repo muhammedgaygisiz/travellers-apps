@@ -4,7 +4,6 @@ import { HeaderComponent } from '../header.component';
 
 describe('HeaderComponent', () => {
   let fixture: ComponentFixture<HeaderComponent>;
-  // eslint-disable-next-line no-unused-vars
   let component: HeaderComponent;
 
   beforeEach(() => {

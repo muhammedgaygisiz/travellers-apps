@@ -9,6 +9,8 @@ import { Dialog } from '@angular/cdk/dialog';
 import { Subject } from 'rxjs';
 import SpyInstance = jest.SpyInstance;
 
+jest.mock('localization');
+
 describe('BiteTribeHomeComponent', () => {
   let component: BiteTribeHomeComponent;
   let fixture: ComponentFixture<BiteTribeHomeComponent>;

@@ -41,6 +41,18 @@ describe('HomeComponent', () => {
         ]);
       });
     });
+
+    describe('given removed location', () => {
+      it('should not have location filter', () => {
+        component.filters = [{ type: 'location', value: 'Köln' }];
+        componentRef.setInput('location', '');
+        component.ngOnChanges({
+          location: { currentValue: '' } as SimpleChange,
+        });
+
+        expect(component.filters).toEqual([]);
+      });
+    });
   });
 
   describe('onDeleteFilter', () => {

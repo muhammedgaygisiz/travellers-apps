@@ -10,7 +10,7 @@ import { SupportedLang } from 'localization';
 
 jest.mock('localization');
 
-const assertDeepEqual = (actual: [], expected: []) => {
+const assertDeepEqual = (actual: [], expected: []): void => {
   expect(actual).toEqual(expected);
 };
 

@@ -22,11 +22,11 @@ export class AddItemContainerComponent {
 
   public location$ = this.addItemService.location$;
 
-  public saveItem(price: Price) {
+  public saveItem(price: Price): void {
     this.addItemService.saveItem(price);
   }
 
-  changeLanguage(event: SupportedLang) {
+  changeLanguage(event: SupportedLang): void {
     this.addItemService.changeLanguage(event);
   }
 }

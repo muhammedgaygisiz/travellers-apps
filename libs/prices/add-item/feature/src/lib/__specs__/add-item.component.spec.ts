@@ -5,7 +5,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TestScheduler } from 'rxjs/internal/testing/TestScheduler';
 import * as rxjs from 'rxjs';
 import { of } from 'rxjs';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, signal } from '@angular/core';
 
 addNecessaryIcons();
 
@@ -76,6 +76,13 @@ describe('AddItemComponent', () => {
         LOCATION
       );
     });
+
+    it('should not patch location form control if no location provided', () => {
+      componentRef.setInput('location', '');
+      component.ngOnChanges({});
+
+      expect(component.priceFormGroup.controls['location'].value).toEqual('');
+    });
   });
 
   describe('onSelect', () => {
@@ -100,6 +107,12 @@ describe('AddItemComponent', () => {
       component.triggerImageUpload();
 
       expect(clickSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not trigger file uploader click if no fileUploader is provided', () => {
+      (component.fileUploader as any) = signal(undefined);
+
+      expect(() => component.triggerImageUpload()).not.toThrow();
     });
   });
 });

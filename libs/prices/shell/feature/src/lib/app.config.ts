@@ -1,6 +1,6 @@
 import {
   ApplicationConfig,
-  provideExperimentalZonelessChangeDetection,
+  provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePricesShell } from './provide-prices-shell';
@@ -13,7 +13,7 @@ import { provideHttpClient } from '@angular/common/http';
 
 export const appConfig = (environment: Environment): ApplicationConfig => ({
   providers: [
-    provideExperimentalZonelessChangeDetection(),
+    provideZonelessChangeDetection(),
     provideAnimations(),
     providePricesShell(environment),
     provideServiceWorker('ngsw-worker.js', {

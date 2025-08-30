@@ -78,13 +78,13 @@ export class AddItemComponent implements OnChanges {
     ]),
   });
 
-  public ngOnChanges(changes: SimpleChanges) {
+  public ngOnChanges(changes: SimpleChanges): void {
     if (changes['location']) {
       this.priceFormGroup.controls['location'].patchValue(this.location());
     }
   }
 
-  onSelect({ target }: Event) {
+  onSelect({ target }: Event): void {
     const file = (target as HTMLInputElement).files?.[0];
 
     if (file) {
@@ -92,7 +92,7 @@ export class AddItemComponent implements OnChanges {
     }
   }
 
-  triggerImageUpload() {
+  triggerImageUpload(): void {
     this.fileUploader()?.nativeElement.click();
   }
 }

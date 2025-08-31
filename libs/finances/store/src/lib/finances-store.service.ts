@@ -57,17 +57,16 @@ export class FinancesStoreService implements StoreService {
     this.store.dispatch(fromAuth.logout());
   }
 
-  saveNewPayment(payment: { amount: number; iban: any }) {
+  saveNewPayment(payment: { amount: number; iban: any }): void {
     this.store.dispatch(saveNewPayment({ payment }));
   }
 
-  async savePayment(payment: any, id: string | undefined) {
+  async savePayment(payment: any, id: string | undefined): Promise<void> {
     if (id) {
       this.store.dispatch(savePayment({ payment, id }));
     }
   }
 
-  // eslint-disable-next-line no-unused-vars
   save(entity: any, docType: string): void {
     throw new Error('Method not implemented.');
   }

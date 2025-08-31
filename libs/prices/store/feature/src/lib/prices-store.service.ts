@@ -36,7 +36,7 @@ export class PricesStoreService implements StoreService {
     this.store.dispatch(fromAuth.login({ authCreds }));
   }
 
-  loginWithGoogleAccount() {
+  loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.loginWithGoogleAccount());
   }
 

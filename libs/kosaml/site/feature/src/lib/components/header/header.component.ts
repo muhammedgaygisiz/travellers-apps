@@ -23,7 +23,7 @@ export class HeaderComponent {
 
   toggleProjectBar = output();
 
-  onToggleProjectBar() {
+  onToggleProjectBar(): void {
     this.toggleProjectBar.emit();
   }
 }

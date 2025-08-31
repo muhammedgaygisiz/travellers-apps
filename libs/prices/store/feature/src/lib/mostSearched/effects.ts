@@ -57,7 +57,7 @@ export class MostSearchedItemsEffects {
     { dispatch: false }
   );
 
-  private async showUnauthorizedToast(isAuthenticated: boolean) {
+  private async showUnauthorizedToast(isAuthenticated: boolean): Promise<void> {
     if (!isAuthenticated) {
       const toast = await this.toastController.create({
         message: 'You have to be logged in',
@@ -69,7 +69,7 @@ export class MostSearchedItemsEffects {
     }
   }
 
-  private toItemsLoadedAction(mostSearchedEntries: MostSearchedItem[]) {
+  private toItemsLoadedAction(mostSearchedEntries: MostSearchedItem[]): any {
     return itemsLoaded({
       items: mostSearchedEntries,
     });

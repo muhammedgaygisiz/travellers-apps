@@ -12,7 +12,7 @@ const selectConcreteUseCaseEntities = createSelector(
   selectEntities
 );
 
-const getSelectedConcreteUseCase = (slice: ConcreteUseCaseState) =>
+const getSelectedConcreteUseCase = (slice: ConcreteUseCaseState): string =>
   slice.selectedConcreteUseCaseId;
 
 const selectCurrentConcreteUseCase = createSelector(

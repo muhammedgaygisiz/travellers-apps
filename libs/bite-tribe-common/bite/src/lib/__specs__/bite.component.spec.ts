@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BiteComponent } from '../bite.component';
 import { ToMetricPipe } from 'distance-pipe';
-import { Bite } from 'model';
+import { Bite, Like } from 'model';
 import {
   ComponentRef,
   CUSTOM_ELEMENTS_SCHEMA,
@@ -13,7 +13,7 @@ import { ToBlobUrlPipe } from 'image-compression';
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
-  transform(value: string) {
+  transform(value: string): string {
     return value;
   }
 }
@@ -30,17 +30,13 @@ describe('BiteComponent', () => {
     place: 'Test Place',
     price: 15.99,
     currency: 'USD',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     position: { longitude: 12.34, latitude: 56.78 },
     distance: '500',
     restaurantId: 'rest1',
     likes: [
-      { userId: 'user1', likeType: 'thumbup' },
-      { userId: 'user2', likeType: 'drooling' },
+      { userId: 'user1', likeType: 'thumbup' } as Like,
+      { userId: 'user2', likeType: 'drooling' } as Like,
     ],
-    thumbup: 1,
-    drooling: 1,
-    mindblown: 0,
     tags: ['spicy', 'vegetarian'],
   };
 
@@ -110,12 +106,6 @@ describe('BiteComponent', () => {
     expect(component.bite()).toEqual(mockBite);
     expect(component.userId()).toBe('user1');
     expect(component.showEditButton()).toBe(false);
-  });
-
-  it('should have correct like counts from bite data', () => {
-    expect(component.bite().thumbup).toBe(1);
-    expect(component.bite().drooling).toBe(1);
-    expect(component.bite().mindblown).toBe(0);
   });
 
   it('should have correct tags from bite data', () => {

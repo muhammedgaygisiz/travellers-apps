@@ -1,8 +1,15 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { AuthService } from 'ta-firestore';
-import { BehaviorSubject, skipWhile, Subject, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  skipWhile,
+  Subject,
+  switchMap,
+} from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BITE_COLLECTION } from './bite-api.service';
+import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 const REVIEW_COLLECTION = 'reviews';
 
@@ -15,7 +22,7 @@ export class ReviewApiService {
 
   private readonly stopped$ = new Subject<void>();
 
-  private async startReviewListener(biteId: string) {
+  private async startReviewListener(biteId: string): Promise<void> {
     // console.debug('#mo Fetching reviews from Firestore');
 
     await FirebaseFirestore.addCollectionSnapshotListener(
@@ -47,7 +54,7 @@ export class ReviewApiService {
     );
   }
 
-  reviewsByBiteId(biteId: string) {
+  reviewsByBiteId(biteId: string): Observable<any[]> {
     return this.authService.isLoggedIn$.pipe(
       skipWhile((isLoggedIn) => !isLoggedIn),
       switchMap(() => {
@@ -59,7 +66,10 @@ export class ReviewApiService {
     );
   }
 
-  async saveNewReview(payload: { review: string; biteId: string }) {
+  async saveNewReview(payload: {
+    review: string;
+    biteId: string;
+  }): Promise<void> {
     try {
       const user = await this.getUser();
 
@@ -80,7 +90,7 @@ export class ReviewApiService {
     }
   }
 
-  private async getUser() {
+  private async getUser(): Promise<User | null | undefined> {
     const authState = await this.authService.authState();
     return authState?.user;
   }

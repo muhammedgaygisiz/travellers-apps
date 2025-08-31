@@ -1,6 +1,6 @@
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { applicationConfig } from '@storybook/angular';
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import { ScenarioComponent } from '../scenario.component';
 
 export default {
@@ -13,11 +13,11 @@ export default {
   ],
 };
 
-export const EmptyScenario = () => ({
+export const EmptyScenario = (): any => ({
   component: ScenarioComponent,
 });
 
-export const FilledScenario = () => ({
+export const FilledScenario = (): any => ({
   component: ScenarioComponent,
   props: {
     model: {
@@ -27,7 +27,7 @@ export const FilledScenario = () => ({
   },
 });
 
-export const ScenarioWithDeleteButton = () => ({
+export const ScenarioWithDeleteButton = (): any => ({
   component: ScenarioComponent,
   props: {
     model: {

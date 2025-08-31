@@ -4,7 +4,6 @@ import { MapService } from './map.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'my-bites-map-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MapPageComponent],
@@ -23,7 +22,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 export class MyBitesMapContainerComponent {
   service = inject(MapService);
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'My Bites Map',
     });

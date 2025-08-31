@@ -25,7 +25,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
-import { Bite } from 'model';
+import { Bite, Geopoint } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { currencyCodes } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
@@ -64,7 +64,7 @@ export class BitePage {
 
   currency = input<string>();
 
-  position = input<{ latitude: number; longitude: number }>();
+  position = input<Geopoint>();
 
   fallbackPosition = linkedSignal(() => {
     return this.position();
@@ -188,7 +188,7 @@ export class BitePage {
     }
   }
 
-  onPositionFromImage(position: { latitude: number; longitude: number }): void {
+  onPositionFromImage(position: Geopoint): void {
     if (position) {
       this.biteFormGroup.controls['position'].patchValue(position);
     }

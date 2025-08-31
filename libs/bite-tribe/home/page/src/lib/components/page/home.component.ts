@@ -132,7 +132,7 @@ export class BiteTribeHomeComponent {
       priceFilter: number;
     },
     modal: IonModal
-  ) {
+  ): void {
     modal.dismiss();
 
     if (filterSelection) {
@@ -140,7 +140,7 @@ export class BiteTribeHomeComponent {
     }
   }
 
-  scrollToTop() {
+  scrollToTop(): void {
     const ionContent = this.ionContent();
 
     if (ionContent) {
@@ -148,13 +148,13 @@ export class BiteTribeHomeComponent {
     }
   }
 
-  emitSortingChange(event: { detail: { value: string } }) {
+  emitSortingChange(event: { detail: { value: string } }): void {
     if (event.detail) {
       this.sortingChange.emit(event.detail.value);
     }
   }
 
-  onFiltersClear(modal: IonModal) {
+  onFiltersClear(modal: IonModal): void {
     modal.dismiss();
     this.filterCleared.emit();
   }

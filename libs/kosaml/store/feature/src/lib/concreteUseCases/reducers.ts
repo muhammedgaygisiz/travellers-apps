@@ -3,7 +3,8 @@ import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { ConcreteUseCase } from '@travellers-apps/kosaml/model/feature';
 import { selectConcreteUseCase } from './actions';
 
-export const selectConcreteUseCaseId = (cuc: ConcreteUseCase) => cuc?.id || '';
+export const selectConcreteUseCaseId = (cuc: ConcreteUseCase): string =>
+  cuc?.id || '';
 
 export const adapter: EntityAdapter<ConcreteUseCase> =
   createEntityAdapter<ConcreteUseCase>({

@@ -38,23 +38,23 @@ export class HomeContainerComponent implements OnInit {
   public isAuthenticated$: Observable<boolean | null> =
     this.homeService.isAuthenticated$;
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.homeService.loadMostSearchedEntries();
   }
 
-  public async onAddItemClick() {
+  public async onAddItemClick(): Promise<void> {
     await this.homeService.onAddItemClick();
   }
 
-  public async onLoginClick() {
+  public async onLoginClick(): Promise<void> {
     await this.homeService.onLoginClick();
   }
 
-  public onLogoutClick() {
+  public onLogoutClick(): void {
     this.homeService.logout();
   }
 
-  public onLanguageChangeClick(event: SupportedLang) {
+  public onLanguageChangeClick(event: SupportedLang): void {
     this.homeService.changeLanguage(event);
   }
 }

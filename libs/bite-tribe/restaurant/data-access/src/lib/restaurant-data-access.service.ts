@@ -12,11 +12,11 @@ export class RestaurantDataAccessService {
   userId = toSignal(this.storeService.userId$);
   restaurant = toSignal(this.storeService.restaurant$);
 
-  submitSocialMediaLinks(restaurantId: string, links: Link[]) {
+  submitSocialMediaLinks(restaurantId: string, links: Link[]): void {
     this.storeService.saveSocialMediaLinks(restaurantId, links);
   }
 
-  submitLikeClick(likeType: { likeType: string; biteId: string }) {
+  submitLikeClick(likeType: { likeType: string; biteId: string }): void {
     const bites = this.bites();
     const userId = this.userId();
 

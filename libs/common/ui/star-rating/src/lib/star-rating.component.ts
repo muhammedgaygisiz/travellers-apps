@@ -13,7 +13,6 @@ import { IsFilledPipe } from './pipes/is-filled.pipe';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'star-rating',
   templateUrl: './star-rating.component.html',
   styleUrl: './star-rating.component.scss',
@@ -48,7 +47,7 @@ export class StarRatingComponent implements ControlValueAccessor {
     return rating ? rating : 0;
   });
 
-  onRate(rating: number) {
+  onRate(rating: number): void {
     if (this.readOnly()) {
       return;
     }
@@ -57,17 +56,17 @@ export class StarRatingComponent implements ControlValueAccessor {
     this.setValueAndTriggerChange(rating);
   }
 
-  setValueAndTriggerChange(rating: number) {
+  setValueAndTriggerChange(rating: number): void {
     this.writeValue(rating);
     this._onChange(rating);
     this._onTouch();
   }
 
-  onHover(index: number) {
+  onHover(index: number): void {
     if (!this.readOnly()) this.hoveredIndex.set(index);
   }
 
-  onLeave() {
+  onLeave(): void {
     this.hoveredIndex.set(-1);
   }
 
@@ -77,7 +76,7 @@ export class StarRatingComponent implements ControlValueAccessor {
     this.value.set(obj);
   }
 
-  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   _onChange: (value: number | null) => void = () => {};
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   _onTouch: () => void = () => {};

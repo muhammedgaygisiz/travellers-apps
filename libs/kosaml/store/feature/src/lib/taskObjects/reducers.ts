@@ -3,7 +3,7 @@ import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { TaskObject } from '@travellers-apps/kosaml/model/feature';
 import { selectTaskObject } from './actions';
 
-export const selectTaskObjectId = (cuc: TaskObject) => cuc?.id || '';
+export const selectTaskObjectId = (cuc: TaskObject): string => cuc?.id || '';
 
 export const adapter: EntityAdapter<TaskObject> =
   createEntityAdapter<TaskObject>({

@@ -11,13 +11,13 @@ export class PaymentService {
 
   payment = this.service.payment;
 
-  saveNewPayment(newPayment: Payment) {
+  saveNewPayment(newPayment: Payment): void {
     this.service.saveNewPayment(newPayment);
 
     this.navController.back();
   }
 
-  savePayment(payment: Payment) {
+  savePayment(payment: Payment): void {
     const currentPayment = this.payment();
     this.service.savePayment(payment, currentPayment?.id);
 

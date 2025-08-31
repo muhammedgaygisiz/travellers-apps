@@ -10,6 +10,7 @@ import {
 import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite } from 'model';
+import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 export const BITE_COLLECTION = 'bites';
 
@@ -36,7 +37,7 @@ export class BiteApiService {
     })
   );
 
-  private async startBitesListener() {
+  private async startBitesListener(): Promise<void> {
     this.bitesCallbackId =
       await FirebaseFirestore.addCollectionSnapshotListener(
         { reference: BITE_COLLECTION },
@@ -55,14 +56,14 @@ export class BiteApiService {
       );
   }
 
-  private async stopBitesListener(callbackId: string) {
+  private async stopBitesListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });
     }
   }
 
-  async saveNewBite(bite: Bite) {
+  async saveNewBite(bite: Bite): Promise<void> {
     try {
       const user = this.getUser();
 
@@ -81,12 +82,12 @@ export class BiteApiService {
     }
   }
 
-  private getUser() {
+  private getUser(): User | null | undefined {
     const authState = this.authService.authState();
     return authState?.user;
   }
 
-  async saveEditedBite(bite: Bite) {
+  async saveEditedBite(bite: Bite): Promise<void> {
     try {
       await FirebaseFirestore.updateDocument({
         reference: `${BITE_COLLECTION}/${bite.id}`,
@@ -102,7 +103,10 @@ export class BiteApiService {
     }
   }
 
-  async saveTagsToExistingBite(payload: { newTags: string[]; id: string }) {
+  async saveTagsToExistingBite(payload: {
+    newTags: string[];
+    id: string;
+  }): Promise<void> {
     try {
       // First get the current document
       const doc = await FirebaseFirestore.getDocument({
@@ -129,7 +133,7 @@ export class BiteApiService {
     }
   }
 
-  async deleteBite(bite: any) {
+  async deleteBite(bite: any): Promise<void> {
     try {
       if (bite.id) {
         await FirebaseFirestore.deleteDocument({

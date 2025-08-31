@@ -39,14 +39,14 @@ export class EditTaskScenarioPageComponent {
     )
   );
 
-  onSaveScenario(scenario: Scenario) {
+  onSaveScenario(scenario: Scenario): void {
     console.log(scenario);
     // this.store.dispatch(TaskScenarioActions.addTaskScenario({ taskScenario: scenario }));
 
     // this.router.navigate(['./project']);
   }
 
-  onDeleteScenario(id: string) {
+  onDeleteScenario(id: string): void {
     console.log(id);
 
     //this.store.dispatch(TaskScenarioActions.deleteTaskScenario({ id }));

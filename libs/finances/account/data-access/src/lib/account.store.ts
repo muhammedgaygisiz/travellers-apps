@@ -34,7 +34,7 @@ export const AccountStore = signalStore(
     _activatedRoute: inject(ActivatedRoute),
   })),
   withMethods((store) => ({
-    loadByQuery() {
+    loadByQuery(): void {
       this.initializeStore();
     },
     setAccount: rxMethod(
@@ -77,7 +77,7 @@ export const AccountStore = signalStore(
         })
       )
     ),
-    initializeStore() {
+    initializeStore(): void {
       const paramMap$ = getCurrentRouteParams(store._activatedRoute);
       this.setFilter(paramMap$);
 
@@ -87,7 +87,7 @@ export const AccountStore = signalStore(
     },
   })),
   withHooks((store) => ({
-    onInit() {
+    onInit(): void {
       store.initializeStore();
     },
   }))

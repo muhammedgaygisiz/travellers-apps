@@ -15,8 +15,11 @@ import {
 } from '@angular/router';
 import { provideBiteTribeStore } from 'bite-tribe/store';
 import { IonicRouteStrategy } from '@ionic/angular';
+import { EnvironmentProviders, Provider } from '@angular/core';
 
-export const provideBiteTribeBusinessShell = (environment: Environment) => [
+export const provideBiteTribeBusinessShell = (
+  environment: Environment
+): (EnvironmentProviders | Provider)[] => [
   provideRouter(ROUTES, withPreloading(PreloadAllModules)),
   {
     provide: RouteReuseStrategy,

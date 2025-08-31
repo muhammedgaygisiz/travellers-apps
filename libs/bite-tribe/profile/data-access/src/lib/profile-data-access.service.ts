@@ -21,11 +21,11 @@ export class ProfileDataAccessService {
   biteCreator = toSignal(this.storeService.biteCreator$);
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
 
-  logout() {
+  logout(): void {
     this.storeService.logout();
   }
 
-  submitLikeClick(likeType: { likeType: string; biteId: string }) {
+  submitLikeClick(likeType: { likeType: string; biteId: string }): void {
     const bites = this.bites();
     const userId = this.userId();
 

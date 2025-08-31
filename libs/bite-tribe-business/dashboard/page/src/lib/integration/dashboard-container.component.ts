@@ -16,7 +16,6 @@ import { DashboardService } from './dashboard.service';
     />
   `,
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class DashboardContainer {
   service = inject(DashboardService);
 }

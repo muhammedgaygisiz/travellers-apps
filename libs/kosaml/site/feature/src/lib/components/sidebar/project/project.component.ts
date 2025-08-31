@@ -59,7 +59,7 @@ export class ProjectComponent implements OnChanges {
 
   dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     if (changes['project']) {
       this.dataSource.data = changes['project'].currentValue;
       this.treeControl.expandAll();
@@ -70,5 +70,5 @@ export class ProjectComponent implements OnChanges {
     this.dataSource.data = this.project() ?? [];
   }
 
-  hasChild = (_: number, node: FlatTreeNode) => node.expandable;
+  hasChild = (_: number, node: FlatTreeNode): boolean => node.expandable;
 }

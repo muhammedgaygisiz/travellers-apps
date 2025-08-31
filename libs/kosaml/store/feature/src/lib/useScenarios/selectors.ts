@@ -13,7 +13,7 @@ export const selectUseScenarioEntities = createSelector(
   selectEntities
 );
 
-export const getSelectedUseScenarioId = (state: UseScenarioState) =>
+export const getSelectedUseScenarioId = (state: UseScenarioState): string =>
   state.selectedUseScenarioId;
 
 export const selectCurrentUseScenarioId = createSelector(

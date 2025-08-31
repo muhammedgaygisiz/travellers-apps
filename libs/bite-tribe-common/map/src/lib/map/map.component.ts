@@ -41,7 +41,6 @@ const withNoWrapOptionToPreventWorldRepetition: L.MapOptions = {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bt-map',
   styleUrl: './map.component.scss',
   templateUrl: './map.component.html',
@@ -109,13 +108,13 @@ export class MapComponent implements OnDestroy {
     }
   });
 
-  private forceMapRedraw() {
+  private forceMapRedraw(): void {
     setTimeout(() => {
       this.map.invalidateSize();
     }, 0);
   }
 
-  private startWithFirstPositionInList(positionsList: Geopoint[]) {
+  private startWithFirstPositionInList(positionsList: Geopoint[]): void {
     const firstPosition = positionsList[0];
     this.map.setView([firstPosition.latitude, firstPosition.longitude], 15);
   }
@@ -157,13 +156,13 @@ export class MapComponent implements OnDestroy {
     }
   });
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     if (this.map) {
       this.map.remove();
     }
   }
 
-  private updateMarkers(positions: Geopoint[]) {
+  private updateMarkers(positions: Geopoint[]): void {
     this.clearMarkers();
 
     positions.forEach((position) => {
@@ -174,7 +173,7 @@ export class MapComponent implements OnDestroy {
     });
   }
 
-  private clearMarkers() {
+  private clearMarkers(): void {
     if (this.markers.length > 0) {
       this.markers.forEach((marker) => {
         this.map.removeLayer(marker);
@@ -183,7 +182,7 @@ export class MapComponent implements OnDestroy {
     }
   }
 
-  private fitMapToMarkers() {
+  private fitMapToMarkers(): void {
     if (this.markers.length > 1) {
       const positionsList = this.positions();
       if (positionsList) {

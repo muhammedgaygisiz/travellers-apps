@@ -7,8 +7,11 @@ import { fromEssentialUseCases } from './essentialUseCases';
 import { fromConcreteUseCases } from './concreteUseCases';
 import { fromTaskObjects } from './taskObjects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { EnvironmentProviders } from '@angular/core';
 
-export const provideKosamlStore = (environment: Environment) => [
+export const provideKosamlStore = (
+  environment: Environment
+): (EnvironmentProviders | never[])[] => [
   provideStore(
     {},
     {

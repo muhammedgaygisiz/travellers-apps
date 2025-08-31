@@ -34,30 +34,30 @@ export class IndexedDbService extends Dexie {
     });
   }
 
-  putAccounts(accounts: Account[]) {
+  putAccounts(accounts: Account[]): void {
     this.accounts.clear();
     this.accounts.bulkPut(accounts);
   }
 
-  putBanks(banks: Bank[]) {
+  putBanks(banks: Bank[]): void {
     this.banks.clear();
     this.banks.bulkPut(banks);
   }
 
-  putPayments(payments: Payment[]) {
+  putPayments(payments: Payment[]): void {
     this.payments.clear();
     this.payments.bulkPut(payments);
   }
 
-  clearBanksInIndexedDb() {
+  clearBanksInIndexedDb(): void {
     this.banks.clear();
   }
 
-  clearAccountsInIndexedDb() {
+  clearAccountsInIndexedDb(): void {
     this.accounts.clear();
   }
 
-  clearPaymentsInIndexedDb() {
+  clearPaymentsInIndexedDb(): void {
     this.payments.clear();
   }
 }

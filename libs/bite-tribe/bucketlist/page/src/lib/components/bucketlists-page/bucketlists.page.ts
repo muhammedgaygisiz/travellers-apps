@@ -19,7 +19,6 @@ import {
 import { CountPipe } from '../../pipes/count.pipe';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bucketlists-page',
   templateUrl: 'bucketlists.page.html',
   styleUrl: 'bucketlists.page.scss',
@@ -37,7 +36,6 @@ import { CountPipe } from '../../pipes/count.pipe';
     IonAlert,
   ],
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class BucketlistsPage {
   bucketlists = input<Bucketlist[]>([]);
 
@@ -58,7 +56,7 @@ export class BucketlistsPage {
     'Cancel',
   ];
 
-  onNewList(alertResult: string) {
+  onNewList(alertResult: string): void {
     const newListName = alertResult[0];
 
     this.newList.emit(newListName);

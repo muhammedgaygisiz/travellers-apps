@@ -5,9 +5,9 @@ export default {
   component: CardComponent,
 };
 
-export const EmptyCard = () => ({});
+export const EmptyCard = (): any => ({});
 
-export const CardWithContent = () => ({
+export const CardWithContent = (): any => ({
   template: `
     <kosaml-card>Some content</kosaml-card>
   `,

@@ -29,7 +29,6 @@ import { BiteComponent } from 'bite-tribe-common/bite';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'restaurant-page',
   templateUrl: './restaurant-page.component.html',
   imports: [
@@ -103,7 +102,7 @@ export class RestaurantPageComponent {
     { initialValue: !this.restaurantFormGroup.valid }
   );
 
-  onImageUploadClick() {
+  onImageUploadClick(): void {
     if (!this.imageBase64()) {
       const fileUpload = this.fileUpload();
 
@@ -118,13 +117,13 @@ export class RestaurantPageComponent {
     }
   }
 
-  async onFileSelected(event: Event) {
+  async onFileSelected(event: Event): Promise<void> {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
       const compressedFile = await compressFile(file);
 
       const reader = new FileReader();
-      reader.onload = () => {
+      reader.onload = (): void => {
         this.restaurantFormGroup.controls['image'].patchValue(
           reader.result as string
         );
@@ -133,7 +132,7 @@ export class RestaurantPageComponent {
     }
   }
 
-  saveNewRestaurant() {
+  saveNewRestaurant(): void {
     if (this.restaurantFormGroup.valid) {
       const newRestaurant = this.restaurantFormGroup.value;
       const biteIds = this.restaurant()?.biteIds || [];

@@ -22,7 +22,7 @@ export class NetworkEffects {
     )
   );
 
-  private getAction(isOnline: boolean) {
+  private getAction(isOnline: boolean): any {
     return networkStatusChanged({ isOnline });
   }
 }

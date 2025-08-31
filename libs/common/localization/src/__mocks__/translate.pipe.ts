@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
   standalone: true,
 })
 export class TranslatePipe implements PipeTransform {
-  transform() {
+  transform(): string {
     return '';
   }
 }

@@ -2,7 +2,7 @@ export const getNormalizedPriceInEur = (
   price: number,
   currency: string,
   exchangeRateToEur: number
-) => {
+): number => {
   if (currency === 'EUR') {
     return price;
   }

@@ -19,7 +19,6 @@ const emojiMap: Record<string, string> = {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bt-likes',
   templateUrl: './likes.component.html',
   styleUrl: './likes.component.scss',
@@ -55,7 +54,7 @@ export class LikesComponent {
     return [...new Set(bite.likes.map((like) => emojiMap[like.likeType]))];
   });
 
-  async openLikeOptions($event: MouseEvent) {
+  async openLikeOptions($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
       component: LikeOptionsPopoverMenuComponent,
       event: $event,

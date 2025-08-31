@@ -1,11 +1,11 @@
 import { formatDate } from '@angular/common';
 
-export const toDateString = (date: any) => {
+export const toDateString = (date: any): string => {
   if (date === null || date === undefined) {
     return '';
   }
 
-  const format = (d: any) => formatDate(d, 'dd.MM.yyyy', 'en-US');
+  const format = (d: any): string => formatDate(d, 'dd.MM.yyyy', 'en-US');
 
   const isDate = date instanceof Date;
   if (isDate) {

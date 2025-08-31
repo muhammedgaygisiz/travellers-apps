@@ -13,7 +13,6 @@ import { AddItemComponent } from '../add-item/add-item.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'menu-item',
   templateUrl: './menu-item.component.html',
   styleUrl: './menu-item.component.scss',
@@ -51,17 +50,17 @@ export class MenuItemComponent {
     return !editModeEnabled;
   });
 
-  onCreateBiteClick(itemData: MenuItem | undefined) {
+  onCreateBiteClick(itemData: MenuItem | undefined): void {
     if (itemData) {
       this.createBiteClick.emit(itemData);
     }
   }
 
-  onAddVariantClick() {
+  onAddVariantClick(): void {
     this.presentAddVariant.set(true);
   }
 
-  onAddVariant(variant: MenuItem) {
+  onAddVariant(variant: MenuItem): void {
     this.presentAddVariant.set(false);
 
     const currentItem = this.item();

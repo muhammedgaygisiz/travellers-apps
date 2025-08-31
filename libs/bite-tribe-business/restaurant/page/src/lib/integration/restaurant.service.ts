@@ -10,13 +10,13 @@ export class RestaurantService {
 
   restaurantToCreate = this.dataAccess.restaurantToCreate;
 
-  submitNewRestaurant(restaurant: Restaurant) {
+  submitNewRestaurant(restaurant: Restaurant): void {
     this.dataAccess.submitNewRestaurant(restaurant);
 
     this.navController.navigateBack(['dashboard']);
   }
 
-  biteClicked(bite: Bite) {
+  biteClicked(bite: Bite): void {
     this.navController.navigateForward(['bite', bite.id]);
   }
 }

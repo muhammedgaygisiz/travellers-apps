@@ -9,7 +9,7 @@ export class AccountService {
 
   private readonly navController = inject(NavController);
 
-  onAddMenuItemClicked() {
+  onAddMenuItemClicked(): void {
     const account = this.store.account();
 
     if (account) {
@@ -17,7 +17,7 @@ export class AccountService {
     }
   }
 
-  onPaymentClicked(payment: Payment) {
+  onPaymentClicked(payment: Payment): void {
     const account = this.store.account();
 
     if (account) {

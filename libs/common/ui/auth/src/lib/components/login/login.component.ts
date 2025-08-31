@@ -1,4 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -38,6 +43,7 @@ interface AuthCredentialFields {
     IonText,
     IonInputPasswordToggle,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
   readonly loginFailed = input(false);
@@ -58,15 +64,15 @@ export class LoginComponent {
     ),
   });
 
-  public onGoogleSignUp() {
+  public onGoogleSignUp(): void {
     this.submitSignupWithGoogle.emit();
   }
 
-  public onAppleSignUp() {
+  public onAppleSignUp(): void {
     this.submitSignupWithApple.emit();
   }
 
-  public onFacebookSignUp() {
+  public onFacebookSignUp(): void {
     this.submitSignupWithFacebook.emit();
   }
 }

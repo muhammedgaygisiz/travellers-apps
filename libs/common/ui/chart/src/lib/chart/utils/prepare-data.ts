@@ -4,7 +4,7 @@ import { calculateCumulativeBalance } from './calculate-cumulative-balance';
 import { withPaddedData } from './with-padded-data';
 import { byDate } from 'utils';
 
-export const prepareData = (currentData: ChartData[]) => {
+export const prepareData = (currentData: ChartData[]): ChartData[] => {
   const data = currentData.sort(byDate).map(sanitizeDate);
 
   calculateCumulativeBalance(data);

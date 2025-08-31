@@ -37,14 +37,14 @@ export class UseScenarioPageComponent {
     tap((id) => this.store.dispatch(fromUseScenarios.selectUseScenario({ id })))
   );
 
-  onSaveScenario(scenario: Scenario) {
+  onSaveScenario(scenario: Scenario): void {
     console.log(scenario);
     // this.store.dispatch(UseScenarioActions.addUseScenario({ useScenario: scenario }));
 
     // this.router.navigate(['./project']);
   }
 
-  onDeleteScenario(id: string) {
+  onDeleteScenario(id: string): void {
     console.log(id);
 
     //this.store.dispatch(UseScenarioActions.deleteUseScenario({ id }));

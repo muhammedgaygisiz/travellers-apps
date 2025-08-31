@@ -5,7 +5,6 @@ import { MapPageComponent } from '../components/map-page/map-page.component';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'home-map-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MapPageComponent],
@@ -24,7 +23,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 export class HomeMapContainerComponent {
   service = inject(MapService);
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Home Map',
     });

@@ -4,7 +4,7 @@ import { normalize, getSimilarityScore } from 'utils';
 export const getBitesByRestaurantIdOrName = (
   normalizedRestaurantIdOrName: string,
   bites: Bite[]
-) =>
+): Bite[] =>
   bites.filter((bite) => {
     const normalizedBitePlace = normalize(bite.place);
 

@@ -10,6 +10,7 @@ import {
 } from 'rxjs';
 import { Settings } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 const SETTINGS_COLLECTION = 'settings';
 
@@ -34,7 +35,7 @@ export class SettingsApiService {
     })
   );
 
-  private async startSettingsListener() {
+  private async startSettingsListener(): Promise<void> {
     const user = await this.getUser();
 
     await FirebaseFirestore.addDocumentSnapshotListener(
@@ -48,12 +49,13 @@ export class SettingsApiService {
     );
   }
 
-  private async getUser() {
+  private async getUser(): Promise<User | null | undefined> {
     const authState = await this.authService.authState();
     return authState?.user;
   }
 
-  async saveSettings(settings: any) {
+  async saveSettings(settings: any): Promise<void> {
+    // console.debug('#mo - Saving settings to Firestore', settings);
     try {
       const user = await this.getUser();
       if (!user?.uid) {

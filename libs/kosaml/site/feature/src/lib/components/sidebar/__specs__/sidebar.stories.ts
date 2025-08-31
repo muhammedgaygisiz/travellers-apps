@@ -18,7 +18,7 @@ export default {
   ],
 };
 
-export const EmptySidebar = () => ({
+export const EmptySidebar = (): any => ({
   component: SidebarComponent,
   props: {
     project: [

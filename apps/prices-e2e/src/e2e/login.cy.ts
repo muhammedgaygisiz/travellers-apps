@@ -2,7 +2,7 @@ describe('Login', () => {
   beforeEach(() =>
     cy.visit('/', {
       onBeforeLoad(win) {
-        win.navigator.geolocation.getCurrentPosition = (cb) => {
+        win.navigator.geolocation.getCurrentPosition = (cb): void => {
           cb({
             coords: {
               latitude: 46.944091,

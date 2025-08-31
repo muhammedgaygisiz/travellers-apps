@@ -93,7 +93,7 @@ export class RegistrationComponent implements OnChanges {
     }
   }
 
-  private async showRegistrationErrorMessage() {
+  private async showRegistrationErrorMessage(): Promise<void> {
     const toast = await this.toastController.create({
       message: 'Email already in use.',
       position: 'bottom',
@@ -109,7 +109,7 @@ export class RegistrationComponent implements OnChanges {
     await toast.present();
   }
 
-  private onConfirmToast() {
+  private onConfirmToast(): void {
     this.errorConfirm.emit();
   }
 }

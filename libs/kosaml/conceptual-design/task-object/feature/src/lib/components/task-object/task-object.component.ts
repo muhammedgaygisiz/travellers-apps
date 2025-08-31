@@ -13,7 +13,7 @@ export class TaskObjectComponent {
 
   displayedColumns?: string[] = ['taskObject', 'attributes', 'actions'];
 
-  getColumnName(column: string) {
+  getColumnName(column: string): string {
     if (column === 'taskObject') {
       return 'Task object';
     }

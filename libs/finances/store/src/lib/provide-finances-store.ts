@@ -14,6 +14,7 @@ import {
   provideFirestoreState,
   provideFirestoreUtils,
 } from 'ta-firestore';
+import { EnvironmentProviders, Provider } from '@angular/core';
 
 const firebaseOptions = {
   apiKey: process.env['NX_APP_FINANCES_API_KEY'],
@@ -23,7 +24,9 @@ const firebaseOptions = {
   messagingSenderId: process.env['NX_APP_FINANCES_MESSAGINX_SENDER_ID'],
 };
 
-export const provideFinancesStore = (environment: Environment) => [
+export const provideFinancesStore = (
+  environment: Environment
+): (EnvironmentProviders | EnvironmentProviders[] | Provider[])[] => [
   provideStore(
     { router: routerReducer },
     {

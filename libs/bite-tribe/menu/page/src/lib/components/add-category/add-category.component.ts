@@ -20,7 +20,6 @@ import { Category } from 'model';
   templateUrl: './add-category.component.html',
   styleUrl: './add-category.component.scss',
   imports: [IonButton, IonInput, IonList, IonItem, ReactiveFormsModule],
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'add-category',
 })
 export class AddCategoryComponent {
@@ -44,7 +43,7 @@ export class AddCategoryComponent {
     { initialValue: !this.newCategoryForm.valid }
   );
 
-  onAddCategory() {
+  onAddCategory(): void {
     if (this.newCategoryForm.valid) {
       this.addCategory.emit(this.newCategoryForm.value as Category);
     }

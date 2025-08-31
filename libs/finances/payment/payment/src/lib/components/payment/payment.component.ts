@@ -71,7 +71,7 @@ export class PaymentComponent {
 
   popover: HTMLIonPopoverElement | undefined;
 
-  async openDatePicker($event: MouseEvent) {
+  async openDatePicker($event: MouseEvent): Promise<void> {
     const consecutiveClicks = $event.detail;
     const isSingleClick = consecutiveClicks === 1;
 
@@ -89,7 +89,7 @@ export class PaymentComponent {
     }
   }
 
-  onIonChange(event: { value: string }) {
+  onIonChange(event: { value: string }): void {
     this.popover?.dismiss();
 
     const date = new Date(event.value);
@@ -97,7 +97,7 @@ export class PaymentComponent {
     this.paymentFormGroup.controls['date'].patchValue(toDateString(date));
   }
 
-  onSubmitClick() {
+  onSubmitClick(): void {
     const payment = this.paymentFormGroup.value;
 
     this.submitPayment.emit({

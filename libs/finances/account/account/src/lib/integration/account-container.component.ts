@@ -22,7 +22,7 @@ import { AccountService } from './account.service';
 export class AccountContainerComponent implements OnInit {
   service = inject(AccountService);
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.service.store.loadByQuery();
   }
 }

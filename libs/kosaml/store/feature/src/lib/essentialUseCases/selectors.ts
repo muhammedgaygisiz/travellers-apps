@@ -12,7 +12,7 @@ const selectEssentialUseCaseEntities = createSelector(
   selectEntities
 );
 
-const getSelectedEssentialUseCase = (slice: EssentialUseCaseState) =>
+const getSelectedEssentialUseCase = (slice: EssentialUseCaseState): string =>
   slice.selectedEssentialUseCaseId;
 
 const selectCurrentEssentialUseCase = createSelector(

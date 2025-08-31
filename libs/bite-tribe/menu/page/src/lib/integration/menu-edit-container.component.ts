@@ -15,7 +15,6 @@ import { MenuService } from './menu.service';
   imports: [MenuPage],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class MenuEditContainer {
   service = inject(MenuService);
 }

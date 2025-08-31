@@ -1,6 +1,9 @@
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { Observable } from 'rxjs';
 
-export const getCurrentRouteParams = (activatedRoute: ActivatedRoute) => {
+export const getCurrentRouteParams = (
+  activatedRoute: ActivatedRoute
+): Observable<ParamMap> => {
   let currentRoute = activatedRoute;
   while (currentRoute?.firstChild) {
     currentRoute = currentRoute?.firstChild;

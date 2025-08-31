@@ -5,6 +5,7 @@ import {
   catchError,
   EMPTY,
   from,
+  Observable,
   skip,
   skipWhile,
   Subject,
@@ -39,7 +40,7 @@ export class MenuApiService {
     })
   );
 
-  private async startMenusListener() {
+  private async startMenusListener(): Promise<void> {
     this.menuCallbackId = await FirebaseFirestore.addCollectionSnapshotListener(
       { reference: MENU_COLLECTION },
       async (menusDocs) => {
@@ -56,14 +57,14 @@ export class MenuApiService {
     );
   }
 
-  private async stopMenuListener(callbackId: string) {
+  private async stopMenuListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });
     }
   }
 
-  loadMenu(menuId: string) {
+  loadMenu(menuId: string): Observable<Menu | undefined> {
     return this.authService.isLoggedIn$.pipe(
       skipWhile((isLoggedIn) => !isLoggedIn),
       switchMap(() => {
@@ -83,7 +84,7 @@ export class MenuApiService {
     );
   }
 
-  private async getMenuById(menuId: string) {
+  private async getMenuById(menuId: string): Promise<Menu | undefined> {
     try {
       const doc = await FirebaseFirestore.getDocument({
         reference: `${MENU_COLLECTION}/${menuId}`,
@@ -104,7 +105,7 @@ export class MenuApiService {
     }
   }
 
-  async saveMenu(menu: Menu) {
+  async saveMenu(menu: Menu): Promise<void> {
     await FirebaseFirestore.updateDocument({
       reference: `${MENU_COLLECTION}/${menu.id}`,
       data: {

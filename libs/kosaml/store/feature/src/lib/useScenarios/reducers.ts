@@ -3,7 +3,7 @@ import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { UseScenario } from '@travellers-apps/kosaml/model/feature';
 import { selectUseScenario } from './actions';
 
-export const selectedUseScenarioId = (us: UseScenario) => us?.id || '';
+export const selectedUseScenarioId = (us: UseScenario): string => us?.id || '';
 
 export const adapter: EntityAdapter<UseScenario> =
   createEntityAdapter<UseScenario>({

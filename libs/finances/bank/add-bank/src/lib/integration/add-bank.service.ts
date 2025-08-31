@@ -8,7 +8,7 @@ export class AddBankService {
   private readonly bankService = inject(BankService);
   private readonly navController = inject(NavController);
 
-  saveNewBank(newBank: Bank) {
+  saveNewBank(newBank: Bank): void {
     this.bankService.saveNewBank(newBank);
 
     this.navController.back();

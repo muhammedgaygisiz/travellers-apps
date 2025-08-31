@@ -88,7 +88,7 @@ const unknownEntity = createAction(
   props<{ docType: string }>()
 );
 
-const getActionByDocType = (docType: string, entity: any) => {
+const getActionByDocType = (docType: string, entity: any): any => {
   switch (docType) {
     case 'bite': {
       if (entity.id) {
@@ -181,7 +181,7 @@ export class BiteTribeStoreService implements StoreService {
     this.store?.dispatch(getActionByDocType(docType, entity));
   }
 
-  saveTags(newTagsArray: string[], id: string) {
+  saveTags(newTagsArray: string[], id: string): void {
     this.store.dispatch(
       saveTags({
         newTags: newTagsArray,
@@ -190,11 +190,11 @@ export class BiteTribeStoreService implements StoreService {
     );
   }
 
-  logout() {
+  logout(): void {
     this.store?.dispatch(fromAuth.logout());
   }
 
-  submitLikeClick(event: { likeType: string; biteId: string }) {
+  submitLikeClick(event: { likeType: string; biteId: string }): void {
     this.store?.dispatch(
       saveLike({
         ...event,
@@ -203,35 +203,35 @@ export class BiteTribeStoreService implements StoreService {
     );
   }
 
-  removeLike(event: { likeType: string; biteId: string }) {
+  removeLike(event: { likeType: string; biteId: string }): void {
     this.store?.dispatch(removeLike({ like: event }));
   }
 
-  saveSettings(settings: Settings) {
+  saveSettings(settings: Settings): void {
     this.store.dispatch(saveSettings({ settings }));
   }
 
-  savePublicProfile(publicUser: PublicUser) {
+  savePublicProfile(publicUser: PublicUser): void {
     this.store.dispatch(savePublicProfile({ publicUser }));
   }
 
-  saveReview(newReview: { review: string; biteId: string }) {
+  saveReview(newReview: { review: string; biteId: string }): void {
     this.store.dispatch(saveNewReview(newReview));
   }
 
-  selectRestaurantToCreate(restaurant: Restaurant) {
+  selectRestaurantToCreate(restaurant: Restaurant): void {
     this.store.dispatch(setRestaurantToCreate({ restaurant }));
   }
 
-  saveMenu(menu: Menu) {
+  saveMenu(menu: Menu): void {
     this.store.dispatch(saveMenu({ menu }));
   }
 
-  prepareBiteFromMenuItem(bite: Partial<Bite>) {
+  prepareBiteFromMenuItem(bite: Partial<Bite>): void {
     this.store.dispatch(cacheBite({ bite }));
   }
 
-  saveSocialMediaLinks(restaurantId: string, links: Link[]) {
+  saveSocialMediaLinks(restaurantId: string, links: Link[]): void {
     this.store.dispatch(
       saveSocialMediaLinksForRestaurant({
         restaurantId,
@@ -240,35 +240,35 @@ export class BiteTribeStoreService implements StoreService {
     );
   }
 
-  saveToBucketList(saveToBucketlistParams: SaveToBucketListParams) {
+  saveToBucketList(saveToBucketlistParams: SaveToBucketListParams): void {
     this.store.dispatch(saveBiteIdToBucketList(saveToBucketlistParams));
   }
 
-  createAndSaveToBucketList(params: CreateAndSaveToBucketListParams) {
+  createAndSaveToBucketList(params: CreateAndSaveToBucketListParams): void {
     this.store.dispatch(createAndSaveBiteIdToBucketList(params));
   }
 
-  removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams) {
+  removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams): void {
     this.store.dispatch(removeBiteFromBucketlist(params));
   }
 
-  submitDeleteBite(bite: Bite) {
+  submitDeleteBite(bite: Bite): void {
     this.store.dispatch(deleteBite({ bite }));
   }
 
-  createBucketList(bucketlistName: string) {
+  createBucketList(bucketlistName: string): void {
     this.store.dispatch(createBucketList({ bucketlistName }));
   }
 
-  goPublic() {
+  goPublic(): void {
     this.store.dispatch(goPublic());
   }
 
-  goPrivate() {
+  goPrivate(): void {
     this.store.dispatch(goPrivate());
   }
 
-  setHomeSorting(sorting: string) {
+  setHomeSorting(sorting: string): void {
     this.store.dispatch(setHomeSorting({ sorting }));
   }
 
@@ -276,11 +276,11 @@ export class BiteTribeStoreService implements StoreService {
     tagFilters: string[];
     distanceFilter: string;
     priceFilter: number;
-  }) {
+  }): void {
     this.store.dispatch(setHomeFilters({ filters }));
   }
 
-  clearHomeFilters() {
+  clearHomeFilters(): void {
     this.store.dispatch(clearHomeFilters());
   }
 }

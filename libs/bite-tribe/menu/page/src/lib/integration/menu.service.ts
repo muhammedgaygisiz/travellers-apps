@@ -14,13 +14,13 @@ export class MenuService {
   restaurant = this.dataAccess.restaurant;
   menu = this.dataAccess.menu;
 
-  saveMenu(menu: Menu) {
+  saveMenu(menu: Menu): void {
     this.dataAccess.saveMenu(menu);
 
     this.navController.back();
   }
 
-  prepareBiteFromMenuItem(menuItem: MenuItem) {
+  prepareBiteFromMenuItem(menuItem: MenuItem): void {
     const restaurant = this.restaurant();
 
     // TODO: Take currency from menu item when available

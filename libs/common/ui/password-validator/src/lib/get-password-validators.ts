@@ -1,7 +1,7 @@
-import { Validators } from '@angular/forms';
+import { ValidatorFn, Validators } from '@angular/forms';
 import { digit, lowerCase, minLength, upperCase } from 'utils';
 
-const getPasswordValidators = () => [
+const getPasswordValidators = (): ValidatorFn[] => [
   Validators.required,
   Validators.pattern(lowerCase),
   Validators.pattern(upperCase),

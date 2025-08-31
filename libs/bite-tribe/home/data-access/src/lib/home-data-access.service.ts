@@ -51,11 +51,11 @@ export class HomeDataAccessService {
   });
   maxPriceHome = toSignal(this.storeService.maxPriceHome$, { initialValue: 0 });
 
-  logout() {
+  logout(): void {
     this.storeService.logout();
   }
 
-  submitLikeClick(likeType: { likeType: string; biteId: string }) {
+  submitLikeClick(likeType: { likeType: string; biteId: string }): void {
     const bites = this.sortedHomeBites();
     const userId = this.userId();
 
@@ -73,11 +73,11 @@ export class HomeDataAccessService {
     this.storeService.submitLikeClick(likeType);
   }
 
-  deleteBite(bite: Bite) {
+  deleteBite(bite: Bite): void {
     this.storeService.submitDeleteBite(bite);
   }
 
-  setHomeSorting(sorting: string) {
+  setHomeSorting(sorting: string): void {
     this.storeService.setHomeSorting(sorting);
   }
 
@@ -85,11 +85,11 @@ export class HomeDataAccessService {
     tagFilters: string[];
     distanceFilter: string;
     priceFilter: number;
-  }) {
+  }): void {
     this.storeService.setHomeFilters(filters);
   }
 
-  clearFilters() {
+  clearFilters(): void {
     this.storeService.clearHomeFilters();
   }
 }

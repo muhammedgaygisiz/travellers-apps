@@ -28,7 +28,7 @@ const testScheduler: TestScheduler = new TestScheduler((actual, expected) => {
 describe('ImageUrlValidator', () => {
   describe('given an image url validator object, a control', () => {
     const imageUrlValidator = new ImageUrlValidator();
-    const someControl = (url: string) =>
+    const someControl = (url: string): AbstractControl =>
       ({
         getRawValue: jest.fn(() => url),
       } as unknown as AbstractControl);

@@ -38,7 +38,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 export class HomeContainerComponent {
   service = inject(HomeService);
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Home',
     });

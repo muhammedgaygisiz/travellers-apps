@@ -4,7 +4,7 @@ import { MostSearchedItem } from '../api/most-searched-item.model';
 const getFilteredPrices = (
   mostSearchedEntries: MostSearchedItem[] | null,
   filters: Filter[]
-) =>
+): MostSearchedItem[] | undefined =>
   mostSearchedEntries?.filter((price) =>
     filters
       .map((filter) => {

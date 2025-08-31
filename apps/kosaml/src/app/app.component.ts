@@ -23,7 +23,7 @@ export class AppComponent {
 
   project$ = this.store.pipe(select(fromSite.selectProjectStructure));
 
-  onToggleProjectBar() {
+  onToggleProjectBar(): void {
     this.store.dispatch(fromSite.toggleProjectBar());
   }
 }

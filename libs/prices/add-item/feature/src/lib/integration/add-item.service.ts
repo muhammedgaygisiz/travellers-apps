@@ -16,7 +16,7 @@ export class AddItemService {
 
   location$ = this.store.select(fromLocation.selectLocation);
 
-  saveItem(price: Price) {
+  saveItem(price: Price): void {
     this.store.dispatch(
       fromMostSearched.saveItem({
         item: price,
@@ -24,7 +24,7 @@ export class AddItemService {
     );
   }
 
-  changeLanguage(event: SupportedLang) {
+  changeLanguage(event: SupportedLang): void {
     this.store.dispatch(fromLocalization.changeLanguage({ lang: event }));
   }
 }

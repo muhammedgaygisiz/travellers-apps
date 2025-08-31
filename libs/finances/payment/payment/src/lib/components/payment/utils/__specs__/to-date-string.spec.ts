@@ -8,7 +8,7 @@ describe('toDateString', () => {
 
   it('should format an object with a toDate method correctly', () => {
     const dateObject = {
-      toDate: () => new Date(2023, 9, 15), // October 15, 2023
+      toDate: (): Date => new Date(2023, 9, 15), // October 15, 2023
     };
     expect(toDateString(dateObject)).toBe('15.10.2023');
   });

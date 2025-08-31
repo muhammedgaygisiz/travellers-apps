@@ -10,7 +10,7 @@ const COLORS = {
 export const createChart = (
   chartElement: HTMLElement,
   currentData: ChartData[]
-) => {
+): void => {
   const preparedData = prepareData(currentData);
 
   const container = chartElement.parentElement;

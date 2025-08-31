@@ -12,7 +12,7 @@ const selectTaskObjectEntities = createSelector(
   selectEntities
 );
 
-const getSelectedTaskObject = (slice: TaskObjectState) =>
+const getSelectedTaskObject = (slice: TaskObjectState): string =>
   slice.selectedTaskObjectId;
 
 const selectCurrentTaskObject = createSelector(

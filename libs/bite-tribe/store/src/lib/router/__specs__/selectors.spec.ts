@@ -1,8 +1,8 @@
 import * as fromSelectors from '../selectors';
 
 jest.mock('@ngrx/router-store', () => ({
-  getRouterSelectors: () => ({
-    selectRouteParams: (state: any) => state,
+  getRouterSelectors: (): any => ({
+    selectRouteParams: (state: any): any => state,
   }),
 }));
 

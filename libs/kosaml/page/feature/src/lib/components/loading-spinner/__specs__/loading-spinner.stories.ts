@@ -19,4 +19,4 @@ export default {
   ],
 };
 
-export const LoadingSpinner = () => ({});
+export const LoadingSpinner = (): any => ({});

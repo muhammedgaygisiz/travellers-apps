@@ -44,7 +44,7 @@ export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
 
 const allBites = createSelector(slice, selectAll);
 
-const byDistance = (a: any, b: any) => {
+const byDistance = (a: any, b: any): number => {
   return a.distance - b.distance;
 };
 

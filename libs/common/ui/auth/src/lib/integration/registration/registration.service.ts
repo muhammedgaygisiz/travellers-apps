@@ -14,7 +14,7 @@ export class RegistrationService {
     this.store.register(registration);
   }
 
-  confirmError() {
+  confirmError(): void {
     this.store.confirmError();
   }
 }

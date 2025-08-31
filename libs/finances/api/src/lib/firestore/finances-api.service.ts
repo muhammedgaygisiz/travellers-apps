@@ -55,12 +55,11 @@ export class FinancesApiService {
   private accountsCallbackId = '';
   private paymentsCallbackId = '';
 
-  // eslint-disable-next-line no-unused-vars
-  saveNewBank(newBank: { name: string }) {
+  saveNewBank(newBank: { name: string }): void {
     // addDoc(this.banksCollection, { ...newBank, id: uuidV4() });
   }
 
-  saveNewPayment(newPayment: { amount: number; iban: string }) {
+  saveNewPayment(newPayment: { amount: number; iban: string }): void {
     FirebaseFirestore.addDocument({
       reference: PAYMENTS_COLLECTION,
       data: {
@@ -70,7 +69,7 @@ export class FinancesApiService {
     });
   }
 
-  async savePayment(payment: any, id: string | undefined) {
+  async savePayment(payment: any, id: string | undefined): Promise<void> {
     const querySnapshot = await FirebaseFirestore.getCollection({
       reference: PAYMENTS_COLLECTION,
       compositeFilter: {
@@ -100,7 +99,7 @@ export class FinancesApiService {
     console.error('No payment found with the given ID:', id);
   }
 
-  async loadPayment(id: any) {
+  async loadPayment(id: any): Promise<Payment | undefined> {
     const querySnapshot = await FirebaseFirestore.getCollection({
       reference: PAYMENTS_COLLECTION,
       compositeFilter: {
@@ -123,7 +122,7 @@ export class FinancesApiService {
     return undefined;
   }
 
-  private async startPaymentsListener() {
+  private async startPaymentsListener(): Promise<void> {
     console.log('#mo Fetching payments from Firestore');
 
     this.paymentsCallbackId =
@@ -140,7 +139,7 @@ export class FinancesApiService {
       );
   }
 
-  private async startBanksListener() {
+  private async startBanksListener(): Promise<void> {
     console.log('#mo Fetching banks from Firestore');
 
     this.banksCallbackId =
@@ -157,7 +156,7 @@ export class FinancesApiService {
       );
   }
 
-  private async startAccountListener() {
+  private async startAccountListener(): Promise<void> {
     console.log('#mo Fetching accounts from Firestore');
 
     this.accountsCallbackId =
@@ -174,19 +173,19 @@ export class FinancesApiService {
       );
   }
 
-  async stopBanksListener() {
+  async stopBanksListener(): Promise<void> {
     await FirebaseFirestore.removeSnapshotListener({
       callbackId: this.banksCallbackId,
     });
   }
 
-  async stopAccountsListener() {
+  async stopAccountsListener(): Promise<void> {
     await FirebaseFirestore.removeSnapshotListener({
       callbackId: this.accountsCallbackId,
     });
   }
 
-  async stopPaymentsListener() {
+  async stopPaymentsListener(): Promise<void> {
     await FirebaseFirestore.removeSnapshotListener({
       callbackId: this.paymentsCallbackId,
     });

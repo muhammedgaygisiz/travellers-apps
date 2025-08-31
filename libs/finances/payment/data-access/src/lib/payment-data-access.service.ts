@@ -10,14 +10,12 @@ export class PaymentDataAccessService {
   payment = toSignal(this.storeService.selectedPayment$);
   iban = toSignal(this.storeService.iban$);
 
-  saveNewPayment(newPayment: { amount: number }) {
+  saveNewPayment(newPayment: { amount: number }): void {
     const iban = this.iban();
     this.storeService.saveNewPayment({ ...newPayment, iban });
   }
 
-  async savePayment(payment: any, id: string | undefined) {
+  async savePayment(payment: any, id: string | undefined): Promise<void> {
     await this.storeService.savePayment(payment, id);
-
-    this.storeService;
   }
 }

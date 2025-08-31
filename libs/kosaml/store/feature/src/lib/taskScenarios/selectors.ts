@@ -13,7 +13,7 @@ export const selectTaskScenarioEntities = createSelector(
   selectEntities
 );
 
-export const getSelectedTaskScenarioId = (state: TaskScenarioState) =>
+export const getSelectedTaskScenarioId = (state: TaskScenarioState): string =>
   state.selectedTaskScenarioId;
 
 export const selectCurrentTaskScenarioId = createSelector(

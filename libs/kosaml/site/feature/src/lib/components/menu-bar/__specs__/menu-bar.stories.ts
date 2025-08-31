@@ -12,6 +12,6 @@ export default {
   ],
 };
 
-export const Menubar = () => ({
+export const Menubar = (): any => ({
   component: MenuBarComponent,
 });

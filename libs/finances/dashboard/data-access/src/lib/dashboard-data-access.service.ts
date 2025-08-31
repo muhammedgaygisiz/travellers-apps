@@ -10,7 +10,7 @@ export class DashboardDataAccessService {
 
   banks = toSignal(this.storeService.banks$, { initialValue: [] });
 
-  logout() {
+  logout(): void {
     this.storeService.logout();
   }
 }

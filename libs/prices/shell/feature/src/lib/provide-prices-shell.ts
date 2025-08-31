@@ -11,8 +11,11 @@ import {
   PricesStoreService,
   providePricesStore,
 } from '@travellers-apps/prices/store/feature';
+import { EnvironmentProviders, Provider } from '@angular/core';
 
-export const providePricesShell = (environment: Environment) => [
+export const providePricesShell = (
+  environment: Environment
+): (EnvironmentProviders | Provider)[] => [
   provideRouter(ROUTES, withPreloading(PreloadAllModules)),
   {
     provide: RouteReuseStrategy,

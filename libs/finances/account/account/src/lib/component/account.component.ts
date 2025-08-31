@@ -44,7 +44,7 @@ export class AccountComponent {
 
   paymentClicked = output<Payment>();
 
-  async showAddPopover($event: MouseEvent) {
+  async showAddPopover($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
       component: AddPopoverMenuComponent,
       event: $event,

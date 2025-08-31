@@ -15,13 +15,13 @@ export class CpBaseUseCaseComponent implements OnInit {
 
   displayedColumns?: string[];
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.displayedColumns = this.initializeDisplayedColumns(this.type());
   }
 
   private initializeDisplayedColumns(
     type: ConceptualDesignUseCaseTypes | undefined
-  ) {
+  ): string[] {
     if (type === ConceptualDesignUseCaseTypes.ESSENTIAL) {
       return ['usersPurpose', 'systemResponsibility'];
     }
@@ -33,7 +33,7 @@ export class CpBaseUseCaseComponent implements OnInit {
     return [];
   }
 
-  getColumnName(column: string) {
+  getColumnName(column: string): string {
     if (column === 'usersPurpose') {
       return "User's purpose";
     }

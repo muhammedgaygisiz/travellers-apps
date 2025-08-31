@@ -16,7 +16,7 @@ import { Scenario } from '@travellers-apps/kosaml/model/feature';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewUseScenarioPageComponent {
-  onSaveScenario(scenario: Scenario) {
+  onSaveScenario(scenario: Scenario): void {
     console.log(scenario);
   }
 }

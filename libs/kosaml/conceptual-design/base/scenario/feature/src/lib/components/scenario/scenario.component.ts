@@ -1,4 +1,10 @@
-import { Component, OnChanges, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  OnChanges,
+  output,
+} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -24,6 +30,7 @@ import { Scenario } from '@travellers-apps/kosaml/model/feature';
     MatButtonModule,
     MatInputModule,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScenarioComponent implements OnChanges {
   readonly model = input<Scenario | null>();
@@ -41,7 +48,7 @@ export class ScenarioComponent implements OnChanges {
 
   matcher = new KosamlErrorMatcher();
 
-  onSubmit() {
+  onSubmit(): void {
     if (!this.scenarioForm?.value) {
       return;
     }
@@ -54,17 +61,17 @@ export class ScenarioComponent implements OnChanges {
     this.scenarioForm.reset();
   }
 
-  ngOnChanges() {
+  ngOnChanges(): void {
     this.setFormFields(this.model());
   }
 
-  setFormFields(model: Scenario | undefined | null) {
+  setFormFields(model: Scenario | undefined | null): void {
     if (model) {
       this.scenarioForm.patchValue(model);
     }
   }
 
-  onDelete() {
+  onDelete(): void {
     let id = '';
 
     const model = this.model();

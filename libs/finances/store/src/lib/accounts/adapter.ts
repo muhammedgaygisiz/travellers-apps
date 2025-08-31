@@ -1,7 +1,7 @@
 import { createEntityAdapter, EntityState } from '@ngrx/entity';
 import { Account } from '../utils/model/account';
 
-const selectId = (account: Account) => account.number;
+const selectId = (account: Account): string => account.number;
 
 export const adapter = createEntityAdapter<Account>({
   selectId,

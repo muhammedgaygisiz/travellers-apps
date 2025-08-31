@@ -30,15 +30,15 @@ export class HomeService {
     this.store.dispatch(fromAuth.logout());
   }
 
-  public async onAddItemClick() {
+  public async onAddItemClick(): Promise<void> {
     await this.navController.navigateForward(['/add-item']);
   }
 
-  public async onLoginClick() {
+  public async onLoginClick(): Promise<void> {
     await this.navController.navigateForward(['/login']);
   }
 
-  changeLanguage(event: SupportedLang) {
+  changeLanguage(event: SupportedLang): void {
     this.store.dispatch(fromLocalization.changeLanguage({ lang: event }));
   }
 }

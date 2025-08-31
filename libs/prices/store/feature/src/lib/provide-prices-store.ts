@@ -15,6 +15,7 @@ import {
   provideFirestoreUtils,
 } from 'ta-firestore';
 import { provideNetworkStatus } from '@travellers-apps/common/networkstatus/feature';
+import { EnvironmentProviders, Provider } from '@angular/core';
 
 const firebaseOptions = {
   apiKey: process.env['NX_APP_API_KEY'],
@@ -24,7 +25,9 @@ const firebaseOptions = {
   messagingSenderId: process.env['NX_APP_MESSAGINX_SENDER_ID'],
 };
 
-export const providePricesStore = (environment: Environment) => [
+export const providePricesStore = (
+  environment: Environment
+): (EnvironmentProviders | Provider)[] => [
   provideStore(
     {},
     {

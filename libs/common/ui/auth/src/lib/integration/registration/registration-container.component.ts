@@ -24,7 +24,7 @@ export class RegistrationContainerComponent {
     this.service.register(registration);
   }
 
-  onErrorConfirm() {
+  onErrorConfirm(): void {
     this.service.confirmError();
   }
 }

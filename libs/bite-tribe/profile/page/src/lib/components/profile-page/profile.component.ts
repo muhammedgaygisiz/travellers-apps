@@ -18,7 +18,6 @@ import { Bite, PublicUser } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'profile-page',
   templateUrl: 'profile.component.html',
   styleUrl: 'profile.component.scss',
@@ -30,8 +29,8 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonButton,
     BiteComponent,
     IonBadge,
-    IonIcon
-],
+    IonIcon,
+  ],
 })
 export class ProfileComponent {
   isAuthenticated = input(false);

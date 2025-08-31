@@ -20,7 +20,7 @@ describe('toDate', () => {
 
   it('should handle firebase timestamp-like objects', () => {
     const mockTimestamp = {
-      toDate: () => new Date('2024-03-15T12:00:00Z'),
+      toDate: (): Date => new Date('2024-03-15T12:00:00Z'),
     };
     const result = toDate(mockTimestamp);
     expect(result).toEqual(new Date('2024-03-15T12:00:00Z'));

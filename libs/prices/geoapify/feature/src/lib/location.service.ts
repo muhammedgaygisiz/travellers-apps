@@ -1,6 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { from, map, Observable, of, switchMap } from 'rxjs';
-import { Geolocation } from '@awesome-cordova-plugins/geolocation/ngx';
+import {
+  Geolocation,
+  Geoposition,
+} from '@awesome-cordova-plugins/geolocation/ngx';
 import { Coordinates } from '@awesome-cordova-plugins/geolocation';
 import { fromFetch } from 'rxjs/internal/observable/dom/fetch';
 
@@ -14,11 +17,11 @@ export class LocationService {
     switchMap((geolocation) => this.getCityForCoordinates(geolocation.coords))
   );
 
-  private getLocation() {
+  private getLocation(): Promise<Geoposition> {
     return this.geolocation.getCurrentPosition();
   }
 
-  private getCityForCoordinates(coords: Coordinates) {
+  private getCityForCoordinates(coords: Coordinates): Observable<any> {
     return fromFetch(
       `https://api.geoapify.com/v1/geocode/reverse?lat=${coords.latitude}&lon=${coords.longitude}&apiKey=${process.env['NX_APP_GEOAPIFY_API_KEY']}`
     ).pipe(

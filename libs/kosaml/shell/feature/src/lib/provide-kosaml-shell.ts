@@ -4,6 +4,7 @@ import {
   withPreloading,
 } from '@angular/router';
 import { routes } from './routes';
+import { EnvironmentProviders } from '@angular/core';
 
-export const provideKosamlShell = () =>
+export const provideKosamlShell = (): EnvironmentProviders =>
   provideRouter(routes, withPreloading(PreloadAllModules));

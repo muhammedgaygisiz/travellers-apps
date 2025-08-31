@@ -1,4 +1,5 @@
 import {
+  EnvironmentProviders,
   isDevMode,
   LOCALE_ID,
   makeEnvironmentProviders,
@@ -29,7 +30,9 @@ interface LocalizationParams {
   defaultLang: SupportedLang;
 }
 
-export const provideLocalization = (i18n?: LocalizationParams) =>
+export const provideLocalization = (
+  i18n?: LocalizationParams
+): EnvironmentProviders =>
   makeEnvironmentProviders([
     provideTranslocoLoader(TranslocoHttpLoader),
     provideTransloco({

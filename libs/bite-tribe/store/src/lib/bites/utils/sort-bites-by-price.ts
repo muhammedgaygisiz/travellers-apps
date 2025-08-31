@@ -4,7 +4,7 @@ import { getNormalizedPriceInEur } from 'utils';
 export const sortBitesByPrice = (
   bites: Bite[],
   exchangeRates: Record<string, number>
-) => {
+): Bite[] => {
   return bites.sort((a: Bite, b: Bite) => {
     return (
       getNormalizedPriceInEur(

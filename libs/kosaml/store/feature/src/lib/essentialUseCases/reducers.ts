@@ -3,7 +3,7 @@ import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { EssentialUseCase } from '@travellers-apps/kosaml/model/feature';
 import { selectEssentialUseCase } from './actions';
 
-export const selectEssentialUseCaseId = (euc: EssentialUseCase) =>
+export const selectEssentialUseCaseId = (euc: EssentialUseCase): string =>
   euc?.id || '';
 
 export const adapter: EntityAdapter<EssentialUseCase> =

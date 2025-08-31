@@ -5,7 +5,7 @@ export const getBitePriceInPreferredCurrency = (
   bite: Bite,
   exchangeRates: Record<string, number>,
   preferredCurrency = 'EUR'
-) => {
+): number => {
   const biteCurrency = bite.currency || 'EUR';
 
   if (biteCurrency === preferredCurrency) {

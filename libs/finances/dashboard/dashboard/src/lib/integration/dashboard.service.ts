@@ -10,15 +10,15 @@ export class DashboardService {
 
   banks = this.service.banks as Signal<any>;
 
-  onAddMenuItemClicked() {
+  onAddMenuItemClicked(): void {
     this.navController.navigateForward([Page.ADD_BANK]);
   }
 
-  onOpenAccountDetails(iban: string) {
+  onOpenAccountDetails(iban: string): void {
     this.navController.navigateForward([Page.ACCOUNT, iban]);
   }
 
-  onLogoutClicked() {
+  onLogoutClicked(): void {
     this.service.logout();
   }
 }

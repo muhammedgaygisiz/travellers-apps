@@ -5,7 +5,7 @@ import { FinancesApiService } from 'finances/api';
 export class BankService {
   private readonly financesFirestoreService = inject(FinancesApiService);
 
-  saveNewBank(newBank: { name: string }) {
+  saveNewBank(newBank: { name: string }): void {
     this.financesFirestoreService.saveNewBank(newBank);
   }
 }

@@ -76,7 +76,7 @@ export class DashboardComponent {
       );
   });
 
-  async showAddPopover($event: MouseEvent) {
+  async showAddPopover($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
       component: AddPopoverMenuComponent,
       event: $event,
@@ -101,13 +101,13 @@ export class DashboardComponent {
     await popover.present();
   }
 
-  onMenuItemClicked = async (menuItem: string) => {
+  onMenuItemClicked = async (menuItem: string): Promise<void> => {
     await this.popoverController.dismiss();
 
     console.log(menuItem);
   };
 
-  onLogoutClick() {
+  onLogoutClick(): void {
     this.logoutClicked.emit();
   }
 }

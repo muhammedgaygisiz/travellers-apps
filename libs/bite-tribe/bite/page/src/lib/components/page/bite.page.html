@@ -49,7 +49,10 @@
         <ion-note>Enter the price in the valid format (e.g. 12.34).</ion-note>
       </div>
 
-      <ion-input label="Tags" formControlName="tags" />
+      <bt-tags-input
+        [tags]="biteFormGroup.get('tags')?.value || []"
+        (tagChanges)="setTags($event)"
+      />
       <hr class="sams-favorite-hr" />
 
       <div class="ion-padding-top">

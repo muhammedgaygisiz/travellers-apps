@@ -20,15 +20,15 @@ export class DetailsService {
   isAuthenticated = this.dataAccess.isAuthenticated;
   biteCreator = this.dataAccess.biteCreator;
 
-  saveNewTags(newTags: string) {
+  saveNewTags(newTags: string[]): void {
     this.dataAccess.saveNewTags(newTags);
   }
 
-  saveReview(newReview: { review: string; biteId: string }) {
+  saveReview(newReview: { review: string; biteId: string }): void {
     this.dataAccess.saveNewReview(newReview);
   }
 
-  addBiteToSelectedBucketList(list: Bucketlist) {
+  addBiteToSelectedBucketList(list: Bucketlist): void {
     const currBite = this.bite();
 
     this.dataAccess.saveToBucketList({
@@ -37,7 +37,7 @@ export class DetailsService {
     });
   }
 
-  saveBiteToBucketListWithNewList(newListName: string) {
+  saveBiteToBucketListWithNewList(newListName: string): void {
     const currBite = this.bite();
 
     this.dataAccess.createAndSaveToBucketList({
@@ -46,33 +46,33 @@ export class DetailsService {
     });
   }
 
-  removeBiteFromBucketlist($event: RemoveBiteFromBucketlistParams) {
+  removeBiteFromBucketlist($event: RemoveBiteFromBucketlistParams): void {
     this.dataAccess.removeBiteFromBucketlist($event);
   }
 
-  likeButtonClicked(likeClick: { likeType: string; biteId: string }) {
+  likeButtonClicked(likeClick: { likeType: string; biteId: string }): void {
     this.dataAccess.submitLikeClick(likeClick);
   }
 
-  logout() {
+  logout(): void {
     this.dataAccess.logout();
   }
 
-  onGotoSettingsClick() {
+  onGotoSettingsClick(): void {
     this.navController.navigateForward(['settings']);
   }
 
-  onGotoMyBitesClick() {
+  onGotoMyBitesClick(): void {
     this.navController.navigateForward(['my-bites']);
   }
 
-  onGotoMyBucketlists() {
+  onGotoMyBucketlists(): void {
     this.navController.navigateForward(['my-bucketlists']);
   }
 
-  onRestaurantClick(bite: Bite) {
+  onRestaurantClick(bite: Bite): void {
     if (bite.restaurantId) {
-      // eslint-disable-next-line no-unused-vars
+       
       const [empty, collectionName, restaurantId] =
         bite.restaurantId.split('/');
 
@@ -94,7 +94,7 @@ export class DetailsService {
     ]);
   }
 
-  onGoToProfileClick(publicUser: PublicUser) {
+  onGoToProfileClick(publicUser: PublicUser): void {
     this.navController.navigateForward(['profile', publicUser.userId]);
   }
 }

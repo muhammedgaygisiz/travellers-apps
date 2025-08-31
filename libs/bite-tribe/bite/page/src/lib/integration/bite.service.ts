@@ -25,29 +25,29 @@ export class BiteService {
     return originalImage;
   });
 
-  submitNewBite(newBite: any) {
-    // eslint-disable-next-line no-unused-vars
+  submitNewBite(newBite: any): void {
+     
     const { id, ...biteData } = newBite;
 
-    this.dataAccess.submitNewBite(biteData);
+    this.dataAccess.submitBite(biteData);
 
     this.navController.navigateBack(['home']);
   }
 
-  submitEditedBite(editedBite: any) {
-    this.dataAccess.submitEditedBite(editedBite);
+  submitEditedBite(editedBite: any): void {
+    this.dataAccess.submitBite(editedBite);
 
     this.navController.navigateBack(['my-bites']);
   }
 
-  startCropImage(image: string | null) {
+  startCropImage(image: string | null): void {
     if (image) {
       this.originalImage.set(image);
       this.navController.navigateForward(['image-crop']);
     }
   }
 
-  setCroppedImage(image: string) {
+  setCroppedImage(image: string): void {
     this.croppedImage.set(image);
     this.navController.back();
   }

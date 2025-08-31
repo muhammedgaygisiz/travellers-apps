@@ -15,10 +15,10 @@ import {
   Review,
 } from 'model';
 import {
+  AlertController,
   IonButton,
   IonContent,
   IonIcon,
-  IonInput,
   IonItem,
   IonLabel,
   IonList,
@@ -27,7 +27,6 @@ import {
   IonText,
   IonTextarea,
   PopoverController,
-  AlertController,
 } from '@ionic/angular/standalone';
 import { CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -37,13 +36,13 @@ import { TimeAgoPipe } from './pipes/time-ago.pipe';
 import { ToMetricPipe } from 'distance-pipe';
 import { MapComponent } from 'bite-tribe-common/map';
 import { ToBlobUrlPipe } from 'image-compression';
-import { TagsComponent } from '../tags/tags.component';
 import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';
 import { IsInPipe } from '../../pipes/is-in-any.pipe';
 import { LikesComponent } from 'bite-tribe-common/bite';
 import { Platform } from '@ionic/angular';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { StarRatingComponent } from 'common/ui/star-rating';
+import { TagsInputComponent } from 'common/ui/tags';
 
 @Component({
   selector: 'details-page',
@@ -59,7 +58,6 @@ import { StarRatingComponent } from 'common/ui/star-rating';
     IonLabel,
     IonItem,
     IonNote,
-    IonInput,
     IonTextarea,
     IonButton,
     ReactiveFormsModule,
@@ -68,15 +66,13 @@ import { StarRatingComponent } from 'common/ui/star-rating';
     ToMetricPipe,
     MapComponent,
     ToBlobUrlPipe,
-    TagsComponent,
     IonIcon,
-    IsInPipe,
     IsInPipe,
     LikesComponent,
     StarRatingComponent,
+    TagsInputComponent,
   ],
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class DetailsPage {
   bite = input<Bite>();
   reviews = input<Review[]>([]);
@@ -85,7 +81,7 @@ export class DetailsPage {
   isAuthenticated = input(false);
   biteCreator = input<PublicUser>();
 
-  submitNewTags = output<string>();
+  submitNewTags = output<string[]>();
   selectList = output<Bucketlist>();
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
   newList = output<string>();
@@ -105,22 +101,9 @@ export class DetailsPage {
 
   isWeb = signal(!this.platform.is('hybrid'));
 
-  newTagsFormGroup = this.formBuilder.nonNullable.group({
-    tags: ['', Validators.required],
-  });
-
   reviewFormGroup = this.formBuilder.nonNullable.group({
     review: ['', Validators.required],
   });
-
-  isTagsFieldInvalid = toSignal(
-    this.newTagsFormGroup.valueChanges.pipe(
-      map(() => {
-        return !this.newTagsFormGroup.valid;
-      })
-    ),
-    { initialValue: !this.newTagsFormGroup.valid }
-  );
 
   isReviewFieldInvalid = toSignal(
     this.reviewFormGroup.valueChanges.pipe(
@@ -131,20 +114,7 @@ export class DetailsPage {
     { initialValue: !this.reviewFormGroup.valid }
   );
 
-  saveTags() {
-    if (!this.newTagsFormGroup.valid) {
-      return;
-    }
-
-    const formValue = this.newTagsFormGroup.value;
-    const newTags = formValue.tags;
-
-    this.submitNewTags.emit(newTags!);
-
-    this.newTagsFormGroup.reset();
-  }
-
-  saveReview() {
+  saveReview(): void {
     if (!this.reviewFormGroup.valid) {
       return;
     }
@@ -166,11 +136,11 @@ export class DetailsPage {
     this.reviewFormGroup.reset();
   }
 
-  onNewList(newListName: string) {
+  onNewList(newListName: string): void {
     this.newList.emit(newListName);
   }
 
-  async showBucketListsSelection($event: MouseEvent) {
+  async showBucketListsSelection($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
       component: BucketListSelectionComponent,
       event: $event,
@@ -189,7 +159,7 @@ export class DetailsPage {
     await popover.present();
   }
 
-  onRestaurantClick(biteData: Bite | undefined) {
+  onRestaurantClick(biteData: Bite | undefined): void {
     if (biteData) {
       this.restaurantClick.emit(biteData);
     }
@@ -200,7 +170,7 @@ export class DetailsPage {
     return result.value;
   }
 
-  async openNavigation() {
+  async openNavigation(): Promise<void> {
     const biteData = this.bite();
     if (!biteData?.position) {
       return;
@@ -239,11 +209,14 @@ export class DetailsPage {
     window.open(url, target);
   }
 
-  private buildUrlForBrowser(destination: string) {
+  private buildUrlForBrowser(destination: string): string {
     return `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
   }
 
-  private buildUrlForAndroidChooser(biteData: Bite, destination: string) {
+  private buildUrlForAndroidChooser(
+    biteData: Bite,
+    destination: string
+  ): string {
     const label = encodeURIComponent(biteData.name || 'Destination');
     return `geo:0,0?q=${destination}(${label})`;
   }
@@ -252,7 +225,7 @@ export class DetailsPage {
     appleMapsUrl: string,
     target: string,
     googleMapsUrl: string
-  ) {
+  ): Promise<void> {
     const alert = await this.alertController.create({
       header: 'Choose Navigation App',
       buttons: [
@@ -262,13 +235,13 @@ export class DetailsPage {
         },
         {
           text: 'Apple Maps',
-          handler: () => {
+          handler: (): void => {
             window.open(appleMapsUrl, target);
           },
         },
         {
           text: 'Google Maps',
-          handler: () => {
+          handler: (): void => {
             window.open(googleMapsUrl, target);
           },
         },

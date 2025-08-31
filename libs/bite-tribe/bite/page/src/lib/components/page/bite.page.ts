@@ -29,9 +29,7 @@ import { Bite } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { currencyCodes } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
-
-const toTagsString = (tags: string[] | undefined = []): string =>
-  tags?.join(' ');
+import { TagsInputComponent } from 'common/ui/tags';
 
 @Component({
   selector: 'bite',
@@ -48,6 +46,7 @@ const toTagsString = (tags: string[] | undefined = []): string =>
     PositionComponent,
     IonNote,
     StarRatingComponent,
+    TagsInputComponent,
   ],
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',
@@ -90,7 +89,7 @@ export class BitePage {
       [Validators.required, FloatNumberDotNotationValidator()],
     ],
     currency: ['EUR', Validators.required],
-    tags: [''],
+    tags: [[] as string[]],
     position: [this.position(), Validators.required],
     rating: [0, [Validators.min(0), Validators.max(5)]],
   });
@@ -107,7 +106,7 @@ export class BitePage {
         place: bite.place,
         price: bite.price,
         currency: bite.currency,
-        tags: toTagsString(bite.tags),
+        tags: bite.tags || [],
         position: bite.position,
         restaurantId: bite.restaurantId || '',
         rating: bite.rating || 0,
@@ -197,5 +196,12 @@ export class BitePage {
 
   emitStartCropImage(a: any): void {
     this.startCropImage.emit(a);
+  }
+
+  setTags(tags: string[]): void {
+    const tagsControl = this.biteFormGroup.get('tags');
+    if (tagsControl) {
+      tagsControl.setValue(tags);
+    }
   }
 }

@@ -10,7 +10,7 @@ const mockBite: Bite = {
   name: 'Test Bite',
 } as Bite;
 
-const createMockDataAccess = (overrides = {}) => {
+const createMockDataAccess = (overrides = {}): any => {
   const base = {
     bite: signal(mockBite),
     reviews: signal([]),
@@ -29,7 +29,7 @@ const createMockDataAccess = (overrides = {}) => {
   return { ...base, ...overrides };
 };
 
-const createNavControllerMock = () => ({
+const createNavControllerMock = (): any => ({
   navigateForward: jest.fn().mockResolvedValue(true),
   navigateBack: jest.fn().mockResolvedValue(true),
   navigateRoot: jest.fn().mockResolvedValue(true),
@@ -79,7 +79,7 @@ describe('DetailsService', () => {
 
   it('should call dataAccess.saveNewTags with provided tags', () => {
     // Arrange
-    const tags = 'italian, spicy';
+    const tags = ['italian', 'spicy'];
 
     // Act
     service.saveNewTags(tags);

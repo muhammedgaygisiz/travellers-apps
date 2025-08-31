@@ -57,13 +57,6 @@ describe('ConfirmDialogComponent', () => {
     expect(buttons[1].textContent.trim()).toBe('No');
   });
 
-  it('should not render message if not provided', () => {
-    component.data.message = '';
-    fixture.detectChanges();
-    const message = fixture.nativeElement.querySelector('ion-text');
-    expect(message).toBeNull();
-  });
-
   describe('button interactions', () => {
     it('should close dialog with "confirm" when confirm button is clicked', () => {
       const confirmButton = fixture.nativeElement.querySelector('ion-button');

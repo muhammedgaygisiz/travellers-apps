@@ -42,8 +42,6 @@ export class BiteApiService {
       await FirebaseFirestore.addCollectionSnapshotListener(
         { reference: BITE_COLLECTION },
         async (biteDocs) => {
-          // console.debug('#mo Fetched bites from Firestore', biteDocs);
-
           const bites =
             biteDocs?.snapshots.map((doc) => ({
               ...doc.data,

@@ -15,11 +15,11 @@ import {
   bite,
   biteCreator,
   bites,
+  bitesBySelectedBucketlist,
+  bitesByUser,
   cachedBite,
   mybites,
-  bitesBySelectedBucketlist,
   sortedHomeBites,
-  bitesByUser,
 } from './bites/selectors';
 import {
   restaurant,
@@ -52,17 +52,17 @@ import {
 } from 'model';
 import {
   currency,
+  exchangeRates,
   gpsPosition,
   homeDistance,
   homeFilters,
+  homeSorting,
   isBitesLoading,
   isPublicProfile,
+  maxPriceHome,
+  preferredCurrency,
   publicUser,
   settings,
-  exchangeRates,
-  preferredCurrency,
-  maxPriceHome,
-  homeSorting,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {

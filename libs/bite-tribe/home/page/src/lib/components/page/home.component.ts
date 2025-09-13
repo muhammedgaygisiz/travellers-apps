@@ -60,7 +60,7 @@ const PAGE_SIZE = 50;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteTribeHomeComponent {
-  bites = input<any[]>();
+  bites = input<Bite[]>();
   allTags = input<string[]>([]);
   selectedFilters = input<string[]>([]);
   enableBackButton = input<boolean>(false);

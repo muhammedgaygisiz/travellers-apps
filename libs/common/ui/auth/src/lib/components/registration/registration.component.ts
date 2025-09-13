@@ -17,7 +17,7 @@ import {
   getPasswordValidators,
   passwordMatchValidator,
   PasswordValidatorComponent,
-} from '@travellers-apps/prices/password-validator/feature';
+} from 'common/password-validator';
 import { AuthErrorCodes } from 'firebase/auth';
 import { ToastController } from '@ionic/angular';
 import { AsyncPipe } from '@angular/common';

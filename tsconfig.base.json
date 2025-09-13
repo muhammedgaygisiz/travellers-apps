@@ -19,7 +19,7 @@
         "libs/common/networkstatus/feature/src/index.ts"
       ],
       "common/geoapify": ["libs/common/geoapify/src/index.ts"],
-      "@travellers-apps/prices/password-validator/feature": [
+      "common/password-validator": [
         "libs/common/ui/password-validator/src/index.ts"
       ],
       "auth": ["libs/common/ui/auth/src/index.ts"],

@@ -1,6 +1,5 @@
- 
 export default {
-  displayName: 'prices-geoapify-feature',
+  displayName: 'geoapify-service',
   preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {},

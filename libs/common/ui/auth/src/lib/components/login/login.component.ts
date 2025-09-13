@@ -10,7 +10,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { getPasswordValidators } from '@travellers-apps/prices/password-validator/feature';
+import { getPasswordValidators } from 'common/password-validator';
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {

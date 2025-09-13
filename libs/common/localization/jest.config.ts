@@ -1,5 +1,5 @@
 export default {
-  displayName: 'prices-localization',
+  displayName: 'localization',
   preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   coverageDirectory: '../../../coverage/libs/common/localization',

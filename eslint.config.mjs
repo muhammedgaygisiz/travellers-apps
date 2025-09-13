@@ -69,30 +69,6 @@ export default [
               ]
             },
             {
-              sourceTag: 'scope:finances',
-              onlyDependOnLibsWithTags: [
-                'scope:finances',
-                'scope:common',
-                'type:ui'
-              ]
-            },
-            {
-              sourceTag: 'scope:kosaml',
-              onlyDependOnLibsWithTags: [
-                'scope:kosaml',
-                'scope:common',
-                'type:ui'
-              ]
-            },
-            {
-              sourceTag: 'scope:prices',
-              onlyDependOnLibsWithTags: [
-                'scope:prices',
-                'scope:common',
-                'type:ui'
-              ]
-            },
-            {
               sourceTag: 'scope:bite-tribe',
               onlyDependOnLibsWithTags: [
                 'scope:bite-tribe',

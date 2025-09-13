@@ -22,6 +22,9 @@
       "bite-tribe-business/dashboard-data-access": [
         "libs/bite-tribe-business/dashboard/data-access/src/index.ts"
       ],
+      "bite-tribe-business/migrations": [
+        "libs/bite-tribe-business/migrations/page/src/index.ts"
+      ],
       "bite-tribe-business/restaurant": [
         "libs/bite-tribe-business/restaurant/page/src/index.ts"
       ],
@@ -30,6 +33,9 @@
       ],
       "bite-tribe-business/shell": [
         "libs/bite-tribe-business/shell/src/index.ts"
+      ],
+      "bite-tribe-business/start": [
+        "libs/bite-tribe-business/start/src/index.ts"
       ],
       "bite-tribe-common/bite": ["libs/bite-tribe-common/bite/src/index.ts"],
       "bite-tribe-common/confirm-dialog": [
@@ -93,9 +99,6 @@
       "image-compression": ["libs/common/image-compression/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
       "model": ["libs/bite-tribe/model/src/index.ts"],
-      "bite-tribe-business/start": [
-        "libs/bite-tribe-business/start/src/index.ts"
-      ],
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
       "utils": ["libs/common/utils/src/index.ts"]
     }

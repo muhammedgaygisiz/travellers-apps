@@ -15,6 +15,14 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: 'migrations',
+    loadComponent: () =>
+      import('bite-tribe-business/migrations').then(
+        (m) => m.MigrationsContainer
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: 'new-restaurant',
     loadComponent: () =>
       import('bite-tribe-business/restaurant').then(

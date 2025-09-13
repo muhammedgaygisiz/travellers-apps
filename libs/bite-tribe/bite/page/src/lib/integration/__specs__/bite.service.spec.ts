@@ -10,6 +10,7 @@ const Mock = {
   submitEditedBite: jest.fn(),
   submitNewBite: jest.fn(),
   navigateForward: jest.fn(),
+  submitBite: jest.fn(),
 };
 
 describe('BiteService', () => {
@@ -54,6 +55,22 @@ describe('BiteService', () => {
     it('should not set originalImage signal if image is null', () => {
       service.startCropImage(null);
       expect(service.originalImage()).toBe('');
+    });
+  });
+
+  describe('submitNewBite', () => {
+    it('should submit bite without id', () => {
+      const newBite = { id: '123', name: 'Test Bite' };
+      service.submitNewBite(newBite);
+
+      expect(Mock.submitBite).toHaveBeenCalledWith({ name: 'Test Bite' });
+    });
+
+    it('should call navigateBack to home', () => {
+      const newBite = { id: '123', name: 'Test Bite' };
+      service.submitNewBite(newBite);
+
+      expect(Mock.navigateBack).toHaveBeenCalledWith(['home']);
     });
   });
 });

@@ -89,13 +89,13 @@
 </ng-template>
 
 <ng-template #withoutLoadingTemplate>
-  @if (!filteredBites().length) {
+  @if (!displayedBites().length) {
   <ion-card>
     <ion-card-content>
       <ion-text color="primary"> No bites found. Be the first one.</ion-text>
     </ion-card-content>
   </ion-card>
-  } @for (bite of filteredBites(); track bite.id) {
+  } @for (bite of displayedBites(); track bite.id) {
   <bt-bite
     [bite]="bite"
     [userId]="userId()"
@@ -106,5 +106,9 @@
     (gotoEdit)="gotoEdit.emit($event)"
     (deleteBite)="deleteBite.emit($event)"
   />
+  } @if(hasMore()) {
+  <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
+    <ion-infinite-scroll-content />
+  </ion-infinite-scroll>
   }
 </ng-template>

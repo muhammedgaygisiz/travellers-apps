@@ -11,11 +11,11 @@ export class BucketlistsService {
 
   bucketlists = this.dataAccess.bucketlists;
 
-  gotoBucketlistDetails(bucketlistId: string) {
+  gotoBucketlistDetails(bucketlistId: string): void {
     this.navController.navigateForward(['my-bucketlists', bucketlistId]);
   }
 
-  createAndSaveToBucketList(bucketListName: string) {
+  createAndSaveToBucketList(bucketListName: string): void {
     this.dataAccess.createAndSaveToBucketList(bucketListName);
   }
 }

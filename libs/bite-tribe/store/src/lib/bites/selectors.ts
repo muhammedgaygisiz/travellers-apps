@@ -44,7 +44,7 @@ export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
 
 const allBites = createSelector(slice, selectAll);
 
-const byDistance = (a: any, b: any) => {
+const byDistance = (a: any, b: any): number => {
   return a.distance - b.distance;
 };
 
@@ -170,30 +170,30 @@ export const sortedHomeBites = createSelector(
   exchangeRates,
   (bites, sorting, exchangeRates) => {
     if (!bites?.length || !sorting) {
-      return bites;
+      return [...bites];
     }
 
     if (sorting === 'distance') {
-      return sortBitesByDistance(bites);
+      return [...sortBitesByDistance(bites)];
     }
 
     if (sorting === 'likes') {
-      return sortBitesByLikes(bites);
+      return [...sortBitesByLikes(bites)];
     }
 
     if (sorting === 'createdAt') {
-      return sortBitesByCreatedAt(bites);
+      return [...sortBitesByCreatedAt(bites)];
     }
 
     if (sorting === 'rating') {
-      return sortBitesByRating(bites);
+      return [...sortBitesByRating(bites)];
     }
 
     if (sorting === 'price') {
-      return sortBitesByPrice(bites, exchangeRates);
+      return [...sortBitesByPrice(bites, exchangeRates)];
     }
 
-    return bites;
+    return [...bites];
   }
 );
 

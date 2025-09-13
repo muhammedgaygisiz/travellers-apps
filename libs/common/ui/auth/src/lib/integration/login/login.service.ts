@@ -22,19 +22,19 @@ export class LoginService {
     this.store?.login(authCreds);
   }
 
-  public async gotoSignUp() {
+  public async gotoSignUp(): Promise<void> {
     await this.navController.navigateForward(['/registration']);
   }
 
-  public loginWithGoogleAccount() {
+  public loginWithGoogleAccount(): void {
     this.store?.loginWithGoogleAccount();
   }
 
-  public loginWithAppleAccount() {
+  public loginWithAppleAccount(): void {
     this.store?.loginWithAppleAccount();
   }
 
-  public loginWithFacebookAccount() {
+  public loginWithFacebookAccount(): void {
     this.store?.loginWithFacebookAccount();
   }
 }

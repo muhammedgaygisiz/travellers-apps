@@ -53,6 +53,14 @@ describe('TagsInputComponent', () => {
       component.inputChange('existing');
       expect(emitSpy).not.toHaveBeenCalled();
     });
+
+    describe('given no control', () => {
+      test('tagInputValueChanges should be null', () => {
+        (component.formGroup as any).removeControl('tagInput');
+        component.ngOnInit();
+        expect(component.tagInputValueChanges$).toBeNull();
+      });
+    });
   });
 
   describe('clearInput', () => {

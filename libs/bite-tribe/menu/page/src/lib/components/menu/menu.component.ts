@@ -21,7 +21,6 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ItemReorderEventDetail } from '@ionic/angular';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bt-menu',
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.scss',
@@ -56,11 +55,11 @@ export class MenuComponent {
     return editModeEnabled && presentShowAddCategory;
   });
 
-  showAddCategory() {
+  showAddCategory(): void {
     this.presentShowAddCategory.set(true);
   }
 
-  onAddCategory(category: Category) {
+  onAddCategory(category: Category): void {
     this.presentShowAddCategory.set(false);
 
     this.linkedMenu.update((curr) => {
@@ -79,7 +78,7 @@ export class MenuComponent {
     });
   }
 
-  onSave() {
+  onSave(): void {
     const menu = this.linkedMenu();
 
     if (menu) {
@@ -91,7 +90,7 @@ export class MenuComponent {
     item: MenuItem;
     category: Category;
     isVariant?: boolean;
-  }) {
+  }): void {
     this.linkedMenu.update((currMenu) => {
       if (currMenu) {
         return {
@@ -129,11 +128,11 @@ export class MenuComponent {
     });
   }
 
-  onCancelAddCategory() {
+  onCancelAddCategory(): void {
     this.presentShowAddCategory.set(false);
   }
 
-  handleReorder(event: CustomEvent<ItemReorderEventDetail>) {
+  handleReorder(event: CustomEvent<ItemReorderEventDetail>): void {
     const fromIndex = event.detail.from;
     const toIndex = event.detail.to;
 
@@ -169,7 +168,7 @@ export class MenuComponent {
     event.detail.complete();
   }
 
-  updateCategory(categoryWithNewOrderOfItems: Category) {
+  updateCategory(categoryWithNewOrderOfItems: Category): void {
     this.linkedMenu.update((menu) => {
       if (menu?.categories) {
         return {

@@ -10,6 +10,7 @@ import {
 } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BITE_COLLECTION } from './bite-api.service';
+import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 const LIKES_COLLECTION_GROUP = 'likes';
 
@@ -36,7 +37,7 @@ export class LikeApiService {
     })
   );
 
-  private async startLikesListener() {
+  private async startLikesListener(): Promise<void> {
     this.likesCallbackId =
       await FirebaseFirestore.addCollectionGroupSnapshotListener(
         { reference: `${LIKES_COLLECTION_GROUP}` },
@@ -53,7 +54,7 @@ export class LikeApiService {
       );
   }
 
-  private async stopLikesListener(callbackId: string) {
+  private async stopLikesListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });
@@ -64,7 +65,7 @@ export class LikeApiService {
     likeType: string;
     biteId: string;
     createdAt: string;
-  }) {
+  }): Promise<void> {
     try {
       const user = await this.getUser();
 
@@ -80,12 +81,12 @@ export class LikeApiService {
     }
   }
 
-  private async getUser() {
+  private async getUser(): Promise<User | null | undefined> {
     const authState = await this.authService.authState();
     return authState?.user;
   }
 
-  async removeLike(like: any) {
+  async removeLike(like: any): Promise<void> {
     try {
       const user = await this.getUser();
       const uid = user?.uid;

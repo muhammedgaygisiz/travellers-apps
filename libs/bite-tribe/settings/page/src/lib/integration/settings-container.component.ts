@@ -20,11 +20,10 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   imports: [PageSettings],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class SettingsContainer {
   service = inject(SettingsService);
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Settings',
     });

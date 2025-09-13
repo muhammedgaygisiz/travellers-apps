@@ -2,6 +2,7 @@ const myOrgEnvRegex = /^NX_/i;
 
 const envVarPlugin = {
   name: 'env-var-plugin',
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   setup(build) {
     const options = build.initialOptions;
 

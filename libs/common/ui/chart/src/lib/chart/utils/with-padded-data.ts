@@ -2,7 +2,7 @@ import { ChartData } from '../api/chart-data';
 
 const DAY_IN_MILLIS = 86400000;
 
-const dayBefore = (firstDay: any) => {
+const dayBefore = (firstDay: any): ChartData => {
   const date = new Date(firstDay.date);
 
   return {
@@ -12,7 +12,7 @@ const dayBefore = (firstDay: any) => {
   };
 };
 
-const addDayAfter = (lastDay: any) => {
+const addDayAfter = (lastDay: any): ChartData => {
   const date = new Date(lastDay.date);
 
   return {
@@ -22,7 +22,7 @@ const addDayAfter = (lastDay: any) => {
   };
 };
 
-export const withPaddedData = (currentData: ChartData[] = []) => {
+export const withPaddedData = (currentData: ChartData[] = []): ChartData[] => {
   if (!currentData.length) {
     return [];
   }

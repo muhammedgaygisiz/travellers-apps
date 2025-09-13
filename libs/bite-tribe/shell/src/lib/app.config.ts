@@ -1,7 +1,7 @@
 import {
   ApplicationConfig,
   isDevMode,
-  provideExperimentalZonelessChangeDetection,
+  provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideBiteTribeShell } from './provide-bite-tribe-shell';
 import { provideIonicAngular } from '@ionic/angular/standalone';
@@ -11,7 +11,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 export const appConfig = (environment: Environment): ApplicationConfig => ({
   providers: [
     provideBiteTribeShell(environment),
-    provideExperimentalZonelessChangeDetection(),
+    provideZonelessChangeDetection(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',

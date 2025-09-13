@@ -1,16 +1,6 @@
 {
   "projects": {},
   "targets": {
-    "prices-bec89": {
-      "hosting": {
-        "app": [
-          "prices-bec89"
-        ],
-        "storybook": [
-          "storybook-e0333"
-        ]
-      }
-    },
     "my-cv-5f65d": {
       "hosting": {
         "cv": [
@@ -18,13 +8,6 @@
         ]
       }
      },
-    "finances-878be": {
-      "hosting": {
-        "finances": [
-          "finances-878be"
-        ]
-      }
-   },
     "bite-tribe": {
       "hosting": {
         "bite-tribe": [

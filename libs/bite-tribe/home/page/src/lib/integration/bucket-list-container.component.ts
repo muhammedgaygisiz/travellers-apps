@@ -31,7 +31,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 export class BucketlistContainerComponent {
   service = inject(HomeService);
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Bucket List',
     });

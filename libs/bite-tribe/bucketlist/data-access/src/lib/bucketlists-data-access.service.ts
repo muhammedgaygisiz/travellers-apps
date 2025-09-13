@@ -11,7 +11,7 @@ export class BucketlistsDataAccessService {
     initialValue: [] as Bucketlist[],
   });
 
-  createAndSaveToBucketList(bucketListName: string) {
+  createAndSaveToBucketList(bucketListName: string): void {
     this.storeService.createBucketList(bucketListName);
   }
 }

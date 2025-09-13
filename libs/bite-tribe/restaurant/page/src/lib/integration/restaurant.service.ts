@@ -15,10 +15,9 @@ export class RestaurantService {
   userId = this.dataAccess.userId;
   restaurant = this.dataAccess.restaurant;
 
-  navigateToMenu(restaurant: Restaurant | undefined) {
+  navigateToMenu(restaurant: Restaurant | undefined): void {
     const bite = this.bite();
     if (bite && restaurant?.menuId) {
-      // eslint-disable-next-line no-unused-vars
       const menuId = this.getMenuId(restaurant);
 
       if (menuId) {
@@ -49,9 +48,9 @@ export class RestaurantService {
     }
   }
 
-  private getMenuId(restaurant: Restaurant) {
+  private getMenuId(restaurant: Restaurant): string | undefined {
     if (restaurant?.menuId) {
-      // eslint-disable-next-line no-unused-vars
+       
       const [empty, collectionName, menuId] = restaurant.menuId.split('/');
 
       return menuId;
@@ -60,18 +59,18 @@ export class RestaurantService {
     return undefined;
   }
 
-  biteClicked(bite: Bite) {
+  biteClicked(bite: Bite): void {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
-  submitSocialMediaLinks({ links }: Partial<{ links: Link[] }>) {
+  submitSocialMediaLinks({ links }: Partial<{ links: Link[] }>): void {
     const restaurant = this.restaurant();
     if (restaurant && links) {
       this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
     }
   }
 
-  likeButtonClicked(likeClick: { likeType: string; biteId: string }) {
+  likeButtonClicked(likeClick: { likeType: string; biteId: string }): void {
     this.dataAccess.submitLikeClick(likeClick);
   }
 }

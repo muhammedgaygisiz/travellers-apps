@@ -2,7 +2,7 @@ import { inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
 import { Project } from './project';
 import { formatNumber } from '@angular/common';
 
-const getDurationInMonth = (project: Project) => {
+const getDurationInMonth = (project: Project): number => {
   const { from, to } = project;
   const startYear = from.getFullYear();
   const startMonth = from.getMonth();
@@ -15,7 +15,10 @@ const getDurationInMonth = (project: Project) => {
   return yearDifference * 12 + monthDifference;
 };
 
-const getFormatedDuration = (durationInMonth: number, localeId: string) => {
+const getFormatedDuration = (
+  durationInMonth: number,
+  localeId: string
+): string => {
   if (durationInMonth > 12) {
     const withMonth = durationInMonth % 12 > 0;
 

@@ -1157,37 +1157,37 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.36):
     - BoringSSL-GRPC/Interface (= 0.0.36)
   - BoringSSL-GRPC/Interface (0.0.36)
-  - Capacitor (7.2.0):
+  - Capacitor (7.4.2):
     - CapacitorCordova
-  - CapacitorAppLauncher (7.0.1):
+  - CapacitorAppLauncher (7.0.2):
     - Capacitor
-  - CapacitorCamera (7.0.1):
+  - CapacitorCamera (7.0.2):
     - Capacitor
-  - CapacitorCordova (7.2.0)
-  - CapacitorFirebaseAnalytics (7.2.0):
+  - CapacitorCordova (7.4.2)
+  - CapacitorFirebaseAnalytics (7.3.0):
     - Capacitor
-    - CapacitorFirebaseAnalytics/Lite (= 7.2.0)
-  - CapacitorFirebaseAnalytics/Analytics (7.2.0):
+    - CapacitorFirebaseAnalytics/Lite (= 7.3.0)
+  - CapacitorFirebaseAnalytics/Analytics (7.3.0):
     - Capacitor
     - FirebaseAnalytics (~> 11.7.0)
     - GoogleAppMeasurementOnDeviceConversion (~> 11.7.0)
-  - CapacitorFirebaseAnalytics/Lite (7.2.0):
+  - CapacitorFirebaseAnalytics/Lite (7.3.0):
     - Capacitor
-  - CapacitorFirebaseAuthentication (7.1.0):
+  - CapacitorFirebaseAuthentication (7.3.0):
     - Capacitor
-    - CapacitorFirebaseAuthentication/Lite (= 7.1.0)
+    - CapacitorFirebaseAuthentication/Lite (= 7.3.0)
     - FirebaseAuth (~> 11.7.0)
-  - CapacitorFirebaseAuthentication/Google (7.1.0):
+  - CapacitorFirebaseAuthentication/Google (7.3.0):
     - Capacitor
     - FirebaseAuth (~> 11.7.0)
     - GoogleSignIn (= 7.1.0)
-  - CapacitorFirebaseAuthentication/Lite (7.1.0):
+  - CapacitorFirebaseAuthentication/Lite (7.3.0):
     - Capacitor
     - FirebaseAuth (~> 11.7.0)
-  - CapacitorFirebaseFirestore (7.1.0):
+  - CapacitorFirebaseFirestore (7.3.0):
     - Capacitor
     - FirebaseFirestore (~> 11.7.0)
-  - CapacitorGeolocation (7.1.1):
+  - CapacitorGeolocation (7.1.4):
     - Capacitor
     - IONGeolocationLib (~> 1.0)
   - FirebaseAnalytics (11.7.0):
@@ -1473,14 +1473,14 @@ SPEC CHECKSUMS:
   abseil: d121da9ef7e2ff4cab7666e76c5a3e0915ae08c3
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   BoringSSL-GRPC: ca6a8e5d04812fce8ffd6437810c2d46f925eaeb
-  Capacitor: 106e7a4205f4618d582b886a975657c61179138d
-  CapacitorAppLauncher: 551876cb6b3f5939206ed7dc35d97b42256940c1
-  CapacitorCamera: eb8687d8687fed853598ec9460d94bcd5e16babe
-  CapacitorCordova: 5967b9ba03915ef1d585469d6e31f31dc49be96f
-  CapacitorFirebaseAnalytics: 5b3fd9ef663eb725becffca883a4006cf7e1ec47
-  CapacitorFirebaseAuthentication: 9aa0fcf60b1c98e173e13f22a2fcc2cab42c7377
-  CapacitorFirebaseFirestore: 362521abdb88faccfc1844536764974db364bff1
-  CapacitorGeolocation: 8f8ac02ceaeb203a4762f8dc4ff5119e3f7fa50a
+  Capacitor: 9d9e481b79ffaeacaf7a85d6a11adec32bd33b59
+  CapacitorAppLauncher: b70f649f609bab6412eccdd413bd7f0dd42df4a9
+  CapacitorCamera: f9e54db0a18bb218a8dc360907d63aaefe9209ff
+  CapacitorCordova: 5e58d04631bc5094894ac106e2bf1da18a9e6151
+  CapacitorFirebaseAnalytics: 99fb86679f3a40b148d6e3e7ddeb6115a9c08edf
+  CapacitorFirebaseAuthentication: b25177f2b09cf7581d3f11d96008cc56dcb5aa36
+  CapacitorFirebaseFirestore: 503c97e3032ad2582061a06ee8d1c83555e842d7
+  CapacitorGeolocation: 32a1f849c38c72b5071de36a28ebc548ef3bb611
   FirebaseAnalytics: bc9e565af9044ba8d6c6e4157e4edca8e5fdf7ec
   FirebaseAppCheckInterop: 73b173e5ec45192e2d522ad43f526a82ad10b852
   FirebaseAuth: 77e25aa24f3e1c626c5babd3338551fc1669ee0e
@@ -1508,4 +1508,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: cd800025f0be760affdd66670f2f4dc63c1ff91c
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

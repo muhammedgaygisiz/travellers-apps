@@ -11,7 +11,7 @@ export class BiteDataAccessService {
   position = toSignal(this.storeService.position$);
   cachedBite = toSignal(this.storeService.cachedBite$);
 
-  async submitBite(bite: any) {
+  async submitBite(bite: any): Promise<void> {
     this.storeService.save(bite, 'bite');
   }
 }

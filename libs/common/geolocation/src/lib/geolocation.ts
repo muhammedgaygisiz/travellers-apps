@@ -1,6 +1,7 @@
 import { Platform } from '@ionic/angular';
 import { Geolocation } from '@capacitor/geolocation';
 import { from, Observable } from 'rxjs';
+import { Position } from '@capacitor/geolocation/dist/esm/definitions';
 
 const getGeoLocationFromWebPlatform = (): Promise<GeolocationPosition> => {
   return new Promise((resolve, reject) => {
@@ -19,7 +20,7 @@ const getGeoLocationFromWebPlatform = (): Promise<GeolocationPosition> => {
   });
 };
 
-const getGeoLocationFromNativePlatform = async () => {
+const getGeoLocationFromNativePlatform = async (): Promise<Position> => {
   const permissionStatus = await Geolocation.checkPermissions();
 
   if (permissionStatus.location !== 'granted') {

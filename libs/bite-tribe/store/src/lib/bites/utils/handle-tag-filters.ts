@@ -1,10 +1,10 @@
 import { Bite } from 'model';
 import { getSimilarityScore, normalize } from 'utils';
 
-const cleanupTags = (tags: string[] = []) =>
+const cleanupTags = (tags: string[] = []): string[] =>
   tags.map((tag: string) => tag.replace('#', ''));
 
-export const handleTagFilters = (filters: string[], bites: Bite[]) => {
+export const handleTagFilters = (filters: string[], bites: Bite[]): Bite[] => {
   if (filters.length > 0) {
     bites = bites.filter((bite) => {
       if (!bite.tags || !Array.isArray(bite.tags)) {

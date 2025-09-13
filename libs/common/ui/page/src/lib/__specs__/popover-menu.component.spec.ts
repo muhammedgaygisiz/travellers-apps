@@ -1,14 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { PopoverMenuComponent } from '../popover-menu.component';
-import {
-  ComponentRef,
-  provideExperimentalZonelessChangeDetection,
-} from '@angular/core';
+import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 import { SupportedLang } from 'localization';
 import { addNecessaryIcons } from 'utils';
 
 addNecessaryIcons();
+
+jest.mock('localization');
 
 global.fetch = jest.fn(() =>
   Promise.resolve({
@@ -25,7 +24,7 @@ describe('PopoverMenuComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideExperimentalZonelessChangeDetection()],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PopoverMenuComponent);

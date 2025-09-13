@@ -16,11 +16,11 @@ export class DashboardDataAccessService {
     initialValue: false,
   });
 
-  logout() {
+  logout(): void {
     this.storeService.logout();
   }
 
-  selectRestaurantToCreate(restaurant: Restaurant) {
+  selectRestaurantToCreate(restaurant: Restaurant): void {
     this.storeService.selectRestaurantToCreate(restaurant);
   }
 }

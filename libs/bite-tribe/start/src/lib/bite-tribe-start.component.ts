@@ -10,7 +10,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   imports: [IonContent, IonButton, RouterLink],
 })
 export class BiteTribeStartComponent {
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Start',
     });

@@ -15,7 +15,6 @@ import {
 import { ToMetricPipe } from 'distance-pipe';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bt-restaurant',
   templateUrl: 'restaurant.component.html',
   styleUrl: 'restaurant.component.scss',

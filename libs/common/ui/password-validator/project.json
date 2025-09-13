@@ -1,5 +1,5 @@
 {
-  "name": "prices-password-validator-feature",
+  "name": "password-validator",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/common/ui/password-validator/src",

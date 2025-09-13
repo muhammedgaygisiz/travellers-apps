@@ -25,14 +25,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
-import { Bite } from 'model';
+import { Bite, Geopoint } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { currencyCodes } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bite',
   imports: [
     PageComponent,
@@ -53,7 +52,6 @@ import { TagsInputComponent } from 'common/ui/tags';
   styleUrl: './bite.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class BitePage {
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
@@ -66,7 +64,7 @@ export class BitePage {
 
   currency = input<string>();
 
-  position = input<{ latitude: number; longitude: number }>();
+  position = input<Geopoint>();
 
   fallbackPosition = linkedSignal(() => {
     return this.position();
@@ -183,24 +181,24 @@ export class BitePage {
     return '';
   });
 
-  saveBite() {
+  saveBite(): void {
     if (this.biteFormGroup.valid) {
       const newBite = this.biteFormGroup.value;
       this.submitBite.emit(newBite);
     }
   }
 
-  onPositionFromImage(position: { latitude: number; longitude: number }) {
+  onPositionFromImage(position: Geopoint): void {
     if (position) {
       this.biteFormGroup.controls['position'].patchValue(position);
     }
   }
 
-  emitStartCropImage(a: any) {
+  emitStartCropImage(a: any): void {
     this.startCropImage.emit(a);
   }
 
-  setTags(tags: string[]) {
+  setTags(tags: string[]): void {
     const tagsControl = this.biteFormGroup.get('tags');
     if (tagsControl) {
       tagsControl.setValue(tags);

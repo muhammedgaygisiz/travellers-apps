@@ -16,7 +16,6 @@ import { Restaurant } from 'model';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bt-business-dashboard',
   templateUrl: './dashboard.component.html',
   imports: [

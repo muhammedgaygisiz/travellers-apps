@@ -33,7 +33,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 export class MyBitesContainerComponent {
   service = inject(HomeService);
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'My Bites',
     });

@@ -15,67 +15,13 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@travellers-apps/common/networkstatus/feature": [
+      "common/networkstatus": [
         "libs/common/networkstatus/feature/src/index.ts"
       ],
-      "@travellers-apps/kosaml/card/feature": [
-        "libs/kosaml/card/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/conceptual-design/base/scenario/feature": [
-        "libs/kosaml/conceptual-design/base/scenario/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/conceptual-design/base/use-case/feature": [
-        "libs/kosaml/conceptual-design/base/use-case/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/conceptual-design/concrete-use-case/feature": [
-        "libs/kosaml/conceptual-design/concrete-use-case/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/conceptual-design/essential-use-case/feature": [
-        "libs/kosaml/conceptual-design/essential-use-case/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/conceptual-design/task-object/feature": [
-        "libs/kosaml/conceptual-design/task-object/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/conceptual-design/task-scenario/feature": [
-        "libs/kosaml/conceptual-design/task-scenario/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/conceptual-design/use-scenario/feature": [
-        "libs/kosaml/conceptual-design/use-scenario/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/model/feature": [
-        "libs/kosaml/model/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/page/feature": [
-        "libs/kosaml/page/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/shell/feature": [
-        "libs/kosaml/shell/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/site/feature": [
-        "libs/kosaml/site/feature/src/index.ts"
-      ],
-      "@travellers-apps/kosaml/store/feature": [
-        "libs/kosaml/store/feature/src/index.ts"
-      ],
-      "@travellers-apps/prices/add-item/feature": [
-        "libs/prices/add-item/feature/src/index.ts"
-      ],
-      "@travellers-apps/prices/geoapify/feature": [
-        "libs/prices/geoapify/feature/src/index.ts"
-      ],
-      "@travellers-apps/prices/home/feature": [
-        "libs/prices/home/feature/src/index.ts"
-      ],
-      "@travellers-apps/prices/password-validator/feature": [
+      "common/geoapify": ["libs/common/geoapify/src/index.ts"],
+      "common/password-validator": [
         "libs/common/ui/password-validator/src/index.ts"
       ],
-      "@travellers-apps/prices/shell/feature": [
-        "libs/prices/shell/feature/src/index.ts"
-      ],
-      "@travellers-apps/prices/store/feature": [
-        "libs/prices/store/feature/src/index.ts"
-      ],
-      "add-popover-menu": ["libs/finances/ui/add-popover-menu/src/index.ts"],
       "auth": ["libs/common/ui/auth/src/index.ts"],
       "bite-tribe-business/dashboard": [
         "libs/bite-tribe-business/dashboard/page/src/index.ts"
@@ -142,35 +88,11 @@
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
       "common/ui/star-rating": ["libs/common/ui/star-rating/src/index.ts"],
       "common/ui/tags": ["libs/common/ui/tags/src/index.ts"],
-      "data-access-utils": ["libs/common/data-access-utils/src/index.ts"],
       "distance-pipe": ["libs/common/distance-pipe/src/index.ts"],
-      "finances/account/data-access": [
-        "libs/finances/account/data-access/src/index.ts"
-      ],
-      "finances/api": ["libs/finances/api/src/index.ts"],
-      "finances/bank/data-access": [
-        "libs/finances/bank/data-access/src/index.ts"
-      ],
-      "finances/dashboard/data-access": [
-        "libs/finances/dashboard/data-access/src/index.ts"
-      ],
-      "finances/pages/account": ["libs/finances/account/account/src/index.ts"],
-      "finances/pages/add-bank": ["libs/finances/bank/add-bank/src/index.ts"],
-      "finances/pages/dashboard": [
-        "libs/finances/dashboard/dashboard/src/index.ts"
-      ],
-      "finances/pages/payment": ["libs/finances/payment/payment/src/index.ts"],
-      "finances/payment/data-access": [
-        "libs/finances/payment/data-access/src/index.ts"
-      ],
-      "finances/shell": ["libs/finances/shell/src/index.ts"],
-      "finances/store": ["libs/finances/store/src/index.ts"],
       "geolocation": ["libs/common/geolocation/src/index.ts"],
       "image-compression": ["libs/common/image-compression/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
       "model": ["libs/bite-tribe/model/src/index.ts"],
-      "pages": ["libs/finances/pages/src/index.ts"],
-      "prices/api": ["libs/prices/api/src/index.ts"],
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
       "utils": ["libs/common/utils/src/index.ts"]
     }

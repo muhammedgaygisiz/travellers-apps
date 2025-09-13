@@ -13,17 +13,17 @@ export class DashboardService {
   restaurants = this.dataAccess.restaurants;
   isAuthenticated = this.dataAccess.isAuthenticated;
 
-  logout() {
+  logout(): void {
     this.dataAccess.logout();
   }
 
-  onCreateRestaurantClick(restaurant: Restaurant) {
+  onCreateRestaurantClick(restaurant: Restaurant): void {
     this.dataAccess.selectRestaurantToCreate(restaurant);
 
     this.navController.navigateForward(['new-restaurant']);
   }
 
-  restaurantClicked(restaurant: Restaurant) {
+  restaurantClicked(restaurant: Restaurant): void {
     const restaurantId = restaurant.id;
 
     if (restaurantId) {

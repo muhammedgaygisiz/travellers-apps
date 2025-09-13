@@ -17,7 +17,7 @@ import {
   getPasswordValidators,
   passwordMatchValidator,
   PasswordValidatorComponent,
-} from '@travellers-apps/prices/password-validator/feature';
+} from 'common/password-validator';
 import { AuthErrorCodes } from 'firebase/auth';
 import { ToastController } from '@ionic/angular';
 import { AsyncPipe } from '@angular/common';
@@ -93,7 +93,7 @@ export class RegistrationComponent implements OnChanges {
     }
   }
 
-  private async showRegistrationErrorMessage() {
+  private async showRegistrationErrorMessage(): Promise<void> {
     const toast = await this.toastController.create({
       message: 'Email already in use.',
       position: 'bottom',
@@ -109,7 +109,7 @@ export class RegistrationComponent implements OnChanges {
     await toast.present();
   }
 
-  private onConfirmToast() {
+  private onConfirmToast(): void {
     this.errorConfirm.emit();
   }
 }

@@ -13,33 +13,32 @@ export class ProfileService {
   userId = this.dataAccess.userId;
   bitesByUser = this.dataAccess.bitesByUser;
 
-  logout() {
+  logout(): void {
     this.dataAccess.logout();
   }
 
-  gotoSettings() {
+  gotoSettings(): void {
     this.navController.navigateForward(['settings']);
   }
 
-  gotoMyBucketlists() {
+  gotoMyBucketlists(): void {
     this.navController.navigateForward(['my-bucketlists']);
   }
 
-  gotoMyBites() {
+  gotoMyBites(): void {
     this.navController.navigateForward(['my-bites']);
   }
 
-  likeButtonClicked(likeClick: { likeType: string; biteId: string }) {
+  likeButtonClicked(likeClick: { likeType: string; biteId: string }): void {
     this.dataAccess.submitLikeClick(likeClick);
   }
 
-  biteClicked(bite: Bite) {
+  biteClicked(bite: Bite): void {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
-  restaurantClicked(bite: Bite) {
+  restaurantClicked(bite: Bite): void {
     if (bite.restaurantId) {
-      // eslint-disable-next-line no-unused-vars
       const [empty, collectionName, restaurantId] =
         bite.restaurantId.split('/');
 

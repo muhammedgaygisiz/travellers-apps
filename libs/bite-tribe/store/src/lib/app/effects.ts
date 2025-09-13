@@ -30,7 +30,7 @@ export class AppEffect {
   private readonly RETRY_GPS_BUTTON = {
     text: 'Retry',
     role: 'cancel',
-    handler: () => {
+    handler: (): void => {
       this.store.dispatch(fetchGpsPosition());
     },
   };

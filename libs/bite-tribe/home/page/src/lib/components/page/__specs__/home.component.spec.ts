@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NavController, provideIonicAngular } from '@ionic/angular/standalone';
-import { getIonicConfig } from 'utils';
+import {
+  IonModal,
+  NavController,
+  provideIonicAngular,
+} from '@ionic/angular/standalone';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { BiteTribeHomeComponent } from '../home.component';
 import { ComponentRef, signal } from '@angular/core';
 import { addIcons } from 'ionicons';
@@ -8,6 +12,11 @@ import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
 import { Subject } from 'rxjs';
 import SpyInstance = jest.SpyInstance;
+import { InfiniteScrollCustomEvent } from '@ionic/angular';
+
+jest.mock('localization');
+
+addNecessaryIcons();
 
 describe('BiteTribeHomeComponent', () => {
   let component: BiteTribeHomeComponent;
@@ -162,6 +171,35 @@ describe('BiteTribeHomeComponent', () => {
       component.onFilterChange(filterSelection, modal);
       expect(modal.dismiss).toHaveBeenCalled();
       expect(filtersChangedSpy).toHaveBeenCalledWith(filterSelection);
+    });
+  });
+
+  describe('onFiltersClear', () => {
+    it('should emit filterCleared output', () => {
+      const modal = {
+        dismiss: jest.fn(),
+      } as unknown as IonModal;
+      const filterClearedSpy = jest.spyOn(component.filterCleared, 'emit');
+
+      component.onFiltersClear(modal);
+      expect(modal.dismiss).toHaveBeenCalled();
+      expect(filterClearedSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('onIonInfinite', () => {
+    it('should load more bites and complete the event', () => {
+      const infiniteScrollEvent = {
+        target: {
+          complete: jest.fn(),
+        },
+      } as unknown as InfiniteScrollCustomEvent;
+
+      const bites = new Array(100).fill({});
+      componentRef.setInput('bites', bites);
+      component.onIonInfinite(infiniteScrollEvent);
+      expect(component.currentPage()).toBe(2);
+      expect(infiniteScrollEvent.target.complete).toHaveBeenCalled();
     });
   });
 });

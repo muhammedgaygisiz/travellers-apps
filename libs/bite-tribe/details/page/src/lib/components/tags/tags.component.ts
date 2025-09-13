@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { IonChip } from '@ionic/angular/standalone';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'tags',
   imports: [IonChip],
   template: `

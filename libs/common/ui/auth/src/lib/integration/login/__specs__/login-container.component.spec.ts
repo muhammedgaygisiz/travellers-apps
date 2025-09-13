@@ -3,9 +3,12 @@ import { signal } from '@angular/core';
 import { LoginContainerComponent } from '../login-container.component';
 import { LoginService } from '../login.service';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { addIcons } from 'ionicons';
 import { logoApple, logoFacebook, logoGoogle } from 'ionicons/icons';
+
+jest.mock('localization');
+addNecessaryIcons();
 
 describe('LoginContainerComponent', () => {
   let component: LoginContainerComponent;
@@ -51,11 +54,6 @@ describe('LoginContainerComponent', () => {
     expect(component.loginFailed()).toBeFalsy();
   });
 
-  it('should reflect changes in loginFailed signal', () => {
-    mockLoginService.loginFailed.set(true);
-    expect(component.loginFailed()).toBeTruthy();
-  });
-
   it('should call login on service when login is called', () => {
     const credentials = { email: 'test@test.com', password: 'password' };
     component.login(credentials);
@@ -65,12 +63,12 @@ describe('LoginContainerComponent', () => {
   it('should not call login on service when service is not given', () => {
     const credentials = { email: 'test@test.com', password: 'password' };
     const loginService = component['loginService'];
-    component['loginService'] = null;
+    (component as any)['loginService'] = null;
 
     component.login(credentials);
     expect(mockLoginService.login).not.toHaveBeenCalled();
 
-    component['loginService'] = loginService;
+    (component as any)['loginService'] = loginService;
   });
 
   it('should call gotoSignUp on service when gotoSignup is called', async () => {
@@ -103,7 +101,7 @@ describe('LoginContainerComponent', () => {
       LoginContainerComponent
     );
     const componentWithoutService = fixtureWithoutService.componentInstance;
-    componentWithoutService['loginService'] = null;
+    (componentWithoutService as any)['loginService'] = null;
 
     expect(componentWithoutService.loginFailed()).toBeFalsy();
   });

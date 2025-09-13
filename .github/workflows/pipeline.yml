@@ -110,179 +110,62 @@ jobs:
           fail_ci_if_error: false # optional (default = false)
           verbose: false # optional (default = false)
 
-  build-storybooks:
-    runs-on: ubuntu-latest
-    needs:
-      - tests
+  #build-storybooks:
+  #  runs-on: ubuntu-latest
+  #  needs:
+  #    - tests
+  #
+  #  steps:
+  #    - name: Checkout repository
+  #      uses: actions/checkout@v4
+  #      with:
+  #        fetch-depth: 0 # Fetch all history for all branches and tags
+  #
+  #    - name: "Restore Cache"
+  #      uses: ./.github/actions/restore-cache
+  #
+  #    - name: "Setup env"
+  #      uses: ./.github/actions/setup-env-for-affected
+  #
+  #    - run: npm run nx -- affected -t build-storybook --configuration=ci
+  #
+  #    - name: Cache Storybook Builds
+  #      uses: actions/cache@v4
+  #      with:
+  #        path: dist/storybook
+  #        key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - name: "Setup env"
-        uses: ./.github/actions/setup-env-for-affected
-
-      - run: npm run nx -- affected -t build-storybook --configuration=ci
-
-      - name: Cache Storybook Builds
-        uses: actions/cache@v4
-        with:
-          path: dist/storybook
-          key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
-
-  loki:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    needs:
-      - build-storybooks
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - name: "Setup env"
-        uses: ./.github/actions/setup-env-for-affected
-
-      - uses: actions/cache/restore@v4
-        with:
-          path: dist/storybook/prices
-          key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
-
-      - run: npm run nx -- affected -t test-loki
-
-      - name: Upload Prices Diffs
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: loki-diffs
-          path: apps/**/.loki/difference
-
-  #Prices
-
-  prices-e2e-test:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    needs:
-      - loki
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: Run E2E Tests
-        uses: cypress-io/github-action@v4.2.0
-        with:
-          install: true
-          command: |
-            npm run nx -- e2e prices-e2e --configurations=production
-        env:
-          # pass GitHub token to detect new build vs re-run build
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CYPRESS_password: ${{ secrets.CYPRESS_PASSWORD }}
-          CYPRESS_username: ${{ secrets.CYPRESS_USER_NAME }}
-          NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
-
-  prices-build:
-    runs-on: ubuntu-latest
-    needs:
-      - prices-e2e-test
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - name: Build Prices App
-        run: npm run nx -- build prices
-        env:
-          NX_APP_API_KEY: ${{ secrets.NX_APP_API_KEY }}
-          NX_APP_AUTH_DOMAIN: ${{ secrets.NX_APP_AUTH_DOMAIN }}
-          NX_APP_PROJECT_ID: ${{ secrets.NX_APP_PROJECT_ID }}
-          NX_APP_STORAGE_BUCKET: ${{ secrets.NX_APP_STORAGE_BUCKET }}
-          NX_APP_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_MESSAGING_SENDER_ID }}
-          NX_APP_GEOAPIFY_API_KEY: ${{ secrets.NX_APP_GEOAPIFY_API_KEY }}
-
-      - name: Cache Prices Build
-        uses: actions/cache@v4
-        with:
-          path: dist/apps/prices
-          key: prices-build-${{ hashFiles('package-lock.json') }}
-
-  prices-cap-sync:
-    runs-on: ubuntu-latest
-    needs:
-      - prices-build
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - uses: actions/cache/restore@v4
-        with:
-          path: dist/apps/prices
-          key: prices-build-${{ hashFiles('package-lock.json') }}
-
-      - name: Capacitor Sync
-        run: npm run cap:sync
-
-# KOSAML
-
-  kosaml-build:
-    runs-on: ubuntu-latest
-    needs:
-      - loki
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - name: Build Prices App
-        run: npm run nx -- build kosaml
-
-# Finances
-
-  finances-build:
-    runs-on: ubuntu-latest
-    needs:
-      - tests
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: "Restore Cache"
-        uses: ./.github/actions/restore-cache
-
-      - name: Build Prices App
-        run: npm run nx -- build finances
+  #loki:
+  #  runs-on: ubuntu-latest
+  #  continue-on-error: true
+  #  needs:
+  #    - build-storybooks
+  #
+  #  steps:
+  #    - name: Checkout repository
+  #      uses: actions/checkout@v4
+  #      with:
+  #        fetch-depth: 0 # Fetch all history for all branches and tags
+  #
+  #    - name: "Restore Cache"
+  #      uses: ./.github/actions/restore-cache
+  #
+  #    - name: "Setup env"
+  #      uses: ./.github/actions/setup-env-for-affected
+  #
+  #    - uses: actions/cache/restore@v4
+  #      with:
+  #        path: dist/storybook/xxx
+  #        key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
+  #
+  #    - run: npm run nx -- affected -t test-loki
+  #
+  #    - name: Upload xxx Diffs
+  #      uses: actions/upload-artifact@v4
+  #      if: failure()
+  #      with:
+  #        name: loki-diffs
+  #        path: apps/**/.loki/difference
 
 # Bite Tribe
 

@@ -3,6 +3,8 @@ import { ImageCropPageComponent } from '../image-crop-page.component';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
+jest.mock('localization');
+
 type MockFileReader = {
   readAsDataURL: jest.Mock;
   addEventListener?: jest.Mock;

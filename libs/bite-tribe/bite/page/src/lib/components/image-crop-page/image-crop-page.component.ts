@@ -11,7 +11,6 @@ import { IonButton, IonContent } from '@ionic/angular/standalone';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'image-crop-page',
   templateUrl: './image-crop-page.component.html',
   styleUrl: './image-crop-page.component.scss',
@@ -42,15 +41,15 @@ export class ImageCropPageComponent {
     return this.dataURLtoFile(image) as File;
   });
 
-  onLoadImageFailed() {
+  onLoadImageFailed(): void {
     console.error('Image load failed.');
   }
 
-  onImageCropped(imageCroppedEvent: ImageCroppedEvent) {
+  onImageCropped(imageCroppedEvent: ImageCroppedEvent): void {
     this.currentCropBlob = imageCroppedEvent.blob;
   }
 
-  async emitCroppedImage() {
+  async emitCroppedImage(): Promise<void> {
     if (!this.currentCropBlob) {
       this.onLoadImageFailed();
       return;
@@ -61,11 +60,11 @@ export class ImageCropPageComponent {
     });
 
     const reader = new FileReader();
-    reader.onload = () => this.croppedImage.emit(reader.result as string);
+    reader.onload = (): void => this.croppedImage.emit(reader.result as string);
     reader.readAsDataURL(croppedFile);
   }
 
-  dataURLtoFile(dataurl: string) {
+  dataURLtoFile(dataurl: string): File {
     const arr = dataurl.split(',');
     const mime = arr[0].match(/:(.*?);/)?.[1];
     const bstr = atob(arr[arr.length - 1]);

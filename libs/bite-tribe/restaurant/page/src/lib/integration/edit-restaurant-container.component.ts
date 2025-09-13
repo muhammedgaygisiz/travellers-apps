@@ -19,7 +19,6 @@ import { RestaurantService } from './restaurant.service';
   `,
   imports: [RestaurantComponent],
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class EditRestaurantContainer {
   service = inject(RestaurantService);
 }

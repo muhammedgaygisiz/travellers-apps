@@ -14,7 +14,6 @@ import { ImageCropPageComponent } from '../components/image-crop-page/image-crop
   `,
   imports: [ImageCropPageComponent],
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class ImageCropContainer {
   service = inject(BiteService);
 }

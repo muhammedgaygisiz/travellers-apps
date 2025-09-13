@@ -4,6 +4,7 @@ import {
   BehaviorSubject,
   catchError,
   from,
+  Observable,
   of,
   skip,
   skipWhile,
@@ -13,6 +14,7 @@ import {
 } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite, PublicUser } from 'model';
+import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 const USERS_COLLECTION = 'users';
 
@@ -39,12 +41,12 @@ export class ProfileApiService {
     })
   );
 
-  private async getUser() {
+  private async getUser(): Promise<User | null | undefined> {
     const authState = await this.authService.authState();
     return authState?.user;
   }
 
-  private async startProfileListener() {
+  private async startProfileListener(): Promise<any> {
     const user = await this.getUser();
 
     this.profileCallbackId =
@@ -79,14 +81,14 @@ export class ProfileApiService {
     return this.profileChannel$;
   }
 
-  private async stopProfileListener(callbackId: string) {
+  private async stopProfileListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });
     }
   }
 
-  async saveUser(isPublic: boolean) {
+  async saveUser(isPublic: boolean): Promise<void> {
     try {
       const user = await this.getUser();
 
@@ -113,7 +115,7 @@ export class ProfileApiService {
     }
   }
 
-  async updateUser(publicUser: PublicUser) {
+  async updateUser(publicUser: PublicUser): Promise<void> {
     try {
       await FirebaseFirestore.updateDocument({
         reference: `${USERS_COLLECTION}/${publicUser.userId}`,
@@ -134,7 +136,7 @@ export class ProfileApiService {
     }
   }
 
-  async deleteUser() {
+  async deleteUser(): Promise<void> {
     const user = await this.getUser();
 
     try {
@@ -152,7 +154,7 @@ export class ProfileApiService {
     }
   }
 
-  getUserByBiteId(bite: Bite | undefined) {
+  getUserByBiteId(bite: Bite | undefined): Observable<any> {
     if (!bite?.userId) {
       return of();
     }
@@ -170,7 +172,7 @@ export class ProfileApiService {
     );
   }
 
-  async saveUserIfNotExisting() {
+  async saveUserIfNotExisting(): Promise<void> {
     const user = await this.getUser();
 
     const userFromDB = await FirebaseFirestore.getDocument({
@@ -188,7 +190,7 @@ export class ProfileApiService {
     }
   }
 
-  private async setUserPublicFlag(uid: string | undefined) {
+  private async setUserPublicFlag(uid: string | undefined): Promise<void> {
     try {
       if (uid) {
         await FirebaseFirestore.updateDocument({

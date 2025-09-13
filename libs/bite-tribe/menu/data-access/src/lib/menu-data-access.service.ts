@@ -13,11 +13,11 @@ export class MenuDataAccessService {
   restaurant = toSignal(this.storeService.restaurant$);
   menu = toSignal(this.storeService.menu$);
 
-  saveMenu(menu: Menu) {
+  saveMenu(menu: Menu): void {
     this.storeService.saveMenu(menu);
   }
 
-  prepareBiteFromMenuItem(biteToBeCreated: Partial<Bite>) {
+  prepareBiteFromMenuItem(biteToBeCreated: Partial<Bite>): void {
     this.storeService.prepareBiteFromMenuItem(biteToBeCreated);
   }
 }

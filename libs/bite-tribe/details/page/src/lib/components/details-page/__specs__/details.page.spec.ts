@@ -17,11 +17,12 @@ import { Bite } from 'model';
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
-  transform(value: string) {
+  transform(value: string): string {
     return value;
   }
 }
 
+jest.mock('localization');
 addNecessaryIcons();
 
 // Properly mock the AppLauncher module

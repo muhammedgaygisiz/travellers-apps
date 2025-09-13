@@ -6,22 +6,22 @@ import { Bite } from 'model';
 import SpyInstance = jest.SpyInstance;
 
 class Mock {
-  sortedHomeBites = () => [];
-  myBites = () => [];
-  bitesBySelectedBucketlist = () => [];
-  allTags = () => [];
-  homeFilters = () => [];
-  userId = () => 'test-user-id';
-  isAuthenticated = () => true;
-  isBitesLoading = () => false;
-  selectedBucketlist = () => null;
-  navigateForward = () => null;
-  logout = () => null;
-  submitLikeClick = () => null;
-  deleteBite = () => null;
-  exchangeRates = () => null;
-  setHomeSorting = () => null;
-  selectedBucketlistTitle = () => null;
+  sortedHomeBites = (): never[] => [];
+  myBites = (): never[] => [];
+  bitesBySelectedBucketlist = (): never[] => [];
+  allTags = (): never[] => [];
+  homeFilters = (): never[] => [];
+  userId = (): string => 'test-user-id';
+  isAuthenticated = (): boolean => true;
+  isBitesLoading = (): boolean => false;
+  selectedBucketlist = (): null => null;
+  navigateForward = (): null => null;
+  logout = (): null => null;
+  submitLikeClick = (): null => null;
+  deleteBite = (): null => null;
+  exchangeRates = (): null => null;
+  setHomeSorting = (): null => null;
+  selectedBucketlistTitle = (): null => null;
 }
 
 describe('HomeService', () => {

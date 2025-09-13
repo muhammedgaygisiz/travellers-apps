@@ -1,4 +1,5 @@
 import * as EXIF from 'exif-js';
+import { Geopoint } from 'model';
 
 const convertDMS2DD = (dms: number[]): number =>
   dms[0] + dms[1] / 60 + dms[2] / 3600;
@@ -13,7 +14,7 @@ const calcGpsPosition = ({
   latRef: string;
   long: number[];
   longRef: string;
-}) => {
+}): Geopoint => {
   const latitude = (latRef === 'N' ? 1 : -1) * convertDMS2DD(lat);
   const longitude = (longRef === 'E' ? 1 : -1) * convertDMS2DD(long);
   return { latitude, longitude };
@@ -21,11 +22,11 @@ const calcGpsPosition = ({
 
 export const getExifDataFromFile = (
   file: File,
-  fallbackPosition: { latitude: number; longitude: number } = {
+  fallbackPosition: Geopoint = {
     latitude: 0,
     longitude: 0,
   }
-): Promise<{ latitude: number; longitude: number }> => {
+): Promise<Geopoint> => {
   return new Promise((resolve) => {
     type EXIFThis = {
       exifData: {
@@ -37,7 +38,6 @@ export const getExifDataFromFile = (
     };
 
     try {
-      // eslint-disable-next-line no-unused-vars
       EXIF.getData(file as unknown as string, function (this: EXIFThis) {
         try {
           const lat = EXIF.getTag(this, 'GPSLatitude');

@@ -15,13 +15,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "common/networkstatus": [
-        "libs/common/networkstatus/feature/src/index.ts"
-      ],
-      "common/geoapify": ["libs/common/geoapify/src/index.ts"],
-      "common/password-validator": [
-        "libs/common/ui/password-validator/src/index.ts"
-      ],
       "auth": ["libs/common/ui/auth/src/index.ts"],
       "bite-tribe-business/dashboard": [
         "libs/bite-tribe-business/dashboard/page/src/index.ts"
@@ -84,6 +77,13 @@
       "bite-tribe/start": ["libs/bite-tribe/start/src/index.ts"],
       "bite-tribe/store": ["libs/bite-tribe/store/src/index.ts"],
       "chart": ["libs/common/ui/chart/src/index.ts"],
+      "common/geoapify": ["libs/common/geoapify/src/index.ts"],
+      "common/networkstatus": [
+        "libs/common/networkstatus/feature/src/index.ts"
+      ],
+      "common/password-validator": [
+        "libs/common/ui/password-validator/src/index.ts"
+      ],
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
       "common/ui/star-rating": ["libs/common/ui/star-rating/src/index.ts"],
@@ -93,6 +93,9 @@
       "image-compression": ["libs/common/image-compression/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],
       "model": ["libs/bite-tribe/model/src/index.ts"],
+      "bite-tribe-business/start": [
+        "libs/bite-tribe-business/start/src/index.ts"
+      ],
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
       "utils": ["libs/common/utils/src/index.ts"]
     }

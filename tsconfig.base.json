@@ -15,16 +15,13 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@travellers-apps/common/networkstatus/feature": [
+      "common/networkstatus": [
         "libs/common/networkstatus/feature/src/index.ts"
       ],
-      "@travellers-apps/prices/geoapify/feature": [
-        "libs/prices/geoapify/feature/src/index.ts"
-      ],
+      "common/geoapify": ["libs/common/geoapify/src/index.ts"],
       "@travellers-apps/prices/password-validator/feature": [
         "libs/common/ui/password-validator/src/index.ts"
       ],
-      "add-popover-menu": ["libs/finances/ui/add-popover-menu/src/index.ts"],
       "auth": ["libs/common/ui/auth/src/index.ts"],
       "bite-tribe-business/dashboard": [
         "libs/bite-tribe-business/dashboard/page/src/index.ts"
@@ -92,7 +89,6 @@
       "common/ui/star-rating": ["libs/common/ui/star-rating/src/index.ts"],
       "common/ui/tags": ["libs/common/ui/tags/src/index.ts"],
       "distance-pipe": ["libs/common/distance-pipe/src/index.ts"],
-      "finances/api": ["libs/finances/api/src/index.ts"],
       "geolocation": ["libs/common/geolocation/src/index.ts"],
       "image-compression": ["libs/common/image-compression/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],

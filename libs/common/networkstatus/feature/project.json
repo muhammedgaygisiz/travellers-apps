@@ -1,5 +1,5 @@
 {
-  "name": "common-networkstatus-feature",
+  "name": "networkstatus-service",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/common/networkstatus/feature/src",

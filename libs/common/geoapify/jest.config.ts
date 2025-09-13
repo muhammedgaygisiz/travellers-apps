@@ -1,8 +1,10 @@
+ 
 export default {
-  displayName: 'add-popover-menu',
-  preset: '../../../../jest.preset.js',
+  displayName: 'prices-geoapify-feature',
+  preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../../coverage/libs/finances/ui/add-popover-menu',
+  globals: {},
+  coverageDirectory: '../../../coverage/libs/common/geoapify',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

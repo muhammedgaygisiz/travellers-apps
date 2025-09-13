@@ -73,4 +73,20 @@ describe('BiteService', () => {
       expect(Mock.navigateBack).toHaveBeenCalledWith(['home']);
     });
   });
+
+  describe('submitEditedBite', () => {
+    it('should submit edited bite', () => {
+      const editedBite = { id: '123', name: 'Edited Bite' };
+      service.submitEditedBite(editedBite);
+
+      expect(Mock.submitBite).toHaveBeenCalledWith(editedBite);
+    });
+
+    it('should navigate back to my-bites', () => {
+      const editedBite = { id: '123', name: 'Edited Bite' };
+      service.submitEditedBite(editedBite);
+
+      expect(Mock.navigateBack).toHaveBeenCalledWith(['my-bites']);
+    });
+  });
 });

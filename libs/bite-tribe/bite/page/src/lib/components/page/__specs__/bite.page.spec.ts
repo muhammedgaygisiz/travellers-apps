@@ -269,4 +269,23 @@ describe('BitePage', () => {
       expect(component.biteFormGroup.controls['tags'].value).toEqual(tags);
     });
   });
+
+  describe('onPositionFromImage', () => {
+    it('should set position in the form group', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.onPositionFromImage(position);
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        position
+      );
+    });
+  });
+
+  describe('emitStartCropImage', () => {
+    it('should emit startCropImage event', () => {
+      const emitSpy = jest.spyOn(component.startCropImage, 'emit');
+      const arg = { test: 'data' };
+      component.emitStartCropImage(arg);
+      expect(emitSpy).toHaveBeenCalledWith(arg);
+    });
+  });
 });

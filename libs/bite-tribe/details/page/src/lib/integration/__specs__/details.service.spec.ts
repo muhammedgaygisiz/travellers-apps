@@ -333,4 +333,40 @@ describe('DetailsService', () => {
       ]);
     });
   });
+
+  describe('onRestaurantClick', () => {
+    it('should navigate to restaurant page with restaurantId if available', () => {
+      const bite: Bite = {
+        id: 'bite123',
+        name: 'Test Bite',
+        restaurantId: '/restaurants/resto123',
+      } as Bite;
+
+      service.onRestaurantClick(bite);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        'bite123',
+        'restaurant',
+        'resto123',
+      ]);
+    });
+
+    it('should navigate to restaurant page with encoded place name from bite', () => {
+      const bite: Bite = {
+        id: 'bite123',
+        name: 'Test Bite',
+        place: 'Some Place',
+      } as Bite;
+
+      service.onRestaurantClick(bite);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        'bite123',
+        'restaurant',
+        encodeURIComponent('Some Place'),
+      ]);
+    });
+  });
 });

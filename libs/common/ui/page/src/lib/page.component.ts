@@ -76,6 +76,8 @@ export class PageComponent {
 
   showMyBucketlists = input(false);
 
+  showMigrationsButton = input(false);
+
   fullWidth = input(false);
 
   appTitle = computed(() => {
@@ -111,6 +113,8 @@ export class PageComponent {
 
   public gotoSettings = output();
 
+  public gotoMigrations = output();
+
   public gotoMyBites = output();
 
   public gotoMyBucketlists = output();
@@ -129,12 +133,14 @@ export class PageComponent {
         showSettingsButton: this.showSettingsButton,
         showMyBites: this.showMyBites,
         showMyBucketlists: this.showMyBucketlists,
+        showMigrationsButton: this.showMigrationsButton,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,
         gotoSettings: this.gotoSettings,
         gotoMyBites: this.gotoMyBites,
         gotoMyBucketlists: this.gotoMyBucketlists,
+        gotoMigrations: this.gotoMigrations,
       },
     });
 

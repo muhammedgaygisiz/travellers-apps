@@ -1,7 +1,0 @@
-{
-  "name": "prices-ios",
-  "devDependencies": {
-    "@capacitor/cli": "6.0.0",
-    "@capacitor/ios": "6.0.0"
-  }
-}

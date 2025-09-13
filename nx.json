@@ -54,7 +54,6 @@
       "cache": true
     }
   },
-  "defaultProject": "prices",
   "useInferencePlugins": false,
   "defaultBase": "develop",
   "plugins": [

@@ -4,8 +4,15 @@ import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
+import * as imageCompressionModule from 'image-compression';
 
 jest.mock('localization');
+
+jest.mock('image-compression');
+const actualImageCompression = jest.requireActual('image-compression');
+jest
+  .spyOn(imageCompressionModule, 'base64ToFile')
+  .mockImplementation((...arg) => actualImageCompression.base64ToFile(...arg));
 
 addNecessaryIcons();
 
@@ -116,7 +123,10 @@ describe('ImageCropPageComponent', () => {
         nativeElement: mockImageElement,
       }) as any;
       const PNG_FILE = new File([''], 'image.png', { type: 'image/png' });
-      component['extractFileFromHtmlImageElement'] = jest.fn(() => PNG_FILE);
+
+      jest
+        .spyOn(imageCompressionModule, 'extractFileFromHtmlImageElement')
+        .mockReturnValue(PNG_FILE);
 
       fixture.detectChanges();
       await fixture.whenRenderingDone();

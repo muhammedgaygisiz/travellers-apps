@@ -259,6 +259,11 @@ export class BiteApiService {
         },
       },
       async (event, error) => {
+        if (error) {
+          console.error('Error uploading image:', error);
+          this.errorHandler.handleError(error);
+        }
+
         if (event?.completed) {
           const downloadUrl = await getDownloadUrlFromFirebaseStorage(
             imagePath

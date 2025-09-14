@@ -204,9 +204,14 @@ export class BiteApiService {
         const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
 
         if (imagePath) {
-          await FirebaseStorage.deleteFile({
-            path: imagePath,
-          });
+          try {
+            await FirebaseStorage.deleteFile({
+              path: imagePath,
+            });
+          } catch (error) {
+            console.error('Error deleting image:', error);
+            this.errorHandler.handleError(error);
+          }
         }
 
         await FirebaseFirestore.deleteDocument({

@@ -25,6 +25,9 @@
       "bite-tribe-business/migrations": [
         "libs/bite-tribe-business/migrations/page/src/index.ts"
       ],
+      "bite-tribe-business/migrations-data-access": [
+        "libs/bite-tribe-business/migrations/data-access/src/index.ts"
+      ],
       "bite-tribe-business/restaurant": [
         "libs/bite-tribe-business/restaurant/page/src/index.ts"
       ],

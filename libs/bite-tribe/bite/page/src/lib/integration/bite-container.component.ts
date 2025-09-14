@@ -11,6 +11,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     [currency]="service.currency()"
     [position]="service.position()"
     [image]="service.imageToDisplay() || ''"
+    [isNew]="true"
     (startCropImage)="service.startCropImage($event)"
     (submitBite)="service.submitNewBite($event)"
   />`,

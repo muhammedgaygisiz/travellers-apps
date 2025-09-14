@@ -11,6 +11,14 @@ import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
+import {
+  dataUrlToBlob,
+  getDownloadUrlFromFirebaseStorage,
+  guessExtFromContentType,
+} from 'utils';
+import { v4 as uuidv4 } from 'uuid';
+import { FirebaseStorage } from '@capacitor-firebase/storage';
+import { toBite } from './utils/to-bite';
 
 export const BITE_COLLECTION = 'bites';
 
@@ -43,11 +51,7 @@ export class BiteApiService {
         { reference: BITE_COLLECTION },
         async (biteDocs) => {
           const bites =
-            biteDocs?.snapshots.map((doc) => ({
-              ...doc.data,
-              id: doc.id,
-              likes: [],
-            })) || [];
+            biteDocs?.snapshots.map((doc) => toBite(doc)) || ([] as Bite[]);
 
           this.bitesChannel$.next(bites);
         }
@@ -65,21 +69,33 @@ export class BiteApiService {
     try {
       const user = this.getUser();
 
-      await FirebaseFirestore.addDocument({
-        reference: BITE_COLLECTION,
-        data: {
-          ...bite,
-          userId: user?.uid || '',
-          createdAt: new Date().toISOString(),
-          createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
-        },
-      });
+      const { image, ...biteDocWithoutImage } = bite;
+
+      const biteId = await this.createNewBite(biteDocWithoutImage, user);
+
+      await this.uploadImageAndUpdateBite(image, biteId);
     } catch (error) {
       console.error('Error saving new bite:', error);
       this.errorHandler.handleError(error);
     }
   }
 
+  private async createNewBite(
+    biteDoc: Omit<Bite, 'image'>,
+    user: User | null | undefined
+  ): Promise<string> {
+    const doc = await FirebaseFirestore.addDocument({
+      reference: BITE_COLLECTION,
+      data: {
+        ...biteDoc,
+        userId: user?.uid || '',
+        createdAt: new Date().toISOString(),
+        createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
+      },
+    });
+
+    return doc.reference.id;
+  }
   private getUser(): User | null | undefined {
     const authState = this.authService.authState();
     return authState?.user;
@@ -87,6 +103,34 @@ export class BiteApiService {
 
   async saveEditedBite(bite: Bite): Promise<void> {
     try {
+      if (bite.imagePath && bite.image) {
+        const { image, ...biteWithoutImage } = bite;
+
+        await this.replaceImageInFirestoreStorage(
+          image,
+          bite.imagePath,
+          bite.id,
+          biteWithoutImage
+        );
+
+        return;
+      }
+
+      if (bite.imagePath && !bite.image) {
+        const { image, ...biteWithoutImage } = bite;
+
+        await FirebaseFirestore.updateDocument({
+          reference: `${BITE_COLLECTION}/${bite.id}`,
+          data: {
+            ...biteWithoutImage,
+            updatedAt: new Date().toISOString(),
+            updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
+          },
+        });
+
+        return;
+      }
+
       await FirebaseFirestore.updateDocument({
         reference: `${BITE_COLLECTION}/${bite.id}`,
         data: {
@@ -134,6 +178,15 @@ export class BiteApiService {
   async deleteBite(bite: any): Promise<void> {
     try {
       if (bite.id) {
+        const imagePathInFirestore = bite.imagePath;
+        const imagePath = this.storagePathFromDownloadUrl(imagePathInFirestore);
+
+        if (imagePath) {
+          await FirebaseStorage.deleteFile({
+            path: imagePath,
+          });
+        }
+
         await FirebaseFirestore.deleteDocument({
           reference: `${BITE_COLLECTION}/${bite.id}`,
         });
@@ -142,5 +195,61 @@ export class BiteApiService {
       console.error('Error deleting bite:', error);
       this.errorHandler.handleError(error);
     }
+  }
+
+  private async uploadImageAndUpdateBite(
+    imageBase64: string,
+    biteId: string,
+    biteWithoutImage?: Omit<Bite, 'image'>
+  ): Promise<void> {
+    const { blob, contentType } = await dataUrlToBlob(imageBase64);
+    const ext = guessExtFromContentType(contentType);
+
+    const imageId = uuidv4();
+    const imagePath = `images/${BITE_COLLECTION}/${biteId}/${imageId}.${ext}`;
+
+    await FirebaseStorage.uploadFile(
+      {
+        path: imagePath,
+        blob,
+        metadata: {
+          contentType: contentType,
+          cacheControl: 'public,max-age=31536000,immutable',
+        },
+      },
+      async (event, error) => {
+        const downloadUrl = await getDownloadUrlFromFirebaseStorage(imagePath);
+
+        await FirebaseFirestore.updateDocument({
+          reference: `${BITE_COLLECTION}/${biteId}`,
+          data: {
+            ...(biteWithoutImage || {}),
+            imagePath: downloadUrl,
+          },
+        });
+      }
+    );
+  }
+
+  private async replaceImageInFirestoreStorage(
+    imageBase64: string,
+    imagePathInFirestore: string,
+    biteId: string,
+    biteWithoutImage: Omit<Bite, 'image'>
+  ): Promise<void> {
+    const imagePath = this.storagePathFromDownloadUrl(imagePathInFirestore);
+
+    await FirebaseStorage.deleteFile({
+      path: imagePath,
+    });
+
+    await this.uploadImageAndUpdateBite(imageBase64, biteId, biteWithoutImage);
+  }
+
+  private storagePathFromDownloadUrl(downloadUrl: string): string {
+    const m = downloadUrl.match(/\/o\/([^?]+)/);
+    if (!m) throw new Error('Invalid Firebase Storage URL');
+
+    return decodeURIComponent(m[1]); // decodes %2F → /
   }
 }

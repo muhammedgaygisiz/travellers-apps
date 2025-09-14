@@ -2,8 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
+  ElementRef,
   input,
+  linkedSignal,
   output,
+  signal,
+  viewChild,
 } from '@angular/core';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { PageComponent } from 'common/ui/page';
@@ -36,9 +41,34 @@ export class ImageCropPageComponent {
 
   currentCropBlob: Blob | null | undefined;
 
-  imageFile = computed((): File => {
+  imageFromUrl = viewChild('imageFromUrl', { read: ElementRef });
+
+  imageFileNew = linkedSignal(() => {
     const image = this.image() || '';
-    return this.dataURLtoFile(image) as File;
+
+    if (this.isBase64()) {
+      return this.dataURLtoFile(image) as File;
+    }
+
+    return null;
+  });
+
+  imgFromHtmlElem = effect(() => {
+    const htmlElem = this.imageFromUrl()?.nativeElement as HTMLImageElement;
+
+    if (htmlElem) {
+      htmlElem.onload = (evt): void => {
+        const file = this.extractFileFromHtmlImageElement(htmlElem);
+
+        this.imageFileNew.set(file);
+      };
+    }
+  });
+
+  isBase64 = computed(() => {
+    const image = this.image();
+
+    return image?.startsWith('data:');
   });
 
   onLoadImageFailed(): void {
@@ -74,5 +104,22 @@ export class ImageCropPageComponent {
       u8arr[n] = bstr.charCodeAt(n);
     }
     return new File([u8arr], new Date().toISOString(), { type: mime });
+  }
+
+  private extractFileFromHtmlImageElement(elem: HTMLImageElement): File {
+    const canvas = document.createElement('canvas');
+    canvas.width = elem.naturalWidth;
+    canvas.height = elem.naturalHeight;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Could not get canvas context');
+    }
+
+    ctx.drawImage(elem, 0, 0);
+
+    const dataUrl = canvas.toDataURL('image/png');
+
+    return this.dataURLtoFile(dataUrl) as File;
   }
 }

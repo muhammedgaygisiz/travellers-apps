@@ -16,7 +16,7 @@
 >
   <ion-content>
     <img
-      [src]="biteData?.image | toBlobUrl"
+      [src]="biteData?.imagePath || (biteData?.image | toBlobUrl)"
       class="dish-image"
       loading="lazy"
     />

@@ -56,18 +56,20 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   position = input<Geopoint>();
 
+  imageUrl = input<string>();
+
   positionFromImage = output<Geopoint>();
 
   private readonly fileUpload =
     viewChild<ElementRef<HTMLInputElement>>('fileUploader');
 
   isWeb = signal(!this.platform.is('hybrid'));
-
   value = signal<string | null>(null);
-
   disabled = signal<boolean | null>(null);
 
-  showImage = computed(() => !!this.value());
+  showImage = computed(() => {
+    return !!this.value() || !!this.imageUrl();
+  });
 
   startCropImage = output<string | null>();
 

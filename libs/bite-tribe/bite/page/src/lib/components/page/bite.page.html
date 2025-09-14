@@ -9,9 +9,11 @@
     <form [formGroup]="biteFormGroup">
       <image-upload
         formControlName="image"
+        [imageUrl]="bite()?.imagePath"
         [position]="this.fallbackPosition()"
         (positionFromImage)="onPositionFromImage($event)"
         (startCropImage)="emitStartCropImage($event)"
+        (imageClearClicked)="resetImagePath()"
       />
 
       <ion-input
@@ -38,10 +40,10 @@
           />
 
           <ion-select formControlName="currency" interface="modal">
-            @for(currency of currencies; track currency.code) {
+            @for (currency of currencies; track currency.code) {
             <ion-select-option [value]="currency.code"
-              >{{ currency.name }}</ion-select-option
-            >
+              >{{ currency.name }}
+            </ion-select-option>
             }
           </ion-select>
         </div>

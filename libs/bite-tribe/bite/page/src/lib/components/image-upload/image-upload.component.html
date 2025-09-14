@@ -1,4 +1,4 @@
-@if(!value()) {
+@if (!value()) {
 <div class="ion-margin-bottom">
   <ion-note class="hint">
     <b> Click into the box to upload or take a photo. </b>
@@ -12,7 +12,7 @@
   (change)="onFileSelected($event)"
 />
 } @if (showImage()) {
-<img [src]="value()" />
+<img [src]="value() || imageUrl()" />
 <div class="ion-text-end">
   <ion-button fill="clear" (click)="cropImage()">Crop</ion-button>
   <ion-button fill="clear" (click)="clearImage()">Delete</ion-button>

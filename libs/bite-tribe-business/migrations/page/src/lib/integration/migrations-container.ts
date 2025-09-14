@@ -1,9 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Migrations } from '../migrations';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Migrations } from '../component/page/migrations';
+import { MigrationsService } from './migrations.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [Migrations],
-  template: ` <btb-migrations /> `,
+  template: ` <btb-migrations class="ion-page" [bites]="service.bites()" /> `,
 })
-export class MigrationsContainer {}
+export class MigrationsContainer {
+  service = inject(MigrationsService);
+}

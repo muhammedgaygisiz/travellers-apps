@@ -5,7 +5,7 @@
     <div class="card-image">
       <img
         alt="Dish"
-        [src]="biteData?.image"
+        [src]="biteData.imagePath || biteData?.image"
         loading="lazy"
         (click)="biteClick.emit(biteData)"
       />

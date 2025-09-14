@@ -1,13 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Migrations } from '../migrations';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+
+jest.mock('localization');
 
 describe('Migrations', () => {
   let component: Migrations;
   let fixture: ComponentFixture<Migrations>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [Migrations],
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideIonicAngular()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Migrations);

@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { BiteService } from '../bite.service';
 import { NavController } from '@ionic/angular';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
+import { signal } from '@angular/core';
 import SpyInstance = jest.SpyInstance;
 
 const Mock = {
@@ -52,7 +53,17 @@ describe('BiteService', () => {
       expect(service.originalImage()).toBe(mockImage);
     });
 
-    it('should not set originalImage signal if image is null', () => {
+    it('should set originalImage signal if image is null and bite has imagePath', () => {
+      const mockBite = { imagePath: 'biteImage.jpg' };
+      service.bite = signal(mockBite) as any;
+      service.startCropImage(null);
+
+      expect(service.originalImage()).toBe('biteImage.jpg');
+    });
+
+    it('should not set originalImage signal if image is null and bite has no imagePath', () => {
+      const mockBite = { imagePath: '' };
+      service.bite = signal(mockBite) as any;
       service.startCropImage(null);
       expect(service.originalImage()).toBe('');
     });

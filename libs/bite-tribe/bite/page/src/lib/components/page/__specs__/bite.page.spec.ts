@@ -101,6 +101,7 @@ describe('BitePage', () => {
     const validBite = {
       id: '',
       image: 'data:image/jpeg;base64,test',
+      imagePath: '',
       name: 'Test Burger',
       place: 'Test Place',
       tags: 'fish healthy',

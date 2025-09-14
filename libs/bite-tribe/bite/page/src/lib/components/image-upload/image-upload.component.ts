@@ -53,12 +53,13 @@ const photoOptions = {
 })
 export class ImageUploadComponent implements ControlValueAccessor {
   private readonly platform = inject(Platform);
-
   position = input<Geopoint>();
 
   imageUrl = input<string>();
 
   positionFromImage = output<Geopoint>();
+  clearImagePath = output();
+  startCropImage = output<string | null>();
 
   private readonly fileUpload =
     viewChild<ElementRef<HTMLInputElement>>('fileUploader');
@@ -70,8 +71,6 @@ export class ImageUploadComponent implements ControlValueAccessor {
   showImage = computed(() => {
     return !!this.value() || !!this.imageUrl();
   });
-
-  startCropImage = output<string | null>();
 
   imageFile?: File;
 
@@ -199,6 +198,8 @@ export class ImageUploadComponent implements ControlValueAccessor {
     if (fileUpload) {
       fileUpload.nativeElement.value = '';
     }
+
+    this.clearImagePath.emit();
   }
 
   // Drag&Drop prevention

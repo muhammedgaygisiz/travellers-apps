@@ -15,6 +15,7 @@ import {
   dataUrlToBlob,
   getDownloadUrlFromFirebaseStorage,
   guessExtFromContentType,
+  storagePathFromDownloadUrl,
 } from 'utils';
 import { v4 as uuidv4 } from 'uuid';
 import { FirebaseStorage } from '@capacitor-firebase/storage';
@@ -131,6 +132,27 @@ export class BiteApiService {
         return;
       }
 
+      if (!bite.imagePath && bite.image) {
+        const doc = await FirebaseFirestore.getDocument({
+          reference: `${BITE_COLLECTION}/${bite.id}`,
+        });
+        const originalBite = toBite(doc.snapshot);
+        const originalImagePath = originalBite.imagePath;
+
+        if (originalImagePath) {
+          const { image, ...biteWithoutImage } = bite;
+
+          await this.replaceImageInFirestoreStorage(
+            image,
+            originalImagePath,
+            bite.id,
+            biteWithoutImage
+          );
+
+          return;
+        }
+      }
+
       await FirebaseFirestore.updateDocument({
         reference: `${BITE_COLLECTION}/${bite.id}`,
         data: {
@@ -179,7 +201,7 @@ export class BiteApiService {
     try {
       if (bite.id) {
         const imagePathInFirestore = bite.imagePath;
-        const imagePath = this.storagePathFromDownloadUrl(imagePathInFirestore);
+        const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
 
         if (imagePath) {
           await FirebaseStorage.deleteFile({
@@ -237,19 +259,12 @@ export class BiteApiService {
     biteId: string,
     biteWithoutImage: Omit<Bite, 'image'>
   ): Promise<void> {
-    const imagePath = this.storagePathFromDownloadUrl(imagePathInFirestore);
+    const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
 
     await FirebaseStorage.deleteFile({
       path: imagePath,
     });
 
     await this.uploadImageAndUpdateBite(imageBase64, biteId, biteWithoutImage);
-  }
-
-  private storagePathFromDownloadUrl(downloadUrl: string): string {
-    const m = downloadUrl.match(/\/o\/([^?]+)/);
-    if (!m) throw new Error('Invalid Firebase Storage URL');
-
-    return decodeURIComponent(m[1]); // decodes %2F → /
   }
 }

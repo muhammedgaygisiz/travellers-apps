@@ -9,11 +9,11 @@
     <form [formGroup]="biteFormGroup">
       <image-upload
         formControlName="image"
-        [imageUrl]="bite()?.imagePath"
+        [imageUrl]="imageUrl()"
         [position]="this.fallbackPosition()"
         (positionFromImage)="onPositionFromImage($event)"
         (startCropImage)="emitStartCropImage($event)"
-        (imageClearClicked)="resetImagePath()"
+        (clearImagePath)="resetImagePath()"
       />
 
       <ion-input

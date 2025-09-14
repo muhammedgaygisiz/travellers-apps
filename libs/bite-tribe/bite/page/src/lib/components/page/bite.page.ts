@@ -205,6 +205,18 @@ export class BitePage {
     return '';
   });
 
+  imagePathValue = toSignal(
+    this.biteFormGroup.valueChanges.pipe(
+      map((formValue) => formValue.imagePath)
+    )
+  );
+
+  imageUrl = computed(() => {
+    const imagePathValue = this.imagePathValue();
+
+    return imagePathValue || undefined;
+  });
+
   saveBite(): void {
     if (this.biteFormGroup.valid) {
       const newBite = this.biteFormGroup.value;

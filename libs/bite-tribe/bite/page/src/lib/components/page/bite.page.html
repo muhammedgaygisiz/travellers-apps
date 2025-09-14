@@ -2,6 +2,7 @@
   [showHeaderMenu]="false"
   [showFooter]="false"
   [enableBackButton]="true"
+  (backButtonClicked)="backButtonClicked.emit()"
 >
   <ion-content class="ion-padding">
     <h1>{{ title() }}</h1>

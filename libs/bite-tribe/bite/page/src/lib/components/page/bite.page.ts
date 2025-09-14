@@ -84,6 +84,8 @@ export class BitePage {
 
   startCropImage = output<string | null>();
 
+  backButtonClicked = output();
+
   isWeb = signal(!this.platform.is('hybrid'));
 
   currencies = currencyCodes;

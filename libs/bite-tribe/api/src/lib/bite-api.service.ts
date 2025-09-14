@@ -97,6 +97,7 @@ export class BiteApiService {
 
     return doc.reference.id;
   }
+
   private getUser(): User | null | undefined {
     const authState = this.authService.authState();
     return authState?.user;
@@ -146,11 +147,23 @@ export class BiteApiService {
             image,
             originalImagePath,
             bite.id,
-            biteWithoutImage
+            { ...biteWithoutImage }
           );
 
           return;
         }
+
+        // Bite created in old style only with base64 image
+        // so we do not have a imagePath yet
+        const { image, imagePath, ...biteWithoutImage } = bite;
+        await this.uploadImageAndUpdateBite(
+          image,
+          bite.id,
+          biteWithoutImage,
+          true
+        );
+
+        return;
       }
 
       await FirebaseFirestore.updateDocument({
@@ -227,7 +240,8 @@ export class BiteApiService {
   private async uploadImageAndUpdateBite(
     imageBase64: string,
     biteId: string,
-    biteWithoutImage?: Omit<Bite, 'image'>
+    biteWithoutImage?: Omit<Bite, 'image'>,
+    clearBase64Image = false
   ): Promise<void> {
     const { blob, contentType } = await dataUrlToBlob(imageBase64);
     const ext = guessExtFromContentType(contentType);
@@ -245,15 +259,25 @@ export class BiteApiService {
         },
       },
       async (event, error) => {
-        const downloadUrl = await getDownloadUrlFromFirebaseStorage(imagePath);
+        if (event?.completed) {
+          const downloadUrl = await getDownloadUrlFromFirebaseStorage(
+            imagePath
+          );
 
-        await FirebaseFirestore.updateDocument({
-          reference: `${BITE_COLLECTION}/${biteId}`,
-          data: {
+          const data = {
             ...(biteWithoutImage || {}),
             imagePath: downloadUrl,
-          },
-        });
+          } as any;
+
+          if (clearBase64Image) {
+            data.image = '';
+          }
+
+          await FirebaseFirestore.updateDocument({
+            reference: `${BITE_COLLECTION}/${biteId}`,
+            data,
+          });
+        }
       }
     );
   }
@@ -262,7 +286,8 @@ export class BiteApiService {
     imageBase64: string,
     imagePathInFirestore: string,
     biteId: string,
-    biteWithoutImage: Omit<Bite, 'image'>
+    biteWithoutImage: Omit<Bite, 'image'>,
+    clearBase64Image = false
   ): Promise<void> {
     const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
 
@@ -270,6 +295,11 @@ export class BiteApiService {
       path: imagePath,
     });
 
-    await this.uploadImageAndUpdateBite(imageBase64, biteId, biteWithoutImage);
+    await this.uploadImageAndUpdateBite(
+      imageBase64,
+      biteId,
+      biteWithoutImage,
+      clearBase64Image
+    );
   }
 }

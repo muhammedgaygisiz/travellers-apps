@@ -121,6 +121,8 @@ export class PageComponent {
 
   public addButtonClick = output<MouseEvent>();
 
+  public backButtonClicked = output();
+
   async showMenuPopover($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
       component: PopoverMenuComponent,

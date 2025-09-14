@@ -14,6 +14,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isCropped]="service.isCropped()"
       (startCropImage)="service.startCropImage($event)"
       (submitBite)="service.submitEditedBite($event)"
+      (backButtonClicked)="service.clearCropping()"
     />
   `,
   imports: [BitePage],

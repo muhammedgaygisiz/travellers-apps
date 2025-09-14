@@ -4,10 +4,12 @@
   [showAddButton]="false"
   [showFooter]="false"
   [showSettingsButton]="false"
+  [showMigrationsButton]="true"
   [fullWidth]="true"
   [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
   (gotoSettings)="gotoSettings.emit()"
+  (gotoMigrations)="gotoMigrations.emit()"
 >
   <ion-content class="ion-padding">
     <div class="desktop-layout">
@@ -19,7 +21,7 @@
         @if (!restaurants()?.length) {
         <ion-card>
           <ion-card-content>
-            <ion-text color="primary"> No restaurants found. </ion-text>
+            <ion-text color="primary"> No restaurants found.</ion-text>
           </ion-card-content>
         </ion-card>
         } @for (restaurant of restaurants(); let index = $index; track

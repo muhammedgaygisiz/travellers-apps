@@ -5,8 +5,19 @@
 >
   <ion-content class="ion-padding">
     <h1>{{ title() }}</h1>
+
+    @if(!isBase64()) {
+    <img
+      #imageFromUrl
+      src="{{ image() }}"
+      alt="Dish"
+      [style.display]="'none'"
+      crossorigin="anonymous"
+    />
+
+    } @let imageFileData = imageFileNew(); @if(imageFileData) {
     <image-cropper
-      [imageFile]="imageFile()"
+      [imageFile]="imageFileData"
       [allowMoveImage]="true"
       [hideResizeSquares]="false"
       [aspectRatio]="3 / 4"
@@ -16,6 +27,7 @@
       (imageCropped)="onImageCropped($event)"
       (loadImageFailed)="onLoadImageFailed()"
     />
+    }
     <ion-button
       class="ion-margin-top"
       expand="block"

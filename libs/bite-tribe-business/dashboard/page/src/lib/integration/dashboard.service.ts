@@ -40,4 +40,8 @@ export class DashboardService {
       return;
     }
   }
+
+  gotoMigrations(): void {
+    this.navController.navigateForward(['migrations']);
+  }
 }

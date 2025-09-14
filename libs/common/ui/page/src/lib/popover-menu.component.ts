@@ -73,10 +73,15 @@ import { SupportedLang } from 'localization';
         <ion-icon name="bookmark-outline" slot="start" />
         My Bucket lists
       </ion-item>
-      } @if(showSettingsButton()) {
+      } @if (showSettingsButton()) {
       <ion-item (click)="gotoSettings.emit()">
         <ion-icon name="settings-outline" slot="start" />
         Settings
+      </ion-item>
+      } @if (showMigrationsButton()) {
+      <ion-item (click)="gotoMigrations.emit()">
+        <ion-icon name="hammer-outline" slot="start" />
+        Migrations
       </ion-item>
       }
       <ion-item
@@ -105,6 +110,8 @@ export class PopoverMenuComponent {
 
   showSettingsButton = input<boolean | null>(false);
 
+  showMigrationsButton = input<boolean | null>(false);
+
   showMyBites = input<boolean | null>(false);
 
   showMyBucketlists = input<boolean | null>(false);
@@ -114,6 +121,8 @@ export class PopoverMenuComponent {
   logoutClick = output();
 
   gotoSettings = output();
+
+  gotoMigrations = output();
 
   gotoMyBites = output();
 

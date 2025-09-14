@@ -2,6 +2,7 @@
   [showHeaderMenu]="false"
   [showFooter]="false"
   [enableBackButton]="true"
+  (backButtonClicked)="backButtonClicked.emit()"
 >
   <ion-content class="ion-padding">
     <h1>{{ title() }}</h1>
@@ -9,9 +10,11 @@
     <form [formGroup]="biteFormGroup">
       <image-upload
         formControlName="image"
+        [imageUrl]="imageUrl()"
         [position]="this.fallbackPosition()"
         (positionFromImage)="onPositionFromImage($event)"
         (startCropImage)="emitStartCropImage($event)"
+        (clearImagePath)="resetImagePath()"
       />
 
       <ion-input
@@ -38,10 +41,10 @@
           />
 
           <ion-select formControlName="currency" interface="modal">
-            @for(currency of currencies; track currency.code) {
+            @for (currency of currencies; track currency.code) {
             <ion-select-option [value]="currency.code"
-              >{{ currency.name }}</ion-select-option
-            >
+              >{{ currency.name }}
+            </ion-select-option>
             }
           </ion-select>
         </div>

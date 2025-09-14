@@ -6,6 +6,7 @@ export interface Bite {
   id: string;
   name: string;
   image: string;
+  imagePath?: string;
   place: string;
   price: number;
   currency?: string;

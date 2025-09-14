@@ -106,7 +106,7 @@ describe('compressPhoto', () => {
     const compressedFile = await compressPhoto(smallPhoto, 512, 512);
     expect(compressedFile).toBeInstanceOf(File);
     expect(compressedFile.size).toBeLessThanOrEqual(800 * 1024);
-    expect(compressedFile.name).toMatch(/\.jpg$/);
+    expect(compressedFile.name).toEqual('file.image/jpeg');
     expect(global.URL.revokeObjectURL).toHaveBeenCalled();
   });
 

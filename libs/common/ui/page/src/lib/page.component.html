@@ -3,7 +3,7 @@
     <ion-toolbar>
       <ion-buttons slot="start">
         @if (enableBackButton()) {
-        <ion-back-button defaultHref="/" />
+        <ion-back-button defaultHref="/" (click)="backButtonClicked.emit()" />
         }
       </ion-buttons>
 

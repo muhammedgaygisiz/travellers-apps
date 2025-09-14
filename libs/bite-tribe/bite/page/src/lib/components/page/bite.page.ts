@@ -20,7 +20,13 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { Platform } from '@ionic/angular';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
@@ -62,6 +68,10 @@ export class BitePage {
 
   image = input<string>('');
 
+  isCropped = input<boolean>(false);
+
+  isNew = input<boolean>(false);
+
   currency = input<string>();
 
   position = input<Geopoint>();
@@ -74,50 +84,66 @@ export class BitePage {
 
   startCropImage = output<string | null>();
 
+  backButtonClicked = output();
+
   isWeb = signal(!this.platform.is('hybrid'));
 
   currencies = currencyCodes;
 
-  biteFormGroup = this.formBuilder.group({
-    id: [''],
-    restaurantId: [''],
-    image: ['', Validators.required],
-    name: ['', Validators.required],
-    place: ['', Validators.required],
-    price: [
-      null as number | null,
-      [Validators.required, FloatNumberDotNotationValidator()],
-    ],
-    currency: ['EUR', Validators.required],
-    tags: [[] as string[]],
-    position: [this.position(), Validators.required],
-    rating: [0, [Validators.min(0), Validators.max(5)]],
-  });
+  biteFormGroup = this.formBuilder.group(
+    {
+      id: [''],
+      restaurantId: [''],
+      image: [''],
+      imagePath: [''],
+      name: ['', Validators.required],
+      place: ['', Validators.required],
+      price: [
+        null as number | null,
+        [Validators.required, FloatNumberDotNotationValidator()],
+      ],
+      currency: ['EUR', Validators.required],
+      tags: [[] as string[]],
+      position: [this.position(), Validators.required],
+      rating: [0, [Validators.min(0), Validators.max(5)]],
+    },
+    {
+      validators: [
+        (fg): ValidationErrors | null => {
+          const imageValue = fg.get('image')?.value;
+          const imagePathValue = fg.get('imagePath')?.value;
+
+          if (!imageValue && !imagePathValue) {
+            return { imageRequired: true };
+          }
+
+          return null;
+        },
+      ],
+    }
+  );
 
   biteInitFromInputEffect = effect(() => {
     const bite = this.bite();
     const image = this.image();
 
-    if (bite) {
-      this.biteFormGroup.patchValue({
-        id: bite.id,
-        image: image || bite.image,
-        name: bite.name,
-        place: bite.place,
-        price: bite.price,
-        currency: bite.currency,
-        tags: bite.tags || [],
-        position: bite.position,
-        restaurantId: bite.restaurantId || '',
-        rating: bite.rating || 0,
-      });
+    if (!bite) {
+      return;
     }
 
-    if (image) {
-      this.biteFormGroup.patchValue({
-        image: image,
-      });
-    }
+    this.biteFormGroup.patchValue({
+      id: bite.id,
+      image: image || bite.image,
+      imagePath: bite.imagePath,
+      name: bite.name,
+      place: bite.place,
+      price: bite.price,
+      currency: bite.currency,
+      tags: bite.tags || [],
+      position: bite.position,
+      restaurantId: bite.restaurantId || '',
+      rating: bite.rating || 0,
+    });
 
     if (bite?.position) {
       this.fallbackPosition.set(bite.position);
@@ -181,6 +207,18 @@ export class BitePage {
     return '';
   });
 
+  imagePathValue = toSignal(
+    this.biteFormGroup.valueChanges.pipe(
+      map((formValue) => formValue.imagePath)
+    )
+  );
+
+  imageUrl = computed(() => {
+    const imagePathValue = this.imagePathValue();
+
+    return imagePathValue || undefined;
+  });
+
   saveBite(): void {
     if (this.biteFormGroup.valid) {
       const newBite = this.biteFormGroup.value;
@@ -203,5 +241,9 @@ export class BitePage {
     if (tagsControl) {
       tagsControl.setValue(tags);
     }
+  }
+
+  resetImagePath(): void {
+    this.biteFormGroup.get('imagePath')?.reset();
   }
 }

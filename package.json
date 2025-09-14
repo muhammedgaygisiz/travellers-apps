@@ -36,6 +36,7 @@
     "@capacitor-firebase/analytics": "7.3.0",
     "@capacitor-firebase/authentication": "7.3.0",
     "@capacitor-firebase/firestore": "7.3.0",
+    "@capacitor-firebase/storage": "^7.3.0",
     "@capacitor/android": "7.4.2",
     "@capacitor/app": "7.0.2",
     "@capacitor/app-launcher": "7.0.2",
@@ -158,6 +159,9 @@
       "firebase": "12.1.0"
     },
     "@capacitor-firebase/firestore": {
+      "firebase": "12.1.0"
+    },
+    "@capacitor-firebase/storage": {
       "firebase": "12.1.0"
     }
   }

@@ -1187,6 +1187,9 @@ PODS:
   - CapacitorFirebaseFirestore (7.3.0):
     - Capacitor
     - FirebaseFirestore (~> 11.7.0)
+  - CapacitorFirebaseStorage (7.3.0):
+    - Capacitor
+    - FirebaseStorage (~> 11.7.0)
   - CapacitorGeolocation (7.1.4):
     - Capacitor
     - IONGeolocationLib (~> 1.0)
@@ -1253,6 +1256,13 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
   - FirebaseSharedSwift (11.12.0)
+  - FirebaseStorage (11.7.0):
+    - FirebaseAppCheckInterop (~> 11.0)
+    - FirebaseAuthInterop (~> 11.0)
+    - FirebaseCore (~> 11.7.0)
+    - FirebaseCoreExtension (~> 11.7.0)
+    - GoogleUtilities/Environment (~> 8.0)
+    - GTMSessionFetcher/Core (< 5.0, >= 3.4)
   - GoogleAppMeasurement (11.7.0):
     - GoogleAppMeasurement/AdIdSupport (= 11.7.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
@@ -1419,6 +1429,7 @@ DEPENDENCIES:
   - "CapacitorFirebaseAuthentication (from `../../../../node_modules/@capacitor-firebase/authentication`)"
   - "CapacitorFirebaseAuthentication/Google (from `../../../../node_modules/@capacitor-firebase/authentication`)"
   - "CapacitorFirebaseFirestore (from `../../../../node_modules/@capacitor-firebase/firestore`)"
+  - "CapacitorFirebaseStorage (from `../../../../node_modules/@capacitor-firebase/storage`)"
   - "CapacitorGeolocation (from `../../../../node_modules/@capacitor/geolocation`)"
 
 SPEC REPOS:
@@ -1437,6 +1448,7 @@ SPEC REPOS:
     - FirebaseFirestoreInternal
     - FirebaseInstallations
     - FirebaseSharedSwift
+    - FirebaseStorage
     - GoogleAppMeasurement
     - GoogleAppMeasurementOnDeviceConversion
     - GoogleSignIn
@@ -1466,6 +1478,8 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor-firebase/authentication"
   CapacitorFirebaseFirestore:
     :path: "../../../../node_modules/@capacitor-firebase/firestore"
+  CapacitorFirebaseStorage:
+    :path: "../../../../node_modules/@capacitor-firebase/storage"
   CapacitorGeolocation:
     :path: "../../../../node_modules/@capacitor/geolocation"
 
@@ -1480,6 +1494,7 @@ SPEC CHECKSUMS:
   CapacitorFirebaseAnalytics: 99fb86679f3a40b148d6e3e7ddeb6115a9c08edf
   CapacitorFirebaseAuthentication: b25177f2b09cf7581d3f11d96008cc56dcb5aa36
   CapacitorFirebaseFirestore: 503c97e3032ad2582061a06ee8d1c83555e842d7
+  CapacitorFirebaseStorage: 14790a1e4b6744e598cb7b5c3f128e82122aeb82
   CapacitorGeolocation: 32a1f849c38c72b5071de36a28ebc548ef3bb611
   FirebaseAnalytics: bc9e565af9044ba8d6c6e4157e4edca8e5fdf7ec
   FirebaseAppCheckInterop: 73b173e5ec45192e2d522ad43f526a82ad10b852
@@ -1492,6 +1507,7 @@ SPEC CHECKSUMS:
   FirebaseFirestoreInternal: 953e31e70db09d928b927b65761171c680d2ea9b
   FirebaseInstallations: 9347e719c3d52d8d7b9074b2c32407dd027305e9
   FirebaseSharedSwift: d2475748a2d2a36242ed13baa34b2acda846c925
+  FirebaseStorage: d35da127dd49edcbd07b8c07cf651a70161558b2
   GoogleAppMeasurement: 0471a5b5bff51f3a91b1e76df22c952d04c63967
   GoogleAppMeasurementOnDeviceConversion: 35ca1deeb019c506d04da8d4887f0d107d1ffca4
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
@@ -1506,6 +1522,6 @@ SPEC CHECKSUMS:
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
 
-PODFILE CHECKSUM: cd800025f0be760affdd66670f2f4dc63c1ff91c
+PODFILE CHECKSUM: c8c532bbb40f1cb4a695e3b98bd6922287e09675
 
 COCOAPODS: 1.16.2

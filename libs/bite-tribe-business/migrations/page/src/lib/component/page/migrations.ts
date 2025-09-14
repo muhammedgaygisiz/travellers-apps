@@ -11,6 +11,8 @@ import {
   guessExtFromContentType,
 } from 'utils';
 
+const BITE_COLLECTION = 'bites';
+
 @Component({
   selector: 'btb-migrations',
   templateUrl: './migrations.html',
@@ -35,9 +37,8 @@ export class Migrations {
 
     console.log('GUESSED IMAGE CONTENT TYPE', ext);
 
-    const collection = 'bites';
     const docId = bite.id;
-    const objectPath = `images/${collection}/${docId}/${uuidv4()}.${ext}`;
+    const objectPath = `images/${BITE_COLLECTION}/${docId}/${uuidv4()}.${ext}`;
 
     console.log('OBJECT PATH', objectPath);
 
@@ -53,31 +54,14 @@ export class Migrations {
       await FirebaseStorage.uploadFile(
         { path: objectPath, blob, metadata },
         async (event, error) => {
-          if (error) console.log(error);
+          if (error) {
+            console.log(error);
+          }
 
           if (event?.completed) {
             console.log('Upload complete');
 
-            const downloadUrl = await getDownloadUrlFromFirebaseStorage(
-              objectPath
-            );
-
-            console.log('DOWNLOAD URL', downloadUrl);
-
-            const migratedBite = {
-              ...bite,
-              image: '', // clear base64 image
-              imagePath: downloadUrl,
-              updatedAt: new Date().toISOString(),
-              updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-            };
-
-            console.log('BITE -> MIGRATED BITE', bite, migratedBite);
-
-            await FirebaseFirestore.updateDocument({
-              reference: `${collection}/${docId}`,
-              data: migratedBite,
-            });
+            await this.updateBiteWithImagePath(objectPath, bite, docId);
           }
           // event.progress (0..1) is available if you want a UI
         }
@@ -85,5 +69,30 @@ export class Migrations {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  private async updateBiteWithImagePath(
+    objectPath: string,
+    bite: Bite,
+    docId: string
+  ): Promise<void> {
+    const downloadUrl = await getDownloadUrlFromFirebaseStorage(objectPath);
+
+    console.log('DOWNLOAD URL', downloadUrl);
+
+    const migratedBite = {
+      ...bite,
+      image: '', // clear base64 image
+      imagePath: downloadUrl,
+      updatedAt: new Date().toISOString(),
+      updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
+    };
+
+    console.log('BITE -> MIGRATED BITE', bite, migratedBite);
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${BITE_COLLECTION}/${docId}`,
+      data: migratedBite,
+    });
   }
 }

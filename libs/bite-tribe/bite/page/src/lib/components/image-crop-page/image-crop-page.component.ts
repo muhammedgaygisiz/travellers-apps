@@ -7,12 +7,15 @@ import {
   input,
   linkedSignal,
   output,
-  signal,
   viewChild,
 } from '@angular/core';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { PageComponent } from 'common/ui/page';
 import { IonButton, IonContent } from '@ionic/angular/standalone';
+import {
+  base64ToFile,
+  extractFileFromHtmlImageElement,
+} from 'image-compression';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,7 +50,7 @@ export class ImageCropPageComponent {
     const image = this.image() || '';
 
     if (this.isBase64()) {
-      return this.dataURLtoFile(image) as File;
+      return base64ToFile(image);
     }
 
     return null;
@@ -58,7 +61,7 @@ export class ImageCropPageComponent {
 
     if (htmlElem) {
       htmlElem.onload = (evt): void => {
-        const file = this.extractFileFromHtmlImageElement(htmlElem);
+        const file = extractFileFromHtmlImageElement(htmlElem);
 
         this.imageFileNew.set(file);
       };
@@ -92,34 +95,5 @@ export class ImageCropPageComponent {
     const reader = new FileReader();
     reader.onload = (): void => this.croppedImage.emit(reader.result as string);
     reader.readAsDataURL(croppedFile);
-  }
-
-  dataURLtoFile(dataurl: string): File {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)?.[1];
-    const bstr = atob(arr[arr.length - 1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], new Date().toISOString(), { type: mime });
-  }
-
-  private extractFileFromHtmlImageElement(elem: HTMLImageElement): File {
-    const canvas = document.createElement('canvas');
-    canvas.width = elem.naturalWidth;
-    canvas.height = elem.naturalHeight;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      throw new Error('Could not get canvas context');
-    }
-
-    ctx.drawImage(elem, 0, 0);
-
-    const dataUrl = canvas.toDataURL('image/png');
-
-    return this.dataURLtoFile(dataUrl) as File;
   }
 }

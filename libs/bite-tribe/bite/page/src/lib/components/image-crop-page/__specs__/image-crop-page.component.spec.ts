@@ -2,8 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ImageCropPageComponent } from '../image-crop-page.component';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { signal } from '@angular/core';
+import { addNecessaryIcons } from 'utils';
 
 jest.mock('localization');
+
+addNecessaryIcons();
 
 type MockFileReader = {
   readAsDataURL: jest.Mock;
@@ -79,15 +83,52 @@ describe('ImageCropPageComponent', () => {
     expect(console.error).toHaveBeenCalledWith('Image load failed.');
   });
 
-  it('should convert data URL to file', () => {
-    const file = component.dataURLtoFile(IMAGE_BLOB);
-    expect(file instanceof File).toBeTruthy();
-    expect(file.type).toBe('image/png');
-  });
-
   it('should handle image cropped event', () => {
     jest.spyOn(component, 'onLoadImageFailed');
     component.onImageCropped(imageCroppedEvent);
     expect(component.currentCropBlob).toBe(imageCroppedEvent.blob);
+  });
+
+  describe('imageFileNew', () => {
+    it('should return null for non-base64 image', () => {
+      component.image = signal('http://example.com/image.png') as any;
+
+      expect(component.imageFileNew()).toBeNull();
+    });
+
+    it('should return File for base64 image', () => {
+      component.image = signal(IMAGE_BLOB) as any;
+
+      const file = component.imageFileNew();
+      expect(file instanceof File).toBeTruthy();
+      expect(file?.type).toBe('image/png');
+    });
+  });
+
+  describe('imgFromHtmlElem', () => {
+    it('should set onload handler for image element', async () => {
+      const mockImageElement = {
+        onload: null,
+      } as unknown as HTMLImageElement;
+
+      // Mock the nativeElement to return our mockImageElement
+      component.imageFromUrl = signal({
+        nativeElement: mockImageElement,
+      }) as any;
+      const PNG_FILE = new File([''], 'image.png', { type: 'image/png' });
+      component['extractFileFromHtmlImageElement'] = jest.fn(() => PNG_FILE);
+
+      fixture.detectChanges();
+      await fixture.whenRenderingDone();
+
+      expect(mockImageElement.onload).toBeInstanceOf(Function);
+
+      // Simulate image load
+      mockImageElement.onload?.({} as any);
+
+      const file = component.imageFileNew();
+      expect(file instanceof File).toBeTruthy();
+      expect(file?.type).toBe('image/png');
+    });
   });
 });

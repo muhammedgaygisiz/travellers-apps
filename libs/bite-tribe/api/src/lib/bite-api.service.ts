@@ -213,18 +213,17 @@ export class BiteApiService {
   async deleteBite(bite: any): Promise<void> {
     try {
       if (bite.id) {
-        const imagePathInFirestore = bite.imagePath;
-        const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
-
-        if (imagePath) {
-          try {
+        try {
+          const imagePathInFirestore = bite.imagePath;
+          const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
+          if (imagePath) {
             await FirebaseStorage.deleteFile({
               path: imagePath,
             });
-          } catch (error) {
-            console.error('Error deleting image:', error);
-            this.errorHandler.handleError(error);
           }
+        } catch (error) {
+          console.error('Error deleting image:', error);
+          this.errorHandler.handleError(error);
         }
 
         await FirebaseFirestore.deleteDocument({

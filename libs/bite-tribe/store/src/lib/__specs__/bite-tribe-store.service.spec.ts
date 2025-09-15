@@ -81,9 +81,7 @@ describe('BiteTribeStoreService', () => {
     it('should throw an error when confirmError is called', inject(
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
-        expect(() => service.confirmError()).toThrowError(
-          'Method not implemented.'
-        );
+        expect(() => service.confirmError()).toThrow('Method not implemented.');
       }
     ));
   });

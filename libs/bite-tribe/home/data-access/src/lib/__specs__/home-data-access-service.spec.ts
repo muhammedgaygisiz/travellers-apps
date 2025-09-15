@@ -2,7 +2,9 @@ import { inject, TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from '../home-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
-import { Bite } from 'model';
+import { Bite, Like } from 'model';
+import { provideMockStore } from '@ngrx/store/testing';
+import SpyInstance = jest.SpyInstance;
 
 class Mock {
   sortedHomeBites$ = of([]);
@@ -28,6 +30,7 @@ class Mock {
   setHomeFilters = () => null;
   clearHomeFilters = () => null;
   reloadBites = () => null;
+  removeLike = () => null;
 }
 
 describe('HomeDataAccessService', () => {
@@ -37,6 +40,7 @@ describe('HomeDataAccessService', () => {
     TestBed.configureTestingModule({
       providers: [
         HomeDataAccessService,
+        provideMockStore(),
         { provide: BiteTribeStoreService, useClass: Mock },
       ],
     }).compileComponents();
@@ -62,6 +66,30 @@ describe('HomeDataAccessService', () => {
   });
 
   describe('submitLikeClick', () => {
+    let removeLikeSpy: SpyInstance;
+    const likeType = { likeType: 'dislike', biteId: '456' };
+    const like = {
+      biteId: likeType.biteId,
+      userId: 'userId',
+      likeType: likeType.likeType,
+    } as unknown as Like;
+    const bite = {
+      id: like.biteId,
+      userId: like.userId,
+      likes: [like],
+    } as Bite;
+
+    beforeEach(inject(
+      [BiteTribeStoreService],
+      (storeService: BiteTribeStoreService) => {
+        removeLikeSpy = jest
+          .spyOn(biteTribeStoreService, 'removeLike')
+          .mockImplementation();
+        storeService.sortedHomeBites$ = of([bite]);
+        storeService.userId$ = of('userId');
+      }
+    ));
+
     it('should call submitLikeClick on BiteTribeStoreService', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
@@ -73,6 +101,14 @@ describe('HomeDataAccessService', () => {
         service.submitLikeClick(likeType);
         expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
         expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
+      }
+    ));
+
+    it('should call submitLikeClick with correct arguments', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        service.submitLikeClick(likeType);
+        expect(removeLikeSpy).toHaveBeenCalledWith(likeType);
       }
     ));
   });

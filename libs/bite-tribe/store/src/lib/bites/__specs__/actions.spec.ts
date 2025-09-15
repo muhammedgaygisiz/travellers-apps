@@ -8,6 +8,7 @@ import {
   saveExistingBite,
   saveNewBite,
   saveTags,
+  stopReloadingBites,
 } from '../actions';
 
 describe('Bites - Actions', () => {
@@ -45,5 +46,9 @@ describe('Bites - Actions', () => {
 
   it('should have noPublicCreatorForBite action', () => {
     expect(noPublicCreatorForBite).toBeDefined();
+  });
+
+  it('should have stopReloadingBites action', () => {
+    expect(stopReloadingBites).toBeDefined();
   });
 });

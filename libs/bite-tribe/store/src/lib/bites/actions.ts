@@ -40,3 +40,5 @@ export const loadedBiteCreator = createAction(
 export const noPublicCreatorForBite = createAction(
   '[BITES] No public creator for bite'
 );
+
+export const stopReloadingBites = createAction('[BITES] Stop reloading bites');

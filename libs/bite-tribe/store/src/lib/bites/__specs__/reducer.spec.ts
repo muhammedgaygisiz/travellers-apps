@@ -1,5 +1,9 @@
 import { reducer } from '../reducer';
-import { loadedBitesFromApi, reloadBites } from '../actions';
+import {
+  loadedBitesFromApi,
+  reloadBites,
+  stopReloadingBites,
+} from '../actions';
 import { Bite } from 'model';
 
 describe('Bite Reducer', () => {
@@ -12,6 +16,20 @@ describe('Bite Reducer', () => {
       const reloadBitesAction = reloadBites();
 
       expect(reducer(INITIAL_STATE, reloadBitesAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('stopReloadingBites', () => {
+    it('should reset the state to initial values', () => {
+      const INITIAL_STATE = { ids: [], entities: {}, reloading: true };
+
+      const NEW_STATE = { ids: [], entities: {}, reloading: false };
+
+      const stopReloadingBitesAction = stopReloadingBites();
+
+      expect(reducer(INITIAL_STATE, stopReloadingBitesAction)).toEqual({
         ...NEW_STATE,
       });
     });

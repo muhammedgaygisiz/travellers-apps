@@ -7,6 +7,7 @@ import {
   noPublicCreatorForBite,
   reloadBites,
   saveNewBite,
+  stopReloadingBites,
 } from './actions';
 import { fromAuth } from 'ta-firestore';
 
@@ -38,6 +39,12 @@ export const reducer = createReducer(
     return {
       ...state,
       reloading: true,
+    };
+  }),
+  on(stopReloadingBites, (state) => {
+    return {
+      ...state,
+      reloading: false,
     };
   }),
   on(loadedBitesFromApi, (state) => {

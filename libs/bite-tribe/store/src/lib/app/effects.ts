@@ -18,6 +18,7 @@ import { AlertController, Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
+import { reloadBites, stopReloadingBites } from '../bites/actions';
 
 @Injectable()
 export class AppEffect {
@@ -69,7 +70,7 @@ export class AppEffect {
   fetchGpsPosition$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(fromAuth.loadedUser, fetchGpsPosition),
+        ofType(fromAuth.loadedUser, fetchGpsPosition, reloadBites),
         filter((payload) => {
           if (payload.type === fromAuth.loadedUser.type) {
             return !!payload.user;
@@ -99,6 +100,13 @@ export class AppEffect {
     },
     { useEffectsErrorHandler: true }
   );
+
+  stopReloadingBites$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(loadedGpsPosition, errorLoadingGpsPosition),
+      map(() => stopReloadingBites())
+    );
+  });
 
   saveSettingsToFirestore$ = createEffect(
     () => {

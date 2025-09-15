@@ -73,7 +73,6 @@ import { TagsInputComponent } from 'common/ui/tags';
     TagsInputComponent,
   ],
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class DetailsPage {
   bite = input<Bite>();
   reviews = input<Review[]>([]);
@@ -115,7 +114,7 @@ export class DetailsPage {
     { initialValue: !this.reviewFormGroup.valid }
   );
 
-  saveReview() {
+  saveReview(): void {
     if (!this.reviewFormGroup.valid) {
       return;
     }
@@ -137,11 +136,11 @@ export class DetailsPage {
     this.reviewFormGroup.reset();
   }
 
-  onNewList(newListName: string) {
+  onNewList(newListName: string): void {
     this.newList.emit(newListName);
   }
 
-  async showBucketListsSelection($event: MouseEvent) {
+  async showBucketListsSelection($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
       component: BucketListSelectionComponent,
       event: $event,
@@ -160,7 +159,7 @@ export class DetailsPage {
     await popover.present();
   }
 
-  onRestaurantClick(biteData: Bite | undefined) {
+  onRestaurantClick(biteData: Bite | undefined): void {
     if (biteData) {
       this.restaurantClick.emit(biteData);
     }
@@ -171,7 +170,7 @@ export class DetailsPage {
     return result.value;
   }
 
-  async openNavigation() {
+  async openNavigation(): Promise<void> {
     const biteData = this.bite();
     if (!biteData?.position) {
       return;
@@ -210,11 +209,14 @@ export class DetailsPage {
     window.open(url, target);
   }
 
-  private buildUrlForBrowser(destination: string) {
+  private buildUrlForBrowser(destination: string): string {
     return `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
   }
 
-  private buildUrlForAndroidChooser(biteData: Bite, destination: string) {
+  private buildUrlForAndroidChooser(
+    biteData: Bite,
+    destination: string
+  ): string {
     const label = encodeURIComponent(biteData.name || 'Destination');
     return `geo:0,0?q=${destination}(${label})`;
   }
@@ -223,7 +225,7 @@ export class DetailsPage {
     appleMapsUrl: string,
     target: string,
     googleMapsUrl: string
-  ) {
+  ): Promise<void> {
     const alert = await this.alertController.create({
       header: 'Choose Navigation App',
       buttons: [
@@ -233,13 +235,13 @@ export class DetailsPage {
         },
         {
           text: 'Apple Maps',
-          handler: () => {
+          handler: (): void => {
             window.open(appleMapsUrl, target);
           },
         },
         {
           text: 'Google Maps',
-          handler: () => {
+          handler: (): void => {
             window.open(googleMapsUrl, target);
           },
         },

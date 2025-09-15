@@ -11,7 +11,7 @@ export class RestaurantDataAccessService {
 
   restaurantToCreate = toSignal(this.storeService.restaurantToCreate$);
 
-  submitNewRestaurant(restaurant: Restaurant) {
+  submitNewRestaurant(restaurant: Restaurant): void {
     this.storeService.save(restaurant, 'restaurant');
   }
 }

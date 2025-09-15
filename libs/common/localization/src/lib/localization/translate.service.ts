@@ -6,7 +6,7 @@ import { SupportedLang } from './model/supported-lang';
 export class TranslateService {
   private readonly translocoService = inject(TranslocoService);
 
-  setActiveLang(lang: SupportedLang) {
+  setActiveLang(lang: SupportedLang): void {
     this.translocoService.setActiveLang(lang);
   }
 }

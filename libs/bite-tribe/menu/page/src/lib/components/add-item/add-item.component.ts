@@ -20,7 +20,6 @@ import { MenuItem } from 'model';
   templateUrl: './add-item.component.html',
   styleUrl: './add-item.component.scss',
   imports: [IonButton, IonInput, IonList, IonItem, ReactiveFormsModule],
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'add-item',
 })
 export class AddItemComponent {
@@ -47,7 +46,7 @@ export class AddItemComponent {
     { initialValue: !this.newItemForm.valid }
   );
 
-  onAddCategory() {
+  onAddCategory(): void {
     if (this.newItemForm.valid) {
       this.addItem.emit(this.newItemForm.value as MenuItem);
     }

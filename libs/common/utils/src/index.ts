@@ -14,3 +14,7 @@ export * from './lib/app-tokens';
 export { toDate } from './lib/to-date';
 export { byDate } from './lib/by-date';
 export { Login } from './lib/login';
+export { dataUrlToBlob } from './lib/data-url-to-blob';
+export { guessExtFromContentType } from './lib/guess-ext-from-content-type';
+export { getDownloadUrlFromFirebaseStorage } from './lib/get-download-url-from-firebase-storage';
+export { storagePathFromDownloadUrl } from './lib/storage-path-from-download-url';

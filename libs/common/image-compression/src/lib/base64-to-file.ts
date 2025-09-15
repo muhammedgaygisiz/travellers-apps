@@ -1,10 +1,11 @@
 export const base64ToFile = (
   base64: string | undefined = '',
-  format: string
+  format?: string
 ): File => {
   try {
     const arr = base64.split(',');
     const mime = arr[0].match(/:(.*?);/)?.[1] || '';
+    format = mime;
 
     // If there's no comma, arr[1] will be undefined
     if (!arr[1]) {

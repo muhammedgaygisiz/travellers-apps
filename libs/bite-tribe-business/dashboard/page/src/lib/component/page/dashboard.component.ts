@@ -16,7 +16,6 @@ import { Restaurant } from 'model';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bt-business-dashboard',
   templateUrl: './dashboard.component.html',
   imports: [
@@ -36,6 +35,8 @@ export class DashboardComponent {
   readonly logoutClick = output();
 
   readonly gotoSettings = output();
+
+  readonly gotoMigrations = output();
 
   readonly restaurantClick = output<Restaurant>();
   readonly createRestaurantClick = output<Restaurant>();

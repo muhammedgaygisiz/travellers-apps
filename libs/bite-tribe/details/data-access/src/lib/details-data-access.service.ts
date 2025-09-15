@@ -20,7 +20,7 @@ export class DetailsDataAccessService {
   });
   biteCreator = toSignal(this.storeService.biteCreator$);
 
-  saveNewTags(newTags: string[]) {
+  saveNewTags(newTags: string[]): void {
     const currentBite = this.bite();
 
     if (currentBite) {
@@ -30,26 +30,26 @@ export class DetailsDataAccessService {
     }
   }
 
-  saveNewReview(newReview: { review: string; biteId: string }) {
+  saveNewReview(newReview: { review: string; biteId: string }): void {
     this.storeService.saveReview(newReview);
   }
 
-  saveToBucketList(saveToBucketListEvent: SaveToBucketListParams) {
+  saveToBucketList(saveToBucketListEvent: SaveToBucketListParams): void {
     this.storeService.saveToBucketList(saveToBucketListEvent);
   }
 
   createAndSaveToBucketList(param: {
     bucketListName: string;
     biteId: string | undefined;
-  }) {
+  }): void {
     this.storeService.createAndSaveToBucketList(param);
   }
 
-  removeBiteFromBucketlist($event: RemoveBiteFromBucketlistParams) {
+  removeBiteFromBucketlist($event: RemoveBiteFromBucketlistParams): void {
     this.storeService.removeBiteFromBucketlist($event);
   }
 
-  submitLikeClick(likeType: { likeType: string; biteId: string }) {
+  submitLikeClick(likeType: { likeType: string; biteId: string }): void {
     const bite = this.bite();
     const userId = this.userId();
 
@@ -65,7 +65,7 @@ export class DetailsDataAccessService {
     this.storeService.submitLikeClick(likeType);
   }
 
-  logout() {
+  logout(): void {
     this.storeService.logout();
   }
 }

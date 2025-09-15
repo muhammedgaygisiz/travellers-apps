@@ -31,7 +31,6 @@ import { ConfirmDialogComponent } from 'bite-tribe-common/confirm-dialog';
 import { currencyCodes } from 'utils';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'settings',
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
@@ -50,7 +49,6 @@ import { currencyCodes } from 'utils';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class PageSettings {
   user = input<User>();
   publicUser = input<PublicUser>();
@@ -81,7 +79,6 @@ export class PageSettings {
     const settings = this.settings();
 
     if (settings) {
-      // eslint-disable-next-line no-unused-vars
       const { updatedAt, ...rest } = settings;
       this.settingsForm.patchValue(rest);
     }
@@ -149,7 +146,7 @@ export class PageSettings {
       });
   }
 
-  saveSettings() {
+  saveSettings(): void {
     if (!this.settingsForm.valid) {
       return;
     }
@@ -175,7 +172,7 @@ export class PageSettings {
     });
   }
 
-  onReturnToPrivate() {
+  onReturnToPrivate(): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Return to Private Profile',

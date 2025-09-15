@@ -13,6 +13,7 @@ def capacitor_pods
   pod 'CapacitorCordova', :path => '../../../../node_modules/@capacitor/ios'
   pod 'CapacitorFirebaseAuthentication', :path => '../../../../node_modules/@capacitor-firebase/authentication'
   pod 'CapacitorFirebaseFirestore', :path => '../../../../node_modules/@capacitor-firebase/firestore'
+  pod 'CapacitorFirebaseStorage', :path => '../../../../node_modules/@capacitor-firebase/storage'
   pod 'CapacitorFirebaseAnalytics', :path => '../../../../node_modules/@capacitor-firebase/analytics'
   pod 'CapacitorGeolocation', :path => '../../../../node_modules/@capacitor/geolocation'
   pod 'CapacitorCamera', :path => '../../../../node_modules/@capacitor/camera'

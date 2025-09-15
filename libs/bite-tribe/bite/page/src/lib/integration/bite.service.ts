@@ -22,11 +22,15 @@ export class BiteService {
     if (croppedImage) {
       return croppedImage;
     }
+
     return originalImage;
   });
 
-  submitNewBite(newBite: any) {
-    // eslint-disable-next-line no-unused-vars
+  isCropped = computed(() => {
+    return !!this.croppedImage();
+  });
+
+  submitNewBite(newBite: any): void {
     const { id, ...biteData } = newBite;
 
     this.dataAccess.submitBite(biteData);
@@ -34,21 +38,36 @@ export class BiteService {
     this.navController.navigateBack(['home']);
   }
 
-  submitEditedBite(editedBite: any) {
+  submitEditedBite(editedBite: any): void {
     this.dataAccess.submitBite(editedBite);
 
     this.navController.navigateBack(['my-bites']);
+
+    this.clearCropping();
   }
 
-  startCropImage(image: string | null) {
+  startCropImage(image: string | null): void {
     if (image) {
       this.originalImage.set(image);
       this.navController.navigateForward(['image-crop']);
+      return;
+    }
+
+    const imagePath = this.bite()?.imagePath;
+    if (imagePath) {
+      this.originalImage.set(imagePath);
+      this.navController.navigateForward(['image-crop']);
+      return;
     }
   }
 
-  setCroppedImage(image: string) {
+  setCroppedImage(image: string): void {
     this.croppedImage.set(image);
     this.navController.back();
+  }
+
+  clearCropping(): void {
+    this.originalImage.set('');
+    this.croppedImage.set('');
   }
 }

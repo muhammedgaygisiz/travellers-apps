@@ -14,11 +14,10 @@ import {
   IonIcon,
 } from '@ionic/angular/standalone';
 import { Bite, PublicUser } from 'model';
-import { NgIf } from '@angular/common';
+
 import { BiteComponent } from 'bite-tribe-common/bite';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'profile-page',
   templateUrl: 'profile.component.html',
   styleUrl: 'profile.component.scss',
@@ -28,7 +27,6 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonContent,
     IonAvatar,
     IonButton,
-    NgIf,
     BiteComponent,
     IonBadge,
     IonIcon,

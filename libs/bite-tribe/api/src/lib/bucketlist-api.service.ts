@@ -14,6 +14,7 @@ import {
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
 } from 'model';
+import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 const BUCKETLIST_COLLECTION = 'bucketlists';
 
@@ -40,12 +41,12 @@ export class BucketlistApiService {
     })
   );
 
-  private async getUser() {
+  private async getUser(): Promise<User | null | undefined> {
     const authState = await this.authService.authState();
     return authState?.user;
   }
 
-  private async startBucketlistsListener() {
+  private async startBucketlistsListener(): Promise<void> {
     const user = await this.getUser();
 
     this.bucketlistCallbackId =
@@ -64,7 +65,7 @@ export class BucketlistApiService {
             ],
           },
         },
-        async (bucketlistDocs) => {
+        async (bucketlistDocs): Promise<void> => {
           const bucketlists =
             bucketlistDocs?.snapshots.map((doc) => ({
               ...doc.data,
@@ -76,7 +77,7 @@ export class BucketlistApiService {
       );
   }
 
-  private async stopBucketlistListener(callbackId: string) {
+  private async stopBucketlistListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });
@@ -86,7 +87,7 @@ export class BucketlistApiService {
   async saveBiteIdToBucketList({
     bucketListId,
     biteId,
-  }: SaveToBucketListParams) {
+  }: SaveToBucketListParams): Promise<void> {
     try {
       const bucketListDoc = await FirebaseFirestore.getDocument({
         reference: `${BUCKETLIST_COLLECTION}/${bucketListId}`,
@@ -117,7 +118,7 @@ export class BucketlistApiService {
 
   async createBucketListAndSaveBiteIdToBucketList(
     params: CreateAndSaveToBucketListParams
-  ) {
+  ): Promise<void> {
     try {
       const user = await this.getUser();
 
@@ -140,7 +141,7 @@ export class BucketlistApiService {
   async removeBiteFromBucketlist({
     bucketlistId,
     biteId,
-  }: RemoveBiteFromBucketlistParams) {
+  }: RemoveBiteFromBucketlistParams): Promise<void> {
     try {
       const bucketListDoc = await FirebaseFirestore.getDocument({
         reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
@@ -164,7 +165,7 @@ export class BucketlistApiService {
     }
   }
 
-  async createBucketList(bucketlistName: string) {
+  async createBucketList(bucketlistName: string): Promise<void> {
     try {
       const user = await this.getUser();
 

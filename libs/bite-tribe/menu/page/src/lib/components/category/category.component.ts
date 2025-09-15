@@ -32,7 +32,6 @@ import { ItemReorderEventDetail } from '@ionic/angular';
     IonIcon,
     IonReorder,
   ],
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'category',
 })
 export class CategoryComponent {
@@ -61,7 +60,7 @@ export class CategoryComponent {
 
   createBiteClick = output<MenuItem>();
 
-  onAddItem(item: MenuItem, isVariant?: boolean) {
+  onAddItem(item: MenuItem, isVariant?: boolean): void {
     this.presentShowAddItem.set(false);
 
     const category = this.linkedCategory();
@@ -70,19 +69,19 @@ export class CategoryComponent {
     }
   }
 
-  showAddItem() {
+  showAddItem(): void {
     this.presentShowAddItem.set(true);
   }
 
-  onCancelAddItem() {
+  onCancelAddItem(): void {
     this.presentShowAddItem.set(false);
   }
 
-  onAddVariant(menuItem: MenuItem) {
+  onAddVariant(menuItem: MenuItem): void {
     this.onAddItem(menuItem, true);
   }
 
-  handleReorder(event: CustomEvent<ItemReorderEventDetail>) {
+  handleReorder(event: CustomEvent<ItemReorderEventDetail>): void {
     // Stop the event from bubbling up to parent reorder groups
     event.stopPropagation();
 

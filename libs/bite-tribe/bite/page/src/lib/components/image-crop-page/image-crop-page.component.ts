@@ -2,16 +2,23 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
+  ElementRef,
   input,
+  linkedSignal,
   output,
+  viewChild,
 } from '@angular/core';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { PageComponent } from 'common/ui/page';
 import { IonButton, IonContent } from '@ionic/angular/standalone';
+import {
+  base64ToFile,
+  extractFileFromHtmlImageElement,
+} from 'image-compression';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'image-crop-page',
   templateUrl: './image-crop-page.component.html',
   styleUrl: './image-crop-page.component.scss',
@@ -37,20 +44,45 @@ export class ImageCropPageComponent {
 
   currentCropBlob: Blob | null | undefined;
 
-  imageFile = computed((): File => {
+  imageFromUrl = viewChild('imageFromUrl', { read: ElementRef });
+
+  imageFileNew = linkedSignal(() => {
     const image = this.image() || '';
-    return this.dataURLtoFile(image) as File;
+
+    if (this.isBase64()) {
+      return base64ToFile(image);
+    }
+
+    return null;
   });
 
-  onLoadImageFailed() {
+  imgFromHtmlElem = effect(() => {
+    const htmlElem = this.imageFromUrl()?.nativeElement as HTMLImageElement;
+
+    if (htmlElem) {
+      htmlElem.onload = (evt): void => {
+        const file = extractFileFromHtmlImageElement(htmlElem);
+
+        this.imageFileNew.set(file);
+      };
+    }
+  });
+
+  isBase64 = computed(() => {
+    const image = this.image();
+
+    return image?.startsWith('data:');
+  });
+
+  onLoadImageFailed(): void {
     console.error('Image load failed.');
   }
 
-  onImageCropped(imageCroppedEvent: ImageCroppedEvent) {
+  onImageCropped(imageCroppedEvent: ImageCroppedEvent): void {
     this.currentCropBlob = imageCroppedEvent.blob;
   }
 
-  async emitCroppedImage() {
+  async emitCroppedImage(): Promise<void> {
     if (!this.currentCropBlob) {
       this.onLoadImageFailed();
       return;
@@ -61,19 +93,7 @@ export class ImageCropPageComponent {
     });
 
     const reader = new FileReader();
-    reader.onload = () => this.croppedImage.emit(reader.result as string);
+    reader.onload = (): void => this.croppedImage.emit(reader.result as string);
     reader.readAsDataURL(croppedFile);
-  }
-
-  dataURLtoFile(dataurl: string) {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)?.[1];
-    const bstr = atob(arr[arr.length - 1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], new Date().toISOString(), { type: mime });
   }
 }

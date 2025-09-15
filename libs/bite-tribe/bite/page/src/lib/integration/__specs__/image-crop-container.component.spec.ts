@@ -3,6 +3,10 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { BiteService } from '../bite.service';
 import { ImageCropContainer } from '../image-crop-container.component';
+import { addNecessaryIcons } from 'utils';
+
+jest.mock('localization');
+addNecessaryIcons();
 
 describe('ImageCropContainer', () => {
   let component: ImageCropContainer;
@@ -17,7 +21,7 @@ describe('ImageCropContainer', () => {
           useValue: {
             editingBite: signal(undefined),
             // eslint-disable-next-line @typescript-eslint/no-empty-function
-            setEditedImage: () => {},
+            setEditedImage: (): void => {},
           },
         },
       ],

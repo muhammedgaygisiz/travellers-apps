@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { BiteService } from '../bite.service';
 import { NavController } from '@ionic/angular';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
+import { signal } from '@angular/core';
 import SpyInstance = jest.SpyInstance;
 
 const Mock = {
@@ -10,6 +11,7 @@ const Mock = {
   submitEditedBite: jest.fn(),
   submitNewBite: jest.fn(),
   navigateForward: jest.fn(),
+  submitBite: jest.fn(),
 };
 
 describe('BiteService', () => {
@@ -51,9 +53,51 @@ describe('BiteService', () => {
       expect(service.originalImage()).toBe(mockImage);
     });
 
-    it('should not set originalImage signal if image is null', () => {
+    it('should set originalImage signal if image is null and bite has imagePath', () => {
+      const mockBite = { imagePath: 'biteImage.jpg' };
+      service.bite = signal(mockBite) as any;
+      service.startCropImage(null);
+
+      expect(service.originalImage()).toBe('biteImage.jpg');
+    });
+
+    it('should not set originalImage signal if image is null and bite has no imagePath', () => {
+      const mockBite = { imagePath: '' };
+      service.bite = signal(mockBite) as any;
       service.startCropImage(null);
       expect(service.originalImage()).toBe('');
+    });
+  });
+
+  describe('submitNewBite', () => {
+    it('should submit bite without id', () => {
+      const newBite = { id: '123', name: 'Test Bite' };
+      service.submitNewBite(newBite);
+
+      expect(Mock.submitBite).toHaveBeenCalledWith({ name: 'Test Bite' });
+    });
+
+    it('should call navigateBack to home', () => {
+      const newBite = { id: '123', name: 'Test Bite' };
+      service.submitNewBite(newBite);
+
+      expect(Mock.navigateBack).toHaveBeenCalledWith(['home']);
+    });
+  });
+
+  describe('submitEditedBite', () => {
+    it('should submit edited bite', () => {
+      const editedBite = { id: '123', name: 'Edited Bite' };
+      service.submitEditedBite(editedBite);
+
+      expect(Mock.submitBite).toHaveBeenCalledWith(editedBite);
+    });
+
+    it('should navigate back to my-bites', () => {
+      const editedBite = { id: '123', name: 'Edited Bite' };
+      service.submitEditedBite(editedBite);
+
+      expect(Mock.navigateBack).toHaveBeenCalledWith(['my-bites']);
     });
   });
 });

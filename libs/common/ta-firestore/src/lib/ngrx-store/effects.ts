@@ -26,6 +26,7 @@ import {
   exhaustMap,
   map,
   mergeMap,
+  Observable,
   of,
   switchMap,
   tap,
@@ -35,6 +36,7 @@ import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
 import { AFTER_LOGIN_PAGE, AFTER_LOGOUT_PAGE } from 'utils';
+import { SignInResult } from '@capacitor-firebase/authentication';
 
 type AuthCreds = { authCreds: AuthCredentials };
 
@@ -207,23 +209,23 @@ export class AuthEffects {
     { dispatch: false }
   );
 
-  private login$(authCreds: AuthCredentials) {
+  private login$(authCreds: AuthCredentials): Observable<SignInResult> {
     return this.authService.loginWithUsernameAndPassword$(authCreds);
   }
 
-  private register$(registration: AuthCredentials) {
+  private register$(registration: AuthCredentials): Observable<any> {
     return this.authService.registerWithUsernameAndPassword$(registration);
   }
 
-  private registerWithGoogleAccount$() {
+  private registerWithGoogleAccount$(): Observable<SignInResult> {
     return this.authService.registerWithGoogleAccount$();
   }
 
-  private registerWithAppleAccount$() {
+  private registerWithAppleAccount$(): Observable<SignInResult> {
     return this.authService.registerWithAppleAccount$();
   }
 
-  private registerWithFacebookAccount$() {
+  private registerWithFacebookAccount$(): Observable<SignInResult> {
     return this.authService.registerWithFacebookAccount$();
   }
 }

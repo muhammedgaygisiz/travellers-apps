@@ -10,7 +10,7 @@ const mockBite: Bite = {
   name: 'Test Bite',
 } as Bite;
 
-const createMockDataAccess = (overrides = {}) => {
+const createMockDataAccess = (overrides = {}): any => {
   const base = {
     bite: signal(mockBite),
     reviews: signal([]),
@@ -29,7 +29,7 @@ const createMockDataAccess = (overrides = {}) => {
   return { ...base, ...overrides };
 };
 
-const createNavControllerMock = () => ({
+const createNavControllerMock = (): any => ({
   navigateForward: jest.fn().mockResolvedValue(true),
   navigateBack: jest.fn().mockResolvedValue(true),
   navigateRoot: jest.fn().mockResolvedValue(true),
@@ -330,6 +330,42 @@ describe('DetailsService', () => {
       service.onGotoMyBucketlists();
       expect(mockNavController.navigateForward).toHaveBeenCalledWith([
         'my-bucketlists',
+      ]);
+    });
+  });
+
+  describe('onRestaurantClick', () => {
+    it('should navigate to restaurant page with restaurantId if available', () => {
+      const bite: Bite = {
+        id: 'bite123',
+        name: 'Test Bite',
+        restaurantId: '/restaurants/resto123',
+      } as Bite;
+
+      service.onRestaurantClick(bite);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        'bite123',
+        'restaurant',
+        'resto123',
+      ]);
+    });
+
+    it('should navigate to restaurant page with encoded place name from bite', () => {
+      const bite: Bite = {
+        id: 'bite123',
+        name: 'Test Bite',
+        place: 'Some Place',
+      } as Bite;
+
+      service.onRestaurantClick(bite);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        'bite123',
+        'restaurant',
+        encodeURIComponent('Some Place'),
       ]);
     });
   });

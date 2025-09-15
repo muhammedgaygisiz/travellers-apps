@@ -10,7 +10,7 @@ export const compressFile = (
     const img = new Image();
     img.src = blobURL;
 
-    img.onload = () =>
+    img.onload = (): void =>
       compressWithCanvas(
         img,
         file.name,
@@ -20,7 +20,7 @@ export const compressFile = (
         0.7
       );
 
-    img.onerror = () => {
+    img.onerror = (): void => {
       console.log('shit happens');
 
       return resolve({} as any);

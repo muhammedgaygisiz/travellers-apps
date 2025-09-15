@@ -86,7 +86,7 @@ export class LikeOptionsPopoverMenuComponent {
         .length || 0
   );
 
-  onLikeButtonClicked(likeType: string) {
+  onLikeButtonClicked(likeType: string): void {
     const biteId = this.bite()?.id;
 
     if (biteId) {

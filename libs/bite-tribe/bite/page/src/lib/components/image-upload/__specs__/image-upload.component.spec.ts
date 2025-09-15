@@ -44,6 +44,7 @@ describe('ImageUploadComponent', () => {
   let platformMock: Partial<Platform>;
   let navControllerMock: Partial<NavController>;
   let mockEmit: jest.Mock;
+  let originalConsoleError: typeof console.error;
 
   beforeEach(async () => {
     platformMock = {
@@ -52,6 +53,12 @@ describe('ImageUploadComponent', () => {
     navControllerMock = {
       navigateForward: jest.fn(),
     };
+
+    // Save original console.error and mock it
+    originalConsoleError = console.error;
+    jest.spyOn(console, 'error').mockImplementation(() => {
+      console.log('error was thrown in test suite');
+    });
 
     addIcons({ imageOutline });
 
@@ -82,6 +89,10 @@ describe('ImageUploadComponent', () => {
     component.value.set(null);
     component.disabled.set(false);
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    console.error = originalConsoleError; // Restore original console.error
   });
 
   it('should call clickOnFileUploader on web', () => {
@@ -214,7 +225,6 @@ describe('ImageUploadComponent', () => {
     // @ts-expect-error - Mocking FileReader
     global.FileReader = jest.fn(() => mockFileReader);
 
-    // eslint-disable-next-line no-unused-vars
     const privateComponent = component as any;
     privateComponent.setValueAndTriggerChange(testFile);
 

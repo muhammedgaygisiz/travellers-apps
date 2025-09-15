@@ -1,0 +1,46 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showLanguages]="false"
+  [showAddButton]="false"
+  [showFooter]="false"
+  [fullWidth]="true"
+  [isAuthenticated]="isAuthenticated()"
+>
+  <ion-content class="ion-padding">
+    <div class="desktop-layout">
+      <div class="first-column">
+        <h1>Bites</h1>
+      </div>
+
+      <table border="1" style="width: 100%">
+        @for (bite of bites(); let index = $index; track bite.id || index) {
+        <tr>
+          <td style="width: 15%">
+            <div style="padding: 1rem">
+              {{ bite.name }}
+              <br />
+              {{ bite.id }}
+              <br />
+              <br />
+              <ion-button (click)="migrate(bite)" [disabled]="!!bite.imagePath"
+                >Migrate</ion-button
+              >
+              @if(!bite.imagePath) {
+              <br />
+              <br />
+              <ion-text style="color: yellow">NEEDS MIGRATION!</ion-text>
+              }
+            </div>
+          </td>
+          <td>
+            <img alt="{{bite.name}}" [src]="bite?.image" width="100" />
+          </td>
+          <td>
+            <img alt="{{bite.name}}" [src]="bite.imagePath" width="100" />
+          </td>
+        </tr>
+        }
+      </table>
+    </div>
+  </ion-content>
+</ta-page>

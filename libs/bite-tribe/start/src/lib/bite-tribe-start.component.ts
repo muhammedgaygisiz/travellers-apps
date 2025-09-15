@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { IonButton, IonContent } from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -8,9 +8,10 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   templateUrl: './bite-tribe-start.component.html',
   styleUrl: './bite-tribe-start.component.scss',
   imports: [IonContent, IonButton, RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteTribeStartComponent {
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Start',
     });

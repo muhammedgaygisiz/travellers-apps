@@ -11,17 +11,18 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       title="Edit Bite"
       [bite]="service.bite()"
       [image]="service.imageToDisplay() || ''"
+      [isCropped]="service.isCropped()"
       (startCropImage)="service.startCropImage($event)"
       (submitBite)="service.submitEditedBite($event)"
+      (backButtonClicked)="service.clearCropping()"
     />
   `,
   imports: [BitePage],
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class EditBiteContainer {
   service = inject(BiteService);
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Edit Bite',
     });

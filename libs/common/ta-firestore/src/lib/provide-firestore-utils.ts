@@ -1,55 +1,48 @@
+import { InjectionToken, Provider } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
+import { FirebaseOptions, initializeApp } from 'firebase/app';
 import {
-  FirebaseOptions,
-  initializeApp,
-  provideFirebaseApp,
-} from '@angular/fire/app';
-import {
-  getFirestore,
+  enableMultiTabIndexedDbPersistence,
+  Firestore,
   initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
-  provideFirestore,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 import {
+  Auth,
   getAuth,
   indexedDBLocalPersistence,
-  initializeAuth,
-  provideAuth,
-} from '@angular/fire/auth';
-import { EnvironmentProviders } from '@angular/core';
-import { Capacitor } from '@capacitor/core';
-import { getApp } from 'firebase/app';
+  initializeAuth as fbInitializeAuth,
+} from 'firebase/auth';
 import { provideFirestoreAnalytics } from './analytics/provide-firestore-analytics';
+
+export const FIREBASE_APP = new InjectionToken<'FIREBASE_APP' | null>(
+  'FIREBASE_APP'
+);
+export const FIREBASE_FIRESTORE = new InjectionToken<Firestore>(
+  'FIREBASE_FIRESTORE'
+);
+export const FIREBASE_AUTH = new InjectionToken<Auth>('FIREBASE_AUTH');
 
 export const provideFirestoreUtils = (
   firebaseOptions: FirebaseOptions,
   withAnalytics?: boolean
-): EnvironmentProviders[] => {
-  const providersWithoutAnalytics = [
-    provideFirebaseApp(() => {
-      const firebaseApp = initializeApp(firebaseOptions || {});
-      initializeFirestore(firebaseApp, {
-        localCache: persistentLocalCache({
-          tabManager: persistentMultipleTabManager(),
-        }),
-      });
-      return firebaseApp;
-    }),
-    provideFirestore(() => getFirestore()),
-    provideAuth(() => {
-      if (Capacitor.isNativePlatform()) {
-        return initializeAuth(getApp(), {
-          persistence: indexedDBLocalPersistence,
-        });
-      }
+): Provider[] => {
+  const app = initializeApp(firebaseOptions || {});
+  const firestore: Firestore = initializeFirestore(app, {});
 
-      return getAuth();
-    }),
+  enableMultiTabIndexedDbPersistence(firestore).catch((err) => {
+    console.warn('Firebase persistence error: ', err);
+  });
+
+  const auth: Auth = Capacitor.isNativePlatform()
+    ? fbInitializeAuth(app, { persistence: indexedDBLocalPersistence })
+    : getAuth(app);
+
+  const providers: Provider[] = [
+    { provide: FIREBASE_APP, useFactory: () => app },
+    { provide: FIREBASE_FIRESTORE, useFactory: () => firestore },
+    { provide: FIREBASE_AUTH, useFactory: () => auth },
   ];
 
-  if (!withAnalytics) {
-    return providersWithoutAnalytics;
-  }
-
-  return [...providersWithoutAnalytics, provideFirestoreAnalytics()];
+  const analyticsProviders = provideFirestoreAnalytics() || [];
+  return withAnalytics ? [...providers, ...analyticsProviders] : providers;
 };

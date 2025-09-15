@@ -36,9 +36,10 @@ import {
   starOutline,
   filter,
   funnelOutline,
+  hammerOutline,
 } from 'ionicons/icons';
 
-export const addNecessaryIcons = () => {
+export const addNecessaryIcons = (): void => {
   addIcons({
     pricetagOutline,
     filterOutline,
@@ -76,5 +77,6 @@ export const addNecessaryIcons = () => {
     starOutline,
     filter,
     funnelOutline,
+    hammerOutline,
   });
 };

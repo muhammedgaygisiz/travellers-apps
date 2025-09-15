@@ -18,19 +18,19 @@ export class MapService {
 
   selectedBucketlist = this.dataAccess.selectedBucketlist;
 
-  logout() {
+  logout(): void {
     this.dataAccess.logout();
   }
 
-  onGotoSettingsClick() {
+  onGotoSettingsClick(): void {
     this.navController.navigateForward(['settings']);
   }
 
-  onGotoMyBitesClick() {
+  onGotoMyBitesClick(): void {
     this.navController.navigateForward(['my-bites']);
   }
 
-  onGotoMyBucketlists() {
+  onGotoMyBucketlists(): void {
     this.navController.navigateForward(['my-bucketlists']);
   }
 

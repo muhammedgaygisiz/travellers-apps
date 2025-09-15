@@ -19,6 +19,7 @@ import { ProfileApiService } from './profile-api.service';
 import { BiteApiService } from './bite-api.service';
 import { SettingsApiService } from './settings-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -42,106 +43,112 @@ export class BiteTribeApiService {
   publicProfile$ = this.profileApiService.publicProfile$;
   settings$ = this.settingsApiService.settings$;
 
-  getExchangeRates() {
+  getExchangeRates(): Promise<Record<string, number>> {
     return this.exchangeRatesApiService.getExchangeRates();
   }
 
-  saveNewReview(payload: { review: string; biteId: string }) {
+  saveNewReview(payload: { review: string; biteId: string }): void {
     this.reviewApiService.saveNewReview(payload);
   }
 
-  reviewsByBiteId(biteId: string) {
+  reviewsByBiteId(biteId: string): Observable<any[]> {
     return this.reviewApiService.reviewsByBiteId(biteId);
   }
 
-  saveSocialMediaLinksForRestaurant(restaurantId: string, links: Link[]) {
+  saveSocialMediaLinksForRestaurant(restaurantId: string, links: Link[]): void {
     this.restaurantApiService.saveSocialMediaLinksForRestaurant(
       restaurantId,
       links
     );
   }
 
-  saveNewRestaurant(restaurant: Restaurant) {
+  saveNewRestaurant(restaurant: Restaurant): void {
     this.restaurantApiService.saveNewRestaurant(restaurant);
   }
 
-  loadRestaurant(restaurantId: string) {
+  loadRestaurant(restaurantId: string): Observable<Restaurant | undefined> {
     return this.restaurantApiService.loadRestaurant(restaurantId);
   }
 
-  saveMenu(menu: Menu) {
+  saveMenu(menu: Menu): void {
     this.menuApiService.saveMenu(menu);
   }
 
-  loadMenu(menuId: string) {
+  loadMenu(menuId: string): Observable<Menu | undefined> {
     return this.menuApiService.loadMenu(menuId);
   }
 
-  async removeLike(like: any) {
+  async removeLike(like: any): Promise<any> {
     return this.likeApiService.removeLike(like);
   }
 
-  saveLike(like: { likeType: string; biteId: string; createdAt: string }) {
+  saveLike(like: {
+    likeType: string;
+    biteId: string;
+    createdAt: string;
+  }): void {
     this.likeApiService.saveLike(like);
   }
 
-  createBucketList(bucketlistName: any) {
+  createBucketList(bucketlistName: any): Promise<void> {
     return this.bucketlistApiService.createBucketList(bucketlistName);
   }
 
-  removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams) {
+  removeBiteFromBucketlist(
+    params: RemoveBiteFromBucketlistParams
+  ): Promise<void> {
     return this.bucketlistApiService.removeBiteFromBucketlist(params);
   }
 
   createBucketListAndSaveBiteIdToBucketList(
     params: CreateAndSaveToBucketListParams
-  ) {
+  ): Promise<void> {
     return this.bucketlistApiService.createBucketListAndSaveBiteIdToBucketList(
       params
     );
   }
 
-  saveBiteIdToBucketList(params: SaveToBucketListParams) {
+  saveBiteIdToBucketList(params: SaveToBucketListParams): Promise<void> {
     return this.bucketlistApiService.saveBiteIdToBucketList(params);
   }
 
-  getUserByBiteId(bite: Bite | undefined) {
+  getUserByBiteId(bite: Bite | undefined): Observable<any> {
     return this.profileApiService.getUserByBiteId(bite);
   }
 
-  deleteBite(bite: any) {
+  deleteBite(bite: any): void {
     this.biteApiService.deleteBite(bite);
   }
 
-  saveTagsToExistingBite(payload: { newTags: string[]; id: string }) {
+  saveTagsToExistingBite(payload: { newTags: string[]; id: string }): void {
     this.biteApiService.saveTagsToExistingBite(payload);
   }
 
-  saveEditedBite(bite: any) {
+  saveEditedBite(bite: any): void {
     this.biteApiService.saveEditedBite(bite);
   }
 
-  saveNewBite(bite: any) {
+  saveNewBite(bite: any): void {
     this.biteApiService.saveNewBite(bite);
   }
 
-  deleteUser() {
+  deleteUser(): void {
     this.profileApiService.deleteUser();
   }
 
-  updateUser(publicUser: PublicUser) {
+  updateUser(publicUser: PublicUser): void {
     this.profileApiService.updateUser(publicUser);
   }
 
-  saveUser() {
+  saveUser(): void {
     this.profileApiService.saveUser(true);
   }
 
-  saveSettings(settings: Settings) {
+  saveSettings(settings: Settings): void {
     this.settingsApiService.saveSettings(settings);
   }
 
-  saveUserIfNotExisting() {
+  saveUserIfNotExisting(): void {
     this.profileApiService.saveUserIfNotExisting();
   }
 }

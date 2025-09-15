@@ -7,7 +7,7 @@ const NODE_MODULES_TO_IGNORE = [
 ].join('|');
 
 export default {
-  displayName: 'prices-password-validator-feature',
+  displayName: 'password-validator',
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {},
@@ -18,7 +18,6 @@ export default {
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
         stringifyContentPathRegex: '\\.(html|svg)$',
-        isolatedModules: true,
       },
     ],
   },

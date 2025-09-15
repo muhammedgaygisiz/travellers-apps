@@ -4,6 +4,7 @@ import {
   BehaviorSubject,
   EMPTY,
   from,
+  Observable,
   skip,
   skipWhile,
   Subject,
@@ -40,7 +41,7 @@ export class RestaurantApiService {
     })
   );
 
-  private async startRestaurantsListener() {
+  private async startRestaurantsListener(): Promise<void> {
     this.restaurantsCallbackId =
       await FirebaseFirestore.addCollectionSnapshotListener(
         { reference: RESTAURANT_COLLECTION },
@@ -61,14 +62,14 @@ export class RestaurantApiService {
       );
   }
 
-  private async stopRestaurantListener(callbackId: string) {
+  private async stopRestaurantListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });
     }
   }
 
-  loadRestaurant(restaurantId: string) {
+  loadRestaurant(restaurantId: string): Observable<Restaurant | undefined> {
     return this.authService.isLoggedIn$.pipe(
       skipWhile((isLoggedIn) => !isLoggedIn),
       switchMap(() => {
@@ -82,7 +83,9 @@ export class RestaurantApiService {
     );
   }
 
-  private async getRestaurantById(restaurantId: string) {
+  private async getRestaurantById(
+    restaurantId: string
+  ): Promise<Restaurant | undefined> {
     try {
       // First try to get by ID
       const doc = await FirebaseFirestore.getDocument({
@@ -130,7 +133,8 @@ export class RestaurantApiService {
     }
   }
 
-  async saveNewRestaurant(restaurant: Restaurant) {
+  async saveNewRestaurant(restaurant: Restaurant): Promise<void> {
+    // Remove biteIds from the restaurant object before saving
     // console.debug('Restaurant to be saved: ', restaurant);
     const { biteIds, ...restaurantToBeSaved } = restaurant;
 
@@ -183,7 +187,11 @@ export class RestaurantApiService {
     }
   }
 
-  async saveSocialMediaLinksForRestaurant(restaurantId: string, links: Link[]) {
+  async saveSocialMediaLinksForRestaurant(
+    restaurantId: string,
+    links: Link[]
+  ): Promise<void> {
+    // Update the restaurant with the social media links
     await FirebaseFirestore.updateDocument({
       reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
       data: {

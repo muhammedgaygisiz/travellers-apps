@@ -32,23 +32,23 @@ export class LoginContainerComponent {
     return false;
   });
 
-  public login(authCreds: Credentials) {
+  public login(authCreds: Credentials): void {
     this.loginService?.login(authCreds);
   }
 
-  public async gotoSignup() {
+  public async gotoSignup(): Promise<void> {
     await this.loginService?.gotoSignUp();
   }
 
-  onSignupWithGoogle() {
+  onSignupWithGoogle(): void {
     this.loginService?.loginWithGoogleAccount();
   }
 
-  onSignupWithApple() {
+  onSignupWithApple(): void {
     this.loginService?.loginWithAppleAccount();
   }
 
-  onSignupWithFacebook() {
+  onSignupWithFacebook(): void {
     this.loginService?.loginWithFacebookAccount();
   }
 }

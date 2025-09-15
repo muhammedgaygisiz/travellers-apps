@@ -5,6 +5,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 
+jest.mock('localization');
 addNecessaryIcons();
 
 describe('DetailsComponent', () => {
@@ -25,7 +26,7 @@ describe('DetailsComponent', () => {
             userId: signal(undefined),
             biteCreator: signal(undefined),
             // eslint-disable-next-line @typescript-eslint/no-empty-function
-            isAuthenticated: () => {},
+            isAuthenticated: (): void => {},
           },
         },
       ],

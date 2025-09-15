@@ -16,11 +16,10 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   imports: [MenuPage],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class MenuContainer {
   service = inject(MenuService);
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Menu',
     });

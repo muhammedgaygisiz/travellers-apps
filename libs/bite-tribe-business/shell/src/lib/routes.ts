@@ -6,12 +6,20 @@ export const ROUTES: Routes = withAuthRoutes([
   {
     path: 'start',
     loadComponent: () =>
-      import('bite-tribe/start').then((m) => m.BiteTribeStartComponent),
+      import('bite-tribe-business/start').then((m) => m.Start),
   },
   {
     path: 'dashboard',
     loadComponent: () =>
       import('bite-tribe-business/dashboard').then((m) => m.DashboardContainer),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'migrations',
+    loadComponent: () =>
+      import('bite-tribe-business/migrations').then(
+        (m) => m.MigrationsContainer
+      ),
     canActivate: [authGuard],
   },
   {

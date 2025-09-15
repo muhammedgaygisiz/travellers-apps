@@ -35,7 +35,7 @@ export class ChartComponent implements OnDestroy {
     }
   });
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.resizeObserver.disconnect();
   }
 

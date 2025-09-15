@@ -6,6 +6,7 @@ import {
   effect,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
@@ -17,6 +18,8 @@ import {
   IonChip,
   IonContent,
   IonIcon,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonModal,
   IonRefresher,
   IonRefresherContent,
@@ -29,7 +32,10 @@ import { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
 import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
+import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { RefresherCustomEvent } from '@ionic/angular';
+
+const PAGE_SIZE = 50;
 
 @Component({
   selector: 'bt-home',
@@ -52,13 +58,15 @@ import { RefresherCustomEvent } from '@ionic/angular';
     IonModal,
     TypeaheadComponent,
     IonBadge,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     IonRefresher,
     IonRefresherContent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteTribeHomeComponent {
-  bites = input<any[]>();
+  bites = input<Bite[]>();
   allTags = input<string[]>([]);
   selectedFilters = input<string[]>([]);
   enableBackButton = input<boolean>(false);
@@ -99,8 +107,7 @@ export class BiteTribeHomeComponent {
 
   ionContent = viewChild(IonContent);
 
-  // Bites are already filtered by the store, just pass through
-  filteredBites = computed(() => this.bites() || []);
+  currentPage = signal<number>(1);
 
   refreshEvent: RefresherCustomEvent | null = null;
   onBiteRefresh = effect(() => {
@@ -148,7 +155,7 @@ export class BiteTribeHomeComponent {
       priceFilter: number;
     },
     modal: IonModal
-  ) {
+  ): void {
     modal.dismiss();
 
     if (filterSelection) {
@@ -156,7 +163,7 @@ export class BiteTribeHomeComponent {
     }
   }
 
-  scrollToTop() {
+  scrollToTop(): void {
     const ionContent = this.ionContent();
 
     if (ionContent) {
@@ -164,18 +171,42 @@ export class BiteTribeHomeComponent {
     }
   }
 
-  emitSortingChange(event: { detail: { value: string } }) {
+  emitSortingChange(event: { detail: { value: string } }): void {
     if (event.detail) {
       this.sortingChange.emit(event.detail.value);
     }
   }
 
-  onFiltersClear(modal: IonModal) {
+  onFiltersClear(modal: IonModal): void {
     modal.dismiss();
     this.filterCleared.emit();
   }
 
-  refreshBites(event: RefresherCustomEvent) {
+  displayedBites = computed(() => {
+    const allBites = this.bites() || [];
+    const page = this.currentPage();
+    const startIndex = 0;
+    const endIndex = page * PAGE_SIZE;
+
+    return allBites.slice(startIndex, endIndex);
+  });
+
+  hasMore = computed(() => {
+    const allBites = this.bites() || [];
+    const page = this.currentPage();
+
+    return allBites.length > page * PAGE_SIZE;
+  });
+
+  onIonInfinite(event: InfiniteScrollCustomEvent): void {
+    if (this.hasMore()) {
+      this.currentPage.set(this.currentPage() + 1);
+    }
+
+    event.target.complete();
+  }
+
+  refreshBites(event: RefresherCustomEvent): void {
     this.refreshEvent = event;
     this.refresh.emit();
   }

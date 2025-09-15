@@ -1,12 +1,13 @@
 import { Photo } from '@capacitor/camera';
+import { Geopoint } from 'model';
 
 export const getExifDataFromPhoto = (
   photo: Photo,
-  fallbackPosition: { latitude: number; longitude: number } = {
+  fallbackPosition: Geopoint = {
     latitude: 0,
     longitude: 0,
   }
-): { latitude: number; longitude: number } => {
+): Geopoint => {
   if (!photo || !photo.exif) {
     return fallbackPosition;
   }

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Photo } from '@capacitor/camera';
 import { compressPhoto } from '../compress-photo';
 
@@ -46,16 +45,16 @@ describe('compressPhoto', () => {
         this._onload = handler;
       }
 
-      get onload() {
-        return this._onload || (() => {});
+      get onload(): () => void {
+        return this._onload || ((): void => {});
       }
 
       set onerror(handler: () => void) {
         this._onerror = handler;
       }
 
-      get onerror() {
-        return this._onerror || (() => {});
+      get onerror(): () => void {
+        return this._onerror || ((): void => {});
       }
 
       constructor() {
@@ -107,7 +106,7 @@ describe('compressPhoto', () => {
     const compressedFile = await compressPhoto(smallPhoto, 512, 512);
     expect(compressedFile).toBeInstanceOf(File);
     expect(compressedFile.size).toBeLessThanOrEqual(800 * 1024);
-    expect(compressedFile.name).toMatch(/\.jpg$/);
+    expect(compressedFile.name).toEqual('file.image/jpeg');
     expect(global.URL.revokeObjectURL).toHaveBeenCalled();
   });
 
@@ -116,7 +115,6 @@ describe('compressPhoto', () => {
     // @ts-expect-error - Mocking Image global
     global.Image = class {
       private _onload?: () => void;
-      // eslint-disable-next-line no-unused-vars
       private _onerror?: (e: Event) => void;
       private _src = '';
 
@@ -126,7 +124,7 @@ describe('compressPhoto', () => {
         setTimeout(() => this._onerror?.(new Event('error')), 0);
       }
 
-      get src() {
+      get src(): string {
         return this._src;
       }
 
@@ -134,7 +132,6 @@ describe('compressPhoto', () => {
         this._onload = handler;
       }
 
-      // eslint-disable-next-line no-unused-vars
       set onerror(handler: (e: Event) => void) {
         this._onerror = handler;
       }

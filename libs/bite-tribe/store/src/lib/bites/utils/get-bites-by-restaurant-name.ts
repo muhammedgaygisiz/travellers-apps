@@ -5,7 +5,7 @@ export const getBitesByRestaurantName = (
   normalizedRestaurantName: string,
   bites: Bite[],
   restaurantId: string
-) =>
+): Bite[] =>
   bites.filter((bite) => {
     const normalizedBitePlace = normalize(bite.place);
 

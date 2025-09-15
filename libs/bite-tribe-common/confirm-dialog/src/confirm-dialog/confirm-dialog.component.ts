@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { IonButton, IonText } from '@ionic/angular/standalone';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 
@@ -45,6 +45,7 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
       }
     }
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmDialogComponent {
   dialogRef = inject(DialogRef<string>);
@@ -55,11 +56,11 @@ export class ConfirmDialogComponent {
     cancelButtonText: string;
   } = inject(DIALOG_DATA);
 
-  onConfirm() {
+  onConfirm(): void {
     this.dialogRef.close('confirm');
   }
 
-  onCancel() {
+  onCancel(): void {
     this.dialogRef.close('cancel');
   }
 }

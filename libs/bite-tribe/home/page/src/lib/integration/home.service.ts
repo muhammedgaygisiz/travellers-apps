@@ -32,25 +32,24 @@ export class HomeService {
 
   isReloadingBites = this.dataAccess.isReloadingBites;
 
-  logout() {
+  logout(): void {
     this.dataAccess.logout();
   }
 
-  likeButtonClicked(likeClick: { likeType: string; biteId: string }) {
+  likeButtonClicked(likeClick: { likeType: string; biteId: string }): void {
     this.dataAccess.submitLikeClick(likeClick);
   }
 
-  biteClicked(bite: Bite) {
+  biteClicked(bite: Bite): void {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
-  onDeleteBiteClick(bite: Bite) {
+  onDeleteBiteClick(bite: Bite): void {
     this.dataAccess.deleteBite(bite);
   }
 
-  restaurantClicked(bite: Bite) {
+  restaurantClicked(bite: Bite): void {
     if (bite.restaurantId) {
-      // eslint-disable-next-line no-unused-vars
       const [empty, collectionName, restaurantId] =
         bite.restaurantId.split('/');
 
@@ -72,27 +71,27 @@ export class HomeService {
     ]);
   }
 
-  onAddButtonClicked() {
+  onAddButtonClicked(): void {
     this.navController.navigateForward(['new-bite']);
   }
 
-  onGotoSettingsClick() {
+  onGotoSettingsClick(): void {
     this.navController.navigateForward(['settings']);
   }
 
-  onGotoMyBitesClick() {
+  onGotoMyBitesClick(): void {
     this.navController.navigateForward(['my-bites']);
   }
 
-  onGotoMyBucketlists() {
+  onGotoMyBucketlists(): void {
     this.navController.navigateForward(['my-bucketlists']);
   }
 
-  onGotoEditClick(biteToEdit: Bite) {
+  onGotoEditClick(biteToEdit: Bite): void {
     this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
   }
 
-  openMapView(mainPage: string) {
+  openMapView(mainPage: string): void {
     if (mainPage === 'my-bucketlists') {
       const selectedBucketlist = this.selectedBucketlist();
 
@@ -107,7 +106,7 @@ export class HomeService {
     this.navController.navigateForward([mainPage, 'map-view']);
   }
 
-  sortingChange(value: string) {
+  sortingChange(value: string): void {
     this.dataAccess.setHomeSorting(value);
   }
 
@@ -115,11 +114,11 @@ export class HomeService {
     tagFilters: string[];
     distanceFilter: string;
     priceFilter: number;
-  }) {
+  }): void {
     this.dataAccess.setFilters(filters);
   }
 
-  filtersCleared() {
+  filtersCleared(): void {
     this.dataAccess.clearFilters();
   }
 

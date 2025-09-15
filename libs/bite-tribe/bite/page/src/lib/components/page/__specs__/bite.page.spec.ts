@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BitePage } from '../bite.page';
 import { Platform } from '@ionic/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideRouter } from '@angular/router';
 import { Camera } from '@capacitor/camera';
 import { ComponentRef } from '@angular/core';
@@ -19,6 +19,8 @@ jest.mock('image-compression', () => ({
   compressFile: jest.fn(),
   compressPhoto: jest.fn(),
 }));
+jest.mock('localization');
+addNecessaryIcons();
 
 describe('BitePage', () => {
   let component: BitePage;
@@ -99,6 +101,7 @@ describe('BitePage', () => {
     const validBite = {
       id: '',
       image: 'data:image/jpeg;base64,test',
+      imagePath: '',
       name: 'Test Burger',
       place: 'Test Place',
       tags: 'fish healthy',
@@ -265,6 +268,25 @@ describe('BitePage', () => {
       const tags = ['tag1', 'tag2'];
       component.setTags(tags);
       expect(component.biteFormGroup.controls['tags'].value).toEqual(tags);
+    });
+  });
+
+  describe('onPositionFromImage', () => {
+    it('should set position in the form group', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.onPositionFromImage(position);
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        position
+      );
+    });
+  });
+
+  describe('emitStartCropImage', () => {
+    it('should emit startCropImage event', () => {
+      const emitSpy = jest.spyOn(component.startCropImage, 'emit');
+      const arg = { test: 'data' };
+      component.emitStartCropImage(arg);
+      expect(emitSpy).toHaveBeenCalledWith(arg);
     });
   });
 });

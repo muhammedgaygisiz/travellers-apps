@@ -2,7 +2,7 @@ import { Photo } from '@capacitor/camera';
 import { compressWithCanvas } from './compress-with-canvas';
 import { base64ToFile } from './base64-to-file';
 
-const toFile = (photo: Photo) => {
+const toFile = (photo: Photo): File => {
   return base64ToFile(
     `data:image/${photo.format};base64,${photo.base64String}`,
     'photo.jpg'
@@ -30,7 +30,7 @@ export const compressPhoto = async (
 
     try {
       await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
+        img.onload = (): void => resolve();
         img.onerror = reject;
       });
 

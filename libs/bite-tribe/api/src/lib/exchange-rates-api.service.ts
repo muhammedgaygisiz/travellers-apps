@@ -5,7 +5,7 @@ export const EXCHANGERATES = 'meta/exchangeRates';
 
 @Injectable({ providedIn: 'root' })
 export class ExchangeRatesApiService {
-  async getExchangeRates() {
+  async getExchangeRates(): Promise<Record<string, number>> {
     // TODO: feature in business app to update exchange rates
     // await FirebaseFirestore.setDocument({
     //   reference: EXCHANGERATES,

@@ -18,7 +18,7 @@ export class MapDataAccessService {
     requireSync: true,
   });
 
-  logout() {
+  logout(): void {
     this.storeService.logout();
   }
 }

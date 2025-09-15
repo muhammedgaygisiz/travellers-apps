@@ -13,10 +13,10 @@ import { DashboardService } from './dashboard.service';
       (logoutClick)="service.logout()"
       (createRestaurantClick)="service.onCreateRestaurantClick($event)"
       (restaurantClick)="service.restaurantClicked($event)"
+      (gotoMigrations)="service.gotoMigrations()"
     />
   `,
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class DashboardContainer {
   service = inject(DashboardService);
 }

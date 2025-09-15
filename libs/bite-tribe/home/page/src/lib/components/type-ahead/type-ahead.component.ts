@@ -29,7 +29,6 @@ import { getSimilarityScore, normalize } from 'utils';
 import { IsCheckedPipe } from './pipes/is-checked.pipe';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-type-ahead',
   templateUrl: 'type-ahead.component.html',
   styleUrl: 'type-ahead.component.scss',
@@ -123,15 +122,15 @@ export class TypeaheadComponent {
     this.workingSelectedValues.set(selectedItems);
   });
 
-  cancelChanges() {
+  cancelChanges(): void {
     this.selectionCancel.emit();
   }
 
-  clearAllFilters() {
+  clearAllFilters(): void {
     this.clearFilters.emit();
   }
 
-  confirmChanges() {
+  confirmChanges(): void {
     this.selectionChange.emit({
       tagFilters: this.workingSelectedValues(),
       distanceFilter: this.distanceValue(),
@@ -139,7 +138,7 @@ export class TypeaheadComponent {
     });
   }
 
-  searchbarInput(event: Event) {
+  searchbarInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
 
     this.rawSearchTerm.set(inputElement.value);
@@ -149,7 +148,9 @@ export class TypeaheadComponent {
     return this.workingSelectedValues().includes(value);
   }
 
-  checkboxChange(event: CustomEvent<{ checked: boolean; value: string }>) {
+  checkboxChange(
+    event: CustomEvent<{ checked: boolean; value: string }>
+  ): void {
     const { checked, value } = event.detail;
 
     if (checked) {
@@ -161,13 +162,13 @@ export class TypeaheadComponent {
     }
   }
 
-  distanceInput(event: Event) {
+  distanceInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
 
     this.distanceValue.set(inputElement.value);
   }
 
-  priceInput(event: CustomEvent) {
+  priceInput(event: CustomEvent): void {
     const inputElement = event.target as HTMLInputElement;
 
     this.priceValue.set(+inputElement.value);

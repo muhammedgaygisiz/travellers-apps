@@ -69,8 +69,10 @@
     </div>
 
     <!-- Show a message when no user data is available -->
-    <div class="no-profile" *ngIf="!biteCreatorData">
+    @if (!biteCreatorData) {
+    <div class="no-profile">
       <p class="no-profile-message">User profile not available.</p>
     </div>
+    }
   </ion-content>
 </ta-page>

@@ -1,5 +1,11 @@
+import {
+  PreloadAllModules,
+  provideRouter,
+  RouteReuseStrategy,
+  withPreloading,
+} from '@angular/router';
 import { ROUTES } from './routes';
-
+import { IonicRouteStrategy } from '@ionic/angular';
 import {
   AFTER_LOGIN_PAGE,
   AFTER_LOGOUT_PAGE,
@@ -7,16 +13,12 @@ import {
   APP_TITLE,
   Environment,
 } from 'utils';
-import {
-  PreloadAllModules,
-  provideRouter,
-  RouteReuseStrategy,
-  withPreloading,
-} from '@angular/router';
 import { provideBiteTribeStore } from 'bite-tribe/store';
-import { IonicRouteStrategy } from '@ionic/angular';
+import { EnvironmentProviders, Provider } from '@angular/core';
 
-export const provideBiteTribeBusinessShell = (environment: Environment) => [
+export const provideBiteTribeBusinessShell = (
+  environment: Environment
+): (EnvironmentProviders | Provider)[] => [
   provideRouter(ROUTES, withPreloading(PreloadAllModules)),
   {
     provide: RouteReuseStrategy,

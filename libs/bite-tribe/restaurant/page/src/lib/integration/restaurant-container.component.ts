@@ -19,11 +19,10 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   `,
   imports: [RestaurantComponent],
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class RestaurantContainer {
   service = inject(RestaurantService);
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Restaurant',
     });

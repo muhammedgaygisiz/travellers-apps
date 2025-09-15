@@ -38,7 +38,6 @@ import { TitleCasePipe } from '@angular/common';
 import { EnsureProtocolPipe } from '../../pipes/ensure-protocol.pipe';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'restaurant',
   templateUrl: 'restaurant.component.html',
   styleUrl: './restaurant.component.scss',
@@ -84,7 +83,7 @@ export class RestaurantComponent {
     links: this.formBuilder.array([]),
   });
 
-  get links() {
+  get links(): FormArray {
     return this.socialMediaForm.get('links') as FormArray;
   }
 
@@ -152,7 +151,7 @@ export class RestaurantComponent {
     return null;
   });
 
-  addSocialMedia() {
+  addSocialMedia(): void {
     this.links.push(
       this.formBuilder.group({
         network: ['', Validators.required],
@@ -161,7 +160,7 @@ export class RestaurantComponent {
     );
   }
 
-  saveSocialMediaLinks() {
+  saveSocialMediaLinks(): void {
     if (this.socialMediaForm.valid) {
       const socialMediaLinks = this.socialMediaForm.value;
       this.submitSocialMediaLinks.emit(socialMediaLinks as { links: Link[] });

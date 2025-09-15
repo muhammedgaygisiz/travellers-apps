@@ -101,4 +101,12 @@ describe('TypeaheadComponent', () => {
       expect(component.distanceValue()).toBe('');
     });
   });
+
+  describe('priceInput', () => {
+    it('should update priceValue on input event', () => {
+      const event = { target: { value: '50' } } as any;
+      component.priceInput(event);
+      expect(component.priceValue()).toBe(50);
+    });
+  });
 });

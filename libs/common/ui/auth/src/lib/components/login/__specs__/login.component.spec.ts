@@ -4,7 +4,6 @@ import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
-
 jest.mock('localization');
 
 describe('LoginComponent', () => {

@@ -30,11 +30,10 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DetailsPage],
 })
-// eslint-disable-next-line @angular-eslint/component-class-suffix
 export class DetailsContainer {
   service = inject(DetailsService);
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Bite Details',
     });

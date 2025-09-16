@@ -9,6 +9,7 @@
     "@capacitor-firebase/analytics": "../../node_modules/@capacitor-firebase/analytics",
     "@capacitor/geolocation": "../../node_modules/@capacitor/geolocation",
     "@capacitor/camera": "../../node_modules/@capacitor/camera",
-    "@capacitor/app-launcher": "../../node_modules/@capacitor/app-launcher"
+    "@capacitor/app-launcher": "../../node_modules/@capacitor/app-launcher",
+    "@capacitor/filesystem": "../../node_modules/@capacitor/filesystem"
   }
 }

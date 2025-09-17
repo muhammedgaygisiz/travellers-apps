@@ -2,6 +2,7 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   inject,
   input,
@@ -14,6 +15,7 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonIcon,
   IonText,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
@@ -41,6 +43,7 @@ import { StarRatingComponent } from 'common/ui/star-rating';
     IonText,
     WithFirstLetterUpperCasePipe,
     StarRatingComponent,
+    IonIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

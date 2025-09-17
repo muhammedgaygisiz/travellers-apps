@@ -3,12 +3,36 @@
     display: flex;
     justify-content: flex-end;
 
-    ion-chip.liked {
-      background-color: var(--ion-color-primary);
+    ion-chip {
+      position: absolute;
+      top: 16px;
+      right: -4px;
+      bottom: -4px;
+      min-width: 32px;
+
+      border-top-right-radius: 0;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 8px;
+
+      background-color: var(--ion-color-tertiary);
+
+      .liked {
+        background-color: var(--ion-color-tertiary);
+      }
+
+      ion-badge {
+        background-color: var(--ion-color-tertiary);
+      }
     }
 
-    ion-label.like {
-      margin-right: 8px;
+    ion-label {
+      &.like {
+        margin-right: 8px;
+      }
+
+      &.ion-margin-horizontal {
+        --ion-margin: 0.5rem;
+      }
     }
   }
 }

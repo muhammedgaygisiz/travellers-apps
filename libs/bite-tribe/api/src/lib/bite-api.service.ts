@@ -24,27 +24,7 @@ import {
 } from '@capacitor-firebase/storage';
 import { toBite } from './utils/to-bite';
 import { Platform } from '@ionic/angular';
-import { Directory, Filesystem } from '@capacitor/filesystem';
-
-const getBlobUri = async (blob: Blob, fileName: string): Promise<string> => {
-  // Convert blob to base64
-  const buffer = await blob.arrayBuffer();
-  const base64Data = btoa(
-    new Uint8Array(buffer).reduce(
-      (data, byte) => data + String.fromCharCode(byte),
-      ''
-    )
-  );
-
-  // Write to temporary file
-  const savedFile = await Filesystem.writeFile({
-    path: fileName,
-    data: base64Data,
-    directory: Directory.Cache,
-  });
-
-  return savedFile.uri;
-};
+import { getBlobWithUri } from './utils/get-blob-with-uri';
 
 export const BITE_COLLECTION = 'bites';
 
@@ -286,7 +266,8 @@ export class BiteApiService {
     };
 
     if (!this.isWeb()) {
-      fileUploadOptions.uri = await getBlobUri(blob, `${imageId}.${ext}`);
+      const writeFileResult = await getBlobWithUri(blob, `${imageId}.${ext}`);
+      fileUploadOptions.uri = writeFileResult.uri;
     }
 
     await FirebaseStorage.uploadFile(
@@ -315,6 +296,15 @@ export class BiteApiService {
             reference: `${BITE_COLLECTION}/${biteId}`,
             data,
           });
+        }
+
+        if (fileUploadOptions.uri) {
+          try {
+            await FirebaseStorage.deleteFile({ path: fileUploadOptions.uri });
+          } catch (error) {
+            console.error('Error deleting temp file:', error);
+            this.errorHandler.handleError(error);
+          }
         }
       }
     );

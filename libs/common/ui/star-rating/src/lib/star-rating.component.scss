@@ -5,9 +5,12 @@
 
     ion-icon {
       font-size: 24px;
-      color: #ffd700;
       cursor: pointer;
       transition: transform 0.2s;
+
+      stroke: var(--ion-color-secondary) !important;
+      fill: #ffd700;
+      stroke-width: 24px;
 
       &:hover {
         transform: scale(1.2);

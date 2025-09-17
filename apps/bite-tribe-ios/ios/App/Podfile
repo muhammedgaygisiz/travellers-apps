@@ -18,6 +18,7 @@ def capacitor_pods
   pod 'CapacitorGeolocation', :path => '../../../../node_modules/@capacitor/geolocation'
   pod 'CapacitorCamera', :path => '../../../../node_modules/@capacitor/camera'
   pod 'CapacitorAppLauncher', :path => '../../../../node_modules/@capacitor/app-launcher'
+  pod 'CapacitorFilesystem', :path => '../../../../node_modules/@capacitor/filesystem'
 end
 
 target 'App' do

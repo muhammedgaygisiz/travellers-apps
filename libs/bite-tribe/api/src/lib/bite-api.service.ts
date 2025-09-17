@@ -1,4 +1,4 @@
-import { ErrorHandler, inject, Injectable } from '@angular/core';
+import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import {
   BehaviorSubject,
   skip,
@@ -18,8 +18,33 @@ import {
   storagePathFromDownloadUrl,
 } from 'utils';
 import { v4 as uuidv4 } from 'uuid';
-import { FirebaseStorage } from '@capacitor-firebase/storage';
+import {
+  FirebaseStorage,
+  UploadFileOptions,
+} from '@capacitor-firebase/storage';
 import { toBite } from './utils/to-bite';
+import { Platform } from '@ionic/angular';
+import { Directory, Filesystem } from '@capacitor/filesystem';
+
+const getBlobUri = async (blob: Blob, fileName: string): Promise<string> => {
+  // Convert blob to base64
+  const buffer = await blob.arrayBuffer();
+  const base64Data = btoa(
+    new Uint8Array(buffer).reduce(
+      (data, byte) => data + String.fromCharCode(byte),
+      ''
+    )
+  );
+
+  // Write to temporary file
+  const savedFile = await Filesystem.writeFile({
+    path: fileName,
+    data: base64Data,
+    directory: Directory.Cache,
+  });
+
+  return savedFile.uri;
+};
 
 export const BITE_COLLECTION = 'bites';
 
@@ -27,11 +52,14 @@ export const BITE_COLLECTION = 'bites';
 export class BiteApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
+  private readonly platform = inject(Platform);
 
   private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
 
   private readonly stopped$ = new Subject<void>();
   bitesCallbackId = '';
+
+  isWeb = signal(!this.platform.is('hybrid'));
 
   public allBites$ = this.authService.isLoggedIn$.pipe(
     skipWhile((isLoggedIn) => !isLoggedIn),
@@ -248,15 +276,21 @@ export class BiteApiService {
     const imageId = uuidv4();
     const imagePath = `images/${BITE_COLLECTION}/${biteId}/${imageId}.${ext}`;
 
-    await FirebaseStorage.uploadFile(
-      {
-        path: imagePath,
-        blob,
-        metadata: {
-          contentType: contentType,
-          cacheControl: 'public,max-age=31536000,immutable',
-        },
+    const fileUploadOptions: UploadFileOptions = {
+      path: imagePath,
+      blob,
+      metadata: {
+        contentType: contentType,
+        cacheControl: 'public,max-age=31536000,immutable',
       },
+    };
+
+    if (!this.isWeb()) {
+      fileUploadOptions.uri = await getBlobUri(blob, `${imageId}.${ext}`);
+    }
+
+    await FirebaseStorage.uploadFile(
+      fileUploadOptions,
       async (event, error) => {
         if (error) {
           console.error('Error uploading image:', error);

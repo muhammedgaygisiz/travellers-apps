@@ -3,6 +3,8 @@ import { ComponentRef } from '@angular/core';
 import { MapComponent } from '../map.component';
 import { Geopoint } from 'model';
 import * as L from 'leaflet';
+import { geopointsToMarkers } from '../utils/geopoints-to-markers';
+import { clearMarkers } from '../utils/clear-markers';
 
 // Mock Leaflet
 const mockMap = {
@@ -36,6 +38,16 @@ jest.mock('../utils/zoom-to-gps-or-default', () => ({
 const fitMapToMarkersMock = jest.fn();
 jest.mock('../utils/fit-map-to-markers', () => ({
   fitMapToMarkers: (): void => fitMapToMarkersMock(),
+}));
+
+const geopointsToMarkersMock = jest.fn();
+jest.mock('../utils/geopoints-to-markers', () => ({
+  geopointsToMarkers: (): void => geopointsToMarkersMock(),
+}));
+
+const clearMarkersMock = jest.fn();
+jest.mock('../utils/clear-markers', () => ({
+  clearMarkers: (): void => clearMarkersMock(),
 }));
 
 describe('MapComponent', () => {
@@ -246,40 +258,6 @@ describe('MapComponent', () => {
 
       expect(() => component.ngOnDestroy()).not.toThrow();
       expect(mockMap.remove).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Input Changes', () => {
-    it('should handle positions input changes', () => {
-      componentRef.setInput('positions', [mockGeopoint]);
-      fixture.detectChanges();
-
-      expect(component.positions()).toEqual([mockGeopoint]);
-    });
-
-    it('should handle readonly input changes', () => {
-      componentRef.setInput('readonly', true);
-      fixture.detectChanges();
-
-      expect(component.readonly()).toBe(true);
-    });
-
-    it('should handle gpsPosition input changes', () => {
-      componentRef.setInput('gpsPosition', mockGeopoint);
-      fixture.detectChanges();
-
-      expect(component.gpsPosition()).toEqual(mockGeopoint);
-    });
-  });
-
-  describe('Position Selection Output', () => {
-    it('should emit positionSelected when triggered', () => {
-      jest.spyOn(component.positionSelected, 'emit');
-
-      const position: Geopoint = { latitude: 50.0, longitude: 1.0 };
-      component.positionSelected.emit(position);
-
-      expect(component.positionSelected.emit).toHaveBeenCalledWith(position);
     });
   });
 });

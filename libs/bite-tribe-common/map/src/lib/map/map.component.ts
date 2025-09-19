@@ -15,6 +15,8 @@ import * as L from 'leaflet';
 import { Geopoint } from 'model';
 import { zoomToGpsOrDefault } from './utils/zoom-to-gps-or-default';
 import { fitMapToMarkers } from './utils/fit-map-to-markers';
+import { clearMarkers } from './utils/clear-markers';
+import { geopointsToMarkers } from './utils/geopoints-to-markers';
 
 // Fix for marker icons
 const iconRetinaUrl = 'assets/leaflet/marker-icon-2x.png';
@@ -154,7 +156,8 @@ export class MapComponent implements OnDestroy {
     // No positions available
     if (this.map && (!positionsList || positionsList.length === 0)) {
       this.map.setView([0, 0], 2);
-      this.clearMarkers();
+      clearMarkers(this.markers, this.map);
+      this.markers = [];
     }
   });
 
@@ -176,22 +179,7 @@ export class MapComponent implements OnDestroy {
   }
 
   private updateMarkers(positions: Geopoint[]): void {
-    this.clearMarkers();
-
-    positions.forEach((position) => {
-      const marker = L.marker([position.latitude, position.longitude]).addTo(
-        this.map
-      );
-      this.markers.push(marker);
-    });
-  }
-
-  private clearMarkers(): void {
-    if (this.markers.length > 0) {
-      this.markers.forEach((marker) => {
-        this.map.removeLayer(marker);
-      });
-      this.markers = [];
-    }
+    clearMarkers(this.markers, this.map);
+    this.markers = geopointsToMarkers(positions, this.map);
   }
 }

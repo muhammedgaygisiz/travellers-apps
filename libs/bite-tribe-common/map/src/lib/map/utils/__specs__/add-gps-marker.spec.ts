@@ -15,6 +15,7 @@ describe('addGpsMarker', () => {
     mockMap = {
       getZoom: jest.fn().mockReturnValue(10),
       on: jest.fn(),
+      createPane: jest.fn().mockReturnValue({ style: {} }),
     } as any;
     mockCircle = {
       setStyle: jest.fn().mockReturnThis(),

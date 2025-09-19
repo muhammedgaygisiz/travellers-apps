@@ -13,7 +13,7 @@ export const fitMapToMarkers = (
       );
 
       // Handle case where markers are on opposite sides of the world
-      if (bounds.getWest() < -90 && bounds.getEast() > 90) {
+      if (bounds.getWest() < -180 && bounds.getEast() > 180) {
         // Adjust bounds to prevent wrapping
         const normalizedPositions = positions.map((p) => {
           // Normalize longitude to -180 to 180

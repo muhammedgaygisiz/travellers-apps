@@ -10,6 +10,21 @@ const GEOPOINT_SAN_FRANCISCO: Geopoint = {
 const COORD_SAN_FRANCISCO: L.LatLngTuple = [37.7749, -122.4194];
 const COORD_LOS_ANGELES: L.LatLngTuple = [34.0522, -118.2437];
 
+const addGpsMarkerMock = jest.fn();
+jest.mock('../add-gps-marker', () => ({
+  addGpsMarker: (...args: any): void => addGpsMarkerMock(...args),
+}));
+
+const removeGpsMarkerMock = jest.fn();
+jest.mock('../remove-gps-marker', () => ({
+  removeGpsMarker: (...args: any): void => removeGpsMarkerMock(...args),
+}));
+
+const zoomToGeopointMock = jest.fn();
+jest.mock('../zoom-to-geopoint', () => ({
+  zoomToGeopoint: (...args: any): void => zoomToGeopointMock(...args),
+}));
+
 describe('zoomToGpsOrDefault', () => {
   let map: L.Map;
   let markers: L.Marker[];
@@ -26,6 +41,8 @@ describe('zoomToGpsOrDefault', () => {
 
   afterEach(() => {
     map.remove();
+    addGpsMarkerMock.mockClear();
+    removeGpsMarkerMock.mockClear();
   });
 
   it('should set view to GPS position if valid GPS position is provided', () => {
@@ -33,10 +50,17 @@ describe('zoomToGpsOrDefault', () => {
 
     zoomToGpsOrDefault(gpsPosition, markers, positions, map);
 
-    expect(map.setView).toHaveBeenCalledWith(
-      [gpsPosition.latitude, gpsPosition.longitude],
-      10
-    );
+    expect(zoomToGeopointMock).toHaveBeenCalledTimes(1);
+    expect(zoomToGeopointMock).toHaveBeenCalledWith(gpsPosition, map);
+  });
+
+  it('should add GPS position marker', () => {
+    const gpsPosition = GEOPOINT_SAN_FRANCISCO;
+
+    zoomToGpsOrDefault(gpsPosition, markers, positions, map);
+
+    expect(addGpsMarkerMock).toHaveBeenCalledTimes(1);
+    expect(addGpsMarkerMock).toHaveBeenCalledWith(gpsPosition, map);
   });
 
   it('should fit map to markers if GPS position is null', () => {
@@ -52,6 +76,15 @@ describe('zoomToGpsOrDefault', () => {
     zoomToGpsOrDefault(gpsPosition, markers, positions, map);
 
     expect(fitBoundsSpy).toHaveBeenCalled();
+  });
+
+  it('should remove GPS position marker if GPS position is null', () => {
+    const gpsPosition = null;
+
+    zoomToGpsOrDefault(gpsPosition, markers, positions, map);
+
+    expect(removeGpsMarkerMock).toHaveBeenCalledTimes(1);
+    expect(removeGpsMarkerMock).toHaveBeenCalledWith(map);
   });
 
   it('should fit map to markers if GPS position is undefined', () => {

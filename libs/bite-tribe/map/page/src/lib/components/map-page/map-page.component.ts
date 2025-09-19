@@ -20,6 +20,7 @@ import { Geopoint } from 'model';
 export class MapPageComponent {
   bites = input<any[]>();
   isAuthenticated = input(false);
+  gpsPosition = input<Geopoint | null | undefined>();
 
   readonly logoutClick = output();
   readonly gotoSettings = output();

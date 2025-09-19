@@ -13,6 +13,8 @@ import {
 } from '@angular/core';
 import * as L from 'leaflet';
 import { Geopoint } from 'model';
+import { zoomToGpsOrDefault } from './utils/zoom-to-gps-or-default';
+import { fitMapToMarkers } from './utils/fit-map-to-markers';
 
 // Fix for marker icons
 const iconRetinaUrl = 'assets/leaflet/marker-icon-2x.png';
@@ -49,6 +51,7 @@ export class MapComponent implements OnDestroy {
   positions = input<Geopoint[] | null | undefined>([]);
   readonly = input(false, { transform: booleanAttribute });
   positionSelected = output<Geopoint>();
+  gpsPosition = input<Geopoint | null | undefined>();
 
   isReadonly = computed(() => {
     const positionsList = this.positions();
@@ -85,11 +88,21 @@ export class MapComponent implements OnDestroy {
         // If there are multiple positions, fit bounds after a short delay
         if (positionsList.length > 1) {
           setTimeout(() => {
-            this.fitMapToMarkers();
+            zoomToGpsOrDefault(
+              this.gpsPosition(),
+              this.markers,
+              positionsList,
+              this.map
+            );
           }, 100);
         }
       } else {
-        this.map.setView([0, 0], 2);
+        zoomToGpsOrDefault(
+          this.gpsPosition(),
+          this.markers,
+          positionsList,
+          this.map
+        );
       }
 
       if (!this.isReadonly()) {
@@ -107,17 +120,6 @@ export class MapComponent implements OnDestroy {
       this.forceMapRedraw();
     }
   });
-
-  private forceMapRedraw(): void {
-    setTimeout(() => {
-      this.map.invalidateSize();
-    }, 0);
-  }
-
-  private startWithFirstPositionInList(positionsList: Geopoint[]): void {
-    const firstPosition = positionsList[0];
-    this.map.setView([firstPosition.latitude, firstPosition.longitude], 15);
-  }
 
   setPositionsEffect = effect(() => {
     const positionsList = this.positions();
@@ -143,7 +145,7 @@ export class MapComponent implements OnDestroy {
 
         // Then fit all markers after a short delay
         setTimeout(() => {
-          this.fitMapToMarkers();
+          fitMapToMarkers(this.markers, positionsList, this.map);
         }, 100);
       }
       return;
@@ -160,6 +162,17 @@ export class MapComponent implements OnDestroy {
     if (this.map) {
       this.map.remove();
     }
+  }
+
+  private forceMapRedraw(): void {
+    setTimeout(() => {
+      this.map.invalidateSize();
+    }, 0);
+  }
+
+  private startWithFirstPositionInList(positionsList: Geopoint[]): void {
+    const firstPosition = positionsList[0];
+    this.map.setView([firstPosition.latitude, firstPosition.longitude], 15);
   }
 
   private updateMarkers(positions: Geopoint[]): void {
@@ -179,35 +192,6 @@ export class MapComponent implements OnDestroy {
         this.map.removeLayer(marker);
       });
       this.markers = [];
-    }
-  }
-
-  private fitMapToMarkers(): void {
-    if (this.markers.length > 1) {
-      const positionsList = this.positions();
-      if (positionsList) {
-        const bounds = L.latLngBounds(
-          positionsList.map((p) => [p.latitude, p.longitude] as L.LatLngTuple)
-        );
-
-        // Handle case where markers are on opposite sides of the world
-        if (bounds.getWest() < -90 && bounds.getEast() > 90) {
-          // Adjust bounds to prevent wrapping
-          const normalizedPositions = positionsList.map((p) => {
-            // Normalize longitude to -180 to 180
-            let lng = p.longitude;
-            while (lng > 180) lng -= 360;
-            while (lng < -180) lng += 360;
-            return [p.latitude, lng] as L.LatLngTuple;
-          });
-
-          const newBounds = L.latLngBounds(normalizedPositions);
-          this.map.fitBounds(newBounds, { padding: [50, 50] });
-        } else {
-          // Standard case
-          this.map.fitBounds(bounds, { padding: [50, 50] });
-        }
-      }
     }
   }
 }

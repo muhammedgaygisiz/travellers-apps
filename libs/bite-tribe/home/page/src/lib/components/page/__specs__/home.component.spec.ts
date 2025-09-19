@@ -53,7 +53,6 @@ describe('BiteTribeHomeComponent', () => {
     fixture = TestBed.createComponent(BiteTribeHomeComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -108,6 +107,11 @@ describe('BiteTribeHomeComponent', () => {
 
       fixture.detectChanges();
       expect(completeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should complete the refresh event if refresh is done', () => {
+      fixture.detectChanges();
+      expect(completeSpy).toHaveBeenCalled();
     });
   });
 

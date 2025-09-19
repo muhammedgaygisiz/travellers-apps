@@ -45,6 +45,17 @@ describe('zoomToGpsOrDefault', () => {
     removeGpsMarkerMock.mockClear();
   });
 
+  it('should do nothing if map is null', () => {
+    const gpsPosition = GEOPOINT_SAN_FRANCISCO;
+    const nullMap = null as any;
+
+    zoomToGpsOrDefault(gpsPosition, markers, positions, nullMap);
+
+    expect(zoomToGeopointMock).not.toHaveBeenCalled();
+    expect(addGpsMarkerMock).not.toHaveBeenCalled();
+    expect(removeGpsMarkerMock).not.toHaveBeenCalled();
+  });
+
   it('should set view to GPS position if valid GPS position is provided', () => {
     const gpsPosition = GEOPOINT_SAN_FRANCISCO;
 

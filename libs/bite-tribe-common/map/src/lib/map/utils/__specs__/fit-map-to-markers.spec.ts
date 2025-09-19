@@ -45,4 +45,18 @@ describe('fitMapToMarkers', () => {
 
     expect(map.fitBounds).not.toHaveBeenCalled();
   });
+
+  it('should handle world-wrapping case when bounds cross antimeridian', () => {
+    markers = [{}, {}];
+    positions = [
+      { latitude: 10, longitude: -190 },
+      { latitude: 15, longitude: 190 },
+    ];
+
+    fitMapToMarkers(markers, positions, map);
+
+    expect(map.fitBounds).toHaveBeenCalledWith(expect.anything(), {
+      padding: [50, 50],
+    });
+  });
 });

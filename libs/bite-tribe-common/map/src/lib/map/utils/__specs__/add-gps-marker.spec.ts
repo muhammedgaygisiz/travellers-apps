@@ -29,6 +29,16 @@ describe('addGpsMarker', () => {
     geopointToLatLngMock.mockReturnValue([51.505, -0.09]);
   });
 
+  it('should not add a marker if gpsPosition is null', () => {
+    addGpsMarker(null as any, mockMap);
+    expect(mockCircle.addTo).not.toHaveBeenCalled();
+  });
+
+  it('should not add a marker if map is null', () => {
+    addGpsMarker(mockGeopoint, null as any);
+    expect(mockCircle.addTo).not.toHaveBeenCalled();
+  });
+
   it('should add a GPS marker to the map at the correct location', () => {
     addGpsMarker(mockGeopoint, mockMap);
 
@@ -80,6 +90,27 @@ describe('addGpsMarker', () => {
       zoomEndCallback();
 
       expect(mockCircle.setRadius).toHaveBeenCalledWith(7.5);
+    });
+
+    it('should resize the circle on zoom in when diff is exactly -1', () => {
+      addGpsMarker(mockGeopoint, mockMap);
+
+      zoomStartCallback = mockMap.on.mock.calls.find(
+        (call: any) => call[0] === 'zoomstart'
+      )[1];
+      zoomEndCallback = mockMap.on.mock.calls.find(
+        (call: any) => call[0] === 'zoomend'
+      )[1];
+
+      mockCircle.getRadius.mockReturnValue(20);
+
+      mockMap.getZoom.mockReturnValue(10);
+      zoomStartCallback();
+
+      mockMap.getZoom.mockReturnValue(11);
+      zoomEndCallback();
+
+      expect(mockCircle.setRadius).toHaveBeenCalledWith(10);
     });
   });
 });

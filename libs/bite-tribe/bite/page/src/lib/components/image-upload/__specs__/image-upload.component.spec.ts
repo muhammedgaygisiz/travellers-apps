@@ -225,7 +225,6 @@ describe('ImageUploadComponent', () => {
     // @ts-expect-error - Mocking FileReader
     global.FileReader = jest.fn(() => mockFileReader);
 
-     
     const privateComponent = component as any;
     privateComponent.setValueAndTriggerChange(testFile);
 

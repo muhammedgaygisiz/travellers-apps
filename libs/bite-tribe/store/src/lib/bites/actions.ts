@@ -1,5 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 
+export const reloadBites = createAction('[BITES] Reload from API');
+
 export const loadedBitesFromApi = createAction(
   '[BITES] Loaded from API',
   props<{ bites: any }>()
@@ -38,3 +40,5 @@ export const loadedBiteCreator = createAction(
 export const noPublicCreatorForBite = createAction(
   '[BITES] No public creator for bite'
 );
+
+export const stopReloadingBites = createAction('[BITES] Stop reloading bites');

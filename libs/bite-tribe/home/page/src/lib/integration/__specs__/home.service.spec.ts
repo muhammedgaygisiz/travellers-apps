@@ -22,6 +22,9 @@ class Mock {
   exchangeRates = (): null => null;
   setHomeSorting = (): null => null;
   selectedBucketlistTitle = (): null => null;
+  reloadHomeBites = (): null => null;
+  setFilters = (): null => null;
+  clearFilters = (): null => null;
 }
 
 describe('HomeService', () => {
@@ -327,5 +330,59 @@ describe('HomeService', () => {
         expect(result).toBe(bucketlistTitle);
       }
     ));
+  });
+
+  describe('filtersChanged', () => {
+    let setFiltersSpy: SpyInstance;
+
+    beforeEach(() => {
+      setFiltersSpy = jest
+        .spyOn(homeDataAccessService, 'setFilters')
+        .mockImplementation();
+    });
+
+    it('should call setHomeFilters with correct parameters', inject(
+      [HomeService],
+      (service: HomeService) => {
+        const filters = {
+          priceFilter: 10,
+          distanceFilter: '50',
+          tagFilters: ['tag1', 'tag2'],
+        };
+        service.filtersChanged(filters);
+        expect(setFiltersSpy).toHaveBeenCalledWith(filters);
+      }
+    ));
+  });
+
+  describe('filtersCleared', () => {
+    let clearFiltersSpy: SpyInstance;
+
+    beforeEach(() => {
+      clearFiltersSpy = jest
+        .spyOn(homeDataAccessService, 'clearFilters')
+        .mockImplementation();
+    });
+
+    it('should call setHomeFilters with correct parameters', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.filtersCleared();
+        expect(clearFiltersSpy).toHaveBeenCalledTimes(1);
+      }
+    ));
+  });
+
+  describe('refresh', () => {
+    let reloadHomeBitesSpy: SpyInstance;
+
+    beforeEach(() => {
+      reloadHomeBitesSpy = jest.spyOn(homeDataAccessService, 'reloadHomeBites');
+    });
+
+    it('should emit refresh', inject([HomeService], (service: HomeService) => {
+      service.refresh();
+      expect(reloadHomeBitesSpy).toHaveBeenCalledTimes(1);
+    }));
   });
 });

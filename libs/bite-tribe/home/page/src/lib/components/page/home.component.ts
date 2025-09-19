@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   output,
   signal,
@@ -20,6 +21,8 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
   IonModal,
+  IonRefresher,
+  IonRefresherContent,
   IonSelect,
   IonSelectOption,
   IonSpinner,
@@ -30,6 +33,7 @@ import { BiteComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
 import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
+import { RefresherCustomEvent } from '@ionic/angular';
 
 const PAGE_SIZE = 50;
 
@@ -56,6 +60,8 @@ const PAGE_SIZE = 50;
     IonBadge,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
+    IonRefresher,
+    IonRefresherContent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -77,6 +83,7 @@ export class BiteTribeHomeComponent {
   distance = input<number>();
   maxPriceFilter = input<number>(0);
   preferedCurrency = input('EUR');
+  isReloadingBites = input<boolean | undefined>(false);
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -96,10 +103,19 @@ export class BiteTribeHomeComponent {
   }>();
   readonly sortingChange = output<string>();
   readonly filterCleared = output<void>();
+  readonly refresh = output<void>();
 
   ionContent = viewChild(IonContent);
 
   currentPage = signal<number>(1);
+
+  refreshEvent: RefresherCustomEvent | null = null;
+  onBiteRefresh = effect(() => {
+    const isReloadingBites = this.isReloadingBites();
+    if (!isReloadingBites && this.refreshEvent) {
+      this.refreshEvent.target.complete();
+    }
+  });
 
   moreThen5Bites = computed(() => {
     const bites = this.bites();
@@ -188,5 +204,10 @@ export class BiteTribeHomeComponent {
     }
 
     event.target.complete();
+  }
+
+  refreshBites(event: RefresherCustomEvent): void {
+    this.refreshEvent = event;
+    this.refresh.emit();
   }
 }

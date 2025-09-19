@@ -21,6 +21,7 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { PublicUser, Settings } from 'model';
 import SpyInstance = jest.SpyInstance;
+import { stopReloadingBites } from '../../bites/actions';
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
@@ -140,6 +141,30 @@ describe('AppEffect', () => {
         expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
       });
       expect(errorSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('stopReloadingBites$', () => {
+    it('should dispatch stopReloadingBites on loadedGpsPosition', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', { a: loadedGpsPosition({ position: {} }) });
+
+        const expected = 'a';
+        const output = { a: stopReloadingBites() };
+
+        expectObservable(effects.stopReloadingBites$).toBe(expected, output);
+      });
+    });
+
+    it('should dispatch stopReloadingBites on errorLoadingGpsPosition', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', { a: errorLoadingGpsPosition({ error: {} }) });
+
+        const expected = 'a';
+        const output = { a: stopReloadingBites() };
+
+        expectObservable(effects.stopReloadingBites$).toBe(expected, output);
+      });
     });
   });
 

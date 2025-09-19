@@ -2,14 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { MapComponent } from '../map.component';
 import { Geopoint } from 'model';
-import * as L from 'leaflet';
-import { geopointsToMarkers } from '../utils/geopoints-to-markers';
-import { clearMarkers } from '../utils/clear-markers';
+import { DEFAULT_ZOOM } from '../model/default-zoom';
 
 // Mock Leaflet
 const mockMap = {
   setView: jest.fn(),
-  getZoom: jest.fn().mockReturnValue(15),
+  getZoom: jest.fn().mockReturnValue(DEFAULT_ZOOM),
   fitBounds: jest.fn(),
   remove: jest.fn(),
   on: jest.fn(),
@@ -32,22 +30,43 @@ jest.mock('leaflet', () => ({
 
 const zoomToGpsOrDefaultMock = jest.fn();
 jest.mock('../utils/zoom-to-gps-or-default', () => ({
-  zoomToGpsOrDefault: (): void => zoomToGpsOrDefaultMock(),
+  zoomToGpsOrDefault: (...args: any): void => zoomToGpsOrDefaultMock(...args),
 }));
 
 const fitMapToMarkersMock = jest.fn();
 jest.mock('../utils/fit-map-to-markers', () => ({
-  fitMapToMarkers: (): void => fitMapToMarkersMock(),
+  fitMapToMarkers: (...args: any): void => fitMapToMarkersMock(...args),
 }));
 
 const geopointsToMarkersMock = jest.fn();
 jest.mock('../utils/geopoints-to-markers', () => ({
-  geopointsToMarkers: (): void => geopointsToMarkersMock(),
+  geopointsToMarkers: (...args: any): void => geopointsToMarkersMock(...args),
 }));
 
 const clearMarkersMock = jest.fn();
 jest.mock('../utils/clear-markers', () => ({
-  clearMarkers: (): void => clearMarkersMock(),
+  clearMarkers: (...args: any): void => clearMarkersMock(...args),
+}));
+
+const createMapMock = jest.fn();
+jest.mock('../utils/create-map', () => ({
+  createMap: (...args: any): void => createMapMock(...args),
+}));
+
+const createOpenstreetmapLayerMock = jest.fn();
+jest.mock('../utils/create-openstreetmap-layer', () => ({
+  createOpenstreetmapLayer: (...args: any): void =>
+    createOpenstreetmapLayerMock(...args),
+}));
+
+const zoomToMarkersMock = jest.fn();
+jest.mock('../utils/zoom-to-markers', () => ({
+  zoomToMarkers: (...args: any): void => zoomToMarkersMock(...args),
+}));
+
+const zoomToGeopointMock = jest.fn();
+jest.mock('../utils/zoom-to-geopoint', () => ({
+  zoomToGeopoint: (...args: any): void => zoomToGeopointMock(...args),
 }));
 
 describe('MapComponent', () => {
@@ -70,8 +89,8 @@ describe('MapComponent', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
 
-    // Reset mocks
-    jest.clearAllMocks();
+    createOpenstreetmapLayerMock.mockReturnValue({ addTo: jest.fn() });
+    createMapMock.mockReturnValue(mockMap);
   });
 
   it('should create', () => {
@@ -79,172 +98,164 @@ describe('MapComponent', () => {
   });
 
   describe('isReadonly', () => {
-    let mockTileLayer: any;
-    let mockMarker: any;
-
-    beforeEach(() => {
-      mockTileLayer = {
-        addTo: jest.fn().mockReturnThis(),
-      };
-
-      mockMarker = {
-        addTo: jest.fn().mockReturnThis(),
-      };
-
-      // Setup Leaflet mocks
-      (L.map as unknown as jest.Mock).mockReturnValue(mockMap);
-      (L.tileLayer as unknown as jest.Mock).mockReturnValue(mockTileLayer);
-      (L.marker as unknown as jest.Mock).mockReturnValue(mockMarker);
-
-      // Mock component methods
-      component['updateMarkers'] = jest.fn();
-      component['startWithFirstPositionInList'] = jest.fn();
-      component['forceMapRedraw'] = jest.fn();
-    });
-
-    it('should return true when readonly input is true', () => {
+    it('should return true if readonly input is true', () => {
       componentRef.setInput('readonly', true);
-      fixture.detectChanges();
-
+      componentRef.setInput('geopoints', []);
       expect(component.isReadonly()).toBe(true);
     });
 
-    it('should return true when there are multiple positions', () => {
-      componentRef.setInput('positions', mockMultipleGeopoints);
-      fixture.detectChanges();
-
-      expect(component.isReadonly()).toBe(true);
-    });
-
-    it('should return false when readonly is false and single position', () => {
+    it('should return true if more than one geopoint is provided', () => {
       componentRef.setInput('readonly', false);
-      componentRef.setInput('positions', [mockGeopoint]);
-      fixture.detectChanges();
+      componentRef.setInput('geopoints', mockMultipleGeopoints);
+      expect(component.isReadonly()).toBe(true);
+    });
 
+    it('should return false if readonly input is false and one or no geopoint is provided', () => {
+      componentRef.setInput('readonly', false);
+      componentRef.setInput('geopoints', [mockGeopoint]);
       expect(component.isReadonly()).toBe(false);
-    });
 
-    it('should return false when readonly is false and no positions', () => {
-      componentRef.setInput('readonly', false);
-      componentRef.setInput('positions', []);
-      fixture.detectChanges();
-
+      componentRef.setInput('geopoints', []);
       expect(component.isReadonly()).toBe(false);
     });
   });
 
   describe('createMapEffect', () => {
-    let mockTileLayer: any;
-    let mockMarker: any;
+    let mapDiv: any;
 
     beforeEach(() => {
-      mockTileLayer = {
-        addTo: jest.fn().mockReturnThis(),
-      };
-
-      mockMarker = {
-        addTo: jest.fn().mockReturnThis(),
-      };
-
-      // Setup Leaflet mocks
-      (L.map as unknown as jest.Mock).mockReturnValue(mockMap);
-      (L.tileLayer as unknown as jest.Mock).mockReturnValue(mockTileLayer);
-      (L.marker as unknown as jest.Mock).mockReturnValue(mockMarker);
-
-      // Mock component methods
-      component['updateMarkers'] = jest.fn();
-      component['startWithFirstPositionInList'] = jest.fn();
-      component['forceMapRedraw'] = jest.fn();
+      mapDiv = document.createElement('div');
+      mapDiv.setAttribute('data-testid', 'map');
+      fixture.nativeElement.appendChild(mapDiv);
+      mockMap.on.mockClear();
     });
 
-    it('should return early when map already exists', () => {
-      component['map'] = mockMap as any;
+    it('should create map and add OSM layer on first render', () => {
+      fixture.detectChanges();
+
+      expect(createMapMock).toHaveBeenCalledTimes(1);
+      expect(createOpenstreetmapLayerMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not recreate map if it already exists', () => {
+      fixture.detectChanges(); // First render
+      fixture.detectChanges(); // Second render
+
+      expect(createMapMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should update markers and zoom if geopoints are provided', () => {
+      componentRef.setInput('geopoints', [mockGeopoint]);
+      componentRef.setInput('gpsPosition', null);
 
       fixture.detectChanges();
 
-      expect(L.map).not.toHaveBeenCalled();
+      expect(geopointsToMarkersMock).toHaveBeenCalled();
+      expect(zoomToMarkersMock).toHaveBeenCalled();
     });
 
-    it('should add click listener when not readonly', () => {
+    it('should call zoomToGpsOrDefault if no geopoints are provided', () => {
+      componentRef.setInput('geopoints', []);
+      componentRef.setInput('gpsPosition', mockGeopoint);
+
+      fixture.detectChanges();
+
+      expect(zoomToGpsOrDefaultMock).toHaveBeenCalled();
+    });
+
+    it('should add click event if not readonly', () => {
       componentRef.setInput('readonly', false);
-      fixture.detectChanges();
+      componentRef.setInput('geopoints', [mockGeopoint]);
 
       fixture.detectChanges();
 
       expect(mockMap.on).toHaveBeenCalledWith('click', expect.any(Function));
     });
 
-    it('should not add click listener when readonly', () => {
+    it('should not add click event if readonly', () => {
       componentRef.setInput('readonly', true);
-      fixture.detectChanges();
+      componentRef.setInput('geopoints', [mockGeopoint]);
 
       fixture.detectChanges();
 
       expect(mockMap.on).not.toHaveBeenCalled();
     });
+  });
 
-    it('should not add click listener when multiple positions (automatically readonly)', () => {
-      componentRef.setInput('readonly', false);
-      componentRef.setInput('positions', mockMultipleGeopoints);
+  describe('setGeopointsEffect', () => {
+    beforeEach(() => {
       fixture.detectChanges();
-
-      fixture.detectChanges();
-
-      expect(mockMap.on).not.toHaveBeenCalled();
-    });
-
-    it('should handle map click event correctly', () => {
-      componentRef.setInput('readonly', false);
-      fixture.detectChanges();
-      jest.spyOn(component.positionSelected, 'emit');
-
-      fixture.detectChanges();
-
-      // Get the click handler that was registered
-      const clickHandler = (mockMap.on as jest.Mock).mock.calls[0][1];
-      const mockClickEvent = {
-        latlng: { lat: 50.0, lng: 1.0 },
-      } as L.LeafletMouseEvent;
-
-      clickHandler(mockClickEvent);
-
-      expect(component['updateMarkers']).toHaveBeenCalledWith([
-        {
-          latitude: 50.0,
-          longitude: 1.0,
-        },
-      ]);
-      expect(component.positionSelected.emit).toHaveBeenCalledWith({
-        latitude: 50.0,
-        longitude: 1.0,
-      });
-    });
-
-    it('should call forceMapRedraw after map creation', () => {
-      fixture.detectChanges();
-
-      expect(component['forceMapRedraw']).toHaveBeenCalled();
-    });
-
-    it('should handle single position without setTimeout', () => {
-      componentRef.setInput('positions', [mockGeopoint]);
+      jest.clearAllMocks();
+      mockMap.remove.mockClear();
       jest.useFakeTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    it('should update markers and zoom when geopoints input changes', () => {
+      componentRef.setInput('geopoints', [mockGeopoint]);
+
       fixture.detectChanges();
 
-      expect(component['updateMarkers']).toHaveBeenCalledWith([mockGeopoint]);
-      expect(component['startWithFirstPositionInList']).toHaveBeenCalledWith([
+      expect(geopointsToMarkersMock).toHaveBeenCalled();
+      expect(zoomToGeopointMock).toHaveBeenCalledWith(
         mockGeopoint,
-      ]);
+        expect.any(Object)
+      );
+    });
 
-      // Verify setTimeout was not called for single position
-      jest.advanceTimersByTime(100);
-      expect(zoomToGpsOrDefaultMock).not.toHaveBeenCalled();
+    it('should clear markers and reset view if geopoints is empty', () => {
+      componentRef.setInput('geopoints', []);
 
-      jest.useRealTimers();
+      fixture.detectChanges();
+
+      expect(clearMarkersMock).toHaveBeenCalled();
+      expect(mockMap.setView).toHaveBeenCalledWith([0, 0], 2);
+    });
+
+    it('should handle undefined geopoints input', () => {
+      componentRef.setInput('geopoints', undefined);
+
+      fixture.detectChanges();
+
+      expect(clearMarkersMock).toHaveBeenCalled();
+      expect(mockMap.setView).toHaveBeenCalledWith([0, 0], 2);
+    });
+
+    it('should zoom to first geopoint if only one geopoint is provided', () => {
+      componentRef.setInput('geopoints', [mockGeopoint]);
+
+      fixture.detectChanges();
+
+      expect(zoomToGeopointMock).toHaveBeenCalledWith(
+        mockGeopoint,
+        expect.any(Object)
+      );
+      expect(fitMapToMarkersMock).not.toHaveBeenCalled();
+    });
+
+    it('should zoom to markers if multiple geopoints are provided', () => {
+      componentRef.setInput('geopoints', mockMultipleGeopoints);
+      componentRef.setInput('gpsPosition', null);
+
+      fixture.detectChanges();
+      jest.runAllTimers();
+
+      expect(zoomToGeopointMock).toHaveBeenCalledWith(
+        mockMultipleGeopoints[0],
+        expect.any(Object)
+      );
+      expect(fitMapToMarkersMock).toHaveBeenCalled();
     });
   });
 
   describe('ngOnDestroy', () => {
+    beforeEach(() => {
+      mockMap.remove.mockClear();
+    });
+
     it('should remove map when map exists', () => {
       component['map'] = mockMap as any;
 

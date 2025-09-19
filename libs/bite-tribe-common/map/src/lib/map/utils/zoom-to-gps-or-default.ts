@@ -1,6 +1,7 @@
 import { Geopoint } from 'model';
 import * as L from 'leaflet';
 import { fitMapToMarkers } from './fit-map-to-markers';
+import { zoomToGeopoint } from './zoom-to-geopoint';
 
 export const zoomToGpsOrDefault = (
   gpsPosition: Geopoint | null | undefined,
@@ -17,6 +18,5 @@ export const zoomToGpsOrDefault = (
     return;
   }
 
-  const currentZoom = map.getZoom();
-  map.setView([gpsPosition.latitude, gpsPosition.longitude], currentZoom || 15);
+  zoomToGeopoint(gpsPosition, map);
 };

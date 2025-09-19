@@ -1,6 +1,7 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, Signal } from '@angular/core';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { NavController } from '@ionic/angular/standalone';
+import { Geopoint } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class MapService {
@@ -17,6 +18,8 @@ export class MapService {
   isAuthenticated = this.dataAccess.isAuthenticated;
 
   selectedBucketlist = this.dataAccess.selectedBucketlist;
+
+  gpsPosition: Signal<Geopoint | null> = this.dataAccess.gpsPosition;
 
   logout(): void {
     this.dataAccess.logout();

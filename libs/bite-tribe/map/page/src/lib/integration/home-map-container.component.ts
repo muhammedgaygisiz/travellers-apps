@@ -13,6 +13,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       class="ion-page"
       [bites]="service.bites()"
       [isAuthenticated]="service.isAuthenticated()"
+      [gpsPosition]="service.gpsPosition()"
       (logoutClick)="service.logout()"
       (gotoSettings)="service.onGotoSettingsClick()"
       (gotoMyBites)="service.onGotoMyBitesClick()"

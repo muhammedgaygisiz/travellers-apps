@@ -17,6 +17,7 @@ export class MapDataAccessService {
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     requireSync: true,
   });
+  gpsPosition = toSignal(this.storeService.position$);
 
   logout(): void {
     this.storeService.logout();

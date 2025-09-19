@@ -11,8 +11,8 @@ import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
 import { Subject } from 'rxjs';
-import SpyInstance = jest.SpyInstance;
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
+import SpyInstance = jest.SpyInstance;
 
 jest.mock('localization');
 
@@ -225,6 +225,26 @@ describe('BiteTribeHomeComponent', () => {
       component.onIonInfinite(infiniteScrollEvent);
       expect(component.currentPage()).toBe(2);
       expect(infiniteScrollEvent.target.complete).toHaveBeenCalled();
+    });
+  });
+
+  describe('refreshBites', () => {
+    const refresherEvent = {
+      target: {
+        complete: jest.fn(),
+      },
+    } as unknown as RefresherCustomEvent;
+    let refreshEmitSpy: SpyInstance;
+
+    beforeEach(() => {
+      refreshEmitSpy = jest
+        .spyOn(component.refresh, 'emit')
+        .mockImplementation();
+    });
+
+    it('should emit refresh event and complete the refresher', () => {
+      component.refreshBites(refresherEvent);
+      expect(refreshEmitSpy).toHaveBeenCalled();
     });
   });
 });

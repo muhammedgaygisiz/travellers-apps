@@ -1,12 +1,111 @@
 import { reducer } from '../reducer';
 import {
+  cacheBite,
+  loadedBiteCreator,
   loadedBitesFromApi,
+  noPublicCreatorForBite,
   reloadBites,
+  saveNewBite,
   stopReloadingBites,
 } from '../actions';
 import { Bite } from 'model';
+import { fromAuth } from 'ta-firestore';
 
 describe('Bite Reducer', () => {
+  describe('fromAuth.logoutSucceeded', () => {
+    it('should clear the state on logout', () => {
+      const INITIAL_STATE = {
+        ids: ['1', '2'],
+        entities: {
+          '1': { id: '1', name: 'Bite 1' } as Bite,
+          '2': { id: '2', name: 'Bite 2' } as Bite,
+        },
+        reloading: false,
+      };
+
+      const NEW_STATE = { ids: [], entities: {}, reloading: false };
+
+      const action = fromAuth.logoutSucceeded;
+
+      expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
+    });
+  });
+
+  describe('loadedBitesFromApi', () => {
+    it('should set loading:home to true', () => {
+      const INITIAL_STATE = { ids: [], entities: {}, reloading: true };
+      const NEW_STATE = { ids: [], entities: {}, reloading: false };
+
+      const loadedBitesFromApiAction = loadedBitesFromApi({
+        bites: [] as Bite[],
+      });
+
+      expect(reducer(INITIAL_STATE, loadedBitesFromApiAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('cacheBite', () => {
+    it('should cache the bite in the state', () => {
+      const INITIAL_STATE = { ids: [], entities: {}, reloading: false };
+      const NEW_STATE = {
+        ids: [],
+        entities: {},
+        reloading: false,
+        cachedBite: { id: '1', name: 'Bite 1' } as Bite,
+      };
+
+      const cacheBiteAction = cacheBite({
+        bite: { id: '1', name: 'Bite 1' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, cacheBiteAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('saveNewBite', () => {
+    it('should clear the cached bite in the state', () => {
+      const INITIAL_STATE = {
+        ids: [],
+        entities: {},
+        reloading: false,
+        cachedBite: { id: '1', name: 'Bite 1' } as Bite,
+      };
+      const NEW_STATE = { ids: [], entities: {}, reloading: false };
+
+      const saveNewBiteAction = saveNewBite({
+        bite: { id: '1', name: 'Bite 1' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, saveNewBiteAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('loadedBiteCreator', () => {
+    it('should set the biteCreator in the state', () => {
+      const INITIAL_STATE = { ids: [], entities: {}, reloading: false };
+      const NEW_STATE = {
+        ids: [],
+        entities: {},
+        reloading: false,
+        biteCreator: { id: 'creator1', name: 'Creator 1' },
+      };
+
+      const loadedBiteCreatorAction = loadedBiteCreator({
+        biteCreator: { id: 'creator1', name: 'Creator 1' },
+      });
+
+      expect(reducer(INITIAL_STATE, loadedBiteCreatorAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
   describe('reloadBites', () => {
     it('should reset the state to initial values', () => {
       const INITIAL_STATE = { ids: [], entities: {}, reloading: false };
@@ -35,16 +134,19 @@ describe('Bite Reducer', () => {
     });
   });
 
-  describe('loadedBitesFromApi', () => {
-    it('should set loading:home to true', () => {
-      const INITIAL_STATE = { ids: [], entities: {}, reloading: true };
+  describe('noPublicCreatorForBite', () => {
+    it('should clear the biteCreator in the state', () => {
+      const INITIAL_STATE = {
+        ids: [],
+        entities: {},
+        reloading: false,
+        biteCreator: { id: 'creator1', name: 'Creator 1' },
+      };
       const NEW_STATE = { ids: [], entities: {}, reloading: false };
 
-      const loadedBitesFromApiAction = loadedBitesFromApi({
-        bites: [] as Bite[],
-      });
+      const noPublicCreatorForBiteAction = noPublicCreatorForBite();
 
-      expect(reducer(INITIAL_STATE, loadedBitesFromApiAction)).toEqual({
+      expect(reducer(INITIAL_STATE, noPublicCreatorForBiteAction)).toEqual({
         ...NEW_STATE,
       });
     });

@@ -23,14 +23,14 @@ class Mock {
   preferedCurrency$ = of('EUR');
   maxPriceHome$ = of(0);
   isReloadingBites$ = of(false);
-  logout = () => null;
-  submitLikeClick = () => null;
-  submitDeleteBite = () => null;
-  setHomeSorting = () => null;
-  setHomeFilters = () => null;
-  clearHomeFilters = () => null;
-  reloadBites = () => null;
-  removeLike = () => null;
+  logout = (): null => null;
+  submitLikeClick = (): null => null;
+  submitDeleteBite = (): null => null;
+  setHomeSorting = (): null => null;
+  setHomeFilters = (): null => null;
+  clearHomeFilters = (): null => null;
+  reloadBites = (): null => null;
+  removeLike = (): null => null;
 }
 
 describe('HomeDataAccessService', () => {

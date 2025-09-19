@@ -14,9 +14,13 @@ import { fromAuth } from 'ta-firestore';
 export const reducer = createReducer(
   initialState,
   on(fromAuth.logoutSucceeded, (state) => adapter.removeAll(state)),
-  on(loadedBitesFromApi, (state, { bites }) =>
-    adapter.upsertMany(bites, initialState)
-  ),
+  on(loadedBitesFromApi, (state, { bites }) => {
+    const stateWithoutReloading = {
+      ...state,
+      reloading: false,
+    };
+    return adapter.upsertMany(bites, stateWithoutReloading);
+  }),
   on(cacheBite, (state, { bite }) => {
     return {
       ...state,
@@ -42,12 +46,6 @@ export const reducer = createReducer(
     };
   }),
   on(stopReloadingBites, (state) => {
-    return {
-      ...state,
-      reloading: false,
-    };
-  }),
-  on(loadedBitesFromApi, (state) => {
     return {
       ...state,
       reloading: false,

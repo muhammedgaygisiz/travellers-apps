@@ -54,6 +54,7 @@
           <ion-select
             interface="modal"
             toggleIcon="chevron-down-outline"
+            [value]="sorting()"
             [placeholder]="sortingLabel()"
             (ionChange)="emitSortingChange($event)"
           >

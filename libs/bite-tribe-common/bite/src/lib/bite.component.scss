@@ -44,6 +44,10 @@
         }
 
         ion-card-content {
+          &.with-edit {
+            flex-direction: column;
+          }
+
           flex: 1;
           display: flex;
           flex-direction: row;

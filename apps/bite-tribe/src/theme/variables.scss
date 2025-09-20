@@ -19,44 +19,88 @@ $BACKGROUND_COLOR: #fff;
 /****************/
 
 :root {
-  /**  Application colors **/
-  // https://ionicframework.com/docs/theming/themes#application-colors
-  --ion-background-color: #{$BACKGROUND_COLOR};
-  --ion-background-color-rgb: 255, 251, 239;
-
-  --ion-tab-bar-background: #{$background};
-  --ion-tab-bar-background-rgb: 255, 251, 239;
-
-  --ion-toolbar-background: var(--ion-color-primary);
-  --ion-toolbar-color: var(--ion-color-primary-contrast);
-
-  --ion-text-color: #{$deep_navy};
-  --ion-text-color-rgb: 0, 54, 95;
-
-  --ion-icon-color: var(--ion-color-primary);
-
   /**  Colors **/
   // https://ionicframework.com/docs/theming/color-generator
   --ion-color-primary: #{$PRIMARY_COLOR};
-  --ion-color-primary-rgb: 0, 54, 95;
-  --ion-color-primary-contrast: #{$cream};
-  --ion-color-primary-contrast-rgb: 252, 247, 240;
-  --ion-color-primary-shade: #003054;
-  --ion-color-primary-tint: #1a4a6f;
+  --ion-color-primary-rgb: 254, 197, 107;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #e0ad5e;
+  --ion-color-primary-tint: #fecb7a;
 
   --ion-color-secondary: #{$SECONDARY_COLOR};
-  --ion-color-secondary-rgb: 196, 91, 43;
-  --ion-color-secondary-contrast: #{$cream};
-  --ion-color-secondary-contrast-rgb: 252, 247, 240;
-  --ion-color-secondary-shade: #ac5026;
-  --ion-color-secondary-tint: #ca6b40;
+  --ion-color-secondary-rgb: 32, 32, 30;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #1c1c1a;
+  --ion-color-secondary-tint: #363635;
 
-  --ion-color-tertiary: #{$TERTIARY_COLOR};
+  --ion-color-tertiary: #f1f1f1;
   --ion-color-tertiary-rgb: 241, 241, 241;
   --ion-color-tertiary-contrast: #000000;
   --ion-color-tertiary-contrast-rgb: 0, 0, 0;
   --ion-color-tertiary-shade: #d4d4d4;
   --ion-color-tertiary-tint: #f2f2f2;
+
+  /**  Application colors **/
+  // https://ionicframework.com/docs/theming/themes#application-colors
+  --ion-background-color: #{$BACKGROUND_COLOR};
+  --ion-background-color-rgb: 255, 255, 255;
+
+  --ion-text-color: #{$SECONDARY_COLOR};
+  --ion-text-color-rgb: 32, 32, 30;
+
+  --ion-text-color-step-50: #2b2b29;
+  --ion-text-color-step-100: #363635;
+  --ion-text-color-step-150: #414140;
+  --ion-text-color-step-200: #4d4d4b;
+  --ion-text-color-step-250: #585856;
+  --ion-text-color-step-300: #636362;
+  --ion-text-color-step-350: #6e6e6d;
+  --ion-text-color-step-400: #797978;
+  --ion-text-color-step-450: #848483;
+  --ion-text-color-step-500: #90908f;
+  --ion-text-color-step-550: #9b9b9a;
+  --ion-text-color-step-600: #a6a6a5;
+  --ion-text-color-step-650: #b1b1b0;
+  --ion-text-color-step-700: #bcbcbc;
+  --ion-text-color-step-750: #c7c7c7;
+  --ion-text-color-step-800: #d2d2d2;
+  --ion-text-color-step-850: #dededd;
+  --ion-text-color-step-900: #e9e9e9;
+  --ion-text-color-step-950: #f4f4f4;
+
+  --ion-background-color-step-50: #f4f4f4;
+  --ion-background-color-step-100: #e9e9e9;
+  --ion-background-color-step-150: #dededd;
+  --ion-background-color-step-200: #d2d2d2;
+  --ion-background-color-step-250: #c7c7c7;
+  --ion-background-color-step-300: #bcbcbc;
+  --ion-background-color-step-350: #b1b1b0;
+  --ion-background-color-step-400: #a6a6a5;
+  --ion-background-color-step-450: #9b9b9a;
+  --ion-background-color-step-500: #90908f;
+  --ion-background-color-step-550: #848483;
+  --ion-background-color-step-600: #797978;
+  --ion-background-color-step-650: #6e6e6d;
+  --ion-background-color-step-700: #636362;
+  --ion-background-color-step-750: #585856;
+  --ion-background-color-step-800: #4d4d4b;
+  --ion-background-color-step-850: #414140;
+  --ion-background-color-step-900: #363634;
+  --ion-background-color-step-950: #2b2b29;
+
+  --ion-toolbar-background: #{$PRIMARY_COLOR};
+  --ion-toolbar-border-color: #d1a356;
+  --ion-toolbar-color: #{SECONDARY_COLOR};
+
+  .button-clear {
+    --color: #{$SECONDARY_COLOR};
+  }
+
+  ion-radio {
+    --color-checked: #{$SECONDARY_COLOR};
+  }
 }
 
 @media (prefers-color-scheme: dark) {

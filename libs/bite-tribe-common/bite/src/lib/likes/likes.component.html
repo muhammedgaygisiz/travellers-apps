@@ -1,6 +1,6 @@
 @let biteData = bite();
 
-<div class="like-container">
+<div class="like-container {{ inCard() ? 'in-card' : '' }}">
   <ion-chip class="{{ calcClass() }}" (click)="openLikeOptions($event)">
     @if (biteData?.likes?.length) { @for (emoji of getLikeEmojis(); let index =
     $index; track index) {

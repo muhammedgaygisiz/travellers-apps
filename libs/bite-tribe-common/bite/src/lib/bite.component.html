@@ -45,7 +45,7 @@
         </ion-card-title>
       </ion-card-header>
 
-      <ion-card-content>
+      <ion-card-content [class.with-edit]="showEditButton()">
         <div class="rating-container ion-margin-vertical">
           @if (biteData?.rating) {
           <star-rating [rating]="biteData?.rating" readOnly />
@@ -57,6 +57,7 @@
           class="ion-margin-top"
           [bite]="biteData"
           [userId]="userId()"
+          [inCard]="true"
           (likeButtonClick)="likeButtonClick.emit($event)"
         />
         } @if (showEditButton()) {

@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
-  selector: 'lib-bite-tribe-start',
+  selector: 'bt-start',
   templateUrl: './bite-tribe-start.component.html',
   styleUrl: './bite-tribe-start.component.scss',
   imports: [IonContent, IonButton, RouterLink],

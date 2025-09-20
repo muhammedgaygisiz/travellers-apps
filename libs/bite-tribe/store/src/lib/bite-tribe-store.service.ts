@@ -170,11 +170,11 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   login(authCreds: Login): void {
-    this.store?.dispatch(fromAuth.login({ authCreds }));
+    this.store.dispatch(fromAuth.login({ authCreds }));
   }
 
   register(registration: Login): void {
-    this.store?.dispatch(fromAuth.register({ registration }));
+    this.store.dispatch(fromAuth.register({ registration }));
   }
 
   confirmError(): void {
@@ -182,7 +182,7 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   save(entity: any, docType: string): void {
-    this.store?.dispatch(getActionByDocType(docType, entity));
+    this.store.dispatch(getActionByDocType(docType, entity));
   }
 
   saveTags(newTagsArray: string[], id: string): void {
@@ -195,7 +195,7 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   logout(): void {
-    this.store?.dispatch(fromAuth.logout());
+    this.store.dispatch(fromAuth.logout());
   }
 
   submitLikeOrDislikeClick(

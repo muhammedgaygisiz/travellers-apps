@@ -73,5 +73,11 @@ describe('MapPageComponent', () => {
       component.onGeopointSelection({ id: '3', latitude: 5, longitude: 6 });
       expect(component.selectedBite).toBeUndefined();
     });
+
+    it('should set selectedBite to undefined if bites is undefined', () => {
+      componentRef.setInput('bites', undefined);
+      component.onGeopointSelection({ id: '1', latitude: 1, longitude: 2 });
+      expect(component.selectedBite).toBeUndefined();
+    });
   });
 });

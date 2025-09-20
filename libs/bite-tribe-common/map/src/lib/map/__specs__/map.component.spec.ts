@@ -5,7 +5,6 @@ import { Geopoint } from 'model';
 import { DEFAULT_ZOOM } from '../model/default-zoom';
 import SpyInstance = jest.SpyInstance;
 
-// Mock Leaflet
 const mockMap = {
   setView: jest.fn(),
   getZoom: jest.fn().mockReturnValue(DEFAULT_ZOOM),
@@ -190,7 +189,6 @@ describe('MapComponent', () => {
       let mapDiv: any;
       let mockMarker1: any;
       let mockMarker2: any;
-      let emitMarkerClickSpy: SpyInstance;
 
       beforeEach(() => {
         mapDiv = document.createElement('div');
@@ -210,13 +208,10 @@ describe('MapComponent', () => {
           .spyOn(component.clickOnMarker, 'emit')
           .mockImplementation();
 
-        // Mock geopointsToMarkers to return markers with titles
-        geopointsToMarkersMock.mockImplementation(
-          (positions: Geopoint[], map: any) => {
-            component['markers'] = [mockMarker1, mockMarker2];
-            return [mockMarker1, mockMarker2];
-          }
-        );
+        geopointsToMarkersMock.mockImplementation(() => {
+          component['markers'] = [mockMarker1, mockMarker2];
+          return [mockMarker1, mockMarker2];
+        });
 
         mockMap.on.mockClear();
       });
@@ -265,7 +260,6 @@ describe('MapComponent', () => {
         componentRef.setInput('geopoints', geopoints);
         fixture.detectChanges();
 
-        // Get the click handler for marker1
         const clickHandler = mockMarker1.on.mock.calls[0][1];
         clickHandler();
 
@@ -285,7 +279,20 @@ describe('MapComponent', () => {
         componentRef.setInput('geopoints', geopoints);
         fixture.detectChanges();
 
-        // Get the click handler for marker2 (which has title 'marker2' but no matching geopoint)
+        const clickHandler = mockMarker2.on.mock.calls[0][1];
+        clickHandler();
+
+        expect(emitMarkerClickSpy).not.toHaveBeenCalled();
+      });
+
+      it('should not emit clickOnMarker when geopoints is undefined', () => {
+        const geopoints = undefined as any;
+
+        componentRef.setInput('emitMarkerClick', true);
+        componentRef.setInput('geopoints', geopoints);
+        component['markers'] = [mockMarker2];
+        fixture.detectChanges();
+
         const clickHandler = mockMarker2.on.mock.calls[0][1];
         clickHandler();
 

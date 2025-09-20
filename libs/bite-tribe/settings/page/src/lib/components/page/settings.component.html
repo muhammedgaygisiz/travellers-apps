@@ -73,6 +73,7 @@
               placeholder="Light"
               interface="popover"
               formControlName="theme"
+              (ionChange)="onThemeChange($event)"
             >
               <ion-select-option value="light">Light</ion-select-option>
               <ion-select-option value="dark">Dark</ion-select-option>

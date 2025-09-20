@@ -198,4 +198,18 @@ export class PageSettings {
   openConfirmationDialog(): void {
     this.isOpen.set(true);
   }
+
+  onThemeChange(event: { detail: { value: string } }): void {
+    const selectedTheme = event?.detail?.value;
+    if (selectedTheme) {
+      document.documentElement.classList.toggle(
+        'dark',
+        selectedTheme === 'dark'
+      );
+      document.documentElement.classList.toggle(
+        'light',
+        selectedTheme === 'light'
+      );
+    }
+  }
 }

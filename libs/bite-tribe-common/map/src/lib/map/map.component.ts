@@ -152,7 +152,7 @@ export class MapComponent implements OnDestroy {
   private addMarkerClickEvent(): void {
     this.markers
       .filter((marker) => !!marker.options.title)
-      .map((marker) => {
+      .forEach((marker) => {
         marker.on('click', () => {
           const geopoint = this.geopoints()?.find(
             (gp) => gp.id === marker.options.title

@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, Signal } from '@angular/core';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import { Geopoint } from 'model';
+import { Bite, Geopoint } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class MapService {
@@ -20,6 +20,7 @@ export class MapService {
   selectedBucketlist = this.dataAccess.selectedBucketlist;
 
   gpsPosition: Signal<Geopoint | null> = this.dataAccess.gpsPosition;
+  userId = this.dataAccess.userId;
 
   logout(): void {
     this.dataAccess.logout();
@@ -35,6 +36,36 @@ export class MapService {
 
   onGotoMyBucketlists(): void {
     this.navController.navigateForward(['my-bucketlists']);
+  }
+
+  likeButtonClicked(likeClick: { likeType: string; biteId: string }): void {
+    this.dataAccess.submitLikeClick(likeClick);
+  }
+
+  biteClicked(bite: Bite): void {
+    this.navController.navigateForward(['bite', bite.id]);
+  }
+
+  restaurantClicked(bite: Bite): void {
+    if (bite.restaurantId) {
+      const [, , restaurantId] = bite.restaurantId.split('/');
+
+      this.navController.navigateForward([
+        'bite',
+        bite.id,
+        'restaurant',
+        restaurantId,
+      ]);
+
+      return;
+    }
+
+    this.navController.navigateForward([
+      'bite',
+      bite.id,
+      'restaurant',
+      encodeURIComponent(bite.place),
+    ]);
   }
 
   bitesBySelectedBucketlist = computed(() => {

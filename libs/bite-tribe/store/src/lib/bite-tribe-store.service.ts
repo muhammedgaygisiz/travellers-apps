@@ -16,11 +16,11 @@ import {
   biteCreator,
   bites,
   bitesBySelectedBucketlist,
+  bitesByUser,
   cachedBite,
+  isReloadingBites,
   mybites,
   sortedHomeBites,
-  bitesByUser,
-  isReloadingBites,
 } from './bites/selectors';
 import {
   restaurant,
@@ -43,6 +43,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
   CreateAndSaveToBucketListParams,
+  Like,
   Link,
   Menu,
   PublicUser,
@@ -195,6 +196,24 @@ export class BiteTribeStoreService implements StoreService {
 
   logout(): void {
     this.store?.dispatch(fromAuth.logout());
+  }
+
+  submitLikeOrDislikeClick(
+    bite: Bite | undefined | null,
+    userId: string,
+    likeType: { likeType: string; biteId: string }
+  ): void {
+    const likeFromUser = bite?.likes?.find(
+      (like: Like) =>
+        like.userId === userId && like.likeType === likeType.likeType
+    );
+
+    if (likeFromUser) {
+      this.removeLike(likeType);
+      return;
+    }
+
+    this.submitLikeClick(likeType);
   }
 
   submitLikeClick(event: { likeType: string; biteId: string }): void {

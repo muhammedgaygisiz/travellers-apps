@@ -3,6 +3,7 @@ import { ComponentRef } from '@angular/core';
 import { MapComponent } from '../map.component';
 import { Geopoint } from 'model';
 import { DEFAULT_ZOOM } from '../model/default-zoom';
+import SpyInstance = jest.SpyInstance;
 
 // Mock Leaflet
 const mockMap = {
@@ -122,12 +123,16 @@ describe('MapComponent', () => {
 
   describe('createMapEffect', () => {
     let mapDiv: any;
+    let emitMarkerClickSpy: SpyInstance;
 
     beforeEach(() => {
       mapDiv = document.createElement('div');
       mapDiv.setAttribute('data-testid', 'map');
       fixture.nativeElement.appendChild(mapDiv);
       mockMap.on.mockClear();
+      emitMarkerClickSpy = jest
+        .spyOn(component.clickOnMarker, 'emit')
+        .mockImplementation();
     });
 
     it('should create map and add OSM layer on first render', () => {
@@ -179,6 +184,186 @@ describe('MapComponent', () => {
       fixture.detectChanges();
 
       expect(mockMap.on).not.toHaveBeenCalled();
+    });
+
+    describe('addMarkerClickEvent via createMapEffect', () => {
+      let mapDiv: any;
+      let mockMarker1: any;
+      let mockMarker2: any;
+      let emitMarkerClickSpy: SpyInstance;
+
+      beforeEach(() => {
+        mapDiv = document.createElement('div');
+        mapDiv.setAttribute('data-testid', 'map');
+        fixture.nativeElement.appendChild(mapDiv);
+
+        mockMarker1 = {
+          on: jest.fn(),
+          options: { title: 'marker1' },
+        };
+        mockMarker2 = {
+          on: jest.fn(),
+          options: { title: 'marker2' },
+        };
+
+        emitMarkerClickSpy = jest
+          .spyOn(component.clickOnMarker, 'emit')
+          .mockImplementation();
+
+        // Mock geopointsToMarkers to return markers with titles
+        geopointsToMarkersMock.mockImplementation(
+          (positions: Geopoint[], map: any) => {
+            component['markers'] = [mockMarker1, mockMarker2];
+            return [mockMarker1, mockMarker2];
+          }
+        );
+
+        mockMap.on.mockClear();
+      });
+
+      it('should add click events to markers when emitMarkerClick is true', () => {
+        const geopoints = [
+          { id: 'marker1', latitude: 51.505, longitude: -0.09 },
+          { id: 'marker2', latitude: 52.505, longitude: -1.09 },
+        ];
+
+        componentRef.setInput('emitMarkerClick', true);
+        componentRef.setInput('geopoints', geopoints);
+        fixture.detectChanges();
+
+        expect(mockMarker1.on).toHaveBeenCalledWith(
+          'click',
+          expect.any(Function)
+        );
+        expect(mockMarker2.on).toHaveBeenCalledWith(
+          'click',
+          expect.any(Function)
+        );
+      });
+
+      it('should not add click events to markers when emitMarkerClick is false', () => {
+        const geopoints = [
+          { id: 'marker1', latitude: 51.505, longitude: -0.09 },
+          { id: 'marker2', latitude: 52.505, longitude: -1.09 },
+        ];
+
+        componentRef.setInput('emitMarkerClick', false);
+        componentRef.setInput('geopoints', geopoints);
+        fixture.detectChanges();
+
+        expect(mockMarker1.on).not.toHaveBeenCalled();
+        expect(mockMarker2.on).not.toHaveBeenCalled();
+      });
+
+      it('should emit clickOnMarker when marker is clicked and geopoint is found', () => {
+        const geopoints = [
+          { id: 'marker1', latitude: 51.505, longitude: -0.09 },
+          { id: 'marker2', latitude: 52.505, longitude: -1.09 },
+        ];
+
+        componentRef.setInput('emitMarkerClick', true);
+        componentRef.setInput('geopoints', geopoints);
+        fixture.detectChanges();
+
+        // Get the click handler for marker1
+        const clickHandler = mockMarker1.on.mock.calls[0][1];
+        clickHandler();
+
+        expect(emitMarkerClickSpy).toHaveBeenCalledWith({
+          id: 'marker1',
+          latitude: 51.505,
+          longitude: -0.09,
+        });
+      });
+
+      it('should not emit clickOnMarker when geopoint is not found', () => {
+        const geopoints = [
+          { id: 'marker1', latitude: 51.505, longitude: -0.09 },
+        ];
+
+        componentRef.setInput('emitMarkerClick', true);
+        componentRef.setInput('geopoints', geopoints);
+        fixture.detectChanges();
+
+        // Get the click handler for marker2 (which has title 'marker2' but no matching geopoint)
+        const clickHandler = mockMarker2.on.mock.calls[0][1];
+        clickHandler();
+
+        expect(emitMarkerClickSpy).not.toHaveBeenCalled();
+      });
+
+      it('should only add click events to markers with titles', () => {
+        const mockMarkerWithoutTitle = {
+          on: jest.fn(),
+          options: {},
+        };
+
+        geopointsToMarkersMock.mockImplementation(() => {
+          component['markers'] = [mockMarker1, mockMarkerWithoutTitle];
+          return [mockMarker1, mockMarkerWithoutTitle];
+        });
+
+        const geopoints = [
+          { id: 'marker1', latitude: 51.505, longitude: -0.09 },
+        ];
+
+        componentRef.setInput('emitMarkerClick', true);
+        componentRef.setInput('geopoints', geopoints);
+        fixture.detectChanges();
+
+        expect(mockMarker1.on).toHaveBeenCalledWith(
+          'click',
+          expect.any(Function)
+        );
+        expect(mockMarkerWithoutTitle.on).not.toHaveBeenCalled();
+      });
+
+      it('should handle multiple marker clicks correctly', () => {
+        const geopoints = [
+          { id: 'marker1', latitude: 51.505, longitude: -0.09 },
+          { id: 'marker2', latitude: 52.505, longitude: -1.09 },
+        ];
+
+        componentRef.setInput('emitMarkerClick', true);
+        componentRef.setInput('geopoints', geopoints);
+        fixture.detectChanges();
+
+        // Click marker1
+        const clickHandler1 = mockMarker1.on.mock.calls[0][1];
+        clickHandler1();
+
+        expect(emitMarkerClickSpy).toHaveBeenCalledWith(geopoints[0]);
+
+        // Click marker2
+        const clickHandler2 = mockMarker2.on.mock.calls[0][1];
+        clickHandler2();
+
+        expect(emitMarkerClickSpy).toHaveBeenCalledWith(geopoints[1]);
+        expect(emitMarkerClickSpy).toHaveBeenCalledTimes(2);
+      });
+
+      it('should handle empty geopoints array when marker is clicked', () => {
+        componentRef.setInput('emitMarkerClick', true);
+        componentRef.setInput('geopoints', []);
+        fixture.detectChanges();
+
+        // Manually trigger marker click since no markers would be created
+        geopointsToMarkersMock.mockImplementation(() => {
+          component['markers'] = [mockMarker1];
+          return [mockMarker1];
+        });
+
+        // Trigger createMapEffect again with markers but empty geopoints
+        componentRef.setInput('geopoints', []);
+        fixture.detectChanges();
+
+        if (mockMarker1.on.mock.calls.length > 0) {
+          const clickHandler = mockMarker1.on.mock.calls[0][1];
+          clickHandler();
+
+          expect(emitMarkerClickSpy).not.toHaveBeenCalled();
+        }
+      });
     });
   });
 

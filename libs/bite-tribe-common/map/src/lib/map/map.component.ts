@@ -47,7 +47,9 @@ L.Marker.prototype.options.icon = iconDefault;
 export class MapComponent implements OnDestroy {
   geopoints = input<Geopoint[] | null | undefined>([]);
   readonly = input(false, { transform: booleanAttribute });
-  geopointSelected = output<Geopoint>();
+  emitMarkerClick = input(false, { transform: booleanAttribute });
+  clickOnMap = output<Geopoint>();
+  clickOnMarker = output<Geopoint>();
   gpsPosition = input<Geopoint | null | undefined>();
 
   private map!: L.Map;
@@ -81,7 +83,11 @@ export class MapComponent implements OnDestroy {
     }
 
     if (!this.isReadonly()) {
-      this.addClickEvent();
+      this.addMapClickEvent();
+    }
+
+    if (this.emitMarkerClick()) {
+      this.addMarkerClickEvent();
     }
 
     this.forceMapRedraw();
@@ -131,7 +137,7 @@ export class MapComponent implements OnDestroy {
     this.markers = geopointsToMarkers(positions, this.map);
   }
 
-  private addClickEvent(): void {
+  private addMapClickEvent(): void {
     this.map.on('click', (e: L.LeafletMouseEvent) => {
       const position: Geopoint = {
         latitude: e.latlng.lat,
@@ -139,7 +145,22 @@ export class MapComponent implements OnDestroy {
       };
       // Replace all markers with the clicked position
       this.updateMarkers([position]);
-      this.geopointSelected.emit(position);
+      this.clickOnMap.emit(position);
     });
+  }
+
+  private addMarkerClickEvent(): void {
+    this.markers
+      .filter((marker) => !!marker.options.title)
+      .map((marker) => {
+        marker.on('click', () => {
+          const geopoint = this.geopoints()?.find(
+            (gp) => gp.id === marker.options.title
+          );
+          if (geopoint) {
+            this.clickOnMarker.emit(geopoint);
+          }
+        });
+      });
   }
 }

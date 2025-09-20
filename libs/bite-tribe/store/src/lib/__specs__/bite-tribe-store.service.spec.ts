@@ -108,6 +108,37 @@ describe('BiteTribeStoreService', () => {
     ));
   });
 
+  describe('submitLikeOrDislikeClick', () => {
+    const userId = 'user1';
+    const likeType = { likeType: 'like', biteId: '123' };
+
+    it('should call removeLike if likeFromUser exists', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const removeLikeSpy = jest.spyOn(service, 'removeLike');
+        const bite = {
+          likes: [{ userId: 'user1', likeType: 'like' }],
+        } as any;
+        service.submitLikeOrDislikeClick(bite, userId, likeType);
+        expect(removeLikeSpy).toHaveBeenCalledTimes(1);
+        expect(removeLikeSpy).toHaveBeenCalledWith(likeType);
+      }
+    ));
+
+    it('should call submitLikeClick if likeFromUser does not exist', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const submitLikeClickSpy = jest.spyOn(service, 'submitLikeClick');
+        const bite = {
+          likes: [{ userId: 'user2', likeType: 'like' }],
+        } as any;
+        service.submitLikeOrDislikeClick(bite, userId, likeType);
+        expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
+        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
+      }
+    ));
+  });
+
   describe('submitLikeClick', () => {
     it('should dispatch submitLikeClick on BiteTribeStoreService', inject(
       [BiteTribeStoreService],

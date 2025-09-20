@@ -61,19 +61,8 @@ export class HomeDataAccessService {
   submitLikeClick(likeType: { likeType: string; biteId: string }): void {
     const bites = this.sortedHomeBites();
     const userId = this.userId();
-
     const bite = bites?.find((bite: Bite) => bite.id === likeType.biteId);
-    const likeFromUser = bite?.likes?.find(
-      (like: Like) =>
-        like.userId === userId && like.likeType === likeType.likeType
-    );
-
-    if (likeFromUser) {
-      this.storeService.removeLike(likeType);
-      return;
-    }
-
-    this.storeService.submitLikeClick(likeType);
+    this.storeService.submitLikeOrDislikeClick(bite, userId, likeType);
   }
 
   deleteBite(bite: Bite): void {

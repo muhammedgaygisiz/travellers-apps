@@ -24,13 +24,12 @@ class Mock {
   maxPriceHome$ = of(0);
   isReloadingBites$ = of(false);
   logout = (): null => null;
-  submitLikeClick = (): null => null;
+  submitLikeOrDislikeClick = (): null => null;
   submitDeleteBite = (): null => null;
   setHomeSorting = (): null => null;
   setHomeFilters = (): null => null;
   clearHomeFilters = (): null => null;
   reloadBites = (): null => null;
-  removeLike = (): null => null;
 }
 
 describe('HomeDataAccessService', () => {
@@ -66,7 +65,6 @@ describe('HomeDataAccessService', () => {
   });
 
   describe('submitLikeClick', () => {
-    let removeLikeSpy: SpyInstance;
     const likeType = { likeType: 'dislike', biteId: '456' };
     const like = {
       biteId: likeType.biteId,
@@ -82,9 +80,6 @@ describe('HomeDataAccessService', () => {
     beforeEach(inject(
       [BiteTribeStoreService],
       (storeService: BiteTribeStoreService) => {
-        removeLikeSpy = jest
-          .spyOn(biteTribeStoreService, 'removeLike')
-          .mockImplementation();
         storeService.sortedHomeBites$ = of([bite]);
         storeService.userId$ = of('userId');
       }
@@ -93,22 +88,18 @@ describe('HomeDataAccessService', () => {
     it('should call submitLikeClick on BiteTribeStoreService', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const likeType = { likeType: 'like', biteId: '123' };
-        const submitLikeClickSpy = jest.spyOn(
+        const likeType = { likeType: 'like', biteId: '456' };
+        const submitLikeOrDislikeClickSpy = jest.spyOn(
           biteTribeStoreService,
-          'submitLikeClick'
+          'submitLikeOrDislikeClick'
         );
         service.submitLikeClick(likeType);
-        expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
-        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
-      }
-    ));
-
-    it('should call submitLikeClick with correct arguments', inject(
-      [HomeDataAccessService],
-      (service: HomeDataAccessService) => {
-        service.submitLikeClick(likeType);
-        expect(removeLikeSpy).toHaveBeenCalledWith(likeType);
+        expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledTimes(1);
+        expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
+          bite,
+          'userId',
+          likeType
+        );
       }
     ));
   });

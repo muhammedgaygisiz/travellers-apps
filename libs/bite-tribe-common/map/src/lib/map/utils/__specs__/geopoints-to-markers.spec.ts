@@ -29,8 +29,10 @@ describe('geopointsToMarkers', () => {
     expect(markers.length).toBe(0);
   });
 
-  it('should handle geopoints without ids', () => {
-    const geopointsWithoutIds = [{ latitude: 51.5074, longitude: -0.1278 }];
+  it('should handle geopoints with ids', () => {
+    const geopointsWithoutIds = [
+      { latitude: 51.5074, longitude: -0.1278, id: '1' },
+    ];
     const markers = geopointsToMarkers(geopointsWithoutIds, map);
     expect(markers.length).toBe(1);
     expect(markers[0].getLatLng()).toEqual({ lat: 51.5074, lng: -0.1278 });

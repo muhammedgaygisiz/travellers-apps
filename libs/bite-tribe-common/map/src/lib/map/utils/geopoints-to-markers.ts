@@ -16,8 +16,8 @@ export const geopointsToMarkers = (
     return L.marker(coordinates, {
       title: geopoint.id,
       icon: getMarkerWithColor(MarkerColor.RED, {
-        rating: geopoint.rating?.toString() || undefined,
+        rating: geopoint.rating?.toString(),
       }),
-      alt: geopoint.rating?.toString() || undefined,
+      alt: geopoint.rating?.toString(),
     }).addTo(map);
   });

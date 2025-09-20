@@ -45,6 +45,9 @@ describe('focusMarker', () => {
 
     expect(mockSetIcon).toHaveBeenCalledTimes(3);
     expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.RED);
-    expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.DARKRED);
+    expect(getMarkerWithColorMock).toHaveBeenCalledWith(
+      MarkerColor.DARKRED,
+      'big'
+    );
   });
 });

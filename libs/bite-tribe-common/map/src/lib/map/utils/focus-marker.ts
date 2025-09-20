@@ -14,5 +14,5 @@ export const focusMarker = (
   markers.forEach((marker) => {
     marker.setIcon(getMarkerWithColor(MarkerColor.RED));
   });
-  marker.setIcon(getMarkerWithColor(MarkerColor.DARKRED));
+  marker.setIcon(getMarkerWithColor(MarkerColor.DARKRED, 'big'));
 };

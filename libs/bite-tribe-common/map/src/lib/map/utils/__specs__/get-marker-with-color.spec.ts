@@ -9,8 +9,7 @@ describe('getMarkerWithColor', () => {
     expect(icon.options.html).toContain(
       `background-color: ${MarkerColor.DARKRED}`
     );
-    expect(icon.options.iconAnchor).toEqual([0, 35]);
-    expect(icon.options.popupAnchor).toEqual([0, -36]);
+    expect(icon.options.iconAnchor).toEqual([-4, 25]);
   });
 
   it('should return a DivIcon with default color when no color is provided', () => {
@@ -18,5 +17,23 @@ describe('getMarkerWithColor', () => {
 
     expect(icon).toBeDefined();
     expect(icon.options.html).toContain(`background-color: ${MarkerColor.RED}`); // Default to red
+  });
+
+  it('should return a DivIcon with the specified size', () => {
+    const icon = getMarkerWithColor(MarkerColor.DARKRED, 'big');
+
+    expect(icon).toBeDefined();
+    expect(icon.options.html).toContain(
+      `background-color: ${MarkerColor.DARKRED}`
+    );
+    expect(icon.options.iconAnchor).toEqual([0, 35]);
+  });
+
+  it('should return a DivIcon with small size by default', () => {
+    const icon = getMarkerWithColor(MarkerColor.RED);
+
+    expect(icon).toBeDefined();
+    expect(icon.options.html).toContain(`background-color: ${MarkerColor.RED}`);
+    expect(icon.options.iconAnchor).toEqual([-4, 25]);
   });
 });

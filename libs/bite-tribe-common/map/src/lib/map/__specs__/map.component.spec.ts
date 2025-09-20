@@ -69,6 +69,11 @@ jest.mock('../utils/zoom-to-geopoint', () => ({
   zoomToGeopoint: (...args: any): void => zoomToGeopointMock(...args),
 }));
 
+const focusMarkerMock = jest.fn();
+jest.mock('../utils/focus-marker', () => ({
+  focusMarker: (...args: any): void => focusMarkerMock(...args),
+}));
+
 describe('MapComponent', () => {
   let component: MapComponent;
   let fixture: ComponentFixture<MapComponent>;
@@ -176,13 +181,130 @@ describe('MapComponent', () => {
       expect(mockMap.on).toHaveBeenCalledWith('click', expect.any(Function));
     });
 
-    it('should not add click event if readonly', () => {
-      componentRef.setInput('readonly', true);
-      componentRef.setInput('geopoints', [mockGeopoint]);
+    describe('addMapClickEvent via createMapEffect', () => {
+      let mapDiv: any;
+      let mockClickEvent: any;
+      let emitClickOnMapSpy: SpyInstance;
+      let emitClickOnMarkerSpy: SpyInstance;
 
-      fixture.detectChanges();
+      beforeEach(() => {
+        mapDiv = document.createElement('div');
+        mapDiv.setAttribute('data-testid', 'map');
+        fixture.nativeElement.appendChild(mapDiv);
 
-      expect(mockMap.on).not.toHaveBeenCalled();
+        mockClickEvent = {
+          latlng: {
+            lat: 51.505,
+            lng: -0.09,
+          },
+        };
+
+        emitClickOnMapSpy = jest
+          .spyOn(component.clickOnMap, 'emit')
+          .mockImplementation();
+        emitClickOnMarkerSpy = jest
+          .spyOn(component.clickOnMarker, 'emit')
+          .mockImplementation();
+
+        mockMap.on.mockClear();
+        focusMarkerMock.mockClear();
+        geopointsToMarkersMock.mockClear();
+      });
+
+      it('should add click event listener to map', () => {
+        fixture.detectChanges();
+
+        expect(mockMap.on).toHaveBeenCalledWith('click', expect.any(Function));
+      });
+
+      it('should emit clickOnMarker with undefined when map is clicked', () => {
+        fixture.detectChanges();
+
+        const clickHandler = mockMap.on.mock.calls[0][1];
+        clickHandler(mockClickEvent);
+
+        expect(emitClickOnMarkerSpy).toHaveBeenCalledWith(undefined);
+        expect(focusMarkerMock).toHaveBeenCalledWith(
+          undefined,
+          [],
+          expect.any(Object)
+        );
+      });
+
+      it('should emit clickOnMap and update markers when not readonly', () => {
+        componentRef.setInput('readonly', false);
+        componentRef.setInput('geopoints', []);
+        fixture.detectChanges();
+
+        const clickHandler = mockMap.on.mock.calls[0][1];
+        clickHandler(mockClickEvent);
+
+        const expectedPosition = {
+          latitude: 51.505,
+          longitude: -0.09,
+        };
+
+        expect(emitClickOnMapSpy).toHaveBeenCalledWith(expectedPosition);
+        expect(geopointsToMarkersMock).toHaveBeenCalledWith(
+          [expectedPosition],
+          expect.any(Object)
+        );
+      });
+
+      it('should not emit clickOnMap when readonly', () => {
+        componentRef.setInput('readonly', true);
+        fixture.detectChanges();
+
+        const clickHandler = mockMap.on.mock.calls[0][1];
+        clickHandler(mockClickEvent);
+
+        expect(emitClickOnMapSpy).not.toHaveBeenCalled();
+        expect(geopointsToMarkersMock).not.toHaveBeenCalled();
+      });
+
+      it('should convert click coordinates to geopoint correctly', () => {
+        const customClickEvent = {
+          latlng: {
+            lat: 40.7128,
+            lng: -74.006,
+          },
+        };
+
+        componentRef.setInput('readonly', false);
+        componentRef.setInput('geopoints', []);
+        fixture.detectChanges();
+
+        const clickHandler = mockMap.on.mock.calls[0][1];
+        clickHandler(customClickEvent);
+
+        const expectedPosition = {
+          latitude: 40.7128,
+          longitude: -74.006,
+        };
+
+        expect(emitClickOnMapSpy).toHaveBeenCalledWith(expectedPosition);
+        expect(geopointsToMarkersMock).toHaveBeenCalledWith(
+          [expectedPosition],
+          expect.any(Object)
+        );
+      });
+
+      it('should clear existing markers when map is clicked and not readonly', () => {
+        const existingMarkers = [{ id: 'existing' }];
+        component['markers'] = existingMarkers as any;
+
+        componentRef.setInput('readonly', false);
+        componentRef.setInput('geopoints', []);
+        fixture.detectChanges();
+
+        const clickHandler = mockMap.on.mock.calls[0][1];
+        clickHandler(mockClickEvent);
+
+        expect(clearMarkersMock).toHaveBeenCalledWith(
+          existingMarkers,
+          expect.any(Object)
+        );
+      });
     });
 
     describe('addMarkerClickEvent via createMapEffect', () => {
@@ -214,6 +336,7 @@ describe('MapComponent', () => {
         });
 
         mockMap.on.mockClear();
+        focusMarkerMock.mockClear();
       });
 
       it('should add click events to markers when emitMarkerClick is true', () => {
@@ -248,6 +371,7 @@ describe('MapComponent', () => {
 
         expect(mockMarker1.on).not.toHaveBeenCalled();
         expect(mockMarker2.on).not.toHaveBeenCalled();
+        expect(focusMarkerMock).not.toHaveBeenCalled();
       });
 
       it('should emit clickOnMarker when marker is clicked and geopoint is found', () => {
@@ -268,6 +392,7 @@ describe('MapComponent', () => {
           latitude: 51.505,
           longitude: -0.09,
         });
+        expect(focusMarkerMock).toHaveBeenCalledTimes(1);
       });
 
       it('should not emit clickOnMarker when geopoint is not found', () => {
@@ -283,6 +408,7 @@ describe('MapComponent', () => {
         clickHandler();
 
         expect(emitMarkerClickSpy).not.toHaveBeenCalled();
+        expect(focusMarkerMock).not.toHaveBeenCalled();
       });
 
       it('should not emit clickOnMarker when geopoints is undefined', () => {
@@ -297,6 +423,7 @@ describe('MapComponent', () => {
         clickHandler();
 
         expect(emitMarkerClickSpy).not.toHaveBeenCalled();
+        expect(focusMarkerMock).not.toHaveBeenCalled();
       });
 
       it('should only add click events to markers with titles', () => {
@@ -323,6 +450,7 @@ describe('MapComponent', () => {
           expect.any(Function)
         );
         expect(mockMarkerWithoutTitle.on).not.toHaveBeenCalled();
+        expect(focusMarkerMock).not.toHaveBeenCalled();
       });
 
       it('should handle multiple marker clicks correctly', () => {
@@ -347,6 +475,7 @@ describe('MapComponent', () => {
 
         expect(emitMarkerClickSpy).toHaveBeenCalledWith(geopoints[1]);
         expect(emitMarkerClickSpy).toHaveBeenCalledTimes(2);
+        expect(focusMarkerMock).toHaveBeenCalledTimes(2);
       });
 
       it('should handle empty geopoints array when marker is clicked', () => {
@@ -369,6 +498,7 @@ describe('MapComponent', () => {
           clickHandler();
 
           expect(emitMarkerClickSpy).not.toHaveBeenCalled();
+          expect(focusMarkerMock).not.toHaveBeenCalled();
         }
       });
     });

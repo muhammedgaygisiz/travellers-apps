@@ -1,6 +1,8 @@
 import * as L from 'leaflet';
-import { Geopoint } from 'model';
 import { LatLngExpression } from 'leaflet';
+import { Geopoint } from 'model';
+import { getMarkerWithColor } from './get-marker-with-color';
+import { MarkerColor } from '../model/marker-color.enum';
 
 export const geopointsToMarkers = (
   geopoints: Geopoint[],
@@ -11,8 +13,11 @@ export const geopointsToMarkers = (
       geopoint.latitude,
       geopoint.longitude,
     ];
-    if (geopoint?.id) {
-      return L.marker(coordinates, { title: geopoint.id }).addTo(map);
-    }
-    return L.marker(coordinates).addTo(map);
+    return L.marker(coordinates, {
+      title: geopoint.id,
+      icon: getMarkerWithColor(MarkerColor.RED, {
+        rating: geopoint.rating?.toString(),
+      }),
+      alt: geopoint.rating?.toString(),
+    }).addTo(map);
   });

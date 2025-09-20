@@ -37,13 +37,28 @@ export class MapPageComponent {
   positions = computed(() => {
     const bites = this.bites();
     return bites?.map(
-      (bite: Bite) => ({ ...bite.position, id: bite.id } as Geopoint)
+      (bite: Bite) =>
+        ({
+          ...bite.position,
+          id: bite.id,
+          rating: this.getRating(bite),
+        } as Geopoint)
     );
   });
 
-  onGeopointSelection(geopoint: Geopoint): void {
+  onGeopointSelection(geopoint: Geopoint | undefined): void {
+    if (!geopoint) {
+      this.selectedBite = undefined;
+      return;
+    }
+
     this.selectedBite = this.bites()?.find(
       (bite: Bite) => bite.id === geopoint.id
     );
+  }
+
+  private getRating(bite: Bite): number | undefined {
+    if (!bite.rating || bite.rating === 0) return undefined;
+    return bite.rating;
   }
 }

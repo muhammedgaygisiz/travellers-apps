@@ -1,9 +1,16 @@
 import { geopointsToMarkers } from '../geopoints-to-markers';
 import * as L from 'leaflet';
+import { MarkerColor } from '../../model/marker-color.enum';
+import { Geopoint } from 'model';
+
+const getMarkerWithColorMock = jest.fn();
+jest.mock('../get-marker-with-color', () => ({
+  getMarkerWithColor: (...args: any): void => getMarkerWithColorMock(...args),
+}));
 
 describe('geopointsToMarkers', () => {
   let map: L.Map;
-  let geopoints: { latitude: number; longitude: number }[];
+  let geopoints: Geopoint[];
 
   beforeEach(() => {
     map = {
@@ -11,8 +18,8 @@ describe('geopointsToMarkers', () => {
     } as any;
 
     geopoints = [
-      { latitude: 40.7128, longitude: -74.006 },
-      { latitude: 34.0522, longitude: -118.2437 },
+      { latitude: 40.7128, longitude: -74.006, rating: 1 },
+      { latitude: 34.0522, longitude: -118.2437, rating: 1 },
     ];
   });
 
@@ -22,6 +29,9 @@ describe('geopointsToMarkers', () => {
     expect(markers.length).toBe(2);
     expect(markers[0].getLatLng()).toEqual({ lat: 40.7128, lng: -74.006 });
     expect(markers[1].getLatLng()).toEqual({ lat: 34.0522, lng: -118.2437 });
+    expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.RED, {
+      rating: '1',
+    });
   });
 
   it('should return an empty array when given an empty geopoints array', () => {
@@ -36,5 +46,9 @@ describe('geopointsToMarkers', () => {
     const markers = geopointsToMarkers(geopointsWithoutIds, map);
     expect(markers.length).toBe(1);
     expect(markers[0].getLatLng()).toEqual({ lat: 51.5074, lng: -0.1278 });
+    expect(markers[0].options.title).toBe('1');
+    expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.RED, {
+      rating: '1',
+    });
   });
 });

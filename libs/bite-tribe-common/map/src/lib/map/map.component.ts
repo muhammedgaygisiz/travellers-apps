@@ -21,6 +21,7 @@ import { zoomToGeopoint } from './utils/zoom-to-geopoint';
 import { createMap } from './utils/create-map';
 import { createOpenstreetmapLayer } from './utils/create-openstreetmap-layer';
 import { zoomToMarkers } from './utils/zoom-to-markers';
+import { focusMarker } from './utils/focus-marker';
 
 // Fix for marker icons
 const iconRetinaUrl = 'assets/leaflet/marker-icon-2x.png';
@@ -49,7 +50,7 @@ export class MapComponent implements OnDestroy {
   readonly = input(false, { transform: booleanAttribute });
   emitMarkerClick = input(false, { transform: booleanAttribute });
   clickOnMap = output<Geopoint>();
-  clickOnMarker = output<Geopoint>();
+  clickOnMarker = output<Geopoint | undefined>();
   gpsPosition = input<Geopoint | null | undefined>();
 
   private map!: L.Map;
@@ -82,9 +83,7 @@ export class MapComponent implements OnDestroy {
       zoomToGpsOrDefault(gpsPosition, this.markers, geopoints, this.map);
     }
 
-    if (!this.isReadonly()) {
-      this.addMapClickEvent();
-    }
+    this.addMapClickEvent();
 
     if (this.emitMarkerClick()) {
       this.addMarkerClickEvent();
@@ -143,9 +142,14 @@ export class MapComponent implements OnDestroy {
         latitude: e.latlng.lat,
         longitude: e.latlng.lng,
       };
-      // Replace all markers with the clicked position
-      this.updateMarkers([position]);
-      this.clickOnMap.emit(position);
+
+      focusMarker(undefined, this.markers, this.map);
+      this.clickOnMarker.emit(undefined);
+
+      if (!this.isReadonly()) {
+        this.updateMarkers([position]);
+        this.clickOnMap.emit(position);
+      }
     });
   }
 
@@ -159,6 +163,7 @@ export class MapComponent implements OnDestroy {
           );
           if (geopoint) {
             this.clickOnMarker.emit(geopoint);
+            focusMarker(marker, this.markers, this.map);
           }
         });
       });

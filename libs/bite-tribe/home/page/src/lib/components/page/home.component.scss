@@ -72,6 +72,13 @@
       ion-icon {
         margin-right: 0;
       }
+
+      ion-select {
+        --placeholder-color: var(--ion-color-secondary);
+        --placeholder-opacity: 1;
+
+        min-height: unset;
+      }
     }
   }
 

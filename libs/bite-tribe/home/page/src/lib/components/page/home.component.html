@@ -50,26 +50,21 @@
       </div>
 
       <div class="sort-container ion-margin-end">
-        <ion-chip id="select-fruits">
-          <ion-text color="secondary">Distance</ion-text>
-          <ion-icon name="chevron-down-outline" color="secondary" />
-
-          <ion-modal trigger="select-fruits" #modal>
-            <ng-template>
-              <ion-select
-                [placeholder]="sortingLabel()"
-                (ionChange)="emitSortingChange($event)"
-              >
-                <ion-select-option value="distance">Distance</ion-select-option>
-                <ion-select-option value="createdAt"
-                  >Creation date</ion-select-option
-                >
-                <ion-select-option value="likes">Likes</ion-select-option>
-                <ion-select-option value="rating">Rating</ion-select-option>
-                <ion-select-option value="price">Price</ion-select-option>
-              </ion-select>
-            </ng-template>
-          </ion-modal>
+        <ion-chip id="select-sorting">
+          <ion-select
+            interface="modal"
+            toggleIcon="chevron-down-outline"
+            [placeholder]="sortingLabel()"
+            (ionChange)="emitSortingChange($event)"
+          >
+            <ion-select-option value="distance">Distance</ion-select-option>
+            <ion-select-option value="createdAt"
+              >Creation date
+            </ion-select-option>
+            <ion-select-option value="likes">Likes</ion-select-option>
+            <ion-select-option value="rating">Rating</ion-select-option>
+            <ion-select-option value="price">Price</ion-select-option>
+          </ion-select>
         </ion-chip>
       </div>
     </div>

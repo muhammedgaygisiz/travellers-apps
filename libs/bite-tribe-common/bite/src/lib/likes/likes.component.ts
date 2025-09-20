@@ -29,8 +29,8 @@ export class LikesComponent {
   popoverController = inject(PopoverController);
 
   bite = input.required<Bite>();
-
   userId = input<string>();
+  inCard = input(false);
 
   likeButtonClick = output<{ likeType: string; biteId: string }>();
 

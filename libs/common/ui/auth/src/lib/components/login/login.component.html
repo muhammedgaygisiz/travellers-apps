@@ -8,23 +8,27 @@
   <ta-card>
     <div class="ion-padding">
       <div class="ion-margin-top ion-margin-bottom separator">
-        <ion-text color="primary"> Sign in with your </ion-text>
+        <ion-text> Sign in with your </ion-text>
       </div>
 
       <div class="registration-options">
         <ion-button fill="outline" (click)="onGoogleSignUp()">
-          <ion-icon name="logo-google" />
+          <ion-icon name="logo-google" color="secondary" />
         </ion-button>
         <ion-button fill="outline" (click)="onAppleSignUp()">
-          <ion-icon name="logo-apple" />
+          <ion-icon name="logo-apple" color="secondary" />
         </ion-button>
-        <ion-button fill="outline" (click)="onFacebookSignUp()" disabled>
-          <ion-icon name="logo-facebook" />
+        <ion-button
+          fill="outline"
+          (click)="onFacebookSignUp()"
+          [disabled]="true"
+        >
+          <ion-icon name="logo-facebook" color="secondary" />
         </ion-button>
       </div>
 
       <div class="ion-margin-top separator ion-margin-bottom">
-        <ion-text color="primary"> Account or with your Email </ion-text>
+        <ion-text> Account or with your Email </ion-text>
       </div>
 
       <form [formGroup]="authFormGroup">
@@ -73,9 +77,7 @@
 
   <ta-card>
     <div class="ion-margin">
-      <ion-text color="primary">
-        If you don't have an account already sign up now.
-      </ion-text>
+      <ion-text> If you don't have an account already sign up now. </ion-text>
 
       <ion-button
         fill="outline"

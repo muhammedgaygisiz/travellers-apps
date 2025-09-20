@@ -29,6 +29,7 @@ import {
   menu,
   navigateOutline,
   chevronUpOutline,
+  chevronDownOutline,
   personCircleOutline,
   handRightOutline,
   informationCircleOutline,
@@ -37,6 +38,8 @@ import {
   filter,
   funnelOutline,
   hammerOutline,
+  mapOutline,
+  footstepsOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = (): void => {
@@ -70,6 +73,7 @@ export const addNecessaryIcons = (): void => {
     menu,
     navigateOutline,
     chevronUpOutline,
+    chevronDownOutline,
     personCircleOutline,
     handRightOutline,
     informationCircleOutline,
@@ -78,5 +82,7 @@ export const addNecessaryIcons = (): void => {
     filter,
     funnelOutline,
     hammerOutline,
+    mapOutline,
+    footstepsOutline,
   });
 };

@@ -2,28 +2,43 @@
   ion-button[slot='fixed'] {
     position: fixed;
     left: 10px;
-    bottom: calc(var(--ion-safe-area-bottom, 0) + 56px);
+    bottom: calc(var(--ion-safe-area-bottom, 0) + 67px);
+  }
+
+  ion-chip {
+    --background: var(--ion-background-color);
+    border: 2px solid var(--ion-color-secondary);
+
+    ion-icon {
+      margin-left: 0;
+      margin-right: 0.5rem;
+    }
   }
 
   .chip-sort-filter-container {
+    position: relative;
+
     display: flex;
     flex-direction: row;
+    justify-content: center;
+
     margin-bottom: 1rem;
 
-    .sort-container {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
+    .background-line {
+      position: absolute;
+      top: 50%;
+      left: -16px;
+      right: -16px;
+      width: 100vw;
+      height: 2px;
+      background-color: var(--ion-color-secondary);
+      z-index: -1000;
     }
 
     .filter-container {
       display: flex;
       flex-direction: row;
       align-items: center;
-
-      .add-filter {
-        margin: 0;
-      }
 
       ion-chip {
         overflow: visible;
@@ -35,15 +50,35 @@
         }
       }
     }
-  }
 
-  .chip-container {
-    display: flex;
-    flex-wrap: wrap;
-    flex: 1;
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
 
-    ion-chip {
-      cursor: pointer;
+      ion-chip {
+        cursor: pointer;
+      }
+    }
+
+    .sort-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      ion-text {
+        margin-right: 0.5rem;
+      }
+
+      ion-icon {
+        margin-right: 0;
+      }
+
+      ion-select {
+        --placeholder-color: var(--ion-color-secondary);
+        --placeholder-opacity: 1;
+
+        min-height: unset;
+      }
     }
   }
 

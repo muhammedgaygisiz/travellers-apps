@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   effect,
   inject,
   input,
@@ -12,6 +11,7 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
+  IonAlert,
   IonButton,
   IonContent,
   IonIcon,
@@ -24,11 +24,13 @@ import {
 } from '@ionic/angular/standalone';
 import { PublicUser, Settings, User } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { Dialog } from '@angular/cdk/dialog';
-import { ConfirmDialogComponent } from 'bite-tribe-common/confirm-dialog';
 import { currencyCodes } from 'utils';
+import type { OverlayEventDetail } from '@ionic/core';
+
+const STAY_PUBLIC = 'stay-public';
+const GO_PRIVATE = 'go-private';
 
 @Component({
   selector: 'settings',
@@ -46,6 +48,7 @@ import { currencyCodes } from 'utils';
     IonInput,
     ReactiveFormsModule,
     IonIcon,
+    IonAlert,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -61,9 +64,19 @@ export class PageSettings {
   submitPublicUser = output<PublicUser>();
 
   private readonly formBuilder = inject(FormBuilder);
-  private readonly dialog = inject(Dialog);
-  private readonly destroyRef = inject(DestroyRef);
   currencies = currencyCodes;
+  isOpen = signal(false);
+
+  confirmationButtons = [
+    {
+      text: 'No, stay public',
+      role: STAY_PUBLIC,
+    },
+    {
+      text: 'Yes, go private',
+      role: GO_PRIVATE,
+    },
+  ];
 
   settingsForm = this.formBuilder.nonNullable.group({
     pushNotifications: [{ value: false, disabled: true }, Validators.required],
@@ -172,23 +185,31 @@ export class PageSettings {
     });
   }
 
-  onReturnToPrivate(): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: 'Return to Private Profile',
-        message:
-          'Are you sure you want to return to a private profile? Your public profile will be hidden.',
-        confirmButtonText: 'Yes, go private',
-        cancelButtonText: 'No, keep public',
-      },
-    });
+  handleGoPrivateConfirmation(event: CustomEvent<OverlayEventDetail>): void {
+    const role = event.detail.role;
 
-    dialogRef.closed
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => {
-        if (result === 'confirm') {
-          this.goPrivate.emit();
-        }
-      });
+    if (role === GO_PRIVATE) {
+      this.goPrivate.emit();
+    }
+
+    this.isOpen.set(false);
+  }
+
+  openConfirmationDialog(): void {
+    this.isOpen.set(true);
+  }
+
+  onThemeChange(event: { detail: { value: string } }): void {
+    const selectedTheme = event?.detail?.value;
+    if (selectedTheme) {
+      document.documentElement.classList.toggle(
+        'dark',
+        selectedTheme === 'dark'
+      );
+      document.documentElement.classList.toggle(
+        'light',
+        selectedTheme === 'light'
+      );
+    }
   }
 }

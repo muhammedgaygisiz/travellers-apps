@@ -30,7 +30,7 @@
           <ion-item>
             <ion-label>
               <h3>Email</h3>
-              <ion-input [value]="user()?.email || ''" readonly />
+              <ion-input [value]="user()?.email || ''" [readonly]="true" />
             </ion-label>
           </ion-item>
 
@@ -46,9 +46,9 @@
 
           <div class="ion-margin-top ion-text-end go-public-button-container">
             @if (isPublicProfile()) {
-            <ion-button (click)="onReturnToPrivate()"
-              >Return to private</ion-button
-            >
+            <ion-button (click)="openConfirmationDialog()">
+              Return to private
+            </ion-button>
             } @else {
             <ion-button (click)="goPublic.emit()">Go public</ion-button>
             }
@@ -73,6 +73,7 @@
               placeholder="Light"
               interface="popover"
               formControlName="theme"
+              (ionChange)="onThemeChange($event)"
             >
               <ion-select-option value="light">Light</ion-select-option>
               <ion-select-option value="dark">Dark</ion-select-option>
@@ -119,3 +120,11 @@
     </div>
   </ion-content>
 </ta-page>
+
+<ion-alert
+  [isOpen]="isOpen()"
+  header="Return to Private Profile"
+  message="Are you sure you want to return to a private profile? You will be shown as Anonymous."
+  [buttons]="confirmationButtons"
+  (didDismiss)="handleGoPrivateConfirmation($event)"
+/>

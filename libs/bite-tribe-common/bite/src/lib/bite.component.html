@@ -5,45 +5,56 @@
     <div class="card-image">
       <img
         alt="Dish"
-        [src]="biteData.imagePath || biteData?.image"
+        src="{{ biteData.imagePath || biteData?.image }}"
+        height="500"
         loading="lazy"
         (click)="biteClick.emit(biteData)"
       />
     </div>
+
     <div class="card-details">
       <ion-card-header>
         <ion-card-subtitle
           class="restaurant-name"
           (click)="restaurantClick.emit(biteData)"
-          >{{ biteData?.place }}
+        >
+          <ion-text color="secondary">
+            {{ biteData?.place }}
+          </ion-text>
+
+          <div class="distance-container">
+            <ion-icon name="footsteps-outline" color="secondary" size="large" />
+            <ion-text color="secondary">{{
+              biteData?.distance | toMetric
+            }}</ion-text>
+          </div>
         </ion-card-subtitle>
 
         <ion-card-title
-          class="link-title ion-padding-bottom"
+          class="ion-padding-bottom"
           (click)="biteClick.emit(biteData)"
         >
           <span class="bite-title">
-            {{ biteData?.name | withFirstLetterUpperCase }}
+            <ion-text color="secondary">
+              {{ biteData?.name | withFirstLetterUpperCase }}
+            </ion-text>
           </span>
         </ion-card-title>
       </ion-card-header>
 
-      <ion-card-content>
-        @if (biteData?.rating) {
-        <div class="ion-margin-vertical">
+      <ion-card-content [class.with-edit]="showEditButton()">
+        <div class="rating-container ion-margin-vertical">
+          @if (biteData?.rating) {
           <star-rating [rating]="biteData?.rating" readOnly />
+          }
         </div>
-        }
 
-        <ion-text
-          color="primary {{ showEditButton() ? 'ion-margin-bottom' : '' }}"
-          >{{ biteData?.distance | toMetric }}
-        </ion-text>
         @if (!showEditButton()) {
         <bt-likes
           class="ion-margin-top"
           [bite]="biteData"
           [userId]="userId()"
+          [inCard]="true"
           (likeButtonClick)="likeButtonClick.emit($event)"
         />
         } @if (showEditButton()) {
@@ -53,7 +64,7 @@
             color="danger"
             fill="outline"
             expand="block"
-            (click)="onDeleteBiteClick(biteData)"
+            (click)="openConfirmationDialog()"
           >
             Delete
           </ion-button>
@@ -63,3 +74,11 @@
     </div>
   </div>
 </ion-card>
+
+<ion-alert
+  [isOpen]="isOpen()"
+  header="Delete Bite"
+  message="Are you sure you want to delete this bite?"
+  [buttons]="confirmationButtons"
+  (didDismiss)="handleConfirmationDismiss($event)"
+/>

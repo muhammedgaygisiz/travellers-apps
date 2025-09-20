@@ -8,14 +8,14 @@
       </ion-buttons>
 
       <ion-title>
-        <ion-icon [name]="appIcon()" />
-        {{ appTitle() }}
+        <ion-icon [name]="appIcon()" color="secondary" />
+        <ion-text color="secondary">{{ appTitle() }}</ion-text>
       </ion-title>
 
       @if (showHeaderMenu()) {
       <ion-buttons slot="end">
         <ion-button data-cy="btn-menu" (click)="showMenuPopover($event)">
-          <ion-icon slot="icon-only" name="menu-outline" />
+          <ion-icon slot="icon-only" name="menu-outline" color="secondary" />
         </ion-button>
       </ion-buttons>
       }
@@ -35,15 +35,15 @@
   </ion-content>
 
   <ng-container>
-    @if (showAddButton()) {
-    <ion-fab vertical="bottom" horizontal="center" slot="fixed">
-      <ion-fab-button color="light" (click)="addButtonClick.emit($event)">
-        <ion-icon name="add" />
-      </ion-fab-button>
-    </ion-fab>
-    } @if (showFooter()) {
+    @if (showFooter()) {
     <ion-footer>
-      <ion-toolbar />
+      <ion-toolbar color="light">
+        @if (showAddButton()) {
+        <ion-button expand="block" (click)="addButtonClick.emit($event)"
+          >Create Bite</ion-button
+        >
+        }
+      </ion-toolbar>
     </ion-footer>
     }
   </ng-container>

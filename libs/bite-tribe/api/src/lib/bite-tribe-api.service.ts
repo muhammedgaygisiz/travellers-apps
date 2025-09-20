@@ -19,7 +19,7 @@ import { ProfileApiService } from './profile-api.service';
 import { BiteApiService } from './bite-api.service';
 import { SettingsApiService } from './settings-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -41,7 +41,16 @@ export class BiteTribeApiService {
   allBucketlists$ = this.bucketlistApiService.allBucketlists$;
   allBites$ = this.biteApiService.allBites$;
   publicProfile$ = this.profileApiService.publicProfile$;
-  settings$ = this.settingsApiService.settings$;
+  settings$ = this.settingsApiService.settings$.pipe(
+    tap((settings) => {
+      const theme = settings.theme;
+
+      if (theme) {
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        document.documentElement.classList.toggle('light', theme === 'light');
+      }
+    })
+  );
 
   getExchangeRates(): Promise<Record<string, number>> {
     return this.exchangeRatesApiService.getExchangeRates();

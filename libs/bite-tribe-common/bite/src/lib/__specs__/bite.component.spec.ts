@@ -10,6 +10,8 @@ import {
 } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { ToBlobUrlPipe } from 'image-compression';
+import { OverlayEventDetail } from '@ionic/core';
+import { addNecessaryIcons } from 'utils';
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
@@ -17,6 +19,8 @@ class MockToBlobUrlPipe implements PipeTransform {
     return value;
   }
 }
+
+addNecessaryIcons();
 
 describe('BiteComponent', () => {
   let component: BiteComponent;
@@ -113,5 +117,41 @@ describe('BiteComponent', () => {
     expect(tags).toContain('spicy');
     expect(tags).toContain('vegetarian');
     expect(tags?.length).toBe(2);
+  });
+
+  describe('handleConfirmationDismiss', () => {
+    it('should emit deleteBite when role is DELETE', () => {
+      jest.spyOn(component.deleteBite, 'emit');
+
+      const mockEvent = {
+        detail: { role: 'delete' },
+      } as CustomEvent<OverlayEventDetail>;
+
+      component.handleConfirmationDismiss(mockEvent);
+
+      expect(component.deleteBite.emit).toHaveBeenCalledWith(mockBite);
+      expect(component.isOpen()).toBe(false);
+    });
+
+    it('should not emit deleteBite when role is CANCEL', () => {
+      jest.spyOn(component.deleteBite, 'emit');
+
+      const mockEvent = {
+        detail: { role: 'cancel' },
+      } as CustomEvent<OverlayEventDetail>;
+
+      component.handleConfirmationDismiss(mockEvent);
+
+      expect(component.deleteBite.emit).not.toHaveBeenCalled();
+      expect(component.isOpen()).toBe(false);
+    });
+  });
+
+  describe('openConfirmationDialog', () => {
+    it('should set isOpen to true', () => {
+      component.isOpen.set(false);
+      component.openConfirmationDialog();
+      expect(component.isOpen()).toBe(true);
+    });
   });
 });

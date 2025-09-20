@@ -11,11 +11,10 @@ import {
   IonButton,
   IonButtons,
   IonContent,
-  IonFab,
-  IonFabButton,
   IonFooter,
   IonHeader,
   IonIcon,
+  IonText,
   IonTitle,
   IonToolbar,
   PopoverController,
@@ -23,7 +22,7 @@ import {
 import { AngularDelegate } from '@ionic/angular';
 import { SupportedLang } from 'localization';
 import { PopoverMenuComponent } from './popover-menu.component';
-import { APP_TITLE, APP_ICON } from 'utils';
+import { APP_ICON, APP_TITLE } from 'utils';
 
 @Component({
   selector: 'ta-page',
@@ -38,9 +37,8 @@ import { APP_TITLE, APP_ICON } from 'utils';
     IonTitle,
     IonButton,
     IonContent,
-    IonFab,
-    IonFabButton,
     IonFooter,
+    IonText,
   ],
   providers: [PopoverController, AngularDelegate],
   styleUrl: './page.component.scss',

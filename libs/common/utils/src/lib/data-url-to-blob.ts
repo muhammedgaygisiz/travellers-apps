@@ -25,7 +25,5 @@ export const dataUrlToBlob = async (
     blob: new Blob([bytes], { type: contentType }), // directly usable in <img src={URL.createObjectURL(blob)}>
   };
 
-  console.log('Blob type:', result.blob.type);
-  console.log('Content type from metadata:', contentType);
   return result;
 };

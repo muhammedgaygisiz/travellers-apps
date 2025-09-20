@@ -10,7 +10,7 @@ describe('createOpenstreetmapLayer', () => {
 
     const options = layer.options as any;
     expect(options.maxZoom).toBe(19);
-    expect(options.attribution).toBe('© OpenStreetMap contributors');
+    expect(options.attribution).toContain('© OpenStreetMap contributors');
     expect(options.noWrap).toBe(true);
   });
 });

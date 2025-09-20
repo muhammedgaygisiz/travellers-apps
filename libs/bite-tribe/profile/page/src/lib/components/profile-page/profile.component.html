@@ -16,7 +16,7 @@
 >
   <ion-content class="ion-padding">
     <div class="profile-container">
-      @if(biteCreatorData?.photoUrl) {
+      @if (biteCreatorData?.photoUrl) {
       <ion-avatar class="profile-avatar">
         <img
           [src]="biteCreatorData?.photoUrl"
@@ -30,10 +30,10 @@
       <h1 class="profile-name">
         {{ biteCreatorData?.displayName }}
 
-        @if(biteCount() > 10) {
+        @if (biteCount() > 10) {
         <ion-badge color="primary" class="bite-badge"
-          >{{ biteCount() }} Bites</ion-badge
-        >
+          >{{ biteCount() }} Bites
+        </ion-badge>
         }
       </h1>
 
@@ -42,8 +42,8 @@
       </p>
 
       <ion-button fill="outline" class="follow-button" disabled
-        >Follow</ion-button
-      >
+        >Follow
+      </ion-button>
 
       <div class="about-section">
         <h2>About</h2>

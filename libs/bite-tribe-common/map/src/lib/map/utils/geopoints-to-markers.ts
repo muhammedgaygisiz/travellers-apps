@@ -13,13 +13,11 @@ export const geopointsToMarkers = (
       geopoint.latitude,
       geopoint.longitude,
     ];
-    if (geopoint?.id) {
-      return L.marker(coordinates, {
-        title: geopoint.id,
-        icon: getMarkerWithColor(MarkerColor.RED),
-      }).addTo(map);
-    }
     return L.marker(coordinates, {
-      icon: getMarkerWithColor(MarkerColor.RED),
+      title: geopoint.id,
+      icon: getMarkerWithColor(MarkerColor.RED, {
+        rating: geopoint.rating?.toString() || undefined,
+      }),
+      alt: geopoint.rating?.toString() || undefined,
     }).addTo(map);
   });

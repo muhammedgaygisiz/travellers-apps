@@ -51,6 +51,32 @@ describe('MapPageComponent', () => {
         { id: '2', lat: 3, lng: 4 },
       ]);
     });
+
+    it('should include rating if bite has rating', () => {
+      const bites = [
+        { id: '1', position: { lat: 1, lng: 2 }, rating: 5 },
+        { id: '2', position: { lat: 3, lng: 4 }, rating: 0 },
+        { id: '3', position: { lat: 5, lng: 6 } },
+      ];
+      componentRef.setInput('bites', bites);
+      expect(component.positions()).toEqual([
+        { id: '1', lat: 1, lng: 2, rating: '5' },
+        { id: '2', lat: 3, lng: 4 },
+        { id: '3', lat: 5, lng: 6 },
+      ]);
+    });
+
+    it('should not include rating if bite has rating = 0', () => {
+      const bites = [{ id: '1', position: { lat: 1, lng: 2 }, rating: 0 }];
+      componentRef.setInput('bites', bites);
+      expect(component.positions()).toEqual([{ id: '1', lat: 1, lng: 2 }]);
+    });
+
+    it('should not include rating if bite is missing rating', () => {
+      const bites = [{ id: '1', position: { lat: 1, lng: 2 } }];
+      componentRef.setInput('bites', bites);
+      expect(component.positions()).toEqual([{ id: '1', lat: 1, lng: 2 }]);
+    });
   });
 
   describe('onGeopointSelection', () => {

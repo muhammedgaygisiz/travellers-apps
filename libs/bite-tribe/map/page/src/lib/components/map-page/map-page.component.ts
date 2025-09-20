@@ -37,7 +37,12 @@ export class MapPageComponent {
   positions = computed(() => {
     const bites = this.bites();
     return bites?.map(
-      (bite: Bite) => ({ ...bite.position, id: bite.id } as Geopoint)
+      (bite: Bite) =>
+        ({
+          ...bite.position,
+          id: bite.id,
+          rating: this.getRating(bite),
+        } as Geopoint)
     );
   });
 
@@ -45,5 +50,10 @@ export class MapPageComponent {
     this.selectedBite = this.bites()?.find(
       (bite: Bite) => bite.id === geopoint.id
     );
+  }
+
+  private getRating(bite: Bite): string | undefined {
+    if (!bite.rating || bite.rating === 0) return undefined;
+    return bite.rating.toString();
   }
 }

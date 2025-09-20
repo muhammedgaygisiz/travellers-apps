@@ -20,7 +20,7 @@ describe('getMarkerWithColor', () => {
   });
 
   it('should return a DivIcon with the specified size', () => {
-    const icon = getMarkerWithColor(MarkerColor.DARKRED, 'big');
+    const icon = getMarkerWithColor(MarkerColor.DARKRED, { size: 'big' });
 
     expect(icon).toBeDefined();
     expect(icon.options.html).toContain(
@@ -35,5 +35,12 @@ describe('getMarkerWithColor', () => {
     expect(icon).toBeDefined();
     expect(icon.options.html).toContain(`background-color: ${MarkerColor.RED}`);
     expect(icon.options.iconAnchor).toEqual([-4, 25]);
+  });
+
+  it('should include rating in the DivIcon when provided', () => {
+    const icon = getMarkerWithColor(MarkerColor.RED, { rating: '5' });
+
+    expect(icon).toBeDefined();
+    expect(icon.options.html).toContain('5 <ion-icon name="star"/>');
   });
 });

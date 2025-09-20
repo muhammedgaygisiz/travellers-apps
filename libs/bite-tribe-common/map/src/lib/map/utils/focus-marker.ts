@@ -12,7 +12,14 @@ export const focusMarker = (
   }
 
   markers.forEach((marker) => {
-    marker.setIcon(getMarkerWithColor(MarkerColor.RED));
+    marker.setIcon(
+      getMarkerWithColor(MarkerColor.RED, { rating: marker.options?.alt })
+    );
   });
-  marker.setIcon(getMarkerWithColor(MarkerColor.DARKRED, 'big'));
+  marker.setIcon(
+    getMarkerWithColor(MarkerColor.DARKRED, {
+      size: 'big',
+      rating: marker.options?.alt,
+    })
+  );
 };

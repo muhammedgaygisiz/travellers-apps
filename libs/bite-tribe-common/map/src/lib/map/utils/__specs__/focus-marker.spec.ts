@@ -10,20 +10,16 @@ describe('focusMarker', () => {
   const mockSetIcon = jest.fn();
   const mockMarker1 = { setIcon: mockSetIcon, options: { alt: '2' } } as any;
   const mockMarker2 = { setIcon: mockSetIcon } as any;
+  const mockMap = {} as any;
+  const focusedMarker = mockMarker1;
 
-  it('should do nothing if marker is undefined', () => {
-    const markers = [mockMarker1, mockMarker2];
-    const focusedMarker = undefined as any;
-    const mockMap = {} as any;
-
-    focusMarker(focusedMarker, markers, mockMap);
-
-    expect(mockSetIcon).not.toHaveBeenCalled();
+  beforeEach(() => {
+    mockSetIcon.mockClear();
+    getMarkerWithColorMock.mockClear();
   });
 
   it('should do nothing if map is undefined', () => {
     const markers = [mockMarker1, mockMarker2];
-    const focusedMarker = mockMarker1;
     const mockMap = undefined as any;
 
     focusMarker(focusedMarker, markers, mockMap);
@@ -33,8 +29,6 @@ describe('focusMarker', () => {
 
   it('should set all markers to RED and the focused marker to DARKRED', () => {
     const markers = [mockMarker1, mockMarker2];
-    const focusedMarker = mockMarker1;
-    const mockMap = {} as any;
 
     focusMarker(focusedMarker, markers, mockMap);
 
@@ -47,5 +41,21 @@ describe('focusMarker', () => {
       size: 'big',
       rating: '2',
     });
+  });
+
+  it('should set all markers to RED if focused marker is undefined', () => {
+    const markers = [mockMarker1, mockMarker2];
+
+    focusMarker(undefined, markers, mockMap);
+
+    expect(getMarkerWithColorMock).toHaveBeenCalledTimes(2);
+    expect(getMarkerWithColorMock).toHaveBeenCalledWith(
+      MarkerColor.RED,
+      expect.anything()
+    );
+    expect(getMarkerWithColorMock).not.toHaveBeenCalledWith(
+      MarkerColor.DARKRED,
+      expect.anything()
+    );
   });
 });

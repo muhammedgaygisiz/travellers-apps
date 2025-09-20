@@ -50,7 +50,7 @@ export class MapComponent implements OnDestroy {
   readonly = input(false, { transform: booleanAttribute });
   emitMarkerClick = input(false, { transform: booleanAttribute });
   clickOnMap = output<Geopoint>();
-  clickOnMarker = output<Geopoint>();
+  clickOnMarker = output<Geopoint | undefined>();
   gpsPosition = input<Geopoint | null | undefined>();
 
   private map!: L.Map;
@@ -83,9 +83,7 @@ export class MapComponent implements OnDestroy {
       zoomToGpsOrDefault(gpsPosition, this.markers, geopoints, this.map);
     }
 
-    if (!this.isReadonly()) {
-      this.addMapClickEvent();
-    }
+    this.addMapClickEvent();
 
     if (this.emitMarkerClick()) {
       this.addMarkerClickEvent();
@@ -144,9 +142,14 @@ export class MapComponent implements OnDestroy {
         latitude: e.latlng.lat,
         longitude: e.latlng.lng,
       };
-      // Replace all markers with the clicked position
-      this.updateMarkers([position]);
-      this.clickOnMap.emit(position);
+
+      focusMarker(undefined, this.markers, this.map);
+      this.clickOnMarker.emit(undefined);
+
+      if (!this.isReadonly()) {
+        this.updateMarkers([position]);
+        this.clickOnMap.emit(position);
+      }
     });
   }
 

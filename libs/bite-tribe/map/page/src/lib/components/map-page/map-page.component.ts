@@ -46,7 +46,12 @@ export class MapPageComponent {
     );
   });
 
-  onGeopointSelection(geopoint: Geopoint): void {
+  onGeopointSelection(geopoint: Geopoint | undefined): void {
+    if (!geopoint) {
+      this.selectedBite = undefined;
+      return;
+    }
+
     this.selectedBite = this.bites()?.find(
       (bite: Bite) => bite.id === geopoint.id
     );

@@ -24,12 +24,9 @@
 
           <div class="distance-container">
             <ion-icon name="footsteps-outline" color="secondary" size="large" />
-            <ion-text
-              color="secondary
-                    {{ showEditButton() ? 'ion-margin-bottom' : '' }}"
-            >
-              {{ biteData?.distance | toMetric }}
-            </ion-text>
+            <ion-text color="secondary">{{
+              biteData?.distance | toMetric
+            }}</ion-text>
           </div>
         </ion-card-subtitle>
 

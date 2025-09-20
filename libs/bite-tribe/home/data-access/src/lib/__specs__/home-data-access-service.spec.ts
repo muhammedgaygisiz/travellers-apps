@@ -24,13 +24,12 @@ class Mock {
   maxPriceHome$ = of(0);
   isReloadingBites$ = of(false);
   logout = (): null => null;
-  submitLikeClick = (): null => null;
+  submitLikeOrDislikeClick = (): null => null;
   submitDeleteBite = (): null => null;
   setHomeSorting = (): null => null;
   setHomeFilters = (): null => null;
   clearHomeFilters = (): null => null;
   reloadBites = (): null => null;
-  removeLike = (): null => null;
 }
 
 describe('HomeDataAccessService', () => {
@@ -66,7 +65,6 @@ describe('HomeDataAccessService', () => {
   });
 
   describe('submitLikeClick', () => {
-    let removeLikeSpy: SpyInstance;
     const likeType = { likeType: 'dislike', biteId: '456' };
     const like = {
       biteId: likeType.biteId,
@@ -78,39 +76,96 @@ describe('HomeDataAccessService', () => {
       userId: like.userId,
       likes: [like],
     } as Bite;
+    let submitLikeOrDislikeClickSpy: SpyInstance;
 
     beforeEach(inject(
       [BiteTribeStoreService],
       (storeService: BiteTribeStoreService) => {
-        removeLikeSpy = jest
-          .spyOn(biteTribeStoreService, 'removeLike')
-          .mockImplementation();
         storeService.sortedHomeBites$ = of([bite]);
         storeService.userId$ = of('userId');
+        submitLikeOrDislikeClickSpy = jest
+          .spyOn(storeService, 'submitLikeOrDislikeClick')
+          .mockImplementation();
       }
     ));
 
-    it('should call submitLikeClick on BiteTribeStoreService', inject(
+    it('should call submitLikeOrDislikeClick when bite is found', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const likeType = { likeType: 'like', biteId: '123' };
-        const submitLikeClickSpy = jest.spyOn(
-          biteTribeStoreService,
-          'submitLikeClick'
-        );
-        service.submitLikeClick(likeType);
-        expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
-        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
+        const likeClick = { likeType: 'like', biteId: '456' };
+
+        service.submitLikeClick(likeClick);
+
+        expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledTimes(1);
+        expect(
+          biteTribeStoreService.submitLikeOrDislikeClick
+        ).toHaveBeenCalledWith(bite, 'userId', likeClick);
       }
     ));
 
-    it('should call submitLikeClick with correct arguments', inject(
+    it('should call submitLikeOrDislikeClick with undefined bite when bite is not found', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        service.submitLikeClick(likeType);
-        expect(removeLikeSpy).toHaveBeenCalledWith(likeType);
+        const likeClick = { likeType: 'like', biteId: 'nonexistent-bite-id' };
+
+        service.submitLikeClick(likeClick);
+
+        expect(
+          biteTribeStoreService.submitLikeOrDislikeClick
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          biteTribeStoreService.submitLikeOrDislikeClick
+        ).toHaveBeenCalledWith(undefined, 'userId', likeClick);
       }
     ));
+
+    describe('with empty bites', () => {
+      beforeEach(inject(
+        [BiteTribeStoreService],
+        (storeService: BiteTribeStoreService) => {
+          storeService.sortedHomeBites$ = of([]);
+        }
+      ));
+
+      it('should handle empty bites array', inject(
+        [HomeDataAccessService],
+        (service: HomeDataAccessService) => {
+          const likeClick = { likeType: 'like', biteId: '456' };
+
+          service.submitLikeClick(likeClick);
+
+          expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
+            undefined,
+            'userId',
+            likeClick
+          );
+        }
+      ));
+    });
+
+    describe('with no bites', () => {
+      beforeEach(inject(
+        [BiteTribeStoreService],
+        (storeService: BiteTribeStoreService) => {
+          storeService.sortedHomeBites$ = of(undefined as any);
+        }
+      ));
+
+      it('should handle empty bites array', inject(
+        [HomeDataAccessService],
+        (service: HomeDataAccessService) => {
+          const likeClick = { likeType: 'like', biteId: '456' };
+
+          service.submitLikeClick(likeClick);
+
+          expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
+            undefined,
+            'userId',
+            likeClick
+          );
+        }
+      ));
+    });
   });
 
   describe('deleteBite', () => {

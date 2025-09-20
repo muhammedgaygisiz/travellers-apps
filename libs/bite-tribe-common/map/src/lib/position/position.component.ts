@@ -12,7 +12,7 @@ import { Geopoint } from 'model';
   selector: 'position',
   template: `
     @if(value()) {
-    <bt-map [geopoints]="[value()!]" (geopointSelected)="setValue($event)" />
+    <bt-map [geopoints]="[value()!]" (clickOnMap)="setValue($event)" />
     }
   `,
   imports: [MapComponent],

@@ -19,7 +19,9 @@ export const reducer = createReducer(
       ...state,
       reloading: false,
     };
-    return adapter.upsertMany(bites, stateWithoutReloading);
+
+    const cleanState = adapter.removeAll(stateWithoutReloading);
+    return adapter.upsertMany(bites, cleanState);
   }),
   on(cacheBite, (state, { bite }) => {
     return {

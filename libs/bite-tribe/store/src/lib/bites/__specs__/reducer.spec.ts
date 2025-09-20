@@ -44,6 +44,30 @@ describe('Bite Reducer', () => {
         ...NEW_STATE,
       });
     });
+
+    it('should not include deleted bite in result', () => {
+      const CURRENT_STATE = {
+        ids: ['3'],
+        entities: { '3': { id: '3', name: 'Bite 2' } as Bite },
+      };
+
+      const loadedBitesFromApiAction = loadedBitesFromApi({
+        bites: [
+          { id: '1', name: 'Bite 1' } as Bite,
+          { id: '2', name: 'Bite 2' } as Bite,
+        ],
+      });
+
+      const result = reducer(CURRENT_STATE, loadedBitesFromApiAction);
+      expect(result).toEqual({
+        ids: ['1', '2'],
+        entities: {
+          '1': { id: '1', name: 'Bite 1' } as Bite,
+          '2': { id: '2', name: 'Bite 2' } as Bite,
+        },
+        reloading: false,
+      });
+    });
   });
 
   describe('cacheBite', () => {

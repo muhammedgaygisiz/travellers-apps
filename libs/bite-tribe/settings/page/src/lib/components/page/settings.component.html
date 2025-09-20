@@ -46,9 +46,9 @@
 
           <div class="ion-margin-top ion-text-end go-public-button-container">
             @if (isPublicProfile()) {
-            <ion-button (click)="onReturnToPrivate()"
-              >Return to private</ion-button
-            >
+            <ion-button (click)="openConfirmationDialog()">
+              Return to private
+            </ion-button>
             } @else {
             <ion-button (click)="goPublic.emit()">Go public</ion-button>
             }
@@ -119,3 +119,11 @@
     </div>
   </ion-content>
 </ta-page>
+
+<ion-alert
+  [isOpen]="isOpen()"
+  header="Return to Private Profile"
+  message="Are you sure you want to return to a private profile? Your will be shown as Anonymous."
+  [buttons]="confirmationButtons"
+  (didDismiss)="handleGoPrivateConfirmation($event)"
+/>

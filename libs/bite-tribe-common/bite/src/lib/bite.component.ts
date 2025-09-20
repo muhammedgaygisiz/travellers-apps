@@ -2,13 +2,12 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
-  computed,
-  DestroyRef,
-  inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import {
+  IonAlert,
   IonButton,
   IonCard,
   IonCardContent,
@@ -21,11 +20,12 @@ import {
 import { Bite } from 'model';
 import { ToMetricPipe } from 'distance-pipe';
 import { LikesComponent } from './likes/likes.component';
-import { Dialog } from '@angular/cdk/dialog';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
-import { ConfirmDialogComponent } from 'bite-tribe-common/confirm-dialog';
 import { StarRatingComponent } from 'common/ui/star-rating';
+import type { OverlayEventDetail } from '@ionic/core';
+
+const DELETE = 'delete';
+const CANCEL = 'cancel';
 
 @Component({
   selector: 'bt-bite',
@@ -44,6 +44,7 @@ import { StarRatingComponent } from 'common/ui/star-rating';
     WithFirstLetterUpperCasePipe,
     StarRatingComponent,
     IonIcon,
+    IonAlert,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -58,25 +59,31 @@ export class BiteComponent {
   gotoEdit = output<Bite>();
   deleteBite = output<Bite>();
 
-  dialog = inject(Dialog);
-  private readonly destroyRef = inject(DestroyRef);
+  isOpen = signal(false);
 
-  async onDeleteBiteClick(biteData: Bite): Promise<void> {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: 'Delete Bite',
-        message: 'Are you sure you want to delete this bite?',
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No',
-      },
-    });
+  confirmationButtons = [
+    {
+      text: 'Cancel',
+      role: CANCEL,
+    },
+    {
+      text: 'Delete',
+      role: DELETE,
+    },
+  ];
 
-    dialogRef.closed
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => {
-        if (result === 'confirm') {
-          this.deleteBite.emit(biteData);
-        }
-      });
+  handleConfirmationDismiss(event: CustomEvent<OverlayEventDetail>): void {
+    const role = event.detail.role;
+
+    if (role === DELETE) {
+      const bite = this.bite();
+      this.deleteBite.emit(bite);
+    }
+
+    this.isOpen.set(false);
+  }
+
+  openConfirmationDialog(): void {
+    this.isOpen.set(true);
   }
 }

@@ -14,7 +14,7 @@ import {
   saveNewBite,
   saveTags,
 } from './actions';
-import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
+import { filter, map, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -79,11 +79,6 @@ export class BiteEffects {
         ofType(deleteBite),
         tap(({ bite }) => {
           this.api.deleteBite(bite);
-        }),
-        catchError((error: any) => {
-          console.log('error', error);
-
-          return of(error);
         })
       );
     },

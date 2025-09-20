@@ -72,7 +72,6 @@ export class DetailsService {
 
   onRestaurantClick(bite: Bite): void {
     if (bite.restaurantId) {
-       
       const [empty, collectionName, restaurantId] =
         bite.restaurantId.split('/');
 

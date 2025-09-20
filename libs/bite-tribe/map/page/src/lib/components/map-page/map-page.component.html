@@ -12,7 +12,24 @@
   (gotoMyBucketlists)="gotoMyBucketlists.emit()"
   (gotoMyBites)="gotoMyBites.emit()"
 >
-  <ion-content [fullscreen]="true">
-    <bt-map readonly [positions]="positions()" />
+  <ion-content>
+    <div class="container">
+      <bt-map
+        readonly
+        emitMarkerClick
+        [geopoints]="positions()"
+        [gpsPosition]="gpsPosition()"
+        (clickOnMarker)="onGeopointSelection($event)"
+      />
+      @if (selectedBite) {
+      <bt-bite
+        [bite]="selectedBite"
+        [userId]="userId()"
+        (biteClick)="biteClick.emit($event)"
+        (restaurantClick)="restaurantClick.emit($event)"
+        (likeButtonClick)="likeButtonClick.emit($event)"
+      />
+      }
+    </div>
   </ion-content>
 </ta-page>

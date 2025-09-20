@@ -18,6 +18,7 @@ import {
   bitesBySelectedBucketlist,
   bitesByUser,
   cachedBite,
+  isReloadingBites,
   mybites,
   sortedHomeBites,
 } from './bites/selectors';
@@ -42,6 +43,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
   CreateAndSaveToBucketListParams,
+  Like,
   Link,
   Menu,
   PublicUser,
@@ -82,6 +84,7 @@ import {
   selectedBucketlist,
   selectedBucketlistTitle,
 } from './bucketlists/selectors';
+import { fromBites } from './bites';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -137,6 +140,7 @@ export class BiteTribeStoreService implements StoreService {
   exchangeRates$ = this.store.select(exchangeRates);
   preferedCurrency$ = this.store.select(preferredCurrency);
   maxPriceHome$ = this.store.select(maxPriceHome);
+  isReloadingBites$ = this.store.select(isReloadingBites);
 
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
@@ -166,11 +170,11 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   login(authCreds: Login): void {
-    this.store?.dispatch(fromAuth.login({ authCreds }));
+    this.store.dispatch(fromAuth.login({ authCreds }));
   }
 
   register(registration: Login): void {
-    this.store?.dispatch(fromAuth.register({ registration }));
+    this.store.dispatch(fromAuth.register({ registration }));
   }
 
   confirmError(): void {
@@ -178,7 +182,7 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   save(entity: any, docType: string): void {
-    this.store?.dispatch(getActionByDocType(docType, entity));
+    this.store.dispatch(getActionByDocType(docType, entity));
   }
 
   saveTags(newTagsArray: string[], id: string): void {
@@ -191,7 +195,25 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   logout(): void {
-    this.store?.dispatch(fromAuth.logout());
+    this.store.dispatch(fromAuth.logout());
+  }
+
+  submitLikeOrDislikeClick(
+    bite: Bite | undefined | null,
+    userId: string,
+    likeType: { likeType: string; biteId: string }
+  ): void {
+    const likeFromUser = bite?.likes?.find(
+      (like: Like) =>
+        like.userId === userId && like.likeType === likeType.likeType
+    );
+
+    if (likeFromUser) {
+      this.removeLike(likeType);
+      return;
+    }
+
+    this.submitLikeClick(likeType);
   }
 
   submitLikeClick(event: { likeType: string; biteId: string }): void {
@@ -282,5 +304,9 @@ export class BiteTribeStoreService implements StoreService {
 
   clearHomeFilters(): void {
     this.store.dispatch(clearHomeFilters());
+  }
+
+  reloadBites(): void {
+    this.store.dispatch(fromBites.reloadBites());
   }
 }

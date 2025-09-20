@@ -11,8 +11,8 @@ import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
 import { Subject } from 'rxjs';
-import SpyInstance = jest.SpyInstance;
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
+import SpyInstance = jest.SpyInstance;
 
 jest.mock('localization');
 
@@ -53,7 +53,6 @@ describe('BiteTribeHomeComponent', () => {
     fixture = TestBed.createComponent(BiteTribeHomeComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -84,6 +83,36 @@ describe('BiteTribeHomeComponent', () => {
 
     component.scrollToTop();
     expect(scrollToTopMock).toHaveBeenCalledWith(300);
+  });
+
+  describe('onBiteRefresh', () => {
+    let completeSpy: SpyInstance;
+    beforeEach(() => {
+      componentRef.setInput('isReloadingBites', false);
+      component.refreshEvent = { target: { complete: jest.fn() } } as any;
+      completeSpy = jest
+        .spyOn(component.refreshEvent.target, 'complete')
+        .mockImplementation();
+    });
+
+    it('should not complete the refresh event if event is not defined', () => {
+      component.refreshEvent = undefined;
+
+      fixture.detectChanges();
+      expect(completeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not complete the refresh event if refresh is still ongoing', () => {
+      componentRef.setInput('isReloadingBites', true);
+
+      fixture.detectChanges();
+      expect(completeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should complete the refresh event if refresh is done', () => {
+      fixture.detectChanges();
+      expect(completeSpy).toHaveBeenCalled();
+    });
   });
 
   describe('selectedSortingLabel', () => {
@@ -200,6 +229,26 @@ describe('BiteTribeHomeComponent', () => {
       component.onIonInfinite(infiniteScrollEvent);
       expect(component.currentPage()).toBe(2);
       expect(infiniteScrollEvent.target.complete).toHaveBeenCalled();
+    });
+  });
+
+  describe('refreshBites', () => {
+    const refresherEvent = {
+      target: {
+        complete: jest.fn(),
+      },
+    } as unknown as RefresherCustomEvent;
+    let refreshEmitSpy: SpyInstance;
+
+    beforeEach(() => {
+      refreshEmitSpy = jest
+        .spyOn(component.refresh, 'emit')
+        .mockImplementation();
+    });
+
+    it('should emit refresh event and complete the refresher', () => {
+      component.refreshBites(refresherEvent);
+      expect(refreshEmitSpy).toHaveBeenCalled();
     });
   });
 });

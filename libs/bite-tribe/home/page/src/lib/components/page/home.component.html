@@ -15,6 +15,10 @@
   (gotoMyBites)="gotoMyBites.emit()"
 >
   <ion-content class="ion-padding">
+    <ion-refresher slot="fixed" (ionRefresh)="refreshBites($event)">
+      <ion-refresher-content />
+    </ion-refresher>
+
     @if (moreThen5Bites()) {
     <ion-button slot="fixed" (click)="scrollToTop()">
       <ion-icon name="chevron-up-outline" />

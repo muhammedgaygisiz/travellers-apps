@@ -109,7 +109,7 @@
 
       <div class="map ion-margin-bottom">
         @if (biteData?.position) {
-        <bt-map [positions]="[biteData?.position!]" readonly />
+        <bt-map [geopoints]="[biteData?.position!]" readonly />
         }
       </div>
 

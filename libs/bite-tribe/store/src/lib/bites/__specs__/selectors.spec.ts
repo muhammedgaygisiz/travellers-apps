@@ -50,6 +50,18 @@ describe('Bites Selectors', () => {
     biteCreator: mockUser,
   };
 
+  describe('isReloadingBites', () => {
+    it('should return false if isReloadingBites is not set', () => {
+      const result = fromSelectors.isReloadingBites.projector(initialState);
+      expect(result).toBeFalsy();
+    });
+
+    it('should return undefined if slice is undefined', () => {
+      const result = fromSelectors.isReloadingBites.projector(undefined as any);
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('cachedBite', () => {
     it('should return the cached bite', () => {
       const result = fromSelectors.cachedBite.projector(initialState);

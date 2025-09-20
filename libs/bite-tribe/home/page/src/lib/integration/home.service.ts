@@ -30,6 +30,8 @@ export class HomeService {
 
   selectedBucketlistTitle = this.dataAccess.selectedBucketlistTitle;
 
+  isReloadingBites = this.dataAccess.isReloadingBites;
+
   logout(): void {
     this.dataAccess.logout();
   }
@@ -118,5 +120,9 @@ export class HomeService {
 
   filtersCleared(): void {
     this.dataAccess.clearFilters();
+  }
+
+  refresh(): void {
+    this.dataAccess.reloadHomeBites();
   }
 }

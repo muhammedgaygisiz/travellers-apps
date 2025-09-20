@@ -50,7 +50,6 @@ export class RestaurantService {
 
   private getMenuId(restaurant: Restaurant): string | undefined {
     if (restaurant?.menuId) {
-       
       const [empty, collectionName, menuId] = restaurant.menuId.split('/');
 
       return menuId;

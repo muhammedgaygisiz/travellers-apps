@@ -8,29 +8,42 @@ import {
 import { PageComponent } from 'common/ui/page';
 import { IonContent } from '@ionic/angular/standalone';
 import { MapComponent } from 'bite-tribe-common/map';
-import { Geopoint } from 'model';
+import { Bite, Geopoint } from 'model';
+import { BiteComponent } from 'bite-tribe-common/bite';
 
 @Component({
   selector: 'map-page',
   templateUrl: './map-page.component.html',
   styleUrl: './map-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageComponent, IonContent, MapComponent],
+  imports: [PageComponent, IonContent, MapComponent, BiteComponent],
 })
 export class MapPageComponent {
   bites = input<any[]>();
   isAuthenticated = input(false);
+  gpsPosition = input<Geopoint | null | undefined>();
+  userId = input<string>();
 
   readonly logoutClick = output();
   readonly gotoSettings = output();
   readonly gotoMyBucketlists = output();
   readonly gotoMyBites = output();
+  readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
+  readonly biteClick = output<Bite>();
+  readonly restaurantClick = output<Bite>();
+
+  selectedBite: Bite | undefined | null;
 
   positions = computed(() => {
     const bites = this.bites();
-
-    return bites?.map((bite) => {
-      return bite.position as Geopoint;
-    });
+    return bites?.map(
+      (bite: Bite) => ({ ...bite.position, id: bite.id } as Geopoint)
+    );
   });
+
+  onGeopointSelection(geopoint: Geopoint): void {
+    this.selectedBite = this.bites()?.find(
+      (bite: Bite) => bite.id === geopoint.id
+    );
+  }
 }

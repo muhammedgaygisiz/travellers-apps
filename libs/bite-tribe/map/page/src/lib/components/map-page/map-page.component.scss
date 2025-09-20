@@ -13,14 +13,24 @@
     }
   }
 
-  bt-map {
+  .container {
     height: 100%;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
 
-    ::ng-deep .map-container {
+    bt-map {
       height: 100%;
       width: 100%;
-      border-radius: 0;
+
+      ::ng-deep .map-container {
+        height: 100%;
+        width: 100%;
+        border-radius: 0;
+      }
+    }
+
+    bt-bite {
+      height: 40%;
     }
   }
 }

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Bite, Like } from 'model';
+import { Bite } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class HomeDataAccessService {
@@ -50,6 +50,9 @@ export class HomeDataAccessService {
     initialValue: 'EUR',
   });
   maxPriceHome = toSignal(this.storeService.maxPriceHome$, { initialValue: 0 });
+  isReloadingBites = toSignal(this.storeService.isReloadingBites$, {
+    initialValue: false,
+  });
 
   logout(): void {
     this.storeService.logout();
@@ -58,19 +61,8 @@ export class HomeDataAccessService {
   submitLikeClick(likeType: { likeType: string; biteId: string }): void {
     const bites = this.sortedHomeBites();
     const userId = this.userId();
-
     const bite = bites?.find((bite: Bite) => bite.id === likeType.biteId);
-    const likeFromUser = bite?.likes?.find(
-      (like: Like) =>
-        like.userId === userId && like.likeType === likeType.likeType
-    );
-
-    if (likeFromUser) {
-      this.storeService.removeLike(likeType);
-      return;
-    }
-
-    this.storeService.submitLikeClick(likeType);
+    this.storeService.submitLikeOrDislikeClick(bite, userId, likeType);
   }
 
   deleteBite(bite: Bite): void {
@@ -91,5 +83,9 @@ export class HomeDataAccessService {
 
   clearFilters(): void {
     this.storeService.clearHomeFilters();
+  }
+
+  reloadHomeBites(): void {
+    this.storeService.reloadBites();
   }
 }

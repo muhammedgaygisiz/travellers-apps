@@ -17,8 +17,16 @@ export class MapDataAccessService {
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     requireSync: true,
   });
+  gpsPosition = toSignal(this.storeService.position$);
 
   logout(): void {
     this.storeService.logout();
+  }
+
+  submitLikeClick(likeType: { likeType: string; biteId: string }): void {
+    const bites = this.bites();
+    const userId = this.userId();
+    const bite = bites?.find((bite: Bite) => bite.id === likeType.biteId);
+    this.storeService.submitLikeOrDislikeClick(bite, userId, likeType);
   }
 }

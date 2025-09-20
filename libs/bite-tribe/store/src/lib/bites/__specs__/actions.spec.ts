@@ -4,12 +4,18 @@ import {
   loadedBiteCreator,
   loadedBitesFromApi,
   noPublicCreatorForBite,
+  reloadBites,
   saveExistingBite,
   saveNewBite,
   saveTags,
+  stopReloadingBites,
 } from '../actions';
 
 describe('Bites - Actions', () => {
+  it('should have reloadBites action', () => {
+    expect(reloadBites).toBeDefined();
+  });
+
   it('should have loadedBitesFromApi action', () => {
     expect(loadedBitesFromApi).toBeDefined();
   });
@@ -40,5 +46,9 @@ describe('Bites - Actions', () => {
 
   it('should have noPublicCreatorForBite action', () => {
     expect(noPublicCreatorForBite).toBeDefined();
+  });
+
+  it('should have stopReloadingBites action', () => {
+    expect(stopReloadingBites).toBeDefined();
   });
 });

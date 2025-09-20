@@ -60,7 +60,7 @@ describe('MapPageComponent', () => {
       ];
       componentRef.setInput('bites', bites);
       expect(component.positions()).toEqual([
-        { id: '1', lat: 1, lng: 2, rating: '5' },
+        { id: '1', lat: 1, lng: 2, rating: 5 },
         { id: '2', lat: 3, lng: 4 },
         { id: '3', lat: 5, lng: 6 },
       ]);

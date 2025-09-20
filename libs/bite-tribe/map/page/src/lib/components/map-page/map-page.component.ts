@@ -57,8 +57,8 @@ export class MapPageComponent {
     );
   }
 
-  private getRating(bite: Bite): string | undefined {
+  private getRating(bite: Bite): number | undefined {
     if (!bite.rating || bite.rating === 0) return undefined;
-    return bite.rating.toString();
+    return bite.rating;
   }
 }

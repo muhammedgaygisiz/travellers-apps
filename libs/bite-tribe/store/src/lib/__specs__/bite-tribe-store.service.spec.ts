@@ -137,6 +137,27 @@ describe('BiteTribeStoreService', () => {
         expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
       }
     ));
+
+    it('should call submitLikeClick if bite is null', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const submitLikeClickSpy = jest.spyOn(service, 'submitLikeClick');
+        service.submitLikeOrDislikeClick(null, userId, likeType);
+        expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
+        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
+      }
+    ));
+
+    it('should call submitLikeClick if bite likes is undefined', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const submitLikeClickSpy = jest.spyOn(service, 'submitLikeClick');
+        const bite = {} as any;
+        service.submitLikeOrDislikeClick(bite, userId, likeType);
+        expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
+        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
+      }
+    ));
   });
 
   describe('submitLikeClick', () => {

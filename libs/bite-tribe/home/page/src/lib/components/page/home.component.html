@@ -126,7 +126,7 @@
     (gotoEdit)="gotoEdit.emit($event)"
     (deleteBite)="deleteBite.emit($event)"
   />
-  } @if(hasMore()) {
+  } @if (hasMore()) {
   <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
     <ion-infinite-scroll-content />
   </ion-infinite-scroll>

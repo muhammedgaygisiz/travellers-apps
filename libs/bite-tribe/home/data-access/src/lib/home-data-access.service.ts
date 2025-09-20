@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Bite, Like } from 'model';
+import { Bite } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class HomeDataAccessService {

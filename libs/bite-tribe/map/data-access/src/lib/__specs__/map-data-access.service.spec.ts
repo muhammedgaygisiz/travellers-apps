@@ -4,6 +4,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { inject, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { Bite, Like } from 'model';
+import SpyInstance = jest.SpyInstance;
 
 class Mock {
   bites$ = of([]);
@@ -59,31 +60,95 @@ describe('MapDataAccessService', () => {
       userId: like.userId,
       likes: [like],
     } as Bite;
+    let submitLikeOrDislikeClickSpy: SpyInstance;
 
     beforeEach(inject(
       [BiteTribeStoreService],
       (storeService: BiteTribeStoreService) => {
         storeService.bites$ = of([bite]);
         storeService.userId$ = of('userId');
+        submitLikeOrDislikeClickSpy = jest
+          .spyOn(storeService, 'submitLikeOrDislikeClick')
+          .mockImplementation();
       }
     ));
 
-    it('should call submitLikeClick on BiteTribeStoreService', inject(
+    it('should call submitLikeOrDislikeClick when bite is found', inject(
       [MapDataAccessService],
       (service: MapDataAccessService) => {
-        const likeType = { likeType: 'like', biteId: '456' };
-        const submitLikeOrDislikeClickSpy = jest.spyOn(
-          biteTribeStoreService,
-          'submitLikeOrDislikeClick'
-        );
-        service.submitLikeClick(likeType);
+        const likeClick = { likeType: 'like', biteId: '456' };
+
+        service.submitLikeClick(likeClick);
+
         expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledTimes(1);
-        expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
-          bite,
-          'userId',
-          likeType
-        );
+        expect(
+          biteTribeStoreService.submitLikeOrDislikeClick
+        ).toHaveBeenCalledWith(bite, 'userId', likeClick);
       }
     ));
+
+    it('should call submitLikeOrDislikeClick with undefined bite when bite is not found', inject(
+      [MapDataAccessService],
+      (service: MapDataAccessService) => {
+        const likeClick = { likeType: 'like', biteId: 'nonexistent-bite-id' };
+
+        service.submitLikeClick(likeClick);
+
+        expect(
+          biteTribeStoreService.submitLikeOrDislikeClick
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          biteTribeStoreService.submitLikeOrDislikeClick
+        ).toHaveBeenCalledWith(undefined, 'userId', likeClick);
+      }
+    ));
+
+    describe('with empty bites', () => {
+      beforeEach(inject(
+        [BiteTribeStoreService],
+        (storeService: BiteTribeStoreService) => {
+          storeService.bites$ = of([]);
+        }
+      ));
+
+      it('should handle empty bites array', inject(
+        [MapDataAccessService],
+        (service: MapDataAccessService) => {
+          const likeClick = { likeType: 'like', biteId: '456' };
+
+          service.submitLikeClick(likeClick);
+
+          expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
+            undefined,
+            'userId',
+            likeClick
+          );
+        }
+      ));
+    });
+
+    describe('with no bites', () => {
+      beforeEach(inject(
+        [BiteTribeStoreService],
+        (storeService: BiteTribeStoreService) => {
+          storeService.bites$ = of(undefined as any);
+        }
+      ));
+
+      it('should handle empty bites array', inject(
+        [MapDataAccessService],
+        (service: MapDataAccessService) => {
+          const likeClick = { likeType: 'like', biteId: '456' };
+
+          service.submitLikeClick(likeClick);
+
+          expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
+            undefined,
+            'userId',
+            likeClick
+          );
+        }
+      ));
+    });
   });
 });

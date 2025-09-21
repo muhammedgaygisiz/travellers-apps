@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.bitetribe.app',
   appName: 'BiteTribe',
   webDir: '../../dist/apps/bite-tribe',
-  bundledWebRuntime: false,
   server: {
     androidScheme: 'https',
   },
@@ -12,6 +11,9 @@ const config: CapacitorConfig = {
     FirebaseAuthentication: {
       skipNativeAuth: false,
       providers: ['google.com', 'apple.com'],
+    },
+    SplashScreen: {
+      launchAutoHide: false,
     },
   },
 };

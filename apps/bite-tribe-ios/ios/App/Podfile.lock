@@ -1196,6 +1196,8 @@ PODS:
   - CapacitorGeolocation (7.1.4):
     - Capacitor
     - IONGeolocationLib (~> 1.0)
+  - CapacitorSplashScreen (7.0.3):
+    - Capacitor
   - FirebaseAnalytics (11.7.0):
     - FirebaseAnalytics/AdIdSupport (= 11.7.0)
     - FirebaseCore (~> 11.7.0)
@@ -1436,6 +1438,7 @@ DEPENDENCIES:
   - "CapacitorFirebaseFirestore (from `../../../../node_modules/@capacitor-firebase/firestore`)"
   - "CapacitorFirebaseStorage (from `../../../../node_modules/@capacitor-firebase/storage`)"
   - "CapacitorGeolocation (from `../../../../node_modules/@capacitor/geolocation`)"
+  - "CapacitorSplashScreen (from `../../../../node_modules/@capacitor/splash-screen`)"
 
 SPEC REPOS:
   trunk:
@@ -1490,6 +1493,8 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor-firebase/storage"
   CapacitorGeolocation:
     :path: "../../../../node_modules/@capacitor/geolocation"
+  CapacitorSplashScreen:
+    :path: "../../../../node_modules/@capacitor/splash-screen"
 
 SPEC CHECKSUMS:
   abseil: d121da9ef7e2ff4cab7666e76c5a3e0915ae08c3
@@ -1505,6 +1510,7 @@ SPEC CHECKSUMS:
   CapacitorFirebaseFirestore: 503c97e3032ad2582061a06ee8d1c83555e842d7
   CapacitorFirebaseStorage: 14790a1e4b6744e598cb7b5c3f128e82122aeb82
   CapacitorGeolocation: 32a1f849c38c72b5071de36a28ebc548ef3bb611
+  CapacitorSplashScreen: e388b8e0ed0e982a9d3a40417f478e7a018a8763
   FirebaseAnalytics: bc9e565af9044ba8d6c6e4157e4edca8e5fdf7ec
   FirebaseAppCheckInterop: 73b173e5ec45192e2d522ad43f526a82ad10b852
   FirebaseAuth: 77e25aa24f3e1c626c5babd3338551fc1669ee0e
@@ -1532,6 +1538,6 @@ SPEC CHECKSUMS:
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
 
-PODFILE CHECKSUM: e27856b1ec5dbf5c9347124ba4f842947e9d284e
+PODFILE CHECKSUM: c07ec9af345d2b0a4bf166285ea3a0e06b3af4da
 
 COCOAPODS: 1.16.2

@@ -19,6 +19,7 @@ def capacitor_pods
   pod 'CapacitorCamera', :path => '../../../../node_modules/@capacitor/camera'
   pod 'CapacitorAppLauncher', :path => '../../../../node_modules/@capacitor/app-launcher'
   pod 'CapacitorFilesystem', :path => '../../../../node_modules/@capacitor/filesystem'
+  pod 'CapacitorSplashScreen', :path => '../../../../node_modules/@capacitor/splash-screen'
 end
 
 target 'App' do

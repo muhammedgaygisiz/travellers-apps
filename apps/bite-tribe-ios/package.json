@@ -10,6 +10,7 @@
     "@capacitor/geolocation": "../../node_modules/@capacitor/geolocation",
     "@capacitor/camera": "../../node_modules/@capacitor/camera",
     "@capacitor/app-launcher": "../../node_modules/@capacitor/app-launcher",
-    "@capacitor/filesystem": "../../node_modules/@capacitor/filesystem"
+    "@capacitor/filesystem": "../../node_modules/@capacitor/filesystem",
+    "@capacitor/splash-screen": "../../node_modules/@capacitor/splash-screen"
   }
 }

@@ -13,6 +13,7 @@ import {
   imageOutline,
   pricetagOutline,
 } from 'ionicons/icons';
+import { Bite } from 'model';
 
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
@@ -98,13 +99,14 @@ describe('BitePage', () => {
   });
 
   it('should emit form value on saveBite when valid', () => {
-    const validBite = {
+    const validBite: Bite = {
       id: '',
       image: 'data:image/jpeg;base64,test',
       imagePath: '',
+      description: '',
       name: 'Test Burger',
       place: 'Test Place',
-      tags: 'fish healthy',
+      tags: ['fish healthy'],
       price: 9.99,
       rating: 0,
       currency: 'EUR',
@@ -162,7 +164,7 @@ describe('BitePage', () => {
 
       fixture.detectChanges();
 
-      expect(component.biteFormGroup.getRawValue()).toEqual({
+      const expected: Bite = {
         id: '1',
         image: 'test.jpg',
         name: 'Test Bite',
@@ -171,9 +173,12 @@ describe('BitePage', () => {
         rating: 0,
         currency: 'USD',
         restaurantId: '',
+        description: '',
         tags: ['test', 'food'],
         position: { latitude: 42, longitude: 24 },
-      });
+      };
+
+      expect(component.biteFormGroup.getRawValue()).toEqual(expected);
     });
 
     it('should set currency when input is provided', () => {

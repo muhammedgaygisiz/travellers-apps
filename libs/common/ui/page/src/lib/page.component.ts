@@ -23,11 +23,11 @@ import { AngularDelegate } from '@ionic/angular';
 import { SupportedLang } from 'localization';
 import { PopoverMenuComponent } from './popover-menu.component';
 import { APP_ICON, APP_TITLE } from 'utils';
+import { UpperCasePipe } from '@angular/common';
 
 @Component({
   selector: 'ta-page',
   templateUrl: './page.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     IonIcon,
     IonHeader,
@@ -39,9 +39,11 @@ import { APP_ICON, APP_TITLE } from 'utils';
     IonContent,
     IonFooter,
     IonText,
+    UpperCasePipe,
   ],
   providers: [PopoverController, AngularDelegate],
   styleUrl: './page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PageComponent {
   appTitleToken = inject(APP_TITLE, { optional: true });
@@ -61,7 +63,7 @@ export class PageComponent {
 
   title = input('');
 
-  icon = input('pricetag-outline');
+  icon = input('');
 
   showFooter = input(true);
 

@@ -126,9 +126,9 @@ describe('BiteTribeHomeComponent', () => {
       expect(component.sortingLabel()).toBe('Likes');
     });
 
-    it('should return "Creation date" when selectedSorting is "date"', () => {
+    it('should return "Date" when selectedSorting is "date"', () => {
       componentRef.setInput('sorting', 'createdAt');
-      expect(component.sortingLabel()).toBe('Creation date');
+      expect(component.sortingLabel()).toBe('Date');
     });
 
     it('should return "Distance" when selectedSorting is unknown', () => {

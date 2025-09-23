@@ -107,6 +107,12 @@
         </div>
       </div>
 
+      @if (biteData?.description) {
+      <div class="description ion-margin-vertical">
+        <p>{{ biteData?.description }}</p>
+      </div>
+      }
+
       <div class="map ion-margin-bottom">
         @if (biteData?.position) {
         <bt-map [geopoints]="[biteData?.position!]" readonly />

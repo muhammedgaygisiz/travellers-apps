@@ -14,6 +14,7 @@ export interface Bite {
   restaurantId?: string;
   tags?: string[];
   rating?: number;
+  description?: string;
 
   createdAt?: string;
   createdAtTimestamp?: number;

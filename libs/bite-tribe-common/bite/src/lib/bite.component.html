@@ -6,7 +6,7 @@
       <img
         alt="Dish"
         src="{{ biteData.imagePath || biteData?.image }}"
-        height="500"
+        height="220"
         loading="lazy"
         (click)="biteClick.emit(biteData)"
       />
@@ -15,7 +15,7 @@
     <div class="card-details">
       <ion-card-header>
         <ion-card-subtitle
-          class="restaurant-name"
+          class="restaurant-name smalltext"
           (click)="restaurantClick.emit(biteData)"
         >
           <ion-text color="secondary">
@@ -24,7 +24,7 @@
 
           <div class="distance-container">
             <ion-icon name="footsteps-outline" color="secondary" size="large" />
-            <ion-text color="secondary">{{
+            <ion-text color="secondary smalltext">{{
               biteData?.distance | toMetric
             }}</ion-text>
           </div>
@@ -35,7 +35,7 @@
           (click)="biteClick.emit(biteData)"
         >
           <span class="bite-title">
-            <ion-text color="secondary">
+            <ion-text color="secondary copytext">
               {{ biteData?.name | withFirstLetterUpperCase }}
             </ion-text>
           </span>

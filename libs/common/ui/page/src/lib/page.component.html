@@ -8,8 +8,14 @@
       </ion-buttons>
 
       <ion-title>
-        <ion-icon [name]="appIcon()" color="secondary" />
-        <ion-text color="secondary">{{ appTitle() }}</ion-text>
+        <div class="title-container">
+          <ion-icon src="assets/icons/logo-black-white.svg" color="secondary" />
+          <ion-text color="secondary">
+            <h2 class="headline">
+              {{ appTitle() | uppercase }}
+            </h2>
+          </ion-text>
+        </div>
       </ion-title>
 
       @if (showHeaderMenu()) {
@@ -37,11 +43,15 @@
   <ng-container>
     @if (showFooter()) {
     <ion-footer>
-      <ion-toolbar color="light">
+      <ion-toolbar>
         @if (showAddButton()) {
-        <ion-button expand="block" (click)="addButtonClick.emit($event)"
-          >Create Bite</ion-button
+        <ion-button
+          expand="block"
+          color="light"
+          (click)="addButtonClick.emit($event)"
         >
+          Create Bite
+        </ion-button>
         }
       </ion-toolbar>
     </ion-footer>

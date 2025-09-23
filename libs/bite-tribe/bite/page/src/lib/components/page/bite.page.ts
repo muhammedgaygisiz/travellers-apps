@@ -18,11 +18,11 @@ import {
   IonSelect,
   IonSelectOption,
   IonText,
+  IonTextarea,
 } from '@ionic/angular/standalone';
 import { Platform } from '@ionic/angular';
 import {
   FormBuilder,
-  FormControl,
   ReactiveFormsModule,
   ValidationErrors,
   Validators,
@@ -53,6 +53,7 @@ import { TagsInputComponent } from 'common/ui/tags';
     IonNote,
     StarRatingComponent,
     TagsInputComponent,
+    IonTextarea,
   ],
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',
@@ -98,6 +99,7 @@ export class BitePage {
       imagePath: [''],
       name: ['', Validators.required],
       place: ['', Validators.required],
+      description: [''],
       price: [
         null as number | null,
         [Validators.required, FloatNumberDotNotationValidator()],
@@ -143,6 +145,7 @@ export class BitePage {
       position: bite.position,
       restaurantId: bite.restaurantId || '',
       rating: bite.rating || 0,
+      description: bite.description || '',
     });
 
     if (bite?.position) {

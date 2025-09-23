@@ -130,7 +130,7 @@ export class BiteTribeHomeComponent {
       case 'likes':
         return 'Likes';
       case 'createdAt':
-        return 'Creation date';
+        return 'Date';
       case 'price':
         return 'Price';
       default:

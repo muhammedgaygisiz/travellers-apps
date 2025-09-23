@@ -58,7 +58,25 @@
       />
       <hr class="sams-favorite-hr" />
 
+      <div class="ion-margin-vertical description">
+        <ion-textarea
+          label="Description"
+          formControlName="description"
+          auto-grow="true"
+          [maxlength]="500"
+          placeholder="Click here and tell us more about this amazing bite ..."
+          [rows]="6"
+        />
+      </div>
+      <hr class="sams-favorite-hr" />
+
       <div class="ion-padding-top">
+        <ion-note class="position-hint">
+          The position will be taken from your image. Otherwise it is set to
+          your current position. If you do not see the pin, please locate
+          yourself on the map and click to the point where this bite was
+          created.
+        </ion-note>
         <position formControlName="position" />
         @if (noGpsPosition()) {
         <ion-text color="danger">

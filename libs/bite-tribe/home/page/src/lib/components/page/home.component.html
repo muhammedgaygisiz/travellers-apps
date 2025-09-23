@@ -25,8 +25,8 @@
     </ion-button>
     }
 
-    <ion-text color="secondary">
-      <h1>{{ title() }}</h1>
+    <ion-text color="secondary" class="subheadline">
+      <h4>{{ title() }}</h4>
     </ion-text>
 
     <div class="chip-sort-filter-container">
@@ -53,7 +53,7 @@
         </ion-chip>
       </div>
 
-      <div class="sort-container ion-margin-end">
+      <div class="sort-container">
         <ion-chip id="select-sorting">
           <ion-select
             interface="modal"
@@ -63,9 +63,7 @@
             (ionChange)="emitSortingChange($event)"
           >
             <ion-select-option value="distance">Distance</ion-select-option>
-            <ion-select-option value="createdAt"
-              >Creation date
-            </ion-select-option>
+            <ion-select-option value="createdAt">Date</ion-select-option>
             <ion-select-option value="likes">Likes</ion-select-option>
             <ion-select-option value="rating">Rating</ion-select-option>
             <ion-select-option value="price">Price</ion-select-option>

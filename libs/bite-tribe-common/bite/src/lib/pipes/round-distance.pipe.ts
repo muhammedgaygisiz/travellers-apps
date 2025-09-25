@@ -9,7 +9,7 @@ export class RoundDistancePipe implements PipeTransform {
     if (!value || isNaN(valueAsNumber)) {
       return value;
     }
-    if (inRange(Math.trunc(valueAsNumber), 10, -10)) {
+    if (inRange(Math.trunc(valueAsNumber), -10, 10)) {
       return value;
     }
     return Math.round(valueAsNumber).toString();

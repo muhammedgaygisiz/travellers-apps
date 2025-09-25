@@ -1,5 +1,6 @@
 :host {
   ion-toolbar {
+    --ion-color-secondary: black;
     --border-width: 0 0 3px;
   }
 
@@ -47,6 +48,25 @@
   ion-footer {
     ion-toolbar {
       --border-width: 0;
+      --background: var(--ion-footer-color-background);
+      --padding-top: 1rem;
+      --padding-start: 1rem;
+      --padding-end: 1rem;
+      --padding-bottom: 1rem;
+
+      border-top: var(--ion-footer-border-width) solid
+        var(--ion-footer-color-border);
+      border-left: var(--ion-footer-border-width) solid
+        var(--ion-footer-color-border);
+      border-right: var(--ion-footer-border-width) solid
+        var(--ion-footer-color-border);
+      border-top-left-radius: var(--ion-footer-border-radius);
+      border-top-right-radius: var(--ion-footer-border-radius);
+
+      ion-button {
+        --ion-toolbar-color: var(--ion-footer-color-button);
+        --ion-toolbar-background: var(--ion-color-primary-contrast);
+      }
     }
   }
 }

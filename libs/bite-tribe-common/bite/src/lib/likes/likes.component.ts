@@ -6,7 +6,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { IonBadge, IonChip, IonLabel } from '@ionic/angular/standalone';
+import { IonChip, IonLabel } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
 import { PopoverController } from '@ionic/angular';
@@ -22,7 +22,7 @@ const emojiMap: Record<string, string> = {
   selector: 'bt-likes',
   templateUrl: './likes.component.html',
   styleUrl: './likes.component.scss',
-  imports: [IonBadge, IonChip, IonLabel],
+  imports: [IonChip, IonLabel],
   providers: [PopoverController],
 })
 export class LikesComponent {
@@ -37,6 +37,10 @@ export class LikesComponent {
   calcClass = computed(() => {
     const bite = this.bite();
     const userId = this.userId();
+
+    if (!bite.likes?.length) {
+      return 'unliked';
+    }
 
     const foundLike = bite?.likes?.find((like) => like.userId === userId);
 

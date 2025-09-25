@@ -14,6 +14,14 @@
 
     <div class="card-details">
       <ion-card-header>
+        <ion-card-title (click)="biteClick.emit(biteData)">
+          <span class="bite-title">
+            <ion-text color="secondary" class="copytext">
+              {{ biteData?.name | withFirstLetterUpperCase }}
+            </ion-text>
+          </span>
+        </ion-card-title>
+
         <ion-card-subtitle
           class="restaurant-name smalltext"
           (click)="restaurantClick.emit(biteData)"
@@ -23,27 +31,16 @@
           </ion-text>
 
           <div class="distance-container">
-            <ion-icon name="footsteps-outline" color="secondary" size="large" />
+            <ion-icon name="location-outline" color="secondary" size="small" />
             <ion-text color="secondary smalltext">{{
-              biteData?.distance | toMetric
+              biteData?.distance | roundDistance | toMetric
             }}</ion-text>
           </div>
         </ion-card-subtitle>
-
-        <ion-card-title
-          class="ion-padding-bottom"
-          (click)="biteClick.emit(biteData)"
-        >
-          <span class="bite-title">
-            <ion-text color="secondary" class="copytext">
-              {{ biteData?.name | withFirstLetterUpperCase }}
-            </ion-text>
-          </span>
-        </ion-card-title>
       </ion-card-header>
 
       <ion-card-content [class.with-edit]="showEditButton()">
-        <div class="rating-container ion-margin-vertical">
+        <div class="rating-container ion-margin-top">
           @if (biteData?.rating) {
           <star-rating [rating]="biteData?.rating" readOnly />
           }

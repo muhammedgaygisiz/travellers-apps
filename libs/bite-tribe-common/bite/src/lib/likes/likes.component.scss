@@ -4,34 +4,45 @@
     justify-content: flex-end;
 
     ion-chip.liked {
-      background-color: var(--ion-color-primary);
+      background-color: var(--ion-color-primary) !important;
+      color: var(--ion-color-primary) !important;
+
+      ion-label {
+        &.like-nr {
+          color: var(--ion-color-primary-contrast);
+        }
+      }
     }
 
-    ion-label.like {
-      margin-right: 8px;
+    ion-chip.unliked {
+      border-left: var(--border-width) solid var(--ion-color-card-border) !important;
+      border-top: var(--border-width) solid var(--ion-color-card-border) !important;
+      background-color: var(--ion-color-card-background) !important;
+    }
+
+    ion-label {
+      font-size: 1.5rem;
+      color: var(--ion-color-tertiary-contrast);
+
+      &.emoji {
+        margin-right: 8px;
+      }
     }
 
     &.in-card {
       ion-chip {
+        padding: 15px;
+        min-height: calc(40px + 1rem);
         position: absolute;
-        top: 16px;
         right: -4px;
         bottom: -4px;
         min-width: 32px;
 
         border-top-right-radius: 0;
         border-bottom-left-radius: 0;
-        border-bottom-right-radius: 8px;
+        border-bottom-right-radius: var(--border-inner-radius);
 
-        background-color: var(--ion-color-tertiary);
-
-        .liked {
-          background-color: var(--ion-color-tertiary);
-        }
-
-        ion-badge {
-          background-color: var(--ion-color-tertiary);
-        }
+        background-color: var(--ion-color-tertiary-tint);
       }
 
       ion-label {

@@ -8,9 +8,8 @@
       cursor: pointer;
       transition: transform 0.2s;
 
-      stroke: var(--ion-color-secondary) !important;
-      fill: #ffd700;
-      stroke-width: 24px;
+      color: var(--border-color);
+      fill: var(--ion-color-primary);
 
       &:hover {
         transform: scale(1.2);

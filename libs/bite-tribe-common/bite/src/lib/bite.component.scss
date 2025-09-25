@@ -1,11 +1,15 @@
 @use 'globals';
 
 :host {
+  --border-radius: 8px;
+  --border-width: 3px;
+
   ion-card {
     margin-top: 0;
     margin-bottom: 0;
 
     min-width: 345px;
+
     ::ng-deep {
       margin-right: 0;
       margin-left: 0;
@@ -13,6 +17,8 @@
 
     .card-content {
       .card-image {
+        max-height: 220px;
+
         img {
           width: 100%;
           min-width: 180px;
@@ -21,6 +27,10 @@
       }
 
       .card-details {
+        background-color: var(--ion-color-card-border);
+        border: var(--border-width) solid var(--ion-color-card-border);
+        border-top: unset;
+
         ion-card-subtitle.restaurant-name {
           display: flex;
           justify-content: space-between;
@@ -44,7 +54,15 @@
           }
         }
 
+        ion-card-header {
+          background-color: var(--ion-color-card-background);
+        }
+
         ion-card-content {
+          border-radius: calc(var(--border-radius) - var(--border-width));
+          background-color: var(--ion-color-card-background);
+          margin: 0;
+
           &.with-edit {
             flex-direction: column;
           }
@@ -73,6 +91,7 @@
         ion-button {
           width: 100%;
         }
+
         width: 100%;
 
         @media (max-width: 390px) {

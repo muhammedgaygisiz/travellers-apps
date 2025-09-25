@@ -23,6 +23,7 @@ import { LikesComponent } from './likes/likes.component';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
+import { RoundDistancePipe } from './pipes/round-distance.pipe';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
@@ -45,6 +46,7 @@ const CANCEL = 'cancel';
     StarRatingComponent,
     IonIcon,
     IonAlert,
+    RoundDistancePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

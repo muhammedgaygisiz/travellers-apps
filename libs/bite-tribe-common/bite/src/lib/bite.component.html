@@ -33,7 +33,7 @@
           <div class="distance-container">
             <ion-icon name="location-outline" color="secondary" size="small" />
             <ion-text color="secondary smalltext">{{
-              biteData?.distance | toMetric
+              biteData?.distance | roundDistance | toMetric
             }}</ion-text>
           </div>
         </ion-card-subtitle>

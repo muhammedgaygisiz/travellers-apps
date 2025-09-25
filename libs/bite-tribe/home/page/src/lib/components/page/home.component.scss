@@ -1,8 +1,9 @@
 :host {
   h4 {
-    margin: 0;
+    margin-left: 1rem;
     margin-bottom: 0.5rem;
   }
+
   ion-button[slot='fixed'] {
     position: fixed;
     left: 10px;
@@ -19,78 +20,6 @@
     }
   }
 
-  .chip-sort-filter-container {
-    position: relative;
-
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-
-    margin-bottom: 1rem;
-
-    .background-line {
-      position: absolute;
-      top: 50%;
-      left: -16px;
-      right: -16px;
-      width: 100vw;
-      height: 1px;
-      background-color: var(--border-color);
-      z-index: -1000;
-    }
-
-    .filter-container {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-
-      ion-chip {
-        overflow: visible;
-
-        ion-badge {
-          position: absolute;
-          top: -10px;
-          right: -10px;
-        }
-      }
-    }
-
-    .chip-container {
-      display: flex;
-      flex-wrap: wrap;
-
-      ion-chip {
-        cursor: pointer;
-      }
-    }
-
-    .sort-container {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-
-      ion-text {
-        margin-right: 0.5rem;
-      }
-
-      ion-icon {
-        margin-right: 0;
-      }
-
-      ion-select {
-        --placeholder-color: var(--ion-color-secondary);
-        --placeholder-opacity: 1;
-
-        min-height: unset;
-      }
-    }
-  }
-
-  bt-bite {
-    display: block;
-    margin-bottom: 1rem;
-  }
-
   .spinner-container {
     width: 100%;
     height: 100%;
@@ -103,5 +32,95 @@
       width: 100px;
       height: 100px;
     }
+  }
+
+  .home-header-container {
+    width: 100%;
+
+    &:before {
+      position: absolute;
+      z-index: -1;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 68px;
+      content: '';
+      background-color: var(--ion-background-color);
+    }
+
+    .chip-sort-filter-container {
+      position: relative;
+
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+
+      margin-bottom: 1rem;
+
+      .background-line {
+        position: absolute;
+        top: 50%;
+        left: -16px;
+        right: -16px;
+        height: 1px;
+        background-color: var(--border-color);
+        z-index: -1000;
+      }
+
+      .filter-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        ion-chip {
+          overflow: visible;
+
+          ion-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+          }
+        }
+      }
+
+      .chip-container {
+        display: flex;
+        flex-wrap: wrap;
+
+        ion-chip {
+          cursor: pointer;
+        }
+      }
+
+      .sort-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        ion-text {
+          margin-right: 0.5rem;
+        }
+
+        ion-icon {
+          margin-right: 0;
+        }
+
+        ion-select {
+          --placeholder-color: var(--ion-color-secondary);
+          --placeholder-opacity: 1;
+
+          min-height: unset;
+        }
+      }
+    }
+  }
+
+  .home-scrolling-content-container {
+    padding-top: 80px;
+  }
+
+  bt-bite {
+    display: block;
+    margin-bottom: 1rem;
   }
 }

@@ -17,6 +17,9 @@ $DARK_SECONDARY_COLOR: #fcf7f0;
 $DARK_TERTIARY_COLOR: #1c212b;
 $DARK_BACKGROUND_COLOR: #131620;
 
+$BORDER_WIDTH: 1px;
+$BORDER_RADIUS: 16px;
+
 /****************/
 
 @mixin light-primary-color {
@@ -148,6 +151,15 @@ $DARK_BACKGROUND_COLOR: #131620;
   --ion-toolbar-border-color: var(--ion-color-primary-shade);
   --ion-toolbar-color: #{SECONDARY_COLOR};
 
+  // Card
+  --border-radius: #{$BORDER_RADIUS};
+  --border-width: #{$BORDER_WIDTH};
+
+  // Footer
+  --ion-footer-color-background: var(--ion-background-color);
+  --ion-footer-border-width: var(--border-width);
+  --ion-footer-border-radius: var(--border-radius);
+
   ion-toolbar {
     --min-height: 56px;
   }
@@ -249,11 +261,26 @@ $DARK_BACKGROUND_COLOR: #131620;
   @include dark-text-color;
   @include dark-background-color;
 
+  // Header
   --ion-toolbar-background: #{$DARK_PRIMARY_COLOR};
   --ion-toolbar-border-color: var(--ion-color-primary-shade);
   --ion-toolbar-color: #{$DARK_SECONDARY_COLOR};
+
+  // General
+  --border-radius: #{$BORDER_RADIUS};
+  --border-inner-radius: calc(var(--border-radius) - var(--border-width));
+  --border-width: #{$BORDER_WIDTH};
+
+  // Card
   --ion-color-card-background: var(--ion-color-tertiary-shade);
   --ion-color-card-border: var(--ion-color-tertiary-tint);
+
+  // Footer
+  --ion-footer-color-background: var(--ion-color-tertiary-shade);
+  --ion-footer-color-border: var(--ion-color-tertiary-tint);
+  --ion-footer-color-button: var(--ion-color-primary);
+  --ion-footer-border-width: var(--border-width);
+  --ion-footer-border-radius: var(--border-radius);
 
   .button-clear {
     --color: #{$DARK_SECONDARY_COLOR};

@@ -8,8 +8,8 @@
     }
 
     ion-chip.unliked {
-      border-left: 3px solid var(--ion-color-card-border) !important;
-      border-top: 3px solid var(--ion-color-card-border) !important;
+      border-left: var(--border-width) solid var(--ion-color-card-border) !important;
+      border-top: var(--border-width) solid var(--ion-color-card-border) !important;
       background-color: var(--ion-color-card-background) !important;
     }
 
@@ -32,7 +32,7 @@
 
         border-top-right-radius: 0;
         border-bottom-left-radius: 0;
-        border-bottom-right-radius: 5px;
+        border-bottom-right-radius: var(--border-inner-radius);
 
         background-color: var(--ion-color-tertiary-tint);
       }

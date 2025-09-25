@@ -30,6 +30,7 @@
         border-top: unset;
 
         ion-card-subtitle.restaurant-name {
+          padding-top: 0.5rem;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -39,13 +40,17 @@
           }
 
           .distance-container {
+            margin-left: 1rem;
             display: flex;
             align-items: center;
+            white-space: nowrap;
           }
         }
 
         span.bite-title {
           word-break: break-word;
+          line-height: 1rem;
+          display: inline-block;
 
           @media (max-width: 768px) {
             font-size: 1.25rem;
@@ -53,7 +58,14 @@
         }
 
         ion-card-header {
+          padding: 15px;
+          padding-top: 10px;
+          padding-bottom: 0;
           background-color: var(--ion-color-card-background);
+          min-height: 90px;
+          display: flex;
+          flex-direction: column;
+          justify-content: start;
         }
 
         ion-card-content {
@@ -61,7 +73,8 @@
           border-bottom-right-radius: var(--border-inner-radius);
           background-color: var(--ion-color-card-background);
           margin: 0;
-          min-height: 70px;
+          min-height: 80px;
+          padding: 15px;
 
           &.with-edit {
             flex-direction: column;

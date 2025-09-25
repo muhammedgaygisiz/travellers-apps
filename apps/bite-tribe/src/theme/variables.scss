@@ -296,8 +296,8 @@ $BORDER_RADIUS: 16px;
   }
 
   ion-toolbar {
-    --ion-color-secondary: black;
-    --ion-toolbar-color: black;
+    --ion-color-secondary: #{$DARK_BACKGROUND_COLOR};
+    --ion-toolbar-color: #{$DARK_BACKGROUND_COLOR};
   }
 }
 

@@ -5,6 +5,13 @@
 
     ion-chip.liked {
       background-color: var(--ion-color-primary) !important;
+      color: var(--ion-color-primary) !important;
+
+      ion-label {
+        &.like-nr {
+          color: var(--ion-color-primary-contrast);
+        }
+      }
     }
 
     ion-chip.unliked {
@@ -17,7 +24,7 @@
       font-size: 1.5rem;
       color: var(--ion-color-tertiary-contrast);
 
-      &.like {
+      &.emoji {
         margin-right: 8px;
       }
     }

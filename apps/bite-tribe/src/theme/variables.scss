@@ -12,7 +12,6 @@ $SECONDARY_COLOR: #20201e;
 $TERTIARY_COLOR: #f1f1f1;
 $BACKGROUND_COLOR: #fff;
 
-$DARK_PRIMARY_COLOR: #c45b2b;
 $DARK_SECONDARY_COLOR: #fcf7f0;
 $DARK_TERTIARY_COLOR: #1c212b;
 $DARK_BACKGROUND_COLOR: #131620;
@@ -180,12 +179,12 @@ $BORDER_RADIUS: 16px;
 }
 
 @mixin dark-primary-color {
-  --ion-color-primary: #{$DARK_PRIMARY_COLOR};
-  --ion-color-primary-rgb: 196, 91, 43;
+  --ion-color-primary: #{$PRIMARY_COLOR};
+  --ion-color-primary-rgb: 254, 197, 107;
   --ion-color-primary-contrast: #000000;
   --ion-color-primary-contrast-rgb: 0, 0, 0;
-  --ion-color-primary-shade: #ac5026;
-  --ion-color-primary-tint: #ca6b40;
+  --ion-color-primary-shade: #e0ad5e;
+  --ion-color-primary-tint: #fecb7a;
 }
 
 @mixin dark-secondary-color {
@@ -266,7 +265,7 @@ $BORDER_RADIUS: 16px;
   @include dark-background-color;
 
   // Header
-  --ion-toolbar-background: #{$DARK_PRIMARY_COLOR};
+  --ion-toolbar-background: #{$PRIMARY_COLOR};
   --ion-toolbar-border-color: var(--ion-color-primary-shade);
   --ion-toolbar-color: #{$DARK_SECONDARY_COLOR};
 
@@ -294,6 +293,11 @@ $BORDER_RADIUS: 16px;
 
   ion-radio {
     --color-checked: #{$DARK_SECONDARY_COLOR};
+  }
+
+  ion-toolbar {
+    --ion-color-secondary: black;
+    --ion-toolbar-color: black;
   }
 }
 

@@ -151,6 +151,10 @@ $BORDER_RADIUS: 16px;
   --ion-toolbar-border-color: var(--ion-color-primary-shade);
   --ion-toolbar-color: #{SECONDARY_COLOR};
 
+  // General
+  --border-color: var(--ion-color-secondary);
+  --background-color: var(--ion-background-color);
+
   // Card
   --border-radius: #{$BORDER_RADIUS};
   --border-width: #{$BORDER_WIDTH};
@@ -270,6 +274,8 @@ $BORDER_RADIUS: 16px;
   --border-radius: #{$BORDER_RADIUS};
   --border-inner-radius: calc(var(--border-radius) - var(--border-width));
   --border-width: #{$BORDER_WIDTH};
+  --border-color: var(--ion-color-tertiary-tint);
+  --background-color: var(--ion-color-tertiary-shade);
 
   // Card
   --ion-color-card-background: var(--ion-color-tertiary-shade);

@@ -24,8 +24,9 @@
 
     &.in-card {
       ion-chip {
+        padding: 15px;
+        min-height: calc(40px + 1rem);
         position: absolute;
-        top: 16px;
         right: -4px;
         bottom: -4px;
         min-width: 32px;

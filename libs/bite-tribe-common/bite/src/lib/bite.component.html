@@ -43,7 +43,7 @@
       </ion-card-header>
 
       <ion-card-content [class.with-edit]="showEditButton()">
-        <div class="rating-container ion-margin-vertical">
+        <div class="rating-container ion-margin-top">
           @if (biteData?.rating) {
           <star-rating [rating]="biteData?.rating" readOnly />
           }

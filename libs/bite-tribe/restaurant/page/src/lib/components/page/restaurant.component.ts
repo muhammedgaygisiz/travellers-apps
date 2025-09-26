@@ -7,17 +7,19 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
   IonContent,
   IonIcon,
-  IonImg,
   IonInput,
   IonItem,
   IonLabel,
   IonList,
+  IonSegment,
+  IonSegmentButton,
   IonSelect,
   IonSelectOption,
   IonText,
@@ -36,6 +38,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TitleCasePipe } from '@angular/common';
 import { EnsureProtocolPipe } from '../../pipes/ensure-protocol.pipe';
+import { MenuItemComponent } from '../menu-item/menu-item.component';
+import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
+import { getPosition } from '../../utils/get-position';
+import { getDistance } from '../../utils/get-distance';
 
 @Component({
   selector: 'restaurant',
@@ -44,7 +50,6 @@ import { EnsureProtocolPipe } from '../../pipes/ensure-protocol.pipe';
   imports: [
     PageComponent,
     IonContent,
-    IonImg,
     ToMetricPipe,
     IonButton,
     IonIcon,
@@ -60,6 +65,10 @@ import { EnsureProtocolPipe } from '../../pipes/ensure-protocol.pipe';
     IonLabel,
     TitleCasePipe,
     EnsureProtocolPipe,
+    IonSegment,
+    IonSegmentButton,
+    MenuItemComponent,
+    RestaurantImageComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -78,6 +87,7 @@ export class RestaurantComponent {
   readonly biteClick = output<Bite>();
   readonly submitSocialMediaLinks = output<Partial<{ links: Link[] }>>();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
+  readonly selectedSegment = signal<'bites' | 'menu'>('bites');
 
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),
@@ -90,18 +100,19 @@ export class RestaurantComponent {
   initSocialMediaLinks = effect(() => {
     const restaurant = this.restaurant();
     const socialMediaLinks = restaurant?.socialMediaLinks;
-    if (socialMediaLinks) {
-      this.links.clear();
-
-      for (const socialMediaLink of socialMediaLinks) {
-        this.links.push(
-          this.formBuilder.group({
-            network: [socialMediaLink.network, Validators.required],
-            url: [socialMediaLink.url, Validators.required],
-          })
-        );
-      }
+    if (!socialMediaLinks?.length) {
+      return;
     }
+
+    this.links.clear();
+    socialMediaLinks.forEach((socialMediaLink) => {
+      this.links.push(
+        this.formBuilder.group({
+          network: [socialMediaLink.network, Validators.required],
+          url: [socialMediaLink.url, Validators.required],
+        })
+      );
+    });
   });
 
   isInvalid = toSignal(
@@ -120,35 +131,19 @@ export class RestaurantComponent {
   placeName = computed(() => {
     const bite = this.bite();
     const restaurant = this.restaurant();
-
     return restaurant?.name || bite?.place;
   });
 
   placeDistance = computed(() => {
     const bite = this.bite();
     const restaurant = this.restaurant();
-
-    const restaurantDistance = restaurant?.distance;
-    if (restaurantDistance && restaurantDistance !== 'NaN') {
-      return restaurantDistance;
-    }
-
-    return bite?.distance;
+    return getDistance(restaurant, bite);
   });
 
   position = computed(() => {
     const bite = this.bite();
     const restaurant = this.restaurant();
-
-    if (restaurant?.position) {
-      return [restaurant?.position];
-    }
-
-    if (bite?.position) {
-      return [bite?.position];
-    }
-
-    return null;
+    return getPosition(restaurant, bite);
   });
 
   addSocialMedia(): void {
@@ -165,5 +160,12 @@ export class RestaurantComponent {
       const socialMediaLinks = this.socialMediaForm.value;
       this.submitSocialMediaLinks.emit(socialMediaLinks as { links: Link[] });
     }
+  }
+
+  setSelectedSegment(selectedSegment: any): void {
+    if (selectedSegment != 'bites' && selectedSegment !== 'menu') {
+      return;
+    }
+    this.selectedSegment.set(selectedSegment);
   }
 }

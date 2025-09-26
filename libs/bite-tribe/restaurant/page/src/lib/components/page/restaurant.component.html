@@ -1,4 +1,4 @@
-@let restaurantData = restaurant();
+@let restaurantData = restaurant(); @let positionData = position();
 
 <ta-page
   [showHeaderMenu]="false"
@@ -8,15 +8,7 @@
   [showFooter]="false"
 >
   <ion-content>
-    @defer { @if (restaurantData?.image) {
-    <ion-img [src]="restaurantData?.image" class="place-image" />
-    } @else {
-    <ion-img [src]="'placeholder-restaurant.png'" class="full-size-image" />
-    } } @placeholder (minimum 1000ms) {
-    <div class="image-loading-placeholder">
-      <ion-icon name="download-outline" color="primary" />
-    </div>
-    }
+    <bt-restaurant-image [restaurant]="restaurantData" />
 
     <div class="ion-padding">
       <div class="header-container">
@@ -32,9 +24,9 @@
 
       {{ placeDistance() | toMetric }}
 
-      @if(editMode()) {
+      @if (editMode()) {
       <div class="ion-margin-top" [formGroup]="socialMediaForm">
-        @if(links.length === 0) {
+        @if (links.length === 0) {
         <ion-text>No Social Media Links</ion-text>
         }
 
@@ -58,17 +50,17 @@
           }
 
           <ion-button class="ion-margin-top" (click)="addSocialMedia()"
-            >Add Link</ion-button
-          >
+            >Add Link
+          </ion-button>
         </ion-list>
 
-        @if(links.length) {
+        @if (links.length) {
         <ion-button
           class="ion-margin-top"
           [disabled]="isInvalid()"
           (click)="saveSocialMediaLinks()"
-          >Save</ion-button
-        >
+          >Save
+        </ion-button>
         }
       </div>
       } @else {
@@ -91,19 +83,36 @@
       }
 
       <div class="ion-margin-top">
-        <bt-map [geopoints]="position()" readonly />
+        <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
       </div>
     </div>
 
-    <div class="ion-padding">
-      @for (bite of bites(); track bite.id) {
+    <div class="ion-padding-start ion-padding-end">
+      <ion-segment
+        [value]="selectedSegment()"
+        (ionChange)="setSelectedSegment($event.detail.value)"
+      >
+        <ion-segment-button value="bites">
+          <ion-label>Bites</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="menu">
+          <ion-label>Menu</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <div class="bites ion-padding">
+      @switch (selectedSegment()) { @case ('bites') { @for (bite of bites();
+      track bite.id) {
       <bt-bite
         [bite]="bite"
         [userId]="userId()"
         (biteClick)="biteClick.emit($event)"
         (likeButtonClick)="likeButtonClick.emit($event)"
       />
-      }
+      } } @case ('menu') { @for (bite of bites(); track bite.id) {
+      <bt-menu-item [bite]="bite" />
+      } } }
     </div>
   </ion-content>
 </ta-page>

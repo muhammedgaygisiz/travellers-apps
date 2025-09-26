@@ -1,0 +1,9 @@
+@let restaurantData = restaurant(); @defer { @if (restaurantData?.image) {
+<ion-img [src]="restaurantData?.image" class="place-image" />
+} @else {
+<ion-img [src]="'placeholder-restaurant.png'" class="full-size-image" />
+} } @placeholder (minimum 1000ms) {
+<div class="image-loading-placeholder">
+  <ion-icon name="download-outline" color="primary" />
+</div>
+}

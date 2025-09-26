@@ -21,6 +21,10 @@
     place-items: center;
     color: var(--ion-color-primary);
 
+    span {
+      text-align: center;
+    }
+
     ion-icon {
       font-size: 2rem;
       padding-bottom: 1rem;

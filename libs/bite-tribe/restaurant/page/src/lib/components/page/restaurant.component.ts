@@ -101,11 +101,12 @@ export class RestaurantComponent {
   initSocialMediaLinks = effect(() => {
     const restaurant = this.restaurant();
     const socialMediaLinks = restaurant?.socialMediaLinks;
+    this.links.clear();
+
     if (!socialMediaLinks?.length) {
       return;
     }
 
-    this.links.clear();
     socialMediaLinks.forEach((socialMediaLink) => {
       this.links.push(
         this.formBuilder.group({

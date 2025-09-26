@@ -205,7 +205,7 @@ describe('RestaurantComponent', () => {
     });
 
     it('should not set invalid segment', () => {
-      component.setSelectedSegment('invalid');
+      component.setSelectedSegment('invalid' as any);
       expect(component.selectedSegment()).toBe('bites'); // default value
     });
   });

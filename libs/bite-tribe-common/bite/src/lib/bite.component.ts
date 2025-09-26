@@ -14,16 +14,14 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
-  IonIcon,
   IonText,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
-import { ToMetricPipe } from 'distance-pipe';
 import { LikesComponent } from './likes/likes.component';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
-import { RoundDistancePipe } from './pipes/round-distance.pipe';
+import { DistanceComponent } from 'common/distance';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
@@ -38,15 +36,13 @@ const CANCEL = 'cancel';
     IonCardHeader,
     IonCardSubtitle,
     IonCardTitle,
-    ToMetricPipe,
     LikesComponent,
     IonButton,
     IonText,
     WithFirstLetterUpperCasePipe,
     StarRatingComponent,
-    IonIcon,
     IonAlert,
-    RoundDistancePipe,
+    DistanceComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

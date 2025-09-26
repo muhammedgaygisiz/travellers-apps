@@ -14,6 +14,7 @@ export class RestaurantService {
   bites = this.dataAccess.bites;
   userId = this.dataAccess.userId;
   restaurant = this.dataAccess.restaurant;
+  darkTheme = this.dataAccess.darkTheme;
 
   navigateToMenu(restaurant: Restaurant | undefined): void {
     const bite = this.bite();

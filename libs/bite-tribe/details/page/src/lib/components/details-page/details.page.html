@@ -61,7 +61,7 @@
           <span class="link" (click)="onRestaurantClick(biteData)">
             {{ biteData?.place }}
           </span>
-          · {{ biteData?.distance | toMetric }}
+          · {{ biteData?.distance | roundDistance | toMetric }}
         </span>
 
         <div class="price-column">

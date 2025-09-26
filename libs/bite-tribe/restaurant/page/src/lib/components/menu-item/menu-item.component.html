@@ -1,0 +1,7 @@
+@let biteData = bite();
+<ion-list>
+  <ion-item>
+    <ion-label>{{ biteData?.name }}</ion-label>
+    {{ biteData?.price | currency }}
+  </ion-item>
+</ion-list>

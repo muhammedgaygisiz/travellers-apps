@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BiteComponent } from '../bite.component';
-import { ToMetricPipe } from 'distance-pipe';
+import { ToMetricPipe } from 'common/distance';
 import { Bite, Like } from 'model';
 import {
   ComponentRef,

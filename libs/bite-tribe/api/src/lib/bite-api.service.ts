@@ -25,6 +25,7 @@ import {
 import { toBite } from './utils/to-bite';
 import { Platform } from '@ionic/angular';
 import { getBlobWithUri } from './utils/get-blob-with-uri';
+import { geohashForLocation } from 'geofire-common';
 
 export const BITE_COLLECTION = 'bites';
 
@@ -93,10 +94,16 @@ export class BiteApiService {
     biteDoc: Omit<Bite, 'image'>,
     user: User | null | undefined
   ): Promise<string> {
+    const gh = geohashForLocation([
+      biteDoc.position.latitude,
+      biteDoc.position.longitude,
+    ]);
+
     const doc = await FirebaseFirestore.addDocument({
       reference: BITE_COLLECTION,
       data: {
         ...biteDoc,
+        geohash: gh,
         userId: user?.uid || '',
         createdAt: new Date().toISOString(),
         createdAtTimestamp: Date.now(), // numeric timestamp for easier queries

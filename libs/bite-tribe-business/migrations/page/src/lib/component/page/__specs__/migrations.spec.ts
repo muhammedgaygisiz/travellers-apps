@@ -6,6 +6,7 @@ import * as utilsModule from 'utils';
 import { addNecessaryIcons } from 'utils';
 import { FirebaseStorage } from '@capacitor-firebase/storage';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { ComponentRef } from '@angular/core';
 
 addNecessaryIcons();
 
@@ -31,19 +32,66 @@ jest
 describe('Migrations', () => {
   let component: Migrations;
   let fixture: ComponentFixture<Migrations>;
+  let updateDocumentSpy: jest.SpyInstance;
+  let compRef: ComponentRef<Migrations>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideIonicAngular()],
     }).compileComponents();
 
+    updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
+
     fixture = TestBed.createComponent(Migrations);
+    compRef = fixture.componentRef;
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    updateDocumentSpy.mockReset();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('bitesNeedingMigration', () => {
+    it('should return bites needing migration', () => {
+      const bites = [
+        { id: '1', imagePath: 'path', image: '' },
+        { id: '2', imagePath: '', image: 'data:image/png;base64,...' },
+        { id: '3', imagePath: undefined, image: 'data:image/png;base64,...' },
+        { id: '4', imagePath: '', image: '' },
+      ] as Bite[];
+
+      compRef.setInput('bites', bites);
+
+      expect(component.bitesNeedingMigration()).toEqual([
+        bites[1],
+        bites[2],
+        bites[3],
+      ]);
+    });
+  });
+
+  describe('bitesWithoutGeohash', () => {
+    it('should return bites without geohash', () => {
+      const bites = [
+        { id: '1', geohash: 'abc' },
+        { id: '2', geohash: '' },
+        { id: '3', geohash: undefined },
+        { id: '4' },
+      ] as Bite[];
+
+      compRef.setInput('bites', bites);
+
+      expect(component.bitesWithoutGeohash()).toEqual([
+        bites[1],
+        bites[2],
+        bites[3],
+      ]);
+    });
   });
 
   describe('migrate', () => {
@@ -131,8 +179,6 @@ describe('Migrations', () => {
         .spyOn(utilsModule, 'getDownloadUrlFromFirebaseStorage')
         .mockResolvedValue('download-url');
 
-      const updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
-
       await component['updateBiteWithImagePath'](
         'object/path',
         {} as Bite,
@@ -142,6 +188,19 @@ describe('Migrations', () => {
       const dataParameter = updateDocumentSpy.mock.calls[0][0].data as Bite;
       expect(dataParameter.image).toEqual('');
       expect(dataParameter.imagePath).toEqual('download-url');
+    });
+  });
+
+  describe('addGeohash', () => {
+    it('should update the bite with a geohash', async () => {
+      const bite = {
+        position: { latitude: 10, longitude: 20 },
+      } as Bite;
+
+      await component.addGeohash(bite);
+
+      const dataParameter = updateDocumentSpy.mock.calls[0][0].data as Bite;
+      expect(dataParameter.geohash).toEqual('s3y0zh7w1z');
     });
   });
 });

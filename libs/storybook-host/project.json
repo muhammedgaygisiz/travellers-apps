@@ -1,0 +1,74 @@
+{
+  "name": "storybook-host",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/storybook-host/src",
+  "prefix": "storybook-host",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "storybook": {
+      "executor": "@storybook/angular:start-storybook",
+      "options": {
+        "experimentalZoneless": true,
+        "port": 4400,
+        "configDir": "libs/storybook-host/.storybook",
+        "browserTarget": "storybook-host:build",
+        "compodoc": false,
+        "styles": [
+          "apps/bite-tribe-business/src/global.scss",
+          "apps/bite-tribe/src/global.scss"
+        ],
+        "stylePreprocessorOptions": {
+          "includePaths": ["libs/bite-tribe-common/styles"]
+        }
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "build": {
+      "executor": "@storybook/angular:build-storybook",
+      "outputs": ["{options.outputDir}"],
+      "options": {
+        "experimentalZoneless": true,
+        "outputDir": "dist/storybook",
+        "configDir": "libs/storybook-host/.storybook",
+        "browserTarget": "storybook-host:build",
+        "compodoc": false,
+        "styles": [
+          "apps/bite-tribe/src/global.scss",
+          "apps/bite-tribe-business/src/global.scss"
+        ],
+        "stylePreprocessorOptions": {
+          "includePaths": ["libs/bite-tribe-common/styles"]
+        }
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "loki": {
+      "executor": "./tools/executors/loki:loki",
+      "options": {
+        "reference": "libs/storybook-host/.loki/reference",
+        "difference": "libs/storybook-host/.loki/difference",
+        "output": "libs/storybook-host/.loki/current",
+        "chromeTolerance": 0.000005,
+        "chromeRetries": 3,
+        "chromeConcurrency": 1
+      },
+      "configurations": {
+        "approve": {
+          "update": true
+        }
+      }
+    }
+  }
+}

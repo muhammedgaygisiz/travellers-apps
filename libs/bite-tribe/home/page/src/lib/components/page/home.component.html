@@ -31,15 +31,9 @@
       </ion-text>
 
       <div class="chip-sort-filter-container">
-        <div class="background-line"></div>
-
         <div class="filter-container">
           <ion-chip id="select-tags">
-            <ion-icon
-              name="funnel-outline"
-              class="add-filter"
-              color="secondary"
-            />
+            <ion-icon name="funnel-outline" color="secondary" />
             @if (selectedFilters().length > 0 || distance()) {
             <ion-badge color="danger">{{ numberOfFilters() }}</ion-badge>
             }

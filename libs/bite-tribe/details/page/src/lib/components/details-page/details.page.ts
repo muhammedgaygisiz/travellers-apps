@@ -33,7 +33,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
-import { ToMetricPipe } from 'distance-pipe';
+import { ToMetricPipe } from 'common/distance';
 import { MapComponent } from 'bite-tribe-common/map';
 import { ToBlobUrlPipe } from 'image-compression';
 import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';

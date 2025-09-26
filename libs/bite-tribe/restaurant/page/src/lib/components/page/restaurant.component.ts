@@ -25,7 +25,6 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { Bite, Link, Menu, MenuItem, Restaurant } from 'model';
-import { ToMetricPipe } from 'distance-pipe';
 import { MapComponent } from 'bite-tribe-common/map';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import {
@@ -42,6 +41,7 @@ import { MenuItemComponent } from '../menu-item/menu-item.component';
 import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
 import { getPosition } from '../../utils/get-position';
 import { getDistance } from '../../utils/get-distance';
+import { DistanceComponent } from 'common/distance';
 
 @Component({
   selector: 'restaurant',
@@ -50,7 +50,6 @@ import { getDistance } from '../../utils/get-distance';
   imports: [
     PageComponent,
     IonContent,
-    ToMetricPipe,
     IonButton,
     IonIcon,
     MapComponent,
@@ -69,6 +68,7 @@ import { getDistance } from '../../utils/get-distance';
     IonSegmentButton,
     MenuItemComponent,
     RestaurantImageComponent,
+    DistanceComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

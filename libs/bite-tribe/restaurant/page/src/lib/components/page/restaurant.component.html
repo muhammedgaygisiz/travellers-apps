@@ -22,7 +22,7 @@
         }
       </div>
 
-      {{ placeDistance() | toMetric }}
+      <bt-distance [distance]="placeDistance()" />
 
       @if (editMode()) {
       <div class="ion-margin-top" [formGroup]="socialMediaForm">

@@ -30,12 +30,7 @@
             {{ biteData?.place }}
           </ion-text>
 
-          <div class="distance-container">
-            <ion-icon name="location-outline" color="secondary" size="small" />
-            <ion-text color="secondary smalltext">{{
-              biteData?.distance | roundDistance | toMetric
-            }}</ion-text>
-          </div>
+          <bt-distance class="distance" [distance]="biteData?.distance" />
         </ion-card-subtitle>
       </ion-card-header>
 

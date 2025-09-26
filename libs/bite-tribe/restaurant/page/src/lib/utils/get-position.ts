@@ -5,11 +5,11 @@ export const getPosition = (
   bite?: Bite
 ): Geopoint | null | undefined => {
   if (restaurant?.position) {
-    return restaurant?.position;
+    return restaurant.position;
   }
 
   if (bite?.position) {
-    return bite?.position;
+    return bite.position;
   }
 
   return null;

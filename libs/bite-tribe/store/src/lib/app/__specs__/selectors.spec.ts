@@ -1,7 +1,6 @@
 import * as fromSelectors from '../selectors';
 import { Geopoint, PublicUser, Settings } from 'model';
 import { AppSlice } from '../app-slice.model';
-import { isDarkTheme } from '../selectors';
 
 describe('App Selectors', () => {
   const mockPosition: Geopoint = {
@@ -196,6 +195,11 @@ describe('App Selectors', () => {
       const result = fromSelectors.homeSorting.projector(stateWithoutSorting);
       expect(result).toBe('distance');
     });
+
+    it('should return distance when slice is undefined', () => {
+      const result = fromSelectors.homeSorting.projector(undefined as any);
+      expect(result).toBe('distance');
+    });
   });
 
   describe('isDarkTheme', () => {
@@ -210,6 +214,11 @@ describe('App Selectors', () => {
         settings: { ...mockState.settings, theme: 'light' },
       };
       const result = fromSelectors.isDarkTheme.projector(stateWithLightTheme);
+      expect(result).toBe(false);
+    });
+
+    it('should return false when slice is undefined', () => {
+      const result = fromSelectors.isDarkTheme.projector(undefined as any);
       expect(result).toBe(false);
     });
   });

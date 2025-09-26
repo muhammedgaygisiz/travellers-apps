@@ -1,7 +1,10 @@
 @let restaurantData = restaurant(); @defer { @if (restaurantData?.image) {
 <ion-img [src]="restaurantData?.image" class="place-image" />
 } @else {
-<ion-img [src]="'placeholder-restaurant.png'" class="full-size-image" />
+<div class="image-loading-placeholder">
+  <ion-icon name="pizza-outline" color="primary" />
+  <span>This restaurant is not verified on BiteTribe yet.</span>
+</div>
 } } @placeholder (minimum 1000ms) {
 <div class="image-loading-placeholder">
   <ion-icon name="download-outline" color="primary" />

@@ -47,4 +47,6 @@ Thumbs.db
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
+### NX Deps Graph ###
 storybook-static
+libs/storybook-host/src/assets/temp/**/*

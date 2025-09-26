@@ -18,6 +18,11 @@ jest.mock('../../../utils/get-position', () => ({
   getPosition: (...args: any): void => getPositionMock(...args),
 }));
 
+const uniqueBitesByNameMock = jest.fn();
+jest.mock('../../../utils/unique-bites-by-name', () => ({
+  uniqueBitesByName: (...args: any): void => uniqueBitesByNameMock(...args),
+}));
+
 addNecessaryIcons();
 
 describe('RestaurantComponent', () => {
@@ -151,6 +156,40 @@ describe('RestaurantComponent', () => {
         { id: '1', name: 'Test Restaurant' },
         { place: 'Bite Place' }
       );
+    });
+  });
+
+  describe('uniqueBites', () => {
+    it('should return unique bites based on id', () => {
+      const bites = [
+        { id: '1', name: 'Bite 1' },
+        { id: '2', name: 'Bite 2' },
+        { id: '1', name: 'Bite 1 Duplicate' },
+      ];
+      uniqueBitesByNameMock.mockReturnValue([
+        { id: '1', name: 'Bite 1' },
+        { id: '2', name: 'Bite 2' },
+      ]);
+      componentRef.setInput('bites', bites);
+      expect(component.uniqueBites()).toEqual([
+        { id: '1', name: 'Bite 1' },
+        { id: '2', name: 'Bite 2' },
+      ]);
+      expect(uniqueBitesByNameMock).toHaveBeenCalledWith(bites);
+    });
+
+    it('should return empty array if no bites', () => {
+      uniqueBitesByNameMock.mockReturnValue([]);
+      componentRef.setInput('bites', []);
+      expect(component.uniqueBites()).toEqual([]);
+      expect(uniqueBitesByNameMock).toHaveBeenCalledWith([]);
+    });
+
+    it('should return empty array if bites is undefined', () => {
+      uniqueBitesByNameMock.mockReturnValue([]);
+      componentRef.setInput('bites', undefined);
+      expect(component.uniqueBites()).toEqual([]);
+      expect(uniqueBitesByNameMock).toHaveBeenCalledWith([]);
     });
   });
 

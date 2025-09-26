@@ -42,6 +42,7 @@ import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.c
 import { getPosition } from '../../utils/get-position';
 import { getDistance } from '../../utils/get-distance';
 import { DistanceComponent } from 'common/distance';
+import { uniqueBitesByName } from '../../utils/unique-bites-by-name';
 
 @Component({
   selector: 'restaurant',
@@ -146,6 +147,13 @@ export class RestaurantComponent {
     const bite = this.bite();
     const restaurant = this.restaurant();
     return getPosition(restaurant, bite);
+  });
+
+  uniqueBites = computed(() => {
+    const bites = this.bites() || [];
+    return uniqueBitesByName(bites).sort(
+      (a, b) => (a.price || 0) - (b.price || 0)
+    );
   });
 
   addSocialMedia(): void {

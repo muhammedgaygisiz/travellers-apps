@@ -113,7 +113,7 @@
         (biteClick)="biteClick.emit($event)"
         (likeButtonClick)="likeButtonClick.emit($event)"
       />
-      } } @case ('menu') { @for (bite of bites(); track bite.id) {
+      } } @case ('menu') { @for (bite of uniqueBites(); track bite.id) {
       <bt-menu-item [bite]="bite" />
       } } }
     </div>

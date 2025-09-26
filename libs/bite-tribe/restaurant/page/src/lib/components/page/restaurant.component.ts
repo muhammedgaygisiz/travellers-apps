@@ -81,6 +81,7 @@ export class RestaurantComponent {
   restaurant = input<Restaurant>();
   menu = input<Menu>();
   editMode = input(false, { transform: booleanAttribute });
+  darkTheme = input<boolean>(false);
 
   readonly createBiteClick = output<MenuItem>();
   readonly showMenuClick = output<Restaurant | undefined>();

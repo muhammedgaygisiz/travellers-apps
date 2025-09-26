@@ -11,6 +11,7 @@ export class RestaurantDataAccessService {
   bites = toSignal(this.storeService.bitesByRestaurant$);
   userId = toSignal(this.storeService.userId$);
   restaurant = toSignal(this.storeService.restaurant$);
+  darkTheme = toSignal(this.storeService.darkTheme$, { initialValue: false });
 
   submitSocialMediaLinks(restaurantId: string, links: Link[]): void {
     this.storeService.saveSocialMediaLinks(restaurantId, links);

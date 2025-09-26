@@ -1,4 +1,5 @@
-@let restaurantData = restaurant(); @defer { @if (restaurantData?.image) {
+@let restaurantData = restaurant(); @let skeletonAnimationData =
+skeletonAnimation(); @defer { @if (restaurantData?.image) {
 <ion-img [src]="restaurantData?.image" class="place-image" />
 } @else {
 <div class="image-loading-placeholder">
@@ -7,6 +8,20 @@
 </div>
 } } @placeholder (minimum 1000ms) {
 <div class="image-loading-placeholder">
-  <ion-icon name="download-outline" color="primary" />
+  <ngx-skeleton-loader
+    appearance="line"
+    style="width: 100%"
+    [animation]="skeletonAnimationData"
+  />
+  <ngx-skeleton-loader
+    appearance="line"
+    style="width: 100%"
+    [animation]="skeletonAnimationData"
+  />
+  <ngx-skeleton-loader
+    appearance="line"
+    style="width: 100%"
+    [animation]="skeletonAnimationData"
+  />
 </div>
 }

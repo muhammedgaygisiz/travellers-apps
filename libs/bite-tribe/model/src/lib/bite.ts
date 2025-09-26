@@ -11,6 +11,7 @@ export interface Bite {
   price: number;
   currency?: string;
   position: Geopoint;
+  geohash?: string;
   restaurantId?: string;
   tags?: string[];
   rating?: number;

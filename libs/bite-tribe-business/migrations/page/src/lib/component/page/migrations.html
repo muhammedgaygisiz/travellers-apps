@@ -12,8 +12,10 @@
         <h1>Bites</h1>
       </div>
 
+      <h2>Image Migration</h2>
       <table border="1" style="width: 100%">
-        @for (bite of bites(); let index = $index; track bite.id || index) {
+        @for (bite of bitesNeedingMigration(); let index = $index; track bite.id
+        || index) {
         <tr>
           <td style="width: 15%">
             <div style="padding: 1rem">
@@ -23,9 +25,9 @@
               <br />
               <br />
               <ion-button (click)="migrate(bite)" [disabled]="!!bite.imagePath"
-                >Migrate</ion-button
-              >
-              @if(!bite.imagePath) {
+                >Migrate
+              </ion-button>
+              @if (!bite.imagePath) {
               <br />
               <br />
               <ion-text style="color: yellow">NEEDS MIGRATION!</ion-text>
@@ -38,6 +40,39 @@
           <td>
             <img alt="{{bite.name}}" [src]="bite.imagePath" width="100" />
           </td>
+        </tr>
+        }
+      </table>
+
+      <h2>Geohash Migration</h2>
+      <table border="1" style="width: 100%">
+        @for (bite of bitesWithoutGeohash(); let index = $index; track bite.id
+        || index) {
+        <tr>
+          <td style="width: 15%">
+            <div style="padding: 1rem">
+              {{ bite.name }}
+              <br />
+              {{ bite.id }}
+              <br />
+              <br />
+              <ion-button
+                (click)="addGeohash(bite)"
+                [disabled]="!!bite.geohash"
+              >
+                Add Geohash
+              </ion-button>
+              @if (!bite.geohash) {
+              <br />
+              <br />
+              <ion-text style="color: yellow">NEEDS MIGRATION!</ion-text>
+              }
+            </div>
+          </td>
+          <td width="200">
+            {{ bite.position?.latitude }}, {{ bite.position?.longitude }}
+          </td>
+          <td width="200">{{ bite.geohash }}</td>
         </tr>
         }
       </table>

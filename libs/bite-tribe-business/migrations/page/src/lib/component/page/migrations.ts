@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonButton, IonContent, IonText } from '@ionic/angular/standalone';
 import { Bite } from 'model';
@@ -10,6 +15,7 @@ import {
   getDownloadUrlFromFirebaseStorage,
   guessExtFromContentType,
 } from 'utils';
+import { geohashForLocation } from 'geofire-common';
 
 const BITE_COLLECTION = 'bites';
 
@@ -23,6 +29,18 @@ const BITE_COLLECTION = 'bites';
 export class Migrations {
   bites = input<Bite[]>();
   isAuthenticated = input(false);
+
+  bitesNeedingMigration = computed(() => {
+    const bites = this.bites();
+
+    return bites?.filter((bite) => !bite.imagePath || bite.image);
+  });
+
+  bitesWithoutGeohash = computed(() => {
+    const bites = this.bites();
+
+    return bites?.filter((bite) => !bite.geohash);
+  });
 
   async migrate(bite: Bite): Promise<void> {
     console.log('START MIGRATION FOR BITE', bite.name);
@@ -93,6 +111,30 @@ export class Migrations {
     await FirebaseFirestore.updateDocument({
       reference: `${BITE_COLLECTION}/${docId}`,
       data: migratedBite,
+    });
+  }
+
+  async addGeohash(bite: Bite): Promise<void> {
+    console.log(bite);
+
+    const position = bite.position;
+    const gh = geohashForLocation([position.latitude, position.longitude]);
+    console.log('GEOHASH', gh);
+
+    const biteWithGeohash = {
+      ...bite,
+      geohash: gh,
+      updatedAt: new Date().toISOString(),
+      updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
+    };
+
+    console.log('BITE WITH GEOHASH', biteWithGeohash);
+
+    const docId = bite.id;
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${BITE_COLLECTION}/${docId}`,
+      data: biteWithGeohash,
     });
   }
 }

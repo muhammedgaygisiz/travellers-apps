@@ -6,6 +6,7 @@ import * as utilsModule from 'utils';
 import { addNecessaryIcons } from 'utils';
 import { FirebaseStorage } from '@capacitor-firebase/storage';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { ComponentRef } from '@angular/core';
 
 addNecessaryIcons();
 
@@ -32,6 +33,7 @@ describe('Migrations', () => {
   let component: Migrations;
   let fixture: ComponentFixture<Migrations>;
   let updateDocumentSpy: jest.SpyInstance;
+  let compRef: ComponentRef<Migrations>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -41,6 +43,7 @@ describe('Migrations', () => {
     updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
 
     fixture = TestBed.createComponent(Migrations);
+    compRef = fixture.componentRef;
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -51,6 +54,44 @@ describe('Migrations', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('bitesNeedingMigration', () => {
+    it('should return bites needing migration', () => {
+      const bites = [
+        { id: '1', imagePath: 'path', image: '' },
+        { id: '2', imagePath: '', image: 'data:image/png;base64,...' },
+        { id: '3', imagePath: undefined, image: 'data:image/png;base64,...' },
+        { id: '4', imagePath: '', image: '' },
+      ] as Bite[];
+
+      compRef.setInput('bites', bites);
+
+      expect(component.bitesNeedingMigration()).toEqual([
+        bites[1],
+        bites[2],
+        bites[3],
+      ]);
+    });
+  });
+
+  describe('bitesWithoutGeohash', () => {
+    it('should return bites without geohash', () => {
+      const bites = [
+        { id: '1', geohash: 'abc' },
+        { id: '2', geohash: '' },
+        { id: '3', geohash: undefined },
+        { id: '4' },
+      ] as Bite[];
+
+      compRef.setInput('bites', bites);
+
+      expect(component.bitesWithoutGeohash()).toEqual([
+        bites[1],
+        bites[2],
+        bites[3],
+      ]);
+    });
   });
 
   describe('migrate', () => {

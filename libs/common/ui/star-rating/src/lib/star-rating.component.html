@@ -1,8 +1,8 @@
+@let starIconPath = '/assets/custom-icons/star.svg';
 <div class="star-rating">
   <ion-icon
-    [name]="
-      (1 | isFilled : hoveredIndex() : getRating()) ? 'star' : 'star-outline'
-    "
+    [src]="starIconPath"
+    [class]="(1 | isFilled : hoveredIndex() : getRating()) ? 'filled' : ''"
     size="large"
     (click)="onRate(1)"
     (mouseover)="onHover(1)"
@@ -11,9 +11,8 @@
   />
 
   <ion-icon
-    [name]="
-      (2 | isFilled : hoveredIndex() : getRating()) ? 'star' : 'star-outline'
-    "
+    [src]="starIconPath"
+    [class]="(2 | isFilled : hoveredIndex() : getRating()) ? 'filled' : ''"
     size="large"
     (click)="onRate(2)"
     (mouseover)="onHover(2)"
@@ -22,9 +21,8 @@
   />
 
   <ion-icon
-    [name]="
-      (3 | isFilled : hoveredIndex() : getRating()) ? 'star' : 'star-outline'
-    "
+    [src]="starIconPath"
+    [class]="(3 | isFilled : hoveredIndex() : getRating()) ? 'filled' : ''"
     size="large"
     (click)="onRate(3)"
     (mouseover)="onHover(3)"
@@ -33,9 +31,8 @@
   />
 
   <ion-icon
-    [name]="
-      (4 | isFilled : hoveredIndex() : getRating()) ? 'star' : 'star-outline'
-    "
+    [src]="starIconPath"
+    [class]="(4 | isFilled : hoveredIndex() : getRating()) ? 'filled' : ''"
     size="large"
     (click)="onRate(4)"
     (mouseover)="onHover(4)"
@@ -44,9 +41,8 @@
   />
 
   <ion-icon
-    [name]="
-      (5 | isFilled : hoveredIndex() : getRating()) ? 'star' : 'star-outline'
-    "
+    [src]="starIconPath"
+    [class]="(5 | isFilled : hoveredIndex() : getRating()) ? 'filled' : ''"
     size="large"
     (click)="onRate(5)"
     (mouseover)="onHover(5)"

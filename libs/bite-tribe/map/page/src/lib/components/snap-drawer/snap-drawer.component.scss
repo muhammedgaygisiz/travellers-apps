@@ -6,9 +6,10 @@
     bottom: 0;
     top: 0;
     background: var(--ion-background-color);
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    transition: transform 0.3s ease;
+    border: var(--border-width) solid var(--ion-color-card-border);
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    transition: none;
     touch-action: none;
     display: flex;
     flex-direction: column;

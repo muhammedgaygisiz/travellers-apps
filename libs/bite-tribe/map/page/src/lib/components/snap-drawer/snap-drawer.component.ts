@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   Component,
   ElementRef,
   HostListener,
@@ -13,7 +14,7 @@ import {
   styleUrl: './snap-drawer.component.scss',
   standalone: true,
 })
-export class SnapDrawerComponent implements OnInit {
+export class SnapDrawerComponent implements OnInit, AfterViewInit {
   /**
    * Snap positions in pixels from the bottom of the screen.
    * Example: [0, 200, 500]
@@ -21,7 +22,7 @@ export class SnapDrawerComponent implements OnInit {
    * - 200 → 200px of drawer visible
    * - 500 → 500px of drawer visible
    */
-  snapPixels = input([290, 400]);
+  snapPixels = input([60, 435]);
 
   translateY = 0; // current Y offset for transform
   private dragging = false;
@@ -35,6 +36,11 @@ export class SnapDrawerComponent implements OnInit {
     this.computeSnapOffsets();
     // Start at the lowest snap (closed)
     this.translateY = Math.max(...this.snapOffsets);
+  }
+
+  ngAfterViewInit(): void {
+    // Re-enable transitions AFTER first render
+    setTimeout(() => this.setTransition(true), 0);
   }
 
   @HostListener('window:resize')

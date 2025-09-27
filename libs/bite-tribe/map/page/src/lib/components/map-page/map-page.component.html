@@ -22,13 +22,15 @@
         (clickOnMarker)="onGeopointSelection($event)"
       />
       @if (selectedBite) {
-      <bt-bite
-        [bite]="selectedBite"
-        [userId]="userId()"
-        (biteClick)="biteClick.emit($event)"
-        (restaurantClick)="restaurantClick.emit($event)"
-        (likeButtonClick)="likeButtonClick.emit($event)"
-      />
+      <bt-snap-drawer [snapPercents]="[90, 50, 10]">
+        <bt-bite
+          [bite]="selectedBite"
+          [userId]="userId()"
+          (biteClick)="biteClick.emit($event)"
+          (restaurantClick)="restaurantClick.emit($event)"
+          (likeButtonClick)="likeButtonClick.emit($event)"
+        />
+      </bt-snap-drawer>
       }
     </div>
   </ion-content>

@@ -29,7 +29,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 export class StarRatingComponent implements ControlValueAccessor {
   rating = input<number | undefined>(0);
 
-  readOnly = input(false, { transform: booleanAttribute });
+  readonly = input(false, { transform: booleanAttribute });
 
   rated = output<number>();
 
@@ -48,7 +48,7 @@ export class StarRatingComponent implements ControlValueAccessor {
   });
 
   onRate(rating: number): void {
-    if (this.readOnly()) {
+    if (this.readonly()) {
       return;
     }
 
@@ -63,7 +63,7 @@ export class StarRatingComponent implements ControlValueAccessor {
   }
 
   onHover(index: number): void {
-    if (!this.readOnly()) this.hoveredIndex.set(index);
+    if (!this.readonly()) this.hoveredIndex.set(index);
   }
 
   onLeave(): void {

@@ -2,8 +2,8 @@ import nx from '@nx/eslint-plugin';
 
 export default [
   ...nx.configs['flat/base'],
-  ...nx.configs['flat/typescript'],
-  ...nx.configs['flat/javascript'],
+  ...nx.configs['flat/angular'],
+  ...nx.configs['flat/angular-template'],
   {
     ignores: ['**/dist'],
   },
@@ -36,6 +36,11 @@ export default [
       '**/*.cjs',
       '**/*.mjs',
     ],
+    // Override or add rules here
+    rules: {},
+  },
+  {
+    files: ['**/*.html'],
     // Override or add rules here
     rules: {},
   },

@@ -18,10 +18,7 @@ const config: StorybookConfig = {
     '../../../apps/bite-tribe-business/src/app/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     '../../../libs/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
   ],
-  addons: [
-    getAbsolutePath('@chromatic-com/storybook'),
-    getAbsolutePath('@storybook/addon-docs'),
-  ],
+  addons: [getAbsolutePath('@chromatic-com/storybook')],
   staticDirs: [
     {
       from: '../src/assets/',

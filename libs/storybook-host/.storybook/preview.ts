@@ -1,15 +1,15 @@
 import { componentWrapperDecorator, Preview } from '@storybook/angular';
 import { INITIAL_VIEWPORTS } from 'storybook/viewport';
 
-const IPAD = 'ipad';
+const IPHONE = 'iphone14';
 
 const parameters = {
   layout: 'fullscreen',
   viewport: {
     viewports: {
-      [IPAD]: INITIAL_VIEWPORTS[IPAD],
+      [IPHONE]: INITIAL_VIEWPORTS[IPHONE],
     },
-    defaultViewport: IPAD,
+    defaultViewport: IPHONE,
   },
   options: {
     storySort: {
@@ -25,30 +25,6 @@ const decorators = [
   }),
 ];
 
-const SUPPORTED_LANGUAGES = [
-  { code: 'en', icon: '🇬🇧', title: 'English' },
-  { code: 'de', icon: '🇩🇪', title: 'Deutsch' },
-  { code: 'fr', icon: '🇫🇷', title: 'Français' },
-  { code: 'it', icon: '🇮🇹', title: 'Italiano' },
-];
-
-const globalTypes = {
-  // adds a custom dropdown menu in the Storybook UI toolbar
-  language: {
-    name: 'Language',
-    description: `Choose a language`,
-    defaultValue: 'de',
-    toolbar: {
-      icon: 'globe',
-      items: SUPPORTED_LANGUAGES.map((language) => ({
-        value: language.code,
-        right: language.icon,
-        title: language.title,
-      })),
-    },
-  },
-};
-
 const setNxGraphIframeHeight = (): void => {
   const graphIframe = document.getElementById('storybook-root') as any;
   graphIframe.style = 'height: 100vh';
@@ -57,7 +33,6 @@ const setNxGraphIframeHeight = (): void => {
 const preview: Preview = {
   decorators,
   parameters,
-  globalTypes,
   tags: ['autodocs'],
 };
 

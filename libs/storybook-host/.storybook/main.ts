@@ -34,8 +34,6 @@ const config: StorybookConfig = {
   ],
   env: (config): any => ({
     ...config,
-    NX_JMC_API_KEY: process.env['NX_JMC_API_KEY'] ?? '',
-    NX_GIS_API_KEY: process.env['NX_GIS_API_KEY'] ?? '',
   }),
 };
 

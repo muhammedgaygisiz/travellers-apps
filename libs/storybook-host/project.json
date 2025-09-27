@@ -24,7 +24,10 @@
           "apps/bite-tribe-business/src/global.scss"
         ],
         "stylePreprocessorOptions": {
-          "includePaths": ["libs/bite-tribe-common/styles"]
+          "includePaths": [
+            "apps/bite-tribe/src/theme",
+            "libs/bite-tribe-common/styles"
+          ]
         }
       },
       "configurations": {
@@ -43,13 +46,16 @@
         "browserTarget": "storybook-host:build",
         "compodoc": false,
         "styles": [
-          "apps/bite-tribe/src/theme/variable.scss",
+          "apps/bite-tribe/src/theme/variables.scss",
           "apps/bite-tribe/src/global.scss",
-          "apps/bite-tribe-business/src/theme/variable.scss",
+          "apps/bite-tribe-business/src/theme/variables.scss",
           "apps/bite-tribe-business/src/global.scss"
         ],
         "stylePreprocessorOptions": {
-          "includePaths": ["libs/bite-tribe-common/styles"]
+          "includePaths": [
+            "apps/bite-tribe/src/theme",
+            "libs/bite-tribe-common/styles"
+          ]
         }
       },
       "configurations": {

@@ -2,6 +2,8 @@ import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { StarRatingComponent } from '../star-rating.component';
+import { addIcons } from 'ionicons';
+import { star, starOutline } from 'ionicons/icons';
 
 export default {
   title: 'Components/Star Rating',
@@ -14,6 +16,11 @@ export default {
 } as Meta<StarRatingComponent>;
 
 type Story = StoryObj<StarRatingComponent>;
+
+addIcons({
+  star,
+  starOutline,
+});
 
 export const Primary: Story = {
   args: {

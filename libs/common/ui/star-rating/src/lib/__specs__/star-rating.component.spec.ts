@@ -69,7 +69,7 @@ describe('StarRatingComponent', () => {
   describe('inputs', () => {
     it('should initialize with default values', () => {
       expect(component.rating()).toBe(0);
-      expect(component.readOnly()).toBe(false);
+      expect(component.readonly()).toBe(false);
     });
 
     it('should update input values', () => {
@@ -77,7 +77,7 @@ describe('StarRatingComponent', () => {
       compRef.setInput('readOnly', true);
 
       expect(component.rating()).toBe(3);
-      expect(component.readOnly()).toBe(true);
+      expect(component.readonly()).toBe(true);
     });
   });
 

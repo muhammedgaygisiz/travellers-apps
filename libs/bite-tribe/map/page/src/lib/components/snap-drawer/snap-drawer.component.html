@@ -1,6 +1,6 @@
 <div
   class="drawer"
-  [ngStyle]="{ transform: 'translateY(' + translateY + 'px)' }"
+  [style]="'transform: translateY(' + translateY + 'px)'"
   (pointerdown)="onPointerDown($event)"
   (pointermove)="onPointerMove($event)"
   (pointerup)="onPointerUp($event)"

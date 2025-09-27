@@ -2,49 +2,51 @@ import {
   Component,
   ElementRef,
   HostListener,
-  Input,
+  input,
   OnInit,
   Renderer2,
 } from '@angular/core';
-import { NgStyle } from '@angular/common';
 
 @Component({
   selector: 'bt-snap-drawer',
   templateUrl: './snap-drawer.component.html',
   styleUrl: './snap-drawer.component.scss',
-  imports: [NgStyle],
   standalone: true,
 })
 export class SnapDrawerComponent implements OnInit {
   /**
-   * Snap points in % of screen height (0 = top, 100 = bottom).
-   * Example: [90, 50, 10] → mostly closed, half, nearly open.
+   * Snap positions in pixels from the bottom of the screen.
+   * Example: [0, 200, 500]
+   * - 0   → drawer closed
+   * - 200 → 200px of drawer visible
+   * - 500 → 500px of drawer visible
    */
-  @Input() snapPercents: number[] = [90, 50, 10];
+  snapPixels = input([290, 400]);
 
-  translateY = 0;
+  translateY = 0; // current Y offset for transform
   private dragging = false;
   private startY = 0;
   private startTranslateY = 0;
-  private snapPixels: number[] = [];
+  private snapOffsets: number[] = [];
 
   constructor(private el: ElementRef, private renderer: Renderer2) {}
 
   ngOnInit(): void {
-    this.computeSnapPixels();
-    // Start at the "closed" position (largest percent = lowest point)
-    this.translateY = Math.max(...this.snapPixels);
+    this.computeSnapOffsets();
+    // Start at the lowest snap (closed)
+    this.translateY = Math.max(...this.snapOffsets);
   }
 
   @HostListener('window:resize')
   onResize(): void {
-    this.computeSnapPixels();
+    this.computeSnapOffsets();
     this.snapToClosest();
   }
 
-  private computeSnapPixels(): void {
+  /** Convert snapPixels (visible height from bottom) → translateY offsets */
+  private computeSnapOffsets(): void {
     const vh = window.innerHeight;
-    this.snapPixels = this.snapPercents.map((p) => (vh * p) / 100);
+    this.snapOffsets = this.snapPixels().map((p) => vh - p);
   }
 
   onPointerDown(event: PointerEvent): void {
@@ -59,8 +61,8 @@ export class SnapDrawerComponent implements OnInit {
     if (!this.dragging) return;
     const delta = event.clientY - this.startY;
     let newY = this.startTranslateY + delta;
-    const min = Math.min(...this.snapPixels); // top-most (open)
-    const max = Math.max(...this.snapPixels); // bottom-most (closed)
+    const min = Math.min(...this.snapOffsets); // top-most (most open)
+    const max = Math.max(...this.snapOffsets); // bottom-most (closed)
     if (newY < min) newY = min;
     if (newY > max) newY = max;
     this.translateY = newY;
@@ -84,15 +86,19 @@ export class SnapDrawerComponent implements OnInit {
   }
 
   private snapToClosest(): void {
-    let closest = this.snapPixels[0];
-    let minDiff = Math.abs(this.translateY - closest);
-    for (const sp of this.snapPixels) {
-      const diff = Math.abs(this.translateY - sp);
+    this.translateY = this.findClosestSnap(this.translateY);
+  }
+
+  private findClosestSnap(value: number): number {
+    let closest = this.snapOffsets[0];
+    let minDiff = Math.abs(value - closest);
+    for (const sp of this.snapOffsets) {
+      const diff = Math.abs(value - sp);
       if (diff < minDiff) {
         minDiff = diff;
         closest = sp;
       }
     }
-    this.translateY = closest;
+    return closest;
   }
 }

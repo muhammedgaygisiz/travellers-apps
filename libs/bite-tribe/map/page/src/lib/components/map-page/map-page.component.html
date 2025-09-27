@@ -22,7 +22,7 @@
         (clickOnMarker)="onGeopointSelection($event)"
       />
       @if (selectedBite) {
-      <bt-snap-drawer [snapPercents]="[90, 50, 10]">
+      <bt-snap-drawer>
         <bt-bite
           [bite]="selectedBite"
           [userId]="userId()"

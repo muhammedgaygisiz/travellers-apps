@@ -17,14 +17,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SnapDrawerComponent implements OnInit, AfterViewInit {
-  /**
-   * Snap positions in pixels from the bottom of the screen.
-   * Example: [0, 200, 500]
-   * - 0   → drawer closed
-   * - 200 → 200px of drawer visible
-   * - 500 → 500px of drawer visible
-   * default: bite-compact component heights
-   */
   snapPixels = input([60, 480]);
 
   translateY = 0;
@@ -32,6 +24,8 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
   private startY = 0;
   private startTranslateY = 0;
   private snapOffsets: number[] = [];
+  private dragDirection = 0; // Track drag direction
+  private dragThreshold = 50; // Minimum drag distance to consider direction
 
   private elementRef: ElementRef = inject(ElementRef);
   private renderer: Renderer2 = inject(Renderer2);
@@ -47,7 +41,6 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Re-enable transitions AFTER first render
     setTimeout(() => this.setTransition(true), 0);
   }
 
@@ -64,6 +57,7 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
     this.dragging = true;
     this.startY = event.clientY;
     this.startTranslateY = this.translateY;
+    this.dragDirection = 0;
     this.setTransition(false);
     (event.target as HTMLElement).setPointerCapture(event.pointerId);
   }
@@ -71,9 +65,15 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
   onPointerMove(event: PointerEvent): void {
     if (!this.dragging) return;
     const delta = event.clientY - this.startY;
+
+    if (Math.abs(delta) > 10) {
+      // avoid jitter
+      this.dragDirection = delta > 0 ? 1 : -1; // 1 = down, -1 = up
+    }
+
     let newY = this.startTranslateY + delta;
-    const min = Math.min(...this.snapOffsets); // top-most (most open)
-    const max = Math.max(...this.snapOffsets); // bottom-most (closed)
+    const min = Math.min(...this.snapOffsets);
+    const max = Math.max(...this.snapOffsets);
     if (newY < min) newY = min;
     if (newY > max) newY = max;
     this.translateY = newY;
@@ -84,7 +84,7 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
     this.dragging = false;
     (event.target as HTMLElement).releasePointerCapture(event.pointerId);
     this.setTransition(true);
-    this.snapToClosest();
+    this.snapWithDirection();
   }
 
   private setTransition(enabled: boolean): void {
@@ -94,6 +94,37 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
       'transition',
       enabled ? 'transform 0.3s ease' : 'none'
     );
+  }
+
+  private snapWithDirection(): void {
+    const dragDistance = Math.abs(this.translateY - this.startTranslateY);
+    if (dragDistance <= this.dragThreshold) {
+      this.snapToClosest();
+      return;
+    }
+    if (this.dragDirection > 0) {
+      this.translateY = this.findNextSnapDown(this.translateY);
+      return;
+    }
+    if (this.dragDirection < 0) {
+      this.translateY = this.findNextSnapUp(this.translateY);
+      return;
+    }
+    this.snapToClosest();
+  }
+
+  private findNextSnapDown(currentY: number): number {
+    const validSnaps = this.snapOffsets.filter((snap) => snap > currentY);
+    return validSnaps.length > 0
+      ? Math.min(...validSnaps)
+      : this.getLowestSnap(this.snapOffsets);
+  }
+
+  private findNextSnapUp(currentY: number): number {
+    const validSnaps = this.snapOffsets.filter((snap) => snap < currentY);
+    return validSnaps.length > 0
+      ? Math.max(...validSnaps)
+      : this.getHighestSnap(this.snapOffsets);
   }
 
   private snapToClosest(): void {

@@ -1,5 +1,6 @@
 :host {
   .drawer {
+    cursor: grab;
     box-shadow: rgba(0, 0, 0, 0.55) 0 3px 15px;
     position: fixed;
     left: 0;
@@ -23,6 +24,5 @@
     background: var(--ion-color-secondary-tint);
     border-radius: 2.5px;
     margin: 8px auto;
-    cursor: grab;
   }
 }

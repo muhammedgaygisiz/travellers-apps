@@ -21,7 +21,7 @@ describe('StarRatingComponent', () => {
   describe('onRate', () => {
     it('should emit rated event when not readonly', () => {
       const ratedSpy = jest.spyOn(component.rated, 'emit');
-      compRef.setInput('readOnly', false);
+      compRef.setInput('readonly', false);
 
       component.onRate(3);
 
@@ -30,7 +30,7 @@ describe('StarRatingComponent', () => {
 
     it('should not emit rated event when readonly', () => {
       const ratedSpy = jest.spyOn(component.rated, 'emit');
-      compRef.setInput('readOnly', true);
+      compRef.setInput('readonly', true);
 
       component.onRate(3);
 
@@ -40,7 +40,7 @@ describe('StarRatingComponent', () => {
 
   describe('onHover', () => {
     it('should update hoveredIndex when not readonly', () => {
-      compRef.setInput('readOnly', false);
+      compRef.setInput('readonly', false);
 
       component.onHover(2);
 
@@ -48,7 +48,7 @@ describe('StarRatingComponent', () => {
     });
 
     it('should not update hoveredIndex when readonly', () => {
-      compRef.setInput('readOnly', true);
+      compRef.setInput('readonly', true);
 
       component.onHover(2);
 
@@ -69,15 +69,15 @@ describe('StarRatingComponent', () => {
   describe('inputs', () => {
     it('should initialize with default values', () => {
       expect(component.rating()).toBe(0);
-      expect(component.readOnly()).toBe(false);
+      expect(component.readonly()).toBe(false);
     });
 
     it('should update input values', () => {
       compRef.setInput('rating', 3);
-      compRef.setInput('readOnly', true);
+      compRef.setInput('readonly', true);
 
       expect(component.rating()).toBe(3);
-      expect(component.readOnly()).toBe(true);
+      expect(component.readonly()).toBe(true);
     });
   });
 

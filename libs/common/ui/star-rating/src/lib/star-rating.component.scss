@@ -7,9 +7,13 @@
       font-size: 24px;
       cursor: pointer;
       transition: transform 0.2s;
+      fill: transparent;
 
-      color: var(--border-color);
-      fill: var(--ion-color-primary);
+      stroke: var(--border-color);
+
+      &.filled {
+        fill: var(--ion-color-primary);
+      }
 
       &:hover {
         transform: scale(1.2);

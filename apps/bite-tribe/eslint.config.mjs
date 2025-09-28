@@ -7,7 +7,7 @@ export default [
   {
     ignores: ['**/dist'],
   },
-{
+  {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     rules: {
       '@nx/enforce-module-boundaries': [
@@ -16,16 +16,16 @@ export default [
           enforceBuildableLibDependency: true,
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
           depConstraints: [
-    {
+            {
               sourceTag: '*',
               onlyDependOnLibsWithTags: ['*'],
             },
-      ],
+          ],
         },
       ],
     },
   },
-          {
+  {
     files: [
       '**/*.ts',
       '**/*.tsx',
@@ -35,8 +35,8 @@ export default [
       '**/*.jsx',
       '**/*.cjs',
       '**/*.mjs',
-        ],
+    ],
     // Override or add rules here
     rules: {},
-    },
+  },
 ];

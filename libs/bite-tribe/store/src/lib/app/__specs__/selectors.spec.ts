@@ -10,6 +10,7 @@ describe('App Selectors', () => {
 
   const mockSettings: Settings = {
     currency: 'EUR',
+    theme: 'dark',
   } as Settings;
 
   const mockProfile: PublicUser = {
@@ -193,6 +194,32 @@ describe('App Selectors', () => {
       const stateWithoutSorting = { ...mockState, homeSorting: undefined };
       const result = fromSelectors.homeSorting.projector(stateWithoutSorting);
       expect(result).toBe('distance');
+    });
+
+    it('should return distance when slice is undefined', () => {
+      const result = fromSelectors.homeSorting.projector(undefined as any);
+      expect(result).toBe('distance');
+    });
+  });
+
+  describe('isDarkTheme', () => {
+    it('should return dark theme true', () => {
+      const result = fromSelectors.isDarkTheme.projector(mockState);
+      expect(result).toBe(true);
+    });
+
+    it('should return dark theme false', () => {
+      const stateWithLightTheme = {
+        ...mockState,
+        settings: { ...mockState.settings, theme: 'light' },
+      };
+      const result = fromSelectors.isDarkTheme.projector(stateWithLightTheme);
+      expect(result).toBe(false);
+    });
+
+    it('should return false when slice is undefined', () => {
+      const result = fromSelectors.isDarkTheme.projector(undefined as any);
+      expect(result).toBe(false);
     });
   });
 });

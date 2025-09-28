@@ -60,6 +60,7 @@ import {
   homeFilters,
   homeSorting,
   isBitesLoading,
+  isDarkTheme,
   isPublicProfile,
   maxPriceHome,
   preferredCurrency,
@@ -141,6 +142,7 @@ export class BiteTribeStoreService implements StoreService {
   preferedCurrency$ = this.store.select(preferredCurrency);
   maxPriceHome$ = this.store.select(maxPriceHome);
   isReloadingBites$ = this.store.select(isReloadingBites);
+  darkTheme$ = this.store.select(isDarkTheme);
 
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);

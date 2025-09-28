@@ -53,7 +53,7 @@
       </div>
 
       <div class="star-rating ion-margin-bottom">
-        <star-rating readOnly [rating]="biteData?.rating" />
+        <star-rating readonly [rating]="biteData?.rating" />
       </div>
 
       <div class="restaurant-distance-price fields ion-margin-bottom">
@@ -61,7 +61,7 @@
           <span class="link" (click)="onRestaurantClick(biteData)">
             {{ biteData?.place }}
           </span>
-          · {{ biteData?.distance | toMetric }}
+          · {{ biteData?.distance | roundDistance | toMetric }}
         </span>
 
         <div class="price-column">

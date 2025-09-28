@@ -1,0 +1,12 @@
+:host {
+  .distance-container {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+
+    .distance-icon {
+      stroke: var(--ion-color-secondary);
+      margin-right: 5px;
+    }
+  }
+}

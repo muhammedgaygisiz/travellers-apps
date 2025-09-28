@@ -31,15 +31,9 @@
       </ion-text>
 
       <div class="chip-sort-filter-container">
-        <div class="background-line"></div>
-
         <div class="filter-container">
           <ion-chip id="select-tags">
-            <ion-icon
-              name="funnel-outline"
-              class="add-filter"
-              color="secondary"
-            />
+            <ion-icon src="assets/custom-icons/filter.svg" class="icon" />
             @if (selectedFilters().length > 0 || distance()) {
             <ion-badge color="danger">{{ numberOfFilters() }}</ion-badge>
             }
@@ -49,7 +43,7 @@
 
         <div class="chip-container">
           <ion-chip (click)="openMapView.emit()">
-            <ion-icon name="map-outline" color="secondary" />
+            <ion-icon src="assets/custom-icons/map.svg" />
             <ion-text color="secondary">Bitemap</ion-text>
           </ion-chip>
         </div>

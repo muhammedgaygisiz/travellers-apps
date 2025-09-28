@@ -151,7 +151,7 @@ $BORDER_RADIUS: 16px;
   --ion-toolbar-color: #{SECONDARY_COLOR};
 
   // General
-  --border-color: var(--ion-color-tertiary-shade);
+  --border-color: var(--ion-color-secondary);
   --background-color: var(--ion-background-color);
 
   // Card
@@ -163,6 +163,7 @@ $BORDER_RADIUS: 16px;
   --ion-footer-border-width: var(--border-width);
   --ion-footer-border-radius: var(--border-radius);
 
+  --ion-header-height: 50px;
   ion-toolbar {
     --min-height: 56px;
   }

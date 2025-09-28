@@ -94,7 +94,7 @@
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
       "common/ui/star-rating": ["libs/common/ui/star-rating/src/index.ts"],
       "common/ui/tags": ["libs/common/ui/tags/src/index.ts"],
-      "distance-pipe": ["libs/common/distance-pipe/src/index.ts"],
+      "common/distance": ["libs/common/distance/src/index.ts"],
       "geolocation": ["libs/common/geolocation/src/index.ts"],
       "image-compression": ["libs/common/image-compression/src/index.ts"],
       "localization": ["libs/common/localization/src/index.ts"],

@@ -12,7 +12,7 @@ import {
   IonCardHeader,
   IonCardTitle,
 } from '@ionic/angular/standalone';
-import { ToMetricPipe } from 'distance-pipe';
+import { ToMetricPipe } from 'common/distance';
 
 @Component({
   selector: 'bt-restaurant',

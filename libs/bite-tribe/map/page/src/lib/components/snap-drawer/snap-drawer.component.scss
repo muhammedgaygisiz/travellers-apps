@@ -1,12 +1,12 @@
 :host {
   .drawer {
+    box-shadow: rgba(0, 0, 0, 0.55) 0 3px 15px;
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     top: 0;
     background: var(--ion-background-color);
-    border: var(--border-width) solid var(--ion-color-card-border);
     border-top-left-radius: var(--border-radius);
     border-top-right-radius: var(--border-radius);
     transition: none;
@@ -20,7 +20,7 @@
   .handle {
     width: 40px;
     height: 5px;
-    background: #ccc;
+    background: var(--ion-color-secondary-tint);
     border-radius: 2.5px;
     margin: 8px auto;
   }

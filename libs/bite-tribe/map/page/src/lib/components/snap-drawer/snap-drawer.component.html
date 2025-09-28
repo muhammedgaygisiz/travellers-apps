@@ -6,6 +6,6 @@
   (pointerup)="onPointerUp($event)"
   (pointercancel)="onPointerUp($event)"
 >
-  <div class="handle"></div>
+  <div class="handle" (click)="snapOpenOrClosed()"></div>
   <ng-content></ng-content>
 </div>

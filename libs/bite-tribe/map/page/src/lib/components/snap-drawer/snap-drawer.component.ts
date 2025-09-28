@@ -51,6 +51,15 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
     setTimeout(() => this.setTransition(true), 0);
   }
 
+  snapOpenOrClosed(): void {
+    const isOpen = this.translateY < this.getLowestSnap(this.snapOffsets);
+    if (isOpen) {
+      this.translateY = this.getLowestSnap(this.snapOffsets);
+      return;
+    }
+    this.translateY = this.getHighestSnap(this.snapOffsets);
+  }
+
   onPointerDown(event: PointerEvent): void {
     this.dragging = true;
     this.startY = event.clientY;
@@ -106,6 +115,10 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
 
   private getLowestSnap(snapOffsets: number[]): number {
     return Math.max(...snapOffsets);
+  }
+
+  private getHighestSnap(snapOffsets: number[]): number {
+    return Math.min(...snapOffsets);
   }
 
   private computeSnapOffsets(): void {

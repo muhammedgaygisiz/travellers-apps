@@ -22,7 +22,7 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
    * - 200 → 200px of drawer visible
    * - 500 → 500px of drawer visible
    */
-  snapPixels = input([60, 435]);
+  snapPixels = input([60, 350]);
 
   translateY = 0; // current Y offset for transform
   private dragging = false;

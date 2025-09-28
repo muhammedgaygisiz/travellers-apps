@@ -23,8 +23,7 @@
       />
       @if (selectedBite) {
       <bt-snap-drawer>
-        <h4 class="bite-title">{{ selectedBite.name }}</h4>
-        <bt-bite
+        <bt-compact-bite
           [bite]="selectedBite"
           [userId]="userId()"
           (biteClick)="biteClick.emit($event)"

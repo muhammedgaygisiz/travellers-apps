@@ -1,8 +1,10 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   HostListener,
+  inject,
   input,
   OnInit,
   Renderer2,
@@ -12,7 +14,7 @@ import {
   selector: 'bt-snap-drawer',
   templateUrl: './snap-drawer.component.html',
   styleUrl: './snap-drawer.component.scss',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SnapDrawerComponent implements OnInit, AfterViewInit {
   /**
@@ -21,38 +23,32 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
    * - 0   → drawer closed
    * - 200 → 200px of drawer visible
    * - 500 → 500px of drawer visible
+   * default: bite-compact component heights
    */
   snapPixels = input([60, 350]);
 
-  translateY = 0; // current Y offset for transform
+  translateY = 0;
   private dragging = false;
   private startY = 0;
   private startTranslateY = 0;
   private snapOffsets: number[] = [];
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {}
+  private elementRef: ElementRef = inject(ElementRef);
+  private renderer: Renderer2 = inject(Renderer2);
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.snapToClosest();
+  }
 
   ngOnInit(): void {
     this.computeSnapOffsets();
-    // Start at the lowest snap (closed)
-    this.translateY = Math.max(...this.snapOffsets);
+    this.translateY = this.getLowestSnap(this.snapOffsets);
   }
 
   ngAfterViewInit(): void {
     // Re-enable transitions AFTER first render
     setTimeout(() => this.setTransition(true), 0);
-  }
-
-  @HostListener('window:resize')
-  onResize(): void {
-    this.computeSnapOffsets();
-    this.snapToClosest();
-  }
-
-  /** Convert snapPixels (visible height from bottom) → translateY offsets */
-  private computeSnapOffsets(): void {
-    const vh = window.innerHeight;
-    this.snapOffsets = this.snapPixels().map((p) => vh - p);
   }
 
   onPointerDown(event: PointerEvent): void {
@@ -83,7 +79,7 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
   }
 
   private setTransition(enabled: boolean): void {
-    const drawerEl = this.el.nativeElement.querySelector('.drawer');
+    const drawerEl = this.elementRef.nativeElement.querySelector('.drawer');
     this.renderer.setStyle(
       drawerEl,
       'transition',
@@ -106,5 +102,16 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
       }
     }
     return closest;
+  }
+
+  private getLowestSnap(snapOffsets: number[]): number {
+    return Math.max(...snapOffsets);
+  }
+
+  private computeSnapOffsets(): void {
+    const windowInnerHeight = window.innerHeight;
+    this.snapOffsets = this.snapPixels().map(
+      (snapPixel) => windowInnerHeight - snapPixel
+    );
   }
 }

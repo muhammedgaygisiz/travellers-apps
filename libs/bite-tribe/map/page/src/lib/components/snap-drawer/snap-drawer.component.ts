@@ -25,7 +25,7 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
    * - 500 → 500px of drawer visible
    * default: bite-compact component heights
    */
-  snapPixels = input([60, 350]);
+  snapPixels = input([60, 480]);
 
   translateY = 0;
   private dragging = false;

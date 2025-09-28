@@ -18,6 +18,11 @@
     display: flex;
     flex-direction: column;
 
+    .bite-title {
+      margin: unset;
+      text-align: center;
+    }
+
     bt-map {
       height: 100%;
       width: 100%;
@@ -30,7 +35,7 @@
     }
 
     bt-bite {
-      height: 40%;
+      margin: 1rem;
     }
   }
 }

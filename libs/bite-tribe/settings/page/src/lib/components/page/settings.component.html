@@ -95,6 +95,21 @@
             </ion-select>
           </ion-item>
           <ion-item>
+            <ion-label>Language</ion-label>
+            <ion-select
+              slot="end"
+              placeholder="English"
+              interface="popover"
+              formControlName="language"
+            >
+              @for(language of languageOptions; track language.value) {
+              <ion-select-option [value]="language.value">{{
+                language.label
+              }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          <ion-item>
             <ion-label>Nearby Distance (meters)</ion-label>
             <ion-input
               slot="end"

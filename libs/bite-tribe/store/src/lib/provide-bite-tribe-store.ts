@@ -6,6 +6,8 @@ import {
   provideFirestoreState,
   provideFirestoreUtils,
 } from 'ta-firestore';
+import { provideLocalization } from 'localization';
+import { SupportedLang } from 'localization';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import {
   provideRouterStore,
@@ -122,6 +124,15 @@ const stateSanitizer: any = (state: any) => {
 
 export const provideBiteTribeStore = (environment: Environment): any => [
   { provide: STORE_SERVICE, useClass: BiteTribeStoreService },
+  provideLocalization({
+    locales: [
+      SupportedLang.EN,
+      SupportedLang.DE,
+      SupportedLang.DE_DE,
+      SupportedLang.DE_CH,
+    ],
+    defaultLang: SupportedLang.EN,
+  }),
   provideStore(
     { router: routerReducer },
     {

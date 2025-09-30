@@ -19,9 +19,12 @@ import { SupportedLang } from './model/supported-lang';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import localeEn from '@angular/common/locales/en';
+import localeFr from '@angular/common/locales/fr';
 
-registerLocaleData(localeDe);
-registerLocaleData(localeEn);
+registerLocaleData(localeDe, 'de-DE');
+registerLocaleData(localeDe, 'de-CH');
+registerLocaleData(localeEn, 'en-US');
+registerLocaleData(localeFr, 'fr-FR');
 
 const PROVIDERS: Provider[] = [TranslateService, TranslocoPipe, TranslatePipe];
 

@@ -1,6 +1,6 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, LOCALE_ID } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
-import { SupportedLang } from './model/supported-lang';
+import { SupportedLang, LANG_TO_LOCALE_MAP } from './model/supported-lang';
 
 @Injectable()
 export class TranslateService {
@@ -8,5 +8,15 @@ export class TranslateService {
 
   setActiveLang(lang: SupportedLang): void {
     this.translocoService.setActiveLang(lang);
+    // Note: Angular LOCALE_ID cannot be changed at runtime
+    // Price formatting will use the Angular formatNumber with explicit locale
+  }
+
+  getActiveLang(): string {
+    return this.translocoService.getActiveLang();
+  }
+
+  getLocaleForLang(lang: SupportedLang): string {
+    return LANG_TO_LOCALE_MAP[lang] || 'en-US';
   }
 }

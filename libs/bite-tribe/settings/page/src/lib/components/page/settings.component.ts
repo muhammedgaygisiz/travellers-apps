@@ -27,6 +27,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { currencyCodes } from 'utils';
+import { TranslateService, SupportedLang } from 'localization';
 import type { OverlayEventDetail } from '@ionic/core';
 
 const STAY_PUBLIC = 'stay-public';
@@ -64,8 +65,15 @@ export class PageSettings {
   submitPublicUser = output<PublicUser>();
 
   private readonly formBuilder = inject(FormBuilder);
+  private readonly translateService = inject(TranslateService);
   currencies = currencyCodes;
   isOpen = signal(false);
+
+  languageOptions = [
+    { value: SupportedLang.EN, label: 'English' },
+    { value: SupportedLang.DE_DE, label: 'German (Germany)' },
+    { value: SupportedLang.DE_CH, label: 'German (Switzerland)' },
+  ];
 
   confirmationButtons = [
     {
@@ -84,6 +92,7 @@ export class PageSettings {
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
     nearby: [2000, [Validators.required, Validators.min(1)]],
+    language: [SupportedLang.EN, Validators.required],
     city: [''],
     displayName: [''],
   });
@@ -93,7 +102,10 @@ export class PageSettings {
 
     if (settings) {
       const { updatedAt, ...rest } = settings;
-      this.settingsForm.patchValue(rest);
+      this.settingsForm.patchValue({
+        ...rest,
+        language: rest.language || SupportedLang.EN,
+      });
     }
 
     const publicUser = this.publicUser();
@@ -164,7 +176,13 @@ export class PageSettings {
       return;
     }
 
-    const { city, displayName, ...newSettings } = this.settingsForm.value;
+    const { city, displayName, language, ...newSettings } =
+      this.settingsForm.value;
+
+    // Update language immediately when saving settings
+    if (language) {
+      this.translateService.setActiveLang(language as SupportedLang);
+    }
 
     const publicUser = this.publicUser();
     if (publicUser) {
@@ -182,6 +200,7 @@ export class PageSettings {
       theme: (newSettings.theme || this.systemTheme()) as 'light' | 'dark',
       currency: newSettings.currency || 'EUR',
       nearby: newSettings.nearby || 50,
+      language: language || SupportedLang.EN,
     });
   }
 

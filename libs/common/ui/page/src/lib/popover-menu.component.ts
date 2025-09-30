@@ -11,7 +11,7 @@ import {
   IonItemGroup,
   IonList,
 } from '@ionic/angular/standalone';
-import { SupportedLang } from 'localization';
+import { SupportedLang, TranslatePipe } from 'localization';
 
 @Component({
   selector: 'ta-popover-menu',
@@ -66,17 +66,17 @@ import { SupportedLang } from 'localization';
       } @else { @if (showMyBites()) {
       <ion-item (click)="gotoMyBites.emit()">
         <ion-icon name="pizza-outline" slot="start" />
-        My Bites
+        {{ 'menu.myBites' | translate }}
       </ion-item>
       } @if (showMyBucketlists()) {
       <ion-item (click)="gotoMyBucketlists.emit()">
         <ion-icon name="bookmark-outline" slot="start" />
-        My Bucket lists
+        {{ 'menu.myBucketlists' | translate }}
       </ion-item>
       } @if (showSettingsButton()) {
       <ion-item (click)="gotoSettings.emit()">
         <ion-icon name="settings-outline" slot="start" />
-        Settings
+        {{ 'menu.settings' | translate }}
       </ion-item>
       } @if (showMigrationsButton()) {
       <ion-item (click)="gotoMigrations.emit()">
@@ -97,7 +97,14 @@ import { SupportedLang } from 'localization';
     </ion-list>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonList, IonItem, IonIcon, IonItemGroup, IonItemDivider],
+  imports: [
+    IonList,
+    IonItem,
+    IonIcon,
+    IonItemGroup,
+    IonItemDivider,
+    TranslatePipe,
+  ],
 })
 export class PopoverMenuComponent {
   protected readonly SupportedLang = SupportedLang;

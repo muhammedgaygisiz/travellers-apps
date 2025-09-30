@@ -27,8 +27,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { currencyCodes } from 'utils';
-import { TranslateService, SupportedLang } from 'localization';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslateService, SupportedLang, TranslatePipe } from 'localization';
 import type { OverlayEventDetail } from '@ionic/core';
 
 const STAY_PUBLIC = 'stay-public';
@@ -51,7 +50,7 @@ const GO_PRIVATE = 'go-private';
     ReactiveFormsModule,
     IonIcon,
     IonAlert,
-    TranslocoPipe,
+    TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -73,8 +72,7 @@ export class PageSettings {
 
   languageOptions = [
     { value: SupportedLang.EN, labelKey: 'common.english' },
-    { value: SupportedLang.DE_DE, labelKey: 'common.german_germany' },
-    { value: SupportedLang.DE_CH, labelKey: 'common.german_switzerland' },
+    { value: SupportedLang.DE, labelKey: 'common.german' },
   ];
 
   confirmationButtons = [

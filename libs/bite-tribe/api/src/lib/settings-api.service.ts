@@ -11,6 +11,7 @@ import {
 import { Settings } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
+import { TranslateService } from 'localization';
 
 const SETTINGS_COLLECTION = 'settings';
 
@@ -18,6 +19,7 @@ const SETTINGS_COLLECTION = 'settings';
 export class SettingsApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
+  private readonly translateService = inject(TranslateService);
 
   private readonly stopped$ = new Subject<void>();
 
@@ -43,7 +45,12 @@ export class SettingsApiService {
       async (settingsDoc) => {
         // console.debug('#mo Fetched settings from Firestore', settingsDoc);
 
-        const settings = settingsDoc?.snapshot.data as any;
+        const settings = settingsDoc?.snapshot.data as Settings;
+
+        if (settings.language) {
+          this.translateService.setActiveLang(settings.language);
+        }
+
         this.settingsChannel$.next(settings);
       }
     );

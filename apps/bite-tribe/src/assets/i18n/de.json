@@ -1,4 +1,9 @@
 {
+  "menu": {
+    "myBites": "Meine Bites",
+    "myBucketlists": "Meine Bucketlisten",
+    "settings": "Einstellungen"
+  },
   "settings": {
     "title": "Einstellungen",
     "profile": "Profil",
@@ -7,12 +12,12 @@
     "city": "Stadt",
     "pushNotifications": "Push-Benachrichtigungen",
     "emailUpdates": "E-Mail-Updates",
-    "theme": "Design",
+    "theme": "Theme",
     "light": "Hell",
     "dark": "Dunkel",
     "currency": "Bevorzugte Währung",
     "language": "Sprache",
-    "nearbyDistance": "Umkreis (Meter)",
+    "nearbyDistance": "Nähere Distanz (Meter)",
     "logOut": "Abmelden",
     "saveChanges": "Änderungen speichern",
     "goPublic": "Öffentlich werden",
@@ -20,7 +25,6 @@
   },
   "common": {
     "english": "Englisch",
-    "german_germany": "Deutsch (Deutschland)",
-    "german_switzerland": "Deutsch (Schweiz)"
+    "german": "Deutsch"
   }
 }

@@ -1,4 +1,9 @@
 {
+  "menu": {
+    "myBites": "My Bites",
+    "myBucketlists": "My Bucket lists",
+    "settings": "Settings"
+  },
   "settings": {
     "title": "Settings",
     "profile": "Profile",
@@ -20,7 +25,6 @@
   },
   "common": {
     "english": "English",
-    "german_germany": "German (Germany)",
-    "german_switzerland": "German (Switzerland)"
+    "german": "German"
   }
 }

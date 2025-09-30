@@ -11,8 +11,9 @@ export const environment = {
     locales: [
       SupportedLang.EN,
       SupportedLang.DE,
-      SupportedLang.DE_DE,
-      SupportedLang.DE_CH,
+      SupportedLang.TR,
+      SupportedLang.FR,
+      SupportedLang.ES,
     ],
     defaultLang: SupportedLang.EN,
   },

@@ -103,6 +103,7 @@ export class PageSettings {
     const settings = this.settings();
 
     if (settings) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { updatedAt: _, ...rest } = settings;
       const currentLang = rest.language || SupportedLang.EN;
 
@@ -157,7 +158,9 @@ export class PageSettings {
 
     const photoUrl =
       user?.photoUrl ||
-      user?.providerData.find((provider: any) => provider.photoUrl)?.photoUrl;
+      user?.providerData.find(
+        (provider: { photoUrl?: string }) => provider.photoUrl
+      )?.photoUrl;
 
     return photoUrl;
   });

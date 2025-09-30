@@ -33,22 +33,16 @@ interface LocalizationParams {
   defaultLang: SupportedLang;
 }
 
-export const provideLocalization = (
-  i18n?: LocalizationParams
-): EnvironmentProviders =>
-  makeEnvironmentProviders([
-    provideTranslocoLoader(TranslocoHttpLoader),
-    provideTransloco({
-      config: translocoConfig({
-        availableLangs: i18n?.locales || [SupportedLang.DE],
-        defaultLang: i18n?.defaultLang || SupportedLang.DE,
-        fallbackLang: SupportedLang.DE,
-        // Remove this option if your application
-        // doesn't support changing language in runtime.
-        reRenderOnLangChange: true,
-        prodMode: !isDevMode(),
-      }),
+export const provideLocalization = (i18n?: LocalizationParams): Provider[] => [
+  provideTransloco({
+    loader: TranslocoHttpLoader,
+    config: translocoConfig({
+      availableLangs: i18n?.locales || [SupportedLang.DE],
+      defaultLang: i18n?.defaultLang || SupportedLang.DE,
+      fallbackLang: SupportedLang.DE,
+      prodMode: !isDevMode(),
     }),
-    { provide: LOCALE_ID, useValue: i18n?.defaultLang || SupportedLang.DE },
-    ...PROVIDERS,
-  ]);
+  }),
+  { provide: LOCALE_ID, useValue: i18n?.defaultLang || SupportedLang.DE },
+  ...PROVIDERS,
+];

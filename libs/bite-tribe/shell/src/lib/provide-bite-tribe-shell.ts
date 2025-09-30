@@ -15,10 +15,12 @@ import {
 } from 'utils';
 import { provideBiteTribeStore } from 'bite-tribe/store';
 import { EnvironmentProviders, Provider } from '@angular/core';
+import { provideLocalization } from 'localization';
 
 export const provideBiteTribeShell = (
   environment: Environment
 ): (EnvironmentProviders | Provider)[] => [
+  provideLocalization(environment.i18n),
   provideRouter(ROUTES, withPreloading(PreloadAllModules)),
   {
     provide: RouteReuseStrategy,

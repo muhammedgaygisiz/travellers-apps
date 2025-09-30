@@ -18,7 +18,7 @@ export default [
           depConstraints: [
             {
               sourceTag: 'type:app',
-              onlyDependOnLibsWithTags: ['type:shell']
+              onlyDependOnLibsWithTags: ['type:shell', 'scope:common']
             },
             {
               sourceTag: 'type:shell',

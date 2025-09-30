@@ -1,0 +1,26 @@
+{
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "displayName": "Display Name",
+    "email": "Email",
+    "city": "City",
+    "pushNotifications": "Push Notifications",
+    "emailUpdates": "Email Updates",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "currency": "Preferred Currency",
+    "language": "Language",
+    "nearbyDistance": "Nearby Distance (meters)",
+    "logOut": "Log Out",
+    "saveChanges": "Save Changes",
+    "goPublic": "Go public",
+    "returnToPrivate": "Return to private"
+  },
+  "common": {
+    "english": "English",
+    "german_germany": "German (Germany)",
+    "german_switzerland": "German (Switzerland)"
+  }
+}

@@ -28,6 +28,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { currencyCodes } from 'utils';
 import { TranslateService, SupportedLang } from 'localization';
+import { TranslocoPipe } from '@jsverse/transloco';
 import type { OverlayEventDetail } from '@ionic/core';
 
 const STAY_PUBLIC = 'stay-public';
@@ -50,6 +51,7 @@ const GO_PRIVATE = 'go-private';
     ReactiveFormsModule,
     IonIcon,
     IonAlert,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -70,9 +72,9 @@ export class PageSettings {
   isOpen = signal(false);
 
   languageOptions = [
-    { value: SupportedLang.EN, label: 'English' },
-    { value: SupportedLang.DE_DE, label: 'German (Germany)' },
-    { value: SupportedLang.DE_CH, label: 'German (Switzerland)' },
+    { value: SupportedLang.EN, labelKey: 'common.english' },
+    { value: SupportedLang.DE_DE, labelKey: 'common.german_germany' },
+    { value: SupportedLang.DE_CH, labelKey: 'common.german_switzerland' },
   ];
 
   confirmationButtons = [
@@ -101,11 +103,16 @@ export class PageSettings {
     const settings = this.settings();
 
     if (settings) {
-      const { updatedAt, ...rest } = settings;
+      const { updatedAt: _, ...rest } = settings;
+      const currentLang = rest.language || SupportedLang.EN;
+
       this.settingsForm.patchValue({
         ...rest,
-        language: rest.language || SupportedLang.EN,
+        language: currentLang,
       });
+
+      // Apply the language immediately when settings load
+      this.translateService.setActiveLang(currentLang);
     }
 
     const publicUser = this.publicUser();
@@ -169,6 +176,13 @@ export class PageSettings {
       .addEventListener('change', (e) => {
         this.systemTheme.set(e.matches ? 'dark' : 'light');
       });
+  }
+
+  onLanguageChange(event: CustomEvent<{ value: SupportedLang }>): void {
+    const selectedLang = event.detail.value;
+    if (selectedLang) {
+      this.translateService.setActiveLang(selectedLang);
+    }
   }
 
   saveSettings(): void {

@@ -95,16 +95,17 @@
             </ion-select>
           </ion-item>
           <ion-item>
-            <ion-label>Language</ion-label>
+            <ion-label>{{ 'settings.language' | transloco }}</ion-label>
             <ion-select
               slot="end"
-              placeholder="English"
+              placeholder="{{ 'common.english' | transloco }}"
               interface="popover"
               formControlName="language"
+              (ionChange)="onLanguageChange($event)"
             >
               @for(language of languageOptions; track language.value) {
               <ion-select-option [value]="language.value">{{
-                language.label
+                language.labelKey | transloco
               }}</ion-select-option>
               }
             </ion-select>

@@ -1,0 +1,26 @@
+{
+  "settings": {
+    "title": "Einstellungen",
+    "profile": "Profil",
+    "displayName": "Anzeigename",
+    "email": "E-Mail",
+    "city": "Stadt",
+    "pushNotifications": "Push-Benachrichtigungen",
+    "emailUpdates": "E-Mail-Updates",
+    "theme": "Theme",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "currency": "Bevorzugte Währung",
+    "language": "Sprache",
+    "nearbyDistance": "Nahbereich (Meter)",
+    "logOut": "Abmelden",
+    "saveChanges": "Änderungen speichern",
+    "goPublic": "Öffentlich werden",
+    "returnToPrivate": "Zu privat zurückkehren"
+  },
+  "common": {
+    "english": "Englisch",
+    "german_germany": "Deutsch (Deutschland)",
+    "german_switzerland": "Deutsch (Schweiz)"
+  }
+}

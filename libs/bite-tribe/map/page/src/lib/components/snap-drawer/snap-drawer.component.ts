@@ -9,6 +9,11 @@ import {
   OnInit,
   Renderer2,
 } from '@angular/core';
+import { computeSnapOffsets } from './utils/compute-snap-offsets';
+import { getLowestSnap } from './utils/get-lowest-snap';
+import { getHighestSnap } from './utils/get-highest-snap';
+import { findNextSnapDown } from './utils/find-next-snap-down';
+import { findClosestSnap } from './utils/find-closest-snap';
 
 @Component({
   selector: 'bt-snap-drawer',
@@ -37,8 +42,8 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.computeSnapOffsets();
-    this.translateY = this.getLowestSnap(this.snapOffsets);
+    this.snapOffsets = computeSnapOffsets(this.snapPixels());
+    this.translateY = getLowestSnap(this.snapOffsets);
   }
 
   ngAfterViewInit(): void {
@@ -48,12 +53,10 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
   }
 
   snapOpenOrClosed(): void {
-    const isOpen = this.translateY < this.getLowestSnap(this.snapOffsets);
-    if (isOpen) {
-      this.translateY = this.getLowestSnap(this.snapOffsets);
-      return;
-    }
-    this.translateY = this.getHighestSnap(this.snapOffsets);
+    const isOpen = this.translateY < getLowestSnap(this.snapOffsets);
+    this.translateY = isOpen
+      ? getLowestSnap(this.snapOffsets)
+      : getHighestSnap(this.snapOffsets);
   }
 
   onPointerDown(event: PointerEvent): void {
@@ -105,56 +108,20 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
       this.snapToClosest();
       return;
     }
-    if (this.dragDirection > 0) {
-      this.translateY = this.findNextSnapDown(this.translateY);
-      return;
-    }
-    this.translateY = this.findNextSnapUp(this.translateY);
-  }
-
-  private findNextSnapDown(currentY: number): number {
-    const validSnaps = this.snapOffsets.filter((snap) => snap > currentY);
-    return validSnaps.length > 0
-      ? Math.min(...validSnaps)
-      : this.getLowestSnap(this.snapOffsets);
+    this.translateY =
+      this.dragDirection > 0
+        ? findNextSnapDown(this.snapOffsets, this.translateY)
+        : this.findNextSnapUp(this.translateY);
   }
 
   private findNextSnapUp(currentY: number): number {
     const validSnaps = this.snapOffsets.filter((snap) => snap < currentY);
     return validSnaps.length > 0
       ? Math.max(...validSnaps)
-      : this.getHighestSnap(this.snapOffsets);
+      : getHighestSnap(this.snapOffsets);
   }
 
   private snapToClosest(): void {
-    this.translateY = this.findClosestSnap(this.translateY);
-  }
-
-  private findClosestSnap(value: number): number {
-    let closest = this.snapOffsets[0];
-    let minDiff = Math.abs(value - closest);
-    for (const sp of this.snapOffsets) {
-      const diff = Math.abs(value - sp);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closest = sp;
-      }
-    }
-    return closest;
-  }
-
-  private getLowestSnap(snapOffsets: number[]): number {
-    return Math.max(...snapOffsets);
-  }
-
-  private getHighestSnap(snapOffsets: number[]): number {
-    return Math.min(...snapOffsets);
-  }
-
-  private computeSnapOffsets(): void {
-    const windowInnerHeight = window.innerHeight;
-    this.snapOffsets = this.snapPixels().map(
-      (snapPixel) => windowInnerHeight - snapPixel
-    );
+    this.translateY = findClosestSnap(this.snapOffsets, this.translateY);
   }
 }

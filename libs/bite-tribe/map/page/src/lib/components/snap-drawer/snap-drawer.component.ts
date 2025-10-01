@@ -17,6 +17,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SnapDrawerComponent implements OnInit, AfterViewInit {
+  // default: bite component size
   snapPixels = input([60, 480]);
 
   translateY = 0;
@@ -41,7 +42,9 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.setTransition(true), 0);
+    setTimeout(() => {
+      this.setTransition(true);
+    });
   }
 
   snapOpenOrClosed(): void {
@@ -66,8 +69,8 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
     if (!this.dragging) return;
     const delta = event.clientY - this.startY;
 
+    // avoid jitter
     if (Math.abs(delta) > 10) {
-      // avoid jitter
       this.dragDirection = delta > 0 ? 1 : -1; // 1 = down, -1 = up
     }
 
@@ -106,11 +109,7 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
       this.translateY = this.findNextSnapDown(this.translateY);
       return;
     }
-    if (this.dragDirection < 0) {
-      this.translateY = this.findNextSnapUp(this.translateY);
-      return;
-    }
-    this.snapToClosest();
+    this.translateY = this.findNextSnapUp(this.translateY);
   }
 
   private findNextSnapDown(currentY: number): number {

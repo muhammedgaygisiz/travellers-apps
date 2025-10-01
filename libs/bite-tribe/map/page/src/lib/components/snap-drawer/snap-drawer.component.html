@@ -7,7 +7,5 @@
   (pointercancel)="onPointerUp($event)"
 >
   <div class="handle" (click)="snapOpenOrClosed()"></div>
-  <div class="unset-cursor">
-    <ng-content></ng-content>
-  </div>
+  <ng-content></ng-content>
 </div>

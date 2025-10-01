@@ -44,7 +44,7 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.setTransition(true);
-    });
+    }, 0);
   }
 
   snapOpenOrClosed(): void {

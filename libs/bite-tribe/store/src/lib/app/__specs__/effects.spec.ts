@@ -32,6 +32,8 @@ const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
 };
 
+jest.mock('localization');
+
 const Mock = {
   settings$: of({ theme: 'dark' } as Settings),
   publicProfile$: of({ displayName: 'test' } as PublicUser),

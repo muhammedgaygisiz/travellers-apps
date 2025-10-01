@@ -42,6 +42,8 @@ const createNavControllerMock = (): any => ({
   setTopOutlet: jest.fn(),
 });
 
+jest.mock('localization');
+
 describe('DetailsService', () => {
   let service: DetailsService;
   let mockDataAccessService: Partial<DetailsDataAccessService>;

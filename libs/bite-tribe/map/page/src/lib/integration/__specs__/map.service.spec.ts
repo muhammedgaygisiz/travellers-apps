@@ -5,6 +5,8 @@ import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { MapService } from '../map.service';
 import { Bite, Bucketlist, Geopoint } from 'model';
 
+jest.mock('localization');
+
 describe('MapService', () => {
   let service: MapService;
   let mockDataAccess: jest.Mocked<MapDataAccessService>;

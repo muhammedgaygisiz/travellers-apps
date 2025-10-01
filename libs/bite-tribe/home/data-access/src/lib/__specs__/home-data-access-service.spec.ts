@@ -32,6 +32,8 @@ class Mock {
   reloadBites = (): null => null;
 }
 
+jest.mock('localization');
+
 describe('HomeDataAccessService', () => {
   let biteTribeStoreService: BiteTribeStoreService;
 

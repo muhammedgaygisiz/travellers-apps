@@ -27,6 +27,8 @@ class Mock {
   clearFilters = (): null => null;
 }
 
+jest.mock('localization');
+
 describe('HomeService', () => {
   let homeDataAccessService: HomeDataAccessService;
   let navController: NavController;

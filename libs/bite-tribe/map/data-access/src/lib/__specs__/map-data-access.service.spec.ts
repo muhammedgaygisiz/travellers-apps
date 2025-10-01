@@ -16,6 +16,8 @@ class Mock {
   submitLikeOrDislikeClick = (): null => null;
 }
 
+jest.mock('localization');
+
 describe('MapDataAccessService', () => {
   let biteTribeStoreService: BiteTribeStoreService;
 

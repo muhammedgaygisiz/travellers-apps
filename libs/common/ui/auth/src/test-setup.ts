@@ -1,7 +1,6 @@
-import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+import { TextDecoder, TextEncoder } from 'util';
+import { setupZonelessTestEnv } from 'jest-preset-angular/setup-env/zoneless';
 
-setupZoneTestEnv();
-
-import { TextEncoder, TextDecoder } from 'util';
+setupZonelessTestEnv();
 
 Object.assign(global, { TextDecoder, TextEncoder });

@@ -27,6 +27,8 @@ const Mock = {
   createBucketList: jest.fn(),
 };
 
+jest.mock('localization');
+
 describe('BucketListEffect', () => {
   let scheduler: TestScheduler;
   let actions$: Observable<any> = of({});

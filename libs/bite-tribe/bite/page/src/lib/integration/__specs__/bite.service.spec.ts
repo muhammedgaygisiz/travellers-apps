@@ -14,6 +14,8 @@ const Mock = {
   submitBite: jest.fn(),
 };
 
+jest.mock('localization');
+
 describe('BiteService', () => {
   let service: BiteService;
 
@@ -26,6 +28,26 @@ describe('BiteService', () => {
     }).compileComponents();
 
     service = TestBed.inject<BiteService>(BiteService);
+  });
+
+  describe('imageToDisplay', () => {
+    it('should return croppedImage if set', () => {
+      service.croppedImage.set('croppedImage.jpg');
+      service.originalImage.set('originalImage.jpg');
+      expect(service.imageToDisplay()).toBe('croppedImage.jpg');
+    });
+
+    it('should return originalImage if croppedImage is not set', () => {
+      service.croppedImage.set('');
+      service.originalImage.set('originalImage.jpg');
+      expect(service.imageToDisplay()).toBe('originalImage.jpg');
+    });
+
+    it('should return empty string if neither image is set', () => {
+      service.croppedImage.set('');
+      service.originalImage.set('');
+      expect(service.imageToDisplay()).toBe('');
+    });
   });
 
   describe('startCropImage', () => {

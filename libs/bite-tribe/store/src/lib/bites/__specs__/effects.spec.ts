@@ -37,6 +37,8 @@ const BITE_MOCK = {
   id: 'biteId',
 } as Bite;
 
+jest.mock('localization');
+
 describe('BiteEffects', () => {
   let scheduler: TestScheduler;
   let actions$: Observable<any> = of({});

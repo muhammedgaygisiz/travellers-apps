@@ -50,10 +50,6 @@ describe('SnapDrawerComponent', () => {
     });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -63,8 +59,6 @@ describe('SnapDrawerComponent', () => {
       componentRef.setInput('snapPixels', [60, 480]);
       component.ngOnInit();
 
-      // With window height 800, snapOffsets should be [740, 320]
-      // Lowest snap (max) should be 740
       expect(component.translateY).toBe(740);
     });
 
@@ -72,8 +66,6 @@ describe('SnapDrawerComponent', () => {
       componentRef.setInput('snapPixels', [100, 600]);
       component.ngOnInit();
 
-      // With window height 800, snapOffsets should be [700, 200]
-      // Lowest snap (max) should be 700
       expect(component.translateY).toBe(700);
     });
   });
@@ -81,14 +73,12 @@ describe('SnapDrawerComponent', () => {
   describe('onResize', () => {
     it('should snap drawer to closest position when window resizes', () => {
       componentRef.setInput('snapPixels', [60, 480]);
-      component.ngOnInit();
+      fixture.detectChanges();
 
-      // Position drawer between snap points
       component.translateY = 500;
 
       component.onResize();
 
-      // Should snap to closest position (740 or 320)
       expect(component.translateY === 320 || component.translateY === 740).toBe(
         true
       );
@@ -98,7 +88,7 @@ describe('SnapDrawerComponent', () => {
   describe('snapOpenOrClosed', () => {
     beforeEach(() => {
       componentRef.setInput('snapPixels', [60, 480]);
-      component.ngOnInit();
+      fixture.detectChanges();
     });
 
     it('should snap to lowest position when drawer is open', () => {
@@ -128,7 +118,7 @@ describe('SnapDrawerComponent', () => {
       setPointerCaptureSpy = jest.spyOn(mockDrawerElement, 'setPointerCapture');
 
       componentRef.setInput('snapPixels', [60, 480]);
-      component.ngOnInit();
+      fixture.detectChanges();
       component.translateY = 500;
     });
 
@@ -149,7 +139,7 @@ describe('SnapDrawerComponent', () => {
 
     beforeEach(() => {
       componentRef.setInput('snapPixels', [60, 480]);
-      component.ngOnInit();
+      fixture.detectChanges();
 
       const downEvent = {
         pointerId: 1,
@@ -178,7 +168,7 @@ describe('SnapDrawerComponent', () => {
 
     beforeEach(() => {
       componentRef.setInput('snapPixels', [60, 480]);
-      component.ngOnInit();
+      fixture.detectChanges();
 
       mockEvent = {
         pointerId: 1,
@@ -277,14 +267,14 @@ describe('SnapDrawerComponent', () => {
   describe('input changes', () => {
     it('should handle different snap pixel configurations', () => {
       componentRef.setInput('snapPixels', [50, 200, 400]);
-      component.ngOnInit();
+      fixture.detectChanges();
 
       expect(component.translateY).toBe(750);
     });
 
     it('should handle single snap pixel', () => {
       componentRef.setInput('snapPixels', [100]);
-      component.ngOnInit();
+      fixture.detectChanges();
 
       expect(component.translateY).toBe(700);
     });
@@ -293,7 +283,7 @@ describe('SnapDrawerComponent', () => {
   describe('drag behavior integration', () => {
     beforeEach(() => {
       componentRef.setInput('snapPixels', [60, 480]);
-      component.ngOnInit();
+      fixture.detectChanges();
     });
 
     it('should handle complete drag sequence from middle position', () => {

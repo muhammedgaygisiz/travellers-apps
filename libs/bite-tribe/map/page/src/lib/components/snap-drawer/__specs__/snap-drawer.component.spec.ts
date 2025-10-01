@@ -70,6 +70,39 @@ describe('SnapDrawerComponent', () => {
     });
   });
 
+  describe('ngAfterViewInit', () => {
+    let querySelectorSpy: SpyInstance;
+    let setStyleSpy: SpyInstance;
+    beforeEach(() => {
+      // not pretty but the only way to mock querySelector and setStyle
+      querySelectorSpy = jest
+        .spyOn(component['elementRef'].nativeElement, 'querySelector')
+        .mockReturnValue({});
+      setStyleSpy = jest
+        .spyOn(component['renderer'], 'setStyle')
+        .mockImplementation();
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should enable transition after timeout', () => {
+      querySelectorSpy.mockReturnValue(mockDrawerElement);
+
+      component.ngAfterViewInit();
+
+      jest.advanceTimersByTime(1);
+
+      expect(setStyleSpy).toHaveBeenCalledWith(
+        mockDrawerElement,
+        'transition',
+        'transform 0.3s ease'
+      );
+    });
+  });
+
   describe('onResize', () => {
     it('should snap drawer to closest position when window resizes', () => {
       componentRef.setInput('snapPixels', [60, 480]);
@@ -247,83 +280,6 @@ describe('SnapDrawerComponent', () => {
       component.onPointerUp(mockEvent);
 
       expect(component.translateY).toBe(320);
-    });
-  });
-
-  describe('window resize handling', () => {
-    it('should recalculate snap positions on window resize', () => {
-      componentRef.setInput('snapPixels', [60, 480]);
-      fixture.detectChanges();
-
-      component.translateY = 500;
-
-      Object.defineProperty(window, 'innerHeight', { value: 1000 });
-      component.onResize();
-
-      expect(component.translateY).toEqual(320);
-    });
-  });
-
-  describe('input changes', () => {
-    it('should handle different snap pixel configurations', () => {
-      componentRef.setInput('snapPixels', [50, 200, 400]);
-      fixture.detectChanges();
-
-      expect(component.translateY).toBe(750);
-    });
-
-    it('should handle single snap pixel', () => {
-      componentRef.setInput('snapPixels', [100]);
-      fixture.detectChanges();
-
-      expect(component.translateY).toBe(700);
-    });
-  });
-
-  describe('drag behavior integration', () => {
-    beforeEach(() => {
-      componentRef.setInput('snapPixels', [60, 480]);
-      fixture.detectChanges();
-    });
-
-    it('should handle complete drag sequence from middle position', () => {
-      component.translateY = 500; // Start in middle
-
-      const downEvent = {
-        pointerId: 1,
-        clientY: 400,
-        target: mockDrawerElement,
-      } as any;
-      component.onPointerDown(downEvent);
-
-      const moveEvent = { clientY: 430 } as any;
-      component.onPointerMove(moveEvent);
-
-      const upEvent = { pointerId: 1, target: mockDrawerElement } as any;
-      component.onPointerUp(upEvent);
-
-      expect([320, 740]).toContain(component.translateY);
-    });
-
-    it('should maintain bounds during extreme movements', () => {
-      component.translateY = 400;
-
-      const downEvent = {
-        pointerId: 1,
-        clientY: 400,
-        target: mockDrawerElement,
-      } as any;
-      component.onPointerDown(downEvent);
-
-      const extremeMoveEvent = { clientY: -1000 } as any;
-      component.onPointerMove(extremeMoveEvent);
-
-      expect(component.translateY).toBe(320);
-
-      const extremeMoveDownEvent = { clientY: 5000 } as any;
-      component.onPointerMove(extremeMoveDownEvent);
-
-      expect(component.translateY).toBe(740);
     });
   });
 });

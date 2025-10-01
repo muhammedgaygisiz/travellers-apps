@@ -1,6 +1,6 @@
-import { inject, Injectable, LOCALE_ID } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
-import { SupportedLang, LANG_TO_LOCALE_MAP } from './model/supported-lang';
+import { LANG_TO_LOCALE_MAP, SupportedLang } from './model/supported-lang';
 
 @Injectable()
 export class TranslateService {

@@ -12,7 +12,7 @@
   (change)="onFileSelected($event)"
 />
 } @if (showImage()) {
-<img [src]="value() || imageUrl()" />
+<img [src]="value() || imageUrl()" alt="Image" />
 <div class="ion-text-end">
   <ion-button fill="clear" (click)="cropImage()">Crop</ion-button>
   <ion-button fill="clear" (click)="clearImage()">Delete</ion-button>

@@ -2,9 +2,21 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import { SupportedLang } from 'localization';
+
 export const environment = {
   production: false,
   isBusiness: false,
+  i18n: {
+    locales: [
+      SupportedLang.EN,
+      SupportedLang.DE,
+      SupportedLang.TR,
+      SupportedLang.FR,
+      SupportedLang.ES,
+    ],
+    defaultLang: SupportedLang.EN,
+  },
 };
 
 /*

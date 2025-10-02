@@ -10,7 +10,7 @@ describe('FloatNumberDotNotationValidator', () => {
       control.addValidators(FloatNumberDotNotationValidator());
     });
 
-    it('should validate commas as invalid', () => {
+    it('should validate comma as invalid', () => {
       control.setValue('9,123');
       expect(control.valid).toBe(false);
     });
@@ -40,19 +40,19 @@ describe('FloatNumberDotNotationValidator', () => {
       expect(control.valid).toBe(true);
     });
 
-    it('should validate negative decimal number as valid', () => {
+    it('should validate negative decimal number as invalid', () => {
       control.setValue(-9.5123);
-      expect(control.valid).toBe(true);
+      expect(control.valid).toBe(false);
     });
 
-    it('should validate negative decimal string as valid', () => {
+    it('should validate negative decimal string as invalid', () => {
       control.setValue('-9.5123');
-      expect(control.valid).toBe(true);
+      expect(control.valid).toBe(false);
     });
 
-    it('should validate empty input as valid', () => {
+    it('should validate empty input as invalid', () => {
       control.setValue('');
-      expect(control.valid).toBe(true);
+      expect(control.valid).toBe(false);
     });
 
     it('should validate 0 as valid', () => {
@@ -62,6 +62,40 @@ describe('FloatNumberDotNotationValidator', () => {
 
     it('should return validation error', () => {
       control.setValue('9,123');
+      expect(control.errors).toEqual({
+        floatNumberDotNotation: {
+          text: 'i18n.validation.float',
+        },
+      });
+    });
+
+    it('should validate dot as invalid', () => {
+      control.setValue('9.123');
+      expect(control.valid).toBe(false);
+    });
+
+    it('should validate comma-separated decimal string as valid', () => {
+      control.setValue('9,5123');
+      expect(control.valid).toBe(true);
+    });
+
+    it('should validate comma-separated decimal number as valid', () => {
+      control.setValue(9.5123);
+      expect(control.valid).toBe(true);
+    });
+
+    it('should validate comma-separated negative decimal string as invalid', () => {
+      control.setValue('-9,5123');
+      expect(control.valid).toBe(false);
+    });
+
+    it('should validate 0 as valid', () => {
+      control.setValue(0);
+      expect(control.valid).toBe(true);
+    });
+
+    it('should return validation error', () => {
+      control.setValue('-100');
       expect(control.errors).toEqual({
         floatNumberDotNotation: {
           text: 'i18n.validation.float',

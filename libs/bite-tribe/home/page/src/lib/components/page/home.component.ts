@@ -32,8 +32,10 @@ import { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
 import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
-import { InfiniteScrollCustomEvent } from '@ionic/angular';
-import { RefresherCustomEvent } from '@ionic/angular';
+import {
+  InfiniteScrollCustomEvent,
+  RefresherCustomEvent,
+} from '@ionic/angular';
 
 const PAGE_SIZE = 50;
 

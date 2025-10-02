@@ -1,5 +1,5 @@
 import nx from '@nx/eslint-plugin';
-import baseConfig from '../../../eslint.config.mjs';
+import baseConfig from '../../eslint.config.mjs';
 
 export default [
   ...baseConfig,
@@ -12,15 +12,15 @@ export default [
         'error',
         {
           type: 'attribute',
-          prefix: 'lib',
+          prefix: 'app',
           style: 'camelCase',
         },
       ],
       '@angular-eslint/component-selector': [
-        'warn',
+        'error',
         {
           type: 'element',
-          prefix: 'bite',
+          prefix: 'app',
           style: 'kebab-case',
         },
       ],

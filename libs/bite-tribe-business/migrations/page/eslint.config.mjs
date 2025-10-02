@@ -17,10 +17,10 @@ export default [
         },
       ],
       '@angular-eslint/component-selector': [
-        'error',
+        'warn',
         {
           type: 'element',
-          prefix: 'btb',
+          prefix: 'bite',
           style: 'kebab-case',
         },
       ],

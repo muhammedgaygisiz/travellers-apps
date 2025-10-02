@@ -1,0 +1,11 @@
+<div
+  class="drawer"
+  [style]="'transform: translateY(' + translateY + 'px)'"
+  (pointerdown)="onPointerDown($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="onPointerUp($event)"
+  (pointercancel)="onPointerUp($event)"
+>
+  <div class="handle" (click)="snapOpenOrClosed()"></div>
+  <ng-content></ng-content>
+</div>

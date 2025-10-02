@@ -10,13 +10,20 @@ import { IonContent } from '@ionic/angular/standalone';
 import { MapComponent } from 'bite-tribe-common/map';
 import { Bite, Geopoint } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
+import { SnapDrawerComponent } from '../snap-drawer/snap-drawer.component';
 
 @Component({
   selector: 'map-page',
   templateUrl: './map-page.component.html',
   styleUrl: './map-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageComponent, IonContent, MapComponent, BiteComponent],
+  imports: [
+    PageComponent,
+    IonContent,
+    MapComponent,
+    BiteComponent,
+    SnapDrawerComponent,
+  ],
 })
 export class MapPageComponent {
   bites = input<any[]>();

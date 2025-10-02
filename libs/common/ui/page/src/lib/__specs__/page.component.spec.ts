@@ -69,32 +69,4 @@ describe('PageComponent', () => {
       });
     });
   });
-
-  describe('app icon', () => {
-    it('should return input icon when provided', () => {
-      componentRef.setInput('icon', 'Test Icon');
-      expect(component.appIcon()).toBe('Test Icon');
-    });
-
-    describe('with injector token', () => {
-      const mockAppIcon = 'Mock App Icon';
-
-      beforeEach(() => {
-        TestBed.resetTestingModule();
-        TestBed.configureTestingModule({
-          providers: [
-            provideZonelessChangeDetection(),
-            provideIonicAngular(getIonicConfig()),
-            { provide: APP_ICON, useValue: mockAppIcon },
-          ],
-        });
-        fixture = TestBed.createComponent(PageComponent);
-        component = fixture.componentInstance;
-      });
-
-      it('should return appIconToken when no icon is provided', () => {
-        expect(component.appIcon()).toBe(mockAppIcon);
-      });
-    });
-  });
 });

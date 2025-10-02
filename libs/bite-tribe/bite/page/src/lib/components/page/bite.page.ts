@@ -36,6 +36,7 @@ import { FloatNumberDotNotationValidator } from '../../validators/float-number-d
 import { currencyCodes } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
+import { getNormalizedPrice } from './utils/get-normalized-price';
 
 @Component({
   selector: 'bite',
@@ -62,8 +63,6 @@ import { TagsInputComponent } from 'common/ui/tags';
 export class BitePage {
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
-
-  title = input<string>('Create Bite');
 
   bite = input<Bite>();
 
@@ -101,7 +100,7 @@ export class BitePage {
       place: ['', Validators.required],
       description: [''],
       price: [
-        null as number | null,
+        null as string | null,
         [Validators.required, FloatNumberDotNotationValidator()],
       ],
       currency: ['EUR', Validators.required],
@@ -139,7 +138,7 @@ export class BitePage {
       imagePath: bite.imagePath,
       name: bite.name,
       place: bite.place,
-      price: bite.price,
+      price: `${bite.price}`,
       currency: bite.currency,
       tags: bite.tags || [],
       position: bite.position,
@@ -225,6 +224,9 @@ export class BitePage {
   saveBite(): void {
     if (this.biteFormGroup.valid) {
       const newBite = this.biteFormGroup.value;
+
+      newBite.price = getNormalizedPrice(newBite.price);
+
       this.submitBite.emit(newBite);
     }
   }

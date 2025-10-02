@@ -138,7 +138,9 @@ export class PageSettings {
 
     const photoUrl =
       user?.photoUrl ||
-      user?.providerData.find((provider: any) => provider.photoUrl)?.photoUrl;
+      user?.providerData.find(
+        (provider: { photoUrl?: string }) => provider.photoUrl
+      )?.photoUrl;
 
     return photoUrl;
   });

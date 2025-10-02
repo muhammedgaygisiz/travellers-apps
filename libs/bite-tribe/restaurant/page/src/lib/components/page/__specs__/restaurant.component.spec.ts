@@ -216,7 +216,7 @@ describe('RestaurantComponent', () => {
           { network: 'facebook', url: 'https://facebook.com/test' },
         ] as Link[],
       } as Restaurant);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
       component.saveSocialMediaLinks();
       expect(emitSpy).toHaveBeenCalledWith({
         links: [{ network: 'facebook', url: 'https://facebook.com/test' }],
@@ -229,7 +229,7 @@ describe('RestaurantComponent', () => {
         name: 'Test Restaurant',
         socialMediaLinks: [{ network: '', url: '' }] as Link[],
       } as Restaurant);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
       component.saveSocialMediaLinks();
       expect(emitSpy).not.toHaveBeenCalled();
     });

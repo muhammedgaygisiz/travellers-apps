@@ -7,7 +7,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NavController, Platform } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { imageOutline } from 'ionicons/icons';
-import { signal } from '@angular/core';
+import { ComponentRef, signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 
 addNecessaryIcons();
@@ -40,6 +40,7 @@ type MockFileReader = {
 
 describe('ImageUploadComponent', () => {
   let component: ImageUploadComponent;
+  let compRef: ComponentRef<ImageUploadComponent>;
   let fixture: ComponentFixture<ImageUploadComponent>;
   let platformMock: Partial<Platform>;
   let navControllerMock: Partial<NavController>;
@@ -72,6 +73,7 @@ describe('ImageUploadComponent', () => {
 
     fixture = TestBed.createComponent(ImageUploadComponent);
     component = fixture.componentInstance;
+    compRef = fixture.componentRef;
     mockEmit = jest.fn();
 
     // Mock the output event emitter
@@ -86,9 +88,20 @@ describe('ImageUploadComponent', () => {
       }),
     });
 
+    // @ts-expect-error - Mocking FileReader
+    global.FileReader = jest.fn(() => ({
+      readAsDataURL: jest.fn(),
+      addEventListener: jest.fn((_, cb) => cb()),
+      onload: null,
+      result: 'data:image/jpeg;base64,abc',
+      EMPTY: 0,
+      LOADING: 1,
+      DONE: 2,
+    }));
+
     component.value.set(null);
     component.disabled.set(false);
-    fixture.detectChanges();
+    compRef.changeDetectorRef.detectChanges();
   });
 
   afterEach(() => {
@@ -128,7 +141,7 @@ describe('ImageUploadComponent', () => {
       }),
     });
 
-    fixture.detectChanges();
+    compRef.changeDetectorRef.detectChanges();
 
     // Act
     await component.onImageUploadClick();
@@ -148,20 +161,6 @@ describe('ImageUploadComponent', () => {
     const event = {
       target: { files: [file] },
     } as unknown as Event;
-
-    // Mock FileReader
-    const mockFileReader: MockFileReader = {
-      readAsDataURL: jest.fn(),
-      addEventListener: jest.fn((_, cb) => cb()),
-      onload: null,
-      result: 'data:image/jpeg;base64,abc',
-      EMPTY: 0,
-      LOADING: 1,
-      DONE: 2,
-    };
-
-    // @ts-expect-error - Mocking FileReader
-    global.FileReader = jest.fn(() => mockFileReader);
 
     await component.onFileSelected(event);
     expect(getExifDataFromFile).toHaveBeenCalledWith(file, undefined);

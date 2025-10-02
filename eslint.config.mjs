@@ -18,7 +18,7 @@ export default [
           depConstraints: [
             {
               sourceTag: 'type:app',
-              onlyDependOnLibsWithTags: ['type:shell']
+              onlyDependOnLibsWithTags: ['type:shell', 'scope:common']
             },
             {
               sourceTag: 'type:shell',
@@ -78,7 +78,12 @@ export default [
             }
           ]
         }
-      ],
+      ]
+    }
+  },
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    rules: {
       '@typescript-eslint/explicit-function-return-type': 'error'
     }
   },

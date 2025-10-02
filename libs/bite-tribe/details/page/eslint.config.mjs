@@ -1,5 +1,5 @@
 import nx from '@nx/eslint-plugin';
-import baseConfig from '../../../eslint.config.mjs';
+import baseConfig from '../../../../eslint.config.mjs';
 
 export default [
   ...baseConfig,
@@ -23,12 +23,15 @@ export default [
           prefix: 'bite',
           style: 'kebab-case',
         },
-      ],
+      ]
     },
   },
   {
     files: ['**/*.html'],
     // Override or add rules here
-    rules: {},
+    rules: {
+      '@angular-eslint/template/click-events-have-key-events': 'warn',
+      '@angular-eslint/template/interactive-supports-focus': 'warn',
+    },
   },
 ];

@@ -19,6 +19,7 @@ import { SupportedLang } from './model/supported-lang';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import localeEn from '@angular/common/locales/en';
+import { provideHttpClient } from '@angular/common/http';
 
 registerLocaleData(localeDe);
 registerLocaleData(localeEn);
@@ -34,15 +35,13 @@ export const provideLocalization = (
   i18n?: LocalizationParams
 ): EnvironmentProviders =>
   makeEnvironmentProviders([
-    provideTranslocoLoader(TranslocoHttpLoader),
+    provideHttpClient(),
     provideTransloco({
+      loader: TranslocoHttpLoader,
       config: translocoConfig({
         availableLangs: i18n?.locales || [SupportedLang.DE],
         defaultLang: i18n?.defaultLang || SupportedLang.DE,
         fallbackLang: SupportedLang.DE,
-        // Remove this option if your application
-        // doesn't support changing language in runtime.
-        reRenderOnLangChange: true,
         prodMode: !isDevMode(),
       }),
     }),

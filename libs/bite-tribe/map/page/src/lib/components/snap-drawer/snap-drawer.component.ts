@@ -23,7 +23,7 @@ import { findClosestSnap } from './utils/find-closest-snap';
 })
 export class SnapDrawerComponent implements OnInit, AfterViewInit {
   // default: bite component size
-  snapPixels = input([60, 480]);
+  snapPixels = input([120, 480]);
 
   translateY = 0;
   private dragging = false;

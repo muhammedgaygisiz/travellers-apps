@@ -86,7 +86,7 @@ describe('SnapDrawerComponent', () => {
 
       component.ngOnInit();
 
-      expect(computeSnapOffsetsMock).toHaveBeenCalledWith([60, 480]);
+      expect(computeSnapOffsetsMock).toHaveBeenCalledWith([120, 480]);
       expect(getLowestSnapMock).toHaveBeenCalledWith([320, 740]);
       expect(component.translateY).toBe(740);
     });

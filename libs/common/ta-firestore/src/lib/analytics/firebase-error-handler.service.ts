@@ -8,7 +8,7 @@ import { Capacitor } from '@capacitor/core';
 export class FirebaseErrorHandlerService {
   analytics = inject(FIREBASE_ANALYTICS);
 
-  handleError(error: any): void {
+  async handleError(error: any): Promise<void> {
     const message = error?.message || error?.toString() || 'Unknown error';
 
     logEvent(this.analytics, 'exception', {
@@ -17,12 +17,15 @@ export class FirebaseErrorHandlerService {
     });
 
     if (Capacitor.isNativePlatform()) {
-      FirebaseCrashlytics.recordException({
-        message: error.message || 'Unknown Angular error',
-        stacktrace: error.stack || '',
-      }).catch((e) => {
+      try {
+        await FirebaseCrashlytics.recordException({
+          message: error.message || 'Unknown Angular error',
+          stacktrace: error.stack || '',
+        });
+      } catch (e: any) {
         console.error('Error reporting to Crashlytics:', e);
-      });
+        return;
+      }
     }
 
     // Optionally, rethrow the error or log it to console

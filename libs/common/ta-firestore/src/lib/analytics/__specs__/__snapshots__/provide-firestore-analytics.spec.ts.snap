@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`provideFirestoreAnalytics should provide FIREBASE_ANALYTICS and ErrorHandler 1`] = `
+Array [
+  Object {
+    "provide": InjectionToken {
+      "_desc": "FIREBASE_ANALYTICS",
+      "ngMetadataName": "InjectionToken",
+      "ɵprov": undefined,
+    },
+    "useFactory": [Function],
+  },
+  Object {
+    "provide": [Function],
+    "useClass": [Function],
+  },
+]
+`;

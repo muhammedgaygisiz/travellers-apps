@@ -4,8 +4,8 @@
   "theme_color": "#00365f",
   "background_color": "#fffbef",
   "display": "standalone",
-  "scope": "./",
-  "start_url": "./",
+  "scope": "/",
+  "start_url": "/",
   "icons": [
     {
       "src": "assets/icons/manifest-icon-192.maskable.png",

@@ -1,6 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { FIREBASE_ANALYTICS } from './provide-firestore-analytics';
 import { logEvent } from 'firebase/analytics';
+import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
+import { Capacitor } from '@capacitor/core';
+
 @Injectable()
 export class FirebaseErrorHandlerService {
   analytics = inject(FIREBASE_ANALYTICS);
@@ -12,6 +15,15 @@ export class FirebaseErrorHandlerService {
       description: message,
       fatal: true,
     });
+
+    if (Capacitor.isNativePlatform()) {
+      FirebaseCrashlytics.recordException({
+        message: error.message || 'Unknown Angular error',
+        stacktrace: error.stack || '',
+      }).catch((e) => {
+        console.error('Error reporting to Crashlytics:', e);
+      });
+    }
 
     // Optionally, rethrow the error or log it to console
     console.error('Captured error:', error);

@@ -20,6 +20,7 @@ def capacitor_pods
   pod 'CapacitorAppLauncher', :path => '../../../../node_modules/@capacitor/app-launcher'
   pod 'CapacitorFilesystem', :path => '../../../../node_modules/@capacitor/filesystem'
   pod 'CapacitorSplashScreen', :path => '../../../../node_modules/@capacitor/splash-screen'
+  pod 'CapacitorFirebaseCrashlytics', :path => '../../../../node_modules/@capacitor-firebase/crashlytics'
 end
 
 target 'App' do

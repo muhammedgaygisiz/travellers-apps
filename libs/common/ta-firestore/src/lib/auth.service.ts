@@ -21,6 +21,7 @@ import { Capacitor } from '@capacitor/core';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from './provide-firestore-utils';
 import { terminate } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 
 @Injectable({
   providedIn: 'root',
@@ -47,6 +48,12 @@ export class AuthService {
         FirebaseAnalytics.setUserId({
           userId: authState.user.uid,
         });
+
+        if (Capacitor.isNativePlatform()) {
+          FirebaseCrashlytics.setUserId({
+            userId: authState.user.uid,
+          });
+        }
       }
 
       return !!authState?.user;

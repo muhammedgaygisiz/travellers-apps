@@ -38,6 +38,7 @@
     "@awesome-cordova-plugins/geolocation": "8.1.0",
     "@capacitor-firebase/analytics": "7.3.0",
     "@capacitor-firebase/authentication": "7.3.0",
+    "@capacitor-firebase/crashlytics": "7.3.1",
     "@capacitor-firebase/firestore": "7.3.0",
     "@capacitor-firebase/storage": "^7.3.0",
     "@capacitor/android": "7.4.2",

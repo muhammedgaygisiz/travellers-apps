@@ -92,6 +92,7 @@ export class AppEffect {
                   buttons: [this.RETRY_GPS_BUTTON],
                 })
                 .then((alert) => alert.present());
+
               return of(errorLoadingGpsPosition({ error }));
             })
           )

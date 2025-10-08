@@ -174,8 +174,9 @@ export class ImageUploadComponent implements ControlValueAccessor {
   private setValueAndTriggerChange(compressedPhoto: File): void {
     const reader = new FileReader();
     reader.onload = (): void => {
-      this.value.set(reader.result as string);
-      this._onChange(reader.result as string);
+      const result = reader.result as string;
+      this.value.set(result);
+      this._onChange(result);
       this._onTouch();
     };
     reader.readAsDataURL(compressedPhoto);

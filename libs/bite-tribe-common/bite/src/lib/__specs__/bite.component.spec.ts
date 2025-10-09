@@ -13,6 +13,8 @@ import { ToBlobUrlPipe } from 'image-compression';
 import { OverlayEventDetail } from '@ionic/core';
 import { addNecessaryIcons } from 'utils';
 
+jest.mock('heic2any', () => jest.fn());
+
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
   transform(value: string): string {

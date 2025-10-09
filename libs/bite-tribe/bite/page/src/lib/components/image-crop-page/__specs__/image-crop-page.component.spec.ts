@@ -7,6 +7,7 @@ import { addNecessaryIcons } from 'utils';
 import * as imageCompressionModule from 'image-compression';
 
 jest.mock('localization');
+jest.mock('heic2any', () => jest.fn());
 
 jest.mock('image-compression');
 const actualImageCompression = jest.requireActual('image-compression');

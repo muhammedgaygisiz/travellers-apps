@@ -5,6 +5,8 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 
+jest.mock('heic2any', () => jest.fn());
+
 jest.mock('localization');
 addNecessaryIcons();
 

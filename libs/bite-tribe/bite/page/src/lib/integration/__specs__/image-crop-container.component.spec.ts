@@ -6,6 +6,7 @@ import { ImageCropContainer } from '../image-crop-container.component';
 import { addNecessaryIcons } from 'utils';
 
 jest.mock('localization');
+jest.mock('heic2any', () => jest.fn());
 addNecessaryIcons();
 
 describe('ImageCropContainer', () => {

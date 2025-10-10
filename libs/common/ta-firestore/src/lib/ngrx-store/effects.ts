@@ -11,7 +11,6 @@ import {
   loginFailed,
   loginSucceeded,
   loginWithAppleAccount,
-  loginWithFacebookAccount,
   loginWithGoogleAccount,
   logout,
   logoutSucceeded,
@@ -64,10 +63,10 @@ export class AuthEffects {
         this.authService.isLoggedIn$.pipe(
           map((isLoggedIn) => {
             return isLoggedIn ? loginSucceeded() : notAuthenticated();
-          })
-        )
-      )
-    )
+          }),
+        ),
+      ),
+    ),
   );
 
   loadUser$ = createEffect(() =>
@@ -76,8 +75,8 @@ export class AuthEffects {
       switchMap(() => this.authService.authStateChange$),
       map((authStateChange) => {
         return loadedUser({ user: authStateChange?.user });
-      })
-    )
+      }),
+    ),
   );
 
   loginEffect$ = createEffect(() =>
@@ -89,10 +88,10 @@ export class AuthEffects {
           catchError((err) => {
             console.debug('#mo error login: ', err);
             return of(loginFailed());
-          })
-        )
-      )
-    )
+          }),
+        ),
+      ),
+    ),
   );
 
   logoutEffect$ = createEffect(() =>
@@ -101,10 +100,10 @@ export class AuthEffects {
       exhaustMap(() =>
         this.authService.logout().pipe(
           map(() => logoutSucceeded()),
-          catchError(() => EMPTY)
-        )
-      )
-    )
+          catchError(() => EMPTY),
+        ),
+      ),
+    ),
   );
 
   registrationEffect$ = createEffect(() =>
@@ -116,10 +115,10 @@ export class AuthEffects {
           tap(() => this.navController.navigateBack(['/login'])),
           catchError((err) => {
             return of(registrationFailed({ code: err.code }));
-          })
-        )
-      )
-    )
+          }),
+        ),
+      ),
+    ),
   );
 
   loginWithGoogleAccountEffect$ = createEffect(() =>
@@ -134,10 +133,10 @@ export class AuthEffects {
           tap(() => this.navController.navigateBack(['/'])),
           catchError((err) => {
             return of(registrationFailed({ code: err.code }));
-          })
-        )
-      )
-    )
+          }),
+        ),
+      ),
+    ),
   );
 
   loginWithAppleAccountEffect$ = createEffect(() =>
@@ -152,28 +151,10 @@ export class AuthEffects {
           tap(() => this.navController.navigateBack(['/'])),
           catchError((err) => {
             return of(registrationFailed({ code: err.code }));
-          })
-        )
-      )
-    )
-  );
-
-  loginWithFacebookAccountEffect$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(loginWithFacebookAccount),
-      mergeMap(() =>
-        this.registerWithFacebookAccount$().pipe(
-          map((result) => {
-            console.debug('#mo signInResult', result);
-            return loginSucceeded();
           }),
-          tap(() => this.navController.navigateBack(['/'])),
-          catchError((err) => {
-            return of(registrationFailed({ code: err.code }));
-          })
-        )
-      )
-    )
+        ),
+      ),
+    ),
   );
 
   successFulLogin$ = createEffect(
@@ -188,9 +169,9 @@ export class AuthEffects {
           }
 
           this.navController.navigateRoot(['/']);
-        })
+        }),
       ),
-    { dispatch: false }
+    { dispatch: false },
   );
 
   successFulLogout$ = createEffect(
@@ -204,9 +185,9 @@ export class AuthEffects {
           }
 
           this.navController.navigateRoot(['/login']);
-        })
+        }),
       ),
-    { dispatch: false }
+    { dispatch: false },
   );
 
   private login$(authCreds: AuthCredentials): Observable<SignInResult> {
@@ -223,9 +204,5 @@ export class AuthEffects {
 
   private registerWithAppleAccount$(): Observable<SignInResult> {
     return this.authService.registerWithAppleAccount$();
-  }
-
-  private registerWithFacebookAccount$(): Observable<SignInResult> {
-    return this.authService.registerWithFacebookAccount$();
   }
 }

@@ -33,8 +33,4 @@ export class LoginService {
   public loginWithAppleAccount(): void {
     this.store?.loginWithAppleAccount();
   }
-
-  public loginWithFacebookAccount(): void {
-    this.store?.loginWithFacebookAccount();
-  }
 }

@@ -12,6 +12,7 @@ import { AuthCredentials } from './api/auth-credentials.model';
 import {
   AuthStateChange,
   FirebaseAuthentication,
+  GetCurrentUserResult,
   SignInResult,
 } from '@capacitor-firebase/authentication';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -29,44 +30,37 @@ import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 export class AuthService {
   private readonly auth = inject(FIREBASE_AUTH);
   private readonly firestore = inject(FIREBASE_FIRESTORE);
-  authStateChange$ = new BehaviorSubject<AuthStateChange | null>(null);
+
+  private readonly _authStateChange$ =
+    new BehaviorSubject<AuthStateChange | null>(null);
+  readonly authStateChange$ = this._authStateChange$.asObservable();
 
   authState = toSignal(this.authStateChange$);
 
   async initilize(): Promise<void> {
     const currentUser = await FirebaseAuthentication.getCurrentUser();
-    this.authStateChange$.next(currentUser);
+    this._authStateChange$.next(currentUser);
+
+    this.setupAnalyticsAndCrashlytics(currentUser);
 
     await FirebaseAuthentication.addListener('authStateChange', (result) => {
-      this.authStateChange$.next(result);
+      this.setupAnalyticsAndCrashlytics(currentUser);
+
+      this._authStateChange$.next(result);
     });
   }
 
   isLoggedIn$ = this.authStateChange$.pipe(
-    map((authState) => {
-      if (authState?.user && !process.env['NX_APP_BITE_TRIBE_IS_BUSINESS']) {
-        FirebaseAnalytics.setUserId({
-          userId: authState.user.uid,
-        });
-
-        if (Capacitor.isNativePlatform()) {
-          FirebaseCrashlytics.setUserId({
-            userId: authState.user.uid,
-          });
-        }
-      }
-
-      return !!authState?.user;
-    }),
+    map((authState) => !!authState?.user),
     distinctUntilChanged(),
-    shareReplay(1)
+    shareReplay(1),
   );
 
   public loginWithUsernameAndPassword$(
-    authCreds: AuthCredentials
+    authCreds: AuthCredentials,
   ): Observable<SignInResult> {
     return from(
-      FirebaseAuthentication.signInWithEmailAndPassword({ ...authCreds })
+      FirebaseAuthentication.signInWithEmailAndPassword({ ...authCreds }),
     );
   }
 
@@ -81,19 +75,19 @@ export class AuthService {
         if (!Capacitor.isNativePlatform()) {
           await FirebaseFirestore.clearPersistence();
         }
-      })
+      }),
     );
   }
 
   public registerWithUsernameAndPassword$(
-    registration: AuthCredentials
+    registration: AuthCredentials,
   ): Observable<any> {
     return from(
       createUserWithEmailAndPassword(
         this.auth,
         registration.email,
-        registration.password
-      )
+        registration.password,
+      ),
     );
   }
 
@@ -105,7 +99,21 @@ export class AuthService {
     return from(FirebaseAuthentication.signInWithApple({ mode: 'popup' }));
   }
 
-  public registerWithFacebookAccount$(): Observable<SignInResult> {
-    return from(FirebaseAuthentication.signInWithFacebook({ mode: 'popup' }));
+  private setupAnalyticsAndCrashlytics(
+    currentUser: GetCurrentUserResult,
+  ): void {
+    const user = currentUser.user;
+
+    if (user && !process.env['NX_APP_BITE_TRIBE_IS_BUSINESS']) {
+      FirebaseAnalytics.setUserId({
+        userId: user.uid,
+      });
+
+      if (Capacitor.isNativePlatform()) {
+        FirebaseCrashlytics.setUserId({
+          userId: user.uid,
+        });
+      }
+    }
   }
 }

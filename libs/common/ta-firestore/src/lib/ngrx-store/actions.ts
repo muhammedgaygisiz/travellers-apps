@@ -3,14 +3,14 @@ import { AuthCredentials } from '../api/auth-credentials.model';
 
 export const login = createAction(
   '[Auth Page] Login',
-  props<{ authCreds: AuthCredentials }>()
+  props<{ authCreds: AuthCredentials }>(),
 );
 
 export const loginSucceeded = createAction('[Auth API] Login successful');
 
 export const loadedUser = createAction(
   '[Auth API] Loaded user',
-  props<{ user: any }>()
+  props<{ user: any }>(),
 );
 
 export const loginFailed = createAction('[Auth API] Login failed');
@@ -23,30 +23,26 @@ export const logout = createAction('[Auth Page] Logout');
 
 export const register = createAction(
   '[Registration Page] Register With Email',
-  props<{ registration: AuthCredentials }>()
+  props<{ registration: AuthCredentials }>(),
 );
 
 export const loginWithGoogleAccount = createAction(
-  '[Registration Page] Login With Google Account'
+  '[Registration Page] Login With Google Account',
 );
 
 export const loginWithAppleAccount = createAction(
-  '[Registration Page] Login With Apple Account'
-);
-
-export const loginWithFacebookAccount = createAction(
-  '[Registration Page] Login With Facebook Account'
+  '[Registration Page] Login With Apple Account',
 );
 
 export const registrationSucceeded = createAction(
-  '[Auth API] Registration successful'
+  '[Auth API] Registration successful',
 );
 
 export const registrationFailed = createAction(
   '[Auth API] Registration failed',
-  props<{ code: string }>()
+  props<{ code: string }>(),
 );
 
 export const confirmRegistrationErrorMessage = createAction(
-  '[Registration Page] Confirm error message'
+  '[Registration Page] Confirm error message',
 );

@@ -8,12 +8,11 @@ export interface StoreService {
 
   loginWithGoogleAccount(): void;
   loginWithAppleAccount(): void;
-  loginWithFacebookAccount(): void;
 
-  // eslint-disable-next-line no-unused-vars
+   
   login(authCreds: Login): void;
 
-  // eslint-disable-next-line no-unused-vars
+   
   register(registration: Login): void;
 
   confirmError(): void;

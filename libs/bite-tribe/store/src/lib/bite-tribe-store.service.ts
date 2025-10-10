@@ -89,7 +89,7 @@ import { fromBites } from './bites';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
-  props<{ docType: string }>()
+  props<{ docType: string }>(),
 );
 
 const getActionByDocType = (docType: string, entity: any): any => {
@@ -167,10 +167,6 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(fromAuth.loginWithAppleAccount());
   }
 
-  loginWithFacebookAccount(): void {
-    this.store.dispatch(fromAuth.loginWithFacebookAccount());
-  }
-
   login(authCreds: Login): void {
     this.store.dispatch(fromAuth.login({ authCreds }));
   }
@@ -192,7 +188,7 @@ export class BiteTribeStoreService implements StoreService {
       saveTags({
         newTags: newTagsArray,
         id,
-      })
+      }),
     );
   }
 
@@ -203,11 +199,11 @@ export class BiteTribeStoreService implements StoreService {
   submitLikeOrDislikeClick(
     bite: Bite | undefined | null,
     userId: string,
-    likeType: { likeType: string; biteId: string }
+    likeType: { likeType: string; biteId: string },
   ): void {
     const likeFromUser = bite?.likes?.find(
       (like: Like) =>
-        like.userId === userId && like.likeType === likeType.likeType
+        like.userId === userId && like.likeType === likeType.likeType,
     );
 
     if (likeFromUser) {
@@ -223,7 +219,7 @@ export class BiteTribeStoreService implements StoreService {
       saveLike({
         ...event,
         createdAt: new Date().toISOString(),
-      })
+      }),
     );
   }
 
@@ -260,7 +256,7 @@ export class BiteTribeStoreService implements StoreService {
       saveSocialMediaLinksForRestaurant({
         restaurantId,
         links,
-      })
+      }),
     );
   }
 

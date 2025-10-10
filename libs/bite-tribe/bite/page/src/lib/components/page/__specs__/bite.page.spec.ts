@@ -191,7 +191,7 @@ describe('BitePage', () => {
       fixture.detectChanges();
 
       expect(component.biteFormGroup.controls['currency'].value).toBe(
-        testCurrency
+        testCurrency,
       );
     });
 
@@ -205,7 +205,7 @@ describe('BitePage', () => {
       fixture.detectChanges();
 
       expect(component.biteFormGroup.controls['position'].value).toEqual(
-        testPosition
+        testPosition,
       );
     });
   });
@@ -213,7 +213,7 @@ describe('BitePage', () => {
   describe('noGpsPosition signal', () => {
     it('should be true if image is valid but position is invalid', () => {
       component.biteFormGroup.controls['image'].patchValue(
-        'data:image/jpeg;base64,test'
+        'data:image/jpeg;base64,test',
       );
       component.biteFormGroup.controls['position'].reset();
 
@@ -228,7 +228,7 @@ describe('BitePage', () => {
 
     it('should be false if position is valid', () => {
       component.biteFormGroup.controls['image'].patchValue(
-        'data:image/jpeg;base64,test'
+        'data:image/jpeg;base64,test',
       );
       component.biteFormGroup.controls['position'].patchValue({
         latitude: 10,
@@ -242,13 +242,13 @@ describe('BitePage', () => {
   describe('getGpsErrorMessage signal', () => {
     it('should return message if image is chosen but no position', () => {
       component.biteFormGroup.controls['image'].patchValue(
-        'data:image/jpeg;base64,test'
+        'data:image/jpeg;base64,test',
       );
       // Simulate no position
       componentRef.setInput('position', undefined as any);
 
       expect(component.getGpsErrorMessage()).toContain(
-        'No GPS position found in the image'
+        'No GPS position found in the image',
       );
     });
 
@@ -257,7 +257,7 @@ describe('BitePage', () => {
       componentRef.setInput('position', undefined as any);
 
       expect(component.getGpsErrorMessage()).toContain(
-        'Please choose a GPS position'
+        'Please choose a GPS position',
       );
     });
 
@@ -281,7 +281,7 @@ describe('BitePage', () => {
       const position = { latitude: 10, longitude: 20 };
       component.onPositionFromImage(position);
       expect(component.biteFormGroup.controls['position'].value).toEqual(
-        position
+        position,
       );
     });
   });
@@ -292,6 +292,23 @@ describe('BitePage', () => {
       const arg = { test: 'data' };
       component.emitStartCropImage(arg);
       expect(emitSpy).toHaveBeenCalledWith(arg);
+    });
+  });
+
+  describe('resetImagePath', () => {
+    it('should reset imagePath control', () => {
+      component.biteFormGroup.controls['imagePath'].patchValue('test/path');
+      component.resetImagePath();
+      expect(component.biteFormGroup.controls['imagePath'].value).toBeNull();
+    });
+  });
+
+  describe('onCurrencySelected', () => {
+    it('should set currency in the form group and should call dismiss on modal', () => {
+      const dismissSpy = jest.fn();
+      component.onCurrencySelected('USD', { dismiss: dismissSpy } as any);
+      expect(component.biteFormGroup.controls['currency'].value).toBe('USD');
+      expect(dismissSpy).toHaveBeenCalled();
     });
   });
 });

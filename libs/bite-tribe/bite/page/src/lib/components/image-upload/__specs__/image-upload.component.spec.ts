@@ -25,6 +25,8 @@ jest.mock('@capacitor/camera', () => ({
   },
 }));
 jest.mock('image-compression');
+jest.mock('heic2any', () => jest.fn());
+
 jest.mock('../../page/utils/get-exif-data-from-file');
 jest.mock('../../page/utils/get-exif-data-from-photo');
 

@@ -1,5 +1,10 @@
 import { compressFile } from '../compress-file';
 
+jest.mock('heic2any', () => ({
+  default: jest.fn(),
+  __esModule: true,
+}));
+
 describe('compress-file', () => {
   let originalCreateObjectURL: typeof URL.createObjectURL;
   let originalRevokeObjectURL: typeof URL.revokeObjectURL;

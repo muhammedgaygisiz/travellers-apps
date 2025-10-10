@@ -16,7 +16,6 @@ import {
   routerRequestAction,
 } from '@ngrx/router-store';
 import { BiteTribeStoreService } from './bite-tribe-store.service';
-import { RouterEffects } from './router/effects';
 import { BiteEffects } from './bites/effects';
 import { fromBites } from './bites';
 import { ReviewEffects } from './reviews/effects';
@@ -130,7 +129,7 @@ export const provideBiteTribeStore = (environment: Environment): any => [
         strictActionImmutability: true,
         strictStateImmutability: true,
       },
-    }
+    },
   ),
   !environment.production
     ? provideStoreDevtools({
@@ -149,22 +148,20 @@ export const provideBiteTribeStore = (environment: Environment): any => [
   environment.isBusiness
     ? provideEffects(
         AuthEffects,
-        RouterEffects,
         RestaurantEffects,
         MenuEffects,
         AppEffect,
-        BiteEffects
+        BiteEffects,
       )
     : provideEffects(
         AuthEffects,
-        RouterEffects,
         BiteEffects,
         LikeEffects,
         ReviewEffects,
         AppEffect,
         RestaurantEffects,
         MenuEffects,
-        BucketListEffect
+        BucketListEffect,
       ),
   provideState(fromBites.key, fromBites.reducer),
   provideState(fromReviews.key, fromReviews.reducer),
@@ -175,6 +172,6 @@ export const provideBiteTribeStore = (environment: Environment): any => [
   provideState(fromBucketlists.key, fromBucketlists.reducer),
   provideFirestoreUtils(
     toFirebaseOptions(environment),
-    !environment.isBusiness
+    !environment.isBusiness,
   ),
 ];

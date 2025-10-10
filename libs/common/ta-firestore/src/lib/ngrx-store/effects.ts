@@ -147,18 +147,13 @@ export class AuthEffects {
   loginWithAppleAccountEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loginWithAppleAccount),
-      mergeMap(() =>
-        this.registerWithAppleAccount$().pipe(
-          map((result) => {
-            console.debug('#mo signInResult', result);
-            return loginSucceeded();
-          }),
+      mergeMap(() => {
+        return this.registerWithAppleAccount$().pipe(
+          map(() => loginSucceeded()),
           tap(() => this.navController.navigateBack(['/'])),
-          catchError((err) => {
-            return of(registrationFailed({ code: err.code }));
-          }),
-        ),
-      ),
+          catchError((err) => of(registrationFailed({ code: err.code }))),
+        );
+      }),
     ),
   );
 
@@ -167,7 +162,13 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(loginSucceeded),
         tap(() => {
-          // console.debug('#mo auth signInSuccessful');
+          const url =
+            location.href.includes('/bite/') &&
+            !location.href.includes('/edit');
+          if (url) {
+            return;
+          }
+
           if (this.pageAfterLogin) {
             this.navController.navigateBack([this.pageAfterLogin]);
             return;

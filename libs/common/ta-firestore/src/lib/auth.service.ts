@@ -1,12 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
-  debounceTime,
   distinctUntilChanged,
   from,
   map,
   Observable,
   shareReplay,
+  skip,
   tap,
 } from 'rxjs';
 import { AuthCredentials } from './api/auth-credentials.model';
@@ -24,6 +24,8 @@ import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from './provide-firestore-utils';
 import { terminate } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
+import { NavController } from '@ionic/angular';
+import { ActivatedRoute } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -31,10 +33,14 @@ import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 export class AuthService {
   private readonly auth = inject(FIREBASE_AUTH);
   private readonly firestore = inject(FIREBASE_FIRESTORE);
+  private readonly navController = inject(NavController);
+  private readonly route = inject(ActivatedRoute);
 
   private readonly _authStateChange$ =
     new BehaviorSubject<AuthStateChange | null>(null);
-  readonly authStateChange$ = this._authStateChange$.asObservable();
+  readonly authStateChange$ = this._authStateChange$
+    .asObservable()
+    .pipe(skip(1));
 
   authState = toSignal(this.authStateChange$);
 

@@ -94,7 +94,7 @@ export class DetailsPage {
   readonly gotoEdit = output<Bite>();
 
   private readonly formBuilder = inject(FormBuilder);
-  private readonly popoverController = inject(PopoverController);
+  private popoverController = inject(PopoverController);
   private readonly platform = inject(Platform);
   private readonly alertController = inject(AlertController);
 

@@ -79,13 +79,13 @@ describe('DetailsPage', () => {
         name: 'Pizza',
         place: 'Italian Restaurant',
         price: 12.99,
-        image: 'test.jpg',
+        imagePath: 'test.jpg',
         tags: ['italian', 'pizza'],
       };
 
       // Act
       componentRef.setInput('bite', mockBite);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
 
       // Assert
       const img = fixture.debugElement.query(By.css('img'));
@@ -204,7 +204,7 @@ describe('DetailsPage', () => {
     beforeEach(() => {
       windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
       componentRef.setInput('bite', mockBite);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
     });
 
     afterEach(() => {
@@ -214,7 +214,7 @@ describe('DetailsPage', () => {
 
     it('should not open navigation if bite has no position', async () => {
       componentRef.setInput('bite', { ...mockBite, position: undefined });
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
 
       await component.openNavigation();
 
@@ -446,6 +446,36 @@ describe('DetailsPage', () => {
       const result = await component['isGoogleMapsInstalled']();
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('editBite', () => {
+    it('should emit gotoEdit event when bite is provided', () => {
+      const mockBite = { id: '1', name: 'Test Bite' } as Bite;
+      const emitSpy = jest.spyOn(component.gotoEdit, 'emit');
+
+      component.editBite(mockBite);
+
+      expect(emitSpy).toHaveBeenCalledWith(mockBite);
+    });
+
+    it('should not emit gotoEdit event when bite is undefined', () => {
+      const emitSpy = jest.spyOn(component.gotoEdit, 'emit');
+
+      component.editBite(undefined);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onNewList', () => {
+    it('should emit newList event with provided list name', () => {
+      const emitSpy = jest.spyOn(component.newList, 'emit');
+      const newListName = 'My New List';
+
+      component.onNewList(newListName);
+
+      expect(emitSpy).toHaveBeenCalledWith(newListName);
     });
   });
 });

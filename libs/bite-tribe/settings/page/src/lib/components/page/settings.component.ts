@@ -19,6 +19,8 @@ import {
   IonItem,
   IonLabel,
   IonModal,
+  IonSelect,
+  IonSelectOption,
   IonText,
   IonToggle,
 } from '@ionic/angular/standalone';
@@ -44,6 +46,8 @@ const GO_PRIVATE = 'go-private';
     IonLabel,
     IonToggle,
     IonButton,
+    IonSelect,
+    IonSelectOption,
     IonInput,
     ReactiveFormsModule,
     IonIcon,

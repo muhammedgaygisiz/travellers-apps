@@ -60,14 +60,17 @@ export class CurrencySelectorComponent {
 
     return this.currencies
       .map((currency) => {
-        const nameScore = getSimilarityScore(
+        const nameMatches = getSimilarityScore(
           normalizedSearchTerm,
           normalize(currency.name)
         );
-        const codeScore = getSimilarityScore(
+        const codeMatches = getSimilarityScore(
           normalizedSearchTerm,
           normalize(currency.code)
         );
+
+        const nameScore = nameMatches.length > 0 ? nameMatches[0].score : 0;
+        const codeScore = codeMatches.length > 0 ? codeMatches[0].score : 0;
 
         return {
           currency,

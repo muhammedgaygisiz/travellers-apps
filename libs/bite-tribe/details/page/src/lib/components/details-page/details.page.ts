@@ -4,7 +4,6 @@ import {
   inject,
   input,
   output,
-  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -35,7 +34,6 @@ import { map } from 'rxjs';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
 import { RoundDistancePipe, ToMetricPipe } from 'common/distance';
 import { MapComponent } from 'bite-tribe-common/map';
-import { ToBlobUrlPipe } from 'image-compression';
 import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';
 import { IsInPipe } from '../../pipes/is-in-any.pipe';
 import { LikesComponent } from 'bite-tribe-common/bite';
@@ -65,7 +63,6 @@ import { TagsInputComponent } from 'common/ui/tags';
     IonText,
     ToMetricPipe,
     MapComponent,
-    ToBlobUrlPipe,
     IonIcon,
     IsInPipe,
     LikesComponent,
@@ -94,13 +91,12 @@ export class DetailsPage {
   readonly gotoMyBucketlists = output();
   readonly restaurantClick = output<Bite>();
   readonly goToProfile = output<PublicUser>();
+  readonly gotoEdit = output<Bite>();
 
   private readonly formBuilder = inject(FormBuilder);
-  popoverController = inject(PopoverController);
+  private popoverController = inject(PopoverController);
   private readonly platform = inject(Platform);
   private readonly alertController = inject(AlertController);
-
-  isWeb = signal(!this.platform.is('hybrid'));
 
   reviewFormGroup = this.formBuilder.nonNullable.group({
     review: ['', Validators.required],
@@ -135,6 +131,14 @@ export class DetailsPage {
     });
 
     this.reviewFormGroup.reset();
+  }
+
+  editBite(bite: Bite | undefined): void {
+    if (!bite) {
+      return;
+    }
+
+    this.gotoEdit.emit(bite);
   }
 
   onNewList(newListName: string): void {

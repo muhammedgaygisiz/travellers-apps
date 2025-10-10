@@ -369,4 +369,27 @@ describe('DetailsService', () => {
       ]);
     });
   });
+
+  describe('onGoToProfileClick', () => {
+    it('should navigate to user profile page with userId', () => {
+      const publicUser = { userId: 'user123' } as any;
+      service.onGoToProfileClick(publicUser);
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'profile',
+        'user123',
+      ]);
+    });
+  });
+
+  describe('onGotoEditClick', () => {
+    it('should navigate to bite edit page with bite id', () => {
+      const biteToEdit: Bite = { id: 'bite123' } as Bite;
+      service.onGotoEditClick(biteToEdit);
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        'bite123',
+        'edit',
+      ]);
+    });
+  });
 });

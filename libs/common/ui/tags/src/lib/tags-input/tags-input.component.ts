@@ -1,4 +1,10 @@
-import { Component, input, OnInit, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  OnInit,
+  output,
+} from '@angular/core';
 import {
   IonChip,
   IonIcon,
@@ -25,6 +31,7 @@ const REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES = /^\s*$/;
     ReactiveFormsModule,
     AsyncPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TagsInputComponent implements OnInit {
   readonly = input<boolean>(false);

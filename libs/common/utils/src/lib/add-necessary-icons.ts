@@ -40,6 +40,7 @@ import {
   hammerOutline,
   mapOutline,
   footstepsOutline,
+  chevronExpandOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = (): void => {
@@ -84,5 +85,6 @@ export const addNecessaryIcons = (): void => {
     hammerOutline,
     mapOutline,
     footstepsOutline,
+    chevronExpandOutline,
   });
 };

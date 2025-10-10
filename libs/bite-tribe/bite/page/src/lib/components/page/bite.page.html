@@ -40,13 +40,13 @@
             inputmode="decimal"
           />
 
-          <ion-select formControlName="currency" interface="modal">
-            @for (currency of currencies; track currency.code) {
-            <ion-select-option [value]="currency.code"
-              >{{ currency.name }}
-            </ion-select-option>
-            }
-          </ion-select>
+          <ion-text
+            id="currency-selector-trigger-bite"
+            class="currency-selector"
+          >
+            {{ selectedCurrencyName() }}
+            <ion-icon name="chevron-expand-outline" />
+          </ion-text>
         </div>
         <hr class="sams-favorite-hr" />
         <ion-note>Enter the price in the valid format (e.g. 12.34).</ion-note>
@@ -98,3 +98,14 @@
     </form>
   </ion-content>
 </ta-page>
+
+<ion-modal trigger="currency-selector-trigger-bite" #currencyModalBite>
+  <ng-template>
+    <currency-selector
+      class="ion-page"
+      [selectedCurrency]="biteFormGroup.get('currency')?.value || 'EUR'"
+      (currencySelected)="onCurrencySelected($event, currencyModalBite)"
+      (selectionCancel)="currencyModalBite.dismiss()"
+    />
+  </ng-template>
+</ion-modal>

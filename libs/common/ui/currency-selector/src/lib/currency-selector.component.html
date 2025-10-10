@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">Cancel</ion-button>
+    </ion-buttons>
+    <ion-title>Select Currency</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-searchbar
+    (ionInput)="searchbarInput($event)"
+    placeholder="Search currencies..."
+  />
+
+  <ion-list [inset]="true">
+    @for (currency of filteredCurrencies(); track currency.code) {
+      <ion-item [detail]="false" (click)="selectCurrency(currency.code)">
+        <ion-label>
+          <h2>{{ currency.name }}</h2>
+          <p>{{ currency.code }} - {{ currency.symbol }}</p>
+        </ion-label>
+        @if (selectedCurrency() === currency.code) {
+          <ion-icon slot="end" name="checkmark" color="primary" />
+        }
+      </ion-item>
+    } @empty {
+      <ion-item>
+        <ion-label>No currencies found</ion-label>
+      </ion-item>
+    }
+  </ion-list>
+</ion-content>

@@ -15,9 +15,10 @@
       flex: 1;
     }
 
-    ion-select {
-      justify-content: flex-end;
-      width: fit-content;
+    ion-text {
+      display: flex;
+      align-items: center;
+      column-gap: 0.25rem;
     }
   }
 

@@ -18,10 +18,13 @@ import {
   IonInput,
   IonItem,
   IonLabel,
+  IonModal,
   IonSelect,
   IonSelectOption,
+  IonText,
   IonToggle,
 } from '@ionic/angular/standalone';
+import { CurrencySelectorComponent } from 'currency-selector';
 import { PublicUser, Settings, User } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -49,6 +52,9 @@ const GO_PRIVATE = 'go-private';
     ReactiveFormsModule,
     IonIcon,
     IonAlert,
+    IonModal,
+    CurrencySelectorComponent,
+    IonText,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -64,6 +70,7 @@ export class PageSettings {
   submitPublicUser = output<PublicUser>();
 
   private readonly formBuilder = inject(FormBuilder);
+
   currencies = currencyCodes;
   isOpen = signal(false);
 
@@ -106,25 +113,27 @@ export class PageSettings {
   });
 
   private systemTheme = signal(
-    window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light',
   );
 
   isFormInvalid = toSignal(
     this.settingsForm.valueChanges.pipe(
       map(() => {
         return !this.settingsForm.valid;
-      })
+      }),
     ),
-    { initialValue: !this.settingsForm.valid }
+    { initialValue: !this.settingsForm.valid },
   );
 
   isFormPristine = toSignal(
     this.settingsForm.valueChanges.pipe(
       map(() => {
         return this.settingsForm.pristine;
-      })
+      }),
     ),
-    { initialValue: this.settingsForm.pristine }
+    { initialValue: this.settingsForm.pristine },
   );
 
   themeEffect = effect(() => {
@@ -139,7 +148,7 @@ export class PageSettings {
     const photoUrl =
       user?.photoUrl ||
       user?.providerData.find(
-        (provider: { photoUrl?: string }) => provider.photoUrl
+        (provider: { photoUrl?: string }) => provider.photoUrl,
       )?.photoUrl;
 
     return photoUrl;
@@ -150,6 +159,15 @@ export class PageSettings {
     const publicUser = this.publicUser();
 
     return publicUser?.displayName || user?.displayName || 'Anonymous';
+  });
+
+  currencyValueChanges = toSignal(
+    this.settingsForm.controls['currency'].valueChanges,
+  );
+  selectedCurrencyName = computed(() => {
+    this.currencyValueChanges();
+    const currencyCode = this.settingsForm.controls['currency'].value;
+    return this.currencies.find((c) => c.code === currencyCode)?.name;
   });
 
   constructor() {
@@ -206,12 +224,17 @@ export class PageSettings {
     if (selectedTheme) {
       document.documentElement.classList.toggle(
         'dark',
-        selectedTheme === 'dark'
+        selectedTheme === 'dark',
       );
       document.documentElement.classList.toggle(
         'light',
-        selectedTheme === 'light'
+        selectedTheme === 'light',
       );
     }
+  }
+
+  onCurrencySelected(currencyCode: string, modal: IonModal): void {
+    this.settingsForm.patchValue({ currency: currencyCode });
+    modal.dismiss();
   }
 }

@@ -1,6 +1,11 @@
 @use 'globals';
 
 :host {
+  .dish-image {
+    width: 100%;
+    min-height: 20vh;
+  }
+
   .bite-creator-container,
   .restaurant-distance-price {
     .link {

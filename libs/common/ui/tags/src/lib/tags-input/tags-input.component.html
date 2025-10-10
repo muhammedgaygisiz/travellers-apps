@@ -2,6 +2,8 @@
 @let readonlyData = readonly();
 
 <div class="container">
+  <!-- Do not move to label attr of ion-input since it causes wrong positioning of the label -->
+  <label id="tags-label">Tags</label>
   @for (tag of tags(); track tag) {
   <ion-chip>
     <ion-label>{{ tag }}</ion-label>
@@ -11,7 +13,7 @@
   </ion-chip>
   } @if (!readonlyData) {
   <ng-container [formGroup]="formGroup">
-    <ion-input label="Tags" formControlName="tagInput" />
+    <ion-input aria-labelledby="tags-label" formControlName="tagInput" />
   </ng-container>
   }
 </div>

@@ -30,7 +30,8 @@ export default [
     files: ['**/*.html'],
     // Override or add rules here
     rules: {
-      '@angular-eslint/template/mouse-events-have-key-events': 'warn'
+      '@angular-eslint/template/mouse-events-have-key-events': 'warn',
+      '@angular-eslint/template/label-has-associated-control': 'warn'
     },
   },
 ];

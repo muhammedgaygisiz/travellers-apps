@@ -1,4 +1,4 @@
-@let biteData = bite();
+@let biteData = bite(); @let biteCreatorData = biteCreator();
 
 <ta-page
   [showHeaderMenu]="true"
@@ -16,14 +16,14 @@
 >
   <ion-content>
     <img
-      [src]="biteData?.imagePath || (biteData?.image | toBlobUrl)"
+      [src]="biteData?.imagePath"
       class="dish-image"
       loading="lazy"
       alt="Dish Image"
     />
 
     <div class="ion-padding">
-      @let biteCreatorData = biteCreator(); @if (biteCreatorData) {
+      @if (biteCreatorData) {
       <div class="bite-creator-container">
         @if (biteCreatorData.photoUrl) {
         <img
@@ -35,9 +35,9 @@
         <ion-icon name="person-circle-outline" class="profile-image" />
         }
         <ion-label (click)="goToProfile.emit(biteCreatorData)">
-          <span class="link"
-            >{{ biteCreatorData.displayName || 'Anonymous' }}</span
-          >
+          <span class="link">
+            {{ biteCreatorData.displayName || 'Anonymous' }}
+          </span>
         </ion-label>
       </div>
       }
@@ -144,12 +144,23 @@
         <form [formGroup]="reviewFormGroup">
           <ion-textarea
             label="Write a review"
-            rows="3"
+            [rows]="3"
             formControlName="review"
           />
         </form>
       </ion-item>
 
+      @if (biteCreatorData?.userId && biteCreatorData?.userId === userId()) {
+      <ion-button
+        fill="outline"
+        expand="block"
+        color="primary"
+        class="ion-margin"
+        (click)="editBite(biteData)"
+      >
+        Edit Bite
+      </ion-button>
+      }
       <ion-button
         expand="block"
         color="primary"

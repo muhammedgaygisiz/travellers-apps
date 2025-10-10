@@ -96,4 +96,8 @@ export class DetailsService {
   onGoToProfileClick(publicUser: PublicUser): void {
     this.navController.navigateForward(['profile', publicUser.userId]);
   }
+
+  onGotoEditClick(biteToEdit: Bite): void {
+    this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
+  }
 }

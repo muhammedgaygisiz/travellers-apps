@@ -25,6 +25,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyBucketlists)="service.onGotoMyBucketlists()"
       (restaurantClick)="service.onRestaurantClick($event)"
       (goToProfile)="service.onGoToProfileClick($event)"
+      (gotoEdit)="service.onGotoEditClick($event)"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

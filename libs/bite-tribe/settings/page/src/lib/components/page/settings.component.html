@@ -79,20 +79,11 @@
               <ion-select-option value="dark">Dark</ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-item>
+          <ion-item button id="currency-selector-trigger">
             <ion-label>Preferred Currency</ion-label>
-            <ion-select
-              slot="end"
-              placeholder="EUR"
-              interface="modal"
-              formControlName="currency"
-            >
-              @for(currency of currencies; track currency.code) {
-              <ion-select-option [value]="currency.code">{{
-                currency.name
-              }}</ion-select-option>
-              }
-            </ion-select>
+            <ion-text slot="end">{{
+              settingsForm.get('currency')?.value
+            }}</ion-text>
           </ion-item>
           <ion-item>
             <ion-label>Nearby Distance (meters)</ion-label>
@@ -128,3 +119,14 @@
   [buttons]="confirmationButtons"
   (didDismiss)="handleGoPrivateConfirmation($event)"
 />
+
+<ion-modal trigger="currency-selector-trigger" #currencyModal>
+  <ng-template>
+    <lib-currency-selector
+      class="ion-page"
+      [selectedCurrency]="settingsForm.get('currency')?.value || 'EUR'"
+      (currencySelected)="onCurrencySelected($event, currencyModal)"
+      (selectionCancel)="currencyModal.dismiss()"
+    />
+  </ng-template>
+</ion-modal>

@@ -18,10 +18,11 @@ import {
   IonInput,
   IonItem,
   IonLabel,
-  IonSelect,
-  IonSelectOption,
+  IonModal,
+  IonText,
   IonToggle,
 } from '@ionic/angular/standalone';
+import { CurrencySelectorComponent } from 'common/ui/currency-selector';
 import { PublicUser, Settings, User } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -43,12 +44,13 @@ const GO_PRIVATE = 'go-private';
     IonLabel,
     IonToggle,
     IonButton,
-    IonSelect,
-    IonSelectOption,
     IonInput,
     ReactiveFormsModule,
     IonIcon,
     IonAlert,
+    IonModal,
+    CurrencySelectorComponent,
+    IonText,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -213,5 +215,10 @@ export class PageSettings {
         selectedTheme === 'light'
       );
     }
+  }
+
+  onCurrencySelected(currencyCode: string, modal: IonModal): void {
+    this.settingsForm.patchValue({ currency: currencyCode });
+    modal.dismiss();
   }
 }

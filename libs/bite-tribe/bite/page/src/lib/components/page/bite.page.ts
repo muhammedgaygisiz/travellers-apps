@@ -14,12 +14,12 @@ import {
   IonButton,
   IonContent,
   IonInput,
+  IonModal,
   IonNote,
-  IonSelect,
-  IonSelectOption,
   IonText,
   IonTextarea,
 } from '@ionic/angular/standalone';
+import { CurrencySelectorComponent } from 'common/ui/currency-selector';
 import { Platform } from '@ionic/angular';
 import {
   FormBuilder,
@@ -46,8 +46,6 @@ import { getNormalizedPrice } from './utils/get-normalized-price';
     IonButton,
     IonContent,
     ReactiveFormsModule,
-    IonSelect,
-    IonSelectOption,
     IonText,
     ImageUploadComponent,
     PositionComponent,
@@ -55,6 +53,8 @@ import { getNormalizedPrice } from './utils/get-normalized-price';
     StarRatingComponent,
     TagsInputComponent,
     IonTextarea,
+    IonModal,
+    CurrencySelectorComponent,
   ],
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',
@@ -250,5 +250,10 @@ export class BitePage {
 
   resetImagePath(): void {
     this.biteFormGroup.get('imagePath')?.reset();
+  }
+
+  onCurrencySelected(currencyCode: string, modal: IonModal): void {
+    this.biteFormGroup.patchValue({ currency: currencyCode });
+    modal.dismiss();
   }
 }

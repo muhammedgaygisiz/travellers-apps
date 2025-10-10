@@ -40,9 +40,13 @@
             inputmode="decimal"
           />
 
-          <ion-button id="currency-selector-trigger-bite" fill="outline">
-            {{ biteFormGroup.get('currency')?.value }}
-          </ion-button>
+          <ion-text
+            id="currency-selector-trigger-bite"
+            class="currency-selector"
+          >
+            {{ selectedCurrencyName() }}
+            <ion-icon name="chevron-expand-outline" />
+          </ion-text>
         </div>
         <hr class="sams-favorite-hr" />
         <ion-note>Enter the price in the valid format (e.g. 12.34).</ion-note>

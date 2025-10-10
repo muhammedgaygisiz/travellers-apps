@@ -11,10 +11,10 @@
           <h2>Profile</h2>
 
           <ion-item>
-            @if(userImage()) {
-            <img [src]="userImage()" alt="Profile" class="profile-image" />
+            @if (userImage()) {
+              <img [src]="userImage()" alt="Profile" class="profile-image" />
             } @else {
-            <ion-icon name="person-circle-outline" class="profile-image" />
+              <ion-icon name="person-circle-outline" class="profile-image" />
             }
             <ion-label>
               <h3>Display Name</h3>
@@ -46,11 +46,11 @@
 
           <div class="ion-margin-top ion-text-end go-public-button-container">
             @if (isPublicProfile()) {
-            <ion-button (click)="openConfirmationDialog()">
-              Return to private
-            </ion-button>
+              <ion-button (click)="openConfirmationDialog()">
+                Return to private
+              </ion-button>
             } @else {
-            <ion-button (click)="goPublic.emit()">Go public</ion-button>
+              <ion-button (click)="goPublic.emit()">Go public</ion-button>
             }
           </div>
         </section>
@@ -79,11 +79,9 @@
               <ion-select-option value="dark">Dark</ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-item button id="currency-selector-trigger">
+          <ion-item id="currency-selector-trigger">
             <ion-label>Preferred Currency</ion-label>
-            <ion-text slot="end">{{
-              settingsForm.get('currency')?.value
-            }}</ion-text>
+            <ion-text slot="end">{{ selectedCurrencyName() }}</ion-text>
           </ion-item>
           <ion-item>
             <ion-label>Nearby Distance (meters)</ion-label>

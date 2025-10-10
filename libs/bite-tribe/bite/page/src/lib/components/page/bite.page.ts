@@ -13,6 +13,7 @@ import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
   IonContent,
+  IonIcon,
   IonInput,
   IonModal,
   IonNote,
@@ -55,6 +56,7 @@ import { getNormalizedPrice } from './utils/get-normalized-price';
     IonTextarea,
     IonModal,
     CurrencySelectorComponent,
+    IonIcon,
   ],
   templateUrl: './bite.page.html',
   styleUrl: './bite.page.scss',
@@ -121,7 +123,7 @@ export class BitePage {
           return null;
         },
       ],
-    }
+    },
   );
 
   biteInitFromInputEffect = effect(() => {
@@ -176,7 +178,7 @@ export class BitePage {
 
   isInvalid = toSignal(
     this.biteFormGroup.valueChanges.pipe(map(() => !this.biteFormGroup.valid)),
-    { initialValue: !this.biteFormGroup.valid }
+    { initialValue: !this.biteFormGroup.valid },
   );
 
   imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);
@@ -211,14 +213,23 @@ export class BitePage {
 
   imagePathValue = toSignal(
     this.biteFormGroup.valueChanges.pipe(
-      map((formValue) => formValue.imagePath)
-    )
+      map((formValue) => formValue.imagePath),
+    ),
   );
 
   imageUrl = computed(() => {
     const imagePathValue = this.imagePathValue();
 
     return imagePathValue || undefined;
+  });
+
+  currencyValueChanges = toSignal(
+    this.biteFormGroup.controls['currency'].valueChanges,
+  );
+  selectedCurrencyName = computed(() => {
+    this.currencyValueChanges();
+    const currencyCode = this.biteFormGroup.controls['currency'].value;
+    return this.currencies.find((c) => c.code === currencyCode)?.name;
   });
 
   saveBite(): void {

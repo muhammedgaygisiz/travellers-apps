@@ -1,18 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CurrencySelectorComponent } from '../currency-selector.component';
-import { provideIonicAngular } from '@ionic/angular/standalone';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons } from 'utils';
+
+addNecessaryIcons();
 
 describe('CurrencySelectorComponent', () => {
   let component: CurrencySelectorComponent;
   let fixture: ComponentFixture<CurrencySelectorComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [CurrencySelectorComponent],
-      providers: [provideIonicAngular(getIonicConfig())],
-    }).compileComponents();
-
+  beforeEach(() => {
     fixture = TestBed.createComponent(CurrencySelectorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -22,8 +18,17 @@ describe('CurrencySelectorComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display all currencies when no search term', () => {
-    expect(component.filteredCurrencies().length).toBeGreaterThan(0);
+  describe('filteredCurrencies', () => {
+    it('should display all currencies when no search term', () => {
+      expect(component.filteredCurrencies().length).toBeGreaterThan(0);
+    });
+
+    it('should sort by similarity score', () => {
+      component.rawSearchTerm.set('van le');
+      const filtered = component.filteredCurrencies();
+      expect(filtered.length).toBeGreaterThan(0);
+      expect(filtered[0].code).toBe('MDL');
+    });
   });
 
   it('should filter currencies based on search term', () => {
@@ -51,5 +56,16 @@ describe('CurrencySelectorComponent', () => {
 
     component.cancel();
     expect(cancelled).toBeTruthy();
+  });
+
+  describe('searchbarInput', () => {
+    it('should update rawSearchTerm on input event', () => {
+      const event = {
+        target: { value: 'test' },
+      } as unknown as Event;
+
+      component.searchbarInput(event);
+      expect(component.rawSearchTerm()).toBe('test');
+    });
   });
 });

@@ -1,10 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  Actions,
-  createEffect,
-  ofType,
-  ROOT_EFFECTS_INIT,
-} from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { map, skipWhile, switchMap, tap } from 'rxjs';
@@ -12,10 +7,11 @@ import { Store } from '@ngrx/store';
 import { menuId } from '../router/selectors';
 import {
   loadedMenuFromApi,
-  noMenuFound,
   loadedMenusFromApi,
+  noMenuFound,
   saveMenu,
 } from './actions';
+import { fromAuth } from 'ta-firestore';
 
 @Injectable()
 export class MenuEffects {
@@ -23,11 +19,11 @@ export class MenuEffects {
   private readonly store = inject(Store);
   private readonly api = inject(BiteTribeApiService);
 
-  loadMenusFromApi$ = createEffect(() => {
+  startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(ROOT_EFFECTS_INIT),
-      switchMap(() => this.api.allMenus$),
-      map((menus) => loadedMenusFromApi({ menus }))
+      ofType(fromAuth.loginSucceeded),
+      switchMap(() => this.api.menus$()),
+      map((menus) => loadedMenusFromApi({ menus })),
     );
   });
 
@@ -46,9 +42,9 @@ export class MenuEffects {
             }
 
             return loadedMenuFromApi({ menu });
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   });
 
@@ -58,9 +54,9 @@ export class MenuEffects {
         ofType(saveMenu),
         tap(({ menu }) => {
           this.api.saveMenu(menu);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 }

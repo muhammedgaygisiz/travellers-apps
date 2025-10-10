@@ -17,8 +17,6 @@ export const loginFailed = createAction('[Auth API] Login failed');
 
 export const logoutSucceeded = createAction('[Auth API] Logout successful');
 
-export const notAuthenticated = createAction('[Auth API] Not logged in');
-
 export const logout = createAction('[Auth Page] Logout');
 
 export const register = createAction(

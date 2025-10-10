@@ -1,12 +1,5 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
-import {
-  BehaviorSubject,
-  skip,
-  skipWhile,
-  Subject,
-  switchMap,
-  takeUntil,
-} from 'rxjs';
+import { BehaviorSubject, skip, Subject } from 'rxjs';
 import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite } from 'model';
@@ -35,27 +28,15 @@ export class BiteApiService {
   private readonly errorHandler = inject(ErrorHandler);
   private readonly platform = inject(Platform);
 
-  private readonly bitesChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly _bitesChannel$ = new BehaviorSubject<Bite[]>([]);
+  bites$ = this._bitesChannel$.asObservable().pipe(skip(1));
 
   private readonly stopped$ = new Subject<void>();
   bitesCallbackId = '';
 
   isWeb = signal(!this.platform.is('hybrid'));
 
-  public allBites$ = this.authService.isLoggedIn$.pipe(
-    skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap((isLoggedIn) => {
-      if (isLoggedIn) {
-        this.startBitesListener();
-      } else {
-        this.stopBitesListener(this.bitesCallbackId);
-      }
-
-      return this.bitesChannel$.pipe(skip(1), takeUntil(this.stopped$));
-    })
-  );
-
-  private async startBitesListener(): Promise<void> {
+  public async startListener(): Promise<void> {
     this.bitesCallbackId =
       await FirebaseFirestore.addCollectionSnapshotListener(
         { reference: BITE_COLLECTION },
@@ -63,8 +44,8 @@ export class BiteApiService {
           const bites =
             biteDocs?.snapshots.map((doc) => toBite(doc)) || ([] as Bite[]);
 
-          this.bitesChannel$.next(bites);
-        }
+          this._bitesChannel$.next(bites);
+        },
       );
   }
 
@@ -92,7 +73,7 @@ export class BiteApiService {
 
   private async createNewBite(
     biteDoc: Omit<Bite, 'image'>,
-    user: User | null | undefined
+    user: User | null | undefined,
   ): Promise<string> {
     const gh = geohashForLocation([
       biteDoc.position.latitude,
@@ -127,7 +108,7 @@ export class BiteApiService {
           image,
           bite.imagePath,
           bite.id,
-          biteWithoutImage
+          biteWithoutImage,
         );
 
         return;
@@ -162,7 +143,7 @@ export class BiteApiService {
             image,
             originalImagePath,
             bite.id,
-            { ...biteWithoutImage }
+            { ...biteWithoutImage },
           );
 
           return;
@@ -175,7 +156,7 @@ export class BiteApiService {
           image,
           bite.id,
           biteWithoutImage,
-          true
+          true,
         );
 
         return;
@@ -257,7 +238,7 @@ export class BiteApiService {
     imageBase64: string,
     biteId: string,
     biteWithoutImage?: Omit<Bite, 'image'>,
-    clearBase64Image = false
+    clearBase64Image = false,
   ): Promise<void> {
     const { blob, contentType } = await dataUrlToBlob(imageBase64);
     const ext = guessExtFromContentType(contentType);
@@ -288,9 +269,8 @@ export class BiteApiService {
         }
 
         if (event?.completed) {
-          const downloadUrl = await getDownloadUrlFromFirebaseStorage(
-            imagePath
-          );
+          const downloadUrl =
+            await getDownloadUrlFromFirebaseStorage(imagePath);
 
           const data = {
             ...(biteWithoutImage || {}),
@@ -315,7 +295,7 @@ export class BiteApiService {
             this.errorHandler.handleError(error);
           }
         }
-      }
+      },
     );
   }
 
@@ -324,7 +304,7 @@ export class BiteApiService {
     imagePathInFirestore: string,
     biteId: string,
     biteWithoutImage: Omit<Bite, 'image'>,
-    clearBase64Image = false
+    clearBase64Image = false,
   ): Promise<void> {
     const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
 
@@ -336,7 +316,7 @@ export class BiteApiService {
       imageBase64,
       biteId,
       biteWithoutImage,
-      clearBase64Image
+      clearBase64Image,
     );
   }
 }

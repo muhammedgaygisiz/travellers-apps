@@ -1,4 +1,4 @@
-import { ErrorHandler, inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import {
   BehaviorSubject,
@@ -9,7 +9,6 @@ import {
   skipWhile,
   Subject,
   switchMap,
-  takeUntil,
 } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Link, Restaurant } from 'model';
@@ -21,44 +20,26 @@ const RESTAURANT_COLLECTION = 'restaurants';
 @Injectable({ providedIn: 'root' })
 export class RestaurantApiService {
   private readonly authService = inject(AuthService);
-  private readonly errorHandler = inject(ErrorHandler);
 
-  private readonly restaurantsChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly _restaurantsChannel$ = new BehaviorSubject<any[]>([]);
+  restaurants$ = this._restaurantsChannel$.asObservable().pipe(skip(1));
 
   private readonly stopped$ = new Subject<void>();
   restaurantsCallbackId = '';
 
-  public allRestaurants$ = this.authService.isLoggedIn$.pipe(
-    skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap((isLoggedIn) => {
-      if (isLoggedIn) {
-        this.startRestaurantsListener();
-      } else {
-        this.stopRestaurantListener(this.restaurantsCallbackId);
-      }
-
-      return this.restaurantsChannel$.pipe(skip(1), takeUntil(this.stopped$));
-    })
-  );
-
-  private async startRestaurantsListener(): Promise<void> {
+  public async startListener(): Promise<void> {
     this.restaurantsCallbackId =
       await FirebaseFirestore.addCollectionSnapshotListener(
         { reference: RESTAURANT_COLLECTION },
-        async (restaurantsDocs) => {
-          // console.debug(
-          //   '#mo Fetched restaurants from Firestore',
-          //   restaurantsDocs
-          // );
-
+        (restaurantsDocs) => {
           const restaurants =
             restaurantsDocs?.snapshots.map((doc) => ({
               ...doc.data,
               id: doc.id,
             })) || [];
 
-          this.restaurantsChannel$.next(restaurants);
-        }
+          this._restaurantsChannel$.next(restaurants);
+        },
       );
   }
 
@@ -79,12 +60,12 @@ export class RestaurantApiService {
         }
 
         return EMPTY;
-      })
+      }),
     );
   }
 
   private async getRestaurantById(
-    restaurantId: string
+    restaurantId: string,
   ): Promise<Restaurant | undefined> {
     try {
       // First try to get by ID
@@ -115,7 +96,7 @@ export class RestaurantApiService {
       const matchingRestaurant = queryResult.snapshots?.find(
         (snapshot) =>
           snapshot.data?.['name']?.toLowerCase() ===
-          restaurantName.toLowerCase()
+          restaurantName.toLowerCase(),
       );
 
       if (matchingRestaurant) {
@@ -181,15 +162,15 @@ export class RestaurantApiService {
               updatedAt: new Date().toISOString(),
               updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
             },
-          })
-        )
+          }),
+        ),
       );
     }
   }
 
   async saveSocialMediaLinksForRestaurant(
     restaurantId: string,
-    links: Link[]
+    links: Link[],
   ): Promise<void> {
     // Update the restaurant with the social media links
     await FirebaseFirestore.updateDocument({

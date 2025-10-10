@@ -1,13 +1,6 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { AuthService } from 'ta-firestore';
-import {
-  BehaviorSubject,
-  skip,
-  skipWhile,
-  Subject,
-  switchMap,
-  takeUntil,
-} from 'rxjs';
+import { BehaviorSubject, skip, Subject } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BITE_COLLECTION } from './bite-api.service';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
@@ -19,25 +12,13 @@ export class LikeApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
 
-  private readonly likesChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly _likesChannel$ = new BehaviorSubject<any[]>([]);
+  likes$ = this._likesChannel$.asObservable().pipe(skip(1));
 
   private readonly stopped$ = new Subject<void>();
   likesCallbackId = '';
 
-  public allLikes$ = this.authService.isLoggedIn$.pipe(
-    skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap((isLoggedIn) => {
-      if (isLoggedIn) {
-        this.startLikesListener();
-      } else {
-        this.stopLikesListener(this.likesCallbackId);
-      }
-
-      return this.likesChannel$.pipe(skip(1), takeUntil(this.stopped$));
-    })
-  );
-
-  private async startLikesListener(): Promise<void> {
+  public async startListener(): Promise<void> {
     this.likesCallbackId =
       await FirebaseFirestore.addCollectionGroupSnapshotListener(
         { reference: `${LIKES_COLLECTION_GROUP}` },
@@ -48,9 +29,9 @@ export class LikeApiService {
             })) || [];
 
           if (likes.length) {
-            this.likesChannel$.next(likes);
+            this._likesChannel$.next(likes);
           }
-        }
+        },
       );
   }
 

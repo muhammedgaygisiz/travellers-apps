@@ -1,30 +1,26 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  Actions,
-  createEffect,
-  ofType,
-  ROOT_EFFECTS_INIT,
-} from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import {
-  saveBiteIdToBucketList,
-  loadedBucketlistsFromApi,
   createAndSaveBiteIdToBucketList,
-  removeBiteFromBucketlist,
   createBucketList,
+  loadedBucketlistsFromApi,
+  removeBiteFromBucketlist,
+  saveBiteIdToBucketList,
 } from './actions';
 import { map, switchMap, tap } from 'rxjs';
+import { fromAuth } from 'ta-firestore';
 
 @Injectable()
 export class BucketListEffect {
   private readonly actions$ = inject(Actions);
   private readonly api = inject(BiteTribeApiService);
 
-  loadBucketlistsFromApi$ = createEffect(() => {
+  startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(ROOT_EFFECTS_INIT),
-      switchMap(() => this.api.allBucketlists$),
-      map((bucketlists) => loadedBucketlistsFromApi({ bucketlists }))
+      ofType(fromAuth.loginSucceeded),
+      switchMap(() => this.api.bucketlists$()),
+      map((bucketlists) => loadedBucketlistsFromApi({ bucketlists })),
     );
   });
 
@@ -34,10 +30,10 @@ export class BucketListEffect {
         ofType(saveBiteIdToBucketList),
         tap((params) => {
           return this.api.saveBiteIdToBucketList(params);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   createBucketlistAndSaveBiteIdToBucketListEffect$ = createEffect(
@@ -46,10 +42,10 @@ export class BucketListEffect {
         ofType(createAndSaveBiteIdToBucketList),
         tap((params) => {
           return this.api.createBucketListAndSaveBiteIdToBucketList(params);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   removeBiteFromBucketlistEffect = createEffect(
@@ -58,10 +54,10 @@ export class BucketListEffect {
         ofType(removeBiteFromBucketlist),
         tap((params) => {
           return this.api.removeBiteFromBucketlist(params);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   createBucketlistEffect$ = createEffect(
@@ -70,9 +66,9 @@ export class BucketListEffect {
         ofType(createBucketList),
         tap(({ bucketlistName }) => {
           return this.api.createBucketList(bucketlistName);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 }

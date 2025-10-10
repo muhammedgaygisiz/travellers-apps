@@ -5,7 +5,6 @@ import {
   loginFailed,
   loginSucceeded,
   logoutSucceeded,
-  notAuthenticated,
   registrationFailed,
 } from './actions';
 import { AuthResult } from './auth-result.model';
@@ -24,11 +23,6 @@ export const reducer = createReducer<AuthResult, Action>(
   on(loadedUser, (state, { user }) => ({
     ...state,
     user,
-  })),
-  on(notAuthenticated, (state) => ({
-    ...state,
-    authenticationFailed: false,
-    authenticated: false,
   })),
   on(loginFailed, (state) => ({
     ...state,
@@ -49,5 +43,5 @@ export const reducer = createReducer<AuthResult, Action>(
     authenticated: false,
     authenticationFailed: false,
     errorCode: null,
-  }))
+  })),
 );

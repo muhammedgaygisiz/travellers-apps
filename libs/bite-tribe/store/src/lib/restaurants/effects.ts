@@ -1,10 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  Actions,
-  createEffect,
-  ofType,
-  ROOT_EFFECTS_INIT,
-} from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { map, skipWhile, switchMap, tap } from 'rxjs';
@@ -12,11 +7,12 @@ import { Store } from '@ngrx/store';
 import { restaurantId } from '../router/selectors';
 import {
   loadedRestaurantFromApi,
-  noRestaurantFound,
   loadedRestaurantsFromApi,
+  noRestaurantFound,
   saveNewRestaurant,
   saveSocialMediaLinksForRestaurant,
 } from './actions';
+import { fromAuth } from 'ta-firestore';
 
 @Injectable()
 export class RestaurantEffects {
@@ -24,11 +20,11 @@ export class RestaurantEffects {
   private readonly store = inject(Store);
   private readonly api = inject(BiteTribeApiService);
 
-  loadRestaurantsFromApi$ = createEffect(() => {
+  startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(ROOT_EFFECTS_INIT),
-      switchMap(() => this.api.allRestaurants$),
-      map((restaurants) => loadedRestaurantsFromApi({ restaurants }))
+      ofType(fromAuth.loginSucceeded),
+      switchMap(() => this.api.restaurants$()),
+      map((restaurants) => loadedRestaurantsFromApi({ restaurants })),
     );
   });
 
@@ -46,9 +42,9 @@ export class RestaurantEffects {
               return noRestaurantFound();
             }
             return loadedRestaurantFromApi({ restaurant });
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   });
 
@@ -58,10 +54,10 @@ export class RestaurantEffects {
         ofType(saveNewRestaurant),
         tap(({ restaurant }) => {
           this.api.saveNewRestaurant(restaurant);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   saveSocialMediaLinksToFirestore$ = createEffect(
@@ -70,9 +66,9 @@ export class RestaurantEffects {
         ofType(saveSocialMediaLinksForRestaurant),
         tap(({ restaurantId, links }) => {
           this.api.saveSocialMediaLinksForRestaurant(restaurantId, links);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 }

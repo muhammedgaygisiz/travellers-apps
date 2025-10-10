@@ -1,29 +1,25 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  Actions,
-  createEffect,
-  ofType,
-  ROOT_EFFECTS_INIT,
-} from '@ngrx/effects';
-import { map, switchMap, tap } from 'rxjs';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   deletedLike,
   loadedLikesFromApi,
   removeLike,
   saveLike,
 } from './actions';
+import { map, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { fromAuth } from 'ta-firestore';
 
 @Injectable()
 export class LikeEffects {
   private readonly actions$ = inject(Actions);
   private readonly api = inject(BiteTribeApiService);
 
-  loadLikesFromApi$ = createEffect(() => {
+  startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(ROOT_EFFECTS_INIT),
-      switchMap(() => this.api.allLikes$),
-      map((likes) => loadedLikesFromApi({ likes }))
+      ofType(fromAuth.loginSucceeded),
+      switchMap(() => this.api.likes$()),
+      map((likes) => loadedLikesFromApi({ likes })),
     );
   });
 
@@ -31,13 +27,13 @@ export class LikeEffects {
     () => {
       return this.actions$.pipe(
         ofType(saveLike),
-        // eslint-disable-next-line no-unused-vars
+         
         tap(({ type, ...like }) => {
           this.api.saveLike(like);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   removeLikeFromBite$ = createEffect(() => {
@@ -47,7 +43,7 @@ export class LikeEffects {
         const likeToBeDeleted = await this.api.removeLike(like.like);
 
         return deletedLike({ like: likeToBeDeleted });
-      })
+      }),
     );
   });
 }

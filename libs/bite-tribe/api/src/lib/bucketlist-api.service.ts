@@ -23,30 +23,13 @@ export class BucketlistApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
 
-  private readonly bucketlistsChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly _bucketlistsChannel$ = new BehaviorSubject<any[]>([]);
+  bucketlists$ = this._bucketlistsChannel$.asObservable().pipe(skip(1));
 
   private readonly stopped$ = new Subject<void>();
   bucketlistCallbackId = '';
 
-  public allBucketlists$ = this.authService.isLoggedIn$.pipe(
-    skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap((isLoggedIn) => {
-      if (isLoggedIn) {
-        this.startBucketlistsListener();
-      } else {
-        this.stopBucketlistListener(this.bucketlistCallbackId);
-      }
-
-      return this.bucketlistsChannel$.pipe(skip(1), takeUntil(this.stopped$));
-    })
-  );
-
-  private async getUser(): Promise<User | null | undefined> {
-    const authState = await this.authService.authState();
-    return authState?.user;
-  }
-
-  private async startBucketlistsListener(): Promise<void> {
+  public async startListener(): Promise<void> {
     const user = await this.getUser();
 
     this.bucketlistCallbackId =
@@ -72,9 +55,14 @@ export class BucketlistApiService {
               id: doc.id,
             })) || [];
 
-          this.bucketlistsChannel$.next(bucketlists);
-        }
+          this._bucketlistsChannel$.next(bucketlists);
+        },
       );
+  }
+
+  private async getUser(): Promise<User | null | undefined> {
+    const authState = await this.authService.authState();
+    return authState?.user;
   }
 
   private async stopBucketlistListener(callbackId: string): Promise<void> {
@@ -117,7 +105,7 @@ export class BucketlistApiService {
   }
 
   async createBucketListAndSaveBiteIdToBucketList(
-    params: CreateAndSaveToBucketListParams
+    params: CreateAndSaveToBucketListParams,
   ): Promise<void> {
     try {
       const user = await this.getUser();

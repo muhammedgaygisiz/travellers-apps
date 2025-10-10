@@ -22,38 +22,24 @@ export class MenuApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
 
-  private readonly menusChannel$ = new BehaviorSubject<any[]>([]);
+  private readonly _menusChannel$ = new BehaviorSubject<any[]>([]);
+  menus$ = this._menusChannel$.asObservable().pipe(skip(1));
 
   private readonly stopped$ = new Subject<void>();
   menuCallbackId = '';
 
-  public allMenus$ = this.authService.isLoggedIn$.pipe(
-    skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap((isLoggedIn) => {
-      if (isLoggedIn) {
-        this.startMenusListener();
-      } else {
-        this.stopMenuListener(this.menuCallbackId);
-      }
-
-      return this.menusChannel$.pipe(skip(1), takeUntil(this.stopped$));
-    })
-  );
-
-  private async startMenusListener(): Promise<void> {
+  public async startListener(): Promise<void> {
     this.menuCallbackId = await FirebaseFirestore.addCollectionSnapshotListener(
       { reference: MENU_COLLECTION },
       async (menusDocs) => {
-        // console.debug('#mo Fetched menus from Firestore', menusDocs);
-
         const menus =
           menusDocs?.snapshots.map((doc) => ({
             ...doc.data,
             id: doc.id,
           })) || [];
 
-        this.menusChannel$.next(menus);
-      }
+        this._menusChannel$.next(menus);
+      },
     );
   }
 
@@ -75,12 +61,12 @@ export class MenuApiService {
               console.error('Error fetching menu:', err);
               this.errorHandler.handleError(err);
               return EMPTY;
-            })
+            }),
           );
         }
 
         return EMPTY;
-      })
+      }),
     );
   }
 

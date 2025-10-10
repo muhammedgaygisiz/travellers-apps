@@ -14,7 +14,6 @@ import {
   loginWithGoogleAccount,
   logout,
   logoutSucceeded,
-  notAuthenticated,
   register,
   registrationFailed,
   registrationSucceeded,
@@ -36,6 +35,7 @@ import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
 import { AFTER_LOGIN_PAGE, AFTER_LOGOUT_PAGE } from 'utils';
 import { SignInResult } from '@capacitor-firebase/authentication';
+import { Store } from '@ngrx/store';
 
 type AuthCreds = { authCreds: AuthCredentials };
 
@@ -44,6 +44,7 @@ export class AuthEffects {
   private readonly actions$ = inject(Actions);
   private readonly authService = inject(AuthService);
   private readonly navController = inject(NavController);
+  private readonly store = inject(Store);
 
   private readonly pageAfterLogout = inject(AFTER_LOGOUT_PAGE, {
     optional: true,
@@ -56,17 +57,21 @@ export class AuthEffects {
     this.authService.initilize();
   }
 
-  checkAuthStatus$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(ROOT_EFFECTS_INIT),
-      switchMap(() =>
-        this.authService.isLoggedIn$.pipe(
-          map((isLoggedIn) => {
-            return isLoggedIn ? loginSucceeded() : notAuthenticated();
-          }),
+  checkAuthStatus$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(ROOT_EFFECTS_INIT),
+        switchMap(() =>
+          this.authService.isLoggedIn$.pipe(
+            map((isLoggedIn) => {
+              if (isLoggedIn) {
+                this.store.dispatch(loginSucceeded());
+              }
+            }),
+          ),
         ),
       ),
-    ),
+    { dispatch: false },
   );
 
   loadUser$ = createEffect(() =>

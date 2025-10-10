@@ -1,5 +1,9 @@
 import { compressFile } from '../compress-file';
+import { convertHeicToJpeg } from '../convert-heic-to-jpeg';
 
+jest.mock('../convert-heic-to-jpeg', () => ({
+  convertHeicToJpeg: jest.fn((file) => file),
+}));
 jest.mock('heic2any', () => ({
   default: jest.fn(),
   __esModule: true,
@@ -108,5 +112,27 @@ describe('compress-file', () => {
 
     // Assert
     expect(result).toEqual({});
+  });
+
+  it('should call jpeg conveersion for HEIC files', async () => {
+    // Arrange
+    const mockFile = new File(['mock-image'], 'test.heic', {
+      type: 'image/heic',
+    });
+    const mockImage = {
+      width: 4096,
+      height: 3072,
+      onload: null as any,
+      onerror: null as any,
+    };
+
+    global.Image = jest.fn(() => mockImage) as any;
+
+    // Act - we do not wait for the result here as we are only interested in
+    // whether the conversion function was called
+    compressFile(mockFile);
+
+    // Assert
+    expect(convertHeicToJpeg).toHaveBeenCalledWith(mockFile);
   });
 });

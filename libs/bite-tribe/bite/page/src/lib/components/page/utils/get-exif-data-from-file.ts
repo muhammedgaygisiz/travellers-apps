@@ -6,22 +6,18 @@ export const getExifDataFromFile = async (
   fallbackPosition: Geopoint = {
     latitude: 0,
     longitude: 0,
-  }
+  },
 ): Promise<Geopoint> => {
   try {
     const metaData = await exifr.parse(file, { gps: true });
-    try {
-      if (metaData?.latitude && metaData?.longitude) {
-        return {
-          latitude: metaData.latitude,
-          longitude: metaData.longitude,
-        };
-      }
-
-      return fallbackPosition;
-    } catch (error) {
-      console.error('Error extracting EXIF data:', error);
+    if (metaData?.latitude && metaData?.longitude) {
+      return {
+        latitude: metaData.latitude,
+        longitude: metaData.longitude,
+      };
     }
+
+    return fallbackPosition;
   } catch (error) {
     console.error('Error reading EXIF data from file:', error);
   }

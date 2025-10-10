@@ -1,4 +1,4 @@
-# common/ui/currency-selector
+# currency-selector
 
 Currency selector component with type-ahead search functionality for filtering currencies.
 
@@ -7,13 +7,13 @@ Currency selector component with type-ahead search functionality for filtering c
 The component can be used in a modal to provide a searchable currency selection interface.
 
 ```typescript
-import { CurrencySelectorComponent } from 'common/ui/currency-selector';
+import { CurrencySelectorComponent } from 'currency-selector';
 import { IonModal } from '@ionic/angular/standalone';
 
 // In your component template:
 <ion-modal trigger="currency-trigger" #currencyModal>
   <ng-template>
-    <lib-currency-selector
+    <currency-selector
       class="ion-page"
       [selectedCurrency]="selectedCurrency"
       (currencySelected)="onCurrencySelected($event, currencyModal)"

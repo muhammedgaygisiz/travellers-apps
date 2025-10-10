@@ -7,7 +7,7 @@ const NODE_MODULES_TO_IGNORE = [
 ].join('|');
 
 export default {
-  displayName: 'common/ui/currency-selector',
+  displayName: 'currency-selector',
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   coverageDirectory: '../../../../coverage/libs/common/ui/currency-selector',

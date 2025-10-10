@@ -120,7 +120,7 @@
 
 <ion-modal trigger="currency-selector-trigger" #currencyModal>
   <ng-template>
-    <lib-currency-selector
+    <currency-selector
       class="ion-page"
       [selectedCurrency]="settingsForm.get('currency')?.value || 'EUR'"
       (currencySelected)="onCurrencySelected($event, currencyModal)"

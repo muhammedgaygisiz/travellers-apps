@@ -24,7 +24,7 @@ import {
   IonText,
   IonToggle,
 } from '@ionic/angular/standalone';
-import { CurrencySelectorComponent } from 'common/ui/currency-selector';
+import { CurrencySelectorComponent } from 'currency-selector';
 import { PublicUser, Settings, User } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';

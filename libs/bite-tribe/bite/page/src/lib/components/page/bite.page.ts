@@ -20,7 +20,7 @@ import {
   IonText,
   IonTextarea,
 } from '@ionic/angular/standalone';
-import { CurrencySelectorComponent } from 'common/ui/currency-selector';
+import { CurrencySelectorComponent } from 'currency-selector';
 import { Platform } from '@ionic/angular';
 import {
   FormBuilder,

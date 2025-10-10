@@ -101,7 +101,7 @@
 
 <ion-modal trigger="currency-selector-trigger-bite" #currencyModalBite>
   <ng-template>
-    <lib-currency-selector
+    <currency-selector
       class="ion-page"
       [selectedCurrency]="biteFormGroup.get('currency')?.value || 'EUR'"
       (currencySelected)="onCurrencySelected($event, currencyModalBite)"

@@ -19,13 +19,14 @@ import { Bite } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { bite } from '../selectors';
 import SpyInstance = jest.SpyInstance;
+import { fromAuth } from 'ta-firestore';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
 };
 
 const Mock = {
-  allBites$: of([]),
+  bites$: (): Observable<any> => of([]),
   saveNewBite: jest.fn(),
   saveEditedBite: jest.fn(),
   saveTagsToExistingBite: jest.fn(),
@@ -69,16 +70,16 @@ describe('BiteEffects', () => {
   });
 
   describe('loadBitesFromApi$', () => {
-    it('should load bites from API on ROOT_EFFECTS_INIT', () => {
+    it('should load bites from API on loginSucceeded', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: rootEffectsInit });
+        actions$ = cold('a', { a: fromAuth.loginSucceeded });
 
         const expected = 'a';
         const output = {
           a: loadedBitesFromApi({ bites: [] }),
         };
 
-        expectObservable(effects.loadBitesFromApi$).toBe(expected, output);
+        expectObservable(effects.startListener$).toBe(expected, output);
       });
     });
   });

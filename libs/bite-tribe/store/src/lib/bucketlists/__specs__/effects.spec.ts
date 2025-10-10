@@ -14,13 +14,14 @@ import {
   saveBiteIdToBucketList,
 } from '../actions';
 import SpyInstance = jest.SpyInstance;
+import { fromAuth } from 'ta-firestore';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
 };
 
 const Mock = {
-  allBucketlists$: of([]),
+  bucketlists$: (): Observable<any> => of([]),
   saveBiteIdToBucketList: jest.fn(),
   createBucketListAndSaveBiteIdToBucketList: jest.fn(),
   removeBiteFromBucketlist: jest.fn(),
@@ -51,17 +52,14 @@ describe('BucketListEffect', () => {
   describe('loadBucketlistsFromApi$', () => {
     it('should load bucketlists from API on ROOT_EFFECTS_INIT', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: rootEffectsInit });
+        actions$ = cold('a', { a: fromAuth.loginSucceeded });
 
         const expected = 'a';
         const output = {
           a: loadedBucketlistsFromApi({ bucketlists: [] }),
         };
 
-        expectObservable(effects.loadBucketlistsFromApi$).toBe(
-          expected,
-          output
-        );
+        expectObservable(effects.startListener$).toBe(expected, output);
       });
     });
   });
@@ -109,11 +107,11 @@ describe('BucketListEffect', () => {
         });
 
         expectObservable(
-          effects.createBucketlistAndSaveBiteIdToBucketListEffect$
+          effects.createBucketlistAndSaveBiteIdToBucketListEffect$,
         );
       });
       expect(
-        createBucketListAndSaveBiteIdToBucketListSpy
+        createBucketListAndSaveBiteIdToBucketListSpy,
       ).toHaveBeenCalledTimes(1);
     });
   });

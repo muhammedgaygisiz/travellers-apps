@@ -104,19 +104,6 @@ describe('LoginService', () => {
     });
   });
 
-  describe('loginWithFacebookAccount', () => {
-    it('should dispatch loginWithFacebookAccount action', () => {
-      const loginWithFacebookSpy = jest.spyOn(
-        store,
-        'loginWithFacebookAccount'
-      );
-
-      service.loginWithFacebookAccount();
-
-      expect(loginWithFacebookSpy).toHaveBeenCalled();
-    });
-  });
-
   describe('when store is not available', () => {
     beforeEach(() => {
       TestBed.resetTestingModule();
@@ -139,7 +126,6 @@ describe('LoginService', () => {
     it('should handle social logins without error', () => {
       expect(() => service.loginWithGoogleAccount()).not.toThrow();
       expect(() => service.loginWithAppleAccount()).not.toThrow();
-      expect(() => service.loginWithFacebookAccount()).not.toThrow();
     });
   });
 });

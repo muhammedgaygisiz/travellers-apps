@@ -26,7 +26,10 @@ describe('BiteTribeStoreService', () => {
     it('should dispatch loginWithGoogleAccount on BiteTribeStoreService', inject(
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
-        const loginSpy = jest.spyOn(fromAuth, 'loginWithGoogleAccount');
+        const loginSpy = jest.spyOn(
+          fromAuth.AuthActions,
+          'loginWithGoogleAccount',
+        );
         service.loginWithGoogleAccount();
         expect(loginSpy).toHaveBeenCalledTimes(1);
       },
@@ -37,7 +40,10 @@ describe('BiteTribeStoreService', () => {
     it('should dispatch loginWithAppleAccount on BiteTribeStoreService', inject(
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
-        const loginSpy = jest.spyOn(fromAuth, 'loginWithAppleAccount');
+        const loginSpy = jest.spyOn(
+          fromAuth.AuthActions,
+          'loginWithAppleAccount',
+        );
         service.loginWithAppleAccount();
         expect(loginSpy).toHaveBeenCalledTimes(1);
       },
@@ -48,7 +54,7 @@ describe('BiteTribeStoreService', () => {
     it('should dispatch login on BiteTribeStoreService', inject(
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
-        const loginSpy = jest.spyOn(fromAuth, 'login');
+        const loginSpy = jest.spyOn(fromAuth.AuthActions, 'login');
         service.login({} as any);
         expect(loginSpy).toHaveBeenCalledTimes(1);
       },
@@ -59,7 +65,10 @@ describe('BiteTribeStoreService', () => {
     it('should dispatch register on BiteTribeStoreService', inject(
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
-        const registerSpy = jest.spyOn(fromAuth, 'register');
+        const registerSpy = jest.spyOn(
+          fromAuth.AuthActions,
+          'registerWithEmail',
+        );
         service.register({} as any);
         expect(registerSpy).toHaveBeenCalledTimes(1);
       },

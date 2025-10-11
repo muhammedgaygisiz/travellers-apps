@@ -51,7 +51,7 @@ describe('BucketListEffect', () => {
   describe('loadBucketlistsFromApi$', () => {
     it('should load bucketlists from API on ROOT_EFFECTS_INIT', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.loginSucceeded });
+        actions$ = cold('a', { a: fromAuth.AuthActions.loginSucceeded });
 
         const expected = 'a';
         const output = {

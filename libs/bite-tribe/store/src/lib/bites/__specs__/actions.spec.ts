@@ -1,54 +1,43 @@
-import {
-  cacheBite,
-  deleteBite,
-  loadedBiteCreator,
-  loadedBitesFromApi,
-  noPublicCreatorForBite,
-  reloadBites,
-  saveExistingBite,
-  saveNewBite,
-  saveTags,
-  stopReloadingBites,
-} from '../actions';
+import { BiteActions } from '../actions';
 
 describe('Bites - Actions', () => {
   it('should have reloadBites action', () => {
-    expect(reloadBites).toBeDefined();
+    expect(BiteActions.reloadBites).toBeDefined();
   });
 
-  it('should have loadedBitesFromApi action', () => {
-    expect(loadedBitesFromApi).toBeDefined();
+  it('should have loadedFromAPI action', () => {
+    expect(BiteActions.loadedFromAPI).toBeDefined();
   });
 
   it('should have saveNewBite action', () => {
-    expect(saveNewBite).toBeDefined();
+    expect(BiteActions.saveNewBite).toBeDefined();
   });
 
   it('should have saveExistingBite action', () => {
-    expect(saveExistingBite).toBeDefined();
+    expect(BiteActions.saveExistingBite).toBeDefined();
   });
 
-  it('should have saveTags action', () => {
-    expect(saveTags).toBeDefined();
+  it('should have saveNewTags action', () => {
+    expect(BiteActions.saveNewTags).toBeDefined();
   });
 
   it('should have cacheBite action', () => {
-    expect(cacheBite).toBeDefined();
+    expect(BiteActions.cacheBite).toBeDefined();
   });
 
   it('should have deleteBite action', () => {
-    expect(deleteBite).toBeDefined();
+    expect(BiteActions.deleteBite).toBeDefined();
   });
 
   it('should have loadedBiteCreator action', () => {
-    expect(loadedBiteCreator).toBeDefined();
+    expect(BiteActions.loadedBiteCreator).toBeDefined();
   });
 
   it('should have noPublicCreatorForBite action', () => {
-    expect(noPublicCreatorForBite).toBeDefined();
+    expect(BiteActions.noPublicCreatorForBite).toBeDefined();
   });
 
   it('should have stopReloadingBites action', () => {
-    expect(stopReloadingBites).toBeDefined();
+    expect(BiteActions.stopReloadingBites).toBeDefined();
   });
 });

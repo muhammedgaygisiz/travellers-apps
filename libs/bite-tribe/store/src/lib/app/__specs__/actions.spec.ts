@@ -1,48 +1,39 @@
-import {
-  fetchGpsPosition,
-  goPrivate,
-  goPublic,
-  loadedGpsPosition,
-  loadedSettingsFromApi,
-  savePublicProfile,
-  saveSettings,
-  setPublicProfile,
-} from '../actions';
+import { AppActions } from '../actions';
 
 describe('App Actions', () => {
   it('should have a fetchGpsPosition action', () => {
-    expect(fetchGpsPosition).toBeDefined();
+    expect(AppActions.fetchGPSPosition).toBeDefined();
   });
 
   it('should have a loadedGpsPosition action', () => {
-    expect(loadedGpsPosition).toBeDefined();
+    expect(AppActions.loadedGPSPosition).toBeDefined();
   });
 
   it('should have a errorLoadingGpsPosition action', () => {
-    expect(fetchGpsPosition).toBeDefined();
+    expect(AppActions.fetchGPSPosition).toBeDefined();
   });
 
   it('should have a saveSettings action', () => {
-    expect(saveSettings).toBeDefined();
+    expect(AppActions.saveSettings).toBeDefined();
   });
 
   it('should have a savePublicProfile action', () => {
-    expect(savePublicProfile).toBeDefined();
+    expect(AppActions.savePublicProfile).toBeDefined();
   });
 
   it('should have a loadedSettingsFromApi action', () => {
-    expect(loadedSettingsFromApi).toBeDefined();
+    expect(AppActions.loadedSettingsFromAPI).toBeDefined();
   });
 
   it('should have a setPublicProfile action', () => {
-    expect(setPublicProfile).toBeDefined();
+    expect(AppActions.setPublicProfile).toBeDefined();
   });
 
   it('should have a goPublic action', () => {
-    expect(goPublic).toBeDefined();
+    expect(AppActions.goPublic).toBeDefined();
   });
 
   it('should have a goPrivate action', () => {
-    expect(goPrivate).toBeDefined();
+    expect(AppActions.goPrivate).toBeDefined();
   });
 });

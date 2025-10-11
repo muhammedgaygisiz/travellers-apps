@@ -1,13 +1,5 @@
 import { reducer } from '../reducer';
-import {
-  cacheBite,
-  loadedBiteCreator,
-  loadedBitesFromApi,
-  noPublicCreatorForBite,
-  reloadBites,
-  saveNewBite,
-  stopReloadingBites,
-} from '../actions';
+import { BiteActions } from '../actions';
 import { Bite } from 'model';
 import { fromAuth } from 'ta-firestore';
 
@@ -25,7 +17,7 @@ describe('Bite Reducer', () => {
 
       const NEW_STATE = { ids: [], entities: {}, reloading: false };
 
-      const action = fromAuth.logoutSucceeded;
+      const action = fromAuth.AuthActions.logoutSucceeded;
 
       expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
     });
@@ -36,7 +28,7 @@ describe('Bite Reducer', () => {
       const INITIAL_STATE = { ids: [], entities: {}, reloading: true };
       const NEW_STATE = { ids: [], entities: {}, reloading: false };
 
-      const loadedBitesFromApiAction = loadedBitesFromApi({
+      const loadedBitesFromApiAction = BiteActions.loadedFromAPI({
         bites: [] as Bite[],
       });
 
@@ -51,7 +43,7 @@ describe('Bite Reducer', () => {
         entities: { '3': { id: '3', name: 'Bite 2' } as Bite },
       };
 
-      const loadedBitesFromApiAction = loadedBitesFromApi({
+      const loadedBitesFromApiAction = BiteActions.loadedFromAPI({
         bites: [
           { id: '1', name: 'Bite 1' } as Bite,
           { id: '2', name: 'Bite 2' } as Bite,
@@ -80,7 +72,7 @@ describe('Bite Reducer', () => {
         cachedBite: { id: '1', name: 'Bite 1' } as Bite,
       };
 
-      const cacheBiteAction = cacheBite({
+      const cacheBiteAction = BiteActions.cacheBite({
         bite: { id: '1', name: 'Bite 1' } as Bite,
       });
 
@@ -100,7 +92,7 @@ describe('Bite Reducer', () => {
       };
       const NEW_STATE = { ids: [], entities: {}, reloading: false };
 
-      const saveNewBiteAction = saveNewBite({
+      const saveNewBiteAction = BiteActions.saveNewBite({
         bite: { id: '1', name: 'Bite 1' } as Bite,
       });
 
@@ -120,7 +112,7 @@ describe('Bite Reducer', () => {
         biteCreator: { id: 'creator1', name: 'Creator 1' },
       };
 
-      const loadedBiteCreatorAction = loadedBiteCreator({
+      const loadedBiteCreatorAction = BiteActions.loadedBiteCreator({
         biteCreator: { id: 'creator1', name: 'Creator 1' },
       });
 
@@ -136,7 +128,7 @@ describe('Bite Reducer', () => {
 
       const NEW_STATE = { ids: [], entities: {}, reloading: true };
 
-      const reloadBitesAction = reloadBites();
+      const reloadBitesAction = BiteActions.reloadBites();
 
       expect(reducer(INITIAL_STATE, reloadBitesAction)).toEqual({
         ...NEW_STATE,
@@ -150,7 +142,7 @@ describe('Bite Reducer', () => {
 
       const NEW_STATE = { ids: [], entities: {}, reloading: false };
 
-      const stopReloadingBitesAction = stopReloadingBites();
+      const stopReloadingBitesAction = BiteActions.stopReloadingBites();
 
       expect(reducer(INITIAL_STATE, stopReloadingBitesAction)).toEqual({
         ...NEW_STATE,
@@ -168,7 +160,7 @@ describe('Bite Reducer', () => {
       };
       const NEW_STATE = { ids: [], entities: {}, reloading: false };
 
-      const noPublicCreatorForBiteAction = noPublicCreatorForBite();
+      const noPublicCreatorForBiteAction = BiteActions.noPublicCreatorForBite();
 
       expect(reducer(INITIAL_STATE, noPublicCreatorForBiteAction)).toEqual({
         ...NEW_STATE,

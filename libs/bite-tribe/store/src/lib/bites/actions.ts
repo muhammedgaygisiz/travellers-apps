@@ -1,44 +1,17 @@
-import { createAction, props } from '@ngrx/store';
+import { createActionGroup, emptyProps, props } from '@ngrx/store';
 
-export const reloadBites = createAction('[BITES] Reload from API');
-
-export const loadedBitesFromApi = createAction(
-  '[BITES] Loaded from API',
-  props<{ bites: any }>()
-);
-
-export const saveNewBite = createAction(
-  '[BITES] Save new bite',
-  props<{ bite: any }>()
-);
-
-export const saveExistingBite = createAction(
-  '[BITES] Save existing bite',
-  props<{ bite: any }>()
-);
-
-export const saveTags = createAction(
-  '[BITES] Save new tags',
-  props<{ newTags: string[]; id: string }>()
-);
-
-export const cacheBite = createAction(
-  '[BITES] Cache bite',
-  props<{ bite: any }>()
-);
-
-export const deleteBite = createAction(
-  '[BITES] Delete bite',
-  props<{ bite: any }>()
-);
-
-export const loadedBiteCreator = createAction(
-  '[BITES] Loaded bite creator',
-  props<{ biteCreator: any }>()
-);
-
-export const noPublicCreatorForBite = createAction(
-  '[BITES] No public creator for bite'
-);
-
-export const stopReloadingBites = createAction('[BITES] Stop reloading bites');
+export const BiteActions = createActionGroup({
+  source: 'BITES',
+  events: {
+    'Reload Bites': emptyProps(),
+    'Loaded from API': props<{ bites: any }>(),
+    'Save new bite': props<{ bite: any }>(),
+    'Save existing bite': props<{ bite: any }>(),
+    'Save new tags': props<{ newTags: string[]; id: string }>(),
+    'Cache bite': props<{ bite: any }>(),
+    'Delete bite': props<{ bite: any }>(),
+    'Loaded bite creator': props<{ biteCreator: any }>(),
+    'No public creator for bite': emptyProps(),
+    'Stop reloading bites': emptyProps(),
+  },
+});

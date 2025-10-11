@@ -2,13 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
-import {
-  cacheBite,
-  deleteBite,
-  saveExistingBite,
-  saveNewBite,
-  saveTags,
-} from './bites/actions';
+import { BiteActions } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import {
   allTags,
@@ -96,10 +90,10 @@ const getActionByDocType = (docType: string, entity: any): any => {
   switch (docType) {
     case 'bite': {
       if (entity.id) {
-        return saveExistingBite({ bite: entity });
+        return BiteActions.saveExistingBite({ bite: entity });
       }
 
-      return saveNewBite({ bite: entity });
+      return BiteActions.saveNewBite({ bite: entity });
     }
     case 'restaurant': {
       return saveNewRestaurant({ restaurant: entity });
@@ -185,7 +179,7 @@ export class BiteTribeStoreService implements StoreService {
 
   saveTags(newTagsArray: string[], id: string): void {
     this.store.dispatch(
-      saveTags({
+      BiteActions.saveNewTags({
         newTags: newTagsArray,
         id,
       }),
@@ -248,7 +242,7 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   prepareBiteFromMenuItem(bite: Partial<Bite>): void {
-    this.store.dispatch(cacheBite({ bite }));
+    this.store.dispatch(BiteActions.cacheBite({ bite }));
   }
 
   saveSocialMediaLinks(restaurantId: string, links: Link[]): void {
@@ -273,7 +267,7 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   submitDeleteBite(bite: Bite): void {
-    this.store.dispatch(deleteBite({ bite }));
+    this.store.dispatch(BiteActions.deleteBite({ bite }));
   }
 
   createBucketList(bucketlistName: string): void {

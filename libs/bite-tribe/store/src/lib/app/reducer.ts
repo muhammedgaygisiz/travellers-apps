@@ -11,7 +11,7 @@ import {
   setHomeSorting,
 } from './actions';
 import { AppSlice } from './app-slice.model';
-import { loadedBitesFromApi } from '../bites/actions';
+import { BiteActions } from '../bites/actions';
 import { fromAuth } from 'ta-firestore';
 
 const initialState: AppSlice = {
@@ -35,7 +35,7 @@ const initialState: AppSlice = {
 export const reducer = createReducer<AppSlice>(
   initialState,
   on(fromAuth.logoutSucceeded, () => initialState),
-  on(loadedBitesFromApi, (state) => ({
+  on(BiteActions.loadedFromAPI, (state) => ({
     ...state,
     loading: {
       ...state.loading,
@@ -97,5 +97,5 @@ export const reducer = createReducer<AppSlice>(
   on(setHomeSorting, (state, { sorting }) => ({
     ...state,
     homeSorting: sorting,
-  }))
+  })),
 );

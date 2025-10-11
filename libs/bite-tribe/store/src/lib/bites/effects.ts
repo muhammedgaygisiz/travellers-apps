@@ -1,14 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  deleteBite,
-  loadedBiteCreator,
-  loadedBitesFromApi,
-  noPublicCreatorForBite,
-  saveExistingBite,
-  saveNewBite,
-  saveTags,
-} from './actions';
+import { BiteActions } from './actions';
 import { filter, map, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
@@ -29,14 +21,14 @@ export class BiteEffects {
     return this.actions$.pipe(
       ofType(fromAuth.loginSucceeded),
       switchMap(() => this.api.bites$()),
-      map((bites) => loadedBitesFromApi({ bites })),
+      map((bites) => BiteActions.loadedFromAPI({ bites })),
     );
   });
 
   saveNewBiteToFirestore$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(saveNewBite),
+        ofType(BiteActions.saveNewBite),
         tap(({ bite }) => {
           this.api.saveNewBite(bite);
         }),
@@ -48,7 +40,7 @@ export class BiteEffects {
   saveEditedBiteToFirestore$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(saveExistingBite),
+        ofType(BiteActions.saveExistingBite),
         tap(({ bite }) => {
           this.api.saveEditedBite(bite);
         }),
@@ -60,7 +52,7 @@ export class BiteEffects {
   saveTagsToExistingBite$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(saveTags),
+        ofType(BiteActions.saveNewTags),
         tap((payload) => {
           this.api.saveTagsToExistingBite(payload);
         }),
@@ -72,7 +64,7 @@ export class BiteEffects {
   deleteBite$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(deleteBite),
+        ofType(BiteActions.deleteBite),
         tap(({ bite }) => {
           this.api.deleteBite(bite);
         }),
@@ -94,12 +86,12 @@ export class BiteEffects {
       }),
       map((biteCreator) => {
         if (biteCreator?.snapshot?.data) {
-          return loadedBiteCreator({
+          return BiteActions.loadedBiteCreator({
             biteCreator: biteCreator?.snapshot?.data,
           });
         }
 
-        return noPublicCreatorForBite();
+        return BiteActions.noPublicCreatorForBite();
       }),
     );
   });

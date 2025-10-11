@@ -5,7 +5,6 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BucketListEffect } from '../effects';
-import { rootEffectsInit } from '@ngrx/effects';
 import {
   createAndSaveBiteIdToBucketList,
   createBucketList,
@@ -13,8 +12,8 @@ import {
   removeBiteFromBucketlist,
   saveBiteIdToBucketList,
 } from '../actions';
-import SpyInstance = jest.SpyInstance;
 import { fromAuth } from 'ta-firestore';
+import SpyInstance = jest.SpyInstance;
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);

@@ -1,13 +1,13 @@
 import { key } from './key';
 import { reducer } from './reducer';
 import { bites, isReloadingBites } from './selectors';
-import { reloadBites } from './actions';
+import { BiteActions } from './actions';
 
 const fromBites = {
   key,
   reducer,
   bites,
-  reloadBites,
+  reloadBites: BiteActions.reloadBites,
   isReloadingBites,
 };
 

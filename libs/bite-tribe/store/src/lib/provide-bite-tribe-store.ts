@@ -29,7 +29,7 @@ import { RestaurantEffects } from './restaurants/effects';
 import { LikeEffects } from './likes/effects';
 import { MenuEffects } from './menus/effects';
 import { FirebaseOptions } from 'firebase/app';
-import { loadedBitesFromApi } from './bites/actions';
+import { BiteActions } from './bites/actions';
 import { loadedRestaurantsFromApi } from './restaurants/actions';
 import { BucketListEffect } from './bucketlists/effects';
 import { fromBucketlists } from './bucketlists';
@@ -48,7 +48,8 @@ const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
 
 const actionSanitizer: any = (action: Action) => {
   const isLoadedBitesWithData =
-    action.type === loadedBitesFromApi.type && (action as any).bites.length > 0;
+    action.type === BiteActions.loadedFromAPI.type &&
+    (action as any).bites.length > 0;
 
   if (isLoadedBitesWithData) {
     return {

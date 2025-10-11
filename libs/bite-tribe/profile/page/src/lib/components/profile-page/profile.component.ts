@@ -52,4 +52,26 @@ export class ProfileComponent {
 
     return bites ? bites.length : 0;
   });
+
+  badgeColor = computed(() => {
+    const biteCount = this.biteCount();
+
+    if (50 <= biteCount && biteCount < 100) {
+      return 'green';
+    }
+
+    if (100 <= biteCount && biteCount < 1000) {
+      return 'bronze';
+    }
+
+    if (1000 <= biteCount && biteCount < 10000) {
+      return 'silver';
+    }
+
+    if (10000 <= biteCount) {
+      return 'gold';
+    }
+
+    return '';
+  });
 }

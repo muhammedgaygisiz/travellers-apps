@@ -35,6 +35,26 @@
 
       font-size: 1.25rem;
       font-weight: bold;
+
+      .bite-badge {
+        background: var(--ion-color-primary);
+
+        &.green {
+          background: var(--ion-color-success);
+        }
+
+        &.bronze {
+          background: #cd7f32;
+        }
+
+        &.silver {
+          background: #c0c0c0;
+        }
+
+        &.gold {
+          background: #ffd700;
+        }
+      }
     }
 
     .profile-location {

@@ -18,7 +18,7 @@ export const authGuard: CanActivateFn = () => {
   if (isBitePage && !authState?.user) {
     return authService.authStateChange$.pipe(
       startWith(null),
-      // Wait for 5 second to see if the user is logged in
+      // Wait for 2 second to see if the user is logged in
       debounceTime(2000),
       map((authState) => {
         if (authState?.user) {

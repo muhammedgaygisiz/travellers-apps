@@ -1,5 +1,9 @@
 @use 'globals';
 
+$BRONZE: #cd7f32;
+$SILVER: #c0c0c0;
+$GOLD: #ffd700;
+
 :host {
   .profile-container {
     margin: 0 auto;
@@ -44,15 +48,15 @@
         }
 
         &.bronze {
-          background: #cd7f32;
+          background: $BRONZE;
         }
 
         &.silver {
-          background: #c0c0c0;
+          background: $SILVER;
         }
 
         &.gold {
-          background: #ffd700;
+          background: $GOLD;
         }
       }
     }

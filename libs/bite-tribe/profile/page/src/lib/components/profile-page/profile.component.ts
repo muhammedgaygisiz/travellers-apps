@@ -17,6 +17,23 @@ import { Bite, PublicUser } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
 
+const BADGE_CONFIG = [
+  { min: 50, max: 100, cssClassName: 'green' },
+  { min: 100, max: 1000, cssClassName: 'bronze' },
+  { min: 1000, max: 10000, cssClassName: 'silver' },
+  { min: 10000, max: Infinity, cssClassName: 'gold' },
+];
+
+const getBadgeColor = (biteCount: number): string => {
+  for (const config of BADGE_CONFIG) {
+    if (biteCount >= config.min && biteCount < config.max) {
+      return config.cssClassName;
+    }
+  }
+
+  return '';
+};
+
 @Component({
   selector: 'profile-page',
   templateUrl: 'profile.component.html',
@@ -56,22 +73,6 @@ export class ProfileComponent {
   badgeColor = computed(() => {
     const biteCount = this.biteCount();
 
-    if (50 <= biteCount && biteCount < 100) {
-      return 'green';
-    }
-
-    if (100 <= biteCount && biteCount < 1000) {
-      return 'bronze';
-    }
-
-    if (1000 <= biteCount && biteCount < 10000) {
-      return 'silver';
-    }
-
-    if (10000 <= biteCount) {
-      return 'gold';
-    }
-
-    return '';
+    return getBadgeColor(biteCount);
   });
 }

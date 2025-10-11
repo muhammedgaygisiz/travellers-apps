@@ -19,7 +19,7 @@ export class BiteEffects {
 
   startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loginSucceeded),
+      ofType(fromAuth.AuthActions.loginSucceeded),
       switchMap(() => this.api.bites$()),
       map((bites) => BiteActions.loadedFromAPI({ bites })),
     );

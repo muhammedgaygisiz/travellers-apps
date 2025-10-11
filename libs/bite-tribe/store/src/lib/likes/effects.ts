@@ -17,7 +17,7 @@ export class LikeEffects {
 
   startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loginSucceeded),
+      ofType(fromAuth.AuthActions.loginSucceeded),
       switchMap(() => this.api.likes$()),
       map((likes) => loadedLikesFromApi({ likes })),
     );
@@ -27,7 +27,7 @@ export class LikeEffects {
     () => {
       return this.actions$.pipe(
         ofType(saveLike),
-         
+
         tap(({ type, ...like }) => {
           this.api.saveLike(like);
         }),

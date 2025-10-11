@@ -18,7 +18,7 @@ export class BucketListEffect {
 
   startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loginSucceeded),
+      ofType(fromAuth.AuthActions.loginSucceeded),
       switchMap(() => this.api.bucketlists$()),
       map((bucketlists) => loadedBucketlistsFromApi({ bucketlists })),
     );

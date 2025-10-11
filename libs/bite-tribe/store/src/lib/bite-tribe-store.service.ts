@@ -154,19 +154,21 @@ export class BiteTribeStoreService implements StoreService {
   homeDistance$ = this.store.select(homeDistance);
 
   loginWithGoogleAccount(): void {
-    this.store.dispatch(fromAuth.loginWithGoogleAccount());
+    this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());
   }
 
   loginWithAppleAccount(): void {
-    this.store.dispatch(fromAuth.loginWithAppleAccount());
+    this.store.dispatch(fromAuth.AuthActions.loginWithAppleAccount());
   }
 
   login(authCreds: Login): void {
-    this.store.dispatch(fromAuth.login({ authCreds }));
+    this.store.dispatch(fromAuth.AuthActions.login({ authCreds }));
   }
 
   register(registration: Login): void {
-    this.store.dispatch(fromAuth.register({ registration }));
+    this.store.dispatch(
+      fromAuth.AuthActions.registerWithEmail({ registration }),
+    );
   }
 
   confirmError(): void {
@@ -187,7 +189,7 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   logout(): void {
-    this.store.dispatch(fromAuth.logout());
+    this.store.dispatch(fromAuth.AuthActions.logout());
   }
 
   submitLikeOrDislikeClick(

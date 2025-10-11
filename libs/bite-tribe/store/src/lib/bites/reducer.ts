@@ -5,7 +5,7 @@ import { fromAuth } from 'ta-firestore';
 
 export const reducer = createReducer(
   initialState,
-  on(fromAuth.logoutSucceeded, (state) => adapter.removeAll(state)),
+  on(fromAuth.AuthActions.logoutSucceeded, (state) => adapter.removeAll(state)),
   on(BiteActions.loadedFromAPI, (state, { bites }) => {
     const stateWithoutReloading = {
       ...state,

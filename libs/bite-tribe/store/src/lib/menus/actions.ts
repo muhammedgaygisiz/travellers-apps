@@ -3,17 +3,17 @@ import { Menu } from 'model';
 
 export const loadedMenusFromApi = createAction(
   '[MENUS] Loaded from API',
-  props<{ menus: Menu[] }>()
+  props<{ menus: Menu[] }>(),
 );
 
 export const loadedMenuFromApi = createAction(
   '[MENUS] Loaded menu from API',
-  props<{ menu: Menu }>()
+  props<{ menu: Menu }>(),
 );
 
 export const noMenuFound = createAction('[MENUS] No restaurant found');
 
 export const saveMenu = createAction(
   '[MENUS] Save menu',
-  props<{ menu: Menu }>()
+  props<{ menu: Menu }>(),
 );

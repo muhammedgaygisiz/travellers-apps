@@ -5,19 +5,7 @@ import {
   ofType,
   ROOT_EFFECTS_INIT,
 } from '@ngrx/effects';
-import {
-  loadedUser,
-  login,
-  loginFailed,
-  loginSucceeded,
-  loginWithAppleAccount,
-  loginWithGoogleAccount,
-  logout,
-  logoutSucceeded,
-  register,
-  registrationFailed,
-  registrationSucceeded,
-} from './actions';
+import { AuthActions } from './actions';
 import {
   catchError,
   EMPTY,
@@ -65,7 +53,7 @@ export class AuthEffects {
           this.authService.isLoggedIn$.pipe(
             map((isLoggedIn) => {
               if (isLoggedIn) {
-                this.store.dispatch(loginSucceeded());
+                this.store.dispatch(AuthActions.loginSucceeded());
               }
             }),
           ),
@@ -76,23 +64,23 @@ export class AuthEffects {
 
   loadUser$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(loginSucceeded),
+      ofType(AuthActions.loginSucceeded),
       switchMap(() => this.authService.authStateChange$),
       map((authStateChange) => {
-        return loadedUser({ user: authStateChange?.user });
+        return AuthActions.loadedUser({ user: authStateChange?.user });
       }),
     ),
   );
 
   loginEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(login),
+      ofType(AuthActions.login),
       mergeMap(({ authCreds }: AuthCreds) =>
         this.login$(authCreds).pipe(
-          map(() => loginSucceeded()),
+          map(() => AuthActions.loginSucceeded()),
           catchError((err) => {
             console.debug('#mo error login: ', err);
-            return of(loginFailed());
+            return of(AuthActions.loginFailed());
           }),
         ),
       ),
@@ -101,10 +89,10 @@ export class AuthEffects {
 
   logoutEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(logout.type),
+      ofType(AuthActions.logout.type),
       exhaustMap(() =>
         this.authService.logout().pipe(
-          map(() => logoutSucceeded()),
+          map(() => AuthActions.logoutSucceeded()),
           catchError(() => EMPTY),
         ),
       ),
@@ -113,13 +101,13 @@ export class AuthEffects {
 
   registrationEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(register),
+      ofType(AuthActions.registerWithEmail),
       mergeMap(({ registration }) =>
         this.register$(registration).pipe(
-          map(() => registrationSucceeded()),
+          map(() => AuthActions.registrationSucceeded()),
           tap(() => this.navController.navigateBack(['/login'])),
           catchError((err) => {
-            return of(registrationFailed({ code: err.code }));
+            return of(AuthActions.registrationFailed({ code: err.code }));
           }),
         ),
       ),
@@ -128,16 +116,16 @@ export class AuthEffects {
 
   loginWithGoogleAccountEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(loginWithGoogleAccount.type),
+      ofType(AuthActions.loginWithGoogleAccount.type),
       mergeMap(() =>
         this.registerWithGoogleAccount$().pipe(
           map((result) => {
             console.debug('#mo signInResult', result);
-            return loginSucceeded();
+            return AuthActions.loginSucceeded();
           }),
           tap(() => this.navController.navigateBack(['/'])),
           catchError((err) => {
-            return of(registrationFailed({ code: err.code }));
+            return of(AuthActions.registrationFailed({ code: err.code }));
           }),
         ),
       ),
@@ -146,12 +134,14 @@ export class AuthEffects {
 
   loginWithAppleAccountEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(loginWithAppleAccount),
+      ofType(AuthActions.loginWithAppleAccount),
       mergeMap(() => {
         return this.registerWithAppleAccount$().pipe(
-          map(() => loginSucceeded()),
+          map(() => AuthActions.loginSucceeded()),
           tap(() => this.navController.navigateBack(['/'])),
-          catchError((err) => of(registrationFailed({ code: err.code }))),
+          catchError((err) =>
+            of(AuthActions.registrationFailed({ code: err.code })),
+          ),
         );
       }),
     ),
@@ -160,7 +150,7 @@ export class AuthEffects {
   successFulLogin$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(loginSucceeded),
+        ofType(AuthActions.loginSucceeded),
         tap(() => {
           const isBitePage = isBiteDetailsPage();
 
@@ -182,7 +172,7 @@ export class AuthEffects {
   successFulLogout$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(logoutSucceeded.type),
+        ofType(AuthActions.logoutSucceeded.type),
         tap(() => {
           if (this.pageAfterLogout) {
             this.navController.navigateRoot([this.pageAfterLogout]);

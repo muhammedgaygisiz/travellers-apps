@@ -34,7 +34,7 @@ const initialState: AppSlice = {
 
 export const reducer = createReducer<AppSlice>(
   initialState,
-  on(fromAuth.logoutSucceeded, () => initialState),
+  on(fromAuth.AuthActions.logoutSucceeded, () => initialState),
   on(BiteActions.loadedFromAPI, (state) => ({
     ...state,
     loading: {
@@ -42,7 +42,7 @@ export const reducer = createReducer<AppSlice>(
       home: false,
     },
   })),
-  on(fromAuth.loginSucceeded, (state) => ({
+  on(fromAuth.AuthActions.loginSucceeded, (state) => ({
     ...state,
     loading: {
       ...state.loading,

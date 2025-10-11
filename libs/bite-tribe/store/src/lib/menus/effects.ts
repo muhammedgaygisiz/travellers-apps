@@ -21,7 +21,7 @@ export class MenuEffects {
 
   startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loginSucceeded),
+      ofType(fromAuth.AuthActions.loginSucceeded),
       switchMap(() => this.api.menus$()),
       map((menus) => loadedMenusFromApi({ menus })),
     );

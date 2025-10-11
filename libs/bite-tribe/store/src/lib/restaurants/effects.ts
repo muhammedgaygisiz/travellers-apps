@@ -22,7 +22,7 @@ export class RestaurantEffects {
 
   startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loginSucceeded),
+      ofType(fromAuth.AuthActions.loginSucceeded),
       switchMap(() => this.api.restaurants$()),
       map((restaurants) => loadedRestaurantsFromApi({ restaurants })),
     );

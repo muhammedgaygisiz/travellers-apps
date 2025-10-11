@@ -5,8 +5,8 @@ import { fromAuth } from 'ta-firestore';
 
 export const reducer = createReducer(
   initialState,
-  on(fromAuth.logoutSucceeded, (state) => adapter.removeAll(state)),
+  on(fromAuth.AuthActions.logoutSucceeded, (state) => adapter.removeAll(state)),
   on(loadedReviewsFromApi, (state, { reviews }) =>
-    adapter.upsertMany(reviews, initialState)
-  )
+    adapter.upsertMany(reviews, initialState),
+  ),
 );

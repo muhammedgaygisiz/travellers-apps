@@ -38,7 +38,7 @@ export class AppEffect {
 
   loadSettingsFromApi$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loadedUser),
+      ofType(fromAuth.AuthActions.loadedUser),
       switchMap(() => this.api.settings$),
       map((settings) => loadedSettingsFromApi({ settings })),
     );
@@ -46,7 +46,7 @@ export class AppEffect {
 
   loadExchangeRatesFromApi$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loadedUser),
+      ofType(fromAuth.AuthActions.loadedUser),
       filter((payload) => !!payload.user),
       switchMap(() =>
         from(this.api.getExchangeRates()).pipe(
@@ -60,7 +60,7 @@ export class AppEffect {
 
   loadPublicProfile$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loadedUser),
+      ofType(fromAuth.AuthActions.loadedUser),
       filter((payload) => !!payload.user),
       switchMap(() => this.api.publicProfile$),
       map((profile) => setPublicProfile({ profile })),
@@ -70,9 +70,13 @@ export class AppEffect {
   fetchGpsPosition$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(fromAuth.loadedUser, fetchGpsPosition, BiteActions.reloadBites),
+        ofType(
+          fromAuth.AuthActions.loadedUser,
+          fetchGpsPosition,
+          BiteActions.reloadBites,
+        ),
         filter((payload) => {
-          if (payload.type === fromAuth.loadedUser.type) {
+          if (payload.type === fromAuth.AuthActions.loadedUser.type) {
             return !!payload.user;
           }
           return true;
@@ -124,7 +128,7 @@ export class AppEffect {
   saveUserAfterLogin$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(fromAuth.loadedUser),
+        ofType(fromAuth.AuthActions.loadedUser),
         filter((payload) => !!payload.user),
         tap(() => {
           this.api.saveUserIfNotExisting();

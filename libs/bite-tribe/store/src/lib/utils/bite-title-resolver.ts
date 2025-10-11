@@ -3,8 +3,9 @@ import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { Title } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { tap } from 'rxjs';
+import { ResolveFn } from '@angular/router';
 
-export const biteTitleResolver = (): string => {
+export const biteTitleResolver: ResolveFn<string> = (): string => {
   const storeService = inject(BiteTribeStoreService);
   const destroyRef = inject(DestroyRef);
   const title = inject(Title);

@@ -33,7 +33,7 @@ import {
 import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
-import { AFTER_LOGIN_PAGE, AFTER_LOGOUT_PAGE } from 'utils';
+import { AFTER_LOGIN_PAGE, AFTER_LOGOUT_PAGE, isBiteDetailsPage } from 'utils';
 import { SignInResult } from '@capacitor-firebase/authentication';
 import { Store } from '@ngrx/store';
 
@@ -162,10 +162,9 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(loginSucceeded),
         tap(() => {
-          const url =
-            location.href.includes('/bite/') &&
-            !location.href.includes('/edit');
-          if (url) {
+          const isBitePage = isBiteDetailsPage();
+
+          if (isBitePage) {
             return;
           }
 

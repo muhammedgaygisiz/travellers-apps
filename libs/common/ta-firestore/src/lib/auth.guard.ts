@@ -2,13 +2,13 @@ import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from './auth.service';
 import { debounceTime, map, startWith } from 'rxjs';
+import { isBiteDetailsPage } from 'utils';
 
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  const isBitePage =
-    location.href.includes('/bite/') && !location.href.includes('/edit');
+  const isBitePage = isBiteDetailsPage();
   const authState = authService.authState();
 
   if (isBitePage && authState?.user) {

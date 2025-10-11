@@ -1,12 +1,12 @@
 import { key } from './key';
 import { reducer } from './reducer';
-import { fetchGpsPosition } from './actions';
+import { AppActions } from './actions';
 import { isDarkTheme } from './selectors';
 
 const fromApp = {
   key,
   reducer,
-  fetchGpsPosition,
+  fetchGpsPosition: AppActions.fetchGPSPosition,
   isDarkTheme,
 };
 

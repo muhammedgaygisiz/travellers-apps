@@ -22,16 +22,8 @@ import {
   restaurantToCreate,
 } from './restaurants/selectors';
 import { menu } from './menus/selectors';
-import { saveMenu } from './menus/actions';
-import {
-  clearHomeFilters,
-  goPrivate,
-  goPublic,
-  savePublicProfile,
-  saveSettings,
-  setHomeFilters,
-  setHomeSorting,
-} from './app/actions';
+import { MenuActions } from './menus/actions';
+import { AppActions } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -224,11 +216,11 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   saveSettings(settings: Settings): void {
-    this.store.dispatch(saveSettings({ settings }));
+    this.store.dispatch(AppActions.saveSettings({ settings }));
   }
 
   savePublicProfile(publicUser: PublicUser): void {
-    this.store.dispatch(savePublicProfile({ publicUser }));
+    this.store.dispatch(AppActions.savePublicProfile({ publicUser }));
   }
 
   saveReview(newReview: { review: string; biteId: string }): void {
@@ -240,7 +232,7 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   saveMenu(menu: Menu): void {
-    this.store.dispatch(saveMenu({ menu }));
+    this.store.dispatch(MenuActions.saveMenu({ menu }));
   }
 
   prepareBiteFromMenuItem(bite: Partial<Bite>): void {
@@ -277,15 +269,15 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   goPublic(): void {
-    this.store.dispatch(goPublic());
+    this.store.dispatch(AppActions.goPublic());
   }
 
   goPrivate(): void {
-    this.store.dispatch(goPrivate());
+    this.store.dispatch(AppActions.goPrivate());
   }
 
   setHomeSorting(sorting: string): void {
-    this.store.dispatch(setHomeSorting({ sorting }));
+    this.store.dispatch(AppActions.setHomeSorting({ sorting }));
   }
 
   setHomeFilters(filters: {
@@ -293,11 +285,11 @@ export class BiteTribeStoreService implements StoreService {
     distanceFilter: string;
     priceFilter: number;
   }): void {
-    this.store.dispatch(setHomeFilters({ filters }));
+    this.store.dispatch(AppActions.setHomeFilters({ filters }));
   }
 
   clearHomeFilters(): void {
-    this.store.dispatch(clearHomeFilters());
+    this.store.dispatch(AppActions.clearHomeFilters());
   }
 
   reloadBites(): void {

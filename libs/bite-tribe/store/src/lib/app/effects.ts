@@ -1,17 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  errorLoadingGpsPosition,
-  fetchGpsPosition,
-  goPrivate,
-  goPublic,
-  loadedGpsPosition,
-  loadedSettingsFromApi,
-  savePublicProfile,
-  saveSettings,
-  setPublicProfile,
-  loadedExchangeRatesFromApi,
-} from './actions';
+import { AppActions } from './actions';
 import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { AlertController, Platform } from '@ionic/angular';
@@ -32,7 +21,7 @@ export class AppEffect {
     text: 'Retry',
     role: 'cancel',
     handler: (): void => {
-      this.store.dispatch(fetchGpsPosition());
+      this.store.dispatch(AppActions.fetchGPSPosition());
     },
   };
 
@@ -40,7 +29,7 @@ export class AppEffect {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),
       switchMap(() => this.api.settings$),
-      map((settings) => loadedSettingsFromApi({ settings })),
+      map((settings) => AppActions.loadedSettingsFromAPI({ settings })),
     );
   });
 
@@ -51,7 +40,7 @@ export class AppEffect {
       switchMap(() =>
         from(this.api.getExchangeRates()).pipe(
           map((exchangeRates) => {
-            return loadedExchangeRatesFromApi({ exchangeRates });
+            return AppActions.loadedExchangeRatesFromAPI({ exchangeRates });
           }),
         ),
       ),
@@ -63,7 +52,7 @@ export class AppEffect {
       ofType(fromAuth.AuthActions.loadedUser),
       filter((payload) => !!payload.user),
       switchMap(() => this.api.publicProfile$),
-      map((profile) => setPublicProfile({ profile })),
+      map((profile) => AppActions.setPublicProfile({ profile })),
     );
   });
 
@@ -72,7 +61,7 @@ export class AppEffect {
       return this.actions$.pipe(
         ofType(
           fromAuth.AuthActions.loadedUser,
-          fetchGpsPosition,
+          AppActions.fetchGPSPosition,
           BiteActions.reloadBites,
         ),
         filter((payload) => {
@@ -84,7 +73,7 @@ export class AppEffect {
         switchMap(() =>
           getCurrentPosition(this.platform).pipe(
             map((currentPosition) =>
-              loadedGpsPosition({ position: currentPosition }),
+              AppActions.loadedGPSPosition({ position: currentPosition }),
             ),
             catchError((error) => {
               console.error(error);
@@ -97,7 +86,7 @@ export class AppEffect {
                 })
                 .then((alert) => alert.present());
 
-              return of(errorLoadingGpsPosition({ error }));
+              return of(AppActions.errorLoadingGPSPosition({ error }));
             }),
           ),
         ),
@@ -108,7 +97,7 @@ export class AppEffect {
 
   stopReloadingBites$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(loadedGpsPosition, errorLoadingGpsPosition),
+      ofType(AppActions.loadedGPSPosition, AppActions.errorLoadingGPSPosition),
       map(() => BiteActions.stopReloadingBites()),
     );
   });
@@ -116,7 +105,7 @@ export class AppEffect {
   saveSettingsToFirestore$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(saveSettings),
+        ofType(AppActions.saveSettings),
         tap(({ settings }) => {
           this.api.saveSettings(settings);
         }),
@@ -141,7 +130,7 @@ export class AppEffect {
   goPublicEffect$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(goPublic),
+        ofType(AppActions.goPublic),
         tap(() => {
           this.api.saveUser();
         }),
@@ -153,7 +142,7 @@ export class AppEffect {
   saveProfileToFirestore$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(savePublicProfile),
+        ofType(AppActions.savePublicProfile),
         tap(({ publicUser }) => {
           this.api.updateUser(publicUser);
         }),
@@ -165,7 +154,7 @@ export class AppEffect {
   goPrivateEffect$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(goPrivate),
+        ofType(AppActions.goPrivate),
         tap(() => {
           this.api.deleteUser();
         }),

@@ -1,15 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import {
-  errorLoadingGpsPosition,
-  goPrivate,
-  loadedGpsPosition,
-  loadedSettingsFromApi,
-  setPublicProfile,
-  setHomeFilters,
-  clearHomeFilters,
-  loadedExchangeRatesFromApi,
-  setHomeSorting,
-} from './actions';
+import { AppActions } from './actions';
 import { AppSlice } from './app-slice.model';
 import { BiteActions } from '../bites/actions';
 import { fromAuth } from 'ta-firestore';
@@ -49,7 +39,7 @@ export const reducer = createReducer<AppSlice>(
       home: true,
     },
   })),
-  on(loadedGpsPosition, (state, { position }) => {
+  on(AppActions.loadedGPSPosition, (state, { position }) => {
     const { coords } = position;
     const { latitude, longitude } = coords;
 
@@ -58,43 +48,43 @@ export const reducer = createReducer<AppSlice>(
       position: { latitude, longitude },
     };
   }),
-  on(errorLoadingGpsPosition, (state) => ({
+  on(AppActions.errorLoadingGPSPosition, (state) => ({
     ...state,
     position: undefined,
   })),
-  on(loadedSettingsFromApi, (state, { settings }) => {
+  on(AppActions.loadedSettingsFromAPI, (state, { settings }) => {
     return {
       ...state,
       settings,
     };
   }),
-  on(setPublicProfile, (state, { profile }) => {
+  on(AppActions.setPublicProfile, (state, { profile }) => {
     return {
       ...state,
       profile,
     };
   }),
-  on(goPrivate, (state) => ({
+  on(AppActions.goPrivate, (state) => ({
     ...state,
     profile: undefined,
   })),
-  on(setHomeFilters, (state, { filters }) => ({
+  on(AppActions.setHomeFilters, (state, { filters }) => ({
     ...state,
     homeFilters: filters.tagFilters,
     maxPriceFilter: filters.priceFilter,
     homeDistance: +filters.distanceFilter,
   })),
-  on(clearHomeFilters, (state) => ({
+  on(AppActions.clearHomeFilters, (state) => ({
     ...state,
     homeFilters: [],
     maxPriceFilter: 0,
     homeDistance: undefined,
   })),
-  on(loadedExchangeRatesFromApi, (state, { exchangeRates }) => ({
+  on(AppActions.loadedExchangeRatesFromAPI, (state, { exchangeRates }) => ({
     ...state,
     exchangeRates,
   })),
-  on(setHomeSorting, (state, { sorting }) => ({
+  on(AppActions.setHomeSorting, (state, { sorting }) => ({
     ...state,
     homeSorting: sorting,
   })),

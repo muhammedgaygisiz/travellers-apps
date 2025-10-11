@@ -5,12 +5,7 @@ import { routerNavigatedAction } from '@ngrx/router-store';
 import { map, skipWhile, switchMap, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { menuId } from '../router/selectors';
-import {
-  loadedMenuFromApi,
-  loadedMenusFromApi,
-  noMenuFound,
-  saveMenu,
-} from './actions';
+import { MenuActions } from './actions';
 import { fromAuth } from 'ta-firestore';
 
 @Injectable()
@@ -23,7 +18,7 @@ export class MenuEffects {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loginSucceeded),
       switchMap(() => this.api.menus$()),
-      map((menus) => loadedMenusFromApi({ menus })),
+      map((menus) => MenuActions.loadedMenusFromAPI({ menus })),
     );
   });
 
@@ -38,10 +33,10 @@ export class MenuEffects {
           }),
           map((menu) => {
             if (!menu) {
-              return noMenuFound();
+              return MenuActions.noMenuFound();
             }
 
-            return loadedMenuFromApi({ menu });
+            return MenuActions.loadedMenuFromAPI({ menu });
           }),
         ),
       ),
@@ -51,7 +46,7 @@ export class MenuEffects {
   saveMenuToFirestore$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(saveMenu),
+        ofType(MenuActions.saveMenu),
         tap(({ menu }) => {
           this.api.saveMenu(menu);
         }),

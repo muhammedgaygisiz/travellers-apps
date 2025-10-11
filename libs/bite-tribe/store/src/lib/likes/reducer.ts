@@ -5,11 +5,11 @@ import { fromAuth } from 'ta-firestore';
 
 export const reducer = createReducer(
   initialState,
-  on(fromAuth.logoutSucceeded, (state) => adapter.removeAll(state)),
+  on(fromAuth.AuthActions.logoutSucceeded, (state) => adapter.removeAll(state)),
   on(loadedLikesFromApi, (state, { likes }) => {
     return adapter.upsertMany(likes, state);
   }),
   on(deletedLike, (state, { like }) => {
     return adapter.removeOne(`${like.biteId}-${like.userId}`, state);
-  })
+  }),
 );

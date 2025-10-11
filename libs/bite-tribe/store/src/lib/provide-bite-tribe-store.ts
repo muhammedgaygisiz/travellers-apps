@@ -16,7 +16,6 @@ import {
   routerRequestAction,
 } from '@ngrx/router-store';
 import { BiteTribeStoreService } from './bite-tribe-store.service';
-import { RouterEffects } from './router/effects';
 import { BiteEffects } from './bites/effects';
 import { fromBites } from './bites';
 import { ReviewEffects } from './reviews/effects';
@@ -30,7 +29,7 @@ import { RestaurantEffects } from './restaurants/effects';
 import { LikeEffects } from './likes/effects';
 import { MenuEffects } from './menus/effects';
 import { FirebaseOptions } from 'firebase/app';
-import { loadedBitesFromApi } from './bites/actions';
+import { BiteActions } from './bites/actions';
 import { loadedRestaurantsFromApi } from './restaurants/actions';
 import { BucketListEffect } from './bucketlists/effects';
 import { fromBucketlists } from './bucketlists';
@@ -49,7 +48,8 @@ const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
 
 const actionSanitizer: any = (action: Action) => {
   const isLoadedBitesWithData =
-    action.type === loadedBitesFromApi.type && (action as any).bites.length > 0;
+    action.type === BiteActions.loadedFromAPI.type &&
+    (action as any).bites.length > 0;
 
   if (isLoadedBitesWithData) {
     return {
@@ -130,7 +130,7 @@ export const provideBiteTribeStore = (environment: Environment): any => [
         strictActionImmutability: true,
         strictStateImmutability: true,
       },
-    }
+    },
   ),
   !environment.production
     ? provideStoreDevtools({
@@ -149,22 +149,20 @@ export const provideBiteTribeStore = (environment: Environment): any => [
   environment.isBusiness
     ? provideEffects(
         AuthEffects,
-        RouterEffects,
         RestaurantEffects,
         MenuEffects,
         AppEffect,
-        BiteEffects
+        BiteEffects,
       )
     : provideEffects(
         AuthEffects,
-        RouterEffects,
         BiteEffects,
         LikeEffects,
         ReviewEffects,
         AppEffect,
         RestaurantEffects,
         MenuEffects,
-        BucketListEffect
+        BucketListEffect,
       ),
   provideState(fromBites.key, fromBites.reducer),
   provideState(fromReviews.key, fromReviews.reducer),
@@ -175,6 +173,6 @@ export const provideBiteTribeStore = (environment: Environment): any => [
   provideState(fromBucketlists.key, fromBucketlists.reducer),
   provideFirestoreUtils(
     toFirebaseOptions(environment),
-    !environment.isBusiness
+    !environment.isBusiness,
   ),
 ];

@@ -5,7 +5,6 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BucketListEffect } from '../effects';
-import { rootEffectsInit } from '@ngrx/effects';
 import {
   createAndSaveBiteIdToBucketList,
   createBucketList,
@@ -13,6 +12,7 @@ import {
   removeBiteFromBucketlist,
   saveBiteIdToBucketList,
 } from '../actions';
+import { fromAuth } from 'ta-firestore';
 import SpyInstance = jest.SpyInstance;
 
 const assertDeepEqual = (actual: any, expected: any): void => {
@@ -20,7 +20,7 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 };
 
 const Mock = {
-  allBucketlists$: of([]),
+  bucketlists$: (): Observable<any> => of([]),
   saveBiteIdToBucketList: jest.fn(),
   createBucketListAndSaveBiteIdToBucketList: jest.fn(),
   removeBiteFromBucketlist: jest.fn(),
@@ -51,17 +51,14 @@ describe('BucketListEffect', () => {
   describe('loadBucketlistsFromApi$', () => {
     it('should load bucketlists from API on ROOT_EFFECTS_INIT', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: rootEffectsInit });
+        actions$ = cold('a', { a: fromAuth.AuthActions.loginSucceeded });
 
         const expected = 'a';
         const output = {
           a: loadedBucketlistsFromApi({ bucketlists: [] }),
         };
 
-        expectObservable(effects.loadBucketlistsFromApi$).toBe(
-          expected,
-          output
-        );
+        expectObservable(effects.startListener$).toBe(expected, output);
       });
     });
   });
@@ -109,11 +106,11 @@ describe('BucketListEffect', () => {
         });
 
         expectObservable(
-          effects.createBucketlistAndSaveBiteIdToBucketListEffect$
+          effects.createBucketlistAndSaveBiteIdToBucketListEffect$,
         );
       });
       expect(
-        createBucketListAndSaveBiteIdToBucketListSpy
+        createBucketListAndSaveBiteIdToBucketListSpy,
       ).toHaveBeenCalledTimes(1);
     });
   });

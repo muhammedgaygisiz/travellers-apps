@@ -15,7 +15,7 @@ describe('Bucketlists Reducer', () => {
       } as EntityState<Bucketlist>;
       const NEW_STATE = { ids: [], entities: {} } as EntityState<Bucketlist>;
 
-      const logoutSucceededAction = fromAuth.logoutSucceeded();
+      const logoutSucceededAction = fromAuth.AuthActions.logoutSucceeded();
 
       expect(reducer(INITIAL_STATE, logoutSucceededAction)).toEqual({
         ...NEW_STATE,

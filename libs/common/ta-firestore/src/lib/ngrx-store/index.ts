@@ -1,15 +1,4 @@
-import {
-  confirmRegistrationErrorMessage,
-  login,
-  loginSucceeded,
-  loginWithGoogleAccount,
-  loginWithAppleAccount,
-  loginWithFacebookAccount,
-  logout,
-  register,
-  logoutSucceeded,
-  loadedUser,
-} from './actions';
+import { AuthActions } from './actions';
 import {
   selectIsAuthenticated,
   selectLoginFailed,
@@ -21,17 +10,8 @@ import {
 export const fromAuth = {
   selectRegistrationErrorCode,
   selectLoginFailed,
-  register,
-  confirmRegistrationErrorMessage,
-  login,
-  loginWithGoogleAccount,
-  loginWithAppleAccount,
-  loginWithFacebookAccount,
   selectIsAuthenticated,
-  loginSucceeded,
-  logout,
-  logoutSucceeded,
   selectUserId,
   selectUser,
-  loadedUser,
+  AuthActions,
 };

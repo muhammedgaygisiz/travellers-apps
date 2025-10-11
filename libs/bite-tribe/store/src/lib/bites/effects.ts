@@ -1,25 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  Actions,
-  createEffect,
-  ofType,
-  ROOT_EFFECTS_INIT,
-} from '@ngrx/effects';
-import {
-  deleteBite,
-  loadedBiteCreator,
-  loadedBitesFromApi,
-  noPublicCreatorForBite,
-  saveExistingBite,
-  saveNewBite,
-  saveTags,
-} from './actions';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { BiteActions } from './actions';
 import { filter, map, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { bite } from './selectors';
+import { fromAuth } from 'ta-firestore';
 
 @Injectable()
 export class BiteEffects {
@@ -29,67 +17,67 @@ export class BiteEffects {
 
   private readonly bite = toSignal(this.store.select(bite));
 
-  loadBitesFromApi$ = createEffect(() => {
+  startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(ROOT_EFFECTS_INIT),
-      switchMap(() => this.api.allBites$),
-      map((bites) => loadedBitesFromApi({ bites }))
+      ofType(fromAuth.AuthActions.loginSucceeded),
+      switchMap(() => this.api.bites$()),
+      map((bites) => BiteActions.loadedFromAPI({ bites })),
     );
   });
 
   saveNewBiteToFirestore$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(saveNewBite),
+        ofType(BiteActions.saveNewBite),
         tap(({ bite }) => {
           this.api.saveNewBite(bite);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   saveEditedBiteToFirestore$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(saveExistingBite),
+        ofType(BiteActions.saveExistingBite),
         tap(({ bite }) => {
           this.api.saveEditedBite(bite);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   saveTagsToExistingBite$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(saveTags),
+        ofType(BiteActions.saveNewTags),
         tap((payload) => {
           this.api.saveTagsToExistingBite(payload);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   deleteBite$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(deleteBite),
+        ofType(BiteActions.deleteBite),
         tap(({ bite }) => {
           this.api.deleteBite(bite);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   loadUserFromBite$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(routerNavigatedAction),
       filter(({ payload }) =>
-        payload.event.urlAfterRedirects.includes('/bite/')
+        payload.event.urlAfterRedirects.includes('/bite/'),
       ),
       switchMap(() => {
         const bite = this.bite();
@@ -98,13 +86,13 @@ export class BiteEffects {
       }),
       map((biteCreator) => {
         if (biteCreator?.snapshot?.data) {
-          return loadedBiteCreator({
+          return BiteActions.loadedBiteCreator({
             biteCreator: biteCreator?.snapshot?.data,
           });
         }
 
-        return noPublicCreatorForBite();
-      })
+        return BiteActions.noPublicCreatorForBite();
+      }),
     );
   });
 }

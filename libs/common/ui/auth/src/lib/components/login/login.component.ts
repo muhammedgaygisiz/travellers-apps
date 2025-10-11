@@ -54,13 +54,12 @@ export class LoginComponent {
 
   public readonly submitSignupWithGoogle = output();
   public readonly submitSignupWithApple = output();
-  public readonly submitSignupWithFacebook = output();
 
   public authFormGroup: FormGroup = new FormGroup<AuthCredentialFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),
     password: new FormControl<string>(
       '',
-      Validators.compose(getPasswordValidators())
+      Validators.compose(getPasswordValidators()),
     ),
   });
 
@@ -70,9 +69,5 @@ export class LoginComponent {
 
   public onAppleSignUp(): void {
     this.submitSignupWithApple.emit();
-  }
-
-  public onFacebookSignUp(): void {
-    this.submitSignupWithFacebook.emit();
   }
 }

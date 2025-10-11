@@ -1,24 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  errorLoadingGpsPosition,
-  fetchGpsPosition,
-  goPrivate,
-  goPublic,
-  loadedGpsPosition,
-  loadedSettingsFromApi,
-  savePublicProfile,
-  saveSettings,
-  setPublicProfile,
-  loadedExchangeRatesFromApi,
-} from './actions';
+import { AppActions } from './actions';
 import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { AlertController, Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
-import { reloadBites, stopReloadingBites } from '../bites/actions';
+import { BiteActions } from '../bites/actions';
 
 @Injectable()
 export class AppEffect {
@@ -32,47 +21,51 @@ export class AppEffect {
     text: 'Retry',
     role: 'cancel',
     handler: (): void => {
-      this.store.dispatch(fetchGpsPosition());
+      this.store.dispatch(AppActions.fetchGPSPosition());
     },
   };
 
   loadSettingsFromApi$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loadedUser),
+      ofType(fromAuth.AuthActions.loadedUser),
       switchMap(() => this.api.settings$),
-      map((settings) => loadedSettingsFromApi({ settings }))
+      map((settings) => AppActions.loadedSettingsFromAPI({ settings })),
     );
   });
 
   loadExchangeRatesFromApi$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loadedUser),
+      ofType(fromAuth.AuthActions.loadedUser),
       filter((payload) => !!payload.user),
       switchMap(() =>
         from(this.api.getExchangeRates()).pipe(
           map((exchangeRates) => {
-            return loadedExchangeRatesFromApi({ exchangeRates });
-          })
-        )
-      )
+            return AppActions.loadedExchangeRatesFromAPI({ exchangeRates });
+          }),
+        ),
+      ),
     );
   });
 
   loadPublicProfile$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.loadedUser),
+      ofType(fromAuth.AuthActions.loadedUser),
       filter((payload) => !!payload.user),
       switchMap(() => this.api.publicProfile$),
-      map((profile) => setPublicProfile({ profile }))
+      map((profile) => AppActions.setPublicProfile({ profile })),
     );
   });
 
   fetchGpsPosition$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(fromAuth.loadedUser, fetchGpsPosition, reloadBites),
+        ofType(
+          fromAuth.AuthActions.loadedUser,
+          AppActions.fetchGPSPosition,
+          BiteActions.reloadBites,
+        ),
         filter((payload) => {
-          if (payload.type === fromAuth.loadedUser.type) {
+          if (payload.type === fromAuth.AuthActions.loadedUser.type) {
             return !!payload.user;
           }
           return true;
@@ -80,7 +73,7 @@ export class AppEffect {
         switchMap(() =>
           getCurrentPosition(this.platform).pipe(
             map((currentPosition) =>
-              loadedGpsPosition({ position: currentPosition })
+              AppActions.loadedGPSPosition({ position: currentPosition }),
             ),
             catchError((error) => {
               console.error(error);
@@ -93,80 +86,80 @@ export class AppEffect {
                 })
                 .then((alert) => alert.present());
 
-              return of(errorLoadingGpsPosition({ error }));
-            })
-          )
-        )
+              return of(AppActions.errorLoadingGPSPosition({ error }));
+            }),
+          ),
+        ),
       );
     },
-    { useEffectsErrorHandler: true }
+    { useEffectsErrorHandler: true },
   );
 
   stopReloadingBites$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(loadedGpsPosition, errorLoadingGpsPosition),
-      map(() => stopReloadingBites())
+      ofType(AppActions.loadedGPSPosition, AppActions.errorLoadingGPSPosition),
+      map(() => BiteActions.stopReloadingBites()),
     );
   });
 
   saveSettingsToFirestore$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(saveSettings),
+        ofType(AppActions.saveSettings),
         tap(({ settings }) => {
           this.api.saveSettings(settings);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   saveUserAfterLogin$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(fromAuth.loadedUser),
+        ofType(fromAuth.AuthActions.loadedUser),
         filter((payload) => !!payload.user),
         tap(() => {
           this.api.saveUserIfNotExisting();
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   goPublicEffect$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(goPublic),
+        ofType(AppActions.goPublic),
         tap(() => {
           this.api.saveUser();
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   saveProfileToFirestore$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(savePublicProfile),
+        ofType(AppActions.savePublicProfile),
         tap(({ publicUser }) => {
           this.api.updateUser(publicUser);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   goPrivateEffect$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(goPrivate),
+        ofType(AppActions.goPrivate),
         tap(() => {
           this.api.deleteUser();
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 }

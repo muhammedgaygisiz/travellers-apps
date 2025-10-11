@@ -1,5 +1,9 @@
 @use 'globals';
 
+$BRONZE: #cd7f32;
+$SILVER: #c0c0c0;
+$GOLD: #ffd700;
+
 :host {
   .profile-container {
     margin: 0 auto;
@@ -35,6 +39,26 @@
 
       font-size: 1.25rem;
       font-weight: bold;
+
+      .bite-badge {
+        background: var(--ion-color-primary);
+
+        &.green {
+          background: var(--ion-color-success);
+        }
+
+        &.bronze {
+          background: $BRONZE;
+        }
+
+        &.silver {
+          background: $SILVER;
+        }
+
+        &.gold {
+          background: $GOLD;
+        }
+      }
     }
 
     .profile-location {

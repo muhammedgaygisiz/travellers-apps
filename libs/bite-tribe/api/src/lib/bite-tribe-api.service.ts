@@ -35,11 +35,6 @@ export class BiteTribeApiService {
   private readonly settingsApiService = inject(SettingsApiService);
   private readonly exchangeRatesApiService = inject(ExchangeRatesApiService);
 
-  allRestaurants$ = this.restaurantApiService.allRestaurants$;
-  allMenus$ = this.menuApiService.allMenus$;
-  allLikes$ = this.likeApiService.allLikes$;
-  allBucketlists$ = this.bucketlistApiService.allBucketlists$;
-  allBites$ = this.biteApiService.allBites$;
   publicProfile$ = this.profileApiService.publicProfile$;
   settings$ = this.settingsApiService.settings$.pipe(
     tap((settings) => {
@@ -49,7 +44,7 @@ export class BiteTribeApiService {
         document.documentElement.classList.toggle('dark', theme === 'dark');
         document.documentElement.classList.toggle('light', theme === 'light');
       }
-    })
+    }),
   );
 
   getExchangeRates(): Promise<Record<string, number>> {
@@ -67,7 +62,7 @@ export class BiteTribeApiService {
   saveSocialMediaLinksForRestaurant(restaurantId: string, links: Link[]): void {
     this.restaurantApiService.saveSocialMediaLinksForRestaurant(
       restaurantId,
-      links
+      links,
     );
   }
 
@@ -104,16 +99,16 @@ export class BiteTribeApiService {
   }
 
   removeBiteFromBucketlist(
-    params: RemoveBiteFromBucketlistParams
+    params: RemoveBiteFromBucketlistParams,
   ): Promise<void> {
     return this.bucketlistApiService.removeBiteFromBucketlist(params);
   }
 
   createBucketListAndSaveBiteIdToBucketList(
-    params: CreateAndSaveToBucketListParams
+    params: CreateAndSaveToBucketListParams,
   ): Promise<void> {
     return this.bucketlistApiService.createBucketListAndSaveBiteIdToBucketList(
-      params
+      params,
     );
   }
 
@@ -159,5 +154,35 @@ export class BiteTribeApiService {
 
   saveUserIfNotExisting(): void {
     this.profileApiService.saveUserIfNotExisting();
+  }
+
+  bites$(): Observable<Bite[]> {
+    this.biteApiService.startListener();
+
+    return this.biteApiService.bites$;
+  }
+
+  likes$(): Observable<any[]> {
+    this.likeApiService.startListener();
+
+    return this.likeApiService.likes$;
+  }
+
+  restaurants$(): Observable<any[]> {
+    this.restaurantApiService.startListener();
+
+    return this.restaurantApiService.restaurants$;
+  }
+
+  menus$(): Observable<any[]> {
+    this.menuApiService.startListener();
+
+    return this.menuApiService.menus$;
+  }
+
+  bucketlists$(): Observable<any[]> {
+    this.bucketlistApiService.startListener();
+
+    return this.bucketlistApiService.bucketlists$;
   }
 }

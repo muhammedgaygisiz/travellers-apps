@@ -4,24 +4,13 @@ import { AlertController, Platform } from '@ionic/angular';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
 import { fromAuth } from 'ta-firestore';
-import {
-  errorLoadingGpsPosition,
-  fetchGpsPosition,
-  goPrivate,
-  goPublic,
-  loadedExchangeRatesFromApi,
-  loadedGpsPosition,
-  loadedSettingsFromApi,
-  savePublicProfile,
-  saveSettings,
-  setPublicProfile,
-} from '../actions';
+import { AppActions } from '../actions';
 import { AppEffect } from '../effects';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { PublicUser, Settings } from 'model';
 import SpyInstance = jest.SpyInstance;
-import { stopReloadingBites } from '../../bites/actions';
+import { BiteActions } from '../../bites/actions';
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
@@ -72,11 +61,13 @@ describe('AppEffect', () => {
   describe('loadSettingsFromApi$', () => {
     it('should load settings from API on ROOT_EFFECTS_INIT', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.loadedUser });
+        actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
 
         const expected = 'a';
         const output = {
-          a: loadedSettingsFromApi({ settings: { theme: 'dark' } as Settings }),
+          a: AppActions.loadedSettingsFromAPI({
+            settings: { theme: 'dark' } as Settings,
+          }),
         };
 
         expectObservable(effects.loadSettingsFromApi$).toBe(expected, output);
@@ -87,7 +78,7 @@ describe('AppEffect', () => {
   describe('loadPublicProfile$', () => {
     it('should do nothing if user is not provided', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.loadedUser });
+        actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
 
         const expected = '-';
 
@@ -97,11 +88,15 @@ describe('AppEffect', () => {
 
     it('should load public profile on fromAuth.loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.loadedUser({ user: {} }) });
+        actions$ = cold('a', {
+          a: fromAuth.AuthActions.loadedUser({ user: {} }),
+        });
 
         const expected = 'a';
         const output = {
-          a: setPublicProfile({ profile: { displayName: 'test' } as any }),
+          a: AppActions.setPublicProfile({
+            profile: { displayName: 'test' } as any,
+          }),
         };
 
         expectObservable(effects.loadPublicProfile$).toBe(expected, output);
@@ -117,10 +112,10 @@ describe('AppEffect', () => {
 
         getCurrentPositionMock.mockReturnValue(cold('--a|', { a: position }));
 
-        actions$ = cold('a', { a: fromAuth.loadedUser({ user }) });
+        actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser({ user }) });
 
         const expected = '--a';
-        const output = { a: loadedGpsPosition({ position }) };
+        const output = { a: AppActions.loadedGPSPosition({ position }) };
 
         expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
       });
@@ -133,10 +128,10 @@ describe('AppEffect', () => {
 
         getCurrentPositionMock.mockReturnValue(cold('--#', {}, error));
 
-        actions$ = cold('a', { a: fetchGpsPosition() });
+        actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
 
         const expected = '--a';
-        const output = { a: errorLoadingGpsPosition({ error }) };
+        const output = { a: AppActions.errorLoadingGPSPosition({ error }) };
 
         expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
       });
@@ -147,10 +142,12 @@ describe('AppEffect', () => {
   describe('stopReloadingBites$', () => {
     it('should dispatch stopReloadingBites on loadedGpsPosition', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: loadedGpsPosition({ position: {} }) });
+        actions$ = cold('a', {
+          a: AppActions.loadedGPSPosition({ position: {} }),
+        });
 
         const expected = 'a';
-        const output = { a: stopReloadingBites() };
+        const output = { a: BiteActions.stopReloadingBites() };
 
         expectObservable(effects.stopReloadingBites$).toBe(expected, output);
       });
@@ -158,10 +155,12 @@ describe('AppEffect', () => {
 
     it('should dispatch stopReloadingBites on errorLoadingGpsPosition', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: errorLoadingGpsPosition({ error: {} }) });
+        actions$ = cold('a', {
+          a: AppActions.errorLoadingGPSPosition({ error: {} }),
+        });
 
         const expected = 'a';
-        const output = { a: stopReloadingBites() };
+        const output = { a: BiteActions.stopReloadingBites() };
 
         expectObservable(effects.stopReloadingBites$).toBe(expected, output);
       });
@@ -181,7 +180,7 @@ describe('AppEffect', () => {
       scheduler.run(({ cold, expectObservable }) => {
         const settings = { theme: 'dark' } as Settings;
         actions$ = cold('a', {
-          a: saveSettings({ settings }),
+          a: AppActions.saveSettings({ settings }),
         });
 
         expectObservable(effects.saveSettingsToFirestore$);
@@ -201,7 +200,7 @@ describe('AppEffect', () => {
     it('should save user on goPublic', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: goPublic(),
+          a: AppActions.goPublic(),
         });
 
         expectObservable(effects.goPublicEffect$);
@@ -221,7 +220,7 @@ describe('AppEffect', () => {
     it('should save profile to firestore on savePublicProfile', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: savePublicProfile({ publicUser: {} as PublicUser }),
+          a: AppActions.savePublicProfile({ publicUser: {} as PublicUser }),
         });
 
         expectObservable(effects.saveProfileToFirestore$);
@@ -241,7 +240,7 @@ describe('AppEffect', () => {
     it('should delete user on goPrivate', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: goPrivate(),
+          a: AppActions.goPrivate(),
         });
 
         expectObservable(effects.goPrivateEffect$);
@@ -263,7 +262,7 @@ describe('AppEffect', () => {
     it('should save user if not existing on loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.loadedUser({ user: {} }),
+          a: fromAuth.AuthActions.loadedUser({ user: {} }),
         });
 
         expectObservable(effects.saveUserAfterLogin$);
@@ -282,18 +281,20 @@ describe('AppEffect', () => {
 
     it('should load exchange rates from API on fromAuth.loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.loadedUser({ user: {} }) });
+        actions$ = cold('a', {
+          a: fromAuth.AuthActions.loadedUser({ user: {} }),
+        });
 
         const expected = 'a';
         const output = {
-          a: loadedExchangeRatesFromApi({
+          a: AppActions.loadedExchangeRatesFromAPI({
             exchangeRates: { USD: 1, EUR: 0.85 },
           }),
         };
 
         expectObservable(effects.loadExchangeRatesFromApi$).toBe(
           expected,
-          output
+          output,
         );
       });
     });

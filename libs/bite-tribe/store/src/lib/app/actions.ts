@@ -1,60 +1,29 @@
-import { createAction, props } from '@ngrx/store';
+import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { PublicUser, Settings } from 'model';
 
-export const fetchGpsPosition = createAction('[APP] Fetch GPS position');
-
-export const loadedGpsPosition = createAction(
-  '[APP] Loaded GPS position',
-  props<{ position: any }>()
-);
-
-export const errorLoadingGpsPosition = createAction(
-  '[APP] Error loading GPS position',
-  props<{ error: any }>()
-);
-
-export const saveSettings = createAction(
-  '[APP] Save settings',
-  props<{ settings: Settings }>()
-);
-
-export const savePublicProfile = createAction(
-  '[APP] Save public profile',
-  props<{ publicUser: PublicUser }>()
-);
-
-export const loadedSettingsFromApi = createAction(
-  '[APP] Loaded settings from API',
-  props<{ settings: Settings }>()
-);
-
-export const setPublicProfile = createAction(
-  '[APP] Set public profile',
-  props<{ profile: PublicUser }>()
-);
-
-export const goPublic = createAction('[APP] Go public');
-export const goPrivate = createAction('[APP] Go private');
-
-export const setHomeFilters = createAction(
-  '[APP] Set home filters',
-  props<{
-    filters: {
-      tagFilters: string[];
-      distanceFilter: string;
-      priceFilter: number;
-    };
-  }>()
-);
-
-export const setHomeSorting = createAction(
-  '[APP] Set home sorting',
-  props<{ sorting: string }>()
-);
-
-export const clearHomeFilters = createAction('[APP] Clear home filters');
-
-export const loadedExchangeRatesFromApi = createAction(
-  '[APP] Loaded exchange rates from API',
-  props<{ exchangeRates: Record<string, number> }>()
-);
+export const AppActions = createActionGroup({
+  source: 'APP',
+  events: {
+    'Fetch GPS position': emptyProps(),
+    'Loaded GPS position': props<{ position: any }>(),
+    'Error loading GPS position': props<{ error: any }>(),
+    'Save settings': props<{ settings: Settings }>(),
+    'Save public profile': props<{ publicUser: PublicUser }>(),
+    'Loaded settings from API': props<{ settings: Settings }>(),
+    'Set public profile': props<{ profile: PublicUser }>(),
+    'Go public': emptyProps(),
+    'Go private': emptyProps(),
+    'Set home filters': props<{
+      filters: {
+        tagFilters: string[];
+        distanceFilter: string;
+        priceFilter: number;
+      };
+    }>(),
+    'Set home sorting': props<{ sorting: string }>(),
+    'Clear home filters': emptyProps(),
+    'Loaded exchange rates from API': props<{
+      exchangeRates: Record<string, number>;
+    }>(),
+  },
+});

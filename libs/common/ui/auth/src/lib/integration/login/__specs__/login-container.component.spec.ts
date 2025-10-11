@@ -86,11 +86,6 @@ describe('LoginContainerComponent', () => {
     expect(mockLoginService.loginWithAppleAccount).toHaveBeenCalled();
   });
 
-  it('should call loginWithFacebookAccount on service when onSignupWithFacebook is called', () => {
-    component.onSignupWithFacebook();
-    expect(mockLoginService.loginWithFacebookAccount).toHaveBeenCalled();
-  });
-
   it('should handle optional service injection', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -98,7 +93,7 @@ describe('LoginContainerComponent', () => {
     }).compileComponents();
 
     const fixtureWithoutService = TestBed.createComponent(
-      LoginContainerComponent
+      LoginContainerComponent,
     );
     const componentWithoutService = fixtureWithoutService.componentInstance;
     (componentWithoutService as any)['loginService'] = null;

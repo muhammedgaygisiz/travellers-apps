@@ -18,13 +18,6 @@
         <ion-button fill="outline" (click)="onAppleSignUp()">
           <ion-icon name="logo-apple" color="secondary" />
         </ion-button>
-        <ion-button
-          fill="outline"
-          (click)="onFacebookSignUp()"
-          [disabled]="true"
-        >
-          <ion-icon name="logo-facebook" color="secondary" />
-        </ion-button>
       </div>
 
       <div class="ion-margin-top separator ion-margin-bottom">
@@ -65,11 +58,11 @@
         </ion-button>
 
         @if (loginFailed()) {
-        <div class="ion-margin-top">
-          <ion-text color="danger">
-            Something went wrong. Please try again.
-          </ion-text>
-        </div>
+          <div class="ion-margin-top">
+            <ion-text color="danger">
+              Something went wrong. Please try again.
+            </ion-text>
+          </div>
         }
       </form>
     </div>

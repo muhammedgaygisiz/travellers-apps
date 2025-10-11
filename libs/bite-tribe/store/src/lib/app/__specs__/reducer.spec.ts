@@ -1,18 +1,8 @@
-import {
-  errorLoadingGpsPosition,
-  goPrivate,
-  loadedGpsPosition,
-  loadedSettingsFromApi,
-  setPublicProfile,
-  setHomeFilters,
-  clearHomeFilters,
-  loadedExchangeRatesFromApi,
-  setHomeSorting,
-} from '../actions';
+import { AppActions } from '../actions';
 import { reducer } from '../reducer';
 import { AppSlice } from '../app-slice.model';
 import { PublicUser, Settings } from 'model';
-import { loadedBitesFromApi } from '../../bites/actions';
+import { BiteActions } from '../../bites/actions';
 import { fromAuth } from 'ta-firestore';
 
 describe('App Reducer', () => {
@@ -44,7 +34,7 @@ describe('App Reducer', () => {
         maxPriceFilter: 0,
       } as AppSlice;
 
-      const logoutAction = fromAuth.logoutSucceeded();
+      const logoutAction = fromAuth.AuthActions.logoutSucceeded();
 
       expect(reducer(INITIAL_STATE, logoutAction)).toEqual({
         ...NEW_STATE,
@@ -61,7 +51,7 @@ describe('App Reducer', () => {
         },
       } as AppSlice;
 
-      const loginAction = fromAuth.loginSucceeded();
+      const loginAction = fromAuth.AuthActions.loginSucceeded();
 
       expect(reducer(INITIAL_STATE, loginAction)).toEqual({
         ...NEW_STATE,
@@ -78,7 +68,7 @@ describe('App Reducer', () => {
         },
       } as AppSlice;
 
-      const loadedBitesFromApiAction = loadedBitesFromApi({ bites: [] });
+      const loadedBitesFromApiAction = BiteActions.loadedFromAPI({ bites: [] });
 
       expect(reducer(INITIAL_STATE, loadedBitesFromApiAction)).toEqual({
         ...NEW_STATE,
@@ -97,7 +87,7 @@ describe('App Reducer', () => {
         position: POSITION_MOCK,
       } as AppSlice;
 
-      const loadedGpsPositionAction = loadedGpsPosition({
+      const loadedGpsPositionAction = AppActions.loadedGPSPosition({
         position: { coords: POSITION_MOCK },
       });
 
@@ -116,7 +106,7 @@ describe('App Reducer', () => {
         position: undefined,
       } as AppSlice;
 
-      const errorLoadingGpsPositionAction = errorLoadingGpsPosition({
+      const errorLoadingGpsPositionAction = AppActions.errorLoadingGPSPosition({
         error: 'error',
       });
 
@@ -134,7 +124,7 @@ describe('App Reducer', () => {
         settings: SETTINGS_MOCK,
       } as AppSlice;
 
-      const loadedSettingsFromApiAction = loadedSettingsFromApi({
+      const loadedSettingsFromApiAction = AppActions.loadedSettingsFromAPI({
         settings: SETTINGS_MOCK,
       });
 
@@ -152,7 +142,7 @@ describe('App Reducer', () => {
         profile: PUBLIC_PROFILE_MOCK,
       } as AppSlice;
 
-      const setPublicProfileAction = setPublicProfile({
+      const setPublicProfileAction = AppActions.setPublicProfile({
         profile: PUBLIC_PROFILE_MOCK,
       });
 
@@ -172,7 +162,7 @@ describe('App Reducer', () => {
         profile: undefined,
       } as AppSlice;
 
-      const goPrivateAction = goPrivate();
+      const goPrivateAction = AppActions.goPrivate();
 
       expect(reducer(INITIAL_STATE, goPrivateAction)).toEqual({
         ...NEW_STATE,
@@ -191,7 +181,7 @@ describe('App Reducer', () => {
         maxPriceFilter: 0,
       } as AppSlice;
 
-      const setHomeFiltersAction = setHomeFilters({
+      const setHomeFiltersAction = AppActions.setHomeFilters({
         filters: {
           tagFilters: ['#food', '#drink'],
           distanceFilter: '',
@@ -214,7 +204,7 @@ describe('App Reducer', () => {
         maxPriceFilter: 0,
       } as AppSlice;
 
-      const setHomeFiltersAction = setHomeFilters({
+      const setHomeFiltersAction = AppActions.setHomeFilters({
         filters: {
           tagFilters: ['#new', '#filters'],
           distanceFilter: '',
@@ -238,7 +228,7 @@ describe('App Reducer', () => {
         maxPriceFilter: 0,
       } as unknown as AppSlice;
 
-      const clearHomeFiltersAction = clearHomeFilters();
+      const clearHomeFiltersAction = AppActions.clearHomeFilters();
 
       expect(reducer(INITIAL_STATE, clearHomeFiltersAction)).toEqual({
         ...NEW_STATE,
@@ -254,7 +244,7 @@ describe('App Reducer', () => {
         maxPriceFilter: 0,
       } as unknown as AppSlice;
 
-      const clearHomeFiltersAction = clearHomeFilters();
+      const clearHomeFiltersAction = AppActions.clearHomeFilters();
 
       expect(reducer(INITIAL_STATE, clearHomeFiltersAction)).toEqual({
         ...NEW_STATE,
@@ -270,9 +260,10 @@ describe('App Reducer', () => {
         exchangeRates: EXCHANGE_RATES_MOCK,
       } as unknown as AppSlice;
 
-      const loadedExchangeRatesFromApiAction = loadedExchangeRatesFromApi({
-        exchangeRates: EXCHANGE_RATES_MOCK,
-      });
+      const loadedExchangeRatesFromApiAction =
+        AppActions.loadedExchangeRatesFromAPI({
+          exchangeRates: EXCHANGE_RATES_MOCK,
+        });
 
       expect(reducer(INITIAL_STATE, loadedExchangeRatesFromApiAction)).toEqual({
         ...NEW_STATE,
@@ -289,7 +280,7 @@ describe('App Reducer', () => {
         homeSorting: 'price',
       } as AppSlice;
 
-      const setHomeSortingAction = setHomeSorting({
+      const setHomeSortingAction = AppActions.setHomeSorting({
         sorting: 'price',
       });
 

@@ -2,13 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { createAction, props, Store } from '@ngrx/store';
-import {
-  cacheBite,
-  deleteBite,
-  saveExistingBite,
-  saveNewBite,
-  saveTags,
-} from './bites/actions';
+import { BiteActions } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import {
   allTags,
@@ -28,16 +22,8 @@ import {
   restaurantToCreate,
 } from './restaurants/selectors';
 import { menu } from './menus/selectors';
-import { saveMenu } from './menus/actions';
-import {
-  clearHomeFilters,
-  goPrivate,
-  goPublic,
-  savePublicProfile,
-  saveSettings,
-  setHomeFilters,
-  setHomeSorting,
-} from './app/actions';
+import { MenuActions } from './menus/actions';
+import { AppActions } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -89,17 +75,17 @@ import { fromBites } from './bites';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
-  props<{ docType: string }>()
+  props<{ docType: string }>(),
 );
 
 const getActionByDocType = (docType: string, entity: any): any => {
   switch (docType) {
     case 'bite': {
       if (entity.id) {
-        return saveExistingBite({ bite: entity });
+        return BiteActions.saveExistingBite({ bite: entity });
       }
 
-      return saveNewBite({ bite: entity });
+      return BiteActions.saveNewBite({ bite: entity });
     }
     case 'restaurant': {
       return saveNewRestaurant({ restaurant: entity });
@@ -160,23 +146,21 @@ export class BiteTribeStoreService implements StoreService {
   homeDistance$ = this.store.select(homeDistance);
 
   loginWithGoogleAccount(): void {
-    this.store.dispatch(fromAuth.loginWithGoogleAccount());
+    this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());
   }
 
   loginWithAppleAccount(): void {
-    this.store.dispatch(fromAuth.loginWithAppleAccount());
-  }
-
-  loginWithFacebookAccount(): void {
-    this.store.dispatch(fromAuth.loginWithFacebookAccount());
+    this.store.dispatch(fromAuth.AuthActions.loginWithAppleAccount());
   }
 
   login(authCreds: Login): void {
-    this.store.dispatch(fromAuth.login({ authCreds }));
+    this.store.dispatch(fromAuth.AuthActions.login({ authCreds }));
   }
 
   register(registration: Login): void {
-    this.store.dispatch(fromAuth.register({ registration }));
+    this.store.dispatch(
+      fromAuth.AuthActions.registerWithEmail({ registration }),
+    );
   }
 
   confirmError(): void {
@@ -189,25 +173,25 @@ export class BiteTribeStoreService implements StoreService {
 
   saveTags(newTagsArray: string[], id: string): void {
     this.store.dispatch(
-      saveTags({
+      BiteActions.saveNewTags({
         newTags: newTagsArray,
         id,
-      })
+      }),
     );
   }
 
   logout(): void {
-    this.store.dispatch(fromAuth.logout());
+    this.store.dispatch(fromAuth.AuthActions.logout());
   }
 
   submitLikeOrDislikeClick(
     bite: Bite | undefined | null,
     userId: string,
-    likeType: { likeType: string; biteId: string }
+    likeType: { likeType: string; biteId: string },
   ): void {
     const likeFromUser = bite?.likes?.find(
       (like: Like) =>
-        like.userId === userId && like.likeType === likeType.likeType
+        like.userId === userId && like.likeType === likeType.likeType,
     );
 
     if (likeFromUser) {
@@ -223,7 +207,7 @@ export class BiteTribeStoreService implements StoreService {
       saveLike({
         ...event,
         createdAt: new Date().toISOString(),
-      })
+      }),
     );
   }
 
@@ -232,11 +216,11 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   saveSettings(settings: Settings): void {
-    this.store.dispatch(saveSettings({ settings }));
+    this.store.dispatch(AppActions.saveSettings({ settings }));
   }
 
   savePublicProfile(publicUser: PublicUser): void {
-    this.store.dispatch(savePublicProfile({ publicUser }));
+    this.store.dispatch(AppActions.savePublicProfile({ publicUser }));
   }
 
   saveReview(newReview: { review: string; biteId: string }): void {
@@ -248,11 +232,11 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   saveMenu(menu: Menu): void {
-    this.store.dispatch(saveMenu({ menu }));
+    this.store.dispatch(MenuActions.saveMenu({ menu }));
   }
 
   prepareBiteFromMenuItem(bite: Partial<Bite>): void {
-    this.store.dispatch(cacheBite({ bite }));
+    this.store.dispatch(BiteActions.cacheBite({ bite }));
   }
 
   saveSocialMediaLinks(restaurantId: string, links: Link[]): void {
@@ -260,7 +244,7 @@ export class BiteTribeStoreService implements StoreService {
       saveSocialMediaLinksForRestaurant({
         restaurantId,
         links,
-      })
+      }),
     );
   }
 
@@ -277,7 +261,7 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   submitDeleteBite(bite: Bite): void {
-    this.store.dispatch(deleteBite({ bite }));
+    this.store.dispatch(BiteActions.deleteBite({ bite }));
   }
 
   createBucketList(bucketlistName: string): void {
@@ -285,15 +269,15 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   goPublic(): void {
-    this.store.dispatch(goPublic());
+    this.store.dispatch(AppActions.goPublic());
   }
 
   goPrivate(): void {
-    this.store.dispatch(goPrivate());
+    this.store.dispatch(AppActions.goPrivate());
   }
 
   setHomeSorting(sorting: string): void {
-    this.store.dispatch(setHomeSorting({ sorting }));
+    this.store.dispatch(AppActions.setHomeSorting({ sorting }));
   }
 
   setHomeFilters(filters: {
@@ -301,11 +285,11 @@ export class BiteTribeStoreService implements StoreService {
     distanceFilter: string;
     priceFilter: number;
   }): void {
-    this.store.dispatch(setHomeFilters({ filters }));
+    this.store.dispatch(AppActions.setHomeFilters({ filters }));
   }
 
   clearHomeFilters(): void {
-    this.store.dispatch(clearHomeFilters());
+    this.store.dispatch(AppActions.clearHomeFilters());
   }
 
   reloadBites(): void {

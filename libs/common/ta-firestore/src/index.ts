@@ -7,5 +7,6 @@ export { provideFirestoreState } from './lib/ngrx-store/provide-firestore-state'
 export { provideFirestoreAnalytics } from './lib/analytics/provide-firestore-analytics';
 
 export { authGuard } from './lib/auth.guard';
+export { startGuard } from './lib/start.guard';
 
 export { AuthService } from './lib/auth.service';

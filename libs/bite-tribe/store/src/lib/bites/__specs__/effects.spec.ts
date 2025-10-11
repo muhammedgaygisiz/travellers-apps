@@ -5,19 +5,11 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BiteEffects } from '../effects';
-import { rootEffectsInit } from '@ngrx/effects';
-import {
-  deleteBite,
-  loadedBiteCreator,
-  loadedBitesFromApi,
-  noPublicCreatorForBite,
-  saveExistingBite,
-  saveNewBite,
-  saveTags,
-} from '../actions';
+import { BiteActions } from '../actions';
 import { Bite } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { bite } from '../selectors';
+import { fromAuth } from 'ta-firestore';
 import SpyInstance = jest.SpyInstance;
 
 const assertDeepEqual = (actual: any, expected: any): void => {
@@ -25,7 +17,7 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 };
 
 const Mock = {
-  allBites$: of([]),
+  bites$: (): Observable<any> => of([]),
   saveNewBite: jest.fn(),
   saveEditedBite: jest.fn(),
   saveTagsToExistingBite: jest.fn(),
@@ -69,16 +61,16 @@ describe('BiteEffects', () => {
   });
 
   describe('loadBitesFromApi$', () => {
-    it('should load bites from API on ROOT_EFFECTS_INIT', () => {
+    it('should load bites from API on loginSucceeded', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: rootEffectsInit });
+        actions$ = cold('a', { a: fromAuth.AuthActions.loginSucceeded });
 
         const expected = 'a';
         const output = {
-          a: loadedBitesFromApi({ bites: [] }),
+          a: BiteActions.loadedFromAPI({ bites: [] }),
         };
 
-        expectObservable(effects.loadBitesFromApi$).toBe(expected, output);
+        expectObservable(effects.startListener$).toBe(expected, output);
       });
     });
   });
@@ -95,7 +87,7 @@ describe('BiteEffects', () => {
     it('should run saveNewBite on saveNewBite', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: saveNewBite({
+          a: BiteActions.saveNewBite({
             bite: {} as Bite,
           }),
         });
@@ -118,7 +110,7 @@ describe('BiteEffects', () => {
     it('should run saveEditedBite on saveExistingBite', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: saveExistingBite({
+          a: BiteActions.saveExistingBite({
             bite: {} as Bite,
           }),
         });
@@ -141,7 +133,7 @@ describe('BiteEffects', () => {
     it('should run saveTagsToExistingBite on saveTags', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: saveTags({
+          a: BiteActions.saveNewTags({
             newTags: ['tag'],
             id: 'biteId',
           }),
@@ -163,7 +155,7 @@ describe('BiteEffects', () => {
     it('should run deleteBite on deleteBite', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: deleteBite({
+          a: BiteActions.deleteBite({
             bite: {} as Bite,
           }),
         });
@@ -211,7 +203,7 @@ describe('BiteEffects', () => {
         });
 
         const expected = 'a';
-        const output = { a: noPublicCreatorForBite() };
+        const output = { a: BiteActions.noPublicCreatorForBite() };
 
         expectObservable(effects.loadUserFromBite$).toBe(expected, output);
       });
@@ -230,7 +222,7 @@ describe('BiteEffects', () => {
 
         const expected = 'a';
         const output = {
-          a: loadedBiteCreator({
+          a: BiteActions.loadedBiteCreator({
             biteCreator: BITE_CREATOR_MOCK.snapshot.data,
           }),
         };

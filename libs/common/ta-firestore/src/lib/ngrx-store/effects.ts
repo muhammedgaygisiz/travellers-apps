@@ -65,9 +65,10 @@ export class AuthEffects {
   loadUser$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.loginSucceeded),
-      switchMap(() => this.authService.authStateChange$),
-      map((authStateChange) => {
-        return AuthActions.loadedUser({ user: authStateChange?.user });
+      map(() => {
+        const authState = this.authService.authState();
+
+        return AuthActions.loadedUser({ user: authState?.user });
       }),
     ),
   );

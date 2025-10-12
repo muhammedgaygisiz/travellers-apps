@@ -37,30 +37,31 @@
       <ion-card-content [class.with-edit]="showEditButton()">
         <div class="rating-container ion-margin-top">
           @if (biteData?.rating) {
-          <star-rating [rating]="biteData?.rating" readonly />
+            <star-rating [rating]="biteData?.rating" readonly />
           }
         </div>
 
         @if (!showEditButton()) {
-        <bt-likes
-          class="ion-margin-top"
-          [bite]="biteData"
-          [userId]="userId()"
-          [inCard]="true"
-          (likeButtonClick)="likeButtonClick.emit($event)"
-        />
-        } @if (showEditButton()) {
-        <div class="bite-actions">
-          <ion-button (click)="gotoEdit.emit(biteData)"> Edit</ion-button>
-          <ion-button
-            color="danger"
-            fill="outline"
-            expand="block"
-            (click)="openConfirmationDialog()"
-          >
-            Delete
-          </ion-button>
-        </div>
+          <bt-likes
+            class="ion-margin-top"
+            [bite]="biteData"
+            [userId]="userId()"
+            [inCard]="true"
+            (likeButtonClick)="likeButtonClick.emit($event)"
+          />
+        }
+        @if (showEditButton()) {
+          <div class="bite-actions ion-margin-top">
+            <ion-button (click)="gotoEdit.emit(biteData)"> Edit</ion-button>
+            <ion-button
+              color="danger"
+              fill="outline"
+              expand="block"
+              (click)="openConfirmationDialog()"
+            >
+              Delete
+            </ion-button>
+          </div>
         }
       </ion-card-content>
     </div>

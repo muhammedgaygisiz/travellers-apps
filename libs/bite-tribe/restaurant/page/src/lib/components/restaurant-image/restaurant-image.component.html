@@ -1,27 +1,24 @@
-@let restaurantData = restaurant(); @let skeletonAnimationData =
-skeletonAnimation(); @defer { @if (restaurantData?.image) {
-<ion-img [src]="restaurantData?.image" class="place-image" />
-} @else {
-<div class="image-loading-placeholder">
-  <ion-icon name="pizza-outline" color="primary" />
-  <span>This restaurant is not verified on BiteTribe yet.</span>
-</div>
-} } @placeholder (minimum 1000ms) {
-<div class="image-loading-placeholder">
-  <ngx-skeleton-loader
-    appearance="line"
-    style="width: 100%"
-    [animation]="skeletonAnimationData"
-  />
-  <ngx-skeleton-loader
-    appearance="line"
-    style="width: 100%"
-    [animation]="skeletonAnimationData"
-  />
-  <ngx-skeleton-loader
-    appearance="line"
-    style="width: 100%"
-    [animation]="skeletonAnimationData"
-  />
-</div>
+@let restaurantData = restaurant();
+@let skeletonAnimationData = skeletonAnimation();
+@defer {
+  @if (restaurantData?.image) {
+    <ion-img [src]="restaurantData?.image" class="place-image" />
+  } @else {
+    <div class="image-loading-placeholder">
+      <ion-icon name="pizza-outline" color="primary" />
+      <span>This restaurant is not verified on BiteTribe yet.</span>
+    </div>
+  }
+} @placeholder (minimum 1000ms) {
+  <div class="image-loading-placeholder">
+    <ngx-skeleton-loader
+      appearance="line"
+      style="width: 100%"
+      [animation]="skeletonAnimationData"
+      [theme]="{
+        height: '200px',
+        width: '100%',
+      }"
+    />
+  </div>
 }

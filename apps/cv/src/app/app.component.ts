@@ -3,7 +3,17 @@ import { RouterModule } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { DurationPipe } from './duration.pipe';
 import { Project } from './project';
-import { APU, AUSBILDUNG, AXA, FH, NLI, PERFOOD, TIMS, TRIP } from './projects';
+import {
+  APU,
+  AUSBILDUNG,
+  AXA,
+  CORIX,
+  FH,
+  NLI,
+  PERFOOD,
+  TIMS,
+  TRIP,
+} from './projects';
 
 interface Education {
   id: number;
@@ -46,7 +56,17 @@ const APPRENTICE: Education = {
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  projects: Project[] = [APU, PERFOOD, TRIP, TIMS, AXA, NLI, FH, AUSBILDUNG];
+  projects: Project[] = [
+    CORIX,
+    APU,
+    PERFOOD,
+    TRIP,
+    TIMS,
+    AXA,
+    NLI,
+    FH,
+    AUSBILDUNG,
+  ];
 
   educations: Education[] = [MASTER, BACHELOR, APPRENTICE];
 }

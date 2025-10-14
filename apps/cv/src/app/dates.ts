@@ -22,4 +22,5 @@ export const JUNI_2022 = new Date(2022, 5);
 export const SEPTEMBER_2022 = new Date(2022, 8);
 
 export const OKTOBER_2022 = new Date(2022, 9);
+export const JUNI_2025 = new Date(2025, 5);
 export const NOW = new Date();

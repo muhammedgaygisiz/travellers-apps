@@ -10,16 +10,48 @@ import {
   JANUAR_2022,
   JUNE_2008,
   JUNI_2022,
+  JUNI_2025,
   NOW,
   OKTOBER_2010,
   OKTOBER_2022,
   SEPTEMBER_2022,
 } from './dates';
 
+export const CORIX = {
+  id: 1,
+  from: JUNI_2025,
+  to: NOW,
+  description: '',
+  company: 'corix AG',
+  role: 'Frontend Dev',
+
+  paragraph: [
+    `
+      In this project, I’m responsible for the frontend migration of a large-scale enterprise application from
+      Google Web Toolkit (GWT) to Angular. The main goal is to modernize the user interface and architecture while
+      maintaining all existing business functionality.
+    `,
+    `
+      My work focuses on designing a clean and scalable frontend architecture that leverages the latest Angular features,
+      emphasizing maintainability, performance, and developer efficiency. I collaborate closely with the UX designer to
+      translate Figma concepts into responsive and accessible UI components that form the foundation of the new application.
+    `,
+    `
+      Together with the backend team, I help replace legacy RPC endpoints with a modern REST API, ensuring seamless
+      integration and preservation of business logic.
+    `,
+    `
+      Beyond development, I’m also responsible for upgrading the team’s Angular know-how, introducing
+      modern best practices such as standalone components, reactive patterns, and improved code organization
+      to ensure long-term maintainability and alignment with current frontend standards.
+    `,
+  ],
+};
+
 export const APU = {
   id: 1,
   from: OKTOBER_2022,
-  to: NOW,
+  to: JUNI_2025,
   description: '',
   company: 'akros AG',
   role: 'Frontend Dev',

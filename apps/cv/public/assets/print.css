@@ -1,0 +1,90 @@
+@page {
+  size: A4;            /* or: 210mm 297mm */
+  margin: 14mm;
+}
+
+html, body {
+  background: #fff !important;
+  color: #000 !important;
+
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+* {
+  color: #000 !important;
+}
+
+
+body {
+  font: 12pt/1.35 "Inter", system-ui, sans-serif; /* 11–12pt is good for CVs */
+  color: #111;
+
+  padding-top: 18mm;
+  padding-bottom: 16mm;
+}
+
+.section,
+.experience-item,
+.education-item {
+  break-inside: avoid;             /* modern */
+  page-break-inside: avoid;        /* legacy */
+  margin-bottom: 4mm;
+}
+
+h2 { break-after: avoid; }
+h2 + .section { break-before: avoid; }
+
+/* Force a new page before a section when desired */
+.page-break { break-before: page; page-break-before: always; }
+
+.project-0, .project-1, .project-3, .project-4, .project-6 {
+  break-before: page; page-break-before: always;
+}
+
+.print-only { display: none !important; }
+
+/** Print styles **/
+@media print {
+  .print-only { display: block !important; }
+  .no-print { display: none !important; }
+}
+
+.print-header, .print-footer {
+  position: fixed;
+  color: #666;
+}
+.print-header {
+  width: 100%;
+  height: 10mm;
+  top: 0;
+
+  background-color: white;
+  text-align: center;
+
+  padding-top: 2mm;
+
+  z-index: 1000;
+}
+.print-footer {
+  width: 100%;
+  height: 10mm;
+  bottom: 0;
+
+  background-color: white;
+  text-align: center;
+
+  padding-bottom: 0;
+  font-size: 9pt;
+
+  z-index: 1000;
+}
+
+/* Reserve space so content doesn't overlap */
+body { padding-top: 18mm; padding-bottom: 16mm; }
+
+/* Page counter (Chromium) */
+@media print {
+  .page-number:after { content: counter(page) " / " counter(pages); }
+}
+/** Print styles **/

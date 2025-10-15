@@ -18,7 +18,7 @@ import {
 } from './dates';
 
 export const CORIX = {
-  id: 1,
+  id: 0,
   from: JUNI_2025,
   to: NOW,
   description: '',

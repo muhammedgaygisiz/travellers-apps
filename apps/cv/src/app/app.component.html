@@ -1,7 +1,12 @@
+<div class="print-header print-only">Muhammed Veysel Gaygisiz — Resume</div>
+<div class="print-footer print-only">
+  mv-gaygisiz.com • <span class="page-number"></span>
+</div>
+
 <div class="container">
   <header>
     <div class="wrapper">
-      <div class="title">#Mo</div>
+      <div class="title no-print">#Mo</div>
       <!--<button type="button">
         <img src="assets/burger-menu.svg" alt="Menu" />
       </button>-->
@@ -18,7 +23,7 @@
       <h1>Muhammed Gaygisiz</h1>
       <hr />
       <p>Master of Science</p>
-      <p>{{ projects | duration }} of experience</p>
+      <p class="total-experience">{{ projects | duration }} of experience</p>
       <br />
       <p class="sub-text">
         Dedicated to creating user-oriented, high-quality software through
@@ -43,51 +48,52 @@
 
     <div class="projects-container">
       <hr />
-      <h2>Projects</h2>
+      <h2 class="print-margin">Projects</h2>
       <div class="table">
         @for (project of projects; track project.id) {
-        <div class="row">
-          <div>
-            <span class="time-range">
-              {{ project.from | date : 'MMMM yyyy' }} -
-              {{ project.to | date : 'MMMM yyyy' }}
-            </span>
-            <br />
-            <span>{{ [project] | duration }}</span>
+          <div class="row">
+            <div>
+              <span class="time-range">
+                {{ project.from | date: 'MMMM yyyy' }} -
+                {{ project.to | date: 'MMMM yyyy' }}
+              </span>
+              <br />
+              <span>{{ [project] | duration }}</span>
+            </div>
+            <div>
+              <span class="company">{{ project.company }}</span>
+              <br />
+              <span class="role">{{ project.role }}</span>
+            </div>
           </div>
-          <div>
-            <span class="company">{{ project.company }}</span>
-            <br />
-            <span class="role">{{ project.role }}</span>
+          <div class="paragraphs">
+            @for (p of project.paragraph; track $index) {
+              <p>{{ p }}</p>
+            }
           </div>
-        </div>
-        <div class="paragraphs">
-          @for (p of project.paragraph; track $index) {
-          <p>{{ p }}</p>
-          }
-        </div>
+          <div class="project-{{ project.id }}"></div>
         }
       </div>
     </div>
 
     <div class="education-container">
       <hr />
-      <h2>Education</h2>
+      <h2 class="page-break">Education</h2>
       <div class="table">
         @for (education of educations; track education.id) {
-        <div class="row">
-          <div>
-            <span class="time-range">
-              {{ education.from }} -
-              {{ education.to }}
-            </span>
+          <div class="row">
+            <div>
+              <span class="time-range">
+                {{ education.from }} -
+                {{ education.to }}
+              </span>
+            </div>
+            <div>
+              <span>{{ education.institution }}</span>
+              <br />
+              <span>{{ education.degree }}</span>
+            </div>
           </div>
-          <div>
-            <span>{{ education.institution }}</span>
-            <br />
-            <span>{{ education.degree }}</span>
-          </div>
-        </div>
         }
       </div>
     </div>

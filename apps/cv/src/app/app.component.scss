@@ -22,6 +22,10 @@ $breakpoint-xxl: 1990px;
   .container {
     padding: 0 0.4rem;
 
+    @media print {
+      margin: 5mm 0;
+    }
+
     header {
       display: flex;
       justify-content: center;
@@ -32,6 +36,10 @@ $breakpoint-xxl: 1990px;
         align-items: center;
 
         padding: 2rem 0;
+
+        @media print {
+          padding: 0;
+        }
       }
 
       button {
@@ -97,6 +105,10 @@ $breakpoint-xxl: 1990px;
           width: $base-width * 3.5;
           border-radius: 50%;
           opacity: 0.6;
+
+          @media print {
+            opacity: 1;
+          }
 
           @media (min-width: $breakpoint-lg) {
             height: fit-content;

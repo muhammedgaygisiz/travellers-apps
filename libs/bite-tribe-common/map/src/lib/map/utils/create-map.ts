@@ -10,9 +10,15 @@ const withNoWrapOptionToPreventWorldRepetition: L.MapOptions = {
   maxBoundsViscosity: 1.0, // How much to constrain the map to maxBounds (1.0 = fully constrained)
 };
 
-export const createMap = (mapElement: ElementRef): L.Map => {
-  return L.map(
-    mapElement.nativeElement,
-    withNoWrapOptionToPreventWorldRepetition
-  );
+export const createMap = (mapElement: ElementRef, enableZoom = true): L.Map => {
+  const mapOptions: L.MapOptions = {
+    ...withNoWrapOptionToPreventWorldRepetition,
+    zoomControl: enableZoom,
+    scrollWheelZoom: enableZoom,
+    doubleClickZoom: enableZoom,
+    touchZoom: enableZoom,
+    boxZoom: enableZoom,
+  };
+
+  return L.map(mapElement.nativeElement, mapOptions);
 };

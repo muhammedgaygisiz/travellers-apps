@@ -125,6 +125,37 @@ describe('MapComponent', () => {
     });
   });
 
+  describe('enableZoom', () => {
+    let mapDiv: any;
+
+    beforeEach(() => {
+      mapDiv = document.createElement('div');
+      mapDiv.setAttribute('data-testid', 'map');
+      fixture.nativeElement.appendChild(mapDiv);
+      createMapMock.mockClear();
+    });
+
+    it('should pass enableZoom as true to createMap by default', () => {
+      fixture.detectChanges();
+
+      expect(createMapMock).toHaveBeenCalledWith(expect.any(Object), true);
+    });
+
+    it('should pass enableZoom as true when explicitly set to true', () => {
+      componentRef.setInput('enableZoom', true);
+      fixture.detectChanges();
+
+      expect(createMapMock).toHaveBeenCalledWith(expect.any(Object), true);
+    });
+
+    it('should pass enableZoom as false when set to false', () => {
+      componentRef.setInput('enableZoom', false);
+      fixture.detectChanges();
+
+      expect(createMapMock).toHaveBeenCalledWith(expect.any(Object), false);
+    });
+  });
+
   describe('createMapEffect', () => {
     let mapDiv: any;
     let emitMarkerClickSpy: SpyInstance;
@@ -134,6 +165,8 @@ describe('MapComponent', () => {
       mapDiv.setAttribute('data-testid', 'map');
       fixture.nativeElement.appendChild(mapDiv);
       mockMap.on.mockClear();
+      createMapMock.mockClear();
+      createOpenstreetmapLayerMock.mockClear();
       emitMarkerClickSpy = jest
         .spyOn(component.clickOnMarker, 'emit')
         .mockImplementation();
@@ -150,7 +183,7 @@ describe('MapComponent', () => {
       fixture.detectChanges(); // First render
       fixture.detectChanges(); // Second render
 
-      expect(createMapMock).toHaveBeenCalledTimes(2);
+      expect(createMapMock).toHaveBeenCalledTimes(1);
     });
 
     it('should update markers and zoom if geopoints are provided', () => {
@@ -227,7 +260,7 @@ describe('MapComponent', () => {
         expect(focusMarkerMock).toHaveBeenCalledWith(
           undefined,
           [],
-          expect.any(Object)
+          expect.any(Object),
         );
       });
 
@@ -247,7 +280,7 @@ describe('MapComponent', () => {
         expect(emitClickOnMapSpy).toHaveBeenCalledWith(expectedPosition);
         expect(geopointsToMarkersMock).toHaveBeenCalledWith(
           [expectedPosition],
-          expect.any(Object)
+          expect.any(Object),
         );
       });
 
@@ -285,7 +318,7 @@ describe('MapComponent', () => {
         expect(emitClickOnMapSpy).toHaveBeenCalledWith(expectedPosition);
         expect(geopointsToMarkersMock).toHaveBeenCalledWith(
           [expectedPosition],
-          expect.any(Object)
+          expect.any(Object),
         );
       });
 
@@ -302,7 +335,7 @@ describe('MapComponent', () => {
 
         expect(clearMarkersMock).toHaveBeenCalledWith(
           existingMarkers,
-          expect.any(Object)
+          expect.any(Object),
         );
       });
     });
@@ -351,11 +384,11 @@ describe('MapComponent', () => {
 
         expect(mockMarker1.on).toHaveBeenCalledWith(
           'click',
-          expect.any(Function)
+          expect.any(Function),
         );
         expect(mockMarker2.on).toHaveBeenCalledWith(
           'click',
-          expect.any(Function)
+          expect.any(Function),
         );
       });
 
@@ -447,7 +480,7 @@ describe('MapComponent', () => {
 
         expect(mockMarker1.on).toHaveBeenCalledWith(
           'click',
-          expect.any(Function)
+          expect.any(Function),
         );
         expect(mockMarkerWithoutTitle.on).not.toHaveBeenCalled();
         expect(focusMarkerMock).not.toHaveBeenCalled();
@@ -524,7 +557,7 @@ describe('MapComponent', () => {
       expect(geopointsToMarkersMock).toHaveBeenCalled();
       expect(zoomToGeopointMock).toHaveBeenCalledWith(
         mockGeopoint,
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -553,7 +586,7 @@ describe('MapComponent', () => {
 
       expect(zoomToGeopointMock).toHaveBeenCalledWith(
         mockGeopoint,
-        expect.any(Object)
+        expect.any(Object),
       );
       expect(fitMapToMarkersMock).not.toHaveBeenCalled();
     });
@@ -567,7 +600,7 @@ describe('MapComponent', () => {
 
       expect(zoomToGeopointMock).toHaveBeenCalledWith(
         mockMultipleGeopoints[0],
-        expect.any(Object)
+        expect.any(Object),
       );
       expect(fitMapToMarkersMock).toHaveBeenCalled();
     });

@@ -17,23 +17,24 @@
       <bt-map
         readonly
         emitMarkerClick
+        [enableZoom]="enableZoom()"
         [geopoints]="positions()"
         [gpsPosition]="gpsPosition()"
         (clickOnMarker)="onGeopointSelection($event)"
       />
       @if (selectedBite) {
-      <bt-snap-drawer>
-        <h4 class="bite-title">
-          {{ selectedBite.name }}
-        </h4>
-        <bt-bite
-          [bite]="selectedBite"
-          [userId]="userId()"
-          (biteClick)="biteClick.emit($event)"
-          (restaurantClick)="restaurantClick.emit($event)"
-          (likeButtonClick)="likeButtonClick.emit($event)"
-        />
-      </bt-snap-drawer>
+        <bt-snap-drawer>
+          <h4 class="bite-title">
+            {{ selectedBite.name }}
+          </h4>
+          <bt-bite
+            [bite]="selectedBite"
+            [userId]="userId()"
+            (biteClick)="biteClick.emit($event)"
+            (restaurantClick)="restaurantClick.emit($event)"
+            (likeButtonClick)="likeButtonClick.emit($event)"
+          />
+        </bt-snap-drawer>
       }
     </div>
   </ion-content>

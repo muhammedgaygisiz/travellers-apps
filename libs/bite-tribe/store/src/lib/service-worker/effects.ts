@@ -62,9 +62,18 @@ export class ServiceWorkerEffects {
                       {
                         text: 'Restart Now',
                         handler: (): void => {
-                          this.updates.activateUpdate().then(() => {
-                            document.location.reload();
-                          });
+                          this.updates
+                            .activateUpdate()
+                            .then(() => {
+                              document.location.reload();
+                            })
+                            .catch((error) => {
+                              console.error(
+                                'Failed to activate update:',
+                                error,
+                              );
+                              document.location.reload();
+                            });
                         },
                       },
                     ],

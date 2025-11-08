@@ -33,6 +33,7 @@ import { BiteActions } from './bites/actions';
 import { loadedRestaurantsFromApi } from './restaurants/actions';
 import { BucketListEffect } from './bucketlists/effects';
 import { fromBucketlists } from './bucketlists';
+import { ServiceWorkerEffects } from './service-worker/effects';
 
 const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
@@ -163,6 +164,7 @@ export const provideBiteTribeStore = (environment: Environment): any => [
         RestaurantEffects,
         MenuEffects,
         BucketListEffect,
+        ServiceWorkerEffects,
       ),
   provideState(fromBites.key, fromBites.reducer),
   provideState(fromReviews.key, fromReviews.reducer),

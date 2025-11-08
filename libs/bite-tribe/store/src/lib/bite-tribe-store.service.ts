@@ -41,6 +41,7 @@ import {
   currency,
   exchangeRates,
   gpsPosition,
+  hasErrorLoadingGpsPosition,
   homeDistance,
   homeFilters,
   homeSorting,
@@ -52,7 +53,6 @@ import {
   preferredCurrency,
   publicUser,
   settings,
-  hasErrorLoadingGpsPosition,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -72,8 +72,6 @@ import {
   selectedBucketlist,
   selectedBucketlistTitle,
 } from './bucketlists/selectors';
-import { fromBites } from './bites';
-import { debounceTime } from 'rxjs';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',

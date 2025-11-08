@@ -18,6 +18,16 @@ body {
   min-width: 370px;
 }
 
+@mixin glass-box {
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(7.9px);
+  -webkit-backdrop-filter: blur(7.9px);
+  border: 1px solid rgba(255, 255, 255, 0.64);
+}
+
 /* Remove outline for non-keyboard :focus */
 .cdk-dialog-container.focus-visible {
   outline: none;

@@ -16,6 +16,16 @@ import {
   OKTOBER_2022,
   SEPTEMBER_2022,
 } from './dates';
+import {
+  ANGULAR,
+  HTML,
+  JAVA,
+  JAVASCRIPT,
+  REACT,
+  REST,
+  SPRING,
+  TYPESCRIPT,
+} from './technologies';
 
 export const CORIX = {
   id: 0,
@@ -24,6 +34,13 @@ export const CORIX = {
   description: '',
   company: 'corix AG',
   role: 'Frontend Dev',
+
+  technologies: {
+    [TYPESCRIPT]: 0.5,
+    [REST]: 0.5,
+    [ANGULAR]: 0.5,
+    [HTML]: 0.5,
+  },
 
   paragraph: [
     `
@@ -55,6 +72,15 @@ export const APU = {
   description: '',
   company: 'akros AG',
   role: 'Frontend Dev',
+
+  technologies: {
+    [JAVA]: 1,
+    [SPRING]: 1,
+    [TYPESCRIPT]: 2.8,
+    [REST]: 2.8,
+    [ANGULAR]: 2.8,
+    [HTML]: 2.8,
+  },
 
   paragraph: [
     `
@@ -95,6 +121,13 @@ export const PERFOOD = {
   company: 'perfood GmbH',
   role: 'Frontend Dev',
 
+  technologies: {
+    [TYPESCRIPT]: 0.3,
+    [REST]: 0.3,
+    [ANGULAR]: 0.3,
+    [HTML]: 0.3,
+  },
+
   paragraph: [
     `I developed Ionic-based Angular components and implemented NestJS-based backend services. To improve UI consistency and reusability, I introduced Storybook for component documentation. Additionally, I began establishing a clear separation between presentational and smart components to enhance maintainability and scalability. My work focused on creating modular and efficient solutions within a structured development process.`,
   ],
@@ -118,6 +151,15 @@ export const TIMS = {
   description: '',
   company: 'akros AG',
   role: 'Frontend Dev and UX Designer',
+
+  technologies: {
+    [JAVA]: 0.5,
+    [REST]: 0.5,
+    [TYPESCRIPT]: 1.9,
+    [ANGULAR]: 1.9,
+    [HTML]: 1.9,
+    [SPRING]: 0.5,
+  },
 
   paragraph: [
     `
@@ -160,6 +202,17 @@ export const AXA = {
   description: '',
   company: 'Axa Konzern AG',
   role: 'Full Stack Dev',
+
+  technologies: {
+    [JAVA]: 1,
+    [JAVASCRIPT]: 1,
+    [TYPESCRIPT]: 1,
+    [REST]: 2.9,
+    [SPRING]: 1,
+    [REACT]: 2,
+    [HTML]: 2.9,
+  },
+
   paragraph: [
     `
       I focused on developing and maintaining modern web applications
@@ -181,6 +234,16 @@ export const NLI = {
   description: '',
   company: 'Next Level Integration GmbH',
   role: 'Consultant, Dev und Project Manager',
+
+  technologies: {
+    [JAVA]: 4,
+    [JAVASCRIPT]: 4,
+    [TYPESCRIPT]: 1,
+    [SPRING]: 1,
+    [REST]: 4,
+    [ANGULAR]: 2,
+    [HTML]: 4,
+  },
 
   paragraph: [
     `
@@ -235,6 +298,10 @@ export const AUSBILDUNG = {
   description: '',
   company: 'IGMG e.V.',
   role: 'Apprentice in Software Development',
+
+  technologies: {
+    [HTML]: 1.9,
+  },
 
   exclude: true,
   paragraph: [

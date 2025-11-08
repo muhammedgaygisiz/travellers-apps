@@ -5,6 +5,8 @@ export interface Project {
 
   exclude?: boolean;
 
+  technologies?: { [key: string]: number };
+
   company: string;
   role: string;
   description: string;

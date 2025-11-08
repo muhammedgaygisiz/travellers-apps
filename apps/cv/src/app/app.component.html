@@ -7,9 +7,6 @@
   <header>
     <div class="wrapper">
       <div class="title no-print">#Mo</div>
-      <!--<button type="button">
-        <img src="assets/burger-menu.svg" alt="Menu" />
-      </button>-->
     </div>
   </header>
 
@@ -37,12 +34,20 @@
 
     <div class="badge-container">
       <div class="row">
-        <div class="technology-box"><span>Angular: 5,5 years</span></div>
-        <div class="technology-box"><span>React: 2 years</span></div>
+        <technology [projects]="projects" [technology]="ANGULAR" />
+        <technology [projects]="projects" [technology]="REACT" />
       </div>
       <div class="row">
-        <div class="technology-box"><span>Spring: 3 years</span></div>
-        <div class="technology-box"><span>REST: 4,5 years</span></div>
+        <technology [projects]="projects" [technology]="SPRING" />
+        <technology [projects]="projects" [technology]="REST" />
+      </div>
+      <div class="row">
+        <technology [projects]="projects" [technology]="JAVA" />
+        <technology [projects]="projects" [technology]="JAVASCRIPT" />
+      </div>
+      <div class="row">
+        <technology [projects]="projects" [technology]="TYPESCRIPT" />
+        <technology [projects]="projects" [technology]="HTML" />
       </div>
     </div>
 
@@ -51,7 +56,7 @@
       <h2 class="print-margin">Projects</h2>
       <div class="table">
         @for (project of projects; track project.id) {
-          <div class="row">
+          <div class="row glassbox">
             <div>
               <span class="time-range">
                 {{ project.from | date: 'MMMM yyyy' }} -
@@ -66,6 +71,14 @@
               <span class="role">{{ project.role }}</span>
             </div>
           </div>
+
+          <div class="badge-grid-container">
+            @let technology = project | technology;
+            @for (tech of technology; track tech) {
+              <technology [projects]="[project]" [technology]="tech" />
+            }
+          </div>
+
           <div class="paragraphs">
             @for (p of project.paragraph; track $index) {
               <p>{{ p }}</p>

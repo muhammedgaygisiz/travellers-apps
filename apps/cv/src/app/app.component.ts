@@ -14,6 +14,18 @@ import {
   TIMS,
   TRIP,
 } from './projects';
+import {
+  JAVA,
+  JAVASCRIPT,
+  REST,
+  SPRING,
+  TYPESCRIPT,
+  REACT,
+  ANGULAR,
+  HTML,
+} from './technologies';
+import { Technology } from '../technology/technology';
+import { TechnologyPipe } from './technology.pipe';
 
 interface Education {
   id: number;
@@ -50,7 +62,7 @@ const APPRENTICE: Education = {
 };
 
 @Component({
-  imports: [RouterModule, DatePipe, DurationPipe],
+  imports: [RouterModule, DatePipe, DurationPipe, Technology, TechnologyPipe],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -69,4 +81,12 @@ export class AppComponent {
   ];
 
   educations: Education[] = [MASTER, BACHELOR, APPRENTICE];
+  protected readonly JAVA = JAVA;
+  protected readonly JAVASCRIPT = JAVASCRIPT;
+  protected readonly TYPESCRIPT = TYPESCRIPT;
+  protected readonly REST = REST;
+  protected readonly SPRING = SPRING;
+  protected readonly REACT = REACT;
+  protected readonly ANGULAR = ANGULAR;
+  protected readonly HTML = HTML;
 }

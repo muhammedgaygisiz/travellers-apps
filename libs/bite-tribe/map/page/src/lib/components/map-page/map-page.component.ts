@@ -30,6 +30,7 @@ export class MapPageComponent {
   isAuthenticated = input(false);
   gpsPosition = input<Geopoint | null | undefined>();
   userId = input<string>();
+  enableZoom = input(true);
 
   readonly logoutClick = output();
   readonly gotoSettings = output();
@@ -49,7 +50,7 @@ export class MapPageComponent {
           ...bite.position,
           id: bite.id,
           rating: this.getRating(bite),
-        } as Geopoint)
+        }) as Geopoint,
     );
   });
 
@@ -60,7 +61,7 @@ export class MapPageComponent {
     }
 
     this.selectedBite = this.bites()?.find(
-      (bite: Bite) => bite.id === geopoint.id
+      (bite: Bite) => bite.id === geopoint.id,
     );
   }
 

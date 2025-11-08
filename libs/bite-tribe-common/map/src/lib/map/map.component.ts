@@ -49,6 +49,7 @@ export class MapComponent implements OnDestroy {
   geopoints = input<Geopoint[] | null | undefined>([]);
   readonly = input(false, { transform: booleanAttribute });
   emitMarkerClick = input(false, { transform: booleanAttribute });
+  enableZoom = input(true, { transform: booleanAttribute });
   clickOnMap = output<Geopoint>();
   clickOnMarker = output<Geopoint | undefined>();
   gpsPosition = input<Geopoint | null | undefined>();
@@ -70,7 +71,7 @@ export class MapComponent implements OnDestroy {
       return;
     }
 
-    this.map = createMap(mapElement);
+    this.map = createMap(mapElement, this.enableZoom());
     createOpenstreetmapLayer().addTo(this.map);
 
     const gpsPosition = this.gpsPosition();
@@ -159,7 +160,7 @@ export class MapComponent implements OnDestroy {
       .forEach((marker) => {
         marker.on('click', () => {
           const geopoint = this.geopoints()?.find(
-            (gp) => gp.id === marker.options.title
+            (gp) => gp.id === marker.options.title,
           );
           if (geopoint) {
             this.clickOnMarker.emit(geopoint);

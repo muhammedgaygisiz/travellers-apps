@@ -368,15 +368,4 @@ describe('BiteTribeStoreService', () => {
       },
     ));
   });
-
-  describe('reloadBites', () => {
-    it('should dispatch reloadBites on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const reloadBitesSpy = jest.spyOn(fromBites, 'reloadBites');
-        service.reloadBites();
-        expect(reloadBitesSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
-  });
 });

@@ -139,34 +139,6 @@ describe('AppEffect', () => {
     });
   });
 
-  describe('stopReloadingBites$', () => {
-    it('should dispatch stopReloadingBites on loadedGpsPosition', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: AppActions.loadedGPSPosition({ position: {} }),
-        });
-
-        const expected = 'a';
-        const output = { a: BiteActions.stopReloadingBites() };
-
-        expectObservable(effects.stopReloadingBites$).toBe(expected, output);
-      });
-    });
-
-    it('should dispatch stopReloadingBites on errorLoadingGpsPosition', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: AppActions.errorLoadingGPSPosition({ error: {} }),
-        });
-
-        const expected = 'a';
-        const output = { a: BiteActions.stopReloadingBites() };
-
-        expectObservable(effects.stopReloadingBites$).toBe(expected, output);
-      });
-    });
-  });
-
   describe('saveSettingsToFirestore$', () => {
     let saveSettingsSpy: SpyInstance;
 

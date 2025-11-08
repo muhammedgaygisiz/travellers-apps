@@ -14,7 +14,6 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
-  IonIcon,
   IonText,
 } from '@ionic/angular/standalone';
 import { Bite } from 'model';
@@ -44,7 +43,6 @@ const CANCEL = 'cancel';
     StarRatingComponent,
     IonAlert,
     DistanceComponent,
-    IonIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

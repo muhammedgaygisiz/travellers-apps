@@ -22,14 +22,15 @@ class Mock {
   exchangeRates$ = of({});
   preferedCurrency$ = of('EUR');
   maxPriceHome$ = of(0);
-  isReloadingBites$ = of(false);
+  isReloadingHome$ = of(false);
+  hasErrorLoadingGpsPosition$ = of(false);
   logout = (): null => null;
   submitLikeOrDislikeClick = (): null => null;
   submitDeleteBite = (): null => null;
   setHomeSorting = (): null => null;
   setHomeFilters = (): null => null;
   clearHomeFilters = (): null => null;
-  reloadBites = (): null => null;
+  reloadGPSPosition = (): null => null;
 }
 
 describe('HomeDataAccessService', () => {
@@ -50,7 +51,7 @@ describe('HomeDataAccessService', () => {
     [HomeDataAccessService],
     (service: HomeDataAccessService) => {
       expect(service).toBeTruthy();
-    }
+    },
   ));
 
   describe('logout', () => {
@@ -60,7 +61,7 @@ describe('HomeDataAccessService', () => {
         const logoutSpy = jest.spyOn(biteTribeStoreService, 'logout');
         service.logout();
         expect(logoutSpy).toHaveBeenCalledTimes(1);
-      }
+      },
     ));
   });
 
@@ -86,7 +87,7 @@ describe('HomeDataAccessService', () => {
         submitLikeOrDislikeClickSpy = jest
           .spyOn(storeService, 'submitLikeOrDislikeClick')
           .mockImplementation();
-      }
+      },
     ));
 
     it('should call submitLikeOrDislikeClick when bite is found', inject(
@@ -98,9 +99,9 @@ describe('HomeDataAccessService', () => {
 
         expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledTimes(1);
         expect(
-          biteTribeStoreService.submitLikeOrDislikeClick
+          biteTribeStoreService.submitLikeOrDislikeClick,
         ).toHaveBeenCalledWith(bite, 'userId', likeClick);
-      }
+      },
     ));
 
     it('should call submitLikeOrDislikeClick with undefined bite when bite is not found', inject(
@@ -111,12 +112,12 @@ describe('HomeDataAccessService', () => {
         service.submitLikeClick(likeClick);
 
         expect(
-          biteTribeStoreService.submitLikeOrDislikeClick
+          biteTribeStoreService.submitLikeOrDislikeClick,
         ).toHaveBeenCalledTimes(1);
         expect(
-          biteTribeStoreService.submitLikeOrDislikeClick
+          biteTribeStoreService.submitLikeOrDislikeClick,
         ).toHaveBeenCalledWith(undefined, 'userId', likeClick);
-      }
+      },
     ));
 
     describe('with empty bites', () => {
@@ -124,7 +125,7 @@ describe('HomeDataAccessService', () => {
         [BiteTribeStoreService],
         (storeService: BiteTribeStoreService) => {
           storeService.sortedHomeBites$ = of([]);
-        }
+        },
       ));
 
       it('should handle empty bites array', inject(
@@ -137,9 +138,9 @@ describe('HomeDataAccessService', () => {
           expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
             undefined,
             'userId',
-            likeClick
+            likeClick,
           );
-        }
+        },
       ));
     });
 
@@ -148,7 +149,7 @@ describe('HomeDataAccessService', () => {
         [BiteTribeStoreService],
         (storeService: BiteTribeStoreService) => {
           storeService.sortedHomeBites$ = of(undefined as any);
-        }
+        },
       ));
 
       it('should handle empty bites array', inject(
@@ -161,9 +162,9 @@ describe('HomeDataAccessService', () => {
           expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
             undefined,
             'userId',
-            likeClick
+            likeClick,
           );
-        }
+        },
       ));
     });
   });
@@ -174,11 +175,11 @@ describe('HomeDataAccessService', () => {
       (service: HomeDataAccessService) => {
         const submitDeleteBiteSpy = jest.spyOn(
           biteTribeStoreService,
-          'submitDeleteBite'
+          'submitDeleteBite',
         );
         service.deleteBite({} as Bite);
         expect(submitDeleteBiteSpy).toHaveBeenCalledTimes(1);
-      }
+      },
     ));
   });
 
@@ -188,12 +189,12 @@ describe('HomeDataAccessService', () => {
       (service: HomeDataAccessService) => {
         const setHomeSortingSpy = jest.spyOn(
           biteTribeStoreService,
-          'setHomeSorting'
+          'setHomeSorting',
         );
         service.setHomeSorting('sorting');
         expect(setHomeSortingSpy).toHaveBeenCalledTimes(1);
         expect(setHomeSortingSpy).toHaveBeenCalledWith('sorting');
-      }
+      },
     ));
   });
 
@@ -203,7 +204,7 @@ describe('HomeDataAccessService', () => {
       (service: HomeDataAccessService) => {
         const setHomeFiltersSpy = jest.spyOn(
           biteTribeStoreService,
-          'setHomeFilters'
+          'setHomeFilters',
         );
         const filters = {
           tagFilters: ['tagFilters'],
@@ -213,7 +214,7 @@ describe('HomeDataAccessService', () => {
         service.setFilters(filters);
         expect(setHomeFiltersSpy).toHaveBeenCalledTimes(1);
         expect(setHomeFiltersSpy).toHaveBeenCalledWith(filters);
-      }
+      },
     ));
   });
 
@@ -223,25 +224,25 @@ describe('HomeDataAccessService', () => {
       (service: HomeDataAccessService) => {
         const clearHomeFiltersSpy = jest.spyOn(
           biteTribeStoreService,
-          'clearHomeFilters'
+          'clearHomeFilters',
         );
         service.clearFilters();
         expect(clearHomeFiltersSpy).toHaveBeenCalledTimes(1);
-      }
+      },
     ));
   });
 
-  describe('reloadHomeBites', () => {
-    it('should call reloadBites', inject(
+  describe('reloadGPSPosition', () => {
+    it('should call reloadGPSPosition', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
         const biteTribeStoreServiceSpy = jest.spyOn(
           biteTribeStoreService,
-          'reloadBites'
+          'reloadGPSPosition',
         );
-        service.reloadHomeBites();
+        service.reloadGPSPosition();
         expect(biteTribeStoreServiceSpy).toHaveBeenCalledTimes(1);
-      }
+      },
     ));
   });
 });

@@ -29,6 +29,8 @@ describe('BiteTribeHomeComponent', () => {
   let closedSubject: Subject<any>;
 
   beforeEach(() => {
+    jest.useFakeTimers();
+
     navController = {
       navigateForward: jest.fn(),
     } as Partial<NavController> as NavController;
@@ -88,10 +90,10 @@ describe('BiteTribeHomeComponent', () => {
     expect(scrollToTopMock).toHaveBeenCalledWith(300);
   });
 
-  describe('onBiteRefresh', () => {
+  describe('onRefresh', () => {
     let completeSpy: SpyInstance;
     beforeEach(() => {
-      componentRef.setInput('isReloadingBites', false);
+      componentRef.setInput('isReloading', false);
       component.refreshEvent = {
         target: { complete: jest.fn() },
       } as unknown as RefresherCustomEvent;
@@ -104,18 +106,24 @@ describe('BiteTribeHomeComponent', () => {
       component.refreshEvent = null;
 
       fixture.detectChanges();
+      jest.runAllTimers();
+
       expect(completeSpy).not.toHaveBeenCalled();
     });
 
     it('should not complete the refresh event if refresh is still ongoing', () => {
-      componentRef.setInput('isReloadingBites', true);
+      componentRef.setInput('isReloading', true);
 
       fixture.detectChanges();
+      jest.runAllTimers();
+
       expect(completeSpy).not.toHaveBeenCalled();
     });
 
     it('should complete the refresh event if refresh is done', () => {
       fixture.detectChanges();
+      jest.runAllTimers();
+
       expect(completeSpy).toHaveBeenCalled();
     });
   });
@@ -253,6 +261,8 @@ describe('BiteTribeHomeComponent', () => {
 
     it('should emit refresh event and complete the refresher', () => {
       component.refreshBites(refresherEvent);
+      jest.runAllTimers();
+
       expect(refreshEmitSpy).toHaveBeenCalled();
     });
   });

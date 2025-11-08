@@ -50,18 +50,6 @@ describe('Bites Selectors', () => {
     biteCreator: mockUser,
   };
 
-  describe('isReloadingBites', () => {
-    it('should return false if isReloadingBites is not set', () => {
-      const result = fromSelectors.isReloadingBites.projector(initialState);
-      expect(result).toBeFalsy();
-    });
-
-    it('should return undefined if slice is undefined', () => {
-      const result = fromSelectors.isReloadingBites.projector(undefined as any);
-      expect(result).toBeUndefined();
-    });
-  });
-
   describe('cachedBite', () => {
     it('should return the cached bite', () => {
       const result = fromSelectors.cachedBite.projector(initialState);
@@ -116,7 +104,7 @@ describe('Bites Selectors', () => {
         'EUR', // preferred currency
         mockPosition, // mock GPS position
         undefined,
-        {} // no exchange rates
+        {}, // no exchange rates
       );
 
       expect(result).toEqual(bitesWithMetadata);
@@ -135,7 +123,7 @@ describe('Bites Selectors', () => {
         'EUR', // preferred currency
         mockPosition,
         undefined,
-        {} // no exchange rates
+        {}, // no exchange rates
       );
 
       expect(result).toHaveLength(1);
@@ -155,7 +143,7 @@ describe('Bites Selectors', () => {
         'EUR', // preferred currency
         mockPosition,
         undefined,
-        {} // no exchange rates
+        {}, // no exchange rates
       );
 
       expect(result).toHaveLength(1);
@@ -175,7 +163,7 @@ describe('Bites Selectors', () => {
         'EUR', // preferred currency
         mockPosition,
         undefined,
-        {} // no exchange rates
+        {}, // no exchange rates
       );
 
       expect(result[0].id).toBe('2'); // closest bite first
@@ -194,7 +182,7 @@ describe('Bites Selectors', () => {
         'EUR', // preferred currency
         undefined, // no GPS position
         undefined,
-        {} // no exchange rates
+        {}, // no exchange rates
       );
 
       expect(result).toEqual(bitesWithMetadata);
@@ -224,7 +212,7 @@ describe('Bites Selectors', () => {
         '1',
         bitesWithMetadata,
         {},
-        'EUR'
+        'EUR',
       );
       expect(result).toEqual({
         ...bitesWithMetadata[0],
@@ -242,7 +230,7 @@ describe('Bites Selectors', () => {
         '3',
         bitesWithMetadata,
         {},
-        'EUR'
+        'EUR',
       );
       expect(result).toBeUndefined();
     });
@@ -253,7 +241,7 @@ describe('Bites Selectors', () => {
       const result = fromSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
         mockLikes,
-        mockPosition
+        mockPosition,
       );
 
       expect(result).toMatchSnapshot();
@@ -263,7 +251,7 @@ describe('Bites Selectors', () => {
       const result = fromSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
         [],
-        mockPosition
+        mockPosition,
       );
 
       expect(result).toMatchSnapshot();
@@ -273,7 +261,7 @@ describe('Bites Selectors', () => {
       const result = fromSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
         [{ id: 'like1', biteId: '5', userId: 'user1' }],
-        mockPosition
+        mockPosition,
       );
 
       expect(result).toMatchSnapshot();
@@ -283,7 +271,7 @@ describe('Bites Selectors', () => {
       const result = fromSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
         mockLikes,
-        undefined
+        undefined,
       );
 
       expect(result).toMatchSnapshot();
@@ -304,7 +292,7 @@ describe('Bites Selectors', () => {
 
       const result = fromSelectors.bitesBySelectedBucketlist.projector(
         bitesWithMetadata,
-        mockBucketlist
+        mockBucketlist,
       );
 
       expect(result).toHaveLength(1);
@@ -319,7 +307,7 @@ describe('Bites Selectors', () => {
 
       const result = fromSelectors.bitesBySelectedBucketlist.projector(
         bitesWithMetadata,
-        undefined
+        undefined,
       );
 
       expect(result).toEqual([]);
@@ -335,7 +323,7 @@ describe('Bites Selectors', () => {
 
       const result = fromSelectors.mybites.projector(
         bitesWithMetadata,
-        'User-1'
+        'User-1',
       );
 
       expect(result).toHaveLength(2);
@@ -351,7 +339,7 @@ describe('Bites Selectors', () => {
 
       const result = fromSelectors.mybites.projector(
         bitesWithMetadata,
-        'Another User'
+        'Another User',
       );
 
       expect(result).toEqual([]);
@@ -368,7 +356,7 @@ describe('Bites Selectors', () => {
       const result = fromSelectors.sortedHomeBites.projector(
         bitesWithMetadata,
         'other-sorting',
-        {}
+        {},
       );
 
       expect(result[0].id).toBe('2'); // closest bite first
@@ -378,7 +366,7 @@ describe('Bites Selectors', () => {
       const result = fromSelectors.sortedHomeBites.projector(
         [],
         'distance',
-        {}
+        {},
       );
       expect(result).toEqual([]);
     });

@@ -122,34 +122,6 @@ describe('Bite Reducer', () => {
     });
   });
 
-  describe('reloadBites', () => {
-    it('should reset the state to initial values', () => {
-      const INITIAL_STATE = { ids: [], entities: {}, reloading: false };
-
-      const NEW_STATE = { ids: [], entities: {}, reloading: true };
-
-      const reloadBitesAction = BiteActions.reloadBites();
-
-      expect(reducer(INITIAL_STATE, reloadBitesAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
-  describe('stopReloadingBites', () => {
-    it('should reset the state to initial values', () => {
-      const INITIAL_STATE = { ids: [], entities: {}, reloading: true };
-
-      const NEW_STATE = { ids: [], entities: {}, reloading: false };
-
-      const stopReloadingBitesAction = BiteActions.stopReloadingBites();
-
-      expect(reducer(INITIAL_STATE, stopReloadingBitesAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
   describe('noPublicCreatorForBite', () => {
     it('should clear the biteCreator in the state', () => {
       const INITIAL_STATE = {

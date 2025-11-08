@@ -25,6 +25,7 @@ class Mock {
   reloadGPSPosition = (): null => null;
   setFilters = (): null => null;
   clearFilters = (): null => null;
+  clearGpsError = (): null => null;
 }
 
 describe('HomeService', () => {
@@ -387,5 +388,21 @@ describe('HomeService', () => {
       service.refresh();
       expect(reloadHomeBitesSpy).toHaveBeenCalledTimes(1);
     }));
+  });
+
+  describe('closeGpsError', () => {
+    let clearGpsErrorSpy: SpyInstance;
+
+    beforeEach(() => {
+      clearGpsErrorSpy = jest.spyOn(homeDataAccessService, 'clearGpsError');
+    });
+
+    it('should call clearGpsError on HomeDataAccessService', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.closeGpsError();
+        expect(clearGpsErrorSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
   });
 });

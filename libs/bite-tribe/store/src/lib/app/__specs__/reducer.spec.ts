@@ -299,4 +299,38 @@ describe('App Reducer', () => {
       });
     });
   });
+
+  describe('reloadGPSPosition', () => {
+    it('should set reloading:home to true', () => {
+      const INITIAL_STATE = {
+        reloading: { home: false },
+      } as AppSlice;
+      const NEW_STATE = {
+        reloading: { home: true },
+      } as AppSlice;
+
+      const reloadGPSPositionAction = AppActions.reloadGPSPosition();
+
+      expect(reducer(INITIAL_STATE, reloadGPSPositionAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('clearGPSError', () => {
+    it('should set errorLoadingGpsPosition to false', () => {
+      const INITIAL_STATE = {
+        errorLoadingGpsPosition: true,
+      } as AppSlice;
+      const NEW_STATE = {
+        errorLoadingGpsPosition: false,
+      } as AppSlice;
+
+      const clearGPSErrorAction = AppActions.clearGPSError();
+
+      expect(reducer(INITIAL_STATE, clearGPSErrorAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
 });

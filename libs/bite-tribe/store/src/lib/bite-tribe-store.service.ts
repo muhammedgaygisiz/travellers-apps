@@ -1,7 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
-import { createAction, props, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { BiteActions } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import {
@@ -56,7 +56,6 @@ import {
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
-  saveNewRestaurant,
   saveSocialMediaLinksForRestaurant,
   setRestaurantToCreate,
 } from './restaurants/actions';
@@ -72,29 +71,7 @@ import {
   selectedBucketlist,
   selectedBucketlistTitle,
 } from './bucketlists/selectors';
-
-const unknownEntity = createAction(
-  '[Unknown Entity]',
-  props<{ docType: string }>(),
-);
-
-const getActionByDocType = (docType: string, entity: any): any => {
-  switch (docType) {
-    case 'bite': {
-      if (entity.id) {
-        return BiteActions.saveExistingBite({ bite: entity });
-      }
-
-      return BiteActions.saveNewBite({ bite: entity });
-    }
-    case 'restaurant': {
-      return saveNewRestaurant({ restaurant: entity });
-    }
-    default: {
-      return unknownEntity({ docType });
-    }
-  }
-};
+import { getActionByDocType } from './utils/get-action-by-doc-type';
 
 @Injectable({
   providedIn: 'root',

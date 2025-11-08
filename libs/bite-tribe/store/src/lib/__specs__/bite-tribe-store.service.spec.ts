@@ -3,7 +3,6 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
-import { fromBites } from '../bites';
 
 describe('BiteTribeStoreService', () => {
   let store: Store;
@@ -364,6 +363,28 @@ describe('BiteTribeStoreService', () => {
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
         service.clearHomeFilters();
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('reloadGPSPosition', () => {
+    it('should dispatch reloadGPSPosition on BiteTribeStoreService', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        service.reloadGPSPosition();
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('clearGpsError', () => {
+    it('should dispatch clearGpsError on BiteTribeStoreService', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        service.clearGpsError();
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));

@@ -20,9 +20,9 @@
     </ion-refresher>
 
     @if (moreThen5Bites()) {
-    <ion-button slot="fixed" (click)="scrollToTop()">
-      <ion-icon name="chevron-up-outline" />
-    </ion-button>
+      <ion-button slot="fixed" (click)="scrollToTop()">
+        <ion-icon name="chevron-up-outline" />
+      </ion-button>
     }
 
     <div class="home-header-container" slot="fixed">
@@ -35,7 +35,7 @@
           <ion-chip id="select-tags">
             <ion-icon src="assets/custom-icons/filter.svg" class="icon" />
             @if (selectedFilters().length > 0 || distance()) {
-            <ion-badge color="danger">{{ numberOfFilters() }}</ion-badge>
+              <ion-badge color="danger">{{ numberOfFilters() }}</ion-badge>
             }
             <ion-text color="secondary">Filter</ion-text>
           </ion-chip>
@@ -96,35 +96,52 @@
 
 <ng-template #withLoadingTemplate>
   @defer (when !isBitesLoading()) {
-  <ng-container *ngTemplateOutlet="withoutLoadingTemplate" />
+    <ng-container *ngTemplateOutlet="withoutLoadingTemplate" />
   } @placeholder (minimum 1000ms) {
-  <div class="spinner-container">
-    <ion-spinner color="primary" />
-  </div>
+    <div class="spinner-container">
+      <ion-spinner color="primary" />
+    </div>
   }
 </ng-template>
 
 <ng-template #withoutLoadingTemplate>
   @if (!displayedBites().length) {
-  <ion-card>
-    <ion-card-content>
-      <ion-text color="primary"> No bites found. Be the first one.</ion-text>
-    </ion-card-content>
-  </ion-card>
-  } @for (bite of displayedBites(); track bite.id) {
-  <bt-bite
-    [bite]="bite"
-    [userId]="userId()"
-    [showEditButton]="editableBites()"
-    (biteClick)="biteClick.emit($event)"
-    (restaurantClick)="restaurantClick.emit($event)"
-    (likeButtonClick)="likeButtonClick.emit($event)"
-    (gotoEdit)="gotoEdit.emit($event)"
-    (deleteBite)="deleteBite.emit($event)"
-  />
-  } @if (hasMore()) {
-  <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
-    <ion-infinite-scroll-content />
-  </ion-infinite-scroll>
+    <ion-card>
+      <ion-card-content>
+        <ion-text color="primary"> No bites found. Be the first one.</ion-text>
+      </ion-card-content>
+    </ion-card>
+  }
+
+  @if (hasErrorLoadingGpsPosition()) {
+    <ion-card>
+      <ion-card-content>
+        <ion-text color="warning">
+          We couldn’t access your location, so the distance to the bites can’t
+          be shown.
+        </ion-text>
+      </ion-card-content>
+
+      <ion-button fill="clear" (click)="refresh.emit()">RETRY</ion-button>
+      <ion-button fill="clear" (click)="closeGpsError.emit()">CLOSE</ion-button>
+    </ion-card>
+  }
+
+  @for (bite of displayedBites(); track bite.id) {
+    <bt-bite
+      [bite]="bite"
+      [userId]="userId()"
+      [showEditButton]="editableBites()"
+      (biteClick)="biteClick.emit($event)"
+      (restaurantClick)="restaurantClick.emit($event)"
+      (likeButtonClick)="likeButtonClick.emit($event)"
+      (gotoEdit)="gotoEdit.emit($event)"
+      (deleteBite)="deleteBite.emit($event)"
+    />
+  }
+  @if (hasMore()) {
+    <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
+      <ion-infinite-scroll-content />
+    </ion-infinite-scroll>
   }
 </ng-template>

@@ -12,7 +12,6 @@ import {
   bitesBySelectedBucketlist,
   bitesByUser,
   cachedBite,
-  isReloadingBites,
   mybites,
   sortedHomeBites,
 } from './bites/selectors';
@@ -48,10 +47,12 @@ import {
   isBitesLoading,
   isDarkTheme,
   isPublicProfile,
+  isReloadingHome,
   maxPriceHome,
   preferredCurrency,
   publicUser,
   settings,
+  hasErrorLoadingGpsPosition,
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
@@ -72,6 +73,7 @@ import {
   selectedBucketlistTitle,
 } from './bucketlists/selectors';
 import { fromBites } from './bites';
+import { debounceTime } from 'rxjs';
 
 const unknownEntity = createAction(
   '[Unknown Entity]',
@@ -127,7 +129,8 @@ export class BiteTribeStoreService implements StoreService {
   exchangeRates$ = this.store.select(exchangeRates);
   preferedCurrency$ = this.store.select(preferredCurrency);
   maxPriceHome$ = this.store.select(maxPriceHome);
-  isReloadingBites$ = this.store.select(isReloadingBites);
+  isReloadingHome$ = this.store.select(isReloadingHome);
+  hasErrorLoadingGpsPosition$ = this.store.select(hasErrorLoadingGpsPosition);
   darkTheme$ = this.store.select(isDarkTheme);
 
   userId$ = this.store.select(fromAuth.selectUserId);
@@ -292,7 +295,11 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(AppActions.clearHomeFilters());
   }
 
-  reloadBites(): void {
-    this.store.dispatch(fromBites.reloadBites());
+  reloadGPSPosition(): void {
+    this.store.dispatch(AppActions.reloadGPSPosition());
+  }
+
+  clearGpsError(): void {
+    this.store.dispatch(AppActions.clearGPSError());
   }
 }

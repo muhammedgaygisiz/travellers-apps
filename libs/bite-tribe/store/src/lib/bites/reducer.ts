@@ -33,18 +33,6 @@ export const reducer = createReducer(
       biteCreator,
     };
   }),
-  on(BiteActions.reloadBites, (state) => {
-    return {
-      ...state,
-      reloading: true,
-    };
-  }),
-  on(BiteActions.stopReloadingBites, (state) => {
-    return {
-      ...state,
-      reloading: false,
-    };
-  }),
   on(BiteActions.noPublicCreatorForBite, (state) => {
     return {
       ...state,

@@ -30,7 +30,9 @@ export class HomeService {
 
   selectedBucketlistTitle = this.dataAccess.selectedBucketlistTitle;
 
-  isReloadingBites = this.dataAccess.isReloadingBites;
+  isReloading = this.dataAccess.isReloading;
+
+  hasErrorLoadingGpsPosition = this.dataAccess.hasErrorLoadingGpsPosition;
 
   logout(): void {
     this.dataAccess.logout();
@@ -123,6 +125,10 @@ export class HomeService {
   }
 
   refresh(): void {
-    this.dataAccess.reloadHomeBites();
+    this.dataAccess.reloadGPSPosition();
+  }
+
+  closeGpsError(): void {
+    this.dataAccess.clearGpsError();
   }
 }

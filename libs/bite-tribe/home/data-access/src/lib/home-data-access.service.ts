@@ -18,7 +18,7 @@ export class HomeDataAccessService {
   });
   bitesBySelectedBucketlist = toSignal(
     this.storeService.bitesBySelectedBucketlist$,
-    { initialValue: [] as Bite[] }
+    { initialValue: [] as Bite[] },
   );
   allTags = toSignal(this.storeService.allTags$, {
     initialValue: [] as string[],
@@ -34,7 +34,7 @@ export class HomeDataAccessService {
     this.storeService.selectedBucketlistTitle$,
     {
       requireSync: true,
-    }
+    },
   );
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
@@ -50,9 +50,13 @@ export class HomeDataAccessService {
     initialValue: 'EUR',
   });
   maxPriceHome = toSignal(this.storeService.maxPriceHome$, { initialValue: 0 });
-  isReloadingBites = toSignal(this.storeService.isReloadingBites$, {
+  isReloading = toSignal(this.storeService.isReloadingHome$, {
     initialValue: false,
   });
+  hasErrorLoadingGpsPosition = toSignal(
+    this.storeService.hasErrorLoadingGpsPosition$,
+    { initialValue: false },
+  );
 
   logout(): void {
     this.storeService.logout();
@@ -85,7 +89,11 @@ export class HomeDataAccessService {
     this.storeService.clearHomeFilters();
   }
 
-  reloadHomeBites(): void {
-    this.storeService.reloadBites();
+  reloadGPSPosition(): void {
+    this.storeService.reloadGPSPosition();
+  }
+
+  clearGpsError(): void {
+    this.storeService.clearGpsError();
   }
 }

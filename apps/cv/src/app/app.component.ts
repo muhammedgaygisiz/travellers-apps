@@ -3,7 +3,29 @@ import { RouterModule } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { DurationPipe } from './duration.pipe';
 import { Project } from './project';
-import { APU, AUSBILDUNG, AXA, FH, NLI, PERFOOD, TIMS, TRIP } from './projects';
+import {
+  APU,
+  AUSBILDUNG,
+  AXA,
+  CORIX,
+  FH,
+  NLI,
+  PERFOOD,
+  TIMS,
+  TRIP,
+} from './projects';
+import {
+  JAVA,
+  JAVASCRIPT,
+  REST,
+  SPRING,
+  TYPESCRIPT,
+  REACT,
+  ANGULAR,
+  HTML,
+} from './technologies';
+import { Technology } from '../technology/technology';
+import { TechnologyPipe } from './technology.pipe';
 
 interface Education {
   id: number;
@@ -40,13 +62,31 @@ const APPRENTICE: Education = {
 };
 
 @Component({
-  imports: [RouterModule, DatePipe, DurationPipe],
+  imports: [RouterModule, DatePipe, DurationPipe, Technology, TechnologyPipe],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  projects: Project[] = [APU, PERFOOD, TRIP, TIMS, AXA, NLI, FH, AUSBILDUNG];
+  projects: Project[] = [
+    CORIX,
+    APU,
+    PERFOOD,
+    TRIP,
+    TIMS,
+    AXA,
+    NLI,
+    FH,
+    AUSBILDUNG,
+  ];
 
   educations: Education[] = [MASTER, BACHELOR, APPRENTICE];
+  protected readonly JAVA = JAVA;
+  protected readonly JAVASCRIPT = JAVASCRIPT;
+  protected readonly TYPESCRIPT = TYPESCRIPT;
+  protected readonly REST = REST;
+  protected readonly SPRING = SPRING;
+  protected readonly REACT = REACT;
+  protected readonly ANGULAR = ANGULAR;
+  protected readonly HTML = HTML;
 }

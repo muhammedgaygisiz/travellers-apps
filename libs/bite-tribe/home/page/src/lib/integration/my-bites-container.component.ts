@@ -15,6 +15,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [bites]="service.myBites()"
       [userId]="service.userId()"
       [showHeaderMenu]="false"
+      [isReloading]="service.isReloading()"
+      [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
       editableBites
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
@@ -26,6 +28,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoEdit)="service.onGotoEditClick($event)"
       (deleteBite)="service.onDeleteBiteClick($event)"
       (openMapView)="service.openMapView('my-bites')"
+      (refresh)="service.refresh()"
+      (closeGpsError)="service.closeGpsError()"
     />
   `,
   imports: [BiteTribeHomeComponent],

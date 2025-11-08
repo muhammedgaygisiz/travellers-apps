@@ -26,6 +26,9 @@ describe('App Selectors', () => {
     },
     homeFilters: ['#food', '#drink'],
     exchangeRates: {},
+    reloading: {
+      home: false,
+    },
   } as AppSlice;
 
   describe('gpsPosition', () => {
@@ -99,7 +102,7 @@ describe('App Selectors', () => {
         profile: { ...mockProfile, public: true },
       };
       const result = fromSelectors.isPublicProfile.projector(
-        stateWithPublicProfile
+        stateWithPublicProfile,
       );
       expect(result).toBe(true);
     });
@@ -110,7 +113,7 @@ describe('App Selectors', () => {
         profile: { ...mockProfile, public: false },
       };
       const result = fromSelectors.isPublicProfile.projector(
-        stateWithPrivateProfile
+        stateWithPrivateProfile,
       );
       expect(result).toBe(false);
     });
@@ -152,7 +155,7 @@ describe('App Selectors', () => {
     it('should return empty object when exchange rates are not set', () => {
       const stateWithoutExchangeRates = { ...mockState, exchangeRates: {} };
       const result = fromSelectors.exchangeRates.projector(
-        stateWithoutExchangeRates
+        stateWithoutExchangeRates,
       );
       expect(result).toEqual({});
     });
@@ -212,13 +215,58 @@ describe('App Selectors', () => {
       const stateWithLightTheme = {
         ...mockState,
         settings: { ...mockState.settings, theme: 'light' },
-      };
+      } as AppSlice;
       const result = fromSelectors.isDarkTheme.projector(stateWithLightTheme);
       expect(result).toBe(false);
     });
 
     it('should return false when slice is undefined', () => {
       const result = fromSelectors.isDarkTheme.projector(undefined as any);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('isReloadingHome', () => {
+    it('should return the reloading state of home', () => {
+      const stateWithHomeReloading = {
+        ...mockState,
+        reloading: { home: true },
+      };
+      const result = fromSelectors.isReloadingHome.projector(
+        stateWithHomeReloading,
+      );
+      expect(result).toBe(true);
+    });
+
+    it('should return false when reloading state is not set', () => {
+      const stateWithoutReloading = { ...mockState, reloading: undefined };
+      const result = fromSelectors.isReloadingHome.projector(
+        stateWithoutReloading,
+      );
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('hasErrorLoadingGpsPosition', () => {
+    it('should return the error loading GPS position state', () => {
+      const stateWithGpsError = {
+        ...mockState,
+        errorLoadingGpsPosition: true,
+      };
+      const result =
+        fromSelectors.hasErrorLoadingGpsPosition.projector(stateWithGpsError);
+      expect(result).toBe(true);
+    });
+
+    it('should return false when error loading GPS position state is not set', () => {
+      const stateWithoutGpsError = {
+        ...mockState,
+        errorLoadingGpsPosition: false,
+      };
+      const result =
+        fromSelectors.hasErrorLoadingGpsPosition.projector(
+          stateWithoutGpsError,
+        );
       expect(result).toBe(false);
     });
   });

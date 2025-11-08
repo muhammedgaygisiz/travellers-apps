@@ -1,7 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
-import { createAction, props, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { BiteActions } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import {
@@ -12,7 +12,6 @@ import {
   bitesBySelectedBucketlist,
   bitesByUser,
   cachedBite,
-  isReloadingBites,
   mybites,
   sortedHomeBites,
 } from './bites/selectors';
@@ -42,12 +41,14 @@ import {
   currency,
   exchangeRates,
   gpsPosition,
+  hasErrorLoadingGpsPosition,
   homeDistance,
   homeFilters,
   homeSorting,
   isBitesLoading,
   isDarkTheme,
   isPublicProfile,
+  isReloadingHome,
   maxPriceHome,
   preferredCurrency,
   publicUser,
@@ -55,7 +56,6 @@ import {
 } from './app/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
-  saveNewRestaurant,
   saveSocialMediaLinksForRestaurant,
   setRestaurantToCreate,
 } from './restaurants/actions';
@@ -71,30 +71,7 @@ import {
   selectedBucketlist,
   selectedBucketlistTitle,
 } from './bucketlists/selectors';
-import { fromBites } from './bites';
-
-const unknownEntity = createAction(
-  '[Unknown Entity]',
-  props<{ docType: string }>(),
-);
-
-const getActionByDocType = (docType: string, entity: any): any => {
-  switch (docType) {
-    case 'bite': {
-      if (entity.id) {
-        return BiteActions.saveExistingBite({ bite: entity });
-      }
-
-      return BiteActions.saveNewBite({ bite: entity });
-    }
-    case 'restaurant': {
-      return saveNewRestaurant({ restaurant: entity });
-    }
-    default: {
-      return unknownEntity({ docType });
-    }
-  }
-};
+import { getActionByDocType } from './utils/get-action-by-doc-type';
 
 @Injectable({
   providedIn: 'root',
@@ -127,7 +104,8 @@ export class BiteTribeStoreService implements StoreService {
   exchangeRates$ = this.store.select(exchangeRates);
   preferedCurrency$ = this.store.select(preferredCurrency);
   maxPriceHome$ = this.store.select(maxPriceHome);
-  isReloadingBites$ = this.store.select(isReloadingBites);
+  isReloadingHome$ = this.store.select(isReloadingHome);
+  hasErrorLoadingGpsPosition$ = this.store.select(hasErrorLoadingGpsPosition);
   darkTheme$ = this.store.select(isDarkTheme);
 
   userId$ = this.store.select(fromAuth.selectUserId);
@@ -292,7 +270,11 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(AppActions.clearHomeFilters());
   }
 
-  reloadBites(): void {
-    this.store.dispatch(fromBites.reloadBites());
+  reloadGPSPosition(): void {
+    this.store.dispatch(AppActions.reloadGPSPosition());
+  }
+
+  clearGpsError(): void {
+    this.store.dispatch(AppActions.clearGPSError());
   }
 }

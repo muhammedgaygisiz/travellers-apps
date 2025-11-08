@@ -7,7 +7,6 @@ import { AlertController, Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
-import { BiteActions } from '../bites/actions';
 
 @Injectable()
 export class AppEffect {
@@ -62,7 +61,7 @@ export class AppEffect {
         ofType(
           fromAuth.AuthActions.loadedUser,
           AppActions.fetchGPSPosition,
-          BiteActions.reloadBites,
+          AppActions.reloadGPSPosition,
         ),
         filter((payload) => {
           if (payload.type === fromAuth.AuthActions.loadedUser.type) {
@@ -77,14 +76,6 @@ export class AppEffect {
             ),
             catchError((error) => {
               console.error(error);
-              this.alertController
-                .create({
-                  header: 'GPS Position missing',
-                  subHeader:
-                    'Your GPS position could not be determined. Please check your device settings, then retry.',
-                  buttons: [this.RETRY_GPS_BUTTON],
-                })
-                .then((alert) => alert.present());
 
               return of(AppActions.errorLoadingGPSPosition({ error }));
             }),
@@ -94,13 +85,6 @@ export class AppEffect {
     },
     { useEffectsErrorHandler: true },
   );
-
-  stopReloadingBites$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(AppActions.loadedGPSPosition, AppActions.errorLoadingGPSPosition),
-      map(() => BiteActions.stopReloadingBites()),
-    );
-  });
 
   saveSettingsToFirestore$ = createEffect(
     () => {

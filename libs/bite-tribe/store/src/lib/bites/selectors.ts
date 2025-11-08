@@ -33,7 +33,6 @@ const slice = createFeatureSelector<
     cachedBite?: Bite;
     editingBite?: Bite;
     biteCreator?: PublicUser;
-    reloading?: boolean;
   }
 >(key);
 
@@ -42,11 +41,6 @@ const { selectAll } = adapter.getSelectors();
 export const cachedBite = createSelector(slice, (state) => state?.cachedBite);
 
 export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
-
-export const isReloadingBites = createSelector(
-  slice,
-  (state) => state?.reloading
-);
 
 const allBites = createSelector(slice, selectAll);
 
@@ -69,12 +63,12 @@ export const bitesWithMetadata = createSelector(
             bite.position?.longitude,
             gpsPosition?.latitude,
             gpsPosition?.longitude,
-            'km'
+            'km',
           ),
         } as Bite;
       })
       .sort(byDistance);
-  }
+  },
 );
 
 export const bites = createSelector(
@@ -92,7 +86,7 @@ export const bites = createSelector(
     preferredCurrency,
     gpsPosition,
     homeDistance,
-    exchangeRates
+    exchangeRates,
   ) => {
     if (!filters.length && !homeDistance && maxPriceInPreferredCurrency === 0) {
       return bites;
@@ -102,17 +96,17 @@ export const bites = createSelector(
       maxPriceInPreferredCurrency,
       exchangeRates,
       bites,
-      preferredCurrency
+      preferredCurrency,
     );
 
     const filteredBitesByNearby = handleNearbyFilter(
       homeDistance,
       gpsPosition,
-      priceFilteredBites
+      priceFilteredBites,
     );
 
     return handleTagFilters(filters, filteredBitesByNearby);
-  }
+  },
 );
 
 export const allTags = createSelector(bitesWithMetadata, (bites) => {
@@ -143,9 +137,9 @@ export const bite = createSelector(
     return enrichByPriceInPreferredCurrency(
       bite,
       exchangeRates,
-      preferredCurrency
+      preferredCurrency,
     );
-  }
+  },
 );
 
 export const mybites = createSelector(
@@ -153,7 +147,7 @@ export const mybites = createSelector(
   fromAuth.selectUserId,
   (bites, userId) => {
     return bites.filter((bite) => bite.userId === userId);
-  }
+  },
 );
 
 export const bitesBySelectedBucketlist = createSelector(
@@ -165,9 +159,9 @@ export const bitesBySelectedBucketlist = createSelector(
     }
 
     return bites.filter((bite) =>
-      selectedBucketlist.biteIds?.includes(bite.id)
+      selectedBucketlist.biteIds?.includes(bite.id),
     );
-  }
+  },
 );
 
 export const sortedHomeBites = createSelector(
@@ -200,7 +194,7 @@ export const sortedHomeBites = createSelector(
     }
 
     return [...bites];
-  }
+  },
 );
 
 export const bitesByUser = createSelector(
@@ -208,5 +202,5 @@ export const bitesByUser = createSelector(
   biteCreator,
   (bites, biteCreator) => {
     return bites.filter((bite) => bite.userId === biteCreator?.userId);
-  }
+  },
 );

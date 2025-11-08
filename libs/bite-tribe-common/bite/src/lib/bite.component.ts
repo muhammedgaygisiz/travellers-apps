@@ -50,6 +50,7 @@ export class BiteComponent {
   bite = input.required<Bite>();
   userId = input<string>();
   showEditButton = input(false, { transform: booleanAttribute });
+  hasErrorLoadingGpsPosition = input(false);
 
   biteClick = output<Bite>();
   restaurantClick = output<Bite>();

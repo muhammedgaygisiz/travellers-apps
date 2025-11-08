@@ -17,6 +17,7 @@ import { roundDistance } from '../../utils/round-distance';
 })
 export class DistanceComponent {
   distance = input<string | undefined>();
+  hasErrorLoadingGpsPosition = input(false);
 
   roundedMetricDistance = computed(() => {
     const distance = this.distance();

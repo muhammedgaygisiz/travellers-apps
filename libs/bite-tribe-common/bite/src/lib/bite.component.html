@@ -29,8 +29,11 @@
           <ion-text color="secondary">
             {{ biteData?.place }}
           </ion-text>
-
-          <bt-distance class="distance" [distance]="biteData?.distance" />
+          <bt-distance
+            class="distance"
+            [distance]="biteData?.distance"
+            [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
+          />
         </ion-card-subtitle>
       </ion-card-header>
 

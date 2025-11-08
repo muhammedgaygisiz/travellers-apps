@@ -20,6 +20,7 @@ const initialState: AppSlice = {
   homeSorting: 'distance',
   exchangeRates: { EUR: 1 },
   maxPriceFilter: 0,
+  errorLoadingGpsPosition: false,
 };
 
 export const reducer = createReducer<AppSlice>(
@@ -39,6 +40,25 @@ export const reducer = createReducer<AppSlice>(
       home: true,
     },
   })),
+  on(AppActions.reloadGPSPosition, (state) => {
+    return {
+      ...state,
+      reloading: {
+        home: true,
+      },
+    };
+  }),
+  on(AppActions.errorLoadingGPSPosition, (state) => ({
+    ...state,
+    reloading: {
+      home: false,
+    },
+    errorLoadingGpsPosition: true,
+  })),
+  on(AppActions.clearGPSError, (state) => ({
+    ...state,
+    errorLoadingGpsPosition: false,
+  })),
   on(AppActions.loadedGPSPosition, (state, { position }) => {
     const { coords } = position;
     const { latitude, longitude } = coords;
@@ -46,12 +66,12 @@ export const reducer = createReducer<AppSlice>(
     return {
       ...state,
       position: { latitude, longitude },
+      reloading: {
+        home: false,
+      },
+      errorLoadingGpsPosition: false,
     };
   }),
-  on(AppActions.errorLoadingGPSPosition, (state) => ({
-    ...state,
-    position: undefined,
-  })),
   on(AppActions.loadedSettingsFromAPI, (state, { settings }) => {
     return {
       ...state,

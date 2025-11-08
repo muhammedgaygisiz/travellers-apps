@@ -15,6 +15,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [userId]="service.userId()"
       [isAuthenticated]="service.isAuthenticated()"
       [showAddButton]="false"
+      [isReloading]="service.isReloading()"
+      [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
@@ -24,6 +26,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoEdit)="service.onGotoEditClick($event)"
       (openMapView)="service.openMapView('my-bucketlists')"
+      (refresh)="service.refresh()"
+      (closeGpsError)="service.closeGpsError()"
     />
   `,
   imports: [BiteTribeHomeComponent],

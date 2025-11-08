@@ -7,4 +7,8 @@
   <ion-text color="secondary" class="smalltext">
     {{ roundedMetricDistance() }}
   </ion-text>
+
+  @if (hasErrorLoadingGpsPosition()) {
+    <ion-icon color="warning" name="alert-outline" />
+  }
 </div>

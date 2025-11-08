@@ -22,9 +22,10 @@ class Mock {
   exchangeRates = (): null => null;
   setHomeSorting = (): null => null;
   selectedBucketlistTitle = (): null => null;
-  reloadHomeBites = (): null => null;
+  reloadGPSPosition = (): null => null;
   setFilters = (): null => null;
   clearFilters = (): null => null;
+  clearGpsError = (): null => null;
 }
 
 describe('HomeService', () => {
@@ -46,7 +47,7 @@ describe('HomeService', () => {
     [HomeService],
     (service: HomeService) => {
       expect(service).toBeTruthy();
-    }
+    },
   ));
 
   describe('bitesBySelectedBucketlist', () => {
@@ -55,7 +56,7 @@ describe('HomeService', () => {
       (service: HomeService) => {
         const result = service.bitesBySelectedBucketlist();
         expect(result).toEqual([]);
-      }
+      },
     ));
   });
 
@@ -71,7 +72,7 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.logout();
         expect(logoutSpy).toHaveBeenCalled();
-      }
+      },
     ));
   });
 
@@ -88,7 +89,7 @@ describe('HomeService', () => {
         const param = { likeType: 'likeType', biteId: 'biteId' };
         service.likeButtonClicked(param);
         expect(submitLikeClickSpy).toHaveBeenCalledWith(param);
-      }
+      },
     ));
   });
 
@@ -105,7 +106,7 @@ describe('HomeService', () => {
         const bite = { id: 'bite-id', restaurantId: 'restaurant-id' } as Bite;
         service.biteClicked(bite);
         expect(navigateForwardSpy).toHaveBeenCalledWith(['bite', bite.id]);
-      }
+      },
     ));
   });
 
@@ -122,7 +123,7 @@ describe('HomeService', () => {
         const bite = { id: 'bite-id' } as Bite;
         service.onDeleteBiteClick(bite);
         expect(deleteBiteSpy).toHaveBeenCalledWith(bite);
-      }
+      },
     ));
   });
 
@@ -144,7 +145,7 @@ describe('HomeService', () => {
           'restaurant',
           '123',
         ]);
-      }
+      },
     ));
   });
 
@@ -160,7 +161,7 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.onAddButtonClicked();
         expect(navigateForwardSpy).toHaveBeenCalledWith(['new-bite']);
-      }
+      },
     ));
   });
 
@@ -176,7 +177,7 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.onGotoSettingsClick();
         expect(navigateForwardSpy).toHaveBeenCalledWith(['settings']);
-      }
+      },
     ));
   });
 
@@ -192,7 +193,7 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.onGotoMyBitesClick();
         expect(navigateForwardSpy).toHaveBeenCalledWith(['my-bites']);
-      }
+      },
     ));
   });
 
@@ -208,7 +209,7 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.onGotoMyBucketlists();
         expect(navigateForwardSpy).toHaveBeenCalledWith(['my-bucketlists']);
-      }
+      },
     ));
   });
 
@@ -229,7 +230,7 @@ describe('HomeService', () => {
           'bite-id',
           'edit',
         ]);
-      }
+      },
     ));
   });
 
@@ -252,7 +253,7 @@ describe('HomeService', () => {
           '1',
           'map-view',
         ]);
-      }
+      },
     ));
 
     it('should navigate to any other route without params', inject(
@@ -260,7 +261,7 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.openMapView('home');
         expect(navigateForwardSpy).toHaveBeenCalledWith(['home', 'map-view']);
-      }
+      },
     ));
   });
 
@@ -277,7 +278,7 @@ describe('HomeService', () => {
         service.sortingChange('distance');
 
         expect(setHomeSortingSpy).toHaveBeenCalledWith('distance');
-      }
+      },
     ));
   });
 
@@ -298,7 +299,7 @@ describe('HomeService', () => {
 
         const result = service.myBites();
         expect(result).toEqual([bites[0]]);
-      }
+      },
     ));
   });
 
@@ -317,7 +318,7 @@ describe('HomeService', () => {
         selectedBucketlistSpy.mockReturnValue('My Bucketlist');
         const result = service.selectedBucketlistTitle();
         expect(result).toBe('My Bucketlist');
-      }
+      },
     ));
 
     it('should return title of the selected bucketlist', inject(
@@ -328,7 +329,7 @@ describe('HomeService', () => {
 
         const result = service.selectedBucketlistTitle();
         expect(result).toBe(bucketlistTitle);
-      }
+      },
     ));
   });
 
@@ -351,7 +352,7 @@ describe('HomeService', () => {
         };
         service.filtersChanged(filters);
         expect(setFiltersSpy).toHaveBeenCalledWith(filters);
-      }
+      },
     ));
   });
 
@@ -369,7 +370,7 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.filtersCleared();
         expect(clearFiltersSpy).toHaveBeenCalledTimes(1);
-      }
+      },
     ));
   });
 
@@ -377,12 +378,31 @@ describe('HomeService', () => {
     let reloadHomeBitesSpy: SpyInstance;
 
     beforeEach(() => {
-      reloadHomeBitesSpy = jest.spyOn(homeDataAccessService, 'reloadHomeBites');
+      reloadHomeBitesSpy = jest.spyOn(
+        homeDataAccessService,
+        'reloadGPSPosition',
+      );
     });
 
     it('should emit refresh', inject([HomeService], (service: HomeService) => {
       service.refresh();
       expect(reloadHomeBitesSpy).toHaveBeenCalledTimes(1);
     }));
+  });
+
+  describe('closeGpsError', () => {
+    let clearGpsErrorSpy: SpyInstance;
+
+    beforeEach(() => {
+      clearGpsErrorSpy = jest.spyOn(homeDataAccessService, 'clearGpsError');
+    });
+
+    it('should call clearGpsError on HomeDataAccessService', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.closeGpsError();
+        expect(clearGpsErrorSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
   });
 });

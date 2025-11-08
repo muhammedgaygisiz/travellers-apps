@@ -85,7 +85,8 @@ export class BiteTribeHomeComponent {
   distance = input<number>();
   maxPriceFilter = input<number>(0);
   preferedCurrency = input('EUR');
-  isReloadingBites = input<boolean | undefined>(false);
+  isReloading = input(false, { transform: booleanAttribute });
+  hasErrorLoadingGpsPosition = input(false);
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -106,16 +107,20 @@ export class BiteTribeHomeComponent {
   readonly sortingChange = output<string>();
   readonly filterCleared = output<void>();
   readonly refresh = output<void>();
+  readonly closeGpsError = output<void>();
 
   ionContent = viewChild(IonContent);
 
   currentPage = signal<number>(1);
 
   refreshEvent: RefresherCustomEvent | null = null;
-  onBiteRefresh = effect(() => {
-    const isReloadingBites = this.isReloadingBites();
-    if (!isReloadingBites && this.refreshEvent) {
-      this.refreshEvent.target.complete();
+  onRefresh = effect(() => {
+    const isReloading = this.isReloading();
+
+    if (!isReloading) {
+      setTimeout(() => {
+        this.refreshEvent?.target.complete();
+      }, 2000);
     }
   });
 
@@ -156,7 +161,7 @@ export class BiteTribeHomeComponent {
       distanceFilter: string;
       priceFilter: number;
     },
-    modal: IonModal
+    modal: IonModal,
   ): void {
     modal.dismiss();
 
@@ -211,5 +216,13 @@ export class BiteTribeHomeComponent {
   refreshBites(event: RefresherCustomEvent): void {
     this.refreshEvent = event;
     this.refresh.emit();
+
+    setTimeout(() => {
+      const reloading = this.isReloading();
+
+      if (!reloading) {
+        event.target.complete();
+      }
+    }, 2000);
   }
 }

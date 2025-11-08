@@ -1,10 +1,6 @@
 import { BiteActions } from '../actions';
 
 describe('Bites - Actions', () => {
-  it('should have reloadBites action', () => {
-    expect(BiteActions.reloadBites).toBeDefined();
-  });
-
   it('should have loadedFromAPI action', () => {
     expect(BiteActions.loadedFromAPI).toBeDefined();
   });
@@ -35,9 +31,5 @@ describe('Bites - Actions', () => {
 
   it('should have noPublicCreatorForBite action', () => {
     expect(BiteActions.noPublicCreatorForBite).toBeDefined();
-  });
-
-  it('should have stopReloadingBites action', () => {
-    expect(BiteActions.stopReloadingBites).toBeDefined();
   });
 });

@@ -16,6 +16,7 @@ describe('App Reducer', () => {
         homeSorting: 'distance',
         exchangeRates: { EUR: 1 },
         maxPriceFilter: 0,
+        errorLoadingGpsPosition: false,
       };
 
       const NEW_STATE = {
@@ -32,6 +33,7 @@ describe('App Reducer', () => {
         homeSorting: 'distance',
         exchangeRates: { EUR: 1 },
         maxPriceFilter: 0,
+        errorLoadingGpsPosition: false,
       } as AppSlice;
 
       const logoutAction = fromAuth.AuthActions.logoutSucceeded();
@@ -85,6 +87,10 @@ describe('App Reducer', () => {
       const INITIAL_STATE = {} as AppSlice;
       const NEW_STATE = {
         position: POSITION_MOCK,
+        errorLoadingGpsPosition: false,
+        reloading: {
+          home: false,
+        },
       } as AppSlice;
 
       const loadedGpsPositionAction = AppActions.loadedGPSPosition({
@@ -98,12 +104,16 @@ describe('App Reducer', () => {
   });
 
   describe('errorLoadingGpsPosition', () => {
-    it('should set position to undefined', () => {
+    it('should keep old position', () => {
       const INITIAL_STATE = {
         position: { latitude: 1, longitude: 2 },
       } as AppSlice;
       const NEW_STATE = {
-        position: undefined,
+        position: { latitude: 1, longitude: 2 },
+        errorLoadingGpsPosition: true,
+        reloading: {
+          home: false,
+        },
       } as AppSlice;
 
       const errorLoadingGpsPositionAction = AppActions.errorLoadingGPSPosition({
@@ -285,6 +295,40 @@ describe('App Reducer', () => {
       });
 
       expect(reducer(INITIAL_STATE, setHomeSortingAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('reloadGPSPosition', () => {
+    it('should set reloading:home to true', () => {
+      const INITIAL_STATE = {
+        reloading: { home: false },
+      } as AppSlice;
+      const NEW_STATE = {
+        reloading: { home: true },
+      } as AppSlice;
+
+      const reloadGPSPositionAction = AppActions.reloadGPSPosition();
+
+      expect(reducer(INITIAL_STATE, reloadGPSPositionAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('clearGPSError', () => {
+    it('should set errorLoadingGpsPosition to false', () => {
+      const INITIAL_STATE = {
+        errorLoadingGpsPosition: true,
+      } as AppSlice;
+      const NEW_STATE = {
+        errorLoadingGpsPosition: false,
+      } as AppSlice;
+
+      const clearGPSErrorAction = AppActions.clearGPSError();
+
+      expect(reducer(INITIAL_STATE, clearGPSErrorAction)).toEqual({
         ...NEW_STATE,
       });
     });

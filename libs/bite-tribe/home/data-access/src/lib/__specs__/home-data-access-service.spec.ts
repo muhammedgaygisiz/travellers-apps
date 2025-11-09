@@ -10,6 +10,8 @@ class Mock {
   sortedHomeBites$ = of([]);
   homeSorting$ = of('distance');
   mybites$ = of([]);
+  sortedMyBites$ = of([]);
+  myBitesSorting$ = of('distance');
   bitesBySelectedBucketlist$ = of([]);
   allTags$ = of([]);
   homeFilters$ = of([]);
@@ -28,6 +30,7 @@ class Mock {
   submitLikeOrDislikeClick = (): null => null;
   submitDeleteBite = (): null => null;
   setHomeSorting = (): null => null;
+  setMyBitesSorting = (): null => null;
   setHomeFilters = (): null => null;
   clearHomeFilters = (): null => null;
   reloadGPSPosition = (): null => null;

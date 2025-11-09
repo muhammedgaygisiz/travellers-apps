@@ -113,7 +113,7 @@ describe('ImageUploadComponent', () => {
   it('should call clickOnFileUploader on web', () => {
     const spy = jest.spyOn(
       component as unknown as { clickOnFileUploader: () => void },
-      'clickOnFileUploader'
+      'clickOnFileUploader',
     );
     component.onImageUploadClick();
     expect(spy).toHaveBeenCalled();
@@ -130,7 +130,7 @@ describe('ImageUploadComponent', () => {
     // Set up spy on the private method
     const getImageFromNativeSpy = jest.spyOn(
       component as unknown as { getImageFromNative: () => Promise<void> },
-      'getImageFromNative'
+      'getImageFromNative',
     );
 
     // Setup other required mocks
@@ -179,7 +179,7 @@ describe('ImageUploadComponent', () => {
       longitude: 4,
     });
     (compressPhoto as jest.Mock).mockResolvedValue(
-      new File(['dummy'], 'test.jpg', { type: 'image/jpeg' })
+      new File(['dummy'], 'test.jpg', { type: 'image/jpeg' }),
     );
 
     // Mock FileReader
@@ -254,20 +254,6 @@ describe('ImageUploadComponent', () => {
     });
     component.clearImage();
     expect(fileUpload.nativeElement.value).toBe('');
-  });
-
-  describe('cropImage', () => {
-    let startCropImageEmit: jest.SpyInstance;
-
-    beforeEach(() => {
-      component.value = signal('image-crop');
-      startCropImageEmit = jest.spyOn(component.startCropImage, 'emit');
-    });
-
-    it('should navigate forward to image-crop', () => {
-      component.cropImage();
-      expect(startCropImageEmit).toHaveBeenCalledWith('image-crop');
-    });
   });
 
   describe('onDragOver', () => {

@@ -9,6 +9,7 @@ import { addIcons } from 'ionicons';
 import { imageOutline } from 'ionicons/icons';
 import { ComponentRef, signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
+import { ImageCroppedEvent } from 'ngx-image-cropper';
 
 addNecessaryIcons();
 
@@ -280,6 +281,57 @@ describe('ImageUploadComponent', () => {
       component.onDrop(event);
       expect(event.preventDefault).toHaveBeenCalled();
       expect(component.isDragging()).toBe(false);
+    });
+  });
+
+  describe('cancelCropping', () => {
+    it('should dismiss crop modal', () => {
+      const dismissMock = jest.fn();
+      Object.defineProperty(component, 'cropModal', {
+        value: () => ({
+          dismiss: dismissMock,
+        }),
+      });
+
+      component.cancelCropping();
+      expect(dismissMock).toHaveBeenCalledWith(null, 'cancel');
+    });
+  });
+
+  describe('confirmCropping', () => {
+    it('should set value, trigger change, and dismiss modal on confirmCropping', () => {
+      const dismissMock = jest.fn();
+      Object.defineProperty(component, 'cropModal', {
+        value: () => ({
+          dismiss: dismissMock,
+        }),
+      });
+      component.croppedImage.set('data:image/jpeg;base64,croppedImage');
+      const onChange = jest.fn();
+      const onTouch = jest.fn();
+      component._onChange = onChange;
+      component._onTouch = onTouch;
+
+      component.confirmCropping();
+
+      expect(component.value()).toBe('data:image/jpeg;base64,croppedImage');
+      expect(onChange).toHaveBeenCalledWith(
+        'data:image/jpeg;base64,croppedImage',
+      );
+      expect(onTouch).toHaveBeenCalled();
+      expect(dismissMock).toHaveBeenCalledWith(null, 'confirmed');
+    });
+  });
+
+  describe('onImageCrop', () => {
+    it('should set croppedImage on onImageCrop', () => {
+      const event = {
+        base64: 'data:image/jpeg;base64,cropped',
+        width: 100,
+        height: 100,
+      } as ImageCroppedEvent;
+      component.onImageCrop(event);
+      expect(component.croppedImage()).toBe('data:image/jpeg;base64,cropped');
     });
   });
 });

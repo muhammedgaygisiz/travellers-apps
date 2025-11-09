@@ -239,12 +239,10 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   cancelCropping(): void {
-    // Close cropping modal
     this.cropModal()?.dismiss(null, 'cancel');
   }
 
   confirmCropping(): void {
-    // Take cropped image and set as value
     const croppedImage = this.croppedImage();
 
     if (croppedImage) {
@@ -258,7 +256,5 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   onImageCrop($event: ImageCroppedEvent): void {
     this.croppedImage.set($event.base64);
-
-    console.log('Cropped image event:', $event.base64);
   }
 }

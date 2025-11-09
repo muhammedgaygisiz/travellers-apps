@@ -157,7 +157,7 @@ export const sortedMyBites = createSelector(
   exchangeRates,
   (bites, sorting, exchangeRates) => {
     if (!bites?.length || !sorting) {
-      return [...bites];
+      return bites || [];
     }
 
     if (sorting === 'distance') {
@@ -180,7 +180,7 @@ export const sortedMyBites = createSelector(
       return [...sortBitesByPrice(bites, exchangeRates)];
     }
 
-    return [...bites];
+    return bites || [];
   },
 );
 

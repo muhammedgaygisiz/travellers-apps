@@ -12,10 +12,16 @@ import {
 } from '@angular/core';
 import {
   IonButton,
+  IonButtons,
   IonCard,
   IonCardContent,
+  IonContent,
+  IonHeader,
   IonIcon,
+  IonModal,
   IonNote,
+  IonTitle,
+  IonToolbar,
 } from '@ionic/angular/standalone';
 import {
   Camera,
@@ -29,6 +35,7 @@ import { compressFile, compressPhoto } from 'image-compression';
 import { getExifDataFromFile } from '../page/utils/get-exif-data-from-file';
 import { getExifDataFromPhoto } from '../page/utils/get-exif-data-from-photo';
 import { Geopoint } from 'model';
+import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 
 const photoOptions = {
   quality: 90,
@@ -42,7 +49,20 @@ const photoOptions = {
   selector: 'image-upload',
   templateUrl: './image-upload.component.html',
   styleUrl: './image-upload.component.scss',
-  imports: [IonCard, IonCardContent, IonIcon, IonButton, IonNote],
+  imports: [
+    IonCard,
+    IonCardContent,
+    IonIcon,
+    IonButton,
+    IonNote,
+    IonModal,
+    ImageCropperComponent,
+    IonHeader,
+    IonToolbar,
+    IonButtons,
+    IonTitle,
+    IonContent,
+  ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -59,14 +79,16 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   positionFromImage = output<Geopoint>();
   clearImagePath = output();
-  startCropImage = output<string | null>();
 
   private readonly fileUpload =
     viewChild<ElementRef<HTMLInputElement>>('fileUploader');
 
+  private readonly cropModal = viewChild<IonModal>('cropModal');
+
   isWeb = signal(!this.platform.is('hybrid'));
   value = signal<string | null>(null);
   disabled = signal<boolean | null>(null);
+  croppedImage = signal<string | null | undefined>(null);
 
   showImage = computed(() => {
     return !!this.value() || !!this.imageUrl();
@@ -182,10 +204,6 @@ export class ImageUploadComponent implements ControlValueAccessor {
     reader.readAsDataURL(compressedPhoto);
   }
 
-  cropImage(): void {
-    this.startCropImage.emit(this.value());
-  }
-
   clearImage(): void {
     this.value.set(null);
     this._onChange(null);
@@ -203,7 +221,6 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   // Drag&Drop prevention
-
   isDragging = signal(false);
 
   onDragOver(event: DragEvent): void {
@@ -219,5 +236,29 @@ export class ImageUploadComponent implements ControlValueAccessor {
   onDrop(event: DragEvent): void {
     event.preventDefault();
     this.isDragging.set(false);
+  }
+
+  cancelCropping(): void {
+    // Close cropping modal
+    this.cropModal()?.dismiss(null, 'cancel');
+  }
+
+  confirmCropping(): void {
+    // Take cropped image and set as value
+    const croppedImage = this.croppedImage();
+
+    if (croppedImage) {
+      this.value.set(croppedImage);
+      this._onChange(croppedImage);
+      this._onTouch();
+
+      this.cropModal()?.dismiss(null, 'confirmed');
+    }
+  }
+
+  onImageCrop($event: ImageCroppedEvent): void {
+    this.croppedImage.set($event.base64);
+
+    console.log('Cropped image event:', $event.base64);
   }
 }

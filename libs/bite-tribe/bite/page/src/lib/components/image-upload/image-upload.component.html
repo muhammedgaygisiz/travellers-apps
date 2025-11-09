@@ -24,16 +24,22 @@
       <ng-template>
         <ion-header>
           <ion-toolbar>
-            <ion-buttons>
+            <ion-buttons slot="start">
               <ion-button (click)="cancelCropping()">Cancel</ion-button>
             </ion-buttons>
             <ion-title>Crop image</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="confirmCropping()">Crop</ion-button>
+            </ion-buttons>
           </ion-toolbar>
         </ion-header>
 
         <ion-content>
+          @let valueData = value();
+          @let imageUrlData = imageUrl();
           <image-cropper
-            [imageBase64]="value() || ''"
+            [imageBase64]="valueData ? valueData : undefined"
+            [imageURL]="imageUrlData ? imageUrlData : undefined"
             [allowMoveImage]="true"
             [hideResizeSquares]="false"
             [aspectRatio]="3 / 4"
@@ -43,13 +49,6 @@
             format="jpeg"
             (imageCropped)="onImageCrop($event)"
           />
-
-          <ion-button
-            class="ion-margin-top"
-            expand="block"
-            (click)="confirmCropping()"
-            >Crop
-          </ion-button>
         </ion-content>
       </ng-template>
     </ion-modal>

@@ -1,46 +1,85 @@
 @if (!value()) {
-<div class="ion-margin-bottom">
-  <ion-note class="hint">
-    <b> Click into the box to upload or take a photo. </b>
-  </ion-note>
-</div>
-} @if (isWeb()) {
-<input
-  type="file"
-  #fileUploader
-  class="ion-hide"
-  (change)="onFileSelected($event)"
-/>
-} @if (showImage()) {
-<img [src]="value() || imageUrl()" alt="Image" />
-<div class="ion-text-end">
-  <ion-button fill="clear" (click)="cropImage()">Crop</ion-button>
-  <ion-button fill="clear" (click)="clearImage()">Delete</ion-button>
-</div>
+  <div class="ion-margin-bottom">
+    <ion-note class="hint">
+      <b> Click into the box to upload or take a photo. </b>
+    </ion-note>
+  </div>
+}
+
+@if (isWeb()) {
+  <input
+    type="file"
+    #fileUploader
+    class="ion-hide"
+    (change)="onFileSelected($event)"
+  />
+}
+
+@if (showImage()) {
+  <img [src]="value() || imageUrl()" alt="Image" />
+  <div class="ion-text-end">
+    <ion-button fill="clear" id="crop-button">Crop</ion-button>
+
+    <ion-modal trigger="crop-button" #cropModal [backdropDismiss]="false">
+      <ng-template>
+        <ion-header>
+          <ion-toolbar>
+            <ion-buttons slot="start">
+              <ion-button (click)="cancelCropping()">Cancel</ion-button>
+            </ion-buttons>
+            <ion-title>Crop image</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="confirmCropping()">Crop</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+
+        <ion-content>
+          @let valueData = value();
+          @let imageUrlData = imageUrl();
+          <image-cropper
+            [imageBase64]="valueData ? valueData : undefined"
+            [imageURL]="imageUrlData ? imageUrlData : undefined"
+            [allowMoveImage]="true"
+            [hideResizeSquares]="false"
+            [aspectRatio]="3 / 4"
+            output="base64"
+            backgroundColor="black"
+            format="jpeg"
+            (imageCropped)="onImageCrop($event)"
+          />
+        </ion-content>
+      </ng-template>
+    </ion-modal>
+
+    <ion-button fill="clear" (click)="clearImage()">Delete</ion-button>
+  </div>
 } @else {
-<ion-card
-  class="image-placeholder"
-  (click)="onImageUploadClick()"
-  (dragover)="onDragOver($event)"
-  (dragleave)="onDragLeave($event)"
-  (drop)="onDrop($event)"
->
-  <ion-card-content>
-    @if (isDragging()) {
-    <div class="drag-overlay ion-text-center">
-      <ion-icon name="hand-right-outline" size="large" />
-      <p>
-        <b
-          >Drag & drop is not supported.<br />Click to upload or take a
-          photo.</b
-        >
-      </p>
-    </div>
-    } @else { @if (isWeb()) {
-    <ion-icon name="image-outline" size="large" />
-    } @else {
-    <ion-icon name="camera-outline" size="large" />
-    } }
-  </ion-card-content>
-</ion-card>
+  <ion-card
+    class="image-placeholder"
+    (click)="onImageUploadClick()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <ion-card-content>
+      @if (isDragging()) {
+        <div class="drag-overlay ion-text-center">
+          <ion-icon name="hand-right-outline" size="large" />
+          <p>
+            <b
+              >Drag & drop is not supported.<br />Click to upload or take a
+              photo.</b
+            >
+          </p>
+        </div>
+      } @else {
+        @if (isWeb()) {
+          <ion-icon name="image-outline" size="large" />
+        } @else {
+          <ion-icon name="camera-outline" size="large" />
+        }
+      }
+    </ion-card-content>
+  </ion-card>
 }

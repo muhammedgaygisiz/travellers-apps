@@ -286,15 +286,6 @@ describe('BitePage', () => {
     });
   });
 
-  describe('emitStartCropImage', () => {
-    it('should emit startCropImage event', () => {
-      const emitSpy = jest.spyOn(component.startCropImage, 'emit');
-      const arg = { test: 'data' };
-      component.emitStartCropImage(arg);
-      expect(emitSpy).toHaveBeenCalledWith(arg);
-    });
-  });
-
   describe('resetImagePath', () => {
     it('should reset imagePath control', () => {
       component.biteFormGroup.controls['imagePath'].patchValue('test/path');

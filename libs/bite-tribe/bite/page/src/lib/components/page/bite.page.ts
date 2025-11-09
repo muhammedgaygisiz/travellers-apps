@@ -70,8 +70,6 @@ export class BitePage {
 
   image = input<string>('');
 
-  isCropped = input<boolean>(false);
-
   isNew = input<boolean>(false);
 
   currency = input<string>();
@@ -83,10 +81,6 @@ export class BitePage {
   });
 
   submitBite = output<typeof this.biteFormGroup.value>();
-
-  startCropImage = output<string | null>();
-
-  backButtonClicked = output();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -246,10 +240,6 @@ export class BitePage {
     if (position) {
       this.biteFormGroup.controls['position'].patchValue(position);
     }
-  }
-
-  emitStartCropImage(a: any): void {
-    this.startCropImage.emit(a);
   }
 
   setTags(tags: string[]): void {

@@ -11,6 +11,7 @@ import {
   homeFilters,
   homeMaxPriceFilter,
   homeSorting,
+  myBitesSorting,
   preferredCurrency,
 } from '../app/selectors';
 import { haversineDistance } from 'utils';
@@ -27,6 +28,7 @@ import { sortBitesByCreatedAt } from './utils/sort-bites-by-created-at';
 import { sortBitesByRating } from './utils/sort-bites-by-rating';
 import { sortBitesByPrice } from './utils/sort-bites-by-price';
 import { enrichByPriceInPreferredCurrency } from './utils/enrich-by-price-in-preferred-currency';
+import { sortByCriteria } from './utils/sort-by-criteria';
 
 const slice = createFeatureSelector<
   EntityState<Bite> & {
@@ -150,6 +152,14 @@ export const mybites = createSelector(
   },
 );
 
+export const sortedMyBites = createSelector(
+  mybites,
+  myBitesSorting,
+  exchangeRates,
+  (bites, sorting, exchangeRates) =>
+    sortByCriteria(bites, sorting, exchangeRates),
+);
+
 export const bitesBySelectedBucketlist = createSelector(
   bitesWithMetadata,
   selectedBucketlist,
@@ -168,33 +178,8 @@ export const sortedHomeBites = createSelector(
   bites,
   homeSorting,
   exchangeRates,
-  (bites, sorting, exchangeRates) => {
-    if (!bites?.length || !sorting) {
-      return [...bites];
-    }
-
-    if (sorting === 'distance') {
-      return [...sortBitesByDistance(bites)];
-    }
-
-    if (sorting === 'likes') {
-      return [...sortBitesByLikes(bites)];
-    }
-
-    if (sorting === 'createdAt') {
-      return [...sortBitesByCreatedAt(bites)];
-    }
-
-    if (sorting === 'rating') {
-      return [...sortBitesByRating(bites)];
-    }
-
-    if (sorting === 'price') {
-      return [...sortBitesByPrice(bites, exchangeRates)];
-    }
-
-    return [...bites];
-  },
+  (bites, sorting, exchangeRates) =>
+    sortByCriteria(bites, sorting, exchangeRates),
 );
 
 export const bitesByUser = createSelector(

@@ -50,7 +50,11 @@ export const maxPriceHome = createSelector(slice, (slice) => {
 });
 
 export const homeSorting = createSelector(slice, (slice) => {
-  return slice?.homeSorting || 'distance';
+  return slice?.sorting?.home || 'distance';
+});
+
+export const myBitesSorting = createSelector(slice, (slice) => {
+  return slice?.sorting?.myBites || 'distance';
 });
 
 export const isDarkTheme = createSelector(slice, (slice) => {

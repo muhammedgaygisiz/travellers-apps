@@ -21,6 +21,7 @@ class Mock {
   deleteBite = (): null => null;
   exchangeRates = (): null => null;
   setHomeSorting = (): null => null;
+  setMyBitesSorting = (): null => null;
   selectedBucketlistTitle = (): null => null;
   reloadGPSPosition = (): null => null;
   setFilters = (): null => null;
@@ -283,10 +284,13 @@ describe('HomeService', () => {
   });
 
   describe('myBitesSortingChange', () => {
-    let setHomeSortingSpy: SpyInstance;
+    let setMyBitesSortingSpy: SpyInstance;
 
     beforeEach(() => {
-      setHomeSortingSpy = jest.spyOn(homeDataAccessService, 'setHomeSorting');
+      setMyBitesSortingSpy = jest.spyOn(
+        homeDataAccessService,
+        'setMyBitesSorting',
+      );
     });
 
     it('should call setHomeSorting', inject(
@@ -294,7 +298,7 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.myBitesSortingChange('distance');
 
-        expect(setHomeSortingSpy).toHaveBeenCalledWith('distance');
+        expect(setMyBitesSortingSpy).toHaveBeenCalledWith('distance');
       },
     ));
   });

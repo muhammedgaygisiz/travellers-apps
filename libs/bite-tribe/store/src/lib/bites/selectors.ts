@@ -11,6 +11,7 @@ import {
   homeFilters,
   homeMaxPriceFilter,
   homeSorting,
+  myBitesSorting,
   preferredCurrency,
 } from '../app/selectors';
 import { haversineDistance } from 'utils';
@@ -147,6 +148,39 @@ export const mybites = createSelector(
   fromAuth.selectUserId,
   (bites, userId) => {
     return bites.filter((bite) => bite.userId === userId);
+  },
+);
+
+export const sortedMyBites = createSelector(
+  mybites,
+  myBitesSorting,
+  exchangeRates,
+  (bites, sorting, exchangeRates) => {
+    if (!bites?.length || !sorting) {
+      return [...bites];
+    }
+
+    if (sorting === 'distance') {
+      return [...sortBitesByDistance(bites)];
+    }
+
+    if (sorting === 'likes') {
+      return [...sortBitesByLikes(bites)];
+    }
+
+    if (sorting === 'createdAt') {
+      return [...sortBitesByCreatedAt(bites)];
+    }
+
+    if (sorting === 'rating') {
+      return [...sortBitesByRating(bites)];
+    }
+
+    if (sorting === 'price') {
+      return [...sortBitesByPrice(bites, exchangeRates)];
+    }
+
+    return [...bites];
   },
 );
 

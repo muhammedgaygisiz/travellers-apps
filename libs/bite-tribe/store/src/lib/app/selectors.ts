@@ -53,6 +53,10 @@ export const homeSorting = createSelector(slice, (slice) => {
   return slice?.homeSorting || 'distance';
 });
 
+export const myBitesSorting = createSelector(slice, (slice) => {
+  return slice?.myBitesSorting || 'distance';
+});
+
 export const isDarkTheme = createSelector(slice, (slice) => {
   return slice?.settings.theme === 'dark';
 });

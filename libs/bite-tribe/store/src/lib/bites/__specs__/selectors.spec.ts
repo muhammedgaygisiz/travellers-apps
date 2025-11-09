@@ -346,6 +346,45 @@ describe('Bites Selectors', () => {
     });
   });
 
+  describe('sortedMyBites', () => {
+    it('should return my bites sorted by distance', () => {
+      const myBites = [
+        { ...mockBite2, likes: [], distance: 10, userId: 'User-1' },
+        { ...mockBite1, likes: mockLikes, distance: 5, userId: 'User-1' },
+      ] as any[];
+
+      const result = fromSelectors.sortedMyBites.projector(
+        myBites,
+        'distance',
+        {},
+      );
+
+      expect(result[0].id).toBe('1'); // closest bite first
+      expect(result[1].id).toBe('2');
+    });
+
+    it('should return my bites sorted by likes', () => {
+      const myBites = [
+        { ...mockBite1, likes: mockLikes, distance: 5, userId: 'User-1' },
+        { ...mockBite2, likes: [], distance: 10, userId: 'User-1' },
+      ] as any[];
+
+      const result = fromSelectors.sortedMyBites.projector(
+        myBites,
+        'likes',
+        {},
+      );
+
+      expect(result[0].id).toBe('1'); // most liked bite first
+      expect(result[1].id).toBe('2');
+    });
+
+    it('should return empty array if no bites exist', () => {
+      const result = fromSelectors.sortedMyBites.projector([], 'distance', {});
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('sortedHomeBites', () => {
     it('should return bites sorted by distance', () => {
       const bitesWithMetadata = [

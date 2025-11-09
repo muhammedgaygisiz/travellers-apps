@@ -31,6 +31,7 @@ describe('App Reducer', () => {
         loading: { home: true },
         homeFilters: [],
         homeSorting: 'distance',
+        myBitesSorting: 'distance',
         exchangeRates: { EUR: 1 },
         maxPriceFilter: 0,
         errorLoadingGpsPosition: false,
@@ -295,6 +296,25 @@ describe('App Reducer', () => {
       });
 
       expect(reducer(INITIAL_STATE, setHomeSortingAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('setMyBitesSorting', () => {
+    it('should set my bites sorting', () => {
+      const INITIAL_STATE = {
+        myBitesSorting: 'distance',
+      } as AppSlice;
+      const NEW_STATE = {
+        myBitesSorting: 'likes',
+      } as AppSlice;
+
+      const setMyBitesSortingAction = AppActions.setMyBitesSorting({
+        sorting: 'likes',
+      });
+
+      expect(reducer(INITIAL_STATE, setMyBitesSortingAction)).toEqual({
         ...NEW_STATE,
       });
     });

@@ -15,5 +15,6 @@ export type AppSlice = {
   exchangeRates: Record<string, number>;
   maxPriceFilter?: number;
   homeSorting?: string;
+  myBitesSorting?: string;
   errorLoadingGpsPosition: boolean;
 };

@@ -17,6 +17,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [showHeaderMenu]="false"
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
+      [sorting]="service.myBitesSorting()"
       editableBites
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
@@ -28,6 +29,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoEdit)="service.onGotoEditClick($event)"
       (deleteBite)="service.onDeleteBiteClick($event)"
       (openMapView)="service.openMapView('my-bites')"
+      (sortingChange)="service.myBitesSortingChange($event)"
       (refresh)="service.refresh()"
       (closeGpsError)="service.closeGpsError()"
     />

@@ -205,6 +205,31 @@ describe('App Selectors', () => {
     });
   });
 
+  describe('myBitesSorting', () => {
+    it('should return the my bites sorting method', () => {
+      const stateWithMyBitesSorting = {
+        ...mockState,
+        myBitesSorting: 'likes',
+      } as AppSlice;
+      const result = fromSelectors.myBitesSorting.projector(
+        stateWithMyBitesSorting,
+      );
+      expect(result).toBe('likes');
+    });
+
+    it('should return "distance" when my bites sorting is not set', () => {
+      const stateWithoutSorting = { ...mockState, myBitesSorting: undefined };
+      const result =
+        fromSelectors.myBitesSorting.projector(stateWithoutSorting);
+      expect(result).toBe('distance');
+    });
+
+    it('should return distance when slice is undefined', () => {
+      const result = fromSelectors.myBitesSorting.projector(undefined as any);
+      expect(result).toBe('distance');
+    });
+  });
+
   describe('isDarkTheme', () => {
     it('should return dark theme true', () => {
       const result = fromSelectors.isDarkTheme.projector(mockState);

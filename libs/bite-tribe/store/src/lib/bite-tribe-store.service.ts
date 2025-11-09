@@ -14,6 +14,7 @@ import {
   cachedBite,
   mybites,
   sortedHomeBites,
+  sortedMyBites,
 } from './bites/selectors';
 import {
   restaurant,
@@ -50,6 +51,7 @@ import {
   isPublicProfile,
   isReloadingHome,
   maxPriceHome,
+  myBitesSorting,
   preferredCurrency,
   publicUser,
   settings,
@@ -90,6 +92,8 @@ export class BiteTribeStoreService implements StoreService {
   homeSorting$ = this.store.select(homeSorting);
   bite$ = this.store.select(bite);
   mybites$ = this.store.select(mybites);
+  sortedMyBites$ = this.store.select(sortedMyBites);
+  myBitesSorting$ = this.store.select(myBitesSorting);
   bitesByUser$ = this.store.select(bitesByUser);
   bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);
   allTags$ = this.store.select(allTags);
@@ -256,6 +260,10 @@ export class BiteTribeStoreService implements StoreService {
 
   setHomeSorting(sorting: string): void {
     this.store.dispatch(AppActions.setHomeSorting({ sorting }));
+  }
+
+  setMyBitesSorting(sorting: string): void {
+    this.store.dispatch(AppActions.setMyBitesSorting({ sorting }));
   }
 
   setHomeFilters(filters: {

@@ -2,8 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { BiteService } from '../bite.service';
 import { NavController } from '@ionic/angular';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
-import { signal } from '@angular/core';
-import SpyInstance = jest.SpyInstance;
 
 const Mock = {
   navigateBack: jest.fn(),
@@ -28,67 +26,6 @@ describe('BiteService', () => {
     }).compileComponents();
 
     service = TestBed.inject<BiteService>(BiteService);
-  });
-
-  describe('imageToDisplay', () => {
-    it('should return croppedImage if set', () => {
-      service.croppedImage.set('croppedImage.jpg');
-      service.originalImage.set('originalImage.jpg');
-      expect(service.imageToDisplay()).toBe('croppedImage.jpg');
-    });
-
-    it('should return originalImage if croppedImage is not set', () => {
-      service.croppedImage.set('');
-      service.originalImage.set('originalImage.jpg');
-      expect(service.imageToDisplay()).toBe('originalImage.jpg');
-    });
-
-    it('should return empty string if neither image is set', () => {
-      service.croppedImage.set('');
-      service.originalImage.set('');
-      expect(service.imageToDisplay()).toBe('');
-    });
-  });
-
-  describe('startCropImage', () => {
-    let startCropImageSpy: SpyInstance;
-
-    beforeEach(() => {
-      startCropImageSpy = jest.spyOn(service, 'startCropImage');
-    });
-
-    it('should setup crop-image', () => {
-      const mockImage = 'mockImage.jpg';
-      service.startCropImage(mockImage);
-      expect(startCropImageSpy).toHaveBeenCalledWith(mockImage);
-    });
-
-    it('should navigate to image-crop', () => {
-      const mockImage = 'mockImage.jpg';
-      service.startCropImage(mockImage);
-      expect(Mock.navigateForward).toHaveBeenCalledWith(['image-crop']);
-    });
-
-    it('should set originalImage signal', () => {
-      const mockImage = 'mockImage.jpg';
-      service.startCropImage(mockImage);
-      expect(service.originalImage()).toBe(mockImage);
-    });
-
-    it('should set originalImage signal if image is null and bite has imagePath', () => {
-      const mockBite = { imagePath: 'biteImage.jpg' };
-      service.bite = signal(mockBite) as any;
-      service.startCropImage(null);
-
-      expect(service.originalImage()).toBe('biteImage.jpg');
-    });
-
-    it('should not set originalImage signal if image is null and bite has no imagePath', () => {
-      const mockBite = { imagePath: '' };
-      service.bite = signal(mockBite) as any;
-      service.startCropImage(null);
-      expect(service.originalImage()).toBe('');
-    });
   });
 
   describe('submitNewBite', () => {

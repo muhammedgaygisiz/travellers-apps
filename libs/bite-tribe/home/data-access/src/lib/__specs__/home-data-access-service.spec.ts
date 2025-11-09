@@ -202,6 +202,21 @@ describe('HomeDataAccessService', () => {
     ));
   });
 
+  describe('setMyBitesSorting', () => {
+    it('should call setMyBitesSorting on BiteTribeStoreService', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        const setMyBitesSortingSpy = jest.spyOn(
+          biteTribeStoreService,
+          'setMyBitesSorting',
+        );
+        service.setMyBitesSorting('sorting');
+        expect(setMyBitesSortingSpy).toHaveBeenCalledTimes(1);
+        expect(setMyBitesSortingSpy).toHaveBeenCalledWith('sorting');
+      },
+    ));
+  });
+
   describe('setFilters', () => {
     it('should call setFilters on BiteTribeStoreService', inject(
       [HomeDataAccessService],

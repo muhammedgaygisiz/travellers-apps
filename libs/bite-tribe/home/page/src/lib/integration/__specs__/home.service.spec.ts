@@ -282,6 +282,23 @@ describe('HomeService', () => {
     ));
   });
 
+  describe('myBitesSortingChange', () => {
+    let setHomeSortingSpy: SpyInstance;
+
+    beforeEach(() => {
+      setHomeSortingSpy = jest.spyOn(homeDataAccessService, 'setHomeSorting');
+    });
+
+    it('should call setHomeSorting', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.myBitesSortingChange('distance');
+
+        expect(setHomeSortingSpy).toHaveBeenCalledWith('distance');
+      },
+    ));
+  });
+
   describe('myBites', () => {
     let myBitesSpy: SpyInstance;
 

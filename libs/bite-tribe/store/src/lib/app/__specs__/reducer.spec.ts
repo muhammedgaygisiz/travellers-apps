@@ -13,7 +13,7 @@ describe('App Reducer', () => {
         settings: { pushNotifications: true } as Settings,
         loading: { home: true },
         homeFilters: ['#food'],
-        homeSorting: 'distance',
+        sorting: { home: 'distance' },
         exchangeRates: { EUR: 1 },
         maxPriceFilter: 0,
         errorLoadingGpsPosition: false,
@@ -30,8 +30,10 @@ describe('App Reducer', () => {
         },
         loading: { home: true },
         homeFilters: [],
-        homeSorting: 'distance',
-        myBitesSorting: 'distance',
+        sorting: {
+          home: 'distance',
+          myBites: 'distance',
+        },
         exchangeRates: { EUR: 1 },
         maxPriceFilter: 0,
         errorLoadingGpsPosition: false,
@@ -285,10 +287,10 @@ describe('App Reducer', () => {
   describe('setHomeSorting', () => {
     it('should set home sorting', () => {
       const INITIAL_STATE = {
-        homeSorting: 'distance',
+        sorting: { home: 'distance' },
       } as AppSlice;
       const NEW_STATE = {
-        homeSorting: 'price',
+        sorting: { home: 'price' },
       } as AppSlice;
 
       const setHomeSortingAction = AppActions.setHomeSorting({
@@ -304,10 +306,10 @@ describe('App Reducer', () => {
   describe('setMyBitesSorting', () => {
     it('should set my bites sorting', () => {
       const INITIAL_STATE = {
-        myBitesSorting: 'distance',
+        sorting: { myBites: 'distance' },
       } as AppSlice;
       const NEW_STATE = {
-        myBitesSorting: 'likes',
+        sorting: { myBites: 'likes' },
       } as AppSlice;
 
       const setMyBitesSortingAction = AppActions.setMyBitesSorting({

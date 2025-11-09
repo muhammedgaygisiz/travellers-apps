@@ -189,12 +189,16 @@ describe('App Selectors', () => {
 
   describe('homeSorting', () => {
     it('should return the home sorting method', () => {
-      const result = fromSelectors.homeSorting.projector(mockState);
-      expect(result).toBe('distance'); // Assuming default sorting is by distance
+      const stateWithSorting = {
+        ...mockState,
+        sorting: { home: 'distance' },
+      } as AppSlice;
+      const result = fromSelectors.homeSorting.projector(stateWithSorting);
+      expect(result).toBe('distance');
     });
 
     it('should return "distance" when home sorting is not set', () => {
-      const stateWithoutSorting = { ...mockState, homeSorting: undefined };
+      const stateWithoutSorting = { ...mockState, sorting: undefined };
       const result = fromSelectors.homeSorting.projector(stateWithoutSorting);
       expect(result).toBe('distance');
     });
@@ -209,7 +213,7 @@ describe('App Selectors', () => {
     it('should return the my bites sorting method', () => {
       const stateWithMyBitesSorting = {
         ...mockState,
-        myBitesSorting: 'likes',
+        sorting: { myBites: 'likes' },
       } as AppSlice;
       const result = fromSelectors.myBitesSorting.projector(
         stateWithMyBitesSorting,
@@ -218,7 +222,7 @@ describe('App Selectors', () => {
     });
 
     it('should return "distance" when my bites sorting is not set', () => {
-      const stateWithoutSorting = { ...mockState, myBitesSorting: undefined };
+      const stateWithoutSorting = { ...mockState, sorting: undefined };
       const result =
         fromSelectors.myBitesSorting.projector(stateWithoutSorting);
       expect(result).toBe('distance');

@@ -16,9 +16,11 @@ const initialState: AppSlice = {
   loading: {
     home: true,
   },
+  sorting: {
+    home: 'distance',
+    myBites: 'distance',
+  },
   homeFilters: [],
-  homeSorting: 'distance',
-  myBitesSorting: 'distance',
   exchangeRates: { EUR: 1 },
   maxPriceFilter: 0,
   errorLoadingGpsPosition: false,
@@ -107,10 +109,16 @@ export const reducer = createReducer<AppSlice>(
   })),
   on(AppActions.setHomeSorting, (state, { sorting }) => ({
     ...state,
-    homeSorting: sorting,
+    sorting: {
+      ...state.sorting,
+      home: sorting,
+    },
   })),
   on(AppActions.setMyBitesSorting, (state, { sorting }) => ({
     ...state,
-    myBitesSorting: sorting,
+    sorting: {
+      ...state.sorting,
+      myBites: sorting,
+    },
   })),
 );

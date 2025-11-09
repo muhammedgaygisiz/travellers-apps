@@ -9,12 +9,14 @@ export type AppSlice = {
   reloading?: {
     home?: boolean;
   };
+  sorting?: {
+    home?: string;
+    myBites?: string;
+  };
   profile?: PublicUser;
   homeFilters?: string[];
   homeDistance?: number;
   exchangeRates: Record<string, number>;
   maxPriceFilter?: number;
-  homeSorting?: string;
-  myBitesSorting?: string;
   errorLoadingGpsPosition: boolean;
 };

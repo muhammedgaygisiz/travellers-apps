@@ -10,11 +10,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       class="ion-page"
       title="Edit Bite"
       [bite]="service.bite()"
-      [image]="service.imageToDisplay() || ''"
-      [isCropped]="service.isCropped()"
-      (startCropImage)="service.startCropImage($event)"
+      [image]="service.image() || ''"
       (submitBite)="service.submitEditedBite($event)"
-      (backButtonClicked)="service.clearCropping()"
     />
   `,
   imports: [BitePage],

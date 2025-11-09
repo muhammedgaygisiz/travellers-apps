@@ -2,7 +2,6 @@
   [showHeaderMenu]="false"
   [showFooter]="false"
   [enableBackButton]="true"
-  (backButtonClicked)="backButtonClicked.emit()"
 >
   <ion-content class="ion-padding">
     <h1>Create Bite</h1>
@@ -13,7 +12,6 @@
         [imageUrl]="imageUrl()"
         [position]="this.fallbackPosition()"
         (positionFromImage)="onPositionFromImage($event)"
-        (startCropImage)="emitStartCropImage($event)"
         (clearImagePath)="resetImagePath()"
       />
 

@@ -1,34 +1,55 @@
 <ta-page
   [showHeaderMenu]="false"
-  [showFooter]="false"
+  [showFooter]="true"
+  [showAddButton]="true"
+  addButtonText="Create new bucketlist"
+  (addButtonClick)="openAlert()"
   [enableBackButton]="true"
 >
   <ion-content class="ion-padding">
-    <h1>My Bucketlists</h1>
+    <div class="bucketlists-header-container" slot="fixed">
+      <ion-text color="secondary" class="subheadline">
+        <h4>{{ title() }}</h4>
+      </ion-text>
+      <div class="chip-sort-filter-container">
+        <div class="sort-container">
+          <ion-chip id="select-sorting">
+            <ion-select
+              interface="modal"
+              toggleIcon="chevron-down-outline"
+              [value]="sorting()"
+              [placeholder]="sortingLabel()"
+              (ionChange)="emitSortingChange($event)"
+            >
+              <ion-select-option value="distance">Distance</ion-select-option>
+              <ion-select-option value="createdAt">Date</ion-select-option>
+              <ion-select-option value="likes">Likes</ion-select-option>
+              <ion-select-option value="rating">Rating</ion-select-option>
+              <ion-select-option value="price">Price</ion-select-option>
+            </ion-select>
+          </ion-chip>
+        </div>
+      </div>
+    </div>
 
-    <ion-list lines="full">
+    <ion-list lines="full" class="bucketlists-scrolling-content-container">
       @for (bucketlist of bucketlists(); track bucketlist.id) {
       <ion-item
         [button]="true"
         (click)="gotoBucketlistDetails.emit(bucketlist.id)"
       >
         <ion-icon name="bookmark" slot="start" />
-        <ion-label>{{bucketlist.name}}</ion-label>
-        <ion-badge>{{bucketlist.biteIds | count}}</ion-badge>
+        <ion-label>{{ bucketlist.name }}</ion-label>
+        <ion-badge>{{ bucketlist.biteIds | count }}</ion-badge>
       </ion-item>
       }
     </ion-list>
 
-    <div class="ion-margin-top ion-text-end end-of-page actions">
-      <ion-button expand="block" id="preset-new-list-alert"
-        >Create new bucket list</ion-button
-      >
-      <ion-alert
-        trigger="preset-new-list-alert"
-        header="Please enter a name for your new list"
-        [inputs]="newListInputs"
-        [buttons]="saveButton"
-      />
-    </div>
+    <ion-alert
+      [isOpen]="isAlertOpen()"
+      header="Please enter a name for your new list"
+      [inputs]="newListInputs"
+      [buttons]="saveButton"
+    />
   </ion-content>
 </ta-page>

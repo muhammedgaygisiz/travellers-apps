@@ -1,24 +1,43 @@
 :host {
+  ion-input {
+    --highlight-color-focused: var(--ion-background-color-step-600);
+    --highlight-color-invalid: var(--ion-background-color-step-600);
+
+    --border-width: 2px;
+    --border-radius: 12px;
+
+    --background: var(--ion-color-tertiary);
+    --border-color: var(--ion-color-tertiary-tint);
+
+    &.ion-margin-top {
+      margin-top: 1.5rem;
+    }
+  }
+
+  .price-container {
+    margin-top: 1.5rem;
+
+    .price {
+      display: flex;
+      flex-direction: row;
+
+      ion-input {
+        flex: 1;
+      }
+
+      ion-text {
+        display: flex;
+        align-items: center;
+        column-gap: 0.25rem;
+      }
+    }
+  }
+
   hr {
     background-color: var(--color);
 
     &.sams-favorite-hr {
       margin-bottom: 0;
-    }
-  }
-
-  .price {
-    display: flex;
-    flex-direction: row;
-
-    ion-input {
-      flex: 1;
-    }
-
-    ion-text {
-      display: flex;
-      align-items: center;
-      column-gap: 0.25rem;
     }
   }
 

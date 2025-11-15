@@ -4,7 +4,7 @@
   [enableBackButton]="true"
 >
   <ion-content class="ion-padding">
-    <h1>Create Bite</h1>
+    <h1 class="ion-margin-bottom">Create Bite</h1>
 
     <form [formGroup]="biteFormGroup">
       <image-upload
@@ -16,38 +16,45 @@
       />
 
       <ion-input
-        label="Dish Name"
+        label="Dish Name?"
         formControlName="name"
-        fill="solid"
+        fill="outline"
         class="ion-margin-top"
+        mode="md"
       />
-      <hr />
+
+      <ion-input
+        label="Place Name?"
+        formControlName="place"
+        fill="outline"
+        class="ion-margin-top"
+        mode="md"
+      />
+
+      <div class="price-container">
+        <div class="price">
+          <ion-input
+            label="Price?"
+            formControlName="price"
+            fill="outline"
+            inputmode="decimal"
+            mode="md"
+          >
+            <ion-text
+              id="currency-selector-trigger-bite"
+              class="currency-selector"
+              slot="end"
+            >
+              {{ selectedCurrencyName() }}
+              <ion-icon name="chevron-expand-outline" />
+            </ion-text>
+          </ion-input>
+        </div>
+        <ion-note>Enter the price in the valid format (e.g. 12.34).</ion-note>
+      </div>
 
       <div class="ion-margin-vertical">
         <star-rating formControlName="rating" />
-      </div>
-
-      <ion-input label="Place Name" formControlName="place" />
-      <hr />
-
-      <div>
-        <div class="price">
-          <ion-input
-            label="Price"
-            formControlName="price"
-            inputmode="decimal"
-          />
-
-          <ion-text
-            id="currency-selector-trigger-bite"
-            class="currency-selector"
-          >
-            {{ selectedCurrencyName() }}
-            <ion-icon name="chevron-expand-outline" />
-          </ion-text>
-        </div>
-        <hr class="sams-favorite-hr" />
-        <ion-note>Enter the price in the valid format (e.g. 12.34).</ion-note>
       </div>
 
       <bt-tags-input

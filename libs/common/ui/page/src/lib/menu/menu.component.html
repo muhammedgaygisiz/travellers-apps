@@ -60,16 +60,16 @@
           My Bucket lists
         </ion-item>
       }
-      @if (showSettingsButton()) {
-        <ion-item (click)="gotoSettings.emit()">
-          <ion-icon name="settings-outline" slot="start" />
-          Settings
-        </ion-item>
-      }
       @if (showMyProfile()) {
         <ion-item (click)="gotoProfile.emit()">
           <ion-icon name="person-circle-outline" slot="start" />
           My Profile
+        </ion-item>
+      }
+      @if (showSettingsButton()) {
+        <ion-item (click)="gotoSettings.emit()">
+          <ion-icon name="settings-outline" slot="start" />
+          Settings
         </ion-item>
       }
       @if (showMigrationsButton()) {

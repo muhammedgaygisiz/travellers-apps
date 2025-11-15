@@ -9,9 +9,11 @@ export class ProfileService {
   private readonly navController = inject(NavController);
 
   isAuthenticated = this.dataAccess.isAuthenticated;
+  myUser = this.dataAccess.myUser;
   biteCreator = this.dataAccess.biteCreator;
   userId = this.dataAccess.userId;
   bitesByUser = this.dataAccess.bitesByUser;
+  myBites = this.dataAccess.myBites;
 
   logout(): void {
     this.dataAccess.logout();
@@ -27,6 +29,10 @@ export class ProfileService {
 
   gotoMyBites(): void {
     this.navController.navigateForward(['my-bites']);
+  }
+
+  gotoMyProfileClicked(): void {
+    this.navController.navigateForward(['my-profile']);
   }
 
   likeButtonClicked(likeClick: { likeType: string; biteId: string }): void {

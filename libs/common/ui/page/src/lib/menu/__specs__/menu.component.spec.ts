@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { PopoverMenuComponent } from '../popover-menu.component';
+import { MenuComponent } from '../menu.component';
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 import { SupportedLang } from 'localization';
 import { addNecessaryIcons } from 'utils';
@@ -13,13 +13,13 @@ global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,
     text: () => Promise.resolve({}),
-  })
+  }),
 ) as jest.Mock;
 
-describe('PopoverMenuComponent', () => {
-  let component: PopoverMenuComponent;
-  let componentRef: ComponentRef<PopoverMenuComponent>;
-  let fixture: ComponentFixture<PopoverMenuComponent>;
+describe('MenuComponent', () => {
+  let component: MenuComponent;
+  let componentRef: ComponentRef<MenuComponent>;
+  let fixture: ComponentFixture<MenuComponent>;
   let languageChangeClickEmitSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -27,13 +27,13 @@ describe('PopoverMenuComponent', () => {
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(PopoverMenuComponent);
+    fixture = TestBed.createComponent(MenuComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
 
     languageChangeClickEmitSpy = jest.spyOn(
       component.languageChangeClick,
-      'emit'
+      'emit',
     );
   });
 
@@ -46,7 +46,7 @@ describe('PopoverMenuComponent', () => {
     fixture.detectChanges();
 
     const englishItem = fixture.debugElement.query(
-      By.css('ion-item:nth-child(2)')
+      By.css('ion-item:nth-child(2)'),
     );
 
     englishItem.triggerEventHandler('click', null);
@@ -64,7 +64,7 @@ describe('PopoverMenuComponent', () => {
 
     jest.spyOn(component.loginClick, 'emit');
     const loginButton = fixture.debugElement.query(
-      By.css('[data-cy="btn-login"]')
+      By.css('[data-cy="btn-login"]'),
     );
 
     loginButton.triggerEventHandler('click', null);
@@ -78,7 +78,7 @@ describe('PopoverMenuComponent', () => {
 
     jest.spyOn(component.logoutClick, 'emit');
     const logoutButton = fixture.debugElement.query(
-      By.css('[data-cy="btn-logout"]')
+      By.css('[data-cy="btn-logout"]'),
     );
     logoutButton.triggerEventHandler('click', null);
     expect(component.logoutClick.emit).toHaveBeenCalled();
@@ -88,10 +88,10 @@ describe('PopoverMenuComponent', () => {
     componentRef.setInput('hideAuthButton', true);
 
     const loginButton = fixture.debugElement.query(
-      By.css('[data-cy="btn-auth"]')
+      By.css('[data-cy="btn-auth"]'),
     );
     const logoutButton = fixture.debugElement.query(
-      By.css('[data-cy="btn-logout"]')
+      By.css('[data-cy="btn-logout"]'),
     );
     expect(loginButton).toBeNull();
     expect(logoutButton).toBeNull();

@@ -1,0 +1,92 @@
+<ion-list lines="none" data-cy="menu-list">
+  @if (showLanguages()) {
+    <ion-item-group>
+      <ion-item-divider>
+        <ion-icon color="dark" name="language-outline" slot="start" />
+        Language
+      </ion-item-divider>
+
+      <ion-item
+        [detail]="false"
+        (click)="languageChangeClick.emit(SupportedLang.EN)"
+      >
+        <ion-icon src="assets/gb.svg" slot="start" />
+        English
+      </ion-item>
+      <ion-item
+        [detail]="false"
+        (click)="languageChangeClick.emit(SupportedLang.FR)"
+      >
+        <ion-icon src="assets/fr.svg" slot="start" />
+        Français
+      </ion-item>
+      <ion-item
+        [detail]="false"
+        (click)="languageChangeClick.emit(SupportedLang.DE)"
+      >
+        <ion-icon src="assets/de.svg" slot="start" />
+        Deutsch
+      </ion-item>
+      <ion-item
+        [detail]="false"
+        (click)="languageChangeClick.emit(SupportedLang.TR)"
+      >
+        <ion-icon src="assets/tr.svg" slot="start" />
+        Türkçe
+      </ion-item>
+    </ion-item-group>
+  }
+  @if (!hideAuthButton()) {
+    @if (!isAuthenticated()) {
+      <ion-item
+        data-cy="btn-login"
+        [button]="true"
+        [detail]="false"
+        (click)="loginClick.emit()"
+      >
+        <ion-icon name="log-in-outline" slot="start" />
+        Login
+      </ion-item>
+    } @else {
+      @if (showMyBites()) {
+        <ion-item (click)="gotoMyBites.emit()">
+          <ion-icon name="pizza-outline" slot="start" />
+          My Bites
+        </ion-item>
+      }
+      @if (showMyBucketlists()) {
+        <ion-item (click)="gotoMyBucketlists.emit()">
+          <ion-icon name="bookmark-outline" slot="start" />
+          My Bucket lists
+        </ion-item>
+      }
+      @if (showMyProfile()) {
+        <ion-item (click)="gotoProfile.emit()">
+          <ion-icon name="person-circle-outline" slot="start" />
+          My Profile
+        </ion-item>
+      }
+      @if (showSettingsButton()) {
+        <ion-item (click)="gotoSettings.emit()">
+          <ion-icon name="settings-outline" slot="start" />
+          Settings
+        </ion-item>
+      }
+      @if (showMigrationsButton()) {
+        <ion-item (click)="gotoMigrations.emit()">
+          <ion-icon name="hammer-outline" slot="start" />
+          Migrations
+        </ion-item>
+      }
+      <ion-item
+        data-cy="btn-logout"
+        [button]="true"
+        [detail]="false"
+        (click)="logoutClick.emit()"
+      >
+        <ion-icon name="log-out-outline" slot="start" />
+        Logout
+      </ion-item>
+    }
+  }
+</ion-list>

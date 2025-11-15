@@ -30,6 +30,10 @@ export class MapService {
     this.navController.navigateForward(['settings']);
   }
 
+  onGotoMyProfileClick(): void {
+    this.navController.navigateForward(['my-profile']);
+  }
+
   onGotoMyBitesClick(): void {
     this.navController.navigateForward(['my-bites']);
   }
@@ -77,7 +81,7 @@ export class MapService {
     }
 
     return bites.filter((bite) =>
-      selectedBucketlist.biteIds?.includes(bite.id)
+      selectedBucketlist.biteIds?.includes(bite.id),
     );
   });
 }

@@ -62,6 +62,10 @@ export class DetailsService {
     this.navController.navigateForward(['settings']);
   }
 
+  onGotoMyProfileClick(): void {
+    this.navController.navigateForward(['my-profile']);
+  }
+
   onGotoMyBitesClick(): void {
     this.navController.navigateForward(['my-bites']);
   }

@@ -12,10 +12,9 @@ describe('Bite Reducer', () => {
           '1': { id: '1', name: 'Bite 1' } as Bite,
           '2': { id: '2', name: 'Bite 2' } as Bite,
         },
-        reloading: false,
       };
 
-      const NEW_STATE = { ids: [], entities: {}, reloading: false };
+      const NEW_STATE = { ids: [], entities: {} };
 
       const action = fromAuth.AuthActions.logoutSucceeded;
 
@@ -25,8 +24,8 @@ describe('Bite Reducer', () => {
 
   describe('loadedBitesFromApi', () => {
     it('should set loading:home to true', () => {
-      const INITIAL_STATE = { ids: [], entities: {}, reloading: true };
-      const NEW_STATE = { ids: [], entities: {}, reloading: false };
+      const INITIAL_STATE = { ids: [], entities: {} };
+      const NEW_STATE = { ids: [], entities: {} };
 
       const loadedBitesFromApiAction = BiteActions.loadedFromAPI({
         bites: [] as Bite[],
@@ -57,18 +56,16 @@ describe('Bite Reducer', () => {
           '1': { id: '1', name: 'Bite 1' } as Bite,
           '2': { id: '2', name: 'Bite 2' } as Bite,
         },
-        reloading: false,
       });
     });
   });
 
   describe('cacheBite', () => {
     it('should cache the bite in the state', () => {
-      const INITIAL_STATE = { ids: [], entities: {}, reloading: false };
+      const INITIAL_STATE = { ids: [], entities: {} };
       const NEW_STATE = {
         ids: [],
         entities: {},
-        reloading: false,
         cachedBite: { id: '1', name: 'Bite 1' } as Bite,
       };
 
@@ -87,10 +84,9 @@ describe('Bite Reducer', () => {
       const INITIAL_STATE = {
         ids: [],
         entities: {},
-        reloading: false,
         cachedBite: { id: '1', name: 'Bite 1' } as Bite,
       };
-      const NEW_STATE = { ids: [], entities: {}, reloading: false };
+      const NEW_STATE = { ids: [], entities: {} };
 
       const saveNewBiteAction = BiteActions.saveNewBite({
         bite: { id: '1', name: 'Bite 1' } as Bite,
@@ -104,11 +100,10 @@ describe('Bite Reducer', () => {
 
   describe('loadedBiteCreator', () => {
     it('should set the biteCreator in the state', () => {
-      const INITIAL_STATE = { ids: [], entities: {}, reloading: false };
+      const INITIAL_STATE = { ids: [], entities: {} };
       const NEW_STATE = {
         ids: [],
         entities: {},
-        reloading: false,
         biteCreator: { id: 'creator1', name: 'Creator 1' },
       };
 
@@ -127,10 +122,9 @@ describe('Bite Reducer', () => {
       const INITIAL_STATE = {
         ids: [],
         entities: {},
-        reloading: false,
         biteCreator: { id: 'creator1', name: 'Creator 1' },
       };
-      const NEW_STATE = { ids: [], entities: {}, reloading: false };
+      const NEW_STATE = { ids: [], entities: {} };
 
       const noPublicCreatorForBiteAction = BiteActions.noPublicCreatorForBite();
 

@@ -8,8 +8,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <profile-page
       class="ion-page"
       [isAuthenticated]="service.isAuthenticated()"
-      [biteCreator]="service.biteCreator()"
-      [bites]="service.bitesByUser()"
+      [user]="service.myUser()"
+      [bites]="service.myBites()"
       [userId]="service.userId()"
       (biteClick)="service.biteClicked($event)"
       (restaurantClick)="service.restaurantClicked($event)"
@@ -23,7 +23,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   imports: [ProfileComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProfileContainer {
+export class MyProfileContainer {
   service = inject(ProfileService);
 
   ionViewDidEnter(): void {

@@ -426,4 +426,20 @@ describe('HomeService', () => {
       },
     ));
   });
+
+  describe('onGotoMyProfileClick', () => {
+    let navigateForwardSpy: SpyInstance;
+
+    beforeEach(() => {
+      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+    });
+
+    it('should navigate to my-profile page', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.onGotoMyProfileClick();
+        expect(navigateForwardSpy).toHaveBeenCalledWith(['my-profile']);
+      },
+    ));
+  });
 });

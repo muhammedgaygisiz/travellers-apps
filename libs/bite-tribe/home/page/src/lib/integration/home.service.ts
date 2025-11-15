@@ -136,4 +136,8 @@ export class HomeService {
   closeGpsError(): void {
     this.dataAccess.clearGpsError();
   }
+
+  onGotoMyProfileClick(): void {
+    this.navController.navigateForward(['my-profile']);
+  }
 }

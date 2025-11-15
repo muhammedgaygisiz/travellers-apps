@@ -22,6 +22,7 @@ import {
   IonSelect,
   IonSelectOption,
   IonText,
+  IonTextarea,
   IonToggle,
 } from '@ionic/angular/standalone';
 import { CurrencySelectorComponent } from 'currency-selector';
@@ -55,6 +56,7 @@ const GO_PRIVATE = 'go-private';
     IonModal,
     CurrencySelectorComponent,
     IonText,
+    IonTextarea,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -93,6 +95,7 @@ export class PageSettings {
     nearby: [2000, [Validators.required, Validators.min(1)]],
     city: [''],
     displayName: [''],
+    about: [''],
   });
 
   settingsEffect = afterRenderEffect(() => {
@@ -184,7 +187,8 @@ export class PageSettings {
       return;
     }
 
-    const { city, displayName, ...newSettings } = this.settingsForm.value;
+    const { city, displayName, about, ...newSettings } =
+      this.settingsForm.value;
 
     const publicUser = this.publicUser();
     if (publicUser) {
@@ -192,6 +196,7 @@ export class PageSettings {
         ...publicUser,
         city,
         displayName: displayName ? displayName : publicUser.displayName,
+        about: about || '',
       });
     }
 

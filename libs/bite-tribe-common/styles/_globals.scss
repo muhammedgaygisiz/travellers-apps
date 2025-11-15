@@ -19,6 +19,18 @@ ion-alert {
   }
 }
 
+@mixin input-styles {
+  --highlight-color: var(--ion-background-color-step-600);
+  --highlight-color-focused: var(--ion-background-color-step-600);
+  --highlight-color-invalid: var(--ion-background-color-step-600);
+
+  --border-width: 2px;
+  --border-radius: 12px;
+
+  --background: var(--ion-input-background);
+  --border-color: var(--ion-input-border-color);
+}
+
 @mixin no-number-arrows {
   appearance: textfield;
 

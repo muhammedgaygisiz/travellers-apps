@@ -4,6 +4,10 @@
     height: 200px;
     margin: 0;
 
+    border-width: var(--ion-image-upload-border-width);
+    border-color: var(--ion-image-upload-border-color);
+    border-style: var(--ion-image-upload-border-style);
+
     border-radius: 12px;
 
     ion-card-content {

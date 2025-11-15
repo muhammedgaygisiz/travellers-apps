@@ -1,15 +1,9 @@
+@use 'globals';
+
 :host {
   ion-input,
   ion-textarea {
-    --highlight-color: var(--ion-background-color-step-600);
-    --highlight-color-focused: var(--ion-background-color-step-600);
-    --highlight-color-invalid: var(--ion-background-color-step-600);
-
-    --border-width: 2px;
-    --border-radius: 12px;
-
-    --background: var(--ion-color-tertiary);
-    --border-color: var(--ion-color-tertiary-tint);
+    @include globals.input-styles;
 
     &.ion-margin-top {
       margin-top: 1.5rem;

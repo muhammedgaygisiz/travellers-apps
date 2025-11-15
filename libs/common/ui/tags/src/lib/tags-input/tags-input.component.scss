@@ -1,3 +1,5 @@
+@use 'globals';
+
 :host {
   label {
     display: block;
@@ -19,14 +21,7 @@
     ion-input {
       flex: 1;
 
-      --highlight-color-focused: var(--ion-background-color-step-600);
-      --highlight-color-invalid: var(--ion-background-color-step-600);
-
-      --border-width: 2px;
-      --border-radius: 12px;
-
-      --background: var(--ion-color-tertiary);
-      --border-color: var(--ion-color-tertiary-tint);
+      @include globals.input-styles;
     }
   }
 }

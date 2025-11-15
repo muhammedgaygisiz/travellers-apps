@@ -9,7 +9,6 @@ export const reducer = createReducer(
   on(BiteActions.loadedFromAPI, (state, { bites }) => {
     const stateWithoutReloading = {
       ...state,
-      reloading: false,
     };
 
     const cleanState = adapter.removeAll(stateWithoutReloading);

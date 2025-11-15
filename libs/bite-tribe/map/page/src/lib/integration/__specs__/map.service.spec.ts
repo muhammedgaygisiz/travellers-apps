@@ -67,10 +67,10 @@ describe('MapService', () => {
 
     service = TestBed.inject(MapService);
     mockDataAccess = TestBed.inject(
-      MapDataAccessService
+      MapDataAccessService,
     ) as jest.Mocked<MapDataAccessService>;
     mockNavController = TestBed.inject(
-      NavController
+      NavController,
     ) as jest.Mocked<NavController>;
   });
 
@@ -213,6 +213,16 @@ describe('MapService', () => {
         'bite1',
         'restaurant',
         'suffix',
+      ]);
+    });
+  });
+
+  describe('onGotoMyProfileClick', () => {
+    it('should navigate to my-profile when onGotoMyProfileClick is called', () => {
+      service.onGotoMyProfileClick();
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'my-profile',
       ]);
     });
   });

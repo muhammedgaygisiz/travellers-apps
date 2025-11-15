@@ -101,7 +101,7 @@ describe('DetailsService', () => {
 
     // Assert
     expect(mockDataAccessService.saveNewReview).toHaveBeenCalledWith(
-      reviewData
+      reviewData,
     );
     expect(mockDataAccessService.saveNewReview).toHaveBeenCalledTimes(1);
   });
@@ -206,13 +206,13 @@ describe('DetailsService', () => {
 
       // Assert
       expect(
-        mockDataAccessService.createAndSaveToBucketList
+        mockDataAccessService.createAndSaveToBucketList,
       ).toHaveBeenCalledWith({
         bucketListName: 'My New List',
         biteId: 'bite123',
       });
       expect(
-        mockDataAccessService.createAndSaveToBucketList
+        mockDataAccessService.createAndSaveToBucketList,
       ).toHaveBeenCalledTimes(1);
     });
 
@@ -239,13 +239,13 @@ describe('DetailsService', () => {
 
       // Assert
       expect(
-        mockDataAccessService.createAndSaveToBucketList
+        mockDataAccessService.createAndSaveToBucketList,
       ).toHaveBeenCalledWith({
         bucketListName: 'My New List',
         biteId: undefined,
       });
       expect(
-        mockDataAccessService.createAndSaveToBucketList
+        mockDataAccessService.createAndSaveToBucketList,
       ).toHaveBeenCalledTimes(1);
     });
   });
@@ -283,10 +283,10 @@ describe('DetailsService', () => {
 
       // Assert
       expect(
-        mockDataAccessService.removeBiteFromBucketlist
+        mockDataAccessService.removeBiteFromBucketlist,
       ).toHaveBeenCalledWith(params);
       expect(
-        mockDataAccessService.removeBiteFromBucketlist
+        mockDataAccessService.removeBiteFromBucketlist,
       ).toHaveBeenCalledTimes(1);
     });
   });
@@ -297,7 +297,7 @@ describe('DetailsService', () => {
       service.likeButtonClicked(likeClick);
 
       expect(mockDataAccessService.submitLikeClick).toHaveBeenCalledWith(
-        likeClick
+        likeClick,
       );
       expect(mockDataAccessService.submitLikeClick).toHaveBeenCalledTimes(1);
     });
@@ -389,6 +389,15 @@ describe('DetailsService', () => {
         'bite',
         'bite123',
         'edit',
+      ]);
+    });
+  });
+
+  describe('onGotoMyProfileClick', () => {
+    it('should navigate to my profile page', () => {
+      service.onGotoMyProfileClick();
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'my-profile',
       ]);
     });
   });

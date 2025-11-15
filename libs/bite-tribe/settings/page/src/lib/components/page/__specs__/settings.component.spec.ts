@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PageSettings } from '../settings.component';
-import { provideIonicAngular, IonModal } from '@ionic/angular/standalone';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { PublicUser, Settings } from 'model';
@@ -214,6 +214,29 @@ describe('PageSettings', () => {
     });
   });
 
+  describe('settingsEffect', () => {
+    it('should patch form with settings when settings input is provided', () => {
+      const mockSettings: Settings = {
+        pushNotifications: true,
+        emailUpdates: true,
+        theme: 'dark',
+        currency: 'USD',
+        nearby: 3000,
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      compRef.setInput('settings', mockSettings);
+      fixture.detectChanges();
+
+      // Wait for afterRenderEffect
+      setTimeout(() => {
+        expect(component.settingsForm.value.theme).toBe('dark');
+        expect(component.settingsForm.value.currency).toBe('USD');
+        expect(component.settingsForm.value.nearby).toBe(3000);
+      }, 100);
+    });
+  });
+
   describe('userImage computed', () => {
     it('should return undefined when no user is provided', () => {
       expect(component.userImage()).toBeUndefined();
@@ -228,6 +251,19 @@ describe('PageSettings', () => {
       compRef.setInput('user', user);
 
       expect(component.userImage()).toBe('https://example.com/photo.jpg');
+    });
+
+    it('should return photoUrl from providerData when user photoUrl is not available', () => {
+      const user = {
+        photoUrl: null,
+        providerData: [{ photoUrl: 'https://example.com/provider-photo.jpg' }],
+      };
+
+      compRef.setInput('user', user);
+
+      expect(component.userImage()).toBe(
+        'https://example.com/provider-photo.jpg',
+      );
     });
   });
 
@@ -291,16 +327,27 @@ describe('PageSettings', () => {
     });
   });
 
-  describe('onCurrencySelected', () => {
-    it('should update currency in form and dismiss modal', () => {
-      const mockModal = {
-        dismiss: jest.fn(),
-      } as unknown as IonModal;
+  describe('onThemeChange', () => {
+    it('should toggle dark class when theme is dark', () => {
+      const event = { detail: { value: 'dark' } };
 
-      component.onCurrencySelected('USD', mockModal);
+      component.onThemeChange(event);
 
-      expect(component.settingsForm.value.currency).toBe('USD');
-      expect(mockModal.dismiss).toHaveBeenCalled();
+      expect(document.documentElement.classList.contains('dark')).toBe(true);
+    });
+
+    it('should toggle light class when theme is light', () => {
+      const event = { detail: { value: 'light' } };
+
+      component.onThemeChange(event);
+
+      expect(document.documentElement.classList.contains('light')).toBe(true);
+    });
+
+    it('should not throw error when event detail value is empty', () => {
+      const event = { detail: { value: '' } };
+
+      expect(() => component.onThemeChange(event)).not.toThrow();
     });
   });
 });

@@ -27,6 +27,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (restaurantClick)="service.restaurantClicked($event)"
       (addButtonClick)="service.onAddButtonClicked()"
       (gotoSettings)="service.onGotoSettingsClick()"
+      (gotoMyProfile)="service.onGotoMyProfileClick()"
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoMyBucketlists)="service.onGotoMyBucketlists()"
       (openMapView)="service.openMapView('home')"

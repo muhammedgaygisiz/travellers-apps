@@ -21,7 +21,7 @@ import {
 } from '@ionic/angular/standalone';
 import { AngularDelegate } from '@ionic/angular';
 import { SupportedLang } from 'localization';
-import { PopoverMenuComponent } from './popover-menu.component';
+import { MenuComponent } from './menu/menu.component';
 import { APP_TITLE } from 'utils';
 import { UpperCasePipe } from '@angular/common';
 
@@ -75,6 +75,8 @@ export class PageComponent {
 
   showMyBucketlists = input(false);
 
+  showMyProfile = input(false);
+
   showMigrationsButton = input(false);
 
   fullWidth = input(false);
@@ -99,6 +101,8 @@ export class PageComponent {
 
   public gotoSettings = output();
 
+  public gotoProfile = output();
+
   public gotoMigrations = output();
 
   public gotoMyBites = output();
@@ -109,7 +113,7 @@ export class PageComponent {
 
   async showMenuPopover($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
-      component: PopoverMenuComponent,
+      component: MenuComponent,
       event: $event,
       dismissOnSelect: true,
       componentProps: {
@@ -119,6 +123,7 @@ export class PageComponent {
         showSettingsButton: this.showSettingsButton,
         showMyBites: this.showMyBites,
         showMyBucketlists: this.showMyBucketlists,
+        showMyProfile: this.showMyProfile,
         showMigrationsButton: this.showMigrationsButton,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
@@ -127,6 +132,7 @@ export class PageComponent {
         gotoMyBites: this.gotoMyBites,
         gotoMyBucketlists: this.gotoMyBucketlists,
         gotoMigrations: this.gotoMigrations,
+        gotoProfile: this.gotoProfile,
       },
     });
 

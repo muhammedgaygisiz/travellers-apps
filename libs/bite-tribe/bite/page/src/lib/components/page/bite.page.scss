@@ -1,6 +1,7 @@
 :host {
   ion-input,
   ion-textarea {
+    --highlight-color: var(--ion-background-color-step-600);
     --highlight-color-focused: var(--ion-background-color-step-600);
     --highlight-color-invalid: var(--ion-background-color-step-600);
 

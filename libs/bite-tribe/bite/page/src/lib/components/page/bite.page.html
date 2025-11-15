@@ -4,7 +4,7 @@
   [enableBackButton]="true"
 >
   <ion-content class="ion-padding">
-    <h1>Create Bite</h1>
+    <h1 class="ion-margin-bottom">Create Bite</h1>
 
     <form [formGroup]="biteFormGroup">
       <image-upload
@@ -16,71 +16,74 @@
       />
 
       <ion-input
-        label="Dish Name"
+        label="Dish Name?"
         formControlName="name"
-        fill="solid"
+        fill="outline"
         class="ion-margin-top"
+        mode="md"
       />
-      <hr />
 
-      <div class="ion-margin-vertical">
-        <star-rating formControlName="rating" />
-      </div>
+      <ion-input
+        label="Place Name?"
+        formControlName="place"
+        fill="outline"
+        class="ion-margin-top"
+        mode="md"
+      />
 
-      <ion-input label="Place Name" formControlName="place" />
-      <hr />
-
-      <div>
+      <div class="price-container ion-margin-bottom">
         <div class="price">
           <ion-input
-            label="Price"
+            label="Price?"
             formControlName="price"
+            fill="outline"
             inputmode="decimal"
-          />
-
-          <ion-text
-            id="currency-selector-trigger-bite"
-            class="currency-selector"
+            mode="md"
           >
-            {{ selectedCurrencyName() }}
-            <ion-icon name="chevron-expand-outline" />
-          </ion-text>
+            <ion-text
+              id="currency-selector-trigger-bite"
+              class="currency-selector"
+              slot="end"
+            >
+              {{ selectedCurrencyName() }}
+              <ion-icon name="chevron-expand-outline" />
+            </ion-text>
+          </ion-input>
         </div>
-        <hr class="sams-favorite-hr" />
-        <ion-note>Enter the price in the valid format (e.g. 12.34).</ion-note>
+      </div>
+
+      <star-rating formControlName="rating" label="Your Rating?" />
+
+      <div class="ion-margin-vertical description">
+        <ion-textarea
+          label="Description?"
+          formControlName="description"
+          fill="outline"
+          auto-grow="true"
+          [maxlength]="500"
+          placeholder="What did you like about this dish, tell us about it!"
+          [rows]="6"
+          mode="md"
+        />
       </div>
 
       <bt-tags-input
         [tags]="biteFormGroup.get('tags')?.value || []"
         (tagChanges)="setTags($event)"
       />
-      <hr class="sams-favorite-hr" />
-
-      <div class="ion-margin-vertical description">
-        <ion-textarea
-          label="Description"
-          formControlName="description"
-          auto-grow="true"
-          [maxlength]="500"
-          placeholder="Click here and tell us more about this amazing bite ..."
-          [rows]="6"
-        />
-      </div>
-      <hr class="sams-favorite-hr" />
 
       <div class="ion-padding-top">
-        <ion-note class="position-hint">
-          The position will be taken from your image. Otherwise it is set to
-          your current position. If you do not see the pin, please locate
-          yourself on the map and click to the point where this bite was
-          created.
-        </ion-note>
+        <ion-label class="map-label">Location:</ion-label>
         <position formControlName="position" />
         @if (noGpsPosition()) {
         <ion-text color="danger">
           <p>{{ getGpsErrorMessage() }}</p>
         </ion-text>
         }
+        <ion-text class="position-hint ion-margin-top">
+          Tap if you want to specify your location, otherwise we use the
+          location of your image or your current location.
+        </ion-text>
       </div>
 
       <ion-button

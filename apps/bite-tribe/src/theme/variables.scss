@@ -19,7 +19,7 @@ $DARK_BACKGROUND_COLOR: #131620;
 $BORDER_WIDTH: 1px;
 $BORDER_RADIUS: 16px;
 
-/****************/
+/******* Light Theme *********/
 
 @mixin light-primary-color {
   --ion-color-primary: #{$PRIMARY_COLOR};
@@ -143,9 +143,10 @@ $BORDER_RADIUS: 16px;
   @include light-text-color;
   @include light-background-color;
 
-  --ion-font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif,
-    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --ion-font-family:
+    'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol';
   --ion-toolbar-background: #{$PRIMARY_COLOR};
   --ion-toolbar-border-color: var(--ion-color-primary-shade);
   --ion-toolbar-color: #{SECONDARY_COLOR};
@@ -177,7 +178,17 @@ $BORDER_RADIUS: 16px;
   ion-radio {
     --color-checked: #{$SECONDARY_COLOR};
   }
+
+  //Image-Upload
+  --ion-image-upload-border-width: 1 * '1px';
+  --ion-image-upload-border-color: black;
+  --ion-image-upload-border-style: solid;
+
+  --ion-input-background: $pure_white;
+  --ion-input-border-color: black;
 }
+
+/******* Dark Theme *********/
 
 @mixin dark-primary-color {
   --ion-color-primary: #{$PRIMARY_COLOR};
@@ -300,6 +311,11 @@ $BORDER_RADIUS: 16px;
     --ion-color-secondary: #{$DARK_BACKGROUND_COLOR};
     --ion-toolbar-color: #{$DARK_BACKGROUND_COLOR};
   }
+
+  --ion-image-upload-border-width: 0;
+
+  --ion-input-background: var(--ion-color-tertiary);
+  --ion-input-border-color: var(--ion-color-tertiary-tint);
 }
 
 html.dark {

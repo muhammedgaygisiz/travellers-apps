@@ -1,4 +1,10 @@
+@use 'globals';
+
 :host {
+  label {
+    display: block;
+  }
+
   .container {
     display: flex;
     flex-wrap: wrap;
@@ -14,6 +20,8 @@
 
     ion-input {
       flex: 1;
+
+      @include globals.input-styles;
     }
   }
 }

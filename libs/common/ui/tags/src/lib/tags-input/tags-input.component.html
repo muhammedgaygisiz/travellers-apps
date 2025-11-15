@@ -1,19 +1,26 @@
 {{ tagInputValueChanges$ | async }}
 @let readonlyData = readonly();
 
+<label id="tags-label" class="ion-margin-bottom">Tags?</label>
+
 <div class="container">
   <!-- Do not move to label attr of ion-input since it causes wrong positioning of the label -->
-  <label id="tags-label">Tags</label>
   @for (tag of tags(); track tag) {
-  <ion-chip>
-    <ion-label>{{ tag }}</ion-label>
-    @if (!readonlyData) {
-    <ion-icon name="close-circle" (click)="removeTag(tag)"></ion-icon>
-    }
-  </ion-chip>
-  } @if (!readonlyData) {
-  <ng-container [formGroup]="formGroup">
-    <ion-input aria-labelledby="tags-label" formControlName="tagInput" />
-  </ng-container>
+    <ion-chip>
+      <ion-label>{{ tag }}</ion-label>
+      @if (!readonlyData) {
+        <ion-icon name="close-circle" (click)="removeTag(tag)"></ion-icon>
+      }
+    </ion-chip>
+  }
+  @if (!readonlyData) {
+    <ng-container [formGroup]="formGroup">
+      <ion-input
+        aria-labelledby="tags-label"
+        formControlName="tagInput"
+        fill="outline"
+        mode="md"
+      />
+    </ng-container>
   }
 </div>

@@ -8,7 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { IonIcon } from '@ionic/angular/standalone';
+import { IonIcon, IonLabel } from '@ionic/angular/standalone';
 import { IsFilledPipe } from './pipes/is-filled.pipe';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -17,7 +17,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   templateUrl: './star-rating.component.html',
   styleUrl: './star-rating.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonIcon, IsFilledPipe],
+  imports: [IonIcon, IsFilledPipe, IonLabel],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -30,6 +30,8 @@ export class StarRatingComponent implements ControlValueAccessor {
   rating = input<number | undefined>(0);
 
   readonly = input(false, { transform: booleanAttribute });
+
+  label = input<string | null>(null);
 
   rated = output<number>();
 

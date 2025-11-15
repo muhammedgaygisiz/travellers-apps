@@ -17,9 +17,7 @@ import {
   IonCardContent,
   IonContent,
   IonHeader,
-  IonIcon,
   IonModal,
-  IonNote,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
@@ -36,6 +34,7 @@ import { getExifDataFromFile } from '../page/utils/get-exif-data-from-file';
 import { getExifDataFromPhoto } from '../page/utils/get-exif-data-from-photo';
 import { Geopoint } from 'model';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
+import { Placeholder } from './components/placeholder';
 
 const photoOptions = {
   quality: 90,
@@ -52,9 +51,7 @@ const photoOptions = {
   imports: [
     IonCard,
     IonCardContent,
-    IonIcon,
     IonButton,
-    IonNote,
     IonModal,
     ImageCropperComponent,
     IonHeader,
@@ -62,6 +59,7 @@ const photoOptions = {
     IonButtons,
     IonTitle,
     IonContent,
+    Placeholder,
   ],
   providers: [
     {

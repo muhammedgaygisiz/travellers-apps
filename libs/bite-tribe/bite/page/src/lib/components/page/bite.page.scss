@@ -1,5 +1,6 @@
 :host {
-  ion-input {
+  ion-input,
+  ion-textarea {
     --highlight-color-focused: var(--ion-background-color-step-600);
     --highlight-color-invalid: var(--ion-background-color-step-600);
 
@@ -33,16 +34,19 @@
     }
   }
 
-  hr {
-    background-color: var(--color);
-
-    &.sams-favorite-hr {
-      margin-bottom: 0;
-    }
+  star-rating {
+    display: block;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   ion-note {
     font-size: 0.8rem;
+  }
+
+  .map-label {
+    display: block;
+    margin-bottom: 1.5rem;
   }
 
   .position-hint {

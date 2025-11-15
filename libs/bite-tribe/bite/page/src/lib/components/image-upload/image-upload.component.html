@@ -1,11 +1,3 @@
-@if (!value()) {
-  <div class="ion-margin-bottom">
-    <ion-note class="hint">
-      <b> Click into the box to upload or take a photo. </b>
-    </ion-note>
-  </div>
-}
-
 @if (isWeb()) {
   <input
     type="file"
@@ -63,23 +55,7 @@
     (drop)="onDrop($event)"
   >
     <ion-card-content>
-      @if (isDragging()) {
-        <div class="drag-overlay ion-text-center">
-          <ion-icon name="hand-right-outline" size="large" />
-          <p>
-            <b
-              >Drag & drop is not supported.<br />Click to upload or take a
-              photo.</b
-            >
-          </p>
-        </div>
-      } @else {
-        @if (isWeb()) {
-          <ion-icon name="image-outline" size="large" />
-        } @else {
-          <ion-icon name="camera-outline" size="large" />
-        }
-      }
+      <placeholder [isDragging]="isDragging()" />
     </ion-card-content>
   </ion-card>
 }

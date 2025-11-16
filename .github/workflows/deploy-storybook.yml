@@ -22,7 +22,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build Bite Tribe Storybook
-        run: npm run nx -- build bite-tribe
+        run: npm run build:storybook
 
       - name: Bite Tribe Storybook Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'

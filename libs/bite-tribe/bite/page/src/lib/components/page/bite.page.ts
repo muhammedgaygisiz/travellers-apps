@@ -17,7 +17,6 @@ import {
   IonInput,
   IonLabel,
   IonModal,
-  IonNote,
   IonText,
   IonTextarea,
 } from '@ionic/angular/standalone';
@@ -51,7 +50,6 @@ import { getNormalizedPrice } from './utils/get-normalized-price';
     IonText,
     ImageUploadComponent,
     PositionComponent,
-    IonNote,
     StarRatingComponent,
     TagsInputComponent,
     IonTextarea,

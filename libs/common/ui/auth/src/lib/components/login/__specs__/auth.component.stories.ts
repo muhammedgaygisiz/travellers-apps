@@ -6,7 +6,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 addNecessaryIcons();
 
 export default {
-  title: 'Pages/Auth',
+  title: 'Pages/Login',
   component: LoginComponent,
   decorators: [
     applicationConfig({

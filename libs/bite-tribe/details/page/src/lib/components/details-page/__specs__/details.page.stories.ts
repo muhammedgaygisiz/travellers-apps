@@ -59,7 +59,7 @@ export const withDescription: Story = {
   },
 };
 
-export const withPreferedCurrency: Story = {
+export const withPreferredCurrency: Story = {
   args: {
     ...withDescription.args,
     bite: {

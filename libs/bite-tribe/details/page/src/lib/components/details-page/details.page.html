@@ -152,17 +152,6 @@
         </form>
       </ion-item>
 
-      @if (biteCreatorData?.userId && biteCreatorData?.userId === userId()) {
-      <ion-button
-        fill="outline"
-        expand="block"
-        color="primary"
-        class="ion-margin"
-        (click)="editBite(biteData)"
-      >
-        Edit Bite
-      </ion-button>
-      }
       <ion-button
         expand="block"
         color="primary"
@@ -170,8 +159,20 @@
         [disabled]="isReviewFieldInvalid()"
         (click)="saveReview()"
       >
-        Post
+        Add your Review
       </ion-button>
+
+      @if (biteCreatorData?.userId && biteCreatorData?.userId === userId()) {
+      <ion-button
+        fill="outline"
+        expand="block"
+        color="primary"
+        class="ion-margin edit-button"
+        (click)="editBite(biteData)"
+      >
+        Edit Bite
+      </ion-button>
+      }
     </div>
   </ion-content>
 </ta-page>

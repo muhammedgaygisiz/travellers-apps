@@ -1,13 +1,13 @@
-import { LoginComponent } from '../login.component';
-import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
+import { PageSettings } from '../settings.component';
+import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
 
 export default {
-  title: 'Pages/Login',
-  component: LoginComponent,
+  title: 'Pages/Settings',
+  component: PageSettings,
   decorators: [
     applicationConfig({
       providers: [
@@ -16,7 +16,7 @@ export default {
       ],
     }),
   ],
-} as Meta<LoginComponent>;
+} as Meta<PageSettings>;
 
-type Story = StoryObj<LoginComponent>;
-export const Primary: Story = {};
+type Story = StoryObj<PageSettings>;
+export const Default: Story = {};

@@ -7,7 +7,7 @@ export const ROUTES: Routes = withAuthRoutes([
   {
     path: 'start',
     loadComponent: () =>
-      import('bite-tribe/start').then((m) => m.BiteTribeStartComponent),
+      import('bite-tribe/start').then((m) => m.StartComponent),
     title: 'Welcome',
     canActivate: [startGuard],
   },

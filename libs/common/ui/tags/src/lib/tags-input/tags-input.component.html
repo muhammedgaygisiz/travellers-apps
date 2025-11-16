@@ -1,7 +1,9 @@
 {{ tagInputValueChanges$ | async }}
 @let readonlyData = readonly();
 
-<label id="tags-label" class="ion-margin-bottom">Tags?</label>
+<label id="tags-label" class="ion-margin-bottom">{{
+  readonly() ? 'Tags' : 'Tags?'
+}}</label>
 
 <div class="container">
   <!-- Do not move to label attr of ion-input since it causes wrong positioning of the label -->

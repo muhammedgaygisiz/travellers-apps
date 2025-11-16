@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BiteTribeStartComponent } from '../bite-tribe-start.component';
+import { StartComponent } from '../start.component';
 import { provideRouter } from '@angular/router';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
@@ -10,15 +10,15 @@ jest.mock('@capacitor-firebase/analytics', () => ({
 }));
 
 describe('BiteTribeStartComponent', () => {
-  let component: BiteTribeStartComponent;
-  let fixture: ComponentFixture<BiteTribeStartComponent>;
+  let component: StartComponent;
+  let fixture: ComponentFixture<StartComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideRouter([])],
     });
 
-    fixture = TestBed.createComponent(BiteTribeStartComponent);
+    fixture = TestBed.createComponent(StartComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

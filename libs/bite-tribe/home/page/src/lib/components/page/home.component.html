@@ -22,7 +22,11 @@
     </ion-refresher>
 
     @if (moreThen5Bites()) {
-      <ion-button slot="fixed" (click)="scrollToTop()">
+      <ion-button
+        slot="fixed"
+        [class.with-safe-distance]="editableBites()"
+        (click)="scrollToTop()"
+      >
         <ion-icon name="chevron-up-outline" />
       </ion-button>
     }

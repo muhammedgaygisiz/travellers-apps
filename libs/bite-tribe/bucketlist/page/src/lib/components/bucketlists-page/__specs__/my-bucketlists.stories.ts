@@ -2,7 +2,7 @@ import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { BucketlistsPage } from '../bucketlists.page';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
-import { Bite, Bucketlist, Like } from 'model';
+import { Bucketlist } from 'model';
 
 addNecessaryIcons();
 

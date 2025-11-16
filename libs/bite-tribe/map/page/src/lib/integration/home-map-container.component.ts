@@ -15,7 +15,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isAuthenticated]="service.isAuthenticated()"
       [gpsPosition]="service.gpsPosition()"
       [userId]="service.userId()"
-      [enableZoom]="false"
+      [enableZoom]="true"
       (logoutClick)="service.logout()"
       (gotoSettings)="service.onGotoSettingsClick()"
       (gotoMyProfile)="service.onGotoMyProfileClick()"

@@ -72,6 +72,11 @@ describe('BucketlistsPage', () => {
       component.isAlertOpen.set(true);
     });
 
+    it('should not emit newList event if the name is empty', () => {
+      component.onNewList(['   ']);
+      expect(newListEmitSpy).not.toHaveBeenCalled();
+    });
+
     it('should set isAlertOpen to false', () => {
       component.onNewList(alertResult);
       expect(component.isAlertOpen()).toBe(false);

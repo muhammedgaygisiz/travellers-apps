@@ -1,8 +1,8 @@
-import { Bite, Bucketlist } from 'model';
+import { Bucketlist } from 'model';
 import { sortBucketlistsByCreatedAt } from './sort-bucketlists-by-created-at';
 import { sortBucketlistsByName } from './sort-bucketlists-by-name';
 
-const EMPTY_ARRAY: Bite[] = [];
+const EMPTY_ARRAY: Bucketlist[] = [];
 
 export const sortByCriteria = (
   bucketlists: Bucketlist[],

@@ -96,6 +96,8 @@ export class BucketlistsPage {
   onNewList(alertResult: string[]): void {
     const newListName = alertResult[0];
 
+    if (!newListName?.trim()) return;
+
     this.isAlertOpen.set(false);
     this.newList.emit(newListName);
   }

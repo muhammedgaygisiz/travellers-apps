@@ -322,6 +322,25 @@ describe('App Reducer', () => {
     });
   });
 
+  describe('setBucketlistSorting', () => {
+    it('should set bucketlist sorting', () => {
+      const INITIAL_STATE = {
+        sorting: { bucketlists: 'name' },
+      } as AppSlice;
+      const NEW_STATE = {
+        sorting: { bucketlists: 'createdAt' },
+      } as AppSlice;
+
+      const setBucketlistSortingAction = AppActions.setBucketlistSorting({
+        sorting: 'createdAt',
+      });
+
+      expect(reducer(INITIAL_STATE, setBucketlistSortingAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
   describe('reloadGPSPosition', () => {
     it('should set reloading:home to true', () => {
       const INITIAL_STATE = {

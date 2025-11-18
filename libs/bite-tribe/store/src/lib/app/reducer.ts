@@ -121,4 +121,11 @@ export const reducer = createReducer<AppSlice>(
       myBites: sorting,
     },
   })),
+  on(AppActions.setBucketlistSorting, (state, { sorting }) => ({
+    ...state,
+    sorting: {
+      ...state.sorting,
+      bucketlists: sorting,
+    },
+  })),
 );

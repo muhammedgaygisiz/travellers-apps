@@ -39,6 +39,7 @@ import {
   Settings,
 } from 'model';
 import {
+  bucketlistSorting,
   currency,
   exchangeRates,
   gpsPosition,
@@ -72,6 +73,7 @@ import {
   bucketlists,
   selectedBucketlist,
   selectedBucketlistTitle,
+  sortedBucketlists,
 } from './bucketlists/selectors';
 import { getActionByDocType } from './utils/get-action-by-doc-type';
 
@@ -89,7 +91,9 @@ export class BiteTribeStoreService implements StoreService {
 
   bites$ = this.store.select(bites);
   sortedHomeBites$ = this.store.select(sortedHomeBites);
+  sortedBucketlists$ = this.store.select(sortedBucketlists);
   homeSorting$ = this.store.select(homeSorting);
+  bucketlistSorting$ = this.store.select(bucketlistSorting);
   bite$ = this.store.select(bite);
   mybites$ = this.store.select(mybites);
   sortedMyBites$ = this.store.select(sortedMyBites);
@@ -284,5 +288,9 @@ export class BiteTribeStoreService implements StoreService {
 
   clearGpsError(): void {
     this.store.dispatch(AppActions.clearGPSError());
+  }
+
+  setBucketlistSorting(sorting: string): void {
+    this.store.dispatch(AppActions.setBucketlistSorting({ sorting }));
   }
 }

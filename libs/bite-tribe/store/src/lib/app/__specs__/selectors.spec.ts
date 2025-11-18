@@ -1,6 +1,7 @@
 import * as fromSelectors from '../selectors';
 import { Geopoint, PublicUser, Settings } from 'model';
 import { AppSlice } from '../app-slice.model';
+import { bucketlistSorting } from '../selectors';
 
 describe('App Selectors', () => {
   const mockPosition: Geopoint = {
@@ -231,6 +232,33 @@ describe('App Selectors', () => {
     it('should return distance when slice is undefined', () => {
       const result = fromSelectors.myBitesSorting.projector(undefined as any);
       expect(result).toBe('distance');
+    });
+  });
+
+  describe('bucketlistSorting', () => {
+    it('should return the bucketlists sorting method', () => {
+      const stateWithBucketlistSorting = {
+        ...mockState,
+        sorting: { bucketlists: 'createdAt' },
+      } as AppSlice;
+      const result = fromSelectors.bucketlistSorting.projector(
+        stateWithBucketlistSorting,
+      );
+      expect(result).toBe('createdAt');
+    });
+
+    it('should return "name" when bucketlists sorting is not set', () => {
+      const stateWithoutSorting = { ...mockState, sorting: undefined };
+      const result =
+        fromSelectors.bucketlistSorting.projector(stateWithoutSorting);
+      expect(result).toBe('name');
+    });
+
+    it('should return name when slice is undefined', () => {
+      const result = fromSelectors.bucketlistSorting.projector(
+        undefined as any,
+      );
+      expect(result).toBe('name');
     });
   });
 

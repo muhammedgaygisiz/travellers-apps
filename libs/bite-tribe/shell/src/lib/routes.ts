@@ -77,7 +77,7 @@ export const ROUTES: Routes = withAuthRoutes([
     path: 'my-bucketlists',
     loadComponent: () =>
       import('bite-tribe/bucketlist').then(
-        (m) => m.MyBucketlistsContainerComponent,
+        (m) => m.BucketlistsContainerComponent,
       ),
     canActivate: [authGuard],
   },

@@ -53,6 +53,13 @@ describe('BucketlistsPage', () => {
       component.emitSortingChange(event);
       expect(component.sortingChange.emit).toHaveBeenCalledWith('createdAt');
     });
+
+    it('should not emit sortingChange event if detail is missing', () => {
+      jest.spyOn(component.sortingChange, 'emit');
+      const event = { detail: null } as any;
+      component.emitSortingChange(event);
+      expect(component.sortingChange.emit).not.toHaveBeenCalled();
+    });
   });
 
   describe('onCancel', () => {
@@ -85,6 +92,11 @@ describe('BucketlistsPage', () => {
     it('should emit newList event with the correct value', () => {
       component.onNewList(alertResult);
       expect(newListEmitSpy).toHaveBeenCalledWith('New Bucketlist');
+    });
+
+    it('should not emit newList event if alertResult is empty', () => {
+      component.onNewList([]);
+      expect(newListEmitSpy).not.toHaveBeenCalled();
     });
   });
 

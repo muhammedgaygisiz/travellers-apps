@@ -12,6 +12,7 @@ import {
   bitesBySelectedBucketlist,
   bitesByUser,
   cachedBite,
+  mybites,
   sortedHomeBites,
   sortedMyBites,
 } from './bites/selectors';
@@ -95,6 +96,7 @@ export class BiteTribeStoreService implements StoreService {
   bucketlistSorting$ = this.store.select(bucketlistSorting);
   bite$ = this.store.select(bite);
   sortedMyBites$ = this.store.select(sortedMyBites);
+  mybites$ = this.store.select(mybites);
   myBitesSorting$ = this.store.select(myBitesSorting);
   bitesByUser$ = this.store.select(bitesByUser);
   bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);

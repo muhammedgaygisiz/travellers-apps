@@ -1,4 +1,4 @@
-@let biteCreatorData = biteCreator();
+@let userData = user();
 
 <ta-page
   [showHeaderMenu]="true"
@@ -6,6 +6,7 @@
   [showSettingsButton]="true"
   [showMyBites]="true"
   [showMyBucketlists]="true"
+  [showMyProfile]="true"
   [showFooter]="false"
   [isAuthenticated]="isAuthenticated()"
   [enableBackButton]="true"
@@ -13,22 +14,20 @@
   (gotoSettings)="gotoSettings.emit()"
   (gotoMyBucketlists)="gotoMyBucketlists.emit()"
   (gotoMyBites)="gotoMyBites.emit()"
+  (gotoProfile)="gotoMyProfile.emit()"
 >
   <ion-content class="ion-padding">
     <div class="profile-container">
-      @if (biteCreatorData?.photoUrl) {
+      @if (userData?.photoUrl) {
         <ion-avatar class="profile-avatar">
-          <img
-            [src]="biteCreatorData?.photoUrl"
-            [alt]="biteCreatorData?.displayName"
-          />
+          <img [src]="userData?.photoUrl" [alt]="userData?.displayName" />
         </ion-avatar>
       } @else {
         <ion-icon name="person-circle-outline" class="profile-image" />
       }
 
       <h1 class="profile-name">
-        {{ biteCreatorData?.displayName }}
+        {{ userData?.displayName }}
 
         @if (biteCount() > 10) {
           <ion-badge class="bite-badge {{ badgeColor() }}"
@@ -38,7 +37,7 @@
       </h1>
 
       <p class="profile-location">
-        {{ biteCreatorData?.city || 'No location' }}
+        {{ userData?.city || 'No location' }}
       </p>
 
       <ion-button fill="outline" class="follow-button" [disabled]="true">
@@ -48,7 +47,7 @@
       <div class="about-section">
         <h2>About</h2>
         <p>
-          {{ biteCreatorData?.about || 'No description available.' }}
+          {{ userData?.about || 'No description available.' }}
         </p>
       </div>
 
@@ -69,7 +68,7 @@
     </div>
 
     <!-- Show a message when no user data is available -->
-    @if (!biteCreatorData) {
+    @if (!userData) {
       <div class="no-profile">
         <p class="no-profile-message">User profile not available.</p>
       </div>

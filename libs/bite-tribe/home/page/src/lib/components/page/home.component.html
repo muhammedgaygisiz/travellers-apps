@@ -5,12 +5,14 @@
   [showSettingsButton]="true"
   [showMyBites]="true"
   [showMyBucketlists]="true"
+  [showMyProfile]="true"
   [enableBackButton]="enableBackButton()"
   [showFooter]="showFooter()"
   [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
   (gotoSettings)="gotoSettings.emit()"
+  (gotoProfile)="gotoMyProfile.emit()"
   (gotoMyBucketlists)="gotoMyBucketlists.emit()"
   (gotoMyBites)="gotoMyBites.emit()"
 >
@@ -20,7 +22,11 @@
     </ion-refresher>
 
     @if (moreThen5Bites()) {
-      <ion-button slot="fixed" (click)="scrollToTop()">
+      <ion-button
+        slot="fixed"
+        [class.with-safe-distance]="editableBites()"
+        (click)="scrollToTop()"
+      >
         <ion-icon name="chevron-up-outline" />
       </ion-button>
     }

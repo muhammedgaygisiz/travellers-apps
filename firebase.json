@@ -32,6 +32,17 @@
           "destination": "/index.html"
         }
       ]
+    },
+    {
+      "target": "bite-tribe-storybook",
+      "public": "dist/storybook",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
     }
   ]
 }

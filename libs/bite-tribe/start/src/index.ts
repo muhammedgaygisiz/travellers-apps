@@ -1,1 +1,1 @@
-export * from './lib/bite-tribe-start.component';
+export * from './lib/start.component';

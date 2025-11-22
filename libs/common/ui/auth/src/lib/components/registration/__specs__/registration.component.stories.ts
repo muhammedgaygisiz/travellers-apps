@@ -6,7 +6,7 @@ import { RegistrationComponent } from '../../../components/registration/registra
 addNecessaryIcons();
 
 export default {
-  title: 'Pages/Registration',
+  title: 'Pages/Email Registration',
   component: RegistrationComponent,
   decorators: [
     applicationConfig({

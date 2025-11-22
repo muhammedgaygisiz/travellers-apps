@@ -7,7 +7,7 @@ export const ROUTES: Routes = withAuthRoutes([
   {
     path: 'start',
     loadComponent: () =>
-      import('bite-tribe/start').then((m) => m.BiteTribeStartComponent),
+      import('bite-tribe/start').then((m) => m.StartComponent),
     title: 'Welcome',
     canActivate: [startGuard],
   },
@@ -96,7 +96,12 @@ export const ROUTES: Routes = withAuthRoutes([
   {
     path: 'profile/:userId',
     loadComponent: () =>
-      import('bite-tribe/profile').then((m) => m.ProfileContainer),
+      import('bite-tribe/profile').then((m) => m.BiteCreatorProfileContainer),
+  },
+  {
+    path: 'my-profile',
+    loadComponent: () =>
+      import('bite-tribe/profile').then((m) => m.MyProfileContainer),
   },
   {
     path: '',

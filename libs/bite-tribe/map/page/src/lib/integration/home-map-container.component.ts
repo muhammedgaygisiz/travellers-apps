@@ -18,6 +18,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [enableZoom]="false"
       (logoutClick)="service.logout()"
       (gotoSettings)="service.onGotoSettingsClick()"
+      (gotoMyProfile)="service.onGotoMyProfileClick()"
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoMyBucketlists)="service.onGotoMyBucketlists()"
       (likeButtonClick)="service.likeButtonClicked($event)"

@@ -91,6 +91,7 @@ export class BiteTribeHomeComponent {
   readonly logoutClick = output();
   readonly addButtonClick = output();
   readonly gotoSettings = output();
+  readonly gotoMyProfile = output();
   readonly gotoMyBites = output();
   readonly gotoMyBucketlists = output();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();

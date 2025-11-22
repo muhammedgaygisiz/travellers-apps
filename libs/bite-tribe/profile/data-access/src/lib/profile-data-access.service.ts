@@ -15,6 +15,12 @@ export class ProfileDataAccessService {
     initialValue: [] as Bite[],
   });
 
+  myUser = toSignal(this.storeService.publicUser$);
+
+  myBites = toSignal(this.storeService.mybites$, {
+    initialValue: [] as Bite[],
+  });
+
   private bites = toSignal(this.storeService.bites$, {
     initialValue: [] as Bite[],
   });
@@ -32,7 +38,7 @@ export class ProfileDataAccessService {
     const bite = bites?.find((bite) => bite.id === likeType.biteId);
     const likeFromUser = bite?.likes?.find(
       (like: Like) =>
-        like.userId === userId && like.likeType === likeType.likeType
+        like.userId === userId && like.likeType === likeType.likeType,
     );
 
     if (likeFromUser) {

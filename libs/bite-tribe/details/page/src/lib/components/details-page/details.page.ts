@@ -87,6 +87,7 @@ export class DetailsPage {
   likeButtonClick = output<{ likeType: string; biteId: string }>();
   readonly logoutClick = output();
   readonly gotoSettings = output();
+  readonly gotoMyProfile = output();
   readonly gotoMyBites = output();
   readonly gotoMyBucketlists = output();
   readonly restaurantClick = output<Bite>();
@@ -106,9 +107,9 @@ export class DetailsPage {
     this.reviewFormGroup.valueChanges.pipe(
       map(() => {
         return !this.reviewFormGroup.valid;
-      })
+      }),
     ),
-    { initialValue: !this.reviewFormGroup.valid }
+    { initialValue: !this.reviewFormGroup.valid },
   );
 
   saveReview(): void {
@@ -197,7 +198,7 @@ export class DetailsPage {
           await this.letUserChooseWhichMapToOpen(
             appleMapsUrl,
             target,
-            googleMapsUrl
+            googleMapsUrl,
           );
           return;
         }
@@ -220,7 +221,7 @@ export class DetailsPage {
 
   private buildUrlForAndroidChooser(
     biteData: Bite,
-    destination: string
+    destination: string,
   ): string {
     const label = encodeURIComponent(biteData.name || 'Destination');
     return `geo:0,0?q=${destination}(${label})`;
@@ -229,7 +230,7 @@ export class DetailsPage {
   private async letUserChooseWhichMapToOpen(
     appleMapsUrl: string,
     target: string,
-    googleMapsUrl: string
+    googleMapsUrl: string,
   ): Promise<void> {
     const alert = await this.alertController.create({
       header: 'Choose Navigation App',

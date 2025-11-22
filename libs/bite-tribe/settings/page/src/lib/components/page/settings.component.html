@@ -44,6 +44,19 @@
             </ion-label>
           </ion-item>
 
+          <ion-item>
+            <ion-label position="stacked">
+              <h3>About</h3>
+            </ion-label>
+            <ion-textarea
+              [value]="publicUser()?.about || ''"
+              formControlName="about"
+              placeholder="Tell us about yourself..."
+              rows="4"
+              [readonly]="!isPublicProfile()"
+            />
+          </ion-item>
+
           <div class="ion-margin-top ion-text-end go-public-button-container">
             @if (isPublicProfile()) {
               <ion-button (click)="openConfirmationDialog()">

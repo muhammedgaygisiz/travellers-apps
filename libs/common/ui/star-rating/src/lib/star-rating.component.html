@@ -1,8 +1,15 @@
 @let starIconPath = '/assets/custom-icons/star.svg';
+
+@if (label()) {
+  <div class="ion-margin-vertical">
+    <ion-label>{{ label() }}</ion-label>
+  </div>
+}
+
 <div class="star-rating">
   <ion-icon
     [src]="starIconPath"
-    [class]="(1 | isFilled : hoveredIndex() : getRating()) ? 'filled' : ''"
+    [class]="(1 | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
     size="large"
     (click)="onRate(1)"
     (mouseover)="onHover(1)"
@@ -12,7 +19,7 @@
 
   <ion-icon
     [src]="starIconPath"
-    [class]="(2 | isFilled : hoveredIndex() : getRating()) ? 'filled' : ''"
+    [class]="(2 | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
     size="large"
     (click)="onRate(2)"
     (mouseover)="onHover(2)"
@@ -22,7 +29,7 @@
 
   <ion-icon
     [src]="starIconPath"
-    [class]="(3 | isFilled : hoveredIndex() : getRating()) ? 'filled' : ''"
+    [class]="(3 | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
     size="large"
     (click)="onRate(3)"
     (mouseover)="onHover(3)"
@@ -32,7 +39,7 @@
 
   <ion-icon
     [src]="starIconPath"
-    [class]="(4 | isFilled : hoveredIndex() : getRating()) ? 'filled' : ''"
+    [class]="(4 | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
     size="large"
     (click)="onRate(4)"
     (mouseover)="onHover(4)"
@@ -42,7 +49,7 @@
 
   <ion-icon
     [src]="starIconPath"
-    [class]="(5 | isFilled : hoveredIndex() : getRating()) ? 'filled' : ''"
+    [class]="(5 | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
     size="large"
     (click)="onRate(5)"
     (mouseover)="onHover(5)"

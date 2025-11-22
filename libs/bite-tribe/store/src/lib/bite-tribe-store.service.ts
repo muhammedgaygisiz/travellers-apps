@@ -39,36 +39,33 @@ import {
   Settings,
 } from 'model';
 import {
-  bucketlistSorting,
   currency,
   exchangeRates,
   gpsPosition,
   hasErrorLoadingGpsPosition,
-  homeDistance,
-  homeFilters,
-  homeSorting,
   isBitesLoading,
   isDarkTheme,
   isPublicProfile,
   isReloadingHome,
-  maxPriceHome,
-  myBitesSorting,
   preferredCurrency,
   publicUser,
   settings,
 } from './app/selectors';
+import {
+  bucketlistSorting,
+  homeDistance,
+  homeFilters,
+  homeSorting,
+  homeMaxPriceFilter,
+  myBitesSorting,
+} from './filtering-and-sorting/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
   saveSocialMediaLinksForRestaurant,
   setRestaurantToCreate,
 } from './restaurants/actions';
 import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
-import {
-  createAndSaveBiteIdToBucketList,
-  createBucketList,
-  removeBiteFromBucketlist,
-  saveBiteIdToBucketList,
-} from './bucketlists/actions';
+import { BucketlistActions } from './bucketlists/actions';
 import {
   bucketlists,
   selectedBucketlist,
@@ -76,6 +73,7 @@ import {
   sortedBucketlists,
 } from './bucketlists/selectors';
 import { getActionByDocType } from './utils/get-action-by-doc-type';
+import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
 
 @Injectable({
   providedIn: 'root',
@@ -111,7 +109,7 @@ export class BiteTribeStoreService implements StoreService {
   restaurantToCreate$ = this.store.select(restaurantToCreate);
   exchangeRates$ = this.store.select(exchangeRates);
   preferedCurrency$ = this.store.select(preferredCurrency);
-  maxPriceHome$ = this.store.select(maxPriceHome);
+  maxPriceHome$ = this.store.select(homeMaxPriceFilter);
   isReloadingHome$ = this.store.select(isReloadingHome);
   hasErrorLoadingGpsPosition$ = this.store.select(hasErrorLoadingGpsPosition);
   darkTheme$ = this.store.select(isDarkTheme);
@@ -235,15 +233,19 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   saveToBucketList(saveToBucketlistParams: SaveToBucketListParams): void {
-    this.store.dispatch(saveBiteIdToBucketList(saveToBucketlistParams));
+    this.store.dispatch(
+      BucketlistActions.saveBiteToBucketlist(saveToBucketlistParams),
+    );
   }
 
   createAndSaveToBucketList(params: CreateAndSaveToBucketListParams): void {
-    this.store.dispatch(createAndSaveBiteIdToBucketList(params));
+    this.store.dispatch(
+      BucketlistActions.createAndSaveBiteIdToBucketlist(params),
+    );
   }
 
   removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams): void {
-    this.store.dispatch(removeBiteFromBucketlist(params));
+    this.store.dispatch(BucketlistActions.removeBiteFromBucketlist(params));
   }
 
   submitDeleteBite(bite: Bite): void {
@@ -251,7 +253,7 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   createBucketList(bucketlistName: string): void {
-    this.store.dispatch(createBucketList({ bucketlistName }));
+    this.store.dispatch(BucketlistActions.createBucketlist({ bucketlistName }));
   }
 
   goPublic(): void {
@@ -263,11 +265,13 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   setHomeSorting(sorting: string): void {
-    this.store.dispatch(AppActions.setHomeSorting({ sorting }));
+    this.store.dispatch(FilteringAndSortingActions.setHomeSorting({ sorting }));
   }
 
   setMyBitesSorting(sorting: string): void {
-    this.store.dispatch(AppActions.setMyBitesSorting({ sorting }));
+    this.store.dispatch(
+      FilteringAndSortingActions.setMyBitesSorting({ sorting }),
+    );
   }
 
   setHomeFilters(filters: {
@@ -275,11 +279,11 @@ export class BiteTribeStoreService implements StoreService {
     distanceFilter: string;
     priceFilter: number;
   }): void {
-    this.store.dispatch(AppActions.setHomeFilters({ filters }));
+    this.store.dispatch(FilteringAndSortingActions.setHomeFilters({ filters }));
   }
 
   clearHomeFilters(): void {
-    this.store.dispatch(AppActions.clearHomeFilters());
+    this.store.dispatch(FilteringAndSortingActions.clearHomeFilters());
   }
 
   reloadGPSPosition(): void {
@@ -291,6 +295,8 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   setBucketlistSorting(sorting: string): void {
-    this.store.dispatch(AppActions.setBucketlistSorting({ sorting }));
+    this.store.dispatch(
+      FilteringAndSortingActions.setBucketlistSorting({ sorting }),
+    );
   }
 }

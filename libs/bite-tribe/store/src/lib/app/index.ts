@@ -6,7 +6,7 @@ import { isDarkTheme } from './selectors';
 const fromApp = {
   key,
   reducer,
-  fetchGpsPosition: AppActions.fetchGPSPosition,
+  AppActions,
   isDarkTheme,
 };
 

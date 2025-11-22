@@ -16,13 +16,7 @@ const initialState: AppSlice = {
   loading: {
     home: true,
   },
-  sorting: {
-    home: 'distance',
-    myBites: 'distance',
-  },
-  homeFilters: [],
   exchangeRates: { EUR: 1 },
-  maxPriceFilter: 0,
   errorLoadingGpsPosition: false,
 };
 
@@ -91,41 +85,8 @@ export const reducer = createReducer<AppSlice>(
     ...state,
     profile: undefined,
   })),
-  on(AppActions.setHomeFilters, (state, { filters }) => ({
-    ...state,
-    homeFilters: filters.tagFilters,
-    maxPriceFilter: filters.priceFilter,
-    homeDistance: +filters.distanceFilter,
-  })),
-  on(AppActions.clearHomeFilters, (state) => ({
-    ...state,
-    homeFilters: [],
-    maxPriceFilter: 0,
-    homeDistance: undefined,
-  })),
   on(AppActions.loadedExchangeRatesFromAPI, (state, { exchangeRates }) => ({
     ...state,
     exchangeRates,
-  })),
-  on(AppActions.setHomeSorting, (state, { sorting }) => ({
-    ...state,
-    sorting: {
-      ...state.sorting,
-      home: sorting,
-    },
-  })),
-  on(AppActions.setMyBitesSorting, (state, { sorting }) => ({
-    ...state,
-    sorting: {
-      ...state.sorting,
-      myBites: sorting,
-    },
-  })),
-  on(AppActions.setBucketlistSorting, (state, { sorting }) => ({
-    ...state,
-    sorting: {
-      ...state.sorting,
-      bucketlists: sorting,
-    },
   })),
 );

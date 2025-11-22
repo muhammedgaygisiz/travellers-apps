@@ -5,13 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BucketListEffect } from '../effects';
-import {
-  createAndSaveBiteIdToBucketList,
-  createBucketList,
-  loadedBucketlistsFromApi,
-  removeBiteFromBucketlist,
-  saveBiteIdToBucketList,
-} from '../actions';
+import { BucketlistActions } from '../actions';
 import { fromAuth } from 'ta-firestore';
 import SpyInstance = jest.SpyInstance;
 
@@ -55,7 +49,7 @@ describe('BucketListEffect', () => {
 
         const expected = 'a';
         const output = {
-          a: loadedBucketlistsFromApi({ bucketlists: [] }),
+          a: BucketlistActions.loadedFromAPI({ bucketlists: [] }),
         };
 
         expectObservable(effects.startListener$).toBe(expected, output);
@@ -75,7 +69,7 @@ describe('BucketListEffect', () => {
     it('should run saveBiteIdToBucketList on saveBiteIdToBucketList', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: saveBiteIdToBucketList({
+          a: BucketlistActions.saveBiteToBucketlist({
             bucketListId: 'bucketListId',
             biteId: 'biteId',
           }),
@@ -99,7 +93,7 @@ describe('BucketListEffect', () => {
     it('should run createBucketListAndSaveBiteIdToBucketList on createAndSaveBiteIdToBucketList', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: createAndSaveBiteIdToBucketList({
+          a: BucketlistActions.createAndSaveBiteIdToBucketlist({
             bucketListName: 'bucketListName',
             biteId: 'biteId',
           }),
@@ -127,7 +121,7 @@ describe('BucketListEffect', () => {
     it('should run removeBiteFromBucketlist on removeBiteFromBucketlist', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: removeBiteFromBucketlist({
+          a: BucketlistActions.removeBiteFromBucketlist({
             bucketlistId: 'bucketlistId',
             biteId: 'biteId',
           }),
@@ -151,7 +145,7 @@ describe('BucketListEffect', () => {
     it('should run createBucketList on createBucketList', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: createBucketList({
+          a: BucketlistActions.createBucketlist({
             bucketlistName: 'bucketlistName',
           }),
         });

@@ -3,26 +3,15 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AppActions } from './actions';
 import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
-import { AlertController, Platform } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
-import { Store } from '@ngrx/store';
 
 @Injectable()
 export class AppEffect {
   private readonly actions$ = inject(Actions);
   private readonly platform = inject(Platform);
   private readonly api = inject(BiteTribeApiService);
-  private readonly alertController = inject(AlertController);
-  private readonly store = inject(Store);
-
-  private readonly RETRY_GPS_BUTTON = {
-    text: 'Retry',
-    role: 'cancel',
-    handler: (): void => {
-      this.store.dispatch(AppActions.fetchGPSPosition());
-    },
-  };
 
   loadSettingsFromApi$ = createEffect(() => {
     return this.actions$.pipe(

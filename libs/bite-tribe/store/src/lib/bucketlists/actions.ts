@@ -1,31 +1,18 @@
-import { createAction, props } from '@ngrx/store';
+import { createActionGroup, props } from '@ngrx/store';
 import {
   CreateAndSaveToBucketListParams,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
 } from 'model';
 
-export const loadedBucketlistsFromApi = createAction(
-  '[BUCKETLISTS] Loaded from API',
-  props<{ bucketlists: any }>()
-);
-
-export const saveBiteIdToBucketList = createAction(
-  '[BUCKETLISTS] Save bite to bucketlist',
-  props<SaveToBucketListParams>()
-);
-
-export const createAndSaveBiteIdToBucketList = createAction(
-  '[BUCKETLISTS] Create bucketlist and save bite to it',
-  props<CreateAndSaveToBucketListParams>()
-);
-
-export const createBucketList = createAction(
-  '[BUCKETLISTS] Create bucketlist',
-  props<{ bucketlistName: string }>()
-);
-
-export const removeBiteFromBucketlist = createAction(
-  '[BUCKETLISTS] Remove bite from bucketlist',
-  props<RemoveBiteFromBucketlistParams>()
-);
+export const BucketlistActions = createActionGroup({
+  source: 'BUCKETLIST',
+  events: {
+    'Loaded from API': props<{ bucketlists: any }>(),
+    'Save bite to bucketlist': props<SaveToBucketListParams>(),
+    'Create and save BiteId to Bucketlist':
+      props<CreateAndSaveToBucketListParams>(),
+    'Create Bucketlist': props<{ bucketlistName: string }>(),
+    'Remove bite from Bucketlist': props<RemoveBiteFromBucketlistParams>(),
+  },
+});

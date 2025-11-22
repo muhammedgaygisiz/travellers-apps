@@ -10,7 +10,6 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { PublicUser, Settings } from 'model';
 import SpyInstance = jest.SpyInstance;
-import { BiteActions } from '../../bites/actions';
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
@@ -47,8 +46,6 @@ describe('AppEffect', () => {
       providers: [
         AppEffect,
         provideMockActions(() => actions$),
-        provideMockStore(),
-        { provide: AlertController, useValue: Mock },
         { provide: BiteTribeApiService, useValue: Mock },
         { provide: Platform, useValue: Mock },
       ],

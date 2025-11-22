@@ -4,7 +4,7 @@ import { adapter } from './adapter';
 import { EntityState } from '@ngrx/entity';
 import { Bucketlist } from 'model';
 import { bucketlistId } from '../router/selectors';
-import { bucketlistSorting } from '../app/selectors';
+import { bucketlistSorting } from '../filtering-and-sorting/selectors';
 import { sortByCriteria } from './utils/sort-by-criteria';
 
 const slice = createFeatureSelector<EntityState<Bucketlist>>(key);

@@ -11,19 +11,15 @@ export const homeFilters = createSelector(
     [],
 );
 
-export const homeMaxPriceFilter = createSelector(
-  slice,
-  (slice) => slice?.filtering?.home?.maxPrice || 0,
-);
-
 export const homeDistance = createSelector(
   slice,
   (slice) => slice?.filtering?.home?.distance,
 );
 
-export const maxPriceHome = createSelector(slice, (slice) => {
-  return slice?.filtering?.home?.maxPrice || 0;
-});
+export const homeMaxPriceFilter = createSelector(
+  slice,
+  (slice) => slice?.filtering?.home?.maxPrice || 0,
+);
 
 export const homeSorting = createSelector(slice, (slice) => {
   return slice?.sorting?.home || 'distance';

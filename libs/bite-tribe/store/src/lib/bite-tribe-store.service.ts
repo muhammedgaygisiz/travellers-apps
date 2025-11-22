@@ -56,7 +56,7 @@ import {
   homeDistance,
   homeFilters,
   homeSorting,
-  maxPriceHome,
+  homeMaxPriceFilter,
   myBitesSorting,
 } from './filtering-and-sorting/selectors';
 import { removeLike, saveLike } from './likes/actions';
@@ -109,7 +109,7 @@ export class BiteTribeStoreService implements StoreService {
   restaurantToCreate$ = this.store.select(restaurantToCreate);
   exchangeRates$ = this.store.select(exchangeRates);
   preferedCurrency$ = this.store.select(preferredCurrency);
-  maxPriceHome$ = this.store.select(maxPriceHome);
+  maxPriceHome$ = this.store.select(homeMaxPriceFilter);
   isReloadingHome$ = this.store.select(isReloadingHome);
   hasErrorLoadingGpsPosition$ = this.store.select(hasErrorLoadingGpsPosition);
   darkTheme$ = this.store.select(isDarkTheme);

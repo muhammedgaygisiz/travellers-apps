@@ -183,4 +183,22 @@ describe('Filtering And Sorting Reducer', () => {
       });
     });
   });
+
+  describe('loadedFromPreferences', () => {
+    it('should take incoming slice', () => {
+      const INITIAL_STATE: FilteringAndSortingSlice = {};
+
+      const NEW_STATE: FilteringAndSortingSlice = {
+        sorting: { bucketlists: 'likes' },
+      };
+      const setBucketlistSortingAction =
+        FilteringAndSortingActions.setBucketlistSorting({
+          sorting: 'likes',
+        });
+
+      expect(reducer(INITIAL_STATE, setBucketlistSortingAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
 });

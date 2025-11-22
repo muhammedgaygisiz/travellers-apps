@@ -16,20 +16,6 @@ const initialState: AppSlice = {
   loading: {
     home: true,
   },
-  sortingAndFiltering: {
-    sorting: {
-      home: 'distance',
-      myBites: 'distance',
-      bucketlists: 'distance',
-    },
-    filtering: {
-      home: {
-        filters: [],
-        distance: undefined,
-        maxPrice: 0,
-      },
-    },
-  },
   exchangeRates: { EUR: 1 },
   errorLoadingGpsPosition: false,
 };
@@ -99,66 +85,8 @@ export const reducer = createReducer<AppSlice>(
     ...state,
     profile: undefined,
   })),
-  on(AppActions.setHomeFilters, (state, { filters }) => ({
-    ...state,
-    sortingAndFiltering: {
-      ...state.sortingAndFiltering,
-      filtering: {
-        ...state.sortingAndFiltering?.filtering,
-        home: {
-          filters: filters.tagFilters,
-          distance: +filters.distanceFilter,
-          maxPrice: filters.priceFilter,
-        },
-      },
-    },
-  })),
-  on(AppActions.clearHomeFilters, (state) => ({
-    ...state,
-    sortingAndFiltering: {
-      ...state.sortingAndFiltering,
-      filtering: {
-        ...state.sortingAndFiltering?.filtering,
-        home: {
-          filters: [],
-          distance: undefined,
-          maxPrice: 0,
-        },
-      },
-    },
-  })),
   on(AppActions.loadedExchangeRatesFromAPI, (state, { exchangeRates }) => ({
     ...state,
     exchangeRates,
-  })),
-  on(AppActions.setHomeSorting, (state, { sorting }) => ({
-    ...state,
-    sortingAndFiltering: {
-      ...state.sortingAndFiltering,
-      sorting: {
-        ...state.sortingAndFiltering?.sorting,
-        home: sorting,
-      },
-    },
-  })),
-  on(AppActions.setMyBitesSorting, (state, { sorting }) => ({
-    ...state,
-    sortingAndFiltering: {
-      ...state.sortingAndFiltering,
-      sorting: {
-        ...state.sortingAndFiltering?.sorting,
-        myBites: sorting,
-      },
-    },
-  })),
-  on(AppActions.setBucketlistSorting, (state, { sorting }) => ({
-    ...state,
-    sortingAndFiltering: {
-      ...state.sortingAndFiltering,
-      sorting: {
-        ...state.sortingAndFiltering?.sorting,
-        bucketlists: sorting,
-      },
-    },
   })),
 );

@@ -39,24 +39,26 @@ import {
   Settings,
 } from 'model';
 import {
-  bucketlistSorting,
   currency,
   exchangeRates,
   gpsPosition,
   hasErrorLoadingGpsPosition,
-  homeDistance,
-  homeFilters,
-  homeSorting,
   isBitesLoading,
   isDarkTheme,
   isPublicProfile,
   isReloadingHome,
-  maxPriceHome,
-  myBitesSorting,
   preferredCurrency,
   publicUser,
   settings,
 } from './app/selectors';
+import {
+  bucketlistSorting,
+  homeDistance,
+  homeFilters,
+  homeSorting,
+  maxPriceHome,
+  myBitesSorting,
+} from './filtering-and-sorting/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
   saveSocialMediaLinksForRestaurant,
@@ -76,6 +78,7 @@ import {
   sortedBucketlists,
 } from './bucketlists/selectors';
 import { getActionByDocType } from './utils/get-action-by-doc-type';
+import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
 
 @Injectable({
   providedIn: 'root',
@@ -263,11 +266,13 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   setHomeSorting(sorting: string): void {
-    this.store.dispatch(AppActions.setHomeSorting({ sorting }));
+    this.store.dispatch(FilteringAndSortingActions.setHomeSorting({ sorting }));
   }
 
   setMyBitesSorting(sorting: string): void {
-    this.store.dispatch(AppActions.setMyBitesSorting({ sorting }));
+    this.store.dispatch(
+      FilteringAndSortingActions.setMyBitesSorting({ sorting }),
+    );
   }
 
   setHomeFilters(filters: {
@@ -275,11 +280,11 @@ export class BiteTribeStoreService implements StoreService {
     distanceFilter: string;
     priceFilter: number;
   }): void {
-    this.store.dispatch(AppActions.setHomeFilters({ filters }));
+    this.store.dispatch(FilteringAndSortingActions.setHomeFilters({ filters }));
   }
 
   clearHomeFilters(): void {
-    this.store.dispatch(AppActions.clearHomeFilters());
+    this.store.dispatch(FilteringAndSortingActions.clearHomeFilters());
   }
 
   reloadGPSPosition(): void {
@@ -291,6 +296,8 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   setBucketlistSorting(sorting: string): void {
-    this.store.dispatch(AppActions.setBucketlistSorting({ sorting }));
+    this.store.dispatch(
+      FilteringAndSortingActions.setBucketlistSorting({ sorting }),
+    );
   }
 }

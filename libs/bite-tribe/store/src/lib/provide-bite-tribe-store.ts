@@ -34,6 +34,7 @@ import { loadedRestaurantsFromApi } from './restaurants/actions';
 import { BucketListEffect } from './bucketlists/effects';
 import { fromBucketlists } from './bucketlists';
 import { ServiceWorkerEffects } from './service-worker/effects';
+import { fromFilteringAndSorting } from './filtering-and-sorting';
 
 const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
@@ -173,6 +174,7 @@ export const provideBiteTribeStore = (environment: Environment): any => [
   provideState(fromRestaurants.key, fromRestaurants.reducer),
   provideState(fromMenus.key, fromMenus.reducer),
   provideState(fromBucketlists.key, fromBucketlists.reducer),
+  provideState(fromFilteringAndSorting.key, fromFilteringAndSorting.reducer),
   provideFirestoreUtils(
     toFirebaseOptions(environment),
     !environment.isBusiness,

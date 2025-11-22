@@ -9,20 +9,6 @@ export type AppSlice = {
   reloading?: {
     home?: boolean;
   };
-  sortingAndFiltering?: {
-    sorting?: {
-      home?: string;
-      myBites?: string;
-      bucketlists?: string;
-    };
-    filtering?: {
-      home?: {
-        filters: string[];
-        distance?: number;
-        maxPrice?: number;
-      };
-    };
-  };
   profile?: PublicUser;
   exchangeRates: Record<string, number>;
   errorLoadingGpsPosition: boolean;

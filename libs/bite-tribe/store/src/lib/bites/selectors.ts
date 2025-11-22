@@ -7,13 +7,15 @@ import { likes } from '../likes/selectors';
 import {
   exchangeRates,
   gpsPosition,
+  preferredCurrency,
+} from '../app/selectors';
+import {
   homeDistance,
   homeFilters,
   homeMaxPriceFilter,
   homeSorting,
   myBitesSorting,
-  preferredCurrency,
-} from '../app/selectors';
+} from '../filtering-and-sorting/selectors';
 import { haversineDistance } from 'utils';
 import { EntityState } from '@ngrx/entity';
 import { handleNearbyFilter } from './utils/handle-nearby-filter';
@@ -22,11 +24,6 @@ import { getLikesForBite } from './utils/get-likes-for-bite';
 import { handleMaxPriceFilter } from './utils/handle-max-price-filter';
 import { fromAuth } from 'ta-firestore';
 import { selectedBucketlist } from '../bucketlists/selectors';
-import { sortBitesByDistance } from './utils/sort-bites-by-distance';
-import { sortBitesByLikes } from './utils/sort-bites-by-likes';
-import { sortBitesByCreatedAt } from './utils/sort-bites-by-created-at';
-import { sortBitesByRating } from './utils/sort-bites-by-rating';
-import { sortBitesByPrice } from './utils/sort-bites-by-price';
 import { enrichByPriceInPreferredCurrency } from './utils/enrich-by-price-in-preferred-currency';
 import { sortByCriteria } from './utils/sort-by-criteria';
 

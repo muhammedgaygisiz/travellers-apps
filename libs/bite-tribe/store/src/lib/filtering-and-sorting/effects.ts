@@ -64,8 +64,8 @@ export class FilteringAndSortingEffects {
     () => {
       return this.actions$.pipe(
         ofType(fromAuth.AuthActions.logout),
-        tap((_) => {
-          Preferences.remove({ key });
+        tap(async (_) => {
+          await Preferences.remove({ key });
         }),
       );
     },

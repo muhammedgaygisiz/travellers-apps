@@ -49,10 +49,15 @@ export class FilteringAndSortingEffects {
           );
 
           if (previousFilteringAndSorting) {
-            const slice = JSON.parse(previousFilteringAndSorting);
-            this.store.dispatch(
-              FilteringAndSortingActions.loadedFromPreferences({ slice }),
-            );
+            try {
+              const slice = JSON.parse(previousFilteringAndSorting);
+              this.store.dispatch(
+                FilteringAndSortingActions.loadedFromPreferences({ slice }),
+              );
+            } catch (err) {
+              console.error('Failed to parse filteringAndSorting from preferences:', err);
+              // Optionally, clear the corrupted preference or dispatch an error action here
+            }
           }
         }),
       );

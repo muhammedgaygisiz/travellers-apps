@@ -14,7 +14,7 @@
     bottom: calc(var(--ion-safe-area-bottom, 0) + 97px);
 
     &.with-safe-distance {
-      bottom: var(--ion-safe-area-bottom, 0);
+      bottom: calc(var(--ion-safe-area-bottom, 0) + 16px);
     }
   }
 

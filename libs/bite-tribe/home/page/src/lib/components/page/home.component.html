@@ -24,7 +24,7 @@
     @if (moreThen5Bites()) {
       <ion-button
         slot="fixed"
-        [class.with-safe-distance]="editableBites()"
+        [class.with-safe-distance]="!showFooter()"
         (click)="scrollToTop()"
       >
         <ion-icon name="chevron-up-outline" />

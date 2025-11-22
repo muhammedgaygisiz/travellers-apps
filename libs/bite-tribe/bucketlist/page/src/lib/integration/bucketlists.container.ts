@@ -8,14 +8,16 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <bucketlists-page
       class="ion-page"
       [bucketlists]="service.bucketlists()"
+      [sorting]="service.sorting()"
       (gotoBucketlistDetails)="service.gotoBucketlistDetails($event)"
       (newList)="service.createAndSaveToBucketList($event)"
+      (sortingChange)="service.sortingChange($event)"
     />
   `,
   imports: [BucketlistsPage],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MyBucketlistsContainerComponent {
+export class BucketlistsContainerComponent {
   service = inject(BucketlistsService);
 
   ionViewDidEnter(): void {

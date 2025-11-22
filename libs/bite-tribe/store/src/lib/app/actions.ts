@@ -23,6 +23,7 @@ export const AppActions = createActionGroup({
       };
     }>(),
     'Set home sorting': props<{ sorting: string }>(),
+    'Set bucketlist sorting': props<{ sorting: string }>(),
     'Set my bites sorting': props<{ sorting: string }>(),
     'Clear home filters': emptyProps(),
     'Loaded exchange rates from API': props<{

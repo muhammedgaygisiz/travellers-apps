@@ -10,6 +10,7 @@ export class BucketlistsService {
   private readonly navController = inject(NavController);
 
   bucketlists = this.dataAccess.bucketlists;
+  sorting = this.dataAccess.sorting;
 
   gotoBucketlistDetails(bucketlistId: string): void {
     this.navController.navigateForward(['my-bucketlists', bucketlistId]);
@@ -17,5 +18,9 @@ export class BucketlistsService {
 
   createAndSaveToBucketList(bucketListName: string): void {
     this.dataAccess.createAndSaveToBucketList(bucketListName);
+  }
+
+  sortingChange(value: string): void {
+    this.dataAccess.setBucketlistSorting(value);
   }
 }

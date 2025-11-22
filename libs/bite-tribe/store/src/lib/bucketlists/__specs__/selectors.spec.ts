@@ -2,6 +2,11 @@ import * as fromSelectors from '../selectors';
 import { EntityState } from '@ngrx/entity';
 import { Bucketlist } from 'model';
 
+const sortByCriteriaMock = jest.fn();
+jest.mock('../utils/sort-by-criteria', () => ({
+  sortByCriteria: (...args: any): any => sortByCriteriaMock(...args),
+}));
+
 describe('Bucketlists - selectors', () => {
   const BUCKETLIST_1 = { id: '1', name: 'Bucketlist 1' } as Bucketlist;
   const BUCKETLIST_2 = { id: '2', name: 'Bucketlist 2' } as Bucketlist;
@@ -31,7 +36,7 @@ describe('Bucketlists - selectors', () => {
     it('should return undefined if bucketlist does not exist', () => {
       const result = fromSelectors.selectedBucketlist.projector(
         initialState,
-        []
+        [],
       );
       expect(result).toBeUndefined();
     });
@@ -39,7 +44,7 @@ describe('Bucketlists - selectors', () => {
     it('should return undefined if slice is undefined', () => {
       const result = fromSelectors.selectedBucketlist.projector(
         undefined as any,
-        [BUCKETLIST_1]
+        [BUCKETLIST_1],
       );
       expect(result).toBeUndefined();
     });
@@ -55,6 +60,24 @@ describe('Bucketlists - selectors', () => {
     it('should return fallback title if bucketlist does not exist', () => {
       const result = fromSelectors.selectedBucketlistTitle.projector(undefined);
       expect(result).toEqual('My Bucketlist');
+    });
+  });
+
+  describe('sortedBucketlists', () => {
+    beforeEach(() => {
+      sortByCriteriaMock.mockReturnValue([BUCKETLIST_1, BUCKETLIST_2]);
+    });
+
+    it('should return the bucketlists sorted by name ascending', () => {
+      const result = fromSelectors.sortedBucketlists.projector(
+        [BUCKETLIST_2, BUCKETLIST_1],
+        'name',
+      );
+      expect(sortByCriteriaMock).toHaveBeenCalledWith(
+        [BUCKETLIST_2, BUCKETLIST_1],
+        'name',
+      );
+      expect(result).toEqual([BUCKETLIST_1, BUCKETLIST_2]);
     });
   });
 });

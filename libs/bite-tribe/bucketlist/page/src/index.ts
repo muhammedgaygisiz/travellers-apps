@@ -1,1 +1,1 @@
-export * from './lib/integration/my-bucketlists.container';
+export * from './lib/integration/bucketlists.container';

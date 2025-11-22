@@ -36,4 +36,8 @@ describe('App Actions', () => {
   it('should have a goPrivate action', () => {
     expect(AppActions.goPrivate).toBeDefined();
   });
+
+  it('should have a setBucketlistSorting action', () => {
+    expect(AppActions.setBucketlistSorting).toBeDefined();
+  });
 });

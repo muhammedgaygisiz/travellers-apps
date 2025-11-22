@@ -12,6 +12,7 @@ export type AppSlice = {
   sorting?: {
     home?: string;
     myBites?: string;
+    bucketlists?: string;
   };
   profile?: PublicUser;
   homeFilters?: string[];

@@ -57,6 +57,10 @@ export const myBitesSorting = createSelector(slice, (slice) => {
   return slice?.sorting?.myBites || 'distance';
 });
 
+export const bucketlistSorting = createSelector(slice, (slice) => {
+  return slice?.sorting?.bucketlists || 'name';
+});
+
 export const isDarkTheme = createSelector(slice, (slice) => {
   return slice?.settings.theme === 'dark';
 });

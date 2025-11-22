@@ -43,10 +43,6 @@ export class FilteringAndSortingEffects {
             key,
           });
 
-          console.log(
-            'previous filteringAndSorting',
-            previousFilteringAndSorting,
-          );
 
           if (previousFilteringAndSorting) {
             try {

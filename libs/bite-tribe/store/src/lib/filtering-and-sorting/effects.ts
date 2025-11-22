@@ -43,16 +43,17 @@ export class FilteringAndSortingEffects {
             key,
           });
 
-          console.log(
-            'previous filteringAndSorting',
-            previousFilteringAndSorting,
-          );
 
           if (previousFilteringAndSorting) {
-            const slice = JSON.parse(previousFilteringAndSorting);
-            this.store.dispatch(
-              FilteringAndSortingActions.loadedFromPreferences({ slice }),
-            );
+            try {
+              const slice = JSON.parse(previousFilteringAndSorting);
+              this.store.dispatch(
+                FilteringAndSortingActions.loadedFromPreferences({ slice }),
+              );
+            } catch (err) {
+              console.error('Failed to parse filteringAndSorting from preferences:', err);
+              // Optionally, clear the corrupted preference or dispatch an error action here
+            }
           }
         }),
       );
@@ -64,8 +65,8 @@ export class FilteringAndSortingEffects {
     () => {
       return this.actions$.pipe(
         ofType(fromAuth.AuthActions.logout),
-        tap((_) => {
-          Preferences.remove({ key });
+        tap(async (_) => {
+          await Preferences.remove({ key });
         }),
       );
     },

@@ -12,14 +12,11 @@ describe('App Reducer', () => {
         profile: { displayName: 'Test User' } as PublicUser,
         settings: { pushNotifications: true } as Settings,
         loading: { home: true },
-        homeFilters: ['#food'],
-        sorting: { home: 'distance' },
         exchangeRates: { EUR: 1 },
-        maxPriceFilter: 0,
         errorLoadingGpsPosition: false,
       };
 
-      const NEW_STATE = {
+      const NEW_STATE: AppSlice = {
         profile: undefined,
         settings: {
           pushNotifications: false,
@@ -29,15 +26,9 @@ describe('App Reducer', () => {
           nearby: 2000,
         },
         loading: { home: true },
-        homeFilters: [],
-        sorting: {
-          home: 'distance',
-          myBites: 'distance',
-        },
         exchangeRates: { EUR: 1 },
-        maxPriceFilter: 0,
         errorLoadingGpsPosition: false,
-      } as AppSlice;
+      };
 
       const logoutAction = fromAuth.AuthActions.logoutSucceeded();
 
@@ -183,88 +174,6 @@ describe('App Reducer', () => {
     });
   });
 
-  describe('setHomeFilters', () => {
-    it('should set home filters', () => {
-      const INITIAL_STATE = {
-        homeFilters: [],
-      } as unknown as AppSlice;
-      const NEW_STATE = {
-        homeDistance: 0,
-        homeFilters: ['#food', '#drink'],
-        maxPriceFilter: 0,
-      } as AppSlice;
-
-      const setHomeFiltersAction = AppActions.setHomeFilters({
-        filters: {
-          tagFilters: ['#food', '#drink'],
-          distanceFilter: '',
-          priceFilter: 0,
-        },
-      });
-
-      expect(reducer(INITIAL_STATE, setHomeFiltersAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-
-    it('should override existing home filters', () => {
-      const INITIAL_STATE = {
-        homeFilters: ['#old', '#filters'],
-      } as AppSlice;
-      const NEW_STATE = {
-        homeDistance: 0,
-        homeFilters: ['#new', '#filters'],
-        maxPriceFilter: 0,
-      } as AppSlice;
-
-      const setHomeFiltersAction = AppActions.setHomeFilters({
-        filters: {
-          tagFilters: ['#new', '#filters'],
-          distanceFilter: '',
-          priceFilter: 0,
-        },
-      });
-
-      expect(reducer(INITIAL_STATE, setHomeFiltersAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
-  describe('clearHomeFilters', () => {
-    it('should clear all home filters', () => {
-      const INITIAL_STATE = {
-        homeFilters: ['#food', '#drink', '#coffee'],
-      } as AppSlice;
-      const NEW_STATE = {
-        homeFilters: [],
-        maxPriceFilter: 0,
-      } as unknown as AppSlice;
-
-      const clearHomeFiltersAction = AppActions.clearHomeFilters();
-
-      expect(reducer(INITIAL_STATE, clearHomeFiltersAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-
-    it('should handle clearing already empty filters', () => {
-      const INITIAL_STATE = {
-        homeFilters: [],
-      } as unknown as AppSlice;
-      const NEW_STATE = {
-        homeFilters: [],
-        maxPriceFilter: 0,
-      } as unknown as AppSlice;
-
-      const clearHomeFiltersAction = AppActions.clearHomeFilters();
-
-      expect(reducer(INITIAL_STATE, clearHomeFiltersAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
   describe('loadedExchangeRatesFromApi', () => {
     it('should set exchange rates', () => {
       const EXCHANGE_RATES_MOCK = { EUR: 1.2, USD: 1.1 };
@@ -279,63 +188,6 @@ describe('App Reducer', () => {
         });
 
       expect(reducer(INITIAL_STATE, loadedExchangeRatesFromApiAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
-  describe('setHomeSorting', () => {
-    it('should set home sorting', () => {
-      const INITIAL_STATE = {
-        sorting: { home: 'distance' },
-      } as AppSlice;
-      const NEW_STATE = {
-        sorting: { home: 'price' },
-      } as AppSlice;
-
-      const setHomeSortingAction = AppActions.setHomeSorting({
-        sorting: 'price',
-      });
-
-      expect(reducer(INITIAL_STATE, setHomeSortingAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
-  describe('setMyBitesSorting', () => {
-    it('should set my bites sorting', () => {
-      const INITIAL_STATE = {
-        sorting: { myBites: 'distance' },
-      } as AppSlice;
-      const NEW_STATE = {
-        sorting: { myBites: 'likes' },
-      } as AppSlice;
-
-      const setMyBitesSortingAction = AppActions.setMyBitesSorting({
-        sorting: 'likes',
-      });
-
-      expect(reducer(INITIAL_STATE, setMyBitesSortingAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
-  describe('setBucketlistSorting', () => {
-    it('should set bucketlist sorting', () => {
-      const INITIAL_STATE = {
-        sorting: { bucketlists: 'name' },
-      } as AppSlice;
-      const NEW_STATE = {
-        sorting: { bucketlists: 'createdAt' },
-      } as AppSlice;
-
-      const setBucketlistSortingAction = AppActions.setBucketlistSorting({
-        sorting: 'createdAt',
-      });
-
-      expect(reducer(INITIAL_STATE, setBucketlistSortingAction)).toEqual({
         ...NEW_STATE,
       });
     });

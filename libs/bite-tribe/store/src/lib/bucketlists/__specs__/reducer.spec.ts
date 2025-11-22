@@ -2,7 +2,7 @@ import { reducer } from '../reducer';
 import { Bucketlist } from 'model';
 import { EntityState } from '@ngrx/entity';
 import { fromAuth } from 'ta-firestore';
-import { loadedBucketlistsFromApi } from '../actions';
+import { BucketlistActions } from '../actions';
 
 describe('Bucketlists Reducer', () => {
   describe('logoutSucceeded', () => {
@@ -36,7 +36,7 @@ describe('Bucketlists Reducer', () => {
         },
       } as EntityState<Bucketlist>;
 
-      const loadedBucketlistsFromApiAction = loadedBucketlistsFromApi({
+      const loadedBucketlistsFromApiAction = BucketlistActions.loadedFromAPI({
         bucketlists: [{ id: 'id' }],
       });
 

@@ -65,12 +65,7 @@ import {
   setRestaurantToCreate,
 } from './restaurants/actions';
 import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
-import {
-  createAndSaveBiteIdToBucketList,
-  createBucketList,
-  removeBiteFromBucketlist,
-  saveBiteIdToBucketList,
-} from './bucketlists/actions';
+import { BucketlistActions } from './bucketlists/actions';
 import {
   bucketlists,
   selectedBucketlist,
@@ -238,15 +233,19 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   saveToBucketList(saveToBucketlistParams: SaveToBucketListParams): void {
-    this.store.dispatch(saveBiteIdToBucketList(saveToBucketlistParams));
+    this.store.dispatch(
+      BucketlistActions.saveBiteToBucketlist(saveToBucketlistParams),
+    );
   }
 
   createAndSaveToBucketList(params: CreateAndSaveToBucketListParams): void {
-    this.store.dispatch(createAndSaveBiteIdToBucketList(params));
+    this.store.dispatch(
+      BucketlistActions.createAndSaveBiteIdToBucketlist(params),
+    );
   }
 
   removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams): void {
-    this.store.dispatch(removeBiteFromBucketlist(params));
+    this.store.dispatch(BucketlistActions.removeBiteFromBucketlist(params));
   }
 
   submitDeleteBite(bite: Bite): void {
@@ -254,7 +253,7 @@ export class BiteTribeStoreService implements StoreService {
   }
 
   createBucketList(bucketlistName: string): void {
-    this.store.dispatch(createBucketList({ bucketlistName }));
+    this.store.dispatch(BucketlistActions.createBucketlist({ bucketlistName }));
   }
 
   goPublic(): void {

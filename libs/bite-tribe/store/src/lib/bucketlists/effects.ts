@@ -1,13 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import {
-  createAndSaveBiteIdToBucketList,
-  createBucketList,
-  loadedBucketlistsFromApi,
-  removeBiteFromBucketlist,
-  saveBiteIdToBucketList,
-} from './actions';
+import { BucketlistActions } from './actions';
 import { map, switchMap, tap } from 'rxjs';
 import { fromAuth } from 'ta-firestore';
 
@@ -20,14 +14,14 @@ export class BucketListEffect {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loginSucceeded),
       switchMap(() => this.api.bucketlists$()),
-      map((bucketlists) => loadedBucketlistsFromApi({ bucketlists })),
+      map((bucketlists) => BucketlistActions.loadedFromAPI({ bucketlists })),
     );
   });
 
   saveBiteIdToBucketListEffect$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(saveBiteIdToBucketList),
+        ofType(BucketlistActions.saveBiteToBucketlist),
         tap((params) => {
           return this.api.saveBiteIdToBucketList(params);
         }),
@@ -39,7 +33,7 @@ export class BucketListEffect {
   createBucketlistAndSaveBiteIdToBucketListEffect$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(createAndSaveBiteIdToBucketList),
+        ofType(BucketlistActions.createAndSaveBiteIdToBucketlist),
         tap((params) => {
           return this.api.createBucketListAndSaveBiteIdToBucketList(params);
         }),
@@ -51,7 +45,7 @@ export class BucketListEffect {
   removeBiteFromBucketlistEffect = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(removeBiteFromBucketlist),
+        ofType(BucketlistActions.removeBiteFromBucketlist),
         tap((params) => {
           return this.api.removeBiteFromBucketlist(params);
         }),
@@ -63,7 +57,7 @@ export class BucketListEffect {
   createBucketlistEffect$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(createBucketList),
+        ofType(BucketlistActions.createBucketlist),
         tap(({ bucketlistName }) => {
           return this.api.createBucketList(bucketlistName);
         }),

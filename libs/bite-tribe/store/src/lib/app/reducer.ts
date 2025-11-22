@@ -16,13 +16,21 @@ const initialState: AppSlice = {
   loading: {
     home: true,
   },
-  sorting: {
-    home: 'distance',
-    myBites: 'distance',
+  sortingAndFiltering: {
+    sorting: {
+      home: 'distance',
+      myBites: 'distance',
+      bucketlists: 'distance',
+    },
+    filtering: {
+      home: {
+        filters: [],
+        distance: undefined,
+        maxPrice: 0,
+      },
+    },
   },
-  homeFilters: [],
   exchangeRates: { EUR: 1 },
-  maxPriceFilter: 0,
   errorLoadingGpsPosition: false,
 };
 
@@ -93,15 +101,31 @@ export const reducer = createReducer<AppSlice>(
   })),
   on(AppActions.setHomeFilters, (state, { filters }) => ({
     ...state,
-    homeFilters: filters.tagFilters,
-    maxPriceFilter: filters.priceFilter,
-    homeDistance: +filters.distanceFilter,
+    sortingAndFiltering: {
+      ...state.sortingAndFiltering,
+      filtering: {
+        ...state.sortingAndFiltering?.filtering,
+        home: {
+          filters: filters.tagFilters,
+          distance: +filters.distanceFilter,
+          maxPrice: filters.priceFilter,
+        },
+      },
+    },
   })),
   on(AppActions.clearHomeFilters, (state) => ({
     ...state,
-    homeFilters: [],
-    maxPriceFilter: 0,
-    homeDistance: undefined,
+    sortingAndFiltering: {
+      ...state.sortingAndFiltering,
+      filtering: {
+        ...state.sortingAndFiltering?.filtering,
+        home: {
+          filters: [],
+          distance: undefined,
+          maxPrice: 0,
+        },
+      },
+    },
   })),
   on(AppActions.loadedExchangeRatesFromAPI, (state, { exchangeRates }) => ({
     ...state,
@@ -109,23 +133,32 @@ export const reducer = createReducer<AppSlice>(
   })),
   on(AppActions.setHomeSorting, (state, { sorting }) => ({
     ...state,
-    sorting: {
-      ...state.sorting,
-      home: sorting,
+    sortingAndFiltering: {
+      ...state.sortingAndFiltering,
+      sorting: {
+        ...state.sortingAndFiltering?.sorting,
+        home: sorting,
+      },
     },
   })),
   on(AppActions.setMyBitesSorting, (state, { sorting }) => ({
     ...state,
-    sorting: {
-      ...state.sorting,
-      myBites: sorting,
+    sortingAndFiltering: {
+      ...state.sortingAndFiltering,
+      sorting: {
+        ...state.sortingAndFiltering?.sorting,
+        myBites: sorting,
+      },
     },
   })),
   on(AppActions.setBucketlistSorting, (state, { sorting }) => ({
     ...state,
-    sorting: {
-      ...state.sorting,
-      bucketlists: sorting,
+    sortingAndFiltering: {
+      ...state.sortingAndFiltering,
+      sorting: {
+        ...state.sortingAndFiltering?.sorting,
+        bucketlists: sorting,
+      },
     },
   })),
 );

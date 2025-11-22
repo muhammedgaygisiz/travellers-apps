@@ -22,17 +22,20 @@ export const publicUser = createSelector(slice, (slice) => slice?.profile);
 
 export const homeFilters = createSelector(
   slice,
-  (slice) => slice?.homeFilters?.map((filter) => filter.toLowerCase()) || [],
+  (slice) =>
+    slice?.sortingAndFiltering?.filtering?.home?.filters?.map((filter) =>
+      filter.toLowerCase(),
+    ) || [],
 );
 
 export const homeMaxPriceFilter = createSelector(
   slice,
-  (slice) => slice?.maxPriceFilter || 0,
+  (slice) => slice?.sortingAndFiltering?.filtering?.home?.maxPrice || 0,
 );
 
 export const homeDistance = createSelector(
   slice,
-  (slice) => slice?.homeDistance,
+  (slice) => slice?.sortingAndFiltering?.filtering?.home?.distance,
 );
 
 export const exchangeRates = createSelector(
@@ -46,19 +49,19 @@ export const preferredCurrency = createSelector(
 );
 
 export const maxPriceHome = createSelector(slice, (slice) => {
-  return slice?.maxPriceFilter || 0;
+  return slice?.sortingAndFiltering?.filtering?.home?.maxPrice || 0;
 });
 
 export const homeSorting = createSelector(slice, (slice) => {
-  return slice?.sorting?.home || 'distance';
+  return slice?.sortingAndFiltering?.sorting?.home || 'distance';
 });
 
 export const myBitesSorting = createSelector(slice, (slice) => {
-  return slice?.sorting?.myBites || 'distance';
+  return slice?.sortingAndFiltering?.sorting?.myBites || 'distance';
 });
 
 export const bucketlistSorting = createSelector(slice, (slice) => {
-  return slice?.sorting?.bucketlists || 'name';
+  return slice?.sortingAndFiltering?.sorting?.bucketlists || 'name';
 });
 
 export const isDarkTheme = createSelector(slice, (slice) => {

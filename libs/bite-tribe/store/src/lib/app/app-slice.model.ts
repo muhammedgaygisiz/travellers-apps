@@ -9,15 +9,21 @@ export type AppSlice = {
   reloading?: {
     home?: boolean;
   };
-  sorting?: {
-    home?: string;
-    myBites?: string;
-    bucketlists?: string;
+  sortingAndFiltering?: {
+    sorting?: {
+      home?: string;
+      myBites?: string;
+      bucketlists?: string;
+    };
+    filtering?: {
+      home?: {
+        filters: string[];
+        distance?: number;
+        maxPrice?: number;
+      };
+    };
   };
   profile?: PublicUser;
-  homeFilters?: string[];
-  homeDistance?: number;
   exchangeRates: Record<string, number>;
-  maxPriceFilter?: number;
   errorLoadingGpsPosition: boolean;
 };

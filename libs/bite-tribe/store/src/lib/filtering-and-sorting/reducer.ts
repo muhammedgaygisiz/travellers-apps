@@ -62,4 +62,7 @@ export const reducer = createReducer(
       bucketlists: sorting,
     },
   })),
+  on(FilteringAndSortingActions.loadedFromPreferences, (state, { slice }) => ({
+    ...slice,
+  })),
 );

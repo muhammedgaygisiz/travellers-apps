@@ -46,8 +46,6 @@ describe('AppEffect', () => {
       providers: [
         AppEffect,
         provideMockActions(() => actions$),
-        provideMockStore(),
-        { provide: AlertController, useValue: Mock },
         { provide: BiteTribeApiService, useValue: Mock },
         { provide: Platform, useValue: Mock },
       ],

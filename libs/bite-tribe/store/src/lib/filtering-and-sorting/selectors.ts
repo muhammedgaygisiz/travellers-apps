@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { FilteringAndSortingSlice } from './filtering-and-sorting-slice.model';
 import { key } from './key';
 
-const slice = createFeatureSelector<FilteringAndSortingSlice>(key);
+export const slice = createFeatureSelector<FilteringAndSortingSlice>(key);
 
 export const homeFilters = createSelector(
   slice,

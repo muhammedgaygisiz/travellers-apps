@@ -8,6 +8,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { bite } from './selectors';
 import { fromAuth } from 'ta-firestore';
+import { AppActions } from '../app/actions';
 
 @Injectable()
 export class BiteEffects {
@@ -17,10 +18,20 @@ export class BiteEffects {
 
   private readonly bite = toSignal(this.store.select(bite));
 
+  /**
+   * TODO: On login without gps position:
+   *
+   *  free user: will see bites from a default position
+   *  paid user: will see bites from around the world with paging
+   */
   startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.AuthActions.loginSucceeded),
-      switchMap(() => this.api.bites$()),
+      ofType(fromAuth.AuthActions.loginSucceeded, AppActions.loadedGPSPosition),
+      switchMap((action) => {
+        const position = (action as any).position;
+
+        return this.api.bites$(position);
+      }),
       map((bites) => BiteActions.loadedFromAPI({ bites })),
     );
   });

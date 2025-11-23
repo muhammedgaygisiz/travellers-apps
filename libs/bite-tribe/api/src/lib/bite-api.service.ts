@@ -1,7 +1,10 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { BehaviorSubject, skip, Subject } from 'rxjs';
 import { AuthService } from 'ta-firestore';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import {
+  FirebaseFirestore,
+  GetCollectionResult,
+} from '@capacitor-firebase/firestore';
 import { Bite } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import {
@@ -18,9 +21,21 @@ import {
 import { toBite } from './utils/to-bite';
 import { Platform } from '@ionic/angular';
 import { getBlobWithUri } from './utils/get-blob-with-uri';
-import { geohashForLocation } from 'geofire-common';
+import {
+  geohashForLocation,
+  geohashQueryBounds,
+  distanceBetween,
+  Geopoint,
+} from 'geofire-common';
 
 export const BITE_COLLECTION = 'bites';
+
+// TODO: Now that we do not load all bites
+//       We have to load my-bites and bites in bucket-lists differently.
+//       I am thinking of loading them, when entering my-bites page
+//       and accordingly when entering the bucket list.
+//       This is an essential switch in our app, because access to more
+//       is going to be part of subscriptions.
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
@@ -31,28 +46,76 @@ export class BiteApiService {
   private readonly _bitesChannel$ = new BehaviorSubject<Bite[]>([]);
   bites$ = this._bitesChannel$.asObservable().pipe(skip(1));
 
-  private readonly stopped$ = new Subject<void>();
-  bitesCallbackId = '';
-
   isWeb = signal(!this.platform.is('hybrid'));
 
-  public async startListener(): Promise<void> {
-    this.bitesCallbackId =
-      await FirebaseFirestore.addCollectionSnapshotListener(
-        { reference: BITE_COLLECTION },
-        async (biteDocs) => {
-          const bites =
-            biteDocs?.snapshots.map((doc) => toBite(doc)) || ([] as Bite[]);
+  /**
+   * Loading of the bites using geohashs are done according
+   * https://firebase.google.com/docs/firestore/solutions/geoqueries#web_4
+   *
+   * @param myposition
+   */
+  public async loadBites(myposition?: GeolocationPosition): Promise<void> {
+    const radiusInM = 15 * 1000;
 
-          this._bitesChannel$.next(bites);
-        },
-      );
-  }
+    const coords = myposition?.coords;
+    if (coords) {
+      const matchingBites: Bite[] = [];
+      const center: Geopoint = [coords.latitude, coords.longitude];
+      const bounds = geohashQueryBounds(center, radiusInM);
 
-  private async stopBitesListener(callbackId: string): Promise<void> {
-    this.stopped$.next();
-    if (callbackId) {
-      await FirebaseFirestore.removeSnapshotListener({ callbackId });
+      const promises: Promise<GetCollectionResult<any>>[] = [];
+      for (const b of bounds) {
+        promises.push(
+          FirebaseFirestore.getCollection({
+            reference: BITE_COLLECTION,
+            compositeFilter: {
+              type: 'and',
+              queryConstraints: [
+                {
+                  type: 'where',
+                  fieldPath: 'geohash',
+                  opStr: '>=',
+                  value: b[0],
+                },
+                {
+                  type: 'where',
+                  fieldPath: 'geohash',
+                  opStr: '<=',
+                  value: b[1],
+                },
+              ],
+            },
+            queryConstraints: [
+              {
+                type: 'orderBy',
+                fieldPath: 'geohash',
+                directionStr: 'asc',
+              },
+            ],
+          }),
+        );
+      }
+
+      const snapshots = await Promise.all(promises);
+
+      for (const snapshot of snapshots) {
+        for (const document of snapshot.snapshots) {
+          const bite = toBite(document);
+          const position = bite.position;
+
+          const distanceInKm = distanceBetween(
+            [position.latitude, position.longitude],
+            center,
+          );
+          const distanceInM = distanceInKm * 1000;
+          if (distanceInM <= radiusInM) {
+            matchingBites.push(bite);
+          }
+        }
+      }
+
+      this._bitesChannel$.next(matchingBites);
+      return;
     }
   }
 

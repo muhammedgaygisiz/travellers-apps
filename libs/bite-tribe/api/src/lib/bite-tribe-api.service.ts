@@ -156,8 +156,8 @@ export class BiteTribeApiService {
     this.profileApiService.saveUserIfNotExisting();
   }
 
-  bites$(): Observable<Bite[]> {
-    this.biteApiService.startListener();
+  bites$(position?: GeolocationPosition): Observable<Bite[]> {
+    this.biteApiService.loadBites(position);
 
     return this.biteApiService.bites$;
   }

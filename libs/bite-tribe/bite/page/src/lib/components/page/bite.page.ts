@@ -236,12 +236,20 @@ export class BitePage {
 
   locationFromImage = computed(() => {
     const currentValue = this.positionValueChanges();
-    return currentValue === this.imagePosition();
+    const position = this.imagePosition();
+    return (
+      currentValue?.latitude === position?.latitude &&
+      currentValue?.longitude === position?.longitude
+    );
   });
 
   locationFromGps = computed(() => {
     const currentValue = this.positionValueChanges();
-    return currentValue === this.position();
+    const position = this.position();
+    return (
+      currentValue?.latitude === position?.latitude &&
+      currentValue?.longitude === position?.longitude
+    );
   });
 
   saveBite(): void {

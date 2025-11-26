@@ -350,6 +350,17 @@ describe('BitePage', () => {
       component.onPositionFromImage(position);
       expect(component.imagePosition()).toEqual(position);
     });
+
+    it('should do nothing if no position provided', () => {
+      component.biteFormGroup.controls['position'].reset();
+      component.imagePosition.set({ latitude: 10, longitude: 20 });
+      component.onPositionFromImage(undefined as any);
+      expect(component.biteFormGroup.controls['position'].value).toBeNull();
+      expect(component.imagePosition()).toEqual({
+        latitude: 10,
+        longitude: 20,
+      });
+    });
   });
 
   describe('onPositionFromNavigator', () => {

@@ -14,6 +14,7 @@ import {
   pricetagOutline,
 } from 'ionicons/icons';
 import { Bite } from 'model';
+import { FormGroup } from '@angular/forms';
 
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
@@ -393,6 +394,13 @@ describe('BitePage', () => {
       component.biteFormGroup.controls['imagePath'].patchValue('test/path');
       component.resetImagePath();
       expect(component.imagePosition()).toBeUndefined();
+    });
+
+    it('should do nothing if imagePath formControl is not initialized', () => {
+      component.imagePosition.set({ latitude: 10, longitude: 20 });
+      component.biteFormGroup = new FormGroup({}) as any;
+      component.resetImagePath();
+      expect(component.biteFormGroup.get('imagePath')).toBeNull();
     });
   });
 

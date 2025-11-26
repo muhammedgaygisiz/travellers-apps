@@ -73,17 +73,29 @@
       />
 
       <div class="ion-padding-top">
-        <ion-label class="map-label">Location:</ion-label>
+        <ion-label class="map-label"
+          >Location (tap map to move location manually):</ion-label
+        >
+        <div class="position-button-container">
+          <ion-button
+            [disabled]="!imagePosition()"
+            (click)="onPositionFromImage(imagePosition())"
+          >
+            {{imageUrl()}} From photo
+          </ion-button>
+          <ion-button
+            [disabled]="!position()"
+            (click)="onPositionFromNavigator()"
+          >
+            From GPS
+          </ion-button>
+        </div>
         <position formControlName="position" />
         @if (noGpsPosition()) {
         <ion-text color="danger">
           <p>{{ getGpsErrorMessage() }}</p>
         </ion-text>
         }
-        <ion-text class="position-hint ion-margin-top">
-          Tap if you want to specify your location, otherwise we use the
-          location of your image or your current location.
-        </ion-text>
       </div>
 
       <ion-button

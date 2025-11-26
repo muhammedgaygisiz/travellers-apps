@@ -284,6 +284,30 @@ describe('BitePage', () => {
         position,
       );
     });
+
+    it('should set position in imagePosition', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.onPositionFromImage(position);
+      expect(component.imagePosition()).toEqual(position);
+    });
+  });
+
+  describe('onPositionFromNavigator', () => {
+    it('should set position in the form group from input', () => {
+      const position = { latitude: 30, longitude: 40 };
+      componentRef.setInput('position', position);
+      component.onPositionFromNavigator();
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        position,
+      );
+    });
+
+    it('should do nothing if no position input value', () => {
+      componentRef.setInput('position', undefined as any);
+      component.biteFormGroup.controls['position'].reset();
+      component.onPositionFromNavigator();
+      expect(component.biteFormGroup.controls['position'].value).toBeNull();
+    });
   });
 
   describe('resetImagePath', () => {
@@ -291,6 +315,13 @@ describe('BitePage', () => {
       component.biteFormGroup.controls['imagePath'].patchValue('test/path');
       component.resetImagePath();
       expect(component.biteFormGroup.controls['imagePath'].value).toBeNull();
+    });
+
+    it('should reset imagePosition', () => {
+      component.imagePosition.set({ latitude: 10, longitude: 20 });
+      component.biteFormGroup.controls['imagePath'].patchValue('test/path');
+      component.resetImagePath();
+      expect(component.imagePosition()).toBeUndefined();
     });
   });
 

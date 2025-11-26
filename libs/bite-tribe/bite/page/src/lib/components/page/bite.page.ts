@@ -8,6 +8,7 @@ import {
   linkedSignal,
   output,
   signal,
+  WritableSignal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -220,6 +221,9 @@ export class BitePage {
   currencyValueChanges = toSignal(
     this.biteFormGroup.controls['currency'].valueChanges,
   );
+
+  imagePosition: WritableSignal<Geopoint | undefined> = signal(undefined);
+
   selectedCurrencyName = computed(() => {
     this.currencyValueChanges();
     const currencyCode = this.biteFormGroup.controls['currency'].value;
@@ -236,7 +240,15 @@ export class BitePage {
     }
   }
 
-  onPositionFromImage(position: Geopoint): void {
+  onPositionFromImage(position?: Geopoint): void {
+    if (position) {
+      this.imagePosition.set(position);
+      this.biteFormGroup.controls['position'].patchValue(position);
+    }
+  }
+
+  onPositionFromNavigator(): void {
+    const position = this.position();
     if (position) {
       this.biteFormGroup.controls['position'].patchValue(position);
     }
@@ -251,6 +263,7 @@ export class BitePage {
 
   resetImagePath(): void {
     this.biteFormGroup.get('imagePath')?.reset();
+    this.imagePosition.set(undefined);
   }
 
   onCurrencySelected(currencyCode: string, modal: IonModal): void {

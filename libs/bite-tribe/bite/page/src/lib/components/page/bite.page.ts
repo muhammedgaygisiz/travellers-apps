@@ -222,12 +222,26 @@ export class BitePage {
     this.biteFormGroup.controls['currency'].valueChanges,
   );
 
+  positionValueChanges = toSignal(
+    this.biteFormGroup.controls['position'].valueChanges,
+  );
+
   imagePosition: WritableSignal<Geopoint | undefined> = signal(undefined);
 
   selectedCurrencyName = computed(() => {
     this.currencyValueChanges();
     const currencyCode = this.biteFormGroup.controls['currency'].value;
     return this.currencies.find((c) => c.code === currencyCode)?.name;
+  });
+
+  locationFromImage = computed(() => {
+    const currentValue = this.positionValueChanges();
+    return currentValue === this.imagePosition();
+  });
+
+  locationFromGps = computed(() => {
+    const currentValue = this.positionValueChanges();
+    return currentValue === this.position();
   });
 
   saveBite(): void {

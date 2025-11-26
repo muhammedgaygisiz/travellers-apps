@@ -98,6 +98,66 @@ describe('BitePage', () => {
     expect(component.isInvalid()).toBe(false);
   });
 
+  describe('locationFromImage', () => {
+    it('should return true if position in form is same as image', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.biteFormGroup.controls['position'].patchValue(position);
+      component.imagePosition.set(position);
+
+      expect(component.locationFromImage()).toBe(true);
+    });
+
+    it('should return false if position in form is different from image', () => {
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+      component.imagePosition.set({ latitude: 30, longitude: 40 });
+
+      expect(component.locationFromImage()).toBe(false);
+    });
+
+    it('should return false if imagePosition is undefined', () => {
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+      component.imagePosition.set(undefined);
+
+      expect(component.locationFromImage()).toBe(false);
+    });
+  });
+
+  describe('locationFromGps', () => {
+    it('should return true if position in form is same as gps position', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.biteFormGroup.controls['position'].patchValue(position);
+      componentRef.setInput('position', position);
+
+      expect(component.locationFromGps()).toBe(true);
+    });
+
+    it('should return false if position in form is different from gps position', () => {
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+      component.fallbackPosition.set({ latitude: 30, longitude: 40 });
+
+      expect(component.locationFromGps()).toBe(false);
+    });
+
+    it('should return false if fallbackPosition is undefined', () => {
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+      component.fallbackPosition.set(undefined);
+
+      expect(component.locationFromGps()).toBe(false);
+    });
+  });
+
   it('should emit form value on saveBite when valid', () => {
     const validBite: Bite = {
       id: '',

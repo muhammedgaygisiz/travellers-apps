@@ -81,13 +81,17 @@
             [disabled]="!imagePosition()"
             (click)="onPositionFromImage(imagePosition())"
           >
-            {{imageUrl()}} From photo
+            From photo @if (locationFromImage()) {
+            <ion-icon name="checkmark-outline" />
+            }
           </ion-button>
           <ion-button
             [disabled]="!position()"
             (click)="onPositionFromNavigator()"
           >
-            From GPS
+            From GPS @if (locationFromGps()) {
+            <ion-icon name="checkmark-outline" />
+            }
           </ion-button>
         </div>
         <position formControlName="position" />

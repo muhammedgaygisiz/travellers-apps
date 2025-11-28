@@ -25,6 +25,29 @@ describe('getExifDataFromPhoto', () => {
     });
   });
 
+  it('should extract GPS coordinates with southern and eastern hemispheres', () => {
+    const mockPhoto: Photo = {
+      path: 'test.jpg',
+      webPath: 'test.jpg',
+      format: 'jpeg',
+      saved: true,
+      exif: {
+        GPS: {
+          Latitude: 34.0522,
+          LatitudeRef: 'S',
+          Longitude: 118.2437,
+          LongitudeRef: 'E',
+        },
+      },
+    };
+
+    const result = getExifDataFromPhoto(mockPhoto);
+    expect(result).toEqual({
+      latitude: -34.0522,
+      longitude: 118.2437,
+    });
+  });
+
   it('should return default coordinates when photo has no EXIF data', () => {
     const mockPhoto: Photo = {
       path: 'test.jpg',

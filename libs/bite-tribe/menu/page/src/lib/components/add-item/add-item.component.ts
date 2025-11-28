@@ -41,12 +41,12 @@ export class AddItemComponent {
     this.newItemForm.valueChanges.pipe(
       map(() => {
         return !this.newItemForm.valid;
-      })
+      }),
     ),
-    { initialValue: !this.newItemForm.valid }
+    { initialValue: !this.newItemForm.valid },
   );
 
-  onAddCategory(): void {
+  onAddItem(): void {
     if (this.newItemForm.valid) {
       this.addItem.emit(this.newItemForm.value as MenuItem);
     }

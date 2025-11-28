@@ -42,6 +42,25 @@ describe('CategoryComponent', () => {
     });
   });
 
+  describe('onAddItem', () => {
+    let emitSpy: SpyInstance;
+    let mockMenuItem: any;
+    let mockCategory: any;
+
+    beforeEach(() => {
+      emitSpy = jest.spyOn(component.addItemToCategory, 'emit');
+      mockMenuItem = { id: '1', name: 'Test Item' } as any;
+      mockCategory = { id: 'cat1', items: [] } as any;
+      componentRef.setInput('category', mockCategory);
+    });
+
+    it('should not emit addItemToCategory if category is undefined', () => {
+      componentRef.setInput('category', undefined);
+      component.onAddItem(mockMenuItem);
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('showAddItem', () => {
     it('should set presentShowAddItem to true', () => {
       component.showAddItem();
@@ -103,6 +122,15 @@ describe('CategoryComponent', () => {
           { id: '1', index: 1 },
         ],
       });
+      expect(mockEvent.detail.complete).toHaveBeenCalled();
+    });
+
+    it('should not emit orderingInCategoryChanged if category is undefined', () => {
+      componentRef.setInput('category', undefined);
+
+      component.handleReorder(mockEvent);
+
+      expect(emitSpy).not.toHaveBeenCalled();
       expect(mockEvent.detail.complete).toHaveBeenCalled();
     });
   });

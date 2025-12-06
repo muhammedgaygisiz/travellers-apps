@@ -212,6 +212,16 @@ describe('App Selectors', () => {
       expect(result).toBe(false);
     });
 
+    it('should return false if profile is not provided', () => {
+      const stateWithoutSubscriptionTier = {
+        ...mockState,
+      };
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        stateWithoutSubscriptionTier,
+      );
+      expect(result).toBe(false);
+    });
+
     it('should return false if subscriptionTier is lower than 1', () => {
       const stateWithSubscriptionTier0 = {
         ...mockState,

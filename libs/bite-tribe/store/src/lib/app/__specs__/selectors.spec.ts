@@ -1,5 +1,4 @@
 import * as fromSelectors from '../selectors';
-import { userHasSubscriptionTierOne } from '../selectors';
 import { Geopoint, PublicUser, Settings } from 'model';
 import { AppSlice } from '../app-slice.model';
 
@@ -214,34 +213,34 @@ describe('App Selectors', () => {
     });
 
     it('should return false if subscriptionTier is lower than 1', () => {
-      const stateWithoutSubscriptionTier = {
+      const stateWithSubscriptionTier0 = {
         ...mockState,
         profile: { subscriptionTier: 0 } as any,
       };
       const result = fromSelectors.userHasSubscriptionTierOne.projector(
-        stateWithoutSubscriptionTier,
+        stateWithSubscriptionTier0,
       );
       expect(result).toBe(false);
     });
 
     it('should return true if subscriptionTier is 1', () => {
-      const stateWithoutSubscriptionTier = {
+      const stateWithSubscriptionTier1 = {
         ...mockState,
         profile: { subscriptionTier: 1 } as any,
       };
       const result = fromSelectors.userHasSubscriptionTierOne.projector(
-        stateWithoutSubscriptionTier,
+        stateWithSubscriptionTier1,
       );
       expect(result).toBe(true);
     });
 
     it('should return true if subscriptionTier is more than 1', () => {
-      const stateWithoutSubscriptionTier = {
+      const stateWithSubscriptionTier2 = {
         ...mockState,
         profile: { subscriptionTier: 2 } as any,
       };
       const result = fromSelectors.userHasSubscriptionTierOne.projector(
-        stateWithoutSubscriptionTier,
+        stateWithSubscriptionTier2,
       );
       expect(result).toBe(true);
     });

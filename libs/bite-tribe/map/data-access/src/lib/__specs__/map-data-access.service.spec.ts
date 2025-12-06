@@ -12,6 +12,7 @@ class Mock {
   selectedBucketlist$ = of(null);
   isAuthenticated$ = of(false);
   position$ = of(null);
+  userHasSubscriptionTierOne$ = of(false);
   logout = (): null => null;
   submitLikeOrDislikeClick = (): null => null;
 }
@@ -34,7 +35,7 @@ describe('MapDataAccessService', () => {
     [MapDataAccessService],
     (service: MapDataAccessService) => {
       expect(service).toBeTruthy();
-    }
+    },
   ));
 
   describe('logout', () => {
@@ -44,7 +45,7 @@ describe('MapDataAccessService', () => {
         const logoutSpy = jest.spyOn(biteTribeStoreService, 'logout');
         service.logout();
         expect(logoutSpy).toHaveBeenCalledTimes(1);
-      }
+      },
     ));
   });
 
@@ -70,7 +71,7 @@ describe('MapDataAccessService', () => {
         submitLikeOrDislikeClickSpy = jest
           .spyOn(storeService, 'submitLikeOrDislikeClick')
           .mockImplementation();
-      }
+      },
     ));
 
     it('should call submitLikeOrDislikeClick when bite is found', inject(
@@ -82,9 +83,9 @@ describe('MapDataAccessService', () => {
 
         expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledTimes(1);
         expect(
-          biteTribeStoreService.submitLikeOrDislikeClick
+          biteTribeStoreService.submitLikeOrDislikeClick,
         ).toHaveBeenCalledWith(bite, 'userId', likeClick);
-      }
+      },
     ));
 
     it('should call submitLikeOrDislikeClick with undefined bite when bite is not found', inject(
@@ -95,12 +96,12 @@ describe('MapDataAccessService', () => {
         service.submitLikeClick(likeClick);
 
         expect(
-          biteTribeStoreService.submitLikeOrDislikeClick
+          biteTribeStoreService.submitLikeOrDislikeClick,
         ).toHaveBeenCalledTimes(1);
         expect(
-          biteTribeStoreService.submitLikeOrDislikeClick
+          biteTribeStoreService.submitLikeOrDislikeClick,
         ).toHaveBeenCalledWith(undefined, 'userId', likeClick);
-      }
+      },
     ));
 
     describe('with empty bites', () => {
@@ -108,7 +109,7 @@ describe('MapDataAccessService', () => {
         [BiteTribeStoreService],
         (storeService: BiteTribeStoreService) => {
           storeService.bites$ = of([]);
-        }
+        },
       ));
 
       it('should handle empty bites array', inject(
@@ -121,9 +122,9 @@ describe('MapDataAccessService', () => {
           expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
             undefined,
             'userId',
-            likeClick
+            likeClick,
           );
-        }
+        },
       ));
     });
 
@@ -132,7 +133,7 @@ describe('MapDataAccessService', () => {
         [BiteTribeStoreService],
         (storeService: BiteTribeStoreService) => {
           storeService.bites$ = of(undefined as any);
-        }
+        },
       ));
 
       it('should handle empty bites array', inject(
@@ -145,9 +146,9 @@ describe('MapDataAccessService', () => {
           expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
             undefined,
             'userId',
-            likeClick
+            likeClick,
           );
-        }
+        },
       ));
     });
   });

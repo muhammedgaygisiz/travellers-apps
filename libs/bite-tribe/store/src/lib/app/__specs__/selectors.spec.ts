@@ -1,4 +1,5 @@
 import * as fromSelectors from '../selectors';
+import { userHasSubscriptionTierOne } from '../selectors';
 import { Geopoint, PublicUser, Settings } from 'model';
 import { AppSlice } from '../app-slice.model';
 
@@ -197,6 +198,52 @@ describe('App Selectors', () => {
           stateWithoutGpsError,
         );
       expect(result).toBe(false);
+    });
+  });
+
+  describe('userHasSubscriptionTierOne', () => {
+    it('should return false if subscriptionTier is not provided', () => {
+      const stateWithoutSubscriptionTier = {
+        ...mockState,
+        profile: {} as any,
+      };
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        stateWithoutSubscriptionTier,
+      );
+      expect(result).toBe(false);
+    });
+
+    it('should return false if subscriptionTier is lower than 1', () => {
+      const stateWithoutSubscriptionTier = {
+        ...mockState,
+        profile: { subscriptionTier: 0 } as any,
+      };
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        stateWithoutSubscriptionTier,
+      );
+      expect(result).toBe(false);
+    });
+
+    it('should return true if subscriptionTier is 1', () => {
+      const stateWithoutSubscriptionTier = {
+        ...mockState,
+        profile: { subscriptionTier: 1 } as any,
+      };
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        stateWithoutSubscriptionTier,
+      );
+      expect(result).toBe(true);
+    });
+
+    it('should return true if subscriptionTier is more than 1', () => {
+      const stateWithoutSubscriptionTier = {
+        ...mockState,
+        profile: { subscriptionTier: 2 } as any,
+      };
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        stateWithoutSubscriptionTier,
+      );
+      expect(result).toBe(true);
     });
   });
 });

@@ -1,4 +1,5 @@
 @let userData = user();
+@let subscriptionTierData = subscriptionTier();
 
 <ta-page
   [showHeaderMenu]="true"
@@ -28,21 +29,31 @@
 
       <h1 class="profile-name">
         {{ userData?.displayName }}
-
-        @if (biteCount() > 10) {
-          <ion-badge class="bite-badge {{ badgeColor() }}"
-            >{{ biteCount() }} Bites
-          </ion-badge>
-        }
+        <ion-badge class="subscription-badge">
+          @if (subscriptionTierData === 1) {
+            PRO
+          }
+          @if (subscriptionTierData === 2) {
+            ULTRA
+          }
+        </ion-badge>
       </h1>
+
+      @if (biteCount() > 10) {
+        <ion-badge class="bite-badge {{ badgeColor() }}"
+          >{{ biteCount() }} Bites
+        </ion-badge>
+      }
 
       <p class="profile-location">
         {{ userData?.city || 'No location' }}
       </p>
 
-      <ion-button fill="outline" class="follow-button" [disabled]="true">
-        Follow
-      </ion-button>
+      @if (isUnfollowedUser()) {
+        <ion-button fill="outline" class="follow-button" [disabled]="true">
+          Follow
+        </ion-button>
+      }
 
       <div class="about-section">
         <h2>About</h2>

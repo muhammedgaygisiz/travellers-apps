@@ -222,6 +222,13 @@ describe('App Selectors', () => {
       expect(result).toBe(false);
     });
 
+    it('should return false if state is not provided', () => {
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        undefined as any,
+      );
+      expect(result).toBe(false);
+    });
+
     it('should return false if subscriptionTier is lower than 1', () => {
       const stateWithSubscriptionTier0 = {
         ...mockState,

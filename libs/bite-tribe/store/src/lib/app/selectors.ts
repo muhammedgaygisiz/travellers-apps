@@ -43,3 +43,10 @@ export const hasErrorLoadingGpsPosition = createSelector(
   slice,
   (state) => state?.errorLoadingGpsPosition,
 );
+
+export const userHasSubscriptionTierOne = createSelector(slice, (state) => {
+  if (state?.profile?.subscriptionTier) {
+    return state.profile.subscriptionTier >= 1;
+  }
+  return false;
+});

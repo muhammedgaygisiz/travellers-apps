@@ -411,4 +411,15 @@ describe('BiteTribeStoreService', () => {
       },
     ));
   });
+
+  describe('followUser', () => {
+    it('should dispatch followUser on BiteTribeStoreService', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        service.followUser({} as any);
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
 });

@@ -62,7 +62,12 @@
         }
       </ion-badge>
       @if (isUnfollowedUser()) {
-        <ion-button fill="outline" class="follow-button" [disabled]="true">
+        <ion-button
+          fill="outline"
+          class="follow-button"
+          [disabled]="true"
+          (click)="onFollow()"
+        >
           Follow
         </ion-button>
       }

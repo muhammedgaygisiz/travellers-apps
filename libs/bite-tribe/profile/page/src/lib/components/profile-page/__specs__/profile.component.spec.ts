@@ -116,4 +116,25 @@ describe('ProfileComponent', () => {
       expect(component.imageLoadErrored()).toBe(true);
     });
   });
+
+  describe('onFollow', () => {
+    it('should emit followClick with user when user is defined', () => {
+      const userMock = { userId: 'user1' } as any;
+      compRef.setInput('user', userMock);
+      const followClickSpy = jest.spyOn(component.followButtonClick, 'emit');
+
+      component.onFollow();
+
+      expect(followClickSpy).toHaveBeenCalledWith(userMock);
+    });
+
+    it('should not emit followClick when user is undefined', () => {
+      compRef.setInput('user', undefined);
+      const followClickSpy = jest.spyOn(component.followButtonClick, 'emit');
+
+      component.onFollow();
+
+      expect(followClickSpy).not.toHaveBeenCalled();
+    });
+  });
 });

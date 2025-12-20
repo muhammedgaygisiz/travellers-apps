@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import { Bite } from 'model';
+import { Bite, PublicUser } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -14,6 +14,8 @@ export class ProfileService {
   userId = this.dataAccess.userId;
   bitesByUser = this.dataAccess.bitesByUser;
   myBites = this.dataAccess.myBites;
+  followerCount = this.dataAccess.followerCount;
+  followingCount = this.dataAccess.followingCount;
 
   logout(): void {
     this.dataAccess.logout();
@@ -64,5 +66,9 @@ export class ProfileService {
       'restaurant',
       encodeURIComponent(bite.place),
     ]);
+  }
+
+  followButtonClicked(user: PublicUser): void {
+    this.dataAccess.submitFollowClick(user);
   }
 }

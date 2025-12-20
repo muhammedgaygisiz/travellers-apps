@@ -68,6 +68,7 @@ export class ProfileComponent {
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
+  readonly followButtonClick = output<PublicUser>();
 
   biteCount = computed(() => {
     const bites = this.bites();
@@ -92,5 +93,12 @@ export class ProfileComponent {
 
   onImageError(): void {
     this.imageLoadErrored.set(true);
+  }
+
+  onFollow(): void {
+    const user = this.user();
+    if (user) {
+      this.followButtonClick.emit(user);
+    }
   }
 }

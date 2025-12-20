@@ -41,6 +41,8 @@ import {
 import {
   currency,
   exchangeRates,
+  followerCount,
+  followingCount,
   gpsPosition,
   hasErrorLoadingGpsPosition,
   isBitesLoading,
@@ -96,6 +98,8 @@ export class BiteTribeStoreService implements StoreService {
   bite$ = this.store.select(bite);
   sortedMyBites$ = this.store.select(sortedMyBites);
   mybites$ = this.store.select(mybites);
+  followerCount$ = this.store.select(followerCount);
+  followingCount$ = this.store.select(followingCount);
   myBitesSorting$ = this.store.select(myBitesSorting);
   bitesByUser$ = this.store.select(bitesByUser);
   bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);
@@ -300,5 +304,9 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(
       FilteringAndSortingActions.setBucketlistSorting({ sorting }),
     );
+  }
+
+  followUser(user: PublicUser): void {
+    this.store.dispatch(AppActions.followUser({ user }));
   }
 }

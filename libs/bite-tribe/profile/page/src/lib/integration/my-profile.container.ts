@@ -10,6 +10,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isAuthenticated]="service.isAuthenticated()"
       [user]="service.myUser()"
       [bites]="service.myBites()"
+      [followerCount]="service.followerCount()"
+      [followingCount]="service.followingCount()"
       [userId]="service.userId()"
       (biteClick)="service.biteClicked($event)"
       (restaurantClick)="service.restaurantClicked($event)"
@@ -18,6 +20,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyBucketlists)="service.gotoMyBucketlists()"
       (gotoMyBites)="service.gotoMyBites()"
       (likeButtonClick)="service.likeButtonClicked($event)"
+      (followButtonClick)="service.followButtonClicked($event)"
     />
   `,
   imports: [ProfileComponent],

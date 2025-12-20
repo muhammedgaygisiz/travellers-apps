@@ -21,6 +21,7 @@ describe('App Selectors', () => {
     position: mockPosition,
     settings: mockSettings,
     profile: mockProfile,
+    followedBy: [],
     loading: {
       home: true,
     },
@@ -79,6 +80,60 @@ describe('App Selectors', () => {
     it('should return the public user profile', () => {
       const result = fromSelectors.publicUser.projector(mockState);
       expect(result).toEqual(mockProfile);
+    });
+  });
+
+  describe('followerCount', () => {
+    it('should return the follower count', () => {
+      const stateWithFollowers = {
+        ...mockState,
+        followedBy: ['1', '2', '3'],
+      };
+      const result = fromSelectors.followerCount.projector(stateWithFollowers);
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 when there are no followers', () => {
+      const stateWithoutFollowers = {
+        ...mockState,
+        profile: { followers: [] } as any,
+      };
+      const result = fromSelectors.followerCount.projector(
+        stateWithoutFollowers,
+      );
+      expect(result).toBe(0);
+    });
+  });
+
+  describe('followingCount', () => {
+    it('should return the following count', () => {
+      const stateWithFollowing = {
+        ...mockState,
+        profile: { followers: ['1', '2', '3', '4'] } as any,
+      };
+      const result = fromSelectors.followingCount.projector(stateWithFollowing);
+      expect(result).toBe(4);
+    });
+
+    it('should return 0 when there is no following', () => {
+      const stateWithoutFollowing = {
+        ...mockState,
+        profile: { followers: [] } as any,
+      };
+      const result = fromSelectors.followingCount.projector(
+        stateWithoutFollowing,
+      );
+      expect(result).toBe(0);
+    });
+
+    it('should return 0 when there is no profile', () => {
+      const stateWithoutProfile = {
+        ...mockState,
+        profile: undefined,
+      };
+      const result =
+        fromSelectors.followingCount.projector(stateWithoutProfile);
+      expect(result).toBe(0);
     });
   });
 

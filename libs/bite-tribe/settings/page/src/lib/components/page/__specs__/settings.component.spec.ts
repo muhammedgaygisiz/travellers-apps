@@ -92,6 +92,7 @@ describe('PageSettings', () => {
         city: 'Test City',
         about: 'About me text',
         public: true,
+        followers: [],
       };
 
       compRef.setInput('publicUser', publicUser);
@@ -118,6 +119,7 @@ describe('PageSettings', () => {
         photoUrl: 'photo.jpg',
         userId: 'user123',
         public: true,
+        followers: [],
       };
       compRef.setInput('publicUser', mockPublicUser);
       compRef.setInput('isPublicProfile', true);
@@ -206,6 +208,7 @@ describe('PageSettings', () => {
         photoUrl: 'photo.jpg',
         userId: 'user123',
         public: true,
+        followers: [],
       };
 
       compRef.setInput('publicUser', publicUser);

@@ -15,6 +15,7 @@ export const AppActions = createActionGroup({
     'Set public profile': props<{ profile: PublicUser }>(),
     'Go public': emptyProps(),
     'Go private': emptyProps(),
+    'Follow user': props<{ user: PublicUser }>(),
     'Loaded exchange rates from API': props<{
       exchangeRates: Record<string, number>;
     }>(),

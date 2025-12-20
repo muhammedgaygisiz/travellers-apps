@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { Bite, Like } from 'model';
+import { Bite, Like, PublicUser } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileDataAccessService {
@@ -19,6 +19,14 @@ export class ProfileDataAccessService {
 
   myBites = toSignal(this.storeService.mybites$, {
     initialValue: [] as Bite[],
+  });
+
+  followerCount = toSignal(this.storeService.followerCount$, {
+    initialValue: 0,
+  });
+
+  followingCount = toSignal(this.storeService.followingCount$, {
+    initialValue: 0,
   });
 
   private bites = toSignal(this.storeService.bites$, {
@@ -47,5 +55,9 @@ export class ProfileDataAccessService {
     }
 
     this.storeService.submitLikeClick(likeType);
+  }
+
+  submitFollowClick(user: PublicUser): void {
+    this.storeService.followUser(user);
   }
 }

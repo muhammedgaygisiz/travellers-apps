@@ -132,8 +132,8 @@ export class BiteTribeApiService {
     this.biteApiService.saveEditedBite(bite);
   }
 
-  saveNewBite(bite: any): void {
-    this.biteApiService.saveNewBite(bite);
+  saveNewBite(bite: any): Promise<Bite> {
+    return this.biteApiService.saveNewBite(bite);
   }
 
   deleteUser(): void {

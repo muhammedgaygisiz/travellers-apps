@@ -139,7 +139,7 @@ export class BiteApiService {
     return result.snapshots.map((snapshot) => toBite(snapshot));
   }
 
-  async saveNewBite(bite: Bite): Promise<void> {
+  async saveNewBite(bite: Bite): Promise<Bite> {
     try {
       const user = this.getUser();
 
@@ -148,9 +148,13 @@ export class BiteApiService {
       const biteId = await this.createNewBite(biteDocWithoutImage, user);
 
       await this.uploadImageAndUpdateBite(image, biteId);
+
+      return await this.loadBiteById(biteId);
     } catch (error) {
       console.error('Error saving new bite:', error);
       this.errorHandler.handleError(error);
+
+      throw error;
     }
   }
 
@@ -343,43 +347,75 @@ export class BiteApiService {
       fileUploadOptions.uri = writeFileResult.uri;
     }
 
-    await FirebaseStorage.uploadFile(
-      fileUploadOptions,
-      async (event, error) => {
+    return new Promise<void>((resolve, reject) => {
+      FirebaseStorage.uploadFile(fileUploadOptions, async (event, error) => {
         if (error) {
           console.error('Error uploading image:', error);
           this.errorHandler.handleError(error);
+
+          if (fileUploadOptions.uri) {
+            try {
+              await FirebaseStorage.deleteFile({ path: fileUploadOptions.uri });
+            } catch (error) {
+              console.error('Error deleting temp file:', error);
+              this.errorHandler.handleError(error);
+            }
+          }
+
+          return reject(error);
         }
 
         if (event?.completed) {
-          const downloadUrl =
-            await getDownloadUrlFromFirebaseStorage(imagePath);
-
-          const data = {
-            ...(biteWithoutImage || {}),
-            imagePath: downloadUrl,
-          } as any;
-
-          if (clearBase64Image) {
-            data.image = '';
-          }
-
-          await FirebaseFirestore.updateDocument({
-            reference: `${BITE_COLLECTION}/${biteId}`,
-            data,
-          });
-        }
-
-        if (fileUploadOptions.uri) {
           try {
-            await FirebaseStorage.deleteFile({ path: fileUploadOptions.uri });
-          } catch (error) {
-            console.error('Error deleting temp file:', error);
-            this.errorHandler.handleError(error);
+            const downloadUrl =
+              await getDownloadUrlFromFirebaseStorage(imagePath);
+
+            const data = {
+              ...(biteWithoutImage || {}),
+              imagePath: downloadUrl,
+            } as any;
+
+            if (clearBase64Image) {
+              data.image = '';
+            }
+
+            await FirebaseFirestore.updateDocument({
+              reference: `${BITE_COLLECTION}/${biteId}`,
+              data,
+            });
+
+            if (fileUploadOptions.uri) {
+              try {
+                await FirebaseStorage.deleteFile({
+                  path: fileUploadOptions.uri,
+                });
+              } catch (e1) {
+                console.error('Error deleting temp file:', e1);
+                this.errorHandler.handleError(e1);
+              }
+            }
+
+            return resolve();
+          } catch (r) {
+            console.error('Error uploading image:', r);
+            this.errorHandler.handleError(r);
+
+            if (fileUploadOptions.uri) {
+              try {
+                await FirebaseStorage.deleteFile({
+                  path: fileUploadOptions.uri,
+                });
+              } catch (e1) {
+                console.error('Error deleting temp file:', e1);
+                this.errorHandler.handleError(e1);
+              }
+            }
+
+            return reject(error);
           }
         }
-      },
-    );
+      });
+    });
   }
 
   private async replaceImageInFirestoreStorage(
@@ -401,5 +437,13 @@ export class BiteApiService {
       biteWithoutImage,
       clearBase64Image,
     );
+  }
+
+  private async loadBiteById(biteId: string): Promise<Bite> {
+    const result = await FirebaseFirestore.getDocument({
+      reference: `${BITE_COLLECTION}/${biteId}`,
+    });
+
+    return toBite(result.snapshot);
   }
 }

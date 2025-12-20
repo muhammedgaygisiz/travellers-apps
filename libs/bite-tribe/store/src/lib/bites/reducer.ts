@@ -25,6 +25,9 @@ export const reducer = createReducer(
       cachedBite: undefined,
     };
   }),
+  on(BiteActions.savedBite, (state, { bite }) => {
+    return adapter.upsertOne(bite, state);
+  }),
   on(BiteActions.loadedBiteCreator, (state, { biteCreator }) => {
     return {
       ...state,

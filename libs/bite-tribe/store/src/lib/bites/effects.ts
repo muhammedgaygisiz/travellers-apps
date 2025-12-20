@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteActions } from './actions';
-import { filter, from, map, switchMap, tap } from 'rxjs';
+import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -42,17 +42,20 @@ export class BiteEffects {
     );
   });
 
-  saveNewBiteToFirestore$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(BiteActions.saveNewBite),
-        tap(({ bite }) => {
-          this.api.saveNewBite(bite);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+  saveNewBiteToFirestore$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BiteActions.saveNewBite),
+      switchMap(({ bite }) =>
+        from(this.api.saveNewBite(bite)).pipe(
+          map((bite) => {
+            console.log('BITE IMAGE PATH: ', bite.imagePath);
+            return BiteActions.savedBite({ bite });
+          }),
+          catchError((err) => of(BiteActions.errorSavingBite({ bite }))),
+        ),
+      ),
+    );
+  });
 
   saveEditedBiteToFirestore$ = createEffect(
     () => {

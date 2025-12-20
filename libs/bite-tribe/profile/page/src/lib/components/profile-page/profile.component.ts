@@ -53,6 +53,8 @@ export class ProfileComponent {
   isAuthenticated = input(false);
   user = input<PublicUser>();
   bites = input<any[]>();
+  followerCount = input<number>(0);
+  followingCount = input<number>(0);
   userId = input<string>();
   subscriptionTier = input<number>(0);
 

@@ -6,14 +6,13 @@ import { fromAuth } from 'ta-firestore';
 export const reducer = createReducer(
   initialState,
   on(fromAuth.AuthActions.logoutSucceeded, (state) => adapter.removeAll(state)),
-  on(BiteActions.loadedFromAPI, (state, { bites }) => {
-    const stateWithoutReloading = {
-      ...state,
-    };
-
-    const cleanState = adapter.removeAll(stateWithoutReloading);
-    return adapter.upsertMany(bites, cleanState);
-  }),
+  on(
+    BiteActions.loadedByGPSPositionFromAPI,
+    BiteActions.loadedByUserFromAPI,
+    (state, { bites }) => {
+      return adapter.upsertMany(bites, state);
+    },
+  ),
   on(BiteActions.cacheBite, (state, { bite }) => {
     return {
       ...state,

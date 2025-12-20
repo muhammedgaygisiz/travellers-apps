@@ -156,10 +156,12 @@ export class BiteTribeApiService {
     this.profileApiService.saveUserIfNotExisting();
   }
 
-  bites$(position?: GeolocationPosition): Observable<Bite[]> {
-    this.biteApiService.loadBites(position);
+  async bitesByPosition(position: GeolocationPosition): Promise<Bite[]> {
+    return await this.biteApiService.loadBitesByLocation(position);
+  }
 
-    return this.biteApiService.bites$;
+  async bitesByUser(user: { uid: string }): Promise<Bite[]> {
+    return await this.biteApiService.loadBitesByUser(user);
   }
 
   likes$(): Observable<any[]> {

@@ -1,5 +1,4 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
-import { BehaviorSubject, skip, Subject } from 'rxjs';
 import { AuthService } from 'ta-firestore';
 import {
   FirebaseFirestore,
@@ -22,16 +21,17 @@ import { toBite } from './utils/to-bite';
 import { Platform } from '@ionic/angular';
 import { getBlobWithUri } from './utils/get-blob-with-uri';
 import {
+  distanceBetween,
   geohashForLocation,
   geohashQueryBounds,
-  distanceBetween,
   Geopoint,
 } from 'geofire-common';
 
 export const BITE_COLLECTION = 'bites';
+const DEFAULT_SEARCH_RADIUS_IN_M = 15 * 1000;
 
 // TODO: Now that we do not load all bites
-//       We have to load my-bites and bites in bucket-lists differently.
+//       We have to load bites in bucket-lists differently.
 //       I am thinking of loading them, when entering my-bites page
 //       and accordingly when entering the bucket list.
 //       This is an essential switch in our app, because access to more
@@ -43,27 +43,25 @@ export class BiteApiService {
   private readonly errorHandler = inject(ErrorHandler);
   private readonly platform = inject(Platform);
 
-  private readonly _bitesChannel$ = new BehaviorSubject<Bite[]>([]);
-  bites$ = this._bitesChannel$.asObservable().pipe(skip(1));
-
   isWeb = signal(!this.platform.is('hybrid'));
 
   /**
    * Loading of the bites using geohashs are done according
    * https://firebase.google.com/docs/firestore/solutions/geoqueries#web_4
    *
-   * @param myposition
+   * @param position
    */
-  public async loadBites(myposition?: GeolocationPosition): Promise<void> {
-    const radiusInM = 15 * 1000;
+  public async loadBitesByLocation(
+    position?: GeolocationPosition,
+  ): Promise<Bite[]> {
+    const coords = position?.coords;
 
-    const coords = myposition?.coords;
     if (coords) {
       const matchingBites: Bite[] = [];
       const center: Geopoint = [coords.latitude, coords.longitude];
-      const bounds = geohashQueryBounds(center, radiusInM);
+      const bounds = geohashQueryBounds(center, DEFAULT_SEARCH_RADIUS_IN_M);
 
-      const promises: Promise<GetCollectionResult<any>>[] = [];
+      const promises: Promise<GetCollectionResult<Bite>>[] = [];
       for (const b of bounds) {
         promises.push(
           FirebaseFirestore.getCollection({
@@ -108,15 +106,37 @@ export class BiteApiService {
             center,
           );
           const distanceInM = distanceInKm * 1000;
-          if (distanceInM <= radiusInM) {
+          if (distanceInM <= DEFAULT_SEARCH_RADIUS_IN_M) {
             matchingBites.push(bite);
           }
         }
       }
 
-      this._bitesChannel$.next(matchingBites);
-      return;
+      return matchingBites;
     }
+
+    return [];
+  }
+
+  public async loadBitesByUser(user: { uid: string }): Promise<Bite[]> {
+    const uid = user.uid;
+
+    const result = await FirebaseFirestore.getCollection({
+      reference: BITE_COLLECTION,
+      compositeFilter: {
+        type: 'and',
+        queryConstraints: [
+          {
+            type: 'where',
+            fieldPath: 'userId',
+            opStr: '==',
+            value: uid,
+          },
+        ],
+      },
+    });
+
+    return result.snapshots.map((snapshot) => toBite(snapshot));
   }
 
   async saveNewBite(bite: Bite): Promise<void> {

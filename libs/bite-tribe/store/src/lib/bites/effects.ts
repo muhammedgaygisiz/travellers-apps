@@ -1,14 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteActions } from './actions';
-import { filter, map, switchMap, tap } from 'rxjs';
+import { filter, from, map, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { bite } from './selectors';
-import { fromAuth } from 'ta-firestore';
 import { AppActions } from '../app/actions';
+import { fromAuth } from 'ta-firestore';
 
 @Injectable()
 export class BiteEffects {
@@ -18,21 +18,27 @@ export class BiteEffects {
 
   private readonly bite = toSignal(this.store.select(bite));
 
-  /**
-   * TODO: On login without gps position:
-   *
-   *  free user: will see bites from a default position
-   *  paid user: will see bites from around the world with paging
-   */
-  startListener$ = createEffect(() => {
+  loadBitesByCurrentUser$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.AuthActions.loginSucceeded, AppActions.loadedGPSPosition),
+      ofType(fromAuth.AuthActions.loadedUser),
       switchMap((action) => {
-        const position = (action as any).position;
+        const user = action.user;
 
-        return this.api.bites$(position);
+        return from(this.api.bitesByUser(user));
       }),
-      map((bites) => BiteActions.loadedFromAPI({ bites })),
+      map((bites) => BiteActions.loadedByUserFromAPI({ bites })),
+    );
+  });
+
+  loadBitesByGpsPosition$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(AppActions.loadedGPSPosition),
+      switchMap((action) => {
+        const position = action.position;
+
+        return from(this.api.bitesByPosition(position));
+      }),
+      map((bites) => BiteActions.loadedByGPSPositionFromAPI({ bites })),
     );
   });
 

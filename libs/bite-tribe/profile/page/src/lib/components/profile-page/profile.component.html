@@ -18,64 +18,72 @@
   (gotoProfile)="gotoMyProfile.emit()"
 >
   <ion-content class="ion-padding">
-    <div class="profile-container">
-      @if (userData?.photoUrl) {
-        <ion-avatar class="profile-avatar">
-          <img [src]="userData?.photoUrl" [alt]="userData?.displayName" />
-        </ion-avatar>
-      } @else {
-        <ion-icon name="person-circle-outline" class="profile-image" />
-      }
+    <div class="profile-header">
+      <div class="photo-column">
+        @if (userData?.photoUrl) {
+          <ion-avatar class="profile-avatar">
+            <img [src]="userData?.photoUrl" [alt]="userData?.displayName" />
+          </ion-avatar>
+        } @else {
+          <ion-icon name="person-circle-outline" class="profile-image" />
+        }
+      </div>
 
-      <h1 class="profile-name">
-        {{ userData?.displayName }}
-        <ion-badge class="subscription-badge">
-          @if (subscriptionTierData === 1) {
-            PRO
-          }
-          @if (subscriptionTierData === 2) {
-            ULTRA
-          }
-        </ion-badge>
-      </h1>
+      <div class="header-column">
+        <strong>Bites</strong>
+        @if (biteCount() > 10) {
+          <ion-badge class="bite-badge {{ badgeColor() }}"
+            >{{ biteCount() }}
+          </ion-badge>
+        }
+      </div>
+      <div class="header-column">
+        <strong>Following</strong>
+        <span>32</span>
+      </div>
+      <div class="header-column">
+        <strong>Followers</strong>
+        <span>32</span>
+      </div>
+    </div>
 
-      @if (biteCount() > 10) {
-        <ion-badge class="bite-badge {{ badgeColor() }}"
-          >{{ biteCount() }} Bites
-        </ion-badge>
-      }
-
-      <p class="profile-location">
-        {{ userData?.city || 'No location' }}
-      </p>
-
+    <h1 class="profile-name">
+      {{ userData?.displayName }}
+      <ion-badge class="subscription-badge">
+        @if (subscriptionTierData === 1) {
+          PRO
+        }
+        @if (subscriptionTierData === 2) {
+          ULTRA
+        }
+      </ion-badge>
       @if (isUnfollowedUser()) {
         <ion-button fill="outline" class="follow-button" [disabled]="true">
           Follow
         </ion-button>
       }
+    </h1>
 
-      <div class="about-section">
-        <h2>About</h2>
-        <p>
-          {{ userData?.about || 'No description available.' }}
-        </p>
-      </div>
+    <span class="profile-location">
+      {{ userData?.city || 'No location' }}
+    </span>
+    <p class="profile-about">
+      {{ userData?.about || 'No description available.' }}
+    </p>
 
-      <div class="bites-section">
-        <h2>Bites</h2>
+    <div class="bites-section">
+      <h2>Bites</h2>
 
-        @for (bite of bites(); track bite.id) {
-          <bt-bite
-            [bite]="bite"
-            [userId]="userId()"
-            [showEditButton]="false"
-            (biteClick)="biteClick.emit($event)"
-            (restaurantClick)="restaurantClick.emit($event)"
-            (likeButtonClick)="likeButtonClick.emit($event)"
-          />
-        }
-      </div>
+      @for (bite of bites(); track bite.id) {
+        <bt-bite
+          [bite]="bite"
+          [userId]="userId()"
+          [showEditButton]="false"
+          (biteClick)="biteClick.emit($event)"
+          (restaurantClick)="restaurantClick.emit($event)"
+          (likeButtonClick)="likeButtonClick.emit($event)"
+        />
+      }
     </div>
 
     <!-- Show a message when no user data is available -->

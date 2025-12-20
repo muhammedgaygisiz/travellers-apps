@@ -18,8 +18,6 @@ describe('ProfileComponent', () => {
     fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;
     compRef = fixture.componentRef;
-
-    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -87,6 +85,35 @@ describe('ProfileComponent', () => {
     it('should return true if userId is not equal to user.id', () => {
       compRef.setInput('userId', 'user2');
       expect(component.isUnfollowedUser()).toBe(true);
+    });
+  });
+
+  describe('validPhotoUrl', () => {
+    beforeEach(() => {
+      compRef.setInput('user', { photoUrl: 'http://localhost:4200' } as any);
+      component.imageLoadErrored.set(false);
+    });
+
+    it('should return true if photoUrl is provided and loaded correctly', () => {
+      expect(component.validPhotoUrl()).toBe(true);
+    });
+
+    it('should return false if photoUrl is missing', () => {
+      compRef.setInput('user', {} as any);
+      expect(component.validPhotoUrl()).toBe(false);
+    });
+
+    it('should return false if image load has errored', () => {
+      component.imageLoadErrored.set(true);
+      expect(component.validPhotoUrl()).toBe(false);
+    });
+  });
+
+  describe('onImageError', () => {
+    it('should set imageLoadErrored to true', () => {
+      component.imageLoadErrored.set(false);
+      component.onImageError();
+      expect(component.imageLoadErrored()).toBe(true);
     });
   });
 });

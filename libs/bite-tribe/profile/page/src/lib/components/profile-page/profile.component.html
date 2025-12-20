@@ -20,9 +20,13 @@
   <ion-content class="ion-padding">
     <div class="profile-header">
       <div class="photo-column">
-        @if (userData?.photoUrl) {
+        @if (validPhotoUrl()) {
           <ion-avatar class="profile-avatar">
-            <img [src]="userData?.photoUrl" [alt]="userData?.displayName" />
+            <img
+              [src]="userData?.photoUrl"
+              [alt]="userData?.displayName"
+              (error)="onImageError()"
+            />
           </ion-avatar>
         } @else {
           <ion-icon name="person-circle-outline" class="profile-image" />

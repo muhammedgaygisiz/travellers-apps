@@ -4,6 +4,7 @@ import {
   computed,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -83,4 +84,13 @@ export class ProfileComponent {
   isUnfollowedUser = computed(() => {
     return this.userId() !== this.user()?.userId;
   });
+
+  imageLoadErrored = signal(false);
+  validPhotoUrl = computed(() => {
+    return !!this.user()?.photoUrl && !this.imageLoadErrored();
+  });
+
+  onImageError(): void {
+    this.imageLoadErrored.set(true);
+  }
 }

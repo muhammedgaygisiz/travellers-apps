@@ -21,6 +21,7 @@ export class MapService {
 
   gpsPosition: Signal<Geopoint | null> = this.dataAccess.gpsPosition;
   userId = this.dataAccess.userId;
+  enableZoom = this.dataAccess.userHasSubscriptionTierOne;
 
   logout(): void {
     this.dataAccess.logout();

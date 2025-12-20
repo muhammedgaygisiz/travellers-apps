@@ -1,4 +1,5 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { Location } from '@angular/common';
+import { inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { NavController } from '@ionic/angular';
 
@@ -6,6 +7,7 @@ import { NavController } from '@ionic/angular';
 export class BiteService {
   public readonly dataAccess = inject(BiteDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly location = inject(Location);
 
   image = signal<string>('');
 
@@ -25,6 +27,6 @@ export class BiteService {
   submitEditedBite(editedBite: any): void {
     this.dataAccess.submitBite(editedBite);
 
-    this.navController.navigateBack(['my-bites']);
+    this.location.back();
   }
 }

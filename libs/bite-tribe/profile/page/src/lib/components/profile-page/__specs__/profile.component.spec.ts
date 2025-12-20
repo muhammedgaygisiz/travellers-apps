@@ -72,4 +72,21 @@ describe('ProfileComponent', () => {
       expect(component.badgeColor()).toBe('');
     });
   });
+
+  describe('isUnfollowedUser', () => {
+    const userMock = { userId: 'user1' } as any;
+    beforeEach(() => {
+      compRef.setInput('user', userMock);
+      compRef.setInput('userId', userMock.userId);
+    });
+
+    it('should return false if current user is me', () => {
+      expect(component.isUnfollowedUser()).toBe(false);
+    });
+
+    it('should return true if userId is not equal to user.id', () => {
+      compRef.setInput('userId', 'user2');
+      expect(component.isUnfollowedUser()).toBe(true);
+    });
+  });
 });

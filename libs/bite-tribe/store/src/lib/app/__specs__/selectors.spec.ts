@@ -199,4 +199,67 @@ describe('App Selectors', () => {
       expect(result).toBe(false);
     });
   });
+
+  describe('userHasSubscriptionTierOne', () => {
+    it('should return false if subscriptionTier is not provided', () => {
+      const stateWithoutSubscriptionTier = {
+        ...mockState,
+        profile: {} as any,
+      };
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        stateWithoutSubscriptionTier,
+      );
+      expect(result).toBe(false);
+    });
+
+    it('should return false if profile is not provided', () => {
+      const stateWithoutSubscriptionTier = {
+        ...mockState,
+      };
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        stateWithoutSubscriptionTier,
+      );
+      expect(result).toBe(false);
+    });
+
+    it('should return false if state is not provided', () => {
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        undefined as any,
+      );
+      expect(result).toBe(false);
+    });
+
+    it('should return false if subscriptionTier is lower than 1', () => {
+      const stateWithSubscriptionTier0 = {
+        ...mockState,
+        profile: { subscriptionTier: 0 } as any,
+      };
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        stateWithSubscriptionTier0,
+      );
+      expect(result).toBe(false);
+    });
+
+    it('should return true if subscriptionTier is 1', () => {
+      const stateWithSubscriptionTier1 = {
+        ...mockState,
+        profile: { subscriptionTier: 1 } as any,
+      };
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        stateWithSubscriptionTier1,
+      );
+      expect(result).toBe(true);
+    });
+
+    it('should return true if subscriptionTier is more than 1', () => {
+      const stateWithSubscriptionTier2 = {
+        ...mockState,
+        profile: { subscriptionTier: 2 } as any,
+      };
+      const result = fromSelectors.userHasSubscriptionTierOne.projector(
+        stateWithSubscriptionTier2,
+      );
+      expect(result).toBe(true);
+    });
+  });
 });

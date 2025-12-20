@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
 import { BiteService } from '../bite.service';
 import { NavController } from '@ionic/angular';
@@ -10,6 +11,7 @@ const Mock = {
   submitNewBite: jest.fn(),
   navigateForward: jest.fn(),
   submitBite: jest.fn(),
+  back: jest.fn(),
 };
 
 jest.mock('localization');
@@ -22,6 +24,7 @@ describe('BiteService', () => {
       providers: [
         { provide: BiteDataAccessService, useValue: Mock },
         { provide: NavController, useValue: Mock },
+        { provide: Location, useValue: Mock },
       ],
     }).compileComponents();
 
@@ -52,11 +55,11 @@ describe('BiteService', () => {
       expect(Mock.submitBite).toHaveBeenCalledWith(editedBite);
     });
 
-    it('should navigate back to my-bites', () => {
+    it('should navigate back to previous page', () => {
       const editedBite = { id: '123', name: 'Edited Bite' };
       service.submitEditedBite(editedBite);
 
-      expect(Mock.navigateBack).toHaveBeenCalledWith(['my-bites']);
+      expect(Mock.back).toHaveBeenCalled();
     });
   });
 });

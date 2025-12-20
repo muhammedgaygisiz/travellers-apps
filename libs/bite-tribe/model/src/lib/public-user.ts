@@ -6,6 +6,7 @@ export interface PublicUser {
   city?: string;
   about?: string;
   public?: boolean;
+  subscriptionTier?: number;
 
   createdAt?: string;
   createdAtTimestamp?: number;

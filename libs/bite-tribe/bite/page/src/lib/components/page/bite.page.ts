@@ -8,6 +8,7 @@ import {
   linkedSignal,
   output,
   signal,
+  WritableSignal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -220,10 +221,35 @@ export class BitePage {
   currencyValueChanges = toSignal(
     this.biteFormGroup.controls['currency'].valueChanges,
   );
+
+  positionValueChanges = toSignal(
+    this.biteFormGroup.controls['position'].valueChanges,
+  );
+
+  imagePosition: WritableSignal<Geopoint | undefined> = signal(undefined);
+
   selectedCurrencyName = computed(() => {
     this.currencyValueChanges();
     const currencyCode = this.biteFormGroup.controls['currency'].value;
     return this.currencies.find((c) => c.code === currencyCode)?.name;
+  });
+
+  locationFromImage = computed(() => {
+    const currentValue = this.positionValueChanges();
+    const position = this.imagePosition();
+    return (
+      currentValue?.latitude === position?.latitude &&
+      currentValue?.longitude === position?.longitude
+    );
+  });
+
+  locationFromGps = computed(() => {
+    const currentValue = this.positionValueChanges();
+    const position = this.position();
+    return (
+      currentValue?.latitude === position?.latitude &&
+      currentValue?.longitude === position?.longitude
+    );
   });
 
   saveBite(): void {
@@ -236,7 +262,15 @@ export class BitePage {
     }
   }
 
-  onPositionFromImage(position: Geopoint): void {
+  onPositionFromImage(position?: Geopoint): void {
+    if (position) {
+      this.imagePosition.set(position);
+      this.biteFormGroup.controls['position'].patchValue(position);
+    }
+  }
+
+  onPositionFromNavigator(): void {
+    const position = this.position();
     if (position) {
       this.biteFormGroup.controls['position'].patchValue(position);
     }
@@ -251,6 +285,7 @@ export class BitePage {
 
   resetImagePath(): void {
     this.biteFormGroup.get('imagePath')?.reset();
+    this.imagePosition.set(undefined);
   }
 
   onCurrencySelected(currencyCode: string, modal: IonModal): void {

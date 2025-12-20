@@ -14,6 +14,7 @@ import {
   pricetagOutline,
 } from 'ionicons/icons';
 import { Bite } from 'model';
+import { FormGroup } from '@angular/forms';
 
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
@@ -96,6 +97,66 @@ describe('BitePage', () => {
 
     component.biteFormGroup.patchValue(validBite as any);
     expect(component.isInvalid()).toBe(false);
+  });
+
+  describe('locationFromImage', () => {
+    it('should return true if position in form is same as image', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.biteFormGroup.controls['position'].patchValue(position);
+      component.imagePosition.set(position);
+
+      expect(component.locationFromImage()).toBe(true);
+    });
+
+    it('should return false if position in form is different from image', () => {
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+      component.imagePosition.set({ latitude: 30, longitude: 40 });
+
+      expect(component.locationFromImage()).toBe(false);
+    });
+
+    it('should return false if imagePosition is undefined', () => {
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+      component.imagePosition.set(undefined);
+
+      expect(component.locationFromImage()).toBe(false);
+    });
+  });
+
+  describe('locationFromGps', () => {
+    it('should return true if position in form is same as gps position', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.biteFormGroup.controls['position'].patchValue(position);
+      componentRef.setInput('position', position);
+
+      expect(component.locationFromGps()).toBe(true);
+    });
+
+    it('should return false if position in form is different from gps position', () => {
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+      component.fallbackPosition.set({ latitude: 30, longitude: 40 });
+
+      expect(component.locationFromGps()).toBe(false);
+    });
+
+    it('should return false if fallbackPosition is undefined', () => {
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+      component.fallbackPosition.set(undefined);
+
+      expect(component.locationFromGps()).toBe(false);
+    });
   });
 
   it('should emit form value on saveBite when valid', () => {
@@ -284,6 +345,41 @@ describe('BitePage', () => {
         position,
       );
     });
+
+    it('should set position in imagePosition', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.onPositionFromImage(position);
+      expect(component.imagePosition()).toEqual(position);
+    });
+
+    it('should do nothing if no position provided', () => {
+      component.biteFormGroup.controls['position'].reset();
+      component.imagePosition.set({ latitude: 10, longitude: 20 });
+      component.onPositionFromImage(undefined as any);
+      expect(component.biteFormGroup.controls['position'].value).toBeNull();
+      expect(component.imagePosition()).toEqual({
+        latitude: 10,
+        longitude: 20,
+      });
+    });
+  });
+
+  describe('onPositionFromNavigator', () => {
+    it('should set position in the form group from input', () => {
+      const position = { latitude: 30, longitude: 40 };
+      componentRef.setInput('position', position);
+      component.onPositionFromNavigator();
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        position,
+      );
+    });
+
+    it('should do nothing if no position input value', () => {
+      componentRef.setInput('position', undefined as any);
+      component.biteFormGroup.controls['position'].reset();
+      component.onPositionFromNavigator();
+      expect(component.biteFormGroup.controls['position'].value).toBeNull();
+    });
   });
 
   describe('resetImagePath', () => {
@@ -291,6 +387,20 @@ describe('BitePage', () => {
       component.biteFormGroup.controls['imagePath'].patchValue('test/path');
       component.resetImagePath();
       expect(component.biteFormGroup.controls['imagePath'].value).toBeNull();
+    });
+
+    it('should reset imagePosition', () => {
+      component.imagePosition.set({ latitude: 10, longitude: 20 });
+      component.biteFormGroup.controls['imagePath'].patchValue('test/path');
+      component.resetImagePath();
+      expect(component.imagePosition()).toBeUndefined();
+    });
+
+    it('should do nothing if imagePath formControl is not initialized', () => {
+      component.imagePosition.set({ latitude: 10, longitude: 20 });
+      component.biteFormGroup = new FormGroup({}) as any;
+      component.resetImagePath();
+      expect(component.biteFormGroup.get('imagePath')).toBeNull();
     });
   });
 

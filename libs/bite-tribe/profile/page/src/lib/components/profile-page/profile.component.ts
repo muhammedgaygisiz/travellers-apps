@@ -54,6 +54,7 @@ export class ProfileComponent {
   user = input<PublicUser>();
   bites = input<any[]>();
   userId = input<string>();
+  subscriptionTier = input<number>(0);
 
   readonly logoutClick = output();
   readonly gotoSettings = output();
@@ -75,5 +76,9 @@ export class ProfileComponent {
     const biteCount = this.biteCount();
 
     return getBadgeColor(biteCount);
+  });
+
+  isUnfollowedUser = computed(() => {
+    return this.userId() !== this.user()?.userId;
   });
 }

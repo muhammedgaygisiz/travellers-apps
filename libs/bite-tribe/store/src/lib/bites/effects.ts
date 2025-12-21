@@ -9,12 +9,15 @@ import { Store } from '@ngrx/store';
 import { bite } from './selectors';
 import { AppActions } from '../app/actions';
 import { fromAuth } from 'ta-firestore';
+import { BiteTribeStoreService } from '../bite-tribe-store.service';
+import { BucketlistActions } from '../bucketlists/actions';
 
 @Injectable()
 export class BiteEffects {
   private readonly actions$ = inject(Actions);
   private readonly api = inject(BiteTribeApiService);
   private readonly store = inject(Store);
+  private readonly storeService = inject(BiteTribeStoreService);
 
   private readonly bite = toSignal(this.store.select(bite));
 
@@ -39,6 +42,26 @@ export class BiteEffects {
         return from(this.api.bitesByPosition(position));
       }),
       map((bites) => BiteActions.loadedByGPSPositionFromAPI({ bites })),
+    );
+  });
+
+  loadBitesByBucketlistId$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(routerNavigatedAction),
+      filter(({ payload }) =>
+        payload.event.urlAfterRedirects.includes('/my-bucketlists/'),
+      ),
+      switchMap(() => {
+        const bucketlist = this.storeService.bucketlist();
+
+        if (!bucketlist) {
+          return of(BucketlistActions.noBucketlistFound());
+        }
+
+        return from(this.api.bitesByBucketlist(bucketlist)).pipe(
+          map((bites) => BiteActions.loadedByBucketlistFromAPI({ bites })),
+        );
+      }),
     );
   });
 

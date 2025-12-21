@@ -9,6 +9,7 @@ export const reducer = createReducer(
   on(
     BiteActions.loadedByGPSPositionFromAPI,
     BiteActions.loadedByUserFromAPI,
+    BiteActions.loadedByBucketlistFromAPI,
     (state, { bites }) => {
       return adapter.upsertMany(bites, state);
     },

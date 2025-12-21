@@ -1,4 +1,4 @@
-import { createActionGroup, props } from '@ngrx/store';
+import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import {
   CreateAndSaveToBucketListParams,
   RemoveBiteFromBucketlistParams,
@@ -14,5 +14,6 @@ export const BucketlistActions = createActionGroup({
       props<CreateAndSaveToBucketListParams>(),
     'Create Bucketlist': props<{ bucketlistName: string }>(),
     'Remove bite from Bucketlist': props<RemoveBiteFromBucketlistParams>(),
+    'No Bucketlist found': emptyProps(),
   },
 });

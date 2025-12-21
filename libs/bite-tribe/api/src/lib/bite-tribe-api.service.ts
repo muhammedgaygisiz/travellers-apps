@@ -3,6 +3,7 @@ import { ReviewApiService } from './review-api.service';
 import { RestaurantApiService } from './restaurant-api.service';
 import {
   Bite,
+  Bucketlist,
   CreateAndSaveToBucketListParams,
   Link,
   Menu,
@@ -158,6 +159,10 @@ export class BiteTribeApiService {
 
   async bitesByUser(user: { uid: string }): Promise<Bite[]> {
     return await this.biteApiService.loadBitesByUser(user);
+  }
+
+  async bitesByBucketlist(bucketlist: Bucketlist): Promise<Bite[]> {
+    return await this.biteApiService.loadBitesByBucketlist(bucketlist);
   }
 
   async deleteBite(bite: Bite): Promise<Bite> {

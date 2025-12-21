@@ -4,7 +4,7 @@ import {
   FirebaseFirestore,
   GetCollectionResult,
 } from '@capacitor-firebase/firestore';
-import { Bite } from 'model';
+import { Bite, Bucketlist } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import {
   dataUrlToBlob,
@@ -458,5 +458,29 @@ export class BiteApiService {
     });
 
     return toBite(result.snapshot);
+  }
+
+  async loadBitesByBucketlist(bucketlist: Bucketlist): Promise<Bite[]> {
+    const biteIds = bucketlist.biteIds || [];
+
+    if (biteIds.length === 0) {
+      return [];
+    }
+
+    const promises = biteIds.map(async (id) => {
+      try {
+        const result = await FirebaseFirestore.getDocument({
+          reference: `${BITE_COLLECTION}/${id}`,
+        });
+        return toBite(result.snapshot);
+      } catch (e) {
+        console.error(`Failed loading bite ${id}:`, e);
+        this.errorHandler.handleError(e);
+        return null;
+      }
+    });
+
+    const bites = await Promise.all(promises);
+    return bites.filter((b): b is Bite => !!b);
   }
 }

@@ -1,8 +1,16 @@
 import { BiteActions } from '../actions';
 
 describe('Bites - Actions', () => {
-  it('should have loadedFromAPI action', () => {
-    expect(BiteActions.loadedFromAPI).toBeDefined();
+  it('should have loadedByGPSPositionFromAPI actions', () => {
+    expect(BiteActions.loadedByGPSPositionFromAPI).toBeDefined();
+  });
+
+  it('should have loadedByUserFromAPI actions', () => {
+    expect(BiteActions.loadedByUserFromAPI).toBeDefined();
+  });
+
+  it('should have loadedByBucketlistFromAPI actions', () => {
+    expect(BiteActions.loadedByBucketlistFromAPI).toBeDefined();
   });
 
   it('should have saveNewBite action', () => {

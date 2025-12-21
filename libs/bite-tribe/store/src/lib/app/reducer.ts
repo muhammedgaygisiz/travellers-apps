@@ -26,6 +26,7 @@ export const reducer = createReducer<AppSlice>(
   on(
     BiteActions.loadedByGPSPositionFromAPI,
     BiteActions.loadedByUserFromAPI,
+    BiteActions.loadedByBucketlistFromAPI,
     (state) => ({
       ...state,
       loading: {

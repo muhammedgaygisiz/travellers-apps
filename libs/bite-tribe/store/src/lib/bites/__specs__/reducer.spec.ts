@@ -22,40 +22,86 @@ describe('Bite Reducer', () => {
     });
   });
 
-  describe('loadedBitesFromApi', () => {
-    it('should set loading:home to true', () => {
+  describe('loadedByGPSPositionFromAPI', () => {
+    it('should add bites to bites slice', () => {
       const INITIAL_STATE = { ids: [], entities: {} };
-      const NEW_STATE = { ids: [], entities: {} };
+      const NEW_STATE = { ids: ['1'], entities: { '1': { id: '1' } } };
 
-      const loadedBitesFromApiAction = BiteActions.loadedFromAPI({
-        bites: [] as Bite[],
+      const loadedBitesFromApiAction = BiteActions.loadedByGPSPositionFromAPI({
+        bites: [{ id: '1' }] as Bite[],
       });
 
       expect(reducer(INITIAL_STATE, loadedBitesFromApiAction)).toEqual({
         ...NEW_STATE,
       });
     });
+  });
 
-    it('should not include deleted bite in result', () => {
-      const CURRENT_STATE = {
-        ids: ['3'],
-        entities: { '3': { id: '3', name: 'Bite 2' } as Bite },
-      };
+  describe('loadedByUserFromAPI', () => {
+    it('should add bites to bites slice', () => {
+      const INITIAL_STATE = { ids: [], entities: {} };
+      const NEW_STATE = { ids: ['1'], entities: { '1': { id: '1' } } };
 
-      const loadedBitesFromApiAction = BiteActions.loadedFromAPI({
-        bites: [
-          { id: '1', name: 'Bite 1' } as Bite,
-          { id: '2', name: 'Bite 2' } as Bite,
-        ],
+      const loadedBitesFromApiAction = BiteActions.loadedByUserFromAPI({
+        bites: [{ id: '1' }] as Bite[],
       });
 
-      const result = reducer(CURRENT_STATE, loadedBitesFromApiAction);
-      expect(result).toEqual({
-        ids: ['1', '2'],
-        entities: {
-          '1': { id: '1', name: 'Bite 1' } as Bite,
-          '2': { id: '2', name: 'Bite 2' } as Bite,
-        },
+      expect(reducer(INITIAL_STATE, loadedBitesFromApiAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('loadedByBucketlistFromAPI', () => {
+    it('should add bites to bites slice', () => {
+      const INITIAL_STATE = { ids: [], entities: {} };
+      const NEW_STATE = { ids: ['1'], entities: { '1': { id: '1' } } };
+
+      const loadedBitesFromApiAction = BiteActions.loadedByBucketlistFromAPI({
+        bites: [{ id: '1' }] as Bite[],
+      });
+
+      expect(reducer(INITIAL_STATE, loadedBitesFromApiAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('deletedBite', () => {
+    it('should remove the bite from the state', () => {
+      const INITIAL_STATE = {
+        ids: ['1'],
+        entities: { '1': { id: '1', name: 'Bite 1' } as Bite },
+      };
+      const NEW_STATE = { ids: [], entities: {} };
+
+      const deletedBiteAction = BiteActions.deletedBite({
+        bite: { id: '1', name: 'Bite 1' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, deletedBiteAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('savedBite', () => {
+    it('should upsert the bite in the state', () => {
+      const INITIAL_STATE = {
+        ids: ['1'],
+        entities: { '1': { id: '1', name: 'Bite prev' } as Bite },
+      };
+      const NEW_STATE = {
+        ids: ['1'],
+        entities: { '1': { id: '1', name: 'Bite new' } as Bite },
+      };
+
+      const savedBiteAction = BiteActions.savedBite({
+        bite: { id: '1', name: 'Bite new' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, savedBiteAction)).toEqual({
+        ...NEW_STATE,
       });
     });
   });

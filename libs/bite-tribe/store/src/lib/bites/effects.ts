@@ -47,10 +47,7 @@ export class BiteEffects {
       ofType(BiteActions.saveNewBite),
       switchMap(({ bite }) =>
         from(this.api.saveNewBite(bite)).pipe(
-          map((bite) => {
-            console.log('BITE IMAGE PATH: ', bite.imagePath);
-            return BiteActions.savedBite({ bite });
-          }),
+          map((bite) => BiteActions.savedBite({ bite })),
           catchError((err) => of(BiteActions.errorSavingBite({ bite }))),
         ),
       ),
@@ -81,17 +78,17 @@ export class BiteEffects {
     { dispatch: false },
   );
 
-  deleteBite$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(BiteActions.deleteBite),
-        tap(({ bite }) => {
-          this.api.deleteBite(bite);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+  deleteBite$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BiteActions.deleteBite),
+      switchMap(({ bite }) => {
+        return from(this.api.deleteBite(bite)).pipe(
+          map((bite) => BiteActions.deletedBite({ bite })),
+          catchError((err) => of(BiteActions.errorDeletingBite({ bite }))),
+        );
+      }),
+    );
+  });
 
   loadUserFromBite$ = createEffect(() => {
     return this.actions$.pipe(

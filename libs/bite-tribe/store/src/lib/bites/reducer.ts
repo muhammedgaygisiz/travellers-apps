@@ -13,6 +13,9 @@ export const reducer = createReducer(
       return adapter.upsertMany(bites, state);
     },
   ),
+  on(BiteActions.deletedBite, (state, { bite }) => {
+    return adapter.removeOne(bite.id, state);
+  }),
   on(BiteActions.cacheBite, (state, { bite }) => {
     return {
       ...state,

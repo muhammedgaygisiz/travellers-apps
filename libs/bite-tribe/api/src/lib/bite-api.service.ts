@@ -293,32 +293,45 @@ export class BiteApiService {
     }
   }
 
-  async deleteBite(bite: any): Promise<void> {
-    if (!bite.id) {
-      return;
-    }
-
-    try {
-      const imagePathInFirestore = bite.imagePath;
-      const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
-      if (imagePath) {
-        await FirebaseStorage.deleteFile({
-          path: imagePath,
-        });
+  async deleteBite(bite: Bite): Promise<Bite> {
+    return new Promise<Bite>((resolve, reject) => {
+      if (!bite.id) {
+        return reject(new Error('Bite ID is required for deletion.'));
       }
-    } catch (error) {
-      console.error('Error deleting image:', error);
-      this.errorHandler.handleError(error);
-    }
 
-    try {
-      await FirebaseFirestore.deleteDocument({
-        reference: `${BITE_COLLECTION}/${bite.id}`,
-      });
-    } catch (error) {
-      console.error('Error deleting bite:', error);
-      this.errorHandler.handleError(error);
-    }
+      try {
+        const imagePathInFirestore = bite.imagePath;
+
+        if (imagePathInFirestore) {
+          const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
+          if (imagePath) {
+            FirebaseStorage.deleteFile({
+              path: imagePath,
+            });
+          }
+        } else {
+          const log = `No imagePath found for bite with id ${bite.id}`;
+          console.error(log);
+          this.errorHandler.handleError(log);
+        }
+      } catch (error) {
+        console.error('Error deleting image:', error);
+        this.errorHandler.handleError(error);
+        return reject(error);
+      }
+
+      try {
+        FirebaseFirestore.deleteDocument({
+          reference: `${BITE_COLLECTION}/${bite.id}`,
+        });
+      } catch (error) {
+        console.error('Error deleting bite:', error);
+        this.errorHandler.handleError(error);
+        return reject(error);
+      }
+
+      return resolve(bite);
+    });
   }
 
   private async uploadImageAndUpdateBite(

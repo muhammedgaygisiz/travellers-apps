@@ -120,10 +120,6 @@ export class BiteTribeApiService {
     return this.profileApiService.getUserByBiteId(bite);
   }
 
-  deleteBite(bite: any): void {
-    this.biteApiService.deleteBite(bite);
-  }
-
   saveTagsToExistingBite(payload: { newTags: string[]; id: string }): void {
     this.biteApiService.saveTagsToExistingBite(payload);
   }
@@ -162,6 +158,10 @@ export class BiteTribeApiService {
 
   async bitesByUser(user: { uid: string }): Promise<Bite[]> {
     return await this.biteApiService.loadBitesByUser(user);
+  }
+
+  async deleteBite(bite: Bite): Promise<Bite> {
+    return await this.biteApiService.deleteBite(bite);
   }
 
   likes$(): Observable<any[]> {

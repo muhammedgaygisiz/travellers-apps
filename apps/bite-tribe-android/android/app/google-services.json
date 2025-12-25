@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "268978529027",
+    "project_id": "bite-tribe",
+    "storage_bucket": "bite-tribe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:268978529027:android:b54ec3762f8ef05c097f36",
+        "android_client_info": {
+          "package_name": "com.bitetribe.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "268978529027-hq9mrut7qekbhsc4di64sa38r6lasvde.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bitetribe.app",
+            "certificate_hash": "485527d2d503a054212900d3fbc8c43f61280dd4"
+          }
+        },
+        {
+          "client_id": "268978529027-udmbsb9o51jus3n20pk9tih5bik74bnq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJThrOuZvMhYUpeiV9BpXoYaWM9ptsdAY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "268978529027-udmbsb9o51jus3n20pk9tih5bik74bnq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "268978529027-r92nsfol8lsg55th4dtr9p43gf5di14n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bitetribe.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

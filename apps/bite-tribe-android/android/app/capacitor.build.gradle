@@ -11,10 +11,14 @@ apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
     implementation project(':capacitor-firebase-authentication')
     implementation project(':capacitor-firebase-firestore')
+    implementation project(':capacitor-firebase-storage')
     implementation project(':capacitor-firebase-analytics')
     implementation project(':capacitor-geolocation')
     implementation project(':capacitor-camera')
     implementation project(':capacitor-app-launcher')
+    implementation project(':capacitor-filesystem')
+    implementation project(':capacitor-splash-screen')
+    implementation project(':capacitor-firebase-crashlytics')
 
 }
 

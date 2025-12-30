@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "268978529027-6o6v3j8ch4i45t1h6f980go1808cov5u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bitetribe.app",
+            "certificate_hash": "5e43bef3a879f01f311f26bf750045cff2421a17"
+          }
+        },
+        {
           "client_id": "268978529027-hq9mrut7qekbhsc4di64sa38r6lasvde.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

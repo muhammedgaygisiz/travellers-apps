@@ -19,7 +19,8 @@
     "cap:run:ios": "cap run ios",
     "cap:run:android": "cap run android",
     "pwa-asset-generator:generate:bite-tribe": "pwa-asset-generator apps/bite-tribe/src/logo.svg -i apps/bite-tribe/src/index.html --favicon -m apps/bite-tribe/src/manifest.webmanifest apps/bite-tribe/src/assets/icons",
-    "ios-asset-generator:generate-ios:bite-tribe": "capacitor-assets generate --ios --iosProject apps/bite-tribe-ios/ios/App --assetPath apps/bite-tribe-ios/assets"
+    "ios-asset-generator:generate-ios:bite-tribe": "capacitor-assets generate --ios --iosProject apps/bite-tribe-ios/ios/App --assetPath apps/bite-tribe-ios/assets",
+    "ios-asset-generator:generate-android:bite-tribe": "capacitor-assets generate --android --androidProject apps/bite-tribe-android/android --assetPath apps/bite-tribe-ios/assets"
   },
   "private": true,
   "dependencies": {

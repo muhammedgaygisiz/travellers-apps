@@ -41,7 +41,6 @@ nx g @nx/angular:lib libs/bite-tribe/<page-name>/data-access --name=bite-tribe/<
 - Under the page's `lib` folder create the folders `integration` and `components`
 
 - In the `integration` folder
-
   - create a typescript module with the name: `<page-name>.container.ts`.
   - In the index.ts file of the page library export the container component
   - It will be an angular component with the template inlined and no styling
@@ -162,3 +161,70 @@ npm list --all
 ```
 
 ```
+
+# Native app insights
+
+## iOS
+
+To create and upload a new version of the iOS app to TestFlight, following
+steps are required:
+
+- Build the web app via
+
+```
+nx build bite-tribe
+```
+
+- Open the iOS project in Xcode
+
+```
+nx run bite-tribe-ios:open
+```
+
+- Increase the build number in Xcode
+- Sync the build result to the iOS project
+
+```
+nx run bite-tribe-ios:sync
+```
+
+- In Xcode select `Any iOS Device (arm64)` as target device
+- In Xcode select `Product` -> `Archive`
+- After the archive is created, the `Organizer` window opens
+- Select the created archive and click on `Distribute App`
+- Confirm all steps of the distribution wizard
+- After the upload is completed, the app should be available in App Store Connect
+- Answer the Compliance questions in App Store Connect
+- Add the external testers to the release
+
+## Android
+
+To create and upload a new version of the Android app to the Play Store, following
+steps are required:
+
+- Build the web app via
+
+```
+nx build bite-tribe
+```
+
+- Open the Android project in Android Studio
+
+```
+nx run bite-tribe-android:open
+```
+
+- Increase the `versionCode` in the root `build.gradle` file
+- Sync the build result to the Android project
+
+```
+nx run bite-tribe-android:sync
+```
+
+- In Android Studio select `Build` -> `Generate Signed Bundle / APK`
+- Select `Android App Bundle` and click `Next`
+- Select the existing key store and provide the credentials
+- Select the `release` build type and finish the wizard
+- After the build is completed, the `Locate` button appears
+- Click on the `Locate` button to open the folder containing the generated app bundle
+- Upload the app bundle to Play Console

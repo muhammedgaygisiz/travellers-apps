@@ -16,6 +16,7 @@ node_modules
 *.launch
 .settings/
 *.sublime-workspace
+apps/bite-tribe-android/android/.idea
 
 # IDE - VSCode
 .vscode/*

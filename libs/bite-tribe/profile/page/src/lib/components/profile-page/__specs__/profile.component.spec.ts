@@ -3,8 +3,9 @@ import { ProfileComponent } from '../profile.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
+import { vi } from 'vitest';
 
-jest.mock('localization');
+vi.mock('localization');
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;

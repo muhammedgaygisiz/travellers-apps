@@ -1,9 +1,10 @@
 import { LikesComponent } from '../likes.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
-import { Bite } from 'model';
+import { Bite, Like } from 'model';
 import { LikeOptionsPopoverMenuComponent } from '../../like-options-popover-menu/like-options-popover-menu.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { vi } from 'vitest';
 
 const mockBite: Bite = {
   id: 'bite1',
@@ -16,12 +17,9 @@ const mockBite: Bite = {
   distance: '500',
   restaurantId: 'rest1',
   likes: [
-    { userId: 'user1', likeType: 'thumbup' },
-    { userId: 'user2', likeType: 'drooling' },
+    { userId: 'user1', likeType: 'thumbup' } as Like,
+    { userId: 'user2', likeType: 'drooling' } as Like,
   ],
-  thumbup: 1,
-  drooling: 1,
-  mindblown: 0,
   tags: ['spicy', 'vegetarian'],
 };
 
@@ -77,7 +75,7 @@ describe('LikesComponent', () => {
 
   it('should open like options popover when openLikeOptions is called', async () => {
     const mockEvent = new MouseEvent('click');
-    const createSpy = jest.spyOn(component['popoverController'], 'create');
+    const createSpy = vi.spyOn(component['popoverController'], 'create');
 
     await component.openLikeOptions(mockEvent);
 

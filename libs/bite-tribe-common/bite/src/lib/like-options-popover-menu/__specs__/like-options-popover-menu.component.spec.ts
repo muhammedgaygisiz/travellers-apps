@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonChip } from '@ionic/angular/standalone';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu.component';
 import { ComponentRef } from '@angular/core';
+import { vi } from 'vitest';
 
 describe('LikeOptionsPopoverMenuComponent', () => {
   let component: LikeOptionsPopoverMenuComponent;
@@ -26,7 +27,7 @@ describe('LikeOptionsPopoverMenuComponent', () => {
   it('should emit like event with correct data when bite exists', () => {
     // Arrange
     const mockBite = { id: '123', name: 'Test Bite' };
-    const emitSpy = jest.spyOn(component.likeButtonClick, 'emit');
+    const emitSpy = vi.spyOn(component.likeButtonClick, 'emit');
     componentRef.setInput('bite', mockBite);
 
     // Act
@@ -41,7 +42,7 @@ describe('LikeOptionsPopoverMenuComponent', () => {
 
   it('should not emit like event when bite is undefined', () => {
     // Arrange
-    const emitSpy = jest.spyOn(component.likeButtonClick, 'emit');
+    const emitSpy = vi.spyOn(component.likeButtonClick, 'emit');
     componentRef.setInput('bite', undefined);
 
     // Act
@@ -65,7 +66,7 @@ describe('LikeOptionsPopoverMenuComponent', () => {
   it('should emit correct like type for each emoji click', () => {
     // Arrange
     const mockBite = { id: '123', name: 'Test Bite' };
-    const emitSpy = jest.spyOn(component.likeButtonClick, 'emit');
+    const emitSpy = vi.spyOn(component.likeButtonClick, 'emit');
     componentRef.setInput('bite', mockBite);
     const chips = fixture.nativeElement.querySelectorAll('ion-chip');
 

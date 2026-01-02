@@ -12,8 +12,9 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { ToBlobUrlPipe } from 'image-compression';
 import { OverlayEventDetail } from '@ionic/core';
 import { addNecessaryIcons } from 'utils';
+import { vi } from 'vitest';
 
-jest.mock('heic2any', () => jest.fn());
+vi.mock('heic2any', () => vi.fn());
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
@@ -123,7 +124,7 @@ describe('BiteComponent', () => {
 
   describe('handleConfirmationDismiss', () => {
     it('should emit deleteBite when role is DELETE', () => {
-      jest.spyOn(component.deleteBite, 'emit');
+      vi.spyOn(component.deleteBite, 'emit');
 
       const mockEvent = {
         detail: { role: 'delete' },
@@ -136,7 +137,7 @@ describe('BiteComponent', () => {
     });
 
     it('should not emit deleteBite when role is CANCEL', () => {
-      jest.spyOn(component.deleteBite, 'emit');
+      vi.spyOn(component.deleteBite, 'emit');
 
       const mockEvent = {
         detail: { role: 'cancel' },

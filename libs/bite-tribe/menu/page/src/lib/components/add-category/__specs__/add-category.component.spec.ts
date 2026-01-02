@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AddCategoryComponent } from '../add-category.component';
+import { vi } from 'vitest';
 
 describe('AddCategoryComponent', () => {
   let component: AddCategoryComponent;
@@ -34,7 +35,7 @@ describe('AddCategoryComponent', () => {
 
   describe('onAddCategory', () => {
     beforeEach(() => {
-      jest.spyOn(component.addCategory, 'emit');
+      vi.spyOn(component.addCategory, 'emit');
     });
 
     it('should emit addCategory event when form is valid', () => {

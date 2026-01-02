@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AddItemComponent } from '../add-item.component';
+import { vi } from 'vitest';
 
 describe('AddItemComponent', () => {
   let component: AddItemComponent;
@@ -34,7 +35,7 @@ describe('AddItemComponent', () => {
 
   describe('onAddItem', () => {
     beforeEach(() => {
-      jest.spyOn(component.addItem, 'emit');
+      vi.spyOn(component.addItem, 'emit');
     });
 
     it('should emit addItem event when form is valid', () => {

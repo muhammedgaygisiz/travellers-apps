@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { MenuItemComponent } from '../menu-item.component';
-import SpyInstance = jest.SpyInstance;
+import { vi, Mock } from 'vitest';
 
 describe('MenuItemComponent', () => {
   let component: MenuItemComponent;
@@ -71,10 +71,10 @@ describe('MenuItemComponent', () => {
   });
 
   describe('onCreateBiteClick', () => {
-    let emitSpy: SpyInstance;
+    let emitSpy: Mock;
 
     beforeEach(() => {
-      emitSpy = jest.spyOn(component.createBiteClick, 'emit');
+      emitSpy = vi.spyOn(component.createBiteClick, 'emit');
     });
 
     it('should emit createBiteClick event with item data when itemData is defined', () => {
@@ -103,10 +103,10 @@ describe('MenuItemComponent', () => {
   });
 
   describe('onAddVariant', () => {
-    let emitSpy: SpyInstance;
+    let emitSpy: Mock;
 
     beforeEach(() => {
-      emitSpy = jest.spyOn(component.addedVariant, 'emit');
+      emitSpy = vi.spyOn(component.addedVariant, 'emit');
     });
 
     it('should add variant to item and emit addedVariant event', () => {

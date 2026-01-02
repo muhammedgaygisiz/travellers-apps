@@ -1,7 +1,7 @@
 import { CategoryComponent } from '../category.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
-import SpyInstance = jest.SpyInstance;
+import { vi, Mock } from 'vitest';
 
 describe('CategoryComponent', () => {
   let component: CategoryComponent;
@@ -43,12 +43,12 @@ describe('CategoryComponent', () => {
   });
 
   describe('onAddItem', () => {
-    let emitSpy: SpyInstance;
+    let emitSpy: Mock;
     let mockMenuItem: any;
     let mockCategory: any;
 
     beforeEach(() => {
-      emitSpy = jest.spyOn(component.addItemToCategory, 'emit');
+      emitSpy = vi.spyOn(component.addItemToCategory, 'emit');
       mockMenuItem = { id: '1', name: 'Test Item' } as any;
       mockCategory = { id: 'cat1', items: [] } as any;
       componentRef.setInput('category', mockCategory);
@@ -77,10 +77,10 @@ describe('CategoryComponent', () => {
   });
 
   describe('onAddVariant', () => {
-    let onAddItemSpy: SpyInstance;
+    let onAddItemSpy: Mock;
 
     beforeEach(() => {
-      onAddItemSpy = jest.spyOn(component, 'onAddItem');
+      onAddItemSpy = vi.spyOn(component, 'onAddItem');
     });
 
     it('should call onAddItem with isVariant true', () => {
@@ -91,18 +91,18 @@ describe('CategoryComponent', () => {
   });
 
   describe('handleReorder', () => {
-    let emitSpy: SpyInstance;
+    let emitSpy: Mock;
     let mockEvent: any;
     let mockCategory: any;
 
     beforeEach(() => {
-      emitSpy = jest.spyOn(component.orderingInCategoryChanged, 'emit');
+      emitSpy = vi.spyOn(component.orderingInCategoryChanged, 'emit');
       mockEvent = {
-        stopPropagation: jest.fn(),
+        stopPropagation: vi.fn(),
         detail: {
           from: 0,
           to: 1,
-          complete: jest.fn(),
+          complete: vi.fn(),
         },
       } as any;
       mockCategory = {

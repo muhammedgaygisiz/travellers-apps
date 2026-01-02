@@ -118,7 +118,7 @@
     "@types/d3": "7.4.3",
     "@types/jest": "30.0.0",
     "@types/memoizee": "0.4.12",
-    "@types/node": "18.16.9",
+    "@types/node": "22.9.4",
     "@types/uuid": "10.0.0",
     "@typescript-eslint/parser": "8.51.0",
     "@typescript-eslint/utils": "8.51.0",

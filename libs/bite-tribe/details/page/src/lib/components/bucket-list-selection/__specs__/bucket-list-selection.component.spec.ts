@@ -11,6 +11,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ComponentRef } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
+import { vi } from 'vitest';
 
 addNecessaryIcons();
 
@@ -73,7 +74,7 @@ describe('BucketListSelectionComponent', () => {
   });
 
   it('should emit removeBiteFromBucketlist when selecting a list that contains the bite', () => {
-    const spy = jest.spyOn(component.removeBiteFromBucketlist, 'emit');
+    const spy = vi.spyOn(component.removeBiteFromBucketlist, 'emit');
     component.onBucketlistSelected(mockBucketlists[0]);
     expect(spy).toHaveBeenCalledWith({
       bucketlistId: '1',
@@ -82,14 +83,14 @@ describe('BucketListSelectionComponent', () => {
   });
 
   it('should emit selectList when selecting a list that does not contain the bite', () => {
-    const spy = jest.spyOn(component.selectList, 'emit');
+    const spy = vi.spyOn(component.selectList, 'emit');
     component.onBucketlistSelected(mockBucketlists[1]);
     expect(spy).toHaveBeenCalledWith(mockBucketlists[1]);
   });
 
   it('should call onNewList with input value when alert is dismissed', () => {
     const newListName = 'New List';
-    const spy = jest.spyOn(component, 'onNewList');
+    const spy = vi.spyOn(component, 'onNewList');
     component.onAlertDidDismiss([newListName]);
     expect(spy).toHaveBeenCalledWith(newListName);
   });

@@ -4,6 +4,7 @@ import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
 import { signal } from '@angular/core';
 import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
 import { NavController } from '@ionic/angular/standalone';
+import { vi } from 'vitest';
 
 const mockBite: Bite = {
   id: 'bite123',
@@ -17,29 +18,29 @@ const createMockDataAccess = (overrides = {}): any => {
     bucketlists: signal([]),
     userId: signal('user1'),
     isAuthenticated: signal(true),
-    saveNewTags: jest.fn(),
-    saveNewReview: jest.fn(),
-    saveToBucketList: jest.fn(),
-    createAndSaveToBucketList: jest.fn(),
-    removeBiteFromBucketlist: jest.fn(),
-    submitLikeClick: jest.fn(),
-    currentPosition: jest.fn(),
-    logout: jest.fn(),
+    saveNewTags: vi.fn(),
+    saveNewReview: vi.fn(),
+    saveToBucketList: vi.fn(),
+    createAndSaveToBucketList: vi.fn(),
+    removeBiteFromBucketlist: vi.fn(),
+    submitLikeClick: vi.fn(),
+    currentPosition: vi.fn(),
+    logout: vi.fn(),
   };
   return { ...base, ...overrides };
 };
 
 const createNavControllerMock = (): any => ({
-  navigateForward: jest.fn().mockResolvedValue(true),
-  navigateBack: jest.fn().mockResolvedValue(true),
-  navigateRoot: jest.fn().mockResolvedValue(true),
-  back: jest.fn(),
-  pop: jest.fn().mockResolvedValue(true),
-  getRouteId: jest.fn(),
-  isTransitioning: jest.fn(),
-  consumeTransition: jest.fn(),
-  setDirection: jest.fn(),
-  setTopOutlet: jest.fn(),
+  navigateForward: vi.fn().mockResolvedValue(true),
+  navigateBack: vi.fn().mockResolvedValue(true),
+  navigateRoot: vi.fn().mockResolvedValue(true),
+  back: vi.fn(),
+  pop: vi.fn().mockResolvedValue(true),
+  getRouteId: vi.fn(),
+  isTransitioning: vi.fn(),
+  consumeTransition: vi.fn(),
+  setDirection: vi.fn(),
+  setTopOutlet: vi.fn(),
 });
 
 describe('DetailsService', () => {
@@ -114,7 +115,7 @@ describe('DetailsService', () => {
 
     beforeEach(() => {
       // Reset mocks between tests
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       TestBed.resetTestingModule();
     });
 
@@ -122,7 +123,7 @@ describe('DetailsService', () => {
       // Arrange
       mockDataAccessService = {
         bite: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
-        saveToBucketList: jest.fn(),
+        saveToBucketList: vi.fn(),
       } as any;
 
       TestBed.configureTestingModule({
@@ -151,7 +152,7 @@ describe('DetailsService', () => {
       // Arrange
       mockDataAccessService = {
         bite: signal(undefined),
-        saveToBucketList: jest.fn(),
+        saveToBucketList: vi.fn(),
       } as any;
 
       TestBed.configureTestingModule({
@@ -179,7 +180,7 @@ describe('DetailsService', () => {
 
   describe('saveBiteToBucketListWithNewList', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       TestBed.resetTestingModule();
     });
 
@@ -187,7 +188,7 @@ describe('DetailsService', () => {
       // Arrange
       mockDataAccessService = {
         bite: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
-        createAndSaveToBucketList: jest.fn(),
+        createAndSaveToBucketList: vi.fn(),
       } as any;
 
       TestBed.configureTestingModule({
@@ -220,7 +221,7 @@ describe('DetailsService', () => {
       // Arrange
       mockDataAccessService = {
         bite: signal(undefined),
-        createAndSaveToBucketList: jest.fn(),
+        createAndSaveToBucketList: vi.fn(),
       } as any;
 
       TestBed.configureTestingModule({
@@ -252,14 +253,14 @@ describe('DetailsService', () => {
 
   describe('removeBiteFromBucketlist', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       TestBed.resetTestingModule();
     });
 
     it('should call dataAccess.removeBiteFromBucketlist with correct parameters', () => {
       // Arrange
       mockDataAccessService = {
-        removeBiteFromBucketlist: jest.fn(),
+        removeBiteFromBucketlist: vi.fn(),
       } as any;
 
       TestBed.configureTestingModule({

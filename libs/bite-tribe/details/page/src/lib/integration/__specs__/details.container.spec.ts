@@ -4,10 +4,11 @@ import { DetailsService } from '../details.service';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
+import { vi } from 'vitest';
 
-jest.mock('heic2any', () => jest.fn());
+vi.mock('heic2any', () => vi.fn());
 
-jest.mock('localization');
+vi.mock('localization');
 addNecessaryIcons();
 
 describe('DetailsComponent', () => {

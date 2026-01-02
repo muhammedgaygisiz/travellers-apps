@@ -1,4 +1,5 @@
 import { TimeAgoPipe } from '../time-ago.pipe';
+import { vi } from 'vitest';
 
 describe('TimeAgoPipe', () => {
   let pipe: TimeAgoPipe;
@@ -7,12 +8,12 @@ describe('TimeAgoPipe', () => {
   beforeEach(() => {
     pipe = new TimeAgoPipe();
     // Mock the current date
-    jest.useFakeTimers();
-    jest.setSystemTime(currentDate);
+    vi.useFakeTimers();
+    vi.setSystemTime(currentDate);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should create', () => {

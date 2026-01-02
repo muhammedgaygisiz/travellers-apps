@@ -4,7 +4,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { inject, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { Bite, Like } from 'model';
-import SpyInstance = jest.SpyInstance;
+import { vi, Mock as ViMock } from 'vitest';
 
 class Mock {
   bites$ = of([]);
@@ -42,7 +42,7 @@ describe('MapDataAccessService', () => {
     it('should call logout on BiteTribeStoreService', inject(
       [MapDataAccessService],
       (service: MapDataAccessService) => {
-        const logoutSpy = jest.spyOn(biteTribeStoreService, 'logout');
+        const logoutSpy = vi.spyOn(biteTribeStoreService, 'logout');
         service.logout();
         expect(logoutSpy).toHaveBeenCalledTimes(1);
       },
@@ -61,16 +61,17 @@ describe('MapDataAccessService', () => {
       userId: like.userId,
       likes: [like],
     } as Bite;
-    let submitLikeOrDislikeClickSpy: SpyInstance;
+    let submitLikeOrDislikeClickSpy: ViMock;
 
     beforeEach(inject(
       [BiteTribeStoreService],
       (storeService: BiteTribeStoreService) => {
         storeService.bites$ = of([bite]);
         storeService.userId$ = of('userId');
-        submitLikeOrDislikeClickSpy = jest
+        submitLikeOrDislikeClickSpy = vi
           .spyOn(storeService, 'submitLikeOrDislikeClick')
-          .mockImplementation();
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
       },
     ));
 

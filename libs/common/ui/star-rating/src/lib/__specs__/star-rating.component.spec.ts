@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StarRatingComponent } from '../star-rating.component';
 import { ComponentRef } from '@angular/core';
+import { vi } from 'vitest';
 
 describe('StarRatingComponent', () => {
   let component: StarRatingComponent;
@@ -20,7 +21,7 @@ describe('StarRatingComponent', () => {
 
   describe('onRate', () => {
     it('should emit rated event when not readonly', () => {
-      const ratedSpy = jest.spyOn(component.rated, 'emit');
+      const ratedSpy = vi.spyOn(component.rated, 'emit');
       compRef.setInput('readonly', false);
 
       component.onRate(3);
@@ -29,7 +30,7 @@ describe('StarRatingComponent', () => {
     });
 
     it('should not emit rated event when readonly', () => {
-      const ratedSpy = jest.spyOn(component.rated, 'emit');
+      const ratedSpy = vi.spyOn(component.rated, 'emit');
       compRef.setInput('readonly', true);
 
       component.onRate(3);
@@ -83,7 +84,7 @@ describe('StarRatingComponent', () => {
 
   describe('registerOnChange', () => {
     it('should register onChange callback', () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       component.registerOnChange(mockFn);
       component._onChange(5);
       expect(mockFn).toHaveBeenCalledWith(5);
@@ -92,7 +93,7 @@ describe('StarRatingComponent', () => {
 
   describe('registerOnTouched', () => {
     it('should register onTouch callback', () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       component.registerOnTouched(mockFn);
       component._onTouch();
       expect(mockFn).toHaveBeenCalled();

@@ -3,9 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
-import SpyInstance = jest.SpyInstance;
+import { Mock, vi } from 'vitest';
 
-jest.mock('localization');
+vi.mock('localization');
 addNecessaryIcons();
 
 describe('BucketlistsPage', () => {
@@ -48,14 +48,14 @@ describe('BucketlistsPage', () => {
 
   describe('emitSortingChange', () => {
     it('should emit sortingChange event with the correct value', () => {
-      jest.spyOn(component.sortingChange, 'emit');
+      vi.spyOn(component.sortingChange, 'emit');
       const event = { detail: { value: 'createdAt' } };
       component.emitSortingChange(event);
       expect(component.sortingChange.emit).toHaveBeenCalledWith('createdAt');
     });
 
     it('should not emit sortingChange event if detail is missing', () => {
-      jest.spyOn(component.sortingChange, 'emit');
+      vi.spyOn(component.sortingChange, 'emit');
       const event = { detail: null } as any;
       component.emitSortingChange(event);
       expect(component.sortingChange.emit).not.toHaveBeenCalled();
@@ -71,11 +71,11 @@ describe('BucketlistsPage', () => {
   });
 
   describe('onNewList', () => {
-    let newListEmitSpy: SpyInstance;
+    let newListEmitSpy: Mock;
     const alertResult = ['New Bucketlist'];
 
     beforeEach(() => {
-      newListEmitSpy = jest.spyOn(component.newList, 'emit');
+      newListEmitSpy = vi.spyOn(component.newList, 'emit');
       component.isAlertOpen.set(true);
     });
 

@@ -52,6 +52,12 @@
         "cmd": "update ios"
       }
     },
+    "doctor": {
+      "executor": "@nxext/capacitor:cap",
+      "options": {
+        "cmd": "doctor ios"
+      }
+    },
     "dev": {
       "executor": "nx:run-commands",
       "options": {

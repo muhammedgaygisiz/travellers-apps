@@ -228,3 +228,17 @@ nx run bite-tribe-android:sync
 - After the build is completed, the `Locate` button appears
 - Click on the `Locate` button to open the folder containing the generated app bundle
 - Upload the app bundle to Play Console
+
+# Health checks for native apps
+
+To run health checks for the native apps, following commands can be used:
+
+```
+nx doctor bite-tribe-ios
+```
+
+or for Android
+
+```
+nx doctor bite-tribe-android
+```

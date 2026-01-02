@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Photo } from '@capacitor/camera';
 import { compressPhoto } from '../compress-photo';
+import { vi } from 'vitest';
 
 describe('compressPhoto', () => {
   let mockPhoto: Photo;
@@ -8,29 +9,29 @@ describe('compressPhoto', () => {
   beforeEach(() => {
     // Mock canvas element
     const mockCanvas = {
-      getContext: jest.fn(() => ({
-        drawImage: jest.fn(),
+      getContext: vi.fn(() => ({
+        drawImage: vi.fn(),
       })),
       width: 100,
       height: 100,
-      toBlob: jest.fn((callback) =>
-        callback(new Blob(['mock-image-data'], { type: 'image/jpeg' }))
+      toBlob: vi.fn((callback) =>
+        callback(new Blob(['mock-image-data'], { type: 'image/jpeg' })),
       ),
     } as unknown as HTMLCanvasElement;
 
     // Mock document.createElement for canvas
-    jest
-      .spyOn(document, 'createElement')
-      .mockImplementation((tagName: string) => {
+    vi.spyOn(document, 'createElement').mockImplementation(
+      (tagName: string) => {
         if (tagName === 'canvas') {
           return mockCanvas;
         }
         return document.createElement(tagName);
-      });
+      },
+    );
 
     // Mock URL.createObjectURL
-    global.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
-    global.URL.revokeObjectURL = jest.fn();
+    global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+    global.URL.revokeObjectURL = vi.fn();
 
     // Mock Image
     // @ts-expect-error - Mocking Image global
@@ -75,7 +76,7 @@ describe('compressPhoto', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should compress photo to a File with size <= MAX_SIZE_BYTES', async () => {
@@ -148,12 +149,12 @@ describe('compressPhoto', () => {
 
     // Mock a large file that needs multiple compression iterations
     const mockCanvas = {
-      getContext: jest.fn(() => ({
-        drawImage: jest.fn(),
+      getContext: vi.fn(() => ({
+        drawImage: vi.fn(),
       })),
       width: 100,
       height: 100,
-      toBlob: jest.fn((callback) => {
+      toBlob: vi.fn((callback) => {
         const size = blobSizes[blobCallCount] || 400 * 1024; // Use 400KB for any additional calls
         callback(new Blob(['x'.repeat(size)], { type: 'image/jpeg' }));
         blobCallCount++;
@@ -161,14 +162,14 @@ describe('compressPhoto', () => {
     } as unknown as HTMLCanvasElement;
 
     // Override createElement to use our custom canvas
-    jest
-      .spyOn(document, 'createElement')
-      .mockImplementation((tagName: string) => {
+    vi.spyOn(document, 'createElement').mockImplementation(
+      (tagName: string) => {
         if (tagName === 'canvas') {
           return mockCanvas;
         }
         return document.createElement(tagName);
-      });
+      },
+    );
 
     const largePhoto: Photo = {
       base64String:
@@ -195,12 +196,12 @@ describe('compressPhoto', () => {
     let blobCallCount = 0;
 
     const mockCanvas = {
-      getContext: jest.fn(() => ({
-        drawImage: jest.fn(),
+      getContext: vi.fn(() => ({
+        drawImage: vi.fn(),
       })),
       width: 100,
       height: 100,
-      toBlob: jest.fn((callback) => {
+      toBlob: vi.fn((callback) => {
         const size = blobSizes[blobCallCount] || 1000 * 1024;
         callback(new Blob(['x'.repeat(size)], { type: 'image/jpeg' }));
         blobCallCount++;
@@ -208,14 +209,14 @@ describe('compressPhoto', () => {
     } as unknown as HTMLCanvasElement;
 
     // Override createElement to use our custom canvas
-    jest
-      .spyOn(document, 'createElement')
-      .mockImplementation((tagName: string) => {
+    vi.spyOn(document, 'createElement').mockImplementation(
+      (tagName: string) => {
         if (tagName === 'canvas') {
           return mockCanvas;
         }
         return document.createElement(tagName);
-      });
+      },
+    );
 
     const largePhoto: Photo = {
       base64String:
@@ -241,12 +242,12 @@ describe('compressPhoto', () => {
     let blobCallCount = 0;
 
     const mockCanvas = {
-      getContext: jest.fn(() => ({
-        drawImage: jest.fn(),
+      getContext: vi.fn(() => ({
+        drawImage: vi.fn(),
       })),
       width: 100,
       height: 100,
-      toBlob: jest.fn((callback) => {
+      toBlob: vi.fn((callback) => {
         const size = blobSizes[blobCallCount] || 1000 * 1024;
         callback(new Blob(['x'.repeat(size)], { type: 'image/jpeg' }));
         blobCallCount++;
@@ -254,14 +255,14 @@ describe('compressPhoto', () => {
     } as unknown as HTMLCanvasElement;
 
     // Override createElement to use our custom canvas
-    jest
-      .spyOn(document, 'createElement')
-      .mockImplementation((tagName: string) => {
+    vi.spyOn(document, 'createElement').mockImplementation(
+      (tagName: string) => {
         if (tagName === 'canvas') {
           return mockCanvas;
         }
         return document.createElement(tagName);
-      });
+      },
+    );
 
     const largePhoto: Photo = {
       ...mockPhoto,

@@ -1,4 +1,5 @@
 import { compressWithCanvas } from '../compress-with-canvas';
+import { vi } from 'vitest';
 
 describe('compressWithCanvas', () => {
   let mockImage: HTMLImageElement;
@@ -13,30 +14,30 @@ describe('compressWithCanvas', () => {
     } as HTMLImageElement;
 
     mockCtx = {
-      drawImage: jest.fn(),
+      drawImage: vi.fn(),
     } as unknown as CanvasRenderingContext2D;
 
     mockCanvas = {
       width: 0,
       height: 0,
-      getContext: jest.fn(() => mockCtx),
-      toBlob: jest.fn(),
+      getContext: vi.fn(() => mockCtx),
+      toBlob: vi.fn(),
     } as unknown as HTMLCanvasElement;
 
-    global.URL.revokeObjectURL = jest.fn();
-    global.document.createElement = jest.fn((tagName: string) => {
+    global.URL.revokeObjectURL = vi.fn();
+    global.document.createElement = vi.fn((tagName: string) => {
       if (tagName === 'canvas') return mockCanvas;
       return {} as HTMLElement;
     });
   });
 
   it('should resize the canvas and draw the image', () => {
-    const mockResize = jest.fn(() => [800, 600]);
-    jest.mock('../resize-retaining-aspect-ratio', () => ({
+    const mockResize = vi.fn(() => [800, 600]);
+    vi.mock('../resize-retaining-aspect-ratio', () => ({
       resizeRetainingAspectRatio: mockResize,
     }));
 
-    compressWithCanvas(mockImage, 'test.jpg', 800, 600, jest.fn(), 0.7);
+    compressWithCanvas(mockImage, 'test.jpg', 800, 600, vi.fn(), 0.7);
 
     expect(global.URL.revokeObjectURL).toHaveBeenCalledWith(mockImage.src);
     expect(mockCanvas.width).toBe(800);
@@ -46,7 +47,7 @@ describe('compressWithCanvas', () => {
 
   it('should resolve with a new File when toBlob succeeds', (done) => {
     const mockBlob = new Blob(['mock-content'], { type: 'image/jpeg' });
-    mockCanvas.toBlob = jest.fn((callback) => callback(mockBlob));
+    mockCanvas.toBlob = vi.fn((callback) => callback(mockBlob));
 
     compressWithCanvas(
       mockImage,
@@ -59,12 +60,12 @@ describe('compressWithCanvas', () => {
         expect((result as any).type).toBe('image/jpeg');
         done();
       },
-      0.7
+      0.7,
     );
   });
 
   it('should resolve with an empty object when toBlob fails', (done) => {
-    mockCanvas.toBlob = jest.fn((callback) => callback(null));
+    mockCanvas.toBlob = vi.fn((callback) => callback(null));
 
     compressWithCanvas(
       mockImage,
@@ -75,7 +76,7 @@ describe('compressWithCanvas', () => {
         expect(result).toEqual({});
         done();
       },
-      0.7
+      0.7,
     );
   });
 });

@@ -9,11 +9,10 @@
       "executor": "@nx/eslint:lint"
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "@nx/vitest:test",
+      "outputs": ["{options.reportsDirectory}"],
       "options": {
-        "jestConfig": "libs/common/image-compression/jest.config.ts",
-        "tsConfig": "libs/common/image-compression/tsconfig.spec.json"
+        "reportsDirectory": "../../../coverage/libs/common/image-compression"
       }
     }
   }

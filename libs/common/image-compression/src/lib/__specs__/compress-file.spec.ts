@@ -1,11 +1,12 @@
 import { compressFile } from '../compress-file';
 import { convertHeicToJpeg } from '../convert-heic-to-jpeg';
+import { vi } from 'vitest';
 
-jest.mock('../convert-heic-to-jpeg', () => ({
-  convertHeicToJpeg: jest.fn((file) => file),
+vi.mock('../convert-heic-to-jpeg', () => ({
+  convertHeicToJpeg: vi.fn((file) => file),
 }));
-jest.mock('heic2any', () => ({
-  default: jest.fn(),
+vi.mock('heic2any', () => ({
+  default: vi.fn(),
   __esModule: true,
 }));
 
@@ -17,20 +18,20 @@ describe('compress-file', () => {
     // Mock URL methods
     originalCreateObjectURL = URL.createObjectURL;
     originalRevokeObjectURL = URL.revokeObjectURL;
-    URL.createObjectURL = jest.fn(() => 'blob:mock-url');
-    URL.revokeObjectURL = jest.fn();
+    URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+    URL.revokeObjectURL = vi.fn();
 
     // Mock canvas
     const mockContext = {
-      drawImage: jest.fn(),
+      drawImage: vi.fn(),
     };
 
     const mockCanvas = {
-      getContext: jest.fn(() => mockContext),
-      toBlob: jest.fn((callback) => callback(new Blob(['mock-blob']))),
+      getContext: vi.fn(() => mockContext),
+      toBlob: vi.fn((callback) => callback(new Blob(['mock-blob']))),
     };
 
-    global.document.createElement = jest.fn((tagName) => {
+    global.document.createElement = vi.fn((tagName) => {
       if (tagName === 'canvas') return mockCanvas as any;
       return {} as any;
     });
@@ -53,7 +54,7 @@ describe('compress-file', () => {
       onerror: null as any,
     };
 
-    global.Image = jest.fn(() => mockImage) as any;
+    global.Image = vi.fn(() => mockImage) as any;
 
     // Act
     const compressionPromise = compressFile(mockFile);
@@ -78,7 +79,7 @@ describe('compress-file', () => {
       onerror: null as any,
     };
 
-    global.Image = jest.fn(() => mockImage) as any;
+    global.Image = vi.fn(() => mockImage) as any;
 
     // Act
     const compressionPromise = compressFile(mockFile, 1024, 1024);
@@ -103,7 +104,7 @@ describe('compress-file', () => {
       onerror: null as any,
     };
 
-    global.Image = jest.fn(() => mockImage) as any;
+    global.Image = vi.fn(() => mockImage) as any;
 
     // Act
     const compressionPromise = compressFile(mockFile);
@@ -126,7 +127,7 @@ describe('compress-file', () => {
       onerror: null as any,
     };
 
-    global.Image = jest.fn(() => mockImage) as any;
+    global.Image = vi.fn(() => mockImage) as any;
 
     // Act - we do not wait for the result here as we are only interested in
     // whether the conversion function was called

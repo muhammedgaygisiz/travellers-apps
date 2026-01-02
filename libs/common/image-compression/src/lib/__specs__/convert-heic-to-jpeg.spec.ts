@@ -1,6 +1,7 @@
-// Mock heic2any before importing
-const mockHeic2any = jest.fn();
-jest.mock('heic2any', () => ({
+import { vi } from 'vitest';
+
+const mockHeic2any = vi.fn();
+vi.mock('heic2any', () => ({
   __esModule: true,
   default: mockHeic2any,
 }));

@@ -5,10 +5,11 @@ import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 import { BiteService } from '../bite.service';
 import { BiteContainer } from '../bite-container.component';
+import { vi } from 'vitest';
 
-jest.mock('heic2any', () => jest.fn());
+vi.mock('heic2any', () => vi.fn());
 
-jest.mock('localization');
+vi.mock('localization');
 addNecessaryIcons();
 
 describe('BiteContainer', () => {

@@ -1,19 +1,20 @@
 import { getExifDataFromFile } from '../get-exif-data-from-file';
 import * as EXIFR from 'exifr';
+import { vi, Mock as ViMock } from 'vitest';
 
-jest.mock('exifr', () => ({
-  parse: jest.fn(),
+vi.mock('exifr', () => ({
+  parse: vi.fn(),
 }));
 
 describe('getExifDataFromFile', () => {
   const mockFile = new File([''], 'test.jpg', { type: 'image/jpeg' });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should extract GPS position from valid EXIF data', async () => {
-    (EXIFR.parse as jest.Mock).mockImplementation(() => ({
+    (EXIFR.parse as ViMock).mockImplementation(() => ({
       latitude: 40.5,
       longitude: 74,
     }));
@@ -27,7 +28,7 @@ describe('getExifDataFromFile', () => {
   });
 
   it('should return default values if EXIF data is missing', async () => {
-    (EXIFR.parse as jest.Mock).mockImplementation(() => ({
+    (EXIFR.parse as ViMock).mockImplementation(() => ({
       latitude: 0,
       longitude: 0,
     }));
@@ -39,7 +40,7 @@ describe('getExifDataFromFile', () => {
 
   it('should reject if an error is thrown', async () => {
     const error = new Error('EXIF error');
-    (EXIFR.parse as jest.Mock).mockImplementation(() => {
+    (EXIFR.parse as ViMock).mockImplementation(() => {
       throw error;
     });
 
@@ -49,7 +50,7 @@ describe('getExifDataFromFile', () => {
   });
 
   it('should return fallback position if getTag throws inside getData', async () => {
-    (EXIFR.parse as jest.Mock).mockImplementation(() => ({
+    (EXIFR.parse as ViMock).mockImplementation(() => ({
       latitude: 123,
       longitude: 456,
     }));

@@ -15,13 +15,14 @@ import {
 } from 'ionicons/icons';
 import { Bite } from 'model';
 import { FormGroup } from '@angular/forms';
+import { Mock, vi } from 'vitest';
 
-jest.mock('@capacitor/camera');
-jest.mock('image-compression', () => ({
-  compressFile: jest.fn(),
-  compressPhoto: jest.fn(),
+vi.mock('@capacitor/camera');
+vi.mock('image-compression', () => ({
+  compressFile: vi.fn(),
+  compressPhoto: vi.fn(),
 }));
-jest.mock('localization');
+vi.mock('localization');
 addNecessaryIcons();
 
 describe('BitePage', () => {
@@ -33,7 +34,7 @@ describe('BitePage', () => {
 
   beforeEach(() => {
     platformMock = {
-      is: jest.fn((key: string) => key === 'web'),
+      is: vi.fn((key: string) => key === 'web'),
       backButton: {
         subscribeWithPriority: () => {},
       } as any,
@@ -41,7 +42,7 @@ describe('BitePage', () => {
 
     // Save original console.error and mock it
     originalConsoleError = console.error;
-    jest.spyOn(console, 'error').mockImplementation(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {
       console.log('error was thrown in test suite');
     });
 
@@ -51,8 +52,8 @@ describe('BitePage', () => {
       arrowBackOutline,
     });
 
-    Camera.getPhoto = jest.fn();
-    Camera.requestPermissions = jest.fn();
+    Camera.getPhoto = vi.fn();
+    Camera.requestPermissions = vi.fn();
 
     TestBed.configureTestingModule({
       providers: [
@@ -178,7 +179,7 @@ describe('BitePage', () => {
       },
     };
 
-    const emitSpy = jest.spyOn(component.submitBite, 'emit');
+    const emitSpy = vi.spyOn(component.submitBite, 'emit');
     component.biteFormGroup.patchValue(validBite as any);
     component.saveBite();
 
@@ -186,7 +187,7 @@ describe('BitePage', () => {
   });
 
   it('should not emit form value on saveBite when invalid', () => {
-    const emitSpy = jest.spyOn(component.submitBite, 'emit');
+    const emitSpy = vi.spyOn(component.submitBite, 'emit');
     component.saveBite();
     expect(emitSpy).not.toHaveBeenCalled();
   });
@@ -197,7 +198,7 @@ describe('BitePage', () => {
     });
 
     it('should handle native platform', () => {
-      (platformMock.is as jest.Mock).mockReturnValue(true);
+      (platformMock.is as Mock).mockReturnValue(true);
       fixture = TestBed.createComponent(BitePage);
       component = fixture.componentInstance;
 
@@ -406,7 +407,7 @@ describe('BitePage', () => {
 
   describe('onCurrencySelected', () => {
     it('should set currency in the form group and should call dismiss on modal', () => {
-      const dismissSpy = jest.fn();
+      const dismissSpy = vi.fn();
       component.onCurrencySelected('USD', { dismiss: dismissSpy } as any);
       expect(component.biteFormGroup.controls['currency'].value).toBe('USD');
       expect(dismissSpy).toHaveBeenCalled();

@@ -3,18 +3,19 @@ import { TestBed } from '@angular/core/testing';
 import { BiteService } from '../bite.service';
 import { NavController } from '@ionic/angular';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
+import { vi } from 'vitest';
 
 const Mock = {
-  navigateBack: jest.fn(),
-  setEditedImage: jest.fn(),
-  submitEditedBite: jest.fn(),
-  submitNewBite: jest.fn(),
-  navigateForward: jest.fn(),
-  submitBite: jest.fn(),
-  back: jest.fn(),
+  navigateBack: vi.fn(),
+  setEditedImage: vi.fn(),
+  submitEditedBite: vi.fn(),
+  submitNewBite: vi.fn(),
+  navigateForward: vi.fn(),
+  submitBite: vi.fn(),
+  back: vi.fn(),
 };
 
-jest.mock('localization');
+vi.mock('localization');
 
 describe('BiteService', () => {
   let service: BiteService;

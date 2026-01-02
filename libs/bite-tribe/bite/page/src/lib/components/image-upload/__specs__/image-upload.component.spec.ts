@@ -10,13 +10,14 @@ import { imageOutline } from 'ionicons/icons';
 import { ComponentRef, signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
+import { vi, Mock } from 'vitest';
 
 addNecessaryIcons();
 
-jest.mock('@capacitor/camera', () => ({
+vi.mock('@capacitor/camera', () => ({
   Camera: {
-    requestPermissions: jest.fn(),
-    getPhoto: jest.fn(),
+    requestPermissions: vi.fn(),
+    getPhoto: vi.fn(),
   },
   CameraResultType: {
     Base64: 'base64',
@@ -25,15 +26,15 @@ jest.mock('@capacitor/camera', () => ({
     Prompt: 'prompt',
   },
 }));
-jest.mock('image-compression');
-jest.mock('heic2any', () => jest.fn());
+vi.mock('image-compression');
+vi.mock('heic2any', () => vi.fn());
 
-jest.mock('../../page/utils/get-exif-data-from-file');
-jest.mock('../../page/utils/get-exif-data-from-photo');
+vi.mock('../../page/utils/get-exif-data-from-file');
+vi.mock('../../page/utils/get-exif-data-from-photo');
 
 type MockFileReader = {
-  readAsDataURL: jest.Mock;
-  addEventListener?: jest.Mock;
+  readAsDataURL: Mock;
+  addEventListener?: Mock;
   onload: null | (() => void);
   result: string;
   EMPTY: 0;
@@ -47,20 +48,20 @@ describe('ImageUploadComponent', () => {
   let fixture: ComponentFixture<ImageUploadComponent>;
   let platformMock: Partial<Platform>;
   let navControllerMock: Partial<NavController>;
-  let mockEmit: jest.Mock;
+  let mockEmit: Mock;
   let originalConsoleError: typeof console.error;
 
   beforeEach(async () => {
     platformMock = {
-      is: jest.fn((key: string) => key === 'web'),
+      is: vi.fn((key: string) => key === 'web'),
     };
     navControllerMock = {
-      navigateForward: jest.fn(),
+      navigateForward: vi.fn(),
     };
 
     // Save original console.error and mock it
     originalConsoleError = console.error;
-    jest.spyOn(console, 'error').mockImplementation(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {
       console.log('error was thrown in test suite');
     });
 
@@ -77,24 +78,22 @@ describe('ImageUploadComponent', () => {
     fixture = TestBed.createComponent(ImageUploadComponent);
     component = fixture.componentInstance;
     compRef = fixture.componentRef;
-    mockEmit = jest.fn();
+    mockEmit = vi.fn();
 
     // Mock the output event emitter
-    jest
-      .spyOn(component.positionFromImage, 'emit')
-      .mockImplementation(mockEmit);
+    vi.spyOn(component.positionFromImage, 'emit').mockImplementation(mockEmit);
 
     // Mock the viewChild fileUpload
     Object.defineProperty(component, 'fileUpload', {
       value: () => ({
-        nativeElement: { click: jest.fn(), value: '' },
+        nativeElement: { click: vi.fn(), value: '' },
       }),
     });
 
     // @ts-expect-error - Mocking FileReader
-    global.FileReader = jest.fn(() => ({
-      readAsDataURL: jest.fn(),
-      addEventListener: jest.fn((_, cb) => cb()),
+    global.FileReader = vi.fn(() => ({
+      readAsDataURL: vi.fn(),
+      addEventListener: vi.fn((_, cb) => cb()),
       onload: null,
       result: 'data:image/jpeg;base64,abc',
       EMPTY: 0,
@@ -112,7 +111,7 @@ describe('ImageUploadComponent', () => {
   });
 
   it('should call clickOnFileUploader on web', () => {
-    const spy = jest.spyOn(
+    const spy = vi.spyOn(
       component as unknown as { clickOnFileUploader: () => void },
       'clickOnFileUploader',
     );
@@ -129,18 +128,16 @@ describe('ImageUploadComponent', () => {
     component.isWeb = signal(false);
 
     // Set up spy on the private method
-    const getImageFromNativeSpy = jest.spyOn(
+    const getImageFromNativeSpy = vi.spyOn(
       component as unknown as { getImageFromNative: () => Promise<void> },
       'getImageFromNative',
     );
 
     // Setup other required mocks
-    jest
-      .spyOn(component.positionFromImage, 'emit')
-      .mockImplementation(mockEmit);
+    vi.spyOn(component.positionFromImage, 'emit').mockImplementation(mockEmit);
     Object.defineProperty(component, 'fileUpload', {
       value: () => ({
-        nativeElement: { click: jest.fn(), value: '' },
+        nativeElement: { click: vi.fn(), value: '' },
       }),
     });
 
@@ -155,11 +152,11 @@ describe('ImageUploadComponent', () => {
 
   it('should emit position from file on file select', async () => {
     const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-    (getExifDataFromFile as jest.Mock).mockResolvedValue({
+    (getExifDataFromFile as Mock).mockResolvedValue({
       latitude: 1,
       longitude: 2,
     });
-    (compressFile as jest.Mock).mockResolvedValue(file);
+    (compressFile as Mock).mockResolvedValue(file);
 
     const event = {
       target: { files: [file] },
@@ -173,19 +170,19 @@ describe('ImageUploadComponent', () => {
   it('should emit position from photo on native image', async () => {
     const photo = { base64String: 'abc', format: 'jpeg' };
 
-    (Camera.requestPermissions as jest.Mock).mockResolvedValue(undefined);
-    (Camera.getPhoto as jest.Mock).mockResolvedValue(photo);
-    (getExifDataFromPhoto as jest.Mock).mockReturnValue({
+    (Camera.requestPermissions as Mock).mockResolvedValue(undefined);
+    (Camera.getPhoto as Mock).mockResolvedValue(photo);
+    (getExifDataFromPhoto as Mock).mockReturnValue({
       latitude: 3,
       longitude: 4,
     });
-    (compressPhoto as jest.Mock).mockResolvedValue(
+    (compressPhoto as Mock).mockResolvedValue(
       new File(['dummy'], 'test.jpg', { type: 'image/jpeg' }),
     );
 
     // Mock FileReader
     const mockFileReader: MockFileReader = {
-      readAsDataURL: jest.fn(),
+      readAsDataURL: vi.fn(),
       onload: null,
       result: 'data:image/jpeg;base64,abc',
       EMPTY: 0,
@@ -194,7 +191,7 @@ describe('ImageUploadComponent', () => {
     };
 
     // @ts-expect-error - Mocking FileReader
-    global.FileReader = jest.fn(() => mockFileReader);
+    global.FileReader = vi.fn(() => mockFileReader);
 
     const privateComponent = component as unknown as {
       getImageFromNative: () => Promise<void>;
@@ -209,14 +206,14 @@ describe('ImageUploadComponent', () => {
 
   it('should set value and trigger change on setValueAndTriggerChange', () => {
     const testFile = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-    const onChange = jest.fn();
-    const onTouch = jest.fn();
+    const onChange = vi.fn();
+    const onTouch = vi.fn();
     component._onChange = onChange;
     component._onTouch = onTouch;
 
     // Mock FileReader
     const mockFileReader: MockFileReader = {
-      readAsDataURL: jest.fn(),
+      readAsDataURL: vi.fn(),
       onload: null,
       result: 'data:image/jpeg;base64,abc',
       EMPTY: 0,
@@ -225,7 +222,7 @@ describe('ImageUploadComponent', () => {
     };
 
     // @ts-expect-error - Mocking FileReader
-    global.FileReader = jest.fn(() => mockFileReader);
+    global.FileReader = vi.fn(() => mockFileReader);
 
     const privateComponent = component as any;
     privateComponent.setValueAndTriggerChange(testFile);
@@ -259,7 +256,7 @@ describe('ImageUploadComponent', () => {
 
   describe('onDragOver', () => {
     it('should prevent default and set isDragging to true', () => {
-      const event = { preventDefault: jest.fn() } as unknown as DragEvent;
+      const event = { preventDefault: vi.fn() } as unknown as DragEvent;
       component.onDragOver(event);
       expect(event.preventDefault).toHaveBeenCalled();
       expect(component.isDragging()).toBe(true);
@@ -268,7 +265,7 @@ describe('ImageUploadComponent', () => {
 
   describe('onDragLeave', () => {
     it('should prevent default and set isDragging to false', () => {
-      const event = { preventDefault: jest.fn() } as unknown as DragEvent;
+      const event = { preventDefault: vi.fn() } as unknown as DragEvent;
       component.onDragLeave(event);
       expect(event.preventDefault).toHaveBeenCalled();
       expect(component.isDragging()).toBe(false);
@@ -277,7 +274,7 @@ describe('ImageUploadComponent', () => {
 
   describe('onDrop', () => {
     it('should prevent default and set isDragging to false', () => {
-      const event = { preventDefault: jest.fn() } as unknown as DragEvent;
+      const event = { preventDefault: vi.fn() } as unknown as DragEvent;
       component.onDrop(event);
       expect(event.preventDefault).toHaveBeenCalled();
       expect(component.isDragging()).toBe(false);
@@ -286,7 +283,7 @@ describe('ImageUploadComponent', () => {
 
   describe('cancelCropping', () => {
     it('should dismiss crop modal', () => {
-      const dismissMock = jest.fn();
+      const dismissMock = vi.fn();
       Object.defineProperty(component, 'cropModal', {
         value: () => ({
           dismiss: dismissMock,
@@ -300,15 +297,15 @@ describe('ImageUploadComponent', () => {
 
   describe('confirmCropping', () => {
     it('should set value, trigger change, and dismiss modal on confirmCropping', () => {
-      const dismissMock = jest.fn();
+      const dismissMock = vi.fn();
       Object.defineProperty(component, 'cropModal', {
         value: () => ({
           dismiss: dismissMock,
         }),
       });
       component.croppedImage.set('data:image/jpeg;base64,croppedImage');
-      const onChange = jest.fn();
-      const onTouch = jest.fn();
+      const onChange = vi.fn();
+      const onTouch = vi.fn();
       component._onChange = onChange;
       component._onTouch = onTouch;
 

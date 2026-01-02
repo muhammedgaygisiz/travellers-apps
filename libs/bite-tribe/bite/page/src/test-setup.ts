@@ -1,8 +1,13 @@
-import { setupZonelessTestEnv } from 'jest-preset-angular/setup-env/zoneless';
+import '@angular/compiler';
+import '@analogjs/vitest-angular/setup-zone';
 
-setupZonelessTestEnv({
-  errorOnUnknownElements: true,
-  errorOnUnknownProperties: true,
-});
+import {
+  BrowserTestingModule,
+  platformBrowserTesting,
+} from '@angular/platform-browser/testing';
+import { getTestBed } from '@angular/core/testing';
 
-URL.createObjectURL = jest.fn(() => 'blob:mock-url');
+getTestBed().initTestEnvironment(
+  BrowserTestingModule,
+  platformBrowserTesting(),
+);

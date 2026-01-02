@@ -51,3 +51,5 @@ Thumbs.db
 ### storybook ###
 storybook-static
 libs/storybook-host/src/assets/temp/**/*
+
+vitest.config.*.timestamp*

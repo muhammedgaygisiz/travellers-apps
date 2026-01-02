@@ -99,7 +99,8 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/bite-tribe/jest.config.ts"
+        "jestConfig": "apps/bite-tribe/jest.config.ts",
+        "tsConfig": "apps/bite-tribe/tsconfig.spec.json"
       }
     },
     "serve-static": {

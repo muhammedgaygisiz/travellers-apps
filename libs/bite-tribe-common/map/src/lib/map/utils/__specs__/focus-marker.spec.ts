@@ -1,13 +1,14 @@
 import { focusMarker } from '../focus-marker';
 import { MarkerColor } from '../../model/marker-color.enum';
+import { vi } from 'vitest';
 
-const getMarkerWithColorMock = jest.fn();
-jest.mock('../get-marker-with-color', () => ({
+const getMarkerWithColorMock = vi.fn();
+vi.mock('../get-marker-with-color', () => ({
   getMarkerWithColor: (...args: any): void => getMarkerWithColorMock(...args),
 }));
 
 describe('focusMarker', () => {
-  const mockSetIcon = jest.fn();
+  const mockSetIcon = vi.fn();
   const mockMarker1 = { setIcon: mockSetIcon, options: { alt: '2' } } as any;
   const mockMarker2 = { setIcon: mockSetIcon } as any;
   const mockMap = {} as any;
@@ -35,7 +36,7 @@ describe('focusMarker', () => {
     expect(mockSetIcon).toHaveBeenCalledTimes(3);
     expect(getMarkerWithColorMock).toHaveBeenCalledWith(
       MarkerColor.RED,
-      expect.anything()
+      expect.anything(),
     );
     expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.DARKRED, {
       size: 'big',
@@ -51,11 +52,11 @@ describe('focusMarker', () => {
     expect(getMarkerWithColorMock).toHaveBeenCalledTimes(2);
     expect(getMarkerWithColorMock).toHaveBeenCalledWith(
       MarkerColor.RED,
-      expect.anything()
+      expect.anything(),
     );
     expect(getMarkerWithColorMock).not.toHaveBeenCalledWith(
       MarkerColor.DARKRED,
-      expect.anything()
+      expect.anything(),
     );
   });
 });

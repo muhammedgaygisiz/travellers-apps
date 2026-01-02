@@ -1,8 +1,9 @@
 import { zoomToMarkers } from '../zoom-to-markers';
 import { DEFAULT_ZOOM } from '../../model/default-zoom';
+import { vi } from 'vitest';
 
-const zoomToGpsOrDefaultMock = jest.fn();
-jest.mock('../zoom-to-gps-or-default', () => ({
+const zoomToGpsOrDefaultMock = vi.fn();
+vi.mock('../zoom-to-gps-or-default', () => ({
   zoomToGpsOrDefault: (): void => zoomToGpsOrDefaultMock(),
 }));
 
@@ -12,17 +13,17 @@ describe('zoomToMarkers', () => {
 
   beforeEach(() => {
     mockMap = {
-      setView: jest.fn(),
-      fitBounds: jest.fn(),
-      getZoom: jest.fn(),
+      setView: vi.fn(),
+      fitBounds: vi.fn(),
+      getZoom: vi.fn(),
     };
     mockMarkers = [{}, {}]; // Mock markers
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   it('should zoom to the first geopoint if only one geopoint is provided', () => {
@@ -47,7 +48,7 @@ describe('zoomToMarkers', () => {
     expect(mockMap.setView).toHaveBeenCalledWith([51.505, -0.09], DEFAULT_ZOOM);
 
     // Fast-forward time to trigger the setTimeout
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(zoomToGpsOrDefaultMock).toHaveBeenCalled();
   });
@@ -64,7 +65,7 @@ describe('zoomToMarkers', () => {
     expect(mockMap.setView).toHaveBeenCalledWith([51.505, -0.09], DEFAULT_ZOOM);
 
     // Fast-forward time to trigger the setTimeout
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(zoomToGpsOrDefaultMock).toHaveBeenCalled();
   });

@@ -2,9 +2,10 @@ import { geopointsToMarkers } from '../geopoints-to-markers';
 import * as L from 'leaflet';
 import { MarkerColor } from '../../model/marker-color.enum';
 import { Geopoint } from 'model';
+import { vi } from 'vitest';
 
-const getMarkerWithColorMock = jest.fn();
-jest.mock('../get-marker-with-color', () => ({
+const getMarkerWithColorMock = vi.fn();
+vi.mock('../get-marker-with-color', () => ({
   getMarkerWithColor: (...args: any): void => getMarkerWithColorMock(...args),
 }));
 
@@ -14,7 +15,7 @@ describe('geopointsToMarkers', () => {
 
   beforeEach(() => {
     map = {
-      addLayer: jest.fn(),
+      addLayer: vi.fn(),
     } as any;
 
     geopoints = [

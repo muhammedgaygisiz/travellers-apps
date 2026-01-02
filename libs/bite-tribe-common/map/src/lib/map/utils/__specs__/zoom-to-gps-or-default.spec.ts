@@ -1,6 +1,7 @@
 import { zoomToGpsOrDefault } from '../zoom-to-gps-or-default';
 import * as L from 'leaflet';
 import { Geopoint } from 'model';
+import { vi } from 'vitest';
 
 const GEOPOINT_SAN_FRANCISCO: Geopoint = {
   latitude: 37.7749,
@@ -10,18 +11,18 @@ const GEOPOINT_SAN_FRANCISCO: Geopoint = {
 const COORD_SAN_FRANCISCO: L.LatLngTuple = [37.7749, -122.4194];
 const COORD_LOS_ANGELES: L.LatLngTuple = [34.0522, -118.2437];
 
-const addGpsMarkerMock = jest.fn();
-jest.mock('../add-gps-marker', () => ({
+const addGpsMarkerMock = vi.fn();
+vi.mock('../add-gps-marker', () => ({
   addGpsMarker: (...args: any): void => addGpsMarkerMock(...args),
 }));
 
-const removeGpsMarkerMock = jest.fn();
-jest.mock('../remove-gps-marker', () => ({
+const removeGpsMarkerMock = vi.fn();
+vi.mock('../remove-gps-marker', () => ({
   removeGpsMarker: (...args: any): void => removeGpsMarkerMock(...args),
 }));
 
-const zoomToGeopointMock = jest.fn();
-jest.mock('../zoom-to-geopoint', () => ({
+const zoomToGeopointMock = vi.fn();
+vi.mock('../zoom-to-geopoint', () => ({
   zoomToGeopoint: (...args: any): void => zoomToGeopointMock(...args),
 }));
 
@@ -32,8 +33,8 @@ describe('zoomToGpsOrDefault', () => {
 
   beforeEach(() => {
     map = L.map(document.createElement('div')).setView([0, 0], 2);
-    jest.spyOn(map, 'setView');
-    jest.spyOn(map, 'getZoom').mockReturnValue(10);
+    vi.spyOn(map, 'setView');
+    vi.spyOn(map, 'getZoom').mockReturnValue(10);
 
     markers = [];
     positions = [];
@@ -82,7 +83,7 @@ describe('zoomToGpsOrDefault', () => {
     positions.push({ latitude: 37.7749, longitude: -122.4194 });
     positions.push({ latitude: 34.0522, longitude: -118.2437 });
 
-    const fitBoundsSpy = jest.spyOn(map, 'fitBounds');
+    const fitBoundsSpy = vi.spyOn(map, 'fitBounds');
 
     zoomToGpsOrDefault(gpsPosition, markers, positions, map);
 
@@ -106,7 +107,7 @@ describe('zoomToGpsOrDefault', () => {
     positions.push({ latitude: 37.7749, longitude: -122.4194 });
     positions.push({ latitude: 34.0522, longitude: -118.2437 });
 
-    const fitBoundsSpy = jest.spyOn(map, 'fitBounds');
+    const fitBoundsSpy = vi.spyOn(map, 'fitBounds');
 
     zoomToGpsOrDefault(gpsPosition, markers, positions, map);
 
@@ -121,7 +122,7 @@ describe('zoomToGpsOrDefault', () => {
     positions.push({ latitude: 37.7749, longitude: -122.4194 });
     positions.push({ latitude: 34.0522, longitude: -118.2437 });
 
-    const fitBoundsSpy = jest.spyOn(map, 'fitBounds');
+    const fitBoundsSpy = vi.spyOn(map, 'fitBounds');
 
     zoomToGpsOrDefault(gpsPosition, markers, positions, map);
 

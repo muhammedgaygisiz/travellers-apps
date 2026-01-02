@@ -1,4 +1,5 @@
 import { clearMarkers } from '../clear-markers';
+import { vi } from 'vitest';
 
 describe('clearMarkers', () => {
   let map: any;
@@ -6,7 +7,7 @@ describe('clearMarkers', () => {
 
   beforeEach(() => {
     map = {
-      removeLayer: jest.fn(),
+      removeLayer: vi.fn(),
     };
     markers = [{ id: 1 }, { id: 2 }, { id: 3 }];
   });

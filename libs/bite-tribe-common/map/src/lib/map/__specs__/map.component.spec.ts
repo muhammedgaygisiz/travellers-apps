@@ -3,24 +3,24 @@ import { ComponentRef } from '@angular/core';
 import { MapComponent } from '../map.component';
 import { Geopoint } from 'model';
 import { DEFAULT_ZOOM } from '../model/default-zoom';
-import SpyInstance = jest.SpyInstance;
+import { Mock, vi } from 'vitest';
 
 const mockMap = {
-  setView: jest.fn(),
-  getZoom: jest.fn().mockReturnValue(DEFAULT_ZOOM),
-  fitBounds: jest.fn(),
-  remove: jest.fn(),
-  on: jest.fn(),
-  removeLayer: jest.fn(),
-  invalidateSize: jest.fn(),
+  setView: vi.fn(),
+  getZoom: vi.fn().mockReturnValue(DEFAULT_ZOOM),
+  fitBounds: vi.fn(),
+  remove: vi.fn(),
+  on: vi.fn(),
+  removeLayer: vi.fn(),
+  invalidateSize: vi.fn(),
 };
 
-jest.mock('leaflet', () => ({
-  map: jest.fn(),
-  tileLayer: jest.fn(),
-  marker: jest.fn(),
-  icon: jest.fn(),
-  latLngBounds: jest.fn(),
+vi.mock('leaflet', () => ({
+  map: vi.fn(),
+  tileLayer: vi.fn(),
+  marker: vi.fn(),
+  icon: vi.fn(),
+  latLngBounds: vi.fn(),
   Marker: {
     prototype: {
       options: {},
@@ -28,49 +28,49 @@ jest.mock('leaflet', () => ({
   },
 }));
 
-const zoomToGpsOrDefaultMock = jest.fn();
-jest.mock('../utils/zoom-to-gps-or-default', () => ({
+const zoomToGpsOrDefaultMock = vi.fn();
+vi.mock('../utils/zoom-to-gps-or-default', () => ({
   zoomToGpsOrDefault: (...args: any): void => zoomToGpsOrDefaultMock(...args),
 }));
 
-const fitMapToMarkersMock = jest.fn();
-jest.mock('../utils/fit-map-to-markers', () => ({
+const fitMapToMarkersMock = vi.fn();
+vi.mock('../utils/fit-map-to-markers', () => ({
   fitMapToMarkers: (...args: any): void => fitMapToMarkersMock(...args),
 }));
 
-const geopointsToMarkersMock = jest.fn();
-jest.mock('../utils/geopoints-to-markers', () => ({
+const geopointsToMarkersMock = vi.fn();
+vi.mock('../utils/geopoints-to-markers', () => ({
   geopointsToMarkers: (...args: any): void => geopointsToMarkersMock(...args),
 }));
 
-const clearMarkersMock = jest.fn();
-jest.mock('../utils/clear-markers', () => ({
+const clearMarkersMock = vi.fn();
+vi.mock('../utils/clear-markers', () => ({
   clearMarkers: (...args: any): void => clearMarkersMock(...args),
 }));
 
-const createMapMock = jest.fn();
-jest.mock('../utils/create-map', () => ({
+const createMapMock = vi.fn();
+vi.mock('../utils/create-map', () => ({
   createMap: (...args: any): void => createMapMock(...args),
 }));
 
-const createOpenstreetmapLayerMock = jest.fn();
-jest.mock('../utils/create-openstreetmap-layer', () => ({
+const createOpenstreetmapLayerMock = vi.fn();
+vi.mock('../utils/create-openstreetmap-layer', () => ({
   createOpenstreetmapLayer: (...args: any): void =>
     createOpenstreetmapLayerMock(...args),
 }));
 
-const zoomToMarkersMock = jest.fn();
-jest.mock('../utils/zoom-to-markers', () => ({
+const zoomToMarkersMock = vi.fn();
+vi.mock('../utils/zoom-to-markers', () => ({
   zoomToMarkers: (...args: any): void => zoomToMarkersMock(...args),
 }));
 
-const zoomToGeopointMock = jest.fn();
-jest.mock('../utils/zoom-to-geopoint', () => ({
+const zoomToGeopointMock = vi.fn();
+vi.mock('../utils/zoom-to-geopoint', () => ({
   zoomToGeopoint: (...args: any): void => zoomToGeopointMock(...args),
 }));
 
-const focusMarkerMock = jest.fn();
-jest.mock('../utils/focus-marker', () => ({
+const focusMarkerMock = vi.fn();
+vi.mock('../utils/focus-marker', () => ({
   focusMarker: (...args: any): void => focusMarkerMock(...args),
 }));
 
@@ -94,7 +94,7 @@ describe('MapComponent', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
 
-    createOpenstreetmapLayerMock.mockReturnValue({ addTo: jest.fn() });
+    createOpenstreetmapLayerMock.mockReturnValue({ addTo: vi.fn() });
     createMapMock.mockReturnValue(mockMap);
   });
 
@@ -158,7 +158,7 @@ describe('MapComponent', () => {
 
   describe('createMapEffect', () => {
     let mapDiv: any;
-    let emitMarkerClickSpy: SpyInstance;
+    let emitMarkerClickSpy: Mock;
 
     beforeEach(() => {
       mapDiv = document.createElement('div');
@@ -167,9 +167,10 @@ describe('MapComponent', () => {
       mockMap.on.mockClear();
       createMapMock.mockClear();
       createOpenstreetmapLayerMock.mockClear();
-      emitMarkerClickSpy = jest
+      emitMarkerClickSpy = vi
         .spyOn(component.clickOnMarker, 'emit')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should create map and add OSM layer on first render', () => {
@@ -217,8 +218,8 @@ describe('MapComponent', () => {
     describe('addMapClickEvent via createMapEffect', () => {
       let mapDiv: any;
       let mockClickEvent: any;
-      let emitClickOnMapSpy: SpyInstance;
-      let emitClickOnMarkerSpy: SpyInstance;
+      let emitClickOnMapSpy: Mock;
+      let emitClickOnMarkerSpy: Mock;
 
       beforeEach(() => {
         mapDiv = document.createElement('div');
@@ -232,12 +233,14 @@ describe('MapComponent', () => {
           },
         };
 
-        emitClickOnMapSpy = jest
+        emitClickOnMapSpy = vi
           .spyOn(component.clickOnMap, 'emit')
-          .mockImplementation();
-        emitClickOnMarkerSpy = jest
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
+        emitClickOnMarkerSpy = vi
           .spyOn(component.clickOnMarker, 'emit')
-          .mockImplementation();
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
 
         mockMap.on.mockClear();
         focusMarkerMock.mockClear();
@@ -351,17 +354,18 @@ describe('MapComponent', () => {
         fixture.nativeElement.appendChild(mapDiv);
 
         mockMarker1 = {
-          on: jest.fn(),
+          on: vi.fn(),
           options: { title: 'marker1' },
         };
         mockMarker2 = {
-          on: jest.fn(),
+          on: vi.fn(),
           options: { title: 'marker2' },
         };
 
-        emitMarkerClickSpy = jest
+        emitMarkerClickSpy = vi
           .spyOn(component.clickOnMarker, 'emit')
-          .mockImplementation();
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
 
         geopointsToMarkersMock.mockImplementation(() => {
           component['markers'] = [mockMarker1, mockMarker2];
@@ -461,7 +465,7 @@ describe('MapComponent', () => {
 
       it('should only add click events to markers with titles', () => {
         const mockMarkerWithoutTitle = {
-          on: jest.fn(),
+          on: vi.fn(),
           options: {},
         };
 
@@ -540,13 +544,13 @@ describe('MapComponent', () => {
   describe('setGeopointsEffect', () => {
     beforeEach(() => {
       fixture.detectChanges();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockMap.remove.mockClear();
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should update markers and zoom when geopoints input changes', () => {
@@ -596,7 +600,7 @@ describe('MapComponent', () => {
       componentRef.setInput('gpsPosition', null);
 
       fixture.detectChanges();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(zoomToGeopointMock).toHaveBeenCalledWith(
         mockMultipleGeopoints[0],

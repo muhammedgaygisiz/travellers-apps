@@ -1,20 +1,21 @@
 import { zoomToGeopoint } from '../zoom-to-geopoint';
 import * as L from 'leaflet';
 import { DEFAULT_ZOOM } from '../../model/default-zoom';
+import { vi, Mock } from 'vitest';
 
 describe('zoomToGeopoint', () => {
   let map: L.Map;
-  let setViewSpy: jest.SpyInstance;
-  let getZoomSpy: jest.SpyInstance;
+  let setViewSpy: Mock;
+  let getZoomSpy: Mock;
 
   beforeEach(() => {
     map = {
-      getZoom: jest.fn(),
-      setView: jest.fn(),
+      getZoom: vi.fn(),
+      setView: vi.fn(),
     } as unknown as L.Map;
 
-    getZoomSpy = jest.spyOn(map, 'getZoom');
-    setViewSpy = jest.spyOn(map, 'setView');
+    getZoomSpy = vi.spyOn(map, 'getZoom');
+    setViewSpy = vi.spyOn(map, 'setView');
   });
 
   it('should set the view to the geopoint with current zoom', () => {

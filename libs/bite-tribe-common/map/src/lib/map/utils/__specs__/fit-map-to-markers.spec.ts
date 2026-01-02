@@ -1,4 +1,5 @@
 import { fitMapToMarkers } from '../fit-map-to-markers';
+import { vi } from 'vitest';
 
 describe('fitMapToMarkers', () => {
   let map: any;
@@ -7,8 +8,8 @@ describe('fitMapToMarkers', () => {
 
   beforeEach(() => {
     map = {
-      fitBounds: jest.fn(),
-      setView: jest.fn(),
+      fitBounds: vi.fn(),
+      setView: vi.fn(),
     };
 
     markers = [];

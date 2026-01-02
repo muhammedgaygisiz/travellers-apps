@@ -1,8 +1,9 @@
 import { addGpsMarker } from '../add-gps-marker';
 import { Geopoint } from 'model';
+import { vi } from 'vitest';
 
-const geopointToLatLngMock = jest.fn();
-jest.mock('../geopoint-to-lat-lng', () => ({
+const geopointToLatLngMock = vi.fn();
+vi.mock('../geopoint-to-lat-lng', () => ({
   geopointToLatLng: (...args: any): void => geopointToLatLngMock(...args),
 }));
 
@@ -13,19 +14,19 @@ describe('addGpsMarker', () => {
 
   beforeEach(() => {
     mockMap = {
-      getZoom: jest.fn().mockReturnValue(10),
-      on: jest.fn(),
-      createPane: jest.fn().mockReturnValue({ style: {} }),
+      getZoom: vi.fn().mockReturnValue(10),
+      on: vi.fn(),
+      createPane: vi.fn().mockReturnValue({ style: {} }),
     } as any;
     mockCircle = {
-      setStyle: jest.fn().mockReturnThis(),
-      addTo: jest.fn().mockReturnThis(),
-      getRadius: jest.fn().mockReturnValue(15),
-      setRadius: jest.fn(),
+      setStyle: vi.fn().mockReturnThis(),
+      addTo: vi.fn().mockReturnThis(),
+      getRadius: vi.fn().mockReturnValue(15),
+      setRadius: vi.fn(),
     } as any;
     mockGeopoint = { latitude: 51.505, longitude: -0.09 };
 
-    jest.spyOn(require('leaflet'), 'circle').mockReturnValue(mockCircle);
+    vi.spyOn(require('leaflet'), 'circle').mockReturnValue(mockCircle);
     geopointToLatLngMock.mockReturnValue([51.505, -0.09]);
   });
 
@@ -60,10 +61,10 @@ describe('addGpsMarker', () => {
       addGpsMarker(mockGeopoint, mockMap);
 
       zoomStartCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomstart'
+        (call: any) => call[0] === 'zoomstart',
       )[1];
       zoomEndCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomend'
+        (call: any) => call[0] === 'zoomend',
       )[1];
 
       mockMap.getZoom.mockReturnValue(9);
@@ -78,10 +79,10 @@ describe('addGpsMarker', () => {
       addGpsMarker(mockGeopoint, mockMap);
 
       zoomStartCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomstart'
+        (call: any) => call[0] === 'zoomstart',
       )[1];
       zoomEndCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomend'
+        (call: any) => call[0] === 'zoomend',
       )[1];
 
       mockMap.getZoom.mockReturnValue(9);
@@ -96,10 +97,10 @@ describe('addGpsMarker', () => {
       addGpsMarker(mockGeopoint, mockMap);
 
       zoomStartCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomstart'
+        (call: any) => call[0] === 'zoomstart',
       )[1];
       zoomEndCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomend'
+        (call: any) => call[0] === 'zoomend',
       )[1];
 
       mockCircle.getRadius.mockReturnValue(20);

@@ -1,6 +1,7 @@
 import { TypeaheadComponent } from '../type-ahead.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
+import { vi } from 'vitest';
 
 describe('TypeaheadComponent', () => {
   let component: TypeaheadComponent;
@@ -26,7 +27,7 @@ describe('TypeaheadComponent', () => {
   });
 
   it('should emit selectionChange on confirmChanges', () => {
-    const selectionChangeSpy = jest.spyOn(component.selectionChange, 'emit');
+    const selectionChangeSpy = vi.spyOn(component.selectionChange, 'emit');
     component.workingSelectedValues.set(['apple']);
     component.confirmChanges();
     expect(selectionChangeSpy).toHaveBeenCalledWith({
@@ -37,7 +38,7 @@ describe('TypeaheadComponent', () => {
   });
 
   it('should emit selectionCancel on cancelChanges', () => {
-    const selectionCancelSpy = jest.spyOn(component.selectionCancel, 'emit');
+    const selectionCancelSpy = vi.spyOn(component.selectionCancel, 'emit');
     component.cancelChanges();
     expect(selectionCancelSpy).toHaveBeenCalled();
   });

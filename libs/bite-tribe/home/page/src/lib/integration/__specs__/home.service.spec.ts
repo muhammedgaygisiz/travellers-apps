@@ -3,7 +3,7 @@ import { HomeService } from '../home.service';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { Bite } from 'model';
-import SpyInstance = jest.SpyInstance;
+import { vi, Mock as ViMock } from 'vitest';
 
 class Mock {
   sortedHomeBites = (): never[] => [];
@@ -62,10 +62,10 @@ describe('HomeService', () => {
   });
 
   describe('logout', () => {
-    let logoutSpy: SpyInstance;
+    let logoutSpy: ViMock;
 
     beforeEach(() => {
-      logoutSpy = jest.spyOn(homeDataAccessService, 'logout');
+      logoutSpy = vi.spyOn(homeDataAccessService, 'logout');
     });
 
     it('should call logout on HomeDataAccessService', inject(
@@ -78,10 +78,10 @@ describe('HomeService', () => {
   });
 
   describe('likeButtonClicked', () => {
-    let submitLikeClickSpy: SpyInstance;
+    let submitLikeClickSpy: ViMock;
 
     beforeEach(() => {
-      submitLikeClickSpy = jest.spyOn(homeDataAccessService, 'submitLikeClick');
+      submitLikeClickSpy = vi.spyOn(homeDataAccessService, 'submitLikeClick');
     });
 
     it('should call likeButtonClicked on HomeDataAccessService with correct parameters', inject(
@@ -95,10 +95,10 @@ describe('HomeService', () => {
   });
 
   describe('biteClicked', () => {
-    let navigateForwardSpy: SpyInstance;
+    let navigateForwardSpy: ViMock;
 
     beforeEach(() => {
-      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+      navigateForwardSpy = vi.spyOn(navController, 'navigateForward');
     });
 
     it('should navigate to bite page with correct parameters', inject(
@@ -112,10 +112,10 @@ describe('HomeService', () => {
   });
 
   describe('onDeleteBiteClick', () => {
-    let deleteBiteSpy: SpyInstance;
+    let deleteBiteSpy: ViMock;
 
     beforeEach(() => {
-      deleteBiteSpy = jest.spyOn(homeDataAccessService, 'deleteBite');
+      deleteBiteSpy = vi.spyOn(homeDataAccessService, 'deleteBite');
     });
 
     it('should call deleteBite on HomeDataAccessService with correct parameters', inject(
@@ -129,10 +129,10 @@ describe('HomeService', () => {
   });
 
   describe('restaurantClicked', () => {
-    let navigateForwardSpy: SpyInstance;
+    let navigateForwardSpy: ViMock;
 
     beforeEach(() => {
-      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+      navigateForwardSpy = vi.spyOn(navController, 'navigateForward');
     });
 
     it('should navigate to restaurant page with correct parameters', inject(
@@ -151,10 +151,10 @@ describe('HomeService', () => {
   });
 
   describe('onAddButtonClicked', () => {
-    let navigateForwardSpy: SpyInstance;
+    let navigateForwardSpy: ViMock;
 
     beforeEach(() => {
-      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+      navigateForwardSpy = vi.spyOn(navController, 'navigateForward');
     });
 
     it('should navigate to new bite page', inject(
@@ -167,10 +167,10 @@ describe('HomeService', () => {
   });
 
   describe('onGotoSettingsClick', () => {
-    let navigateForwardSpy: SpyInstance;
+    let navigateForwardSpy: ViMock;
 
     beforeEach(() => {
-      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+      navigateForwardSpy = vi.spyOn(navController, 'navigateForward');
     });
 
     it('should navigate to new bite page', inject(
@@ -183,10 +183,10 @@ describe('HomeService', () => {
   });
 
   describe('onGotoMyBitesClick', () => {
-    let navigateForwardSpy: SpyInstance;
+    let navigateForwardSpy: ViMock;
 
     beforeEach(() => {
-      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+      navigateForwardSpy = vi.spyOn(navController, 'navigateForward');
     });
 
     it('should navigate to new bite page', inject(
@@ -199,10 +199,10 @@ describe('HomeService', () => {
   });
 
   describe('onGotoMyBucketlists', () => {
-    let navigateForwardSpy: SpyInstance;
+    let navigateForwardSpy: ViMock;
 
     beforeEach(() => {
-      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+      navigateForwardSpy = vi.spyOn(navController, 'navigateForward');
     });
 
     it('should navigate to new bite page', inject(
@@ -215,10 +215,10 @@ describe('HomeService', () => {
   });
 
   describe('onGotoEditClick', () => {
-    let navigateForwardSpy: SpyInstance;
+    let navigateForwardSpy: ViMock;
 
     beforeEach(() => {
-      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+      navigateForwardSpy = vi.spyOn(navController, 'navigateForward');
     });
 
     it('should navigate to new bite page', inject(
@@ -236,11 +236,11 @@ describe('HomeService', () => {
   });
 
   describe('openMapView', () => {
-    let navigateForwardSpy: SpyInstance;
+    let navigateForwardSpy: ViMock;
 
     beforeEach(() => {
-      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
-      jest.spyOn(homeDataAccessService, 'selectedBucketlist').mockReturnValue({
+      navigateForwardSpy = vi.spyOn(navController, 'navigateForward');
+      vi.spyOn(homeDataAccessService, 'selectedBucketlist').mockReturnValue({
         id: '1',
       } as any);
     });
@@ -267,10 +267,10 @@ describe('HomeService', () => {
   });
 
   describe('sortingChange', () => {
-    let setHomeSortingSpy: SpyInstance;
+    let setHomeSortingSpy: ViMock;
 
     beforeEach(() => {
-      setHomeSortingSpy = jest.spyOn(homeDataAccessService, 'setHomeSorting');
+      setHomeSortingSpy = vi.spyOn(homeDataAccessService, 'setHomeSorting');
     });
 
     it('should call setHomeSorting', inject(
@@ -284,10 +284,10 @@ describe('HomeService', () => {
   });
 
   describe('myBitesSortingChange', () => {
-    let setMyBitesSortingSpy: SpyInstance;
+    let setMyBitesSortingSpy: ViMock;
 
     beforeEach(() => {
-      setMyBitesSortingSpy = jest.spyOn(
+      setMyBitesSortingSpy = vi.spyOn(
         homeDataAccessService,
         'setMyBitesSorting',
       );
@@ -304,10 +304,10 @@ describe('HomeService', () => {
   });
 
   describe('myBites', () => {
-    let myBitesSpy: SpyInstance;
+    let myBitesSpy: ViMock;
 
     beforeEach(() => {
-      myBitesSpy = jest
+      myBitesSpy = vi
         .spyOn(homeDataAccessService, 'myBites')
         .mockReturnValue([]);
     });
@@ -325,10 +325,10 @@ describe('HomeService', () => {
   });
 
   describe('selectedBucketlistTitle', () => {
-    let selectedBucketlistSpy: SpyInstance;
+    let selectedBucketlistSpy: ViMock;
 
     beforeEach(() => {
-      selectedBucketlistSpy = jest
+      selectedBucketlistSpy = vi
         .spyOn(homeDataAccessService, 'selectedBucketlistTitle')
         .mockReturnValue(null as any);
     });
@@ -355,12 +355,13 @@ describe('HomeService', () => {
   });
 
   describe('filtersChanged', () => {
-    let setFiltersSpy: SpyInstance;
+    let setFiltersSpy: ViMock;
 
     beforeEach(() => {
-      setFiltersSpy = jest
+      setFiltersSpy = vi
         .spyOn(homeDataAccessService, 'setFilters')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should call setHomeFilters with correct parameters', inject(
@@ -378,12 +379,13 @@ describe('HomeService', () => {
   });
 
   describe('filtersCleared', () => {
-    let clearFiltersSpy: SpyInstance;
+    let clearFiltersSpy: ViMock;
 
     beforeEach(() => {
-      clearFiltersSpy = jest
+      clearFiltersSpy = vi
         .spyOn(homeDataAccessService, 'clearFilters')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should call setHomeFilters with correct parameters', inject(
@@ -396,13 +398,10 @@ describe('HomeService', () => {
   });
 
   describe('refresh', () => {
-    let reloadHomeBitesSpy: SpyInstance;
+    let reloadHomeBitesSpy: ViMock;
 
     beforeEach(() => {
-      reloadHomeBitesSpy = jest.spyOn(
-        homeDataAccessService,
-        'reloadGPSPosition',
-      );
+      reloadHomeBitesSpy = vi.spyOn(homeDataAccessService, 'reloadGPSPosition');
     });
 
     it('should emit refresh', inject([HomeService], (service: HomeService) => {
@@ -412,10 +411,10 @@ describe('HomeService', () => {
   });
 
   describe('closeGpsError', () => {
-    let clearGpsErrorSpy: SpyInstance;
+    let clearGpsErrorSpy: ViMock;
 
     beforeEach(() => {
-      clearGpsErrorSpy = jest.spyOn(homeDataAccessService, 'clearGpsError');
+      clearGpsErrorSpy = vi.spyOn(homeDataAccessService, 'clearGpsError');
     });
 
     it('should call clearGpsError on HomeDataAccessService', inject(
@@ -428,10 +427,10 @@ describe('HomeService', () => {
   });
 
   describe('onGotoMyProfileClick', () => {
-    let navigateForwardSpy: SpyInstance;
+    let navigateForwardSpy: ViMock;
 
     beforeEach(() => {
-      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+      navigateForwardSpy = vi.spyOn(navController, 'navigateForward');
     });
 
     it('should navigate to my-profile page', inject(

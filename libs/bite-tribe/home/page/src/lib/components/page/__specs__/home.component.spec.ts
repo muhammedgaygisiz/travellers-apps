@@ -15,9 +15,9 @@ import {
   InfiniteScrollCustomEvent,
   RefresherCustomEvent,
 } from '@ionic/angular';
-import SpyInstance = jest.SpyInstance;
+import { vi, Mock } from 'vitest';
 
-jest.mock('localization');
+vi.mock('localization');
 
 addNecessaryIcons();
 
@@ -29,15 +29,15 @@ describe('BiteTribeHomeComponent', () => {
   let closedSubject: Subject<any>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     navController = {
-      navigateForward: jest.fn(),
+      navigateForward: vi.fn(),
     } as Partial<NavController> as NavController;
 
     closedSubject = new Subject<any>();
     const dialogMock = {
-      open: jest.fn().mockReturnValue({
+      open: vi.fn().mockReturnValue({
         closed: closedSubject.asObservable(),
       }),
     };
@@ -81,7 +81,7 @@ describe('BiteTribeHomeComponent', () => {
   });
 
   it('should call scrollToTop on ionContent when scrollToTop is called', () => {
-    const scrollToTopMock = jest.fn();
+    const scrollToTopMock = vi.fn();
     component.ionContent = signal({
       scrollToTop: scrollToTopMock,
     } as any) as any;
@@ -91,22 +91,23 @@ describe('BiteTribeHomeComponent', () => {
   });
 
   describe('onRefresh', () => {
-    let completeSpy: SpyInstance;
+    let completeSpy: Mock;
     beforeEach(() => {
       componentRef.setInput('isReloading', false);
       component.refreshEvent = {
-        target: { complete: jest.fn() },
+        target: { complete: vi.fn() },
       } as unknown as RefresherCustomEvent;
-      completeSpy = jest
+      completeSpy = vi
         .spyOn(component.refreshEvent.target, 'complete')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should not complete the refresh event if event is not defined', () => {
       component.refreshEvent = null;
 
       fixture.detectChanges();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(completeSpy).not.toHaveBeenCalled();
     });
@@ -115,14 +116,14 @@ describe('BiteTribeHomeComponent', () => {
       componentRef.setInput('isReloading', true);
 
       fixture.detectChanges();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(completeSpy).not.toHaveBeenCalled();
     });
 
     it('should complete the refresh event if refresh is done', () => {
       fixture.detectChanges();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(completeSpy).toHaveBeenCalled();
     });
@@ -156,10 +157,10 @@ describe('BiteTribeHomeComponent', () => {
   });
 
   describe('emitSortingChange', () => {
-    let sortingChangeSpy: SpyInstance;
+    let sortingChangeSpy: Mock;
 
     beforeEach(() => {
-      sortingChangeSpy = jest.spyOn(component.sortingChange, 'emit');
+      sortingChangeSpy = vi.spyOn(component.sortingChange, 'emit');
     });
 
     it('should emit sortingChange with the new value', () => {
@@ -197,7 +198,7 @@ describe('BiteTribeHomeComponent', () => {
 
     beforeEach(() => {
       modal = {
-        dismiss: jest.fn(),
+        dismiss: vi.fn(),
       };
     });
 
@@ -208,7 +209,7 @@ describe('BiteTribeHomeComponent', () => {
         priceFilter: 20,
       };
 
-      const filtersChangedSpy = jest.spyOn(component.filtersChanged, 'emit');
+      const filtersChangedSpy = vi.spyOn(component.filtersChanged, 'emit');
 
       component.onFilterChange(filterSelection, modal);
       expect(modal.dismiss).toHaveBeenCalled();
@@ -219,9 +220,9 @@ describe('BiteTribeHomeComponent', () => {
   describe('onFiltersClear', () => {
     it('should emit filterCleared output', () => {
       const modal = {
-        dismiss: jest.fn(),
+        dismiss: vi.fn(),
       } as unknown as IonModal;
-      const filterClearedSpy = jest.spyOn(component.filterCleared, 'emit');
+      const filterClearedSpy = vi.spyOn(component.filterCleared, 'emit');
 
       component.onFiltersClear(modal);
       expect(modal.dismiss).toHaveBeenCalled();
@@ -233,7 +234,7 @@ describe('BiteTribeHomeComponent', () => {
     it('should load more bites and complete the event', () => {
       const infiniteScrollEvent = {
         target: {
-          complete: jest.fn(),
+          complete: vi.fn(),
         },
       } as unknown as InfiniteScrollCustomEvent;
 
@@ -248,20 +249,21 @@ describe('BiteTribeHomeComponent', () => {
   describe('refreshBites', () => {
     const refresherEvent = {
       target: {
-        complete: jest.fn(),
+        complete: vi.fn(),
       },
     } as unknown as RefresherCustomEvent;
-    let refreshEmitSpy: SpyInstance;
+    let refreshEmitSpy: Mock;
 
     beforeEach(() => {
-      refreshEmitSpy = jest
+      refreshEmitSpy = vi
         .spyOn(component.refresh, 'emit')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should emit refresh event and complete the refresher', () => {
       component.refreshBites(refresherEvent);
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(refreshEmitSpy).toHaveBeenCalled();
     });

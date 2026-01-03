@@ -1,16 +1,17 @@
 import { provideFirestoreAnalytics } from '../provide-firestore-analytics';
 import { getApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
+import { vi, Mock } from 'vitest';
 
-jest.mock('firebase/app', () => {
+vi.mock('firebase/app', () => {
   return {
-    getApp: jest.fn(),
+    getApp: vi.fn(),
   };
 });
 
-jest.mock('firebase/analytics', () => {
+vi.mock('firebase/analytics', () => {
   return {
-    getAnalytics: jest.fn(),
+    getAnalytics: vi.fn(),
   };
 });
 
@@ -32,19 +33,22 @@ describe('provideFirestoreAnalytics', () => {
     });
 
     it('should log warning if error happens and return null', () => {
-      (getApp as jest.Mock).mockImplementation(() => {
+      (getApp as Mock).mockImplementation(() => {
         throw new Error('Test error');
       });
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
 
       const result = factory();
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'Firebase Analytics is not supported in this environment.'
+        'Firebase Analytics is not supported in this environment.',
       );
 
       consoleWarnSpy.mockRestore();
-      (getApp as jest.Mock).mockReset();
+      (getApp as Mock).mockReset();
 
       expect(result).toBeNull();
     });

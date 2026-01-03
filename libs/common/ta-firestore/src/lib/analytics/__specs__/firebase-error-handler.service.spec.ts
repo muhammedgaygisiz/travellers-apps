@@ -4,17 +4,18 @@ import { FIREBASE_ANALYTICS } from '../provide-firestore-analytics';
 import { logEvent } from 'firebase/analytics';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
+import { vi } from 'vitest';
 
-jest.mock('@capacitor/core');
-jest.mock('firebase/analytics', () => {
+vi.mock('@capacitor/core');
+vi.mock('firebase/analytics', () => {
   return {
-    logEvent: jest.fn(),
+    logEvent: vi.fn(),
   };
 });
-jest.mock('@capacitor-firebase/crashlytics', () => {
+vi.mock('@capacitor-firebase/crashlytics', () => {
   return {
     FirebaseCrashlytics: {
-      recordException: jest.fn(),
+      recordException: vi.fn(),
     },
   };
 });
@@ -22,7 +23,10 @@ jest.mock('@capacitor-firebase/crashlytics', () => {
 describe('FirebaseErrorHandlerService', (): void => {
   let service: FirebaseErrorHandlerService;
   const testError = new Error('Test error');
-  const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+  const consoleErrorSpy = vi
+    .spyOn(console, 'error')
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    .mockImplementation(() => {});
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -59,7 +63,7 @@ describe('FirebaseErrorHandlerService', (): void => {
         });
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           'Captured error:',
-          objError
+          objError,
         );
       });
     });
@@ -75,7 +79,7 @@ describe('FirebaseErrorHandlerService', (): void => {
         });
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           'Captured error:',
-          objError
+          objError,
         );
       });
     });
@@ -91,7 +95,7 @@ describe('FirebaseErrorHandlerService', (): void => {
         });
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           'Captured error:',
-          objError
+          objError,
         );
       });
     });
@@ -107,31 +111,31 @@ describe('FirebaseErrorHandlerService', (): void => {
       });
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Captured error:',
-        testError
+        testError,
       );
     });
   });
 
   describe('given native platform', () => {
     beforeEach(() => {
-      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+      vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
     });
 
     it('should log error on exception in recordException', async () => {
-      jest
-        .spyOn(FirebaseCrashlytics, 'recordException')
-        .mockRejectedValue(new Error('Crashlytics error'));
+      vi.spyOn(FirebaseCrashlytics, 'recordException').mockRejectedValue(
+        new Error('Crashlytics error'),
+      );
 
       await service.handleError(testError);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error reporting to Crashlytics:',
-        expect.any(Error)
+        expect.any(Error),
       );
     });
 
     it('should call logEvent, FirebaseCrashlytics.recordException and log error to console', async () => {
-      const recordExceptionSpy = jest
+      const recordExceptionSpy = vi
         .spyOn(FirebaseCrashlytics, 'recordException')
         .mockResolvedValue();
 
@@ -139,7 +143,7 @@ describe('FirebaseErrorHandlerService', (): void => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Captured error:',
-        testError
+        testError,
       );
       expect(recordExceptionSpy).toHaveBeenCalledWith({
         message: 'Test error',

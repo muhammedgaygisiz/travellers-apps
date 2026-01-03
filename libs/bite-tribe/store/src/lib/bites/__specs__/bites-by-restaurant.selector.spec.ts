@@ -1,23 +1,24 @@
 import { Bite, Geopoint } from 'model';
 import { bitesByRestaurant } from '../bites-by-restaurant.selector';
+import { vi } from 'vitest';
 
-const getBitesByRestaurantNameMock = jest.fn();
-jest.mock('../utils/get-bites-by-restaurant-name', () => ({
+const getBitesByRestaurantNameMock = vi.fn();
+vi.mock('../utils/get-bites-by-restaurant-name', () => ({
   getBitesByRestaurantName: (): void => getBitesByRestaurantNameMock(),
 }));
 
-const normalizeMock = jest.fn();
-jest.mock('utils', () => ({
+const normalizeMock = vi.fn();
+vi.mock('utils', () => ({
   normalize: (): void => normalizeMock(),
 }));
 
-const getBitesByRestaurantIdOrNameMock = jest.fn();
-jest.mock('../utils/get-bites-by-restaurant-id-or-name', () => ({
+const getBitesByRestaurantIdOrNameMock = vi.fn();
+vi.mock('../utils/get-bites-by-restaurant-id-or-name', () => ({
   getBitesByRestaurantIdOrName: (): void => getBitesByRestaurantIdOrNameMock(),
 }));
 
-const getCloseBitesMock = jest.fn();
-jest.mock('../utils/get-close-bites', () => ({
+const getCloseBitesMock = vi.fn();
+vi.mock('../utils/get-close-bites', () => ({
   getCloseBites: (): void => getCloseBitesMock(),
 }));
 
@@ -47,7 +48,7 @@ describe('BitesByRestaurant Selectors', () => {
         [],
         '123',
         undefined,
-        mockBite1
+        mockBite1,
       );
       expect(result).toEqual([mockBite1]);
     });
@@ -57,7 +58,7 @@ describe('BitesByRestaurant Selectors', () => {
         [],
         '123',
         {} as any,
-        mockBite1
+        mockBite1,
       );
       expect(result).toEqual([mockBite1]);
     });

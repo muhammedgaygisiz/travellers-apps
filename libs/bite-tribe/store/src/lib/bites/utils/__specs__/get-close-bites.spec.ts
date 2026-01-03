@@ -1,8 +1,9 @@
 import { getCloseBites } from '../get-close-bites';
 import { Bite } from 'model';
+import { vi } from 'vitest';
 
-const haversineDistanceMock = jest.fn();
-jest.mock('utils', () => ({
+const haversineDistanceMock = vi.fn();
+vi.mock('utils', () => ({
   haversineDistance: (): void => haversineDistanceMock(),
 }));
 
@@ -27,7 +28,7 @@ describe('getCloseBites', () => {
   ] as Bite[];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return bites within 200 meters', () => {

@@ -1,8 +1,9 @@
 import { getRestaurant } from '../get-restaurant';
 import { Restaurant } from 'model';
+import { vi } from 'vitest';
 
-const normalizeMock = jest.fn();
-jest.mock('utils', () => ({
+const normalizeMock = vi.fn();
+vi.mock('utils', () => ({
   normalize: (...args: any): void => normalizeMock(...args),
 }));
 

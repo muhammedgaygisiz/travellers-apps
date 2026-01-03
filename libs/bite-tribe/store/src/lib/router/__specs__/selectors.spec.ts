@@ -1,6 +1,7 @@
 import * as fromSelectors from '../selectors';
+import { vi } from 'vitest';
 
-jest.mock('@ngrx/router-store', () => ({
+vi.mock('@ngrx/router-store', () => ({
   getRouterSelectors: (): any => ({
     selectRouteParams: (state: any): any => state,
   }),
@@ -8,7 +9,7 @@ jest.mock('@ngrx/router-store', () => ({
 
 describe('Router Selectors', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('biteId', () => {

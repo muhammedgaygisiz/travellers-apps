@@ -1,13 +1,14 @@
 import { sortByCriteria } from '../sort-by-criteria';
+import { vi } from 'vitest';
 
-const sortBucketlistsByNameMock = jest.fn();
-jest.mock('../sort-bucketlists-by-name', () => ({
+const sortBucketlistsByNameMock = vi.fn();
+vi.mock('../sort-bucketlists-by-name', () => ({
   sortBucketlistsByName: (...args: any): any =>
     sortBucketlistsByNameMock(...args),
 }));
 
-const sortBucketlistsByCreatedAtMock = jest.fn();
-jest.mock('../sort-bucketlists-by-created-at', () => ({
+const sortBucketlistsByCreatedAtMock = vi.fn();
+vi.mock('../sort-bucketlists-by-created-at', () => ({
   sortBucketlistsByCreatedAt: (...args: any): any =>
     sortBucketlistsByCreatedAtMock(...args),
 }));

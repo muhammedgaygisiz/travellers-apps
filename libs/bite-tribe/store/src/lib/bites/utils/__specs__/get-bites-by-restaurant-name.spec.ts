@@ -1,9 +1,10 @@
 import { getBitesByRestaurantName } from '../get-bites-by-restaurant-name';
 import { Bite } from 'model';
+import { vi } from 'vitest';
 
-const getSimilarityScoreMock = jest.fn();
-const normalizeMock = jest.fn();
-jest.mock('utils', () => ({
+const getSimilarityScoreMock = vi.fn();
+const normalizeMock = vi.fn();
+vi.mock('utils', () => ({
   getSimilarityScore: (): void => getSimilarityScoreMock(),
   normalize: (): void => normalizeMock(),
 }));

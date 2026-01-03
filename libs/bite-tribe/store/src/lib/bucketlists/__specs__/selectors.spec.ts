@@ -1,9 +1,10 @@
 import * as fromSelectors from '../selectors';
 import { EntityState } from '@ngrx/entity';
 import { Bucketlist } from 'model';
+import { vi } from 'vitest';
 
-const sortByCriteriaMock = jest.fn();
-jest.mock('../utils/sort-by-criteria', () => ({
+const sortByCriteriaMock = vi.fn();
+vi.mock('../utils/sort-by-criteria', () => ({
   sortByCriteria: (...args: any): any => sortByCriteriaMock(...args),
 }));
 

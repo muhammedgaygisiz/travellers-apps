@@ -1,18 +1,17 @@
 import { TestScheduler } from 'rxjs/testing';
 import { Observable, of } from 'rxjs';
-import { AlertController, Platform } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
 import { fromAuth } from 'ta-firestore';
 import { AppActions } from '../actions';
 import { AppEffect } from '../effects';
-import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { PublicUser, Settings } from 'model';
-import SpyInstance = jest.SpyInstance;
+import { vi, Mock } from 'vitest';
 
-const getCurrentPositionMock = jest.fn();
-jest.mock('geolocation', () => ({
+const getCurrentPositionMock = vi.fn();
+vi.mock('geolocation', () => ({
   getCurrentPosition: (): void => getCurrentPositionMock(),
 }));
 
@@ -23,15 +22,15 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 const Mock = {
   settings$: of({ theme: 'dark' } as Settings),
   publicProfile$: of({ displayName: 'test' } as PublicUser),
-  create: jest.fn().mockResolvedValue({
-    present: jest.fn(),
+  create: vi.fn().mockResolvedValue({
+    present: vi.fn(),
   }),
-  saveSettings: jest.fn(),
-  saveUser: jest.fn(),
-  updateUser: jest.fn(),
-  deleteUser: jest.fn(),
-  saveUserIfNotExisting: jest.fn(),
-  getExchangeRates: jest.fn(),
+  saveSettings: vi.fn(),
+  saveUser: vi.fn(),
+  updateUser: vi.fn(),
+  deleteUser: vi.fn(),
+  saveUserIfNotExisting: vi.fn(),
+  getExchangeRates: vi.fn(),
 };
 
 describe('AppEffect', () => {
@@ -119,7 +118,10 @@ describe('AppEffect', () => {
     });
 
     it('should emit errorLoadingGpsPosition and show alert on error', () => {
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const errorSpy = vi
+        .spyOn(console, 'error')
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
       scheduler.run(({ cold, expectObservable }) => {
         const error = new Error('GPS Error');
 
@@ -137,12 +139,13 @@ describe('AppEffect', () => {
   });
 
   describe('saveSettingsToFirestore$', () => {
-    let saveSettingsSpy: SpyInstance;
+    let saveSettingsSpy: Mock;
 
     beforeEach(() => {
-      saveSettingsSpy = jest
+      saveSettingsSpy = vi
         .spyOn(apiService, 'saveSettings')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should save settings on saveSettings', () => {
@@ -160,10 +163,13 @@ describe('AppEffect', () => {
   });
 
   describe('goPublicEffect$', () => {
-    let saveUserSpy: SpyInstance;
+    let saveUserSpy: Mock;
 
     beforeEach(() => {
-      saveUserSpy = jest.spyOn(apiService, 'saveUser').mockImplementation();
+      saveUserSpy = vi
+        .spyOn(apiService, 'saveUser')
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should save user on goPublic', () => {
@@ -180,10 +186,13 @@ describe('AppEffect', () => {
   });
 
   describe('saveProfileToFirestore$', () => {
-    let updateUserSpy: SpyInstance;
+    let updateUserSpy: Mock;
 
     beforeEach(() => {
-      updateUserSpy = jest.spyOn(apiService, 'updateUser').mockImplementation();
+      updateUserSpy = vi
+        .spyOn(apiService, 'updateUser')
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should save profile to firestore on savePublicProfile', () => {
@@ -200,10 +209,13 @@ describe('AppEffect', () => {
   });
 
   describe('goPrivateEffect$', () => {
-    let deleteUserSpy: SpyInstance;
+    let deleteUserSpy: Mock;
 
     beforeEach(() => {
-      deleteUserSpy = jest.spyOn(apiService, 'deleteUser').mockImplementation();
+      deleteUserSpy = vi
+        .spyOn(apiService, 'deleteUser')
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should delete user on goPrivate', () => {
@@ -220,12 +232,13 @@ describe('AppEffect', () => {
   });
 
   describe('saveUserAfterLogin$', () => {
-    let saveUserIfNotExistingSpy: SpyInstance;
+    let saveUserIfNotExistingSpy: Mock;
 
     beforeEach(() => {
-      saveUserIfNotExistingSpy = jest
+      saveUserIfNotExistingSpy = vi
         .spyOn(apiService, 'saveUserIfNotExisting')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should save user if not existing on loadedUser', () => {
@@ -243,9 +256,9 @@ describe('AppEffect', () => {
 
   describe('loadExchangeRatesFromApi$', () => {
     beforeEach(() => {
-      jest
-        .spyOn(apiService, 'getExchangeRates')
-        .mockReturnValue(of({ USD: 1, EUR: 0.85 }) as any);
+      vi.spyOn(apiService, 'getExchangeRates').mockReturnValue(
+        of({ USD: 1, EUR: 0.85 }) as any,
+      );
     });
 
     it('should load exchange rates from API on fromAuth.loadedUser', () => {

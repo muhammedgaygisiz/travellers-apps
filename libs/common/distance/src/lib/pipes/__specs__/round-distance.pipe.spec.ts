@@ -1,7 +1,8 @@
 import { RoundDistancePipe } from '../round-distance.pipe';
+import { vi } from 'vitest';
 
-const roundDistanceMock = jest.fn();
-jest.mock('../../utils/round-distance', () => ({
+const roundDistanceMock = vi.fn();
+vi.mock('../../utils/round-distance', () => ({
   roundDistance: (...args: any): void => roundDistanceMock(...args),
 }));
 

@@ -3,14 +3,15 @@ import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { DistanceComponent } from '../distance.component';
+import { vi } from 'vitest';
 
-const toMetricMock = jest.fn();
-jest.mock('../../../utils/to-metric', () => ({
+const toMetricMock = vi.fn();
+vi.mock('../../../utils/to-metric', () => ({
   toMetric: (...args: any): void => toMetricMock(...args),
 }));
 
-const roundDistanceMock = jest.fn();
-jest.mock('../../../utils/round-distance', () => ({
+const roundDistanceMock = vi.fn();
+vi.mock('../../../utils/round-distance', () => ({
   roundDistance: (...args: any): void => roundDistanceMock(...args),
 }));
 

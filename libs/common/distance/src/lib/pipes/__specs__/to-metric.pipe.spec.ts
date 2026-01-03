@@ -1,7 +1,8 @@
 import { ToMetricPipe } from '../to-metric.pipe';
+import { vi } from 'vitest';
 
-const toMetricMock = jest.fn();
-jest.mock('../../utils/to-metric', () => ({
+const toMetricMock = vi.fn();
+vi.mock('../../utils/to-metric', () => ({
   toMetric: (...args: any): void => toMetricMock(...args),
 }));
 

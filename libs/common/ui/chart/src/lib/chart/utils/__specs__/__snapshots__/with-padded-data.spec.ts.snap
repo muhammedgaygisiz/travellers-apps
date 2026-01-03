@@ -1,23 +1,23 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`withPaddedData should pad multiple data points correctly 1`] = `
-Array [
-  Object {
+exports[`withPaddedData > should pad multiple data points correctly 1`] = `
+[
+  {
     "amount": 0,
     "balance": 0,
     "date": 2024-03-14T12:00:00.000Z,
   },
-  Object {
+  {
     "amount": 100,
     "balance": 100,
     "date": "2024-03-15T12:00:00.000Z",
   },
-  Object {
+  {
     "amount": 50,
     "balance": 150,
     "date": "2024-03-16T12:00:00.000Z",
   },
-  Object {
+  {
     "amount": 0,
     "balance": 150,
     "date": 2024-03-17T12:00:00.000Z,
@@ -25,19 +25,19 @@ Array [
 ]
 `;
 
-exports[`withPaddedData should pad single data point with day before and after 1`] = `
-Array [
-  Object {
+exports[`withPaddedData > should pad single data point with day before and after 1`] = `
+[
+  {
     "amount": 0,
     "balance": 0,
     "date": 2024-03-14T12:00:00.000Z,
   },
-  Object {
+  {
     "amount": 100,
     "balance": 100,
     "date": "2024-03-15T12:00:00.000Z",
   },
-  Object {
+  {
     "amount": 0,
     "balance": 100,
     "date": 2024-03-16T12:00:00.000Z,

@@ -88,14 +88,6 @@
     "lint": {
       "executor": "@nx/eslint:lint"
     },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "apps/bite-tribe-business/jest.config.ts",
-        "tsConfig": "apps/bite-tribe-business/tsconfig.spec.json"
-      }
-    },
     "serve-static": {
       "executor": "@nx/web:file-server",
       "options": {
@@ -103,6 +95,13 @@
         "port": 4200,
         "staticFilePath": "dist/apps/bite-tribe-business/browser",
         "spa": true
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "reportsDirectory": "../../coverage/apps/bite-tribe-business"
       }
     }
   }

@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 
-jest.mock('localization');
+vi.mock('localization');
 
 describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;

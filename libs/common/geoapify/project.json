@@ -6,16 +6,16 @@
   "prefix": "travellers-apps",
   "tags": ["scope:common"],
   "targets": {
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/common/geoapify"],
-      "options": {
-        "jestConfig": "libs/common/geoapify/jest.config.ts",
-        "tsConfig": "libs/common/geoapify/tsconfig.spec.json"
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "reportsDirectory": "../../../coverage/libs/common/geoapify",
+        "passWithNoTests": true
+      }
     }
   }
 }

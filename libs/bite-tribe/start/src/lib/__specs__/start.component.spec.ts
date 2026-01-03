@@ -2,10 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StartComponent } from '../start.component';
 import { provideRouter } from '@angular/router';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { vi } from 'vitest';
 
-jest.mock('@capacitor-firebase/analytics', () => ({
+vi.mock('@capacitor-firebase/analytics', () => ({
   FirebaseAnalytics: {
-    setCurrentScreen: jest.fn(),
+    setCurrentScreen: vi.fn(),
   },
 }));
 
@@ -28,7 +29,7 @@ describe('BiteTribeStartComponent', () => {
   });
 
   it('should call FirebaseAnalytics.setCurrentScreen on ionViewDidEnter', () => {
-    const spy = jest.spyOn(FirebaseAnalytics, 'setCurrentScreen');
+    const spy = vi.spyOn(FirebaseAnalytics, 'setCurrentScreen');
     component.ionViewDidEnter();
     expect(spy).toHaveBeenCalledWith({
       screenName: 'Start',

@@ -2,8 +2,9 @@ import { Platform } from '@ionic/angular';
 import { Geolocation } from '@capacitor/geolocation';
 import { getCurrentPosition } from './geolocation';
 import { lastValueFrom } from 'rxjs';
+import { vi, Mock } from 'vitest';
 
-jest.mock('@capacitor/geolocation');
+vi.mock('@capacitor/geolocation');
 
 describe('Geolocation Service', () => {
   let platform: Platform;
@@ -22,26 +23,24 @@ describe('Geolocation Service', () => {
 
   beforeEach(() => {
     platform = {
-      is: jest.fn(),
+      is: vi.fn(),
     } as unknown as Platform;
 
     // Reset all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    Geolocation.checkPermissions = jest.fn();
-    Geolocation.requestPermissions = jest.fn();
-    Geolocation.getCurrentPosition = jest.fn();
+    Geolocation.checkPermissions = vi.fn();
+    Geolocation.requestPermissions = vi.fn();
+    Geolocation.getCurrentPosition = vi.fn();
   });
 
   describe('getCurrentPosition', () => {
     it('should use native implementation on capacitor platform', async () => {
-      (platform.is as jest.Mock).mockReturnValue(true);
-      (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({
+      (platform.is as Mock).mockReturnValue(true);
+      (Geolocation.checkPermissions as Mock).mockResolvedValue({
         location: 'granted',
       });
-      (Geolocation.getCurrentPosition as jest.Mock).mockResolvedValue(
-        mockPosition
-      );
+      (Geolocation.getCurrentPosition as Mock).mockResolvedValue(mockPosition);
 
       const result = await lastValueFrom(getCurrentPosition(platform));
 
@@ -55,16 +54,14 @@ describe('Geolocation Service', () => {
     });
 
     it('should request permissions if not granted on native platform', async () => {
-      (platform.is as jest.Mock).mockReturnValue(true);
-      (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({
+      (platform.is as Mock).mockReturnValue(true);
+      (Geolocation.checkPermissions as Mock).mockResolvedValue({
         location: 'denied',
       });
-      (Geolocation.requestPermissions as jest.Mock).mockResolvedValue({
+      (Geolocation.requestPermissions as Mock).mockResolvedValue({
         location: 'granted',
       });
-      (Geolocation.getCurrentPosition as jest.Mock).mockResolvedValue(
-        mockPosition
-      );
+      (Geolocation.getCurrentPosition as Mock).mockResolvedValue(mockPosition);
 
       await getCurrentPosition(platform);
 
@@ -72,15 +69,15 @@ describe('Geolocation Service', () => {
     });
 
     it('should use web implementation on non-capacitor platform', async () => {
-      (platform.is as jest.Mock).mockReturnValue(false);
+      (platform.is as Mock).mockReturnValue(false);
       const mockNavigator = {
         geolocation: {
-          getCurrentPosition: jest.fn((success) => success(mockPosition)),
+          getCurrentPosition: vi.fn((success) => success(mockPosition)),
         },
       };
-      jest
-        .spyOn(global, 'navigator', 'get')
-        .mockReturnValue(mockNavigator as any);
+      vi.spyOn(global, 'navigator', 'get').mockReturnValue(
+        mockNavigator as any,
+      );
 
       const result = await lastValueFrom(getCurrentPosition(platform));
 
@@ -90,11 +87,11 @@ describe('Geolocation Service', () => {
     });
 
     it('should reject if geolocation is not supported on web', async () => {
-      (platform.is as jest.Mock).mockReturnValue(false);
-      jest.spyOn(global, 'navigator', 'get').mockReturnValue({} as any);
+      (platform.is as Mock).mockReturnValue(false);
+      vi.spyOn(global, 'navigator', 'get').mockReturnValue({} as any);
 
       await expect(lastValueFrom(getCurrentPosition(platform))).rejects.toThrow(
-        'Geolocation is not supported'
+        'Geolocation is not supported',
       );
     });
   });

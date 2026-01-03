@@ -14,7 +14,7 @@ addNecessaryIcons();
 describe('LoginContainerComponent', () => {
   let component: LoginContainerComponent;
   let fixture: ComponentFixture<LoginContainerComponent>;
-  let mockLoginService: jest.Mocked<LoginService>;
+  let mockLoginService: any;
 
   beforeEach(() => {
     mockLoginService = {
@@ -24,7 +24,7 @@ describe('LoginContainerComponent', () => {
       loginWithGoogleAccount: vi.fn(),
       loginWithAppleAccount: vi.fn(),
       loginWithFacebookAccount: vi.fn(),
-    } as unknown as jest.Mocked<LoginService>;
+    } as any;
 
     TestBed.configureTestingModule({
       providers: [

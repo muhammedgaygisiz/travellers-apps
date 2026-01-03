@@ -1,6 +1,13 @@
-import { TextDecoder, TextEncoder } from 'util';
-import { setupZonelessTestEnv } from 'jest-preset-angular/setup-env/zoneless';
+import '@angular/compiler';
+import '@analogjs/vitest-angular/setup-zone';
 
-setupZonelessTestEnv();
+import {
+  BrowserTestingModule,
+  platformBrowserTesting,
+} from '@angular/platform-browser/testing';
+import { getTestBed } from '@angular/core/testing';
 
-Object.assign(global, { TextDecoder, TextEncoder });
+getTestBed().initTestEnvironment(
+  BrowserTestingModule,
+  platformBrowserTesting(),
+);

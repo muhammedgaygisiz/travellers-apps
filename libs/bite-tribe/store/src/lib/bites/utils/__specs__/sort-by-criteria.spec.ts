@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { sortByCriteria } from '../sort-by-criteria';
 import { Bite } from 'model';
 

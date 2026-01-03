@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChartComponent } from './chart.component';
 import { ComponentRef } from '@angular/core';
@@ -109,9 +110,9 @@ describe('ChartComponent', () => {
   });
 
   it('should disconnect resize observer on destroy', () => {
-    const disconnectSpy = jest.spyOn(
+    const disconnectSpy = vi.spyOn(
       global.ResizeObserver.prototype,
-      'disconnect'
+      'disconnect',
     );
     component.ngOnDestroy();
     expect(disconnectSpy).toHaveBeenCalled();

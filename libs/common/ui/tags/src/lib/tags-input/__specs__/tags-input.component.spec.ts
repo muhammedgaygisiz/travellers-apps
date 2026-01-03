@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, test, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TagsInputComponent } from '../tags-input.component';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -33,7 +34,7 @@ describe('TagsInputComponent', () => {
     let emitSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      emitSpy = jest.spyOn(component.tagChanges, 'emit').mockImplementation();
+      emitSpy = vi.spyOn(component.tagChanges, 'emit').mockImplementation();
     });
 
     it('should emit tagChanges with new tag if input is not blank', () => {
@@ -75,7 +76,7 @@ describe('TagsInputComponent', () => {
     let emitSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      emitSpy = jest.spyOn(component.tagChanges, 'emit').mockImplementation();
+      emitSpy = vi.spyOn(component.tagChanges, 'emit').mockImplementation();
     });
 
     it('should remove tag and emit updated tags', () => {

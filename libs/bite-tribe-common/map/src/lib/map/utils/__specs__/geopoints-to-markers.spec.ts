@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { geopointsToMarkers } from '../geopoints-to-markers';
 import * as L from 'leaflet';
 import { MarkerColor } from '../../model/marker-color.enum';

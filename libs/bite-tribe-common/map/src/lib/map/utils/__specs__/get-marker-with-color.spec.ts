@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { getMarkerWithColor } from '../get-marker-with-color';
 import { MarkerColor } from '../../model/marker-color.enum';
 
@@ -7,7 +8,7 @@ describe('getMarkerWithColor', () => {
 
     expect(icon).toBeDefined();
     expect(icon.options.html).toContain(
-      `background-color: ${MarkerColor.DARKRED}`
+      `background-color: ${MarkerColor.DARKRED}`,
     );
     expect(icon.options.iconAnchor).toEqual([-4, 25]);
   });
@@ -24,7 +25,7 @@ describe('getMarkerWithColor', () => {
 
     expect(icon).toBeDefined();
     expect(icon.options.html).toContain(
-      `background-color: ${MarkerColor.DARKRED}`
+      `background-color: ${MarkerColor.DARKRED}`,
     );
     expect(icon.options.iconAnchor).toEqual([0, 35]);
   });

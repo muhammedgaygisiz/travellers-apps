@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PasswordValidatorComponent } from '../component/password-validator.component';
@@ -6,7 +7,7 @@ import { EMPTY, of } from 'rxjs';
 import { ComponentRef } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 
-jest.mock('memoizee');
+vi.mock('memoizee');
 addNecessaryIcons();
 
 const assertDeepEqual = (actual: any, expected: any): void => {
@@ -35,7 +36,7 @@ describe('PasswordValidatorComponent', () => {
 
   describe('ngOnChanges', () => {
     it('should call initStreams', () => {
-      const initStreamsSpy = jest.spyOn(component as any, 'initStreams');
+      const initStreamsSpy = vi.spyOn(component as any, 'initStreams');
 
       component.ngOnChanges();
 
@@ -52,7 +53,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: 'success' }
+            { a: 'success' },
           );
         });
       });
@@ -66,7 +67,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: 'danger' }
+            { a: 'danger' },
           );
         });
       });
@@ -80,7 +81,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: '' }
+            { a: '' },
           );
         });
       });
@@ -96,7 +97,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'checkmark-outline' }
+            { a: 'checkmark-outline' },
           );
         });
       });
@@ -110,7 +111,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'close-outline' }
+            { a: 'close-outline' },
           );
         });
       });
@@ -124,7 +125,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'close-outline' }
+            { a: 'close-outline' },
           );
         });
       });
@@ -140,7 +141,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: 'success' }
+            { a: 'success' },
           );
         });
       });
@@ -154,7 +155,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: 'danger' }
+            { a: 'danger' },
           );
         });
       });
@@ -168,7 +169,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: '' }
+            { a: '' },
           );
         });
       });
@@ -184,7 +185,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'checkmark-outline' }
+            { a: 'checkmark-outline' },
           );
         });
       });
@@ -198,7 +199,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'close-outline' }
+            { a: 'close-outline' },
           );
         });
       });
@@ -212,7 +213,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'close-outline' }
+            { a: 'close-outline' },
           );
         });
       });

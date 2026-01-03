@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import * as fromSelectors from '../selectors';
 import { Geopoint, PublicUser, Settings } from 'model';
 import { AppSlice } from '../app-slice.model';

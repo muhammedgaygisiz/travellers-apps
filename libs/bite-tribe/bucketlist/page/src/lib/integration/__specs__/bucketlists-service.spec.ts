@@ -1,11 +1,12 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BucketlistsService } from '../bucketlists.service';
 import { TestBed } from '@angular/core/testing';
 import { NavController } from '@ionic/angular';
 import { BucketlistsDataAccessService } from 'bite-tribe/bucketlist-data-access';
 
-const setBucketlistSortingMock = jest.fn();
-const navigateForwardMock = jest.fn();
-const createAndSaveToBucketListMock = jest.fn();
+const setBucketlistSortingMock = vi.fn();
+const navigateForwardMock = vi.fn();
+const createAndSaveToBucketListMock = vi.fn();
 const Mock = {
   setBucketlistSorting: setBucketlistSortingMock,
   createAndSaveToBucketList: createAndSaveToBucketListMock,

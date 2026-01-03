@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { zoomToGeopoint } from '../zoom-to-geopoint';
 import * as L from 'leaflet';
 import { DEFAULT_ZOOM } from '../../model/default-zoom';

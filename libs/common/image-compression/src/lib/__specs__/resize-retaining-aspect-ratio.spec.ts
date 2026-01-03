@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { resizeRetainingAspectRatio } from '../resize-retaining-aspect-ratio';
 
 describe('resizeRetainingAspectRatio', () => {

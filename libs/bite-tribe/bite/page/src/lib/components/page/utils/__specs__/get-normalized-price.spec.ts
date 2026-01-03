@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { getNormalizedPrice } from '../get-normalized-price';
 
 describe('getNormalizedPrice', () => {

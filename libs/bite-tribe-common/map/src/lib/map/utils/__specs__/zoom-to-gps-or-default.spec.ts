@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { zoomToGpsOrDefault } from '../zoom-to-gps-or-default';
 import * as L from 'leaflet';
 import { Geopoint } from 'model';

@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { vi } from 'vitest';
 
 const mockHeic2any = vi.fn();

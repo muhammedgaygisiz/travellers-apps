@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { findClosestSnap } from '../find-closest-snap';
 import { vi } from 'vitest';
 

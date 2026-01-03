@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { getHighestSnap } from '../get-highest-snap';
 
 describe('getHighestSnap', () => {

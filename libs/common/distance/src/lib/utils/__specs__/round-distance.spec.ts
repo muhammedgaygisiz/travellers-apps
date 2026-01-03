@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { roundDistance } from '../round-distance';
 
 describe('RoundDistance', () => {

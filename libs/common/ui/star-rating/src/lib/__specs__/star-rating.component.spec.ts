@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StarRatingComponent } from '../star-rating.component';
 import { ComponentRef } from '@angular/core';

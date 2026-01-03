@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PageComponent } from '../page.component';
@@ -7,7 +8,7 @@ import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 
 addNecessaryIcons();
 
-jest.mock('localization');
+vi.mock('localization');
 
 describe('PageComponent', () => {
   let component: PageComponent;
@@ -32,9 +33,9 @@ describe('PageComponent', () => {
 
   describe('showMenuPopover', () => {
     it('should show menu popover', async () => {
-      const popoverControllerCreateSpy = jest
+      const popoverControllerCreateSpy = vi
         .spyOn(component.popoverController, 'create')
-        .mockReturnValue({ present: jest.fn() } as any);
+        .mockReturnValue({ present: vi.fn() } as any);
 
       await component.showMenuPopover({} as MouseEvent);
 

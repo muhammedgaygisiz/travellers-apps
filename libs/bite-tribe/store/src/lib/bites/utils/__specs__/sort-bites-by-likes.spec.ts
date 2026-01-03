@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { sortBitesByLikes } from '../sort-bites-by-likes';
 import { Bite } from 'model';
 

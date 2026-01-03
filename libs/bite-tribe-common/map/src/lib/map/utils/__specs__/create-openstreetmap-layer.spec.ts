@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { createOpenstreetmapLayer } from '../create-openstreetmap-layer';
 import * as L from 'leaflet';
 

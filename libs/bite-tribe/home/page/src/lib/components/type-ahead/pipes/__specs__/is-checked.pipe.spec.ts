@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { IsCheckedPipe } from '../is-checked.pipe';
 
 describe('IsCheckedPipe', () => {

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { stringIncludesDelimiter } from '../string-includes-delimiter';
 import { DELIMITERS } from '../../model/delimiters';
 

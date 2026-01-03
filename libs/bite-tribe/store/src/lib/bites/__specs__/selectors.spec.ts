@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { Bite, Bucketlist, Geopoint, PublicUser } from 'model';
 import * as fromSelectors from '../selectors';
 import { EntityState } from '@ngrx/entity';

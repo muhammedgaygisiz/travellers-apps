@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { compressWithCanvas } from '../compress-with-canvas';
 import { vi } from 'vitest';
 

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import calculateIcon from '../calculate-icon';
 
 describe('calculateIcon', () => {

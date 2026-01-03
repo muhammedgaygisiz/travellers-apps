@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { restaurant, restaurants, restaurantToCreate } from '../selectors';
 
 describe('restaurant Selectors', () => {
@@ -42,19 +43,19 @@ describe('restaurant Selectors', () => {
       const result = restaurants.projector(
         state.restaurants,
         state.gpsPosition,
-        state.bites
+        state.bites,
       );
 
       expect(result.length).toBe(3);
 
       const savedRestaurant1 = result.find(
-        (r) => r.name === 'Saved Restaurant 1'
+        (r) => r.name === 'Saved Restaurant 1',
       );
       const savedRestaurant2 = result.find(
-        (r) => r.name === 'Saved Restaurant 2'
+        (r) => r.name === 'Saved Restaurant 2',
       );
       const unsavedRestaurant1 = result.find(
-        (r) => r.name === 'Unsaved Restaurant 1'
+        (r) => r.name === 'Unsaved Restaurant 1',
       );
 
       expect(savedRestaurant1).toBeDefined();
@@ -77,7 +78,7 @@ describe('restaurant Selectors', () => {
       const result = restaurants.projector(
         state.restaurants,
         state.gpsPosition,
-        state.bites
+        state.bites,
       );
 
       expect(result.length).toBe(0);
@@ -106,16 +107,16 @@ describe('restaurant Selectors', () => {
       const result = restaurants.projector(
         state.restaurants,
         state.gpsPosition,
-        state.bites
+        state.bites,
       );
 
       expect(result.length).toBe(2);
 
       const savedRestaurant1 = result.find(
-        (r) => r.name === 'Saved Restaurant 1'
+        (r) => r.name === 'Saved Restaurant 1',
       );
       const unsavedRestaurant1 = result.find(
-        (r) => r.name === 'Unsaved Restaurant 1'
+        (r) => r.name === 'Unsaved Restaurant 1',
       );
 
       expect(savedRestaurant1).toBeDefined();
@@ -148,7 +149,7 @@ describe('restaurant Selectors', () => {
       const result = restaurant.projector(
         '1',
         state.restaurants,
-        state.gpsPosition
+        state.gpsPosition,
       );
 
       expect(result).toBeDefined();
@@ -171,7 +172,7 @@ describe('restaurant Selectors', () => {
       const result = restaurant.projector(
         'nonexistent-id',
         state.restaurants,
-        state.gpsPosition
+        state.gpsPosition,
       );
 
       expect(result).toBeUndefined();
@@ -192,7 +193,7 @@ describe('restaurant Selectors', () => {
       const result = restaurant.projector(
         '1',
         state.restaurants,
-        state.gpsPosition
+        state.gpsPosition,
       );
 
       expect(result).toBeUndefined();

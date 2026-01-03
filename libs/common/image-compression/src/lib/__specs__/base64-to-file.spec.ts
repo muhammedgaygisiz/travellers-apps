@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { base64ToFile } from '../base64-to-file';
 
 describe('base64ToFile', () => {

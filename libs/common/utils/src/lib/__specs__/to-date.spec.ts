@@ -1,15 +1,16 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { toDate } from '../to-date';
 
 describe('toDate', () => {
   const mockDate = new Date('2024-03-15T12:00:00Z');
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(mockDate);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockDate);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should handle date strings', () => {

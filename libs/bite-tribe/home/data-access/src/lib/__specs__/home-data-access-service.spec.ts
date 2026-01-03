@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { inject, TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from '../home-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
@@ -62,7 +63,7 @@ describe('HomeDataAccessService', () => {
     it('should call logout on BiteTribeStoreService', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const logoutSpy = jest.spyOn(biteTribeStoreService, 'logout');
+        const logoutSpy = vi.spyOn(biteTribeStoreService, 'logout');
         service.logout();
         expect(logoutSpy).toHaveBeenCalledTimes(1);
       },
@@ -88,7 +89,7 @@ describe('HomeDataAccessService', () => {
       (storeService: BiteTribeStoreService) => {
         storeService.sortedHomeBites$ = of([bite]);
         storeService.userId$ = of('userId');
-        submitLikeOrDislikeClickSpy = jest
+        submitLikeOrDislikeClickSpy = vi
           .spyOn(storeService, 'submitLikeOrDislikeClick')
           .mockImplementation();
       },
@@ -177,7 +178,7 @@ describe('HomeDataAccessService', () => {
     it('should call deleteBite on BiteTribeStoreService', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const submitDeleteBiteSpy = jest.spyOn(
+        const submitDeleteBiteSpy = vi.spyOn(
           biteTribeStoreService,
           'submitDeleteBite',
         );
@@ -191,7 +192,7 @@ describe('HomeDataAccessService', () => {
     it('should call setHomeSorting on BiteTribeStoreService', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const setHomeSortingSpy = jest.spyOn(
+        const setHomeSortingSpy = vi.spyOn(
           biteTribeStoreService,
           'setHomeSorting',
         );
@@ -206,7 +207,7 @@ describe('HomeDataAccessService', () => {
     it('should call setMyBitesSorting on BiteTribeStoreService', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const setMyBitesSortingSpy = jest.spyOn(
+        const setMyBitesSortingSpy = vi.spyOn(
           biteTribeStoreService,
           'setMyBitesSorting',
         );
@@ -221,7 +222,7 @@ describe('HomeDataAccessService', () => {
     it('should call setFilters on BiteTribeStoreService', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const setHomeFiltersSpy = jest.spyOn(
+        const setHomeFiltersSpy = vi.spyOn(
           biteTribeStoreService,
           'setHomeFilters',
         );
@@ -241,7 +242,7 @@ describe('HomeDataAccessService', () => {
     it('should call clearFilters on BiteTribeStoreService', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const clearHomeFiltersSpy = jest.spyOn(
+        const clearHomeFiltersSpy = vi.spyOn(
           biteTribeStoreService,
           'clearHomeFilters',
         );
@@ -255,7 +256,7 @@ describe('HomeDataAccessService', () => {
     it('should call reloadGPSPosition', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const biteTribeStoreServiceSpy = jest.spyOn(
+        const biteTribeStoreServiceSpy = vi.spyOn(
           biteTribeStoreService,
           'reloadGPSPosition',
         );
@@ -269,7 +270,7 @@ describe('HomeDataAccessService', () => {
     it('should call clearGpsError', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const biteTribeStoreServiceSpy = jest.spyOn(
+        const biteTribeStoreServiceSpy = vi.spyOn(
           biteTribeStoreService,
           'clearGpsError',
         );

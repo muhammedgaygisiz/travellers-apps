@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PageSettings } from '../settings.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
@@ -5,7 +6,7 @@ import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { PublicUser, Settings } from 'model';
 
-jest.mock('localization');
+vi.mock('localization');
 
 describe('PageSettings', () => {
   let component: PageSettings;
@@ -16,15 +17,15 @@ describe('PageSettings', () => {
     // Mock window.matchMedia
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
-      value: jest.fn().mockImplementation((query) => ({
+      value: vi.fn().mockImplementation((query) => ({
         matches: false,
         media: query,
         onchange: null,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
       })),
     });
 

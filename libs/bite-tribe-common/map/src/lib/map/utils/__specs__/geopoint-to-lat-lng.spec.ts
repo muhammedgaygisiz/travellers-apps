@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { geopointToLatLng } from '../geopoint-to-lat-lng';
 
 describe('geopointToLatLng', () => {

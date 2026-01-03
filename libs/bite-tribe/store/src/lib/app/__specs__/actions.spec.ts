@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { AppActions } from '../actions';
 
 describe('App Actions', () => {

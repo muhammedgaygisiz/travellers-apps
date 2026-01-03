@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { getExifDataFromPhoto } from '../get-exif-data-from-photo';
 import { Photo } from '@capacitor/camera';
 

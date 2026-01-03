@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { LoginContainerComponent } from '../login-container.component';
@@ -7,7 +8,7 @@ import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { addIcons } from 'ionicons';
 import { logoApple, logoFacebook, logoGoogle } from 'ionicons/icons';
 
-jest.mock('localization');
+vi.mock('localization');
 addNecessaryIcons();
 
 describe('LoginContainerComponent', () => {
@@ -18,11 +19,11 @@ describe('LoginContainerComponent', () => {
   beforeEach(() => {
     mockLoginService = {
       loginFailed: signal(false) as unknown as any,
-      login: jest.fn(),
-      gotoSignUp: jest.fn(),
-      loginWithGoogleAccount: jest.fn(),
-      loginWithAppleAccount: jest.fn(),
-      loginWithFacebookAccount: jest.fn(),
+      login: vi.fn(),
+      gotoSignUp: vi.fn(),
+      loginWithGoogleAccount: vi.fn(),
+      loginWithAppleAccount: vi.fn(),
+      loginWithFacebookAccount: vi.fn(),
     } as unknown as jest.Mocked<LoginService>;
 
     TestBed.configureTestingModule({

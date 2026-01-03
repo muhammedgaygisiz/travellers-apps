@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { getBitesByRestaurantIdOrName } from '../get-bites-by-restaurant-id-or-name';
 import { Bite } from 'model';
 

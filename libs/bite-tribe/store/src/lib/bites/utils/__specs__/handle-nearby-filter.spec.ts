@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { handleNearbyFilter } from '../handle-nearby-filter';
 import { Bite } from 'model';
 

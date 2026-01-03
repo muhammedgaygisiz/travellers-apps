@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { getPosition } from '../get-position';
 
 describe('getPosition', () => {

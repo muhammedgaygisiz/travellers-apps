@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, it } from 'vitest';
 import { getExifDataFromFile } from '../get-exif-data-from-file';
 import * as EXIFR from 'exifr';
 import { vi, Mock as ViMock } from 'vitest';

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { adapter } from '../adapter';
 
 describe('Likes Adapter', () => {

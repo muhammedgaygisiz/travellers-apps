@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { provideFirestoreAnalytics } from '../provide-firestore-analytics';
 import { getApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';

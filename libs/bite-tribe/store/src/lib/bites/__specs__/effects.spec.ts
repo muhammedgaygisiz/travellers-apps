@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi, Mock } from 'vitest';
 import { TestScheduler } from 'rxjs/testing';
 import { Observable, of } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -10,7 +11,6 @@ import { Bite } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { bite } from '../selectors';
 import { fromAuth } from 'ta-firestore';
-import SpyInstance = jest.SpyInstance;
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -18,11 +18,11 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 
 const Mock = {
   bites$: (): Observable<any> => of([]),
-  saveNewBite: jest.fn(),
-  saveEditedBite: jest.fn(),
-  saveTagsToExistingBite: jest.fn(),
-  deleteBite: jest.fn(),
-  getUserByBiteId: jest.fn(),
+  saveNewBite: vi.fn(),
+  saveEditedBite: vi.fn(),
+  saveTagsToExistingBite: vi.fn(),
+  deleteBite: vi.fn(),
+  getUserByBiteId: vi.fn(),
 };
 
 const BITE_MOCK = {
@@ -76,12 +76,13 @@ describe('BiteEffects', () => {
   });
 
   describe('saveNewBiteToFirestore$', () => {
-    let saveNewBiteSpy: SpyInstance;
+    let saveNewBiteSpy: Mock;
 
     beforeEach(() => {
-      saveNewBiteSpy = jest
+      saveNewBiteSpy = vi
         .spyOn(apiService, 'saveNewBite')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should run saveNewBite on saveNewBite', () => {
@@ -99,12 +100,13 @@ describe('BiteEffects', () => {
   });
 
   describe('saveEditedBiteToFirestore$', () => {
-    let saveEditedBiteSpy: SpyInstance;
+    let saveEditedBiteSpy: Mock;
 
     beforeEach(() => {
-      saveEditedBiteSpy = jest
+      saveEditedBiteSpy = vi
         .spyOn(apiService, 'saveEditedBite')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should run saveEditedBite on saveExistingBite', () => {
@@ -122,12 +124,13 @@ describe('BiteEffects', () => {
   });
 
   describe('saveTagsToExistingBite$', () => {
-    let saveTagsToExistingBiteSpy: SpyInstance;
+    let saveTagsToExistingBiteSpy: Mock;
 
     beforeEach(() => {
-      saveTagsToExistingBiteSpy = jest
+      saveTagsToExistingBiteSpy = vi
         .spyOn(apiService, 'saveTagsToExistingBite')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should run saveTagsToExistingBite on saveTags', () => {
@@ -146,10 +149,13 @@ describe('BiteEffects', () => {
   });
 
   describe('deleteBite$', () => {
-    let deleteBiteSpy: SpyInstance;
+    let deleteBiteSpy: Mock;
 
     beforeEach(() => {
-      deleteBiteSpy = jest.spyOn(apiService, 'deleteBite').mockImplementation();
+      deleteBiteSpy = vi
+        .spyOn(apiService, 'deleteBite')
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should run deleteBite on deleteBite', () => {
@@ -167,7 +173,7 @@ describe('BiteEffects', () => {
   });
 
   describe('loadUserFromBite$', () => {
-    let getUserByBiteIdSpy: SpyInstance;
+    let getUserByBiteIdSpy: Mock;
     const BITE_CREATOR_MOCK = {
       snapshot: {
         data: {} as any,
@@ -175,7 +181,7 @@ describe('BiteEffects', () => {
     } as any;
 
     beforeEach(() => {
-      getUserByBiteIdSpy = jest
+      getUserByBiteIdSpy = vi
         .spyOn(apiService, 'getUserByBiteId')
         .mockReturnValue(of(BITE_CREATOR_MOCK));
     });

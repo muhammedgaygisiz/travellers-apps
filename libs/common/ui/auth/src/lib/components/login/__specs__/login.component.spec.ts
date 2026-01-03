@@ -1,10 +1,11 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LoginComponent } from '../login.component';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
-jest.mock('localization');
+vi.mock('localization');
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -25,7 +26,7 @@ describe('LoginComponent', () => {
   });
 
   it('should emit submitSignupWithGoogle on button click', () => {
-    const submitSignupWithGoogleEmitSpy = jest.spyOn(
+    const submitSignupWithGoogleEmitSpy = vi.spyOn(
       component.submitSignupWithGoogle,
       'emit',
     );
@@ -35,7 +36,7 @@ describe('LoginComponent', () => {
   });
 
   it('should emit submitSignupWithApple on button click', () => {
-    const submitSignupWithAppleEmitSpy = jest.spyOn(
+    const submitSignupWithAppleEmitSpy = vi.spyOn(
       component.submitSignupWithApple,
       'emit',
     );

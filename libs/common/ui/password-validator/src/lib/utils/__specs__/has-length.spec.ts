@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import hasLength from '../has-length';
 
 describe('hasLength', () => {

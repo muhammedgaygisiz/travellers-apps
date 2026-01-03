@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Photo } from '@capacitor/camera';
 import { compressPhoto } from '../compress-photo';
 import { vi } from 'vitest';

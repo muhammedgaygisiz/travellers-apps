@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi, Mock as ViMock } from 'vitest';
 import { TestScheduler } from 'rxjs/testing';
 import { Observable, of } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -7,7 +8,6 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { BucketListEffect } from '../effects';
 import { BucketlistActions } from '../actions';
 import { fromAuth } from 'ta-firestore';
-import SpyInstance = jest.SpyInstance;
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -15,10 +15,10 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 
 const Mock = {
   bucketlists$: (): Observable<any> => of([]),
-  saveBiteIdToBucketList: jest.fn(),
-  createBucketListAndSaveBiteIdToBucketList: jest.fn(),
-  removeBiteFromBucketlist: jest.fn(),
-  createBucketList: jest.fn(),
+  saveBiteIdToBucketList: vi.fn(),
+  createBucketListAndSaveBiteIdToBucketList: vi.fn(),
+  removeBiteFromBucketlist: vi.fn(),
+  createBucketList: vi.fn(),
 };
 
 describe('BucketListEffect', () => {
@@ -58,12 +58,13 @@ describe('BucketListEffect', () => {
   });
 
   describe('saveBiteIdToBucketListEffect$', () => {
-    let saveBiteIdToBucketListSpy: SpyInstance;
+    let saveBiteIdToBucketListSpy: ViMock;
 
     beforeEach(() => {
-      saveBiteIdToBucketListSpy = jest
+      saveBiteIdToBucketListSpy = vi
         .spyOn(apiService, 'saveBiteIdToBucketList')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should run saveBiteIdToBucketList on saveBiteIdToBucketList', () => {
@@ -82,12 +83,13 @@ describe('BucketListEffect', () => {
   });
 
   describe('createBucketlistAndSaveBiteIdToBucketListEffect$', () => {
-    let createBucketListAndSaveBiteIdToBucketListSpy: SpyInstance;
+    let createBucketListAndSaveBiteIdToBucketListSpy: ViMock;
 
     beforeEach(() => {
-      createBucketListAndSaveBiteIdToBucketListSpy = jest
+      createBucketListAndSaveBiteIdToBucketListSpy = vi
         .spyOn(apiService, 'createBucketListAndSaveBiteIdToBucketList')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should run createBucketListAndSaveBiteIdToBucketList on createAndSaveBiteIdToBucketList', () => {
@@ -110,12 +112,13 @@ describe('BucketListEffect', () => {
   });
 
   describe('removeBiteFromBucketlistEffect', () => {
-    let removeBiteFromBucketlistSpy: SpyInstance;
+    let removeBiteFromBucketlistSpy: ViMock;
 
     beforeEach(() => {
-      removeBiteFromBucketlistSpy = jest
+      removeBiteFromBucketlistSpy = vi
         .spyOn(apiService, 'removeBiteFromBucketlist')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should run removeBiteFromBucketlist on removeBiteFromBucketlist', () => {
@@ -134,12 +137,13 @@ describe('BucketListEffect', () => {
   });
 
   describe('createBucketlistEffect$', () => {
-    let createBucketListSpy: SpyInstance;
+    let createBucketListSpy: ViMock;
 
     beforeEach(() => {
-      createBucketListSpy = jest
+      createBucketListSpy = vi
         .spyOn(apiService, 'createBucketList')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should run createBucketList on createBucketList', () => {

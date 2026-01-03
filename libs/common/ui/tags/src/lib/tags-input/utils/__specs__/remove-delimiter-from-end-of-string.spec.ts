@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { removeDelimiterFromEndOfString } from '../remove-delimiter-from-end-of-string';
 
 describe('removeDelimiterFromEndOfString', () => {

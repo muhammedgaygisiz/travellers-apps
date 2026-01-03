@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { removeGpsMarker } from '../remove-gps-marker';
 import * as L from 'leaflet';
 

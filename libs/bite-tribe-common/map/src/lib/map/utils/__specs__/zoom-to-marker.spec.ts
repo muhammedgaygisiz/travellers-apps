@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { zoomToMarkers } from '../zoom-to-markers';
 import { DEFAULT_ZOOM } from '../../model/default-zoom';
 import { vi } from 'vitest';

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { handleMaxPriceFilter } from '../handle-max-price-filter';
 import { Bite } from 'model';
 

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { uniqueBitesByName } from '../unique-bites-by-name';
 
 describe('uniqueBitesByName', () => {

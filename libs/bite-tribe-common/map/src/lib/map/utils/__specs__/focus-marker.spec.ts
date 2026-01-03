@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { focusMarker } from '../focus-marker';
 import { MarkerColor } from '../../model/marker-color.enum';
 import { vi } from 'vitest';

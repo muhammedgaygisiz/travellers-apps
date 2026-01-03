@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ImageUploadComponent } from '../image-upload.component';
 import { Camera } from '@capacitor/camera';
 import { compressFile, compressPhoto } from 'image-compression';

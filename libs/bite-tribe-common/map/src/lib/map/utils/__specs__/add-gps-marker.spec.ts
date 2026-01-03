@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { addGpsMarker } from '../add-gps-marker';
 import { Geopoint } from 'model';
 import { vi } from 'vitest';

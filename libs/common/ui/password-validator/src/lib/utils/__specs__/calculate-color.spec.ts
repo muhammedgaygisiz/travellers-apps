@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import calculateColor from '../calculate-color';
 
 describe('calculateColor', () => {

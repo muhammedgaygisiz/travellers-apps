@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestScheduler } from 'rxjs/testing';
 import { biteTitleResolver } from '../bite-title-resolver';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
@@ -14,8 +15,8 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 describe('biteTitleResolver', () => {
   let scheduler: TestScheduler;
 
-  const routeMock = jest.fn() as unknown as ActivatedRouteSnapshot;
-  const stateMock = jest.fn() as unknown as RouterStateSnapshot;
+  const routeMock = vi.fn() as unknown as ActivatedRouteSnapshot;
+  const stateMock = vi.fn() as unknown as RouterStateSnapshot;
 
   beforeEach(() => {
     scheduler = new TestScheduler(assertDeepEqual);

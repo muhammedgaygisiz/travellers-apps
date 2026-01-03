@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { CalcClassPipe } from '../calc-class.pipe';
 import { Bite } from 'model';
 

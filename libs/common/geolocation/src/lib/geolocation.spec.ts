@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { Platform } from '@ionic/angular';
 import { Geolocation } from '@capacitor/geolocation';
 import { getCurrentPosition } from './geolocation';

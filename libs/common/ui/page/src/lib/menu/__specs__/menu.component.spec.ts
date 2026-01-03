@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MenuComponent } from '../menu.component';
@@ -7,9 +8,9 @@ import { addNecessaryIcons } from 'utils';
 
 addNecessaryIcons();
 
-jest.mock('localization');
+vi.mock('localization');
 
-global.fetch = jest.fn(() =>
+global.fetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
     text: () => Promise.resolve({}),
@@ -31,7 +32,7 @@ describe('MenuComponent', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
 
-    languageChangeClickEmitSpy = jest.spyOn(
+    languageChangeClickEmitSpy = vi.spyOn(
       component.languageChangeClick,
       'emit',
     );
@@ -62,7 +63,7 @@ describe('MenuComponent', () => {
 
     expect(fixture.debugElement).toMatchSnapshot();
 
-    jest.spyOn(component.loginClick, 'emit');
+    vi.spyOn(component.loginClick, 'emit');
     const loginButton = fixture.debugElement.query(
       By.css('[data-cy="btn-login"]'),
     );
@@ -76,7 +77,7 @@ describe('MenuComponent', () => {
 
     fixture.detectChanges();
 
-    jest.spyOn(component.logoutClick, 'emit');
+    vi.spyOn(component.logoutClick, 'emit');
     const logoutButton = fixture.debugElement.query(
       By.css('[data-cy="btn-logout"]'),
     );

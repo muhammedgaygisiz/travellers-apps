@@ -1,3 +1,4 @@
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { compressFile } from '../compress-file';
 import { convertHeicToJpeg } from '../convert-heic-to-jpeg';
 import { vi } from 'vitest';

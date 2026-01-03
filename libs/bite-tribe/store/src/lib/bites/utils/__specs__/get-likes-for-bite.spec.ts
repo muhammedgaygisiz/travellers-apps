@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { getLikesForBite } from '../get-likes-for-bite';
 import { Bite, Like } from 'model';
 

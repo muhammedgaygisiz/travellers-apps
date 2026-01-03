@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { fitMapToMarkers } from '../fit-map-to-markers';
 import { vi } from 'vitest';
 

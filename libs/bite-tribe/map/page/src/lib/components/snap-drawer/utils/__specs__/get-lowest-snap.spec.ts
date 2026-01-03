@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { getLowestSnap } from '../get-lowest-snap';
 
 describe('getLowestSnap', () => {

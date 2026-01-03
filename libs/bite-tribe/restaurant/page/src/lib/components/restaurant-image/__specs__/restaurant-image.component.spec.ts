@@ -1,10 +1,11 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { RestaurantImageComponent } from '../restaurant-image.component';
 import { ComponentRef } from '@angular/core';
 
-jest.mock('localization');
+vi.mock('localization');
 
 addNecessaryIcons();
 

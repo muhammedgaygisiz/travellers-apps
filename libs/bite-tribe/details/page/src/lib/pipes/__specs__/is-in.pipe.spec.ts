@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { IsInPipe } from '../is-in.pipe';
 import { Bite, Bucketlist } from 'model';
 
@@ -30,7 +31,7 @@ describe('IsInPipe', () => {
   it('should return "bookmark-outline" when bite is not in bucketlist', () => {
     const differentBite = { ...mockBite, id: 'bite3' };
     expect(pipe.transform(differentBite, mockBucketlist)).toBe(
-      'bookmark-outline'
+      'bookmark-outline',
     );
   });
 
@@ -40,13 +41,13 @@ describe('IsInPipe', () => {
 
   it('should return "bookmark-outline" when bucketlist is undefined', () => {
     expect(pipe.transform(mockBite, undefined as unknown as Bucketlist)).toBe(
-      'bookmark-outline'
+      'bookmark-outline',
     );
   });
 
   it('should return "bookmark-outline" when both bite and bucketlist are undefined', () => {
     expect(pipe.transform(undefined, undefined as unknown as Bucketlist)).toBe(
-      'bookmark-outline'
+      'bookmark-outline',
     );
   });
 });

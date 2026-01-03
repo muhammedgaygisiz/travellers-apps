@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { NavController } from '@ionic/angular';
@@ -5,7 +6,7 @@ import { provideRouter } from '@angular/router';
 import { LoginService } from '../login.service';
 import { STORE_SERVICE, StoreService } from 'utils';
 
-jest.mock('localization');
+vi.mock('localization');
 
 describe('LoginService', () => {
   let service: LoginService;
@@ -21,11 +22,11 @@ describe('LoginService', () => {
         {
           provide: STORE_SERVICE,
           useValue: {
-            login: jest.fn(),
-            loginWithGoogleAccount: jest.fn(),
-            loginWithAppleAccount: jest.fn(),
-            loginWithFacebookAccount: jest.fn(),
-            loginFailed: jest.fn(),
+            login: vi.fn(),
+            loginWithGoogleAccount: vi.fn(),
+            loginWithAppleAccount: vi.fn(),
+            loginWithFacebookAccount: vi.fn(),
+            loginFailed: vi.fn(),
           },
         },
       ],
@@ -63,7 +64,7 @@ describe('LoginService', () => {
 
   describe('login', () => {
     it('should dispatch auth action', () => {
-      const loginSpy = jest.spyOn(store, 'login');
+      const loginSpy = vi.spyOn(store, 'login');
 
       const authCreds = {
         email: 'email',
@@ -77,7 +78,7 @@ describe('LoginService', () => {
 
   describe('gotoSignUp', () => {
     it('should call navigateForward', async () => {
-      const navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+      const navigateForwardSpy = vi.spyOn(navController, 'navigateForward');
       await service.gotoSignUp();
 
       expect(navigateForwardSpy).toHaveBeenCalledWith(['/registration']);
@@ -86,7 +87,7 @@ describe('LoginService', () => {
 
   describe('loginWithGoogleAccount', () => {
     it('should dispatch loginWithGoogleAccount action', () => {
-      const loginWithGoogleSpy = jest.spyOn(store, 'loginWithGoogleAccount');
+      const loginWithGoogleSpy = vi.spyOn(store, 'loginWithGoogleAccount');
 
       service.loginWithGoogleAccount();
 
@@ -96,7 +97,7 @@ describe('LoginService', () => {
 
   describe('loginWithAppleAccount', () => {
     it('should dispatch loginWithAppleAccount action', () => {
-      const loginWithAppleSpy = jest.spyOn(store, 'loginWithAppleAccount');
+      const loginWithAppleSpy = vi.spyOn(store, 'loginWithAppleAccount');
 
       service.loginWithAppleAccount();
 

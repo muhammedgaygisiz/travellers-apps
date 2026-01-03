@@ -1,15 +1,16 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { withPaddedData } from '../with-padded-data';
 
 describe('withPaddedData', () => {
   const mockDate = new Date('2024-03-15T12:00:00Z');
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(mockDate);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockDate);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should return empty array for empty input', () => {

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { Bite } from 'model';
 import { getBitePriceInPreferredCurrency } from '../get-bite-price-in-preferred-currency';
 
@@ -10,7 +11,7 @@ describe('getBitePriceInPreferredCurrency', () => {
     const price = getBitePriceInPreferredCurrency(
       bite,
       exchangeRates,
-      preferredCurrency
+      preferredCurrency,
     );
     expect(price).toBe(100);
   });
@@ -23,7 +24,7 @@ describe('getBitePriceInPreferredCurrency', () => {
     const price = getBitePriceInPreferredCurrency(
       bite,
       exchangeRates,
-      preferredCurrency
+      preferredCurrency,
     );
     expect(price).toBeCloseTo(85); // 100 * 0.85
   });
@@ -36,7 +37,7 @@ describe('getBitePriceInPreferredCurrency', () => {
     const price = getBitePriceInPreferredCurrency(
       bite,
       exchangeRates,
-      preferredCurrency
+      preferredCurrency,
     );
     expect(price).toBeCloseTo(85); // Default to 1 if no rate
   });

@@ -1,11 +1,12 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BucketlistsDataAccessService } from '../bucketlists-data-access.service';
 import { TestBed } from '@angular/core/testing';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 
-const createBucketListMock = jest.fn();
-const setBucketlistSortingMock = jest.fn();
-const navigateForwardMock = jest.fn();
+const createBucketListMock = vi.fn();
+const setBucketlistSortingMock = vi.fn();
+const navigateForwardMock = vi.fn();
 const Mock = {
   sortedBucketlists$: of(undefined),
   bucketlistSorting$: of(undefined),

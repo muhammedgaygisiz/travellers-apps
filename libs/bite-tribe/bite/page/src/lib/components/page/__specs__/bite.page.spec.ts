@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BitePage } from '../bite.page';
 import { Platform } from '@ionic/angular';

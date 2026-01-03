@@ -8,37 +8,37 @@ import {
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { SnapDrawerComponent } from '../snap-drawer.component';
-import SpyInstance = jest.SpyInstance;
+import { vi, Mock as ViMock, MockInstance } from 'vitest';
 
 class Mock {
-  setStyle = jest.fn();
+  setStyle = vi.fn();
   nativeElement = {
-    querySelector: jest.fn(),
+    querySelector: vi.fn(),
   };
 }
 
-const computeSnapOffsetsMock = jest.fn();
-jest.mock('../utils/compute-snap-offsets', () => ({
+const computeSnapOffsetsMock = vi.fn();
+vi.mock('../utils/compute-snap-offsets', () => ({
   computeSnapOffsets: (...args: any): void => computeSnapOffsetsMock(...args),
 }));
 
-const getLowestSnapMock = jest.fn();
-jest.mock('../utils/get-lowest-snap', () => ({
+const getLowestSnapMock = vi.fn();
+vi.mock('../utils/get-lowest-snap', () => ({
   getLowestSnap: (...args: any): void => getLowestSnapMock(...args),
 }));
 
-const getHighestSnapMock = jest.fn();
-jest.mock('../utils/get-highest-snap', () => ({
+const getHighestSnapMock = vi.fn();
+vi.mock('../utils/get-highest-snap', () => ({
   getHighestSnap: (...args: any): void => getHighestSnapMock(...args),
 }));
 
-const findNextSnapDownMock = jest.fn();
-jest.mock('../utils/find-next-snap-down', () => ({
+const findNextSnapDownMock = vi.fn();
+vi.mock('../utils/find-next-snap-down', () => ({
   findNextSnapDown: (...args: any): void => findNextSnapDownMock(...args),
 }));
 
-const findClosestSnapMock = jest.fn();
-jest.mock('../utils/find-closest-snap', () => ({
+const findClosestSnapMock = vi.fn();
+vi.mock('../utils/find-closest-snap', () => ({
   findClosestSnap: (...args: any): void => findClosestSnapMock(...args),
 }));
 
@@ -46,12 +46,12 @@ describe('SnapDrawerComponent', () => {
   let component: SnapDrawerComponent;
   let fixture: ComponentFixture<SnapDrawerComponent>;
   let componentRef: ComponentRef<SnapDrawerComponent>;
-  let mockDrawerElement: jest.Mocked<HTMLElement>;
+  let mockDrawerElement: any;
 
   beforeEach(() => {
     mockDrawerElement = {
-      setPointerCapture: jest.fn(),
-      releasePointerCapture: jest.fn(),
+      setPointerCapture: vi.fn(),
+      releasePointerCapture: vi.fn(),
     } as any;
 
     TestBed.configureTestingModule({
@@ -93,21 +93,22 @@ describe('SnapDrawerComponent', () => {
   });
 
   describe('ngAfterViewInit', () => {
-    let querySelectorSpy: SpyInstance;
-    let setStyleSpy: SpyInstance;
+    let querySelectorSpy: MockInstance;
+    let setStyleSpy: ViMock;
     beforeEach(() => {
       // not pretty but the only way to mock querySelector and setStyle
-      querySelectorSpy = jest
+      querySelectorSpy = vi
         .spyOn(component['elementRef'].nativeElement, 'querySelector')
         .mockReturnValue({});
-      setStyleSpy = jest
+      setStyleSpy = vi
         .spyOn(component['renderer'], 'setStyle')
-        .mockImplementation();
-      jest.useFakeTimers();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should enable transition after timeout', () => {
@@ -115,12 +116,12 @@ describe('SnapDrawerComponent', () => {
 
       component.ngAfterViewInit();
 
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
 
       expect(setStyleSpy).toHaveBeenCalledWith(
         mockDrawerElement,
         'transition',
-        'transform 0.3s ease'
+        'transform 0.3s ease',
       );
     });
   });
@@ -160,9 +161,9 @@ describe('SnapDrawerComponent', () => {
   });
 
   describe('onPointerDown', () => {
-    let mockEvent: jest.Mocked<PointerEvent>;
-    let setPointerCaptureSpy: SpyInstance;
-    let setStyleSpy: SpyInstance;
+    let mockEvent: any;
+    let setPointerCaptureSpy: MockInstance;
+    let setStyleSpy: ViMock;
 
     beforeEach(() => {
       mockEvent = {
@@ -171,14 +172,15 @@ describe('SnapDrawerComponent', () => {
         target: mockDrawerElement,
       } as any;
 
-      setPointerCaptureSpy = jest.spyOn(mockDrawerElement, 'setPointerCapture');
+      setPointerCaptureSpy = vi.spyOn(mockDrawerElement, 'setPointerCapture');
 
       componentRef.setInput('snapPixels', [60, 480]);
       fixture.detectChanges();
       component.translateY = 500;
-      setStyleSpy = jest
+      setStyleSpy = vi
         .spyOn(component['renderer'], 'setStyle')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should initialize drag state', () => {
@@ -248,12 +250,13 @@ describe('SnapDrawerComponent', () => {
   });
 
   describe('onPointerUp', () => {
-    let setStyleSpy: SpyInstance;
+    let setStyleSpy: ViMock;
 
     beforeEach(() => {
-      setStyleSpy = jest
+      setStyleSpy = vi
         .spyOn(component['renderer'], 'setStyle')
-        .mockImplementation();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
     });
 
     it('should not process when not dragging', () => {

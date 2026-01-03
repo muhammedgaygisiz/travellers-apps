@@ -3,8 +3,9 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons } from 'utils';
 import { MapService } from '../map.service';
 import { BucketListMapContainerComponent } from '../bucket-list-map.container.component';
+import { vi } from 'vitest';
 
-jest.mock('localization');
+vi.mock('localization');
 addNecessaryIcons();
 
 class Mock {}

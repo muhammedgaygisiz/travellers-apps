@@ -3,10 +3,11 @@ import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { MapPageComponent } from '../map-page.component';
+import { vi } from 'vitest';
 
 addNecessaryIcons();
 
-jest.mock('localization');
+vi.mock('localization');
 
 describe('MapPageComponent', () => {
   let component: MapPageComponent;

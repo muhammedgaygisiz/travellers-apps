@@ -4,11 +4,12 @@ import { NavController } from '@ionic/angular/standalone';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { MapService } from '../map.service';
 import { Bite, Bucketlist, Geopoint } from 'model';
+import { vi } from 'vitest';
 
 describe('MapService', () => {
   let service: MapService;
-  let mockDataAccess: jest.Mocked<MapDataAccessService>;
-  let mockNavController: jest.Mocked<NavController>;
+  let mockDataAccess: any;
+  let mockNavController: any;
 
   const mockBites: Bite[] = [
     {
@@ -44,8 +45,8 @@ describe('MapService', () => {
 
   beforeEach(() => {
     const dataAccessMock = {
-      logout: jest.fn(),
-      submitLikeClick: jest.fn(),
+      logout: vi.fn(),
+      submitLikeClick: vi.fn(),
       bites: signal(mockBites),
       isAuthenticated: signal(true),
       selectedBucketlist: signal(mockBucketlist),
@@ -54,7 +55,7 @@ describe('MapService', () => {
     };
 
     const navControllerMock = {
-      navigateForward: jest.fn(),
+      navigateForward: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -66,12 +67,8 @@ describe('MapService', () => {
     });
 
     service = TestBed.inject(MapService);
-    mockDataAccess = TestBed.inject(
-      MapDataAccessService,
-    ) as jest.Mocked<MapDataAccessService>;
-    mockNavController = TestBed.inject(
-      NavController,
-    ) as jest.Mocked<NavController>;
+    mockDataAccess = TestBed.inject(MapDataAccessService) as any;
+    mockNavController = TestBed.inject(NavController) as any;
   });
 
   it('should be created', () => {

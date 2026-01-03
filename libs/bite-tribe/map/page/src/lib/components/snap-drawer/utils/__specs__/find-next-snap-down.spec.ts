@@ -1,7 +1,8 @@
 import { findNextSnapDown } from '../find-next-snap-down';
+import { vi } from 'vitest';
 
-const getLowestSnapMock = jest.fn();
-jest.mock('../get-lowest-snap', () => ({
+const getLowestSnapMock = vi.fn();
+vi.mock('../get-lowest-snap', () => ({
   getLowestSnap: (...args: any): void => getLowestSnapMock(...args),
 }));
 

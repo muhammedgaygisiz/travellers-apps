@@ -2,11 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { vi } from 'vitest';
 
-jest.mock('localization');
-jest.mock('@capacitor/splash-screen', () => ({
+vi.mock('localization');
+vi.mock('@capacitor/splash-screen', () => ({
   SplashScreen: {
-    hide: jest.fn(),
+    hide: vi.fn(),
   },
 }));
 
@@ -30,10 +31,10 @@ describe('AppComponent', () => {
 
   describe('ngOnInit', () => {
     it('should call platform.ready and SplashScreen.hide', async () => {
-      const platformReadySpy = jest
+      const platformReadySpy = vi
         .spyOn(component.platform, 'ready')
         .mockResolvedValue('');
-      const splashScreenHideSpy = jest.spyOn(SplashScreen, 'hide');
+      const splashScreenHideSpy = vi.spyOn(SplashScreen, 'hide');
 
       await component.ngOnInit();
       expect(platformReadySpy).toHaveBeenCalled();

@@ -13,8 +13,7 @@
       "executor": "@nx/vitest:test",
       "outputs": ["{options.reportsDirectory}"],
       "options": {
-        "reportsDirectory": "../../../../coverage/libs/bite-tribe/menu/data-access",
-        "passWithNoTests": true
+        "reportsDirectory": "../../../../coverage/libs/bite-tribe/menu/data-access"
       }
     }
   }

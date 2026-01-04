@@ -13,8 +13,7 @@
       "executor": "@nx/vitest:test",
       "outputs": ["{options.reportsDirectory}"],
       "options": {
-        "reportsDirectory": "../../../coverage/libs/common/geoapify",
-        "passWithNoTests": true
+        "reportsDirectory": "../../../coverage/libs/common/geoapify"
       }
     }
   }

@@ -51,6 +51,12 @@
       "options": {
         "cmd": "update android"
       }
+    },
+    "doctor": {
+      "executor": "@nxext/capacitor:cap",
+      "options": {
+        "cmd": "doctor android"
+      }
     }
   }
 }

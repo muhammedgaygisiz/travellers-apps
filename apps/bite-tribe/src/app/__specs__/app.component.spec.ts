@@ -1,15 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AppComponent } from './app.component';
+import { AppComponent } from '../app.component';
 import { provideRouter } from '@angular/router';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { vi } from 'vitest';
-
-vi.mock('localization');
-vi.mock('@capacitor/splash-screen', () => ({
-  SplashScreen: {
-    hide: vi.fn(),
-  },
-}));
 
 describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;
@@ -36,7 +29,7 @@ describe('AppComponent', () => {
         .mockResolvedValue('');
       const splashScreenHideSpy = vi.spyOn(SplashScreen, 'hide');
 
-      await component.ngOnInit();
+      component.ngOnInit();
       expect(platformReadySpy).toHaveBeenCalled();
       // Wait for the promise in ngOnInit to resolve
       await platformReadySpy.mock.results[0].value;

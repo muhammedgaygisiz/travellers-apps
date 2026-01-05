@@ -4,9 +4,14 @@ import { TestBed } from '@angular/core/testing';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 
+vi.mock('bite-tribe/store', () => ({
+  BiteTribeStoreService: vi.fn().mockImplementation(() => ({})),
+}));
+
 const createBucketListMock = vi.fn();
 const setBucketlistSortingMock = vi.fn();
 const navigateForwardMock = vi.fn();
+
 const Mock = {
   sortedBucketlists$: of(undefined),
   bucketlistSorting$: of(undefined),
@@ -15,7 +20,7 @@ const Mock = {
   navigateForward: navigateForwardMock,
 };
 
-describe('BucketlistsDataAccessService', () => {
+describe(BucketlistsDataAccessService.name, () => {
   let service: BucketlistsDataAccessService;
 
   beforeEach(() => {

@@ -6,14 +6,6 @@
   "prefix": "travellers-apps",
   "tags": ["scope:common", "type:ui", "framework:ionic"],
   "targets": {
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/common/ui/password-validator"],
-      "options": {
-        "jestConfig": "libs/common/ui/password-validator/jest.config.ts",
-        "tsConfig": "libs/common/ui/password-validator/tsconfig.spec.json"
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },
@@ -26,6 +18,13 @@
           "libs/common/ui/password-validator/**/*.scss"
         ],
         "formatter": "compact"
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "reportsDirectory": "../../../../coverage/libs/common/ui/password-validator"
       }
     }
   }

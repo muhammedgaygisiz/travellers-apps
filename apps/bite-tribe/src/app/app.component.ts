@@ -25,6 +25,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
   platform = inject(Platform);
 
+  backButtonHandler = ({ canGoBack }: { canGoBack: boolean }): void =>
+    this.handleBackButton(canGoBack);
+
   constructor() {
     addNecessaryIcons();
 
@@ -42,9 +45,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private initBackbuttonHandler(): void {
-    App.addListener('backButton', ({ canGoBack }) => {
-      this.handleBackButton(canGoBack);
-    });
+    App.addListener('backButton', this.backButtonHandler.bind(this));
   }
 
   private handleBackButton(canGoBack: boolean): void {

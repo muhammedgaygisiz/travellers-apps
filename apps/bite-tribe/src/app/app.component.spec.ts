@@ -37,6 +37,20 @@ describe(AppComponent.name, () => {
     expect(component).toBeDefined();
   });
 
+  describe('backButtonHandler', () => {
+    it('should call handleBackButton with correct canGoBack value', () => {
+      const handleBackButtonSpy = jest.spyOn(
+        component as any,
+        'handleBackButton',
+      );
+
+      const testCanGoBack = true;
+      component.backButtonHandler({ canGoBack: testCanGoBack });
+
+      expect(handleBackButtonSpy).toHaveBeenCalledWith(testCanGoBack);
+    });
+  });
+
   describe('constructor', () => {
     it('should initialize back button handler', () => {
       const appAddListenerSpy = jest.spyOn(App, 'addListener');

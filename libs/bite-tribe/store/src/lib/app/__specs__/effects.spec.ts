@@ -1,6 +1,6 @@
 import { TestScheduler } from 'rxjs/testing';
 import { Observable, of } from 'rxjs';
-import { AlertController, Platform } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
 import { fromAuth } from 'ta-firestore';
@@ -9,6 +9,8 @@ import { AppEffect } from '../effects';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { PublicUser, Settings } from 'model';
+import { routerNavigatedAction } from '@ngrx/router-store';
+import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import SpyInstance = jest.SpyInstance;
 
 const getCurrentPositionMock = jest.fn();
@@ -32,6 +34,7 @@ const Mock = {
   deleteUser: jest.fn(),
   saveUserIfNotExisting: jest.fn(),
   getExchangeRates: jest.fn(),
+  reloadGPSPosition: jest.fn(),
 };
 
 describe('AppEffect', () => {
@@ -39,6 +42,7 @@ describe('AppEffect', () => {
   let actions$: Observable<any> = of({});
   let effects: AppEffect;
   let apiService: BiteTribeApiService;
+  let storeService: BiteTribeStoreService;
 
   beforeEach(() => {
     scheduler = new TestScheduler(assertDeepEqual);
@@ -48,11 +52,13 @@ describe('AppEffect', () => {
         provideMockActions(() => actions$),
         { provide: BiteTribeApiService, useValue: Mock },
         { provide: Platform, useValue: Mock },
+        provideMockStore(),
       ],
     });
 
     effects = TestBed.inject(AppEffect);
     apiService = TestBed.inject(BiteTribeApiService);
+    storeService = TestBed.inject(BiteTribeStoreService);
   });
 
   describe('loadSettingsFromApi$', () => {
@@ -266,6 +272,30 @@ describe('AppEffect', () => {
           output,
         );
       });
+    });
+  });
+
+  describe('reloadGpsOnPageChangeToCreateBite$', () => {
+    let reloadGPSPositionSpy: SpyInstance;
+
+    beforeEach(() => {
+      reloadGPSPositionSpy = jest
+        .spyOn(storeService, 'reloadGPSPosition')
+        .mockImplementation();
+    });
+
+    it('should call reloadGPSPosition from Store Service', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: routerNavigatedAction({
+            payload: { event: { url: '/new-bite' } },
+          } as any),
+        });
+
+        expectObservable(effects.reloadGpsOnPageChangeToCreateBite$);
+      });
+
+      expect(reloadGPSPositionSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

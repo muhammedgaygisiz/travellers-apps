@@ -7,6 +7,7 @@ import {
 import { IonApp, IonRouterOutlet, Platform } from '@ionic/angular/standalone';
 import { addNecessaryIcons } from 'bite-tribe/shell';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { App } from '@capacitor/app';
 
 @Component({
   selector: 'bt-root',
@@ -25,11 +26,23 @@ export class AppComponent implements OnInit {
 
   constructor() {
     addNecessaryIcons();
+
+    this.initBackbuttonHandler();
   }
 
   ngOnInit(): void {
     this.platform.ready().then(() => {
       SplashScreen.hide();
+    });
+  }
+
+  private initBackbuttonHandler(): void {
+    App.addListener('backButton', ({ canGoBack }) => {
+      if (!canGoBack) {
+        App.exitApp();
+      } else {
+        window.history.back();
+      }
     });
   }
 }

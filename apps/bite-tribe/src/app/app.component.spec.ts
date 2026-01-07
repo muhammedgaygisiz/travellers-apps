@@ -2,6 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { App } from '@capacitor/app';
+
+jest.mock('@capacitor/app', () => ({
+  App: {
+    addListener: jest.fn(),
+  },
+}));
 
 jest.mock('localization');
 jest.mock('@capacitor/splash-screen', () => ({
@@ -40,6 +47,17 @@ describe('AppComponent', () => {
       // Wait for the promise in ngOnInit to resolve
       await platformReadySpy.mock.results[0].value;
       expect(splashScreenHideSpy).toHaveBeenCalled();
+    });
+
+    it('should initialize back button handler', () => {
+      const appAddListenerSpy = jest.spyOn(App, 'addListener');
+
+      component['initBackbuttonHandler']();
+
+      expect(appAddListenerSpy).toHaveBeenCalledWith(
+        'backButton',
+        expect.any(Function),
+      );
     });
   });
 });

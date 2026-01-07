@@ -16,6 +16,7 @@
     "@capacitor/preferences": "../../node_modules/@capacitor/preferences",
     "@capacitor/haptics": "../../node_modules/@capacitor/haptics",
     "@capacitor/keyboard": "../../node_modules/@capacitor/keyboard",
-    "@capacitor/status-bar": "../../node_modules/@capacitor/status-bar"
+    "@capacitor/status-bar": "../../node_modules/@capacitor/status-bar",
+    "@capacitor/app": "../../node_modules/@capacitor/app"
   }
 }

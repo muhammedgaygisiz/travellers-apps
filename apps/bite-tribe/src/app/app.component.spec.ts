@@ -7,6 +7,7 @@ import { App } from '@capacitor/app';
 jest.mock('@capacitor/app', () => ({
   App: {
     addListener: jest.fn(),
+    exitApp: jest.fn(),
   },
 }));
 
@@ -17,7 +18,7 @@ jest.mock('@capacitor/splash-screen', () => ({
   },
 }));
 
-describe('AppComponent', () => {
+describe(AppComponent.name, () => {
   let fixture: ComponentFixture<AppComponent>;
   let component: AppComponent;
 
@@ -58,6 +59,24 @@ describe('AppComponent', () => {
         'backButton',
         expect.any(Function),
       );
+    });
+  });
+
+  describe('handleBackButton', () => {
+    it('should call App.exitApp if canGoBack is false', () => {
+      const appExitAppSpy = jest.spyOn(App, 'exitApp');
+
+      component['handleBackButton'](false);
+
+      expect(appExitAppSpy).toHaveBeenCalled();
+    });
+
+    it('should call window.history.back if canGoBack is true', () => {
+      const windowHistoryBackSpy = jest.spyOn(window.history, 'back');
+
+      component['handleBackButton'](true);
+
+      expect(windowHistoryBackSpy).toHaveBeenCalled();
     });
   });
 });

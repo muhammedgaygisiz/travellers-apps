@@ -38,11 +38,15 @@ export class AppComponent implements OnInit {
 
   private initBackbuttonHandler(): void {
     App.addListener('backButton', ({ canGoBack }) => {
-      if (!canGoBack) {
-        App.exitApp();
-      } else {
-        window.history.back();
-      }
+      this.handleBackButton(canGoBack);
     });
+  }
+
+  private handleBackButton(canGoBack: boolean): void {
+    if (!canGoBack) {
+      App.exitApp();
+    } else {
+      window.history.back();
+    }
   }
 }

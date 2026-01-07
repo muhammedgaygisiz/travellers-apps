@@ -1,4 +1,5 @@
-@let restaurantData = restaurant(); @let positionData = position();
+@let restaurantData = restaurant();
+@let positionData = position();
 
 <ta-page
   [showHeaderMenu]="false"
@@ -18,71 +19,80 @@
         <h1>{{ placeName() }}</h1>
 
         @if (restaurantData) {
-        <ion-button fill="clear" (click)="showMenuClick.emit(restaurantData)">
-          <ion-icon slot="start" name="restaurant-outline" />
-          Menu
-        </ion-button>
+          <ion-button fill="clear" (click)="showMenuClick.emit(restaurantData)">
+            <ion-icon slot="start" name="restaurant-outline" />
+            Menu
+          </ion-button>
         }
       </div>
 
       <bt-distance [distance]="placeDistance()" />
 
       @if (editMode()) {
-      <div class="ion-margin-top" [formGroup]="socialMediaForm">
-        @if (links.length === 0) {
-        <ion-text>No Social Media Links</ion-text>
-        }
-
-        <ion-list lines="full" formArrayName="links">
-          @for (socialMedia of links.controls; track $index; let i = $index) {
-          <ion-item [formGroupName]="i">
-            <ion-select
-              class="ion-margin-end"
-              placeholder="Social Network"
-              interface="popover"
-              formControlName="network"
-            >
-              <ion-select-option value="facebook">Facebook</ion-select-option>
-              <ion-select-option value="instagram">Instagram</ion-select-option>
-              <ion-select-option value="twitter">Twitter</ion-select-option>
-              <ion-select-option value="linkedin">LinkedIn</ion-select-option>
-              <ion-select-option value="website">Website</ion-select-option>
-            </ion-select>
-            <ion-input placeholder="Link" formControlName="url"></ion-input>
-          </ion-item>
+        <div class="ion-margin-top" [formGroup]="socialMediaForm">
+          @if (links.length === 0) {
+            <ion-text>No Social Media Links</ion-text>
           }
 
-          <ion-button class="ion-margin-top" (click)="addSocialMedia()"
-            >Add Link
-          </ion-button>
-        </ion-list>
+          <ion-list lines="full" formArrayName="links">
+            @for (socialMedia of links.controls; track $index; let i = $index) {
+              <ion-item [formGroupName]="i">
+                <ion-select
+                  class="ion-margin-end"
+                  placeholder="Social Network"
+                  interface="popover"
+                  formControlName="network"
+                >
+                  <ion-select-option value="facebook"
+                    >Facebook</ion-select-option
+                  >
+                  <ion-select-option value="instagram"
+                    >Instagram</ion-select-option
+                  >
+                  <ion-select-option value="twitter">Twitter</ion-select-option>
+                  <ion-select-option value="linkedin"
+                    >LinkedIn</ion-select-option
+                  >
+                  <ion-select-option value="website">Website</ion-select-option>
+                </ion-select>
+                <ion-input placeholder="Link" formControlName="url"></ion-input>
+              </ion-item>
+            }
 
-        @if (links.length) {
-        <ion-button
-          class="ion-margin-top"
-          [disabled]="isInvalid()"
-          (click)="saveSocialMediaLinks()"
-          >Save
-        </ion-button>
-        }
-      </div>
+            <ion-button class="ion-margin-top" (click)="addSocialMedia()"
+              >Add Link
+            </ion-button>
+          </ion-list>
+
+          @if (links.length) {
+            <ion-button
+              class="ion-margin-top"
+              [disabled]="isInvalid()"
+              (click)="saveSocialMediaLinks()"
+              >Save
+            </ion-button>
+          }
+        </div>
       } @else {
-      <div class="ion-margin-top">
-        @if (restaurantData?.socialMediaLinks?.length) {
-        <ion-list lines="full">
-          @for (link of restaurantData?.socialMediaLinks; track link.network) {
-          <ion-item>
-            <ion-icon slot="start" [name]="'logo-' + link.network" />
-            <ion-label>
-              <a [href]="link.url | ensureProtocol" target="_blank">{{
-                link.network | titlecase
-              }}</a>
-            </ion-label>
-          </ion-item>
+        <div class="ion-margin-top">
+          @if (restaurantData?.socialMediaLinks?.length) {
+            <ion-list lines="full">
+              @for (
+                link of restaurantData?.socialMediaLinks;
+                track link.network
+              ) {
+                <ion-item>
+                  <ion-icon slot="start" [name]="'logo-' + link.network" />
+                  <ion-label>
+                    <a [href]="link.url | ensureProtocol" target="_blank">{{
+                      link.network | titlecase
+                    }}</a>
+                  </ion-label>
+                </ion-item>
+              }
+            </ion-list>
           }
-        </ion-list>
-        }
-      </div>
+        </div>
       }
 
       <div class="ion-margin-top">
@@ -104,18 +114,26 @@
       </ion-segment>
     </div>
 
-    <div class="bites ion-padding">
-      @switch (selectedSegment()) { @case ('bites') { @for (bite of bites();
-      track bite.id) {
-      <bt-bite
-        [bite]="bite"
-        [userId]="userId()"
-        (biteClick)="biteClick.emit($event)"
-        (likeButtonClick)="likeButtonClick.emit($event)"
-      />
-      } } @case ('menu') { @for (bite of uniqueBites(); track bite.id) {
-      <bt-menu-item [bite]="bite" />
-      } } }
+    <div class="bites ion-padding safe-padding-bottom">
+      @switch (selectedSegment()) {
+        @case ('bites') {
+          @for (bite of bites(); track bite.id) {
+            <bt-bite
+              [bite]="bite"
+              [userId]="userId()"
+              (biteClick)="biteClick.emit($event)"
+              (likeButtonClick)="likeButtonClick.emit($event)"
+            />
+          }
+        }
+        @case ('menu') {
+          <div class="ion-padding-bottom">
+            @for (bite of uniqueBites(); track bite.id) {
+              <bt-menu-item [bite]="bite" />
+            }
+          </div>
+        }
+      }
     </div>
   </ion-content>
 </ta-page>

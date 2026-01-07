@@ -152,22 +152,25 @@
         </form>
       </ion-item>
 
+      @let isOwnBite = biteCreatorData?.userId && biteCreatorData?.userId ===
+      userId();
       <ion-button
         expand="block"
         color="primary"
         class="ion-margin"
+        [class.safe-padding-bottom]="!isOwnBite"
         [disabled]="isReviewFieldInvalid()"
         (click)="saveReview()"
       >
         Add your Review
       </ion-button>
 
-      @if (biteCreatorData?.userId && biteCreatorData?.userId === userId()) {
+      @if (isOwnBite) {
       <ion-button
         fill="outline"
         expand="block"
         color="primary"
-        class="ion-margin edit-button"
+        class="ion-margin edit-button safe-padding-bottom"
         (click)="editBite(biteData)"
       >
         Edit Bite

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  OnDestroy,
   OnInit,
 } from '@angular/core';
 import { IonApp, IonRouterOutlet, Platform } from '@ionic/angular/standalone';
@@ -19,7 +20,7 @@ import { App } from '@capacitor/app';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonApp, IonRouterOutlet],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'bite-tribe';
 
   platform = inject(Platform);
@@ -34,6 +35,10 @@ export class AppComponent implements OnInit {
     this.platform.ready().then(() => {
       SplashScreen.hide();
     });
+  }
+
+  ngOnDestroy(): void {
+    App.removeAllListeners();
   }
 
   private initBackbuttonHandler(): void {

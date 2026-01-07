@@ -8,6 +8,7 @@ jest.mock('@capacitor/app', () => ({
   App: {
     addListener: jest.fn(),
     exitApp: jest.fn(),
+    removeAllListeners: jest.fn(),
   },
 }));
 
@@ -36,6 +37,19 @@ describe(AppComponent.name, () => {
     expect(component).toBeDefined();
   });
 
+  describe('constructor', () => {
+    it('should initialize back button handler', () => {
+      const appAddListenerSpy = jest.spyOn(App, 'addListener');
+
+      component['initBackbuttonHandler']();
+
+      expect(appAddListenerSpy).toHaveBeenCalledWith(
+        'backButton',
+        expect.any(Function),
+      );
+    });
+  });
+
   describe('ngOnInit', () => {
     it('should call platform.ready and SplashScreen.hide', async () => {
       const platformReadySpy = jest
@@ -49,16 +63,15 @@ describe(AppComponent.name, () => {
       await platformReadySpy.mock.results[0].value;
       expect(splashScreenHideSpy).toHaveBeenCalled();
     });
+  });
 
-    it('should initialize back button handler', () => {
-      const appAddListenerSpy = jest.spyOn(App, 'addListener');
+  describe('ngOnDestroy', () => {
+    it('should call App.removeAllListeners', () => {
+      const appRemoveAllListenersSpy = jest.spyOn(App, 'removeAllListeners');
 
-      component['initBackbuttonHandler']();
+      component.ngOnDestroy();
 
-      expect(appAddListenerSpy).toHaveBeenCalledWith(
-        'backButton',
-        expect.any(Function),
-      );
+      expect(appRemoveAllListenersSpy).toHaveBeenCalled();
     });
   });
 

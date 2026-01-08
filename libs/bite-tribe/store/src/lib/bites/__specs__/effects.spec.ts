@@ -15,6 +15,7 @@ import { AppActions } from '../../app/actions';
 import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import { signal, WritableSignal } from '@angular/core';
 import { BucketlistActions } from '../../bucketlists/actions';
+import { PATH } from 'utils';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -30,6 +31,7 @@ const Mock = {
   deleteBite: jest.fn(),
   getUserByBiteId: jest.fn(),
   bucketlist: (): WritableSignal<string> => signal(''),
+  user: jest.fn(),
 };
 
 const BITE_MOCK = {
@@ -71,9 +73,13 @@ describe('BiteEffects', () => {
   });
 
   describe('loadBitesByCurrentUser$', () => {
-    it('should load bites from API on loadedUser', () => {
+    it('should load bites from API on my-bites page entry', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
+        actions$ = cold('a', {
+          a: routerNavigatedAction({
+            payload: { event: { urlAfterRedirects: PATH.MY_BITES } } as any,
+          }),
+        });
 
         const expected = 'a';
         const output = {

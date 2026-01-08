@@ -27,7 +27,7 @@ export class BiteEffects {
       filter(({ payload }) =>
         payload.event.urlAfterRedirects.includes(PATH.MY_BITES),
       ),
-      switchMap((action) => {
+      switchMap(() => {
         const user = this.storeService.user();
 
         return from(this.api.bitesByUser(user));
@@ -107,12 +107,12 @@ export class BiteEffects {
   deleteBite$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BiteActions.deleteBite),
-      switchMap(({ bite }) => {
-        return from(this.api.deleteBite(bite)).pipe(
+      switchMap(({ bite }) =>
+        from(this.api.deleteBite(bite)).pipe(
           map((bite) => BiteActions.deletedBite({ bite })),
-          catchError((err) => of(BiteActions.errorDeletingBite({ bite }))),
-        );
-      }),
+          catchError(() => of(BiteActions.errorDeletingBite({ bite }))),
+        ),
+      ),
     );
   });
 

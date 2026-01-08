@@ -2,8 +2,8 @@ import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import { BehaviorSubject, skip, Subject } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BITE_COLLECTION } from './bite-api/bite-api.service';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
+import { BITE_COLLECTION } from './bite-api/utils/constants';
 
 const LIKES_COLLECTION_GROUP = 'likes';
 

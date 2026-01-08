@@ -154,19 +154,19 @@ export class BiteTribeApiService {
   }
 
   async bitesByPosition(position: GeolocationPosition): Promise<Bite[]> {
-    return await this.biteApiService.loadBitesByLocation(position);
+    return this.biteApiService.loadBitesByLocation(position);
   }
 
   async bitesByUser(user: { uid: string }): Promise<Bite[]> {
-    return await this.biteApiService.loadBitesByUser(user);
+    return this.biteApiService.loadBitesByUser(user);
   }
 
   async bitesByBucketlist(bucketlist: Bucketlist): Promise<Bite[]> {
-    return await this.biteApiService.loadBitesByBucketlist(bucketlist);
+    return this.biteApiService.loadBitesByBucketlist(bucketlist);
   }
 
   async deleteBite(bite: Bite): Promise<Bite> {
-    return await this.biteApiService.deleteBite(bite);
+    return this.biteApiService.deleteBite(bite);
   }
 
   likes$(): Observable<any[]> {

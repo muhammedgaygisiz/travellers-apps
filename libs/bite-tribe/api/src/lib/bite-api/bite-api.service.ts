@@ -1,9 +1,6 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
-import {
-  FirebaseFirestore,
-  GetCollectionResult,
-} from '@capacitor-firebase/firestore';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite, Bucketlist } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import {
@@ -20,15 +17,10 @@ import {
 import { toBite } from '../utils/to-bite';
 import { Platform } from '@ionic/angular';
 import { getBlobWithUri } from './utils/get-blob-with-uri';
-import {
-  distanceBetween,
-  geohashForLocation,
-  geohashQueryBounds,
-  Geopoint,
-} from 'geofire-common';
-
-export const BITE_COLLECTION = 'bites';
-const DEFAULT_SEARCH_RADIUS_IN_M = 15 * 1000;
+import { loadBitesByLocation } from './utils/load-bites-by-location';
+import { BITE_COLLECTION } from './utils/constants';
+import { loadBitesByUser } from './utils/load-bites-by-user';
+import { createBite } from './utils/create-bite';
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
@@ -47,98 +39,19 @@ export class BiteApiService {
   public async loadBitesByLocation(
     position?: GeolocationPosition,
   ): Promise<Bite[]> {
-    const coords = position?.coords;
-
-    if (coords) {
-      const matchingBites: Bite[] = [];
-      const center: Geopoint = [coords.latitude, coords.longitude];
-      const bounds = geohashQueryBounds(center, DEFAULT_SEARCH_RADIUS_IN_M);
-
-      const promises: Promise<GetCollectionResult<Bite>>[] = [];
-      for (const b of bounds) {
-        promises.push(
-          FirebaseFirestore.getCollection({
-            reference: BITE_COLLECTION,
-            compositeFilter: {
-              type: 'and',
-              queryConstraints: [
-                {
-                  type: 'where',
-                  fieldPath: 'geohash',
-                  opStr: '>=',
-                  value: b[0],
-                },
-                {
-                  type: 'where',
-                  fieldPath: 'geohash',
-                  opStr: '<=',
-                  value: b[1],
-                },
-              ],
-            },
-            queryConstraints: [
-              {
-                type: 'orderBy',
-                fieldPath: 'geohash',
-                directionStr: 'asc',
-              },
-            ],
-          }),
-        );
-      }
-
-      const snapshots = await Promise.all(promises);
-
-      for (const snapshot of snapshots) {
-        for (const document of snapshot.snapshots) {
-          const bite = toBite(document);
-          const position = bite.position;
-
-          const distanceInKm = distanceBetween(
-            [position.latitude, position.longitude],
-            center,
-          );
-          const distanceInM = distanceInKm * 1000;
-          if (distanceInM <= DEFAULT_SEARCH_RADIUS_IN_M) {
-            matchingBites.push(bite);
-          }
-        }
-      }
-
-      return matchingBites;
-    }
-
-    return [];
+    return loadBitesByLocation(position);
   }
 
   public async loadBitesByUser(user: { uid: string }): Promise<Bite[]> {
-    const uid = user.uid;
-
-    const result = await FirebaseFirestore.getCollection({
-      reference: BITE_COLLECTION,
-      compositeFilter: {
-        type: 'and',
-        queryConstraints: [
-          {
-            type: 'where',
-            fieldPath: 'userId',
-            opStr: '==',
-            value: uid,
-          },
-        ],
-      },
-    });
-
-    return result.snapshots.map((snapshot) => toBite(snapshot));
+    return loadBitesByUser(user);
   }
 
-  async saveNewBite(bite: Bite): Promise<Bite> {
+  public async saveNewBite(bite: Bite): Promise<Bite> {
+    const user = this.getUser();
+    const { image, ...biteDocWithoutImage } = bite;
+
     try {
-      const user = this.getUser();
-
-      const { image, ...biteDocWithoutImage } = bite;
-
-      const biteId = await this.createNewBite(biteDocWithoutImage, user);
+      const biteId = await createBite(biteDocWithoutImage, user);
 
       await this.uploadImageAndUpdateBite(image, biteId);
 
@@ -149,29 +62,6 @@ export class BiteApiService {
 
       throw error;
     }
-  }
-
-  private async createNewBite(
-    biteDoc: Omit<Bite, 'image'>,
-    user: User | null | undefined,
-  ): Promise<string> {
-    const gh = geohashForLocation([
-      biteDoc.position.latitude,
-      biteDoc.position.longitude,
-    ]);
-
-    const doc = await FirebaseFirestore.addDocument({
-      reference: BITE_COLLECTION,
-      data: {
-        ...biteDoc,
-        geohash: gh,
-        userId: user?.uid || '',
-        createdAt: new Date().toISOString(),
-        createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
-      },
-    });
-
-    return doc.reference.id;
   }
 
   private getUser(): User | null | undefined {

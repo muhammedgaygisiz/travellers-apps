@@ -133,6 +133,7 @@ export class BiteTribeStoreService implements StoreService {
   homeDistance$ = this.store.select(homeDistance);
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
+  user = toSignal(this.user$);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());

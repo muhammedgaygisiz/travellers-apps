@@ -8,9 +8,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { bite } from './selectors';
 import { AppActions } from '../app/actions';
-import { fromAuth } from 'ta-firestore';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { BucketlistActions } from '../bucketlists/actions';
+import { PATH } from 'utils';
 
 @Injectable()
 export class BiteEffects {
@@ -23,9 +23,12 @@ export class BiteEffects {
 
   loadBitesByCurrentUser$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.AuthActions.loadedUser),
+      ofType(routerNavigatedAction),
+      filter(({ payload }) =>
+        payload.event.urlAfterRedirects.includes(PATH.MY_BITES),
+      ),
       switchMap((action) => {
-        const user = action.user;
+        const user = this.storeService.user();
 
         return from(this.api.bitesByUser(user));
       }),

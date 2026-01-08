@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
 import { authGuard, startGuard } from 'ta-firestore';
 import { biteTitleResolver } from 'bite-tribe/store';
+import { PATH } from 'utils';
 
 export const ROUTES: Routes = withAuthRoutes([
   {
@@ -26,7 +27,7 @@ export const ROUTES: Routes = withAuthRoutes([
     title: 'Bites',
   },
   {
-    path: 'new-bite',
+    path: PATH.NEW_BITE,
     loadComponent: () => import('bite-tribe/bite').then((m) => m.BiteContainer),
     canActivate: [authGuard],
     title: 'New',

@@ -95,7 +95,7 @@
           </ion-button>
         </div>
         <position formControlName="position" />
-        @if (noGpsPosition()) {
+        @if (biteFormGroup.get('position')?.invalid) {
         <ion-text color="danger">
           <p>{{ getGpsErrorMessage() }}</p>
         </ion-text>

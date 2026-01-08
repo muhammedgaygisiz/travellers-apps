@@ -9,13 +9,16 @@ export const zoomToGpsOrDefault = (
   gpsPosition: Geopoint | null | undefined,
   markers: L.Marker[],
   positions: Geopoint[] | null | undefined,
-  map: L.Map
+  map: L.Map,
 ): void => {
   if (!map) {
     return;
   }
 
-  if (!gpsPosition || !gpsPosition.latitude || !gpsPosition.longitude) {
+  const hasNoGpsPosition =
+    !gpsPosition || !gpsPosition.latitude || !gpsPosition.longitude;
+
+  if (hasNoGpsPosition) {
     fitMapToMarkers(markers, positions, map);
     removeGpsMarker(map);
     return;

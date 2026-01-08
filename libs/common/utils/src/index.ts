@@ -1,3 +1,5 @@
+export { PATH } from './lib/paths';
+
 export { normalize } from './lib/normalize';
 export { currencyCodes } from './lib/currencies';
 export { getSimilarityScore } from './lib/get-similarity-score';

@@ -11,9 +11,7 @@ import { Geopoint } from 'model';
 @Component({
   selector: 'position',
   template: `
-    @if(value()) {
     <bt-map [geopoints]="[value()!]" (clickOnMap)="setValue($event)" />
-    }
   `,
   imports: [MapComponent],
   providers: [

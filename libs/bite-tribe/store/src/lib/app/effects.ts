@@ -8,6 +8,7 @@ import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
+import { PATH } from 'utils';
 
 @Injectable()
 export class AppEffect {
@@ -144,7 +145,7 @@ export class AppEffect {
       return this.actions$.pipe(
         ofType(routerNavigatedAction),
         filter((action) =>
-          action.payload.event.urlAfterRedirects.includes('/new-bite'),
+          action.payload.event.urlAfterRedirects.includes(`/${PATH.NEW_BITE}`),
         ),
         tap(() => this.storeService.reloadGPSPosition()),
       );

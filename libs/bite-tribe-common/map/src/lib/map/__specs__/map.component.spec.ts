@@ -535,6 +535,15 @@ describe('MapComponent', () => {
         }
       });
     });
+
+    it('should set map view to default if no geopoints or gpsPosition are provided', () => {
+      componentRef.setInput('geopoints', []);
+      componentRef.setInput('gpsPosition', null);
+
+      fixture.detectChanges();
+
+      expect(mockMap.setView).toHaveBeenCalledWith([0, 0], 2);
+    });
   });
 
   describe('setGeopointsEffect', () => {

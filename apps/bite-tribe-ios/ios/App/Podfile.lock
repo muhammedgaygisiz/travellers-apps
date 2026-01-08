@@ -1206,6 +1206,8 @@ PODS:
   - BoringSSL-GRPC/Interface (0.0.37)
   - Capacitor (8.0.0):
     - CapacitorCordova
+  - CapacitorApp (8.0.0):
+    - Capacitor
   - CapacitorAppLauncher (8.0.0):
     - Capacitor
   - CapacitorCamera (8.0.0):
@@ -1246,7 +1248,15 @@ PODS:
   - CapacitorGeolocation (8.0.0):
     - Capacitor
     - IONGeolocationLib (= 2.0.0)
+  - CapacitorHaptics (8.0.0):
+    - Capacitor
+  - CapacitorKeyboard (8.0.0):
+    - Capacitor
+  - CapacitorPreferences (8.0.0):
+    - Capacitor
   - CapacitorSplashScreen (8.0.0):
+    - Capacitor
+  - CapacitorStatusBar (8.0.0):
     - Capacitor
   - FirebaseAnalytics/Core (12.7.0):
     - FirebaseCore (~> 12.7.0)
@@ -1496,6 +1506,7 @@ PODS:
 
 DEPENDENCIES:
   - "Capacitor (from `../../../../node_modules/@capacitor/ios`)"
+  - "CapacitorApp (from `../../../../node_modules/@capacitor/app`)"
   - "CapacitorAppLauncher (from `../../../../node_modules/@capacitor/app-launcher`)"
   - "CapacitorCamera (from `../../../../node_modules/@capacitor/camera`)"
   - "CapacitorCordova (from `../../../../node_modules/@capacitor/ios`)"
@@ -1508,7 +1519,11 @@ DEPENDENCIES:
   - "CapacitorFirebaseFirestore (from `../../../../node_modules/@capacitor-firebase/firestore`)"
   - "CapacitorFirebaseStorage (from `../../../../node_modules/@capacitor-firebase/storage`)"
   - "CapacitorGeolocation (from `../../../../node_modules/@capacitor/geolocation`)"
+  - "CapacitorHaptics (from `../../../../node_modules/@capacitor/haptics`)"
+  - "CapacitorKeyboard (from `../../../../node_modules/@capacitor/keyboard`)"
+  - "CapacitorPreferences (from `../../../../node_modules/@capacitor/preferences`)"
   - "CapacitorSplashScreen (from `../../../../node_modules/@capacitor/splash-screen`)"
+  - "CapacitorStatusBar (from `../../../../node_modules/@capacitor/status-bar`)"
 
 SPEC REPOS:
   trunk:
@@ -1550,6 +1565,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Capacitor:
     :path: "../../../../node_modules/@capacitor/ios"
+  CapacitorApp:
+    :path: "../../../../node_modules/@capacitor/app"
   CapacitorAppLauncher:
     :path: "../../../../node_modules/@capacitor/app-launcher"
   CapacitorCamera:
@@ -1570,8 +1587,16 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor-firebase/storage"
   CapacitorGeolocation:
     :path: "../../../../node_modules/@capacitor/geolocation"
+  CapacitorHaptics:
+    :path: "../../../../node_modules/@capacitor/haptics"
+  CapacitorKeyboard:
+    :path: "../../../../node_modules/@capacitor/keyboard"
+  CapacitorPreferences:
+    :path: "../../../../node_modules/@capacitor/preferences"
   CapacitorSplashScreen:
     :path: "../../../../node_modules/@capacitor/splash-screen"
+  CapacitorStatusBar:
+    :path: "../../../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
@@ -1579,6 +1604,7 @@ SPEC CHECKSUMS:
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   Capacitor: 341ff7cf652ec695d1a8ebf604db448ac7b6d635
+  CapacitorApp: 3963a84197280757b84f126afd1520a85ae3b092
   CapacitorAppLauncher: 7f2330aa2d8a72a4767ab05af9df4bf68166ebf0
   CapacitorCamera: 592acb7ab9fb748e2d8571eb03af30ec4e1ace12
   CapacitorCordova: 5dc3912d25ef770a3fe0f431bb65c9fbfa2e92f9
@@ -1589,7 +1615,11 @@ SPEC CHECKSUMS:
   CapacitorFirebaseFirestore: 7037e8a30f1ac9cb4c77ee629f115847dc74256f
   CapacitorFirebaseStorage: dd1182dfa6c5515db5bd19a6630da2becf4c88b1
   CapacitorGeolocation: 8a405e707de9aff6ac9eca7f408966a370f7ca33
+  CapacitorHaptics: 2079d9fa04c5a71e18663b4722323c304c58245c
+  CapacitorKeyboard: d7868c079a4d5277a3deca27a10a488fcbbb8b69
+  CapacitorPreferences: 443fabe9670226200e595658a87ef0b1566716d4
   CapacitorSplashScreen: 422880d7117605c30699eb4b21644b62db42e86c
+  CapacitorStatusBar: 312e2e67928dfe9514c4a8916a1fd610552f5f35
   FirebaseAnalytics: e423129866107aeacf6010a280b9c9829f9ea50d
   FirebaseAppCheckInterop: d58366471f1dadf2ed998b15f85c658458a10142
   FirebaseAuth: 88beaef7c688a2950541552b6dd195d22137c41a
@@ -1621,6 +1651,6 @@ SPEC CHECKSUMS:
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
 
-PODFILE CHECKSUM: 690c9fedd9d183cd480e1068c4d8f7b1c50b4c74
+PODFILE CHECKSUM: c273a2ccf8715e1f2c41aa6f02a84e1986ebd958
 
 COCOAPODS: 1.16.2

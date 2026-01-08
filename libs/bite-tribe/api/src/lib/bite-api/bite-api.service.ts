@@ -17,7 +17,7 @@ import {
   FirebaseStorage,
   UploadFileOptions,
 } from '@capacitor-firebase/storage';
-import { toBite } from './utils/to-bite';
+import { toBite } from '../utils/to-bite';
 import { Platform } from '@ionic/angular';
 import { getBlobWithUri } from './utils/get-blob-with-uri';
 import {
@@ -29,13 +29,6 @@ import {
 
 export const BITE_COLLECTION = 'bites';
 const DEFAULT_SEARCH_RADIUS_IN_M = 15 * 1000;
-
-// TODO: Now that we do not load all bites
-//       We have to load bites in bucket-lists differently.
-//       I am thinking of loading them, when entering my-bites page
-//       and accordingly when entering the bucket list.
-//       This is an essential switch in our app, because access to more
-//       is going to be part of subscriptions.
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {

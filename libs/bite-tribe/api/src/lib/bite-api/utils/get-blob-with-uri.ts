@@ -1,9 +1,9 @@
 import { Directory, Filesystem, WriteFileResult } from '@capacitor/filesystem';
-import { toBase64 } from './to-base-64';
+import { toBase64 } from '../../utils/to-base-64';
 
 export const getBlobWithUri = async (
   blob: Blob,
-  fileName: string
+  fileName: string,
 ): Promise<WriteFileResult> => {
   const base64Data = await toBase64(blob);
 

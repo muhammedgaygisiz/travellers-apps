@@ -17,7 +17,7 @@ import { MenuApiService } from './menu-api.service';
 import { LikeApiService } from './like-api.service';
 import { BucketlistApiService } from './bucketlist-api.service';
 import { ProfileApiService } from './profile-api.service';
-import { BiteApiService } from './bite-api.service';
+import { BiteApiService } from './bite-api/bite-api.service';
 import { SettingsApiService } from './settings-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
 import { Observable, tap } from 'rxjs';

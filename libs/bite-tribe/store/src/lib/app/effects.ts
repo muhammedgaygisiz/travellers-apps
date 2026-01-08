@@ -143,7 +143,9 @@ export class AppEffect {
     () => {
       return this.actions$.pipe(
         ofType(routerNavigatedAction),
-        filter((action) => action.payload.event.url.includes('/new-bite')),
+        filter((action) =>
+          action.payload.event.urlAfterRedirects.includes('/new-bite'),
+        ),
         tap(() => this.storeService.reloadGPSPosition()),
       );
     },

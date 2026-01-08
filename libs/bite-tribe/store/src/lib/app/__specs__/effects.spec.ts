@@ -288,7 +288,7 @@ describe('AppEffect', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: routerNavigatedAction({
-            payload: { event: { url: '/new-bite' } },
+            payload: { event: { urlAfterRedirects: '/new-bite' } },
           } as any),
         });
 

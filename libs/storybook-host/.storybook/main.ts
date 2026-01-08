@@ -1,3 +1,4 @@
+// This file has been automatically migrated to valid ESM format by Storybook.
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import type { StorybookConfig } from '@storybook/angular';
@@ -11,7 +12,7 @@ const config: StorybookConfig = {
   ...rootMain,
   core: {
     ...rootMain.core,
-    builder: '@storybook/builder-webpack5',
+    builder: getAbsolutePath("@storybook/builder-webpack5"),
   },
   stories: [
     '../../../apps/bite-tribe/src/app/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',

@@ -10,7 +10,8 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/common/ui/card"],
       "options": {
-        "jestConfig": "libs/common/ui/card/jest.config.ts"
+        "jestConfig": "libs/common/ui/card/jest.config.ts",
+        "tsConfig": "libs/common/ui/card/tsconfig.spec.json"
       }
     },
     "lint": {

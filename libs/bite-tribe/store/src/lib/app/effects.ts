@@ -6,12 +6,16 @@ import { getCurrentPosition } from 'geolocation';
 import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
+import { routerNavigatedAction } from '@ngrx/router-store';
+import { BiteTribeStoreService } from '../bite-tribe-store.service';
+import { PATH } from 'utils';
 
 @Injectable()
 export class AppEffect {
   private readonly actions$ = inject(Actions);
   private readonly platform = inject(Platform);
   private readonly api = inject(BiteTribeApiService);
+  private readonly storeService = inject(BiteTribeStoreService);
 
   loadSettingsFromApi$ = createEffect(() => {
     return this.actions$.pipe(
@@ -131,6 +135,19 @@ export class AppEffect {
         tap(() => {
           this.api.deleteUser();
         }),
+      );
+    },
+    { dispatch: false },
+  );
+
+  reloadGpsOnPageChangeToCreateBite$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(routerNavigatedAction),
+        filter((action) =>
+          action.payload.event.urlAfterRedirects.includes(`/${PATH.NEW_BITE}`),
+        ),
+        tap(() => this.storeService.reloadGPSPosition()),
       );
     },
     { dispatch: false },

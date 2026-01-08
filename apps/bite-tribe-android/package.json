@@ -5,9 +5,18 @@
     "@capacitor/android": "../../node_modules/@capacitor/android",
     "@capacitor-firebase/authentication": "../../node_modules/@capacitor-firebase/authentication",
     "@capacitor-firebase/firestore": "../../node_modules/@capacitor-firebase/firestore",
+    "@capacitor-firebase/storage": "../../node_modules/@capacitor-firebase/storage",
     "@capacitor-firebase/analytics": "../../node_modules/@capacitor-firebase/analytics",
     "@capacitor/geolocation": "../../node_modules/@capacitor/geolocation",
     "@capacitor/camera": "../../node_modules/@capacitor/camera",
-    "@capacitor/app-launcher": "../../node_modules/@capacitor/app-launcher"
+    "@capacitor/app-launcher": "../../node_modules/@capacitor/app-launcher",
+    "@capacitor/filesystem": "../../node_modules/@capacitor/filesystem",
+    "@capacitor/splash-screen": "../../node_modules/@capacitor/splash-screen",
+    "@capacitor-firebase/crashlytics": "../../node_modules/@capacitor-firebase/crashlytics",
+    "@capacitor/preferences": "../../node_modules/@capacitor/preferences",
+    "@capacitor/haptics": "../../node_modules/@capacitor/haptics",
+    "@capacitor/keyboard": "../../node_modules/@capacitor/keyboard",
+    "@capacitor/status-bar": "../../node_modules/@capacitor/status-bar",
+    "@capacitor/app": "../../node_modules/@capacitor/app"
   }
 }

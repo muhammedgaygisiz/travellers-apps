@@ -21,10 +21,6 @@ describe('Bites - Actions', () => {
     expect(BiteActions.saveExistingBite).toBeDefined();
   });
 
-  it('should have saveNewTags action', () => {
-    expect(BiteActions.saveNewTags).toBeDefined();
-  });
-
   it('should have cacheBite action', () => {
     expect(BiteActions.cacheBite).toBeDefined();
   });

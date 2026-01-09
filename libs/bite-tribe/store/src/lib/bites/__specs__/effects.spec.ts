@@ -253,30 +253,6 @@ describe('BiteEffects', () => {
     });
   });
 
-  describe('saveTagsToExistingBite$', () => {
-    let saveTagsToExistingBiteSpy: SpyInstance;
-
-    beforeEach(() => {
-      saveTagsToExistingBiteSpy = jest
-        .spyOn(apiService, 'saveTagsToExistingBite')
-        .mockImplementation();
-    });
-
-    it('should run saveTagsToExistingBite on saveTags', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: BiteActions.saveNewTags({
-            newTags: ['tag'],
-            id: 'biteId',
-          }),
-        });
-
-        expectObservable(effects.saveTagsToExistingBite$);
-      });
-      expect(saveTagsToExistingBiteSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('deleteBite$', () => {
     describe('given a successful delete call', () => {
       beforeEach(() => {

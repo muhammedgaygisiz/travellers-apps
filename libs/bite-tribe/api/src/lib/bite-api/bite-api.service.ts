@@ -13,6 +13,7 @@ import { loadBitesByUser } from './utils/load-bites-by-user';
 import { createBite } from './utils/create-bite';
 import { uploadImageAndUpdateBite } from './utils/upload-image-and-update-bite';
 import { replaceImageInFirestoreStorage } from './utils/replace-image-in-firestorestorage';
+import { saveEditedBite } from './utils/save-edited-bite';
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
@@ -63,85 +64,14 @@ export class BiteApiService {
 
   public async saveEditedBite(bite: Bite): Promise<void> {
     try {
-      if (bite.imagePath && bite.image) {
-        const { image, ...biteWithoutImage } = bite;
-
-        await replaceImageInFirestoreStorage(
-          this.isWeb(),
-          image,
-          bite.imagePath,
-          bite.id,
-          biteWithoutImage,
-        );
-
-        return;
-      }
-
-      if (bite.imagePath && !bite.image) {
-        const { image, ...biteWithoutImage } = bite;
-
-        await FirebaseFirestore.updateDocument({
-          reference: `${BITE_COLLECTION}/${bite.id}`,
-          data: {
-            ...biteWithoutImage,
-            updatedAt: new Date().toISOString(),
-            updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-          },
-        });
-
-        return;
-      }
-
-      if (!bite.imagePath && bite.image) {
-        const doc = await FirebaseFirestore.getDocument({
-          reference: `${BITE_COLLECTION}/${bite.id}`,
-        });
-        const originalBite = toBite(doc.snapshot);
-        const originalImagePath = originalBite.imagePath;
-
-        if (originalImagePath) {
-          const { image, ...biteWithoutImage } = bite;
-
-          await replaceImageInFirestoreStorage(
-            this.isWeb(),
-            image,
-            originalImagePath,
-            bite.id,
-            { ...biteWithoutImage },
-          );
-
-          return;
-        }
-
-        // Bite created in old style only with base64 image
-        // so we do not have a imagePath yet
-        const { image, imagePath, ...biteWithoutImage } = bite;
-        await uploadImageAndUpdateBite(
-          this.isWeb(),
-          image,
-          bite.id,
-          biteWithoutImage,
-          true,
-        );
-
-        return;
-      }
-
-      await FirebaseFirestore.updateDocument({
-        reference: `${BITE_COLLECTION}/${bite.id}`,
-        data: {
-          ...bite,
-          updatedAt: new Date().toISOString(),
-          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-        },
-      });
+      await saveEditedBite(this.isWeb(), bite);
     } catch (error) {
       console.error('Error saving edited bite:', error);
       this.errorHandler.handleError(error);
     }
   }
 
-  async saveTagsToExistingBite(payload: {
+  public async saveTagsToExistingBite(payload: {
     newTags: string[];
     id: string;
   }): Promise<void> {

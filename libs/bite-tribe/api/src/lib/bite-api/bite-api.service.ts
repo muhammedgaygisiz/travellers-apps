@@ -13,6 +13,8 @@ import { loadBitesByUser } from './utils/load-bites-by-user';
 import { createBite } from './utils/create-bite';
 import { uploadImageAndUpdateBite } from './utils/upload-image-and-update-bite';
 import { saveEditedBite } from './utils/save-edited-bite';
+import { loadBiteById } from './utils/load-bite-by-id';
+import { loadBitesByBuckelist } from './utils/load-bites-by-buckelist';
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
@@ -47,7 +49,7 @@ export class BiteApiService {
 
       await uploadImageAndUpdateBite(this.isWeb(), image, biteId);
 
-      return await this.loadBiteById(biteId);
+      return await loadBiteById(biteId);
     } catch (error) {
       console.error('Error saving new bite:', error);
       this.errorHandler.handleError(error);
@@ -111,35 +113,13 @@ export class BiteApiService {
     });
   }
 
-  private async loadBiteById(biteId: string): Promise<Bite> {
-    const result = await FirebaseFirestore.getDocument({
-      reference: `${BITE_COLLECTION}/${biteId}`,
-    });
-
-    return toBite(result.snapshot);
-  }
-
   async loadBitesByBucketlist(bucketlist: Bucketlist): Promise<Bite[]> {
-    const biteIds = bucketlist.biteIds || [];
-
-    if (biteIds.length === 0) {
+    try {
+      return await loadBitesByBuckelist(bucketlist);
+    } catch (e) {
+      console.error(`Failed loading bites for bucketlist ${bucketlist.id}:`, e);
+      this.errorHandler.handleError(e);
       return [];
     }
-
-    const promises = biteIds.map(async (id) => {
-      try {
-        const result = await FirebaseFirestore.getDocument({
-          reference: `${BITE_COLLECTION}/${id}`,
-        });
-        return toBite(result.snapshot);
-      } catch (e) {
-        console.error(`Failed loading bite ${id}:`, e);
-        this.errorHandler.handleError(e);
-        return null;
-      }
-    });
-
-    const bites = await Promise.all(promises);
-    return bites.filter((b): b is Bite => !!b);
   }
 }

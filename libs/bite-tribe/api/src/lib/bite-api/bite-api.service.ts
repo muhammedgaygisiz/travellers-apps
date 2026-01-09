@@ -16,7 +16,7 @@ import {
 } from '@capacitor-firebase/storage';
 import { toBite } from '../utils/to-bite';
 import { Platform } from '@ionic/angular';
-import { getBlobWithUri } from './utils/get-blob-with-uri';
+import { writeBlobToFileSystem } from './utils/write-blob-to-file-system';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
 import { BITE_COLLECTION } from './utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
@@ -239,7 +239,10 @@ export class BiteApiService {
     };
 
     if (!this.isWeb()) {
-      const writeFileResult = await getBlobWithUri(blob, `${imageId}.${ext}`);
+      const writeFileResult = await writeBlobToFileSystem(
+        blob,
+        `${imageId}.${ext}`,
+      );
       fileUploadOptions.uri = writeFileResult.uri;
     }
 

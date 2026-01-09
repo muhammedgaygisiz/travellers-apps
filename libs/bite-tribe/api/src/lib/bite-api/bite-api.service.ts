@@ -15,6 +15,7 @@ import { uploadImageAndUpdateBite } from './utils/upload-image-and-update-bite';
 import { saveEditedBite } from './utils/save-edited-bite';
 import { loadBiteById } from './utils/load-bite-by-id';
 import { loadBitesByBucketlist } from './utils/load-bites-by-bucketlist';
+import { deleteFileInFirebaseStorage } from './utils/delete-file-in-firebasestorage';
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
@@ -72,45 +73,37 @@ export class BiteApiService {
     }
   }
 
-  async deleteBite(bite: Bite): Promise<Bite> {
-    return new Promise<Bite>((resolve, reject) => {
-      if (!bite.id) {
-        return reject(new Error('Bite ID is required for deletion.'));
+  public async deleteBite(bite: Bite): Promise<Bite> {
+    if (!bite.id) {
+      return Promise.reject(new Error('Bite ID is required for deletion.'));
+    }
+
+    const imagePathInFirestore = bite.imagePath;
+    try {
+      if (imagePathInFirestore) {
+        await deleteFileInFirebaseStorage(imagePathInFirestore);
+      } else {
+        const log = `No imagePath found for bite with id ${bite.id}`;
+        console.error(log);
+        this.errorHandler.handleError(log);
       }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      this.errorHandler.handleError(error);
+      return Promise.reject(error);
+    }
 
-      try {
-        const imagePathInFirestore = bite.imagePath;
+    try {
+      await FirebaseFirestore.deleteDocument({
+        reference: `${BITE_COLLECTION}/${bite.id}`,
+      });
+    } catch (error) {
+      console.error('Error deleting bite:', error);
+      this.errorHandler.handleError(error);
+      return Promise.reject(error);
+    }
 
-        if (imagePathInFirestore) {
-          const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
-          if (imagePath) {
-            FirebaseStorage.deleteFile({
-              path: imagePath,
-            });
-          }
-        } else {
-          const log = `No imagePath found for bite with id ${bite.id}`;
-          console.error(log);
-          this.errorHandler.handleError(log);
-        }
-      } catch (error) {
-        console.error('Error deleting image:', error);
-        this.errorHandler.handleError(error);
-        return reject(error);
-      }
-
-      try {
-        FirebaseFirestore.deleteDocument({
-          reference: `${BITE_COLLECTION}/${bite.id}`,
-        });
-      } catch (error) {
-        console.error('Error deleting bite:', error);
-        this.errorHandler.handleError(error);
-        return reject(error);
-      }
-
-      return resolve(bite);
-    });
+    return Promise.resolve(bite);
   }
 
   async loadBitesByBucketlist(bucketlist: Bucketlist): Promise<Bite[]> {

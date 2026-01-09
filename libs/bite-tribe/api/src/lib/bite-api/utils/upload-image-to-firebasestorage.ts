@@ -21,8 +21,6 @@ const uploadWithWeb = (
         resolve(fileUploadOptions.path);
         return;
       }
-
-      console.log('Upload ongoing', evt);
     });
   });
 };
@@ -41,8 +39,6 @@ const uploadWithNative = (
         resolve(fileUploadOptions.path);
         return;
       }
-
-      console.log('Upload ongoing', evt);
     });
   });
 };

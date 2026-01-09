@@ -3,7 +3,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { from, Observable } from 'rxjs';
 import { Position } from '@capacitor/geolocation/dist/esm/definitions';
 
-const TIMOUT = 5000;
+const TIMEOUT = 8000;
 
 const getGeoLocationFromWebPlatform = (): Promise<GeolocationPosition> => {
   return new Promise((resolve, reject) => {
@@ -16,7 +16,7 @@ const getGeoLocationFromWebPlatform = (): Promise<GeolocationPosition> => {
       (error) => reject(error),
       {
         enableHighAccuracy: true,
-        timeout: TIMOUT,
+        timeout: TIMEOUT,
       },
     );
   });
@@ -31,7 +31,7 @@ const getGeoLocationFromNativePlatform = async (): Promise<Position> => {
 
   return await Geolocation.getCurrentPosition({
     enableHighAccuracy: true,
-    timeout: TIMOUT,
+    timeout: TIMEOUT,
   });
 };
 

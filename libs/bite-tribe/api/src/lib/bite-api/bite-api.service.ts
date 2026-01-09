@@ -14,7 +14,7 @@ import { createBite } from './utils/create-bite';
 import { uploadImageAndUpdateBite } from './utils/upload-image-and-update-bite';
 import { saveEditedBite } from './utils/save-edited-bite';
 import { loadBiteById } from './utils/load-bite-by-id';
-import { loadBitesByBuckelist } from './utils/load-bites-by-buckelist';
+import { loadBitesByBucketlist } from './utils/load-bites-by-bucketlist';
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
@@ -115,7 +115,7 @@ export class BiteApiService {
 
   async loadBitesByBucketlist(bucketlist: Bucketlist): Promise<Bite[]> {
     try {
-      return await loadBitesByBuckelist(bucketlist);
+      return await loadBitesByBucketlist(bucketlist);
     } catch (e) {
       console.error(`Failed loading bites for bucketlist ${bucketlist.id}:`, e);
       this.errorHandler.handleError(e);

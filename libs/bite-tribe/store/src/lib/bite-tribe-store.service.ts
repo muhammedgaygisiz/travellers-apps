@@ -75,7 +75,6 @@ import {
 } from './bucketlists/selectors';
 import { getActionByDocType } from './utils/get-action-by-doc-type';
 import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
-import { bucketlistId } from './router/selectors';
 
 @Injectable({
   providedIn: 'root',

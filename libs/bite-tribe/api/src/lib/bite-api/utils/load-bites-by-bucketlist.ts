@@ -1,7 +1,7 @@
 import { Bite, Bucketlist } from 'model';
 import { loadBiteById } from './load-bite-by-id';
 
-export const loadBitesByBuckelist = async (
+export const loadBitesByBucketlist = async (
   bucketlist: Bucketlist,
 ): Promise<Bite[]> => {
   const biteIds = bucketlist.biteIds || [];

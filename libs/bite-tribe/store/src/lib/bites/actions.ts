@@ -11,7 +11,6 @@ export const BiteActions = createActionGroup({
     'Save existing bite': props<{ bite: Bite }>(),
     'Saved bite': props<{ bite: Bite }>(),
     'Error saving bite': props<{ bite: Bite }>(),
-    'Save new tags': props<{ newTags: string[]; id: string }>(),
     'Cache bite': props<{ bite: Partial<Bite> }>(),
     'Delete bite': props<{ bite: Bite }>(),
     'Deleted bite': props<{ bite: Bite }>(),

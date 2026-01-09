@@ -20,10 +20,6 @@ export class DetailsService {
   isAuthenticated = this.dataAccess.isAuthenticated;
   biteCreator = this.dataAccess.biteCreator;
 
-  saveNewTags(newTags: string[]): void {
-    this.dataAccess.saveNewTags(newTags);
-  }
-
   saveReview(newReview: { review: string; biteId: string }): void {
     this.dataAccess.saveNewReview(newReview);
   }

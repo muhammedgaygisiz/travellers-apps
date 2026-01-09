@@ -79,7 +79,6 @@ export class DetailsPage {
   isAuthenticated = input(false);
   biteCreator = input<PublicUser>();
 
-  submitNewTags = output<string[]>();
   selectList = output<Bucketlist>();
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
   newList = output<string>();

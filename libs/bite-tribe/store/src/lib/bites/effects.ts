@@ -92,18 +92,6 @@ export class BiteEffects {
     { dispatch: false },
   );
 
-  saveTagsToExistingBite$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(BiteActions.saveNewTags),
-        tap((payload) => {
-          this.api.saveTagsToExistingBite(payload);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
-
   deleteBite$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BiteActions.deleteBite),

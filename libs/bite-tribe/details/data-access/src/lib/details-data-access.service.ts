@@ -20,16 +20,6 @@ export class DetailsDataAccessService {
   });
   biteCreator = toSignal(this.storeService.biteCreator$);
 
-  saveNewTags(newTags: string[]): void {
-    const currentBite = this.bite();
-
-    if (currentBite) {
-      this.storeService.saveTags(newTags, currentBite.id);
-
-      return;
-    }
-  }
-
   saveNewReview(newReview: { review: string; biteId: string }): void {
     this.storeService.saveReview(newReview);
   }
@@ -54,7 +44,7 @@ export class DetailsDataAccessService {
     const userId = this.userId();
 
     const likeFromUser = bite?.likes?.find(
-      (like) => like.userId === userId && like.likeType === likeType.likeType
+      (like) => like.userId === userId && like.likeType === likeType.likeType,
     );
 
     if (likeFromUser) {

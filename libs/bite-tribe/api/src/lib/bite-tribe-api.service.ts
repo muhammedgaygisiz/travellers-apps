@@ -121,10 +121,6 @@ export class BiteTribeApiService {
     return this.profileApiService.getUserByBiteId(bite);
   }
 
-  saveTagsToExistingBite(payload: { newTags: string[]; id: string }): void {
-    this.biteApiService.saveTagsToExistingBite(payload);
-  }
-
   saveEditedBite(bite: any): void {
     this.biteApiService.saveEditedBite(bite);
   }

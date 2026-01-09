@@ -12,7 +12,6 @@ import { BITE_COLLECTION } from './utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
 import { createBite } from './utils/create-bite';
 import { uploadImageAndUpdateBite } from './utils/upload-image-and-update-bite';
-import { replaceImageInFirestoreStorage } from './utils/replace-image-in-firestorestorage';
 import { saveEditedBite } from './utils/save-edited-bite';
 
 @Injectable({ providedIn: 'root' })
@@ -67,36 +66,6 @@ export class BiteApiService {
       await saveEditedBite(this.isWeb(), bite);
     } catch (error) {
       console.error('Error saving edited bite:', error);
-      this.errorHandler.handleError(error);
-    }
-  }
-
-  public async saveTagsToExistingBite(payload: {
-    newTags: string[];
-    id: string;
-  }): Promise<void> {
-    try {
-      // First get the current document
-      const doc = await FirebaseFirestore.getDocument({
-        reference: `${BITE_COLLECTION}/${payload.id}`,
-      });
-
-      const data = doc.snapshot.data;
-      // Combine existing and new tags, removing duplicates
-      const existingTags = data && (data['tags'] || []);
-      const uniqueTags = [...new Set([...existingTags, ...payload.newTags])];
-
-      // Update the document with merged tags
-      await FirebaseFirestore.updateDocument({
-        reference: `${BITE_COLLECTION}/${payload.id}`,
-        data: {
-          tags: uniqueTags,
-          updatedAt: new Date().toISOString(),
-          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-        },
-      });
-    } catch (error) {
-      console.error('Error updating tags:', error);
       this.errorHandler.handleError(error);
     }
   }

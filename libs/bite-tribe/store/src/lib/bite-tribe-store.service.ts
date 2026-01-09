@@ -161,15 +161,6 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(getActionByDocType(docType, entity));
   }
 
-  saveTags(newTagsArray: string[], id: string): void {
-    this.store.dispatch(
-      BiteActions.saveNewTags({
-        newTags: newTagsArray,
-        id,
-      }),
-    );
-  }
-
   logout(): void {
     this.store.dispatch(fromAuth.AuthActions.logout());
   }

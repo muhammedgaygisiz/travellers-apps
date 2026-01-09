@@ -3,24 +3,16 @@ import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite, Bucketlist } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
-import {
-  dataUrlToBlob,
-  getDownloadUrlFromFirebaseStorage,
-  guessExtFromContentType,
-  storagePathFromDownloadUrl,
-} from 'utils';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  FirebaseStorage,
-  UploadFileOptions,
-} from '@capacitor-firebase/storage';
+import { storagePathFromDownloadUrl } from 'utils';
+import { FirebaseStorage } from '@capacitor-firebase/storage';
 import { toBite } from '../utils/to-bite';
 import { Platform } from '@ionic/angular';
-import { writeBlobToFileSystem } from './utils/write-blob-to-file-system';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
 import { BITE_COLLECTION } from './utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
 import { createBite } from './utils/create-bite';
+import { uploadImageAndUpdateBite } from './utils/upload-image-and-update-bite';
+import { replaceImageInFirestoreStorage } from './utils/replace-image-in-firestorestorage';
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
@@ -53,7 +45,7 @@ export class BiteApiService {
     try {
       const biteId = await createBite(biteDocWithoutImage, user);
 
-      await this.uploadImageAndUpdateBite(image, biteId);
+      await uploadImageAndUpdateBite(this.isWeb(), image, biteId);
 
       return await this.loadBiteById(biteId);
     } catch (error) {
@@ -69,12 +61,13 @@ export class BiteApiService {
     return authState?.user;
   }
 
-  async saveEditedBite(bite: Bite): Promise<void> {
+  public async saveEditedBite(bite: Bite): Promise<void> {
     try {
       if (bite.imagePath && bite.image) {
         const { image, ...biteWithoutImage } = bite;
 
-        await this.replaceImageInFirestoreStorage(
+        await replaceImageInFirestoreStorage(
+          this.isWeb(),
           image,
           bite.imagePath,
           bite.id,
@@ -109,7 +102,8 @@ export class BiteApiService {
         if (originalImagePath) {
           const { image, ...biteWithoutImage } = bite;
 
-          await this.replaceImageInFirestoreStorage(
+          await replaceImageInFirestoreStorage(
+            this.isWeb(),
             image,
             originalImagePath,
             bite.id,
@@ -122,7 +116,8 @@ export class BiteApiService {
         // Bite created in old style only with base64 image
         // so we do not have a imagePath yet
         const { image, imagePath, ...biteWithoutImage } = bite;
-        await this.uploadImageAndUpdateBite(
+        await uploadImageAndUpdateBite(
+          this.isWeb(),
           image,
           bite.id,
           biteWithoutImage,
@@ -215,127 +210,6 @@ export class BiteApiService {
 
       return resolve(bite);
     });
-  }
-
-  private async uploadImageAndUpdateBite(
-    imageBase64: string,
-    biteId: string,
-    biteWithoutImage?: Omit<Bite, 'image'>,
-    clearBase64Image = false,
-  ): Promise<void> {
-    const { blob, contentType } = await dataUrlToBlob(imageBase64);
-    const ext = guessExtFromContentType(contentType);
-
-    const imageId = uuidv4();
-    const imagePath = `images/${BITE_COLLECTION}/${biteId}/${imageId}.${ext}`;
-
-    const fileUploadOptions: UploadFileOptions = {
-      path: imagePath,
-      blob,
-      metadata: {
-        contentType: contentType,
-        cacheControl: 'public,max-age=31536000,immutable',
-      },
-    };
-
-    if (!this.isWeb()) {
-      const writeFileResult = await writeBlobToFileSystem(
-        blob,
-        `${imageId}.${ext}`,
-      );
-      fileUploadOptions.uri = writeFileResult.uri;
-    }
-
-    return new Promise<void>((resolve, reject) => {
-      FirebaseStorage.uploadFile(fileUploadOptions, async (event, error) => {
-        if (error) {
-          console.error('Error uploading image:', error);
-          this.errorHandler.handleError(error);
-
-          if (fileUploadOptions.uri) {
-            try {
-              await FirebaseStorage.deleteFile({ path: fileUploadOptions.uri });
-            } catch (error) {
-              console.error('Error deleting temp file:', error);
-              this.errorHandler.handleError(error);
-            }
-          }
-
-          return reject(error);
-        }
-
-        if (event?.completed) {
-          try {
-            const downloadUrl =
-              await getDownloadUrlFromFirebaseStorage(imagePath);
-
-            const data = {
-              ...(biteWithoutImage || {}),
-              imagePath: downloadUrl,
-            } as any;
-
-            if (clearBase64Image) {
-              data.image = '';
-            }
-
-            await FirebaseFirestore.updateDocument({
-              reference: `${BITE_COLLECTION}/${biteId}`,
-              data,
-            });
-
-            if (fileUploadOptions.uri) {
-              try {
-                await FirebaseStorage.deleteFile({
-                  path: fileUploadOptions.uri,
-                });
-              } catch (e1) {
-                console.error('Error deleting temp file:', e1);
-                this.errorHandler.handleError(e1);
-              }
-            }
-
-            return resolve();
-          } catch (r) {
-            console.error('Error uploading image:', r);
-            this.errorHandler.handleError(r);
-
-            if (fileUploadOptions.uri) {
-              try {
-                await FirebaseStorage.deleteFile({
-                  path: fileUploadOptions.uri,
-                });
-              } catch (e1) {
-                console.error('Error deleting temp file:', e1);
-                this.errorHandler.handleError(e1);
-              }
-            }
-
-            return reject(error);
-          }
-        }
-      });
-    });
-  }
-
-  private async replaceImageInFirestoreStorage(
-    imageBase64: string,
-    imagePathInFirestore: string,
-    biteId: string,
-    biteWithoutImage: Omit<Bite, 'image'>,
-    clearBase64Image = false,
-  ): Promise<void> {
-    const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
-
-    await FirebaseStorage.deleteFile({
-      path: imagePath,
-    });
-
-    await this.uploadImageAndUpdateBite(
-      imageBase64,
-      biteId,
-      biteWithoutImage,
-      clearBase64Image,
-    );
   }
 
   private async loadBiteById(biteId: string): Promise<Bite> {

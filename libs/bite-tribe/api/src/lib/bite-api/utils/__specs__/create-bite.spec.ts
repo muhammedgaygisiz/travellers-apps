@@ -22,29 +22,52 @@ describe('createBite', () => {
     });
   });
 
-  describe('given a bite and user', () => {
+  describe('given a bite', () => {
     const bite = {
       position: { latitude: 10, longitude: 20 },
     } as Omit<Bite, 'image'>;
 
-    const user = { uid: '789' } as User;
+    describe('and a user', () => {
+      const user = { uid: '789' } as User;
 
-    it('should call addDocument with ', () => {
-      createBite(bite, user);
+      it('should call addDocument including user id', () => {
+        createBite(bite, user);
 
-      expect(geohashForLocation).toHaveBeenCalledWith([10, 20]);
-      expect(FirebaseFirestore.addDocument).toHaveBeenCalledWith({
-        reference: 'bites',
-        data: {
-          createdAt: '2024-03-15T12:00:00.000Z',
-          createdAtTimestamp: 1710504000000,
-          geohash: '123',
-          position: {
-            latitude: 10,
-            longitude: 20,
+        expect(geohashForLocation).toHaveBeenCalledWith([10, 20]);
+        expect(FirebaseFirestore.addDocument).toHaveBeenCalledWith({
+          reference: 'bites',
+          data: {
+            createdAt: '2024-03-15T12:00:00.000Z',
+            createdAtTimestamp: 1710504000000,
+            geohash: '123',
+            position: {
+              latitude: 10,
+              longitude: 20,
+            },
+            userId: '789',
           },
-          userId: '789',
-        },
+        });
+      });
+    });
+
+    describe('and no user', () => {
+      it('should call addDocument without user id', () => {
+        createBite(bite, null);
+
+        expect(geohashForLocation).toHaveBeenCalledWith([10, 20]);
+        expect(FirebaseFirestore.addDocument).toHaveBeenCalledWith({
+          reference: 'bites',
+          data: {
+            createdAt: '2024-03-15T12:00:00.000Z',
+            createdAtTimestamp: 1710504000000,
+            geohash: '123',
+            position: {
+              latitude: 10,
+              longitude: 20,
+            },
+            userId: '',
+          },
+        });
       });
     });
   });

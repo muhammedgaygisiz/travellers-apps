@@ -15,6 +15,7 @@ export class BiteService {
   currency = this.dataAccess.currency;
   position = this.dataAccess.position;
   cachedBite = this.dataAccess.cachedBite;
+  bitesWithMetadata = this.dataAccess.bitesWithMetadata;
 
   submitNewBite(newBite: any): void {
     const { id, ...biteData } = newBite;

@@ -29,7 +29,14 @@
         fill="outline"
         class="ion-margin-top"
         mode="md"
-      />
+      >
+        <ion-icon
+          id="restaurant-selector-trigger-bite"
+          slot="end"
+          name="search-outline"
+          class="restaurant-search-icon"
+        />
+      </ion-input>
 
       <div class="price-container ion-margin-bottom">
         <div class="price">
@@ -123,6 +130,18 @@
       [selectedCurrency]="biteFormGroup.get('currency')?.value || 'EUR'"
       (currencySelected)="onCurrencySelected($event, currencyModalBite)"
       (selectionCancel)="currencyModalBite.dismiss()"
+    />
+  </ng-template>
+</ion-modal>
+
+<ion-modal trigger="restaurant-selector-trigger-bite" #restaurantModalBite>
+  <ng-template>
+    <lib-restaurant-selector
+      class="ion-page"
+      [restaurants]="nearbyRestaurants()"
+      [selectedRestaurant]="biteFormGroup.get('place')?.value || ''"
+      (restaurantSelected)="onRestaurantSelected($event, restaurantModalBite)"
+      (selectionCancel)="restaurantModalBite.dismiss()"
     />
   </ng-template>
 </ion-modal>

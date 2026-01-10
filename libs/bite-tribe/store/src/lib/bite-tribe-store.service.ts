@@ -11,6 +11,7 @@ import {
   bites,
   bitesBySelectedBucketlist,
   bitesByUser,
+  bitesWithMetadata,
   cachedBite,
   mybites,
   sortedHomeBites,
@@ -89,6 +90,7 @@ export class BiteTribeStoreService implements StoreService {
   registrationError = signal('Not implemented yet.');
 
   bites$ = this.store.select(bites);
+  bitesWithMetadata$ = this.store.select(bitesWithMetadata);
   sortedHomeBites$ = this.store.select(sortedHomeBites);
   sortedBucketlists$ = this.store.select(sortedBucketlists);
   homeSorting$ = this.store.select(homeSorting);

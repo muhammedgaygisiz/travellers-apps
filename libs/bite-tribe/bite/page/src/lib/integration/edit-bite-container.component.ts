@@ -11,6 +11,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       title="Edit Bite"
       [bite]="service.bite()"
       [image]="service.image() || ''"
+      [allBites]="service.bitesWithMetadata() || []"
       (submitBite)="service.submitEditedBite($event)"
     />
   `,

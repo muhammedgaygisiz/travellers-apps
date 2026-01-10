@@ -77,18 +77,6 @@ describe('DetailsService', () => {
     expect(service.bite()).toEqual(mockBite);
   });
 
-  it('should call dataAccess.saveNewTags with provided tags', () => {
-    // Arrange
-    const tags = ['italian', 'spicy'];
-
-    // Act
-    service.saveNewTags(tags);
-
-    // Assert
-    expect(mockDataAccessService.saveNewTags).toHaveBeenCalledWith(tags);
-    expect(mockDataAccessService.saveNewTags).toHaveBeenCalledTimes(1);
-  });
-
   it('should call dataAccess.saveNewReview with provided review data', () => {
     // Arrange
     const reviewData = {

@@ -13,7 +13,7 @@ import {
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Link, Restaurant } from 'model';
 import { MENU_COLLECTION } from './menu-api.service';
-import { BITE_COLLECTION } from './bite-api.service';
+import { BITE_COLLECTION } from './bite-api/utils/constants';
 
 const RESTAURANT_COLLECTION = 'restaurants';
 

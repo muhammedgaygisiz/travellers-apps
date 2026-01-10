@@ -131,6 +131,9 @@ export class BiteTribeStoreService implements StoreService {
   homeFilters$ = this.store.select(homeFilters);
   homeDistance$ = this.store.select(homeDistance);
 
+  bucketlist = toSignal(this.store.select(selectedBucketlist));
+  user = toSignal(this.user$);
+
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());
   }
@@ -155,15 +158,6 @@ export class BiteTribeStoreService implements StoreService {
 
   save(entity: any, docType: string): void {
     this.store.dispatch(getActionByDocType(docType, entity));
-  }
-
-  saveTags(newTagsArray: string[], id: string): void {
-    this.store.dispatch(
-      BiteActions.saveNewTags({
-        newTags: newTagsArray,
-        id,
-      }),
-    );
   }
 
   logout(): void {

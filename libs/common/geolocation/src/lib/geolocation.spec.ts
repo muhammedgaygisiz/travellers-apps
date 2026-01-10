@@ -40,7 +40,7 @@ describe('Geolocation Service', () => {
         location: 'granted',
       });
       (Geolocation.getCurrentPosition as jest.Mock).mockResolvedValue(
-        mockPosition
+        mockPosition,
       );
 
       const result = await lastValueFrom(getCurrentPosition(platform));
@@ -49,7 +49,7 @@ describe('Geolocation Service', () => {
       expect(Geolocation.checkPermissions).toHaveBeenCalled();
       expect(Geolocation.getCurrentPosition).toHaveBeenCalledWith({
         enableHighAccuracy: true,
-        timeout: 5000,
+        timeout: 8000,
       });
       expect(result).toEqual(mockPosition);
     });
@@ -63,7 +63,7 @@ describe('Geolocation Service', () => {
         location: 'granted',
       });
       (Geolocation.getCurrentPosition as jest.Mock).mockResolvedValue(
-        mockPosition
+        mockPosition,
       );
 
       await getCurrentPosition(platform);
@@ -94,7 +94,7 @@ describe('Geolocation Service', () => {
       jest.spyOn(global, 'navigator', 'get').mockReturnValue({} as any);
 
       await expect(lastValueFrom(getCurrentPosition(platform))).rejects.toThrow(
-        'Geolocation is not supported'
+        'Geolocation is not supported',
       );
     });
   });

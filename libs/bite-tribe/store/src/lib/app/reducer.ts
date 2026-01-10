@@ -23,13 +23,18 @@ const initialState: AppSlice = {
 export const reducer = createReducer<AppSlice>(
   initialState,
   on(fromAuth.AuthActions.logoutSucceeded, () => initialState),
-  on(BiteActions.loadedFromAPI, (state) => ({
-    ...state,
-    loading: {
-      ...state.loading,
-      home: false,
-    },
-  })),
+  on(
+    BiteActions.loadedByGPSPositionFromAPI,
+    BiteActions.loadedByUserFromAPI,
+    BiteActions.loadedByBucketlistFromAPI,
+    (state) => ({
+      ...state,
+      loading: {
+        ...state.loading,
+        home: false,
+      },
+    }),
+  ),
   on(fromAuth.AuthActions.loginSucceeded, (state) => ({
     ...state,
     loading: {

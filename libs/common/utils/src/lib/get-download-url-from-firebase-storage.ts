@@ -1,16 +1,16 @@
 import { FirebaseStorage } from '@capacitor-firebase/storage';
 
 export const getDownloadUrlFromFirebaseStorage = async (
-  objectPath: string
+  objectPath: string,
 ): Promise<string | undefined> => {
-  try {
-    const result = await FirebaseStorage.getDownloadUrl({
+  return new Promise((resolve, reject) => {
+    FirebaseStorage.getDownloadUrl({
       path: objectPath,
-    });
-
-    return result.downloadUrl;
-  } catch (e) {
-    console.warn(`Failed to get download url from FirebaseStorage: ${e}`);
-    return undefined;
-  }
+    })
+      .then((result) => resolve(result.downloadUrl))
+      .catch((e) => {
+        console.warn(`Failed to get download url from FirebaseStorage: ${e}`);
+        reject(e);
+      });
+  });
 };

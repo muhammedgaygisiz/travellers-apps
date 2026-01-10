@@ -3,6 +3,7 @@ import { ReviewApiService } from './review-api.service';
 import { RestaurantApiService } from './restaurant-api.service';
 import {
   Bite,
+  Bucketlist,
   CreateAndSaveToBucketListParams,
   Link,
   Menu,
@@ -16,7 +17,7 @@ import { MenuApiService } from './menu-api.service';
 import { LikeApiService } from './like-api.service';
 import { BucketlistApiService } from './bucketlist-api.service';
 import { ProfileApiService } from './profile-api.service';
-import { BiteApiService } from './bite-api.service';
+import { BiteApiService } from './bite-api/bite-api.service';
 import { SettingsApiService } from './settings-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
 import { Observable, tap } from 'rxjs';
@@ -120,20 +121,12 @@ export class BiteTribeApiService {
     return this.profileApiService.getUserByBiteId(bite);
   }
 
-  deleteBite(bite: any): void {
-    this.biteApiService.deleteBite(bite);
-  }
-
-  saveTagsToExistingBite(payload: { newTags: string[]; id: string }): void {
-    this.biteApiService.saveTagsToExistingBite(payload);
-  }
-
   saveEditedBite(bite: any): void {
     this.biteApiService.saveEditedBite(bite);
   }
 
-  saveNewBite(bite: any): void {
-    this.biteApiService.saveNewBite(bite);
+  saveNewBite(bite: any): Promise<Bite> {
+    return this.biteApiService.saveNewBite(bite);
   }
 
   deleteUser(): void {
@@ -156,10 +149,20 @@ export class BiteTribeApiService {
     this.profileApiService.saveUserIfNotExisting();
   }
 
-  bites$(): Observable<Bite[]> {
-    this.biteApiService.startListener();
+  async bitesByPosition(position: GeolocationPosition): Promise<Bite[]> {
+    return this.biteApiService.loadBitesByLocation(position);
+  }
 
-    return this.biteApiService.bites$;
+  async bitesByUser(user: { uid: string }): Promise<Bite[]> {
+    return this.biteApiService.loadBitesByUser(user);
+  }
+
+  async bitesByBucketlist(bucketlist: Bucketlist): Promise<Bite[]> {
+    return this.biteApiService.loadBitesByBucketlist(bucketlist);
+  }
+
+  async deleteBite(bite: Bite): Promise<Bite> {
+    return this.biteApiService.deleteBite(bite);
   }
 
   likes$(): Observable<any[]> {

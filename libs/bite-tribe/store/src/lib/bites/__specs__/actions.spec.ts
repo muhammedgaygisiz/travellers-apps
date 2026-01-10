@@ -1,8 +1,16 @@
 import { BiteActions } from '../actions';
 
 describe('Bites - Actions', () => {
-  it('should have loadedFromAPI action', () => {
-    expect(BiteActions.loadedFromAPI).toBeDefined();
+  it('should have loadedByGPSPositionFromAPI actions', () => {
+    expect(BiteActions.loadedByGPSPositionFromAPI).toBeDefined();
+  });
+
+  it('should have loadedByUserFromAPI actions', () => {
+    expect(BiteActions.loadedByUserFromAPI).toBeDefined();
+  });
+
+  it('should have loadedByBucketlistFromAPI actions', () => {
+    expect(BiteActions.loadedByBucketlistFromAPI).toBeDefined();
   });
 
   it('should have saveNewBite action', () => {
@@ -11,10 +19,6 @@ describe('Bites - Actions', () => {
 
   it('should have saveExistingBite action', () => {
     expect(BiteActions.saveExistingBite).toBeDefined();
-  });
-
-  it('should have saveNewTags action', () => {
-    expect(BiteActions.saveNewTags).toBeDefined();
   });
 
   it('should have cacheBite action', () => {

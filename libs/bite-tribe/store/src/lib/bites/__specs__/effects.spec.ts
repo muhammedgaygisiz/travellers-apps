@@ -11,18 +11,27 @@ import { routerNavigatedAction } from '@ngrx/router-store';
 import { bite } from '../selectors';
 import { fromAuth } from 'ta-firestore';
 import SpyInstance = jest.SpyInstance;
+import { AppActions } from '../../app/actions';
+import { BiteTribeStoreService } from '../../bite-tribe-store.service';
+import { signal, WritableSignal } from '@angular/core';
+import { BucketlistActions } from '../../bucketlists/actions';
+import { PATH } from 'utils';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
 };
 
 const Mock = {
-  bites$: (): Observable<any> => of([]),
+  bitesByUser: (): Observable<any> => of([]),
+  bitesByPosition: (): Observable<any> => of([]),
+  bitesByBucketlist: (): Observable<any> => of([]),
   saveNewBite: jest.fn(),
   saveEditedBite: jest.fn(),
   saveTagsToExistingBite: jest.fn(),
   deleteBite: jest.fn(),
   getUserByBiteId: jest.fn(),
+  bucketlist: (): WritableSignal<string> => signal(''),
+  user: jest.fn(),
 };
 
 const BITE_MOCK = {
@@ -35,6 +44,7 @@ describe('BiteEffects', () => {
   let effects: BiteEffects;
   let apiService: BiteTribeApiService;
   let store: MockStore;
+  let storeService: BiteTribeStoreService;
 
   beforeEach(() => {
     scheduler = new TestScheduler(assertDeepEqual);
@@ -51,6 +61,7 @@ describe('BiteEffects', () => {
           },
         }),
         { provide: BiteTribeApiService, useValue: Mock },
+        { provide: BiteTribeStoreService, useValue: Mock },
       ],
     });
 
@@ -58,43 +69,164 @@ describe('BiteEffects', () => {
     store.overrideSelector(bite, BITE_MOCK);
     effects = TestBed.inject(BiteEffects);
     apiService = TestBed.inject(BiteTribeApiService);
+    storeService = TestBed.inject(BiteTribeStoreService);
   });
 
-  describe('loadBitesFromApi$', () => {
-    it('should load bites from API on loginSucceeded', () => {
+  describe('loadBitesByCurrentUser$', () => {
+    it('should load bites from API on my-bites page entry', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.AuthActions.loginSucceeded });
+        actions$ = cold('a', {
+          a: routerNavigatedAction({
+            payload: { event: { urlAfterRedirects: PATH.MY_BITES } } as any,
+          }),
+        });
 
         const expected = 'a';
         const output = {
-          a: BiteActions.loadedFromAPI({ bites: [] }),
+          a: BiteActions.loadedByUserFromAPI({ bites: [] }),
         };
 
-        expectObservable(effects.startListener$).toBe(expected, output);
+        expectObservable(effects.loadBitesByCurrentUser$).toBe(
+          expected,
+          output,
+        );
+      });
+    });
+  });
+
+  describe('loadBitesByGpsPosition$', () => {
+    it('should load bites from API on loadedGPSPosition', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: AppActions.loadedGPSPosition({
+            position: {} as any,
+          }),
+        });
+
+        const expected = 'a';
+        const output = {
+          a: BiteActions.loadedByGPSPositionFromAPI({ bites: [] }),
+        };
+
+        expectObservable(effects.loadBitesByGpsPosition$).toBe(
+          expected,
+          output,
+        );
+      });
+    });
+  });
+
+  describe('loadBitesByBucketlistId$', () => {
+    describe('given a bucketlist', () => {
+      it('should load bites from API on navigating to bucketlist url', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: routerNavigatedAction({
+              payload: {
+                event: { urlAfterRedirects: '/my-bucketlists/123' },
+              } as any,
+            }),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BiteActions.loadedByBucketlistFromAPI({ bites: [] }),
+          };
+
+          expectObservable(effects.loadBitesByBucketlistId$).toBe(
+            expected,
+            output,
+          );
+        });
+      });
+    });
+
+    describe('given no bucketlist', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(storeService, 'bucketlist')
+          .mockReturnValue(undefined as any);
+      });
+
+      it('should return noBucketlistFound on navigating to bucketlist url', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: routerNavigatedAction({
+              payload: {
+                event: { urlAfterRedirects: '/my-bucketlists/123' },
+              } as any,
+            }),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BucketlistActions.noBucketlistFound(),
+          };
+
+          expectObservable(effects.loadBitesByBucketlistId$).toBe(
+            expected,
+            output,
+          );
+        });
       });
     });
   });
 
   describe('saveNewBiteToFirestore$', () => {
-    let saveNewBiteSpy: SpyInstance;
+    describe('given a successful save call', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(apiService, 'saveNewBite')
+          .mockReturnValue(of(BITE_MOCK) as any);
+      });
 
-    beforeEach(() => {
-      saveNewBiteSpy = jest
-        .spyOn(apiService, 'saveNewBite')
-        .mockImplementation();
+      it('should return savedBite on saveNewBite', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BiteActions.saveNewBite({
+              bite: {} as Bite,
+            }),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BiteActions.savedBite({ bite: BITE_MOCK }),
+          };
+
+          expectObservable(effects.saveNewBiteToFirestore$).toBe(
+            expected,
+            output,
+          );
+        });
+      });
     });
 
-    it('should run saveNewBite on saveNewBite', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: BiteActions.saveNewBite({
-            bite: {} as Bite,
-          }),
-        });
+    describe('given a erroneous save call', () => {
+      it('should return errorSavingBite on saveNewBite', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          jest
+            .spyOn(apiService, 'saveNewBite')
+            .mockReturnValue(
+              cold('#', {}, new Error('Error saving bite')) as any,
+            );
 
-        expectObservable(effects.saveNewBiteToFirestore$);
+          actions$ = cold('a', {
+            a: BiteActions.saveNewBite({
+              bite: {} as Bite,
+            }),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BiteActions.errorSavingBite({ bite: {} as Bite }),
+          };
+
+          expectObservable(effects.saveNewBiteToFirestore$).toBe(
+            expected,
+            output,
+          );
+        });
       });
-      expect(saveNewBiteSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -121,48 +253,55 @@ describe('BiteEffects', () => {
     });
   });
 
-  describe('saveTagsToExistingBite$', () => {
-    let saveTagsToExistingBiteSpy: SpyInstance;
-
-    beforeEach(() => {
-      saveTagsToExistingBiteSpy = jest
-        .spyOn(apiService, 'saveTagsToExistingBite')
-        .mockImplementation();
-    });
-
-    it('should run saveTagsToExistingBite on saveTags', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: BiteActions.saveNewTags({
-            newTags: ['tag'],
-            id: 'biteId',
-          }),
-        });
-
-        expectObservable(effects.saveTagsToExistingBite$);
-      });
-      expect(saveTagsToExistingBiteSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('deleteBite$', () => {
-    let deleteBiteSpy: SpyInstance;
+    describe('given a successful delete call', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(apiService, 'deleteBite')
+          .mockReturnValue(of(BITE_MOCK) as any);
+      });
 
-    beforeEach(() => {
-      deleteBiteSpy = jest.spyOn(apiService, 'deleteBite').mockImplementation();
+      it('should return deletedBite on deleteBite', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BiteActions.deleteBite({
+              bite: {} as Bite,
+            }),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BiteActions.deletedBite({ bite: BITE_MOCK }),
+          };
+
+          expectObservable(effects.deleteBite$).toBe(expected, output);
+        });
+      });
     });
 
-    it('should run deleteBite on deleteBite', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: BiteActions.deleteBite({
-            bite: {} as Bite,
-          }),
-        });
+    describe('given an erroneous delete call', () => {
+      it('should return errorDeletingBite on deleteBite', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          jest
+            .spyOn(apiService, 'deleteBite')
+            .mockReturnValue(
+              cold('#', {}, new Error('Error deleting bite')) as any,
+            );
 
-        expectObservable(effects.deleteBite$);
+          actions$ = cold('a', {
+            a: BiteActions.deleteBite({
+              bite: {} as Bite,
+            }),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BiteActions.errorDeletingBite({ bite: {} as Bite }),
+          };
+
+          expectObservable(effects.deleteBite$).toBe(expected, output);
+        });
       });
-      expect(deleteBiteSpy).toHaveBeenCalledTimes(1);
     });
   });
 

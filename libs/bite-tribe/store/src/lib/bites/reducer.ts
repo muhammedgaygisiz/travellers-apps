@@ -6,13 +6,16 @@ import { fromAuth } from 'ta-firestore';
 export const reducer = createReducer(
   initialState,
   on(fromAuth.AuthActions.logoutSucceeded, (state) => adapter.removeAll(state)),
-  on(BiteActions.loadedFromAPI, (state, { bites }) => {
-    const stateWithoutReloading = {
-      ...state,
-    };
-
-    const cleanState = adapter.removeAll(stateWithoutReloading);
-    return adapter.upsertMany(bites, cleanState);
+  on(
+    BiteActions.loadedByGPSPositionFromAPI,
+    BiteActions.loadedByUserFromAPI,
+    BiteActions.loadedByBucketlistFromAPI,
+    (state, { bites }) => {
+      return adapter.upsertMany(bites, state);
+    },
+  ),
+  on(BiteActions.deletedBite, (state, { bite }) => {
+    return adapter.removeOne(bite.id, state);
   }),
   on(BiteActions.cacheBite, (state, { bite }) => {
     return {
@@ -25,6 +28,9 @@ export const reducer = createReducer(
       ...state,
       cachedBite: undefined,
     };
+  }),
+  on(BiteActions.savedBite, (state, { bite }) => {
+    return adapter.upsertOne(bite, state);
   }),
   on(BiteActions.loadedBiteCreator, (state, { biteCreator }) => {
     return {

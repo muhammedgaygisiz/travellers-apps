@@ -83,17 +83,6 @@ describe('BiteTribeStoreService', () => {
     ));
   });
 
-  describe('saveTags', () => {
-    it('should dispatch saveTags on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.saveTags([], 'id');
-        expect(dispatchSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
-  });
-
   describe('logout', () => {
     it('should dispatch logout on BiteTribeStoreService', inject(
       [BiteTribeStoreService],

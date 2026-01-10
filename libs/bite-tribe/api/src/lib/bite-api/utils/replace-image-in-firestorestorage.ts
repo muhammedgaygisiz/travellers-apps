@@ -1,7 +1,7 @@
 import { Bite } from 'model';
-import { storagePathFromDownloadUrl } from 'utils';
-import { FirebaseStorage } from '@capacitor-firebase/storage';
 import { uploadImageAndUpdateBite } from './upload-image-and-update-bite';
+import { deleteFileInFirebaseStorage } from './delete-file-in-firebasestorage';
+
 export const replaceImageInFirestoreStorage = async (
   isWeb: boolean,
   imageBase64: string,
@@ -9,9 +9,7 @@ export const replaceImageInFirestoreStorage = async (
   biteId: string,
   biteWithoutImage: Omit<Bite, 'image'>,
 ): Promise<void> => {
-  const imagePath = storagePathFromDownloadUrl(imagePathInFirestore);
-
-  await FirebaseStorage.deleteFile({ path: imagePath });
+  await deleteFileInFirebaseStorage(imagePathInFirestore);
 
   await uploadImageAndUpdateBite(isWeb, imageBase64, biteId, biteWithoutImage);
 };

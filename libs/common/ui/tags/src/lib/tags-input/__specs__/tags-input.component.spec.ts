@@ -85,4 +85,26 @@ describe('TagsInputComponent', () => {
       expect(emitSpy).toHaveBeenCalledWith(['tag2']);
     });
   });
+
+  describe('addSuggestedTag', () => {
+    let emitSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      emitSpy = jest.spyOn(component.tagChanges, 'emit').mockImplementation();
+    });
+
+    it('should add suggested tag and emit updated tags', () => {
+      const suggestedTag = 'newTag';
+      componentRef.setInput('tags', ['existing']);
+      component.addSuggestedTag(suggestedTag);
+      expect(emitSpy).toHaveBeenCalledWith(['existing', 'newTag']);
+    });
+
+    it('should not add suggested tag if it already exists', () => {
+      const existingTag = 'existing';
+      componentRef.setInput('tags', ['existing']);
+      component.addSuggestedTag(existingTag);
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
 });

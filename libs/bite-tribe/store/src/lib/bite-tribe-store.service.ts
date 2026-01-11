@@ -13,10 +13,12 @@ import {
   bitesByUser,
   bitesWithMetadata,
   cachedBite,
+  editingBite,
   mybites,
   nearbyRestaurants,
   sortedHomeBites,
   sortedMyBites,
+  tagSuggestionsForEditingBite,
 } from './bites/selectors';
 import {
   restaurant,
@@ -92,6 +94,9 @@ export class BiteTribeStoreService implements StoreService {
 
   bites$ = this.store.select(bites);
   nearbyRestaurants$ = this.store.select(nearbyRestaurants);
+  tagSuggestionsForEditingBite$ = this.store.select(
+    tagSuggestionsForEditingBite,
+  );
   sortedHomeBites$ = this.store.select(sortedHomeBites);
   sortedBucketlists$ = this.store.select(sortedBucketlists);
   homeSorting$ = this.store.select(homeSorting);
@@ -161,6 +166,10 @@ export class BiteTribeStoreService implements StoreService {
 
   save(entity: any, docType: string): void {
     this.store.dispatch(getActionByDocType(docType, entity));
+  }
+
+  setEditingBite(bite: Partial<Bite>): void {
+    this.store.dispatch(BiteActions.setEditingBite({ bite }));
   }
 
   logout(): void {

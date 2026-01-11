@@ -23,6 +23,12 @@ export const reducer = createReducer(
       cachedBite: bite,
     };
   }),
+  on(BiteActions.setEditingBite, (state, { bite }) => {
+    return {
+      ...state,
+      editingBite: bite,
+    };
+  }),
   on(BiteActions.saveNewBite, (state) => {
     return {
       ...state,

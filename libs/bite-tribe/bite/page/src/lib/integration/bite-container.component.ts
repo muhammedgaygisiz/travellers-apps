@@ -13,7 +13,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     [image]="service.image() || ''"
     [isNew]="true"
     [nearbyRestaurants]="service.nearbyRestaurants() || []"
+    [suggestedTags]="service.tagSuggestionsForEditingBite() || []"
     (submitBite)="service.submitNewBite($event)"
+    (placeChange)="onPlaceChange($event)"
   />`,
   imports: [BitePage],
 })
@@ -24,5 +26,10 @@ export class BiteContainer {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'New Bite',
     });
+  }
+
+  onPlaceChange(place: string): void {
+    const currentBite = this.service.cachedBite() || {};
+    this.service.setEditingBite({ ...currentBite, place });
   }
 }

@@ -26,3 +26,19 @@
     </ng-container>
   }
 </div>
+
+@if (!readonlyData && suggestedTags().length > 0) {
+  <div class="suggestions-container ion-margin-top">
+    <label class="suggestions-label">Suggested Tags:</label>
+    <div class="suggestions">
+      @for (suggestedTag of suggestedTags(); track suggestedTag) {
+        @if (!tags().includes(suggestedTag)) {
+          <ion-chip class="suggestion" (click)="addSuggestedTag(suggestedTag)">
+            <ion-icon name="add-circle-outline"></ion-icon>
+            <ion-label>{{ suggestedTag }}</ion-label>
+          </ion-chip>
+        }
+      }
+    </div>
+  </div>
+}

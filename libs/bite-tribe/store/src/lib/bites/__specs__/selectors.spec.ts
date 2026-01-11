@@ -455,4 +455,71 @@ describe('Bites Selectors', () => {
       expect(result).toEqual([PLACE_2, PLACE_1]);
     });
   });
+
+  describe('tagSuggestionsForEditingBite', () => {
+    it('should return tag suggestions based on editing bite place', () => {
+      const bitesWithMetadata = [
+        {
+          ...mockBite1,
+          place: 'Pizza Hut',
+          tags: ['pizza', 'italian'],
+        },
+        {
+          ...mockBite2,
+          place: 'Pizza Hut',
+          tags: ['pasta', 'italian'],
+        },
+      ] as any[];
+
+      const editingBite = {
+        place: 'Pizza Hut',
+      } as Bite;
+
+      const result = fromSelectors.tagSuggestionsForEditingBite.projector(
+        editingBite,
+        bitesWithMetadata,
+      );
+
+      expect(result).toContain('pizza');
+      expect(result).toContain('italian');
+      expect(result).toContain('pasta');
+    });
+
+    it('should return empty array if editing bite has no place', () => {
+      const bitesWithMetadata = [mockBite1, mockBite2] as any[];
+      const editingBite = {} as Bite;
+
+      const result = fromSelectors.tagSuggestionsForEditingBite.projector(
+        editingBite,
+        bitesWithMetadata,
+      );
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array if editing bite is null', () => {
+      const bitesWithMetadata = [mockBite1, mockBite2] as any[];
+
+      const result = fromSelectors.tagSuggestionsForEditingBite.projector(
+        null as any,
+        bitesWithMetadata,
+      );
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array if no matching bites found', () => {
+      const bitesWithMetadata = [mockBite1, mockBite2] as any[];
+      const editingBite = {
+        place: 'Non-existent Restaurant',
+      } as Bite;
+
+      const result = fromSelectors.tagSuggestionsForEditingBite.projector(
+        editingBite,
+        bitesWithMetadata,
+      );
+
+      expect(result).toEqual([]);
+    });
+  });
 });

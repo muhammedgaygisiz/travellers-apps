@@ -30,6 +30,7 @@ import { byDistance } from './utils/by-distance';
 import { getUniqueRestaurantNames } from './utils/get-unique-restaurant-names';
 import { getNearbyBites } from './utils/get-nearby-bites';
 import { getNearbyRestaurantNamesByPosition } from './utils/get-nearby-restaurant-names-by-position';
+import { getTagSuggestionsByPlace } from './utils/get-tag-suggestions-by-place';
 
 const slice = createFeatureSelector<
   EntityState<Bite> & {
@@ -186,4 +187,17 @@ export const bitesByUser = createSelector(
 
 export const nearbyRestaurants = createSelector(bitesWithMetadata, (bites) =>
   getNearbyRestaurantNamesByPosition(bites),
+);
+
+export const editingBite = createSelector(slice, (state) => state?.editingBite);
+
+export const tagSuggestionsForEditingBite = createSelector(
+  editingBite,
+  bitesWithMetadata,
+  (bite, bites) => {
+    if (!bite?.place) {
+      return [];
+    }
+    return getTagSuggestionsByPlace(bite.place, bites);
+  },
 );

@@ -79,11 +79,15 @@ export class BitePage {
 
   position = input<Geopoint>();
 
+  suggestedTags = input<string[]>([]);
+
   fallbackPosition = linkedSignal(() => {
     return this.position();
   });
 
   submitBite = output<typeof this.biteFormGroup.value>();
+
+  placeChange = output<string>();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -158,6 +162,15 @@ export class BitePage {
 
     if (currency) {
       this.biteFormGroup.controls['currency'].patchValue(currency);
+    }
+  });
+
+  placeValueChangesEffect = effect(() => {
+    const placeControl = this.biteFormGroup.controls['place'];
+    const place = placeControl.value;
+
+    if (place) {
+      this.placeChange.emit(place);
     }
   });
 

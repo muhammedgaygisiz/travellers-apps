@@ -79,8 +79,6 @@ export class BitePage {
 
   position = input<Geopoint>();
 
-  allBites = input<Bite[]>([]);
-
   fallbackPosition = linkedSignal(() => {
     return this.position();
   });
@@ -91,31 +89,7 @@ export class BitePage {
 
   currencies = currencyCodes;
 
-  // Compute nearby restaurants (within 1km)
-  nearbyRestaurants = computed(() => {
-    const allBites = this.allBites();
-    const position = this.position();
-
-    if (!allBites || !position) {
-      return [];
-    }
-
-    // Filter bites within 1km and extract unique restaurant names
-    const nearbyBites = allBites.filter((bite) => {
-      const distance = bite.distance ? parseFloat(bite.distance) : Infinity;
-      return distance <= 1; // 1km
-    });
-
-    // Get unique restaurant names
-    const restaurantNames = new Set<string>();
-    nearbyBites.forEach((bite) => {
-      if (bite.place && bite.place.trim()) {
-        restaurantNames.add(bite.place);
-      }
-    });
-
-    return Array.from(restaurantNames).sort();
-  });
+  nearbyRestaurants = input<string[]>([]);
 
   biteFormGroup = this.formBuilder.group(
     {

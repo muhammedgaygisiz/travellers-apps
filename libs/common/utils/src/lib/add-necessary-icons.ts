@@ -42,6 +42,7 @@ import {
   footstepsOutline,
   chevronExpandOutline,
   alertOutline,
+  searchOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = (): void => {
@@ -88,5 +89,6 @@ export const addNecessaryIcons = (): void => {
     footstepsOutline,
     chevronExpandOutline,
     alertOutline,
+    searchOutline,
   });
 };

@@ -39,7 +39,7 @@ export class BiteTribeApiService {
   publicProfile$ = this.profileApiService.publicProfile$;
   settings$ = this.settingsApiService.settings$.pipe(
     tap((settings) => {
-      const theme = settings.theme;
+      const theme = settings?.theme;
 
       if (theme) {
         document.documentElement.classList.toggle('dark', theme === 'dark');

@@ -59,7 +59,7 @@ export class RestaurantSelectorComponent {
 
     const normalizedSearchTerm = normalize(searchTerm);
 
-    const scoredRestaurants = restaurants
+    return restaurants
       .map((restaurant) => {
         const nameMatches = getSimilarityScore(
           normalizedSearchTerm,
@@ -76,8 +76,6 @@ export class RestaurantSelectorComponent {
       .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score)
       .map(({ restaurant }) => restaurant);
-
-    return scoredRestaurants;
   });
 
   // Show custom option if search term doesn't match any restaurant exactly
@@ -101,7 +99,7 @@ export class RestaurantSelectorComponent {
 
   searchbarInput(event: Event): void {
     const target = event.target as HTMLIonSearchbarElement;
-    this.rawSearchTerm.set(target.value?.toLowerCase() || '');
+    this.rawSearchTerm.set(target.value || '');
   }
 
   selectRestaurant(name: string): void {

@@ -16,7 +16,7 @@ import {
   homeSorting,
   myBitesSorting,
 } from '../filtering-and-sorting/selectors';
-import { haversineDistance } from 'utils';
+import { getSimilarityScore, haversineDistance, normalize } from 'utils';
 import { EntityState } from '@ngrx/entity';
 import { handleNearbyFilter } from './utils/handle-nearby-filter';
 import { handleTagFilters } from './utils/handle-tag-filters';
@@ -184,5 +184,56 @@ export const bitesByUser = createSelector(
   biteCreator,
   (bites, biteCreator) => {
     return bites.filter((bite) => bite.userId === biteCreator?.userId);
+  },
+);
+
+const containsFuzzyEqualRestaurantName = (
+  restaurantName: string,
+  restaurantNames: string[],
+): boolean => {
+  return restaurantNames.some((name) => {
+    const normalizedPlaceName = normalize(name);
+
+    const similarityScore = getSimilarityScore(
+      normalizedPlaceName,
+      restaurantName,
+    );
+
+    return similarityScore.length > 0 && similarityScore[0].score >= 0.8;
+  });
+};
+
+export const nearbyRestaurants = createSelector(
+  bitesWithMetadata,
+  gpsPosition,
+  (bites, gpsPosition) => {
+    const allBites = bites;
+
+    if (!allBites || !gpsPosition) {
+      return [];
+    }
+
+    // Filter bites within 1km and extract unique restaurant names
+    const nearbyBites = allBites.filter((bite) => {
+      const distance = bite.distance ? parseFloat(bite.distance) : Infinity;
+      return distance <= 1; // 1km
+    });
+
+    // Get unique restaurant names
+    const restaurantNames = new Set<string>();
+    nearbyBites.forEach((bite) => {
+      const restaurantName = bite.place && bite.place.trim();
+
+      const listContainsFuzzyEqualRestaurantName =
+        containsFuzzyEqualRestaurantName(
+          restaurantName,
+          Array.from(restaurantNames),
+        );
+      if (restaurantName && !listContainsFuzzyEqualRestaurantName) {
+        restaurantNames.add(restaurantName);
+      }
+    });
+
+    return Array.from(restaurantNames).sort();
   },
 );

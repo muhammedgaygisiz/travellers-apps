@@ -12,7 +12,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     [position]="service.position()"
     [image]="service.image() || ''"
     [isNew]="true"
-    [allBites]="service.bitesWithMetadata() || []"
+    [nearbyRestaurants]="service.nearbyRestaurants() || []"
     (submitBite)="service.submitNewBite($event)"
   />`,
   imports: [BitePage],

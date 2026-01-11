@@ -14,6 +14,7 @@ import {
   bitesWithMetadata,
   cachedBite,
   mybites,
+  nearbyRestaurants,
   sortedHomeBites,
   sortedMyBites,
 } from './bites/selectors';
@@ -90,7 +91,7 @@ export class BiteTribeStoreService implements StoreService {
   registrationError = signal('Not implemented yet.');
 
   bites$ = this.store.select(bites);
-  bitesWithMetadata$ = this.store.select(bitesWithMetadata);
+  nearbyRestaurants$ = this.store.select(nearbyRestaurants);
   sortedHomeBites$ = this.store.select(sortedHomeBites);
   sortedBucketlists$ = this.store.select(sortedBucketlists);
   homeSorting$ = this.store.select(homeSorting);

@@ -439,4 +439,20 @@ describe('Bites Selectors', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('nearbyRestaurants', () => {
+    it('should return sorted place names from nearby bites', () => {
+      const PLACE_1 = 'Fish & Chips Deli';
+      const PLACE_2 = 'Beef Burger Lovers Place';
+      const bitesWithMetadata = [
+        { ...mockBite1, likes: mockLikes, distance: '0', place: PLACE_1 },
+        { ...mockBite2, likes: [], distance: '0.01', place: PLACE_2 },
+      ] as any[];
+
+      const result =
+        fromSelectors.nearbyRestaurants.projector(bitesWithMetadata);
+
+      expect(result).toEqual([PLACE_2, PLACE_1]);
+    });
+  });
 });

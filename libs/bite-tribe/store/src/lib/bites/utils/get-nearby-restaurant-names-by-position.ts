@@ -3,7 +3,7 @@ import { getNearbyBites } from './get-nearby-bites';
 import { getUniqueRestaurantNames } from './get-unique-restaurant-names';
 
 export const getNearbyRestaurantNamesByPosition = (bites: Bite[]): string[] => {
-  if (!bites) {
+  if (!bites?.length) {
     return [];
   }
 

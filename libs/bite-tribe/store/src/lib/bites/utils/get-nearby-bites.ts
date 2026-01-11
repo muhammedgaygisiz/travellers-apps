@@ -1,7 +1,9 @@
 import { Bite } from 'model';
 
-export const getNearbyBites = (allBites: Bite[]): Bite[] =>
-  allBites.filter((bite) => {
+const ONE_KM = 1;
+
+export const getNearbyBites = (bites: Bite[]): Bite[] =>
+  bites.filter((bite) => {
     const distance = bite.distance ? parseFloat(bite.distance) : Infinity;
-    return distance <= 1; // 1km
+    return distance <= ONE_KM;
   });

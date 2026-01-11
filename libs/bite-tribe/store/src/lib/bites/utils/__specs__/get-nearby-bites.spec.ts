@@ -1,0 +1,35 @@
+import { getNearbyBites } from '../get-nearby-bites';
+
+describe('getNearbyBites', () => {
+  describe('given nearby bites', () => {
+    it('should return nearby bites', () => {
+      const bites = [
+        { id: '1', distance: '0.5' },
+        { id: '2', distance: '1.0' },
+        { id: '3', distance: '1.5' },
+        { id: '4' }, // No distance provided
+      ];
+
+      const nearbyBites = getNearbyBites(bites as any);
+
+      expect(nearbyBites).toEqual([
+        { id: '1', distance: '0.5' },
+        { id: '2', distance: '1.0' },
+      ]);
+    });
+  });
+
+  describe('given no nearby bites', () => {
+    it('should return an empty array', () => {
+      const bites = [
+        { id: '1', distance: '1.5' },
+        { id: '2', distance: '2.0' },
+        { id: '3' }, // No distance provided
+      ];
+
+      const nearbyBites = getNearbyBites(bites as any);
+
+      expect(nearbyBites).toEqual([]);
+    });
+  });
+});

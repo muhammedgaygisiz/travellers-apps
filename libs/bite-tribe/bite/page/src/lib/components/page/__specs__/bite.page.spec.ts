@@ -412,4 +412,17 @@ describe('BitePage', () => {
       expect(dismissSpy).toHaveBeenCalled();
     });
   });
+
+  describe('onRestaurantSelected', () => {
+    it('should set place in the form group and should call dismiss on modal', () => {
+      const dismissSpy = jest.fn();
+      component.onRestaurantSelected('Test Restaurant', {
+        dismiss: dismissSpy,
+      } as any);
+      expect(component.biteFormGroup.controls['place'].value).toBe(
+        'Test Restaurant',
+      );
+      expect(dismissSpy).toHaveBeenCalled();
+    });
+  });
 });

@@ -1,0 +1,50 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">Cancel</ion-button>
+    </ion-buttons>
+    <ion-title>Select Restaurant</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-searchbar
+    (ionInput)="searchbarInput($event)"
+    placeholder="Search restaurants..."
+  />
+
+  <ion-list [inset]="true">
+    @if (showCustomOption()) {
+      <ion-item [detail]="false" (click)="selectCustomRestaurant()">
+        <ion-label>
+          <h2>Use: "{{ rawSearchTerm() }}"</h2>
+          <p>Add as new restaurant</p>
+        </ion-label>
+      </ion-item>
+    }
+
+    @for (restaurant of filteredRestaurants(); track restaurant) {
+      <ion-item [detail]="false" (click)="selectRestaurant(restaurant)">
+        <ion-label>
+          <h2>{{ restaurant }}</h2>
+        </ion-label>
+        @if (selectedRestaurant() === restaurant) {
+          <ion-icon slot="end" name="checkmark" color="primary" />
+        }
+      </ion-item>
+    } @empty {
+      @if (!showCustomOption() && rawSearchTerm()) {
+        <ion-item>
+          <ion-label>No restaurants found</ion-label>
+        </ion-item>
+      }
+      @if (!rawSearchTerm()) {
+        <ion-item>
+          <ion-label>
+            <p>Start typing to search restaurants</p>
+          </ion-label>
+        </ion-item>
+      }
+    }
+  </ion-list>
+</ion-content>

@@ -22,6 +22,7 @@ import {
   IonTextarea,
 } from '@ionic/angular/standalone';
 import { CurrencySelectorComponent } from 'currency-selector';
+import { RestaurantSelectorComponent } from 'restaurant-selector';
 import { Platform } from '@ionic/angular';
 import {
   FormBuilder,
@@ -56,6 +57,7 @@ import { getNormalizedPrice } from './utils/get-normalized-price';
     IonTextarea,
     IonModal,
     CurrencySelectorComponent,
+    RestaurantSelectorComponent,
     IonIcon,
     IonLabel,
   ],
@@ -86,6 +88,8 @@ export class BitePage {
   isWeb = signal(!this.platform.is('hybrid'));
 
   currencies = currencyCodes;
+
+  nearbyRestaurants = input<string[]>([]);
 
   biteFormGroup = this.formBuilder.group(
     {
@@ -290,6 +294,11 @@ export class BitePage {
 
   onCurrencySelected(currencyCode: string, modal: IonModal): void {
     this.biteFormGroup.patchValue({ currency: currencyCode });
+    modal.dismiss();
+  }
+
+  onRestaurantSelected(restaurantName: string, modal: IonModal): void {
+    this.biteFormGroup.patchValue({ place: restaurantName });
     modal.dismiss();
   }
 }

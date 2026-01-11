@@ -2,6 +2,18 @@ import { containsFuzzyEqualRestaurantName } from './contains-fuzzy-equal-restaur
 import { Bite } from 'model';
 import { isSimilar } from './is-similar';
 
+const getCandidateWithLongestName = (candidatesArray: string[]): string => {
+  if (candidatesArray.length === 0) {
+    return '';
+  }
+
+  if (candidatesArray.length === 1) {
+    return candidatesArray[0];
+  }
+
+  return candidatesArray.reduce((a, b) => (a.length > b.length ? a : b));
+};
+
 const getLongestFuzzyEqualRestaurantName = (
   place: string,
   places: string[],
@@ -19,9 +31,7 @@ const getLongestFuzzyEqualRestaurantName = (
 
   const candidatesArray = Array.from(candidates);
 
-  return candidatesArray.reduce(function (a, b) {
-    return a.length > b.length ? a : b;
-  });
+  return getCandidateWithLongestName(candidatesArray);
 };
 
 export const getUniqueRestaurantNames = (bites: Bite[]): Set<string> => {

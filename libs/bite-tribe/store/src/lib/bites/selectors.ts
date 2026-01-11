@@ -50,23 +50,23 @@ export const bitesWithMetadata = createSelector(
   allBites,
   likes,
   gpsPosition,
-  (bites, likes, gpsPosition) => {
-    return bites
-      .map((bite) => {
-        return {
-          ...bite,
-          likes: getLikesForBite(likes, bite),
-          distance: haversineDistance(
-            bite.position?.latitude,
-            bite.position?.longitude,
-            gpsPosition?.latitude,
-            gpsPosition?.longitude,
-            'km',
-          ),
-        } as Bite;
-      })
-      .sort(byDistance);
-  },
+  (bites, likes, gpsPosition) =>
+    bites
+      .map(
+        (bite) =>
+          ({
+            ...bite,
+            likes: getLikesForBite(likes, bite),
+            distance: haversineDistance(
+              bite.position?.latitude,
+              bite.position?.longitude,
+              gpsPosition?.latitude,
+              gpsPosition?.longitude,
+              'km',
+            ),
+          }) as Bite,
+      )
+      .sort(byDistance),
 );
 
 export const bites = createSelector(
@@ -187,15 +187,11 @@ export const nearbyRestaurants = createSelector(
   bitesWithMetadata,
   gpsPosition,
   (bites, gpsPosition) => {
-    const allBites = bites;
-
     if (!allBites || !gpsPosition) {
       return [];
     }
 
-    const nearbyBites = getNearbyBites(allBites);
-
-    // Get unique restaurant names
+    const nearbyBites = getNearbyBites(bites);
     const restaurantNames = getUniqueRestaurantNames(nearbyBites);
 
     return Array.from(restaurantNames).sort();

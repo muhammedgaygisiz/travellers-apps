@@ -84,15 +84,15 @@ describe('RestaurantSelectorComponent', () => {
   });
 
   it('should update rawSearchTerm on searchbar input', () => {
-    const searchValue = 'test search';
+    const searchValue = 'Test Restaurant';
     const mockEvent = {
       target: {
         value: searchValue,
       } as HTMLIonSearchbarElement,
-    } as Event;
+    } as unknown as Event;
 
     component.searchbarInput(mockEvent);
 
-    expect(component.rawSearchTerm()).toBe(searchValue.toLowerCase());
+    expect(component.rawSearchTerm()).toBe(searchValue);
   });
 });

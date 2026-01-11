@@ -18,7 +18,7 @@ describe('getUniqueRestaurantNames', () => {
   });
 
   it('should return an empty array when given an empty bites array', () => {
-    const bites: any[] = [];
+    const bites: Bite[] = [];
     const result = getUniqueRestaurantNames(bites);
     expect(result).toEqual(new Set([]));
   });

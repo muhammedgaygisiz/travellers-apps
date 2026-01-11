@@ -31,7 +31,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
 import { Bite, Geopoint } from 'model';
@@ -167,6 +167,8 @@ export class BitePage {
 
   placeValueChange = toSignal(
     this.biteFormGroup.controls['place'].valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
       tap((place) => {
         if (place) {
           this.placeChange.emit(place);

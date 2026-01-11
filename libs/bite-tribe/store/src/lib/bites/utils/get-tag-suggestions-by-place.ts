@@ -1,6 +1,7 @@
 import { Bite } from 'model';
 import { getBitesByRestaurantIdOrName } from './get-bites-by-restaurant-id-or-name';
 import { normalize, getSimilarityScore } from 'utils';
+import { isSimilar } from './is-similar';
 
 /**
  * Get unique tag suggestions from bites at a given restaurant/place.
@@ -9,19 +10,13 @@ import { normalize, getSimilarityScore } from 'utils';
  */
 export const getTagSuggestionsByPlace = (
   placeName: string,
-  allBites: Bite[],
+  bites: Bite[],
 ): string[] => {
   if (!placeName || !placeName.trim()) {
     return [];
   }
 
-  const normalizedPlaceName = normalize(placeName);
-
-  // Get all bites from the same or similar restaurant
-  const bitesAtPlace = getBitesByRestaurantIdOrName(
-    normalizedPlaceName,
-    allBites,
-  );
+  const bitesAtPlace = bites.filter((bite) => isSimilar(placeName, bite.place));
 
   if (bitesAtPlace.length === 0) {
     return [];

@@ -6,31 +6,26 @@ describe('getTagSuggestionsByPlace', () => {
     {
       id: '1',
       place: 'Pizza Hut',
-      restaurantId: 'rest1',
       tags: ['pizza', 'italian', 'fastfood'],
     } as Bite,
     {
       id: '2',
       place: 'Pizza Hut',
-      restaurantId: 'rest1',
       tags: ['pasta', 'pizza', 'italian'],
     } as Bite,
     {
       id: '3',
       place: 'Burger King',
-      restaurantId: 'rest2',
       tags: ['burger', 'fastfood', 'american'],
     } as Bite,
     {
       id: '4',
       place: 'Sushi Place',
-      restaurantId: 'rest3',
       tags: ['sushi', 'japanese', 'seafood'],
     } as Bite,
     {
       id: '5',
       place: 'Pizza Hut Central',
-      restaurantId: 'rest1',
       tags: ['#pizza', '#dessert'],
     } as Bite,
   ];
@@ -118,7 +113,7 @@ describe('getTagSuggestionsByPlace', () => {
         id: '2',
         place: 'Test Place',
         tags: [],
-      } as Bite,
+      } as unknown as Bite,
     ];
     const result = getTagSuggestionsByPlace('Test Place', bitesWithNoTags);
     expect(result).toEqual([]);
@@ -148,13 +143,6 @@ describe('getTagSuggestionsByPlace', () => {
     // Should keep the longest variant when tags are similar
     expect(result.length).toBeLessThan(3);
     expect(result).toContain('italianfood');
-  });
-
-  it('should match restaurant by ID when provided', () => {
-    const result = getTagSuggestionsByPlace('rest2', mockBites);
-    expect(result).toContain('burger');
-    expect(result).toContain('fastfood');
-    expect(result).toContain('american');
   });
 
   it('should not include duplicate tags from multiple bites', () => {

@@ -191,13 +191,20 @@ export const nearbyRestaurants = createSelector(bitesWithMetadata, (bites) =>
 
 export const editingBite = createSelector(slice, (state) => state?.editingBite);
 
+const nearbyBitesWithTags = createSelector(bitesWithMetadata, (bites) => {
+  const nearbyBites = getNearbyBites(bites);
+
+  return nearbyBites.filter((bite) => bite.tags && bite.tags.length > 0);
+});
+
 export const tagSuggestionsForEditingBite = createSelector(
   editingBite,
-  bitesWithMetadata,
+  nearbyBitesWithTags,
   (bite, bites) => {
     if (!bite?.place) {
       return [];
     }
+
     return getTagSuggestionsByPlace(bite.place, bites);
   },
 );

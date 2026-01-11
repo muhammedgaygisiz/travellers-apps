@@ -467,5 +467,34 @@ describe('BitePage', () => {
         });
       });
     });
+
+    describe('given a value change on the place form control with value undefined', () => {
+      it('should not emit placeChange', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          const valueChangeEvents$ =
+            component.biteFormGroup.controls['place'].valueChanges;
+
+          const placeChangeSpy = jest.spyOn(component.placeChange, 'emit');
+
+          // Simulate value changes
+          const values = {
+            a: undefined,
+          };
+
+          const source$ = cold('--a--', values);
+          const subscription = source$.subscribe((val) => {
+            component.biteFormGroup.controls['place'].setValue(val as any);
+          });
+
+          expectObservable(valueChangeEvents$).toBe('--a', values);
+
+          // Assert that placeChange was not emitted
+          scheduler.flush();
+          expect(placeChangeSpy).not.toHaveBeenCalled();
+
+          subscription.unsubscribe();
+        });
+      });
+    });
   });
 });

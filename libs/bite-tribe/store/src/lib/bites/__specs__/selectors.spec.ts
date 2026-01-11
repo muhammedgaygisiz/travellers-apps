@@ -456,11 +456,46 @@ describe('Bites Selectors', () => {
     });
   });
 
+  describe('editingBite', () => {
+    it('should return the editing bite', () => {
+      const result = fromSelectors.editingBite.projector({
+        ...initialState,
+        editingBite: mockBite2,
+      });
+
+      expect(result).toEqual(mockBite2);
+    });
+
+    it('should return undefined if no editing bite', () => {
+      const result = fromSelectors.editingBite.projector({
+        ...initialState,
+        editingBite: undefined,
+      });
+
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('nearbyBitesWithTags', () => {
     it('should return empty array if no bites exist', () => {
       const result = fromSelectors.nearbyBitesWithTags.projector([]);
 
       expect(result).toEqual([]);
+    });
+
+    it('should return bites that have tags', () => {
+      const bitesWithMetadata = [
+        { ...mockBite1, tags: ['tag1'], distance: '0' } as any,
+        { ...mockBite2, tags: [], distance: '0.01' } as any,
+        { ...mockBite2, tags: ['tag2'], distance: '0.02' } as any,
+      ];
+
+      const result =
+        fromSelectors.nearbyBitesWithTags.projector(bitesWithMetadata);
+
+      expect(result).toHaveLength(2);
+      expect(result).toContain(bitesWithMetadata[0]);
+      expect(result).toContain(bitesWithMetadata[2]);
     });
   });
 

@@ -31,7 +31,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
 import { Bite, Geopoint } from 'model';
@@ -165,14 +165,15 @@ export class BitePage {
     }
   });
 
-  placeValueChangesEffect = effect(() => {
-    const placeControl = this.biteFormGroup.controls['place'];
-    const place = placeControl.value;
-
-    if (place) {
-      this.placeChange.emit(place);
-    }
-  });
+  placeValueChange = toSignal(
+    this.biteFormGroup.controls['place'].valueChanges.pipe(
+      tap((place) => {
+        if (place) {
+          this.placeChange.emit(place);
+        }
+      }),
+    ),
+  );
 
   positionInitFromInputEffect = effect(() => {
     const bite = this.bite();

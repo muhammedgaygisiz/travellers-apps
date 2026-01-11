@@ -2,6 +2,8 @@ import { createReducer, on } from '@ngrx/store';
 import { adapter, initialState } from './adapter';
 import { BiteActions } from './actions';
 import { fromAuth } from 'ta-firestore';
+import { routerNavigatedAction } from '@ngrx/router-store';
+import { PATH } from 'utils';
 
 export const reducer = createReducer(
   initialState,
@@ -36,7 +38,22 @@ export const reducer = createReducer(
     };
   }),
   on(BiteActions.savedBite, (state, { bite }) => {
-    return adapter.upsertOne(bite, state);
+    const stateWithResetCachedBite = {
+      ...state,
+      editingBite: undefined,
+    };
+
+    return adapter.upsertOne(bite, stateWithResetCachedBite);
+  }),
+  on(routerNavigatedAction, (state, { payload }) => {
+    if (payload.event.url.includes(PATH.HOME)) {
+      return {
+        ...state,
+        biteCreator: undefined,
+      };
+    }
+
+    return state;
   }),
   on(BiteActions.loadedBiteCreator, (state, { biteCreator }) => {
     return {

@@ -13,7 +13,7 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [startGuard],
   },
   {
-    path: 'home',
+    path: PATH.HOME,
     loadComponent: () =>
       import('bite-tribe/home').then((m) => m.HomeContainerComponent),
     canActivate: [authGuard],

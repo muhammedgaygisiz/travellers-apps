@@ -2,6 +2,8 @@ import { reducer } from '../reducer';
 import { BiteActions } from '../actions';
 import { Bite } from 'model';
 import { fromAuth } from 'ta-firestore';
+import { routerNavigatedAction } from '@ngrx/router-store';
+import { PATH } from 'utils';
 
 describe('Bite Reducer', () => {
   describe('fromAuth.logoutSucceeded', () => {
@@ -90,6 +92,26 @@ describe('Bite Reducer', () => {
       const INITIAL_STATE = {
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite prev' } as Bite },
+      };
+      const NEW_STATE = {
+        ids: ['1'],
+        entities: { '1': { id: '1', name: 'Bite new' } as Bite },
+      };
+
+      const savedBiteAction = BiteActions.savedBite({
+        bite: { id: '1', name: 'Bite new' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, savedBiteAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+
+    it('should reset editingBite', () => {
+      const INITIAL_STATE = {
+        ids: ['1'],
+        entities: { '1': { id: '1', name: 'Bite prev' } as Bite },
+        editingBite: { id: '1', name: 'Bite prev' } as Bite,
       };
       const NEW_STATE = {
         ids: ['1'],
@@ -195,6 +217,44 @@ describe('Bite Reducer', () => {
 
       expect(reducer(INITIAL_STATE, setEditingBiteAction)).toEqual({
         ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('routerNavigatedAction', () => {
+    it('should clear biteCreator when navigating to HOME path', () => {
+      const INITIAL_STATE = {
+        ids: [],
+        entities: {},
+        biteCreator: { id: 'creator1', name: 'Creator 1' },
+      };
+      const NEW_STATE = { ids: [], entities: {} };
+
+      const payload = { payload: { event: { url: PATH.HOME } } } as any;
+
+      expect(reducer(INITIAL_STATE, routerNavigatedAction(payload))).toEqual({
+        ...NEW_STATE,
+      });
+    });
+
+    it('should not change state when navigating to other paths', () => {
+      const INITIAL_STATE = {
+        ids: [],
+        entities: {},
+        biteCreator: { id: 'creator1', name: 'Creator 1' },
+      };
+
+      const routerNavigatedAction = {
+        type: '[Router] Navigated',
+        payload: {
+          event: {
+            url: '/other-path',
+          },
+        },
+      };
+
+      expect(reducer(INITIAL_STATE, routerNavigatedAction)).toEqual({
+        ...INITIAL_STATE,
       });
     });
   });

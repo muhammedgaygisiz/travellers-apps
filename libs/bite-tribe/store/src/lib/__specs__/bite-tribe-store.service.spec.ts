@@ -400,4 +400,15 @@ describe('BiteTribeStoreService', () => {
       },
     ));
   });
+
+  describe('setEditingBite', () => {
+    it('should dispatch setEditingBite on BiteTribeStoreService', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        service.setEditingBite({} as any);
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
 });

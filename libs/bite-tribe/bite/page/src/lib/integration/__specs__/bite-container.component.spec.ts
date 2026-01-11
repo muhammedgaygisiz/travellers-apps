@@ -14,6 +14,7 @@ addNecessaryIcons();
 describe('BiteContainer', () => {
   let component: BiteContainer;
   let fixture: ComponentFixture<BiteContainer>;
+  let biteServiceMock: BiteService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -27,6 +28,7 @@ describe('BiteContainer', () => {
             position: signal(undefined),
             image: signal(undefined),
             submitNewBite: (): void => {},
+            setEditingBite: (): jest.Mock => jest.fn(),
           },
         },
       ],
@@ -34,9 +36,30 @@ describe('BiteContainer', () => {
 
     fixture = TestBed.createComponent(BiteContainer);
     component = fixture.componentInstance;
+    biteServiceMock = TestBed.inject(BiteService);
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('onPlaceChange', () => {
+    let setEditingBiteSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      setEditingBiteSpy = jest.spyOn(biteServiceMock, 'setEditingBite');
+    });
+
+    it('should call setEditingBite with updated place', () => {
+      const testPlace = 'Test Place';
+      const existingBite = { id: '123', place: 'Old Place' };
+      (biteServiceMock.cachedBite as any) = signal(existingBite);
+      component.onPlaceChange(testPlace);
+
+      expect(setEditingBiteSpy).toHaveBeenCalledWith({
+        id: '123',
+        place: testPlace,
+      });
+    });
   });
 });

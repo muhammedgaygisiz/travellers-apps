@@ -179,4 +179,23 @@ describe('Bite Reducer', () => {
       });
     });
   });
+
+  describe('setEditingBite', () => {
+    it('should set the editingBite in the state', () => {
+      const INITIAL_STATE = { ids: [], entities: {} };
+      const NEW_STATE = {
+        ids: [],
+        entities: {},
+        editingBite: { id: '1', name: 'Bite 1' } as Bite,
+      };
+
+      const setEditingBiteAction = BiteActions.setEditingBite({
+        bite: { id: '1', name: 'Bite 1' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, setEditingBiteAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
 });

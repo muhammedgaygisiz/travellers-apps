@@ -30,6 +30,7 @@ export class BiteContainer {
 
   onPlaceChange(place: string): void {
     const currentBite = this.service.cachedBite() || {};
-    this.service.setEditingBite({ ...currentBite, place });
+    const editingBiteWithCurrentPlace = { ...currentBite, place };
+    this.service.setEditingBite(editingBiteWithCurrentPlace);
   }
 }

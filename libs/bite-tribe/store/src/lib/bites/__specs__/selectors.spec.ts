@@ -456,6 +456,14 @@ describe('Bites Selectors', () => {
     });
   });
 
+  describe('nearbyBitesWithTags', () => {
+    it('should return empty array if no bites exist', () => {
+      const result = fromSelectors.nearbyBitesWithTags.projector([]);
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('tagSuggestionsForEditingBite', () => {
     it('should return tag suggestions based on editing bite place', () => {
       const bitesWithMetadata = [

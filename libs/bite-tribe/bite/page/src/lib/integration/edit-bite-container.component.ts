@@ -12,7 +12,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [bite]="service.bite()"
       [image]="service.image() || ''"
       [nearbyRestaurants]="service.nearbyRestaurants() || []"
+      [suggestedTags]="service.tagSuggestionsForEditingBite() || []"
       (submitBite)="service.submitEditedBite($event)"
+      (placeChange)="onPlaceChange($event)"
     />
   `,
   imports: [BitePage],
@@ -24,5 +26,12 @@ export class EditBiteContainer {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Edit Bite',
     });
+  }
+
+  onPlaceChange(place: string): void {
+    const currentBite = this.service.bite();
+    if (currentBite) {
+      this.service.setEditingBite({ ...currentBite, place });
+    }
   }
 }

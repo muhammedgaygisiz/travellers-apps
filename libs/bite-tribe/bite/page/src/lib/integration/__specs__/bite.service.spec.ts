@@ -12,6 +12,7 @@ const Mock = {
   navigateForward: jest.fn(),
   submitBite: jest.fn(),
   back: jest.fn(),
+  setEditingBite: jest.fn(),
 };
 
 jest.mock('localization');
@@ -60,6 +61,15 @@ describe('BiteService', () => {
       service.submitEditedBite(editedBite);
 
       expect(Mock.back).toHaveBeenCalled();
+    });
+  });
+
+  describe('setEditingBite', () => {
+    it('should set editing bite', () => {
+      const bite = { id: '123', name: 'Editing Bite' };
+      service.setEditingBite(bite);
+
+      expect(Mock.setEditingBite).toHaveBeenCalledWith(bite);
     });
   });
 });

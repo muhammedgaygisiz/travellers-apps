@@ -76,6 +76,7 @@
 
       <bt-tags-input
         [tags]="biteFormGroup.get('tags')?.value || []"
+        [suggestedTags]="suggestedTags()"
         (tagChanges)="setTags($event)"
       />
 

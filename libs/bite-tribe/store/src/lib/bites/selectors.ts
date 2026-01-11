@@ -29,6 +29,7 @@ import { sortByCriteria } from './utils/sort-by-criteria';
 import { byDistance } from './utils/by-distance';
 import { getUniqueRestaurantNames } from './utils/get-unique-restaurant-names';
 import { getNearbyBites } from './utils/get-nearby-bites';
+import { getNearbyRestaurantNamesByPosition } from './utils/get-nearby-restaurant-names-by-position';
 
 const slice = createFeatureSelector<
   EntityState<Bite> & {
@@ -183,17 +184,6 @@ export const bitesByUser = createSelector(
     bites.filter((bite) => bite.userId === biteCreator?.userId),
 );
 
-export const nearbyRestaurants = createSelector(
-  bitesWithMetadata,
-  gpsPosition,
-  (bites, gpsPosition) => {
-    if (!allBites || !gpsPosition) {
-      return [];
-    }
-
-    const nearbyBites = getNearbyBites(bites);
-    const restaurantNames = getUniqueRestaurantNames(nearbyBites);
-
-    return Array.from(restaurantNames).sort();
-  },
+export const nearbyRestaurants = createSelector(bitesWithMetadata, (bites) =>
+  getNearbyRestaurantNamesByPosition(bites),
 );

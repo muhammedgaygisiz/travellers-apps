@@ -19,7 +19,8 @@ export class MapService {
 
   selectedBucketlist = this.dataAccess.selectedBucketlist;
 
-  gpsPosition: Signal<Geopoint | null> = this.dataAccess.gpsPosition;
+  gpsPosition: Signal<Geopoint | null | undefined> =
+    this.dataAccess.gpsPosition;
   userId = this.dataAccess.userId;
   enableZoom = this.dataAccess.userHasSubscriptionTierOne;
 

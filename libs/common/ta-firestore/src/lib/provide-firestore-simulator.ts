@@ -26,7 +26,7 @@ export const provideFirestoreSimulator = (
 
   connectAuthEmulator(auth, emulators.authUrl, { disableWarnings: true });
   connectFirestoreEmulator(firestore, emulators.host, emulators.firestorePort);
-  connectStorageEmulator(storage, emulators?.host, emulators?.storagePort);
+  connectStorageEmulator(storage, emulators.host, emulators.storagePort);
 
   return [
     { provide: FIREBASE_APP, useFactory: () => app },

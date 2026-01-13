@@ -11,6 +11,7 @@
       }
     },
     "record": {
+      "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/firebase-simulator",
         "command": "firebase emulators:start --only auth,firestore,storage --import .firebase-export --export-on-exit .firebase-export"

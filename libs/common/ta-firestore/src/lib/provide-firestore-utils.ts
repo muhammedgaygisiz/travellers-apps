@@ -34,13 +34,19 @@ export const provideFirestoreUtils = (
   const app = initializeApp(firebaseOptions || {});
   const firestore: Firestore = initializeFirestore(app, {});
 
-  if (process.env['NX_APP_BITE_TRIBE_IS_DEV']) {
+  if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] === 'true') {
     console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
 
     console.log('DEV ENVIRONMENT - ', firebaseOptions);
 
-    const storage = getStorage(app);
-    return provideFirestoreSimulator(emulators, app, firestore, storage);
+    if (emulators) {
+      const storage = getStorage(app);
+      return provideFirestoreSimulator(emulators, app, firestore, storage);
+    }
+
+    console.warn(
+      'DEV ENVIRONMENT - NX_APP_BITE_TRIBE_IS_DEV is true, but no emulators configuration was provided. Falling back to standard Firestore initialization.',
+    );
   }
 
   enableMultiTabIndexedDbPersistence(firestore).catch((err) => {

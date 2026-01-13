@@ -7,7 +7,7 @@
       "lastLoginAt": "1768330790319",
       "passwordHash": "fakeHash:salt=fakeSalt0X2Qe62iMEaEn2ncHKRf:password=Test4711",
       "salt": "fakeSalt0X2Qe62iMEaEn2ncHKRf",
-      "passwordUpdatedAt": 1768329713573,
+      "passwordUpdatedAt": 1768332236882,
       "providerUserInfo": [
         {
           "providerId": "password",
@@ -16,11 +16,10 @@
           "rawId": "test@test.com"
         }
       ],
-      "validSince": "1768329713",
+      "validSince": "1768332236",
       "email": "test@test.com",
       "emailVerified": false,
-      "disabled": false,
-      "lastRefreshAt": "2026-01-13T18:59:50.319Z"
+      "disabled": false
     }
   ]
 }

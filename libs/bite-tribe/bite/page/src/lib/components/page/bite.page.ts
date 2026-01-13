@@ -167,9 +167,6 @@ export class BitePage {
 
   placeValueChange = toSignal(
     this.biteFormGroup.controls['place'].valueChanges.pipe(
-      tap((value) => {
-        console.log('Place value changed:', value);
-      }),
       debounceTime(300),
       distinctUntilChanged(),
       tap((place) => {

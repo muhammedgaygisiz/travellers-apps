@@ -19,7 +19,7 @@ const parameters = {
 };
 
 const decorators = [
-  componentWrapperDecorator((story) => {
+  componentWrapperDecorator((story: any) => {
     setNxGraphIframeHeight();
     return story;
   }),

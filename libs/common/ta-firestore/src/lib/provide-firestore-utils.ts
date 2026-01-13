@@ -10,31 +10,43 @@ import {
   Auth,
   getAuth,
   indexedDBLocalPersistence,
-  initializeAuth as fbInitializeAuth,
+  initializeAuth,
 } from 'firebase/auth';
 import { provideFirestoreAnalytics } from './analytics/provide-firestore-analytics';
+import { provideFirestoreSimulator } from './provide-firestore-simulator';
+import { Emulators } from 'utils';
 
 export const FIREBASE_APP = new InjectionToken<'FIREBASE_APP' | null>(
-  'FIREBASE_APP'
+  'FIREBASE_APP',
 );
 export const FIREBASE_FIRESTORE = new InjectionToken<Firestore>(
-  'FIREBASE_FIRESTORE'
+  'FIREBASE_FIRESTORE',
 );
 export const FIREBASE_AUTH = new InjectionToken<Auth>('FIREBASE_AUTH');
 
 export const provideFirestoreUtils = (
   firebaseOptions: FirebaseOptions,
-  withAnalytics?: boolean
+  withAnalytics?: boolean,
+  prod?: boolean,
+  emulators?: Emulators,
 ): Provider[] => {
   const app = initializeApp(firebaseOptions || {});
   const firestore: Firestore = initializeFirestore(app, {});
+
+  if (!prod) {
+    console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
+
+    console.log('DEV ENVIRONMENT - ', firebaseOptions);
+
+    return provideFirestoreSimulator(emulators, app, firestore);
+  }
 
   enableMultiTabIndexedDbPersistence(firestore).catch((err) => {
     console.warn('Firebase persistence error: ', err);
   });
 
   const auth: Auth = Capacitor.isNativePlatform()
-    ? fbInitializeAuth(app, { persistence: indexedDBLocalPersistence })
+    ? initializeAuth(app, { persistence: indexedDBLocalPersistence })
     : getAuth(app);
 
   const providers: Provider[] = [

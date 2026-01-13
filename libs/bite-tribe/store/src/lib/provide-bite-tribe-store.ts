@@ -147,5 +147,7 @@ export const provideBiteTribeStore = (environment: Environment): any => [
   provideFirestoreUtils(
     toFirebaseOptions(environment),
     !environment.isBusiness,
+    environment.production,
+    environment.emulators,
   ),
 ];

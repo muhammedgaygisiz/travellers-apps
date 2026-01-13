@@ -107,6 +107,9 @@ describe('App Reducer', () => {
       const NEW_STATE = {
         position: { latitude: 1, longitude: 2 },
         errorLoadingGpsPosition: true,
+        loading: {
+          home: false,
+        },
         reloading: {
           home: false,
         },

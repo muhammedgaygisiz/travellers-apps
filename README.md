@@ -19,11 +19,19 @@ npm install
 
 # Run the application locally:
 
+## Start the frontend application
+
 ```
 nx serve bite-tribe
 ```
 
 - The application will be available at [http://localhost:4200](http://localhost:4200)
+
+## Start firebase emulators for local development
+
+```
+nx serve firebase-simulator
+```
 
 # Howto setup a new page
 

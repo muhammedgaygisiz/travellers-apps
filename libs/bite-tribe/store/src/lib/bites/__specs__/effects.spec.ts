@@ -231,25 +231,60 @@ describe('BiteEffects', () => {
   });
 
   describe('saveEditedBiteToFirestore$', () => {
-    let saveEditedBiteSpy: SpyInstance;
+    describe('given a successful save call', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(apiService, 'saveEditedBite')
+          .mockReturnValue(of(BITE_MOCK) as any);
+      });
 
-    beforeEach(() => {
-      saveEditedBiteSpy = jest
-        .spyOn(apiService, 'saveEditedBite')
-        .mockImplementation();
+      it('should return savedBite on saveExistingBite', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BiteActions.saveExistingBite({
+              bite: {} as Bite,
+            }),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BiteActions.savedBite({ bite: BITE_MOCK }),
+          };
+
+          expectObservable(effects.saveEditedBiteToFirestore$).toBe(
+            expected,
+            output,
+          );
+        });
+      });
     });
 
-    it('should run saveEditedBite on saveExistingBite', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: BiteActions.saveExistingBite({
-            bite: {} as Bite,
-          }),
-        });
+    describe('given an erroneous save call', () => {
+      it('should return errorSavingBite on saveExistingBite', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          jest
+            .spyOn(apiService, 'saveEditedBite')
+            .mockReturnValue(
+              cold('#', {}, new Error('Error saving bite')) as any,
+            );
 
-        expectObservable(effects.saveEditedBiteToFirestore$);
+          actions$ = cold('a', {
+            a: BiteActions.saveExistingBite({
+              bite: {} as Bite,
+            }),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BiteActions.errorSavingBite({ bite: {} as Bite }),
+          };
+
+          expectObservable(effects.saveEditedBiteToFirestore$).toBe(
+            expected,
+            output,
+          );
+        });
       });
-      expect(saveEditedBiteSpy).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -80,17 +80,17 @@ export class BiteEffects {
     );
   });
 
-  saveEditedBiteToFirestore$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(BiteActions.saveExistingBite),
-        tap(({ bite }) => {
-          this.api.saveEditedBite(bite);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+  saveEditedBiteToFirestore$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BiteActions.saveExistingBite),
+      switchMap(({ bite }) => {
+        return from(this.api.saveEditedBite(bite)).pipe(
+          map((bite) => BiteActions.savedBite({ bite })),
+          catchError((err) => of(BiteActions.errorSavingBite({ bite }))),
+        );
+      }),
+    );
+  });
 
   deleteBite$ = createEffect(() => {
     return this.actions$.pipe(

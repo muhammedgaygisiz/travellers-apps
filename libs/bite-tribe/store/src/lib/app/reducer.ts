@@ -55,6 +55,10 @@ export const reducer = createReducer<AppSlice>(
     reloading: {
       home: false,
     },
+    loading: {
+      ...state.loading,
+      home: false,
+    },
     errorLoadingGpsPosition: true,
   })),
   on(AppActions.clearGPSError, (state) => ({

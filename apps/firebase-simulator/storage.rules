@@ -1,0 +1,10 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      // WARNING: Development/simulator-only rules. Do NOT use these permissive
+      // rules in production, as they allow unrestricted read and write access.
+      allow read, write: if true;
+    }
+  }
+}

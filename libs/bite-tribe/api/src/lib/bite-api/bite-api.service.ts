@@ -64,12 +64,16 @@ export class BiteApiService {
     return authState?.user;
   }
 
-  public async saveEditedBite(bite: Bite): Promise<void> {
+  public async saveEditedBite(bite: Bite): Promise<Bite> {
     try {
       await saveEditedBite(this.isWeb(), bite);
+
+      return await loadBiteById(bite.id);
     } catch (error) {
       console.error('Error saving edited bite:', error);
       this.errorHandler.handleError(error);
+
+      throw error;
     }
   }
 

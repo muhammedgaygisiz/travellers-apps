@@ -17,6 +17,12 @@ export const environment = {
     ],
     defaultLang: SupportedLang.EN,
   },
+  emulators: {
+    host: 'localhost',
+    firestorePort: 8080,
+    storagePort: 9199,
+    authUrl: 'http://localhost:9099',
+  },
 };
 
 /*

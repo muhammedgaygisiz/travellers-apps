@@ -1,0 +1,10 @@
+{
+  "name": "firebase-simulator",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/firebase-simulator/src",
+  "targets": {
+    "serve": {
+      "command": "firebase --version"
+    }
+  }
+}

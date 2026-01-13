@@ -19,6 +19,11 @@ npm install
 
 # Run the application locally:
 
+If you start the application like described below, it will connect to the real firebase.
+
+It is recommended to use the firebase emulators for local development (see below). For that,
+set the environment variable `NX_APP_BITE_TRIBE_IS_DEV` to `true` in the `.env` file.
+
 ## Start the frontend application
 
 ```

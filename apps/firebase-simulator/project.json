@@ -4,7 +4,11 @@
   "sourceRoot": "apps/firebase-simulator/src",
   "targets": {
     "serve": {
-      "command": "firebase --version"
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/firebase-simulator",
+        "command": "firebase emulators:start --only auth,firestore,storage --import .firebase-export --export-on-exit .firebase-export"
+      }
     }
   }
 }

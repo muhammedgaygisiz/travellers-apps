@@ -12,6 +12,8 @@ import {
   indexedDBLocalPersistence,
   initializeAuth,
 } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
+
 import { provideFirestoreAnalytics } from './analytics/provide-firestore-analytics';
 import { provideFirestoreSimulator } from './provide-firestore-simulator';
 import { Emulators } from 'utils';
@@ -27,18 +29,18 @@ export const FIREBASE_AUTH = new InjectionToken<Auth>('FIREBASE_AUTH');
 export const provideFirestoreUtils = (
   firebaseOptions: FirebaseOptions,
   withAnalytics?: boolean,
-  prod?: boolean,
   emulators?: Emulators,
 ): Provider[] => {
   const app = initializeApp(firebaseOptions || {});
   const firestore: Firestore = initializeFirestore(app, {});
 
-  if (!prod) {
+  if (process.env['NX_APP_BITE_TRIBE_IS_DEV']) {
     console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
 
     console.log('DEV ENVIRONMENT - ', firebaseOptions);
 
-    return provideFirestoreSimulator(emulators, app, firestore);
+    const storage = getStorage(app);
+    return provideFirestoreSimulator(emulators, app, firestore, storage);
   }
 
   enableMultiTabIndexedDbPersistence(firestore).catch((err) => {

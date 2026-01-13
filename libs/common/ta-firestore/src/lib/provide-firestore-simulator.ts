@@ -8,6 +8,8 @@ import {
 } from './provide-firestore-utils';
 import { FirebaseApp } from '@firebase/app';
 import { connectFirestoreEmulator, Firestore } from 'firebase/firestore';
+import { connectStorageEmulator } from 'firebase/storage';
+import { FirebaseStorage } from '@firebase/storage';
 
 export const provideFirestoreSimulator = (
   emulators: Emulators | undefined = {
@@ -18,11 +20,13 @@ export const provideFirestoreSimulator = (
   },
   app: FirebaseApp,
   firestore: Firestore,
+  storage: FirebaseStorage,
 ): Provider[] => {
   const auth = getAuth();
 
   connectAuthEmulator(auth, emulators.authUrl, { disableWarnings: true });
   connectFirestoreEmulator(firestore, emulators.host, emulators.firestorePort);
+  connectStorageEmulator(storage, emulators?.host, emulators?.storagePort);
 
   return [
     { provide: FIREBASE_APP, useFactory: () => app },

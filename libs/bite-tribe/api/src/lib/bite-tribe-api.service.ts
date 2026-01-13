@@ -121,8 +121,8 @@ export class BiteTribeApiService {
     return this.profileApiService.getUserByBiteId(bite);
   }
 
-  saveEditedBite(bite: any): void {
-    this.biteApiService.saveEditedBite(bite);
+  saveEditedBite(bite: any): Promise<Bite> {
+    return this.biteApiService.saveEditedBite(bite);
   }
 
   saveNewBite(bite: any): Promise<Bite> {

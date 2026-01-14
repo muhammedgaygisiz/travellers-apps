@@ -35,7 +35,7 @@
     },
     {
       "target": "bite-tribe-storybook",
-      "public": "dist/storybook",
+      "public": "dist/apps/storybook-host",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {

@@ -107,7 +107,7 @@
     "@nx/jest": "22.3.3",
     "@nx/js": "22.3.3",
     "@nx/playwright": "22.3.3",
-    "@nx/storybook": "22.3.3",
+    "@nx/storybook": "^22.3.3",
     "@nx/web": "22.3.3",
     "@nx/workspace": "22.3.3",
     "@nxext/capacitor": "21.0.0",

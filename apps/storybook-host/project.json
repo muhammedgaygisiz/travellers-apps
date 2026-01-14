@@ -86,7 +86,13 @@
         "port": 4400,
         "configDir": "apps/storybook-host/.storybook",
         "browserTarget": "storybook-host:build-storybook",
-        "compodoc": false
+        "compodoc": false,
+        "stylePreprocessorOptions": {
+          "includePaths": [
+            "apps/bite-tribe/src/theme",
+            "libs/bite-tribe-common/styles"
+          ]
+        }
       },
       "configurations": {
         "ci": {

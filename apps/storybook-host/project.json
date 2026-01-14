@@ -87,6 +87,12 @@
         "configDir": "apps/storybook-host/.storybook",
         "browserTarget": "storybook-host:build-storybook",
         "compodoc": false,
+        "styles": [
+          "apps/bite-tribe/src/theme/variables.scss",
+          "apps/bite-tribe/src/global.scss",
+          "apps/bite-tribe-business/src/theme/variables.scss",
+          "apps/bite-tribe-business/src/global.scss"
+        ],
         "stylePreprocessorOptions": {
           "includePaths": [
             "apps/bite-tribe/src/theme",

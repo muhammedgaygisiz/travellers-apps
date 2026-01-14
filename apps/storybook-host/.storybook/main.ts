@@ -6,6 +6,12 @@ const config: StorybookConfig = {
     '../../../libs/**/src/lib/**/*.stories.ts',
   ],
   addons: [],
+  staticDirs: [
+    {
+      from: '../../../apps/bite-tribe/src/assets/',
+      to: '/assets/',
+    },
+  ],
   framework: {
     name: '@storybook/angular',
     options: {},

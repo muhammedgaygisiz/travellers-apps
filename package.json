@@ -8,7 +8,7 @@
     "commitizen": "commitizen",
     "husky": "husky",
     "nx": "nx",
-    "nxgraph-html": "nx graph --file=libs/storybook-host/src/assets/temp/nxgraph.html",
+    "nxgraph-html": "nx graph --file=apps/storybook-host/src/assets/temp/nxgraph.html",
     "loki": "nx loki",
     "start": "nx serve",
     "build": "nx build",

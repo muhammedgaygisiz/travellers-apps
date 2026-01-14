@@ -8,6 +8,10 @@ const config: StorybookConfig = {
   addons: [],
   staticDirs: [
     {
+      from: '../src/assets/',
+      to: '/assets/',
+    },
+    {
       from: '../../../apps/bite-tribe/src/assets/',
       to: '/assets/',
     },

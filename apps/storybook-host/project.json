@@ -20,7 +20,18 @@
             "input": "apps/storybook-host/public"
           }
         ],
-        "styles": ["apps/storybook-host/src/styles.scss"]
+        "styles": [
+          "apps/bite-tribe/src/theme/variables.scss",
+          "apps/bite-tribe/src/global.scss",
+          "apps/bite-tribe-business/src/theme/variables.scss",
+          "apps/bite-tribe-business/src/global.scss"
+        ],
+        "stylePreprocessorOptions": {
+          "includePaths": [
+            "apps/bite-tribe/src/theme",
+            "libs/bite-tribe-common/styles"
+          ]
+        }
       },
       "configurations": {
         "production": {
@@ -46,39 +57,8 @@
       },
       "defaultConfiguration": "production"
     },
-    "serve": {
-      "continuous": true,
-      "executor": "@angular/build:dev-server",
-      "configurations": {
-        "production": {
-          "buildTarget": "storybook-host:build:production"
-        },
-        "development": {
-          "buildTarget": "storybook-host:build:development"
-        }
-      },
-      "defaultConfiguration": "development"
-    },
     "lint": {
       "executor": "@nx/eslint:lint"
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "apps/storybook-host/jest.config.cts",
-        "tsConfig": "apps/storybook-host/tsconfig.spec.json"
-      }
-    },
-    "serve-static": {
-      "continuous": true,
-      "executor": "@nx/web:file-server",
-      "options": {
-        "buildTarget": "storybook-host:build",
-        "port": 4200,
-        "staticFilePath": "dist/apps/storybook-host/browser",
-        "spa": true
-      }
     },
     "storybook": {
       "executor": "@storybook/angular:start-storybook",
@@ -112,8 +92,20 @@
       "options": {
         "outputDir": "dist/storybook/storybook-host",
         "configDir": "apps/storybook-host/.storybook",
-        "browserTarget": "storybook-host:build-storybook",
-        "compodoc": false
+        "browserTarget": "storybook-host:build",
+        "compodoc": false,
+        "styles": [
+          "apps/bite-tribe/src/theme/variables.scss",
+          "apps/bite-tribe/src/global.scss",
+          "apps/bite-tribe-business/src/theme/variables.scss",
+          "apps/bite-tribe-business/src/global.scss"
+        ],
+        "stylePreprocessorOptions": {
+          "includePaths": [
+            "apps/bite-tribe/src/theme",
+            "libs/bite-tribe-common/styles"
+          ]
+        }
       },
       "configurations": {
         "ci": {

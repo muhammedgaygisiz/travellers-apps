@@ -119,6 +119,48 @@ describe(EditProfilePage.name, () => {
     });
   });
 
+  describe('profileEffect', () => {
+    describe('given a public user', () => {
+      it('should patch form values from publicUser input', () => {
+        const publicUser: PublicUser = {
+          displayName: 'Test User',
+          email: 'e@mail.com',
+          photoUrl: 'photo.jpg',
+          userId: 'user123',
+          city: 'Test City',
+          about: 'About me text',
+          public: true,
+        };
+
+        compRef.setInput('publicUser', publicUser);
+        fixture.detectChanges(); // Wait for afterRenderEffect to complete
+
+        expect(component.profileForm.value).toEqual({
+          about: 'About me text',
+          city: 'Test City',
+          displayName: 'Test User',
+          email: 'e@mail.com',
+          public: true,
+        });
+      });
+    });
+
+    describe('given no public user', () => {
+      it('should not modify form values', () => {
+        compRef.setInput('publicUser', undefined);
+        fixture.detectChanges(); // Wait for afterRenderEffect to complete
+
+        expect(component.profileForm.value).toEqual({
+          about: '',
+          city: '',
+          displayName: 'Anonymous',
+          email: '',
+          public: false,
+        });
+      });
+    });
+  });
+
   describe('userImage computed', () => {
     it('should return undefined when no user is provided', () => {
       expect(component.userImage()).toBeUndefined();
@@ -248,6 +290,34 @@ describe(EditProfilePage.name, () => {
       component.saveProfile();
 
       expect(submitPublicUserEmitSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handlePubicChange', () => {
+    describe('given change to unchecked', () => {
+      it('should open confirmation dialog', () => {
+        const openConfirmationDialogSpy = jest.spyOn(
+          component,
+          'openConfirmationDialog',
+        );
+
+        component.handlePubicChange({ detail: { checked: false } } as any);
+
+        expect(openConfirmationDialogSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('given change to checked', () => {
+      it('should not open confirmation dialog', () => {
+        const openConfirmationDialogSpy = jest.spyOn(
+          component,
+          'openConfirmationDialog',
+        );
+
+        component.handlePubicChange({ detail: { checked: true } } as any);
+
+        expect(openConfirmationDialogSpy).not.toHaveBeenCalled();
+      });
     });
   });
 });

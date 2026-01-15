@@ -157,7 +157,7 @@ export class EditProfilePage {
     }
   }
 
-  protected handlePubicChange(
+  handlePubicChange(
     $event: IonToggleCustomEvent<ToggleChangeEventDetail>,
   ): void {
     if (!$event.detail.checked) {

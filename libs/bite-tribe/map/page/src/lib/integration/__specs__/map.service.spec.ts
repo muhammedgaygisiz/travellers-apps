@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { NavController } from '@ionic/angular/standalone';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { MapService } from '../map.service';
-import { Bite, Bucketlist, Geopoint } from 'model';
+import type { Bite, Bucketlist, Geopoint } from 'model';
 
 describe('MapService', () => {
   let service: MapService;

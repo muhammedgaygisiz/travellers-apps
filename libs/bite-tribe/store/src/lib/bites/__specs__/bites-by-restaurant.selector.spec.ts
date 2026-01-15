@@ -1,4 +1,4 @@
-import { Bite, Geopoint } from 'model';
+import type { Bite, Geopoint } from 'model';
 import { bitesByRestaurant } from '../bites-by-restaurant.selector';
 
 const getBitesByRestaurantNameMock = jest.fn();
@@ -47,7 +47,7 @@ describe('BitesByRestaurant Selectors', () => {
         [],
         '123',
         undefined,
-        mockBite1
+        mockBite1,
       );
       expect(result).toEqual([mockBite1]);
     });
@@ -57,7 +57,7 @@ describe('BitesByRestaurant Selectors', () => {
         [],
         '123',
         {} as any,
-        mockBite1
+        mockBite1,
       );
       expect(result).toEqual([mockBite1]);
     });

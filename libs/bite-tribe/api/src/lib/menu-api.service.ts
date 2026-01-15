@@ -10,10 +10,9 @@ import {
   skipWhile,
   Subject,
   switchMap,
-  takeUntil,
 } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { Menu } from 'model';
+import type { Menu } from 'model';
 
 export const MENU_COLLECTION = 'menus';
 

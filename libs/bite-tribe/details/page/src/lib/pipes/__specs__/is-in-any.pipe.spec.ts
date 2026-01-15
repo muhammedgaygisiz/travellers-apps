@@ -1,5 +1,5 @@
 import { IsInPipe } from '../is-in-any.pipe';
-import { Bite, Bucketlist } from 'model';
+import type { Bite, Bucketlist } from 'model';
 
 describe('IsInAnyPipe', () => {
   let pipe: IsInPipe;
@@ -49,13 +49,13 @@ describe('IsInAnyPipe', () => {
 
   it('should return "add-outline" when bucketlists is undefined', () => {
     expect(pipe.transform(mockBite, undefined as unknown as Bucketlist[])).toBe(
-      'add-outline'
+      'add-outline',
     );
   });
 
   it('should return "add-outline" when both bite and bucketlists are undefined', () => {
     expect(
-      pipe.transform(undefined, undefined as unknown as Bucketlist[])
+      pipe.transform(undefined, undefined as unknown as Bucketlist[]),
     ).toBe('add-outline');
   });
 });

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { ReviewApiService } from './review-api.service';
 import { RestaurantApiService } from './restaurant-api.service';
-import {
+import type {
   Bite,
   Bucketlist,
   CreateAndSaveToBucketListParams,
@@ -129,12 +129,8 @@ export class BiteTribeApiService {
     return this.biteApiService.saveNewBite(bite);
   }
 
-  deleteUser(): void {
-    this.profileApiService.deleteUser();
-  }
-
-  updateUser(publicUser: PublicUser): void {
-    this.profileApiService.updateUser(publicUser);
+  updateUser(publicUser: PublicUser): Promise<PublicUser | undefined> {
+    return this.profileApiService.updateUser(publicUser);
   }
 
   saveUser(): void {

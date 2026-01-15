@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { Bite, Like } from 'model';
+import { Bite, Like, PublicUser } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileDataAccessService {
@@ -26,6 +26,7 @@ export class ProfileDataAccessService {
   });
   biteCreator = toSignal(this.storeService.biteCreator$);
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
+  isPublicProfile = toSignal(this.storeService.isPublicProfile$);
 
   logout(): void {
     this.storeService.logout();
@@ -47,5 +48,9 @@ export class ProfileDataAccessService {
     }
 
     this.storeService.submitLikeClick(likeType);
+  }
+
+  savePublicProfile(publicUser: PublicUser): void {
+    this.storeService.savePublicProfile(publicUser);
   }
 }

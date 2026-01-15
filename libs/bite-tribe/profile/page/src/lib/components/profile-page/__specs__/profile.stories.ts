@@ -23,11 +23,11 @@ type Story = StoryObj<ProfileComponent>;
 export const Default: Story = {
   args: {
     user: {
+      userId: '1',
       about: "It's me, Mario!",
       city: 'Berne',
       displayName: 'Mo',
-      photoUrl:
-        'https://lh3.googleusercontent.com/a/ACg8ocKHFN9hwLoWCBJfmCvVTe7e52JATaD9YpcXPwQ6ucMTEiqOuarL=s96-c',
+      photoUrl: '',
     } as PublicUser,
     bites: [
       {
@@ -50,8 +50,19 @@ export const withoutBites: Story = {
       about: "It's me, Mario!",
       city: 'Berne',
       displayName: 'Mo',
-      photoUrl:
-        'https://lh3.googleusercontent.com/a/ACg8ocKHFN9hwLoWCBJfmCvVTe7e52JATaD9YpcXPwQ6ucMTEiqOuarL=s96-c',
+      photoUrl: '',
+    } as PublicUser,
+    bites: [],
+  },
+};
+
+export const ownProfile: Story = {
+  args: {
+    user: {
+      about: "It's me, Mario!",
+      city: 'Berne',
+      displayName: 'Mo',
+      photoUrl: '',
     } as PublicUser,
     bites: [],
   },

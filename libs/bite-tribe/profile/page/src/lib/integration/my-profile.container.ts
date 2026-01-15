@@ -4,6 +4,7 @@ import { ProfileComponent } from '../components/profile-page/profile.component';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
+  selector: 'my-profile-container',
   template: `
     <profile-page
       class="ion-page"
@@ -17,6 +18,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoSettings)="service.gotoSettings()"
       (gotoMyBucketlists)="service.gotoMyBucketlists()"
       (gotoMyBites)="service.gotoMyBites()"
+      (gotoEditProfile)="service.gotoEditProfile()"
       (likeButtonClick)="service.likeButtonClicked($event)"
     />
   `,

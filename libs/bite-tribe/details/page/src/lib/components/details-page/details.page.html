@@ -25,7 +25,7 @@
     />
 
     <div class="ion-padding">
-      @if (biteCreatorData) {
+      @if (biteCreatorData && biteCreatorData.public) {
       <div class="bite-creator-container">
         @if (biteCreatorData.photoUrl) {
         <img

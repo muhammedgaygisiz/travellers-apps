@@ -1,4 +1,4 @@
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { sortBitesByCreatedAt } from '../sort-bites-by-created-at';
 
 describe('sortBitesByCreatedAt', () => {

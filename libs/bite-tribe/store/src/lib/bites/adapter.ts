@@ -1,5 +1,5 @@
 import { createEntityAdapter } from '@ngrx/entity';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 export const adapter = createEntityAdapter<Bite>();
 

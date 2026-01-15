@@ -28,7 +28,7 @@ import {
   IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
 import { TypeaheadComponent } from '../type-ahead/type-ahead.component';

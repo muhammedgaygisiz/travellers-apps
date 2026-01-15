@@ -1,5 +1,5 @@
 import { createEntityAdapter, EntityState } from '@ngrx/entity';
-import { Bucketlist } from 'model';
+import type { Bucketlist } from 'model';
 
 export const adapter = createEntityAdapter<Bucketlist>();
 

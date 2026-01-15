@@ -1,6 +1,6 @@
 import * as fromSelectors from '../selectors';
 import { EntityState } from '@ngrx/entity';
-import { Bucketlist } from 'model';
+import type { Bucketlist } from 'model';
 
 const sortByCriteriaMock = jest.fn();
 jest.mock('../utils/sort-by-criteria', () => ({

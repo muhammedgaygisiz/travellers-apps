@@ -9,7 +9,7 @@ import {
   takeUntil,
 } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import {
+import type {
   CreateAndSaveToBucketListParams,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,

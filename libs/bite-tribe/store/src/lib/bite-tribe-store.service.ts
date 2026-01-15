@@ -30,7 +30,7 @@ import { MenuActions } from './menus/actions';
 import { AppActions } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
-import {
+import type {
   Bite,
   CreateAndSaveToBucketListParams,
   Like,
@@ -211,8 +211,8 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(AppActions.saveSettings({ settings }));
   }
 
-  savePublicProfile(publicUser: PublicUser): void {
-    this.store.dispatch(AppActions.savePublicProfile({ publicUser }));
+  savePublicProfile(profile: PublicUser): void {
+    this.store.dispatch(AppActions.savePublicProfile({ profile }));
   }
 
   saveReview(newReview: { review: string; biteId: string }): void {
@@ -262,14 +262,6 @@ export class BiteTribeStoreService implements StoreService {
 
   createBucketList(bucketlistName: string): void {
     this.store.dispatch(BucketlistActions.createBucketlist({ bucketlistName }));
-  }
-
-  goPublic(): void {
-    this.store.dispatch(AppActions.goPublic());
-  }
-
-  goPrivate(): void {
-    this.store.dispatch(AppActions.goPrivate());
   }
 
   setHomeSorting(sorting: string): void {

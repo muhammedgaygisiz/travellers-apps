@@ -1,5 +1,5 @@
 import { reducer } from '../reducer';
-import { Bucketlist } from 'model';
+import type { Bucketlist } from 'model';
 import { EntityState } from '@ngrx/entity';
 import { fromAuth } from 'ta-firestore';
 import { BucketlistActions } from '../actions';

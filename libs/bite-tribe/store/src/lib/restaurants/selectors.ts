@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
-import { Restaurant } from 'model';
+import type { Restaurant } from 'model';
 import { restaurantId } from '../router/selectors';
 import { adapter, RestaurantState } from './adapter';
 import { gpsPosition } from '../app/selectors';
@@ -27,13 +27,13 @@ export const restaurants = createSelector(
           restaurant.position.longitude,
           gpsPosition?.latitude,
           gpsPosition?.longitude,
-          'km'
+          'km',
         ),
       } as Restaurant;
     });
 
     const savedRestaurantNames = savedRestaurantsWithDistances.map(
-      (restaurant) => restaurant.name
+      (restaurant) => restaurant.name,
     );
 
     const unsavedRestaurants =
@@ -42,7 +42,7 @@ export const restaurants = createSelector(
         .reduce((uniqueRestaurants, bite) => {
           const existingRestaurant = uniqueRestaurants.find(
             (r) =>
-              r.name.toLowerCase().trim() === bite.place.toLowerCase().trim()
+              r.name.toLowerCase().trim() === bite.place.toLowerCase().trim(),
           );
 
           if (existingRestaurant && existingRestaurant.biteIds) {
@@ -55,7 +55,7 @@ export const restaurants = createSelector(
                 bite.position?.longitude,
                 gpsPosition?.latitude,
                 gpsPosition?.longitude,
-                'km'
+                'km',
               ),
               unsaved: true,
               biteIds: [bite.id], // Include the bite ID
@@ -64,11 +64,12 @@ export const restaurants = createSelector(
           return uniqueRestaurants;
         }, [] as Restaurant[])
         .filter(
-          (restaurant) => !savedRestaurantNames.includes(restaurant.name.trim())
+          (restaurant) =>
+            !savedRestaurantNames.includes(restaurant.name.trim()),
         ) || [];
 
     return [...savedRestaurantsWithDistances, ...unsavedRestaurants];
-  }
+  },
 );
 
 export const restaurant = createSelector(
@@ -86,18 +87,18 @@ export const restaurant = createSelector(
           foundRestaurantById.position?.longitude,
           gpsPosition?.latitude,
           gpsPosition?.longitude,
-          'km'
+          'km',
         ),
       };
     }
 
     return undefined;
-  }
+  },
 );
 
 const selectedRestaurantToCreate = createSelector(
   slice,
-  (slice) => slice.restaurantToCreate
+  (slice) => slice.restaurantToCreate,
 );
 
 export const restaurantToCreate = createSelector(
@@ -105,12 +106,12 @@ export const restaurantToCreate = createSelector(
   bites,
   (restaurantToCreate, bites) => {
     const bitesOfRestaurant = restaurantToCreate.biteIds?.map((biteId) =>
-      bites.find((b) => b.id === biteId)
+      bites.find((b) => b.id === biteId),
     );
 
     return {
       ...restaurantToCreate,
       bites: bitesOfRestaurant,
     } as Restaurant;
-  }
+  },
 );

@@ -1,5 +1,5 @@
 import { createEntityAdapter, EntityState } from '@ngrx/entity';
-import { Restaurant } from 'model';
+import type { Restaurant } from 'model';
 
 export const adapter = createEntityAdapter<Restaurant>();
 

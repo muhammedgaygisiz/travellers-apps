@@ -1,5 +1,5 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { PublicUser, Settings } from 'model';
+import type { PublicUser, Settings } from 'model';
 
 export const AppActions = createActionGroup({
   source: 'APP',
@@ -10,11 +10,11 @@ export const AppActions = createActionGroup({
     'Loaded GPS position': props<{ position: any }>(),
     'Error loading GPS position': props<{ error: any }>(),
     'Save settings': props<{ settings: Settings }>(),
-    'Save public profile': props<{ publicUser: PublicUser }>(),
+    'Save public profile': props<{ profile: PublicUser }>(),
+    'Saved public profile': props<{ profile: PublicUser }>(),
+    'Error saving public profile': emptyProps(),
     'Loaded settings from API': props<{ settings: Settings }>(),
     'Set public profile': props<{ profile: PublicUser }>(),
-    'Go public': emptyProps(),
-    'Go private': emptyProps(),
     'Loaded exchange rates from API': props<{
       exchangeRates: Record<string, number>;
     }>(),

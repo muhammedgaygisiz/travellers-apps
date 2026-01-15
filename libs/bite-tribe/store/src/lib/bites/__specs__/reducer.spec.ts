@@ -1,6 +1,6 @@
 import { reducer } from '../reducer';
 import { BiteActions } from '../actions';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { PATH } from 'utils';

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AppActions } from './actions';
-import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
+import { catchError, filter, from, map, of, switchMap, take, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -43,7 +43,7 @@ export class AppEffect {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),
       filter((payload) => !!payload.user),
-      switchMap(() => this.api.publicProfile$),
+      switchMap(() => this.api.publicProfile$.pipe(take(1))),
       map((profile) => AppActions.setPublicProfile({ profile })),
     );
   });
@@ -104,41 +104,23 @@ export class AppEffect {
     { dispatch: false },
   );
 
-  goPublicEffect$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AppActions.goPublic),
-        tap(() => {
-          this.api.saveUser();
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+  saveProfileToFirestore$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(AppActions.savePublicProfile),
+      switchMap(({ profile }) => {
+        return from(this.api.updateUser(profile)).pipe(
+          map((updatedUser) => {
+            if (updatedUser) {
+              return AppActions.savedPublicProfile({ profile: updatedUser });
+            }
 
-  saveProfileToFirestore$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AppActions.savePublicProfile),
-        tap(({ publicUser }) => {
-          this.api.updateUser(publicUser);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
-
-  goPrivateEffect$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AppActions.goPrivate),
-        tap(() => {
-          this.api.deleteUser();
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+            return AppActions.errorSavingPublicProfile();
+          }),
+          catchError(() => of(AppActions.errorSavingPublicProfile())),
+        );
+      }),
+    );
+  });
 
   reloadGpsOnPageChangeToCreateBite$ = createEffect(
     () => {

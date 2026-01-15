@@ -13,7 +13,7 @@ import { ToBlobUrlPipe } from 'image-compression';
 import { addNecessaryIcons } from 'utils';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { Platform } from '@ionic/angular';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
@@ -249,18 +249,18 @@ describe('DetailsPage', () => {
         await component.openNavigation();
         expect(window.open).toHaveBeenCalledWith(
           'maps://?daddr=10,20',
-          '_system'
+          '_system',
         );
       });
 
       it('should open Apple Maps if checking for Google Maps fails', async () => {
         (AppLauncher.canOpenUrl as jest.Mock).mockRejectedValue(
-          new Error('some error')
+          new Error('some error'),
         );
         await component.openNavigation();
         expect(window.open).toHaveBeenCalledWith(
           'maps://?daddr=10,20',
-          '_system'
+          '_system',
         );
       });
     });
@@ -273,7 +273,7 @@ describe('DetailsPage', () => {
       it('should open geo intent', async () => {
         await component.openNavigation();
         const expectedUrl = `geo:0,0?q=10,20(${encodeURIComponent(
-          mockBite.name
+          mockBite.name,
         )})`;
         expect(window.open).toHaveBeenCalledWith(expectedUrl, '_system');
       });
@@ -351,7 +351,7 @@ describe('DetailsPage', () => {
 
       // Find Apple Maps button
       const appleMapsButton = capturedButtons.find(
-        (btn) => btn.text === 'Apple Maps'
+        (btn) => btn.text === 'Apple Maps',
       );
       expect(appleMapsButton).toBeDefined();
 
@@ -361,7 +361,7 @@ describe('DetailsPage', () => {
       // Check if window.open was called with correct URL
       expect(window.open).toHaveBeenCalledWith(
         'maps://?daddr=10,20',
-        '_system'
+        '_system',
       );
     });
 
@@ -383,7 +383,7 @@ describe('DetailsPage', () => {
       await component.openNavigation();
 
       const googleMapsButton = capturedButtons.find(
-        (btn) => btn.text === 'Google Maps'
+        (btn) => btn.text === 'Google Maps',
       );
       expect(googleMapsButton).toBeDefined();
 
@@ -391,7 +391,7 @@ describe('DetailsPage', () => {
 
       expect(window.open).toHaveBeenCalledWith(
         'comgooglemaps://?daddr=10,20&directionsmode=driving',
-        '_system'
+        '_system',
       );
     });
   });

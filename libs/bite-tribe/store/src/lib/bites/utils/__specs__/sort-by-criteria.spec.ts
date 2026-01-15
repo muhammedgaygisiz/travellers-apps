@@ -1,5 +1,5 @@
 import { sortByCriteria } from '../sort-by-criteria';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 describe('sortByCriteria', () => {
   it('should return empty array if bites is null', () => {

@@ -1,9 +1,9 @@
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { normalize, getSimilarityScore } from 'utils';
 
 export const getBitesByRestaurantIdOrName = (
   normalizedRestaurantIdOrName: string,
-  bites: Bite[]
+  bites: Bite[],
 ): Bite[] =>
   bites.filter((bite) => {
     const normalizedBitePlace = normalize(bite.place);
@@ -15,7 +15,7 @@ export const getBitesByRestaurantIdOrName = (
     // Use fast-fuzzy to match restaurant names with a threshold
     const similarityScore = getSimilarityScore(
       normalizedBitePlace,
-      normalizedRestaurantIdOrName
+      normalizedRestaurantIdOrName,
     );
 
     return (

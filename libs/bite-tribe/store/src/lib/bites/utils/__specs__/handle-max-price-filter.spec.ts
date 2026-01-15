@@ -1,5 +1,5 @@
 import { handleMaxPriceFilter } from '../handle-max-price-filter';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 describe('handleMaxPriceFilter', () => {
   const exchangeRates = {

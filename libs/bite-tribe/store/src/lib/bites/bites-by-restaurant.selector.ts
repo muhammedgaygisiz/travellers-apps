@@ -6,7 +6,7 @@ import { normalize } from 'utils';
 import { getBitesByRestaurantName } from './utils/get-bites-by-restaurant-name';
 import { getBitesByRestaurantIdOrName } from './utils/get-bites-by-restaurant-id-or-name';
 import { getCloseBites } from './utils/get-close-bites';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 export const bitesByRestaurant = createSelector(
   bites,
@@ -26,7 +26,7 @@ export const bitesByRestaurant = createSelector(
       const bitesByRestaurant = getBitesByRestaurantName(
         normalizedRestaurantName,
         possiblyCloseBites,
-        restaurant.id
+        restaurant.id,
       );
 
       if (
@@ -45,13 +45,13 @@ export const bitesByRestaurant = createSelector(
 
       const bitesByRestaurantIdOrName = getBitesByRestaurantIdOrName(
         normalizedRestaurantIdOrName,
-        possiblyCloseBites
+        possiblyCloseBites,
       );
 
       if (
         sourceBite &&
         !bitesByRestaurantIdOrName.find(
-          (bite: Bite) => bite.id === sourceBite?.id
+          (bite: Bite) => bite.id === sourceBite?.id,
         )
       ) {
         return [sourceBite, ...bitesByRestaurantIdOrName];
@@ -61,5 +61,5 @@ export const bitesByRestaurant = createSelector(
     }
 
     return [];
-  }
+  },
 );

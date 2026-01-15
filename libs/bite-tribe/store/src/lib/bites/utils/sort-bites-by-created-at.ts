@@ -1,4 +1,4 @@
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 export const sortBitesByCreatedAt = (bites: Bite[]): Bite[] => {
   return bites.sort((a, b) => {

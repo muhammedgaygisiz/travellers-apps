@@ -1,11 +1,11 @@
 import { Photo } from '@capacitor/camera';
-import { Geopoint } from 'model';
+import type { Geopoint } from 'model';
 
 const normalizeGps = (
   lat: number,
   latRef: string,
   lon: number,
-  lonRef: string
+  lonRef: string,
 ): { latitude: number; longitude: number } => {
   const latitude = latRef === 'S' ? -lat : lat;
   const longitude = lonRef === 'W' ? -lon : lon;
@@ -17,7 +17,7 @@ export const getExifDataFromPhoto = (
   fallbackPosition: Geopoint = {
     latitude: 0,
     longitude: 0,
-  }
+  },
 ): Geopoint => {
   if (!photo || !photo.exif) {
     return fallbackPosition;
@@ -37,7 +37,7 @@ export const getExifDataFromPhoto = (
       exifGps.Latitude,
       exifGps.LatitudeRef,
       exifGps.Longitude,
-      exifGps.LongitudeRef
+      exifGps.LongitudeRef,
     );
   }
 

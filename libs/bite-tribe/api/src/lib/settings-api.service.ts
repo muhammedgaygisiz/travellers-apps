@@ -8,7 +8,7 @@ import {
   switchMap,
   takeUntil,
 } from 'rxjs';
-import { Settings } from 'model';
+import type { Settings } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
@@ -22,7 +22,7 @@ export class SettingsApiService {
   private readonly stopped$ = new Subject<void>();
 
   private readonly settingsChannel$ = new BehaviorSubject<Settings>(
-    {} as Settings
+    {} as Settings,
   );
 
   public settings$ = this.authService.isLoggedIn$.pipe(
@@ -32,7 +32,7 @@ export class SettingsApiService {
       this.startSettingsListener();
 
       return this.settingsChannel$.pipe(skip(1), takeUntil(this.stopped$));
-    })
+    }),
   );
 
   private async startSettingsListener(): Promise<void> {
@@ -45,7 +45,7 @@ export class SettingsApiService {
 
         const settings = settingsDoc?.snapshot.data as any;
         this.settingsChannel$.next(settings);
-      }
+      },
     );
   }
 

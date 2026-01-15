@@ -52,7 +52,7 @@ const getBadgeColor = (biteCount: number): string => {
 export class ProfileComponent {
   isAuthenticated = input(false);
   user = input<PublicUser>();
-  bites = input<any[]>();
+  bites = input<Bite[]>();
   userId = input<string>();
   subscriptionTier = input<number>(0);
 
@@ -61,6 +61,7 @@ export class ProfileComponent {
   readonly gotoMyBucketlists = output();
   readonly gotoMyBites = output();
   readonly gotoMyProfile = output();
+  readonly gotoEditProfile = output();
 
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();

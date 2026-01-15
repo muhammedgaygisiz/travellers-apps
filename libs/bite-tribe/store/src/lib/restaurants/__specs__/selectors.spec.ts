@@ -42,19 +42,19 @@ describe('restaurant Selectors', () => {
       const result = restaurants.projector(
         state.restaurants,
         state.gpsPosition,
-        state.bites
+        state.bites,
       );
 
       expect(result.length).toBe(3);
 
       const savedRestaurant1 = result.find(
-        (r) => r.name === 'Saved Restaurant 1'
+        (r) => r.name === 'Saved Restaurant 1',
       );
       const savedRestaurant2 = result.find(
-        (r) => r.name === 'Saved Restaurant 2'
+        (r) => r.name === 'Saved Restaurant 2',
       );
       const unsavedRestaurant1 = result.find(
-        (r) => r.name === 'Unsaved Restaurant 1'
+        (r) => r.name === 'Unsaved Restaurant 1',
       );
 
       expect(savedRestaurant1).toBeDefined();
@@ -77,7 +77,7 @@ describe('restaurant Selectors', () => {
       const result = restaurants.projector(
         state.restaurants,
         state.gpsPosition,
-        state.bites
+        state.bites,
       );
 
       expect(result.length).toBe(0);
@@ -106,16 +106,16 @@ describe('restaurant Selectors', () => {
       const result = restaurants.projector(
         state.restaurants,
         state.gpsPosition,
-        state.bites
+        state.bites,
       );
 
       expect(result.length).toBe(2);
 
       const savedRestaurant1 = result.find(
-        (r) => r.name === 'Saved Restaurant 1'
+        (r) => r.name === 'Saved Restaurant 1',
       );
       const unsavedRestaurant1 = result.find(
-        (r) => r.name === 'Unsaved Restaurant 1'
+        (r) => r.name === 'Unsaved Restaurant 1',
       );
 
       expect(savedRestaurant1).toBeDefined();
@@ -148,7 +148,7 @@ describe('restaurant Selectors', () => {
       const result = restaurant.projector(
         '1',
         state.restaurants,
-        state.gpsPosition
+        state.gpsPosition,
       );
 
       expect(result).toBeDefined();
@@ -171,7 +171,7 @@ describe('restaurant Selectors', () => {
       const result = restaurant.projector(
         'nonexistent-id',
         state.restaurants,
-        state.gpsPosition
+        state.gpsPosition,
       );
 
       expect(result).toBeUndefined();
@@ -192,7 +192,7 @@ describe('restaurant Selectors', () => {
       const result = restaurant.projector(
         '1',
         state.restaurants,
-        state.gpsPosition
+        state.gpsPosition,
       );
 
       expect(result).toBeUndefined();
@@ -217,6 +217,58 @@ describe('restaurant Selectors', () => {
         latitude: 51.5074,
         longitude: -0.1278,
       });
+    });
+
+    it('should include bites of restaurant', () => {
+      const state: any = {
+        restaurantToCreate: {
+          name: 'New Restaurant',
+          position: { latitude: 51.5074, longitude: -0.1278 },
+          biteIds: ['b1', 'b2'],
+        },
+        bites: [
+          {
+            id: 'b1',
+            place: 'New Restaurant',
+            position: { latitude: 51.5074, longitude: -0.1278 },
+            restaurantId: null,
+          },
+          {
+            id: 'b2',
+            place: 'New Restaurant',
+            position: { latitude: 51.5074, longitude: -0.1278 },
+            restaurantId: null,
+          },
+          {
+            id: 'b3',
+            place: 'Other Place',
+            position: { latitude: 40.7128, longitude: -74.006 },
+            restaurantId: null,
+          },
+        ],
+      };
+
+      const result = restaurantToCreate.projector(
+        state.restaurantToCreate,
+        state.bites,
+      );
+
+      expect(result).toBeDefined();
+      expect(result?.bites?.length).toBe(2);
+      expect(result?.bites).toEqual([
+        {
+          id: 'b1',
+          place: 'New Restaurant',
+          position: { latitude: 51.5074, longitude: -0.1278 },
+          restaurantId: null,
+        },
+        {
+          id: 'b2',
+          place: 'New Restaurant',
+          position: { latitude: 51.5074, longitude: -0.1278 },
+          restaurantId: null,
+        },
+      ]);
     });
   });
 });

@@ -1,9 +1,9 @@
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { haversineDistance } from 'utils';
 
 export const getCloseBites = (
   sourceBite: Bite | undefined,
-  bites: Bite[]
+  bites: Bite[],
 ): Bite[] => {
   if (sourceBite) {
     const sourceBitePosition = sourceBite.position;
@@ -20,8 +20,8 @@ export const getCloseBites = (
           sourceBitePosition.longitude,
           bitePosition.latitude,
           bitePosition.longitude,
-          'm'
-        )
+          'm',
+        ),
       );
 
       return distance <= 200; // 200 meters

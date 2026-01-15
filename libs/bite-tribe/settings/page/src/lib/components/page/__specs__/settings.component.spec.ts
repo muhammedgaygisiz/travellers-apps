@@ -7,26 +7,30 @@ import { PublicUser, Settings } from 'model';
 
 jest.mock('localization');
 
-describe('PageSettings', () => {
+const setupMockForWindowMatchMedia = (value?: boolean): void => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: value ?? false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+};
+
+describe(PageSettings.name, () => {
   let component: PageSettings;
   let fixture: ComponentFixture<PageSettings>;
   let compRef: ComponentRef<PageSettings>;
 
   beforeEach(() => {
     // Mock window.matchMedia
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: jest.fn().mockImplementation((query) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-      })),
-    });
+    setupMockForWindowMatchMedia(false);
 
     TestBed.configureTestingModule({
       providers: [provideIonicAngular(getIonicConfig())],
@@ -52,14 +56,7 @@ describe('PageSettings', () => {
         theme: 'light',
         currency: 'EUR',
         nearby: 2000,
-        city: '',
-        displayName: 'Anonymous',
-        about: '',
       });
-    });
-
-    it('should have about field in the form', () => {
-      expect(component.settingsForm.contains('about')).toBe(true);
     });
 
     it('should mark form as pristine initially', () => {
@@ -67,50 +64,9 @@ describe('PageSettings', () => {
     });
   });
 
-  describe('About field', () => {
-    it('should update form when about value changes', () => {
-      const aboutText = 'This is my about section';
-      component.settingsForm.patchValue({ about: aboutText });
-
-      expect(component.settingsForm.value.about).toBe(aboutText);
-    });
-
-    it('should mark form as dirty when about is changed', () => {
-      const aboutControl = component.settingsForm.get('about');
-      aboutControl?.setValue('Test about');
-      aboutControl?.markAsDirty();
-
-      expect(component.settingsForm.dirty).toBe(true);
-    });
-
-    it('should patch about field from publicUser input', () => {
-      const publicUser: PublicUser = {
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'photo.jpg',
-        userId: 'user123',
-        city: 'Test City',
-        about: 'About me text',
-        public: true,
-      };
-
-      compRef.setInput('publicUser', publicUser);
-      fixture.detectChanges();
-
-      // Wait for afterRenderEffect to complete
-      setTimeout(() => {
-        expect(component.settingsForm.value.about).toBe('About me text');
-      }, 100);
-    });
-
-    it('should handle empty about field', () => {
-      component.settingsForm.patchValue({ about: '' });
-
-      expect(component.settingsForm.value.about).toBe('');
-    });
-  });
-
   describe('saveSettings', () => {
+    let submitSettingsEmitSpy: jest.SpyInstance;
+
     beforeEach(() => {
       const mockPublicUser: PublicUser = {
         displayName: 'Test User',
@@ -120,97 +76,113 @@ describe('PageSettings', () => {
         public: true,
       };
       compRef.setInput('publicUser', mockPublicUser);
-      compRef.setInput('isPublicProfile', true);
+
+      submitSettingsEmitSpy = jest.spyOn(component.submitSettings, 'emit');
     });
 
-    it('should include about field when saving public user', () => {
-      const aboutText = 'My bio';
-      component.settingsForm.patchValue({
-        about: aboutText,
-        city: 'Berlin',
-        displayName: 'New Name',
-      });
-
-      let emittedPublicUser: PublicUser | undefined;
-      component.submitPublicUser.subscribe((user) => {
-        emittedPublicUser = user;
-      });
-
-      component.saveSettings();
-
-      expect(emittedPublicUser).toBeDefined();
-      expect(emittedPublicUser?.about).toBe(aboutText);
-    });
-
-    it('should save empty string for about when not provided', () => {
-      component.settingsForm.patchValue({
-        city: 'Berlin',
-      });
-
-      let emittedPublicUser: PublicUser | undefined;
-      component.submitPublicUser.subscribe((user) => {
-        emittedPublicUser = user;
-      });
-
-      component.saveSettings();
-
-      expect(emittedPublicUser).toBeDefined();
-      expect(emittedPublicUser?.about).toBe('');
-    });
-
-    it('should not save if form is invalid', () => {
-      component.settingsForm.patchValue({ nearby: -1 }); // Invalid value
-      component.settingsForm.markAsDirty();
-
-      let submitCalled = false;
-      component.submitPublicUser.subscribe(() => {
-        submitCalled = true;
-      });
-
-      component.saveSettings();
-
-      expect(submitCalled).toBe(false);
-    });
-
-    it('should emit settings without about field', () => {
-      component.settingsForm.patchValue({
+    it('should emit submitSettings with form values', () => {
+      const mockSettings: Settings = {
+        pushNotifications: true,
+        emailUpdates: false,
         theme: 'dark',
         currency: 'USD',
         nearby: 5000,
-        about: 'This should not be in settings',
-      });
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
 
-      let emittedSettings: Settings | undefined;
-      component.submitSettings.subscribe((settings) => {
-        emittedSettings = settings;
+      component.settingsForm.setValue({
+        pushNotifications: mockSettings.pushNotifications,
+        emailUpdates: mockSettings.emailUpdates,
+        theme: mockSettings.theme,
+        currency: mockSettings.currency,
+        nearby: mockSettings.nearby,
       });
 
       component.saveSettings();
 
-      expect(emittedSettings).toBeDefined();
-      expect(emittedSettings).not.toHaveProperty('about');
-      expect(emittedSettings?.theme).toBe('dark');
-      expect(emittedSettings?.currency).toBe('USD');
+      expect(submitSettingsEmitSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not emit if form is invalid', () => {
+      component.settingsForm.patchValue({ nearby: 0 }); // Invalid value
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should emit currency from form if provided', () => {
+      const mockCurrency = 'JPY';
+
+      component.settingsForm.patchValue({ currency: mockCurrency });
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ currency: mockCurrency }),
+      );
+    });
+
+    it('should emit default currency if none provided in form', () => {
+      component.settingsForm.patchValue({ currency: '' });
+
+      jest.spyOn(component.settingsForm, 'valid', 'get').mockReturnValue(true);
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ currency: 'EUR' }),
+      );
+    });
+
+    it('should emit nearby from form if provided', () => {
+      const mockNearby = 1500;
+
+      component.settingsForm.patchValue({ nearby: mockNearby });
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ nearby: mockNearby }),
+      );
+    });
+
+    it('should emit default nearby if none provided in form', () => {
+      component.settingsForm.patchValue({ nearby: undefined as any });
+
+      jest.spyOn(component.settingsForm, 'valid', 'get').mockReturnValue(true);
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ nearby: 50 }),
+      );
     });
   });
 
-  describe('displayName computed', () => {
-    it('should return "Anonymous" when no user or publicUser is provided', () => {
-      expect(component.displayName()).toBe('Anonymous');
+  describe('calculateTheme', () => {
+    describe('given no theme', () => {
+      it('should return dark when systemTheme is dark', () => {
+        component.systemTheme.set('dark');
+
+        expect(component.calculateTheme(null)).toBe('dark');
+      });
+
+      it('should return light when systemTheme is light', () => {
+        component.systemTheme.set('light');
+
+        expect(component.calculateTheme(null)).toBe('light');
+      });
     });
 
-    it('should return publicUser displayName when available', () => {
-      const publicUser: PublicUser = {
-        displayName: 'Public Name',
-        email: 'test@example.com',
-        photoUrl: 'photo.jpg',
-        userId: 'user123',
-        public: true,
-      };
+    describe('given a theme', () => {
+      it('should return dark when theme is dark', () => {
+        expect(component.calculateTheme('dark')).toBe('dark');
+      });
 
-      compRef.setInput('publicUser', publicUser);
-
-      expect(component.displayName()).toBe('Public Name');
+      it('should return light when theme is light', () => {
+        expect(component.calculateTheme('light')).toBe('light');
+      });
     });
   });
 
@@ -237,36 +209,6 @@ describe('PageSettings', () => {
     });
   });
 
-  describe('userImage computed', () => {
-    it('should return undefined when no user is provided', () => {
-      expect(component.userImage()).toBeUndefined();
-    });
-
-    it('should return photoUrl from user when available', () => {
-      const user = {
-        photoUrl: 'https://example.com/photo.jpg',
-        providerData: [],
-      };
-
-      compRef.setInput('user', user);
-
-      expect(component.userImage()).toBe('https://example.com/photo.jpg');
-    });
-
-    it('should return photoUrl from providerData when user photoUrl is not available', () => {
-      const user = {
-        photoUrl: null,
-        providerData: [{ photoUrl: 'https://example.com/provider-photo.jpg' }],
-      };
-
-      compRef.setInput('user', user);
-
-      expect(component.userImage()).toBe(
-        'https://example.com/provider-photo.jpg',
-      );
-    });
-  });
-
   describe('Form validation', () => {
     it('should be valid with default values', () => {
       expect(component.settingsForm.valid).toBe(true);
@@ -276,54 +218,6 @@ describe('PageSettings', () => {
       component.settingsForm.patchValue({ nearby: 0 });
 
       expect(component.settingsForm.valid).toBe(false);
-    });
-
-    it('should be valid with about field populated', () => {
-      component.settingsForm.patchValue({ about: 'Some text' });
-
-      expect(component.settingsForm.valid).toBe(true);
-    });
-  });
-
-  describe('openConfirmationDialog', () => {
-    it('should set isOpen to true', () => {
-      component.openConfirmationDialog();
-
-      expect(component.isOpen()).toBe(true);
-    });
-  });
-
-  describe('handleGoPrivateConfirmation', () => {
-    it('should emit goPrivate when role is GO_PRIVATE', () => {
-      let emitted = false;
-      component.goPrivate.subscribe(() => {
-        emitted = true;
-      });
-
-      const event = {
-        detail: { role: 'go-private' },
-      } as CustomEvent<{ role: string }>;
-
-      component.handleGoPrivateConfirmation(event);
-
-      expect(emitted).toBe(true);
-      expect(component.isOpen()).toBe(false);
-    });
-
-    it('should not emit goPrivate when role is STAY_PUBLIC', () => {
-      let emitted = false;
-      component.goPrivate.subscribe(() => {
-        emitted = true;
-      });
-
-      const event = {
-        detail: { role: 'stay-public' },
-      } as CustomEvent<{ role: string }>;
-
-      component.handleGoPrivateConfirmation(event);
-
-      expect(emitted).toBe(false);
-      expect(component.isOpen()).toBe(false);
     });
   });
 
@@ -348,6 +242,40 @@ describe('PageSettings', () => {
       const event = { detail: { value: '' } };
 
       expect(() => component.onThemeChange(event)).not.toThrow();
+    });
+  });
+
+  describe('onCurrencySelected', () => {
+    it('should patch currency in the form and dismiss modal', () => {
+      const mockCurrencyCode = 'GBP';
+      const mockModal = {
+        dismiss: jest.fn(),
+      } as any;
+
+      component.onCurrencySelected(mockCurrencyCode, mockModal);
+
+      expect(component.settingsForm.value.currency).toBe(mockCurrencyCode);
+      expect(mockModal.dismiss).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleSystemThemeChange', () => {
+    it('should set systemTheme signal on call', () => {
+      const mockEvent = { matches: true } as MediaQueryListEvent;
+
+      component.handleSystemThemeChange(mockEvent);
+
+      expect(component.systemTheme()).toBe('dark');
+    });
+  });
+
+  describe('getTheme', () => {
+    it('should return dark when matches is true', () => {
+      expect(component.getTheme(true)).toBe('dark');
+    });
+
+    it('should return light when matches is false', () => {
+      expect(component.getTheme(false)).toBe('light');
     });
   });
 });

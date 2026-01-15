@@ -1,12 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import { Bite } from 'model';
+import { Bite, PublicUser } from 'model';
+import { PATH } from 'utils';
+import { Location } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
-  dataAccess = inject(ProfileDataAccessService);
+  private readonly dataAccess = inject(ProfileDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly location = inject(Location);
 
   isAuthenticated = this.dataAccess.isAuthenticated;
   myUser = this.dataAccess.myUser;
@@ -14,6 +17,7 @@ export class ProfileService {
   userId = this.dataAccess.userId;
   bitesByUser = this.dataAccess.bitesByUser;
   myBites = this.dataAccess.myBites;
+  isPublicProfile = this.dataAccess.isPublicProfile;
 
   logout(): void {
     this.dataAccess.logout();
@@ -29,6 +33,10 @@ export class ProfileService {
 
   gotoMyBites(): void {
     this.navController.navigateForward(['my-bites']);
+  }
+
+  gotoEditProfile(): void {
+    this.navController.navigateForward([PATH.EDIT_PROFILE]);
   }
 
   gotoMyProfileClicked(): void {
@@ -64,5 +72,11 @@ export class ProfileService {
       'restaurant',
       encodeURIComponent(bite.place),
     ]);
+  }
+
+  saveProfile(publicUser: PublicUser): void {
+    this.dataAccess.savePublicProfile(publicUser);
+
+    this.location.back();
   }
 }

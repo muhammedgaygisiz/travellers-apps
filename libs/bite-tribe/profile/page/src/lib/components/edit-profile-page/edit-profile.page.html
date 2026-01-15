@@ -55,7 +55,11 @@
 
       <ion-item>
         <ion-label>Public User</ion-label>
-        <ion-toggle slot="end" formControlName="public" />
+        <ion-toggle
+          slot="end"
+          formControlName="public"
+          (ionChange)="handlePubicChange($event)"
+        />
       </ion-item>
 
       <div class="button-container safe-padding-bottom">

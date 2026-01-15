@@ -192,7 +192,7 @@ describe('AppEffect', () => {
 
       describe('given user call was successful but updated user is undefined', () => {
         beforeEach(() => {
-          updateUserSpy = jest
+          jest
             .spyOn(apiService, 'updateUser')
             .mockReturnValue(of(undefined) as any);
         });
@@ -219,7 +219,7 @@ describe('AppEffect', () => {
 
       describe('given update call throws an error', () => {
         beforeEach(() => {
-          updateUserSpy = jest.spyOn(apiService, 'updateUser').mockReturnValue(
+          jest.spyOn(apiService, 'updateUser').mockReturnValue(
             new Observable((subscriber) => {
               subscriber.error(new Error('Update failed'));
             }) as any,

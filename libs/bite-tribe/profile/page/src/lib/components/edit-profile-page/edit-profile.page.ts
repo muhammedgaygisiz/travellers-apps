@@ -23,9 +23,10 @@ import {
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import type { PublicUser, User } from 'model';
-import type { OverlayEventDetail } from '@ionic/core';
+import type { IonToggleCustomEvent, OverlayEventDetail } from '@ionic/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { ToggleChangeEventDetail } from '@ionic/angular';
 
 const STAY_PUBLIC = 'stay-public';
 const GO_PRIVATE = 'go-private';
@@ -123,7 +124,11 @@ export class EditProfilePage {
   }
 
   handleGoPrivateConfirmation(event: CustomEvent<OverlayEventDetail>): void {
-    console.log('TODO');
+    if (event.detail.role === GO_PRIVATE) {
+      this.profileForm.patchValue({ public: false });
+    } else {
+      this.profileForm.patchValue({ public: true });
+    }
 
     this.isOpen.set(false);
   }
@@ -149,6 +154,14 @@ export class EditProfilePage {
       };
 
       this.submitPublicUser.emit(updatedUser);
+    }
+  }
+
+  protected handlePubicChange(
+    $event: IonToggleCustomEvent<ToggleChangeEventDetail>,
+  ): void {
+    if (!$event.detail.checked) {
+      this.openConfirmationDialog();
     }
   }
 }

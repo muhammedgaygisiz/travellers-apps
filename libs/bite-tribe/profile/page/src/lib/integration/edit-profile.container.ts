@@ -4,6 +4,7 @@ import { ProfileService } from './profile.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
+  selector: 'edit-profile-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [EditProfilePage],
   template: `

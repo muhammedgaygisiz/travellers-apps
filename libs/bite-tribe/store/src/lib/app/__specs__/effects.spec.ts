@@ -167,12 +167,8 @@ describe('AppEffect', () => {
 
   describe('saveProfileToFirestore$', () => {
     describe('given user was updated successfully', () => {
-      let updateUserSpy: SpyInstance;
-
       beforeEach(() => {
-        updateUserSpy = jest
-          .spyOn(apiService, 'updateUser')
-          .mockReturnValue(of({}) as any);
+        jest.spyOn(apiService, 'updateUser').mockReturnValue(of({}) as any);
       });
 
       it('should save profile to firestore on savePublicProfile', () => {

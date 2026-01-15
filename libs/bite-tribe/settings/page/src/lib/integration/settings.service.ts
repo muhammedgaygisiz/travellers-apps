@@ -13,23 +13,10 @@ export class SettingsService {
   user = this.dataAccess.user;
   publicUser = this.dataAccess.publicUser;
   settings = this.dataAccess.settings;
-  isPublicProfile = this.dataAccess.isPublicProfile;
 
   saveSettings(settings: Settings): void {
     this.dataAccess.saveSettings(settings);
 
     this.navController.navigateBack(['home']);
-  }
-
-  goPublic(): void {
-    this.dataAccess.goPublic();
-  }
-
-  goPrivate(): void {
-    this.dataAccess.goPrivate();
-  }
-
-  saveProfile(publicUser: PublicUser): void {
-    this.dataAccess.savePublicProfile(publicUser);
   }
 }

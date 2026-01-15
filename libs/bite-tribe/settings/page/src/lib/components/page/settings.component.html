@@ -4,68 +4,13 @@
   [showFooter]="false"
 >
   <ion-content class="ion-padding">
-    <div class="settings-container">
+    <h1 class="ion-margin-bottom">Settings</h1>
+
+    <div>
       <form [formGroup]="settingsForm">
         <!-- Profile Section -->
         <section class="settings-section">
           <h2>Profile</h2>
-
-          <ion-item>
-            @if (userImage()) {
-              <img [src]="userImage()" alt="Profile" class="profile-image" />
-            } @else {
-              <ion-icon name="person-circle-outline" class="profile-image" />
-            }
-            <ion-label>
-              <h3>Display Name</h3>
-              <ion-input
-                [value]="displayName()"
-                placeholder="Enter display name"
-                [readonly]="!isPublicProfile()"
-                formControlName="displayName"
-              />
-            </ion-label>
-          </ion-item>
-
-          <ion-item>
-            <ion-label>
-              <h3>Email</h3>
-              <ion-input [value]="user()?.email || ''" [readonly]="true" />
-            </ion-label>
-          </ion-item>
-
-          <ion-item>
-            <ion-label>
-              <h3>City</h3>
-              <ion-input
-                [value]="publicUser()?.city || ''"
-                formControlName="city"
-              />
-            </ion-label>
-          </ion-item>
-
-          <ion-item>
-            <ion-label position="stacked">
-              <h3>About</h3>
-            </ion-label>
-            <ion-textarea
-              [value]="publicUser()?.about || ''"
-              formControlName="about"
-              placeholder="Tell us about yourself..."
-              rows="4"
-              [readonly]="!isPublicProfile()"
-            />
-          </ion-item>
-
-          <div class="ion-margin-top ion-text-end go-public-button-container">
-            @if (isPublicProfile()) {
-              <ion-button (click)="openConfirmationDialog()">
-                Return to private
-              </ion-button>
-            } @else {
-              <ion-button (click)="goPublic.emit()">Go public</ion-button>
-            }
-          </div>
         </section>
 
         <!-- Settings Section -->
@@ -122,14 +67,6 @@
     </div>
   </ion-content>
 </ta-page>
-
-<ion-alert
-  [isOpen]="isOpen()"
-  header="Return to Private Profile"
-  message="Are you sure you want to return to a private profile? You will be shown as Anonymous."
-  [buttons]="confirmationButtons"
-  (didDismiss)="handleGoPrivateConfirmation($event)"
-/>
 
 <ion-modal trigger="currency-selector-trigger" #currencyModal>
   <ng-template>

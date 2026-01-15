@@ -10,11 +10,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [user]="service.user()"
       [publicUser]="service.publicUser()"
       [settings]="service.settings()"
-      [isPublicProfile]="service.isPublicProfile()"
       (submitSettings)="service.saveSettings($event)"
-      (submitPublicUser)="service.saveProfile($event)"
-      (goPublic)="service.goPublic()"
-      (goPrivate)="service.goPrivate()"
     />
   `,
   imports: [PageSettings],

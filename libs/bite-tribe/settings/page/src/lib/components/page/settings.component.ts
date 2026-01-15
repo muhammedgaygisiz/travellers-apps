@@ -11,10 +11,8 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
-  IonAlert,
   IonButton,
   IonContent,
-  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
@@ -22,7 +20,6 @@ import {
   IonSelect,
   IonSelectOption,
   IonText,
-  IonTextarea,
   IonToggle,
 } from '@ionic/angular/standalone';
 import { CurrencySelectorComponent } from 'currency-selector';
@@ -31,10 +28,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { currencyCodes } from 'utils';
-import type { OverlayEventDetail } from '@ionic/core';
-
-const STAY_PUBLIC = 'stay-public';
-const GO_PRIVATE = 'go-private';
 
 @Component({
   selector: 'settings',
@@ -51,12 +44,9 @@ const GO_PRIVATE = 'go-private';
     IonSelectOption,
     IonInput,
     ReactiveFormsModule,
-    IonIcon,
-    IonAlert,
     IonModal,
     CurrencySelectorComponent,
     IonText,
-    IonTextarea,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -64,28 +54,12 @@ export class PageSettings {
   user = input<User>();
   publicUser = input<PublicUser>();
   settings = input<Settings>();
-  isPublicProfile = input<boolean>();
 
-  goPublic = output();
-  goPrivate = output();
   submitSettings = output<Settings>();
-  submitPublicUser = output<PublicUser>();
 
   private readonly formBuilder = inject(FormBuilder);
 
   currencies = currencyCodes;
-  isOpen = signal(false);
-
-  confirmationButtons = [
-    {
-      text: 'No, stay public',
-      role: STAY_PUBLIC,
-    },
-    {
-      text: 'Yes, go private',
-      role: GO_PRIVATE,
-    },
-  ];
 
   settingsForm = this.formBuilder.nonNullable.group({
     pushNotifications: [{ value: false, disabled: true }, Validators.required],
@@ -93,9 +67,6 @@ export class PageSettings {
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
     nearby: [2000, [Validators.required, Validators.min(1)]],
-    city: [''],
-    displayName: [''],
-    about: [''],
   });
 
   settingsEffect = afterRenderEffect(() => {
@@ -105,14 +76,6 @@ export class PageSettings {
       const { updatedAt, ...rest } = settings;
       this.settingsForm.patchValue(rest);
     }
-
-    const publicUser = this.publicUser();
-    if (publicUser) {
-      this.settingsForm.patchValue(publicUser);
-    }
-
-    const displayName = this.displayName();
-    this.settingsForm.patchValue({ displayName });
   });
 
   private systemTheme = signal(
@@ -145,25 +108,6 @@ export class PageSettings {
     this.settingsForm.patchValue({ theme: systemTheme });
   });
 
-  userImage = computed(() => {
-    const user = this.user();
-
-    const photoUrl =
-      user?.photoUrl ||
-      user?.providerData.find(
-        (provider: { photoUrl?: string }) => provider.photoUrl,
-      )?.photoUrl;
-
-    return photoUrl;
-  });
-
-  displayName = computed(() => {
-    const user = this.user();
-    const publicUser = this.publicUser();
-
-    return publicUser?.displayName || user?.displayName || 'Anonymous';
-  });
-
   currencyValueChanges = toSignal(
     this.settingsForm.controls['currency'].valueChanges,
   );
@@ -187,19 +131,7 @@ export class PageSettings {
       return;
     }
 
-    const { city, displayName, about, ...newSettings } =
-      this.settingsForm.value;
-
-    const publicUser = this.publicUser();
-    if (publicUser) {
-      this.submitPublicUser.emit({
-        ...publicUser,
-        city,
-        displayName: displayName ? displayName : publicUser.displayName,
-        about: about || '',
-      });
-    }
-
+    const newSettings = this.settingsForm.getRawValue();
     this.submitSettings.emit({
       ...newSettings,
       pushNotifications: !!newSettings.pushNotifications,
@@ -208,20 +140,6 @@ export class PageSettings {
       currency: newSettings.currency || 'EUR',
       nearby: newSettings.nearby || 50,
     });
-  }
-
-  handleGoPrivateConfirmation(event: CustomEvent<OverlayEventDetail>): void {
-    const role = event.detail.role;
-
-    if (role === GO_PRIVATE) {
-      this.goPrivate.emit();
-    }
-
-    this.isOpen.set(false);
-  }
-
-  openConfirmationDialog(): void {
-    this.isOpen.set(true);
   }
 
   onThemeChange(event: { detail: { value: string } }): void {

@@ -49,6 +49,9 @@
         {{ userData?.city || 'No location' }}
       </p>
 
+      @if (userData?.userId === user()?.userId) {
+        <ion-button (click)="gotoEditProfile.emit()">Edit Profile</ion-button>
+      }
       @if (isUnfollowedUser()) {
         <ion-button fill="outline" class="follow-button" [disabled]="true">
           Follow

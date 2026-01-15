@@ -1,0 +1,7 @@
+@use 'globals';
+
+:host {
+  .profile-image {
+    @include globals.profile-image;
+  }
+}

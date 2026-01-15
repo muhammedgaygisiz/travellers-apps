@@ -165,26 +165,6 @@ describe('AppEffect', () => {
     });
   });
 
-  describe('goPublicEffect$', () => {
-    let saveUserSpy: SpyInstance;
-
-    beforeEach(() => {
-      saveUserSpy = jest.spyOn(apiService, 'saveUser').mockImplementation();
-    });
-
-    it('should save user on goPublic', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: AppActions.goPublic(),
-        });
-
-        expectObservable(effects.goPublicEffect$);
-      });
-
-      expect(saveUserSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('saveProfileToFirestore$', () => {
     let updateUserSpy: SpyInstance;
 
@@ -195,33 +175,13 @@ describe('AppEffect', () => {
     it('should save profile to firestore on savePublicProfile', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: AppActions.savePublicProfile({ publicUser: {} as PublicUser }),
+          a: AppActions.savePublicProfile({ profile: {} as PublicUser }),
         });
 
         expectObservable(effects.saveProfileToFirestore$);
       });
 
       expect(updateUserSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('goPrivateEffect$', () => {
-    let deleteUserSpy: SpyInstance;
-
-    beforeEach(() => {
-      deleteUserSpy = jest.spyOn(apiService, 'deleteUser').mockImplementation();
-    });
-
-    it('should delete user on goPrivate', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: AppActions.goPrivate(),
-        });
-
-        expectObservable(effects.goPrivateEffect$);
-      });
-
-      expect(deleteUserSpy).toHaveBeenCalledTimes(1);
     });
   });
 

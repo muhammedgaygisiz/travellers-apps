@@ -78,7 +78,7 @@ export class PageSettings {
     }
   });
 
-  private systemTheme = signal(
+  systemTheme = signal(
     window.matchMedia('(prefers-color-scheme: dark)').matches
       ? 'dark'
       : 'light',
@@ -115,11 +115,13 @@ export class PageSettings {
 
   constructor() {
     // Watch for system theme changes
+    this.registerSystemThemeChangeHandler();
+  }
+
+  registerSystemThemeChangeHandler(): void {
     window
       .matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', (e) => {
-        this.systemTheme.set(e.matches ? 'dark' : 'light');
-      });
+      .addEventListener('change', this.handleSystemThemeChange.bind(this));
   }
 
   saveSettings(): void {
@@ -128,14 +130,20 @@ export class PageSettings {
     }
 
     const newSettings = this.settingsForm.getRawValue();
+    const theme = this.calculateTheme(newSettings.theme);
+
     this.submitSettings.emit({
       ...newSettings,
       pushNotifications: !!newSettings.pushNotifications,
       emailUpdates: !!newSettings.emailUpdates,
-      theme: (newSettings.theme || this.systemTheme()) as 'light' | 'dark',
+      theme,
       currency: newSettings.currency || 'EUR',
       nearby: newSettings.nearby || 50,
     });
+  }
+
+  calculateTheme(theme: string | null): 'light' | 'dark' {
+    return (theme || this.systemTheme()) as 'light' | 'dark';
   }
 
   onThemeChange(event: { detail: { value: string } }): void {
@@ -155,5 +163,13 @@ export class PageSettings {
   onCurrencySelected(currencyCode: string, modal: IonModal): void {
     this.settingsForm.patchValue({ currency: currencyCode });
     modal.dismiss();
+  }
+
+  handleSystemThemeChange(e: MediaQueryListEvent): void {
+    this.systemTheme.set(this.getTheme(e.matches));
+  }
+
+  getTheme(matches: boolean): 'dark' | 'light' {
+    return matches ? 'dark' : 'light';
   }
 }

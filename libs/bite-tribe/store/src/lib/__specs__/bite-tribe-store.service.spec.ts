@@ -302,28 +302,6 @@ describe('BiteTribeStoreService', () => {
     ));
   });
 
-  describe('goPublic', () => {
-    it('should dispatch goPublic on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.goPublic();
-        expect(dispatchSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
-  });
-
-  describe('goPrivate', () => {
-    it('should dispatch goPrivate on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.goPrivate();
-        expect(dispatchSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
-  });
-
   describe('setHomeSorting', () => {
     it('should dispatch setHomeSorting on BiteTribeStoreService', inject(
       [BiteTribeStoreService],

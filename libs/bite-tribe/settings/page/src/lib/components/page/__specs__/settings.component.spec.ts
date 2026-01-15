@@ -7,6 +7,22 @@ import { PublicUser, Settings } from 'model';
 
 jest.mock('localization');
 
+const setupMockForWindowMatchMedia = (value?: boolean): void => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: value ?? false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+};
+
 describe(PageSettings.name, () => {
   let component: PageSettings;
   let fixture: ComponentFixture<PageSettings>;
@@ -14,19 +30,7 @@ describe(PageSettings.name, () => {
 
   beforeEach(() => {
     // Mock window.matchMedia
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: jest.fn().mockImplementation((query) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-      })),
-    });
+    setupMockForWindowMatchMedia(false);
 
     TestBed.configureTestingModule({
       providers: [provideIonicAngular(getIonicConfig())],
@@ -106,6 +110,80 @@ describe(PageSettings.name, () => {
 
       expect(submitSettingsEmitSpy).not.toHaveBeenCalled();
     });
+
+    it('should emit currency from form if provided', () => {
+      const mockCurrency = 'JPY';
+
+      component.settingsForm.patchValue({ currency: mockCurrency });
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ currency: mockCurrency }),
+      );
+    });
+
+    it('should emit default currency if none provided in form', () => {
+      component.settingsForm.patchValue({ currency: '' });
+
+      jest.spyOn(component.settingsForm, 'valid', 'get').mockReturnValue(true);
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ currency: 'EUR' }),
+      );
+    });
+
+    it('should emit nearby from form if provided', () => {
+      const mockNearby = 1500;
+
+      component.settingsForm.patchValue({ nearby: mockNearby });
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ nearby: mockNearby }),
+      );
+    });
+
+    it('should emit default nearby if none provided in form', () => {
+      component.settingsForm.patchValue({ nearby: undefined as any });
+
+      jest.spyOn(component.settingsForm, 'valid', 'get').mockReturnValue(true);
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ nearby: 50 }),
+      );
+    });
+  });
+
+  describe('calculateTheme', () => {
+    describe('given no theme', () => {
+      it('should return dark when systemTheme is dark', () => {
+        component.systemTheme.set('dark');
+
+        expect(component.calculateTheme(null)).toBe('dark');
+      });
+
+      it('should return light when systemTheme is light', () => {
+        component.systemTheme.set('light');
+
+        expect(component.calculateTheme(null)).toBe('light');
+      });
+    });
+
+    describe('given a theme', () => {
+      it('should return dark when theme is dark', () => {
+        expect(component.calculateTheme('dark')).toBe('dark');
+      });
+
+      it('should return light when theme is light', () => {
+        expect(component.calculateTheme('light')).toBe('light');
+      });
+    });
   });
 
   describe('settingsEffect', () => {
@@ -164,6 +242,40 @@ describe(PageSettings.name, () => {
       const event = { detail: { value: '' } };
 
       expect(() => component.onThemeChange(event)).not.toThrow();
+    });
+  });
+
+  describe('onCurrencySelected', () => {
+    it('should patch currency in the form and dismiss modal', () => {
+      const mockCurrencyCode = 'GBP';
+      const mockModal = {
+        dismiss: jest.fn(),
+      } as any;
+
+      component.onCurrencySelected(mockCurrencyCode, mockModal);
+
+      expect(component.settingsForm.value.currency).toBe(mockCurrencyCode);
+      expect(mockModal.dismiss).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleSystemThemeChange', () => {
+    it('should set systemTheme signal on call', () => {
+      const mockEvent = { matches: true } as MediaQueryListEvent;
+
+      component.handleSystemThemeChange(mockEvent);
+
+      expect(component.systemTheme()).toBe('dark');
+    });
+  });
+
+  describe('getTheme', () => {
+    it('should return dark when matches is true', () => {
+      expect(component.getTheme(true)).toBe('dark');
+    });
+
+    it('should return light when matches is false', () => {
+      expect(component.getTheme(false)).toBe('light');
     });
   });
 });

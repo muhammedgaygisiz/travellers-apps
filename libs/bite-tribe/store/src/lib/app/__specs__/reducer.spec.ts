@@ -161,24 +161,6 @@ describe('App Reducer', () => {
     });
   });
 
-  describe('goPrivate', () => {
-    it('should set profile to undefined', () => {
-      const PUBLIC_PROFILE_MOCK = { displayName: 'test' } as PublicUser;
-      const INITIAL_STATE = {
-        profile: PUBLIC_PROFILE_MOCK,
-      } as AppSlice;
-      const NEW_STATE = {
-        profile: undefined,
-      } as AppSlice;
-
-      const goPrivateAction = AppActions.goPrivate();
-
-      expect(reducer(INITIAL_STATE, goPrivateAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
   describe('loadedExchangeRatesFromApi', () => {
     it('should set exchange rates', () => {
       const EXCHANGE_RATES_MOCK = { EUR: 1.2, USD: 1.1 };

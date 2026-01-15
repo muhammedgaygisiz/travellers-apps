@@ -123,7 +123,7 @@ export class ProfileApiService {
         photoUrl: publicUser.photoUrl,
         city: publicUser.city || '',
         about: publicUser.about || '',
-        public: true,
+        public: publicUser.public || false,
         updatedAt: new Date().toISOString(),
         updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
       };

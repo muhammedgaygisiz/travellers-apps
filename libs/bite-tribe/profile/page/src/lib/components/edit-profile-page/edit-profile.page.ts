@@ -139,14 +139,16 @@ export class EditProfilePage {
 
     const publicUser = this.publicUser();
     if (publicUser) {
-      this.submitPublicUser.emit({
+      const updatedUser = {
         ...publicUser,
         city: city ?? '',
         displayName: displayName ? displayName : publicUser.displayName,
         about: about || '',
         email: email || '',
         public: isPublic || false,
-      });
+      };
+
+      this.submitPublicUser.emit(updatedUser);
     }
   }
 }

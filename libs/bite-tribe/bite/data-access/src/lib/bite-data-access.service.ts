@@ -10,8 +10,16 @@ export class BiteDataAccessService {
   currency = toSignal(this.storeService.currencyFromSettings$);
   position = toSignal(this.storeService.position$);
   cachedBite = toSignal(this.storeService.cachedBite$);
+  nearbyRestaurants = toSignal(this.storeService.nearbyRestaurants$);
+  tagSuggestionsForEditingBite = toSignal(
+    this.storeService.tagSuggestionsForEditingBite$,
+  );
 
   async submitBite(bite: any): Promise<void> {
     this.storeService.save(bite, 'bite');
+  }
+
+  setEditingBite(bite: Partial<any>): void {
+    this.storeService.setEditingBite(bite);
   }
 }

@@ -6,4 +6,4 @@ export const toBite = (doc: DocumentSnapshot<DocumentData>): Bite =>
     ...doc.data,
     id: doc.id,
     likes: [],
-  } as unknown as Bite);
+  }) as unknown as Bite;

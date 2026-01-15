@@ -24,4 +24,32 @@
       @include globals.input-styles;
     }
   }
+
+  .suggestions-container {
+    .suggestions-label {
+      font-size: 0.875rem;
+      color: var(--ion-color-medium);
+      margin-bottom: 0.5rem;
+    }
+
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+
+      .suggestion {
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+
+        ion-icon {
+          color: var(--ion-color-primary);
+          margin-right: 0.25rem;
+        }
+      }
+    }
+  }
 }

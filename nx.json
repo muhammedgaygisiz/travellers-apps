@@ -51,6 +51,14 @@
         "{workspaceRoot}/.stylelintrc(.(json|yml|yaml|js))?"
       ],
       "cache": true
+    },
+    "build-storybook": {
+      "cache": true
+    },
+    "@angular/build:application": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "useInferencePlugins": false,

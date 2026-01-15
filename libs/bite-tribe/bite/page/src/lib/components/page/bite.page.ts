@@ -22,6 +22,7 @@ import {
   IonTextarea,
 } from '@ionic/angular/standalone';
 import { CurrencySelectorComponent } from 'currency-selector';
+import { RestaurantSelectorComponent } from 'restaurant-selector';
 import { Platform } from '@ionic/angular';
 import {
   FormBuilder,
@@ -30,7 +31,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
 import { Bite, Geopoint } from 'model';
@@ -56,6 +57,7 @@ import { getNormalizedPrice } from './utils/get-normalized-price';
     IonTextarea,
     IonModal,
     CurrencySelectorComponent,
+    RestaurantSelectorComponent,
     IonIcon,
     IonLabel,
   ],
@@ -77,15 +79,21 @@ export class BitePage {
 
   position = input<Geopoint>();
 
+  suggestedTags = input<string[]>([]);
+
   fallbackPosition = linkedSignal(() => {
     return this.position();
   });
 
   submitBite = output<typeof this.biteFormGroup.value>();
 
+  placeChange = output<string>();
+
   isWeb = signal(!this.platform.is('hybrid'));
 
   currencies = currencyCodes;
+
+  nearbyRestaurants = input<string[]>([]);
 
   biteFormGroup = this.formBuilder.group(
     {
@@ -156,6 +164,18 @@ export class BitePage {
       this.biteFormGroup.controls['currency'].patchValue(currency);
     }
   });
+
+  placeValueChange = toSignal(
+    this.biteFormGroup.controls['place'].valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      tap((place) => {
+        if (place) {
+          this.placeChange.emit(place);
+        }
+      }),
+    ),
+  );
 
   positionInitFromInputEffect = effect(() => {
     const bite = this.bite();
@@ -290,6 +310,11 @@ export class BitePage {
 
   onCurrencySelected(currencyCode: string, modal: IonModal): void {
     this.biteFormGroup.patchValue({ currency: currencyCode });
+    modal.dismiss();
+  }
+
+  onRestaurantSelected(restaurantName: string, modal: IonModal): void {
+    this.biteFormGroup.patchValue({ place: restaurantName });
     modal.dismiss();
   }
 }

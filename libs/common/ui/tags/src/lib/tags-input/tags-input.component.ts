@@ -36,6 +36,7 @@ const REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES = /^\s*$/;
 export class TagsInputComponent implements OnInit {
   readonly = input<boolean>(false);
   tags = input<string[]>([]);
+  suggestedTags = input<string[]>([]);
   tagChanges = output<string[]>();
 
   formGroup = new FormGroup({
@@ -52,7 +53,7 @@ export class TagsInputComponent implements OnInit {
           if (stringIncludesDelimiter(value)) {
             this.inputChange(removeDelimiterFromEndOfString(value));
           }
-        })
+        }),
       );
     }
   }
@@ -73,5 +74,12 @@ export class TagsInputComponent implements OnInit {
   removeTag(tag: string): void {
     const updatedTags = this.tags().filter((t) => t !== tag);
     this.tagChanges.emit(updatedTags);
+  }
+
+  addSuggestedTag(tag: string): void {
+    const isUniqueTag = !this.tags().includes(tag);
+    if (isUniqueTag) {
+      this.tagChanges.emit([...this.tags(), tag]);
+    }
   }
 }

@@ -1,7 +1,7 @@
-import { PublicUser, Settings } from 'model';
+import { Geopoint, PublicUser, Settings } from 'model';
 
 export type AppSlice = {
-  position?: any;
+  position?: Geopoint;
   settings: Settings;
   loading?: {
     home?: boolean;

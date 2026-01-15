@@ -2,6 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { App } from '@capacitor/app';
+
+jest.mock('@capacitor/app', () => ({
+  App: {
+    addListener: jest.fn(),
+    exitApp: jest.fn(),
+    removeAllListeners: jest.fn(),
+  },
+}));
 
 jest.mock('localization');
 jest.mock('@capacitor/splash-screen', () => ({
@@ -10,7 +19,7 @@ jest.mock('@capacitor/splash-screen', () => ({
   },
 }));
 
-describe('AppComponent', () => {
+describe(AppComponent.name, () => {
   let fixture: ComponentFixture<AppComponent>;
   let component: AppComponent;
 
@@ -28,6 +37,33 @@ describe('AppComponent', () => {
     expect(component).toBeDefined();
   });
 
+  describe('backButtonHandler', () => {
+    it('should call handleBackButton with correct canGoBack value', () => {
+      const handleBackButtonSpy = jest.spyOn(
+        component as any,
+        'handleBackButton',
+      );
+
+      const testCanGoBack = true;
+      component.backButtonHandler({ canGoBack: testCanGoBack });
+
+      expect(handleBackButtonSpy).toHaveBeenCalledWith(testCanGoBack);
+    });
+  });
+
+  describe('constructor', () => {
+    it('should initialize back button handler', () => {
+      const appAddListenerSpy = jest.spyOn(App, 'addListener');
+
+      component['initBackbuttonHandler']();
+
+      expect(appAddListenerSpy).toHaveBeenCalledWith(
+        'backButton',
+        expect.any(Function),
+      );
+    });
+  });
+
   describe('ngOnInit', () => {
     it('should call platform.ready and SplashScreen.hide', async () => {
       const platformReadySpy = jest
@@ -40,6 +76,34 @@ describe('AppComponent', () => {
       // Wait for the promise in ngOnInit to resolve
       await platformReadySpy.mock.results[0].value;
       expect(splashScreenHideSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('ngOnDestroy', () => {
+    it('should call App.removeAllListeners', () => {
+      const appRemoveAllListenersSpy = jest.spyOn(App, 'removeAllListeners');
+
+      component.ngOnDestroy();
+
+      expect(appRemoveAllListenersSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleBackButton', () => {
+    it('should call App.exitApp if canGoBack is false', () => {
+      const appExitAppSpy = jest.spyOn(App, 'exitApp');
+
+      component['handleBackButton'](false);
+
+      expect(appExitAppSpy).toHaveBeenCalled();
+    });
+
+    it('should call window.history.back if canGoBack is true', () => {
+      const windowHistoryBackSpy = jest.spyOn(window.history, 'back');
+
+      component['handleBackButton'](true);
+
+      expect(windowHistoryBackSpy).toHaveBeenCalled();
     });
   });
 });

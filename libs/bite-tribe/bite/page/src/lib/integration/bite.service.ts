@@ -15,6 +15,8 @@ export class BiteService {
   currency = this.dataAccess.currency;
   position = this.dataAccess.position;
   cachedBite = this.dataAccess.cachedBite;
+  nearbyRestaurants = this.dataAccess.nearbyRestaurants;
+  tagSuggestionsForEditingBite = this.dataAccess.tagSuggestionsForEditingBite;
 
   submitNewBite(newBite: any): void {
     const { id, ...biteData } = newBite;
@@ -28,5 +30,9 @@ export class BiteService {
     this.dataAccess.submitBite(editedBite);
 
     this.location.back();
+  }
+
+  setEditingBite(bite: Partial<any>): void {
+    this.dataAccess.setEditingBite(bite);
   }
 }

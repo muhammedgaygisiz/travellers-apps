@@ -57,7 +57,7 @@ describe('App Reducer', () => {
     });
   });
 
-  describe('loadedBitesFromApi', () => {
+  describe('loadedByGPSPositionFromAPI', () => {
     it('should set loading:home to false', () => {
       const INITIAL_STATE = { loading: { home: true } } as AppSlice;
       const NEW_STATE = {
@@ -66,7 +66,9 @@ describe('App Reducer', () => {
         },
       } as AppSlice;
 
-      const loadedBitesFromApiAction = BiteActions.loadedFromAPI({ bites: [] });
+      const loadedBitesFromApiAction = BiteActions.loadedByGPSPositionFromAPI({
+        bites: [],
+      });
 
       expect(reducer(INITIAL_STATE, loadedBitesFromApiAction)).toEqual({
         ...NEW_STATE,
@@ -107,6 +109,9 @@ describe('App Reducer', () => {
       const NEW_STATE = {
         position: { latitude: 1, longitude: 2 },
         errorLoadingGpsPosition: true,
+        loading: {
+          home: false,
+        },
         reloading: {
           home: false,
         },

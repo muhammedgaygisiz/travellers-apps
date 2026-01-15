@@ -12,6 +12,11 @@
     "@capacitor/app-launcher": "../../node_modules/@capacitor/app-launcher",
     "@capacitor/filesystem": "../../node_modules/@capacitor/filesystem",
     "@capacitor/splash-screen": "../../node_modules/@capacitor/splash-screen",
-    "@capacitor-firebase/crashlytics": "../../node_modules/@capacitor-firebase/crashlytics"
+    "@capacitor-firebase/crashlytics": "../../node_modules/@capacitor-firebase/crashlytics",
+    "@capacitor/preferences": "../../node_modules/@capacitor/preferences",
+    "@capacitor/haptics": "../../node_modules/@capacitor/haptics",
+    "@capacitor/keyboard": "../../node_modules/@capacitor/keyboard",
+    "@capacitor/status-bar": "../../node_modules/@capacitor/status-bar",
+    "@capacitor/app": "../../node_modules/@capacitor/app"
   }
 }

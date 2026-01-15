@@ -111,7 +111,7 @@
 </ng-template>
 
 <ng-template #withoutLoadingTemplate>
-  @if (!displayedBites().length) {
+  @if (!displayedBites().length && !hasErrorLoadingGpsPosition()) {
     <ion-card>
       <ion-card-content>
         <ion-text color="primary"> No bites found. Be the first one.</ion-text>

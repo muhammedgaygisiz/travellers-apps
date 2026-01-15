@@ -29,7 +29,14 @@
         fill="outline"
         class="ion-margin-top"
         mode="md"
-      />
+      >
+        <ion-icon
+          id="restaurant-selector-trigger-bite"
+          slot="end"
+          name="search-outline"
+          aria-label="Search for restaurant"
+        />
+      </ion-input>
 
       <div class="price-container ion-margin-bottom">
         <div class="price">
@@ -69,6 +76,7 @@
 
       <bt-tags-input
         [tags]="biteFormGroup.get('tags')?.value || []"
+        [suggestedTags]="suggestedTags()"
         (tagChanges)="setTags($event)"
       />
 
@@ -95,7 +103,7 @@
           </ion-button>
         </div>
         <position formControlName="position" />
-        @if (noGpsPosition()) {
+        @if (biteFormGroup.get('position')?.invalid) {
         <ion-text color="danger">
           <p>{{ getGpsErrorMessage() }}</p>
         </ion-text>
@@ -106,7 +114,7 @@
         expand="block"
         color="primary"
         routerDirection="back"
-        class="ion-margin-top"
+        class="ion-margin-top safe-padding-bottom"
         [disabled]="isInvalid()"
         (click)="saveBite()"
       >
@@ -123,6 +131,18 @@
       [selectedCurrency]="biteFormGroup.get('currency')?.value || 'EUR'"
       (currencySelected)="onCurrencySelected($event, currencyModalBite)"
       (selectionCancel)="currencyModalBite.dismiss()"
+    />
+  </ng-template>
+</ion-modal>
+
+<ion-modal trigger="restaurant-selector-trigger-bite" #restaurantModalBite>
+  <ng-template>
+    <lib-restaurant-selector
+      class="ion-page"
+      [restaurants]="nearbyRestaurants()"
+      [selectedRestaurant]="biteFormGroup.get('place')?.value || ''"
+      (restaurantSelected)="onRestaurantSelected($event, restaurantModalBite)"
+      (selectionCancel)="restaurantModalBite.dismiss()"
     />
   </ng-template>
 </ion-modal>

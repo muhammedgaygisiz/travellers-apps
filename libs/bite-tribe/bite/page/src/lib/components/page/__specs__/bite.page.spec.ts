@@ -15,6 +15,9 @@ import {
 } from 'ionicons/icons';
 import { Bite } from 'model';
 import { FormGroup } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
@@ -24,14 +27,20 @@ jest.mock('image-compression', () => ({
 jest.mock('localization');
 addNecessaryIcons();
 
+const assertDeepEqual = (actual: any, expected: any): void => {
+  expect(actual).toEqual(expected);
+};
+
 describe('BitePage', () => {
   let component: BitePage;
   let componentRef: ComponentRef<BitePage>;
   let fixture: ComponentFixture<BitePage>;
   let platformMock: Partial<Platform>;
   let originalConsoleError: typeof console.error;
+  let scheduler: TestScheduler;
 
   beforeEach(() => {
+    scheduler = new TestScheduler(assertDeepEqual);
     platformMock = {
       is: jest.fn((key: string) => key === 'web'),
       backButton: {
@@ -410,6 +419,82 @@ describe('BitePage', () => {
       component.onCurrencySelected('USD', { dismiss: dismissSpy } as any);
       expect(component.biteFormGroup.controls['currency'].value).toBe('USD');
       expect(dismissSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('onRestaurantSelected', () => {
+    it('should set place in the form group and should call dismiss on modal', () => {
+      const dismissSpy = jest.fn();
+      component.onRestaurantSelected('Test Restaurant', {
+        dismiss: dismissSpy,
+      } as any);
+      expect(component.biteFormGroup.controls['place'].value).toBe(
+        'Test Restaurant',
+      );
+      expect(dismissSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('placeValueChange', () => {
+    describe('given a value change on the place form control', () => {
+      let valueChangeEvents$: Observable<string | null>;
+
+      it('should emit placeChange', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          valueChangeEvents$ =
+            component.biteFormGroup.controls['place'].valueChanges;
+
+          const placeChangeSpy = jest.spyOn(component.placeChange, 'emit');
+
+          // Simulate value changes
+          const values = {
+            a: 'Place 3',
+          };
+
+          const source$ = cold('--a--', values);
+          const subscription = source$.subscribe((val) => {
+            component.biteFormGroup.controls['place'].setValue(val);
+          });
+
+          expectObservable(valueChangeEvents$).toBe('--a', values);
+
+          // Assert that placeChange was emitted with correct values
+          scheduler.flush();
+          expect(placeChangeSpy).toHaveBeenCalledTimes(1);
+          expect(placeChangeSpy).toHaveBeenNthCalledWith(1, 'Place 3');
+
+          subscription.unsubscribe();
+        });
+      });
+    });
+
+    describe('given a value change on the place form control with value undefined', () => {
+      it('should not emit placeChange', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          const valueChangeEvents$ =
+            component.biteFormGroup.controls['place'].valueChanges;
+
+          const placeChangeSpy = jest.spyOn(component.placeChange, 'emit');
+
+          // Simulate value changes
+          const values = {
+            a: undefined,
+          };
+
+          const source$ = cold('--a--', values);
+          const subscription = source$.subscribe((val) => {
+            component.biteFormGroup.controls['place'].setValue(val as any);
+          });
+
+          expectObservable(valueChangeEvents$).toBe('--a', values);
+
+          // Assert that placeChange was not emitted
+          scheduler.flush();
+          expect(placeChangeSpy).not.toHaveBeenCalled();
+
+          subscription.unsubscribe();
+        });
+      });
     });
   });
 });

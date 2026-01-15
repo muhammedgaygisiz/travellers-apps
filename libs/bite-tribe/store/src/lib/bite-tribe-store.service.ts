@@ -11,10 +11,14 @@ import {
   bites,
   bitesBySelectedBucketlist,
   bitesByUser,
+  bitesWithMetadata,
   cachedBite,
+  editingBite,
   mybites,
+  nearbyRestaurants,
   sortedHomeBites,
   sortedMyBites,
+  tagSuggestionsForEditingBite,
 } from './bites/selectors';
 import {
   restaurant,
@@ -91,6 +95,10 @@ export class BiteTribeStoreService implements StoreService {
   registrationError = signal('Not implemented yet.');
 
   bites$ = this.store.select(bites);
+  nearbyRestaurants$ = this.store.select(nearbyRestaurants);
+  tagSuggestionsForEditingBite$ = this.store.select(
+    tagSuggestionsForEditingBite,
+  );
   sortedHomeBites$ = this.store.select(sortedHomeBites);
   sortedBucketlists$ = this.store.select(sortedBucketlists);
   homeSorting$ = this.store.select(homeSorting);
@@ -135,6 +143,9 @@ export class BiteTribeStoreService implements StoreService {
   homeFilters$ = this.store.select(homeFilters);
   homeDistance$ = this.store.select(homeDistance);
 
+  bucketlist = toSignal(this.store.select(selectedBucketlist));
+  user = toSignal(this.user$);
+
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());
   }
@@ -161,13 +172,8 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(getActionByDocType(docType, entity));
   }
 
-  saveTags(newTagsArray: string[], id: string): void {
-    this.store.dispatch(
-      BiteActions.saveNewTags({
-        newTags: newTagsArray,
-        id,
-      }),
-    );
+  setEditingBite(bite: Partial<Bite>): void {
+    this.store.dispatch(BiteActions.setEditingBite({ bite }));
   }
 
   logout(): void {

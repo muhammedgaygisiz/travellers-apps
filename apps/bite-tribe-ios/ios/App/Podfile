@@ -1,6 +1,6 @@
 require_relative '../../../../node_modules/@capacitor/ios/scripts/pods_helpers'
 
-platform :ios, '14.0'
+platform :ios, '15.0'
 use_frameworks!
 
 # workaround to avoid Xcode caching of Pods that requires
@@ -21,6 +21,11 @@ def capacitor_pods
   pod 'CapacitorFilesystem', :path => '../../../../node_modules/@capacitor/filesystem'
   pod 'CapacitorSplashScreen', :path => '../../../../node_modules/@capacitor/splash-screen'
   pod 'CapacitorFirebaseCrashlytics', :path => '../../../../node_modules/@capacitor-firebase/crashlytics'
+  pod 'CapacitorPreferences', :path => '../../../../node_modules/@capacitor/preferences'
+  pod 'CapacitorHaptics', :path => '../../../../node_modules/@capacitor/haptics'
+  pod 'CapacitorKeyboard', :path => '../../../../node_modules/@capacitor/keyboard'
+  pod 'CapacitorStatusBar', :path => '../../../../node_modules/@capacitor/status-bar'
+  pod 'CapacitorApp', :path => '../../../../node_modules/@capacitor/app'
 end
 
 target 'App' do

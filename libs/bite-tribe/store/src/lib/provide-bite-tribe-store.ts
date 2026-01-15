@@ -29,7 +29,6 @@ import { RestaurantEffects } from './restaurants/effects';
 import { LikeEffects } from './likes/effects';
 import { MenuEffects } from './menus/effects';
 import { FirebaseOptions } from 'firebase/app';
-import { BiteActions } from './bites/actions';
 import { loadedRestaurantsFromApi } from './restaurants/actions';
 import { BucketListEffect } from './bucketlists/effects';
 import { fromBucketlists } from './bucketlists';
@@ -50,20 +49,6 @@ const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
 });
 
 const actionSanitizer: any = (action: Action) => {
-  const isLoadedBitesWithData =
-    action.type === BiteActions.loadedFromAPI.type &&
-    (action as any).bites.length > 0;
-
-  if (isLoadedBitesWithData) {
-    return {
-      ...action,
-      bites: (action as any).bites.map((bite: any) => ({
-        ...bite,
-        image: bite.image ? '...' : null,
-      })),
-    };
-  }
-
   const isLoadedRestaurantsWithData =
     action.type === loadedRestaurantsFromApi.type &&
     (action as any).restaurants.length > 0;
@@ -83,24 +68,6 @@ const actionSanitizer: any = (action: Action) => {
 
 const stateSanitizer: any = (state: any) => {
   let sanitizedState = { ...state };
-
-  if (state.bites?.ids.length > 0) {
-    sanitizedState = {
-      ...state,
-      bites: {
-        ...state.bites,
-        entities: state.bites.ids.map((id: string) => {
-          const bite = state.bites.entities[id];
-          return {
-            ...bite,
-            image: bite.image ? '...' : bite.image, // Sanitize image data
-          };
-        }),
-      },
-    };
-
-    return sanitizedState;
-  }
 
   if (state.restaurants?.ids.length > 0) {
     sanitizedState = {
@@ -180,5 +147,6 @@ export const provideBiteTribeStore = (environment: Environment): any => [
   provideFirestoreUtils(
     toFirebaseOptions(environment),
     !environment.isBusiness,
+    environment.emulators,
   ),
 ];

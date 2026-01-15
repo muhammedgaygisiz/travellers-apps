@@ -92,6 +92,9 @@
       ],
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
       "currency-selector": ["libs/common/ui/currency-selector/src/index.ts"],
+      "restaurant-selector": [
+        "libs/common/ui/restaurant-selector/src/index.ts"
+      ],
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
       "common/ui/star-rating": ["libs/common/ui/star-rating/src/index.ts"],
       "common/ui/tags": ["libs/common/ui/tags/src/index.ts"],

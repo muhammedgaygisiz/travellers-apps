@@ -8,8 +8,8 @@ import {
   switchMap,
 } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BITE_COLLECTION } from './bite-api.service';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
+import { BITE_COLLECTION } from './bite-api/utils/constants';
 
 const REVIEW_COLLECTION = 'reviews';
 
@@ -50,7 +50,7 @@ export class ReviewApiService {
           })) || [];
 
         this.reviewsChannel$.next(reviews);
-      }
+      },
     );
   }
 
@@ -62,7 +62,7 @@ export class ReviewApiService {
         this.startReviewListener(biteId);
 
         return this.reviewsChannel$;
-      })
+      }),
     );
   }
 

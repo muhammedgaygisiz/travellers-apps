@@ -26,6 +26,11 @@ import { fromAuth } from 'ta-firestore';
 import { selectedBucketlist } from '../bucketlists/selectors';
 import { enrichByPriceInPreferredCurrency } from './utils/enrich-by-price-in-preferred-currency';
 import { sortByCriteria } from './utils/sort-by-criteria';
+import { byDistance } from './utils/by-distance';
+import { getUniqueRestaurantNames } from './utils/get-unique-restaurant-names';
+import { getNearbyBites } from './utils/get-nearby-bites';
+import { getNearbyRestaurantNamesByPosition } from './utils/get-nearby-restaurant-names-by-position';
+import { getTagSuggestionsByPlace } from './utils/get-tag-suggestions-by-place';
 
 const slice = createFeatureSelector<
   EntityState<Bite> & {
@@ -43,31 +48,27 @@ export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
 
 const allBites = createSelector(slice, selectAll);
 
-const byDistance = (a: any, b: any): number => {
-  return a.distance - b.distance;
-};
-
 export const bitesWithMetadata = createSelector(
   allBites,
   likes,
   gpsPosition,
-  (bites, likes, gpsPosition) => {
-    return bites
-      .map((bite) => {
-        return {
-          ...bite,
-          likes: getLikesForBite(likes, bite),
-          distance: haversineDistance(
-            bite.position?.latitude,
-            bite.position?.longitude,
-            gpsPosition?.latitude,
-            gpsPosition?.longitude,
-            'km',
-          ),
-        } as Bite;
-      })
-      .sort(byDistance);
-  },
+  (bites, likes, gpsPosition) =>
+    bites
+      .map(
+        (bite) =>
+          ({
+            ...bite,
+            likes: getLikesForBite(likes, bite),
+            distance: haversineDistance(
+              bite.position?.latitude,
+              bite.position?.longitude,
+              gpsPosition?.latitude,
+              gpsPosition?.longitude,
+              'km',
+            ),
+          }) as Bite,
+      )
+      .sort(byDistance),
 );
 
 export const bites = createSelector(
@@ -144,9 +145,7 @@ export const bite = createSelector(
 export const mybites = createSelector(
   bitesWithMetadata,
   fromAuth.selectUserId,
-  (bites, userId) => {
-    return bites.filter((bite) => bite.userId === userId);
-  },
+  (bites, userId) => bites.filter((bite) => bite.userId === userId),
 );
 
 export const sortedMyBites = createSelector(
@@ -182,7 +181,33 @@ export const sortedHomeBites = createSelector(
 export const bitesByUser = createSelector(
   bitesWithMetadata,
   biteCreator,
-  (bites, biteCreator) => {
-    return bites.filter((bite) => bite.userId === biteCreator?.userId);
+  (bites, biteCreator) =>
+    bites.filter((bite) => bite.userId === biteCreator?.userId),
+);
+
+export const nearbyRestaurants = createSelector(bitesWithMetadata, (bites) =>
+  getNearbyRestaurantNamesByPosition(bites),
+);
+
+export const editingBite = createSelector(slice, (state) => state?.editingBite);
+
+export const nearbyBitesWithTags = createSelector(
+  bitesWithMetadata,
+  (bites) => {
+    const nearbyBites = getNearbyBites(bites);
+
+    return nearbyBites.filter((bite) => bite.tags && bite.tags.length > 0);
+  },
+);
+
+export const tagSuggestionsForEditingBite = createSelector(
+  editingBite,
+  nearbyBitesWithTags,
+  (bite, bites) => {
+    if (!bite?.place) {
+      return [];
+    }
+
+    return getTagSuggestionsByPlace(bite.place, bites);
   },
 );

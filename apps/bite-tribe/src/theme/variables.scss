@@ -175,6 +175,10 @@ $BORDER_RADIUS: 16px;
     --color: #{$SECONDARY_COLOR};
   }
 
+  .safe-padding-bottom {
+    padding-bottom: var(--ion-safe-area-bottom, 0) !important;
+  }
+
   ion-radio {
     --color-checked: #{$SECONDARY_COLOR};
   }

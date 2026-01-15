@@ -1,0 +1,117 @@
+{
+  "name": "storybook-host",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/storybook-host/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/storybook-host",
+        "browser": "apps/storybook-host/src/main.ts",
+        "tsConfig": "apps/storybook-host/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/storybook-host/public"
+          }
+        ],
+        "styles": [
+          "apps/bite-tribe/src/theme/variables.scss",
+          "apps/bite-tribe/src/global.scss",
+          "apps/bite-tribe-business/src/theme/variables.scss",
+          "apps/bite-tribe-business/src/global.scss"
+        ],
+        "stylePreprocessorOptions": {
+          "includePaths": [
+            "apps/bite-tribe/src/theme",
+            "libs/bite-tribe-common/styles"
+          ]
+        }
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "storybook": {
+      "executor": "@storybook/angular:start-storybook",
+      "options": {
+        "port": 4400,
+        "configDir": "apps/storybook-host/.storybook",
+        "browserTarget": "storybook-host:build-storybook",
+        "compodoc": false,
+        "styles": [
+          "apps/bite-tribe/src/theme/variables.scss",
+          "apps/bite-tribe/src/global.scss",
+          "apps/bite-tribe-business/src/theme/variables.scss",
+          "apps/bite-tribe-business/src/global.scss"
+        ],
+        "stylePreprocessorOptions": {
+          "includePaths": [
+            "apps/bite-tribe/src/theme",
+            "libs/bite-tribe-common/styles"
+          ]
+        }
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "build-storybook": {
+      "executor": "@storybook/angular:build-storybook",
+      "outputs": ["{options.outputDir}"],
+      "options": {
+        "outputDir": "dist/storybook/storybook-host",
+        "configDir": "apps/storybook-host/.storybook",
+        "browserTarget": "storybook-host:build",
+        "compodoc": false,
+        "styles": [
+          "apps/bite-tribe/src/theme/variables.scss",
+          "apps/bite-tribe/src/global.scss",
+          "apps/bite-tribe-business/src/theme/variables.scss",
+          "apps/bite-tribe-business/src/global.scss"
+        ],
+        "stylePreprocessorOptions": {
+          "includePaths": [
+            "apps/bite-tribe/src/theme",
+            "libs/bite-tribe-common/styles"
+          ]
+        }
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-export const normalize = (str: string): string =>
+export const normalize = (str: string | undefined = ''): string =>
   str
     .trim()
     .toLowerCase()

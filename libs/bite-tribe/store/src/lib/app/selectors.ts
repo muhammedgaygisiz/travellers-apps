@@ -39,7 +39,7 @@ export const preferredCurrency = createSelector(
 );
 
 export const isDarkTheme = createSelector(slice, (slice) => {
-  return slice?.settings.theme === 'dark';
+  return slice?.settings?.theme === 'dark';
 });
 
 export const isReloadingHome = createSelector(

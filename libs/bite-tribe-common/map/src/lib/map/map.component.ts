@@ -75,13 +75,15 @@ export class MapComponent implements OnDestroy {
     createOpenstreetmapLayer().addTo(this.map);
 
     const gpsPosition = this.gpsPosition();
-    const geopoints = this.geopoints();
+    const geopoints = this.cleanUpPoints();
 
     if (geopoints && geopoints.length > 0) {
       this.updateMarkers(geopoints);
       zoomToMarkers(gpsPosition, geopoints, this.markers, this.map);
-    } else {
+    } else if (gpsPosition) {
       zoomToGpsOrDefault(gpsPosition, this.markers, geopoints, this.map);
+    } else {
+      this.map.setView([0, 0], 2);
     }
 
     this.addMapClickEvent();
@@ -92,6 +94,10 @@ export class MapComponent implements OnDestroy {
 
     this.forceMapRedraw();
   });
+
+  private cleanUpPoints(): Geopoint[] {
+    return (this.geopoints() || []).filter((point) => !!point);
+  }
 
   setGeopointsEffect = effect(() => {
     const geopoints = this.geopoints();

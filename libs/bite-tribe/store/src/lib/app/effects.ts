@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AppActions } from './actions';
-import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
+import { catchError, filter, from, map, of, switchMap, take, tap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -43,7 +43,7 @@ export class AppEffect {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),
       filter((payload) => !!payload.user),
-      switchMap(() => this.api.publicProfile$),
+      switchMap(() => this.api.publicProfile$.pipe(take(1))),
       map((profile) => AppActions.setPublicProfile({ profile })),
     );
   });

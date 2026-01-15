@@ -129,7 +129,13 @@ export class EditProfilePage {
   }
 
   saveProfile(): void {
-    const { city, displayName, about } = this.profileForm.value;
+    const {
+      city,
+      displayName,
+      about,
+      public: isPublic,
+      email,
+    } = this.profileForm.value;
 
     const publicUser = this.publicUser();
     if (publicUser) {
@@ -138,6 +144,8 @@ export class EditProfilePage {
         city: city ?? '',
         displayName: displayName ? displayName : publicUser.displayName,
         about: about || '',
+        email: email || '',
+        public: isPublic || false,
       });
     }
   }

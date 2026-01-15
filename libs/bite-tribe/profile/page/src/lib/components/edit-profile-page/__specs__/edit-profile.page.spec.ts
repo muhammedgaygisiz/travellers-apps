@@ -4,6 +4,7 @@ import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { PublicUser, Settings } from 'model';
+import type { OverlayEventDetail } from '@ionic/core';
 
 jest.mock('localization');
 
@@ -87,66 +88,6 @@ describe(EditProfilePage.name, () => {
     });
   });
 
-  describe('saveProfile', () => {
-    let submitPublicUserEmitSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      const mockPublicUser: PublicUser = {
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'photo.jpg',
-        userId: 'user123',
-        public: true,
-      };
-      compRef.setInput('publicUser', mockPublicUser);
-
-      submitPublicUserEmitSpy = jest.spyOn(component.submitPublicUser, 'emit');
-    });
-
-    it('should include about field when saving public user', () => {
-      const aboutText = 'My bio';
-      component.profileForm.patchValue({
-        about: aboutText,
-        city: 'Berlin',
-        displayName: 'New Name',
-      });
-
-      let emittedPublicUser: PublicUser | undefined;
-      component.submitPublicUser.subscribe((user) => {
-        emittedPublicUser = user;
-      });
-
-      component.saveProfile();
-
-      expect(emittedPublicUser).toBeDefined();
-      expect(emittedPublicUser?.about).toBe(aboutText);
-    });
-
-    it('should save empty string for about when not provided', () => {
-      component.profileForm.patchValue({
-        city: 'Berlin',
-      });
-
-      let emittedPublicUser: PublicUser | undefined;
-      component.submitPublicUser.subscribe((user) => {
-        emittedPublicUser = user;
-      });
-
-      component.saveProfile();
-
-      expect(emittedPublicUser).toBeDefined();
-      expect(emittedPublicUser?.about).toBe('');
-    });
-
-    it('should not save if publicUser is not provided', () => {
-      compRef.setInput('publicUser', undefined);
-
-      component.saveProfile();
-
-      expect(submitPublicUserEmitSpy).not.toHaveBeenCalled();
-    });
-  });
-
   describe('displayName effect', () => {
     it('should return "Anonymous" when no user or publicUser is provided', () => {
       compRef.setInput('user', undefined);
@@ -221,6 +162,92 @@ describe(EditProfilePage.name, () => {
       component.openConfirmationDialog();
 
       expect(component.isOpen()).toBe(true);
+    });
+  });
+
+  describe('handleGoPrivateConfirmation', () => {
+    describe('given a confirmation', () => {
+      it('should set public field to false', () => {
+        component.profileForm.patchValue({ public: true });
+
+        component.handleGoPrivateConfirmation({
+          detail: { role: 'go-private' },
+        } as CustomEvent<OverlayEventDetail>);
+
+        expect(component.profileForm.value.public).toBe(false);
+      });
+    });
+
+    describe('given a rejection', () => {
+      it('should set public field to true', () => {
+        component.profileForm.patchValue({ public: false });
+
+        component.handleGoPrivateConfirmation({
+          detail: { role: 'stay-public' },
+        } as CustomEvent<OverlayEventDetail>);
+
+        expect(component.profileForm.value.public).toBe(true);
+      });
+    });
+  });
+
+  describe('saveProfile', () => {
+    let submitPublicUserEmitSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      const mockPublicUser: PublicUser = {
+        displayName: 'Test User',
+        email: 'test@example.com',
+        photoUrl: 'photo.jpg',
+        userId: 'user123',
+        public: true,
+      };
+      compRef.setInput('publicUser', mockPublicUser);
+
+      submitPublicUserEmitSpy = jest.spyOn(component.submitPublicUser, 'emit');
+    });
+
+    it('should include about field when saving public user', () => {
+      const aboutText = 'My bio';
+      component.profileForm.patchValue({
+        about: aboutText,
+        city: 'Berlin',
+        displayName: 'New Name',
+      });
+
+      let emittedPublicUser: PublicUser | undefined;
+      component.submitPublicUser.subscribe((user) => {
+        emittedPublicUser = user;
+      });
+
+      component.saveProfile();
+
+      expect(emittedPublicUser).toBeDefined();
+      expect(emittedPublicUser?.about).toBe(aboutText);
+    });
+
+    it('should save empty string for about when not provided', () => {
+      component.profileForm.patchValue({
+        city: 'Berlin',
+      });
+
+      let emittedPublicUser: PublicUser | undefined;
+      component.submitPublicUser.subscribe((user) => {
+        emittedPublicUser = user;
+      });
+
+      component.saveProfile();
+
+      expect(emittedPublicUser).toBeDefined();
+      expect(emittedPublicUser?.about).toBe('');
+    });
+
+    it('should not save if publicUser is not provided', () => {
+      compRef.setInput('publicUser', undefined);
+
+      component.saveProfile();
+
+      expect(submitPublicUserEmitSpy).not.toHaveBeenCalled();
     });
   });
 });

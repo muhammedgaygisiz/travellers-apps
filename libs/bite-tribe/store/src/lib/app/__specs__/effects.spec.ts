@@ -166,22 +166,89 @@ describe('AppEffect', () => {
   });
 
   describe('saveProfileToFirestore$', () => {
-    let updateUserSpy: SpyInstance;
+    describe('given user was updated successfully', () => {
+      let updateUserSpy: SpyInstance;
 
-    beforeEach(() => {
-      updateUserSpy = jest.spyOn(apiService, 'updateUser').mockImplementation();
-    });
-
-    it('should save profile to firestore on savePublicProfile', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: AppActions.savePublicProfile({ profile: {} as PublicUser }),
-        });
-
-        expectObservable(effects.saveProfileToFirestore$);
+      beforeEach(() => {
+        updateUserSpy = jest
+          .spyOn(apiService, 'updateUser')
+          .mockReturnValue(of({}) as any);
       });
 
-      expect(updateUserSpy).toHaveBeenCalledTimes(1);
+      it('should save profile to firestore on savePublicProfile', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: AppActions.savePublicProfile({ profile: {} as PublicUser }),
+          });
+
+          const expected = 'a';
+          const expectedOutput = {
+            a: AppActions.savedPublicProfile({
+              profile: {} as PublicUser,
+            }),
+          };
+          expectObservable(effects.saveProfileToFirestore$).toBe(
+            expected,
+            expectedOutput,
+          );
+        });
+      });
+
+      describe('given user call was successful but updated user is undefined', () => {
+        beforeEach(() => {
+          updateUserSpy = jest
+            .spyOn(apiService, 'updateUser')
+            .mockReturnValue(of(undefined) as any);
+        });
+
+        it('should emit errorSavingPublicProfile action', () => {
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('a', {
+              a: AppActions.savePublicProfile({
+                profile: {} as PublicUser,
+              }),
+            });
+
+            const expected = 'a';
+            const expectedOutput = {
+              a: AppActions.errorSavingPublicProfile(),
+            };
+            expectObservable(effects.saveProfileToFirestore$).toBe(
+              expected,
+              expectedOutput,
+            );
+          });
+        });
+      });
+
+      describe('given update call throws an error', () => {
+        beforeEach(() => {
+          updateUserSpy = jest.spyOn(apiService, 'updateUser').mockReturnValue(
+            new Observable((subscriber) => {
+              subscriber.error(new Error('Update failed'));
+            }) as any,
+          );
+        });
+
+        it('should emit errorSavingPublicProfile action', () => {
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('a', {
+              a: AppActions.savePublicProfile({
+                profile: {} as PublicUser,
+              }),
+            });
+
+            const expected = 'a';
+            const expectedOutput = {
+              a: AppActions.errorSavingPublicProfile(),
+            };
+            expectObservable(effects.saveProfileToFirestore$).toBe(
+              expected,
+              expectedOutput,
+            );
+          });
+        });
+      });
     });
   });
 

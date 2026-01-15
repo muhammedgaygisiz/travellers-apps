@@ -21,7 +21,7 @@ import {
   IonTextarea,
   IonToggle,
 } from '@ionic/angular/standalone';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import type { PublicUser, User } from 'model';
 import type { OverlayEventDetail } from '@ionic/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -93,7 +93,7 @@ export class EditProfilePage {
     displayName: [''],
     city: [''],
     about: [''],
-    email: [''],
+    email: ['', Validators.required],
     public: [false],
   });
 

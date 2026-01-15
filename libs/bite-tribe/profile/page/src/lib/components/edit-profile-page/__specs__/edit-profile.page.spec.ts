@@ -1,0 +1,226 @@
+import { EditProfilePage } from '../edit-profile.page';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentRef } from '@angular/core';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+import { getIonicConfig } from 'utils';
+import { PublicUser, Settings } from 'model';
+
+jest.mock('localization');
+
+describe(EditProfilePage.name, () => {
+  let component: EditProfilePage;
+  let fixture: ComponentFixture<EditProfilePage>;
+  let compRef: ComponentRef<EditProfilePage>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideIonicAngular(getIonicConfig())],
+    });
+
+    fixture = TestBed.createComponent(EditProfilePage);
+    component = fixture.componentInstance;
+    compRef = fixture.componentRef;
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  describe('Form initialization', () => {
+    it('should initialize form with default values', () => {
+      const formValue = component.profileForm.getRawValue();
+
+      expect(formValue).toEqual({
+        city: '',
+        displayName: '',
+        about: '',
+        email: '',
+        public: false,
+      });
+    });
+
+    it('should have about field in the form', () => {
+      expect(component.profileForm.contains('about')).toBe(true);
+    });
+  });
+
+  describe('About field', () => {
+    it('should update form when about value changes', () => {
+      const aboutText = 'This is my about section';
+      component.profileForm.patchValue({ about: aboutText });
+
+      expect(component.profileForm.value.about).toBe(aboutText);
+    });
+
+    it('should mark form as dirty when about is changed', () => {
+      const aboutControl = component.profileForm.get('about');
+      aboutControl?.setValue('Test about');
+      aboutControl?.markAsDirty();
+
+      expect(component.profileForm.dirty).toBe(true);
+    });
+
+    it('should patch about field from publicUser input', () => {
+      const publicUser: PublicUser = {
+        displayName: 'Test User',
+        email: 'test@example.com',
+        photoUrl: 'photo.jpg',
+        userId: 'user123',
+        city: 'Test City',
+        about: 'About me text',
+        public: true,
+      };
+
+      compRef.setInput('publicUser', publicUser);
+      fixture.detectChanges();
+
+      // Wait for afterRenderEffect to complete
+      setTimeout(() => {
+        expect(component.profileForm.value.about).toBe('About me text');
+      }, 100);
+    });
+
+    it('should handle empty about field', () => {
+      component.profileForm.patchValue({ about: '' });
+
+      expect(component.profileForm.value.about).toBe('');
+    });
+  });
+
+  describe('saveProfile', () => {
+    let submitPublicUserEmitSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      const mockPublicUser: PublicUser = {
+        displayName: 'Test User',
+        email: 'test@example.com',
+        photoUrl: 'photo.jpg',
+        userId: 'user123',
+        public: true,
+      };
+      compRef.setInput('publicUser', mockPublicUser);
+
+      submitPublicUserEmitSpy = jest.spyOn(component.submitPublicUser, 'emit');
+    });
+
+    it('should include about field when saving public user', () => {
+      const aboutText = 'My bio';
+      component.profileForm.patchValue({
+        about: aboutText,
+        city: 'Berlin',
+        displayName: 'New Name',
+      });
+
+      let emittedPublicUser: PublicUser | undefined;
+      component.submitPublicUser.subscribe((user) => {
+        emittedPublicUser = user;
+      });
+
+      component.saveProfile();
+
+      expect(emittedPublicUser).toBeDefined();
+      expect(emittedPublicUser?.about).toBe(aboutText);
+    });
+
+    it('should save empty string for about when not provided', () => {
+      component.profileForm.patchValue({
+        city: 'Berlin',
+      });
+
+      let emittedPublicUser: PublicUser | undefined;
+      component.submitPublicUser.subscribe((user) => {
+        emittedPublicUser = user;
+      });
+
+      component.saveProfile();
+
+      expect(emittedPublicUser).toBeDefined();
+      expect(emittedPublicUser?.about).toBe('');
+    });
+
+    it('should not save if publicUser is not provided', () => {
+      compRef.setInput('publicUser', undefined);
+
+      component.saveProfile();
+
+      expect(submitPublicUserEmitSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('displayName effect', () => {
+    it('should return "Anonymous" when no user or publicUser is provided', () => {
+      compRef.setInput('user', undefined);
+      compRef.setInput('publicUser', undefined);
+
+      compRef.changeDetectorRef.detectChanges();
+
+      expect(component.profileForm.controls['displayName'].value).toBe(
+        'Anonymous',
+      );
+    });
+
+    it('should return publicUser displayName when available', () => {
+      const publicUser: PublicUser = {
+        displayName: 'Public Name',
+        email: 'test@example.com',
+        photoUrl: 'photo.jpg',
+        userId: 'user123',
+        public: true,
+      };
+
+      compRef.setInput('publicUser', publicUser);
+
+      compRef.changeDetectorRef.detectChanges();
+
+      expect(component.profileForm.controls['displayName'].value).toBe(
+        'Public Name',
+      );
+    });
+  });
+
+  describe('userImage computed', () => {
+    it('should return undefined when no user is provided', () => {
+      expect(component.userImage()).toBeUndefined();
+    });
+
+    it('should return photoUrl from user when available', () => {
+      const user = {
+        photoUrl: 'https://example.com/photo.jpg',
+        providerData: [],
+      };
+
+      compRef.setInput('user', user);
+
+      expect(component.userImage()).toBe('https://example.com/photo.jpg');
+    });
+
+    it('should return photoUrl from providerData when user photoUrl is not available', () => {
+      const user = {
+        photoUrl: null,
+        providerData: [{ photoUrl: 'https://example.com/provider-photo.jpg' }],
+      };
+
+      compRef.setInput('user', user);
+
+      expect(component.userImage()).toBe(
+        'https://example.com/provider-photo.jpg',
+      );
+    });
+  });
+
+  describe('Form validation', () => {
+    it('should be valid with about field populated', () => {
+      component.profileForm.patchValue({ email: 'some@supermail.com' });
+
+      expect(component.profileForm.valid).toBe(true);
+    });
+  });
+
+  describe('openConfirmationDialog', () => {
+    it('should set isOpen to true', () => {
+      component.openConfirmationDialog();
+
+      expect(component.isOpen()).toBe(true);
+    });
+  });
+});

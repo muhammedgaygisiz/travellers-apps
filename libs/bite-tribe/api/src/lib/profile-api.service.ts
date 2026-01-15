@@ -13,7 +13,7 @@ import {
   takeUntil,
 } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { Bite, PublicUser } from 'model';
+import type { Bite, PublicUser } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 const USERS_COLLECTION = 'users';
@@ -133,7 +133,7 @@ export class ProfileApiService {
         data: updatedUser,
       });
 
-      return { ...updatedUser, ...publicUser } as PublicUser;
+      return { ...publicUser, ...updatedUser } as PublicUser;
     } catch (error) {
       console.error('Error updating public user:', error);
       this.errorHandler.handleError(error);

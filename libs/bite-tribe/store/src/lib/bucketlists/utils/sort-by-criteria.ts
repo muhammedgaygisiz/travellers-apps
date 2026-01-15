@@ -1,4 +1,4 @@
-import { Bucketlist } from 'model';
+import type { Bucketlist } from 'model';
 import { sortBucketlistsByCreatedAt } from './sort-bucketlists-by-created-at';
 import { sortBucketlistsByName } from './sort-bucketlists-by-name';
 

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { ReviewApiService } from './review-api.service';
 import { RestaurantApiService } from './restaurant-api.service';
-import {
+import type {
   Bite,
   Bucketlist,
   CreateAndSaveToBucketListParams,

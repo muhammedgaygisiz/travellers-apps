@@ -73,7 +73,7 @@ export class EditProfilePage {
     return photoUrl;
   });
 
-  displayName = effect(() => {
+  setDisplayNameEffect = effect(() => {
     const user = this.user();
     const publicUser = this.publicUser();
 

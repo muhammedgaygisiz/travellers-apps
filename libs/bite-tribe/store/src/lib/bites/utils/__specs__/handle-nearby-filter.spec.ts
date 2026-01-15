@@ -1,5 +1,5 @@
 import { handleNearbyFilter } from '../handle-nearby-filter';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 describe('handleNearbyFilter', () => {
   it('should return all bites when no filters are applied', () => {

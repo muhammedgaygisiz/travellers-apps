@@ -1,5 +1,5 @@
 import { sortBitesByPrice } from '../sort-bites-by-price';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 describe('sortBitesByPrice', () => {
   it('should sort bites by price in ascending order', () => {

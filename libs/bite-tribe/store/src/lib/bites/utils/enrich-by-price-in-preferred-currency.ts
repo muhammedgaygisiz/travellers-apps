@@ -1,10 +1,10 @@
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { getBitePriceInPreferredCurrency } from './get-bite-price-in-preferred-currency';
 
 export const enrichByPriceInPreferredCurrency = (
   bite: Bite | undefined,
   exchangeRates: Record<string, number>,
-  preferedCurrency: string
+  preferedCurrency: string,
 ): Bite | undefined => {
   if (!bite) {
     return undefined;
@@ -15,7 +15,7 @@ export const enrichByPriceInPreferredCurrency = (
     priceInPreferredCurrency: getBitePriceInPreferredCurrency(
       bite,
       exchangeRates,
-      preferedCurrency
+      preferedCurrency,
     ),
     priceInPreferredCurrencySymbol: preferedCurrency,
   };

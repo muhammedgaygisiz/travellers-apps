@@ -1,9 +1,9 @@
-import { Restaurant } from 'model';
+import type { Restaurant } from 'model';
 import { normalize } from 'utils';
 
 export const getRestaurant = (
   restaurants: Restaurant[],
-  id: string
+  id: string,
 ): Restaurant | undefined => {
   const foundRestaurantById = restaurants.find((restaurant) => {
     const normalizedRestaurantId = normalize(restaurant.id);

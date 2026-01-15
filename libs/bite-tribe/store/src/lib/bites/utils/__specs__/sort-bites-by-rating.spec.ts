@@ -1,4 +1,4 @@
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { sortBitesByRating } from '../sort-bites-by-rating';
 
 describe('sortBitesByRating', () => {

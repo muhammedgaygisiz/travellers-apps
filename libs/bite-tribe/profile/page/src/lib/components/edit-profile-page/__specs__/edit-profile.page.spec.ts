@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
-import { PublicUser, Settings } from 'model';
+import type { PublicUser } from 'model';
 import type { OverlayEventDetail } from '@ionic/core';
 
 jest.mock('localization');
@@ -88,7 +88,7 @@ describe(EditProfilePage.name, () => {
     });
   });
 
-  describe('displayName effect', () => {
+  describe('setDisplayNameEffect', () => {
     it('should return "Anonymous" when no user or publicUser is provided', () => {
       compRef.setInput('user', undefined);
       compRef.setInput('publicUser', undefined);

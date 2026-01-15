@@ -1,7 +1,7 @@
 import { AppActions } from '../actions';
 import { reducer } from '../reducer';
 import { AppSlice } from '../app-slice.model';
-import { PublicUser, Settings } from 'model';
+import type { PublicUser, Settings } from 'model';
 import { BiteActions } from '../../bites/actions';
 import { fromAuth } from 'ta-firestore';
 

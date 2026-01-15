@@ -1,5 +1,5 @@
 import { getBitesByRestaurantIdOrName } from '../get-bites-by-restaurant-id-or-name';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 describe('getBitesByRestaurantIdOrName', () => {
   const bites = [

@@ -1,5 +1,5 @@
 import { sortBitesByLikes } from '../sort-bites-by-likes';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 describe('sortBitesByLikes', () => {
   it('should sort bites by likes in descending order', () => {

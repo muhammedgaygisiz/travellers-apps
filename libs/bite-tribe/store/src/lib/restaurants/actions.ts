@@ -1,31 +1,31 @@
 import { createAction, props } from '@ngrx/store';
-import { Link, Restaurant } from 'model';
+import type { Link, Restaurant } from 'model';
 
 export const loadedRestaurantsFromApi = createAction(
   '[RESTAURANTS] Loaded from API',
-  props<{ restaurants: Restaurant[] }>()
+  props<{ restaurants: Restaurant[] }>(),
 );
 
 export const loadedRestaurantFromApi = createAction(
   '[RESTAURANTS] Loaded restaurant from API',
-  props<{ restaurant: Restaurant }>()
+  props<{ restaurant: Restaurant }>(),
 );
 
 export const noRestaurantFound = createAction(
-  '[RESTAURANTS] No restaurant found'
+  '[RESTAURANTS] No restaurant found',
 );
 
 export const setRestaurantToCreate = createAction(
   '[RESTAURANTS] Set restaurant to create',
-  props<{ restaurant: Restaurant }>()
+  props<{ restaurant: Restaurant }>(),
 );
 
 export const saveNewRestaurant = createAction(
   '[RESTAURANTS] Save new restaurant',
-  props<{ restaurant: Restaurant }>()
+  props<{ restaurant: Restaurant }>(),
 );
 
 export const saveSocialMediaLinksForRestaurant = createAction(
   '[RESTAURANTS] Save social media links for restaurant',
-  props<{ restaurantId: string; links: Link[] }>()
+  props<{ restaurantId: string; links: Link[] }>(),
 );

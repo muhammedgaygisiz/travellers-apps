@@ -1,5 +1,5 @@
 import { getCloseBites } from '../get-close-bites';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 const haversineDistanceMock = jest.fn();
 jest.mock('utils', () => ({

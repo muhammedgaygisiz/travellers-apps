@@ -1,7 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
 import { adapter } from './adapter';
-import { Bite, PublicUser } from 'model';
+import type { Bite, PublicUser } from 'model';
 import { biteId } from '../router/selectors';
 import { likes } from '../likes/selectors';
 import {

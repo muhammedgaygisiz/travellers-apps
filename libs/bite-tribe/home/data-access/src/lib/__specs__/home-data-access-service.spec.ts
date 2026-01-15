@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from '../home-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
-import { Bite, Like } from 'model';
+import type { Bite, Like } from 'model';
 import { provideMockStore } from '@ngrx/store/testing';
 import SpyInstance = jest.SpyInstance;
 

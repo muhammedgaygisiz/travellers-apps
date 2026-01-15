@@ -30,7 +30,7 @@ import { MenuActions } from './menus/actions';
 import { AppActions } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
-import {
+import type {
   Bite,
   CreateAndSaveToBucketListParams,
   Like,

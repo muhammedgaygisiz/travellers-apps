@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { MenuDataAccessService } from 'bite-tribe/menu-data-access';
-import { Bite, Menu, MenuItem } from 'model';
+import type { Bite, Menu, MenuItem } from 'model';
 import { NavController } from '@ionic/angular';
 
 @Injectable({

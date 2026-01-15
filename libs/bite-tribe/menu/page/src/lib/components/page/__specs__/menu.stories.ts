@@ -2,7 +2,7 @@ import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { MenuPage } from '../menu-page.component';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { Menu, Restaurant } from 'model';
+import type { Menu, Restaurant } from 'model';
 import { restaurantB64Image } from './restaurant-b64-image';
 
 addNecessaryIcons();

@@ -8,7 +8,7 @@ import { AppActions } from '../actions';
 import { AppEffect } from '../effects';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { PublicUser, Settings } from 'model';
+import type { PublicUser, Settings } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import SpyInstance = jest.SpyInstance;

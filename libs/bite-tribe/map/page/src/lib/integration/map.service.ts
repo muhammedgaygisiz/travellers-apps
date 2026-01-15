@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, Signal } from '@angular/core';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import { Bite, Geopoint } from 'model';
+import type { Bite, Geopoint } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class MapService {

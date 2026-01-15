@@ -1,5 +1,6 @@
 @let userData = user();
 @let subscriptionTierData = subscriptionTier();
+@let currentUserId = userId();
 
 <ta-page
   [showHeaderMenu]="true"
@@ -49,7 +50,7 @@
         {{ userData?.city || 'No location' }}
       </p>
 
-      @if (userData?.userId === user()?.userId) {
+      @if (!!currentUserId && userData?.userId === currentUserId) {
         <ion-button (click)="gotoEditProfile.emit()">Edit Profile</ion-button>
       }
       @if (isUnfollowedUser()) {
@@ -71,7 +72,7 @@
         @for (bite of bites(); track bite.id) {
           <bt-bite
             [bite]="bite"
-            [userId]="userId()"
+            [userId]="currentUserId"
             [showEditButton]="false"
             (biteClick)="biteClick.emit($event)"
             (restaurantClick)="restaurantClick.emit($event)"

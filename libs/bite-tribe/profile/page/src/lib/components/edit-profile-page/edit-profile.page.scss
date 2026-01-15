@@ -4,4 +4,27 @@
   .profile-image {
     @include globals.profile-image;
   }
+
+  .go-public-button-container {
+    display: flex;
+    justify-content: stretch;
+
+    width: 100%;
+
+    ion-button {
+      flex: 1;
+      margin-top: 16px;
+    }
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 32px;
+
+    ion-button {
+      flex: 1;
+    }
+  }
 }

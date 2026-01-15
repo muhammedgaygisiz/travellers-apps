@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -22,6 +23,8 @@ import {
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import type { PublicUser, User } from 'model';
 import type { OverlayEventDetail } from '@ionic/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 
 const STAY_PUBLIC = 'stay-public';
 const GO_PRIVATE = 'go-private';
@@ -71,11 +74,13 @@ export class EditProfilePage {
     return photoUrl;
   });
 
-  displayName = computed(() => {
+  displayName = effect(() => {
     const user = this.user();
     const publicUser = this.publicUser();
 
-    return publicUser?.displayName || user?.displayName || 'Anonymous';
+    this.profileForm.patchValue({
+      displayName: publicUser?.displayName || user?.displayName || 'Anonymous',
+    });
   });
 
   profileEffect = afterRenderEffect(() => {
@@ -83,9 +88,6 @@ export class EditProfilePage {
     if (publicUser) {
       this.profileForm.patchValue(publicUser);
     }
-
-    const displayName = this.displayName();
-    this.profileForm.patchValue({ displayName });
   });
 
   isOpen = signal(false);
@@ -93,7 +95,18 @@ export class EditProfilePage {
     displayName: [''],
     city: [''],
     about: [''],
+    email: [''],
   });
+
+  isFormInvalid = toSignal(
+    this.profileForm.valueChanges.pipe(map(() => !this.profileForm.valid)),
+    { initialValue: !this.profileForm.valid },
+  );
+
+  isFormPristine = toSignal(
+    this.profileForm.valueChanges.pipe(map(() => this.profileForm.pristine)),
+    { initialValue: this.profileForm.pristine },
+  );
 
   confirmationButtons = [
     {

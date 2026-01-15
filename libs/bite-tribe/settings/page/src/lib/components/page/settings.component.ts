@@ -85,11 +85,7 @@ export class PageSettings {
   );
 
   isFormInvalid = toSignal(
-    this.settingsForm.valueChanges.pipe(
-      map(() => {
-        return !this.settingsForm.valid;
-      }),
-    ),
+    this.settingsForm.valueChanges.pipe(map(() => !this.settingsForm.valid)),
     { initialValue: !this.settingsForm.valid },
   );
 

@@ -54,13 +54,13 @@
           </ion-item>
         </section>
 
-        <!-- Action Buttons -->
         <div class="button-container safe-padding-bottom">
           <ion-button fill="outline" color="medium">Log Out</ion-button>
           <ion-button
             [disabled]="isFormInvalid() || isFormPristine()"
             (click)="saveSettings()"
-            >Save Changes
+          >
+            Save Changes
           </ion-button>
         </div>
       </form>

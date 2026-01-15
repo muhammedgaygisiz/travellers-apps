@@ -104,18 +104,6 @@ export class AppEffect {
     { dispatch: false },
   );
 
-  goPublicEffect$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AppActions.goPublic),
-        tap(() => {
-          this.api.saveUser();
-        }),
-      );
-    },
-    { dispatch: false },
-  );
-
   saveProfileToFirestore$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(AppActions.savePublicProfile),
@@ -133,18 +121,6 @@ export class AppEffect {
       }),
     );
   });
-
-  goPrivateEffect$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AppActions.goPrivate),
-        tap(() => {
-          this.api.deleteUser();
-        }),
-      );
-    },
-    { dispatch: false },
-  );
 
   reloadGpsOnPageChangeToCreateBite$ = createEffect(
     () => {

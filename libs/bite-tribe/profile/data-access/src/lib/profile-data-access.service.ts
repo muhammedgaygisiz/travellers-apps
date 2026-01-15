@@ -50,14 +50,6 @@ export class ProfileDataAccessService {
     this.storeService.submitLikeClick(likeType);
   }
 
-  goPublic(): void {
-    this.storeService.goPublic();
-  }
-
-  goPrivate(): void {
-    this.storeService.goPrivate();
-  }
-
   savePublicProfile(publicUser: PublicUser): void {
     this.storeService.savePublicProfile(publicUser);
   }

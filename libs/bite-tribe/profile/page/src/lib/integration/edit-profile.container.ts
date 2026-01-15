@@ -10,11 +10,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <edit-profile-page
       class="ion-page"
       [isAuthenticated]="service.isAuthenticated()"
-      [isPublicProfile]="service.isPublicProfile()"
       [publicUser]="service.myUser()"
       (submitPublicUser)="service.saveProfile($event)"
-      (goPublic)="service.goPublic()"
-      (goPrivate)="service.goPrivate()"
     />
   `,
 })

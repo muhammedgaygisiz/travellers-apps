@@ -94,10 +94,6 @@ export const reducer = createReducer<AppSlice>(
       };
     },
   ),
-  on(AppActions.goPrivate, (state) => ({
-    ...state,
-    profile: undefined,
-  })),
   on(AppActions.loadedExchangeRatesFromAPI, (state, { exchangeRates }) => ({
     ...state,
     exchangeRates,

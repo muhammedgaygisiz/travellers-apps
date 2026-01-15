@@ -53,15 +53,10 @@
         />
       </ion-item>
 
-      <div class="ion-margin-top ion-text-end go-public-button-container">
-        @if (isPublicProfile()) {
-        <ion-button (click)="openConfirmationDialog()">
-          Return to private
-        </ion-button>
-        } @else {
-        <ion-button (click)="goPublic.emit()">Go public</ion-button>
-        }
-      </div>
+      <ion-item>
+        <ion-label>Public User</ion-label>
+        <ion-toggle slot="end" formControlName="public" />
+      </ion-item>
 
       <div class="button-container safe-padding-bottom">
         <ion-button

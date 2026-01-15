@@ -19,6 +19,7 @@ import {
   IonItem,
   IonLabel,
   IonTextarea,
+  IonToggle,
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import type { PublicUser, User } from 'model';
@@ -45,6 +46,7 @@ const GO_PRIVATE = 'go-private';
     IonTextarea,
     IonButton,
     IonAlert,
+    IonToggle,
   ],
 })
 export class EditProfilePage {
@@ -56,10 +58,6 @@ export class EditProfilePage {
 
   publicUser = input<PublicUser>();
 
-  isPublicProfile = input<boolean>();
-
-  goPublic = output();
-  goPrivate = output();
   submitPublicUser = output<PublicUser>();
 
   userImage = computed(() => {
@@ -96,6 +94,7 @@ export class EditProfilePage {
     city: [''],
     about: [''],
     email: [''],
+    public: [false],
   });
 
   isFormInvalid = toSignal(
@@ -124,11 +123,7 @@ export class EditProfilePage {
   }
 
   handleGoPrivateConfirmation(event: CustomEvent<OverlayEventDetail>): void {
-    const role = event.detail.role;
-
-    if (role === GO_PRIVATE) {
-      this.goPrivate.emit();
-    }
+    console.log('TODO');
 
     this.isOpen.set(false);
   }

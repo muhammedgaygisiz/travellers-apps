@@ -74,14 +74,6 @@ export class ProfileService {
     ]);
   }
 
-  goPublic(): void {
-    this.dataAccess.goPublic();
-  }
-
-  goPrivate(): void {
-    this.dataAccess.goPrivate();
-  }
-
   saveProfile(publicUser: PublicUser): void {
     this.dataAccess.savePublicProfile(publicUser);
 

@@ -264,14 +264,6 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(BucketlistActions.createBucketlist({ bucketlistName }));
   }
 
-  goPublic(): void {
-    this.store.dispatch(AppActions.goPublic());
-  }
-
-  goPrivate(): void {
-    this.store.dispatch(AppActions.goPrivate());
-  }
-
   setHomeSorting(sorting: string): void {
     this.store.dispatch(FilteringAndSortingActions.setHomeSorting({ sorting }));
   }

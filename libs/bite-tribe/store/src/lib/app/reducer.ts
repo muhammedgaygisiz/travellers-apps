@@ -84,12 +84,16 @@ export const reducer = createReducer<AppSlice>(
       settings,
     };
   }),
-  on(AppActions.setPublicProfile, (state, { profile }) => {
-    return {
-      ...state,
-      profile,
-    };
-  }),
+  on(
+    AppActions.setPublicProfile,
+    AppActions.savedPublicProfile,
+    (state, { profile }) => {
+      return {
+        ...state,
+        profile,
+      };
+    },
+  ),
   on(AppActions.goPrivate, (state) => ({
     ...state,
     profile: undefined,

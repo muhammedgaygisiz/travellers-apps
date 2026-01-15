@@ -4,6 +4,7 @@ import { ProfileComponent } from '../components/profile-page/profile.component';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
+  selector: 'my-profile-container',
   template: `
     <profile-page
       class="ion-page"

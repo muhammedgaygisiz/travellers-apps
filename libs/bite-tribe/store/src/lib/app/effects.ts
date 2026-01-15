@@ -116,17 +116,23 @@ export class AppEffect {
     { dispatch: false },
   );
 
-  saveProfileToFirestore$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AppActions.savePublicProfile),
-        tap(({ publicUser }) => {
-          this.api.updateUser(publicUser);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+  saveProfileToFirestore$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(AppActions.savePublicProfile),
+      switchMap(({ profile }) => {
+        return from(this.api.updateUser(profile)).pipe(
+          map((updatedUser) => {
+            if (updatedUser) {
+              return AppActions.savedPublicProfile({ profile: updatedUser });
+            }
+
+            return AppActions.errorSavingPublicProfile();
+          }),
+          catchError(() => of(AppActions.errorSavingPublicProfile())),
+        );
+      }),
+    );
+  });
 
   goPrivateEffect$ = createEffect(
     () => {

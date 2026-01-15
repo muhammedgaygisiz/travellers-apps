@@ -38,7 +38,7 @@ export class ProfileApiService {
       }
 
       return this.profileChannel$.pipe(skip(1), takeUntil(this.stopped$));
-    })
+    }),
   );
 
   private async getUser(): Promise<User | null | undefined> {
@@ -75,7 +75,7 @@ export class ProfileApiService {
               id: publicProfileDoc.snapshots[0].id,
             });
           }
-        }
+        },
       );
 
     return this.profileChannel$;
@@ -93,7 +93,7 @@ export class ProfileApiService {
       const user = await this.getUser();
 
       const photoUrl = ((user as any)?.providerData as any[]).find(
-        (data) => data.photoUrl?.length
+        (data) => data.photoUrl?.length,
       )?.photoUrl;
 
       await FirebaseFirestore.setDocument({
@@ -115,24 +115,30 @@ export class ProfileApiService {
     }
   }
 
-  async updateUser(publicUser: PublicUser): Promise<void> {
+  async updateUser(publicUser: PublicUser): Promise<PublicUser | undefined> {
     try {
+      const updatedUser: Omit<PublicUser, 'userId'> = {
+        displayName: publicUser.displayName,
+        email: publicUser.email,
+        photoUrl: publicUser.photoUrl,
+        city: publicUser.city || '',
+        about: publicUser.about || '',
+        public: true,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
+      };
+
       await FirebaseFirestore.updateDocument({
         reference: `${USERS_COLLECTION}/${publicUser.userId}`,
-        data: {
-          displayName: publicUser.displayName,
-          email: publicUser.email,
-          photoUrl: publicUser.photoUrl,
-          city: publicUser.city || '',
-          about: publicUser.about || '',
-          public: true,
-          updatedAt: new Date().toISOString(),
-          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-        },
+        data: updatedUser,
       });
+
+      return { ...updatedUser, ...publicUser } as PublicUser;
     } catch (error) {
       console.error('Error updating public user:', error);
       this.errorHandler.handleError(error);
+
+      return undefined;
     }
   }
 
@@ -162,13 +168,13 @@ export class ProfileApiService {
     return from(
       FirebaseFirestore.getDocument({
         reference: `${USERS_COLLECTION}/${bite.userId}`,
-      })
+      }),
     ).pipe(
       catchError((error) => {
         console.error('Error fetching user by bite ID:', error);
         this.errorHandler.handleError(error);
         throw new Error(error);
-      })
+      }),
     );
   }
 

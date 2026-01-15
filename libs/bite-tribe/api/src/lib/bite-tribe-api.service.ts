@@ -133,8 +133,8 @@ export class BiteTribeApiService {
     this.profileApiService.deleteUser();
   }
 
-  updateUser(publicUser: PublicUser): void {
-    this.profileApiService.updateUser(publicUser);
+  updateUser(publicUser: PublicUser): Promise<PublicUser | undefined> {
+    return this.profileApiService.updateUser(publicUser);
   }
 
   saveUser(): void {

@@ -3,11 +3,13 @@ import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { Bite, PublicUser } from 'model';
 import { PATH } from 'utils';
+import { Location } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
-  dataAccess = inject(ProfileDataAccessService);
+  private readonly dataAccess = inject(ProfileDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly location = inject(Location);
 
   isAuthenticated = this.dataAccess.isAuthenticated;
   myUser = this.dataAccess.myUser;
@@ -82,5 +84,7 @@ export class ProfileService {
 
   saveProfile(publicUser: PublicUser): void {
     this.dataAccess.savePublicProfile(publicUser);
+
+    this.location.back();
   }
 }

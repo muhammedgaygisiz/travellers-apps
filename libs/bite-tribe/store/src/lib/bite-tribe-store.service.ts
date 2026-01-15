@@ -211,8 +211,8 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(AppActions.saveSettings({ settings }));
   }
 
-  savePublicProfile(publicUser: PublicUser): void {
-    this.store.dispatch(AppActions.savePublicProfile({ publicUser }));
+  savePublicProfile(profile: PublicUser): void {
+    this.store.dispatch(AppActions.savePublicProfile({ profile }));
   }
 
   saveReview(newReview: { review: string; biteId: string }): void {

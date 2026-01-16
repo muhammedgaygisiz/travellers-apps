@@ -67,9 +67,7 @@
           <ion-button (click)="gotoEditProfile.emit()">Edit Profile</ion-button>
         }
         @if (isUnfollowedUser()) {
-          <ion-button fill="outline" [disabled]="true" (click)="onFollow()">
-            Follow
-          </ion-button>
+          <ion-button fill="outline" (click)="onFollow()"> Follow </ion-button>
         }
       </div>
     </h1>

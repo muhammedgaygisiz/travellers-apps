@@ -145,6 +145,10 @@ export class BiteTribeApiService {
     this.profileApiService.saveUserIfNotExisting();
   }
 
+  followUser(user: PublicUser): void {
+    this.profileApiService.followUser(user);
+  }
+
   async bitesByPosition(position: GeolocationPosition): Promise<Bite[]> {
     return this.biteApiService.loadBitesByLocation(position);
   }

@@ -134,4 +134,14 @@ export class AppEffect {
     },
     { dispatch: false },
   );
+
+  followUser$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(AppActions.followUser),
+        tap(({ user }) => this.api.followUser(user)),
+      );
+    },
+    { dispatch: false },
+  );
 }

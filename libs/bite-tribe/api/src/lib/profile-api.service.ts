@@ -214,4 +214,32 @@ export class ProfileApiService {
       this.errorHandler.handleError(error);
     }
   }
+
+  async followUser(user: PublicUser): Promise<void> {
+    try {
+      const currentUser = await this.getUser();
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+
+      const followRelationship = {
+        createdAt: new Date().toISOString(),
+        followerUid: currentUser.uid,
+        followedUid: user.userId,
+      };
+
+      await FirebaseFirestore.setDocument({
+        reference: `${USERS_COLLECTION}/${user.userId}/followers/${currentUser.uid}`,
+        data: followRelationship,
+      });
+
+      await FirebaseFirestore.setDocument({
+        reference: `${USERS_COLLECTION}/${currentUser.uid}/following/${user.userId}`,
+        data: followRelationship,
+      });
+    } catch (error) {
+      console.error('Error following user:', error);
+      this.errorHandler.handleError(error);
+    }
+  }
 }

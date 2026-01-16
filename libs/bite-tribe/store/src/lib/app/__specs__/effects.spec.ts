@@ -35,6 +35,7 @@ const Mock = {
   saveUserIfNotExisting: jest.fn(),
   getExchangeRates: jest.fn(),
   reloadGPSPosition: jest.fn(),
+  followUser: jest.fn(),
 };
 
 describe('AppEffect', () => {
@@ -319,6 +320,27 @@ describe('AppEffect', () => {
       });
 
       expect(reloadGPSPositionSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('followUser$', () => {
+    let followUserSpy: SpyInstance;
+
+    beforeEach(() => {
+      followUserSpy = jest.spyOn(apiService, 'followUser').mockImplementation();
+    });
+
+    it('should call followUser from Store Service', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        const user = { userId: 'user-id' } as PublicUser;
+        actions$ = cold('a', {
+          a: AppActions.followUser({ user }),
+        });
+
+        expectObservable(effects.followUser$);
+      });
+
+      expect(followUserSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

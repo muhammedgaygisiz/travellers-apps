@@ -26,8 +26,10 @@ export class BiteEffects {
   loadBitesByCurrentUser$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(routerNavigatedAction),
-      filter(({ payload }) =>
-        payload.event.urlAfterRedirects.includes(PATH.MY_BITES),
+      filter(
+        ({ payload }) =>
+          payload.event.urlAfterRedirects.includes(PATH.MY_BITES) ||
+          payload.event.urlAfterRedirects.includes(PATH.MY_PROFILE),
       ),
       switchMap(() => {
         const user = this.storeService.user();

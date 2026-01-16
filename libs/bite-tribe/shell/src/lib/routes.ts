@@ -100,7 +100,7 @@ export const ROUTES: Routes = withAuthRoutes([
       import('bite-tribe/profile').then((m) => m.BiteCreatorProfileContainer),
   },
   {
-    path: 'my-profile',
+    path: PATH.MY_PROFILE,
     loadComponent: () =>
       import('bite-tribe/profile').then((m) => m.MyProfileContainer),
   },

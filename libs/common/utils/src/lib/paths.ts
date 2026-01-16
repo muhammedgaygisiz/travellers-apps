@@ -4,4 +4,5 @@ export const PATH = {
   HOME: 'home',
   EDIT_PROFILE: 'edit-profile',
   PROFILE: 'profile',
+  MY_PROFILE: 'my-profile',
 };

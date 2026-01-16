@@ -18,5 +18,6 @@ export const BiteActions = createActionGroup({
     'Error deleting bite': props<{ bite: Bite }>(),
     'Loaded bite creator': props<{ biteCreator: any }>(),
     'No public creator for bite': emptyProps(),
+    'No bites for bite creator profile': emptyProps(),
   },
 });

@@ -8,13 +8,14 @@ import {
   switchMap,
   takeUntil,
 } from 'rxjs';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type {
   CreateAndSaveToBucketListParams,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
 } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
+import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
 
 const BUCKETLIST_COLLECTION = 'bucketlists';
 
@@ -30,7 +31,7 @@ export class BucketlistApiService {
   bucketlistCallbackId = '';
 
   public async startListener(): Promise<void> {
-    const user = await this.getUser();
+    const user = this.getUser();
 
     this.bucketlistCallbackId =
       await FirebaseFirestore.addCollectionSnapshotListener(
@@ -48,24 +49,29 @@ export class BucketlistApiService {
             ],
           },
         },
-        async (bucketlistDocs): Promise<void> => {
-          const bucketlists =
-            bucketlistDocs?.snapshots.map((doc) => ({
-              ...doc.data,
-              id: doc.id,
-            })) || [];
-
-          this._bucketlistsChannel$.next(bucketlists);
-        },
+        async (bucketlistDocs): Promise<void> =>
+          this.handleResponse(bucketlistDocs),
       );
   }
 
-  private async getUser(): Promise<User | null | undefined> {
-    const authState = await this.authService.authState();
+  handleResponse(
+    bucketlistDocs: AddCollectionSnapshotListenerCallbackEvent<DocumentData> | null,
+  ): void {
+    const bucketlists =
+      bucketlistDocs?.snapshots.map((doc) => ({
+        ...doc.data,
+        id: doc.id,
+      })) || [];
+
+    this._bucketlistsChannel$.next(bucketlists);
+  }
+
+  private getUser(): User | null | undefined {
+    const authState = this.authService.authState();
     return authState?.user;
   }
 
-  private async stopBucketlistListener(callbackId: string): Promise<void> {
+  async stopBucketlistListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });
@@ -108,7 +114,7 @@ export class BucketlistApiService {
     params: CreateAndSaveToBucketListParams,
   ): Promise<void> {
     try {
-      const user = await this.getUser();
+      const user = this.getUser();
 
       await FirebaseFirestore.addDocument({
         reference: BUCKETLIST_COLLECTION,
@@ -155,7 +161,7 @@ export class BucketlistApiService {
 
   async createBucketList(bucketlistName: string): Promise<void> {
     try {
-      const user = await this.getUser();
+      const user = this.getUser();
 
       await FirebaseFirestore.addDocument({
         reference: BUCKETLIST_COLLECTION,

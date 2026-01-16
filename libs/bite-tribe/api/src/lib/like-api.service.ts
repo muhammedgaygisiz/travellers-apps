@@ -43,7 +43,7 @@ export class LikeApiService {
     }
   }
 
-  private async stopLikesListener(callbackId: string): Promise<void> {
+  async stopLikesListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });

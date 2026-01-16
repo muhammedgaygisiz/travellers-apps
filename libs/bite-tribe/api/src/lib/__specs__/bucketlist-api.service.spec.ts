@@ -45,7 +45,7 @@ describe(BucketlistApiService.name, () => {
         .mockResolvedValue('callbackId');
     });
 
-    it('should start the listener and update bucketlists$', async () => {
+    it('should start the listener', async () => {
       await service.startListener();
 
       expect(addCollectionSnapshotListnerMock).toHaveBeenCalled();

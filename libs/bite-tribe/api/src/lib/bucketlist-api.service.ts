@@ -49,8 +49,7 @@ export class BucketlistApiService {
             ],
           },
         },
-        async (bucketlistDocs): Promise<void> =>
-          this.handleResponse(bucketlistDocs),
+        (bucketlistDocs): void => this.handleResponse(bucketlistDocs),
       );
   }
 

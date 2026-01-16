@@ -1,7 +1,11 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import { BehaviorSubject, skip, Subject } from 'rxjs';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import {
+  AddCollectionGroupSnapshotListenerCallbackEvent,
+  DocumentData,
+  FirebaseFirestore,
+} from '@capacitor-firebase/firestore';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { BITE_COLLECTION } from './bite-api/utils/constants';
 
@@ -22,17 +26,21 @@ export class LikeApiService {
     this.likesCallbackId =
       await FirebaseFirestore.addCollectionGroupSnapshotListener(
         { reference: `${LIKES_COLLECTION_GROUP}` },
-        (likeDocs: any) => {
-          const likes =
-            likeDocs?.snapshots.map((likeDoc: any) => ({
-              ...likeDoc.data,
-            })) || [];
-
-          if (likes.length) {
-            this._likesChannel$.next(likes);
-          }
-        },
+        (likeDocs) => this.handleResponse(likeDocs),
       );
+  }
+
+  handleResponse(
+    likeDocs: AddCollectionGroupSnapshotListenerCallbackEvent<DocumentData> | null,
+  ): void {
+    const likes =
+      likeDocs?.snapshots.map((likeDoc: any) => ({
+        ...likeDoc.data,
+      })) || [];
+
+    if (likes.length) {
+      this._likesChannel$.next(likes);
+    }
   }
 
   private async stopLikesListener(callbackId: string): Promise<void> {

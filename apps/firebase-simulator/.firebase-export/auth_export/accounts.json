@@ -4,10 +4,10 @@
     {
       "localId": "helULN26hP9Qeig6NQLIEcEe3AP6",
       "createdAt": "1768318963883",
-      "lastLoginAt": "1768330790319",
+      "lastLoginAt": "1768566548696",
       "passwordHash": "fakeHash:salt=fakeSalt0X2Qe62iMEaEn2ncHKRf:password=Test4711",
       "salt": "fakeSalt0X2Qe62iMEaEn2ncHKRf",
-      "passwordUpdatedAt": 1768332236882,
+      "passwordUpdatedAt": 1768565560101,
       "providerUserInfo": [
         {
           "providerId": "password",
@@ -16,10 +16,31 @@
           "rawId": "test@test.com"
         }
       ],
-      "validSince": "1768332236",
+      "validSince": "1768565560",
       "email": "test@test.com",
       "emailVerified": false,
-      "disabled": false
+      "disabled": false,
+      "lastRefreshAt": "2026-01-16T12:29:08.696Z"
+    },
+    {
+      "localId": "sKjq4POYpxuV27V3JIJfshUre4Cw",
+      "lastLoginAt": "1768566470321",
+      "emailVerified": false,
+      "email": "test2@test.com",
+      "salt": "fakeSaltNTo2Jz0URIQNNvgqbEL8",
+      "passwordHash": "fakeHash:salt=fakeSaltNTo2Jz0URIQNNvgqbEL8:password=Test4711",
+      "passwordUpdatedAt": 1768566145323,
+      "validSince": "1768566145",
+      "createdAt": "1768566145323",
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "email": "test2@test.com",
+          "federatedId": "test2@test.com",
+          "rawId": "test2@test.com"
+        }
+      ],
+      "lastRefreshAt": "2026-01-16T12:27:50.321Z"
     }
   ]
 }

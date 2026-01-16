@@ -1,0 +1,18 @@
+{
+  "name": "images/bites/eJC1zr1DrIwhSm4nznU7/c5ea5a2a-8204-48fa-a7c7-d552a70767b2.jpg",
+  "bucket": "bite-tribe.firebasestorage.app",
+  "metageneration": 1,
+  "generation": 1768566208126,
+  "contentType": "image/jpeg",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "cacheControl": "public,max-age=31536000,immutable",
+  "downloadTokens": ["7640f21f-963c-4548-bf04-887d21d6b357"],
+  "etag": "xYxVWz+L/dAXswmh4DLNbnl6GqE",
+  "customMetadata": {},
+  "timeCreated": "2026-01-16T12:23:28.126Z",
+  "updated": "2026-01-16T12:23:28.126Z",
+  "size": 85184,
+  "md5Hash": "H0iOqma3i7gMnIe9L1pGww==",
+  "crc32c": "736811448"
+}

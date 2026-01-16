@@ -9,12 +9,12 @@ import { BiteActions } from '../actions';
 import type { Bite } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { bite } from '../selectors';
-import SpyInstance = jest.SpyInstance;
 import { AppActions } from '../../app/actions';
 import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import { signal, WritableSignal } from '@angular/core';
 import { BucketlistActions } from '../../bucketlists/actions';
 import { PATH } from 'utils';
+import SpyInstance = jest.SpyInstance;
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -37,7 +37,7 @@ const BITE_MOCK = {
   id: 'biteId',
 } as Bite;
 
-describe('BiteEffects', () => {
+describe(BiteEffects.name, () => {
   let scheduler: TestScheduler;
   let actions$: Observable<any> = of({});
   let effects: BiteEffects;
@@ -89,6 +89,78 @@ describe('BiteEffects', () => {
           expected,
           output,
         );
+      });
+    });
+
+    it('should load bites from API on my-profile page entry', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: routerNavigatedAction({
+            payload: { event: { urlAfterRedirects: PATH.MY_PROFILE } } as any,
+          }),
+        });
+
+        const expected = 'a';
+        const output = {
+          a: BiteActions.loadedByUserFromAPI({ bites: [] }),
+        };
+
+        expectObservable(effects.loadBitesByCurrentUser$).toBe(
+          expected,
+          output,
+        );
+      });
+    });
+  });
+
+  describe('loadBitesForBiteCreatorProfile', () => {
+    describe('given a bite creator profile page entry', () => {
+      const BITE_CREATOR_PROFILE_PAGE_ENTRY = routerNavigatedAction({
+        payload: { event: { urlAfterRedirects: PATH.PROFILE } } as any,
+      });
+
+      describe('and no bite creator id', () => {
+        it('should return noBitesForBiteCreatorProfile', () => {
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('a', {
+              a: BITE_CREATOR_PROFILE_PAGE_ENTRY,
+            });
+
+            const expected = 'a';
+            const output = {
+              a: BiteActions.noBitesForBiteCreatorProfile(),
+            };
+
+            expectObservable(effects.loadBitesForBiteCreatorProfile$).toBe(
+              expected,
+              output,
+            );
+          });
+        });
+      });
+
+      describe('and a bite creator id is defined', () => {
+        beforeEach(() => {
+          (effects as any)['biteCreatorId'] = (): string => 'biteCreatorId';
+        });
+
+        it('should load bites from API', () => {
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('a', {
+              a: BITE_CREATOR_PROFILE_PAGE_ENTRY,
+            });
+
+            const expected = 'a';
+            const output = {
+              a: BiteActions.loadedByUserFromAPI({ bites: [] }),
+            };
+
+            expectObservable(effects.loadBitesForBiteCreatorProfile$).toBe(
+              expected,
+              output,
+            );
+          });
+        });
       });
     });
   });

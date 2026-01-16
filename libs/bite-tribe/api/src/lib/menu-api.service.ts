@@ -11,8 +11,9 @@ import {
   Subject,
   switchMap,
 } from 'rxjs';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { Menu } from 'model';
+import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
 
 export const MENU_COLLECTION = 'menus';
 
@@ -31,18 +32,24 @@ export class MenuApiService {
     this.menuCallbackId = await FirebaseFirestore.addCollectionSnapshotListener(
       { reference: MENU_COLLECTION },
       async (menusDocs) => {
-        const menus =
-          menusDocs?.snapshots.map((doc) => ({
-            ...doc.data,
-            id: doc.id,
-          })) || [];
-
-        this._menusChannel$.next(menus);
+        this.handleResponse(menusDocs);
       },
     );
   }
 
-  private async stopMenuListener(callbackId: string): Promise<void> {
+  handleResponse(
+    menusDocs: AddCollectionSnapshotListenerCallbackEvent<DocumentData> | null,
+  ): void {
+    const menus =
+      menusDocs?.snapshots.map((doc) => ({
+        ...doc.data,
+        id: doc.id,
+      })) || [];
+
+    this._menusChannel$.next(menus);
+  }
+
+  async stopMenuListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });

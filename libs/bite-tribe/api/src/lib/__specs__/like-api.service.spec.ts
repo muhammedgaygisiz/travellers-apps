@@ -80,7 +80,7 @@ describe(LikeApiService.name, () => {
         .mockResolvedValue();
 
       const callbackId = 'testCallbackId';
-      await (service as any).stopLikesListener(callbackId);
+      await service.stopLikesListener(callbackId);
 
       expect(removeSnapshotListenerMock).toHaveBeenCalledWith({ callbackId });
     });

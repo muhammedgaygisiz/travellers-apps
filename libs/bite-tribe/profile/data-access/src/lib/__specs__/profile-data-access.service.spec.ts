@@ -15,6 +15,7 @@ class Mock {
   bites$ = of([]);
   biteCreator$ = of(null);
   userId$ = of('user-id');
+  isPublicProfile$ = of(true);
   logout = (): null => null;
   removeLike = (): null => null;
   submitLikeClick = (): null => null;

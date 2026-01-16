@@ -13,7 +13,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { MenuItem } from 'model';
+import type { MenuItem } from 'model';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

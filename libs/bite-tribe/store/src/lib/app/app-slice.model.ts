@@ -1,4 +1,4 @@
-import { Geopoint, PublicUser, Settings } from 'model';
+import type { Geopoint, PublicUser, Settings } from 'model';
 
 export type AppSlice = {
   position?: Geopoint;

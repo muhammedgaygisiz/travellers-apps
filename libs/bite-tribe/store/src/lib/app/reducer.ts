@@ -85,16 +85,16 @@ export const reducer = createReducer<AppSlice>(
       settings,
     };
   }),
-  on(AppActions.setPublicProfile, (state, { profile }) => {
-    return {
-      ...state,
-      profile,
-    };
-  }),
-  on(AppActions.goPrivate, (state) => ({
-    ...state,
-    profile: undefined,
-  })),
+  on(
+    AppActions.setPublicProfile,
+    AppActions.savedPublicProfile,
+    (state, { profile }) => {
+      return {
+        ...state,
+        profile,
+      };
+    },
+  ),
   on(AppActions.loadedExchangeRatesFromAPI, (state, { exchangeRates }) => ({
     ...state,
     exchangeRates,

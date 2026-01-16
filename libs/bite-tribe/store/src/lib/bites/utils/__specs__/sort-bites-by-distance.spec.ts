@@ -1,5 +1,5 @@
 import { sortBitesByDistance } from '../sort-bites-by-distance';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 describe('sortBitesByDistance', () => {
   it('should sort bites by distance in ascending order', () => {

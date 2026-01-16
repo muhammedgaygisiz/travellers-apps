@@ -1,5 +1,5 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { Menu } from 'model';
+import type { Menu } from 'model';
 
 export const MenuActions = createActionGroup({
   source: 'MENUS',

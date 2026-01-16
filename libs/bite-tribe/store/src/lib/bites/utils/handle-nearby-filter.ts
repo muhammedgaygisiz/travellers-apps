@@ -1,4 +1,4 @@
-import { Bite, Geopoint } from 'model';
+import type { Bite, Geopoint } from 'model';
 
 const byDistance =
   (nearbyDistanceInKm: number) =>
@@ -16,7 +16,7 @@ const toKm = (nearbySetting: number): number => nearbySetting / 1000;
 export const handleNearbyFilter = (
   distance: number | undefined,
   gpsPosition: Geopoint | undefined,
-  bites: Bite[]
+  bites: Bite[],
 ): Bite[] => {
   const hasNearbyFilter = distance;
   if (hasNearbyFilter && gpsPosition) {

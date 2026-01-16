@@ -1,5 +1,5 @@
-import { Geopoint } from './geopoint';
-import { Like } from './like';
+import type { Geopoint } from './geopoint';
+import type { Like } from './like';
 
 export interface Bite {
   userId?: string;

@@ -1,5 +1,5 @@
 import { sortBucketlistsByName } from '../sort-bucketlists-by-name';
-import { Bucketlist } from 'model';
+import type { Bucketlist } from 'model';
 
 describe('sortBucketlistsByName', () => {
   it('should sort bucketlists by name in ascending order', () => {

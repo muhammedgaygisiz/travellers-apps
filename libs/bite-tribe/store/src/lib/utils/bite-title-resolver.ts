@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { map, Observable } from 'rxjs';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { ResolveFn } from '@angular/router';
 
 export const biteTitleResolver: ResolveFn<string> = (): Observable<string> => {

@@ -1,4 +1,4 @@
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { sortBitesByDistance } from './sort-bites-by-distance';
 import { sortBitesByLikes } from './sort-bites-by-likes';
 import { sortBitesByCreatedAt } from './sort-bites-by-created-at';

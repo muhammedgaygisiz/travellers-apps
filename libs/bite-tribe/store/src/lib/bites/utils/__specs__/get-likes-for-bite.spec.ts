@@ -1,5 +1,5 @@
 import { getLikesForBite } from '../get-likes-for-bite';
-import { Bite, Like } from 'model';
+import type { Bite, Like } from 'model';
 
 describe('getLikesForBite', () => {
   it('should return an empty array if likes is undefined', () => {

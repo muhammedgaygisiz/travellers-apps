@@ -1,5 +1,5 @@
 import * as fromSelectors from '../selectors';
-import { Geopoint, PublicUser, Settings } from 'model';
+import type { Geopoint, PublicUser, Settings } from 'model';
 import { AppSlice } from '../app-slice.model';
 
 describe('App Selectors', () => {

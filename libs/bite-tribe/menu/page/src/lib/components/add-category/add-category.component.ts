@@ -13,7 +13,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { Category } from 'model';
+import type { Category } from 'model';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,9 +38,9 @@ export class AddCategoryComponent {
     this.newCategoryForm.valueChanges.pipe(
       map(() => {
         return !this.newCategoryForm.valid;
-      })
+      }),
     ),
-    { initialValue: !this.newCategoryForm.valid }
+    { initialValue: !this.newCategoryForm.valid },
   );
 
   onAddCategory(): void {

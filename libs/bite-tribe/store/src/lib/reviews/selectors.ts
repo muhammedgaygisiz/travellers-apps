@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
 import { adapter } from './adapter';
 import { EntityState } from '@ngrx/entity';
-import { Review } from 'model';
+import type { Review } from 'model';
 
 const slice = createFeatureSelector<EntityState<Review>>(key);
 

@@ -105,6 +105,11 @@ export const ROUTES: Routes = withAuthRoutes([
       import('bite-tribe/profile').then((m) => m.MyProfileContainer),
   },
   {
+    path: PATH.EDIT_PROFILE,
+    loadComponent: () =>
+      import('bite-tribe/profile').then((m) => m.EditProfileContainer),
+  },
+  {
     path: '',
     redirectTo: 'start',
     pathMatch: 'full',

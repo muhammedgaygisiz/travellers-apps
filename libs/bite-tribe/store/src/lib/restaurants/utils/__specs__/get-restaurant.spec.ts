@@ -1,5 +1,5 @@
 import { getRestaurant } from '../get-restaurant';
-import { Restaurant } from 'model';
+import type { Restaurant } from 'model';
 
 const normalizeMock = jest.fn();
 jest.mock('utils', () => ({

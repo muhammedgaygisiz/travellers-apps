@@ -2,7 +2,7 @@ import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { MapPageComponent } from '../map-page.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
-import { Bite, Like } from 'model';
+import type { Bite, Like } from 'model';
 
 addNecessaryIcons();
 

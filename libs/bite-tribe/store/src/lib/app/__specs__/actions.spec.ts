@@ -28,12 +28,4 @@ describe('App Actions', () => {
   it('should have a setPublicProfile action', () => {
     expect(AppActions.setPublicProfile).toBeDefined();
   });
-
-  it('should have a goPublic action', () => {
-    expect(AppActions.goPublic).toBeDefined();
-  });
-
-  it('should have a goPrivate action', () => {
-    expect(AppActions.goPrivate).toBeDefined();
-  });
 });

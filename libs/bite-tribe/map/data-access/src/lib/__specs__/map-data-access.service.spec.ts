@@ -3,7 +3,7 @@ import { MapDataAccessService } from '../map-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { inject, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { Bite, Like } from 'model';
+import type { Bite, Like } from 'model';
 import SpyInstance = jest.SpyInstance;
 
 class Mock {

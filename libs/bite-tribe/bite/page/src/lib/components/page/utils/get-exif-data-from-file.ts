@@ -1,5 +1,5 @@
 import * as exifr from 'exifr';
-import { Geopoint } from 'model';
+import type { Geopoint } from 'model';
 
 export const getExifDataFromFile = async (
   file: File,

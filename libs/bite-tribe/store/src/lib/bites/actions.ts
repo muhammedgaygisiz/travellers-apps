@@ -1,5 +1,5 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 export const BiteActions = createActionGroup({
   source: 'BITES',

@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonContent, IonImg } from '@ionic/angular/standalone';
-import { Bite, Menu, MenuItem, Restaurant } from 'model';
+import type { Bite, Menu, MenuItem, Restaurant } from 'model';
 import { MenuComponent } from '../menu/menu.component';
 
 @Component({

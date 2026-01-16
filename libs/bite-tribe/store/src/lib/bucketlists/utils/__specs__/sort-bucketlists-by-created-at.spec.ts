@@ -1,5 +1,5 @@
 import { sortBucketlistsByCreatedAt } from '../sort-bucketlists-by-created-at';
-import { Bucketlist } from 'model';
+import type { Bucketlist } from 'model';
 
 describe('sortBucketlistsByCreatedAt', () => {
   it('should sort bucketlists by createdAt in descending order', () => {

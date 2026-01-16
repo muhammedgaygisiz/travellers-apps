@@ -1,5 +1,5 @@
 import { getBitesByRestaurantName } from '../get-bites-by-restaurant-name';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 const getSimilarityScoreMock = jest.fn();
 const normalizeMock = jest.fn();

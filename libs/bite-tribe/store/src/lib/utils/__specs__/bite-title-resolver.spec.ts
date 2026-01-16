@@ -4,7 +4,7 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { bite } from '../../bites/selectors';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { Observable } from 'rxjs';
 
 const assertDeepEqual = (actual: any, expected: any): void => {

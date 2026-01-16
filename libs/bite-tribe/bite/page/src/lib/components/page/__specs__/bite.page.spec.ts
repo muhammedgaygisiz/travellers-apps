@@ -13,11 +13,10 @@ import {
   imageOutline,
   pricetagOutline,
 } from 'ionicons/icons';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { FormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { toObservable } from '@angular/core/rxjs-interop';
 
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({

@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { HomeService } from '../home.service';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import SpyInstance = jest.SpyInstance;
 
 class Mock {

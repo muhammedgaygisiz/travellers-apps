@@ -1,5 +1,5 @@
 import { handleTagFilters } from '../handle-tag-filters';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 describe('handleTagFilters', () => {
   it('should return all bites when no filters are applied', () => {

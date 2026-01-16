@@ -1,6 +1,6 @@
-import { Geopoint } from './geopoint';
-import { Bite } from './bite';
-import { Link } from './link';
+import type { Geopoint } from './geopoint';
+import type { Bite } from './bite';
+import type { Link } from './link';
 
 export interface Restaurant {
   id: string;

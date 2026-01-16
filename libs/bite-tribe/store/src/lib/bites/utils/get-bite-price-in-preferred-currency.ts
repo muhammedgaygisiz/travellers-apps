@@ -1,10 +1,10 @@
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { getNormalizedPriceInEur } from 'utils';
 
 export const getBitePriceInPreferredCurrency = (
   bite: Bite,
   exchangeRates: Record<string, number>,
-  preferredCurrency = 'EUR'
+  preferredCurrency = 'EUR',
 ): number => {
   const biteCurrency = bite.currency || 'EUR';
 
@@ -15,7 +15,7 @@ export const getBitePriceInPreferredCurrency = (
   const normalizedPriceInEur = getNormalizedPriceInEur(
     bite.price,
     biteCurrency,
-    exchangeRates[biteCurrency] || 1 // Default to 1 if no rate
+    exchangeRates[biteCurrency] || 1, // Default to 1 if no rate
   );
 
   const exchangeRateToPreferedCurrency = exchangeRates[preferredCurrency] || 1; // Default to 1 if no rate

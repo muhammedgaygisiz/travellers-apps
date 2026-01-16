@@ -32,7 +32,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { compressFile, compressPhoto } from 'image-compression';
 import { getExifDataFromFile } from '../page/utils/get-exif-data-from-file';
 import { getExifDataFromPhoto } from '../page/utils/get-exif-data-from-photo';
-import { Geopoint } from 'model';
+import type { Geopoint } from 'model';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { Placeholder } from './components/placeholder';
 

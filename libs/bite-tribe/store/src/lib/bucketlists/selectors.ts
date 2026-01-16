@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
 import { adapter } from './adapter';
 import { EntityState } from '@ngrx/entity';
-import { Bucketlist } from 'model';
+import type { Bucketlist } from 'model';
 import { bucketlistId } from '../router/selectors';
 import { bucketlistSorting } from '../filtering-and-sorting/selectors';
 import { sortByCriteria } from './utils/sort-by-criteria';

@@ -13,7 +13,7 @@ import {
   IonReorder,
   IonReorderGroup,
 } from '@ionic/angular/standalone';
-import { Category, MenuItem } from 'model';
+import type { Category, MenuItem } from 'model';
 import { NgTemplateOutlet } from '@angular/common';
 import { AddItemComponent } from '../add-item/add-item.component';
 import { MenuItemComponent } from '../menu-item/menu-item.component';

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 
 @Injectable({

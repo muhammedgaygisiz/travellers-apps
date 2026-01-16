@@ -1,5 +1,5 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import {
+import type {
   CreateAndSaveToBucketListParams,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,

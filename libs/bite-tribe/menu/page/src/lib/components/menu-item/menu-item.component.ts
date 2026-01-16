@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { IonButton } from '@ionic/angular/standalone';
-import { MenuItem } from 'model';
+import type { MenuItem } from 'model';
 import { AddItemComponent } from '../add-item/add-item.component';
 
 @Component({

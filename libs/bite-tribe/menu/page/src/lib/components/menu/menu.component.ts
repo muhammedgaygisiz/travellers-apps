@@ -8,7 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { Category, Menu, MenuItem } from 'model';
+import type { Category, Menu, MenuItem } from 'model';
 import {
   IonButton,
   IonIcon,
@@ -152,7 +152,7 @@ export class MenuComponent {
           (category, idx) => ({
             ...category,
             index: idx,
-          })
+          }),
         );
 
         // Return the updated menu with reordered categories and updated indices
@@ -176,7 +176,7 @@ export class MenuComponent {
           categories: menu.categories.map((cat) =>
             cat.title === categoryWithNewOrderOfItems.title
               ? categoryWithNewOrderOfItems
-              : cat
+              : cat,
           ),
         };
       }

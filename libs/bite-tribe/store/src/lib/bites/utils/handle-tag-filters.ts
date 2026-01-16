@@ -1,4 +1,4 @@
-import { Bite } from 'model';
+import type { Bite } from 'model';
 import { getSimilarityScore, normalize } from 'utils';
 
 const cleanupTags = (tags: string[] = []): string[] =>

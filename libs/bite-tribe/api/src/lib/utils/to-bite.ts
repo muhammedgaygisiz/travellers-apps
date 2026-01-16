@@ -1,5 +1,5 @@
 import { DocumentData, DocumentSnapshot } from '@capacitor-firebase/firestore';
-import { Bite } from 'model';
+import type { Bite } from 'model';
 
 export const toBite = (doc: DocumentSnapshot<DocumentData>): Bite =>
   ({

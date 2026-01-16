@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteActions } from './actions';
-import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
+import { catchError, filter, from, map, of, switchMap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -11,6 +11,7 @@ import { AppActions } from '../app/actions';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { BucketlistActions } from '../bucketlists/actions';
 import { PATH } from 'utils';
+import { userId } from '../router/selectors';
 
 @Injectable()
 export class BiteEffects {
@@ -20,12 +21,15 @@ export class BiteEffects {
   private readonly storeService = inject(BiteTribeStoreService);
 
   private readonly bite = toSignal(this.store.select(bite));
+  private readonly biteCreatorId = toSignal(this.store.select(userId));
 
   loadBitesByCurrentUser$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(routerNavigatedAction),
-      filter(({ payload }) =>
-        payload.event.urlAfterRedirects.includes(PATH.MY_BITES),
+      filter(
+        ({ payload }) =>
+          payload.event.urlAfterRedirects.includes(PATH.MY_BITES) ||
+          payload.event.urlAfterRedirects.includes(PATH.MY_PROFILE),
       ),
       switchMap(() => {
         const user = this.storeService.user();
@@ -33,6 +37,26 @@ export class BiteEffects {
         return from(this.api.bitesByUser(user));
       }),
       map((bites) => BiteActions.loadedByUserFromAPI({ bites })),
+    );
+  });
+
+  loadBitesForBiteCreatorProfile$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(routerNavigatedAction),
+      filter(({ payload }) =>
+        payload.event.urlAfterRedirects.includes(PATH.PROFILE),
+      ),
+      switchMap(() => {
+        const biteCreatorId = this.biteCreatorId();
+
+        if (!biteCreatorId) {
+          return of(BiteActions.noBitesForBiteCreatorProfile());
+        }
+
+        return from(this.api.bitesByUser({ uid: biteCreatorId })).pipe(
+          map((bites) => BiteActions.loadedByUserFromAPI({ bites })),
+        );
+      }),
     );
   });
 

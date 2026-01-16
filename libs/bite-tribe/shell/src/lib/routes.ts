@@ -95,12 +95,12 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
-    path: 'profile/:userId',
+    path: `${PATH.PROFILE}/:userId`,
     loadComponent: () =>
       import('bite-tribe/profile').then((m) => m.BiteCreatorProfileContainer),
   },
   {
-    path: 'my-profile',
+    path: PATH.MY_PROFILE,
     loadComponent: () =>
       import('bite-tribe/profile').then((m) => m.MyProfileContainer),
   },

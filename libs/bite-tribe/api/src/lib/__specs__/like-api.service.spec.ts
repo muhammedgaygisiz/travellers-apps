@@ -62,7 +62,7 @@ describe(LikeApiService.name, () => {
           { data: { likeType: 'like', biteId: 'bite1' } },
           { data: { likeType: 'love', biteId: 'bite2' } },
         ],
-      };
+      } as any;
 
       service.handleResponse(mockLikeDocs);
 

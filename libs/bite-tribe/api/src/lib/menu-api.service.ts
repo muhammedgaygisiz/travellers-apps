@@ -60,7 +60,6 @@ export class MenuApiService {
     return this.authService.isLoggedIn$.pipe(
       skipWhile((isLoggedIn) => !isLoggedIn),
       switchMap(() => {
-        // console.debug('#mo - Start Listener for Menu');
         if (menuId) {
           return from(this.getMenuById(menuId)).pipe(
             catchError((err) => {
@@ -76,7 +75,7 @@ export class MenuApiService {
     );
   }
 
-  private async getMenuById(menuId: string): Promise<Menu | undefined> {
+  async getMenuById(menuId: string): Promise<Menu | undefined> {
     try {
       const doc = await FirebaseFirestore.getDocument({
         reference: `${MENU_COLLECTION}/${menuId}`,

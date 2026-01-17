@@ -11,4 +11,4 @@ export type * from './lib/create-and-save-to-bucket-list-params';
 export type * from './lib/remove-bite-from-bucketlist-params';
 export type * from './lib/bucketlist';
 export type * from './lib/public-user';
-export * from './lib/like';
+export type * from './lib/like';

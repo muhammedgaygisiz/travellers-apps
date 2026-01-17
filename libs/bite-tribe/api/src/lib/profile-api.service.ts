@@ -65,9 +65,7 @@ export class ProfileApiService {
             ],
           },
         },
-        (publicProfileDoc: any) => {
-          this.handleResponse(publicProfileDoc);
-        },
+        (publicProfileDoc: any) => this.handleResponse(publicProfileDoc),
       );
 
     return this.profileChannel$;

@@ -313,9 +313,7 @@ describe(ProfileApiService.name, () => {
                 },
               } as any);
 
-            const setDocumentSpy = jest
-              .spyOn(FirebaseFirestore, 'setDocument')
-              .mockResolvedValue();
+            jest.spyOn(FirebaseFirestore, 'setDocument').mockResolvedValue();
 
             await service.saveUserIfNotExisting();
 

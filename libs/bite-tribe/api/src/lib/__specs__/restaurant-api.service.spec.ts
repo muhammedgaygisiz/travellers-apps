@@ -217,7 +217,7 @@ describe(RestaurantApiService.name, () => {
       const links = [
         { platform: 'Facebook', url: 'https://facebook.com/resto' },
         { platform: 'Instagram', url: 'https://instagram.com/resto' },
-      ];
+      ] as any;
 
       await service.saveSocialMediaLinksForRestaurant(restaurantId, links);
 

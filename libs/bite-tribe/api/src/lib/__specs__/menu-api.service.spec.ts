@@ -83,7 +83,7 @@ describe(MenuApiService.name, () => {
 
       service.handleResponse(mockDocs);
 
-      expect(nextSpy);
+      expect(nextSpy).toHaveBeenCalled();
     });
   });
 

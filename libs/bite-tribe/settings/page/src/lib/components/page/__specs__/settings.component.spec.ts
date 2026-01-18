@@ -74,6 +74,7 @@ describe(PageSettings.name, () => {
         photoUrl: 'photo.jpg',
         userId: 'user123',
         public: true,
+        followers: [],
       };
       compRef.setInput('publicUser', mockPublicUser);
 

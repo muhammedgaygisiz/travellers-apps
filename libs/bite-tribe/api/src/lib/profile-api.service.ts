@@ -32,9 +32,7 @@ export class ProfileApiService {
     skipWhile((isLoggedIn) => !isLoggedIn),
     switchMap((isLoggedIn) => {
       if (isLoggedIn) {
-        this.startProfileListener();
-      } else {
-        this.stopProfileListener(this.profileCallbackId);
+        this.startListener();
       }
 
       return this.profileChannel$.pipe(skip(1), takeUntil(this.stopped$));
@@ -42,11 +40,11 @@ export class ProfileApiService {
   );
 
   private async getUser(): Promise<User | null | undefined> {
-    const authState = await this.authService.authState();
+    const authState = this.authService.authState();
     return authState?.user;
   }
 
-  private async startProfileListener(): Promise<any> {
+  async startListener(): Promise<any> {
     const user = await this.getUser();
 
     this.profileCallbackId =
@@ -65,23 +63,25 @@ export class ProfileApiService {
             ],
           },
         },
-        (publicProfileDoc: any) => {
-          const isPublicProfile = publicProfileDoc?.snapshots?.length > 0;
-
-          if (isPublicProfile) {
-            const publicProfile = publicProfileDoc.snapshots[0].data;
-            this.profileChannel$.next({
-              ...publicProfile,
-              id: publicProfileDoc.snapshots[0].id,
-            });
-          }
-        },
+        (publicProfileDoc: any) => this.handleResponse(publicProfileDoc),
       );
 
     return this.profileChannel$;
   }
 
-  private async stopProfileListener(callbackId: string): Promise<void> {
+  handleResponse(publicProfileDoc: any): void {
+    const isPublicProfile = publicProfileDoc?.snapshots?.length > 0;
+
+    if (isPublicProfile) {
+      const publicProfile = publicProfileDoc.snapshots[0].data;
+      this.profileChannel$.next({
+        ...publicProfile,
+        id: publicProfileDoc.snapshots[0].id,
+      });
+    }
+  }
+
+  async stopProfileListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });
@@ -117,7 +117,7 @@ export class ProfileApiService {
 
   async updateUser(publicUser: PublicUser): Promise<PublicUser | undefined> {
     try {
-      const updatedUser: Omit<PublicUser, 'userId'> = {
+      const updatedUser: Omit<PublicUser, 'userId' | 'followers'> = {
         displayName: publicUser.displayName,
         email: publicUser.email,
         photoUrl: publicUser.photoUrl,
@@ -139,24 +139,6 @@ export class ProfileApiService {
       this.errorHandler.handleError(error);
 
       return undefined;
-    }
-  }
-
-  async deleteUser(): Promise<void> {
-    const user = await this.getUser();
-
-    try {
-      await FirebaseFirestore.updateDocument({
-        reference: `${USERS_COLLECTION}/${user?.uid}`,
-        data: {
-          public: false,
-          updatedAt: new Date().toISOString(),
-          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-        },
-      });
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      this.errorHandler.handleError(error);
     }
   }
 
@@ -196,7 +178,7 @@ export class ProfileApiService {
     }
   }
 
-  private async setUserPublicFlag(uid: string | undefined): Promise<void> {
+  async setUserPublicFlag(uid: string | undefined): Promise<void> {
     try {
       if (uid) {
         await FirebaseFirestore.updateDocument({
@@ -210,6 +192,34 @@ export class ProfileApiService {
       }
     } catch (error) {
       console.error('Error updating public user:', error);
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async followUser(user: PublicUser): Promise<void> {
+    try {
+      const currentUser = await this.getUser();
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+
+      const followRelationship = {
+        createdAt: new Date().toISOString(),
+        followerUid: currentUser.uid,
+        followedUid: user.userId,
+      };
+
+      await FirebaseFirestore.setDocument({
+        reference: `${USERS_COLLECTION}/${user.userId}/followers/${currentUser.uid}`,
+        data: followRelationship,
+      });
+
+      await FirebaseFirestore.setDocument({
+        reference: `${USERS_COLLECTION}/${currentUser.uid}/following/${user.userId}`,
+        data: followRelationship,
+      });
+    } catch (error) {
+      console.error('Error following user:', error);
       this.errorHandler.handleError(error);
     }
   }

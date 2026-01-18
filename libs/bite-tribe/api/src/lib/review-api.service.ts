@@ -7,9 +7,10 @@ import {
   Subject,
   switchMap,
 } from 'rxjs';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { BITE_COLLECTION } from './bite-api/utils/constants';
+import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
 
 const REVIEW_COLLECTION = 'reviews';
 
@@ -22,7 +23,7 @@ export class ReviewApiService {
 
   private readonly stopped$ = new Subject<void>();
 
-  private async startReviewListener(biteId: string): Promise<void> {
+  async startReviewListener(biteId: string): Promise<void> {
     // console.debug('#mo Fetching reviews from Firestore');
 
     await FirebaseFirestore.addCollectionSnapshotListener(
@@ -41,17 +42,23 @@ export class ReviewApiService {
         },
       },
       (docs) => {
-        // console.debug('#mo Fetched reviews from Firestore', docs);
-
-        const reviews =
-          docs?.snapshots.map((doc) => ({
-            ...doc.data,
-            id: doc.id,
-          })) || [];
-
-        this.reviewsChannel$.next(reviews);
+        this.handleResponse(docs);
       },
     );
+  }
+
+  handleResponse(
+    docs: AddCollectionSnapshotListenerCallbackEvent<DocumentData> | null,
+  ): void {
+    // console.debug('#mo Fetched reviews from Firestore', docs);
+
+    const reviews =
+      docs?.snapshots.map((doc) => ({
+        ...doc.data,
+        id: doc.id,
+      })) || [];
+
+    this.reviewsChannel$.next(reviews);
   }
 
   reviewsByBiteId(biteId: string): Observable<any[]> {

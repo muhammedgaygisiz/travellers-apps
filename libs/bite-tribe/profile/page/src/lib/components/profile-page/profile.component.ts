@@ -4,6 +4,7 @@ import {
   computed,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -53,6 +54,8 @@ export class ProfileComponent {
   isAuthenticated = input(false);
   user = input<PublicUser>();
   bites = input<Bite[]>();
+  followerCount = input<number>(0);
+  followingCount = input<number>(0);
   userId = input<string>();
   subscriptionTier = input<number>(0);
 
@@ -66,6 +69,7 @@ export class ProfileComponent {
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
+  readonly followButtonClick = output<PublicUser>();
 
   biteCount = computed(() => {
     const bites = this.bites();
@@ -79,7 +83,30 @@ export class ProfileComponent {
     return getBadgeColor(biteCount);
   });
 
-  isUnfollowedUser = computed(() => {
-    return this.userId() !== this.user()?.userId;
+  isUnfollowedUser = computed((): boolean => {
+    const currentUserId = this.userId();
+    const profileOwner = this.user()?.userId;
+
+    if (!profileOwner) {
+      return false;
+    }
+
+    return currentUserId !== profileOwner;
   });
+
+  imageLoadErrored = signal(false);
+  validPhotoUrl = computed(() => {
+    return !!this.user()?.photoUrl && !this.imageLoadErrored();
+  });
+
+  onImageError(): void {
+    this.imageLoadErrored.set(true);
+  }
+
+  onFollow(): void {
+    const user = this.user();
+    if (user) {
+      this.followButtonClick.emit(user);
+    }
+  }
 }

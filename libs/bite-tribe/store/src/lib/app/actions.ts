@@ -15,6 +15,7 @@ export const AppActions = createActionGroup({
     'Error saving public profile': emptyProps(),
     'Loaded settings from API': props<{ settings: Settings }>(),
     'Set public profile': props<{ profile: PublicUser }>(),
+    'Follow user': props<{ user: PublicUser }>(),
     'Loaded exchange rates from API': props<{
       exchangeRates: Record<string, number>;
     }>(),

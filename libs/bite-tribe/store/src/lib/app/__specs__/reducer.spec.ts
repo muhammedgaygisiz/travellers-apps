@@ -10,6 +10,7 @@ describe('App Reducer', () => {
     it('should reset the state to initial values', () => {
       const INITIAL_STATE: AppSlice = {
         profile: { displayName: 'Test User' } as PublicUser,
+        followedBy: [],
         settings: { pushNotifications: true } as Settings,
         loading: { home: true },
         exchangeRates: { EUR: 1 },
@@ -18,6 +19,7 @@ describe('App Reducer', () => {
 
       const NEW_STATE: AppSlice = {
         profile: undefined,
+        followedBy: [],
         settings: {
           pushNotifications: false,
           emailUpdates: false,

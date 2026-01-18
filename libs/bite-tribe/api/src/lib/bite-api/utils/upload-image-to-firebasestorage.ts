@@ -7,27 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BITE_COLLECTION } from './constants';
 import { writeBlobToFileSystem } from './write-blob-to-file-system';
 
-const uploadWithWeb = (
-  fileUploadOptions: UploadFileOptions,
-): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    FirebaseStorage.uploadFile(fileUploadOptions, (evt, err) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      if (evt?.completed) {
-        resolve(fileUploadOptions.path);
-        return;
-      }
-    });
-  });
-};
-
-const uploadWithNative = (
-  fileUploadOptions: UploadFileOptions,
-): Promise<string> => {
+const upload = (fileUploadOptions: UploadFileOptions): Promise<string> => {
   return new Promise((resolve, reject) => {
     FirebaseStorage.uploadFile(fileUploadOptions, (evt, err) => {
       if (err) {
@@ -64,12 +44,12 @@ export const uploadImageToFirebaseStorage = async (
   };
 
   if (isWeb) {
-    return await uploadWithWeb(fileUploadOptions);
+    return await upload(fileUploadOptions);
   }
 
   const fileName = `${imageId}.${ext}`;
   const writeFileResult = await writeBlobToFileSystem(blob, fileName);
   fileUploadOptions.uri = writeFileResult.uri;
 
-  return await uploadWithNative(fileUploadOptions);
+  return await upload(fileUploadOptions);
 };

@@ -6,6 +6,7 @@ import { fromAuth } from 'ta-firestore';
 
 const initialState: AppSlice = {
   profile: undefined,
+  followedBy: [],
   settings: {
     pushNotifications: false,
     emailUpdates: false,

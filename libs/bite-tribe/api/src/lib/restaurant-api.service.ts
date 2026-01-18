@@ -10,10 +10,11 @@ import {
   Subject,
   switchMap,
 } from 'rxjs';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { Link, Restaurant } from 'model';
 import { MENU_COLLECTION } from './menu-api.service';
 import { BITE_COLLECTION } from './bite-api/utils/constants';
+import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
 
 const RESTAURANT_COLLECTION = 'restaurants';
 
@@ -32,18 +33,24 @@ export class RestaurantApiService {
       await FirebaseFirestore.addCollectionSnapshotListener(
         { reference: RESTAURANT_COLLECTION },
         (restaurantsDocs) => {
-          const restaurants =
-            restaurantsDocs?.snapshots.map((doc) => ({
-              ...doc.data,
-              id: doc.id,
-            })) || [];
-
-          this._restaurantsChannel$.next(restaurants);
+          this.handleResponse(restaurantsDocs);
         },
       );
   }
 
-  private async stopRestaurantListener(callbackId: string): Promise<void> {
+  handleResponse(
+    restaurantsDocs: AddCollectionSnapshotListenerCallbackEvent<DocumentData> | null,
+  ): void {
+    const restaurants =
+      restaurantsDocs?.snapshots?.map((doc) => ({
+        ...doc.data,
+        id: doc.id,
+      })) || [];
+
+    this._restaurantsChannel$.next(restaurants);
+  }
+
+  async stopRestaurantListener(callbackId: string): Promise<void> {
     this.stopped$.next();
     if (callbackId) {
       await FirebaseFirestore.removeSnapshotListener({ callbackId });
@@ -64,7 +71,7 @@ export class RestaurantApiService {
     );
   }
 
-  private async getRestaurantById(
+  async getRestaurantById(
     restaurantId: string,
   ): Promise<Restaurant | undefined> {
     try {

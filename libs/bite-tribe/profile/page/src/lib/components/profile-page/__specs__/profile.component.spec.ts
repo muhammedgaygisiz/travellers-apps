@@ -18,8 +18,6 @@ describe('ProfileComponent', () => {
     fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;
     compRef = fixture.componentRef;
-
-    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -84,9 +82,74 @@ describe('ProfileComponent', () => {
       expect(component.isUnfollowedUser()).toBe(false);
     });
 
-    it('should return true if userId is not equal to user.id', () => {
+    it('should return true if current user in not me', () => {
       compRef.setInput('userId', 'user2');
       expect(component.isUnfollowedUser()).toBe(true);
+    });
+
+    it('should return false if profile owner in not defined', () => {
+      compRef.setInput('user', undefined);
+      expect(component.isUnfollowedUser()).toBe(false);
+    });
+
+    it('should return false if profile owners userId in not defined', () => {
+      compRef.setInput('user', {} as any);
+      expect(component.isUnfollowedUser()).toBe(false);
+    });
+  });
+
+  describe('validPhotoUrl', () => {
+    beforeEach(() => {
+      compRef.setInput('user', { photoUrl: 'http://localhost:4200' } as any);
+      component.imageLoadErrored.set(false);
+    });
+
+    it('should return true if photoUrl is provided and loaded correctly', () => {
+      expect(component.validPhotoUrl()).toBe(true);
+    });
+
+    it('should return false if photoUrl is missing', () => {
+      compRef.setInput('user', {} as any);
+      expect(component.validPhotoUrl()).toBe(false);
+    });
+
+    it('should return false if user is missing', () => {
+      compRef.setInput('user', undefined);
+      expect(component.validPhotoUrl()).toBe(false);
+    });
+
+    it('should return false if image load has errored', () => {
+      component.imageLoadErrored.set(true);
+      expect(component.validPhotoUrl()).toBe(false);
+    });
+  });
+
+  describe('onImageError', () => {
+    it('should set imageLoadErrored to true', () => {
+      component.imageLoadErrored.set(false);
+      component.onImageError();
+      expect(component.imageLoadErrored()).toBe(true);
+    });
+  });
+
+  describe('onFollow', () => {
+    it('should emit followClick with user when user is defined', () => {
+      const userMock = { userId: 'user1' } as any;
+      compRef.setInput('user', userMock);
+      const followClickSpy = jest.spyOn(component.followButtonClick, 'emit');
+
+      component.onFollow();
+
+      expect(followClickSpy).toHaveBeenCalledWith(userMock);
+    });
+
+    it('should not emit followClick when user is undefined', () => {
+      compRef.setInput('user', undefined);
+      const followClickSpy = jest.spyOn(component.followButtonClick, 'emit');
+
+      component.onFollow();
+
+      expect(followClickSpy).not.toHaveBeenCalled();
     });
   });
 });

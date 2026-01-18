@@ -10,6 +10,7 @@ export type AppSlice = {
     home?: boolean;
   };
   profile?: PublicUser;
+  followedBy: string[];
   exchangeRates: Record<string, number>;
   errorLoadingGpsPosition: boolean;
 };

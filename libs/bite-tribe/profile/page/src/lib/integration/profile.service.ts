@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import { Bite, PublicUser } from 'model';
+import type { Bite, PublicUser } from 'model';
 import { PATH } from 'utils';
 import { Location } from '@angular/common';
 
@@ -18,6 +18,8 @@ export class ProfileService {
   bitesByUser = this.dataAccess.bitesByUser;
   myBites = this.dataAccess.myBites;
   isPublicProfile = this.dataAccess.isPublicProfile;
+  followerCount = this.dataAccess.followerCount;
+  followingCount = this.dataAccess.followingCount;
 
   logout(): void {
     this.dataAccess.logout();
@@ -78,5 +80,9 @@ export class ProfileService {
     this.dataAccess.savePublicProfile(publicUser);
 
     this.location.back();
+  }
+
+  followButtonClicked(user: PublicUser): void {
+    this.dataAccess.submitFollowClick(user);
   }
 }

@@ -5,24 +5,33 @@ $SILVER: #c0c0c0;
 $GOLD: #ffd700;
 
 :host {
-  .profile-container {
+  .profile-image {
+    @include globals.profile-image;
+
+    width: 96px;
+    height: 96px;
+    margin-right: 0;
+  }
+
+  .profile-header {
     margin: 0 auto;
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
 
-    .profile-image {
-      @include globals.profile-image;
+    strong {
+      margin-bottom: 1rem;
+    }
 
-      width: 96px;
-      height: 96px;
+    .header-column {
+      display: flex;
+      flex-direction: column;
       justify-content: center;
-      margin-right: 0;
     }
 
     .profile-avatar {
       display: flex;
       width: 100%;
       height: fit-content;
-      justify-content: center;
 
       img {
         width: 96px;
@@ -30,67 +39,71 @@ $GOLD: #ffd700;
         border-radius: 50%;
       }
     }
+  }
 
-    .profile-name {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 0.5rem;
+  .profile-name {
+    display: flex;
+    gap: 0.5rem;
 
-      font-size: 1.25rem;
-      font-weight: bold;
+    font-size: 1.25rem;
+    font-weight: bold;
 
-      .subscription-badge {
-        background: var(--ion-color-tertiary-tint);
-        color: var(--ion-color-tertiary-contrast);
+    .subscription-badge {
+      background: var(--ion-color-tertiary-tint);
+      color: var(--ion-color-tertiary-contrast);
+    }
+
+    .bite-badge {
+      background: var(--ion-color-primary);
+
+      &.green {
+        background: var(--ion-color-success);
       }
 
-      .bite-badge {
-        background: var(--ion-color-primary);
+      &.bronze {
+        background: $BRONZE;
+      }
 
-        &.green {
-          background: var(--ion-color-success);
-        }
+      &.silver {
+        background: $SILVER;
+      }
 
-        &.bronze {
-          background: $BRONZE;
-        }
-
-        &.silver {
-          background: $SILVER;
-        }
-
-        &.gold {
-          background: $GOLD;
-        }
+      &.gold {
+        background: $GOLD;
       }
     }
+  }
 
-    .profile-location {
-      color: gray;
-      margin-top: 8px;
-    }
+  .profile-location {
+    color: gray;
+  }
 
-    .follow-button {
-      min-width: 120px;
-    }
+  .profile-about {
+    color: gray;
+    font-style: italic;
+  }
 
-    .about-section,
-    .bites-section {
-      text-align: left;
-      margin-top: 1.5rem;
-    }
+  .buttons {
+    position: absolute;
+    right: 1rem;
+  }
 
-    .about-section h2,
-    .bites-section h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
+  .about-section,
+  .bites-section {
+    text-align: left;
+    margin-top: 1.5rem;
+  }
 
-    bt-bite {
-      display: block;
-      margin-bottom: 1rem;
-    }
+  .about-section h2,
+  .bites-section h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  bt-bite {
+    display: block;
+    overflow: scroll;
+    margin-bottom: 1rem;
   }
 }

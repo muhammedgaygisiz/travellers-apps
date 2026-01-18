@@ -9,7 +9,11 @@ import {
   takeUntil,
 } from 'rxjs';
 import type { Settings } from 'model';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import {
+  AddDocumentSnapshotListenerCallbackEvent,
+  DocumentData,
+  FirebaseFirestore,
+} from '@capacitor-firebase/firestore';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 const SETTINGS_COLLECTION = 'settings';
@@ -35,18 +39,22 @@ export class SettingsApiService {
     }),
   );
 
-  private async startSettingsListener(): Promise<void> {
+  async startSettingsListener(): Promise<void> {
     const user = await this.getUser();
 
     await FirebaseFirestore.addDocumentSnapshotListener(
       { reference: `${SETTINGS_COLLECTION}/${user?.uid}` },
-      async (settingsDoc) => {
-        // console.debug('#mo Fetched settings from Firestore', settingsDoc);
-
-        const settings = settingsDoc?.snapshot.data as any;
-        this.settingsChannel$.next(settings);
+      (settingsDoc) => {
+        this.handleResponse(settingsDoc);
       },
     );
+  }
+
+  handleResponse(
+    settingsDoc: AddDocumentSnapshotListenerCallbackEvent<DocumentData> | null,
+  ): void {
+    const settings = settingsDoc?.snapshot.data as any;
+    this.settingsChannel$.next(settings);
   }
 
   private async getUser(): Promise<User | null | undefined> {

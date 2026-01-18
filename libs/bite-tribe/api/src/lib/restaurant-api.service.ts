@@ -10,11 +10,7 @@ import {
   Subject,
   switchMap,
 } from 'rxjs';
-import {
-  DocumentData,
-  DocumentSnapshot,
-  FirebaseFirestore,
-} from '@capacitor-firebase/firestore';
+import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { Link, Restaurant } from 'model';
 import { MENU_COLLECTION } from './menu-api.service';
 import { BITE_COLLECTION } from './bite-api/utils/constants';

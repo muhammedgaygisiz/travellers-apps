@@ -9,6 +9,7 @@ class Mock {
   navigateForward = (): null => null;
   submitLikeClick = (): null => null;
   submitFollowClick = (): null => null;
+  savePublicProfile = (): null => null;
 }
 
 describe('ProfileService', () => {
@@ -67,6 +68,16 @@ describe('ProfileService', () => {
         .mockImplementation();
       service.gotoMyBites();
       expect(navigateSpy).toHaveBeenCalledWith(['my-bites']);
+    });
+  });
+
+  describe('gotoEditProfile', () => {
+    it('should navigate to edit-profile', () => {
+      const navigateSpy = jest
+        .spyOn(service['navController'], 'navigateForward')
+        .mockImplementation();
+      service.gotoEditProfile();
+      expect(navigateSpy).toHaveBeenCalledWith(['edit-profile']);
     });
   });
 
@@ -133,6 +144,18 @@ describe('ProfileService', () => {
         'restaurant',
         encodeURIComponent('Some Place'),
       ]);
+    });
+  });
+
+  describe('saveProfile', () => {
+    it('should call savePublicProfile on dataAccess with correct parameters', () => {
+      const publicUser = { id: 'user123' } as any;
+      const savePublicProfileSpy = jest.spyOn(
+        profileDataAccessService,
+        'savePublicProfile',
+      );
+      service.saveProfile(publicUser);
+      expect(savePublicProfileSpy).toHaveBeenCalledWith(publicUser);
     });
   });
 

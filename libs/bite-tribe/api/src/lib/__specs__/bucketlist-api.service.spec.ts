@@ -50,6 +50,25 @@ describe(BucketlistApiService.name, () => {
 
       expect(addCollectionSnapshotListnerMock).toHaveBeenCalled();
     });
+
+    describe('given passed callback of listener', () => {
+      it('should handle response when listener callback is invoked', async () => {
+        await service.startListener();
+
+        const mockDocs = {
+          snapshots: [
+            { id: 1, data: { name: 'Bucketlist 1' } },
+            { id: 2, data: { name: 'Bucketlist 2' } },
+          ],
+        } as any;
+
+        // Simulate the listener callback invocation
+        const listenerCallback =
+          addCollectionSnapshotListnerMock.mock.calls[0][1];
+
+        listenerCallback(mockDocs);
+      });
+    });
   });
 
   describe('handleResponse', () => {

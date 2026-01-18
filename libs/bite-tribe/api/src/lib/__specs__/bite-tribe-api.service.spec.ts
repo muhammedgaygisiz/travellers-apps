@@ -11,6 +11,11 @@ import { BiteApiService } from '../bite-api/bite-api.service';
 import { SettingsApiService } from '../settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
 import { of } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
+
+const assertEqual = (a: any, b: any): void => {
+  expect(a).toEqual(b);
+};
 
 class Mock {
   publicProfile$ = of(null);
@@ -69,6 +74,62 @@ describe('BiteTribeApiService', () => {
       expect(service).toBeTruthy();
     },
   ));
+
+  describe('settings$', () => {
+    const scheduler = new TestScheduler(assertEqual);
+    const classListSpy = jest.spyOn(
+      document.documentElement.classList,
+      'toggle',
+    );
+
+    describe('given a dark theme', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(SettingsApiService, {
+          useValue: { settings$: of({ theme: 'dark' }) },
+        });
+      });
+
+      it('should add dark class to document element', inject(
+        [BiteTribeApiService, SettingsApiService],
+        (
+          service: BiteTribeApiService,
+          settingsApiService: SettingsApiService,
+        ) => {
+          scheduler.run(({ expectObservable }) => {
+            expectObservable(service.settings$).toBe('(a|)', {
+              a: { theme: 'dark' },
+            });
+          });
+
+          expect(classListSpy).toHaveBeenCalledWith('dark', true);
+        },
+      ));
+    });
+
+    describe('given a light theme', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(SettingsApiService, {
+          useValue: { settings$: of({ theme: 'light' }) },
+        });
+      });
+
+      it('should add light class to document element', inject(
+        [BiteTribeApiService, SettingsApiService],
+        (
+          service: BiteTribeApiService,
+          settingsApiService: SettingsApiService,
+        ) => {
+          scheduler.run(({ expectObservable }) => {
+            expectObservable(service.settings$).toBe('(a|)', {
+              a: { theme: 'light' },
+            });
+          });
+
+          expect(classListSpy).toHaveBeenCalledWith('light', true);
+        },
+      ));
+    });
+  });
 
   describe('getExchangeRates', () => {
     it('should call getExchangeRates on ExchangeRatesApiService', inject(

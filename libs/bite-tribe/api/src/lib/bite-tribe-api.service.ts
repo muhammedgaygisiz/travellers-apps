@@ -20,7 +20,7 @@ import { ProfileApiService } from './profile-api.service';
 import { BiteApiService } from './bite-api/bite-api.service';
 import { SettingsApiService } from './settings-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
-import { Observable, tap } from 'rxjs';
+import { from, Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -193,5 +193,13 @@ export class BiteTribeApiService {
     this.biteApiService.startlatestBitesListener(number);
 
     return this.biteApiService.latestBites$;
+  }
+
+  getTotalNumberOfBites(): Observable<number> {
+    return from(this.biteApiService.getTotalNumberOfBites());
+  }
+
+  getTotalNumberOfUsers(): Observable<number> {
+    return from(this.profileApiService.getTotalNumberOfUsers());
   }
 }

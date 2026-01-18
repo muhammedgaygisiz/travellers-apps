@@ -19,6 +19,8 @@ const initialState: AppSlice = {
   },
   exchangeRates: { EUR: 1 },
   errorLoadingGpsPosition: false,
+  totalNumberBites: 0,
+  totalNumberUsers: 0,
 };
 
 export const reducer = createReducer<AppSlice>(
@@ -98,5 +100,13 @@ export const reducer = createReducer<AppSlice>(
   on(AppActions.loadedExchangeRatesFromAPI, (state, { exchangeRates }) => ({
     ...state,
     exchangeRates,
+  })),
+  on(AppActions.loadedTotalNumberOfBites, (state, { total }) => ({
+    ...state,
+    totalNumberBites: total,
+  })),
+  on(AppActions.loadedTotalNumberOfUsers, (state, { total }) => ({
+    ...state,
+    totalNumberUsers: total,
   })),
 );

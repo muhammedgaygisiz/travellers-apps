@@ -17,6 +17,28 @@ export class AppEffect {
   private readonly api = inject(BiteTribeApiService);
   private readonly storeService = inject(BiteTribeStoreService);
 
+  loadTotalNumberBites$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(fromAuth.AuthActions.loginSucceeded),
+      switchMap(() => {
+        return this.api
+          .getTotalNumberOfBites()
+          .pipe(map((total) => AppActions.loadedTotalNumberOfBites({ total })));
+      }),
+    );
+  });
+
+  loadTotalNumberUsers$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(fromAuth.AuthActions.loginSucceeded),
+      switchMap(() => {
+        return this.api
+          .getTotalNumberOfUsers()
+          .pipe(map((total) => AppActions.loadedTotalNumberOfUsers({ total })));
+      }),
+    );
+  });
+
   loadSettingsFromApi$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),

@@ -15,6 +15,8 @@ describe('App Reducer', () => {
         loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
+        totalNumberBites: 0,
+        totalNumberUsers: 0,
       };
 
       const NEW_STATE: AppSlice = {
@@ -30,6 +32,8 @@ describe('App Reducer', () => {
         loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
+        totalNumberBites: 0,
+        totalNumberUsers: 0,
       };
 
       const logoutAction = fromAuth.AuthActions.logoutSucceeded();

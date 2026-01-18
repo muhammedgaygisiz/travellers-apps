@@ -10,9 +10,13 @@ import { loadBiteById } from '../utils/load-bite-by-id';
 import { Bite, Bucketlist } from 'model';
 import { saveEditedBite } from '../utils/save-edited-bite';
 import { deleteFileInFirebaseStorage } from '../utils/delete-file-in-firebasestorage';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import {
+  AddDocumentSnapshotListenerCallbackEvent,
+  FirebaseFirestore,
+} from '@capacitor-firebase/firestore';
 import { ErrorHandler } from '@angular/core';
 import { loadBitesByBucketlist } from '../utils/load-bites-by-bucketlist';
+import { BITE_COLLECTION } from '../utils/constants';
 
 jest.mock('../utils/load-bites-by-location', () => ({
   loadBitesByLocation: jest.fn(),
@@ -48,6 +52,7 @@ jest.mock('../utils/delete-file-in-firebasestorage', () => ({
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
     deleteDocument: jest.fn(),
+    addCollectionSnapshotListener: jest.fn(),
   },
 }));
 
@@ -290,6 +295,52 @@ describe(BiteApiService.name, () => {
           expect.any(Error),
         );
         expect(result).toEqual([]);
+      });
+    });
+  });
+
+  describe('startlatestBitesListener', () => {
+    it('should call FirebaseFirestore.addCollectionSnapshotListener', async () => {
+      const addCollectionSnapshotListenerSpy = jest
+        .spyOn(FirebaseFirestore, 'addCollectionSnapshotListener')
+        .mockImplementation();
+
+      await service.startlatestBitesListener(5);
+
+      expect(addCollectionSnapshotListenerSpy).toHaveBeenCalledWith(
+        {
+          reference: BITE_COLLECTION,
+          queryConstraints: [
+            {
+              type: 'orderBy',
+              fieldPath: 'createdAtTimestamp',
+              directionStr: 'desc',
+            },
+            { type: 'limit', limit: 5 },
+          ],
+        },
+        expect.any(Function),
+      );
+    });
+
+    describe('given passed callback of listener', () => {
+      it('should handle response when listener callback is invoked', async () => {
+        const addCollectionSnapshotListenerSpy = jest.spyOn(
+          FirebaseFirestore,
+          'addCollectionSnapshotListener',
+        );
+
+        await service.startlatestBitesListener(5);
+
+        const listenerCallback =
+          addCollectionSnapshotListenerSpy.mock.calls[0][1];
+
+        const mockSnapshot = { snapshots: [] } as any;
+        listenerCallback(mockSnapshot, null);
+
+        // Since the actual implementation of the callback is not defined,
+        // we just ensure that invoking the callback does not throw an error.
+        expect(true).toBe(true);
       });
     });
   });

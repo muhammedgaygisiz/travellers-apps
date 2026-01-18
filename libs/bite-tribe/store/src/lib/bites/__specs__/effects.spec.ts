@@ -15,6 +15,7 @@ import { signal, WritableSignal } from '@angular/core';
 import { BucketlistActions } from '../../bucketlists/actions';
 import { PATH } from 'utils';
 import SpyInstance = jest.SpyInstance;
+import { fromAuth } from 'ta-firestore';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -31,6 +32,7 @@ const Mock = {
   getUserByBiteId: jest.fn(),
   bucketlist: (): WritableSignal<string> => signal(''),
   user: jest.fn(),
+  latestBites$: (): Observable<any> => of([]),
 };
 
 const BITE_MOCK = {
@@ -473,6 +475,32 @@ describe(BiteEffects.name, () => {
         };
 
         expectObservable(effects.loadUserFromBite$).toBe(expected, output);
+      });
+    });
+  });
+
+  describe('listenToLatest20Bites$', () => {
+    describe('on loginSucceeded', () => {
+      it('should call api.listenToLatest20Bites', () => {
+        const listenToLatest20BitesSpy = jest.spyOn(apiService, 'latestBites$');
+
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: fromAuth.AuthActions.loginSucceeded(),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BiteActions.loadedLatestFromAPI({ bites: [] }),
+          };
+
+          expectObservable(effects.listenToLatest20Bites$).toBe(
+            expected,
+            output,
+          );
+        });
+
+        expect(listenToLatest20BitesSpy).toHaveBeenCalledTimes(1);
       });
     });
   });

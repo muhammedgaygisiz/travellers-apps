@@ -47,6 +47,7 @@ class Mock {
   loadBitesByBucketlist = jest.fn();
   deleteBite = jest.fn();
   startListener = jest.fn();
+  startlatestBitesListener = jest.fn();
 }
 
 describe('BiteTribeApiService', () => {
@@ -619,6 +620,24 @@ describe('BiteTribeApiService', () => {
         const bucketlists$ = service.bucketlists$();
         expect(startListenerSpy).toHaveBeenCalled();
         expect(bucketlists$).toBe(bucketlistsObservable);
+      },
+    ));
+  });
+
+  describe('latestBites$', () => {
+    it('should call startlatestBitesListener and return latestBites$ from BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const startlatestBitesListenerSpy = jest.spyOn(
+          biteApiService,
+          'startlatestBitesListener',
+        );
+        const latestBitesObservable = of([{ id: 'bite-id' }] as any);
+        biteApiService.latestBites$ = latestBitesObservable;
+        const numberOfBites = 5;
+        const latestBites$ = service.latestBites$(numberOfBites);
+        expect(startlatestBitesListenerSpy).toHaveBeenCalledWith(numberOfBites);
+        expect(latestBites$).toBe(latestBitesObservable);
       },
     ));
   });

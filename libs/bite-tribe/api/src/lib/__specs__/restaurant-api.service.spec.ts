@@ -102,11 +102,39 @@ describe(RestaurantApiService.name, () => {
     describe('given logged in true', () => {
       describe('and no restaurant id', () => {
         it('should return EMPTY', () => {
-          scheduler.run(async ({ expectObservable }) => {
+          scheduler.run(({ expectObservable }) => {
+            (service as any).authService.isLoggedIn$ = of(true);
+
             const result$ = service.loadRestaurant('');
 
             expectObservable(result$).toBe('|');
           });
+        });
+      });
+
+      describe('and valid restaurant id', () => {
+        it('should call getRestaurantById and return restaurant', () => {
+          const getRestaurantByIdSpy = jest
+            .spyOn(service, 'getRestaurantById')
+            .mockReturnValue(
+              of({
+                id: 'resto-123',
+                name: 'Test Restaurant',
+              }) as any,
+            );
+
+          scheduler.run(({ expectObservable }) => {
+            // Update isLoggedIn$ to emit true
+            (service as any).authService.isLoggedIn$ = of(true);
+
+            const result$ = service.loadRestaurant('resto-123');
+
+            expectObservable(result$).toBe('(a|)', {
+              a: { id: 'resto-123', name: 'Test Restaurant' },
+            });
+          });
+
+          expect(getRestaurantByIdSpy).toHaveBeenCalledWith('resto-123');
         });
       });
     });

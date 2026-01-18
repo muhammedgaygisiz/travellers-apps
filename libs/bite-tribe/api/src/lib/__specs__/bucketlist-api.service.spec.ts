@@ -141,6 +141,29 @@ describe(BucketlistApiService.name, () => {
         });
       });
     });
+
+    describe('given an error', () => {
+      it('should handle error', async () => {
+        const consoleErrorSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation();
+
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockRejectedValue(new Error('Failed to get document'));
+
+        try {
+          await service.saveBiteIdToBucketList({} as any);
+        } catch (e) {
+          // do nothing
+        }
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error saving bite ID to bucket list:',
+          expect.any(Error),
+        );
+      });
+    });
   });
 
   describe('createBucketListAndSaveBiteIdToBucketList', () => {
@@ -191,6 +214,32 @@ describe(BucketlistApiService.name, () => {
             createdAtTimestamp: 1710504000000,
           },
         });
+      });
+    });
+
+    describe('given no error', () => {
+      it('should handle', async () => {
+        const consoleErrorSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation();
+
+        jest
+          .spyOn(FirebaseFirestore, 'addDocument')
+          .mockRejectedValue(new Error('Failed to add document'));
+
+        try {
+          await service.createBucketListAndSaveBiteIdToBucketList({
+            bucketListName: 'My Bucketlist',
+            biteId: 'bite1',
+          });
+        } catch (e) {
+          // do nothing
+        }
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error creating bucket list and saving bite ID:',
+          expect.any(Error),
+        );
       });
     });
   });

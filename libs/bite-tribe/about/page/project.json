@@ -1,10 +1,10 @@
 {
-  "name": "page",
+  "name": "bite-tribe/about",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/bite-tribe/about/page/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:bite-tribe", "type:feature"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

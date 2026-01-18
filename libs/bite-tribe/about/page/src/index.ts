@@ -1,1 +1,1 @@
-export * from './lib/page/page';
+export { AboutContainerComponent } from './lib/integration/about-container.component';

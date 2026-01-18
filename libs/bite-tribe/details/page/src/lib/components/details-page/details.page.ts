@@ -44,8 +44,8 @@ import { TagsInputComponent } from 'common/ui/tags';
 
 @Component({
   selector: 'details-page',
-  templateUrl: './details.page.html',
-  styleUrls: ['./details.page.scss'],
+  templateUrl: 'details.page.html',
+  styleUrl: 'details.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PageComponent,

@@ -4,7 +4,7 @@
   "sourceRoot": "libs/bite-tribe/about/data-access/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:bite-tribe", "type:data-access"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

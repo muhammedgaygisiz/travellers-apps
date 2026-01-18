@@ -31,6 +31,7 @@ import { getUniqueRestaurantNames } from './utils/get-unique-restaurant-names';
 import { getNearbyBites } from './utils/get-nearby-bites';
 import { getNearbyRestaurantNamesByPosition } from './utils/get-nearby-restaurant-names-by-position';
 import { getTagSuggestionsByPlace } from './utils/get-tag-suggestions-by-place';
+import { dedupMerge } from './utils/dedup-merge';
 
 const slice = createFeatureSelector<BitesState>(key);
 
@@ -49,8 +50,10 @@ export const bitesWithMetadata = createSelector(
   latestBites,
   likes,
   gpsPosition,
-  (bites, latestBites, likes, gpsPosition) =>
-    [...bites, ...latestBites]
+  (bites, latestBites, likes, gpsPosition) => {
+    const dedupedBites = dedupMerge(bites, latestBites);
+
+    return dedupedBites
       .map(
         (bite) =>
           ({
@@ -65,7 +68,8 @@ export const bitesWithMetadata = createSelector(
             ),
           }) as Bite,
       )
-      .sort(byDistance),
+      .sort(byDistance);
+  },
 );
 
 export const bites = createSelector(

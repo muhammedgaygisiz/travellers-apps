@@ -7,11 +7,39 @@ jest.mock('../load-bite-by-id', () => ({
 }));
 
 describe('loadBitesByBucketlist', () => {
-  it('should call loadBiteById for each bite id', async () => {
-    await loadBitesByBucketlist({
-      biteIds: ['bite1', 'bite2', 'bite3'],
-    } as Bucketlist);
+  beforeEach(() => {
+    (loadBiteById as jest.Mock).mockClear();
+  });
 
-    expect(loadBiteById).toHaveBeenCalledTimes(3);
+  describe('given bite ids in bucketlist', () => {
+    it('should call loadBiteById for each bite id', async () => {
+      await loadBitesByBucketlist({
+        biteIds: ['bite1', 'bite2', 'bite3'],
+      } as Bucketlist);
+
+      expect(loadBiteById).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('given not bites in bucketlist', () => {
+    it('should not call loadBiteById and return empty array', async () => {
+      const result = await loadBitesByBucketlist({
+        biteIds: [],
+      } as unknown as Bucketlist);
+
+      expect(loadBiteById).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
+
+    describe('with bite ids undefined', () => {
+      it('should not call loadBiteById and return empty array', async () => {
+        const result = await loadBitesByBucketlist({
+          // biteIds is undefined
+        } as unknown as Bucketlist);
+
+        expect(loadBiteById).not.toHaveBeenCalled();
+        expect(result).toEqual([]);
+      });
+    });
   });
 });

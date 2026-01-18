@@ -1,6 +1,15 @@
-import { createEntityAdapter } from '@ngrx/entity';
+import { createEntityAdapter, EntityState } from '@ngrx/entity';
 import type { Bite } from 'model';
+
+export interface BitesState extends EntityState<Bite> {
+  cachedBite?: Partial<Bite>;
+  editingBite?: Partial<Bite>;
+  biteCreator?: any;
+  latestBites: Bite[];
+}
 
 export const adapter = createEntityAdapter<Bite>();
 
-export const initialState = adapter.getInitialState();
+export const initialState: BitesState = adapter.getInitialState({
+  latestBites: [],
+});

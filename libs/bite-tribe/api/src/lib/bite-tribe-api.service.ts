@@ -188,4 +188,10 @@ export class BiteTribeApiService {
 
     return this.bucketlistApiService.bucketlists$;
   }
+
+  latestBites$(number: number): Observable<Bite[]> {
+    this.biteApiService.startlatestBitesListener(number);
+
+    return this.biteApiService.latestBites$;
+  }
 }

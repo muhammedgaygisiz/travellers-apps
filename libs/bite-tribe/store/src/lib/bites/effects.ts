@@ -12,6 +12,7 @@ import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { BucketlistActions } from '../bucketlists/actions';
 import { PATH } from 'utils';
 import { userId } from '../router/selectors';
+import { fromAuth } from 'ta-firestore';
 
 @Injectable()
 export class BiteEffects {
@@ -22,6 +23,14 @@ export class BiteEffects {
 
   private readonly bite = toSignal(this.store.select(bite));
   private readonly biteCreatorId = toSignal(this.store.select(userId));
+
+  listenToLatest20Bites$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(fromAuth.AuthActions.loginSucceeded),
+      switchMap(() => this.api.latestBites$(20)),
+      map((bites) => BiteActions.loadedLatestFromAPI({ bites })),
+    );
+  });
 
   loadBitesByCurrentUser$ = createEffect(() => {
     return this.actions$.pipe(

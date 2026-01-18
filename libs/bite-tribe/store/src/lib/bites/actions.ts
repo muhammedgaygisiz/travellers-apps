@@ -19,5 +19,6 @@ export const BiteActions = createActionGroup({
     'Loaded bite creator': props<{ biteCreator: any }>(),
     'No public creator for bite': emptyProps(),
     'No bites for bite creator profile': emptyProps(),
+    'Loaded Latest from API': props<{ bites: Bite[] }>(),
   },
 });

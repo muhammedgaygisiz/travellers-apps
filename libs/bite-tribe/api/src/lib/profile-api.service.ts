@@ -33,8 +33,6 @@ export class ProfileApiService {
     switchMap((isLoggedIn) => {
       if (isLoggedIn) {
         this.startListener();
-      } else {
-        this.stopProfileListener(this.profileCallbackId);
       }
 
       return this.profileChannel$.pipe(skip(1), takeUntil(this.stopped$));

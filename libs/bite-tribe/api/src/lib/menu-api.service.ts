@@ -63,9 +63,7 @@ export class MenuApiService {
         if (menuId) {
           return from(this.getMenuById(menuId)).pipe(
             catchError((err) => {
-              console.error('Error fetching menu:', err);
-              this.errorHandler.handleError(err);
-              return EMPTY;
+              return this.handleError(err);
             }),
           );
         }
@@ -75,16 +73,22 @@ export class MenuApiService {
     );
   }
 
+  handleError(err: any): typeof EMPTY {
+    console.error('Error fetching menu:', err);
+    this.errorHandler.handleError(err);
+    return EMPTY;
+  }
+
   async getMenuById(menuId: string): Promise<Menu | undefined> {
     try {
       const doc = await FirebaseFirestore.getDocument({
         reference: `${MENU_COLLECTION}/${menuId}`,
       });
 
-      if (doc.snapshot.data) {
-        const data = doc.snapshot.data;
+      const data = doc.snapshot.data;
+      if (data) {
         return {
-          id: data?.['id'] || menuId,
+          id: data['id'] ?? menuId,
           ...data,
         } as Menu;
       }

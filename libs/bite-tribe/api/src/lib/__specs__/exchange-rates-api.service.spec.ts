@@ -47,5 +47,17 @@ describe(ExchangeRatesApiService.name, () => {
         expect(rates).toEqual({ EUR: 1 });
       });
     });
+
+    describe('given doc is undefined', () => {
+      it('should return default exchange rate', async () => {
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockResolvedValue(undefined as any);
+
+        const rates = await service.getExchangeRates();
+
+        expect(rates).toEqual({ EUR: 1 });
+      });
+    });
   });
 });

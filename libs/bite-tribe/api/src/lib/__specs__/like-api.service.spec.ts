@@ -2,6 +2,7 @@ import { LikeApiService } from '../like-api.service';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
+import { ErrorHandler } from '@angular/core';
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
@@ -16,12 +17,19 @@ const MockedAuthService = {
   authState: (): any => ({ user: { uid: '123' } }),
 };
 
+const ErrorHandlerMock = {
+  handleError: jest.fn(),
+};
+
 describe(LikeApiService.name, () => {
   let service: LikeApiService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [{ provide: AuthService, useValue: MockedAuthService }],
+      providers: [
+        { provide: AuthService, useValue: MockedAuthService },
+        { provide: ErrorHandler, useValue: ErrorHandlerMock },
+      ],
     });
 
     service = TestBed.inject(LikeApiService);
@@ -108,6 +116,31 @@ describe(LikeApiService.name, () => {
         },
       });
     });
+
+    describe('given an error', () => {
+      it('should log the error to console', async () => {
+        const consoleErrorSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation();
+
+        jest
+          .spyOn(FirebaseFirestore, 'setDocument')
+          .mockRejectedValue(new Error('Failed to save like'));
+
+        const like = {
+          likeType: 'thumbup',
+          biteId: 'bite123',
+          createdAt: '2024-06-01T00:00:00Z',
+        };
+
+        await service.saveLike(like);
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error saving like:',
+          expect.any(Error),
+        );
+      });
+    });
   });
 
   describe('removeLike', () => {
@@ -124,6 +157,29 @@ describe(LikeApiService.name, () => {
 
       expect(deleteDocumentMock).toHaveBeenCalledWith({
         reference: `bites/${like.biteId}/likes/123`,
+      });
+    });
+
+    describe('given an error', () => {
+      it('should handle the error', async () => {
+        const consoleErrorSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation();
+
+        jest
+          .spyOn(FirebaseFirestore, 'deleteDocument')
+          .mockRejectedValue(new Error('Failed to remove like'));
+
+        const like = {
+          biteId: 'bite123',
+        };
+
+        await service.removeLike(like);
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error removing like:',
+          expect.any(Error),
+        );
       });
     });
   });

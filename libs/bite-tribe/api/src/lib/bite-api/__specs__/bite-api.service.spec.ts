@@ -131,6 +131,24 @@ describe(BiteApiService.name, () => {
       );
       expect(loadBiteById).toHaveBeenCalledWith({ id: mockedBiteId });
     });
+
+    describe('given an error', () => {
+      it('should handle the error', async () => {
+        (createBite as jest.Mock).mockRejectedValueOnce(
+          new Error('Failed to create bite'),
+        );
+
+        try {
+          await service.saveNewBite({} as Bite);
+        } catch (error) {
+          // Expected to throw
+        }
+
+        expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(
+          expect.any(Error),
+        );
+      });
+    });
   });
 
   describe('saveEditedBite', () => {
@@ -141,6 +159,24 @@ describe(BiteApiService.name, () => {
 
       expect(saveEditedBite).toHaveBeenCalledWith(true, mockedBite);
       expect(loadBiteById).toHaveBeenCalledWith(mockedBiteId);
+    });
+
+    describe('given an error', () => {
+      it('should handle the error', async () => {
+        (saveEditedBite as jest.Mock).mockRejectedValueOnce(
+          new Error('Failed to save edited bite'),
+        );
+
+        try {
+          await service.saveEditedBite({} as Bite);
+        } catch (error) {
+          // Expected to throw
+        }
+
+        expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(
+          expect.any(Error),
+        );
+      });
     });
   });
 
@@ -165,6 +201,47 @@ describe(BiteApiService.name, () => {
           reference: `bites/${bite.id}`,
         });
       });
+
+      describe('given an error in deleteFileInFirebaseStorage', () => {
+        beforeEach(() => {
+          (FirebaseFirestore.deleteDocument as any).mockReset();
+        });
+
+        it('should handle the error and not call FirebaseFirestore.deleteDocument', async () => {
+          (deleteFileInFirebaseStorage as jest.Mock).mockRejectedValueOnce(
+            new Error('Failed to delete image'),
+          );
+
+          try {
+            await service.deleteBite(bite);
+          } catch (error) {
+            // Expected to throw
+          }
+
+          expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(
+            expect.any(Error),
+          );
+          expect(FirebaseFirestore.deleteDocument).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('given an error while deleting bite', () => {
+        it('should handle the error', async () => {
+          (FirebaseFirestore.deleteDocument as jest.Mock).mockRejectedValueOnce(
+            new Error('Failed to delete bite'),
+          );
+
+          try {
+            await service.deleteBite(bite);
+          } catch (error) {
+            // Expected to throw
+          }
+
+          expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(
+            expect.any(Error),
+          );
+        });
+      });
     });
 
     describe('given a bite without imagePath', () => {
@@ -181,6 +258,16 @@ describe(BiteApiService.name, () => {
         });
       });
     });
+
+    describe('given a bite without id', () => {
+      const biteWithoutId = {} as Bite;
+
+      it('should reject the promise', async () => {
+        await expect(service.deleteBite(biteWithoutId)).rejects.toThrow(
+          'Bite ID is required for deletion.',
+        );
+      });
+    });
   });
 
   describe('loadBitesByBucketlist', () => {
@@ -189,6 +276,21 @@ describe(BiteApiService.name, () => {
       await service.loadBitesByBucketlist(mockedBucketlist);
 
       expect(loadBitesByBucketlist).toHaveBeenCalledWith(mockedBucketlist);
+    });
+
+    describe('given an error', () => {
+      it('should handle the error and return empty array', async () => {
+        (loadBitesByBucketlist as jest.Mock).mockRejectedValueOnce(
+          new Error('Failed to load bites'),
+        );
+
+        const result = await service.loadBitesByBucketlist({} as Bucketlist);
+
+        expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(
+          expect.any(Error),
+        );
+        expect(result).toEqual([]);
+      });
     });
   });
 });

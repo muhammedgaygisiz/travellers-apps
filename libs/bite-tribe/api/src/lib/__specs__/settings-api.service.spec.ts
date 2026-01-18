@@ -101,5 +101,19 @@ describe(SettingsApiService.name, () => {
         },
       });
     });
+
+    describe('given user is undefined', () => {
+      beforeEach(() => {
+        jest.spyOn(MockedAuthService, 'authState').mockResolvedValue({});
+      });
+
+      it('should throw an error', async () => {
+        const settingsToSave = { theme: 'light', notificationsEnabled: false };
+
+        await expect(service.saveSettings(settingsToSave)).rejects.toThrow(
+          'No user logged in',
+        );
+      });
+    });
   });
 });

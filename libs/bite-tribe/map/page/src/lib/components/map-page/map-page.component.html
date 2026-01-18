@@ -5,6 +5,7 @@
   [showMyBites]="true"
   [showMyBucketlists]="true"
   [showMyProfile]="true"
+  [showAboutButton]="true"
   [showFooter]="false"
   [isAuthenticated]="isAuthenticated()"
   [enableBackButton]="true"
@@ -13,6 +14,7 @@
   (gotoMyBucketlists)="gotoMyBucketlists.emit()"
   (gotoMyBites)="gotoMyBites.emit()"
   (gotoProfile)="gotoMyProfile.emit()"
+  (gotoAbout)="gotoAbout.emit()"
 >
   <ion-content>
     <div class="container">

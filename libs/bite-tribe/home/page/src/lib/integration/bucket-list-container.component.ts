@@ -26,6 +26,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyProfile)="service.onGotoMyProfileClick()"
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoEdit)="service.onGotoEditClick($event)"
+      (gotoAbout)="service.onGotoAboutClick()"
       (openMapView)="service.openMapView('my-bucketlists')"
       (refresh)="service.refresh()"
       (closeGpsError)="service.closeGpsError()"

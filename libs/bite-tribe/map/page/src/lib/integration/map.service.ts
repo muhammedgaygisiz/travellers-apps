@@ -2,6 +2,7 @@ import { computed, inject, Injectable, Signal } from '@angular/core';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { Bite, Geopoint } from 'model';
+import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class MapService {
@@ -42,6 +43,10 @@ export class MapService {
 
   onGotoMyBucketlists(): void {
     this.navController.navigateForward(['my-bucketlists']);
+  }
+
+  onGotoAboutClick(): void {
+    this.navController.navigateForward([PATH.ABOUT]);
   }
 
   likeButtonClicked(likeClick: { likeType: string; biteId: string }): void {

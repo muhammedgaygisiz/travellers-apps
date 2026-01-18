@@ -35,6 +35,7 @@ export class MapPageComponent {
   readonly logoutClick = output();
   readonly gotoSettings = output();
   readonly gotoMyProfile = output();
+  readonly gotoAbout = output();
   readonly gotoMyBucketlists = output();
   readonly gotoMyBites = output();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();

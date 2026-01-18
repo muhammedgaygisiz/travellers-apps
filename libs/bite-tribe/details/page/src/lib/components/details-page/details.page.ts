@@ -87,6 +87,7 @@ export class DetailsPage {
   readonly logoutClick = output();
   readonly gotoSettings = output();
   readonly gotoMyProfile = output();
+  readonly gotoAbout = output();
   readonly gotoMyBites = output();
   readonly gotoMyBucketlists = output();
   readonly restaurantClick = output<Bite>();

@@ -7,6 +7,7 @@ import {
   RemoveBiteFromBucketlistParams,
 } from 'model';
 import { NavController } from '@ionic/angular/standalone';
+import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -99,5 +100,9 @@ export class DetailsService {
 
   onGotoEditClick(biteToEdit: Bite): void {
     this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
+  }
+
+  onGotoAboutClick(): void {
+    this.navController.navigateForward([PATH.ABOUT]);
   }
 }

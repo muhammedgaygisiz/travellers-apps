@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
-import { adapter } from './adapter';
+import { adapter, BitesState } from './adapter';
 import type { Bite, PublicUser } from 'model';
 import { biteId } from '../router/selectors';
 import { likes } from '../likes/selectors';
@@ -31,29 +31,32 @@ import { getUniqueRestaurantNames } from './utils/get-unique-restaurant-names';
 import { getNearbyBites } from './utils/get-nearby-bites';
 import { getNearbyRestaurantNamesByPosition } from './utils/get-nearby-restaurant-names-by-position';
 import { getTagSuggestionsByPlace } from './utils/get-tag-suggestions-by-place';
+import { dedupMerge } from './utils/dedup-merge';
 
-const slice = createFeatureSelector<
-  EntityState<Bite> & {
-    cachedBite?: Bite;
-    editingBite?: Bite;
-    biteCreator?: PublicUser;
-  }
->(key);
+const slice = createFeatureSelector<BitesState>(key);
 
 const { selectAll } = adapter.getSelectors();
 
-export const cachedBite = createSelector(slice, (state) => state?.cachedBite);
+export const cachedBite = createSelector(
+  slice,
+  (state) => state?.cachedBite as Bite | undefined,
+);
 
 export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
 
 const allBites = createSelector(slice, selectAll);
 
+const latestBites = createSelector(slice, (state) => state.latestBites);
+
 export const bitesWithMetadata = createSelector(
   allBites,
+  latestBites,
   likes,
   gpsPosition,
-  (bites, likes, gpsPosition) =>
-    bites
+  (bites, latestBites, likes, gpsPosition) => {
+    const dedupedBites = dedupMerge(bites, latestBites);
+
+    return dedupedBites
       .map(
         (bite) =>
           ({
@@ -68,7 +71,8 @@ export const bitesWithMetadata = createSelector(
             ),
           }) as Bite,
       )
-      .sort(byDistance),
+      .sort(byDistance);
+  },
 );
 
 export const bites = createSelector(

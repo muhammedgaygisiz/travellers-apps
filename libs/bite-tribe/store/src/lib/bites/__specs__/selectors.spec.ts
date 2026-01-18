@@ -1,6 +1,7 @@
 import type { Bite, Bucketlist, Geopoint, PublicUser } from 'model';
 import * as fromSelectors from '../selectors';
 import { EntityState } from '@ngrx/entity';
+import { BitesState } from '../adapter';
 
 describe('Bites Selectors', () => {
   const mockPosition: Geopoint = {
@@ -36,11 +37,7 @@ describe('Bites Selectors', () => {
     { id: 'like2', biteId: '1', userId: 'user2' },
   ];
 
-  const initialState: EntityState<Bite> & {
-    cachedBite?: Bite;
-    editingBite?: Bite;
-    biteCreator?: PublicUser;
-  } = {
+  const initialState: BitesState = {
     ids: ['1', '2'],
     entities: {
       '1': mockBite1,
@@ -48,6 +45,7 @@ describe('Bites Selectors', () => {
     },
     cachedBite: mockBite1,
     biteCreator: mockUser,
+    latestBites: [],
   };
 
   describe('cachedBite', () => {
@@ -240,6 +238,7 @@ describe('Bites Selectors', () => {
     it('should return bites with likes and distance', () => {
       const result = fromSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
+        [],
         mockLikes,
         mockPosition,
       );
@@ -251,6 +250,7 @@ describe('Bites Selectors', () => {
       const result = fromSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
         [],
+        [],
         mockPosition,
       );
 
@@ -260,6 +260,7 @@ describe('Bites Selectors', () => {
     it('should return bites without likes if no matching likes', () => {
       const result = fromSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
+        [],
         [{ id: 'like1', biteId: '5', userId: 'user1' }],
         mockPosition,
       );
@@ -270,6 +271,7 @@ describe('Bites Selectors', () => {
     it('should return bites no distance if no position', () => {
       const result = fromSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
+        [],
         mockLikes,
         undefined,
       );

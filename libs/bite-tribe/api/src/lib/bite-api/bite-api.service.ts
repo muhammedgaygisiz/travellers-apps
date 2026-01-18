@@ -1,11 +1,12 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import {
+  DocumentData,
+  DocumentSnapshot,
+  FirebaseFirestore,
+} from '@capacitor-firebase/firestore';
 import { Bite, Bucketlist } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
-import { storagePathFromDownloadUrl } from 'utils';
-import { FirebaseStorage } from '@capacitor-firebase/storage';
-import { toBite } from '../utils/to-bite';
 import { Platform } from '@ionic/angular';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
 import { BITE_COLLECTION } from './utils/constants';
@@ -16,12 +17,18 @@ import { saveEditedBite } from './utils/save-edited-bite';
 import { loadBiteById } from './utils/load-bite-by-id';
 import { loadBitesByBucketlist } from './utils/load-bites-by-bucketlist';
 import { deleteFileInFirebaseStorage } from './utils/delete-file-in-firebasestorage';
+import { BehaviorSubject } from 'rxjs';
+import { toBite } from '../utils/to-bite';
+import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
   private readonly platform = inject(Platform);
+
+  private readonly _latestBitesChannel$ = new BehaviorSubject<Bite[]>([]);
+  latestBites$ = this._latestBitesChannel$.asObservable();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -118,5 +125,32 @@ export class BiteApiService {
       this.errorHandler.handleError(e);
       return [];
     }
+  }
+
+  async startlatestBitesListener(number: number): Promise<void> {
+    await FirebaseFirestore.addCollectionSnapshotListener(
+      {
+        reference: BITE_COLLECTION,
+        queryConstraints: [
+          {
+            type: 'orderBy',
+            fieldPath: 'createdAtTimestamp',
+            directionStr: 'desc',
+          },
+          { type: 'limit', limit: number },
+        ],
+      },
+      (biteDocs) => {
+        this.handleLatestBites(biteDocs);
+      },
+    );
+  }
+
+  handleLatestBites(
+    biteDocs: AddCollectionSnapshotListenerCallbackEvent<DocumentData> | null,
+  ): void {
+    const bites = biteDocs?.snapshots?.map((snapshot) => toBite(snapshot));
+
+    this._latestBitesChannel$.next(bites || []);
   }
 }

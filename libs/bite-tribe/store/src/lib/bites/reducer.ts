@@ -67,4 +67,10 @@ export const reducer = createReducer(
       biteCreator: undefined,
     };
   }),
+  on(BiteActions.loadedLatestFromAPI, (state, { bites }) => {
+    return {
+      ...state,
+      latestBites: bites,
+    };
+  }),
 );

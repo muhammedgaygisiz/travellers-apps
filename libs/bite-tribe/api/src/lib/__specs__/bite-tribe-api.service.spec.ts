@@ -82,6 +82,8 @@ describe('BiteTribeApiService', () => {
       'toggle',
     );
 
+    beforeEach(() => classListSpy.mockClear());
+
     describe('given a dark theme', () => {
       beforeEach(() => {
         TestBed.overrideProvider(SettingsApiService, {
@@ -126,6 +128,28 @@ describe('BiteTribeApiService', () => {
           });
 
           expect(classListSpy).toHaveBeenCalledWith('light', true);
+        },
+      ));
+    });
+
+    describe('with undefined settings', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(SettingsApiService, {
+          useValue: { settings$: of(undefined) },
+        });
+      });
+
+      it('should not modify document element classes', inject(
+        [BiteTribeApiService, SettingsApiService],
+        (
+          service: BiteTribeApiService,
+          settingsApiService: SettingsApiService,
+        ) => {
+          scheduler.run(({ expectObservable }) => {
+            expectObservable(service.settings$).toBe('(a|)', { a: undefined });
+          });
+
+          expect(classListSpy).not.toHaveBeenCalled();
         },
       ));
     });

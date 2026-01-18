@@ -176,6 +176,31 @@ describe(MenuApiService.name, () => {
       });
       expect(getDocumentSpy).toHaveBeenCalledTimes(1);
     });
+
+    describe('given no data returned', () => {
+      it('should return undefined', async () => {
+        jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+          snapshot: {
+            data: null,
+          },
+        } as any);
+
+        const result = await service.getMenuById('menuId');
+
+        expect(result).toBeUndefined();
+      });
+    });
+
+    describe('given an error', () => {
+      it('should return undefined', async () => {
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockRejectedValue(new Error('Test error'));
+
+        const result = await service.getMenuById('menuId');
+        return expect(result).toBeUndefined();
+      });
+    });
   });
 
   describe('saveMenu', () => {

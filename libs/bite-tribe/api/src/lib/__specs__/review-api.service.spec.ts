@@ -130,5 +130,37 @@ describe(ReviewApiService.name, () => {
         });
       },
     ));
+
+    describe('given an error', () => {
+      it('should handle the error', inject(
+        [ReviewApiService],
+        async (service: ReviewApiService) => {
+          jest
+            .spyOn(FirebaseFirestore, 'addDocument')
+            .mockRejectedValue(new Error('Firestore error'));
+          const consoleErrorSpy = jest
+            .spyOn(console, 'error')
+            .mockImplementation();
+
+          const payload = {
+            review: 'Great food!',
+            rating: 5,
+            biteId: 'biteId123',
+            userId: 'userId123',
+          };
+
+          try {
+            await service.saveNewReview(payload);
+          } catch {
+            // Swallow the error for test
+          }
+
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error saving new review:',
+            expect.any(Error),
+          );
+        },
+      ));
+    });
   });
 });

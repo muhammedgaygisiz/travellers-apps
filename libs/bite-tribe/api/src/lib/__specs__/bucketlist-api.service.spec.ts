@@ -217,7 +217,7 @@ describe(BucketlistApiService.name, () => {
       });
     });
 
-    describe('given no error', () => {
+    describe('given error', () => {
       it('should handle', async () => {
         const consoleErrorSpy = jest
           .spyOn(console, 'error')
@@ -245,25 +245,50 @@ describe(BucketlistApiService.name, () => {
   });
 
   describe('removeBiteFromBucketlist', () => {
-    it('should remove biteId from the bucketlist', async () => {
-      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
-        snapshot: {
-          data: { biteIds: ['bite1', 'bite2', 'bite3'] },
-        },
-      } as any);
+    describe('given no error', () => {
+      it('should remove biteId from the bucketlist', async () => {
+        jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+          snapshot: {
+            data: { biteIds: ['bite1', 'bite2', 'bite3'] },
+          },
+        } as any);
 
-      await service.removeBiteFromBucketlist({
-        bucketlistId: '1',
-        biteId: 'bite2',
+        await service.removeBiteFromBucketlist({
+          bucketlistId: '1',
+          biteId: 'bite2',
+        });
+
+        expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
+          reference: `bucketlists/1`,
+          data: {
+            biteIds: ['bite1', 'bite3'],
+            updatedAt: '2024-03-15T12:00:00.000Z',
+            updatedAtTimestamp: 1710504000000,
+          },
+        });
       });
+    });
 
-      expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
-        reference: `bucketlists/1`,
-        data: {
-          biteIds: ['bite1', 'bite3'],
-          updatedAt: '2024-03-15T12:00:00.000Z',
-          updatedAtTimestamp: 1710504000000,
-        },
+    describe('given an error', () => {
+      it('should handle error', async () => {
+        const consoleErrorSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation();
+
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockRejectedValue(new Error('Failed to get document'));
+
+        try {
+          await service.removeBiteFromBucketlist({} as any);
+        } catch (e) {
+          // do nothing
+        }
+
+        expect(consoleErrorSpy).toHaveBeenLastCalledWith(
+          'Error removing bite from bucket list:',
+          expect.any(Error),
+        );
       });
     });
   });

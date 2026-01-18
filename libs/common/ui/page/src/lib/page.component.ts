@@ -60,7 +60,7 @@ export class PageComponent {
 
   isAuthenticated = input(false);
 
-  showLanguages = input(true);
+  showLanguages = input(false);
 
   title = input('');
 

@@ -20,6 +20,7 @@ class Mock {
   removeLike = (): null => null;
   submitLikeClick = (): null => null;
   submitFollowClick = (): null => null;
+  savePublicProfile = (): null => null;
   followUser = (): null => null;
 }
 
@@ -93,6 +94,21 @@ describe('ProfileDataAccessService', () => {
         },
       ));
     });
+  });
+
+  describe('savePublicProfile', () => {
+    it('should call savePublicProfile on storeService', inject(
+      [ProfileDataAccessService],
+      (service: ProfileDataAccessService) => {
+        const savePublicProfileSpy = jest.spyOn(
+          storeService,
+          'savePublicProfile',
+        );
+        const mockUser = { id: 'user-id', name: 'Test User' } as any;
+        service.savePublicProfile(mockUser);
+        expect(savePublicProfileSpy).toHaveBeenCalledWith(mockUser);
+      },
+    ));
   });
 
   describe('submitFollowClick', () => {

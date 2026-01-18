@@ -83,8 +83,15 @@ export class ProfileComponent {
     return getBadgeColor(biteCount);
   });
 
-  isUnfollowedUser = computed(() => {
-    return this.userId() !== this.user()?.userId;
+  isUnfollowedUser = computed((): boolean => {
+    const currentUserId = this.userId();
+    const profileOwner = this.user()?.userId;
+
+    if (!profileOwner) {
+      return false;
+    }
+
+    return currentUserId !== profileOwner;
   });
 
   imageLoadErrored = signal(false);

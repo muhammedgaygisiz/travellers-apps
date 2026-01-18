@@ -98,47 +98,77 @@ describe(BucketlistApiService.name, () => {
   });
 
   describe('stopBucketlistListener', () => {
-    it('should call stopped$.next and removeSnapshotListener', async () => {
-      const removeSnapshotListenerMock = jest
+    let removeSnapshotListenerMock: jest.SpyInstance;
+    let stoppedNextSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      removeSnapshotListenerMock = jest
         .spyOn(FirebaseFirestore, 'removeSnapshotListener')
         .mockResolvedValue();
 
-      const stoppedNextSpy = jest
+      stoppedNextSpy = jest
         .spyOn((service as any).stopped$, 'next')
         .mockImplementation();
+    });
 
-      const callbackId = 'testCallbackId';
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
 
-      await service.stopBucketlistListener(callbackId);
+    describe('given callback id', () => {
+      it('should call stopped$.next and removeSnapshotListener', async () => {
+        const callbackId = 'testCallbackId';
 
-      expect(stoppedNextSpy).toHaveBeenCalled();
-      expect(removeSnapshotListenerMock).toHaveBeenCalledWith({
-        callbackId,
+        await service.stopBucketlistListener(callbackId);
+
+        expect(stoppedNextSpy).toHaveBeenCalled();
+        expect(removeSnapshotListenerMock).toHaveBeenCalledWith({
+          callbackId,
+        });
+      });
+    });
+
+    describe('given no callback id', () => {
+      it('should call stopped$.next and not call removeSnapshotListener', async () => {
+        const callbackId = '';
+
+        await service.stopBucketlistListener(callbackId);
+
+        expect(stoppedNextSpy).toHaveBeenCalled();
+        expect(removeSnapshotListenerMock).not.toHaveBeenCalled();
       });
     });
   });
 
   describe('saveBiteIdToBucketList', () => {
+    let getDocumentSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      getDocumentSpy = jest.spyOn(FirebaseFirestore, 'getDocument');
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should call FirebaseFirestore.getDocument', async () => {
-      const getDocumentMock = jest
-        .spyOn(FirebaseFirestore, 'getDocument')
-        .mockResolvedValue({
-          data: { biteIds: [] },
-        } as any);
+      getDocumentSpy.mockResolvedValue({
+        data: { biteIds: [] },
+      } as any);
 
       await service.saveBiteIdToBucketList({
         bucketListId: '1',
         biteId: 'bite1',
       });
 
-      expect(getDocumentMock).toHaveBeenCalledWith({
+      expect(getDocumentSpy).toHaveBeenCalledWith({
         reference: `bucketlists/1`,
       });
     });
 
     describe('given returned bucketlist', () => {
       it('should call FirebaseFirestore.updateDocument with new biteIds', async () => {
-        jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        getDocumentSpy.mockResolvedValue({
           snapshot: {
             data: { biteIds: ['bite0'] },
             path: 'bucketlists/1',
@@ -161,15 +191,26 @@ describe(BucketlistApiService.name, () => {
       });
     });
 
+    describe('given bucketlist doc is undefined', () => {
+      it('should not call FirebaseFirestore.updateDocument', async () => {
+        getDocumentSpy.mockResolvedValue(undefined);
+
+        await service.saveBiteIdToBucketList({
+          bucketListId: '1',
+          biteId: 'bite1',
+        });
+
+        expect(FirebaseFirestore.updateDocument).not.toHaveBeenCalled();
+      });
+    });
+
     describe('given an error', () => {
       it('should handle error', async () => {
         const consoleErrorSpy = jest
           .spyOn(console, 'error')
           .mockImplementation();
 
-        jest
-          .spyOn(FirebaseFirestore, 'getDocument')
-          .mockRejectedValue(new Error('Failed to get document'));
+        getDocumentSpy.mockRejectedValue(new Error('Failed to get document'));
 
         try {
           await service.saveBiteIdToBucketList({} as any);
@@ -264,9 +305,22 @@ describe(BucketlistApiService.name, () => {
   });
 
   describe('removeBiteFromBucketlist', () => {
-    describe('given no error', () => {
+    let getDocumentSpy: jest.SpyInstance;
+    let updateDocumentMock: jest.SpyInstance;
+
+    beforeEach(() => {
+      getDocumentSpy = jest.spyOn(FirebaseFirestore, 'getDocument');
+      updateDocumentMock = jest.spyOn(FirebaseFirestore, 'updateDocument');
+    });
+
+    afterEach(() => {
+      getDocumentSpy.mockClear();
+      updateDocumentMock.mockClear();
+    });
+
+    describe('given a bucketlist doc', () => {
       it('should remove biteId from the bucketlist', async () => {
-        jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        getDocumentSpy.mockResolvedValue({
           snapshot: {
             data: { biteIds: ['bite1', 'bite2', 'bite3'] },
           },
@@ -277,10 +331,30 @@ describe(BucketlistApiService.name, () => {
           biteId: 'bite2',
         });
 
-        expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
+        expect(updateDocumentMock).toHaveBeenCalledWith({
           reference: `bucketlists/1`,
           data: {
             biteIds: ['bite1', 'bite3'],
+            updatedAt: '2024-03-15T12:00:00.000Z',
+            updatedAtTimestamp: 1710504000000,
+          },
+        });
+      });
+    });
+
+    describe('given no bucektlist doc', () => {
+      it('should call updateDocument with biteIds undefined', async () => {
+        getDocumentSpy.mockResolvedValue(undefined as any);
+
+        await service.removeBiteFromBucketlist({
+          bucketlistId: '1',
+          biteId: 'bite2',
+        });
+
+        expect(updateDocumentMock).toHaveBeenCalledWith({
+          reference: `bucketlists/1`,
+          data: {
+            biteIds: undefined,
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -294,9 +368,7 @@ describe(BucketlistApiService.name, () => {
           .spyOn(console, 'error')
           .mockImplementation();
 
-        jest
-          .spyOn(FirebaseFirestore, 'getDocument')
-          .mockRejectedValue(new Error('Failed to get document'));
+        getDocumentSpy.mockRejectedValue(new Error('Failed to get document'));
 
         try {
           await service.removeBiteFromBucketlist({} as any);
@@ -313,23 +385,53 @@ describe(BucketlistApiService.name, () => {
   });
 
   describe('createBucketList', () => {
-    it('should create a new bucketlist', async () => {
-      const addDocumentMock = jest
-        .spyOn(FirebaseFirestore, 'addDocument')
-        .mockResolvedValue({} as any);
+    let addDocumentMock: jest.SpyInstance;
 
-      await service.createBucketList('My Bucketlist');
+    beforeEach(() => {
+      addDocumentMock = jest.spyOn(FirebaseFirestore, 'addDocument');
+    });
 
-      expect(addDocumentMock).toHaveBeenCalled();
-      expect(addDocumentMock).toHaveBeenCalledWith({
-        reference: 'bucketlists',
-        data: {
-          userId: '123',
-          name: 'My Bucketlist',
-          biteIds: [],
-          createdAt: '2024-03-15T12:00:00.000Z',
-          createdAtTimestamp: 1710504000000,
-        },
+    afterEach(() => {
+      addDocumentMock.mockClear();
+    });
+
+    describe('given no error', () => {
+      it('should create a new bucketlist', async () => {
+        addDocumentMock.mockResolvedValue({} as any);
+        await service.createBucketList('My Bucketlist');
+
+        expect(addDocumentMock).toHaveBeenCalled();
+        expect(addDocumentMock).toHaveBeenCalledWith({
+          reference: 'bucketlists',
+          data: {
+            userId: '123',
+            name: 'My Bucketlist',
+            biteIds: [],
+            createdAt: '2024-03-15T12:00:00.000Z',
+            createdAtTimestamp: 1710504000000,
+          },
+        });
+      });
+    });
+
+    describe('given an error', () => {
+      it('should handle error', async () => {
+        const consoleErrorSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation();
+
+        addDocumentMock.mockRejectedValue(new Error('Failed to add document'));
+
+        try {
+          await service.createBucketList('My Bucketlist');
+        } catch (e) {
+          // do nothing
+        }
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error creating bucket list:',
+          expect.any(Error),
+        );
       });
     });
   });

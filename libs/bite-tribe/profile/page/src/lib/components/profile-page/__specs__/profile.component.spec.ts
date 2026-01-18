@@ -82,9 +82,19 @@ describe('ProfileComponent', () => {
       expect(component.isUnfollowedUser()).toBe(false);
     });
 
-    it('should return true if userId is not equal to user.id', () => {
+    it('should return true if current user in not me', () => {
       compRef.setInput('userId', 'user2');
       expect(component.isUnfollowedUser()).toBe(true);
+    });
+
+    it('should return false if profile owner in not defined', () => {
+      compRef.setInput('user', undefined);
+      expect(component.isUnfollowedUser()).toBe(false);
+    });
+
+    it('should return false if profile owners userId in not defined', () => {
+      compRef.setInput('user', {} as any);
+      expect(component.isUnfollowedUser()).toBe(false);
     });
   });
 
@@ -100,6 +110,11 @@ describe('ProfileComponent', () => {
 
     it('should return false if photoUrl is missing', () => {
       compRef.setInput('user', {} as any);
+      expect(component.validPhotoUrl()).toBe(false);
+    });
+
+    it('should return false if user is missing', () => {
+      compRef.setInput('user', undefined);
       expect(component.validPhotoUrl()).toBe(false);
     });
 

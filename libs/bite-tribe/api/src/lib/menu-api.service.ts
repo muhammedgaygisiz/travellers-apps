@@ -61,11 +61,7 @@ export class MenuApiService {
       skipWhile((isLoggedIn) => !isLoggedIn),
       switchMap(() => {
         if (menuId) {
-          return from(this.getMenuById(menuId)).pipe(
-            catchError((err) => {
-              return this.handleError(err);
-            }),
-          );
+          return from(this.getMenuById(menuId));
         }
 
         return EMPTY;

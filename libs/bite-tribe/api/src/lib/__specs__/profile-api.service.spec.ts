@@ -102,6 +102,29 @@ describe(ProfileApiService.name, () => {
         expect(addCollectionSnapshotListenerSpy).toHaveBeenCalled();
       },
     ));
+
+    describe('given passed callback of listener', () => {
+      it('should handle response when listener callback is invoked', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          await service.startListener();
+          const mockDoc = {
+            snapshots: [
+              {
+                data: {
+                  userId: '123',
+                  name: 'Test User',
+                },
+              },
+            ],
+          };
+
+          const callback = addCollectionSnapshotListenerSpy.mock.calls[0][1];
+
+          callback(mockDoc);
+        },
+      ));
+    });
   });
 
   describe('handleResponse', () => {

@@ -51,6 +51,29 @@ describe(ReviewApiService.name, () => {
         expect(addCollectionSnapshotListenerSpy).toHaveBeenCalled();
       },
     ));
+
+    describe('given passed callback of listener', () => {
+      it('should handle response when listener callback is invoked', inject(
+        [ReviewApiService],
+        async (service: ReviewApiService) => {
+          const handleResponseSpy = jest
+            .spyOn(service, 'handleResponse')
+            .mockImplementation();
+
+          const mockDocs = {
+            snapshots: [
+              { id: '1', data: { name: 'Restaurant 1' } },
+              { id: '2', data: { name: 'Restaurant 2' } },
+            ],
+          } as any;
+
+          await service.startReviewListener('biteId123');
+
+          const callback = addCollectionSnapshotListenerSpy.mock.calls[0][1];
+          callback(mockDocs);
+        },
+      ));
+    });
   });
 
   describe('handleResponse', () => {

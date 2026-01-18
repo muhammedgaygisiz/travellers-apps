@@ -100,17 +100,35 @@ describe(MenuApiService.name, () => {
   });
 
   describe('stopMenuListener', () => {
-    it('should call stopped$.next and removeSnapshotListener', async () => {
-      const removeSnapshotListenerSpy = jest
-        .spyOn(FirebaseFirestore, 'removeSnapshotListener')
-        .mockResolvedValue();
+    const removeSnapshotListenerSpy = jest
+      .spyOn(FirebaseFirestore, 'removeSnapshotListener')
+      .mockResolvedValue();
 
-      const callbackId = 'test-callback-id';
+    beforeEach(() => {
+      removeSnapshotListenerSpy.mockReset();
+    });
 
-      await service.stopMenuListener(callbackId);
+    describe('given a callbak id', () => {
+      it('should call stopped$.next and removeSnapshotListener', async () => {
+        const callbackId = 'test-callback-id';
 
-      expect(removeSnapshotListenerSpy).toHaveBeenCalledWith({
-        callbackId,
+        await service.stopMenuListener(callbackId);
+
+        expect(removeSnapshotListenerSpy).toHaveBeenCalledWith({
+          callbackId,
+        });
+      });
+    });
+
+    describe('given no callback id', () => {
+      it('should not call removeSnapshotListener', async () => {
+        const removeSnapshotListenerSpy = jest
+          .spyOn(FirebaseFirestore, 'removeSnapshotListener')
+          .mockResolvedValue();
+
+        await service.stopMenuListener('');
+
+        expect(removeSnapshotListenerSpy).not.toHaveBeenCalled();
       });
     });
   });

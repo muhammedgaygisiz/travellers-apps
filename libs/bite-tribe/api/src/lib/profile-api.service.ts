@@ -40,7 +40,7 @@ export class ProfileApiService {
   );
 
   private async getUser(): Promise<User | null | undefined> {
-    const authState = await this.authService.authState();
+    const authState = this.authService.authState();
     return authState?.user;
   }
 

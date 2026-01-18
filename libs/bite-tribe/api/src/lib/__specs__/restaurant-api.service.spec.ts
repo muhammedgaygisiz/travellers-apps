@@ -101,17 +101,40 @@ describe(RestaurantApiService.name, () => {
   });
 
   describe('stopRestaurantListener', () => {
-    it('should call stopped$.next and removeSnapshotListener', async () => {
-      const removeSnapshotListenerSpy = jest
-        .spyOn(FirebaseFirestore, 'removeSnapshotListener')
-        .mockResolvedValue();
+    let removeSnapshotListenerSpy: jest.SpyInstance;
 
-      const callbackId = 'test-callback-id';
+    beforeEach(() => {
+      removeSnapshotListenerSpy = jest.spyOn(
+        FirebaseFirestore,
+        'removeSnapshotListener',
+      );
+    });
 
-      await service.stopRestaurantListener(callbackId);
+    afterEach(() => {
+      removeSnapshotListenerSpy.mockClear();
+    });
 
-      expect(removeSnapshotListenerSpy).toHaveBeenCalledWith({
-        callbackId,
+    describe('given a callback id', () => {
+      it('should call stopped$.next and removeSnapshotListener', async () => {
+        removeSnapshotListenerSpy.mockResolvedValue({});
+
+        const callbackId = 'test-callback-id';
+
+        await service.stopRestaurantListener(callbackId);
+
+        expect(removeSnapshotListenerSpy).toHaveBeenCalledWith({
+          callbackId,
+        });
+      });
+    });
+
+    describe('given no callback id', () => {
+      it('should call stopped$.next and not call removeSnapshotListener', async () => {
+        const callbackId = '';
+
+        await service.stopRestaurantListener(callbackId);
+
+        expect(removeSnapshotListenerSpy).not.toHaveBeenCalled();
       });
     });
   });
@@ -264,75 +287,186 @@ describe(RestaurantApiService.name, () => {
           expect(restaurant).toBeUndefined();
         });
       });
+
+      describe('with no snapshots in queryResult', () => {
+        it('should return undefined', async () => {
+          const getDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'getDocument')
+            .mockResolvedValue({
+              snapshot: {
+                data: undefined,
+              },
+            } as any);
+
+          const getCollectionSpy = jest
+            .spyOn(FirebaseFirestore, 'getCollection')
+            .mockResolvedValue({
+              snapshots: undefined,
+            } as any);
+
+          const restaurant = await service.getRestaurantById(
+            encodeURIComponent('Another Nonexistent Restaurant'),
+          );
+
+          expect(getDocumentSpy).toHaveBeenCalledWith({
+            reference: 'restaurants/Another%20Nonexistent%20Restaurant',
+          });
+
+          expect(getCollectionSpy).toHaveBeenCalledWith({
+            reference: 'restaurants',
+            queryConstraints: [{ type: 'limit', limit: 10 }],
+          });
+
+          expect(restaurant).toBeUndefined();
+        });
+      });
+    });
+
+    describe('given an error', () => {
+      it('should catch error and return undefined', async () => {
+        const getDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockRejectedValue(new Error('Firestore error'));
+
+        const restaurant = await service.getRestaurantById('resto-error');
+
+        expect(getDocumentSpy).toHaveBeenCalledWith({
+          reference: 'restaurants/resto-error',
+        });
+
+        expect(restaurant).toBeUndefined();
+      });
     });
   });
 
   describe('saveNewRestaurant', () => {
-    it('should remove bite ids, save restaurant and add a new menu for it', async () => {
-      const mockedNewRestaurant = {
-        name: 'New Resto',
-        biteIds: ['bite1', 'bite2'],
-      } as any;
+    let addDocumentSpy: jest.SpyInstance;
+    let updateDocumentSpy: jest.SpyInstance;
 
-      const addDocumentSpy = jest
-        .spyOn(FirebaseFirestore, 'addDocument')
-        .mockResolvedValueOnce({ reference: { id: 'New Resto' } } as any)
-        .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+    beforeEach(() => {
+      addDocumentSpy = jest.spyOn(FirebaseFirestore, 'addDocument');
+      updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
+    });
 
-      const updateDocumentSpy = jest
-        .spyOn(FirebaseFirestore, 'updateDocument')
-        .mockResolvedValueOnce({ reference: { id: 'menu-789' } } as any)
-        .mockResolvedValueOnce({} as any)
-        .mockResolvedValueOnce({} as any);
+    afterEach(() => {
+      addDocumentSpy.mockClear();
+      updateDocumentSpy.mockClear();
+    });
 
-      await service.saveNewRestaurant(mockedNewRestaurant);
-
-      expect(addDocumentSpy).toHaveBeenCalledTimes(2);
-      expect(updateDocumentSpy).toHaveBeenCalledTimes(3);
-
-      expect(addDocumentSpy).toHaveBeenNthCalledWith(1, {
-        reference: 'restaurants',
-        data: {
-          createdAt: '2024-03-15T12:00:00.000Z',
-          createdAtTimestamp: 1710504000000,
+    describe('given biteIds', () => {
+      it('should remove bite ids, save restaurant and add a new menu for it', async () => {
+        const mockedNewRestaurant = {
           name: 'New Resto',
-        },
-      });
+          biteIds: ['bite1', 'bite2'],
+        } as any;
 
-      expect(addDocumentSpy).toHaveBeenNthCalledWith(2, {
-        reference: 'menus',
-        data: {
-          categories: [],
-          createdAt: '2024-03-15T12:00:00.000Z',
-          createdAtTimestamp: 1710504000000,
-        },
-      });
+        addDocumentSpy
+          .mockResolvedValueOnce({ reference: { id: 'New Resto' } } as any)
+          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
 
-      expect(updateDocumentSpy).toHaveBeenNthCalledWith(1, {
-        reference: 'restaurants/New Resto',
-        data: {
-          menuId: '/menus/menu-456',
-          updatedAt: '2024-03-15T12:00:00.000Z',
-          updatedAtTimestamp: 1710504000000,
-        },
-      });
+        updateDocumentSpy
+          .mockResolvedValueOnce({ reference: { id: 'menu-789' } } as any)
+          .mockResolvedValueOnce({} as any)
+          .mockResolvedValueOnce({} as any);
 
-      expect(updateDocumentSpy).toHaveBeenNthCalledWith(2, {
-        reference: 'bites/bite1',
-        data: {
-          restaurantId: '/restaurants/New Resto',
-          updatedAt: '2024-03-15T12:00:00.000Z',
-          updatedAtTimestamp: 1710504000000,
-        },
-      });
+        await service.saveNewRestaurant(mockedNewRestaurant);
 
-      expect(updateDocumentSpy).toHaveBeenNthCalledWith(3, {
-        reference: 'bites/bite2',
-        data: {
-          restaurantId: '/restaurants/New Resto',
-          updatedAt: '2024-03-15T12:00:00.000Z',
-          updatedAtTimestamp: 1710504000000,
-        },
+        expect(addDocumentSpy).toHaveBeenCalledTimes(2);
+        expect(updateDocumentSpy).toHaveBeenCalledTimes(3);
+
+        expect(addDocumentSpy).toHaveBeenNthCalledWith(1, {
+          reference: 'restaurants',
+          data: {
+            createdAt: '2024-03-15T12:00:00.000Z',
+            createdAtTimestamp: 1710504000000,
+            name: 'New Resto',
+          },
+        });
+
+        expect(addDocumentSpy).toHaveBeenNthCalledWith(2, {
+          reference: 'menus',
+          data: {
+            categories: [],
+            createdAt: '2024-03-15T12:00:00.000Z',
+            createdAtTimestamp: 1710504000000,
+          },
+        });
+
+        expect(updateDocumentSpy).toHaveBeenNthCalledWith(1, {
+          reference: 'restaurants/New Resto',
+          data: {
+            menuId: '/menus/menu-456',
+            updatedAt: '2024-03-15T12:00:00.000Z',
+            updatedAtTimestamp: 1710504000000,
+          },
+        });
+
+        expect(updateDocumentSpy).toHaveBeenNthCalledWith(2, {
+          reference: 'bites/bite1',
+          data: {
+            restaurantId: '/restaurants/New Resto',
+            updatedAt: '2024-03-15T12:00:00.000Z',
+            updatedAtTimestamp: 1710504000000,
+          },
+        });
+
+        expect(updateDocumentSpy).toHaveBeenNthCalledWith(3, {
+          reference: 'bites/bite2',
+          data: {
+            restaurantId: '/restaurants/New Resto',
+            updatedAt: '2024-03-15T12:00:00.000Z',
+            updatedAtTimestamp: 1710504000000,
+          },
+        });
+      });
+    });
+
+    describe('given biteIds is empty list', () => {
+      it('should save restaurant and add a new menu for it without updating bites', async () => {
+        const mockedNewRestaurant = {
+          name: 'New Resto',
+          biteIds: [],
+        } as any;
+
+        addDocumentSpy
+          .mockResolvedValueOnce({ reference: { id: 'New Resto' } } as any)
+          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+
+        updateDocumentSpy.mockResolvedValueOnce({
+          reference: { id: 'menu-789' },
+        } as any);
+
+        await service.saveNewRestaurant(mockedNewRestaurant);
+
+        expect(addDocumentSpy).toHaveBeenCalledTimes(2);
+        expect(updateDocumentSpy).toHaveBeenCalledTimes(1);
+
+        expect(addDocumentSpy).toHaveBeenNthCalledWith(1, {
+          reference: 'restaurants',
+          data: {
+            createdAt: '2024-03-15T12:00:00.000Z',
+            createdAtTimestamp: 1710504000000,
+            name: 'New Resto',
+          },
+        });
+
+        expect(addDocumentSpy).toHaveBeenNthCalledWith(2, {
+          reference: 'menus',
+          data: {
+            categories: [],
+            createdAt: '2024-03-15T12:00:00.000Z',
+            createdAtTimestamp: 1710504000000,
+          },
+        });
+
+        expect(updateDocumentSpy).toHaveBeenNthCalledWith(1, {
+          reference: 'restaurants/New Resto',
+          data: {
+            menuId: '/menus/menu-456',
+            updatedAt: '2024-03-15T12:00:00.000Z',
+            updatedAtTimestamp: 1710504000000,
+          },
+        });
       });
     });
   });

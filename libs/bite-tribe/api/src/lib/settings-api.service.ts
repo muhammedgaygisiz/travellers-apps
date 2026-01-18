@@ -44,7 +44,7 @@ export class SettingsApiService {
 
     await FirebaseFirestore.addDocumentSnapshotListener(
       { reference: `${SETTINGS_COLLECTION}/${user?.uid}` },
-      async (settingsDoc) => {
+      (settingsDoc) => {
         this.handleResponse(settingsDoc);
       },
     );

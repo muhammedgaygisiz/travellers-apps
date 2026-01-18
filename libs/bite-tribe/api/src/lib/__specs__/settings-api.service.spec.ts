@@ -48,6 +48,27 @@ describe(SettingsApiService.name, () => {
 
       expect(addDocumentSnapshotListenerSpy).toHaveBeenCalled();
     });
+
+    describe('given passed callback of listener', () => {
+      it('should handle response when listener callback is invoked', async () => {
+        await service.startSettingsListener();
+
+        const mockSettingsDoc = {
+          snapshot: {
+            data: {
+              theme: 'dark',
+              notificationsEnabled: true,
+            },
+          },
+        } as any;
+
+        const callback = (
+          addDocumentSnapshotListenerSpy.mock.calls[0][1] as any
+        ).bind(service);
+
+        callback(mockSettingsDoc);
+      });
+    });
   });
 
   describe('handleResponse', () => {

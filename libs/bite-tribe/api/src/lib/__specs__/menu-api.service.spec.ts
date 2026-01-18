@@ -62,6 +62,18 @@ describe(MenuApiService.name, () => {
 
       expect(addCollectionSnapshotListenerSpy).toHaveBeenCalled();
     });
+
+    describe('given passed callback of listener', () => {
+      it('should handle response when listener callback is invoked', async () => {
+        await service.startListener();
+
+        const callback =
+          addCollectionSnapshotListenerSpy.mock.calls[0][1].bind(service);
+
+        const mockDocs = { snapshots: [] } as any;
+        callback(mockDocs);
+      });
+    });
   });
 
   describe('handleResponse', () => {

@@ -31,7 +31,7 @@ export class MenuApiService {
   public async startListener(): Promise<void> {
     this.menuCallbackId = await FirebaseFirestore.addCollectionSnapshotListener(
       { reference: MENU_COLLECTION },
-      async (menusDocs) => {
+      (menusDocs) => {
         this.handleResponse(menusDocs);
       },
     );

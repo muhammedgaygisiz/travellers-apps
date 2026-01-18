@@ -30,6 +30,8 @@ export class MenuComponent {
 
   showSettingsButton = input<boolean | null>(false);
 
+  showAboutButton = input<boolean | null>(false);
+
   showMigrationsButton = input<boolean | null>(false);
 
   showMyBites = input<boolean | null>(false);
@@ -43,6 +45,8 @@ export class MenuComponent {
   logoutClick = output();
 
   gotoSettings = output();
+
+  gotoAbout = output();
 
   gotoProfile = output();
 

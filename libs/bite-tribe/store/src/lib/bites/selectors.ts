@@ -37,7 +37,10 @@ const slice = createFeatureSelector<BitesState>(key);
 
 const { selectAll } = adapter.getSelectors();
 
-export const cachedBite = createSelector(slice, (state) => state?.cachedBite);
+export const cachedBite = createSelector(
+  slice,
+  (state) => state?.cachedBite as Bite | undefined,
+);
 
 export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
 

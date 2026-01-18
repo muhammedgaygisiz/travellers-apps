@@ -344,4 +344,39 @@ describe(BiteApiService.name, () => {
       });
     });
   });
+
+  describe('handleLatestBites', () => {
+    it('should update _latestBitesChannel$ with bites from snapshots', () => {
+      const mockSnapshot1 = {
+        id: 'bite1',
+        data: () => ({ name: 'Bite 1' }),
+      } as any;
+      const mockSnapshot2 = {
+        id: 'bite2',
+        data: () => ({ name: 'Bite 2' }),
+      } as any;
+
+      const mockEvent = {
+        snapshots: [mockSnapshot1, mockSnapshot2],
+      };
+
+      service.handleLatestBites(mockEvent);
+
+      service.latestBites$.subscribe((bites) => {
+        expect(bites.length).toBe(2);
+        expect(bites[0].id).toBe('bite1');
+        expect(bites[0].name).toBe('Bite 1');
+        expect(bites[1].id).toBe('bite2');
+        expect(bites[1].name).toBe('Bite 2');
+      });
+    });
+
+    it('should update _latestBitesChannel$ with empty array when event is null', () => {
+      service.handleLatestBites(null);
+
+      service.latestBites$.subscribe((bites) => {
+        expect(bites.length).toBe(0);
+      });
+    });
+  });
 });

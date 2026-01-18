@@ -1,6 +1,10 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import {
+  DocumentData,
+  DocumentSnapshot,
+  FirebaseFirestore,
+} from '@capacitor-firebase/firestore';
 import { Bite, Bucketlist } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { Platform } from '@ionic/angular';
@@ -15,6 +19,7 @@ import { loadBitesByBucketlist } from './utils/load-bites-by-bucketlist';
 import { deleteFileInFirebaseStorage } from './utils/delete-file-in-firebasestorage';
 import { BehaviorSubject } from 'rxjs';
 import { toBite } from '../utils/to-bite';
+import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
@@ -136,10 +141,16 @@ export class BiteApiService {
         ],
       },
       (biteDocs) => {
-        const bites = biteDocs?.snapshots.map((snapshot) => toBite(snapshot));
-
-        this._latestBitesChannel$.next(bites || []);
+        this.handleLatestBites(biteDocs);
       },
     );
+  }
+
+  handleLatestBites(
+    biteDocs: AddCollectionSnapshotListenerCallbackEvent<DocumentData> | null,
+  ): void {
+    const bites = biteDocs?.snapshots?.map((snapshot) => toBite(snapshot));
+
+    this._latestBitesChannel$.next(bites || []);
   }
 }

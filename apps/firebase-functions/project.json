@@ -1,0 +1,28 @@
+{
+  "name": "firebase-functions",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/firebase-functions",
+  "targets": {
+    "npm-init": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/firebase-functions/functions",
+        "command": "npm i"
+      }
+    },
+    "firebase-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/firebase-functions/functions",
+        "command": "npm run build"
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/firebase-functions/functions",
+        "command": "npm run deploy"
+      }
+    }
+  }
+}

@@ -10,8 +10,9 @@ import { ProfileApiService } from '../profile-api.service';
 import { BiteApiService } from '../bite-api/bite-api.service';
 import { SettingsApiService } from '../settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
+import { scheduler } from 'node:timers/promises';
 
 const assertEqual = (a: any, b: any): void => {
   expect(a).toEqual(b);
@@ -48,6 +49,8 @@ class Mock {
   deleteBite = jest.fn();
   startListener = jest.fn();
   startlatestBitesListener = jest.fn();
+  getTotalNumberOfBites = jest.fn();
+  getTotalNumberOfUsers = jest.fn();
 }
 
 describe('BiteTribeApiService', () => {
@@ -638,6 +641,43 @@ describe('BiteTribeApiService', () => {
         const latestBites$ = service.latestBites$(numberOfBites);
         expect(startlatestBitesListenerSpy).toHaveBeenCalledWith(numberOfBites);
         expect(latestBites$).toBe(latestBitesObservable);
+      },
+    ));
+  });
+
+  describe('getTotalNumberOfBites', () => {
+    it('should call getTotalNumberOfBites on BiteApiService and return an observable', inject(
+      [BiteTribeApiService, BiteApiService],
+      async (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const getTotalNumberOfBitesSpy = jest
+          .spyOn(biteApiService, 'getTotalNumberOfBites')
+          .mockReturnValue(Promise.resolve(42));
+
+        const totalBites$ = service.getTotalNumberOfBites();
+
+        const total = await lastValueFrom(totalBites$);
+        expect(total).toBe(42);
+        expect(getTotalNumberOfBitesSpy).toHaveBeenCalled();
+      },
+    ));
+  });
+
+  describe('getTotalNumberOfUsers', () => {
+    it('should call getTotalNumberOfUsers on ProfileApiService and return an observable', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        const getTotalNumberOfUsersSpy = jest
+          .spyOn(profileApiService, 'getTotalNumberOfUsers')
+          .mockReturnValue(Promise.resolve(100));
+
+        const totalUsers$ = service.getTotalNumberOfUsers();
+
+        const total = await lastValueFrom(totalUsers$);
+        expect(total).toBe(100);
+        expect(getTotalNumberOfUsersSpy).toHaveBeenCalled();
       },
     ));
   });

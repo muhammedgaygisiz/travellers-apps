@@ -87,6 +87,29 @@ describe('AppEffect', () => {
     });
   });
 
+  describe('loadTotalNumberUsers$', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(apiService, 'getTotalNumberOfUsers')
+        .mockReturnValue(of(100) as any);
+    });
+
+    it('should load total number of users on loginSucceeded', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: fromAuth.AuthActions.loginSucceeded(),
+        });
+
+        const expected = 'a';
+        const output = {
+          a: AppActions.loadedTotalNumberOfUsers({ total: 100 }),
+        };
+
+        expectObservable(effects.loadTotalNumberUsers$).toBe(expected, output);
+      });
+    });
+  });
+
   describe('loadSettingsFromApi$', () => {
     it('should load settings from API on ROOT_EFFECTS_INIT', () => {
       scheduler.run(({ cold, expectObservable }) => {

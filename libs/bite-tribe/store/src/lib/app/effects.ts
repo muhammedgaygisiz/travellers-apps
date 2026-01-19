@@ -12,6 +12,7 @@ import { stopIfUserIsUndefined } from './utils/stop-if-user-is-undefined';
 import { dispatchGpsPosition } from './utils/dispatch-gps-position';
 import { initPushNotifications } from './utils/init-push-notifications';
 import { Store } from '@ngrx/store';
+import { withUserFromAction } from './utils/with-user-from-action';
 
 @Injectable()
 export class AppEffect {
@@ -80,7 +81,8 @@ export class AppEffect {
         ofType(fromAuth.AuthActions.loadedUser),
         stopIfUserIsUndefined(),
         dispatchGpsPosition(this.platform, this.store),
-        initPushNotifications(),
+        withUserFromAction(),
+        initPushNotifications(this.platform),
       ),
     { dispatch: false },
   );

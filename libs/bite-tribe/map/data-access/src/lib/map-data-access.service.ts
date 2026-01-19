@@ -31,6 +31,11 @@ export class MapDataAccessService {
     const bites = this.bites();
     const userId = this.userId();
     const bite = bites?.find((bite: Bite) => bite.id === likeType.biteId);
+
+    if (!userId) {
+      return;
+    }
+
     this.storeService.submitLikeOrDislikeClick(bite, userId, likeType);
   }
 }

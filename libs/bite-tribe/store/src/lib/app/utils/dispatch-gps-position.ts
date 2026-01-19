@@ -1,8 +1,8 @@
 import {
   catchError,
-  EMPTY,
   map,
   Observable,
+  of,
   pipe,
   switchMap,
   UnaryFunction,
@@ -16,23 +16,23 @@ import { Store } from '@ngrx/store';
 export const dispatchGpsPosition = (
   platform: Platform,
   store: Store,
-): UnaryFunction<Observable<any>, Observable<void>> =>
+): UnaryFunction<Observable<any>, Observable<any>> =>
   pipe(
-    switchMap(() =>
+    switchMap((args: any) =>
       getCurrentPosition(platform).pipe(
         map((currentPosition) => {
           store.dispatch(
             AppActions.loadedGPSPosition({ position: currentPosition }),
           );
 
-          return;
+          return args;
         }),
         catchError((error) => {
           console.error(error);
 
           store.dispatch(AppActions.errorLoadingGPSPosition({ error }));
 
-          return EMPTY;
+          return of(args);
         }),
       ),
     ),

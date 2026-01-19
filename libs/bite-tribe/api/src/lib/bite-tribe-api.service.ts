@@ -153,8 +153,8 @@ export class BiteTribeApiService {
     return this.biteApiService.loadBitesByLocation(position);
   }
 
-  async bitesByUser(user: { uid: string }): Promise<Bite[]> {
-    return this.biteApiService.loadBitesByUser(user);
+  async bitesByUser(userUid: string): Promise<Bite[]> {
+    return this.biteApiService.loadBitesByUser(userUid);
   }
 
   async bitesByBucketlist(bucketlist: Bucketlist): Promise<Bite[]> {

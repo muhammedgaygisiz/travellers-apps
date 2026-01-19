@@ -2,12 +2,15 @@ import { Action, createReducer, on } from '@ngrx/store';
 import { AuthActions } from './actions';
 import { AuthResult } from './auth-result.model';
 
+const INITIAL_STATE: AuthResult = {
+  user: undefined,
+  authenticated: false,
+  authenticationFailed: false,
+  errorCode: null,
+};
+
 export const reducer = createReducer<AuthResult, Action>(
-  {
-    authenticated: false,
-    authenticationFailed: false,
-    errorCode: null,
-  },
+  INITIAL_STATE,
   on(AuthActions.loginSucceeded, (state) => ({
     ...state,
     authenticationFailed: false,
@@ -36,5 +39,6 @@ export const reducer = createReducer<AuthResult, Action>(
     authenticated: false,
     authenticationFailed: false,
     errorCode: null,
+    user: undefined,
   })),
 );

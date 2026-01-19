@@ -55,22 +55,6 @@ export class DetailsService {
     this.dataAccess.logout();
   }
 
-  onGotoSettingsClick(): void {
-    this.navController.navigateForward(['settings']);
-  }
-
-  onGotoMyProfileClick(): void {
-    this.navController.navigateForward(['my-profile']);
-  }
-
-  onGotoMyBitesClick(): void {
-    this.navController.navigateForward(['my-bites']);
-  }
-
-  onGotoMyBucketlists(): void {
-    this.navController.navigateForward(['my-bucketlists']);
-  }
-
   onRestaurantClick(bite: Bite): void {
     if (bite.restaurantId) {
       const [empty, collectionName, restaurantId] =
@@ -100,9 +84,5 @@ export class DetailsService {
 
   onGotoEditClick(biteToEdit: Bite): void {
     this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
-  }
-
-  onGotoAboutClick(): void {
-    this.navController.navigateForward([PATH.ABOUT]);
   }
 }

@@ -85,11 +85,6 @@ export class DetailsPage {
   submitNewReview = output<{ review: string; biteId: string }>();
   likeButtonClick = output<{ likeType: string; biteId: string }>();
   readonly logoutClick = output();
-  readonly gotoSettings = output();
-  readonly gotoMyProfile = output();
-  readonly gotoAbout = output();
-  readonly gotoMyBites = output();
-  readonly gotoMyBucketlists = output();
   readonly restaurantClick = output<Bite>();
   readonly goToProfile = output<PublicUser>();
   readonly gotoEdit = output<Bite>();

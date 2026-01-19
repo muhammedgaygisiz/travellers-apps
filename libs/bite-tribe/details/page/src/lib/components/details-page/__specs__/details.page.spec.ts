@@ -405,30 +405,6 @@ describe('DetailsPage', () => {
 
       expect(emitSpy).toHaveBeenCalled();
     });
-
-    it('should emit gotoSettings event', () => {
-      const emitSpy = jest.spyOn(component.gotoSettings, 'emit');
-
-      component.gotoSettings.emit();
-
-      expect(emitSpy).toHaveBeenCalled();
-    });
-
-    it('should emit gotoMyBites event', () => {
-      const emitSpy = jest.spyOn(component.gotoMyBites, 'emit');
-
-      component.gotoMyBites.emit();
-
-      expect(emitSpy).toHaveBeenCalled();
-    });
-
-    it('should emit gotoMyBucketlists event', () => {
-      const emitSpy = jest.spyOn(component.gotoMyBucketlists, 'emit');
-
-      component.gotoMyBucketlists.emit();
-
-      expect(emitSpy).toHaveBeenCalled();
-    });
   });
 
   describe('isGoogleMapsInstalled', () => {

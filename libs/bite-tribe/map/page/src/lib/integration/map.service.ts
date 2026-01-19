@@ -29,26 +29,6 @@ export class MapService {
     this.dataAccess.logout();
   }
 
-  onGotoSettingsClick(): void {
-    this.navController.navigateForward(['settings']);
-  }
-
-  onGotoMyProfileClick(): void {
-    this.navController.navigateForward(['my-profile']);
-  }
-
-  onGotoMyBitesClick(): void {
-    this.navController.navigateForward(['my-bites']);
-  }
-
-  onGotoMyBucketlists(): void {
-    this.navController.navigateForward(['my-bucketlists']);
-  }
-
-  onGotoAboutClick(): void {
-    this.navController.navigateForward([PATH.ABOUT]);
-  }
-
   likeButtonClicked(likeClick: { likeType: string; biteId: string }): void {
     this.dataAccess.submitLikeClick(likeClick);
   }

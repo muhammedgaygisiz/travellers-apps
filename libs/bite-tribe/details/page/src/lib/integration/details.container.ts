@@ -19,14 +19,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (newList)="service.saveBiteToBucketListWithNewList($event)"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (logoutClick)="service.logout()"
-      (gotoSettings)="service.onGotoSettingsClick()"
-      (gotoMyProfile)="service.onGotoMyProfileClick()"
-      (gotoMyBites)="service.onGotoMyBitesClick()"
-      (gotoMyBucketlists)="service.onGotoMyBucketlists()"
       (restaurantClick)="service.onRestaurantClick($event)"
       (goToProfile)="service.onGoToProfileClick($event)"
       (gotoEdit)="service.onGotoEditClick($event)"
-      (gotoAbout)="service.onGotoAboutClick()"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

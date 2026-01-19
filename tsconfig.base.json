@@ -108,7 +108,8 @@
       "bite-tribe/about": ["libs/bite-tribe/about/page/src/index.ts"],
       "bite-tribe/about-data-access": [
         "libs/bite-tribe/about/data-access/src/index.ts"
-      ]
+      ],
+      "push-notifications": ["libs/common/push-notifications/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

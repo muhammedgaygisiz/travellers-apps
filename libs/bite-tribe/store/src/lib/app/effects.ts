@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AppActions } from './actions';
 import { catchError, filter, from, map, of, switchMap, take, tap } from 'rxjs';
-import { getCurrentPosition } from 'geolocation';
 import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
@@ -11,6 +10,8 @@ import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { PATH } from 'utils';
 import { stopIfUserIsUndefined } from './utils/stop-if-user-is-undefined';
 import { dispatchGpsPosition } from './utils/dispatch-gps-position';
+import { initPushNotifications } from './utils/init-push-notifications';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class AppEffect {
@@ -18,6 +19,7 @@ export class AppEffect {
   private readonly platform = inject(Platform);
   private readonly api = inject(BiteTribeApiService);
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly store = inject(Store);
 
   loadTotalNumberBites$ = createEffect(() => {
     return this.actions$.pipe(
@@ -72,19 +74,24 @@ export class AppEffect {
     );
   });
 
-  fetchGpsPositionAfterUserLoaded$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(fromAuth.AuthActions.loadedUser),
-      stopIfUserIsUndefined(),
-      dispatchGpsPosition(this.platform),
-    ),
+  initAfterLogin$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(fromAuth.AuthActions.loadedUser),
+        stopIfUserIsUndefined(),
+        dispatchGpsPosition(this.platform, this.store),
+        initPushNotifications(),
+      ),
+    { dispatch: false },
   );
 
-  fetchGpsPosition$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AppActions.fetchGPSPosition, AppActions.reloadGPSPosition),
-      dispatchGpsPosition(this.platform),
-    ),
+  fetchGpsPosition$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AppActions.fetchGPSPosition, AppActions.reloadGPSPosition),
+        dispatchGpsPosition(this.platform, this.store),
+      ),
+    { dispatch: false },
   );
 
   saveSettingsToFirestore$ = createEffect(

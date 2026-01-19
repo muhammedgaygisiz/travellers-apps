@@ -1,8 +1,8 @@
 import {
   catchError,
+  EMPTY,
   map,
   Observable,
-  of,
   pipe,
   switchMap,
   UnaryFunction,
@@ -10,21 +10,29 @@ import {
 import { Platform } from '@ionic/angular';
 import { getCurrentPosition } from 'geolocation';
 import { AppActions } from '../actions';
-import { Action } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 
+/** Dispatches the GPS position to the store */
 export const dispatchGpsPosition = (
   platform: Platform,
-): UnaryFunction<Observable<any>, Observable<Action>> =>
+  store: Store,
+): UnaryFunction<Observable<any>, Observable<void>> =>
   pipe(
     switchMap(() =>
       getCurrentPosition(platform).pipe(
-        map((currentPosition) =>
-          AppActions.loadedGPSPosition({ position: currentPosition }),
-        ),
+        map((currentPosition) => {
+          store.dispatch(
+            AppActions.loadedGPSPosition({ position: currentPosition }),
+          );
+
+          return;
+        }),
         catchError((error) => {
           console.error(error);
 
-          return of(AppActions.errorLoadingGPSPosition({ error }));
+          store.dispatch(AppActions.errorLoadingGPSPosition({ error }));
+
+          return EMPTY;
         }),
       ),
     ),

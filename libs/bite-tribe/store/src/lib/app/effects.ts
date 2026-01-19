@@ -9,6 +9,8 @@ import { fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { PATH } from 'utils';
+import { stopIfUserIsUndefined } from './utils/stop-if-user-is-undefined';
+import { dispatchGpsPosition } from './utils/dispatch-gps-position';
 
 @Injectable()
 export class AppEffect {
@@ -50,7 +52,7 @@ export class AppEffect {
   loadExchangeRatesFromApi$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),
-      filter((payload) => !!payload.user),
+      stopIfUserIsUndefined(),
       switchMap(() =>
         from(this.api.getExchangeRates()).pipe(
           map((exchangeRates) => {
@@ -64,41 +66,25 @@ export class AppEffect {
   loadPublicProfile$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),
-      filter((payload) => !!payload.user),
+      stopIfUserIsUndefined(),
       switchMap(() => this.api.publicProfile$.pipe(take(1))),
       map((profile) => AppActions.setPublicProfile({ profile })),
     );
   });
 
-  fetchGpsPosition$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(
-          fromAuth.AuthActions.loadedUser,
-          AppActions.fetchGPSPosition,
-          AppActions.reloadGPSPosition,
-        ),
-        filter((payload) => {
-          if (payload.type === fromAuth.AuthActions.loadedUser.type) {
-            return !!payload.user;
-          }
-          return true;
-        }),
-        switchMap(() =>
-          getCurrentPosition(this.platform).pipe(
-            map((currentPosition) =>
-              AppActions.loadedGPSPosition({ position: currentPosition }),
-            ),
-            catchError((error) => {
-              console.error(error);
+  fetchGpsPositionAfterUserLoaded$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(fromAuth.AuthActions.loadedUser),
+      stopIfUserIsUndefined(),
+      dispatchGpsPosition(this.platform),
+    ),
+  );
 
-              return of(AppActions.errorLoadingGPSPosition({ error }));
-            }),
-          ),
-        ),
-      );
-    },
-    { useEffectsErrorHandler: true },
+  fetchGpsPosition$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AppActions.fetchGPSPosition, AppActions.reloadGPSPosition),
+      dispatchGpsPosition(this.platform),
+    ),
   );
 
   saveSettingsToFirestore$ = createEffect(
@@ -117,7 +103,7 @@ export class AppEffect {
     () => {
       return this.actions$.pipe(
         ofType(fromAuth.AuthActions.loadedUser),
-        filter((payload) => !!payload.user),
+        stopIfUserIsUndefined(),
         tap(() => {
           this.api.saveUserIfNotExisting();
         }),

@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import type { Bite } from 'model';
 import { NavController } from '@ionic/angular/standalone';
+import { PATH } from 'utils';
 
 @Injectable({
   providedIn: 'root',
@@ -92,6 +93,10 @@ export class HomeService {
 
   onGotoEditClick(biteToEdit: Bite): void {
     this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
+  }
+
+  onGotoAboutClick(): void {
+    this.navController.navigateForward([PATH.ABOUT]);
   }
 
   openMapView(mainPage: string): void {

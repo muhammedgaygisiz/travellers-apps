@@ -235,6 +235,22 @@ describe('HomeService', () => {
     ));
   });
 
+  describe('gotoAboutClick', () => {
+    let navigateForwardSpy: SpyInstance;
+
+    beforeEach(() => {
+      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+    });
+
+    it('should navigate to about page', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.onGotoAboutClick();
+        expect(navigateForwardSpy).toHaveBeenCalledWith(['about']);
+      },
+    ));
+  });
+
   describe('openMapView', () => {
     let navigateForwardSpy: SpyInstance;
 

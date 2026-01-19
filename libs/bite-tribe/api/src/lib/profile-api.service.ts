@@ -223,4 +223,12 @@ export class ProfileApiService {
       this.errorHandler.handleError(error);
     }
   }
+
+  getTotalNumberOfUsers(): Promise<number> {
+    return new Promise((resolve) => {
+      FirebaseFirestore.getCountFromServer({
+        reference: USERS_COLLECTION,
+      }).then((result) => resolve(result.count));
+    });
+  }
 }

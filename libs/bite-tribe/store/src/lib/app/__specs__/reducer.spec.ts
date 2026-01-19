@@ -15,6 +15,8 @@ describe('App Reducer', () => {
         loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
+        totalNumberBites: 0,
+        totalNumberUsers: 0,
       };
 
       const NEW_STATE: AppSlice = {
@@ -30,6 +32,8 @@ describe('App Reducer', () => {
         loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
+        totalNumberBites: 0,
+        totalNumberUsers: 0,
       };
 
       const logoutAction = fromAuth.AuthActions.logoutSucceeded();
@@ -211,6 +215,46 @@ describe('App Reducer', () => {
       const clearGPSErrorAction = AppActions.clearGPSError();
 
       expect(reducer(INITIAL_STATE, clearGPSErrorAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('loadedTotalNumberOfBites', () => {
+    it('should set totalNumberBites', () => {
+      const INITIAL_STATE = {
+        totalNumberBites: 0,
+      } as AppSlice;
+      const NEW_STATE = {
+        totalNumberBites: 42,
+      } as AppSlice;
+
+      const loadedTotalNumberOfBitesAction =
+        AppActions.loadedTotalNumberOfBites({
+          total: 42,
+        });
+
+      expect(reducer(INITIAL_STATE, loadedTotalNumberOfBitesAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('loadedTotalNumberOfUsers', () => {
+    it('should set totalNumberUsers', () => {
+      const INITIAL_STATE = {
+        totalNumberUsers: 0,
+      } as AppSlice;
+      const NEW_STATE = {
+        totalNumberUsers: 100,
+      } as AppSlice;
+
+      const loadedTotalNumberOfUsersAction =
+        AppActions.loadedTotalNumberOfUsers({
+          total: 100,
+        });
+
+      expect(reducer(INITIAL_STATE, loadedTotalNumberOfUsersAction)).toEqual({
         ...NEW_STATE,
       });
     });

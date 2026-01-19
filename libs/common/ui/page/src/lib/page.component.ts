@@ -60,7 +60,7 @@ export class PageComponent {
 
   isAuthenticated = input(false);
 
-  showLanguages = input(true);
+  showLanguages = input(false);
 
   title = input('');
 
@@ -70,8 +70,9 @@ export class PageComponent {
 
   showHeaderMenu = input(true);
 
-  // TODO: Convert to input with list of menu items to be shown
   showSettingsButton = input(false);
+
+  showAboutButton = input(false);
 
   showMyBites = input(false);
 
@@ -103,6 +104,8 @@ export class PageComponent {
 
   public gotoSettings = output();
 
+  public gotoAbout = output();
+
   public gotoProfile = output();
 
   public gotoMigrations = output();
@@ -123,6 +126,7 @@ export class PageComponent {
         hideAuthButton: this.hideAuthButton,
         showLanguages: this.showLanguages,
         showSettingsButton: this.showSettingsButton,
+        showAboutButton: this.showAboutButton,
         showMyBites: this.showMyBites,
         showMyBucketlists: this.showMyBucketlists,
         showMyProfile: this.showMyProfile,
@@ -131,6 +135,7 @@ export class PageComponent {
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,
         gotoSettings: this.gotoSettings,
+        gotoAbout: this.gotoAbout,
         gotoMyBites: this.gotoMyBites,
         gotoMyBucketlists: this.gotoMyBucketlists,
         gotoMigrations: this.gotoMigrations,

@@ -1,0 +1,34 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+  [enableBackButton]="true"
+>
+  <ion-content class="ion-padding">
+    <h1>About</h1>
+
+    <div>
+      <p>Bite Tribe is a social food discovery app for food lovers.</p>
+      <p>
+        Capture your meals, tag the location, and share bites from around the
+        world. Discover hidden gems, track where you’ve eaten, and see what
+        others are tasting nearby.
+      </p>
+    </div>
+
+    <div class="ion-margin-top">
+      Total Number of Bites on Bite Tribe:
+      <br />
+
+      <ion-text color="primary">{{totalNumberBites()}}</ion-text>
+    </div>
+    <div class="ion-margin-top">
+      Total Number of Users on Bite Tribe:
+      <br />
+
+      <ion-text color="primary">{{totalNumberUsers()}}</ion-text>
+    </div>
+    <div class="ion-text-center ion-margin-top">
+      <img width="150" src="assets/icons/logo.svg" alt="logo" />
+    </div>
+  </ion-content>
+</ta-page>

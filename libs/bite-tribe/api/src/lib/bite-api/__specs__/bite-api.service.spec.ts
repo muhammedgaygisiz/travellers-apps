@@ -10,10 +10,7 @@ import { loadBiteById } from '../utils/load-bite-by-id';
 import { Bite, Bucketlist } from 'model';
 import { saveEditedBite } from '../utils/save-edited-bite';
 import { deleteFileInFirebaseStorage } from '../utils/delete-file-in-firebasestorage';
-import {
-  AddDocumentSnapshotListenerCallbackEvent,
-  FirebaseFirestore,
-} from '@capacitor-firebase/firestore';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { ErrorHandler } from '@angular/core';
 import { loadBitesByBucketlist } from '../utils/load-bites-by-bucketlist';
 import { BITE_COLLECTION } from '../utils/constants';
@@ -53,6 +50,7 @@ jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
     deleteDocument: jest.fn(),
     addCollectionSnapshotListener: jest.fn(),
+    getCountFromServer: jest.fn(),
   },
 }));
 
@@ -377,6 +375,22 @@ describe(BiteApiService.name, () => {
       service.latestBites$.subscribe((bites) => {
         expect(bites.length).toBe(0);
       });
+    });
+  });
+
+  describe('getTotalNumberOfBites', () => {
+    it('should call FirebaseFirestore to get total number of bites', async () => {
+      const mockCountResult = { count: 42 };
+      (FirebaseFirestore.getCountFromServer as jest.Mock).mockResolvedValueOnce(
+        mockCountResult,
+      );
+
+      const totalBites = await service.getTotalNumberOfBites();
+
+      expect(FirebaseFirestore.getCountFromServer).toHaveBeenCalledWith({
+        reference: BITE_COLLECTION,
+      });
+      expect(totalBites).toBe(42);
     });
   });
 });

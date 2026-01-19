@@ -103,36 +103,6 @@ describe('MapService', () => {
     });
   });
 
-  describe('onGotoSettingsClick', () => {
-    it('should navigate to settings when onGotoSettingsClick is called', () => {
-      service.onGotoSettingsClick();
-
-      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
-        'settings',
-      ]);
-    });
-  });
-
-  describe('onGotoMyBitesClick', () => {
-    it('should navigate to my-bites when onGotoMyBitesClick is called', () => {
-      service.onGotoMyBitesClick();
-
-      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
-        'my-bites',
-      ]);
-    });
-  });
-
-  describe('onGotoMyBucketlists', () => {
-    it('should navigate to my-bucketlists when onGotoMyBucketlists is called', () => {
-      service.onGotoMyBucketlists();
-
-      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
-        'my-bucketlists',
-      ]);
-    });
-  });
-
   describe('likeButtonClicked', () => {
     it('should submit like click through dataAccess', () => {
       const likeClick = { likeType: 'heart', biteId: 'bite1' };
@@ -213,16 +183,6 @@ describe('MapService', () => {
         'bite1',
         'restaurant',
         'suffix',
-      ]);
-    });
-  });
-
-  describe('onGotoMyProfileClick', () => {
-    it('should navigate to my-profile when onGotoMyProfileClick is called', () => {
-      service.onGotoMyProfileClick();
-
-      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
-        'my-profile',
       ]);
     });
   });

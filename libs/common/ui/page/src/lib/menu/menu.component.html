@@ -72,6 +72,12 @@
           Settings
         </ion-item>
       }
+      @if (showAboutButton()) {
+        <ion-item (click)="gotoAbout.emit()">
+          <ion-icon name="information-circle-outline" slot="start" />
+          About
+        </ion-item>
+      }
       @if (showMigrationsButton()) {
         <ion-item (click)="gotoMigrations.emit()">
           <ion-icon name="hammer-outline" slot="start" />

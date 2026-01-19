@@ -56,6 +56,8 @@ import {
   preferredCurrency,
   publicUser,
   settings,
+  totalNumberBites,
+  totalNumberUsers,
   userHasSubscriptionTierOne,
 } from './app/selectors';
 import {
@@ -142,6 +144,8 @@ export class BiteTribeStoreService implements StoreService {
   isBitesLoading$ = this.store.select(isBitesLoading);
   homeFilters$ = this.store.select(homeFilters);
   homeDistance$ = this.store.select(homeDistance);
+  totalNumberBites$ = this.store.select(totalNumberBites);
+  totalNumberUsers$ = this.store.select(totalNumberUsers);
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);

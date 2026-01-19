@@ -5,4 +5,5 @@ export const PATH = {
   EDIT_PROFILE: 'edit-profile',
   PROFILE: 'profile',
   MY_PROFILE: 'my-profile',
+  ABOUT: 'about',
 };

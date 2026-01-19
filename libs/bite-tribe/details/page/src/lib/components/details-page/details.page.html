@@ -1,20 +1,11 @@
 @let biteData = bite(); @let biteCreatorData = biteCreator();
 
 <ta-page
-  [showHeaderMenu]="true"
-  [showLanguages]="false"
-  [showSettingsButton]="true"
-  [showMyBites]="true"
-  [showMyBucketlists]="true"
-  [showMyProfile]="true"
+  [showHeaderMenu]="false"
   [showFooter]="false"
   [isAuthenticated]="isAuthenticated()"
   [enableBackButton]="true"
   (logoutClick)="logoutClick.emit()"
-  (gotoSettings)="gotoSettings.emit()"
-  (gotoMyBucketlists)="gotoMyBucketlists.emit()"
-  (gotoMyBites)="gotoMyBites.emit()"
-  (gotoProfile)="gotoMyProfile.emit()"
 >
   <ion-content>
     <img

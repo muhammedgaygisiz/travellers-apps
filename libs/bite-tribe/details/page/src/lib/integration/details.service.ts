@@ -7,6 +7,7 @@ import {
   RemoveBiteFromBucketlistParams,
 } from 'model';
 import { NavController } from '@ionic/angular/standalone';
+import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -52,22 +53,6 @@ export class DetailsService {
 
   logout(): void {
     this.dataAccess.logout();
-  }
-
-  onGotoSettingsClick(): void {
-    this.navController.navigateForward(['settings']);
-  }
-
-  onGotoMyProfileClick(): void {
-    this.navController.navigateForward(['my-profile']);
-  }
-
-  onGotoMyBitesClick(): void {
-    this.navController.navigateForward(['my-bites']);
-  }
-
-  onGotoMyBucketlists(): void {
-    this.navController.navigateForward(['my-bucketlists']);
   }
 
   onRestaurantClick(bite: Bite): void {

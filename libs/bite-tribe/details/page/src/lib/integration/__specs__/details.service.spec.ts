@@ -299,29 +299,6 @@ describe('DetailsService', () => {
     });
   });
 
-  describe('navigation methods', () => {
-    it('should navigate to settings page', () => {
-      service.onGotoSettingsClick();
-      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
-        'settings',
-      ]);
-    });
-
-    it('should navigate to my bites page', () => {
-      service.onGotoMyBitesClick();
-      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
-        'my-bites',
-      ]);
-    });
-
-    it('should navigate to my bucketlists page', () => {
-      service.onGotoMyBucketlists();
-      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
-        'my-bucketlists',
-      ]);
-    });
-  });
-
   describe('onRestaurantClick', () => {
     it('should navigate to restaurant page with restaurantId if available', () => {
       const bite: Bite = {
@@ -377,15 +354,6 @@ describe('DetailsService', () => {
         'bite',
         'bite123',
         'edit',
-      ]);
-    });
-  });
-
-  describe('onGotoMyProfileClick', () => {
-    it('should navigate to my profile page', () => {
-      service.onGotoMyProfileClick();
-      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
-        'my-profile',
       ]);
     });
   });

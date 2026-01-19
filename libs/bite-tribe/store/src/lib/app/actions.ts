@@ -19,5 +19,7 @@ export const AppActions = createActionGroup({
     'Loaded exchange rates from API': props<{
       exchangeRates: Record<string, number>;
     }>(),
+    'Loaded total number of bites': props<{ total: number }>(),
+    'Loaded total number of users': props<{ total: number }>(),
   },
 });

@@ -2,6 +2,7 @@ import { computed, inject, Injectable, Signal } from '@angular/core';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { Bite, Geopoint } from 'model';
+import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class MapService {
@@ -26,22 +27,6 @@ export class MapService {
 
   logout(): void {
     this.dataAccess.logout();
-  }
-
-  onGotoSettingsClick(): void {
-    this.navController.navigateForward(['settings']);
-  }
-
-  onGotoMyProfileClick(): void {
-    this.navController.navigateForward(['my-profile']);
-  }
-
-  onGotoMyBitesClick(): void {
-    this.navController.navigateForward(['my-bites']);
-  }
-
-  onGotoMyBucketlists(): void {
-    this.navController.navigateForward(['my-bucketlists']);
   }
 
   likeButtonClicked(likeClick: { likeType: string; biteId: string }): void {

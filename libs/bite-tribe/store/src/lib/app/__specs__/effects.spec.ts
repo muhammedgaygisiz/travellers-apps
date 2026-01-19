@@ -36,6 +36,8 @@ const Mock = {
   getExchangeRates: jest.fn(),
   reloadGPSPosition: jest.fn(),
   followUser: jest.fn(),
+  getTotalNumberOfBites: jest.fn(),
+  getTotalNumberOfUsers: jest.fn(),
 };
 
 describe('AppEffect', () => {
@@ -60,6 +62,52 @@ describe('AppEffect', () => {
     effects = TestBed.inject(AppEffect);
     apiService = TestBed.inject(BiteTribeApiService);
     storeService = TestBed.inject(BiteTribeStoreService);
+  });
+
+  describe('loadTotalNumberBites$', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(apiService, 'getTotalNumberOfBites')
+        .mockReturnValue(of(42) as any);
+    });
+
+    it('should load total number of bites on loginSucceeded', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: fromAuth.AuthActions.loginSucceeded(),
+        });
+
+        const expected = 'a';
+        const output = {
+          a: AppActions.loadedTotalNumberOfBites({ total: 42 }),
+        };
+
+        expectObservable(effects.loadTotalNumberBites$).toBe(expected, output);
+      });
+    });
+  });
+
+  describe('loadTotalNumberUsers$', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(apiService, 'getTotalNumberOfUsers')
+        .mockReturnValue(of(100) as any);
+    });
+
+    it('should load total number of users on loginSucceeded', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: fromAuth.AuthActions.loginSucceeded(),
+        });
+
+        const expected = 'a';
+        const output = {
+          a: AppActions.loadedTotalNumberOfUsers({ total: 100 }),
+        };
+
+        expectObservable(effects.loadTotalNumberUsers$).toBe(expected, output);
+      });
+    });
   });
 
   describe('loadSettingsFromApi$', () => {

@@ -28,6 +28,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyProfile)="service.onGotoMyProfileClick()"
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoEdit)="service.onGotoEditClick($event)"
+      (gotoAbout)="service.onGotoAboutClick()"
       (deleteBite)="service.onDeleteBiteClick($event)"
       (openMapView)="service.openMapView('my-bites')"
       (sortingChange)="service.myBitesSortingChange($event)"

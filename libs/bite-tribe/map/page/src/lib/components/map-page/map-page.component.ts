@@ -33,10 +33,6 @@ export class MapPageComponent {
   enableZoom = input(true);
 
   readonly logoutClick = output();
-  readonly gotoSettings = output();
-  readonly gotoMyProfile = output();
-  readonly gotoMyBucketlists = output();
-  readonly gotoMyBites = output();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();

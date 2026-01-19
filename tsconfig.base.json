@@ -104,7 +104,11 @@
       "localization": ["libs/common/localization/src/index.ts"],
       "model": ["libs/bite-tribe/model/src/index.ts"],
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
-      "utils": ["libs/common/utils/src/index.ts"]
+      "utils": ["libs/common/utils/src/index.ts"],
+      "bite-tribe/about": ["libs/bite-tribe/about/page/src/index.ts"],
+      "bite-tribe/about-data-access": [
+        "libs/bite-tribe/about/data-access/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

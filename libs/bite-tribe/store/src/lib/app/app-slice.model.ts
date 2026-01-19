@@ -13,4 +13,6 @@ export type AppSlice = {
   followedBy: string[];
   exchangeRates: Record<string, number>;
   errorLoadingGpsPosition: boolean;
+  totalNumberBites: number;
+  totalNumberUsers: number;
 };

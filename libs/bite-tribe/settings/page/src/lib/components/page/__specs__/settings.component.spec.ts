@@ -56,6 +56,7 @@ describe(PageSettings.name, () => {
         theme: 'light',
         currency: 'EUR',
         nearby: 2000,
+        allowFollow: false,
       });
     });
 
@@ -88,6 +89,7 @@ describe(PageSettings.name, () => {
         theme: 'dark',
         currency: 'USD',
         nearby: 5000,
+        allowFollow: true,
         updatedAt: '2024-01-01T00:00:00Z',
       };
 
@@ -97,6 +99,7 @@ describe(PageSettings.name, () => {
         theme: mockSettings.theme,
         currency: mockSettings.currency,
         nearby: mockSettings.nearby,
+        allowFollow: mockSettings.allowFollow,
       });
 
       component.saveSettings();
@@ -195,6 +198,7 @@ describe(PageSettings.name, () => {
         theme: 'dark',
         currency: 'USD',
         nearby: 3000,
+        allowFollow: true,
         updatedAt: '2024-01-01T00:00:00Z',
       };
 

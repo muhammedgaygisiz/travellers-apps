@@ -105,19 +105,25 @@ export class AppEffect {
     () => {
       return this.actions$.pipe(
         ofType(AppActions.saveSettings),
-        tap(({ settings }) => {
+        switchMap(({ settings }) => {
           this.api.saveSettings(settings);
-          
+
           // Also update the allowFollow field in PublicUser
-          this.storeService.publicUser$.pipe(take(1)).subscribe((publicUser) => {
-            if (publicUser && publicUser.allowFollow !== settings.allowFollow) {
-              const updatedProfile = {
-                ...publicUser,
-                allowFollow: settings.allowFollow,
-              };
-              this.api.updateUser(updatedProfile);
-            }
-          });
+          return this.storeService.publicUser$.pipe(
+            take(1),
+            tap((publicUser) => {
+              if (
+                publicUser &&
+                publicUser.allowFollow !== settings.allowFollow
+              ) {
+                const updatedProfile = {
+                  ...publicUser,
+                  allowFollow: settings.allowFollow,
+                };
+                this.api.updateUser(updatedProfile);
+              }
+            }),
+          );
         }),
       );
     },

@@ -4,5 +4,6 @@ export interface Settings {
   theme: 'light' | 'dark';
   currency: string;
   nearby: number;
+  allowFollow: boolean;
   updatedAt?: string;
 }

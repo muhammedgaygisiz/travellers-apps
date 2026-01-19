@@ -17,6 +17,12 @@
             <ion-label>Email Updates</ion-label>
             <ion-toggle slot="end" formControlName="emailUpdates" />
           </ion-item>
+          @if (isPublicProfile()) {
+            <ion-item>
+              <ion-label>Allow follow</ion-label>
+              <ion-toggle slot="end" formControlName="allowFollow" />
+            </ion-item>
+          }
           <ion-item>
             <ion-label>Theme</ion-label>
             <ion-select

@@ -6,6 +6,7 @@ export interface PublicUser {
   city?: string;
   about?: string;
   public?: boolean;
+  allowFollow?: boolean;
   subscriptionTier?: number;
   followers: string[];
 

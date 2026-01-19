@@ -59,6 +59,10 @@ export class PageSettings {
 
   private readonly formBuilder = inject(FormBuilder);
 
+  isPublicProfile = computed(() => {
+    return this.publicUser()?.public ?? false;
+  });
+
   currencies = currencyCodes;
 
   settingsForm = this.formBuilder.nonNullable.group({
@@ -67,6 +71,7 @@ export class PageSettings {
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
     nearby: [2000, [Validators.required, Validators.min(1)]],
+    allowFollow: [false, Validators.required],
   });
 
   settingsEffect = afterRenderEffect(() => {
@@ -139,6 +144,7 @@ export class PageSettings {
       theme,
       currency: newSettings.currency || 'EUR',
       nearby: newSettings.nearby || 50,
+      allowFollow: !!newSettings.allowFollow,
     });
   }
 

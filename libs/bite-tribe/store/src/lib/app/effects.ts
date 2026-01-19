@@ -107,6 +107,17 @@ export class AppEffect {
         ofType(AppActions.saveSettings),
         tap(({ settings }) => {
           this.api.saveSettings(settings);
+          
+          // Also update the allowFollow field in PublicUser
+          this.storeService.publicUser$.pipe(take(1)).subscribe((publicUser) => {
+            if (publicUser && publicUser.allowFollow !== settings.allowFollow) {
+              const updatedProfile = {
+                ...publicUser,
+                allowFollow: settings.allowFollow,
+              };
+              this.api.updateUser(updatedProfile);
+            }
+          });
         }),
       );
     },

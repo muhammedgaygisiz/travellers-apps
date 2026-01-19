@@ -85,13 +85,17 @@ export class ProfileComponent {
 
   isUnfollowedUser = computed((): boolean => {
     const currentUserId = this.userId();
-    const profileOwner = this.user()?.userId;
+    const profileUser = this.user();
+    const profileOwner = profileUser?.userId;
 
     if (!profileOwner) {
       return false;
     }
 
-    return currentUserId !== profileOwner;
+    const isDifferentUser = currentUserId !== profileOwner;
+    const allowsFollowing = profileUser?.allowFollow ?? false;
+
+    return isDifferentUser && allowsFollowing;
   });
 
   imageLoadErrored = signal(false);

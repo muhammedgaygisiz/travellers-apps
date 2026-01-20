@@ -520,7 +520,7 @@ describe('BiteTribeApiService', () => {
         const loadBitesByUserSpy = jest
           .spyOn(biteApiService, 'loadBitesByUser')
           .mockReturnValue(Promise.resolve([]));
-        const user = { uid: 'user-id' };
+        const user = 'user-id';
         service.bitesByUser(user);
         expect(loadBitesByUserSpy).toHaveBeenCalledWith(user);
       },

@@ -116,7 +116,7 @@ export const reducer = createReducer<AppSlice>(
     ...state,
     totalNumberUsers: total,
   })),
-  on(AppActions.loadedProfileMetadata, (state, metadata) => ({
+  on(AppActions.loadedProfileMetadata, (state, { type, ...metadata }) => ({
     ...state,
     profileMetadata: {
       ...metadata,
@@ -124,6 +124,6 @@ export const reducer = createReducer<AppSlice>(
   })),
   on(routerRequestAction, (state) => ({
     ...state,
-    ...CLEAN_PROFILE_METADATA,
+    profileMetadata: { ...CLEAN_PROFILE_METADATA },
   })),
 );

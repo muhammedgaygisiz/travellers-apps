@@ -232,6 +232,7 @@ export class ProfileApiService {
     try {
       const currentUser = await this.getUser();
 
+      console.log('Unfollowing user:', user, 'by', currentUser);
       if (!currentUser) {
         throw new Error('User not authenticated');
       }

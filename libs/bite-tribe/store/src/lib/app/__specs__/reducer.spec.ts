@@ -4,6 +4,10 @@ import { AppSlice } from '../app-slice.model';
 import type { PublicUser, Settings } from 'model';
 import { BiteActions } from '../../bites/actions';
 import { fromAuth } from 'ta-firestore';
+import {
+  routerNavigationAction,
+  routerRequestAction,
+} from '@ngrx/router-store';
 
 describe('App Reducer', () => {
   describe('fromAuth.logoutSucceeded', () => {
@@ -265,6 +269,58 @@ describe('App Reducer', () => {
       expect(reducer(INITIAL_STATE, loadedTotalNumberOfUsersAction)).toEqual({
         ...NEW_STATE,
       });
+    });
+  });
+
+  describe('loadedProfileMetadata', () => {
+    it('should set profileMetadata', () => {
+      const INITIAL_STATE = {
+        profileMetadata: {
+          followers: 0,
+          following: 0,
+          isFollowedByMe: false,
+        },
+      } as AppSlice;
+      const NEW_STATE = {
+        profileMetadata: {
+          followers: 10,
+          following: 5,
+          isFollowedByMe: true,
+        },
+      } as AppSlice;
+
+      const loadedProfileMetadataAction = AppActions.loadedProfileMetadata({
+        followers: 10,
+        following: 5,
+        isFollowedByMe: true,
+      });
+
+      expect(reducer(INITIAL_STATE, loadedProfileMetadataAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('routerRequestAction', () => {
+    it('should reset profileMetadata fields', () => {
+      const INITIAL_STATE = {
+        profileMetadata: {
+          followers: 10,
+          following: 5,
+          isFollowedByMe: true,
+        },
+      } as AppSlice;
+      const NEW_STATE = {
+        profileMetadata: {
+          followers: 0,
+          following: 0,
+          isFollowedByMe: false,
+        },
+      } as AppSlice;
+
+      const action = routerRequestAction({} as any);
+
+      expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
     });
   });
 });

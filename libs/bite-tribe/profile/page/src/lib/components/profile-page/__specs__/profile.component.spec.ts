@@ -24,6 +24,20 @@ describe('ProfileComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('followerCount', () => {
+    it('should return 0 if followers is 0', () => {
+      compRef.setInput('profileMetadata', { followers: 0 } as any);
+
+      expect(component.followerCount()).toBe(0);
+    });
+
+    it('should return the length of followers if followers is defined', () => {
+      compRef.setInput('profileMetadata', { followers: 3 } as any);
+
+      expect(component.followerCount()).toBe(3);
+    });
+  });
+
   describe('biteCount', () => {
     it('should return 0 if bites is undefined', () => {
       compRef.setInput('bites', undefined);
@@ -150,6 +164,71 @@ describe('ProfileComponent', () => {
       component.onFollow();
 
       expect(followClickSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('unfollow', () => {
+    it('should emit unfollowClick with user when user is defined', () => {
+      const userMock = { userId: 'user1' } as any;
+      compRef.setInput('user', userMock);
+      const unfollowClickSpy = jest.spyOn(
+        component.unfollowButtonClick,
+        'emit',
+      );
+
+      component.unfollow();
+
+      expect(unfollowClickSpy).toHaveBeenCalledWith(userMock);
+    });
+
+    it('should not emit unfollowClick when user is undefined', () => {
+      compRef.setInput('user', undefined);
+      const unfollowClickSpy = jest.spyOn(
+        component.unfollowButtonClick,
+        'emit',
+      );
+
+      component.unfollow();
+
+      expect(unfollowClickSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('openConfirmationDialog', () => {
+    it('should set isOpen to true', () => {
+      component.isOpen.set(false);
+      component.openConfirmationDialog();
+      expect(component.isOpen()).toBe(true);
+    });
+  });
+
+  describe('handleConfirmationDismiss', () => {
+    it('should call unfollow and set isOpen to false when role is UNFOLLOW', () => {
+      const unfollowSpy = jest.spyOn(component, 'unfollow');
+      component.isOpen.set(true);
+
+      const event = new CustomEvent('dismiss', {
+        detail: { role: 'unfollow' },
+      });
+
+      component.handleConfirmationDismiss(event);
+
+      expect(unfollowSpy).toHaveBeenCalled();
+      expect(component.isOpen()).toBe(false);
+    });
+
+    it('should set isOpen to false when role is not UNFOLLOW', () => {
+      const unfollowSpy = jest.spyOn(component, 'unfollow');
+      component.isOpen.set(true);
+
+      const event = new CustomEvent('dismiss', {
+        detail: { role: 'CANCEL' },
+      });
+
+      component.handleConfirmationDismiss(event);
+
+      expect(unfollowSpy).not.toHaveBeenCalled();
+      expect(component.isOpen()).toBe(false);
     });
   });
 });

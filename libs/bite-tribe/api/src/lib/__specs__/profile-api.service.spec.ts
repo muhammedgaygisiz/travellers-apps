@@ -19,6 +19,8 @@ jest.mock('@capacitor-firebase/firestore', () => ({
     updateDocument: jest.fn(),
     getDocument: jest.fn(),
     getCountFromServer: jest.fn(),
+    deleteDocument: jest.fn(),
+    getCollection: jest.fn(),
   },
 }));
 
@@ -518,13 +520,18 @@ describe(ProfileApiService.name, () => {
     ));
 
     describe('given current user is undefined', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(AuthService, {
+          useValue: {
+            ...MockedAuthService,
+            authState: (): any => ({ user: undefined }),
+          },
+        });
+      });
+
       it('should handle the error', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
-          jest
-            .spyOn(MockedAuthService, 'authState')
-            .mockReturnValue(Promise.resolve({ user: undefined }));
-
           const consoleErrorSpy = jest
             .spyOn(console, 'error')
             .mockImplementation();
@@ -564,5 +571,245 @@ describe(ProfileApiService.name, () => {
         expect(result).toBe(42);
       },
     ));
+  });
+
+  describe('unfollowUser', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    describe('given current user is defined', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(AuthService, {
+          useValue: MockedAuthService,
+        });
+      });
+
+      it('should call delete followers and following entries', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const deleteDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'deleteDocument')
+            .mockResolvedValue();
+
+          const publicUser = {
+            userId: 'unfollowed-user-id',
+          } as unknown as PublicUser;
+
+          await service.unfollowUser(publicUser);
+
+          expect(deleteDocumentSpy).toHaveBeenCalledWith({
+            reference: 'users/unfollowed-user-id/followers/123',
+          });
+
+          expect(deleteDocumentSpy).toHaveBeenCalledWith({
+            reference: 'users/123/following/unfollowed-user-id',
+          });
+        },
+      ));
+    });
+
+    describe('given current user is undefined', () => {
+      it('should handle the error', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          jest
+            .spyOn(MockedAuthService, 'authState')
+            .mockReturnValue(Promise.resolve({ user: undefined }));
+
+          const consoleErrorSpy = jest
+            .spyOn(console, 'error')
+            .mockImplementation();
+
+          const publicUser = {
+            userId: 'unfollowed-user-id',
+          } as unknown as PublicUser;
+
+          try {
+            await service.unfollowUser(publicUser);
+          } catch (error) {
+            // Expected to throw
+          }
+
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error unfollowing user:',
+            expect.any(Error),
+          );
+        },
+      ));
+    });
+  });
+
+  describe('fetchFollowers', () => {
+    it('should load followers subcollection', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const mockedSnapshots = [
+          { id: 'follower1', data: (): any => ({}) },
+          { id: 'follower2', data: (): any => ({}) },
+        ];
+
+        const getCollectionSpy = jest
+          .spyOn(FirebaseFirestore, 'getCollection')
+          .mockResolvedValue({ snapshots: mockedSnapshots } as any);
+
+        const result = await service.fetchFollowers('user-id-123');
+
+        expect(getCollectionSpy).toHaveBeenCalledWith({
+          reference: 'users/user-id-123/followers',
+        });
+        expect(result).toEqual(mockedSnapshots);
+      },
+    ));
+
+    describe('given an error', () => {
+      it('should handle the error and return empty array', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const consoleErrorSpy = jest
+            .spyOn(console, 'error')
+            .mockImplementation();
+
+          jest
+            .spyOn(FirebaseFirestore, 'getCollection')
+            .mockRejectedValue(new Error('Failed to fetch followers'));
+
+          const result = await service.fetchFollowers('user-id-123');
+
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error fetching followers:',
+            expect.any(Error),
+          );
+          expect(result).toEqual([]);
+        },
+      ));
+    });
+  });
+
+  describe('fetchFollowing', () => {
+    it('should load following subcollection', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const mockedSnapshots = [
+          { id: 'following1', data: (): any => ({}) },
+          { id: 'following2', data: (): any => ({}) },
+        ];
+
+        const getCollectionSpy = jest
+          .spyOn(FirebaseFirestore, 'getCollection')
+          .mockResolvedValue({ snapshots: mockedSnapshots } as any);
+
+        const result = await service.fetchFollowing('user-id-123');
+
+        expect(getCollectionSpy).toHaveBeenCalledWith({
+          reference: 'users/user-id-123/following',
+        });
+        expect(result).toEqual(mockedSnapshots);
+      },
+    ));
+
+    describe('given an error', () => {
+      it('should handle the error and return empty array', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const consoleErrorSpy = jest
+            .spyOn(console, 'error')
+            .mockImplementation();
+
+          jest
+            .spyOn(FirebaseFirestore, 'getCollection')
+            .mockRejectedValue(new Error('Failed to fetch following'));
+
+          const result = await service.fetchFollowing('user-id-123');
+
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error fetching following:',
+            expect.any(Error),
+          );
+          expect(result).toEqual([]);
+        },
+      ));
+    });
+  });
+
+  describe('isCurrentUserFollowing', () => {
+    describe('given current user is in followers list', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(AuthService, {
+          useValue: {
+            ...MockedAuthService,
+            authState: (): any => ({ user: { uid: 'current-user-id' } }),
+          },
+        });
+      });
+
+      it('should return true', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const followers = [
+            { id: 'follower1' },
+            { id: 'current-user-id' },
+            { id: 'follower3' },
+          ] as any;
+
+          const result = await service.isCurrentUserFollowing(followers);
+
+          expect(result).toBe(true);
+        },
+      ));
+    });
+
+    describe('given current user is not in followers list', () => {
+      it('should return false', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          jest
+            .spyOn(MockedAuthService, 'authState')
+            .mockReturnValue(
+              Promise.resolve({ user: { uid: 'current-user-id' } }),
+            );
+
+          const followers = [
+            { id: 'follower1' },
+            { id: 'follower2' },
+            { id: 'follower3' },
+          ] as any;
+
+          const result = await service.isCurrentUserFollowing(followers);
+
+          expect(result).toBe(false);
+        },
+      ));
+    });
+
+    describe('given current user is undefined', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(AuthService, {
+          useValue: {
+            ...MockedAuthService,
+            authState: (): any => ({ user: undefined }),
+          },
+        });
+      });
+
+      it('should return false if current user is undefined', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          jest
+            .spyOn(MockedAuthService, 'authState')
+            .mockReturnValue(Promise.resolve({ user: undefined }));
+
+          const followers = [
+            { id: 'follower1' },
+            { id: 'follower2' },
+            { id: 'follower3' },
+          ] as any;
+
+          const result = await service.isCurrentUserFollowing(followers);
+
+          expect(result).toBe(false);
+        },
+      ));
+    });
   });
 });

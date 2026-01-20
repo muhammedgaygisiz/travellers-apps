@@ -42,6 +42,7 @@ class Mock {
   saveSettings = jest.fn();
   saveUserIfNotExisting = jest.fn();
   followUser = jest.fn();
+  unfollowUser = jest.fn();
   loadBitesByLocation = jest.fn();
   loadBitesByUser = jest.fn();
   loadBitesByBucketlist = jest.fn();
@@ -50,9 +51,12 @@ class Mock {
   startlatestBitesListener = jest.fn();
   getTotalNumberOfBites = jest.fn();
   getTotalNumberOfUsers = jest.fn();
+  fetchFollowers = jest.fn();
+  fetchFollowing = jest.fn();
+  isCurrentUserFollowing = jest.fn();
 }
 
-describe('BiteTribeApiService', () => {
+describe(BiteTribeApiService.name, () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
@@ -488,6 +492,18 @@ describe('BiteTribeApiService', () => {
     ));
   });
 
+  describe('unfollowUser', () => {
+    it('should call unfollowUser on ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
+        const unfollowUserSpy = jest.spyOn(profileApiService, 'unfollowUser');
+        const user = { id: 'user-id', name: 'Test User' } as any;
+        service.unfollowUser(user);
+        expect(unfollowUserSpy).toHaveBeenCalledWith(user);
+      },
+    ));
+  });
+
   describe('bitesByPosition', () => {
     it('should call loadBitesByLocation on BiteApiService', inject(
       [BiteTribeApiService, BiteApiService],
@@ -520,7 +536,7 @@ describe('BiteTribeApiService', () => {
         const loadBitesByUserSpy = jest
           .spyOn(biteApiService, 'loadBitesByUser')
           .mockReturnValue(Promise.resolve([]));
-        const user = { uid: 'user-id' };
+        const user = 'user-id';
         service.bitesByUser(user);
         expect(loadBitesByUserSpy).toHaveBeenCalledWith(user);
       },
@@ -677,6 +693,41 @@ describe('BiteTribeApiService', () => {
         const total = await lastValueFrom(totalUsers$);
         expect(total).toBe(100);
         expect(getTotalNumberOfUsersSpy).toHaveBeenCalled();
+      },
+    ));
+  });
+
+  describe('fetchFollowMetadata', () => {
+    it('should call fetchFollowers, fetchFollowing and isCurrentUserFollowing on ProfileApiService and return the metadata', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        const fetchFollowersSpy = jest
+          .spyOn(profileApiService, 'fetchFollowers')
+          .mockResolvedValue(['follower1', 'follower2'] as any);
+        const fetchFollowingSpy = jest
+          .spyOn(profileApiService, 'fetchFollowing')
+          .mockResolvedValue(['following1'] as any);
+        const isCurrentUserFollowingSpy = jest
+          .spyOn(profileApiService, 'isCurrentUserFollowing')
+          .mockReturnValue(Promise.resolve(true));
+
+        const userId = 'user-id';
+        const metadata = await service.fetchFollowMetadata(userId);
+
+        expect(metadata).toEqual({
+          followers: 2,
+          following: 1,
+          isFollowedByMe: true,
+        });
+        expect(fetchFollowersSpy).toHaveBeenCalledWith(userId);
+        expect(fetchFollowingSpy).toHaveBeenCalledWith(userId);
+        expect(isCurrentUserFollowingSpy).toHaveBeenCalledWith([
+          'follower1',
+          'follower2',
+        ]);
       },
     ));
   });

@@ -311,4 +311,26 @@ describe('App Selectors', () => {
       expect(result).toBe(0);
     });
   });
+
+  describe('profileMeatadata', () => {
+    it('should return the profile metadata', () => {
+      const result = fromSelectors.profileMeatadata.projector(mockState);
+      expect(result).toEqual({
+        followers: 0,
+        following: 0,
+        isFollowedByMe: false,
+      });
+    });
+
+    it('should return undefined when profile metadata is not set', () => {
+      const stateWithoutProfileMetadata = {
+        ...mockState,
+        profileMetadata: undefined,
+      } as any;
+      const result = fromSelectors.profileMeatadata.projector(
+        stateWithoutProfileMetadata,
+      );
+      expect(result).toBeUndefined();
+    });
+  });
 });

@@ -4,7 +4,7 @@ import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
 
-describe('BiteTribeStoreService', () => {
+describe(BiteTribeStoreService.name, () => {
   let store: Store;
 
   beforeEach(() => {
@@ -446,6 +446,17 @@ describe('BiteTribeStoreService', () => {
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
         service.followUser({} as any);
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('unfollowUser', () => {
+    it('should dispatch unfollowUser on BiteTribeStoreService', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        service.unfollowUser({} as any);
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));

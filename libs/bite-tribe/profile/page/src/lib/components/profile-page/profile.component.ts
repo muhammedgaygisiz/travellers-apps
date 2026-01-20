@@ -137,7 +137,7 @@ export class ProfileComponent {
     }
   }
 
-  protected unfollow(): void {
+  unfollow(): void {
     const user = this.user();
     if (user) {
       this.unfollowButtonClick.emit(user);

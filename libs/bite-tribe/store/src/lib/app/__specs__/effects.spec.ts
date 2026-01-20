@@ -1,17 +1,18 @@
 import { TestScheduler } from 'rxjs/testing';
-import { Observable, of } from 'rxjs';
+import { map, Observable, of, pipe, UnaryFunction } from 'rxjs';
 import { Platform } from '@ionic/angular';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
 import { fromAuth } from 'ta-firestore';
 import { AppActions } from '../actions';
 import { AppEffect } from '../effects';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import type { PublicUser, Settings } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import SpyInstance = jest.SpyInstance;
+import { Store } from '@ngrx/store';
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
@@ -46,6 +47,8 @@ describe('AppEffect', () => {
   let effects: AppEffect;
   let apiService: BiteTribeApiService;
   let storeService: BiteTribeStoreService;
+  let store: Store;
+  let dispatchSpy: SpyInstance;
 
   beforeEach(() => {
     scheduler = new TestScheduler(assertDeepEqual);
@@ -62,6 +65,9 @@ describe('AppEffect', () => {
     effects = TestBed.inject(AppEffect);
     apiService = TestBed.inject(BiteTribeApiService);
     storeService = TestBed.inject(BiteTribeStoreService);
+    store = TestBed.inject(MockStore);
+
+    dispatchSpy = jest.spyOn(store, 'dispatch').mockImplementation();
   });
 
   describe('loadTotalNumberBites$', () => {
@@ -141,7 +147,7 @@ describe('AppEffect', () => {
     it('should load public profile on fromAuth.loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loadedUser({ user: {} }),
+          a: fromAuth.AuthActions.loadedUser({ user: {} as any }),
         });
 
         const expected = 'a';
@@ -157,37 +163,47 @@ describe('AppEffect', () => {
   });
 
   describe('fetchGpsPosition$', () => {
-    it('should emit loadedGpsPosition on successful location fetch', () => {
+    it('should dispatch loadedGpsPosition on successful location fetch', () => {
       scheduler.run(({ cold, expectObservable }) => {
-        const user = { id: 1 };
         const position = { coords: { latitude: 1, longitude: 2 } };
 
-        getCurrentPositionMock.mockReturnValue(cold('--a|', { a: position }));
+        getCurrentPositionMock.mockReturnValue(cold('a|', { a: position }));
 
-        actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser({ user }) });
+        actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
 
-        const expected = '--a';
-        const output = { a: AppActions.loadedGPSPosition({ position }) };
+        const expected = 'a';
+        const output = { a: AppActions.fetchGPSPosition() };
 
         expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
       });
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        AppActions.loadedGPSPosition({
+          position: { coords: { latitude: 1, longitude: 2 } },
+        }),
+      );
     });
 
     it('should emit errorLoadingGpsPosition and show alert on error', () => {
       const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const error = new Error('GPS Error');
       scheduler.run(({ cold, expectObservable }) => {
-        const error = new Error('GPS Error');
-
-        getCurrentPositionMock.mockReturnValue(cold('--#', {}, error));
+        getCurrentPositionMock.mockReturnValue(cold('#', {}, error));
 
         actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
 
-        const expected = '--a';
-        const output = { a: AppActions.errorLoadingGPSPosition({ error }) };
+        const expected = 'a';
+        const output = { a: AppActions.fetchGPSPosition() };
 
         expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
       });
+
       expect(errorSpy).toHaveBeenCalledTimes(1);
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        AppActions.errorLoadingGPSPosition({
+          error,
+        }),
+      );
     });
   });
 
@@ -309,7 +325,7 @@ describe('AppEffect', () => {
     it('should save user if not existing on loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loadedUser({ user: {} }),
+          a: fromAuth.AuthActions.loadedUser({ user: {} as any }),
         });
 
         expectObservable(effects.saveUserAfterLogin$);
@@ -329,7 +345,7 @@ describe('AppEffect', () => {
     it('should load exchange rates from API on fromAuth.loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loadedUser({ user: {} }),
+          a: fromAuth.AuthActions.loadedUser({ user: {} as any }),
         });
 
         const expected = 'a';

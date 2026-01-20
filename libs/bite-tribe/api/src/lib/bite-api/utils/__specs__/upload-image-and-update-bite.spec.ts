@@ -1,26 +1,25 @@
 import { uploadImageAndUpdateBite } from '../upload-image-and-update-bite';
 import { Bite } from 'model';
+import { updateBiteWithImagePathFromFirestorage } from '../update-bite-with-image-path-from-firestorage';
+import { uploadImageToFirebaseStorage } from '../upload-image-to-firebasestorage';
 
-const uploadImageToFirebaseStorageMock = jest.fn();
 jest.mock('../upload-image-to-firebasestorage', () => ({
-  uploadImageToFirebaseStorage: (): any => uploadImageToFirebaseStorageMock,
+  uploadImageToFirebaseStorage: jest.fn(),
 }));
 
-const updateBiteWithImagePathFromFirestorageMock = jest.fn();
 jest.mock('../update-bite-with-image-path-from-firestorage', () => ({
-  updateBiteWithImagePathFromFirestorage: (): any =>
-    updateBiteWithImagePathFromFirestorageMock,
+  updateBiteWithImagePathFromFirestorage: jest.fn(),
 }));
 
 describe('uploadImageAndUpdateBite', () => {
-  let logSpy: jest.SpyInstance;
-
-  beforeEach(() => {
-    logSpy = jest.spyOn(console, 'log').mockImplementation();
-  });
-
   it('should upload image and update bite', async () => {
     await uploadImageAndUpdateBite(true, 'base64', 'biteId', {} as Bite);
-    expect(logSpy).toHaveBeenCalledWith('updatedBite:', expect.anything());
+
+    expect(uploadImageToFirebaseStorage).toHaveBeenCalledWith(
+      true,
+      'base64',
+      'biteId',
+    );
+    expect(updateBiteWithImagePathFromFirestorage).toHaveBeenCalled();
   });
 });

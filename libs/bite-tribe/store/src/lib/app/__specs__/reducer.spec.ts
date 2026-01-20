@@ -10,18 +10,21 @@ describe('App Reducer', () => {
     it('should reset the state to initial values', () => {
       const INITIAL_STATE: AppSlice = {
         profile: { displayName: 'Test User' } as PublicUser,
-        followedBy: [],
         settings: { pushNotifications: true } as Settings,
         loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
         totalNumberBites: 0,
         totalNumberUsers: 0,
+        profileMetadata: {
+          followers: 0,
+          following: 0,
+          isFollowedByMe: false,
+        },
       };
 
       const NEW_STATE: AppSlice = {
         profile: undefined,
-        followedBy: [],
         settings: {
           pushNotifications: false,
           emailUpdates: false,
@@ -34,6 +37,11 @@ describe('App Reducer', () => {
         errorLoadingGpsPosition: false,
         totalNumberBites: 0,
         totalNumberUsers: 0,
+        profileMetadata: {
+          followers: 0,
+          following: 0,
+          isFollowedByMe: false,
+        },
       };
 
       const logoutAction = fromAuth.AuthActions.logoutSucceeded();

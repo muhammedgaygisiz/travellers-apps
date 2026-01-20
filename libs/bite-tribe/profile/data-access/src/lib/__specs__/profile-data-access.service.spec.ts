@@ -10,12 +10,11 @@ class Mock {
   bitesByUser$ = of([]);
   publicUser$ = of(null);
   mybites$ = of([]);
-  followerCount$ = of(0);
-  followingCount$ = of(0);
   bites$ = of([]);
   biteCreator$ = of(null);
   userId$ = of('user-id');
   isPublicProfile$ = of(true);
+  profileMeatadata$ = of(true);
   logout = (): null => null;
   removeLike = (): null => null;
   submitLikeClick = (): null => null;

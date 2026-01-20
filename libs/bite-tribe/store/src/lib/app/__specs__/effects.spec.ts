@@ -40,6 +40,8 @@ const Mock = {
   followUser: jest.fn(),
   getTotalNumberOfBites: jest.fn(),
   getTotalNumberOfUsers: jest.fn(),
+  unfollowUser: jest.fn(),
+  fetchFollowMetadata: jest.fn(),
 };
 
 describe(AppEffect.name, () => {
@@ -68,6 +70,7 @@ describe(AppEffect.name, () => {
     storeService = TestBed.inject(BiteTribeStoreService);
     store = TestBed.inject(MockStore);
 
+    jest.spyOn(storeService, 'user').mockReturnValue({ uid: '1' } as any);
     dispatchSpy = jest.spyOn(store, 'dispatch').mockImplementation();
   });
 

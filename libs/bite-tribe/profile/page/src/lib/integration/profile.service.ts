@@ -20,7 +20,6 @@ export class ProfileService {
   isPublicProfile = this.dataAccess.isPublicProfile;
   followerCount = this.dataAccess.followerCount;
   followingCount = this.dataAccess.followingCount;
-  biteCreatorSettings = this.dataAccess.settings;
 
   logout(): void {
     this.dataAccess.logout();

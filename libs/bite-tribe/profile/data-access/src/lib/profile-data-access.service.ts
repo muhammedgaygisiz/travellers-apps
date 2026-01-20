@@ -29,8 +29,6 @@ export class ProfileDataAccessService {
     initialValue: 0,
   });
 
-  settings = toSignal(this.storeService.settings$);
-
   private bites = toSignal(this.storeService.bites$, {
     initialValue: [] as Bite[],
   });

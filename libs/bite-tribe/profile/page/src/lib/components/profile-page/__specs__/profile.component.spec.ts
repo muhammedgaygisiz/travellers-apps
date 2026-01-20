@@ -72,7 +72,7 @@ describe('ProfileComponent', () => {
   });
 
   describe('isUnfollowedUser', () => {
-    const userMock = { userId: 'user1', allowFollow: true } as any;
+    const userMock = { userId: 'user1' } as any;
     beforeEach(() => {
       compRef.setInput('user', userMock);
       compRef.setInput('userId', userMock.userId);
@@ -94,18 +94,6 @@ describe('ProfileComponent', () => {
 
     it('should return false if profile owners userId in not defined', () => {
       compRef.setInput('user', {} as any);
-      expect(component.isUnfollowedUser()).toBe(false);
-    });
-
-    it('should return false if allowFollow is false', () => {
-      compRef.setInput('user', { userId: 'user1', allowFollow: false } as any);
-      compRef.setInput('userId', 'user2');
-      expect(component.isUnfollowedUser()).toBe(false);
-    });
-
-    it('should return false if allowFollow is undefined', () => {
-      compRef.setInput('user', { userId: 'user1' } as any);
-      compRef.setInput('userId', 'user2');
       expect(component.isUnfollowedUser()).toBe(false);
     });
   });

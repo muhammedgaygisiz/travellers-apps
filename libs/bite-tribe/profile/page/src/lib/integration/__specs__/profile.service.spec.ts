@@ -5,14 +5,15 @@ import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
 
 class Mock {
-  logout = (): null => null;
-  navigateForward = (): null => null;
-  submitLikeClick = (): null => null;
-  submitFollowClick = (): null => null;
-  savePublicProfile = (): null => null;
+  logout = jest.fn();
+  navigateForward = jest.fn();
+  submitLikeClick = jest.fn();
+  submitFollowClick = jest.fn();
+  savePublicProfile = jest.fn();
+  submitUnfollowClick = jest.fn();
 }
 
-describe('ProfileService', () => {
+describe(ProfileService.name, () => {
   let service: ProfileService;
   let profileDataAccessService: ProfileDataAccessService;
 
@@ -168,6 +169,18 @@ describe('ProfileService', () => {
       );
       service.followButtonClicked(user);
       expect(submitFollowClickSpy).toHaveBeenCalledWith(user);
+    });
+  });
+
+  describe('unfollowButtonClicked', () => {
+    it('should call submitUnfollowClick on dataAccess with correct parameters', () => {
+      const user = { id: 'user123' } as any;
+      const submitUnfollowClickSpy = jest.spyOn(
+        profileDataAccessService,
+        'submitUnfollowClick',
+      );
+      service.unfollowButtonClicked(user);
+      expect(submitUnfollowClickSpy).toHaveBeenCalledWith(user);
     });
   });
 });

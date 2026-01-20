@@ -37,8 +37,6 @@ export const provideFirestoreUtils = (
   if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] === 'true') {
     console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
 
-    console.log('DEV ENVIRONMENT - ', firebaseOptions);
-
     if (emulators) {
       const storage = getStorage(app);
       return provideFirestoreSimulator(emulators, app, firestore, storage);

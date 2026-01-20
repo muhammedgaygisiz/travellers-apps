@@ -10,7 +10,11 @@ export type AppSlice = {
     home?: boolean;
   };
   profile?: PublicUser;
-  followedBy: string[];
+  profileMetadata: {
+    followers: number;
+    following: number;
+    isFollowedByMe: boolean;
+  };
   exchangeRates: Record<string, number>;
   errorLoadingGpsPosition: boolean;
   totalNumberBites: number;

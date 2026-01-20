@@ -28,7 +28,7 @@ describe('withUserFromAction', () => {
           }),
         });
 
-        const effect = createEffect(() => {
+        const effect$ = createEffect(() => {
           return action$.pipe(
             ofType(fromAuth.AuthActions.loadedUser),
             withUserFromAction(),
@@ -36,7 +36,7 @@ describe('withUserFromAction', () => {
           );
         });
 
-        expectObservable(effect).toBe('--a--', {
+        expectObservable(effect$).toBe('--a--', {
           a: wrapInTestAction('user-123'),
         });
       });

@@ -11,6 +11,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [user]="service.biteCreator()"
       [bites]="service.bitesByUser()"
       [userId]="service.userId()"
+      [profileMetadata]="service.profileMetadata()"
       (biteClick)="service.biteClicked($event)"
       (restaurantClick)="service.restaurantClicked($event)"
       (logoutClick)="service.logout()"
@@ -21,6 +22,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyProfile)="service.gotoMyProfileClicked()"
       (gotoEditProfile)="service.gotoEditProfile()"
       (followButtonClick)="service.followButtonClicked($event)"
+      (unfollowButtonClick)="service.unfollowButtonClicked($event)"
     />
   `,
   imports: [ProfileComponent],

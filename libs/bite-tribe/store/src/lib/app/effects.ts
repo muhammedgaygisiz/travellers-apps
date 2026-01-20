@@ -1,7 +1,18 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AppActions } from './actions';
-import { catchError, filter, from, map, of, switchMap, take, tap } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  filter,
+  from,
+  map,
+  of,
+  switchMap,
+  take,
+  tap,
+  throttleTime,
+} from 'rxjs';
 import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
@@ -13,6 +24,9 @@ import { dispatchGpsPosition } from './utils/dispatch-gps-position';
 import { initPushNotifications } from './utils/init-push-notifications';
 import { Store } from '@ngrx/store';
 import { withUserFromAction } from './utils/with-user-from-action';
+import { isProfilePage } from './utils/is-profile-page';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { userId } from '../router/selectors';
 
 @Injectable()
 export class AppEffect {
@@ -21,6 +35,8 @@ export class AppEffect {
   private readonly api = inject(BiteTribeApiService);
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly store = inject(Store);
+
+  private readonly biteCreatorId = toSignal(this.store.select(userId));
 
   loadTotalNumberBites$ = createEffect(() => {
     return this.actions$.pipe(
@@ -156,7 +172,45 @@ export class AppEffect {
     () => {
       return this.actions$.pipe(
         ofType(AppActions.followUser),
-        tap(({ user }) => this.api.followUser(user)),
+        throttleTime(500),
+        tap(async ({ user }) => {
+          await this.api.followUser(user);
+
+          this.store.dispatch(AppActions.reloadProfileMetadata());
+        }),
+      );
+    },
+    { dispatch: false },
+  );
+
+  unfollowUser$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(AppActions.unfollowUser),
+        throttleTime(500),
+        tap(async ({ user }) => {
+          await this.api.unfollowUser(user);
+
+          this.store.dispatch(AppActions.reloadProfileMetadata());
+        }),
+      );
+    },
+    { dispatch: false },
+  );
+
+  fetchFollowMetadata$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(routerNavigatedAction, AppActions.reloadProfileMetadata),
+        isProfilePage(),
+        tap(async () => {
+          const userId: string =
+            this.biteCreatorId() ?? this.storeService.user()?.uid ?? '';
+
+          const metaData = await this.api.fetchFollowMetadata(userId);
+
+          this.store.dispatch(AppActions.loadedProfileMetadata(metaData));
+        }),
       );
     },
     { dispatch: false },

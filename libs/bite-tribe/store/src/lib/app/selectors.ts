@@ -20,14 +20,6 @@ export const isBitesLoading = createSelector(slice, (slice) => {
 
 export const publicUser = createSelector(slice, (slice) => slice?.profile);
 
-export const followerCount = createSelector(slice, (slice) => {
-  return slice.followedBy?.length || 0;
-});
-
-export const followingCount = createSelector(slice, (slice) => {
-  return slice.profile?.followers?.length || 0;
-});
-
 export const exchangeRates = createSelector(
   slice,
   (slice) => slice?.exchangeRates,
@@ -67,4 +59,9 @@ export const totalNumberBites = createSelector(
 export const totalNumberUsers = createSelector(
   slice,
   (state) => state?.totalNumberUsers || 0,
+);
+
+export const profileMeatadata = createSelector(
+  slice,
+  (state) => state?.profileMetadata,
 );

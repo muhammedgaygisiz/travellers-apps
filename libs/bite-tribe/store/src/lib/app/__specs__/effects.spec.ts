@@ -1,5 +1,5 @@
 import { TestScheduler } from 'rxjs/testing';
-import { map, Observable, of, pipe, UnaryFunction } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Platform } from '@ionic/angular';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
@@ -11,9 +11,9 @@ import { BiteTribeApiService } from 'bite-tribe/api';
 import type { PublicUser, Settings } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../../bite-tribe-store.service';
-import SpyInstance = jest.SpyInstance;
 import { Store } from '@ngrx/store';
 import { getEffectsMetadata } from '@ngrx/effects';
+import SpyInstance = jest.SpyInstance;
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
@@ -40,9 +40,11 @@ const Mock = {
   followUser: jest.fn(),
   getTotalNumberOfBites: jest.fn(),
   getTotalNumberOfUsers: jest.fn(),
+  unfollowUser: jest.fn(),
+  fetchFollowMetadata: jest.fn(),
 };
 
-describe('AppEffect', () => {
+describe(AppEffect.name, () => {
   let scheduler: TestScheduler;
   let actions$: Observable<any> = of({});
   let effects: AppEffect;
@@ -68,6 +70,7 @@ describe('AppEffect', () => {
     storeService = TestBed.inject(BiteTribeStoreService);
     store = TestBed.inject(MockStore);
 
+    jest.spyOn(storeService, 'user').mockReturnValue({ uid: '1' } as any);
     dispatchSpy = jest.spyOn(store, 'dispatch').mockImplementation();
   });
 
@@ -412,6 +415,53 @@ describe('AppEffect', () => {
       });
 
       expect(followUserSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('unfollowUser', () => {
+    let unfollowUserSpy: SpyInstance;
+
+    beforeEach(() => {
+      unfollowUserSpy = jest
+        .spyOn(apiService, 'unfollowUser')
+        .mockImplementation();
+    });
+
+    it('should call unfollowUser from Store Service', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        const user = { userId: 'user-id' } as PublicUser;
+        actions$ = cold('a', {
+          a: AppActions.unfollowUser({ user }),
+        });
+
+        expectObservable(effects.unfollowUser$);
+      });
+
+      expect(unfollowUserSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('fetchFollowMetadata$', () => {
+    let fetchFollowMetadataSpy: SpyInstance;
+
+    beforeEach(() => {
+      fetchFollowMetadataSpy = jest
+        .spyOn(apiService, 'fetchFollowMetadata')
+        .mockImplementation();
+    });
+
+    it('should call fetchFollowMetadataSpy from Api Service', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: routerNavigatedAction({
+            payload: { event: { urlAfterRedirects: '/profile/user-id' } },
+          } as any),
+        });
+
+        expectObservable(effects.fetchFollowMetadata$);
+      });
+
+      expect(fetchFollowMetadataSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

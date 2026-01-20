@@ -49,3 +49,6 @@ project(':capacitor-app').projectDir = new File('../../../node_modules/@capacito
 
 include ':capacitor-push-notifications'
 project(':capacitor-push-notifications').projectDir = new File('../../../node_modules/@capacitor/push-notifications/android')
+
+include ':capacitor-firebase-messaging'
+project(':capacitor-firebase-messaging').projectDir = new File('../../../node_modules/@capacitor-firebase/messaging/android')

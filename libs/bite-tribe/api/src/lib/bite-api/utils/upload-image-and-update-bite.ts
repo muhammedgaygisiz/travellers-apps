@@ -15,14 +15,10 @@ export const uploadImageAndUpdateBite = async (
     biteId,
   );
 
-  console.log('image uploaded to path:', imagePath);
-
-  const updatedBite = await updateBiteWithImagePathFromFirestorage(
+  await updateBiteWithImagePathFromFirestorage(
     imagePath,
     biteWithoutImage,
     clearBase64Image,
     biteId,
   );
-
-  console.log('updatedBite:', updatedBite);
 };

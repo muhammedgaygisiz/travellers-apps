@@ -18,6 +18,7 @@
     "@capacitor/keyboard": "../../node_modules/@capacitor/keyboard",
     "@capacitor/status-bar": "../../node_modules/@capacitor/status-bar",
     "@capacitor/app": "../../node_modules/@capacitor/app",
-    "@capacitor/push-notifications": "../../node_modules/@capacitor/push-notifications"
+    "@capacitor/push-notifications": "../../node_modules/@capacitor/push-notifications",
+    "@capacitor-firebase/messaging": "../../node_modules/@capacitor-firebase/messaging"
   }
 }

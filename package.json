@@ -41,6 +41,7 @@
     "@capacitor-firebase/authentication": "8.0.1",
     "@capacitor-firebase/crashlytics": "8.0.1",
     "@capacitor-firebase/firestore": "8.0.1",
+    "@capacitor-firebase/messaging": "8.0.0",
     "@capacitor-firebase/storage": "8.0.1",
     "@capacitor/app": "8.0.0",
     "@capacitor/app-launcher": "8.0.0",
@@ -187,6 +188,9 @@
       "firebase": "12.1.0"
     },
     "@capacitor-firebase/storage": {
+      "firebase": "12.1.0"
+    },
+    "@capacitor-firebase/messaging": {
       "firebase": "12.1.0"
     },
     "@typescript-eslint/eslint-plugin": {

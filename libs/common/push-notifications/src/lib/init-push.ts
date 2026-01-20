@@ -2,6 +2,7 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 
 const upsertToken = async (
   userUid: string,
@@ -42,21 +43,45 @@ const upsertToken = async (
   });
 };
 
+const getFcmToken = async (): Promise<string | null> => {
+  const platform = Capacitor.getPlatform();
+
+  try {
+    const { token } = await FirebaseMessaging.getToken();
+
+    if (!token || token.trim().length === 0) {
+      console.warn('Firebase Messaging returned empty token');
+      return null;
+    }
+    return token;
+  } catch (e) {
+    console.error(
+      'Failed to get FCM token for Firebase Messaging on platform:',
+      platform,
+      e,
+    );
+    return null;
+  }
+};
+
 export const initPush = async (
   platform: Platform,
   userUid: string | undefined,
 ): Promise<void> => {
   if (platform.is('capacitor')) {
-    console.log('INITIALIZING PUSH NOTIFICATIONS WITH USER UID:', userUid);
-
     if (!userUid) {
       return;
     }
 
-    PushNotifications.addListener('registration', async (token) => {
-      console.log('Push registration success, token: ' + token.value);
+    PushNotifications.addListener('registration', async () => {
+      const fcmToken = await getFcmToken();
 
-      await upsertToken(userUid, token.value);
+      if (!fcmToken) {
+        console.error('No FCM token available, cannot upsert push token');
+        return;
+      }
+
+      await upsertToken(userUid, fcmToken);
     });
 
     PushNotifications.addListener('registrationError', (error) => {
@@ -79,7 +104,6 @@ export const initPush = async (
 
     const permissions = await PushNotifications.requestPermissions();
 
-    console.log('Push notification permissions: ', permissions);
     if (permissions.receive !== 'granted') {
       return;
     }

@@ -1,4 +1,4 @@
-import { withUserFromAction } from './with-user-from-action';
+import { withUserFromAction } from '../with-user-from-action';
 import { TestScheduler } from 'rxjs/testing';
 import { createEffect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs';

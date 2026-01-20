@@ -13,6 +13,7 @@ import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import SpyInstance = jest.SpyInstance;
 import { Store } from '@ngrx/store';
+import { getEffectsMetadata } from '@ngrx/effects';
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
@@ -163,6 +164,12 @@ describe('AppEffect', () => {
   });
 
   describe('fetchGpsPosition$', () => {
+    it('should have dispatch false set', () => {
+      expect(
+        getEffectsMetadata(effects).fetchGpsPosition$?.dispatch,
+      ).toBeFalsy();
+    });
+
     it('should dispatch loadedGpsPosition on successful location fetch', () => {
       scheduler.run(({ cold, expectObservable }) => {
         const position = { coords: { latitude: 1, longitude: 2 } };

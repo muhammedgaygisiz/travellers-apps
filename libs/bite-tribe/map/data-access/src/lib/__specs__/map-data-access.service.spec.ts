@@ -151,5 +151,25 @@ describe('MapDataAccessService', () => {
         },
       ));
     });
+
+    describe('given no user id', () => {
+      beforeEach(inject(
+        [BiteTribeStoreService],
+        (storeService: BiteTribeStoreService) => {
+          storeService.userId$ = of('');
+        },
+      ));
+
+      it('should not call submitLikeOrDislikeClick', inject(
+        [MapDataAccessService],
+        (service: MapDataAccessService) => {
+          const likeClick = { likeType: 'like', biteId: '456' };
+
+          service.submitLikeClick(likeClick);
+
+          expect(submitLikeOrDislikeClickSpy).not.toHaveBeenCalled();
+        },
+      ));
+    });
   });
 });

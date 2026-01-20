@@ -12,7 +12,6 @@ import { SettingsApiService } from '../settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
 import { lastValueFrom, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { scheduler } from 'node:timers/promises';
 
 const assertEqual = (a: any, b: any): void => {
   expect(a).toEqual(b);

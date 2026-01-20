@@ -1,7 +1,18 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AppActions } from './actions';
-import { catchError, filter, from, map, of, switchMap, take, tap } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  filter,
+  from,
+  map,
+  of,
+  switchMap,
+  take,
+  tap,
+  throttleTime,
+} from 'rxjs';
 import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
@@ -161,6 +172,7 @@ export class AppEffect {
     () => {
       return this.actions$.pipe(
         ofType(AppActions.followUser),
+        throttleTime(500),
         tap(async ({ user }) => {
           await this.api.followUser(user);
 
@@ -175,6 +187,7 @@ export class AppEffect {
     () => {
       return this.actions$.pipe(
         ofType(AppActions.unfollowUser),
+        throttleTime(500),
         tap(async ({ user }) => {
           await this.api.unfollowUser(user);
 

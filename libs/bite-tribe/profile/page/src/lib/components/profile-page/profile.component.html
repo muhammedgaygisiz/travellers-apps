@@ -31,10 +31,13 @@
 
       <div class="header-column">
         <strong>Bites</strong>
-        @if (biteCount() > 10) {
-          <ion-badge class="bite-badge {{ badgeColor() }}"
-            >{{ biteCount() }}
+        @let calculatedBadgeColor = badgeColor();
+        @if (calculatedBadgeColor) {
+          <ion-badge class="bite-badge {{ calculatedBadgeColor }}">
+            {{ biteCount() }}
           </ion-badge>
+        } @else {
+          <span>{{ biteCount() }}</span>
         }
       </div>
       <div class="header-column">

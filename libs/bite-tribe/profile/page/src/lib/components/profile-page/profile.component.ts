@@ -29,7 +29,7 @@ const BADGE_CONFIG = [
 
 const getBadgeColor = (biteCount: number): string => {
   for (const config of BADGE_CONFIG) {
-    if (biteCount >= config.min && biteCount < config.max) {
+    if (config.min <= biteCount && biteCount < config.max) {
       return config.cssClassName;
     }
   }

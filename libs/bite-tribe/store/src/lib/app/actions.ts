@@ -1,5 +1,5 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import type { PublicUser, Settings } from 'model';
+import type { ProfileMetaData, PublicUser, Settings } from 'model';
 
 export const AppActions = createActionGroup({
   source: 'APP',
@@ -16,10 +16,13 @@ export const AppActions = createActionGroup({
     'Loaded settings from API': props<{ settings: Settings }>(),
     'Set public profile': props<{ profile: PublicUser }>(),
     'Follow user': props<{ user: PublicUser }>(),
+    'Unfollow user': props<{ user: PublicUser }>(),
     'Loaded exchange rates from API': props<{
       exchangeRates: Record<string, number>;
     }>(),
     'Loaded total number of bites': props<{ total: number }>(),
     'Loaded total number of users': props<{ total: number }>(),
+    'Loaded Profile metadata': props<ProfileMetaData>(),
+    'Reload Profile metadata': emptyProps(),
   },
 });

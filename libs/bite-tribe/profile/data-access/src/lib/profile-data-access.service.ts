@@ -21,20 +21,17 @@ export class ProfileDataAccessService {
     initialValue: [] as Bite[],
   });
 
-  followerCount = toSignal(this.storeService.followerCount$, {
-    initialValue: 0,
-  });
-
-  followingCount = toSignal(this.storeService.followingCount$, {
-    initialValue: 0,
-  });
-
   private bites = toSignal(this.storeService.bites$, {
     initialValue: [] as Bite[],
   });
+
   biteCreator = toSignal(this.storeService.biteCreator$);
+
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
+
   isPublicProfile = toSignal(this.storeService.isPublicProfile$);
+
+  profileMetadata = toSignal(this.storeService.profileMeatadata$);
 
   logout(): void {
     this.storeService.logout();
@@ -64,5 +61,9 @@ export class ProfileDataAccessService {
 
   submitFollowClick(user: PublicUser): void {
     this.storeService.followUser(user);
+  }
+
+  submitUnfollowClick(user: PublicUser): void {
+    this.storeService.unfollowUser(user);
   }
 }

@@ -10,18 +10,18 @@ class Mock {
   bitesByUser$ = of([]);
   publicUser$ = of(null);
   mybites$ = of([]);
-  followerCount$ = of(0);
-  followingCount$ = of(0);
   bites$ = of([]);
   biteCreator$ = of(null);
   userId$ = of('user-id');
   isPublicProfile$ = of(true);
-  logout = (): null => null;
-  removeLike = (): null => null;
-  submitLikeClick = (): null => null;
-  submitFollowClick = (): null => null;
-  savePublicProfile = (): null => null;
-  followUser = (): null => null;
+  profileMeatadata$ = of(true);
+  logout = jest.fn();
+  removeLike = jest.fn();
+  submitLikeClick = jest.fn();
+  submitFollowClick = jest.fn();
+  savePublicProfile = jest.fn();
+  followUser = jest.fn();
+  unfollowUser = jest.fn();
 }
 
 describe('ProfileDataAccessService', () => {
@@ -119,6 +119,18 @@ describe('ProfileDataAccessService', () => {
         const mockUser = { id: 'user-id', name: 'Test User' } as any;
         service.submitFollowClick(mockUser);
         expect(followUserSpy).toHaveBeenCalledWith(mockUser);
+      },
+    ));
+  });
+
+  describe('submitUnfollowClick', () => {
+    it('should call unfollowUser on storeService', inject(
+      [ProfileDataAccessService],
+      (service: ProfileDataAccessService) => {
+        const unfollowUserSpy = jest.spyOn(storeService, 'unfollowUser');
+        const mockUser = { id: 'user-id', name: 'Test User' } as any;
+        service.submitUnfollowClick(mockUser);
+        expect(unfollowUserSpy).toHaveBeenCalledWith(mockUser);
       },
     ));
   });

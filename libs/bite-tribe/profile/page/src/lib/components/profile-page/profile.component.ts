@@ -8,15 +8,17 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
+  IonAlert,
   IonAvatar,
   IonBadge,
   IonButton,
   IonContent,
   IonIcon,
 } from '@ionic/angular/standalone';
-import { Bite, PublicUser } from 'model';
+import { Bite, ProfileMetaData, PublicUser } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
+import { OverlayEventDetail } from '@ionic/core';
 
 const BADGE_CONFIG = [
   { min: 50, max: 100, cssClassName: 'green' },
@@ -27,13 +29,16 @@ const BADGE_CONFIG = [
 
 const getBadgeColor = (biteCount: number): string => {
   for (const config of BADGE_CONFIG) {
-    if (biteCount >= config.min && biteCount < config.max) {
+    if (config.min <= biteCount && biteCount < config.max) {
       return config.cssClassName;
     }
   }
 
   return '';
 };
+
+const UNFOLLOW = 'unfollow';
+const CANCEL = 'cancel';
 
 @Component({
   selector: 'profile-page',
@@ -48,14 +53,14 @@ const getBadgeColor = (biteCount: number): string => {
     BiteComponent,
     IonBadge,
     IonIcon,
+    IonAlert,
   ],
 })
 export class ProfileComponent {
   isAuthenticated = input(false);
   user = input<PublicUser>();
   bites = input<Bite[]>();
-  followerCount = input<number>(0);
-  followingCount = input<number>(0);
+  profileMetadata = input<ProfileMetaData>();
   userId = input<string>();
   subscriptionTier = input<number>(0);
 
@@ -70,6 +75,28 @@ export class ProfileComponent {
   readonly restaurantClick = output<Bite>();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
   readonly followButtonClick = output<PublicUser>();
+  readonly unfollowButtonClick = output<PublicUser>();
+
+  isOpen = signal(false);
+
+  confirmationButtons = [
+    {
+      text: 'Cancel',
+      role: CANCEL,
+    },
+    {
+      text: 'Yes, unfollow',
+      role: UNFOLLOW,
+    },
+  ];
+
+  followerCount = computed(() => {
+    return this.profileMetadata()?.followers;
+  });
+
+  followingCount = computed(() => {
+    return this.profileMetadata()?.following;
+  });
 
   biteCount = computed(() => {
     const bites = this.bites();
@@ -108,5 +135,26 @@ export class ProfileComponent {
     if (user) {
       this.followButtonClick.emit(user);
     }
+  }
+
+  unfollow(): void {
+    const user = this.user();
+    if (user) {
+      this.unfollowButtonClick.emit(user);
+    }
+  }
+
+  openConfirmationDialog(): void {
+    this.isOpen.set(true);
+  }
+
+  handleConfirmationDismiss(event: CustomEvent<OverlayEventDetail>): void {
+    const role = event.detail.role;
+
+    if (role === UNFOLLOW) {
+      this.unfollow();
+    }
+
+    this.isOpen.set(false);
   }
 }

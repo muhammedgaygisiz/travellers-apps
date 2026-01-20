@@ -1242,6 +1242,9 @@ PODS:
   - CapacitorFirebaseFirestore (8.0.1):
     - Capacitor
     - FirebaseFirestore (~> 12.7.0)
+  - CapacitorFirebaseMessaging (8.0.0):
+    - Capacitor
+    - FirebaseMessaging (~> 12.7.0)
   - CapacitorFirebaseStorage (8.0.1):
     - Capacitor
     - FirebaseStorage (~> 12.7.0)
@@ -1253,6 +1256,8 @@ PODS:
   - CapacitorKeyboard (8.0.0):
     - Capacitor
   - CapacitorPreferences (8.0.0):
+    - Capacitor
+  - CapacitorPushNotifications (8.0.0):
     - Capacitor
   - CapacitorSplashScreen (8.0.0):
     - Capacitor
@@ -1329,6 +1334,15 @@ PODS:
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - PromisesObjC (~> 2.4)
+  - FirebaseMessaging (12.7.0):
+    - FirebaseCore (~> 12.7.0)
+    - FirebaseInstallations (~> 12.7.0)
+    - GoogleDataTransport (~> 10.1)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/Reachability (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - nanopb (~> 3.30910.0)
   - FirebaseRemoteConfigInterop (12.7.0)
   - FirebaseSessions (12.7.0):
     - FirebaseCore (~> 12.7.0)
@@ -1517,11 +1531,13 @@ DEPENDENCIES:
   - "CapacitorFirebaseAuthentication/Google (from `../../../../node_modules/@capacitor-firebase/authentication`)"
   - "CapacitorFirebaseCrashlytics (from `../../../../node_modules/@capacitor-firebase/crashlytics`)"
   - "CapacitorFirebaseFirestore (from `../../../../node_modules/@capacitor-firebase/firestore`)"
+  - "CapacitorFirebaseMessaging (from `../../../../node_modules/@capacitor-firebase/messaging`)"
   - "CapacitorFirebaseStorage (from `../../../../node_modules/@capacitor-firebase/storage`)"
   - "CapacitorGeolocation (from `../../../../node_modules/@capacitor/geolocation`)"
   - "CapacitorHaptics (from `../../../../node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../../../node_modules/@capacitor/keyboard`)"
   - "CapacitorPreferences (from `../../../../node_modules/@capacitor/preferences`)"
+  - "CapacitorPushNotifications (from `../../../../node_modules/@capacitor/push-notifications`)"
   - "CapacitorSplashScreen (from `../../../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../../../node_modules/@capacitor/status-bar`)"
 
@@ -1542,6 +1558,7 @@ SPEC REPOS:
     - FirebaseFirestore
     - FirebaseFirestoreInternal
     - FirebaseInstallations
+    - FirebaseMessaging
     - FirebaseRemoteConfigInterop
     - FirebaseSessions
     - FirebaseSharedSwift
@@ -1583,6 +1600,8 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor-firebase/crashlytics"
   CapacitorFirebaseFirestore:
     :path: "../../../../node_modules/@capacitor-firebase/firestore"
+  CapacitorFirebaseMessaging:
+    :path: "../../../../node_modules/@capacitor-firebase/messaging"
   CapacitorFirebaseStorage:
     :path: "../../../../node_modules/@capacitor-firebase/storage"
   CapacitorGeolocation:
@@ -1593,6 +1612,8 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor/keyboard"
   CapacitorPreferences:
     :path: "../../../../node_modules/@capacitor/preferences"
+  CapacitorPushNotifications:
+    :path: "../../../../node_modules/@capacitor/push-notifications"
   CapacitorSplashScreen:
     :path: "../../../../node_modules/@capacitor/splash-screen"
   CapacitorStatusBar:
@@ -1613,11 +1634,13 @@ SPEC CHECKSUMS:
   CapacitorFirebaseAuthentication: cb5ddfd40d28ae8522b9af25741ba62eaa939501
   CapacitorFirebaseCrashlytics: 9498eaa61bdcc42971392747c221a407c38ddc5e
   CapacitorFirebaseFirestore: 7037e8a30f1ac9cb4c77ee629f115847dc74256f
+  CapacitorFirebaseMessaging: cd18e49885a34360561372c5bdb093cab4177ce2
   CapacitorFirebaseStorage: dd1182dfa6c5515db5bd19a6630da2becf4c88b1
   CapacitorGeolocation: 8a405e707de9aff6ac9eca7f408966a370f7ca33
   CapacitorHaptics: 2079d9fa04c5a71e18663b4722323c304c58245c
   CapacitorKeyboard: d7868c079a4d5277a3deca27a10a488fcbbb8b69
   CapacitorPreferences: 443fabe9670226200e595658a87ef0b1566716d4
+  CapacitorPushNotifications: 722c1528eabbefd355f47e373a4c6235d01e85e9
   CapacitorSplashScreen: 422880d7117605c30699eb4b21644b62db42e86c
   CapacitorStatusBar: 312e2e67928dfe9514c4a8916a1fd610552f5f35
   FirebaseAnalytics: e423129866107aeacf6010a280b9c9829f9ea50d
@@ -1631,6 +1654,7 @@ SPEC CHECKSUMS:
   FirebaseFirestore: 7a9554afcc2084cb03a50e447dfaa4d82dc00135
   FirebaseFirestoreInternal: 11f040c76de2d5f3ea81b15a63cd347199e11aed
   FirebaseInstallations: 6d05424a046b68ca146b4de4376f05b4e9262fc3
+  FirebaseMessaging: b5f7bdc62b91b6102015991fb7bc6fa75f643908
   FirebaseRemoteConfigInterop: 0bae7d21510b3a0a79af727961c4973aac585add
   FirebaseSessions: bc59e7d0ba90f96f40325fd1defbdec86ba26f20
   FirebaseSharedSwift: a652f2174ce29ce333d1f67df955499d2db009f6
@@ -1651,6 +1675,6 @@ SPEC CHECKSUMS:
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
 
-PODFILE CHECKSUM: c273a2ccf8715e1f2c41aa6f02a84e1986ebd958
+PODFILE CHECKSUM: 5d0dc1dd3cc55b5bfc1b02c48da7f59446747825
 
 COCOAPODS: 1.16.2

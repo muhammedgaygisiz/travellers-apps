@@ -3,11 +3,7 @@ import { BITE_COLLECTION } from './constants';
 import { toBite } from '../../utils/to-bite';
 import { Bite } from 'model';
 
-export const loadBitesByUser = async (user: {
-  uid: string;
-}): Promise<Bite[]> => {
-  const uid = user.uid;
-
+export const loadBitesByUser = async (uid: string): Promise<Bite[]> => {
   const result = await FirebaseFirestore.getCollection({
     reference: BITE_COLLECTION,
     compositeFilter: {

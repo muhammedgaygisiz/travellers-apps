@@ -2,13 +2,17 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AppActions } from './actions';
 import { catchError, filter, from, map, of, switchMap, take, tap } from 'rxjs';
-import { getCurrentPosition } from 'geolocation';
 import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { PATH } from 'utils';
+import { stopIfUserIsUndefined } from './utils/stop-if-user-is-undefined';
+import { dispatchGpsPosition } from './utils/dispatch-gps-position';
+import { initPushNotifications } from './utils/init-push-notifications';
+import { Store } from '@ngrx/store';
+import { withUserFromAction } from './utils/with-user-from-action';
 
 @Injectable()
 export class AppEffect {
@@ -16,6 +20,7 @@ export class AppEffect {
   private readonly platform = inject(Platform);
   private readonly api = inject(BiteTribeApiService);
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly store = inject(Store);
 
   loadTotalNumberBites$ = createEffect(() => {
     return this.actions$.pipe(
@@ -50,7 +55,7 @@ export class AppEffect {
   loadExchangeRatesFromApi$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),
-      filter((payload) => !!payload.user),
+      stopIfUserIsUndefined(),
       switchMap(() =>
         from(this.api.getExchangeRates()).pipe(
           map((exchangeRates) => {
@@ -64,41 +69,31 @@ export class AppEffect {
   loadPublicProfile$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),
-      filter((payload) => !!payload.user),
+      stopIfUserIsUndefined(),
       switchMap(() => this.api.publicProfile$.pipe(take(1))),
       map((profile) => AppActions.setPublicProfile({ profile })),
     );
   });
 
-  fetchGpsPosition$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(
-          fromAuth.AuthActions.loadedUser,
-          AppActions.fetchGPSPosition,
-          AppActions.reloadGPSPosition,
-        ),
-        filter((payload) => {
-          if (payload.type === fromAuth.AuthActions.loadedUser.type) {
-            return !!payload.user;
-          }
-          return true;
-        }),
-        switchMap(() =>
-          getCurrentPosition(this.platform).pipe(
-            map((currentPosition) =>
-              AppActions.loadedGPSPosition({ position: currentPosition }),
-            ),
-            catchError((error) => {
-              console.error(error);
+  initAfterLogin$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(fromAuth.AuthActions.loadedUser),
+        stopIfUserIsUndefined(),
+        dispatchGpsPosition(this.platform, this.store),
+        withUserFromAction(),
+        initPushNotifications(this.platform),
+      ),
+    { dispatch: false },
+  );
 
-              return of(AppActions.errorLoadingGPSPosition({ error }));
-            }),
-          ),
-        ),
-      );
-    },
-    { useEffectsErrorHandler: true },
+  fetchGpsPosition$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AppActions.fetchGPSPosition, AppActions.reloadGPSPosition),
+        dispatchGpsPosition(this.platform, this.store),
+      ),
+    { dispatch: false },
   );
 
   saveSettingsToFirestore$ = createEffect(
@@ -117,7 +112,7 @@ export class AppEffect {
     () => {
       return this.actions$.pipe(
         ofType(fromAuth.AuthActions.loadedUser),
-        filter((payload) => !!payload.user),
+        stopIfUserIsUndefined(),
         tap(() => {
           this.api.saveUserIfNotExisting();
         }),

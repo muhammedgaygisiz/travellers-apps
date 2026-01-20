@@ -105,9 +105,9 @@ describe(BiteApiService.name, () => {
 
   describe('loadBitesByUser', () => {
     it('should call loadBitesByUser', async () => {
-      await service.loadBitesByUser({ uid: '123' });
+      await service.loadBitesByUser('123');
 
-      expect(loadBitesByUser).toHaveBeenCalledWith({ uid: '123' });
+      expect(loadBitesByUser).toHaveBeenCalledWith('123');
     });
   });
 

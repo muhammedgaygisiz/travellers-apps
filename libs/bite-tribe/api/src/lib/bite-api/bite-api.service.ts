@@ -44,8 +44,8 @@ export class BiteApiService {
     return loadBitesByLocation(position);
   }
 
-  public async loadBitesByUser(user: { uid: string }): Promise<Bite[]> {
-    return loadBitesByUser(user);
+  public async loadBitesByUser(userUid: string): Promise<Bite[]> {
+    return loadBitesByUser(userUid);
   }
 
   public async saveNewBite(bite: Bite): Promise<Bite> {

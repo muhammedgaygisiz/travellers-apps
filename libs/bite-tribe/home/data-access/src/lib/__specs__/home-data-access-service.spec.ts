@@ -171,6 +171,26 @@ describe('HomeDataAccessService', () => {
         },
       ));
     });
+
+    describe('with no user id', () => {
+      beforeEach(inject(
+        [BiteTribeStoreService],
+        (storeService: BiteTribeStoreService) => {
+          storeService.userId$ = of('');
+        },
+      ));
+
+      it('should not call submitLikeOrDislikeClick', inject(
+        [HomeDataAccessService],
+        (service: HomeDataAccessService) => {
+          const likeClick = { likeType: 'like', biteId: '456' };
+
+          service.submitLikeClick(likeClick);
+
+          expect(submitLikeOrDislikeClickSpy).not.toHaveBeenCalled();
+        },
+      ));
+    });
   });
 
   describe('deleteBite', () => {

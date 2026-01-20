@@ -113,6 +113,32 @@ describe(BiteEffects.name, () => {
         );
       });
     });
+
+    describe('with no user id', () => {
+      beforeEach(() => {
+        jest.spyOn(storeService, 'user').mockReturnValue(null);
+      });
+
+      it('should return empty bites array', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: routerNavigatedAction({
+              payload: { event: { urlAfterRedirects: PATH.MY_PROFILE } } as any,
+            }),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BiteActions.loadedByUserFromAPI({ bites: [] }),
+          };
+
+          expectObservable(effects.loadBitesByCurrentUser$).toBe(
+            expected,
+            output,
+          );
+        });
+      });
+    });
   });
 
   describe('loadBitesForBiteCreatorProfile', () => {

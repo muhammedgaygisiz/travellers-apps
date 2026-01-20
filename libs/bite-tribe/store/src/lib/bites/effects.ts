@@ -43,7 +43,11 @@ export class BiteEffects {
       switchMap(() => {
         const user = this.storeService.user();
 
-        return from(this.api.bitesByUser(user));
+        if (!user) {
+          return of([]);
+        }
+
+        return from(this.api.bitesByUser(user?.uid));
       }),
       map((bites) => BiteActions.loadedByUserFromAPI({ bites })),
     );
@@ -62,7 +66,7 @@ export class BiteEffects {
           return of(BiteActions.noBitesForBiteCreatorProfile());
         }
 
-        return from(this.api.bitesByUser({ uid: biteCreatorId })).pipe(
+        return from(this.api.bitesByUser(biteCreatorId)).pipe(
           map((bites) => BiteActions.loadedByUserFromAPI({ bites })),
         );
       }),

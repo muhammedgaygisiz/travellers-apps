@@ -23,11 +23,12 @@ import {
   IonToggle,
 } from '@ionic/angular/standalone';
 import { CurrencySelectorComponent } from 'currency-selector';
-import { PublicUser, Settings, User } from 'model';
+import { PublicUser, Settings } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { currencyCodes } from 'utils';
+import { User } from '@capacitor-firebase/authentication';
 
 @Component({
   selector: 'settings',
@@ -51,7 +52,7 @@ import { currencyCodes } from 'utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PageSettings {
-  user = input<User>();
+  user = input<User | null | undefined>();
   publicUser = input<PublicUser>();
   settings = input<Settings>();
 

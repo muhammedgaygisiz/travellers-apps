@@ -35,7 +35,9 @@ const getGeoLocationFromNativePlatform = async (): Promise<Position> => {
   });
 };
 
-export const getCurrentPosition = (platform: Platform): Observable<any> => {
+export const getCurrentPosition = (
+  platform: Platform,
+): Observable<GeolocationPosition | Position> => {
   if (platform.is('capacitor')) {
     return from(getGeoLocationFromNativePlatform());
   }

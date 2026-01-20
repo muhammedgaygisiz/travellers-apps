@@ -1,0 +1,16 @@
+{
+  "name": "push-notifications",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/common/push-notifications/src",
+  "projectType": "library",
+  "tags": ["scope:common", "framework:ionic"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/common/push-notifications/jest.config.cts"
+      }
+    }
+  }
+}

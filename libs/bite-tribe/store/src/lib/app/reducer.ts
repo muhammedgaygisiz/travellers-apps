@@ -3,10 +3,16 @@ import { AppActions } from './actions';
 import { AppSlice } from './app-slice.model';
 import { BiteActions } from '../bites/actions';
 import { fromAuth } from 'ta-firestore';
+import { routerNavigatedAction, routerRequestAction } from '@ngrx/router-store';
+import { PATH } from 'utils';
 
+const CLEAN_PROFILE_METADATA = {
+  followers: 0,
+  following: 0,
+  isFollowedByMe: false,
+};
 const initialState: AppSlice = {
   profile: undefined,
-  followedBy: [],
   settings: {
     pushNotifications: false,
     emailUpdates: false,
@@ -21,6 +27,7 @@ const initialState: AppSlice = {
   errorLoadingGpsPosition: false,
   totalNumberBites: 0,
   totalNumberUsers: 0,
+  profileMetadata: CLEAN_PROFILE_METADATA,
 };
 
 export const reducer = createReducer<AppSlice>(
@@ -108,5 +115,15 @@ export const reducer = createReducer<AppSlice>(
   on(AppActions.loadedTotalNumberOfUsers, (state, { total }) => ({
     ...state,
     totalNumberUsers: total,
+  })),
+  on(AppActions.loadedProfileMetadata, (state, metadata) => ({
+    ...state,
+    profileMetadata: {
+      ...metadata,
+    },
+  })),
+  on(routerRequestAction, (state) => ({
+    ...state,
+    ...CLEAN_PROFILE_METADATA,
   })),
 );

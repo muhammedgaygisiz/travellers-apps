@@ -11,9 +11,7 @@ import {
   bites,
   bitesBySelectedBucketlist,
   bitesByUser,
-  bitesWithMetadata,
   cachedBite,
-  editingBite,
   mybites,
   nearbyRestaurants,
   sortedHomeBites,
@@ -45,8 +43,6 @@ import type {
 import {
   currency,
   exchangeRates,
-  followerCount,
-  followingCount,
   gpsPosition,
   hasErrorLoadingGpsPosition,
   isBitesLoading,
@@ -54,6 +50,7 @@ import {
   isPublicProfile,
   isReloadingHome,
   preferredCurrency,
+  profileMeatadata,
   publicUser,
   settings,
   totalNumberBites,
@@ -64,8 +61,8 @@ import {
   bucketlistSorting,
   homeDistance,
   homeFilters,
-  homeSorting,
   homeMaxPriceFilter,
+  homeSorting,
   myBitesSorting,
 } from './filtering-and-sorting/selectors';
 import { removeLike, saveLike } from './likes/actions';
@@ -108,8 +105,6 @@ export class BiteTribeStoreService implements StoreService {
   bite$ = this.store.select(bite);
   sortedMyBites$ = this.store.select(sortedMyBites);
   mybites$ = this.store.select(mybites);
-  followerCount$ = this.store.select(followerCount);
-  followingCount$ = this.store.select(followingCount);
   myBitesSorting$ = this.store.select(myBitesSorting);
   bitesByUser$ = this.store.select(bitesByUser);
   bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);
@@ -146,9 +141,11 @@ export class BiteTribeStoreService implements StoreService {
   homeDistance$ = this.store.select(homeDistance);
   totalNumberBites$ = this.store.select(totalNumberBites);
   totalNumberUsers$ = this.store.select(totalNumberUsers);
+  profileMeatadata$ = this.store.select(profileMeatadata);
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);
+  biteCreator = toSignal(this.biteCreator$);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());

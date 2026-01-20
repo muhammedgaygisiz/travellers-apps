@@ -39,11 +39,11 @@
       </div>
       <div class="header-column">
         <strong>Following</strong>
-        <span>{{ followerCount() }}</span>
+        <span>{{ followingCount() }}</span>
       </div>
       <div class="header-column">
         <strong>Followers</strong>
-        <span>{{ followingCount() }}</span>
+        <span>{{ followerCount() }}</span>
       </div>
     </div>
 
@@ -62,7 +62,15 @@
           <ion-button (click)="gotoEditProfile.emit()">Edit Profile</ion-button>
         }
         @if (isUnfollowedUser()) {
-          <ion-button fill="outline" (click)="onFollow()"> Follow </ion-button>
+          @if (this.profileMetadata()?.isFollowedByMe) {
+            <ion-button fill="outline" (click)="onUnfollow()">
+              Following
+            </ion-button>
+          } @else {
+            <ion-button fill="outline" (click)="onFollow()">
+              Follow
+            </ion-button>
+          }
         }
       </div>
     </h1>

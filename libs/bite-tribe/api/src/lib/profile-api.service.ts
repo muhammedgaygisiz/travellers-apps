@@ -12,7 +12,11 @@ import {
   switchMap,
   takeUntil,
 } from 'rxjs';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import {
+  DocumentData,
+  DocumentSnapshot,
+  FirebaseFirestore,
+} from '@capacitor-firebase/firestore';
 import type { Bite, PublicUser } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
@@ -230,5 +234,51 @@ export class ProfileApiService {
         reference: USERS_COLLECTION,
       }).then((result) => resolve(result.count));
     });
+  }
+
+  async fetchFollowers(
+    userId: string,
+  ): Promise<DocumentSnapshot<DocumentData>[]> {
+    return new Promise((resolve) => {
+      FirebaseFirestore.getCollection({
+        reference: `${USERS_COLLECTION}/${userId}/followers`,
+      })
+        .then((result) => {
+          resolve(result.snapshots);
+        })
+        .catch((error) => {
+          console.error('Error fetching followers:', error);
+          resolve([]);
+        });
+    });
+  }
+
+  async fetchFollowing(
+    userId: string,
+  ): Promise<DocumentSnapshot<DocumentData>[]> {
+    return new Promise((resolve) => {
+      FirebaseFirestore.getCollection({
+        reference: `${USERS_COLLECTION}/${userId}/following`,
+      })
+        .then((result) => {
+          resolve(result.snapshots);
+        })
+        .catch((error) => {
+          console.error('Error fetching following:', error);
+          resolve([]);
+        });
+    });
+  }
+
+  async isCurrentUserFollowing(
+    followers: DocumentSnapshot<DocumentData>[],
+  ): Promise<boolean> {
+    const user = await this.getUser();
+
+    if (!user?.uid) {
+      return false;
+    }
+
+    return followers.some((follower) => follower.id === user.uid);
   }
 }

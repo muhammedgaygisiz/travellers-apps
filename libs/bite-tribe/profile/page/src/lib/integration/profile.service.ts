@@ -18,8 +18,7 @@ export class ProfileService {
   bitesByUser = this.dataAccess.bitesByUser;
   myBites = this.dataAccess.myBites;
   isPublicProfile = this.dataAccess.isPublicProfile;
-  followerCount = this.dataAccess.followerCount;
-  followingCount = this.dataAccess.followingCount;
+  profileMetadata = this.dataAccess.profileMetadata;
 
   logout(): void {
     this.dataAccess.logout();

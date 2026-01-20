@@ -14,7 +14,7 @@ import {
   IonContent,
   IonIcon,
 } from '@ionic/angular/standalone';
-import { Bite, PublicUser } from 'model';
+import { Bite, ProfileMetaData, PublicUser } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
 
@@ -54,8 +54,7 @@ export class ProfileComponent {
   isAuthenticated = input(false);
   user = input<PublicUser>();
   bites = input<Bite[]>();
-  followerCount = input<number>(0);
-  followingCount = input<number>(0);
+  profileMetadata = input<ProfileMetaData>();
   userId = input<string>();
   subscriptionTier = input<number>(0);
 
@@ -70,6 +69,14 @@ export class ProfileComponent {
   readonly restaurantClick = output<Bite>();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
   readonly followButtonClick = output<PublicUser>();
+
+  followerCount = computed(() => {
+    return this.profileMetadata()?.followers;
+  });
+
+  followingCount = computed(() => {
+    return this.profileMetadata()?.following;
+  });
 
   biteCount = computed(() => {
     const bites = this.bites();
@@ -108,5 +115,9 @@ export class ProfileComponent {
     if (user) {
       this.followButtonClick.emit(user);
     }
+  }
+
+  protected onUnfollow(): void {
+    // TODO
   }
 }

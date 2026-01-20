@@ -7,7 +7,6 @@ export interface PublicUser {
   about?: string;
   public?: boolean;
   subscriptionTier?: number;
-  followers: string[];
 
   createdAt?: string;
   createdAtTimestamp?: number;

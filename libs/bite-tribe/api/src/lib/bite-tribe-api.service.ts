@@ -145,8 +145,8 @@ export class BiteTribeApiService {
     this.profileApiService.saveUserIfNotExisting();
   }
 
-  followUser(user: PublicUser): void {
-    this.profileApiService.followUser(user);
+  async followUser(user: PublicUser): Promise<void> {
+    await this.profileApiService.followUser(user);
   }
 
   async bitesByPosition(position: GeolocationPosition): Promise<Bite[]> {
@@ -201,5 +201,22 @@ export class BiteTribeApiService {
 
   getTotalNumberOfUsers(): Observable<number> {
     return from(this.profileApiService.getTotalNumberOfUsers());
+  }
+
+  async fetchFollowMetadata(userId: string): Promise<{
+    followers: number;
+    following: number;
+    isFollowedByMe: boolean;
+  }> {
+    const followers = await this.profileApiService.fetchFollowers(userId);
+    const following = await this.profileApiService.fetchFollowing(userId);
+    const isCurrentUserFollowing =
+      await this.profileApiService.isCurrentUserFollowing(followers);
+
+    return {
+      followers: followers.length ?? 0,
+      following: following.length ?? 0,
+      isFollowedByMe: isCurrentUserFollowing,
+    };
   }
 }

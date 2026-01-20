@@ -8,6 +8,7 @@ const db = admin.firestore();
 type Bite = {
   userId: string;
   name: string;
+  id: string;
 };
 
 type User = {
@@ -96,7 +97,7 @@ export const notifyFollowersOnNewBite = onDocumentCreated(
         },
         data: {
           type: 'NEW_BITE',
-          biteId: snap.id,
+          biteId: bite.id,
           authorUid: authorUid,
         },
       });

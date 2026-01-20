@@ -47,7 +47,9 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to your photo library so you can select and share food photos.</string>
 	<key>UIBackgroundModes</key>
-	<array/>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

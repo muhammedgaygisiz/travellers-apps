@@ -69,6 +69,12 @@ export const initPush = async (
   userUid: string | undefined,
 ): Promise<void> => {
   if (platform.is('capacitor')) {
+    try {
+      await PushNotifications.removeAllListeners();
+    } catch (error) {
+      console.warn('No previous PushNotifications listeners to remove');
+    }
+
     if (!userUid) {
       return;
     }

@@ -171,6 +171,20 @@ export class AppEffect {
     { dispatch: false },
   );
 
+  unfollowUser$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(AppActions.unfollowUser),
+        tap(async ({ user }) => {
+          await this.api.unfollowUser(user);
+
+          this.store.dispatch(AppActions.reloadProfileMetadata());
+        }),
+      );
+    },
+    { dispatch: false },
+  );
+
   fetchFollowMetadata$ = createEffect(
     () => {
       return this.actions$.pipe(

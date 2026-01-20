@@ -13,6 +13,6 @@ export const isProfilePage = (): UnaryFunction<
         return payload.event.urlAfterRedirects.includes(`/${PATH.PROFILE}/`);
       }
 
-      return false;
+      return true;
     }),
   );

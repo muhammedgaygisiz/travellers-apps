@@ -149,6 +149,10 @@ export class BiteTribeApiService {
     await this.profileApiService.followUser(user);
   }
 
+  async unfollowUser(user: PublicUser): Promise<void> {
+    await this.profileApiService.unfollowUser(user);
+  }
+
   async bitesByPosition(position: GeolocationPosition): Promise<Bite[]> {
     return this.biteApiService.loadBitesByLocation(position);
   }

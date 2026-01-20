@@ -63,8 +63,8 @@
         }
         @if (isUnfollowedUser()) {
           @if (this.profileMetadata()?.isFollowedByMe) {
-            <ion-button fill="outline" (click)="onUnfollow()">
-              Following
+            <ion-button fill="outline" (click)="openConfirmationDialog()">
+              Stop following
             </ion-button>
           } @else {
             <ion-button fill="outline" (click)="onFollow()">
@@ -105,3 +105,11 @@
     }
   </ion-content>
 </ta-page>
+
+<ion-alert
+  [isOpen]="isOpen()"
+  header="Stop following"
+  message="Are you sure you want to stop following {{ user()?.displayName }}?"
+  [buttons]="confirmationButtons"
+  (didDismiss)="handleConfirmationDismiss($event)"
+/>

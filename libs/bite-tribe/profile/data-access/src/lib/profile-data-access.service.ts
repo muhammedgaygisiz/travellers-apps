@@ -62,4 +62,8 @@ export class ProfileDataAccessService {
   submitFollowClick(user: PublicUser): void {
     this.storeService.followUser(user);
   }
+
+  submitUnfollowClick(user: PublicUser): void {
+    this.storeService.unfollowUser(user);
+  }
 }

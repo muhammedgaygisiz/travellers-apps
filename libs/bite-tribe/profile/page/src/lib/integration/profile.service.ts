@@ -84,4 +84,8 @@ export class ProfileService {
   followButtonClicked(user: PublicUser): void {
     this.dataAccess.submitFollowClick(user);
   }
+
+  unfollowButtonClicked(user: PublicUser): void {
+    this.dataAccess.submitUnfollowClick(user);
+  }
 }

@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
+  IonAlert,
   IonAvatar,
   IonBadge,
   IonButton,
@@ -17,6 +18,7 @@ import {
 import { Bite, ProfileMetaData, PublicUser } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
+import { OverlayEventDetail } from '@ionic/core';
 
 const BADGE_CONFIG = [
   { min: 50, max: 100, cssClassName: 'green' },
@@ -35,6 +37,9 @@ const getBadgeColor = (biteCount: number): string => {
   return '';
 };
 
+const UNFOLLOW = 'unfollow';
+const CANCEL = 'cancel';
+
 @Component({
   selector: 'profile-page',
   templateUrl: 'profile.component.html',
@@ -48,6 +53,7 @@ const getBadgeColor = (biteCount: number): string => {
     BiteComponent,
     IonBadge,
     IonIcon,
+    IonAlert,
   ],
 })
 export class ProfileComponent {
@@ -69,6 +75,20 @@ export class ProfileComponent {
   readonly restaurantClick = output<Bite>();
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
   readonly followButtonClick = output<PublicUser>();
+  readonly unfollowButtonClick = output<PublicUser>();
+
+  isOpen = signal(false);
+
+  confirmationButtons = [
+    {
+      text: 'Cancel',
+      role: CANCEL,
+    },
+    {
+      text: 'Yes, unfollow',
+      role: UNFOLLOW,
+    },
+  ];
 
   followerCount = computed(() => {
     return this.profileMetadata()?.followers;
@@ -117,7 +137,24 @@ export class ProfileComponent {
     }
   }
 
-  protected onUnfollow(): void {
-    // TODO
+  protected unfollow(): void {
+    const user = this.user();
+    if (user) {
+      this.unfollowButtonClick.emit(user);
+    }
+  }
+
+  openConfirmationDialog(): void {
+    this.isOpen.set(true);
+  }
+
+  handleConfirmationDismiss(event: CustomEvent<OverlayEventDetail>): void {
+    const role = event.detail.role;
+
+    if (role === UNFOLLOW) {
+      this.unfollow();
+    }
+
+    this.isOpen.set(false);
   }
 }

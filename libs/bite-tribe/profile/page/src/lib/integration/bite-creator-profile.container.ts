@@ -22,6 +22,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyProfile)="service.gotoMyProfileClicked()"
       (gotoEditProfile)="service.gotoEditProfile()"
       (followButtonClick)="service.followButtonClicked($event)"
+      (unfollowButtonClick)="service.unfollowButtonClicked($event)"
     />
   `,
   imports: [ProfileComponent],

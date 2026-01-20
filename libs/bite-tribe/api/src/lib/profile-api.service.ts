@@ -228,6 +228,27 @@ export class ProfileApiService {
     }
   }
 
+  async unfollowUser(user: PublicUser): Promise<void> {
+    try {
+      const currentUser = await this.getUser();
+
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+
+      await FirebaseFirestore.deleteDocument({
+        reference: `${USERS_COLLECTION}/${user.userId}/followers/${currentUser.uid}`,
+      });
+
+      await FirebaseFirestore.deleteDocument({
+        reference: `${USERS_COLLECTION}/${currentUser.uid}/following/${user.userId}`,
+      });
+    } catch (e) {
+      console.error('Error unfollowing user:', e);
+      this.errorHandler.handleError(e);
+    }
+  }
+
   getTotalNumberOfUsers(): Promise<number> {
     return new Promise((resolve) => {
       FirebaseFirestore.getCountFromServer({

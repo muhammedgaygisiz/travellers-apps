@@ -8,8 +8,8 @@ export const isProfilePage = (): UnaryFunction<
 > =>
   pipe(
     filter(({ type, payload }) => {
-      const isRouterNavitation = type === routerNavigatedAction.type;
-      if (isRouterNavitation) {
+      const isRouterNavigatedAction = type === routerNavigatedAction.type;
+      if (isRouterNavigatedAction) {
         const urlAfterRedirects = payload.event.urlAfterRedirects;
         return (
           urlAfterRedirects.includes(`/${PATH.PROFILE}/`) ||

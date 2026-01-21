@@ -161,7 +161,7 @@ export const notifyFollowersOnNewBite = onDocumentCreated(
     logger.info('--- Author exist:', authorSnap.exists);
     if (!authorSnap.exists) {
       logger.warn(
-        `--- Author does not exist: ${authorSnap.exists}, abortind notification`,
+        `--- Author does not exist: ${authorSnap.exists}, aborting notification`,
       );
       return;
     }

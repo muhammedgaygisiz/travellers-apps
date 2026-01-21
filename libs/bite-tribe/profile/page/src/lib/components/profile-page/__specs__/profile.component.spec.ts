@@ -67,6 +67,20 @@ describe('ProfileComponent', () => {
     });
   });
 
+  describe('displayedBites', () => {
+    it('should return the correct number of bites based on currentPage', () => {
+      const bitesArray = new Array(150).fill({}).map((_, i) => ({ id: i + 1 }));
+      compRef.setInput('bites', bitesArray);
+      component.currentPage.set(2);
+
+      const displayed = component.displayedBites();
+
+      expect(displayed.length).toBe(100);
+      expect(displayed[0].id).toBe(1);
+      expect(displayed[49].id).toBe(50);
+    });
+  });
+
   describe('badgeColor', () => {
     it('should return "green" if biteCount is between 50 and 99', () => {
       compRef.setInput('bites', new Array(75));
@@ -243,6 +257,24 @@ describe('ProfileComponent', () => {
 
       expect(unfollowSpy).not.toHaveBeenCalled();
       expect(component.isOpen()).toBe(false);
+    });
+  });
+
+  describe('onIonInfinite', () => {
+    it('should increment currentPage by 1 and complete the event', () => {
+      component.currentPage.set(1);
+      const completeSpy = jest.fn();
+
+      const event = {
+        target: {
+          complete: completeSpy,
+        },
+      } as any;
+
+      component.onIonInfinite(event);
+
+      expect(component.currentPage()).toBe(2);
+      expect(completeSpy).toHaveBeenCalled();
     });
   });
 });

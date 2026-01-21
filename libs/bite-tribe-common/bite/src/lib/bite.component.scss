@@ -15,7 +15,11 @@
 
     .card-content {
       .card-image {
+        border: var(--border-width) solid var(--ion-color-card-border);
+        border-bottom: unset;
+
         max-height: 220px;
+        min-height: 220px;
 
         img {
           width: 100%;

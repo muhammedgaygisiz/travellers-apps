@@ -7,3 +7,4 @@ coverage:
 ignore:
   - "apps/cv/**"
   - "**/*.stories.ts"
+  - "apps/bite-tribe-firebase/**"

@@ -36,6 +36,27 @@ describe('isProfilePage', () => {
       });
     });
 
+    describe('with my-profile in path', () => {
+      it('should return source event', () => {
+        scheduler.run(({ expectObservable, cold }) => {
+          const sourceEvent = routerNavigatedAction({
+            payload: { event: { urlAfterRedirects: '/my-profile' } },
+          } as any);
+          const action$ = cold('a', {
+            a: sourceEvent,
+          });
+
+          const effect$ = createEffect(() => {
+            return action$.pipe(ofType(routerNavigatedAction), isProfilePage());
+          });
+
+          expectObservable(effect$).toBe('a', {
+            a: sourceEvent,
+          });
+        });
+      });
+    });
+
     describe('without profile in path', () => {
       it('should not return any event', () => {
         scheduler.run(({ expectObservable, cold }) => {

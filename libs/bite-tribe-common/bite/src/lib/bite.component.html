@@ -3,13 +3,15 @@
 <ion-card>
   <div class="card-content">
     <div class="card-image">
-      <img
-        alt="Dish"
-        src="{{ biteData.imagePath || biteData?.image }}"
-        height="220"
-        loading="lazy"
-        (click)="biteClick.emit(biteData)"
-      />
+      @if (biteData.image || biteData.imagePath) {
+        <img
+          alt="Dish"
+          src="{{ biteData.imagePath || biteData?.image }}"
+          height="220"
+          loading="lazy"
+          (click)="biteClick.emit(biteData)"
+        />
+      }
     </div>
 
     <div class="card-details">

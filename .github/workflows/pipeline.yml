@@ -1,4 +1,4 @@
-name: Travellers Apps CI
+name: BiteTrice CI
 
 on:
   push:
@@ -101,7 +101,7 @@ jobs:
       - name: Run Unit Tests
         run: npm run nx -- affected -t test --coverage --coverageReporters=cobertura
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           directory: ./coverage # optional

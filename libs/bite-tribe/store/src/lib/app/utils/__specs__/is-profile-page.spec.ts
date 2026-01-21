@@ -54,5 +54,24 @@ describe('isProfilePage', () => {
         });
       });
     });
+
+    describe('given another action', () => {
+      it('should return the source event', () => {
+        scheduler.run(({ expectObservable, cold }) => {
+          const sourceEvent = { type: 'SOME_OTHER_ACTION' };
+          const action$ = cold('a', {
+            a: sourceEvent,
+          });
+
+          const effect$ = createEffect(() => {
+            return action$.pipe(isProfilePage());
+          });
+
+          expectObservable(effect$).toBe('a', {
+            a: sourceEvent,
+          });
+        });
+      });
+    });
   });
 });

@@ -1540,6 +1540,7 @@ DEPENDENCIES:
   - "CapacitorPushNotifications (from `../../../../node_modules/@capacitor/push-notifications`)"
   - "CapacitorSplashScreen (from `../../../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../../../node_modules/@capacitor/status-bar`)"
+  - FirebaseMessaging
 
 SPEC REPOS:
   trunk:
@@ -1675,6 +1676,6 @@ SPEC CHECKSUMS:
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
 
-PODFILE CHECKSUM: 5d0dc1dd3cc55b5bfc1b02c48da7f59446747825
+PODFILE CHECKSUM: 08d86752d928dfbb3ddb5f09e835303e34b40ca8
 
 COCOAPODS: 1.16.2

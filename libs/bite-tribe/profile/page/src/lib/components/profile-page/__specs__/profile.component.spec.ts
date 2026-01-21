@@ -38,6 +38,20 @@ describe('ProfileComponent', () => {
     });
   });
 
+  describe('followingCount', () => {
+    it('should return 0 if following is 0', () => {
+      compRef.setInput('profileMetadata', { following: 0 } as any);
+
+      expect(component.followingCount()).toBe(0);
+    });
+
+    it('should return the length of following if following is defined', () => {
+      compRef.setInput('profileMetadata', { following: 5 } as any);
+
+      expect(component.followingCount()).toBe(5);
+    });
+  });
+
   describe('biteCount', () => {
     it('should return 0 if bites is undefined', () => {
       compRef.setInput('bites', undefined);

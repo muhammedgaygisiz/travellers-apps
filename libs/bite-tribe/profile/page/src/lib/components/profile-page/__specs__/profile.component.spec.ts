@@ -68,16 +68,30 @@ describe('ProfileComponent', () => {
   });
 
   describe('displayedBites', () => {
-    it('should return the correct number of bites based on currentPage', () => {
-      const bitesArray = new Array(150).fill({}).map((_, i) => ({ id: i + 1 }));
-      compRef.setInput('bites', bitesArray);
-      component.currentPage.set(2);
+    describe('given bites', () => {
+      it('should return the correct number of bites based on currentPage', () => {
+        const bitesArray = new Array(150)
+          .fill({})
+          .map((_, i) => ({ id: i + 1 }));
+        compRef.setInput('bites', bitesArray);
+        component.currentPage.set(2);
 
-      const displayed = component.displayedBites();
+        const displayed = component.displayedBites();
 
-      expect(displayed.length).toBe(100);
-      expect(displayed[0].id).toBe(1);
-      expect(displayed[49].id).toBe(50);
+        expect(displayed.length).toBe(100);
+        expect(displayed[0].id).toBe(1);
+        expect(displayed[49].id).toBe(50);
+      });
+    });
+
+    describe('given bites are undefined', () => {
+      it('should return an empty array', () => {
+        compRef.setInput('bites', undefined);
+
+        const displayed = component.displayedBites();
+
+        expect(displayed.length).toBe(0);
+      });
     });
   });
 

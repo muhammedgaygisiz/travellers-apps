@@ -14,11 +14,14 @@ import {
   IonButton,
   IonContent,
   IonIcon,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
 } from '@ionic/angular/standalone';
 import { Bite, ProfileMetaData, PublicUser } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { OverlayEventDetail } from '@ionic/core';
+import { InfiniteScrollCustomEvent } from '@ionic/angular';
 
 const BADGE_CONFIG = [
   { min: 50, max: 100, cssClassName: 'green' },
@@ -40,6 +43,8 @@ const getBadgeColor = (biteCount: number): string => {
 const UNFOLLOW = 'unfollow';
 const CANCEL = 'cancel';
 
+const PAGE_SIZE = 50;
+
 @Component({
   selector: 'profile-page',
   templateUrl: 'profile.component.html',
@@ -54,6 +59,8 @@ const CANCEL = 'cancel';
     IonBadge,
     IonIcon,
     IonAlert,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
   ],
 })
 export class ProfileComponent {
@@ -78,6 +85,7 @@ export class ProfileComponent {
   readonly unfollowButtonClick = output<PublicUser>();
 
   isOpen = signal(false);
+  currentPage = signal<number>(1);
 
   confirmationButtons = [
     {
@@ -102,6 +110,15 @@ export class ProfileComponent {
     const bites = this.bites();
 
     return bites ? bites.length : 0;
+  });
+
+  displayedBites = computed(() => {
+    const allBites = this.bites() || [];
+    const page = this.currentPage();
+    const startIndex = 0;
+    const endIndex = page * PAGE_SIZE;
+
+    return allBites.slice(startIndex, endIndex);
   });
 
   badgeColor = computed(() => {
@@ -156,5 +173,10 @@ export class ProfileComponent {
     }
 
     this.isOpen.set(false);
+  }
+
+  onIonInfinite(event: InfiniteScrollCustomEvent): void {
+    this.currentPage.update((curr) => curr + 1);
+    event.target.complete();
   }
 }

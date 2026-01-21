@@ -88,7 +88,7 @@
     <div class="bites-section">
       <h2>Bites</h2>
 
-      @for (bite of bites(); track bite.id) {
+      @for (bite of displayedBites(); track bite.id) {
         <bt-bite
           [bite]="bite"
           [userId]="currentUserId"
@@ -98,6 +98,10 @@
           (likeButtonClick)="likeButtonClick.emit($event)"
         />
       }
+
+      <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
+        <ion-infinite-scroll-content />
+      </ion-infinite-scroll>
     </div>
 
     <!-- Show a message when no user data is available -->

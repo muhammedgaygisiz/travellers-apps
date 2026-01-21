@@ -209,7 +209,7 @@ export class BiteTribeHomeComponent {
 
   onIonInfinite(event: InfiniteScrollCustomEvent): void {
     if (this.hasMore()) {
-      this.currentPage.set(this.currentPage() + 1);
+      this.currentPage.update((curr) => curr + 1);
     }
 
     event.target.complete();

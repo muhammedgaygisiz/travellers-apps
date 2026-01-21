@@ -1,0 +1,9 @@
+# file: `codecov.yml`
+coverage:
+  status:
+    project: yes
+    patch: yes
+
+ignore:
+  - "apps/cv/**"
+  - "**/*.stories.ts"

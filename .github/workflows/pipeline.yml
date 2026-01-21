@@ -109,7 +109,6 @@ jobs:
           name: codecov-umbrella # optional
           fail_ci_if_error: false # optional (default = false)
           verbose: false # optional (default = false)
-          gcov_ignore: "apps/cv/**"
 
   #build-storybooks:
   #  runs-on: ubuntu-latest

@@ -15,19 +15,7 @@ export default {
 
 type Story = StoryObj<CardComponent>;
 
-export const Empty: Story = {
-  render: () => ({
-    template: `
-      <ta-card>
-        <div class="ion-margin">
-          Cart Content has to take care of its own margin
-        </div>
-      </ta-card>
-    `,
-  }),
-};
-
-export const Primary: Story = {
+export const Example: Story = {
   args: {
     entry: {
       id: 'some-id',

@@ -10,7 +10,11 @@ export const isProfilePage = (): UnaryFunction<
     filter(({ type, payload }) => {
       const isRouterNavitation = type === routerNavigatedAction.type;
       if (isRouterNavitation) {
-        return payload.event.urlAfterRedirects.includes(`/${PATH.PROFILE}/`);
+        const urlAfterRedirects = payload.event.urlAfterRedirects;
+        return (
+          urlAfterRedirects.includes(`/${PATH.PROFILE}/`) ||
+          urlAfterRedirects === `/${PATH.MY_PROFILE}`
+        );
       }
 
       return true;

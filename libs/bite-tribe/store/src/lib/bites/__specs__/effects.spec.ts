@@ -6,7 +6,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BiteEffects } from '../effects';
 import { BiteActions } from '../actions';
-import type { Bite } from 'model';
+import type { Bite, PublicUser } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { bite } from '../selectors';
 import { AppActions } from '../../app/actions';
@@ -441,16 +441,12 @@ describe(BiteEffects.name, () => {
 
   describe('loadUserFromBite$', () => {
     let getUserByBiteIdSpy: SpyInstance;
-    const BITE_CREATOR_MOCK = {
-      snapshot: {
-        data: {} as any,
-      },
-    } as any;
+    const BITE_CREATOR_MOCK = {} as PublicUser;
 
     beforeEach(() => {
       getUserByBiteIdSpy = jest
         .spyOn(apiService, 'getUserByBiteId')
-        .mockReturnValue(of(BITE_CREATOR_MOCK));
+        .mockReturnValue(of(BITE_CREATOR_MOCK) as any);
     });
 
     it('should do nothing on non-bite url', () => {
@@ -467,7 +463,7 @@ describe(BiteEffects.name, () => {
     });
 
     it('should return noPublicCreatorForBite on missing public creator', () => {
-      getUserByBiteIdSpy.mockReturnValue(of({ snapshot: undefined }));
+      getUserByBiteIdSpy.mockReturnValue(of(undefined));
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: routerNavigatedAction({
@@ -496,7 +492,7 @@ describe(BiteEffects.name, () => {
         const expected = 'a';
         const output = {
           a: BiteActions.loadedBiteCreator({
-            biteCreator: BITE_CREATOR_MOCK.snapshot.data,
+            biteCreator: BITE_CREATOR_MOCK,
           }),
         };
 

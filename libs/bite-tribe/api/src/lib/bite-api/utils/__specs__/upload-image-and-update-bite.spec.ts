@@ -4,14 +4,14 @@ import { updateBiteWithImagePathFromFirestorage } from '../update-bite-with-imag
 import { uploadBase64ToFirebaseStorage } from '../upload-base64-to-firebase-storage';
 
 jest.mock('../upload-base64-to-firebase-storage', () => ({
-  uploadImageToFirebaseStorage: jest.fn(),
+  uploadBase64ToFirebaseStorage: jest.fn(),
 }));
 
 jest.mock('../update-bite-with-image-path-from-firestorage', () => ({
   updateBiteWithImagePathFromFirestorage: jest.fn(),
 }));
 
-describe('uploadImageAndUpdateBite', () => {
+describe(uploadImageAndUpdateBite.name, () => {
   it('should upload image and update bite', async () => {
     await uploadImageAndUpdateBite(true, 'base64', 'biteId', {} as Bite);
 

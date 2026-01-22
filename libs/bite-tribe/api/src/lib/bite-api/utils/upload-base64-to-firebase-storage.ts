@@ -1,6 +1,6 @@
 import { dataUrlToBlob, guessExtFromContentType } from 'utils';
 import { BITE_COLLECTION } from './constants';
-import { uploadBlobToFirebaseStorage } from './uploadBlobToFirebaseStorage';
+import { uploadBlobToFirebasestorage } from './upload-blob-to-firebasestorage';
 
 export const uploadBase64ToFirebaseStorage = async (
   isWeb: boolean,
@@ -11,7 +11,7 @@ export const uploadBase64ToFirebaseStorage = async (
   const { blob, contentType } = await dataUrlToBlob(base64);
   const ext = guessExtFromContentType(contentType);
 
-  return await uploadBlobToFirebaseStorage(
+  return uploadBlobToFirebasestorage(
     collection,
     docId,
     ext,

@@ -23,7 +23,7 @@ const uploadToFirebase = (
   });
 };
 
-export const uploadBlobToFirebaseStorage = async (
+export const uploadBlobToFirebasestorage = async (
   collection: string,
   docId: string,
   ext: string,

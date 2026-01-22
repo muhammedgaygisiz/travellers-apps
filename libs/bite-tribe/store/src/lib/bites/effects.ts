@@ -150,7 +150,9 @@ export class BiteEffects {
       switchMap(() => {
         const bite = this.bite();
 
-        return from(this.api.getUserByBiteId(bite));
+        return from(this.api.getUserByBiteId(bite)).pipe(
+          catchError(() => of(undefined)),
+        );
       }),
       map((biteCreator) => {
         if (biteCreator) {

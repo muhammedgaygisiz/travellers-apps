@@ -17,10 +17,8 @@ import type { Bite, PublicUser } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { toPublicUser } from './utils/to-public-user';
 import { isIdpAvatarUrl } from './utils/is-idp-avatar-url';
-import { uploadBase64ToFirebaseStorage } from './bite-api/utils/upload-base64-to-firebase-storage';
 import { Platform } from '@ionic/angular';
-import { toBase64 } from './utils/to-base-64';
-import { uploadBlobToFirebaseStorage } from './bite-api/utils/uploadBlobToFirebaseStorage';
+import { uploadBlobToFirebasestorage } from './bite-api/utils/upload-blob-to-firebasestorage';
 import { FirebaseStorage } from '@capacitor-firebase/storage';
 
 const USERS_COLLECTION = 'users';
@@ -176,8 +174,6 @@ export class ProfileApiService {
       this.errorHandler.handleError(error);
       throw error;
     }
-
-    return Promise.resolve();
   }
 
   async saveUserIfNotExisting(): Promise<void> {
@@ -346,7 +342,7 @@ export class ProfileApiService {
     const blob = await res.blob();
     const extension = avatarUrl.split('.').pop() || 'jpg';
     const contentType = blob.type || `image/${extension}`;
-    const path = await uploadBlobToFirebaseStorage(
+    const path = await uploadBlobToFirebasestorage(
       USERS_COLLECTION,
       user.userId,
       extension,

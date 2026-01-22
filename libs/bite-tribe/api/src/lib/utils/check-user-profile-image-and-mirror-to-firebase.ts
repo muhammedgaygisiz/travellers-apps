@@ -37,7 +37,7 @@ const mirrorUserProfileImage = async (
   });
 };
 
-export const checkAndMirrorUserProfileImage = (
+export const checkUserProfileImageAndMirrorToFirebase = (
   user: PublicUser,
   isWeb: boolean,
 ): Promise<PublicUser> => {

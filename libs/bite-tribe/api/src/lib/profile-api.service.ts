@@ -20,7 +20,7 @@ import { isIdpAvatarUrl } from './utils/is-idp-avatar-url';
 import { Platform } from '@ionic/angular';
 import { uploadBlobToFirebasestorage } from './bite-api/utils/upload-blob-to-firebasestorage';
 import { FirebaseStorage } from '@capacitor-firebase/storage';
-import { checkAndMirrorUserProfileImage } from './utils/check-user-profile-image-and-mirror-to-firebase';
+import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
 import { USERS_COLLECTION } from './utils/user-collection-key';
 
 @Injectable({ providedIn: 'root' })
@@ -161,7 +161,7 @@ export class ProfileApiService {
       });
       const user = toPublicUser(result.snapshot);
 
-      const updatedUser = await checkAndMirrorUserProfileImage(
+      const updatedUser = await checkUserProfileImageAndMirrorToFirebase(
         user,
         this.isWeb(),
       );

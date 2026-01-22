@@ -150,13 +150,11 @@ export class BiteEffects {
       switchMap(() => {
         const bite = this.bite();
 
-        return this.api.getUserByBiteId(bite);
+        return from(this.api.getUserByBiteId(bite));
       }),
       map((biteCreator) => {
-        if (biteCreator?.snapshot?.data) {
-          return BiteActions.loadedBiteCreator({
-            biteCreator: biteCreator?.snapshot?.data,
-          });
+        if (biteCreator) {
+          return BiteActions.loadedBiteCreator({ biteCreator });
         }
 
         return BiteActions.noPublicCreatorForBite();

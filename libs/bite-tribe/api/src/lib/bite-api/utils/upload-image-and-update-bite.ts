@@ -1,5 +1,5 @@
 import { Bite } from 'model';
-import { uploadImageToFirebaseStorage } from './upload-image-to-firebasestorage';
+import { uploadBase64ToFirebaseStorage } from './upload-base64-to-firebase-storage';
 import { updateBiteWithImagePathFromFirestorage } from './update-bite-with-image-path-from-firestorage';
 
 export const uploadImageAndUpdateBite = async (
@@ -9,7 +9,7 @@ export const uploadImageAndUpdateBite = async (
   biteWithoutImage?: Omit<Bite, 'image'>,
   clearBase64Image = false,
 ): Promise<void> => {
-  const imagePath = await uploadImageToFirebaseStorage(
+  const imagePath = await uploadBase64ToFirebaseStorage(
     isWeb,
     imageBase64,
     biteId,

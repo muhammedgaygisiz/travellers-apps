@@ -1,10 +1,6 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
-import {
-  DocumentData,
-  DocumentSnapshot,
-  FirebaseFirestore,
-} from '@capacitor-firebase/firestore';
+import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite, Bucketlist } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { Platform } from '@ionic/angular';

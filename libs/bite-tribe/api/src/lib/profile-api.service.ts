@@ -1,11 +1,7 @@
-import { ErrorHandler, inject, Injectable } from '@angular/core';
+import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import {
   BehaviorSubject,
-  catchError,
-  from,
-  Observable,
-  of,
   skip,
   skipWhile,
   Subject,
@@ -19,6 +15,13 @@ import {
 } from '@capacitor-firebase/firestore';
 import type { Bite, PublicUser } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
+import { toPublicUser } from './utils/to-public-user';
+import { isIdpAvatarUrl } from './utils/is-idp-avatar-url';
+import { uploadBase64ToFirebaseStorage } from './bite-api/utils/upload-base64-to-firebase-storage';
+import { Platform } from '@ionic/angular';
+import { toBase64 } from './utils/to-base-64';
+import { uploadBlobToFirebaseStorage } from './bite-api/utils/uploadBlobToFirebaseStorage';
+import { FirebaseStorage } from '@capacitor-firebase/storage';
 
 const USERS_COLLECTION = 'users';
 
@@ -26,8 +29,10 @@ const USERS_COLLECTION = 'users';
 export class ProfileApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
-
+  private readonly platform = inject(Platform);
   private readonly profileChannel$ = new BehaviorSubject<any>(null);
+
+  isWeb = signal(!this.platform.is('hybrid'));
 
   private readonly stopped$ = new Subject<void>();
   profileCallbackId = '';
@@ -146,22 +151,33 @@ export class ProfileApiService {
     }
   }
 
-  getUserByBiteId(bite: Bite | undefined): Observable<any> {
+  async getUserByBiteId(bite: Bite | undefined): Promise<PublicUser | void> {
     if (!bite?.userId) {
-      return of();
+      return Promise.resolve();
     }
 
-    return from(
-      FirebaseFirestore.getDocument({
-        reference: `${USERS_COLLECTION}/${bite.userId}`,
-      }),
-    ).pipe(
-      catchError((error) => {
-        console.error('Error fetching user by bite ID:', error);
-        this.errorHandler.handleError(error);
-        throw new Error(error);
-      }),
-    );
+    try {
+      const reference = `${USERS_COLLECTION}/${bite.userId}`;
+      const result = await FirebaseFirestore.getDocument({
+        reference,
+      });
+      const user = toPublicUser(result.snapshot);
+
+      const updatedUser = await this.checkAndMirrorUserProfileImage(user);
+
+      await FirebaseFirestore.setDocument({
+        reference,
+        data: updatedUser,
+      });
+
+      return Promise.resolve(updatedUser);
+    } catch (error) {
+      console.error('Error fetching user by bite ID:', error);
+      this.errorHandler.handleError(error);
+      throw error;
+    }
+
+    return Promise.resolve();
   }
 
   async saveUserIfNotExisting(): Promise<void> {
@@ -302,5 +318,49 @@ export class ProfileApiService {
     }
 
     return followers.some((follower) => follower.id === user.uid);
+  }
+
+  private checkAndMirrorUserProfileImage(
+    user: PublicUser,
+  ): Promise<PublicUser> {
+    if (!user.photoUrl) {
+      return Promise.resolve(user);
+    }
+
+    if (isIdpAvatarUrl(user.photoUrl)) {
+      return this.mirrorUserProfileImage(user);
+    }
+
+    return Promise.resolve(user);
+  }
+
+  private async mirrorUserProfileImage(user: PublicUser): Promise<PublicUser> {
+    const avatarUrl = user.photoUrl;
+
+    const res = await fetch(avatarUrl, { cache: 'no-cache' });
+
+    if (!res.ok) {
+      return Promise.resolve(user);
+    }
+
+    const blob = await res.blob();
+    const extension = avatarUrl.split('.').pop() || 'jpg';
+    const contentType = blob.type || `image/${extension}`;
+    const path = await uploadBlobToFirebaseStorage(
+      USERS_COLLECTION,
+      user.userId,
+      extension,
+      blob,
+      contentType,
+      this.isWeb(),
+    );
+
+    const getDownloadUrlResult = await FirebaseStorage.getDownloadUrl({ path });
+    const photoUrl = getDownloadUrlResult.downloadUrl;
+
+    return Promise.resolve({
+      ...user,
+      photoUrl,
+    });
   }
 }

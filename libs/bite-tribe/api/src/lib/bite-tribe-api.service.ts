@@ -117,7 +117,7 @@ export class BiteTribeApiService {
     return this.bucketlistApiService.saveBiteIdToBucketList(params);
   }
 
-  getUserByBiteId(bite: Bite | undefined): Observable<any> {
+  async getUserByBiteId(bite: Bite | undefined): Promise<PublicUser | void> {
     return this.profileApiService.getUserByBiteId(bite);
   }
 

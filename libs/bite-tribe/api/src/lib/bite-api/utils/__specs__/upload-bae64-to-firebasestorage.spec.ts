@@ -1,4 +1,4 @@
-import { uploadImageToFirebaseStorage } from '../upload-image-to-firebasestorage';
+import { uploadBase64ToFirebaseStorage } from '../upload-base64-to-firebase-storage';
 import { FirebaseStorage } from '@capacitor-firebase/storage';
 
 jest.mock('../write-blob-to-file-system', () => ({
@@ -15,7 +15,7 @@ jest.mock('@capacitor-firebase/storage', () => ({
   },
 }));
 
-describe('uploadImageToFirebaseStorage', () => {
+describe(uploadBase64ToFirebaseStorage.name, () => {
   describe('given web environment', () => {
     let uploadFileSpy: jest.SpyInstance;
 
@@ -24,7 +24,7 @@ describe('uploadImageToFirebaseStorage', () => {
     });
 
     it('should upload image using web method', async () => {
-      await uploadImageToFirebaseStorage(
+      await uploadBase64ToFirebaseStorage(
         true,
         'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
         'bite123',
@@ -52,7 +52,7 @@ describe('uploadImageToFirebaseStorage', () => {
 
       it('should throw an error', async () => {
         await expect(
-          uploadImageToFirebaseStorage(
+          uploadBase64ToFirebaseStorage(
             true,
             'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
             'bite123',
@@ -71,7 +71,7 @@ describe('uploadImageToFirebaseStorage', () => {
       it('should not resolve or reject the upload promise', async () => {
         // Since the upload promise neither resolves nor rejects,
         // we can test this by setting a timeout and expecting the promise to still be pending.
-        const uploadPromise = uploadImageToFirebaseStorage(
+        const uploadPromise = uploadBase64ToFirebaseStorage(
           true,
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
           'bite123',
@@ -102,7 +102,7 @@ describe('uploadImageToFirebaseStorage', () => {
     });
 
     it('should upload image using native method', async () => {
-      await uploadImageToFirebaseStorage(
+      await uploadBase64ToFirebaseStorage(
         false,
         'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD',
         'bite456',

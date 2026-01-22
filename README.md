@@ -35,7 +35,7 @@ nx serve bite-tribe
 ## Start firebase emulators for local development
 
 ```
-nx serve firebase-simulator
+nx firebase-serve bite-tribe-firebase
 ```
 
 # Howto setup a new page
@@ -255,3 +255,21 @@ or for Android
 ```
 nx doctor bite-tribe-android
 ```
+
+# Firebase Setup
+
+To setup firebase emulators for local development, following steps are required:
+
+In the root of the app, in `apps/bite-tribe/.env`, set the following line:
+
+```
+NX_APP_BITE_TRIBE_IS_DEV=true
+```
+
+Then, run the firebase emulators via:
+
+```
+nx firebase-serve bite-tribe-firebase
+```
+
+This will start the firebase emulators.

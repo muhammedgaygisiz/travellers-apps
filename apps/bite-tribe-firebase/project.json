@@ -1,0 +1,35 @@
+{
+  "name": "bite-tribe-firebase",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/bite-tribe-firebase",
+  "targets": {
+    "firebase-serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase",
+        "command": "firebase emulators:start --only auth,firestore,storage,functions --import .firebase-export"
+      }
+    },
+    "firebase-record": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase",
+        "command": "firebase emulators:start --only auth,firestore,storage --import .firebase-export --export-on-exit .firebase-export"
+      }
+    },
+    "firebase-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase/functions",
+        "command": "npm run build"
+      }
+    },
+    "firebase-deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase/functions",
+        "command": "npm run deploy"
+      }
+    }
+  }
+}

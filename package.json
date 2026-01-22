@@ -12,7 +12,7 @@
     "loki": "nx loki",
     "start": "nx serve",
     "build": "nx build",
-    "build:storybook": "npm run nxgraph-html && nx run storybook-host:build",
+    "build:storybook": "npm run nxgraph-html && nx run storybook-host:build-storybook",
     "test": "nx affected --base=develop -t test --parallel --coverage --coverageReporters=text",
     "pwa-asset-generator": "pwa-asset-generator",
     "storybook": "npm run nxgraph-html && nx storybook storybook-host",

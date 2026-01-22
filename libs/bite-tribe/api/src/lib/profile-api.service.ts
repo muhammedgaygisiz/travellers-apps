@@ -20,8 +20,8 @@ import { isIdpAvatarUrl } from './utils/is-idp-avatar-url';
 import { Platform } from '@ionic/angular';
 import { uploadBlobToFirebasestorage } from './bite-api/utils/upload-blob-to-firebasestorage';
 import { FirebaseStorage } from '@capacitor-firebase/storage';
-
-const USERS_COLLECTION = 'users';
+import { checkAndMirrorUserProfileImage } from './utils/check-user-profile-image-and-mirror-to-firebase';
+import { USERS_COLLECTION } from './utils/user-collection-key';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileApiService {
@@ -161,7 +161,10 @@ export class ProfileApiService {
       });
       const user = toPublicUser(result.snapshot);
 
-      const updatedUser = await this.checkAndMirrorUserProfileImage(user);
+      const updatedUser = await checkAndMirrorUserProfileImage(
+        user,
+        this.isWeb(),
+      );
 
       await FirebaseFirestore.setDocument({
         reference,
@@ -314,49 +317,5 @@ export class ProfileApiService {
     }
 
     return followers.some((follower) => follower.id === user.uid);
-  }
-
-  private checkAndMirrorUserProfileImage(
-    user: PublicUser,
-  ): Promise<PublicUser> {
-    if (!user.photoUrl) {
-      return Promise.resolve(user);
-    }
-
-    if (isIdpAvatarUrl(user.photoUrl)) {
-      return this.mirrorUserProfileImage(user);
-    }
-
-    return Promise.resolve(user);
-  }
-
-  private async mirrorUserProfileImage(user: PublicUser): Promise<PublicUser> {
-    const avatarUrl = user.photoUrl;
-
-    const res = await fetch(avatarUrl, { cache: 'no-cache' });
-
-    if (!res.ok) {
-      return Promise.resolve(user);
-    }
-
-    const blob = await res.blob();
-    const extension = avatarUrl.split('.').pop() || 'jpg';
-    const contentType = blob.type || `image/${extension}`;
-    const path = await uploadBlobToFirebasestorage(
-      USERS_COLLECTION,
-      user.userId,
-      extension,
-      blob,
-      contentType,
-      this.isWeb(),
-    );
-
-    const getDownloadUrlResult = await FirebaseStorage.getDownloadUrl({ path });
-    const photoUrl = getDownloadUrlResult.downloadUrl;
-
-    return Promise.resolve({
-      ...user,
-      photoUrl,
-    });
   }
 }

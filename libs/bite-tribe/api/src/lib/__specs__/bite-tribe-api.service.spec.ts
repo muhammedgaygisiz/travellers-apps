@@ -396,7 +396,7 @@ describe(BiteTribeApiService.name, () => {
       (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
         const getUserByBiteIdSpy = jest
           .spyOn(profileApiService, 'getUserByBiteId')
-          .mockReturnValue(of(undefined));
+          .mockReturnValue(of(undefined) as any);
         const bite = { id: 'bite-id' } as any;
         service.getUserByBiteId(bite);
         expect(getUserByBiteIdSpy).toHaveBeenCalledWith(bite);

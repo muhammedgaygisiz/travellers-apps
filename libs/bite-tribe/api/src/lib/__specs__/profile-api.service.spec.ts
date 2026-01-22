@@ -1,7 +1,7 @@
 import { ProfileApiService } from '../profile-api.service';
 import { AuthService } from 'ta-firestore';
 import { inject, TestBed } from '@angular/core/testing';
-import { isEmpty, lastValueFrom, of } from 'rxjs';
+import { from, lastValueFrom, of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { PublicUser } from 'model';
 import { TestScheduler } from 'rxjs/testing';
@@ -284,9 +284,9 @@ describe(ProfileApiService.name, () => {
       it('should return empty observable', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
-          const result = service.getUserByBiteId(undefined);
+          const result = await service.getUserByBiteId(undefined);
 
-          expect(await lastValueFrom(result.pipe(isEmpty()))).toBeTruthy();
+          expect(result).toBeUndefined();
         },
       ));
     });
@@ -297,8 +297,8 @@ describe(ProfileApiService.name, () => {
         async (service: ProfileApiService) => {
           const mockedData = {
             snapshot: {
+              id: 'bite-user-id',
               data: {
-                userId: 'bite-user-id',
                 name: 'Bite User',
               },
             },
@@ -308,16 +308,28 @@ describe(ProfileApiService.name, () => {
             .spyOn(FirebaseFirestore, 'getDocument')
             .mockResolvedValue(mockedData);
 
+          const setDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'setDocument')
+            .mockResolvedValue(mockedData);
+
           const bite = { userId: 'bite-user-id' } as any;
 
-          const result$ = service.getUserByBiteId(bite);
-
-          const result = await lastValueFrom(result$);
+          const result = await service.getUserByBiteId(bite);
 
           expect(getDocumentSpy).toHaveBeenCalledWith({
             reference: 'users/bite-user-id',
           });
-          expect(result).toEqual(mockedData);
+          expect(setDocumentSpy).toHaveBeenCalledWith({
+            reference: 'users/bite-user-id',
+            data: {
+              userId: 'bite-user-id',
+              name: 'Bite User',
+            },
+          });
+          expect(result).toEqual({
+            userId: 'bite-user-id',
+            name: 'Bite User',
+          });
         },
       ));
     });
@@ -336,7 +348,7 @@ describe(ProfileApiService.name, () => {
 
           const bite = { userId: 'bite-user-id' } as any;
 
-          const result$ = service.getUserByBiteId(bite);
+          const result$ = from(service.getUserByBiteId(bite));
 
           await expect(lastValueFrom(result$)).rejects.toThrow(
             'Failed to fetch user',

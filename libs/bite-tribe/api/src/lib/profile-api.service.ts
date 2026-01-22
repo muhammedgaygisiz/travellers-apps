@@ -16,10 +16,7 @@ import {
 import type { Bite, PublicUser } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { toPublicUser } from './utils/to-public-user';
-import { isIdpAvatarUrl } from './utils/is-idp-avatar-url';
 import { Platform } from '@ionic/angular';
-import { uploadBlobToFirebasestorage } from './bite-api/utils/upload-blob-to-firebasestorage';
-import { FirebaseStorage } from '@capacitor-firebase/storage';
 import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
 import { USERS_COLLECTION } from './utils/user-collection-key';
 

@@ -11,11 +11,16 @@
 
     <form [formGroup]="profileForm">
       <ion-item>
-        @let photoUrl = publicUser?.photoUrl; @if (photoUrl) {
-        <img [src]="photoUrl" alt="Profile" class="profile-image" />
-        } @else {
-        <ion-icon name="person-circle-outline" class="profile-image" />
-        }
+        <div class="profile-image-block">
+          @let photoUrl = publicUser?.photoUrl; @if (photoUrl) {
+          <img [src]="photoUrl" alt="Profile" class="profile-image" />
+          } @else {
+          <ion-icon name="person-circle-outline" class="profile-image" />
+          }
+
+          <ion-button fill="clear"> Edit </ion-button>
+        </div>
+
         <ion-label>
           <h3>Display Name</h3>
           <ion-input

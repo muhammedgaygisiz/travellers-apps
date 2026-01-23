@@ -1,6 +1,6 @@
 import type { PublicUser } from 'model';
 import { isIdpAvatarUrl } from './is-idp-avatar-url';
-import { uploadBlobToFirebasestorage } from '../bite-api/utils/upload-blob-to-firebasestorage';
+import { uploadBlobToFirebasestorage } from './upload-blob-to-firebasestorage';
 import { FirebaseStorage } from '@capacitor-firebase/storage';
 import { USERS_COLLECTION } from './user-collection-key';
 

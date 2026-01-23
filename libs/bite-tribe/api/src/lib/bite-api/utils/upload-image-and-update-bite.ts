@@ -1,6 +1,6 @@
 import { Bite } from 'model';
-import { uploadBase64ToFirebaseStorage } from './upload-base64-to-firebase-storage';
 import { updateBiteWithImagePathFromFirestorage } from './update-bite-with-image-path-from-firestorage';
+import { uploadBase64ToFirebaseStorage } from '../../utils/upload-base64-to-firebase-storage';
 
 export const uploadImageAndUpdateBite = async (
   isWeb: boolean,

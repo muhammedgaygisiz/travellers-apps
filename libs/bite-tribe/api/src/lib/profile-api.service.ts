@@ -19,6 +19,10 @@ import { toPublicUser } from './utils/to-public-user';
 import { Platform } from '@ionic/angular';
 import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
 import { USERS_COLLECTION } from './utils/user-collection-key';
+import { isBase64String } from 'utils';
+import { getDownloadUrlFromFirebaseStorage } from 'utils';
+import { deleteCurrentImage } from './utils/delete-current-image';
+import { uploadBase64ToFirebaseStorage } from './utils/upload-base64-to-firebase-storage';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileApiService {
@@ -121,6 +125,44 @@ export class ProfileApiService {
 
   async updateUser(publicUser: PublicUser): Promise<PublicUser | undefined> {
     try {
+      const photoUrl = publicUser.photoUrl;
+
+      if (isBase64String(photoUrl)) {
+        console.log('You must upload the image before updating the user.');
+
+        await deleteCurrentImage(publicUser);
+
+        const { photoUrl: base64Image, ...restOfPublicUser } = publicUser;
+        const newPhotoRef = await uploadBase64ToFirebaseStorage(
+          this.isWeb(),
+          base64Image,
+          publicUser.userId,
+          USERS_COLLECTION,
+        );
+
+        const newPhotoUrl =
+          await getDownloadUrlFromFirebaseStorage(newPhotoRef);
+
+        const updatedUser: PublicUser = {
+          ...restOfPublicUser,
+          photoUrl: newPhotoUrl || '',
+          displayName: publicUser.displayName,
+          email: publicUser.email,
+          city: publicUser.city || '',
+          about: publicUser.about || '',
+          public: publicUser.public || false,
+          updatedAt: new Date().toISOString(),
+          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
+        };
+
+        await FirebaseFirestore.updateDocument({
+          reference: `${USERS_COLLECTION}/${publicUser.userId}`,
+          data: updatedUser,
+        });
+
+        return { ...publicUser, ...updatedUser } as PublicUser;
+      }
+
       const updatedUser: Omit<PublicUser, 'userId' | 'followers'> = {
         displayName: publicUser.displayName,
         email: publicUser.email,

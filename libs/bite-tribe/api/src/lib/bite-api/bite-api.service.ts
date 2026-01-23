@@ -5,7 +5,7 @@ import { Bite, Bucketlist } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { Platform } from '@ionic/angular';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
-import { BITE_COLLECTION } from './utils/constants';
+import { BITE_COLLECTION } from '../utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
 import { createBite } from './utils/create-bite';
 import { uploadImageAndUpdateBite } from './utils/upload-image-and-update-bite';

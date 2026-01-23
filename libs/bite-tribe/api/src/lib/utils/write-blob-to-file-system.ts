@@ -1,5 +1,5 @@
 import { Directory, Filesystem, WriteFileResult } from '@capacitor/filesystem';
-import { toBase64 } from '../../utils/to-base-64';
+import { toBase64 } from './to-base-64';
 
 export const writeBlobToFileSystem = async (
   blob: Blob,

@@ -1,7 +1,7 @@
 import { Bite } from 'model';
 import { replaceImageInFirestoreStorage } from './replace-image-in-firestorestorage';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BITE_COLLECTION } from './constants';
+import { BITE_COLLECTION } from '../../utils/constants';
 import { toBite } from '../../utils/to-bite';
 import { uploadImageAndUpdateBite } from './upload-image-and-update-bite';
 

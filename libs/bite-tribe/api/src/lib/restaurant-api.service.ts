@@ -13,8 +13,8 @@ import {
 import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { Link, Restaurant } from 'model';
 import { MENU_COLLECTION } from './menu-api.service';
-import { BITE_COLLECTION } from './bite-api/utils/constants';
 import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
+import { BITE_COLLECTION } from './utils/constants';
 
 const RESTAURANT_COLLECTION = 'restaurants';
 

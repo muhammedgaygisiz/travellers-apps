@@ -97,6 +97,7 @@ export class EditProfilePage {
     about: [''],
     email: ['', Validators.required],
     public: [false],
+    photoUrl: [''],
   });
 
   isFormInvalid = toSignal(
@@ -141,6 +142,7 @@ export class EditProfilePage {
       about,
       public: isPublic,
       email,
+      photoUrl,
     } = this.profileForm.value;
 
     const publicUser = this.publicUser();
@@ -152,6 +154,7 @@ export class EditProfilePage {
         about: about || '',
         email: email || '',
         public: isPublic || false,
+        photoUrl: photoUrl || '',
       };
 
       this.submitPublicUser.emit(updatedUser);
@@ -168,5 +171,9 @@ export class EditProfilePage {
 
   protected cancel(): void {
     this.profileImageSelectionModal()?.dismiss(null, 'cancel');
+  }
+
+  protected dismissImageModal(): void {
+    this.profileImageSelectionModal()?.dismiss();
   }
 }

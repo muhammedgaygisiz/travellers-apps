@@ -1,5 +1,5 @@
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BITE_COLLECTION } from './constants';
+import { BITE_COLLECTION } from '../../utils/constants';
 import { toBite } from '../../utils/to-bite';
 import { Bite } from 'model';
 

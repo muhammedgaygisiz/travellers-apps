@@ -1,8 +1,8 @@
 import { ImageUploadComponent } from '../image-upload.component';
 import { Camera } from '@capacitor/camera';
 import { compressFile, compressPhoto } from 'image-compression';
-import { getExifDataFromFile } from '../../page/utils/get-exif-data-from-file';
-import { getExifDataFromPhoto } from '../../page/utils/get-exif-data-from-photo';
+import { getExifDataFromFile } from '../utils/get-exif-data-from-file';
+import { getExifDataFromPhoto } from '../utils/get-exif-data-from-photo';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NavController, Platform } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -28,8 +28,8 @@ jest.mock('@capacitor/camera', () => ({
 jest.mock('image-compression');
 jest.mock('heic2any', () => jest.fn());
 
-jest.mock('../../page/utils/get-exif-data-from-file');
-jest.mock('../../page/utils/get-exif-data-from-photo');
+jest.mock('../utils/get-exif-data-from-file');
+jest.mock('../utils/get-exif-data-from-photo');
 
 type MockFileReader = {
   readAsDataURL: jest.Mock;

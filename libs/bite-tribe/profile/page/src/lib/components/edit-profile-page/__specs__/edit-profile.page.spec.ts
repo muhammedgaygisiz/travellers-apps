@@ -90,7 +90,6 @@ describe(EditProfilePage.name, () => {
 
   describe('setDisplayNameEffect', () => {
     it('should return "Anonymous" when no user or publicUser is provided', () => {
-      compRef.setInput('user', undefined);
       compRef.setInput('publicUser', undefined);
 
       compRef.changeDetectorRef.detectChanges();
@@ -158,36 +157,6 @@ describe(EditProfilePage.name, () => {
           public: false,
         });
       });
-    });
-  });
-
-  describe('userImage computed', () => {
-    it('should return undefined when no user is provided', () => {
-      expect(component.userImage()).toBeUndefined();
-    });
-
-    it('should return photoUrl from user when available', () => {
-      const user = {
-        photoUrl: 'https://example.com/photo.jpg',
-        providerData: [],
-      };
-
-      compRef.setInput('user', user);
-
-      expect(component.userImage()).toBe('https://example.com/photo.jpg');
-    });
-
-    it('should return photoUrl from providerData when user photoUrl is not available', () => {
-      const user = {
-        photoUrl: null,
-        providerData: [{ photoUrl: 'https://example.com/provider-photo.jpg' }],
-      };
-
-      compRef.setInput('user', user);
-
-      expect(component.userImage()).toBe(
-        'https://example.com/provider-photo.jpg',
-      );
     });
   });
 

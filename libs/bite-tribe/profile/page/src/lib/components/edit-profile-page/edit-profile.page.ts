@@ -22,7 +22,7 @@ import {
   IonToggle,
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import type { PublicUser, User } from 'model';
+import type { PublicUser } from 'model';
 import type { IonToggleCustomEvent, OverlayEventDetail } from '@ionic/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -55,30 +55,15 @@ export class EditProfilePage {
 
   isAuthenticated = input(false);
 
-  user = input<User>();
-
   publicUser = input<PublicUser>();
 
   submitPublicUser = output<PublicUser>();
 
-  userImage = computed(() => {
-    const user = this.user();
-
-    const photoUrl =
-      user?.photoUrl ||
-      user?.providerData.find(
-        (provider: { photoUrl?: string }) => provider.photoUrl,
-      )?.photoUrl;
-
-    return photoUrl;
-  });
-
   setDisplayNameEffect = effect(() => {
-    const user = this.user();
     const publicUser = this.publicUser();
 
     this.profileForm.patchValue({
-      displayName: publicUser?.displayName || user?.displayName || 'Anonymous',
+      displayName: publicUser?.displayName || 'Anonymous',
     });
   });
 

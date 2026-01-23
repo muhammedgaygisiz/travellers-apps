@@ -1,3 +1,5 @@
+@let publicUser = this.publicUser();
+
 <ta-page
   [showHeaderMenu]="false"
   [showFooter]="false"
@@ -9,8 +11,8 @@
 
     <form [formGroup]="profileForm">
       <ion-item>
-        @if (userImage()) {
-        <img [src]="userImage()" alt="Profile" class="profile-image" />
+        @let photoUrl = publicUser?.photoUrl; @if (photoUrl) {
+        <img [src]="photoUrl" alt="Profile" class="profile-image" />
         } @else {
         <ion-icon name="person-circle-outline" class="profile-image" />
         }

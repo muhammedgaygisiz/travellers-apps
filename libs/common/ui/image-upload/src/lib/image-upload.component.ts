@@ -30,11 +30,11 @@ import {
 import { Platform } from '@ionic/angular';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { compressFile, compressPhoto } from 'image-compression';
-import { getExifDataFromFile } from '../page/utils/get-exif-data-from-file';
-import { getExifDataFromPhoto } from '../page/utils/get-exif-data-from-photo';
 import type { Geopoint } from 'model';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { Placeholder } from './components/placeholder';
+import { getExifDataFromPhoto } from './utils/get-exif-data-from-photo';
+import { getExifDataFromFile } from './utils/get-exif-data-from-file';
 
 const photoOptions = {
   quality: 90,

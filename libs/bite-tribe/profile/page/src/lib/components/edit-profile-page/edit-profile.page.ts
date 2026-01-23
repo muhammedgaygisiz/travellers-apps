@@ -2,24 +2,29 @@ import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
-  computed,
   effect,
   inject,
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
   IonAlert,
   IonButton,
+  IonButtons,
   IonContent,
+  IonHeader,
   IonIcon,
   IonInput,
   IonItem,
   IonLabel,
+  IonModal,
   IonTextarea,
+  IonTitle,
   IonToggle,
+  IonToolbar,
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import type { PublicUser } from 'model';
@@ -27,6 +32,7 @@ import type { IonToggleCustomEvent, OverlayEventDetail } from '@ionic/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { ToggleChangeEventDetail } from '@ionic/angular';
+import { ImageUploadComponent } from 'image-upload';
 
 const STAY_PUBLIC = 'stay-public';
 const GO_PRIVATE = 'go-private';
@@ -48,10 +54,20 @@ const GO_PRIVATE = 'go-private';
     IonButton,
     IonAlert,
     IonToggle,
+    IonModal,
+    IonHeader,
+    IonToolbar,
+    IonButtons,
+    IonTitle,
+    ImageUploadComponent,
   ],
 })
 export class EditProfilePage {
   private readonly formBuilder = inject(FormBuilder);
+
+  private readonly profileImageSelectionModal = viewChild<IonModal>(
+    'profileImageSelectionModal',
+  );
 
   isAuthenticated = input(false);
 
@@ -148,5 +164,9 @@ export class EditProfilePage {
     if (!$event.detail.checked) {
       this.openConfirmationDialog();
     }
+  }
+
+  protected cancel(): void {
+    this.profileImageSelectionModal()?.dismiss(null, 'cancel');
   }
 }

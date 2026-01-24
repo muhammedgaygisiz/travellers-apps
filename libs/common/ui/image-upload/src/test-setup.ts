@@ -4,3 +4,5 @@ setupZoneTestEnv({
   errorOnUnknownElements: true,
   errorOnUnknownProperties: true,
 });
+
+URL.createObjectURL = jest.fn(() => 'blob:mock-url');

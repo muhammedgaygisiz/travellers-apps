@@ -348,11 +348,9 @@ describe(ProfileApiService.name, () => {
 
           const bite = { userId: 'bite-user-id' } as any;
 
-          const result$ = from(service.getUserByBiteId(bite));
+          const result = await service.getUserByBiteId(bite);
 
-          await expect(lastValueFrom(result$)).rejects.toThrow(
-            'Failed to fetch user',
-          );
+          expect(result).toBeUndefined();
         },
       ));
     });

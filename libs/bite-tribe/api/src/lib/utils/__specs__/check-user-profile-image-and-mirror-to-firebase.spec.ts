@@ -85,6 +85,11 @@ describe(checkUserProfileImageAndMirrorToFirebase.name, () => {
         'image/jpeg',
         true,
       );
+      expect(result).toEqual({
+        displayName: 'User 1',
+        photoUrl: 'https://url-to-mirrored-image.com/avatar.jpg',
+        userId: 'user1',
+      });
     });
   });
 

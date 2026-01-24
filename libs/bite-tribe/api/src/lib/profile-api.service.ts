@@ -214,7 +214,7 @@ export class ProfileApiService {
     } catch (error) {
       console.error('Error fetching user by bite ID:', error);
       this.errorHandler.handleError(error);
-      throw error;
+      return Promise.resolve();
     }
   }
 

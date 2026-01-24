@@ -449,7 +449,7 @@ describe(BiteEffects.name, () => {
         .mockReturnValue(of(BITE_CREATOR_MOCK) as any);
     });
 
-    it('should do nothing on non-bite url', () => {
+    it('should do nothing on non-bite url and profile url', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: routerNavigatedAction({
@@ -479,7 +479,7 @@ describe(BiteEffects.name, () => {
       expect(getUserByBiteIdSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should return loadedBiteCreator', () => {
+    it('should return loadedBiteCreator on bite url', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: routerNavigatedAction({
@@ -494,6 +494,45 @@ describe(BiteEffects.name, () => {
           a: BiteActions.loadedBiteCreator({
             biteCreator: BITE_CREATOR_MOCK,
           }),
+        };
+
+        expectObservable(effects.loadUserFromBite$).toBe(expected, output);
+      });
+    });
+
+    it('should return loadedBiteCreator saved public profile with user id', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: AppActions.savedPublicProfile({
+            profile: { userId: 'userId' } as PublicUser,
+          }),
+        });
+
+        const expected = 'a';
+        const output = {
+          a: BiteActions.loadedBiteCreator({
+            biteCreator: BITE_CREATOR_MOCK,
+          }),
+        };
+
+        expectObservable(effects.loadUserFromBite$).toBe(expected, output);
+      });
+    });
+
+    it('should return noPublicCreatorForBite on saved public profile wihtout user id', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: AppActions.savedPublicProfile({
+            profile: {} as PublicUser,
+          }),
+        });
+
+        effects.bite = signal(undefined);
+        effects.biteCreatorId = signal(undefined);
+
+        const expected = 'a';
+        const output = {
+          a: BiteActions.noPublicCreatorForBite(),
         };
 
         expectObservable(effects.loadUserFromBite$).toBe(expected, output);

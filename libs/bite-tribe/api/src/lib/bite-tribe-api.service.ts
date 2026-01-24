@@ -121,6 +121,10 @@ export class BiteTribeApiService {
     return this.profileApiService.getUserByBiteId(bite);
   }
 
+  async getUserById(biteCreatorId: string): Promise<PublicUser | void> {
+    return this.profileApiService.getUserById(biteCreatorId);
+  }
+
   saveEditedBite(bite: any): Promise<Bite> {
     return this.biteApiService.saveEditedBite(bite);
   }

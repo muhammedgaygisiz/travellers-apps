@@ -218,6 +218,26 @@ export class ProfileApiService {
     }
   }
 
+  async getUserById(biteCreatorId: string): Promise<PublicUser | void> {
+    if (!biteCreatorId) {
+      return Promise.resolve();
+    }
+
+    try {
+      const reference = `${USERS_COLLECTION}/${biteCreatorId}`;
+      const result = await FirebaseFirestore.getDocument({
+        reference,
+      });
+      const user = toPublicUser(result.snapshot);
+
+      return Promise.resolve(user);
+    } catch (error) {
+      console.error('Error fetching user by ID:', error);
+      this.errorHandler.handleError(error);
+      return Promise.resolve();
+    }
+  }
+
   async saveUserIfNotExisting(): Promise<void> {
     const user = await this.getUser();
 

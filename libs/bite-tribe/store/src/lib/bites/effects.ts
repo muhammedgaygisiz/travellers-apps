@@ -3,7 +3,10 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteActions } from './actions';
 import { catchError, filter, from, map, of, switchMap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { routerNavigatedAction } from '@ngrx/router-store';
+import {
+  RouterNavigatedAction,
+  routerNavigatedAction,
+} from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { bite } from './selectors';
@@ -21,8 +24,8 @@ export class BiteEffects {
   private readonly store = inject(Store);
   private readonly storeService = inject(BiteTribeStoreService);
 
-  private readonly bite = toSignal(this.store.select(bite));
-  private readonly biteCreatorId = toSignal(this.store.select(userId));
+  bite = toSignal(this.store.select(bite));
+  biteCreatorId = toSignal(this.store.select(userId));
 
   listenToLatest20Bites$ = createEffect(() => {
     return this.actions$.pipe(
@@ -143,16 +146,32 @@ export class BiteEffects {
 
   loadUserFromBite$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(routerNavigatedAction),
-      filter(({ payload }) =>
-        payload.event.urlAfterRedirects.includes('/bite/'),
-      ),
+      ofType(routerNavigatedAction, AppActions.savedPublicProfile),
+      filter((action) => {
+        if (action.type === routerNavigatedAction.type) {
+          return action.payload.event.urlAfterRedirects.includes('/bite/');
+        }
+
+        return action.type === AppActions.savedPublicProfile.type;
+      }),
       switchMap(() => {
         const bite = this.bite();
 
-        return from(this.api.getUserByBiteId(bite)).pipe(
-          catchError(() => of(undefined)),
-        );
+        if (bite) {
+          return from(this.api.getUserByBiteId(bite)).pipe(
+            catchError(() => of(undefined)),
+          );
+        }
+
+        const biteCreatorId = this.biteCreatorId();
+
+        if (biteCreatorId) {
+          return from(this.api.getUserById(biteCreatorId)).pipe(
+            catchError(() => of(undefined)),
+          );
+        }
+
+        return of(undefined);
       }),
       map((biteCreator) => {
         if (biteCreator) {

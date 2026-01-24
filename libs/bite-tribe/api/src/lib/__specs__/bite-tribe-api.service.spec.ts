@@ -35,6 +35,7 @@ class Mock {
   createBucketListAndSaveBiteIdToBucketList = jest.fn();
   saveBiteIdToBucketList = jest.fn();
   getUserByBiteId = jest.fn();
+  getUserById = jest.fn();
   saveEditedBite = jest.fn();
   saveNewBite = jest.fn();
   updateUser = jest.fn();
@@ -400,6 +401,34 @@ describe(BiteTribeApiService.name, () => {
         const bite = { id: 'bite-id' } as any;
         service.getUserByBiteId(bite);
         expect(getUserByBiteIdSpy).toHaveBeenCalledWith(bite);
+      },
+    ));
+  });
+
+  describe('getUserById', () => {
+    it('should call getUserById on ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
+        const getUserByIdSpy = jest
+          .spyOn(profileApiService, 'getUserById')
+          .mockReturnValue(Promise.resolve(undefined));
+        const biteCreatorId = 'user-id';
+        service.getUserById(biteCreatorId);
+        expect(getUserByIdSpy).toHaveBeenCalledWith(biteCreatorId);
+      },
+    ));
+  });
+
+  describe('getUserById', () => {
+    it('should call getUserById on ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
+        const getUserByIdSpy = jest
+          .spyOn(profileApiService, 'getUserById')
+          .mockReturnValue(Promise.resolve(undefined));
+        const biteCreatorId = 'user-id';
+        service.getUserById(biteCreatorId);
+        expect(getUserByIdSpy).toHaveBeenCalledWith(biteCreatorId);
       },
     ));
   });

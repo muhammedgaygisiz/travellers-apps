@@ -30,7 +30,6 @@ import {
 import { Platform } from '@ionic/angular';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { compressFile, compressPhoto } from 'image-compression';
-import type { Geopoint } from 'model';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { Placeholder } from './components/placeholder';
 import { getExifDataFromPhoto } from './utils/get-exif-data-from-photo';
@@ -71,11 +70,17 @@ const photoOptions = {
 })
 export class ImageUploadComponent implements ControlValueAccessor {
   private readonly platform = inject(Platform);
-  position = input<Geopoint>();
+  position = input<{
+    latitude: number;
+    longitude: number;
+  }>();
 
   imageUrl = input<string>();
 
-  positionFromImage = output<Geopoint>();
+  positionFromImage = output<{
+    latitude: number;
+    longitude: number;
+  }>();
   clearImagePath = output();
 
   private readonly fileUpload =
@@ -111,7 +116,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
     this._onTouch = fn;
   }
 
-  setDisabledState?(isDisabled: boolean): void {
+  setDisabledState(isDisabled: boolean): void {
     this.disabled.set(isDisabled);
   }
 

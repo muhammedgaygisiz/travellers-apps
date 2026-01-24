@@ -334,4 +334,38 @@ describe('ImageUploadComponent', () => {
       expect(component.croppedImage()).toBe('data:image/jpeg;base64,cropped');
     });
   });
+
+  describe('writeValue', () => {
+    it('should set the value signal', () => {
+      component.writeValue('data:image/jpeg;base64,writeValueTest');
+      expect(component.value()).toBe('data:image/jpeg;base64,writeValueTest');
+    });
+  });
+
+  describe('registerOnChange', () => {
+    it('should register the onChange function', () => {
+      const onChangeMock = jest.fn();
+      component.registerOnChange(onChangeMock);
+      component._onChange('testValue');
+      expect(onChangeMock).toHaveBeenCalledWith('testValue');
+    });
+  });
+
+  describe('registerOnTouched', () => {
+    it('should register the onTouch function', () => {
+      const onTouchMock = jest.fn();
+      component.registerOnTouched(onTouchMock);
+      component._onTouch();
+      expect(onTouchMock).toHaveBeenCalled();
+    });
+  });
+
+  describe('setDisabledState', () => {
+    it('should set the disabled signal', () => {
+      component.setDisabledState(true);
+      expect(component.disabled()).toBe(true);
+      component.setDisabledState(false);
+      expect(component.disabled()).toBe(false);
+    });
+  });
 });

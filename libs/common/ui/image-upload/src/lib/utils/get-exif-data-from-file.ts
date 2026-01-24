@@ -1,13 +1,15 @@
 import * as exifr from 'exifr';
-import type { Geopoint } from 'model';
 
 export const getExifDataFromFile = async (
   file: File,
-  fallbackPosition: Geopoint = {
+  fallbackPosition = {
     latitude: 0,
     longitude: 0,
   },
-): Promise<Geopoint> => {
+): Promise<{
+  latitude: number;
+  longitude: number;
+}> => {
   try {
     const metaData = await exifr.parse(file, { gps: true });
     if (metaData?.latitude && metaData?.longitude) {

@@ -1,7 +1,7 @@
 import { ProfileApiService } from '../profile-api.service';
 import { AuthService } from 'ta-firestore';
 import { inject, TestBed } from '@angular/core/testing';
-import { from, lastValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { PublicUser } from 'model';
 import { TestScheduler } from 'rxjs/testing';
@@ -22,6 +22,10 @@ jest.mock('@capacitor-firebase/firestore', () => ({
     deleteDocument: jest.fn(),
     getCollection: jest.fn(),
   },
+}));
+
+jest.mock('utils', () => ({
+  isBase64String: jest.fn(),
 }));
 
 const MockedAuthService = {
@@ -228,35 +232,37 @@ describe(ProfileApiService.name, () => {
   });
 
   describe('updateUser', () => {
-    it('should call FirebaseFirestore.updateDocument', inject(
-      [ProfileApiService],
-      async (service: ProfileApiService) => {
-        const updateDocumentSpy = jest
-          .spyOn(FirebaseFirestore, 'updateDocument')
-          .mockResolvedValue();
+    describe('given a user without base64 as photoUrl', () => {
+      it('should call FirebaseFirestore.updateDocument', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const updateDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'updateDocument')
+            .mockResolvedValue();
 
-        const publicUser = {
-          userId: '123',
-          name: 'Updated User',
-        } as unknown as PublicUser;
+          const publicUser = {
+            userId: '123',
+            name: 'Updated User',
+          } as unknown as PublicUser;
 
-        await service.updateUser(publicUser);
+          await service.updateUser(publicUser);
 
-        expect(updateDocumentSpy).toHaveBeenCalledWith({
-          reference: 'users/123',
-          data: {
-            about: '',
-            city: '',
-            displayName: undefined,
-            email: undefined,
-            photoUrl: undefined,
-            public: false,
-            updatedAt: '2024-03-15T12:00:00.000Z',
-            updatedAtTimestamp: 1710504000000,
-          },
-        });
-      },
-    ));
+          expect(updateDocumentSpy).toHaveBeenCalledWith({
+            reference: 'users/123',
+            data: {
+              about: '',
+              city: '',
+              displayName: undefined,
+              email: undefined,
+              photoUrl: undefined,
+              public: false,
+              updatedAt: '2024-03-15T12:00:00.000Z',
+              updatedAtTimestamp: 1710504000000,
+            },
+          });
+        },
+      ));
+    });
 
     describe('given an error', () => {
       it('should handle the error and return undefined', inject(

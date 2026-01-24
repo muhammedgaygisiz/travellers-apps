@@ -7,6 +7,7 @@ import type { PublicUser } from 'model';
 import type { OverlayEventDetail } from '@ionic/core';
 
 jest.mock('localization');
+jest.mock('heic2any', () => ({}));
 
 describe(EditProfilePage.name, () => {
   let component: EditProfilePage;
@@ -36,6 +37,7 @@ describe(EditProfilePage.name, () => {
         displayName: '',
         about: '',
         email: '',
+        photoUrl: '',
         public: false,
       });
     });
@@ -139,6 +141,7 @@ describe(EditProfilePage.name, () => {
           city: 'Test City',
           displayName: 'Test User',
           email: 'e@mail.com',
+          photoUrl: 'photo.jpg',
           public: true,
         });
       });
@@ -154,6 +157,7 @@ describe(EditProfilePage.name, () => {
           city: '',
           displayName: 'Anonymous',
           email: '',
+          photoUrl: '',
           public: false,
         });
       });

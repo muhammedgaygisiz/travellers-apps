@@ -13,7 +13,7 @@ import { deleteFileInFirebaseStorage } from '../utils/delete-file-in-firebasesto
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { ErrorHandler } from '@angular/core';
 import { loadBitesByBucketlist } from '../utils/load-bites-by-bucketlist';
-import { BITE_COLLECTION } from '../utils/constants';
+import { BITE_COLLECTION } from '../../utils/constants';
 
 jest.mock('../utils/load-bites-by-location', () => ({
   loadBitesByLocation: jest.fn(),

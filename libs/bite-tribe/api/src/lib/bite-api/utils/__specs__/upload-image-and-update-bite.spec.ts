@@ -1,9 +1,9 @@
 import { uploadImageAndUpdateBite } from '../upload-image-and-update-bite';
 import { Bite } from 'model';
 import { updateBiteWithImagePathFromFirestorage } from '../update-bite-with-image-path-from-firestorage';
-import { uploadBase64ToFirebaseStorage } from '../upload-base64-to-firebase-storage';
+import { uploadBase64ToFirebaseStorage } from '../../../utils/upload-base64-to-firebase-storage';
 
-jest.mock('../upload-base64-to-firebase-storage', () => ({
+jest.mock('../../../utils/upload-base64-to-firebase-storage', () => ({
   uploadBase64ToFirebaseStorage: jest.fn(),
 }));
 

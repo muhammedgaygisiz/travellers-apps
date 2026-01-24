@@ -1,9 +1,9 @@
 import { checkUserProfileImageAndMirrorToFirebase } from '../check-user-profile-image-and-mirror-to-firebase';
 import { PublicUser } from 'model';
-import { uploadBlobToFirebasestorage } from '../../bite-api/utils/upload-blob-to-firebasestorage';
+import { uploadBlobToFirebasestorage } from '../upload-blob-to-firebasestorage';
 import { USERS_COLLECTION } from '../user-collection-key';
 
-jest.mock('../../bite-api/utils/upload-blob-to-firebasestorage', () => ({
+jest.mock('../upload-blob-to-firebasestorage', () => ({
   uploadBlobToFirebasestorage: jest.fn(),
 }));
 

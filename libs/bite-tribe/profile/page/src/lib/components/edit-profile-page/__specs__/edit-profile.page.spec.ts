@@ -1,6 +1,6 @@
 import { EditProfilePage } from '../edit-profile.page';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, signal } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import type { PublicUser } from 'model';
@@ -290,6 +290,52 @@ describe(EditProfilePage.name, () => {
         component.handlePubicChange({ detail: { checked: true } } as any);
 
         expect(openConfirmationDialogSpy).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('cancel', () => {
+    describe('given modal is defined', () => {
+      it('should dismiss profile image selection modal with cancel role', () => {
+        const dismissSpy = jest.fn();
+        component.profileImageSelectionModal = signal({
+          dismiss: dismissSpy,
+        }) as any;
+
+        component.cancel();
+
+        expect(dismissSpy).toHaveBeenCalledWith(null, 'cancel');
+      });
+    });
+
+    describe('given modal is undefined', () => {
+      it('should not throw when dismissing modal', () => {
+        component.profileImageSelectionModal = signal(undefined) as any;
+
+        expect(() => component.cancel()).not.toThrow();
+      });
+    });
+  });
+
+  describe('dismissImageModal', () => {
+    describe('given modal is defined', () => {
+      it('should dismiss profile image selection modal', () => {
+        const dismissSpy = jest.fn();
+        component.profileImageSelectionModal = signal({
+          dismiss: dismissSpy,
+        }) as any;
+
+        component.dismissImageModal();
+
+        expect(dismissSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('given modal is undefined', () => {
+      it('should not throw when dismissing modal', () => {
+        component.profileImageSelectionModal = signal(undefined) as any;
+
+        expect(() => component.dismissImageModal()).not.toThrow();
       });
     });
   });

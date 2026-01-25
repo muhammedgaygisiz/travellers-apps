@@ -65,7 +65,7 @@ const GO_PRIVATE = 'go-private';
 export class EditProfilePage {
   private readonly formBuilder = inject(FormBuilder);
 
-  private readonly profileImageSelectionModal = viewChild<IonModal>(
+  profileImageSelectionModal = viewChild<IonModal>(
     'profileImageSelectionModal',
   );
 
@@ -169,11 +169,11 @@ export class EditProfilePage {
     }
   }
 
-  protected cancel(): void {
+  cancel(): void {
     this.profileImageSelectionModal()?.dismiss(null, 'cancel');
   }
 
-  protected dismissImageModal(): void {
+  dismissImageModal(): void {
     this.profileImageSelectionModal()?.dismiss();
   }
 }

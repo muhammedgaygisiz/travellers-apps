@@ -33,6 +33,7 @@ const Mock = {
   bucketlist: (): WritableSignal<string> => signal(''),
   user: jest.fn(),
   latestBites$: (): Observable<any> => of([]),
+  getUserById: (): Observable<any> => of({}),
 };
 
 const BITE_MOCK = {
@@ -519,7 +520,7 @@ describe(BiteEffects.name, () => {
       });
     });
 
-    it('should return noPublicCreatorForBite on saved public profile wihtout user id', () => {
+    it('should return noPublicCreatorForBite on saved public profile without user id', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: AppActions.savedPublicProfile({
@@ -533,6 +534,28 @@ describe(BiteEffects.name, () => {
         const expected = 'a';
         const output = {
           a: BiteActions.noPublicCreatorForBite(),
+        };
+
+        expectObservable(effects.loadUserFromBite$).toBe(expected, output);
+      });
+    });
+
+    it('should return loadedBiteCreator given a biteCreatorId', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: AppActions.savedPublicProfile({
+            profile: {} as PublicUser,
+          }),
+        });
+
+        (effects as any)['bite'] = (): string => undefined as any;
+        (effects as any)['biteCreatorId'] = (): string => 'biteCreatorId';
+
+        const expected = 'a';
+        const output = {
+          a: BiteActions.loadedBiteCreator({
+            biteCreator: BITE_CREATOR_MOCK,
+          }),
         };
 
         expectObservable(effects.loadUserFromBite$).toBe(expected, output);

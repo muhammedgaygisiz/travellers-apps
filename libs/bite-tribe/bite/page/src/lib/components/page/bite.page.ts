@@ -81,9 +81,7 @@ export class BitePage {
 
   suggestedTags = input<string[]>([]);
 
-  fallbackPosition = linkedSignal(() => {
-    return this.position();
-  });
+  fallbackPosition = linkedSignal(() => this.position());
 
   submitBite = output<typeof this.biteFormGroup.value>();
 

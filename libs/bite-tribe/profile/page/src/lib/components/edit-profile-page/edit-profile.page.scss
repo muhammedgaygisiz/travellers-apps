@@ -1,8 +1,18 @@
 @use 'globals';
 
 :host {
-  .profile-image {
-    @include globals.profile-image;
+  .profile-image-block {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    margin-right: 16px;
+
+    .profile-image {
+      @include globals.profile-image;
+
+      margin-right: 0;
+    }
   }
 
   .go-public-button-container {

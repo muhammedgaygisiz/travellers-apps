@@ -7,7 +7,7 @@ import {
   FirebaseFirestore,
 } from '@capacitor-firebase/firestore';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
-import { BITE_COLLECTION } from './bite-api/utils/constants';
+import { BITE_COLLECTION } from './utils/constants';
 
 const LIKES_COLLECTION_GROUP = 'likes';
 

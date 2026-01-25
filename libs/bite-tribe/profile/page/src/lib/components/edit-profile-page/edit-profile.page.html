@@ -9,11 +9,17 @@
 
     <form [formGroup]="profileForm">
       <ion-item>
-        @if (userImage()) {
-        <img [src]="userImage()" alt="Profile" class="profile-image" />
-        } @else {
-        <ion-icon name="person-circle-outline" class="profile-image" />
-        }
+        <div class="profile-image-block" id="select-image">
+          @let photoUrl = this.profileForm.get('photoUrl')?.value; @if
+          (photoUrl) {
+          <img [src]="photoUrl" alt="Profile" class="profile-image" />
+          } @else {
+          <ion-icon name="person-circle-outline" class="profile-image" />
+          }
+
+          <ion-button fill="clear"> Edit</ion-button>
+        </div>
+
         <ion-label>
           <h3>Display Name</h3>
           <ion-input
@@ -21,6 +27,34 @@
             formControlName="displayName"
           />
         </ion-label>
+
+        <ion-modal
+          #profileImageSelectionModal
+          trigger="select-image"
+          [backdropDismiss]="false"
+        >
+          <ng-template>
+            <ion-header>
+              <ion-toolbar>
+                <ion-buttons>
+                  <ion-button (click)="cancel()">Cancel</ion-button>
+                </ion-buttons>
+                <ion-title>Profile Image</ion-title>
+              </ion-toolbar>
+            </ion-header>
+            <ion-content class="ion-padding">
+              <image-upload formControlName="photoUrl" />
+
+              <ion-button
+                expand="block"
+                class="ion-margin-top"
+                (click)="dismissImageModal()"
+              >
+                Save
+              </ion-button>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
       </ion-item>
 
       <ion-item>

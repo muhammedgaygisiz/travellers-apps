@@ -2,31 +2,37 @@ import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
-  computed,
   effect,
   inject,
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
   IonAlert,
   IonButton,
+  IonButtons,
   IonContent,
+  IonHeader,
   IonIcon,
   IonInput,
   IonItem,
   IonLabel,
+  IonModal,
   IonTextarea,
+  IonTitle,
   IonToggle,
+  IonToolbar,
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import type { PublicUser, User } from 'model';
+import type { PublicUser } from 'model';
 import type { IonToggleCustomEvent, OverlayEventDetail } from '@ionic/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { ToggleChangeEventDetail } from '@ionic/angular';
+import { ImageUploadComponent } from 'image-upload';
 
 const STAY_PUBLIC = 'stay-public';
 const GO_PRIVATE = 'go-private';
@@ -48,37 +54,32 @@ const GO_PRIVATE = 'go-private';
     IonButton,
     IonAlert,
     IonToggle,
+    IonModal,
+    IonHeader,
+    IonToolbar,
+    IonButtons,
+    IonTitle,
+    ImageUploadComponent,
   ],
 })
 export class EditProfilePage {
   private readonly formBuilder = inject(FormBuilder);
 
-  isAuthenticated = input(false);
+  profileImageSelectionModal = viewChild<IonModal>(
+    'profileImageSelectionModal',
+  );
 
-  user = input<User>();
+  isAuthenticated = input(false);
 
   publicUser = input<PublicUser>();
 
   submitPublicUser = output<PublicUser>();
 
-  userImage = computed(() => {
-    const user = this.user();
-
-    const photoUrl =
-      user?.photoUrl ||
-      user?.providerData.find(
-        (provider: { photoUrl?: string }) => provider.photoUrl,
-      )?.photoUrl;
-
-    return photoUrl;
-  });
-
   setDisplayNameEffect = effect(() => {
-    const user = this.user();
     const publicUser = this.publicUser();
 
     this.profileForm.patchValue({
-      displayName: publicUser?.displayName || user?.displayName || 'Anonymous',
+      displayName: publicUser?.displayName || 'Anonymous',
     });
   });
 
@@ -96,6 +97,7 @@ export class EditProfilePage {
     about: [''],
     email: ['', Validators.required],
     public: [false],
+    photoUrl: [''],
   });
 
   isFormInvalid = toSignal(
@@ -140,6 +142,7 @@ export class EditProfilePage {
       about,
       public: isPublic,
       email,
+      photoUrl,
     } = this.profileForm.value;
 
     const publicUser = this.publicUser();
@@ -151,6 +154,7 @@ export class EditProfilePage {
         about: about || '',
         email: email || '',
         public: isPublic || false,
+        photoUrl: photoUrl || '',
       };
 
       this.submitPublicUser.emit(updatedUser);
@@ -163,5 +167,13 @@ export class EditProfilePage {
     if (!$event.detail.checked) {
       this.openConfirmationDialog();
     }
+  }
+
+  cancel(): void {
+    this.profileImageSelectionModal()?.dismiss(null, 'cancel');
+  }
+
+  dismissImageModal(): void {
+    this.profileImageSelectionModal()?.dismiss();
   }
 }

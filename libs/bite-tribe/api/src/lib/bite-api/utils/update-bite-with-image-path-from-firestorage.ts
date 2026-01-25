@@ -1,7 +1,7 @@
 import { Bite } from 'model';
 import { getDownloadUrlFromFirebaseStorage } from 'utils';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BITE_COLLECTION } from './constants';
+import { BITE_COLLECTION } from '../../utils/constants';
 
 export const updateBiteWithImagePathFromFirestorage = async (
   imagePath: string,

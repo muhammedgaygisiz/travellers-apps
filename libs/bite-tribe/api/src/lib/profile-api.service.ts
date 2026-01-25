@@ -1,11 +1,7 @@
-import { ErrorHandler, inject, Injectable } from '@angular/core';
+import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import {
   BehaviorSubject,
-  catchError,
-  from,
-  Observable,
-  of,
   skip,
   skipWhile,
   Subject,
@@ -19,15 +15,23 @@ import {
 } from '@capacitor-firebase/firestore';
 import type { Bite, PublicUser } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
-
-const USERS_COLLECTION = 'users';
+import { toPublicUser } from './utils/to-public-user';
+import { Platform } from '@ionic/angular';
+import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
+import { USERS_COLLECTION } from './utils/user-collection-key';
+import { isBase64String } from 'utils';
+import { getDownloadUrlFromFirebaseStorage } from 'utils';
+import { deleteCurrentImage } from './utils/delete-current-image';
+import { uploadBase64ToFirebaseStorage } from './utils/upload-base64-to-firebase-storage';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
-
+  private readonly platform = inject(Platform);
   private readonly profileChannel$ = new BehaviorSubject<any>(null);
+
+  isWeb = signal(!this.platform.is('hybrid'));
 
   private readonly stopped$ = new Subject<void>();
   profileCallbackId = '';
@@ -121,6 +125,44 @@ export class ProfileApiService {
 
   async updateUser(publicUser: PublicUser): Promise<PublicUser | undefined> {
     try {
+      const photoUrl = publicUser.photoUrl;
+
+      if (isBase64String(photoUrl)) {
+        console.log('You must upload the image before updating the user.');
+
+        await deleteCurrentImage(publicUser);
+
+        const { photoUrl: base64Image, ...restOfPublicUser } = publicUser;
+        const newPhotoRef = await uploadBase64ToFirebaseStorage(
+          this.isWeb(),
+          base64Image,
+          publicUser.userId,
+          USERS_COLLECTION,
+        );
+
+        const newPhotoUrl =
+          await getDownloadUrlFromFirebaseStorage(newPhotoRef);
+
+        const updatedUser: PublicUser = {
+          ...restOfPublicUser,
+          photoUrl: newPhotoUrl || '',
+          displayName: publicUser.displayName,
+          email: publicUser.email,
+          city: publicUser.city || '',
+          about: publicUser.about || '',
+          public: publicUser.public || false,
+          updatedAt: new Date().toISOString(),
+          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
+        };
+
+        await FirebaseFirestore.updateDocument({
+          reference: `${USERS_COLLECTION}/${publicUser.userId}`,
+          data: updatedUser,
+        });
+
+        return { ...publicUser, ...updatedUser } as PublicUser;
+      }
+
       const updatedUser: Omit<PublicUser, 'userId' | 'followers'> = {
         displayName: publicUser.displayName,
         email: publicUser.email,
@@ -146,22 +188,54 @@ export class ProfileApiService {
     }
   }
 
-  getUserByBiteId(bite: Bite | undefined): Observable<any> {
+  async getUserByBiteId(bite: Bite | undefined): Promise<PublicUser | void> {
     if (!bite?.userId) {
-      return of();
+      return Promise.resolve();
     }
 
-    return from(
-      FirebaseFirestore.getDocument({
-        reference: `${USERS_COLLECTION}/${bite.userId}`,
-      }),
-    ).pipe(
-      catchError((error) => {
-        console.error('Error fetching user by bite ID:', error);
-        this.errorHandler.handleError(error);
-        throw new Error(error);
-      }),
-    );
+    try {
+      const reference = `${USERS_COLLECTION}/${bite.userId}`;
+      const result = await FirebaseFirestore.getDocument({
+        reference,
+      });
+      const user = toPublicUser(result.snapshot);
+
+      const updatedUser = await checkUserProfileImageAndMirrorToFirebase(
+        user,
+        this.isWeb(),
+      );
+
+      await FirebaseFirestore.setDocument({
+        reference,
+        data: updatedUser,
+      });
+
+      return Promise.resolve(updatedUser);
+    } catch (error) {
+      console.error('Error fetching user by bite ID:', error);
+      this.errorHandler.handleError(error);
+      return Promise.resolve();
+    }
+  }
+
+  async getUserById(biteCreatorId: string): Promise<PublicUser | void> {
+    if (!biteCreatorId) {
+      return Promise.resolve();
+    }
+
+    try {
+      const reference = `${USERS_COLLECTION}/${biteCreatorId}`;
+      const result = await FirebaseFirestore.getDocument({
+        reference,
+      });
+      const user = toPublicUser(result.snapshot);
+
+      return Promise.resolve(user);
+    } catch (error) {
+      console.error('Error fetching user by ID:', error);
+      this.errorHandler.handleError(error);
+      return Promise.resolve();
+    }
   }
 
   async saveUserIfNotExisting(): Promise<void> {

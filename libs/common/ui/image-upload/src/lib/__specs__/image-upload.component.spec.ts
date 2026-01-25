@@ -1,8 +1,8 @@
 import { ImageUploadComponent } from '../image-upload.component';
 import { Camera } from '@capacitor/camera';
 import { compressFile, compressPhoto } from 'image-compression';
-import { getExifDataFromFile } from '../../page/utils/get-exif-data-from-file';
-import { getExifDataFromPhoto } from '../../page/utils/get-exif-data-from-photo';
+import { getExifDataFromFile } from '../utils/get-exif-data-from-file';
+import { getExifDataFromPhoto } from '../utils/get-exif-data-from-photo';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NavController, Platform } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -28,8 +28,8 @@ jest.mock('@capacitor/camera', () => ({
 jest.mock('image-compression');
 jest.mock('heic2any', () => jest.fn());
 
-jest.mock('../../page/utils/get-exif-data-from-file');
-jest.mock('../../page/utils/get-exif-data-from-photo');
+jest.mock('../utils/get-exif-data-from-file');
+jest.mock('../utils/get-exif-data-from-photo');
 
 type MockFileReader = {
   readAsDataURL: jest.Mock;
@@ -332,6 +332,40 @@ describe('ImageUploadComponent', () => {
       } as ImageCroppedEvent;
       component.onImageCrop(event);
       expect(component.croppedImage()).toBe('data:image/jpeg;base64,cropped');
+    });
+  });
+
+  describe('writeValue', () => {
+    it('should set the value signal', () => {
+      component.writeValue('data:image/jpeg;base64,writeValueTest');
+      expect(component.value()).toBe('data:image/jpeg;base64,writeValueTest');
+    });
+  });
+
+  describe('registerOnChange', () => {
+    it('should register the onChange function', () => {
+      const onChangeMock = jest.fn();
+      component.registerOnChange(onChangeMock);
+      component._onChange('testValue');
+      expect(onChangeMock).toHaveBeenCalledWith('testValue');
+    });
+  });
+
+  describe('registerOnTouched', () => {
+    it('should register the onTouch function', () => {
+      const onTouchMock = jest.fn();
+      component.registerOnTouched(onTouchMock);
+      component._onTouch();
+      expect(onTouchMock).toHaveBeenCalled();
+    });
+  });
+
+  describe('setDisabledState', () => {
+    it('should set the disabled signal', () => {
+      component.setDisabledState(true);
+      expect(component.disabled()).toBe(true);
+      component.setDisabledState(false);
+      expect(component.disabled()).toBe(false);
     });
   });
 });

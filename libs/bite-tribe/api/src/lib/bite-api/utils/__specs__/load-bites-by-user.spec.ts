@@ -15,7 +15,7 @@ describe('loadBitesByUser', () => {
   });
 
   it('should call getCollection and convert data to bites', () => {
-    loadBitesByUser({ uid: 'user123' });
+    loadBitesByUser('user123');
 
     expect(FirebaseFirestore.getCollection).toHaveBeenCalledTimes(1);
   });

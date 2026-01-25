@@ -6,6 +6,9 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { PublicUser } from 'model';
 import { TestScheduler } from 'rxjs/testing';
 import { ErrorHandler } from '@angular/core';
+import { getDownloadUrlFromFirebaseStorage, isBase64String } from 'utils';
+import { deleteCurrentImage } from '../utils/delete-current-image';
+import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -26,6 +29,15 @@ jest.mock('@capacitor-firebase/firestore', () => ({
 
 jest.mock('utils', () => ({
   isBase64String: jest.fn(),
+  getDownloadUrlFromFirebaseStorage: jest.fn(),
+}));
+
+jest.mock('../utils/delete-current-image', () => ({
+  deleteCurrentImage: jest.fn(),
+}));
+
+jest.mock('../utils/upload-base64-to-firebase-storage', () => ({
+  uploadBase64ToFirebaseStorage: jest.fn(),
 }));
 
 const MockedAuthService = {
@@ -258,6 +270,65 @@ describe(ProfileApiService.name, () => {
               public: false,
               updatedAt: '2024-03-15T12:00:00.000Z',
               updatedAtTimestamp: 1710504000000,
+            },
+          });
+        },
+      ));
+    });
+
+    describe('given a user with base64 string as photoUrl', () => {
+      beforeEach(() => {
+        (isBase64String as jest.Mock).mockReturnValue(true);
+        (deleteCurrentImage as jest.Mock).mockImplementation();
+        (uploadBase64ToFirebaseStorage as jest.Mock).mockResolvedValue(
+          Promise.resolve('new-photo-url'),
+        );
+        (getDownloadUrlFromFirebaseStorage as jest.Mock).mockReturnValue(
+          'download-url',
+        );
+        jest
+          .spyOn(FirebaseFirestore, 'updateDocument')
+          .mockResolvedValue(Promise.resolve());
+      });
+
+      it('should delete current image, upload base64 image and update the user', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const publicUser = {
+            userId: '123',
+            name: 'Updated User',
+            photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+          } as unknown as PublicUser;
+
+          await service.updateUser(publicUser);
+
+          expect(deleteCurrentImage).toHaveBeenCalledWith({
+            name: 'Updated User',
+            photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            userId: '123',
+          });
+          expect(getDownloadUrlFromFirebaseStorage).toHaveBeenCalledWith(
+            'new-photo-url',
+          );
+          expect(uploadBase64ToFirebaseStorage).toHaveBeenCalledWith(
+            true,
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            '123',
+            'users',
+          );
+          expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
+            reference: 'users/123',
+            data: {
+              about: '',
+              city: '',
+              displayName: undefined,
+              email: undefined,
+              name: 'Updated User',
+              photoUrl: 'download-url',
+              public: false,
+              updatedAt: '2024-03-15T12:00:00.000Z',
+              updatedAtTimestamp: 1710504000000,
+              userId: '123',
             },
           });
         },

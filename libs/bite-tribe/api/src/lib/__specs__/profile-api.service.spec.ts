@@ -433,6 +433,64 @@ describe(ProfileApiService.name, () => {
     });
   });
 
+  describe('getUserById', () => {
+    describe('given no biteCreatorId', () => {
+      it('should return undefined', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const result = await service.getUserById('');
+
+          expect(result).toBeUndefined();
+        },
+      ));
+    });
+
+    describe('given a biteCreatorId', () => {
+      it('should call FirebaseFirestore.getDocument and return the user data', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const mockedData = {
+            snapshot: {
+              id: 'user-id-123',
+              data: {
+                name: 'Test User',
+              },
+            },
+          } as any;
+
+          const getDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'getDocument')
+            .mockResolvedValue(mockedData);
+
+          const result = await service.getUserById('user-id-123');
+
+          expect(getDocumentSpy).toHaveBeenCalledWith({
+            reference: 'users/user-id-123',
+          });
+          expect(result).toEqual({
+            userId: 'user-id-123',
+            name: 'Test User',
+          });
+        },
+      ));
+    });
+
+    describe('given an error', () => {
+      it('should handle the error and return undefined', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          jest
+            .spyOn(FirebaseFirestore, 'getDocument')
+            .mockRejectedValue(new Error('Failed to fetch user'));
+
+          const result = await service.getUserById('user-id-123');
+
+          expect(result).toBeUndefined();
+        },
+      ));
+    });
+  });
+
   describe('saveUserIfNotExisting', () => {
     let getDocumentSpy: jest.SpyInstance;
     let setUserPublicFlagSpy: jest.SpyInstance;

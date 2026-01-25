@@ -6,7 +6,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BiteEffects } from '../effects';
 import { BiteActions } from '../actions';
-import type { Bite } from 'model';
+import type { Bite, PublicUser } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { bite } from '../selectors';
 import { AppActions } from '../../app/actions';
@@ -33,6 +33,7 @@ const Mock = {
   bucketlist: (): WritableSignal<string> => signal(''),
   user: jest.fn(),
   latestBites$: (): Observable<any> => of([]),
+  getUserById: (): Observable<any> => of({}),
 };
 
 const BITE_MOCK = {
@@ -441,19 +442,15 @@ describe(BiteEffects.name, () => {
 
   describe('loadUserFromBite$', () => {
     let getUserByBiteIdSpy: SpyInstance;
-    const BITE_CREATOR_MOCK = {
-      snapshot: {
-        data: {} as any,
-      },
-    } as any;
+    const BITE_CREATOR_MOCK = {} as PublicUser;
 
     beforeEach(() => {
       getUserByBiteIdSpy = jest
         .spyOn(apiService, 'getUserByBiteId')
-        .mockReturnValue(of(BITE_CREATOR_MOCK));
+        .mockReturnValue(of(BITE_CREATOR_MOCK) as any);
     });
 
-    it('should do nothing on non-bite url', () => {
+    it('should do nothing on non-bite url and profile url', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: routerNavigatedAction({
@@ -467,7 +464,7 @@ describe(BiteEffects.name, () => {
     });
 
     it('should return noPublicCreatorForBite on missing public creator', () => {
-      getUserByBiteIdSpy.mockReturnValue(of({ snapshot: undefined }));
+      getUserByBiteIdSpy.mockReturnValue(of(undefined));
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: routerNavigatedAction({
@@ -483,7 +480,7 @@ describe(BiteEffects.name, () => {
       expect(getUserByBiteIdSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should return loadedBiteCreator', () => {
+    it('should return loadedBiteCreator on bite url', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: routerNavigatedAction({
@@ -496,7 +493,68 @@ describe(BiteEffects.name, () => {
         const expected = 'a';
         const output = {
           a: BiteActions.loadedBiteCreator({
-            biteCreator: BITE_CREATOR_MOCK.snapshot.data,
+            biteCreator: BITE_CREATOR_MOCK,
+          }),
+        };
+
+        expectObservable(effects.loadUserFromBite$).toBe(expected, output);
+      });
+    });
+
+    it('should return loadedBiteCreator saved public profile with user id', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: AppActions.savedPublicProfile({
+            profile: { userId: 'userId' } as PublicUser,
+          }),
+        });
+
+        const expected = 'a';
+        const output = {
+          a: BiteActions.loadedBiteCreator({
+            biteCreator: BITE_CREATOR_MOCK,
+          }),
+        };
+
+        expectObservable(effects.loadUserFromBite$).toBe(expected, output);
+      });
+    });
+
+    it('should return noPublicCreatorForBite on saved public profile without user id', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: AppActions.savedPublicProfile({
+            profile: {} as PublicUser,
+          }),
+        });
+
+        effects.bite = signal(undefined);
+        effects.biteCreatorId = signal(undefined);
+
+        const expected = 'a';
+        const output = {
+          a: BiteActions.noPublicCreatorForBite(),
+        };
+
+        expectObservable(effects.loadUserFromBite$).toBe(expected, output);
+      });
+    });
+
+    it('should return loadedBiteCreator given a biteCreatorId', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: AppActions.savedPublicProfile({
+            profile: {} as PublicUser,
+          }),
+        });
+
+        (effects as any)['bite'] = (): string => undefined as any;
+        (effects as any)['biteCreatorId'] = (): string => 'biteCreatorId';
+
+        const expected = 'a';
+        const output = {
+          a: BiteActions.loadedBiteCreator({
+            biteCreator: BITE_CREATOR_MOCK,
           }),
         };
 

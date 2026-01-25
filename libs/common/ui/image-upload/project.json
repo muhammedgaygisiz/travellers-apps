@@ -1,0 +1,21 @@
+{
+  "name": "image-upload",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/common/ui/image-upload/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:common", "type:ui", "framework:ionic"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/common/ui/image-upload/jest.config.cts",
+        "tsConfig": "libs/common/ui/image-upload/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

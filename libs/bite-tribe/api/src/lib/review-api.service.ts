@@ -9,8 +9,8 @@ import {
 } from 'rxjs';
 import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
-import { BITE_COLLECTION } from './bite-api/utils/constants';
 import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
+import { BITE_COLLECTION } from './utils/constants';
 
 const REVIEW_COLLECTION = 'reviews';
 

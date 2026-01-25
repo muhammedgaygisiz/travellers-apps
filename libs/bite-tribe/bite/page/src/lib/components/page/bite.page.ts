@@ -33,7 +33,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
-import { ImageUploadComponent } from '../image-upload/image-upload.component';
+import { ImageUploadComponent } from 'image-upload';
 import type { Bite, Geopoint } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { currencyCodes } from 'utils';

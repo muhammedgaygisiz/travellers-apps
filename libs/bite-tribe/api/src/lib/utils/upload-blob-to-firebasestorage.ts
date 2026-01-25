@@ -2,12 +2,12 @@ import {
   FirebaseStorage,
   UploadFileOptions,
 } from '@capacitor-firebase/storage';
-import { dataUrlToBlob, guessExtFromContentType } from 'utils';
-import { v4 as uuidv4 } from 'uuid';
-import { BITE_COLLECTION } from './constants';
 import { writeBlobToFileSystem } from './write-blob-to-file-system';
+import { v4 as uuidv4 } from 'uuid';
 
-const upload = (fileUploadOptions: UploadFileOptions): Promise<string> => {
+const uploadToFirebase = (
+  fileUploadOptions: UploadFileOptions,
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     FirebaseStorage.uploadFile(fileUploadOptions, (evt, err) => {
       if (err) {
@@ -23,16 +23,16 @@ const upload = (fileUploadOptions: UploadFileOptions): Promise<string> => {
   });
 };
 
-export const uploadImageToFirebaseStorage = async (
+export const uploadBlobToFirebasestorage = async (
+  collection: string,
+  docId: string,
+  ext: string,
+  blob: Blob,
+  contentType: string,
   isWeb: boolean,
-  imageBase64: string,
-  biteId: string,
 ): Promise<string> => {
-  const { blob, contentType } = await dataUrlToBlob(imageBase64);
-  const ext = guessExtFromContentType(contentType);
-
   const imageId = uuidv4();
-  const imagePath = `images/${BITE_COLLECTION}/${biteId}/${imageId}.${ext}`;
+  const imagePath = `images/${collection}/${docId}/${imageId}.${ext}`;
 
   const fileUploadOptions: UploadFileOptions = {
     path: imagePath,
@@ -44,12 +44,12 @@ export const uploadImageToFirebaseStorage = async (
   };
 
   if (isWeb) {
-    return await upload(fileUploadOptions);
+    return await uploadToFirebase(fileUploadOptions);
   }
 
   const fileName = `${imageId}.${ext}`;
   const writeFileResult = await writeBlobToFileSystem(blob, fileName);
   fileUploadOptions.uri = writeFileResult.uri;
 
-  return await upload(fileUploadOptions);
+  return await uploadToFirebase(fileUploadOptions);
 };

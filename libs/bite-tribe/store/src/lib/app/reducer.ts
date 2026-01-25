@@ -3,8 +3,7 @@ import { AppActions } from './actions';
 import { AppSlice } from './app-slice.model';
 import { BiteActions } from '../bites/actions';
 import { fromAuth } from 'ta-firestore';
-import { routerNavigatedAction, routerRequestAction } from '@ngrx/router-store';
-import { PATH } from 'utils';
+import { routerRequestAction } from '@ngrx/router-store';
 
 const CLEAN_PROFILE_METADATA = {
   followers: 0,
@@ -100,7 +99,9 @@ export const reducer = createReducer<AppSlice>(
     (state, { profile }) => {
       return {
         ...state,
-        profile,
+        profile: {
+          ...profile,
+        },
       };
     },
   ),

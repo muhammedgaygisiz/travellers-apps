@@ -1,7 +1,7 @@
 import { Bite } from 'model';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { geohashForLocation } from 'geofire-common';
-import { BITE_COLLECTION } from './constants';
+import { BITE_COLLECTION } from '../../utils/constants';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 export const createBite = async (

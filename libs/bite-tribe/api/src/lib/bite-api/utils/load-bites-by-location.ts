@@ -5,7 +5,10 @@ import {
   FirebaseFirestore,
   GetCollectionResult,
 } from '@capacitor-firebase/firestore';
-import { BITE_COLLECTION, DEFAULT_SEARCH_RADIUS_IN_M } from './constants';
+import {
+  BITE_COLLECTION,
+  DEFAULT_SEARCH_RADIUS_IN_M,
+} from '../../utils/constants';
 import { toBite } from '../../utils/to-bite';
 
 const querySingleBound = (

@@ -1,12 +1,13 @@
 import { EditProfilePage } from '../edit-profile.page';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, signal } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import type { PublicUser } from 'model';
 import type { OverlayEventDetail } from '@ionic/core';
 
 jest.mock('localization');
+jest.mock('heic2any', () => ({}));
 
 describe(EditProfilePage.name, () => {
   let component: EditProfilePage;
@@ -36,6 +37,7 @@ describe(EditProfilePage.name, () => {
         displayName: '',
         about: '',
         email: '',
+        photoUrl: '',
         public: false,
       });
     });
@@ -90,7 +92,6 @@ describe(EditProfilePage.name, () => {
 
   describe('setDisplayNameEffect', () => {
     it('should return "Anonymous" when no user or publicUser is provided', () => {
-      compRef.setInput('user', undefined);
       compRef.setInput('publicUser', undefined);
 
       compRef.changeDetectorRef.detectChanges();
@@ -140,6 +141,7 @@ describe(EditProfilePage.name, () => {
           city: 'Test City',
           displayName: 'Test User',
           email: 'e@mail.com',
+          photoUrl: 'photo.jpg',
           public: true,
         });
       });
@@ -155,39 +157,10 @@ describe(EditProfilePage.name, () => {
           city: '',
           displayName: 'Anonymous',
           email: '',
+          photoUrl: '',
           public: false,
         });
       });
-    });
-  });
-
-  describe('userImage computed', () => {
-    it('should return undefined when no user is provided', () => {
-      expect(component.userImage()).toBeUndefined();
-    });
-
-    it('should return photoUrl from user when available', () => {
-      const user = {
-        photoUrl: 'https://example.com/photo.jpg',
-        providerData: [],
-      };
-
-      compRef.setInput('user', user);
-
-      expect(component.userImage()).toBe('https://example.com/photo.jpg');
-    });
-
-    it('should return photoUrl from providerData when user photoUrl is not available', () => {
-      const user = {
-        photoUrl: null,
-        providerData: [{ photoUrl: 'https://example.com/provider-photo.jpg' }],
-      };
-
-      compRef.setInput('user', user);
-
-      expect(component.userImage()).toBe(
-        'https://example.com/provider-photo.jpg',
-      );
     });
   });
 
@@ -317,6 +290,52 @@ describe(EditProfilePage.name, () => {
         component.handlePubicChange({ detail: { checked: true } } as any);
 
         expect(openConfirmationDialogSpy).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('cancel', () => {
+    describe('given modal is defined', () => {
+      it('should dismiss profile image selection modal with cancel role', () => {
+        const dismissSpy = jest.fn();
+        component.profileImageSelectionModal = signal({
+          dismiss: dismissSpy,
+        }) as any;
+
+        component.cancel();
+
+        expect(dismissSpy).toHaveBeenCalledWith(null, 'cancel');
+      });
+    });
+
+    describe('given modal is undefined', () => {
+      it('should not throw when dismissing modal', () => {
+        component.profileImageSelectionModal = signal(undefined) as any;
+
+        expect(() => component.cancel()).not.toThrow();
+      });
+    });
+  });
+
+  describe('dismissImageModal', () => {
+    describe('given modal is defined', () => {
+      it('should dismiss profile image selection modal', () => {
+        const dismissSpy = jest.fn();
+        component.profileImageSelectionModal = signal({
+          dismiss: dismissSpy,
+        }) as any;
+
+        component.dismissImageModal();
+
+        expect(dismissSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('given modal is undefined', () => {
+      it('should not throw when dismissing modal', () => {
+        component.profileImageSelectionModal = signal(undefined) as any;
+
+        expect(() => component.dismissImageModal()).not.toThrow();
       });
     });
   });

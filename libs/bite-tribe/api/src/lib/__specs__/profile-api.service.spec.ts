@@ -1,11 +1,14 @@
 import { ProfileApiService } from '../profile-api.service';
 import { AuthService } from 'ta-firestore';
 import { inject, TestBed } from '@angular/core/testing';
-import { isEmpty, lastValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { PublicUser } from 'model';
 import { TestScheduler } from 'rxjs/testing';
 import { ErrorHandler } from '@angular/core';
+import { getDownloadUrlFromFirebaseStorage, isBase64String } from 'utils';
+import { deleteCurrentImage } from '../utils/delete-current-image';
+import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -22,6 +25,19 @@ jest.mock('@capacitor-firebase/firestore', () => ({
     deleteDocument: jest.fn(),
     getCollection: jest.fn(),
   },
+}));
+
+jest.mock('utils', () => ({
+  isBase64String: jest.fn(),
+  getDownloadUrlFromFirebaseStorage: jest.fn(),
+}));
+
+jest.mock('../utils/delete-current-image', () => ({
+  deleteCurrentImage: jest.fn(),
+}));
+
+jest.mock('../utils/upload-base64-to-firebase-storage', () => ({
+  uploadBase64ToFirebaseStorage: jest.fn(),
 }));
 
 const MockedAuthService = {
@@ -228,35 +244,96 @@ describe(ProfileApiService.name, () => {
   });
 
   describe('updateUser', () => {
-    it('should call FirebaseFirestore.updateDocument', inject(
-      [ProfileApiService],
-      async (service: ProfileApiService) => {
-        const updateDocumentSpy = jest
+    describe('given a user without base64 as photoUrl', () => {
+      it('should call FirebaseFirestore.updateDocument', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const updateDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'updateDocument')
+            .mockResolvedValue();
+
+          const publicUser = {
+            userId: '123',
+            name: 'Updated User',
+          } as unknown as PublicUser;
+
+          await service.updateUser(publicUser);
+
+          expect(updateDocumentSpy).toHaveBeenCalledWith({
+            reference: 'users/123',
+            data: {
+              about: '',
+              city: '',
+              displayName: undefined,
+              email: undefined,
+              photoUrl: undefined,
+              public: false,
+              updatedAt: '2024-03-15T12:00:00.000Z',
+              updatedAtTimestamp: 1710504000000,
+            },
+          });
+        },
+      ));
+    });
+
+    describe('given a user with base64 string as photoUrl', () => {
+      beforeEach(() => {
+        (isBase64String as jest.Mock).mockReturnValue(true);
+        (deleteCurrentImage as jest.Mock).mockImplementation();
+        (uploadBase64ToFirebaseStorage as jest.Mock).mockResolvedValue(
+          Promise.resolve('new-photo-url'),
+        );
+        (getDownloadUrlFromFirebaseStorage as jest.Mock).mockReturnValue(
+          'download-url',
+        );
+        jest
           .spyOn(FirebaseFirestore, 'updateDocument')
-          .mockResolvedValue();
+          .mockResolvedValue(Promise.resolve());
+      });
 
-        const publicUser = {
-          userId: '123',
-          name: 'Updated User',
-        } as unknown as PublicUser;
+      it('should delete current image, upload base64 image and update the user', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const publicUser = {
+            userId: '123',
+            name: 'Updated User',
+            photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+          } as unknown as PublicUser;
 
-        await service.updateUser(publicUser);
+          await service.updateUser(publicUser);
 
-        expect(updateDocumentSpy).toHaveBeenCalledWith({
-          reference: 'users/123',
-          data: {
-            about: '',
-            city: '',
-            displayName: undefined,
-            email: undefined,
-            photoUrl: undefined,
-            public: false,
-            updatedAt: '2024-03-15T12:00:00.000Z',
-            updatedAtTimestamp: 1710504000000,
-          },
-        });
-      },
-    ));
+          expect(deleteCurrentImage).toHaveBeenCalledWith({
+            name: 'Updated User',
+            photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            userId: '123',
+          });
+          expect(getDownloadUrlFromFirebaseStorage).toHaveBeenCalledWith(
+            'new-photo-url',
+          );
+          expect(uploadBase64ToFirebaseStorage).toHaveBeenCalledWith(
+            true,
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            '123',
+            'users',
+          );
+          expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
+            reference: 'users/123',
+            data: {
+              about: '',
+              city: '',
+              displayName: undefined,
+              email: undefined,
+              name: 'Updated User',
+              photoUrl: 'download-url',
+              public: false,
+              updatedAt: '2024-03-15T12:00:00.000Z',
+              updatedAtTimestamp: 1710504000000,
+              userId: '123',
+            },
+          });
+        },
+      ));
+    });
 
     describe('given an error', () => {
       it('should handle the error and return undefined', inject(
@@ -284,9 +361,9 @@ describe(ProfileApiService.name, () => {
       it('should return empty observable', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
-          const result = service.getUserByBiteId(undefined);
+          const result = await service.getUserByBiteId(undefined);
 
-          expect(await lastValueFrom(result.pipe(isEmpty()))).toBeTruthy();
+          expect(result).toBeUndefined();
         },
       ));
     });
@@ -297,8 +374,8 @@ describe(ProfileApiService.name, () => {
         async (service: ProfileApiService) => {
           const mockedData = {
             snapshot: {
+              id: 'bite-user-id',
               data: {
-                userId: 'bite-user-id',
                 name: 'Bite User',
               },
             },
@@ -308,16 +385,28 @@ describe(ProfileApiService.name, () => {
             .spyOn(FirebaseFirestore, 'getDocument')
             .mockResolvedValue(mockedData);
 
+          const setDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'setDocument')
+            .mockResolvedValue(mockedData);
+
           const bite = { userId: 'bite-user-id' } as any;
 
-          const result$ = service.getUserByBiteId(bite);
-
-          const result = await lastValueFrom(result$);
+          const result = await service.getUserByBiteId(bite);
 
           expect(getDocumentSpy).toHaveBeenCalledWith({
             reference: 'users/bite-user-id',
           });
-          expect(result).toEqual(mockedData);
+          expect(setDocumentSpy).toHaveBeenCalledWith({
+            reference: 'users/bite-user-id',
+            data: {
+              userId: 'bite-user-id',
+              name: 'Bite User',
+            },
+          });
+          expect(result).toEqual({
+            userId: 'bite-user-id',
+            name: 'Bite User',
+          });
         },
       ));
     });
@@ -336,11 +425,67 @@ describe(ProfileApiService.name, () => {
 
           const bite = { userId: 'bite-user-id' } as any;
 
-          const result$ = service.getUserByBiteId(bite);
+          const result = await service.getUserByBiteId(bite);
 
-          await expect(lastValueFrom(result$)).rejects.toThrow(
-            'Failed to fetch user',
-          );
+          expect(result).toBeUndefined();
+        },
+      ));
+    });
+  });
+
+  describe('getUserById', () => {
+    describe('given no biteCreatorId', () => {
+      it('should return undefined', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const result = await service.getUserById('');
+
+          expect(result).toBeUndefined();
+        },
+      ));
+    });
+
+    describe('given a biteCreatorId', () => {
+      it('should call FirebaseFirestore.getDocument and return the user data', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const mockedData = {
+            snapshot: {
+              id: 'user-id-123',
+              data: {
+                name: 'Test User',
+              },
+            },
+          } as any;
+
+          const getDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'getDocument')
+            .mockResolvedValue(mockedData);
+
+          const result = await service.getUserById('user-id-123');
+
+          expect(getDocumentSpy).toHaveBeenCalledWith({
+            reference: 'users/user-id-123',
+          });
+          expect(result).toEqual({
+            userId: 'user-id-123',
+            name: 'Test User',
+          });
+        },
+      ));
+    });
+
+    describe('given an error', () => {
+      it('should handle the error and return undefined', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          jest
+            .spyOn(FirebaseFirestore, 'getDocument')
+            .mockRejectedValue(new Error('Failed to fetch user'));
+
+          const result = await service.getUserById('user-id-123');
+
+          expect(result).toBeUndefined();
         },
       ));
     });

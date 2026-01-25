@@ -1,7 +1,7 @@
 import { writeBlobToFileSystem } from '../write-blob-to-file-system';
 
 const toBase64Mock = jest.fn();
-jest.mock('../../../utils/to-base-64', () => ({
+jest.mock('../to-base-64', () => ({
   toBase64: (): any => toBase64Mock,
 }));
 

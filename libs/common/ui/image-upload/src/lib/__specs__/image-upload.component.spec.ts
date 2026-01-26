@@ -264,7 +264,7 @@ describe('ImageUploadComponent', () => {
 
         expect(Camera.requestPermissions).toHaveBeenCalled();
         expect(Camera.getPhoto).toHaveBeenCalled();
-        expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo, undefined);
+        expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo);
         expect(mockEmit).toHaveBeenCalledWith({ latitude: 3, longitude: 4 });
       });
     });
@@ -301,7 +301,7 @@ describe('ImageUploadComponent', () => {
       };
       privateComponent.readAndEmitPositionFrom(photo);
 
-      expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo, undefined);
+      expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo);
       expect(mockEmit).toHaveBeenCalledWith({ latitude: 7, longitude: 8 });
     });
 
@@ -319,7 +319,7 @@ describe('ImageUploadComponent', () => {
       };
       privateComponent.readAndEmitPositionFrom(photo);
 
-      expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo, undefined);
+      expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo);
       expect(warnSpy).toHaveBeenCalledWith(
         'Error reading GPS position from photo:',
         error,
@@ -720,7 +720,6 @@ describe('ImageUploadComponent', () => {
         expect(FilePicker.pickImages).toHaveBeenCalledWith({ readData: true });
         expect(getExifDataFromFilePath).toHaveBeenCalledWith(
           '/path/to/image.jpg',
-          undefined,
         );
         expect(mockEmit).toHaveBeenCalledWith({ latitude: 10, longitude: 20 });
       });
@@ -756,7 +755,6 @@ describe('ImageUploadComponent', () => {
 
         expect(getExifDataFromFilePath).toHaveBeenCalledWith(
           '/path/to/file.jpg',
-          undefined,
         );
         expect(mockEmit).toHaveBeenCalledWith({ latitude: 15, longitude: 25 });
       });

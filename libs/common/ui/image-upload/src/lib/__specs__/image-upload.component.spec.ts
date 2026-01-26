@@ -258,6 +258,45 @@ describe('ImageUploadComponent', () => {
     });
   });
 
+  describe('readAndEmitPositionFrom', () => {
+    it('should emit position from photo', () => {
+      const photo = { base64String: 'abc', format: 'jpeg' };
+      (getExifDataFromPhoto as jest.Mock).mockReturnValue({
+        latitude: 7,
+        longitude: 8,
+      });
+
+      const privateComponent = component as unknown as {
+        readAndEmitPositionFrom: (photo: any) => void;
+      };
+      privateComponent.readAndEmitPositionFrom(photo);
+
+      expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo, undefined);
+      expect(mockEmit).toHaveBeenCalledWith({ latitude: 7, longitude: 8 });
+    });
+
+    it('should handle errors when emitting position from photo', () => {
+      const photo = { base64String: 'abc', format: 'jpeg' };
+      const error = new Error('EXIF error');
+      (getExifDataFromPhoto as jest.Mock).mockImplementation(() => {
+        throw error;
+      });
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const privateComponent = component as unknown as {
+        readAndEmitPositionFrom: (photo: any) => void;
+      };
+      privateComponent.readAndEmitPositionFrom(photo);
+
+      expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo, undefined);
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Error reading GPS position from photo:',
+        error,
+      );
+    });
+  });
+
   describe('setValueAndTriggerChange', () => {
     it('should set value and trigger change on setValueAndTriggerChange', () => {
       const testFile = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });

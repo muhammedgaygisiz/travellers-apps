@@ -50,7 +50,7 @@ describe('getExifDataFromFilePath', () => {
     expect(EXIFR.parse).toHaveBeenCalled();
   });
 
-  it('should return fallback position if EXIF data is missing', async () => {
+  it('should return undefined if EXIF data is missing', async () => {
     const mockBase64 = 'base64data';
     (Filesystem.readFile as jest.Mock).mockResolvedValue({
       data: mockBase64,
@@ -64,23 +64,14 @@ describe('getExifDataFromFilePath', () => {
     (EXIFR.parse as jest.Mock).mockResolvedValue({});
 
     const result = await getExifDataFromFilePath(mockFilePath);
-    expect(result).toEqual({ latitude: 0, longitude: 0 });
+    expect(result).toBeUndefined();
   });
 
-  it('should return fallback position if an error is thrown', async () => {
+  it('should return undefined if an error is thrown', async () => {
     const error = new Error('File read error');
     (Filesystem.readFile as jest.Mock).mockRejectedValue(error);
 
     const result = await getExifDataFromFilePath(mockFilePath);
-    expect(result).toEqual({ latitude: 0, longitude: 0 });
-  });
-
-  it('should use custom fallback position', async () => {
-    const error = new Error('File read error');
-    (Filesystem.readFile as jest.Mock).mockRejectedValue(error);
-
-    const customFallback = { latitude: 123, longitude: 456 };
-    const result = await getExifDataFromFilePath(mockFilePath, customFallback);
-    expect(result).toEqual(customFallback);
+    expect(result).toBeUndefined();
   });
 });

@@ -274,7 +274,11 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   private async patchPositionFromFilePath(filePath: string): Promise<void> {
     try {
-      const exifData = await getExifDataFromFilePath(filePath, this.position());
+      const exifData = await getExifDataFromFilePath(filePath);
+
+      if (!exifData) {
+        return;
+      }
 
       this.positionFromImage.emit(exifData);
     } catch (e) {
@@ -285,8 +289,11 @@ export class ImageUploadComponent implements ControlValueAccessor {
   private readAndEmitPositionFrom(photo: Photo): void {
     if (photo) {
       try {
-        const exifData = getExifDataFromPhoto(photo, this.position());
+        const exifData = getExifDataFromPhoto(photo);
 
+        if (!exifData) {
+          return;
+        }
         this.positionFromImage.emit(exifData);
       } catch (e) {
         console.warn('Error reading GPS position from photo:', e);

@@ -1,16 +1,13 @@
 import * as exifr from 'exifr';
 import { Filesystem } from '@capacitor/filesystem';
 
-export const getExifDataFromFilePath = async (
-  filePath: string,
-  fallbackPosition = {
-    latitude: 0,
-    longitude: 0,
-  },
-): Promise<{
+type Position = {
   latitude: number;
   longitude: number;
-}> => {
+};
+export const getExifDataFromFilePath = async (
+  filePath: string,
+): Promise<Position | undefined> => {
   try {
     // Read the file as base64
     const fileContent = await Filesystem.readFile({
@@ -33,9 +30,9 @@ export const getExifDataFromFilePath = async (
       };
     }
 
-    return fallbackPosition;
+    return undefined;
   } catch (error) {
     console.error('Error reading EXIF data from file path:', error);
-    return fallbackPosition;
+    return undefined;
   }
 };

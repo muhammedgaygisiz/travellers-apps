@@ -288,6 +288,37 @@ describe('ImageUploadComponent', () => {
     });
   });
 
+  describe('showImageSourceDialog', () => {
+    it('should create and present alert dialog', async () => {
+      const alertMock = {
+        present: jest.fn(),
+      };
+      alertControllerMock.create = jest.fn().mockResolvedValue(alertMock);
+
+      (component as any).alertController = alertControllerMock;
+      await component.showImageSourceDialog();
+
+      expect(alertControllerMock.create).toHaveBeenCalledWith({
+        header: 'Choose Image Source',
+        buttons: [
+          {
+            role: 'cancel',
+            text: 'Cancel',
+          },
+          {
+            handler: expect.any(Function),
+            text: 'Take Photo',
+          },
+          {
+            handler: expect.any(Function),
+            text: 'Choose from Gallery',
+          },
+        ],
+      });
+      expect(alertMock.present).toHaveBeenCalled();
+    });
+  });
+
   describe('readAndEmitPositionFrom', () => {
     it('should emit position from photo', () => {
       const photo = { base64String: 'abc', format: 'jpeg' };

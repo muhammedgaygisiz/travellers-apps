@@ -190,8 +190,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
     }
   }
 
-  private async showImageSourceDialog(): Promise<void> {
-    // TODO: Add translation support for dialog text
+  async showImageSourceDialog(): Promise<void> {
     const alert = await this.alertController.create({
       header: 'Choose Image Source',
       buttons: [

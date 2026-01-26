@@ -1,5 +1,5 @@
 import { ImageUploadComponent } from '../image-upload.component';
-import { Camera } from '@capacitor/camera';
+import { Camera, Photo } from '@capacitor/camera';
 import { compressFile, compressPhoto } from 'image-compression';
 import { getExifDataFromFile } from '../utils/get-exif-data-from-file';
 import { getExifDataFromPhoto } from '../utils/get-exif-data-from-photo';
@@ -424,6 +424,57 @@ describe('ImageUploadComponent', () => {
 
         expect(getExifDataFromFile).not.toHaveBeenCalled();
         expect(mockEmit).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('readAndEmitPositionFrom', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    describe('given a file', () => {
+      it('should emit position from photo', () => {
+        const photo = { base64String: 'abc', format: 'jpeg' } as Photo;
+        (getExifDataFromPhoto as jest.Mock).mockReturnValue({
+          latitude: 7,
+          longitude: 8,
+        });
+
+        component.readAndEmitPositionFrom(photo);
+        expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo);
+        expect(mockEmit).toHaveBeenCalledWith({ latitude: 7, longitude: 8 });
+      });
+    });
+
+    describe('given file is not defined', () => {
+      it('should do nothing if photo is not defined', () => {
+        component.readAndEmitPositionFrom(null as unknown as Photo);
+        expect(getExifDataFromPhoto).not.toHaveBeenCalled();
+        expect(mockEmit).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('given an error', () => {
+      it('should handle errors when emitting position from photo', () => {
+        const photo = { base64String: 'abc', format: 'jpeg' } as Photo;
+        const error = new Error('EXIF error');
+        (getExifDataFromPhoto as jest.Mock).mockImplementation(() => {
+          throw error;
+        });
+         
+        const warnSpy = jest
+          .spyOn(console, 'warn')
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
+
+        component.readAndEmitPositionFrom(photo);
+
+        expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo);
+        expect(warnSpy).toHaveBeenCalledWith(
+          'Error reading GPS position from photo:',
+          error,
+        );
       });
     });
   });

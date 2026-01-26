@@ -281,7 +281,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
     }
   }
 
-  private readAndEmitPositionFrom(photo: Photo): void {
+  readAndEmitPositionFrom(photo: Photo): void {
     if (photo) {
       try {
         const exifData = getExifDataFromPhoto(photo);

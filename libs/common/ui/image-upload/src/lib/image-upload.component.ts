@@ -20,6 +20,7 @@ import {
   IonModal,
   IonTitle,
   IonToolbar,
+  AlertController,
 } from '@ionic/angular/standalone';
 import {
   Camera,
@@ -34,6 +35,8 @@ import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { Placeholder } from './components/placeholder';
 import { getExifDataFromPhoto } from './utils/get-exif-data-from-photo';
 import { getExifDataFromFile } from './utils/get-exif-data-from-file';
+import { FilePicker } from '@capawesome/capacitor-file-picker';
+import { getExifDataFromFilePath } from './utils/get-exif-data-from-file-path';
 
 const photoOptions = {
   quality: 90,
@@ -70,6 +73,7 @@ const photoOptions = {
 })
 export class ImageUploadComponent implements ControlValueAccessor {
   private readonly platform = inject(Platform);
+  private readonly alertController = inject(AlertController);
   position = input<{
     latitude: number;
     longitude: number;
@@ -128,6 +132,13 @@ export class ImageUploadComponent implements ControlValueAccessor {
       return;
     }
 
+    // On Android, show a dialog to choose between camera and gallery
+    if (this.platform.is('android')) {
+      this.showImageSourceDialog();
+      return;
+    }
+
+    // On iOS and other platforms, use the default camera prompt
     this.getImageFromNative();
   }
 
@@ -169,6 +180,99 @@ export class ImageUploadComponent implements ControlValueAccessor {
     } catch (e) {
       console.error('Error taking photo:', e);
       throw e;
+    }
+  }
+
+  private async showImageSourceDialog(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Choose Image Source',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Take Photo',
+          handler: (): void => {
+            this.takePhotoWithCamera();
+          },
+        },
+        {
+          text: 'Choose from Gallery',
+          handler: (): void => {
+            this.pickImageFromGallery();
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  private async takePhotoWithCamera(): Promise<void> {
+    try {
+      await Camera.requestPermissions();
+
+      const photo = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+      });
+
+      this.readAndEmitPositionFrom(photo);
+
+      const compressedPhoto = await compressPhoto(photo);
+
+      this.setValueAndTriggerChange(compressedPhoto);
+    } catch (e) {
+      console.error('Error taking photo:', e);
+    }
+  }
+
+  private async pickImageFromGallery(): Promise<void> {
+    try {
+      const result = await FilePicker.pickImages({
+        readData: true,
+      });
+
+      if (result.files.length === 0) {
+        return;
+      }
+
+      const pickedFile = result.files[0];
+
+      // Extract EXIF data from the file path
+      if (pickedFile.path) {
+        await this.patchPositionFromFilePath(pickedFile.path);
+      }
+
+      // Convert the file data to a File object
+      if (pickedFile.data) {
+        const base64Data = pickedFile.data;
+        const blob = await fetch(
+          `data:${pickedFile.mimeType};base64,${base64Data}`,
+        ).then((res) => res.blob());
+        const file = new File([blob], pickedFile.name, {
+          type: pickedFile.mimeType,
+        });
+
+        const compressedFile = await compressFile(file);
+        this.setValueAndTriggerChange(compressedFile);
+        this.imageFile = compressedFile;
+      }
+    } catch (e) {
+      console.error('Error picking image from gallery:', e);
+    }
+  }
+
+  private async patchPositionFromFilePath(filePath: string): Promise<void> {
+    try {
+      const exifData = await getExifDataFromFilePath(filePath, this.position());
+
+      this.positionFromImage.emit(exifData);
+    } catch (e) {
+      console.warn('Error reading GPS position from file path:', e);
     }
   }
 

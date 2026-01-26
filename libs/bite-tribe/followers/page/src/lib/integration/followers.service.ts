@@ -4,6 +4,7 @@ import { FollowersDataAccessService } from 'bite-tribe/followers-data-access';
 import type { PublicUser } from 'model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class FollowersService {
@@ -48,7 +49,7 @@ export class FollowersService {
   }
 
   userClicked(user: PublicUser): void {
-    this.navController.navigateForward(['profile', user.userId]);
+    this.navController.navigateForward([PATH.PROFILE, user.userId]);
   }
 
   async unfollowClicked(user: PublicUser): Promise<void> {

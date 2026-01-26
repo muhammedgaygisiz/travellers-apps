@@ -19,6 +19,7 @@ import {
   IonButtons,
 } from '@ionic/angular/standalone';
 import type { PublicUser } from 'model';
+import { PATH } from 'utils';
 
 @Component({
   selector: 'followers-list',
@@ -49,4 +50,6 @@ export class FollowersListComponent {
 
   userClick = output<PublicUser>();
   unfollowClick = output<PublicUser>();
+
+  readonly defaultHref = `/${PATH.MY_PROFILE}`;
 }

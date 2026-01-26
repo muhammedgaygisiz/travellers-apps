@@ -26,14 +26,14 @@ describe('getExifDataFromFile', () => {
     expect(EXIFR.parse).toHaveBeenCalled();
   });
 
-  it('should return default values if EXIF data is missing', async () => {
+  it('should return undefined if EXIF data is missing', async () => {
     (EXIFR.parse as jest.Mock).mockImplementation(() => ({
       latitude: 0,
       longitude: 0,
     }));
 
     const result = await getExifDataFromFile(mockFile);
-    expect(result).toEqual({ latitude: 0, longitude: 0 });
+    expect(result).toBeUndefined();
     expect(EXIFR.parse).toHaveBeenCalled();
   });
 
@@ -44,7 +44,7 @@ describe('getExifDataFromFile', () => {
     });
 
     const result = await getExifDataFromFile(mockFile);
-    expect(result).toEqual({ latitude: 0, longitude: 0 });
+    expect(result).toEqual(undefined);
     expect(EXIFR.parse).toHaveBeenCalled();
   });
 
@@ -54,10 +54,7 @@ describe('getExifDataFromFile', () => {
       longitude: 456,
     }));
 
-    const result = await getExifDataFromFile(mockFile, {
-      latitude: 123,
-      longitude: 456,
-    });
+    const result = await getExifDataFromFile(mockFile);
     expect(result).toEqual({ latitude: 123, longitude: 456 });
   });
 });

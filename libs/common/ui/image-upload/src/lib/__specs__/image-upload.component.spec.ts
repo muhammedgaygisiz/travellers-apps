@@ -166,7 +166,7 @@ describe('ImageUploadComponent', () => {
     } as unknown as Event;
 
     await component.onFileSelected(event);
-    expect(getExifDataFromFile).toHaveBeenCalledWith(file, undefined);
+    expect(getExifDataFromFile).toHaveBeenCalledWith(file);
     expect(mockEmit).toHaveBeenCalledWith({ latitude: 1, longitude: 2 });
   });
 

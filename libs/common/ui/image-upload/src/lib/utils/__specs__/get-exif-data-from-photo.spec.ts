@@ -56,18 +56,12 @@ describe('getExifDataFromPhoto', () => {
       };
 
       const result = getExifDataFromPhoto(mockPhoto);
-      expect(result).toEqual({
-        latitude: 0,
-        longitude: 0,
-      });
+      expect(result).toBeUndefined();
     });
 
     it('should return default coordinates when photo is null', () => {
       const result = getExifDataFromPhoto(null as unknown as Photo);
-      expect(result).toEqual({
-        latitude: 0,
-        longitude: 0,
-      });
+      expect(result).toBeUndefined();
     });
 
     it('should return default coordinates when GPS data is incomplete', () => {
@@ -84,24 +78,7 @@ describe('getExifDataFromPhoto', () => {
       };
 
       const result = getExifDataFromPhoto(mockPhoto);
-      expect(result).toEqual({
-        latitude: 0,
-        longitude: 0,
-      });
-    });
-
-    it('should use fallback position when provided and no valid GPS data', () => {
-      const mockPhoto: Photo = {
-        ...BASE_PHOTO,
-      };
-
-      const fallbackPosition = {
-        latitude: 51.5074,
-        longitude: -0.1278,
-      };
-
-      const result = getExifDataFromPhoto(mockPhoto, fallbackPosition);
-      expect(result).toEqual(fallbackPosition);
+      expect(result).toBeUndefined();
     });
   });
 
@@ -154,10 +131,7 @@ describe('getExifDataFromPhoto', () => {
       };
 
       const result = getExifDataFromPhoto(mockPhoto);
-      expect(result).toEqual({
-        latitude: 0,
-        longitude: 0,
-      });
+      expect(result).toBeUndefined();
     });
   });
 });

@@ -28,6 +28,7 @@ import {
   FormBuilder,
   ReactiveFormsModule,
   ValidationErrors,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -40,6 +41,7 @@ import { currencyCodes } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
 import { getNormalizedPrice } from './utils/get-normalized-price';
+import { ImageValidator } from './utils/image-validator';
 
 @Component({
   selector: 'bite',
@@ -112,18 +114,7 @@ export class BitePage {
       rating: [0, [Validators.min(0), Validators.max(5)]],
     },
     {
-      validators: [
-        (fg): ValidationErrors | null => {
-          const imageValue = fg.get('image')?.value;
-          const imagePathValue = fg.get('imagePath')?.value;
-
-          if (!imageValue && !imagePathValue) {
-            return { imageRequired: true };
-          }
-
-          return null;
-        },
-      ],
+      validators: [ImageValidator],
     },
   );
 

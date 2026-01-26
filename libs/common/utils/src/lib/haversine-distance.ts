@@ -5,11 +5,7 @@ const radiusMap: Record<string, number> = {
   mi: 3958.8,
 };
 
-const toRad = (value: number | undefined): number | undefined => {
-  if (value === undefined) {
-    return undefined;
-  }
-
+const toRad = (value: number): number => {
   return (value * Math.PI) / 180;
 };
 
@@ -18,7 +14,7 @@ export const haversineDistance = (
   lon1?: number,
   lat2?: number,
   lon2?: number,
-  unit = 'km'
+  unit = 'km',
 ): string | undefined => {
   const R = radiusMap[unit] || radiusMap['km']; // Default to kilometers
 
@@ -34,16 +30,8 @@ export const haversineDistance = (
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
 
-  if (dLat === undefined || dLon === undefined) {
-    return undefined;
-  }
-
   const rad1 = toRad(lat1);
   const rad2 = toRad(lat2);
-
-  if (rad1 === undefined || rad2 === undefined) {
-    return undefined;
-  }
 
   const a =
     Math.sin(dLat / 2) ** 2 +

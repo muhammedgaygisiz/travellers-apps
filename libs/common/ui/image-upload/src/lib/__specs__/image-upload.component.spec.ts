@@ -127,150 +127,327 @@ describe('ImageUploadComponent', () => {
     console.error = originalConsoleError; // Restore original console.error
   });
 
-  it('should call clickOnFileUploader on web', () => {
-    const spy = jest.spyOn(
-      component as unknown as { clickOnFileUploader: () => void },
-      'clickOnFileUploader',
-    );
-    component.onImageUploadClick();
-    expect(spy).toHaveBeenCalled();
-  });
-
-  it('should call getImageFromNative on native', async () => {
-    // First create new component
-    fixture = TestBed.createComponent(ImageUploadComponent);
-    component = fixture.componentInstance;
-
-    // Mock isWeb signal directly
-    component.isWeb = signal(false);
-
-    // Set up spy on the private method
-    const getImageFromNativeSpy = jest.spyOn(
-      component as unknown as { getImageFromNative: () => Promise<void> },
-      'getImageFromNative',
-    );
-
-    // Setup other required mocks
-    jest
-      .spyOn(component.positionFromImage, 'emit')
-      .mockImplementation(mockEmit);
-    Object.defineProperty(component, 'fileUpload', {
-      value: () => ({
-        nativeElement: { click: jest.fn(), value: '' },
-      }),
+  describe('onImageUploadClick', () => {
+    it('should call clickOnFileUploader on web', () => {
+      const spy = jest.spyOn(
+        component as unknown as { clickOnFileUploader: () => void },
+        'clickOnFileUploader',
+      );
+      component.onImageUploadClick();
+      expect(spy).toHaveBeenCalled();
     });
 
-    compRef.changeDetectorRef.detectChanges();
+    it('should call getImageFromNative on native', async () => {
+      // First create new component
+      fixture = TestBed.createComponent(ImageUploadComponent);
+      component = fixture.componentInstance;
 
-    // Act
-    await component.onImageUploadClick();
+      // Mock isWeb signal directly
+      component.isWeb = signal(false);
 
-    // Assert
-    expect(getImageFromNativeSpy).toHaveBeenCalled();
-  });
+      // Set up spy on the private method
+      const getImageFromNativeSpy = jest.spyOn(
+        component as unknown as { getImageFromNative: () => Promise<void> },
+        'getImageFromNative',
+      );
 
-  it('should emit position from file on file select', async () => {
-    const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-    (getExifDataFromFile as jest.Mock).mockResolvedValue({
-      latitude: 1,
-      longitude: 2,
+      // Setup other required mocks
+      jest
+        .spyOn(component.positionFromImage, 'emit')
+        .mockImplementation(mockEmit);
+      Object.defineProperty(component, 'fileUpload', {
+        value: () => ({
+          nativeElement: { click: jest.fn(), value: '' },
+        }),
+      });
+
+      compRef.changeDetectorRef.detectChanges();
+
+      // Act
+      await component.onImageUploadClick();
+
+      // Assert
+      expect(getImageFromNativeSpy).toHaveBeenCalled();
     });
-    (compressFile as jest.Mock).mockResolvedValue(file);
-
-    const event = {
-      target: { files: [file] },
-    } as unknown as Event;
-
-    await component.onFileSelected(event);
-    expect(getExifDataFromFile).toHaveBeenCalledWith(file, undefined);
-    expect(mockEmit).toHaveBeenCalledWith({ latitude: 1, longitude: 2 });
   });
 
-  it('should emit position from photo on native image', async () => {
-    const photo = { base64String: 'abc', format: 'jpeg' };
+  describe('onFileSelected', () => {
+    describe('given an event with a file', () => {
+      it('should emit position from file on file select', async () => {
+        const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+        (getExifDataFromFile as jest.Mock).mockResolvedValue({
+          latitude: 1,
+          longitude: 2,
+        });
+        (compressFile as jest.Mock).mockResolvedValue(file);
 
-    (Camera.requestPermissions as jest.Mock).mockResolvedValue(undefined);
-    (Camera.getPhoto as jest.Mock).mockResolvedValue(photo);
-    (getExifDataFromPhoto as jest.Mock).mockReturnValue({
-      latitude: 3,
-      longitude: 4,
+        const event = {
+          target: { files: [file] },
+        } as unknown as Event;
+
+        await component.onFileSelected(event);
+        expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+        expect(mockEmit).toHaveBeenCalledWith({ latitude: 1, longitude: 2 });
+      });
     });
-    (compressPhoto as jest.Mock).mockResolvedValue(
-      new File(['dummy'], 'test.jpg', { type: 'image/jpeg' }),
-    );
 
-    // Mock FileReader
-    const mockFileReader: MockFileReader = {
-      readAsDataURL: jest.fn(),
-      onload: null,
-      result: 'data:image/jpeg;base64,abc',
-      EMPTY: 0,
-      LOADING: 1,
-      DONE: 2,
-    };
+    describe('given an event without a file', () => {
+      it('should not emit position on file select', async () => {
+        const event = {
+          target: { files: [] },
+        } as unknown as Event;
 
-    // @ts-expect-error - Mocking FileReader
-    global.FileReader = jest.fn(() => mockFileReader);
-
-    const privateComponent = component as unknown as {
-      getImageFromNative: () => Promise<void>;
-    };
-    await privateComponent.getImageFromNative();
-
-    expect(Camera.requestPermissions).toHaveBeenCalled();
-    expect(Camera.getPhoto).toHaveBeenCalled();
-    expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo, undefined);
-    expect(mockEmit).toHaveBeenCalledWith({ latitude: 3, longitude: 4 });
-  });
-
-  it('should set value and trigger change on setValueAndTriggerChange', () => {
-    const testFile = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-    const onChange = jest.fn();
-    const onTouch = jest.fn();
-    component._onChange = onChange;
-    component._onTouch = onTouch;
-
-    // Mock FileReader
-    const mockFileReader: MockFileReader = {
-      readAsDataURL: jest.fn(),
-      onload: null,
-      result: 'data:image/jpeg;base64,abc',
-      EMPTY: 0,
-      LOADING: 1,
-      DONE: 2,
-    };
-
-    // @ts-expect-error - Mocking FileReader
-    global.FileReader = jest.fn(() => mockFileReader);
-
-    const privateComponent = component as any;
-    privateComponent.setValueAndTriggerChange(testFile);
-
-    // Simulate FileReader onload
-    if (mockFileReader.onload) {
-      mockFileReader.onload();
-    }
-
-    expect(component.value()).toBe('data:image/jpeg;base64,abc');
-    expect(onChange).toHaveBeenCalledWith('data:image/jpeg;base64,abc');
-    expect(onTouch).toHaveBeenCalled();
-  });
-
-  it('should clear image and emit fallback position', () => {
-    component.value.set('data:image/jpeg;base64,abc');
-    fixture.componentRef.setInput('position', { latitude: 5, longitude: 6 });
-    component.clearImage();
-    expect(component.value()).toBe(null);
-    expect(mockEmit).toHaveBeenCalledWith({ latitude: 5, longitude: 6 });
-  });
-
-  it('should clear file input value on clearImage', () => {
-    const fileUpload = { nativeElement: { value: 'something' } };
-    Object.defineProperty(component, 'fileUpload', {
-      value: () => fileUpload,
+        await component.onFileSelected(event);
+        expect(mockEmit).not.toHaveBeenCalled();
+      });
     });
-    component.clearImage();
-    expect(fileUpload.nativeElement.value).toBe('');
+  });
+
+  describe('clickOnFileUploader', () => {
+    describe('given a fileUpload element', () => {
+      it('should trigger click on file upload element', () => {
+        const clickMock = jest.fn();
+        (component as any).fileUpload = (): any => ({
+          nativeElement: { click: clickMock },
+        });
+
+        component['clickOnFileUploader']();
+        expect(clickMock).toHaveBeenCalled();
+      });
+    });
+
+    describe('given no fileUpload element', () => {
+      it('should log an error', () => {
+        (component as any).fileUpload = (): any => null;
+
+        component['clickOnFileUploader']();
+        expect(console.error).toHaveBeenCalledWith(
+          'File upload element not found',
+        );
+      });
+    });
+  });
+
+  describe('getImageFromNative', () => {
+    describe('when executed', () => {
+      it('should emit position from photo on native image', async () => {
+        const photo = { base64String: 'abc', format: 'jpeg' };
+
+        (Camera.requestPermissions as jest.Mock).mockResolvedValue(undefined);
+        (Camera.getPhoto as jest.Mock).mockResolvedValue(photo);
+        (getExifDataFromPhoto as jest.Mock).mockReturnValue({
+          latitude: 3,
+          longitude: 4,
+        });
+        (compressPhoto as jest.Mock).mockResolvedValue(
+          new File(['dummy'], 'test.jpg', { type: 'image/jpeg' }),
+        );
+
+        // Mock FileReader
+        const mockFileReader: MockFileReader = {
+          readAsDataURL: jest.fn(),
+          onload: null,
+          result: 'data:image/jpeg;base64,abc',
+          EMPTY: 0,
+          LOADING: 1,
+          DONE: 2,
+        };
+
+        // @ts-expect-error - Mocking FileReader
+        global.FileReader = jest.fn(() => mockFileReader);
+
+        const privateComponent = component as unknown as {
+          getImageFromNative: () => Promise<void>;
+        };
+        await privateComponent.getImageFromNative();
+
+        expect(Camera.requestPermissions).toHaveBeenCalled();
+        expect(Camera.getPhoto).toHaveBeenCalled();
+        expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo, undefined);
+        expect(mockEmit).toHaveBeenCalledWith({ latitude: 3, longitude: 4 });
+      });
+    });
+
+    describe('given an error accured', () => {
+      it('should log the error', async () => {
+        const error = new Error('Camera error');
+        (Camera.requestPermissions as jest.Mock).mockRejectedValue(error);
+
+        const privateComponent = component as unknown as {
+          getImageFromNative: () => Promise<void>;
+        };
+        await expect(privateComponent.getImageFromNative()).rejects.toThrow(
+          'Camera error',
+        );
+        expect(console.error).toHaveBeenCalledWith(
+          'Error taking photo:',
+          error,
+        );
+      });
+    });
+  });
+
+  describe('readAndEmitPositionFrom', () => {
+    it('should emit position from photo', () => {
+      const photo = { base64String: 'abc', format: 'jpeg' };
+      (getExifDataFromPhoto as jest.Mock).mockReturnValue({
+        latitude: 7,
+        longitude: 8,
+      });
+
+      const privateComponent = component as unknown as {
+        readAndEmitPositionFrom: (photo: any) => void;
+      };
+      privateComponent.readAndEmitPositionFrom(photo);
+
+      expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo, undefined);
+      expect(mockEmit).toHaveBeenCalledWith({ latitude: 7, longitude: 8 });
+    });
+
+    it('should handle errors when emitting position from photo', () => {
+      const photo = { base64String: 'abc', format: 'jpeg' };
+      const error = new Error('EXIF error');
+      (getExifDataFromPhoto as jest.Mock).mockImplementation(() => {
+        throw error;
+      });
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const privateComponent = component as unknown as {
+        readAndEmitPositionFrom: (photo: any) => void;
+      };
+      privateComponent.readAndEmitPositionFrom(photo);
+
+      expect(getExifDataFromPhoto).toHaveBeenCalledWith(photo, undefined);
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Error reading GPS position from photo:',
+        error,
+      );
+    });
+  });
+
+  describe('patchPositionFromFile', () => {
+    describe('given a file', () => {
+      it('should emit position from file', async () => {
+        const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+        (getExifDataFromFile as jest.Mock).mockResolvedValue({
+          latitude: 9,
+          longitude: 10,
+        });
+
+        const privateComponent = component as unknown as {
+          patchPositionFromFile: (file: File | undefined) => Promise<void>;
+        };
+        await privateComponent.patchPositionFromFile(file);
+
+        expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+        expect(mockEmit).toHaveBeenCalledWith({ latitude: 9, longitude: 10 });
+      });
+
+      it('should not emit if no EXIF data found in file', async () => {
+        const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+        (getExifDataFromFile as jest.Mock).mockResolvedValue(undefined);
+
+        const privateComponent = component as unknown as {
+          patchPositionFromFile: (file: File | undefined) => Promise<void>;
+        };
+        await privateComponent.patchPositionFromFile(file);
+
+        expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+        expect(mockEmit).not.toHaveBeenCalled();
+      });
+
+      it('should handle errors when emitting position from file', async () => {
+        const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+        const error = new Error('EXIF error');
+        (getExifDataFromFile as jest.Mock).mockRejectedValue(error);
+        const warnSpy = jest
+          .spyOn(console, 'warn')
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
+
+        const privateComponent = component as unknown as {
+          patchPositionFromFile: (file: File | undefined) => Promise<void>;
+        };
+        await privateComponent.patchPositionFromFile(file);
+
+        expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+        expect(warnSpy).toHaveBeenCalledWith(
+          'Error reading GPS position from file:',
+          error,
+        );
+      });
+    });
+
+    describe('given no file', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should do nothing', async () => {
+        const privateComponent = component as unknown as {
+          patchPositionFromFile: (file: File | undefined) => Promise<void>;
+        };
+        await privateComponent.patchPositionFromFile(undefined);
+
+        expect(getExifDataFromFile).not.toHaveBeenCalled();
+        expect(mockEmit).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('setValueAndTriggerChange', () => {
+    it('should set value and trigger change on setValueAndTriggerChange', () => {
+      const testFile = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+      const onChange = jest.fn();
+      const onTouch = jest.fn();
+      component._onChange = onChange;
+      component._onTouch = onTouch;
+
+      // Mock FileReader
+      const mockFileReader: MockFileReader = {
+        readAsDataURL: jest.fn(),
+        onload: null,
+        result: 'data:image/jpeg;base64,abc',
+        EMPTY: 0,
+        LOADING: 1,
+        DONE: 2,
+      };
+
+      // @ts-expect-error - Mocking FileReader
+      global.FileReader = jest.fn(() => mockFileReader);
+
+      const privateComponent = component as any;
+      privateComponent.setValueAndTriggerChange(testFile);
+
+      // Simulate FileReader onload
+      if (mockFileReader.onload) {
+        mockFileReader.onload();
+      }
+
+      expect(component.value()).toBe('data:image/jpeg;base64,abc');
+      expect(onChange).toHaveBeenCalledWith('data:image/jpeg;base64,abc');
+      expect(onTouch).toHaveBeenCalled();
+    });
+  });
+
+  describe('clearImage', () => {
+    it('should clear image and emit fallback position', () => {
+      component.value.set('data:image/jpeg;base64,abc');
+      fixture.componentRef.setInput('position', { latitude: 5, longitude: 6 });
+      component.clearImage();
+      expect(component.value()).toBe(null);
+      expect(mockEmit).toHaveBeenCalledWith({ latitude: 5, longitude: 6 });
+    });
+
+    it('should clear file input value on clearImage', () => {
+      const fileUpload = { nativeElement: { value: 'something' } };
+      Object.defineProperty(component, 'fileUpload', {
+        value: () => fileUpload,
+      });
+      component.clearImage();
+      expect(fileUpload.nativeElement.value).toBe('');
+    });
   });
 
   describe('onDragOver', () => {
@@ -301,41 +478,58 @@ describe('ImageUploadComponent', () => {
   });
 
   describe('cancelCropping', () => {
-    it('should dismiss crop modal', () => {
-      const dismissMock = jest.fn();
-      Object.defineProperty(component, 'cropModal', {
-        value: () => ({
+    describe('given crop modal is defined', () => {
+      it('should dismiss crop modal', () => {
+        const dismissMock = jest.fn();
+        (component as any).cropModal = (): any => ({
           dismiss: dismissMock,
-        }),
-      });
+        });
 
-      component.cancelCropping();
-      expect(dismissMock).toHaveBeenCalledWith(null, 'cancel');
+        component.cancelCropping();
+        expect(dismissMock).toHaveBeenCalledWith(null, 'cancel');
+      });
+    });
+
+    describe('given no crop modal is undefined', () => {
+      it('should do nothing', () => {
+        (component as any).cropModal = (): any => undefined;
+
+        expect(() => component.cancelCropping()).not.toThrow();
+      });
     });
   });
 
   describe('confirmCropping', () => {
-    it('should set value, trigger change, and dismiss modal on confirmCropping', () => {
-      const dismissMock = jest.fn();
-      Object.defineProperty(component, 'cropModal', {
-        value: () => ({
+    describe('given croppedImage is defined', () => {
+      it('should set value, trigger change, and dismiss modal on confirmCropping', () => {
+        const dismissMock = jest.fn();
+        (component as any).cropModal = (): any => ({
           dismiss: dismissMock,
-        }),
+        });
+        component.croppedImage.set('data:image/jpeg;base64,croppedImage');
+        const onChange = jest.fn();
+        const onTouch = jest.fn();
+        component._onChange = onChange;
+        component._onTouch = onTouch;
+
+        component.confirmCropping();
+
+        expect(component.value()).toBe('data:image/jpeg;base64,croppedImage');
+        expect(onChange).toHaveBeenCalledWith(
+          'data:image/jpeg;base64,croppedImage',
+        );
+        expect(onTouch).toHaveBeenCalled();
+        expect(dismissMock).toHaveBeenCalledWith(null, 'confirmed');
       });
-      component.croppedImage.set('data:image/jpeg;base64,croppedImage');
-      const onChange = jest.fn();
-      const onTouch = jest.fn();
-      component._onChange = onChange;
-      component._onTouch = onTouch;
+    });
 
-      component.confirmCropping();
+    describe('given croppedImage is undefined', () => {
+      it('should do nothing', () => {
+        (component as any).cropModal = (): undefined => undefined;
+        component.croppedImage.set(null);
 
-      expect(component.value()).toBe('data:image/jpeg;base64,croppedImage');
-      expect(onChange).toHaveBeenCalledWith(
-        'data:image/jpeg;base64,croppedImage',
-      );
-      expect(onTouch).toHaveBeenCalled();
-      expect(dismissMock).toHaveBeenCalledWith(null, 'confirmed');
+        expect(() => component.confirmCropping()).not.toThrow();
+      });
     });
   });
 

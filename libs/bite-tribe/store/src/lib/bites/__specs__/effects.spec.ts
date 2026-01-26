@@ -75,43 +75,49 @@ describe(BiteEffects.name, () => {
   });
 
   describe('loadBitesByCurrentUser$', () => {
-    it('should load bites from API on my-bites page entry', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: routerNavigatedAction({
-            payload: { event: { urlAfterRedirects: PATH.MY_BITES } } as any,
-          }),
-        });
-
-        const expected = 'a';
-        const output = {
-          a: BiteActions.loadedByUserFromAPI({ bites: [] }),
-        };
-
-        expectObservable(effects.loadBitesByCurrentUser$).toBe(
-          expected,
-          output,
-        );
+    describe('given a user', () => {
+      beforeEach(() => {
+        jest.spyOn(storeService, 'user').mockReturnValue({});
       });
-    });
 
-    it('should load bites from API on my-profile page entry', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: routerNavigatedAction({
-            payload: { event: { urlAfterRedirects: PATH.MY_PROFILE } } as any,
-          }),
+      it('should load bites from API on my-bites page entry', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: routerNavigatedAction({
+              payload: { event: { urlAfterRedirects: PATH.MY_BITES } } as any,
+            }),
+          });
+
+          const expected = 'a';
+          const output = {
+            a: BiteActions.loadedByUserFromAPI({ bites: [] }),
+          };
+
+          expectObservable(effects.loadBitesByCurrentUser$).toBe(
+            expected,
+            output,
+          );
         });
+      });
 
-        const expected = 'a';
-        const output = {
-          a: BiteActions.loadedByUserFromAPI({ bites: [] }),
-        };
+      it('should load bites from API on my-profile page entry', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: routerNavigatedAction({
+              payload: { event: { urlAfterRedirects: PATH.MY_PROFILE } } as any,
+            }),
+          });
 
-        expectObservable(effects.loadBitesByCurrentUser$).toBe(
-          expected,
-          output,
-        );
+          const expected = 'a';
+          const output = {
+            a: BiteActions.loadedByUserFromAPI({ bites: [] }),
+          };
+
+          expectObservable(effects.loadBitesByCurrentUser$).toBe(
+            expected,
+            output,
+          );
+        });
       });
     });
 

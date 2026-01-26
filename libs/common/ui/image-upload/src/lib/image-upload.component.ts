@@ -294,7 +294,11 @@ export class ImageUploadComponent implements ControlValueAccessor {
   private async patchPositionFromFile(file: File | undefined): Promise<void> {
     if (file) {
       try {
-        const exifData = await getExifDataFromFile(file, this.position());
+        const exifData = await getExifDataFromFile(file);
+
+        if (!exifData) {
+          return;
+        }
 
         this.positionFromImage.emit(exifData);
       } catch (e) {

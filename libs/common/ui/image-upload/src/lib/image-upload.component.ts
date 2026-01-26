@@ -235,6 +235,9 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   private async pickImageFromGallery(): Promise<void> {
     try {
+      await FilePicker.requestPermissions({
+        permissions: ['accessMediaLocation'],
+      });
       const result = await FilePicker.pickImages({
         readData: true,
       });

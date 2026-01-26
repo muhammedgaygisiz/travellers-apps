@@ -26,6 +26,7 @@ dependencies {
     implementation project(':capacitor-app')
     implementation project(':capacitor-push-notifications')
     implementation project(':capacitor-firebase-messaging')
+    implementation project(':capawesome-capacitor-file-picker')
 
 }
 

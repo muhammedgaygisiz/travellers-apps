@@ -25,6 +25,7 @@ export const getExifDataFromFilePath = async (
 
     // Parse EXIF data
     const metaData = await exifr.parse(blob, { gps: true });
+
     if (metaData?.latitude && metaData?.longitude) {
       return {
         latitude: metaData.latitude,

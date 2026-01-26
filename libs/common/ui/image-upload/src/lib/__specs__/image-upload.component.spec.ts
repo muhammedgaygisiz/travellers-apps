@@ -462,41 +462,58 @@ describe('ImageUploadComponent', () => {
   });
 
   describe('cancelCropping', () => {
-    it('should dismiss crop modal', () => {
-      const dismissMock = jest.fn();
-      Object.defineProperty(component, 'cropModal', {
-        value: () => ({
+    describe('given crop modal is defined', () => {
+      it('should dismiss crop modal', () => {
+        const dismissMock = jest.fn();
+        (component as any).cropModal = (): any => ({
           dismiss: dismissMock,
-        }),
-      });
+        });
 
-      component.cancelCropping();
-      expect(dismissMock).toHaveBeenCalledWith(null, 'cancel');
+        component.cancelCropping();
+        expect(dismissMock).toHaveBeenCalledWith(null, 'cancel');
+      });
+    });
+
+    describe('given no crop modal is undefined', () => {
+      it('should do nothing', () => {
+        (component as any).cropModal = (): any => undefined;
+
+        expect(() => component.cancelCropping()).not.toThrow();
+      });
     });
   });
 
   describe('confirmCropping', () => {
-    it('should set value, trigger change, and dismiss modal on confirmCropping', () => {
-      const dismissMock = jest.fn();
-      Object.defineProperty(component, 'cropModal', {
-        value: () => ({
+    describe('given croppedImage is defined', () => {
+      it('should set value, trigger change, and dismiss modal on confirmCropping', () => {
+        const dismissMock = jest.fn();
+        (component as any).cropModal = (): any => ({
           dismiss: dismissMock,
-        }),
+        });
+        component.croppedImage.set('data:image/jpeg;base64,croppedImage');
+        const onChange = jest.fn();
+        const onTouch = jest.fn();
+        component._onChange = onChange;
+        component._onTouch = onTouch;
+
+        component.confirmCropping();
+
+        expect(component.value()).toBe('data:image/jpeg;base64,croppedImage');
+        expect(onChange).toHaveBeenCalledWith(
+          'data:image/jpeg;base64,croppedImage',
+        );
+        expect(onTouch).toHaveBeenCalled();
+        expect(dismissMock).toHaveBeenCalledWith(null, 'confirmed');
       });
-      component.croppedImage.set('data:image/jpeg;base64,croppedImage');
-      const onChange = jest.fn();
-      const onTouch = jest.fn();
-      component._onChange = onChange;
-      component._onTouch = onTouch;
+    });
 
-      component.confirmCropping();
+    describe('given croppedImage is undefined', () => {
+      it('should do nothing', () => {
+        (component as any).cropModal = (): undefined => undefined;
+        component.croppedImage.set(null);
 
-      expect(component.value()).toBe('data:image/jpeg;base64,croppedImage');
-      expect(onChange).toHaveBeenCalledWith(
-        'data:image/jpeg;base64,croppedImage',
-      );
-      expect(onTouch).toHaveBeenCalled();
-      expect(dismissMock).toHaveBeenCalledWith(null, 'confirmed');
+        expect(() => component.confirmCropping()).not.toThrow();
+      });
     });
   });
 

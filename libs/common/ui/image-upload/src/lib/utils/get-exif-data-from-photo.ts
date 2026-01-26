@@ -26,13 +26,13 @@ export const getExifDataFromPhoto = (
   const exif: any = photo.exif;
   const exifGps = exif['GPS'];
 
-  const iosExifData =
+  const isValidIosExif =
     exifGps &&
     typeof exifGps.Latitude === 'number' &&
     typeof exifGps.LatitudeRef === 'string' &&
     typeof exifGps.Longitude === 'number' &&
     typeof exifGps.LongitudeRef === 'string';
-  if (iosExifData) {
+  if (isValidIosExif) {
     return normalizeGps(
       exifGps.Latitude,
       exifGps.LatitudeRef,

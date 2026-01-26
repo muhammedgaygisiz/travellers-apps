@@ -156,21 +156,34 @@ describe('ImageUploadComponent', () => {
   });
 
   describe('onFileSelected', () => {
-    it('should emit position from file on file select', async () => {
-      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-      (getExifDataFromFile as jest.Mock).mockResolvedValue({
-        latitude: 1,
-        longitude: 2,
+    describe('given an event with a file', () => {
+      it('should emit position from file on file select', async () => {
+        const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+        (getExifDataFromFile as jest.Mock).mockResolvedValue({
+          latitude: 1,
+          longitude: 2,
+        });
+        (compressFile as jest.Mock).mockResolvedValue(file);
+
+        const event = {
+          target: { files: [file] },
+        } as unknown as Event;
+
+        await component.onFileSelected(event);
+        expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+        expect(mockEmit).toHaveBeenCalledWith({ latitude: 1, longitude: 2 });
       });
-      (compressFile as jest.Mock).mockResolvedValue(file);
+    });
 
-      const event = {
-        target: { files: [file] },
-      } as unknown as Event;
+    describe('given an event without a file', () => {
+      it('should not emit position on file select', async () => {
+        const event = {
+          target: { files: [] },
+        } as unknown as Event;
 
-      await component.onFileSelected(event);
-      expect(getExifDataFromFile).toHaveBeenCalledWith(file);
-      expect(mockEmit).toHaveBeenCalledWith({ latitude: 1, longitude: 2 });
+        await component.onFileSelected(event);
+        expect(mockEmit).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -298,52 +311,72 @@ describe('ImageUploadComponent', () => {
   });
 
   describe('patchPositionFromFile', () => {
-    it('should emit position from file', async () => {
-      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-      (getExifDataFromFile as jest.Mock).mockResolvedValue({
-        latitude: 9,
-        longitude: 10,
+    describe('given a file', () => {
+      it('should emit position from file', async () => {
+        const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+        (getExifDataFromFile as jest.Mock).mockResolvedValue({
+          latitude: 9,
+          longitude: 10,
+        });
+
+        const privateComponent = component as unknown as {
+          patchPositionFromFile: (file: File | undefined) => Promise<void>;
+        };
+        await privateComponent.patchPositionFromFile(file);
+
+        expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+        expect(mockEmit).toHaveBeenCalledWith({ latitude: 9, longitude: 10 });
       });
 
-      const privateComponent = component as unknown as {
-        patchPositionFromFile: (file: File | undefined) => Promise<void>;
-      };
-      await privateComponent.patchPositionFromFile(file);
+      it('should not emit if no EXIF data found in file', async () => {
+        const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+        (getExifDataFromFile as jest.Mock).mockResolvedValue(undefined);
 
-      expect(getExifDataFromFile).toHaveBeenCalledWith(file);
-      expect(mockEmit).toHaveBeenCalledWith({ latitude: 9, longitude: 10 });
+        const privateComponent = component as unknown as {
+          patchPositionFromFile: (file: File | undefined) => Promise<void>;
+        };
+        await privateComponent.patchPositionFromFile(file);
+
+        expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+        expect(mockEmit).not.toHaveBeenCalled();
+      });
+
+      it('should handle errors when emitting position from file', async () => {
+        const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+        const error = new Error('EXIF error');
+        (getExifDataFromFile as jest.Mock).mockRejectedValue(error);
+        const warnSpy = jest
+          .spyOn(console, 'warn')
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
+
+        const privateComponent = component as unknown as {
+          patchPositionFromFile: (file: File | undefined) => Promise<void>;
+        };
+        await privateComponent.patchPositionFromFile(file);
+
+        expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+        expect(warnSpy).toHaveBeenCalledWith(
+          'Error reading GPS position from file:',
+          error,
+        );
+      });
     });
 
-    it('should not emit if no EXIF data found in file', async () => {
-      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-      (getExifDataFromFile as jest.Mock).mockResolvedValue(undefined);
+    describe('given no file', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
 
-      const privateComponent = component as unknown as {
-        patchPositionFromFile: (file: File | undefined) => Promise<void>;
-      };
-      await privateComponent.patchPositionFromFile(file);
+      it('should do nothing', async () => {
+        const privateComponent = component as unknown as {
+          patchPositionFromFile: (file: File | undefined) => Promise<void>;
+        };
+        await privateComponent.patchPositionFromFile(undefined);
 
-      expect(getExifDataFromFile).toHaveBeenCalledWith(file);
-      expect(mockEmit).not.toHaveBeenCalled();
-    });
-
-    it('should handle errors when emitting position from file', async () => {
-      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-      const error = new Error('EXIF error');
-      (getExifDataFromFile as jest.Mock).mockRejectedValue(error);
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-      const privateComponent = component as unknown as {
-        patchPositionFromFile: (file: File | undefined) => Promise<void>;
-      };
-      await privateComponent.patchPositionFromFile(file);
-
-      expect(getExifDataFromFile).toHaveBeenCalledWith(file);
-      expect(warnSpy).toHaveBeenCalledWith(
-        'Error reading GPS position from file:',
-        error,
-      );
+        expect(getExifDataFromFile).not.toHaveBeenCalled();
+        expect(mockEmit).not.toHaveBeenCalled();
+      });
     });
   });
 

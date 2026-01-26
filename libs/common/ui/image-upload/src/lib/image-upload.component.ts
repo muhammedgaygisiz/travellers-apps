@@ -45,6 +45,13 @@ const photoOptions = {
   source: CameraSource.Prompt,
 };
 
+const cameraOnlyOptions = {
+  quality: 90,
+  allowEditing: false,
+  resultType: CameraResultType.Base64,
+  source: CameraSource.Camera,
+};
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'image-upload',
@@ -184,6 +191,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   private async showImageSourceDialog(): Promise<void> {
+    // TODO: Add translation support for dialog text
     const alert = await this.alertController.create({
       header: 'Choose Image Source',
       buttons: [
@@ -213,12 +221,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
     try {
       await Camera.requestPermissions();
 
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Base64,
-        source: CameraSource.Camera,
-      });
+      const photo = await Camera.getPhoto(cameraOnlyOptions);
 
       this.readAndEmitPositionFrom(photo);
 

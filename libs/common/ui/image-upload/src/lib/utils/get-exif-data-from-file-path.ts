@@ -19,7 +19,8 @@ export const getExifDataFromFilePath = async (
 
     // Convert base64 to blob for exifr
     const base64Data = fileContent.data as string;
-    const response = await fetch(`data:image/jpeg;base64,${base64Data}`);
+    // Use a generic image mime type since we don't know the exact format
+    const response = await fetch(`data:image/*;base64,${base64Data}`);
     const blob = await response.blob();
 
     // Parse EXIF data
@@ -34,7 +35,6 @@ export const getExifDataFromFilePath = async (
     return fallbackPosition;
   } catch (error) {
     console.error('Error reading EXIF data from file path:', error);
+    return fallbackPosition;
   }
-
-  return fallbackPosition;
 };

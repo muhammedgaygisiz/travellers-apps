@@ -297,6 +297,56 @@ describe('ImageUploadComponent', () => {
     });
   });
 
+  describe('patchPositionFromFile', () => {
+    it('should emit position from file', async () => {
+      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+      (getExifDataFromFile as jest.Mock).mockResolvedValue({
+        latitude: 9,
+        longitude: 10,
+      });
+
+      const privateComponent = component as unknown as {
+        patchPositionFromFile: (file: File | undefined) => Promise<void>;
+      };
+      await privateComponent.patchPositionFromFile(file);
+
+      expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+      expect(mockEmit).toHaveBeenCalledWith({ latitude: 9, longitude: 10 });
+    });
+
+    it('should not emit if no EXIF data found in file', async () => {
+      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+      (getExifDataFromFile as jest.Mock).mockResolvedValue(undefined);
+
+      const privateComponent = component as unknown as {
+        patchPositionFromFile: (file: File | undefined) => Promise<void>;
+      };
+      await privateComponent.patchPositionFromFile(file);
+
+      expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+      expect(mockEmit).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors when emitting position from file', async () => {
+      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+      const error = new Error('EXIF error');
+      (getExifDataFromFile as jest.Mock).mockRejectedValue(error);
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const privateComponent = component as unknown as {
+        patchPositionFromFile: (file: File | undefined) => Promise<void>;
+      };
+      await privateComponent.patchPositionFromFile(file);
+
+      expect(getExifDataFromFile).toHaveBeenCalledWith(file);
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Error reading GPS position from file:',
+        error,
+      );
+    });
+  });
+
   describe('setValueAndTriggerChange', () => {
     it('should set value and trigger change on setValueAndTriggerChange', () => {
       const testFile = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });

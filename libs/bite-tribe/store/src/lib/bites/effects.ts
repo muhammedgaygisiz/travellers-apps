@@ -3,10 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteActions } from './actions';
 import { catchError, filter, from, map, of, switchMap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import {
-  RouterNavigatedAction,
-  routerNavigatedAction,
-} from '@ngrx/router-store';
+import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { bite } from './selectors';

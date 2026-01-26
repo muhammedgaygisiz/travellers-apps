@@ -1,15 +1,12 @@
 import * as exifr from 'exifr';
 
-export const getExifDataFromFile = async (
-  file: File,
-  fallbackPosition = {
-    latitude: 0,
-    longitude: 0,
-  },
-): Promise<{
+type Position = {
   latitude: number;
   longitude: number;
-}> => {
+};
+export const getExifDataFromFile = async (
+  file: File,
+): Promise<Position | undefined> => {
   try {
     const metaData = await exifr.parse(file, { gps: true });
     if (metaData?.latitude && metaData?.longitude) {
@@ -19,10 +16,11 @@ export const getExifDataFromFile = async (
       };
     }
 
-    return fallbackPosition;
+    console.log('No GPS data found in EXIF metadata.');
+    return undefined;
   } catch (error) {
     console.error('Error reading EXIF data from file:', error);
   }
 
-  return fallbackPosition;
+  return undefined;
 };

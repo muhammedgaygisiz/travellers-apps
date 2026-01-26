@@ -88,23 +88,25 @@ describe('BitePage', () => {
     expect(component.isInvalid()).toBe(true);
   });
 
-  it('should validate required fields', () => {
-    const validBite = {
-      id: '',
-      image: 'data:image/jpeg;base64,test',
-      name: 'Test Burger',
-      place: 'Test Place',
-      tags: 'fish healthy',
-      price: 9.99,
-      currency: 'EUR',
-      position: {
-        latitude: 10,
-        longitude: 20,
-      },
-    };
+  describe('biteFormGroup', () => {
+    it('should validate required fields', () => {
+      const validBite = {
+        id: '',
+        image: 'data:image/jpeg;base64,test',
+        name: 'Test Burger',
+        place: 'Test Place',
+        tags: 'fish healthy',
+        price: 9.99,
+        currency: 'EUR',
+        position: {
+          latitude: 10,
+          longitude: 20,
+        },
+      };
 
-    component.biteFormGroup.patchValue(validBite as any);
-    expect(component.isInvalid()).toBe(false);
+      component.biteFormGroup.patchValue(validBite as any);
+      expect(component.isInvalid()).toBe(false);
+    });
   });
 
   describe('locationFromImage', () => {
@@ -167,36 +169,38 @@ describe('BitePage', () => {
     });
   });
 
-  it('should emit form value on saveBite when valid', () => {
-    const validBite: Bite = {
-      id: '',
-      image: 'data:image/jpeg;base64,test',
-      imagePath: '',
-      description: '',
-      name: 'Test Burger',
-      place: 'Test Place',
-      tags: ['fish healthy'],
-      price: '9.99' as any,
-      rating: 0,
-      currency: 'EUR',
-      restaurantId: '',
-      position: {
-        latitude: 0,
-        longitude: 0,
-      },
-    };
+  describe('saveBite', () => {
+    it('should emit form value on saveBite when valid', () => {
+      const validBite: Bite = {
+        id: '',
+        image: 'data:image/jpeg;base64,test',
+        imagePath: '',
+        description: '',
+        name: 'Test Burger',
+        place: 'Test Place',
+        tags: ['fish healthy'],
+        price: '9.99' as any,
+        rating: 0,
+        currency: 'EUR',
+        restaurantId: '',
+        position: {
+          latitude: 0,
+          longitude: 0,
+        },
+      };
 
-    const emitSpy = jest.spyOn(component.submitBite, 'emit');
-    component.biteFormGroup.patchValue(validBite as any);
-    component.saveBite();
+      const emitSpy = jest.spyOn(component.submitBite, 'emit');
+      component.biteFormGroup.patchValue(validBite as any);
+      component.saveBite();
 
-    expect(emitSpy).toHaveBeenCalledWith(validBite);
-  });
+      expect(emitSpy).toHaveBeenCalledWith(validBite);
+    });
 
-  it('should not emit form value on saveBite when invalid', () => {
-    const emitSpy = jest.spyOn(component.submitBite, 'emit');
-    component.saveBite();
-    expect(emitSpy).not.toHaveBeenCalled();
+    it('should not emit form value on saveBite when invalid', () => {
+      const emitSpy = jest.spyOn(component.submitBite, 'emit');
+      component.saveBite();
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('Platform specific behavior', () => {
@@ -277,6 +281,48 @@ describe('BitePage', () => {
         testPosition,
       );
     });
+
+    it('should set fallback position if position in bite is provided', () => {
+      const testPosition = { latitude: 42, longitude: 24 };
+      const testBite = {
+        id: '1',
+        image: 'test.jpg',
+        name: 'Test Bite',
+        place: 'Test Place',
+        price: 10,
+        currency: 'USD',
+        tags: ['test', 'food'],
+        position: testPosition,
+      };
+
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      componentRef.setInput('bite', testBite);
+      fixture.detectChanges();
+
+      expect(component.fallbackPosition()).toEqual(testPosition);
+    });
+
+    it('should not set fallback position if position in bite is not provided', () => {
+      const testBite = {
+        id: '1',
+        image: 'test.jpg',
+        name: 'Test Bite',
+        place: 'Test Place',
+        price: 10,
+        currency: 'USD',
+        tags: ['test', 'food'],
+      };
+
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      componentRef.setInput('bite', testBite);
+      fixture.detectChanges();
+
+      expect(component.fallbackPosition()).toBeUndefined();
+    });
   });
 
   describe('noGpsPosition signal', () => {
@@ -342,6 +388,12 @@ describe('BitePage', () => {
       const tags = ['tag1', 'tag2'];
       component.setTags(tags);
       expect(component.biteFormGroup.controls['tags'].value).toEqual(tags);
+    });
+
+    it('should not set tags if control is missing', () => {
+      component.biteFormGroup = new FormGroup({}) as any;
+      const tags = ['tag1', 'tag2'];
+      expect(() => component.setTags(tags)).not.toThrow();
     });
   });
 

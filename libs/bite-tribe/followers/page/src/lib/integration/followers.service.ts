@@ -1,28 +1,28 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { NavController } from '@ionic/angular/standalone';
-import { ProfileApiService } from 'bite-tribe/api';
+import { FollowersDataAccessService } from 'bite-tribe/followers-data-access';
 import type { PublicUser } from 'model';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AuthService } from 'ta-firestore';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 
 @Injectable({ providedIn: 'root' })
 export class FollowersService {
   private readonly navController = inject(NavController);
-  private readonly profileApiService = inject(ProfileApiService);
-  private readonly authService = inject(AuthService);
+  private readonly dataAccessService = inject(FollowersDataAccessService);
+  private readonly storeService = inject(BiteTribeStoreService);
 
   users = signal<PublicUser[]>([]);
   isLoading = signal<boolean>(false);
   type = signal<'followers' | 'following'>('followers');
 
-  currentUserId = toSignal(this.authService.userId$, { initialValue: '' });
+  currentUserId = toSignal(this.storeService.userId$, { initialValue: '' });
 
   async loadFollowers(userId: string): Promise<void> {
     this.isLoading.set(true);
     this.type.set('followers');
     try {
       const followers =
-        await this.profileApiService.fetchFollowersWithDetails(userId);
+        await this.dataAccessService.fetchFollowersWithDetails(userId);
       this.users.set(followers);
     } catch (error) {
       console.error('Error loading followers:', error);
@@ -37,7 +37,7 @@ export class FollowersService {
     this.type.set('following');
     try {
       const following =
-        await this.profileApiService.fetchFollowingWithDetails(userId);
+        await this.dataAccessService.fetchFollowingWithDetails(userId);
       this.users.set(following);
     } catch (error) {
       console.error('Error loading following:', error);
@@ -53,7 +53,7 @@ export class FollowersService {
 
   async unfollowClicked(user: PublicUser): Promise<void> {
     try {
-      await this.profileApiService.unfollowUser(user);
+      await this.dataAccessService.unfollowUser(user);
       // Reload the list after unfollowing
       const currentUserId = this.currentUserId();
       if (currentUserId) {

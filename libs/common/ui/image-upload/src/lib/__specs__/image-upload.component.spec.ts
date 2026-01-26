@@ -33,6 +33,7 @@ jest.mock('heic2any', () => jest.fn());
 jest.mock('@capawesome/capacitor-file-picker', () => ({
   FilePicker: {
     pickImages: jest.fn(),
+    requestPermissions: jest.fn(),
   },
 }));
 

@@ -39,6 +39,28 @@ describe('getExifDataFromFile', () => {
     });
   });
 
+  describe('given a file with partial gps meta data', () => {
+    it('should return undefined if only latitude is present', async () => {
+      (EXIFR.parse as jest.Mock).mockImplementation(() => ({
+        latitude: 40.5,
+      }));
+
+      const result = await getExifDataFromFile(mockFile);
+      expect(result).toBeUndefined();
+      expect(EXIFR.parse).toHaveBeenCalled();
+    });
+
+    it('should return undefined if only longitude is present', async () => {
+      (EXIFR.parse as jest.Mock).mockImplementation(() => ({
+        longitude: 74,
+      }));
+
+      const result = await getExifDataFromFile(mockFile);
+      expect(result).toBeUndefined();
+      expect(EXIFR.parse).toHaveBeenCalled();
+    });
+  });
+
   describe('given a file with exif data without gps fields', () => {
     it('should return undefined if GPS data is missing in EXIF', async () => {
       (EXIFR.parse as jest.Mock).mockImplementation(() => ({}));

@@ -1,4 +1,4 @@
-name: BiteTrice CI
+name: BiteTribe CI
 
 on:
   push:

@@ -52,3 +52,6 @@ project(':capacitor-push-notifications').projectDir = new File('../../../node_mo
 
 include ':capacitor-firebase-messaging'
 project(':capacitor-firebase-messaging').projectDir = new File('../../../node_modules/@capacitor-firebase/messaging/android')
+
+include ':capawesome-capacitor-file-picker'
+project(':capawesome-capacitor-file-picker').projectDir = new File('../../../node_modules/@capawesome/capacitor-file-picker/android')

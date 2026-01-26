@@ -12,15 +12,9 @@ const normalizeGps = (
   return { latitude, longitude };
 };
 
-export const getExifDataFromPhoto = (
-  photo: Photo,
-  fallbackPosition = {
-    latitude: 0,
-    longitude: 0,
-  },
-): Coords => {
+export const getExifDataFromPhoto = (photo: Photo): Coords | undefined => {
   if (!photo || !photo.exif) {
-    return fallbackPosition;
+    return undefined;
   }
 
   const exif: any = photo.exif;
@@ -56,5 +50,5 @@ export const getExifDataFromPhoto = (
     return normalizeGps(lat, latRef, lon, lonRef);
   }
 
-  return fallbackPosition;
+  return undefined;
 };

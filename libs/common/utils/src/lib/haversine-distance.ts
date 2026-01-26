@@ -30,16 +30,8 @@ export const haversineDistance = (
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
 
-  if (dLat === undefined || dLon === undefined) {
-    return undefined;
-  }
-
   const rad1 = toRad(lat1);
   const rad2 = toRad(lat2);
-
-  if (rad1 === undefined || rad2 === undefined) {
-    return undefined;
-  }
 
   const a =
     Math.sin(dLat / 2) ** 2 +

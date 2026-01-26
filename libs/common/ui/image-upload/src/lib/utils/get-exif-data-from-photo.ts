@@ -26,19 +26,34 @@ export const getExifDataFromPhoto = (
   const exif: any = photo.exif;
   const exifGps = exif['GPS'];
 
-  if (
+  const isValidIosExif =
     exifGps &&
     typeof exifGps.Latitude === 'number' &&
     typeof exifGps.LatitudeRef === 'string' &&
     typeof exifGps.Longitude === 'number' &&
-    typeof exifGps.LongitudeRef === 'string'
-  ) {
+    typeof exifGps.LongitudeRef === 'string';
+  if (isValidIosExif) {
     return normalizeGps(
       exifGps.Latitude,
       exifGps.LatitudeRef,
       exifGps.Longitude,
       exifGps.LongitudeRef,
     );
+  }
+
+  // Android-style flat GPS fields on root EXIF
+  const lat = exif['GPSLatitude'] as number | undefined;
+  const latRef = exif['GPSLatitudeRef'] as string | undefined;
+  const lon = exif['GPSLongitude'] as number | undefined;
+  const lonRef = exif['GPSLongitudeRef'] as string | undefined;
+
+  const androidExifData =
+    typeof lat === 'number' &&
+    typeof latRef === 'string' &&
+    typeof lon === 'number' &&
+    typeof lonRef === 'string';
+  if (androidExifData) {
+    return normalizeGps(lat, latRef, lon, lonRef);
   }
 
   return fallbackPosition;

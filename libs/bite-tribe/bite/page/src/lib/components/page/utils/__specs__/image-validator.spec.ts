@@ -22,7 +22,7 @@ describe(ImageValidator.name, () => {
     expect(ImageValidator(formGroupWithImagePath)).toBeNull();
   });
 
-  it('should return an error if neither image nor imagePath is provided', () => {
+  it('should return an error if image nor imagePath is empty', () => {
     const formGroupWithoutImageAndPath = {
       get: (key: string) => {
         if (key === 'image') return { value: '' };
@@ -33,6 +33,18 @@ describe(ImageValidator.name, () => {
 
     expect(ImageValidator(formGroupWithoutImageAndPath)).toEqual({
       imageRequired: true,
+    });
+  });
+
+  describe('given image and imagePath form controls are not defined', () => {
+    it('should return an error', () => {
+      const formGroupWithoutControls = {
+        get: (key: string) => null,
+      } as any;
+
+      expect(ImageValidator(formGroupWithoutControls)).toEqual({
+        imageRequired: true,
+      });
     });
   });
 });

@@ -55,6 +55,7 @@
       "bite-tribe/details-data-access": [
         "libs/bite-tribe/details/data-access/src/index.ts"
       ],
+      "bite-tribe/followers": ["libs/bite-tribe/followers/page/src/index.ts"],
       "bite-tribe/home": ["libs/bite-tribe/home/page/src/index.ts"],
       "bite-tribe/home-data-access": [
         "libs/bite-tribe/home/data-access/src/index.ts"

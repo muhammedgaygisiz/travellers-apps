@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/my-profile"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      @if (type() === 'followers') {
+        Followers
+      } @else {
+        Following
+      }
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (isLoading()) {
+    <div class="loading-container">
+      <ion-label>Loading...</ion-label>
+    </div>
+  } @else if (users().length === 0) {
+    <div class="empty-container">
+      <ion-label>
+        @if (type() === 'followers') {
+          No followers yet
+        } @else {
+          Not following anyone yet
+        }
+      </ion-label>
+    </div>
+  } @else {
+    <ion-list>
+      @for (user of users(); track user.userId) {
+        <ion-item button (click)="userClick.emit(user)">
+          <ion-avatar slot="start">
+            <img [src]="user.photoUrl" [alt]="user.displayName" />
+          </ion-avatar>
+          <ion-label>
+            <h2>{{ user.displayName }}</h2>
+            @if (user.city) {
+              <p>{{ user.city }}</p>
+            }
+          </ion-label>
+          @if (type() === 'following' && user.userId !== currentUserId()) {
+            <ion-button
+              slot="end"
+              fill="outline"
+              (click)="unfollowClick.emit(user); $event.stopPropagation()"
+            >
+              Unfollow
+            </ion-button>
+          }
+        </ion-item>
+      }
+    </ion-list>
+  }
+</ion-content>

@@ -88,4 +88,12 @@ export class ProfileService {
   unfollowButtonClicked(user: PublicUser): void {
     this.dataAccess.submitUnfollowClick(user);
   }
+
+  gotoFollowers(userId: string): void {
+    this.navController.navigateForward([PATH.FOLLOWERS, userId, 'followers']);
+  }
+
+  gotoFollowing(userId: string): void {
+    this.navController.navigateForward([PATH.FOLLOWERS, userId, 'following']);
+  }
 }

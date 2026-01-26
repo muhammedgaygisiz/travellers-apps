@@ -42,11 +42,19 @@
       </div>
       <div class="header-column">
         <strong>Following</strong>
-        <span>{{ followingCount() }}</span>
+        <span
+          class="clickable"
+          (click)="followingClick.emit(user()?.userId!)"
+          >{{ followingCount() }}</span
+        >
       </div>
       <div class="header-column">
         <strong>Followers</strong>
-        <span>{{ followerCount() }}</span>
+        <span
+          class="clickable"
+          (click)="followersClick.emit(user()?.userId!)"
+          >{{ followerCount() }}</span
+        >
       </div>
     </div>
 

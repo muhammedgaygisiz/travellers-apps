@@ -83,6 +83,8 @@ export class ProfileComponent {
   readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
   readonly followButtonClick = output<PublicUser>();
   readonly unfollowButtonClick = output<PublicUser>();
+  readonly followersClick = output<string>();
+  readonly followingClick = output<string>();
 
   isOpen = signal(false);
   currentPage = signal<number>(1);

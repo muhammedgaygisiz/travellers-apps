@@ -1,0 +1,33 @@
+.loading-container,
+.empty-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 2rem;
+
+  ion-label {
+    text-align: center;
+    color: var(--ion-color-medium);
+  }
+}
+
+ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+ion-avatar {
+  width: 48px;
+  height: 48px;
+}
+
+h2 {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+p {
+  color: var(--ion-color-medium);
+  font-size: 0.875rem;
+}

@@ -200,15 +200,11 @@ export class ImageUploadComponent implements ControlValueAccessor {
         },
         {
           text: 'Take Photo',
-          handler: (): void => {
-            this.takePhotoWithCamera();
-          },
+          handler: this.takePhotoWithCamera.bind(this),
         },
         {
           text: 'Choose from Gallery',
-          handler: (): void => {
-            this.pickImageFromGallery();
-          },
+          handler: this.pickImageFromGallery.bind(this),
         },
       ],
     });

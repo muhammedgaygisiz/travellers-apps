@@ -790,6 +790,17 @@ describe('ImageUploadComponent', () => {
         expect(mockEmit).toHaveBeenCalledWith({ latitude: 15, longitude: 25 });
       });
 
+      it('should do nothing if exifData is undefined', async () => {
+        (getExifDataFromFilePath as jest.Mock).mockResolvedValue(undefined);
+
+        await (component as any).patchPositionFromFilePath('/path/to/file.jpg');
+
+        expect(getExifDataFromFilePath).toHaveBeenCalledWith(
+          '/path/to/file.jpg',
+        );
+        expect(mockEmit).not.toHaveBeenCalled();
+      });
+
       it('should handle errors when extracting EXIF data', async () => {
         const error = new Error('EXIF error');
         (getExifDataFromFilePath as jest.Mock).mockRejectedValue(error);

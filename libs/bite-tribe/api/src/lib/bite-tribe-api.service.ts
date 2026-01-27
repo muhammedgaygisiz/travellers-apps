@@ -227,4 +227,12 @@ export class BiteTribeApiService {
       isFollowedByMe: isCurrentUserFollowing,
     };
   }
+
+  fetchFollowersWithDetails(userId: any): Promise<PublicUser[]> {
+    return this.profileApiService.fetchFollowersWithDetails(userId);
+  }
+
+  fetchFollowingWithDetails(userId: any): Promise<PublicUser[]> {
+    return this.profileApiService.fetchFollowingWithDetails(userId);
+  }
 }

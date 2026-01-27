@@ -25,30 +25,13 @@ import { FollowersService } from './followers.service';
   imports: [FollowersListComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FollowersContainer implements OnInit {
+export class FollowersContainer {
   service = inject(FollowersService);
 
-  async ngOnInit(): Promise<void> {
-    //const userId = this.route.snapshot.paramMap.get('userId');
-    //const type = this.route.snapshot.paramMap.get('type') as
-    //  | 'followers'
-    //  | 'following';
-    //
-    //if (!userId) {
-    //  console.error('No userId provided');
-    //  return;
-    //}
-    //
-    //if (type === 'followers') {
-    //  await this.service.loadFollowers(userId);
-    //} else if (type === 'following') {
-    //  await this.service.loadFollowing(userId);
-    //}
-  }
-
   ionViewDidEnter(): void {
+    const type = this.service.type();
     FirebaseAnalytics.setCurrentScreen({
-      screenName: 'Followers',
+      screenName: type,
     });
   }
 }

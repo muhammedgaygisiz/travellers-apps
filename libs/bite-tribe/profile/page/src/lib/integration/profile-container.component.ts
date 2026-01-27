@@ -4,11 +4,12 @@ import { ProfileComponent } from '../components/profile-page/profile.component';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
+  selector: 'profile-container',
   template: `
     <profile-page
       class="ion-page"
       [isAuthenticated]="service.isAuthenticated()"
-      [user]="service.biteCreator()"
+      [user]="service.user()"
       [bites]="service.bitesByUser()"
       [userId]="service.userId()"
       [profileMetadata]="service.profileMetadata()"
@@ -30,7 +31,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   imports: [ProfileComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BiteCreatorProfileContainer {
+export class ProfileContainer {
   service = inject(ProfileService);
 
   ionViewDidEnter(): void {

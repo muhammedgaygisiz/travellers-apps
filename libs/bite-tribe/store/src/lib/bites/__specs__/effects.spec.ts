@@ -77,7 +77,7 @@ describe(BiteEffects.name, () => {
   describe('loadBitesByCurrentUser$', () => {
     describe('given a user', () => {
       beforeEach(() => {
-        jest.spyOn(storeService, 'user').mockReturnValue({});
+        jest.spyOn(storeService, 'user').mockReturnValue({} as any);
       });
 
       it('should load bites from API on my-bites page entry', () => {

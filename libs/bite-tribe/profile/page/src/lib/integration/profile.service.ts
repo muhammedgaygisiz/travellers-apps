@@ -13,7 +13,7 @@ export class ProfileService {
 
   isAuthenticated = this.dataAccess.isAuthenticated;
   myUser = this.dataAccess.myUser;
-  biteCreator = this.dataAccess.biteCreator;
+  user = this.dataAccess.user;
   userId = this.dataAccess.userId;
   bitesByUser = this.dataAccess.bitesByUser;
   myBites = this.dataAccess.myBites;

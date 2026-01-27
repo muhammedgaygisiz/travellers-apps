@@ -19,4 +19,5 @@ export type AppSlice = {
   errorLoadingGpsPosition: boolean;
   totalNumberBites: number;
   totalNumberUsers: number;
+  users: PublicUser[];
 };

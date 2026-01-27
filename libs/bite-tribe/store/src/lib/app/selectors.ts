@@ -65,3 +65,5 @@ export const profileMeatadata = createSelector(
   slice,
   (state) => state?.profileMetadata,
 );
+
+export const users = createSelector(slice, (state) => state?.users);

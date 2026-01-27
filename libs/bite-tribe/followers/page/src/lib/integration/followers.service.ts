@@ -12,41 +12,41 @@ export class FollowersService {
   private readonly dataAccessService = inject(FollowersDataAccessService);
   private readonly storeService = inject(BiteTribeStoreService);
 
-  users = signal<PublicUser[]>([]);
+  users = this.dataAccessService.users;
+  type = this.dataAccessService.type;
   isLoading = signal<boolean>(false);
-  type = signal<'followers' | 'following'>('followers');
 
   currentUserId = toSignal(this.storeService.userId$, { initialValue: '' });
 
-  async loadFollowers(userId: string): Promise<void> {
-    this.isLoading.set(true);
-    this.type.set('followers');
-    try {
-      const followers =
-        await this.dataAccessService.fetchFollowersWithDetails(userId);
-      this.users.set(followers);
-    } catch (error) {
-      console.error('Error loading followers:', error);
-      this.users.set([]);
-    } finally {
-      this.isLoading.set(false);
-    }
-  }
+  // async loadFollowers(userId: string): Promise<void> {
+  //   this.isLoading.set(true);
+  //   this.type.set('followers');
+  //   try {
+  //     const followers =
+  //       await this.dataAccessService.fetchFollowersWithDetails(userId);
+  //     this.users.set(followers);
+  //   } catch (error) {
+  //     console.error('Error loading followers:', error);
+  //     this.users.set([]);
+  //   } finally {
+  //     this.isLoading.set(false);
+  //   }
+  // }
 
-  async loadFollowing(userId: string): Promise<void> {
-    this.isLoading.set(true);
-    this.type.set('following');
-    try {
-      const following =
-        await this.dataAccessService.fetchFollowingWithDetails(userId);
-      this.users.set(following);
-    } catch (error) {
-      console.error('Error loading following:', error);
-      this.users.set([]);
-    } finally {
-      this.isLoading.set(false);
-    }
-  }
+  // async loadFollowing(userId: string): Promise<void> {
+  //   this.isLoading.set(true);
+  //   this.type.set('following');
+  //   try {
+  //     const following =
+  //       await this.dataAccessService.fetchFollowingWithDetails(userId);
+  //     this.users.set(following);
+  //   } catch (error) {
+  //     console.error('Error loading following:', error);
+  //     this.users.set([]);
+  //   } finally {
+  //     this.isLoading.set(false);
+  //   }
+  // }
 
   userClicked(user: PublicUser): void {
     this.navController.navigateForward([PATH.PROFILE, user.userId]);
@@ -58,7 +58,7 @@ export class FollowersService {
       // Reload the list after unfollowing
       const currentUserId = this.currentUserId();
       if (currentUserId) {
-        await this.loadFollowing(currentUserId);
+        // await this.loadFollowing(currentUserId);
       }
     } catch (error) {
       console.error('Error unfollowing user:', error);

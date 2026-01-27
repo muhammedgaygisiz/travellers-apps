@@ -6,37 +6,29 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  IonAvatar,
   IonButton,
   IonContent,
-  IonHeader,
   IonItem,
   IonLabel,
   IonList,
-  IonTitle,
-  IonToolbar,
-  IonAvatar,
-  IonBackButton,
-  IonButtons,
 } from '@ionic/angular/standalone';
 import type { PublicUser } from 'model';
 import { PATH } from 'utils';
+import { PageComponent } from 'common/ui/page';
 
 @Component({
   selector: 'followers-list',
   standalone: true,
   imports: [
     CommonModule,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
     IonList,
     IonItem,
     IonLabel,
     IonButton,
     IonAvatar,
-    IonBackButton,
-    IonButtons,
+    PageComponent,
   ],
   templateUrl: './followers-list.component.html',
   styleUrls: ['./followers-list.component.scss'],

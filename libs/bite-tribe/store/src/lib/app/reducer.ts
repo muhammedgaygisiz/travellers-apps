@@ -27,6 +27,7 @@ const initialState: AppSlice = {
   totalNumberBites: 0,
   totalNumberUsers: 0,
   profileMetadata: CLEAN_PROFILE_METADATA,
+  users: [],
 };
 
 export const reducer = createReducer<AppSlice>(

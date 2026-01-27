@@ -56,6 +56,7 @@ import {
   totalNumberBites,
   totalNumberUsers,
   userHasSubscriptionTierOne,
+  users,
 } from './app/selectors';
 import {
   bucketlistSorting,
@@ -80,6 +81,7 @@ import {
 } from './bucketlists/selectors';
 import { getActionByDocType } from './utils/get-action-by-doc-type';
 import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
+import { followType } from './router/selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -142,6 +144,9 @@ export class BiteTribeStoreService implements StoreService {
   totalNumberBites$ = this.store.select(totalNumberBites);
   totalNumberUsers$ = this.store.select(totalNumberUsers);
   profileMeatadata$ = this.store.select(profileMeatadata);
+
+  users$ = this.store.select(users);
+  type$ = this.store.select(followType);
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);

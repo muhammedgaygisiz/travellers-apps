@@ -1,12 +1,16 @@
 <ta-page
   [enableBackButton]="true"
+  [showHeaderMenu]="false"
   [showFooter]="false"
-  [title]="type() === 'followers' ? 'Followers' : 'Following'"
 >
-  <ion-content>
+  <ion-content class="ion-padding">
+    <h1 class="ion-margin-bottom">
+      {{ type() === 'followers' ? 'Followers' : 'Following' }}
+    </h1>
+
     @if (isLoading()) {
-      <div class="loading-container">
-        <ion-label>Loading...</ion-label>
+      <div class="spinner-container">
+        <ion-spinner color="primary" />
       </div>
     } @else if (users().length === 0) {
       <div class="empty-container">
@@ -21,9 +25,13 @@
     } @else {
       <ion-list>
         @for (user of users(); track user.userId) {
-          <ion-item button (click)="userClick.emit(user)">
+          <ion-item
+            [button]="true"
+            (click)="userClick.emit(user)"
+            class="ion-margin-vertical"
+          >
             <ion-avatar slot="start">
-              <img [src]="user.photoUrl" [alt]="user.displayName" />
+              <img [src]="user.photoUrl" />
             </ion-avatar>
             <ion-label>
               <h2>{{ user.displayName }}</h2>
@@ -35,10 +43,20 @@
               <ion-button
                 slot="end"
                 fill="outline"
-                (click)="unfollowClick.emit(user); $event.stopPropagation()"
+                (click)="openConfirmationDialog($event)"
               >
                 Unfollow
               </ion-button>
+
+              <ion-alert
+                [isOpen]="isOpen()"
+                header="Stop following"
+                message="Are you sure you want to stop following {{
+                  user?.displayName
+                }}?"
+                [buttons]="confirmationButtons"
+                (didDismiss)="handleConfirmationDismiss($event, user)"
+              />
             }
           </ion-item>
         }

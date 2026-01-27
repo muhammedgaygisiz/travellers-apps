@@ -5,6 +5,7 @@ export type AppSlice = {
   settings: Settings;
   loading?: {
     home?: boolean;
+    followers?: boolean;
   };
   reloading?: {
     home?: boolean;

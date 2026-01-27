@@ -10,6 +10,7 @@ const CLEAN_PROFILE_METADATA = {
   following: 0,
   isFollowedByMe: false,
 };
+
 const initialState: AppSlice = {
   profile: undefined,
   settings: {
@@ -21,6 +22,7 @@ const initialState: AppSlice = {
   },
   loading: {
     home: true,
+    followers: true,
   },
   exchangeRates: { EUR: 1 },
   errorLoadingGpsPosition: false,
@@ -126,5 +128,19 @@ export const reducer = createReducer<AppSlice>(
   on(routerRequestAction, (state) => ({
     ...state,
     profileMetadata: { ...CLEAN_PROFILE_METADATA },
+  })),
+  on(AppActions.startLoadingFollowersData, (state) => ({
+    ...state,
+    loading: {
+      ...state.loading,
+      followers: true,
+    },
+  })),
+  on(AppActions.stopLoadingFollowersData, (state) => ({
+    ...state,
+    loading: {
+      ...state.loading,
+      followers: false,
+    },
   })),
 );

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { UserActions } from './actions';
-import { catchError, filter, from, map, of, switchMap } from 'rxjs';
+import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
@@ -74,6 +74,7 @@ export class UserEffects {
           return of(UserActions.noUserIDProvided());
         }
 
+        this.storeService.startLoadingFollowersData();
         if (type === 'followers') {
           return from(this.api.fetchFollowersWithDetails(userId)).pipe(
             map((users) => UserActions.loadedFollowers({ users })),
@@ -85,6 +86,9 @@ export class UserEffects {
             catchError(() => of(UserActions.errorLoadingFollowings())),
           );
         }
+      }),
+      tap(() => {
+        this.storeService.stopLoadingFollowersData();
       }),
     );
   });

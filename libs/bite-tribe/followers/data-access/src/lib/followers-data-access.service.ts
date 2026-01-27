@@ -14,6 +14,9 @@ export class FollowersDataAccessService {
   });
 
   type = toSignal(this.storeService.type$);
+  isLoading = toSignal(this.storeService.isFollowersLoading$, {
+    initialValue: false,
+  });
 
   async fetchFollowersWithDetails(userId: string): Promise<PublicUser[]> {
     return this.profileApiService.fetchFollowersWithDetails(userId);

@@ -14,7 +14,7 @@ export class FollowersService {
 
   users = this.dataAccessService.users;
   type = this.dataAccessService.type;
-  isLoading = signal<boolean>(false);
+  isLoading = this.dataAccessService.isLoading;
 
   currentUserId = toSignal(this.storeService.userId$, { initialValue: '' });
 

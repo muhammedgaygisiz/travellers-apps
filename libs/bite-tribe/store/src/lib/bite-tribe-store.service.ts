@@ -46,6 +46,7 @@ import {
   hasErrorLoadingGpsPosition,
   isBitesLoading,
   isDarkTheme,
+  isFollowersLoading,
   isPublicProfile,
   isReloadingHome,
   preferredCurrency,
@@ -147,6 +148,7 @@ export class BiteTribeStoreService implements StoreService {
 
   users$ = this.store.select(users);
   type$ = this.store.select(followType);
+  isFollowersLoading$ = this.store.select(isFollowersLoading);
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);
@@ -317,5 +319,13 @@ export class BiteTribeStoreService implements StoreService {
 
   unfollowUser(user: PublicUser): void {
     this.store.dispatch(AppActions.unfollowUser({ user }));
+  }
+
+  startLoadingFollowersData(): void {
+    this.store.dispatch(AppActions.startLoadingFollowersData());
+  }
+
+  stopLoadingFollowersData(): void {
+    this.store.dispatch(AppActions.stopLoadingFollowersData());
   }
 }

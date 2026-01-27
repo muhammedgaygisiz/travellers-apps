@@ -18,6 +18,10 @@ export const isBitesLoading = createSelector(slice, (slice) => {
   return slice?.loading?.home;
 });
 
+export const isFollowersLoading = createSelector(slice, (slice) => {
+  return slice?.loading?.followers || false;
+});
+
 export const publicUser = createSelector(slice, (slice) => slice?.profile);
 
 export const exchangeRates = createSelector(

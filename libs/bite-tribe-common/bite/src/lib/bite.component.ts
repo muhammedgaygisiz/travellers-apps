@@ -16,7 +16,7 @@ import {
   IonCardTitle,
   IonText,
 } from '@ionic/angular/standalone';
-import { Bite } from 'model';
+import { Bite, Like } from 'model';
 import { LikesComponent } from './likes/likes.component';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { StarRatingComponent } from 'common/ui/star-rating';
@@ -54,7 +54,7 @@ export class BiteComponent {
 
   biteClick = output<Bite>();
   restaurantClick = output<Bite>();
-  likeButtonClick = output<{ likeType: string; biteId: string }>();
+  likeButtonClick = output<Like>();
   gotoEdit = output<Bite>();
   deleteBite = output<Bite>();
 

@@ -17,7 +17,7 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
 } from '@ionic/angular/standalone';
-import { Bite, ProfileMetaData, PublicUser } from 'model';
+import { Bite, Like, ProfileMetaData, PublicUser } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { OverlayEventDetail } from '@ionic/core';
@@ -80,7 +80,7 @@ export class ProfileComponent {
 
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();
-  readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
+  readonly likeButtonClick = output<Like>();
   readonly followButtonClick = output<PublicUser>();
   readonly unfollowButtonClick = output<PublicUser>();
   readonly followersClick = output<string>();

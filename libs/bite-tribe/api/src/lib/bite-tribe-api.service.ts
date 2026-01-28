@@ -84,15 +84,11 @@ export class BiteTribeApiService {
     return this.menuApiService.loadMenu(menuId);
   }
 
-  async removeLike(like: any): Promise<any> {
+  async removeLike(like: any): Promise<Like> {
     return this.likeApiService.removeLike(like);
   }
 
-  saveLike(like: {
-    likeType: string;
-    biteId: string;
-    createdAt: string;
-  }): Promise<Like | undefined> {
+  saveLike(like: Like): Promise<Like | undefined> {
     return this.likeApiService.saveLike(like);
   }
 

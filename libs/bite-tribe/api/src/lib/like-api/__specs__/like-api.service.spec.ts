@@ -3,6 +3,7 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
 import { ErrorHandler } from '@angular/core';
+import { Like } from 'model';
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
@@ -10,6 +11,7 @@ jest.mock('@capacitor-firebase/firestore', () => ({
     removeSnapshotListener: jest.fn(),
     setDocument: jest.fn(),
     deleteDocument: jest.fn(),
+    getDocument: jest.fn(),
   },
 }));
 
@@ -39,66 +41,22 @@ describe(LikeApiService.name, () => {
     expect(service).toBeTruthy();
   });
 
-  describe('startListener', () => {
-    let addCollectionGroupSnapshotListenerMock: jest.SpyInstance;
-
-    beforeEach(() => {
-      addCollectionGroupSnapshotListenerMock = jest
-        .spyOn(FirebaseFirestore, 'addCollectionGroupSnapshotListener')
-        .mockResolvedValue('callbackId');
-    });
-
-    it('should start the listener', async () => {
-      await service.startListener();
-
-      expect(addCollectionGroupSnapshotListenerMock).toHaveBeenCalled();
-    });
-  });
-
-  describe('handleResponse', () => {
-    let nextSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      nextSpy = jest
-        .spyOn((service as any)._likesChannel$, 'next')
-        .mockImplementation();
-    });
-
-    it('should process likes and update the likesChannel$', () => {
-      const mockLikeDocs = {
-        snapshots: [
-          { data: { likeType: 'like', biteId: 'bite1' } },
-          { data: { likeType: 'love', biteId: 'bite2' } },
-        ],
-      } as any;
-
-      service.handleResponse(mockLikeDocs);
-
-      expect(nextSpy).toHaveBeenCalledWith([
-        { likeType: 'like', biteId: 'bite1' },
-        { likeType: 'love', biteId: 'bite2' },
-      ]);
-    });
-  });
-
-  describe('stopLikesListener', () => {
-    it('should call stopped$.next and removeSnapshotListener', async () => {
-      const removeSnapshotListenerMock = jest
-        .spyOn(FirebaseFirestore, 'removeSnapshotListener')
-        .mockResolvedValue();
-
-      const callbackId = 'testCallbackId';
-      await service.stopLikesListener(callbackId);
-
-      expect(removeSnapshotListenerMock).toHaveBeenCalledWith({ callbackId });
-    });
-  });
-
   describe('saveLike', () => {
     it('should call FirebaseFirestore.setDocument', async () => {
       const setDocumentMock = jest
         .spyOn(FirebaseFirestore, 'setDocument')
         .mockResolvedValue();
+
+      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        snapshot: {
+          data: {
+            likeType: 'thumbup',
+            biteId: 'bite123',
+            createdAt: '2024-06-01T00:00:00Z',
+            userId: '123',
+          },
+        } as any,
+      });
 
       const like = {
         likeType: 'thumbup',
@@ -151,7 +109,7 @@ describe(LikeApiService.name, () => {
 
       const like = {
         biteId: 'bite123',
-      };
+      } as Like;
 
       await service.removeLike(like);
 
@@ -172,7 +130,7 @@ describe(LikeApiService.name, () => {
 
         const like = {
           biteId: 'bite123',
-        };
+        } as Like;
 
         await service.removeLike(like);
 

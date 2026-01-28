@@ -37,7 +37,7 @@ export class ProfileDataAccessService {
     this.storeService.logout();
   }
 
-  submitLikeClick(likeType: { likeType: string; biteId: string }): void {
+  submitLikeClick(likeType: Like): void {
     const bites = this.bites();
     const userId = this.userId();
 

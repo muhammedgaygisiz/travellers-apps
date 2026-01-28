@@ -1,10 +1,6 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { AuthService } from 'ta-firestore';
-import {
-  AddCollectionGroupSnapshotListenerCallbackEvent,
-  DocumentData,
-  FirebaseFirestore,
-} from '@capacitor-firebase/firestore';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { BITE_COLLECTION } from '../utils/constants';
 import { Bite, Like } from 'model';
@@ -24,21 +20,27 @@ export class LikeApiService {
     biteId: string;
     createdAt: string;
   }): Promise<Like | undefined> {
-    const user = await this.getUser();
+    try {
+      const user = await this.getUser();
 
-    await FirebaseFirestore.setDocument({
-      reference: `${BITE_COLLECTION}/${like.biteId}/likes/${user?.uid}`,
-      data: {
-        ...like,
-        userId: user?.uid,
-      },
-    });
+      await FirebaseFirestore.setDocument({
+        reference: `${BITE_COLLECTION}/${like.biteId}/likes/${user?.uid}`,
+        data: {
+          ...like,
+          userId: user?.uid,
+        },
+      });
 
-    const result = await FirebaseFirestore.getDocument({
-      reference: `${BITE_COLLECTION}/${like.biteId}/likes/${user?.uid}`,
-    });
+      const result = await FirebaseFirestore.getDocument({
+        reference: `${BITE_COLLECTION}/${like.biteId}/likes/${user?.uid}`,
+      });
 
-    return result.snapshot.data as Like;
+      return result.snapshot.data as Like;
+    } catch (error) {
+      console.error('Error saving like:', error);
+      this.errorHandler.handleError(error);
+      return undefined;
+    }
   }
 
   private async getUser(): Promise<User | null | undefined> {

@@ -6,9 +6,8 @@ import {
   removeLike,
   saveLike,
 } from './actions';
-import { catchError, filter, from, map, switchMap, tap } from 'rxjs';
+import { filter, from, map, switchMap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { fromAuth } from 'ta-firestore';
 import { BiteActions } from '../bites/actions';
 
 @Injectable()
@@ -34,22 +33,23 @@ export class LikeEffects {
   saveLikeToBite$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(saveLike),
-      switchMap(({ type, ...like }) =>
-        from(this.api.saveLike(like)).pipe(
+      switchMap(({ like }) => {
+        const { type, ...rest } = like as any;
+        return from(this.api.saveLike(rest)).pipe(
           map((like) => loadedLikesFromApi({ likes: like ? [like] : [] })),
-        ),
-      ),
-    );
-  });
-
-  removeLikeFromBite$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(removeLike),
-      switchMap(async (like) => {
-        const likeToBeDeleted = await this.api.removeLike(like.like);
-
-        return deletedLike({ like: likeToBeDeleted });
+        );
       }),
     );
   });
+
+  removeLikeFromBite$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(removeLike),
+      switchMap(({ like }) =>
+        from(this.api.removeLike(like)).pipe(
+          map((like) => deletedLike({ like: like })),
+        ),
+      ),
+    ),
+  );
 }

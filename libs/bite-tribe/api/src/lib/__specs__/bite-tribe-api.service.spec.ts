@@ -4,7 +4,7 @@ import { BiteTribeApiService } from '../bite-tribe-api.service';
 import { ReviewApiService } from '../review-api.service';
 import { RestaurantApiService } from '../restaurant-api.service';
 import { MenuApiService } from '../menu-api.service';
-import { LikeApiService } from '../like-api.service';
+import { LikeApiService } from '../like-api/like-api.service';
 import { BucketlistApiService } from '../bucketlist-api.service';
 import { ProfileApiService } from '../profile-api.service';
 import { BiteApiService } from '../bite-api/bite-api.service';
@@ -587,20 +587,6 @@ describe(BiteTribeApiService.name, () => {
         const bite = { id: 'bite-id' } as any;
         service.deleteBite(bite);
         expect(deleteBiteSpy).toHaveBeenCalledWith(bite);
-      },
-    ));
-  });
-
-  describe('likes$', () => {
-    it('should call startListener and return likes$ from LikeApiService', inject(
-      [BiteTribeApiService, LikeApiService],
-      (service: BiteTribeApiService, likeApiService: LikeApiService) => {
-        const startListenerSpy = jest.spyOn(likeApiService, 'startListener');
-        const likesObservable = of([{ id: 'like-id' }]);
-        likeApiService.likes$ = likesObservable;
-        const likes$ = service.likes$();
-        expect(startListenerSpy).toHaveBeenCalled();
-        expect(likes$).toBe(likesObservable);
       },
     ));
   });

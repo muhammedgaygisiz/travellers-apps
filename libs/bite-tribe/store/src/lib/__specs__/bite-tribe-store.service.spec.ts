@@ -461,4 +461,26 @@ describe(BiteTribeStoreService.name, () => {
       },
     ));
   });
+
+  describe('startLoadingFollowersData', () => {
+    it('should dispatch startLoadingFollowersData on BiteTribeStoreService', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        service.startLoadingFollowersData({} as any);
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('stopLoadingFollowersData', () => {
+    it('should dispatch stopLoadingFollowersData on BiteTribeStoreService', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        service.stopLoadingFollowersData();
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
 });

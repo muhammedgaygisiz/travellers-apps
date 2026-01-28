@@ -323,4 +323,46 @@ describe('App Reducer', () => {
       expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
     });
   });
+
+  describe('startLoadingFollowersData', () => {
+    it('should set loading:followers to true', () => {
+      const INITIAL_STATE = {
+        loading: {
+          followers: false,
+        },
+      } as AppSlice;
+      const NEW_STATE = {
+        loading: {
+          followers: true,
+        },
+      } as AppSlice;
+
+      const action = AppActions.startLoadingFollowersData();
+
+      expect(reducer(INITIAL_STATE, action)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('stopLoadingFollowersData', () => {
+    it('should set loading:followers to false', () => {
+      const INITIAL_STATE = {
+        loading: {
+          followers: true,
+        },
+      } as AppSlice;
+      const NEW_STATE = {
+        loading: {
+          followers: false,
+        },
+      } as AppSlice;
+
+      const action = AppActions.stopLoadingFollowersData();
+
+      expect(reducer(INITIAL_STATE, action)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
 });

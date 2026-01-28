@@ -55,6 +55,8 @@ class Mock {
   fetchFollowers = jest.fn();
   fetchFollowing = jest.fn();
   isCurrentUserFollowing = jest.fn();
+  fetchFollowersWithDetails = jest.fn();
+  fetchFollowingWithDetails = jest.fn();
 }
 
 describe(BiteTribeApiService.name, () => {
@@ -743,6 +745,44 @@ describe(BiteTribeApiService.name, () => {
           'follower1',
           'follower2',
         ]);
+      },
+    ));
+  });
+
+  describe('fetchFollowersWithDetails', () => {
+    it('should call fetchFollowersWithDetails on ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        const fetchFollowersWithDetailsSpy = jest
+          .spyOn(profileApiService, 'fetchFollowersWithDetails')
+          .mockResolvedValue([] as any);
+
+        const userId = 'user-id';
+        await service.fetchFollowersWithDetails(userId);
+
+        expect(fetchFollowersWithDetailsSpy).toHaveBeenCalledWith(userId);
+      },
+    ));
+  });
+
+  describe('fetchFollowingWithDetails', () => {
+    it('should call fetchFollowingWithDetails on ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        const fetchFollowingWithDetailsSpy = jest
+          .spyOn(profileApiService, 'fetchFollowingWithDetails')
+          .mockResolvedValue([] as any);
+
+        const userId = 'user-id';
+        await service.fetchFollowingWithDetails(userId);
+
+        expect(fetchFollowingWithDetailsSpy).toHaveBeenCalledWith(userId);
       },
     ));
   });

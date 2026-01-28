@@ -467,7 +467,7 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.startLoadingFollowersData({} as any);
+        service.startLoadingFollowersData();
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));

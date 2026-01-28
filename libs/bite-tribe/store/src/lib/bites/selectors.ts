@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
 import { adapter, BitesState } from './adapter';
 import type { Bite, PublicUser } from 'model';
-import { biteId } from '../router/selectors';
+import { biteId, userId } from '../router/selectors';
 import { likes } from '../likes/selectors';
 import {
   exchangeRates,
@@ -146,6 +146,8 @@ export const bite = createSelector(
   },
 );
 
+export const creatorId = createSelector(bite, (bite) => bite?.userId);
+
 export const mybites = createSelector(
   bitesWithMetadata,
   fromAuth.selectUserId,
@@ -184,9 +186,10 @@ export const sortedHomeBites = createSelector(
 
 export const bitesByUser = createSelector(
   bitesWithMetadata,
-  biteCreator,
-  (bites, biteCreator) =>
-    bites.filter((bite) => bite.userId === biteCreator?.userId),
+  userId,
+  (bites, userId) => {
+    return bites.filter((bite) => bite.userId === userId);
+  },
 );
 
 export const nearbyRestaurants = createSelector(bitesWithMetadata, (bites) =>

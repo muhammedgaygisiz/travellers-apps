@@ -97,7 +97,7 @@ export const ROUTES: Routes = withAuthRoutes([
   {
     path: `${PATH.PROFILE}/:userId`,
     loadComponent: () =>
-      import('bite-tribe/profile').then((m) => m.BiteCreatorProfileContainer),
+      import('bite-tribe/profile').then((m) => m.ProfileContainer),
   },
   {
     path: PATH.MY_PROFILE,
@@ -108,6 +108,12 @@ export const ROUTES: Routes = withAuthRoutes([
     path: PATH.EDIT_PROFILE,
     loadComponent: () =>
       import('bite-tribe/profile').then((m) => m.EditProfileContainer),
+  },
+  {
+    path: `${PATH.FOLLOWERS}/:userId/:type`,
+    loadComponent: () =>
+      import('bite-tribe/followers').then((m) => m.FollowersContainer),
+    canActivate: [authGuard],
   },
   {
     path: PATH.ABOUT,

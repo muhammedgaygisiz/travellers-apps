@@ -25,7 +25,7 @@ export class ProfileDataAccessService {
     initialValue: [] as Bite[],
   });
 
-  biteCreator = toSignal(this.storeService.biteCreator$);
+  user = toSignal(this.storeService.userByUrlParam$);
 
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
 

@@ -24,6 +24,7 @@ import { fromLikes } from './likes';
 import { fromApp } from './app';
 import { fromRestaurants } from './restaurants';
 import { fromMenus } from './menus';
+import { fromUsers } from './users';
 import { AppEffect } from './app/effects';
 import { RestaurantEffects } from './restaurants/effects';
 import { LikeEffects } from './likes/effects';
@@ -35,6 +36,7 @@ import { fromBucketlists } from './bucketlists';
 import { ServiceWorkerEffects } from './service-worker/effects';
 import { fromFilteringAndSorting } from './filtering-and-sorting';
 import { FilteringAndSortingEffects } from './filtering-and-sorting/effects';
+import { UserEffects } from './users/effects';
 
 const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
@@ -135,6 +137,7 @@ export const provideBiteTribeStore = (environment: Environment): any => [
         BucketListEffect,
         ServiceWorkerEffects,
         FilteringAndSortingEffects,
+        UserEffects,
       ),
   provideState(fromBites.key, fromBites.reducer),
   provideState(fromReviews.key, fromReviews.reducer),
@@ -144,6 +147,7 @@ export const provideBiteTribeStore = (environment: Environment): any => [
   provideState(fromMenus.key, fromMenus.reducer),
   provideState(fromBucketlists.key, fromBucketlists.reducer),
   provideState(fromFilteringAndSorting.key, fromFilteringAndSorting.reducer),
+  provideState(fromUsers.key, fromUsers.reducer),
   provideFirestoreUtils(
     toFirebaseOptions(environment),
     !environment.isBusiness,

@@ -27,3 +27,8 @@ export const userId = createSelector(
   selectRouteParams,
   (params) => params?.['userId'],
 );
+
+export const followType = createSelector(
+  selectRouteParams,
+  (params) => params?.['type'],
+);

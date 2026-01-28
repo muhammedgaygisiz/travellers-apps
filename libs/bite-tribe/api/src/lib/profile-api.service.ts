@@ -377,4 +377,63 @@ export class ProfileApiService {
 
     return followers.some((follower) => follower.id === user.uid);
   }
+
+  async fetchFollowersWithDetails(userId: string): Promise<PublicUser[]> {
+    try {
+      const followers = await this.fetchFollowers(userId);
+      const userIds = followers.map((follower) => follower.id);
+
+      if (userIds.length === 0) {
+        return [];
+      }
+
+      const users: PublicUser[] = [];
+      for (const uid of userIds) {
+        const userDoc = await FirebaseFirestore.getDocument({
+          reference: `${USERS_COLLECTION}/${uid}`,
+        });
+
+        if (userDoc.snapshot?.data) {
+          users.push(userDoc.snapshot.data as PublicUser);
+        }
+      }
+
+      return users;
+    } catch (error) {
+      console.error('Error fetching followers with details:', error);
+      this.errorHandler.handleError(error);
+      return [];
+    }
+  }
+
+  async fetchFollowingWithDetails(userId: string): Promise<PublicUser[]> {
+    try {
+      const following = await this.fetchFollowing(userId);
+      const followingData = following.map((doc) => doc.data);
+      const userIds = followingData
+        .map((data: any) => data?.followedUid)
+        .filter(Boolean);
+
+      if (userIds.length === 0) {
+        return [];
+      }
+
+      const users: PublicUser[] = [];
+      for (const uid of userIds) {
+        const userDoc = await FirebaseFirestore.getDocument({
+          reference: `${USERS_COLLECTION}/${uid}`,
+        });
+
+        if (userDoc.snapshot.data) {
+          users.push(userDoc.snapshot.data as PublicUser);
+        }
+      }
+
+      return users;
+    } catch (error) {
+      console.error('Error fetching following with details:', error);
+      this.errorHandler.handleError(error);
+      return [];
+    }
+  }
 }

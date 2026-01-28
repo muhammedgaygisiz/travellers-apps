@@ -957,4 +957,279 @@ describe(ProfileApiService.name, () => {
       ));
     });
   });
+
+  describe('fetchFollowersWithDetails', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    describe('given followers found', () => {
+      describe('with snapshot in doc', () => {
+        it('should fetch followers and their user details', inject(
+          [ProfileApiService],
+          async (service: ProfileApiService) => {
+            const mockedFollowers = [
+              { id: 'follower1', name: 'User follower1' },
+              { id: 'follower2', name: 'User follower2' },
+            ] as any;
+
+            const fetchFollowersSpy = jest
+              .spyOn(service, 'fetchFollowers')
+              .mockResolvedValue(mockedFollowers);
+
+            const getDocumentSpy = jest
+              .spyOn(FirebaseFirestore, 'getDocument')
+              .mockImplementation(({ reference }) => {
+                const userId = reference.split('/')[1];
+                return Promise.resolve({
+                  snapshot: {
+                    id: userId,
+                    data: {
+                      ...mockedFollowers.find((f: any) => f.id === userId),
+                    },
+                  },
+                } as any);
+              });
+
+            const result =
+              await service.fetchFollowersWithDetails('user-id-123');
+
+            expect(fetchFollowersSpy).toHaveBeenCalledWith('user-id-123');
+            expect(getDocumentSpy).toHaveBeenCalledTimes(2);
+            expect(result).toEqual([
+              { id: 'follower1', name: 'User follower1' },
+              { id: 'follower2', name: 'User follower2' },
+            ]);
+          },
+        ));
+      });
+
+      describe('without snapshot in doc', () => {
+        it('should skip follower without snapshot', inject(
+          [ProfileApiService],
+          async (service: ProfileApiService) => {
+            const mockedFollowers = [
+              { id: 'follower1', name: 'User follower1' },
+              { id: 'follower2', name: 'User follower2' },
+            ] as any;
+
+            const fetchFollowersSpy = jest
+              .spyOn(service, 'fetchFollowers')
+              .mockResolvedValue(mockedFollowers);
+
+            const getDocumentSpy = jest
+              .spyOn(FirebaseFirestore, 'getDocument')
+              .mockImplementation(({ reference }) => {
+                const userId = reference.split('/')[1];
+                if (userId === 'follower1') {
+                  return Promise.resolve({
+                    snapshot: null,
+                  } as any);
+                }
+                return Promise.resolve({
+                  snapshot: {
+                    id: userId,
+                    data: {
+                      ...mockedFollowers.find((f: any) => f.id === userId),
+                    },
+                  },
+                } as any);
+              });
+
+            const result =
+              await service.fetchFollowersWithDetails('user-id-123');
+
+            expect(fetchFollowersSpy).toHaveBeenCalledWith('user-id-123');
+            expect(getDocumentSpy).toHaveBeenCalledTimes(2);
+            expect(result).toEqual([
+              { id: 'follower2', name: 'User follower2' },
+            ]);
+          },
+        ));
+      });
+    });
+
+    describe('given no followers found', () => {
+      it('should return empty array', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const fetchFollowersSpy = jest
+            .spyOn(service, 'fetchFollowers')
+            .mockResolvedValue([]);
+
+          const getDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'getDocument')
+            .mockImplementation();
+
+          const result = await service.fetchFollowersWithDetails('user-id-123');
+
+          expect(fetchFollowersSpy).toHaveBeenCalledWith('user-id-123');
+          expect(getDocumentSpy).not.toHaveBeenCalled();
+          expect(result).toEqual([]);
+        },
+      ));
+    });
+
+    describe('given an error occurs', () => {
+      it('should handle the error and return empty array', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const consoleErrorSpy = jest
+            .spyOn(console, 'error')
+            .mockImplementation();
+
+          jest
+            .spyOn(service, 'fetchFollowers')
+            .mockRejectedValue(new Error('Failed to fetch followers'));
+
+          const result = await service.fetchFollowersWithDetails('user-id-123');
+
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error fetching followers with details:',
+            expect.any(Error),
+          );
+          expect(result).toEqual([]);
+        },
+      ));
+    });
+  });
+
+  describe('fetchFollowingWithDetails', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    describe('given followings found', () => {
+      describe('with data', () => {
+        it('should fetch following and their user details', inject(
+          [ProfileApiService],
+          async (service: ProfileApiService) => {
+            const mockedFollowing = [
+              { data: { followedUid: 'following1', name: 'User following1' } },
+              { data: { followedUid: 'following2', name: 'User following2' } },
+            ] as any;
+
+            const fetchFollowingSpy = jest
+              .spyOn(service, 'fetchFollowing')
+              .mockResolvedValue(mockedFollowing);
+
+            const getDocumentSpy = jest
+              .spyOn(FirebaseFirestore, 'getDocument')
+              .mockImplementation(({ reference }) => {
+                const userId = reference.split('/')[1];
+                const { followedUid, ...rest } = mockedFollowing.find(
+                  (f: any) => f.data.followedUid === userId,
+                ).data;
+                return Promise.resolve({
+                  snapshot: {
+                    id: userId,
+                    data: {
+                      ...rest,
+                      id: followedUid,
+                    },
+                  },
+                } as any);
+              });
+
+            const result =
+              await service.fetchFollowingWithDetails('user-id-123');
+
+            expect(fetchFollowingSpy).toHaveBeenCalledWith('user-id-123');
+            expect(getDocumentSpy).toHaveBeenCalledTimes(2);
+            expect(result).toEqual([
+              { id: 'following1', name: 'User following1' },
+              { id: 'following2', name: 'User following2' },
+            ]);
+          },
+        ));
+      });
+
+      describe('with no data', () => {
+        it('should skip following without data', inject(
+          [ProfileApiService],
+          async (service: ProfileApiService) => {
+            const mockedFollowing = [
+              { data: { followedUid: 'following1', name: 'User following1' } },
+              { data: null },
+            ] as any;
+
+            const fetchFollowingSpy = jest
+              .spyOn(service, 'fetchFollowing')
+              .mockResolvedValue(mockedFollowing);
+
+            const getDocumentSpy = jest
+              .spyOn(FirebaseFirestore, 'getDocument')
+              .mockImplementation(({ reference }) => {
+                const userId = reference.split('/')[1];
+                const { followedUid, ...rest } = mockedFollowing.find(
+                  (f: any) => f.data && f.data.followedUid === userId,
+                ).data;
+                return Promise.resolve({
+                  snapshot: {
+                    id: userId,
+                    data: {
+                      ...rest,
+                      id: followedUid,
+                    },
+                  },
+                } as any);
+              });
+
+            const result =
+              await service.fetchFollowingWithDetails('user-id-123');
+
+            expect(fetchFollowingSpy).toHaveBeenCalledWith('user-id-123');
+            expect(getDocumentSpy).toHaveBeenCalledTimes(1);
+            expect(result).toEqual([
+              { id: 'following1', name: 'User following1' },
+            ]);
+          },
+        ));
+      });
+    });
+
+    describe('given no followings found', () => {
+      it('should return empty array', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const fetchFollowingSpy = jest
+            .spyOn(service, 'fetchFollowing')
+            .mockResolvedValue([]);
+
+          const getDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'getDocument')
+            .mockImplementation();
+
+          const result = await service.fetchFollowingWithDetails('user-id-123');
+
+          expect(fetchFollowingSpy).toHaveBeenCalledWith('user-id-123');
+          expect(getDocumentSpy).not.toHaveBeenCalled();
+          expect(result).toEqual([]);
+        },
+      ));
+    });
+
+    describe('given an error occurs', () => {
+      it('should handle the error and return empty array', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const consoleErrorSpy = jest
+            .spyOn(console, 'error')
+            .mockImplementation();
+
+          jest
+            .spyOn(service, 'fetchFollowing')
+            .mockRejectedValue(new Error('Failed to fetch following'));
+
+          const result = await service.fetchFollowingWithDetails('user-id-123');
+
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error fetching following with details:',
+            expect.any(Error),
+          );
+          expect(result).toEqual([]);
+        },
+      ));
+    });
+  });
 });

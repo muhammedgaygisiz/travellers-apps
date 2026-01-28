@@ -333,4 +333,66 @@ describe('App Selectors', () => {
       expect(result).toBeUndefined();
     });
   });
+
+  describe('isFollowersLoading', () => {
+    describe('slice is undefined', () => {
+      it('should return false', () => {
+        const result = fromSelectors.isFollowersLoading.projector(
+          undefined as any,
+        );
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('loading is undefined', () => {
+      it('should return false', () => {
+        const stateWithoutLoading = {
+          ...mockState,
+          loading: undefined,
+        } as any;
+        const result =
+          fromSelectors.isFollowersLoading.projector(stateWithoutLoading);
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('followers loading is undefined', () => {
+      it('should return false', () => {
+        const stateWithoutFollowersLoading = {
+          ...mockState,
+          loading: {},
+        } as any;
+        const result = fromSelectors.isFollowersLoading.projector(
+          stateWithoutFollowersLoading,
+        );
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('followers loading is true', () => {
+      it('should return true', () => {
+        const stateWithFollowersLoading = {
+          ...mockState,
+          loading: { followers: true },
+        } as any;
+        const result = fromSelectors.isFollowersLoading.projector(
+          stateWithFollowersLoading,
+        );
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('followers loading is false', () => {
+      it('should return false', () => {
+        const stateWithFollowersLoadingFalse = {
+          ...mockState,
+          loading: { followers: false },
+        } as any;
+        const result = fromSelectors.isFollowersLoading.projector(
+          stateWithFollowersLoadingFalse,
+        );
+        expect(result).toBe(false);
+      });
+    });
+  });
 });

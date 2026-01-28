@@ -6,4 +6,5 @@ export const PATH = {
   PROFILE: 'profile',
   MY_PROFILE: 'my-profile',
   ABOUT: 'about',
+  FOLLOWERS: 'followers',
 };

@@ -36,7 +36,7 @@ describe('App Reducer', () => {
           currency: 'EUR',
           nearby: 2000,
         },
-        loading: { home: true },
+        loading: { home: true, followers: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
         totalNumberBites: 0,
@@ -321,6 +321,48 @@ describe('App Reducer', () => {
       const action = routerRequestAction({} as any);
 
       expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
+    });
+  });
+
+  describe('startLoadingFollowersData', () => {
+    it('should set loading:followers to true', () => {
+      const INITIAL_STATE = {
+        loading: {
+          followers: false,
+        },
+      } as AppSlice;
+      const NEW_STATE = {
+        loading: {
+          followers: true,
+        },
+      } as AppSlice;
+
+      const action = AppActions.startLoadingFollowersData();
+
+      expect(reducer(INITIAL_STATE, action)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('stopLoadingFollowersData', () => {
+    it('should set loading:followers to false', () => {
+      const INITIAL_STATE = {
+        loading: {
+          followers: true,
+        },
+      } as AppSlice;
+      const NEW_STATE = {
+        loading: {
+          followers: false,
+        },
+      } as AppSlice;
+
+      const action = AppActions.stopLoadingFollowersData();
+
+      expect(reducer(INITIAL_STATE, action)).toEqual({
+        ...NEW_STATE,
+      });
     });
   });
 });

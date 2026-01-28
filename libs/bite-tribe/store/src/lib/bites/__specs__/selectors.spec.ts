@@ -1,6 +1,5 @@
 import type { Bite, Bucketlist, Geopoint, PublicUser } from 'model';
 import * as fromSelectors from '../selectors';
-import { EntityState } from '@ngrx/entity';
 import { BitesState } from '../adapter';
 
 describe('Bites Selectors', () => {
@@ -420,9 +419,10 @@ describe('Bites Selectors', () => {
         { ...mockBite2, likes: [], distance: '0.01', userId: 'User-2' },
       ] as any[];
 
-      const result = fromSelectors.bitesByUser.projector(bitesWithMetadata, {
-        userId: 'User-1',
-      } as PublicUser);
+      const result = fromSelectors.bitesByUser.projector(
+        bitesWithMetadata,
+        'User-1',
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('1');

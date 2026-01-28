@@ -1,0 +1,66 @@
+<ta-page
+  [enableBackButton]="true"
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+>
+  <ion-content class="ion-padding">
+    <h1 class="ion-margin-bottom">
+      {{ type() === 'followers' ? 'Followers' : 'Following' }}
+    </h1>
+
+    @if (isLoading()) {
+      <div class="spinner-container">
+        <ion-spinner color="primary" />
+      </div>
+    } @else if (users().length === 0) {
+      <div class="empty-container">
+        <ion-label>
+          @if (type() === 'followers') {
+            No followers yet
+          } @else {
+            Not following anyone yet
+          }
+        </ion-label>
+      </div>
+    } @else {
+      <ion-list>
+        @for (user of users(); track user.userId) {
+          <ion-item
+            [button]="true"
+            (click)="userClick.emit(user)"
+            class="ion-margin-vertical"
+          >
+            <ion-avatar slot="start">
+              <img [src]="user.photoUrl" />
+            </ion-avatar>
+            <ion-label>
+              <h2>{{ user.displayName }}</h2>
+              @if (user.city) {
+                <p>{{ user.city }}</p>
+              }
+            </ion-label>
+            @if (type() === 'following' && user.userId !== currentUserId()) {
+              <ion-button
+                slot="end"
+                fill="outline"
+                (click)="openConfirmationDialog($event)"
+              >
+                Unfollow
+              </ion-button>
+
+              <ion-alert
+                [isOpen]="isOpen()"
+                header="Stop following"
+                message="Are you sure you want to stop following {{
+                  user?.displayName
+                }}?"
+                [buttons]="confirmationButtons"
+                (didDismiss)="handleConfirmationDismiss($event, user)"
+              />
+            }
+          </ion-item>
+        }
+      </ion-list>
+    }
+  </ion-content>
+</ta-page>

@@ -183,4 +183,34 @@ describe(ProfileService.name, () => {
       expect(submitUnfollowClickSpy).toHaveBeenCalledWith(user);
     });
   });
+
+  describe('gotoFollowers', () => {
+    it('should navigate to the correct followers page', () => {
+      const userId = 'user123';
+      const navigateSpy = jest
+        .spyOn(service['navController'], 'navigateForward')
+        .mockImplementation();
+      service.gotoFollowers(userId);
+      expect(navigateSpy).toHaveBeenCalledWith([
+        'followers',
+        userId,
+        'followers',
+      ]);
+    });
+  });
+
+  describe('gotoFollowing', () => {
+    it('should navigate to the correct following page', () => {
+      const userId = 'user123';
+      const navigateSpy = jest
+        .spyOn(service['navController'], 'navigateForward')
+        .mockImplementation();
+      service.gotoFollowing(userId);
+      expect(navigateSpy).toHaveBeenCalledWith([
+        'followers',
+        userId,
+        'following',
+      ]);
+    });
+  });
 });

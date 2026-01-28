@@ -26,6 +26,16 @@ $GOLD: #ffd700;
       display: flex;
       flex-direction: column;
       justify-content: center;
+
+      .clickable {
+        cursor: pointer;
+        color: var(--ion-color-primary);
+        font-weight: 600;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
 
     .profile-avatar {

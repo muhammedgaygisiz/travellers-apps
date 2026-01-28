@@ -35,7 +35,7 @@ export class AppEffect {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly store = inject(Store);
 
-  private readonly biteCreatorId = toSignal(this.store.select(userId));
+  private readonly userId = toSignal(this.store.select(userId));
 
   loadTotalNumberBites$ = createEffect(() => {
     return this.actions$.pipe(
@@ -204,7 +204,7 @@ export class AppEffect {
         isProfilePage(),
         tap(async () => {
           const userId: string =
-            this.biteCreatorId() ?? this.storeService.user()?.uid ?? '';
+            this.userId() ?? this.storeService.user()?.uid ?? '';
 
           const metaData = await this.api.fetchFollowMetadata(userId);
 

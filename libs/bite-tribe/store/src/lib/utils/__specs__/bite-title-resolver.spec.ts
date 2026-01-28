@@ -40,7 +40,56 @@ describe('biteTitleResolver', () => {
       mockStore.overrideSelector(bite, mockBite);
     });
 
-    it('should return the bite name', () => {
+    describe('with bite name', () => {
+      it('should return the bite name', () => {
+        scheduler.run(({ expectObservable }) => {
+          TestBed.runInInjectionContext(() => {
+            const obs$ = biteTitleResolver(
+              routeMock,
+              stateMock,
+            ) as Observable<string>;
+
+            const expected = 'a';
+            const output = { a: 'My Bite' };
+
+            expectObservable(obs$).toBe(expected, output);
+          });
+        });
+      });
+    });
+
+    describe('without bite name', () => {
+      beforeEach(() => {
+        const mockStore = TestBed.inject(MockStore);
+        const mockBite = {} as Bite;
+        mockStore.overrideSelector(bite, mockBite);
+      });
+
+      it('should return "Bite"', () => {
+        scheduler.run(({ expectObservable }) => {
+          TestBed.runInInjectionContext(() => {
+            const obs$ = biteTitleResolver(
+              routeMock,
+              stateMock,
+            ) as Observable<string>;
+
+            const expected = 'a';
+            const output = { a: 'Bite' };
+
+            expectObservable(obs$).toBe(expected, output);
+          });
+        });
+      });
+    });
+  });
+
+  describe('given no bite', () => {
+    beforeEach(() => {
+      const mockStore = TestBed.inject(MockStore);
+      mockStore.overrideSelector(bite, undefined);
+    });
+
+    it('should return "Bite"', () => {
       scheduler.run(({ expectObservable }) => {
         TestBed.runInInjectionContext(() => {
           const obs$ = biteTitleResolver(
@@ -49,7 +98,7 @@ describe('biteTitleResolver', () => {
           ) as Observable<string>;
 
           const expected = 'a';
-          const output = { a: 'My Bite' };
+          const output = { a: 'Bite' };
 
           expectObservable(obs$).toBe(expected, output);
         });

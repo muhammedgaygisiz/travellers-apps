@@ -62,7 +62,7 @@ export class BiteApiService {
     }
   }
 
-  private getUser(): User | null | undefined {
+  getUser(): User | null | undefined {
     const authState = this.authService.authState();
     return authState?.user;
   }

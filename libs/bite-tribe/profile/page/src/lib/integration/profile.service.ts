@@ -13,7 +13,7 @@ export class ProfileService {
 
   isAuthenticated = this.dataAccess.isAuthenticated;
   myUser = this.dataAccess.myUser;
-  biteCreator = this.dataAccess.biteCreator;
+  user = this.dataAccess.user;
   userId = this.dataAccess.userId;
   bitesByUser = this.dataAccess.bitesByUser;
   myBites = this.dataAccess.myBites;
@@ -87,5 +87,13 @@ export class ProfileService {
 
   unfollowButtonClicked(user: PublicUser): void {
     this.dataAccess.submitUnfollowClick(user);
+  }
+
+  gotoFollowers(userId: string): void {
+    this.navController.navigateForward([PATH.FOLLOWERS, userId, 'followers']);
+  }
+
+  gotoFollowing(userId: string): void {
+    this.navController.navigateForward([PATH.FOLLOWERS, userId, 'following']);
   }
 }

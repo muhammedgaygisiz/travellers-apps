@@ -15,6 +15,7 @@ class Mock {
   userId$ = of('user-id');
   isPublicProfile$ = of(true);
   profileMeatadata$ = of(true);
+  userByUrlParam$ = of(null);
   logout = jest.fn();
   removeLike = jest.fn();
   submitLikeClick = jest.fn();

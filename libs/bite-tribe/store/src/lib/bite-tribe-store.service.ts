@@ -7,7 +7,6 @@ import { saveNewReview } from './reviews/actions';
 import {
   allTags,
   bite,
-  biteCreator,
   bites,
   bitesBySelectedBucketlist,
   bitesByUser,
@@ -47,6 +46,7 @@ import {
   hasErrorLoadingGpsPosition,
   isBitesLoading,
   isDarkTheme,
+  isFollowersLoading,
   isPublicProfile,
   isReloadingHome,
   preferredCurrency,
@@ -80,6 +80,8 @@ import {
 } from './bucketlists/selectors';
 import { getActionByDocType } from './utils/get-action-by-doc-type';
 import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
+import { followType } from './router/selectors';
+import { userByUrlParam, userByUserIdInBite, users } from './users/selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -135,17 +137,23 @@ export class BiteTribeStoreService implements StoreService {
   selectedBucketlist$ = this.store.select(selectedBucketlist);
   selectedBucketlistTitle$ = this.store.select(selectedBucketlistTitle);
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
-  biteCreator$ = this.store.select(biteCreator);
+  biteCreator$ = this.store.select(userByUserIdInBite);
   isBitesLoading$ = this.store.select(isBitesLoading);
   homeFilters$ = this.store.select(homeFilters);
   homeDistance$ = this.store.select(homeDistance);
   totalNumberBites$ = this.store.select(totalNumberBites);
   totalNumberUsers$ = this.store.select(totalNumberUsers);
   profileMeatadata$ = this.store.select(profileMeatadata);
+  userByUrlParam$ = this.store.select(userByUrlParam);
+
+  users$ = this.store.select(users);
+  type$ = this.store.select(followType);
+  isFollowersLoading$ = this.store.select(isFollowersLoading);
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);
   biteCreator = toSignal(this.biteCreator$);
+  followType = toSignal(this.type$);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());
@@ -311,5 +319,13 @@ export class BiteTribeStoreService implements StoreService {
 
   unfollowUser(user: PublicUser): void {
     this.store.dispatch(AppActions.unfollowUser({ user }));
+  }
+
+  startLoadingFollowersData(): void {
+    this.store.dispatch(AppActions.startLoadingFollowersData());
+  }
+
+  stopLoadingFollowersData(): void {
+    this.store.dispatch(AppActions.stopLoadingFollowersData());
   }
 }

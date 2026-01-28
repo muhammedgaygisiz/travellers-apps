@@ -36,7 +36,7 @@ describe('App Reducer', () => {
           currency: 'EUR',
           nearby: 2000,
         },
-        loading: { home: true },
+        loading: { home: true, followers: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
         totalNumberBites: 0,

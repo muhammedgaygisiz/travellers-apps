@@ -187,7 +187,9 @@ export const sortedHomeBites = createSelector(
 export const bitesByUser = createSelector(
   bitesWithMetadata,
   userId,
-  (bites, userId) => bites.filter((bite) => bite.userId === userId),
+  (bites, userId) => {
+    return bites.filter((bite) => bite.userId === userId);
+  },
 );
 
 export const nearbyRestaurants = createSelector(bitesWithMetadata, (bites) =>

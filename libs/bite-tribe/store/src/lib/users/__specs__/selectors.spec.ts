@@ -88,18 +88,40 @@ describe('Users Selectors', () => {
     describe('given followType "followers"', () => {
       const followType = 'followers';
 
-      it('should return followers', () => {
-        const result = fromSelectors.users.projector(state, followType);
-        expect(result).toEqual(FOLLOWERS);
+      describe('and followers exist', () => {
+        it('should return followers', () => {
+          const result = fromSelectors.users.projector(state, followType);
+          expect(result).toEqual(FOLLOWERS);
+        });
+      });
+
+      describe('and slice is undefined', () => {
+        const state = undefined as unknown as UsersState;
+
+        it('should return empty array', () => {
+          const result = fromSelectors.users.projector(state, followType);
+          expect(result).toEqual([]);
+        });
       });
     });
 
     describe('given followType "following"', () => {
       const followType = 'following';
 
-      it('should return followings', () => {
-        const result = fromSelectors.users.projector(state, followType);
-        expect(result).toEqual(FOLLOWINGS);
+      describe('and followings exist', () => {
+        it('should return followings', () => {
+          const result = fromSelectors.users.projector(state, followType);
+          expect(result).toEqual(FOLLOWINGS);
+        });
+      });
+
+      describe('and slice is undefined', () => {
+        const state = undefined as unknown as UsersState;
+
+        it('should return empty array', () => {
+          const result = fromSelectors.users.projector(state, followType);
+          expect(result).toEqual([]);
+        });
       });
     });
 

@@ -57,8 +57,8 @@ export class SettingsApiService {
     this.settingsChannel$.next(settings);
   }
 
-  private async getUser(): Promise<User | null | undefined> {
-    const authState = await this.authService.authState();
+  async getUser(): Promise<User | null | undefined> {
+    const authState = this.authService.authState();
     return authState?.user;
   }
 

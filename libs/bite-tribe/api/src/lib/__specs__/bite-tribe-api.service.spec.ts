@@ -12,6 +12,7 @@ import { SettingsApiService } from '../settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
 import { lastValueFrom, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
+import { Like } from 'model';
 
 const assertEqual = (a: any, b: any): void => {
   expect(a).toEqual(b);
@@ -312,7 +313,11 @@ describe(BiteTribeApiService.name, () => {
       [BiteTribeApiService, LikeApiService],
       (service: BiteTribeApiService, likeApiService: LikeApiService) => {
         const saveLikeSpy = jest.spyOn(likeApiService, 'saveLike');
-        const like = { likeType: 'like', biteId: 'bite-id', createdAt: 'date' };
+        const like = {
+          likeType: 'like',
+          biteId: 'bite-id',
+          createdAt: 'date',
+        } as unknown as Like;
         service.saveLike(like);
         expect(saveLikeSpy).toHaveBeenCalledWith(like);
       },

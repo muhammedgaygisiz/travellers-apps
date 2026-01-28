@@ -16,12 +16,12 @@ import type {
 } from 'model';
 import { MenuApiService } from './menu-api.service';
 import { LikeApiService } from './like-api/like-api.service';
-import { BucketlistApiService } from './bucketlist-api.service';
+import { BucketlistApiService } from './bucketlist-api/bucketlist-api.service';
 import { ProfileApiService } from './profile-api.service';
 import { BiteApiService } from './bite-api/bite-api.service';
 import { SettingsApiService } from './settings-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
-import { from, Observable, tap } from 'rxjs';
+import { from, Observable, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -104,13 +104,13 @@ export class BiteTribeApiService {
 
   createBucketListAndSaveBiteIdToBucketList(
     params: CreateAndSaveToBucketListParams,
-  ): Promise<void> {
+  ): Promise<Bucketlist> {
     return this.bucketlistApiService.createBucketListAndSaveBiteIdToBucketList(
       params,
     );
   }
 
-  saveBiteIdToBucketList(params: SaveToBucketListParams): Promise<void> {
+  saveBiteIdToBucketList(params: SaveToBucketListParams): Promise<Bucketlist> {
     return this.bucketlistApiService.saveBiteIdToBucketList(params);
   }
 
@@ -186,10 +186,8 @@ export class BiteTribeApiService {
     return this.menuApiService.menus$;
   }
 
-  bucketlists$(): Observable<any[]> {
-    this.bucketlistApiService.startListener();
-
-    return this.bucketlistApiService.bucketlists$;
+  loadBucketlistsByUserId(uid: string): Promise<Bucketlist[]> {
+    return this.bucketlistApiService.loadBucketlistsByUserId(uid);
   }
 
   latestBites$(number: number): Observable<Bite[]> {

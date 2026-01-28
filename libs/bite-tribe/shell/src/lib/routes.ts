@@ -33,7 +33,7 @@ export const ROUTES: Routes = withAuthRoutes([
     title: 'New',
   },
   {
-    path: `bite/:biteId`,
+    path: `${PATH.BITE}/:biteId`,
     loadComponent: () =>
       import('bite-tribe/details').then((m) => m.DetailsContainer),
     title: biteTitleResolver,
@@ -75,7 +75,7 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
-    path: 'my-bucketlists',
+    path: PATH.MY_BUCKETLISTS,
     loadComponent: () =>
       import('bite-tribe/bucketlist').then(
         (m) => m.BucketlistsContainerComponent,

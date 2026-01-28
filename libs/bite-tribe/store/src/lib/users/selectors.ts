@@ -14,6 +14,9 @@ export const userByUrlParam = createSelector(
   userId,
   allUsers,
   (userIdParam, users) => {
+    if (!userIdParam) {
+      return undefined;
+    }
     return users.find((user) => user.userId === userIdParam);
   },
 );

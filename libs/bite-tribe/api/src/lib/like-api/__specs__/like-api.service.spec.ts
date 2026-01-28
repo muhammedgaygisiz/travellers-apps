@@ -132,7 +132,11 @@ describe(LikeApiService.name, () => {
           biteId: 'bite123',
         } as Like;
 
-        await service.removeLike(like);
+        try {
+          await service.removeLike(like);
+        } catch (error) {
+          // Expected to throw
+        }
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           'Error removing like:',

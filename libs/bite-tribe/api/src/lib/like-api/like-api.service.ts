@@ -44,7 +44,7 @@ export class LikeApiService {
   }
 
   private async getUser(): Promise<User | null | undefined> {
-    const authState = await this.authService.authState();
+    const authState = this.authService.authState();
     return authState?.user;
   }
 
@@ -56,13 +56,19 @@ export class LikeApiService {
       throw new Error('User not authenticated');
     }
 
-    await FirebaseFirestore.deleteDocument({
-      reference: `${BITE_COLLECTION}/${like.biteId}/likes/${uid}`,
-    });
+    try {
+      await FirebaseFirestore.deleteDocument({
+        reference: `${BITE_COLLECTION}/${like.biteId}/likes/${uid}`,
+      });
 
-    return {
-      ...like,
-      userId: uid,
-    };
+      return {
+        ...like,
+        userId: uid,
+      };
+    } catch (error) {
+      console.error('Error removing like:', error);
+      this.errorHandler.handleError(error);
+      return Promise.reject(error);
+    }
   }
 }

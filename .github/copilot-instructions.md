@@ -106,6 +106,7 @@ nx g @nx/angular:lib libs/<scope>/<page-name>/data-access --name=<scope>/<page-n
 ```
 
 After generation:
+
 1. Delete default content from `src/lib` folder
 2. Create `integration` and `components` folders
 3. Export container component from `index.ts`
@@ -140,13 +141,7 @@ After generation:
 Include this configuration in `jest.config.ts`:
 
 ```typescript
-const NODE_MODULES_TO_IGNORE = [
-  '.*.mjs$',
-  'ionicons',
-  '@ionic',
-  '@stencil',
-  '@capacitor',
-].join('|');
+const NODE_MODULES_TO_IGNORE = ['.*.mjs$', 'ionicons', '@ionic', '@stencil', '@capacitor'].join('|');
 
 export default {
   displayName: '<library-name>',
@@ -164,11 +159,7 @@ export default {
     ],
   },
   transformIgnorePatterns: [`node_modules/(?!(${NODE_MODULES_TO_IGNORE}))`],
-  snapshotSerializers: [
-    'jest-preset-angular/build/serializers/no-ng-attributes',
-    'jest-preset-angular/build/serializers/ng-snapshot',
-    'jest-preset-angular/build/serializers/html-comment',
-  ],
+  snapshotSerializers: ['jest-preset-angular/build/serializers/no-ng-attributes', 'jest-preset-angular/build/serializers/ng-snapshot', 'jest-preset-angular/build/serializers/html-comment'],
 };
 ```
 
@@ -365,3 +356,11 @@ nx report
 - Responsive: Mobile-first design with tablet support
 - Offline: IndexedDB via Dexie for offline support
 - i18n: Transloco for internationalization
+
+# Versioning Tool
+
+The workspace uses Git and GitHub for version control.
+On Push `nx affected --base=develop -t test --parallel --coverage --coverageReporters=text`
+is executed to run tests. If the coverage decreases the push is blocked, so it is
+crucial to have tests for any new code added. nx runs the tests per library and checks the
+coverage per library. So if any library has less coverage than before the push will be blocked.

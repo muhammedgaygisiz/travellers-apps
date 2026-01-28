@@ -154,6 +154,25 @@ describe(BiteApiService.name, () => {
     });
   });
 
+  describe('getUser', () => {
+    describe('given a authState', () => {
+      it('should return the user from AuthService', () => {
+        const user = service.getUser();
+        expect(user).toBe(mockedUser);
+      });
+    });
+
+    describe('given no authState', () => {
+      it('should return undefined', () => {
+        const authService = TestBed.inject(AuthService);
+        jest.spyOn(authService, 'authState').mockReturnValueOnce(null);
+
+        const user = service.getUser();
+        expect(user).toBeUndefined();
+      });
+    });
+  });
+
   describe('saveEditedBite', () => {
     it('should save edited bite and reload bite', async () => {
       const mockedBiteId = 'mister-sams-favorite-bite-id';

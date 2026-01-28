@@ -424,7 +424,7 @@ export class ProfileApiService {
           reference: `${USERS_COLLECTION}/${uid}`,
         });
 
-        if (userDoc.snapshot?.data) {
+        if (userDoc.snapshot.data) {
           users.push(userDoc.snapshot.data as PublicUser);
         }
       }

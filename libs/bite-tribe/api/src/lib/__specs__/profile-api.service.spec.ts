@@ -959,6 +959,10 @@ describe(ProfileApiService.name, () => {
   });
 
   describe('fetchFollowersWithDetails', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
     it('should fetch followers and their user details', inject(
       [ProfileApiService],
       async (service: ProfileApiService) => {
@@ -996,6 +1000,10 @@ describe(ProfileApiService.name, () => {
   });
 
   describe('fetchFollowingWithDetails', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
     it('should fetch following and their user details', inject(
       [ProfileApiService],
       async (service: ProfileApiService) => {

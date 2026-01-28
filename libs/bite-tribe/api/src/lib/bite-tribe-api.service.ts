@@ -5,6 +5,7 @@ import type {
   Bite,
   Bucketlist,
   CreateAndSaveToBucketListParams,
+  Like,
   Link,
   Menu,
   PublicUser,
@@ -14,7 +15,7 @@ import type {
   Settings,
 } from 'model';
 import { MenuApiService } from './menu-api.service';
-import { LikeApiService } from './like-api.service';
+import { LikeApiService } from './like-api/like-api.service';
 import { BucketlistApiService } from './bucketlist-api.service';
 import { ProfileApiService } from './profile-api.service';
 import { BiteApiService } from './bite-api/bite-api.service';
@@ -26,13 +27,13 @@ import { from, Observable, tap } from 'rxjs';
   providedIn: 'root',
 })
 export class BiteTribeApiService {
+  private readonly biteApiService = inject(BiteApiService);
+  private readonly likeApiService = inject(LikeApiService);
   private readonly reviewApiService = inject(ReviewApiService);
   private readonly restaurantApiService = inject(RestaurantApiService);
   private readonly menuApiService = inject(MenuApiService);
-  private readonly likeApiService = inject(LikeApiService);
   private readonly bucketlistApiService = inject(BucketlistApiService);
   private readonly profileApiService = inject(ProfileApiService);
-  private readonly biteApiService = inject(BiteApiService);
   private readonly settingsApiService = inject(SettingsApiService);
   private readonly exchangeRatesApiService = inject(ExchangeRatesApiService);
 
@@ -91,8 +92,8 @@ export class BiteTribeApiService {
     likeType: string;
     biteId: string;
     createdAt: string;
-  }): void {
-    this.likeApiService.saveLike(like);
+  }): Promise<Like | undefined> {
+    return this.likeApiService.saveLike(like);
   }
 
   createBucketList(bucketlistName: any): Promise<void> {
@@ -173,10 +174,8 @@ export class BiteTribeApiService {
     return this.biteApiService.deleteBite(bite);
   }
 
-  likes$(): Observable<any[]> {
-    this.likeApiService.startListener();
-
-    return this.likeApiService.likes$;
+  async loadLikesForBites(bites: Bite[]): Promise<Like[]> {
+    return this.likeApiService.loadLikesForBites(bites);
   }
 
   restaurants$(): Observable<any[]> {

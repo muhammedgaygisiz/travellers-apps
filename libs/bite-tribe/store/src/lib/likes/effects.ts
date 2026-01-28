@@ -6,9 +6,10 @@ import {
   removeLike,
   saveLike,
 } from './actions';
-import { map, switchMap, tap } from 'rxjs';
+import { catchError, filter, from, map, switchMap, tap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
+import { BiteActions } from '../bites/actions';
 
 @Injectable()
 export class LikeEffects {
@@ -17,24 +18,29 @@ export class LikeEffects {
 
   startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.AuthActions.loginSucceeded),
-      switchMap(() => this.api.likes$()),
-      map((likes) => loadedLikesFromApi({ likes })),
+      ofType(
+        BiteActions.loadedLatestFromAPI,
+        BiteActions.loadedByGPSPositionFromAPI,
+      ),
+      filter(({ bites }) => bites.length > 0),
+      switchMap(({ bites }) =>
+        from(this.api.loadLikesForBites(bites)).pipe(
+          map((likes) => loadedLikesFromApi({ likes })),
+        ),
+      ),
     );
   });
 
-  saveLikeToBite$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(saveLike),
-
-        tap(({ type, ...like }) => {
-          this.api.saveLike(like);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+  saveLikeToBite$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(saveLike),
+      switchMap(({ type, ...like }) =>
+        from(this.api.saveLike(like)).pipe(
+          map((like) => loadedLikesFromApi({ likes: like ? [like] : [] })),
+        ),
+      ),
+    );
+  });
 
   removeLikeFromBite$ = createEffect(() => {
     return this.actions$.pipe(

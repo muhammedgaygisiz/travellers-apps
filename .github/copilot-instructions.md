@@ -364,3 +364,12 @@ On Push `nx affected --base=develop -t test --parallel --coverage --coverageRepo
 is executed to run tests. If the coverage decreases the push is blocked, so it is
 crucial to have tests for any new code added. nx runs the tests per library and checks the
 coverage per library. So if any library has less coverage than before the push will be blocked.
+
+# Data fetching
+
+Data fetching is done in the effects layer of the ngrx store. For that,
+the route is checked and if it is the correct one the data is fetched from the backend.
+The data is then stored in the according slice. The container receives the data from the store
+via its dedicated service, which itself uses the according data-access layer, which uses the
+store service. The store service encapsulates ngrx, so that the rest of the application is not
+dependent on ngrx directly.

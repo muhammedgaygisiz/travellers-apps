@@ -957,4 +957,84 @@ describe(ProfileApiService.name, () => {
       ));
     });
   });
+
+  describe('fetchFollowersWithDetails', () => {
+    it('should fetch followers and their user details', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const mockedFollowers = [
+          { id: 'follower1', name: 'User follower1' },
+          { id: 'follower2', name: 'User follower2' },
+        ] as any;
+
+        const fetchFollowersSpy = jest
+          .spyOn(service, 'fetchFollowers')
+          .mockResolvedValue(mockedFollowers);
+
+        const getDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockImplementation(({ reference }) => {
+            const userId = reference.split('/')[1];
+            return Promise.resolve({
+              snapshot: {
+                id: userId,
+                data: { ...mockedFollowers.find((f: any) => f.id === userId) },
+              },
+            } as any);
+          });
+
+        const result = await service.fetchFollowersWithDetails('user-id-123');
+
+        expect(fetchFollowersSpy).toHaveBeenCalledWith('user-id-123');
+        expect(getDocumentSpy).toHaveBeenCalledTimes(2);
+        expect(result).toEqual([
+          { id: 'follower1', name: 'User follower1' },
+          { id: 'follower2', name: 'User follower2' },
+        ]);
+      },
+    ));
+  });
+
+  describe('fetchFollowingWithDetails', () => {
+    it('should fetch following and their user details', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const mockedFollowing = [
+          { data: { followedUid: 'following1', name: 'User following1' } },
+          { data: { followedUid: 'following2', name: 'User following2' } },
+        ] as any;
+
+        const fetchFollowingSpy = jest
+          .spyOn(service, 'fetchFollowing')
+          .mockResolvedValue(mockedFollowing);
+
+        const getDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockImplementation(({ reference }) => {
+            const userId = reference.split('/')[1];
+            const { followedUid, ...rest } = mockedFollowing.find(
+              (f: any) => f.data.followedUid === userId,
+            ).data;
+            return Promise.resolve({
+              snapshot: {
+                id: userId,
+                data: {
+                  ...rest,
+                  id: followedUid,
+                },
+              },
+            } as any);
+          });
+
+        const result = await service.fetchFollowingWithDetails('user-id-123');
+
+        expect(fetchFollowingSpy).toHaveBeenCalledWith('user-id-123');
+        expect(getDocumentSpy).toHaveBeenCalledTimes(2);
+        expect(result).toEqual([
+          { id: 'following1', name: 'User following1' },
+          { id: 'following2', name: 'User following2' },
+        ]);
+      },
+    ));
+  });
 });

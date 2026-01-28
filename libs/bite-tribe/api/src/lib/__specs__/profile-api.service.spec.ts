@@ -964,42 +964,89 @@ describe(ProfileApiService.name, () => {
     });
 
     describe('given followers found', () => {
-      it('should fetch followers and their user details', inject(
-        [ProfileApiService],
-        async (service: ProfileApiService) => {
-          const mockedFollowers = [
-            { id: 'follower1', name: 'User follower1' },
-            { id: 'follower2', name: 'User follower2' },
-          ] as any;
+      describe('with snapshot in doc', () => {
+        it('should fetch followers and their user details', inject(
+          [ProfileApiService],
+          async (service: ProfileApiService) => {
+            const mockedFollowers = [
+              { id: 'follower1', name: 'User follower1' },
+              { id: 'follower2', name: 'User follower2' },
+            ] as any;
 
-          const fetchFollowersSpy = jest
-            .spyOn(service, 'fetchFollowers')
-            .mockResolvedValue(mockedFollowers);
+            const fetchFollowersSpy = jest
+              .spyOn(service, 'fetchFollowers')
+              .mockResolvedValue(mockedFollowers);
 
-          const getDocumentSpy = jest
-            .spyOn(FirebaseFirestore, 'getDocument')
-            .mockImplementation(({ reference }) => {
-              const userId = reference.split('/')[1];
-              return Promise.resolve({
-                snapshot: {
-                  id: userId,
-                  data: {
-                    ...mockedFollowers.find((f: any) => f.id === userId),
+            const getDocumentSpy = jest
+              .spyOn(FirebaseFirestore, 'getDocument')
+              .mockImplementation(({ reference }) => {
+                const userId = reference.split('/')[1];
+                return Promise.resolve({
+                  snapshot: {
+                    id: userId,
+                    data: {
+                      ...mockedFollowers.find((f: any) => f.id === userId),
+                    },
                   },
-                },
-              } as any);
-            });
+                } as any);
+              });
 
-          const result = await service.fetchFollowersWithDetails('user-id-123');
+            const result =
+              await service.fetchFollowersWithDetails('user-id-123');
 
-          expect(fetchFollowersSpy).toHaveBeenCalledWith('user-id-123');
-          expect(getDocumentSpy).toHaveBeenCalledTimes(2);
-          expect(result).toEqual([
-            { id: 'follower1', name: 'User follower1' },
-            { id: 'follower2', name: 'User follower2' },
-          ]);
-        },
-      ));
+            expect(fetchFollowersSpy).toHaveBeenCalledWith('user-id-123');
+            expect(getDocumentSpy).toHaveBeenCalledTimes(2);
+            expect(result).toEqual([
+              { id: 'follower1', name: 'User follower1' },
+              { id: 'follower2', name: 'User follower2' },
+            ]);
+          },
+        ));
+      });
+
+      describe('without snapshot in doc', () => {
+        it('should skip follower without snapshot', inject(
+          [ProfileApiService],
+          async (service: ProfileApiService) => {
+            const mockedFollowers = [
+              { id: 'follower1', name: 'User follower1' },
+              { id: 'follower2', name: 'User follower2' },
+            ] as any;
+
+            const fetchFollowersSpy = jest
+              .spyOn(service, 'fetchFollowers')
+              .mockResolvedValue(mockedFollowers);
+
+            const getDocumentSpy = jest
+              .spyOn(FirebaseFirestore, 'getDocument')
+              .mockImplementation(({ reference }) => {
+                const userId = reference.split('/')[1];
+                if (userId === 'follower1') {
+                  return Promise.resolve({
+                    snapshot: null,
+                  } as any);
+                }
+                return Promise.resolve({
+                  snapshot: {
+                    id: userId,
+                    data: {
+                      ...mockedFollowers.find((f: any) => f.id === userId),
+                    },
+                  },
+                } as any);
+              });
+
+            const result =
+              await service.fetchFollowersWithDetails('user-id-123');
+
+            expect(fetchFollowersSpy).toHaveBeenCalledWith('user-id-123');
+            expect(getDocumentSpy).toHaveBeenCalledTimes(2);
+            expect(result).toEqual([
+              { id: 'follower2', name: 'User follower2' },
+            ]);
+          },
+        ));
+      });
     });
 
     describe('given no followers found', () => {

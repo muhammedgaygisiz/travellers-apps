@@ -14,7 +14,6 @@ import {
   DocumentData,
   FirebaseFirestore,
 } from '@capacitor-firebase/firestore';
-import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 const SETTINGS_COLLECTION = 'settings';
 
@@ -40,7 +39,7 @@ export class SettingsApiService {
   );
 
   async startSettingsListener(): Promise<void> {
-    const user = await this.getUser();
+    const user = this.authService.getUser();
 
     await FirebaseFirestore.addDocumentSnapshotListener(
       { reference: `${SETTINGS_COLLECTION}/${user?.uid}` },
@@ -57,15 +56,10 @@ export class SettingsApiService {
     this.settingsChannel$.next(settings);
   }
 
-  async getUser(): Promise<User | null | undefined> {
-    const authState = this.authService.authState();
-    return authState?.user;
-  }
-
   async saveSettings(settings: any): Promise<void> {
     // console.debug('#mo - Saving settings to Firestore', settings);
     try {
-      const user = await this.getUser();
+      const user = this.authService.getUser();
       if (!user?.uid) {
         throw new Error('No user logged in');
       }

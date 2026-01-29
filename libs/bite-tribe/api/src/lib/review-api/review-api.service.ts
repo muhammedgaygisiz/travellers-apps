@@ -1,7 +1,6 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { BITE_COLLECTION, REVIEW_COLLECTION } from '../utils/constants';
 import { loadReviewsByBiteId } from './utils/load-review-by-bite-id';
 import { Review } from 'model';
@@ -20,7 +19,7 @@ export class ReviewApiService {
     biteId: string;
   }): Promise<void> {
     try {
-      const user = this.getUser();
+      const user = this.authService.getUser();
 
       await FirebaseFirestore.addDocument({
         reference: REVIEW_COLLECTION,
@@ -37,10 +36,5 @@ export class ReviewApiService {
       console.error('Error saving new review:', error);
       this.errorHandler.handleError(error);
     }
-  }
-
-  private getUser(): User | null | undefined {
-    const authState = this.authService.authState();
-    return authState?.user;
   }
 }

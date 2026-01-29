@@ -25,7 +25,7 @@ export class BucketListEffect {
       ),
       shouldLoadBucketlists(),
       switchMap(() => {
-        const user = this.getUser();
+        const user = this.authService.getUser();
 
         if (!user) {
           return [];
@@ -39,11 +39,6 @@ export class BucketListEffect {
       }),
     );
   });
-
-  getUser(): User | null | undefined {
-    const authState = this.authService.authState();
-    return authState?.user;
-  }
 
   saveBiteIdToBucketListEffect$ = createEffect(() =>
     this.actions$.pipe(

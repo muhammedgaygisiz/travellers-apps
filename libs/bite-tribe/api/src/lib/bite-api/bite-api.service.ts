@@ -2,7 +2,6 @@ import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite, Bucketlist } from 'model';
-import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { Platform } from '@ionic/angular';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
 import { BITE_COLLECTION } from '../utils/constants';
@@ -45,7 +44,7 @@ export class BiteApiService {
   }
 
   public async saveNewBite(bite: Bite): Promise<Bite> {
-    const user = this.getUser();
+    const user = this.authService.getUser();
     const { image, ...biteDocWithoutImage } = bite;
 
     try {
@@ -60,11 +59,6 @@ export class BiteApiService {
 
       throw error;
     }
-  }
-
-  getUser(): User | null | undefined {
-    const authState = this.authService.authState();
-    return authState?.user;
   }
 
   public async saveEditedBite(bite: Bite): Promise<Bite> {

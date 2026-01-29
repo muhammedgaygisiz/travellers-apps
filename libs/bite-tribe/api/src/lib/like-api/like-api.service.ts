@@ -1,7 +1,6 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { BITE_COLLECTION } from '../utils/constants';
 import { Bite, Like } from 'model';
 import { loadLikesByBites } from './utils/load-likes-by-bites';
@@ -21,7 +20,7 @@ export class LikeApiService {
     createdAt: string;
   }): Promise<Like | undefined> {
     try {
-      const user = this.getUser();
+      const user = this.authService.getUser();
 
       await FirebaseFirestore.setDocument({
         reference: `${BITE_COLLECTION}/${like.biteId}/likes/${user?.uid}`,
@@ -43,13 +42,8 @@ export class LikeApiService {
     }
   }
 
-  private getUser(): User | null | undefined {
-    const authState = this.authService.authState();
-    return authState?.user;
-  }
-
   async removeLike(like: Like): Promise<Like> {
-    const user = await this.getUser();
+    const user = this.authService.getUser();
     const uid = user?.uid;
 
     if (!uid) {

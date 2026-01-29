@@ -14,7 +14,6 @@ import {
   FirebaseFirestore,
 } from '@capacitor-firebase/firestore';
 import type { Bite, PublicUser } from 'model';
-import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { toPublicUser } from './utils/to-public-user';
 import { Platform } from '@ionic/angular';
 import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
@@ -46,13 +45,8 @@ export class ProfileApiService {
     }),
   );
 
-  private getUser(): User | null | undefined {
-    const authState = this.authService.authState();
-    return authState?.user;
-  }
-
   async startListener(): Promise<any> {
-    const user = await this.getUser();
+    const user = this.authService.getUser();
 
     this.profileCallbackId =
       await FirebaseFirestore.addCollectionSnapshotListener(
@@ -97,7 +91,7 @@ export class ProfileApiService {
 
   async saveUser(isPublic: boolean): Promise<void> {
     try {
-      const user = await this.getUser();
+      const user = this.authService.getUser();
 
       const photoUrl = ((user as any)?.providerData as any[]).find(
         (data) => data.photoUrl?.length,
@@ -238,7 +232,7 @@ export class ProfileApiService {
   }
 
   async saveUserIfNotExisting(): Promise<void> {
-    const user = await this.getUser();
+    const user = this.authService.getUser();
 
     const userFromDB = await FirebaseFirestore.getDocument({
       reference: `${USERS_COLLECTION}/${user?.uid}`,
@@ -275,7 +269,7 @@ export class ProfileApiService {
 
   async followUser(user: PublicUser): Promise<void> {
     try {
-      const currentUser = await this.getUser();
+      const currentUser = this.authService.getUser();
       if (!currentUser) {
         throw new Error('User not authenticated');
       }
@@ -303,7 +297,7 @@ export class ProfileApiService {
 
   async unfollowUser(user: PublicUser): Promise<void> {
     try {
-      const currentUser = await this.getUser();
+      const currentUser = this.authService.getUser();
 
       console.log('Unfollowing user:', user, 'by', currentUser);
       if (!currentUser) {
@@ -368,7 +362,7 @@ export class ProfileApiService {
   async isCurrentUserFollowing(
     followers: DocumentSnapshot<DocumentData>[],
   ): Promise<boolean> {
-    const user = await this.getUser();
+    const user = this.authService.getUser();
 
     if (!user?.uid) {
       return false;

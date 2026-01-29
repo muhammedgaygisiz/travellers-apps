@@ -7,7 +7,6 @@ import type {
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
 } from 'model';
-import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { loadBucketlistsByUserId } from './utils/load-bucketlists-by-user-id';
 import { BUCKETLIST_COLLECTION } from '../utils/constants';
 
@@ -18,11 +17,6 @@ export class BucketlistApiService {
 
   loadBucketlistsByUserId(userId: string): Promise<Bucketlist[]> {
     return loadBucketlistsByUserId(userId);
-  }
-
-  private getUser(): User | null | undefined {
-    const authState = this.authService.authState();
-    return authState?.user;
   }
 
   async saveBiteIdToBucketList({
@@ -56,7 +50,7 @@ export class BucketlistApiService {
   async createBucketListAndSaveBiteIdToBucketList(
     params: CreateAndSaveToBucketListParams,
   ): Promise<Bucketlist> {
-    const user = this.getUser();
+    const user = this.authService.getUser();
 
     const docResult = await FirebaseFirestore.addDocument({
       reference: BUCKETLIST_COLLECTION,
@@ -105,7 +99,7 @@ export class BucketlistApiService {
 
   async createBucketList(bucketlistName: string): Promise<void> {
     try {
-      const user = this.getUser();
+      const user = this.authService.getUser();
 
       await FirebaseFirestore.addDocument({
         reference: BUCKETLIST_COLLECTION,

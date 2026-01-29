@@ -69,7 +69,9 @@ export class ProfileComponent {
   bites = input<Bite[]>();
   profileMetadata = input<ProfileMetaData>();
   userId = input<string>();
-  subscriptionTier = input<number>(0);
+  subscriptionTier = computed((): number => {
+    return this.user()?.subscriptionTier || 0;
+  });
 
   readonly logoutClick = output();
   readonly gotoSettings = output();

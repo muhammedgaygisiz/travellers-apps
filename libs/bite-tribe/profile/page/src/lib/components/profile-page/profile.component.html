@@ -61,6 +61,9 @@
     <h1 class="profile-name">
       {{ userData?.displayName }}
       <ion-badge class="subscription-badge">
+        @if (subscriptionTierData === 0) {
+          FREE
+        }
         @if (subscriptionTierData === 1) {
           PRO
         }

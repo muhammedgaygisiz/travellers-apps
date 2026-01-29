@@ -39,7 +39,10 @@ export class AppEffect {
 
   loadTotalNumberBites$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.AuthActions.loginSucceeded),
+      ofType(routerNavigatedAction),
+      filter((action) =>
+        action.payload.event.urlAfterRedirects.startsWith(`/${PATH.ABOUT}`),
+      ),
       switchMap(() => {
         return this.api
           .getTotalNumberOfBites()
@@ -50,7 +53,10 @@ export class AppEffect {
 
   loadTotalNumberUsers$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.AuthActions.loginSucceeded),
+      ofType(routerNavigatedAction),
+      filter((action) =>
+        action.payload.event.urlAfterRedirects.startsWith(`/${PATH.ABOUT}`),
+      ),
       switchMap(() => {
         return this.api
           .getTotalNumberOfUsers()

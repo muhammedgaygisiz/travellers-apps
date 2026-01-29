@@ -84,7 +84,9 @@ describe(AppEffect.name, () => {
     it('should load total number of bites on loginSucceeded', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loginSucceeded(),
+          a: routerNavigatedAction({
+            payload: { event: { urlAfterRedirects: '/about' } },
+          } as any),
         });
 
         const expected = 'a';
@@ -107,7 +109,9 @@ describe(AppEffect.name, () => {
     it('should load total number of users on loginSucceeded', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loginSucceeded(),
+          a: routerNavigatedAction({
+            payload: { event: { urlAfterRedirects: '/about' } },
+          } as any),
         });
 
         const expected = 'a';

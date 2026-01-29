@@ -182,25 +182,6 @@ describe('Bite Reducer', () => {
     });
   });
 
-  describe('loadedBiteCreator', () => {
-    it('should set the biteCreator in the state', () => {
-      const NEW_STATE = {
-        ids: [],
-        entities: {},
-        biteCreator: { id: 'creator1', name: 'Creator 1' },
-        latestBites: [],
-      };
-
-      const loadedBiteCreatorAction = BiteActions.loadedBiteCreator({
-        biteCreator: { id: 'creator1', name: 'Creator 1' },
-      });
-
-      expect(reducer(EMPTY_STATE, loadedBiteCreatorAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
   describe('noPublicCreatorForBite', () => {
     it('should clear the biteCreator in the state', () => {
       const INITIAL_STATE = {

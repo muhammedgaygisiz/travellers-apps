@@ -72,8 +72,8 @@ export class BiteTribeApiService {
     this.restaurantApiService.saveNewRestaurant(restaurant);
   }
 
-  loadRestaurant(restaurantId: string): Observable<Restaurant | undefined> {
-    return this.restaurantApiService.loadRestaurant(restaurantId);
+  loadRestaurant(restaurantId: string): Promise<Restaurant | undefined> {
+    return this.restaurantApiService.loadRestaurantById(restaurantId);
   }
 
   saveMenu(menu: Menu): void {
@@ -175,7 +175,7 @@ export class BiteTribeApiService {
   }
 
   restaurants(restaurantId: string): Promise<Restaurant | undefined> {
-    return this.restaurantApiService.getRestaurantById(restaurantId);
+    return this.restaurantApiService.loadRestaurantById(restaurantId);
   }
 
   menus$(): Observable<any[]> {

@@ -1,13 +1,9 @@
 import { RestaurantApiService } from '../restaurant-api.service';
 import { TestBed } from '@angular/core/testing';
-import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { TestScheduler } from 'rxjs/testing';
-import { of } from 'rxjs';
+import * as getRestaurantByIdUtils from '../utils/get-restaurant-by-id';
 
-const assertDeepEqual = (actual: any, expected: any): void => {
-  expect(actual).toEqual(expected);
-};
+jest.mock('../utils/get-restaurant-by-id');
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
@@ -20,22 +16,13 @@ jest.mock('@capacitor-firebase/firestore', () => ({
   },
 }));
 
-const MockedAuthService = {
-  isLoggedIn$: of(false),
-};
-
 describe(RestaurantApiService.name, () => {
   let service: RestaurantApiService;
-  let scheduler: TestScheduler;
   const mockDate = new Date('2024-03-15T12:00:00Z');
 
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(mockDate);
-    scheduler = new TestScheduler(assertDeepEqual);
-    TestBed.configureTestingModule({
-      providers: [{ provide: AuthService, useValue: MockedAuthService }],
-    });
 
     service = TestBed.inject(RestaurantApiService);
   });
@@ -44,297 +31,34 @@ describe(RestaurantApiService.name, () => {
     expect(service).toBeTruthy();
   });
 
-  describe('startListener', () => {
-    let addCollectionSnapshotListenerSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      addCollectionSnapshotListenerSpy = jest
-        .spyOn(FirebaseFirestore, 'addCollectionSnapshotListener')
-        .mockResolvedValue('mocked-callback-id');
-    });
-
-    it('should start the listener', async () => {
-      await service.startListener();
-
-      expect(addCollectionSnapshotListenerSpy).toHaveBeenCalled();
-    });
-
-    describe('given passed callback of listener', () => {
-      it('should handle response when listener callback is invoked', async () => {
-        await service.startListener();
-
-        const mockRestaurantsDocs = {
-          snapshots: [
-            { id: '1', data: { name: 'Restaurant 1' } },
-            { id: '2', data: { name: 'Restaurant 2' } },
-          ],
-        } as any;
-
-        // Simulate the callback invocation
-        const callback = addCollectionSnapshotListenerSpy.mock.calls[0][1];
-        callback(mockRestaurantsDocs);
-      });
-    });
-  });
-
-  describe('handleResponse', () => {
-    let nextSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      nextSpy = jest
-        .spyOn((service as any)._restaurantsChannel$, 'next')
-        .mockImplementation();
-    });
-
-    it('should handle the response and update restaurants channel', () => {
-      const mockDocs = {
-        snapshots: [
-          { id: '1', data: { name: 'Restaurant 1' } },
-          { id: '2', data: { name: 'Restaurant 2' } },
-        ],
-      } as any;
-
-      service.handleResponse(mockDocs);
-
-      expect(nextSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('stopRestaurantListener', () => {
-    let removeSnapshotListenerSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      removeSnapshotListenerSpy = jest.spyOn(
-        FirebaseFirestore,
-        'removeSnapshotListener',
-      );
-    });
-
-    afterEach(() => {
-      removeSnapshotListenerSpy.mockClear();
-    });
-
-    describe('given a callback id', () => {
-      it('should call stopped$.next and removeSnapshotListener', async () => {
-        removeSnapshotListenerSpy.mockResolvedValue({});
-
-        const callbackId = 'test-callback-id';
-
-        await service.stopRestaurantListener(callbackId);
-
-        expect(removeSnapshotListenerSpy).toHaveBeenCalledWith({
-          callbackId,
-        });
-      });
-    });
-
-    describe('given no callback id', () => {
-      it('should call stopped$.next and not call removeSnapshotListener', async () => {
-        const callbackId = '';
-
-        await service.stopRestaurantListener(callbackId);
-
-        expect(removeSnapshotListenerSpy).not.toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('loadRestaurant', () => {
+  describe('loadRestaurantById', () => {
     describe('given logged in true', () => {
       describe('and no restaurant id', () => {
-        it('should return EMPTY', () => {
-          scheduler.run(({ expectObservable }) => {
-            (service as any).authService.isLoggedIn$ = of(true);
+        it('should return EMPTY', async () => {
+          const result = await service.loadRestaurantById('');
 
-            const result$ = service.loadRestaurant('');
-
-            expectObservable(result$).toBe('|');
-          });
+          expect(result).toBeUndefined();
         });
       });
 
       describe('and valid restaurant id', () => {
-        it('should call getRestaurantById and return restaurant', () => {
+        it('should call getRestaurantById and return restaurant', async () => {
           const getRestaurantByIdSpy = jest
-            .spyOn(service, 'getRestaurantById')
-            .mockReturnValue(
-              of({
-                id: 'resto-123',
-                name: 'Test Restaurant',
-              }) as any,
-            );
+            .spyOn(getRestaurantByIdUtils, 'getRestaurantById')
+            .mockResolvedValue({
+              id: 'resto-123',
+              name: 'Test Restaurant',
+            } as any);
 
-          scheduler.run(({ expectObservable }) => {
-            // Update isLoggedIn$ to emit true
-            (service as any).authService.isLoggedIn$ = of(true);
+          const result = await service.loadRestaurantById('resto-123');
 
-            const result$ = service.loadRestaurant('resto-123');
-
-            expectObservable(result$).toBe('(a|)', {
-              a: { id: 'resto-123', name: 'Test Restaurant' },
-            });
+          expect(result).toEqual({
+            id: 'resto-123',
+            name: 'Test Restaurant',
           });
 
           expect(getRestaurantByIdSpy).toHaveBeenCalledWith('resto-123');
         });
-      });
-    });
-  });
-
-  describe('getRestaurantById', () => {
-    describe('given a found restaurant', () => {
-      it('should process response and call FirebaseFirestore.getDocument', async () => {
-        const getDocumentSpy = jest
-          .spyOn(FirebaseFirestore, 'getDocument')
-          .mockResolvedValue({
-            snapshot: {
-              data: {
-                id: 'resto-123',
-                name: 'Test Restaurant',
-              },
-            },
-          } as any);
-
-        const restaurant = await service.getRestaurantById('resto-123');
-
-        expect(getDocumentSpy).toHaveBeenCalledWith({
-          reference: 'restaurants/resto-123',
-        });
-        expect(restaurant).toEqual({
-          id: 'resto-123',
-          name: 'Test Restaurant',
-        });
-      });
-    });
-
-    describe('given no restaurant found', () => {
-      describe('with matching restaurant by name', () => {
-        const RESTAURANTS_WITH_MATCHING_NAME = [
-          {
-            id: 'resto-001',
-            data: { name: 'Sample Restaurant' },
-          },
-          {
-            id: 'resto-002',
-            data: { name: 'Test Restaurant' },
-          },
-        ];
-
-        it('should query top 10 restaurants and try to match by name', async () => {
-          const getDocumentSpy = jest
-            .spyOn(FirebaseFirestore, 'getDocument')
-            .mockResolvedValue({
-              snapshot: {
-                data: undefined,
-              },
-            } as any);
-
-          const getCollectionSpy = jest
-            .spyOn(FirebaseFirestore, 'getCollection')
-            .mockResolvedValue({
-              snapshots: RESTAURANTS_WITH_MATCHING_NAME,
-            } as any);
-
-          const restaurant = await service.getRestaurantById(
-            encodeURIComponent('Test Restaurant'),
-          );
-
-          expect(getDocumentSpy).toHaveBeenCalledWith({
-            reference: 'restaurants/Test%20Restaurant',
-          });
-
-          expect(getCollectionSpy).toHaveBeenCalledWith({
-            reference: 'restaurants',
-            queryConstraints: [{ type: 'limit', limit: 10 }],
-          });
-
-          expect(restaurant).toEqual({
-            id: 'resto-002',
-            name: 'Test Restaurant',
-          });
-        });
-      });
-
-      describe('with no mathing restaurant by name', () => {
-        it('should return undefined', async () => {
-          const getDocumentSpy = jest
-            .spyOn(FirebaseFirestore, 'getDocument')
-            .mockResolvedValue({
-              snapshot: {
-                data: undefined,
-              },
-            } as any);
-
-          const getCollectionSpy = jest
-            .spyOn(FirebaseFirestore, 'getCollection')
-            .mockResolvedValue({
-              snapshots: [],
-            } as any);
-
-          const restaurant = await service.getRestaurantById(
-            encodeURIComponent('Nonexistent Restaurant'),
-          );
-
-          expect(getDocumentSpy).toHaveBeenCalledWith({
-            reference: 'restaurants/Nonexistent%20Restaurant',
-          });
-
-          expect(getCollectionSpy).toHaveBeenCalledWith({
-            reference: 'restaurants',
-            queryConstraints: [{ type: 'limit', limit: 10 }],
-          });
-
-          expect(restaurant).toBeUndefined();
-        });
-      });
-
-      describe('with no snapshots in queryResult', () => {
-        it('should return undefined', async () => {
-          const getDocumentSpy = jest
-            .spyOn(FirebaseFirestore, 'getDocument')
-            .mockResolvedValue({
-              snapshot: {
-                data: undefined,
-              },
-            } as any);
-
-          const getCollectionSpy = jest
-            .spyOn(FirebaseFirestore, 'getCollection')
-            .mockResolvedValue({
-              snapshots: undefined,
-            } as any);
-
-          const restaurant = await service.getRestaurantById(
-            encodeURIComponent('Another Nonexistent Restaurant'),
-          );
-
-          expect(getDocumentSpy).toHaveBeenCalledWith({
-            reference: 'restaurants/Another%20Nonexistent%20Restaurant',
-          });
-
-          expect(getCollectionSpy).toHaveBeenCalledWith({
-            reference: 'restaurants',
-            queryConstraints: [{ type: 'limit', limit: 10 }],
-          });
-
-          expect(restaurant).toBeUndefined();
-        });
-      });
-    });
-
-    describe('given an error', () => {
-      it('should catch error and return undefined', async () => {
-        const getDocumentSpy = jest
-          .spyOn(FirebaseFirestore, 'getDocument')
-          .mockRejectedValue(new Error('Firestore error'));
-
-        const restaurant = await service.getRestaurantById('resto-error');
-
-        expect(getDocumentSpy).toHaveBeenCalledWith({
-          reference: 'restaurants/resto-error',
-        });
-
-        expect(restaurant).toBeUndefined();
       });
     });
   });

@@ -3,7 +3,7 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { Link, Restaurant } from 'model';
 import { MENU_COLLECTION } from '../menu-api/menu-api.service';
 import { BITE_COLLECTION, RESTAURANT_COLLECTION } from '../utils/constants';
-import { getRestaurantById } from './utils/load-restaurant-by-id';
+import { getRestaurantById } from './utils/get-restaurant-by-id';
 
 @Injectable({ providedIn: 'root' })
 export class RestaurantApiService {

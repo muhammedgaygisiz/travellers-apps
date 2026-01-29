@@ -1,5 +1,4 @@
-import { inject, Injectable } from '@angular/core';
-import { AuthService } from 'ta-firestore';
+import { Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { Link, Restaurant } from 'model';
 import { MENU_COLLECTION } from '../menu-api/menu-api.service';
@@ -8,8 +7,6 @@ import { getRestaurantById } from './utils/load-restaurant-by-id';
 
 @Injectable({ providedIn: 'root' })
 export class RestaurantApiService {
-  private readonly authService = inject(AuthService);
-
   loadRestaurantById(restaurantId: string): Promise<Restaurant | undefined> {
     return getRestaurantById(restaurantId);
   }

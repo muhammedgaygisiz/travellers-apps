@@ -19,8 +19,7 @@ import { toPublicUser } from './utils/to-public-user';
 import { Platform } from '@ionic/angular';
 import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
 import { USERS_COLLECTION } from './utils/user-collection-key';
-import { isBase64String } from 'utils';
-import { getDownloadUrlFromFirebaseStorage } from 'utils';
+import { getDownloadUrlFromFirebaseStorage, isBase64String } from 'utils';
 import { deleteCurrentImage } from './utils/delete-current-image';
 import { uploadBase64ToFirebaseStorage } from './utils/upload-base64-to-firebase-storage';
 
@@ -47,7 +46,7 @@ export class ProfileApiService {
     }),
   );
 
-  private async getUser(): Promise<User | null | undefined> {
+  private getUser(): User | null | undefined {
     const authState = this.authService.authState();
     return authState?.user;
   }

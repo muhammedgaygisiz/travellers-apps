@@ -20,7 +20,7 @@ export class ReviewApiService {
     biteId: string;
   }): Promise<void> {
     try {
-      const user = await this.getUser();
+      const user = this.getUser();
 
       await FirebaseFirestore.addDocument({
         reference: REVIEW_COLLECTION,

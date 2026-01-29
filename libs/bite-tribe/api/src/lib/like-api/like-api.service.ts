@@ -21,7 +21,7 @@ export class LikeApiService {
     createdAt: string;
   }): Promise<Like | undefined> {
     try {
-      const user = await this.getUser();
+      const user = this.getUser();
 
       await FirebaseFirestore.setDocument({
         reference: `${BITE_COLLECTION}/${like.biteId}/likes/${user?.uid}`,
@@ -43,7 +43,7 @@ export class LikeApiService {
     }
   }
 
-  private async getUser(): Promise<User | null | undefined> {
+  private getUser(): User | null | undefined {
     const authState = this.authService.authState();
     return authState?.user;
   }

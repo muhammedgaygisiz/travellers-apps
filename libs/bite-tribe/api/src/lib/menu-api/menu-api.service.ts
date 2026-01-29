@@ -1,25 +1,13 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
-import { AuthService } from 'ta-firestore';
-import {
-  BehaviorSubject,
-  EMPTY,
-  from,
-  Observable,
-  skip,
-  skipWhile,
-  Subject,
-  switchMap,
-} from 'rxjs';
-import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { EMPTY } from 'rxjs';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { Menu } from 'model';
-import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
 import { getMenuById } from './utils/get-menu-by-id';
 
 export const MENU_COLLECTION = 'menus';
 
 @Injectable({ providedIn: 'root' })
 export class MenuApiService {
-  private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
 
   loadMenu(menuId: string): Promise<Menu | undefined> {

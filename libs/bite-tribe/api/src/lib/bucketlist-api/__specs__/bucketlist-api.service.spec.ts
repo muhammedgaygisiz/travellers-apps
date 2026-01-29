@@ -1,4 +1,4 @@
-import { BucketlistApiService } from '../bucketlist-api/bucketlist-api.service';
+import { BucketlistApiService } from '../bucketlist-api.service';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';

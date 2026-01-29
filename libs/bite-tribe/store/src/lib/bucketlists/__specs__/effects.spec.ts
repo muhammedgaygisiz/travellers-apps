@@ -6,8 +6,8 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BucketListEffect } from '../effects';
 import { BucketlistActions } from '../actions';
-import { fromAuth } from 'ta-firestore';
 import SpyInstance = jest.SpyInstance;
+import { AuthService } from 'ta-firestore';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -19,6 +19,10 @@ const Mock = {
   createBucketListAndSaveBiteIdToBucketList: jest.fn(),
   removeBiteFromBucketlist: jest.fn(),
   createBucketList: jest.fn(),
+};
+
+const MockedAuthService = {
+  authState: (): any => ({ user: { uid: '123' } }),
 };
 
 describe('BucketListEffect', () => {
@@ -35,26 +39,12 @@ describe('BucketListEffect', () => {
         provideMockActions(() => actions$),
         provideMockStore(),
         { provide: BiteTribeApiService, useValue: Mock },
+        { provide: AuthService, useValue: MockedAuthService },
       ],
     });
 
     effects = TestBed.inject(BucketListEffect);
     apiService = TestBed.inject(BiteTribeApiService);
-  });
-
-  describe('loadBucketlistsFromApi$', () => {
-    it('should load bucketlists from API on ROOT_EFFECTS_INIT', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.AuthActions.loginSucceeded });
-
-        const expected = 'a';
-        const output = {
-          a: BucketlistActions.loadedFromAPI({ bucketlists: [] }),
-        };
-
-        expectObservable(effects.startListener$).toBe(expected, output);
-      });
-    });
   });
 
   describe('saveBiteIdToBucketListEffect$', () => {

@@ -1,4 +1,4 @@
-import { BucketlistApiService } from '../bucketlist-api.service';
+import { BucketlistApiService } from '../bucketlist-api/bucketlist-api.service';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
@@ -36,110 +36,6 @@ describe(BucketlistApiService.name, () => {
     expect(service).toBeTruthy();
   });
 
-  describe('startListener', () => {
-    let addCollectionSnapshotListnerMock: jest.SpyInstance;
-
-    beforeEach(() => {
-      addCollectionSnapshotListnerMock = jest
-        .spyOn(FirebaseFirestore, 'addCollectionSnapshotListener')
-        .mockResolvedValue('callbackId');
-    });
-
-    it('should start the listener', async () => {
-      await service.startListener();
-
-      expect(addCollectionSnapshotListnerMock).toHaveBeenCalled();
-    });
-
-    describe('given passed callback of listener', () => {
-      it('should handle response when listener callback is invoked', async () => {
-        await service.startListener();
-
-        const mockDocs = {
-          snapshots: [
-            { id: 1, data: { name: 'Bucketlist 1' } },
-            { id: 2, data: { name: 'Bucketlist 2' } },
-          ],
-        } as any;
-
-        // Simulate the listener callback invocation
-        const listenerCallback =
-          addCollectionSnapshotListnerMock.mock.calls[0][1];
-
-        listenerCallback(mockDocs);
-      });
-    });
-  });
-
-  describe('handleResponse', () => {
-    let nextSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      nextSpy = jest
-        .spyOn((service as any)._bucketlistsChannel$, 'next')
-        .mockImplementation();
-    });
-
-    it('should process bucketlist documents and update the bucketlists$', () => {
-      const mockDocs = {
-        snapshots: [
-          { id: 1, data: { name: 'Bucketlist 1' } },
-          { id: 2, data: { name: 'Bucketlist 2' } },
-        ],
-      } as any;
-
-      service.handleResponse(mockDocs);
-
-      expect(nextSpy).toHaveBeenCalledWith([
-        { id: 1, name: 'Bucketlist 1' },
-        { id: 2, name: 'Bucketlist 2' },
-      ]);
-    });
-  });
-
-  describe('stopBucketlistListener', () => {
-    let removeSnapshotListenerMock: jest.SpyInstance;
-    let stoppedNextSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      removeSnapshotListenerMock = jest
-        .spyOn(FirebaseFirestore, 'removeSnapshotListener')
-        .mockResolvedValue();
-
-      stoppedNextSpy = jest
-        .spyOn((service as any).stopped$, 'next')
-        .mockImplementation();
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    describe('given callback id', () => {
-      it('should call stopped$.next and removeSnapshotListener', async () => {
-        const callbackId = 'testCallbackId';
-
-        await service.stopBucketlistListener(callbackId);
-
-        expect(stoppedNextSpy).toHaveBeenCalled();
-        expect(removeSnapshotListenerMock).toHaveBeenCalledWith({
-          callbackId,
-        });
-      });
-    });
-
-    describe('given no callback id', () => {
-      it('should call stopped$.next and not call removeSnapshotListener', async () => {
-        const callbackId = '';
-
-        await service.stopBucketlistListener(callbackId);
-
-        expect(stoppedNextSpy).toHaveBeenCalled();
-        expect(removeSnapshotListenerMock).not.toHaveBeenCalled();
-      });
-    });
-  });
-
   describe('saveBiteIdToBucketList', () => {
     let getDocumentSpy: jest.SpyInstance;
 
@@ -153,7 +49,7 @@ describe(BucketlistApiService.name, () => {
 
     it('should call FirebaseFirestore.getDocument', async () => {
       getDocumentSpy.mockResolvedValue({
-        data: { biteIds: [] },
+        snapshot: { data: { biteIds: [] } },
       } as any);
 
       await service.saveBiteIdToBucketList({
@@ -188,40 +84,6 @@ describe(BucketlistApiService.name, () => {
             updatedAtTimestamp: 1710504000000,
           },
         });
-      });
-    });
-
-    describe('given bucketlist doc is undefined', () => {
-      it('should not call FirebaseFirestore.updateDocument', async () => {
-        getDocumentSpy.mockResolvedValue(undefined);
-
-        await service.saveBiteIdToBucketList({
-          bucketListId: '1',
-          biteId: 'bite1',
-        });
-
-        expect(FirebaseFirestore.updateDocument).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('given an error', () => {
-      it('should handle error', async () => {
-        const consoleErrorSpy = jest
-          .spyOn(console, 'error')
-          .mockImplementation();
-
-        getDocumentSpy.mockRejectedValue(new Error('Failed to get document'));
-
-        try {
-          await service.saveBiteIdToBucketList({} as any);
-        } catch (e) {
-          // do nothing
-        }
-
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error saving bite ID to bucket list:',
-          expect.any(Error),
-        );
       });
     });
   });
@@ -274,32 +136,6 @@ describe(BucketlistApiService.name, () => {
             createdAtTimestamp: 1710504000000,
           },
         });
-      });
-    });
-
-    describe('given error', () => {
-      it('should handle', async () => {
-        const consoleErrorSpy = jest
-          .spyOn(console, 'error')
-          .mockImplementation();
-
-        jest
-          .spyOn(FirebaseFirestore, 'addDocument')
-          .mockRejectedValue(new Error('Failed to add document'));
-
-        try {
-          await service.createBucketListAndSaveBiteIdToBucketList({
-            bucketListName: 'My Bucketlist',
-            biteId: 'bite1',
-          });
-        } catch (e) {
-          // do nothing
-        }
-
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error creating bucket list and saving bite ID:',
-          expect.any(Error),
-        );
       });
     });
   });

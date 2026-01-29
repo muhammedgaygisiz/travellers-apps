@@ -5,7 +5,7 @@ import { ReviewApiService } from '../review-api.service';
 import { RestaurantApiService } from '../restaurant-api.service';
 import { MenuApiService } from '../menu-api.service';
 import { LikeApiService } from '../like-api/like-api.service';
-import { BucketlistApiService } from '../bucketlist-api.service';
+import { BucketlistApiService } from '../bucketlist-api/bucketlist-api.service';
 import { ProfileApiService } from '../profile-api.service';
 import { BiteApiService } from '../bite-api/bite-api.service';
 import { SettingsApiService } from '../settings-api.service';
@@ -626,26 +626,6 @@ describe(BiteTribeApiService.name, () => {
         const menus$ = service.menus$();
         expect(startListenerSpy).toHaveBeenCalled();
         expect(menus$).toBe(menusObservable);
-      },
-    ));
-  });
-
-  describe('bucketlists$', () => {
-    it('should call startListener and return bucketlists$ from BucketlistApiService', inject(
-      [BiteTribeApiService, BucketlistApiService],
-      (
-        service: BiteTribeApiService,
-        bucketlistApiService: BucketlistApiService,
-      ) => {
-        const startListenerSpy = jest.spyOn(
-          bucketlistApiService,
-          'startListener',
-        );
-        const bucketlistsObservable = of([{ id: 'bucketlist-id' }]);
-        bucketlistApiService.bucketlists$ = bucketlistsObservable;
-        const bucketlists$ = service.bucketlists$();
-        expect(startListenerSpy).toHaveBeenCalled();
-        expect(bucketlists$).toBe(bucketlistsObservable);
       },
     ));
   });

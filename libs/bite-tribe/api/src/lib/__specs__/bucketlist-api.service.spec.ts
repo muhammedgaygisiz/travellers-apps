@@ -93,7 +93,13 @@ describe(BucketlistApiService.name, () => {
       it('should create a new bucketlist and save biteId to it', async () => {
         const addDocumentMock = jest
           .spyOn(FirebaseFirestore, 'addDocument')
-          .mockResolvedValue({} as any);
+          .mockResolvedValue({ reference: { path: 'path' } } as any);
+
+        const getDocumentMock = jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockResolvedValue({
+            snapshot: { data: {} },
+          } as any);
 
         await service.createBucketListAndSaveBiteIdToBucketList({
           bucketListName: 'My Bucketlist',
@@ -111,6 +117,9 @@ describe(BucketlistApiService.name, () => {
             createdAtTimestamp: 1710504000000,
           },
         });
+        expect(getDocumentMock).toHaveBeenCalledWith({
+          reference: 'path',
+        });
       });
     });
 
@@ -118,9 +127,13 @@ describe(BucketlistApiService.name, () => {
       it('should create a new bucketlist with empty biteIds', async () => {
         const addDocumentMock = jest
           .spyOn(FirebaseFirestore, 'addDocument')
-          .mockResolvedValue({} as any);
+          .mockResolvedValue({ reference: { path: 'path' } } as any);
 
-        await service.createBucketListAndSaveBiteIdToBucketList({
+        jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+          snapshot: { data: {} } as any,
+        });
+
+        const result = await service.createBucketListAndSaveBiteIdToBucketList({
           bucketListName: 'My Bucketlist',
           biteId: undefined,
         });
@@ -136,6 +149,7 @@ describe(BucketlistApiService.name, () => {
             createdAtTimestamp: 1710504000000,
           },
         });
+        expect(result).toEqual({});
       });
     });
   });

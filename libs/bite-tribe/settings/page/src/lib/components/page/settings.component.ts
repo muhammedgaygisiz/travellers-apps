@@ -125,7 +125,7 @@ export class PageSettings {
   });
 
   isFreeUser = computed(() => this.subscriptionTier() === 0);
-  isProUser = computed(() => this.subscriptionTier() === 1);
+  isProUser = computed(() => this.subscriptionTier() >= 1);
 
   constructor() {
     // Watch for system theme changes

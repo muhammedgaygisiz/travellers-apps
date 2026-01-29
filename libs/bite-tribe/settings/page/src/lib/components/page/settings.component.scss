@@ -11,8 +11,11 @@
       grid-template-columns: 1fr 1fr;
       gap: 16px;
 
+      @media (max-width: 400px) {
+        grid-template-columns: 1fr;
+      }
+
       ta-card {
-        cursor: pointer;
         transition: all 0.3s ease;
 
         ion-card {

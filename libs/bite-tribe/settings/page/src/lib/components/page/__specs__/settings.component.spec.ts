@@ -328,6 +328,22 @@ describe(PageSettings.name, () => {
       expect(component.isProUser()).toBe(true);
     });
 
+    it('should identify pro user when subscriptionTier is greater than 1', () => {
+      const mockPublicUser: PublicUser = {
+        displayName: 'Test User',
+        email: 'test@example.com',
+        photoUrl: 'photo.jpg',
+        userId: 'user123',
+        subscriptionTier: 2,
+      };
+      compRef.setInput('publicUser', mockPublicUser);
+      fixture.detectChanges();
+
+      expect(component.subscriptionTier()).toBe(2);
+      expect(component.isFreeUser()).toBe(false);
+      expect(component.isProUser()).toBe(true);
+    });
+
     it('should handle undefined publicUser', () => {
       compRef.setInput('publicUser', undefined);
       fixture.detectChanges();

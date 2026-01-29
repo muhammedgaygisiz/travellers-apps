@@ -29,6 +29,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { currencyCodes } from 'utils';
 import { User } from '@capacitor-firebase/authentication';
+import { CardComponent } from 'common/ui/card';
+import { IonCardHeader, IonCardTitle } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'settings',
@@ -48,6 +50,9 @@ import { User } from '@capacitor-firebase/authentication';
     IonModal,
     CurrencySelectorComponent,
     IonText,
+    CardComponent,
+    IonCardHeader,
+    IonCardTitle,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -113,6 +118,14 @@ export class PageSettings {
     const currencyCode = this.settingsForm.controls['currency'].value;
     return this.currencies.find((c) => c.code === currencyCode)?.name;
   });
+
+  subscriptionTier = computed(() => {
+    const user = this.publicUser();
+    return user?.subscriptionTier ?? 0;
+  });
+
+  isFreeUser = computed(() => this.subscriptionTier() === 0);
+  isProUser = computed(() => this.subscriptionTier() === 1);
 
   constructor() {
     // Watch for system theme changes

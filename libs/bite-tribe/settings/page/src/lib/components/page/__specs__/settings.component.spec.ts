@@ -279,4 +279,62 @@ describe(PageSettings.name, () => {
       expect(component.getTheme(false)).toBe('light');
     });
   });
+
+  describe('Subscription Tier', () => {
+    it('should default to free tier (0) when publicUser has no subscriptionTier', () => {
+      const mockPublicUser: PublicUser = {
+        displayName: 'Test User',
+        email: 'test@example.com',
+        photoUrl: 'photo.jpg',
+        userId: 'user123',
+      };
+      compRef.setInput('publicUser', mockPublicUser);
+      fixture.detectChanges();
+
+      expect(component.subscriptionTier()).toBe(0);
+      expect(component.isFreeUser()).toBe(true);
+      expect(component.isProUser()).toBe(false);
+    });
+
+    it('should identify free user when subscriptionTier is 0', () => {
+      const mockPublicUser: PublicUser = {
+        displayName: 'Test User',
+        email: 'test@example.com',
+        photoUrl: 'photo.jpg',
+        userId: 'user123',
+        subscriptionTier: 0,
+      };
+      compRef.setInput('publicUser', mockPublicUser);
+      fixture.detectChanges();
+
+      expect(component.subscriptionTier()).toBe(0);
+      expect(component.isFreeUser()).toBe(true);
+      expect(component.isProUser()).toBe(false);
+    });
+
+    it('should identify pro user when subscriptionTier is 1', () => {
+      const mockPublicUser: PublicUser = {
+        displayName: 'Test User',
+        email: 'test@example.com',
+        photoUrl: 'photo.jpg',
+        userId: 'user123',
+        subscriptionTier: 1,
+      };
+      compRef.setInput('publicUser', mockPublicUser);
+      fixture.detectChanges();
+
+      expect(component.subscriptionTier()).toBe(1);
+      expect(component.isFreeUser()).toBe(false);
+      expect(component.isProUser()).toBe(true);
+    });
+
+    it('should handle undefined publicUser', () => {
+      compRef.setInput('publicUser', undefined);
+      fixture.detectChanges();
+
+      expect(component.subscriptionTier()).toBe(0);
+      expect(component.isFreeUser()).toBe(true);
+      expect(component.isProUser()).toBe(false);
+    });
+  });
 });

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { ReviewApiService } from './review-api.service';
+import { ReviewApiService } from './review-api/review-api.service';
 import { RestaurantApiService } from './restaurant-api/restaurant-api.service';
-import type {
+import {
   Bite,
   Bucketlist,
   CreateAndSaveToBucketListParams,
@@ -11,10 +11,11 @@ import type {
   PublicUser,
   RemoveBiteFromBucketlistParams,
   Restaurant,
+  Review,
   SaveToBucketListParams,
   Settings,
 } from 'model';
-import { MenuApiService } from './menu-api.service';
+import { MenuApiService } from './menu-api/menu-api.service';
 import { LikeApiService } from './like-api/like-api.service';
 import { BucketlistApiService } from './bucketlist-api/bucketlist-api.service';
 import { ProfileApiService } from './profile-api.service';
@@ -57,7 +58,7 @@ export class BiteTribeApiService {
     this.reviewApiService.saveNewReview(payload);
   }
 
-  reviewsByBiteId(biteId: string): Observable<any[]> {
+  reviewsByBiteId(biteId: string): Promise<Review[]> {
     return this.reviewApiService.reviewsByBiteId(biteId);
   }
 
@@ -80,7 +81,7 @@ export class BiteTribeApiService {
     this.menuApiService.saveMenu(menu);
   }
 
-  loadMenu(menuId: string): Observable<Menu | undefined> {
+  loadMenu(menuId: string): Promise<Menu | undefined> {
     return this.menuApiService.loadMenu(menuId);
   }
 
@@ -178,10 +179,8 @@ export class BiteTribeApiService {
     return this.restaurantApiService.loadRestaurantById(restaurantId);
   }
 
-  menus$(): Observable<any[]> {
-    this.menuApiService.startListener();
-
-    return this.menuApiService.menus$;
+  menus(menuId: string): Promise<Menu | undefined> {
+    return this.menuApiService.loadMenu(menuId);
   }
 
   loadBucketlistsByUserId(uid: string): Promise<Bucketlist[]> {

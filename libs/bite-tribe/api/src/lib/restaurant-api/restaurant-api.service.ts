@@ -1,20 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { AuthService } from 'ta-firestore';
-import {
-  BehaviorSubject,
-  EMPTY,
-  from,
-  Observable,
-  skip,
-  skipWhile,
-  Subject,
-  switchMap,
-} from 'rxjs';
-import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { EMPTY, from, Observable, skipWhile, switchMap } from 'rxjs';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { Link, Restaurant } from 'model';
-import { MENU_COLLECTION } from './menu-api.service';
-import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
-import { BITE_COLLECTION } from './utils/constants';
+import { MENU_COLLECTION } from '../menu-api.service';
+import { BITE_COLLECTION } from '../utils/constants';
 
 const RESTAURANT_COLLECTION = 'restaurants';
 
@@ -22,46 +12,10 @@ const RESTAURANT_COLLECTION = 'restaurants';
 export class RestaurantApiService {
   private readonly authService = inject(AuthService);
 
-  private readonly _restaurantsChannel$ = new BehaviorSubject<any[]>([]);
-  restaurants$ = this._restaurantsChannel$.asObservable().pipe(skip(1));
-
-  private readonly stopped$ = new Subject<void>();
-  restaurantsCallbackId = '';
-
-  public async startListener(): Promise<void> {
-    this.restaurantsCallbackId =
-      await FirebaseFirestore.addCollectionSnapshotListener(
-        { reference: RESTAURANT_COLLECTION },
-        (restaurantsDocs) => {
-          this.handleResponse(restaurantsDocs);
-        },
-      );
-  }
-
-  handleResponse(
-    restaurantsDocs: AddCollectionSnapshotListenerCallbackEvent<DocumentData> | null,
-  ): void {
-    const restaurants =
-      restaurantsDocs?.snapshots?.map((doc) => ({
-        ...doc.data,
-        id: doc.id,
-      })) || [];
-
-    this._restaurantsChannel$.next(restaurants);
-  }
-
-  async stopRestaurantListener(callbackId: string): Promise<void> {
-    this.stopped$.next();
-    if (callbackId) {
-      await FirebaseFirestore.removeSnapshotListener({ callbackId });
-    }
-  }
-
   loadRestaurant(restaurantId: string): Observable<Restaurant | undefined> {
     return this.authService.isLoggedIn$.pipe(
       skipWhile((isLoggedIn) => !isLoggedIn),
       switchMap(() => {
-        // console.debug('#mo - Start Listener for Restaurant');
         if (restaurantId) {
           return from(this.getRestaurantById(restaurantId));
         }

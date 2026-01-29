@@ -6,7 +6,7 @@ import { PATH } from 'utils';
 
 export const ROUTES: Routes = withAuthRoutes([
   {
-    path: 'start',
+    path: PATH.START,
     loadComponent: () =>
       import('bite-tribe/start').then((m) => m.StartComponent),
     title: 'Welcome',
@@ -20,7 +20,7 @@ export const ROUTES: Routes = withAuthRoutes([
     title: 'Bites',
   },
   {
-    path: 'home/map-view',
+    path: `${PATH.HOME}/map-view`,
     loadComponent: () =>
       import('bite-tribe/map').then((m) => m.HomeMapContainerComponent),
     canActivate: [authGuard],
@@ -40,19 +40,19 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
-    path: `bite/:biteId/edit`,
+    path: `${PATH.BITE}/:biteId/edit`,
     loadComponent: () =>
       import('bite-tribe/bite').then((m) => m.EditBiteContainer),
     canActivate: [authGuard],
   },
   {
-    path: 'bite/:biteId/restaurant/:restaurantId',
+    path: `${PATH.BITE}/:biteId/${PATH.RESTAURANT}/:restaurantId`,
     loadComponent: () =>
       import('bite-tribe/restaurant').then((m) => m.RestaurantContainer),
     canActivate: [authGuard],
   },
   {
-    path: 'bite/:biteId/restaurant/:restaurantId/menu/:menuId',
+    path: `${PATH.BITE}/:biteId/${PATH.RESTAURANT}/:restaurantId/${PATH.MENU}/:menuId`,
     loadComponent: () => import('bite-tribe/menu').then((m) => m.MenuContainer),
     canActivate: [authGuard],
   },
@@ -63,13 +63,13 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
-    path: 'my-bites',
+    path: PATH.MY_BITES,
     loadComponent: () =>
       import('bite-tribe/home').then((m) => m.MyBitesContainerComponent),
     canActivate: [authGuard],
   },
   {
-    path: 'my-bites/map-view',
+    path: `${PATH.MY_BITES}/map-view`,
     loadComponent: () =>
       import('bite-tribe/map').then((m) => m.MyBitesMapContainerComponent),
     canActivate: [authGuard],
@@ -83,13 +83,13 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
-    path: 'my-bucketlists/:bucketlistId',
+    path: `${PATH.MY_BUCKETLISTS}/:bucketlistId`,
     loadComponent: () =>
       import('bite-tribe/home').then((m) => m.BucketlistContainerComponent),
     canActivate: [authGuard],
   },
   {
-    path: 'my-bucketlists/:bucketlistId/map-view',
+    path: `${PATH.MY_BUCKETLISTS}/:bucketlistId/map-view`,
     loadComponent: () =>
       import('bite-tribe/map').then((m) => m.BucketListMapContainerComponent),
     canActivate: [authGuard],

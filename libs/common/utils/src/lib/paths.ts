@@ -1,4 +1,5 @@
 export const PATH = {
+  START: 'start',
   NEW_BITE: 'new-bite',
   MY_BITES: 'my-bites',
   BITE: 'bite',
@@ -9,4 +10,6 @@ export const PATH = {
   ABOUT: 'about',
   FOLLOWERS: 'followers',
   MY_BUCKETLISTS: 'my-bucketlists',
+  RESTAURANT: 'restaurant',
+  MENU: 'menu',
 };

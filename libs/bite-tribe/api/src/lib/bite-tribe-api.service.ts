@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { ReviewApiService } from './review-api.service';
-import { RestaurantApiService } from './restaurant-api.service';
+import { RestaurantApiService } from './restaurant-api/restaurant-api.service';
 import type {
   Bite,
   Bucketlist,
@@ -174,10 +174,8 @@ export class BiteTribeApiService {
     return this.likeApiService.loadLikesForBites(bites);
   }
 
-  restaurants$(): Observable<any[]> {
-    this.restaurantApiService.startListener();
-
-    return this.restaurantApiService.restaurants$;
+  restaurants(restaurantId: string): Promise<Restaurant | undefined> {
+    return this.restaurantApiService.getRestaurantById(restaurantId);
   }
 
   menus$(): Observable<any[]> {

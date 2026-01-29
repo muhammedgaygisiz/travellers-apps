@@ -7,6 +7,7 @@ import { routerNavigatedAction } from '@ngrx/router-store';
 import { PATH } from 'utils';
 import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { AuthService } from 'ta-firestore';
+import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
 
 @Injectable()
 export class BucketListEffect {
@@ -22,35 +23,7 @@ export class BucketListEffect {
         BucketlistActions.savedBiteToBucketlist,
         BucketlistActions.createdBucketlistAndSavedBiteToIt,
       ),
-      filter((action) => {
-        if (action.type === routerNavigatedAction.type) {
-          const { payload } = action;
-          const urlAfterRedirects = payload.event.urlAfterRedirects;
-          return (
-            (urlAfterRedirects.startsWith(`/${PATH.MY_BUCKETLISTS}`) &&
-              urlAfterRedirects.endsWith(PATH.MY_BUCKETLISTS)) ||
-            (urlAfterRedirects.startsWith(`/${PATH.BITE}`) &&
-              !urlAfterRedirects.includes(`${PATH.RESTAURANT}`))
-          );
-        }
-
-        if (action.type === BucketlistActions.removeBiteFromBucketlist.type) {
-          return true;
-        }
-
-        if (action.type === BucketlistActions.savedBiteToBucketlist.type) {
-          return true;
-        }
-
-        if (
-          action.type ===
-          BucketlistActions.createdBucketlistAndSavedBiteToIt.type
-        ) {
-          return true;
-        }
-
-        return false;
-      }),
+      shouldLoadBucketlists(),
       switchMap(() => {
         const user = this.getUser();
 
@@ -98,17 +71,18 @@ export class BucketListEffect {
     );
   });
 
-  removeBiteFromBucketlistEffect = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(BucketlistActions.removeBiteFromBucketlist),
-        tap((params) => {
-          return this.api.removeBiteFromBucketlist(params);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+  removeBiteFromBucketlistEffect = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BucketlistActions.removeBiteFromBucketlist),
+      switchMap((params) => {
+        return from(this.api.removeBiteFromBucketlist(params)).pipe(
+          map(() => {
+            return BucketlistActions.removedBiteFromBucketlist();
+          }),
+        );
+      }),
+    );
+  });
 
   createBucketlistEffect$ = createEffect(
     () => {

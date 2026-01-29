@@ -4,7 +4,6 @@ import type { Bite } from 'model';
 export interface BitesState extends EntityState<Bite> {
   cachedBite?: Partial<Bite>;
   editingBite?: Partial<Bite>;
-  biteCreator?: any;
   latestBites: Bite[];
 }
 

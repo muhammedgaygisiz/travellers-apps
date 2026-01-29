@@ -42,8 +42,6 @@ export const cachedBite = createSelector(
   (state) => state?.cachedBite as Bite | undefined,
 );
 
-export const biteCreator = createSelector(slice, (state) => state?.biteCreator);
-
 const allBites = createSelector(slice, selectAll);
 
 const latestBites = createSelector(slice, (state) => state.latestBites);

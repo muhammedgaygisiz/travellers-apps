@@ -17,5 +17,6 @@ export const BucketlistActions = createActionGroup({
     'Create Bucketlist': props<{ bucketlistName: string }>(),
     'Remove bite from Bucketlist': props<RemoveBiteFromBucketlistParams>(),
     'No Bucketlist found': emptyProps(),
+    'Created Bucketlist and saved Bite to it': emptyProps(),
   },
 });

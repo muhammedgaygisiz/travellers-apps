@@ -20,7 +20,7 @@ export class BucketListEffect {
         routerNavigatedAction,
         BucketlistActions.removeBiteFromBucketlist,
         BucketlistActions.savedBiteToBucketlist,
-        BucketlistActions.createAndSaveBiteIdToBucketlist,
+        BucketlistActions.createdBucketlistAndSavedBiteToIt,
       ),
       filter((action) => {
         if (action.type === routerNavigatedAction.type) {
@@ -42,7 +42,8 @@ export class BucketListEffect {
         }
 
         if (
-          action.type === BucketlistActions.createAndSaveBiteIdToBucketlist.type
+          action.type ===
+          BucketlistActions.createdBucketlistAndSavedBiteToIt.type
         ) {
           return true;
         }
@@ -89,7 +90,7 @@ export class BucketListEffect {
       switchMap((params) =>
         from(this.api.createBucketListAndSaveBiteIdToBucketList(params)).pipe(
           map((bucketlist) =>
-            BucketlistActions.savedBiteToBucketlist({ bucketlist }),
+            BucketlistActions.createdBucketlistAndSavedBiteToIt(),
           ),
         ),
       ),

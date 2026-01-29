@@ -29,7 +29,8 @@ export class BucketListEffect {
           return (
             (urlAfterRedirects.startsWith(`/${PATH.MY_BUCKETLISTS}`) &&
               urlAfterRedirects.endsWith(PATH.MY_BUCKETLISTS)) ||
-            urlAfterRedirects.startsWith(`/${PATH.BITE}`)
+            (urlAfterRedirects.startsWith(`/${PATH.BITE}`) &&
+              !urlAfterRedirects.includes(`${PATH.RESTAURANT}`))
           );
         }
 

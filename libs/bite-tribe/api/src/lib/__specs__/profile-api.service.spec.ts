@@ -41,11 +41,9 @@ jest.mock('../utils/upload-base64-to-firebase-storage', () => ({
 }));
 
 const MockedAuthService = {
-  authState: (): any => ({
-    user: {
-      uid: '123',
-      providerData: [{ photoUrl: 'photo-url' }],
-    },
+  getUser: (): any => ({
+    uid: '123',
+    providerData: [{ photoUrl: 'photo-url' }],
   }),
   isLoggedIn$: of(true),
 };
@@ -669,7 +667,7 @@ describe(ProfileApiService.name, () => {
         TestBed.overrideProvider(AuthService, {
           useValue: {
             ...MockedAuthService,
-            authState: (): any => ({ user: undefined }),
+            getUser: (): any => undefined,
           },
         });
       });
@@ -758,9 +756,7 @@ describe(ProfileApiService.name, () => {
       it('should handle the error', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
-          jest
-            .spyOn(MockedAuthService, 'authState')
-            .mockReturnValue(Promise.resolve({ user: undefined }));
+          jest.spyOn(MockedAuthService, 'getUser').mockReturnValue(undefined);
 
           const consoleErrorSpy = jest
             .spyOn(console, 'error')
@@ -883,7 +879,7 @@ describe(ProfileApiService.name, () => {
         TestBed.overrideProvider(AuthService, {
           useValue: {
             ...MockedAuthService,
-            authState: (): any => ({ user: { uid: 'current-user-id' } }),
+            getUser: (): any => ({ uid: 'current-user-id' }),
           },
         });
       });
@@ -909,10 +905,8 @@ describe(ProfileApiService.name, () => {
         [ProfileApiService],
         async (service: ProfileApiService) => {
           jest
-            .spyOn(MockedAuthService, 'authState')
-            .mockReturnValue(
-              Promise.resolve({ user: { uid: 'current-user-id' } }),
-            );
+            .spyOn(MockedAuthService, 'getUser')
+            .mockReturnValue(Promise.resolve({ uid: 'current-user-id' }));
 
           const followers = [
             { id: 'follower1' },
@@ -940,9 +934,7 @@ describe(ProfileApiService.name, () => {
       it('should return false if current user is undefined', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
-          jest
-            .spyOn(MockedAuthService, 'authState')
-            .mockReturnValue(Promise.resolve({ user: undefined }));
+          jest.spyOn(MockedAuthService, 'getUser').mockReturnValue(undefined);
 
           const followers = [
             { id: 'follower1' },

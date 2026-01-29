@@ -60,7 +60,7 @@ jest.mock('../utils/load-bites-by-bucketlist', () => ({
 
 const mockedUser = { uid: '123' };
 const MockedAuthService = {
-  authState: (): any => ({ user: mockedUser }),
+  getUser: (): any => mockedUser,
   isLoggedIn$: of(false),
 };
 
@@ -150,25 +150,6 @@ describe(BiteApiService.name, () => {
         expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(
           expect.any(Error),
         );
-      });
-    });
-  });
-
-  describe('getUser', () => {
-    describe('given a authState', () => {
-      it('should return the user from AuthService', () => {
-        const user = service.getUser();
-        expect(user).toBe(mockedUser);
-      });
-    });
-
-    describe('given no authState', () => {
-      it('should return undefined', () => {
-        const authService = TestBed.inject(AuthService);
-        jest.spyOn(authService, 'authState').mockReturnValueOnce(null);
-
-        const user = service.getUser();
-        expect(user).toBeUndefined();
       });
     });
   });

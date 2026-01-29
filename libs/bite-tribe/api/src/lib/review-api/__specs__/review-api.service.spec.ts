@@ -12,7 +12,7 @@ jest.mock('@capacitor-firebase/firestore', () => ({
 }));
 
 const MockedAuthService = {
-  authState: (): any => ({ user: { uid: '123', displayName: 'El Mo' } }),
+  getUser: (): any => ({ uid: '123', displayName: 'El Mo' }),
   isLoggedIn$: of(false),
 };
 

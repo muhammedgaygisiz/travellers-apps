@@ -17,7 +17,7 @@ jest.mock('@capacitor-firebase/firestore', () => ({
 }));
 
 const MockedAuthService = {
-  authState: (): any => ({ user: { uid: '123' } }),
+  getUser: (): any => ({ uid: '123' }),
   isLoggedIn$: of(false),
 };
 
@@ -182,7 +182,7 @@ describe(SettingsApiService.name, () => {
 
     describe('given user is undefined', () => {
       beforeEach(() => {
-        jest.spyOn(MockedAuthService, 'authState').mockResolvedValue({});
+        jest.spyOn(MockedAuthService, 'getUser').mockReturnValue({});
       });
 
       it('should throw an error', inject(

@@ -14,7 +14,7 @@ jest.mock('@capacitor-firebase/firestore', () => ({
 }));
 
 const MockedAuthService = {
-  authState: (): any => ({ user: { uid: '123' } }),
+  getUser: (): any => ({ uid: '123' }),
 };
 
 describe(BucketlistApiService.name, () => {

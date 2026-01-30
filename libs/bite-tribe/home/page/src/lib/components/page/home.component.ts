@@ -28,7 +28,7 @@ import {
   IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
-import type { Bite } from 'model';
+import type { Bite, Like } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
 import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
@@ -95,7 +95,7 @@ export class BiteTribeHomeComponent {
   readonly gotoMyBites = output();
   readonly gotoAbout = output();
   readonly gotoMyBucketlists = output();
-  readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
+  readonly likeButtonClick = output<Like>();
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();
   readonly gotoEdit = output<Bite>();

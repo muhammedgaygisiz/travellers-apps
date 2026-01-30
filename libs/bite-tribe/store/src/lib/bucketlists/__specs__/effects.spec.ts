@@ -6,19 +6,23 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BucketListEffect } from '../effects';
 import { BucketlistActions } from '../actions';
-import { fromAuth } from 'ta-firestore';
 import SpyInstance = jest.SpyInstance;
+import { AuthService } from 'ta-firestore';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
 };
 
-const Mock = {
-  bucketlists$: (): Observable<any> => of([]),
+const BiteTribeApiServiceMock = {
+  loadBucketlistsByUserId: jest.fn(),
   saveBiteIdToBucketList: jest.fn(),
   createBucketListAndSaveBiteIdToBucketList: jest.fn(),
   removeBiteFromBucketlist: jest.fn(),
   createBucketList: jest.fn(),
+};
+
+const MockedAuthService = {
+  getUser: (): any => ({}),
 };
 
 describe('BucketListEffect', () => {
@@ -26,6 +30,7 @@ describe('BucketListEffect', () => {
   let actions$: Observable<any> = of({});
   let effects: BucketListEffect;
   let apiService: BiteTribeApiService;
+  let authService: AuthService;
 
   beforeEach(() => {
     scheduler = new TestScheduler(assertDeepEqual);
@@ -34,25 +39,58 @@ describe('BucketListEffect', () => {
         BucketListEffect,
         provideMockActions(() => actions$),
         provideMockStore(),
-        { provide: BiteTribeApiService, useValue: Mock },
+        { provide: BiteTribeApiService, useValue: BiteTribeApiServiceMock },
+        { provide: AuthService, useValue: MockedAuthService },
       ],
     });
 
     effects = TestBed.inject(BucketListEffect);
     apiService = TestBed.inject(BiteTribeApiService);
+    authService = TestBed.inject(AuthService);
+
+    jest
+      .spyOn(authService, 'getUser')
+      .mockImplementation(() => ({ uid: '123' }) as any);
   });
 
-  describe('loadBucketlistsFromApi$', () => {
-    it('should load bucketlists from API on ROOT_EFFECTS_INIT', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.AuthActions.loginSucceeded });
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-        const expected = 'a';
-        const output = {
-          a: BucketlistActions.loadedFromAPI({ bucketlists: [] }),
-        };
+  describe('loadMyBucketlists$', () => {
+    describe('given no user', () => {
+      beforeEach(() => {
+        jest.spyOn(authService, 'getUser').mockReturnValue(null);
+      });
 
-        expectObservable(effects.startListener$).toBe(expected, output);
+      it('should not load bucketlists', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BucketlistActions.removedBiteFromBucketlist(),
+          });
+
+          expectObservable(effects.loadMyBucketlists$).toBe('');
+        });
+      });
+    });
+
+    describe('given a user with uid', () => {
+      it('should load bucketlists by user id', () => {
+        const loadBucketlistsByUserIdSpy = jest
+          .spyOn(apiService, 'loadBucketlistsByUserId')
+          .mockReturnValue(of([]) as any);
+
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BucketlistActions.removedBiteFromBucketlist(),
+          });
+
+          expectObservable(effects.loadMyBucketlists$).toBe('a', {
+            a: BucketlistActions.loadedFromAPI({ bucketlists: [] }),
+          });
+        });
+
+        expect(loadBucketlistsByUserIdSpy).toHaveBeenCalledWith('123');
       });
     });
   });
@@ -63,7 +101,7 @@ describe('BucketListEffect', () => {
     beforeEach(() => {
       saveBiteIdToBucketListSpy = jest
         .spyOn(apiService, 'saveBiteIdToBucketList')
-        .mockImplementation();
+        .mockReturnValue(of({}) as any);
     });
 
     it('should run saveBiteIdToBucketList on saveBiteIdToBucketList', () => {
@@ -75,8 +113,11 @@ describe('BucketListEffect', () => {
           }),
         });
 
-        expectObservable(effects.saveBiteIdToBucketListEffect$);
+        expectObservable(effects.saveBiteIdToBucketListEffect$).toBe('a', {
+          a: BucketlistActions.savedBiteToBucketlist({ bucketlist: {} as any }),
+        });
       });
+
       expect(saveBiteIdToBucketListSpy).toHaveBeenCalledTimes(1);
     });
   });
@@ -87,7 +128,7 @@ describe('BucketListEffect', () => {
     beforeEach(() => {
       createBucketListAndSaveBiteIdToBucketListSpy = jest
         .spyOn(apiService, 'createBucketListAndSaveBiteIdToBucketList')
-        .mockImplementation();
+        .mockImplementation(() => of({}) as any);
     });
 
     it('should run createBucketListAndSaveBiteIdToBucketList on createAndSaveBiteIdToBucketList', () => {
@@ -101,7 +142,9 @@ describe('BucketListEffect', () => {
 
         expectObservable(
           effects.createBucketlistAndSaveBiteIdToBucketListEffect$,
-        );
+        ).toBe('a', {
+          a: BucketlistActions.createdBucketlistAndSavedBiteToIt(),
+        });
       });
       expect(
         createBucketListAndSaveBiteIdToBucketListSpy,
@@ -115,7 +158,7 @@ describe('BucketListEffect', () => {
     beforeEach(() => {
       removeBiteFromBucketlistSpy = jest
         .spyOn(apiService, 'removeBiteFromBucketlist')
-        .mockImplementation();
+        .mockImplementation(() => of({}) as any);
     });
 
     it('should run removeBiteFromBucketlist on removeBiteFromBucketlist', () => {
@@ -127,7 +170,9 @@ describe('BucketListEffect', () => {
           }),
         });
 
-        expectObservable(effects.removeBiteFromBucketlistEffect);
+        expectObservable(effects.removeBiteFromBucketlistEffect).toBe('a', {
+          a: BucketlistActions.removedBiteFromBucketlist(),
+        });
       });
       expect(removeBiteFromBucketlistSpy).toHaveBeenCalledTimes(1);
     });

@@ -5,6 +5,7 @@
   "sourceRoot": "apps/bite-tribe-android",
   "prefix": "bite-tribe-android",
   "tags": ["scope:bite-tribe"],
+  "implicitDependencies": ["bite-tribe"],
   "targets": {
     "build": {
       "options": {

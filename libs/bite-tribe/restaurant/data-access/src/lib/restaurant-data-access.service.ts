@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { Link } from 'model';
+import { Like, Link } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class RestaurantDataAccessService {
@@ -17,14 +17,14 @@ export class RestaurantDataAccessService {
     this.storeService.saveSocialMediaLinks(restaurantId, links);
   }
 
-  submitLikeClick(likeType: { likeType: string; biteId: string }): void {
+  submitLikeClick(likeType: Like): void {
     const bites = this.bites();
     const userId = this.userId();
 
     const bite = bites?.find((bite) => bite.id === likeType.biteId);
     const likeFromUser = bite?.likes?.find(
       (like: any) =>
-        like.userId === userId && like.likeType === likeType.likeType
+        like.userId === userId && like.likeType === likeType.likeType,
     );
 
     if (likeFromUser) {

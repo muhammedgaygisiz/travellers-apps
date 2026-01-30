@@ -24,8 +24,7 @@ import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from './provide-firestore-utils';
 import { terminate } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
-import { NavController } from '@ionic/angular';
-import { ActivatedRoute } from '@angular/router';
+import { User } from '@capacitor-firebase/authentication';
 
 @Injectable({
   providedIn: 'root',
@@ -33,8 +32,6 @@ import { ActivatedRoute } from '@angular/router';
 export class AuthService {
   private readonly auth = inject(FIREBASE_AUTH);
   private readonly firestore = inject(FIREBASE_FIRESTORE);
-  private readonly navController = inject(NavController);
-  private readonly route = inject(ActivatedRoute);
 
   private readonly _authStateChange$ =
     new BehaviorSubject<AuthStateChange | null>(null);
@@ -43,6 +40,10 @@ export class AuthService {
     .pipe(skip(1));
 
   authState = toSignal(this.authStateChange$);
+
+  getUser(): User | null | undefined {
+    return this.authState()?.user;
+  }
 
   async initilize(): Promise<void> {
     const currentUser = await FirebaseAuthentication.getCurrentUser();

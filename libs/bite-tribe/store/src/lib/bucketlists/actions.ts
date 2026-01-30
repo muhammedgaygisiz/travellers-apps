@@ -1,5 +1,6 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import type {
+  Bucketlist,
   CreateAndSaveToBucketListParams,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
@@ -10,10 +11,13 @@ export const BucketlistActions = createActionGroup({
   events: {
     'Loaded from API': props<{ bucketlists: any }>(),
     'Save bite to bucketlist': props<SaveToBucketListParams>(),
+    'Saved bite to bucketlist': props<{ bucketlist: Bucketlist }>(),
     'Create and save BiteId to Bucketlist':
       props<CreateAndSaveToBucketListParams>(),
     'Create Bucketlist': props<{ bucketlistName: string }>(),
     'Remove bite from Bucketlist': props<RemoveBiteFromBucketlistParams>(),
+    'Removed bite from Bucketlist': emptyProps(),
     'No Bucketlist found': emptyProps(),
+    'Created Bucketlist and saved Bite to it': emptyProps(),
   },
 });

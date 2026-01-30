@@ -1,31 +1,22 @@
 import { createAction, props } from '@ngrx/store';
+import { Like } from 'model';
 
 export const loadedLikesFromApi = createAction(
   '[LIKES] Loaded from API',
-  props<{ likes: any }>()
+  props<{ likes: Like[] }>(),
 );
 
 export const saveLike = createAction(
   '[BITES] Save like',
-  props<{
-    createdAt: string;
-    likeType: string;
-    biteId: string;
-  }>()
+  props<{ like: Like }>(),
 );
 
 export const deletedLike = createAction(
   '[BITES] Deleted like',
-  props<{
-    like: {
-      likeType: string;
-      biteId: string;
-      userId: string;
-    };
-  }>()
+  props<{ like: Like }>(),
 );
 
 export const removeLike = createAction(
   '[BITES] Remove like',
-  props<{ like: { likeType: string; biteId: string } }>()
+  props<{ like: Like }>(),
 );

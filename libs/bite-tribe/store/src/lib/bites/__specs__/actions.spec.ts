@@ -29,10 +29,6 @@ describe('Bites - Actions', () => {
     expect(BiteActions.deleteBite).toBeDefined();
   });
 
-  it('should have loadedBiteCreator action', () => {
-    expect(BiteActions.loadedBiteCreator).toBeDefined();
-  });
-
   it('should have noPublicCreatorForBite action', () => {
     expect(BiteActions.noPublicCreatorForBite).toBeDefined();
   });

@@ -26,7 +26,12 @@ export class UserEffects {
       ofType(routerNavigatedAction, UserActions.savedPublicProfile),
       filter((action) => {
         if (action.type === routerNavigatedAction.type) {
-          return action.payload.event.urlAfterRedirects.includes('/bite/');
+          return (
+            action.payload.event.urlAfterRedirects.includes(`/${PATH.BITE}/`) &&
+            !action.payload.event.urlAfterRedirects.includes(
+              `/${PATH.RESTAURANT}/`,
+            )
+          );
         }
 
         return action.type === UserActions.savedPublicProfile.type;

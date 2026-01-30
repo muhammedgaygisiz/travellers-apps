@@ -2,17 +2,17 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { map, skipWhile, switchMap, tap } from 'rxjs';
+import { filter, from, map, skipWhile, switchMap, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { restaurantId } from '../router/selectors';
 import {
   loadedRestaurantFromApi,
-  loadedRestaurantsFromApi,
   noRestaurantFound,
   saveNewRestaurant,
   saveSocialMediaLinksForRestaurant,
 } from './actions';
-import { fromAuth } from 'ta-firestore';
+import { PATH } from 'utils';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable()
 export class RestaurantEffects {
@@ -20,31 +20,34 @@ export class RestaurantEffects {
   private readonly store = inject(Store);
   private readonly api = inject(BiteTribeApiService);
 
-  startListener$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(fromAuth.AuthActions.loginSucceeded),
-      switchMap(() => this.api.restaurants$()),
-      map((restaurants) => loadedRestaurantsFromApi({ restaurants })),
-    );
-  });
+  restaurantID = toSignal(this.store.select(restaurantId));
 
-  loadRestaurantFromApi$ = createEffect(() => {
+  loadRestaurantById$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(routerNavigatedAction),
-      switchMap(() =>
-        this.store.select(restaurantId).pipe(
-          skipWhile((restaurantId) => !restaurantId),
-          switchMap((restaurantId) => {
-            return this.api.loadRestaurant(restaurantId);
-          }),
+      filter(({ payload }) => {
+        return (
+          payload.event.urlAfterRedirects.includes(`${PATH.RESTAURANT}`) &&
+          !payload.event.urlAfterRedirects.includes(`${PATH.MENU}`)
+        );
+      }),
+      switchMap(() => {
+        const restaurantId = this.restaurantID();
+
+        if (!restaurantId) {
+          return [noRestaurantFound()];
+        }
+
+        return from(this.api.loadRestaurant(restaurantId)).pipe(
           map((restaurant) => {
             if (!restaurant) {
               return noRestaurantFound();
             }
+
             return loadedRestaurantFromApi({ restaurant });
           }),
-        ),
-      ),
+        );
+      }),
     );
   });
 

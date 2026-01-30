@@ -2,10 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { BucketlistActions } from './actions';
-import { filter, from, map, switchMap, tap } from 'rxjs';
+import { from, map, switchMap, tap } from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { PATH } from 'utils';
-import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 import { AuthService } from 'ta-firestore';
 import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
 
@@ -15,11 +13,11 @@ export class BucketListEffect {
   private readonly api = inject(BiteTribeApiService);
   private readonly authService = inject(AuthService);
 
-  loadMyBucketlists = createEffect(() => {
+  loadMyBucketlists$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(
         routerNavigatedAction,
-        BucketlistActions.removeBiteFromBucketlist,
+        BucketlistActions.removedBiteFromBucketlist,
         BucketlistActions.savedBiteToBucketlist,
         BucketlistActions.createdBucketlistAndSavedBiteToIt,
       ),

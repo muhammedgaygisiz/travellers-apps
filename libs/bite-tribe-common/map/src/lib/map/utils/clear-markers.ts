@@ -1,9 +1,10 @@
 import * as L from 'leaflet';
 
-export const clearMarkers = (markers: L.Marker[], map: L.Map): void => {
-  if (markers.length > 0) {
-    markers.forEach((marker) => {
-      map.removeLayer(marker);
-    });
+export const clearMarkers = (
+  markerClusterGroup: L.MarkerClusterGroup,
+  map: L.Map,
+): void => {
+  if (markerClusterGroup) {
+    map.removeLayer(markerClusterGroup);
   }
 };

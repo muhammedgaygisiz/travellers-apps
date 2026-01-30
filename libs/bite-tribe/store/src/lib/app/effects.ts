@@ -68,8 +68,25 @@ export class AppEffect {
   loadSettingsFromApi$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),
-      switchMap(() => this.api.settings$),
-      map((settings) => AppActions.loadedSettingsFromAPI({ settings })),
+      switchMap(() =>
+        from(this.api.loadSettings()).pipe(
+          tap((settings) => {
+            const theme = settings?.theme;
+
+            if (theme) {
+              document.documentElement.classList.toggle(
+                'dark',
+                theme === 'dark',
+              );
+              document.documentElement.classList.toggle(
+                'light',
+                theme === 'light',
+              );
+            }
+          }),
+          map((settings) => AppActions.loadedSettingsFromAPI({ settings })),
+        ),
+      ),
     );
   });
 

@@ -20,9 +20,9 @@ import { LikeApiService } from './like-api/like-api.service';
 import { BucketlistApiService } from './bucketlist-api/bucketlist-api.service';
 import { ProfileApiService } from './profile-api.service';
 import { BiteApiService } from './bite-api/bite-api.service';
-import { SettingsApiService } from './settings-api.service';
+import { SettingsApiService } from './settings-api/settings-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
-import { from, Observable, tap } from 'rxjs';
+import { from, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -39,16 +39,10 @@ export class BiteTribeApiService {
   private readonly exchangeRatesApiService = inject(ExchangeRatesApiService);
 
   publicProfile$ = this.profileApiService.publicProfile$;
-  settings$ = this.settingsApiService.settings$.pipe(
-    tap((settings) => {
-      const theme = settings?.theme;
 
-      if (theme) {
-        document.documentElement.classList.toggle('dark', theme === 'dark');
-        document.documentElement.classList.toggle('light', theme === 'light');
-      }
-    }),
-  );
+  loadSettings(): Promise<Settings> {
+    return this.settingsApiService.loadSettingsByUserId();
+  }
 
   getExchangeRates(): Promise<Record<string, number>> {
     return this.exchangeRatesApiService.getExchangeRates();

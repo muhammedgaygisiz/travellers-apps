@@ -45,7 +45,7 @@ export class AuthService {
     return this.authState()?.user;
   }
 
-  async initilize(): Promise<void> {
+  async initialize(): Promise<void> {
     const currentUser = await FirebaseAuthentication.getCurrentUser();
     this._authStateChange$.next(currentUser);
 
@@ -68,19 +68,19 @@ export class AuthService {
     );
   }
 
-  public logout(): Observable<void> {
-    return from(FirebaseAuthentication.signOut()).pipe(
-      tap(async () => {
-        await this.auth.signOut();
+  public async logout(): Promise<void> {
+    await FirebaseAuthentication.signOut();
 
-        await FirebaseFirestore.removeAllListeners();
-        await terminate(this.firestore);
+    await this.auth.signOut();
 
-        if (!Capacitor.isNativePlatform()) {
-          await FirebaseFirestore.clearPersistence();
-        }
-      }),
-    );
+    await FirebaseFirestore.removeAllListeners();
+    await terminate(this.firestore);
+
+    if (!Capacitor.isNativePlatform()) {
+      await FirebaseFirestore.clearPersistence();
+    }
+
+    return Promise.resolve();
   }
 
   public registerWithUsernameAndPassword$(

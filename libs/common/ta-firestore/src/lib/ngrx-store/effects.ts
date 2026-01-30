@@ -10,6 +10,7 @@ import {
   catchError,
   EMPTY,
   exhaustMap,
+  from,
   map,
   mergeMap,
   Observable,
@@ -42,7 +43,7 @@ export class AuthEffects {
   });
 
   constructor() {
-    this.authService.initilize();
+    this.authService.initialize();
   }
 
   checkAuthStatus$ = createEffect(
@@ -96,11 +97,11 @@ export class AuthEffects {
 
   logoutEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.logout.type),
+      ofType(AuthActions.logout),
       exhaustMap(() =>
-        this.authService.logout().pipe(
+        from(this.authService.logout()).pipe(
           map(() => AuthActions.logoutSucceeded()),
-          catchError(() => EMPTY),
+          catchError(() => of(AuthActions.logoutFailed())),
         ),
       ),
     ),

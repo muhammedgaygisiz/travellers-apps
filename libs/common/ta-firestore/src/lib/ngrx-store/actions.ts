@@ -10,6 +10,7 @@ export const AuthActions = createActionGroup({
     'Loaded user': props<{ user: User | null | undefined }>(),
     'Login failed': emptyProps(),
     'Logout succeeded': emptyProps(),
+    'Logout failed': emptyProps(),
     Logout: emptyProps(),
     'Register with Email': props<{ registration: AuthCredentials }>(),
     'Login with Google Account': emptyProps(),

@@ -14,8 +14,7 @@ import {
   DocumentData,
   FirebaseFirestore,
 } from '@capacitor-firebase/firestore';
-
-const SETTINGS_COLLECTION = 'settings';
+import { SETTINGS_COLLECTION } from './utils/constants';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsApiService {

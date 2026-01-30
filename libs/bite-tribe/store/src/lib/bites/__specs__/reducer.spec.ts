@@ -2,7 +2,10 @@ import { reducer } from '../reducer';
 import { BiteActions } from '../actions';
 import type { Bite } from 'model';
 import { fromAuth } from 'ta-firestore';
-import { routerNavigatedAction } from '@ngrx/router-store';
+import {
+  routerNavigatedAction,
+  routerNavigationAction,
+} from '@ngrx/router-store';
 import { PATH } from 'utils';
 import { BitesState } from '../adapter';
 
@@ -242,16 +245,11 @@ describe('Bite Reducer', () => {
         latestBites: [],
       };
 
-      const routerNavigatedAction = {
-        type: '[Router] Navigated',
-        payload: {
-          event: {
-            url: '/other-path',
-          },
-        },
-      };
+      const action = routerNavigatedAction({
+        payload: { event: { url: PATH.BITE } } as any,
+      });
 
-      expect(reducer(INITIAL_STATE, routerNavigatedAction)).toEqual({
+      expect(reducer(INITIAL_STATE, action)).toEqual({
         ...INITIAL_STATE,
       });
     });

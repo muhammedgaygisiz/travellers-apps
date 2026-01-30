@@ -4,6 +4,11 @@ import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
 import { ErrorHandler } from '@angular/core';
 import { Like } from 'model';
+import * as loadLikesByBitesUtils from '../utils/load-likes-by-bites';
+
+jest.mock('../utils/load-likes-by-bites', () => ({
+  loadLikesByBites: jest.fn().mockResolvedValue([]),
+}));
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
@@ -39,6 +44,18 @@ describe(LikeApiService.name, () => {
 
   it('should create', () => {
     expect(service).toBeTruthy();
+  });
+
+  describe('loadLikesForBites', () => {
+    it('should call loadLikesByBites utility function', async () => {
+      const bites = [{ id: 'bite1' }, { id: 'bite2' }] as any;
+
+      await service.loadLikesForBites(bites);
+
+      expect(loadLikesByBitesUtils.loadLikesByBites).toHaveBeenCalledWith(
+        bites,
+      );
+    });
   });
 
   describe('saveLike', () => {

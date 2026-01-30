@@ -2,6 +2,11 @@ import { BucketlistApiService } from '../bucketlist-api.service';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import * as loadBucketlistsByUserIdUtil from '../utils/load-bucketlists-by-user-id';
+
+jest.mock('../utils/load-bucketlists-by-user-id', () => ({
+  loadBucketlistsByUserId: jest.fn().mockResolvedValue([]),
+}));
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
@@ -34,6 +39,16 @@ describe(BucketlistApiService.name, () => {
 
   it('should create', () => {
     expect(service).toBeTruthy();
+  });
+
+  describe('loadBucketlistsByUserId', () => {
+    it('should call loadBucketlistsByUserId utility function', async () => {
+      const userId = 'userId123';
+      await service.loadBucketlistsByUserId(userId);
+      expect(
+        loadBucketlistsByUserIdUtil.loadBucketlistsByUserId,
+      ).toHaveBeenCalledWith(userId);
+    });
   });
 
   describe('saveBiteIdToBucketList', () => {

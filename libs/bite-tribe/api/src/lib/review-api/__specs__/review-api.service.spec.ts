@@ -1,8 +1,13 @@
 import { ReviewApiService } from '../review-api.service';
 import { inject, TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
-import { isEmpty, lastValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import * as loadReviewsByBiteIdUtils from '../utils/load-review-by-bite-id';
+
+jest.mock('../utils/load-review-by-bite-id', () => ({
+  loadReviewsByBiteId: jest.fn().mockResolvedValue([]),
+}));
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
@@ -33,6 +38,19 @@ describe(ReviewApiService.name, () => {
       expect(service).toBeTruthy();
     },
   ));
+
+  describe('reviewsByBiteId', () => {
+    it('should call loadReviewsByBiteId utility function', inject(
+      [ReviewApiService],
+      async (service: ReviewApiService) => {
+        const biteId = 'biteId123';
+        await service.reviewsByBiteId(biteId);
+        expect(
+          loadReviewsByBiteIdUtils.loadReviewsByBiteId,
+        ).toHaveBeenCalledWith(biteId);
+      },
+    ));
+  });
 
   describe('saveNewReview', () => {
     it('should call FirebaseFirestore.addDocument', inject(

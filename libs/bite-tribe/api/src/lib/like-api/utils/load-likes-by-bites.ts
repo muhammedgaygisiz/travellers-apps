@@ -6,7 +6,7 @@ import {
 } from '@capacitor-firebase/firestore';
 
 export const loadLikesByBites = (bites: Bite[]): Promise<Like[]> => {
-  const biteIds = bites.map((bite) => bite.id);
+  const biteIds = bites.map((bite) => bite.id).filter(Boolean);
 
   const likePromises = biteIds.map(async (biteId) => {
     const likeDocs = await FirebaseFirestore.getCollection({

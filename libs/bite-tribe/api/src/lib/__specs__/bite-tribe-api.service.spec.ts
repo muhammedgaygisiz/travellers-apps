@@ -37,6 +37,7 @@ class MenuApiMock {
 class LikeApiMock {
   saveLike = jest.fn();
   removeLike = jest.fn();
+  loadLikesForBites = jest.fn();
 }
 
 class BucketlistApiMock {
@@ -44,6 +45,7 @@ class BucketlistApiMock {
   createBucketListAndSaveBiteIdToBucketList = jest.fn();
   removeBiteFromBucketlist = jest.fn();
   createBucketList = jest.fn();
+  loadBucketlistsByUserId = jest.fn();
 }
 
 class ProfileApiMock {
@@ -615,6 +617,68 @@ describe(BiteTribeApiService.name, () => {
         const bite = { id: 'bite-id' } as any;
         service.deleteBite(bite);
         expect(deleteBiteSpy).toHaveBeenCalledWith(bite);
+      },
+    ));
+  });
+
+  describe('loadLikesForBites', () => {
+    it('should call loadLikesForBites on LikeApiService', inject(
+      [BiteTribeApiService, LikeApiService],
+      (service: BiteTribeApiService, likeApiService: LikeApiService) => {
+        const loadLikesForBitesSpy = jest
+          .spyOn(likeApiService, 'loadLikesForBites')
+          .mockReturnValue(Promise.resolve([]));
+        const bites = [{ id: 'bite-id-1' }, { id: 'bite-id-2' }] as any;
+        service.loadLikesForBites(bites);
+        expect(loadLikesForBitesSpy).toHaveBeenCalledWith(bites);
+      },
+    ));
+  });
+
+  describe('restaurants', () => {
+    it('should call loadRestaurantById on RestaurantApiService', inject(
+      [BiteTribeApiService, RestaurantApiService],
+      (
+        service: BiteTribeApiService,
+        restaurantApiService: RestaurantApiService,
+      ) => {
+        const loadRestaurantByIdSpy = jest
+          .spyOn(restaurantApiService, 'loadRestaurantById')
+          .mockReturnValue(Promise.resolve(undefined));
+        const restaurantId = 'restaurant-id';
+        service.restaurants(restaurantId);
+        expect(loadRestaurantByIdSpy).toHaveBeenCalledWith(restaurantId);
+      },
+    ));
+  });
+
+  describe('menus', () => {
+    it('should call loadMenu on MenuApiService', inject(
+      [BiteTribeApiService, MenuApiService],
+      (service: BiteTribeApiService, menuApiService: MenuApiService) => {
+        const loadMenuSpy = jest
+          .spyOn(menuApiService, 'loadMenu')
+          .mockReturnValue(Promise.resolve(undefined));
+        const menuId = 'menu-id';
+        service.menus(menuId);
+        expect(loadMenuSpy).toHaveBeenCalledWith(menuId);
+      },
+    ));
+  });
+
+  describe('loadBucketlistsByUserId', () => {
+    it('should call loadBucketlistsByUserId on BucketlistApiService', inject(
+      [BiteTribeApiService, BucketlistApiService],
+      (
+        service: BiteTribeApiService,
+        bucketlistApiService: BucketlistApiService,
+      ) => {
+        const loadBucketlistsByUserIdSpy = jest
+          .spyOn(bucketlistApiService, 'loadBucketlistsByUserId')
+          .mockReturnValue(Promise.resolve([]));
+        const uid = 'user-id';
+        service.loadBucketlistsByUserId(uid);
+        expect(loadBucketlistsByUserIdSpy).toHaveBeenCalledWith(uid);
       },
     ));
   });

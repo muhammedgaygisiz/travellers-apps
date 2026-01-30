@@ -18,11 +18,11 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 const AuthServiceMock = {
   isLoggedIn$: of(true),
   initialize: jest.fn(),
-  loginWithUsernameAndPassword$: (): any => of({} as any),
+  loginWithUsernameAndPassword: jest.fn(),
   logout: jest.fn(() => Promise.resolve()),
-  registerWithUsernameAndPassword$: (): any => of({} as any),
-  registerWithGoogleAccount$: (): any => of({} as any),
-  registerWithAppleAccount$: (): any => of({} as any),
+  registerWithUsernameAndPassword: jest.fn(() => Promise.resolve()),
+  registerWithGoogleAccount: jest.fn(() => Promise.resolve()),
+  registerWithAppleAccount: jest.fn(() => Promise.resolve()),
 };
 
 const MockNavController = {
@@ -79,10 +79,12 @@ describe(AuthEffects.name, () => {
           };
           actions$ = cold('-a', { a: AuthActions.login({ authCreds }) });
 
-          expectObservable(effects.loginEffect$).toBe('-a', {
-            a: AuthActions.loginSucceeded(),
-          });
+          expectObservable(effects.loginEffect$);
         });
+
+        expect(
+          AuthServiceMock.loginWithUsernameAndPassword,
+        ).toHaveBeenCalledWith({ email: 'q@q.de', password: 'password' });
       });
     });
   });
@@ -113,9 +115,14 @@ describe(AuthEffects.name, () => {
             a: AuthActions.registerWithEmail({ registration }),
           });
 
-          expectObservable(effects.registrationEffect$).toBe('-a', {
-            a: AuthActions.registrationSucceeded(),
-          });
+          expectObservable(effects.registrationEffect$);
+        });
+
+        expect(
+          AuthServiceMock.registerWithUsernameAndPassword,
+        ).toHaveBeenCalledWith({
+          email: 'q@q.de',
+          password: 'password',
         });
       });
     });
@@ -129,10 +136,10 @@ describe(AuthEffects.name, () => {
             a: AuthActions.loginWithGoogleAccount(),
           });
 
-          expectObservable(effects.loginWithGoogleAccountEffect$).toBe('-a', {
-            a: AuthActions.loginSucceeded(),
-          });
+          expectObservable(effects.loginWithGoogleAccountEffect$);
         });
+
+        expect(AuthServiceMock.registerWithGoogleAccount).toHaveBeenCalled();
       });
     });
   });
@@ -145,10 +152,10 @@ describe(AuthEffects.name, () => {
             a: AuthActions.loginWithAppleAccount(),
           });
 
-          expectObservable(effects.loginWithAppleAccountEffect$).toBe('-a', {
-            a: AuthActions.loginSucceeded(),
-          });
+          expectObservable(effects.loginWithAppleAccountEffect$);
         });
+
+        expect(AuthServiceMock.registerWithAppleAccount).toHaveBeenCalled();
       });
     });
   });
@@ -159,12 +166,10 @@ describe(AuthEffects.name, () => {
         scheduler.run(({ cold, expectObservable }) => {
           actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
 
-          expectObservable(effects.successFulLogin$).toBe('-a', {
-            a: AuthActions.loginSucceeded(),
-          });
+          expectObservable(effects.successFulLogin$);
         });
 
-        expect(MockNavController.navigateBack).toHaveBeenCalledWith(['/']);
+        expect(MockNavController.navigateRoot).toHaveBeenCalledWith(['/']);
       });
     });
   });

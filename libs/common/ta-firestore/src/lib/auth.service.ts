@@ -2,19 +2,16 @@ import { inject, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   distinctUntilChanged,
-  from,
   map,
-  Observable,
   shareReplay,
   skip,
-  tap,
 } from 'rxjs';
 import { AuthCredentials } from './api/auth-credentials.model';
 import {
   AuthStateChange,
   FirebaseAuthentication,
-  GetCurrentUserResult,
   SignInResult,
+  User,
 } from '@capacitor-firebase/authentication';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -24,17 +21,18 @@ import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from './provide-firestore-utils';
 import { terminate } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
-import { User } from '@capacitor-firebase/authentication';
+import { UserCredential } from '@firebase/auth';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly auth = inject(FIREBASE_AUTH);
-  private readonly firestore = inject(FIREBASE_FIRESTORE);
+  readonly auth = inject(FIREBASE_AUTH);
+  readonly firestore = inject(FIREBASE_FIRESTORE);
 
-  private readonly _authStateChange$ =
-    new BehaviorSubject<AuthStateChange | null>(null);
+  readonly _authStateChange$ = new BehaviorSubject<AuthStateChange | null>(
+    null,
+  );
   readonly authStateChange$ = this._authStateChange$
     .asObservable()
     .pipe(skip(1));
@@ -60,12 +58,12 @@ export class AuthService {
     shareReplay(1),
   );
 
-  public loginWithUsernameAndPassword$(
+  public async loginWithUsernameAndPassword(
     authCreds: AuthCredentials,
-  ): Observable<SignInResult> {
-    return from(
-      FirebaseAuthentication.signInWithEmailAndPassword({ ...authCreds }),
-    );
+  ): Promise<SignInResult> {
+    return await FirebaseAuthentication.signInWithEmailAndPassword({
+      ...authCreds,
+    });
   }
 
   public async logout(): Promise<void> {
@@ -83,36 +81,34 @@ export class AuthService {
     return Promise.resolve();
   }
 
-  public registerWithUsernameAndPassword$(
+  public async registerWithUsernameAndPassword(
     registration: AuthCredentials,
-  ): Observable<any> {
-    return from(
-      createUserWithEmailAndPassword(
-        this.auth,
-        registration.email,
-        registration.password,
-      ),
+  ): Promise<UserCredential> {
+    return await createUserWithEmailAndPassword(
+      this.auth,
+      registration.email,
+      registration.password,
     );
   }
 
-  public registerWithGoogleAccount$(): Observable<SignInResult> {
-    return from(FirebaseAuthentication.signInWithGoogle({ mode: 'popup' }));
+  public async registerWithGoogleAccount(): Promise<SignInResult> {
+    return await FirebaseAuthentication.signInWithGoogle({ mode: 'popup' });
   }
 
-  public registerWithAppleAccount$(): Observable<SignInResult> {
-    return from(FirebaseAuthentication.signInWithApple({ mode: 'popup' }));
+  public async registerWithAppleAccount(): Promise<SignInResult> {
+    return await FirebaseAuthentication.signInWithApple({ mode: 'popup' });
   }
 
-  setupAnalyticsAndCrashlytics(currentUser: User): void {
+  async setupAnalyticsAndCrashlytics(currentUser: User): Promise<void> {
     const user = currentUser;
 
     if (user && !process.env['NX_APP_BITE_TRIBE_IS_BUSINESS']) {
-      FirebaseAnalytics.setUserId({
+      await FirebaseAnalytics.setUserId({
         userId: user.uid,
       });
 
       if (Capacitor.isNativePlatform()) {
-        FirebaseCrashlytics.setUserId({
+        await FirebaseCrashlytics.setUserId({
           userId: user.uid,
         });
       }

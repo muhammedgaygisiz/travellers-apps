@@ -1,7 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RemoveBiteFromBucketlistParams, SaveToBucketListParams } from 'model';
+import {
+  Like,
+  RemoveBiteFromBucketlistParams,
+  SaveToBucketListParams,
+} from 'model';
 
 @Injectable({
   providedIn: 'root',
@@ -39,7 +43,7 @@ export class DetailsDataAccessService {
     this.storeService.removeBiteFromBucketlist($event);
   }
 
-  submitLikeClick(likeType: { likeType: string; biteId: string }): void {
+  submitLikeClick(likeType: Like): void {
     const bite = this.bite();
     const userId = this.userId();
 

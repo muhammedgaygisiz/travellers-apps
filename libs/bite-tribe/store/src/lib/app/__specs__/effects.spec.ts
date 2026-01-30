@@ -24,12 +24,11 @@ const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
 };
 
-const Mock = {
-  settings$: of({ theme: 'dark' } as Settings),
+const PlatformMock = {};
+
+const BiteTribeApiServiceMock = {
   publicProfile$: of({ displayName: 'test' } as PublicUser),
-  create: jest.fn().mockResolvedValue({
-    present: jest.fn(),
-  }),
+  loadSettings: jest.fn(),
   saveSettings: jest.fn(),
   saveUser: jest.fn(),
   updateUser: jest.fn(),
@@ -59,8 +58,8 @@ describe(AppEffect.name, () => {
       providers: [
         AppEffect,
         provideMockActions(() => actions$),
-        { provide: BiteTribeApiService, useValue: Mock },
-        { provide: Platform, useValue: Mock },
+        { provide: BiteTribeApiService, useValue: BiteTribeApiServiceMock },
+        { provide: Platform, useValue: PlatformMock },
         provideMockStore(),
       ],
     });
@@ -84,7 +83,9 @@ describe(AppEffect.name, () => {
     it('should load total number of bites on loginSucceeded', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loginSucceeded(),
+          a: routerNavigatedAction({
+            payload: { event: { urlAfterRedirects: '/about' } },
+          } as any),
         });
 
         const expected = 'a';
@@ -107,7 +108,9 @@ describe(AppEffect.name, () => {
     it('should load total number of users on loginSucceeded', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loginSucceeded(),
+          a: routerNavigatedAction({
+            payload: { event: { urlAfterRedirects: '/about' } },
+          } as any),
         });
 
         const expected = 'a';
@@ -121,18 +124,65 @@ describe(AppEffect.name, () => {
   });
 
   describe('loadSettingsFromApi$', () => {
-    it('should load settings from API on ROOT_EFFECTS_INIT', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
+    beforeEach(() => {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove('light');
+    });
 
-        const expected = 'a';
-        const output = {
-          a: AppActions.loadedSettingsFromAPI({
-            settings: { theme: 'dark' } as Settings,
-          }),
-        };
+    describe('given settings with dark theme exist', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(apiService, 'loadSettings')
+          .mockReturnValue(of({ theme: 'dark' }) as any);
+      });
 
-        expectObservable(effects.loadSettingsFromApi$).toBe(expected, output);
+      it('should load settings from API on fromAuth.AuthActions.loadedUser', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
+
+          const expected = 'a';
+          const output = {
+            a: AppActions.loadedSettingsFromAPI({
+              settings: { theme: 'dark' } as Settings,
+            }),
+          };
+
+          expectObservable(effects.loadSettingsFromApi$).toBe(expected, output);
+        });
+      });
+
+      it('should set dark theme on document element', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
+
+          expectObservable(effects.loadSettingsFromApi$);
+        });
+
+        expect(document.documentElement.classList.contains('dark')).toBe(true);
+        expect(document.documentElement.classList.contains('light')).toBe(
+          false,
+        );
+      });
+    });
+
+    describe('given settings without theme', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(apiService, 'loadSettings')
+          .mockReturnValue(of({} as Settings) as any);
+      });
+
+      it('should not set theme on document element', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
+
+          expectObservable(effects.loadSettingsFromApi$);
+        });
+
+        expect(document.documentElement.classList.contains('dark')).toBe(false);
+        expect(document.documentElement.classList.contains('light')).toBe(
+          false,
+        );
       });
     });
   });

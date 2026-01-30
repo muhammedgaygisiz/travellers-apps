@@ -1,8 +1,13 @@
 import { ReviewApiService } from '../review-api.service';
 import { inject, TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
-import { isEmpty, lastValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import * as loadReviewsByBiteIdUtils from '../utils/load-review-by-bite-id';
+
+jest.mock('../utils/load-review-by-bite-id', () => ({
+  loadReviewsByBiteId: jest.fn().mockResolvedValue([]),
+}));
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
@@ -12,7 +17,7 @@ jest.mock('@capacitor-firebase/firestore', () => ({
 }));
 
 const MockedAuthService = {
-  authState: (): any => ({ user: { uid: '123', displayName: 'El Mo' } }),
+  getUser: (): any => ({ uid: '123', displayName: 'El Mo' }),
   isLoggedIn$: of(false),
 };
 
@@ -34,94 +39,17 @@ describe(ReviewApiService.name, () => {
     },
   ));
 
-  describe('startReviewListener', () => {
-    let addCollectionSnapshotListenerSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      addCollectionSnapshotListenerSpy = jest
-        .spyOn(FirebaseFirestore, 'addCollectionSnapshotListener')
-        .mockResolvedValue('mocked-callback-id');
-    });
-
-    it('should start the listener', inject(
+  describe('reviewsByBiteId', () => {
+    it('should call loadReviewsByBiteId utility function', inject(
       [ReviewApiService],
       async (service: ReviewApiService) => {
-        await service.startReviewListener('');
-
-        expect(addCollectionSnapshotListenerSpy).toHaveBeenCalled();
+        const biteId = 'biteId123';
+        await service.reviewsByBiteId(biteId);
+        expect(
+          loadReviewsByBiteIdUtils.loadReviewsByBiteId,
+        ).toHaveBeenCalledWith(biteId);
       },
     ));
-
-    describe('given passed callback of listener', () => {
-      it('should handle response when listener callback is invoked', inject(
-        [ReviewApiService],
-        async (service: ReviewApiService) => {
-          const handleResponseSpy = jest
-            .spyOn(service, 'handleResponse')
-            .mockImplementation();
-
-          const mockDocs = {
-            snapshots: [
-              { id: '1', data: { name: 'Restaurant 1' } },
-              { id: '2', data: { name: 'Restaurant 2' } },
-            ],
-          } as any;
-
-          await service.startReviewListener('biteId123');
-
-          const callback = addCollectionSnapshotListenerSpy.mock.calls[0][1];
-          callback(mockDocs);
-        },
-      ));
-    });
-  });
-
-  describe('handleResponse', () => {
-    let nextSpy: jest.SpyInstance;
-
-    it('should handle the response and update reviews channel', inject(
-      [ReviewApiService],
-      (service: ReviewApiService) => {
-        nextSpy = jest
-          .spyOn((service as any).reviewsChannel$, 'next')
-          .mockImplementation();
-
-        const mockDocs = {
-          snapshots: [
-            { id: '1', data: { name: 'Restaurant 1' } },
-            { id: '2', data: { name: 'Restaurant 2' } },
-          ],
-        } as any;
-
-        service.handleResponse(mockDocs);
-
-        expect(nextSpy).toHaveBeenCalled();
-      },
-    ));
-  });
-
-  describe('reviewsByBiteId', () => {
-    describe('given logged in true', () => {
-      beforeEach(() => {
-        TestBed.overrideProvider(AuthService, {
-          useValue: { ...MockedAuthService, isLoggedIn$: of(true) },
-        });
-      });
-
-      it('should call startReviewListener', inject(
-        [ReviewApiService],
-        async (service: ReviewApiService) => {
-          const startReviewListenerSpy = jest
-            .spyOn(service, 'startReviewListener')
-            .mockResolvedValue();
-
-          const result$ = service.reviewsByBiteId('biteId123');
-          expect(await lastValueFrom(result$.pipe(isEmpty()))).toBeFalsy();
-
-          expect(startReviewListenerSpy).toHaveBeenCalledWith('biteId123');
-        },
-      ));
-    });
   });
 
   describe('saveNewReview', () => {

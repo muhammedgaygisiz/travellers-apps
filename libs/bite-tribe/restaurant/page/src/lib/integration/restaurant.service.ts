@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
-import { Bite, Link, Restaurant } from 'model';
+import { Bite, Like, Link, Restaurant } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 
 @Injectable({
@@ -70,7 +70,7 @@ export class RestaurantService {
     }
   }
 
-  likeButtonClicked(likeClick: { likeType: string; biteId: string }): void {
+  likeButtonClicked(likeClick: Like): void {
     this.dataAccess.submitLikeClick(likeClick);
   }
 }

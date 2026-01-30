@@ -140,43 +140,4 @@ export class BiteEffects {
       ),
     );
   });
-
-  loadUserFromBite$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(routerNavigatedAction, AppActions.savedPublicProfile),
-      filter((action) => {
-        if (action.type === routerNavigatedAction.type) {
-          return action.payload.event.urlAfterRedirects.includes('/bite/');
-        }
-
-        return action.type === AppActions.savedPublicProfile.type;
-      }),
-      switchMap(() => {
-        const bite = this.bite();
-
-        if (bite) {
-          return from(this.api.getUserByBiteId(bite)).pipe(
-            catchError(() => of(undefined)),
-          );
-        }
-
-        const biteCreatorId = this.biteCreatorId();
-
-        if (biteCreatorId) {
-          return from(this.api.getUserById(biteCreatorId)).pipe(
-            catchError(() => of(undefined)),
-          );
-        }
-
-        return of(undefined);
-      }),
-      map((biteCreator) => {
-        if (biteCreator) {
-          return BiteActions.loadedBiteCreator({ biteCreator });
-        }
-
-        return BiteActions.noPublicCreatorForBite();
-      }),
-    );
-  });
 }

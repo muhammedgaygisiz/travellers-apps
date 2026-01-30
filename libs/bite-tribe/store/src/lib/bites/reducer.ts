@@ -55,12 +55,6 @@ export const reducer = createReducer(
 
     return state;
   }),
-  on(BiteActions.loadedBiteCreator, (state, { biteCreator }) => {
-    return {
-      ...state,
-      biteCreator,
-    };
-  }),
   on(BiteActions.noPublicCreatorForBite, (state) => {
     return {
       ...state,

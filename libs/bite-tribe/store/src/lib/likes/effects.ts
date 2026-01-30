@@ -6,9 +6,9 @@ import {
   removeLike,
   saveLike,
 } from './actions';
-import { map, switchMap, tap } from 'rxjs';
+import { filter, from, map, switchMap } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { fromAuth } from 'ta-firestore';
+import { BiteActions } from '../bites/actions';
 
 @Injectable()
 export class LikeEffects {
@@ -17,33 +17,39 @@ export class LikeEffects {
 
   startListener$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fromAuth.AuthActions.loginSucceeded),
-      switchMap(() => this.api.likes$()),
-      map((likes) => loadedLikesFromApi({ likes })),
+      ofType(
+        BiteActions.loadedLatestFromAPI,
+        BiteActions.loadedByGPSPositionFromAPI,
+      ),
+      filter(({ bites }) => bites.length > 0),
+      switchMap(({ bites }) =>
+        from(this.api.loadLikesForBites(bites)).pipe(
+          map((likes) => loadedLikesFromApi({ likes })),
+        ),
+      ),
     );
   });
 
-  saveLikeToBite$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(saveLike),
-
-        tap(({ type, ...like }) => {
-          this.api.saveLike(like);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
-
-  removeLikeFromBite$ = createEffect(() => {
+  saveLikeToBite$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(removeLike),
-      switchMap(async (like) => {
-        const likeToBeDeleted = await this.api.removeLike(like.like);
-
-        return deletedLike({ like: likeToBeDeleted });
+      ofType(saveLike),
+      switchMap(({ like }) => {
+        const { type, ...rest } = like as any;
+        return from(this.api.saveLike(rest)).pipe(
+          map((like) => loadedLikesFromApi({ likes: like ? [like] : [] })),
+        );
       }),
     );
   });
+
+  removeLikeFromBite$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(removeLike),
+      switchMap(({ like }) =>
+        from(this.api.removeLike(like)).pipe(
+          map((like) => deletedLike({ like: like })),
+        ),
+      ),
+    ),
+  );
 }

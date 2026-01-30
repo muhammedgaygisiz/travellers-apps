@@ -9,6 +9,7 @@ import { PageComponent } from 'common/ui/page';
 import {
   Bite,
   Bucketlist,
+  Like,
   PublicUser,
   RemoveBiteFromBucketlistParams,
   Review,
@@ -83,7 +84,7 @@ export class DetailsPage {
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
   newList = output<string>();
   submitNewReview = output<{ review: string; biteId: string }>();
-  likeButtonClick = output<{ likeType: string; biteId: string }>();
+  likeButtonClick = output<Like>();
   readonly logoutClick = output();
   readonly restaurantClick = output<Bite>();
   readonly goToProfile = output<PublicUser>();

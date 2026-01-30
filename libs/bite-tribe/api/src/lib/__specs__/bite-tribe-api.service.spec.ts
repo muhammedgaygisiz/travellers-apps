@@ -1,56 +1,62 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from '../bite-tribe-api.service';
-import { ReviewApiService } from '../review-api.service';
-import { RestaurantApiService } from '../restaurant-api.service';
-import { MenuApiService } from '../menu-api.service';
-import { LikeApiService } from '../like-api.service';
-import { BucketlistApiService } from '../bucketlist-api.service';
+import { ReviewApiService } from '../review-api/review-api.service';
+import { RestaurantApiService } from '../restaurant-api/restaurant-api.service';
+import { MenuApiService } from '../menu-api/menu-api.service';
+import { LikeApiService } from '../like-api/like-api.service';
+import { BucketlistApiService } from '../bucketlist-api/bucketlist-api.service';
 import { ProfileApiService } from '../profile-api.service';
 import { BiteApiService } from '../bite-api/bite-api.service';
-import { SettingsApiService } from '../settings-api.service';
+import { SettingsApiService } from '../settings-api/settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
 import { lastValueFrom, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
+import { Like } from 'model';
 
 const assertEqual = (a: any, b: any): void => {
   expect(a).toEqual(b);
 };
 
-class Mock {
-  publicProfile$ = of(null);
-  settings$ = of(null);
-  getExchangeRates = jest.fn();
-  saveNewReview = jest.fn();
+class ReviewApiMock {
   reviewsByBiteId = jest.fn();
-  saveSocialMediaLinksForRestaurant = jest.fn();
+  saveNewReview = jest.fn();
+}
+
+class RestaurantApiMock {
+  loadRestaurantById = jest.fn();
   saveNewRestaurant = jest.fn();
-  loadRestaurant = jest.fn();
-  saveMenu = jest.fn();
+  saveSocialMediaLinksForRestaurant = jest.fn();
+}
+
+class MenuApiMock {
   loadMenu = jest.fn();
-  removeLike = jest.fn();
+  saveMenu = jest.fn();
+}
+
+class LikeApiMock {
   saveLike = jest.fn();
-  createBucketList = jest.fn();
-  removeBiteFromBucketlist = jest.fn();
-  createBucketListAndSaveBiteIdToBucketList = jest.fn();
+  removeLike = jest.fn();
+  loadLikesForBites = jest.fn();
+}
+
+class BucketlistApiMock {
   saveBiteIdToBucketList = jest.fn();
+  createBucketListAndSaveBiteIdToBucketList = jest.fn();
+  removeBiteFromBucketlist = jest.fn();
+  createBucketList = jest.fn();
+  loadBucketlistsByUserId = jest.fn();
+}
+
+class ProfileApiMock {
+  publicProfile$ = of(null);
+  saveUser = jest.fn();
+  updateUser = jest.fn();
   getUserByBiteId = jest.fn();
   getUserById = jest.fn();
-  saveEditedBite = jest.fn();
-  saveNewBite = jest.fn();
-  updateUser = jest.fn();
-  saveUser = jest.fn();
-  saveSettings = jest.fn();
   saveUserIfNotExisting = jest.fn();
   followUser = jest.fn();
   unfollowUser = jest.fn();
-  loadBitesByLocation = jest.fn();
-  loadBitesByUser = jest.fn();
-  loadBitesByBucketlist = jest.fn();
-  deleteBite = jest.fn();
-  startListener = jest.fn();
-  startlatestBitesListener = jest.fn();
-  getTotalNumberOfBites = jest.fn();
   getTotalNumberOfUsers = jest.fn();
   fetchFollowers = jest.fn();
   fetchFollowing = jest.fn();
@@ -59,20 +65,40 @@ class Mock {
   fetchFollowingWithDetails = jest.fn();
 }
 
+class BiteApiMock {
+  loadBitesByLocation = jest.fn();
+  loadBitesByUser = jest.fn();
+  saveNewBite = jest.fn();
+  saveEditedBite = jest.fn();
+  deleteBite = jest.fn();
+  loadBitesByBucketlist = jest.fn();
+  startlatestBitesListener = jest.fn();
+  getTotalNumberOfBites = jest.fn();
+}
+
+class SettingsApiMock {
+  loadSettingsByUserId = jest.fn();
+  saveSettings = jest.fn();
+}
+
+class ExchangeRatesApiMock {
+  getExchangeRates = jest.fn();
+}
+
 describe(BiteTribeApiService.name, () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         BiteTribeApiService,
-        { provide: ReviewApiService, useClass: Mock },
-        { provide: RestaurantApiService, useClass: Mock },
-        { provide: MenuApiService, useClass: Mock },
-        { provide: LikeApiService, useClass: Mock },
-        { provide: BucketlistApiService, useClass: Mock },
-        { provide: ProfileApiService, useClass: Mock },
-        { provide: BiteApiService, useClass: Mock },
-        { provide: SettingsApiService, useClass: Mock },
-        { provide: ExchangeRatesApiService, useClass: Mock },
+        { provide: ReviewApiService, useClass: ReviewApiMock },
+        { provide: RestaurantApiService, useClass: RestaurantApiMock },
+        { provide: MenuApiService, useClass: MenuApiMock },
+        { provide: LikeApiService, useClass: LikeApiMock },
+        { provide: BucketlistApiService, useClass: BucketlistApiMock },
+        { provide: ProfileApiService, useClass: ProfileApiMock },
+        { provide: BiteApiService, useClass: BiteApiMock },
+        { provide: SettingsApiService, useClass: SettingsApiMock },
+        { provide: ExchangeRatesApiService, useClass: ExchangeRatesApiMock },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -94,75 +120,22 @@ describe(BiteTribeApiService.name, () => {
 
     beforeEach(() => classListSpy.mockClear());
 
-    describe('given a dark theme', () => {
-      beforeEach(() => {
-        TestBed.overrideProvider(SettingsApiService, {
-          useValue: { settings$: of({ theme: 'dark' }) },
-        });
-      });
+    it('should call loadSettingsByUserId', inject(
+      [BiteTribeApiService, SettingsApiService],
+      async (
+        service: BiteTribeApiService,
+        settingsApiService: SettingsApiService,
+      ) => {
+        const loadSettingsByUserIdSpy = jest
+          .spyOn(settingsApiService, 'loadSettingsByUserId')
+          .mockReturnValue(Promise.resolve({ theme: 'dark' } as any));
 
-      it('should add dark class to document element', inject(
-        [BiteTribeApiService, SettingsApiService],
-        (
-          service: BiteTribeApiService,
-          settingsApiService: SettingsApiService,
-        ) => {
-          scheduler.run(({ expectObservable }) => {
-            expectObservable(service.settings$).toBe('(a|)', {
-              a: { theme: 'dark' },
-            });
-          });
+        const settings = await service.loadSettings();
 
-          expect(classListSpy).toHaveBeenCalledWith('dark', true);
-        },
-      ));
-    });
-
-    describe('given a light theme', () => {
-      beforeEach(() => {
-        TestBed.overrideProvider(SettingsApiService, {
-          useValue: { settings$: of({ theme: 'light' }) },
-        });
-      });
-
-      it('should add light class to document element', inject(
-        [BiteTribeApiService, SettingsApiService],
-        (
-          service: BiteTribeApiService,
-          settingsApiService: SettingsApiService,
-        ) => {
-          scheduler.run(({ expectObservable }) => {
-            expectObservable(service.settings$).toBe('(a|)', {
-              a: { theme: 'light' },
-            });
-          });
-
-          expect(classListSpy).toHaveBeenCalledWith('light', true);
-        },
-      ));
-    });
-
-    describe('with undefined settings', () => {
-      beforeEach(() => {
-        TestBed.overrideProvider(SettingsApiService, {
-          useValue: { settings$: of(undefined) },
-        });
-      });
-
-      it('should not modify document element classes', inject(
-        [BiteTribeApiService, SettingsApiService],
-        (
-          service: BiteTribeApiService,
-          settingsApiService: SettingsApiService,
-        ) => {
-          scheduler.run(({ expectObservable }) => {
-            expectObservable(service.settings$).toBe('(a|)', { a: undefined });
-          });
-
-          expect(classListSpy).not.toHaveBeenCalled();
-        },
-      ));
-    });
+        expect(loadSettingsByUserIdSpy).toHaveBeenCalledTimes(1);
+        expect(settings).toEqual({ theme: 'dark' });
+      },
+    ));
   });
 
   describe('getExchangeRates', () => {
@@ -199,7 +172,7 @@ describe(BiteTribeApiService.name, () => {
       (service: BiteTribeApiService, reviewApiService: ReviewApiService) => {
         const reviewsByBiteIdSpy = jest
           .spyOn(reviewApiService, 'reviewsByBiteId')
-          .mockReturnValue(of([]));
+          .mockResolvedValue([]);
         const biteId = 'bite-id';
         service.reviewsByBiteId(biteId);
         expect(reviewsByBiteIdSpy).toHaveBeenCalledWith(biteId);
@@ -260,8 +233,8 @@ describe(BiteTribeApiService.name, () => {
         restaurantApiService: RestaurantApiService,
       ) => {
         const loadRestaurantSpy = jest
-          .spyOn(restaurantApiService, 'loadRestaurant')
-          .mockReturnValue(of(undefined));
+          .spyOn(restaurantApiService, 'loadRestaurantById')
+          .mockResolvedValue(undefined);
         const restaurantId = 'restaurant-id';
         service.loadRestaurant(restaurantId);
         expect(loadRestaurantSpy).toHaveBeenCalledWith(restaurantId);
@@ -287,7 +260,7 @@ describe(BiteTribeApiService.name, () => {
       (service: BiteTribeApiService, menuApiService: MenuApiService) => {
         const loadMenuSpy = jest
           .spyOn(menuApiService, 'loadMenu')
-          .mockReturnValue(of(undefined));
+          .mockResolvedValue(undefined);
         const menuId = 'menu-id';
         service.loadMenu(menuId);
         expect(loadMenuSpy).toHaveBeenCalledWith(menuId);
@@ -312,7 +285,11 @@ describe(BiteTribeApiService.name, () => {
       [BiteTribeApiService, LikeApiService],
       (service: BiteTribeApiService, likeApiService: LikeApiService) => {
         const saveLikeSpy = jest.spyOn(likeApiService, 'saveLike');
-        const like = { likeType: 'like', biteId: 'bite-id', createdAt: 'date' };
+        const like = {
+          likeType: 'like',
+          biteId: 'bite-id',
+          createdAt: 'date',
+        } as unknown as Like;
         service.saveLike(like);
         expect(saveLikeSpy).toHaveBeenCalledWith(like);
       },
@@ -591,70 +568,64 @@ describe(BiteTribeApiService.name, () => {
     ));
   });
 
-  describe('likes$', () => {
-    it('should call startListener and return likes$ from LikeApiService', inject(
+  describe('loadLikesForBites', () => {
+    it('should call loadLikesForBites on LikeApiService', inject(
       [BiteTribeApiService, LikeApiService],
       (service: BiteTribeApiService, likeApiService: LikeApiService) => {
-        const startListenerSpy = jest.spyOn(likeApiService, 'startListener');
-        const likesObservable = of([{ id: 'like-id' }]);
-        likeApiService.likes$ = likesObservable;
-        const likes$ = service.likes$();
-        expect(startListenerSpy).toHaveBeenCalled();
-        expect(likes$).toBe(likesObservable);
+        const loadLikesForBitesSpy = jest
+          .spyOn(likeApiService, 'loadLikesForBites')
+          .mockReturnValue(Promise.resolve([]));
+        const bites = [{ id: 'bite-id-1' }, { id: 'bite-id-2' }] as any;
+        service.loadLikesForBites(bites);
+        expect(loadLikesForBitesSpy).toHaveBeenCalledWith(bites);
       },
     ));
   });
 
-  describe('restaurants$', () => {
-    it('should call startListener and return restaurants$ from RestaurantApiService', inject(
+  describe('restaurants', () => {
+    it('should call loadRestaurantById on RestaurantApiService', inject(
       [BiteTribeApiService, RestaurantApiService],
       (
         service: BiteTribeApiService,
         restaurantApiService: RestaurantApiService,
       ) => {
-        const startListenerSpy = jest.spyOn(
-          restaurantApiService,
-          'startListener',
-        );
-        const restaurantsObservable = of([{ id: 'restaurant-id' }]);
-        restaurantApiService.restaurants$ = restaurantsObservable;
-        const restaurants$ = service.restaurants$();
-        expect(startListenerSpy).toHaveBeenCalled();
-        expect(restaurants$).toBe(restaurantsObservable);
+        const loadRestaurantByIdSpy = jest
+          .spyOn(restaurantApiService, 'loadRestaurantById')
+          .mockReturnValue(Promise.resolve(undefined));
+        const restaurantId = 'restaurant-id';
+        service.restaurants(restaurantId);
+        expect(loadRestaurantByIdSpy).toHaveBeenCalledWith(restaurantId);
       },
     ));
   });
 
-  describe('menus$', () => {
-    it('should call startListener and return menus$ from MenuApiService', inject(
+  describe('menus', () => {
+    it('should call loadMenu on MenuApiService', inject(
       [BiteTribeApiService, MenuApiService],
       (service: BiteTribeApiService, menuApiService: MenuApiService) => {
-        const startListenerSpy = jest.spyOn(menuApiService, 'startListener');
-        const menusObservable = of([{ id: 'menu-id' }]);
-        menuApiService.menus$ = menusObservable;
-        const menus$ = service.menus$();
-        expect(startListenerSpy).toHaveBeenCalled();
-        expect(menus$).toBe(menusObservable);
+        const loadMenuSpy = jest
+          .spyOn(menuApiService, 'loadMenu')
+          .mockReturnValue(Promise.resolve(undefined));
+        const menuId = 'menu-id';
+        service.menus(menuId);
+        expect(loadMenuSpy).toHaveBeenCalledWith(menuId);
       },
     ));
   });
 
-  describe('bucketlists$', () => {
-    it('should call startListener and return bucketlists$ from BucketlistApiService', inject(
+  describe('loadBucketlistsByUserId', () => {
+    it('should call loadBucketlistsByUserId on BucketlistApiService', inject(
       [BiteTribeApiService, BucketlistApiService],
       (
         service: BiteTribeApiService,
         bucketlistApiService: BucketlistApiService,
       ) => {
-        const startListenerSpy = jest.spyOn(
-          bucketlistApiService,
-          'startListener',
-        );
-        const bucketlistsObservable = of([{ id: 'bucketlist-id' }]);
-        bucketlistApiService.bucketlists$ = bucketlistsObservable;
-        const bucketlists$ = service.bucketlists$();
-        expect(startListenerSpy).toHaveBeenCalled();
-        expect(bucketlists$).toBe(bucketlistsObservable);
+        const loadBucketlistsByUserIdSpy = jest
+          .spyOn(bucketlistApiService, 'loadBucketlistsByUserId')
+          .mockReturnValue(Promise.resolve([]));
+        const uid = 'user-id';
+        service.loadBucketlistsByUserId(uid);
+        expect(loadBucketlistsByUserIdSpy).toHaveBeenCalledWith(uid);
       },
     ));
   });

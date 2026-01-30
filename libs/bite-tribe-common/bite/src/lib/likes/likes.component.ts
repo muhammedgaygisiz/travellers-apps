@@ -7,7 +7,7 @@ import {
   output,
 } from '@angular/core';
 import { IonChip, IonLabel } from '@ionic/angular/standalone';
-import { Bite } from 'model';
+import { Bite, Like } from 'model';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
 import { PopoverController } from '@ionic/angular';
 
@@ -32,7 +32,7 @@ export class LikesComponent {
   userId = input<string>();
   inCard = input(false);
 
-  likeButtonClick = output<{ likeType: string; biteId: string }>();
+  likeButtonClick = output<Like>();
 
   calcClass = computed(() => {
     const bite = this.bite();

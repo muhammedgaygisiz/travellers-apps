@@ -4,7 +4,8 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/storybook-host/src",
-  "tags": [],
+  "tags": ["scope:bite-tribe"],
+  "implicitDependencies": ["bite-tribe"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",

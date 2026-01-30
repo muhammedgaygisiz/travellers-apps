@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import type { Bite } from 'model';
+import type { Bite, Like } from 'model';
 
 @Injectable({
   providedIn: 'root',
@@ -27,7 +27,7 @@ export class MapDataAccessService {
     this.storeService.logout();
   }
 
-  submitLikeClick(likeType: { likeType: string; biteId: string }): void {
+  submitLikeClick(likeType: Like): void {
     const bites = this.bites();
     const userId = this.userId();
     const bite = bites?.find((bite: Bite) => bite.id === likeType.biteId);

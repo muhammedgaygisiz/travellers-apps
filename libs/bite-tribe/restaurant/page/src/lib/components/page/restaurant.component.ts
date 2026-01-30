@@ -24,7 +24,7 @@ import {
   IonSelectOption,
   IonText,
 } from '@ionic/angular/standalone';
-import { Bite, Link, Menu, MenuItem, Restaurant } from 'model';
+import { Bite, Like, Link, Menu, MenuItem, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import {
@@ -88,7 +88,7 @@ export class RestaurantComponent {
   readonly showMenuClick = output<Restaurant | undefined>();
   readonly biteClick = output<Bite>();
   readonly submitSocialMediaLinks = output<Partial<{ links: Link[] }>>();
-  readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
+  readonly likeButtonClick = output<Like>();
   readonly selectedSegment = signal<'bites' | 'menu'>('bites');
 
   readonly socialMediaForm = this.formBuilder.group({
@@ -113,7 +113,7 @@ export class RestaurantComponent {
         this.formBuilder.group({
           network: [socialMediaLink.network, Validators.required],
           url: [socialMediaLink.url, Validators.required],
-        })
+        }),
       );
     });
   });
@@ -126,9 +126,9 @@ export class RestaurantComponent {
         }
 
         return !this.socialMediaForm.valid;
-      })
+      }),
     ),
-    { initialValue: !this.socialMediaForm.valid }
+    { initialValue: !this.socialMediaForm.valid },
   );
 
   placeName = computed(() => {
@@ -152,7 +152,7 @@ export class RestaurantComponent {
   uniqueBites = computed(() => {
     const bites = this.bites() || [];
     return uniqueBitesByName(bites).sort(
-      (a, b) => (a.price || 0) - (b.price || 0)
+      (a, b) => (a.price || 0) - (b.price || 0),
     );
   });
 
@@ -161,7 +161,7 @@ export class RestaurantComponent {
       this.formBuilder.group({
         network: ['', Validators.required],
         url: ['', Validators.required],
-      })
+      }),
     );
   }
 

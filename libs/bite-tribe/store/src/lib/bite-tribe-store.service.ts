@@ -192,7 +192,7 @@ export class BiteTribeStoreService implements StoreService {
   submitLikeOrDislikeClick(
     bite: Bite | undefined | null,
     userId: string,
-    likeType: { likeType: string; biteId: string },
+    likeType: Like,
   ): void {
     const likeFromUser = bite?.likes?.find(
       (like: Like) =>
@@ -207,16 +207,18 @@ export class BiteTribeStoreService implements StoreService {
     this.submitLikeClick(likeType);
   }
 
-  submitLikeClick(event: { likeType: string; biteId: string }): void {
+  submitLikeClick(event: Like): void {
     this.store?.dispatch(
       saveLike({
-        ...event,
-        createdAt: new Date().toISOString(),
+        like: {
+          ...event,
+          createdAt: new Date().toISOString(),
+        },
       }),
     );
   }
 
-  removeLike(event: { likeType: string; biteId: string }): void {
+  removeLike(event: Like): void {
     this.store?.dispatch(removeLike({ like: event }));
   }
 

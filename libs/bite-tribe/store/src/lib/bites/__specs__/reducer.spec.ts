@@ -2,7 +2,10 @@ import { reducer } from '../reducer';
 import { BiteActions } from '../actions';
 import type { Bite } from 'model';
 import { fromAuth } from 'ta-firestore';
-import { routerNavigatedAction } from '@ngrx/router-store';
+import {
+  routerNavigatedAction,
+  routerNavigationAction,
+} from '@ngrx/router-store';
 import { PATH } from 'utils';
 import { BitesState } from '../adapter';
 
@@ -182,25 +185,6 @@ describe('Bite Reducer', () => {
     });
   });
 
-  describe('loadedBiteCreator', () => {
-    it('should set the biteCreator in the state', () => {
-      const NEW_STATE = {
-        ids: [],
-        entities: {},
-        biteCreator: { id: 'creator1', name: 'Creator 1' },
-        latestBites: [],
-      };
-
-      const loadedBiteCreatorAction = BiteActions.loadedBiteCreator({
-        biteCreator: { id: 'creator1', name: 'Creator 1' },
-      });
-
-      expect(reducer(EMPTY_STATE, loadedBiteCreatorAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
   describe('noPublicCreatorForBite', () => {
     it('should clear the biteCreator in the state', () => {
       const INITIAL_STATE = {
@@ -261,16 +245,11 @@ describe('Bite Reducer', () => {
         latestBites: [],
       };
 
-      const routerNavigatedAction = {
-        type: '[Router] Navigated',
-        payload: {
-          event: {
-            url: '/other-path',
-          },
-        },
-      };
+      const action = routerNavigatedAction({
+        payload: { event: { url: PATH.BITE } } as any,
+      });
 
-      expect(reducer(INITIAL_STATE, routerNavigatedAction)).toEqual({
+      expect(reducer(INITIAL_STATE, action)).toEqual({
         ...INITIAL_STATE,
       });
     });

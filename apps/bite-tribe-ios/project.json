@@ -5,6 +5,7 @@
   "sourceRoot": "apps/bite-tribe-ios",
   "prefix": "bite-tribe-ios",
   "tags": ["scope:bite-tribe"],
+  "implicitDependencies": ["bite-tribe"],
   "targets": {
     "build": {
       "options": {

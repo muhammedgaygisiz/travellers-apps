@@ -8,7 +8,7 @@ import {
 import { PageComponent } from 'common/ui/page';
 import { IonContent } from '@ionic/angular/standalone';
 import { MapComponent } from 'bite-tribe-common/map';
-import type { Bite, Geopoint } from 'model';
+import type { Bite, Geopoint, Like } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { SnapDrawerComponent } from '../snap-drawer/snap-drawer.component';
 
@@ -33,7 +33,7 @@ export class MapPageComponent {
   enableZoom = input(true);
 
   readonly logoutClick = output();
-  readonly likeButtonClick = output<{ likeType: string; biteId: string }>();
+  readonly likeButtonClick = output<Like>();
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();
 

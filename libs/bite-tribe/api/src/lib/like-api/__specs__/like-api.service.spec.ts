@@ -3,6 +3,12 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
 import { ErrorHandler } from '@angular/core';
+import { Like } from 'model';
+import * as loadLikesByBitesUtils from '../utils/load-likes-by-bites';
+
+jest.mock('../utils/load-likes-by-bites', () => ({
+  loadLikesByBites: jest.fn().mockResolvedValue([]),
+}));
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
@@ -10,11 +16,12 @@ jest.mock('@capacitor-firebase/firestore', () => ({
     removeSnapshotListener: jest.fn(),
     setDocument: jest.fn(),
     deleteDocument: jest.fn(),
+    getDocument: jest.fn(),
   },
 }));
 
 const MockedAuthService = {
-  authState: (): any => ({ user: { uid: '123' } }),
+  getUser: (): any => ({ uid: '123' }),
 };
 
 const ErrorHandlerMock = {
@@ -39,58 +46,15 @@ describe(LikeApiService.name, () => {
     expect(service).toBeTruthy();
   });
 
-  describe('startListener', () => {
-    let addCollectionGroupSnapshotListenerMock: jest.SpyInstance;
+  describe('loadLikesForBites', () => {
+    it('should call loadLikesByBites utility function', async () => {
+      const bites = [{ id: 'bite1' }, { id: 'bite2' }] as any;
 
-    beforeEach(() => {
-      addCollectionGroupSnapshotListenerMock = jest
-        .spyOn(FirebaseFirestore, 'addCollectionGroupSnapshotListener')
-        .mockResolvedValue('callbackId');
-    });
+      await service.loadLikesForBites(bites);
 
-    it('should start the listener', async () => {
-      await service.startListener();
-
-      expect(addCollectionGroupSnapshotListenerMock).toHaveBeenCalled();
-    });
-  });
-
-  describe('handleResponse', () => {
-    let nextSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      nextSpy = jest
-        .spyOn((service as any)._likesChannel$, 'next')
-        .mockImplementation();
-    });
-
-    it('should process likes and update the likesChannel$', () => {
-      const mockLikeDocs = {
-        snapshots: [
-          { data: { likeType: 'like', biteId: 'bite1' } },
-          { data: { likeType: 'love', biteId: 'bite2' } },
-        ],
-      } as any;
-
-      service.handleResponse(mockLikeDocs);
-
-      expect(nextSpy).toHaveBeenCalledWith([
-        { likeType: 'like', biteId: 'bite1' },
-        { likeType: 'love', biteId: 'bite2' },
-      ]);
-    });
-  });
-
-  describe('stopLikesListener', () => {
-    it('should call stopped$.next and removeSnapshotListener', async () => {
-      const removeSnapshotListenerMock = jest
-        .spyOn(FirebaseFirestore, 'removeSnapshotListener')
-        .mockResolvedValue();
-
-      const callbackId = 'testCallbackId';
-      await service.stopLikesListener(callbackId);
-
-      expect(removeSnapshotListenerMock).toHaveBeenCalledWith({ callbackId });
+      expect(loadLikesByBitesUtils.loadLikesByBites).toHaveBeenCalledWith(
+        bites,
+      );
     });
   });
 
@@ -99,6 +63,17 @@ describe(LikeApiService.name, () => {
       const setDocumentMock = jest
         .spyOn(FirebaseFirestore, 'setDocument')
         .mockResolvedValue();
+
+      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        snapshot: {
+          data: {
+            likeType: 'thumbup',
+            biteId: 'bite123',
+            createdAt: '2024-06-01T00:00:00Z',
+            userId: '123',
+          },
+        } as any,
+      });
 
       const like = {
         likeType: 'thumbup',
@@ -151,7 +126,7 @@ describe(LikeApiService.name, () => {
 
       const like = {
         biteId: 'bite123',
-      };
+      } as Like;
 
       await service.removeLike(like);
 
@@ -172,9 +147,13 @@ describe(LikeApiService.name, () => {
 
         const like = {
           biteId: 'bite123',
-        };
+        } as Like;
 
-        await service.removeLike(like);
+        try {
+          await service.removeLike(like);
+        } catch (error) {
+          // Expected to throw
+        }
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           'Error removing like:',

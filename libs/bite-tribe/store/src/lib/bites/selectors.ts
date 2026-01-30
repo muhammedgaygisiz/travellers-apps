@@ -1,7 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
 import { adapter, BitesState } from './adapter';
-import type { Bite, PublicUser } from 'model';
+import type { Bite } from 'model';
 import { biteId, userId } from '../router/selectors';
 import { likes } from '../likes/selectors';
 import {
@@ -17,7 +17,6 @@ import {
   myBitesSorting,
 } from '../filtering-and-sorting/selectors';
 import { haversineDistance } from 'utils';
-import { EntityState } from '@ngrx/entity';
 import { handleNearbyFilter } from './utils/handle-nearby-filter';
 import { handleTagFilters } from './utils/handle-tag-filters';
 import { getLikesForBite } from './utils/get-likes-for-bite';
@@ -27,7 +26,6 @@ import { selectedBucketlist } from '../bucketlists/selectors';
 import { enrichByPriceInPreferredCurrency } from './utils/enrich-by-price-in-preferred-currency';
 import { sortByCriteria } from './utils/sort-by-criteria';
 import { byDistance } from './utils/by-distance';
-import { getUniqueRestaurantNames } from './utils/get-unique-restaurant-names';
 import { getNearbyBites } from './utils/get-nearby-bites';
 import { getNearbyRestaurantNamesByPosition } from './utils/get-nearby-restaurant-names-by-position';
 import { getTagSuggestionsByPlace } from './utils/get-tag-suggestions-by-place';

@@ -24,6 +24,32 @@ describe('ProfileComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('subscriptionTier', () => {
+    describe('given no user', () => {
+      it('should return 0', () => {
+        compRef.setInput('user', undefined);
+
+        expect(component.subscriptionTier()).toBe(0);
+      });
+    });
+
+    describe('given a user without subscriptionTier', () => {
+      it('should return 0', () => {
+        compRef.setInput('user', {} as any);
+
+        expect(component.subscriptionTier()).toBe(0);
+      });
+    });
+
+    describe('given a user with subscriptionTier 1', () => {
+      it('should return 1', () => {
+        compRef.setInput('user', { subscriptionTier: 1 } as any);
+
+        expect(component.subscriptionTier()).toBe(1);
+      });
+    });
+  });
+
   describe('followerCount', () => {
     it('should return 0 if followers is 0', () => {
       compRef.setInput('profileMetadata', { followers: 0 } as any);

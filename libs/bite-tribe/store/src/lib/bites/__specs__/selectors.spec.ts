@@ -167,14 +167,59 @@ describe('Bites Selectors', () => {
   });
 
   describe('allTags', () => {
-    it('should return unique sorted tags without # symbol', () => {
-      const bitesWithMetadata = [
-        { ...mockBite1, likes: mockLikes, distance: '0' },
-        { ...mockBite2, likes: [], distance: '0.01' },
-      ] as any[];
+    describe('given bites', () => {
+      describe('with tags', () => {
+        it('should return unique sorted tags without # symbol', () => {
+          const bitesWithMetadata = [
+            { ...mockBite1, likes: mockLikes, distance: '0' },
+            { ...mockBite2, likes: [], distance: '0.01' },
+          ] as any[];
 
-      const result = fromSelectors.allTags.projector(bitesWithMetadata);
-      expect(result).toEqual(['coffee', 'drink', 'food', 'vienna']);
+          const result = fromSelectors.allTags.projector(bitesWithMetadata);
+          expect(result).toEqual(['coffee', 'drink', 'food', 'vienna']);
+        });
+      });
+
+      describe('without tags', () => {
+        it('should return empty array', () => {
+          const bitesWithMetadata = [
+            { ...mockBite1, likes: mockLikes, distance: '0', tags: [] },
+            { ...mockBite2, likes: [], distance: '0.01', tags: [] },
+          ] as any[];
+
+          const result = fromSelectors.allTags.projector(bitesWithMetadata);
+          expect(result).toEqual([]);
+        });
+      });
+
+      describe('with tags that that are not arrays', () => {
+        it('should return empty array', () => {
+          const bitesWithMetadata = [
+            { ...mockBite1, likes: mockLikes, distance: '0', tags: null },
+            { ...mockBite2, likes: [], distance: '0.01', tags: undefined },
+          ] as any[];
+
+          const result = fromSelectors.allTags.projector(bitesWithMetadata);
+          expect(result).toEqual([]);
+        });
+      });
+
+      describe('with tags where cleaned tags are empty', () => {
+        it('should return empty array', () => {
+          const bitesWithMetadata = [
+            {
+              ...mockBite1,
+              likes: mockLikes,
+              distance: '0',
+              tags: ['#', '##'],
+            },
+            { ...mockBite2, likes: [], distance: '0.01', tags: ['###'] },
+          ] as any[];
+
+          const result = fromSelectors.allTags.projector(bitesWithMetadata);
+          expect(result).toEqual([]);
+        });
+      });
     });
   });
 
@@ -260,38 +305,63 @@ describe('Bites Selectors', () => {
   });
 
   describe('bitesBySelectedBucketlist', () => {
-    const mockBucketlist = {
-      id: 'bucketlist1',
-      biteIds: ['1'],
-    } as Bucketlist;
+    describe('given bucketlist with bites', () => {
+      const mockBucketlist = {
+        id: 'bucketlist1',
+        biteIds: ['1'],
+      } as Bucketlist;
 
-    it('should return bites in the selected bucketlist', () => {
-      const bitesWithMetadata = [
-        { ...mockBite1, likes: mockLikes, distance: '0' },
-        { ...mockBite2, likes: [], distance: '0.01' },
-      ] as any[];
+      it('should return bites in the selected bucketlist', () => {
+        const bitesWithMetadata = [
+          { ...mockBite1, likes: mockLikes, distance: '0' },
+          { ...mockBite2, likes: [], distance: '0.01' },
+        ] as any[];
 
-      const result = fromSelectors.bitesBySelectedBucketlist.projector(
-        bitesWithMetadata,
-        mockBucketlist,
-      );
+        const result = fromSelectors.bitesBySelectedBucketlist.projector(
+          bitesWithMetadata,
+          mockBucketlist,
+        );
 
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('1');
+        expect(result).toHaveLength(1);
+        expect(result[0].id).toBe('1');
+      });
     });
 
-    it('should return empty array if no bucketlist is selected', () => {
-      const bitesWithMetadata = [
-        { ...mockBite1, likes: mockLikes, distance: '0' },
-        { ...mockBite2, likes: [], distance: '0.01' },
-      ] as any[];
+    describe('given bucketlist without bites', () => {
+      const mockBucketlist = {
+        id: 'bucketlist1',
+        biteIds: [],
+      } as unknown as Bucketlist;
 
-      const result = fromSelectors.bitesBySelectedBucketlist.projector(
-        bitesWithMetadata,
-        undefined,
-      );
+      it('should return empty array', () => {
+        const bitesWithMetadata = [
+          { ...mockBite1, likes: mockLikes, distance: '0' },
+          { ...mockBite2, likes: [], distance: '0.01' },
+        ] as any[];
 
-      expect(result).toEqual([]);
+        const result = fromSelectors.bitesBySelectedBucketlist.projector(
+          bitesWithMetadata,
+          mockBucketlist,
+        );
+
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe('given no selected bucketlist', () => {
+      it('should return empty array if no bucketlist is selected', () => {
+        const bitesWithMetadata = [
+          { ...mockBite1, likes: mockLikes, distance: '0' },
+          { ...mockBite2, likes: [], distance: '0.01' },
+        ] as any[];
+
+        const result = fromSelectors.bitesBySelectedBucketlist.projector(
+          bitesWithMetadata,
+          undefined,
+        );
+
+        expect(result).toEqual([]);
+      });
     });
   });
 

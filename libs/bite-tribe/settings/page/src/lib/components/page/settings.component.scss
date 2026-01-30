@@ -1,4 +1,45 @@
 :host {
+  .subscription-section {
+    h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .subscription-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+
+      @media (max-width: 400px) {
+        grid-template-columns: 1fr;
+      }
+
+      ta-card {
+        transition: all 0.3s ease;
+
+        ::ng-deep ion-card {
+          margin: 0;
+          text-align: center;
+          border: 2px solid transparent;
+        }
+
+        &.highlighted ::ng-deep ion-card {
+          border-color: var(--ion-color-primary);
+        }
+
+        ion-card-header {
+          padding: 24px 16px;
+        }
+
+        ion-card-title {
+          font-size: 1.125rem;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
   .nearby-value {
     text-align: end;
   }

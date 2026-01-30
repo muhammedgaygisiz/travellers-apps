@@ -6,6 +6,33 @@
   <ion-content class="ion-padding">
     <h1 class="ion-margin-bottom">Settings</h1>
 
+    <!-- Subscription Tier Section -->
+    <section class="subscription-section ion-margin-bottom">
+      <h2>Account Type</h2>
+      <div class="subscription-cards">
+        <ta-card
+          [class.highlighted]="isFreeUser()"
+          [attr.aria-label]="'Free tier'"
+          [attr.aria-current]="isFreeUser() ? 'true' : null"
+          role="status"
+        >
+          <ion-card-header>
+            <ion-card-title>Free</ion-card-title>
+          </ion-card-header>
+        </ta-card>
+        <ta-card
+          [class.highlighted]="isProUser()"
+          [attr.aria-label]="'PRO tier'"
+          [attr.aria-current]="isProUser() ? 'true' : null"
+          role="status"
+        >
+          <ion-card-header>
+            <ion-card-title>PRO</ion-card-title>
+          </ion-card-header>
+        </ta-card>
+      </div>
+    </section>
+
     <div>
       <form [formGroup]="settingsForm">
         <section class="settings-section">

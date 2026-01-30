@@ -154,31 +154,60 @@ describe(SettingsApiService.name, () => {
   });
 
   describe('saveSettings', () => {
-    let setDocumentSpy: jest.SpyInstance;
+    describe('given a user', () => {
+      describe('with uid', () => {
+        let setDocumentSpy: jest.SpyInstance;
 
-    beforeEach(() => {
-      setDocumentSpy = jest
-        .spyOn(FirebaseFirestore, 'setDocument')
-        .mockResolvedValue();
-    });
-
-    it('should call FirebaseFirestore.setDocument', inject(
-      [SettingsApiService],
-      async (service: SettingsApiService) => {
-        const settingsToSave = { theme: 'light', notificationsEnabled: false };
-
-        await service.saveSettings(settingsToSave);
-
-        expect(setDocumentSpy).toHaveBeenCalledWith({
-          reference: 'settings/123',
-          data: {
-            theme: 'light',
-            notificationsEnabled: false,
-            updatedAt: mockDate.toISOString(),
-          },
+        beforeEach(() => {
+          setDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'setDocument')
+            .mockResolvedValue();
         });
-      },
-    ));
+
+        it('should call FirebaseFirestore.setDocument', inject(
+          [SettingsApiService],
+          async (service: SettingsApiService) => {
+            const settingsToSave = {
+              theme: 'light',
+              notificationsEnabled: false,
+            };
+
+            await service.saveSettings(settingsToSave);
+
+            expect(setDocumentSpy).toHaveBeenCalledWith({
+              reference: 'settings/123',
+              data: {
+                theme: 'light',
+                notificationsEnabled: false,
+                updatedAt: mockDate.toISOString(),
+              },
+            });
+          },
+        ));
+      });
+
+      describe('with uid undefined', () => {
+        beforeEach(() => {
+          jest
+            .spyOn(MockedAuthService, 'getUser')
+            .mockReturnValue({ uid: undefined });
+        });
+
+        it('should throw an error', inject(
+          [SettingsApiService],
+          async (service: SettingsApiService) => {
+            const settingsToSave = {
+              theme: 'light',
+              notificationsEnabled: false,
+            };
+
+            await expect(service.saveSettings(settingsToSave)).rejects.toThrow(
+              'No user logged in',
+            );
+          },
+        ));
+      });
+    });
 
     describe('given user is undefined', () => {
       beforeEach(() => {

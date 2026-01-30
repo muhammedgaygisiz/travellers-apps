@@ -17,6 +17,7 @@ import { getStorage } from 'firebase/storage';
 import { provideFirestoreAnalytics } from './analytics/provide-firestore-analytics';
 import { provideFirestoreSimulator } from './provide-firestore-simulator';
 import { Emulators } from 'utils';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 export const FIREBASE_APP = new InjectionToken<'FIREBASE_APP' | null>(
   'FIREBASE_APP',
@@ -36,6 +37,9 @@ export const provideFirestoreUtils = (
 
   if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] === 'true') {
     console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
+
+    console.log('DISABLING ANALYTICS');
+    FirebaseAnalytics.setEnabled({ enabled: false });
 
     if (emulators) {
       const storage = getStorage(app);

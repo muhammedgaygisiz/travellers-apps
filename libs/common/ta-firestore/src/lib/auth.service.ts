@@ -49,11 +49,7 @@ export class AuthService {
     const currentUser = await FirebaseAuthentication.getCurrentUser();
     this._authStateChange$.next(currentUser);
 
-    this.setupAnalyticsAndCrashlytics(currentUser);
-
     await FirebaseAuthentication.addListener('authStateChange', (result) => {
-      this.setupAnalyticsAndCrashlytics(currentUser);
-
       this._authStateChange$.next(result);
     });
   }
@@ -107,10 +103,8 @@ export class AuthService {
     return from(FirebaseAuthentication.signInWithApple({ mode: 'popup' }));
   }
 
-  private setupAnalyticsAndCrashlytics(
-    currentUser: GetCurrentUserResult,
-  ): void {
-    const user = currentUser.user;
+  setupAnalyticsAndCrashlytics(currentUser: User): void {
+    const user = currentUser;
 
     if (user && !process.env['NX_APP_BITE_TRIBE_IS_BUSINESS']) {
       FirebaseAnalytics.setUserId({

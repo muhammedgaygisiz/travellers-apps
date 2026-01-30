@@ -68,7 +68,13 @@ export class AuthEffects {
       map(() => {
         const authState = this.authService.authState();
 
-        return AuthActions.loadedUser({ user: authState?.user });
+        const user = authState?.user;
+        return AuthActions.loadedUser({ user });
+      }),
+      tap(({ user }) => {
+        if (user) {
+          this.authService.setupAnalyticsAndCrashlytics(user);
+        }
       }),
     ),
   );

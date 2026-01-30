@@ -8,7 +8,7 @@ import { LikeApiService } from '../like-api/like-api.service';
 import { BucketlistApiService } from '../bucketlist-api/bucketlist-api.service';
 import { ProfileApiService } from '../profile-api.service';
 import { BiteApiService } from '../bite-api/bite-api.service';
-import { SettingsApiService } from '../settings-api.service';
+import { SettingsApiService } from '../settings-api/settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
 import { lastValueFrom, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
@@ -77,7 +77,7 @@ class BiteApiMock {
 }
 
 class SettingsApiMock {
-  settings$ = of(null);
+  loadSettingsByUserId = jest.fn();
   saveSettings = jest.fn();
 }
 
@@ -120,75 +120,22 @@ describe(BiteTribeApiService.name, () => {
 
     beforeEach(() => classListSpy.mockClear());
 
-    describe('given a dark theme', () => {
-      beforeEach(() => {
-        TestBed.overrideProvider(SettingsApiService, {
-          useValue: { settings$: of({ theme: 'dark' }) },
-        });
-      });
+    it('should call loadSettingsByUserId', inject(
+      [BiteTribeApiService, SettingsApiService],
+      async (
+        service: BiteTribeApiService,
+        settingsApiService: SettingsApiService,
+      ) => {
+        const loadSettingsByUserIdSpy = jest
+          .spyOn(settingsApiService, 'loadSettingsByUserId')
+          .mockReturnValue(Promise.resolve({ theme: 'dark' } as any));
 
-      it('should add dark class to document element', inject(
-        [BiteTribeApiService, SettingsApiService],
-        (
-          service: BiteTribeApiService,
-          settingsApiService: SettingsApiService,
-        ) => {
-          scheduler.run(({ expectObservable }) => {
-            expectObservable(service.settings$).toBe('(a|)', {
-              a: { theme: 'dark' },
-            });
-          });
+        const settings = await service.loadSettings();
 
-          expect(classListSpy).toHaveBeenCalledWith('dark', true);
-        },
-      ));
-    });
-
-    describe('given a light theme', () => {
-      beforeEach(() => {
-        TestBed.overrideProvider(SettingsApiService, {
-          useValue: { settings$: of({ theme: 'light' }) },
-        });
-      });
-
-      it('should add light class to document element', inject(
-        [BiteTribeApiService, SettingsApiService],
-        (
-          service: BiteTribeApiService,
-          settingsApiService: SettingsApiService,
-        ) => {
-          scheduler.run(({ expectObservable }) => {
-            expectObservable(service.settings$).toBe('(a|)', {
-              a: { theme: 'light' },
-            });
-          });
-
-          expect(classListSpy).toHaveBeenCalledWith('light', true);
-        },
-      ));
-    });
-
-    describe('with undefined settings', () => {
-      beforeEach(() => {
-        TestBed.overrideProvider(SettingsApiService, {
-          useValue: { settings$: of(undefined) },
-        });
-      });
-
-      it('should not modify document element classes', inject(
-        [BiteTribeApiService, SettingsApiService],
-        (
-          service: BiteTribeApiService,
-          settingsApiService: SettingsApiService,
-        ) => {
-          scheduler.run(({ expectObservable }) => {
-            expectObservable(service.settings$).toBe('(a|)', { a: undefined });
-          });
-
-          expect(classListSpy).not.toHaveBeenCalled();
-        },
-      ));
-    });
+        expect(loadSettingsByUserIdSpy).toHaveBeenCalledTimes(1);
+        expect(settings).toEqual({ theme: 'dark' });
+      },
+    ));
   });
 
   describe('getExchangeRates', () => {

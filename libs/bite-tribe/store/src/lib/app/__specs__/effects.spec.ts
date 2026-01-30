@@ -24,12 +24,11 @@ const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
 };
 
-const Mock = {
-  settings$: of({ theme: 'dark' } as Settings),
+const PlatformMock = {};
+
+const BiteTribeApiServiceMock = {
   publicProfile$: of({ displayName: 'test' } as PublicUser),
-  create: jest.fn().mockResolvedValue({
-    present: jest.fn(),
-  }),
+  loadSettings: jest.fn(),
   saveSettings: jest.fn(),
   saveUser: jest.fn(),
   updateUser: jest.fn(),
@@ -59,8 +58,8 @@ describe(AppEffect.name, () => {
       providers: [
         AppEffect,
         provideMockActions(() => actions$),
-        { provide: BiteTribeApiService, useValue: Mock },
-        { provide: Platform, useValue: Mock },
+        { provide: BiteTribeApiService, useValue: BiteTribeApiServiceMock },
+        { provide: Platform, useValue: PlatformMock },
         provideMockStore(),
       ],
     });
@@ -125,7 +124,13 @@ describe(AppEffect.name, () => {
   });
 
   describe('loadSettingsFromApi$', () => {
-    it('should load settings from API on ROOT_EFFECTS_INIT', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(apiService, 'loadSettings')
+        .mockReturnValue(of({ theme: 'dark' }) as any);
+    });
+
+    it('should load settings from API on fromAuth.AuthActions.loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
 

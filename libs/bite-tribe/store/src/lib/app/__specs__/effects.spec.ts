@@ -125,23 +125,64 @@ describe(AppEffect.name, () => {
 
   describe('loadSettingsFromApi$', () => {
     beforeEach(() => {
-      jest
-        .spyOn(apiService, 'loadSettings')
-        .mockReturnValue(of({ theme: 'dark' }) as any);
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove('light');
     });
 
-    it('should load settings from API on fromAuth.AuthActions.loadedUser', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
+    describe('given settings with dark theme exist', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(apiService, 'loadSettings')
+          .mockReturnValue(of({ theme: 'dark' }) as any);
+      });
 
-        const expected = 'a';
-        const output = {
-          a: AppActions.loadedSettingsFromAPI({
-            settings: { theme: 'dark' } as Settings,
-          }),
-        };
+      it('should load settings from API on fromAuth.AuthActions.loadedUser', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
 
-        expectObservable(effects.loadSettingsFromApi$).toBe(expected, output);
+          const expected = 'a';
+          const output = {
+            a: AppActions.loadedSettingsFromAPI({
+              settings: { theme: 'dark' } as Settings,
+            }),
+          };
+
+          expectObservable(effects.loadSettingsFromApi$).toBe(expected, output);
+        });
+      });
+
+      it('should set dark theme on document element', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
+
+          expectObservable(effects.loadSettingsFromApi$);
+        });
+
+        expect(document.documentElement.classList.contains('dark')).toBe(true);
+        expect(document.documentElement.classList.contains('light')).toBe(
+          false,
+        );
+      });
+    });
+
+    describe('given settings without theme', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(apiService, 'loadSettings')
+          .mockReturnValue(of({} as Settings) as any);
+      });
+
+      it('should not set theme on document element', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', { a: fromAuth.AuthActions.loadedUser });
+
+          expectObservable(effects.loadSettingsFromApi$);
+        });
+
+        expect(document.documentElement.classList.contains('dark')).toBe(false);
+        expect(document.documentElement.classList.contains('light')).toBe(
+          false,
+        );
       });
     });
   });

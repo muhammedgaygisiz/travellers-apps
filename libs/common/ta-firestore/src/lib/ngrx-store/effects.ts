@@ -8,7 +8,6 @@ import {
 import { AuthActions } from './actions';
 import {
   catchError,
-  EMPTY,
   exhaustMap,
   from,
   map,
@@ -124,7 +123,7 @@ export class AuthEffects {
 
   loginWithGoogleAccountEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.loginWithGoogleAccount.type),
+      ofType(AuthActions.loginWithGoogleAccount),
       mergeMap(() =>
         this.registerWithGoogleAccount$().pipe(
           map((result) => {

@@ -7,6 +7,9 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { AuthService } from '../../auth.service';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { AuthActions } from '../actions';
+import { NavController } from '@ionic/angular';
+
+jest.mock('@ionic/angular');
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -17,6 +20,14 @@ const AuthServiceMock = {
   initialize: jest.fn(),
   loginWithUsernameAndPassword$: (): any => of({} as any),
   logout: jest.fn(() => Promise.resolve()),
+  registerWithUsernameAndPassword$: (): any => of({} as any),
+  registerWithGoogleAccount$: (): any => of({} as any),
+  registerWithAppleAccount$: (): any => of({} as any),
+};
+
+const MockNavController = {
+  navigateBack: jest.fn(),
+  navigateRoot: jest.fn(),
 };
 
 describe(AuthEffects.name, () => {
@@ -35,6 +46,7 @@ describe(AuthEffects.name, () => {
         provideMockActions(() => actions$),
         { provide: AuthService, useValue: AuthServiceMock },
         provideMockStore(),
+        { provide: NavController, useValue: MockNavController },
       ],
     });
 
@@ -71,6 +83,88 @@ describe(AuthEffects.name, () => {
             a: AuthActions.loginSucceeded(),
           });
         });
+      });
+    });
+  });
+
+  describe('logoutEffect$', () => {
+    describe('given a logout action', () => {
+      it('should call authService.logout', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('-a', { a: AuthActions.logout() });
+
+          expectObservable(effects.logoutEffect$);
+        });
+
+        expect(AuthServiceMock.logout).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('registrationEffect$', () => {
+    describe('given a registerWithEmail action', () => {
+      it('should call registerWithUsernameAndPassword$ with registration', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          const registration = {
+            email: 'q@q.de',
+            password: 'password',
+          };
+          actions$ = cold('-a', {
+            a: AuthActions.registerWithEmail({ registration }),
+          });
+
+          expectObservable(effects.registrationEffect$).toBe('-a', {
+            a: AuthActions.registrationSucceeded(),
+          });
+        });
+      });
+    });
+  });
+
+  describe('loginWithGoogleAccountEffect$', () => {
+    describe('given a loginWithGoogleAccount action', () => {
+      it('should call registerWithGoogleAccount$', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('-a', {
+            a: AuthActions.loginWithGoogleAccount(),
+          });
+
+          expectObservable(effects.loginWithGoogleAccountEffect$).toBe('-a', {
+            a: AuthActions.loginSucceeded(),
+          });
+        });
+      });
+    });
+  });
+
+  describe('loginWithAppleAccountEffect$', () => {
+    describe('given a loginWithAppleAccount action', () => {
+      it('should call registerWithAppleAccount$', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('-a', {
+            a: AuthActions.loginWithAppleAccount(),
+          });
+
+          expectObservable(effects.loginWithAppleAccountEffect$).toBe('-a', {
+            a: AuthActions.loginSucceeded(),
+          });
+        });
+      });
+    });
+  });
+
+  describe('successFulLogin$', () => {
+    describe('given a loginSucceeded action', () => {
+      it('should navigate back to root', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
+
+          expectObservable(effects.successFulLogin$).toBe('-a', {
+            a: AuthActions.loginSucceeded(),
+          });
+        });
+
+        expect(MockNavController.navigateBack).toHaveBeenCalledWith(['/']);
       });
     });
   });

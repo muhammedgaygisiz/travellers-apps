@@ -8,6 +8,12 @@ import { AuthService } from '../../auth.service';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { AuthActions } from '../actions';
 import { NavController } from '@ionic/angular';
+import { isBiteDetailsPage } from 'utils';
+
+jest.mock('utils', () => ({
+  ...jest.requireActual('utils'),
+  isBiteDetailsPage: jest.fn(() => false),
+}));
 
 jest.mock('@ionic/angular');
 
@@ -90,6 +96,10 @@ describe(AuthEffects.name, () => {
   });
 
   describe('loginEffect$', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     describe('given a login action', () => {
       it('should call login$ with authCreds', () => {
         scheduler.run(({ cold, expectObservable }) => {
@@ -193,7 +203,7 @@ describe(AuthEffects.name, () => {
           actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
 
           const expected = cold('-b', {
-            b: AuthActions.loadedUser({ user: { uid: '123' } }),
+            b: AuthActions.loadedUser({ user: { uid: '123' } as any }),
           });
 
           expectObservable(effects.loadUser$).toEqual(expected);
@@ -276,28 +286,88 @@ describe(AuthEffects.name, () => {
 
   describe('successFulLogin$', () => {
     describe('given a loginSucceeded action', () => {
-      it('should navigate back to root', () => {
-        scheduler.run(({ cold, expectObservable }) => {
-          actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
-
-          expectObservable(effects.successFulLogin$);
+      describe('and it is a bite detail page', () => {
+        beforeEach(() => {
+          (isBiteDetailsPage as jest.Mock).mockReturnValue(true);
         });
 
-        expect(MockNavController.navigateRoot).toHaveBeenCalledWith(['/']);
+        it('should do nothing', () => {
+          (effects as any).pageAfterLogin = '/bites/123';
+
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
+
+            expectObservable(effects.successFulLogin$);
+          });
+
+          expect(MockNavController.navigateRoot).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('and pageAfterLogin is defined', () => {
+        beforeEach(() => {
+          (isBiteDetailsPage as jest.Mock).mockReturnValue(false);
+        });
+
+        it('should navigate to pageAfterLogin', () => {
+          (effects as any).pageAfterLogin = '/custom-login-page';
+
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
+
+            expectObservable(effects.successFulLogin$);
+          });
+
+          expect(MockNavController.navigateBack).toHaveBeenCalledWith([
+            '/custom-login-page',
+          ]);
+        });
+      });
+
+      describe('and it is not a bite page or the pageAfterLogin', () => {
+        it('should navigate back to root', () => {
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
+
+            expectObservable(effects.successFulLogin$);
+          });
+
+          expect(MockNavController.navigateRoot).toHaveBeenCalledWith(['/']);
+        });
       });
     });
   });
 
   describe('successFulLogout$', () => {
     describe('given a logoutSucceeded action', () => {
-      it('should navigate to login page', () => {
-        scheduler.run(({ cold, expectObservable }) => {
-          actions$ = cold('-a', { a: AuthActions.logoutSucceeded() });
+      describe('and no pageAfterLogout is defined', () => {
+        it('should navigate to login page', () => {
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('-a', { a: AuthActions.logoutSucceeded() });
 
-          expectObservable(effects.successFulLogout$);
+            expectObservable(effects.successFulLogout$);
+          });
+
+          expect(MockNavController.navigateRoot).toHaveBeenCalledWith([
+            '/login',
+          ]);
         });
+      });
 
-        expect(MockNavController.navigateRoot).toHaveBeenCalledWith(['/login']);
+      describe('and pageAfterLogout is defined', () => {
+        it('should navigate to pageAfterLogout', () => {
+          (effects as any).pageAfterLogout = '/custom-logout-page';
+
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('-a', { a: AuthActions.logoutSucceeded() });
+
+            expectObservable(effects.successFulLogout$);
+          });
+
+          expect(MockNavController.navigateRoot).toHaveBeenCalledWith([
+            '/custom-logout-page',
+          ]);
+        });
       });
     });
   });

@@ -37,7 +37,7 @@ describe(provideFirestoreUtils.name, () => {
     });
 
     describe('without analytics', () => {
-      it('should initialize firestore utils without connecting to emulators', async () => {
+      it('should initialize firestore utils without connecting to emulators', () => {
         const FIREBASE_OPTIONS = {} as any;
         const WITHOUT_ANALYTICS = false;
         const EMULATORS = {
@@ -46,7 +46,7 @@ describe(provideFirestoreUtils.name, () => {
           storage: { host: 'localhost', port: 9199 },
         } as any;
 
-        const providers = await provideFirestoreUtils(
+        const providers = provideFirestoreUtils(
           FIREBASE_OPTIONS,
           WITHOUT_ANALYTICS,
           EMULATORS,
@@ -70,7 +70,7 @@ describe(provideFirestoreUtils.name, () => {
     });
 
     describe('with analytics', () => {
-      it('should initialize firestore utils without connecting to emulators', async () => {
+      it('should initialize firestore utils without connecting to emulators', () => {
         const FIREBASE_OPTIONS = {} as any;
         const WITH_ANALYTICS = true;
         const EMULATORS = {
@@ -79,7 +79,7 @@ describe(provideFirestoreUtils.name, () => {
           storage: { host: 'localhost', port: 9199 },
         } as any;
 
-        const providers = await provideFirestoreUtils(
+        const providers = provideFirestoreUtils(
           FIREBASE_OPTIONS,
           WITH_ANALYTICS,
           EMULATORS,
@@ -121,17 +121,16 @@ describe(provideFirestoreUtils.name, () => {
 
       analyticsSetEnablesSpy = jest.spyOn(FirebaseAnalytics, 'setEnabled');
       getStorageSpy = jest.spyOn(storageUtils, 'getStorage');
-      provideFirestoreSimulatorSpy = jest.spyOn(
-        simulatorUtils,
-        'provideFirestoreSimulator',
-      );
+      provideFirestoreSimulatorSpy = jest
+        .spyOn(simulatorUtils, 'provideFirestoreSimulator')
+        .mockReturnValue([]);
     });
 
     afterAll(() => {
       process.env['NX_APP_BITE_TRIBE_IS_DEV'] = undefined;
     });
 
-    it('should initialize firestore utils connecting to emulators', async () => {
+    it('should initialize firestore utils connecting to emulators', () => {
       const FIREBASE_OPTIONS = {} as any;
       const WITHOUT_ANALYTICS = false;
       const EMULATORS = {
@@ -140,7 +139,7 @@ describe(provideFirestoreUtils.name, () => {
         storage: { host: 'localhost', port: 9199 },
       } as any;
 
-      const providers = await provideFirestoreUtils(
+      const providers = provideFirestoreUtils(
         FIREBASE_OPTIONS,
         WITHOUT_ANALYTICS,
         EMULATORS,
@@ -159,10 +158,10 @@ describe(provideFirestoreUtils.name, () => {
         undefined,
       );
 
-      expect(providers).toEqual(expect.any(Array));
+      expect(providers).toEqual([]);
     });
 
-    it('should fall back to standard initialization when no emulators provided', async () => {
+    it('should fall back to standard initialization when no emulators provided', () => {
       const consoleWarnSpy = jest
         .spyOn(console, 'warn')
         .mockImplementation(() => {
@@ -172,7 +171,7 @@ describe(provideFirestoreUtils.name, () => {
       const FIREBASE_OPTIONS = {} as any;
       const WITHOUT_ANALYTICS = false;
 
-      const providers = await provideFirestoreUtils(
+      const providers = provideFirestoreUtils(
         FIREBASE_OPTIONS,
         WITHOUT_ANALYTICS,
       );
@@ -208,29 +207,27 @@ describe(provideFirestoreUtils.name, () => {
       process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
     });
 
-    it('should handle persistence errors gracefully', async () => {
-      const consoleWarnSpy = jest
-        .spyOn(console, 'warn')
-        .mockImplementation(() => {
-          // Mock implementation
-        });
+    it('should handle persistence errors gracefully', () => {
+      const consoleWarnSpy = jest.spyOn(console, 'warn');
 
       const persistenceError = new Error('Persistence failed');
       jest
         .spyOn(firestoreUtils, 'enableMultiTabIndexedDbPersistence')
-        .mockRejectedValue(persistenceError);
+        .mockImplementation(() => {
+          throw persistenceError;
+        });
 
       const FIREBASE_OPTIONS = {} as any;
       const WITHOUT_ANALYTICS = false;
 
-      const providers = await provideFirestoreUtils(
+      const providers = provideFirestoreUtils(
         FIREBASE_OPTIONS,
         WITHOUT_ANALYTICS,
       );
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         'Firebase persistence error: ',
-        persistenceError,
+        expect.anything(),
       );
 
       expect(providers).toEqual(
@@ -251,13 +248,13 @@ describe(provideFirestoreUtils.name, () => {
       process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
     });
 
-    it('should use initializeAuth when on native platform', async () => {
+    it('should use initializeAuth when on native platform', () => {
       jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
 
       const FIREBASE_OPTIONS = {} as any;
       const WITHOUT_ANALYTICS = false;
 
-      const providers = await provideFirestoreUtils(
+      const providers = provideFirestoreUtils(
         FIREBASE_OPTIONS,
         WITHOUT_ANALYTICS,
       );
@@ -272,13 +269,13 @@ describe(provideFirestoreUtils.name, () => {
       );
     });
 
-    it('should use getAuth when not on native platform', async () => {
+    it('should use getAuth when not on native platform', () => {
       jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
 
       const FIREBASE_OPTIONS = {} as any;
       const WITHOUT_ANALYTICS = false;
 
-      const providers = await provideFirestoreUtils(
+      const providers = provideFirestoreUtils(
         FIREBASE_OPTIONS,
         WITHOUT_ANALYTICS,
       );

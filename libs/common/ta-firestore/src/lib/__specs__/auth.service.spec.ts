@@ -8,6 +8,9 @@ import * as authUtils from 'firebase/auth';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 import { Capacitor } from '@capacitor/core';
+import { TestScheduler } from 'rxjs/testing';
+import { cold } from 'jasmine-marbles';
+import { of, tap } from 'rxjs';
 
 jest.mock('@capacitor/core', () => ({
   Capacitor: {
@@ -50,10 +53,16 @@ jest.mock('firebase/firestore');
 
 jest.mock('firebase/auth');
 
+const assertEqual = (a: any, b: any): void => {
+  expect(a).toEqual(b);
+};
+
 describe(AuthService.name, () => {
   let service: AuthService;
+  let scheduler: TestScheduler;
 
   beforeEach(() => {
+    scheduler = new TestScheduler(assertEqual);
     TestBed.configureTestingModule({
       providers: [
         { provide: FIREBASE_AUTH, useValue: { signOut: jest.fn() } },
@@ -128,6 +137,77 @@ describe(AuthService.name, () => {
       expect(authStateChangeNextSpy).toHaveBeenNthCalledWith(2, {
         user: { uid: '456' },
       });
+    });
+  });
+
+  describe('isLoggedIn$', () => {
+    describe('current value of authStateChange$ is null', () => {
+      it('should emit false', () => {
+        scheduler.run(({ expectObservable, cold }) => {
+          cold('ab', {
+            a: null,
+            b: null,
+          })
+            .pipe(
+              tap((value) => (service as any)._authStateChange$.next(value)),
+            )
+            .subscribe();
+
+          expectObservable(service.isLoggedIn$).toBe('-a', { a: false });
+        });
+      });
+    });
+
+    describe('current value of authStateChange$ is user but null', () => {
+      it('should emit false', () => {
+        scheduler.run(({ expectObservable, cold }) => {
+          cold('ab', {
+            a: null,
+            b: { user: null },
+          })
+            .pipe(
+              tap((value) => (service as any)._authStateChange$.next(value)),
+            )
+            .subscribe();
+
+          expectObservable(service.isLoggedIn$).toBe('-a', { a: false });
+        });
+      });
+    });
+
+    describe('current value of authStateChange$ is proper user', () => {
+      it('should emit false', () => {
+        scheduler.run(({ expectObservable, cold }) => {
+          cold('abc', {
+            a: null,
+            b: { user: null },
+            c: { user: {} },
+          })
+            .pipe(
+              tap((value) => (service as any)._authStateChange$.next(value)),
+            )
+            .subscribe();
+
+          expectObservable(service.isLoggedIn$).toBe('-ab', {
+            a: false,
+            b: true,
+          });
+        });
+      });
+    });
+  });
+
+  describe('authStateChangeListener', () => {
+    it('should emit auth state changes', () => {
+      const authStateChangeNextSpy = jest.spyOn(
+        (service as any)._authStateChange$,
+        'next',
+      );
+
+      const newState = { user: { uid: '789' } };
+      service.authStateChangeListener(newState);
+
+      expect(authStateChangeNextSpy).toHaveBeenCalledWith(newState);
     });
   });
 

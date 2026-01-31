@@ -33,11 +33,16 @@ export class AuthService {
   readonly _authStateChange$ = new BehaviorSubject<AuthStateChange | null>(
     null,
   );
+
   readonly authStateChange$ = this._authStateChange$
     .asObservable()
     .pipe(skip(1));
 
   authState = toSignal(this.authStateChange$);
+
+  authStateChangeListener = (result: any): void => {
+    this._authStateChange$.next(result);
+  };
 
   getUser(): User | null | undefined {
     return this.authState()?.user;
@@ -47,9 +52,10 @@ export class AuthService {
     const currentUser = await FirebaseAuthentication.getCurrentUser();
     this._authStateChange$.next(currentUser);
 
-    await FirebaseAuthentication.addListener('authStateChange', (result) => {
-      this._authStateChange$.next(result);
-    });
+    await FirebaseAuthentication.addListener(
+      'authStateChange',
+      this.authStateChangeListener.bind(this),
+    );
   }
 
   isLoggedIn$ = this.authStateChange$.pipe(

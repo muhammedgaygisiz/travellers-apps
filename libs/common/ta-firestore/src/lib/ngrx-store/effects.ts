@@ -71,9 +71,9 @@ export class AuthEffects {
         const user = authState?.user;
         return AuthActions.loadedUser({ user });
       }),
-      tap(({ user }) => {
+      tap(async ({ user }) => {
         if (user) {
-          this.authService.setupAnalyticsAndCrashlytics(user);
+          await this.authService.setupAnalyticsAndCrashlytics(user);
         }
       }),
     ),
@@ -113,9 +113,9 @@ export class AuthEffects {
         from(this.register(registration)).pipe(
           map(() => AuthActions.registrationSucceeded()),
           tap(() => this.navController.navigateBack(['/login'])),
-          catchError((err) => {
-            return of(AuthActions.registrationFailed({ code: err.code }));
-          }),
+          catchError((err) =>
+            of(AuthActions.registrationFailed({ code: err.code })),
+          ),
         ),
       ),
     ),
@@ -179,7 +179,7 @@ export class AuthEffects {
   successFulLogout$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(AuthActions.logoutSucceeded.type),
+        ofType(AuthActions.logoutSucceeded),
         tap(() => {
           if (this.pageAfterLogout) {
             this.navController.navigateRoot([this.pageAfterLogout]);

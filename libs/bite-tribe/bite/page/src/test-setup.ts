@@ -1,4 +1,6 @@
 import { setupZonelessTestEnv } from 'jest-preset-angular/setup-env/zoneless';
+import 'leaflet';
+import 'leaflet.markercluster';
 
 setupZonelessTestEnv({
   errorOnUnknownElements: true,

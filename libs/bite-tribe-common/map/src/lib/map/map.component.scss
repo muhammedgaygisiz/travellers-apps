@@ -3,3 +3,11 @@
   width: 100%;
   border-radius: var(--border-radius);
 }
+
+::ng-deep .marker-cluster-small {
+  background-color: rgba(0, 0, 0, 0.6);
+
+  & div {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+}

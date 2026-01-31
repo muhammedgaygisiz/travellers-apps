@@ -1,12 +1,7 @@
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { getRestaurantById } from '../get-restaurant-by-id';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getDocument: jest.fn(),
-    getCollection: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe('getRestaurantById', () => {
   describe('given a found restaurant', () => {

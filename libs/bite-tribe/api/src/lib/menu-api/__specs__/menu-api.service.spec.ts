@@ -8,14 +8,7 @@ import * as getMenuByIdUtil from '../utils/get-menu-by-id';
 
 jest.mock('../utils/get-menu-by-id');
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    addCollectionSnapshotListener: jest.fn(),
-    removeSnapshotListener: jest.fn(),
-    getDocument: jest.fn(),
-    updateDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 const MockedAuthService = {
   authState: (): any => ({

@@ -9,12 +9,7 @@ jest.mock('../utils/load-settings-by-user-id', () => ({
   loadSettingsByUserId: jest.fn(),
 }));
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    addDocumentSnapshotListener: jest.fn(),
-    setDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 const MockedAuthService = {
   getUser: (): any => ({ uid: '123' }),

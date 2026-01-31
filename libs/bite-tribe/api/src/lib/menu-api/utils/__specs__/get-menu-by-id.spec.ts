@@ -1,11 +1,7 @@
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { getMenuById } from '../get-menu-by-id';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe('getMenuById', () => {
   it('should process response and call FirebaseFirestore.getDocument', async () => {

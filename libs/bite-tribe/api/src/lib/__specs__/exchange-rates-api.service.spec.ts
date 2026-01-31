@@ -2,11 +2,7 @@ import { ExchangeRatesApiService } from '../exchange-rates-api.service';
 import { TestBed } from '@angular/core/testing';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe(ExchangeRatesApiService.name, () => {
   let service: ExchangeRatesApiService;

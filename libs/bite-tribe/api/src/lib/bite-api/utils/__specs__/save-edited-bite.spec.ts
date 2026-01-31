@@ -8,12 +8,7 @@ import { replaceImageInFirestoreStorage } from '../replace-image-in-firestoresto
 import { uploadImageAndUpdateBite } from '../upload-image-and-update-bite';
 import { Bite } from 'model';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    updateDocument: jest.fn(),
-    getDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 jest.mock('../replace-image-in-firestorestorage', () => ({
   replaceImageInFirestoreStorage: jest.fn(),

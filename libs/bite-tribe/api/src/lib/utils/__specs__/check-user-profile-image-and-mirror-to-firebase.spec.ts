@@ -7,13 +7,7 @@ jest.mock('../upload-blob-to-firebasestorage', () => ({
   uploadBlobToFirebasestorage: jest.fn(),
 }));
 
-jest.mock('@capacitor-firebase/storage', () => ({
-  FirebaseStorage: {
-    getDownloadUrl: jest.fn().mockResolvedValue({
-      downloadUrl: 'https://url-to-mirrored-image.com/avatar.jpg',
-    }),
-  },
-}));
+jest.mock('@capacitor-firebase/storage');
 
 const USER_ID = 'user1';
 const BASE_USER = {

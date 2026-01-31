@@ -2,11 +2,7 @@ import { loadLikesByBites } from '../load-likes-by-bites';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite } from 'model';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getCollection: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe(loadLikesByBites.name, () => {
   afterEach(() => {

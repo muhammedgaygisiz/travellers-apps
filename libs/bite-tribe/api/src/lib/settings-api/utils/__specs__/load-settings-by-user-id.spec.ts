@@ -1,11 +1,7 @@
 import { loadSettingsByUserId } from '../load-settings-by-user-id';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe(loadSettingsByUserId.name, () => {
   let getDocumentSpy: jest.SpyInstance;

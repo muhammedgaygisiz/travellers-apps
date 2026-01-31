@@ -1,11 +1,7 @@
 import { loadBucketlistsByUserId } from '../load-bucketlists-by-user-id';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getCollection: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe(loadBucketlistsByUserId.name, () => {
   describe('given no bucketlists for user', () => {

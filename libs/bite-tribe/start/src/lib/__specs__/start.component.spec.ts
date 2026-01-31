@@ -3,11 +3,7 @@ import { StartComponent } from '../start.component';
 import { provideRouter } from '@angular/router';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
-jest.mock('@capacitor-firebase/analytics', () => ({
-  FirebaseAnalytics: {
-    setCurrentScreen: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/analytics');
 
 describe('BiteTribeStartComponent', () => {
   let component: StartComponent;

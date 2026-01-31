@@ -7,13 +7,7 @@ jest.mock('../write-blob-to-file-system', () => ({
   }),
 }));
 
-jest.mock('@capacitor-firebase/storage', () => ({
-  FirebaseStorage: {
-    uploadFile: jest.fn((_: any, callback: any): void => {
-      callback({ completed: true }, null);
-    }),
-  },
-}));
+jest.mock('@capacitor-firebase/storage');
 
 describe(uploadBase64ToFirebaseStorage.name, () => {
   describe('given web environment', () => {

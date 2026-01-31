@@ -45,7 +45,9 @@
         "stylePreprocessorOptions": {
           "includePaths": ["libs/bite-tribe-common/styles"]
         },
-        "scripts": [],
+        "scripts": [
+          "node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"
+        ],
         "serviceWorker": true,
         "ngswConfigPath": "apps/bite-tribe/ngsw-config.json"
       },

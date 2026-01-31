@@ -21,6 +21,9 @@ jest.mock('leaflet', () => ({
   marker: jest.fn(),
   icon: jest.fn(),
   latLngBounds: jest.fn(),
+  markerClusterGroup: (): any => ({
+    addLayers: (): any => ({ addTo: jest.fn() }),
+  }),
   Marker: {
     prototype: {
       options: {},
@@ -242,6 +245,7 @@ describe('MapComponent', () => {
         mockMap.on.mockClear();
         focusMarkerMock.mockClear();
         geopointsToMarkersMock.mockClear();
+        clearMarkersMock.mockClear();
       });
 
       it('should add click event listener to map', () => {
@@ -278,10 +282,7 @@ describe('MapComponent', () => {
         };
 
         expect(emitClickOnMapSpy).toHaveBeenCalledWith(expectedPosition);
-        expect(geopointsToMarkersMock).toHaveBeenCalledWith(
-          [expectedPosition],
-          expect.any(Object),
-        );
+        expect(geopointsToMarkersMock).toHaveBeenCalledWith([expectedPosition]);
       });
 
       it('should not emit clickOnMap when readonly', () => {
@@ -316,16 +317,10 @@ describe('MapComponent', () => {
         };
 
         expect(emitClickOnMapSpy).toHaveBeenCalledWith(expectedPosition);
-        expect(geopointsToMarkersMock).toHaveBeenCalledWith(
-          [expectedPosition],
-          expect.any(Object),
-        );
+        expect(geopointsToMarkersMock).toHaveBeenCalledWith([expectedPosition]);
       });
 
       it('should clear existing markers when map is clicked and not readonly', () => {
-        const existingMarkers = [{ id: 'existing' }];
-        component['markers'] = existingMarkers as any;
-
         componentRef.setInput('readonly', false);
         componentRef.setInput('geopoints', []);
         fixture.detectChanges();
@@ -333,10 +328,7 @@ describe('MapComponent', () => {
         const clickHandler = mockMap.on.mock.calls[0][1];
         clickHandler(mockClickEvent);
 
-        expect(clearMarkersMock).toHaveBeenCalledWith(
-          existingMarkers,
-          expect.any(Object),
-        );
+        expect(clearMarkersMock).toHaveBeenCalledTimes(1);
       });
     });
 

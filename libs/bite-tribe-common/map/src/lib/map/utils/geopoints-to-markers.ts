@@ -4,10 +4,7 @@ import { Geopoint } from 'model';
 import { getMarkerWithColor } from './get-marker-with-color';
 import { MarkerColor } from '../model/marker-color.enum';
 
-export const geopointsToMarkers = (
-  geopoints: Geopoint[],
-  map: L.Map
-): L.Marker[] =>
+export const geopointsToMarkers = (geopoints: Geopoint[]): L.Marker[] =>
   geopoints.map((geopoint) => {
     const coordinates: LatLngExpression = [
       geopoint.latitude,
@@ -19,5 +16,5 @@ export const geopointsToMarkers = (
         rating: geopoint.rating?.toString(),
       }),
       alt: geopoint.rating?.toString(),
-    }).addTo(map);
+    });
   });

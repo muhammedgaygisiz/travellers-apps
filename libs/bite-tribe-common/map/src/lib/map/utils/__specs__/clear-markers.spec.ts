@@ -1,26 +1,25 @@
 import { clearMarkers } from '../clear-markers';
+import * as L from 'leaflet';
+import 'leaflet.markercluster';
 
 describe('clearMarkers', () => {
   let map: any;
-  let markers: any[];
+  let markers: L.MarkerClusterGroup;
 
   beforeEach(() => {
     map = {
       removeLayer: jest.fn(),
     };
-    markers = [{ id: 1 }, { id: 2 }, { id: 3 }];
+    markers = L.markerClusterGroup();
   });
 
   it('should remove all markers from the map', () => {
     clearMarkers(markers, map);
-    expect(map.removeLayer).toHaveBeenCalledTimes(markers.length);
-    markers.forEach((marker, index) => {
-      expect(map.removeLayer).toHaveBeenNthCalledWith(index + 1, marker);
-    });
+    expect(map.removeLayer).toHaveBeenCalledWith(markers);
   });
 
   it('should not call removeLayer if there are no markers', () => {
-    clearMarkers([], map);
+    clearMarkers(null as any, map);
     expect(map.removeLayer).not.toHaveBeenCalled();
   });
 });

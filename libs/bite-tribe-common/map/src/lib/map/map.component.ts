@@ -12,6 +12,7 @@ import {
   viewChild,
 } from '@angular/core';
 import * as L from 'leaflet';
+import 'leaflet.markercluster';
 import { Geopoint } from 'model';
 import { zoomToGpsOrDefault } from './utils/zoom-to-gps-or-default';
 import { fitMapToMarkers } from './utils/fit-map-to-markers';
@@ -55,6 +56,7 @@ export class MapComponent implements OnDestroy {
   gpsPosition = input<Geopoint | null | undefined>();
 
   private map!: L.Map;
+  private markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup();
   private markers: L.Marker[] = [];
   private readonly mapChild = viewChild<ElementRef>('map');
 
@@ -106,7 +108,7 @@ export class MapComponent implements OnDestroy {
 
     if (!geopoints?.length) {
       this.map.setView([0, 0], 2);
-      clearMarkers(this.markers, this.map);
+      clearMarkers(this.markerClusterGroup, this.map);
       this.markers = [];
       return;
     }
@@ -139,8 +141,11 @@ export class MapComponent implements OnDestroy {
   }
 
   private updateMarkers(positions: Geopoint[]): void {
-    clearMarkers(this.markers, this.map);
-    this.markers = geopointsToMarkers(positions, this.map);
+    clearMarkers(this.markerClusterGroup, this.map);
+    this.markers = geopointsToMarkers(positions);
+    this.markerClusterGroup = L.markerClusterGroup()
+      .addLayers(this.markers)
+      .addTo(this.map);
   }
 
   private addMapClickEvent(): void {

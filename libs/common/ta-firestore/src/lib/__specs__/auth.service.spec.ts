@@ -9,8 +9,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 import { Capacitor } from '@capacitor/core';
 import { TestScheduler } from 'rxjs/testing';
-import { cold } from 'jasmine-marbles';
-import { of, tap } from 'rxjs';
+import { tap } from 'rxjs';
 
 jest.mock('@capacitor/core', () => ({
   Capacitor: {
@@ -29,11 +28,7 @@ jest.mock('@capacitor-firebase/authentication', () => ({
   },
 }));
 
-jest.mock('@capacitor-firebase/analytics', () => ({
-  FirebaseAnalytics: {
-    setUserId: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/analytics');
 
 jest.mock('@capacitor-firebase/crashlytics', () => ({
   FirebaseCrashlytics: {
@@ -41,13 +36,7 @@ jest.mock('@capacitor-firebase/crashlytics', () => ({
   },
 }));
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    terminate: jest.fn(),
-    clearPersistence: jest.fn(),
-    removeAllListeners: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 jest.mock('firebase/firestore');
 

@@ -1,11 +1,7 @@
 import { loadBiteById } from '../load-bite-by-id';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe('loadBiteById', () => {
   let getDocumentSpy: jest.SpyInstance;

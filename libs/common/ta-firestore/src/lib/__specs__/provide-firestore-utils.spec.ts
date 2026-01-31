@@ -14,11 +14,7 @@ jest.mock('firebase/storage', () => ({
   getStorage: jest.fn(),
 }));
 
-jest.mock('@capacitor-firebase/analytics', () => ({
-  FirebaseAnalytics: {
-    setEnabled: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/analytics');
 
 jest.mock('../provide-firestore-simulator', () => ({
   provideFirestoreSimulator: jest.fn().mockResolvedValue([]),

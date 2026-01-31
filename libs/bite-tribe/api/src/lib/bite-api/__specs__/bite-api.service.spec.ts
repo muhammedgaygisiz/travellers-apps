@@ -46,13 +46,7 @@ jest.mock('../utils/delete-file-in-firebasestorage', () => ({
   deleteFileInFirebaseStorage: jest.fn(),
 }));
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    deleteDocument: jest.fn(),
-    addCollectionSnapshotListener: jest.fn(),
-    getCountFromServer: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 jest.mock('../utils/load-bites-by-bucketlist', () => ({
   loadBitesByBucketlist: jest.fn(),

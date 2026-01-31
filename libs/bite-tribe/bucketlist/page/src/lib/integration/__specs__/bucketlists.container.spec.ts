@@ -1,10 +1,12 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BucketlistsContainerComponent } from '../bucketlists.container';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 import { BucketlistsService } from '../bucketlists.service';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+
+jest.mock('@capacitor-firebase/analytics');
 
 jest.mock('heic2any', () => jest.fn());
 
@@ -24,9 +26,9 @@ describe('BucketlistsContainerComponent', () => {
           useValue: {
             bucketlists: signal(undefined),
             sorting: signal(undefined),
-            gotoBucketlistDetails: (): void => {},
-            createAndSaveToBucketList: (): void => {},
-            sortingChange: (): void => {},
+            gotoBucketlistDetails: jest.fn(),
+            createAndSaveToBucketList: jest.fn(),
+            sortingChange: jest.fn(),
           },
         },
       ],
@@ -39,5 +41,21 @@ describe('BucketlistsContainerComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('ionViewDidEnter', () => {
+    let setCurrentScreenSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      setCurrentScreenSpy = jest.spyOn(FirebaseAnalytics, 'setCurrentScreen');
+    });
+
+    it('should call FirebaseAnalytics.setCurrentScreen with correct screen name', () => {
+      component.ionViewDidEnter();
+
+      expect(setCurrentScreenSpy).toHaveBeenCalledWith({
+        screenName: 'My Bucketlists',
+      });
+    });
   });
 });

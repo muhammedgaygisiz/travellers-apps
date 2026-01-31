@@ -5,11 +5,7 @@ import { geohashForLocation } from 'geofire-common';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 jest.mock('geofire-common', () => ({ geohashForLocation: jest.fn() }));
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    addDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe('createBite', () => {
   beforeEach(() => {

@@ -4,6 +4,9 @@ import { DetailsService } from '../details.service';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+
+jest.mock('@capacitor-firebase/analytics');
 
 jest.mock('heic2any', () => jest.fn());
 
@@ -41,5 +44,21 @@ describe('DetailsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('ionViewDidEnter', () => {
+    let setCurrentScreenSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      setCurrentScreenSpy = jest.spyOn(FirebaseAnalytics, 'setCurrentScreen');
+    });
+
+    it('should call FirebaseAnalytics.setCurrentScreen with correct screen name', () => {
+      component.ionViewDidEnter();
+
+      expect(setCurrentScreenSpy).toHaveBeenCalledWith({
+        screenName: 'Bite Details',
+      });
+    });
   });
 });

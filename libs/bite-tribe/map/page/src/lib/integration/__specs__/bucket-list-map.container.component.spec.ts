@@ -5,11 +5,7 @@ import { MapService } from '../map.service';
 import { BucketListMapContainerComponent } from '../bucket-list-map.container.component';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
-jest.mock('@capacitor-firebase/analytics', () => ({
-  FirebaseAnalytics: {
-    setCurrentScreen: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/analytics');
 
 jest.mock('localization');
 addNecessaryIcons();

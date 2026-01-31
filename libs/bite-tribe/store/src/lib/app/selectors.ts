@@ -49,10 +49,10 @@ export const hasErrorLoadingGpsPosition = createSelector(
 );
 
 export const userHasSubscriptionTierOne = createSelector(slice, (state) => {
-  // if (state?.profile?.subscriptionTier) {
-  //   return state.profile.subscriptionTier >= 1;
-  // }
-  return true;
+  if (state?.profile?.subscriptionTier) {
+    return state.profile.subscriptionTier >= 1;
+  }
+  return false;
 });
 
 export const totalNumberBites = createSelector(

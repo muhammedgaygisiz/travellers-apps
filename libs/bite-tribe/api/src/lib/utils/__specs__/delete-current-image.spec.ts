@@ -3,11 +3,7 @@ import { PublicUser } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { deleteFileInFirebaseStorage } from '../../bite-api/utils/delete-file-in-firebasestorage';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 jest.mock('../../bite-api/utils/delete-file-in-firebasestorage', () => ({
   deleteFileInFirebaseStorage: jest.fn(),

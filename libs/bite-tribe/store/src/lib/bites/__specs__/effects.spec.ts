@@ -6,7 +6,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BiteEffects } from '../effects';
 import { BiteActions } from '../actions';
-import type { Bite, PublicUser } from 'model';
+import type { Bite } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { bite } from '../selectors';
 import { AppActions } from '../../app/actions';
@@ -14,7 +14,6 @@ import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import { signal, WritableSignal } from '@angular/core';
 import { BucketlistActions } from '../../bucketlists/actions';
 import { PATH } from 'utils';
-import SpyInstance = jest.SpyInstance;
 import { fromAuth } from 'ta-firestore';
 
 const assertDeepEqual = (actual: any, expected: any): void => {

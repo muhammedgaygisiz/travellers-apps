@@ -6,11 +6,7 @@ jest.mock('utils', () => ({
   getDownloadUrlFromFirebaseStorage: jest.fn().mockResolvedValue('mocked-url'),
 }));
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    updateDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe('updateBiteWithImagePathFromFirestorage', () => {
   it('should set imagePath in bite to download url from firestore', async () => {

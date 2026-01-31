@@ -5,16 +5,7 @@ import * as getRestaurantByIdUtils from '../utils/get-restaurant-by-id';
 
 jest.mock('../utils/get-restaurant-by-id');
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    addCollectionSnapshotListener: jest.fn(),
-    removeSnapshotListener: jest.fn(),
-    getDocument: jest.fn(),
-    addDocument: jest.fn(),
-    updateDocument: jest.fn(),
-    getCollection: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe(RestaurantApiService.name, () => {
   let service: RestaurantApiService;

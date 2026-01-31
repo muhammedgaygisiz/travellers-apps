@@ -1,11 +1,7 @@
 import { deleteFileInFirebaseStorage } from '../delete-file-in-firebasestorage';
 import { FirebaseStorage } from '@capacitor-firebase/storage';
 
-jest.mock('@capacitor-firebase/storage', () => ({
-  FirebaseStorage: {
-    deleteFile: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/storage');
 
 describe('deleteFileInFirebaseStorage', () => {
   let deleteFileSpy: jest.SpyInstance;

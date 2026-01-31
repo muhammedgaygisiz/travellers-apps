@@ -1,11 +1,7 @@
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { loadBitesByUser } from '../load-bites-by-user';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getCollection: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe('loadBitesByUser', () => {
   beforeEach(() => {

@@ -3,6 +3,9 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons } from 'utils';
 import { MapService } from '../map.service';
 import { BucketListMapContainerComponent } from '../bucket-list-map.container.component';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+
+jest.mock('@capacitor-firebase/analytics');
 
 jest.mock('localization');
 addNecessaryIcons();
@@ -30,5 +33,21 @@ describe('BucketListMapContainerComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('ionViewDidEnter', () => {
+    let setCurrentScreenSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      setCurrentScreenSpy = jest.spyOn(FirebaseAnalytics, 'setCurrentScreen');
+    });
+
+    it('should call FirebaseAnalytics.setCurrentScreen with correct screen name', () => {
+      component.ionViewDidEnter();
+
+      expect(setCurrentScreenSpy).toHaveBeenCalledWith({
+        screenName: 'Bucketlist Map',
+      });
+    });
   });
 });

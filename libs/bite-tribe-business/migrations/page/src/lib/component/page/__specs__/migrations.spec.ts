@@ -11,16 +11,8 @@ import { ComponentRef } from '@angular/core';
 addNecessaryIcons();
 
 jest.mock('localization');
-jest.mock('@capacitor-firebase/storage', () => ({
-  FirebaseStorage: {
-    uploadFile: jest.fn(),
-  },
-}));
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    updateDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/storage');
+jest.mock('@capacitor-firebase/firestore');
 
 jest.mock('utils');
 
@@ -106,7 +98,7 @@ describe('Migrations', () => {
       it('should upload the image to firebase and call updateBiteWithImagePath on success', async () => {
         const firebaseStorageUploadFile = jest.spyOn(
           FirebaseStorage,
-          'uploadFile'
+          'uploadFile',
         );
 
         await component.migrate(oldBite);
@@ -126,14 +118,14 @@ describe('Migrations', () => {
         expect(updateBiteWithImagePathSpy).toHaveBeenCalledWith(
           expect.stringContaining('images/bites/bite-id/'),
           oldBite,
-          'bite-id'
+          'bite-id',
         );
       });
 
       it('should console.log error if error on uploadFile callback is set', async () => {
         const firebaseStorageUploadFile = jest.spyOn(
           FirebaseStorage,
-          'uploadFile'
+          'uploadFile',
         );
 
         const consoleLogSpy = jest.spyOn(console, 'log');
@@ -152,7 +144,7 @@ describe('Migrations', () => {
       it('should console.error log if upload throws an exception', async () => {
         const firebaseStorageUploadFile = jest.spyOn(
           FirebaseStorage,
-          'uploadFile'
+          'uploadFile',
         );
         const consoleErrorSpy = jest
           .spyOn(console, 'error')
@@ -165,7 +157,7 @@ describe('Migrations', () => {
         await component.migrate(oldBite);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-          new Error('Upload failed')
+          new Error('Upload failed'),
         );
       });
     });
@@ -182,7 +174,7 @@ describe('Migrations', () => {
       await component['updateBiteWithImagePath'](
         'object/path',
         {} as Bite,
-        '1'
+        '1',
       );
 
       const dataParameter = updateDocumentSpy.mock.calls[0][0].data as Bite;

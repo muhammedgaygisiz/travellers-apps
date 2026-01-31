@@ -8,11 +8,10 @@ import {
 import { AuthActions } from './actions';
 import {
   catchError,
-  EMPTY,
   exhaustMap,
+  from,
   map,
   mergeMap,
-  Observable,
   of,
   switchMap,
   tap,
@@ -24,6 +23,7 @@ import { AuthService } from '../auth.service';
 import { AFTER_LOGIN_PAGE, AFTER_LOGOUT_PAGE, isBiteDetailsPage } from 'utils';
 import { SignInResult } from '@capacitor-firebase/authentication';
 import { Store } from '@ngrx/store';
+import { UserCredential } from '@firebase/auth';
 
 type AuthCreds = { authCreds: AuthCredentials };
 
@@ -42,7 +42,7 @@ export class AuthEffects {
   });
 
   constructor() {
-    this.authService.initilize();
+    this.authService.initialize();
   }
 
   checkAuthStatus$ = createEffect(
@@ -68,7 +68,13 @@ export class AuthEffects {
       map(() => {
         const authState = this.authService.authState();
 
-        return AuthActions.loadedUser({ user: authState?.user });
+        const user = authState?.user;
+        return AuthActions.loadedUser({ user });
+      }),
+      tap(async ({ user }) => {
+        if (user) {
+          await this.authService.setupAnalyticsAndCrashlytics(user);
+        }
       }),
     ),
   );
@@ -77,7 +83,7 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.login),
       mergeMap(({ authCreds }: AuthCreds) =>
-        this.login$(authCreds).pipe(
+        from(this.login(authCreds)).pipe(
           map(() => AuthActions.loginSucceeded()),
           catchError((err) => {
             console.debug('#mo error login: ', err);
@@ -90,11 +96,11 @@ export class AuthEffects {
 
   logoutEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.logout.type),
+      ofType(AuthActions.logout),
       exhaustMap(() =>
-        this.authService.logout().pipe(
+        from(this.authService.logout()).pipe(
           map(() => AuthActions.logoutSucceeded()),
-          catchError(() => EMPTY),
+          catchError(() => of(AuthActions.logoutFailed())),
         ),
       ),
     ),
@@ -104,12 +110,12 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.registerWithEmail),
       mergeMap(({ registration }) =>
-        this.register$(registration).pipe(
+        from(this.register(registration)).pipe(
           map(() => AuthActions.registrationSucceeded()),
           tap(() => this.navController.navigateBack(['/login'])),
-          catchError((err) => {
-            return of(AuthActions.registrationFailed({ code: err.code }));
-          }),
+          catchError((err) =>
+            of(AuthActions.registrationFailed({ code: err.code })),
+          ),
         ),
       ),
     ),
@@ -117,9 +123,9 @@ export class AuthEffects {
 
   loginWithGoogleAccountEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.loginWithGoogleAccount.type),
+      ofType(AuthActions.loginWithGoogleAccount),
       mergeMap(() =>
-        this.registerWithGoogleAccount$().pipe(
+        from(this.registerWithGoogleAccount()).pipe(
           map((result) => {
             console.debug('#mo signInResult', result);
             return AuthActions.loginSucceeded();
@@ -136,15 +142,15 @@ export class AuthEffects {
   loginWithAppleAccountEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.loginWithAppleAccount),
-      mergeMap(() => {
-        return this.registerWithAppleAccount$().pipe(
+      mergeMap(() =>
+        from(this.registerWithAppleAccount()).pipe(
           map(() => AuthActions.loginSucceeded()),
           tap(() => this.navController.navigateBack(['/'])),
           catchError((err) =>
             of(AuthActions.registrationFailed({ code: err.code })),
           ),
-        );
-      }),
+        ),
+      ),
     ),
   );
 
@@ -173,7 +179,7 @@ export class AuthEffects {
   successFulLogout$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(AuthActions.logoutSucceeded.type),
+        ofType(AuthActions.logoutSucceeded),
         tap(() => {
           if (this.pageAfterLogout) {
             this.navController.navigateRoot([this.pageAfterLogout]);
@@ -186,19 +192,19 @@ export class AuthEffects {
     { dispatch: false },
   );
 
-  private login$(authCreds: AuthCredentials): Observable<SignInResult> {
-    return this.authService.loginWithUsernameAndPassword$(authCreds);
+  private login(authCreds: AuthCredentials): Promise<SignInResult> {
+    return this.authService.loginWithUsernameAndPassword(authCreds);
   }
 
-  private register$(registration: AuthCredentials): Observable<any> {
-    return this.authService.registerWithUsernameAndPassword$(registration);
+  private register(registration: AuthCredentials): Promise<UserCredential> {
+    return this.authService.registerWithUsernameAndPassword(registration);
   }
 
-  private registerWithGoogleAccount$(): Observable<SignInResult> {
-    return this.authService.registerWithGoogleAccount$();
+  private registerWithGoogleAccount(): Promise<SignInResult> {
+    return this.authService.registerWithGoogleAccount();
   }
 
-  private registerWithAppleAccount$(): Observable<SignInResult> {
-    return this.authService.registerWithAppleAccount$();
+  private registerWithAppleAccount(): Promise<SignInResult> {
+    return this.authService.registerWithAppleAccount();
   }
 }

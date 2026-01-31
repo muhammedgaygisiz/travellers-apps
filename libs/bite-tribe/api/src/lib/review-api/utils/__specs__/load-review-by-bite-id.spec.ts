@@ -1,11 +1,7 @@
 import { loadReviewsByBiteId } from '../load-review-by-bite-id';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getCollection: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 describe(loadReviewsByBiteId.name, () => {
   describe('given no reviews for bite', () => {

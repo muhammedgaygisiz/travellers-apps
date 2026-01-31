@@ -59,7 +59,7 @@ describe('FirebaseErrorHandlerService', (): void => {
         });
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           'Captured error:',
-          objError
+          objError,
         );
       });
     });
@@ -75,7 +75,7 @@ describe('FirebaseErrorHandlerService', (): void => {
         });
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           'Captured error:',
-          objError
+          objError,
         );
       });
     });
@@ -91,7 +91,7 @@ describe('FirebaseErrorHandlerService', (): void => {
         });
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           'Captured error:',
-          objError
+          objError,
         );
       });
     });
@@ -107,7 +107,7 @@ describe('FirebaseErrorHandlerService', (): void => {
       });
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Captured error:',
-        testError
+        testError,
       );
     });
   });
@@ -126,7 +126,7 @@ describe('FirebaseErrorHandlerService', (): void => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error reporting to Crashlytics:',
-        expect.any(Error)
+        expect.any(Error),
       );
     });
 
@@ -139,11 +139,45 @@ describe('FirebaseErrorHandlerService', (): void => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Captured error:',
-        testError
+        testError,
       );
       expect(recordExceptionSpy).toHaveBeenCalledWith({
         message: 'Test error',
         stacktrace: testError.stack || '',
+      });
+    });
+  });
+
+  describe('given no message in error', () => {
+    it('should record exception with fallback message', () => {
+      const errorWithoutMessage = { stack: 'stack trace' };
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+      const recordExceptionSpy = jest
+        .spyOn(FirebaseCrashlytics, 'recordException')
+        .mockResolvedValue();
+
+      service.handleError(errorWithoutMessage);
+
+      expect(recordExceptionSpy).toHaveBeenCalledWith({
+        message: 'Unknown Angular error',
+        stacktrace: 'stack trace',
+      });
+    });
+  });
+
+  describe('given no stack in error', () => {
+    it('should use empty string as stacktrace', () => {
+      const errorWithoutStack = { message: 'Some error' };
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+      const recordExceptionSpy = jest
+        .spyOn(FirebaseCrashlytics, 'recordException')
+        .mockResolvedValue();
+
+      service.handleError(errorWithoutStack);
+
+      expect(recordExceptionSpy).toHaveBeenCalledWith({
+        message: 'Some error',
+        stacktrace: '',
       });
     });
   });

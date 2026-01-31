@@ -10,15 +10,7 @@ jest.mock('../utils/load-likes-by-bites', () => ({
   loadLikesByBites: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    addCollectionGroupSnapshotListener: jest.fn(),
-    removeSnapshotListener: jest.fn(),
-    setDocument: jest.fn(),
-    deleteDocument: jest.fn(),
-    getDocument: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 const MockedAuthService = {
   getUser: (): any => ({ uid: '123' }),

@@ -8,3 +8,4 @@ ignore:
   - "apps/cv/**"
   - "**/*.stories.ts"
   - "apps/bite-tribe-firebase/**"
+  - "libs/common/ta-firestore/**"

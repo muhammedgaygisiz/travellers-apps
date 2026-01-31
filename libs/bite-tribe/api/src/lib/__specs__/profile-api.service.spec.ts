@@ -14,18 +14,7 @@ const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
 };
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    addCollectionSnapshotListener: jest.fn(),
-    removeSnapshotListener: jest.fn(),
-    setDocument: jest.fn(),
-    updateDocument: jest.fn(),
-    getDocument: jest.fn(),
-    getCountFromServer: jest.fn(),
-    deleteDocument: jest.fn(),
-    getCollection: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 jest.mock('utils', () => ({
   isBase64String: jest.fn(),

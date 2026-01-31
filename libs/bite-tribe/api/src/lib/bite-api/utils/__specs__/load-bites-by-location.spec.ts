@@ -2,11 +2,7 @@ import { loadBitesByLocation } from '../load-bites-by-location';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { geohashQueryBounds, distanceBetween } from 'geofire-common';
 
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: {
-    getCollection: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/firestore');
 
 jest.mock('geofire-common', () => ({
   geohashQueryBounds: jest.fn(),

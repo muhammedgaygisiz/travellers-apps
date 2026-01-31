@@ -22,6 +22,7 @@ import { zoomToGeopoint } from './utils/zoom-to-geopoint';
 import { createMap } from './utils/create-map';
 import { createOpenstreetmapLayer } from './utils/create-openstreetmap-layer';
 import { zoomToMarkers } from './utils/zoom-to-markers';
+import { focusMarker } from './utils/focus-marker';
 
 // Fix for marker icons
 const iconRetinaUrl = 'assets/leaflet/marker-icon-2x.png';
@@ -154,7 +155,7 @@ export class MapComponent implements OnDestroy {
         longitude: e.latlng.lng,
       };
 
-      // focusMarker(undefined, this.markers, this.map);
+      focusMarker(undefined, this.markers, this.map);
       this.clickOnMarker.emit(undefined);
 
       if (!this.isReadonly()) {
@@ -174,7 +175,7 @@ export class MapComponent implements OnDestroy {
           );
           if (geopoint) {
             this.clickOnMarker.emit(geopoint);
-            // focusMarker(marker, this.markers, this.map);
+            focusMarker(marker, this.markers, this.map);
           }
         });
       });

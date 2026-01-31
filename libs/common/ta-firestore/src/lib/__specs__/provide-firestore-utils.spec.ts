@@ -4,6 +4,8 @@ import { FirebaseErrorHandlerService } from '../analytics/firebase-error-handler
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import * as storageUtils from 'firebase/storage';
 import * as simulatorUtils from '../provide-firestore-simulator';
+import * as firestoreUtils from 'firebase/firestore';
+import { Capacitor } from '@capacitor/core';
 
 jest.mock('firebase/app');
 jest.mock('firebase/firestore');
@@ -158,6 +160,137 @@ describe(provideFirestoreUtils.name, () => {
       );
 
       expect(providers).toEqual(expect.any(Array));
+    });
+
+    it('should fall back to standard initialization when no emulators provided', async () => {
+      const consoleWarnSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      const FIREBASE_OPTIONS = {} as any;
+      const WITHOUT_ANALYTICS = false;
+
+      const providers = await provideFirestoreUtils(
+        FIREBASE_OPTIONS,
+        WITHOUT_ANALYTICS,
+      );
+
+      expect(analyticsSetEnablesSpy).toHaveBeenCalledWith({ enabled: false });
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'DEV ENVIRONMENT - NX_APP_BITE_TRIBE_IS_DEV is true, but no emulators configuration was provided. Falling back to standard Firestore initialization.',
+      );
+
+      expect(providers).toEqual(
+        expect.arrayContaining([
+          {
+            provide: new InjectionToken('FIREBASE_APP'),
+            useFactory: expect.anything(),
+          },
+          {
+            provide: new InjectionToken('FIREBASE_FIRESTORE'),
+            useFactory: expect.anything(),
+          },
+          {
+            provide: new InjectionToken('FIREBASE_AUTH'),
+            useFactory: expect.anything(),
+          },
+        ]),
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+  });
+
+  describe('persistence error handling', () => {
+    beforeAll(() => {
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
+    });
+
+    it('should handle persistence errors gracefully', async () => {
+      const consoleWarnSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      const persistenceError = new Error('Persistence failed');
+      jest
+        .spyOn(firestoreUtils, 'enableMultiTabIndexedDbPersistence')
+        .mockRejectedValue(persistenceError);
+
+      const FIREBASE_OPTIONS = {} as any;
+      const WITHOUT_ANALYTICS = false;
+
+      const providers = await provideFirestoreUtils(
+        FIREBASE_OPTIONS,
+        WITHOUT_ANALYTICS,
+      );
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Firebase persistence error: ',
+        persistenceError,
+      );
+
+      expect(providers).toEqual(
+        expect.arrayContaining([
+          {
+            provide: new InjectionToken('FIREBASE_APP'),
+            useFactory: expect.anything(),
+          },
+        ]),
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+  });
+
+  describe('native platform check', () => {
+    beforeAll(() => {
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
+    });
+
+    it('should use initializeAuth when on native platform', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+
+      const FIREBASE_OPTIONS = {} as any;
+      const WITHOUT_ANALYTICS = false;
+
+      const providers = await provideFirestoreUtils(
+        FIREBASE_OPTIONS,
+        WITHOUT_ANALYTICS,
+      );
+
+      expect(providers).toEqual(
+        expect.arrayContaining([
+          {
+            provide: new InjectionToken('FIREBASE_AUTH'),
+            useFactory: expect.anything(),
+          },
+        ]),
+      );
+    });
+
+    it('should use getAuth when not on native platform', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+
+      const FIREBASE_OPTIONS = {} as any;
+      const WITHOUT_ANALYTICS = false;
+
+      const providers = await provideFirestoreUtils(
+        FIREBASE_OPTIONS,
+        WITHOUT_ANALYTICS,
+      );
+
+      expect(providers).toEqual(
+        expect.arrayContaining([
+          {
+            provide: new InjectionToken('FIREBASE_AUTH'),
+            useFactory: expect.anything(),
+          },
+        ]),
+      );
     });
   });
 });

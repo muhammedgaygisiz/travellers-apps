@@ -26,4 +26,12 @@ export default {
     'jest-preset-angular/build/serializers/ng-snapshot',
     'jest-preset-angular/build/serializers/html-comment',
   ],
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      functions: 85,
+      lines: 91,
+      statements: 92,
+    },
+  },
 };

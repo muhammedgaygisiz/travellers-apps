@@ -27,11 +27,11 @@ export const FIREBASE_FIRESTORE = new InjectionToken<Firestore>(
 );
 export const FIREBASE_AUTH = new InjectionToken<Auth>('FIREBASE_AUTH');
 
-export const provideFirestoreUtils = (
+export const provideFirestoreUtils = async (
   firebaseOptions: FirebaseOptions,
   withAnalytics?: boolean,
   emulators?: Emulators,
-): Provider[] => {
+): Promise<Provider[]> => {
   const app = initializeApp(firebaseOptions || {});
   const firestore: Firestore = initializeFirestore(app, {});
 
@@ -39,7 +39,7 @@ export const provideFirestoreUtils = (
     console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
 
     console.log('DISABLING ANALYTICS');
-    FirebaseAnalytics.setEnabled({ enabled: false });
+    await FirebaseAnalytics.setEnabled({ enabled: false });
 
     if (emulators) {
       const storage = getStorage(app);
@@ -51,9 +51,11 @@ export const provideFirestoreUtils = (
     );
   }
 
-  enableMultiTabIndexedDbPersistence(firestore).catch((err) => {
+  try {
+    await enableMultiTabIndexedDbPersistence(firestore);
+  } catch (err) {
     console.warn('Firebase persistence error: ', err);
-  });
+  }
 
   const auth: Auth = Capacitor.isNativePlatform()
     ? initializeAuth(app, { persistence: indexedDBLocalPersistence })

@@ -4,6 +4,16 @@ import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../provide-firestore-utils';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import * as firestoreUtils from 'firebase/firestore';
+import * as authUtils from 'firebase/auth';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
+import { Capacitor } from '@capacitor/core';
+
+jest.mock('@capacitor/core', () => ({
+  Capacitor: {
+    isNativePlatform: jest.fn(),
+  },
+}));
 
 jest.mock('@capacitor-firebase/authentication', () => ({
   FirebaseAuthentication: {
@@ -11,6 +21,20 @@ jest.mock('@capacitor-firebase/authentication', () => ({
     addListener: jest.fn(),
     signInWithEmailAndPassword: jest.fn(),
     signOut: jest.fn(),
+    signInWithGoogle: jest.fn(),
+    signInWithApple: jest.fn(),
+  },
+}));
+
+jest.mock('@capacitor-firebase/analytics', () => ({
+  FirebaseAnalytics: {
+    setUserId: jest.fn(),
+  },
+}));
+
+jest.mock('@capacitor-firebase/crashlytics', () => ({
+  FirebaseCrashlytics: {
+    setUserId: jest.fn(),
   },
 }));
 
@@ -23,6 +47,8 @@ jest.mock('@capacitor-firebase/firestore', () => ({
 }));
 
 jest.mock('firebase/firestore');
+
+jest.mock('firebase/auth');
 
 describe(AuthService.name, () => {
   let service: AuthService;
@@ -144,6 +170,8 @@ describe(AuthService.name, () => {
     });
 
     it('should perform logout operations', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+
       await service.logout();
 
       expect(FirebaseAuthentication.signOut).toHaveBeenCalled();
@@ -151,6 +179,93 @@ describe(AuthService.name, () => {
       expect(removeAllListenersSpy).toHaveBeenCalled();
       expect(terminateSpy).toHaveBeenCalled();
       expect(clearPersistanceSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('registerWithUsernameAndPassword', () => {
+    let createUserWithEmailAndPasswordSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      createUserWithEmailAndPasswordSpy = jest
+        .spyOn(authUtils, 'createUserWithEmailAndPassword')
+        .mockResolvedValue({ user: { uid: '123' } } as any);
+    });
+
+    it('should call createUserWithEmailAndPassword with correct registration data', async () => {
+      const registration = { email: 'q@q.de', password: 'password' };
+      const result =
+        await service.registerWithUsernameAndPassword(registration);
+
+      expect(createUserWithEmailAndPasswordSpy).toHaveBeenCalledWith(
+        service.auth,
+        registration.email,
+        registration.password,
+      );
+      expect(result).toEqual({ user: { uid: '123' } });
+    });
+  });
+
+  describe('registerWithGoogleAccount', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(FirebaseAuthentication, 'signInWithGoogle')
+        .mockResolvedValue({ user: { uid: '123' } } as any);
+    });
+
+    it('should call signInWithGoogle with popup mode', async () => {
+      const result = await service.registerWithGoogleAccount();
+
+      expect(FirebaseAuthentication.signInWithGoogle).toHaveBeenCalledWith({
+        mode: 'popup',
+      });
+      expect(result).toEqual({ user: { uid: '123' } });
+    });
+  });
+
+  describe('registerWithAppleAccount', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(FirebaseAuthentication, 'signInWithApple')
+        .mockResolvedValue({ user: { uid: '123' } } as any);
+    });
+
+    it('should call signInWithApple with popup mode', async () => {
+      const result = await service.registerWithAppleAccount();
+
+      expect(FirebaseAuthentication.signInWithApple).toHaveBeenCalledWith({
+        mode: 'popup',
+      });
+      expect(result).toEqual({ user: { uid: '123' } });
+    });
+  });
+
+  describe('setupAnalyticsAndCrashlytics', () => {
+    beforeEach(() => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+    });
+
+    describe('given a user', () => {
+      it('should set userid on analytics', () => {
+        const user = { uid: '123' } as any;
+        service.setupAnalyticsAndCrashlytics(user);
+
+        expect(FirebaseAnalytics.setUserId).toHaveBeenCalledWith({
+          userId: '123',
+        });
+      });
+    });
+
+    describe('given it is native platform', () => {
+      it('should set userid on crashlytics', () => {
+        jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+
+        const user = { uid: '123' } as any;
+        service.setupAnalyticsAndCrashlytics(user);
+
+        expect(FirebaseCrashlytics.setUserId).toHaveBeenCalledWith({
+          userId: '123',
+        });
+      });
     });
   });
 });

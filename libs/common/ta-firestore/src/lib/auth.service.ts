@@ -78,7 +78,9 @@ export class AuthService {
       await FirebaseFirestore.clearPersistence();
     }
 
-    return Promise.resolve();
+    this._authStateChange$.next(null);
+
+    window.location.reload();
   }
 
   public async registerWithUsernameAndPassword(

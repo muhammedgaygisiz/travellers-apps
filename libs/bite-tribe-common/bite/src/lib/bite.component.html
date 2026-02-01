@@ -11,6 +11,10 @@
           loading="lazy"
           (click)="biteClick.emit(biteData)"
         />
+      } @else if (isLoading()) {
+        <div class="spinner-container">
+          <ion-spinner color="primary" name="dots" />
+        </div>
       }
     </div>
 

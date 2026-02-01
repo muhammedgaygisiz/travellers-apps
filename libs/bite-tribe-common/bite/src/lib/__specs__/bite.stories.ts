@@ -20,6 +20,7 @@ const template = `
     <bt-bite
       [bite]="bite"
       [showEditButton]="showEditButton"
+      [isLoading]="isLoading"
     />
   </div>
 `;
@@ -48,6 +49,7 @@ export const Bite: Story = {
 export const Loading: Story = {
   args: {
     ...Bite.args,
+    isLoading: true,
     bite: {
       ...Bite.args?.bite,
       imagePath: null,

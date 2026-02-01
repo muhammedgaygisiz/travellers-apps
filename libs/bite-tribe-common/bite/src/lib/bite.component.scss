@@ -26,6 +26,20 @@
           min-width: 180px;
           object-fit: cover;
         }
+
+        .spinner-container {
+          max-height: 220px;
+          min-height: 220px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          ion-spinner {
+            width: 100px;
+            height: 100px;
+          }
+        }
       }
 
       .card-details {

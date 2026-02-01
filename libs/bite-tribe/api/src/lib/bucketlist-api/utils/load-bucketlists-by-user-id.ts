@@ -18,13 +18,6 @@ export const loadBucketlistsByUserId = async (
         },
       ],
     },
-    queryConstraints: [
-      {
-        type: 'orderBy',
-        fieldPath: 'createdAtTimestamp',
-        directionStr: 'desc',
-      },
-    ],
   });
 
   const bucketlists: Bucketlist[] = data.snapshots.map(

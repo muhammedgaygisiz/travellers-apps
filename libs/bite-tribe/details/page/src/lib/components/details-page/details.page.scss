@@ -6,6 +6,20 @@
     min-height: 20vh;
   }
 
+  .spinner-container {
+    width: 100%;
+    min-height: 20vh;
+
+    display: flex;
+    justify-content: center;
+    padding-top: 10vh;
+
+    ion-spinner {
+      width: 100px;
+      height: 100px;
+    }
+  }
+
   .bite-creator-container,
   .restaurant-distance-price {
     .link {

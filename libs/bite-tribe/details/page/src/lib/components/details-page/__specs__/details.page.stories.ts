@@ -76,3 +76,16 @@ export const myBite: Story = {
     userId: '1',
   },
 };
+
+export const loading: Story = {
+  args: {
+    ...Default.args,
+    isLoading: true,
+    bite: {
+      ...Default.args!.bite,
+      imagePath: '',
+      description:
+        'A refreshing blend of botanical flavors, perfect for a sunny day in the city. This drink combines herbal notes with a hint of citrus, creating a delightful and invigorating experience.',
+    } as unknown as Bite,
+  },
+};

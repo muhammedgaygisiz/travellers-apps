@@ -297,12 +297,12 @@ describe(ProfileApiService.name, () => {
           expect(getDownloadUrlFromFirebaseStorage).toHaveBeenCalledWith(
             'new-photo-url',
           );
-          expect(uploadBase64ToFirebaseStorage).toHaveBeenCalledWith(
-            true,
-            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
-            '123',
-            'users',
-          );
+          expect(uploadBase64ToFirebaseStorage).toHaveBeenCalledWith({
+            isWeb: true,
+            base64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            docId: '123',
+            collection: 'users',
+          });
           expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
             reference: 'users/123',
             data: {

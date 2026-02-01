@@ -39,13 +39,6 @@ describe('BiteService', () => {
 
       expect(Mock.submitBite).toHaveBeenCalledWith({ name: 'Test Bite' });
     });
-
-    it('should call navigateBack to home', () => {
-      const newBite = { id: '123', name: 'Test Bite' };
-      service.submitNewBite(newBite);
-
-      expect(Mock.navigateBack).toHaveBeenCalledWith(['home']);
-    });
   });
 
   describe('submitEditedBite', () => {

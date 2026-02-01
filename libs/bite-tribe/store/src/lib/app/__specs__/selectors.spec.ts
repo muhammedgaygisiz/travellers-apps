@@ -17,13 +17,14 @@ describe('App Selectors', () => {
     name: 'Test User',
   } as unknown as PublicUser;
 
+  const loading = {
+    home: true,
+  };
   const mockState: AppSlice = {
     position: mockPosition,
     settings: mockSettings,
     profile: mockProfile,
-    loading: {
-      home: true,
-    },
+    loading,
     exchangeRates: {},
     reloading: {
       home: false,
@@ -70,14 +71,12 @@ describe('App Selectors', () => {
 
   describe('isBitesLoading', () => {
     it('should return the home loading state', () => {
-      const result = fromSelectors.isBitesLoading.projector(mockState);
+      const result = fromSelectors.isBitesLoading.projector(loading);
       expect(result).toBe(true);
     });
 
     it('should return undefined when loading state is not set', () => {
-      const stateWithoutLoading = { ...mockState, loading: undefined };
-      const result =
-        fromSelectors.isBitesLoading.projector(stateWithoutLoading);
+      const result = fromSelectors.isBitesLoading.projector(undefined as any);
       expect(result).toBeUndefined();
     });
   });
@@ -372,8 +371,7 @@ describe('App Selectors', () => {
     describe('followers loading is true', () => {
       it('should return true', () => {
         const stateWithFollowersLoading = {
-          ...mockState,
-          loading: { followers: true },
+          followers: true,
         } as any;
         const result = fromSelectors.isFollowersLoading.projector(
           stateWithFollowersLoading,

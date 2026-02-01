@@ -416,8 +416,8 @@ describe(BiteTribeApiService.name, () => {
       (service: BiteTribeApiService, biteApiService: BiteApiService) => {
         const saveNewBiteSpy = jest.spyOn(biteApiService, 'saveNewBite');
         const bite = { content: 'New bite content' } as any;
-        service.saveNewBite(bite);
-        expect(saveNewBiteSpy).toHaveBeenCalledWith(bite);
+        service.saveNewBite(bite, jest.fn);
+        expect(saveNewBiteSpy).toHaveBeenCalledWith(bite, expect.any(Function));
       },
     ));
   });

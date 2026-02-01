@@ -26,7 +26,7 @@ jest.mock('../utils/load-bites-by-user', () => ({
 const mockedBiteId = 'mocked-bite-id';
 jest.mock('../utils/create-bite', () => {
   return {
-    createBite: jest.fn(() => ({ id: mockedBiteId })),
+    createBite: jest.fn(() => mockedBiteId),
   };
 });
 
@@ -115,18 +115,19 @@ describe(BiteApiService.name, () => {
         ...mockedBiteWithoutImage,
       } as unknown as Bite;
 
-      await service.saveNewBite(mockedBite);
+      await service.saveNewBite(mockedBite, jest.fn);
 
       expect(createBite).toHaveBeenCalledWith(
         mockedBiteWithoutImage,
         mockedUser,
       );
-      expect(uploadImageAndUpdateBite).toHaveBeenCalledWith(
-        true,
-        mockedBase64Image,
-        { id: mockedBiteId },
-      );
-      expect(loadBiteById).toHaveBeenCalledWith({ id: mockedBiteId });
+      expect(uploadImageAndUpdateBite).toHaveBeenCalledWith({
+        isWeb: true,
+        imageBase64: mockedBase64Image,
+        biteId: mockedBiteId,
+        callbackFn: expect.any(Function),
+      });
+      expect(loadBiteById).toHaveBeenCalledWith(mockedBiteId);
     });
 
     describe('given an error', () => {
@@ -136,7 +137,7 @@ describe(BiteApiService.name, () => {
         );
 
         try {
-          await service.saveNewBite({} as Bite);
+          await service.saveNewBite({} as Bite, jest.fn);
         } catch (error) {
           // Expected to throw
         }

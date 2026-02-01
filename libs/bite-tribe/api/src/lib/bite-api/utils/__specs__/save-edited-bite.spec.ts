@@ -272,19 +272,19 @@ describe('saveEditedBite', () => {
         expect(getDocumentSpy).toHaveBeenCalledWith({
           reference: 'bites/bite4',
         });
-        expect(uploadImageSpy).toHaveBeenCalledWith(
-          true,
-          'data:image/jpeg;base64,newImage456',
-          'bite4',
-          {
+        expect(uploadImageSpy).toHaveBeenCalledWith({
+          isWeb: true,
+          imageBase64: 'data:image/jpeg;base64,newImage456',
+          biteId: 'bite4',
+          biteWithoutImage: {
             id: 'bite4',
             name: 'Pasta',
             place: 'Restaurant D',
             price: 18.0,
             position: { latitude: 40.7131, longitude: -74.009 },
           },
-          true,
-        );
+          clearBase64Image: true,
+        });
         expect(replaceImageSpy).not.toHaveBeenCalled();
       });
 
@@ -294,19 +294,19 @@ describe('saveEditedBite', () => {
         expect(getDocumentSpy).toHaveBeenCalledWith({
           reference: 'bites/bite4',
         });
-        expect(uploadImageSpy).toHaveBeenCalledWith(
-          false,
-          'data:image/jpeg;base64,newImage456',
-          'bite4',
-          {
+        expect(uploadImageSpy).toHaveBeenCalledWith({
+          isWeb: false,
+          imageBase64: 'data:image/jpeg;base64,newImage456',
+          biteId: 'bite4',
+          biteWithoutImage: {
             id: 'bite4',
             name: 'Pasta',
             place: 'Restaurant D',
             price: 18.0,
             position: { latitude: 40.7131, longitude: -74.009 },
           },
-          true,
-        );
+          clearBase64Image: true,
+        });
         expect(replaceImageSpy).not.toHaveBeenCalled();
       });
     });

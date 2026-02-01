@@ -18,11 +18,11 @@ describe(uploadBase64ToFirebaseStorage.name, () => {
     });
 
     it('should upload image using web method', async () => {
-      await uploadBase64ToFirebaseStorage(
-        true,
-        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
-        'bite123',
-      );
+      await uploadBase64ToFirebaseStorage({
+        isWeb: true,
+        base64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+        docId: 'bite123',
+      });
 
       expect(uploadFileSpy).toHaveBeenCalledWith(
         {
@@ -46,11 +46,11 @@ describe(uploadBase64ToFirebaseStorage.name, () => {
 
       it('should throw an error', async () => {
         await expect(
-          uploadBase64ToFirebaseStorage(
-            true,
-            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
-            'bite123',
-          ),
+          uploadBase64ToFirebaseStorage({
+            isWeb: true,
+            base64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            docId: 'bite123',
+          }),
         ).rejects.toThrow('Upload failed');
       });
     });
@@ -65,11 +65,11 @@ describe(uploadBase64ToFirebaseStorage.name, () => {
       it('should not resolve or reject the upload promise', async () => {
         // Since the upload promise neither resolves nor rejects,
         // we can test this by setting a timeout and expecting the promise to still be pending.
-        const uploadPromise = uploadBase64ToFirebaseStorage(
-          true,
-          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
-          'bite123',
-        );
+        const uploadPromise = uploadBase64ToFirebaseStorage({
+          isWeb: true,
+          base64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+          docId: 'bite123',
+        });
 
         const timeoutPromise = new Promise((resolve) =>
           setTimeout(resolve, 100),
@@ -96,11 +96,11 @@ describe(uploadBase64ToFirebaseStorage.name, () => {
     });
 
     it('should upload image using native method', async () => {
-      await uploadBase64ToFirebaseStorage(
-        false,
-        'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD',
-        'bite456',
-      );
+      await uploadBase64ToFirebaseStorage({
+        isWeb: false,
+        base64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD',
+        docId: 'bite456',
+      });
 
       expect(uploadFileSpy).toHaveBeenCalledWith(
         {

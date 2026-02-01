@@ -71,7 +71,6 @@ import { TagsInputComponent } from 'common/ui/tags';
     StarRatingComponent,
     TagsInputComponent,
     RoundDistancePipe,
-    IonSpinner,
   ],
 })
 export class DetailsPage {
@@ -81,7 +80,6 @@ export class DetailsPage {
   userId = input<string>();
   isAuthenticated = input(false);
   biteCreator = input<PublicUser>();
-  isLoading = input(false);
 
   selectList = output<Bucketlist>();
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();

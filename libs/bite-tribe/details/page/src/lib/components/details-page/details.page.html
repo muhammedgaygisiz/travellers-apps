@@ -8,18 +8,12 @@
   (logoutClick)="logoutClick.emit()"
 >
   <ion-content>
-    @if (biteData?.imagePath) {
     <img
       [src]="biteData?.imagePath"
       class="dish-image"
       loading="lazy"
       alt="Dish Image"
     />
-    } @else if (isLoading()) {
-    <div class="spinner-container">
-      <ion-spinner color="primary" name="dots" />
-    </div>
-    }
 
     <div class="ion-padding">
       @if (biteCreatorData && biteCreatorData.public) {

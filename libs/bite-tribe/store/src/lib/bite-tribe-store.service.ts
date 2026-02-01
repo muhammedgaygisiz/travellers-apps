@@ -56,6 +56,8 @@ import {
   totalNumberBites,
   totalNumberUsers,
   userHasSubscriptionTierOne,
+  uploadingProgressForBiteImage,
+  biteIdWithUploadingImage,
 } from './app/selectors';
 import {
   bucketlistSorting,
@@ -125,6 +127,10 @@ export class BiteTribeStoreService implements StoreService {
   isReloadingHome$ = this.store.select(isReloadingHome);
   hasErrorLoadingGpsPosition$ = this.store.select(hasErrorLoadingGpsPosition);
   darkTheme$ = this.store.select(isDarkTheme);
+  uploadingProgressForBiteImage$ = this.store.select(
+    uploadingProgressForBiteImage,
+  );
+  biteIdWithUploadingImage$ = this.store.select(biteIdWithUploadingImage);
 
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);

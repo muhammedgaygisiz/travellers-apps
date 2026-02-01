@@ -13,6 +13,7 @@ import { BucketlistActions } from '../bucketlists/actions';
 import { PATH } from 'utils';
 import { userId } from '../router/selectors';
 import { fromAuth } from 'ta-firestore';
+import { CreateAndUploadBiteCallbackParams } from 'model';
 
 @Injectable()
 export class BiteEffects {
@@ -108,12 +109,37 @@ export class BiteEffects {
   saveNewBiteToFirestore$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BiteActions.saveNewBite),
-      switchMap(({ bite }) =>
-        from(this.api.saveNewBite(bite)).pipe(
+      switchMap(({ bite }) => {
+        let biteIdBeingCreated = '';
+        return from(
+          this.api.saveNewBite(
+            bite,
+            (p: CreateAndUploadBiteCallbackParams): void => {
+              if (p.createdBiteId) {
+                biteIdBeingCreated = p.createdBiteId;
+
+                this.store.dispatch(
+                  BiteActions.createdBiteAndStartingUploadingBiteImage({
+                    biteId: p.createdBiteId,
+                  }),
+                );
+              }
+
+              if (p.uploadParams) {
+                this.store.dispatch(
+                  BiteActions.uploadingProgressForBiteImage({
+                    progress: p.uploadParams,
+                    biteId: biteIdBeingCreated,
+                  }),
+                );
+              }
+            },
+          ),
+        ).pipe(
           map((bite) => BiteActions.savedBite({ bite })),
           catchError((err) => of(BiteActions.errorSavingBite({ bite }))),
-        ),
-      ),
+        );
+      }),
     );
   });
 

@@ -19,14 +19,14 @@ const mirrorUserProfileImage = async (
   const blob = await res.blob();
   const extension = avatarUrl.split('.').pop() || 'jpg';
   const contentType = blob.type || `image/${extension}`;
-  const path = await uploadBlobToFirebasestorage(
-    USERS_COLLECTION,
-    user.userId,
+  const path = await uploadBlobToFirebasestorage({
+    collection: USERS_COLLECTION,
+    docId: user.userId,
     extension,
     blob,
     contentType,
     isWeb,
-  );
+  });
 
   const getDownloadUrlResult = await FirebaseStorage.getDownloadUrl({ path });
   const photoUrl = getDownloadUrlResult.downloadUrl;

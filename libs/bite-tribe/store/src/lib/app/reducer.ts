@@ -143,4 +143,34 @@ export const reducer = createReducer<AppSlice>(
       followers: false,
     },
   })),
+  on(
+    BiteActions.createdBiteAndStartingUploadingBiteImage,
+    (state, { biteId }) => ({
+      ...state,
+      loading: {
+        ...state.loading,
+        uploadingImageForBite: biteId,
+      },
+    }),
+  ),
+  on(
+    BiteActions.uploadingProgressForBiteImage,
+    (state, { progress, biteId }) => {
+      return {
+        ...state,
+        uploadingProgressForBiteImage: {
+          [biteId]: progress,
+        },
+      };
+    },
+  ),
+  on(BiteActions.savedBite, (state) => {
+    return {
+      ...state,
+      loading: {
+        ...state.loading,
+        uploadingImageForBite: undefined,
+      },
+    };
+  }),
 );

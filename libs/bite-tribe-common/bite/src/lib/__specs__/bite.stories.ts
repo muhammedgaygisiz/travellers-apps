@@ -20,7 +20,6 @@ const template = `
     <bt-bite
       [bite]="bite"
       [showEditButton]="showEditButton"
-      [isLoading]="isLoading"
     />
   </div>
 `;
@@ -38,21 +37,6 @@ export const Bite: Story = {
           likeType: 'thumbup',
         },
       ],
-    } as any,
-  },
-  render: (args) => ({
-    props: { ...args },
-    template,
-  }),
-};
-
-export const Loading: Story = {
-  args: {
-    ...Bite.args,
-    isLoading: true,
-    bite: {
-      ...Bite.args?.bite,
-      imagePath: null,
     } as any,
   },
   render: (args) => ({

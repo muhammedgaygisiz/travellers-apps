@@ -14,6 +14,12 @@ export class BiteDataAccessService {
   tagSuggestionsForEditingBite = toSignal(
     this.storeService.tagSuggestionsForEditingBite$,
   );
+  uploadingProgressForBiteImage = toSignal(
+    this.storeService.uploadingProgressForBiteImage$,
+  );
+  biteIdWithUploadingImage = toSignal(
+    this.storeService.biteIdWithUploadingImage$,
+  );
 
   async submitBite(bite: any): Promise<void> {
     this.storeService.save(bite, 'bite');

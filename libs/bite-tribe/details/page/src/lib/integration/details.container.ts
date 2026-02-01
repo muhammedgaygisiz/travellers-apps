@@ -2,9 +2,12 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DetailsPage } from '../components/details-page/details.page';
 import { DetailsService } from './details.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { IonLoading } from '@ionic/angular/standalone';
 
 @Component({
   template: `
+    <ion-loading />
+
     <details-page
       class="ion-page"
       [bite]="service.bite()"
@@ -25,7 +28,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DetailsPage],
+  imports: [DetailsPage, IonLoading],
 })
 export class DetailsContainer {
   service = inject(DetailsService);

@@ -14,12 +14,18 @@ export const currency = createSelector(slice, (slice) => {
   return slice?.settings?.currency;
 });
 
-export const isBitesLoading = createSelector(slice, (slice) => {
-  return slice?.loading?.home;
+const loading = createSelector(slice, (slice) => slice?.loading || {});
+
+export const isBitesLoading = createSelector(loading, (loading) => {
+  return loading?.home;
 });
 
-export const isFollowersLoading = createSelector(slice, (slice) => {
-  return slice?.loading?.followers || false;
+export const isFollowersLoading = createSelector(loading, (loading) => {
+  return loading?.followers || false;
+});
+
+export const biteIdWithUploadingImage = createSelector(loading, (loading) => {
+  return loading?.uploadingImageForBite || '';
 });
 
 export const publicUser = createSelector(slice, (slice) => slice?.profile);
@@ -68,4 +74,9 @@ export const totalNumberUsers = createSelector(
 export const profileMeatadata = createSelector(
   slice,
   (state) => state?.profileMetadata,
+);
+
+export const uploadingProgressForBiteImage = createSelector(
+  slice,
+  (state) => state?.uploadingProgressForBiteImage || {},
 );

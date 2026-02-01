@@ -1,4 +1,4 @@
-import type { Geopoint, PublicUser, Settings } from 'model';
+import type { Geopoint, PublicUser, Settings, UploadParams } from 'model';
 
 export type AppSlice = {
   position?: Geopoint;
@@ -6,9 +6,13 @@ export type AppSlice = {
   loading?: {
     home?: boolean;
     followers?: boolean;
+    uploadingImageForBite?: string;
   };
   reloading?: {
     home?: boolean;
+  };
+  uploadingProgressForBiteImage?: {
+    [biteId: string]: UploadParams;
   };
   profile?: PublicUser;
   profileMetadata: {

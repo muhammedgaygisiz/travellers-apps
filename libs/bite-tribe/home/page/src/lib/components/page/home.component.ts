@@ -41,8 +41,8 @@ const PAGE_SIZE = 50;
 
 @Component({
   selector: 'bt-home',
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss',
+  templateUrl: 'home.component.html',
+  styleUrl: 'home.component.scss',
   imports: [
     PageComponent,
     IonContent,

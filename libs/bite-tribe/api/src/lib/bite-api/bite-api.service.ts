@@ -1,7 +1,7 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { Bite, Bucketlist } from 'model';
+import { Bite, Bucketlist, CreateAndUploadBiteCallbackParams } from 'model';
 import { Platform } from '@ionic/angular';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
 import { BITE_COLLECTION } from '../utils/constants';
@@ -43,14 +43,24 @@ export class BiteApiService {
     return loadBitesByUser(userUid);
   }
 
-  public async saveNewBite(bite: Bite): Promise<Bite> {
+  public async saveNewBite(
+    bite: Bite,
+    callbackFn: (p: CreateAndUploadBiteCallbackParams) => void,
+  ): Promise<Bite> {
     const user = this.authService.getUser();
     const { image, ...biteDocWithoutImage } = bite;
 
     try {
       const biteId = await createBite(biteDocWithoutImage, user);
 
-      await uploadImageAndUpdateBite(this.isWeb(), image, biteId);
+      callbackFn({ createdBiteId: biteId });
+
+      await uploadImageAndUpdateBite({
+        isWeb: this.isWeb(),
+        imageBase64: image,
+        biteId,
+        callbackFn,
+      });
 
       return await loadBiteById(biteId);
     } catch (error) {

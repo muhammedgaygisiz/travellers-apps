@@ -14,7 +14,6 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
-  IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
 import { Bite, Like } from 'model';
@@ -44,7 +43,6 @@ const CANCEL = 'cancel';
     StarRatingComponent,
     IonAlert,
     DistanceComponent,
-    IonSpinner,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -53,7 +51,6 @@ export class BiteComponent {
   userId = input<string>();
   showEditButton = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
-  isLoading = input(false, { transform: booleanAttribute });
 
   biteClick = output<Bite>();
   restaurantClick = output<Bite>();

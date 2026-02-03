@@ -18,7 +18,7 @@ export const uploadImageAndUpdateBite = async ({
   biteWithoutImage,
   clearBase64Image = false,
   callbackFn,
-}: Params): Promise<void> => {
+}: Params): Promise<Bite> => {
   const imagePath = await uploadBase64ToFirebaseStorage({
     isWeb,
     base64: imageBase64,
@@ -26,7 +26,7 @@ export const uploadImageAndUpdateBite = async ({
     callbackFn,
   });
 
-  await updateBiteWithImagePathFromFirestorage(
+  return await updateBiteWithImagePathFromFirestorage(
     imagePath,
     biteWithoutImage,
     clearBase64Image,

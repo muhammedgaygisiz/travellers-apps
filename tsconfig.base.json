@@ -88,9 +88,6 @@
       "bite-tribe/store": ["libs/bite-tribe/store/src/index.ts"],
       "chart": ["libs/common/ui/chart/src/index.ts"],
       "common/geoapify": ["libs/common/geoapify/src/index.ts"],
-      "common/networkstatus": [
-        "libs/common/networkstatus/feature/src/index.ts"
-      ],
       "common/password-validator": [
         "libs/common/ui/password-validator/src/index.ts"
       ],

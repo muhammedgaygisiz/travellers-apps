@@ -4,6 +4,7 @@ import type { Like } from './like';
 export interface Bite {
   userId?: string;
   id: string;
+
   name: string;
   image: string;
   imagePath?: string;

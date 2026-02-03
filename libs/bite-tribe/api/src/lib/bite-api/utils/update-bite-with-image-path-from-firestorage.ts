@@ -14,7 +14,7 @@ export const updateBiteWithImagePathFromFirestorage = async (
   const data = {
     ...(biteWithoutImage || {}),
     imagePath: downloadUrl,
-  } as any;
+  } as Bite;
 
   if (clearBase64Image) {
     data.image = '';
@@ -25,5 +25,5 @@ export const updateBiteWithImagePathFromFirestorage = async (
     data,
   });
 
-  return data as Bite;
+  return data;
 };

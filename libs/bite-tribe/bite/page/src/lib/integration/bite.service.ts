@@ -2,7 +2,7 @@ import { Location } from '@angular/common';
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { NavController } from '@ionic/angular';
-import { LoadingController } from '@ionic/angular/standalone';
+import { AlertController, LoadingController } from '@ionic/angular/standalone';
 
 @Injectable({ providedIn: 'root' })
 export class BiteService {
@@ -10,6 +10,7 @@ export class BiteService {
   private readonly navController = inject(NavController);
   private readonly location = inject(Location);
   private readonly loadingController = inject(LoadingController);
+  private readonly alertController = inject(AlertController);
 
   image = signal<string>('');
 
@@ -36,7 +37,7 @@ export class BiteService {
     await this.loading.present();
   }
 
-  navigationEffect = effect(() => {
+  navigationEffect = effect(async () => {
     const biteIdUploadingImage = this.biteIdWithUploadingImage();
 
     if (!biteIdUploadingImage) {
@@ -58,6 +59,31 @@ export class BiteService {
         this.loading?.dismiss();
         this.navController.navigateBack(['home']);
       }, 3000);
+      return;
+    }
+
+    if (uploadParams.err) {
+      const uploadErrorAlert = await this.alertController.create({
+        header: 'Image Upload Failed',
+        message:
+          'There was an error uploading the image. Please take a screenshot of ' +
+          'this message and send it to the Discord Channel.' +
+          '' +
+          'Error:' +
+          '' +
+          `${uploadParams.err.message || uploadParams.err}`,
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'OK',
+            handler: (): void => {
+              this.loading?.dismiss();
+            },
+          },
+        ],
+      });
+
+      await uploadErrorAlert.present();
       return;
     }
   });

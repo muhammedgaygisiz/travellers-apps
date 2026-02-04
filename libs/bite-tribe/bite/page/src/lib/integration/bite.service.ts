@@ -25,26 +25,6 @@ export class BiteService {
     this.dataAccess.submitBite(biteData);
   }
 
-  isLoading = computed(() => {
-    const biteIdUploadingImage = this.biteIdWithUploadingImage();
-
-    if (!biteIdUploadingImage) {
-      return false;
-    }
-
-    const uploadProgress = this.uploadingProgressForBiteImage();
-    if (!uploadProgress) {
-      return false;
-    }
-
-    const uploadParams = uploadProgress[biteIdUploadingImage];
-    if (uploadParams.evt && !uploadParams.evt.completed) {
-      return true;
-    }
-
-    return false;
-  });
-
   submitEditedBite(editedBite: any): void {
     this.dataAccess.submitBite(editedBite);
 

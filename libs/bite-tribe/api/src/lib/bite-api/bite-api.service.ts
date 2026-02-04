@@ -51,7 +51,7 @@ export class BiteApiService {
     const { image, ...biteDocWithoutImage } = bite;
 
     try {
-      const biteId = await createBite(biteDocWithoutImage, user);
+      const biteId = createBite(biteDocWithoutImage, user);
 
       callbackFn({ createdBiteId: biteId });
 

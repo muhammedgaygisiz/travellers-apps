@@ -61,12 +61,15 @@ export const uploadBlobToFirebasestorage = async ({
   };
 
   if (isWeb) {
-    return await uploadToFirebase(fileUploadOptions, callbackFn);
+    uploadToFirebase(fileUploadOptions, callbackFn);
+
+    return imagePath;
   }
 
   const fileName = `${imageId}.${extension}`;
   const writeFileResult = await writeBlobToFileSystem(blob, fileName);
   fileUploadOptions.uri = writeFileResult.uri;
 
-  return await uploadToFirebase(fileUploadOptions, callbackFn);
+  uploadToFirebase(fileUploadOptions, callbackFn);
+  return imagePath;
 };

@@ -365,4 +365,72 @@ describe('App Reducer', () => {
       });
     });
   });
+
+  describe('createdBiteAndStartUploadingBiteImage', () => {
+    it('should set uploadingImageForBite to the bite ID', () => {
+      const INITIAL_STATE = {
+        loading: {},
+      } as AppSlice;
+      const NEW_STATE = {
+        loading: {
+          uploadingImageForBite: 'bite123',
+        },
+      } as AppSlice;
+
+      const action = BiteActions.createdBiteAndStartUploadingBiteImage({
+        biteId: 'bite123',
+      });
+
+      expect(reducer(INITIAL_STATE, action)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('uploadingProgressForBiteImage', () => {
+    it('should set uploadingProgressForBiteImage with the progress data', () => {
+      const INITIAL_STATE = {} as AppSlice;
+      const progressData = {
+        evt: { completed: false, bytesTransferred: 100, totalBytes: 1000 },
+        err: null,
+      };
+      const NEW_STATE = {
+        uploadingProgressForBiteImage: {
+          bite123: progressData,
+        },
+      } as AppSlice;
+
+      const action = BiteActions.uploadingProgressForBiteImage({
+        biteId: 'bite123',
+        progress: progressData,
+      });
+
+      expect(reducer(INITIAL_STATE, action)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
+  describe('savedBite', () => {
+    it('should clear uploadingImageForBite', () => {
+      const INITIAL_STATE = {
+        loading: {
+          uploadingImageForBite: 'bite123',
+        },
+      } as AppSlice;
+      const NEW_STATE = {
+        loading: {
+          uploadingImageForBite: undefined,
+        },
+      } as AppSlice;
+
+      const action = BiteActions.savedBite({
+        bite: { id: 'bite123' } as any,
+      });
+
+      expect(reducer(INITIAL_STATE, action)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
 });

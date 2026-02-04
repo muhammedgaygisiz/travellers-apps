@@ -119,7 +119,7 @@ export class BiteEffects {
                 biteIdBeingCreated = p.createdBiteId;
 
                 this.store.dispatch(
-                  BiteActions.createdBiteAndStartingUploadingBiteImage({
+                  BiteActions.createdBiteAndStartUploadingBiteImage({
                     biteId: p.createdBiteId,
                   }),
                 );

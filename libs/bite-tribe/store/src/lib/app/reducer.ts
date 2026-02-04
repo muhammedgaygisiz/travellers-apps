@@ -144,7 +144,7 @@ export const reducer = createReducer<AppSlice>(
     },
   })),
   on(
-    BiteActions.createdBiteAndStartingUploadingBiteImage,
+    BiteActions.createdBiteAndStartUploadingBiteImage,
     (state, { biteId }) => ({
       ...state,
       loading: {

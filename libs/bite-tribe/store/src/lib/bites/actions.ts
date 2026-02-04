@@ -19,7 +19,7 @@ export const BiteActions = createActionGroup({
     'No public creator for bite': emptyProps(),
     'No bites for bite creator profile': emptyProps(),
     'Loaded Latest from API': props<{ bites: Bite[] }>(),
-    'Created Bite and starting uploading bite image': props<{
+    'Created Bite and start uploading bite image': props<{
       biteId: string;
     }>(),
     'Uploading Progress for bite image': props<{

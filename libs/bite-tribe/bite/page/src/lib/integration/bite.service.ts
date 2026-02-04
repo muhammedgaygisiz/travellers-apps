@@ -19,7 +19,7 @@ export class BiteService {
   uploadingProgressForBiteImage = this.dataAccess.uploadingProgressForBiteImage;
   biteIdWithUploadingImage = this.dataAccess.biteIdWithUploadingImage;
 
-  async submitNewBite(newBite: any): Promise<void> {
+  submitNewBite(newBite: any): void {
     const { id, ...biteData } = newBite;
 
     this.dataAccess.submitBite(biteData);

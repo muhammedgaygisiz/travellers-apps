@@ -31,8 +31,8 @@ import { AlertController, LoadingController } from '@ionic/angular/standalone';
 export class BiteContainer {
   service = inject(BiteService);
 
-  private readonly navController = inject(NavController);
-  private readonly alertController = inject(AlertController);
+  readonly navController = inject(NavController);
+  readonly alertController = inject(AlertController);
   private readonly loadingController = inject(LoadingController);
   loading: HTMLIonLoadingElement | null = null;
 

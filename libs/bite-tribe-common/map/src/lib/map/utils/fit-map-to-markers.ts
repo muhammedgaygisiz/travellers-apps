@@ -1,15 +1,15 @@
-import * as L from 'leaflet';
+import { L } from './leaflet-markercluster';
 import { Geopoint } from 'model';
 
 export const fitMapToMarkers = (
   markers: L.Marker[],
   positions: Geopoint[] | null | undefined,
-  map: L.Map
+  map: L.Map,
 ): void => {
   if (markers.length > 1) {
     if (positions) {
       const bounds = L.latLngBounds(
-        positions.map((p) => [p.latitude, p.longitude] as L.LatLngTuple)
+        positions.map((p) => [p.latitude, p.longitude] as L.LatLngTuple),
       );
 
       // Handle case where markers are on opposite sides of the world

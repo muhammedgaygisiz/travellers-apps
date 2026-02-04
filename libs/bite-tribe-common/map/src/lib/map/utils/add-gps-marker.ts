@@ -1,6 +1,6 @@
-import * as L from 'leaflet';
 import { Geopoint } from 'model';
 import { geopointToLatLng } from './geopoint-to-lat-lng';
+import { L } from './leaflet-markercluster';
 
 const GPS_MARKER_PANE = 'location-marker';
 const GPS_MARKER_RADIUS = 20;
@@ -14,7 +14,7 @@ const GPS_MARKER_STYLE = {
 const resizeCircle = (
   zoom: { start: number; end: number },
   map: L.Map,
-  circle: L.Circle
+  circle: L.Circle,
 ): void => {
   zoom.end = map.getZoom();
   const diff = zoom.start - zoom.end;

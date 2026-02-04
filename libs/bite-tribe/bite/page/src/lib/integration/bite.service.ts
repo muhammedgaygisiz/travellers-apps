@@ -1,16 +1,12 @@
 import { Location } from '@angular/common';
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
-import { NavController } from '@ionic/angular';
-import { AlertController, LoadingController } from '@ionic/angular/standalone';
+import { LoadingController } from '@ionic/angular/standalone';
 
 @Injectable({ providedIn: 'root' })
 export class BiteService {
   public readonly dataAccess = inject(BiteDataAccessService);
-  private readonly navController = inject(NavController);
   private readonly location = inject(Location);
-  private readonly loadingController = inject(LoadingController);
-  private readonly alertController = inject(AlertController);
 
   image = signal<string>('');
 
@@ -23,70 +19,11 @@ export class BiteService {
   uploadingProgressForBiteImage = this.dataAccess.uploadingProgressForBiteImage;
   biteIdWithUploadingImage = this.dataAccess.biteIdWithUploadingImage;
 
-  loading: HTMLIonLoadingElement | null = null;
-
   async submitNewBite(newBite: any): Promise<void> {
     const { id, ...biteData } = newBite;
 
     this.dataAccess.submitBite(biteData);
-
-    this.loading = await this.loadingController.create({
-      duration: 3000,
-    });
-
-    await this.loading.present();
   }
-
-  navigationEffect = effect(async () => {
-    const biteIdUploadingImage = this.biteIdWithUploadingImage();
-
-    if (!biteIdUploadingImage) {
-      return;
-    }
-
-    const uploadProgress = this.uploadingProgressForBiteImage();
-    if (!uploadProgress) {
-      return;
-    }
-
-    const uploadParams = uploadProgress[biteIdUploadingImage];
-    if (!uploadParams) {
-      return;
-    }
-
-    if (uploadParams.evt?.completed) {
-      setTimeout(() => {
-        this.loading?.dismiss();
-        this.navController.navigateBack(['home']);
-      }, 3000);
-      return;
-    }
-
-    if (uploadParams.err) {
-      const uploadErrorAlert = await this.alertController.create({
-        header: 'Image Upload Failed',
-        message:
-          'There was an error uploading the image. Please take a screenshot of ' +
-          'this message and send it to the Discord Channel.' +
-          '' +
-          'Error:' +
-          '' +
-          `${uploadParams.err.message || uploadParams.err}`,
-        backdropDismiss: false,
-        buttons: [
-          {
-            text: 'OK',
-            handler: (): void => {
-              this.loading?.dismiss();
-            },
-          },
-        ],
-      });
-
-      await uploadErrorAlert.present();
-      return;
-    }
-  });
 
   isLoading = computed(() => {
     const biteIdUploadingImage = this.biteIdWithUploadingImage();

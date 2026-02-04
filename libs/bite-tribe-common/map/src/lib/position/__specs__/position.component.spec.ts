@@ -2,6 +2,18 @@ import { PositionComponent } from '../position.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 
+jest.mock('../../map/utils/leaflet-markercluster', () => ({
+  L: {
+    icon: jest.fn(),
+    Marker: {
+      prototype: {
+        options: {},
+      },
+    },
+    markerClusterGroup: jest.fn(),
+  },
+}));
+
 describe(PositionComponent.name, () => {
   let component: PositionComponent;
   let fixture: ComponentFixture<PositionComponent>;

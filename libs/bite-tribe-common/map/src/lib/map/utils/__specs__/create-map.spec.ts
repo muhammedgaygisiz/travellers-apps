@@ -1,4 +1,13 @@
 import { createMap } from '../create-map';
+jest.mock('../leaflet-markercluster', () => ({
+  L: {
+    map: jest.fn((_, options) => ({
+      options: {
+        ...options,
+      },
+    })),
+  },
+}));
 
 describe('createMap', () => {
   it('should create a Leaflet map instance', () => {

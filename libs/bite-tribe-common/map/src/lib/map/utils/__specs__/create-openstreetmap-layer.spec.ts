@@ -1,5 +1,16 @@
 import { createOpenstreetmapLayer } from '../create-openstreetmap-layer';
-import * as L from 'leaflet';
+
+jest.mock('../leaflet-markercluster', () => ({
+  L: {
+    tileLayer: jest.fn(() => ({
+      options: {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors',
+        noWrap: true,
+      },
+    })),
+  },
+}));
 
 describe('createOpenstreetmapLayer', () => {
   it('should create an OpenStreetMap tile layer with correct properties', () => {

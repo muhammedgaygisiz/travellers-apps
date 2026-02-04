@@ -183,7 +183,7 @@ export class BiteTribeStoreService implements StoreService {
     throw new Error('Method not implemented.');
   }
 
-  save(entity: Bite, docType: string): void {
+  save(entity: Bite | Restaurant, docType: string): void {
     this.store.dispatch(getActionByDocType(docType, entity));
   }
 

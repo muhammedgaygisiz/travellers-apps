@@ -24,7 +24,6 @@ import {
   IonList,
   IonListHeader,
   IonNote,
-  IonSpinner,
   IonText,
   IonTextarea,
   PopoverController,

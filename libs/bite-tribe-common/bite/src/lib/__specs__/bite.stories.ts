@@ -45,6 +45,20 @@ export const Bite: Story = {
   }),
 };
 
+export const Loading: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...Bite.args?.bite,
+      imagePath: null,
+    } as any,
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
 export const EditMode: Story = {
   args: {
     ...Bite.args,

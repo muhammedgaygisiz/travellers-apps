@@ -53,6 +53,23 @@ describe('BiteContainer', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('ionViewDidEnter', () => {
+    it('should call FirebaseAnalytics.setCurrentScreen', () => {
+      const setCurrentScreenSpy = jest
+        .spyOn(
+          require('@capacitor-firebase/analytics').FirebaseAnalytics,
+          'setCurrentScreen',
+        )
+        .mockResolvedValue(undefined);
+
+      component.ionViewDidEnter();
+
+      expect(setCurrentScreenSpy).toHaveBeenCalledWith({
+        screenName: 'New Bite',
+      });
+    });
+  });
+
   describe('onPlaceChange', () => {
     let setEditingBiteSpy: jest.SpyInstance;
 
@@ -166,7 +183,12 @@ describe('BiteContainer', () => {
         describe('and err is defined', () => {
           it('should present an alert', async () => {
             const alertController = component.alertController;
-            const createAlertSpy = jest.spyOn(alertController, 'create');
+            const mockAlert = {
+              present: jest.fn().mockResolvedValue(undefined),
+            };
+            const createAlertSpy = jest
+              .spyOn(alertController, 'create')
+              .mockResolvedValue(mockAlert as any);
 
             (biteServiceMock.biteIdWithUploadingImage as any) =
               signal('bite123');
@@ -174,6 +196,9 @@ describe('BiteContainer', () => {
               bite123: { err: new Error('Upload failed') },
             });
             compRef.changeDetectorRef.detectChanges();
+
+            // Wait for effect to run
+            await new Promise((resolve) => setTimeout(resolve, 100));
 
             expect(createAlertSpy).toHaveBeenCalledWith(
               expect.objectContaining({
@@ -185,6 +210,44 @@ describe('BiteContainer', () => {
                 buttons: expect.any(Array),
               }),
             );
+
+            expect(mockAlert.present).toHaveBeenCalled();
+          });
+
+          it('should dismiss loading when OK button is clicked', async () => {
+            const alertController = component.alertController;
+            let okButtonHandler: () => void = () => {};
+            const mockAlert = {
+              present: jest.fn().mockResolvedValue(undefined),
+            };
+            const createAlertSpy = jest
+              .spyOn(alertController, 'create')
+              .mockImplementation(async (opts) => {
+                okButtonHandler = opts.buttons![0].handler as () => void;
+                return mockAlert as any;
+              });
+
+            const mockLoading = {
+              dismiss: jest.fn().mockResolvedValue(undefined),
+            };
+            component.loading = mockLoading as any;
+
+            (biteServiceMock.biteIdWithUploadingImage as any) =
+              signal('bite123');
+            (biteServiceMock.uploadingProgressForBiteImage as any) = signal({
+              bite123: { err: new Error('Upload failed') },
+            });
+            compRef.changeDetectorRef.detectChanges();
+
+            // Wait for effect to run
+            await new Promise((resolve) => setTimeout(resolve, 100));
+
+            expect(createAlertSpy).toHaveBeenCalled();
+
+            // Call the OK button handler
+            okButtonHandler();
+
+            expect(mockLoading.dismiss).toHaveBeenCalled();
           });
         });
       });

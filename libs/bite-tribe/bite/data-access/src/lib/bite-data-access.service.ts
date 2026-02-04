@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Bite } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
@@ -21,7 +22,7 @@ export class BiteDataAccessService {
     this.storeService.biteIdWithUploadingImage$,
   );
 
-  async submitBite(bite: any): Promise<void> {
+  async submitBite(bite: Bite): Promise<void> {
     this.storeService.save(bite, 'bite');
   }
 

@@ -3,13 +3,13 @@ import {
   Component,
   effect,
   inject,
-  signal,
 } from '@angular/core';
 import { BiteService } from './bite.service';
 import { BitePage } from '../components/page/bite.page';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { NavController } from '@ionic/angular';
 import { AlertController, LoadingController } from '@ionic/angular/standalone';
+import { Bite } from 'model';
 
 @Component({
   selector: 'bite-container',
@@ -48,7 +48,7 @@ export class BiteContainer {
     this.service.setEditingBite(editingBiteWithCurrentPlace);
   }
 
-  async submitNewBite(newBite: any): Promise<void> {
+  async submitNewBite(newBite: Bite): Promise<void> {
     this.service.submitNewBite(newBite);
 
     this.loading = await this.loadingController.create({
@@ -76,9 +76,10 @@ export class BiteContainer {
     }
 
     if (uploadParams.evt?.completed) {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         this.loading?.dismiss();
         this.navController.navigateBack(['home']);
+        clearTimeout(timeout);
       }, 3000);
       return;
     }

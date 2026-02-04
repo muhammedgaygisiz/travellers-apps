@@ -79,7 +79,7 @@ export class BitePage {
 
   fallbackPosition = linkedSignal(() => this.position());
 
-  submitBite = output<typeof this.biteFormGroup.value>();
+  submitBite = output<Bite>();
 
   placeChange = output<string>();
 
@@ -261,7 +261,7 @@ export class BitePage {
 
       newBite.price = getNormalizedPrice(newBite.price);
 
-      this.submitBite.emit(newBite);
+      this.submitBite.emit(newBite as unknown as Bite);
     }
   }
 

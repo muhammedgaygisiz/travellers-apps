@@ -37,6 +37,7 @@ describe('BiteContainer', () => {
             setEditingBite: (): jest.Mock => jest.fn(),
             nearbyRestaurants: jest.fn(),
             tagSuggestionsForEditingBite: jest.fn(),
+            biteIdWithUploadingImage: jest.fn(),
           },
         },
       ],
@@ -69,6 +70,27 @@ describe('BiteContainer', () => {
         id: '123',
         place: testPlace,
       });
+    });
+  });
+
+  describe('submitNewBite', () => {
+    let submitNewBiteSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      submitNewBiteSpy = jest.spyOn(biteServiceMock, 'submitNewBite');
+    });
+
+    it('should call submitNewBite on the service', async () => {
+      const newBite = { id: '456', place: 'New Place' };
+      await component.submitNewBite(newBite as any);
+
+      expect(submitNewBiteSpy).toHaveBeenCalledWith(newBite);
+    });
+
+    it('should start loading', async () => {
+      await component.submitNewBite({} as any);
+
+      expect(component.loading).not.toBeNull();
     });
   });
 

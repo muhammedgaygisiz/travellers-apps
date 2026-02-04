@@ -1,7 +1,7 @@
 import { Location } from '@angular/common';
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
-import { LoadingController } from '@ionic/angular/standalone';
+import { Bite } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class BiteService {
@@ -19,10 +19,10 @@ export class BiteService {
   uploadingProgressForBiteImage = this.dataAccess.uploadingProgressForBiteImage;
   biteIdWithUploadingImage = this.dataAccess.biteIdWithUploadingImage;
 
-  submitNewBite(newBite: any): void {
+  submitNewBite(newBite: Bite): void {
     const { id, ...biteData } = newBite;
 
-    this.dataAccess.submitBite(biteData);
+    this.dataAccess.submitBite(biteData as Bite);
   }
 
   submitEditedBite(editedBite: any): void {

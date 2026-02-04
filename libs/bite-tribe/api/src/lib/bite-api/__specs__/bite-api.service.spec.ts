@@ -131,9 +131,9 @@ describe(BiteApiService.name, () => {
 
     describe('given an error', () => {
       it('should handle the error', async () => {
-        (createBite as jest.Mock).mockRejectedValueOnce(
-          new Error('Failed to create bite'),
-        );
+        (createBite as jest.Mock).mockImplementation(() => {
+          throw new Error('error');
+        });
 
         try {
           await service.saveNewBite({} as Bite);

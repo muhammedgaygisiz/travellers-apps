@@ -15,22 +15,6 @@ const mockMap = {
   invalidateSize: jest.fn(),
 };
 
-jest.mock('leaflet', () => ({
-  map: jest.fn(),
-  tileLayer: jest.fn(),
-  marker: jest.fn(),
-  icon: jest.fn(),
-  latLngBounds: jest.fn(),
-  markerClusterGroup: (): any => ({
-    addLayers: (): any => ({ addTo: jest.fn() }),
-  }),
-  Marker: {
-    prototype: {
-      options: {},
-    },
-  },
-}));
-
 const zoomToGpsOrDefaultMock = jest.fn();
 jest.mock('../utils/zoom-to-gps-or-default', () => ({
   zoomToGpsOrDefault: (...args: any): void => zoomToGpsOrDefaultMock(...args),

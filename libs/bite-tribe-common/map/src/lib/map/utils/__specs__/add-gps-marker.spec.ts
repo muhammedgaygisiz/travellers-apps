@@ -6,6 +6,10 @@ jest.mock('../geopoint-to-lat-lng', () => ({
   geopointToLatLng: (...args: any): void => geopointToLatLngMock(...args),
 }));
 
+jest.mock('../leaflet-markercluster', () => ({
+  L: jest.requireActual('leaflet'),
+}));
+
 describe('addGpsMarker', () => {
   let mockMap: any;
   let mockCircle: any;
@@ -60,10 +64,10 @@ describe('addGpsMarker', () => {
       addGpsMarker(mockGeopoint, mockMap);
 
       zoomStartCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomstart'
+        (call: any) => call[0] === 'zoomstart',
       )[1];
       zoomEndCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomend'
+        (call: any) => call[0] === 'zoomend',
       )[1];
 
       mockMap.getZoom.mockReturnValue(9);
@@ -78,10 +82,10 @@ describe('addGpsMarker', () => {
       addGpsMarker(mockGeopoint, mockMap);
 
       zoomStartCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomstart'
+        (call: any) => call[0] === 'zoomstart',
       )[1];
       zoomEndCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomend'
+        (call: any) => call[0] === 'zoomend',
       )[1];
 
       mockMap.getZoom.mockReturnValue(9);
@@ -96,10 +100,10 @@ describe('addGpsMarker', () => {
       addGpsMarker(mockGeopoint, mockMap);
 
       zoomStartCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomstart'
+        (call: any) => call[0] === 'zoomstart',
       )[1];
       zoomEndCallback = mockMap.on.mock.calls.find(
-        (call: any) => call[0] === 'zoomend'
+        (call: any) => call[0] === 'zoomend',
       )[1];
 
       mockCircle.getRadius.mockReturnValue(20);

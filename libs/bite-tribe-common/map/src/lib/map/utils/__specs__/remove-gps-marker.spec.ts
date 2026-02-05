@@ -1,6 +1,8 @@
 import { removeGpsMarker } from '../remove-gps-marker';
 
-jest.mock('../leaflet-markercluster');
+jest.mock('../leaflet-markercluster', () => ({
+  L: jest.requireActual('leaflet'),
+}));
 
 describe('removeGpsMarker', () => {
   let map: L.Map;

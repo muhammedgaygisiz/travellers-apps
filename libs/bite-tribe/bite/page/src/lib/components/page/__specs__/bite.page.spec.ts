@@ -18,6 +18,8 @@ import { FormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
+jest.mock('leaflet');
+
 jest.mock('@capacitor/camera');
 jest.mock('image-compression', () => ({
   compressFile: jest.fn(),
@@ -235,7 +237,7 @@ describe('BitePage', () => {
       componentRef = fixture.componentRef;
       componentRef.setInput('bite', testBite);
 
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
 
       const expected: Bite = {
         id: '1',
@@ -275,7 +277,7 @@ describe('BitePage', () => {
       component = fixture.componentInstance;
       componentRef = fixture.componentRef;
       componentRef.setInput('position', testPosition);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
 
       expect(component.biteFormGroup.controls['position'].value).toEqual(
         testPosition,
@@ -299,7 +301,7 @@ describe('BitePage', () => {
       component = fixture.componentInstance;
       componentRef = fixture.componentRef;
       componentRef.setInput('bite', testBite);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
 
       expect(component.fallbackPosition()).toEqual(testPosition);
     });

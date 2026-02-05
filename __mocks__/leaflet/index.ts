@@ -10,6 +10,7 @@ export default {
     remove: jest.fn(),
     eachLayer: jest.fn(),
     options,
+    on: jest.fn(),
   })),
   tileLayer: jest.fn((_, options) => ({
     addTo: jest.fn(),

@@ -1,4 +1,4 @@
-import { L } from './leaflet-markercluster';
+import * as L from 'leaflet';
 import { getMarkerWithColor } from './get-marker-with-color';
 import { MarkerColor } from '../model/marker-color.enum';
 

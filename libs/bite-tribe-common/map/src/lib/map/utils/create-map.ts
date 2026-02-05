@@ -1,4 +1,4 @@
-import { L } from './leaflet-markercluster';
+import * as L from 'leaflet';
 import { ElementRef } from '@angular/core';
 
 const withNoWrapOptionToPreventWorldRepetition: L.MapOptions = {

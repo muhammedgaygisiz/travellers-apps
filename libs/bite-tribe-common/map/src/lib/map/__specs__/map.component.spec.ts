@@ -15,20 +15,18 @@ const mockMap = {
   invalidateSize: jest.fn(),
 };
 
-jest.mock('../utils/leaflet-markercluster', () => ({
-  L: {
-    map: jest.fn(),
-    tileLayer: jest.fn(),
-    marker: jest.fn(),
-    icon: jest.fn(),
-    latLngBounds: jest.fn(),
-    markerClusterGroup: (): any => ({
-      addLayers: (): any => ({ addTo: jest.fn() }),
-    }),
-    Marker: {
-      prototype: {
-        options: {},
-      },
+jest.mock('leaflet', () => ({
+  map: jest.fn(),
+  tileLayer: jest.fn(),
+  marker: jest.fn(),
+  icon: jest.fn(),
+  latLngBounds: jest.fn(),
+  markerClusterGroup: (): any => ({
+    addLayers: (): any => ({ addTo: jest.fn() }),
+  }),
+  Marker: {
+    prototype: {
+      options: {},
     },
   },
 }));

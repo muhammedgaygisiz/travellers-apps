@@ -1,4 +1,4 @@
-import { L } from './leaflet-markercluster';
+import * as L from 'leaflet';
 
 export const createOpenstreetmapLayer = (): L.Layer => {
   return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

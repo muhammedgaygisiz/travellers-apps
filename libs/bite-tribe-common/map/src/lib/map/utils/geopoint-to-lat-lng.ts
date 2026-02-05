@@ -1,4 +1,4 @@
-import { L } from './leaflet-markercluster';
+import * as L from 'leaflet';
 import { Geopoint } from 'model';
 
 export const geopointToLatLng = (geopoint: Geopoint): L.LatLng => {

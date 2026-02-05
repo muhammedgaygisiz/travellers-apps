@@ -1,4 +1,4 @@
-import { L } from './leaflet-markercluster';
+import * as L from 'leaflet';
 import { Geopoint } from 'model';
 import { DEFAULT_ZOOM } from '../model/default-zoom';
 

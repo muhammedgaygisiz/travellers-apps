@@ -1,4 +1,4 @@
-import { L } from './leaflet-markercluster';
+import * as L from 'leaflet';
 import { MarkerColor } from '../model/marker-color.enum';
 
 const getSize = (size: 'big' | 'small' = 'small'): number =>

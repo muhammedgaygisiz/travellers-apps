@@ -1,13 +1,6 @@
 import { zoomToGpsOrDefault } from '../zoom-to-gps-or-default';
+import * as L from 'leaflet';
 import { Geopoint } from 'model';
-
-jest.mock('../leaflet-markercluster', () => ({
-  L: {
-    latLngBounds: jest.fn(() => ({
-      getWest: jest.fn(),
-    })),
-  },
-}));
 
 const GEOPOINT_SAN_FRANCISCO: Geopoint = {
   latitude: 37.7749,

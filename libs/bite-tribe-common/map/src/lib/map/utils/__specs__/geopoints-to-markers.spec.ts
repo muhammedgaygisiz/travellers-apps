@@ -1,21 +1,7 @@
 import { geopointsToMarkers } from '../geopoints-to-markers';
+import * as L from 'leaflet';
 import { MarkerColor } from '../../model/marker-color.enum';
 import { Geopoint } from 'model';
-
-jest.mock('../leaflet-markercluster', () => ({
-  L: {
-    marker: jest.fn((coords: any[]) => ({
-      getLatLng: (): any => ({
-        lat: coords[0],
-        lng: coords[1],
-      }),
-      options: {
-        title: '1',
-      },
-    })),
-    markerClusterGroup: jest.fn(),
-  },
-}));
 
 const getMarkerWithColorMock = jest.fn();
 jest.mock('../get-marker-with-color', () => ({

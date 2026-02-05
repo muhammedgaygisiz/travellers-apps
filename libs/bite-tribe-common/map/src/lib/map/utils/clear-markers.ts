@@ -1,4 +1,4 @@
-import { L } from './leaflet-markercluster';
+import * as L from 'leaflet';
 
 export const clearMarkers = (
   markerClusterGroup: L.MarkerClusterGroup,

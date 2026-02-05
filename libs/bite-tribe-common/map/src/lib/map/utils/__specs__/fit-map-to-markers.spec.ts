@@ -1,13 +1,5 @@
 import { fitMapToMarkers } from '../fit-map-to-markers';
 
-jest.mock('../leaflet-markercluster', () => ({
-  L: {
-    latLngBounds: jest.fn(() => ({
-      getWest: jest.fn(),
-    })),
-  },
-}));
-
 describe('fitMapToMarkers', () => {
   let map: any;
   let markers: any[];

@@ -1,4 +1,4 @@
-import { L } from './leaflet-markercluster';
+import * as L from 'leaflet';
 
 export const removeGpsMarker = (map: L.Map): void => {
   map.eachLayer((layer) => {

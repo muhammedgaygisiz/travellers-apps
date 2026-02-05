@@ -6,10 +6,6 @@ jest.mock('../geopoint-to-lat-lng', () => ({
   geopointToLatLng: (...args: any): void => geopointToLatLngMock(...args),
 }));
 
-jest.mock('../leaflet-markercluster', () => ({
-  L: jest.requireActual('leaflet'),
-}));
-
 describe('addGpsMarker', () => {
   let mockMap: any;
   let mockCircle: any;

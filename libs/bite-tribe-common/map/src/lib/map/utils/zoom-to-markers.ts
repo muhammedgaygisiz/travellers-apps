@@ -1,7 +1,7 @@
 import { zoomToGpsOrDefault } from './zoom-to-gps-or-default';
 import { Geopoint } from 'model';
 import { zoomToGeopoint } from './zoom-to-geopoint';
-import { L } from './leaflet-markercluster';
+import * as L from 'leaflet';
 
 const startWithFirstPositionInList = (
   positionsList: Geopoint[],

@@ -24,11 +24,9 @@ jest.mock('../utils/load-bites-by-user', () => ({
 }));
 
 const mockedBiteId = 'mocked-bite-id';
-jest.mock('../utils/create-bite', () => {
-  return {
-    createBite: jest.fn(() => ({ id: mockedBiteId })),
-  };
-});
+jest.mock('../utils/create-bite', () => ({
+  createBite: jest.fn(() => mockedBiteId),
+}));
 
 jest.mock('../utils/upload-image-and-update-bite', () => ({
   uploadImageAndUpdateBite: jest.fn(),
@@ -124,9 +122,9 @@ describe(BiteApiService.name, () => {
       expect(uploadImageAndUpdateBite).toHaveBeenCalledWith(
         true,
         mockedBase64Image,
-        { id: mockedBiteId },
+        mockedBiteId,
       );
-      expect(loadBiteById).toHaveBeenCalledWith({ id: mockedBiteId });
+      expect(loadBiteById).toHaveBeenCalledWith(mockedBiteId);
     });
 
     describe('given an error', () => {

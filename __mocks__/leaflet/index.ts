@@ -35,4 +35,8 @@ export default {
   latLngBounds: jest.fn(() => ({
     getWest: jest.fn(),
   })),
+  latLng: jest.fn((lat, lng) => ({
+    lat,
+    lng,
+  })),
 };

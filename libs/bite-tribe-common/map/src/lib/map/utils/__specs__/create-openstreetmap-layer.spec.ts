@@ -1,6 +1,9 @@
 import { createOpenstreetmapLayer } from '../create-openstreetmap-layer';
 import * as L from 'leaflet';
 
+jest.mock('leaflet');
+jest.mock('leaflet.markercluster');
+
 describe('createOpenstreetmapLayer', () => {
   it('should create an OpenStreetMap tile layer with correct properties', () => {
     const layer: L.Layer = createOpenstreetmapLayer();

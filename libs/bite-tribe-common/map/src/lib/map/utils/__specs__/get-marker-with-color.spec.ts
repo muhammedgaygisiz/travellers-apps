@@ -1,13 +1,15 @@
 import { getMarkerWithColor } from '../get-marker-with-color';
 import { MarkerColor } from '../../model/marker-color.enum';
 
+jest.mock('leaflet');
+
 describe('getMarkerWithColor', () => {
   it('should return a DivIcon with the specified color', () => {
     const icon = getMarkerWithColor(MarkerColor.DARKRED);
 
     expect(icon).toBeDefined();
     expect(icon.options.html).toContain(
-      `background-color: ${MarkerColor.DARKRED}`
+      `background-color: ${MarkerColor.DARKRED}`,
     );
     expect(icon.options.iconAnchor).toEqual([-4, 25]);
   });
@@ -24,7 +26,7 @@ describe('getMarkerWithColor', () => {
 
     expect(icon).toBeDefined();
     expect(icon.options.html).toContain(
-      `background-color: ${MarkerColor.DARKRED}`
+      `background-color: ${MarkerColor.DARKRED}`,
     );
     expect(icon.options.iconAnchor).toEqual([0, 35]);
   });

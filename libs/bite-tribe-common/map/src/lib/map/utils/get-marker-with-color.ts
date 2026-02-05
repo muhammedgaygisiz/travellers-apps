@@ -1,4 +1,4 @@
-import * as L from 'leaflet';
+import L from 'leaflet';
 import { MarkerColor } from '../model/marker-color.enum';
 
 const getSize = (size: 'big' | 'small' = 'small'): number =>
@@ -10,7 +10,7 @@ const getAnchorY = (size: 'big' | 'small' = 'small'): number =>
 
 export const getMarkerWithColor = (
   color: MarkerColor,
-  options?: { size?: 'big' | 'small'; rating?: string }
+  options?: { size?: 'big' | 'small'; rating?: string },
 ): L.DivIcon => {
   const styleSize = getSize(options?.size);
   const markerStyle = `

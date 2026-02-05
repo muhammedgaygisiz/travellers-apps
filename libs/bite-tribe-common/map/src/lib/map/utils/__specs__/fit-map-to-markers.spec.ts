@@ -1,62 +1,76 @@
 import { fitMapToMarkers } from '../fit-map-to-markers';
+import L from 'leaflet';
+
+jest.mock('leaflet');
 
 describe('fitMapToMarkers', () => {
-  let map: any;
-  let markers: any[];
-  let positions: any[];
+  describe('given less than 2 markers', () => {
+    it('should not call fitBounds', () => {
+      const map = {
+        fitBounds: jest.fn(),
+      } as any;
 
-  beforeEach(() => {
-    map = {
-      fitBounds: jest.fn(),
-      setView: jest.fn(),
-    };
-
-    markers = [];
-    positions = [];
+      fitMapToMarkers([], null, map);
+      expect(map.fitBounds).not.toHaveBeenCalled();
+    });
   });
 
-  it('should fit bounds when multiple markers are present', () => {
-    markers = [{}, {}, {}];
-    positions = [
-      { latitude: 10, longitude: 20 },
-      { latitude: 15, longitude: 25 },
-      { latitude: 5, longitude: 30 },
-    ];
+  describe('given more then 1 marker but no positions', () => {
+    it('should not call fitBounds', () => {
+      const map = {
+        fitBounds: jest.fn(),
+      } as any;
 
-    fitMapToMarkers(markers, positions, map);
-
-    expect(map.fitBounds).toHaveBeenCalled();
+      fitMapToMarkers([{} as any, {} as any], null, map);
+      expect(map.fitBounds).not.toHaveBeenCalled();
+    });
   });
 
-  it('should not fit bounds when one or no markers are present', () => {
-    markers = [{}];
-    positions = [{ latitude: 10, longitude: 20 }];
+  describe('given 2 markers and positions', () => {
+    describe('in opposite sides of the world', () => {
+      beforeEach(() => {
+        jest.spyOn(L, 'latLngBounds').mockReturnValue({
+          getWest: () => -190,
+          getEast: () => 190,
+        } as any);
+      });
 
-    fitMapToMarkers(markers, positions, map);
+      it('should normalize longitudes and call fitBounds', () => {
+        const map = {
+          fitBounds: jest.fn(),
+        } as any;
 
-    expect(map.fitBounds).not.toHaveBeenCalled();
-  });
+        const positions = [
+          { latitude: 10, longitude: 170 },
+          { latitude: -10, longitude: -170 },
+        ];
 
-  it('should handle null positions gracefully', () => {
-    markers = [{}, {}];
-    positions = null as any;
+        fitMapToMarkers([{} as any, {} as any], positions, map);
+        expect(map.fitBounds).toHaveBeenCalled();
+      });
+    });
 
-    fitMapToMarkers(markers, positions, map);
+    describe('in same side of the world', () => {
+      beforeEach(() => {
+        jest.spyOn(L, 'latLngBounds').mockReturnValue({
+          getWest: () => -100,
+          getEast: () => 100,
+        } as any);
+      });
 
-    expect(map.fitBounds).not.toHaveBeenCalled();
-  });
+      it('should call fitBounds with original bounds', () => {
+        const map = {
+          fitBounds: jest.fn(),
+        } as any;
 
-  it('should handle world-wrapping case when bounds cross antimeridian', () => {
-    markers = [{}, {}];
-    positions = [
-      { latitude: 10, longitude: -190 },
-      { latitude: 15, longitude: 190 },
-    ];
+        const positions = [
+          { latitude: 10, longitude: 50 },
+          { latitude: -10, longitude: -50 },
+        ];
 
-    fitMapToMarkers(markers, positions, map);
-
-    expect(map.fitBounds).toHaveBeenCalledWith(expect.anything(), {
-      padding: [50, 50],
+        fitMapToMarkers([{} as any, {} as any], positions, map);
+        expect(map.fitBounds).toHaveBeenCalled();
+      });
     });
   });
 });

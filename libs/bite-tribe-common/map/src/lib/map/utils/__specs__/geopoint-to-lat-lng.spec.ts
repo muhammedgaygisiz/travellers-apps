@@ -1,5 +1,7 @@
 import { geopointToLatLng } from '../geopoint-to-lat-lng';
 
+jest.mock('leaflet');
+
 describe('geopointToLatLng', () => {
   it('should convert Geopoint to L.LatLng correctly', () => {
     const geopoint = { latitude: 51.505, longitude: -0.09 };

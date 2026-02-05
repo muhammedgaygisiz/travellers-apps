@@ -11,7 +11,7 @@ import {
   output,
   viewChild,
 } from '@angular/core';
-import * as L from 'leaflet';
+import L from 'leaflet';
 import 'leaflet.markercluster';
 import { Geopoint } from 'model';
 import { zoomToGpsOrDefault } from './utils/zoom-to-gps-or-default';

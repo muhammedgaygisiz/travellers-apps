@@ -1,6 +1,8 @@
 import { zoomToGpsOrDefault } from '../zoom-to-gps-or-default';
-import * as L from 'leaflet';
+import L from 'leaflet';
 import { Geopoint } from 'model';
+
+jest.mock('leaflet');
 
 const GEOPOINT_SAN_FRANCISCO: Geopoint = {
   latitude: 37.7749,
@@ -29,11 +31,16 @@ describe('zoomToGpsOrDefault', () => {
   let map: L.Map;
   let markers: L.Marker[];
   let positions: { latitude: number; longitude: number }[];
+  let fitBoundsSpy: jest.SpyInstance;
 
   beforeEach(() => {
     map = L.map(document.createElement('div')).setView([0, 0], 2);
     jest.spyOn(map, 'setView');
     jest.spyOn(map, 'getZoom').mockReturnValue(10);
+    fitBoundsSpy = jest
+      .spyOn(map, 'fitBounds')
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      .mockImplementation((() => {}) as any);
 
     markers = [];
     positions = [];
@@ -74,19 +81,19 @@ describe('zoomToGpsOrDefault', () => {
     expect(addGpsMarkerMock).toHaveBeenCalledWith(gpsPosition, map);
   });
 
-  it('should fit map to markers if GPS position is null', () => {
-    const gpsPosition = null;
+  describe('given gps position is null', () => {
+    it('should fit map to markers', () => {
+      const gpsPosition = null;
 
-    markers.push(L.marker(COORD_SAN_FRANCISCO));
-    markers.push(L.marker(COORD_LOS_ANGELES));
-    positions.push({ latitude: 37.7749, longitude: -122.4194 });
-    positions.push({ latitude: 34.0522, longitude: -118.2437 });
+      markers.push(L.marker(COORD_SAN_FRANCISCO));
+      markers.push(L.marker(COORD_LOS_ANGELES));
+      positions.push({ latitude: 37.7749, longitude: -122.4194 });
+      positions.push({ latitude: 34.0522, longitude: -118.2437 });
 
-    const fitBoundsSpy = jest.spyOn(map, 'fitBounds');
+      zoomToGpsOrDefault(gpsPosition, markers, positions, map);
 
-    zoomToGpsOrDefault(gpsPosition, markers, positions, map);
-
-    expect(fitBoundsSpy).toHaveBeenCalled();
+      expect(fitBoundsSpy).toHaveBeenCalled();
+    });
   });
 
   it('should remove GPS position marker if GPS position is null', () => {
@@ -98,19 +105,19 @@ describe('zoomToGpsOrDefault', () => {
     expect(removeGpsMarkerMock).toHaveBeenCalledWith(map);
   });
 
-  it('should fit map to markers if GPS position is undefined', () => {
-    const gpsPosition = undefined;
+  describe('given gps position is undefined', () => {
+    it('should fit map to markers', () => {
+      const gpsPosition = undefined;
 
-    markers.push(L.marker(COORD_SAN_FRANCISCO));
-    markers.push(L.marker(COORD_LOS_ANGELES));
-    positions.push({ latitude: 37.7749, longitude: -122.4194 });
-    positions.push({ latitude: 34.0522, longitude: -118.2437 });
+      markers.push(L.marker(COORD_SAN_FRANCISCO));
+      markers.push(L.marker(COORD_LOS_ANGELES));
+      positions.push({ latitude: 37.7749, longitude: -122.4194 });
+      positions.push({ latitude: 34.0522, longitude: -118.2437 });
 
-    const fitBoundsSpy = jest.spyOn(map, 'fitBounds');
+      zoomToGpsOrDefault(gpsPosition, markers, positions, map);
 
-    zoomToGpsOrDefault(gpsPosition, markers, positions, map);
-
-    expect(fitBoundsSpy).toHaveBeenCalled();
+      expect(fitBoundsSpy).toHaveBeenCalled();
+    });
   });
 
   it('should fit map to markers if GPS position is missing latitude', () => {
@@ -120,8 +127,6 @@ describe('zoomToGpsOrDefault', () => {
     markers.push(L.marker(COORD_LOS_ANGELES));
     positions.push({ latitude: 37.7749, longitude: -122.4194 });
     positions.push({ latitude: 34.0522, longitude: -118.2437 });
-
-    const fitBoundsSpy = jest.spyOn(map, 'fitBounds');
 
     zoomToGpsOrDefault(gpsPosition, markers, positions, map);
 

@@ -1,6 +1,9 @@
 import { clearMarkers } from '../clear-markers';
-import * as L from 'leaflet';
+import L from 'leaflet';
 import 'leaflet.markercluster';
+
+jest.mock('leaflet');
+jest.mock('leaflet.markercluster');
 
 describe('clearMarkers', () => {
   let map: any;

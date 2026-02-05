@@ -1,5 +1,5 @@
 import { Geopoint } from 'model';
-import * as L from 'leaflet';
+import L from 'leaflet';
 import { fitMapToMarkers } from './fit-map-to-markers';
 import { zoomToGeopoint } from './zoom-to-geopoint';
 import { addGpsMarker } from './add-gps-marker';

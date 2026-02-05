@@ -2,6 +2,10 @@ export default {
   map: jest.fn((nativeElement, options) => ({
     setView: jest.fn(() => ({
       eachLayer: jest.fn(),
+      setView: jest.fn(),
+      getZoom: jest.fn(),
+      fitBounds: jest.fn(),
+      remove: jest.fn(),
     })),
     remove: jest.fn(),
     eachLayer: jest.fn(),
@@ -38,5 +42,11 @@ export default {
   latLng: jest.fn((lat, lng) => ({
     lat,
     lng,
+  })),
+  divIcon: jest.fn((opts) => ({
+    options: {
+      html: opts.html,
+      iconAnchor: opts.iconAnchor,
+    },
   })),
 };

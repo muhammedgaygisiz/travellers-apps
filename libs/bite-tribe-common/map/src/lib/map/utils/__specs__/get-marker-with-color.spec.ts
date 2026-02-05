@@ -1,6 +1,8 @@
 import { getMarkerWithColor } from '../get-marker-with-color';
 import { MarkerColor } from '../../model/marker-color.enum';
 
+jest.mock('leaflet');
+
 describe('getMarkerWithColor', () => {
   it('should return a DivIcon with the specified color', () => {
     const icon = getMarkerWithColor(MarkerColor.DARKRED);

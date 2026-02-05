@@ -1,6 +1,8 @@
 import { zoomToGpsOrDefault } from '../zoom-to-gps-or-default';
-import * as L from 'leaflet';
+import L from 'leaflet';
 import { Geopoint } from 'model';
+
+jest.mock('leaflet');
 
 const GEOPOINT_SAN_FRANCISCO: Geopoint = {
   latitude: 37.7749,

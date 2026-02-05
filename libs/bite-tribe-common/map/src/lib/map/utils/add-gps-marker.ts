@@ -1,4 +1,4 @@
-import * as L from 'leaflet';
+import L from 'leaflet';
 import { Geopoint } from 'model';
 import { geopointToLatLng } from './geopoint-to-lat-lng';
 

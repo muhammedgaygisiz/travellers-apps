@@ -6,6 +6,7 @@ import { RestaurantComponent } from '../restaurant.component';
 import { Link, Restaurant } from 'model';
 import SpyInstance = jest.SpyInstance;
 
+jest.mock('leaflet');
 jest.mock('localization');
 
 const getDistanceMock = jest.fn();
@@ -66,7 +67,7 @@ describe('RestaurantComponent', () => {
           { network: 'website', url: 'https://test.com' },
         ] as Link[],
       } as Restaurant);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
       expect(component.links.length).toBe(4);
     });
 
@@ -75,7 +76,7 @@ describe('RestaurantComponent', () => {
         id: '1',
         name: 'Test Restaurant',
       } as Restaurant);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
       expect(component.links.length).toBe(0);
     });
   });
@@ -89,7 +90,7 @@ describe('RestaurantComponent', () => {
           { network: 'facebook', url: 'https://facebook.com/test' },
         ] as Link[],
       } as Restaurant);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
       expect(component.isInvalid()).toBe(false);
     });
 
@@ -99,7 +100,7 @@ describe('RestaurantComponent', () => {
         name: 'Test Restaurant',
         socialMediaLinks: [{ network: '', url: '' }] as Link[],
       } as Restaurant);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
       expect(component.isInvalid()).toBe(true);
     });
   });
@@ -138,7 +139,7 @@ describe('RestaurantComponent', () => {
       expect(component.placeDistance()).toBe('5 km');
       expect(getDistanceMock).toHaveBeenCalledWith(
         { id: '1', name: 'Test Restaurant' },
-        { place: 'Bite Place' }
+        { place: 'Bite Place' },
       );
     });
   });
@@ -154,7 +155,7 @@ describe('RestaurantComponent', () => {
       expect(component.position()).toEqual({ lat: 10, lng: 20 });
       expect(getPositionMock).toHaveBeenCalledWith(
         { id: '1', name: 'Test Restaurant' },
-        { place: 'Bite Place' }
+        { place: 'Bite Place' },
       );
     });
   });

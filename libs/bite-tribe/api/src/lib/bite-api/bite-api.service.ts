@@ -48,9 +48,9 @@ export class BiteApiService {
     const { image, ...biteDocWithoutImage } = bite;
 
     try {
-      const biteId = await createBite(biteDocWithoutImage, user);
+      const biteId = createBite(biteDocWithoutImage, user);
 
-      await uploadImageAndUpdateBite(this.isWeb(), image, biteId);
+      uploadImageAndUpdateBite(this.isWeb(), image, biteId);
 
       return await loadBiteById(biteId);
     } catch (error) {

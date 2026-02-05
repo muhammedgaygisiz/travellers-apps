@@ -4,6 +4,9 @@ import { addNecessaryIcons } from 'utils';
 import { HomeMapContainerComponent } from '../home-map-container.component';
 import { MapService } from '../map.service';
 
+jest.mock('leaflet');
+jest.mock('leaflet.markercluster');
+
 jest.mock('localization');
 addNecessaryIcons();
 

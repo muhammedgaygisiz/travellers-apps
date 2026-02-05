@@ -5,7 +5,9 @@ import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 import { BiteService } from '../bite.service';
 import { BiteContainer } from '../bite-container.component';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
+jest.mock('@capacitor-firebase/analytics');
 jest.mock('heic2any', () => jest.fn());
 
 jest.mock('localization');
@@ -43,22 +45,58 @@ describe('BiteContainer', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('ionViewDidEnter', () => {
+    let setCurrentScreenSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      setCurrentScreenSpy = jest.spyOn(FirebaseAnalytics, 'setCurrentScreen');
+    });
+
+    it('should set current screen to "New Bite"', () => {
+      component.ionViewDidEnter();
+
+      expect(setCurrentScreenSpy).toHaveBeenCalledWith({
+        screenName: 'New Bite',
+      });
+    });
+  });
+
   describe('onPlaceChange', () => {
     let setEditingBiteSpy: jest.SpyInstance;
+    const testPlace = 'Test Place';
 
     beforeEach(() => {
       setEditingBiteSpy = jest.spyOn(biteServiceMock, 'setEditingBite');
     });
 
-    it('should call setEditingBite with updated place', () => {
-      const testPlace = 'Test Place';
+    describe('given a cached bite', () => {
       const existingBite = { id: '123', place: 'Old Place' };
-      (biteServiceMock.cachedBite as any) = signal(existingBite);
-      component.onPlaceChange(testPlace);
 
-      expect(setEditingBiteSpy).toHaveBeenCalledWith({
-        id: '123',
-        place: testPlace,
+      beforeEach(() => {
+        (biteServiceMock.cachedBite as any) = signal(existingBite);
+      });
+
+      it('should call setEditingBite with updated place', () => {
+        component.onPlaceChange(testPlace);
+
+        expect(setEditingBiteSpy).toHaveBeenCalledWith({
+          id: '123',
+          place: testPlace,
+        });
+      });
+    });
+
+    describe('given no cached bite', () => {
+      beforeEach(() => {
+        (biteServiceMock.cachedBite as any) = signal(undefined);
+      });
+
+      it('should call setEditingBite with new bite containing place', () => {
+        component.onPlaceChange(testPlace);
+
+        expect(setEditingBiteSpy).toHaveBeenCalledWith({
+          place: testPlace,
+        });
       });
     });
   });

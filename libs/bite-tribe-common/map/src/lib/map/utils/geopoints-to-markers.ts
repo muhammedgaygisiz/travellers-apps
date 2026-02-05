@@ -1,12 +1,11 @@
-import * as L from 'leaflet';
-import { LatLngExpression } from 'leaflet';
+import L from 'leaflet';
 import { Geopoint } from 'model';
 import { getMarkerWithColor } from './get-marker-with-color';
 import { MarkerColor } from '../model/marker-color.enum';
 
 export const geopointsToMarkers = (geopoints: Geopoint[]): L.Marker[] =>
   geopoints.map((geopoint) => {
-    const coordinates: LatLngExpression = [
+    const coordinates: L.LatLngExpression = [
       geopoint.latitude,
       geopoint.longitude,
     ];

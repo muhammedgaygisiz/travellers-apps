@@ -1,7 +1,9 @@
 import { geopointsToMarkers } from '../geopoints-to-markers';
-import * as L from 'leaflet';
+import L from 'leaflet';
 import { MarkerColor } from '../../model/marker-color.enum';
 import { Geopoint } from 'model';
+
+jest.mock('leaflet');
 
 const getMarkerWithColorMock = jest.fn();
 jest.mock('../get-marker-with-color', () => ({
@@ -24,7 +26,7 @@ describe('geopointsToMarkers', () => {
   });
 
   it('should convert geopoints to markers and add them to the map', () => {
-    const markers = geopointsToMarkers(geopoints, map);
+    const markers = geopointsToMarkers(geopoints);
 
     expect(markers.length).toBe(2);
     expect(markers[0].getLatLng()).toEqual({ lat: 40.7128, lng: -74.006 });
@@ -35,7 +37,7 @@ describe('geopointsToMarkers', () => {
   });
 
   it('should return an empty array when given an empty geopoints array', () => {
-    const markers = geopointsToMarkers([], map);
+    const markers = geopointsToMarkers([]);
     expect(markers.length).toBe(0);
   });
 
@@ -43,7 +45,7 @@ describe('geopointsToMarkers', () => {
     const geopointsWithoutIds = [
       { latitude: 51.5074, longitude: -0.1278, id: '1' },
     ];
-    const markers = geopointsToMarkers(geopointsWithoutIds, map);
+    const markers = geopointsToMarkers(geopointsWithoutIds);
     expect(markers.length).toBe(1);
     expect(markers[0].getLatLng()).toEqual({ lat: 51.5074, lng: -0.1278 });
     expect(markers[0].options.title).toBe('1');

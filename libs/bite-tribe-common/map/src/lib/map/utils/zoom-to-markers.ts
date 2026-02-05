@@ -5,7 +5,7 @@ import * as L from 'leaflet';
 
 const startWithFirstPositionInList = (
   positionsList: Geopoint[],
-  map: L.Map
+  map: L.Map,
 ): void => {
   const firstPosition = positionsList[0];
   zoomToGeopoint(firstPosition, map);
@@ -15,7 +15,7 @@ export const zoomToMarkers = (
   gpsPosition: Geopoint | null | undefined,
   geopoints: Geopoint[],
   markers: L.Marker[],
-  map: L.Map
+  map: L.Map,
 ): void => {
   // First focus on the first position briefly
   startWithFirstPositionInList(geopoints, map);

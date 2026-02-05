@@ -30,8 +30,8 @@ describe('createBite', () => {
         createBite(bite, user);
 
         expect(geohashForLocation).toHaveBeenCalledWith([10, 20]);
-        expect(FirebaseFirestore.addDocument).toHaveBeenCalledWith({
-          reference: 'bites',
+        expect(FirebaseFirestore.setDocument).toHaveBeenCalledWith({
+          reference: expect.stringContaining('bites'),
           data: {
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
@@ -51,8 +51,8 @@ describe('createBite', () => {
         createBite(bite, null);
 
         expect(geohashForLocation).toHaveBeenCalledWith([10, 20]);
-        expect(FirebaseFirestore.addDocument).toHaveBeenCalledWith({
-          reference: 'bites',
+        expect(FirebaseFirestore.setDocument).toHaveBeenCalledWith({
+          reference: expect.stringContaining('bites'),
           data: {
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,

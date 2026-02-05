@@ -1,5 +1,7 @@
 import { createMap } from '../create-map';
 
+jest.mock('leaflet');
+
 describe('createMap', () => {
   it('should create a Leaflet map instance', () => {
     const mockElement = {

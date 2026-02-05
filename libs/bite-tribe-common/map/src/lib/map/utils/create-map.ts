@@ -1,4 +1,4 @@
-import * as L from 'leaflet';
+import L from 'leaflet';
 import { ElementRef } from '@angular/core';
 
 const withNoWrapOptionToPreventWorldRepetition: L.MapOptions = {

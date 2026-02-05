@@ -1,4 +1,4 @@
-import * as L from 'leaflet';
+import L from 'leaflet';
 import { Geopoint } from 'model';
 import { getMarkerWithColor } from './get-marker-with-color';
 import { MarkerColor } from '../model/marker-color.enum';

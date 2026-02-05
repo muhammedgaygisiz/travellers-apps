@@ -1,5 +1,7 @@
 import { fitMapToMarkers } from '../fit-map-to-markers';
 
+jest.mock('leaflet');
+
 describe('fitMapToMarkers', () => {
   let map: any;
   let markers: any[];

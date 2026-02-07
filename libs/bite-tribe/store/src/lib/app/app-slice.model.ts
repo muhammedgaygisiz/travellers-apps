@@ -18,6 +18,4 @@ export type AppSlice = {
   };
   exchangeRates: Record<string, number>;
   errorLoadingGpsPosition: boolean;
-  totalNumberBites: number;
-  totalNumberUsers: number;
 };

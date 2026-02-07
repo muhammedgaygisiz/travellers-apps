@@ -26,8 +26,6 @@ const initialState: AppSlice = {
   },
   exchangeRates: { EUR: 1 },
   errorLoadingGpsPosition: false,
-  totalNumberBites: 0,
-  totalNumberUsers: 0,
   profileMetadata: CLEAN_PROFILE_METADATA,
 };
 
@@ -110,14 +108,6 @@ export const reducer = createReducer<AppSlice>(
   on(AppActions.loadedExchangeRatesFromAPI, (state, { exchangeRates }) => ({
     ...state,
     exchangeRates,
-  })),
-  on(AppActions.loadedTotalNumberOfBites, (state, { total }) => ({
-    ...state,
-    totalNumberBites: total,
-  })),
-  on(AppActions.loadedTotalNumberOfUsers, (state, { total }) => ({
-    ...state,
-    totalNumberUsers: total,
   })),
   on(AppActions.loadedProfileMetadata, (state, { type, ...metadata }) => ({
     ...state,

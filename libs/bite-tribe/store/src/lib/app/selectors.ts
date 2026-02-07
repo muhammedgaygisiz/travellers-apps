@@ -55,16 +55,6 @@ export const userHasSubscriptionTierOne = createSelector(slice, (state) => {
   return false;
 });
 
-export const totalNumberBites = createSelector(
-  slice,
-  (state) => state?.totalNumberBites || 0,
-);
-
-export const totalNumberUsers = createSelector(
-  slice,
-  (state) => state?.totalNumberUsers || 0,
-);
-
 export const profileMeatadata = createSelector(
   slice,
   (state) => state?.profileMetadata,

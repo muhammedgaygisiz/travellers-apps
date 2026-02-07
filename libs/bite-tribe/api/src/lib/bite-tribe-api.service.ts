@@ -187,10 +187,6 @@ export class BiteTribeApiService {
     return this.biteApiService.latestBites$;
   }
 
-  getTotalNumberOfBites(): Observable<number> {
-    return from(this.biteApiService.getTotalNumberOfBites());
-  }
-
   getTotalNumberOfUsers(): Observable<number> {
     return from(this.profileApiService.getTotalNumberOfUsers());
   }

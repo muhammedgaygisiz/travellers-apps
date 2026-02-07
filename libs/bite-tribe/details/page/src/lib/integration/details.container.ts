@@ -12,7 +12,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [bucketlists]="service.bucketlists()"
       [userId]="service.userId()"
       [isAuthenticated]="service.isAuthenticated()"
-      [biteCreator]="service.biteCreator()"
+      [biteCreator]="service.biteCreator.value()"
       (submitNewReview)="service.saveReview($event)"
       (selectList)="service.addBiteToSelectedBucketList($event)"
       (removeBiteFromBucketlist)="service.removeBiteFromBucketlist($event)"

@@ -1,10 +1,4 @@
-import { createReducer, on } from '@ngrx/store';
-import { adapter, initialState } from './adapter';
-import { UserActions } from './actions';
+import { createReducer } from '@ngrx/store';
+import { initialState } from './adapter';
 
-export const reducer = createReducer(
-  initialState,
-  on(UserActions.loadedBiteCreator, (state, { user }) =>
-    adapter.upsertOne(user, state),
-  ),
-);
+export const reducer = createReducer(initialState);

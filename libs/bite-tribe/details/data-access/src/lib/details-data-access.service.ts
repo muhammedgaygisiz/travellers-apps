@@ -1,11 +1,19 @@
-import { inject, Injectable } from '@angular/core';
+import {
+  computed,
+  inject,
+  Injectable,
+  resource,
+  ResourceLoader,
+} from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Like,
+  PublicUser,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
 } from 'model';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +30,29 @@ export class DetailsDataAccessService {
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
   });
-  biteCreator = toSignal(this.storeService.biteCreator$);
+
+  biteCreatorId = computed(() => {
+    const bite = this.bite();
+    return bite?.userId;
+  });
+
+  biteCreatorLoader: ResourceLoader<any, any> = ({ params }) => {
+    const userId = params.userId;
+    if (userId) {
+      return FirebaseFirestore.getDocument({
+        reference: `users/${userId}`,
+      }).then((res) => res.snapshot.data as PublicUser);
+    }
+
+    return Promise.resolve();
+  };
+
+  biteCreator = resource({
+    params: () => ({
+      userId: this.biteCreatorId(),
+    }),
+    loader: this.biteCreatorLoader.bind(this),
+  });
 
   saveNewReview(newReview: { review: string; biteId: string }): void {
     this.storeService.saveReview(newReview);

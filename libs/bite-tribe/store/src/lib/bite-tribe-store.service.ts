@@ -78,7 +78,6 @@ import {
 import { getActionByDocType } from './utils/get-action-by-doc-type';
 import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
 import { followType, userId as userIdFromUrl } from './router/selectors';
-import { userByUrlParam, userByUserIdInBite } from './users/selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -134,7 +133,6 @@ export class BiteTribeStoreService implements StoreService {
   selectedBucketlist$ = this.store.select(selectedBucketlist);
   selectedBucketlistTitle$ = this.store.select(selectedBucketlistTitle);
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
-  biteCreator$ = this.store.select(userByUserIdInBite);
   isBitesLoading$ = this.store.select(isBitesLoading);
   homeFilters$ = this.store.select(homeFilters);
   homeDistance$ = this.store.select(homeDistance);
@@ -145,7 +143,6 @@ export class BiteTribeStoreService implements StoreService {
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);
-  biteCreator = toSignal(this.biteCreator$);
   followType = toSignal(this.type$);
 
   type = toSignal(this.type$);

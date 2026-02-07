@@ -1,7 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { followType, userId } from '../router/selectors';
+import { userId } from '../router/selectors';
 import { adapter } from './adapter';
-import { creatorId } from '../bites/selectors';
 import { key } from './key';
 import { EntityState } from '@ngrx/entity';
 import { PublicUser } from 'model';
@@ -20,13 +19,5 @@ export const userByUrlParam = createSelector(
       return undefined;
     }
     return users.find((user) => user.userId === userIdParam);
-  },
-);
-
-export const userByUserIdInBite = createSelector(
-  creatorId,
-  allUsers,
-  (creatorId, users) => {
-    return users.find((user) => user.userId === creatorId);
   },
 );

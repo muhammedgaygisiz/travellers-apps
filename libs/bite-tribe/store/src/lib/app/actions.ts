@@ -22,7 +22,5 @@ export const AppActions = createActionGroup({
     }>(),
     'Loaded Profile metadata': props<ProfileMetaData>(),
     'Reload Profile metadata': emptyProps(),
-    'Start loading followers data': emptyProps(),
-    'Stop loading followers data': emptyProps(),
   },
 });

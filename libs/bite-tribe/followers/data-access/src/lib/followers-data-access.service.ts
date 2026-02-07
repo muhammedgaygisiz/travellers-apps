@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, resource } from '@angular/core';
 import { ProfileApiService } from 'bite-tribe/api';
 import type { PublicUser } from 'model';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -9,14 +9,24 @@ export class FollowersDataAccessService {
   private readonly profileApiService = inject(ProfileApiService);
   private readonly storeService = inject(BiteTribeStoreService);
 
-  users = toSignal(this.storeService.users$, {
-    initialValue: [] as PublicUser[],
+  users = resource({
+    params: () => ({
+      userId: this.storeService.userIdFromUrl(),
+      type: this.storeService.type(),
+    }),
+    loader: ({ params }) => {
+      const type = params.type;
+      const userId = params.userId;
+
+      if (type === 'followers') {
+        return this.profileApiService.fetchFollowersWithDetails(userId);
+      } else {
+        return this.profileApiService.fetchFollowingWithDetails(userId);
+      }
+    },
   });
 
   type = toSignal(this.storeService.type$);
-  isLoading = toSignal(this.storeService.isFollowersLoading$, {
-    initialValue: false,
-  });
 
   async fetchFollowersWithDetails(userId: string): Promise<PublicUser[]> {
     return this.profileApiService.fetchFollowersWithDetails(userId);

@@ -7,19 +7,4 @@ export const reducer = createReducer(
   on(UserActions.loadedBiteCreator, (state, { user }) =>
     adapter.upsertOne(user, state),
   ),
-  on(
-    UserActions.loadedFollowers,
-    UserActions.loadedFollowings,
-    (state, { users }) => {
-      return adapter.upsertMany(users, state);
-    },
-  ),
-  on(UserActions.loadedFollowers, (state, { users }) => ({
-    ...state,
-    followers: users,
-  })),
-  on(UserActions.loadedFollowings, (state, { users }) => ({
-    ...state,
-    followings: users,
-  })),
 );

@@ -187,10 +187,6 @@ export class BiteTribeApiService {
     return this.biteApiService.latestBites$;
   }
 
-  getTotalNumberOfUsers(): Observable<number> {
-    return from(this.profileApiService.getTotalNumberOfUsers());
-  }
-
   async fetchFollowMetadata(userId: string): Promise<{
     followers: number;
     following: number;

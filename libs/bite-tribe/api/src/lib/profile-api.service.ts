@@ -317,14 +317,6 @@ export class ProfileApiService {
     }
   }
 
-  getTotalNumberOfUsers(): Promise<number> {
-    return new Promise((resolve) => {
-      FirebaseFirestore.getCountFromServer({
-        reference: USERS_COLLECTION,
-      }).then((result) => resolve(result.count));
-    });
-  }
-
   async fetchFollowers(
     userId: string,
   ): Promise<DocumentSnapshot<DocumentData>[]> {

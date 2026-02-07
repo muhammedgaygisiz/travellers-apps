@@ -12,7 +12,7 @@
       <div class="spinner-container">
         <ion-spinner color="primary" />
       </div>
-    } @else if (users().length === 0) {
+    } @else if (users()?.length === 0) {
       <div class="empty-container">
         <ion-label>
           @if (type() === 'followers') {

@@ -1,7 +1,8 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, resource } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import type { Bite, Like, PublicUser } from 'model';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileDataAccessService {
@@ -25,7 +26,16 @@ export class ProfileDataAccessService {
     initialValue: [] as Bite[],
   });
 
-  user = toSignal(this.storeService.userByUrlParam$);
+  user = resource({
+    params: () => ({
+      userId: this.storeService.userIdFromUrl(),
+    }),
+    loader: ({ params }) => {
+      return FirebaseFirestore.getDocument({
+        reference: `users/${params.userId}`,
+      }).then((result) => result.snapshot.data as PublicUser);
+    },
+  });
 
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
 

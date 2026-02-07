@@ -1,7 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   inject,
+  input,
   OnInit,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -14,10 +16,10 @@ import { FollowersService } from './followers.service';
   template: `
     <followers-list
       class="ion-page"
-      [users]="service.users()"
+      [users]="service.users.value()"
       [type]="service.type()"
       [currentUserId]="service.currentUserId()"
-      [isLoading]="service.isLoading()"
+      [isLoading]="service.users.isLoading()"
       (userClick)="service.userClicked($event)"
       (unfollowClick)="service.unfollowClicked($event)"
     />

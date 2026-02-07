@@ -44,7 +44,7 @@ const CANCEL = 'cancel';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FollowersListComponent {
-  users = input.required<PublicUser[]>();
+  users = input.required<PublicUser[] | undefined>();
   type = input.required<'followers' | 'following'>();
   currentUserId = input<string>();
   isLoading = input<boolean>(false);

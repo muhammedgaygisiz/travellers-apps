@@ -139,7 +139,6 @@ export class BiteTribeStoreService implements StoreService {
   homeFilters$ = this.store.select(homeFilters);
   homeDistance$ = this.store.select(homeDistance);
   profileMeatadata$ = this.store.select(profileMeatadata);
-  userByUrlParam$ = this.store.select(userByUrlParam);
 
   type$ = this.store.select(followType);
   userIdFromUrl$ = this.store.select(userIdFromUrl);

@@ -24,10 +24,10 @@ export class FollowersService {
   async unfollowClicked(user: PublicUser): Promise<void> {
     try {
       await this.dataAccessService.unfollowUser(user);
-      // Reload the list after unfollowing
+
       const currentUserId = this.currentUserId();
       if (currentUserId) {
-        // await this.loadFollowing(currentUserId);
+        this.dataAccessService.users.reload();
       }
     } catch (error) {
       console.error('Error unfollowing user:', error);

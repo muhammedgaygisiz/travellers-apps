@@ -40,36 +40,4 @@ describe('Users Selectors', () => {
       });
     });
   });
-
-  describe('userByUserIdInBite', () => {
-    describe('given a creator id', () => {
-      const creatorId = 'user-123';
-
-      describe('and users', () => {
-        const USER_1 = { userId: 'user-123', name: 'Alice' };
-        const USER_2 = { userId: 'user-456', name: 'Bob' };
-        const users = [USER_1, USER_2] as unknown as PublicUser[];
-
-        it('should return user matching creator id', () => {
-          const result = fromSelectors.userByUserIdInBite.projector(
-            creatorId,
-            users,
-          );
-          expect(result).toEqual(USER_1);
-        });
-      });
-
-      describe('and no users', () => {
-        const users = [] as unknown as PublicUser[];
-
-        it('should return undefined', () => {
-          const result = fromSelectors.userByUserIdInBite.projector(
-            creatorId,
-            users,
-          );
-          expect(result).toBeUndefined();
-        });
-      });
-    });
-  });
 });

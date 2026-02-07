@@ -27,7 +27,7 @@ export class DetailsService {
   }
 
   addBiteToSelectedBucketList(list: Bucketlist): void {
-    const currBite = this.bite();
+    const currBite = this.bite.value();
 
     this.dataAccess.saveToBucketList({
       bucketListId: list.id,
@@ -36,7 +36,7 @@ export class DetailsService {
   }
 
   saveBiteToBucketListWithNewList(newListName: string): void {
-    const currBite = this.bite();
+    const currBite = this.bite.value();
 
     this.dataAccess.createAndSaveToBucketList({
       bucketListName: newListName,

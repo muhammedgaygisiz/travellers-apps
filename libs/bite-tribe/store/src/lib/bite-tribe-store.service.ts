@@ -77,7 +77,11 @@ import {
 } from './bucketlists/selectors';
 import { getActionByDocType } from './utils/get-action-by-doc-type';
 import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
-import { followType, userId as userIdFromUrl } from './router/selectors';
+import {
+  followType,
+  userId as userIdFromUrl,
+  biteId as biteIdFromUrl,
+} from './router/selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -140,6 +144,7 @@ export class BiteTribeStoreService implements StoreService {
 
   type$ = this.store.select(followType);
   userIdFromUrl$ = this.store.select(userIdFromUrl);
+  biteIdFromUrl$ = this.store.select(biteIdFromUrl);
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);
@@ -147,6 +152,7 @@ export class BiteTribeStoreService implements StoreService {
 
   type = toSignal(this.type$);
   userIdFromUrl = toSignal(this.userIdFromUrl$);
+  biteIdFromUrl = toSignal(this.biteIdFromUrl$);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());

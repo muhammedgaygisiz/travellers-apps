@@ -142,8 +142,6 @@ export const bite = createSelector(
   },
 );
 
-export const creatorId = createSelector(bite, (bite) => bite?.userId);
-
 export const mybites = createSelector(
   bitesWithMetadata,
   fromAuth.selectUserId,

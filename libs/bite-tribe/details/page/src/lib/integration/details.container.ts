@@ -7,7 +7,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   template: `
     <details-page
       class="ion-page"
-      [bite]="service.bite()"
+      [bite]="service.bite.value()"
       [reviews]="service.reviews()"
       [bucketlists]="service.bucketlists()"
       [userId]="service.userId()"
@@ -34,5 +34,7 @@ export class DetailsContainer {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Bite Details',
     });
+
+    this.service.bite.reload();
   }
 }

@@ -8,6 +8,7 @@ import {
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
+  Bite,
   Like,
   PublicUser,
   RemoveBiteFromBucketlistParams,
@@ -21,7 +22,41 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 export class DetailsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
-  bite = toSignal(this.storeService.bite$);
+  biteLoader: ResourceLoader<any, any> = async ({ params }) => {
+    const biteId = params.biteId;
+    if (biteId) {
+      const likeDocs = await FirebaseFirestore.getCollection({
+        reference: `bites/${biteId}/likes`,
+      });
+
+      const likes = likeDocs.snapshots.map(
+        (like) =>
+          ({
+            ...like.data,
+          }) as Like,
+      );
+
+      return FirebaseFirestore.getDocument({
+        reference: `bites/${biteId}`,
+      }).then((res) => {
+        return {
+          ...res.snapshot.data,
+          likes,
+          id: res.snapshot.id,
+        } as Bite;
+      });
+    }
+
+    return Promise.resolve();
+  };
+
+  bite = resource({
+    params: () => ({
+      biteId: this.storeService.biteIdFromUrl(),
+    }),
+    loader: this.biteLoader.bind(this),
+  });
+
   reviews = toSignal(this.storeService.reviews$, { initialValue: [] as any });
   bucketlists = toSignal(this.storeService.bucketlists$, {
     initialValue: [] as any,
@@ -32,7 +67,7 @@ export class DetailsDataAccessService {
   });
 
   biteCreatorId = computed(() => {
-    const bite = this.bite();
+    const bite = this.bite.value();
     return bite?.userId;
   });
 
@@ -74,11 +109,12 @@ export class DetailsDataAccessService {
   }
 
   submitLikeClick(likeType: Like): void {
-    const bite = this.bite();
+    const bite = this.bite.value();
     const userId = this.userId();
 
     const likeFromUser = bite?.likes?.find(
-      (like) => like.userId === userId && like.likeType === likeType.likeType,
+      (like: Like) =>
+        like.userId === userId && like.likeType === likeType.likeType,
     );
 
     if (likeFromUser) {

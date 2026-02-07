@@ -1,4 +1,4 @@
-import { inject, Injectable, resource } from '@angular/core';
+import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import type { Bite, Like, PublicUser } from 'model';
@@ -26,15 +26,17 @@ export class ProfileDataAccessService {
     initialValue: [] as Bite[],
   });
 
+  userLoader: ResourceLoader<any, any> = ({ params }) => {
+    return FirebaseFirestore.getDocument({
+      reference: `users/${params.userId}`,
+    }).then((result) => result.snapshot.data as PublicUser);
+  };
+
   user = resource({
     params: () => ({
       userId: this.storeService.userIdFromUrl(),
     }),
-    loader: ({ params }) => {
-      return FirebaseFirestore.getDocument({
-        reference: `users/${params.userId}`,
-      }).then((result) => result.snapshot.data as PublicUser);
-    },
+    loader: this.userLoader.bind(this),
   });
 
   userId = toSignal(this.storeService.userId$, { initialValue: '' });

@@ -5,7 +5,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { ProfileApiService } from 'bite-tribe/api';
 import { of } from 'rxjs';
 import { PublicUser } from 'model';
-import { signal, WritableSignal } from '@angular/core';
+import { signal } from '@angular/core';
 
 class MockBiteTribeStoreService {
   type$ = of('followers');

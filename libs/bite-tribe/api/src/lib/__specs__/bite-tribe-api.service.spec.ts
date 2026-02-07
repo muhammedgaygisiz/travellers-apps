@@ -648,23 +648,6 @@ describe(BiteTribeApiService.name, () => {
     ));
   });
 
-  describe('getTotalNumberOfBites', () => {
-    it('should call getTotalNumberOfBites on BiteApiService and return an observable', inject(
-      [BiteTribeApiService, BiteApiService],
-      async (service: BiteTribeApiService, biteApiService: BiteApiService) => {
-        const getTotalNumberOfBitesSpy = jest
-          .spyOn(biteApiService, 'getTotalNumberOfBites')
-          .mockReturnValue(Promise.resolve(42));
-
-        const totalBites$ = service.getTotalNumberOfBites();
-
-        const total = await lastValueFrom(totalBites$);
-        expect(total).toBe(42);
-        expect(getTotalNumberOfBitesSpy).toHaveBeenCalled();
-      },
-    ));
-  });
-
   describe('getTotalNumberOfUsers', () => {
     it('should call getTotalNumberOfUsers on ProfileApiService and return an observable', inject(
       [BiteTribeApiService, ProfileApiService],

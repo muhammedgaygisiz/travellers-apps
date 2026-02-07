@@ -29,8 +29,6 @@ describe('App Selectors', () => {
       home: false,
     },
     errorLoadingGpsPosition: false,
-    totalNumberBites: 0,
-    totalNumberUsers: 0,
     profileMetadata: {
       followers: 0,
       following: 0,
@@ -267,48 +265,6 @@ describe('App Selectors', () => {
         stateWithSubscriptionTier2,
       );
       expect(result).toBe(true);
-    });
-  });
-
-  describe('totalNumberBites', () => {
-    it('should return the total number of bites', () => {
-      const stateWithBites = {
-        ...mockState,
-        totalNumberBites: 42,
-      };
-      const result = fromSelectors.totalNumberBites.projector(stateWithBites);
-      expect(result).toBe(42);
-    });
-
-    it('should return 0 when total number of bites is not set', () => {
-      const stateWithoutBites = {
-        ...mockState,
-        totalNumberBites: undefined,
-      } as any;
-      const result =
-        fromSelectors.totalNumberBites.projector(stateWithoutBites);
-      expect(result).toBe(0);
-    });
-  });
-
-  describe('totalNumberUsers', () => {
-    it('should return the total number of users', () => {
-      const stateWithUsers = {
-        ...mockState,
-        totalNumberUsers: 100,
-      };
-      const result = fromSelectors.totalNumberUsers.projector(stateWithUsers);
-      expect(result).toBe(100);
-    });
-
-    it('should return 0 when total number of users is not set', () => {
-      const stateWithoutUsers = {
-        ...mockState,
-        totalNumberUsers: undefined,
-      } as any;
-      const result =
-        fromSelectors.totalNumberUsers.projector(stateWithoutUsers);
-      expect(result).toBe(0);
     });
   });
 

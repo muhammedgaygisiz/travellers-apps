@@ -4,10 +4,7 @@ import { AppSlice } from '../app-slice.model';
 import type { PublicUser, Settings } from 'model';
 import { BiteActions } from '../../bites/actions';
 import { fromAuth } from 'ta-firestore';
-import {
-  routerNavigationAction,
-  routerRequestAction,
-} from '@ngrx/router-store';
+import { routerRequestAction } from '@ngrx/router-store';
 
 describe('App Reducer', () => {
   describe('fromAuth.logoutSucceeded', () => {
@@ -18,8 +15,6 @@ describe('App Reducer', () => {
         loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
-        totalNumberBites: 0,
-        totalNumberUsers: 0,
         profileMetadata: {
           followers: 0,
           following: 0,
@@ -39,8 +34,6 @@ describe('App Reducer', () => {
         loading: { home: true, followers: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
-        totalNumberBites: 0,
-        totalNumberUsers: 0,
         profileMetadata: {
           followers: 0,
           following: 0,
@@ -227,46 +220,6 @@ describe('App Reducer', () => {
       const clearGPSErrorAction = AppActions.clearGPSError();
 
       expect(reducer(INITIAL_STATE, clearGPSErrorAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
-  describe('loadedTotalNumberOfBites', () => {
-    it('should set totalNumberBites', () => {
-      const INITIAL_STATE = {
-        totalNumberBites: 0,
-      } as AppSlice;
-      const NEW_STATE = {
-        totalNumberBites: 42,
-      } as AppSlice;
-
-      const loadedTotalNumberOfBitesAction =
-        AppActions.loadedTotalNumberOfBites({
-          total: 42,
-        });
-
-      expect(reducer(INITIAL_STATE, loadedTotalNumberOfBitesAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
-  describe('loadedTotalNumberOfUsers', () => {
-    it('should set totalNumberUsers', () => {
-      const INITIAL_STATE = {
-        totalNumberUsers: 0,
-      } as AppSlice;
-      const NEW_STATE = {
-        totalNumberUsers: 100,
-      } as AppSlice;
-
-      const loadedTotalNumberOfUsersAction =
-        AppActions.loadedTotalNumberOfUsers({
-          total: 100,
-        });
-
-      expect(reducer(INITIAL_STATE, loadedTotalNumberOfUsersAction)).toEqual({
         ...NEW_STATE,
       });
     });

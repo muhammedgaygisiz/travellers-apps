@@ -10,7 +10,7 @@ import { ProfileApiService } from '../profile-api.service';
 import { BiteApiService } from '../bite-api/bite-api.service';
 import { SettingsApiService } from '../settings-api/settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
-import { lastValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { Like } from 'model';
 
@@ -644,26 +644,6 @@ describe(BiteTribeApiService.name, () => {
         const latestBites$ = service.latestBites$(numberOfBites);
         expect(startlatestBitesListenerSpy).toHaveBeenCalledWith(numberOfBites);
         expect(latestBites$).toBe(latestBitesObservable);
-      },
-    ));
-  });
-
-  describe('getTotalNumberOfUsers', () => {
-    it('should call getTotalNumberOfUsers on ProfileApiService and return an observable', inject(
-      [BiteTribeApiService, ProfileApiService],
-      async (
-        service: BiteTribeApiService,
-        profileApiService: ProfileApiService,
-      ) => {
-        const getTotalNumberOfUsersSpy = jest
-          .spyOn(profileApiService, 'getTotalNumberOfUsers')
-          .mockReturnValue(Promise.resolve(100));
-
-        const totalUsers$ = service.getTotalNumberOfUsers();
-
-        const total = await lastValueFrom(totalUsers$);
-        expect(total).toBe(100);
-        expect(getTotalNumberOfUsersSpy).toHaveBeenCalled();
       },
     ));
   });

@@ -12,7 +12,9 @@ const mockBite: Bite = {
 
 const createMockDataAccess = (overrides = {}): any => {
   const base = {
-    bite: signal(mockBite),
+    bite: {
+      value: signal(mockBite),
+    },
     reviews: signal([]),
     bucketlists: signal([]),
     userId: signal('user1'),
@@ -74,7 +76,7 @@ describe('DetailsService', () => {
   });
 
   it('should have bite data from DetailsDataAccessService', () => {
-    expect(service.bite()).toEqual(mockBite);
+    expect(service.bite.value()).toEqual(mockBite);
   });
 
   it('should call dataAccess.saveNewReview with provided review data', () => {
@@ -109,7 +111,9 @@ describe('DetailsService', () => {
     it('should call dataAccess.saveToBucketList with correct parameters when bite exists', () => {
       // Arrange
       mockDataAccessService = {
-        bite: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
+        bite: {
+          value: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
+        },
         saveToBucketList: jest.fn(),
       } as any;
 
@@ -138,7 +142,9 @@ describe('DetailsService', () => {
     it('should handle undefined bite gracefully', () => {
       // Arrange
       mockDataAccessService = {
-        bite: signal(undefined),
+        bite: {
+          value: signal(undefined),
+        },
         saveToBucketList: jest.fn(),
       } as any;
 
@@ -174,7 +180,9 @@ describe('DetailsService', () => {
     it('should call dataAccess.createAndSaveToBucketList with correct parameters when bite exists', () => {
       // Arrange
       mockDataAccessService = {
-        bite: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
+        bite: {
+          value: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
+        },
         createAndSaveToBucketList: jest.fn(),
       } as any;
 
@@ -207,7 +215,9 @@ describe('DetailsService', () => {
     it('should handle undefined bite gracefully', () => {
       // Arrange
       mockDataAccessService = {
-        bite: signal(undefined),
+        bite: {
+          value: signal(undefined),
+        },
         createAndSaveToBucketList: jest.fn(),
       } as any;
 

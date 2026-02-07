@@ -24,7 +24,10 @@ describe('DetailsComponent', () => {
         {
           provide: DetailsService,
           useValue: {
-            bite: signal(undefined),
+            bite: {
+              value: signal(undefined),
+              reload: jest.fn(),
+            },
             reviews: signal(undefined),
             currentPosition: signal(undefined),
             bucketlists: signal(undefined),

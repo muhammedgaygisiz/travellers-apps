@@ -210,14 +210,28 @@ describe(BiteTribeStoreService.name, () => {
   });
 
   describe('removeLike', () => {
-    it('should dispatch removeLike on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.removeLike({} as any);
-        expect(dispatchSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
+    describe('given store is defined', () => {
+      it('should dispatch removeLike on BiteTribeStoreService', inject(
+        [BiteTribeStoreService],
+        (service: BiteTribeStoreService) => {
+          const dispatchSpy = jest.spyOn(store, 'dispatch');
+          service.removeLike({} as any);
+          expect(dispatchSpy).toHaveBeenCalledTimes(1);
+        },
+      ));
+    });
+
+    describe('given store is undefined', () => {
+      it('should not ditpatch', inject(
+        [BiteTribeStoreService],
+        (service: BiteTribeStoreService) => {
+          service['store'] = undefined as any;
+          const dispatchSpy = jest.spyOn(store, 'dispatch');
+          service.removeLike({} as any);
+          expect(dispatchSpy).toHaveBeenCalledTimes(0);
+        },
+      ));
+    });
   });
 
   describe('saveSettings', () => {

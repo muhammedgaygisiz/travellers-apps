@@ -89,16 +89,29 @@ describe('TypeaheadComponent', () => {
   });
 
   describe('distanceInput', () => {
-    it('should update distanceValue on input event', () => {
-      const event = { target: { value: '100' } } as any;
-      component.distanceInput(event);
-      expect(component.distanceValue()).toBe('100');
+    describe('given input value', () => {
+      it('should update distanceValue on input event', () => {
+        const event = { target: { value: '100' } } as any;
+        component.distanceInput(event);
+        expect(component.distanceValue()).toBe('100');
+      });
     });
 
-    it('should not update distanceValue if input is empty', () => {
-      const event = { target: { value: '' } } as any;
-      component.distanceInput(event);
-      expect(component.distanceValue()).toBe('');
+    describe('given empty input', () => {
+      it('should not update distanceValue if input is empty', () => {
+        const event = { target: { value: '' } } as any;
+        component.distanceInput(event);
+        expect(component.distanceValue()).toBe('');
+      });
+    });
+
+    describe('given distance input', () => {
+      it('should return distance as string', () => {
+        compRef.setInput('distance', 555);
+        compRef.changeDetectorRef.detectChanges();
+
+        expect(component.distanceValue()).toBe('555');
+      });
     });
   });
 

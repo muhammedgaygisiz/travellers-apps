@@ -51,18 +51,29 @@ describe('App Selectors', () => {
   });
 
   describe('currency', () => {
-    it('should return the currency from settings', () => {
-      const result = fromSelectors.currency.projector(mockState);
-      expect(result).toBe('EUR');
+    describe('given slice and settings', () => {
+      it('should return the currency from settings', () => {
+        const result = fromSelectors.currency.projector(mockState);
+        expect(result).toBe('EUR');
+      });
     });
 
-    it('should return undefined when settings or currency is not set', () => {
-      const stateWithoutSettings = {
-        ...mockState,
-        settings: undefined,
-      } as unknown as AppSlice;
-      const result = fromSelectors.currency.projector(stateWithoutSettings);
-      expect(result).toBeUndefined();
+    describe('given no settings', () => {
+      it('should return undefined', () => {
+        const stateWithoutSettings = {
+          ...mockState,
+          settings: undefined,
+        } as unknown as AppSlice;
+        const result = fromSelectors.currency.projector(stateWithoutSettings);
+        expect(result).toBeUndefined();
+      });
+    });
+
+    describe('given no slice', () => {
+      it('should return undefined', () => {
+        const result = fromSelectors.currency.projector(undefined as any);
+        expect(result).toBeUndefined();
+      });
     });
   });
 

@@ -148,17 +148,62 @@ describe('ProfileDataAccessService', () => {
         .mockResolvedValue({ snapshot: { data: {} } } as any);
     });
 
-    it('should load user data from FirebaseFirestore', inject(
-      [ProfileDataAccessService],
-      async (service: ProfileDataAccessService) => {
-        await service.userLoader({
-          params: { userId: 'user-id' },
-        } as any);
+    describe('given a user id', () => {
+      it('should load user data from FirebaseFirestore', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          await service.userLoader({
+            params: { userId: 'user-id' },
+          } as any);
 
-        expect(getDocumentSpy).toHaveBeenCalledWith({
-          reference: 'users/user-id',
-        });
-      },
-    ));
+          expect(getDocumentSpy).toHaveBeenCalledWith({
+            reference: 'users/user-id',
+          });
+        },
+      ));
+    });
+
+    describe('given no user id', () => {
+      it('should return an empty object', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          const result = await service.userLoader({
+            params: { userId: '' },
+          } as any);
+
+          expect(result).toEqual({});
+        },
+      ));
+    });
+
+    describe('given no snapshot is returned', () => {
+      it('should return an empty object', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          getDocumentSpy.mockResolvedValue({ snapshot: null } as any);
+
+          const result = await service.userLoader({
+            params: { userId: 'user-id' },
+          } as any);
+
+          expect(result).toEqual({});
+        },
+      ));
+    });
+
+    describe('given a snapshot without data is returned', () => {
+      it('should return an empty object', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          getDocumentSpy.mockResolvedValue({ snapshot: { data: null } } as any);
+
+          const result = await service.userLoader({
+            params: { userId: 'user-id' },
+          } as any);
+
+          expect(result).toEqual({});
+        },
+      ));
+    });
   });
 });

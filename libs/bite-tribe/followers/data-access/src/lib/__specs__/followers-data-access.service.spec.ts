@@ -42,6 +42,79 @@ describe('FollowersDataAccessService', () => {
     },
   ));
 
+  describe('usersLoader', () => {
+    describe('given no user id', () => {
+      it('should return empty array for followers', inject(
+        [FollowersDataAccessService],
+        (service: FollowersDataAccessService) => {
+          const result = service.usersLoader({
+            params: { type: 'followers' },
+          } as any);
+
+          expect(result).resolves.toEqual([]);
+        },
+      ));
+
+      it('should return empty array for following', inject(
+        [FollowersDataAccessService],
+        (service: FollowersDataAccessService) => {
+          const result = service.usersLoader({
+            params: { type: 'following' },
+          } as any);
+
+          expect(result).resolves.toEqual([]);
+        },
+      ));
+    });
+
+    describe('given user id but different type', () => {
+      it('should return empty array', inject(
+        [FollowersDataAccessService],
+        (service: FollowersDataAccessService) => {
+          const result = service.usersLoader({
+            params: { type: 'unknown', userId: 'some-user-id' },
+          } as any);
+
+          expect(result).resolves.toEqual([]);
+        },
+      ));
+    });
+
+    describe('given a user id', () => {
+      describe('and type followers', () => {
+        it('should call fetchFollowersWithDetails', inject(
+          [FollowersDataAccessService],
+          (service: FollowersDataAccessService) => {
+            const userId = 'some-user-id';
+            service.usersLoader({
+              params: { type: 'followers', userId },
+            } as any);
+
+            expect(
+              profileApiService.fetchFollowersWithDetails,
+            ).toHaveBeenCalledWith(userId);
+          },
+        ));
+      });
+
+      describe('and type following', () => {
+        it('should call fetchFollowingWithDetails', inject(
+          [FollowersDataAccessService],
+          (service: FollowersDataAccessService) => {
+            const userId = 'some-user-id';
+            service.usersLoader({
+              params: { type: 'following', userId },
+            } as any);
+
+            expect(
+              profileApiService.fetchFollowingWithDetails,
+            ).toHaveBeenCalledWith(userId);
+          },
+        ));
+      });
+    });
+  });
+
   describe('users', () => {
     const userId = 'some-user-id';
     let fetchFollowersWithDetailsSpy: jest.SpyInstance;

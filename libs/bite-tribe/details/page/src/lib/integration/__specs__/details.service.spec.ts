@@ -14,6 +14,7 @@ const createMockDataAccess = (overrides = {}): any => {
   const base = {
     bite: {
       value: signal(mockBite),
+      reload: jest.fn(),
     },
     reviews: signal([]),
     bucketlists: signal([]),
@@ -298,6 +299,17 @@ describe('DetailsService', () => {
         likeClick,
       );
       expect(mockDataAccessService.submitLikeClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('should trigger reload of bite after 1 sec', () => {
+      jest.useFakeTimers();
+      const likeClick = { likeType: 'like', biteId: 'bite123' };
+      service.likeButtonClicked(likeClick);
+
+      // Fast-forward time
+      jest.runAllTimers();
+
+      expect(service.bite.reload).toHaveBeenCalled();
     });
   });
 

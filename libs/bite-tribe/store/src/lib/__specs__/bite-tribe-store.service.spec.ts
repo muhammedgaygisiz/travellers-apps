@@ -210,14 +210,28 @@ describe(BiteTribeStoreService.name, () => {
   });
 
   describe('removeLike', () => {
-    it('should dispatch removeLike on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.removeLike({} as any);
-        expect(dispatchSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
+    describe('given store is defined', () => {
+      it('should dispatch removeLike on BiteTribeStoreService', inject(
+        [BiteTribeStoreService],
+        (service: BiteTribeStoreService) => {
+          const dispatchSpy = jest.spyOn(store, 'dispatch');
+          service.removeLike({} as any);
+          expect(dispatchSpy).toHaveBeenCalledTimes(1);
+        },
+      ));
+    });
+
+    describe('given store is undefined', () => {
+      it('should not ditpatch', inject(
+        [BiteTribeStoreService],
+        (service: BiteTribeStoreService) => {
+          service['store'] = undefined as any;
+          const dispatchSpy = jest.spyOn(store, 'dispatch');
+          service.removeLike({} as any);
+          expect(dispatchSpy).toHaveBeenCalledTimes(0);
+        },
+      ));
+    });
   });
 
   describe('saveSettings', () => {
@@ -457,28 +471,6 @@ describe(BiteTribeStoreService.name, () => {
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
         service.unfollowUser({} as any);
-        expect(dispatchSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
-  });
-
-  describe('startLoadingFollowersData', () => {
-    it('should dispatch startLoadingFollowersData on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.startLoadingFollowersData();
-        expect(dispatchSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
-  });
-
-  describe('stopLoadingFollowersData', () => {
-    it('should dispatch stopLoadingFollowersData on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.stopLoadingFollowersData();
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));

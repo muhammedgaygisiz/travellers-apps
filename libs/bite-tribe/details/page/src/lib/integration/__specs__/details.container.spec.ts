@@ -24,12 +24,17 @@ describe('DetailsComponent', () => {
         {
           provide: DetailsService,
           useValue: {
-            bite: signal(undefined),
+            bite: {
+              value: signal(undefined),
+              reload: jest.fn(),
+            },
             reviews: signal(undefined),
             currentPosition: signal(undefined),
             bucketlists: signal(undefined),
             userId: signal(undefined),
-            biteCreator: signal(undefined),
+            biteCreator: {
+              value: signal(undefined),
+            },
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             isAuthenticated: (): void => {},
           },

@@ -29,8 +29,6 @@ describe('App Selectors', () => {
       home: false,
     },
     errorLoadingGpsPosition: false,
-    totalNumberBites: 0,
-    totalNumberUsers: 0,
     profileMetadata: {
       followers: 0,
       following: 0,
@@ -53,18 +51,29 @@ describe('App Selectors', () => {
   });
 
   describe('currency', () => {
-    it('should return the currency from settings', () => {
-      const result = fromSelectors.currency.projector(mockState);
-      expect(result).toBe('EUR');
+    describe('given slice and settings', () => {
+      it('should return the currency from settings', () => {
+        const result = fromSelectors.currency.projector(mockState);
+        expect(result).toBe('EUR');
+      });
     });
 
-    it('should return undefined when settings or currency is not set', () => {
-      const stateWithoutSettings = {
-        ...mockState,
-        settings: undefined,
-      } as unknown as AppSlice;
-      const result = fromSelectors.currency.projector(stateWithoutSettings);
-      expect(result).toBeUndefined();
+    describe('given no settings', () => {
+      it('should return undefined', () => {
+        const stateWithoutSettings = {
+          ...mockState,
+          settings: undefined,
+        } as unknown as AppSlice;
+        const result = fromSelectors.currency.projector(stateWithoutSettings);
+        expect(result).toBeUndefined();
+      });
+    });
+
+    describe('given no slice', () => {
+      it('should return undefined', () => {
+        const result = fromSelectors.currency.projector(undefined as any);
+        expect(result).toBeUndefined();
+      });
     });
   });
 
@@ -270,48 +279,6 @@ describe('App Selectors', () => {
     });
   });
 
-  describe('totalNumberBites', () => {
-    it('should return the total number of bites', () => {
-      const stateWithBites = {
-        ...mockState,
-        totalNumberBites: 42,
-      };
-      const result = fromSelectors.totalNumberBites.projector(stateWithBites);
-      expect(result).toBe(42);
-    });
-
-    it('should return 0 when total number of bites is not set', () => {
-      const stateWithoutBites = {
-        ...mockState,
-        totalNumberBites: undefined,
-      } as any;
-      const result =
-        fromSelectors.totalNumberBites.projector(stateWithoutBites);
-      expect(result).toBe(0);
-    });
-  });
-
-  describe('totalNumberUsers', () => {
-    it('should return the total number of users', () => {
-      const stateWithUsers = {
-        ...mockState,
-        totalNumberUsers: 100,
-      };
-      const result = fromSelectors.totalNumberUsers.projector(stateWithUsers);
-      expect(result).toBe(100);
-    });
-
-    it('should return 0 when total number of users is not set', () => {
-      const stateWithoutUsers = {
-        ...mockState,
-        totalNumberUsers: undefined,
-      } as any;
-      const result =
-        fromSelectors.totalNumberUsers.projector(stateWithoutUsers);
-      expect(result).toBe(0);
-    });
-  });
-
   describe('profileMeatadata', () => {
     it('should return the profile metadata', () => {
       const result = fromSelectors.profileMeatadata.projector(mockState);
@@ -331,68 +298,6 @@ describe('App Selectors', () => {
         stateWithoutProfileMetadata,
       );
       expect(result).toBeUndefined();
-    });
-  });
-
-  describe('isFollowersLoading', () => {
-    describe('slice is undefined', () => {
-      it('should return false', () => {
-        const result = fromSelectors.isFollowersLoading.projector(
-          undefined as any,
-        );
-        expect(result).toBe(false);
-      });
-    });
-
-    describe('loading is undefined', () => {
-      it('should return false', () => {
-        const stateWithoutLoading = {
-          ...mockState,
-          loading: undefined,
-        } as any;
-        const result =
-          fromSelectors.isFollowersLoading.projector(stateWithoutLoading);
-        expect(result).toBe(false);
-      });
-    });
-
-    describe('followers loading is undefined', () => {
-      it('should return false', () => {
-        const stateWithoutFollowersLoading = {
-          ...mockState,
-          loading: {},
-        } as any;
-        const result = fromSelectors.isFollowersLoading.projector(
-          stateWithoutFollowersLoading,
-        );
-        expect(result).toBe(false);
-      });
-    });
-
-    describe('followers loading is true', () => {
-      it('should return true', () => {
-        const stateWithFollowersLoading = {
-          ...mockState,
-          loading: { followers: true },
-        } as any;
-        const result = fromSelectors.isFollowersLoading.projector(
-          stateWithFollowersLoading,
-        );
-        expect(result).toBe(true);
-      });
-    });
-
-    describe('followers loading is false', () => {
-      it('should return false', () => {
-        const stateWithFollowersLoadingFalse = {
-          ...mockState,
-          loading: { followers: false },
-        } as any;
-        const result = fromSelectors.isFollowersLoading.projector(
-          stateWithFollowersLoadingFalse,
-        );
-        expect(result).toBe(false);
-      });
     });
   });
 });

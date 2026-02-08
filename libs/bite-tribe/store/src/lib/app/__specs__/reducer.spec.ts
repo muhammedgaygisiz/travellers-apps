@@ -4,10 +4,7 @@ import { AppSlice } from '../app-slice.model';
 import type { PublicUser, Settings } from 'model';
 import { BiteActions } from '../../bites/actions';
 import { fromAuth } from 'ta-firestore';
-import {
-  routerNavigationAction,
-  routerRequestAction,
-} from '@ngrx/router-store';
+import { routerRequestAction } from '@ngrx/router-store';
 
 describe('App Reducer', () => {
   describe('fromAuth.logoutSucceeded', () => {
@@ -18,8 +15,6 @@ describe('App Reducer', () => {
         loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
-        totalNumberBites: 0,
-        totalNumberUsers: 0,
         profileMetadata: {
           followers: 0,
           following: 0,
@@ -36,11 +31,9 @@ describe('App Reducer', () => {
           currency: 'EUR',
           nearby: 2000,
         },
-        loading: { home: true, followers: true },
+        loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
-        totalNumberBites: 0,
-        totalNumberUsers: 0,
         profileMetadata: {
           followers: 0,
           following: 0,
@@ -232,46 +225,6 @@ describe('App Reducer', () => {
     });
   });
 
-  describe('loadedTotalNumberOfBites', () => {
-    it('should set totalNumberBites', () => {
-      const INITIAL_STATE = {
-        totalNumberBites: 0,
-      } as AppSlice;
-      const NEW_STATE = {
-        totalNumberBites: 42,
-      } as AppSlice;
-
-      const loadedTotalNumberOfBitesAction =
-        AppActions.loadedTotalNumberOfBites({
-          total: 42,
-        });
-
-      expect(reducer(INITIAL_STATE, loadedTotalNumberOfBitesAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
-  describe('loadedTotalNumberOfUsers', () => {
-    it('should set totalNumberUsers', () => {
-      const INITIAL_STATE = {
-        totalNumberUsers: 0,
-      } as AppSlice;
-      const NEW_STATE = {
-        totalNumberUsers: 100,
-      } as AppSlice;
-
-      const loadedTotalNumberOfUsersAction =
-        AppActions.loadedTotalNumberOfUsers({
-          total: 100,
-        });
-
-      expect(reducer(INITIAL_STATE, loadedTotalNumberOfUsersAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
   describe('loadedProfileMetadata', () => {
     it('should set profileMetadata', () => {
       const INITIAL_STATE = {
@@ -321,48 +274,6 @@ describe('App Reducer', () => {
       const action = routerRequestAction({} as any);
 
       expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
-    });
-  });
-
-  describe('startLoadingFollowersData', () => {
-    it('should set loading:followers to true', () => {
-      const INITIAL_STATE = {
-        loading: {
-          followers: false,
-        },
-      } as AppSlice;
-      const NEW_STATE = {
-        loading: {
-          followers: true,
-        },
-      } as AppSlice;
-
-      const action = AppActions.startLoadingFollowersData();
-
-      expect(reducer(INITIAL_STATE, action)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
-  describe('stopLoadingFollowersData', () => {
-    it('should set loading:followers to false', () => {
-      const INITIAL_STATE = {
-        loading: {
-          followers: true,
-        },
-      } as AppSlice;
-      const NEW_STATE = {
-        loading: {
-          followers: false,
-        },
-      } as AppSlice;
-
-      const action = AppActions.stopLoadingFollowersData();
-
-      expect(reducer(INITIAL_STATE, action)).toEqual({
-        ...NEW_STATE,
-      });
     });
   });
 });

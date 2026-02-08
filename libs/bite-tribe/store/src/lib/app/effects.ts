@@ -37,34 +37,6 @@ export class AppEffect {
 
   private readonly userId = toSignal(this.store.select(userId));
 
-  loadTotalNumberBites$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(routerNavigatedAction),
-      filter((action) =>
-        action.payload.event.urlAfterRedirects.startsWith(`/${PATH.ABOUT}`),
-      ),
-      switchMap(() => {
-        return this.api
-          .getTotalNumberOfBites()
-          .pipe(map((total) => AppActions.loadedTotalNumberOfBites({ total })));
-      }),
-    );
-  });
-
-  loadTotalNumberUsers$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(routerNavigatedAction),
-      filter((action) =>
-        action.payload.event.urlAfterRedirects.startsWith(`/${PATH.ABOUT}`),
-      ),
-      switchMap(() => {
-        return this.api
-          .getTotalNumberOfUsers()
-          .pipe(map((total) => AppActions.loadedTotalNumberOfUsers({ total })));
-      }),
-    );
-  });
-
   loadSettingsFromApi$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),

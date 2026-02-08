@@ -1,13 +1,21 @@
-import { inject, Injectable } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { BiteTribeStoreService } from 'bite-tribe/store';
+import { Injectable, resource } from '@angular/core';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AboutDataAccessService {
-  private readonly storeService = inject(BiteTribeStoreService);
+  totalNumberBites = resource({
+    loader: () =>
+      FirebaseFirestore.getCountFromServer({
+        reference: 'bites',
+      }).then((result) => result.count),
+  });
 
-  totalNumberBites = toSignal(this.storeService.totalNumberBites$);
-  totalNumberUsers = toSignal(this.storeService.totalNumberUsers$);
+  totalNumberUsers = resource({
+    loader: () =>
+      FirebaseFirestore.getCountFromServer({
+        reference: 'users',
+      }).then((result) => result.count),
+  });
 }

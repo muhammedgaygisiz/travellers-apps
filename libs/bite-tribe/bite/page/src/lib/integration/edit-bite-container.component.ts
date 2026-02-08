@@ -9,7 +9,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <bite
       class="ion-page"
       title="Edit Bite"
-      [bite]="service.bite()"
+      [bite]="service.bite.value()"
       [image]="service.image() || ''"
       [nearbyRestaurants]="service.nearbyRestaurants() || []"
       [suggestedTags]="service.tagSuggestionsForEditingBite() || []"
@@ -29,7 +29,7 @@ export class EditBiteContainer {
   }
 
   onPlaceChange(place: string): void {
-    const currentBite = this.service.bite();
+    const currentBite = this.service.bite.value();
     if (currentBite) {
       this.service.setEditingBite({ ...currentBite, place });
     }

@@ -73,56 +73,6 @@ describe(AppEffect.name, () => {
     dispatchSpy = jest.spyOn(store, 'dispatch').mockImplementation();
   });
 
-  describe('loadTotalNumberBites$', () => {
-    beforeEach(() => {
-      jest
-        .spyOn(apiService, 'getTotalNumberOfBites')
-        .mockReturnValue(of(42) as any);
-    });
-
-    it('should load total number of bites on loginSucceeded', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: routerNavigatedAction({
-            payload: { event: { urlAfterRedirects: '/about' } },
-          } as any),
-        });
-
-        const expected = 'a';
-        const output = {
-          a: AppActions.loadedTotalNumberOfBites({ total: 42 }),
-        };
-
-        expectObservable(effects.loadTotalNumberBites$).toBe(expected, output);
-      });
-    });
-  });
-
-  describe('loadTotalNumberUsers$', () => {
-    beforeEach(() => {
-      jest
-        .spyOn(apiService, 'getTotalNumberOfUsers')
-        .mockReturnValue(of(100) as any);
-    });
-
-    it('should load total number of users on loginSucceeded', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: routerNavigatedAction({
-            payload: { event: { urlAfterRedirects: '/about' } },
-          } as any),
-        });
-
-        const expected = 'a';
-        const output = {
-          a: AppActions.loadedTotalNumberOfUsers({ total: 100 }),
-        };
-
-        expectObservable(effects.loadTotalNumberUsers$).toBe(expected, output);
-      });
-    });
-  });
-
   describe('loadSettingsFromApi$', () => {
     beforeEach(() => {
       document.documentElement.classList.remove('dark');

@@ -9,8 +9,8 @@ import { AboutService } from './about.service';
   template: `
     <about-page
       class="ion-page"
-      [totalNumberBites]="service.totalNumberBites()"
-      [totalNumberUsers]="service.totalNumberUsers()"
+      [totalNumberBites]="service.totalNumberBites.value()"
+      [totalNumberUsers]="service.totalNumberUsers.value()"
     />
   `,
   imports: [AboutPage],
@@ -22,5 +22,8 @@ export class AboutContainerComponent {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'About',
     });
+
+    this.service.totalNumberBites.reload();
+    this.service.totalNumberUsers.reload();
   }
 }

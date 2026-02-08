@@ -687,24 +687,6 @@ describe(ProfileApiService.name, () => {
     });
   });
 
-  describe('getTotalNumberOfUsers', () => {
-    it('should call FirebaseFirestore.getCountFromServer and return the count', inject(
-      [ProfileApiService],
-      async (service: ProfileApiService) => {
-        const getCountFromServerSpy = jest
-          .spyOn(FirebaseFirestore, 'getCountFromServer')
-          .mockResolvedValue({ count: 42 } as any);
-
-        const result = await service.getTotalNumberOfUsers();
-
-        expect(getCountFromServerSpy).toHaveBeenCalledWith({
-          reference: 'users',
-        });
-        expect(result).toBe(42);
-      },
-    ));
-  });
-
   describe('unfollowUser', () => {
     beforeEach(() => {
       jest.resetAllMocks();

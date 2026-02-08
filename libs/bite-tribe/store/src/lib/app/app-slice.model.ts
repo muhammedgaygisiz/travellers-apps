@@ -5,7 +5,6 @@ export type AppSlice = {
   settings: Settings;
   loading?: {
     home?: boolean;
-    followers?: boolean;
   };
   reloading?: {
     home?: boolean;
@@ -18,6 +17,4 @@ export type AppSlice = {
   };
   exchangeRates: Record<string, number>;
   errorLoadingGpsPosition: boolean;
-  totalNumberBites: number;
-  totalNumberUsers: number;
 };

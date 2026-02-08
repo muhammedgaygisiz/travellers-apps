@@ -2,10 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PrivacyPolicy } from '../privacy-policy';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 jest.mock('localization');
+jest.mock('@capacitor-firebase/analytics');
 
-describe('PrivacyPolicy', () => {
+describe(PrivacyPolicy.name, () => {
   let component: PrivacyPolicy;
   let fixture: ComponentFixture<PrivacyPolicy>;
 
@@ -29,6 +31,18 @@ describe('PrivacyPolicy', () => {
         jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
 
         expect(component.year).toBe('2026');
+      });
+    });
+  });
+
+  describe('ionViewDidEnter', () => {
+    it('should set current screen to Privacy Policy', () => {
+      jest.spyOn(FirebaseAnalytics, 'setCurrentScreen');
+
+      component.ionViewDidEnter();
+
+      expect(FirebaseAnalytics.setCurrentScreen).toHaveBeenCalledWith({
+        screenName: 'Privacy Policy',
       });
     });
   });

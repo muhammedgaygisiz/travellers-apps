@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonButton, IonContent } from '@ionic/angular/standalone';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
   selector: 'lib-privacy-policy',
@@ -12,6 +13,12 @@ export class PrivacyPolicy {
   isContactClicked = signal(false);
 
   year = String(new Date().getFullYear());
+
+  ionViewDidEnter(): void {
+    FirebaseAnalytics.setCurrentScreen({
+      screenName: 'Privacy Policy',
+    });
+  }
 
   contactClicked(): void {
     this.isContactClicked.set(true);

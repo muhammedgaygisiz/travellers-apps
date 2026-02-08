@@ -20,8 +20,8 @@ export const bitesByRestaurant = createSelector(
 
     const possiblyCloseBites = getCloseBites(sourceBite, bites);
 
-    if (restaurant) {
-      const normalizedRestaurantName = normalize(restaurant?.name);
+    if (restaurant?.name) {
+      const normalizedRestaurantName = normalize(restaurant.name);
 
       const bitesByRestaurant = getBitesByRestaurantName(
         normalizedRestaurantName,

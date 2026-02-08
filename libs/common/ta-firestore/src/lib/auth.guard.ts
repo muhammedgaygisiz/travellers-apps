@@ -2,7 +2,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from './auth.service';
 import { debounceTime, map, startWith } from 'rxjs';
-import { isBiteDetailsPage } from 'utils';
+import { isBiteDetailsPage, isPrivacyPage } from 'utils';
 
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
@@ -10,6 +10,11 @@ export const authGuard: CanActivateFn = () => {
 
   const isBitePage = isBiteDetailsPage();
   const authState = authService.authState();
+
+  const isPrivacyPageAddressed = isPrivacyPage();
+  if (isPrivacyPageAddressed) {
+    return true;
+  }
 
   if (isBitePage && authState?.user) {
     return true;

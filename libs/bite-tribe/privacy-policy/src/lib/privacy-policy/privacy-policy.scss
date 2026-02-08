@@ -1,0 +1,65 @@
+:host {
+  --max: 860px;
+  --pad: 20px;
+  --fg: #111;
+  --muted: #555;
+  --bg: #fff;
+  --card: #f7f7f8;
+  --border: #e6e6e8;
+
+  main {
+    padding: calc(var(--pad) * 1.4) var(--pad);
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin: 0 0 0.2rem 0;
+  }
+
+  .sub {
+    margin: 0.2rem 0 0;
+    color: var(--muted);
+  }
+
+  h2 {
+    margin-top: 1.7rem;
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    margin-top: 1rem;
+    font-size: 1.05rem;
+  }
+
+  ul {
+    padding-left: 1.2rem;
+  }
+
+  code {
+    background: #f1f1f3;
+    padding: 0.12rem 0.28rem;
+    border-radius: 6px;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  footer {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 var(--pad) calc(var(--pad) * 1.4);
+    border-top: 1px solid var(--border);
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+}

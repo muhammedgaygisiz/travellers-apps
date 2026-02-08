@@ -114,7 +114,10 @@
         "libs/bite-tribe/about/data-access/src/index.ts"
       ],
       "push-notifications": ["libs/common/push-notifications/src/index.ts"],
-      "image-upload": ["libs/common/ui/image-upload/src/index.ts"]
+      "image-upload": ["libs/common/ui/image-upload/src/index.ts"],
+      "bite-tribe/privacy-policy": [
+        "libs/bite-tribe/privacy-policy/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

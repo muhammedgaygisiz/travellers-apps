@@ -12,4 +12,5 @@ export const PATH = {
   MY_BUCKETLISTS: 'my-bucketlists',
   RESTAURANT: 'restaurant',
   MENU: 'menu',
+  PRIVACY_POLICY: 'privacy',
 };

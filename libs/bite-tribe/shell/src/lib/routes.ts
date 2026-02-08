@@ -121,6 +121,11 @@ export const ROUTES: Routes = withAuthRoutes([
       import('bite-tribe/about').then((m) => m.AboutContainerComponent),
   },
   {
+    path: PATH.PRIVACY_POLICY,
+    loadComponent: () =>
+      import('bite-tribe/privacy-policy').then((m) => m.PrivacyPolicy),
+  },
+  {
     path: '',
     redirectTo: 'start',
     pathMatch: 'full',

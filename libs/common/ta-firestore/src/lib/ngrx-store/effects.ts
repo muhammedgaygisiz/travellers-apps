@@ -20,7 +20,12 @@ import {
 import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
-import { AFTER_LOGIN_PAGE, AFTER_LOGOUT_PAGE, isBiteDetailsPage } from 'utils';
+import {
+  AFTER_LOGIN_PAGE,
+  AFTER_LOGOUT_PAGE,
+  isBiteDetailsPage,
+  isPrivacyPage,
+} from 'utils';
 import { SignInResult } from '@capacitor-firebase/authentication';
 import { Store } from '@ngrx/store';
 import { UserCredential } from '@firebase/auth';
@@ -162,6 +167,11 @@ export class AuthEffects {
           const isBitePage = isBiteDetailsPage();
 
           if (isBitePage) {
+            return;
+          }
+
+          const isPrivacyPageAddressed = isPrivacyPage();
+          if (isPrivacyPageAddressed) {
             return;
           }
 

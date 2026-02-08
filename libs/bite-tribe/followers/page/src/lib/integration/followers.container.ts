@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-  input,
-  OnInit,
-} from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FollowersListComponent } from '../components/followers-list/followers-list.component';
 import { FollowersService } from './followers.service';

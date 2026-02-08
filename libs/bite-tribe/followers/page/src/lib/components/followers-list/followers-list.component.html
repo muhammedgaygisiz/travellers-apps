@@ -24,7 +24,7 @@
       </div>
     } @else {
       <ion-list>
-        @for (user of users(); track user.userId) {
+        @for (user of users() ?? []; track user.userId) {
           <ion-item
             [button]="true"
             (click)="userClick.emit(user)"

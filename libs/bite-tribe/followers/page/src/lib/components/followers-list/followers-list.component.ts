@@ -39,8 +39,8 @@ const CANCEL = 'cancel';
     IonSpinner,
     IonAlert,
   ],
-  templateUrl: './followers-list.component.html',
-  styleUrls: ['./followers-list.component.scss'],
+  templateUrl: 'followers-list.component.html',
+  styleUrls: ['followers-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FollowersListComponent {

@@ -14,11 +14,17 @@ export class FollowersDataAccessService {
     const type = params.type;
     const userId = params.userId;
 
+    if (!userId) {
+      return Promise.resolve([]);
+    }
+
     if (type === 'followers') {
       return this.profileApiService.fetchFollowersWithDetails(userId);
-    } else {
+    } else if (type === 'following') {
       return this.profileApiService.fetchFollowingWithDetails(userId);
     }
+
+    return Promise.resolve([]);
   };
 
   users = resource({

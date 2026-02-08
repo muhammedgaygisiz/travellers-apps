@@ -73,16 +73,14 @@ describe('FollowersDataAccessService', () => {
       });
 
       describe('without user id', () => {
-        it('should pass to api service anyways', inject(
+        it('should not call api', inject(
           [FollowersDataAccessService],
           (service: FollowersDataAccessService) => {
             service.usersLoader({
               params: { type: 'followers' },
             } as any);
 
-            expect(fetchFollowersWithDetailsSpy).toHaveBeenCalledWith(
-              undefined,
-            );
+            expect(fetchFollowersWithDetailsSpy).not.toHaveBeenCalled();
           },
         ));
       });
@@ -103,16 +101,14 @@ describe('FollowersDataAccessService', () => {
       });
 
       describe('without user id', () => {
-        it('should pass to api service anyways', inject(
+        it('should not call api', inject(
           [FollowersDataAccessService],
           (service: FollowersDataAccessService) => {
             service.usersLoader({
               params: { type: 'following' },
             } as any);
 
-            expect(fetchFollowingWithDetailsSpy).toHaveBeenCalledWith(
-              undefined,
-            );
+            expect(fetchFollowingWithDetailsSpy).not.toHaveBeenCalled();
           },
         ));
       });

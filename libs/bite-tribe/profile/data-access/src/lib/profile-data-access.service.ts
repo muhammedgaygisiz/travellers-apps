@@ -26,10 +26,20 @@ export class ProfileDataAccessService {
     initialValue: [] as Bite[],
   });
 
-  userLoader: ResourceLoader<any, any> = ({ params }) => {
-    return FirebaseFirestore.getDocument({
+  userLoader: ResourceLoader<any, any> = async ({ params }) => {
+    if (!params.userId) {
+      return Promise.resolve({});
+    }
+
+    const userDoc = await FirebaseFirestore.getDocument({
       reference: `users/${params.userId}`,
-    }).then((result) => result.snapshot.data as PublicUser);
+    });
+
+    if (!userDoc.snapshot?.data) {
+      return Promise.resolve({});
+    }
+
+    return userDoc.snapshot.data as PublicUser;
   };
 
   user = resource({

@@ -50,6 +50,11 @@ export class DetailsService {
 
   likeButtonClicked(likeClick: Like): void {
     this.dataAccess.submitLikeClick(likeClick);
+
+    const timeout = setTimeout(() => {
+      this.bite.reload();
+      clearTimeout(timeout);
+    }, 1000);
   }
 
   logout(): void {

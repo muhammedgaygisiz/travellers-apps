@@ -143,12 +143,4 @@ export class BiteApiService {
 
     this._latestBitesChannel$.next(bites || []);
   }
-
-  getTotalNumberOfBites(): Promise<number> {
-    return new Promise((resolve) => {
-      FirebaseFirestore.getCountFromServer({
-        reference: BITE_COLLECTION,
-      }).then((result) => resolve(result.count));
-    });
-  }
 }

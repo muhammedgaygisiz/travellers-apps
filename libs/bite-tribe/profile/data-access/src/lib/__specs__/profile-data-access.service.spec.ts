@@ -4,6 +4,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 import { ProfileDataAccessService } from '../profile-data-access.service';
 import SpyInstance = jest.SpyInstance;
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 class Mock {
   isAuthenticated$ = of(true);
@@ -24,6 +25,8 @@ class Mock {
   followUser = jest.fn();
   unfollowUser = jest.fn();
 }
+
+jest.mock('@capacitor-firebase/firestore');
 
 describe('ProfileDataAccessService', () => {
   let storeService: BiteTribeStoreService;
@@ -134,5 +137,73 @@ describe('ProfileDataAccessService', () => {
         expect(unfollowUserSpy).toHaveBeenCalledWith(mockUser);
       },
     ));
+  });
+
+  describe('userLoader', () => {
+    let getDocumentSpy: SpyInstance;
+
+    beforeEach(() => {
+      getDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockResolvedValue({ snapshot: { data: {} } } as any);
+    });
+
+    describe('given a user id', () => {
+      it('should load user data from FirebaseFirestore', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          await service.userLoader({
+            params: { userId: 'user-id' },
+          } as any);
+
+          expect(getDocumentSpy).toHaveBeenCalledWith({
+            reference: 'users/user-id',
+          });
+        },
+      ));
+    });
+
+    describe('given no user id', () => {
+      it('should return an empty object', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          const result = await service.userLoader({
+            params: { userId: '' },
+          } as any);
+
+          expect(result).toEqual({});
+        },
+      ));
+    });
+
+    describe('given no snapshot is returned', () => {
+      it('should return an empty object', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          getDocumentSpy.mockResolvedValue({ snapshot: null } as any);
+
+          const result = await service.userLoader({
+            params: { userId: 'user-id' },
+          } as any);
+
+          expect(result).toEqual({});
+        },
+      ));
+    });
+
+    describe('given a snapshot without data is returned', () => {
+      it('should return an empty object', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          getDocumentSpy.mockResolvedValue({ snapshot: { data: null } } as any);
+
+          const result = await service.userLoader({
+            params: { userId: 'user-id' },
+          } as any);
+
+          expect(result).toEqual({});
+        },
+      ));
+    });
   });
 });

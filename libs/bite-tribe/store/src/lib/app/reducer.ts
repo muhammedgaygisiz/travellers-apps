@@ -22,12 +22,9 @@ const initialState: AppSlice = {
   },
   loading: {
     home: true,
-    followers: true,
   },
   exchangeRates: { EUR: 1 },
   errorLoadingGpsPosition: false,
-  totalNumberBites: 0,
-  totalNumberUsers: 0,
   profileMetadata: CLEAN_PROFILE_METADATA,
 };
 
@@ -111,14 +108,6 @@ export const reducer = createReducer<AppSlice>(
     ...state,
     exchangeRates,
   })),
-  on(AppActions.loadedTotalNumberOfBites, (state, { total }) => ({
-    ...state,
-    totalNumberBites: total,
-  })),
-  on(AppActions.loadedTotalNumberOfUsers, (state, { total }) => ({
-    ...state,
-    totalNumberUsers: total,
-  })),
   on(AppActions.loadedProfileMetadata, (state, { type, ...metadata }) => ({
     ...state,
     profileMetadata: {
@@ -128,19 +117,5 @@ export const reducer = createReducer<AppSlice>(
   on(routerRequestAction, (state) => ({
     ...state,
     profileMetadata: { ...CLEAN_PROFILE_METADATA },
-  })),
-  on(AppActions.startLoadingFollowersData, (state) => ({
-    ...state,
-    loading: {
-      ...state.loading,
-      followers: true,
-    },
-  })),
-  on(AppActions.stopLoadingFollowersData, (state) => ({
-    ...state,
-    loading: {
-      ...state.loading,
-      followers: false,
-    },
   })),
 );

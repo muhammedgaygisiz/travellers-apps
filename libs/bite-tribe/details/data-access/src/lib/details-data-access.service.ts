@@ -1,11 +1,20 @@
-import { inject, Injectable } from '@angular/core';
+import {
+  computed,
+  inject,
+  Injectable,
+  resource,
+  ResourceLoader,
+} from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
+  Bite,
   Like,
+  PublicUser,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
 } from 'model';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +22,41 @@ import {
 export class DetailsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
-  bite = toSignal(this.storeService.bite$);
+  biteLoader: ResourceLoader<any, any> = async ({ params }) => {
+    const biteId = params.biteId;
+    if (biteId) {
+      const likeDocs = await FirebaseFirestore.getCollection({
+        reference: `bites/${biteId}/likes`,
+      });
+
+      const likes = likeDocs.snapshots.map(
+        (like) =>
+          ({
+            ...like.data,
+          }) as Like,
+      );
+
+      return FirebaseFirestore.getDocument({
+        reference: `bites/${biteId}`,
+      }).then((res) => {
+        return {
+          ...res.snapshot.data,
+          likes,
+          id: res.snapshot.id,
+        } as Bite;
+      });
+    }
+
+    return Promise.resolve();
+  };
+
+  bite = resource({
+    params: () => ({
+      biteId: this.storeService.biteIdFromUrl(),
+    }),
+    loader: this.biteLoader.bind(this),
+  });
+
   reviews = toSignal(this.storeService.reviews$, { initialValue: [] as any });
   bucketlists = toSignal(this.storeService.bucketlists$, {
     initialValue: [] as any,
@@ -22,7 +65,29 @@ export class DetailsDataAccessService {
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
   });
-  biteCreator = toSignal(this.storeService.biteCreator$);
+
+  biteCreatorId = computed(() => {
+    const bite = this.bite.value();
+    return bite?.userId;
+  });
+
+  biteCreatorLoader: ResourceLoader<any, any> = ({ params }) => {
+    const userId = params.userId;
+    if (userId) {
+      return FirebaseFirestore.getDocument({
+        reference: `users/${userId}`,
+      }).then((res) => res.snapshot.data as PublicUser);
+    }
+
+    return Promise.resolve();
+  };
+
+  biteCreator = resource({
+    params: () => ({
+      userId: this.biteCreatorId(),
+    }),
+    loader: this.biteCreatorLoader.bind(this),
+  });
 
   saveNewReview(newReview: { review: string; biteId: string }): void {
     this.storeService.saveReview(newReview);
@@ -44,11 +109,12 @@ export class DetailsDataAccessService {
   }
 
   submitLikeClick(likeType: Like): void {
-    const bite = this.bite();
+    const bite = this.bite.value();
     const userId = this.userId();
 
     const likeFromUser = bite?.likes?.find(
-      (like) => like.userId === userId && like.likeType === likeType.likeType,
+      (like: Like) =>
+        like.userId === userId && like.likeType === likeType.likeType,
     );
 
     if (likeFromUser) {

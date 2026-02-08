@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnInit,
-} from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FollowersListComponent } from '../components/followers-list/followers-list.component';
 import { FollowersService } from './followers.service';
@@ -14,10 +8,10 @@ import { FollowersService } from './followers.service';
   template: `
     <followers-list
       class="ion-page"
-      [users]="service.users()"
+      [users]="service.users.value()"
       [type]="service.type()"
       [currentUserId]="service.currentUserId()"
-      [isLoading]="service.isLoading()"
+      [isLoading]="service.users.isLoading()"
       (userClick)="service.userClicked($event)"
       (unfollowClick)="service.unfollowClicked($event)"
     />

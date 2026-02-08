@@ -11,6 +11,7 @@ import {
   IonAvatar,
   IonButton,
   IonContent,
+  IonIcon,
   IonItem,
   IonLabel,
   IonList,
@@ -38,13 +39,14 @@ const CANCEL = 'cancel';
     PageComponent,
     IonSpinner,
     IonAlert,
+    IonIcon,
   ],
-  templateUrl: './followers-list.component.html',
-  styleUrls: ['./followers-list.component.scss'],
+  templateUrl: 'followers-list.component.html',
+  styleUrls: ['followers-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FollowersListComponent {
-  users = input.required<PublicUser[]>();
+  users = input.required<PublicUser[] | undefined>();
   type = input.required<'followers' | 'following'>();
   currentUserId = input<string>();
   isLoading = input<boolean>(false);

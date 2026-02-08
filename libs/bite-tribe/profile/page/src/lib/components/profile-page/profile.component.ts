@@ -65,7 +65,7 @@ const PAGE_SIZE = 50;
 })
 export class ProfileComponent {
   isAuthenticated = input(false);
-  user = input<PublicUser>();
+  user = input<PublicUser | undefined>();
   bites = input<Bite[]>();
   profileMetadata = input<ProfileMetaData>();
   userId = input<string>();

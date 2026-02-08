@@ -369,20 +369,4 @@ describe(BiteApiService.name, () => {
       });
     });
   });
-
-  describe('getTotalNumberOfBites', () => {
-    it('should call FirebaseFirestore to get total number of bites', async () => {
-      const mockCountResult = { count: 42 };
-      (FirebaseFirestore.getCountFromServer as jest.Mock).mockResolvedValueOnce(
-        mockCountResult,
-      );
-
-      const totalBites = await service.getTotalNumberOfBites();
-
-      expect(FirebaseFirestore.getCountFromServer).toHaveBeenCalledWith({
-        reference: BITE_COLLECTION,
-      });
-      expect(totalBites).toBe(42);
-    });
-  });
 });

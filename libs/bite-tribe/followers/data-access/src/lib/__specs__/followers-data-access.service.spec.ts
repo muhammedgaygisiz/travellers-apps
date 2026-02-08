@@ -5,11 +5,12 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { ProfileApiService } from 'bite-tribe/api';
 import { of } from 'rxjs';
 import { PublicUser } from 'model';
+import { signal } from '@angular/core';
 
 class MockBiteTribeStoreService {
-  users$ = of([]);
   type$ = of('followers');
-  isFollowersLoading$ = of(false);
+  userIdFromUrl = signal(null);
+  type = signal(null);
 }
 
 class MockProfileApiService {
@@ -41,42 +42,150 @@ describe('FollowersDataAccessService', () => {
     },
   ));
 
-  describe('fetchFollowersWithDetails', () => {
-    it('should call fetchFollowersWithDetails on ProfileApiService', inject(
-      [FollowersDataAccessService],
-      async (service: FollowersDataAccessService) => {
-        const mockUsers: PublicUser[] = [
-          { userId: 'user1', displayName: 'User 1' } as PublicUser,
-        ];
-        const fetchSpy = jest
-          .spyOn(profileApiService, 'fetchFollowersWithDetails')
-          .mockResolvedValue(mockUsers);
+  describe('usersLoader', () => {
+    describe('given no user id', () => {
+      it('should return empty array for followers', inject(
+        [FollowersDataAccessService],
+        (service: FollowersDataAccessService) => {
+          const result = service.usersLoader({
+            params: { type: 'followers' },
+          } as any);
 
-        const result = await service.fetchFollowersWithDetails('test-user-id');
+          expect(result).resolves.toEqual([]);
+        },
+      ));
 
-        expect(fetchSpy).toHaveBeenCalledWith('test-user-id');
-        expect(result).toEqual(mockUsers);
-      },
-    ));
+      it('should return empty array for following', inject(
+        [FollowersDataAccessService],
+        (service: FollowersDataAccessService) => {
+          const result = service.usersLoader({
+            params: { type: 'following' },
+          } as any);
+
+          expect(result).resolves.toEqual([]);
+        },
+      ));
+    });
+
+    describe('given user id but different type', () => {
+      it('should return empty array', inject(
+        [FollowersDataAccessService],
+        (service: FollowersDataAccessService) => {
+          const result = service.usersLoader({
+            params: { type: 'unknown', userId: 'some-user-id' },
+          } as any);
+
+          expect(result).resolves.toEqual([]);
+        },
+      ));
+    });
+
+    describe('given a user id', () => {
+      describe('and type followers', () => {
+        it('should call fetchFollowersWithDetails', inject(
+          [FollowersDataAccessService],
+          (service: FollowersDataAccessService) => {
+            const userId = 'some-user-id';
+            service.usersLoader({
+              params: { type: 'followers', userId },
+            } as any);
+
+            expect(
+              profileApiService.fetchFollowersWithDetails,
+            ).toHaveBeenCalledWith(userId);
+          },
+        ));
+      });
+
+      describe('and type following', () => {
+        it('should call fetchFollowingWithDetails', inject(
+          [FollowersDataAccessService],
+          (service: FollowersDataAccessService) => {
+            const userId = 'some-user-id';
+            service.usersLoader({
+              params: { type: 'following', userId },
+            } as any);
+
+            expect(
+              profileApiService.fetchFollowingWithDetails,
+            ).toHaveBeenCalledWith(userId);
+          },
+        ));
+      });
+    });
   });
 
-  describe('fetchFollowingWithDetails', () => {
-    it('should call fetchFollowingWithDetails on ProfileApiService', inject(
-      [FollowersDataAccessService],
-      async (service: FollowersDataAccessService) => {
-        const mockUsers: PublicUser[] = [
-          { userId: 'user1', displayName: 'User 1' } as PublicUser,
-        ];
-        const fetchSpy = jest
-          .spyOn(profileApiService, 'fetchFollowingWithDetails')
-          .mockResolvedValue(mockUsers);
+  describe('users', () => {
+    const userId = 'some-user-id';
+    let fetchFollowersWithDetailsSpy: jest.SpyInstance;
+    let fetchFollowingWithDetailsSpy: jest.SpyInstance;
 
-        const result = await service.fetchFollowingWithDetails('test-user-id');
+    beforeEach(() => {
+      fetchFollowersWithDetailsSpy = jest.spyOn(
+        profileApiService,
+        'fetchFollowersWithDetails',
+      );
+      fetchFollowingWithDetailsSpy = jest.spyOn(
+        profileApiService,
+        'fetchFollowingWithDetails',
+      );
+    });
 
-        expect(fetchSpy).toHaveBeenCalledWith('test-user-id');
-        expect(result).toEqual(mockUsers);
-      },
-    ));
+    describe('given followers type', () => {
+      describe('with user id', () => {
+        it('should fetch followers', inject(
+          [FollowersDataAccessService, BiteTribeStoreService],
+          (service: FollowersDataAccessService) => {
+            service.usersLoader({
+              params: { type: 'followers', userId },
+            } as any);
+
+            expect(fetchFollowersWithDetailsSpy).toHaveBeenCalledWith(userId);
+          },
+        ));
+      });
+
+      describe('without user id', () => {
+        it('should not call api', inject(
+          [FollowersDataAccessService],
+          (service: FollowersDataAccessService) => {
+            service.usersLoader({
+              params: { type: 'followers' },
+            } as any);
+
+            expect(fetchFollowersWithDetailsSpy).not.toHaveBeenCalled();
+          },
+        ));
+      });
+    });
+
+    describe('given following type', () => {
+      describe('with user id', () => {
+        it('should fetch followings', inject(
+          [FollowersDataAccessService],
+          (service: FollowersDataAccessService) => {
+            service.usersLoader({
+              params: { type: 'following', userId },
+            } as any);
+
+            expect(fetchFollowingWithDetailsSpy).toHaveBeenCalledWith(userId);
+          },
+        ));
+      });
+
+      describe('without user id', () => {
+        it('should not call api', inject(
+          [FollowersDataAccessService],
+          (service: FollowersDataAccessService) => {
+            service.usersLoader({
+              params: { type: 'following' },
+            } as any);
+
+            expect(fetchFollowingWithDetailsSpy).not.toHaveBeenCalled();
+          },
+        ));
+      });
+    });
   });
 
   describe('unfollowUser', () => {

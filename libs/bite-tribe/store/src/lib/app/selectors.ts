@@ -18,10 +18,6 @@ export const isBitesLoading = createSelector(slice, (slice) => {
   return slice?.loading?.home;
 });
 
-export const isFollowersLoading = createSelector(slice, (slice) => {
-  return slice?.loading?.followers || false;
-});
-
 export const publicUser = createSelector(slice, (slice) => slice?.profile);
 
 export const exchangeRates = createSelector(
@@ -54,16 +50,6 @@ export const userHasSubscriptionTierOne = createSelector(slice, (state) => {
   }
   return false;
 });
-
-export const totalNumberBites = createSelector(
-  slice,
-  (state) => state?.totalNumberBites || 0,
-);
-
-export const totalNumberUsers = createSelector(
-  slice,
-  (state) => state?.totalNumberUsers || 0,
-);
 
 export const profileMeatadata = createSelector(
   slice,

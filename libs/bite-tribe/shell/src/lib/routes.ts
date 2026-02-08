@@ -43,6 +43,7 @@ export const ROUTES: Routes = withAuthRoutes([
     path: `${PATH.BITE}/:biteId/edit`,
     loadComponent: () =>
       import('bite-tribe/bite').then((m) => m.EditBiteContainer),
+    title: biteTitleResolver,
     canActivate: [authGuard],
   },
   {
@@ -60,18 +61,21 @@ export const ROUTES: Routes = withAuthRoutes([
     path: 'settings',
     loadComponent: () =>
       import('bite-tribe/settings').then((m) => m.SettingsContainer),
+    title: 'Settings',
     canActivate: [authGuard],
   },
   {
     path: PATH.MY_BITES,
     loadComponent: () =>
       import('bite-tribe/home').then((m) => m.MyBitesContainerComponent),
+    title: 'My Bites',
     canActivate: [authGuard],
   },
   {
     path: `${PATH.MY_BITES}/map-view`,
     loadComponent: () =>
       import('bite-tribe/map').then((m) => m.MyBitesMapContainerComponent),
+    title: 'My Bites',
     canActivate: [authGuard],
   },
   {
@@ -80,6 +84,7 @@ export const ROUTES: Routes = withAuthRoutes([
       import('bite-tribe/bucketlist').then(
         (m) => m.BucketlistsContainerComponent,
       ),
+    title: 'My Bucketlists',
     canActivate: [authGuard],
   },
   {
@@ -98,16 +103,21 @@ export const ROUTES: Routes = withAuthRoutes([
     path: `${PATH.PROFILE}/:userId`,
     loadComponent: () =>
       import('bite-tribe/profile').then((m) => m.ProfileContainer),
+    canActivate: [authGuard],
   },
   {
     path: PATH.MY_PROFILE,
     loadComponent: () =>
       import('bite-tribe/profile').then((m) => m.MyProfileContainer),
+    title: 'My Profile',
+    canActivate: [authGuard],
   },
   {
     path: PATH.EDIT_PROFILE,
     loadComponent: () =>
       import('bite-tribe/profile').then((m) => m.EditProfileContainer),
+    title: 'Edit Profile',
+    canActivate: [authGuard],
   },
   {
     path: `${PATH.FOLLOWERS}/:userId/:type`,
@@ -119,11 +129,14 @@ export const ROUTES: Routes = withAuthRoutes([
     path: PATH.ABOUT,
     loadComponent: () =>
       import('bite-tribe/about').then((m) => m.AboutContainerComponent),
+    title: 'About',
+    canActivate: [authGuard],
   },
   {
     path: PATH.PRIVACY_POLICY,
     loadComponent: () =>
       import('bite-tribe/privacy-policy').then((m) => m.PrivacyPolicy),
+    title: 'Privacy Policy',
   },
   {
     path: '',

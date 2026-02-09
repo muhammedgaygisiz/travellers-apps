@@ -2,7 +2,7 @@ import { TypeaheadComponent } from '../type-ahead.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 
-describe('TypeaheadComponent', () => {
+describe(TypeaheadComponent.name, () => {
   let component: TypeaheadComponent;
   let fixture: ComponentFixture<TypeaheadComponent>;
   let compRef: ComponentRef<TypeaheadComponent>;
@@ -120,6 +120,34 @@ describe('TypeaheadComponent', () => {
       const event = { target: { value: '50' } } as any;
       component.priceInput(event);
       expect(component.priceValue()).toBe(50);
+    });
+  });
+
+  describe('priceValue', () => {
+    describe('given a price', () => {
+      it('should return the price', () => {
+        compRef.setInput('price', 100);
+        compRef.changeDetectorRef.detectChanges();
+
+        expect(component.priceValue()).toBe(100);
+      });
+    });
+
+    describe('given no price', () => {
+      it('should return 0', () => {
+        compRef.setInput('price', undefined);
+        compRef.changeDetectorRef.detectChanges();
+
+        expect(component.priceValue()).toBe(0);
+      });
+    });
+  });
+
+  describe('clearAllFilters', () => {
+    it('should emit clearFilters event', () => {
+      const clearFiltersSpy = jest.spyOn(component.clearFilters, 'emit');
+      component.clearAllFilters();
+      expect(clearFiltersSpy).toHaveBeenCalled();
     });
   });
 });

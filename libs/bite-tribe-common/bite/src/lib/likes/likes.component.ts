@@ -38,7 +38,7 @@ export class LikesComponent {
     const bite = this.bite();
     const userId = this.userId();
 
-    if (!bite.likes?.length) {
+    if (!bite?.likes?.length) {
       return 'unliked';
     }
 

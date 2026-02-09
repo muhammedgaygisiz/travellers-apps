@@ -25,7 +25,7 @@ const mockBite: Bite = {
   tags: ['spicy', 'vegetarian'],
 };
 
-describe('LikesComponent', () => {
+describe(LikesComponent.name, () => {
   let component: LikesComponent;
   let componentRef: ComponentRef<LikesComponent>;
   let fixture: ComponentFixture<LikesComponent>;
@@ -54,11 +54,32 @@ describe('LikesComponent', () => {
     expect(component.calcClass()).toBe('');
   });
 
-  it('should map like types to emojis correctly', () => {
-    const emojis = component.getLikeEmojis();
-    expect(emojis).toContain('👍');
-    expect(emojis).toContain('🤤');
-    expect(emojis).toHaveLength(2);
+  describe('getLikeEmojis', () => {
+    describe('given bite with liked', () => {
+      it('should map like types to emojis correctly', () => {
+        const emojis = component.getLikeEmojis();
+        expect(emojis).toContain('👍');
+        expect(emojis).toContain('🤤');
+        expect(emojis).toHaveLength(2);
+      });
+    });
+
+    describe('given bite without likes', () => {
+      it('should return empty array', () => {
+        const noLikesBite = { ...mockBite, likes: [] };
+        componentRef.setInput('bite', noLikesBite);
+        componentRef.changeDetectorRef.detectChanges();
+        expect(component.getLikeEmojis()).toEqual([]);
+      });
+    });
+
+    describe('given bite is not defined', () => {
+      it('should return empty array', () => {
+        componentRef.setInput('bite', null as any);
+        componentRef.changeDetectorRef.detectChanges();
+        expect(component.getLikeEmojis()).toEqual([]);
+      });
+    });
   });
 
   it('should handle empty likes array', () => {

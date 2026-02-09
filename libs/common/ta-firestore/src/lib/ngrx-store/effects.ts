@@ -23,6 +23,7 @@ import { AuthService } from '../auth.service';
 import {
   AFTER_LOGIN_PAGE,
   AFTER_LOGOUT_PAGE,
+  isAccountDeletionPage,
   isBiteDetailsPage,
   isPrivacyPage,
 } from 'utils';
@@ -172,6 +173,11 @@ export class AuthEffects {
 
           const isPrivacyPageAddressed = isPrivacyPage();
           if (isPrivacyPageAddressed) {
+            return;
+          }
+
+          const isAccountDeletionPageAddressed = isAccountDeletionPage();
+          if (isAccountDeletionPageAddressed) {
             return;
           }
 

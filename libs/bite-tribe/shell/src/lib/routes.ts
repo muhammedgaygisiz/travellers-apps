@@ -139,6 +139,12 @@ export const ROUTES: Routes = withAuthRoutes([
     title: 'Privacy Policy',
   },
   {
+    path: PATH.ACCOUNT_DELETION,
+    loadComponent: () =>
+      import('bite-tribe/delete-account').then((m) => m.DeleteAccount),
+    title: 'Account Deletion',
+  },
+  {
     path: '',
     redirectTo: 'start',
     pathMatch: 'full',

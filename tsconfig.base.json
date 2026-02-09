@@ -117,6 +117,9 @@
       "image-upload": ["libs/common/ui/image-upload/src/index.ts"],
       "bite-tribe/privacy-policy": [
         "libs/bite-tribe/privacy-policy/src/index.ts"
+      ],
+      "bite-tribe/delete-account": [
+        "libs/bite-tribe/delete-account/src/index.ts"
       ]
     }
   },

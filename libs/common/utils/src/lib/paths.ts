@@ -13,4 +13,5 @@ export const PATH = {
   RESTAURANT: 'restaurant',
   MENU: 'menu',
   PRIVACY_POLICY: 'privacy',
+  ACCOUNT_DELETION: 'account-deletion',
 };

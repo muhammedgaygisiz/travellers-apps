@@ -131,6 +131,10 @@ export class DetailsDataAccessService {
     const bite = this.bite.value();
     const userId = this.userId();
 
+    if (!bite) {
+      return;
+    }
+
     const likeFromUser = bite?.likes?.find(
       (like: Like) =>
         like.userId === userId && like.likeType === likeType.likeType,

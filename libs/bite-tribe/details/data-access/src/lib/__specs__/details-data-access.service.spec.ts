@@ -42,6 +42,9 @@ describe(DetailsDataAccessService.name, () => {
             createAndSaveToBucketList: jest.fn(),
             removeBiteFromBucketlist: jest.fn(),
             logout: jest.fn(),
+            submitLikeClick: jest.fn(),
+            removeLike: jest.fn(),
+            biteIdFromUrl: jest.fn(),
           },
         },
       ],
@@ -239,6 +242,62 @@ describe(DetailsDataAccessService.name, () => {
     it('should call logout on store service', () => {
       service.logout();
       expect(logoutSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('submitLikeClick', () => {
+    describe('given no bite and user id', () => {
+      let submitLikeClickSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        submitLikeClickSpy = jest.spyOn(storeService, 'submitLikeClick');
+      });
+
+      it('should not call submitLikeClick', () => {
+        service.submitLikeClick({ likeType: 'like' } as any);
+
+        expect(submitLikeClickSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('given a bite without likes', () => {
+      let submitLikeClickSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        submitLikeClickSpy = jest.spyOn(storeService, 'submitLikeClick');
+        service.bite = {
+          value: () => ({ id: 'test-bite-id' }) as any,
+        } as any;
+        jest.spyOn(service, 'userId').mockReturnValue('test-user-id');
+      });
+
+      it('should call submitLikeClick with like type', () => {
+        service.submitLikeClick({ likeType: 'like' } as any);
+
+        expect(submitLikeClickSpy).toHaveBeenCalledWith({ likeType: 'like' });
+      });
+    });
+
+    describe('given a like from user exists', () => {
+      let removeLikeSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        removeLikeSpy = jest.spyOn(storeService, 'removeLike');
+        service.bite = {
+          value: () =>
+            ({
+              id: 'test-bite-id',
+              likes: [{ userId: 'test-user-id', likeType: 'like' }],
+            }) as any,
+        } as any;
+        jest.spyOn(service, 'userId').mockReturnValue('test-user-id');
+      });
+
+      it('should call removeLike with like type', () => {
+        service.submitLikeClick({ likeType: 'like' } as any);
+
+        expect(removeLikeSpy).toHaveBeenCalledWith({ likeType: 'like' });
+      });
     });
   });
 });

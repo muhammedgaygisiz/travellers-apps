@@ -1,12 +1,10 @@
 import { TimeAgoPipe } from '../time-ago.pipe';
 
 describe('TimeAgoPipe', () => {
-  let pipe: TimeAgoPipe;
+  const pipe = new TimeAgoPipe();
   const currentDate = new Date('2025-06-09T12:00:00Z');
 
   beforeEach(() => {
-    pipe = new TimeAgoPipe();
-    // Mock the current date
     jest.useFakeTimers();
     jest.setSystemTime(currentDate);
   });
@@ -47,5 +45,12 @@ describe('TimeAgoPipe', () => {
   it('should handle invalid date string', () => {
     const invalidDate = 'not-a-date';
     expect(pipe.transform(invalidDate)).toBe('NaN y ago');
+  });
+
+  describe('given diffMinutes is less than 60', () => {
+    it('should return "just now" for 1 minute ago', () => {
+      const oneMinuteAgo = new Date('2025-06-09T11:59:00Z');
+      expect(pipe.transform(oneMinuteAgo.toISOString())).toBe('just now');
+    });
   });
 });

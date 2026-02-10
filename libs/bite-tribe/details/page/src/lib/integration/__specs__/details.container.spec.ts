@@ -13,7 +13,7 @@ jest.mock('heic2any', () => jest.fn());
 jest.mock('localization');
 addNecessaryIcons();
 
-describe('DetailsComponent', () => {
+describe(DetailsContainer.name, () => {
   let component: DetailsContainer;
   let fixture: ComponentFixture<DetailsContainer>;
 
@@ -29,7 +29,9 @@ describe('DetailsComponent', () => {
               reload: jest.fn(),
             },
             reviews: signal(undefined),
-            currentPosition: signal(undefined),
+            currentPosition: {
+              value: signal(undefined),
+            },
             bucketlists: signal(undefined),
             userId: signal(undefined),
             biteCreator: {
@@ -44,7 +46,6 @@ describe('DetailsComponent', () => {
 
     fixture = TestBed.createComponent(DetailsContainer);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {

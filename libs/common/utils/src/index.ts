@@ -25,3 +25,4 @@ export { isBiteDetailsPage } from './lib/is-bite-details-page';
 export { isBase64String } from './lib/is-base64-string';
 export { isPrivacyPage } from './lib/is-privacy-page';
 export { isAccountDeletionPage } from './lib/is-account-deletion-page';
+export { getBitePriceInPreferredCurrency } from './lib/get-bite-price-in-preferred-currency';

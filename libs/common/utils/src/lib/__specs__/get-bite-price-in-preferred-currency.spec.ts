@@ -1,9 +1,8 @@
-import type { Bite } from 'model';
 import { getBitePriceInPreferredCurrency } from '../get-bite-price-in-preferred-currency';
 
 describe('getBitePriceInPreferredCurrency', () => {
   it('should return the price in the preferred currency if the bite currency matches', () => {
-    const bite = { price: 100, currency: 'USD' } as Bite;
+    const bite = { price: 100, currency: 'USD' };
     const exchangeRates = { USD: 1, EUR: 0.85 };
     const preferredCurrency = 'USD';
 
@@ -16,7 +15,7 @@ describe('getBitePriceInPreferredCurrency', () => {
   });
 
   it('should convert the price to the preferred currency if the bite currency does not match', () => {
-    const bite = { price: 100, currency: 'USD' } as Bite;
+    const bite = { price: 100, currency: 'USD' };
     const exchangeRates = { USD: 1, EUR: 0.85 };
     const preferredCurrency = 'EUR';
 
@@ -29,7 +28,7 @@ describe('getBitePriceInPreferredCurrency', () => {
   });
 
   it('should handle cases where the exchange rate for the bite currency is not available', () => {
-    const bite = { price: 100, currency: 'GBP' } as Bite; // GBP has no rate
+    const bite = { price: 100, currency: 'GBP' }; // GBP has no rate
     const exchangeRates = { USD: 1, EUR: 0.85 };
     const preferredCurrency = 'EUR';
 
@@ -42,7 +41,7 @@ describe('getBitePriceInPreferredCurrency', () => {
   });
 
   it('should return the price in EUR if no preferred currency is specified', () => {
-    const bite = { price: 100, currency: 'USD' } as Bite;
+    const bite = { price: 100, currency: 'USD' };
     const exchangeRates = { USD: 1, EUR: 0.85 };
 
     const price = getBitePriceInPreferredCurrency(bite, exchangeRates);

@@ -134,6 +134,10 @@ describe(DetailsDataAccessService.name, () => {
   });
 
   describe('positionLoader', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     describe('given no permissions', () => {
       let checkPermissionsSpy: jest.SpyInstance;
       let requestPermissionsSpy: jest.SpyInstance;
@@ -157,6 +161,32 @@ describe(DetailsDataAccessService.name, () => {
         expect(checkPermissionsSpy).toHaveBeenCalled();
         expect(requestPermissionsSpy).toHaveBeenCalled();
         expect(getCurrentPositionSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('given permission is granted', () => {
+      let checkPermissionsSpy: jest.SpyInstance;
+      let getCurrentPositionSpy: jest.SpyInstance;
+      let requestPermissionsSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        checkPermissionsSpy = jest
+          .spyOn(Geolocation, 'checkPermissions')
+          .mockReturnValue({ location: 'granted' } as any);
+        getCurrentPositionSpy = jest
+          .spyOn(Geolocation, 'getCurrentPosition')
+          .mockReturnValue({} as any);
+        requestPermissionsSpy = jest
+          .spyOn(Geolocation, 'requestPermissions')
+          .mockResolvedValue({} as any);
+      });
+
+      it('should not request permissions', async () => {
+        await service.positionLoader({} as any);
+
+        expect(checkPermissionsSpy).toHaveBeenCalled();
+        expect(getCurrentPositionSpy).toHaveBeenCalled();
+        expect(requestPermissionsSpy).not.toHaveBeenCalled();
       });
     });
   });

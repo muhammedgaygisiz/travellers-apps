@@ -48,7 +48,6 @@ describe('Geolocation Service', () => {
       expect(platform.is).toHaveBeenCalledWith('capacitor');
       expect(Geolocation.checkPermissions).toHaveBeenCalled();
       expect(Geolocation.getCurrentPosition).toHaveBeenCalledWith({
-        enableHighAccuracy: true,
         timeout: 8000,
       });
       expect(result).toEqual(mockPosition);

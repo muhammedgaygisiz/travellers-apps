@@ -15,6 +15,7 @@ import {
   SaveToBucketListParams,
 } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { Geolocation, Position } from '@capacitor/geolocation';
 
 @Injectable({
   providedIn: 'root',
@@ -61,6 +62,8 @@ export class DetailsDataAccessService {
   bucketlists = toSignal(this.storeService.bucketlists$, {
     initialValue: [] as any,
   });
+  exchangeRates = toSignal(this.storeService.exchangeRates$);
+  preferredCurrency = toSignal(this.storeService.preferedCurrency$);
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
@@ -82,11 +85,27 @@ export class DetailsDataAccessService {
     return Promise.resolve();
   };
 
+  positionLoader: ResourceLoader<any, Position> = async () => {
+    const permissionStatus = await Geolocation.checkPermissions();
+
+    if (permissionStatus.location !== 'granted') {
+      await Geolocation.requestPermissions();
+    }
+
+    return Geolocation.getCurrentPosition({
+      timeout: 10000,
+    });
+  };
+
   biteCreator = resource({
     params: () => ({
       userId: this.biteCreatorId(),
     }),
     loader: this.biteCreatorLoader.bind(this),
+  });
+
+  position = resource({
+    loader: this.positionLoader.bind(this),
   });
 
   saveNewReview(newReview: { review: string; biteId: string }): void {
@@ -111,6 +130,10 @@ export class DetailsDataAccessService {
   submitLikeClick(likeType: Like): void {
     const bite = this.bite.value();
     const userId = this.userId();
+
+    if (!bite) {
+      return;
+    }
 
     const likeFromUser = bite?.likes?.find(
       (like: Like) =>

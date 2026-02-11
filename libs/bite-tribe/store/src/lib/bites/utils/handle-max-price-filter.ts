@@ -1,5 +1,5 @@
 import type { Bite } from 'model';
-import { getBitePriceInPreferredCurrency } from './get-bite-price-in-preferred-currency';
+import { getBitePriceInPreferredCurrency } from 'utils';
 
 export const handleMaxPriceFilter = (
   maxPriceInPreferedCurrency: number,

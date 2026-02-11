@@ -47,4 +47,12 @@ describe('getBitePriceInPreferredCurrency', () => {
     const price = getBitePriceInPreferredCurrency(bite, exchangeRates);
     expect(price).toBeCloseTo(85); // Default to EUR
   });
+
+  it('should return use EUR exchange rate (1) if exchange rate is unknown', () => {
+    const bite = { price: 100, currency: 'GBP' }; // GBP has no rate
+    const exchangeRates = { USD: 1, EUR: 0.85 };
+
+    const price = getBitePriceInPreferredCurrency(bite, exchangeRates);
+    expect(price).toBeCloseTo(85); // Default to 1 if no rate
+  });
 });

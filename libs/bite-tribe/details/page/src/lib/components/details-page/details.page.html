@@ -55,16 +55,27 @@
           <span class="link" (click)="onRestaurantClick(biteData)">
             {{ biteData?.place }}
           </span>
-          · {{ biteData?.distance | roundDistance | toMetric }}
+          @if (biteData?.distance) { · {{ biteData?.distance | roundDistance |
+          toMetric }} } @let positionData = position(); @if (positionData) { ·
+          {{ biteData?.position | calcDistance : positionData | roundDistance |
+          toMetric }} }
         </span>
 
         <div class="price-column">
           @if (biteData?.priceInPreferredCurrency && biteData?.currency !==
           biteData?.priceInPreferredCurrencySymbol) {
           <span class="price">
-            {{ biteData?.priceInPreferredCurrency |
-            currency:(biteData?.priceInPreferredCurrencySymbol || 'USD') }}
+            @if (biteData?.priceInPreferredCurrency) { {{
+            biteData?.priceInPreferredCurrency |
+            currency:(biteData?.priceInPreferredCurrencySymbol || 'USD') }} }
           </span>
+          } @else if (biteData?.price && biteData?.currency !==
+          preferredCurrency()) {
+          <span class="price">
+            {{ biteData | convertToPreferredCurrency : exchangeRates() :
+            preferredCurrency() | currency:(preferredCurrency() || 'USD') }}
+          </span>
+
           } @if (biteData?.price) {
           <span class="price">
             {{ biteData?.price | currency:(biteData?.currency || 'USD') }}

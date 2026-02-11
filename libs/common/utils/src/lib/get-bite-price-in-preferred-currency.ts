@@ -1,8 +1,10 @@
-import type { Bite } from 'model';
-import { getNormalizedPriceInEur } from 'utils';
+import { getNormalizedPriceInEur } from './get-normalized-price-in-eur';
 
 export const getBitePriceInPreferredCurrency = (
-  bite: Bite,
+  bite: {
+    currency?: string;
+    price: number;
+  },
   exchangeRates: Record<string, number>,
   preferredCurrency = 'EUR',
 ): number => {
@@ -18,6 +20,6 @@ export const getBitePriceInPreferredCurrency = (
     exchangeRates[biteCurrency] || 1, // Default to 1 if no rate
   );
 
-  const exchangeRateToPreferedCurrency = exchangeRates[preferredCurrency] || 1; // Default to 1 if no rate
-  return +normalizedPriceInEur * exchangeRateToPreferedCurrency;
+  const exchangeRateToPreferredCurrency = exchangeRates[preferredCurrency] || 1; // Default to 1 if no rate
+  return +normalizedPriceInEur * exchangeRateToPreferredCurrency;
 };

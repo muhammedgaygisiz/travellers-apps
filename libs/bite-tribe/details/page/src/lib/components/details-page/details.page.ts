@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  Input,
   input,
   output,
 } from '@angular/core';
@@ -42,6 +43,9 @@ import { Platform } from '@ionic/angular';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
+import { Position } from '@capacitor/geolocation';
+import { CalcDistancePipe } from './pipes/calc-distance.pipe';
+import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-currency.pipe';
 
 @Component({
   selector: 'details-page',
@@ -70,6 +74,8 @@ import { TagsInputComponent } from 'common/ui/tags';
     StarRatingComponent,
     TagsInputComponent,
     RoundDistancePipe,
+    CalcDistancePipe,
+    ConvertToPreferredCurrencyPipe,
   ],
 })
 export class DetailsPage {
@@ -79,6 +85,9 @@ export class DetailsPage {
   userId = input<string>();
   isAuthenticated = input(false);
   biteCreator = input<PublicUser>();
+  position = input<Position>();
+  exchangeRates = input<Record<string, number>>();
+  preferredCurrency = input<string>();
 
   selectList = output<Bucketlist>();
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();

@@ -18,9 +18,12 @@ export class DetailsService {
   bite = this.dataAccess.bite;
   reviews = this.dataAccess.reviews;
   bucketlists = this.dataAccess.bucketlists;
+  exchangeRates = this.dataAccess.exchangeRates;
+  preferredCurrency = this.dataAccess.preferredCurrency;
   userId = this.dataAccess.userId;
   isAuthenticated = this.dataAccess.isAuthenticated;
   biteCreator = this.dataAccess.biteCreator;
+  position = this.dataAccess.position;
 
   saveReview(newReview: { review: string; biteId: string }): void {
     this.dataAccess.saveNewReview(newReview);

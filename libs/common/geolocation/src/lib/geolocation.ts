@@ -30,7 +30,6 @@ const getGeoLocationFromNativePlatform = async (): Promise<Position> => {
   }
 
   return await Geolocation.getCurrentPosition({
-    enableHighAccuracy: true,
     timeout: TIMEOUT,
   });
 };

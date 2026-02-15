@@ -189,6 +189,28 @@ describe(DetailsDataAccessService.name, () => {
         expect(requestPermissionsSpy).not.toHaveBeenCalled();
       });
     });
+
+    describe('given checkPermission throws', () => {
+      let checkPermissionsSpy: jest.SpyInstance;
+      let getCurrentPositionSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        checkPermissionsSpy = jest
+          .spyOn(Geolocation, 'checkPermissions')
+          .mockRejectedValue(new Error('Permission error'));
+        getCurrentPositionSpy = jest
+          .spyOn(Geolocation, 'getCurrentPosition')
+          .mockReturnValue({} as any);
+      });
+
+      it('should return undefined', async () => {
+        const result = await service.positionLoader({} as any);
+
+        expect(checkPermissionsSpy).toHaveBeenCalled();
+        expect(getCurrentPositionSpy).not.toHaveBeenCalled();
+        expect(result).toBeUndefined();
+      });
+    });
   });
 
   describe('saveNewReview', () => {

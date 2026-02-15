@@ -86,15 +86,21 @@ export class DetailsDataAccessService {
   };
 
   positionLoader: ResourceLoader<any, Position> = async () => {
-    const permissionStatus = await Geolocation.checkPermissions();
+    try {
+      const permissionStatus = await Geolocation.checkPermissions();
 
-    if (permissionStatus.location !== 'granted') {
-      await Geolocation.requestPermissions();
+      if (permissionStatus.location !== 'granted') {
+        await Geolocation.requestPermissions();
+      }
+
+      return Geolocation.getCurrentPosition({
+        timeout: 10000,
+      });
+    } catch (error) {
+      console.error('Error getting position:', error);
+
+      return undefined;
     }
-
-    return Geolocation.getCurrentPosition({
-      timeout: 10000,
-    });
   };
 
   biteCreator = resource({

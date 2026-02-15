@@ -98,6 +98,41 @@ describe(DetailsDataAccessService.name, () => {
         });
       });
     });
+
+    describe('given bite has likes', () => {
+      beforeEach(() => {
+        jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
+          snapshots: [
+            { data: { userId: 'user1', likeType: 'like' } },
+            { data: { userId: 'user2', likeType: 'dislike' } },
+          ],
+        } as any);
+
+        jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+          snapshot: {
+            data: { name: 'Test Bite' },
+            id: 'test-bite-id',
+          } as unknown as any,
+        });
+      });
+
+      it('should return bite with likes', async () => {
+        const result = await service.biteLoader({
+          params: {
+            biteId: 'test-bite-id',
+          },
+        } as any);
+
+        expect(result).toEqual({
+          name: 'Test Bite',
+          id: 'test-bite-id',
+          likes: [
+            { userId: 'user1', likeType: 'like' },
+            { userId: 'user2', likeType: 'dislike' },
+          ],
+        });
+      });
+    });
   });
 
   describe('biteCreatorLoader', () => {
@@ -187,6 +222,28 @@ describe(DetailsDataAccessService.name, () => {
         expect(checkPermissionsSpy).toHaveBeenCalled();
         expect(getCurrentPositionSpy).toHaveBeenCalled();
         expect(requestPermissionsSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('given checkPermission throws', () => {
+      let checkPermissionsSpy: jest.SpyInstance;
+      let getCurrentPositionSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        checkPermissionsSpy = jest
+          .spyOn(Geolocation, 'checkPermissions')
+          .mockRejectedValue(new Error('Permission error'));
+        getCurrentPositionSpy = jest
+          .spyOn(Geolocation, 'getCurrentPosition')
+          .mockReturnValue({} as any);
+      });
+
+      it('should return undefined', async () => {
+        const result = await service.positionLoader({} as any);
+
+        expect(checkPermissionsSpy).toHaveBeenCalled();
+        expect(getCurrentPositionSpy).not.toHaveBeenCalled();
+        expect(result).toBeUndefined();
       });
     });
   });

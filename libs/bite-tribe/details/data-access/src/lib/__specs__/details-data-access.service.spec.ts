@@ -98,6 +98,41 @@ describe(DetailsDataAccessService.name, () => {
         });
       });
     });
+
+    describe('given bite has likes', () => {
+      beforeEach(() => {
+        jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
+          snapshots: [
+            { data: { userId: 'user1', likeType: 'like' } },
+            { data: { userId: 'user2', likeType: 'dislike' } },
+          ],
+        } as any);
+
+        jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+          snapshot: {
+            data: { name: 'Test Bite' },
+            id: 'test-bite-id',
+          } as unknown as any,
+        });
+      });
+
+      it('should return bite with likes', async () => {
+        const result = await service.biteLoader({
+          params: {
+            biteId: 'test-bite-id',
+          },
+        } as any);
+
+        expect(result).toEqual({
+          name: 'Test Bite',
+          id: 'test-bite-id',
+          likes: [
+            { userId: 'user1', likeType: 'like' },
+            { userId: 'user2', likeType: 'dislike' },
+          ],
+        });
+      });
+    });
   });
 
   describe('biteCreatorLoader', () => {

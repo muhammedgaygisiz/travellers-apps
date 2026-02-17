@@ -38,7 +38,6 @@ type Params = {
   extension: string;
   blob: Blob;
   contentType: string;
-  isWeb: boolean;
   callbackFn?: (p: CreateAndUploadBiteCallbackParams) => void;
 };
 
@@ -48,7 +47,6 @@ export const uploadBlobToFirebasestorage = async ({
   extension,
   blob,
   contentType,
-  isWeb,
   callbackFn,
 }: Params): Promise<string> => {
   const imageId = uuidv4();
@@ -62,12 +60,6 @@ export const uploadBlobToFirebasestorage = async ({
       cacheControl: 'public,max-age=31536000,immutable',
     },
   };
-
-  if (isWeb) {
-    uploadToFirebase(fileUploadOptions, callbackFn);
-
-    return imagePath;
-  }
 
   const fileName = `${imageId}.${extension}`;
   const writeFileResult = await writeBlobToFileSystem(blob, fileName);

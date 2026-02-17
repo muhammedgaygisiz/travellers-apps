@@ -25,7 +25,6 @@ const mirrorUserProfileImage = async (
     extension,
     blob,
     contentType,
-    isWeb,
   });
 
   const getDownloadUrlResult = await FirebaseStorage.getDownloadUrl({ path });

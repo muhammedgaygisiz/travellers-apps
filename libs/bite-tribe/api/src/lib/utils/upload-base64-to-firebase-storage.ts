@@ -27,7 +27,6 @@ export const uploadBase64ToFirebaseStorage = async ({
     extension: ext,
     blob,
     contentType,
-    isWeb,
     callbackFn,
   });
 };

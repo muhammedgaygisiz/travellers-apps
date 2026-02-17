@@ -13,7 +13,6 @@ export const saveEditedBite = async (
     const { image, ...biteWithoutImage } = bite;
 
     await replaceImageInFirestoreStorage(
-      isWeb,
       image,
       bite.imagePath,
       bite.id,
@@ -48,13 +47,9 @@ export const saveEditedBite = async (
     if (originalImagePath) {
       const { image, ...biteWithoutImage } = bite;
 
-      await replaceImageInFirestoreStorage(
-        isWeb,
-        image,
-        originalImagePath,
-        bite.id,
-        { ...biteWithoutImage },
-      );
+      await replaceImageInFirestoreStorage(image, originalImagePath, bite.id, {
+        ...biteWithoutImage,
+      });
 
       return;
     }
@@ -63,7 +58,6 @@ export const saveEditedBite = async (
     // so we do not have a imagePath yet
     const { image, imagePath, ...biteWithoutImage } = bite;
     await uploadImageAndUpdateBite({
-      isWeb,
       imageBase64: image,
       biteId: bite.id,
       biteWithoutImage,

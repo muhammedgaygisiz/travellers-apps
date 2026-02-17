@@ -127,7 +127,6 @@ export class ProfileApiService {
 
         const { photoUrl: base64Image, ...restOfPublicUser } = publicUser;
         const newPhotoRef = await uploadBase64ToFirebaseStorage({
-          isWeb: this.isWeb(),
           base64: base64Image,
           docId: publicUser.userId,
           collection: USERS_COLLECTION,

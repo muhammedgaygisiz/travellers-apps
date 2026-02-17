@@ -159,6 +159,7 @@ export class BiteEffects {
                     BiteActions.uploadingImage({
                       progress: p.uploadParams,
                       biteId: bite.id,
+                      imagePath: p.imagePath,
                     }),
                   );
                 } else if (p.uploadParams?.evt?.completed === true) {

@@ -23,6 +23,7 @@ export const BiteActions = createActionGroup({
     'Uploading Image': props<{
       progress: UploadParams;
       biteId: string;
+      imagePath: string;
     }>(),
     'Uploaded Image': props<{ bite: Bite; imagePath: string }>(),
     'Error uploading image': props<{ bite: Bite }>(),

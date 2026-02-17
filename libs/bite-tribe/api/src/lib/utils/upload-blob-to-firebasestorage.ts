@@ -14,7 +14,11 @@ const uploadToFirebase = (
     FirebaseStorage.uploadFile(fileUploadOptions, (evt, err) => {
       if (callbackFn) {
         callbackFn({
-          uploadParams: { evt, err },
+          uploadParams: {
+            evt,
+            err,
+            offlineImagePath: fileUploadOptions.uri || '',
+          },
           imagePath: fileUploadOptions.path,
         });
       }

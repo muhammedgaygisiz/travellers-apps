@@ -67,7 +67,6 @@ export class BiteApiService {
     const { image, ...biteDocWithoutImage } = bite;
 
     uploadBase64ToFirebaseStorage({
-      isWeb: this.isWeb(),
       base64: image,
       docId: bite.id,
       collection: BITE_COLLECTION,

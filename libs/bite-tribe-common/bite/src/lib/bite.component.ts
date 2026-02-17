@@ -23,6 +23,8 @@ import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
 import { DistanceComponent } from 'common/distance';
 import { UploadFileCallbackEvent } from '@capacitor-firebase/storage/dist/esm/definitions';
+import { GetImagePipe } from './pipes/get-image.pipe';
+import { AsyncPipe } from '@angular/common';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
@@ -44,6 +46,8 @@ const CANCEL = 'cancel';
     StarRatingComponent,
     IonAlert,
     DistanceComponent,
+    GetImagePipe,
+    AsyncPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -52,7 +56,7 @@ export class BiteComponent {
   userId = input<string>();
   showEditButton = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
-  uploadState = input<UploadParams>();
+  uploadState = input<{ progress: UploadParams }>();
 
   biteClick = output<Bite>();
   restaurantClick = output<Bite>();

@@ -4,7 +4,6 @@ import { uploadBlobToFirebasestorage } from './upload-blob-to-firebasestorage';
 import { CreateAndUploadBiteCallbackParams } from 'model';
 
 type Params = {
-  isWeb: boolean;
   base64: string;
   docId: string;
   collection?: string;
@@ -12,7 +11,6 @@ type Params = {
 };
 
 export const uploadBase64ToFirebaseStorage = async ({
-  isWeb,
   base64,
   docId,
   collection = BITE_COLLECTION,

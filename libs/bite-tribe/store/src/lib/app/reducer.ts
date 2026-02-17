@@ -118,4 +118,10 @@ export const reducer = createReducer<AppSlice>(
     ...state,
     profileMetadata: { ...CLEAN_PROFILE_METADATA },
   })),
+  on(BiteActions.uploadingImage, (state, { biteId, progress }) => ({
+    ...state,
+    uploadingPorgressForBiteImage: {
+      [biteId]: progress,
+    },
+  })),
 );

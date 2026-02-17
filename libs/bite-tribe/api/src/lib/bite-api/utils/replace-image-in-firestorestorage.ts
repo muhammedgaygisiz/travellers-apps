@@ -11,5 +11,10 @@ export const replaceImageInFirestoreStorage = async (
 ): Promise<void> => {
   await deleteFileInFirebaseStorage(imagePathInFirestore);
 
-  await uploadImageAndUpdateBite(isWeb, imageBase64, biteId, biteWithoutImage);
+  await uploadImageAndUpdateBite({
+    isWeb,
+    imageBase64,
+    biteId,
+    biteWithoutImage,
+  });
 };

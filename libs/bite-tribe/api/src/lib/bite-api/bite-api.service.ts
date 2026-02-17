@@ -1,7 +1,7 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { Bite, Bucketlist } from 'model';
+import { Bite, Bucketlist, CreateAndUploadBiteCallbackParams } from 'model';
 import { Platform } from '@ionic/angular';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
 import { BITE_COLLECTION } from '../utils/constants';
@@ -15,6 +15,8 @@ import { deleteFileInFirebaseStorage } from './utils/delete-file-in-firebasestor
 import { BehaviorSubject } from 'rxjs';
 import { toBite } from '../utils/to-bite';
 import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
+import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
+import { updateBiteWithImagePathFromFirestorage } from './utils/update-bite-with-image-path-from-firestorage';
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
@@ -43,14 +45,11 @@ export class BiteApiService {
     return loadBitesByUser(userUid);
   }
 
-  public async saveNewBite(bite: Bite): Promise<Bite> {
+  public async saveNewBite(biteWithoutImage: Bite): Promise<Bite> {
     const user = this.authService.getUser();
-    const { image, ...biteDocWithoutImage } = bite;
 
     try {
-      const biteId = createBite(biteDocWithoutImage, user);
-
-      uploadImageAndUpdateBite(this.isWeb(), image, biteId);
+      const biteId = createBite(biteWithoutImage, user);
 
       return await loadBiteById(biteId);
     } catch (error) {
@@ -59,6 +58,37 @@ export class BiteApiService {
 
       throw error;
     }
+  }
+
+  public async uploadImage(
+    bite: Bite,
+    callbackFn: (p: CreateAndUploadBiteCallbackParams) => void,
+  ): Promise<void> {
+    const { image, ...biteDocWithoutImage } = bite;
+
+    uploadBase64ToFirebaseStorage({
+      isWeb: this.isWeb(),
+      base64: image,
+      docId: bite.id,
+      collection: BITE_COLLECTION,
+      callbackFn,
+    });
+  }
+
+  public async updateImagePathInBite(
+    bite: Bite,
+    imagePath: string,
+  ): Promise<Bite> {
+    const { image, ...biteWithoutImage } = bite;
+
+    await updateBiteWithImagePathFromFirestorage(
+      imagePath,
+      biteWithoutImage,
+      true,
+      bite.id,
+    );
+
+    return await loadBiteById(bite.id);
   }
 
   public async saveEditedBite(bite: Bite): Promise<Bite> {

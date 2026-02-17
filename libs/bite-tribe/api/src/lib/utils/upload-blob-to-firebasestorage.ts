@@ -4,12 +4,21 @@ import {
 } from '@capacitor-firebase/storage';
 import { writeBlobToFileSystem } from './write-blob-to-file-system';
 import { v4 as uuidv4 } from 'uuid';
+import { CreateAndUploadBiteCallbackParams } from 'model';
 
 const uploadToFirebase = (
   fileUploadOptions: UploadFileOptions,
+  callbackFn?: (p: CreateAndUploadBiteCallbackParams) => void,
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     FirebaseStorage.uploadFile(fileUploadOptions, (evt, err) => {
+      if (callbackFn) {
+        callbackFn({
+          uploadParams: { evt, err },
+          imagePath: fileUploadOptions.path,
+        });
+      }
+
       if (err) {
         reject(err);
         return;
@@ -23,16 +32,27 @@ const uploadToFirebase = (
   });
 };
 
-export const uploadBlobToFirebasestorage = async (
-  collection: string,
-  docId: string,
-  ext: string,
-  blob: Blob,
-  contentType: string,
-  isWeb: boolean,
-): Promise<string> => {
+type Params = {
+  collection: string;
+  docId: string;
+  extension: string;
+  blob: Blob;
+  contentType: string;
+  isWeb: boolean;
+  callbackFn?: (p: CreateAndUploadBiteCallbackParams) => void;
+};
+
+export const uploadBlobToFirebasestorage = async ({
+  collection,
+  docId,
+  extension,
+  blob,
+  contentType,
+  isWeb,
+  callbackFn,
+}: Params): Promise<string> => {
   const imageId = uuidv4();
-  const imagePath = `images/${collection}/${docId}/${imageId}.${ext}`;
+  const imagePath = `images/${collection}/${docId}/${imageId}.${extension}`;
 
   const fileUploadOptions: UploadFileOptions = {
     path: imagePath,
@@ -44,12 +64,15 @@ export const uploadBlobToFirebasestorage = async (
   };
 
   if (isWeb) {
-    return await uploadToFirebase(fileUploadOptions);
+    uploadToFirebase(fileUploadOptions, callbackFn);
+
+    return imagePath;
   }
 
-  const fileName = `${imageId}.${ext}`;
+  const fileName = `${imageId}.${extension}`;
   const writeFileResult = await writeBlobToFileSystem(blob, fileName);
   fileUploadOptions.uri = writeFileResult.uri;
 
-  return await uploadToFirebase(fileUploadOptions);
+  uploadToFirebase(fileUploadOptions, callbackFn);
+  return imagePath;
 };

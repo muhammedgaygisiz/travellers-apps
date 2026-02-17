@@ -5,6 +5,7 @@ import {
   Bite,
   Bucketlist,
   CreateAndSaveToBucketListParams,
+  CreateAndUploadBiteCallbackParams,
   Like,
   Link,
   Menu,
@@ -121,8 +122,19 @@ export class BiteTribeApiService {
     return this.biteApiService.saveEditedBite(bite);
   }
 
-  saveNewBite(bite: any): Promise<Bite> {
-    return this.biteApiService.saveNewBite(bite);
+  saveNewBite(biteWithoutImage: any): Promise<Bite> {
+    return this.biteApiService.saveNewBite(biteWithoutImage);
+  }
+
+  uploadImage(
+    bite: any,
+    callbackFn: (p: CreateAndUploadBiteCallbackParams) => void,
+  ): Promise<void> {
+    return this.biteApiService.uploadImage(bite, callbackFn);
+  }
+
+  updateImagePathInBite(bite: Bite, imagePath: string): Promise<Bite> {
+    return this.biteApiService.updateImagePathInBite(bite, imagePath);
   }
 
   updateUser(publicUser: PublicUser): Promise<PublicUser | undefined> {

@@ -62,13 +62,13 @@ export const saveEditedBite = async (
     // Bite created in old style only with base64 image
     // so we do not have a imagePath yet
     const { image, imagePath, ...biteWithoutImage } = bite;
-    await uploadImageAndUpdateBite(
+    await uploadImageAndUpdateBite({
       isWeb,
-      image,
-      bite.id,
+      imageBase64: image,
+      biteId: bite.id,
       biteWithoutImage,
-      true,
-    );
+      clearBase64Image: true,
+    });
 
     return;
   }

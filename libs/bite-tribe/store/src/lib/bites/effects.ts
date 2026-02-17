@@ -1,7 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteActions } from './actions';
-import { catchError, filter, from, map, of, switchMap } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  filter,
+  from,
+  map,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -13,6 +22,7 @@ import { BucketlistActions } from '../bucketlists/actions';
 import { PATH } from 'utils';
 import { userId } from '../router/selectors';
 import { fromAuth } from 'ta-firestore';
+import { CreateAndUploadBiteCallbackParams } from 'model';
 
 @Injectable()
 export class BiteEffects {
@@ -108,12 +118,81 @@ export class BiteEffects {
   saveNewBiteToFirestore$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BiteActions.saveNewBite),
-      switchMap(({ bite }) =>
-        from(this.api.saveNewBite(bite)).pipe(
-          map((bite) => BiteActions.savedBite({ bite })),
+      switchMap(({ bite }) => {
+        const { image, ...biteDocWithoutImage } = bite;
+
+        return from(this.api.saveNewBite(biteDocWithoutImage)).pipe(
+          map((savedBite) => {
+            const newBite = {
+              ...savedBite,
+              image,
+            };
+
+            return BiteActions.savedBite({
+              bite: newBite,
+            });
+          }),
+          tap(({ bite }) => {
+            this.store.dispatch(
+              BiteActions.uploadImage({
+                bite,
+              }),
+            );
+          }),
           catchError((err) => of(BiteActions.errorSavingBite({ bite }))),
-        ),
-      ),
+        );
+      }),
+    );
+  });
+
+  uploadImage$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(BiteActions.uploadImage),
+        switchMap(({ bite }) => {
+          return from(
+            this.api.uploadImage(
+              bite,
+              (p: CreateAndUploadBiteCallbackParams): void => {
+                if (p.uploadParams?.evt?.completed === false) {
+                  this.store.dispatch(
+                    BiteActions.uploadingImage({
+                      progress: p.uploadParams,
+                      biteId: bite.id,
+                    }),
+                  );
+                } else if (p.uploadParams?.evt?.completed === true) {
+                  this.store.dispatch(
+                    BiteActions.uploadedImage({
+                      bite,
+                      imagePath: p.imagePath,
+                    }),
+                  );
+                }
+              },
+            ),
+          ).pipe(
+            catchError(() => of(BiteActions.errorUploadingImage({ bite }))),
+          );
+        }),
+      );
+    },
+    { dispatch: false },
+  );
+
+  updateImagePathInBite$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BiteActions.uploadedImage),
+      switchMap(({ bite, imagePath }) => {
+        return from(this.api.updateImagePathInBite(bite, imagePath)).pipe(
+          map((updatedBite) =>
+            BiteActions.updatedImagePathInBite({ bite: updatedBite }),
+          ),
+          catchError(() =>
+            of(BiteActions.errorUpdatingImagePathInBite({ bite })),
+          ),
+        );
+      }),
     );
   });
 

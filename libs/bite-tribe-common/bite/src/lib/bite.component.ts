@@ -16,20 +16,21 @@ import {
   IonCardTitle,
   IonText,
 } from '@ionic/angular/standalone';
-import { Bite, Like } from 'model';
+import { Bite, Like, UploadParams } from 'model';
 import { LikesComponent } from './likes/likes.component';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
 import { DistanceComponent } from 'common/distance';
+import { UploadFileCallbackEvent } from '@capacitor-firebase/storage/dist/esm/definitions';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
 
 @Component({
   selector: 'bt-bite',
-  templateUrl: './bite.component.html',
-  styleUrls: ['./bite.component.scss'],
+  templateUrl: 'bite.component.html',
+  styleUrls: ['bite.component.scss'],
   imports: [
     IonCard,
     IonCardContent,
@@ -51,6 +52,7 @@ export class BiteComponent {
   userId = input<string>();
   showEditButton = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
+  uploadState = input<UploadParams>();
 
   biteClick = output<Bite>();
   restaurantClick = output<Bite>();

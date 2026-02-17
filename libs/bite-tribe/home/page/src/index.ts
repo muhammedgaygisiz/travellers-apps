@@ -1,3 +1,3 @@
-export { HomeContainerComponent } from './lib/integration/home-container.component';
-export { MyBitesContainerComponent } from './lib/integration/my-bites-container.component';
-export { BucketlistContainerComponent } from './lib/integration/bucket-list-container.component';
+export { HomeContainer } from './lib/integration/home.container';
+export { MyBitesContainer } from './lib/integration/my-bites.container';
+export { BucketListContainer } from './lib/integration/bucket-list.container';

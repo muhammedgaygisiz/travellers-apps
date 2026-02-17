@@ -23,6 +23,7 @@ const initialState: AppSlice = {
   loading: {
     home: true,
   },
+  uploadingProgressForBiteImage: {},
   exchangeRates: { EUR: 1 },
   errorLoadingGpsPosition: false,
   profileMetadata: CLEAN_PROFILE_METADATA,
@@ -120,7 +121,7 @@ export const reducer = createReducer<AppSlice>(
   })),
   on(BiteActions.uploadingImage, (state, { biteId, progress }) => ({
     ...state,
-    uploadingPorgressForBiteImage: {
+    uploadingProgressForBiteImage: {
       [biteId]: progress,
     },
   })),

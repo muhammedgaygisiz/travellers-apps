@@ -53,6 +53,7 @@ import {
   publicUser,
   settings,
   userHasSubscriptionTierOne,
+  imageUploads,
 } from './app/selectors';
 import {
   bucketlistSorting,
@@ -101,6 +102,7 @@ export class BiteTribeStoreService implements StoreService {
     tagSuggestionsForEditingBite,
   );
   sortedHomeBites$ = this.store.select(sortedHomeBites);
+  imageUploads$ = this.store.select(imageUploads);
   sortedBucketlists$ = this.store.select(sortedBucketlists);
   homeSorting$ = this.store.select(homeSorting);
   bucketlistSorting$ = this.store.select(bucketlistSorting);

@@ -1,8 +1,12 @@
 @let biteData = bite();
+@let uploadData = uploadState();
 
 <ion-card>
   <div class="card-content">
-    <div class="card-image">
+    <div
+      class="card-image"
+      [class.loading]="uploadData?.evt?.completed === false"
+    >
       @if (biteData.image || biteData.imagePath) {
         <img
           alt="Dish"

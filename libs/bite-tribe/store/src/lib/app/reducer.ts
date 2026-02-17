@@ -122,7 +122,19 @@ export const reducer = createReducer<AppSlice>(
   on(BiteActions.uploadingImage, (state, { biteId, progress }) => ({
     ...state,
     uploadingProgressForBiteImage: {
+      ...state.uploadingProgressForBiteImage,
       [biteId]: progress,
     },
   })),
+  on(BiteActions.uploadedImage, (state, { bite }) => {
+    const { uploadingProgressForBiteImage } = state;
+    const { id } = bite;
+
+    const { [id]: _, ...rest } = uploadingProgressForBiteImage;
+
+    return {
+      ...state,
+      uploadingProgressForBiteImage: rest,
+    };
+  }),
 );

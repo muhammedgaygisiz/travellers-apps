@@ -5,16 +5,16 @@ import { Filesystem } from '@capacitor/filesystem';
 @Pipe({ name: 'getImage' })
 export class GetImagePipe implements PipeTransform {
   async transform(
-    bite: Bite,
-    uploadState: { progress: UploadParams } | undefined,
+    bite: Bite | undefined,
+    uploadState: { progress: UploadParams } | undefined | null,
   ): Promise<string> {
-    const imagePath = bite.imagePath || bite?.image;
+    const imagePath = bite?.imagePath || bite?.image;
 
-    if (imagePath?.length > 0) {
+    if (imagePath?.length && imagePath.length > 0) {
       return Promise.resolve(imagePath);
     }
 
-    const offlineImagePath = uploadState?.progress.offlineImagePath;
+    const offlineImagePath = uploadState?.progress?.offlineImagePath;
 
     if (offlineImagePath) {
       const readFileResult = await Filesystem.readFile({

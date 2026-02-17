@@ -8,6 +8,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <details-page
       class="ion-page"
       [bite]="service.bite.value()"
+      [uploadState]="service.uploadState()"
       [reviews]="service.reviews()"
       [bucketlists]="service.bucketlists()"
       [userId]="service.userId()"
@@ -38,6 +39,9 @@ export class DetailsContainer {
       screenName: 'Bite Details',
     });
 
+    // Reset the resources otherwise error state will cause issues
     this.service.bite.reload();
+    this.service.position.reload();
+    this.service.biteCreator.reload();
   }
 }

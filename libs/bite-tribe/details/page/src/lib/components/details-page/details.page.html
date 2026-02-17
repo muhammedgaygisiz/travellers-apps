@@ -1,4 +1,5 @@
-@let biteData = bite(); @let biteCreatorData = biteCreator();
+@let biteData = bite(); @let biteCreatorData = biteCreator(); @let uploadData =
+uploadState();
 
 <ta-page
   [showHeaderMenu]="false"
@@ -9,8 +10,9 @@
 >
   <ion-content>
     <img
-      [src]="biteData?.imagePath"
+      src="{{ biteData | getImage : uploadData | async }}"
       class="dish-image"
+      [class.loading]="uploadData?.progress?.evt?.completed === false"
       loading="lazy"
       alt="Dish Image"
     />
@@ -55,10 +57,9 @@
           <span class="link" (click)="onRestaurantClick(biteData)">
             {{ biteData?.place }}
           </span>
-          @if (biteData?.distance) { · {{ biteData?.distance | roundDistance |
-          toMetric }} } @let positionData = position(); @if (positionData) { ·
-          {{ biteData?.position | calcDistance : positionData | roundDistance |
-          toMetric }} }
+          @let positionData = position(); @if (positionData) { · {{
+          biteData?.position | calcDistance : positionData | roundDistance
+          |toMetric }} }
         </span>
 
         <div class="price-column">

@@ -17,6 +17,8 @@ import {
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Geolocation, Position } from '@capacitor/geolocation';
 
+const ONE_MINUTE = 60 * 1000;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -116,7 +118,7 @@ export class DetailsDataAccessService {
       }
 
       return Geolocation.getCurrentPosition({
-        timeout: 10000,
+        maximumAge: ONE_MINUTE,
       });
     } catch (error) {
       console.error('Error getting position:', error);

@@ -53,13 +53,16 @@ export const Loading: Story = {
       ...Bite.args?.bite,
     } as any,
     uploadState: {
-      evt: {
-        progress: 0,
-        bytesTransferred: 0,
-        totalBytes: 189428,
-        completed: false,
+      progress: {
+        evt: {
+          progress: 0,
+          bytesTransferred: 0,
+          totalBytes: 189428,
+          completed: false,
+        },
+        err: null,
+        offlineImagePath: '',
       },
-      err: null,
     },
   },
   render: (args) => ({

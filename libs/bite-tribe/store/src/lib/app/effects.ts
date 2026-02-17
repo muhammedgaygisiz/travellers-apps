@@ -90,7 +90,7 @@ export class AppEffect {
       this.actions$.pipe(
         ofType(fromAuth.AuthActions.loadedUser),
         stopIfUserIsUndefined(),
-        dispatchGpsPosition(this.platform, this.store),
+        dispatchGpsPosition(this.store),
         withUserFromAction(),
         initPushNotifications(this.platform),
       ),
@@ -101,7 +101,7 @@ export class AppEffect {
     () =>
       this.actions$.pipe(
         ofType(AppActions.fetchGPSPosition, AppActions.reloadGPSPosition),
-        dispatchGpsPosition(this.platform, this.store),
+        dispatchGpsPosition(this.store),
       ),
     { dispatch: false },
   );

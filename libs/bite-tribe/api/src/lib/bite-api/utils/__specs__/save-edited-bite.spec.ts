@@ -78,7 +78,6 @@ describe('saveEditedBite', () => {
       await saveEditedBite(true, bite);
 
       expect(replaceImageSpy).toHaveBeenCalledWith(
-        true,
         'data:image/jpeg;base64,/9j/4AAQ...',
         'bites/bite1/image.jpg',
         'bite1',
@@ -98,7 +97,6 @@ describe('saveEditedBite', () => {
       await saveEditedBite(false, bite);
 
       expect(replaceImageSpy).toHaveBeenCalledWith(
-        false,
         'data:image/jpeg;base64,/9j/4AAQ...',
         'bites/bite1/image.jpg',
         'bite1',
@@ -204,7 +202,6 @@ describe('saveEditedBite', () => {
           reference: 'bites/bite3',
         });
         expect(replaceImageSpy).toHaveBeenCalledWith(
-          true,
           'data:image/jpeg;base64,newImage123',
           'bites/bite3/old-image.jpg',
           'bite3',
@@ -226,7 +223,6 @@ describe('saveEditedBite', () => {
           reference: 'bites/bite3',
         });
         expect(replaceImageSpy).toHaveBeenCalledWith(
-          false,
           'data:image/jpeg;base64,newImage123',
           'bites/bite3/old-image.jpg',
           'bite3',
@@ -272,19 +268,18 @@ describe('saveEditedBite', () => {
         expect(getDocumentSpy).toHaveBeenCalledWith({
           reference: 'bites/bite4',
         });
-        expect(uploadImageSpy).toHaveBeenCalledWith(
-          true,
-          'data:image/jpeg;base64,newImage456',
-          'bite4',
-          {
+        expect(uploadImageSpy).toHaveBeenCalledWith({
+          imageBase64: 'data:image/jpeg;base64,newImage456',
+          biteId: 'bite4',
+          biteWithoutImage: {
             id: 'bite4',
             name: 'Pasta',
             place: 'Restaurant D',
             price: 18.0,
             position: { latitude: 40.7131, longitude: -74.009 },
           },
-          true,
-        );
+          clearBase64Image: true,
+        });
         expect(replaceImageSpy).not.toHaveBeenCalled();
       });
 
@@ -294,19 +289,18 @@ describe('saveEditedBite', () => {
         expect(getDocumentSpy).toHaveBeenCalledWith({
           reference: 'bites/bite4',
         });
-        expect(uploadImageSpy).toHaveBeenCalledWith(
-          false,
-          'data:image/jpeg;base64,newImage456',
-          'bite4',
-          {
+        expect(uploadImageSpy).toHaveBeenCalledWith({
+          imageBase64: 'data:image/jpeg;base64,newImage456',
+          biteId: 'bite4',
+          biteWithoutImage: {
             id: 'bite4',
             name: 'Pasta',
             place: 'Restaurant D',
             price: 18.0,
             position: { latitude: 40.7131, longitude: -74.009 },
           },
-          true,
-        );
+          clearBase64Image: true,
+        });
         expect(replaceImageSpy).not.toHaveBeenCalled();
       });
     });

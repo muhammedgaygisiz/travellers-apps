@@ -104,25 +104,17 @@ describe(BiteApiService.name, () => {
   });
 
   describe('saveNewBite', () => {
-    it('should extract base64 image, save the bite, upload the image and update the bite with the image path', async () => {
-      const mockedBiteWithoutImage = { id: 'bite123', title: 'Test Bite' };
-      const mockedBase64Image =
-        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...';
-      const mockedBite = {
-        image: mockedBase64Image,
-        ...mockedBiteWithoutImage,
+    it('should save the bite and return the saved bite', async () => {
+      const mockedBiteWithoutImage = {
+        id: 'bite123',
+        title: 'Test Bite',
       } as unknown as Bite;
 
-      await service.saveNewBite(mockedBite);
+      await service.saveNewBite(mockedBiteWithoutImage);
 
       expect(createBite).toHaveBeenCalledWith(
         mockedBiteWithoutImage,
         mockedUser,
-      );
-      expect(uploadImageAndUpdateBite).toHaveBeenCalledWith(
-        true,
-        mockedBase64Image,
-        mockedBiteId,
       );
       expect(loadBiteById).toHaveBeenCalledWith(mockedBiteId);
     });

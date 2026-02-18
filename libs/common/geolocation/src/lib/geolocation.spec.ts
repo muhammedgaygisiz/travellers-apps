@@ -1,12 +1,12 @@
-import { Platform } from '@ionic/angular';
 import { Geolocation } from '@capacitor/geolocation';
 import { getCurrentPosition } from './geolocation';
 import { lastValueFrom } from 'rxjs';
+import { Capacitor } from '@capacitor/core';
 
 jest.mock('@capacitor/geolocation');
+jest.mock('@capacitor/core');
 
-describe('Geolocation Service', () => {
-  let platform: Platform;
+describe(getCurrentPosition.name, () => {
   const mockPosition: GeolocationPosition = {
     coords: {
       latitude: 51.5074,
@@ -21,80 +21,67 @@ describe('Geolocation Service', () => {
   } as GeolocationPosition;
 
   beforeEach(() => {
-    platform = {
-      is: jest.fn(),
-    } as unknown as Platform;
-
     // Reset all mocks
     jest.clearAllMocks();
-
-    Geolocation.checkPermissions = jest.fn();
-    Geolocation.requestPermissions = jest.fn();
-    Geolocation.getCurrentPosition = jest.fn();
   });
 
-  describe('getCurrentPosition', () => {
-    it('should use native implementation on capacitor platform', async () => {
-      (platform.is as jest.Mock).mockReturnValue(true);
-      (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({
-        location: 'granted',
-      });
-      (Geolocation.getCurrentPosition as jest.Mock).mockResolvedValue(
-        mockPosition,
-      );
-
-      const result = await lastValueFrom(getCurrentPosition(platform));
-
-      expect(platform.is).toHaveBeenCalledWith('capacitor');
-      expect(Geolocation.checkPermissions).toHaveBeenCalled();
-      expect(Geolocation.getCurrentPosition).toHaveBeenCalledWith({
-        timeout: 8000,
-      });
-      expect(result).toEqual(mockPosition);
+  describe('given native platform', () => {
+    beforeEach(() => {
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     });
 
-    it('should request permissions if not granted on native platform', async () => {
-      (platform.is as jest.Mock).mockReturnValue(true);
-      (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({
-        location: 'denied',
+    describe('and permission is not granted', () => {
+      beforeEach(() => {
+        (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({
+          location: 'denied',
+        });
       });
-      (Geolocation.requestPermissions as jest.Mock).mockResolvedValue({
-        location: 'granted',
+
+      it('should request permissions', async () => {
+        await lastValueFrom(getCurrentPosition());
+
+        expect(Geolocation.requestPermissions).toHaveBeenCalled();
       });
-      (Geolocation.getCurrentPosition as jest.Mock).mockResolvedValue(
-        mockPosition,
-      );
-
-      await getCurrentPosition(platform);
-
-      expect(Geolocation.requestPermissions).toHaveBeenCalled();
     });
 
-    it('should use web implementation on non-capacitor platform', async () => {
-      (platform.is as jest.Mock).mockReturnValue(false);
-      const mockNavigator = {
-        geolocation: {
-          getCurrentPosition: jest.fn((success) => success(mockPosition)),
-        },
-      };
-      jest
-        .spyOn(global, 'navigator', 'get')
-        .mockReturnValue(mockNavigator as any);
+    describe('and permission is granted', () => {
+      beforeEach(() => {
+        (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({
+          location: 'granted',
+        });
+      });
 
-      const result = await lastValueFrom(getCurrentPosition(platform));
+      it('should not request permissions', async () => {
+        await lastValueFrom(getCurrentPosition());
 
-      expect(platform.is).toHaveBeenCalledWith('capacitor');
-      expect(mockNavigator.geolocation.getCurrentPosition).toHaveBeenCalled();
-      expect(result).toEqual(mockPosition);
+        expect(Geolocation.requestPermissions).not.toHaveBeenCalled();
+      });
+
+      it('should read current position', async () => {
+        (Geolocation.getCurrentPosition as jest.Mock).mockResolvedValue(
+          mockPosition,
+        );
+
+        const result = await lastValueFrom(getCurrentPosition());
+
+        expect(Geolocation.checkPermissions).toHaveBeenCalled();
+        expect(Geolocation.getCurrentPosition).toHaveBeenCalledWith({
+          maximumAge: 60000,
+        });
+        expect(result).toEqual(mockPosition);
+      });
+    });
+  });
+
+  describe('given not native platform', () => {
+    beforeEach(() => {
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     });
 
-    it('should reject if geolocation is not supported on web', async () => {
-      (platform.is as jest.Mock).mockReturnValue(false);
-      jest.spyOn(global, 'navigator', 'get').mockReturnValue({} as any);
+    it('should not request permission', async () => {
+      await lastValueFrom(getCurrentPosition());
 
-      await expect(lastValueFrom(getCurrentPosition(platform))).rejects.toThrow(
-        'Geolocation is not supported',
-      );
+      expect(Geolocation.requestPermissions).not.toHaveBeenCalled();
     });
   });
 });

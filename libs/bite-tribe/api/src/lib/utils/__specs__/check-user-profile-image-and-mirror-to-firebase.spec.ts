@@ -71,14 +71,13 @@ describe(checkUserProfileImageAndMirrorToFirebase.name, () => {
       const result = await checkUserProfileImageAndMirrorToFirebase(user, true);
 
       expect(fetchSpy).toHaveBeenCalledWith(PHOTO_URL, { cache: 'no-cache' });
-      expect(uploadBlobToFirebasestorage).toHaveBeenCalledWith(
-        USERS_COLLECTION,
-        USER_ID,
-        expect.any(String),
-        expect.any(Blob),
-        'image/jpeg',
-        true,
-      );
+      expect(uploadBlobToFirebasestorage).toHaveBeenCalledWith({
+        collection: USERS_COLLECTION,
+        docId: USER_ID,
+        extension: expect.any(String),
+        blob: expect.any(Blob),
+        contentType: 'image/jpeg',
+      });
       expect(result).toEqual({
         displayName: 'User 1',
         photoUrl: 'https://url-to-mirrored-image.com/avatar.jpg',

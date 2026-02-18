@@ -74,6 +74,8 @@ class BiteApiMock {
   loadBitesByBucketlist = jest.fn();
   startlatestBitesListener = jest.fn();
   getTotalNumberOfBites = jest.fn();
+  uploadImage = jest.fn();
+  updateImagePathInBite = jest.fn();
 }
 
 class SettingsApiMock {
@@ -418,6 +420,35 @@ describe(BiteTribeApiService.name, () => {
         const bite = { content: 'New bite content' } as any;
         service.saveNewBite(bite);
         expect(saveNewBiteSpy).toHaveBeenCalledWith(bite);
+      },
+    ));
+  });
+
+  describe('uploadImage', () => {
+    it('should call uploadImage on BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const uploadImageSpy = jest.spyOn(biteApiService, 'uploadImage');
+        const bite = { id: 'bite-id', content: 'Bite with image' } as any;
+        const callbackFn = jest.fn();
+        service.uploadImage(bite, callbackFn);
+        expect(uploadImageSpy).toHaveBeenCalledWith(bite, callbackFn);
+      },
+    ));
+  });
+
+  describe('updateImagePathInBite', () => {
+    it('should call updateImagePathInBite on BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const updateImagePathInBiteSpy = jest.spyOn(
+          biteApiService,
+          'updateImagePathInBite',
+        );
+        const bite = { id: 'bite-id', content: 'Bite with image' } as any;
+        const imagePath = 'path/to/image.jpg';
+        service.updateImagePathInBite(bite, imagePath);
+        expect(updateImagePathInBiteSpy).toHaveBeenCalledWith(bite, imagePath);
       },
     ));
   });

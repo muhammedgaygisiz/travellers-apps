@@ -49,10 +49,11 @@ import {
   isPublicProfile,
   isReloadingHome,
   preferredCurrency,
-  profileMeatadata,
+  profileMetadata,
   publicUser,
   settings,
   userHasSubscriptionTierOne,
+  imageUploads,
 } from './app/selectors';
 import {
   bucketlistSorting,
@@ -101,6 +102,7 @@ export class BiteTribeStoreService implements StoreService {
     tagSuggestionsForEditingBite,
   );
   sortedHomeBites$ = this.store.select(sortedHomeBites);
+  imageUploads$ = this.store.select(imageUploads);
   sortedBucketlists$ = this.store.select(sortedBucketlists);
   homeSorting$ = this.store.select(homeSorting);
   bucketlistSorting$ = this.store.select(bucketlistSorting);
@@ -140,7 +142,7 @@ export class BiteTribeStoreService implements StoreService {
   isBitesLoading$ = this.store.select(isBitesLoading);
   homeFilters$ = this.store.select(homeFilters);
   homeDistance$ = this.store.select(homeDistance);
-  profileMeatadata$ = this.store.select(profileMeatadata);
+  profileMetadata$ = this.store.select(profileMetadata);
 
   type$ = this.store.select(followType);
   userIdFromUrl$ = this.store.select(userIdFromUrl);

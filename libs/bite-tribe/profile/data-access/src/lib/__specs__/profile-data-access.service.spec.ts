@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { ProfileDataAccessService } from '../profile-data-access.service';
 import SpyInstance = jest.SpyInstance;
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { Like } from 'model';
 
 class Mock {
   isAuthenticated$ = of(true);
@@ -15,7 +16,7 @@ class Mock {
   biteCreator$ = of(null);
   userId$ = of('user-id');
   isPublicProfile$ = of(true);
-  profileMeatadata$ = of(true);
+  profileMetadata$ = of(true);
   userByUrlParam$ = of(null);
   logout = jest.fn();
   removeLike = jest.fn();
@@ -66,9 +67,12 @@ describe('ProfileDataAccessService', () => {
       [ProfileDataAccessService],
       (service: ProfileDataAccessService) => {
         const submitLikeClickSpy = jest.spyOn(storeService, 'submitLikeClick');
-        service.submitLikeClick({ likeType: 'like', biteId: 'bite-id' });
+        service.submitLikeClick({
+          likeType: 'thumbup',
+          biteId: 'bite-id',
+        } as Like);
         expect(submitLikeClickSpy).toHaveBeenCalledWith({
-          likeType: 'like',
+          likeType: 'thumbup',
           biteId: 'bite-id',
         });
       },
@@ -82,7 +86,7 @@ describe('ProfileDataAccessService', () => {
         storeService.bites$ = of([
           {
             id: 'bite-id',
-            likes: [{ userId: 'user-id', likeType: 'like' }],
+            likes: [{ userId: 'user-id', likeType: 'thumbup' }],
           } as any,
         ]);
       });
@@ -90,9 +94,12 @@ describe('ProfileDataAccessService', () => {
       it('should removeLike', inject(
         [ProfileDataAccessService],
         (service: ProfileDataAccessService) => {
-          service.submitLikeClick({ likeType: 'like', biteId: 'bite-id' });
+          service.submitLikeClick({
+            likeType: 'thumbup',
+            biteId: 'bite-id',
+          } as Like);
           expect(removeLikeSpy).toHaveBeenCalledWith({
-            likeType: 'like',
+            likeType: 'thumbup',
             biteId: 'bite-id',
           });
         },

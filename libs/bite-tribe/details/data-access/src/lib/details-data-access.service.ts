@@ -17,6 +17,8 @@ import {
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Geolocation, Position } from '@capacitor/geolocation';
 
+const ONE_MINUTE = 60 * 1000;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -57,7 +59,9 @@ export class DetailsDataAccessService {
     }),
     loader: this.biteLoader.bind(this),
   });
-
+  imageUploads = toSignal(this.storeService.imageUploads$, {
+    initialValue: <Record<string, Record<any, any>>>{},
+  });
   reviews = toSignal(this.storeService.reviews$, { initialValue: [] as any });
   bucketlists = toSignal(this.storeService.bucketlists$, {
     initialValue: [] as any,
@@ -72,6 +76,26 @@ export class DetailsDataAccessService {
   biteCreatorId = computed(() => {
     const bite = this.bite.value();
     return bite?.userId;
+  });
+
+  uploadState = computed((): any => {
+    const bite = this.bite.value();
+    const uploads = this.imageUploads();
+
+    if (!bite) {
+      return {};
+    }
+
+    if (!uploads) {
+      return {};
+    }
+
+    const id = bite.id;
+    if (!id) {
+      return {};
+    }
+
+    return uploads[id];
   });
 
   biteCreatorLoader: ResourceLoader<any, any> = ({ params }) => {
@@ -94,7 +118,7 @@ export class DetailsDataAccessService {
       }
 
       return Geolocation.getCurrentPosition({
-        timeout: 10000,
+        maximumAge: ONE_MINUTE,
       });
     } catch (error) {
       console.error('Error getting position:', error);

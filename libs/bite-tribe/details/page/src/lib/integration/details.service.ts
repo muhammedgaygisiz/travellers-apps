@@ -8,7 +8,6 @@ import {
   RemoveBiteFromBucketlistParams,
 } from 'model';
 import { NavController } from '@ionic/angular/standalone';
-import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -16,6 +15,7 @@ export class DetailsService {
   private readonly navController = inject(NavController);
 
   bite = this.dataAccess.bite;
+  uploadState = this.dataAccess.uploadState;
   reviews = this.dataAccess.reviews;
   bucketlists = this.dataAccess.bucketlists;
   exchangeRates = this.dataAccess.exchangeRates;

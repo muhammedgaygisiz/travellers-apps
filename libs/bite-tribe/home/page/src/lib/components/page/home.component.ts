@@ -41,8 +41,8 @@ const PAGE_SIZE = 50;
 
 @Component({
   selector: 'bt-home',
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss',
+  templateUrl: 'home.component.html',
+  styleUrl: 'home.component.scss',
   imports: [
     PageComponent,
     IonContent,
@@ -69,6 +69,7 @@ const PAGE_SIZE = 50;
 })
 export class BiteTribeHomeComponent {
   bites = input<Bite[]>();
+  uploads = input<Record<string, any>>({});
   allTags = input<string[]>([]);
   selectedFilters = input<string[]>([]);
   enableBackButton = input<boolean>(false);

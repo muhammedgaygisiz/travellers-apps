@@ -10,6 +10,7 @@ class Mock {
   sortedHomeBites$ = of([]);
   homeSorting$ = of('distance');
   mybites$ = of([]);
+  imageUploads$ = of([]);
   sortedMyBites$ = of([]);
   myBitesSorting$ = of('distance');
   bitesBySelectedBucketlist$ = of([]);

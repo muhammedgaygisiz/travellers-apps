@@ -10,6 +10,9 @@ export class HomeDataAccessService {
   sortedHomeBites = toSignal(this.storeService.sortedHomeBites$, {
     initialValue: [] as Bite[],
   });
+  imageUploads = toSignal(this.storeService.imageUploads$, {
+    initialValue: {},
+  });
   sorting = toSignal(this.storeService.homeSorting$, {
     initialValue: 'distance',
   });

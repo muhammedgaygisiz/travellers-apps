@@ -51,7 +51,11 @@ export const userHasSubscriptionTierOne = createSelector(slice, (state) => {
   return false;
 });
 
-export const profileMeatadata = createSelector(
+export const profileMetadata = createSelector(
   slice,
   (state) => state?.profileMetadata,
 );
+
+export const imageUploads = createSelector(slice, (state) => {
+  return state.uploadingProgressForBiteImage;
+});

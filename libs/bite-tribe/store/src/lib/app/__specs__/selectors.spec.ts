@@ -1,6 +1,7 @@
 import * as fromSelectors from '../selectors';
 import type { Geopoint, PublicUser, Settings } from 'model';
 import { AppSlice } from '../app-slice.model';
+import { imageUploads, profileMetadata } from '../selectors';
 
 describe('App Selectors', () => {
   const mockPosition: Geopoint = {
@@ -21,6 +22,7 @@ describe('App Selectors', () => {
     position: mockPosition,
     settings: mockSettings,
     profile: mockProfile,
+    uploadingProgressForBiteImage: {},
     loading: {
       home: true,
     },
@@ -87,6 +89,11 @@ describe('App Selectors', () => {
       const stateWithoutLoading = { ...mockState, loading: undefined };
       const result =
         fromSelectors.isBitesLoading.projector(stateWithoutLoading);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when slice is undefined', () => {
+      const result = fromSelectors.isBitesLoading.projector(undefined as any);
       expect(result).toBeUndefined();
     });
   });
@@ -279,9 +286,9 @@ describe('App Selectors', () => {
     });
   });
 
-  describe('profileMeatadata', () => {
+  describe('profileMetadata', () => {
     it('should return the profile metadata', () => {
-      const result = fromSelectors.profileMeatadata.projector(mockState);
+      const result = fromSelectors.profileMetadata.projector(mockState);
       expect(result).toEqual({
         followers: 0,
         following: 0,
@@ -294,10 +301,17 @@ describe('App Selectors', () => {
         ...mockState,
         profileMetadata: undefined,
       } as any;
-      const result = fromSelectors.profileMeatadata.projector(
+      const result = fromSelectors.profileMetadata.projector(
         stateWithoutProfileMetadata,
       );
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('imageUploads', () => {
+    it('should return the image uploads', () => {
+      const result = fromSelectors.imageUploads.projector(mockState);
+      expect(result).toEqual({});
     });
   });
 });

@@ -8,15 +8,17 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   template: `
     <bt-home
       class="ion-page"
-      [bites]="service.bitesBySelectedBucketlist()"
-      [title]="service.selectedBucketlistTitle()"
+      title="My Bites"
       [showFooter]="false"
-      [enableBackButton]="true"
-      [userId]="service.userId()"
-      [isAuthenticated]="service.isAuthenticated()"
       [showAddButton]="false"
+      [enableBackButton]="true"
+      [bites]="service.myBites()"
+      [userId]="service.userId()"
+      [showHeaderMenu]="false"
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
+      [sorting]="service.myBitesSorting()"
+      editableBites
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
@@ -27,19 +29,21 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyBites)="service.onGotoMyBitesClick()"
       (gotoEdit)="service.onGotoEditClick($event)"
       (gotoAbout)="service.onGotoAboutClick()"
-      (openMapView)="service.openMapView('my-bucketlists')"
+      (deleteBite)="service.onDeleteBiteClick($event)"
+      (openMapView)="service.openMapView('my-bites')"
+      (sortingChange)="service.myBitesSortingChange($event)"
       (refresh)="service.refresh()"
       (closeGpsError)="service.closeGpsError()"
     />
   `,
   imports: [BiteTribeHomeComponent],
 })
-export class BucketlistContainerComponent {
+export class MyBitesContainer {
   service = inject(HomeService);
 
   ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
-      screenName: 'Bucket List',
+      screenName: 'My Bites',
     });
   }
 }

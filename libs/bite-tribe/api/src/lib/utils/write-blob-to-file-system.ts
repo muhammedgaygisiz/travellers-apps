@@ -10,6 +10,6 @@ export const writeBlobToFileSystem = async (
   return await Filesystem.writeFile({
     path: fileName,
     data: base64Data,
-    directory: Directory.Cache,
+    directory: Directory.Documents,
   });
 };

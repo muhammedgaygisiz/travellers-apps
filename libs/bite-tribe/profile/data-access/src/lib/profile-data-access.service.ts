@@ -53,7 +53,7 @@ export class ProfileDataAccessService {
 
   isPublicProfile = toSignal(this.storeService.isPublicProfile$);
 
-  profileMetadata = toSignal(this.storeService.profileMeatadata$);
+  profileMetadata = toSignal(this.storeService.profileMetadata$);
 
   logout(): void {
     this.storeService.logout();

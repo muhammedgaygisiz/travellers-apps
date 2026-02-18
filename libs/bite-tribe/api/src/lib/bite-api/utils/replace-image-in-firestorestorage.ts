@@ -3,7 +3,6 @@ import { uploadImageAndUpdateBite } from './upload-image-and-update-bite';
 import { deleteFileInFirebaseStorage } from './delete-file-in-firebasestorage';
 
 export const replaceImageInFirestoreStorage = async (
-  isWeb: boolean,
   imageBase64: string,
   imagePathInFirestore: string,
   biteId: string,
@@ -11,5 +10,9 @@ export const replaceImageInFirestoreStorage = async (
 ): Promise<void> => {
   await deleteFileInFirebaseStorage(imagePathInFirestore);
 
-  await uploadImageAndUpdateBite(isWeb, imageBase64, biteId, biteWithoutImage);
+  await uploadImageAndUpdateBite({
+    imageBase64,
+    biteId,
+    biteWithoutImage,
+  });
 };

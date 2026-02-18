@@ -26,6 +26,7 @@ const Mock = {
   bitesByBucketlist: (): Observable<any> => of([]),
   saveNewBite: jest.fn(),
   uploadImage: (): Observable<any> => of({}),
+  updateImagePathInBite: (): Observable<any> => of([]),
   saveEditedBite: jest.fn(),
   saveTagsToExistingBite: jest.fn(),
   deleteBite: jest.fn(),
@@ -380,6 +381,34 @@ describe(BiteEffects.name, () => {
             bite: {} as Bite,
             imagePath: undefined,
           } as any),
+        );
+      });
+    });
+  });
+
+  describe('updateImagePathInBite$', () => {
+    describe('given an uploadedImage action', () => {
+      it('should call updateImagePathInBite from api service', () => {
+        const updateImagePathInBiteSpy = jest.spyOn(
+          apiService,
+          'updateImagePathInBite',
+        );
+
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BiteActions.uploadedImage({
+              bite: {} as Bite,
+              imagePath: 'imagePath',
+            }),
+          });
+
+          expectObservable(effects.updateImagePathInBite$);
+        });
+
+        expect(updateImagePathInBiteSpy).toHaveBeenCalledTimes(1);
+        expect(updateImagePathInBiteSpy).toHaveBeenCalledWith(
+          {} as Bite,
+          'imagePath',
         );
       });
     });

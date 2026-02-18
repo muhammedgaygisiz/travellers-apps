@@ -278,4 +278,66 @@ describe('App Reducer', () => {
       expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
     });
   });
+
+  describe('uploadingImage', () => {
+    it('should set uploading progress for bite image', () => {
+      const INITIAL_STATE = {
+        uploadingProgressForBiteImage: {},
+      } as AppSlice;
+      const NEW_STATE = {
+        uploadingProgressForBiteImage: {
+          'bite-id-123': {
+            imagePath: 'path/to/image.jpg',
+            progress: {
+              evt: {
+                completed: false,
+                progress: 50,
+              },
+            },
+          },
+        },
+      } as unknown as AppSlice;
+
+      const action = BiteActions.uploadingImage({
+        biteId: 'bite-id-123',
+        imagePath: 'path/to/image.jpg',
+        progress: {
+          evt: {
+            progress: 50,
+            completed: false,
+          },
+        },
+      });
+
+      expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
+    });
+  });
+
+  describe('uploadedImage', () => {
+    it('should remove uploading progress for bite image', () => {
+      const INITIAL_STATE = {
+        uploadingProgressForBiteImage: {
+          'bite-id-123': {
+            imagePath: 'path/to/image.jpg',
+            progress: {
+              evt: {
+                completed: false,
+                progress: 50,
+              },
+            },
+          },
+        },
+      } as unknown as AppSlice;
+      const NEW_STATE = {
+        uploadingProgressForBiteImage: {},
+      } as AppSlice;
+
+      const action = BiteActions.uploadedImage({
+        bite: { id: 'bite-id-123' } as any,
+        imagePath: 'path/to/image.jpg',
+      });
+
+      expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
+    });
+  });
 });

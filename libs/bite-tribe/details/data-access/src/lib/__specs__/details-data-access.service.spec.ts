@@ -35,6 +35,7 @@ describe(DetailsDataAccessService.name, () => {
             bucketlists$: of(),
             exchangeRates$: of(),
             preferedCurrency$: of(),
+            imageUploads$: of(),
             userId$: of(),
             isAuthenticated$: of(),
             saveReview: jest.fn(),

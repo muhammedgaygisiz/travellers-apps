@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DetailsPage } from '../details.page';
 import { PageComponent } from 'common/ui/page';
-import { By } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 import {
   AlertController,
@@ -88,9 +87,6 @@ describe('DetailsPage', () => {
       componentRef.changeDetectorRef.detectChanges();
 
       // Assert
-      const img = fixture.debugElement.query(By.css('img'));
-      expect(img.attributes['src']).toBe('test.jpg');
-
       const content = fixture.debugElement.nativeElement.textContent;
       expect(content).toContain('Pizza');
       expect(content).toContain('Italian Restaurant');

@@ -10,6 +10,7 @@ export type AppSlice = {
     home?: boolean;
   };
   profile?: PublicUser;
+  uploadingProgressForBiteImage: Record<string, Record<any, any>>;
   profileMetadata: {
     followers: number;
     following: number;

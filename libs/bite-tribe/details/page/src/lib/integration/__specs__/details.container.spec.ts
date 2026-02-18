@@ -28,6 +28,10 @@ describe(DetailsContainer.name, () => {
               value: signal(undefined),
               reload: jest.fn(),
             },
+            position: {
+              value: signal(undefined),
+              reload: jest.fn(),
+            },
             reviews: signal(undefined),
             currentPosition: {
               value: signal(undefined),
@@ -36,6 +40,7 @@ describe(DetailsContainer.name, () => {
             userId: signal(undefined),
             biteCreator: {
               value: signal(undefined),
+              reload: jest.fn(),
             },
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             isAuthenticated: (): void => {},

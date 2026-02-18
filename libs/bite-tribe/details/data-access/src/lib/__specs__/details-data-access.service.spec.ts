@@ -35,6 +35,7 @@ describe(DetailsDataAccessService.name, () => {
             bucketlists$: of(),
             exchangeRates$: of(),
             preferedCurrency$: of(),
+            imageUploads$: of(),
             userId$: of(),
             isAuthenticated$: of(),
             saveReview: jest.fn(),
@@ -131,6 +132,59 @@ describe(DetailsDataAccessService.name, () => {
             { userId: 'user2', likeType: 'dislike' },
           ],
         });
+      });
+    });
+  });
+
+  describe('uploadState', () => {
+    describe('given no bite', () => {
+      it('should return empty object', () => {
+        const result = service.uploadState();
+        expect(result).toEqual({});
+      });
+    });
+
+    describe('given no uploads', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(service.bite, 'value')
+          .mockReturnValue({ id: 'test-bite-id' } as any);
+        jest.spyOn(service, 'imageUploads').mockReturnValue(undefined as any);
+      });
+
+      it('should return empty object', () => {
+        const result = service.uploadState();
+        expect(result).toEqual({});
+      });
+    });
+
+    describe('given bite without and id', () => {
+      beforeEach(() => {
+        jest.spyOn(service.bite, 'value').mockReturnValue({} as any);
+        jest.spyOn(service, 'imageUploads').mockReturnValue({
+          'test-bite-id': { progress: 50 },
+        });
+      });
+
+      it('should return empty object', () => {
+        const result = service.uploadState();
+        expect(result).toEqual({});
+      });
+    });
+
+    describe('given bite with id and according upload', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(service.bite, 'value')
+          .mockReturnValue({ id: 'test-bite-id' } as any);
+        jest.spyOn(service, 'imageUploads').mockReturnValue({
+          'test-bite-id': { progress: 50 },
+        });
+      });
+
+      it('should return upload state for bite', () => {
+        const result = service.uploadState();
+        expect(result).toEqual({ progress: 50 });
       });
     });
   });

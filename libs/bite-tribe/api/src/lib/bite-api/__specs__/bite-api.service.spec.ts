@@ -5,7 +5,6 @@ import { of } from 'rxjs';
 import { loadBitesByLocation } from '../utils/load-bites-by-location';
 import { loadBitesByUser } from '../utils/load-bites-by-user';
 import { createBite } from '../utils/create-bite';
-import { uploadImageAndUpdateBite } from '../utils/upload-image-and-update-bite';
 import { loadBiteById } from '../utils/load-bite-by-id';
 import { Bite, Bucketlist } from 'model';
 import { saveEditedBite } from '../utils/save-edited-bite';
@@ -14,6 +13,8 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { ErrorHandler } from '@angular/core';
 import { loadBitesByBucketlist } from '../utils/load-bites-by-bucketlist';
 import { BITE_COLLECTION } from '../../utils/constants';
+import { uploadBase64ToFirebaseStorage } from '../../utils/upload-base64-to-firebase-storage';
+import { updateBiteWithImagePathFromFirestorage } from '../utils/update-bite-with-image-path-from-firestorage';
 
 jest.mock('../utils/load-bites-by-location', () => ({
   loadBitesByLocation: jest.fn(),
@@ -48,6 +49,14 @@ jest.mock('@capacitor-firebase/firestore');
 
 jest.mock('../utils/load-bites-by-bucketlist', () => ({
   loadBitesByBucketlist: jest.fn(),
+}));
+
+jest.mock('../../utils/upload-base64-to-firebase-storage', () => ({
+  uploadBase64ToFirebaseStorage: jest.fn(),
+}));
+
+jest.mock('../utils/update-bite-with-image-path-from-firestorage', () => ({
+  updateBiteWithImagePathFromFirestorage: jest.fn(),
 }));
 
 const mockedUser = { uid: '123' };
@@ -104,25 +113,17 @@ describe(BiteApiService.name, () => {
   });
 
   describe('saveNewBite', () => {
-    it('should extract base64 image, save the bite, upload the image and update the bite with the image path', async () => {
-      const mockedBiteWithoutImage = { id: 'bite123', title: 'Test Bite' };
-      const mockedBase64Image =
-        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...';
-      const mockedBite = {
-        image: mockedBase64Image,
-        ...mockedBiteWithoutImage,
+    it('should save the bite and return the saved bite', async () => {
+      const mockedBiteWithoutImage = {
+        id: 'bite123',
+        title: 'Test Bite',
       } as unknown as Bite;
 
-      await service.saveNewBite(mockedBite);
+      await service.saveNewBite(mockedBiteWithoutImage);
 
       expect(createBite).toHaveBeenCalledWith(
         mockedBiteWithoutImage,
         mockedUser,
-      );
-      expect(uploadImageAndUpdateBite).toHaveBeenCalledWith(
-        true,
-        mockedBase64Image,
-        mockedBiteId,
       );
       expect(loadBiteById).toHaveBeenCalledWith(mockedBiteId);
     });
@@ -143,6 +144,51 @@ describe(BiteApiService.name, () => {
           expect.any(Error),
         );
       });
+    });
+  });
+
+  describe('uploadImage', () => {
+    it('should call uploadBase64ToFirebaseStorage with correct parameters', async () => {
+      const mockedBite = {
+        id: 'bite123',
+        image: 'base64ImageString',
+        title: 'Test Bite',
+      } as unknown as Bite;
+
+      const callbackFn = jest.fn();
+
+      service.uploadImage(mockedBite, callbackFn);
+
+      expect(uploadBase64ToFirebaseStorage).toHaveBeenCalledWith({
+        base64: 'base64ImageString',
+        callbackFn: expect.any(Function),
+        collection: 'bites',
+        docId: 'bite123',
+      });
+    });
+  });
+
+  describe('updateImagePathInBite', () => {
+    it('should call updateBiteWithImagePathFromFirestorage and loadBiteById', async () => {
+      const mockedBite = {
+        id: 'bite123',
+        title: 'Test Bite',
+      } as unknown as Bite;
+
+      const mockedImagePath = 'path/to/image.jpg';
+
+      await service.updateImagePathInBite(mockedBite, mockedImagePath);
+
+      expect(updateBiteWithImagePathFromFirestorage).toHaveBeenCalledWith(
+        mockedImagePath,
+        {
+          id: 'bite123',
+          title: 'Test Bite',
+        },
+        true,
+        'bite123',
+      );
+      expect(loadBiteById).toHaveBeenCalledWith('bite123');
     });
   });
 

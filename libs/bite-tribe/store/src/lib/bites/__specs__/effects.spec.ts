@@ -25,6 +25,8 @@ const Mock = {
   bitesByPosition: (): Observable<any> => of([]),
   bitesByBucketlist: (): Observable<any> => of([]),
   saveNewBite: jest.fn(),
+  uploadImage: (): Observable<any> => of({}),
+  updateImagePathInBite: (): Observable<any> => of([]),
   saveEditedBite: jest.fn(),
   saveTagsToExistingBite: jest.fn(),
   deleteBite: jest.fn(),
@@ -46,6 +48,7 @@ describe(BiteEffects.name, () => {
   let apiService: BiteTribeApiService;
   let store: MockStore;
   let storeService: BiteTribeStoreService;
+  let dispatchSpy: jest.SpyInstance;
 
   beforeEach(() => {
     scheduler = new TestScheduler(assertDeepEqual);
@@ -71,6 +74,8 @@ describe(BiteEffects.name, () => {
     effects = TestBed.inject(BiteEffects);
     apiService = TestBed.inject(BiteTribeApiService);
     storeService = TestBed.inject(BiteTribeStoreService);
+
+    dispatchSpy = jest.spyOn(store, 'dispatch');
   });
 
   describe('loadBitesByCurrentUser$', () => {
@@ -331,6 +336,80 @@ describe(BiteEffects.name, () => {
             output,
           );
         });
+      });
+    });
+  });
+
+  describe('uploadImage', () => {
+    describe('given a uploadImage action', () => {
+      it('should call uploadImage from api service', () => {
+        const uploadImageSpy = jest.spyOn(apiService, 'uploadImage');
+
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BiteActions.uploadImage({
+              bite: {} as Bite,
+            }),
+          });
+
+          expectObservable(effects.uploadImage$);
+        });
+
+        expect(uploadImageSpy).toHaveBeenCalledTimes(1);
+        const callbackFn = uploadImageSpy.mock.calls[0][1];
+
+        // Call with not completed parameter
+        callbackFn({ uploadParams: { evt: { completed: false } } } as any);
+
+        expect(dispatchSpy).toHaveBeenCalledWith(
+          BiteActions.uploadingImage({
+            biteId: undefined,
+            imagePath: undefined,
+            progress: {
+              evt: {
+                completed: false,
+              },
+            },
+          } as any),
+        );
+
+        // Call with completed parameter
+        callbackFn({ uploadParams: { evt: { completed: true } } } as any);
+
+        expect(dispatchSpy).toHaveBeenCalledWith(
+          BiteActions.uploadedImage({
+            bite: {} as Bite,
+            imagePath: undefined,
+          } as any),
+        );
+      });
+    });
+  });
+
+  describe('updateImagePathInBite$', () => {
+    describe('given an uploadedImage action', () => {
+      it('should call updateImagePathInBite from api service', () => {
+        const updateImagePathInBiteSpy = jest.spyOn(
+          apiService,
+          'updateImagePathInBite',
+        );
+
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BiteActions.uploadedImage({
+              bite: {} as Bite,
+              imagePath: 'imagePath',
+            }),
+          });
+
+          expectObservable(effects.updateImagePathInBite$);
+        });
+
+        expect(updateImagePathInBiteSpy).toHaveBeenCalledTimes(1);
+        expect(updateImagePathInBiteSpy).toHaveBeenCalledWith(
+          {} as Bite,
+          'imagePath',
+        );
       });
     });
   });

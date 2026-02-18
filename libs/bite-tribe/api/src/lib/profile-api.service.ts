@@ -126,12 +126,11 @@ export class ProfileApiService {
         await deleteCurrentImage(publicUser);
 
         const { photoUrl: base64Image, ...restOfPublicUser } = publicUser;
-        const newPhotoRef = await uploadBase64ToFirebaseStorage(
-          this.isWeb(),
-          base64Image,
-          publicUser.userId,
-          USERS_COLLECTION,
-        );
+        const newPhotoRef = await uploadBase64ToFirebaseStorage({
+          base64: base64Image,
+          docId: publicUser.userId,
+          collection: USERS_COLLECTION,
+        });
 
         const newPhotoUrl =
           await getDownloadUrlFromFirebaseStorage(newPhotoRef);

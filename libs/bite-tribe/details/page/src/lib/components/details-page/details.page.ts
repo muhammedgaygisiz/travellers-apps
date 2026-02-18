@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
-  Input,
   input,
   output,
 } from '@angular/core';
@@ -14,6 +13,7 @@ import {
   PublicUser,
   RemoveBiteFromBucketlistParams,
   Review,
+  UploadParams,
 } from 'model';
 import {
   AlertController,
@@ -29,7 +29,7 @@ import {
   IonTextarea,
   PopoverController,
 } from '@ionic/angular/standalone';
-import { CurrencyPipe } from '@angular/common';
+import { AsyncPipe, CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -38,7 +38,7 @@ import { RoundDistancePipe, ToMetricPipe } from 'common/distance';
 import { MapComponent } from 'bite-tribe-common/map';
 import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';
 import { IsInPipe } from '../../pipes/is-in-any.pipe';
-import { LikesComponent } from 'bite-tribe-common/bite';
+import { LikesComponent, GetImagePipe } from 'bite-tribe-common/bite';
 import { Platform } from '@ionic/angular';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { StarRatingComponent } from 'common/ui/star-rating';
@@ -76,10 +76,13 @@ import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-cur
     RoundDistancePipe,
     CalcDistancePipe,
     ConvertToPreferredCurrencyPipe,
+    GetImagePipe,
+    AsyncPipe,
   ],
 })
 export class DetailsPage {
   bite = input<Bite>();
+  uploadState = input<any>();
   reviews = input<Review[]>([]);
   bucketlists = input<Bucketlist[]>([]);
   userId = input<string>();

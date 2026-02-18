@@ -14,8 +14,7 @@ export const ROUTES: Routes = withAuthRoutes([
   },
   {
     path: PATH.HOME,
-    loadComponent: () =>
-      import('bite-tribe/home').then((m) => m.HomeContainerComponent),
+    loadComponent: () => import('bite-tribe/home').then((m) => m.HomeContainer),
     canActivate: [authGuard],
     title: 'Bites',
   },
@@ -67,7 +66,7 @@ export const ROUTES: Routes = withAuthRoutes([
   {
     path: PATH.MY_BITES,
     loadComponent: () =>
-      import('bite-tribe/home').then((m) => m.MyBitesContainerComponent),
+      import('bite-tribe/home').then((m) => m.MyBitesContainer),
     title: 'My Bites',
     canActivate: [authGuard],
   },
@@ -90,7 +89,7 @@ export const ROUTES: Routes = withAuthRoutes([
   {
     path: `${PATH.MY_BUCKETLISTS}/:bucketlistId`,
     loadComponent: () =>
-      import('bite-tribe/home').then((m) => m.BucketlistContainerComponent),
+      import('bite-tribe/home').then((m) => m.BucketListContainer),
     canActivate: [authGuard],
   },
   {

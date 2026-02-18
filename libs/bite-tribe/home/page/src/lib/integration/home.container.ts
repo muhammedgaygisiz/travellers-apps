@@ -4,11 +4,11 @@ import { HomeService } from './home.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <bt-home
       class="ion-page"
       [bites]="service.sortedHomeBites()"
+      [uploads]="service.imageUploads()"
       [allTags]="service.allTags()"
       [selectedFilters]="service.homeFilters()"
       [userId]="service.userId()"
@@ -40,8 +40,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     />
   `,
   imports: [BiteTribeHomeComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeContainerComponent {
+export class HomeContainer {
   service = inject(HomeService);
 
   ionViewDidEnter(): void {

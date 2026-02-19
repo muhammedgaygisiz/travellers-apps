@@ -1,9 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject,
-  OnChanges,
-  SimpleChanges,
   input,
   output,
 } from '@angular/core';
@@ -18,9 +15,6 @@ import {
   passwordMatchValidator,
   PasswordValidatorComponent,
 } from 'common/password-validator';
-import { AuthErrorCodes } from 'firebase/auth';
-import { ToastController } from '@ionic/angular';
-import { AsyncPipe } from '@angular/common';
 import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
@@ -40,11 +34,10 @@ interface RegistrationFields {
 
 @Component({
   selector: 'ta-registration',
-  templateUrl: './registration.component.html',
-  styleUrls: ['./registration.component.scss'],
+  templateUrl: 'registration.component.html',
+  styleUrls: ['registration.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
     PageComponent,
     CardComponent,
     ReactiveFormsModule,
@@ -56,14 +49,10 @@ interface RegistrationFields {
     IonInputPasswordToggle,
   ],
 })
-export class RegistrationComponent implements OnChanges {
+export class RegistrationComponent {
   public readonly registrationError = input<string | null>('');
 
   public readonly submitRegistration = output<Credentials>();
-
-  public readonly errorConfirm = output();
-
-  private readonly toastController = inject(ToastController);
 
   public registrationFormGroup: FormGroup = new FormGroup<RegistrationFields>(
     {
@@ -73,43 +62,16 @@ export class RegistrationComponent implements OnChanges {
       ]),
       password: new FormControl<string>(
         '',
-        Validators.compose(getPasswordValidators())
+        Validators.compose(getPasswordValidators()),
       ),
       passwordConfirm: new FormControl<string>(
         '',
-        Validators.compose(getPasswordValidators())
+        Validators.compose(getPasswordValidators()),
       ),
     },
     {
       validators: passwordMatchValidator,
       updateOn: 'change',
-    }
+    },
   );
-
-  public async ngOnChanges(changes: SimpleChanges): Promise<void> {
-    const receivedRegistrationError = changes['registrationError'].currentValue;
-    if (receivedRegistrationError?.indexOf(AuthErrorCodes.EMAIL_EXISTS) > -1) {
-      await this.showRegistrationErrorMessage();
-    }
-  }
-
-  private async showRegistrationErrorMessage(): Promise<void> {
-    const toast = await this.toastController.create({
-      message: 'Email already in use.',
-      position: 'bottom',
-      buttons: [
-        {
-          text: 'OK',
-          role: 'confirm',
-          handler: this.onConfirmToast.bind(this),
-        },
-      ],
-    });
-
-    await toast.present();
-  }
-
-  private onConfirmToast(): void {
-    this.errorConfirm.emit();
-  }
 }

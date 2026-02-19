@@ -19,9 +19,7 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from './provide-firestore-utils';
 import { terminate } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
-import { UserCredential } from '@firebase/auth';
 
 @Injectable({
   providedIn: 'root',
@@ -91,12 +89,11 @@ export class AuthService {
 
   public async registerWithUsernameAndPassword(
     registration: AuthCredentials,
-  ): Promise<UserCredential> {
-    return await createUserWithEmailAndPassword(
-      this.auth,
-      registration.email,
-      registration.password,
-    );
+  ): Promise<SignInResult> {
+    return await FirebaseAuthentication.createUserWithEmailAndPassword({
+      email: registration.email,
+      password: registration.password,
+    });
   }
 
   public async registerWithGoogleAccount(): Promise<SignInResult> {

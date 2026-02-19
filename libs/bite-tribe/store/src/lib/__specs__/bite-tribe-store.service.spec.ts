@@ -74,15 +74,6 @@ describe(BiteTribeStoreService.name, () => {
     ));
   });
 
-  describe('confirmError', () => {
-    it('should throw an error when confirmError is called', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        expect(() => service.confirmError()).toThrow('Method not implemented.');
-      },
-    ));
-  });
-
   describe('save', () => {
     describe('given docType "bite" with existing id in entity', () => {
       it('should dispatch saveExistingBite', inject(

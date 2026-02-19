@@ -29,7 +29,6 @@ import {
 } from 'utils';
 import { SignInResult } from '@capacitor-firebase/authentication';
 import { Store } from '@ngrx/store';
-import { UserCredential } from '@firebase/auth';
 
 type AuthCreds = { authCreds: AuthCredentials };
 
@@ -107,21 +106,6 @@ export class AuthEffects {
         from(this.authService.logout()).pipe(
           map(() => AuthActions.logoutSucceeded()),
           catchError(() => of(AuthActions.logoutFailed())),
-        ),
-      ),
-    ),
-  );
-
-  registrationEffect$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.registerWithEmail),
-      mergeMap(({ registration }) =>
-        from(this.register(registration)).pipe(
-          map(() => AuthActions.registrationSucceeded()),
-          tap(() => this.navController.navigateBack(['/login'])),
-          catchError((err) =>
-            of(AuthActions.registrationFailed({ code: err.code })),
-          ),
         ),
       ),
     ),
@@ -210,10 +194,6 @@ export class AuthEffects {
 
   private login(authCreds: AuthCredentials): Promise<SignInResult> {
     return this.authService.loginWithUsernameAndPassword(authCreds);
-  }
-
-  private register(registration: AuthCredentials): Promise<UserCredential> {
-    return this.authService.registerWithUsernameAndPassword(registration);
   }
 
   private registerWithGoogleAccount(): Promise<SignInResult> {

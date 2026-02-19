@@ -25,16 +25,6 @@ export const reducer = createReducer<AuthResult, Action>(
     authenticationFailed: true,
     authenticated: false,
   })),
-  on(AuthActions.registrationFailed, (state, { code }) => ({
-    ...state,
-    registrationFailed: true,
-    errorCode: code,
-  })),
-  on(AuthActions.confirmRegistrationErrorMessage, (state) => ({
-    ...state,
-    registrationFailed: false,
-    errorCode: null,
-  })),
   on(AuthActions.logoutSucceeded, () => ({
     authenticated: false,
     authenticationFailed: false,

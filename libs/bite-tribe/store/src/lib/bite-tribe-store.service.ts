@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
@@ -44,6 +44,7 @@ import {
   exchangeRates,
   gpsPosition,
   hasErrorLoadingGpsPosition,
+  imageUploads,
   isBitesLoading,
   isDarkTheme,
   isPublicProfile,
@@ -53,7 +54,6 @@ import {
   publicUser,
   settings,
   userHasSubscriptionTierOne,
-  imageUploads,
 } from './app/selectors';
 import {
   bucketlistSorting,
@@ -79,9 +79,9 @@ import {
 import { getActionByDocType } from './utils/get-action-by-doc-type';
 import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
 import {
+  biteId as biteIdFromUrl,
   followType,
   userId as userIdFromUrl,
-  biteId as biteIdFromUrl,
 } from './router/selectors';
 
 @Injectable({
@@ -93,8 +93,6 @@ export class BiteTribeStoreService implements StoreService {
   loginFailed = toSignal(this.store.select(fromAuth.selectLoginFailed), {
     initialValue: false,
   });
-
-  registrationError = signal('Not implemented yet.');
 
   bites$ = this.store.select(bites);
   nearbyRestaurants$ = this.store.select(nearbyRestaurants);

@@ -4,16 +4,10 @@ import { Login } from './login';
 export interface StoreService {
   loginFailed: Signal<boolean>;
 
-  registrationError: Signal<string | null>;
-
   loginWithGoogleAccount(): void;
   loginWithAppleAccount(): void;
 
-   
   login(authCreds: Login): void;
-
-   
-  register(registration: Login): void;
 
   confirmError(): void;
 }

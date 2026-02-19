@@ -1,5 +1,3 @@
-@if (registrationFormGroup.statusChanges | async) { }
-
 <ta-page
   [showHeaderMenu]="false"
   [enableBackButton]="true"
@@ -48,13 +46,13 @@
           (click)="submitRegistration.emit(registrationFormGroup.value)"
           data-cy="submit"
         >
-          Save
+          Sign up
         </ion-button>
 
         @if (registrationFormGroup.errors?.['mismatch']) {
-        <div class="ion-margin-top">
-          <ion-text color="danger"> Password does not match.</ion-text>
-        </div>
+          <div class="ion-margin-top">
+            <ion-text color="danger"> Password does not match.</ion-text>
+          </div>
         }
       </form>
     </div>

@@ -17,6 +17,5 @@ export const AuthActions = createActionGroup({
     'Login with Apple Account': emptyProps(),
     'Registration succeeded': emptyProps(),
     'Registration failed': props<{ code: string }>(),
-    'Confirm registration error message': emptyProps(),
   },
 });

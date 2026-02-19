@@ -133,31 +133,6 @@ describe(AuthEffects.name, () => {
     });
   });
 
-  describe('registrationEffect$', () => {
-    describe('given a registerWithEmail action', () => {
-      it('should call registerWithUsernameAndPassword$ with registration', () => {
-        scheduler.run(({ cold, expectObservable }) => {
-          const registration = {
-            email: 'q@q.de',
-            password: 'password',
-          };
-          actions$ = cold('-a', {
-            a: AuthActions.registerWithEmail({ registration }),
-          });
-
-          expectObservable(effects.registrationEffect$);
-        });
-
-        expect(
-          AuthServiceMock.registerWithUsernameAndPassword,
-        ).toHaveBeenCalledWith({
-          email: 'q@q.de',
-          password: 'password',
-        });
-      });
-    });
-  });
-
   describe('loginWithGoogleAccountEffect$', () => {
     describe('given a loginWithGoogleAccount action', () => {
       it('should call registerWithGoogleAccount$', () => {

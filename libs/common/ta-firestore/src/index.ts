@@ -1,3 +1,5 @@
+export { AuthActions } from './lib/ngrx-store/actions';
+
 export { fromAuth } from './lib/ngrx-store';
 
 export { AuthEffects } from './lib/ngrx-store/effects';

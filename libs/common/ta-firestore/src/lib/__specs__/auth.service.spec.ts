@@ -17,16 +17,7 @@ jest.mock('@capacitor/core', () => ({
   },
 }));
 
-jest.mock('@capacitor-firebase/authentication', () => ({
-  FirebaseAuthentication: {
-    getCurrentUser: jest.fn(),
-    addListener: jest.fn(),
-    signInWithEmailAndPassword: jest.fn(),
-    signOut: jest.fn(),
-    signInWithGoogle: jest.fn(),
-    signInWithApple: jest.fn(),
-  },
-}));
+jest.mock('@capacitor-firebase/authentication');
 
 jest.mock('@capacitor-firebase/analytics');
 
@@ -256,7 +247,7 @@ describe(AuthService.name, () => {
 
     beforeEach(() => {
       createUserWithEmailAndPasswordSpy = jest
-        .spyOn(authUtils, 'createUserWithEmailAndPassword')
+        .spyOn(FirebaseAuthentication, 'createUserWithEmailAndPassword')
         .mockResolvedValue({ user: { uid: '123' } } as any);
     });
 
@@ -265,11 +256,10 @@ describe(AuthService.name, () => {
       const result =
         await service.registerWithUsernameAndPassword(registration);
 
-      expect(createUserWithEmailAndPasswordSpy).toHaveBeenCalledWith(
-        service.auth,
-        registration.email,
-        registration.password,
-      );
+      expect(createUserWithEmailAndPasswordSpy).toHaveBeenCalledWith({
+        email: registration.email,
+        password: registration.password,
+      });
       expect(result).toEqual({ user: { uid: '123' } });
     });
   });

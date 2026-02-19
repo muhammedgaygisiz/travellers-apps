@@ -8,8 +8,6 @@ export interface StoreService {
   loginWithAppleAccount(): void;
 
   login(authCreds: Login): void;
-
-  confirmError(): void;
 }
 
 export const STORE_SERVICE = new InjectionToken<StoreService>('store-service');

@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { Credentials } from '../../api/credentials.model';
-import { STORE_SERVICE } from 'utils';
 import { AuthService } from 'ta-firestore';
 import { NavController, ToastController } from '@ionic/angular';
 import { AuthErrorCodes } from 'firebase/auth';
@@ -9,10 +8,9 @@ import { AuthErrorCodes } from 'firebase/auth';
   providedIn: 'root',
 })
 export class RegistrationService {
-  private store = inject(STORE_SERVICE);
-  private authService = inject(AuthService);
-  private readonly toastController = inject(ToastController);
-  private readonly navController = inject(NavController);
+  authService = inject(AuthService);
+  readonly toastController = inject(ToastController);
+  readonly navController = inject(NavController);
 
   public async register(registration: Credentials): Promise<void> {
     try {
@@ -52,9 +50,5 @@ export class RegistrationService {
     });
 
     await toast.present();
-  }
-
-  confirmError(): void {
-    this.store.confirmError();
   }
 }

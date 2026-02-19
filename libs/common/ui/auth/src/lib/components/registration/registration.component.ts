@@ -54,8 +54,6 @@ export class RegistrationComponent {
 
   public readonly submitRegistration = output<Credentials>();
 
-  public readonly errorConfirm = output();
-
   public registrationFormGroup: FormGroup = new FormGroup<RegistrationFields>(
     {
       email: new FormControl<string>('', [

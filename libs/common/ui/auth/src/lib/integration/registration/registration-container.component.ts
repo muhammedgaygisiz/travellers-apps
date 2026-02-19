@@ -5,11 +5,7 @@ import { Credentials } from '../../api/credentials.model';
 
 @Component({
   template: `
-    <ta-registration
-      class="ion-page"
-      (submitRegistration)="onSubmit($event)"
-      (errorConfirm)="onErrorConfirm()"
-    />
+    <ta-registration class="ion-page" (submitRegistration)="onSubmit($event)" />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RegistrationComponent],
@@ -19,9 +15,5 @@ export class RegistrationContainerComponent {
 
   onSubmit(registration: Credentials): void {
     this.service.register(registration);
-  }
-
-  onErrorConfirm(): void {
-    this.service.confirmError();
   }
 }

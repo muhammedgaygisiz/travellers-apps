@@ -130,5 +130,21 @@ describe(AppComponent.name, () => {
         ]);
       });
     });
+
+    describe('given another link', () => {
+      it('should not navigate', () => {
+        const navControllerNavigateForwardSpy = jest
+          .spyOn(component.navController, 'navigateForward')
+          .mockImplementation();
+
+        const testUrl = 'https://example.com/other/path';
+        const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
+        const whereAppUrlOpen = ([event]): boolean => event === 'appUrlOpen';
+        const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
+        appUrlOpenListener({ url: testUrl });
+
+        expect(navControllerNavigateForwardSpy).not.toHaveBeenCalled();
+      });
+    });
   });
 });

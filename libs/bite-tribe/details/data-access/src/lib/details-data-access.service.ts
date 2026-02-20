@@ -16,8 +16,11 @@ import {
 } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Geolocation, Position } from '@capacitor/geolocation';
+import { Share } from '@capacitor/share';
 
 const ONE_MINUTE = 60 * 1000;
+
+const SHARE_BITE_URL = 'https://bite-tribe.web.app/s/bite';
 
 @Injectable({
   providedIn: 'root',
@@ -180,5 +183,29 @@ export class DetailsDataAccessService {
 
   logout(): void {
     this.storeService.logout();
+  }
+
+  async shareBite(bite: Bite): Promise<void> {
+    const url = `${SHARE_BITE_URL}/${encodeURIComponent(bite.id)}`;
+
+    const title = bite.place ? `${bite.name} @ ${bite.place}` : bite.name;
+
+    const parts = [];
+    if (bite.price) {
+      parts.push(`${bite.currency} ${bite.price}`);
+    }
+
+    if (bite.rating) {
+      parts.push(`⭐️ ${bite.rating}`);
+    }
+
+    const text = `${parts.length ? parts.join(' · ') : 'Check out this Bite on BiteTribe 👇'}\n${url}`;
+
+    await Share.share({
+      title,
+      text,
+      url,
+      dialogTitle: 'Share Bite',
+    });
   }
 }

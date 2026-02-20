@@ -14,20 +14,12 @@
   }
 
   .bite-creator-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
     .profile-image {
       @include globals.profile-image;
     }
   }
 
   .title-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
     .navigate {
       cursor: pointer;
     }
@@ -39,25 +31,12 @@
     }
 
     .price-column {
-      display: flex;
-      flex-direction: column;
-
       gap: 0.5rem;
     }
   }
 
   .fields {
     width: 100%;
-
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
-  .like-and-bucketlist-bar {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
   }
 
   ion-list-header {
@@ -67,8 +46,6 @@
   .review {
     ion-label {
       .review-row {
-        display: flex;
-        align-items: center;
         gap: 8px;
         margin-bottom: 4px;
 

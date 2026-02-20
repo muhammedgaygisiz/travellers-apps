@@ -1,5 +1,5 @@
 import { PushNotifications } from '@capacitor/push-notifications';
-import { Platform } from '@ionic/angular';
+import { NavController, Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseMessaging } from '@capacitor-firebase/messaging';
@@ -67,6 +67,7 @@ const getFcmToken = async (): Promise<string | null> => {
 export const initPush = async (
   platform: Platform,
   userUid: string | undefined,
+  navController: NavController,
 ): Promise<void> => {
   if (platform.is('capacitor')) {
     try {
@@ -98,6 +99,11 @@ export const initPush = async (
       'pushNotificationReceived',
       (notification) => {
         console.log('Push notification received: ', notification);
+        const data = notification.data;
+
+        if (data?.type === 'NEW_BITE' && data?.biteId) {
+          navController.navigateForward(['bite', data.biteId]);
+        }
       },
     );
 

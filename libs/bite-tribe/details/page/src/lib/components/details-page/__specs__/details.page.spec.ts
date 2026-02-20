@@ -450,4 +450,27 @@ describe('DetailsPage', () => {
       expect(emitSpy).toHaveBeenCalledWith(newListName);
     });
   });
+
+  describe('onShareBiteClicked', () => {
+    describe('given bite is defined', () => {
+      it('should emit shareBite event with bite data', () => {
+        const mockBite = { id: '1', name: 'Test Bite' } as Bite;
+        const emitSpy = jest.spyOn(component.shareBite, 'emit');
+
+        component.onShareBiteClicked(mockBite);
+
+        expect(emitSpy).toHaveBeenCalledWith(mockBite);
+      });
+    });
+
+    describe('given bite is undefined', () => {
+      it('should not emit shareBite event', () => {
+        const emitSpy = jest.spyOn(component.shareBite, 'emit');
+
+        component.onShareBiteClicked(undefined);
+
+        expect(emitSpy).not.toHaveBeenCalled();
+      });
+    });
+  });
 });

@@ -1259,6 +1259,8 @@ PODS:
     - Capacitor
   - CapacitorPushNotifications (8.0.0):
     - Capacitor
+  - CapacitorShare (8.0.1):
+    - Capacitor
   - CapacitorSplashScreen (8.0.0):
     - Capacitor
   - CapacitorStatusBar (8.0.0):
@@ -1538,6 +1540,7 @@ DEPENDENCIES:
   - "CapacitorKeyboard (from `../../../../node_modules/@capacitor/keyboard`)"
   - "CapacitorPreferences (from `../../../../node_modules/@capacitor/preferences`)"
   - "CapacitorPushNotifications (from `../../../../node_modules/@capacitor/push-notifications`)"
+  - "CapacitorShare (from `../../../../node_modules/@capacitor/share`)"
   - "CapacitorSplashScreen (from `../../../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../../../node_modules/@capacitor/status-bar`)"
   - FirebaseMessaging
@@ -1615,6 +1618,8 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor/preferences"
   CapacitorPushNotifications:
     :path: "../../../../node_modules/@capacitor/push-notifications"
+  CapacitorShare:
+    :path: "../../../../node_modules/@capacitor/share"
   CapacitorSplashScreen:
     :path: "../../../../node_modules/@capacitor/splash-screen"
   CapacitorStatusBar:
@@ -1642,6 +1647,7 @@ SPEC CHECKSUMS:
   CapacitorKeyboard: d7868c079a4d5277a3deca27a10a488fcbbb8b69
   CapacitorPreferences: 443fabe9670226200e595658a87ef0b1566716d4
   CapacitorPushNotifications: 722c1528eabbefd355f47e373a4c6235d01e85e9
+  CapacitorShare: 0c58305114538568059bfc07111f22dcb9cb2a82
   CapacitorSplashScreen: 422880d7117605c30699eb4b21644b62db42e86c
   CapacitorStatusBar: 312e2e67928dfe9514c4a8916a1fd610552f5f35
   FirebaseAnalytics: e423129866107aeacf6010a280b9c9829f9ea50d
@@ -1676,6 +1682,6 @@ SPEC CHECKSUMS:
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
 
-PODFILE CHECKSUM: 08d86752d928dfbb3ddb5f09e835303e34b40ca8
+PODFILE CHECKSUM: 539fa634eb3e6307a9c0f115b6b9a04fcfb085d1
 
 COCOAPODS: 1.16.2

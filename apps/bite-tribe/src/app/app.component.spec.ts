@@ -33,6 +33,10 @@ describe(AppComponent.name, () => {
     component = fixture.debugElement.componentInstance;
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should create component', () => {
     expect(component).toBeDefined();
   });
@@ -104,6 +108,43 @@ describe(AppComponent.name, () => {
       component['handleBackButton'](true);
 
       expect(windowHistoryBackSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('appUrlOpen Handler', () => {
+    describe('given a shared link', () => {
+      it('should navigate to the correct bite', () => {
+        const navControllerNavigateForwardSpy = jest
+          .spyOn(component.navController, 'navigateForward')
+          .mockImplementation();
+
+        const testUrl = 'https://example.com/s/bite/123';
+        const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
+        const whereAppUrlOpen = ([event]): boolean => event === 'appUrlOpen';
+        const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
+        appUrlOpenListener({ url: testUrl });
+
+        expect(navControllerNavigateForwardSpy).toHaveBeenCalledWith([
+          'bite',
+          '123',
+        ]);
+      });
+    });
+
+    describe('given another link', () => {
+      it('should not navigate', () => {
+        const navControllerNavigateForwardSpy = jest
+          .spyOn(component.navController, 'navigateForward')
+          .mockImplementation();
+
+        const testUrl = 'https://example.com/other/path';
+        const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
+        const whereAppUrlOpen = ([event]): boolean => event === 'appUrlOpen';
+        const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
+        appUrlOpenListener({ url: testUrl });
+
+        expect(navControllerNavigateForwardSpy).not.toHaveBeenCalled();
+      });
     });
   });
 });

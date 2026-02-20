@@ -33,6 +33,10 @@ describe(AppComponent.name, () => {
     component = fixture.debugElement.componentInstance;
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should create component', () => {
     expect(component).toBeDefined();
   });
@@ -115,11 +119,10 @@ describe(AppComponent.name, () => {
           .mockImplementation();
 
         const testUrl = 'https://example.com/s/bite/123';
-        (App.addListener as jest.Mock).mock.calls.find(
-          ([event]) => event === 'appUrlOpen',
-        )[1]({
-          url: testUrl,
-        });
+        const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
+        const whereAppUrlOpen = ([event]): boolean => event === 'appUrlOpen';
+        const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
+        appUrlOpenListener({ url: testUrl });
 
         expect(navControllerNavigateForwardSpy).toHaveBeenCalledWith([
           'bite',

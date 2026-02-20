@@ -65,6 +65,13 @@ export const notifyUserOnNewFollower = onDocumentCreated(
       return;
     }
 
+    if (followRelationship.followedUid !== userId) {
+      logger.warn(
+        `--- Follower (${followRelationship.followedUid}) does not match event userId (${userId}), aborting notification`,
+      );
+      return;
+    }
+
     const userData = userSnap.data() as User;
 
     logger.info('--- User:', userData);

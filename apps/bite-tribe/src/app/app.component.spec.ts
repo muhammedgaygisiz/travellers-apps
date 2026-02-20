@@ -106,4 +106,26 @@ describe(AppComponent.name, () => {
       expect(windowHistoryBackSpy).toHaveBeenCalled();
     });
   });
+
+  describe('appUrlOpen Handler', () => {
+    describe('given a shared link', () => {
+      it('should navigate to the correct bite', () => {
+        const navControllerNavigateForwardSpy = jest
+          .spyOn(component.navController, 'navigateForward')
+          .mockImplementation();
+
+        const testUrl = 'https://example.com/s/bite/123';
+        (App.addListener as jest.Mock).mock.calls.find(
+          ([event]) => event === 'appUrlOpen',
+        )[1]({
+          url: testUrl,
+        });
+
+        expect(navControllerNavigateForwardSpy).toHaveBeenCalledWith([
+          'bite',
+          '123',
+        ]);
+      });
+    });
+  });
 });

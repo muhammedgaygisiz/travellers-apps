@@ -70,7 +70,7 @@ export class AppComponent implements OnInit, OnDestroy {
       const path = url.pathname;
 
       if (path.startsWith('/s/bite/')) {
-        const biteId = path.split('/s/bite/')[3];
+        const biteId = path.split('/s/bite/')[1];
         this.navController.navigateForward(['bite', biteId]);
       }
     });

@@ -15,14 +15,6 @@ export default [
           prefix: 'lib',
           style: 'camelCase',
         },
-      ],
-      '@angular-eslint/component-selector': [
-        'warn',
-        {
-          type: 'element',
-          prefix: 'bite',
-          style: 'kebab-case',
-        },
       ]
     },
   },

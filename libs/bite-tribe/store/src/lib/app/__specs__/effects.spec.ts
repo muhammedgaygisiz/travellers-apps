@@ -1,6 +1,6 @@
 import { TestScheduler } from 'rxjs/testing';
 import { Observable, of } from 'rxjs';
-import { Platform } from '@ionic/angular';
+import { NavController, Platform } from '@ionic/angular';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
 import { fromAuth } from 'ta-firestore';
@@ -43,6 +43,8 @@ const BiteTribeApiServiceMock = {
   fetchFollowMetadata: jest.fn(),
 };
 
+const NavControllerMock = {};
+
 describe(AppEffect.name, () => {
   let scheduler: TestScheduler;
   let actions$: Observable<any> = of({});
@@ -60,6 +62,7 @@ describe(AppEffect.name, () => {
         provideMockActions(() => actions$),
         { provide: BiteTribeApiService, useValue: BiteTribeApiServiceMock },
         { provide: Platform, useValue: PlatformMock },
+        { provide: NavController, useValue: NavControllerMock },
         provideMockStore(),
       ],
     });

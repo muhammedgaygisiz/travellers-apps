@@ -12,7 +12,7 @@ import {
   tap,
   throttleTime,
 } from 'rxjs';
-import { Platform } from '@ionic/angular';
+import { NavController, Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
@@ -34,6 +34,7 @@ export class AppEffect {
   private readonly api = inject(BiteTribeApiService);
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly store = inject(Store);
+  private readonly navController = inject(NavController);
 
   private readonly userId = toSignal(this.store.select(userId));
 
@@ -92,7 +93,7 @@ export class AppEffect {
         stopIfUserIsUndefined(),
         dispatchGpsPosition(this.store),
         withUserFromAction(),
-        initPushNotifications(this.platform),
+        initPushNotifications(this.platform, this.navController),
       ),
     { dispatch: false },
   );

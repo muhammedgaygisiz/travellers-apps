@@ -19,7 +19,9 @@ uploadState();
 
     <div class="ion-padding">
       @if (biteCreatorData && biteCreatorData.public) {
-      <div class="bite-creator-container">
+      <div
+        class="ion-display-flex ion-flex-row bite-creator-container ion-align-items-center"
+      >
         @if (biteCreatorData.photoUrl) {
         <img
           [src]="biteCreatorData.photoUrl"
@@ -37,22 +39,37 @@ uploadState();
       </div>
       }
 
-      <div class="title-container ion-margin-bottom">
-        <h1>{{ biteData?.name }}</h1>
-        <ion-icon
-          name="navigate-outline"
-          color="primary"
-          size="large"
-          class="ion-margin-start navigate"
-          (click)="openNavigation()"
-        />
+      <div
+        class="ion-display-flex ion-flex-row title-container ion-justify-content-between ion-align-items-center ion-margin-bottom"
+      >
+        <div class="ion-display-flex ion-flex-row ion-align-items-center">
+          <h1 class="ion-margin-end">{{ biteData?.name }}</h1>
+          <ion-icon
+            name="share-social-outline"
+            color="primary"
+            size="large"
+            (click)="onShareBiteClicked(biteData)"
+          />
+        </div>
+
+        <div class="ion-text-end">
+          <ion-icon
+            name="navigate-outline"
+            color="primary"
+            size="large"
+            class="ion-margin-start navigate"
+            (click)="openNavigation()"
+          />
+        </div>
       </div>
 
       <div class="star-rating ion-margin-bottom">
         <star-rating readonly [rating]="biteData?.rating" />
       </div>
 
-      <div class="restaurant-distance-price fields ion-margin-bottom">
+      <div
+        class="restaurant-distance-price fields ion-display-flex ion-flex-row ion-justify-content-between ion-margin-bottom"
+      >
         <span class="restaurant-distance">
           <span class="link" (click)="onRestaurantClick(biteData)">
             {{ biteData?.place }}
@@ -62,7 +79,7 @@ uploadState();
           |toMetric }} }
         </span>
 
-        <div class="price-column">
+        <div class="ion-display-flex ion-flex-column">
           @if (biteData?.priceInPreferredCurrency && biteData?.currency !==
           biteData?.priceInPreferredCurrencySymbol) {
           <span class="price">
@@ -89,7 +106,9 @@ uploadState();
         <span>{{ biteData?.createdAt | timeAgo }}</span>
       </div>
 
-      <div class="like-and-bucketlist-bar ion-margin-bottom">
+      <div
+        class="ion-display-flex ion-flex-row ion-justify-content-between ion-margin-bottom"
+      >
         @if (biteData) {
         <div class="ion-text-start">
           <bt-likes
@@ -135,7 +154,7 @@ uploadState();
         @for (review of reviews(); track review.id) {
         <ion-item lines="full" class="review">
           <ion-label>
-            <div class="review-row">
+            <div class="ion-display-flex ion-align-items-center review-row">
               <h2>{{ review.author }}</h2>
               <ion-text><p>{{ review.review }}</p></ion-text>
             </div>

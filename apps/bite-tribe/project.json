@@ -36,6 +36,16 @@
           {
             "glob": "**/*",
             "input": "libs/bite-tribe-common/assets"
+          },
+          {
+            "glob": "**/*",
+            "input": "apps/bite-tribe/src/.well-known",
+            "output": ".well-known"
+          },
+          {
+            "glob": "**/*",
+            "input": "apps/bite-tribe/src/apple-app-site-association",
+            "output": "apple-app-site-association"
           }
         ],
         "styles": [

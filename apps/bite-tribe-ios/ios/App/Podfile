@@ -28,6 +28,7 @@ def capacitor_pods
   pod 'CapacitorApp', :path => '../../../../node_modules/@capacitor/app'
   pod 'CapacitorPushNotifications', :path => '../../../../node_modules/@capacitor/push-notifications'
   pod 'CapacitorFirebaseMessaging', :path => '../../../../node_modules/@capacitor-firebase/messaging'
+  pod 'CapacitorShare', :path => '../../../../node_modules/@capacitor/share'
 end
 
 target 'App' do

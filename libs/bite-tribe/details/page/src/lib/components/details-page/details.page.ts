@@ -13,7 +13,6 @@ import {
   PublicUser,
   RemoveBiteFromBucketlistParams,
   Review,
-  UploadParams,
 } from 'model';
 import {
   AlertController,
@@ -38,7 +37,7 @@ import { RoundDistancePipe, ToMetricPipe } from 'common/distance';
 import { MapComponent } from 'bite-tribe-common/map';
 import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';
 import { IsInPipe } from '../../pipes/is-in-any.pipe';
-import { LikesComponent, GetImagePipe } from 'bite-tribe-common/bite';
+import { GetImagePipe, LikesComponent } from 'bite-tribe-common/bite';
 import { Platform } from '@ionic/angular';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { StarRatingComponent } from 'common/ui/star-rating';
@@ -93,6 +92,7 @@ export class DetailsPage {
   preferredCurrency = input<string>();
 
   selectList = output<Bucketlist>();
+  shareBite = output<Bite>();
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
   newList = output<string>();
   submitNewReview = output<{ review: string; biteId: string }>();
@@ -263,5 +263,11 @@ export class DetailsPage {
     });
 
     await alert.present();
+  }
+
+  onShareBiteClicked(bite: Bite | undefined): void {
+    if (bite) {
+      this.shareBite.emit(bite);
+    }
   }
 }

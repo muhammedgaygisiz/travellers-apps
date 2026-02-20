@@ -94,4 +94,8 @@ export class DetailsService {
   onGotoEditClick(biteToEdit: Bite): void {
     this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
   }
+
+  onShareBiteClick(bite: Bite): void {
+    this.dataAccess.shareBite(bite);
+  }
 }

@@ -47,6 +47,7 @@ Thumbs.db
 .nx/workspace-data
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+.firebase/
 
 ### storybook ###
 storybook-static

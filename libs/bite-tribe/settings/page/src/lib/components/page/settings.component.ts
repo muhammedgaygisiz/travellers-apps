@@ -26,7 +26,6 @@ import { CurrencySelectorComponent } from 'currency-selector';
 import { PublicUser, Settings } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
 import { currencyCodes } from 'utils';
 import { User } from '@capacitor-firebase/authentication';
 import { CardComponent } from 'common/ui/card';
@@ -88,20 +87,6 @@ export class PageSettings {
     window.matchMedia('(prefers-color-scheme: dark)').matches
       ? 'dark'
       : 'light',
-  );
-
-  isFormInvalid = toSignal(
-    this.settingsForm.valueChanges.pipe(map(() => !this.settingsForm.valid)),
-    { initialValue: !this.settingsForm.valid },
-  );
-
-  isFormPristine = toSignal(
-    this.settingsForm.valueChanges.pipe(
-      map(() => {
-        return this.settingsForm.pristine;
-      }),
-    ),
-    { initialValue: this.settingsForm.pristine },
   );
 
   themeEffect = effect(() => {
@@ -176,6 +161,8 @@ export class PageSettings {
 
   onCurrencySelected(currencyCode: string, modal: IonModal): void {
     this.settingsForm.patchValue({ currency: currencyCode });
+    this.settingsForm.controls['currency'].markAsDirty();
+
     modal.dismiss();
   }
 

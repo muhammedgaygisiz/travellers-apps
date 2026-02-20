@@ -99,11 +99,6 @@ export const initPush = async (
       'pushNotificationReceived',
       (notification) => {
         console.log('Push notification received: ', notification);
-        const data = notification.data;
-
-        if (data?.type === 'NEW_BITE' && data?.biteId) {
-          navController.navigateForward(['bite', data.biteId]);
-        }
       },
     );
 
@@ -111,6 +106,11 @@ export const initPush = async (
       'pushNotificationActionPerformed',
       (action) => {
         console.log('Push notification action performed: ', action);
+        const data = action.notification.data;
+
+        if (data?.type === 'NEW_BITE' && data?.biteId) {
+          navController.navigateForward(['bite', data.biteId]);
+        }
       },
     );
 

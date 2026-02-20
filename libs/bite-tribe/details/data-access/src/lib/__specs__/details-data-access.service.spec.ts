@@ -4,6 +4,8 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Geolocation } from '@capacitor/geolocation';
+import { Bite } from 'model';
+import { Share } from '@capacitor/share';
 
 jest.mock('bite-tribe/store');
 jest.mock('@capacitor/geolocation', () => ({
@@ -19,6 +21,7 @@ jest.mock('@capacitor/geolocation', () => ({
     requestPermissions: jest.fn(),
   },
 }));
+jest.mock('@capacitor/share');
 
 describe(DetailsDataAccessService.name, () => {
   let service: DetailsDataAccessService;
@@ -438,6 +441,34 @@ describe(DetailsDataAccessService.name, () => {
         service.submitLikeClick({ likeType: 'like' } as any);
 
         expect(removeLikeSpy).toHaveBeenCalledWith({ likeType: 'like' });
+      });
+    });
+  });
+
+  describe('shareBite', () => {
+    let shareSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      shareSpy = jest.spyOn(Share, 'share');
+    });
+
+    it('should build share options and call share', () => {
+      const mockedBite = {
+        id: 'test-bite-id',
+        name: 'Test Bite',
+        place: 'Test Place',
+        price: 10,
+        currency: '$',
+        rating: 4,
+      } as Bite;
+
+      service.shareBite(mockedBite);
+
+      expect(shareSpy).toHaveBeenCalledWith({
+        dialogTitle: 'Share Bite',
+        text: '$ 10 · ⭐️ 4\nhttps://bite-tribe.web.app/s/bite/test-bite-id',
+        title: 'Test Bite @ Test Place',
+        url: 'https://bite-tribe.web.app/s/bite/test-bite-id',
       });
     });
   });

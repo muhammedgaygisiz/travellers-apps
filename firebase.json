@@ -16,10 +16,8 @@
       "public": "dist/apps/bite-tribe",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
+        { "source": "/s/**", "function": "handleSharedLinkToBite" },
+        { "source": "**", "destination": "/index.html" }
       ]
     },
     {

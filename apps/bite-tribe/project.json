@@ -36,6 +36,11 @@
           {
             "glob": "**/*",
             "input": "libs/bite-tribe-common/assets"
+          },
+          {
+            "glob": "**/*",
+            "input": "apps/bite-tribe/src/.well-known",
+            "output": ".well-known"
           }
         ],
         "styles": [

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bitetribe.app",
+      "sha256_cert_fingerprints": [
+        "34:67:17:77:36:90:77:DD:04:C6:90:9B:D9:22:C2:F8:F6:99:FC:02:D4:28:07:08:12:2C:59:46:50:45:27:AF"
+      ]
+    }
+  }
+]

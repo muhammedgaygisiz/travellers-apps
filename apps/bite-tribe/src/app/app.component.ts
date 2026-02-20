@@ -5,7 +5,12 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { IonApp, IonRouterOutlet, Platform } from '@ionic/angular/standalone';
+import {
+  IonApp,
+  IonRouterOutlet,
+  NavController,
+  Platform,
+} from '@ionic/angular/standalone';
 import { addNecessaryIcons } from 'bite-tribe/shell';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
@@ -24,6 +29,7 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'bite-tribe';
 
   platform = inject(Platform);
+  navController = inject(NavController);
 
   backButtonHandler = ({ canGoBack }: { canGoBack: boolean }): void =>
     this.handleBackButton(canGoBack);
@@ -32,6 +38,8 @@ export class AppComponent implements OnInit, OnDestroy {
     addNecessaryIcons();
 
     this.initBackbuttonHandler();
+
+    this.initAppUrlOpenHandler();
   }
 
   ngOnInit(): void {
@@ -54,5 +62,17 @@ export class AppComponent implements OnInit, OnDestroy {
     } else {
       window.history.back();
     }
+  }
+
+  private initAppUrlOpenHandler(): void {
+    App.addListener('appUrlOpen', (data) => {
+      const url = new URL(data.url);
+      const path = url.pathname;
+
+      if (path.startsWith('/s/bite/')) {
+        const biteId = path.split('/s/bite/')[3];
+        this.navController.navigateForward(['bite', biteId]);
+      }
+    });
   }
 }

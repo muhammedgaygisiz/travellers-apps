@@ -98,8 +98,8 @@ export const notifyUserOnNewFollower = onDocumentCreated(
         },
         data: {
           type: 'NEW_FOLLOWER',
-          biteId: `${userId}`,
-          likeCreatorId: `${newFollowerUid}`,
+          userId: `${userId}`,
+          followerUid: `${newFollowerUid}`,
         },
       });
 

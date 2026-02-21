@@ -15,7 +15,8 @@ export class FollowersService {
   users = this.dataAccessService.users;
   type = this.dataAccessService.type;
 
-  currentUserId = toSignal(this.storeService.userId$, { initialValue: '' });
+  loggedInUserId = toSignal(this.storeService.userId$, { initialValue: '' });
+  userIdFromUrl = this.storeService.userIdFromUrl;
 
   userClicked(user: PublicUser): void {
     this.navController.navigateForward([PATH.PROFILE, user.userId]);
@@ -25,8 +26,8 @@ export class FollowersService {
     try {
       await this.dataAccessService.unfollowUser(user);
 
-      const currentUserId = this.currentUserId();
-      if (currentUserId) {
+      const loggedInUserId = this.loggedInUserId();
+      if (loggedInUserId) {
         this.dataAccessService.users.reload();
       }
     } catch (error) {

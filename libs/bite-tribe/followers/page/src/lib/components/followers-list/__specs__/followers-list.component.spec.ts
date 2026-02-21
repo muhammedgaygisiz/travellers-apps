@@ -114,9 +114,9 @@ describe(FollowersListComponent.name, () => {
       expect(component.type()).toBe('followers');
     });
 
-    it('should accept currentUserId input', () => {
-      componentRef.setInput('currentUserId', 'current-user-id');
-      expect(component.currentUserId()).toBe('current-user-id');
+    it('should accept loggedInUserId input', () => {
+      componentRef.setInput('loggedInUserId', 'current-user-id');
+      expect(component.loggedInUserId()).toBe('current-user-id');
     });
 
     it('should accept isLoading input', () => {

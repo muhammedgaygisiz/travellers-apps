@@ -10,8 +10,9 @@ import { FollowersService } from './followers.service';
       class="ion-page"
       [users]="service.users.value()"
       [type]="service.type()"
-      [currentUserId]="service.currentUserId()"
+      [loggedInUserId]="service.loggedInUserId()"
       [isLoading]="service.users.isLoading()"
+      [profileOwnerid]="service.userIdFromUrl()"
       (userClick)="service.userClicked($event)"
       (unfollowClick)="service.unfollowClicked($event)"
     />

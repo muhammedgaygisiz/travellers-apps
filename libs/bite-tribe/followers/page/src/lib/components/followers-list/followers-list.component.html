@@ -41,7 +41,12 @@
                   <p>{{ user.city }}</p>
                 }
               </ion-label>
-              @if (type() === 'following' && user.userId !== currentUserId()) {
+              @let itsNotMe = user.userId !== loggedInUserId();
+              @if (
+                type() === 'following' &&
+                itsNotMe &&
+                loggedInUserId() === profileOwnerid()
+              ) {
                 <ion-button
                   slot="end"
                   fill="outline"

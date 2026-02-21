@@ -1,7 +1,11 @@
 {
   "$schema": "../../node_modules/@angular/service-worker/config/schema.json",
   "index": "/index.html",
-  "navigationUrls": ["!/s/**"],
+  "navigationUrls": [
+    "!/s/**",
+    "!/.well-known/assetlinks.json",
+    "!/apple-app-site-association"
+  ],
   "assetGroups": [
     {
       "name": "app",

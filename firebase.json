@@ -15,6 +15,16 @@
       "target": "bite-tribe",
       "public": "dist/apps/bite-tribe",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "headers": [
+        {
+          "source": "/.well-known/assetlinks.json",
+          "headers": [{ "key": "Content-Type", "value": "application/json" }]
+        },
+        {
+          "source": "/.well-known/apple-app-site-association",
+          "headers": [{ "key": "Content-Type", "value": "application/json" }]
+        }
+      ],
       "rewrites": [
         { "source": "/s/**", "function": "handleSharedLinkToBite" },
         { "source": "**", "destination": "/index.html" }

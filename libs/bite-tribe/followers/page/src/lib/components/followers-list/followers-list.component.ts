@@ -48,8 +48,9 @@ const CANCEL = 'cancel';
 export class FollowersListComponent {
   users = input.required<PublicUser[] | undefined>();
   type = input.required<'followers' | 'following'>();
-  currentUserId = input<string>();
+  loggedInUserId = input<string>();
   isLoading = input<boolean>(false);
+  profileOwnerid = input<string>();
 
   userClick = output<PublicUser>();
   unfollowClick = output<PublicUser>();

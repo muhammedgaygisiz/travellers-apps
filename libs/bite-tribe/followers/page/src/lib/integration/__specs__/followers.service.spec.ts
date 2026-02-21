@@ -6,9 +6,12 @@ import { NavController } from '@ionic/angular/standalone';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 import { PATH } from 'utils';
+import { PublicUser } from 'model';
 
 class MockFollowersDataAccessService {
-  users = jest.fn();
+  users = {
+    reload: jest.fn(),
+  };
   type = jest.fn();
   isLoading = jest.fn();
   unfollowUser = jest.fn();
@@ -66,12 +69,12 @@ describe(FollowersService.name, () => {
       expect(unfollowSpy).toHaveBeenCalledWith(user);
     });
 
-    it('should not attempt to reload when currentUserId is empty', async () => {
+    it('should not attempt to reload when loggedInUserId is empty', async () => {
       const user = { userId: 'user123' } as PublicUser;
       jest.spyOn(dataAccessService, 'unfollowUser').mockResolvedValue();
 
-      // Mock currentUserId to return empty string
-      Object.defineProperty(service, 'currentUserId', {
+      // Mock loggedInUserId to return empty string
+      Object.defineProperty(service, 'loggedInUserId', {
         get: jest.fn((): (() => string) => () => ''),
         configurable: true,
       });

@@ -4,7 +4,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 import { BiteService } from '../bite.service';
-import { BiteContainer } from '../bite-container.component';
+import { CreateBiteContainer } from '../create-bite.container';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 jest.mock('@capacitor-firebase/analytics');
@@ -13,9 +13,9 @@ jest.mock('heic2any', () => jest.fn());
 jest.mock('localization');
 addNecessaryIcons();
 
-describe('BiteContainer', () => {
-  let component: BiteContainer;
-  let fixture: ComponentFixture<BiteContainer>;
+describe(CreateBiteContainer.name, () => {
+  let component: CreateBiteContainer;
+  let fixture: ComponentFixture<CreateBiteContainer>;
   let biteServiceMock: BiteService;
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('BiteContainer', () => {
       ],
     });
 
-    fixture = TestBed.createComponent(BiteContainer);
+    fixture = TestBed.createComponent(CreateBiteContainer);
     component = fixture.componentInstance;
     biteServiceMock = TestBed.inject(BiteService);
   });

@@ -3,6 +3,7 @@ import { NavController, Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+import { PATH } from 'utils';
 
 const upsertToken = async (
   userUid: string,
@@ -109,7 +110,7 @@ export const initPush = async (
         const data = action.notification.data;
 
         if (data?.type === 'NEW_BITE' && data?.biteId) {
-          navController.navigateForward(['bite', data.biteId]);
+          navController.navigateForward([PATH.BITE, data.biteId]);
         }
       },
     );

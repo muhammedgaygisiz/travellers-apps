@@ -9,6 +9,8 @@ import { ErrorHandler } from '@angular/core';
 import { getDownloadUrlFromFirebaseStorage, isBase64String } from 'utils';
 import { deleteCurrentImage } from '../utils/delete-current-image';
 import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
+import { updateProfileWithImagePathFromFirebaseStorage } from '../bite-api/utils/update-profile-with-image-path-from-firestorage';
+import { loadProfileById } from '../bite-api/utils/load-profile-by-id';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -27,6 +29,17 @@ jest.mock('../utils/delete-current-image', () => ({
 
 jest.mock('../utils/upload-base64-to-firebase-storage', () => ({
   uploadBase64ToFirebaseStorage: jest.fn(),
+}));
+
+jest.mock(
+  '../bite-api/utils/update-profile-with-image-path-from-firestorage',
+  () => ({
+    updateProfileWithImagePathFromFirebaseStorage: jest.fn(),
+  }),
+);
+
+jest.mock('../bite-api/utils/load-profile-by-id', () => ({
+  loadProfileById: jest.fn(),
 }));
 
 const MockedAuthService = {
@@ -336,7 +349,7 @@ describe(ProfileApiService.name, () => {
 
           const result = await service.updateUser(publicUser);
 
-          expect(result).toBeUndefined();
+          expect(result).toEqual(publicUser);
         },
       ));
     });
@@ -1193,5 +1206,56 @@ describe(ProfileApiService.name, () => {
         },
       ));
     });
+  });
+
+  describe('uploadImage', () => {
+    it('should call uploadBase64ToFirebaseStorage and return download url', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const BASE64_PHOTO =
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA';
+
+        await service.uploadImage(
+          {
+            photoUrl: BASE64_PHOTO,
+            userId: '123',
+          } as PublicUser,
+          () => {
+            /** Something */
+          },
+        );
+
+        expect(uploadBase64ToFirebaseStorage).toHaveBeenCalledWith({
+          base64: BASE64_PHOTO,
+          collection: 'users',
+          docId: '123',
+          callbackFn: expect.any(Function),
+        });
+      },
+    ));
+  });
+
+  describe('updatePhotoUrlInUser', () => {
+    it('should call updateProfileWithImagePathFromFirebaseStorage, load and return profile', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        await service.updatePhotoUrlInUser(
+          { userId: 'user-id-123' } as PublicUser,
+          'new-photo-url',
+        );
+
+        expect(
+          updateProfileWithImagePathFromFirebaseStorage,
+        ).toHaveBeenCalledWith(
+          'new-photo-url',
+          {
+            userId: 'user-id-123',
+          },
+          'user-id-123',
+        );
+
+        expect(loadProfileById).toHaveBeenCalledWith('user-id-123');
+      },
+    ));
   });
 });

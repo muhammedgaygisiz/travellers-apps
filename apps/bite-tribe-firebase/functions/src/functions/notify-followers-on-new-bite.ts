@@ -30,8 +30,10 @@ export const notifyFollowersOnNewBite = onDocumentCreated(
   'bites/{biteId}',
   async (event) => {
     const snap = event.data;
+    const biteId = event.params.biteId;
 
     logger.info('--- New bite created, preparing to notify followers');
+    logger.info('--- Bite ID:', biteId);
     if (!snap) {
       return;
     }
@@ -90,7 +92,7 @@ export const notifyFollowersOnNewBite = onDocumentCreated(
 
     logger.info('--- Chunks:', chunks);
     for (const chunk of chunks) {
-      const res = await sendNotification(chunk, body, bite, authorUid);
+      const res = await sendNotification(chunk, body, biteId, authorUid);
 
       const invalidTokens = getInvalidTokens(res, chunk);
 

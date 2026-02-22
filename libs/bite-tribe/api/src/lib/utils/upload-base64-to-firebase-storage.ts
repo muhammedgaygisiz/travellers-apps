@@ -1,13 +1,13 @@
 import { dataUrlToBlob, guessExtFromContentType } from 'utils';
 import { BITE_COLLECTION } from './constants';
 import { uploadBlobToFirebasestorage } from './upload-blob-to-firebasestorage';
-import { CreateAndUploadBiteCallbackParams } from 'model';
+import { CreateAndUploadImageCallbackParams } from 'model';
 
 type Params = {
   base64: string;
   docId: string;
   collection?: string;
-  callbackFn?: (p: CreateAndUploadBiteCallbackParams) => void;
+  callbackFn?: (p: CreateAndUploadImageCallbackParams) => void;
 };
 
 export const uploadBase64ToFirebaseStorage = async ({

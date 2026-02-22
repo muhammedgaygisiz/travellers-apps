@@ -1,7 +1,7 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { Bite, Bucketlist, CreateAndUploadBiteCallbackParams } from 'model';
+import { Bite, Bucketlist, CreateAndUploadImageCallbackParams } from 'model';
 import { Platform } from '@ionic/angular';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
 import { BITE_COLLECTION } from '../utils/constants';
@@ -61,7 +61,7 @@ export class BiteApiService {
 
   public async uploadImage(
     bite: Bite,
-    callbackFn: (p: CreateAndUploadBiteCallbackParams) => void,
+    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
   ): Promise<void> {
     const { image, ...biteDocWithoutImage } = bite;
 

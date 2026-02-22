@@ -4,11 +4,11 @@ import {
 } from '@capacitor-firebase/storage';
 import { writeBlobToFileSystem } from './write-blob-to-file-system';
 import { v4 as uuidv4 } from 'uuid';
-import { CreateAndUploadBiteCallbackParams } from 'model';
+import { CreateAndUploadImageCallbackParams } from 'model';
 
 const uploadToFirebase = (
   fileUploadOptions: UploadFileOptions,
-  callbackFn?: (p: CreateAndUploadBiteCallbackParams) => void,
+  callbackFn?: (p: CreateAndUploadImageCallbackParams) => void,
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     FirebaseStorage.uploadFile(fileUploadOptions, (evt, err) => {
@@ -42,7 +42,7 @@ type Params = {
   extension: string;
   blob: Blob;
   contentType: string;
-  callbackFn?: (p: CreateAndUploadBiteCallbackParams) => void;
+  callbackFn?: (p: CreateAndUploadImageCallbackParams) => void;
 };
 
 export const uploadBlobToFirebasestorage = async ({

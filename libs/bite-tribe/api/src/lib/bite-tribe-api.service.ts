@@ -5,7 +5,7 @@ import {
   Bite,
   Bucketlist,
   CreateAndSaveToBucketListParams,
-  CreateAndUploadBiteCallbackParams,
+  CreateAndUploadImageCallbackParams,
   Like,
   Link,
   Menu,
@@ -23,7 +23,7 @@ import { ProfileApiService } from './profile-api.service';
 import { BiteApiService } from './bite-api/bite-api.service';
 import { SettingsApiService } from './settings-api/settings-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
-import { from, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -128,16 +128,30 @@ export class BiteTribeApiService {
 
   uploadImage(
     bite: any,
-    callbackFn: (p: CreateAndUploadBiteCallbackParams) => void,
+    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
   ): Promise<void> {
     return this.biteApiService.uploadImage(bite, callbackFn);
+  }
+
+  uploadProfileImage(
+    profile: any,
+    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
+  ): Promise<void> {
+    return this.profileApiService.uploadImage(profile, callbackFn);
   }
 
   updateImagePathInBite(bite: Bite, imagePath: string): Promise<Bite> {
     return this.biteApiService.updateImagePathInBite(bite, imagePath);
   }
 
-  updateUser(publicUser: PublicUser): Promise<PublicUser | undefined> {
+  updatePhotoUrlInUser(
+    profile: PublicUser,
+    photoUrl: string,
+  ): Promise<PublicUser> {
+    return this.profileApiService.updatePhotoUrlInUser(profile, photoUrl);
+  }
+
+  updateUser(publicUser: PublicUser): Promise<PublicUser> {
     return this.profileApiService.updateUser(publicUser);
   }
 

@@ -20,7 +20,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   />`,
   imports: [BitePage],
 })
-export class BiteContainer {
+export class CreateBiteContainer {
   service = inject(BiteService);
 
   ionViewDidEnter(): void {

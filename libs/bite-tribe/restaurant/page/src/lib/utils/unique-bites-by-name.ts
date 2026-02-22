@@ -1,12 +1,16 @@
 import { Bite } from 'model';
+import { normalize } from 'utils';
 
 export const uniqueBitesByName = (bites: Bite[]): Bite[] => {
   const seenNames = new Map<string, boolean>();
+
   return [...bites].filter((bite) => {
-    if (seenNames.get(bite.name)) {
+    const normalizedName = normalize(bite.name);
+
+    if (seenNames.get(normalizedName)) {
       return false;
     }
-    seenNames.set(bite.name, true);
+    seenNames.set(normalizedName, true);
     return true;
   });
 };

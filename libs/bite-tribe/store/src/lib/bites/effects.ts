@@ -13,7 +13,7 @@ import { BucketlistActions } from '../bucketlists/actions';
 import { PATH } from 'utils';
 import { userId } from '../router/selectors';
 import { fromAuth } from 'ta-firestore';
-import { CreateAndUploadBiteCallbackParams } from 'model';
+import { CreateAndUploadImageCallbackParams } from 'model';
 
 @Injectable()
 export class BiteEffects {
@@ -144,7 +144,7 @@ export class BiteEffects {
           return from(
             this.api.uploadImage(
               bite,
-              (p: CreateAndUploadBiteCallbackParams): void => {
+              (p: CreateAndUploadImageCallbackParams): void => {
                 if (p.uploadParams?.evt?.completed === false) {
                   this.store.dispatch(
                     BiteActions.uploadingImage({

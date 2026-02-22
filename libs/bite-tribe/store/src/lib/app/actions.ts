@@ -1,5 +1,10 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import type { ProfileMetaData, PublicUser, Settings } from 'model';
+import type {
+  ProfileMetaData,
+  PublicUser,
+  Settings,
+  UploadParams,
+} from 'model';
 
 export const AppActions = createActionGroup({
   source: 'APP',
@@ -12,6 +17,8 @@ export const AppActions = createActionGroup({
     'Save settings': props<{ settings: Settings }>(),
     'Save public profile': props<{ profile: PublicUser }>(),
     'Saved public profile': props<{ profile: PublicUser }>(),
+    'Upload profile image': props<{ profile: PublicUser }>(),
+    'Error Uploading Profile Image': props<{ profile: PublicUser }>(),
     'Error saving public profile': emptyProps(),
     'Loaded settings from API': props<{ settings: Settings }>(),
     'Set public profile': props<{ profile: PublicUser }>(),
@@ -22,5 +29,16 @@ export const AppActions = createActionGroup({
     }>(),
     'Loaded Profile metadata': props<ProfileMetaData>(),
     'Reload Profile metadata': emptyProps(),
+    'Uploading Profile Image': props<{
+      progress: UploadParams;
+      profile: PublicUser;
+      imagePath: string;
+    }>(),
+    'Uploaded Profile Image': props<{
+      profile: PublicUser;
+      imagePath: string;
+    }>(),
+    'Updated Photo Url in Profile': props<{ profile: PublicUser }>(),
+    'Error Updating PhotoUrl in Profile': props<{ profile: PublicUser }>(),
   },
 });

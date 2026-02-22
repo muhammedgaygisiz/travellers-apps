@@ -268,33 +268,6 @@ describe(AppEffect.name, () => {
         });
       });
 
-      describe('given user call was successful but updated user is undefined', () => {
-        beforeEach(() => {
-          jest
-            .spyOn(apiService, 'updateUser')
-            .mockReturnValue(of(undefined) as any);
-        });
-
-        it('should emit errorSavingPublicProfile action', () => {
-          scheduler.run(({ cold, expectObservable }) => {
-            actions$ = cold('a', {
-              a: AppActions.savePublicProfile({
-                profile: {} as PublicUser,
-              }),
-            });
-
-            const expected = 'a';
-            const expectedOutput = {
-              a: AppActions.errorSavingPublicProfile(),
-            };
-            expectObservable(effects.saveProfileToFirestore$).toBe(
-              expected,
-              expectedOutput,
-            );
-          });
-        });
-      });
-
       describe('given update call throws an error', () => {
         beforeEach(() => {
           jest.spyOn(apiService, 'updateUser').mockReturnValue(

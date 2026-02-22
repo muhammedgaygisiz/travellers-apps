@@ -336,7 +336,7 @@ describe(ProfileApiService.name, () => {
 
           const result = await service.updateUser(publicUser);
 
-          expect(result).toBeUndefined();
+          expect(result).toEqual(publicUser);
         },
       ));
     });

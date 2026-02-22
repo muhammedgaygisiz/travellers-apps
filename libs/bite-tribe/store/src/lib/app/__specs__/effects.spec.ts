@@ -41,6 +41,8 @@ const BiteTribeApiServiceMock = {
   getTotalNumberOfUsers: jest.fn(),
   unfollowUser: jest.fn(),
   fetchFollowMetadata: jest.fn(),
+  uploadProfileImage: jest.fn(),
+  updatePhotoUrlInUser: jest.fn(),
 };
 
 const NavControllerMock = {};
@@ -244,15 +246,75 @@ describe(AppEffect.name, () => {
   });
 
   describe('saveProfileToFirestore$', () => {
-    describe('given user was updated successfully', () => {
+    describe('given no photo change', () => {
+      describe('and user was updated successfully', () => {
+        beforeEach(() => {
+          jest.spyOn(apiService, 'updateUser').mockReturnValue(of({}) as any);
+        });
+
+        it('should save profile to firestore on savePublicProfile', () => {
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('a', {
+              a: AppActions.savePublicProfile({ profile: {} as PublicUser }),
+            });
+
+            const expected = 'a';
+            const expectedOutput = {
+              a: AppActions.savedPublicProfile({
+                profile: {} as PublicUser,
+              }),
+            };
+            expectObservable(effects.saveProfileToFirestore$).toBe(
+              expected,
+              expectedOutput,
+            );
+          });
+        });
+
+        describe('given update call throws an error', () => {
+          beforeEach(() => {
+            jest.spyOn(apiService, 'updateUser').mockReturnValue(
+              new Observable((subscriber) => {
+                subscriber.error(new Error('Update failed'));
+              }) as any,
+            );
+          });
+
+          it('should emit errorSavingPublicProfile action', () => {
+            scheduler.run(({ cold, expectObservable }) => {
+              actions$ = cold('a', {
+                a: AppActions.savePublicProfile({
+                  profile: {} as PublicUser,
+                }),
+              });
+
+              const expected = 'a';
+              const expectedOutput = {
+                a: AppActions.errorSavingPublicProfile(),
+              };
+              expectObservable(effects.saveProfileToFirestore$).toBe(
+                expected,
+                expectedOutput,
+              );
+            });
+          });
+        });
+      });
+    });
+
+    describe('given a new photo', () => {
       beforeEach(() => {
         jest.spyOn(apiService, 'updateUser').mockReturnValue(of({}) as any);
       });
 
-      it('should save profile to firestore on savePublicProfile', () => {
+      it('should save profile to firestore and dispatch uploadProfileImage on savePublicProfile', () => {
         scheduler.run(({ cold, expectObservable }) => {
+          const profile = {
+            displayName: 'test',
+            photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+          } as PublicUser;
           actions$ = cold('a', {
-            a: AppActions.savePublicProfile({ profile: {} as PublicUser }),
+            a: AppActions.savePublicProfile({ profile }),
           });
 
           const expected = 'a';
@@ -266,35 +328,97 @@ describe(AppEffect.name, () => {
             expectedOutput,
           );
         });
+
+        expect(dispatchSpy).toHaveBeenCalledWith(
+          AppActions.uploadProfileImage({
+            profile: {
+              photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            } as PublicUser,
+          }),
+        );
+      });
+    });
+  });
+
+  describe('uploadProfileImage$', () => {
+    let uploadProfileImageSpy: SpyInstance;
+
+    beforeEach(() => {
+      uploadProfileImageSpy = jest
+        .spyOn(apiService, 'uploadProfileImage')
+        .mockImplementation();
+    });
+
+    it('should call uploadProfileImage from Api Service', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        const profile = {
+          displayName: 'test',
+          photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+        } as PublicUser;
+        actions$ = cold('a', {
+          a: AppActions.uploadProfileImage({ profile }),
+        });
+
+        expectObservable(effects.uploadProfileImage$);
       });
 
-      describe('given update call throws an error', () => {
-        beforeEach(() => {
-          jest.spyOn(apiService, 'updateUser').mockReturnValue(
-            new Observable((subscriber) => {
-              subscriber.error(new Error('Update failed'));
-            }) as any,
-          );
+      expect(uploadProfileImageSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('updatePhotoUrlInProfile', () => {
+    let updatePhotoUrlInUserSpy: SpyInstance;
+
+    beforeEach(() => {
+      updatePhotoUrlInUserSpy = jest
+        .spyOn(apiService, 'updatePhotoUrlInUser')
+        .mockImplementation();
+    });
+
+    it('should call updatePhotoUrlInUser from Api Service with new photoUrl after photo upload', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        const profile = {
+          displayName: 'test',
+          photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+        } as PublicUser;
+        const imagePath = 'path/to/uploaded/image.jpg';
+        actions$ = cold('a', {
+          a: AppActions.uploadedProfileImage({ profile, imagePath }),
         });
 
-        it('should emit errorSavingPublicProfile action', () => {
-          scheduler.run(({ cold, expectObservable }) => {
-            actions$ = cold('a', {
-              a: AppActions.savePublicProfile({
-                profile: {} as PublicUser,
-              }),
-            });
+        expectObservable(effects.updatePhotoUrlInProfile$);
+      });
 
-            const expected = 'a';
-            const expectedOutput = {
-              a: AppActions.errorSavingPublicProfile(),
-            };
-            expectObservable(effects.saveProfileToFirestore$).toBe(
-              expected,
-              expectedOutput,
-            );
-          });
+      expect(updatePhotoUrlInUserSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should emit updatedPhotoUrlInProfile', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        const profile = {
+          displayName: 'test',
+          photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+        } as PublicUser;
+        const imagePath = 'path/to/uploaded/image.jpg';
+        const updatedUser = { ...profile, photoUrl: imagePath } as PublicUser;
+
+        jest
+          .spyOn(apiService, 'updatePhotoUrlInUser')
+          .mockReturnValue(of(updatedUser) as any);
+
+        actions$ = cold('a', {
+          a: AppActions.uploadedProfileImage({ profile, imagePath }),
         });
+
+        const expected = 'a';
+        const expectedOutput = {
+          a: AppActions.updatedPhotoUrlInProfile({
+            profile: updatedUser,
+          }),
+        };
+        expectObservable(effects.updatePhotoUrlInProfile$).toBe(
+          expected,
+          expectedOutput,
+        );
       });
     });
   });

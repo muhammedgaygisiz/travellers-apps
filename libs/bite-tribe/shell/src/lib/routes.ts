@@ -27,7 +27,8 @@ export const ROUTES: Routes = withAuthRoutes([
   },
   {
     path: PATH.NEW_BITE,
-    loadComponent: () => import('bite-tribe/bite').then((m) => m.BiteContainer),
+    loadComponent: () =>
+      import('bite-tribe/bite').then((m) => m.CreateBiteContainer),
     canActivate: [authGuard],
     title: 'New',
   },

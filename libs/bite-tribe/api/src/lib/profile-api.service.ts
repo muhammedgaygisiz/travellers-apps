@@ -13,7 +13,11 @@ import {
   DocumentSnapshot,
   FirebaseFirestore,
 } from '@capacitor-firebase/firestore';
-import type { Bite, PublicUser } from 'model';
+import type {
+  Bite,
+  CreateAndUploadImageCallbackParams,
+  PublicUser,
+} from 'model';
 import { toPublicUser } from './utils/to-public-user';
 import { Platform } from '@ionic/angular';
 import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
@@ -21,6 +25,8 @@ import { USERS_COLLECTION } from './utils/user-collection-key';
 import { getDownloadUrlFromFirebaseStorage, isBase64String } from 'utils';
 import { deleteCurrentImage } from './utils/delete-current-image';
 import { uploadBase64ToFirebaseStorage } from './utils/upload-base64-to-firebase-storage';
+import { updateProfileWithImagePathFromFirebaseStorage } from './bite-api/utils/update-profile-with-image-path-from-firestorage';
+import { loadProfileById } from './bite-api/utils/load-profile-by-id';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileApiService {
@@ -116,7 +122,7 @@ export class ProfileApiService {
     }
   }
 
-  async updateUser(publicUser: PublicUser): Promise<PublicUser | undefined> {
+  async updateUser(publicUser: PublicUser): Promise<PublicUser> {
     try {
       const photoUrl = publicUser.photoUrl;
 
@@ -176,7 +182,7 @@ export class ProfileApiService {
       console.error('Error updating public user:', error);
       this.errorHandler.handleError(error);
 
-      return undefined;
+      return publicUser;
     }
   }
 
@@ -419,5 +425,34 @@ export class ProfileApiService {
       this.errorHandler.handleError(error);
       return [];
     }
+  }
+
+  public async uploadImage(
+    profile: PublicUser,
+    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
+  ): Promise<void> {
+    const { photoUrl, ...profileWithoutImage } = profile;
+
+    uploadBase64ToFirebaseStorage({
+      base64: photoUrl,
+      docId: profile.userId,
+      collection: USERS_COLLECTION,
+      callbackFn,
+    });
+  }
+
+  public async updatePhotoUrlInUser(
+    profile: PublicUser,
+    photoUrl: string,
+  ): Promise<PublicUser> {
+    const { photoUrl: base64Photo, ...profileWithoutImage } = profile;
+
+    await updateProfileWithImagePathFromFirebaseStorage(
+      photoUrl,
+      profileWithoutImage,
+      profile.userId,
+    );
+
+    return loadProfileById(profile.userId);
   }
 }

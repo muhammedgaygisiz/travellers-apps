@@ -6,8 +6,8 @@ export interface UploadParams {
   offlineImagePath: string;
 }
 
-export interface CreateAndUploadBiteCallbackParams {
+export interface CreateAndUploadImageCallbackParams {
   uploadParams?: UploadParams;
-  createdBiteId?: string;
+  createdDocId?: string;
   imagePath: string;
 }

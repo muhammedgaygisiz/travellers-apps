@@ -1,4 +1,4 @@
-import { Bite, CreateAndUploadBiteCallbackParams } from 'model';
+import { Bite, CreateAndUploadImageCallbackParams } from 'model';
 import { updateBiteWithImagePathFromFirestorage } from './update-bite-with-image-path-from-firestorage';
 import { uploadBase64ToFirebaseStorage } from '../../utils/upload-base64-to-firebase-storage';
 
@@ -7,7 +7,7 @@ type Params = {
   biteId: string;
   biteWithoutImage?: Omit<Bite, 'image'>;
   clearBase64Image?: boolean;
-  callbackFn?: (p: CreateAndUploadBiteCallbackParams) => void;
+  callbackFn?: (p: CreateAndUploadImageCallbackParams) => void;
 };
 
 export const uploadImageAndUpdateBite = async ({

@@ -35,4 +35,18 @@ describe('uniqueBitesByName', () => {
     expect(uniqueBites.length).toBe(3);
     expect(uniqueBites).toEqual(bites);
   });
+
+  describe('given two bites with same name but one has a typo', () => {
+    it('should return one bite', () => {
+      const bites = [
+        { name: 'Chicken', price: 10 },
+        { name: 'chicken', price: 20 },
+      ];
+      const uniqueBites = uniqueBitesByName(bites as any);
+      expect(uniqueBites.length).toBe(1);
+      // This is a lack in the conception of the dynamic menu. We have to give further thoughts which price should be shown.
+      // The latest or a range of prices. For now, we will just show the first one.
+      expect(uniqueBites).toEqual([{ name: 'Chicken', price: 10 }]);
+    });
+  });
 });

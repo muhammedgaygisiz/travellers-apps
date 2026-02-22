@@ -364,6 +364,73 @@ describe(AppEffect.name, () => {
 
       expect(uploadProfileImageSpy).toHaveBeenCalledTimes(1);
     });
+
+    describe('callback fn of uploadProfileImage', () => {
+      describe('given upload completed', () => {
+        it('should dispatch uploadedProfileImage with image path', () => {
+          const callbackFn = jest.fn();
+          uploadProfileImageSpy.mockImplementation(
+            (profile: PublicUser, cb: (p: any) => void): void => {
+              callbackFn(profile, cb);
+              cb({
+                uploadParams: { evt: { completed: true } },
+                imagePath: 'path/to/uploaded/image.jpg',
+              });
+            },
+          );
+
+          scheduler.run(({ cold, expectObservable }) => {
+            const profile = {
+              displayName: 'test',
+              photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            } as PublicUser;
+            actions$ = cold('a', {
+              a: AppActions.uploadProfileImage({ profile }),
+            });
+
+            expectObservable(effects.uploadProfileImage$);
+          });
+        });
+      });
+
+      describe('given upload not completed yet', () => {
+        it('should dispatch uploadingProfileImage with progress', () => {
+          const callbackFn = jest.fn();
+          uploadProfileImageSpy.mockImplementation(
+            (profile: PublicUser, cb: (p: any) => void): void => {
+              callbackFn(profile, cb);
+              cb({
+                uploadParams: { evt: { completed: false, progress: 50 } },
+                imagePath: 'path/to/uploaded/image.jpg',
+              });
+            },
+          );
+
+          scheduler.run(({ cold, expectObservable }) => {
+            const profile = {
+              displayName: 'test',
+              photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            } as PublicUser;
+            actions$ = cold('a', {
+              a: AppActions.uploadProfileImage({ profile }),
+            });
+
+            expectObservable(effects.uploadProfileImage$);
+          });
+
+          expect(dispatchSpy).toHaveBeenCalledWith(
+            AppActions.uploadingProfileImage({
+              progress: { evt: { completed: false, progress: 50 } } as any,
+              profile: {
+                displayName: 'test',
+                photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+              } as PublicUser,
+              imagePath: 'path/to/uploaded/image.jpg',
+            }),
+          );
+        });
+      });
+    });
   });
 
   describe('updatePhotoUrlInProfile', () => {

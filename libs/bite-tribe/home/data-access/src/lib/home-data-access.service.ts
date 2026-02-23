@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import type { Bite, Like } from 'model';
@@ -16,9 +16,7 @@ export class HomeDataAccessService {
   sorting = toSignal(this.storeService.homeSorting$, {
     initialValue: 'distance',
   });
-  myBites = toSignal(this.storeService.sortedMyBites$, {
-    initialValue: [] as Bite[],
-  });
+  myBites = signal(<Bite[]>[]);
   myBitesSorting = toSignal(this.storeService.myBitesSorting$, {
     initialValue: 'distance',
   });

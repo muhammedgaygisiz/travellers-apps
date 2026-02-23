@@ -142,20 +142,6 @@ export const bite = createSelector(
   },
 );
 
-export const mybites = createSelector(
-  bitesWithMetadata,
-  fromAuth.selectUserId,
-  (bites, userId) => bites.filter((bite) => bite.userId === userId),
-);
-
-export const sortedMyBites = createSelector(
-  mybites,
-  myBitesSorting,
-  exchangeRates,
-  (bites, sorting, exchangeRates) =>
-    sortByCriteria(bites, sorting, exchangeRates),
-);
-
 export const bitesBySelectedBucketlist = createSelector(
   bitesWithMetadata,
   selectedBucketlist,

@@ -1,8 +1,15 @@
-import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
+import {
+  inject,
+  Injectable,
+  resource,
+  ResourceLoader,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import type { Bite, Like, PublicUser } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileDataAccessService {
@@ -18,9 +25,7 @@ export class ProfileDataAccessService {
 
   myUser = toSignal(this.storeService.publicUser$);
 
-  myBites = toSignal(this.storeService.mybites$, {
-    initialValue: [] as Bite[],
-  });
+  myBites = signal(<Bite[]>[]);
 
   private bites = toSignal(this.storeService.bites$, {
     initialValue: [] as Bite[],

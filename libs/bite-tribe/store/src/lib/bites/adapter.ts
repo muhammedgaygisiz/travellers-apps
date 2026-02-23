@@ -5,10 +5,12 @@ export interface BitesState extends EntityState<Bite> {
   cachedBite?: Partial<Bite>;
   editingBite?: Partial<Bite>;
   latestBites: Bite[];
+  bitesByUserId: Bite[];
 }
 
 export const adapter = createEntityAdapter<Bite>();
 
 export const initialState: BitesState = adapter.getInitialState({
   latestBites: [],
+  bitesByUserId: [],
 });

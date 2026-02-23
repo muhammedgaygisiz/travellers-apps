@@ -4,15 +4,14 @@ import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
 import { BiteActions } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
+import { bites, sortedHomeBites } from './bites/home-bites.selector';
+import { bitesByUser, sortedBitesByUser } from './bites/bites-by-id.selector';
 import {
   allTags,
   bite,
-  bites,
   bitesBySelectedBucketlist,
-  bitesByUser,
   cachedBite,
   nearbyRestaurants,
-  sortedHomeBites,
   tagSuggestionsForEditingBite,
 } from './bites/selectors';
 import {
@@ -103,6 +102,7 @@ export class BiteTribeStoreService implements StoreService {
   homeSorting$ = this.store.select(homeSorting);
   bucketlistSorting$ = this.store.select(bucketlistSorting);
   bite$ = this.store.select(bite);
+  sortedMyBites$ = this.store.select(sortedBitesByUser);
   myBitesSorting$ = this.store.select(myBitesSorting);
   bitesByUser$ = this.store.select(bitesByUser);
   bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);

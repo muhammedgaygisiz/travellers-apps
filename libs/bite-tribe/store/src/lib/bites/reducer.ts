@@ -10,7 +10,6 @@ export const reducer = createReducer(
   on(fromAuth.AuthActions.logoutSucceeded, (state) => adapter.removeAll(state)),
   on(
     BiteActions.loadedByGPSPositionFromAPI,
-    BiteActions.loadedByUserFromAPI,
     BiteActions.loadedByBucketlistFromAPI,
     (state, { bites }) => {
       return adapter.upsertMany(bites, state);
@@ -65,6 +64,12 @@ export const reducer = createReducer(
     return {
       ...state,
       latestBites: bites,
+    };
+  }),
+  on(BiteActions.loadedByUserFromAPI, (state, { bites }) => {
+    return {
+      ...state,
+      bitesByUserId: bites,
     };
   }),
 );

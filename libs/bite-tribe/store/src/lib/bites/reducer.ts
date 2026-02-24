@@ -12,11 +12,17 @@ export const reducer = createReducer(
     BiteActions.loadedByGPSPositionFromAPI,
     BiteActions.loadedByBucketlistFromAPI,
     (state, { bites }) => {
-      return adapter.upsertMany(bites, state);
+      return {
+        ...state,
+        ...adapter.upsertMany(bites, state),
+      };
     },
   ),
   on(BiteActions.deletedBite, (state, { bite }) => {
-    return adapter.removeOne(bite.id, state);
+    return {
+      ...state,
+      ...adapter.removeOne(bite.id, state),
+    };
   }),
   on(BiteActions.cacheBite, (state, { bite }) => {
     return {

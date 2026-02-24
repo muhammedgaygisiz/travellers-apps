@@ -1,5 +1,7 @@
 import type { Bite, Bucketlist, Geopoint, PublicUser } from 'model';
 import * as fromSelectors from '../selectors';
+import * as fromHomeSelectors from '../home-bites.selector';
+import * as fromBitesByIdSelectors from '../bites-by-id.selector';
 import { BitesState } from '../adapter';
 
 describe('Bites Selectors', () => {
@@ -27,10 +29,6 @@ describe('Bites Selectors', () => {
     place: 'Test Place 2',
   } as Bite;
 
-  const mockUser: PublicUser = {
-    name: 'Test User',
-  } as unknown as PublicUser;
-
   const mockLikes = [
     { id: 'like1', biteId: '1', userId: 'user1' },
     { id: 'like2', biteId: '1', userId: 'user2' },
@@ -43,8 +41,8 @@ describe('Bites Selectors', () => {
       '2': mockBite2,
     },
     cachedBite: mockBite1,
-    biteCreator: mockUser,
     latestBites: [],
+    bitesByUserId: [],
   };
 
   describe('cachedBite', () => {
@@ -74,7 +72,7 @@ describe('Bites Selectors', () => {
         { ...mockBite2, likes: [], distance: '0.01' },
       ] as any[];
 
-      const result = fromSelectors.bites.projector(
+      const result = fromHomeSelectors.bites.projector(
         bitesWithMetadata,
         [], // no filters
         0, // no max price
@@ -93,7 +91,7 @@ describe('Bites Selectors', () => {
         { ...mockBite2, likes: [], distance: '0.01' },
       ] as any[];
 
-      const result = fromSelectors.bites.projector(
+      const result = fromHomeSelectors.bites.projector(
         bitesWithMetadata,
         ['food'], // filter by food tag
         0, // no max price
@@ -113,7 +111,7 @@ describe('Bites Selectors', () => {
         { ...mockBite2, likes: [], distance: '0.01', price: 20 },
       ] as any[];
 
-      const result = fromSelectors.bites.projector(
+      const result = fromHomeSelectors.bites.projector(
         bitesWithMetadata,
         [], // no tags filter
         15, // max price
@@ -133,7 +131,7 @@ describe('Bites Selectors', () => {
         { ...mockBite1, likes: mockLikes, distance: '0.01' },
       ] as any[];
 
-      const result = fromSelectors.bites.projector(
+      const result = fromHomeSelectors.bites.projector(
         bitesWithMetadata,
         [], // no filters
         0, // no max price
@@ -152,7 +150,7 @@ describe('Bites Selectors', () => {
         { ...mockBite2, likes: [], distance: '0.01' },
       ] as any[];
 
-      const result = fromSelectors.bites.projector(
+      const result = fromHomeSelectors.bites.projector(
         bitesWithMetadata,
         [], // no filters
         0, // no max price
@@ -260,7 +258,7 @@ describe('Bites Selectors', () => {
 
   describe('bitesWithMetadata', () => {
     it('should return bites with likes and distance', () => {
-      const result = fromSelectors.bitesWithMetadata.projector(
+      const result = fromHomeSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
         [],
         mockLikes,
@@ -271,7 +269,7 @@ describe('Bites Selectors', () => {
     });
 
     it('should return bites without likes', () => {
-      const result = fromSelectors.bitesWithMetadata.projector(
+      const result = fromHomeSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
         [],
         [],
@@ -282,7 +280,7 @@ describe('Bites Selectors', () => {
     });
 
     it('should return bites without likes if no matching likes', () => {
-      const result = fromSelectors.bitesWithMetadata.projector(
+      const result = fromHomeSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
         [],
         [{ id: 'like1', biteId: '5', userId: 'user1' }],
@@ -293,7 +291,7 @@ describe('Bites Selectors', () => {
     });
 
     it('should return bites no distance if no position', () => {
-      const result = fromSelectors.bitesWithMetadata.projector(
+      const result = fromHomeSelectors.bitesWithMetadata.projector(
         [mockBite1, mockBite2],
         [],
         mockLikes,
@@ -372,9 +370,14 @@ describe('Bites Selectors', () => {
         { ...mockBite2, likes: [], distance: '0.01', userId: 'User-1' },
       ] as any[];
 
-      const result = fromSelectors.mybites.projector(
+      const result = fromBitesByIdSelectors.mybites.projector(
         bitesWithMetadata,
-        'User-1',
+        [],
+        0,
+        'EUR',
+        undefined,
+        undefined,
+        {},
       );
 
       expect(result).toHaveLength(2);
@@ -383,14 +386,14 @@ describe('Bites Selectors', () => {
     });
 
     it('should return empty array if no bites created by the user', () => {
-      const bitesWithMetadata = [
-        { ...mockBite1, likes: mockLikes, distance: '0' },
-        { ...mockBite2, likes: [], distance: '0.01' },
-      ] as any[];
-
-      const result = fromSelectors.mybites.projector(
-        bitesWithMetadata,
-        'Another User',
+      const result = fromBitesByIdSelectors.mybites.projector(
+        [],
+        [],
+        0,
+        'EUR',
+        undefined,
+        undefined,
+        {},
       );
 
       expect(result).toEqual([]);
@@ -404,7 +407,7 @@ describe('Bites Selectors', () => {
         { ...mockBite1, likes: mockLikes, distance: 5, userId: 'User-1' },
       ] as any[];
 
-      const result = fromSelectors.sortedMyBites.projector(
+      const result = fromBitesByIdSelectors.sortedBitesByUser.projector(
         myBites,
         'distance',
         {},
@@ -420,7 +423,7 @@ describe('Bites Selectors', () => {
         { ...mockBite2, likes: [], distance: 10, userId: 'User-1' },
       ] as any[];
 
-      const result = fromSelectors.sortedMyBites.projector(
+      const result = fromBitesByIdSelectors.sortedBitesByUser.projector(
         myBites,
         'likes',
         {},
@@ -431,7 +434,11 @@ describe('Bites Selectors', () => {
     });
 
     it('should return empty array if no bites exist', () => {
-      const result = fromSelectors.sortedMyBites.projector([], 'distance', {});
+      const result = fromBitesByIdSelectors.sortedBitesByUser.projector(
+        [],
+        'distance',
+        {},
+      );
       expect(result).toEqual([]);
     });
   });
@@ -443,7 +450,7 @@ describe('Bites Selectors', () => {
         { ...mockBite1, likes: mockLikes, distance: '0.01' },
       ] as any[];
 
-      const result = fromSelectors.sortedHomeBites.projector(
+      const result = fromHomeSelectors.sortedHomeBites.projector(
         bitesWithMetadata,
         'other-sorting',
         {},
@@ -453,7 +460,7 @@ describe('Bites Selectors', () => {
     });
 
     it('should return empty array if no bites exist', () => {
-      const result = fromSelectors.sortedHomeBites.projector(
+      const result = fromHomeSelectors.sortedHomeBites.projector(
         [],
         'distance',
         {},
@@ -469,7 +476,7 @@ describe('Bites Selectors', () => {
         { ...mockBite2, likes: [], distance: '0.01', userId: 'User-2' },
       ] as any[];
 
-      const result = fromSelectors.bitesByUser.projector(
+      const result = fromBitesByIdSelectors.bitesByUser.projector(
         bitesWithMetadata,
         'User-1',
       );
@@ -484,9 +491,12 @@ describe('Bites Selectors', () => {
         { ...mockBite2, likes: [], distance: '0.01' },
       ] as any[];
 
-      const result = fromSelectors.bitesByUser.projector(bitesWithMetadata, {
-        userId: 'Another User',
-      } as PublicUser);
+      const result = fromBitesByIdSelectors.bitesByUser.projector(
+        bitesWithMetadata,
+        {
+          userId: 'Another User',
+        } as PublicUser,
+      );
 
       expect(result).toEqual([]);
     });

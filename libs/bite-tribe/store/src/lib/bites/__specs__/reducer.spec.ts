@@ -2,14 +2,16 @@ import { reducer } from '../reducer';
 import { BiteActions } from '../actions';
 import type { Bite } from 'model';
 import { fromAuth } from 'ta-firestore';
-import {
-  routerNavigatedAction,
-  routerNavigationAction,
-} from '@ngrx/router-store';
+import { routerNavigatedAction } from '@ngrx/router-store';
 import { PATH } from 'utils';
 import { BitesState } from '../adapter';
 
-const EMPTY_STATE: BitesState = { ids: [], entities: {}, latestBites: [] };
+const EMPTY_STATE: BitesState = {
+  ids: [],
+  entities: {},
+  latestBites: [],
+  bitesByUserId: [],
+};
 
 describe('Bite Reducer', () => {
   describe('fromAuth.logoutSucceeded', () => {
@@ -21,6 +23,7 @@ describe('Bite Reducer', () => {
           '2': { id: '2', name: 'Bite 2' } as Bite,
         },
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const action = fromAuth.AuthActions.logoutSucceeded;
@@ -35,6 +38,7 @@ describe('Bite Reducer', () => {
         ids: ['1'],
         entities: { '1': { id: '1' } },
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const loadedBitesFromApiAction = BiteActions.loadedByGPSPositionFromAPI({
@@ -48,19 +52,16 @@ describe('Bite Reducer', () => {
   });
 
   describe('loadedByUserFromAPI', () => {
-    it('should add bites to bites slice', () => {
-      const NEW_STATE = {
-        ids: ['1'],
-        entities: { '1': { id: '1' } },
-        latestBites: [],
-      };
-
+    it('should add bites to bitesByUserId slice', () => {
       const loadedBitesFromApiAction = BiteActions.loadedByUserFromAPI({
         bites: [{ id: '1' }] as Bite[],
       });
 
       expect(reducer(EMPTY_STATE, loadedBitesFromApiAction)).toEqual({
-        ...NEW_STATE,
+        ids: [],
+        entities: {},
+        bitesByUserId: [{ id: '1' }],
+        latestBites: [],
       });
     });
   });
@@ -71,6 +72,7 @@ describe('Bite Reducer', () => {
         ids: ['1'],
         entities: { '1': { id: '1' } },
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const loadedBitesFromApiAction = BiteActions.loadedByBucketlistFromAPI({
@@ -89,8 +91,14 @@ describe('Bite Reducer', () => {
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite 1' } as Bite },
         latestBites: [],
+        bitesByUserId: [],
       };
-      const NEW_STATE = { ids: [], entities: {}, latestBites: [] };
+      const NEW_STATE = {
+        ids: [],
+        entities: {},
+        latestBites: [],
+        bitesByUserId: [],
+      };
 
       const deletedBiteAction = BiteActions.deletedBite({
         bite: { id: '1', name: 'Bite 1' } as Bite,
@@ -108,11 +116,13 @@ describe('Bite Reducer', () => {
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite prev' } as Bite },
         latestBites: [],
+        bitesByUserId: [],
       };
       const NEW_STATE = {
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite new' } as Bite },
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const savedBiteAction = BiteActions.savedBite({
@@ -130,11 +140,13 @@ describe('Bite Reducer', () => {
         entities: { '1': { id: '1', name: 'Bite prev' } as Bite },
         editingBite: { id: '1', name: 'Bite prev' } as Bite,
         latestBites: [],
+        bitesByUserId: [],
       };
       const NEW_STATE = {
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite new' } as Bite },
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const savedBiteAction = BiteActions.savedBite({
@@ -154,6 +166,7 @@ describe('Bite Reducer', () => {
         entities: {},
         cachedBite: { id: '1', name: 'Bite 1' } as Bite,
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const cacheBiteAction = BiteActions.cacheBite({
@@ -173,6 +186,7 @@ describe('Bite Reducer', () => {
         entities: {},
         cachedBite: { id: '1', name: 'Bite 1' } as Bite,
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const saveNewBiteAction = BiteActions.saveNewBite({
@@ -192,6 +206,7 @@ describe('Bite Reducer', () => {
         entities: {},
         biteCreator: { id: 'creator1', name: 'Creator 1' },
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const noPublicCreatorForBiteAction = BiteActions.noPublicCreatorForBite();
@@ -209,6 +224,7 @@ describe('Bite Reducer', () => {
         entities: {},
         editingBite: { id: '1', name: 'Bite 1' } as Bite,
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const setEditingBiteAction = BiteActions.setEditingBite({
@@ -228,6 +244,7 @@ describe('Bite Reducer', () => {
         entities: {},
         biteCreator: { id: 'creator1', name: 'Creator 1' },
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const payload = { payload: { event: { url: PATH.HOME } } } as any;
@@ -243,6 +260,7 @@ describe('Bite Reducer', () => {
         entities: {},
         biteCreator: { id: 'creator1', name: 'Creator 1' },
         latestBites: [],
+        bitesByUserId: [],
       };
 
       const action = routerNavigatedAction({
@@ -261,6 +279,7 @@ describe('Bite Reducer', () => {
         ids: [],
         entities: {},
         latestBites: [{ id: '1' } as Bite, { id: '2' } as Bite],
+        bitesByUserId: [],
       };
 
       const loadedLatestFromApiAction = BiteActions.loadedLatestFromAPI({

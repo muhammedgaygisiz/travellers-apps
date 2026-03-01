@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { NavController } from '@ionic/angular/standalone';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { MapService } from '../map.service';
-import type { Bite, Bucketlist, Geopoint } from 'model';
+import type { Bite, Bucketlist, Geopoint, Like } from 'model';
 
 describe('MapService', () => {
   let service: MapService;
@@ -47,6 +47,7 @@ describe('MapService', () => {
       logout: jest.fn(),
       submitLikeClick: jest.fn(),
       bites: signal(mockBites),
+      bitesBySelectedBucketlist: signal([mockBites[0], mockBites[2]]),
       isAuthenticated: signal(true),
       selectedBucketlist: signal(mockBucketlist),
       gpsPosition: signal(mockGeopoint),
@@ -105,7 +106,12 @@ describe('MapService', () => {
 
   describe('likeButtonClicked', () => {
     it('should submit like click through dataAccess', () => {
-      const likeClick = { likeType: 'heart', biteId: 'bite1' };
+      const likeClick: Like = {
+        likeType: 'thumbup',
+        biteId: 'bite1',
+        userId: 'user1',
+        createdAt: '2024-06-01T12:00:00Z',
+      };
 
       service.likeButtonClicked(likeClick);
 

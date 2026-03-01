@@ -6,8 +6,14 @@ import { provideMockStore } from '@ngrx/store/testing';
 import type { Bite, Like } from 'model';
 import SpyInstance = jest.SpyInstance;
 
+const BASE_LIKE = {
+  userId: 'user-id',
+  createdAt: '2024-01-01T00:00:00Z',
+};
+
 class Mock {
   bites$ = of([]);
+  bitesBySelectedBucketlist$ = of([]);
   userId$ = of('test-user-id');
   selectedBucketlist$ = of(null);
   isAuthenticated$ = of(false);
@@ -77,7 +83,11 @@ describe('MapDataAccessService', () => {
     it('should call submitLikeOrDislikeClick when bite is found', inject(
       [MapDataAccessService],
       (service: MapDataAccessService) => {
-        const likeClick = { likeType: 'like', biteId: '456' };
+        const likeClick: Like = {
+          ...BASE_LIKE,
+          likeType: 'thumbup',
+          biteId: '456',
+        };
 
         service.submitLikeClick(likeClick);
 
@@ -91,7 +101,11 @@ describe('MapDataAccessService', () => {
     it('should call submitLikeOrDislikeClick with undefined bite when bite is not found', inject(
       [MapDataAccessService],
       (service: MapDataAccessService) => {
-        const likeClick = { likeType: 'like', biteId: 'nonexistent-bite-id' };
+        const likeClick: Like = {
+          ...BASE_LIKE,
+          likeType: 'thumbup',
+          biteId: 'nonexistent-bite-id',
+        };
 
         service.submitLikeClick(likeClick);
 
@@ -115,7 +129,11 @@ describe('MapDataAccessService', () => {
       it('should handle empty bites array', inject(
         [MapDataAccessService],
         (service: MapDataAccessService) => {
-          const likeClick = { likeType: 'like', biteId: '456' };
+          const likeClick: Like = {
+            ...BASE_LIKE,
+            likeType: 'thumbup',
+            biteId: '456',
+          };
 
           service.submitLikeClick(likeClick);
 
@@ -139,7 +157,11 @@ describe('MapDataAccessService', () => {
       it('should handle empty bites array', inject(
         [MapDataAccessService],
         (service: MapDataAccessService) => {
-          const likeClick = { likeType: 'like', biteId: '456' };
+          const likeClick: Like = {
+            ...BASE_LIKE,
+            likeType: 'thumbup',
+            biteId: '456',
+          };
 
           service.submitLikeClick(likeClick);
 
@@ -163,7 +185,11 @@ describe('MapDataAccessService', () => {
       it('should not call submitLikeOrDislikeClick', inject(
         [MapDataAccessService],
         (service: MapDataAccessService) => {
-          const likeClick = { likeType: 'like', biteId: '456' };
+          const likeClick: Like = {
+            ...BASE_LIKE,
+            likeType: 'thumbup',
+            biteId: '456',
+          };
 
           service.submitLikeClick(likeClick);
 

@@ -4,7 +4,6 @@ import { BitesState } from './adapter';
 import type { Bite } from 'model';
 import { biteId } from '../router/selectors';
 import { exchangeRates, preferredCurrency } from '../app/selectors';
-import { selectedBucketlist } from '../bucketlists/selectors';
 import { enrichByPriceInPreferredCurrency } from './utils/enrich-by-price-in-preferred-currency';
 import { getNearbyBites } from './utils/get-nearby-bites';
 import { getNearbyRestaurantNamesByPosition } from './utils/get-nearby-restaurant-names-by-position';
@@ -47,20 +46,6 @@ export const bite = createSelector(
       bite,
       exchangeRates,
       preferredCurrency,
-    );
-  },
-);
-
-export const bitesBySelectedBucketlist = createSelector(
-  bitesWithMetadata,
-  selectedBucketlist,
-  (bites, selectedBucketlist) => {
-    if (!selectedBucketlist) {
-      return [];
-    }
-
-    return bites.filter((bite) =>
-      selectedBucketlist.biteIds?.includes(bite.id),
     );
   },
 );

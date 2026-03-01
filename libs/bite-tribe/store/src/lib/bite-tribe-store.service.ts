@@ -9,11 +9,11 @@ import { bitesByUser, sortedBitesByUser } from './bites/bites-by-id.selector';
 import {
   allTags,
   bite,
-  bitesBySelectedBucketlist,
   cachedBite,
   nearbyRestaurants,
   tagSuggestionsForEditingBite,
 } from './bites/selectors';
+import { bitesByBucketlist } from './bites/bites-by-bucketlist.selector';
 import {
   restaurant,
   restaurants,
@@ -105,7 +105,7 @@ export class BiteTribeStoreService implements StoreService {
   sortedMyBites$ = this.store.select(sortedBitesByUser);
   myBitesSorting$ = this.store.select(myBitesSorting);
   bitesByUser$ = this.store.select(bitesByUser);
-  bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);
+  bitesBySelectedBucketlist$ = this.store.select(bitesByBucketlist);
   allTags$ = this.store.select(allTags);
   bitesByRestaurant$ = this.store.select(bitesByRestaurant);
   restaurant$ = this.store.select(restaurant);

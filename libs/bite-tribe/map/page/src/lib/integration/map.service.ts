@@ -2,7 +2,6 @@ import { computed, inject, Injectable, Signal } from '@angular/core';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { Bite, Geopoint, Like } from 'model';
-import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class MapService {
@@ -10,6 +9,7 @@ export class MapService {
   private readonly navController = inject(NavController);
 
   bites = this.dataAccess.bites;
+  bitesBySelectedBucketlist = this.dataAccess.bitesBySelectedBucketlist;
   myBites = computed(() => {
     const bites = this.dataAccess.bites();
     const userId = this.dataAccess.userId();
@@ -58,17 +58,4 @@ export class MapService {
       encodeURIComponent(bite.place),
     ]);
   }
-
-  bitesBySelectedBucketlist = computed(() => {
-    const bites = this.dataAccess.bites();
-    const selectedBucketlist = this.selectedBucketlist();
-
-    if (!selectedBucketlist) {
-      return [];
-    }
-
-    return bites.filter((bite) =>
-      selectedBucketlist.biteIds?.includes(bite.id),
-    );
-  });
 }

@@ -1,4 +1,4 @@
-import type { Bite, Bucketlist, Geopoint, PublicUser } from 'model';
+import type { Bite, Geopoint, PublicUser } from 'model';
 import * as fromSelectors from '../selectors';
 import * as fromHomeSelectors from '../home-bites.selector';
 import * as fromBitesByIdSelectors from '../bites-by-id.selector';
@@ -43,6 +43,7 @@ describe('Bites Selectors', () => {
     cachedBite: mockBite1,
     latestBites: [],
     bitesByUserId: [],
+    bitesByBucketlist: [],
   };
 
   describe('cachedBite', () => {
@@ -299,67 +300,6 @@ describe('Bites Selectors', () => {
       );
 
       expect(result).toMatchSnapshot();
-    });
-  });
-
-  describe('bitesBySelectedBucketlist', () => {
-    describe('given bucketlist with bites', () => {
-      const mockBucketlist = {
-        id: 'bucketlist1',
-        biteIds: ['1'],
-      } as Bucketlist;
-
-      it('should return bites in the selected bucketlist', () => {
-        const bitesWithMetadata = [
-          { ...mockBite1, likes: mockLikes, distance: '0' },
-          { ...mockBite2, likes: [], distance: '0.01' },
-        ] as any[];
-
-        const result = fromSelectors.bitesBySelectedBucketlist.projector(
-          bitesWithMetadata,
-          mockBucketlist,
-        );
-
-        expect(result).toHaveLength(1);
-        expect(result[0].id).toBe('1');
-      });
-    });
-
-    describe('given bucketlist without bites', () => {
-      const mockBucketlist = {
-        id: 'bucketlist1',
-        biteIds: [],
-      } as unknown as Bucketlist;
-
-      it('should return empty array', () => {
-        const bitesWithMetadata = [
-          { ...mockBite1, likes: mockLikes, distance: '0' },
-          { ...mockBite2, likes: [], distance: '0.01' },
-        ] as any[];
-
-        const result = fromSelectors.bitesBySelectedBucketlist.projector(
-          bitesWithMetadata,
-          mockBucketlist,
-        );
-
-        expect(result).toEqual([]);
-      });
-    });
-
-    describe('given no selected bucketlist', () => {
-      it('should return empty array if no bucketlist is selected', () => {
-        const bitesWithMetadata = [
-          { ...mockBite1, likes: mockLikes, distance: '0' },
-          { ...mockBite2, likes: [], distance: '0.01' },
-        ] as any[];
-
-        const result = fromSelectors.bitesBySelectedBucketlist.projector(
-          bitesWithMetadata,
-          undefined,
-        );
-
-        expect(result).toEqual([]);
-      });
     });
   });
 

@@ -16,6 +16,11 @@ export const homeDistance = createSelector(
   (slice) => slice?.filtering?.home?.distance,
 );
 
+export const myBitesDistance = createSelector(
+  slice,
+  (slice) => slice?.filtering?.mybites?.distance,
+);
+
 export const homeMaxPriceFilter = createSelector(
   slice,
   (slice) => slice?.filtering?.home?.maxPrice || 0,
@@ -25,8 +30,20 @@ export const homeSorting = createSelector(slice, (slice) => {
   return slice?.sorting?.home || 'distance';
 });
 
+export const myBitesFilters = createSelector(
+  slice,
+  (slice) =>
+    slice?.filtering?.mybites?.filters?.map((filter) => filter.toLowerCase()) ||
+    [],
+);
+
+export const myBitesMaxPriceFilter = createSelector(
+  slice,
+  (slice) => slice?.filtering?.mybites?.maxPrice || 0,
+);
+
 export const myBitesSorting = createSelector(slice, (slice) => {
-  return slice?.sorting?.myBites || 'distance';
+  return slice?.sorting?.mybites || 'distance';
 });
 
 export const bucketlistSorting = createSelector(slice, (slice) => {

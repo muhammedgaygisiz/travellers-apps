@@ -98,7 +98,7 @@ describe('Filtering and Sorting Selectors', () => {
     it('should return the my bites sorting method', () => {
       const stateWithMyBitesSorting: FilteringAndSortingSlice = {
         ...mockState,
-        sorting: { myBites: 'likes' },
+        sorting: { mybites: 'likes' },
       };
       const result = fromSelectors.myBitesSorting.projector(
         stateWithMyBitesSorting,

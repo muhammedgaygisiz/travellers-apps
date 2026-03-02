@@ -5,7 +5,7 @@ import { restaurantId } from '../router/selectors';
 import { adapter, RestaurantState } from './adapter';
 import { gpsPosition } from '../app/selectors';
 import { haversineDistance } from 'utils';
-import { bites } from '../bites/selectors';
+import { bites } from '../bites/home-bites.selector';
 import { getRestaurant } from './utils/get-restaurant';
 
 const slice = createFeatureSelector<RestaurantState>(key);
@@ -38,10 +38,10 @@ export const restaurants = createSelector(
 
     const unsavedRestaurants =
       bites
-        .filter((bite) => !bite.restaurantId)
-        .reduce((uniqueRestaurants, bite) => {
+        .filter((bite: any) => !bite.restaurantId)
+        .reduce((uniqueRestaurants: any, bite: any) => {
           const existingRestaurant = uniqueRestaurants.find(
-            (r) =>
+            (r: any) =>
               r.name.toLowerCase().trim() === bite.place.toLowerCase().trim(),
           );
 
@@ -64,7 +64,7 @@ export const restaurants = createSelector(
           return uniqueRestaurants;
         }, [] as Restaurant[])
         .filter(
-          (restaurant) =>
+          (restaurant: any) =>
             !savedRestaurantNames.includes(restaurant.name.trim()),
         ) || [];
 

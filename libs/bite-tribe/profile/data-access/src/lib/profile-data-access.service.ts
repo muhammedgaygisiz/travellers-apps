@@ -18,7 +18,7 @@ export class ProfileDataAccessService {
 
   myUser = toSignal(this.storeService.publicUser$);
 
-  myBites = toSignal(this.storeService.mybites$, {
+  myBites = toSignal(this.storeService.sortedMyBites$, {
     initialValue: [] as Bite[],
   });
 

@@ -3,6 +3,7 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
+import { Like } from 'model';
 
 describe(BiteTribeStoreService.name, () => {
   let store: Store;
@@ -137,14 +138,24 @@ describe(BiteTribeStoreService.name, () => {
 
   describe('submitLikeOrDislikeClick', () => {
     const userId = 'user1';
-    const likeType = { likeType: 'like', biteId: '123' };
+    const likeType: Like = {
+      likeType: 'thumbup',
+      biteId: '123',
+      userId: 'user1',
+      createdAt: '2024-01-01T00:00:00.000Z',
+    };
 
     it('should call removeLike if likeFromUser exists', inject(
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const removeLikeSpy = jest.spyOn(service, 'removeLike');
         const bite = {
-          likes: [{ userId: 'user1', likeType: 'like' }],
+          likes: [
+            {
+              userId: 'user1',
+              likeType: 'thumbup',
+            },
+          ],
         } as any;
         service.submitLikeOrDislikeClick(bite, userId, likeType);
         expect(removeLikeSpy).toHaveBeenCalledTimes(1);
@@ -191,7 +202,12 @@ describe(BiteTribeStoreService.name, () => {
     it('should dispatch submitLikeClick on BiteTribeStoreService', inject(
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
-        const likeType = { likeType: 'like', biteId: '123' };
+        const likeType: Like = {
+          likeType: 'thumbup',
+          biteId: '123',
+          userId: 'user1',
+          createdAt: '2024-01-01T00:00:00.000Z',
+        };
         const submitLikeClickSpy = jest.spyOn(service, 'submitLikeClick');
         service.submitLikeClick(likeType);
         expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);

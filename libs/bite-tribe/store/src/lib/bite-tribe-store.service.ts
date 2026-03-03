@@ -4,19 +4,16 @@ import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
 import { BiteActions } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
+import { bites, sortedHomeBites } from './bites/home-bites.selector';
+import { bitesByUser, sortedBitesByUser } from './bites/bites-by-id.selector';
 import {
   allTags,
   bite,
-  bites,
-  bitesBySelectedBucketlist,
-  bitesByUser,
   cachedBite,
-  mybites,
   nearbyRestaurants,
-  sortedHomeBites,
-  sortedMyBites,
   tagSuggestionsForEditingBite,
 } from './bites/selectors';
+import { bitesByBucketlist } from './bites/bites-by-bucketlist.selector';
 import {
   restaurant,
   restaurants,
@@ -105,11 +102,10 @@ export class BiteTribeStoreService implements StoreService {
   homeSorting$ = this.store.select(homeSorting);
   bucketlistSorting$ = this.store.select(bucketlistSorting);
   bite$ = this.store.select(bite);
-  sortedMyBites$ = this.store.select(sortedMyBites);
-  mybites$ = this.store.select(mybites);
+  sortedMyBites$ = this.store.select(sortedBitesByUser);
   myBitesSorting$ = this.store.select(myBitesSorting);
   bitesByUser$ = this.store.select(bitesByUser);
-  bitesBySelectedBucketlist$ = this.store.select(bitesBySelectedBucketlist);
+  bitesBySelectedBucketlist$ = this.store.select(bitesByBucketlist);
   allTags$ = this.store.select(allTags);
   bitesByRestaurant$ = this.store.select(bitesByRestaurant);
   restaurant$ = this.store.select(restaurant);

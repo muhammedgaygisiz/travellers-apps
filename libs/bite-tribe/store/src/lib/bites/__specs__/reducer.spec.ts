@@ -2,25 +2,28 @@ import { reducer } from '../reducer';
 import { BiteActions } from '../actions';
 import type { Bite } from 'model';
 import { fromAuth } from 'ta-firestore';
-import {
-  routerNavigatedAction,
-  routerNavigationAction,
-} from '@ngrx/router-store';
+import { routerNavigatedAction } from '@ngrx/router-store';
 import { PATH } from 'utils';
 import { BitesState } from '../adapter';
 
-const EMPTY_STATE: BitesState = { ids: [], entities: {}, latestBites: [] };
+const EMPTY_STATE: BitesState = {
+  ids: [],
+  entities: {},
+  latestBites: [],
+  bitesByUserId: [],
+  bitesByBucketlist: [],
+};
 
 describe('Bite Reducer', () => {
   describe('fromAuth.logoutSucceeded', () => {
     it('should clear the state on logout', () => {
       const INITIAL_STATE: BitesState = {
+        ...EMPTY_STATE,
         ids: ['1', '2'],
         entities: {
           '1': { id: '1', name: 'Bite 1' } as Bite,
           '2': { id: '2', name: 'Bite 2' } as Bite,
         },
-        latestBites: [],
       };
 
       const action = fromAuth.AuthActions.logoutSucceeded;
@@ -32,9 +35,9 @@ describe('Bite Reducer', () => {
   describe('loadedByGPSPositionFromAPI', () => {
     it('should add bites to bites slice', () => {
       const NEW_STATE = {
+        ...EMPTY_STATE,
         ids: ['1'],
         entities: { '1': { id: '1' } },
-        latestBites: [],
       };
 
       const loadedBitesFromApiAction = BiteActions.loadedByGPSPositionFromAPI({
@@ -48,19 +51,14 @@ describe('Bite Reducer', () => {
   });
 
   describe('loadedByUserFromAPI', () => {
-    it('should add bites to bites slice', () => {
-      const NEW_STATE = {
-        ids: ['1'],
-        entities: { '1': { id: '1' } },
-        latestBites: [],
-      };
-
+    it('should add bites to bitesByUserId slice', () => {
       const loadedBitesFromApiAction = BiteActions.loadedByUserFromAPI({
         bites: [{ id: '1' }] as Bite[],
       });
 
       expect(reducer(EMPTY_STATE, loadedBitesFromApiAction)).toEqual({
-        ...NEW_STATE,
+        ...EMPTY_STATE,
+        bitesByUserId: [{ id: '1' }],
       });
     });
   });
@@ -68,9 +66,8 @@ describe('Bite Reducer', () => {
   describe('loadedByBucketlistFromAPI', () => {
     it('should add bites to bites slice', () => {
       const NEW_STATE = {
-        ids: ['1'],
-        entities: { '1': { id: '1' } },
-        latestBites: [],
+        ...EMPTY_STATE,
+        bitesByBucketlist: [{ id: '1' }],
       };
 
       const loadedBitesFromApiAction = BiteActions.loadedByBucketlistFromAPI({
@@ -86,11 +83,13 @@ describe('Bite Reducer', () => {
   describe('deletedBite', () => {
     it('should remove the bite from the state', () => {
       const INITIAL_STATE = {
+        ...EMPTY_STATE,
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite 1' } as Bite },
-        latestBites: [],
       };
-      const NEW_STATE = { ids: [], entities: {}, latestBites: [] };
+      const NEW_STATE = {
+        ...EMPTY_STATE,
+      };
 
       const deletedBiteAction = BiteActions.deletedBite({
         bite: { id: '1', name: 'Bite 1' } as Bite,
@@ -105,14 +104,14 @@ describe('Bite Reducer', () => {
   describe('savedBite', () => {
     it('should upsert the bite in the state', () => {
       const INITIAL_STATE = {
+        ...EMPTY_STATE,
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite prev' } as Bite },
-        latestBites: [],
       };
       const NEW_STATE = {
+        ...EMPTY_STATE,
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite new' } as Bite },
-        latestBites: [],
       };
 
       const savedBiteAction = BiteActions.savedBite({
@@ -126,15 +125,15 @@ describe('Bite Reducer', () => {
 
     it('should reset editingBite', () => {
       const INITIAL_STATE = {
+        ...EMPTY_STATE,
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite prev' } as Bite },
         editingBite: { id: '1', name: 'Bite prev' } as Bite,
-        latestBites: [],
       };
       const NEW_STATE = {
+        ...EMPTY_STATE,
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite new' } as Bite },
-        latestBites: [],
       };
 
       const savedBiteAction = BiteActions.savedBite({
@@ -150,10 +149,8 @@ describe('Bite Reducer', () => {
   describe('cacheBite', () => {
     it('should cache the bite in the state', () => {
       const NEW_STATE = {
-        ids: [],
-        entities: {},
+        ...EMPTY_STATE,
         cachedBite: { id: '1', name: 'Bite 1' } as Bite,
-        latestBites: [],
       };
 
       const cacheBiteAction = BiteActions.cacheBite({
@@ -169,10 +166,8 @@ describe('Bite Reducer', () => {
   describe('saveNewBite', () => {
     it('should clear the cached bite in the state', () => {
       const INITIAL_STATE = {
-        ids: [],
-        entities: {},
+        ...EMPTY_STATE,
         cachedBite: { id: '1', name: 'Bite 1' } as Bite,
-        latestBites: [],
       };
 
       const saveNewBiteAction = BiteActions.saveNewBite({
@@ -188,10 +183,8 @@ describe('Bite Reducer', () => {
   describe('noPublicCreatorForBite', () => {
     it('should clear the biteCreator in the state', () => {
       const INITIAL_STATE = {
-        ids: [],
-        entities: {},
+        ...EMPTY_STATE,
         biteCreator: { id: 'creator1', name: 'Creator 1' },
-        latestBites: [],
       };
 
       const noPublicCreatorForBiteAction = BiteActions.noPublicCreatorForBite();
@@ -205,10 +198,8 @@ describe('Bite Reducer', () => {
   describe('setEditingBite', () => {
     it('should set the editingBite in the state', () => {
       const NEW_STATE = {
-        ids: [],
-        entities: {},
+        ...EMPTY_STATE,
         editingBite: { id: '1', name: 'Bite 1' } as Bite,
-        latestBites: [],
       };
 
       const setEditingBiteAction = BiteActions.setEditingBite({
@@ -224,10 +215,8 @@ describe('Bite Reducer', () => {
   describe('routerNavigatedAction', () => {
     it('should clear biteCreator when navigating to HOME path', () => {
       const INITIAL_STATE = {
-        ids: [],
-        entities: {},
+        ...EMPTY_STATE,
         biteCreator: { id: 'creator1', name: 'Creator 1' },
-        latestBites: [],
       };
 
       const payload = { payload: { event: { url: PATH.HOME } } } as any;
@@ -239,10 +228,8 @@ describe('Bite Reducer', () => {
 
     it('should not change state when navigating to other paths', () => {
       const INITIAL_STATE = {
-        ids: [],
-        entities: {},
+        ...EMPTY_STATE,
         biteCreator: { id: 'creator1', name: 'Creator 1' },
-        latestBites: [],
       };
 
       const action = routerNavigatedAction({
@@ -258,8 +245,7 @@ describe('Bite Reducer', () => {
   describe('loadedLatestFromAPI', () => {
     it('should update latestBites in the state', () => {
       const NEW_STATE = {
-        ids: [],
-        entities: {},
+        ...EMPTY_STATE,
         latestBites: [{ id: '1' } as Bite, { id: '2' } as Bite],
       };
 

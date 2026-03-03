@@ -10,6 +10,12 @@ export class MapDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
   bites = toSignal(this.storeService.bites$, { initialValue: [] as Bite[] });
+  bitesBySelectedBucketlist = toSignal(
+    this.storeService.bitesBySelectedBucketlist$,
+    {
+      initialValue: [] as Bite[],
+    },
+  );
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,

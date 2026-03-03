@@ -18,6 +18,7 @@ class Mock {
   isPublicProfile$ = of(true);
   profileMetadata$ = of(true);
   userByUrlParam$ = of(null);
+  sortedMyBites$ = of(null);
   logout = jest.fn();
   removeLike = jest.fn();
   submitLikeClick = jest.fn();

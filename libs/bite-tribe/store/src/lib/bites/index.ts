@@ -1,6 +1,6 @@
 import { key } from './key';
 import { reducer } from './reducer';
-import { bites } from './selectors';
+import { bites } from './home-bites.selector';
 
 const fromBites = {
   key,

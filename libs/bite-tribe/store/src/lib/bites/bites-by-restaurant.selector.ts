@@ -1,6 +1,7 @@
 import { createSelector } from '@ngrx/store';
 import { restaurant } from '../restaurants/selectors';
-import { bite, bites } from './selectors';
+import { bite } from './selectors';
+import { bites } from './home-bites.selector';
 import { restaurantId } from '../router/selectors';
 import { normalize } from 'utils';
 import { getBitesByRestaurantName } from './utils/get-bites-by-restaurant-name';

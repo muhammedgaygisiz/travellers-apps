@@ -7,7 +7,7 @@ import { Bucketlist } from 'model';
 addNecessaryIcons();
 
 export default {
-  title: 'Pages/My Bucketlists',
+  title: 'Pages/My Bucket Lists',
   component: BucketlistsPage,
   decorators: [
     applicationConfig({

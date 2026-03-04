@@ -10,12 +10,7 @@ export class MapService {
 
   bites = this.dataAccess.bites;
   bitesBySelectedBucketlist = this.dataAccess.bitesBySelectedBucketlist;
-  myBites = computed(() => {
-    const bites = this.dataAccess.bites();
-    const userId = this.dataAccess.userId();
-
-    return bites.filter((bite) => bite.userId === userId);
-  });
+  myBites = this.dataAccess.myBites;
   isAuthenticated = this.dataAccess.isAuthenticated;
 
   selectedBucketlist = this.dataAccess.selectedBucketlist;

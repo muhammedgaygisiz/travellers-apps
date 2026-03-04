@@ -46,7 +46,7 @@ import { CountPipe } from '../../pipes/count.pipe';
 })
 export class BucketlistsPage {
   bucketlists = input<Bucketlist[]>([]);
-  title = input('My Bucketlists');
+  title = input('My Bucket Lists');
   sorting = input<string>('name');
   sortingLabel = computed(() => {
     const sorting = this.sorting();

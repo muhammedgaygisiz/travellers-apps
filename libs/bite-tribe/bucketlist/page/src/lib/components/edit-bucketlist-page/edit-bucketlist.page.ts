@@ -82,6 +82,11 @@ export class EditBucketlistPage {
       return;
     }
     const name = this.titleFormGroup.value.name;
+
+    if (!name) {
+      return;
+    }
+
     this.saveTitle.emit(name);
   }
 

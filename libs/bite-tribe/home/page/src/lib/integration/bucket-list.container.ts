@@ -10,6 +10,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       class="ion-page"
       [bites]="service.bitesBySelectedBucketlist()"
       [title]="service.selectedBucketlistTitle()"
+      [showHeaderMenu]="false"
       [showFooter]="false"
       [enableBackButton]="true"
       [userId]="service.userId()"

@@ -13,6 +13,7 @@ const BASE_LIKE = {
 
 class Mock {
   bites$ = of([]);
+  sortedMyBites$ = of([]);
   bitesBySelectedBucketlist$ = of([]);
   userId$ = of('test-user-id');
   selectedBucketlist$ = of(null);
@@ -23,7 +24,7 @@ class Mock {
   submitLikeOrDislikeClick = (): null => null;
 }
 
-describe('MapDataAccessService', () => {
+describe(MapDataAccessService.name, () => {
   let biteTribeStoreService: BiteTribeStoreService;
 
   beforeEach(() => {

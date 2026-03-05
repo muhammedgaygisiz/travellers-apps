@@ -428,7 +428,7 @@ describe('MapComponent', () => {
         component['markers'] = [mockMarker2];
         fixture.detectChanges();
 
-        const clickHandler = mockMarker2.on.mock.calls[0][1];
+        const clickHandler = mockMarker2.on;
         clickHandler();
 
         expect(emitMarkerClickSpy).not.toHaveBeenCalled();

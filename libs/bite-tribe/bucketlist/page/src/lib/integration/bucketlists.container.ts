@@ -12,6 +12,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoBucketlistDetails)="service.gotoBucketlistDetails($event)"
       (newList)="service.createAndSaveToBucketList($event)"
       (sortingChange)="service.sortingChange($event)"
+      (editBucketlist)="service.gotoEditBucketlist($event)"
+      (deleteBucketlist)="service.deleteBucketlist($event)"
     />
   `,
   imports: [BucketlistsPage],

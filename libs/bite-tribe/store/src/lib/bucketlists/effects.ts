@@ -88,4 +88,26 @@ export class BucketListEffect {
     },
     { dispatch: false },
   );
+
+  deleteBucketlistEffect$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BucketlistActions.deleteBucketlist),
+      switchMap(({ bucketlistId }) =>
+        from(this.api.deleteBucketlist(bucketlistId)).pipe(
+          map(() => BucketlistActions.deletedBucketlist()),
+        ),
+      ),
+    );
+  });
+
+  updateBucketlistNameEffect$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BucketlistActions.updateBucketlistName),
+      switchMap(({ bucketlistId, name }) =>
+        from(this.api.updateBucketlistName(bucketlistId, name)).pipe(
+          map(() => BucketlistActions.updatedBucketlistName()),
+        ),
+      ),
+    );
+  });
 }

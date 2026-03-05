@@ -36,7 +36,26 @@
         (click)="gotoBucketlistDetails.emit(bucketlist.id)"
       >
         <ion-icon name="bookmark" slot="start" />
-        <ion-label>{{ bucketlist.name }}</ion-label>
+        <div class="bucketlist-content">
+          <ion-label>{{ bucketlist.name }}</ion-label>
+          <div class="bucketlist-actions">
+            <ion-button
+              fill="clear"
+              size="small"
+              (click)="onEditBucketlist(bucketlist.id, $event)"
+            >
+              Edit
+            </ion-button>
+            <ion-button
+              fill="clear"
+              size="small"
+              color="danger"
+              (click)="openDeleteConfirmation(bucketlist.id, $event)"
+            >
+              Delete
+            </ion-button>
+          </div>
+        </div>
         <ion-badge>{{ bucketlist.biteIds | count }}</ion-badge>
       </ion-item>
       }
@@ -47,6 +66,14 @@
       header="Please enter a name for your new list"
       [inputs]="newListInputs"
       [buttons]="saveButton"
+    />
+
+    <ion-alert
+      [isOpen]="isDeleteAlertOpen()"
+      header="Delete Bucket List"
+      message="Are you sure you want to delete this bucket list?"
+      [buttons]="deleteConfirmationButtons"
+      (didDismiss)="handleDeleteConfirmationDismiss($event)"
     />
   </ion-content>
 </ta-page>

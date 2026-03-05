@@ -34,6 +34,14 @@ export const shouldLoadBucketlists = (): UnaryFunction<
         return true;
       }
 
+      if (action.type === BucketlistActions.deletedBucketlist.type) {
+        return true;
+      }
+
+      if (action.type === BucketlistActions.updatedBucketlistName.type) {
+        return true;
+      }
+
       return false;
     }),
   );

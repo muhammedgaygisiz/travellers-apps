@@ -1,0 +1,58 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+  [enableBackButton]="true"
+>
+  <ion-content class="ion-padding">
+    <h1 class="ion-margin-bottom">Edit Bucket List</h1>
+
+    <form [formGroup]="titleFormGroup">
+      <ion-input
+        label="Bucket List Name"
+        formControlName="name"
+        fill="outline"
+        class="ion-margin-top"
+        mode="md"
+      />
+
+      <ion-button
+        expand="block"
+        class="ion-margin-top"
+        (click)="onSaveTitle()"
+        [disabled]="!titleFormGroup.valid"
+      >
+        Save
+      </ion-button>
+    </form>
+
+    @if (bites().length > 0) {
+    <ion-list class="ion-margin-top">
+      <ion-list-header>
+        <ion-label>Bites in this list</ion-label>
+      </ion-list-header>
+      @for (bite of bites(); track bite.id) {
+      <ion-item>
+        <ion-label>{{ bite.name }}</ion-label>
+        <ion-button
+          slot="end"
+          fill="clear"
+          color="danger"
+          size="small"
+          (click)="openRemoveBiteConfirmation(bite.id, $event)"
+        >
+          Delete Bite from Bucket List
+        </ion-button>
+      </ion-item>
+      }
+    </ion-list>
+    }
+
+    <ion-alert
+      [isOpen]="isRemoveBiteAlertOpen()"
+      header="Remove Bite"
+      message="Are you sure you want to remove this bite from the bucket list?"
+      [buttons]="removeBiteConfirmationButtons"
+      (didDismiss)="handleRemoveBiteDismiss($event)"
+    />
+  </ion-content>
+</ta-page>

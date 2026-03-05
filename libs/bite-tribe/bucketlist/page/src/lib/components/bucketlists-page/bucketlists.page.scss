@@ -70,4 +70,17 @@
       }
     }
   }
+
+  .bucketlist-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0.25rem 0;
+
+    .bucketlist-actions {
+      display: flex;
+      flex-direction: row;
+      gap: 0.25rem;
+    }
+  }
 }

@@ -11,6 +11,7 @@ import { Bucketlist } from 'model';
 import {
   IonAlert,
   IonBadge,
+  IonButton,
   IonChip,
   IonContent,
   IonIcon,
@@ -22,6 +23,10 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { CountPipe } from '../../pipes/count.pipe';
+import type { OverlayEventDetail } from '@ionic/core';
+
+const DELETE = 'delete';
+const CANCEL = 'cancel';
 
 @Component({
   selector: 'bucketlists-page',
@@ -42,6 +47,7 @@ import { CountPipe } from '../../pipes/count.pipe';
     IonSelect,
     IonSelectOption,
     IonText,
+    IonButton,
   ],
 })
 export class BucketlistsPage {
@@ -63,8 +69,12 @@ export class BucketlistsPage {
   gotoBucketlistDetails = output<string>();
   newList = output<string>();
   readonly sortingChange = output<string>();
+  readonly editBucketlist = output<string>();
+  readonly deleteBucketlist = output<string>();
 
   isAlertOpen = signal<boolean>(false);
+  isDeleteAlertOpen = signal<boolean>(false);
+  bucketlistToDelete = signal<string | null>(null);
 
   emitSortingChange(event: { detail: { value: string } }): void {
     if (event.detail) {
@@ -89,6 +99,17 @@ export class BucketlistsPage {
     },
   ];
 
+  deleteConfirmationButtons = [
+    {
+      text: 'Cancel',
+      role: CANCEL,
+    },
+    {
+      text: 'Delete',
+      role: DELETE,
+    },
+  ];
+
   onCancel(): void {
     this.isAlertOpen.set(false);
   }
@@ -104,5 +125,32 @@ export class BucketlistsPage {
 
   openAlert(): void {
     this.isAlertOpen.set(true);
+  }
+
+  openDeleteConfirmation(bucketlistId: string, event: Event): void {
+    event.stopPropagation();
+    this.bucketlistToDelete.set(bucketlistId);
+    this.isDeleteAlertOpen.set(true);
+  }
+
+  handleDeleteConfirmationDismiss(
+    event: CustomEvent<OverlayEventDetail>,
+  ): void {
+    const role = event.detail.role;
+
+    if (role === DELETE) {
+      const id = this.bucketlistToDelete();
+      if (id) {
+        this.deleteBucketlist.emit(id);
+      }
+    }
+
+    this.isDeleteAlertOpen.set(false);
+    this.bucketlistToDelete.set(null);
+  }
+
+  onEditBucketlist(bucketlistId: string, event: Event): void {
+    event.stopPropagation();
+    this.editBucketlist.emit(bucketlistId);
   }
 }

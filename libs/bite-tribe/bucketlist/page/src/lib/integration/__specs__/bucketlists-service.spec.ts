@@ -6,9 +6,11 @@ import { BucketlistsDataAccessService } from 'bite-tribe/bucketlist-data-access'
 const setBucketlistSortingMock = jest.fn();
 const navigateForwardMock = jest.fn();
 const createAndSaveToBucketListMock = jest.fn();
+const deleteBucketlistMock = jest.fn();
 const Mock = {
   setBucketlistSorting: setBucketlistSortingMock,
   createAndSaveToBucketList: createAndSaveToBucketListMock,
+  deleteBucketlist: deleteBucketlistMock,
   navigateForward: navigateForwardMock,
 };
 
@@ -37,6 +39,18 @@ describe('BucketlistsService', () => {
     });
   });
 
+  describe('gotoEditBucketlist', () => {
+    it('should call navigateForward with correct parameters', () => {
+      const bucketlistId = '12345';
+      service.gotoEditBucketlist(bucketlistId);
+      expect(navigateForwardMock).toHaveBeenCalledWith([
+        'my-bucketlists',
+        bucketlistId,
+        'edit',
+      ]);
+    });
+  });
+
   describe('createAndSaveToBucketList', () => {
     it('should call createAndSaveToBucketList with correct value', () => {
       const bucketListName = 'New Bucket List';
@@ -44,6 +58,14 @@ describe('BucketlistsService', () => {
       expect(createAndSaveToBucketListMock).toHaveBeenCalledWith(
         bucketListName,
       );
+    });
+  });
+
+  describe('deleteBucketlist', () => {
+    it('should call deleteBucketlist with correct bucketlistId', () => {
+      const bucketlistId = '12345';
+      service.deleteBucketlist(bucketlistId);
+      expect(deleteBucketlistMock).toHaveBeenCalledWith(bucketlistId);
     });
   });
 

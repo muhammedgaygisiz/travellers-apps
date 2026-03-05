@@ -94,6 +94,15 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: `${PATH.MY_BUCKETLISTS}/:bucketlistId/edit`,
+    loadComponent: () =>
+      import('bite-tribe/bucketlist').then(
+        (m) => m.EditBucketlistsContainerComponent,
+      ),
+    title: 'Edit Bucket List',
+    canActivate: [authGuard],
+  },
+  {
     path: `${PATH.MY_BUCKETLISTS}/:bucketlistId/map-view`,
     loadComponent: () =>
       import('bite-tribe/map').then((m) => m.BucketListMapContainerComponent),

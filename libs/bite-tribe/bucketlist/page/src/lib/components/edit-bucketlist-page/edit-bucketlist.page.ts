@@ -81,10 +81,8 @@ export class EditBucketlistPage {
     if (!this.titleFormGroup.valid) {
       return;
     }
-    const name = this.titleFormGroup.value.name?.trim();
-    if (name) {
-      this.saveTitle.emit(name);
-    }
+    const name = this.titleFormGroup.value.name;
+    this.saveTitle.emit(name);
   }
 
   openRemoveBiteConfirmation(biteId: string, event: Event): void {

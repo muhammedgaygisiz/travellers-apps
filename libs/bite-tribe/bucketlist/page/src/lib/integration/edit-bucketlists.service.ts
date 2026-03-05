@@ -15,9 +15,11 @@ export class EditBucketlistsService {
 
   saveTitle(name: string): void {
     const bucketlistId = this.selectedBucketlist()?.id;
-    if (bucketlistId) {
-      this.dataAccess.updateBucketlistName(bucketlistId, name);
+    if (!bucketlistId) {
+      console.warn('Cannot save title: no bucket list selected');
+      return;
     }
+    this.dataAccess.updateBucketlistName(bucketlistId, name);
   }
 
   removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams): void {

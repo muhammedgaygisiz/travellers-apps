@@ -5,7 +5,7 @@ import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { MapService } from '../map.service';
 import type { Bite, Bucketlist, Geopoint, Like } from 'model';
 
-describe('MapService', () => {
+describe(MapService.name, () => {
   let service: MapService;
   let mockDataAccess: jest.Mocked<MapDataAccessService>;
   let mockNavController: jest.Mocked<NavController>;
@@ -46,7 +46,7 @@ describe('MapService', () => {
     const dataAccessMock = {
       logout: jest.fn(),
       submitLikeClick: jest.fn(),
-      bites: signal(mockBites),
+      myBites: signal([mockBites[0], mockBites[2]]),
       bitesBySelectedBucketlist: signal([mockBites[0], mockBites[2]]),
       isAuthenticated: signal(true),
       selectedBucketlist: signal(mockBucketlist),

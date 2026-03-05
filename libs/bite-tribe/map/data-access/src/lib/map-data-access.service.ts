@@ -16,6 +16,9 @@ export class MapDataAccessService {
       initialValue: [] as Bite[],
     },
   );
+  myBites = toSignal(this.storeService.sortedMyBites$, {
+    initialValue: [] as Bite[],
+  });
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,

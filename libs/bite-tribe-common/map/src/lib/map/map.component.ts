@@ -25,18 +25,16 @@ import { zoomToMarkers } from './utils/zoom-to-markers';
 import { focusMarker } from './utils/focus-marker';
 
 // Fix for marker icons
-const iconRetinaUrl = 'assets/leaflet/marker-icon-2x.png';
 const iconUrl = 'assets/leaflet/marker-icon.png';
 const shadowUrl = 'assets/leaflet/marker-shadow.png';
 const iconDefault = L.icon({
-  iconRetinaUrl,
   iconUrl,
   shadowUrl,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41],
+  iconSize: [38, 58], // Increased size
+  iconAnchor: [19, 58], // Adjusted anchor
+  popupAnchor: [1, -44], // Adjusted popup anchor
+  tooltipAnchor: [24, -38], // Adjusted tooltip anchor
+  shadowSize: [58, 58], // Increased shadow size
 });
 L.Marker.prototype.options.icon = iconDefault;
 
@@ -90,10 +88,6 @@ export class MapComponent implements OnDestroy {
 
     this.addMapClickEvent();
 
-    if (this.emitMarkerClick()) {
-      this.addMarkerClickEvent();
-    }
-
     this.forceMapRedraw();
   });
 
@@ -146,6 +140,10 @@ export class MapComponent implements OnDestroy {
     this.markerClusterGroup = L.markerClusterGroup()
       .addLayers(this.markers)
       .addTo(this.map);
+
+    if (this.emitMarkerClick()) {
+      this.addMarkerClickEvent();
+    }
   }
 
   private addMapClickEvent(): void {

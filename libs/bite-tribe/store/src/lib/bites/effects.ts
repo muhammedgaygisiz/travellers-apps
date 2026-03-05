@@ -14,6 +14,7 @@ import { PATH } from 'utils';
 import { userId } from '../router/selectors';
 import { fromAuth } from 'ta-firestore';
 import { CreateAndUploadImageCallbackParams } from 'model';
+import { ToastController } from '@ionic/angular';
 
 @Injectable()
 export class BiteEffects {
@@ -21,6 +22,7 @@ export class BiteEffects {
   private readonly api = inject(BiteTribeApiService);
   private readonly store = inject(Store);
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly toastController = inject(ToastController);
 
   bite = toSignal(this.store.select(bite));
   biteCreatorId = toSignal(this.store.select(userId));
@@ -164,7 +166,25 @@ export class BiteEffects {
               },
             ),
           ).pipe(
-            catchError(() => of(BiteActions.errorUploadingImage({ bite }))),
+            catchError(async (err) => {
+              await this.toastController.create({
+                message: `
+                  Error uploading image:
+
+                  ${err.code ? `Code: ${err.code}` : ''}
+                  ${err.message}
+                `,
+                position: 'middle',
+                buttons: [
+                  {
+                    text: 'OK',
+                    role: 'confirm',
+                  },
+                ],
+              });
+
+              return of(BiteActions.errorUploadingImage({ bite }));
+            }),
           );
         }),
       );

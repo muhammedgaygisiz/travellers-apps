@@ -19,10 +19,10 @@ import { IsInPipe } from '../../pipes/is-in.pipe';
     <ion-content class="ion-no-padding">
       <ion-list lines="none">
         @for (bucketList of bucketLists(); track bucketList) {
-        <ion-item [detail]="false" (click)="onBucketlistSelected(bucketList)">
-          <ion-icon slot="start" [name]="bite() | isIn : bucketList" />
-          {{ bucketList.name }}
-        </ion-item>
+          <ion-item [detail]="false" (click)="onBucketlistSelected(bucketList)">
+            <ion-icon slot="start" [name]="bite() | isIn: bucketList" />
+            {{ bucketList.name }}
+          </ion-item>
         }
         <ion-item [detail]="false" id="preset-new-list-alert">
           <ion-icon slot="start" name="add-circle-outline" />
@@ -71,7 +71,7 @@ export class BucketListSelectionComponent {
 
   onBucketlistSelected(bucketList: Bucketlist): void {
     const bite = this.bite();
-    if (bite && bucketList.biteIds.includes(bite.id)) {
+    if (bite && bucketList.biteIds?.includes(bite.id)) {
       this.removeBiteFromBucketlist.emit({
         bucketlistId: bucketList.id,
         biteId: bite.id,

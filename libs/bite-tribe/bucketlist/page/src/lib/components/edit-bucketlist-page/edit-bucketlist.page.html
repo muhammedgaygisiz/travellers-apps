@@ -8,7 +8,7 @@
 
     <form [formGroup]="titleFormGroup">
       <ion-input
-        label="Bucket List Name"
+        label="Name"
         formControlName="name"
         fill="outline"
         class="ion-margin-top"
@@ -28,7 +28,7 @@
     @if (bites().length > 0) {
     <ion-list class="ion-margin-top">
       <ion-list-header>
-        <ion-label>Bites in this list</ion-label>
+        <ion-label>Bites</ion-label>
       </ion-list-header>
       @for (bite of bites(); track bite.id) {
       <ion-item>
@@ -40,7 +40,7 @@
           size="small"
           (click)="openRemoveBiteConfirmation(bite.id, $event)"
         >
-          Delete Bite from Bucket List
+          Delete
         </ion-button>
       </ion-item>
       }

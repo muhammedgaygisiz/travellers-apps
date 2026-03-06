@@ -21,6 +21,7 @@ export class BucketListEffect {
         BucketlistActions.savedBiteToBucketlist,
         BucketlistActions.createdBucketlistAndSavedBiteToIt,
         BucketlistActions.createdBucketlist,
+        BucketlistActions.deletedBucketlist,
       ),
       shouldLoadBucketlists(),
       switchMap(() => {

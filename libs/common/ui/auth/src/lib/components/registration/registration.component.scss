@@ -1,4 +1,10 @@
+@use 'globals';
+
 :host {
+  ion-input {
+    @include globals.input-styles;
+  }
+
   ion-item {
     --background: var(--background);
   }

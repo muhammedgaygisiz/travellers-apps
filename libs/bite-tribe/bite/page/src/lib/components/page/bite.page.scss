@@ -14,16 +14,7 @@
     margin-top: 1.5rem;
 
     .price {
-      display: flex;
-      flex-direction: row;
-
-      ion-input {
-        flex: 1;
-      }
-
       ion-text {
-        display: flex;
-        align-items: center;
         column-gap: 0.25rem;
       }
     }
@@ -40,13 +31,10 @@
   }
 
   .map-label {
-    display: block;
     margin-bottom: 0.5rem;
   }
 
   .position-button-container {
-    display: flex;
-    justify-content: space-between;
     margin-bottom: 0.5rem;
 
     ion-button {
@@ -55,10 +43,5 @@
         margin-right: 0.5rem;
       }
     }
-  }
-
-  .position-hint {
-    display: inline-block;
-    margin-bottom: 0.5rem;
   }
 }

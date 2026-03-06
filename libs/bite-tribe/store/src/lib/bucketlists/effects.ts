@@ -20,6 +20,7 @@ export class BucketListEffect {
         BucketlistActions.removedBiteFromBucketlist,
         BucketlistActions.savedBiteToBucketlist,
         BucketlistActions.createdBucketlistAndSavedBiteToIt,
+        BucketlistActions.createdBucketlist,
       ),
       shouldLoadBucketlists(),
       switchMap(() => {
@@ -77,17 +78,16 @@ export class BucketListEffect {
     );
   });
 
-  createBucketlistEffect$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(BucketlistActions.createBucketlist),
-        tap(({ bucketlistName }) => {
-          return this.api.createBucketList(bucketlistName);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+  createBucketlistEffect$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BucketlistActions.createBucketlist),
+      switchMap(({ bucketlistName }) => {
+        return from(this.api.createBucketList(bucketlistName)).pipe(
+          map(() => BucketlistActions.createdBucketlist()),
+        );
+      }),
+    );
+  });
 
   deleteBucketlistEffect$ = createEffect(() => {
     return this.actions$.pipe(

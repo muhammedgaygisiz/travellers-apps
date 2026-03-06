@@ -11,8 +11,12 @@
       <ion-text color="secondary" class="subheadline">
         <h4>{{ title() }}</h4>
       </ion-text>
-      <div class="chip-sort-filter-container">
-        <div class="sort-container">
+      <div
+        class="ion-display-flex ion-flex-row ion-justify-content-center ion-margin-bottom chip-sort-filter-container"
+      >
+        <div
+          class="ion-display-flex ion-flex-row ion-justify-content-center sort-container"
+        >
           <ion-chip id="select-sorting">
             <ion-select
               interface="modal"
@@ -29,25 +33,30 @@
       </div>
     </div>
 
-    <ion-list lines="full" class="bucketlists-scrolling-content-container">
+    <ion-list
+      lines="full"
+      class="ion-padding-top bucketlists-scrolling-content-container"
+    >
       @for (bucketlist of bucketlists(); track bucketlist.id) {
       <ion-item
         [button]="true"
         (click)="gotoBucketlistDetails.emit(bucketlist.id)"
       >
         <ion-icon name="bookmark" slot="start" />
-        <div class="bucketlist-content">
-          <ion-label>{{ bucketlist.name }}</ion-label>
-          <div class="bucketlist-actions">
+        <div
+          class="ion-display-flex ion-flex-column ion-flex-1 bucketlist-content"
+        >
+          <ion-label class="ion-margin-bottom ion-margin-top title-margin"
+            >{{ bucketlist.name }}</ion-label
+          >
+          <div class="ion-display-flex ion-margin-bottom bucketlist-actions">
             <ion-button
-              fill="clear"
               size="small"
               (click)="onEditBucketlist(bucketlist.id, $event)"
             >
               Edit
             </ion-button>
             <ion-button
-              fill="clear"
               size="small"
               color="danger"
               (click)="openDeleteConfirmation(bucketlist.id, $event)"

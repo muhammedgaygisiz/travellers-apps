@@ -42,6 +42,10 @@ export const shouldLoadBucketlists = (): UnaryFunction<
         return true;
       }
 
+      if (action.type === BucketlistActions.createdBucketlist.type) {
+        return true;
+      }
+
       return false;
     }),
   );

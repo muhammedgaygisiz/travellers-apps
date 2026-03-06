@@ -4,6 +4,7 @@ import { BucketlistsService } from './bucketlists.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
+  selector: 'bt-bucketlists',
   template: `
     <bucketlists-page
       class="ion-page"

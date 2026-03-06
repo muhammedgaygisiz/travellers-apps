@@ -1,15 +1,11 @@
 :host {
-  div.actions {
-    margin-top: 2rem;
-  }
-
   h4 {
     margin-left: 1rem;
     margin-bottom: 0.5rem;
   }
 
   .bucketlists-scrolling-content-container {
-    padding-top: 80px;
+    --ion-padding: 5rem;
   }
 
   ion-chip {
@@ -42,17 +38,7 @@
     .chip-sort-filter-container {
       position: relative;
 
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-
-      margin-bottom: 1rem;
-
       .sort-container {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
         ion-text {
           margin-right: 0.5rem;
         }
@@ -72,13 +58,13 @@
   }
 
   .bucketlist-content {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
     padding: 0.25rem 0;
 
+    .title-margin {
+      --ion-margin: 0.5rem;
+    }
+
     .bucketlist-actions {
-      display: flex;
       gap: 0.25rem;
     }
   }

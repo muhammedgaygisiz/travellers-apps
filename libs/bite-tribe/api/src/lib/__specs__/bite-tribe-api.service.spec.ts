@@ -46,6 +46,8 @@ class BucketlistApiMock {
   removeBiteFromBucketlist = jest.fn();
   createBucketList = jest.fn();
   loadBucketlistsByUserId = jest.fn();
+  deleteBucketlist = jest.fn();
+  updateBucketlistName = jest.fn();
 }
 
 class ProfileApiMock {
@@ -657,6 +659,44 @@ describe(BiteTribeApiService.name, () => {
         const uid = 'user-id';
         service.loadBucketlistsByUserId(uid);
         expect(loadBucketlistsByUserIdSpy).toHaveBeenCalledWith(uid);
+      },
+    ));
+  });
+
+  describe('deleteBucketlist', () => {
+    it('should call deleteBucketlist on BucketlistApiService', inject(
+      [BiteTribeApiService, BucketlistApiService],
+      (
+        service: BiteTribeApiService,
+        bucketlistApiService: BucketlistApiService,
+      ) => {
+        const deleteBucketlistSpy = jest
+          .spyOn(bucketlistApiService, 'deleteBucketlist')
+          .mockReturnValue(Promise.resolve());
+        const bucketlistId = 'bucketlist-id';
+        service.deleteBucketlist(bucketlistId);
+        expect(deleteBucketlistSpy).toHaveBeenCalledWith(bucketlistId);
+      },
+    ));
+  });
+
+  describe('updateBucketlistName', () => {
+    it('should call updateBucketlistName on BucketlistApiService', inject(
+      [BiteTribeApiService, BucketlistApiService],
+      (
+        service: BiteTribeApiService,
+        bucketlistApiService: BucketlistApiService,
+      ) => {
+        const updateBucketlistNameSpy = jest
+          .spyOn(bucketlistApiService, 'updateBucketlistName')
+          .mockReturnValue(Promise.resolve());
+        const bucketlistId = 'bucketlist-id';
+        const name = 'Updated Bucketlist Name';
+        service.updateBucketlistName(bucketlistId, name);
+        expect(updateBucketlistNameSpy).toHaveBeenCalledWith(
+          bucketlistId,
+          name,
+        );
       },
     ));
   });

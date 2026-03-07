@@ -292,4 +292,103 @@ describe(BucketlistApiService.name, () => {
       });
     });
   });
+
+  describe('deleteBucketlist', () => {
+    let deleteDocumentMock: jest.SpyInstance;
+
+    beforeEach(() => {
+      deleteDocumentMock = jest.spyOn(FirebaseFirestore, 'deleteDocument');
+    });
+
+    afterEach(() => {
+      deleteDocumentMock.mockClear();
+    });
+
+    describe('given no error', () => {
+      it('should delete the bucketlist', async () => {
+        deleteDocumentMock.mockResolvedValue({} as any);
+        await service.deleteBucketlist('1');
+
+        expect(deleteDocumentMock).toHaveBeenCalled();
+        expect(deleteDocumentMock).toHaveBeenCalledWith({
+          reference: `bucketlists/1`,
+        });
+      });
+    });
+
+    describe('given an error', () => {
+      it('should handle error', async () => {
+        const consoleErrorSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation();
+
+        deleteDocumentMock.mockRejectedValue(
+          new Error('Failed to delete document'),
+        );
+
+        try {
+          await service.deleteBucketlist('1');
+        } catch (e) {
+          // do nothing
+        }
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error deleting bucket list:',
+          expect.any(Error),
+        );
+      });
+    });
+  });
+
+  describe('updateBucketlistName', () => {
+    let updateDocumentMock: jest.SpyInstance;
+
+    beforeEach(() => {
+      updateDocumentMock = jest.spyOn(FirebaseFirestore, 'updateDocument');
+    });
+
+    afterEach(() => {
+      updateDocumentMock.mockClear();
+    });
+
+    describe('given no error', () => {
+      it('should update the bucketlist name', async () => {
+        updateDocumentMock.mockResolvedValue({} as any);
+        await service.updateBucketlistName('1', 'New Name');
+
+        expect(updateDocumentMock).toHaveBeenCalled();
+        expect(updateDocumentMock).toHaveBeenCalledWith({
+          reference: `bucketlists/1`,
+          data: {
+            name: 'New Name',
+            updatedAt: '2024-03-15T12:00:00.000Z',
+            updatedAtTimestamp: 1710504000000,
+          },
+        });
+      });
+    });
+
+    describe('given an error', () => {
+      it('should handle error', async () => {
+        const consoleErrorSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation();
+
+        updateDocumentMock.mockRejectedValue(
+          new Error('Failed to update document'),
+        );
+
+        try {
+          await service.updateBucketlistName('1', 'New Name');
+        } catch (e) {
+          // do nothing
+        }
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error updating bucket list name:',
+          expect.any(Error),
+        );
+      });
+    });
+  });
 });

@@ -6,12 +6,14 @@ import { from, map, switchMap, tap } from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { AuthService } from 'ta-firestore';
 import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
+import { ToastController } from '@ionic/angular';
 
 @Injectable()
 export class BucketListEffect {
   private readonly actions$ = inject(Actions);
   private readonly api = inject(BiteTribeApiService);
   private readonly authService = inject(AuthService);
+  private readonly toastController = inject(ToastController);
 
   loadMyBucketlists$ = createEffect(() => {
     return this.actions$.pipe(
@@ -106,9 +108,31 @@ export class BucketListEffect {
       ofType(BucketlistActions.updateBucketlistName),
       switchMap(({ bucketlistId, name }) =>
         from(this.api.updateBucketlistName(bucketlistId, name)).pipe(
-          map(() => BucketlistActions.updatedBucketlistName()),
+          map(() => {
+            this.showSuccessfulChangeToast(
+              'Bucket list name updated successfully',
+            );
+            return BucketlistActions.updatedBucketlistName();
+          }),
         ),
       ),
     );
   });
+
+  private async showSuccessfulChangeToast(
+    bucketlistNameUpdated: string,
+  ): Promise<void> {
+    const toast = await this.toastController.create({
+      message: bucketlistNameUpdated,
+      position: 'bottom',
+      buttons: [
+        {
+          text: 'OK',
+          role: 'confirm',
+        },
+      ],
+    });
+
+    await toast.present();
+  }
 }

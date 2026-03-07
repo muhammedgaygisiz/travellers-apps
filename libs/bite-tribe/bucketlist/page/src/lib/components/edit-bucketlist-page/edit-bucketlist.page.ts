@@ -70,12 +70,10 @@ export class EditBucketlistPage {
     },
   ];
 
-  constructor() {
-    effect(() => {
-      const name = this.bucketlist()?.name ?? '';
-      this.titleFormGroup.patchValue({ name });
-    });
-  }
+  setNameControlFromBucketlistInput = effect(() => {
+    const name = this.bucketlist()?.name ?? '';
+    this.titleFormGroup.patchValue({ name });
+  });
 
   onSaveTitle(): void {
     if (!this.titleFormGroup.valid) {

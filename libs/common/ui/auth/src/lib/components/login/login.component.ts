@@ -15,6 +15,7 @@ import { PageComponent } from 'common/ui/page';
 import { CardComponent } from 'common/ui/card';
 import {
   IonButton,
+  IonContent,
   IonIcon,
   IonInput,
   IonInputPasswordToggle,
@@ -30,8 +31,8 @@ interface AuthCredentialFields {
 
 @Component({
   selector: 'ta-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
+  templateUrl: 'login.component.html',
+  styleUrls: ['login.component.scss'],
   imports: [
     PageComponent,
     CardComponent,
@@ -42,6 +43,7 @@ interface AuthCredentialFields {
     IonInput,
     IonText,
     IonInputPasswordToggle,
+    IonContent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

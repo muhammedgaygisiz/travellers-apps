@@ -1,5 +1,5 @@
-export const getNormalizedPrice = (
-  price: string | null | undefined
+export const normalizePriceForBackend = (
+  price: string | null | undefined,
 ): string => {
   if (!price) {
     return '';

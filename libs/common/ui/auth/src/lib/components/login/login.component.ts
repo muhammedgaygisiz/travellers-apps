@@ -39,7 +39,6 @@ interface AuthCredentialFields {
     ReactiveFormsModule,
     IonButton,
     IonIcon,
-    IonItem,
     IonInput,
     IonText,
     IonInputPasswordToggle,

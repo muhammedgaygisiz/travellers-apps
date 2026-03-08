@@ -152,6 +152,21 @@ describe(AuthEffects.name, () => {
         expect(AuthServiceMock.logout).toHaveBeenCalled();
       });
     });
+
+    describe('given an error occurs', () => {
+      it('should dispatch logoutFailed action', () => {
+        AuthServiceMock.logout.mockRejectedValue(new Error('Logout error'));
+
+        scheduler.run(async ({ cold, expectObservable }) => {
+          actions$ = cold('-a', { a: AuthActions.logout() });
+
+          const expected = cold('-b', { b: AuthActions.logoutFailed() });
+
+          await firstValueFrom(effects.logoutEffect$);
+          expectObservable(effects.logoutEffect$).toEqual(expected);
+        });
+      });
+    });
   });
 
   describe('loginWithGoogleAccountEffect$', () => {
@@ -166,6 +181,27 @@ describe(AuthEffects.name, () => {
         });
 
         expect(AuthServiceMock.registerWithGoogleAccount).toHaveBeenCalled();
+      });
+    });
+
+    describe('given an error occurs', () => {
+      it('should dispatch loginFailed action', () => {
+        AuthServiceMock.registerWithGoogleAccount.mockRejectedValue(
+          new Error('Google login error'),
+        );
+
+        scheduler.run(async ({ cold, expectObservable }) => {
+          actions$ = cold('-a', {
+            a: AuthActions.loginWithGoogleAccount(),
+          });
+
+          const expected = cold('-b', { b: AuthActions.loginFailed() });
+
+          await firstValueFrom(effects.loginWithGoogleAccountEffect$);
+          expectObservable(effects.loginWithGoogleAccountEffect$).toEqual(
+            expected as any,
+          );
+        });
       });
     });
   });

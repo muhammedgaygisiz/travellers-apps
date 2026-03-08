@@ -102,6 +102,10 @@ export class AuthService {
     this._authStateChange$.next(null);
 
     this.navController.navigateRoot('login');
+    this.reloadPage();
+  }
+
+  reloadPage(): void {
     window.location.reload();
   }
 

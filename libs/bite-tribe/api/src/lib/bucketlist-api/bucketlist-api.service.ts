@@ -115,4 +115,34 @@ export class BucketlistApiService {
       this.errorHandler.handleError(error);
     }
   }
+
+  async deleteBucketlist(bucketlistId: string): Promise<void> {
+    try {
+      await FirebaseFirestore.deleteDocument({
+        reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
+      });
+    } catch (error) {
+      console.error('Error deleting bucket list:', error);
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async updateBucketlistName(
+    bucketlistId: string,
+    name: string,
+  ): Promise<void> {
+    try {
+      await FirebaseFirestore.updateDocument({
+        reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
+        data: {
+          name,
+          updatedAt: new Date().toISOString(),
+          updatedAtTimestamp: Date.now(),
+        },
+      });
+    } catch (error) {
+      console.error('Error updating bucket list name:', error);
+      this.errorHandler.handleError(error);
+    }
+  }
 }

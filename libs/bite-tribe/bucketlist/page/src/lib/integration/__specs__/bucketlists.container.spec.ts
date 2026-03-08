@@ -29,6 +29,8 @@ describe('BucketlistsContainerComponent', () => {
             gotoBucketlistDetails: jest.fn(),
             createAndSaveToBucketList: jest.fn(),
             sortingChange: jest.fn(),
+            gotoEditBucketlist: jest.fn(),
+            deleteBucketlist: jest.fn(),
           },
         },
       ],

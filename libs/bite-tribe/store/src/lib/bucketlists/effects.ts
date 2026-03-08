@@ -6,12 +6,14 @@ import { from, map, switchMap, tap } from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { AuthService } from 'ta-firestore';
 import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
+import { ToastController } from '@ionic/angular';
 
 @Injectable()
 export class BucketListEffect {
   private readonly actions$ = inject(Actions);
   private readonly api = inject(BiteTribeApiService);
   private readonly authService = inject(AuthService);
+  private readonly toastController = inject(ToastController);
 
   loadMyBucketlists$ = createEffect(() => {
     return this.actions$.pipe(
@@ -20,6 +22,8 @@ export class BucketListEffect {
         BucketlistActions.removedBiteFromBucketlist,
         BucketlistActions.savedBiteToBucketlist,
         BucketlistActions.createdBucketlistAndSavedBiteToIt,
+        BucketlistActions.createdBucketlist,
+        BucketlistActions.deletedBucketlist,
       ),
       shouldLoadBucketlists(),
       switchMap(() => {
@@ -77,15 +81,58 @@ export class BucketListEffect {
     );
   });
 
-  createBucketlistEffect$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(BucketlistActions.createBucketlist),
-        tap(({ bucketlistName }) => {
-          return this.api.createBucketList(bucketlistName);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+  createBucketlistEffect$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BucketlistActions.createBucketlist),
+      switchMap(({ bucketlistName }) => {
+        return from(this.api.createBucketList(bucketlistName)).pipe(
+          map(() => BucketlistActions.createdBucketlist()),
+        );
+      }),
+    );
+  });
+
+  deleteBucketlistEffect$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BucketlistActions.deleteBucketlist),
+      switchMap(({ bucketlistId }) =>
+        from(this.api.deleteBucketlist(bucketlistId)).pipe(
+          map(() => BucketlistActions.deletedBucketlist()),
+        ),
+      ),
+    );
+  });
+
+  updateBucketlistNameEffect$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BucketlistActions.updateBucketlistName),
+      switchMap(({ bucketlistId, name }) =>
+        from(this.api.updateBucketlistName(bucketlistId, name)).pipe(
+          map(() => {
+            this.showSuccessfulChangeToast(
+              'Bucket list name updated successfully',
+            );
+            return BucketlistActions.updatedBucketlistName();
+          }),
+        ),
+      ),
+    );
+  });
+
+  private async showSuccessfulChangeToast(
+    bucketlistNameUpdated: string,
+  ): Promise<void> {
+    const toast = await this.toastController.create({
+      message: bucketlistNameUpdated,
+      position: 'bottom',
+      buttons: [
+        {
+          text: 'OK',
+          role: 'confirm',
+        },
+      ],
+    });
+
+    await toast.present();
+  }
 }

@@ -4,40 +4,42 @@
   [hideAuthButton]="true"
   [showFooter]="false"
 >
-  <ta-card>
-    <div class="ion-padding">
+  <ion-content class="ion-padding">
+    <h1 class="ion-margin-bottom">Sign up</h1>
+
+    <div>
       <form [formGroup]="registrationFormGroup">
-        <ion-item lines="full">
-          <ion-input
-            autocomplete="email"
-            inputmode="email"
-            formControlName="email"
-            label="Email"
-            labelPlacement="floating"
-          />
-        </ion-item>
+        <ion-input
+          label="Email"
+          formControlName="email"
+          fill="outline"
+          mode="md"
+          class="ion-margin-top"
+          autocomplete="email"
+          inputmode="email"
+        />
 
-        <ion-item lines="full">
-          <ion-input
-            type="password"
-            formControlName="password"
-            label="Password"
-            labelPlacement="floating"
-          >
-            <ion-input-password-toggle slot="end" />
-          </ion-input>
-        </ion-item>
+        <ion-input
+          type="password"
+          label="Password"
+          formControlName="password"
+          fill="outline"
+          mode="md"
+          class="ion-margin-top"
+        >
+          <ion-input-password-toggle slot="end" />
+        </ion-input>
 
-        <ion-item lines="full">
-          <ion-input
-            type="password"
-            formControlName="passwordConfirm"
-            label="Confirm Password"
-            labelPlacement="floating"
-          >
-            <ion-input-password-toggle slot="end" />
-          </ion-input>
-        </ion-item>
+        <ion-input
+          type="password"
+          label="Confirm Password"
+          formControlName="passwordConfirm"
+          fill="outline"
+          mode="md"
+          class="ion-margin-top"
+        >
+          <ion-input-password-toggle slot="end" />
+        </ion-input>
 
         <ion-button
           class="ion-margin-top"
@@ -56,13 +58,9 @@
         }
       </form>
     </div>
-  </ta-card>
 
-  <ta-card>
-    <div class="ion-padding">
-      <ta-password-validator
-        [password$]="registrationFormGroup.controls['password'].valueChanges"
-      />
-    </div>
-  </ta-card>
+    <ta-password-validator
+      [password$]="registrationFormGroup.controls['password'].valueChanges"
+    />
+  </ion-content>
 </ta-page>

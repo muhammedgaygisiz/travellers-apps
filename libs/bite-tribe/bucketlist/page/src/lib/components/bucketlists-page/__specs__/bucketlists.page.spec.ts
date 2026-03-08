@@ -107,4 +107,66 @@ describe('BucketlistsPage', () => {
       expect(component.isAlertOpen()).toBe(true);
     });
   });
+
+  describe('openDeleteConfirmation', () => {
+    it('should set bucketlistToDelete and isDeleteAlertOpen', () => {
+      const bucketlistId = '123';
+      const event = new Event('click');
+      component.openDeleteConfirmation(bucketlistId, event);
+      expect(component.bucketlistToDelete()).toBe(bucketlistId);
+      expect(component.isDeleteAlertOpen()).toBe(true);
+    });
+
+    it('should stop event propagation', () => {
+      const bucketlistId = '123';
+      const event = new Event('click');
+      jest.spyOn(event, 'stopPropagation');
+      component.openDeleteConfirmation(bucketlistId, event);
+      expect(event.stopPropagation).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleDeleteConfirmationDismiss', () => {
+    describe('given confirmation was not clicked', () => {
+      it('should not emit deleteBucketlist event', () => {
+        const event = new CustomEvent('dismiss', {
+          detail: { role: 'cancel' },
+        });
+        jest.spyOn(component.deleteBucketlist, 'emit');
+        component.handleDeleteConfirmationDismiss(event);
+        expect(component.deleteBucketlist.emit).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('given confirmation was clicked', () => {
+      it('should emit deleteBucketlist event with the correct id', () => {
+        const bucketlistId = '123';
+        component.bucketlistToDelete.set(bucketlistId);
+        const event = new CustomEvent('dismiss', {
+          detail: { role: 'delete' },
+        });
+        jest.spyOn(component.deleteBucketlist, 'emit');
+        component.handleDeleteConfirmationDismiss(event);
+        expect(component.deleteBucketlist.emit).toHaveBeenCalledWith(
+          bucketlistId,
+        );
+      });
+    });
+  });
+
+  describe('onEditBucketlist', () => {
+    it('should stop event propagation', () => {
+      const bucketlistId = '123';
+      const event = new Event('click');
+      jest.spyOn(event, 'stopPropagation');
+      const editBucketlistEmitSpy = jest.spyOn(
+        component.editBucketlist,
+        'emit',
+      );
+      component.onEditBucketlist(bucketlistId, event);
+
+      expect(event.stopPropagation).toHaveBeenCalled();
+      expect(editBucketlistEmitSpy).toHaveBeenCalledWith(bucketlistId);
+    });
+  });
 });

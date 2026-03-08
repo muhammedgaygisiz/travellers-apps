@@ -207,6 +207,14 @@ export class BiteTribeApiService {
     return this.bucketlistApiService.loadBucketlistsByUserId(uid);
   }
 
+  deleteBucketlist(bucketlistId: string): Promise<void> {
+    return this.bucketlistApiService.deleteBucketlist(bucketlistId);
+  }
+
+  updateBucketlistName(bucketlistId: string, name: string): Promise<void> {
+    return this.bucketlistApiService.updateBucketlistName(bucketlistId, name);
+  }
+
   latestBites$(number: number): Observable<Bite[]> {
     this.biteApiService.startlatestBitesListener(number);
 

@@ -34,8 +34,9 @@ import { FloatNumberDotNotationValidator } from '../../validators/float-number-d
 import { currencyCodes } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
-import { getNormalizedPrice } from './utils/get-normalized-price';
+import { normalizePriceForBackend } from './utils/normalize-price-for-backend';
 import { ImageValidator } from './utils/image-validator';
+import { normalizePriceForForm } from './utils/normalize-price-for-form';
 
 @Component({
   selector: 'bite',
@@ -120,13 +121,16 @@ export class BitePage {
       return;
     }
 
+    // Price is stored as string in the backend but is a number in the model
+    const price = normalizePriceForForm(`${bite.price}`);
+
     this.biteFormGroup.patchValue({
       id: bite.id,
       image: image || bite.image,
       imagePath: bite.imagePath,
       name: bite.name,
       place: bite.place,
-      price: `${bite.price}`,
+      price,
       currency: bite.currency,
       tags: bite.tags || [],
       position: bite.position,
@@ -259,7 +263,7 @@ export class BitePage {
     if (this.biteFormGroup.valid) {
       const newBite = this.biteFormGroup.value;
 
-      newBite.price = getNormalizedPrice(newBite.price);
+      newBite.price = normalizePriceForBackend(newBite.price);
 
       this.submitBite.emit(newBite);
     }

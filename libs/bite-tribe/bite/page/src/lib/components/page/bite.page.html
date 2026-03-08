@@ -38,7 +38,7 @@
         />
       </ion-input>
 
-      <div class="price-container ion-margin-bottom">
+      <div class="ion-flex-1 price-container ion-margin-bottom">
         <div class="price">
           <ion-input
             label="Price?"
@@ -51,6 +51,7 @@
               id="currency-selector-trigger-bite"
               class="currency-selector"
               slot="end"
+              class="ion-display-flex ion-align-items-center"
             >
               {{ selectedCurrencyName() }}
               <ion-icon name="chevron-expand-outline" />
@@ -81,10 +82,12 @@
       />
 
       <div class="ion-padding-top">
-        <ion-label class="map-label"
+        <ion-label class="ion-display-block map-label"
           >Location (tap map to move location manually):</ion-label
         >
-        <div class="position-button-container">
+        <div
+          class="ion-display-flex ion-justify-content-center position-button-container"
+        >
           <ion-button
             [disabled]="!imagePosition()"
             (click)="onPositionFromImage(imagePosition())"

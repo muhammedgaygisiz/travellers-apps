@@ -24,13 +24,7 @@ import {
 import { CurrencySelectorComponent } from 'currency-selector';
 import { RestaurantSelectorComponent } from 'restaurant-selector';
 import { Platform } from '@ionic/angular';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
@@ -63,8 +57,8 @@ import { ImageValidator } from './utils/image-validator';
     IonIcon,
     IonLabel,
   ],
-  templateUrl: './bite.page.html',
-  styleUrl: './bite.page.scss',
+  templateUrl: 'bite.page.html',
+  styleUrl: 'bite.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BitePage {

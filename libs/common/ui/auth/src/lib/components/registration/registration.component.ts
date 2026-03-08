@@ -16,12 +16,11 @@ import {
   PasswordValidatorComponent,
 } from 'common/password-validator';
 import { PageComponent } from 'common/ui/page';
-import { CardComponent } from 'common/ui/card';
 import {
   IonButton,
+  IonContent,
   IonInput,
   IonInputPasswordToggle,
-  IonItem,
   IonText,
 } from '@ionic/angular/standalone';
 import { Credentials } from '../../api/credentials.model';
@@ -39,14 +38,13 @@ interface RegistrationFields {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PageComponent,
-    CardComponent,
     ReactiveFormsModule,
     PasswordValidatorComponent,
-    IonItem,
     IonInput,
     IonButton,
     IonText,
     IonInputPasswordToggle,
+    IonContent,
   ],
 })
 export class RegistrationComponent {

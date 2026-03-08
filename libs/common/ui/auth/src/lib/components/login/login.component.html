@@ -5,10 +5,14 @@
   [hideAuthButton]="true"
   [showFooter]="false"
 >
-  <ta-card>
+  <ion-content class="ion-padding">
+    <h1 class="ion-margin-bottom">Log in</h1>
+
     <div class="ion-padding">
-      <div class="ion-margin-top ion-margin-bottom separator">
-        <ion-text> Sign in with your </ion-text>
+      <div
+        class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
+      >
+        <ion-text> Sign in with</ion-text>
       </div>
 
       <div class="registration-options">
@@ -20,33 +24,35 @@
         </ion-button>
       </div>
 
-      <div class="ion-margin-top separator ion-margin-bottom">
-        <ion-text> Account or with your Email </ion-text>
+      <div
+        class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
+      >
+        <ion-text> or with your Email</ion-text>
       </div>
 
       <form [formGroup]="authFormGroup">
-        <ion-item lines="full">
-          <ion-input
-            autocomplete="email"
-            inputmode="email"
-            formControlName="email"
-            data-cy="email"
-            label="Email"
-            labelPlacement="floating"
-          />
-        </ion-item>
+        <ion-input
+          label="Email"
+          formControlName="email"
+          fill="outline"
+          mode="md"
+          class="ion-margin-top"
+          autocomplete="email"
+          inputmode="email"
+          data-cy="email"
+        />
 
-        <ion-item lines="full">
-          <ion-input
-            type="password"
-            formControlName="password"
-            data-cy="password"
-            label="Password"
-            labelPlacement="floating"
-          >
-            <ion-input-password-toggle slot="end" />
-          </ion-input>
-        </ion-item>
+        <ion-input
+          label="Password"
+          formControlName="password"
+          fill="outline"
+          mode="md"
+          class="ion-margin-top"
+          type="password"
+          data-cy="password"
+        >
+          <ion-input-password-toggle slot="end" />
+        </ion-input>
 
         <ion-button
           class="ion-margin-top"
@@ -66,21 +72,21 @@
         }
       </form>
     </div>
-  </ta-card>
 
-  <ta-card>
-    <div class="ion-margin">
-      <ion-text> If you don't have an account already sign up now. </ion-text>
+    <ta-card>
+      <div class="ion-margin">
+        <ion-text> If you don't have an account already sign up now.</ion-text>
 
-      <ion-button
-        fill="outline"
-        class="ion-margin-top"
-        expand="block"
-        (click)="signup.emit()"
-        data-cy="signup"
-      >
-        Sign up
-      </ion-button>
-    </div>
-  </ta-card>
+        <ion-button
+          fill="outline"
+          class="ion-margin-top"
+          expand="block"
+          (click)="signup.emit()"
+          data-cy="signup"
+        >
+          Sign up
+        </ion-button>
+      </div>
+    </ta-card>
+  </ion-content>
 </ta-page>

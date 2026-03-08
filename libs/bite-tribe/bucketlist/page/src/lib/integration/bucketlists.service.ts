@@ -16,8 +16,20 @@ export class BucketlistsService {
     this.navController.navigateForward(['my-bucketlists', bucketlistId]);
   }
 
+  gotoEditBucketlist(bucketlistId: string): void {
+    this.navController.navigateForward([
+      'my-bucketlists',
+      bucketlistId,
+      'edit',
+    ]);
+  }
+
   createAndSaveToBucketList(bucketListName: string): void {
     this.dataAccess.createAndSaveToBucketList(bucketListName);
+  }
+
+  deleteBucketlist(bucketlistId: string): void {
+    this.dataAccess.deleteBucketlist(bucketlistId);
   }
 
   sortingChange(value: string): void {

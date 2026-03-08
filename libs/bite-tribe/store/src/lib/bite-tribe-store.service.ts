@@ -270,6 +270,16 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(BucketlistActions.createBucketlist({ bucketlistName }));
   }
 
+  deleteBucketlist(bucketlistId: string): void {
+    this.store.dispatch(BucketlistActions.deleteBucketlist({ bucketlistId }));
+  }
+
+  updateBucketlistName(bucketlistId: string, name: string): void {
+    this.store.dispatch(
+      BucketlistActions.updateBucketlistName({ bucketlistId, name }),
+    );
+  }
+
   setHomeSorting(sorting: string): void {
     this.store.dispatch(FilteringAndSortingActions.setHomeSorting({ sorting }));
   }

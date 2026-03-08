@@ -4,12 +4,12 @@ import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../provide-firestore-utils';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import * as firestoreUtils from 'firebase/firestore';
-import * as authUtils from 'firebase/auth';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 import { Capacitor } from '@capacitor/core';
 import { TestScheduler } from 'rxjs/testing';
 import { tap } from 'rxjs';
+import { NavController } from '@ionic/angular';
 
 jest.mock('@capacitor/core', () => ({
   Capacitor: {
@@ -40,13 +40,19 @@ const assertEqual = (a: any, b: any): void => {
 describe(AuthService.name, () => {
   let service: AuthService;
   let scheduler: TestScheduler;
+  let navigateRootMock: jest.Mock;
 
   beforeEach(() => {
     scheduler = new TestScheduler(assertEqual);
+    navigateRootMock = jest.fn();
     TestBed.configureTestingModule({
       providers: [
         { provide: FIREBASE_AUTH, useValue: { signOut: jest.fn() } },
         { provide: FIREBASE_FIRESTORE, useValue: {} },
+        {
+          provide: NavController,
+          useValue: { navigateRoot: navigateRootMock },
+        },
       ],
     });
 
@@ -210,14 +216,13 @@ describe(AuthService.name, () => {
   });
 
   describe('logout', () => {
-    let signOutSpy: jest.SpyInstance;
     let removeAllListenersSpy: jest.SpyInstance;
     let terminateSpy: jest.SpyInstance;
     let clearPersistanceSpy: jest.SpyInstance;
+    let reloadPageSpy: jest.SpyInstance;
 
     beforeEach(() => {
       jest.spyOn(FirebaseAuthentication, 'signOut').mockResolvedValue();
-      signOutSpy = jest.spyOn(service.auth, 'signOut').mockResolvedValue();
       terminateSpy = jest
         .spyOn(firestoreUtils, 'terminate')
         .mockImplementation();
@@ -227,6 +232,7 @@ describe(AuthService.name, () => {
       removeAllListenersSpy = jest
         .spyOn(FirebaseFirestore, 'removeAllListeners')
         .mockImplementation();
+      reloadPageSpy = jest.spyOn(service, 'reloadPage').mockImplementation();
     });
 
     it('should perform logout operations', async () => {
@@ -235,10 +241,11 @@ describe(AuthService.name, () => {
       await service.logout();
 
       expect(FirebaseAuthentication.signOut).toHaveBeenCalled();
-      expect(signOutSpy).toHaveBeenCalled();
       expect(removeAllListenersSpy).toHaveBeenCalled();
       expect(terminateSpy).toHaveBeenCalled();
       expect(clearPersistanceSpy).toHaveBeenCalled();
+      expect(navigateRootMock).toHaveBeenCalledWith('login');
+      expect(reloadPageSpy).toHaveBeenCalled();
     });
   });
 

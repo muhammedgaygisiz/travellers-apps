@@ -121,9 +121,9 @@ export class AuthEffects {
             return AuthActions.loginSucceeded();
           }),
           tap(() => this.navController.navigateBack(['/'])),
-          catchError((err) => {
-            return of(AuthActions.registrationFailed({ code: err.code }));
-          }),
+          catchError((err) =>
+            of(AuthActions.registrationFailed({ code: err.code })),
+          ),
         ),
       ),
     ),

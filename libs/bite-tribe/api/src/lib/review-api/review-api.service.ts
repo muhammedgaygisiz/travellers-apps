@@ -17,7 +17,7 @@ export class ReviewApiService {
   async saveNewReview(payload: {
     review: string;
     biteId: string;
-  }): Promise<void> {
+  }): Promise<Review[]> {
     try {
       const user = this.authService.getUser();
 
@@ -32,9 +32,13 @@ export class ReviewApiService {
           author: user?.displayName || '',
         },
       });
+
+      return loadReviewsByBiteId(payload.biteId);
     } catch (error) {
       console.error('Error saving new review:', error);
       this.errorHandler.handleError(error);
+
+      return <Review[]>[];
     }
   }
 }

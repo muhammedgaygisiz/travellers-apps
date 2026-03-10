@@ -61,11 +61,13 @@ describe(loadReviewsByBiteId.name, () => {
         {
           biteId: '/bites/biteId123',
           rating: 5,
+          id: 'review1',
           comment: 'Great bite!',
         },
         {
           biteId: '/bites/biteId123',
           rating: 4,
+          id: 'review2',
           comment: 'Good bite!',
         },
       ]);

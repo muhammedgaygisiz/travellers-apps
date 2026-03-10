@@ -1,6 +1,14 @@
 @use 'globals';
 
 :host {
+  ion-textarea {
+    @include globals.input-styles;
+
+    &.ion-margin-top {
+      margin-top: 1.5rem;
+    }
+  }
+
   .dish-image {
     width: 100%;
     min-height: 20vh;
@@ -71,9 +79,5 @@
         display: block;
       }
     }
-  }
-
-  .edit-button {
-    margin-top: 32px;
   }
 }

@@ -164,22 +164,23 @@ uploadState();
         }
       </ion-list>
 
-      <ion-item lines="full" class="ion-margin-top">
+      <div class="ion-margin-vertical">
         <form [formGroup]="reviewFormGroup">
           <ion-textarea
             label="Write a review"
-            rows="3"
             formControlName="review"
+            fill="outline"
+            mode="md"
+            rows="3"
           />
         </form>
-      </ion-item>
+      </div>
 
       @let isOwnBite = biteCreatorData?.userId && biteCreatorData?.userId ===
       userId();
       <ion-button
         expand="block"
         color="primary"
-        class="ion-margin"
         [class.safe-padding-bottom]="!isOwnBite"
         [disabled]="isReviewFieldInvalid()"
         (click)="saveReview()"
@@ -192,7 +193,7 @@ uploadState();
         fill="outline"
         expand="block"
         color="primary"
-        class="ion-margin edit-button safe-padding-bottom"
+        class="ion-margin-top safe-padding-bottom"
         (click)="editBite(biteData)"
       >
         Edit Bite

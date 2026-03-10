@@ -112,6 +112,18 @@ export const initPush = async (
         if (data?.type === 'NEW_BITE' && data?.biteId) {
           navController.navigateForward([PATH.BITE, data.biteId]);
         }
+
+        if (data?.type === 'NEW_BITE_REVIEW' && data?.biteId) {
+          navController.navigateForward([PATH.BITE, data.biteId]);
+        }
+
+        if (data?.type === 'NEW_BITE_LIKE' && data?.biteId) {
+          navController.navigateForward([PATH.BITE, data.biteId]);
+        }
+
+        if (data?.type === 'NEW_FOLLOWER' && data?.followerUid) {
+          navController.navigateForward([PATH.PROFILE, data.followerUid]);
+        }
       },
     );
 

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { loadedReviewsFromApi, saveNewReview } from './actions';
-import { filter, map, switchMap, tap } from 'rxjs';
+import { filter, map, of, switchMap, tap } from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
@@ -33,15 +33,13 @@ export class ReviewEffects {
     );
   });
 
-  saveNewReviewToFirestore$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(saveNewReview),
-        tap((payload) => {
-          this.api.saveNewReview(payload);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
+  saveNewReviewToFirestore$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(saveNewReview),
+      switchMap((payload) => {
+        return this.api.saveNewReview(payload);
+      }),
+      map((reviews) => loadedReviewsFromApi({ reviews })),
+    );
+  });
 }

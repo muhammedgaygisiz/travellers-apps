@@ -24,6 +24,7 @@ export const loadReviewsByBiteId = async (
     (reviewDoc) =>
       ({
         ...reviewDoc.data,
+        id: reviewDoc.id,
       }) as Review,
   );
 };

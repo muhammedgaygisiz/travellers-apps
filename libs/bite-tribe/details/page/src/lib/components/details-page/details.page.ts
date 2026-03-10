@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   output,
@@ -101,6 +102,7 @@ export class DetailsPage {
   readonly restaurantClick = output<Bite>();
   readonly goToProfile = output<PublicUser>();
   readonly gotoEdit = output<Bite>();
+  readonly gotoNew = output<Bite>();
 
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);
@@ -148,6 +150,14 @@ export class DetailsPage {
     }
 
     this.gotoEdit.emit(bite);
+  }
+
+  newBite(bite: Bite | undefined): void {
+    if (!bite) {
+      return;
+    }
+
+    this.gotoNew.emit(bite);
   }
 
   onNewList(newListName: string): void {

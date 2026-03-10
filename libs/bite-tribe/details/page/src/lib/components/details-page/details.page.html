@@ -1,6 +1,5 @@
 @let biteData = bite(); @let biteCreatorData = biteCreator(); @let uploadData =
-uploadState();
-
+uploadState(); @let isBucketlistBite = biteData | isInAny: bucketlists();
 <ta-page
   [showHeaderMenu]="false"
   [showFooter]="false"
@@ -124,11 +123,14 @@ uploadState();
             shape="round"
             (click)="showBucketListsSelection($event)"
           >
-            <ion-icon
-              slot="icon-only"
-              [name]="biteData | isInAny: bucketlists()"
-            />
+            <ion-icon slot="icon-only" [name]="isBucketlistBite" />
           </ion-button>
+
+          @if (isBucketlistBite) {
+          <ion-button fill="outline" shape="round" (click)="newBite(biteData)">
+            <ion-icon slot="icon-only" name="pizza-outline" />
+          </ion-button>
+          }
         </div>
       </div>
 

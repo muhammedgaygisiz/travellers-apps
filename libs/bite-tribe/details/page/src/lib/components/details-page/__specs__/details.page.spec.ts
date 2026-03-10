@@ -440,6 +440,25 @@ describe('DetailsPage', () => {
     });
   });
 
+  describe('newBite', () => {
+    it('should emit gotoNew event when bite is provided', () => {
+      const mockBite = { id: '1', name: 'Test Bite' } as Bite;
+      const emitSpy = jest.spyOn(component.gotoNew, 'emit');
+
+      component.newBite(mockBite);
+
+      expect(emitSpy).toHaveBeenCalledWith(mockBite);
+    });
+
+    it('should not emit gotoNew event when bite is undefined', () => {
+      const emitSpy = jest.spyOn(component.gotoNew, 'emit');
+
+      component.newBite(undefined);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('onNewList', () => {
     it('should emit newList event with provided list name', () => {
       const emitSpy = jest.spyOn(component.newList, 'emit');

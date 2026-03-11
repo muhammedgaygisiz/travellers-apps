@@ -95,6 +95,7 @@ export class BiteTribeHomeComponent {
   readonly gotoMyProfile = output();
   readonly gotoMyBites = output();
   readonly gotoAbout = output();
+  readonly gotoMarketPlace = output();
   readonly gotoMyBucketlists = output();
   readonly likeButtonClick = output<Like>();
   readonly biteClick = output<Bite>();

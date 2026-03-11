@@ -82,6 +82,8 @@ export class PageComponent {
 
   showMigrationsButton = input(false);
 
+  showMarketPlaceButton = input(false);
+
   fullWidth = input(false);
 
   appTitle = computed(() => {
@@ -114,6 +116,8 @@ export class PageComponent {
 
   public gotoMyBucketlists = output();
 
+  public gotoMarketPlace = output();
+
   public addButtonClick = output<MouseEvent>();
 
   async showMenuPopover($event: MouseEvent): Promise<void> {
@@ -131,6 +135,7 @@ export class PageComponent {
         showMyBucketlists: this.showMyBucketlists,
         showMyProfile: this.showMyProfile,
         showMigrationsButton: this.showMigrationsButton,
+        showMarketPlaceButton: this.showMarketPlaceButton,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,
@@ -140,6 +145,7 @@ export class PageComponent {
         gotoMyBucketlists: this.gotoMyBucketlists,
         gotoMigrations: this.gotoMigrations,
         gotoProfile: this.gotoProfile,
+        gotoMarketPlace: this.gotoMarketPlace,
       },
     });
 

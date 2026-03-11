@@ -113,6 +113,12 @@
       "bite-tribe/about-data-access": [
         "libs/bite-tribe/about/data-access/src/index.ts"
       ],
+      "bite-tribe/market-place": [
+        "libs/bite-tribe/market-place/page/src/index.ts"
+      ],
+      "bite-tribe/market-place-data-access": [
+        "libs/bite-tribe/market-place/data-access/src/index.ts"
+      ],
       "push-notifications": ["libs/common/push-notifications/src/index.ts"],
       "image-upload": ["libs/common/ui/image-upload/src/index.ts"],
       "bite-tribe/privacy-policy": [

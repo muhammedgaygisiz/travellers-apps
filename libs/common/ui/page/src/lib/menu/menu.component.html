@@ -78,6 +78,12 @@
           About
         </ion-item>
       }
+      @if (showMarketPlaceButton()) {
+        <ion-item (click)="gotoMarketPlace.emit()">
+          <ion-icon name="storefront-outline" slot="start" />
+          Market Place
+        </ion-item>
+      }
       @if (showMigrationsButton()) {
         <ion-item (click)="gotoMigrations.emit()">
           <ion-icon name="hammer-outline" slot="start" />

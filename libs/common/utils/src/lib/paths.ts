@@ -14,4 +14,5 @@ export const PATH = {
   MENU: 'menu',
   PRIVACY_POLICY: 'privacy',
   ACCOUNT_DELETION: 'account-deletion',
+  MARKET_PLACE: 'market-place',
 };

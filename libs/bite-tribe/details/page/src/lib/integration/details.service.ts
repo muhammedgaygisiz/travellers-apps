@@ -95,6 +95,19 @@ export class DetailsService {
     this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
   }
 
+  onGotoNewClick(originalBite: Bite): void {
+    const userAgnosticBiteInfo = {
+      name: originalBite.name,
+      place: originalBite.place,
+      price: originalBite.price,
+      currency: originalBite.currency,
+      restaurantId: originalBite.restaurantId,
+      position: originalBite.position,
+    } as Bite;
+    this.dataAccess.cacheBite(userAgnosticBiteInfo);
+    this.navController.navigateForward(['new-bite']);
+  }
+
   onShareBiteClick(bite: Bite): void {
     this.dataAccess.shareBite(bite);
   }

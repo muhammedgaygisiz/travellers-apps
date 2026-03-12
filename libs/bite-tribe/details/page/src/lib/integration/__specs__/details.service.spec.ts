@@ -4,6 +4,7 @@ import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
 import { signal } from '@angular/core';
 import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
 import { NavController } from '@ionic/angular/standalone';
+import SpyInstance = jest.SpyInstance;
 
 const mockBite: Bite = {
   id: 'bite123',
@@ -28,6 +29,7 @@ const createMockDataAccess = (overrides = {}): any => {
     submitLikeClick: jest.fn(),
     currentPosition: jest.fn(),
     logout: jest.fn(),
+    cacheBite: jest.fn(),
   };
   return { ...base, ...overrides };
 };
@@ -292,7 +294,7 @@ describe('DetailsService', () => {
 
   describe('likeButtonClicked', () => {
     it('should call dataAccess.submitLikeClick with correct parameters', () => {
-      const likeClick = { likeType: 'like', biteId: 'bite123' };
+      const likeClick = { likeType: 'like', biteId: 'bite123' } as any;
       service.likeButtonClicked(likeClick);
 
       expect(mockDataAccessService.submitLikeClick).toHaveBeenCalledWith(
@@ -303,7 +305,7 @@ describe('DetailsService', () => {
 
     it('should trigger reload of bite after 1 sec', () => {
       jest.useFakeTimers();
-      const likeClick = { likeType: 'like', biteId: 'bite123' };
+      const likeClick = { likeType: 'like', biteId: 'bite123' } as any;
       service.likeButtonClicked(likeClick);
 
       // Fast-forward time
@@ -376,6 +378,37 @@ describe('DetailsService', () => {
         'bite',
         'bite123',
         'edit',
+      ]);
+    });
+  });
+
+  describe('onGotoNewClick', () => {
+    let cacheBiteSpy: SpyInstance;
+
+    beforeEach(() => {
+      cacheBiteSpy = jest
+        .spyOn(service.dataAccess, 'cacheBite')
+        .mockImplementation();
+    });
+
+    it('should navigate to new bite page with user agnostic bite info', () => {
+      const originalBite: Bite = {
+        id: 'bite123',
+        name: 'Pizzoccheri',
+        place: 'Grotto Broggini',
+        price: 25,
+        currency: 'CHF',
+        restaurantId: '123',
+        position: {} as any,
+      } as Bite;
+      service.onGotoNewClick(originalBite);
+      expect(cacheBiteSpy).toHaveBeenCalledTimes(1);
+      expect(cacheBiteSpy).toHaveBeenCalledWith({
+        ...originalBite,
+        id: undefined,
+      });
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'new-bite',
       ]);
     });
   });

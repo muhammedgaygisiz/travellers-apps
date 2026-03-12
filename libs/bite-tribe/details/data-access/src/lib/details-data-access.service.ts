@@ -185,6 +185,10 @@ export class DetailsDataAccessService {
     this.storeService.logout();
   }
 
+  cacheBite(bite: Bite): void {
+    this.storeService.cacheBite(bite);
+  }
+
   async shareBite(bite: Bite): Promise<void> {
     const url = `${SHARE_BITE_URL}/${encodeURIComponent(bite.id)}`;
 

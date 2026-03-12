@@ -34,28 +34,30 @@ describe('GetBucketlistsIconPipe', () => {
     expect(pipe.transform(mockBite, mockBucketlists)).toBe('bookmark');
   });
 
-  it('should return "add-outline" when bite is not in any bucketlist', () => {
+  it('should return "bookmark-outline" when bite is not in any bucketlist', () => {
     const differentBite = { ...mockBite, id: 'bite5' };
-    expect(pipe.transform(differentBite, mockBucketlists)).toBe('add-outline');
-  });
-
-  it('should return "add-outline" when bucketlists array is empty', () => {
-    expect(pipe.transform(mockBite, [])).toBe('add-outline');
-  });
-
-  it('should return "add-outline" when bite is undefined', () => {
-    expect(pipe.transform(undefined, mockBucketlists)).toBe('add-outline');
-  });
-
-  it('should return "add-outline" when bucketlists is undefined', () => {
-    expect(pipe.transform(mockBite, undefined as unknown as Bucketlist[])).toBe(
-      'add-outline',
+    expect(pipe.transform(differentBite, mockBucketlists)).toBe(
+      'bookmark-outline',
     );
   });
 
-  it('should return "add-outline" when both bite and bucketlists are undefined', () => {
+  it('should return "bookmark-outline" when bucketlists array is empty', () => {
+    expect(pipe.transform(mockBite, [])).toBe('bookmark-outline');
+  });
+
+  it('should return "bookmark-outline" when bite is undefined', () => {
+    expect(pipe.transform(undefined, mockBucketlists)).toBe('bookmark-outline');
+  });
+
+  it('should return "bookmark-outline" when bucketlists is undefined', () => {
+    expect(pipe.transform(mockBite, undefined as unknown as Bucketlist[])).toBe(
+      'bookmark-outline',
+    );
+  });
+
+  it('should return "bookmark-outline" when both bite and bucketlists are undefined', () => {
     expect(
       pipe.transform(undefined, undefined as unknown as Bucketlist[]),
-    ).toBe('add-outline');
+    ).toBe('bookmark-outline');
   });
 });

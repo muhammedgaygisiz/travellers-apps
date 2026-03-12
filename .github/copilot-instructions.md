@@ -135,6 +135,7 @@ After generation:
 - **Test Location**: Tests should be in `__specs__/` folders alongside components
 - **Naming**: `*.spec.ts`
 - **Coverage**: Tests run with coverage reporting to Codecov
+- **Zone**: Use `setupZonelessTestEnv` for `test-setup.ts`
 
 ### Jest Setup for Page Libraries
 

@@ -4,7 +4,7 @@
 <ion-card>
   <div class="card-content">
     <div
-      class="card-image"
+      class="card-image cursor-pointer"
       [class.loading]="uploadData?.progress?.evt?.completed === false"
     >
       @if (
@@ -25,18 +25,19 @@
     <div class="card-details">
       <ion-card-header>
         <ion-card-title (click)="biteClick.emit(biteData)">
-          <span class="bite-title">
+          <span class="bite-title cursor-pointer">
             <ion-text color="secondary" class="copytext">
               {{ biteData?.name | withFirstLetterUpperCase }}
             </ion-text>
           </span>
         </ion-card-title>
 
-        <ion-card-subtitle
-          class="restaurant-name smalltext"
-          (click)="restaurantClick.emit(biteData)"
-        >
-          <ion-text color="secondary">
+        <ion-card-subtitle class="restaurant-name smalltext">
+          <ion-text
+            color="secondary"
+            class="cursor-pointer"
+            (click)="restaurantClick.emit(biteData)"
+          >
             {{ biteData?.place }}
           </ion-text>
           <bt-distance

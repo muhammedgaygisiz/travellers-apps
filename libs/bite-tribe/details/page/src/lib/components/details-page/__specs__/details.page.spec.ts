@@ -152,6 +152,73 @@ describe('DetailsPage', () => {
     });
   });
 
+  describe('isBucketlistBite', () => {
+    it('should return true if bite is in any bucketlist', () => {
+      const mockBite = { id: '1', name: 'Pizza' };
+      const mockBucketlists = [
+        { id: 'list1', name: 'List 1', biteIds: ['1'] },
+        { id: 'list2', name: 'List 2', biteIds: [] },
+      ];
+
+      componentRef.setInput('bite', mockBite);
+      componentRef.setInput('bucketlists', mockBucketlists);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.isBucketlistBite()).toBe(true);
+    });
+
+    it('should return false if bite is not in any bucketlist', () => {
+      const mockBite = { id: '1', name: 'Pizza' };
+      const mockBucketlists = [
+        { id: 'list1', name: 'List 1', biteIds: ['2'] },
+        { id: 'list2', name: 'List 2', biteIds: [] },
+      ];
+
+      componentRef.setInput('bite', mockBite);
+      componentRef.setInput('bucketlists', mockBucketlists);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.isBucketlistBite()).toBe(false);
+    });
+
+    it('should return false if bite is undefined', () => {
+      const mockBucketlists = [
+        { id: 'list1', name: 'List 1', biteIds: ['1'] },
+        { id: 'list2', name: 'List 2', biteIds: [] },
+      ];
+
+      componentRef.setInput('bite', undefined);
+      componentRef.setInput('bucketlists', mockBucketlists);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.isBucketlistBite()).toBe(false);
+    });
+
+    it('should return false if bucketlists is undefined', () => {
+      const mockBite = { id: '1', name: 'Pizza' };
+
+      componentRef.setInput('bite', mockBite);
+      componentRef.setInput('bucketlists', undefined);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.isBucketlistBite()).toBe(false);
+    });
+
+    it('should return false if bite id is missing', () => {
+      const mockBite = { name: 'Pizza' } as unknown as Bite;
+      const mockBucketlists = [
+        { id: 'list1', name: 'List 1', biteIds: ['1'] },
+        { id: 'list2', name: 'List 2', biteIds: [] },
+      ];
+
+      componentRef.setInput('bite', mockBite);
+      componentRef.setInput('bucketlists', mockBucketlists);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.isBucketlistBite()).toBe(false);
+    });
+  });
+
   describe('Bucket List Selection', () => {
     it('should create and present popover with correct configuration', async () => {
       const mockEvent = new MouseEvent('click');

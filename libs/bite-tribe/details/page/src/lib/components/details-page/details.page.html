@@ -1,5 +1,5 @@
 @let biteData = bite(); @let biteCreatorData = biteCreator(); @let uploadData =
-uploadState(); @let isBucketlistBite = biteData | isInAny: bucketlists();
+uploadState();
 <ta-page
   [showHeaderMenu]="false"
   [showFooter]="false"
@@ -117,19 +117,33 @@ uploadState(); @let isBucketlistBite = biteData | isInAny: bucketlists();
           />
         </div>
         }
-        <div class="ion-text-end">
-          <ion-button
-            fill="outline"
-            shape="round"
+        <div class="ion-text-end ion-display-flex">
+          <ion-icon
+            slot="icon-only"
+            color="primary"
+            size="large"
+            class="ion-margin-start icon-button"
+            [name]="biteData | getBucketlistsIcon: bucketlists()"
             (click)="showBucketListsSelection($event)"
-          >
-            <ion-icon slot="icon-only" [name]="isBucketlistBite" />
-          </ion-button>
-
-          @if (isBucketlistBite) {
-          <ion-button fill="outline" shape="round" (click)="newBite(biteData)">
-            <ion-icon slot="icon-only" name="pizza-outline" />
-          </ion-button>
+          />
+          @if (isBucketlistBite()) {
+          <div class="new-bite-container">
+            <ion-icon
+              slot="icon-only"
+              color="primary"
+              size="large"
+              class="ion-margin-start icon-button"
+              name="pizza-outline"
+              (click)="newBite(biteData)"
+            />
+            <ion-icon
+              slot="icon-only"
+              color="primary"
+              name="add-outline"
+              class="icon-button icon-small-align"
+              (click)="newBite(biteData)"
+            />
+          </div>
           }
         </div>
       </div>

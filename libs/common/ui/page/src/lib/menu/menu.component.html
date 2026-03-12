@@ -48,6 +48,12 @@
         Login
       </ion-item>
     } @else {
+      @if (showMyProfile()) {
+        <ion-item (click)="gotoProfile.emit()">
+          <ion-icon name="person-circle-outline" slot="start" />
+          My Profile
+        </ion-item>
+      }
       @if (showMyBites()) {
         <ion-item (click)="gotoMyBites.emit()">
           <ion-icon name="pizza-outline" slot="start" />
@@ -60,10 +66,10 @@
           My Bucket lists
         </ion-item>
       }
-      @if (showMyProfile()) {
-        <ion-item (click)="gotoProfile.emit()">
-          <ion-icon name="person-circle-outline" slot="start" />
-          My Profile
+      @if (showMarketPlaceButton()) {
+        <ion-item (click)="gotoMarketPlace.emit()">
+          <ion-icon name="storefront-outline" slot="start" />
+          Market Place
         </ion-item>
       }
       @if (showSettingsButton()) {
@@ -76,12 +82,6 @@
         <ion-item (click)="gotoAbout.emit()">
           <ion-icon name="information-circle-outline" slot="start" />
           About
-        </ion-item>
-      }
-      @if (showMarketPlaceButton()) {
-        <ion-item (click)="gotoMarketPlace.emit()">
-          <ion-icon name="storefront-outline" slot="start" />
-          Market Place
         </ion-item>
       }
       @if (showMigrationsButton()) {

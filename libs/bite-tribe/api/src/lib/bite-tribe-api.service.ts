@@ -49,8 +49,11 @@ export class BiteTribeApiService {
     return this.exchangeRatesApiService.getExchangeRates();
   }
 
-  saveNewReview(payload: { review: string; biteId: string }): void {
-    this.reviewApiService.saveNewReview(payload);
+  saveNewReview(payload: {
+    review: string;
+    biteId: string;
+  }): Promise<Review[]> {
+    return this.reviewApiService.saveNewReview(payload);
   }
 
   reviewsByBiteId(biteId: string): Promise<Review[]> {

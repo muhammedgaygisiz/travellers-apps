@@ -40,6 +40,8 @@ export class MenuComponent {
 
   showMyProfile = input<boolean | null>(false);
 
+  showMarketPlaceButton = input<boolean | null>(false);
+
   loginClick = output();
 
   logoutClick = output();
@@ -55,6 +57,8 @@ export class MenuComponent {
   gotoMyBites = output();
 
   gotoMyBucketlists = output();
+
+  gotoMarketPlace = output();
 
   languageChangeClick = output<SupportedLang>();
 }

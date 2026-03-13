@@ -142,6 +142,15 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: PATH.MARKET_PLACE,
+    loadComponent: () =>
+      import('bite-tribe/market-place').then(
+        (m) => m.MarketPlaceContainerComponent,
+      ),
+    title: 'Market Place',
+    canActivate: [authGuard],
+  },
+  {
     path: PATH.PRIVACY_POLICY,
     loadComponent: () =>
       import('bite-tribe/privacy-policy').then((m) => m.PrivacyPolicy),

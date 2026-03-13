@@ -100,6 +100,10 @@ export class HomeService {
     this.navController.navigateForward([PATH.ABOUT]);
   }
 
+  onGotoMarketPlaceClick(): void {
+    this.navController.navigateForward([PATH.MARKET_PLACE]);
+  }
+
   openMapView(mainPage: string): void {
     if (mainPage === 'my-bucketlists') {
       const selectedBucketlist = this.selectedBucketlist();

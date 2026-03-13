@@ -135,6 +135,7 @@ After generation:
 - **Test Location**: Tests should be in `__specs__/` folders alongside components
 - **Naming**: `*.spec.ts`
 - **Coverage**: Tests run with coverage reporting to Codecov
+- **Zone**: Use `setupZonelessTestEnv` for `test-setup.ts`
 
 ### Jest Setup for Page Libraries
 
@@ -373,3 +374,7 @@ The data is then stored in the according slice. The container receives the data 
 via its dedicated service, which itself uses the according data-access layer, which uses the
 store service. The store service encapsulates ngrx, so that the rest of the application is not
 dependent on ngrx directly.
+
+# Icons
+
+When a new icon is used (Ionic Icons Library) it needs to be imported and added to the `addNecessaryIcons` function.

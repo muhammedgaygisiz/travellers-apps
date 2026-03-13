@@ -251,6 +251,22 @@ describe('HomeService', () => {
     ));
   });
 
+  describe('onGotoMarketPlaceClick', () => {
+    let navigateForwardSpy: SpyInstance;
+
+    beforeEach(() => {
+      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+    });
+
+    it('should navigate to market-place page', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.onGotoMarketPlaceClick();
+        expect(navigateForwardSpy).toHaveBeenCalledWith(['market-place']);
+      },
+    ));
+  });
+
   describe('openMapView', () => {
     let navigateForwardSpy: SpyInstance;
 

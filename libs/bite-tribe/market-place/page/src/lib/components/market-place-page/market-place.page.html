@@ -6,9 +6,11 @@
   <ion-content class="ion-padding">
     <h1>Market Place</h1>
 
-    @if (biteTrails(); as trails) { @for (biteTrail of trails; track
-    biteTrail.id) {
-    <div>{{ biteTrail.name }}</div>
-    } }
+    <div class="ion-margin-top">
+      @if (biteTrails(); as trails) { @for (biteTrail of trails; track
+      biteTrail.id) {
+      <div>{{ biteTrail.name }}</div>
+      } }
+    </div>
   </ion-content>
 </ta-page>

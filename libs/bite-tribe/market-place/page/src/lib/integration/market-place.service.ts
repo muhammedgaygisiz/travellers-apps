@@ -4,4 +4,6 @@ import { MarketPlaceDataAccessService } from 'bite-tribe/market-place-data-acces
 @Injectable({ providedIn: 'root' })
 export class MarketPlaceService {
   dataAccess = inject(MarketPlaceDataAccessService);
+
+  biteTrails = this.dataAccess.biteTrails;
 }

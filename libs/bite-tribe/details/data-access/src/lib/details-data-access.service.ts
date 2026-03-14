@@ -185,7 +185,7 @@ export class DetailsDataAccessService {
     this.storeService.logout();
   }
 
-  cacheBite(bite: Bite): void {
+  cacheBite(bite: Partial<Bite>): void {
     this.storeService.cacheBite(bite);
   }
 

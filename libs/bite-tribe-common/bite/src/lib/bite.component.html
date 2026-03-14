@@ -4,7 +4,7 @@
 <ion-card>
   <div class="card-content">
     <div
-      class="card-image cursor-pointer"
+      class="card-image"
       [class.loading]="uploadData?.progress?.evt?.completed === false"
     >
       @if (
@@ -14,6 +14,7 @@
       ) {
         <img
           alt="Dish"
+          class="cursor-pointer"
           src="{{ biteData | getImage: uploadData | async }}"
           height="220"
           loading="lazy"

@@ -103,7 +103,7 @@ export class DetailsService {
       currency: originalBite.currency,
       restaurantId: originalBite.restaurantId,
       position: originalBite.position,
-    } as Bite;
+    } as Partial<Bite>;
     this.dataAccess.cacheBite(userAgnosticBiteInfo);
     this.navController.navigateForward(['new-bite']);
   }

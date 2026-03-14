@@ -13,7 +13,7 @@ cre
         <div
           class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
         >
-          <ion-text> Sign in with</ion-text>
+          <ion-text> Log in with</ion-text>
         </div>
 
         <div class="registration-options">
@@ -57,6 +57,7 @@ cre
 
           <ion-button
             class="ion-margin-top"
+            fill="outline"
             expand="block"
             [disabled]="!authFormGroup.valid"
             (click)="submitAuth.emit(authFormGroup.value)"
@@ -80,7 +81,6 @@ cre
           <ion-text> or, if you don't have an account yet:</ion-text>
         </div>
         <ion-button
-          fill="outline"
           class="ion-margin-top"
           expand="block"
           (click)="signup.emit()"

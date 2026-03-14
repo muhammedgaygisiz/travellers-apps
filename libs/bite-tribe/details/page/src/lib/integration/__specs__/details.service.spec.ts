@@ -30,6 +30,7 @@ const createMockDataAccess = (overrides = {}): any => {
     currentPosition: jest.fn(),
     logout: jest.fn(),
     cacheBite: jest.fn(),
+    shareBite: jest.fn(),
   };
   return { ...base, ...overrides };
 };
@@ -410,6 +411,15 @@ describe('DetailsService', () => {
       expect(mockNavController.navigateForward).toHaveBeenCalledWith([
         'new-bite',
       ]);
+    });
+  });
+
+  describe('onShareBiteClick', () => {
+    it('should call dataAccess.shareBite with the provided bite', () => {
+      const bite: Bite = { id: 'bite123', name: 'Test Bite' } as Bite;
+      service.onShareBiteClick(bite);
+      expect(service.dataAccess.shareBite).toHaveBeenCalledWith(bite);
+      expect(service.dataAccess.shareBite).toHaveBeenCalledTimes(1);
     });
   });
 });

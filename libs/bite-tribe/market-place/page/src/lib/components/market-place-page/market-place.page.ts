@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonContent } from '@ionic/angular/standalone';
+import type { BiteTrail } from 'model';
 
 @Component({
   selector: 'market-place-page',
@@ -9,4 +10,6 @@ import { IonContent } from '@ionic/angular/standalone';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [PageComponent, IonContent],
 })
-export class MarketPlacePage {}
+export class MarketPlacePage {
+  biteTrails = input<BiteTrail[] | undefined>();
+}

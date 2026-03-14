@@ -6,7 +6,12 @@ import { MarketPlaceService } from './market-place.service';
 @Component({
   selector: 'market-place-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: ` <market-place-page class="ion-page" /> `,
+  template: `
+    <market-place-page
+      class="ion-page"
+      [biteTrails]="service.biteTrails.value()"
+    />
+  `,
   imports: [MarketPlacePage],
 })
 export class MarketPlaceContainerComponent {

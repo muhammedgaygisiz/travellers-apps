@@ -1,0 +1,105 @@
+@let biteTrailData = biteTrail();
+
+<ion-card>
+  <div class="card-content">
+    <div class="card-image">
+      <img
+        alt="{{biteTrailData.name}}"
+        class="cursor-pointer"
+        src="{{biteTrailData.imagePath}}"
+        height="220"
+        loading="lazy"
+      />
+    </div>
+
+    <div class="card-details">
+      <ion-card-header
+        class="ion-display-flex ion-flex-column ion-justify-content-start"
+      >
+        <ion-card-title>
+          <span class="title cursor-pointer">
+            <ion-text color="secondary" class="copytext">
+              {{ biteTrailData?.name }}
+            </ion-text>
+          </span>
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content class="owner smalltext">
+        <div class="ion-display-flex ion-flex-row">
+          <div class="ion-display-flex ion-flex-column ion-flex-1">
+            <div
+              class="ion-display-flex ion-flex-row ion-align-items-center ion-margin-bottom"
+            >
+              <ion-avatar class="ion-margin-end">
+                <img
+                  [src]="biteTrailData.ownerImagePath"
+                  alt="{{biteTrailData.ownerName}}"
+                />
+              </ion-avatar>
+
+              <ion-text color="secondary" class="cursor-pointer">
+                <p>
+                  by
+                  <ion-text color="primary"
+                    >&#64;{{ biteTrailData.ownerName }}
+                  </ion-text>
+                </p>
+              </ion-text>
+
+              <ion-icon
+                name="shield-checkmark-outline"
+                color="primary"
+                size="small"
+              />
+            </div>
+
+            <div class="ion-display-flex ion-flex-row ion-align-items-center">
+              <ion-icon
+                name="location-outline"
+                size="small"
+                class="ion-margin-end"
+              />
+              <ion-text color="secondary" class="location">
+                {{ biteTrailData?.location }}
+              </ion-text>
+              <ion-text class="ion-margin-horizontal">·</ion-text>
+              <ion-icon name="list-outline" size="small"></ion-icon>
+              <ion-text color="secondary" class="ion-margin-start"
+                >{{ biteTrailData.biteIds.length ? biteTrailData.biteIds.length
+                : 0 }} Bites
+              </ion-text>
+            </div>
+          </div>
+
+          <div class="ion-display-flex ion-flex-column ion-align-items-end">
+            <ion-badge class="outlined-badge ion-margin-bottom">
+              <ion-icon name="flame-outline" />
+              Best Seller
+            </ion-badge>
+            <ion-text>Sold 231 times</ion-text>
+          </div>
+        </div>
+
+        <div class="ion-margin-top">
+          <ion-text color="secondary">{{ biteTrailData.description }}</ion-text>
+        </div>
+
+        <div
+          class="price-row ion-display-flex ion-flex-row ion-align-items-center ion-margin-top"
+        >
+          <div class="ion-flex-1 ion-display-flex ion-align-items-center">
+            <ion-text class="ion-margin-horizontal" color="secondary"
+              ><h2>CHF</h2></ion-text
+            >
+            <ion-text color="secondary"><h1>4.90</h1></ion-text>
+          </div>
+          <ion-button shape="round">
+            View BiteTrail
+            <ion-icon name="arrow-forward-outline" />
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </div>
+  </div>
+</ion-card>

@@ -24,7 +24,9 @@
     </div>
 
     <div class="card-details">
-      <ion-card-header>
+      <ion-card-header
+        class="ion-display-flex ion-flex-column ion-justify-content-start"
+      >
         <ion-card-title (click)="biteClick.emit(biteData)">
           <span class="bite-title cursor-pointer">
             <ion-text color="secondary" class="copytext">
@@ -33,7 +35,9 @@
           </span>
         </ion-card-title>
 
-        <ion-card-subtitle class="restaurant-name smalltext">
+        <ion-card-subtitle
+          class="ion-display-flex ion-justify-content-between ion-align-items-center restaurant-name smalltext"
+        >
           <ion-text
             color="secondary"
             class="cursor-pointer"

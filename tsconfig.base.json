@@ -126,7 +126,8 @@
       ],
       "bite-tribe/delete-account": [
         "libs/bite-tribe/delete-account/src/index.ts"
-      ]
+      ],
+      "bite-trail": ["libs/bite-tribe-common/bite-trail/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

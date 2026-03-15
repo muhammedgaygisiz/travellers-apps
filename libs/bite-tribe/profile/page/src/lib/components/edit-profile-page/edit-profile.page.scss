@@ -4,14 +4,24 @@
   .profile-image-block {
     display: flex;
     flex-direction: column;
-
     align-items: center;
-    margin-right: 16px;
+    margin-bottom: 8px;
 
     .profile-image {
       @include globals.profile-image;
 
+      width: 72px;
+      height: 72px;
       margin-right: 0;
+    }
+  }
+
+  ion-input,
+  ion-textarea {
+    @include globals.input-styles;
+
+    &.ion-margin-top {
+      margin-top: 1.5rem;
     }
   }
 

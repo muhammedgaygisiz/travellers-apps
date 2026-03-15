@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BiteTrail } from './bite-trail';
+import { BiteTrailComponent } from './bite-trail';
 
 describe('BiteTrail', () => {
-  let component: BiteTrail;
-  let fixture: ComponentFixture<BiteTrail>;
+  let component: BiteTrailComponent;
+  let fixture: ComponentFixture<BiteTrailComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BiteTrail],
+      imports: [BiteTrailComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BiteTrail);
+    fixture = TestBed.createComponent(BiteTrailComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

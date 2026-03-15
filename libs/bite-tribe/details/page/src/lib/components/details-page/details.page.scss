@@ -27,9 +27,17 @@
     }
   }
 
-  .title-container {
-    .navigate {
-      cursor: pointer;
+  .icon-button {
+    cursor: pointer;
+  }
+
+  .new-bite-container {
+    position: relative;
+
+    .icon-small-align {
+      position: absolute;
+      left: 2.4rem;
+      top: 30%;
     }
   }
 

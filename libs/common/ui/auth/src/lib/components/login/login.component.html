@@ -5,80 +5,81 @@
   [hideAuthButton]="true"
   [showFooter]="false"
 >
-  <ion-content class="ion-padding">
-    <h1 class="ion-margin-bottom">Log in</h1>
-
-    <div class="ion-padding">
-      <div
-        class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
-      >
-        <ion-text> Sign in with</ion-text>
-      </div>
-
-      <div class="registration-options">
-        <ion-button fill="outline" (click)="onGoogleSignUp()">
-          <ion-icon name="logo-google" color="secondary" />
-        </ion-button>
-        <ion-button fill="outline" (click)="onAppleSignUp()">
-          <ion-icon name="logo-apple" color="secondary" />
-        </ion-button>
-      </div>
-
-      <div
-        class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
-      >
-        <ion-text> or with your Email</ion-text>
-      </div>
-
-      <form [formGroup]="authFormGroup">
-        <ion-input
-          label="Email"
-          formControlName="email"
-          fill="outline"
-          mode="md"
-          class="ion-margin-top"
-          autocomplete="email"
-          inputmode="email"
-          data-cy="email"
-        />
-
-        <ion-input
-          label="Password"
-          formControlName="password"
-          fill="outline"
-          mode="md"
-          class="ion-margin-top"
-          type="password"
-          data-cy="password"
+  <ion-content>
+    <div slot="fixed" class="container ion-padding">
+      <div>
+        <h1 class="ion-margin-bottom">Log in</h1>
+        <div
+          class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
         >
-          <ion-input-password-toggle slot="end" />
-        </ion-input>
+          <ion-text> Log in with</ion-text>
+        </div>
 
+        <div class="registration-options">
+          <ion-button fill="outline" (click)="onGoogleSignUp()">
+            <ion-icon name="logo-google" color="secondary" />
+          </ion-button>
+          <ion-button fill="outline" (click)="onAppleSignUp()">
+            <ion-icon name="logo-apple" color="secondary" />
+          </ion-button>
+        </div>
+
+        <div
+          class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
+        >
+          <ion-text> or with your Email</ion-text>
+        </div>
+
+        <form [formGroup]="authFormGroup">
+          <ion-input
+            label="Email"
+            formControlName="email"
+            fill="outline"
+            mode="md"
+            class="ion-margin-top"
+            autocomplete="email"
+            inputmode="email"
+            data-cy="email"
+          />
+
+          <ion-input
+            label="Password"
+            formControlName="password"
+            fill="outline"
+            mode="md"
+            class="ion-margin-top"
+            type="password"
+            data-cy="password"
+          >
+            <ion-input-password-toggle slot="end" color="secondary" />
+          </ion-input>
+
+          <ion-button
+            class="ion-margin-top"
+            fill="outline"
+            expand="block"
+            [disabled]="!authFormGroup.valid"
+            (click)="submitAuth.emit(authFormGroup.value)"
+            data-cy="submit"
+            >Log In
+          </ion-button>
+
+          @if (loginFailed()) {
+            <div class="ion-margin-top">
+              <ion-text color="danger">
+                Something went wrong. Please try again.
+              </ion-text>
+            </div>
+          }
+        </form>
+      </div>
+      <div class="ion-margin-bottom">
+        <div
+          class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
+        >
+          <ion-text> or, if you don't have an account yet:</ion-text>
+        </div>
         <ion-button
-          class="ion-margin-top"
-          expand="block"
-          [disabled]="!authFormGroup.valid"
-          (click)="submitAuth.emit(authFormGroup.value)"
-          data-cy="submit"
-          >Log In
-        </ion-button>
-
-        @if (loginFailed()) {
-          <div class="ion-margin-top">
-            <ion-text color="danger">
-              Something went wrong. Please try again.
-            </ion-text>
-          </div>
-        }
-      </form>
-    </div>
-
-    <ta-card>
-      <div class="ion-margin">
-        <ion-text> If you don't have an account already sign up now.</ion-text>
-
-        <ion-button
-          fill="outline"
           class="ion-margin-top"
           expand="block"
           (click)="signup.emit()"
@@ -87,6 +88,6 @@
           Sign up
         </ion-button>
       </div>
-    </ta-card>
+    </div>
   </ion-content>
 </ta-page>

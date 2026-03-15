@@ -233,7 +233,7 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(MenuActions.saveMenu({ menu }));
   }
 
-  prepareBiteFromMenuItem(bite: Partial<Bite>): void {
+  cacheBite(bite: Partial<Bite>): void {
     this.store.dispatch(BiteActions.cacheBite({ bite }));
   }
 

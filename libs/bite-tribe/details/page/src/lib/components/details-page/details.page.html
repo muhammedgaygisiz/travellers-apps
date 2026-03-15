@@ -1,6 +1,5 @@
 @let biteData = bite(); @let biteCreatorData = biteCreator(); @let uploadData =
 uploadState();
-
 <ta-page
   [showHeaderMenu]="false"
   [showFooter]="false"
@@ -48,6 +47,7 @@ uploadState();
             name="share-social-outline"
             color="primary"
             size="large"
+            class="cursor-pointer"
             (click)="onShareBiteClicked(biteData)"
           />
         </div>
@@ -57,7 +57,7 @@ uploadState();
             name="navigate-outline"
             color="primary"
             size="large"
-            class="ion-margin-start navigate"
+            class="ion-margin-start cursor-pointer"
             (click)="openNavigation()"
           />
         </div>
@@ -118,17 +118,36 @@ uploadState();
           />
         </div>
         }
-        <div class="ion-text-end">
-          <ion-button
-            fill="outline"
-            shape="round"
+        <div class="ion-text-end ion-display-flex">
+          <ion-icon
+            slot="icon-only"
+            color="primary"
+            size="large"
+            class="ion-margin-start icon-button"
+            [name]="biteData | getBucketlistsIcon: bucketlists()"
             (click)="showBucketListsSelection($event)"
-          >
+          />
+          @if (isBucketlistBite()) {
+          <div class="new-bite-container">
             <ion-icon
               slot="icon-only"
-              [name]="biteData | isInAny: bucketlists()"
+              color="primary"
+              size="large"
+              class="ion-margin-start icon-button"
+              name="pizza-outline"
+              (click)="newBite(biteData)"
             />
-          </ion-button>
+            <ion-icon
+              slot="icon-only"
+              color="primary"
+              name="add-outline"
+              aria-hidden="true"
+              tabindex="-1"
+              class="icon-button icon-small-align"
+              (click)="newBite(biteData)"
+            />
+          </div>
+          }
         </div>
       </div>
 

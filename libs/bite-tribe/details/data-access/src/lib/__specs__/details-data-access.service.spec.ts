@@ -49,6 +49,7 @@ describe(DetailsDataAccessService.name, () => {
             submitLikeClick: jest.fn(),
             removeLike: jest.fn(),
             biteIdFromUrl: jest.fn(),
+            cacheBite: jest.fn(),
           },
         },
       ],
@@ -470,6 +471,19 @@ describe(DetailsDataAccessService.name, () => {
         title: 'Test Bite @ Test Place',
         url: 'https://bite-tribe.web.app/s/bite/test-bite-id',
       });
+    });
+  });
+
+  describe('cacheBite', () => {
+    let cacheBiteSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      cacheBiteSpy = jest.spyOn(storeService, 'cacheBite');
+    });
+
+    it('should call cacheBite on store service', () => {
+      service.cacheBite({} as Bite);
+      expect(cacheBiteSpy).toHaveBeenCalled();
     });
   });
 });

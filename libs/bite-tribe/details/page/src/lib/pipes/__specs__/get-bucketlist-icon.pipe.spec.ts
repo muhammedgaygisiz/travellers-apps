@@ -1,8 +1,8 @@
-import { IsInPipe } from '../is-in.pipe';
+import { GetBucketlistIconPipe } from '../get-bucketlist-icon.pipe';
 import type { Bite, Bucketlist } from 'model';
 
-describe('IsInPipe', () => {
-  let pipe: IsInPipe;
+describe('GetBucketlistIconPipe', () => {
+  let pipe: GetBucketlistIconPipe;
 
   const mockBite: Bite = {
     id: 'bite1',
@@ -16,7 +16,7 @@ describe('IsInPipe', () => {
   } as Bucketlist;
 
   beforeEach(() => {
-    pipe = new IsInPipe();
+    pipe = new GetBucketlistIconPipe();
   });
 
   it('should create', () => {

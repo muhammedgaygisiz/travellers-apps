@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BucketListSelectionComponent } from '../bucket-list-selection.component';
 import { Bite, Bucketlist } from 'model';
-import { IsInPipe } from '../../../pipes/is-in.pipe';
+import { GetBucketlistIconPipe } from '../../../pipes/get-bucketlist-icon.pipe';
 import {
   IonAlert,
   IonContent,
@@ -49,7 +49,7 @@ describe('BucketListSelectionComponent', () => {
         IonItem,
         IonIcon,
         IonContent,
-        IsInPipe,
+        GetBucketlistIconPipe,
         IonAlert,
       ],
     }).compileComponents();

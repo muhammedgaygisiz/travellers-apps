@@ -12,7 +12,7 @@ import {
   IonList,
 } from '@ionic/angular/standalone';
 import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
-import { IsInPipe } from '../../pipes/is-in.pipe';
+import { GetBucketlistIconPipe } from '../../pipes/get-bucketlist-icon.pipe';
 
 @Component({
   template: `
@@ -20,13 +20,20 @@ import { IsInPipe } from '../../pipes/is-in.pipe';
       <ion-list lines="none">
         @for (bucketList of bucketLists(); track bucketList) {
           <ion-item [detail]="false" (click)="onBucketlistSelected(bucketList)">
-            <ion-icon slot="start" [name]="bite() | isIn: bucketList" />
+            <ion-icon
+              slot="start"
+              [name]="bite() | getBucketlistIcon: bucketList"
+            />
             {{ bucketList.name }}
           </ion-item>
         }
-        <ion-item [detail]="false" id="preset-new-list-alert">
-          <ion-icon slot="start" name="add-circle-outline" />
-          Create New List
+        <ion-item
+          [detail]="false"
+          id="preset-new-list-alert"
+          class="cursor-pointer"
+        >
+          <ion-icon slot="start" name="add-outline" />
+          New bucketlist
         </ion-item>
         <ion-alert
           trigger="preset-new-list-alert"
@@ -38,7 +45,14 @@ import { IsInPipe } from '../../pipes/is-in.pipe';
     </ion-content>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonList, IonItem, IonIcon, IonContent, IsInPipe, IonAlert],
+  imports: [
+    IonList,
+    IonItem,
+    IonIcon,
+    IonContent,
+    GetBucketlistIconPipe,
+    IonAlert,
+  ],
 })
 export class BucketListSelectionComponent {
   bucketLists = input<Bucketlist[]>([]);

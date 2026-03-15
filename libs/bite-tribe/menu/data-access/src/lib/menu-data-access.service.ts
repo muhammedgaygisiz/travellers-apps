@@ -18,6 +18,6 @@ export class MenuDataAccessService {
   }
 
   prepareBiteFromMenuItem(biteToBeCreated: Partial<Bite>): void {
-    this.storeService.prepareBiteFromMenuItem(biteToBeCreated);
+    this.storeService.cacheBite(biteToBeCreated);
   }
 }

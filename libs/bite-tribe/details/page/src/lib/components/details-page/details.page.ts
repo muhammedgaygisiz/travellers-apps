@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   output,
@@ -36,7 +37,7 @@ import { TimeAgoPipe } from './pipes/time-ago.pipe';
 import { RoundDistancePipe, ToMetricPipe } from 'common/distance';
 import { MapComponent } from 'bite-tribe-common/map';
 import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';
-import { IsInPipe } from '../../pipes/is-in-any.pipe';
+import { GetBucketlistsIconPipe } from '../../pipes/get-bucketlists-icon.pipe';
 import { GetImagePipe, LikesComponent } from 'bite-tribe-common/bite';
 import { Platform } from '@ionic/angular';
 import { AppLauncher } from '@capacitor/app-launcher';
@@ -68,7 +69,7 @@ import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-cur
     ToMetricPipe,
     MapComponent,
     IonIcon,
-    IsInPipe,
+    GetBucketlistsIconPipe,
     LikesComponent,
     StarRatingComponent,
     TagsInputComponent,
@@ -101,6 +102,7 @@ export class DetailsPage {
   readonly restaurantClick = output<Bite>();
   readonly goToProfile = output<PublicUser>();
   readonly gotoEdit = output<Bite>();
+  readonly gotoNew = output<Bite>();
 
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);
@@ -119,6 +121,16 @@ export class DetailsPage {
     ),
     { initialValue: !this.reviewFormGroup.valid },
   );
+
+  isBucketlistBite = computed(() => {
+    const biteId = this.bite()?.id;
+    const bucketlists = this.bucketlists() || [];
+    if (!biteId) {
+      return false;
+    }
+
+    return bucketlists.some((list) => list.biteIds?.includes(biteId));
+  });
 
   saveReview(): void {
     if (!this.reviewFormGroup.valid) {
@@ -148,6 +160,14 @@ export class DetailsPage {
     }
 
     this.gotoEdit.emit(bite);
+  }
+
+  newBite(bite: Bite | undefined): void {
+    if (!bite) {
+      return;
+    }
+
+    this.gotoNew.emit(bite);
   }
 
   onNewList(newListName: string): void {

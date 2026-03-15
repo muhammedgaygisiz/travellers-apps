@@ -12,14 +12,12 @@ import {
 } from '@angular/forms';
 import { getPasswordValidators } from 'common/password-validator';
 import { PageComponent } from 'common/ui/page';
-import { CardComponent } from 'common/ui/card';
 import {
   IonButton,
   IonContent,
   IonIcon,
   IonInput,
   IonInputPasswordToggle,
-  IonItem,
   IonText,
 } from '@ionic/angular/standalone';
 import { Credentials } from '../../api/credentials.model';
@@ -35,7 +33,6 @@ interface AuthCredentialFields {
   styleUrls: ['login.component.scss'],
   imports: [
     PageComponent,
-    CardComponent,
     ReactiveFormsModule,
     IonButton,
     IonIcon,

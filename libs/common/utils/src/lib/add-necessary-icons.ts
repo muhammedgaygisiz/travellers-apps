@@ -45,6 +45,10 @@ import {
   searchOutline,
   shareSocialOutline,
   storefrontOutline,
+  shieldCheckmarkOutline,
+  flameOutline,
+  listOutline,
+  arrowForwardOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = (): void => {
@@ -94,5 +98,9 @@ export const addNecessaryIcons = (): void => {
     searchOutline,
     shareSocialOutline,
     storefrontOutline,
+    shieldCheckmarkOutline,
+    flameOutline,
+    listOutline,
+    arrowForwardOutline,
   });
 };

@@ -9,7 +9,7 @@
     <div class="ion-margin-top">
       @if (biteTrails(); as trails) { @for (biteTrail of trails; track
       biteTrail.id) {
-      <div>{{ biteTrail.name }}</div>
+      <bite-trail [biteTrail]="biteTrail" />
       } }
     </div>
   </ion-content>

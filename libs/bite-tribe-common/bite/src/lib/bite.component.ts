@@ -22,7 +22,6 @@ import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-ca
 import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
 import { DistanceComponent } from 'common/distance';
-import { UploadFileCallbackEvent } from '@capacitor-firebase/storage/dist/esm/definitions';
 import { GetImagePipe } from './pipes/get-image.pipe';
 import { AsyncPipe } from '@angular/common';
 

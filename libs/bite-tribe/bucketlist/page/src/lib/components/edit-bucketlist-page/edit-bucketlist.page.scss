@@ -1,6 +1,12 @@
+@use 'globals';
+
 :host {
   ion-input {
-    margin-top: 1.5rem;
+    @include globals.input-styles;
+
+    &.ion-margin-top {
+      margin-top: 1.5rem;
+    }
   }
 
   ion-button[expand='block'] {

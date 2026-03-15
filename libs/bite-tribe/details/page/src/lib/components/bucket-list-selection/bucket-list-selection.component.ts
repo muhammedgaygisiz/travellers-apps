@@ -33,7 +33,7 @@ import { GetBucketlistIconPipe } from '../../pipes/get-bucketlist-icon.pipe';
           class="cursor-pointer"
         >
           <ion-icon slot="start" name="add-outline" />
-          New bucketlist
+          New Bucket list
         </ion-item>
         <ion-alert
           trigger="preset-new-list-alert"

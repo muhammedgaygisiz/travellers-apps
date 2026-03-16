@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { BiteTrail } from 'model';
 import {
   IonAvatar,
@@ -34,4 +39,6 @@ import { DecimalPipe, UpperCasePipe } from '@angular/common';
 })
 export class BiteTrailComponent {
   biteTrail = input.required<BiteTrail>();
+
+  goToProfile = output<string>();
 }

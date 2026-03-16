@@ -1,0 +1,111 @@
+import { TestBed } from '@angular/core/testing';
+import { BiteTrailService } from '../bite-trail.service';
+import { BiteTrailDataAccessService } from 'bite-tribe/bite-trail-data-access';
+import { NavController } from '@ionic/angular/standalone';
+import { signal } from '@angular/core';
+import type { Bite, Like } from 'model';
+import { PATH } from 'utils';
+
+const mockNavigateForward = jest.fn();
+const mockDataAccess = {
+  sortedBites: signal<Bite[]>([]),
+  biteTrailName: signal('Test Trail'),
+  sorting: signal('distance'),
+  userId: signal('user-1'),
+  isAuthenticated: signal(true),
+  biteTrailIdFromUrl: signal<string | undefined>('trail-1'),
+  setSorting: jest.fn(),
+  setFilters: jest.fn(),
+  clearFilters: jest.fn(),
+};
+
+describe(BiteTrailService.name, () => {
+  let service: BiteTrailService;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    TestBed.configureTestingModule({
+      providers: [
+        BiteTrailService,
+        { provide: BiteTrailDataAccessService, useValue: mockDataAccess },
+        {
+          provide: NavController,
+          useValue: { navigateForward: mockNavigateForward },
+        },
+      ],
+    });
+    service = TestBed.inject(BiteTrailService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  describe('biteClicked', () => {
+    it('should navigate to the bite page', () => {
+      const bite = { id: 'bite-123' } as Bite;
+      service.biteClicked(bite);
+      expect(mockNavigateForward).toHaveBeenCalledWith([PATH.BITE, 'bite-123']);
+    });
+  });
+
+  describe('restaurantClicked', () => {
+    it('should navigate with restaurantId extracted from restaurantId path', () => {
+      const bite = {
+        id: 'bite-1',
+        restaurantId: 'restaurants/col/rest-1',
+        place: 'Test',
+      } as Bite;
+      service.restaurantClicked(bite);
+      expect(mockNavigateForward).toHaveBeenCalledWith([
+        PATH.BITE,
+        'bite-1',
+        PATH.RESTAURANT,
+        'rest-1',
+      ]);
+    });
+
+    it('should navigate with encoded place name when no restaurantId', () => {
+      const bite = { id: 'bite-1', place: 'Nice Place' } as Bite;
+      service.restaurantClicked(bite);
+      expect(mockNavigateForward).toHaveBeenCalledWith([
+        PATH.BITE,
+        'bite-1',
+        PATH.RESTAURANT,
+        encodeURIComponent('Nice Place'),
+      ]);
+    });
+  });
+
+  describe('likeButtonClicked', () => {
+    it('should not throw when called', () => {
+      expect(() => service.likeButtonClicked({} as Like)).not.toThrow();
+    });
+  });
+
+  describe('sortingChange', () => {
+    it('should call dataAccess.setSorting', () => {
+      service.sortingChange('rating');
+      expect(mockDataAccess.setSorting).toHaveBeenCalledWith('rating');
+    });
+  });
+
+  describe('openMapView', () => {
+    it('should navigate to map view when biteTrailId is set', () => {
+      service.openMapView();
+      expect(mockNavigateForward).toHaveBeenCalledWith([
+        PATH.BITE_TRAIL,
+        'trail-1',
+        'map-view',
+      ]);
+    });
+
+    it('should not navigate when biteTrailId is undefined', () => {
+      mockDataAccess.biteTrailIdFromUrl.set(undefined);
+      service.openMapView();
+      expect(mockNavigateForward).not.toHaveBeenCalled();
+      // Restore
+      mockDataAccess.biteTrailIdFromUrl.set('trail-1');
+    });
+  });
+});

@@ -4,6 +4,7 @@ import { BiteTrailService } from '../bite-trail.service';
 import { signal } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 jest.mock('localization');
 jest.mock('@capacitor-firebase/analytics', () => ({
@@ -40,5 +41,16 @@ describe(BiteTrailContainerComponent.name, () => {
   it('should create', () => {
     const fixture = TestBed.createComponent(BiteTrailContainerComponent);
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  describe('ionViewDidEnter', () => {
+    it('should set current screen to Bite Trail', () => {
+      jest.spyOn(FirebaseAnalytics, 'setCurrentScreen');
+      const fixture = TestBed.createComponent(BiteTrailContainerComponent);
+      fixture.componentInstance.ionViewDidEnter();
+      expect(FirebaseAnalytics.setCurrentScreen).toHaveBeenCalledWith({
+        screenName: 'Bite Trail',
+      });
+    });
   });
 });

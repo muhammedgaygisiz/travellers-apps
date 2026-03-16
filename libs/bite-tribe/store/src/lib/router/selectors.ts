@@ -32,3 +32,8 @@ export const followType = createSelector(
   selectRouteParams,
   (params) => params?.['type'],
 );
+
+export const biteTrailId = createSelector(
+  selectRouteParams,
+  (params) => params?.['biteTrailId'],
+);

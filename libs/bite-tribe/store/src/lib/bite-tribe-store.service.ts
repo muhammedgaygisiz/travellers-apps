@@ -77,6 +77,7 @@ import { getActionByDocType } from './utils/get-action-by-doc-type';
 import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
 import {
   biteId as biteIdFromUrl,
+  biteTrailId as biteTrailIdFromUrlSelector,
   followType,
   userId as userIdFromUrl,
 } from './router/selectors';
@@ -141,6 +142,7 @@ export class BiteTribeStoreService implements StoreService {
   type$ = this.store.select(followType);
   userIdFromUrl$ = this.store.select(userIdFromUrl);
   biteIdFromUrl$ = this.store.select(biteIdFromUrl);
+  biteTrailIdFromUrl$ = this.store.select(biteTrailIdFromUrlSelector);
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);
@@ -149,6 +151,7 @@ export class BiteTribeStoreService implements StoreService {
   type = toSignal(this.type$);
   userIdFromUrl = toSignal(this.userIdFromUrl$);
   biteIdFromUrl = toSignal(this.biteIdFromUrl$);
+  biteTrailIdFromUrl = toSignal(this.biteTrailIdFromUrl$);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());

@@ -1,0 +1,28 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bite-trail-header-container {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 16px 0;
+  background: var(--ion-background-color, #fff);
+  z-index: 10;
+  width: 100%;
+}
+
+.subheadline {
+  h4 {
+    margin: 0 0 4px;
+  }
+}
+
+.chip-sort-filter-container {
+  gap: 8px;
+}
+
+.bite-trail-scrolling-content-container {
+  margin-top: 100px;
+}

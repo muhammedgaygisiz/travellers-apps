@@ -93,14 +93,20 @@
           class="price-row ion-display-flex ion-flex-row ion-align-items-center ion-margin-top"
         >
           <div class="ion-flex-1 ion-display-flex ion-align-items-center">
+            @if (biteTrailData.price === 0) {
+            <ion-text color="success">
+              <h1>Free</h1>
+            </ion-text>
+            } @else {
             <ion-text class="ion-margin-horizontal" color="secondary">
               <h2>{{ biteTrailData.currency | uppercase }}</h2>
             </ion-text>
             <ion-text color="secondary"
               ><h1>{{ biteTrailData.price | number:'1.2-2' }}</h1></ion-text
             >
+            }
           </div>
-          <ion-button shape="round">
+          <ion-button shape="round" (click)="viewBiteTrail.emit(biteTrailData)">
             View BiteTrail
             <ion-icon name="arrow-forward-outline" />
           </ion-button>

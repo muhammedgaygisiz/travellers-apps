@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { BiteTrail } from 'model';
 import {
   IonAvatar,
@@ -11,6 +16,7 @@ import {
   IonIcon,
   IonText,
 } from '@ionic/angular/standalone';
+import { DecimalPipe, UpperCasePipe } from '@angular/common';
 
 @Component({
   selector: 'bite-trail',
@@ -24,6 +30,8 @@ import {
     IonIcon,
     IonBadge,
     IonButton,
+    UpperCasePipe,
+    DecimalPipe,
   ],
   templateUrl: 'bite-trail.html',
   styleUrl: 'bite-trail.scss',
@@ -31,4 +39,6 @@ import {
 })
 export class BiteTrailComponent {
   biteTrail = input.required<BiteTrail>();
+
+  goToProfile = output<string>();
 }

@@ -9,7 +9,10 @@
     <div class="ion-margin-top">
       @if (biteTrails(); as trails) { @for (biteTrail of trails; track
       biteTrail.id) {
-      <bite-trail [biteTrail]="biteTrail" />
+      <bite-trail
+        [biteTrail]="biteTrail"
+        (goToProfile)="service.onGoToProfileClick($event)"
+      />
       } }
     </div>
   </ion-content>

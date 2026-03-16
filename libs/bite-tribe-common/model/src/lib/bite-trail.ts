@@ -8,6 +8,8 @@ export interface BiteTrail {
   ownerName: string;
   location: string;
   description: string;
+  price: number;
+  currency: string;
 
   createdAt?: string;
   createdAtTimestamp?: number;

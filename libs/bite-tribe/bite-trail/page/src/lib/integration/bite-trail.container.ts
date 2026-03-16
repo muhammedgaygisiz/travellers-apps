@@ -17,7 +17,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (restaurantClick)="service.restaurantClicked($event)"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (sortingChange)="service.sortingChange($event)"
-      (openMapView)="service.openMapView(service.getBiteTrailId())"
+      (openMapView)="service.openMapView()"
     />
   `,
   imports: [BiteTrailBitesPage],

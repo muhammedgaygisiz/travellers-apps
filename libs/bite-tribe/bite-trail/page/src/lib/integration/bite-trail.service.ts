@@ -14,6 +14,7 @@ export class BiteTrailService {
   sorting = this.dataAccess.sorting;
   userId = this.dataAccess.userId;
   isAuthenticated = this.dataAccess.isAuthenticated;
+  biteTrailId = this.dataAccess.biteTrailIdFromUrl;
 
   biteClicked(bite: Bite): void {
     this.navController.navigateForward([PATH.BITE, bite.id]);
@@ -49,7 +50,9 @@ export class BiteTrailService {
     this.dataAccess.setSorting(sorting);
   }
 
-  openMapView(biteTrailId: string | undefined): void {
+  openMapView(): void {
+    const biteTrailId = this.biteTrailId();
+
     if (!biteTrailId) {
       return;
     }
@@ -59,9 +62,5 @@ export class BiteTrailService {
       biteTrailId,
       'map-view',
     ]);
-  }
-
-  getBiteTrailId(): string | undefined {
-    return this.dataAccess.biteTrail.value()?.id;
   }
 }

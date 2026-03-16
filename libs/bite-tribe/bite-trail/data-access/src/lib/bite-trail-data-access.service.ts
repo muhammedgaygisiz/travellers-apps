@@ -30,6 +30,7 @@ export class BiteTrailDataAccessService {
     initialValue: false,
   });
   gpsPosition = toSignal(this.storeService.position$);
+  biteTrailIdFromUrl = this.storeService.biteTrailIdFromUrl;
 
   biteTrailLoader: ResourceLoader<
     BiteTrail | undefined,
@@ -132,12 +133,8 @@ export class BiteTrailDataAccessService {
     this._sorting.set(sorting);
   }
 
-  setFilters(filters: {
-    tagFilters: string[];
-    distanceFilter: string;
-    priceFilter: number;
-  }): void {
-    this._tagFilters.set(filters.tagFilters);
+  setFilters(tagFilters: string[]): void {
+    this._tagFilters.set(tagFilters);
   }
 
   clearFilters(): void {

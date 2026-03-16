@@ -45,11 +45,7 @@ describe(BiteTrailDataAccessService.name, () => {
 
   describe('setFilters', () => {
     it('should update tag filters', () => {
-      service.setFilters({
-        tagFilters: ['pizza', 'italian'],
-        distanceFilter: '',
-        priceFilter: 0,
-      });
+      service.setFilters(['pizza', 'italian']);
 
       expect(service.tagFilters()).toEqual(['pizza', 'italian']);
     });
@@ -57,11 +53,7 @@ describe(BiteTrailDataAccessService.name, () => {
 
   describe('clearFilters', () => {
     it('should reset tag filters to empty', () => {
-      service.setFilters({
-        tagFilters: ['pizza'],
-        distanceFilter: '',
-        priceFilter: 0,
-      });
+      service.setFilters(['pizza']);
       service.clearFilters();
 
       expect(service.tagFilters()).toEqual([]);

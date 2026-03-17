@@ -41,8 +41,12 @@
               <ion-text color="secondary" class="cursor-pointer">
                 <p>
                   by
-                  <ion-text color="primary"
-                    >&#64;{{ biteTrailData.ownerName }}
+                  <ion-text
+                    color="primary"
+                    class="cursor-pointer"
+                    (click)="goToProfile.emit(biteTrailData.ownerId)"
+                  >
+                    &#64;{{ biteTrailData.ownerName }}
                   </ion-text>
                 </p>
               </ion-text>
@@ -89,10 +93,12 @@
           class="price-row ion-display-flex ion-flex-row ion-align-items-center ion-margin-top"
         >
           <div class="ion-flex-1 ion-display-flex ion-align-items-center">
-            <ion-text class="ion-margin-horizontal" color="secondary"
-              ><h2>CHF</h2></ion-text
+            <ion-text class="ion-margin-horizontal" color="secondary">
+              <h2>{{ biteTrailData.currency | uppercase }}</h2>
+            </ion-text>
+            <ion-text color="secondary"
+              ><h1>{{ biteTrailData.price | number:'1.2-2' }}</h1></ion-text
             >
-            <ion-text color="secondary"><h1>4.90</h1></ion-text>
           </div>
           <ion-button shape="round">
             View BiteTrail

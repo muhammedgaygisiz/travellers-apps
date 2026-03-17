@@ -4,7 +4,6 @@ import {
   Injectable,
   resource,
   ResourceLoader,
-  signal,
 } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { Bite, BiteTrail, Geopoint } from 'model';

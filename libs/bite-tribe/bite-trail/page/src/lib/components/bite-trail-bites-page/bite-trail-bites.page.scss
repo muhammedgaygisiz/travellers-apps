@@ -1,28 +1,55 @@
 :host {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.bite-trail-header-container {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 16px 0;
-  background: var(--ion-background-color, #fff);
-  z-index: 10;
-  width: 100%;
-}
-
-.subheadline {
   h4 {
-    margin: 0 0 4px;
+    margin-left: 1rem;
+    margin-bottom: 0.5rem;
   }
-}
 
-.chip-sort-filter-container {
-  gap: 8px;
-}
+  ion-chip {
+    --background: var(--background-color);
+    border: 1px solid var(--border-color);
 
-.bite-trail-scrolling-content-container {
-  margin-top: 100px;
+    ion-icon {
+      margin-left: 0;
+      margin-right: 0.5rem;
+      fill: transparent;
+      stroke: var(--ion-color-secondary);
+    }
+  }
+
+  .bite-trail-header-container {
+    width: 100%;
+
+    &:before {
+      position: absolute;
+      z-index: -1;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 68px;
+      border-bottom: 1px solid var(--border-color);
+      content: '';
+      background-color: var(--ion-background-color);
+    }
+
+    .chip-map-sort-container {
+      position: relative;
+
+      margin-bottom: 1rem;
+
+      .chip-container {
+        ion-chip {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  .bite-trail-scrolling-content-container {
+    padding-top: 80px;
+  }
+
+  bt-bite {
+    display: block;
+    margin-bottom: 1rem;
+  }
 }

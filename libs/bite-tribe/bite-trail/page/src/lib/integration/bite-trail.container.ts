@@ -11,12 +11,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       class="ion-page"
       [bites]="service.bites()"
       [title]="service.title()"
-      [sorting]="service.sorting()"
       [userId]="service.userId()"
       (biteClick)="service.biteClicked($event)"
       (restaurantClick)="service.restaurantClicked($event)"
-      (likeButtonClick)="service.likeButtonClicked($event)"
-      (sortingChange)="service.sortingChange($event)"
       (openMapView)="service.openMapView()"
     />
   `,

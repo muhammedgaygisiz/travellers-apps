@@ -10,33 +10,19 @@
       </ion-text>
 
       <div
-        class="chip-sort-filter-container ion-display-flex ion-flex-row ion-justify-content-center ion-margin-bottom"
+        class="chip-map-sort-container ion-display-flex ion-flex-row ion-justify-content-center"
       >
-        <ion-chip (click)="openMapView.emit()">
-          <ion-icon name="map-outline" />
-          <ion-text color="secondary">Map</ion-text>
-        </ion-chip>
-
-        <ion-chip id="select-sorting">
-          <ion-select
-            interface="modal"
-            toggleIcon="chevron-down-outline"
-            [value]="sorting()"
-            [placeholder]="sortingLabel()"
-            (ionChange)="emitSortingChange($event)"
-          >
-            <ion-select-option value="distance">Distance</ion-select-option>
-            <ion-select-option value="createdAt">Date</ion-select-option>
-            <ion-select-option value="likes">Likes</ion-select-option>
-            <ion-select-option value="rating">Rating</ion-select-option>
-            <ion-select-option value="price">Price</ion-select-option>
-          </ion-select>
-        </ion-chip>
+        <div class="chip-container ion-display-flex ion-wrap">
+          <ion-chip (click)="openMapView.emit()">
+            <ion-icon name="map-outline" />
+            <ion-text color="secondary">Map</ion-text>
+          </ion-chip>
+        </div>
       </div>
     </div>
 
     <div class="bite-trail-scrolling-content-container">
-      @if (!bites()?.length) {
+      @if (!bites().length) {
       <ion-card>
         <ion-card-content>
           <ion-text color="primary">No bites found in this trail.</ion-text>
@@ -48,7 +34,6 @@
         [userId]="userId()"
         (biteClick)="biteClick.emit($event)"
         (restaurantClick)="restaurantClick.emit($event)"
-        (likeButtonClick)="likeButtonClick.emit($event)"
       />
       }
     </div>

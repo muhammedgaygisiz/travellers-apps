@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   input,
   output,
 } from '@angular/core';
@@ -12,11 +11,9 @@ import {
   IonChip,
   IonContent,
   IonIcon,
-  IonSelect,
-  IonSelectOption,
   IonText,
 } from '@ionic/angular/standalone';
-import type { Bite, Like } from 'model';
+import type { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 
 @Component({
@@ -30,8 +27,6 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonChip,
     IonIcon,
     IonText,
-    IonSelect,
-    IonSelectOption,
     IonCard,
     IonCardContent,
     BiteComponent,
@@ -40,37 +35,9 @@ import { BiteComponent } from 'bite-tribe-common/bite';
 export class BiteTrailBitesPage {
   bites = input<Bite[]>([]);
   title = input('');
-  sorting = input<string>('distance');
   userId = input<string>();
 
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();
-  readonly likeButtonClick = output<Like>();
-  readonly sortingChange = output<string>();
   readonly openMapView = output<void>();
-
-  sortingLabel = computed(() => {
-    const sorting = this.sorting();
-
-    switch (sorting) {
-      case 'distance':
-        return 'Distance';
-      case 'likes':
-        return 'Likes';
-      case 'createdAt':
-        return 'Date';
-      case 'price':
-        return 'Price';
-      case 'rating':
-        return 'Rating';
-      default:
-        return 'Distance';
-    }
-  });
-
-  emitSortingChange(event: { detail: { value: string } }): void {
-    if (event.detail) {
-      this.sortingChange.emit(event.detail.value);
-    }
-  }
 }

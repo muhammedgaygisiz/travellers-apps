@@ -12,7 +12,7 @@ export class MapService {
 
   bites = this.dataAccess.bites;
   bitesBySelectedBucketlist = this.dataAccess.bitesBySelectedBucketlist;
-  bitesByBiteTrail = this.biteTrailDataAccess.sortedBites;
+  bitesByBiteTrail = this.biteTrailDataAccess.bitesWithDistance;
   myBites = this.dataAccess.myBites;
   isAuthenticated = this.dataAccess.isAuthenticated;
 

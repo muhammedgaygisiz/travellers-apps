@@ -9,22 +9,21 @@ export class BiteTrailService {
   private readonly dataAccess = inject(BiteTrailDataAccessService);
   private readonly navController = inject(NavController);
 
-  bites = this.dataAccess.sortedBites;
+  bites = this.dataAccess.bitesWithDistance;
   title = this.dataAccess.biteTrailName;
-  sorting = this.dataAccess.sorting;
   userId = this.dataAccess.userId;
   isAuthenticated = this.dataAccess.isAuthenticated;
   biteTrailId = this.dataAccess.biteTrailIdFromUrl;
 
   biteClicked(bite: Bite): void {
-    this.navController.navigateForward([PATH.BITE, bite.id]);
+    void this.navController.navigateForward([PATH.BITE, bite.id]);
   }
 
   restaurantClicked(bite: Bite): void {
     if (bite.restaurantId) {
       const [, , restaurantId] = bite.restaurantId.split('/');
 
-      this.navController.navigateForward([
+      void this.navController.navigateForward([
         PATH.BITE,
         bite.id,
         PATH.RESTAURANT,
@@ -34,20 +33,12 @@ export class BiteTrailService {
       return;
     }
 
-    this.navController.navigateForward([
+    void this.navController.navigateForward([
       PATH.BITE,
       bite.id,
       PATH.RESTAURANT,
       encodeURIComponent(bite.place),
     ]);
-  }
-
-  likeButtonClicked(_like: Like): void {
-    // Like functionality is read-only for bite trail bites
-  }
-
-  sortingChange(sorting: string): void {
-    this.dataAccess.setSorting(sorting);
   }
 
   openMapView(): void {

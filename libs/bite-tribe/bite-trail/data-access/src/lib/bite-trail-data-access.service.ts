@@ -19,12 +19,6 @@ const BITE_COLLECTION = 'bites';
 export class BiteTrailDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
-  private readonly _sorting = signal<string>('distance');
-  private readonly _tagFilters = signal<string[]>([]);
-
-  sorting = this._sorting.asReadonly();
-  tagFilters = this._tagFilters.asReadonly();
-
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
@@ -118,68 +112,4 @@ export class BiteTrailDataAccessService {
         }) as Bite,
     );
   });
-
-  sortedBites = computed(() => {
-    const bites = this.bitesWithDistance();
-    const sorting = this._sorting();
-    const tagFilters = this._tagFilters();
-
-    const filtered = this.applyTagFilters(bites, tagFilters);
-
-    return this.sortBites(filtered, sorting);
-  });
-
-  setSorting(sorting: string): void {
-    this._sorting.set(sorting);
-  }
-
-  setFilters(tagFilters: string[]): void {
-    this._tagFilters.set(tagFilters);
-  }
-
-  clearFilters(): void {
-    this._tagFilters.set([]);
-  }
-
-  private applyTagFilters(bites: Bite[], tagFilters: string[]): Bite[] {
-    if (!tagFilters.length) {
-      return bites;
-    }
-
-    return bites.filter((bite) => {
-      const tags = bite.tags ?? [];
-
-      return tagFilters.every((filter) =>
-        tags.some((tag) => tag.toLowerCase().includes(filter.toLowerCase())),
-      );
-    });
-  }
-
-  private sortBites(bites: Bite[], sorting: string): Bite[] {
-    const sorted = [...bites];
-
-    switch (sorting) {
-      case 'distance':
-        return sorted.sort((a, b) => {
-          const da = a.distance ? parseFloat(a.distance) : Infinity;
-          const db = b.distance ? parseFloat(b.distance) : Infinity;
-
-          return da - db;
-        });
-      case 'likes':
-        return sorted.sort(
-          (a, b) => (b.likes?.length ?? 0) - (a.likes?.length ?? 0),
-        );
-      case 'createdAt':
-        return sorted.sort(
-          (a, b) => (b.createdAtTimestamp ?? 0) - (a.createdAtTimestamp ?? 0),
-        );
-      case 'rating':
-        return sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-      case 'price':
-        return sorted.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-      default:
-        return sorted;
-    }
-  }
 }

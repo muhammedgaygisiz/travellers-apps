@@ -8,14 +8,10 @@ import { PATH } from 'utils';
 
 const mockNavigateForward = jest.fn();
 const mockDataAccess = {
-  sortedBites: signal<Bite[]>([]),
   biteTrailName: signal('Test Trail'),
-  sorting: signal('distance'),
   userId: signal('user-1'),
   isAuthenticated: signal(true),
   biteTrailIdFromUrl: signal<string | undefined>('trail-1'),
-  setSorting: jest.fn(),
-  setFilters: jest.fn(),
   clearFilters: jest.fn(),
 };
 

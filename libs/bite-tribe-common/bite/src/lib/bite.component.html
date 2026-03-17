@@ -60,7 +60,7 @@
           }
         </div>
 
-        @if (!showEditButton()) {
+        @if (!showEditButton() && !readonly()) {
           <bt-likes
             class="ion-margin-top"
             [bite]="biteData"

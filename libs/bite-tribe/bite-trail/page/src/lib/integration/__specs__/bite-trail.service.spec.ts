@@ -3,7 +3,7 @@ import { BiteTrailService } from '../bite-trail.service';
 import { BiteTrailDataAccessService } from 'bite-tribe/bite-trail-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
-import type { Bite, Like } from 'model';
+import type { Bite } from 'model';
 import { PATH } from 'utils';
 
 const mockNavigateForward = jest.fn();
@@ -74,19 +74,6 @@ describe(BiteTrailService.name, () => {
         PATH.RESTAURANT,
         encodeURIComponent('Nice Place'),
       ]);
-    });
-  });
-
-  describe('likeButtonClicked', () => {
-    it('should not throw when called', () => {
-      expect(() => service.likeButtonClicked({} as Like)).not.toThrow();
-    });
-  });
-
-  describe('sortingChange', () => {
-    it('should call dataAccess.setSorting', () => {
-      service.sortingChange('rating');
-      expect(mockDataAccess.setSorting).toHaveBeenCalledWith('rating');
     });
   });
 

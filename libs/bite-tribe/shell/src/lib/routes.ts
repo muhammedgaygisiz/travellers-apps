@@ -151,6 +151,21 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: `${PATH.BITE_TRAIL}/:biteTrailId`,
+    loadComponent: () =>
+      import('bite-tribe/bite-trail').then(
+        (m) => m.BiteTrailContainerComponent,
+      ),
+    title: 'Bite Trail',
+    canActivate: [authGuard],
+  },
+  {
+    path: `${PATH.BITE_TRAIL}/:biteTrailId/map-view`,
+    loadComponent: () =>
+      import('bite-tribe/map').then((m) => m.BiteTrailMapContainerComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: PATH.PRIVACY_POLICY,
     loadComponent: () =>
       import('bite-tribe/privacy-policy').then((m) => m.PrivacyPolicy),

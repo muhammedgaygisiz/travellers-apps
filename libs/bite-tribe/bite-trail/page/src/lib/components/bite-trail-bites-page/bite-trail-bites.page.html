@@ -1,0 +1,42 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+  [enableBackButton]="true"
+>
+  <ion-content class="ion-padding">
+    <div class="bite-trail-header-container" slot="fixed">
+      <ion-text color="secondary" class="subheadline">
+        <h4>{{ title() }}</h4>
+      </ion-text>
+
+      <div
+        class="chip-map-sort-container ion-display-flex ion-flex-row ion-justify-content-center"
+      >
+        <div class="chip-container ion-display-flex ion-flex-wrap">
+          <ion-chip (click)="openMapView.emit()">
+            <ion-icon name="map-outline" />
+            <ion-text color="secondary">Bitemap</ion-text>
+          </ion-chip>
+        </div>
+      </div>
+    </div>
+
+    <div class="bite-trail-scrolling-content-container">
+      @if (!bites().length) {
+      <ion-card>
+        <ion-card-content>
+          <ion-text color="primary">No bites found in this trail.</ion-text>
+        </ion-card-content>
+      </ion-card>
+      } @for (bite of bites(); track bite.id) {
+      <bt-bite
+        [bite]="bite"
+        [userId]="userId()"
+        [readonly]="true"
+        (biteClick)="biteClick.emit($event)"
+        (restaurantClick)="restaurantClick.emit($event)"
+      />
+      }
+    </div>
+  </ion-content>
+</ta-page>

@@ -1,15 +1,18 @@
-import { computed, inject, Injectable, Signal } from '@angular/core';
+import { inject, Injectable, Signal } from '@angular/core';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { Bite, Geopoint, Like } from 'model';
+import { BiteTrailDataAccessService } from 'bite-tribe/bite-trail-data-access';
 
 @Injectable({ providedIn: 'root' })
 export class MapService {
   dataAccess = inject(MapDataAccessService);
+  private readonly biteTrailDataAccess = inject(BiteTrailDataAccessService);
   private readonly navController = inject(NavController);
 
   bites = this.dataAccess.bites;
   bitesBySelectedBucketlist = this.dataAccess.bitesBySelectedBucketlist;
+  bitesByBiteTrail = this.biteTrailDataAccess.bitesWithDistance;
   myBites = this.dataAccess.myBites;
   isAuthenticated = this.dataAccess.isAuthenticated;
 

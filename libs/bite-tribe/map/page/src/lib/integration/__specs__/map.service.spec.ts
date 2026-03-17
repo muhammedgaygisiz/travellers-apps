@@ -4,6 +4,7 @@ import { NavController } from '@ionic/angular/standalone';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { MapService } from '../map.service';
 import type { Bite, Bucketlist, Geopoint, Like } from 'model';
+import { BiteTrailDataAccessService } from 'bite-tribe/bite-trail-data-access';
 
 describe(MapService.name, () => {
   let service: MapService;
@@ -52,6 +53,11 @@ describe(MapService.name, () => {
       selectedBucketlist: signal(mockBucketlist),
       gpsPosition: signal(mockGeopoint),
       userId: signal('user1'),
+      userHasSubscriptionTierOne: signal(false),
+    };
+
+    const biteTrailDataAccessMock = {
+      sortedBites: signal([]),
     };
 
     const navControllerMock = {
@@ -62,6 +68,10 @@ describe(MapService.name, () => {
       providers: [
         MapService,
         { provide: MapDataAccessService, useValue: dataAccessMock },
+        {
+          provide: BiteTrailDataAccessService,
+          useValue: biteTrailDataAccessMock,
+        },
         { provide: NavController, useValue: navControllerMock },
       ],
     });

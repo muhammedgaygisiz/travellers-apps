@@ -42,8 +42,12 @@
         <h4>{{ title() }}</h4>
       </ion-text>
 
-      <div class="chip-sort-filter-container">
-        <div class="filter-container">
+      <div
+        class="chip-sort-filter-container ion-display-flex ion-flex-row ion-justify-content-center"
+      >
+        <div
+          class="filter-container ion-display-flex ion-flex-row ion-align-items-center"
+        >
           <ion-chip id="select-tags">
             <ion-icon src="assets/custom-icons/filter.svg" class="icon" />
             @if (selectedFilters().length > 0 || distance()) {
@@ -53,14 +57,16 @@
           </ion-chip>
         </div>
 
-        <div class="chip-container">
+        <div class="chip-container ion-display-flex ion-flex-wrap">
           <ion-chip (click)="openMapView.emit()">
             <ion-icon src="assets/custom-icons/map.svg" />
             <ion-text color="secondary">Bitemap</ion-text>
           </ion-chip>
         </div>
 
-        <div class="sort-container">
+        <div
+          class="sort-container ion-display-flex ion-flex-row ion-align-items-center"
+        >
           <ion-chip id="select-sorting">
             <ion-select
               interface="modal"
@@ -110,7 +116,7 @@
   @defer (when !isBitesLoading()) {
     <ng-container *ngTemplateOutlet="withoutLoadingTemplate" />
   } @placeholder (minimum 1000ms) {
-    <div class="spinner-container">
+    <div class="spinner-container ion-display-flex ion-justify-content-center">
       <ion-spinner color="primary" />
     </div>
   }

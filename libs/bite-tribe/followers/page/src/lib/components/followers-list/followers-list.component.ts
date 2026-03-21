@@ -5,7 +5,6 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   IonAlert,
   IonAvatar,
@@ -29,7 +28,6 @@ const CANCEL = 'cancel';
   selector: 'followers-list',
   standalone: true,
   imports: [
-    CommonModule,
     IonContent,
     IonList,
     IonItem,

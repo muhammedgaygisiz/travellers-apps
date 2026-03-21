@@ -7,6 +7,7 @@ export interface PublicUser {
   about?: string;
   public?: boolean;
   subscriptionTier?: number;
+  isBusiness?: boolean;
 
   createdAt?: string;
   createdAtTimestamp?: number;

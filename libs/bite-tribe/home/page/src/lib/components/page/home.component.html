@@ -22,6 +22,21 @@
   (gotoAbout)="gotoAbout.emit()"
   (gotoMarketPlace)="gotoMarketPlace.emit()"
 >
+  @if (showSearch()) {
+    <ion-buttons header-end slot="end">
+      <ion-button
+        data-cy="btn-search"
+        (click)="toggleSearch()"
+        [attr.aria-pressed]="isSearchVisible()"
+      >
+        <ion-icon
+          slot="icon-only"
+          [name]="isSearchVisible() ? 'close-outline' : 'search-outline'"
+          color="secondary"
+        />
+      </ion-button>
+    </ion-buttons>
+  }
   <ion-content class="ion-padding">
     <ion-refresher slot="fixed" (ionRefresh)="refreshBites($event)">
       <ion-refresher-content />
@@ -38,6 +53,16 @@
     }
 
     <div class="home-header-container" slot="fixed">
+      @if (isSearchVisible()) {
+        <ion-searchbar
+          data-cy="search-input"
+          placeholder="Search bites..."
+          [value]="searchTerm()"
+          (ionInput)="onSearchInput($event)"
+          animated
+        />
+      }
+
       <ion-text color="secondary" class="subheadline">
         <h4>{{ title() }}</h4>
       </ion-text>

@@ -13,6 +13,7 @@ import { PageComponent } from 'common/ui/page';
 import {
   IonBadge,
   IonButton,
+  IonButtons,
   IonCard,
   IonCardContent,
   IonChip,
@@ -23,6 +24,7 @@ import {
   IonModal,
   IonRefresher,
   IonRefresherContent,
+  IonSearchbar,
   IonSelect,
   IonSelectOption,
   IonSpinner,
@@ -36,6 +38,7 @@ import {
   InfiniteScrollCustomEvent,
   RefresherCustomEvent,
 } from '@ionic/angular';
+import { getSimilarityScore, normalize } from 'utils';
 
 const PAGE_SIZE = 50;
 
@@ -55,6 +58,7 @@ const PAGE_SIZE = 50;
     NgTemplateOutlet,
     IonIcon,
     IonButton,
+    IonButtons,
     IonSelect,
     IonSelectOption,
     IonModal,
@@ -64,6 +68,7 @@ const PAGE_SIZE = 50;
     IonInfiniteScrollContent,
     IonRefresher,
     IonRefresherContent,
+    IonSearchbar,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -88,6 +93,7 @@ export class BiteTribeHomeComponent {
   preferedCurrency = input('EUR');
   isReloading = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
+  showSearch = input(false, { transform: booleanAttribute });
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -116,6 +122,9 @@ export class BiteTribeHomeComponent {
   ionContent = viewChild(IonContent);
 
   currentPage = signal<number>(1);
+
+  isSearchVisible = signal(false);
+  searchTerm = signal('');
 
   refreshEvent: RefresherCustomEvent | null = null;
   onRefresh = effect(() => {
@@ -193,8 +202,37 @@ export class BiteTribeHomeComponent {
     this.filterCleared.emit();
   }
 
-  displayedBites = computed(() => {
+  toggleSearch(): void {
+    this.isSearchVisible.update((visible) => !visible);
+    if (!this.isSearchVisible()) {
+      this.searchTerm.set('');
+    }
+  }
+
+  onSearchInput(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.searchTerm.set(inputElement.value ?? '');
+    this.currentPage.set(1);
+  }
+
+  filteredBites = computed(() => {
     const allBites = this.bites() || [];
+    const rawTerm = this.searchTerm();
+
+    if (!rawTerm) {
+      return allBites;
+    }
+
+    const term = normalize(rawTerm);
+
+    return allBites.filter((bite) => {
+      const name = normalize(bite.name);
+      return name.includes(term) || getSimilarityScore(term, name).length > 0;
+    });
+  });
+
+  displayedBites = computed(() => {
+    const allBites = this.filteredBites();
     const page = this.currentPage();
     const startIndex = 0;
     const endIndex = page * PAGE_SIZE;
@@ -203,7 +241,7 @@ export class BiteTribeHomeComponent {
   });
 
   hasMore = computed(() => {
-    const allBites = this.bites() || [];
+    const allBites = this.filteredBites();
     const page = this.currentPage();
 
     return allBites.length > page * PAGE_SIZE;

@@ -56,6 +56,7 @@ export class BiteComponent {
   showEditButton = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
   uploadState = input<{ progress: UploadParams }>();
+  readonly = input(false, { transform: booleanAttribute });
 
   biteClick = output<Bite>();
   restaurantClick = output<Bite>();

@@ -15,4 +15,5 @@ export const PATH = {
   PRIVACY_POLICY: 'privacy',
   ACCOUNT_DELETION: 'account-deletion',
   MARKET_PLACE: 'market-place',
+  BITE_TRAIL: 'bite-trail',
 };

@@ -52,3 +52,6 @@ Thumbs.db
 ### storybook ###
 storybook-static
 apps/storybook-host/src/assets/temp/**/*
+
+# Husky backup hooks
+.husky/*.bak

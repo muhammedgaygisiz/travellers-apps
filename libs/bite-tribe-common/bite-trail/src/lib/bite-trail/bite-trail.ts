@@ -41,4 +41,5 @@ export class BiteTrailComponent {
   biteTrail = input.required<BiteTrail>();
 
   goToProfile = output<string>();
+  viewBiteTrail = output<BiteTrail>();
 }

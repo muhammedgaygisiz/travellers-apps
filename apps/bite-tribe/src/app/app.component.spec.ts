@@ -3,6 +3,8 @@ import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
+import { AppForegroundService } from 'bite-tribe/shell';
+import { provideMockStore } from '@ngrx/store/testing';
 
 jest.mock('@capacitor/app', () => ({
   App: {
@@ -25,7 +27,7 @@ describe(AppComponent.name, () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), provideMockStore()],
       imports: [AppComponent],
     }).compileComponents();
 
@@ -63,6 +65,17 @@ describe(AppComponent.name, () => {
 
       expect(appAddListenerSpy).toHaveBeenCalledWith(
         'backButton',
+        expect.any(Function),
+      );
+    });
+
+    it('should initialize app state change handler', () => {
+      const appAddListenerSpy = jest.spyOn(App, 'addListener');
+
+      component['initAppStateChangeHandler']();
+
+      expect(appAddListenerSpy).toHaveBeenCalledWith(
+        'appStateChange',
         expect.any(Function),
       );
     });
@@ -145,6 +158,25 @@ describe(AppComponent.name, () => {
 
         expect(navControllerNavigateForwardSpy).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('appStateChange Handler', () => {
+    it('should delegate to AppForegroundService.handleAppStateChange', () => {
+      const appForegroundService = TestBed.inject(AppForegroundService);
+      const handleAppStateChangeSpy = jest.spyOn(
+        appForegroundService,
+        'handleAppStateChange',
+      );
+
+      const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
+      const whereAppStateChange = ([event]: [string]): boolean =>
+        event === 'appStateChange';
+      const appStateChangeListener =
+        addListenerCalls.find(whereAppStateChange)[1];
+      appStateChangeListener({ isActive: true });
+
+      expect(handleAppStateChangeSpy).toHaveBeenCalledWith(true);
     });
   });
 });

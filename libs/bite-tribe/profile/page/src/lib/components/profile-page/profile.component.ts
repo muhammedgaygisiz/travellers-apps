@@ -9,36 +9,19 @@ import {
 import { PageComponent } from 'common/ui/page';
 import {
   IonAlert,
-  IonAvatar,
   IonBadge,
   IonButton,
   IonContent,
-  IonIcon,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
 } from '@ionic/angular/standalone';
-import { Bite, Like, ProfileMetaData, PublicUser } from 'model';
+import { Bite, BiteTrail, Like, ProfileMetaData, PublicUser } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { OverlayEventDetail } from '@ionic/core';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
-
-const BADGE_CONFIG = [
-  { min: 50, max: 100, cssClassName: 'green' },
-  { min: 100, max: 1000, cssClassName: 'bronze' },
-  { min: 1000, max: 10000, cssClassName: 'silver' },
-  { min: 10000, max: Infinity, cssClassName: 'gold' },
-];
-
-const getBadgeColor = (biteCount: number): string => {
-  for (const config of BADGE_CONFIG) {
-    if (config.min <= biteCount && biteCount < config.max) {
-      return config.cssClassName;
-    }
-  }
-
-  return '';
-};
+import { BiteTrailComponent } from 'bite-trail';
+import { ProfileHeader } from './components/profile-header';
 
 const UNFOLLOW = 'unfollow';
 const CANCEL = 'cancel';
@@ -53,14 +36,14 @@ const PAGE_SIZE = 50;
   imports: [
     PageComponent,
     IonContent,
-    IonAvatar,
     IonButton,
     BiteComponent,
     IonBadge,
-    IonIcon,
     IonAlert,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
+    BiteTrailComponent,
+    ProfileHeader,
   ],
 })
 export class ProfileComponent {
@@ -72,6 +55,7 @@ export class ProfileComponent {
   subscriptionTier = computed((): number => {
     return this.user()?.subscriptionTier || 0;
   });
+  biteTrails = input<BiteTrail[]>();
 
   readonly logoutClick = output();
   readonly gotoSettings = output();
@@ -116,6 +100,12 @@ export class ProfileComponent {
     return bites ? bites.length : 0;
   });
 
+  biteTrailCount = computed(() => {
+    const biteTrails = this.biteTrails();
+
+    return biteTrails ? biteTrails.length : 0;
+  });
+
   displayedBites = computed(() => {
     const allBites = this.bites() || [];
     const page = this.currentPage();
@@ -125,10 +115,13 @@ export class ProfileComponent {
     return allBites.slice(startIndex, endIndex);
   });
 
-  badgeColor = computed(() => {
-    const biteCount = this.biteCount();
+  displayedBiteTrails = computed(() => {
+    const allBiteTrails = this.biteTrails() || [];
+    const page = this.currentPage();
+    const startIndex = 0;
+    const endIndex = page * PAGE_SIZE;
 
-    return getBadgeColor(biteCount);
+    return allBiteTrails.slice(startIndex, endIndex);
   });
 
   isUnfollowedUser = computed((): boolean => {
@@ -141,15 +134,6 @@ export class ProfileComponent {
 
     return currentUserId !== profileOwner;
   });
-
-  imageLoadErrored = signal(false);
-  validPhotoUrl = computed(() => {
-    return !!this.user()?.photoUrl && !this.imageLoadErrored();
-  });
-
-  onImageError(): void {
-    this.imageLoadErrored.set(true);
-  }
 
   onFollow(): void {
     const user = this.user();

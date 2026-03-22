@@ -2,12 +2,14 @@ import { EditProfilePage } from '../edit-profile.page';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, signal } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import type { PublicUser } from 'model';
 import type { OverlayEventDetail } from '@ionic/core';
 
 jest.mock('localization');
 jest.mock('heic2any', () => ({}));
+
+addNecessaryIcons();
 
 describe(EditProfilePage.name, () => {
   let component: EditProfilePage;

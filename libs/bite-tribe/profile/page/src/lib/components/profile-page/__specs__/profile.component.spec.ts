@@ -93,6 +93,21 @@ describe('ProfileComponent', () => {
     });
   });
 
+  describe('biteTrailCount', () => {
+    it('should return 0 if biteTrails is undefined', () => {
+      compRef.setInput('biteTrails', undefined);
+
+      expect(component.biteTrailCount()).toBe(0);
+    });
+
+    it('should return the length of biteTrails if biteTrails is defined', () => {
+      const biteTrailsArray = [{}, {}, {}, {}];
+      compRef.setInput('biteTrails', biteTrailsArray);
+
+      expect(component.biteTrailCount()).toBe(biteTrailsArray.length);
+    });
+  });
+
   describe('displayedBites', () => {
     describe('given bites', () => {
       it('should return the correct number of bites based on currentPage', () => {
@@ -121,35 +136,31 @@ describe('ProfileComponent', () => {
     });
   });
 
-  describe('badgeColor', () => {
-    it('should return "green" if biteCount is between 50 and 99', () => {
-      compRef.setInput('bites', new Array(75));
+  describe('displayedBiteTrails', () => {
+    describe('given biteTrails', () => {
+      it('should return the correct number of biteTrails based on currentPage', () => {
+        const biteTrailsArray = new Array(120)
+          .fill({})
+          .map((_, i) => ({ id: i + 1 }));
+        compRef.setInput('biteTrails', biteTrailsArray);
+        component.currentPage.set(1);
 
-      expect(component.badgeColor()).toBe('green');
+        const displayed = component.displayedBiteTrails();
+
+        expect(displayed.length).toBe(50);
+        expect(displayed[0].id).toBe(1);
+        expect(displayed[49].id).toBe(50);
+      });
     });
 
-    it('should return "bronze" if biteCount is between 100 and 999', () => {
-      compRef.setInput('bites', new Array(150));
+    describe('given biteTrails are undefined', () => {
+      it('should return an empty array', () => {
+        compRef.setInput('biteTrails', undefined);
 
-      expect(component.badgeColor()).toBe('bronze');
-    });
+        const displayed = component.displayedBiteTrails();
 
-    it('should return "silver" if biteCount is between 1000 and 10000', () => {
-      compRef.setInput('bites', new Array(1001));
-
-      expect(component.badgeColor()).toBe('silver');
-    });
-
-    it('should return "gold" if biteCount is 10000 or more', () => {
-      compRef.setInput('bites', new Array(10001));
-
-      expect(component.badgeColor()).toBe('gold');
-    });
-
-    it('should return empty if biteCount is less than 50', () => {
-      compRef.setInput('bites', new Array(30));
-
-      expect(component.badgeColor()).toBe('');
+        expect(displayed.length).toBe(0);
+      });
     });
   });
 
@@ -177,40 +188,6 @@ describe('ProfileComponent', () => {
     it('should return false if profile owners userId in not defined', () => {
       compRef.setInput('user', {} as any);
       expect(component.isUnfollowedUser()).toBe(false);
-    });
-  });
-
-  describe('validPhotoUrl', () => {
-    beforeEach(() => {
-      compRef.setInput('user', { photoUrl: 'http://localhost:4200' } as any);
-      component.imageLoadErrored.set(false);
-    });
-
-    it('should return true if photoUrl is provided and loaded correctly', () => {
-      expect(component.validPhotoUrl()).toBe(true);
-    });
-
-    it('should return false if photoUrl is missing', () => {
-      compRef.setInput('user', {} as any);
-      expect(component.validPhotoUrl()).toBe(false);
-    });
-
-    it('should return false if user is missing', () => {
-      compRef.setInput('user', undefined);
-      expect(component.validPhotoUrl()).toBe(false);
-    });
-
-    it('should return false if image load has errored', () => {
-      component.imageLoadErrored.set(true);
-      expect(component.validPhotoUrl()).toBe(false);
-    });
-  });
-
-  describe('onImageError', () => {
-    it('should set imageLoadErrored to true', () => {
-      component.imageLoadErrored.set(false);
-      component.onImageError();
-      expect(component.imageLoadErrored()).toBe(true);
     });
   });
 

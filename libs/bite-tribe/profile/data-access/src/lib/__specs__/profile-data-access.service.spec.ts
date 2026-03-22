@@ -11,18 +11,14 @@ class Mock {
   isAuthenticated$ = of(true);
   bitesByUser$ = of([]);
   publicUser$ = of(null);
-  mybites$ = of([]);
   bites$ = of([]);
-  biteCreator$ = of(null);
   userId$ = of('user-id');
   isPublicProfile$ = of(true);
   profileMetadata$ = of(true);
-  userByUrlParam$ = of(null);
   sortedMyBites$ = of(null);
   logout = jest.fn();
   removeLike = jest.fn();
   submitLikeClick = jest.fn();
-  submitFollowClick = jest.fn();
   savePublicProfile = jest.fn();
   followUser = jest.fn();
   unfollowUser = jest.fn();
@@ -51,6 +47,79 @@ describe('ProfileDataAccessService', () => {
       expect(service).toBeTruthy();
     },
   ));
+
+  describe('biteTrailLoader', () => {
+    let getCollectionSpy: SpyInstance;
+
+    beforeEach(() => {
+      getCollectionSpy = jest
+        .spyOn(FirebaseFirestore, 'getCollection')
+        .mockResolvedValue({ snapshots: [] } as any);
+    });
+
+    describe('given no bite trails', () => {
+      it('should load bite trail data from FirebaseFirestore', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          await service.biteTrailLoader({
+            params: { userId: 'user-id' },
+          } as any);
+
+          expect(getCollectionSpy).toHaveBeenCalledWith({
+            reference: 'biteTrails',
+            compositeFilter: {
+              type: 'and',
+              queryConstraints: [
+                {
+                  type: 'where',
+                  fieldPath: 'ownerId',
+                  opStr: '==',
+                  value: 'user-id',
+                },
+              ],
+            },
+          });
+        },
+      ));
+    });
+
+    describe('given bite trails', () => {
+      it('should return bite trails in the correct format', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          getCollectionSpy.mockResolvedValue({
+            snapshots: [
+              {
+                id: 'bite-trail-id',
+                data: { name: 'Bite Trail 1' },
+              },
+            ],
+          } as any);
+
+          const result = await service.biteTrailLoader({
+            params: { userId: 'user-id' },
+          } as any);
+
+          expect(result).toEqual([
+            { id: 'bite-trail-id', name: 'Bite Trail 1' },
+          ]);
+        },
+      ));
+    });
+
+    describe('given no user id', () => {
+      it('should return an empty array', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          const result = await service.biteTrailLoader({
+            params: { userId: '' },
+          } as any);
+
+          expect(result).toEqual([]);
+        },
+      ));
+    });
+  });
 
   describe('logout', () => {
     it('should call logout on BiteTribeStoreService', inject(

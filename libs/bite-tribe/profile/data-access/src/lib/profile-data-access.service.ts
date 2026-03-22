@@ -1,8 +1,10 @@
 import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import type { Bite, Like, PublicUser } from 'model';
+import type { Bite, BiteTrail, Like, PublicUser } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+
+const BITE_TRAIL_COLLECTION = 'biteTrails';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileDataAccessService {
@@ -47,6 +49,48 @@ export class ProfileDataAccessService {
       userId: this.storeService.userIdFromUrl(),
     }),
     loader: this.userLoader.bind(this),
+  });
+
+  biteTrailLoader: ResourceLoader<any, any> = async ({ params }) => {
+    if (!params.userId) {
+      return Promise.resolve([]);
+    }
+
+    const result = await FirebaseFirestore.getCollection({
+      reference: BITE_TRAIL_COLLECTION,
+      compositeFilter: {
+        type: 'and',
+        queryConstraints: [
+          {
+            type: 'where',
+            fieldPath: 'ownerId',
+            opStr: '==',
+            value: params.userId,
+          },
+        ],
+      },
+    });
+
+    return result.snapshots.map((snapshot) => {
+      return {
+        id: snapshot.id,
+        ...snapshot.data,
+      } as BiteTrail;
+    });
+  };
+
+  biteTrailsByUser = resource({
+    params: () => ({
+      userId: this.storeService.userIdFromUrl(),
+    }),
+    loader: this.biteTrailLoader.bind(this),
+  });
+
+  myBiteTrails = resource({
+    params: () => ({
+      userId: this.storeService.user()?.uid,
+    }),
+    loader: this.biteTrailLoader.bind(this),
   });
 
   userId = toSignal(this.storeService.userId$, { initialValue: '' });

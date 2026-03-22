@@ -1,0 +1,38 @@
+@let userData = user();
+
+<div class="profile-header">
+  <div class="photo-column">
+    @if (validPhotoUrl()) {
+    <ion-avatar class="profile-avatar">
+      <img
+        [src]="userData?.photoUrl"
+        [alt]="userData?.displayName"
+        (error)="onImageError()"
+      />
+    </ion-avatar>
+    } @else {
+    <ion-icon name="person-circle-outline" class="profile-image" />
+    }
+  </div>
+
+  <div class="header-column">
+    <strong>{{ userData?.isOrganisation ? 'Bite Trails' : 'Bites' }}</strong>
+    @let calculatedBadgeColor = badgeColor(); @if (calculatedBadgeColor) {
+    <ion-badge class="bite-badge {{ calculatedBadgeColor }}">
+      {{ userData?.isOrganisation ? biteTrailCount() : biteCount() }}
+    </ion-badge>
+    } @else { {{ userData?.isOrganisation ? biteTrailCount() : biteCount() }} }
+  </div>
+  <div class="header-column">
+    <strong>Following</strong>
+    <span class="clickable" (click)="handleFollowingClick()"
+      >{{ followingCount() }}</span
+    >
+  </div>
+  <div class="header-column">
+    <strong>Followers</strong>
+    <span class="clickable" (click)="handleFollowersClick()"
+      >{{ followerCount() }}</span
+    >
+  </div>
+</div>

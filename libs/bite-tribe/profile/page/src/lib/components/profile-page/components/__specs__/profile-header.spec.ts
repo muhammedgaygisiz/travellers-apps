@@ -81,4 +81,44 @@ describe(ProfileHeader.name, () => {
       expect(component.imageLoadErrored()).toBe(true);
     });
   });
+
+  describe('handleFollowingClick', () => {
+    it('should emit followingClick with userId', () => {
+      jest.spyOn(component.followingClick, 'emit');
+      compRef.setInput('user', { userId: '123' } as PublicUser);
+
+      component.handleFollowingClick();
+
+      expect(component.followingClick.emit).toHaveBeenCalledWith('123');
+    });
+
+    it('should not emit followingClick if userId is missing', () => {
+      jest.spyOn(component.followingClick, 'emit');
+      compRef.setInput('user', {} as PublicUser);
+
+      component.handleFollowingClick();
+
+      expect(component.followingClick.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleFollowersClick', () => {
+    it('should emit followersClick with userId', () => {
+      jest.spyOn(component.followersClick, 'emit');
+      compRef.setInput('user', { userId: '123' } as PublicUser);
+
+      component.handleFollowersClick();
+
+      expect(component.followersClick.emit).toHaveBeenCalledWith('123');
+    });
+
+    it('should not emit followersClick if userId is missing', () => {
+      jest.spyOn(component.followersClick, 'emit');
+      compRef.setInput('user', {} as PublicUser);
+
+      component.handleFollowersClick();
+
+      expect(component.followersClick.emit).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -93,6 +93,21 @@ describe('ProfileComponent', () => {
     });
   });
 
+  describe('biteTrailCount', () => {
+    it('should return 0 if biteTrails is undefined', () => {
+      compRef.setInput('biteTrails', undefined);
+
+      expect(component.biteTrailCount()).toBe(0);
+    });
+
+    it('should return the length of biteTrails if biteTrails is defined', () => {
+      const biteTrailsArray = [{}, {}, {}, {}];
+      compRef.setInput('biteTrails', biteTrailsArray);
+
+      expect(component.biteTrailCount()).toBe(biteTrailsArray.length);
+    });
+  });
+
   describe('displayedBites', () => {
     describe('given bites', () => {
       it('should return the correct number of bites based on currentPage', () => {
@@ -115,6 +130,34 @@ describe('ProfileComponent', () => {
         compRef.setInput('bites', undefined);
 
         const displayed = component.displayedBites();
+
+        expect(displayed.length).toBe(0);
+      });
+    });
+  });
+
+  describe('displayedBiteTrails', () => {
+    describe('given biteTrails', () => {
+      it('should return the correct number of biteTrails based on currentPage', () => {
+        const biteTrailsArray = new Array(120)
+          .fill({})
+          .map((_, i) => ({ id: i + 1 }));
+        compRef.setInput('biteTrails', biteTrailsArray);
+        component.currentPage.set(1);
+
+        const displayed = component.displayedBiteTrails();
+
+        expect(displayed.length).toBe(100);
+        expect(displayed[0].id).toBe(1);
+        expect(displayed[99].id).toBe(100);
+      });
+    });
+
+    describe('given biteTrails are undefined', () => {
+      it('should return an empty array', () => {
+        compRef.setInput('biteTrails', undefined);
+
+        const displayed = component.displayedBiteTrails();
 
         expect(displayed.length).toBe(0);
       });

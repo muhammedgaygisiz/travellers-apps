@@ -28,96 +28,8 @@ const getBadgeColor = (biteCount: number): string => {
 
 @Component({
   selector: 'profile-header',
-  template: `
-    @let userData = user();
-
-    <div class="profile-header">
-      <div class="photo-column">
-        @if (validPhotoUrl()) {
-          <ion-avatar class="profile-avatar">
-            <img
-              [src]="userData?.photoUrl"
-              [alt]="userData?.displayName"
-              (error)="onImageError()"
-            />
-          </ion-avatar>
-        } @else {
-          <ion-icon name="person-circle-outline" class="profile-image" />
-        }
-      </div>
-
-      <div class="header-column">
-        <strong>{{
-          userData?.isOrganisation ? 'Bite Trails' : 'Bites'
-        }}</strong>
-        @let calculatedBadgeColor = badgeColor();
-        @if (calculatedBadgeColor) {
-          <ion-badge class="bite-badge {{ calculatedBadgeColor }}">
-            {{ userData?.isOrganisation ? biteTrailCount() : biteCount() }}
-          </ion-badge>
-        } @else {
-          {{ userData?.isOrganisation ? biteTrailCount() : biteCount() }}
-        }
-      </div>
-      <div class="header-column">
-        <strong>Following</strong>
-        <span
-          class="clickable"
-          (click)="followingClick.emit(user()?.userId!)"
-          >{{ followingCount() }}</span
-        >
-      </div>
-      <div class="header-column">
-        <strong>Followers</strong>
-        <span
-          class="clickable"
-          (click)="followersClick.emit(user()?.userId!)"
-          >{{ followerCount() }}</span
-        >
-      </div>
-    </div>
-  `,
-  styles: `
-    :host {
-      .profile-header {
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-
-        strong {
-          margin-bottom: 1rem;
-        }
-
-        .header-column {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-
-          .clickable {
-            cursor: pointer;
-            color: var(--ion-color-primary);
-            font-weight: 600;
-
-            &:hover {
-              text-decoration: underline;
-            }
-          }
-        }
-
-        .profile-avatar {
-          display: flex;
-          width: 100%;
-          height: fit-content;
-
-          img {
-            width: 96px;
-            height: 96px;
-            border-radius: 50%;
-          }
-        }
-      }
-    }
-  `,
+  templateUrl: 'profile-header.html',
+  styleUrl: 'profile-header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonAvatar, IonBadge, IonIcon],
 })
@@ -125,8 +37,8 @@ export class ProfileHeader {
   user = input<PublicUser | undefined>();
   biteCount = input(0);
   biteTrailCount = input(0);
-  followingCount = input(0);
-  followerCount = input(0);
+  followingCount = input<number | undefined>(0);
+  followerCount = input<number | undefined>(0);
 
   readonly followersClick = output<string>();
   readonly followingClick = output<string>();
@@ -152,5 +64,19 @@ export class ProfileHeader {
 
   onImageError(): void {
     this.imageLoadErrored.set(true);
+  }
+
+  handleFollowingClick(): void {
+    const userId = this.user()?.userId;
+    if (userId) {
+      this.followingClick.emit(userId);
+    }
+  }
+
+  handleFollowersClick(): void {
+    const userId = this.user()?.userId;
+    if (userId) {
+      this.followersClick.emit(userId);
+    }
   }
 }

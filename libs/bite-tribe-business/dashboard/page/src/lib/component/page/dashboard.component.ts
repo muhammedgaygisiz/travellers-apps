@@ -8,29 +8,40 @@ import { PageComponent } from 'common/ui/page';
 import {
   IonCard,
   IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
   IonContent,
-  IonText,
+  IonItem,
+  IonLabel,
+  IonList,
 } from '@ionic/angular/standalone';
-import { RestaurantComponent } from '../restaurant/restaurant.component';
-import { Restaurant } from 'model';
+import { Geopoint, PublicUser, Restaurant } from 'model';
+import { MapComponent } from 'bite-tribe-common/map';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'bt-business-dashboard',
-  templateUrl: './dashboard.component.html',
+  templateUrl: 'dashboard.component.html',
   imports: [
     PageComponent,
     IonContent,
     IonCard,
     IonCardContent,
-    IonText,
-    RestaurantComponent,
+    IonCardHeader,
+    IonCardTitle,
+    MapComponent,
+    IonList,
+    IonLabel,
+    IonItem,
   ],
   styleUrl: 'dashboard.component.scss',
 })
 export class DashboardComponent {
+  organisations = input<PublicUser[]>();
   restaurants = input<Restaurant[]>();
+
   isAuthenticated = input(false);
+  gpsPosition = input<Geopoint | null | undefined>();
 
   readonly logoutClick = output();
 

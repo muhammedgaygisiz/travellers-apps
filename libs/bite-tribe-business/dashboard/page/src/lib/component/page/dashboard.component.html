@@ -12,26 +12,70 @@
   (gotoMigrations)="gotoMigrations.emit()"
 >
   <ion-content class="ion-padding">
-    <div class="desktop-layout">
-      <div class="first-column">
-        <h1>Restaurants</h1>
-      </div>
-
-      <div class="restaurants-grid">
-        @if (!restaurants()?.length) {
+    <div class="ion-display-flex ion-flex-row">
+      <div
+        class="ion-display-flex ion-flex-column column ion-flex-2 ion-padding"
+      >
         <ion-card>
+          <ion-card-header>
+            <ion-card-title></ion-card-title>
+          </ion-card-header>
           <ion-card-content>
-            <ion-text color="primary"> No restaurants found.</ion-text>
+            <bt-map [gpsPosition]="gpsPosition()" enableZoom readonly />
           </ion-card-content>
         </ion-card>
-        } @for (restaurant of restaurants(); let index = $index; track
-        restaurant.id || index) {
-        <bt-restaurant
-          [restaurant]="restaurant"
-          (restaurantClick)="restaurantClick.emit($event)"
-          (createRestaurant)="createRestaurantClick.emit($event)"
-        />
-        }
+      </div>
+      <div
+        class="ion-display-flex ion-flex-column column ion-flex-2 ion-padding"
+      >
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Organisations</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="full">
+              @for (
+                organisation of organisations();
+                track organisation.userId
+              ) {
+                <ion-item [button]="true">
+                  <ion-label>{{ organisation.displayName }}</ion-label>
+                </ion-item>
+              } @empty {
+                <p>No organisations found.</p>
+              }
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Restaurants</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="full">
+              @for (restaurant of restaurants(); track restaurant.id) {
+                <ion-item [button]="true">
+                  <ion-label>{{ restaurant.name }}</ion-label>
+                </ion-item>
+              } @empty {
+                <p>No restaurants found.</p>
+              }
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </div>
+      <div
+        class="ion-display-flex ion-flex-column column ion-flex-1 ion-padding"
+      >
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Col 3</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>Test</p>
+          </ion-card-content>
+        </ion-card>
       </div>
     </div>
   </ion-content>

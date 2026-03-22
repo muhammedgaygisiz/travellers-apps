@@ -10,8 +10,10 @@ export class DashboardService {
   dataAccess = inject(DashboardDataAccessService);
   private readonly navController = inject(NavController);
 
+  organisations = this.dataAccess.organisations;
   restaurants = this.dataAccess.restaurants;
   isAuthenticated = this.dataAccess.isAuthenticated;
+  gpsPosition = this.dataAccess.gpsPosition;
 
   logout(): void {
     this.dataAccess.logout();

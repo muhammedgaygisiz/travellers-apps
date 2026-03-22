@@ -147,9 +147,9 @@ describe('ProfileComponent', () => {
 
         const displayed = component.displayedBiteTrails();
 
-        expect(displayed.length).toBe(100);
+        expect(displayed.length).toBe(50);
         expect(displayed[0].id).toBe(1);
-        expect(displayed[99].id).toBe(100);
+        expect(displayed[49].id).toBe(50);
       });
     });
 

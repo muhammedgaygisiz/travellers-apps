@@ -16,7 +16,9 @@ export class ProfileService {
   user = this.dataAccess.user;
   userId = this.dataAccess.userId;
   bitesByUser = this.dataAccess.bitesByUser;
+  biteTrailsByUser = this.dataAccess.biteTrailsByUser;
   myBites = this.dataAccess.myBites;
+  myBiteTrails = this.dataAccess.myBiteTrails;
   isPublicProfile = this.dataAccess.isPublicProfile;
   profileMetadata = this.dataAccess.profileMetadata;
 

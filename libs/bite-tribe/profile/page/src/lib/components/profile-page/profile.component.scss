@@ -13,44 +13,6 @@ $GOLD: #ffd700;
     margin-right: 0;
   }
 
-  .profile-header {
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-
-    strong {
-      margin-bottom: 1rem;
-    }
-
-    .header-column {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-
-      .clickable {
-        cursor: pointer;
-        color: var(--ion-color-primary);
-        font-weight: 600;
-
-        &:hover {
-          text-decoration: underline;
-        }
-      }
-    }
-
-    .profile-avatar {
-      display: flex;
-      width: 100%;
-      height: fit-content;
-
-      img {
-        width: 96px;
-        height: 96px;
-        border-radius: 50%;
-      }
-    }
-  }
-
   .profile-name {
     display: flex;
     gap: 0.5rem;

@@ -44,9 +44,7 @@ export class DashboardComponent {
   gpsPosition = input<Geopoint | null | undefined>();
 
   readonly logoutClick = output();
-
   readonly gotoSettings = output();
-
   readonly gotoMigrations = output();
 
   readonly restaurantClick = output<Restaurant>();

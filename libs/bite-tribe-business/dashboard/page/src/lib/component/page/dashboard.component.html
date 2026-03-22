@@ -55,7 +55,10 @@
           <ion-card-content>
             <ion-list lines="full">
               @for (restaurant of restaurants(); track restaurant.id) {
-                <ion-item [button]="true">
+                <ion-item
+                  [button]="true"
+                  (click)="restaurantClick.emit(restaurant)"
+                >
                   <ion-label>{{ restaurant.name }}</ion-label>
                 </ion-item>
               } @empty {

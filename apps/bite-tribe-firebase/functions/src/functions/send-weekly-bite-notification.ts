@@ -1,11 +1,11 @@
-import { onSchedule } from "firebase-functions/scheduler";
-import * as admin from "firebase-admin";
-import { logger } from "firebase-functions";
+import { onSchedule } from 'firebase-functions/scheduler';
+import * as admin from 'firebase-admin';
+import { logger } from 'firebase-functions';
 
 const db = admin.firestore();
 
-const WEEKLY_BITES_TOPIC = "weekly-bites";
-const ZURICH_TZ = "Europe/Zurich";
+const WEEKLY_BITES_TOPIC = 'weekly-bites';
+const ZURICH_TZ = 'Europe/Zurich';
 
 /**
  * Returns the UTC timestamp (ms) for 00:00:00.000 on the given calendar date
@@ -22,21 +22,18 @@ export const toMidnightZurich = (
 ): number => {
   // Start from UTC midnight of the requested date
   const utcMidnight = new Date(
-    `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T00:00:00Z`,
+    `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T00:00:00Z`,
   );
 
   // Find out what wall-clock time that UTC instant corresponds to in Zurich
-  const timeFormatter = new Intl.DateTimeFormat("en-US", {
+  const timeFormatter = new Intl.DateTimeFormat('en-US', {
     timeZone: ZURICH_TZ,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
     hour12: false,
   });
-  const [h, m, s] = timeFormatter
-    .format(utcMidnight)
-    .split(":")
-    .map(Number);
+  const [h, m, s] = timeFormatter.format(utcMidnight).split(':').map(Number);
 
   // Zurich is always ahead of UTC (UTC+1 or UTC+2).
   // UTC midnight therefore appears as 01:00 or 02:00 in Zurich.
@@ -84,14 +81,14 @@ export const getPreviousWeekBounds = (): { start: number; end: number } => {
   const now = new Date();
 
   // Determine today's calendar date in Zurich timezone
-  const todayZurich = new Intl.DateTimeFormat("en-CA", {
+  const todayZurich = new Intl.DateTimeFormat('en-CA', {
     timeZone: ZURICH_TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   }).format(now); // "YYYY-MM-DD"
 
-  const [yearStr, monthStr, dayStr] = todayZurich.split("-");
+  const [yearStr, monthStr, dayStr] = todayZurich.split('-');
   const year = parseInt(yearStr, 10);
   const month = parseInt(monthStr, 10); // 1-indexed
   const day = parseInt(dayStr, 10);
@@ -122,11 +119,11 @@ export const getPreviousWeekBounds = (): { start: number; end: number } => {
  */
 export const sendWeeklyBiteNotification = onSchedule(
   {
-    schedule: "0 18 * * 1",
+    schedule: '0 18 * * 1',
     timeZone: ZURICH_TZ,
   },
   async () => {
-    logger.info("--- Starting weekly bite notification");
+    logger.info('--- Starting weekly bite notification');
 
     const { start, end } = getPreviousWeekBounds();
 
@@ -135,9 +132,9 @@ export const sendWeeklyBiteNotification = onSchedule(
     );
 
     const countSnap = await db
-      .collection("bites")
-      .where("createdAtTimestamp", ">=", start)
-      .where("createdAtTimestamp", "<=", end)
+      .collection('bites')
+      .where('createdAtTimestamp', '>=', start)
+      .where('createdAtTimestamp', '<=', end)
       .count()
       .get();
 
@@ -146,29 +143,29 @@ export const sendWeeklyBiteNotification = onSchedule(
     logger.info(`--- Found ${biteCount} bites from last week`);
 
     if (biteCount === 0) {
-      logger.info("--- No bites found for last week, skipping notification");
+      logger.info('--- No bites found for last week, skipping notification');
       return;
     }
 
     const body =
       biteCount === 1
-        ? "1 new bite was added last week!"
-        : `${biteCount} new bites were added last week!`;
+        ? '🍽️ The BiteTribe shared 1 new bite last week 🤩'
+        : `🍽️ The BiteTribe shared ${biteCount} new bites last week 🤩`;
 
-    logger.info("--- Sending topic notification to:", WEEKLY_BITES_TOPIC);
+    logger.info('--- Sending topic notification to:', WEEKLY_BITES_TOPIC);
 
     await admin.messaging().send({
       topic: WEEKLY_BITES_TOPIC,
       notification: {
-        title: "Weekly Bite Summary",
+        title: "🍽️ This week's bites are here",
         body,
       },
       data: {
-        type: "WEEKLY_BITE_SUMMARY",
+        type: 'WEEKLY_BITE_SUMMARY',
         biteCount: `${biteCount}`,
       },
     });
 
-    logger.info("--- Weekly bite notification sent successfully");
+    logger.info('--- Weekly bite notification sent successfully');
   },
 );

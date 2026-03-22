@@ -7,7 +7,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/bite-tribe-firebase",
-        "command": "firebase emulators:start --only auth,firestore,storage,functions --import .firebase-export"
+        "command": "firebase emulators:start --only auth,firestore,storage,functions,pubsub --import .firebase-export"
       }
     },
     "firebase-record": {

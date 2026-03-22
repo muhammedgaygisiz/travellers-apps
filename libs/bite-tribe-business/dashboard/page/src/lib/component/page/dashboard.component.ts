@@ -48,5 +48,6 @@ export class DashboardComponent {
   readonly gotoMigrations = output();
 
   readonly restaurantClick = output<Restaurant>();
+  readonly organisationClick = output<PublicUser>();
   readonly createRestaurantClick = output<Restaurant>();
 }

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { DashboardDataAccessService } from 'bite-tribe-business/dashboard-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import { Restaurant } from 'model';
+import { PublicUser, Restaurant } from 'model';
 
 @Injectable({
   providedIn: 'root',
@@ -40,6 +40,14 @@ export class DashboardService {
         encodeURIComponent(restaurantName),
       ]);
       return;
+    }
+  }
+
+  organisationClicked(organisation: PublicUser): void {
+    const organisationId = organisation.userId;
+
+    if (organisationId) {
+      this.navController.navigateForward([organisationId, 'dashboard']);
     }
   }
 

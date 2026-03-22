@@ -38,7 +38,10 @@
                 organisation of organisations();
                 track organisation.userId
               ) {
-                <ion-item [button]="true">
+                <ion-item
+                  [button]="true"
+                  (click)="organisationClick.emit(organisation)"
+                >
                   <ion-label>{{ organisation.displayName }}</ion-label>
                 </ion-item>
               } @empty {

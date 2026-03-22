@@ -1,18 +1,8 @@
-@use 'globals';
-
 $BRONZE: #cd7f32;
 $SILVER: #c0c0c0;
 $GOLD: #ffd700;
 
 :host {
-  .profile-image {
-    @include globals.profile-image;
-
-    width: 96px;
-    height: 96px;
-    margin-right: 0;
-  }
-
   .profile-name {
     display: flex;
     gap: 0.5rem;

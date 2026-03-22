@@ -18,6 +18,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
       [sorting]="service.myBitesSorting()"
+      showSearch
       editableBites
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"

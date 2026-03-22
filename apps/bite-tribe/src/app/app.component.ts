@@ -11,7 +11,7 @@ import {
   NavController,
   Platform,
 } from '@ionic/angular/standalone';
-import { addNecessaryIcons } from 'bite-tribe/shell';
+import { addNecessaryIcons, AppForegroundService } from 'bite-tribe/shell';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
 
@@ -30,6 +30,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   platform = inject(Platform);
   navController = inject(NavController);
+  private readonly appForegroundService = inject(AppForegroundService);
 
   backButtonHandler = ({ canGoBack }: { canGoBack: boolean }): void =>
     this.handleBackButton(canGoBack);
@@ -40,6 +41,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.initBackbuttonHandler();
 
     this.initAppUrlOpenHandler();
+
+    this.initAppStateChangeHandler();
   }
 
   ngOnInit(): void {
@@ -73,6 +76,12 @@ export class AppComponent implements OnInit, OnDestroy {
         const biteId = path.split('/s/bite/')[1];
         this.navController.navigateForward(['bite', biteId]);
       }
+    });
+  }
+
+  private initAppStateChangeHandler(): void {
+    App.addListener('appStateChange', ({ isActive }) => {
+      this.appForegroundService.handleAppStateChange(isActive);
     });
   }
 }

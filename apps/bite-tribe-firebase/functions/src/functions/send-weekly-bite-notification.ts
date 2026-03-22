@@ -1,10 +1,14 @@
 import { onSchedule } from 'firebase-functions/scheduler';
 import * as admin from 'firebase-admin';
 import { logger } from 'firebase-functions';
+import { getInvalidTokens } from './utils/get-invalid-tokens';
+import { cleanupInvalidTokens } from './utils/cleanup-invalid-tokens';
+import { getTokens } from './utils/get-tokens';
+import { buildChunks } from './utils/build-chunks';
+import { CHUNK_SIZE } from './utils/chunk-size';
 
 const db = admin.firestore();
 
-const WEEKLY_BITES_TOPIC = 'weekly-bites';
 const ZURICH_TZ = 'Europe/Zurich';
 
 /**
@@ -112,17 +116,25 @@ export const getPreviousWeekBounds = (): { start: number; end: number } => {
   };
 };
 
+const getAllUserUids = async (): Promise<string[]> => {
+  const usersSnap = await db.collection('users').get();
+
+  logger.info(`--- Number of users: ${usersSnap.size}`);
+
+  return usersSnap.docs.map((doc) => doc.id);
+};
+
 /**
  * Scheduled Cloud Function that runs every Monday evening (18:00 Europe/Zurich).
  * It counts the bites created during the previous calendar week and sends a
- * single FCM topic notification to all users subscribed to 'weekly-bites'.
+ * push notification to all users with enabled push tokens.
  */
 export const sendWeeklyBiteNotification = onSchedule(
   {
     schedule: '0 18 * * 1',
     timeZone: ZURICH_TZ,
   },
-  async () => {
+  async (): Promise<void> => {
     logger.info('--- Starting weekly bite notification');
 
     const { start, end } = getPreviousWeekBounds();
@@ -147,24 +159,50 @@ export const sendWeeklyBiteNotification = onSchedule(
       return;
     }
 
+    const userUids = await getAllUserUids();
+    if (userUids.length === 0) {
+      logger.warn('--- No users found, aborting notification');
+      return;
+    }
+
+    const tokens = await getTokens(userUids);
+    if (tokens.length === 0) {
+      logger.warn('--- No valid push tokens found, aborting notification');
+      return;
+    }
+
     const body =
       biteCount === 1
         ? '🍽️ The BiteTribe shared 1 new bite last week 🤩'
         : `🍽️ The BiteTribe shared ${biteCount} new bites last week 🤩`;
 
-    logger.info('--- Sending topic notification to:', WEEKLY_BITES_TOPIC);
+    const chunks = buildChunks(tokens, CHUNK_SIZE);
 
-    await admin.messaging().send({
-      topic: WEEKLY_BITES_TOPIC,
-      notification: {
-        title: "🍽️ This week's bites are here",
-        body,
-      },
-      data: {
-        type: 'WEEKLY_BITE_SUMMARY',
-        biteCount: `${biteCount}`,
-      },
-    });
+    logger.info(
+      `--- Sending weekly bite notification to ${tokens.length} tokens`,
+    );
+    logger.info('--- Chunks:', chunks);
+
+    for (const chunk of chunks) {
+      const res = await admin.messaging().sendEachForMulticast({
+        tokens: chunk,
+        notification: {
+          title: "🍽️ This week's bites are here",
+          body,
+        },
+        data: {
+          type: 'WEEKLY_BITE_SUMMARY',
+          biteCount: `${biteCount}`,
+        },
+      });
+
+      const invalidTokens = getInvalidTokens(res, chunk);
+
+      logger.info('--- Invalid tokens to clean up:', invalidTokens);
+      if (invalidTokens.length > 0) {
+        await cleanupInvalidTokens(invalidTokens);
+      }
+    }
 
     logger.info('--- Weekly bite notification sent successfully');
   },

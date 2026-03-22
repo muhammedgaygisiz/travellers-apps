@@ -53,16 +53,6 @@
     }
 
     <div class="home-header-container" slot="fixed">
-      @if (isSearchVisible()) {
-        <ion-searchbar
-          data-cy="search-input"
-          placeholder="Search bites..."
-          [value]="searchTerm()"
-          (ionInput)="onSearchInput($event)"
-          animated
-        />
-      }
-
       <ion-text color="secondary" class="subheadline">
         <h4>{{ title() }}</h4>
       </ion-text>
@@ -168,6 +158,16 @@
       <ion-button fill="clear" (click)="refresh.emit()">RETRY</ion-button>
       <ion-button fill="clear" (click)="closeGpsError.emit()">CLOSE</ion-button>
     </ion-card>
+  }
+
+  @if (isSearchVisible()) {
+    <ion-searchbar
+      data-cy="search-input"
+      placeholder="Search ..."
+      [value]="searchTerm()"
+      (ionInput)="onSearchInput($event)"
+      animated
+    />
   }
 
   @for (bite of displayedBites(); track bite.id) {

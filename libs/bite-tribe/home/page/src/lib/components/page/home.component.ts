@@ -227,7 +227,15 @@ export class BiteTribeHomeComponent {
 
     return allBites.filter((bite) => {
       const name = normalize(bite.name);
-      return name.includes(term) || getSimilarityScore(term, name).length > 0;
+      const foundInName =
+        name.includes(term) || getSimilarityScore(term, name).length > 0;
+
+      const restoName = normalize(bite.place);
+      const foundInRestoName =
+        restoName.includes(term) ||
+        getSimilarityScore(term, restoName).length > 0;
+
+      return foundInName || foundInRestoName;
     });
   });
 

@@ -7,7 +7,8 @@ export interface PublicUser {
   about?: string;
   public?: boolean;
   subscriptionTier?: number;
-  isBusiness?: boolean;
+  isOrganisation?: boolean;
+  isRestaurant?: boolean;
 
   createdAt?: string;
   createdAtTimestamp?: number;

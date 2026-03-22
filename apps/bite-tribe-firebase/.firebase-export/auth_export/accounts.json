@@ -2,12 +2,32 @@
   "kind": "identitytoolkit#DownloadAccountResponse",
   "users": [
     {
+      "localId": "gSJki3B6jFSYQWlZZSUtb58iN7tA",
+      "lastLoginAt": "1774180212582",
+      "emailVerified": false,
+      "email": "organisation@test.com",
+      "salt": "fakeSaltSiManBbkWVbN09ifE31v",
+      "passwordHash": "fakeHash:salt=fakeSaltSiManBbkWVbN09ifE31v:password=Test4711",
+      "passwordUpdatedAt": 1774180212582,
+      "validSince": "1774180212",
+      "createdAt": "1774180212582",
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "email": "organisation@test.com",
+          "federatedId": "organisation@test.com",
+          "rawId": "organisation@test.com"
+        }
+      ],
+      "lastRefreshAt": "2026-03-22T14:52:07.254Z"
+    },
+    {
       "localId": "helULN26hP9Qeig6NQLIEcEe3AP6",
       "createdAt": "1768318963883",
-      "lastLoginAt": "1773780167480",
+      "lastLoginAt": "1774191280044",
       "passwordHash": "fakeHash:salt=fakeSalt0X2Qe62iMEaEn2ncHKRf:password=Test4711",
       "salt": "fakeSalt0X2Qe62iMEaEn2ncHKRf",
-      "passwordUpdatedAt": 1774179990700,
+      "passwordUpdatedAt": 1774180186292,
       "providerUserInfo": [
         {
           "providerId": "password",
@@ -16,10 +36,11 @@
           "rawId": "test@test.com"
         }
       ],
-      "validSince": "1774179990",
+      "validSince": "1774180186",
       "email": "test@test.com",
       "emailVerified": false,
-      "disabled": false
+      "disabled": false,
+      "lastRefreshAt": "2026-03-22T14:54:40.044Z"
     },
     {
       "localId": "sKjq4POYpxuV27V3JIJfshUre4Cw",
@@ -27,7 +48,7 @@
       "lastLoginAt": "1768566470321",
       "passwordHash": "fakeHash:salt=fakeSaltNTo2Jz0URIQNNvgqbEL8:password=Test4711",
       "salt": "fakeSaltNTo2Jz0URIQNNvgqbEL8",
-      "passwordUpdatedAt": 1774179990701,
+      "passwordUpdatedAt": 1774180186292,
       "providerUserInfo": [
         {
           "providerId": "password",
@@ -36,7 +57,7 @@
           "rawId": "test2@test.com"
         }
       ],
-      "validSince": "1774179990",
+      "validSince": "1774180186",
       "email": "test2@test.com",
       "emailVerified": false,
       "disabled": false

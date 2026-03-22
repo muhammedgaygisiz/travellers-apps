@@ -22,6 +22,21 @@
   (gotoAbout)="gotoAbout.emit()"
   (gotoMarketPlace)="gotoMarketPlace.emit()"
 >
+  @if (showSearch()) {
+    <ion-buttons header-end slot="end">
+      <ion-button
+        data-cy="btn-search"
+        (click)="toggleSearch()"
+        [attr.aria-pressed]="isSearchVisible()"
+      >
+        <ion-icon
+          slot="icon-only"
+          [name]="isSearchVisible() ? 'close-outline' : 'search-outline'"
+          color="secondary"
+        />
+      </ion-button>
+    </ion-buttons>
+  }
   <ion-content class="ion-padding">
     <ion-refresher slot="fixed" (ionRefresh)="refreshBites($event)">
       <ion-refresher-content />
@@ -143,6 +158,16 @@
       <ion-button fill="clear" (click)="refresh.emit()">RETRY</ion-button>
       <ion-button fill="clear" (click)="closeGpsError.emit()">CLOSE</ion-button>
     </ion-card>
+  }
+
+  @if (isSearchVisible()) {
+    <ion-searchbar
+      data-cy="search-input"
+      placeholder="Search ..."
+      [value]="searchTerm()"
+      (ionInput)="onSearchInput($event)"
+      animated
+    />
   }
 
   @for (bite of displayedBites(); track bite.id) {

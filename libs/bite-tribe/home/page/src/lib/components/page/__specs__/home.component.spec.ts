@@ -266,4 +266,64 @@ describe('BiteTribeHomeComponent', () => {
       expect(refreshEmitSpy).toHaveBeenCalled();
     });
   });
+
+  describe('search functionality', () => {
+    const mockBites = [
+      { id: '1', name: 'Burger', place: 'Burger Place' },
+      { id: '2', name: 'Pizza', place: 'Pizza Place' },
+      { id: '3', name: 'Sushi', place: 'Sushi Bar' },
+    ] as any[];
+
+    beforeEach(() => {
+      componentRef.setInput('bites', mockBites);
+    });
+
+    it('should return all bites when searchTerm is empty', () => {
+      component.searchTerm.set('');
+      expect(component.filteredBites()).toEqual(mockBites);
+    });
+
+    it('should filter bites by exact name match', () => {
+      component.searchTerm.set('Pizza');
+      const result = component.filteredBites();
+      expect(result.length).toBe(1);
+      expect(result[0].name).toBe('Pizza');
+    });
+
+    it('should filter bites case-insensitively', () => {
+      component.searchTerm.set('burger');
+      const result = component.filteredBites();
+      expect(result.length).toBe(1);
+      expect(result[0].name).toBe('Burger');
+    });
+
+    it('should toggle isSearchVisible on toggleSearch', () => {
+      expect(component.isSearchVisible()).toBe(false);
+      component.toggleSearch();
+      expect(component.isSearchVisible()).toBe(true);
+      component.toggleSearch();
+      expect(component.isSearchVisible()).toBe(false);
+    });
+
+    it('should clear searchTerm when hiding search', () => {
+      component.isSearchVisible.set(true);
+      component.searchTerm.set('Pizza');
+      component.toggleSearch();
+      expect(component.searchTerm()).toBe('');
+    });
+
+    it('should update searchTerm and reset page on onSearchInput', () => {
+      component.currentPage.set(3);
+      const event = { target: { value: 'Sushi' } } as any;
+      component.onSearchInput(event);
+      expect(component.searchTerm()).toBe('Sushi');
+      expect(component.currentPage()).toBe(1);
+    });
+
+    it('should use filteredBites for displayedBites', () => {
+      component.searchTerm.set('Burger');
+      expect(component.displayedBites().length).toBe(1);
+      expect(component.displayedBites()[0].name).toBe('Burger');
+    });
+  });
 });

@@ -1,9 +1,9 @@
 @let userData = user();
 
-<div class="profile-header">
+<div class="profile-header ion-display-flex ion-justify-content-between">
   <div class="photo-column">
     @if (validPhotoUrl()) {
-    <ion-avatar class="profile-avatar">
+    <ion-avatar class="profile-avatar ion-display-flex">
       <img
         [src]="userData?.photoUrl"
         [alt]="userData?.displayName"
@@ -15,7 +15,9 @@
     }
   </div>
 
-  <div class="header-column">
+  <div
+    class="header-column ion-display-flex ion-flex-column ion-justify-content-center"
+  >
     <strong>{{ userData?.isOrganisation ? 'Bite Trails' : 'Bites' }}</strong>
     @let calculatedBadgeColor = badgeColor(); @if (calculatedBadgeColor) {
     <ion-badge class="bite-badge {{ calculatedBadgeColor }}">
@@ -23,13 +25,17 @@
     </ion-badge>
     } @else { {{ userData?.isOrganisation ? biteTrailCount() : biteCount() }} }
   </div>
-  <div class="header-column">
+  <div
+    class="header-column ion-display-flex ion-flex-column ion-justify-content-center"
+  >
     <strong>Following</strong>
     <span class="clickable" (click)="handleFollowingClick()"
       >{{ followingCount() }}</span
     >
   </div>
-  <div class="header-column">
+  <div
+    class="header-column ion-display-flex ion-flex-column ion-justify-content-center"
+  >
     <strong>Followers</strong>
     <span class="clickable" (click)="handleFollowersClick()"
       >{{ followerCount() }}</span

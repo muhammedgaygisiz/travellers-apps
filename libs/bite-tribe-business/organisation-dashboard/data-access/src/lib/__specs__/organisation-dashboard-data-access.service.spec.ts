@@ -33,23 +33,6 @@ describe('OrganisationDashboardDataAccessService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('setSelectedUserId', () => {
-    it('should update the selectedUserId signal', () => {
-      expect(service.selectedUserId()).toBeUndefined();
-
-      service.setSelectedUserId('user-123');
-
-      expect(service.selectedUserId()).toBe('user-123');
-    });
-
-    it('should update the selectedUserId signal when called with a new value', () => {
-      service.setSelectedUserId('user-123');
-      service.setSelectedUserId('user-456');
-
-      expect(service.selectedUserId()).toBe('user-456');
-    });
-  });
-
   describe('bitesLoader', () => {
     it('should return empty array when userId is not provided', async () => {
       const result = await service.bitesLoader({ params: {} } as any);

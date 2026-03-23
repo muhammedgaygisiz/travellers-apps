@@ -36,7 +36,6 @@ export class RestaurantService {
     }
 
     const menuId = restaurant?.menuId;
-
     if (menuId) {
       const normalisedMenuId = this.normaliseMenuId(restaurant);
 
@@ -63,7 +62,7 @@ export class RestaurantService {
   }
 
   private normaliseMenuId(
-    restaurant: Restaurant,
+    restaurant: Restaurant | undefined,
     fallbackMenuId?: string,
   ): string | undefined {
     if (restaurant?.menuId) {

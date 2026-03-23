@@ -2,9 +2,27 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import { SupportedLang } from 'bite-tribe-business/shell';
+
 export const environment = {
   production: false,
   isBusiness: true,
+  i18n: {
+    locales: [
+      SupportedLang.EN,
+      SupportedLang.DE,
+      SupportedLang.TR,
+      SupportedLang.FR,
+      SupportedLang.ES,
+    ],
+    defaultLang: SupportedLang.EN,
+  },
+  emulators: {
+    host: 'localhost',
+    firestorePort: 8080,
+    storagePort: 9199,
+    authUrl: 'http://localhost:9099',
+  },
 };
 
 /*

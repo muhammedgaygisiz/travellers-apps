@@ -18,7 +18,15 @@ export const ROUTES: Routes = withAuthRoutes([
     path: 'migrations',
     loadComponent: () =>
       import('bite-tribe-business/migrations').then(
-        (m) => m.MigrationsContainer
+        (m) => m.MigrationsContainer,
+      ),
+    canActivate: [authGuard],
+  },
+  {
+    path: ':organisationId/dashboard',
+    loadComponent: () =>
+      import('bite-tribe-business/organisation-dashboard').then(
+        (m) => m.OrganisationDashboardContainer,
       ),
     canActivate: [authGuard],
   },
@@ -26,7 +34,7 @@ export const ROUTES: Routes = withAuthRoutes([
     path: 'new-restaurant',
     loadComponent: () =>
       import('bite-tribe-business/restaurant').then(
-        (m) => m.RestaurantContainer
+        (m) => m.RestaurantContainer,
       ),
     canActivate: [authGuard],
   },

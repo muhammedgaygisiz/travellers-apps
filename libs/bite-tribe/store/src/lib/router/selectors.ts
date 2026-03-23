@@ -37,3 +37,8 @@ export const biteTrailId = createSelector(
   selectRouteParams,
   (params) => params?.['biteTrailId'],
 );
+
+export const organisationId = createSelector(
+  selectRouteParams,
+  (params) => params?.['organisationId'],
+);

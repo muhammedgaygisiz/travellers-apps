@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PageComponent } from '../page.component';
-import { addNecessaryIcons, APP_ICON, APP_TITLE, getIonicConfig } from 'utils';
+import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 

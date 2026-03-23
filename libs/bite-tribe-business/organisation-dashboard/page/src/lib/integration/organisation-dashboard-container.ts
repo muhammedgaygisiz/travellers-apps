@@ -8,6 +8,8 @@ import { OrganisationDashboard } from '../components/page/organisation-dashboard
     <organisation-dashboard
       class="ion-page"
       [employees]="service.employees.value()"
+      [bites]="service.bites.value()"
+      (employeeSelected)="service.selectEmployee($event)"
     />
   `,
   imports: [OrganisationDashboard],

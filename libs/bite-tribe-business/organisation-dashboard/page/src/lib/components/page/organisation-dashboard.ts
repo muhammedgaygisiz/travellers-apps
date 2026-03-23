@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
   IonCard,
@@ -10,6 +10,7 @@ import {
   IonLabel,
   IonList,
 } from '@ionic/angular/standalone';
+import { Bite, PublicUser } from 'model';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +30,9 @@ import {
   styleUrl: 'organisation-dashboard.scss',
 })
 export class OrganisationDashboard {
+  employees = input<PublicUser[] | undefined>([]);
+  bites = input<Bite[] | undefined>([]);
+
   protected selectEmployee(): void {
     //TODO: implement employee selection logic
   }

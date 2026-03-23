@@ -80,6 +80,7 @@ import {
   biteTrailId as biteTrailIdFromUrlSelector,
   followType,
   userId as userIdFromUrl,
+  organisationId as organisationIdFromUrlSelector,
 } from './router/selectors';
 
 @Injectable({
@@ -143,6 +144,7 @@ export class BiteTribeStoreService implements StoreService {
   userIdFromUrl$ = this.store.select(userIdFromUrl);
   biteIdFromUrl$ = this.store.select(biteIdFromUrl);
   biteTrailIdFromUrl$ = this.store.select(biteTrailIdFromUrlSelector);
+  organisationIdFromUrl$ = this.store.select(organisationIdFromUrlSelector);
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);
@@ -152,6 +154,7 @@ export class BiteTribeStoreService implements StoreService {
   userIdFromUrl = toSignal(this.userIdFromUrl$);
   biteIdFromUrl = toSignal(this.biteIdFromUrl$);
   biteTrailIdFromUrl = toSignal(this.biteTrailIdFromUrl$);
+  organisationIdFromUrl = toSignal(this.organisationIdFromUrl$);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());

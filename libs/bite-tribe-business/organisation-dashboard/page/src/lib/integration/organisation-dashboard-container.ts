@@ -4,7 +4,12 @@ import { OrganisationDashboard } from '../components/page/organisation-dashboard
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: ` <organisation-dashboard class="ion-page" /> `,
+  template: `
+    <organisation-dashboard
+      class="ion-page"
+      [employees]="service.employees.value()"
+    />
+  `,
   imports: [OrganisationDashboard],
 })
 export class OrganisationDashboardContainer {

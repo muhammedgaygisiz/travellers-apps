@@ -82,6 +82,7 @@ export class BucketlistApiService {
         userId: user?.uid || '',
         name: params.bucketListName,
         biteIds: params.biteIds,
+        biteTrailId: params.biteTrailId,
         createdAt: new Date().toISOString(),
         createdAtTimestamp: Date.now(),
       },

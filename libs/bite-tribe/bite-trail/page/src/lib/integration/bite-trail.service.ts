@@ -15,6 +15,7 @@ export class BiteTrailService {
   isAuthenticated = this.dataAccess.isAuthenticated;
   biteTrailId = this.dataAccess.biteTrailIdFromUrl;
   isFree = this.dataAccess.isFree;
+  savedBucketlistId = this.dataAccess.savedBucketlistId;
 
   biteClicked(bite: Bite): void {
     void this.navController.navigateForward([PATH.BITE, bite.id]);
@@ -58,5 +59,18 @@ export class BiteTrailService {
 
   getForFree(): void {
     this.dataAccess.saveBiteTrailAsBucketList();
+  }
+
+  goToSavedBucketList(): void {
+    const bucketlistId = this.savedBucketlistId();
+
+    if (!bucketlistId) {
+      return;
+    }
+
+    void this.navController.navigateForward([
+      PATH.MY_BUCKETLISTS,
+      bucketlistId,
+    ]);
   }
 }

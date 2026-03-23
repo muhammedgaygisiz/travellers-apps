@@ -13,6 +13,7 @@ const mockStoreService = {
   userId$: of('user-1'),
   isAuthenticated$: of(true),
   position$: of({ latitude: 47.3769, longitude: 8.5417 }),
+  bucketlists$: of([]),
   saveBiteTrailAsBucketList: jest.fn(),
 };
 
@@ -78,14 +79,55 @@ describe(BiteTrailDataAccessService.name, () => {
       expect(mockStoreService.saveBiteTrailAsBucketList).not.toHaveBeenCalled();
     });
 
-    it('should dispatch saveBiteTrailAsBucketList with trail name and biteIds', () => {
-      const trail = { name: 'My Trail', biteIds: ['b1', 'b2'], price: 0 };
+    it('should dispatch saveBiteTrailAsBucketList with trail name, biteIds and biteTrailId', () => {
+      const trail = {
+        id: 'trail-1',
+        name: 'My Trail',
+        biteIds: ['b1', 'b2'],
+        price: 0,
+      };
       (service as any).biteTrail = { value: signal(trail) };
       service.saveBiteTrailAsBucketList();
       expect(mockStoreService.saveBiteTrailAsBucketList).toHaveBeenCalledWith({
         bucketListName: 'My Trail',
         biteIds: ['b1', 'b2'],
+        biteTrailId: 'trail-1',
       });
+    });
+  });
+
+  describe('savedBucketlistId', () => {
+    it('should return null when no bucketlists exist', () => {
+      (service as any).bucketlists = signal([]);
+      expect(service.savedBucketlistId()).toBeNull();
+    });
+
+    it('should return null when no bucketlist matches the current bite trail', () => {
+      biteTrailIdSignal.set('trail-1');
+      (service as any).bucketlists = signal([
+        {
+          id: 'bl-1',
+          biteTrailId: 'other-trail',
+          name: 'Other',
+          biteIds: [],
+          userId: 'u',
+        },
+      ]);
+      expect(service.savedBucketlistId()).toBeNull();
+    });
+
+    it('should return bucketlist id when a bucketlist matches the current bite trail', () => {
+      biteTrailIdSignal.set('trail-1');
+      (service as any).bucketlists = signal([
+        {
+          id: 'bl-42',
+          biteTrailId: 'trail-1',
+          name: 'My Trail BL',
+          biteIds: [],
+          userId: 'u',
+        },
+      ]);
+      expect(service.savedBucketlistId()).toBe('bl-42');
     });
   });
 

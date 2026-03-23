@@ -14,6 +14,7 @@ const mockDataAccess = {
   isAuthenticated: signal(true),
   biteTrailIdFromUrl: signal<string | undefined>('trail-1'),
   isFree: signal(false),
+  savedBucketlistId: signal<string | null>(null),
   clearFilters: jest.fn(),
   saveBiteTrailAsBucketList: mockSaveBiteTrailAsBucketList,
 };
@@ -99,6 +100,23 @@ describe(BiteTrailService.name, () => {
     it('should call saveBiteTrailAsBucketList on data access', () => {
       service.getForFree();
       expect(mockSaveBiteTrailAsBucketList).toHaveBeenCalled();
+    });
+  });
+
+  describe('goToSavedBucketList', () => {
+    it('should navigate to the saved bucket list when savedBucketlistId is set', () => {
+      mockDataAccess.savedBucketlistId.set('bl-42');
+      service.goToSavedBucketList();
+      expect(mockNavigateForward).toHaveBeenCalledWith([
+        PATH.MY_BUCKETLISTS,
+        'bl-42',
+      ]);
+    });
+
+    it('should not navigate when savedBucketlistId is null', () => {
+      mockDataAccess.savedBucketlistId.set(null);
+      service.goToSavedBucketList();
+      expect(mockNavigateForward).not.toHaveBeenCalled();
     });
   });
 });

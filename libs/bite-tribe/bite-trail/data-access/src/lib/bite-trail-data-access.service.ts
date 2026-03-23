@@ -24,6 +24,7 @@ export class BiteTrailDataAccessService {
   });
   gpsPosition = toSignal(this.storeService.position$);
   biteTrailIdFromUrl = this.storeService.biteTrailIdFromUrl;
+  bucketlists = toSignal(this.storeService.bucketlists$, { initialValue: [] });
 
   biteTrailLoader: ResourceLoader<
     BiteTrail | undefined,
@@ -60,6 +61,13 @@ export class BiteTrailDataAccessService {
 
   isFree = computed(() => (this.biteTrail.value()?.price ?? -1) === 0);
 
+  savedBucketlistId = computed(() => {
+    const biteTrailId = this.biteTrailIdFromUrl();
+    const bucketlists = this.bucketlists();
+    const found = bucketlists.find((bl) => bl.biteTrailId === biteTrailId);
+    return found?.id ?? null;
+  });
+
   saveBiteTrailAsBucketList(): void {
     const biteTrail = this.biteTrail.value();
 
@@ -70,6 +78,7 @@ export class BiteTrailDataAccessService {
     this.storeService.saveBiteTrailAsBucketList({
       bucketListName: biteTrail.name,
       biteIds: biteTrail.biteIds,
+      biteTrailId: biteTrail.id,
     });
   }
 

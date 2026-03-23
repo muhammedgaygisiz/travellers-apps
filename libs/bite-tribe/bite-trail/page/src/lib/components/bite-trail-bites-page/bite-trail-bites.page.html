@@ -2,9 +2,9 @@
   [showHeaderMenu]="false"
   [showFooter]="isFree()"
   [showAddButton]="isFree()"
-  [addButtonText]="'Get BiteTrail for free'"
+  [addButtonText]="savedBucketlistId() ? 'Go to saved Bucket list' : 'Get BiteTrail for free'"
   [enableBackButton]="true"
-  (addButtonClick)="getForFree.emit()"
+  (addButtonClick)="savedBucketlistId() ? goToSavedBucketList.emit() : getForFree.emit()"
 >
   <ion-content class="ion-padding">
     <div class="bite-trail-header-container" slot="fixed">
@@ -25,7 +25,20 @@
     </div>
 
     <div class="bite-trail-scrolling-content-container">
-      @if (!bites().length) {
+      @if (savedBucketlistId()) {
+      <ion-card class="saved-hint-card">
+        <ion-card-content class="ion-display-flex ion-align-items-center">
+          <ion-icon
+            name="checkmark-circle-outline"
+            color="success"
+            class="ion-margin-end"
+          />
+          <ion-text color="secondary"
+            >You already saved this BiteTrail to your Bucket list.</ion-text
+          >
+        </ion-card-content>
+      </ion-card>
+      } @if (!bites().length) {
       <ion-card>
         <ion-card-content>
           <ion-text color="primary">No bites found in this trail.</ion-text>

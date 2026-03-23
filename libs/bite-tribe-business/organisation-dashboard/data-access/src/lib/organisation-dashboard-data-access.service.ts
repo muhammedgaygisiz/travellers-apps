@@ -59,33 +59,37 @@ export class OrganisationDashboardDataAccessService {
       return [];
     }
 
-    const allBitesPromises = userIds.map(async (userId) => {
-      const biteDocsByUserId = await FirebaseFirestore.getCollection({
-        reference: BITE_COLLECTION,
-        compositeFilter: {
-          type: 'and',
-          queryConstraints: [
-            {
-              type: 'where',
-              fieldPath: 'userId',
-              opStr: '==',
-              value: userId,
-            },
-          ],
-        },
-      });
+    const allBitesPromises: Promise<Bite[]>[] = userIds.map(
+      async (userId: string) => {
+        const biteDocsByUserId = await FirebaseFirestore.getCollection({
+          reference: BITE_COLLECTION,
+          compositeFilter: {
+            type: 'and',
+            queryConstraints: [
+              {
+                type: 'where',
+                fieldPath: 'userId',
+                opStr: '==',
+                value: userId,
+              },
+            ],
+          },
+        });
 
-      if (!biteDocsByUserId?.snapshots?.length) {
-        return [];
-      }
+        if (!biteDocsByUserId?.snapshots?.length) {
+          return [] as Bite[];
+        }
 
-      return biteDocsByUserId.snapshots.map(
-        (doc) => ({ ...doc.data, id: doc.id }) as Bite,
-      );
-    });
+        return biteDocsByUserId.snapshots.map(
+          (doc) => ({ ...doc.data, id: doc.id }) as Bite,
+        );
+      },
+    );
 
     const results = await Promise.all(allBitesPromises);
-    return results.flat();
+    return results
+      .map((res) => res)
+      .reduce((acc, bites) => [...acc, ...bites], []);
   };
 
   employees = resource({

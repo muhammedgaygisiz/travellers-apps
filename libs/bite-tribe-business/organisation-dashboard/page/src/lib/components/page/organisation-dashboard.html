@@ -15,7 +15,7 @@
           </ion-card-header>
           <ion-card-content>
             <ion-list lines="full">
-              @for ( employee of employees(); track employee.userId ) {
+              @for (employee of employees(); track employee.userId) {
               <ion-item [button]="true" (click)="toggleEmployee(employee)">
                 <ion-checkbox
                   slot="start"
@@ -28,10 +28,9 @@
               <p>No employees found.</p>
               }
             </ion-list>
-            <ion-button expand="block" (click)="onLoadBitesClicked()"
-              >Load Bites</ion-button
-            >
           </ion-card-content>
+
+          <ion-button (click)="onLoadBitesClicked()"> Load Bites </ion-button>
         </ion-card>
       </div>
       <div
@@ -48,17 +47,18 @@
                 <ion-checkbox slot="start" aria-label="Toggle Bite selection" />
                 <ion-label>{{ bite.name }}</ion-label>
                 <ion-note slot="end"
-                  >{{ getEmployeeName(bite.userId) }}</ion-note
-                >
+                  >{{ getEmployeeName(bite.userId) }}
+                </ion-note>
               </ion-item>
               } @empty {
               <p>No bites found.</p>
               }
             </ion-list>
-            <ion-button expand="block" (click)="onCreateBiteTrailClicked()"
-              >Create Bite Trail</ion-button
-            >
           </ion-card-content>
+
+          <ion-button (click)="onCreateBiteTrailClicked()">
+            Create Bite Trail
+          </ion-button>
         </ion-card>
       </div>
       <div

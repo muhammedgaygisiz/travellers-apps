@@ -10,6 +10,6 @@ export class OrganisationDashboardService {
   bites = this.dataAccess.bites;
 
   selectEmployee(user: PublicUser): void {
-    this.dataAccess.setSelectedUserId(user.userId);
+    this.dataAccess.selectedUserId.set(user.userId);
   }
 }

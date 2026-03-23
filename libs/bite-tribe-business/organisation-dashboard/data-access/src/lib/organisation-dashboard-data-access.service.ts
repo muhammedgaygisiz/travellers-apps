@@ -95,8 +95,4 @@ export class OrganisationDashboardDataAccessService {
     }),
     loader: this.bitesLoader.bind(this),
   });
-
-  setSelectedUserId(userId: string): void {
-    this.selectedUserId.set(userId);
-  }
 }

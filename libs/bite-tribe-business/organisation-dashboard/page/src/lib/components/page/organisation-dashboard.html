@@ -46,8 +46,8 @@
               <ion-item>
                 <ion-checkbox slot="start" aria-label="Toggle Bite selection" />
                 <ion-label>{{ bite.name }}</ion-label>
-                <ion-note slot="end"
-                  >{{ getEmployeeName(bite.userId) }}
+                <ion-note slot="end">
+                  {{ bite.userId | employeeName: employees() }}
                 </ion-note>
               </ion-item>
               } @empty {

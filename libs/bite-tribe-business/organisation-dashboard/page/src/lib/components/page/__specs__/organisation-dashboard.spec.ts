@@ -75,35 +75,6 @@ describe('OrganisationDashboard', () => {
     });
   });
 
-  describe('getEmployeeName', () => {
-    it('should return the display name for a known userId', () => {
-      const employees: PublicUser[] = [
-        {
-          userId: 'user-1',
-          displayName: 'Alice',
-          email: 'alice@example.com',
-          photoUrl: '',
-        },
-      ];
-
-      compRef.setInput('employees', employees);
-      fixture.detectChanges();
-
-      expect(component['getEmployeeName']('user-1')).toBe('Alice');
-    });
-
-    it('should return empty string for an unknown userId', () => {
-      compRef.setInput('employees', []);
-      fixture.detectChanges();
-
-      expect(component['getEmployeeName']('unknown')).toBe('');
-    });
-
-    it('should return empty string when userId is undefined', () => {
-      expect(component['getEmployeeName'](undefined)).toBe('');
-    });
-  });
-
   describe('loadBitesClicked output', () => {
     it('should emit loadBitesClicked event when Load Bites button is clicked', () => {
       const loadBitesClickedSpy = jest.fn();

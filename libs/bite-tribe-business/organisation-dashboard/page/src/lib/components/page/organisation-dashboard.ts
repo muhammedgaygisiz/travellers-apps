@@ -19,6 +19,7 @@ import {
   IonNote,
 } from '@ionic/angular/standalone';
 import { Bite, PublicUser } from 'model';
+import { EmployeeNamePipe } from './pipes/employee-name.pipe';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +38,7 @@ import { Bite, PublicUser } from 'model';
     IonCheckbox,
     IonButton,
     IonNote,
+    EmployeeNamePipe,
   ],
   styleUrl: 'organisation-dashboard.scss',
 })
@@ -63,14 +65,5 @@ export class OrganisationDashboard {
 
   protected isEmployeeSelected(employee: PublicUser): boolean {
     return this.selectedEmployeeIds().includes(employee.userId);
-  }
-
-  protected getEmployeeName(userId: string | undefined): string {
-    if (!userId) {
-      return '';
-    }
-    return (
-      this.employees()?.find((e) => e.userId === userId)?.displayName ?? ''
-    );
   }
 }

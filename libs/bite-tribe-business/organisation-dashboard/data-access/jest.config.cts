@@ -1,3 +1,11 @@
+const NODE_MODULES_TO_IGNORE = [
+  '.*.mjs$',
+  'ionicons',
+  '@ionic',
+  '@stencil',
+  '@capacitor',
+].join('|');
+
 module.exports = {
   displayName: 'bite-tribe-business/organisation-dashboard-data-access',
   preset: '../../../../jest.preset.js',
@@ -10,10 +18,11 @@ module.exports = {
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
         stringifyContentPathRegex: '\\.(html|svg)$',
+        isolatedModules: true,
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+  transformIgnorePatterns: [`node_modules/(?!(${NODE_MODULES_TO_IGNORE}))`],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',

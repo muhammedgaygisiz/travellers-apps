@@ -1,10 +1,16 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
   IonCard,
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
+  IonCheckbox,
   IonContent,
   IonItem,
   IonLabel,
@@ -26,6 +32,7 @@ import { Bite, PublicUser } from 'model';
     IonList,
     IonItem,
     IonLabel,
+    IonCheckbox,
   ],
   styleUrl: 'organisation-dashboard.scss',
 })
@@ -33,7 +40,9 @@ export class OrganisationDashboard {
   employees = input<PublicUser[] | undefined>([]);
   bites = input<Bite[] | undefined>([]);
 
-  protected selectEmployee(): void {
-    //TODO: implement employee selection logic
+  readonly employeeSelected = output<PublicUser>();
+
+  protected selectEmployee(employee: PublicUser): void {
+    this.employeeSelected.emit(employee);
   }
 }

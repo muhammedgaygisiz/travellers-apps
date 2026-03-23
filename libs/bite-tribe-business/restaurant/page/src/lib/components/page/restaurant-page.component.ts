@@ -30,7 +30,8 @@ import { BiteComponent } from 'bite-tribe-common/bite';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'restaurant-page',
-  templateUrl: './restaurant-page.component.html',
+  templateUrl: 'restaurant-page.component.html',
+  styleUrl: 'restaurant-page.component.scss',
   imports: [
     PageComponent,
     IonContent,
@@ -44,7 +45,6 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonButton,
     BiteComponent,
   ],
-  styleUrl: '/restaurant-page.component.scss',
 })
 export class RestaurantPageComponent {
   restaurant = input<Restaurant>();
@@ -71,11 +71,11 @@ export class RestaurantPageComponent {
 
     if (firstBite) {
       this.restaurantFormGroup.controls['latitude'].patchValue(
-        firstBite.position.latitude
+        firstBite.position.latitude,
       );
 
       this.restaurantFormGroup.controls['longitude'].patchValue(
-        firstBite.position.longitude
+        firstBite.position.longitude,
       );
     }
   });
@@ -84,7 +84,7 @@ export class RestaurantPageComponent {
     viewChild<ElementRef<HTMLInputElement>>('fileUploader');
 
   imageBase64 = toSignal(
-    this.restaurantFormGroup.controls['image'].valueChanges
+    this.restaurantFormGroup.controls['image'].valueChanges,
   );
 
   showImage = computed(() => {
@@ -97,9 +97,9 @@ export class RestaurantPageComponent {
     this.restaurantFormGroup.valueChanges.pipe(
       map(() => {
         return !this.restaurantFormGroup.valid;
-      })
+      }),
     ),
-    { initialValue: !this.restaurantFormGroup.valid }
+    { initialValue: !this.restaurantFormGroup.valid },
   );
 
   onImageUploadClick(): void {
@@ -125,7 +125,7 @@ export class RestaurantPageComponent {
       const reader = new FileReader();
       reader.onload = (): void => {
         this.restaurantFormGroup.controls['image'].patchValue(
-          reader.result as string
+          reader.result as string,
         );
       };
       reader.readAsDataURL(compressedFile);

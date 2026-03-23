@@ -90,6 +90,23 @@ describe('RestaurantService', () => {
       ]);
     });
 
+    it('should navigate to menu if restaurants menu id is set weirdly', () => {
+      const restaurant: Restaurant = {
+        id: 'restaurant123',
+        name: 'Test Restaurant',
+        menuId: '/menus/menu456',
+      } as Restaurant;
+      service.navigateToMenu(restaurant);
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        mockBite.id,
+        'restaurant',
+        restaurant.id,
+        'menu',
+        'menu456',
+      ]);
+    });
+
     it('should not navigate if no menuId', () => {
       const restaurant: Restaurant = {
         id: 'restaurant123',

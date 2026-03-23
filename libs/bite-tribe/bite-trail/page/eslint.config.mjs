@@ -7,16 +7,7 @@ export default [
   ...nx.configs['flat/angular-template'],
   {
     files: ['**/*.ts'],
-    rules: {
-      '@angular-eslint/directive-selector': [
-        'error',
-        {
-          type: 'attribute',
-          prefix: 'lib',
-          style: 'camelCase',
-        },
-      ],
-    },
+    rules: {},
   },
   {
     files: ['**/*.html'],

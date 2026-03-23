@@ -58,6 +58,21 @@ export class BiteTrailDataAccessService {
 
   biteTrailName = computed(() => this.biteTrail.value()?.name ?? '');
 
+  isFree = computed(() => (this.biteTrail.value()?.price ?? -1) === 0);
+
+  saveBiteTrailAsBucketList(): void {
+    const biteTrail = this.biteTrail.value();
+
+    if (!biteTrail) {
+      return;
+    }
+
+    this.storeService.saveBiteTrailAsBucketList({
+      bucketListName: biteTrail.name,
+      biteIds: biteTrail.biteIds,
+    });
+  }
+
   bitesLoader: ResourceLoader<Bite[], { biteIds: string[] | undefined }> =
     async ({ params }) => {
       const { biteIds } = params;

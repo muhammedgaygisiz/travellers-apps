@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
+  IonButton,
   IonCard,
   IonCardContent,
   IonChip,
@@ -29,6 +30,7 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonText,
     IonCard,
     IonCardContent,
+    IonButton,
     BiteComponent,
   ],
 })
@@ -36,8 +38,10 @@ export class BiteTrailBitesPage {
   bites = input<Bite[]>([]);
   title = input('');
   userId = input<string>();
+  isFree = input<boolean>(false);
 
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();
   readonly openMapView = output<void>();
+  readonly getForFree = output<void>();
 }

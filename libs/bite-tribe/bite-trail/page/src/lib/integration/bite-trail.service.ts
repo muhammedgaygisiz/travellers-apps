@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTrailDataAccessService } from 'bite-tribe/bite-trail-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import type { Bite, Like } from 'model';
+import type { Bite } from 'model';
 import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
@@ -14,6 +14,7 @@ export class BiteTrailService {
   userId = this.dataAccess.userId;
   isAuthenticated = this.dataAccess.isAuthenticated;
   biteTrailId = this.dataAccess.biteTrailIdFromUrl;
+  isFree = this.dataAccess.isFree;
 
   biteClicked(bite: Bite): void {
     void this.navController.navigateForward([PATH.BITE, bite.id]);
@@ -53,5 +54,9 @@ export class BiteTrailService {
       biteTrailId,
       'map-view',
     ]);
+  }
+
+  getForFree(): void {
+    this.dataAccess.saveBiteTrailAsBucketList();
   }
 }

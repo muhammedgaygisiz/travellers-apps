@@ -20,11 +20,13 @@ const mockBiteTrailService = {
   userId: signal('user-1'),
   isAuthenticated: signal(true),
   biteTrailId: signal('trail-1'),
+  isFree: signal(false),
   biteClicked: jest.fn(),
   restaurantClicked: jest.fn(),
   likeButtonClicked: jest.fn(),
   sortingChange: jest.fn(),
   openMapView: jest.fn(),
+  getForFree: jest.fn(),
 };
 
 describe(BiteTrailContainerComponent.name, () => {

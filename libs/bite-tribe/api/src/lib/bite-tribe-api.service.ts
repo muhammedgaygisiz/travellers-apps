@@ -6,6 +6,7 @@ import {
   Bucketlist,
   CreateAndSaveToBucketListParams,
   CreateAndUploadImageCallbackParams,
+  CreateBucketListFromBiteTrailParams,
   Like,
   Link,
   Menu,
@@ -216,6 +217,12 @@ export class BiteTribeApiService {
 
   updateBucketlistName(bucketlistId: string, name: string): Promise<void> {
     return this.bucketlistApiService.updateBucketlistName(bucketlistId, name);
+  }
+
+  createBucketListFromBiteTrail(
+    params: CreateBucketListFromBiteTrailParams,
+  ): Promise<Bucketlist> {
+    return this.bucketlistApiService.createBucketListFromBiteTrail(params);
   }
 
   latestBites$(number: number): Observable<Bite[]> {

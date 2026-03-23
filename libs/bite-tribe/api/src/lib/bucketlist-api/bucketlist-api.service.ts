@@ -4,6 +4,7 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type {
   Bucketlist,
   CreateAndSaveToBucketListParams,
+  CreateBucketListFromBiteTrailParams,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
 } from 'model';
@@ -60,6 +61,29 @@ export class BucketlistApiService {
         biteIds: params.biteId ? [params.biteId] : [],
         createdAt: new Date().toISOString(),
         createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
+      },
+    });
+
+    const result = await FirebaseFirestore.getDocument({
+      reference: docResult.reference.path,
+    });
+
+    return result.snapshot.data as Bucketlist;
+  }
+
+  async createBucketListFromBiteTrail(
+    params: CreateBucketListFromBiteTrailParams,
+  ): Promise<Bucketlist> {
+    const user = this.authService.getUser();
+
+    const docResult = await FirebaseFirestore.addDocument({
+      reference: BUCKETLIST_COLLECTION,
+      data: {
+        userId: user?.uid || '',
+        name: params.bucketListName,
+        biteIds: params.biteIds,
+        createdAt: new Date().toISOString(),
+        createdAtTimestamp: Date.now(),
       },
     });
 

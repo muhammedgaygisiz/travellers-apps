@@ -12,9 +12,11 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [bites]="service.bites()"
       [title]="service.title()"
       [userId]="service.userId()"
+      [isFree]="service.isFree()"
       (biteClick)="service.biteClicked($event)"
       (restaurantClick)="service.restaurantClicked($event)"
       (openMapView)="service.openMapView()"
+      (getForFree)="service.getForFree()"
     />
   `,
   imports: [BiteTrailBitesPage],

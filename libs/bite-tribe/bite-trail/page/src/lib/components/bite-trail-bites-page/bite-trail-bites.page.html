@@ -1,7 +1,10 @@
 <ta-page
   [showHeaderMenu]="false"
-  [showFooter]="false"
+  [showFooter]="isFree()"
+  [showAddButton]="isFree()"
+  [addButtonText]="'Get for free'"
   [enableBackButton]="true"
+  (addButtonClick)="getForFree.emit()"
 >
   <ion-content class="ion-padding">
     <div class="bite-trail-header-container" slot="fixed">

@@ -6,13 +6,16 @@ import { signal } from '@angular/core';
 import type { Bite } from 'model';
 import { PATH } from 'utils';
 
+const mockSaveBiteTrailAsBucketList = jest.fn();
 const mockNavigateForward = jest.fn();
 const mockDataAccess = {
   biteTrailName: signal('Test Trail'),
   userId: signal('user-1'),
   isAuthenticated: signal(true),
   biteTrailIdFromUrl: signal<string | undefined>('trail-1'),
+  isFree: signal(false),
   clearFilters: jest.fn(),
+  saveBiteTrailAsBucketList: mockSaveBiteTrailAsBucketList,
 };
 
 describe(BiteTrailService.name, () => {
@@ -89,6 +92,13 @@ describe(BiteTrailService.name, () => {
       expect(mockNavigateForward).not.toHaveBeenCalled();
       // Restore
       mockDataAccess.biteTrailIdFromUrl.set('trail-1');
+    });
+  });
+
+  describe('getForFree', () => {
+    it('should call saveBiteTrailAsBucketList on data access', () => {
+      service.getForFree();
+      expect(mockSaveBiteTrailAsBucketList).toHaveBeenCalled();
     });
   });
 });

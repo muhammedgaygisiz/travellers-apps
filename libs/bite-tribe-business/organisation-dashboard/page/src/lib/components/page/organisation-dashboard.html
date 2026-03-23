@@ -2,5 +2,45 @@
   [showHeaderMenu]="false"
   [showFooter]="false"
   [enableBackButton]="true"
+  [fullWidth]="true"
 >
+  <ion-content class="ion-padding">
+    <div class="ion-display-flex ion-flex-row">
+      <div
+        class="ion-display-flex ion-flex-column ion-felx-2 ion-padding column"
+      >
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Employees</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="full">
+              <ion-item [button]="true" (click)="selectEmployee()">
+                <ion-label>Test User A</ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </div>
+      <div
+        class="ion-display-flex ion-flex-column ion-felx-2 ion-padding column"
+      >
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Bites</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="full">
+              <ion-item [button]="true">
+                <ion-label>Bite 1</ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </div>
+      <div
+        class="ion-display-flex ion-flex-column ion-felx-1 ion-padding column"
+      ></div>
+    </div>
+  </ion-content>
 </ta-page>

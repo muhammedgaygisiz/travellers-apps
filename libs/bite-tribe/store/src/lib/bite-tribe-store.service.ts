@@ -27,6 +27,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import type {
   Bite,
   CreateAndSaveToBucketListParams,
+  CreateBucketListFromBiteTrailParams,
   Like,
   Link,
   Menu,
@@ -262,6 +263,10 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(
       BucketlistActions.createAndSaveBiteIdToBucketlist(params),
     );
+  }
+
+  saveBiteTrailAsBucketList(params: CreateBucketListFromBiteTrailParams): void {
+    this.store.dispatch(BucketlistActions.saveBiteTrailAsBucketList(params));
   }
 
   removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams): void {

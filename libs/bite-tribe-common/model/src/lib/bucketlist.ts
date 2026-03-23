@@ -3,6 +3,7 @@ export interface Bucketlist {
   userId: string;
   name: string;
   biteIds: string[];
+  biteTrailId?: string;
 
   createdAt?: string;
   createdAtTimestamp?: number;

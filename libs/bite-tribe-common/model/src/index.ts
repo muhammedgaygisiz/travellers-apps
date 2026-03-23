@@ -8,6 +8,7 @@ export type * from './lib/geopoint';
 export type * from './lib/link';
 export type * from './lib/save-to-bucket-list-params';
 export type * from './lib/create-and-save-to-bucket-list-params';
+export type * from './lib/create-bucket-list-from-bite-trail-params';
 export type * from './lib/remove-bite-from-bucketlist-params';
 export type * from './lib/bucketlist';
 export type * from './lib/bite-trail';

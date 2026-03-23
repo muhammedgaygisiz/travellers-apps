@@ -2,6 +2,7 @@ import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import type {
   Bucketlist,
   CreateAndSaveToBucketListParams,
+  CreateBucketListFromBiteTrailParams,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
 } from 'model';
@@ -24,5 +25,8 @@ export const BucketlistActions = createActionGroup({
     'Deleted Bucketlist': emptyProps(),
     'Update Bucketlist Name': props<{ bucketlistId: string; name: string }>(),
     'Updated Bucketlist Name': emptyProps(),
+    'Save Bite Trail as Bucket List':
+      props<CreateBucketListFromBiteTrailParams>(),
+    'Saved Bite Trail as Bucket List': emptyProps(),
   },
 });

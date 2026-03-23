@@ -8,6 +8,7 @@ import { BucketListEffect } from '../effects';
 import { BucketlistActions } from '../actions';
 import SpyInstance = jest.SpyInstance;
 import { AuthService } from 'ta-firestore';
+import { NavController, ToastController } from '@ionic/angular';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -19,10 +20,21 @@ const BiteTribeApiServiceMock = {
   createBucketListAndSaveBiteIdToBucketList: jest.fn(),
   removeBiteFromBucketlist: jest.fn(),
   createBucketList: jest.fn(),
+  createBucketListFromBiteTrail: jest.fn(),
 };
 
 const MockedAuthService = {
   getUser: (): any => ({}),
+};
+
+const mockToastCreate = jest.fn().mockResolvedValue({ present: jest.fn() });
+const MockToastController = {
+  create: mockToastCreate,
+};
+
+const mockNavigateForward = jest.fn();
+const MockNavController = {
+  navigateForward: mockNavigateForward,
 };
 
 describe('BucketListEffect', () => {
@@ -33,6 +45,7 @@ describe('BucketListEffect', () => {
   let authService: AuthService;
 
   beforeEach(() => {
+    mockToastCreate.mockResolvedValue({ present: jest.fn() });
     scheduler = new TestScheduler(assertDeepEqual);
     TestBed.configureTestingModule({
       providers: [
@@ -41,6 +54,8 @@ describe('BucketListEffect', () => {
         provideMockStore(),
         { provide: BiteTribeApiService, useValue: BiteTribeApiServiceMock },
         { provide: AuthService, useValue: MockedAuthService },
+        { provide: ToastController, useValue: MockToastController },
+        { provide: NavController, useValue: MockNavController },
       ],
     });
 
@@ -198,6 +213,36 @@ describe('BucketListEffect', () => {
         expectObservable(effects.createBucketlistEffect$);
       });
       expect(createBucketListSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('saveBiteTrailAsBucketListEffect$', () => {
+    let createBucketListFromBiteTrailSpy: SpyInstance;
+
+    beforeEach(() => {
+      createBucketListFromBiteTrailSpy = jest
+        .spyOn(apiService, 'createBucketListFromBiteTrail')
+        .mockImplementation(() => of({}) as any);
+    });
+
+    it('should call createBucketListFromBiteTrail and dispatch savedBiteTrailAsBucketList', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: BucketlistActions.saveBiteTrailAsBucketList({
+            bucketListName: 'My Trail',
+            biteIds: ['bite-1', 'bite-2'],
+          }),
+        });
+
+        expectObservable(effects.saveBiteTrailAsBucketListEffect$).toBe('a', {
+          a: BucketlistActions.savedBiteTrailAsBucketList(),
+        });
+      });
+      expect(createBucketListFromBiteTrailSpy).toHaveBeenCalledWith({
+        bucketListName: 'My Trail',
+        biteIds: ['bite-1', 'bite-2'],
+        type: BucketlistActions.saveBiteTrailAsBucketList.type,
+      });
     });
   });
 });

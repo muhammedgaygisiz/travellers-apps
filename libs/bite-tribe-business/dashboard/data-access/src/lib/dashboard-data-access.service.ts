@@ -1,6 +1,6 @@
 import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { BiteTrail, PublicUser, Restaurant } from 'model';
+import { PublicUser, Restaurant } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 

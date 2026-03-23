@@ -149,7 +149,7 @@ $BORDER_RADIUS: 16px;
     'Segoe UI Emoji', 'Segoe UI Symbol';
   --ion-toolbar-background: #{$PRIMARY_COLOR};
   --ion-toolbar-border-color: var(--ion-color-primary-shade);
-  --ion-toolbar-color: #{SECONDARY_COLOR};
+  --ion-toolbar-color: #{$SECONDARY_COLOR};
 
   // General
   --border-color: var(--ion-color-secondary);
@@ -184,7 +184,7 @@ $BORDER_RADIUS: 16px;
   }
 
   //Image-Upload
-  --ion-image-upload-border-width: 1 * '1px';
+  --ion-image-upload-border-width: 1px;
   --ion-image-upload-border-color: black;
   --ion-image-upload-border-style: solid;
 

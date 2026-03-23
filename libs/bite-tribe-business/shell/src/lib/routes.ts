@@ -23,7 +23,7 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
-    path: ':organidationId/dashboard',
+    path: ':organisationId/dashboard',
     loadComponent: () =>
       import('bite-tribe-business/organisation-dashboard').then(
         (m) => m.OrganisationDashboardContainer,

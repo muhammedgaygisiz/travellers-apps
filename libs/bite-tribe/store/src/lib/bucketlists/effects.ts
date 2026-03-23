@@ -2,11 +2,12 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { BucketlistActions } from './actions';
-import { from, map, switchMap, tap } from 'rxjs';
+import { from, map, switchMap } from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { AuthService } from 'ta-firestore';
 import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
-import { ToastController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular';
+import { PATH } from 'utils';
 
 @Injectable()
 export class BucketListEffect {
@@ -14,6 +15,7 @@ export class BucketListEffect {
   private readonly api = inject(BiteTribeApiService);
   private readonly authService = inject(AuthService);
   private readonly toastController = inject(ToastController);
+  private readonly navController = inject(NavController);
 
   loadMyBucketlists$ = createEffect(() => {
     return this.actions$.pipe(
@@ -118,6 +120,41 @@ export class BucketListEffect {
       ),
     );
   });
+
+  saveBiteTrailAsBucketListEffect$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BucketlistActions.saveBiteTrailAsBucketList),
+      switchMap((params) =>
+        from(this.api.createBucketListFromBiteTrail(params)).pipe(
+          map(() => {
+            this.showBiteTrailSavedAsBucketListToast();
+            return BucketlistActions.savedBiteTrailAsBucketList();
+          }),
+        ),
+      ),
+    );
+  });
+
+  private async showBiteTrailSavedAsBucketListToast(): Promise<void> {
+    const toast = await this.toastController.create({
+      message: 'Bite trail saved as bucket list!',
+      position: 'bottom',
+      buttons: [
+        {
+          text: 'Go to Bucket Lists',
+          handler: (): void => {
+            void this.navController.navigateForward([PATH.MY_BUCKETLISTS]);
+          },
+        },
+      ],
+    });
+
+    if (!toast) {
+      return;
+    }
+
+    await toast.present();
+  }
 
   private async showSuccessfulChangeToast(
     bucketlistNameUpdated: string,

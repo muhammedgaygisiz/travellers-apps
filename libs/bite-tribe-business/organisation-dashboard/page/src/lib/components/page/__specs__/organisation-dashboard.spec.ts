@@ -27,8 +27,8 @@ describe('OrganisationDashboard', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('selectEmployee', () => {
-    it('should emit employeeSelected event with the selected employee', () => {
+  describe('toggleEmployee', () => {
+    it('should emit employeeToggled event with the toggled employee', () => {
       const employee: PublicUser = {
         userId: 'user-1',
         displayName: 'Test User',
@@ -36,12 +36,93 @@ describe('OrganisationDashboard', () => {
         photoUrl: 'photo.jpg',
       };
 
-      const employeeSelectedSpy = jest.fn();
-      component.employeeSelected.subscribe(employeeSelectedSpy);
+      const employeeToggledSpy = jest.fn();
+      component.employeeToggled.subscribe(employeeToggledSpy);
 
-      component['selectEmployee'](employee);
+      component['toggleEmployee'](employee);
 
-      expect(employeeSelectedSpy).toHaveBeenCalledWith(employee);
+      expect(employeeToggledSpy).toHaveBeenCalledWith(employee);
+    });
+  });
+
+  describe('isEmployeeSelected', () => {
+    it('should return true when employee is in selectedEmployeeIds', () => {
+      const employee: PublicUser = {
+        userId: 'user-1',
+        displayName: 'Alice',
+        email: 'alice@example.com',
+        photoUrl: '',
+      };
+
+      compRef.setInput('selectedEmployeeIds', ['user-1']);
+      fixture.detectChanges();
+
+      expect(component['isEmployeeSelected'](employee)).toBe(true);
+    });
+
+    it('should return false when employee is not in selectedEmployeeIds', () => {
+      const employee: PublicUser = {
+        userId: 'user-2',
+        displayName: 'Bob',
+        email: 'bob@example.com',
+        photoUrl: '',
+      };
+
+      compRef.setInput('selectedEmployeeIds', ['user-1']);
+      fixture.detectChanges();
+
+      expect(component['isEmployeeSelected'](employee)).toBe(false);
+    });
+  });
+
+  describe('getEmployeeName', () => {
+    it('should return the display name for a known userId', () => {
+      const employees: PublicUser[] = [
+        {
+          userId: 'user-1',
+          displayName: 'Alice',
+          email: 'alice@example.com',
+          photoUrl: '',
+        },
+      ];
+
+      compRef.setInput('employees', employees);
+      fixture.detectChanges();
+
+      expect(component['getEmployeeName']('user-1')).toBe('Alice');
+    });
+
+    it('should return empty string for an unknown userId', () => {
+      compRef.setInput('employees', []);
+      fixture.detectChanges();
+
+      expect(component['getEmployeeName']('unknown')).toBe('');
+    });
+
+    it('should return empty string when userId is undefined', () => {
+      expect(component['getEmployeeName'](undefined)).toBe('');
+    });
+  });
+
+  describe('loadBitesClicked output', () => {
+    it('should emit loadBitesClicked event when Load Bites button is clicked', () => {
+      const loadBitesClickedSpy = jest.fn();
+      component.loadBitesClicked.subscribe(loadBitesClickedSpy);
+
+      component['onLoadBitesClicked']();
+
+      expect(loadBitesClickedSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('createBiteTrailClicked output', () => {
+    it('should emit createBiteTrailClicked event when Create Bite Trail button is clicked', () => {
+      const createBiteTrailClickedSpy = jest.fn();
+      component.createBiteTrailClicked.subscribe(createBiteTrailClickedSpy);
+
+      component['onCreateBiteTrailClicked']();
+
+      expect(createBiteTrailClickedSpy).toHaveBeenCalled();
     });
   });
 
@@ -99,6 +180,38 @@ describe('OrganisationDashboard', () => {
         l.textContent?.trim(),
       );
       expect(displayedNames).toContain('Delicious Pasta');
+    });
+
+    it('should show employee name in ion-note for a bite', () => {
+      const employees: PublicUser[] = [
+        {
+          userId: 'user-1',
+          displayName: 'Alice',
+          email: 'alice@example.com',
+          photoUrl: '',
+        },
+      ];
+      const bites: Bite[] = [
+        {
+          id: 'bite-1',
+          name: 'Delicious Pasta',
+          image: '',
+          place: 'Restaurant A',
+          price: 12,
+          userId: 'user-1',
+          position: { latitude: 0, longitude: 0 },
+        },
+      ];
+
+      compRef.setInput('employees', employees);
+      compRef.setInput('bites', bites);
+      fixture.detectChanges();
+
+      const nativeElement: HTMLElement = fixture.nativeElement;
+      const notes = nativeElement.querySelectorAll('ion-note');
+
+      const noteTexts = Array.from(notes).map((n) => n.textContent?.trim());
+      expect(noteTexts).toContain('Alice');
     });
   });
 });

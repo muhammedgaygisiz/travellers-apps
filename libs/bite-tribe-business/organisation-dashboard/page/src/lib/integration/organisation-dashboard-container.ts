@@ -9,7 +9,9 @@ import { OrganisationDashboard } from '../components/page/organisation-dashboard
       class="ion-page"
       [employees]="service.employees.value()"
       [bites]="service.bites.value()"
-      (employeeSelected)="service.selectEmployee($event)"
+      [selectedEmployeeIds]="service.selectedEmployeeIds()"
+      (employeeToggled)="service.toggleEmployee($event)"
+      (loadBitesClicked)="service.loadBites()"
     />
   `,
   imports: [OrganisationDashboard],

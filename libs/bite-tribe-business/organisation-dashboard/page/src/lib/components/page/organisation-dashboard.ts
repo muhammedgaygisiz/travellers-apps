@@ -10,6 +10,7 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
+  IonCheckbox,
   IonContent,
   IonItem,
   IonLabel,
@@ -31,6 +32,7 @@ import { Bite, PublicUser } from 'model';
     IonList,
     IonItem,
     IonLabel,
+    IonCheckbox,
   ],
   styleUrl: 'organisation-dashboard.scss',
 })

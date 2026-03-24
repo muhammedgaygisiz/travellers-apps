@@ -17,6 +17,7 @@ import {
   IonCardTitle,
   IonCheckbox,
   IonContent,
+  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
@@ -32,6 +33,7 @@ import { map } from 'rxjs';
 import { Bite, BiteTrail, PublicUser } from 'model';
 import { CurrencySelectorComponent } from 'currency-selector';
 import { currencyCodes } from 'utils';
+import { ImageUploadComponent } from 'image-upload';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,6 +59,8 @@ import { currencyCodes } from 'utils';
     IonModal,
     ReactiveFormsModule,
     CurrencySelectorComponent,
+    ImageUploadComponent,
+    IonIcon,
   ],
 })
 export class CreateBiteTrailComponent {
@@ -118,6 +122,23 @@ export class CreateBiteTrailComponent {
     return allBites;
   });
 
+  imagePathValue = toSignal(
+    this.biteTrailFormGroup.valueChanges.pipe(
+      map((formValue) => formValue.imagePath),
+    ),
+  );
+
+  imageUrl = computed(() => {
+    const imagePathValue = this.imagePathValue();
+
+    return imagePathValue || undefined;
+  });
+
+  protected readonly fallbackPosition = signal<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
   isBiteSelected(bite: Bite): boolean {
     return this.localSelectedBiteIds().includes(bite.id);
   }
@@ -165,5 +186,9 @@ export class CreateBiteTrailComponent {
       imagePath: formValue.imagePath,
       biteIds: this.localSelectedBiteIds(),
     });
+  }
+
+  protected resetImagePath(): void {
+    this.biteTrailFormGroup.get('imagePath')?.reset();
   }
 }

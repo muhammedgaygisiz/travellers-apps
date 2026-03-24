@@ -7,6 +7,12 @@
     <h1 class="ion-margin-bottom">Create Bite Trail</h1>
 
     <form [formGroup]="biteTrailFormGroup">
+      <image-upload
+        formControlName="image"
+        [imageUrl]="imageUrl()"
+        (clearImagePath)="resetImagePath()"
+      />
+
       <ion-input
         label="Trail Name?"
         formControlName="name"
@@ -51,18 +57,11 @@
               class="currency-selector ion-display-flex ion-align-items-center"
             >
               {{ selectedCurrencyName() }}
+              <ion-icon name="chevron-expand-outline" />
             </ion-text>
           </ion-input>
         </div>
       </div>
-
-      <ion-input
-        label="Image Path?"
-        formControlName="imagePath"
-        fill="outline"
-        class="ion-margin-top"
-        mode="md"
-      />
 
       <div class="ion-margin-top">
         <ion-card>

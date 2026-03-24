@@ -14,6 +14,7 @@ export class OrganisationDashboardService {
 
   employees = this.dataAccess.employees;
   bites = this.dataAccess.bites;
+  biteTrails = this.dataAccess.biteTrails;
   selectedEmployeeIds = this.dataAccess.selectedUserIds;
   selectedBiteIds = this.dataAccess.selectedBiteIds;
 

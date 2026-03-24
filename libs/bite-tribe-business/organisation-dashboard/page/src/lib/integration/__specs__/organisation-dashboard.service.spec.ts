@@ -19,6 +19,7 @@ describe('OrganisationDashboardService', () => {
   beforeEach(() => {
     const mockBites = { value: jest.fn().mockReturnValue([]) };
     const mockEmployees = { value: jest.fn().mockReturnValue([]) };
+    const mockBiteTrails = { value: jest.fn().mockReturnValue([]) };
 
     dataAccessMock = {
       selectedUserIds: signal<string[]>([]),
@@ -26,6 +27,7 @@ describe('OrganisationDashboardService', () => {
       loadBitesTrigger: signal<string[]>([]),
       bites: mockBites,
       employees: mockEmployees,
+      biteTrails: mockBiteTrails,
       organisationId: signal<string | undefined>(undefined),
     } as unknown as jest.Mocked<OrganisationDashboardDataAccessService>;
 
@@ -63,6 +65,12 @@ describe('OrganisationDashboardService', () => {
   describe('bites', () => {
     it('should expose the bites resource from dataAccess', () => {
       expect(service.bites).toBe(dataAccessMock.bites);
+    });
+  });
+
+  describe('biteTrails', () => {
+    it('should expose the biteTrails resource from dataAccess', () => {
+      expect(service.biteTrails).toBe(dataAccessMock.biteTrails);
     });
   });
 

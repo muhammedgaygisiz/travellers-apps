@@ -3,25 +3,31 @@ import { CreateBiteTrailComponent } from '../create-bite-trail.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { Bite, PublicUser } from 'model';
 import { ComponentRef } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { addNecessaryIcons } from 'utils';
 
-jest.mock('localization');
 jest.mock('@capacitor-firebase/firestore');
+
+jest.mock('@capacitor/camera');
+jest.mock('image-compression', () => ({
+  compressFile: jest.fn(),
+  compressPhoto: jest.fn(),
+}));
+jest.mock('localization');
+addNecessaryIcons();
 
 describe('CreateBiteTrailComponent', () => {
   let component: CreateBiteTrailComponent;
-  let fixture: ComponentFixture<CreateBiteTrailComponent>;
   let compRef: ComponentRef<CreateBiteTrailComponent>;
+  let fixture: ComponentFixture<CreateBiteTrailComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule],
       providers: [provideIonicAngular()],
-    }).compileComponents();
+    });
 
     fixture = TestBed.createComponent(CreateBiteTrailComponent);
-    compRef = fixture.componentRef;
     component = fixture.componentInstance;
+    compRef = fixture.componentRef;
     fixture.detectChanges();
   });
 

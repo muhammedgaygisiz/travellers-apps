@@ -92,6 +92,7 @@ export class CreateBiteTrailComponent {
     location: [''],
     price: [0, [Validators.required, Validators.min(0)]],
     currency: ['EUR', Validators.required],
+    image: [''],
     imagePath: [''],
   });
 

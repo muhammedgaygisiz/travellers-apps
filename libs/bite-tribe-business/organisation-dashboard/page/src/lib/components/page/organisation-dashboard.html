@@ -43,8 +43,12 @@
           <ion-card-content>
             <ion-list lines="full">
               @for (bite of bites(); track bite.id) {
-              <ion-item>
-                <ion-checkbox slot="start" aria-label="Toggle Bite selection" />
+              <ion-item [button]="true" (click)="toggleBite(bite)">
+                <ion-checkbox
+                  slot="start"
+                  [checked]="isBiteSelected(bite)"
+                  aria-label="Toggle Bite selection"
+                />
                 <ion-label>{{ bite.name }}</ion-label>
                 <ion-note slot="end">
                   {{ bite.userId | employeeName: employees() }}

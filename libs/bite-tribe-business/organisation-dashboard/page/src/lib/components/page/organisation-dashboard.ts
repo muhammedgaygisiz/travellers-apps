@@ -46,10 +46,12 @@ export class OrganisationDashboard {
   employees = input<PublicUser[] | undefined>([]);
   bites = input<Bite[] | undefined>([]);
   selectedEmployeeIds = input<string[]>([]);
+  selectedBiteIds = input<string[]>([]);
 
   readonly employeeToggled = output<PublicUser>();
   readonly loadBitesClicked = output<void>();
   readonly createBiteTrailClicked = output<void>();
+  readonly biteToggled = output<Bite>();
 
   protected toggleEmployee(employee: PublicUser): void {
     this.employeeToggled.emit(employee);
@@ -65,5 +67,13 @@ export class OrganisationDashboard {
 
   protected isEmployeeSelected(employee: PublicUser): boolean {
     return this.selectedEmployeeIds().includes(employee.userId);
+  }
+
+  protected isBiteSelected(bite: Bite): boolean {
+    return this.selectedBiteIds().includes(bite.id);
+  }
+
+  protected toggleBite(bite: Bite): void {
+    this.biteToggled.emit(bite);
   }
 }

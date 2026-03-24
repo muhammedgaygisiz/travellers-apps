@@ -1,0 +1,28 @@
+@use 'globals';
+
+:host {
+  ion-input,
+  ion-textarea {
+    @include globals.input-styles;
+
+    &.ion-margin-top {
+      margin-top: 1.5rem;
+    }
+  }
+
+  .price-container {
+    margin-top: 1.5rem;
+
+    .price {
+      ion-text {
+        column-gap: 0.25rem;
+      }
+    }
+  }
+
+  .owner-info {
+    ion-text {
+      font-size: 0.9rem;
+    }
+  }
+}

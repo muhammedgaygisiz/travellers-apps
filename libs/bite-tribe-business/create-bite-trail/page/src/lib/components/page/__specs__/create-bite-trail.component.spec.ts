@@ -156,6 +156,19 @@ describe('CreateBiteTrailComponent', () => {
     });
   });
 
+  describe('onCurrencySelected', () => {
+    it('should update the currency form control and dismiss the modal', () => {
+      const modal = {
+        dismiss: jest.fn(),
+      } as unknown as HTMLIonModalElement;
+
+      component.onCurrencySelected('USD', modal);
+
+      expect(component.biteTrailFormGroup.get('currency')?.value).toBe('USD');
+      expect(modal.dismiss).toHaveBeenCalled();
+    });
+  });
+
   describe('saveTrail', () => {
     it('should not emit submitTrail if the form is invalid', () => {
       const submitTrailSpy = jest.fn();
@@ -194,6 +207,16 @@ describe('CreateBiteTrailComponent', () => {
           biteIds: ['bite-1'],
         }),
       );
+    });
+  });
+
+  describe('resetImagePath', () => {
+    it('should reset the imagePath form control', () => {
+      component.biteTrailFormGroup
+        .get('imagePath')
+        ?.setValue('path/to/image.jpg');
+      component.resetImagePath();
+      expect(component.biteTrailFormGroup.get('imagePath')?.value).toEqual('');
     });
   });
 });

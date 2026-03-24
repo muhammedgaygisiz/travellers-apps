@@ -14,6 +14,7 @@ describe('OrganisationDashboardService', () => {
   let service: OrganisationDashboardService;
   let dataAccessMock: jest.Mocked<OrganisationDashboardDataAccessService>;
   let createBiteTrailDataAccessMock: jest.Mocked<CreateBiteTrailDataAccessService>;
+  let navControllerMock: jest.Mocked<NavController>;
 
   beforeEach(() => {
     const mockBites = { value: jest.fn().mockReturnValue([]) };
@@ -52,6 +53,7 @@ describe('OrganisationDashboardService', () => {
     });
 
     service = TestBed.inject(OrganisationDashboardService);
+    navControllerMock = TestBed.inject(NavController);
   });
 
   it('should be created', () => {
@@ -149,9 +151,46 @@ describe('OrganisationDashboardService', () => {
   });
 
   describe('createBiteTrail', () => {
-    it('should not navigate if organisationId is undefined', () => {
-      dataAccessMock.organisationId.set(undefined);
-      expect(() => service.createBiteTrail()).not.toThrow();
+    describe('given no organisationId', () => {
+      it('should not navigate', () => {
+        dataAccessMock.organisationId.set(undefined);
+        expect(() => service.createBiteTrail()).not.toThrow();
+      });
+    });
+
+    describe('given an organisationId', () => {
+      it('should set selectedBites and employees in createBiteTrailDataAccess and navigate to create-bite-trail page', () => {
+        const mockNavigateForward = jest.fn();
+
+        const selectedBites = [{ id: 'bite-1', name: 'Pasta' }] as Bite[];
+        const employees = [
+          {
+            userId: 'user-1',
+            displayName: 'Alice',
+            email: 'q@q.de',
+            photoUrl: '',
+          },
+        ] as PublicUser[];
+
+        dataAccessMock.organisationId.set('org-123');
+        dataAccessMock.selectedBiteIds.set(['bite-1']);
+        dataAccessMock.bites.value.mockReturnValue(selectedBites);
+        dataAccessMock.employees.value.mockReturnValue(employees);
+        navControllerMock.navigateForward.mockImplementation(
+          mockNavigateForward,
+        );
+
+        service.createBiteTrail();
+
+        expect(createBiteTrailDataAccessMock.selectedBites()).toEqual(
+          selectedBites,
+        );
+        expect(createBiteTrailDataAccessMock.employees()).toEqual(employees);
+        expect(mockNavigateForward).toHaveBeenCalledWith([
+          'org-123',
+          'create-bite-trail',
+        ]);
+      });
     });
   });
 });

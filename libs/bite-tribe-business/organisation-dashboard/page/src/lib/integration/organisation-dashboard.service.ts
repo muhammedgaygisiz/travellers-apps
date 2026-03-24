@@ -53,9 +53,11 @@ export class OrganisationDashboardService {
       return;
     }
 
+    const selectedBiteIds = this.dataAccess.selectedBiteIds();
     const selectedBites = (this.dataAccess.bites.value() ?? []).filter((bite) =>
-      this.dataAccess.selectedBiteIds().includes(bite.id),
+      selectedBiteIds.includes(bite.id),
     );
+
     const employees = this.dataAccess.employees.value() ?? [];
 
     this.createBiteTrailDataAccess.selectedBites.set(selectedBites);

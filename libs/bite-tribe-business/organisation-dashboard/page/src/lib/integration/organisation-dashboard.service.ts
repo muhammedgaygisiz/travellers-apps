@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { OrganisationDashboardDataAccessService } from 'bite-tribe-business/organisation-dashboard-data-access';
-import { PublicUser } from 'model';
+import { Bite, PublicUser } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class OrganisationDashboardService {
@@ -9,6 +9,7 @@ export class OrganisationDashboardService {
   employees = this.dataAccess.employees;
   bites = this.dataAccess.bites;
   selectedEmployeeIds = this.dataAccess.selectedUserIds;
+  selectedBiteIds = this.dataAccess.selectedBiteIds;
 
   toggleEmployee(user: PublicUser): void {
     const currentIds = this.dataAccess.selectedUserIds();
@@ -22,9 +23,26 @@ export class OrganisationDashboardService {
     }
   }
 
+  toggleBite(bite: Bite): void {
+    const currentIds = this.dataAccess.selectedBiteIds();
+    const biteIndex = currentIds.indexOf(bite.id);
+    if (biteIndex > -1) {
+      this.dataAccess.selectedBiteIds.set(
+        currentIds.filter((id) => id !== bite.id),
+      );
+    } else {
+      this.dataAccess.selectedBiteIds.set([...currentIds, bite.id]);
+    }
+  }
+
   loadBites(): void {
     this.dataAccess.loadBitesTrigger.set([
       ...this.dataAccess.selectedUserIds(),
     ]);
+  }
+
+  createBiteTrail(): void {
+    const selectedBiteIds = this.dataAccess.selectedBiteIds();
+    void this.dataAccess.createBiteTrail(selectedBiteIds);
   }
 }

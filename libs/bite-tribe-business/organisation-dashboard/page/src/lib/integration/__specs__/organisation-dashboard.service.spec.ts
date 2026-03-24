@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { OrganisationDashboardService } from '../organisation-dashboard.service';
 import { OrganisationDashboardDataAccessService } from 'bite-tribe-business/organisation-dashboard-data-access';
-import { PublicUser } from 'model';
+import { Bite, PublicUser } from 'model';
 import { signal } from '@angular/core';
 
 jest.mock('bite-tribe-business/organisation-dashboard-data-access');
@@ -18,6 +18,8 @@ describe('OrganisationDashboardService', () => {
     dataAccessMock = {
       selectedUserIds: signal<string[]>([]),
       loadBitesTrigger: signal<string[]>([]),
+      selectedBiteIds: signal<string[]>([]),
+      createBiteTrail: jest.fn().mockResolvedValue(undefined),
       bites: mockBites,
       employees: mockEmployees,
     } as unknown as jest.Mocked<OrganisationDashboardDataAccessService>;
@@ -54,6 +56,12 @@ describe('OrganisationDashboardService', () => {
   describe('selectedEmployeeIds', () => {
     it('should expose the selectedUserIds signal from dataAccess', () => {
       expect(service.selectedEmployeeIds).toBe(dataAccessMock.selectedUserIds);
+    });
+  });
+
+  describe('selectedBiteIds', () => {
+    it('should expose the selectedBiteIds signal from dataAccess', () => {
+      expect(service.selectedBiteIds).toBe(dataAccessMock.selectedBiteIds);
     });
   });
 
@@ -100,11 +108,45 @@ describe('OrganisationDashboardService', () => {
     });
   });
 
+  describe('toggleBite', () => {
+    it('should add bite ID to selectedBiteIds when not already selected', () => {
+      const bite = { id: 'bite-1' } as Bite;
+      service.toggleBite(bite);
+      expect(dataAccessMock.selectedBiteIds()).toContain('bite-1');
+    });
+
+    it('should remove bite ID from selectedBiteIds when already selected', () => {
+      dataAccessMock.selectedBiteIds.set(['bite-1']);
+      const bite = { id: 'bite-1' } as Bite;
+      service.toggleBite(bite);
+      expect(dataAccessMock.selectedBiteIds()).not.toContain('bite-1');
+    });
+
+    it('should support multiple selected bites', () => {
+      const bite1 = { id: 'bite-1' } as Bite;
+      const bite2 = { id: 'bite-2' } as Bite;
+      service.toggleBite(bite1);
+      service.toggleBite(bite2);
+      expect(dataAccessMock.selectedBiteIds()).toEqual(['bite-1', 'bite-2']);
+    });
+  });
+
   describe('loadBites', () => {
     it('should copy selectedUserIds to loadBitesTrigger', () => {
       dataAccessMock.selectedUserIds.set(['user-1', 'user-2']);
       service.loadBites();
       expect(dataAccessMock.loadBitesTrigger()).toEqual(['user-1', 'user-2']);
+    });
+  });
+
+  describe('createBiteTrail', () => {
+    it('should call createBiteTrail on dataAccess with the selected bite IDs', () => {
+      dataAccessMock.selectedBiteIds.set(['bite-1', 'bite-2']);
+      service.createBiteTrail();
+      expect(dataAccessMock.createBiteTrail).toHaveBeenCalledWith([
+        'bite-1',
+        'bite-2',
+      ]);
     });
   });
 });

@@ -10,8 +10,11 @@ import { OrganisationDashboard } from '../components/page/organisation-dashboard
       [employees]="service.employees.value()"
       [bites]="service.bites.value()"
       [selectedEmployeeIds]="service.selectedEmployeeIds()"
+      [selectedBiteIds]="service.selectedBiteIds()"
       (employeeToggled)="service.toggleEmployee($event)"
+      (biteToggled)="service.toggleBite($event)"
       (loadBitesClicked)="service.loadBites()"
+      (createBiteTrailClicked)="service.createBiteTrail()"
     />
   `,
   imports: [OrganisationDashboard],

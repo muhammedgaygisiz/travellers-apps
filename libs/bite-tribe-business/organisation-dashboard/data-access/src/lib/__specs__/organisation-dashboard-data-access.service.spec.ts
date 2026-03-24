@@ -2,9 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import {
   OrganisationDashboardDataAccessService,
   BITE_COLLECTION,
+  BITE_TRAIL_COLLECTION,
+  DEFAULT_BITE_TRAIL_NAME,
   USERS_COLLECTION,
 } from '../organisation-dashboard-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { of } from 'rxjs';
 import { signal } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
@@ -21,6 +24,7 @@ describe('OrganisationDashboardDataAccessService', () => {
           provide: BiteTribeStoreService,
           useValue: {
             organisationIdFromUrl: signal(undefined),
+            userId$: of('user-1'),
           },
         },
       ],
@@ -150,6 +154,86 @@ describe('OrganisationDashboardDataAccessService', () => {
       } as any);
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('createBiteTrail', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should add a document to the biteTrails collection with the provided biteIds', async () => {
+      const addDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'addDocument')
+        .mockResolvedValue({ reference: { path: 'biteTrails/new-id' } } as any);
+
+      await service.createBiteTrail(['bite-1', 'bite-2']);
+
+      expect(addDocumentSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reference: BITE_TRAIL_COLLECTION,
+          data: expect.objectContaining({
+            biteIds: ['bite-1', 'bite-2'],
+            name: DEFAULT_BITE_TRAIL_NAME,
+          }),
+        }),
+      );
+    });
+
+    it('should not create a document when ownerId cannot be resolved', async () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          OrganisationDashboardDataAccessService,
+          {
+            provide: BiteTribeStoreService,
+            useValue: {
+              organisationIdFromUrl: signal(undefined),
+              userId$: of(''),
+            },
+          },
+        ],
+      });
+      service = TestBed.inject(OrganisationDashboardDataAccessService);
+
+      const addDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'addDocument')
+        .mockResolvedValue({ reference: { path: 'biteTrails/new-id' } } as any);
+
+      await service.createBiteTrail(['bite-1']);
+
+      expect(addDocumentSpy).not.toHaveBeenCalled();
+    });
+
+    it('should use the organisationId as ownerId when available', async () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          OrganisationDashboardDataAccessService,
+          {
+            provide: BiteTribeStoreService,
+            useValue: {
+              organisationIdFromUrl: signal('org-42'),
+              userId$: of('user-1'),
+            },
+          },
+        ],
+      });
+      service = TestBed.inject(OrganisationDashboardDataAccessService);
+
+      const addDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'addDocument')
+        .mockResolvedValue({
+          reference: { path: 'biteTrails/new-id' },
+        } as any);
+
+      await service.createBiteTrail(['bite-1']);
+
+      expect(addDocumentSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ ownerId: 'org-42' }),
+        }),
+      );
     });
   });
 });

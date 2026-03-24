@@ -97,6 +97,60 @@ describe('OrganisationDashboard', () => {
     });
   });
 
+  describe('toggleBite', () => {
+    it('should emit biteToggled event with the toggled bite', () => {
+      const bite: Bite = {
+        id: 'bite-1',
+        name: 'Pasta',
+        image: '',
+        place: 'Restaurant A',
+        price: 12,
+        position: { latitude: 0, longitude: 0 },
+      };
+
+      const biteToggledSpy = jest.fn();
+      component.biteToggled.subscribe(biteToggledSpy);
+
+      component['toggleBite'](bite);
+
+      expect(biteToggledSpy).toHaveBeenCalledWith(bite);
+    });
+  });
+
+  describe('isBiteSelected', () => {
+    it('should return true when bite is in selectedBiteIds', () => {
+      const bite: Bite = {
+        id: 'bite-1',
+        name: 'Pasta',
+        image: '',
+        place: 'Restaurant A',
+        price: 12,
+        position: { latitude: 0, longitude: 0 },
+      };
+
+      compRef.setInput('selectedBiteIds', ['bite-1']);
+      fixture.detectChanges();
+
+      expect(component['isBiteSelected'](bite)).toBe(true);
+    });
+
+    it('should return false when bite is not in selectedBiteIds', () => {
+      const bite: Bite = {
+        id: 'bite-2',
+        name: 'Pizza',
+        image: '',
+        place: 'Restaurant B',
+        price: 10,
+        position: { latitude: 0, longitude: 0 },
+      };
+
+      compRef.setInput('selectedBiteIds', ['bite-1']);
+      fixture.detectChanges();
+
+      expect(component['isBiteSelected'](bite)).toBe(false);
+    });
+  });
+
   describe('employees input', () => {
     it('should render employee display names', () => {
       const employees: PublicUser[] = [

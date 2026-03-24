@@ -1,15 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { OrganisationDashboardService } from '../organisation-dashboard.service';
 import { OrganisationDashboardDataAccessService } from 'bite-tribe-business/organisation-dashboard-data-access';
-import { PublicUser } from 'model';
+import { CreateBiteTrailDataAccessService } from 'bite-tribe-business/create-bite-trail-data-access';
+import { NavController } from '@ionic/angular/standalone';
+import { Bite, PublicUser } from 'model';
 import { signal } from '@angular/core';
 
 jest.mock('bite-tribe-business/organisation-dashboard-data-access');
+jest.mock('bite-tribe-business/create-bite-trail-data-access');
 jest.mock('@capacitor-firebase/firestore');
 
 describe('OrganisationDashboardService', () => {
   let service: OrganisationDashboardService;
   let dataAccessMock: jest.Mocked<OrganisationDashboardDataAccessService>;
+  let createBiteTrailDataAccessMock: jest.Mocked<CreateBiteTrailDataAccessService>;
+  let navControllerMock: jest.Mocked<NavController>;
 
   beforeEach(() => {
     const mockBites = { value: jest.fn().mockReturnValue([]) };
@@ -17,10 +22,17 @@ describe('OrganisationDashboardService', () => {
 
     dataAccessMock = {
       selectedUserIds: signal<string[]>([]),
+      selectedBiteIds: signal<string[]>([]),
       loadBitesTrigger: signal<string[]>([]),
       bites: mockBites,
       employees: mockEmployees,
+      organisationId: signal<string | undefined>(undefined),
     } as unknown as jest.Mocked<OrganisationDashboardDataAccessService>;
+
+    createBiteTrailDataAccessMock = {
+      selectedBites: signal<Bite[]>([]),
+      employees: signal<PublicUser[]>([]),
+    } as unknown as jest.Mocked<CreateBiteTrailDataAccessService>;
 
     TestBed.configureTestingModule({
       providers: [
@@ -29,10 +41,19 @@ describe('OrganisationDashboardService', () => {
           provide: OrganisationDashboardDataAccessService,
           useValue: dataAccessMock,
         },
+        {
+          provide: CreateBiteTrailDataAccessService,
+          useValue: createBiteTrailDataAccessMock,
+        },
+        {
+          provide: NavController,
+          useValue: { navigateForward: jest.fn() },
+        },
       ],
     });
 
     service = TestBed.inject(OrganisationDashboardService);
+    navControllerMock = TestBed.inject(NavController);
   });
 
   it('should be created', () => {
@@ -54,6 +75,12 @@ describe('OrganisationDashboardService', () => {
   describe('selectedEmployeeIds', () => {
     it('should expose the selectedUserIds signal from dataAccess', () => {
       expect(service.selectedEmployeeIds).toBe(dataAccessMock.selectedUserIds);
+    });
+  });
+
+  describe('selectedBiteIds', () => {
+    it('should expose the selectedBiteIds signal from dataAccess', () => {
+      expect(service.selectedBiteIds).toBe(dataAccessMock.selectedBiteIds);
     });
   });
 
@@ -100,11 +127,70 @@ describe('OrganisationDashboardService', () => {
     });
   });
 
+  describe('toggleBite', () => {
+    it('should add bite ID to selectedBiteIds when not already selected', () => {
+      const bite = { id: 'bite-1', name: 'Pasta' } as Bite;
+      service.toggleBite(bite);
+      expect(dataAccessMock.selectedBiteIds()).toContain('bite-1');
+    });
+
+    it('should remove bite ID from selectedBiteIds when already selected', () => {
+      dataAccessMock.selectedBiteIds.set(['bite-1']);
+      const bite = { id: 'bite-1', name: 'Pasta' } as Bite;
+      service.toggleBite(bite);
+      expect(dataAccessMock.selectedBiteIds()).not.toContain('bite-1');
+    });
+  });
+
   describe('loadBites', () => {
     it('should copy selectedUserIds to loadBitesTrigger', () => {
       dataAccessMock.selectedUserIds.set(['user-1', 'user-2']);
       service.loadBites();
       expect(dataAccessMock.loadBitesTrigger()).toEqual(['user-1', 'user-2']);
+    });
+  });
+
+  describe('createBiteTrail', () => {
+    describe('given no organisationId', () => {
+      it('should not navigate', () => {
+        dataAccessMock.organisationId.set(undefined);
+        expect(() => service.createBiteTrail()).not.toThrow();
+      });
+    });
+
+    describe('given an organisationId', () => {
+      it('should set selectedBites and employees in createBiteTrailDataAccess and navigate to create-bite-trail page', () => {
+        const mockNavigateForward = jest.fn();
+
+        const selectedBites = [{ id: 'bite-1', name: 'Pasta' }] as Bite[];
+        const employees = [
+          {
+            userId: 'user-1',
+            displayName: 'Alice',
+            email: 'q@q.de',
+            photoUrl: '',
+          },
+        ] as PublicUser[];
+
+        dataAccessMock.organisationId.set('org-123');
+        dataAccessMock.selectedBiteIds.set(['bite-1']);
+        dataAccessMock.bites.value.mockReturnValue(selectedBites);
+        dataAccessMock.employees.value.mockReturnValue(employees);
+        navControllerMock.navigateForward.mockImplementation(
+          mockNavigateForward,
+        );
+
+        service.createBiteTrail();
+
+        expect(createBiteTrailDataAccessMock.selectedBites()).toEqual(
+          selectedBites,
+        );
+        expect(createBiteTrailDataAccessMock.employees()).toEqual(employees);
+        expect(mockNavigateForward).toHaveBeenCalledWith([
+          'org-123',
+          'create-bite-trail',
+        ]);
+      });
     });
   });
 });

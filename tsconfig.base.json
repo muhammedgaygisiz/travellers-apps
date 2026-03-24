@@ -137,6 +137,12 @@
       ],
       "bite-tribe-business/organisation-dashboard-data-access": [
         "libs/bite-tribe-business/organisation-dashboard/data-access/src/index.ts"
+      ],
+      "bite-tribe-business/create-bite-trail": [
+        "libs/bite-tribe-business/create-bite-trail/page/src/index.ts"
+      ],
+      "bite-tribe-business/create-bite-trail-data-access": [
+        "libs/bite-tribe-business/create-bite-trail/data-access/src/index.ts"
       ]
     }
   },

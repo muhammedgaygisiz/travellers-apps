@@ -34,13 +34,21 @@ describe('OrganisationDashboardDataAccessService', () => {
   });
 
   describe('bitesLoader', () => {
-    it('should return empty array when userId is not provided', async () => {
+    it('should return empty array when userIds is not provided', async () => {
       const result = await service.bitesLoader({ params: {} } as any);
 
       expect(result).toEqual([]);
     });
 
-    it('should query Firestore bites collection with the provided userId', async () => {
+    it('should return empty array when userIds is an empty array', async () => {
+      const result = await service.bitesLoader({
+        params: { userIds: [] },
+      } as any);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should query Firestore bites collection for each provided userId', async () => {
       const getCollectionSpy = jest
         .spyOn(FirebaseFirestore, 'getCollection')
         .mockResolvedValue({
@@ -50,7 +58,7 @@ describe('OrganisationDashboardDataAccessService', () => {
         } as any);
 
       const result = await service.bitesLoader({
-        params: { userId: 'user-1' },
+        params: { userIds: ['user-1'] },
       } as any);
 
       expect(getCollectionSpy).toHaveBeenCalledWith(
@@ -61,13 +69,42 @@ describe('OrganisationDashboardDataAccessService', () => {
       expect((result as any)[0].name).toBe('Pasta');
     });
 
+    it('should aggregate bites from multiple users', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'getCollection')
+        .mockImplementation(({ compositeFilter }: any) => {
+          const userId = compositeFilter.queryConstraints[0].value;
+          if (userId === 'user-1') {
+            return Promise.resolve({
+              snapshots: [
+                { id: 'bite-1', data: { name: 'Pasta', userId: 'user-1' } },
+              ],
+            } as any);
+          }
+          if (userId === 'user-2') {
+            return Promise.resolve({
+              snapshots: [
+                { id: 'bite-2', data: { name: 'Pizza', userId: 'user-2' } },
+              ],
+            } as any);
+          }
+          return Promise.resolve({ snapshots: [] } as any);
+        });
+
+      const result = await service.bitesLoader({
+        params: { userIds: ['user-1', 'user-2'] },
+      } as any);
+
+      expect(result).toHaveLength(2);
+    });
+
     it('should return empty array when no bites snapshots found', async () => {
       jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
         snapshots: [],
       } as any);
 
       const result = await service.bitesLoader({
-        params: { userId: 'user-1' },
+        params: { userIds: ['user-1'] },
       } as any);
 
       expect(result).toEqual([]);

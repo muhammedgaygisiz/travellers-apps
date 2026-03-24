@@ -16,7 +16,8 @@ export const BITE_COLLECTION = 'bites';
 export class OrganisationDashboardDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
-  selectedUserId = signal<string | undefined>(undefined);
+  selectedUserIds = signal<string[]>([]);
+  loadBitesTrigger = signal<string[]>([]);
 
   employeesLoader: ResourceLoader<PublicUser[] | undefined, any> = async ({
     params,
@@ -52,34 +53,43 @@ export class OrganisationDashboardDataAccessService {
   };
 
   bitesLoader: ResourceLoader<Bite[] | undefined, any> = async ({ params }) => {
-    const { userId } = params;
+    const { userIds } = params;
 
-    if (!userId) {
+    if (!userIds || userIds.length === 0) {
       return [];
     }
 
-    const biteDocsByUserId = await FirebaseFirestore.getCollection({
-      reference: BITE_COLLECTION,
-      compositeFilter: {
-        type: 'and',
-        queryConstraints: [
-          {
-            type: 'where',
-            fieldPath: 'userId',
-            opStr: '==',
-            value: userId,
+    const allBitesPromises: Promise<Bite[]>[] = userIds.map(
+      async (userId: string) => {
+        const biteDocsByUserId = await FirebaseFirestore.getCollection({
+          reference: BITE_COLLECTION,
+          compositeFilter: {
+            type: 'and',
+            queryConstraints: [
+              {
+                type: 'where',
+                fieldPath: 'userId',
+                opStr: '==',
+                value: userId,
+              },
+            ],
           },
-        ],
+        });
+
+        if (!biteDocsByUserId?.snapshots?.length) {
+          return [] as Bite[];
+        }
+
+        return biteDocsByUserId.snapshots.map(
+          (doc) => ({ ...doc.data, id: doc.id }) as Bite,
+        );
       },
-    });
-
-    if (!biteDocsByUserId?.snapshots?.length) {
-      return [];
-    }
-
-    return biteDocsByUserId.snapshots.map(
-      (doc) => ({ ...doc.data, id: doc.id }) as Bite,
     );
+
+    const results = await Promise.all(allBitesPromises);
+    return results
+      .map((res) => res)
+      .reduce((acc, bites) => [...acc, ...bites], []);
   };
 
   employees = resource({
@@ -91,7 +101,7 @@ export class OrganisationDashboardDataAccessService {
 
   bites = resource({
     params: () => ({
-      userId: this.selectedUserId(),
+      userIds: this.loadBitesTrigger(),
     }),
     loader: this.bitesLoader.bind(this),
   });

@@ -16,7 +16,8 @@ describe('OrganisationDashboardService', () => {
     const mockEmployees = { value: jest.fn().mockReturnValue([]) };
 
     dataAccessMock = {
-      selectedUserId: signal(''),
+      selectedUserIds: signal<string[]>([]),
+      loadBitesTrigger: signal<string[]>([]),
       bites: mockBites,
       employees: mockEmployees,
     } as unknown as jest.Mocked<OrganisationDashboardDataAccessService>;
@@ -50,16 +51,60 @@ describe('OrganisationDashboardService', () => {
     });
   });
 
-  describe('selectEmployee', () => {
-    it('should set the selected user ID in dataAccess', () => {
+  describe('selectedEmployeeIds', () => {
+    it('should expose the selectedUserIds signal from dataAccess', () => {
+      expect(service.selectedEmployeeIds).toBe(dataAccessMock.selectedUserIds);
+    });
+  });
+
+  describe('toggleEmployee', () => {
+    it('should add user ID to selectedUserIds when not already selected', () => {
       const user: PublicUser = {
-        displayName: '',
-        email: '',
+        displayName: 'Alice',
+        email: 'alice@example.com',
         photoUrl: '',
         userId: '123',
       };
-      service.selectEmployee(user);
-      expect(dataAccessMock.selectedUserId()).toEqual('123');
+      service.toggleEmployee(user);
+      expect(dataAccessMock.selectedUserIds()).toContain('123');
+    });
+
+    it('should remove user ID from selectedUserIds when already selected', () => {
+      dataAccessMock.selectedUserIds.set(['123']);
+      const user: PublicUser = {
+        displayName: 'Alice',
+        email: 'alice@example.com',
+        photoUrl: '',
+        userId: '123',
+      };
+      service.toggleEmployee(user);
+      expect(dataAccessMock.selectedUserIds()).not.toContain('123');
+    });
+
+    it('should support multiple selected employees', () => {
+      const user1: PublicUser = {
+        displayName: 'Alice',
+        email: 'alice@example.com',
+        photoUrl: '',
+        userId: '123',
+      };
+      const user2: PublicUser = {
+        displayName: 'Bob',
+        email: 'bob@example.com',
+        photoUrl: '',
+        userId: '456',
+      };
+      service.toggleEmployee(user1);
+      service.toggleEmployee(user2);
+      expect(dataAccessMock.selectedUserIds()).toEqual(['123', '456']);
+    });
+  });
+
+  describe('loadBites', () => {
+    it('should copy selectedUserIds to loadBitesTrigger', () => {
+      dataAccessMock.selectedUserIds.set(['user-1', 'user-2']);
+      service.loadBites();
+      expect(dataAccessMock.loadBitesTrigger()).toEqual(['user-1', 'user-2']);
     });
   });
 });

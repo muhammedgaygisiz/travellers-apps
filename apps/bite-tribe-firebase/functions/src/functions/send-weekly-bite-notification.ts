@@ -173,8 +173,8 @@ export const sendWeeklyBiteNotification = onSchedule(
 
     const body =
       biteCount === 1
-        ? '🍽️ The BiteTribe shared 1 new bite last week 🤩'
-        : `🍽️ The BiteTribe shared ${biteCount} new bites last week 🤩`;
+        ? 'The BiteTribe shared 1 new bite last week'
+        : `The BiteTribe shared ${biteCount} new bites last week`;
 
     const chunks = buildChunks(tokens, CHUNK_SIZE);
 
@@ -187,7 +187,7 @@ export const sendWeeklyBiteNotification = onSchedule(
       const res = await admin.messaging().sendEachForMulticast({
         tokens: chunk,
         notification: {
-          title: "🍽️ This week's bites are here",
+          title: "🍽️ This week's bites are here 🤩",
           body,
         },
         data: {

@@ -5,12 +5,13 @@ import {
   ResourceLoader,
   signal,
 } from '@angular/core';
-import { Bite, PublicUser } from 'model';
+import { Bite, BiteTrail, PublicUser } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 export const USERS_COLLECTION = 'users';
 export const BITE_COLLECTION = 'bites';
+export const BITE_TRAIL_COLLECTION = 'biteTrails';
 
 @Injectable({ providedIn: 'root' })
 export class OrganisationDashboardDataAccessService {
@@ -94,6 +95,39 @@ export class OrganisationDashboardDataAccessService {
       .reduce((acc, bites) => [...acc, ...bites], []);
   };
 
+  biteTrailsLoader: ResourceLoader<BiteTrail[] | undefined, any> = async ({
+    params,
+  }) => {
+    const { organisationId } = params;
+
+    if (!organisationId) {
+      return [];
+    }
+
+    const biteTrailDocs = await FirebaseFirestore.getCollection({
+      reference: BITE_TRAIL_COLLECTION,
+      compositeFilter: {
+        type: 'and',
+        queryConstraints: [
+          {
+            type: 'where',
+            fieldPath: 'ownerId',
+            opStr: '==',
+            value: organisationId,
+          },
+        ],
+      },
+    });
+
+    if (!biteTrailDocs?.snapshots?.length) {
+      return [];
+    }
+
+    return biteTrailDocs.snapshots.map(
+      (doc) => ({ ...doc.data, id: doc.id }) as BiteTrail,
+    );
+  };
+
   employees = resource({
     params: () => ({
       organisationId: this.storeService.organisationIdFromUrl(),
@@ -106,5 +140,12 @@ export class OrganisationDashboardDataAccessService {
       userIds: this.loadBitesTrigger(),
     }),
     loader: this.bitesLoader.bind(this),
+  });
+
+  biteTrails = resource({
+    params: () => ({
+      organisationId: this.storeService.organisationIdFromUrl(),
+    }),
+    loader: this.biteTrailsLoader.bind(this),
   });
 }

@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import {
   OrganisationDashboardDataAccessService,
   BITE_COLLECTION,
+  BITE_TRAIL_COLLECTION,
   USERS_COLLECTION,
 } from '../organisation-dashboard-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
@@ -146,6 +147,50 @@ describe('OrganisationDashboardDataAccessService', () => {
       } as any);
 
       const result = await service.employeesLoader({
+        params: { organisationId: 'org-1' },
+      } as any);
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('biteTrailsLoader', () => {
+    it('should return empty array when organisationId is not provided', async () => {
+      const result = await service.biteTrailsLoader({ params: {} } as any);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should query Firestore biteTrails collection with the provided organisationId', async () => {
+      const getCollectionSpy = jest
+        .spyOn(FirebaseFirestore, 'getCollection')
+        .mockResolvedValue({
+          snapshots: [
+            {
+              id: 'trail-1',
+              data: { name: 'Trail One', ownerId: 'org-1' },
+            },
+          ],
+        } as any);
+
+      const result = await service.biteTrailsLoader({
+        params: { organisationId: 'org-1' },
+      } as any);
+
+      expect(getCollectionSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ reference: BITE_TRAIL_COLLECTION }),
+      );
+      expect(result).toHaveLength(1);
+      expect((result as any)[0].id).toBe('trail-1');
+      expect((result as any)[0].name).toBe('Trail One');
+    });
+
+    it('should return empty array when no bite trail snapshots found', async () => {
+      jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
+        snapshots: [],
+      } as any);
+
+      const result = await service.biteTrailsLoader({
         params: { organisationId: 'org-1' },
       } as any);
 

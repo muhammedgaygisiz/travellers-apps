@@ -1,0 +1,124 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+  [enableBackButton]="true"
+>
+  <ion-content class="ion-padding">
+    <h1 class="ion-margin-bottom">Create Bite Trail</h1>
+
+    <form [formGroup]="biteTrailFormGroup">
+      <image-upload
+        formControlName="image"
+        [imageUrl]="imageUrl()"
+        (clearImagePath)="resetImagePath()"
+      />
+
+      <ion-input
+        label="Trail Name?"
+        formControlName="name"
+        fill="outline"
+        class="ion-margin-top"
+        mode="md"
+      />
+
+      <div class="ion-margin-vertical">
+        <ion-textarea
+          label="Description?"
+          formControlName="description"
+          fill="outline"
+          auto-grow="true"
+          [maxlength]="500"
+          placeholder="Describe this bite trail..."
+          [rows]="4"
+          mode="md"
+        />
+      </div>
+
+      <ion-input
+        label="Location?"
+        formControlName="location"
+        fill="outline"
+        class="ion-margin-top"
+        mode="md"
+      />
+
+      <div class="ion-flex-1 price-container ion-margin-bottom">
+        <div class="price">
+          <ion-input
+            label="Price?"
+            formControlName="price"
+            fill="outline"
+            inputmode="decimal"
+            mode="md"
+          >
+            <ion-text
+              id="currency-selector-trigger-bite-trail"
+              slot="end"
+              class="currency-selector ion-display-flex ion-align-items-center"
+            >
+              {{ selectedCurrencyName() }}
+              <ion-icon name="chevron-expand-outline" />
+            </ion-text>
+          </ion-input>
+        </div>
+      </div>
+
+      <div class="ion-margin-top">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Selected Bites</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="full">
+              @for (bite of displayedBites(); track bite.id) {
+                <ion-item [button]="true" (click)="toggleBite(bite)">
+                  <ion-checkbox
+                    slot="start"
+                    [checked]="isBiteSelected(bite)"
+                    aria-label="Toggle Bite selection"
+                  />
+                  <ion-label>{{ bite.name }}</ion-label>
+                  <ion-note slot="end">
+                    {{ getEmployeeName(bite.userId) }}
+                  </ion-note>
+                </ion-item>
+              } @empty {
+                <p>No bites selected.</p>
+              }
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      @if (organisation()) {
+        <div class="ion-margin-top owner-info">
+          <ion-text color="medium">
+            <p>Owner: {{ organisation()?.displayName }}</p>
+          </ion-text>
+        </div>
+      }
+
+      <ion-button
+        expand="block"
+        color="primary"
+        routerDirection="back"
+        class="ion-margin-top safe-padding-bottom"
+        [disabled]="isInvalid()"
+        (click)="saveTrail()"
+      >
+        Create Bite Trail
+      </ion-button>
+    </form>
+  </ion-content>
+</ta-page>
+
+<ion-modal trigger="currency-selector-trigger-bite-trail" #currencyModal>
+  <ng-template>
+    <currency-selector
+      class="ion-page"
+      [selectedCurrency]="biteTrailFormGroup.get('currency')?.value || 'EUR'"
+      (currencySelected)="onCurrencySelected($event, currencyModal)"
+      (selectionCancel)="currencyModal.dismiss()"
+    />
+  </ng-template>
+</ion-modal>

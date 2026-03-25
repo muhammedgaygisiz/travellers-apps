@@ -17,7 +17,9 @@ export class OrganisationDashboardDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
   selectedUserIds = signal<string[]>([]);
+  selectedBiteIds = signal<string[]>([]);
   loadBitesTrigger = signal<string[]>([]);
+  organisationId = this.storeService.organisationIdFromUrl;
 
   employeesLoader: ResourceLoader<PublicUser[] | undefined, any> = async ({
     params,

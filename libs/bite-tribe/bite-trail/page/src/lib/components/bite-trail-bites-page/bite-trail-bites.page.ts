@@ -6,7 +6,6 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
-  IonButton,
   IonCard,
   IonCardContent,
   IonChip,
@@ -30,7 +29,6 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonText,
     IonCard,
     IonCardContent,
-    IonButton,
     BiteComponent,
   ],
 })

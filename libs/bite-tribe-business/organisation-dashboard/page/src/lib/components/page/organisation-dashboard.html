@@ -32,6 +32,23 @@
 
           <ion-button (click)="onLoadBitesClicked()"> Load Bites </ion-button>
         </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Bite Trails</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="full">
+              @for (biteTrail of biteTrails(); track biteTrail.id) {
+              <ion-item>
+                <ion-label>{{ biteTrail.name }}</ion-label>
+              </ion-item>
+              } @empty {
+              <p>No bite trails found.</p>
+              }
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
       </div>
       <div
         class="ion-display-flex ion-flex-column ion-flex-2 ion-padding column"

@@ -18,7 +18,7 @@ import {
   IonList,
   IonNote,
 } from '@ionic/angular/standalone';
-import { Bite, PublicUser } from 'model';
+import { Bite, BiteTrail, PublicUser } from 'model';
 import { EmployeeNamePipe } from './pipes/employee-name.pipe';
 
 @Component({
@@ -45,6 +45,7 @@ import { EmployeeNamePipe } from './pipes/employee-name.pipe';
 export class OrganisationDashboard {
   employees = input<PublicUser[] | undefined>([]);
   bites = input<Bite[] | undefined>([]);
+  biteTrails = input<BiteTrail[] | undefined>([]);
   selectedEmployeeIds = input<string[]>([]);
   selectedBiteIds = input<string[]>([]);
 

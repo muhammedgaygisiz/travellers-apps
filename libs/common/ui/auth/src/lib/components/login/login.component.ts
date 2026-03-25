@@ -10,7 +10,6 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { getPasswordValidators } from 'common/password-validator';
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
@@ -55,10 +54,7 @@ export class LoginComponent {
 
   public authFormGroup: FormGroup = new FormGroup<AuthCredentialFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),
-    password: new FormControl<string>(
-      '',
-      Validators.compose(getPasswordValidators()),
-    ),
+    password: new FormControl<string>('', Validators.required),
   });
 
   public onGoogleSignUp(): void {

@@ -43,4 +43,28 @@ describe('LoginComponent', () => {
 
     expect(submitSignupWithAppleEmitSpy).toHaveBeenCalledTimes(1);
   });
+
+  it('should have invalid form when password is empty', () => {
+    component.authFormGroup.setValue({
+      email: 'test@example.com',
+      password: '',
+    });
+    expect(component.authFormGroup.invalid).toBe(true);
+  });
+
+  it('should have valid form when email and password are provided', () => {
+    component.authFormGroup.setValue({
+      email: 'test@example.com',
+      password: 'anypassword',
+    });
+    expect(component.authFormGroup.valid).toBe(true);
+  });
+
+  it('should accept any non-empty password without complex validation', () => {
+    component.authFormGroup.setValue({
+      email: 'test@example.com',
+      password: 'abc',
+    });
+    expect(component.authFormGroup.valid).toBe(true);
+  });
 });

@@ -1,6 +1,8 @@
 @use 'globals';
 
 :host {
+  --border-radius: 46px;
+
   ion-card {
     margin-top: 0;
     margin-bottom: 0;

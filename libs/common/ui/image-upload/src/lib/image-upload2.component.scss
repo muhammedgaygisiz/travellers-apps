@@ -1,0 +1,28 @@
+:host {
+  .image-placeholder {
+    background-color: var(--ion-color-tertiary-tint);
+    height: 200px;
+    margin: 0;
+
+    border-width: var(--ion-image-upload-border-width);
+    border-color: var(--ion-image-upload-border-color);
+    border-style: var(--ion-image-upload-border-style);
+
+    border-radius: 12px;
+
+    ion-card-content {
+      height: 100%;
+      padding: 0;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    }
+  }
+}

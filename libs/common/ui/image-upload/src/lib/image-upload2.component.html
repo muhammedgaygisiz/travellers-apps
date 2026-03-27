@@ -1,0 +1,61 @@
+@if (isWeb()) {
+  <input
+    type="file"
+    #fileUploader
+    class="ion-hide"
+    (change)="onFileSelected($event)"
+  />
+}
+
+@if (showImage()) {
+  <img [src]="value() || imageUrl()" alt="Image" />
+  <div class="ion-text-end">
+    <ion-button fill="clear" id="crop-button2">Crop</ion-button>
+
+    <ion-modal trigger="crop-button2" #cropModal [backdropDismiss]="false">
+      <ng-template>
+        <ion-header>
+          <ion-toolbar>
+            <ion-buttons slot="start">
+              <ion-button (click)="cancelCropping()">Cancel</ion-button>
+            </ion-buttons>
+            <ion-title>Crop image</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="confirmCropping()">Crop</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+
+        <ion-content>
+          @let valueData = value();
+          @let imageUrlData = imageUrl();
+          <image-cropper
+            [imageBase64]="valueData ? valueData : undefined"
+            [imageURL]="imageUrlData ? imageUrlData : undefined"
+            [allowMoveImage]="true"
+            [hideResizeSquares]="false"
+            [aspectRatio]="3 / 4"
+            output="base64"
+            backgroundColor="black"
+            format="jpeg"
+            (imageCropped)="onImageCrop($event)"
+          />
+        </ion-content>
+      </ng-template>
+    </ion-modal>
+
+    <ion-button fill="clear" (click)="clearImage()">Delete</ion-button>
+  </div>
+} @else {
+  <ion-card
+    class="image-placeholder"
+    (click)="onImageUploadClick()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <ion-card-content>
+      <placeholder [isDragging]="isDragging()" />
+    </ion-card-content>
+  </ion-card>
+}

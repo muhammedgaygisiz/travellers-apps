@@ -8,9 +8,11 @@
       </ion-buttons>
 
       <ion-title>
-        <div class="title-container">
-          <ion-icon src="assets/icons/logo-black-white.svg" color="secondary" />
-          <ion-text color="secondary">
+        <div
+          class="title-container ion-display-flex ion-flex-row ion-align-items-center ion-justify-content-center"
+        >
+          <ion-icon src="assets/icons/logo-black-white.svg" color="primary" />
+          <ion-text>
             <h2 class="headline">
               {{ appTitle() | uppercase }}
             </h2>
@@ -21,7 +23,7 @@
       @if (showHeaderMenu()) {
         <ion-buttons slot="end">
           <ion-button data-cy="btn-menu" (click)="showMenuPopover($event)">
-            <ion-icon slot="icon-only" name="menu-outline" color="secondary" />
+            <ion-icon slot="icon-only" name="menu-outline" />
           </ion-button>
         </ion-buttons>
       }

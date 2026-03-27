@@ -7,7 +7,7 @@ $background: #fffbef;
 
 /** New Design **/
 
-$PRIMARY_COLOR: #fec56b;
+$PRIMARY_COLOR: #4a90d9;
 $SECONDARY_COLOR: #20201e;
 $TERTIARY_COLOR: #f1f1f1;
 $BACKGROUND_COLOR: #fff;
@@ -23,11 +23,11 @@ $BORDER_RADIUS: 16px;
 
 @mixin light-primary-color {
   --ion-color-primary: #{$PRIMARY_COLOR};
-  --ion-color-primary-rgb: 254, 197, 107;
-  --ion-color-primary-contrast: #000000;
-  --ion-color-primary-contrast-rgb: 0, 0, 0;
-  --ion-color-primary-shade: #e0ad5e;
-  --ion-color-primary-tint: #fecb7a;
+  --ion-color-primary-rgb: 74, 144, 217;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #417fbf;
+  --ion-color-primary-tint: #5c9ddd;
 }
 
 @mixin light-secondary-color {
@@ -149,7 +149,7 @@ $BORDER_RADIUS: 16px;
     'Segoe UI Emoji', 'Segoe UI Symbol';
   --ion-toolbar-background: #{$PRIMARY_COLOR};
   --ion-toolbar-border-color: var(--ion-color-primary-shade);
-  --ion-toolbar-color: #{$SECONDARY_COLOR};
+  --ion-toolbar-color: #ffffff;
 
   // General
   --border-color: var(--ion-color-secondary);
@@ -196,11 +196,11 @@ $BORDER_RADIUS: 16px;
 
 @mixin dark-primary-color {
   --ion-color-primary: #{$PRIMARY_COLOR};
-  --ion-color-primary-rgb: 254, 197, 107;
-  --ion-color-primary-contrast: #000000;
-  --ion-color-primary-contrast-rgb: 0, 0, 0;
-  --ion-color-primary-shade: #e0ad5e;
-  --ion-color-primary-tint: #fecb7a;
+  --ion-color-primary-rgb: 74, 144, 217;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #417fbf;
+  --ion-color-primary-tint: #5c9ddd;
 }
 
 @mixin dark-secondary-color {

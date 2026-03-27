@@ -7,27 +7,29 @@ $background: #fffbef;
 
 /** New Design **/
 
-$PRIMARY_COLOR: #fec56b;
+$PRIMARY_ORANGE: #fec56b;
+
+$PRIMARY_COLOR: #4a90d9;
 $SECONDARY_COLOR: #20201e;
 $TERTIARY_COLOR: #f1f1f1;
 $BACKGROUND_COLOR: #fff;
 
 $DARK_SECONDARY_COLOR: #fcf7f0;
 $DARK_TERTIARY_COLOR: #1c212b;
-$DARK_BACKGROUND_COLOR: #131620;
+$DARK_BACKGROUND_COLOR: #1a1c22;
 
 $BORDER_WIDTH: 1px;
-$BORDER_RADIUS: 16px;
+$BORDER_RADIUS: 24px;
 
 /******* Light Theme *********/
 
 @mixin light-primary-color {
   --ion-color-primary: #{$PRIMARY_COLOR};
-  --ion-color-primary-rgb: 254, 197, 107;
-  --ion-color-primary-contrast: #000000;
-  --ion-color-primary-contrast-rgb: 0, 0, 0;
-  --ion-color-primary-shade: #e0ad5e;
-  --ion-color-primary-tint: #fecb7a;
+  --ion-color-primary-rgb: 74, 144, 217;
+  --ion-color-primary-contrast: #263341; // #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #417fbf;
+  --ion-color-primary-tint: #5c9ddd;
 }
 
 @mixin light-secondary-color {
@@ -45,7 +47,7 @@ $BORDER_RADIUS: 16px;
   --ion-color-tertiary-contrast: #000000;
   --ion-color-tertiary-contrast-rgb: 0, 0, 0;
   --ion-color-tertiary-shade: #d4d4d4;
-  --ion-color-tertiary-tint: #f2f2f2;
+  --ion-color-tertiary-tint: #f1f1f2;
 }
 
 @mixin light-text-color {
@@ -131,6 +133,8 @@ $BORDER_RADIUS: 16px;
 }
 
 :root {
+  --bite-tribe-color: #{$PRIMARY_ORANGE};
+
   /**  Colors **/
   // https://ionicframework.com/docs/theming/color-generator
   @include light-primary-color;
@@ -147,9 +151,9 @@ $BORDER_RADIUS: 16px;
     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol';
-  --ion-toolbar-background: #{$PRIMARY_COLOR};
+  --ion-toolbar-background: #{$pure_white};
   --ion-toolbar-border-color: var(--ion-color-primary-shade);
-  --ion-toolbar-color: #{$SECONDARY_COLOR};
+  --ion-toolbar-color: #1f1f1f;
 
   // General
   --border-color: var(--ion-color-secondary);
@@ -161,6 +165,8 @@ $BORDER_RADIUS: 16px;
 
   // Footer
   --ion-footer-color-background: var(--ion-background-color);
+  --ion-footer-color-border: var(--ion-color-tertiary-tint);
+  --ion-footer-color-button: var(--ion-color-primary);
   --ion-footer-border-width: var(--border-width);
   --ion-footer-border-radius: var(--border-radius);
 
@@ -196,11 +202,11 @@ $BORDER_RADIUS: 16px;
 
 @mixin dark-primary-color {
   --ion-color-primary: #{$PRIMARY_COLOR};
-  --ion-color-primary-rgb: 254, 197, 107;
-  --ion-color-primary-contrast: #000000;
-  --ion-color-primary-contrast-rgb: 0, 0, 0;
-  --ion-color-primary-shade: #e0ad5e;
-  --ion-color-primary-tint: #fecb7a;
+  --ion-color-primary-rgb: 74, 144, 217;
+  --ion-color-primary-contrast: #263341; // #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #417fbf;
+  --ion-color-primary-tint: #5c9ddd;
 }
 
 @mixin dark-secondary-color {
@@ -218,7 +224,7 @@ $BORDER_RADIUS: 16px;
   --ion-color-tertiary-contrast: #ffffff;
   --ion-color-tertiary-contrast-rgb: 255, 255, 255;
   --ion-color-tertiary-shade: #191e26;
-  --ion-color-tertiary-tint: #2d333c;
+  --ion-color-tertiary-tint: #434a51;
 }
 
 @mixin dark-background-color {
@@ -281,13 +287,11 @@ $BORDER_RADIUS: 16px;
   @include dark-background-color;
 
   // Header
-  --ion-toolbar-background: #{$PRIMARY_COLOR};
+  --ion-toolbar-background: #263341;
   --ion-toolbar-border-color: var(--ion-color-primary-shade);
-  --ion-toolbar-color: #{$DARK_SECONDARY_COLOR};
+  --ion-toolbar-color: #{$TERTIARY_COLOR};
 
   // General
-  --border-radius: #{$BORDER_RADIUS};
-  --border-inner-radius: calc(var(--border-radius) - var(--border-width));
   --border-width: #{$BORDER_WIDTH};
   --border-color: var(--ion-color-tertiary-tint);
   --background-color: var(--ion-color-tertiary-shade);
@@ -309,11 +313,6 @@ $BORDER_RADIUS: 16px;
 
   ion-radio {
     --color-checked: #{$DARK_SECONDARY_COLOR};
-  }
-
-  ion-toolbar {
-    --ion-color-secondary: #{$DARK_BACKGROUND_COLOR};
-    --ion-toolbar-color: #{$DARK_BACKGROUND_COLOR};
   }
 
   --ion-image-upload-border-width: 0;

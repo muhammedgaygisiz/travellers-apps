@@ -527,7 +527,7 @@ describe('ImageUpload2Component', () => {
 
       const warnSpy = jest
         .spyOn(console, 'warn')
-        .mockImplementation((..._args: unknown[]) => undefined);
+        .mockImplementation(() => undefined);
 
       expect(() =>
         component.readAndEmitPositionFrom({} as Photo),

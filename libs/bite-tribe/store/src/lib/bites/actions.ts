@@ -1,5 +1,5 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import type { Bite, UploadParams } from 'model';
+import type { Bite } from 'model';
 
 export const BiteActions = createActionGroup({
   source: 'BITES',
@@ -19,15 +19,5 @@ export const BiteActions = createActionGroup({
     'No public creator for bite': emptyProps(),
     'No bites for bite creator profile': emptyProps(),
     'Loaded Latest from API': props<{ bites: Bite[] }>(),
-    'Upload Image': props<{ bite: Bite }>(),
-    'Uploading Image': props<{
-      progress: UploadParams;
-      biteId: string;
-      imagePath: string;
-    }>(),
-    'Uploaded Image': props<{ bite: Bite; imagePath: string }>(),
-    'Error uploading image': props<{ bite: Bite }>(),
-    'Updated Image Path in Bite': props<{ bite: Bite }>(),
-    'Error updating image path in Bite': props<{ bite: Bite }>(),
   },
 });

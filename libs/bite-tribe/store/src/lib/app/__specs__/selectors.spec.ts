@@ -1,7 +1,7 @@
 import * as fromSelectors from '../selectors';
 import type { Geopoint, PublicUser, Settings } from 'model';
 import { AppSlice } from '../app-slice.model';
-import { imageUploads, profileMetadata } from '../selectors';
+import { profileMetadata } from '../selectors';
 
 describe('App Selectors', () => {
   const mockPosition: Geopoint = {
@@ -22,7 +22,6 @@ describe('App Selectors', () => {
     position: mockPosition,
     settings: mockSettings,
     profile: mockProfile,
-    uploadingProgressForBiteImage: {},
     loading: {
       home: true,
     },
@@ -305,13 +304,6 @@ describe('App Selectors', () => {
         stateWithoutProfileMetadata,
       );
       expect(result).toBeUndefined();
-    });
-  });
-
-  describe('imageUploads', () => {
-    it('should return the image uploads', () => {
-      const result = fromSelectors.imageUploads.projector(mockState);
-      expect(result).toEqual({});
     });
   });
 });

@@ -16,7 +16,7 @@ import {
   IonCardTitle,
   IonText,
 } from '@ionic/angular/standalone';
-import { Bite, Like, UploadParams } from 'model';
+import { Bite, Like } from 'model';
 import { LikesComponent } from './likes/likes.component';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { StarRatingComponent } from 'common/ui/star-rating';
@@ -55,7 +55,6 @@ export class BiteComponent {
   userId = input<string>();
   showEditButton = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
-  uploadState = input<{ progress: UploadParams }>();
   readonly = input(false, { transform: booleanAttribute });
 
   biteClick = output<Bite>();

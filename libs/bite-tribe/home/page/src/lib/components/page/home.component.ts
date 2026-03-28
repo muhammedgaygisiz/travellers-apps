@@ -74,7 +74,6 @@ const PAGE_SIZE = 50;
 })
 export class BiteTribeHomeComponent {
   bites = input<Bite[]>();
-  uploads = input<Record<string, any>>({});
   allTags = input<string[]>([]);
   selectedFilters = input<string[]>([]);
   enableBackButton = input<boolean>(false);

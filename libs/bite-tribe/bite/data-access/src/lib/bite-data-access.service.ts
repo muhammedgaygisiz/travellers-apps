@@ -3,14 +3,11 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { ToastController } from '@ionic/angular';
-import { CreateAndUploadImageCallbackParams } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly api = inject(BiteTribeApiService);
-  private readonly toastController = inject(ToastController);
 
   biteLoader: ResourceLoader<any, any> = ({ params }) => {
     const biteId = params.biteId;
@@ -62,40 +59,10 @@ export class BiteDataAccessService {
     const biteWithImage = { ...savedBite, image };
     this.storeService.notifyBiteSaved(biteWithImage);
 
-    try {
-      await this.api.uploadImage(
-        biteWithImage,
-        (p: CreateAndUploadImageCallbackParams): void => {
-          if (p.uploadParams?.evt?.completed === false) {
-            this.storeService.notifyUploadingImage(
-              p.uploadParams,
-              biteWithImage.id,
-              p.imagePath,
-            );
-          } else if (p.uploadParams?.evt?.completed === true) {
-            this.storeService.notifyUploadedImage(biteWithImage, p.imagePath);
-
-            this.api
-              .updateImagePathInBite(biteWithImage, p.imagePath)
-              .then((updatedBite) => {
-                this.storeService.notifyUpdatedImagePathInBite(updatedBite);
-              })
-              .catch(() => {});
-          }
-        },
-      );
-    } catch (err: any) {
-      const toast = await this.toastController.create({
-        message: `
-          Error uploading image:
-
-          ${err.code ? `Code: ${err.code}` : ''}
-          ${err.message}
-        `,
-        position: 'middle',
-        buttons: [{ text: 'OK', role: 'confirm' }],
-      });
-      await toast.present();
+    if (image) {
+      try {
+        await this.api.updateImagePathInBite(biteWithImage, image);
+      } catch {}
     }
   }
 

@@ -82,7 +82,6 @@ import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-cur
 })
 export class DetailsPage {
   bite = input<Bite>();
-  uploadState = input<any>();
   reviews = input<Review[]>([]);
   bucketlists = input<Bucketlist[]>([]);
   userId = input<string>();

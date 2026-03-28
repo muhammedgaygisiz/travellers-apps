@@ -15,7 +15,6 @@ export class DetailsService {
   private readonly navController = inject(NavController);
 
   bite = this.dataAccess.bite;
-  uploadState = this.dataAccess.uploadState;
   reviews = this.dataAccess.reviews;
   bucketlists = this.dataAccess.bucketlists;
   exchangeRates = this.dataAccess.exchangeRates;

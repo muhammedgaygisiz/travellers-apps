@@ -1,5 +1,3 @@
-@let uploadData = uploads();
-
 <ta-page
   [showHeaderMenu]="showHeaderMenu()"
   [showLanguages]="false"
@@ -173,7 +171,6 @@
   @for (bite of displayedBites(); track bite.id) {
     <bt-bite
       [bite]="bite"
-      [uploadState]="uploadData[bite.id]"
       [userId]="userId()"
       [showEditButton]="editableBites()"
       [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"

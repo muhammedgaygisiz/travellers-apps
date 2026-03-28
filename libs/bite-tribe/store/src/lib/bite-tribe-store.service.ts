@@ -36,14 +36,12 @@ import type {
   Restaurant,
   SaveToBucketListParams,
   Settings,
-  UploadParams,
 } from 'model';
 import {
   currency,
   exchangeRates,
   gpsPosition,
   hasErrorLoadingGpsPosition,
-  imageUploads,
   isBitesLoading,
   isDarkTheme,
   isPublicProfile,
@@ -101,7 +99,6 @@ export class BiteTribeStoreService implements StoreService {
     tagSuggestionsForEditingBite,
   );
   sortedHomeBites$ = this.store.select(sortedHomeBites);
-  imageUploads$ = this.store.select(imageUploads);
   sortedBucketlists$ = this.store.select(sortedBucketlists);
   homeSorting$ = this.store.select(homeSorting);
   bucketlistSorting$ = this.store.select(bucketlistSorting);
@@ -186,22 +183,6 @@ export class BiteTribeStoreService implements StoreService {
 
   notifyBiteSaved(bite: Bite): void {
     this.store.dispatch(BiteActions.savedBite({ bite }));
-  }
-
-  notifyUploadingImage(
-    progress: UploadParams,
-    biteId: string,
-    imagePath: string,
-  ): void {
-    this.store.dispatch(BiteActions.uploadingImage({ progress, biteId, imagePath }));
-  }
-
-  notifyUploadedImage(bite: Bite, imagePath: string): void {
-    this.store.dispatch(BiteActions.uploadedImage({ bite, imagePath }));
-  }
-
-  notifyUpdatedImagePathInBite(bite: Bite): void {
-    this.store.dispatch(BiteActions.updatedImagePathInBite({ bite }));
   }
 
   setEditingBite(bite: Partial<Bite>): void {

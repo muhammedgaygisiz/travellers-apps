@@ -379,7 +379,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   rotateImage(): void {
     const currentRotation = this.canvasRotation();
-    this.canvasRotation.set((currentRotation + 1) % 4);
+    this.canvasRotation.set((currentRotation + 3) % 4);
   }
 
   onImageCrop($event: ImageCroppedEvent): void {

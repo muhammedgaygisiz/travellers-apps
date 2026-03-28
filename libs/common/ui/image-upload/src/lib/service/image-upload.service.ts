@@ -110,6 +110,15 @@ export class ImageUploadService {
     }
   }
 
+  finishCallback:
+    | ((
+        file: File | undefined,
+        base64: string | undefined,
+        downloadUrl: string | undefined,
+        position: { latitude: number; longitude: number } | undefined,
+      ) => void)
+    | undefined = undefined;
+
   async handleFileSelected(
     file: File,
     collectionId: string,
@@ -125,14 +134,8 @@ export class ImageUploadService {
     await this.compressFile(file);
 
     this.collectionId.set(collectionId);
+    this.finishCallback = finishedCallback;
     await this.uploadAsBase64(file);
-
-    finishedCallback(
-      this.imageFile(),
-      this.imageAsBase64(),
-      this.imageDownloadUrl(),
-      this.positionFromImage(),
-    );
   }
 
   private prcessPositionFromImage = async (file: File): Promise<void> => {
@@ -210,6 +213,13 @@ export class ImageUploadService {
       const imagePath = p.imagePath;
       const downloadUrl = await getDownloadUrlFromFirebaseStorage(imagePath);
       this.imageDownloadUrl.set(downloadUrl);
+
+      this.finishCallback?.(
+        this.imageFile(),
+        this.imageAsBase64(),
+        this.imageDownloadUrl(),
+        this.positionFromImage(),
+      );
     }
 
     await this.loading?.dismiss();

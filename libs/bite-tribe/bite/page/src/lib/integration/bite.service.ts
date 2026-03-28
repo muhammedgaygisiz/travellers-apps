@@ -19,7 +19,7 @@ export class BiteService {
   tagSuggestionsForEditingBite = this.dataAccess.tagSuggestionsForEditingBite;
 
   submitNewBite(newBite: any): void {
-    this.dataAccess.submitBite(newBite);
+    this.dataAccess.submitNewBite(newBite);
 
     this.navController.navigateBack(['home']);
   }

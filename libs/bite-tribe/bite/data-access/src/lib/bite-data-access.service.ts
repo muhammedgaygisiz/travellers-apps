@@ -42,6 +42,10 @@ export class BiteDataAccessService {
     this.storeService.save(bite, 'bite');
   }
 
+  async submitNewBite(bite: any): Promise<void> {
+    this.storeService.saveNewBite(bite);
+  }
+
   setEditingBite(bite: Partial<any>): void {
     this.storeService.setEditingBite(bite);
   }

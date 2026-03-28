@@ -179,6 +179,10 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(getActionByDocType(docType, entity));
   }
 
+  saveNewBite(bite: any): void {
+    this.store.dispatch(BiteActions.saveNewBite({ bite }));
+  }
+
   setEditingBite(bite: Partial<Bite>): void {
     this.store.dispatch(BiteActions.setEditingBite({ bite }));
   }

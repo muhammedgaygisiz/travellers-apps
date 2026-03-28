@@ -33,11 +33,11 @@ describe('BiteService', () => {
   });
 
   describe('submitNewBite', () => {
-    it('should submit bite including id', () => {
+    it('should submit new bite via submitNewBite including id', () => {
       const newBite = { id: '123', name: 'Test Bite' };
       service.submitNewBite(newBite);
 
-      expect(Mock.submitBite).toHaveBeenCalledWith({
+      expect(Mock.submitNewBite).toHaveBeenCalledWith({
         id: '123',
         name: 'Test Bite',
       });

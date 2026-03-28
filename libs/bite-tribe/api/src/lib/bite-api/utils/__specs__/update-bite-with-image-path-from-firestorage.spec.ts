@@ -52,4 +52,22 @@ describe('updateBiteWithImagePathFromFirestorage', () => {
       data: updatedBite,
     });
   });
+
+  it('should use download url directly when imagePath is already an http url', async () => {
+    const { getDownloadUrlFromFirebaseStorage } = jest.requireMock('utils');
+    (getDownloadUrlFromFirebaseStorage as jest.Mock).mockClear();
+
+    const alreadyUploadedUrl =
+      'https://firebasestorage.googleapis.com/v0/b/test/o/image.jpg';
+
+    const updatedBite = await updateBiteWithImagePathFromFirestorage(
+      alreadyUploadedUrl,
+      { name: 'Bite Name' } as unknown as Bite,
+      true,
+      'biteId123',
+    );
+
+    expect(getDownloadUrlFromFirebaseStorage).not.toHaveBeenCalled();
+    expect(updatedBite.imagePath).toEqual(alreadyUploadedUrl);
+  });
 });

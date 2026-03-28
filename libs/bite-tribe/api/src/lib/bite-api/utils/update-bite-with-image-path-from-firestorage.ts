@@ -9,7 +9,9 @@ export const updateBiteWithImagePathFromFirestorage = async (
   clearBase64Image: boolean,
   biteId: string,
 ): Promise<Bite> => {
-  const downloadUrl = await getDownloadUrlFromFirebaseStorage(imagePath);
+  const downloadUrl = imagePath.startsWith('http')
+    ? imagePath
+    : await getDownloadUrlFromFirebaseStorage(imagePath);
 
   const data = {
     ...(biteWithoutImage || {}),

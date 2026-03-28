@@ -166,6 +166,30 @@ describe(BiteApiService.name, () => {
         docId: 'bite123',
       });
     });
+
+    it('should invoke callbackFn directly when image is already a URL', async () => {
+      (uploadBase64ToFirebaseStorage as jest.Mock).mockClear();
+
+      const mockedBite = {
+        id: 'bite123',
+        image: 'https://firebasestorage.googleapis.com/v0/b/test/o/image.jpg',
+        title: 'Test Bite',
+      } as unknown as Bite;
+
+      const callbackFn = jest.fn();
+
+      await service.uploadImage(mockedBite, callbackFn);
+
+      expect(uploadBase64ToFirebaseStorage).not.toHaveBeenCalled();
+      expect(callbackFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          imagePath: mockedBite.image,
+          uploadParams: expect.objectContaining({
+            evt: expect.objectContaining({ completed: true }),
+          }),
+        }),
+      );
+    });
   });
 
   describe('updateImagePathInBite', () => {

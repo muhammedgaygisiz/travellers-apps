@@ -7,10 +7,11 @@
     <h1 class="ion-margin-bottom">Create Bite</h1>
 
     <form [formGroup]="biteFormGroup">
-      <image-upload
+      <image-upload2
         formControlName="image"
         [imageUrl]="imageUrl()"
         [position]="this.fallbackPosition()"
+        collectionId="bites"
         (positionFromImage)="onPositionFromImage($event)"
         (clearImagePath)="resetImagePath()"
       />

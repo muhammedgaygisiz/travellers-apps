@@ -28,7 +28,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
 import { PositionComponent } from 'bite-tribe-common/map';
-import { ImageUploadComponent } from 'image-upload';
+import { ImageUpload2Component } from 'image-upload';
 import type { Bite, Geopoint } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { currencyCodes } from 'utils';
@@ -47,7 +47,7 @@ import { normalizePriceForForm } from './utils/normalize-price-for-form';
     IonContent,
     ReactiveFormsModule,
     IonText,
-    ImageUploadComponent,
+    ImageUpload2Component,
     PositionComponent,
     StarRatingComponent,
     TagsInputComponent,

@@ -374,6 +374,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
       this._onTouch();
 
       this.cropModal()?.dismiss(null, 'confirmed');
+      this.canvasRotation.set(0);
     }
   }
 

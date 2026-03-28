@@ -149,6 +149,10 @@ export class ImageUpload2Component implements ControlValueAccessor {
       this.setValueAndNotify(downloadUrl);
       return;
     }
+
+    if (base64) {
+      this.setValueAndNotify(base64);
+    }
   }
 
   clearImage(): void {
@@ -194,7 +198,7 @@ export class ImageUpload2Component implements ControlValueAccessor {
 
     if (croppedImage) {
       this.cropModal()?.dismiss(null, 'confirmed');
-      // await this.imageUploadService.uploadBase64(croppedImage);
+      await this.imageUploadService.uploadBase64String(croppedImage);
     }
   }
 

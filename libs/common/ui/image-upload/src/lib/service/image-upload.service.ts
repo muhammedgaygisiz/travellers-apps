@@ -159,9 +159,18 @@ export class ImageUploadService {
 
   async uploadAsBase64(compressed: File): Promise<void> {
     const base64 = await this.readFileAsDataUrl(compressed);
+    await this.uploadBase64String(base64);
+  }
 
+  async uploadBase64String(base64: string): Promise<void> {
     if (!navigator.onLine) {
       this.imageAsBase64.set(base64);
+      this.finishCallback?.(
+        this.imageFile(),
+        base64,
+        undefined,
+        this.positionFromImage(),
+      );
       return;
     }
 
@@ -176,6 +185,12 @@ export class ImageUploadService {
     if (!this.collectionId()) {
       console.error('Collection ID is not set. Cannot upload image.');
       this.imageAsBase64.set(base64);
+      this.finishCallback?.(
+        this.imageFile(),
+        base64,
+        undefined,
+        this.positionFromImage(),
+      );
       return;
     }
 
@@ -310,7 +325,7 @@ export class ImageUploadService {
         return;
       }
 
-      //this.positionFromImage.emit(exifData);
+      this.positionFromImage.set(exifData);
     } catch (e) {
       console.warn('Error reading GPS position from file path:', e);
     }

@@ -7,6 +7,9 @@
       background-color: var(--ion-color-primary) !important;
       color: var(--ion-color-primary) !important;
 
+      border-left: var(--border-width) solid var(--ion-color-tertiary-tint) !important;
+      border-top: var(--border-width) solid var(--ion-color-tertiary-tint) !important;
+
       ion-label {
         &.like-nr {
           color: var(--ion-color-primary-contrast);
@@ -15,9 +18,8 @@
     }
 
     ion-chip.unliked {
-      border-left: var(--border-width) solid var(--ion-color-card-border) !important;
-      border-top: var(--border-width) solid var(--ion-color-card-border) !important;
-      background-color: var(--ion-color-card-background) !important;
+      border-left: var(--border-width) solid var(--ion-color-tertiary-tint) !important;
+      border-top: var(--border-width) solid var(--ion-color-tertiary-tint) !important;
     }
 
     ion-label {
@@ -25,13 +27,17 @@
       color: var(--ion-color-tertiary-contrast);
 
       &.emoji {
-        margin-right: 8px;
+        margin-right: -8px;
+
+        &.last-emoji {
+          margin-right: 8px;
+        }
       }
     }
 
     &.in-card {
       ion-chip {
-        padding: 15px;
+        padding: 16px 32px 16px 16px;
         min-height: calc(40px + 1rem);
         position: absolute;
         right: -4px;
@@ -42,7 +48,7 @@
         border-bottom-left-radius: 0;
         border-bottom-right-radius: var(--border-inner-radius);
 
-        background-color: var(--ion-color-tertiary-tint);
+        background-color: var(#2d333c);
       }
 
       ion-label {

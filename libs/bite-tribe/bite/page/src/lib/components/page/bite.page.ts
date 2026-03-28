@@ -32,6 +32,7 @@ import { ImageUpload2Component } from 'image-upload';
 import type { Bite, Geopoint } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { currencyCodes } from 'utils';
+import { v4 as uuidv4 } from 'uuid';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
 import { normalizePriceForBackend } from './utils/normalize-price-for-backend';
@@ -86,13 +87,15 @@ export class BitePage {
 
   isWeb = signal(!this.platform.is('hybrid'));
 
+  biteDocumentId = signal(uuidv4());
+
   currencies = currencyCodes;
 
   nearbyRestaurants = input<string[]>([]);
 
   biteFormGroup = this.formBuilder.group(
     {
-      id: [''],
+      id: [this.biteDocumentId()],
       restaurantId: [''],
       image: [''],
       imagePath: [''],

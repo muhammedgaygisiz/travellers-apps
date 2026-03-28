@@ -64,6 +64,8 @@ export class ImageUpload2Component implements ControlValueAccessor {
 
   collectionId = input.required<string>();
 
+  docId = input<string>();
+
   positionFromImage = output<{
     latitude: number;
     longitude: number;
@@ -132,6 +134,7 @@ export class ImageUpload2Component implements ControlValueAccessor {
       file,
       collectionId,
       this.handleFileUploadFinished.bind(this),
+      this.docId(),
     );
   }
 

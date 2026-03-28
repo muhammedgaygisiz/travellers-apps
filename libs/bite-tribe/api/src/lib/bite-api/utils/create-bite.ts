@@ -19,8 +19,11 @@ export const createBite = (
    * when uploading the image to Firebase Storage.
    *
    * We cannot rely on the promise since it does not resolve when offline.
+   *
+   * If a pre-generated id is provided (e.g. from the bite page to match the
+   * image upload path), use it; otherwise generate a new one.
    */
-  const id = uuid();
+  const id = biteDoc.id || uuid();
   FirebaseFirestore.setDocument({
     reference: `${BITE_COLLECTION}/${id}`,
     data: {

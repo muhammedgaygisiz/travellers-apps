@@ -30,6 +30,7 @@ export class ImageUploadService {
   isWeb = signal(!this.platform.is('hybrid'));
 
   collectionId = signal<string | undefined>(undefined);
+  docId = signal<string | undefined>(undefined);
 
   imageFile = signal<File | undefined>(undefined);
   imageAsBase64 = signal<string | undefined>(undefined);
@@ -128,17 +129,19 @@ export class ImageUploadService {
       downloadUrl: string | undefined,
       position: { latitude: number; longitude: number } | undefined,
     ) => void,
+    docId?: string,
   ): Promise<void> {
-    await this.prcessPositionFromImage(file);
+    await this.processPositionFromImage(file);
 
     await this.compressFile(file);
 
     this.collectionId.set(collectionId);
+    this.docId.set(docId);
     this.finishCallback = finishedCallback;
     await this.uploadAsBase64(file);
   }
 
-  private prcessPositionFromImage = async (file: File): Promise<void> => {
+  private processPositionFromImage = async (file: File): Promise<void> => {
     try {
       const exifData = await getExifDataFromFile(file);
 
@@ -200,7 +203,7 @@ export class ImageUploadService {
     await this.loading.present();
 
     try {
-      const uuid = uuidv4();
+      const uuid = this.docId() ?? uuidv4();
       const collectionId = this.collectionId();
       await uploadBase64ToFirebaseStorage({
         base64,

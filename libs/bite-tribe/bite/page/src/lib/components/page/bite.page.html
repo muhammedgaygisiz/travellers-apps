@@ -12,6 +12,7 @@
         [imageUrl]="imageUrl()"
         [position]="this.fallbackPosition()"
         collectionId="bites"
+        [docId]="biteDocumentId()"
         (positionFromImage)="onPositionFromImage($event)"
         (clearImagePath)="resetImagePath()"
       />

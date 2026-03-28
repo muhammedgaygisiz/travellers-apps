@@ -36,6 +36,7 @@ import type {
   Restaurant,
   SaveToBucketListParams,
   Settings,
+  UploadParams,
 } from 'model';
 import {
   currency,
@@ -181,6 +182,26 @@ export class BiteTribeStoreService implements StoreService {
 
   saveNewBite(bite: any): void {
     this.store.dispatch(BiteActions.saveNewBite({ bite }));
+  }
+
+  notifyBiteSaved(bite: Bite): void {
+    this.store.dispatch(BiteActions.savedBite({ bite }));
+  }
+
+  notifyUploadingImage(
+    progress: UploadParams,
+    biteId: string,
+    imagePath: string,
+  ): void {
+    this.store.dispatch(BiteActions.uploadingImage({ progress, biteId, imagePath }));
+  }
+
+  notifyUploadedImage(bite: Bite, imagePath: string): void {
+    this.store.dispatch(BiteActions.uploadedImage({ bite, imagePath }));
+  }
+
+  notifyUpdatedImagePathInBite(bite: Bite): void {
+    this.store.dispatch(BiteActions.updatedImagePathInBite({ bite }));
   }
 
   setEditingBite(bite: Partial<Bite>): void {

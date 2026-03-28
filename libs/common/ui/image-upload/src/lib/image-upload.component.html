@@ -10,7 +10,7 @@
 @if (showImage()) {
   <img [src]="value() || imageUrl()" alt="Image" />
   <div class="ion-text-end">
-    <ion-button fill="clear" id="crop-button">Crop</ion-button>
+    <ion-button fill="clear" id="crop-button">Edit image</ion-button>
 
     <ion-modal trigger="crop-button" #cropModal [backdropDismiss]="false">
       <ng-template>
@@ -19,10 +19,10 @@
             <ion-buttons slot="start">
               <ion-button (click)="cancelCropping()">Cancel</ion-button>
             </ion-buttons>
-            <ion-title>Crop image</ion-title>
+            <ion-title>Edit image</ion-title>
             <ion-buttons slot="end">
               <ion-button (click)="rotateImage()">Rotate</ion-button>
-              <ion-button (click)="confirmCropping()">Crop</ion-button>
+              <ion-button (click)="confirmCropping()">Save</ion-button>
             </ion-buttons>
           </ion-toolbar>
         </ion-header>

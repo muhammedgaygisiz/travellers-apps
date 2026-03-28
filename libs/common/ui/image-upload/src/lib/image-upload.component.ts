@@ -103,6 +103,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
   value = signal<string | null>(null);
   disabled = signal<boolean | null>(null);
   croppedImage = signal<string | null | undefined>(null);
+  canvasRotation = signal(0);
 
   showImage = computed(() => {
     return !!this.value() || !!this.imageUrl();
@@ -358,6 +359,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   cancelCropping(): void {
+    this.canvasRotation.set(0);
     this.cropModal()?.dismiss(null, 'cancel');
   }
 
@@ -371,6 +373,11 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
       this.cropModal()?.dismiss(null, 'confirmed');
     }
+  }
+
+  rotateImage(): void {
+    const currentRotation = this.canvasRotation();
+    this.canvasRotation.set((currentRotation + 1) % 4);
   }
 
   onImageCrop($event: ImageCroppedEvent): void {

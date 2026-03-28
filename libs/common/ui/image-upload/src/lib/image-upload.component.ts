@@ -11,6 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import {
+  AlertController,
   IonButton,
   IonButtons,
   IonCard,
@@ -20,14 +21,8 @@ import {
   IonModal,
   IonTitle,
   IonToolbar,
-  AlertController,
 } from '@ionic/angular/standalone';
-import {
-  Camera,
-  CameraResultType,
-  CameraSource,
-  Photo,
-} from '@capacitor/camera';
+import { Camera, Photo } from '@capacitor/camera';
 import { Platform } from '@ionic/angular';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { compressFile, compressPhoto } from 'image-compression';
@@ -37,20 +32,7 @@ import { getExifDataFromPhoto } from './utils/get-exif-data-from-photo';
 import { getExifDataFromFile } from './utils/get-exif-data-from-file';
 import { FilePicker } from '@capawesome/capacitor-file-picker';
 import { getExifDataFromFilePath } from './utils/get-exif-data-from-file-path';
-
-const photoOptions = {
-  quality: 90,
-  allowEditing: false,
-  resultType: CameraResultType.Base64,
-  source: CameraSource.Prompt,
-};
-
-const cameraOnlyOptions = {
-  quality: 90,
-  allowEditing: false,
-  resultType: CameraResultType.Base64,
-  source: CameraSource.Camera,
-};
+import { cameraOnlyOptions, photoOptions } from './utils/image-options';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -119,11 +101,11 @@ export class ImageUploadComponent implements ControlValueAccessor {
     this.value.set(obj);
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: () => void): void {
     this._onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this._onTouch = fn;
   }
 

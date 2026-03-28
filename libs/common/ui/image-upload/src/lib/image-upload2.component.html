@@ -1,4 +1,4 @@
-@if (isWeb()) {
+@if (imageUploadService.isWeb()) {
   <input
     type="file"
     #fileUploader
@@ -54,7 +54,9 @@
     (dragleave)="onDragLeave($event)"
     (drop)="onDrop($event)"
   >
-    <ion-card-content>
+    <ion-card-content
+      class="ion-display-flex ion-justify-content-center ion-align-items-center"
+    >
       <placeholder [isDragging]="isDragging()" />
     </ion-card-content>
   </ion-card>

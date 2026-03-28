@@ -4,7 +4,7 @@
   "sourceRoot": "libs/common/ui/image-upload/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["scope:common", "type:ui", "framework:ionic"],
+  "tags": ["smart:component"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

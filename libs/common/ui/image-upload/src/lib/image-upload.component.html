@@ -8,46 +8,62 @@
 }
 
 @if (showImage()) {
-  <img [src]="value() || imageUrl()" alt="Image" />
-  <div class="ion-text-end">
-    <ion-button fill="clear" id="crop-button">Edit image</ion-button>
-
-    <ion-modal trigger="crop-button" #cropModal [backdropDismiss]="false">
-      <ng-template>
-        <ion-header>
-          <ion-toolbar>
-            <ion-buttons slot="start">
-              <ion-button (click)="cancelCropping()">Cancel</ion-button>
-            </ion-buttons>
-            <ion-title>Edit image</ion-title>
-            <ion-buttons slot="end">
-              <ion-button (click)="rotateImage()">Rotate</ion-button>
-              <ion-button (click)="confirmCropping()">Save</ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
-
-        <ion-content>
-          @let valueData = value();
-          @let imageUrlData = imageUrl();
-          <image-cropper
-            [imageBase64]="valueData ? valueData : undefined"
-            [imageURL]="imageUrlData ? imageUrlData : undefined"
-            [allowMoveImage]="true"
-            [hideResizeSquares]="false"
-            [aspectRatio]="3 / 4"
-            [canvasRotation]="canvasRotation()"
-            output="base64"
-            backgroundColor="black"
-            format="jpeg"
-            (imageCropped)="onImageCrop($event)"
-          />
-        </ion-content>
-      </ng-template>
-    </ion-modal>
-
-    <ion-button fill="clear" (click)="clearImage()">Delete</ion-button>
+  <div class="image-preview">
+    <img [src]="value() || imageUrl()" alt="Image" />
+    <div class="image-actions-overlay">
+      <ion-button
+        fill="solid"
+        size="small"
+        id="crop-button"
+        aria-label="Edit image"
+      >
+        <ion-icon name="crop-outline" />
+      </ion-button>
+      <ion-button
+        fill="solid"
+        size="small"
+        color="danger"
+        (click)="clearImage()"
+        aria-label="Delete image"
+      >
+        <ion-icon name="trash-outline" />
+      </ion-button>
+    </div>
   </div>
+
+  <ion-modal trigger="crop-button" #cropModal [backdropDismiss]="false">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="cancelCropping()">Cancel</ion-button>
+          </ion-buttons>
+          <ion-title>Edit image</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="rotateImage()">Rotate</ion-button>
+            <ion-button (click)="confirmCropping()">Save</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content>
+        @let valueData = value();
+        @let imageUrlData = imageUrl();
+        <image-cropper
+          [imageBase64]="valueData ? valueData : undefined"
+          [imageURL]="imageUrlData ? imageUrlData : undefined"
+          [allowMoveImage]="true"
+          [hideResizeSquares]="false"
+          [aspectRatio]="3 / 4"
+          [canvasRotation]="canvasRotation()"
+          output="base64"
+          backgroundColor="black"
+          format="jpeg"
+          (imageCropped)="onImageCrop($event)"
+        />
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 } @else {
   <ion-card
     class="image-placeholder"

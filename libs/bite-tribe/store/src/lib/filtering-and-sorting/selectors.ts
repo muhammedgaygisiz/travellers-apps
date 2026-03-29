@@ -43,7 +43,7 @@ export const myBitesMaxPriceFilter = createSelector(
 );
 
 export const myBitesSorting = createSelector(slice, (slice) => {
-  return slice?.sorting?.mybites || 'distance';
+  return slice?.sorting?.myBites || 'distance';
 });
 
 export const bucketlistSorting = createSelector(slice, (slice) => {

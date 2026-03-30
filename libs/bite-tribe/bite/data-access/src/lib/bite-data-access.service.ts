@@ -45,6 +45,12 @@ export class BiteDataAccessService {
   }
 
   async submitNewBite(bite: any): Promise<void> {
+    if (!navigator.onLine) {
+      const savedBite = await this.api.saveNewBite(bite);
+      this.storeService.notifyBiteSaved(savedBite);
+      return;
+    }
+
     const { image, ...biteDocWithoutImage } = bite;
 
     this.storeService.saveNewBite(bite);
@@ -62,7 +68,9 @@ export class BiteDataAccessService {
     if (image) {
       try {
         await this.api.updateImagePathInBite(biteWithImage, image);
-      } catch {}
+      } catch {
+        console.log('Error updating image', image);
+      }
     }
   }
 

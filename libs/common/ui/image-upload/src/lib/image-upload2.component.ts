@@ -110,12 +110,11 @@ export class ImageUpload2Component implements ControlValueAccessor {
 
   onImageUploadClick(): void {
     const fileUploadElem = this.fileUpload();
-    if (!fileUploadElem) {
-      console.error('File upload element not found');
-      return;
-    }
 
-    this.imageUploadService.handleImageUploadClick(fileUploadElem);
+    this.imageUploadService.handleImageUploadClick(
+      fileUploadElem,
+      this.handleFileUploadFinished.bind(this),
+    );
   }
 
   async onFileSelected(event: Event): Promise<void> {
@@ -135,7 +134,6 @@ export class ImageUpload2Component implements ControlValueAccessor {
     void this.imageUploadService.handleFileSelected(
       file,
       collectionId,
-      this.handleFileUploadFinished.bind(this),
       this.docId(),
     );
   }

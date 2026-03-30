@@ -16,6 +16,7 @@ import { uploadBase64ToFirebaseStorage } from 'bite-tribe/api';
 import { v4 as uuidv4 } from 'uuid';
 import { getDownloadUrlFromFirebaseStorage } from 'utils';
 import { CreateAndUploadImageCallbackParams } from 'model';
+import { NetworkStatusService } from 'common/networkstatus';
 
 const MIN_FREE_BYTES_MULTIPLIER = 3;
 
@@ -26,6 +27,8 @@ export class ImageUploadService {
   private readonly toastController = inject(ToastController);
 
   private readonly loadingController = inject(LoadingController);
+
+  private readonly networkStatusService = inject(NetworkStatusService);
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -47,7 +50,16 @@ export class ImageUploadService {
 
   loading: HTMLIonLoadingElement | undefined = undefined;
 
-  handleImageUploadClick(fileUpload: ElementRef<HTMLInputElement>): void {
+  handleImageUploadClick(
+    fileUpload: ElementRef<HTMLInputElement> | undefined,
+    finishedCallback: (
+      file: File | undefined,
+      base64: string | undefined,
+      downloadUrl: string | undefined,
+      position: { latitude: number; longitude: number } | undefined,
+    ) => void,
+  ): void {
+    this.finishCallback = finishedCallback;
     const isWeb = this.isWeb();
 
     if (isWeb) {
@@ -64,7 +76,7 @@ export class ImageUploadService {
   }
 
   private handleWebImageUploadClick(
-    fileUpload: ElementRef<HTMLInputElement>,
+    fileUpload: ElementRef<HTMLInputElement> | undefined,
   ): void {
     if (!fileUpload) {
       console.error('File upload element not found');
@@ -125,12 +137,6 @@ export class ImageUploadService {
   async handleFileSelected(
     file: File,
     collectionId: string,
-    finishedCallback: (
-      file: File | undefined,
-      base64: string | undefined,
-      downloadUrl: string | undefined,
-      position: { latitude: number; longitude: number } | undefined,
-    ) => void,
     docId?: string,
   ): Promise<void> {
     await this.processPositionFromImage(file);
@@ -139,7 +145,6 @@ export class ImageUploadService {
 
     this.collectionId.set(collectionId);
     this.docId.set(docId);
-    this.finishCallback = finishedCallback;
     await this.uploadAsBase64(file);
   }
 
@@ -168,7 +173,7 @@ export class ImageUploadService {
   }
 
   async uploadBase64String(base64: string): Promise<void> {
-    if (!navigator.onLine) {
+    if (!this.networkStatusService.status()) {
       this.imageAsBase64.set(base64);
       this.finishCallback?.(
         this.imageFile(),

@@ -2,9 +2,10 @@ import { InjectionToken, Provider } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseOptions, initializeApp } from 'firebase/app';
 import {
-  enableMultiTabIndexedDbPersistence,
   Firestore,
   initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
 } from 'firebase/firestore';
 import {
   Auth,
@@ -33,7 +34,11 @@ export const provideFirestoreUtils = (
   emulators?: Emulators,
 ): Provider[] => {
   const app = initializeApp(firebaseOptions || {});
-  const firestore: Firestore = initializeFirestore(app, {});
+  const firestore: Firestore = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager(),
+    }),
+  });
 
   if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] === 'true') {
     console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
@@ -51,15 +56,9 @@ export const provideFirestoreUtils = (
     );
   }
 
-  try {
-    enableMultiTabIndexedDbPersistence(firestore);
-  } catch (err) {
-    console.warn('Firebase persistence error: ', err);
-  }
-
   const auth: Auth = Capacitor.isNativePlatform()
-    ? initializeAuth(app, { persistence: indexedDBLocalPersistence })
-    : getAuth(app);
+    ? getAuth(app)
+    : initializeAuth(app, { persistence: indexedDBLocalPersistence });
 
   const providers: Provider[] = [
     { provide: FIREBASE_APP, useFactory: () => app },

@@ -7,10 +7,6 @@
   />
 }
 
-@if (imageUploadService.uploadProgress() > 0 && imageUploadService.uploadProgress() < 1) {
-  <ion-progress-bar [value]="imageUploadService.uploadProgress()" />
-}
-
 @if (showImage()) {
   <img [src]="value() || imageUrl()" alt="Image" />
   <div class="ion-text-end">
@@ -61,7 +57,18 @@
     <ion-card-content
       class="ion-display-flex ion-justify-content-center ion-align-items-center"
     >
-      <placeholder [isDragging]="isDragging()" />
+      @if (
+        imageUploadService.uploadProgress() > 0 &&
+        imageUploadService.uploadProgress() < 1
+      ) {
+        <div
+          class="upload-container ion-display-flex ion-align-items-center ion-margin"
+        >
+          <ion-progress-bar [value]="imageUploadService.uploadProgress()" />
+        </div>
+      } @else {
+        <placeholder [isDragging]="isDragging()" />
+      }
     </ion-card-content>
   </ion-card>
 }

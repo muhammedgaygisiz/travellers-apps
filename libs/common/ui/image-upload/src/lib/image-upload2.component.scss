@@ -1,4 +1,11 @@
 :host {
+  .progress-bar-overlay {
+    height: 200px;
+
+    .progress-bar-container {
+    }
+  }
+
   .image-placeholder {
     background-color: var(--ion-color-tertiary-tint);
     height: 200px;
@@ -13,6 +20,11 @@
     ion-card-content {
       height: 100%;
       padding: 0;
+
+      .upload-container {
+        width: 100%;
+        height: 100%;
+      }
 
       img {
         width: 100%;

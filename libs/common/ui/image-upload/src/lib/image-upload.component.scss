@@ -1,4 +1,25 @@
 :host {
+  .image-preview {
+    position: relative;
+    width: 100%;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      object-fit: cover;
+    }
+
+    .image-actions-overlay {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 8px;
+    }
+  }
+
   .image-placeholder {
     background-color: var(--ion-color-tertiary-tint);
     height: 200px;
@@ -23,6 +44,18 @@
         height: 100%;
         object-fit: contain;
       }
+    }
+  }
+}
+
+ion-content {
+  .edit-image-container {
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+
+    ion-button {
+      margin-right: 8px;
     }
   }
 }

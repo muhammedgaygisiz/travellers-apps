@@ -6,7 +6,7 @@ import { getExifDataFromPhoto } from '../utils/get-exif-data-from-photo';
 import { getExifDataFromFilePath } from '../utils/get-exif-data-from-file-path';
 import { FilePicker } from '@capawesome/capacitor-file-picker';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NavController, Platform, AlertController } from '@ionic/angular';
+import { AlertController, NavController, Platform } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { imageOutline } from 'ionicons/icons';
 import { ComponentRef, signal } from '@angular/core';
@@ -634,6 +634,20 @@ describe('ImageUploadComponent', () => {
 
         expect(() => component.confirmCropping()).not.toThrow();
       });
+    });
+  });
+
+  describe('rotateImage', () => {
+    it('should rotate image by updating canvasRotation', () => {
+      component.canvasRotation.set(0);
+      component.rotateImage();
+      expect(component.canvasRotation()).toBe(3);
+      component.rotateImage();
+      expect(component.canvasRotation()).toBe(2);
+      component.rotateImage();
+      expect(component.canvasRotation()).toBe(1);
+      component.rotateImage();
+      expect(component.canvasRotation()).toBe(0);
     });
   });
 

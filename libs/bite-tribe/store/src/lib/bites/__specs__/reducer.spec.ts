@@ -81,14 +81,11 @@ describe('Bite Reducer', () => {
   });
 
   describe('deletedBite', () => {
-    it('should remove the bite from the state', () => {
+    it('should remove the bite from the entity state', () => {
       const INITIAL_STATE = {
         ...EMPTY_STATE,
         ids: ['1'],
         entities: { '1': { id: '1', name: 'Bite 1' } as Bite },
-      };
-      const NEW_STATE = {
-        ...EMPTY_STATE,
       };
 
       const deletedBiteAction = BiteActions.deletedBite({
@@ -96,8 +93,62 @@ describe('Bite Reducer', () => {
       });
 
       expect(reducer(INITIAL_STATE, deletedBiteAction)).toEqual({
-        ...NEW_STATE,
+        ...EMPTY_STATE,
       });
+    });
+
+    it('should remove the bite from bitesByUserId', () => {
+      const INITIAL_STATE = {
+        ...EMPTY_STATE,
+        bitesByUserId: [
+          { id: '1', name: 'Bite 1' } as Bite,
+          { id: '2', name: 'Bite 2' } as Bite,
+        ],
+      };
+
+      const deletedBiteAction = BiteActions.deletedBite({
+        bite: { id: '1', name: 'Bite 1' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, deletedBiteAction).bitesByUserId).toEqual([
+        { id: '2', name: 'Bite 2' },
+      ]);
+    });
+
+    it('should remove the bite from latestBites', () => {
+      const INITIAL_STATE = {
+        ...EMPTY_STATE,
+        latestBites: [
+          { id: '1', name: 'Bite 1' } as Bite,
+          { id: '2', name: 'Bite 2' } as Bite,
+        ],
+      };
+
+      const deletedBiteAction = BiteActions.deletedBite({
+        bite: { id: '1', name: 'Bite 1' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, deletedBiteAction).latestBites).toEqual([
+        { id: '2', name: 'Bite 2' },
+      ]);
+    });
+
+    it('should remove the bite from bitesByBucketlist', () => {
+      const INITIAL_STATE = {
+        ...EMPTY_STATE,
+        bitesByBucketlist: [
+          { id: '1', name: 'Bite 1' } as Bite,
+          { id: '2', name: 'Bite 2' } as Bite,
+        ],
+      };
+
+      const deletedBiteAction = BiteActions.deletedBite({
+        bite: { id: '1', name: 'Bite 1' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, deletedBiteAction).bitesByBucketlist).toEqual([
+        { id: '2', name: 'Bite 2' },
+      ]);
     });
   });
 

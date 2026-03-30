@@ -18,6 +18,7 @@ import {
   IonContent,
   IonHeader,
   IonModal,
+  IonProgressBar,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
@@ -42,6 +43,7 @@ import { ImageUploadService } from './service/image-upload.service';
     IonButtons,
     IonTitle,
     IonContent,
+    IonProgressBar,
     Placeholder,
   ],
   providers: [

@@ -7,6 +7,10 @@
   />
 }
 
+@if (imageUploadService.uploadProgress() > 0 && imageUploadService.uploadProgress() < 1) {
+  <ion-progress-bar [value]="imageUploadService.uploadProgress()" />
+}
+
 @if (showImage()) {
   <img [src]="value() || imageUrl()" alt="Image" />
   <div class="ion-text-end">

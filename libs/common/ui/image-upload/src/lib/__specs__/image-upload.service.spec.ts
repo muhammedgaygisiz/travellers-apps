@@ -380,6 +380,42 @@ describe('ImageUploadService', () => {
       );
     });
 
+    it('should set uploadProgress to 1 when upload is completed', async () => {
+      const { getDownloadUrlFromFirebaseStorage } = jest.requireMock('utils');
+      (getDownloadUrlFromFirebaseStorage as jest.Mock).mockResolvedValue(
+        'https://example.com/img.jpg',
+      );
+
+      service.loading = loadingMock as unknown as HTMLIonLoadingElement;
+      service.finishCallback = jest.fn();
+
+      await service.handleUploadProgress({
+        uploadParams: {
+          evt: { completed: true },
+          err: undefined,
+          offlineImagePath: '',
+        },
+        imagePath: 'images/bites/uuid/img.jpg',
+      });
+
+      expect(service.uploadProgress()).toBe(1);
+    });
+
+    it('should update uploadProgress from evt.progress during upload', async () => {
+      service.loading = loadingMock as unknown as HTMLIonLoadingElement;
+
+      await service.handleUploadProgress({
+        uploadParams: {
+          evt: { completed: false, progress: 0.5 },
+          err: undefined,
+          offlineImagePath: '',
+        },
+        imagePath: 'images/bites/uuid/img.jpg',
+      });
+
+      expect(service.uploadProgress()).toBe(0.5);
+    });
+
     it('should log error when upload progress has an error', async () => {
       const consoleSpy = jest
         .spyOn(console, 'error')

@@ -43,6 +43,8 @@ export class ImageUploadService {
     | undefined
   >(undefined);
 
+  uploadProgress = signal<number>(0);
+
   loading: HTMLIonLoadingElement | undefined = undefined;
 
   handleImageUploadClick(fileUpload: ElementRef<HTMLInputElement>): void {
@@ -201,6 +203,7 @@ export class ImageUploadService {
       message: 'Uploading image...',
     });
     await this.loading.present();
+    this.uploadProgress.set(0);
 
     try {
       const uuid = this.docId() ?? uuidv4();
@@ -225,8 +228,14 @@ export class ImageUploadService {
       console.error('Error during upload:', p.uploadParams?.err);
     }
 
+    if (p.uploadParams?.evt && !p.uploadParams.evt.completed) {
+      const progress = p.uploadParams.evt.progress ?? 0;
+      this.uploadProgress.set(progress);
+    }
+
     if (p.uploadParams?.evt?.completed) {
       console.log('Upload completed for image:', p.imagePath);
+      this.uploadProgress.set(1);
 
       const imagePath = p.imagePath;
       const downloadUrl = await getDownloadUrlFromFirebaseStorage(imagePath);

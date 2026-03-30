@@ -5,7 +5,7 @@ import { FilteringAndSortingActions } from './actions';
 const initialState: FilteringAndSortingSlice = {
   sorting: {
     home: 'distance',
-    mybites: 'distance',
+    myBites: 'distance',
     bucketlists: 'distance',
   },
   filtering: {

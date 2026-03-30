@@ -1,7 +1,7 @@
 export type FilteringAndSortingSlice = {
   sorting?: {
     home?: string;
-    mybites?: string;
+    myBites?: string;
     bucketlists?: string;
   };
   filtering?: {

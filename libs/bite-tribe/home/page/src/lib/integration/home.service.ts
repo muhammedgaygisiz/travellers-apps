@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
+import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import type { Bite, Like } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import { PATH } from 'utils';
@@ -9,6 +10,7 @@ import { PATH } from 'utils';
 })
 export class HomeService {
   dataAccess = inject(HomeDataAccessService);
+  private readonly biteDataAccess = inject(BiteDataAccessService);
   private readonly navController = inject(NavController);
 
   sortedHomeBites = this.dataAccess.sortedHomeBites;
@@ -49,7 +51,7 @@ export class HomeService {
   }
 
   onDeleteBiteClick(bite: Bite): void {
-    this.dataAccess.deleteBite(bite);
+    this.biteDataAccess.deleteBite(bite);
   }
 
   restaurantClicked(bite: Bite): void {

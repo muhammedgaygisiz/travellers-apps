@@ -116,16 +116,4 @@ export class BiteEffects {
       }),
     );
   });
-
-  deleteBite$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(BiteActions.deleteBite),
-      switchMap(({ bite }) =>
-        from(this.api.deleteBite(bite)).pipe(
-          map((bite) => BiteActions.deletedBite({ bite })),
-          catchError(() => of(BiteActions.errorDeletingBite({ bite }))),
-        ),
-      ),
-    );
-  });
 }

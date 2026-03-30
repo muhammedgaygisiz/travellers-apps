@@ -279,8 +279,12 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(BucketlistActions.removeBiteFromBucketlist(params));
   }
 
-  submitDeleteBite(bite: Bite): void {
-    this.store.dispatch(BiteActions.deleteBite({ bite }));
+  notifyBiteDeleted(bite: Bite): void {
+    this.store.dispatch(BiteActions.deletedBite({ bite }));
+  }
+
+  notifyErrorDeletingBite(bite: Bite): void {
+    this.store.dispatch(BiteActions.errorDeletingBite({ bite }));
   }
 
   createBucketList(bucketlistName: string): void {

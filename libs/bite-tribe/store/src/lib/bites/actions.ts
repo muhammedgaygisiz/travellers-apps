@@ -13,7 +13,6 @@ export const BiteActions = createActionGroup({
     'Error saving bite': props<{ bite: Bite }>(),
     'Cache bite': props<{ bite: Partial<Bite> }>(),
     'Set editing bite': props<{ bite: Partial<Bite> }>(),
-    'Delete bite': props<{ bite: Bite }>(),
     'Deleted bite': props<{ bite: Bite }>(),
     'Error deleting bite': props<{ bite: Bite }>(),
     'No public creator for bite': emptyProps(),

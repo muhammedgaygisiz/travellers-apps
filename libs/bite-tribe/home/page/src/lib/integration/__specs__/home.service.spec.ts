@@ -1,6 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { HomeService } from '../home.service';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
+import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { Bite } from 'model';
 import SpyInstance = jest.SpyInstance;
@@ -18,7 +19,6 @@ class Mock {
   navigateForward = (): null => null;
   logout = (): null => null;
   submitLikeClick = (): null => null;
-  deleteBite = (): null => null;
   exchangeRates = (): null => null;
   setHomeSorting = (): null => null;
   setMyBitesSorting = (): null => null;
@@ -29,18 +29,25 @@ class Mock {
   clearGpsError = (): null => null;
 }
 
+class MockBiteDataAccess {
+  deleteBite = (): null => null;
+}
+
 describe('HomeService', () => {
   let homeDataAccessService: HomeDataAccessService;
+  let biteDataAccessService: BiteDataAccessService;
   let navController: NavController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         { provide: HomeDataAccessService, useClass: Mock },
+        { provide: BiteDataAccessService, useClass: MockBiteDataAccess },
         { provide: NavController, useClass: Mock },
       ],
     }).compileComponents();
     homeDataAccessService = TestBed.inject(HomeDataAccessService);
+    biteDataAccessService = TestBed.inject(BiteDataAccessService);
     navController = TestBed.inject(NavController);
   });
 
@@ -115,10 +122,10 @@ describe('HomeService', () => {
     let deleteBiteSpy: SpyInstance;
 
     beforeEach(() => {
-      deleteBiteSpy = jest.spyOn(homeDataAccessService, 'deleteBite');
+      deleteBiteSpy = jest.spyOn(biteDataAccessService, 'deleteBite');
     });
 
-    it('should call deleteBite on HomeDataAccessService with correct parameters', inject(
+    it('should call deleteBite on BiteDataAccessService with correct parameters', inject(
       [HomeService],
       (service: HomeService) => {
         const bite = { id: 'bite-id' } as Bite;

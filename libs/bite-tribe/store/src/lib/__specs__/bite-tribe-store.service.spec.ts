@@ -351,12 +351,23 @@ describe(BiteTribeStoreService.name, () => {
     ));
   });
 
-  describe('submitDeleteBite', () => {
-    it('should dispatch submitDeleteBite on BiteTribeStoreService', inject(
+  describe('notifyBiteDeleted', () => {
+    it('should dispatch deletedBite action', inject(
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.submitDeleteBite({} as any);
+        service.notifyBiteDeleted({} as any);
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('notifyErrorDeletingBite', () => {
+    it('should dispatch errorDeletingBite action', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        service.notifyErrorDeletingBite({} as any);
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));

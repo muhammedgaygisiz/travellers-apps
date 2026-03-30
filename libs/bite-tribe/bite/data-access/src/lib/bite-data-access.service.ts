@@ -66,6 +66,15 @@ export class BiteDataAccessService {
     }
   }
 
+  async deleteBite(bite: any): Promise<void> {
+    try {
+      const deletedBite = await this.api.deleteBite(bite);
+      this.storeService.notifyBiteDeleted(deletedBite);
+    } catch {
+      this.storeService.notifyErrorDeletingBite(bite);
+    }
+  }
+
   setEditingBite(bite: Partial<any>): void {
     this.storeService.setEditingBite(bite);
   }

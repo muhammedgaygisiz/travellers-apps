@@ -28,7 +28,6 @@ class Mock {
   hasErrorLoadingGpsPosition$ = of(false);
   logout = (): null => null;
   submitLikeOrDislikeClick = (): null => null;
-  submitDeleteBite = (): null => null;
   setHomeSorting = (): null => null;
   setMyBitesSorting = (): null => null;
   setHomeFilters = (): null => null;
@@ -191,20 +190,6 @@ describe('HomeDataAccessService', () => {
         },
       ));
     });
-  });
-
-  describe('deleteBite', () => {
-    it('should call deleteBite on BiteTribeStoreService', inject(
-      [HomeDataAccessService],
-      (service: HomeDataAccessService) => {
-        const submitDeleteBiteSpy = jest.spyOn(
-          biteTribeStoreService,
-          'submitDeleteBite',
-        );
-        service.deleteBite({} as Bite);
-        expect(submitDeleteBiteSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
   });
 
   describe('setHomeSorting', () => {

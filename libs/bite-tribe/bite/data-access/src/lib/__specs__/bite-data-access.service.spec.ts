@@ -18,11 +18,14 @@ const MockStoreService = {
   saveNewBite: jest.fn(),
   setEditingBite: jest.fn(),
   notifyBiteSaved: jest.fn(),
+  notifyBiteDeleted: jest.fn(),
+  notifyErrorDeletingBite: jest.fn(),
 };
 
 const MockApiService = {
   saveNewBite: jest.fn(),
   updateImagePathInBite: jest.fn(),
+  deleteBite: jest.fn(),
 };
 
 describe('BiteDataAccessService', () => {
@@ -125,6 +128,35 @@ describe('BiteDataAccessService', () => {
       service.setEditingBite(bite);
 
       expect(MockStoreService.setEditingBite).toHaveBeenCalledWith(bite);
+    });
+  });
+
+  describe('deleteBite', () => {
+    const bite = { id: 'bite123', name: 'Test Bite' } as unknown as Bite;
+
+    it('should call api.deleteBite with the bite', async () => {
+      MockApiService.deleteBite.mockResolvedValue(bite);
+
+      await service.deleteBite(bite);
+
+      expect(MockApiService.deleteBite).toHaveBeenCalledWith(bite);
+    });
+
+    it('should notify store that bite was deleted on success', async () => {
+      MockApiService.deleteBite.mockResolvedValue(bite);
+
+      await service.deleteBite(bite);
+
+      expect(MockStoreService.notifyBiteDeleted).toHaveBeenCalledWith(bite);
+    });
+
+    it('should notify store of error when api.deleteBite throws', async () => {
+      MockApiService.deleteBite.mockRejectedValue(new Error('Delete failed'));
+
+      await service.deleteBite(bite);
+
+      expect(MockStoreService.notifyBiteDeleted).not.toHaveBeenCalled();
+      expect(MockStoreService.notifyErrorDeletingBite).toHaveBeenCalledWith(bite);
     });
   });
 });

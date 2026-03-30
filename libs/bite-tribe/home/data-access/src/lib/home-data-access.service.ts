@@ -77,10 +77,6 @@ export class HomeDataAccessService {
     this.storeService.submitLikeOrDislikeClick(bite, userId, likeType);
   }
 
-  deleteBite(bite: Bite): void {
-    this.storeService.submitDeleteBite(bite);
-  }
-
   setHomeSorting(sorting: string): void {
     this.storeService.setHomeSorting(sorting);
   }

@@ -75,7 +75,9 @@ describe('BitePage', () => {
     fixture = TestBed.createComponent(BitePage);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-    fixture.detectChanges();
+
+    componentRef.setInput('networkStatus', { connected: true });
+    componentRef.changeDetectorRef.detectChanges();
   });
 
   afterEach(() => {

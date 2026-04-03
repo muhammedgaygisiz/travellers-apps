@@ -20,6 +20,8 @@
     "@capacitor/app": "../../node_modules/@capacitor/app",
     "@capacitor/push-notifications": "../../node_modules/@capacitor/push-notifications",
     "@capacitor-firebase/messaging": "../../node_modules/@capacitor-firebase/messaging",
-    "@capacitor/share": "../../node_modules/@capacitor/share"
+    "@capawesome/capacitor-file-picker": "../../node_modules/@capawesome/capacitor-file-picker",
+    "@capacitor/share": "../../node_modules/@capacitor/share",
+    "@capacitor/network": "../../node_modules/@capacitor/network"
   }
 }

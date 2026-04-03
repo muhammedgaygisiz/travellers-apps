@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   inject,
@@ -20,13 +21,25 @@ import { Platform } from '@ionic/angular';
           </b>
         </ion-note>
       } @else {
-        @if (isWeb()) {
-          <ion-icon name="image-outline" size="large" />
+        @if (!disabled()) {
+          @if (isWeb()) {
+            <ion-icon name="image-outline" size="large" />
+          } @else {
+            <ion-icon name="camera-outline" size="large" />
+          }
         } @else {
-          <ion-icon name="camera-outline" size="large" />
+          <ion-icon name="cloud-offline-outline" size="large" />
         }
+
         <ion-note class="hint ion-margin-top">
-          <b> Tap into the box to upload <br />or take a photo. </b>
+          @if (!disabled()) {
+            <b> Tap into the box to upload <br />or take a photo. </b>
+          } @else {
+            <b>
+              It seems you are offline. You can still create a bite without an
+              image and add one later when you are back online.
+            </b>
+          }
         </ion-note>
       }
     </div>
@@ -59,4 +72,5 @@ export class Placeholder {
   isWeb = signal(!this.platform.is('hybrid'));
 
   isDragging = input(false);
+  disabled = input(false, { transform: booleanAttribute });
 }

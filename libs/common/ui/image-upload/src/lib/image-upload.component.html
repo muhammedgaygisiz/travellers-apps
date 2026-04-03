@@ -77,7 +77,7 @@
     (drop)="onDrop($event)"
   >
     <ion-card-content>
-      <placeholder [isDragging]="isDragging()" />
+      <placeholder [isDragging]="isDragging()" [disabled]="disabled()" />
     </ion-card-content>
   </ion-card>
 }

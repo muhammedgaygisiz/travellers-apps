@@ -28,6 +28,7 @@ dependencies {
     implementation project(':capacitor-firebase-messaging')
     implementation project(':capawesome-capacitor-file-picker')
     implementation project(':capacitor-share')
+    implementation project(':capacitor-network')
 
 }
 

@@ -45,6 +45,11 @@
         object-fit: contain;
       }
     }
+
+    &.isDisabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   }
 }
 

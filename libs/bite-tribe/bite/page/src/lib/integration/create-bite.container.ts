@@ -15,6 +15,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     [isNew]="true"
     [nearbyRestaurants]="service.nearbyRestaurants() || []"
     [suggestedTags]="service.tagSuggestionsForEditingBite() || []"
+    [networkStatus]="service.networkStatus()"
     (submitBite)="service.submitNewBite($event)"
     (placeChange)="onPlaceChange($event)"
   />`,
@@ -24,7 +25,7 @@ export class CreateBiteContainer {
   service = inject(BiteService);
 
   ionViewDidEnter(): void {
-    FirebaseAnalytics.setCurrentScreen({
+    void FirebaseAnalytics.setCurrentScreen({
       screenName: 'New Bite',
     });
   }

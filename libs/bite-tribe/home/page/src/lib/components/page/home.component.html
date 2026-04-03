@@ -32,7 +32,6 @@
         <ion-icon
           slot="icon-only"
           [name]="isSearchVisible() ? 'close-outline' : 'search-outline'"
-          color="secondary"
         />
       </ion-button>
     </ion-buttons>
@@ -138,14 +137,6 @@
 </ng-template>
 
 <ng-template #withoutLoadingTemplate>
-  @if (!displayedBites().length && !hasErrorLoadingGpsPosition()) {
-    <ion-card>
-      <ion-card-content>
-        <ion-text color="primary"> No bites found. Be the first one.</ion-text>
-      </ion-card-content>
-    </ion-card>
-  }
-
   @if (hasErrorLoadingGpsPosition()) {
     <ion-card>
       <ion-card-content>
@@ -160,13 +151,27 @@
     </ion-card>
   }
 
+  @if (networkStatus()?.connected === false) {
+    <ion-card>
+      <ion-card-content>
+        <div class="ion-display-flex ion-flex-row ion-align-items-center">
+          <ion-icon name="cloud-offline-outline" color="warning" />
+
+          <ion-text color="warning" class="ion-padding-start">
+            It seems you are offline. Please check your internet connection.
+          </ion-text>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  }
+
   @if (isSearchVisible()) {
     <ion-searchbar
       data-cy="search-input"
       placeholder="Search ..."
       [value]="searchTerm()"
       (ionInput)="onSearchInput($event)"
-      animated
+      [animated]="true"
     />
   }
 
@@ -183,6 +188,10 @@
       (gotoEdit)="gotoEdit.emit($event)"
       (deleteBite)="deleteBite.emit($event)"
     />
+  } @empty {
+    <div class="ion-display-flex ion-justify-content-center ion-padding-top">
+      <ion-text color="primary"> No bites found. Be the first one.</ion-text>
+    </div>
   }
 
   @if (hasMore()) {

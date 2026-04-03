@@ -2,10 +2,12 @@ import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import type { Bite, Like } from 'model';
+import { NetworkStatusService } from 'common/networkstatus';
 
 @Injectable({ providedIn: 'root' })
 export class HomeDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly networkStatusService = inject(NetworkStatusService);
 
   sortedHomeBites = toSignal(this.storeService.sortedHomeBites$, {
     initialValue: [] as Bite[],
@@ -63,6 +65,8 @@ export class HomeDataAccessService {
     this.storeService.hasErrorLoadingGpsPosition$,
     { initialValue: false },
   );
+
+  networkStatus = this.networkStatusService.status;
 
   logout(): void {
     this.storeService.logout();

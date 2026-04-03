@@ -17,6 +17,7 @@ import {
   close,
   closeCircle,
   closeOutline,
+  cloudOfflineOutline,
   cropOutline,
   downloadOutline,
   filter,
@@ -108,5 +109,6 @@ export const addNecessaryIcons = (): void => {
     arrowForwardOutline,
     cropOutline,
     trashOutline,
+    cloudOfflineOutline,
   });
 };

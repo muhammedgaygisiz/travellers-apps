@@ -1,16 +1,15 @@
-import { combineLatest, fromEvent, map, startWith } from 'rxjs';
+import { Injectable, linkedSignal } from '@angular/core';
+import { ConnectionStatus, Network } from '@capacitor/network';
+import { from } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
+@Injectable({ providedIn: 'root' })
 export class NetworkStatusService {
-  online$ = fromEvent(window, 'online').pipe(
-    startWith(null),
-    map(() => 'online')
-  );
-  offline$ = fromEvent(window, 'offline').pipe(
-    startWith(null),
-    map(() => 'offline')
-  );
+  _status = toSignal(from(Network.getStatus()));
 
-  status$ = combineLatest([this.online$, this.offline$]).pipe(
-    map(() => navigator.onLine)
-  );
+  status = linkedSignal(() => this._status());
+
+  setNetworkStatus(networkStatusEvent: ConnectionStatus): void {
+    this.status.set(networkStatusEvent);
+  }
 }

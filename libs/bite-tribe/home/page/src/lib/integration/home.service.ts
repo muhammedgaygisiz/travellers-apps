@@ -37,6 +37,8 @@ export class HomeService {
 
   hasErrorLoadingGpsPosition = this.dataAccess.hasErrorLoadingGpsPosition;
 
+  networkStatus = this.dataAccess.networkStatus;
+
   logout(): void {
     this.dataAccess.logout();
   }

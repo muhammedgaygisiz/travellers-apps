@@ -135,6 +135,12 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   onImageUploadClick(): void {
+    const isDisabled = this.disabled();
+
+    if (isDisabled) {
+      return;
+    }
+
     const isWeb = this.isWeb();
 
     if (isWeb) {

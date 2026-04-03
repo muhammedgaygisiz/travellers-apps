@@ -17,6 +17,7 @@ export class BiteService {
   cachedBite = this.dataAccess.cachedBite;
   nearbyRestaurants = this.dataAccess.nearbyRestaurants;
   tagSuggestionsForEditingBite = this.dataAccess.tagSuggestionsForEditingBite;
+  networkStatus = this.dataAccess.networkStatus;
 
   submitNewBite(newBite: any): void {
     const { id, ...biteData } = newBite;

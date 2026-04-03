@@ -205,6 +205,36 @@ describe('BitePage', () => {
       component.saveBite();
       expect(emitSpy).not.toHaveBeenCalled();
     });
+
+    it('should emit form value on saveBite without image required when offline', () => {
+      componentRef.setInput('networkStatus', { connected: false });
+      componentRef.changeDetectorRef.detectChanges();
+
+      const validBite: Bite = {
+        id: '',
+        image: '',
+        imagePath: '',
+        description: '',
+        name: 'Test Burger',
+        place: 'Test Place',
+        tags: ['fish healthy'],
+        price: '9.99' as any,
+        rating: 0,
+        currency: 'EUR',
+        restaurantId: '',
+        position: {
+          latitude: 0,
+          longitude: 0,
+        },
+      };
+
+      const emitSpy = jest.spyOn(component.submitBite, 'emit');
+      component.biteFormGroup.patchValue(validBite as any);
+      component.saveBite();
+
+      const { image, ...expectedBite } = validBite;
+      expect(emitSpy).toHaveBeenCalledWith(expectedBite);
+    });
   });
 
   describe('Platform specific behavior', () => {

@@ -14,7 +14,7 @@ import {
 import { addNecessaryIcons, AppForegroundService } from 'bite-tribe/shell';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
-import { Network } from '@capacitor/network';
+import { ConnectionStatus, Network } from '@capacitor/network';
 import { NetworkStatusService } from 'common/networkstatus';
 
 @Component({
@@ -51,47 +51,50 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.platform.ready().then(() => {
-      SplashScreen.hide();
+      void SplashScreen.hide();
     });
   }
 
   ngOnDestroy(): void {
-    App.removeAllListeners();
+    void App.removeAllListeners();
   }
 
   private initBackbuttonHandler(): void {
-    App.addListener('backButton', this.backButtonHandler.bind(this));
+    void App.addListener('backButton', this.backButtonHandler.bind(this));
   }
 
   private handleBackButton(canGoBack: boolean): void {
     if (!canGoBack) {
-      App.exitApp();
+      void App.exitApp();
     } else {
       window.history.back();
     }
   }
 
   private initAppUrlOpenHandler(): void {
-    App.addListener('appUrlOpen', (data) => {
+    void App.addListener('appUrlOpen', (data) => {
       const url = new URL(data.url);
       const path = url.pathname;
 
       if (path.startsWith('/s/bite/')) {
         const biteId = path.split('/s/bite/')[1];
-        this.navController.navigateForward(['bite', biteId]);
+        void this.navController.navigateForward(['bite', biteId]);
       }
     });
   }
 
   private initAppStateChangeHandler(): void {
-    App.addListener('appStateChange', ({ isActive }) => {
+    void App.addListener('appStateChange', ({ isActive }) => {
       this.appForegroundService.handleAppStateChange(isActive);
     });
   }
 
   private initNetworkStatusHandler(): void {
-    Network.addListener('networkStatusChange', (event) => {
-      this.networkStatusService.setNetworkStatus(event);
-    });
+    void Network.addListener(
+      'networkStatusChange',
+      (event: ConnectionStatus) => {
+        this.networkStatusService.setNetworkStatus(event);
+      },
+    );
   }
 }

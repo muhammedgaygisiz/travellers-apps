@@ -119,10 +119,12 @@ export class BitePage {
   networkStatusEffect = effect(() => {
     const networkStatus = this.networkStatus();
 
-    if (networkStatus?.connected) {
+    if (networkStatus?.connected === true) {
       this.biteFormGroup.get('image')?.enable();
-    } else {
+    } else if (networkStatus?.connected === false) {
       this.biteFormGroup.get('image')?.disable();
+    } else {
+      return;
     }
 
     this.biteFormGroup.updateValueAndValidity();

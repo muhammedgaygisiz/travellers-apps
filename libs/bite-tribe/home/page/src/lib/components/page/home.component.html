@@ -151,7 +151,7 @@
     </ion-card>
   }
 
-  @if (!networkStatus()?.connected) {
+  @if (networkStatus()?.connected === false) {
     <ion-card>
       <ion-card-content>
         <div class="ion-display-flex ion-flex-row ion-align-items-center">

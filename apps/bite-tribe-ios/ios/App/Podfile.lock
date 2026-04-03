@@ -1255,6 +1255,8 @@ PODS:
     - Capacitor
   - CapacitorKeyboard (8.0.0):
     - Capacitor
+  - CapacitorNetwork (8.0.1):
+    - Capacitor
   - CapacitorPreferences (8.0.0):
     - Capacitor
   - CapacitorPushNotifications (8.0.0):
@@ -1264,6 +1266,8 @@ PODS:
   - CapacitorSplashScreen (8.0.0):
     - Capacitor
   - CapacitorStatusBar (8.0.0):
+    - Capacitor
+  - CapawesomeCapacitorFilePicker (8.0.1):
     - Capacitor
   - FirebaseAnalytics/Core (12.7.0):
     - FirebaseCore (~> 12.7.0)
@@ -1538,11 +1542,13 @@ DEPENDENCIES:
   - "CapacitorGeolocation (from `../../../../node_modules/@capacitor/geolocation`)"
   - "CapacitorHaptics (from `../../../../node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../../../node_modules/@capacitor/keyboard`)"
+  - "CapacitorNetwork (from `../../../../node_modules/@capacitor/network`)"
   - "CapacitorPreferences (from `../../../../node_modules/@capacitor/preferences`)"
   - "CapacitorPushNotifications (from `../../../../node_modules/@capacitor/push-notifications`)"
   - "CapacitorShare (from `../../../../node_modules/@capacitor/share`)"
   - "CapacitorSplashScreen (from `../../../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../../../node_modules/@capacitor/status-bar`)"
+  - "CapawesomeCapacitorFilePicker (from `../../../../node_modules/@capawesome/capacitor-file-picker`)"
   - FirebaseMessaging
 
 SPEC REPOS:
@@ -1614,6 +1620,8 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor/haptics"
   CapacitorKeyboard:
     :path: "../../../../node_modules/@capacitor/keyboard"
+  CapacitorNetwork:
+    :path: "../../../../node_modules/@capacitor/network"
   CapacitorPreferences:
     :path: "../../../../node_modules/@capacitor/preferences"
   CapacitorPushNotifications:
@@ -1624,6 +1632,8 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor/splash-screen"
   CapacitorStatusBar:
     :path: "../../../../node_modules/@capacitor/status-bar"
+  CapawesomeCapacitorFilePicker:
+    :path: "../../../../node_modules/@capawesome/capacitor-file-picker"
 
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
@@ -1645,11 +1655,13 @@ SPEC CHECKSUMS:
   CapacitorGeolocation: 8a405e707de9aff6ac9eca7f408966a370f7ca33
   CapacitorHaptics: 2079d9fa04c5a71e18663b4722323c304c58245c
   CapacitorKeyboard: d7868c079a4d5277a3deca27a10a488fcbbb8b69
+  CapacitorNetwork: 8812ce60d11fb63d8f2e4ba51a49b2e59892ebe2
   CapacitorPreferences: 443fabe9670226200e595658a87ef0b1566716d4
   CapacitorPushNotifications: 722c1528eabbefd355f47e373a4c6235d01e85e9
   CapacitorShare: 0c58305114538568059bfc07111f22dcb9cb2a82
   CapacitorSplashScreen: 422880d7117605c30699eb4b21644b62db42e86c
   CapacitorStatusBar: 312e2e67928dfe9514c4a8916a1fd610552f5f35
+  CapawesomeCapacitorFilePicker: cbd96b593d2bfdceb353ed161f9462ce4a9d67a9
   FirebaseAnalytics: e423129866107aeacf6010a280b9c9829f9ea50d
   FirebaseAppCheckInterop: d58366471f1dadf2ed998b15f85c658458a10142
   FirebaseAuth: 88beaef7c688a2950541552b6dd195d22137c41a
@@ -1682,6 +1694,6 @@ SPEC CHECKSUMS:
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
 
-PODFILE CHECKSUM: 539fa634eb3e6307a9c0f115b6b9a04fcfb085d1
+PODFILE CHECKSUM: 546eb3686631c8e27eeb11eb6254d2c3963578f0
 
 COCOAPODS: 1.16.2

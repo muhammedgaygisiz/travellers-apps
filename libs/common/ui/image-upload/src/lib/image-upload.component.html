@@ -70,6 +70,7 @@
 } @else {
   <ion-card
     class="image-placeholder"
+    [class.isDisabled]="disabled()"
     (click)="onImageUploadClick()"
     (dragover)="onDragOver($event)"
     (dragleave)="onDragLeave($event)"

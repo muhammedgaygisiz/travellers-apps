@@ -37,6 +37,7 @@ import { TagsInputComponent } from 'common/ui/tags';
 import { normalizePriceForBackend } from './utils/normalize-price-for-backend';
 import { ImageValidator } from './utils/image-validator';
 import { normalizePriceForForm } from './utils/normalize-price-for-form';
+import { ConnectionStatus } from '@capacitor/network';
 
 @Component({
   selector: 'bite',
@@ -78,6 +79,8 @@ export class BitePage {
 
   suggestedTags = input<string[]>([]);
 
+  networkStatus = input<ConnectionStatus | undefined>();
+
   fallbackPosition = linkedSignal(() => this.position());
 
   submitBite = output<typeof this.biteFormGroup.value>();
@@ -112,6 +115,18 @@ export class BitePage {
       validators: [ImageValidator],
     },
   );
+
+  networkStatusEffect = effect(() => {
+    const networkStatus = this.networkStatus();
+
+    if (networkStatus?.connected) {
+      this.biteFormGroup.get('image')?.enable();
+    } else {
+      this.biteFormGroup.get('image')?.disable();
+    }
+
+    this.biteFormGroup.updateValueAndValidity();
+  });
 
   biteInitFromInputEffect = effect(() => {
     const bite = this.bite();

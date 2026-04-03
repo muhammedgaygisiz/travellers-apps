@@ -2,10 +2,12 @@ import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { NetworkStatusService } from 'common/networkstatus';
 
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly networkStatusService = inject(NetworkStatusService);
 
   biteLoader: ResourceLoader<any, any> = ({ params }) => {
     const biteId = params.biteId;
@@ -37,6 +39,8 @@ export class BiteDataAccessService {
   tagSuggestionsForEditingBite = toSignal(
     this.storeService.tagSuggestionsForEditingBite$,
   );
+
+  networkStatus = this.networkStatusService.status;
 
   async submitBite(bite: any): Promise<void> {
     this.storeService.save(bite, 'bite');

@@ -39,6 +39,7 @@ import {
   RefresherCustomEvent,
 } from '@ionic/angular';
 import { getSimilarityScore, normalize } from 'utils';
+import { ConnectionStatus } from '@capacitor/network';
 
 const PAGE_SIZE = 50;
 
@@ -254,6 +255,8 @@ export class BiteTribeHomeComponent {
 
     return allBites.length > page * PAGE_SIZE;
   });
+
+  networkStatus = input<ConnectionStatus | undefined>();
 
   onIonInfinite(event: InfiniteScrollCustomEvent): void {
     if (this.hasMore()) {

@@ -14,6 +14,8 @@ import {
 import { addNecessaryIcons, AppForegroundService } from 'bite-tribe/shell';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
+import { Network } from '@capacitor/network';
+import { NetworkStatusService } from 'common/networkstatus';
 
 @Component({
   selector: 'bt-root',
@@ -31,6 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
   platform = inject(Platform);
   navController = inject(NavController);
   private readonly appForegroundService = inject(AppForegroundService);
+  private readonly networkStatusService = inject(NetworkStatusService);
 
   backButtonHandler = ({ canGoBack }: { canGoBack: boolean }): void =>
     this.handleBackButton(canGoBack);
@@ -43,6 +46,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.initAppUrlOpenHandler();
 
     this.initAppStateChangeHandler();
+    this.initNetworkStatusHandler();
   }
 
   ngOnInit(): void {
@@ -82,6 +86,12 @@ export class AppComponent implements OnInit, OnDestroy {
   private initAppStateChangeHandler(): void {
     App.addListener('appStateChange', ({ isActive }) => {
       this.appForegroundService.handleAppStateChange(isActive);
+    });
+  }
+
+  private initNetworkStatusHandler(): void {
+    Network.addListener('networkStatusChange', (event) => {
+      this.networkStatusService.setNetworkStatus(event);
     });
   }
 }

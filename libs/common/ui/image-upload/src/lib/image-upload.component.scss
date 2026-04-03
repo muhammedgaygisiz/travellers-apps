@@ -45,6 +45,10 @@
         object-fit: contain;
       }
     }
+
+    &.isDisabled {
+      display: none;
+    }
   }
 }
 

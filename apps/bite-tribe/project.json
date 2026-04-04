@@ -108,7 +108,10 @@
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
-        "buildTarget": "bite-tribe:build"
+        "buildTarget": "bite-tribe:build",
+        "format": "xlf",
+        "outputPath": "apps/bite-tribe/src/locale",
+        "outFile": "messages.xlf"
       }
     },
     "lint": {

@@ -5,7 +5,6 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import SpyInstance = jest.SpyInstance;
 
-jest.mock('localization');
 addNecessaryIcons();
 
 describe('BucketlistsPage', () => {

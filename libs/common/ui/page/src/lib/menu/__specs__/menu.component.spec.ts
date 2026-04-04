@@ -2,12 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MenuComponent } from '../menu.component';
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
-import { SupportedLang } from 'localization';
-import { addNecessaryIcons } from 'utils';
+import { addNecessaryIcons, SupportedLang } from 'utils';
 
 addNecessaryIcons();
-
-jest.mock('localization');
 
 global.fetch = jest.fn(() =>
   Promise.resolve({

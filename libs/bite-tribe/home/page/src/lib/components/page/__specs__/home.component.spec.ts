@@ -17,8 +17,6 @@ import {
 } from '@ionic/angular';
 import SpyInstance = jest.SpyInstance;
 
-jest.mock('localization');
-
 addNecessaryIcons();
 
 describe('BiteTribeHomeComponent', () => {

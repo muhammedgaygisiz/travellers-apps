@@ -3,8 +3,6 @@ import { BiteTrailBitesPage } from '../bite-trail-bites.page';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 
-jest.mock('localization');
-
 describe(BiteTrailBitesPage.name, () => {
   let component: BiteTrailBitesPage;
   let fixture: ComponentFixture<BiteTrailBitesPage>;

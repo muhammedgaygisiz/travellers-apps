@@ -12,7 +12,7 @@ jest.mock('image-compression', () => ({
   compressFile: jest.fn(),
   compressPhoto: jest.fn(),
 }));
-jest.mock('localization');
+
 addNecessaryIcons();
 
 describe('CreateBiteTrailComponent', () => {

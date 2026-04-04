@@ -25,7 +25,7 @@ jest.mock('image-compression', () => ({
   compressFile: jest.fn(),
   compressPhoto: jest.fn(),
 }));
-jest.mock('localization');
+
 addNecessaryIcons();
 
 const assertDeepEqual = (actual: any, expected: any): void => {

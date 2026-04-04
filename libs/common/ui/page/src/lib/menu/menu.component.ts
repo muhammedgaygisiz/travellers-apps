@@ -11,6 +11,7 @@ import {
   IonItemGroup,
   IonList,
 } from '@ionic/angular/standalone';
+import { SupportedLang } from 'utils';
 
 @Component({
   selector: 'popover-menu',

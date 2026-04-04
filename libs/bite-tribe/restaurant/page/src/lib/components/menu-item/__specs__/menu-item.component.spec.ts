@@ -3,8 +3,6 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { MenuItemComponent } from '../menu-item.component';
 
-jest.mock('localization');
-
 addNecessaryIcons();
 
 describe('MenuItemComponent', () => {

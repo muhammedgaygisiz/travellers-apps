@@ -5,8 +5,6 @@ import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { PublicUser, Settings } from 'model';
 
-jest.mock('localization');
-
 const setupMockForWindowMatchMedia = (value?: boolean): void => {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,

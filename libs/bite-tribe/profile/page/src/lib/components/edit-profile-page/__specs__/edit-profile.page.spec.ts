@@ -6,7 +6,6 @@ import { addNecessaryIcons, getIonicConfig } from 'utils';
 import type { PublicUser } from 'model';
 import type { OverlayEventDetail } from '@ionic/core';
 
-jest.mock('localization');
 jest.mock('heic2any', () => ({}));
 
 addNecessaryIcons();

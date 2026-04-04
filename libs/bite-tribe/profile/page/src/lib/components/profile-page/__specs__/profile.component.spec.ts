@@ -4,8 +4,6 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 
-jest.mock('localization');
-
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
   let fixture: ComponentFixture<ProfileComponent>;

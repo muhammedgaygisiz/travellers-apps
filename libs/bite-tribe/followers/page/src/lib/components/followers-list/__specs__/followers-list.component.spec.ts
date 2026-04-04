@@ -5,8 +5,6 @@ import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 
-jest.mock('localization');
-
 describe(FollowersListComponent.name, () => {
   let component: FollowersListComponent;
   let fixture: ComponentFixture<FollowersListComponent>;

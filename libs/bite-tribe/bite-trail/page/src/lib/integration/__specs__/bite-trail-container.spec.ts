@@ -6,7 +6,6 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
-jest.mock('localization');
 jest.mock('@capacitor-firebase/analytics', () => ({
   FirebaseAnalytics: {
     setCurrentScreen: jest.fn(),

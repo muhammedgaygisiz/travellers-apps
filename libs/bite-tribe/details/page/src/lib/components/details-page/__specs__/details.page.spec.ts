@@ -22,7 +22,7 @@ class MockToBlobUrlPipe implements PipeTransform {
 }
 
 jest.mock('heic2any', () => jest.fn());
-jest.mock('localization');
+
 addNecessaryIcons();
 
 // Properly mock the AppLauncher module

@@ -14,7 +14,6 @@ jest.mock('@capacitor/app', () => ({
   },
 }));
 
-jest.mock('localization');
 jest.mock('@capacitor/splash-screen', () => ({
   SplashScreen: {
     hide: jest.fn(),

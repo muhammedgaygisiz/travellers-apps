@@ -7,7 +7,6 @@ import { Link, Restaurant } from 'model';
 import SpyInstance = jest.SpyInstance;
 
 jest.mock('leaflet');
-jest.mock('localization');
 
 const getDistanceMock = jest.fn();
 jest.mock('../../../utils/get-distance', () => ({

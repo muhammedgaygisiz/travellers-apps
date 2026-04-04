@@ -7,7 +7,6 @@ import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { addIcons } from 'ionicons';
 import { logoApple, logoFacebook, logoGoogle } from 'ionicons/icons';
 
-jest.mock('localization');
 addNecessaryIcons();
 
 describe('LoginContainerComponent', () => {

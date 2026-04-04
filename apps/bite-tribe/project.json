@@ -72,12 +72,14 @@
               "maximumError": "8kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "localize": ["en", "tr"]
         },
         "development": {
           "optimization": false,
           "extractLicenses": false,
-          "sourceMap": true
+          "sourceMap": true,
+          "localize": false
         }
       },
       "defaultConfiguration": "production"

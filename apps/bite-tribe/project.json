@@ -5,6 +5,14 @@
   "prefix": "app",
   "sourceRoot": "apps/bite-tribe/src",
   "tags": ["scope:bite-tribe", "type:app"],
+  "i18n": {
+    "sourceLocale": "en",
+    "locales": {
+      "tr": {
+        "translation": "apps/bite-tribe/src/locale/messages.tr.xlf"
+      }
+    }
+  },
   "targets": {
     "build": {
       "executor": "@nx/angular:browser-esbuild",
@@ -96,14 +104,6 @@
       },
       "defaultConfiguration": "development",
       "continuous": true
-    },
-    "i18n": {
-      "sourceLocale": "en",
-      "locales": {
-        "tr": {
-          "translation": "apps/bite-tribe/src/locale/messages.tr.xlf"
-        }
-      }
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",

@@ -53,7 +53,7 @@ export class PageComponent {
 
   showAddButton = input<boolean | null>(false);
 
-  addButtonText = input<string | null>('Create bite');
+  addButtonText = input<string | null>($localize`Create Bite`);
 
   hideAuthButton = input(false);
 

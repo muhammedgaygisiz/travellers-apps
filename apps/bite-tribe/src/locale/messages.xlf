@@ -2,14 +2,12 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en" datatype="plaintext" original="ng2.template">
     <body>
-      <trans-unit id="createBitePageTitle" datatype="html">
+      <trans-unit id="8283217997409294842" datatype="html">
         <source>Create Bite</source>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/bite/page/src/lib/components/page/bite.page.html</context>
           <context context-type="linenumber">7</context>
         </context-group>
-        <note priority="1" from="description">H1 Title of the Create Bite Pagel</note>
-        <note priority="1" from="meaning">Create Bite Page Title</note>
       </trans-unit>
     </body>
   </file>

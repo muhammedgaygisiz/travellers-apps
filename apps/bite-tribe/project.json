@@ -22,7 +22,7 @@
         "outputPath": "dist/apps/bite-tribe",
         "index": "apps/bite-tribe/src/index.html",
         "main": "apps/bite-tribe/src/main.ts",
-        "polyfills": [],
+        "polyfills": ["@angular/localize/init"],
         "tsConfig": "apps/bite-tribe/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -89,7 +89,7 @@
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true,
-          "localize": false
+          "localize": ["tr"]
         },
         "tr": {
           "optimization": false,

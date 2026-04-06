@@ -1,7 +1,16 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en-US" target-language="tr" datatype="plaintext" original="ng2.template">
     <body>
+    <trans-unit id="createBitePageTitle" datatype="html">
+            <source>Create Bite</source>
+            <target state="translated">Bite Olustur</target>
+            <context-group purpose="location">
+              <context context-type="sourcefile">libs/bite-tribe/bite/page/src/lib/components/page/bite.page.html</context>
+              <context context-type="linenumber">7</context>
+            </context-group>
+            <note priority="1" from="description">Create bite action label</note>
+          </trans-unit>
     </body>
   </file>
 </xliff>

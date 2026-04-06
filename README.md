@@ -273,3 +273,25 @@ nx firebase-serve bite-tribe-firebase
 ```
 
 This will start the firebase emulators.
+
+# Localization
+
+Add a angular i18n tag to the element in the template:
+
+```html
+<h1 class="ion-margin-bottom" i18n="Create Bite Page Title|H1 Title of the Create Bite Pagel@@createBitePageTitle">Create Bite</h1>
+```
+
+The format of the i18n tag is as follows:
+
+`i18n="Meaning|Description@@id"`
+
+Run the following command to extract the i18n tags into a `messages.xlf` file:
+
+`nx extract-i18n bite-tribe`
+
+The `messages.xlf` file will be generated in the `apps/bite-tribe/src/locale` folder. This file contains all the i18n tags and their translations (if available).
+The translations are in the according files like `apps/bite-tribe/src/locale/messages.de.xlf` for german.
+
+To work with the `.xlf` files use Poedit, which is a free and open source translation editor. It can be installed via brew with `brew install --cask poedit` or it can be
+downloaded from [here](https://poedit.net/download). You can open the `.xlf` files with Poedit and add the translations for the different languages. After adding the translations, save the file and the translations will be available in the app.

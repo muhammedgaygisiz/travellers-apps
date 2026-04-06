@@ -64,7 +64,9 @@
           "includePaths": ["libs/bite-tribe-common/styles"]
         },
         "serviceWorker": true,
-        "ngswConfigPath": "apps/bite-tribe/ngsw-config.json"
+        "ngswConfigPath": "apps/bite-tribe/ngsw-config.json",
+        "localize": true,
+        "i18nMissingTranslation": "warning"
       },
       "configurations": {
         "production": {
@@ -88,6 +90,12 @@
           "extractLicenses": false,
           "sourceMap": true,
           "localize": false
+        },
+        "tr": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "localize": ["tr"]
         }
       },
       "defaultConfiguration": "production"
@@ -131,7 +139,7 @@
         "buildTarget": "bite-tribe:build",
         "port": 4200,
         "staticFilePath": "dist/apps/bite-tribe",
-        "spa": true
+        "spa": false
       }
     }
   }

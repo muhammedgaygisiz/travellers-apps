@@ -62,6 +62,70 @@
                 <context context-type="linenumber">96</context>
               </context-group>
             </trans-unit>
+            <trans-unit id="8726138323871139597" datatype="html">
+                    <source>Following</source>
+                    <target>Takipte</target>
+                    <context-group purpose="location">
+                      <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/components/profile-header.html</context>
+                      <context context-type="linenumber">31</context>
+                    </context-group>
+                  </trans-unit>
+                  <trans-unit id="4914577418256256836" datatype="html">
+                    <source>Followers</source>
+                    <target>Takipçiler</target>
+                    <context-group purpose="location">
+                      <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/components/profile-header.html</context>
+                      <context context-type="linenumber">39</context>
+                    </context-group>
+                  </trans-unit>
+                  <trans-unit id="4505152381300139635" datatype="html">
+                    <source> Edit Profile </source>
+                    <target>Profili düzenle</target>
+                    <context-group purpose="location">
+                      <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.html</context>
+                      <context context-type="linenumber">45,47</context>
+                    </context-group>
+                  </trans-unit>
+                  <trans-unit id="2222016658375497692" datatype="html">
+                    <source> Stop following </source>
+                    <target>Takibi bırak</target>
+                    <context-group purpose="location">
+                      <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.html</context>
+                      <context context-type="linenumber">51,53</context>
+                    </context-group>
+                  </trans-unit>
+                  <trans-unit id="7524447451832891431" datatype="html">
+                    <source> Follow </source>
+                    <target>Takip et</target>
+                    <context-group purpose="location">
+                      <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.html</context>
+                      <context context-type="linenumber">55,57</context>
+                    </context-group>
+                  </trans-unit>
+      <trans-unit id="5585432160601987352" datatype="html">
+        <source>User profile not available.</source>
+        <target>Kullanıcı profili mevcut değil.</target>
+                    <context-group purpose="location">
+                      <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.html</context>
+          <context context-type="linenumber">99</context>
+                    </context-group>
+      </trans-unit>
+      <trans-unit id="9119757647796405986" datatype="html">
+        <source>No location</source>
+        <target>Konum yok</target>
+                    <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+          <context context-type="linenumber">79</context>
+                    </context-group>
+                  </trans-unit>
+                  <trans-unit id="5273516896947770386" datatype="html">
+                          <source>No description available.</source>
+                          <target>Açıklama bulunmamaktadır.</target>
+                          <context-group purpose="location">
+                            <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+                            <context context-type="linenumber">80</context>
+                          </context-group>
+                        </trans-unit>
             <trans-unit id="2127032578120864096" datatype="html">
                     <source>My Profile</source>
                     <target>Profilim</target>

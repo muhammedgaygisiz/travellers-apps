@@ -75,6 +75,11 @@ export class ProfileComponent {
   isOpen = signal(false);
   currentPage = signal<number>(1);
 
+  readonly texts = {
+    noLocation: $localize`No location`,
+    noDescription: $localize`No description available.`,
+  };
+
   confirmationButtons = [
     {
       text: 'Cancel',

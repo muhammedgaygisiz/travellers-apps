@@ -42,17 +42,21 @@
         </ion-badge>
         <div class="buttons">
           @if (!!currentUserId && userData?.userId === currentUserId) {
-            <ion-button (click)="gotoEditProfile.emit()"
-              >Edit Profile</ion-button
-            >
+            <ion-button (click)="gotoEditProfile.emit()" i18n>
+              Edit Profile
+            </ion-button>
           }
           @if (isUnfollowedUser()) {
             @if (this.profileMetadata()?.isFollowedByMe) {
-              <ion-button fill="outline" (click)="openConfirmationDialog()">
+              <ion-button
+                fill="outline"
+                (click)="openConfirmationDialog()"
+                i18n
+              >
                 Stop following
               </ion-button>
             } @else {
-              <ion-button fill="outline" (click)="onFollow()">
+              <ion-button fill="outline" (click)="onFollow()" i18n>
                 Follow
               </ion-button>
             }
@@ -62,10 +66,10 @@
     </h1>
 
     <span class="profile-location">
-      {{ userData?.city || 'No location' }}
+      {{ userData?.city || texts.noLocation }}
     </span>
     <p class="profile-about">
-      {{ userData?.about || 'No description available.' }}
+      {{ userData?.about || texts.noDescription }}
     </p>
 
     <div class="bites-section">
@@ -96,7 +100,7 @@
     <!-- Show a message when no user data is available -->
     @if (!userData) {
       <div class="no-profile">
-        <p class="no-profile-message">User profile not available.</p>
+        <p class="no-profile-message" i18n>User profile not available.</p>
       </div>
     }
   </ion-content>

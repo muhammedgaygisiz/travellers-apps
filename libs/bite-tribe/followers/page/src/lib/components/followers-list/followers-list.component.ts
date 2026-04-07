@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   output,
   signal,
@@ -55,13 +56,21 @@ export class FollowersListComponent {
 
   isOpen = signal(false);
 
+  readonly texts = {
+    followers: $localize`Followers`,
+    following: $localize`Following`,
+    alertHeader: $localize`Stop following`,
+    alertMessage: (user: PublicUser): string =>
+      $localize`Are you sure you want to stop following ${user.displayName}?`,
+  };
+
   confirmationButtons = [
     {
-      text: 'Cancel',
+      text: $localize`Cancel`,
       role: CANCEL,
     },
     {
-      text: 'Yes, unfollow',
+      text: $localize`Yes, unfollow`,
       role: UNFOLLOW,
     },
   ];

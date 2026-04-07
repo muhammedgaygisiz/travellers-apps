@@ -5,7 +5,7 @@
 >
   <ion-content class="ion-padding">
     <h1 class="ion-margin-bottom">
-      {{ type() === 'followers' ? 'Followers' : 'Following' }}
+      {{ type() === 'followers' ? texts.followers : texts.following }}
     </h1>
 
     @if (isLoading()) {
@@ -16,9 +16,9 @@
       <div class="empty-container">
         <ion-label>
           @if (type() === 'followers') {
-            No followers yet
+            <ng-container i18n>No followers yet</ng-container>
           } @else {
-            Not following anyone yet
+            <ng-container i18n>Not following anyone yet</ng-container>
           }
         </ion-label>
       </div>
@@ -51,16 +51,15 @@
                   slot="end"
                   fill="outline"
                   (click)="openConfirmationDialog($event)"
+                  i18n
                 >
                   Unfollow
                 </ion-button>
 
                 <ion-alert
                   [isOpen]="isOpen()"
-                  header="Stop following"
-                  message="Are you sure you want to stop following {{
-                    user?.displayName
-                  }}?"
+                  header="{{ texts.alertHeader }}"
+                  message="{{ texts.alertMessage(user) }}"
                   [buttons]="confirmationButtons"
                   (didDismiss)="handleConfirmationDismiss($event, user)"
                 />

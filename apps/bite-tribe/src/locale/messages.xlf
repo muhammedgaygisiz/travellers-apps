@@ -13,6 +13,93 @@
           <context context-type="linenumber">56</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="5032086401729660724" datatype="html">
+        <source>No followers yet</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6379239168986952614" datatype="html">
+        <source>Not following anyone yet</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4680184347989147730" datatype="html">
+        <source> Unfollow </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.html</context>
+          <context context-type="linenumber">55,57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4914577418256256836" datatype="html">
+        <source>Followers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/components/profile-header.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8726138323871139597" datatype="html">
+        <source>Following</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/components/profile-header.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4866908001435867234" datatype="html">
+        <source>Stop following</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2476559392506255860" datatype="html">
+        <source>Are you sure you want to stop following <x id="PH" equiv-text="user.displayName"/>?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2159130950882492111" datatype="html">
+        <source>Cancel</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
+          <context context-type="linenumber">67</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5053110338961381130" datatype="html">
+        <source>Yes, unfollow</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
+          <context context-type="linenumber">71</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="8829497237648100098" datatype="html">
         <source>Filter</source>
         <context-group purpose="location">
@@ -55,20 +142,6 @@
           <context context-type="linenumber">98</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="8726138323871139597" datatype="html">
-        <source>Following</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/components/profile-header.html</context>
-          <context context-type="linenumber">31</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="4914577418256256836" datatype="html">
-        <source>Followers</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/components/profile-header.html</context>
-          <context context-type="linenumber">39</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="4505152381300139635" datatype="html">
         <source> Edit Profile </source>
         <context-group purpose="location">
@@ -109,34 +182,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
           <context context-type="linenumber">80</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="4866908001435867234" datatype="html">
-        <source>Stop following</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
-          <context context-type="linenumber">81</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2159130950882492111" datatype="html">
-        <source>Cancel</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
-          <context context-type="linenumber">86</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="5053110338961381130" datatype="html">
-        <source>Yes, unfollow</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
-          <context context-type="linenumber">90</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2476559392506255860" datatype="html">
-        <source>Are you sure you want to stop following <x id="PH" equiv-text="displayName"/>?</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
-          <context context-type="linenumber">97</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2127032578120864096" datatype="html">

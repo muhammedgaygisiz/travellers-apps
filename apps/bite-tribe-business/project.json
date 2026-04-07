@@ -14,7 +14,7 @@
         "outputPath": "dist/apps/bite-tribe-business",
         "index": "apps/bite-tribe-business/src/index.html",
         "main": "apps/bite-tribe-business/src/main.ts",
-        "polyfills": [],
+        "polyfills": ["@angular/localize/init"],
         "tsConfig": "apps/bite-tribe-business/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -44,7 +44,7 @@
         "stylePreprocessorOptions": {
           "includePaths": ["libs/bite-tribe-common/styles"]
         },
-        "scripts": []
+        "localize": false
       },
       "configurations": {
         "production": {

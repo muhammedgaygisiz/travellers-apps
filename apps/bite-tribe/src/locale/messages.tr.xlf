@@ -126,6 +126,38 @@
                             <context context-type="linenumber">80</context>
                           </context-group>
                         </trans-unit>
+                        <trans-unit id="4866908001435867234" datatype="html">
+                                <source>Stop following</source>
+                                <target>Takibi bırak</target>
+                                <context-group purpose="location">
+                                  <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+                                  <context context-type="linenumber">81</context>
+                                </context-group>
+                              </trans-unit>
+                              <trans-unit id="2159130950882492111" datatype="html">
+                                <source>Cancel</source>
+                                <target>İptal et</target>
+                                <context-group purpose="location">
+                                  <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+                                  <context context-type="linenumber">86</context>
+                                </context-group>
+                              </trans-unit>
+                              <trans-unit id="5053110338961381130" datatype="html">
+                                <source>Yes, unfollow</source>
+                                <target>Evet, takipten çık</target>
+                                <context-group purpose="location">
+                                  <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+                                  <context context-type="linenumber">90</context>
+                                </context-group>
+                              </trans-unit>
+                              <trans-unit id="2476559392506255860" datatype="html">
+                                <source>Are you sure you want to stop following <x id="PH" equiv-text="displayName"/>?</source>
+                                <target><x id="PH" equiv-text="displayName"/> takip etmeyi bırakmak istediğinizden emin misiniz?</target>
+                                <context-group purpose="location">
+                                  <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+                                  <context context-type="linenumber">97</context>
+                                </context-group>
+                              </trans-unit>
             <trans-unit id="2127032578120864096" datatype="html">
                     <source>My Profile</source>
                     <target>Profilim</target>

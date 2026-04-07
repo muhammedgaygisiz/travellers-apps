@@ -78,18 +78,24 @@ export class ProfileComponent {
   readonly texts = {
     noLocation: $localize`No location`,
     noDescription: $localize`No description available.`,
+    alertHeader: $localize`Stop following`,
   };
 
   confirmationButtons = [
     {
-      text: 'Cancel',
+      text: $localize`Cancel`,
       role: CANCEL,
     },
     {
-      text: 'Yes, unfollow',
+      text: $localize`Yes, unfollow`,
       role: UNFOLLOW,
     },
   ];
+
+  alertMessage = computed(() => {
+    const displayName = this.user()?.displayName;
+    return $localize`Are you sure you want to stop following ${displayName}?`;
+  });
 
   followerCount = computed(() => {
     return this.profileMetadata()?.followers;

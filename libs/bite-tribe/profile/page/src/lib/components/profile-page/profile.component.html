@@ -108,8 +108,8 @@
 
 <ion-alert
   [isOpen]="isOpen()"
-  header="Stop following"
-  message="Are you sure you want to stop following {{ user()?.displayName }}?"
+  header="{{ texts.alertHeader }}"
+  message="{{ alertMessage() }}"
   [buttons]="confirmationButtons"
   (didDismiss)="handleConfirmationDismiss($event)"
 />

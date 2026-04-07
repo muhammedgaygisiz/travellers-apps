@@ -51,37 +51,37 @@
       @if (showMyProfile()) {
         <ion-item (click)="gotoProfile.emit()">
           <ion-icon name="person-circle-outline" slot="start" />
-          My Profile
+          <ng-container i18n>My Profile</ng-container>
         </ion-item>
       }
       @if (showMyBites()) {
         <ion-item (click)="gotoMyBites.emit()">
           <ion-icon name="pizza-outline" slot="start" />
-          My Bites
+          <ng-container i18n>My Bites</ng-container>
         </ion-item>
       }
       @if (showMyBucketlists()) {
         <ion-item (click)="gotoMyBucketlists.emit()">
           <ion-icon name="bookmark-outline" slot="start" />
-          My Bucket lists
+          <ng-container i18n>My Bucket lists</ng-container>
         </ion-item>
       }
       @if (showMarketPlaceButton()) {
         <ion-item (click)="gotoMarketPlace.emit()">
           <ion-icon name="storefront-outline" slot="start" />
-          Market Place
+          <ng-container i18n>Market Place</ng-container>
         </ion-item>
       }
       @if (showSettingsButton()) {
         <ion-item (click)="gotoSettings.emit()">
           <ion-icon name="settings-outline" slot="start" />
-          Settings
+          <ng-container i18n>Settings</ng-container>
         </ion-item>
       }
       @if (showAboutButton()) {
         <ion-item (click)="gotoAbout.emit()">
           <ion-icon name="information-circle-outline" slot="start" />
-          About
+          <ng-container i18n>About</ng-container>
         </ion-item>
       }
       @if (showMigrationsButton()) {
@@ -97,7 +97,7 @@
         (click)="logoutClick.emit()"
       >
         <ion-icon name="log-out-outline" slot="start" />
-        Logout
+        <ng-container i18n>Logout</ng-container>
       </ion-item>
     }
   }

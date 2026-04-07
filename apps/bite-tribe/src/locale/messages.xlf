@@ -8,6 +8,101 @@
           <context context-type="sourcefile">libs/bite-tribe/bite/page/src/lib/components/page/bite.page.html</context>
           <context context-type="linenumber">7</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/page.component.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8829497237648100098" datatype="html">
+        <source>Filter</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1779552786277618671" datatype="html">
+        <source>Distance</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3973931101896534797" datatype="html">
+        <source>Date</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7112532281224432421" datatype="html">
+        <source>Likes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3706222784708785028" datatype="html">
+        <source>Rating</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
+          <context context-type="linenumber">95</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8894377483833272091" datatype="html">
+        <source>Price</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2127032578120864096" datatype="html">
+        <source>My Profile</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3799596955318277506" datatype="html">
+        <source>My Bites</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3254043251666367743" datatype="html">
+        <source>My Bucket lists</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3538932877216515604" datatype="html">
+        <source>Market Place</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4930506384627295710" datatype="html">
+        <source>Settings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">78</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1726363342938046830" datatype="html">
+        <source>About</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3797778920049399855" datatype="html">
+        <source>Logout</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
       </trans-unit>
     </body>
   </file>

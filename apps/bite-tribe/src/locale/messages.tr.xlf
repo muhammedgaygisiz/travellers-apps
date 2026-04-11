@@ -124,7 +124,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">70</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
@@ -243,6 +243,14 @@
           <context context-type="linenumber">56</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="5138338861179121885" datatype="html">
+        <source> Location (tap map to move location manually): </source>
+        <target>Konum (haritaya dokunarak konumu manuel olarak değişte bilirsin):</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/bite/page/src/lib/components/page/bite.page.html</context>
+          <context context-type="linenumber">84,86</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="2346317781314844497" datatype="html">
               <source>Create new bucket list</source>
               <target>Yeni yapılacaklar listesi oluştur</target>
@@ -347,12 +355,38 @@
                 <context context-type="linenumber">55,57</context>
               </context-group>
             </trans-unit>
+      <trans-unit id="4866908001435867234" datatype="html">
+        <source>Stop following</source>
+        <target>Takibi bırak</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.html</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1502787884735177394" datatype="html">
+        <source>Are you sure you want to stop following <x id="INTERPOLATION" equiv-text="{{
+                    user?.displayName
+                    }}"/>?
+          </source>
+        <target>
+          <x id="INTERPOLATION" equiv-text="{{user?.displayName}}"/>
+          takip etmeyi bırakmak istediğinizden emin misiniz?
+        </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.html</context>
+          <context context-type="linenumber">62,64</context>
+        </context-group>
+      </trans-unit>
             <trans-unit id="4914577418256256836" datatype="html">
               <source>Followers</source>
               <target>Takipçiler</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-          <context context-type="linenumber">60</context>
+          <context context-type="linenumber">64</context>
               </context-group>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/components/profile-header.html</context>
@@ -364,35 +398,11 @@
               <target>Takipte</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">65</context>
               </context-group>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/components/profile-header.html</context>
                 <context context-type="linenumber">31</context>
-              </context-group>
-            </trans-unit>
-            <trans-unit id="4866908001435867234" datatype="html">
-              <source>Stop following</source>
-              <target>Takibi bırak</target>
-              <context-group purpose="location">
-                <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-          <context context-type="linenumber">62</context>
-              </context-group>
-              <context-group purpose="location">
-                <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
-                <context context-type="linenumber">81</context>
-              </context-group>
-            </trans-unit>
-            <trans-unit id="2476559392506255860" datatype="html">
-              <source>Are you sure you want to stop following <x id="PH" equiv-text="user.displayName"/>?</source>
-              <target><x id="PH" equiv-text="displayName"/> takip etmeyi bırakmak istediğinizden emin misiniz?</target>
-              <context-group purpose="location">
-                <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-          <context context-type="linenumber">64</context>
-              </context-group>
-              <context-group purpose="location">
-                <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
-                <context context-type="linenumber">97</context>
               </context-group>
             </trans-unit>
             <trans-unit id="5053110338961381130" datatype="html">
@@ -400,7 +410,7 @@
               <target>Evet, takipten çık</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-          <context context-type="linenumber">73</context>
+          <context context-type="linenumber">74</context>
               </context-group>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
@@ -641,6 +651,17 @@
                           <context-group purpose="location">
                             <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
                             <context context-type="linenumber">80</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2476559392506255860" datatype="html">
+        <source>Are you sure you want to stop following <x id="PH" equiv-text="displayName"/>?</source>
+        <target>
+                  <x id="PH" equiv-text="displayName"/>
+                  takip etmeyi bırakmak istediğinizden emin misiniz?
+                </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
+          <context context-type="linenumber">97</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4930506384627295710" datatype="html">
@@ -936,7 +957,7 @@
         <target><x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>Sayı<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/></target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/common/ui/password-validator/src/lib/component/password-validator.component.html</context>
-          <context context-type="linenumber">30,31</context>
+          <context context-type="linenumber">31,33</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3356019779147003450" datatype="html">
@@ -944,7 +965,7 @@
         <target>En az <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>8 karakter<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/></target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/common/ui/password-validator/src/lib/component/password-validator.component.html</context>
-          <context context-type="linenumber">38,39</context>
+          <context context-type="linenumber">41,43</context>
                     </context-group>
                   </trans-unit>
     </body>

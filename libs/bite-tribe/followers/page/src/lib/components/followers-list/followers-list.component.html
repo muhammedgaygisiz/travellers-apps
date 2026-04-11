@@ -5,7 +5,7 @@
 >
   <ion-content class="ion-padding">
     <h1 class="ion-margin-bottom">
-      {{ type() === 'followers' ? texts.followers : texts.following }}
+      {{ toggleTitleText() }}
     </h1>
 
     @if (isLoading()) {
@@ -58,10 +58,14 @@
 
                 <ion-alert
                   [isOpen]="isOpen()"
-                  header="{{ texts.alertHeader }}"
-                  message="{{ texts.alertMessage(user) }}"
+                  header="Stop following"
+                  message="Are you sure you want to stop following {{
+                    user?.displayName
+                  }}?"
                   [buttons]="confirmationButtons"
                   (didDismiss)="handleConfirmationDismiss($event, user)"
+                  i18n-header
+                  i18n-message
                 />
               }
             </ion-item>

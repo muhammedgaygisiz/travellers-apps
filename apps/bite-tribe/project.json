@@ -153,6 +153,24 @@
         },
         "development": {
           "buildTarget": "bite-tribe:build:development"
+        },
+        "tr": {
+          "buildTarget": "bite-tribe:build:tr"
+        },
+        "de": {
+          "buildTarget": "bite-tribe:build:de"
+        },
+        "fr": {
+          "buildTarget": "bite-tribe:build:fr"
+        },
+        "it": {
+          "buildTarget": "bite-tribe:build:it"
+        },
+        "es": {
+          "buildTarget": "bite-tribe:build:es"
+        },
+        "ar": {
+          "buildTarget": "bite-tribe:build:ar"
         }
       },
       "defaultConfiguration": "development",

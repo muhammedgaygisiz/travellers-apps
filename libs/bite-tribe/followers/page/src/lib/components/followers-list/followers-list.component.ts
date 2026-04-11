@@ -56,13 +56,11 @@ export class FollowersListComponent {
 
   isOpen = signal(false);
 
-  readonly texts = {
-    followers: $localize`Followers`,
-    following: $localize`Following`,
-    alertHeader: $localize`Stop following`,
-    alertMessage: (user: PublicUser): string =>
-      $localize`Are you sure you want to stop following ${user.displayName}?`,
-  };
+  toggleTitleText = computed(() => {
+    const type = this.type();
+
+    return type === 'followers' ? $localize`Followers` : $localize`Following`;
+  });
 
   confirmationButtons = [
     {
@@ -94,7 +92,6 @@ export class FollowersListComponent {
 
     this.isOpen.set(false);
   }
-
   unfollow(user: PublicUser): void {
     if (user) {
       this.unfollowClick.emit(user);

@@ -43,7 +43,7 @@
               <target>Takipçiler</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-                <context context-type="linenumber">59</context>
+          <context context-type="linenumber">60</context>
               </context-group>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/components/profile-header.html</context>
@@ -55,7 +55,7 @@
               <target>Takipte</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-                <context context-type="linenumber">60</context>
+          <context context-type="linenumber">61</context>
               </context-group>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/components/profile-header.html</context>
@@ -67,7 +67,7 @@
               <target>Takibi bırak</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-                <context context-type="linenumber">61</context>
+          <context context-type="linenumber">62</context>
               </context-group>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
@@ -79,7 +79,7 @@
               <target><x id="PH" equiv-text="displayName"/> takip etmeyi bırakmak istediğinizden emin misiniz?</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-                <context context-type="linenumber">62</context>
+          <context context-type="linenumber">64</context>
               </context-group>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
@@ -91,7 +91,11 @@
               <target>İptal et</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-                <context context-type="linenumber">67</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">30</context>
               </context-group>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
@@ -103,7 +107,7 @@
               <target>Evet, takipten çık</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
-                <context context-type="linenumber">71</context>
+          <context context-type="linenumber">73</context>
               </context-group>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
@@ -123,7 +127,7 @@
               <target>Mesafe</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
-                <context context-type="linenumber">92</context>
+          <context context-type="linenumber">93</context>
               </context-group>
             </trans-unit>
             <trans-unit id="3973931101896534797" datatype="html">
@@ -131,7 +135,7 @@
               <target>Tarih</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
-                <context context-type="linenumber">93</context>
+          <context context-type="linenumber">95</context>
               </context-group>
             </trans-unit>
             <trans-unit id="7112532281224432421" datatype="html">
@@ -139,7 +143,7 @@
               <target>Likes</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
-                <context context-type="linenumber">94</context>
+          <context context-type="linenumber">96</context>
               </context-group>
             </trans-unit>
             <trans-unit id="3706222784708785028" datatype="html">
@@ -147,7 +151,7 @@
               <target>Puan</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
-                <context context-type="linenumber">95</context>
+          <context context-type="linenumber">97</context>
               </context-group>
             </trans-unit>
             <trans-unit id="8894377483833272091" datatype="html">
@@ -155,9 +159,141 @@
               <target>Fiyat</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/home/page/src/lib/components/page/home.component.html</context>
-                <context context-type="linenumber">96</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2984628903434675339" datatype="html">
+        <source>Edit Profile</source>
+        <target>Profili Düzenle</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7585826646011739428" datatype="html">
+        <source>Edit</source>
+        <target>Düzenle</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4357457444132463679" datatype="html">
+        <source>Profile Image</source>
+        <target>Profil Resmi</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3620188369327429839" datatype="html">
+        <source> Save </source>
+        <target>Kaydet</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3013055597615607317" datatype="html">
+        <source>Display Name</source>
+        <target>Görünen Ad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">51</context>
               </context-group>
             </trans-unit>
+      <trans-unit id="1079794859781630706" datatype="html">
+        <source>Enter display name</source>
+        <target>Görünen adı girin</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4768749765465246664" datatype="html">
+        <source>Email</source>
+        <target>E-posta</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2314075913167237221" datatype="html">
+        <source>City</source>
+        <target>Şehir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">71</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1726363342938046830" datatype="html">
+        <source>About</source>
+        <target>Hakkında</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5995666782696005929" datatype="html">
+        <source>Tell us about yourself...</source>
+        <target>Bize kendinden bahset...</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2344943809712935481" datatype="html">
+        <source>Public User</source>
+        <target>Açık Kullanıcı</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6273997865051397082" datatype="html">
+        <source> Save Changes </source>
+        <target>Değişiklikleri Kaydet</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">105,107</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2486873208191488906" datatype="html">
+        <source>Return to Private Profile</source>
+        <target>Özel Profile Dön</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3212301764327840591" datatype="html">
+        <source>Are you sure you want to return to a private profile? You will be shown as Anonymous.</source>
+        <target>Özel profile dönmek istediğinizden emin misiniz? Anonim olarak görüneceksiniz.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5362876186674665977" datatype="html">
+        <source>No, stay public</source>
+        <target>Hayır, açık kal</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.ts</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7309577430257206666" datatype="html">
+        <source>Yes, go private</source>
+        <target>Evet, özel moduna geç</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.ts</context>
+          <context context-type="linenumber">119</context>
+        </context-group>
+      </trans-unit>
                   <trans-unit id="4505152381300139635" datatype="html">
                     <source> Edit Profile </source>
                     <target>Profili düzenle</target>
@@ -171,7 +307,7 @@
                     <target>Takibi bırak</target>
                     <context-group purpose="location">
                       <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.html</context>
-                      <context context-type="linenumber">51,53</context>
+          <context context-type="linenumber">55,57</context>
                     </context-group>
                   </trans-unit>
                   <trans-unit id="7524447451832891431" datatype="html">
@@ -179,7 +315,7 @@
                     <target>Takip et</target>
                     <context-group purpose="location">
                       <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.html</context>
-                      <context context-type="linenumber">55,57</context>
+          <context context-type="linenumber">59,61</context>
                     </context-group>
                   </trans-unit>
       <trans-unit id="5585432160601987352" datatype="html">
@@ -187,7 +323,7 @@
         <target>Kullanıcı profili mevcut değil.</target>
                     <context-group purpose="location">
                       <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.html</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">103</context>
                     </context-group>
       </trans-unit>
       <trans-unit id="9119757647796405986" datatype="html">
@@ -244,14 +380,6 @@
                     <context-group purpose="location">
                       <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
                       <context context-type="linenumber">78</context>
-                    </context-group>
-                  </trans-unit>
-                  <trans-unit id="1726363342938046830" datatype="html">
-                    <source>About</source>
-                    <target>Hakkinda</target>
-                    <context-group purpose="location">
-                      <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
-                      <context context-type="linenumber">84</context>
                     </context-group>
                   </trans-unit>
                   <trans-unit id="3797778920049399855" datatype="html">

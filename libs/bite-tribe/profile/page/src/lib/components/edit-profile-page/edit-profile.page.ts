@@ -112,11 +112,11 @@ export class EditProfilePage {
 
   confirmationButtons = [
     {
-      text: 'No, stay public',
+      text: $localize`No, stay public`,
       role: STAY_PUBLIC,
     },
     {
-      text: 'Yes, go private',
+      text: $localize`Yes, go private`,
       role: GO_PRIVATE,
     },
   ];

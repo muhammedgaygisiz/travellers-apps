@@ -5,7 +5,7 @@
   [enableBackButton]="true"
 >
   <ion-content class="ion-padding">
-    <h1 class="ion-margin-bottom">Edit Profile</h1>
+    <h1 class="ion-margin-bottom" i18n>Edit Profile</h1>
 
     <form [formGroup]="profileForm">
       <div class="profile-image-block" id="select-image">
@@ -15,7 +15,7 @@
         } @else {
         <ion-icon name="person-circle-outline" class="profile-image" />
         }
-        <ion-button fill="clear">Edit</ion-button>
+        <ion-button fill="clear" i18n>Edit</ion-button>
       </div>
 
       <ion-modal
@@ -27,9 +27,9 @@
           <ion-header>
             <ion-toolbar>
               <ion-buttons>
-                <ion-button (click)="cancel()">Cancel</ion-button>
+                <ion-button (click)="cancel()" i18n>Cancel</ion-button>
               </ion-buttons>
-              <ion-title>Profile Image</ion-title>
+              <ion-title i18n>Profile Image</ion-title>
             </ion-toolbar>
           </ion-header>
           <ion-content class="ion-padding">
@@ -39,6 +39,7 @@
               expand="block"
               class="ion-margin-top"
               (click)="dismissImageModal()"
+              i18n
             >
               Save
             </ion-button>
@@ -53,6 +54,8 @@
         fill="outline"
         mode="md"
         class="ion-margin-top"
+        i18n-label
+        i18n-placeholder
       />
 
       <ion-input
@@ -61,6 +64,7 @@
         fill="outline"
         mode="md"
         class="ion-margin-top"
+        i18n-label
       />
 
       <ion-input
@@ -69,6 +73,7 @@
         fill="outline"
         mode="md"
         class="ion-margin-top"
+        i18n-label
       />
 
       <ion-textarea
@@ -79,10 +84,12 @@
         mode="md"
         [rows]="4"
         class="ion-margin-top"
+        i18n-label
+        i18n-placeholder
       />
 
       <ion-item class="ion-margin-top">
-        <ion-label>Public User</ion-label>
+        <ion-label i18n>Public User</ion-label>
         <ion-toggle
           slot="end"
           formControlName="public"
@@ -94,6 +101,7 @@
         <ion-button
           [disabled]="isFormInvalid() || isFormPristine()"
           (click)="saveProfile()"
+          i18n
         >
           Save Changes
         </ion-button>
@@ -108,4 +116,6 @@
   message="Are you sure you want to return to a private profile? You will be shown as Anonymous."
   [buttons]="confirmationButtons"
   (didDismiss)="handleGoPrivateConfirmation($event)"
+  i18n-header
+  i18n-message
 />

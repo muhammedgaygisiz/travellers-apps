@@ -4,11 +4,11 @@
   [enableBackButton]="true"
 >
   <ion-content class="ion-padding">
-    <h1>About</h1>
+    <h1 i18n>About</h1>
 
     <div>
-      <p>Bite Tribe is a social food discovery app for food lovers.</p>
-      <p>
+      <p i18n>Bite Tribe is a social food discovery app for food lovers.</p>
+      <p i18n>
         Capture your meals, tag the location, and share bites from around the
         world. Discover hidden gems, track where you’ve eaten, and see what
         others are tasting nearby.
@@ -16,13 +16,13 @@
     </div>
 
     <div class="ion-margin-top">
-      Total Number of Bites on Bite Tribe:
+      <ng-container i18n>Total Number of Bites on Bite Tribe:</ng-container>
       <br />
 
       <ion-text color="primary">{{totalNumberBites()}}</ion-text>
     </div>
     <div class="ion-margin-top">
-      Total Number of Users on Bite Tribe:
+      <ng-container i18n>Total Number of Users on Bite Tribe:</ng-container>
       <br />
 
       <ion-text color="primary">{{totalNumberUsers()}}</ion-text>

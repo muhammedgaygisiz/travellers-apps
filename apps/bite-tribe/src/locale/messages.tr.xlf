@@ -36,7 +36,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="8785122281012266870" datatype="html">
-        <source>En Çok Satanlar</source>
+        <source>Best Seller</source>
+        <target>En Çok Satanlar</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
           <context context-type="linenumber">84</context>
@@ -148,6 +149,54 @@
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/bucketlist/page/src/lib/components/bucketlists-page/bucketlists.page.ts</context>
           <context context-type="linenumber">107</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1726363342938046830" datatype="html">
+        <source>About</source>
+        <target>Hakkında</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/about/page/src/lib/components/about-page/about.page.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4978546566590727524" datatype="html">
+        <source>Bite Tribe is a social food discovery app for food lovers.</source>
+        <target>Bite Tribe, yemek severler için tasarlanmış bir sosyal yemek keşif uygulamasıdır.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/about/page/src/lib/components/about-page/about.page.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6981684121360284875" datatype="html">
+        <source> Capture your meals, tag the location, and share bites from around the world. Discover hidden gems, track where you’ve eaten, and see what others are tasting nearby. </source>
+        <target>Yemeklerinizi fotoğraflayın, konum etiketleyin ve dünyanın dört bir yanından lezzetleri paylaşın. Gizli hazineleri keşfedin, nerede yemek yediğinizi takip edin ve yakınlarda başkalarının neler tattığını görün.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/about/page/src/lib/components/about-page/about.page.html</context>
+          <context context-type="linenumber">11,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1445106191534708224" datatype="html">
+        <source>Total Number of Bites on Bite Tribe:</source>
+        <target>Bite Tribe'deki Toplam Bite Sayısı:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/about/page/src/lib/components/about-page/about.page.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5068049969506733674" datatype="html">
+        <source>Total Number of Users on Bite Tribe:</source>
+        <target>Bite Tribe'deki toplam kullanıcı sayısı:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/about/page/src/lib/components/about-page/about.page.html</context>
+          <context context-type="linenumber">25</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8417421411982138093" datatype="html">
@@ -469,6 +518,10 @@
           <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
           <context context-type="linenumber">62</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="2314075913167237221" datatype="html">
         <source>City</source>
@@ -476,18 +529,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
           <context context-type="linenumber">71</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="1726363342938046830" datatype="html">
-        <source>About</source>
-        <target>Hakkında</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
-          <context context-type="linenumber">80</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
-          <context context-type="linenumber">84</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5995666782696005929" datatype="html">
@@ -680,6 +721,7 @@
       </trans-unit>
       <trans-unit id="3797778920049399855" datatype="html">
         <source>Logout</source>
+        <target>Çıkış</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
           <context context-type="linenumber">79</context>
@@ -689,6 +731,34 @@
           <context context-type="linenumber">100</context>
         </context-group>
                         </trans-unit>
+      <trans-unit id="1345872746605910184" datatype="html">
+        <source>Find it. Try it. Share it.</source>
+        <target>Bul. Dene. Paylaş.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/start/src/lib/start.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4166166242155319722" datatype="html">
+        <source> Log In </source>
+        <target>Giriş Yap</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/start/src/lib/start.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
+          <context context-type="linenumber">66,68</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="744750008248382275" datatype="html">
+        <source> Sign Up </source>
+        <target>Kaydol</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/start/src/lib/start.component.html</context>
+          <context context-type="linenumber">19,21</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="1279036365143313688" datatype="html">
         <source>BiteTrail saved as bucket list!</source>
         <target>BiteTrail, yapılacaklar listesi'ne eklendi!</target>
@@ -703,6 +773,62 @@
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/store/src/lib/bucketlists/effects.ts</context>
           <context context-type="linenumber">144</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2336550011721758066" datatype="html">
+        <source>Log in</source>
+        <target>Giriş yap</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5766181472013217686" datatype="html">
+        <source> Log in with</source>
+        <target>Hesapla giriş yap</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8464044883966085050" datatype="html">
+        <source> or with your Email</source>
+        <target>ya da e-posta adresinle giris yap</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1431416938026210429" datatype="html">
+        <source>Password</source>
+        <target>Şifre</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2398583048519934048" datatype="html">
+        <source> Something went wrong. Please try again. </source>
+        <target>Bir hata oluştu. Lütfen tekrar dene.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
+          <context context-type="linenumber">72,74</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4029277674895318328" datatype="html">
+        <source> ya da henüz bir hesabın yoksa:</source>
+        <target></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
+          <context context-type="linenumber">83</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7203320122205058413" datatype="html">
+        <source> Sign up </source>
+        <target>Kaydol</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
+          <context context-type="linenumber">91,93</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1364770640750393197" datatype="html">

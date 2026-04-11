@@ -31,8 +31,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { currencyCodes } from 'utils';
 import { User } from '@capacitor-firebase/authentication';
 import { CardComponent } from 'common/ui/card';
-import { Browser } from 'leaflet';
-import win = Browser.win;
 
 @Component({
   selector: 'settings',

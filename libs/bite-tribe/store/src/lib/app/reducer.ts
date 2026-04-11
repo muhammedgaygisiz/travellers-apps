@@ -88,12 +88,16 @@ export const reducer = createReducer<AppSlice>(
       errorLoadingGpsPosition: false,
     };
   }),
-  on(AppActions.loadedSettingsFromAPI, (state, { settings }) => {
-    return {
-      ...state,
-      settings,
-    };
-  }),
+  on(
+    AppActions.loadedSettingsFromAPI,
+    AppActions.savedSettings,
+    (state, { settings }) => {
+      return {
+        ...state,
+        settings,
+      };
+    },
+  ),
   on(
     AppActions.setPublicProfile,
     AppActions.savedPublicProfile,

@@ -719,6 +719,94 @@
           <context context-type="linenumber">62</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="2826581353496868063" datatype="html">
+        <source>Language</source>
+        <target>Sprache</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5866254605255506989" datatype="html">
+        <source>English</source>
+        <target>Englisch</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8960848528321183635" datatype="html">
+        <source>Amharic</source>
+        <target>Amharisch</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6269202464699193298" datatype="html">
+        <source>Arabic</source>
+        <target>Arabisch</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">78</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1858110241312746425" datatype="html">
+        <source>German</source>
+        <target>Deutsch</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">79</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5190825892106392539" datatype="html">
+        <source>Spanish</source>
+        <target>Spanisch</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7633754075223722162" datatype="html">
+        <source>French</source>
+        <target>Französisch</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8312065814232621608" datatype="html">
+        <source>Indonesian</source>
+        <target>Indonesisch</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2935232983274991580" datatype="html">
+        <source>Italian</source>
+        <target>Italienisch</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">83</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="510990609175066066" datatype="html">
+        <source>Thai</source>
+        <target>Thailändisch</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5682359291233237791" datatype="html">
+        <source>Turkish</source>
+        <target>Türkisch</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="7843443425041291846" datatype="html">
         <source>Nearby Distance (meters)</source>
         <target>In deiner Nähe (in Metern)</target>

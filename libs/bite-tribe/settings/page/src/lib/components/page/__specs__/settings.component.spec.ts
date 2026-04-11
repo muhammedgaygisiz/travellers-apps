@@ -54,6 +54,7 @@ describe(PageSettings.name, () => {
         theme: 'light',
         currency: 'EUR',
         nearby: 2000,
+        language: 'en',
       });
     });
 
@@ -86,6 +87,7 @@ describe(PageSettings.name, () => {
         currency: 'USD',
         nearby: 5000,
         updatedAt: '2024-01-01T00:00:00Z',
+        language: 'de',
       };
 
       component.settingsForm.setValue({
@@ -94,6 +96,7 @@ describe(PageSettings.name, () => {
         theme: mockSettings.theme,
         currency: mockSettings.currency,
         nearby: mockSettings.nearby,
+        language: mockSettings.language,
       });
 
       component.saveSettings();
@@ -193,6 +196,7 @@ describe(PageSettings.name, () => {
         currency: 'USD',
         nearby: 3000,
         updatedAt: '2024-01-01T00:00:00Z',
+        language: 'de',
       };
 
       compRef.setInput('settings', mockSettings);

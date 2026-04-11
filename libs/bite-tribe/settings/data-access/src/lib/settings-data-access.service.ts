@@ -3,6 +3,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PublicUser, Settings } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { Preferences } from '@capacitor/preferences';
 
 @Injectable({
   providedIn: 'root',
@@ -15,9 +16,18 @@ export class SettingsDataAccessService {
   settings = toSignal(this.storeService.settings$);
   publicUser = toSignal(this.storeService.publicUser$);
 
-  saveSettings(settings: Settings): void {
+  async saveSettings(settings: Settings): Promise<void> {
+    await this.saveLanguageToPreferences(settings.language);
+
     this.api.saveSettings(settings);
 
     this.storeService.notifySavedSettings(settings);
+  }
+
+  private saveLanguageToPreferences(language = 'en'): Promise<void> {
+    return Preferences.set({
+      key: 'lang',
+      value: language,
+    });
   }
 }

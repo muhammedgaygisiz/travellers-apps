@@ -164,7 +164,7 @@ export class BiteTribeApiService {
   }
 
   saveSettings(settings: Settings): void {
-    this.settingsApiService.saveSettings(settings);
+    void this.settingsApiService.saveSettings(settings);
   }
 
   saveUserIfNotExisting(): void {

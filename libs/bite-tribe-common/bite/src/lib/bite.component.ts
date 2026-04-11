@@ -68,11 +68,11 @@ export class BiteComponent {
 
   confirmationButtons = [
     {
-      text: 'Cancel',
+      text: $localize`Cancel`,
       role: CANCEL,
     },
     {
-      text: 'Delete',
+      text: $localize`Delete`,
       role: DELETE,
     },
   ];

@@ -52,17 +52,16 @@ const CANCEL = 'cancel';
 })
 export class BucketlistsPage {
   bucketlists = input<Bucketlist[]>([]);
-  title = input('My Bucket Lists');
-  sorting = input<string>('name');
+  sorting = input<string>($localize`name`);
   sortingLabel = computed(() => {
     const sorting = this.sorting();
     switch (sorting) {
       case 'name':
-        return 'Name';
+        return $localize`Name`;
       case 'createdAt':
-        return 'Date';
+        return $localize`Date`;
       default:
-        return 'Name';
+        return $localize`Name`;
     }
   });
 
@@ -101,11 +100,11 @@ export class BucketlistsPage {
 
   deleteConfirmationButtons = [
     {
-      text: 'Cancel',
+      text: $localize`Cancel`,
       role: CANCEL,
     },
     {
-      text: 'Delete',
+      text: $localize`Delete`,
       role: DELETE,
     },
   ];

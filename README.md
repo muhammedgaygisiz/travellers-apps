@@ -276,22 +276,60 @@ This will start the firebase emulators.
 
 # Localization
 
-Add a angular i18n tag to the element in the template:
+Add an angular i18n tag to the element in the template:
 
 ```html
-<h1 class="ion-margin-bottom" i18n="Create Bite Page Title|H1 Title of the Create Bite Pagel@@createBitePageTitle">Create Bite</h1>
+<h1 class="ion-margin-bottom" i18n>Create Bite</h1>
 ```
 
-The format of the i18n tag is as follows:
+If the text is inside an attribute (e.g. placeholder, aria-label, etc.), the i18n tag has to be added to the attribute with the suffix `:attr`:
 
-`i18n="Meaning|Description@@id"`
+```html
+<ion-input placeholder="Enter your name" i18n-placeholder></ion-input>
+```
 
 Run the following command to extract the i18n tags into a `messages.xlf` file:
 
 `nx extract-i18n bite-tribe`
 
+## Terminology:
+
+- Source file: `messages.xlf`, which contains the translation units (tagged texts in the application)
+- Translation file: e.g. `messages.de.xlf`, which contains the translations for the translation units in the source file
+- Translation unit: A translation unit is a piece of text in the application that is tagged. It is generated as a `trans-unit` in the `messages.xlf` file by Angular (`nx extract-i18n bite-tribe`).
+
+In source file (`messages.xlf`):
+
+```xml
+<trans-unit id="8785122281012266870" datatype="html">
+  <source>Best Seller</source>      <!-- Text to be translated -->
+  <context-group purpose="location">
+    <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
+    <context context-type="linenumber">84</context>
+  </context-group>
+</trans-unit>
+```
+
+In translation file (`messages.de.xlf`):
+
+```xml
+<trans-unit id="8785122281012266870" datatype="html">
+  <source>Best Seller</source>
+  <target>Bestseller</target>            <!-- Translation of the text in the source tag -->
+  <context-group purpose="location">
+    <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
+    <context context-type="linenumber">84</context>
+  </context-group>
+</trans-unit>
+```
+
+- Target: The translation of the text in the `source` tag of the `trans-unit` in the `messages.xlf` file. The translation is added in the translation file (e.g. `messages.de.xlf`) in a `target` tag for every `trans-unit`.
+
 The `messages.xlf` file will be generated in the `apps/bite-tribe/src/locale` folder. This file contains all the i18n tags and their translations (if available).
 The translations are in the according files like `apps/bite-tribe/src/locale/messages.de.xlf` for german.
 
-To work with the `.xlf` files use Poedit, which is a free and open source translation editor. It can be installed via brew with `brew install --cask poedit` or it can be
-downloaded from [here](https://poedit.net/download). You can open the `.xlf` files with Poedit and add the translations for the different languages. After adding the translations, save the file and the translations will be available in the app.
+To work with the `.xlf` files use file comparison of your IDE. Compare the `messages.xlf` file with the translation file (e.g. `messages.de.xlf`).
+The `.xlf` file does not contain the `<target>` tags, which are the translations. The translation file (e.g. `.de.xlf`) contains the `<target>`tags.
+
+The `.xlf` file and the translation file (e.g. `.de.xlf`) have to be the same!
+The difference is that the for every `trans-unit` the translation file contains a `<target>` tag, which is the translation of the text in the `source` tag.

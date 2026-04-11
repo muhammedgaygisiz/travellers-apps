@@ -92,6 +92,7 @@ export class FollowersListComponent {
 
     this.isOpen.set(false);
   }
+
   unfollow(user: PublicUser): void {
     if (user) {
       this.unfollowClick.emit(user);

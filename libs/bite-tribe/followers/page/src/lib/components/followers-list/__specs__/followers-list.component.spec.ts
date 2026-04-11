@@ -4,6 +4,7 @@ import { PublicUser } from 'model';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
+import { describe } from 'node:test';
 
 describe(FollowersListComponent.name, () => {
   let component: FollowersListComponent;
@@ -23,6 +24,18 @@ describe(FollowersListComponent.name, () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('toggleTitleText', () => {
+    it('should return "Followers" when type is followers', () => {
+      componentRef.setInput('type', 'followers');
+      expect(component.toggleTitleText()).toBe('Followers');
+    });
+
+    it('should return "Following" when type is following', () => {
+      componentRef.setInput('type', 'following');
+      expect(component.toggleTitleText()).toBe('Following');
+    });
   });
 
   describe('openConfirmationDialog', () => {

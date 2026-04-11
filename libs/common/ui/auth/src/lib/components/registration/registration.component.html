@@ -5,7 +5,7 @@
   [showFooter]="false"
 >
   <ion-content class="ion-padding">
-    <h1 class="ion-margin-bottom">Sign up</h1>
+    <h1 class="ion-margin-bottom" i18n>Sign up</h1>
 
     <div>
       <form [formGroup]="registrationFormGroup">
@@ -17,6 +17,7 @@
           class="ion-margin-top"
           autocomplete="email"
           inputmode="email"
+          i18n-label
         />
 
         <ion-input
@@ -26,6 +27,7 @@
           fill="outline"
           mode="md"
           class="ion-margin-top"
+          i18n-label
         >
           <ion-input-password-toggle slot="end" />
         </ion-input>
@@ -37,6 +39,7 @@
           fill="outline"
           mode="md"
           class="ion-margin-top"
+          i18n-label
         >
           <ion-input-password-toggle slot="end" />
         </ion-input>
@@ -47,13 +50,14 @@
           [disabled]="!registrationFormGroup.valid"
           (click)="submitRegistration.emit(registrationFormGroup.value)"
           data-cy="submit"
+          i18n
         >
           Sign up
         </ion-button>
 
         @if (registrationFormGroup.errors?.['mismatch']) {
           <div class="ion-margin-top">
-            <ion-text color="danger"> Password does not match.</ion-text>
+            <ion-text color="danger" i18n> Password does not match.</ion-text>
           </div>
         }
       </form>

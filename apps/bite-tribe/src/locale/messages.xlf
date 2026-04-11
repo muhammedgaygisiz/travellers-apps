@@ -461,6 +461,10 @@
           <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
           <context context-type="linenumber">35</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/registration/registration.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="2314075913167237221" datatype="html">
         <source>City</source>
@@ -657,7 +661,7 @@
         <source> Log In </source>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/start/src/lib/start.component.html</context>
-          <context context-type="linenumber">11</context>
+          <context context-type="linenumber">11,13</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
@@ -668,7 +672,7 @@
         <source> Sign Up </source>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/start/src/lib/start.component.html</context>
-          <context context-type="linenumber">19,21</context>
+          <context context-type="linenumber">21,23</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1279036365143313688" datatype="html">
@@ -712,6 +716,10 @@
           <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
           <context context-type="linenumber">47</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/registration/registration.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="2398583048519934048" datatype="html">
         <source> Something went wrong. Please try again. </source>
@@ -732,6 +740,31 @@
         <context-group purpose="location">
           <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
           <context context-type="linenumber">91,93</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/registration/registration.component.html</context>
+          <context context-type="linenumber">54,56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7028204981963450021" datatype="html">
+        <source>Sign up</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/registration/registration.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3241357959735682038" datatype="html">
+        <source>Confirm Password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/registration/registration.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="133066833565155462" datatype="html">
+        <source> Password does not match.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/registration/registration.component.html</context>
+          <context context-type="linenumber">60</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1364770640750393197" datatype="html">
@@ -767,6 +800,41 @@
         <context-group purpose="location">
           <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
           <context context-type="linenumber">66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6395341494682185729" datatype="html">
+        <source>Password must contain the following:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/password-validator/src/lib/component/password-validator.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5766619657283304663" datatype="html">
+        <source> A <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>lower<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/> case letter </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/password-validator/src/lib/component/password-validator.component.html</context>
+          <context context-type="linenumber">10,12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4319413504981962919" datatype="html">
+        <source> A <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>capital<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/> (uppercase) letter </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/password-validator/src/lib/component/password-validator.component.html</context>
+          <context context-type="linenumber">20,22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="647407737529389962" datatype="html">
+        <source>A <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>number<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/password-validator/src/lib/component/password-validator.component.html</context>
+          <context context-type="linenumber">30,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3356019779147003450" datatype="html">
+        <source>Minimum <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>8 characters<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/password-validator/src/lib/component/password-validator.component.html</context>
+          <context context-type="linenumber">38,39</context>
         </context-group>
       </trans-unit>
     </body>

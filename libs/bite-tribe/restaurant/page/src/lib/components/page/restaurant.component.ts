@@ -18,15 +18,12 @@ import {
   IonItem,
   IonLabel,
   IonList,
-  IonSegment,
-  IonSegmentButton,
   IonSelect,
   IonSelectOption,
   IonText,
 } from '@ionic/angular/standalone';
 import { Bite, Like, Link, Menu, MenuItem, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
-import { BiteComponent } from 'bite-tribe-common/bite';
 import {
   FormArray,
   FormBuilder,
@@ -37,7 +34,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TitleCasePipe } from '@angular/common';
 import { EnsureProtocolPipe } from '../../pipes/ensure-protocol.pipe';
-import { MenuItemComponent } from '../menu-item/menu-item.component';
 import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
 import { getPosition } from '../../utils/get-position';
 import { getDistance } from '../../utils/get-distance';
@@ -54,7 +50,6 @@ import { uniqueBitesByName } from '../../utils/unique-bites-by-name';
     IonButton,
     IonIcon,
     MapComponent,
-    BiteComponent,
     IonList,
     ReactiveFormsModule,
     IonItem,
@@ -65,9 +60,6 @@ import { uniqueBitesByName } from '../../utils/unique-bites-by-name';
     IonLabel,
     TitleCasePipe,
     EnsureProtocolPipe,
-    IonSegment,
-    IonSegmentButton,
-    MenuItemComponent,
     RestaurantImageComponent,
     DistanceComponent,
   ],
@@ -86,6 +78,7 @@ export class RestaurantComponent {
 
   readonly createBiteClick = output<MenuItem>();
   readonly showMenuClick = output<Restaurant | undefined>();
+  readonly showBitesClick = output<Restaurant | undefined>();
   readonly biteClick = output<Bite>();
   readonly submitSocialMediaLinks = output<Partial<{ links: Link[] }>>();
   readonly likeButtonClick = output<Like>();

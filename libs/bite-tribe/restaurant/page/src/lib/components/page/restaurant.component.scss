@@ -10,13 +10,20 @@
     }
   }
 
-  .bites {
-    max-height: calc(100vh - var(--ion-header-height) - 3rem);
-    overflow: scroll;
+  ion-button {
+    margin: 0;
+    --border-width: 0;
+    --color: white;
+    border-bottom: 1px solid var(--ion-input-border-color);
 
-    bt-bite {
-      display: block;
-      margin-bottom: 1rem;
+    &:first-of-type {
+      border-top: 1px solid var(--ion-input-border-color);
     }
+  }
+
+  .btn {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
   }
 }

@@ -4,7 +4,6 @@ import { PublicUser } from 'model';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
-import { describe } from 'node:test';
 
 describe(FollowersListComponent.name, () => {
   let component: FollowersListComponent;

@@ -75,11 +75,8 @@ export class ProfileComponent {
   isOpen = signal(false);
   currentPage = signal<number>(1);
 
-  readonly texts = {
-    noLocation: $localize`No location`,
-    noDescription: $localize`No description available.`,
-    alertHeader: $localize`Stop following`,
-  };
+  readonly noLocationText = $localize`No location`;
+  readonly noDescriptionText = $localize`No description available.`;
 
   confirmationButtons = [
     {
@@ -91,11 +88,6 @@ export class ProfileComponent {
       role: UNFOLLOW,
     },
   ];
-
-  alertMessage = computed(() => {
-    const displayName = this.user()?.displayName;
-    return $localize`Are you sure you want to stop following ${displayName}?`;
-  });
 
   followerCount = computed(() => {
     return this.profileMetadata()?.followers;

@@ -66,10 +66,10 @@
     </h1>
 
     <span class="profile-location">
-      {{ userData?.city || texts.noLocation }}
+      {{ userData?.city || noLocationText }}
     </span>
     <p class="profile-about">
-      {{ userData?.about || texts.noDescription }}
+      {{ userData?.about || noDescriptionText }}
     </p>
 
     <div class="bites-section">
@@ -108,8 +108,10 @@
 
 <ion-alert
   [isOpen]="isOpen()"
-  header="{{ texts.alertHeader }}"
-  message="{{ alertMessage() }}"
+  header="Stop following"
+  message="Are you sure you want to stop following {{ user()?.displayName }}?"
   [buttons]="confirmationButtons"
   (didDismiss)="handleConfirmationDismiss($event)"
+  i18n-header
+  i18n-message
 />

@@ -10,6 +10,21 @@
     "locales": {
       "tr": {
         "translation": "apps/bite-tribe/src/locale/messages.tr.xlf"
+      },
+      "de": {
+        "translation": "apps/bite-tribe/src/locale/messages.de.xlf"
+      },
+      "fr": {
+        "translation": "apps/bite-tribe/src/locale/messages.fr.xlf"
+      },
+      "it": {
+        "translation": "apps/bite-tribe/src/locale/messages.it.xlf"
+      },
+      "es": {
+        "translation": "apps/bite-tribe/src/locale/messages.es.xlf"
+      },
+      "ar": {
+        "translation": "apps/bite-tribe/src/locale/messages.ar.xlf"
       }
     }
   },
@@ -83,19 +98,49 @@
             }
           ],
           "outputHashing": "all",
-          "localize": ["en", "tr"]
+          "localize": ["en", "tr", "de", "fr", "it", "es", "ar"]
         },
         "development": {
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true,
-          "localize": ["tr"]
+          "localize": ["en"]
         },
         "tr": {
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true,
           "localize": ["tr"]
+        },
+        "de": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "localize": ["de"]
+        },
+        "fr": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "localize": ["fr"]
+        },
+        "it": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "localize": ["it"]
+        },
+        "es": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "localize": ["es"]
+        },
+        "ar": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "localize": ["ar"]
         }
       },
       "defaultConfiguration": "production"
@@ -139,7 +184,7 @@
         "buildTarget": "bite-tribe:build",
         "port": 4200,
         "staticFilePath": "dist/apps/bite-tribe",
-        "spa": false
+        "spa": true
       }
     }
   }

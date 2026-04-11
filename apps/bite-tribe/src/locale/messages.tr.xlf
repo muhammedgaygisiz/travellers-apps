@@ -39,7 +39,7 @@
         <source>En Çok Satanlar</source>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">84</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6544873984545232811" datatype="html">
@@ -47,7 +47,7 @@
         <target>231 kez satıldı</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">86</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5891064527381218201" datatype="html">
@@ -55,7 +55,11 @@
         <target>Ücretsiz</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">20</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1185933474689924377" datatype="html">
@@ -63,7 +67,7 @@
         <target>BiteTrail'i görüntüle</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
-          <context context-type="linenumber">114</context>
+          <context context-type="linenumber">112</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7585826646011739428" datatype="html">
@@ -129,6 +133,10 @@
           <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
           <context context-type="linenumber">86</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/currency-selector/src/lib/currency-selector.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="7022070615528435141" datatype="html">
         <source>Delete</source>
@@ -163,7 +171,7 @@
         <target>Kaydedilmiş Yapılacaklar Listesi'ne git</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/bite-trail/page/src/lib/components/bite-trail-bites-page/bite-trail-bites.page.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">52</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6970333477905764673" datatype="html">
@@ -171,7 +179,7 @@
         <target>BiteTrail'i ücretsiz edinin</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/bite-trail/page/src/lib/components/bite-trail-bites-page/bite-trail-bites.page.ts</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">53</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8283217997409294842" datatype="html">
@@ -505,6 +513,10 @@
           <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
           <context context-type="linenumber">105,107</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">84,86</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="2486873208191488906" datatype="html">
         <source>Return to Private Profile</source>
@@ -584,7 +596,98 @@
                           <context-group purpose="location">
                             <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts</context>
                             <context context-type="linenumber">80</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4930506384627295710" datatype="html">
+        <source>Settings</source>
+        <target>Ayarlar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">78</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="41047660829707556" datatype="html">
+        <source>Account Type</source>
+        <target>Hesap Türü</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7462666978471511375" datatype="html">
+        <source>Push Notifications</source>
+        <target>Anlık Bildirimler</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8227953906026520254" datatype="html">
+        <source>Email Updates</source>
+        <target>E-posta Güncellemeleri</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7103588127254721505" datatype="html">
+        <source>Theme</source>
+        <target>Tema</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="413116577994876478" datatype="html">
+        <source>Light</source>
+        <target>Açık mod</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3892161059518616136" datatype="html">
+        <source>Dark</source>
+        <target>Karanlık mod</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5571284627351829969" datatype="html">
+        <source>Preferred Currency</source>
+        <target>Tercih Edilen Para Birimi</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7843443425041291846" datatype="html">
+        <source>Nearby Distance (meters)</source>
+        <target>Yakın mesafe (metre)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3797778920049399855" datatype="html">
+        <source>Logout</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
+          <context context-type="linenumber">79</context>
                           </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
                         </trans-unit>
       <trans-unit id="1279036365143313688" datatype="html">
         <source>BiteTrail saved as bucket list!</source>
@@ -602,6 +705,30 @@
           <context context-type="linenumber">144</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="1364770640750393197" datatype="html">
+        <source>Select Currency</source>
+        <target>Para Birimini Seç</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/currency-selector/src/lib/currency-selector.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1083867112583092601" datatype="html">
+        <source>Search currencies...</source>
+        <target>Para birimlerini ara...</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/currency-selector/src/lib/currency-selector.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7054569559488369252" datatype="html">
+        <source>No currencies found</source>
+        <target>Hiçbir para birimi bulunamadı</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/currency-selector/src/lib/currency-selector.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
             <trans-unit id="2127032578120864096" datatype="html">
                     <source>My Profile</source>
                     <target>Profilim</target>
@@ -616,22 +743,6 @@
                     <context-group purpose="location">
                       <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
                       <context context-type="linenumber">66</context>
-                    </context-group>
-                  </trans-unit>
-                  <trans-unit id="4930506384627295710" datatype="html">
-                    <source>Settings</source>
-                    <target>Ayarlar</target>
-                    <context-group purpose="location">
-                      <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
-                      <context context-type="linenumber">78</context>
-                    </context-group>
-                  </trans-unit>
-                  <trans-unit id="3797778920049399855" datatype="html">
-                    <source>Logout</source>
-                    <target>Çıkış</target>
-                    <context-group purpose="location">
-                      <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
-                      <context context-type="linenumber">100</context>
                     </context-group>
                   </trans-unit>
     </body>

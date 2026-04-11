@@ -4,11 +4,11 @@
   [showFooter]="false"
 >
   <ion-content class="ion-padding">
-    <h1 class="ion-margin-bottom">Settings</h1>
+    <h1 class="ion-margin-bottom" i18n>Settings</h1>
 
     <!-- Subscription Tier Section -->
     <section class="subscription-section ion-margin-bottom">
-      <h2>Account Type</h2>
+      <h2 i18n>Account Type</h2>
       <div class="subscription-cards">
         <ta-card
           [class.highlighted]="isFreeUser()"
@@ -17,7 +17,7 @@
           role="status"
         >
           <ion-card-header>
-            <ion-card-title>Free</ion-card-title>
+            <ion-card-title i18n>Free</ion-card-title>
           </ion-card-header>
         </ta-card>
         <ta-card
@@ -37,32 +37,33 @@
       <form [formGroup]="settingsForm">
         <section class="settings-section">
           <ion-item>
-            <ion-label>Push Notifications</ion-label>
+            <ion-label i18n>Push Notifications</ion-label>
             <ion-toggle slot="end" formControlName="pushNotifications" />
           </ion-item>
           <ion-item>
-            <ion-label>Email Updates</ion-label>
+            <ion-label i18n>Email Updates</ion-label>
             <ion-toggle slot="end" formControlName="emailUpdates" />
           </ion-item>
           <ion-item>
-            <ion-label>Theme</ion-label>
+            <ion-label i18n>Theme</ion-label>
             <ion-select
               slot="end"
               placeholder="Light"
               interface="popover"
               formControlName="theme"
               (ionChange)="onThemeChange($event)"
+              i18n-placeholder
             >
-              <ion-select-option value="light">Light</ion-select-option>
-              <ion-select-option value="dark">Dark</ion-select-option>
+              <ion-select-option value="light" i18n>Light</ion-select-option>
+              <ion-select-option value="dark" i18n>Dark</ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item id="currency-selector-trigger">
-            <ion-label>Preferred Currency</ion-label>
+            <ion-label i18n>Preferred Currency</ion-label>
             <ion-text slot="end">{{ selectedCurrencyName() }}</ion-text>
           </ion-item>
           <ion-item>
-            <ion-label>Nearby Distance (meters)</ion-label>
+            <ion-label i18n>Nearby Distance (meters)</ion-label>
             <ion-input
               slot="end"
               type="number"
@@ -75,10 +76,11 @@
         </section>
 
         <div class="button-container safe-padding-bottom">
-          <ion-button fill="outline" color="medium">Log Out</ion-button>
+          <ion-button fill="outline" color="medium" i18n>Logout</ion-button>
           <ion-button
             [disabled]="!settingsForm.valid || settingsForm.pristine"
             (click)="saveSettings()"
+            i18n
           >
             Save Changes
           </ion-button>

@@ -1,9 +1,9 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="cancel()">Cancel</ion-button>
+      <ion-button (click)="cancel()" i18n>Cancel</ion-button>
     </ion-buttons>
-    <ion-title>Select Currency</ion-title>
+    <ion-title i18n>Select Currency</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -11,6 +11,7 @@
   <ion-searchbar
     (ionInput)="searchbarInput($event)"
     placeholder="Search currencies..."
+    i18n-placeholder
   />
 
   <ion-list [inset]="true">
@@ -26,7 +27,7 @@
       </ion-item>
     } @empty {
       <ion-item>
-        <ion-label>No currencies found</ion-label>
+        <ion-label i18n>No currencies found</ion-label>
       </ion-item>
     }
   </ion-list>

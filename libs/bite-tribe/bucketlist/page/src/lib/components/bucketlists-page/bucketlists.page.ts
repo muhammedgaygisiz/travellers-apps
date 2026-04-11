@@ -52,7 +52,7 @@ const CANCEL = 'cancel';
 })
 export class BucketlistsPage {
   bucketlists = input<Bucketlist[]>([]);
-  sorting = input<string>($localize`name`);
+  sorting = input<string>('name');
   sortingLabel = computed(() => {
     const sorting = this.sorting();
     switch (sorting) {

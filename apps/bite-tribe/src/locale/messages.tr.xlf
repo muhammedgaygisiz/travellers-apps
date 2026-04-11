@@ -2,6 +2,70 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en" datatype="plaintext" original="ng2.template">
     <body>
+      <trans-unit id="307878768767833610" datatype="html">
+        <source><x id="START_TAG_ION_TEXT_1" ctype="x-ion_text_1" equiv-text="&lt;ion-text color=&quot;secondary&quot; class=&quot;cursor-pointer&quot;&gt;"/><x id="START_PARAGRAPH" ctype="x-p" equiv-text="&lt;p&gt;"/> by <x id="START_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;ion-text
+                              color=&quot;primary&quot;
+                              class=&quot;cursor-pointer&quot;
+                              (click)=&quot;goToProfile.emit(biteTrailData.ownerId)&quot;
+                            &gt;"/> @<x id="INTERPOLATION" equiv-text="{{ biteTrailData.ownerName }}"/> <x id="CLOSE_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;/ion-text&gt;"/><x id="CLOSE_PARAGRAPH" ctype="x-p" equiv-text="&lt;/p&gt;"/><x id="CLOSE_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;/ion-text&gt;"/><x id="START_TAG_ION_ICON" ctype="x-ion_icon" equiv-text="&lt;ion-icon
+                          name=&quot;shield-checkmark-outline&quot;
+                          color=&quot;primary&quot;
+                          size=&quot;small&quot;
+                          class=&quot;ion-margin-end&quot;
+                        /&gt;"/><x id="CLOSE_TAG_ION_ICON" ctype="x-ion_icon" equiv-text="&lt;ion-icon
+                          name=&quot;shield-checkmark-outline&quot;
+                          color=&quot;primary&quot;
+                          size=&quot;small&quot;
+                          class=&quot;ion-margin-end&quot;
+                        /&gt;"/></source>
+        <target>
+            <x id="START_TAG_ION_TEXT_1" ctype="x-ion_text_1" equiv-text="&lt;ion-text color=&quot;secondary&quot; class=&quot;cursor-pointer&quot;&gt;"/>
+              <x id="START_PARAGRAPH" ctype="x-p" equiv-text="&lt;p&gt;"/>
+                <x id="START_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;ion-text color=&quot;primary&quot; class=&quot;cursor-pointer&quot; (click)=&quot;goToProfile.emit(biteTrailData.ownerId)&quot; &gt;"/>
+                  @<x id="INTERPOLATION" equiv-text="{{ biteTrailData.ownerName }}"/>
+                <x id="CLOSE_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;/ion-text&gt;"/>
+              <x id="CLOSE_PARAGRAPH" ctype="x-p" equiv-text="&lt;/p&gt;"/>
+            <x id="CLOSE_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;/ion-text&gt;"/>
+            <x id="START_TAG_ION_ICON" ctype="x-ion_icon" equiv-text="&lt;ion-icon name=&quot;shield-checkmark-outline&quot; color=&quot;primary&quot; size=&quot;small&quot; /&gt;"/>
+            <x id="CLOSE_TAG_ION_ICON" ctype="x-ion_icon" equiv-text="&lt;ion-icon name=&quot;shield-checkmark-outline&quot; color=&quot;primary&quot; size=&quot;small&quot; /&gt;"/>
+            tarafindan
+        </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
+          <context context-type="linenumber">42,59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8785122281012266870" datatype="html">
+        <source>En Çok Satanlar</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6544873984545232811" datatype="html">
+        <source>Sold 231 times</source>
+        <target>231 kez satıldı</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5891064527381218201" datatype="html">
+        <source>Free</source>
+        <target>Ücretsiz</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
+          <context context-type="linenumber">102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1185933474689924377" datatype="html">
+        <source>View BiteTrail</source>
+        <target>BiteTrail'i görüntüle</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
+          <context context-type="linenumber">114</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="7585826646011739428" datatype="html">
         <source>Edit</source>
         <target>Düzenle</target>
@@ -78,6 +142,38 @@
           <context context-type="linenumber">107</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="8417421411982138093" datatype="html">
+        <source> You already saved this BiteTrail to your Bucket list. </source>
+        <target>Bu BiteTrail'i önceden Yapılacaklar listenize eklediniz.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/bite-trail/page/src/lib/components/bite-trail-bites-page/bite-trail-bites.page.html</context>
+          <context context-type="linenumber">37,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="882191557096474438" datatype="html">
+        <source>No bites found in this trail.</source>
+        <target>Bu BiteTrail'de hiçbir Bite bulunamadı.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/bite-trail/page/src/lib/components/bite-trail-bites-page/bite-trail-bites.page.html</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3429300526771133078" datatype="html">
+        <source>Go to saved Bucket list</source>
+        <target>Kaydedilmiş Yapılacaklar Listesi'ne git</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/bite-trail/page/src/lib/components/bite-trail-bites-page/bite-trail-bites.page.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6970333477905764673" datatype="html">
+        <source>Get BiteTrail for free</source>
+        <target>BiteTrail'i ücretsiz edinin</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/bite-trail/page/src/lib/components/bite-trail-bites-page/bite-trail-bites.page.ts</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="8283217997409294842" datatype="html">
         <source>Create Bite</source>
         <target>Bite Oluştur</target>
@@ -103,7 +199,7 @@
               <target>Yapilacak listelerim</target>
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/bucketlist/page/src/lib/components/bucketlists-page/bucketlists.page.html</context>
-                <context context-type="linenumber">12</context>
+          <context context-type="linenumber">13</context>
               </context-group>
             </trans-unit>
             <trans-unit id="8953033926734869941" datatype="html">
@@ -168,13 +264,6 @@
               <context-group purpose="location">
                 <context context-type="sourcefile">libs/bite-tribe/bucketlist/page/src/lib/components/bucketlists-page/bucketlists.page.html</context>
           <context context-type="linenumber">87</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="3325180562659478330" datatype="html">
-        <source>name</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/bite-tribe/bucketlist/page/src/lib/components/bucketlists-page/bucketlists.page.ts</context>
-          <context context-type="linenumber">55</context>
               </context-group>
             </trans-unit>
       <trans-unit id="5032086401729660724" datatype="html">
@@ -311,6 +400,18 @@
         <context-group purpose="location">
           <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
           <context context-type="linenumber">60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3538932877216515604" datatype="html">
+        <source>Market Place</source>
+        <target>Pazar Yeri</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/market-place/page/src/lib/components/market-place-page/market-place.page.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
+          <context context-type="linenumber">72</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2984628903434675339" datatype="html">
@@ -485,6 +586,22 @@
                             <context context-type="linenumber">80</context>
                           </context-group>
                         </trans-unit>
+      <trans-unit id="1279036365143313688" datatype="html">
+        <source>BiteTrail saved as bucket list!</source>
+        <target>BiteTrail, yapılacaklar listesi'ne eklendi!</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/store/src/lib/bucketlists/effects.ts</context>
+          <context context-type="linenumber">140</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3630336201668467369" datatype="html">
+        <source>Go to Bucket Lists</source>
+        <target>Yapılacaklar Listesi'ne git</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/bite-tribe/store/src/lib/bucketlists/effects.ts</context>
+          <context context-type="linenumber">144</context>
+        </context-group>
+      </trans-unit>
             <trans-unit id="2127032578120864096" datatype="html">
                     <source>My Profile</source>
                     <target>Profilim</target>
@@ -499,14 +616,6 @@
                     <context-group purpose="location">
                       <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
                       <context context-type="linenumber">66</context>
-                    </context-group>
-                  </trans-unit>
-                  <trans-unit id="3538932877216515604" datatype="html">
-                    <source>Market Place</source>
-                    <target>Pazar Yeri</target>
-                    <context-group purpose="location">
-                      <context context-type="sourcefile">libs/common/ui/page/src/lib/menu/menu.component.html</context>
-                      <context context-type="linenumber">72</context>
                     </context-group>
                   </trans-unit>
                   <trans-unit id="4930506384627295710" datatype="html">

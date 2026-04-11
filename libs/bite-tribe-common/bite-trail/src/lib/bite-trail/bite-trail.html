@@ -38,24 +38,26 @@
                 />
               </ion-avatar>
 
-              <ion-text color="secondary" class="cursor-pointer">
-                <p>
-                  by
-                  <ion-text
-                    color="primary"
-                    class="cursor-pointer"
-                    (click)="goToProfile.emit(biteTrailData.ownerId)"
-                  >
-                    &#64;{{ biteTrailData.ownerName }}
-                  </ion-text>
-                </p>
-              </ion-text>
-
-              <ion-icon
-                name="shield-checkmark-outline"
-                color="primary"
-                size="small"
-              />
+              <ng-container i18n>
+                <ion-text color="secondary" class="cursor-pointer">
+                  <p>
+                    by
+                    <ion-text
+                      color="primary"
+                      class="cursor-pointer"
+                      (click)="goToProfile.emit(biteTrailData.ownerId)"
+                    >
+                      &#64;{{ biteTrailData.ownerName }}
+                    </ion-text>
+                  </p>
+                </ion-text>
+                <ion-icon
+                  name="shield-checkmark-outline"
+                  color="primary"
+                  size="small"
+                  class="ion-margin-end"
+                />
+              </ng-container>
             </div>
 
             <div class="ion-display-flex ion-flex-row ion-align-items-center">
@@ -79,9 +81,9 @@
           <div class="ion-display-flex ion-flex-column ion-align-items-end">
             <ion-badge class="outlined-badge ion-margin-bottom">
               <ion-icon name="flame-outline" />
-              Best Seller
+              <ng-container i18n>Best Seller</ng-container>
             </ion-badge>
-            <ion-text>Sold 231 times</ion-text>
+            <ion-text i18n>Sold 231 times</ion-text>
           </div>
         </div>
 
@@ -95,19 +97,19 @@
           <div class="ion-flex-1 ion-display-flex ion-align-items-center">
             @if (biteTrailData.price === 0) {
             <ion-text color="secondary" class="ion-margin-horizontal">
-              <h1>Free</h1>
+              <h1 i18n>Free</h1>
             </ion-text>
             } @else {
             <ion-text class="ion-margin-horizontal" color="secondary">
               <h2>{{ biteTrailData.currency | uppercase }}</h2>
             </ion-text>
-            <ion-text color="secondary"
-              ><h1>{{ biteTrailData.price | number:'1.2-2' }}</h1></ion-text
-            >
+            <ion-text color="secondary">
+              <h1>{{ biteTrailData.price | number:'1.2-2' }}</h1>
+            </ion-text>
             }
           </div>
           <ion-button shape="round" (click)="viewBiteTrail.emit(biteTrailData)">
-            View BiteTrail
+            <ng-container i18n>View BiteTrail</ng-container>
             <ion-icon name="arrow-forward-outline" />
           </ion-button>
         </div>

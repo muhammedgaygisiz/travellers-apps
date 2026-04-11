@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   output,
 } from '@angular/core';
@@ -44,4 +45,11 @@ export class BiteTrailBitesPage {
   readonly openMapView = output<void>();
   readonly getForFree = output<void>();
   readonly goToSavedBucketList = output<void>();
+
+  toggleAddButtonText = computed(() => {
+    const savedBucketlistId = this.savedBucketlistId();
+    return savedBucketlistId
+      ? $localize`Go to saved Bucket list`
+      : $localize`Get BiteTrail for free`;
+  });
 }

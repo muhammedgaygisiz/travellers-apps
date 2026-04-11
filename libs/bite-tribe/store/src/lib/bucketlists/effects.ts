@@ -137,11 +137,11 @@ export class BucketListEffect {
 
   private async showBiteTrailSavedAsBucketListToast(): Promise<void> {
     const toast = await this.toastController.create({
-      message: 'Bite trail saved as bucket list!',
+      message: $localize`BiteTrail saved as bucket list!`,
       position: 'bottom',
       buttons: [
         {
-          text: 'Go to Bucket Lists',
+          text: $localize`Go to Bucket Lists`,
           handler: (): void => {
             void this.navController.navigateForward([PATH.MY_BUCKETLISTS]);
           },

@@ -364,8 +364,7 @@
       <trans-unit id="1502787884735177394" datatype="html">
         <source>Are you sure you want to stop following <x id="INTERPOLATION" equiv-text="{{                     user?.displayName                   }}" />?</source>
         <target>
-          <x id="INTERPOLATION" equiv-text="{{user?.displayName}}" />
-          ?
+          Êtes-vous sûr de vouloir ne plus suivre <x id="INTERPOLATION" equiv-text="{{user?.displayName}}" /> ?
         </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.html</context>

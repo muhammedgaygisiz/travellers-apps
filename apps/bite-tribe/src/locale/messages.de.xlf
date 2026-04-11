@@ -15,6 +15,7 @@
         <target>
           <x id="START_TAG_ION_TEXT_1" ctype="x-ion_text_1" equiv-text="&lt;ion-text color=&quot;secondary&quot; class=&quot;cursor-pointer&quot;&gt;" />
           <x id="START_PARAGRAPH" ctype="x-p" equiv-text="&lt;p&gt;" />
+            von
           <x id="START_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;ion-text color=&quot;primary&quot; class=&quot;cursor-pointer&quot; (click)=&quot;goToProfile.emit(biteTrailData.ownerId)&quot; &gt;" />
                   @<x id="INTERPOLATION" equiv-text="{{ biteTrailData.ownerName }}" />
           <x id="CLOSE_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;/ion-text&gt;" />
@@ -22,7 +23,6 @@
           <x id="CLOSE_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;/ion-text&gt;" />
           <x id="START_TAG_ION_ICON" ctype="x-ion_icon" equiv-text="&lt;ion-icon name=&quot;shield-checkmark-outline&quot; color=&quot;primary&quot; size=&quot;small&quot; /&gt;" />
           <x id="CLOSE_TAG_ION_ICON" ctype="x-ion_icon" equiv-text="&lt;ion-icon name=&quot;shield-checkmark-outline&quot; color=&quot;primary&quot; size=&quot;small&quot; /&gt;" />
-            von
         </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
@@ -31,7 +31,7 @@
       </trans-unit>
       <trans-unit id="8785122281012266870" datatype="html">
         <source>Best Seller</source>
-        <target>Bestseller</target>
+        <target>Best Seller</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
           <context context-type="linenumber">84</context>
@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="6544873984545232811" datatype="html">
         <source>Sold 231 times</source>
-        <target>231-mal verkauft</target>
+        <target>231 mal verkauft</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>
           <context context-type="linenumber">86</context>
@@ -163,7 +163,7 @@
       </trans-unit>
       <trans-unit id="4978546566590727524" datatype="html">
         <source>Bite Tribe is a social food discovery app for food lovers.</source>
-        <target>Bite Tribe ist eine soziale Food-Discovery-App für Essensliebhaber.</target>
+        <target>Bite Tribe ist eine soziale Food-Discovery-App für Foodies.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/about/page/src/lib/components/about-page/about.page.html</context>
           <context context-type="linenumber">10</context>
@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="1445106191534708224" datatype="html">
         <source>Total Number of Bites on Bite Tribe:</source>
-        <target>Gesamtanzahl der Bites auf Bite Tribe:</target>
+        <target>Anzahl Bites auf Bite Tribe:</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/about/page/src/lib/components/about-page/about.page.html</context>
           <context context-type="linenumber">19</context>
@@ -187,7 +187,7 @@
       </trans-unit>
       <trans-unit id="5068049969506733674" datatype="html">
         <source>Total Number of Users on Bite Tribe:</source>
-        <target>Gesamtanzahl der Benutzer auf Bite Tribe:</target>
+        <target>Anzahl Benutzer auf Bite Tribe:</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/about/page/src/lib/components/about-page/about.page.html</context>
           <context context-type="linenumber">25</context>
@@ -335,7 +335,7 @@
       </trans-unit>
       <trans-unit id="6379239168986952614" datatype="html">
         <source>Not following anyone yet</source>
-        <target>Folgt noch niemandem</target>
+        <target>Du folgst noch niemandem</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.html</context>
           <context context-type="linenumber">21</context>
@@ -389,7 +389,7 @@
       </trans-unit>
       <trans-unit id="8726138323871139597" datatype="html">
         <source>Following</source>
-        <target>Folgt</target>
+        <target>Folgst</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts</context>
           <context context-type="linenumber">62</context>
@@ -721,7 +721,7 @@
       </trans-unit>
       <trans-unit id="7843443425041291846" datatype="html">
         <source>Nearby Distance (meters)</source>
-        <target>Nahbereich (Meter)</target>
+        <target>In deiner Nähe (in Metern)</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/settings/page/src/lib/components/page/settings.component.html</context>
           <context context-type="linenumber">66</context>

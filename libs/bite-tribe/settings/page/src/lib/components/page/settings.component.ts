@@ -12,8 +12,10 @@ import {
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
+  IonCardHeader,
+  IonCardTitle,
   IonContent,
-  IonInput,
+  IonIcon,
   IonItem,
   IonLabel,
   IonModal,
@@ -29,7 +31,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { currencyCodes } from 'utils';
 import { User } from '@capacitor-firebase/authentication';
 import { CardComponent } from 'common/ui/card';
-import { IonCardHeader, IonCardTitle } from '@ionic/angular/standalone';
+import { Browser } from 'leaflet';
+import win = Browser.win;
 
 @Component({
   selector: 'settings',
@@ -44,7 +47,6 @@ import { IonCardHeader, IonCardTitle } from '@ionic/angular/standalone';
     IonButton,
     IonSelect,
     IonSelectOption,
-    IonInput,
     ReactiveFormsModule,
     IonModal,
     CurrencySelectorComponent,
@@ -52,6 +54,7 @@ import { IonCardHeader, IonCardTitle } from '@ionic/angular/standalone';
     CardComponent,
     IonCardHeader,
     IonCardTitle,
+    IonIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -61,6 +64,7 @@ export class PageSettings {
   settings = input<Settings>();
 
   submitSettings = output<Settings>();
+  logout = output<void>();
 
   private readonly formBuilder = inject(FormBuilder);
 
@@ -71,6 +75,7 @@ export class PageSettings {
     emailUpdates: [{ value: false, disabled: true }, Validators.required],
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
+    language: ['en', Validators.required],
     nearby: [2000, [Validators.required, Validators.min(1)]],
   });
 
@@ -89,6 +94,8 @@ export class PageSettings {
       : 'light',
   );
 
+  systemLanguage = signal(navigator.language || navigator.languages[0] || 'en');
+
   themeEffect = effect(() => {
     const systemTheme = this.systemTheme();
 
@@ -98,6 +105,7 @@ export class PageSettings {
   currencyValueChanges = toSignal(
     this.settingsForm.controls['currency'].valueChanges,
   );
+
   selectedCurrencyName = computed(() => {
     this.currencyValueChanges();
     const currencyCode = this.settingsForm.controls['currency'].value;
@@ -115,12 +123,19 @@ export class PageSettings {
   constructor() {
     // Watch for system theme changes
     this.registerSystemThemeChangeHandler();
+    this.registerSystemLanguageChangeHandler();
   }
 
   registerSystemThemeChangeHandler(): void {
     window
       .matchMedia('(prefers-color-scheme: dark)')
       .addEventListener('change', this.handleSystemThemeChange.bind(this));
+  }
+
+  private registerSystemLanguageChangeHandler(): void {
+    window
+      .matchMedia('(prefers-language: en)')
+      .addEventListener('change', this.handleSystemLanguageChange.bind(this));
   }
 
   saveSettings(): void {
@@ -168,6 +183,10 @@ export class PageSettings {
 
   handleSystemThemeChange(e: MediaQueryListEvent): void {
     this.systemTheme.set(this.getTheme(e.matches));
+  }
+
+  handleSystemLanguageChange(e: MediaQueryListEvent): void {
+    this.systemLanguage.set(this.getTheme(e.matches));
   }
 
   getTheme(matches: boolean): 'dark' | 'light' {

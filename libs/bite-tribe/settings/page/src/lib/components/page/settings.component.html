@@ -60,23 +60,37 @@
           </ion-item>
           <ion-item id="currency-selector-trigger">
             <ion-label i18n>Preferred Currency</ion-label>
-            <ion-text slot="end">{{ selectedCurrencyName() }}</ion-text>
+            <ion-text slot="end">
+              {{ selectedCurrencyName() }}
+              <ion-icon name="chevron-expand-outline" />
+            </ion-text>
           </ion-item>
           <ion-item>
-            <ion-label i18n>Nearby Distance (meters)</ion-label>
-            <ion-input
+            <ion-label i18n>Language</ion-label>
+            <ion-select
               slot="end"
-              type="number"
-              min="1"
-              formControlName="nearby"
-              placeholder="2000"
-              class="nearby-value"
-            />
+              placeholder="English"
+              interface="modal"
+              formControlName="language"
+              i18n-placeholder
+            >
+              <ion-select-option value="am" i18n>Amharic</ion-select-option>
+              <ion-select-option value="ar" i18n>Arabic</ion-select-option>
+              <ion-select-option value="de" i18n>German</ion-select-option>
+              <ion-select-option value="es" i18n>Spanish</ion-select-option>
+              <ion-select-option value="fr" i18n>French</ion-select-option>
+              <ion-select-option value="id" i18n>Indonesian</ion-select-option>
+              <ion-select-option value="it" i18n>Italian</ion-select-option>
+              <ion-select-option value="th" i18n>Thai</ion-select-option>
+              <ion-select-option value="tr" i18n>Turkish</ion-select-option>
+            </ion-select>
           </ion-item>
         </section>
 
         <div class="button-container safe-padding-bottom">
-          <ion-button fill="outline" color="medium" i18n>Logout</ion-button>
+          <ion-button fill="outline" color="medium" i18n (click)="logout.emit()"
+            >Logout</ion-button
+          >
           <ion-button
             [disabled]="!settingsForm.valid || settingsForm.pristine"
             (click)="saveSettings()"

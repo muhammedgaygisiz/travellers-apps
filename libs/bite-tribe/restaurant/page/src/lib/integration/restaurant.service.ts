@@ -61,6 +61,21 @@ export class RestaurantService {
     }
   }
 
+  navigateToBites(restaurant: Restaurant | undefined): void {
+    const bite = this.bite();
+    if (bite && restaurant?.menuId) {
+      this.navController.navigateForward([
+        'bite',
+        bite.id,
+        'restaurant',
+        restaurant.id,
+        'bites',
+      ]);
+
+      return;
+    }
+  }
+
   private normaliseMenuId(
     restaurant: Restaurant | undefined,
     fallbackMenuId?: string,

@@ -6,6 +6,7 @@ const initialState: FilteringAndSortingSlice = {
   sorting: {
     home: 'distance',
     myBites: 'distance',
+    restaurantBites: 'createdAt',
     bucketlists: 'distance',
   },
   filtering: {

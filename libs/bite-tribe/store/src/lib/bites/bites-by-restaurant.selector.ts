@@ -8,6 +8,9 @@ import { getBitesByRestaurantName } from './utils/get-bites-by-restaurant-name';
 import { getBitesByRestaurantIdOrName } from './utils/get-bites-by-restaurant-id-or-name';
 import { getCloseBites } from './utils/get-close-bites';
 import type { Bite } from 'model';
+import { restaurantBitesSorting } from '../filtering-and-sorting/selectors';
+import { exchangeRates } from '../app/selectors';
+import { sortByCriteria } from './utils/sort-by-criteria';
 
 export const bitesByRestaurant = createSelector(
   bites,
@@ -63,4 +66,12 @@ export const bitesByRestaurant = createSelector(
 
     return [];
   },
+);
+
+export const sortedBitesByRestaurant = createSelector(
+  bitesByRestaurant,
+  restaurantBitesSorting,
+  exchangeRates,
+  (bites, sorting, exchangeRates) =>
+    sortByCriteria(bites, sorting, exchangeRates),
 );

@@ -46,6 +46,10 @@ export const myBitesSorting = createSelector(slice, (slice) => {
   return slice?.sorting?.myBites || 'distance';
 });
 
+export const restaurantBitesSorting = createSelector(slice, (slice) => {
+  return slice?.sorting?.restaurantBites || 'createdAt';
+});
+
 export const bucketlistSorting = createSelector(slice, (slice) => {
   return slice?.sorting?.bucketlists || 'name';
 });

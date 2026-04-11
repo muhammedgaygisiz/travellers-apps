@@ -24,6 +24,12 @@ export class HomeDataAccessService {
   myBitesSorting = toSignal(this.storeService.myBitesSorting$, {
     initialValue: 'distance',
   });
+  restaurantBites = toSignal(this.storeService.sortedRestaurantBites$, {
+    initialValue: [] as Bite[],
+  });
+  restaurantBitesSorting = toSignal(this.storeService.restaurantBitesSorting$, {
+    initialValue: 'createdAt',
+  });
   bitesBySelectedBucketlist = toSignal(
     this.storeService.bitesBySelectedBucketlist$,
     { initialValue: [] as Bite[] },
@@ -94,6 +100,10 @@ export class HomeDataAccessService {
 
   setMyBitesSorting(sorting: string): void {
     this.storeService.setMyBitesSorting(sorting);
+  }
+
+  setRestaurantBitesSorting(sorting: string): void {
+    this.storeService.setRestaurantBitesSorting(sorting);
   }
 
   setFilters(filters: {

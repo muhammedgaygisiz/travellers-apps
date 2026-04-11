@@ -25,6 +25,15 @@
       },
       "ar": {
         "translation": "apps/bite-tribe/src/locale/messages.ar.xlf"
+      },
+      "am": {
+        "translation": "apps/bite-tribe/src/locale/messages.am.xlf"
+      },
+      "id": {
+        "translation": "apps/bite-tribe/src/locale/messages.id.xlf"
+      },
+      "th": {
+        "translation": "apps/bite-tribe/src/locale/messages.th.xlf"
       }
     }
   },
@@ -98,7 +107,18 @@
             }
           ],
           "outputHashing": "all",
-          "localize": ["en", "tr", "de", "fr", "it", "es", "ar"]
+          "localize": [
+            "en",
+            "tr",
+            "de",
+            "fr",
+            "it",
+            "es",
+            "ar",
+            "am",
+            "id",
+            "th"
+          ]
         },
         "development": {
           "optimization": false,
@@ -141,6 +161,24 @@
           "extractLicenses": false,
           "sourceMap": true,
           "localize": ["ar"]
+        },
+        "am": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "localize": ["am"]
+        },
+        "id": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "localize": ["id"]
+        },
+        "th": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "localize": ["th"]
         }
       },
       "defaultConfiguration": "production"
@@ -171,6 +209,15 @@
         },
         "ar": {
           "buildTarget": "bite-tribe:build:ar"
+        },
+        "am": {
+          "buildTarget": "bite-tribe:build:am"
+        },
+        "id": {
+          "buildTarget": "bite-tribe:build:id"
+        },
+        "th": {
+          "buildTarget": "bite-tribe:build:th"
         }
       },
       "defaultConfiguration": "development",

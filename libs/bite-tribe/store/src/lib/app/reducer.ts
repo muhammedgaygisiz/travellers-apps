@@ -19,6 +19,7 @@ const initialState: AppSlice = {
     theme: 'light',
     currency: 'EUR',
     nearby: 2000,
+    language: 'en',
   },
   loading: {
     home: true,

@@ -15,6 +15,7 @@
         <target>
           <x id="START_TAG_ION_TEXT_1" ctype="x-ion_text_1" equiv-text="&lt;ion-text color=&quot;secondary&quot; class=&quot;cursor-pointer&quot;&gt;" />
           <x id="START_PARAGRAPH" ctype="x-p" equiv-text="&lt;p&gt;" />
+            por
           <x id="START_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;ion-text color=&quot;primary&quot; class=&quot;cursor-pointer&quot; (click)=&quot;goToProfile.emit(biteTrailData.ownerId)&quot; &gt;" />
                   @<x id="INTERPOLATION" equiv-text="{{ biteTrailData.ownerName }}" />
           <x id="CLOSE_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;/ion-text&gt;" />
@@ -22,7 +23,6 @@
           <x id="CLOSE_TAG_ION_TEXT" ctype="x-ion_text" equiv-text="&lt;/ion-text&gt;" />
           <x id="START_TAG_ION_ICON" ctype="x-ion_icon" equiv-text="&lt;ion-icon name=&quot;shield-checkmark-outline&quot; color=&quot;primary&quot; size=&quot;small&quot; /&gt;" />
           <x id="CLOSE_TAG_ION_ICON" ctype="x-ion_icon" equiv-text="&lt;ion-icon name=&quot;shield-checkmark-outline&quot; color=&quot;primary&quot; size=&quot;small&quot; /&gt;" />
-            por
         </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe-common/bite-trail/src/lib/bite-trail/bite-trail.html</context>

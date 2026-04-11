@@ -222,29 +222,6 @@ describe(AppEffect.name, () => {
     });
   });
 
-  describe('saveSettingsToFirestore$', () => {
-    let saveSettingsSpy: SpyInstance;
-
-    beforeEach(() => {
-      saveSettingsSpy = jest
-        .spyOn(apiService, 'saveSettings')
-        .mockImplementation();
-    });
-
-    it('should save settings on saveSettings', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        const settings = { theme: 'dark' } as Settings;
-        actions$ = cold('a', {
-          a: AppActions.saveSettings({ settings }),
-        });
-
-        expectObservable(effects.saveSettingsToFirestore$);
-      });
-
-      expect(saveSettingsSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('saveProfileToFirestore$', () => {
     describe('given no photo change', () => {
       describe('and user was updated successfully', () => {

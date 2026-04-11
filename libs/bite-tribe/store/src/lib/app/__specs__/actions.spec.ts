@@ -13,8 +13,8 @@ describe('App Actions', () => {
     expect(AppActions.fetchGPSPosition).toBeDefined();
   });
 
-  it('should have a saveSettings action', () => {
-    expect(AppActions.saveSettings).toBeDefined();
+  it('should have a savedSettings action', () => {
+    expect(AppActions.savedSettings).toBeDefined();
   });
 
   it('should have a savePublicProfile action', () => {

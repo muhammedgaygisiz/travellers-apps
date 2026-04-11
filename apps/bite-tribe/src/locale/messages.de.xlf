@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="6942036540757847139" datatype="html">
         <source>Are you sure you want to delete this bite?</source>
-        <target>Sind Sie sicher, dass Sie diesen Bite löschen möchten?</target>
+        <target>Bist du sicher, dass du diesen Bite löschen möchtest?</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe-common/bite/src/lib/bite.component.html</context>
           <context context-type="linenumber">94</context>
@@ -171,7 +171,7 @@
       </trans-unit>
       <trans-unit id="6981684121360284875" datatype="html">
         <source> Capture your meals, tag the location, and share bites from around the world. Discover hidden gems, track where you’ve eaten, and see what others are tasting nearby. </source>
-        <target> Fotografieren Sie Ihre Mahlzeiten, markieren Sie den Standort und teilen Sie Bites aus aller Welt. Entdecken Sie versteckte Schätze, verfolgen Sie, wo Sie gegessen haben, und sehen Sie, was andere in Ihrer Nähe probieren. </target>
+        <target> Fotografiere deine Mahlzeiten, markiere den Standort und teile Bites aus aller Welt. Entdecke versteckte Schätze, verfolge, wo du gegessen hast, und sieh, was andere in deiner Nähe probieren. </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/about/page/src/lib/components/about-page/about.page.html</context>
           <context context-type="linenumber">11,15</context>
@@ -195,7 +195,7 @@
       </trans-unit>
       <trans-unit id="8417421411982138093" datatype="html">
         <source> You already saved this BiteTrail to your Bucket list. </source>
-        <target> Sie haben diesen BiteTrail bereits zu Ihrer Bucket-Liste hinzugefügt. </target>
+        <target> Du hast diesen BiteTrail bereits zu deiner Bucket-Liste hinzugefügt. </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/bite-trail/page/src/lib/components/bite-trail-bites-page/bite-trail-bites.page.html</context>
           <context context-type="linenumber">37,39</context>
@@ -303,7 +303,7 @@
       </trans-unit>
       <trans-unit id="2096189932171386238" datatype="html">
         <source>Please enter a name for your new list</source>
-        <target>Bitte geben Sie einen Namen für Ihre neue Liste ein</target>
+        <target>Gib bitte einen Namen für deine neue Liste ein</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/bucketlist/page/src/lib/components/bucketlists-page/bucketlists.page.html</context>
           <context context-type="linenumber">78</context>
@@ -319,7 +319,7 @@
       </trans-unit>
       <trans-unit id="4127670714648382804" datatype="html">
         <source>Are you sure you want to delete this bucket list?</source>
-        <target>Sind Sie sicher, dass Sie diese Bucket-Liste löschen möchten?</target>
+        <target>Bist du sicher, dass du diese Bucket-Liste löschen möchtest?</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/bucketlist/page/src/lib/components/bucketlists-page/bucketlists.page.html</context>
           <context context-type="linenumber">87</context>
@@ -364,7 +364,7 @@
       <trans-unit id="1502787884735177394" datatype="html">
         <source>Are you sure you want to stop following <x id="INTERPOLATION" equiv-text="{{                     user?.displayName                   }}" />?</source>
         <target>
-          Sind Sie sicher, dass Sie <x id="INTERPOLATION" equiv-text="{{user?.displayName}}" /> nicht mehr folgen möchten?
+          Bist du sicher, dass du <x id="INTERPOLATION" equiv-text="{{user?.displayName}}" /> nicht mehr folgen möchtest?
         </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.html</context>
@@ -541,7 +541,7 @@
       </trans-unit>
       <trans-unit id="5995666782696005929" datatype="html">
         <source>Tell us about yourself...</source>
-        <target>Erzählen Sie uns etwas über sich...</target>
+        <target>Erzähl uns etwas über dich...</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
           <context context-type="linenumber">82</context>
@@ -577,7 +577,7 @@
       </trans-unit>
       <trans-unit id="3212301764327840591" datatype="html">
         <source>Are you sure you want to return to a private profile? You will be shown as Anonymous.</source>
-        <target>Sind Sie sicher, dass Sie zu einem privaten Profil zurückkehren möchten? Sie werden als Anonym angezeigt.</target>
+        <target>Bist du sicher, dass du zu einem privaten Profil zurückkehren möchtest? Du wirst als Anonym angezeigt.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/bite-tribe/profile/page/src/lib/components/edit-profile-page/edit-profile.page.html</context>
           <context context-type="linenumber">116</context>
@@ -801,7 +801,7 @@
       </trans-unit>
       <trans-unit id="8464044883966085050" datatype="html">
         <source> or with your Email</source>
-        <target> oder mit Ihrer E-Mail</target>
+        <target> oder mit deiner E-Mail</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
           <context context-type="linenumber">30</context>
@@ -821,7 +821,7 @@
       </trans-unit>
       <trans-unit id="2398583048519934048" datatype="html">
         <source> Something went wrong. Please try again. </source>
-        <target> Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut. </target>
+        <target> Etwas ist schiefgelaufen. Bitte versuche es erneut. </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
           <context context-type="linenumber">72,74</context>
@@ -829,7 +829,7 @@
       </trans-unit>
       <trans-unit id="4029277674895318328" datatype="html">
         <source> or, if you don't have an account yet:</source>
-        <target> oder, wenn Sie noch kein Konto haben:</target>
+        <target> oder, wenn du noch kein Konto hast:</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/common/ui/auth/src/lib/components/login/login.component.html</context>
           <context context-type="linenumber">83</context>

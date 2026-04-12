@@ -142,6 +142,17 @@ describe('RestaurantService', () => {
       service.navigateToBites(restaurant);
       expect(mockNavController.navigateForward).not.toHaveBeenCalled();
     });
+
+    it('should not navigate if no bite', () => {
+      service.bite = signal(undefined);
+      const restaurant: Restaurant = {
+        id: 'restaurant123',
+        name: 'Test Restaurant',
+        menuId: 'empty/collections/menu456',
+      } as Restaurant;
+      service.navigateToBites(restaurant);
+      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
+    });
   });
 
   describe('biteClicked', () => {

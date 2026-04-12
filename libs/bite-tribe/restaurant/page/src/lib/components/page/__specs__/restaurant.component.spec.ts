@@ -45,6 +45,35 @@ describe('RestaurantComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('averageBiteRating', () => {
+    it('should return average rating', () => {
+      componentRef.setInput('bites', [
+        { rating: 4 },
+        { rating: 5 },
+        { rating: 3 },
+      ] as any);
+      expect(component.averageBiteRating()).toBe(4);
+    });
+
+    it('should return 0 if no bites', () => {
+      componentRef.setInput('bites', []);
+      expect(component.averageBiteRating()).toBe(0);
+    });
+
+    it('should return 0 if bites is undefined', () => {
+      componentRef.setInput('bites', undefined);
+      expect(component.averageBiteRating()).toBe(0);
+    });
+
+    it('should round if many decimals result from average', () => {
+      componentRef.setInput('bites', [
+        { rating: 4 },
+        { rating: 5.512312 },
+      ] as any);
+      expect(component.averageBiteRating()).toBe(4.8);
+    });
+  });
+
   describe('links', () => {
     it('should return empty array if no links', () => {
       componentRef.setInput('restaurant', {

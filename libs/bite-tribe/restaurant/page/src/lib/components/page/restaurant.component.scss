@@ -10,20 +10,39 @@
     }
   }
 
-  ion-button {
-    margin: 0;
-    --border-width: 0;
-    --color: white;
-    border-bottom: 1px solid var(--ion-input-border-color);
+  .buttons-container {
+    ion-button {
+      margin: 0;
+      --border-width: 0;
+      --color: white;
+      border-bottom: 1px solid var(--ion-input-border-color);
 
-    &:first-of-type {
-      border-top: 1px solid var(--ion-input-border-color);
+      &:first-of-type {
+        border-top: 1px solid var(--ion-input-border-color);
+      }
+    }
+
+    .fill-button-content {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
     }
   }
 
-  .btn {
-    width: 100%;
+  .rating-container {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    white-space: nowrap;
+    margin-bottom: 0.5rem;
+
+    .rating-icon {
+      stroke: var(--border-color);
+      fill: var(--bite-tribe-color);
+      margin-right: 5px;
+    }
+
+    .rating {
+      margin-right: 0.5rem;
+    }
   }
 }

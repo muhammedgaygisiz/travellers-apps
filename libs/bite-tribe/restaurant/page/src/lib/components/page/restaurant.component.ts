@@ -84,6 +84,16 @@ export class RestaurantComponent {
   readonly likeButtonClick = output<Like>();
   readonly selectedSegment = signal<'bites' | 'menu'>('bites');
 
+  averageBiteRating = computed(() => {
+    const bites = this.bites() || [];
+    const totalRating = bites.reduce(
+      (acc, bite) => acc + (bite.rating || 0),
+      0,
+    );
+    const average = bites.length > 0 ? totalRating / bites.length : 0;
+    return Math.round(average * 10) / 10;
+  });
+
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),
   });

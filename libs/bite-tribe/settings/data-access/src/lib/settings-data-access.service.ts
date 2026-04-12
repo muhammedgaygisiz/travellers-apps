@@ -26,6 +26,7 @@ export class SettingsDataAccessService {
     this.storeService.notifySavedSettings(settings);
 
     this.setLanguage(settings.language);
+    document.location.reload();
   }
 
   private saveLanguageToPreferences(language = 'en'): Promise<void> {

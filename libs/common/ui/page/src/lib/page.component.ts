@@ -55,7 +55,7 @@ export class PageComponent {
 
   showAddButton = input<boolean | null>(false);
 
-  addButtonText = input<string | null>('Create Bite');
+  addButtonText = input<string | null>();
 
   hideAuthButton = input(false);
 

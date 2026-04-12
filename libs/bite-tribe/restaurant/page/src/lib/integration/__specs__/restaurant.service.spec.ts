@@ -143,6 +143,11 @@ describe('RestaurantService', () => {
       expect(mockNavController.navigateForward).not.toHaveBeenCalled();
     });
 
+    it('should not navigate if no restaurant', () => {
+      service.navigateToBites(undefined as any);
+      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
+    });
+
     it('should not navigate if no bite', () => {
       service.bite = signal(undefined);
       const restaurant: Restaurant = {

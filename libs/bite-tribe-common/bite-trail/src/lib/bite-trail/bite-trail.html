@@ -43,20 +43,20 @@
                   {{ 'by-before' | transloco}}
                   <ion-text
                     color="primary"
-                    class="cursor-pointer"
+                    class="cursor-pointer ion-display-flex"
                     (click)="goToProfile.emit(biteTrailData.ownerId)"
                   >
                     &#64;{{ biteTrailData.ownerName }}
+                    <ion-icon
+                      name="shield-checkmark-outline"
+                      color="primary"
+                      size="small"
+                      class="ion-margin-end"
+                    />
                   </ion-text>
                   {{ 'by-after' | transloco}}
                 </p>
               </ion-text>
-              <ion-icon
-                name="shield-checkmark-outline"
-                color="primary"
-                size="small"
-                class="ion-margin-end"
-              />
             </div>
 
             <div class="ion-display-flex ion-flex-row ion-align-items-center">

@@ -63,7 +63,8 @@
   "are-you-sure-you-want-to-delete-this-bite": "Are you sure you want to delete this bite?",
   "best-seller": "Best Seller",
   "free": "Free",
-  "ion-text-color-secondary-class-cursor-pointer-p-by-ion-text-color-primary-class-cursor-pointer-click-go-to-profile-emit-bite-trail-data-owner-id-64-bite-trail-data-owner-name-ion-text-p-ion-text-ion-icon-name-shield-checkmark-outline-color-primary-size-small-class-ion-margin-end": "<ion-text color=\"secondary\" class=\"cursor-pointer\">                  <p>                    by                    <ion-text                      color=\"primary\"                      class=\"cursor-pointer\"                      (click)=\"goToProfile.emit(biteTrailData.ownerId)\"                    >                      &#64;{{ biteTrailData.ownerName }}                    </ion-text>                  </p>                </ion-text>                <ion-icon                  name=\"shield-checkmark-outline\"                  color=\"primary\"                  size=\"small\"                  class=\"ion-margin-end\"                />",
+  "by-before": "by",
+  "by-after": "",
   "sold-231-times": "Sold 231 times",
   "view-bite-trail": "View BiteTrail",
   "market-place": "Market Place",
@@ -98,5 +99,8 @@
   "spanish": "Spanish",
   "thai": "Thai",
   "theme": "Theme",
-  "turkish": "Turkish"
+  "turkish": "Turkish",
+  "english": "English",
+  "follow": "Follow",
+  "user-profile-not-available": "User profile not available."
 }

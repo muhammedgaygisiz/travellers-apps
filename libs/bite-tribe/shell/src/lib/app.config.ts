@@ -21,6 +21,18 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
     provideIonicAngular(getIonicConfig()),
     provideTransloco({
       config: {
+        availableLangs: [
+          'en',
+          'de',
+          'fr',
+          'tr',
+          'es',
+          'it',
+          'ar',
+          'am',
+          'id',
+          'th',
+        ],
         defaultLang: 'en',
         fallbackLang: 'en',
       },

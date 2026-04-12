@@ -17,6 +17,7 @@ import { App } from '@capacitor/app';
 import { ConnectionStatus, Network } from '@capacitor/network';
 import { NetworkStatusService } from 'common/networkstatus';
 import { TranslocoService } from '@jsverse/transloco';
+import { Preferences } from '@capacitor/preferences';
 
 @Component({
   selector: 'bt-root',
@@ -41,7 +42,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.handleBackButton(canGoBack);
 
   constructor() {
-    this.transloco.setActiveLang('en');
+    void this.initLanguage();
 
     addNecessaryIcons();
 
@@ -51,6 +52,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.initAppStateChangeHandler();
     this.initNetworkStatusHandler();
+  }
+
+  private async initLanguage(): Promise<void> {
+    const { value } = await Preferences.get({ key: 'lang' });
+    this.transloco.setActiveLang(value ?? 'en');
   }
 
   ngOnInit(): void {

@@ -38,6 +38,7 @@ import { normalizePriceForBackend } from './utils/normalize-price-for-backend';
 import { ImageValidator } from './utils/image-validator';
 import { normalizePriceForForm } from './utils/normalize-price-for-form';
 import { ConnectionStatus } from '@capacitor/network';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'bite',
@@ -58,6 +59,7 @@ import { ConnectionStatus } from '@capacitor/network';
     RestaurantSelectorComponent,
     IonIcon,
     IonLabel,
+    TranslocoPipe,
   ],
   templateUrl: 'bite.page.html',
   styleUrl: 'bite.page.scss',

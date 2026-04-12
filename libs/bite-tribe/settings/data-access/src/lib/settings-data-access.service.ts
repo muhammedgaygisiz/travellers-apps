@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { PublicUser, Settings } from 'model';
+import { Settings } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { Preferences } from '@capacitor/preferences';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,7 @@ import { Preferences } from '@capacitor/preferences';
 export class SettingsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly api = inject(BiteTribeApiService);
+  private readonly transloco = inject(TranslocoService);
 
   user = toSignal(this.storeService.user$);
   settings = toSignal(this.storeService.settings$);
@@ -22,6 +24,8 @@ export class SettingsDataAccessService {
     await this.api.saveSettings(settings);
 
     this.storeService.notifySavedSettings(settings);
+
+    this.setLanguage(settings.language);
   }
 
   private saveLanguageToPreferences(language = 'en'): Promise<void> {
@@ -29,5 +33,9 @@ export class SettingsDataAccessService {
       key: 'lang',
       value: language,
     });
+  }
+
+  private setLanguage(language = 'en'): void {
+    this.transloco.setActiveLang(language);
   }
 }

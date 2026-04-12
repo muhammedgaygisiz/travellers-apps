@@ -16,6 +16,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
 import { ConnectionStatus, Network } from '@capacitor/network';
 import { NetworkStatusService } from 'common/networkstatus';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'bt-root',
@@ -34,11 +35,14 @@ export class AppComponent implements OnInit, OnDestroy {
   navController = inject(NavController);
   private readonly appForegroundService = inject(AppForegroundService);
   private readonly networkStatusService = inject(NetworkStatusService);
+  private readonly transloco = inject(TranslocoService);
 
   backButtonHandler = ({ canGoBack }: { canGoBack: boolean }): void =>
     this.handleBackButton(canGoBack);
 
   constructor() {
+    this.transloco.setActiveLang('en');
+
     addNecessaryIcons();
 
     this.initBackbuttonHandler();

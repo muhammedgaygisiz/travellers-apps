@@ -30,6 +30,13 @@
         "cwd": "apps/bite-tribe-firebase/functions",
         "command": "npm run deploy"
       }
+    },
+    "firebase-kill": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase",
+        "command": "npx kill-port 9099 8080 9000 9199 5001 8085"
+      }
     }
   }
 }

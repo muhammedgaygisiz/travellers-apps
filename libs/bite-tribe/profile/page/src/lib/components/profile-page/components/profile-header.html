@@ -28,7 +28,7 @@
   <div
     class="header-column ion-display-flex ion-flex-column ion-justify-content-center"
   >
-    <strong i18n>Following</strong>
+    <strong>{{ 'following' | transloco }}</strong>
     <span class="clickable" (click)="handleFollowingClick()"
       >{{ followingCount() }}</span
     >
@@ -36,7 +36,7 @@
   <div
     class="header-column ion-display-flex ion-flex-column ion-justify-content-center"
   >
-    <strong i18n>Followers</strong>
+    <strong>{{ 'followers' | transloco }}</strong>
     <span class="clickable" (click)="handleFollowersClick()"
       >{{ followerCount() }}</span
     >

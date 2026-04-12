@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -24,6 +25,7 @@ import {
 } from '@ionic/angular/standalone';
 import { CountPipe } from '../../pipes/count.pipe';
 import type { OverlayEventDetail } from '@ionic/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
@@ -48,20 +50,23 @@ const CANCEL = 'cancel';
     IonSelectOption,
     IonText,
     IonButton,
+    TranslocoPipe,
   ],
 })
 export class BucketlistsPage {
+  private readonly transloco = inject(TranslocoService);
+
   bucketlists = input<Bucketlist[]>([]);
   sorting = input<string>('name');
   sortingLabel = computed(() => {
     const sorting = this.sorting();
     switch (sorting) {
       case 'name':
-        return $localize`Name`;
+        return this.transloco.translate('name');
       case 'createdAt':
-        return $localize`Date`;
+        return this.transloco.translate('date');
       default:
-        return $localize`Name`;
+        return this.transloco.translate('name');
     }
   });
 
@@ -100,11 +105,11 @@ export class BucketlistsPage {
 
   deleteConfirmationButtons = [
     {
-      text: $localize`Cancel`,
+      text: this.transloco.translate('cancel'),
       role: CANCEL,
     },
     {
-      text: $localize`Delete`,
+      text: this.transloco.translate('delete'),
       role: DELETE,
     },
   ];

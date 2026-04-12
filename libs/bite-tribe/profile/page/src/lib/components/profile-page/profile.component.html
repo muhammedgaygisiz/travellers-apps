@@ -42,23 +42,19 @@
         </ion-badge>
         <div class="buttons">
           @if (!!currentUserId && userData?.userId === currentUserId) {
-            <ion-button (click)="gotoEditProfile.emit()" i18n>
-              Edit Profile
-            </ion-button>
+            <ion-button (click)="gotoEditProfile.emit()">{{
+              'edit-profile' | transloco
+            }}</ion-button>
           }
           @if (isUnfollowedUser()) {
             @if (this.profileMetadata()?.isFollowedByMe) {
-              <ion-button
-                fill="outline"
-                (click)="openConfirmationDialog()"
-                i18n
-              >
-                Stop following
-              </ion-button>
+              <ion-button fill="outline" (click)="openConfirmationDialog()">{{
+                'stop-following' | transloco
+              }}</ion-button>
             } @else {
-              <ion-button fill="outline" (click)="onFollow()" i18n>
-                Follow
-              </ion-button>
+              <ion-button fill="outline" (click)="onFollow()">{{
+                'follow' | transloco
+              }}</ion-button>
             }
           }
         </div>
@@ -66,10 +62,10 @@
     </h1>
 
     <span class="profile-location">
-      {{ userData?.city || noLocationText }}
+      {{ userData?.city || ('no-location' | transloco) }}
     </span>
     <p class="profile-about">
-      {{ userData?.about || noDescriptionText }}
+      {{ userData?.about || ('no-description-available' | transloco) }}
     </p>
 
     <div class="bites-section">
@@ -100,7 +96,9 @@
     <!-- Show a message when no user data is available -->
     @if (!userData) {
       <div class="no-profile">
-        <p class="no-profile-message" i18n>User profile not available.</p>
+        <p class="no-profile-message">
+          {{ 'user-profile-not-available' | transloco }}
+        </p>
       </div>
     }
   </ion-content>
@@ -112,6 +110,4 @@
   message="Are you sure you want to stop following {{ user()?.displayName }}?"
   [buttons]="confirmationButtons"
   (didDismiss)="handleConfirmationDismiss($event)"
-  i18n-header
-  i18n-message
 />

@@ -14,7 +14,7 @@
         "outputPath": "dist/apps/bite-tribe-business",
         "index": "apps/bite-tribe-business/src/index.html",
         "main": "apps/bite-tribe-business/src/main.ts",
-        "polyfills": ["@angular/localize/init"],
+        "polyfills": [],
         "tsConfig": "apps/bite-tribe-business/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -44,7 +44,7 @@
         "stylePreprocessorOptions": {
           "includePaths": ["libs/bite-tribe-common/styles"]
         },
-        "localize": false
+        "scripts": []
       },
       "configurations": {
         "production": {
@@ -82,12 +82,6 @@
       },
       "defaultConfiguration": "development",
       "continuous": true
-    },
-    "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
-      "options": {
-        "buildTarget": "bite-tribe-business:build"
-      }
     },
     "lint": {
       "executor": "@nx/eslint:lint"

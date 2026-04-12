@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -21,6 +22,7 @@ import type { PublicUser } from 'model';
 import { PATH } from 'utils';
 import { PageComponent } from 'common/ui/page';
 import { OverlayEventDetail } from '@ionic/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const UNFOLLOW = 'unfollow';
 const CANCEL = 'cancel';
@@ -39,12 +41,15 @@ const CANCEL = 'cancel';
     IonSpinner,
     IonAlert,
     IonIcon,
+    TranslocoPipe,
   ],
   templateUrl: 'followers-list.component.html',
   styleUrls: ['followers-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FollowersListComponent {
+  private readonly transloco = inject(TranslocoService);
+
   users = input.required<PublicUser[] | undefined>();
   type = input.required<'followers' | 'following'>();
   loggedInUserId = input<string>();
@@ -59,16 +64,18 @@ export class FollowersListComponent {
   toggleTitleText = computed(() => {
     const type = this.type();
 
-    return type === 'followers' ? $localize`Followers` : $localize`Following`;
+    return type === 'followers'
+      ? this.transloco.translate('followers')
+      : this.transloco.translate('following');
   });
 
   confirmationButtons = [
     {
-      text: $localize`Cancel`,
+      text: this.transloco.translate('cancel'),
       role: CANCEL,
     },
     {
-      text: $localize`Yes, unfollow`,
+      text: this.transloco.translate('yes-unfollow'),
       role: UNFOLLOW,
     },
   ];

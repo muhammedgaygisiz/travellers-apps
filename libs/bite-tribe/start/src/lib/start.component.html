@@ -4,23 +4,21 @@
       <div class="ion-text-center logo-text-container">
         <img src="assets/icons/logo.svg" alt="BiteTribe Logo" class="logo" />
         <span class="company-name">BiteTribe</span>
-        <span class="tagline" i18n>Find it. Try it. Share it.</span>
+        <span class="tagline">{{ 'find-it-try-it-share-it' | transloco }}</span>
       </div>
 
       <div class="ion-padding-top buttons-container">
-        <ion-button expand="block" routerLink="/login" i18n>
-          Log In
-        </ion-button>
+        <ion-button expand="block" routerLink="/login">{{
+          'log-in' | transloco
+        }}</ion-button>
 
         <ion-button
           expand="block"
           fill="outline"
           routerLink="/registration"
           class="ion-margin-top"
-          i18n
+          >{{ 'sign-up' | transloco }}</ion-button
         >
-          Sign Up
-        </ion-button>
       </div>
     </div>
   </ion-content>

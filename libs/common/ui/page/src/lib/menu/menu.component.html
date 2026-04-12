@@ -51,37 +51,37 @@
       @if (showMyProfile()) {
         <ion-item (click)="gotoProfile.emit()">
           <ion-icon name="person-circle-outline" slot="start" />
-          <ng-container i18n>My Profile</ng-container>
+          <ng-container>{{ 'my-profile' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showMyBites()) {
         <ion-item (click)="gotoMyBites.emit()">
           <ion-icon name="pizza-outline" slot="start" />
-          <ng-container i18n>My Bites</ng-container>
+          <ng-container>{{ 'my-bites' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showMyBucketlists()) {
         <ion-item (click)="gotoMyBucketlists.emit()">
           <ion-icon name="bookmark-outline" slot="start" />
-          <ng-container i18n>My Bucket lists</ng-container>
+          <ng-container>{{ 'my-bucket-lists' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showMarketPlaceButton()) {
         <ion-item (click)="gotoMarketPlace.emit()">
           <ion-icon name="storefront-outline" slot="start" />
-          <ng-container i18n>Market Place</ng-container>
+          <ng-container>{{ 'market-place' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showSettingsButton()) {
         <ion-item (click)="gotoSettings.emit()">
           <ion-icon name="settings-outline" slot="start" />
-          <ng-container i18n>Settings</ng-container>
+          <ng-container>{{ 'settings' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showAboutButton()) {
         <ion-item (click)="gotoAbout.emit()">
           <ion-icon name="information-circle-outline" slot="start" />
-          <ng-container i18n>About</ng-container>
+          <ng-container>{{ 'about' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showMigrationsButton()) {
@@ -97,7 +97,7 @@
         (click)="logoutClick.emit()"
       >
         <ion-icon name="log-out-outline" slot="start" />
-        <ng-container i18n>Logout</ng-container>
+        <ng-container>{{ 'logout' | transloco }}</ng-container>
       </ion-item>
     }
   }

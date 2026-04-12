@@ -38,26 +38,11 @@
                 />
               </ion-avatar>
 
-              <ng-container i18n>
-                <ion-text color="secondary" class="cursor-pointer">
-                  <p>
-                    by
-                    <ion-text
-                      color="primary"
-                      class="cursor-pointer"
-                      (click)="goToProfile.emit(biteTrailData.ownerId)"
-                    >
-                      &#64;{{ biteTrailData.ownerName }}
-                    </ion-text>
-                  </p>
-                </ion-text>
-                <ion-icon
-                  name="shield-checkmark-outline"
-                  color="primary"
-                  size="small"
-                  class="ion-margin-end"
-                />
-              </ng-container>
+              <ng-container
+                >{{
+                'ion-text-color-secondary-class-cursor-pointer-p-by-ion-text-color-primary-class-cursor-pointer-click-go-to-profile-emit-bite-trail-data-owner-id-64-bite-trail-data-owner-name-ion-text-p-ion-text-ion-icon-name-shield-checkmark-outline-color-primary-size-small-class-ion-margin-end'
+                | transloco }}</ng-container
+              >
             </div>
 
             <div class="ion-display-flex ion-flex-row ion-align-items-center">
@@ -81,9 +66,9 @@
           <div class="ion-display-flex ion-flex-column ion-align-items-end">
             <ion-badge class="outlined-badge ion-margin-bottom">
               <ion-icon name="flame-outline" />
-              <ng-container i18n>Best Seller</ng-container>
+              <ng-container>{{ 'best-seller' | transloco }}</ng-container>
             </ion-badge>
-            <ion-text i18n>Sold 231 times</ion-text>
+            <ion-text>{{ 'sold-231-times' | transloco }}</ion-text>
           </div>
         </div>
 
@@ -97,7 +82,7 @@
           <div class="ion-flex-1 ion-display-flex ion-align-items-center">
             @if (biteTrailData.price === 0) {
             <ion-text color="secondary" class="ion-margin-horizontal">
-              <h1 i18n>Free</h1>
+              <h1>{{ 'free' | transloco }}</h1>
             </ion-text>
             } @else {
             <ion-text class="ion-margin-horizontal" color="secondary">
@@ -109,7 +94,7 @@
             }
           </div>
           <ion-button shape="round" (click)="viewBiteTrail.emit(biteTrailData)">
-            <ng-container i18n>View BiteTrail</ng-container>
+            <ng-container>{{ 'view-bite-trail' | transloco }}</ng-container>
             <ion-icon name="arrow-forward-outline" />
           </ion-button>
         </div>

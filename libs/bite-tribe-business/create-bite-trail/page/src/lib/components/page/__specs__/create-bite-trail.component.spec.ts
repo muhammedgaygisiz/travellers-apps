@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CreateBiteTrailComponent } from '../create-bite-trail.component';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import { IonModal, provideIonicAngular } from '@ionic/angular/standalone';
 import { Bite, PublicUser } from 'model';
 import { ComponentRef } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
@@ -160,7 +160,7 @@ describe('CreateBiteTrailComponent', () => {
     it('should update the currency form control and dismiss the modal', () => {
       const modal = {
         dismiss: jest.fn(),
-      } as unknown as HTMLIonModalElement;
+      } as unknown as IonModal;
 
       component.onCurrencySelected('USD', modal);
 

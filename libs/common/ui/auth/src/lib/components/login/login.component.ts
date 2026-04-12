@@ -20,6 +20,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { Credentials } from '../../api/credentials.model';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 interface AuthCredentialFields {
   email: FormControl<string | null>;
@@ -39,6 +40,7 @@ interface AuthCredentialFields {
     IonText,
     IonInputPasswordToggle,
     IonContent,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

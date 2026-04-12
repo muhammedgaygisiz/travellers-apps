@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "types": ["node", "@angular/localize"],
+    "types": ["node"],
     "moduleResolution": "bundler"
   },
   "files": ["src/main.ts"],

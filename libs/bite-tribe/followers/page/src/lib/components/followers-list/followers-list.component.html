@@ -16,9 +16,11 @@
       <div class="empty-container">
         <ion-label>
           @if (type() === 'followers') {
-            <ng-container i18n>No followers yet</ng-container>
+            <ng-container>{{ 'no-followers-yet' | transloco }}</ng-container>
           } @else {
-            <ng-container i18n>Not following anyone yet</ng-container>
+            <ng-container>{{
+              'not-following-anyone-yet' | transloco
+            }}</ng-container>
           }
         </ion-label>
       </div>
@@ -51,21 +53,18 @@
                   slot="end"
                   fill="outline"
                   (click)="openConfirmationDialog($event)"
-                  i18n
+                  >{{ 'unfollow' | transloco }}</ion-button
                 >
-                  Unfollow
-                </ion-button>
 
                 <ion-alert
                   [isOpen]="isOpen()"
-                  header="Stop following"
-                  message="Are you sure you want to stop following {{
-                    user?.displayName
-                  }}?"
+                  header="{{ 'stop-following' | transloco }}"
+                  message="{{
+                    'are-you-sure-you-want-to-stop-following-username'
+                      | transloco: { username: user?.displayName }
+                  }}"
                   [buttons]="confirmationButtons"
                   (didDismiss)="handleConfirmationDismiss($event, user)"
-                  i18n-header
-                  i18n-message
                 />
               }
             </ion-item>
@@ -75,7 +74,7 @@
                 <ion-icon name="person-circle-outline" class="profile-image" />
               </ion-avatar>
               <ion-label>
-                <h2>Anonymous</h2>
+                <h2>{{ 'anonymous' | transloco }}</h2>
               </ion-label>
             </ion-item>
           }

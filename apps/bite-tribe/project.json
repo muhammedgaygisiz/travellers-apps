@@ -5,38 +5,6 @@
   "prefix": "app",
   "sourceRoot": "apps/bite-tribe/src",
   "tags": ["scope:bite-tribe", "type:app"],
-  "i18n": {
-    "sourceLocale": "en",
-    "locales": {
-      "tr": {
-        "translation": "apps/bite-tribe/src/locale/messages.tr.xlf"
-      },
-      "de": {
-        "translation": "apps/bite-tribe/src/locale/messages.de.xlf"
-      },
-      "fr": {
-        "translation": "apps/bite-tribe/src/locale/messages.fr.xlf"
-      },
-      "it": {
-        "translation": "apps/bite-tribe/src/locale/messages.it.xlf"
-      },
-      "es": {
-        "translation": "apps/bite-tribe/src/locale/messages.es.xlf"
-      },
-      "ar": {
-        "translation": "apps/bite-tribe/src/locale/messages.ar.xlf"
-      },
-      "am": {
-        "translation": "apps/bite-tribe/src/locale/messages.am.xlf"
-      },
-      "id": {
-        "translation": "apps/bite-tribe/src/locale/messages.id.xlf"
-      },
-      "th": {
-        "translation": "apps/bite-tribe/src/locale/messages.th.xlf"
-      }
-    }
-  },
   "targets": {
     "build": {
       "executor": "@nx/angular:browser-esbuild",
@@ -46,7 +14,7 @@
         "outputPath": "dist/apps/bite-tribe",
         "index": "apps/bite-tribe/src/index.html",
         "main": "apps/bite-tribe/src/main.ts",
-        "polyfills": ["@angular/localize/init"],
+        "polyfills": [],
         "tsConfig": "apps/bite-tribe/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -88,9 +56,7 @@
           "includePaths": ["libs/bite-tribe-common/styles"]
         },
         "serviceWorker": true,
-        "ngswConfigPath": "apps/bite-tribe/ngsw-config.json",
-        "localize": true,
-        "i18nMissingTranslation": "warning"
+        "ngswConfigPath": "apps/bite-tribe/ngsw-config.json"
       },
       "configurations": {
         "production": {
@@ -106,79 +72,12 @@
               "maximumError": "8kb"
             }
           ],
-          "outputHashing": "all",
-          "localize": [
-            "en",
-            "tr",
-            "de",
-            "fr",
-            "it",
-            "es",
-            "ar",
-            "am",
-            "id",
-            "th"
-          ]
+          "outputHashing": "all"
         },
         "development": {
           "optimization": false,
           "extractLicenses": false,
-          "sourceMap": true,
-          "localize": ["en"]
-        },
-        "tr": {
-          "optimization": false,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "localize": ["tr"]
-        },
-        "de": {
-          "optimization": false,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "localize": ["de"]
-        },
-        "fr": {
-          "optimization": false,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "localize": ["fr"]
-        },
-        "it": {
-          "optimization": false,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "localize": ["it"]
-        },
-        "es": {
-          "optimization": false,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "localize": ["es"]
-        },
-        "ar": {
-          "optimization": false,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "localize": ["ar"]
-        },
-        "am": {
-          "optimization": false,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "localize": ["am"]
-        },
-        "id": {
-          "optimization": false,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "localize": ["id"]
-        },
-        "th": {
-          "optimization": false,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "localize": ["th"]
+          "sourceMap": true
         }
       },
       "defaultConfiguration": "production"
@@ -191,46 +90,10 @@
         },
         "development": {
           "buildTarget": "bite-tribe:build:development"
-        },
-        "tr": {
-          "buildTarget": "bite-tribe:build:tr"
-        },
-        "de": {
-          "buildTarget": "bite-tribe:build:de"
-        },
-        "fr": {
-          "buildTarget": "bite-tribe:build:fr"
-        },
-        "it": {
-          "buildTarget": "bite-tribe:build:it"
-        },
-        "es": {
-          "buildTarget": "bite-tribe:build:es"
-        },
-        "ar": {
-          "buildTarget": "bite-tribe:build:ar"
-        },
-        "am": {
-          "buildTarget": "bite-tribe:build:am"
-        },
-        "id": {
-          "buildTarget": "bite-tribe:build:id"
-        },
-        "th": {
-          "buildTarget": "bite-tribe:build:th"
         }
       },
       "defaultConfiguration": "development",
       "continuous": true
-    },
-    "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
-      "options": {
-        "buildTarget": "bite-tribe:build",
-        "format": "xlf",
-        "outputPath": "apps/bite-tribe/src/locale",
-        "outFile": "messages.xlf"
-      }
     },
     "lint": {
       "executor": "@nx/eslint:lint"

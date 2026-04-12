@@ -12,12 +12,20 @@ import {
   IonList,
 } from '@ionic/angular/standalone';
 import { SupportedLang } from 'utils';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'popover-menu',
   templateUrl: 'menu.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonList, IonItem, IonIcon, IonItemGroup, IonItemDivider],
+  imports: [
+    IonList,
+    IonItem,
+    IonIcon,
+    IonItemGroup,
+    IonItemDivider,
+    TranslocoPipe,
+  ],
 })
 export class MenuComponent {
   protected readonly SupportedLang = SupportedLang;

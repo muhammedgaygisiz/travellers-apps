@@ -8,6 +8,7 @@ import { AuthService } from 'ta-firestore';
 import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
 import { NavController, ToastController } from '@ionic/angular';
 import { PATH } from 'utils';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Injectable()
 export class BucketListEffect {
@@ -16,6 +17,7 @@ export class BucketListEffect {
   private readonly authService = inject(AuthService);
   private readonly toastController = inject(ToastController);
   private readonly navController = inject(NavController);
+  private readonly transloco = inject(TranslocoService);
 
   loadMyBucketlists$ = createEffect(() => {
     return this.actions$.pipe(
@@ -137,11 +139,11 @@ export class BucketListEffect {
 
   private async showBiteTrailSavedAsBucketListToast(): Promise<void> {
     const toast = await this.toastController.create({
-      message: $localize`BiteTrail saved as bucket list!`,
+      message: this.transloco.translate('bitetrail-saved-as-bucket-list'),
       position: 'bottom',
       buttons: [
         {
-          text: $localize`Go to Bucket Lists`,
+          text: this.transloco.translate('go-to-bucket-lists'),
           handler: (): void => {
             void this.navController.navigateForward([PATH.MY_BUCKETLISTS]);
           },

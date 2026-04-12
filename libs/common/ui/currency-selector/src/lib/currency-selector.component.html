@@ -1,17 +1,16 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="cancel()" i18n>Cancel</ion-button>
+      <ion-button (click)="cancel()">{{ 'cancel' | transloco }}</ion-button>
     </ion-buttons>
-    <ion-title i18n>Select Currency</ion-title>
+    <ion-title>{{ 'select-currency' | transloco }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-searchbar
     (ionInput)="searchbarInput($event)"
-    placeholder="Search currencies..."
-    i18n-placeholder
+    placeholder="{{ 'search-currencies' | transloco }}"
   />
 
   <ion-list [inset]="true">
@@ -27,7 +26,7 @@
       </ion-item>
     } @empty {
       <ion-item>
-        <ion-label i18n>No currencies found</ion-label>
+        <ion-label>{{ 'no-currencies-found' | transloco }}</ion-label>
       </ion-item>
     }
   </ion-list>

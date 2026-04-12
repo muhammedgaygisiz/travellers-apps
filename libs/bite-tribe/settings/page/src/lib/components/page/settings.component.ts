@@ -31,6 +31,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { currencyCodes } from 'utils';
 import { User } from '@capacitor-firebase/authentication';
 import { CardComponent } from 'common/ui/card';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'settings',
@@ -53,6 +54,7 @@ import { CardComponent } from 'common/ui/card';
     IonCardHeader,
     IonCardTitle,
     IonIcon,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

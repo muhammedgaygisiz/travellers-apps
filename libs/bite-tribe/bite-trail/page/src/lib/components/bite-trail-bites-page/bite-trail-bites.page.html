@@ -34,16 +34,17 @@
             class="ion-margin-end"
             size="large"
           />
-          <ion-text color="secondary" i18n>
-            You already saved this BiteTrail to your Bucket list.
-          </ion-text>
+          <ion-text color="secondary"
+            >{{ 'you-already-saved-this-bite-trail-to-your-bucket-list' |
+            transloco }}</ion-text
+          >
         </ion-card-content>
       </ion-card>
       } @if (!bites().length) {
       <ion-card>
         <ion-card-content>
-          <ion-text color="primary" i18n
-            >No bites found in this trail.</ion-text
+          <ion-text color="primary"
+            >{{ 'no-bites-found-in-this-trail' | transloco }}</ion-text
           >
         </ion-card-content>
       </ion-card>

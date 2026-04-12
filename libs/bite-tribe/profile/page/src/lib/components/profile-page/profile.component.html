@@ -42,19 +42,19 @@
         </ion-badge>
         <div class="buttons">
           @if (!!currentUserId && userData?.userId === currentUserId) {
-            <ion-button (click)="gotoEditProfile.emit()">{{
-              'edit-profile' | transloco
-            }}</ion-button>
+            <ion-button (click)="gotoEditProfile.emit()"
+              >{{ 'edit-profile' | transloco }}
+            </ion-button>
           }
           @if (isUnfollowedUser()) {
             @if (this.profileMetadata()?.isFollowedByMe) {
-              <ion-button fill="outline" (click)="openConfirmationDialog()">{{
-                'stop-following' | transloco
-              }}</ion-button>
+              <ion-button fill="outline" (click)="openConfirmationDialog()"
+                >{{ 'stop-following' | transloco }}
+              </ion-button>
             } @else {
-              <ion-button fill="outline" (click)="onFollow()">{{
-                'follow' | transloco
-              }}</ion-button>
+              <ion-button fill="outline" (click)="onFollow()"
+                >{{ 'follow' | transloco }}
+              </ion-button>
             }
           }
         </div>

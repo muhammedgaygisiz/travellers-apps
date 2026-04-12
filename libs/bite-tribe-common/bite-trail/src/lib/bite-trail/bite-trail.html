@@ -38,11 +38,25 @@
                 />
               </ion-avatar>
 
-              <ng-container
-                >{{
-                'ion-text-color-secondary-class-cursor-pointer-p-by-ion-text-color-primary-class-cursor-pointer-click-go-to-profile-emit-bite-trail-data-owner-id-64-bite-trail-data-owner-name-ion-text-p-ion-text-ion-icon-name-shield-checkmark-outline-color-primary-size-small-class-ion-margin-end'
-                | transloco }}</ng-container
-              >
+              <ion-text color="secondary" class="cursor-pointer">
+                <p>
+                  {{ 'by-before' | transloco}}
+                  <ion-text
+                    color="primary"
+                    class="cursor-pointer"
+                    (click)="goToProfile.emit(biteTrailData.ownerId)"
+                  >
+                    &#64;{{ biteTrailData.ownerName }}
+                  </ion-text>
+                  {{ 'by-after' | transloco}}
+                </p>
+              </ion-text>
+              <ion-icon
+                name="shield-checkmark-outline"
+                color="primary"
+                size="small"
+                class="ion-margin-end"
+              />
             </div>
 
             <div class="ion-display-flex ion-flex-row ion-align-items-center">

@@ -6,8 +6,18 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { addIcons } from 'ionicons';
 import { logoApple, logoFacebook, logoGoogle } from 'ionicons/icons';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('LoginContainerComponent', () => {
   let component: LoginContainerComponent;
@@ -31,6 +41,7 @@ describe('LoginContainerComponent', () => {
           provide: LoginService,
           useValue: mockLoginService,
         },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     }).compileComponents();
 
@@ -88,7 +99,10 @@ describe('LoginContainerComponent', () => {
   it('should handle optional service injection', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     }).compileComponents();
 
     const fixtureWithoutService = TestBed.createComponent(

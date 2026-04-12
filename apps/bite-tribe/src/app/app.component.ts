@@ -54,7 +54,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.initNetworkStatusHandler();
   }
 
-  private async initLanguage(): Promise<void> {
+  async initLanguage(): Promise<void> {
     const { value } = await Preferences.get({ key: 'lang' });
     this.transloco.setActiveLang(value ?? 'en');
   }

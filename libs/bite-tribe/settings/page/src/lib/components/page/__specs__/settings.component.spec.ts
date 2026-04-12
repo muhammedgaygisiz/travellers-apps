@@ -4,6 +4,8 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { PublicUser, Settings } from 'model';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 const setupMockForWindowMatchMedia = (value?: boolean): void => {
   Object.defineProperty(window, 'matchMedia', {
@@ -21,6 +23,14 @@ const setupMockForWindowMatchMedia = (value?: boolean): void => {
   });
 };
 
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
+
 describe(PageSettings.name, () => {
   let component: PageSettings;
   let fixture: ComponentFixture<PageSettings>;
@@ -31,7 +41,10 @@ describe(PageSettings.name, () => {
     setupMockForWindowMatchMedia(false);
 
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     });
     fixture = TestBed.createComponent(PageSettings);
     component = fixture.componentInstance;

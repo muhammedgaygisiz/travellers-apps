@@ -5,10 +5,20 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import type { PublicUser } from 'model';
 import type { OverlayEventDetail } from '@ionic/core';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('heic2any', () => ({}));
 
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe(EditProfilePage.name, () => {
   let component: EditProfilePage;
@@ -17,7 +27,10 @@ describe(EditProfilePage.name, () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     });
 
     fixture = TestBed.createComponent(EditProfilePage);

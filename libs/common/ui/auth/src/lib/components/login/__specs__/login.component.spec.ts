@@ -2,8 +2,18 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LoginComponent } from '../login.component';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -11,7 +21,10 @@ describe('LoginComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     });
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;

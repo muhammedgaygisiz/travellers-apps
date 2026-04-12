@@ -3,6 +3,16 @@ import { ProfileComponent } from '../profile.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -11,7 +21,10 @@ describe('ProfileComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     });
     fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;

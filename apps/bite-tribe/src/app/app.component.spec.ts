@@ -5,6 +5,10 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
 import { AppForegroundService } from 'bite-tribe/shell';
 import { provideMockStore } from '@ngrx/store/testing';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
+import { Network } from '@capacitor/network';
+import { Preferences } from '@capacitor/preferences';
 
 jest.mock('@capacitor/app', () => ({
   App: {
@@ -20,13 +24,39 @@ jest.mock('@capacitor/splash-screen', () => ({
   },
 }));
 
+jest.mock('@capacitor/network', () => ({
+  Network: {
+    addListener: jest.fn(),
+    getStatus: jest.fn(() => of({})),
+  },
+}));
+
+jest.mock('@capacitor/preferences', () => ({
+  Preferences: {
+    get: (): any => Promise.resolve({ value: null }),
+  },
+}));
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+  setActiveLang: jest.fn(),
+};
+
 describe(AppComponent.name, () => {
   let fixture: ComponentFixture<AppComponent>;
   let component: AppComponent;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), provideMockStore()],
+      providers: [
+        provideRouter([]),
+        provideMockStore(),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
       imports: [AppComponent],
     }).compileComponents();
 
@@ -176,6 +206,57 @@ describe(AppComponent.name, () => {
       appStateChangeListener({ isActive: true });
 
       expect(handleAppStateChangeSpy).toHaveBeenCalledWith(true);
+    });
+  });
+
+  describe('initNetworkStatusHandler', () => {
+    it('should call setNetworkStatus when listeners callback is called', () => {
+      const addListenerCalls = (Network.addListener as jest.Mock).mock.calls;
+
+      const setNetworkStatusSpy = jest.spyOn(
+        (component as any).networkStatusService,
+        'setNetworkStatus',
+      );
+      addListenerCalls.find(([event]) => event === 'networkStatusChange')[1]({
+        connected: true,
+      });
+
+      expect(setNetworkStatusSpy).toHaveBeenCalledWith({ connected: true });
+    });
+  });
+
+  describe('initLanguage', () => {
+    describe('given not lang in preferences', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(Preferences, 'get')
+          .mockImplementation(() => Promise.resolve({ value: null }));
+      });
+
+      it('should call setActiveLang with default lang', async () => {
+        const setActiveLangSpy = MockTranslocoService.setActiveLang;
+
+        await component.initLanguage();
+
+        expect(setActiveLangSpy).toHaveBeenCalledWith('en');
+      });
+    });
+
+    describe('given lang in preferences', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(Preferences, 'get')
+          .mockImplementation(() => Promise.resolve({ value: 'de' }));
+      });
+      it('should call setActiveLang with lang from preferences', async () => {
+        const setActiveLangSpy = MockTranslocoService.setActiveLang;
+        const testLang = 'fr';
+        (Preferences.get as jest.Mock).mockResolvedValue({ value: testLang });
+
+        await component.initLanguage();
+
+        expect(setActiveLangSpy).toHaveBeenCalledWith(testLang);
+      });
     });
   });
 });

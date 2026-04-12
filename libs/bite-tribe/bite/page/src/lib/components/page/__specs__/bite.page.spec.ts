@@ -15,8 +15,9 @@ import {
 } from 'ionicons/icons';
 import type { Bite } from 'model';
 import { FormGroup } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
+import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('leaflet');
 
@@ -30,6 +31,14 @@ addNecessaryIcons();
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
+};
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
 };
 
 describe('BitePage', () => {
@@ -69,6 +78,7 @@ describe('BitePage', () => {
         provideIonicAngular(getIonicConfig()),
         provideRouter([]),
         { provide: Platform, useValue: platformMock },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 

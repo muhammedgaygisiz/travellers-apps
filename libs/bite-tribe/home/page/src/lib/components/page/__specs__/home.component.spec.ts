@@ -10,14 +10,23 @@ import { ComponentRef, signal } from '@angular/core';
 import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import {
   InfiniteScrollCustomEvent,
   RefresherCustomEvent,
 } from '@ionic/angular';
 import SpyInstance = jest.SpyInstance;
+import { TranslocoService } from '@jsverse/transloco';
 
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('BiteTribeHomeComponent', () => {
   let component: BiteTribeHomeComponent;
@@ -45,6 +54,7 @@ describe('BiteTribeHomeComponent', () => {
         provideIonicAngular(getIonicConfig()),
         { provide: NavController, useValue: navController },
         { provide: Dialog, useValue: dialogMock },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 

@@ -163,8 +163,8 @@ export class BiteTribeApiService {
     this.profileApiService.saveUser(true);
   }
 
-  saveSettings(settings: Settings): void {
-    void this.settingsApiService.saveSettings(settings);
+  saveSettings(settings: Settings): Promise<void> {
+    return this.settingsApiService.saveSettings(settings);
   }
 
   saveUserIfNotExisting(): void {

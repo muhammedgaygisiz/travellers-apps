@@ -19,7 +19,7 @@ export class SettingsDataAccessService {
   async saveSettings(settings: Settings): Promise<void> {
     await this.saveLanguageToPreferences(settings.language);
 
-    this.api.saveSettings(settings);
+    await this.api.saveSettings(settings);
 
     this.storeService.notifySavedSettings(settings);
   }

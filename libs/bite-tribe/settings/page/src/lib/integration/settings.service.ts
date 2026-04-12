@@ -19,4 +19,8 @@ export class SettingsService {
 
     void this.navController.navigateBack(['home']);
   }
+
+  logout(): void {
+    this.dataAccess.logout();
+  }
 }

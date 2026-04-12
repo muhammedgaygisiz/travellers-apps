@@ -66,7 +66,6 @@ describe(PageSettings.name, () => {
         emailUpdates: false,
         theme: 'light',
         currency: 'EUR',
-        nearby: 2000,
         language: 'en',
       });
     });
@@ -108,7 +107,6 @@ describe(PageSettings.name, () => {
         emailUpdates: mockSettings.emailUpdates,
         theme: mockSettings.theme,
         currency: mockSettings.currency,
-        nearby: mockSettings.nearby,
         language: mockSettings.language,
       });
 
@@ -118,7 +116,7 @@ describe(PageSettings.name, () => {
     });
 
     it('should not emit if form is invalid', () => {
-      component.settingsForm.patchValue({ nearby: 0 }); // Invalid value
+      component.settingsForm.patchValue({ currency: undefined }); // Invalid value
 
       component.saveSettings();
 
@@ -146,30 +144,6 @@ describe(PageSettings.name, () => {
 
       expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
         expect.objectContaining({ currency: 'EUR' }),
-      );
-    });
-
-    it('should emit nearby from form if provided', () => {
-      const mockNearby = 1500;
-
-      component.settingsForm.patchValue({ nearby: mockNearby });
-
-      component.saveSettings();
-
-      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ nearby: mockNearby }),
-      );
-    });
-
-    it('should emit default nearby if none provided in form', () => {
-      component.settingsForm.patchValue({ nearby: undefined as any });
-
-      jest.spyOn(component.settingsForm, 'valid', 'get').mockReturnValue(true);
-
-      component.saveSettings();
-
-      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ nearby: 50 }),
       );
     });
   });
@@ -219,7 +193,6 @@ describe(PageSettings.name, () => {
       setTimeout(() => {
         expect(component.settingsForm.value.theme).toBe('dark');
         expect(component.settingsForm.value.currency).toBe('USD');
-        expect(component.settingsForm.value.nearby).toBe(3000);
       }, 100);
     });
   });
@@ -229,8 +202,8 @@ describe(PageSettings.name, () => {
       expect(component.settingsForm.valid).toBe(true);
     });
 
-    it('should be invalid when nearby is less than 1', () => {
-      component.settingsForm.patchValue({ nearby: 0 });
+    it('should be invalid when currency is undefined', () => {
+      component.settingsForm.patchValue({ currency: undefined });
 
       expect(component.settingsForm.valid).toBe(false);
     });

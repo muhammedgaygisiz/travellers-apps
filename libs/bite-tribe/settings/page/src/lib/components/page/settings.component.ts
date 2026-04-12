@@ -76,7 +76,6 @@ export class PageSettings {
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
     language: ['en', Validators.required],
-    nearby: [2000, [Validators.required, Validators.min(1)]],
   });
 
   settingsEffect = afterRenderEffect(() => {
@@ -123,19 +122,12 @@ export class PageSettings {
   constructor() {
     // Watch for system theme changes
     this.registerSystemThemeChangeHandler();
-    this.registerSystemLanguageChangeHandler();
   }
 
   registerSystemThemeChangeHandler(): void {
     window
       .matchMedia('(prefers-color-scheme: dark)')
       .addEventListener('change', this.handleSystemThemeChange.bind(this));
-  }
-
-  private registerSystemLanguageChangeHandler(): void {
-    window
-      .matchMedia('(prefers-language: en)')
-      .addEventListener('change', this.handleSystemLanguageChange.bind(this));
   }
 
   saveSettings(): void {
@@ -152,7 +144,6 @@ export class PageSettings {
       emailUpdates: !!newSettings.emailUpdates,
       theme,
       currency: newSettings.currency || 'EUR',
-      nearby: newSettings.nearby || 50,
     });
   }
 
@@ -183,10 +174,6 @@ export class PageSettings {
 
   handleSystemThemeChange(e: MediaQueryListEvent): void {
     this.systemTheme.set(this.getTheme(e.matches));
-  }
-
-  handleSystemLanguageChange(e: MediaQueryListEvent): void {
-    this.systemLanguage.set(this.getTheme(e.matches));
   }
 
   getTheme(matches: boolean): 'dark' | 'light' {

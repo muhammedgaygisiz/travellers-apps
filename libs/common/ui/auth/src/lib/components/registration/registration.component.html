@@ -21,6 +21,17 @@
 
         <ion-input
           type="password"
+          label="{{ 'password' | transloco }}"
+          formControlName="password"
+          fill="outline"
+          mode="md"
+          class="ion-margin-top"
+        >
+          <ion-input-password-toggle slot="end" />
+        </ion-input>
+
+        <ion-input
+          type="password"
           label="{{ 'confirm-password' | transloco }}"
           formControlName="passwordConfirm"
           fill="outline"

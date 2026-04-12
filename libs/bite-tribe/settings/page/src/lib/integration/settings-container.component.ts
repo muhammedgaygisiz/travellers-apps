@@ -11,6 +11,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [publicUser]="service.publicUser()"
       [settings]="service.settings()"
       (submitSettings)="service.saveSettings($event)"
+      (logout)="service.logout()"
     />
   `,
   imports: [PageSettings],

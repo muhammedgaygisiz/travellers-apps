@@ -39,4 +39,8 @@ export class SettingsDataAccessService {
   private setLanguage(language = 'en'): void {
     this.transloco.setActiveLang(language);
   }
+
+  logout(): void {
+    this.storeService.logout();
+  }
 }

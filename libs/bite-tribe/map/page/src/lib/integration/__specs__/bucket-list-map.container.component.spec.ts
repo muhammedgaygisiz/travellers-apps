@@ -7,7 +7,6 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 jest.mock('@capacitor-firebase/analytics');
 
-jest.mock('localization');
 addNecessaryIcons();
 
 class Mock {}

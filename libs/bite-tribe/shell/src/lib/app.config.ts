@@ -7,6 +7,8 @@ import { provideBiteTribeShell } from './provide-bite-tribe-shell';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { Environment, getIonicConfig } from 'utils';
 import { provideServiceWorker } from '@angular/service-worker';
+import { provideTransloco } from '@jsverse/transloco';
+import { TranslocoHttpLoader } from './transloco-loader';
 
 export const appConfig = (environment: Environment): ApplicationConfig => ({
   providers: [
@@ -17,5 +19,24 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
       registrationStrategy: 'registerWhenStable:30000',
     }),
     provideIonicAngular(getIonicConfig()),
+    provideTransloco({
+      config: {
+        availableLangs: [
+          'en',
+          'de',
+          'fr',
+          'tr',
+          'es',
+          'it',
+          'ar',
+          'am',
+          'id',
+          'th',
+        ],
+        defaultLang: 'en',
+        fallbackLang: 'en',
+      },
+      loader: TranslocoHttpLoader,
+    }),
   ],
 });

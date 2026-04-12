@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { IonAvatar, IonBadge, IonIcon } from '@ionic/angular/standalone';
 import { PublicUser } from 'model';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 const BADGE_CONFIG = [
   { min: 50, max: 100, cssClassName: 'green' },
@@ -31,7 +32,7 @@ const getBadgeColor = (biteCount: number): string => {
   templateUrl: 'profile-header.html',
   styleUrl: 'profile-header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonAvatar, IonBadge, IonIcon],
+  imports: [IonAvatar, IonBadge, IonIcon, TranslocoPipe],
 })
 export class ProfileHeader {
   user = input<PublicUser | undefined>();

@@ -17,6 +17,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { DecimalPipe, UpperCasePipe } from '@angular/common';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'bite-trail',
@@ -32,6 +33,7 @@ import { DecimalPipe, UpperCasePipe } from '@angular/common';
     IonButton,
     UpperCasePipe,
     DecimalPipe,
+    TranslocoPipe,
   ],
   templateUrl: 'bite-trail.html',
   styleUrl: 'bite-trail.scss',

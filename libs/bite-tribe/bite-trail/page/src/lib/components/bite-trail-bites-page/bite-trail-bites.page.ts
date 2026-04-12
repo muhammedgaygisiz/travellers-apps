@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  inject,
   input,
   output,
 } from '@angular/core';
@@ -15,6 +17,7 @@ import {
 } from '@ionic/angular/standalone';
 import type { Bite } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'bite-trail-bites-page',
@@ -30,9 +33,12 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonCard,
     IonCardContent,
     BiteComponent,
+    TranslocoPipe,
   ],
 })
 export class BiteTrailBitesPage {
+  transloco = inject(TranslocoService);
+
   bites = input<Bite[]>([]);
   title = input('');
   userId = input<string>();
@@ -44,4 +50,11 @@ export class BiteTrailBitesPage {
   readonly openMapView = output<void>();
   readonly getForFree = output<void>();
   readonly goToSavedBucketList = output<void>();
+
+  toggleAddButtonText = computed(() => {
+    const savedBucketlistId = this.savedBucketlistId();
+    return savedBucketlistId
+      ? this.transloco.translate('go-to-saved-bucket-list')
+      : this.transloco.translate('get-bitetrail-for-free');
+  });
 }

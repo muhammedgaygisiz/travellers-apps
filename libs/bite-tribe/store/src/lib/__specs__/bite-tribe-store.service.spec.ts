@@ -241,12 +241,12 @@ describe(BiteTribeStoreService.name, () => {
     });
   });
 
-  describe('saveSettings', () => {
+  describe('notifySavedSettings', () => {
     it('should dispatch saveSettings on BiteTribeStoreService', inject(
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.saveSettings({} as any);
+        service.notifySavedSettings({} as any);
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));

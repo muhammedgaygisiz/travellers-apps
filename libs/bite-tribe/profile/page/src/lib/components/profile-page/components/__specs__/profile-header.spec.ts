@@ -2,6 +2,16 @@ import { ProfileHeader } from '../profile-header';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { PublicUser } from 'model';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe(ProfileHeader.name, () => {
   let component: ProfileHeader;
@@ -9,6 +19,11 @@ describe(ProfileHeader.name, () => {
   let compRef: ComponentRef<ProfileHeader>;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
+    });
     fixture = TestBed.createComponent(ProfileHeader);
     component = fixture.componentInstance;
     compRef = fixture.componentRef;

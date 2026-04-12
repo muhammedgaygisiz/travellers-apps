@@ -24,6 +24,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { Credentials } from '../../api/credentials.model';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 interface RegistrationFields {
   email: FormControl<string | null>;
@@ -45,6 +46,7 @@ interface RegistrationFields {
     IonText,
     IonInputPasswordToggle,
     IonContent,
+    TranslocoPipe,
   ],
 })
 export class RegistrationComponent {

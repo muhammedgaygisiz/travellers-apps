@@ -5,8 +5,9 @@ import { signal } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
-jest.mock('localization');
 jest.mock('@capacitor-firebase/analytics', () => ({
   FirebaseAnalytics: {
     setCurrentScreen: jest.fn(),
@@ -31,6 +32,14 @@ const mockBiteTrailService = {
   goToSavedBucketList: jest.fn(),
 };
 
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
+
 describe(BiteTrailContainerComponent.name, () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -38,6 +47,7 @@ describe(BiteTrailContainerComponent.name, () => {
       providers: [
         provideIonicAngular(getIonicConfig()),
         { provide: BiteTrailService, useValue: mockBiteTrailService },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     }).compileComponents();
   });

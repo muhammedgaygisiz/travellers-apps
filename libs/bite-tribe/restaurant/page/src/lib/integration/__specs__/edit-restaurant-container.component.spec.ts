@@ -8,7 +8,6 @@ jest.mock('@capacitor-firebase/analytics');
 
 jest.mock('heic2any', () => jest.fn());
 
-jest.mock('localization');
 addNecessaryIcons();
 
 describe(EditRestaurantContainer.name, () => {

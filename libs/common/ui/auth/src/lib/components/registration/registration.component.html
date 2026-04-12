@@ -5,12 +5,12 @@
   [showFooter]="false"
 >
   <ion-content class="ion-padding">
-    <h1 class="ion-margin-bottom">Sign up</h1>
+    <h1 class="ion-margin-bottom">{{ 'sign-up' | transloco }}</h1>
 
     <div>
       <form [formGroup]="registrationFormGroup">
         <ion-input
-          label="Email"
+          label="{{ 'email' | transloco }}"
           formControlName="email"
           fill="outline"
           mode="md"
@@ -21,7 +21,7 @@
 
         <ion-input
           type="password"
-          label="Password"
+          label="{{ 'password' | transloco }}"
           formControlName="password"
           fill="outline"
           mode="md"
@@ -32,7 +32,7 @@
 
         <ion-input
           type="password"
-          label="Confirm Password"
+          label="{{ 'confirm-password' | transloco }}"
           formControlName="passwordConfirm"
           fill="outline"
           mode="md"
@@ -47,13 +47,14 @@
           [disabled]="!registrationFormGroup.valid"
           (click)="submitRegistration.emit(registrationFormGroup.value)"
           data-cy="submit"
+          >{{ 'sign-up' | transloco }}</ion-button
         >
-          Sign up
-        </ion-button>
 
         @if (registrationFormGroup.errors?.['mismatch']) {
           <div class="ion-margin-top">
-            <ion-text color="danger"> Password does not match.</ion-text>
+            <ion-text color="danger">{{
+              'password-does-not-match' | transloco
+            }}</ion-text>
           </div>
         }
       </form>

@@ -9,6 +9,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <bt-home
       class="ion-page"
       title="My Bites"
+      i18n-title
       [showFooter]="false"
       [showAddButton]="false"
       [enableBackButton]="true"

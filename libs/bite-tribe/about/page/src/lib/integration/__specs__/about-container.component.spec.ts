@@ -3,9 +3,18 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
-jest.mock('localization');
 jest.mock('@capacitor-firebase/analytics');
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe(AboutContainerComponent.name, () => {
   let component: AboutContainerComponent;
@@ -13,7 +22,10 @@ describe(AboutContainerComponent.name, () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AboutContainerComponent);

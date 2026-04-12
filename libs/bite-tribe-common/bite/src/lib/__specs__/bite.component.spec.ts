@@ -12,6 +12,8 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { ToBlobUrlPipe } from 'image-compression';
 import { OverlayEventDetail } from '@ionic/core';
 import { addNecessaryIcons } from 'utils';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 jest.mock('heic2any', () => jest.fn());
 
@@ -23,6 +25,21 @@ class MockToBlobUrlPipe implements PipeTransform {
 }
 
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
+
+@Pipe({ name: 'transloco' })
+class MockTranslocoPipe implements PipeTransform {
+  transform(value: string): string {
+    return value;
+  }
+}
 
 describe('BiteComponent', () => {
   let component: BiteComponent;
@@ -49,7 +66,12 @@ describe('BiteComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [BiteComponent],
-      providers: [provideIonicAngular(), ToMetricPipe],
+      providers: [
+        provideIonicAngular(),
+        ToMetricPipe,
+        { provide: TranslocoService, useValue: MockTranslocoService },
+        { provide: TranslocoPipe, useValue: MockTranslocoPipe },
+      ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).overrideComponent(BiteComponent, {
       remove: { imports: [ToBlobUrlPipe] },
@@ -89,7 +111,12 @@ describe('BiteComponent', () => {
   });
 
   it('should emit likeButtonClick with correct data', (done) => {
-    const expectedData = { likeType: 'thumbup', biteId: 'bite1' };
+    const expectedData: Like = {
+      createdAt: '',
+      userId: '',
+      likeType: 'thumbup',
+      biteId: 'bite1',
+    };
 
     component.likeButtonClick.subscribe((data) => {
       expect(data).toEqual(expectedData);

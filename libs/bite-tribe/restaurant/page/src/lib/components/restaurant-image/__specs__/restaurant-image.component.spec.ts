@@ -4,8 +4,6 @@ import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { RestaurantImageComponent } from '../restaurant-image.component';
 import { ComponentRef } from '@angular/core';
 
-jest.mock('localization');
-
 addNecessaryIcons();
 
 describe('RestaurantImageComponent', () => {

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -22,6 +23,7 @@ import { OverlayEventDetail } from '@ionic/core';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { BiteTrailComponent } from 'bite-trail';
 import { ProfileHeader } from './components/profile-header';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const UNFOLLOW = 'unfollow';
 const CANCEL = 'cancel';
@@ -44,9 +46,12 @@ const PAGE_SIZE = 50;
     IonInfiniteScrollContent,
     BiteTrailComponent,
     ProfileHeader,
+    TranslocoPipe,
   ],
 })
 export class ProfileComponent {
+  transloco = inject(TranslocoService);
+
   isAuthenticated = input(false);
   user = input<PublicUser | undefined>();
   bites = input<Bite[]>();
@@ -77,11 +82,11 @@ export class ProfileComponent {
 
   confirmationButtons = [
     {
-      text: 'Cancel',
+      text: this.transloco.translate('cancel'),
       role: CANCEL,
     },
     {
-      text: 'Yes, unfollow',
+      text: this.transloco.translate('yes-unfollow'),
       role: UNFOLLOW,
     },
   ];

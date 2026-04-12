@@ -11,13 +11,14 @@ import hasLength from '../utils/has-length';
 import calculateColor, { ClassName } from '../utils/calculate-color';
 import { AsyncPipe } from '@angular/common';
 import { IonIcon, IonItem, IonText } from '@ionic/angular/standalone';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'ta-password-validator',
   templateUrl: './password-validator.component.html',
   styleUrls: ['./password-validator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AsyncPipe, IonItem, IonText, IonIcon],
+  imports: [AsyncPipe, IonItem, IonText, IonIcon, TranslocoPipe],
 })
 export class PasswordValidatorComponent implements OnChanges {
   public readonly password$ = input<Observable<string | null>>();
@@ -42,53 +43,53 @@ export class PasswordValidatorComponent implements OnChanges {
   private initStreams(): void {
     const password$ = this.password$();
     this.hasUpperCaseLetter$ = password$?.pipe(
-      map((password) => this.test(password).forPattern(upperCase))
+      map((password) => this.test(password).forPattern(upperCase)),
     );
 
     this.hasLowerCaseLetter$ = password$?.pipe(
       map((password) => {
         return this.test(password).forPattern(lowerCase);
-      })
+      }),
     );
 
     this.hasNumber$ = password$?.pipe(
-      map((password) => this.test(password).forPattern(digit))
+      map((password) => this.test(password).forPattern(digit)),
     );
 
     this.hasLength8$ = password$?.pipe(
-      map((password) => this.test(password).forLength(minLength))
+      map((password) => this.test(password).forLength(minLength)),
     );
 
     this.hasLowerCaseLetterColor$ = this.hasLowerCaseLetter$?.pipe(
-      map((hasLowerCaseLetter) => calculateColor(hasLowerCaseLetter))
+      map((hasLowerCaseLetter) => calculateColor(hasLowerCaseLetter)),
     );
 
     this.hasLowerCaseLetterIcon$ = this.hasLowerCaseLetter$?.pipe(
-      map((hasLowerCaseLetter) => calculateIcon(hasLowerCaseLetter))
+      map((hasLowerCaseLetter) => calculateIcon(hasLowerCaseLetter)),
     );
 
     this.hasUpperCaseLetterColor$ = this.hasUpperCaseLetter$?.pipe(
-      map((hasUpperCaseLetter) => calculateColor(hasUpperCaseLetter))
+      map((hasUpperCaseLetter) => calculateColor(hasUpperCaseLetter)),
     );
 
     this.hasUpperCaseLetterIcon$ = this.hasUpperCaseLetter$?.pipe(
-      map((hasUpperCaseLetter) => calculateIcon(hasUpperCaseLetter))
+      map((hasUpperCaseLetter) => calculateIcon(hasUpperCaseLetter)),
     );
 
     this.hasNumberColor$ = this.hasNumber$?.pipe(
-      map((hasNumber) => calculateColor(hasNumber))
+      map((hasNumber) => calculateColor(hasNumber)),
     );
 
     this.hasNumberIcon$ = this.hasNumber$?.pipe(
-      map((hasNumber) => calculateIcon(hasNumber))
+      map((hasNumber) => calculateIcon(hasNumber)),
     );
 
     this.hasLength8Color$ = this.hasLength8$?.pipe(
-      map((hasLength8) => calculateColor(hasLength8))
+      map((hasLength8) => calculateColor(hasLength8)),
     );
 
     this.hasLength8Icon$ = this.hasLength8$?.pipe(
-      map((hasLength8) => calculateIcon(hasLength8))
+      map((hasLength8) => calculateIcon(hasLength8)),
     );
   }
 
@@ -113,7 +114,7 @@ export class PasswordValidatorComponent implements OnChanges {
 
   private isFulfilled(
     password: string,
-    condition: () => boolean
+    condition: () => boolean,
   ): boolean | null {
     if (!password) {
       return null;

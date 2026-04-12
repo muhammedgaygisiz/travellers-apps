@@ -4,8 +4,8 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { PublicUser, Settings } from 'model';
-
-jest.mock('localization');
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 const setupMockForWindowMatchMedia = (value?: boolean): void => {
   Object.defineProperty(window, 'matchMedia', {
@@ -23,6 +23,14 @@ const setupMockForWindowMatchMedia = (value?: boolean): void => {
   });
 };
 
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
+
 describe(PageSettings.name, () => {
   let component: PageSettings;
   let fixture: ComponentFixture<PageSettings>;
@@ -33,7 +41,10 @@ describe(PageSettings.name, () => {
     setupMockForWindowMatchMedia(false);
 
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     });
     fixture = TestBed.createComponent(PageSettings);
     component = fixture.componentInstance;
@@ -55,7 +66,7 @@ describe(PageSettings.name, () => {
         emailUpdates: false,
         theme: 'light',
         currency: 'EUR',
-        nearby: 2000,
+        language: 'en',
       });
     });
 
@@ -88,6 +99,7 @@ describe(PageSettings.name, () => {
         currency: 'USD',
         nearby: 5000,
         updatedAt: '2024-01-01T00:00:00Z',
+        language: 'de',
       };
 
       component.settingsForm.setValue({
@@ -95,7 +107,7 @@ describe(PageSettings.name, () => {
         emailUpdates: mockSettings.emailUpdates,
         theme: mockSettings.theme,
         currency: mockSettings.currency,
-        nearby: mockSettings.nearby,
+        language: mockSettings.language,
       });
 
       component.saveSettings();
@@ -104,7 +116,7 @@ describe(PageSettings.name, () => {
     });
 
     it('should not emit if form is invalid', () => {
-      component.settingsForm.patchValue({ nearby: 0 }); // Invalid value
+      component.settingsForm.patchValue({ currency: undefined }); // Invalid value
 
       component.saveSettings();
 
@@ -132,30 +144,6 @@ describe(PageSettings.name, () => {
 
       expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
         expect.objectContaining({ currency: 'EUR' }),
-      );
-    });
-
-    it('should emit nearby from form if provided', () => {
-      const mockNearby = 1500;
-
-      component.settingsForm.patchValue({ nearby: mockNearby });
-
-      component.saveSettings();
-
-      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ nearby: mockNearby }),
-      );
-    });
-
-    it('should emit default nearby if none provided in form', () => {
-      component.settingsForm.patchValue({ nearby: undefined as any });
-
-      jest.spyOn(component.settingsForm, 'valid', 'get').mockReturnValue(true);
-
-      component.saveSettings();
-
-      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ nearby: 50 }),
       );
     });
   });
@@ -195,6 +183,7 @@ describe(PageSettings.name, () => {
         currency: 'USD',
         nearby: 3000,
         updatedAt: '2024-01-01T00:00:00Z',
+        language: 'de',
       };
 
       compRef.setInput('settings', mockSettings);
@@ -204,7 +193,6 @@ describe(PageSettings.name, () => {
       setTimeout(() => {
         expect(component.settingsForm.value.theme).toBe('dark');
         expect(component.settingsForm.value.currency).toBe('USD');
-        expect(component.settingsForm.value.nearby).toBe(3000);
       }, 100);
     });
   });
@@ -214,8 +202,8 @@ describe(PageSettings.name, () => {
       expect(component.settingsForm.valid).toBe(true);
     });
 
-    it('should be invalid when nearby is less than 1', () => {
-      component.settingsForm.patchValue({ nearby: 0 });
+    it('should be invalid when currency is undefined', () => {
+      component.settingsForm.patchValue({ currency: undefined });
 
       expect(component.settingsForm.valid).toBe(false);
     });

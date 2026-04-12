@@ -3,8 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
-jest.mock('localization');
-
 describe(EditBucketlistPage.name, () => {
   let comp: EditBucketlistPage;
   let fixture: ComponentFixture<EditBucketlistPage>;

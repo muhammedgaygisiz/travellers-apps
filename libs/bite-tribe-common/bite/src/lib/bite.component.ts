@@ -2,6 +2,7 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  inject,
   input,
   output,
   signal,
@@ -24,6 +25,7 @@ import type { OverlayEventDetail } from '@ionic/core';
 import { DistanceComponent } from 'common/distance';
 import { GetImagePipe } from './pipes/get-image.pipe';
 import { AsyncPipe } from '@angular/common';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
@@ -47,10 +49,13 @@ const CANCEL = 'cancel';
     DistanceComponent,
     GetImagePipe,
     AsyncPipe,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteComponent {
+  private readonly transloco = inject(TranslocoService);
+
   bite = input.required<Bite>();
   userId = input<string>();
   showEditButton = input(false, { transform: booleanAttribute });
@@ -68,11 +73,11 @@ export class BiteComponent {
 
   confirmationButtons = [
     {
-      text: 'Cancel',
+      text: this.transloco.translate('cancel'),
       role: CANCEL,
     },
     {
-      text: 'Delete',
+      text: this.transloco.translate('delete'),
       role: DELETE,
     },
   ];

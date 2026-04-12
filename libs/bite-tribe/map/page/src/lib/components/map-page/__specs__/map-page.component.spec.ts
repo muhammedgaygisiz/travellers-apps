@@ -6,8 +6,6 @@ import { MapPageComponent } from '../map-page.component';
 
 addNecessaryIcons();
 
-jest.mock('localization');
-
 describe('MapPageComponent', () => {
   let component: MapPageComponent;
   let fixture: ComponentFixture<MapPageComponent>;

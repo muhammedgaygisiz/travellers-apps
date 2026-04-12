@@ -5,13 +5,22 @@ import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 import { BucketlistsService } from '../bucketlists.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 jest.mock('@capacitor-firebase/analytics');
 
 jest.mock('heic2any', () => jest.fn());
 
-jest.mock('localization');
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('BucketlistsContainerComponent', () => {
   let component: BucketlistsContainerComponent;
@@ -33,6 +42,7 @@ describe('BucketlistsContainerComponent', () => {
             deleteBucketlist: jest.fn(),
           },
         },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 

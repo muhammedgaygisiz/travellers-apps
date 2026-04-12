@@ -56,6 +56,13 @@ export const unregistered: Story = {
   },
 };
 
+export const unregisteredWithoutBites: Story = {
+  args: {
+    ...unregistered.args,
+    bites: [],
+  },
+};
+
 export const registered: Story = {
   args: {
     bites: [...(unregistered.args?.bites || [])],

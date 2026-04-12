@@ -20,19 +20,17 @@
         <h1>{{ placeName() }}</h1>
       </div>
 
-      @if (biteCount) {
-        <div class="rating-container">
-          <ion-icon [src]="starIconPath" class="rating-icon" />
+      <div class="rating-container">
+        <ion-icon [src]="starIconPath" class="rating-icon" />
+        @if (biteCount) {
           <span class="rating">{{ averageBiteRating() }}</span>
           <span class="text-small text-secondary">
             ({{ biteCount }} ratings)</span
           >
-        </div>
-      } @else {
-        <div class="rating-container">
+        } @else {
           <span class="text-small text-secondary">No ratings yet</span>
-        </div>
-      }
+        }
+      </div>
 
       <bt-distance [distance]="placeDistance()" />
 
@@ -120,16 +118,18 @@
             <ion-icon slot="end" name="chevron-forward-outline" />
           </div>
         </ion-button>
-        <ion-button
-          expand="full"
-          fill="outline"
-          (click)="showBitesClick.emit(restaurantData)"
-        >
-          <div class="fill-button-content">
-            <span>Bites</span>
-            <ion-icon slot="end" name="chevron-forward-outline" />
-          </div>
-        </ion-button>
+        @if (biteCount) {
+          <ion-button
+            expand="full"
+            fill="outline"
+            (click)="showBitesClick.emit(restaurantData)"
+          >
+            <div class="fill-button-content">
+              <span>Bites</span>
+              <ion-icon slot="end" name="chevron-forward-outline" />
+            </div>
+          </ion-button>
+        }
       </div>
     </div>
   </ion-content>

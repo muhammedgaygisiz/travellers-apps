@@ -117,6 +117,33 @@ describe('RestaurantService', () => {
     });
   });
 
+  describe('navigateToBites', () => {
+    it('should navigate to bites if bite and restaurant with menuId exist', () => {
+      const restaurant: Restaurant = {
+        id: 'restaurant123',
+        name: 'Test Restaurant',
+        menuId: 'empty/collections/menu456',
+      } as Restaurant;
+      service.navigateToBites(restaurant);
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        mockBite.id,
+        'restaurant',
+        restaurant.id,
+        'bites',
+      ]);
+    });
+
+    it('should not navigate if no menuId', () => {
+      const restaurant: Restaurant = {
+        id: 'restaurant123',
+        name: 'Test Restaurant',
+      } as Restaurant;
+      service.navigateToBites(restaurant);
+      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
+    });
+  });
+
   describe('biteClicked', () => {
     it('should navigate to bite details', () => {
       const bite: Bite = {

@@ -1,67 +1,68 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { HomeService } from '../home.service';
 import { RestaurantBitesContainer } from '../restaurant-bites.container';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+import { addNecessaryIcons } from 'utils';
+
+jest.mock('@capacitor-firebase/analytics');
+jest.mock('localization');
+addNecessaryIcons();
 
 describe('RestaurantBitesContainer', () => {
   let component: RestaurantBitesContainer;
   let fixture: ComponentFixture<RestaurantBitesContainer>;
-  let mockHomeService: jasmine.SpyObj<HomeService>;
+  let homeServiceMock: HomeService;
 
-  beforeEach(async () => {
-    const homeServiceSpy = jasmine.createSpyObj(
-      'HomeService',
-      [
-        'logout',
-        'likeButtonClicked',
-        'biteClicked',
-        'restaurantClicked',
-        'onAddButtonClicked',
-        'onGotoSettingsClick',
-        'onGotoMyProfileClick',
-        'onGotoMyBitesClick',
-        'onGotoEditClick',
-        'onGotoAboutClick',
-        'onDeleteBiteClick',
-        'openMapView',
-        'restaurantBitesSortingChange',
-        'refresh',
-        'closeGpsError',
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideIonicAngular(),
+        {
+          provide: HomeService,
+          useValue: {
+            likeButtonClicked: (): void => {},
+            biteClicked: (): void => {},
+            restaurantClicked: (): void => {},
+            onAddButtonClicked: (): void => {},
+            onGotoSettingsClick: (): void => {},
+            onGotoMyProfileClick: (): void => {},
+            onGotoMyBitesClick: (): void => {},
+            onGotoEditClick: (): void => {},
+            onGotoAboutClick: (): void => {},
+            onDeleteBiteClick: (): void => {},
+            openMapView: (): void => {},
+            restaurantBitesSortingChange: (): void => {},
+            refresh: (): void => {},
+            closeGpsError: (): void => {},
+          },
+        },
       ],
-      {
-        restaurantBites: jasmine.createSpy().and.returnValue([]),
-        userId: jasmine.createSpy().and.returnValue('test-user'),
-        isReloading: jasmine.createSpy().and.returnValue(false),
-        hasErrorLoadingGpsPosition: jasmine.createSpy().and.returnValue(false),
-        restaurantBitesSorting: jasmine
-          .createSpy()
-          .and.returnValue('createdAt'),
-      },
-    );
-
-    await TestBed.configureTestingModule({
-      imports: [RestaurantBitesContainer],
-      providers: [{ provide: HomeService, useValue: homeServiceSpy }],
-    }).compileComponents();
+    });
 
     fixture = TestBed.createComponent(RestaurantBitesContainer);
     component = fixture.componentInstance;
-    mockHomeService = TestBed.inject(
-      HomeService,
-    ) as jasmine.SpyObj<HomeService>;
+    homeServiceMock = TestBed.inject(HomeService);
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call FirebaseAnalytics.setCurrentScreen on ionViewDidEnter', () => {
-    spyOn(FirebaseAnalytics, 'setCurrentScreen');
+  describe('ionViewDidEnter', () => {
+    let setCurrentScreenSpy: jest.SpyInstance;
 
-    component.ionViewDidEnter();
+    beforeEach(() => {
+      setCurrentScreenSpy = jest.spyOn(FirebaseAnalytics, 'setCurrentScreen');
+    });
 
-    expect(FirebaseAnalytics.setCurrentScreen).toHaveBeenCalledWith({
-      screenName: 'Restaurant Bites',
+    it('should set current screen to "Restaurant Bites"', () => {
+      component.ionViewDidEnter();
+
+      expect(setCurrentScreenSpy).toHaveBeenCalledWith({
+        screenName: 'Restaurant Bites',
+      });
     });
   });
 });

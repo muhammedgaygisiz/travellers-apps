@@ -54,7 +54,7 @@ export class BiteTrailBitesPage {
   toggleAddButtonText = computed(() => {
     const savedBucketlistId = this.savedBucketlistId();
     return savedBucketlistId
-      ? this.transloco.translate('go-to-saved bucket-list')
+      ? this.transloco.translate('go-to-saved-bucket-list')
       : this.transloco.translate('get-bitetrail-for-free');
   });
 }

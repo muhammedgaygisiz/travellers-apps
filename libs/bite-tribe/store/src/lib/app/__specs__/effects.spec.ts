@@ -254,7 +254,7 @@ describe(AppEffect.name, () => {
       );
     });
 
-    it('should dispatch loadedGpsPosition on reloadGpsPosition even when movement is below threshold', () => {
+    it('should dispatch loadedGPSPosition on reloadGpsPosition even when movement is below threshold', () => {
       scheduler.run(({ cold, expectObservable }) => {
         const previousPosition = { latitude: 10, longitude: 20 };
         const smallMovementPosition = {

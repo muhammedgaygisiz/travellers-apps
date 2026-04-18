@@ -27,10 +27,7 @@ export class SettingsDataAccessService {
 
     this.setLanguage(settings.language);
 
-    const languageChanged = this.settings()?.language !== settings.language;
-    if (languageChanged) {
-      document.location.reload();
-    }
+    document.location.reload();
   }
 
   private saveLanguageToPreferences(language = 'en'): Promise<void> {

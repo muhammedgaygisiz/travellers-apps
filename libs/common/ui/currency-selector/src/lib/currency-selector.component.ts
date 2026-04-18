@@ -47,6 +47,8 @@ export class CurrencySelectorComponent {
   favoriteCurrencies = input<string[] | undefined>([]);
   disableFavChange = input<boolean>(false);
 
+  leftButtonLangCode = input<string>('cancel');
+
   currencySelected = output<string>();
   favoriteCurrencyToggled = output<string>();
   selectionCancel = output<void>();

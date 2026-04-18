@@ -14,6 +14,7 @@ import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import { Store } from '@ngrx/store';
 import { getEffectsMetadata } from '@ngrx/effects';
 import SpyInstance = jest.SpyInstance;
+import { gpsPosition } from '../selectors';
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
@@ -186,15 +187,84 @@ describe(AppEffect.name, () => {
 
         actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
 
-        const expected = 'a';
-        const output = { a: AppActions.fetchGPSPosition() };
-
-        expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
+        expectObservable(effects.fetchGpsPosition$);
       });
 
       expect(dispatchSpy).toHaveBeenCalledWith(
         AppActions.loadedGPSPosition({
           position: { coords: { latitude: 1, longitude: 2 } },
+        }),
+      );
+    });
+
+    it('should not dispatch loadedGpsPosition when movement is below threshold', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        const previousPosition = { latitude: 10, longitude: 20 };
+        const smallMovementPosition = {
+          coords: { latitude: 10.00001, longitude: 20.00001 },
+        };
+
+        (store as MockStore).overrideSelector(gpsPosition, previousPosition);
+        getCurrentPositionMock.mockReturnValue(
+          cold('a|', { a: smallMovementPosition }),
+        );
+
+        actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
+
+        expectObservable(effects.fetchGpsPosition$);
+      });
+
+      expect(dispatchSpy).not.toHaveBeenCalledWith(
+        AppActions.loadedGPSPosition({
+          position: { coords: { latitude: 10.00001, longitude: 20.00001 } },
+        }),
+      );
+    });
+
+    it('should dispatch loadedGpsPosition when movement is meaningful', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        const previousPosition = { latitude: 10, longitude: 20 };
+        const meaningfulMovementPosition = {
+          coords: { latitude: 10.002, longitude: 20.002 },
+        };
+
+        (store as MockStore).overrideSelector(gpsPosition, previousPosition);
+        getCurrentPositionMock.mockReturnValue(
+          cold('a|', { a: meaningfulMovementPosition }),
+        );
+
+        actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
+
+        expectObservable(effects.fetchGpsPosition$);
+      });
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        AppActions.loadedGPSPosition({
+          position: { coords: { latitude: 10.002, longitude: 20.002 } },
+        }),
+      );
+    });
+
+    it('should dispatch clearReloadGPSPosition if no meaningful movement', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        const previousPosition = { latitude: 10, longitude: 20 };
+        const smallMovementPosition = {
+          coords: { latitude: 10.00001, longitude: 20.00001 },
+        };
+
+        (store as MockStore).overrideSelector(gpsPosition, previousPosition);
+        getCurrentPositionMock.mockReturnValue(
+          cold('a|', { a: smallMovementPosition }),
+        );
+
+        actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
+
+        expectObservable(effects.fetchGpsPosition$);
+      });
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        AppActions.clearReloadGPSPosition({
+          reason: 'No meaningful movement detected',
         }),
       );
     });

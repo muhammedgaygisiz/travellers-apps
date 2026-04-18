@@ -33,6 +33,7 @@ export class BiteDataAccessService {
   });
 
   currency = toSignal(this.storeService.currencyFromSettings$);
+  favCurrencies = toSignal(this.storeService.favCurrenciesFromSettings$);
   position = toSignal(this.storeService.position$);
   cachedBite = toSignal(this.storeService.cachedBite$);
   nearbyRestaurants = toSignal(this.storeService.nearbyRestaurants$);

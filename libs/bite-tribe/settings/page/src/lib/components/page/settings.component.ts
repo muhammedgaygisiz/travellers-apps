@@ -75,6 +75,7 @@ export class PageSettings {
     emailUpdates: [{ value: false, disabled: true }, Validators.required],
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
+    favoriteCurrencies: [[] as string[]],
     language: ['en', Validators.required],
   });
 
@@ -111,6 +112,25 @@ export class PageSettings {
     return this.currencies.find((c) => c.code === currencyCode)?.name;
   });
 
+  favoriteCurrenciesValueChanges = toSignal(
+    this.settingsForm.controls['favoriteCurrencies'].valueChanges,
+  );
+
+  favoriteCurrencyNames = computed(() => {
+    this.favoriteCurrenciesValueChanges();
+    const favoriteCurrencyCodes =
+      this.settingsForm.controls['favoriteCurrencies'].value;
+
+    return favoriteCurrencyCodes
+      .map((currencyCode) => {
+        return this.currencies.find(
+          (currency) => currency.code === currencyCode,
+        )?.name;
+      })
+      .filter((currencyName): currencyName is string => !!currencyName)
+      .join(', ');
+  });
+
   subscriptionTier = computed(() => {
     const user = this.publicUser();
     return user?.subscriptionTier ?? 0;
@@ -137,6 +157,7 @@ export class PageSettings {
 
     const newSettings = this.settingsForm.getRawValue();
     const theme = this.calculateTheme(newSettings.theme);
+    const favoriteCurrencies = [...new Set(newSettings.favoriteCurrencies)];
 
     this.submitSettings.emit({
       ...newSettings,
@@ -144,6 +165,7 @@ export class PageSettings {
       emailUpdates: !!newSettings.emailUpdates,
       theme,
       currency: newSettings.currency || 'EUR',
+      favoriteCurrencies,
     });
   }
 
@@ -170,6 +192,22 @@ export class PageSettings {
     this.settingsForm.controls['currency'].markAsDirty();
 
     modal.dismiss();
+  }
+
+  onFavoriteCurrencyToggle(currencyCode: string): void {
+    const favoriteCurrencies =
+      this.settingsForm.controls['favoriteCurrencies'].value;
+    const isFavoriteCurrency = favoriteCurrencies.includes(currencyCode);
+    const newFavoriteCurrencies = isFavoriteCurrency
+      ? favoriteCurrencies.filter((favoriteCurrencyCode) => {
+          return favoriteCurrencyCode !== currencyCode;
+        })
+      : [...favoriteCurrencies, currencyCode];
+
+    this.settingsForm.patchValue({
+      favoriteCurrencies: newFavoriteCurrencies,
+    });
+    this.settingsForm.controls['favoriteCurrencies'].markAsDirty();
   }
 
   handleSystemThemeChange(e: MediaQueryListEvent): void {

@@ -1,14 +1,29 @@
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { CurrencySelectorComponent } from '../currency-selector.component';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
+
+addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: (key: string): string => key,
+  config: {
+    reRenderOnLangChange: (): boolean => true,
+  },
+  langChanges$: of(),
+};
 
 export default {
   title: 'Components/Currency Selector',
   component: CurrencySelectorComponent,
   decorators: [
     applicationConfig({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     }),
   ],
 } as Meta<CurrencySelectorComponent>;

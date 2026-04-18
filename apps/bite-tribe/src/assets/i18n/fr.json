@@ -122,5 +122,11 @@
   "close": "FERMER",
   "drag-and-drop-not-supported": "Le glisser-déposer n'est pas pris en charge. <br />Appuie pour téléverser ou prendre une photo.",
   "tap-into-box": "Appuie dans la zone pour téléverser <br />ou prendre une photo.",
-  "image-upload-disabled": "Il semble que tu sois hors ligne. Tu peux quand même créer un Bite sans image et en ajouter une plus tard, quand tu seras de nouveau en ligne."
+  "image-upload-disabled": "Il semble que tu sois hors ligne. Tu peux quand même créer un Bite sans image et en ajouter une plus tard, quand tu seras de nouveau en ligne.",
+  "not-verified-restaurant": "Ce restaurant n'est pas encore verifie sur BiteTribe.",
+  "restaurant-rating": "({{ biteCount }} avis)",
+  "no-ratings-yet": "Pas encore d'avis",
+  "no-social-media-links": "Aucun lien vers les reseaux sociaux",
+  "menu": "Menu",
+  "bites": "Bites"
 }

@@ -39,6 +39,7 @@ import { getPosition } from '../../utils/get-position';
 import { getDistance } from '../../utils/get-distance';
 import { DistanceComponent } from 'common/distance';
 import { uniqueBitesByName } from '../../utils/unique-bites-by-name';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'restaurant',
@@ -62,6 +63,7 @@ import { uniqueBitesByName } from '../../utils/unique-bites-by-name';
     EnsureProtocolPipe,
     RestaurantImageComponent,
     DistanceComponent,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

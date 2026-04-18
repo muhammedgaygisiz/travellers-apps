@@ -122,5 +122,11 @@
   "close": "KAPAT",
   "drag-and-drop-not-supported": "Drag-and-drop desteklenmiyor. <br />Yüklemek veya fotoğraf çekmek için dokun.",
   "tap-into-box": "Yüklemek için kutuya dokun <br />veya fotoğraf çek.",
-  "image-upload-disabled": "Görünüşe göre çevrimdışısın. Yine de görsel olmadan bir bite oluşturabilirsin ve tekrar çevrimiçi olduğunda bir görsel ekleyebilirsin."
+  "image-upload-disabled": "Görünüşe göre çevrimdışısın. Yine de görsel olmadan bir bite oluşturabilirsin ve tekrar çevrimiçi olduğunda bir görsel ekleyebilirsin.",
+  "not-verified-restaurant": "Bu restoran henüz BiteTribe'da doğrulanmadı.",
+  "restaurant-rating": "({{ biteCount }} değerlendirme)",
+  "no-ratings-yet": "Henüz değerlendirme yok",
+  "no-social-media-links": "Sosyal Medya Bağlantısı Yok",
+  "menu": "Menü",
+  "bites": "Bite'lar"
 }

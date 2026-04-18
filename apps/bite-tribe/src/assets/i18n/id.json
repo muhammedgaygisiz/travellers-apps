@@ -122,5 +122,11 @@
   "close": "TUTUP",
   "drag-and-drop-not-supported": "Drag & drop tidak didukung. <br />Ketuk untuk mengunggah atau mengambil foto.",
   "tap-into-box": "Ketuk kotaknya untuk mengunggah <br />atau mengambil foto.",
-  "image-upload-disabled": "Sepertinya kamu sedang offline. Kamu tetap bisa membuat Bite tanpa gambar dan menambahkannya nanti saat kamu kembali online."
+  "image-upload-disabled": "Sepertinya kamu sedang offline. Kamu tetap bisa membuat Bite tanpa gambar dan menambahkannya nanti saat kamu kembali online.",
+  "not-verified-restaurant": "Restoran ini belum terverifikasi di BiteTribe.",
+  "restaurant-rating": "({{ biteCount }} penilaian)",
+  "no-ratings-yet": "Belum ada penilaian",
+  "no-social-media-links": "Tidak ada tautan media sosial",
+  "menu": "Menu",
+  "bites": "Bites"
 }

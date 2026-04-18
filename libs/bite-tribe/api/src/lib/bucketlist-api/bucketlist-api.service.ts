@@ -78,29 +78,50 @@ export class BucketlistApiService {
     params: CreateBucketListFromBiteTrailParams,
   ): Promise<Bucketlist> {
     const user = this.authService.getUser();
-    const soldAt = new Date().toISOString();
-    const soldAtTimestamp = Date.now();
+
+    if (!user?.uid) {
+      throw new Error('User not authenticated');
+    }
+
+    const nowTimestamp = Date.now();
+    const nowIsoString = new Date(nowTimestamp).toISOString();
 
     const docResult = await FirebaseFirestore.addDocument({
       reference: BUCKETLIST_COLLECTION,
       data: {
-        userId: user?.uid || '',
+        userId: user.uid,
         name: params.bucketListName,
         biteIds: params.biteIds,
         biteTrailId: params.biteTrailId,
-        createdAt: new Date().toISOString(),
-        createdAtTimestamp: Date.now(),
+        createdAt: nowIsoString,
+        createdAtTimestamp: nowTimestamp,
       },
     });
 
-    await FirebaseFirestore.addDocument({
-      reference: `${BITE_TRAIL_COLLECTION}/${params.biteTrailId}/sells`,
-      data: {
-        userId: user?.uid || '',
-        soldAt,
-        soldAtTimestamp,
-      },
-    });
+    try {
+      await FirebaseFirestore.addDocument({
+        reference: `${BITE_TRAIL_COLLECTION}/${params.biteTrailId}/sells`,
+        data: {
+          userId: user.uid,
+          soldAt: nowIsoString,
+          soldAtTimestamp: nowTimestamp,
+        },
+      });
+    } catch (error) {
+      try {
+        await FirebaseFirestore.deleteDocument({
+          reference: docResult.reference.path,
+        });
+      } catch (rollbackError) {
+        console.error(
+          'Error rolling back bucket list after sell write failure:',
+          rollbackError,
+        );
+        this.errorHandler.handleError(rollbackError);
+      }
+
+      throw error;
+    }
 
     const result = await FirebaseFirestore.getDocument({
       reference: docResult.reference.path,
@@ -145,7 +166,6 @@ export class BucketlistApiService {
         data: {
           userId: user?.uid || '',
           name: bucketlistName,
-          biteIds: [],
           createdAt: new Date().toISOString(),
           createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },

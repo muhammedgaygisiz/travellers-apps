@@ -162,6 +162,29 @@ describe(BucketlistApiService.name, () => {
   });
 
   describe('createBucketListFromBiteTrail', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should throw when user is not authenticated', async () => {
+      jest.clearAllMocks();
+
+      const getUserSpy = jest
+        .spyOn(MockedAuthService, 'getUser')
+        .mockReturnValue(undefined);
+      const addDocumentMock = jest.spyOn(FirebaseFirestore, 'addDocument');
+
+      await expect(
+        service.createBucketListFromBiteTrail({
+          bucketListName: 'Free Trail',
+          biteIds: ['bite-1'],
+          biteTrailId: 'trail-1',
+        }),
+      ).rejects.toThrow('User not authenticated');
+
+      expect(addDocumentMock).not.toHaveBeenCalled();
+    });
+
     it('should create bucketlist and write sell in bite trail sub-collection', async () => {
       jest.clearAllMocks();
 
@@ -210,9 +233,33 @@ describe(BucketlistApiService.name, () => {
       expect(getDocumentMock).toHaveBeenCalledWith({
         reference: 'bucketlists/new-bucketlist',
       });
+    });
 
-      addDocumentMock.mockRestore();
-      getDocumentMock.mockRestore();
+    it('should rollback bucketlist creation if sell write fails', async () => {
+      jest.clearAllMocks();
+
+      const error = new Error('Failed to save sell');
+      const addDocumentMock = jest
+        .spyOn(FirebaseFirestore, 'addDocument')
+        .mockResolvedValueOnce({
+          reference: { path: 'bucketlists/new-bucketlist' },
+        } as any)
+        .mockRejectedValueOnce(error);
+      const deleteDocumentMock = jest
+        .spyOn(FirebaseFirestore, 'deleteDocument')
+        .mockResolvedValue({} as any);
+
+      await expect(
+        service.createBucketListFromBiteTrail({
+          bucketListName: 'Free Trail',
+          biteIds: ['bite-1', 'bite-2'],
+          biteTrailId: 'trail-1',
+        }),
+      ).rejects.toThrow('Failed to save sell');
+
+      expect(deleteDocumentMock).toHaveBeenCalledWith({
+        reference: 'bucketlists/new-bucketlist',
+      });
     });
   });
 
@@ -318,7 +365,6 @@ describe(BucketlistApiService.name, () => {
           data: {
             userId: '123',
             name: 'My Bucketlist',
-            biteIds: [],
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
           },

@@ -105,7 +105,6 @@
       "common/distance": ["libs/common/distance/src/index.ts"],
       "geolocation": ["libs/common/geolocation/src/index.ts"],
       "image-compression": ["libs/common/image-compression/src/index.ts"],
-      "localization": ["libs/common/localization/src/index.ts"],
       "model": ["libs/bite-tribe-common/model/src/index.ts"],
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
       "utils": ["libs/common/utils/src/index.ts"],

@@ -1,7 +1,6 @@
 export { appConfig } from './lib/app.config';
 export { provideBiteTribeShell } from './lib/provide-bite-tribe-shell';
-export { addNecessaryIcons } from 'utils';
-export { SupportedLang } from 'localization';
+export { addNecessaryIcons, SupportedLang } from 'utils';
 export {
   AppForegroundService,
   FOREGROUND_REFRESH_THRESHOLD_MS,

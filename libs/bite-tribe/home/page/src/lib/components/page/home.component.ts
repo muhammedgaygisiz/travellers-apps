@@ -40,6 +40,7 @@ import {
 } from '@ionic/angular';
 import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 const PAGE_SIZE = 50;
 
@@ -70,6 +71,7 @@ const PAGE_SIZE = 50;
     IonRefresher,
     IonRefresherContent,
     IonSearchbar,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

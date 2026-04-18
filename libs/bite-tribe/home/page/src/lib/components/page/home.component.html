@@ -67,7 +67,7 @@
             @if (selectedFilters().length > 0 || distance()) {
               <ion-badge color="danger">{{ numberOfFilters() }}</ion-badge>
             }
-            <ion-text color="secondary">Filter</ion-text>
+            <ion-text color="secondary">{{ 'filter' | transloco }}</ion-text>
           </ion-chip>
         </div>
 
@@ -89,11 +89,21 @@
               [placeholder]="sortingLabel()"
               (ionChange)="emitSortingChange($event)"
             >
-              <ion-select-option value="distance">Distance</ion-select-option>
-              <ion-select-option value="createdAt">Date</ion-select-option>
-              <ion-select-option value="likes">Likes</ion-select-option>
-              <ion-select-option value="rating">Rating</ion-select-option>
-              <ion-select-option value="price">Price</ion-select-option>
+              <ion-select-option value="distance">
+                {{ 'distance' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="createdAt">{{
+                'date' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="likes">{{
+                'likes' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="rating">{{
+                'rating' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="price">{{
+                'price' | transloco
+              }}</ion-select-option>
             </ion-select>
           </ion-chip>
         </div>

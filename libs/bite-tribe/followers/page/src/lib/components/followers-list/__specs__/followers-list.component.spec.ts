@@ -4,8 +4,16 @@ import { PublicUser } from 'model';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
-jest.mock('localization');
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe(FollowersListComponent.name, () => {
   let component: FollowersListComponent;
@@ -15,7 +23,10 @@ describe(FollowersListComponent.name, () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FollowersListComponent],
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FollowersListComponent);
@@ -25,6 +36,18 @@ describe(FollowersListComponent.name, () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('toggleTitleText', () => {
+    it('should return "Followers" when type is followers', () => {
+      componentRef.setInput('type', 'followers');
+      expect(component.toggleTitleText()).toBe('followers');
+    });
+
+    it('should return "Following" when type is following', () => {
+      componentRef.setInput('type', 'following');
+      expect(component.toggleTitleText()).toBe('following');
+    });
   });
 
   describe('openConfirmationDialog', () => {
@@ -128,8 +151,8 @@ describe(FollowersListComponent.name, () => {
   describe('confirmationButtons', () => {
     it('should have Cancel and Yes, unfollow buttons', () => {
       expect(component.confirmationButtons).toEqual([
-        { text: 'Cancel', role: 'cancel' },
-        { text: 'Yes, unfollow', role: 'unfollow' },
+        { text: 'cancel', role: 'cancel' },
+        { text: 'yes-unfollow', role: 'unfollow' },
       ]);
     });
   });

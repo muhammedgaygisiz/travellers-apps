@@ -4,9 +4,18 @@ import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import SpyInstance = jest.SpyInstance;
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
-jest.mock('localization');
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('BucketlistsPage', () => {
   let component: BucketlistsPage;
@@ -18,6 +27,7 @@ describe('BucketlistsPage', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
     fixture = TestBed.createComponent(BucketlistsPage);
@@ -32,17 +42,17 @@ describe('BucketlistsPage', () => {
   describe('sortingLabel', () => {
     it('should return "Name" when sorting is "name"', () => {
       componentRef.setInput('sorting', 'name');
-      expect(component.sortingLabel()).toBe('Name');
+      expect(component.sortingLabel()).toBe('name');
     });
 
     it('should return "Date" when sorting is "createdAt"', () => {
       componentRef.setInput('sorting', 'createdAt');
-      expect(component.sortingLabel()).toBe('Date');
+      expect(component.sortingLabel()).toBe('date');
     });
 
     it('should return "Name" for any other sorting value', () => {
       componentRef.setInput('sorting', 'otherValue');
-      expect(component.sortingLabel()).toBe('Name');
+      expect(component.sortingLabel()).toBe('name');
     });
   });
 

@@ -16,6 +16,8 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
 import { ConnectionStatus, Network } from '@capacitor/network';
 import { NetworkStatusService } from 'common/networkstatus';
+import { TranslocoService } from '@jsverse/transloco';
+import { Preferences } from '@capacitor/preferences';
 
 @Component({
   selector: 'bt-root',
@@ -34,11 +36,14 @@ export class AppComponent implements OnInit, OnDestroy {
   navController = inject(NavController);
   private readonly appForegroundService = inject(AppForegroundService);
   private readonly networkStatusService = inject(NetworkStatusService);
+  private readonly transloco = inject(TranslocoService);
 
   backButtonHandler = ({ canGoBack }: { canGoBack: boolean }): void =>
     this.handleBackButton(canGoBack);
 
   constructor() {
+    void this.initLanguage();
+
     addNecessaryIcons();
 
     this.initBackbuttonHandler();
@@ -47,6 +52,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.initAppStateChangeHandler();
     this.initNetworkStatusHandler();
+  }
+
+  async initLanguage(): Promise<void> {
+    const { value } = await Preferences.get({ key: 'lang' });
+    this.transloco.setActiveLang(value ?? 'en');
   }
 
   ngOnInit(): void {

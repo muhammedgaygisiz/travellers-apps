@@ -14,7 +14,7 @@ export const AppActions = createActionGroup({
     'Clear GPS error': emptyProps(),
     'Loaded GPS position': props<{ position: any }>(),
     'Error loading GPS position': props<{ error: any }>(),
-    'Save settings': props<{ settings: Settings }>(),
+    'Saved settings': props<{ settings: Settings }>(),
     'Save public profile': props<{ profile: PublicUser }>(),
     'Saved public profile': props<{ profile: PublicUser }>(),
     'Upload profile image': props<{ profile: PublicUser }>(),

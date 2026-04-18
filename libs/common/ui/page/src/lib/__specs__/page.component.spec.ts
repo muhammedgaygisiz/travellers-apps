@@ -7,8 +7,6 @@ import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 
 addNecessaryIcons();
 
-jest.mock('localization');
-
 describe('PageComponent', () => {
   let component: PageComponent;
   let fixture: ComponentFixture<PageComponent>;

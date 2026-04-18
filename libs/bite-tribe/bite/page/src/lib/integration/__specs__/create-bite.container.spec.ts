@@ -6,12 +6,21 @@ import { addNecessaryIcons } from 'utils';
 import { BiteService } from '../bite.service';
 import { CreateBiteContainer } from '../create-bite.container';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 jest.mock('@capacitor-firebase/analytics');
 jest.mock('heic2any', () => jest.fn());
 
-jest.mock('localization');
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe(CreateBiteContainer.name, () => {
   let component: CreateBiteContainer;
@@ -33,6 +42,7 @@ describe(CreateBiteContainer.name, () => {
             setEditingBite: (): jest.Mock => jest.fn(),
           },
         },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 

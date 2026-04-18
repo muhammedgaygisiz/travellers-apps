@@ -20,10 +20,10 @@ import {
   PopoverController,
 } from '@ionic/angular/standalone';
 import { AngularDelegate } from '@ionic/angular';
-import { SupportedLang } from 'localization';
 import { MenuComponent } from './menu/menu.component';
-import { APP_TITLE } from 'utils';
+import { APP_TITLE, SupportedLang } from 'utils';
 import { UpperCasePipe } from '@angular/common';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'ta-page',
@@ -40,6 +40,7 @@ import { UpperCasePipe } from '@angular/common';
     IonFooter,
     IonText,
     UpperCasePipe,
+    TranslocoPipe,
   ],
   providers: [PopoverController, AngularDelegate],
   styleUrl: './page.component.scss',
@@ -54,7 +55,7 @@ export class PageComponent {
 
   showAddButton = input<boolean | null>(false);
 
-  addButtonText = input<string | null>('Create bite');
+  addButtonText = input<string | null>();
 
   hideAuthButton = input(false);
 

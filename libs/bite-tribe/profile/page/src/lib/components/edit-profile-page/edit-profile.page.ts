@@ -33,6 +33,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { ToggleChangeEventDetail } from '@ionic/angular';
 import { ImageUploadComponent } from 'image-upload';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const STAY_PUBLIC = 'stay-public';
 const GO_PRIVATE = 'go-private';
@@ -60,10 +61,12 @@ const GO_PRIVATE = 'go-private';
     IonButtons,
     IonTitle,
     ImageUploadComponent,
+    TranslocoPipe,
   ],
 })
 export class EditProfilePage {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly transloco = inject(TranslocoService);
 
   profileImageSelectionModal = viewChild<IonModal>(
     'profileImageSelectionModal',
@@ -112,11 +115,11 @@ export class EditProfilePage {
 
   confirmationButtons = [
     {
-      text: 'No, stay public',
+      text: this.transloco.translate('no-stay-public'),
       role: STAY_PUBLIC,
     },
     {
-      text: 'Yes, go private',
+      text: this.transloco.translate('yes-go-private'),
       role: GO_PRIVATE,
     },
   ];

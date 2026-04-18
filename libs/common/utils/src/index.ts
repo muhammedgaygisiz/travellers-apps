@@ -1,3 +1,5 @@
+export { SupportedLang } from './lib/supported-lang';
+
 export { PATH } from './lib/paths';
 
 export { normalize } from './lib/normalize';

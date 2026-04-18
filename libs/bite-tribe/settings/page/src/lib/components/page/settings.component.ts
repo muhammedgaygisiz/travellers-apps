@@ -12,8 +12,10 @@ import {
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
+  IonCardHeader,
+  IonCardTitle,
   IonContent,
-  IonInput,
+  IonIcon,
   IonItem,
   IonLabel,
   IonModal,
@@ -29,7 +31,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { currencyCodes } from 'utils';
 import { User } from '@capacitor-firebase/authentication';
 import { CardComponent } from 'common/ui/card';
-import { IonCardHeader, IonCardTitle } from '@ionic/angular/standalone';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'settings',
@@ -44,7 +46,6 @@ import { IonCardHeader, IonCardTitle } from '@ionic/angular/standalone';
     IonButton,
     IonSelect,
     IonSelectOption,
-    IonInput,
     ReactiveFormsModule,
     IonModal,
     CurrencySelectorComponent,
@@ -52,6 +53,8 @@ import { IonCardHeader, IonCardTitle } from '@ionic/angular/standalone';
     CardComponent,
     IonCardHeader,
     IonCardTitle,
+    IonIcon,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -61,6 +64,7 @@ export class PageSettings {
   settings = input<Settings>();
 
   submitSettings = output<Settings>();
+  logout = output<void>();
 
   private readonly formBuilder = inject(FormBuilder);
 
@@ -71,7 +75,7 @@ export class PageSettings {
     emailUpdates: [{ value: false, disabled: true }, Validators.required],
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
-    nearby: [2000, [Validators.required, Validators.min(1)]],
+    language: ['en', Validators.required],
   });
 
   settingsEffect = afterRenderEffect(() => {
@@ -89,6 +93,8 @@ export class PageSettings {
       : 'light',
   );
 
+  systemLanguage = signal(navigator.language || navigator.languages[0] || 'en');
+
   themeEffect = effect(() => {
     const systemTheme = this.systemTheme();
 
@@ -98,6 +104,7 @@ export class PageSettings {
   currencyValueChanges = toSignal(
     this.settingsForm.controls['currency'].valueChanges,
   );
+
   selectedCurrencyName = computed(() => {
     this.currencyValueChanges();
     const currencyCode = this.settingsForm.controls['currency'].value;
@@ -137,7 +144,6 @@ export class PageSettings {
       emailUpdates: !!newSettings.emailUpdates,
       theme,
       currency: newSettings.currency || 'EUR',
-      nearby: newSettings.nearby || 50,
     });
   }
 

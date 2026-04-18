@@ -15,8 +15,6 @@ const Mock = {
   setEditingBite: jest.fn(),
 };
 
-jest.mock('localization');
-
 describe('BiteService', () => {
   let service: BiteService;
 

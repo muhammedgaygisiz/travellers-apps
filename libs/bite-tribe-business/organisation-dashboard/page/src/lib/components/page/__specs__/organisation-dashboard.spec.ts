@@ -4,7 +4,6 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { Bite, PublicUser } from 'model';
 import { ComponentRef } from '@angular/core';
 
-jest.mock('localization');
 jest.mock('@capacitor-firebase/firestore');
 
 describe('OrganisationDashboard', () => {

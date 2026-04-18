@@ -2,8 +2,18 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StartComponent } from '../start.component';
 import { provideRouter } from '@angular/router';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 jest.mock('@capacitor-firebase/analytics');
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('BiteTribeStartComponent', () => {
   let component: StartComponent;
@@ -11,7 +21,10 @@ describe('BiteTribeStartComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     });
 
     fixture = TestBed.createComponent(StartComponent);

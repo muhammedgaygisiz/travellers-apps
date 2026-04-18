@@ -4,11 +4,11 @@
   [showFooter]="false"
 >
   <ion-content class="ion-padding">
-    <h1 class="ion-margin-bottom">Settings</h1>
+    <h1 class="ion-margin-bottom">{{ 'settings' | transloco }}</h1>
 
     <!-- Subscription Tier Section -->
     <section class="subscription-section ion-margin-bottom">
-      <h2>Account Type</h2>
+      <h2>{{ 'account-type' | transloco }}</h2>
       <div class="subscription-cards">
         <ta-card
           [class.highlighted]="isFreeUser()"
@@ -17,7 +17,7 @@
           role="status"
         >
           <ion-card-header>
-            <ion-card-title>Free</ion-card-title>
+            <ion-card-title>{{ 'free' | transloco }}</ion-card-title>
           </ion-card-header>
         </ta-card>
         <ta-card
@@ -37,51 +37,85 @@
       <form [formGroup]="settingsForm">
         <section class="settings-section">
           <ion-item>
-            <ion-label>Push Notifications</ion-label>
+            <ion-label>{{ 'push-notifications' | transloco }}</ion-label>
             <ion-toggle slot="end" formControlName="pushNotifications" />
           </ion-item>
           <ion-item>
-            <ion-label>Email Updates</ion-label>
+            <ion-label>{{ 'email-updates' | transloco }}</ion-label>
             <ion-toggle slot="end" formControlName="emailUpdates" />
           </ion-item>
           <ion-item>
-            <ion-label>Theme</ion-label>
+            <ion-label>{{ 'theme' | transloco }}</ion-label>
             <ion-select
               slot="end"
-              placeholder="Light"
+              placeholder="{{ 'light' | transloco }}"
               interface="popover"
               formControlName="theme"
               (ionChange)="onThemeChange($event)"
             >
-              <ion-select-option value="light">Light</ion-select-option>
-              <ion-select-option value="dark">Dark</ion-select-option>
+              <ion-select-option value="light">{{
+                'light' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="dark">{{
+                'dark' | transloco
+              }}</ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item id="currency-selector-trigger">
-            <ion-label>Preferred Currency</ion-label>
-            <ion-text slot="end">{{ selectedCurrencyName() }}</ion-text>
+            <ion-label>{{ 'preferred-currency' | transloco }}</ion-label>
+            <ion-text slot="end">
+              {{ selectedCurrencyName() }}
+              <ion-icon name="chevron-expand-outline" />
+            </ion-text>
           </ion-item>
           <ion-item>
-            <ion-label>Nearby Distance (meters)</ion-label>
-            <ion-input
+            <ion-label>{{ 'language' | transloco }}</ion-label>
+            <ion-select
               slot="end"
-              type="number"
-              min="1"
-              formControlName="nearby"
-              placeholder="2000"
-              class="nearby-value"
-            />
+              placeholder="{{ 'english' | transloco }}"
+              interface="modal"
+              formControlName="language"
+            >
+              <ion-select-option value="am">{{
+                'amharic' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="ar">{{
+                'arabic' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="de">{{
+                'german' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="es">{{
+                'spanish' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="fr">{{
+                'french' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="id">{{
+                'indonesian' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="it">{{
+                'italian' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="th">{{
+                'thai' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="tr">{{
+                'turkish' | transloco
+              }}</ion-select-option>
+            </ion-select>
           </ion-item>
         </section>
 
         <div class="button-container safe-padding-bottom">
-          <ion-button fill="outline" color="medium">Log Out</ion-button>
+          <ion-button fill="outline" (click)="logout.emit()">{{
+            'logout' | transloco
+          }}</ion-button>
           <ion-button
             [disabled]="!settingsForm.valid || settingsForm.pristine"
             (click)="saveSettings()"
+            >{{ 'save-changes' | transloco }}</ion-button
           >
-            Save Changes
-          </ion-button>
         </div>
       </form>
     </div>

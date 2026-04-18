@@ -2,14 +2,14 @@
   [showHeaderMenu]="false"
   [showFooter]="true"
   [showAddButton]="true"
-  addButtonText="Create new bucket list"
+  addButtonText="{{'create-new-bucket-list' | transloco}}"
   (addButtonClick)="openAlert()"
   [enableBackButton]="true"
 >
   <ion-content class="ion-padding">
     <div class="bucketlists-header-container" slot="fixed">
       <ion-text color="secondary" class="subheadline">
-        <h4>{{ title() }}</h4>
+        <h4>{{ 'my-bucket-lists' | transloco }}</h4>
       </ion-text>
       <div
         class="ion-display-flex ion-flex-row ion-justify-content-center ion-margin-bottom chip-sort-filter-container"
@@ -25,8 +25,12 @@
               [placeholder]="sortingLabel()"
               (ionChange)="emitSortingChange($event)"
             >
-              <ion-select-option value="name">Name</ion-select-option>
-              <ion-select-option value="createdAt">Date</ion-select-option>
+              <ion-select-option value="name"
+                >{{ 'name' | transloco }}</ion-select-option
+              >
+              <ion-select-option value="createdAt"
+                >{{ 'date' | transloco }}</ion-select-option
+              >
             </ion-select>
           </ion-chip>
         </div>
@@ -54,14 +58,14 @@
               size="small"
               (click)="onEditBucketlist(bucketlist.id, $event)"
             >
-              Edit
+              {{ 'edit' | transloco }}
             </ion-button>
             <ion-button
               size="small"
               color="danger"
               (click)="openDeleteConfirmation(bucketlist.id, $event)"
             >
-              Delete
+              {{ 'delete' | transloco }}
             </ion-button>
           </div>
         </div>
@@ -72,15 +76,15 @@
 
     <ion-alert
       [isOpen]="isAlertOpen()"
-      header="Please enter a name for your new list"
+      header="{{'please-enter-a-name-for-your-new-list' | transloco}}"
       [inputs]="newListInputs"
       [buttons]="saveButton"
     />
 
     <ion-alert
       [isOpen]="isDeleteAlertOpen()"
-      header="Delete Bucket List"
-      message="Are you sure you want to delete this bucket list?"
+      header="{{'delete-bucket-list' | transloco}}"
+      message="{{'are-you-sure-you-want-to-delete-this-bucket-list' | transloco}}"
       [buttons]="deleteConfirmationButtons"
       (didDismiss)="handleDeleteConfirmationDismiss($event)"
     />

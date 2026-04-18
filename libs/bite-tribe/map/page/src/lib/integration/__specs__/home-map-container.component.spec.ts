@@ -7,7 +7,6 @@ import { MapService } from '../map.service';
 jest.mock('leaflet');
 jest.mock('leaflet.markercluster');
 
-jest.mock('localization');
 addNecessaryIcons();
 
 class Mock {}

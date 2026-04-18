@@ -53,7 +53,7 @@
               expand="block"
               (click)="addButtonClick.emit($event)"
             >
-              {{ addButtonText() }}
+              {{ addButtonText() ?? ('create-bite' | transloco) }}
             </ion-button>
           }
         </ion-toolbar>

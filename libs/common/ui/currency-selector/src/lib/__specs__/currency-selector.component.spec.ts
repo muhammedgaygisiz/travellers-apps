@@ -1,14 +1,29 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CurrencySelectorComponent } from '../currency-selector.component';
 import { addNecessaryIcons } from 'utils';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('CurrencySelectorComponent', () => {
   let component: CurrencySelectorComponent;
   let fixture: ComponentFixture<CurrencySelectorComponent>;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
+    });
     fixture = TestBed.createComponent(CurrencySelectorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

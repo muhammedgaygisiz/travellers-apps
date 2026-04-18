@@ -14,6 +14,11 @@ export const currency = createSelector(slice, (slice) => {
   return slice?.settings?.currency;
 });
 
+export const favCurrencies = createSelector(
+  settings,
+  (settings) => settings?.favoriteCurrencies || [],
+);
+
 export const isBitesLoading = createSelector(slice, (slice) => {
   return slice?.loading?.home;
 });

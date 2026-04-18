@@ -66,6 +66,7 @@ describe(PageSettings.name, () => {
         emailUpdates: false,
         theme: 'light',
         currency: 'EUR',
+        favoriteCurrencies: [],
         language: 'en',
       });
     });
@@ -97,6 +98,7 @@ describe(PageSettings.name, () => {
         emailUpdates: false,
         theme: 'dark',
         currency: 'USD',
+        favoriteCurrencies: ['USD', 'EUR'],
         nearby: 5000,
         updatedAt: '2024-01-01T00:00:00Z',
         language: 'de',
@@ -107,6 +109,7 @@ describe(PageSettings.name, () => {
         emailUpdates: mockSettings.emailUpdates,
         theme: mockSettings.theme,
         currency: mockSettings.currency,
+        favoriteCurrencies: mockSettings.favoriteCurrencies || [],
         language: mockSettings.language,
       });
 
@@ -132,6 +135,16 @@ describe(PageSettings.name, () => {
 
       expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
         expect.objectContaining({ currency: mockCurrency }),
+      );
+    });
+
+    it('should emit favorite currencies from form', () => {
+      component.settingsForm.patchValue({ favoriteCurrencies: ['USD', 'GBP'] });
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ favoriteCurrencies: ['USD', 'GBP'] }),
       );
     });
 
@@ -181,6 +194,7 @@ describe(PageSettings.name, () => {
         emailUpdates: true,
         theme: 'dark',
         currency: 'USD',
+        favoriteCurrencies: ['USD'],
         nearby: 3000,
         updatedAt: '2024-01-01T00:00:00Z',
         language: 'de',
@@ -193,6 +207,9 @@ describe(PageSettings.name, () => {
       setTimeout(() => {
         expect(component.settingsForm.value.theme).toBe('dark');
         expect(component.settingsForm.value.currency).toBe('USD');
+        expect(component.settingsForm.value.favoriteCurrencies).toEqual([
+          'USD',
+        ]);
       }, 100);
     });
   });
@@ -244,6 +261,27 @@ describe(PageSettings.name, () => {
 
       expect(component.settingsForm.value.currency).toBe(mockCurrencyCode);
       expect(mockModal.dismiss).toHaveBeenCalled();
+    });
+  });
+
+  describe('onFavoriteCurrencyToggle', () => {
+    it('should add currency to favorite currencies when missing', () => {
+      component.settingsForm.patchValue({ favoriteCurrencies: ['EUR'] });
+
+      component.onFavoriteCurrencyToggle('USD');
+
+      expect(component.settingsForm.value.favoriteCurrencies).toEqual([
+        'EUR',
+        'USD',
+      ]);
+    });
+
+    it('should remove currency from favorite currencies when present', () => {
+      component.settingsForm.patchValue({ favoriteCurrencies: ['EUR', 'USD'] });
+
+      component.onFavoriteCurrencyToggle('USD');
+
+      expect(component.settingsForm.value.favoriteCurrencies).toEqual(['EUR']);
     });
   });
 

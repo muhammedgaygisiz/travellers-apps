@@ -44,8 +44,13 @@ import { TranslocoPipe } from '@jsverse/transloco';
 })
 export class CurrencySelectorComponent {
   selectedCurrency = input<string>('EUR');
+  favoriteCurrencies = input<string[] | undefined>([]);
+  disableFavChange = input<boolean>(false);
+
+  leftButtonLangCode = input<string>('cancel');
 
   currencySelected = output<string>();
+  favoriteCurrencyToggled = output<string>();
   selectionCancel = output<void>();
 
   currencies = currencyCodes;
@@ -53,9 +58,14 @@ export class CurrencySelectorComponent {
 
   filteredCurrencies = computed(() => {
     const searchTerm = this.rawSearchTerm();
+    const favoriteCurrencyCodes = new Set(this.favoriteCurrencies());
 
     if (!searchTerm) {
-      return this.currencies;
+      return [...this.currencies].sort(
+        (a, b) =>
+          Number(favoriteCurrencyCodes.has(b.code)) -
+          Number(favoriteCurrencyCodes.has(a.code)),
+      );
     }
 
     const normalizedSearchTerm = normalize(searchTerm);
@@ -80,7 +90,17 @@ export class CurrencySelectorComponent {
         };
       })
       .filter(({ score }) => score > 0)
-      .sort((a, b) => b.score - a.score)
+      .sort((a, b) => {
+        const favoriteSortResult =
+          Number(favoriteCurrencyCodes.has(b.currency.code)) -
+          Number(favoriteCurrencyCodes.has(a.currency.code));
+
+        if (favoriteSortResult !== 0) {
+          return favoriteSortResult;
+        }
+
+        return b.score - a.score;
+      })
       .map(({ currency }) => currency);
   });
 
@@ -91,6 +111,15 @@ export class CurrencySelectorComponent {
 
   selectCurrency(code: string): void {
     this.currencySelected.emit(code);
+  }
+
+  toggleFavorite(event: Event, code: string): void {
+    event.stopPropagation();
+    this.favoriteCurrencyToggled.emit(code);
+  }
+
+  isFavorite(currencyCode: string): boolean {
+    return this.favoriteCurrencies()?.includes(currencyCode) || false;
   }
 
   cancel(): void {

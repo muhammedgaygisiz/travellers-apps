@@ -11,6 +11,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       class="ion-page"
       [bite]="service.cachedBite()"
       [currency]="service.currency()"
+      [favCurrencies]="service.favCurrencies()"
       [position]="service.position()"
       [image]="service.image() || ''"
       [isNew]="true"

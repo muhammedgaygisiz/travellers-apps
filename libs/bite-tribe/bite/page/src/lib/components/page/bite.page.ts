@@ -77,6 +77,8 @@ export class BitePage {
 
   currency = input<string>();
 
+  favCurrencies = input<string[]>();
+
   position = input<Geopoint>();
 
   suggestedTags = input<string[]>([]);

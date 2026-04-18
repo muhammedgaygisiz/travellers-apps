@@ -84,11 +84,19 @@ export const reducer = createReducer<AppSlice>(
       ...state,
       position: { latitude, longitude },
       reloading: {
+        ...state.reloading,
         home: false,
       },
       errorLoadingGpsPosition: false,
     };
   }),
+  on(AppActions.clearReloadGPSPosition, (state) => ({
+    ...state,
+    reloading: {
+      ...state.reloading,
+      home: false,
+    },
+  })),
   on(
     AppActions.loadedSettingsFromAPI,
     AppActions.savedSettings,

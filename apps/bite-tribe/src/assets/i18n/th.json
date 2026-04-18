@@ -102,5 +102,20 @@
   "turkish": "ตุรกี",
   "english": "อังกฤษ",
   "follow": "ติดตาม",
-  "user-profile-not-available": "ไม่มีโปรไฟล์ผู้ใช้"
+  "user-profile-not-available": "ไม่มีโปรไฟล์ผู้ใช้",
+  "dish-name-label": "ชื่อเมนู?",
+  "place-name-label": "ชื่อสถานที่?",
+  "price-label": "ราคา?",
+  "rating-label": "คะแนนของคุณ?",
+  "description-label": "คำอธิบาย?",
+  "description-placeholder": "คุณชอบอะไรเกี่ยวกับเมนูนี้ บอกเราได้เลย!",
+  "tags": "แท็ก",
+  "tags-label": "แท็ก? (คั่นด้วยช่องว่าง)",
+  "from-photo": "จากรูปภาพ",
+  "from-gps": "จาก GPS",
+  "no-gps-position-error-message": "ไม่พบตำแหน่ง GPS ในรูปภาพ โปรดเลือกตำแหน่ง GPS จากแผนที่หรือเปิดใช้งานตำแหน่ง GPS",
+  "chose-gps-position-error-message": "โปรดเลือกตำแหน่ง GPS จากแผนที่หรือเปิดใช้งานตำแหน่ง GPS",
+  "post": "โพสต์",
+  "we-could-not-access-your-location": "เราไม่สามารถเข้าถึงตำแหน่งของคุณได้ ระยะทางถึง Bites อาจแสดงไม่ได้หรือไม่เป็นปัจจุบัน",
+  "you-are-offline": "ดูเหมือนว่าคุณออฟไลน์อยู่ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ"
 }

@@ -102,5 +102,20 @@
   "turkish": "Turco",
   "english": "Inglés",
   "follow": "Seguir",
-  "user-profile-not-available": "Perfil de usuario no disponible."
+  "user-profile-not-available": "Perfil de usuario no disponible.",
+  "dish-name-label": "¿Nombre del plato?",
+  "place-name-label": "¿Nombre del lugar?",
+  "price-label": "¿Precio?",
+  "rating-label": "¿Tu calificación?",
+  "description-label": "¿Descripción?",
+  "description-placeholder": "¿Qué te gustó de este plato? ¡Cuéntanos!",
+  "tags": "Etiquetas",
+  "tags-label": "¿Etiquetas? (separa con espacios)",
+  "from-photo": "Desde foto",
+  "from-gps": "Desde GPS",
+  "no-gps-position-error-message": "No se encontró una posición GPS en la imagen. Por favor, elige una posición GPS en el mapa o activa la ubicación GPS.",
+  "chose-gps-position-error-message": "Por favor, elige una posición GPS en el mapa o activa la ubicación GPS.",
+  "post": "Publicar",
+  "we-could-not-access-your-location": "No pudimos acceder a tu ubicación. La distancia a los Bites no se puede mostrar o no está actualizada.",
+  "you-are-offline": "Parece que estás sin conexión. Por favor, revisa tu conexión a internet."
 }

@@ -151,8 +151,7 @@
     <ion-card>
       <ion-card-content>
         <ion-text color="warning">
-          We couldn’t access your location. The distance to the bites can’t be
-          shown or is not up-to-date.
+          {{ 'we-could-not-access-your-location' | transloco }}
         </ion-text>
       </ion-card-content>
 
@@ -165,10 +164,10 @@
     <ion-card>
       <ion-card-content>
         <div class="ion-display-flex ion-flex-row ion-align-items-center">
-          <ion-icon name="cloud-offline-outline" color="warning" />
+          <ion-icon name="cloud-offline-outline" color="warning" size="large" />
 
           <ion-text color="warning" class="ion-padding-start">
-            It seems you are offline. Please check your internet connection.
+            {{ 'you-are-offline' | transloco }}
           </ion-text>
         </div>
       </ion-card-content>

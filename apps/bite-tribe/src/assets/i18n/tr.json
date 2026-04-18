@@ -102,5 +102,20 @@
   "turkish": "Türkçe",
   "english": "İngilizce",
   "follow": "Takip et",
-  "user-profile-not-available": "Kullanıcı profili mevcut değil."
+  "user-profile-not-available": "Kullanıcı profili mevcut değil.",
+  "dish-name-label": "Yemek Adı?",
+  "place-name-label": "Mekan Adı?",
+  "price-label": "Fiyat?",
+  "rating-label": "Puanın?",
+  "description-label": "Açıklama?",
+  "description-placeholder": "Bu yemekle ilgili neyi beğendin, bize anlat!",
+  "tags": "Etiketler",
+  "tags-label": "Etiketler? (boşlukla ayır)",
+  "from-photo": "Fotoğraftan",
+  "from-gps": "GPS'ten",
+  "no-gps-position-error-message": "Görselde GPS konumu bulunamadı. Lütfen haritadan bir GPS konumu seç veya GPS konumunu etkinleştir.",
+  "chose-gps-position-error-message": "Lütfen haritadan bir GPS konumu seç veya GPS konumunu etkinleştir.",
+  "post": "Paylaş",
+  "we-could-not-access-your-location": "Konumuna erişemedik. Bite'lara olan mesafe gösterilemiyor veya güncel değil.",
+  "you-are-offline": "Görünüşe göre çevrimdışısın. Lütfen internet bağlantını kontrol et."
 }

@@ -102,5 +102,20 @@
   "turkish": "Türkisch",
   "english": "Englisch",
   "follow": "Folgen",
-  "user-profile-not-available": "Benutzerprofil nicht verfügbar."
+  "user-profile-not-available": "Benutzerprofil nicht verfügbar.",
+  "dish-name-label": "Gerichtname?",
+  "place-name-label": "Restaurantname?",
+  "price-label": "Preis?",
+  "rating-label": "Deine Bewertung?",
+  "description-label": "Beschreibung?",
+  "description-placeholder": "Was hat dir an diesem Gericht gefallen? Erzähl uns davon!",
+  "tags": "Tags",
+  "tags-label": "Tags? (mit Leerzeichen trennen)",
+  "from-photo": "Aus Foto",
+  "from-gps": "Aus GPS",
+  "no-gps-position-error-message": "Keine GPS-Position im Bild gefunden. Bitte wähle eine GPS-Position auf der Karte oder aktiviere die GPS-Position.",
+  "chose-gps-position-error-message": "Bitte wähle eine GPS-Position auf der Karte oder aktiviere die GPS-Position.",
+  "post": "Posten",
+  "we-could-not-access-your-location": "Wir konnten nicht auf deinen Standort zugreifen. Die Entfernung zu den Bites kann nicht angezeigt werden oder ist nicht aktuell.",
+  "you-are-offline": "Du scheinst offline zu sein. Bitte überprüfe deine Internetverbindung."
 }

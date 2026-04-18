@@ -41,20 +41,20 @@ const hasMeaningfulMovement = (
   return distanceInMeters >= GPS_MEANINGFUL_MOVEMENT_THRESHOLD_METERS;
 };
 
-const isReloadGpsPositionAction = (args: Action): boolean =>
-  args.type === AppActions.reloadGPSPosition.type;
+const isReloadGpsPositionAction = (action: Action): boolean =>
+  action.type === AppActions.reloadGPSPosition.type;
 
 /** Dispatches the GPS position to the store */
 export const dispatchGpsPosition = (
   store: Store,
 ): UnaryFunction<Observable<Action>, Observable<Action>> =>
   pipe(
-    switchMap((args: Action) =>
+    switchMap((action: Action) =>
       getCurrentPosition().pipe(
         withLatestFrom(store.select(gpsPosition).pipe(take(1))),
         map(([currentPosition, previousPosition]) => {
           if (
-            isReloadGpsPositionAction(args) ||
+            isReloadGpsPositionAction(action) ||
             hasMeaningfulMovement(previousPosition, currentPosition)
           ) {
             store.dispatch(
@@ -62,14 +62,14 @@ export const dispatchGpsPosition = (
             );
           }
 
-          return args;
+          return action;
         }),
         catchError((error) => {
           console.error(error);
 
           store.dispatch(AppActions.errorLoadingGPSPosition({ error }));
 
-          return of(args);
+          return of(action);
         }),
       ),
     ),

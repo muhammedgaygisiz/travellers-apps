@@ -7,9 +7,10 @@ import {
   output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { BiteTrailRating, Bucketlist } from 'model';
+import { Bucketlist } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StarRatingComponent } from 'common/ui/star-rating';
+import { BiteTrailRating } from 'bite-tribe/bucketlist-data-access';
 import {
   IonButton,
   IonContent,

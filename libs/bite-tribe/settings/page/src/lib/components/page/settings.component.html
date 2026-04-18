@@ -61,10 +61,17 @@
               </ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-item id="currency-selector-trigger">
+          <ion-item button (click)="currencyModal.present()">
             <ion-label>{{ 'preferred-currency' | transloco }}</ion-label>
             <ion-text slot="end">
               {{ selectedCurrencyName() }}
+              <ion-icon name="chevron-expand-outline" />
+            </ion-text>
+          </ion-item>
+          <ion-item button (click)="currencyModal.present()">
+            <ion-label>{{ 'favorite-currencies' | transloco }}</ion-label>
+            <ion-text slot="end">
+              {{ favoriteCurrencyNames() || '-' }}
               <ion-icon name="chevron-expand-outline" />
             </ion-text>
           </ion-item>
@@ -125,12 +132,14 @@
   </ion-content>
 </ta-page>
 
-<ion-modal trigger="currency-selector-trigger" #currencyModal>
+<ion-modal #currencyModal>
   <ng-template>
     <currency-selector
       class="ion-page"
       [selectedCurrency]="settingsForm.get('currency')?.value || 'EUR'"
+      [favoriteCurrencies]="settingsForm.get('favoriteCurrencies')?.value || []"
       (currencySelected)="onCurrencySelected($event, currencyModal)"
+      (favoriteCurrencyToggled)="onFavoriteCurrencyToggle($event)"
       (selectionCancel)="currencyModal.dismiss()"
     />
   </ng-template>

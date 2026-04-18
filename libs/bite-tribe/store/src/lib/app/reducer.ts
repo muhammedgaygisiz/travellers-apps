@@ -18,6 +18,7 @@ const initialState: AppSlice = {
     emailUpdates: false,
     theme: 'light',
     currency: 'EUR',
+    favoriteCurrencies: [],
     nearby: 2000,
     language: 'en',
   },

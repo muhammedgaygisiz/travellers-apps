@@ -83,8 +83,7 @@
               <ng-container>{{ 'best-seller' | transloco }}</ng-container>
             </ion-badge>
             <ion-text>
-              {{ ('sold-231-times' | transloco).replace('231',
-              (biteTrailData.soldCount ?? 231).toString()) }}
+              {{ 'sold-times' | transloco: { count: biteTrailData.soldCount ?? 0 } }}
             </ion-text>
           </div>
         </div>

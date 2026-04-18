@@ -66,6 +66,7 @@
   "by-before": "โดย",
   "by-after": "",
   "sold-231-times": "ขายแล้ว 231 ครั้ง",
+  "sold-times": "ขายแล้ว {{count}} ครั้ง",
   "view-bite-trail": "ดู BiteTrail",
   "market-place": "ตลาด",
   "no-currencies-found": "ไม่พบสกุลเงิน",

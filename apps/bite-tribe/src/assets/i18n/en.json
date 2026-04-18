@@ -66,6 +66,7 @@
   "by-before": "by",
   "by-after": "",
   "sold-231-times": "Sold 231 times",
+  "sold-times": "Sold {{count}} times",
   "view-bite-trail": "View BiteTrail",
   "market-place": "Market Place",
   "no-currencies-found": "No currencies found",

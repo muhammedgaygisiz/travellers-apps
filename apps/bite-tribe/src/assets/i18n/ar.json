@@ -66,6 +66,7 @@
   "by-before": "بواسطة",
   "by-after": "",
   "sold-231-times": "بيع 231 مرة",
+  "sold-times": "بيع {{count}} مرة",
   "view-bite-trail": "عرض BiteTrail",
   "market-place": "السوق",
   "no-currencies-found": "لم يتم العثور على عملات",

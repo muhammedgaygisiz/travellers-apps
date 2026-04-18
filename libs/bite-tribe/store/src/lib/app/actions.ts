@@ -13,6 +13,7 @@ export const AppActions = createActionGroup({
     'Reload GPS position': emptyProps(),
     'Clear GPS error': emptyProps(),
     'Loaded GPS position': props<{ position: any }>(),
+    'Clear Reload GPS position': props<{ reason: string }>(),
     'Error loading GPS position': props<{ error: any }>(),
     'Saved settings': props<{ settings: Settings }>(),
     'Save public profile': props<{ profile: PublicUser }>(),

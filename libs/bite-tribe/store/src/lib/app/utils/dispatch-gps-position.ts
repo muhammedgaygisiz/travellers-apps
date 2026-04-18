@@ -40,12 +40,6 @@ const hasMeaningfulMovement = (
   return distanceInMeters >= GPS_MEANINGFUL_MOVEMENT_THRESHOLD_METERS;
 };
 
-const isReloadGpsPositionAction = (args: unknown): boolean =>
-  typeof args === 'object' &&
-  args !== null &&
-  'type' in args &&
-  args.type === AppActions.reloadGPSPosition.type;
-
 /** Dispatches the GPS position to the store */
 export const dispatchGpsPosition = (
   store: Store,
@@ -55,15 +49,19 @@ export const dispatchGpsPosition = (
       getCurrentPosition().pipe(
         withLatestFrom(store.select(gpsPosition).pipe(take(1))),
         map(([currentPosition, previousPosition]) => {
-          if (
-            isReloadGpsPositionAction(args) ||
-            hasMeaningfulMovement(previousPosition, currentPosition)
-          ) {
+          if (hasMeaningfulMovement(previousPosition, currentPosition)) {
             store.dispatch(
               AppActions.loadedGPSPosition({ position: currentPosition }),
             );
+
+            return args;
           }
 
+          store.dispatch(
+            AppActions.clearReloadGPSPosition({
+              reason: 'No meaningful movement detected',
+            }),
+          );
           return args;
         }),
         catchError((error) => {

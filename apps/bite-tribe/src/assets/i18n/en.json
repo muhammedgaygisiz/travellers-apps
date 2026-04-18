@@ -128,5 +128,8 @@
   "no-ratings-yet": "No ratings yet",
   "no-social-media-links": "No Social Media Links",
   "menu": "Menu",
-  "bites": "Bites"
+  "bites": "Bites",
+  "no-menu-yet": "No item here yet, start by adding a category now.",
+  "save-menu": "Save Menu",
+  "add-category": "Add Category"
 }

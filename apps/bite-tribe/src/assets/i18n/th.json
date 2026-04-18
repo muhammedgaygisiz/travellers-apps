@@ -128,5 +128,9 @@
   "no-ratings-yet": "ยังไม่มีการให้คะแนน",
   "no-social-media-links": "ไม่มีลิงก์โซเชียลมีเดีย",
   "menu": "เมนู",
-  "bites": "Bites"
+  "bites": "Bites",
+  "add-category": "เพิ่มหมวดหมู่",
+  "save-menu": "บันทึกเมนู",
+  "no-menu-yet": "ยังไม่มีเมนู",
+  "go-to-saved-bucket-list": "ไปที่รายการความฝันที่บันทึกไว้"
 }

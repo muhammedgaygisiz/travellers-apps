@@ -19,6 +19,7 @@ import { AddCategoryComponent } from '../add-category/add-category.component';
 import { CategoryComponent } from '../category/category.component';
 import { NgTemplateOutlet } from '@angular/common';
 import { ItemReorderEventDetail } from '@ionic/angular';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'bt-menu',
@@ -33,6 +34,7 @@ import { ItemReorderEventDetail } from '@ionic/angular';
     IonReorderGroup,
     IonReorder,
     IonIcon,
+    TranslocoPipe,
   ],
 })
 export class MenuComponent {

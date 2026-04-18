@@ -36,33 +36,65 @@ export class RestaurantService {
     }
 
     const menuId = restaurant?.menuId;
-    if (menuId) {
-      const normalisedMenuId = this.normaliseMenuId(restaurant);
+    if (menuId && bite) {
+      this.gotoMaintainedMenu(bite, restaurant);
 
-      if (normalisedMenuId) {
+      return;
+    }
+
+    if (bite) {
+      this.gotoDynamicMenu(bite);
+    }
+  }
+
+  private gotoMaintainedMenu(
+    bite: Bite,
+    restaurant: Restaurant | undefined,
+  ): void {
+    const normalisedMenuId = this.normaliseMenuId(restaurant);
+    if (restaurant && normalisedMenuId) {
+      void this.navController.navigateForward([
+        'bite',
+        bite.id,
+        'restaurant',
+        restaurant.id,
+        'menu',
+        normalisedMenuId,
+      ]);
+    }
+  }
+
+  private gotoDynamicMenu = (bite: Bite): void => {
+    void this.navController.navigateForward([
+      'bite',
+      bite.id,
+      'restaurant',
+      encodeURIComponent(bite.place),
+      'menu',
+      'default',
+    ]);
+  };
+
+  navigateToBites(restaurant: Restaurant | undefined): void {
+    const bite = this.bite();
+
+    if (bite?.restaurantId) {
+      const [empty, collectionName, restaurantId] =
+        bite.restaurantId.split('/');
+
+      if (restaurantId) {
         this.navController.navigateForward([
+          'bite',
+          bite.id,
           'restaurant',
-          restaurant.id,
-          'menu',
-          normalisedMenuId,
+          restaurantId,
+          'bites',
         ]);
 
         return;
       }
     }
 
-    if (menuId) {
-      this.navController.navigateForward([
-        'restaurant',
-        restaurant?.id,
-        'menu',
-        menuId,
-      ]);
-    }
-  }
-
-  navigateToBites(restaurant: Restaurant | undefined): void {
-    const bite = this.bite();
     if (bite && restaurant?.menuId) {
       this.navController.navigateForward([
         'bite',
@@ -73,6 +105,16 @@ export class RestaurantService {
       ]);
 
       return;
+    }
+
+    if (bite) {
+      this.navController.navigateForward([
+        'bite',
+        bite.id,
+        'restaurant',
+        encodeURIComponent(bite.place),
+        'bites',
+      ]);
     }
   }
 

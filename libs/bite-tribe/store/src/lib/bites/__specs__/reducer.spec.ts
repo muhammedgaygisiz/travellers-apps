@@ -99,6 +99,63 @@ describe('Bite Reducer', () => {
         ...NEW_STATE,
       });
     });
+
+    it('should remove the bite from bitesByUserId', () => {
+      const INITIAL_STATE = {
+        ...EMPTY_STATE,
+        bitesByUserId: [{ id: '1', name: 'Bite 1' } as Bite],
+      };
+      const NEW_STATE = {
+        ...EMPTY_STATE,
+        bitesByUserId: [],
+      };
+
+      const deletedBiteAction = BiteActions.deletedBite({
+        bite: { id: '1', name: 'Bite 1' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, deletedBiteAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+
+    it('should remove the bite from latest bites', () => {
+      const INITIAL_STATE = {
+        ...EMPTY_STATE,
+        latestBites: [{ id: '1', name: 'Bite 1' } as Bite],
+      };
+      const NEW_STATE = {
+        ...EMPTY_STATE,
+        latestBites: [],
+      };
+
+      const deletedBiteAction = BiteActions.deletedBite({
+        bite: { id: '1', name: 'Bite 1' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, deletedBiteAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+
+    it('should remove bite from bitesByBucketlist', () => {
+      const INITIAL_STATE = {
+        ...EMPTY_STATE,
+        bitesByBucketlist: [{ id: '1', name: 'Bite 1' } as Bite],
+      };
+      const NEW_STATE = {
+        ...EMPTY_STATE,
+        bitesByBucketlist: [],
+      };
+
+      const deletedBiteAction = BiteActions.deletedBite({
+        bite: { id: '1', name: 'Bite 1' } as Bite,
+      });
+
+      expect(reducer(INITIAL_STATE, deletedBiteAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
   });
 
   describe('savedBite', () => {

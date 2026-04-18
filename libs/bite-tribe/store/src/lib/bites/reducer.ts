@@ -15,6 +15,9 @@ export const reducer = createReducer(
   on(BiteActions.deletedBite, (state, { bite }) => ({
     ...state,
     ...adapter.removeOne(bite.id, state),
+    bitesByUserId: state.bitesByUserId.filter((b) => b.id !== bite.id),
+    latestBites: state.latestBites.filter((b) => b.id !== bite.id),
+    bitesByBucketlist: state.bitesByBucketlist.filter((b) => b.id !== bite.id),
   })),
   on(BiteActions.cacheBite, (state, { bite }) => ({
     ...state,

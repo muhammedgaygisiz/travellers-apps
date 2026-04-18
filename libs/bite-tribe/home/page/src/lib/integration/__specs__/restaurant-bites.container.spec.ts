@@ -5,20 +5,30 @@ import { HomeService } from '../home.service';
 import { RestaurantBitesContainer } from '../restaurant-bites.container';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons } from 'utils';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('@capacitor-firebase/analytics');
-jest.mock('localization');
+
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('RestaurantBitesContainer', () => {
   let component: RestaurantBitesContainer;
   let fixture: ComponentFixture<RestaurantBitesContainer>;
-  let homeServiceMock: HomeService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(),
+        { provide: TranslocoService, useValue: MockTranslocoService },
         {
           provide: HomeService,
           useValue: {
@@ -43,7 +53,6 @@ describe('RestaurantBitesContainer', () => {
 
     fixture = TestBed.createComponent(RestaurantBitesContainer);
     component = fixture.componentInstance;
-    homeServiceMock = TestBed.inject(HomeService);
   });
 
   it('should create', () => {

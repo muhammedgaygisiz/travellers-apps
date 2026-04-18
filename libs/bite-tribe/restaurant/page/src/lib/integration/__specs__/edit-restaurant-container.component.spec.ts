@@ -3,12 +3,22 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons } from 'utils';
 import { EditRestaurantContainer } from '../edit-restaurant-container.component';
 import { RestaurantService } from '../restaurant.service';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('@capacitor-firebase/analytics');
 
 jest.mock('heic2any', () => jest.fn());
 
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe(EditRestaurantContainer.name, () => {
   let component: EditRestaurantContainer;
@@ -22,6 +32,7 @@ describe(EditRestaurantContainer.name, () => {
           provide: RestaurantService,
           useValue: {},
         },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 

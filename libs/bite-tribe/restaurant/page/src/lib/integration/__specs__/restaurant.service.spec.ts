@@ -8,6 +8,7 @@ import { RestaurantService } from '../restaurant.service';
 const mockBite: Bite = {
   id: 'bite123',
   name: 'Test Bite',
+  place: 'Test place',
 } as Bite;
 
 const mockRestaurant: Restaurant = {
@@ -107,13 +108,20 @@ describe('RestaurantService', () => {
       ]);
     });
 
-    it('should not navigate if no menuId', () => {
+    it('should navigate to dynamic menu if no menuId', () => {
       const restaurant: Restaurant = {
         id: 'restaurant123',
         name: 'Test Restaurant',
       } as Restaurant;
       service.navigateToMenu(restaurant);
-      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        mockBite.id,
+        'restaurant',
+        'Test%20place',
+        'menu',
+        'default',
+      ]);
     });
   });
 
@@ -134,18 +142,30 @@ describe('RestaurantService', () => {
       ]);
     });
 
-    it('should not navigate if no menuId', () => {
+    it('should navigate to dynamic bites page if no menuId', () => {
       const restaurant: Restaurant = {
         id: 'restaurant123',
         name: 'Test Restaurant',
       } as Restaurant;
       service.navigateToBites(restaurant);
-      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        mockBite.id,
+        'restaurant',
+        'Test%20place',
+        'bites',
+      ]);
     });
 
-    it('should not navigate if no restaurant', () => {
+    it('should navigate to dynamic bites page if no restaurant', () => {
       service.navigateToBites(undefined as any);
-      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        mockBite.id,
+        'restaurant',
+        'Test%20place',
+        'bites',
+      ]);
     });
 
     it('should not navigate if no bite', () => {

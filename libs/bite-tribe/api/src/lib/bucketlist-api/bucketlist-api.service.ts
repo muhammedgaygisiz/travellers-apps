@@ -9,7 +9,10 @@ import type {
   SaveToBucketListParams,
 } from 'model';
 import { loadBucketlistsByUserId } from './utils/load-bucketlists-by-user-id';
-import { BUCKETLIST_COLLECTION } from '../utils/constants';
+import {
+  BITE_TRAIL_COLLECTION,
+  BUCKETLIST_COLLECTION,
+} from '../utils/constants';
 
 @Injectable({ providedIn: 'root' })
 export class BucketlistApiService {
@@ -76,17 +79,49 @@ export class BucketlistApiService {
   ): Promise<Bucketlist> {
     const user = this.authService.getUser();
 
+    if (!user?.uid) {
+      throw new Error('User not authenticated');
+    }
+
+    const nowTimestamp = Date.now();
+    const nowIsoString = new Date(nowTimestamp).toISOString();
+
     const docResult = await FirebaseFirestore.addDocument({
       reference: BUCKETLIST_COLLECTION,
       data: {
-        userId: user?.uid || '',
+        userId: user.uid,
         name: params.bucketListName,
         biteIds: params.biteIds,
         biteTrailId: params.biteTrailId,
-        createdAt: new Date().toISOString(),
-        createdAtTimestamp: Date.now(),
+        createdAt: nowIsoString,
+        createdAtTimestamp: nowTimestamp,
       },
     });
+
+    try {
+      await FirebaseFirestore.addDocument({
+        reference: `${BITE_TRAIL_COLLECTION}/${params.biteTrailId}/sells`,
+        data: {
+          userId: user.uid,
+          soldAt: nowIsoString,
+          soldAtTimestamp: nowTimestamp,
+        },
+      });
+    } catch (error) {
+      try {
+        await FirebaseFirestore.deleteDocument({
+          reference: docResult.reference.path,
+        });
+      } catch (rollbackError) {
+        console.error(
+          'Error rolling back bucket list after sell write failure:',
+          rollbackError,
+        );
+        this.errorHandler.handleError(rollbackError);
+      }
+
+      throw error;
+    }
 
     const result = await FirebaseFirestore.getDocument({
       reference: docResult.reference.path,

@@ -60,13 +60,17 @@ import {
   homeMaxPriceFilter,
   homeSorting,
   myBitesSorting,
+  restaurantBitesSorting,
 } from './filtering-and-sorting/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
   saveSocialMediaLinksForRestaurant,
   setRestaurantToCreate,
 } from './restaurants/actions';
-import { bitesByRestaurant } from './bites/bites-by-restaurant.selector';
+import {
+  bitesByRestaurant,
+  sortedBitesByRestaurant,
+} from './bites/bites-by-restaurant.selector';
 import { BucketlistActions } from './bucketlists/actions';
 import {
   bucketlists,
@@ -107,6 +111,8 @@ export class BiteTribeStoreService implements StoreService {
   bite$ = this.store.select(bite);
   sortedMyBites$ = this.store.select(sortedBitesByUser);
   myBitesSorting$ = this.store.select(myBitesSorting);
+  sortedRestaurantBites$ = this.store.select(sortedBitesByRestaurant);
+  restaurantBitesSorting$ = this.store.select(restaurantBitesSorting);
   bitesByUser$ = this.store.select(bitesByUser);
   bitesBySelectedBucketlist$ = this.store.select(bitesByBucketlist);
   allTags$ = this.store.select(allTags);
@@ -298,6 +304,12 @@ export class BiteTribeStoreService implements StoreService {
   setMyBitesSorting(sorting: string): void {
     this.store.dispatch(
       FilteringAndSortingActions.setMyBitesSorting({ sorting }),
+    );
+  }
+
+  setRestaurantBitesSorting(sorting: string): void {
+    this.store.dispatch(
+      FilteringAndSortingActions.setRestaurantBitesSorting({ sorting }),
     );
   }
 

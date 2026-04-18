@@ -16,6 +16,8 @@ export class HomeService {
   sorting = this.dataAccess.sorting;
   myBites = this.dataAccess.myBites;
   myBitesSorting = this.dataAccess.myBitesSorting;
+  restaurantBites = this.dataAccess.restaurantBites;
+  restaurantBitesSorting = this.dataAccess.restaurantBitesSorting;
   bitesBySelectedBucketlist = this.dataAccess.bitesBySelectedBucketlist;
   allTags = this.dataAccess.allTags;
   homeFilters = this.dataAccess.homeFilters;
@@ -127,6 +129,10 @@ export class HomeService {
 
   myBitesSortingChange(value: string): void {
     this.dataAccess.setMyBitesSorting(value);
+  }
+
+  restaurantBitesSortingChange(value: string): void {
+    this.dataAccess.setRestaurantBitesSorting(value);
   }
 
   filtersChanged(filters: {

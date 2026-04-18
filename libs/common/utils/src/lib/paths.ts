@@ -2,6 +2,7 @@ export const PATH = {
   START: 'start',
   NEW_BITE: 'new-bite',
   MY_BITES: 'my-bites',
+  BITES: 'bites',
   BITE: 'bite',
   HOME: 'home',
   EDIT_PROFILE: 'edit-profile',

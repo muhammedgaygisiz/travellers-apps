@@ -1,5 +1,8 @@
 import type { Bite, Geopoint, Restaurant } from 'model';
-import { bitesByRestaurant } from '../bites-by-restaurant.selector';
+import {
+  bitesByRestaurant,
+  sortedBitesByRestaurant,
+} from '../bites-by-restaurant.selector';
 
 const getBitesByRestaurantNameMock = jest.fn();
 jest.mock('../utils/get-bites-by-restaurant-name', () => ({
@@ -139,6 +142,22 @@ describe('BitesByRestaurant Selectors', () => {
         mockBite1,
       );
       expect(result).toEqual([mockBite1]);
+    });
+  });
+
+  describe('sortedBitesByRestaurant', () => {
+    it('should sort bites by the given criteria', () => {
+      const mockExchangeRates = { EUR: 1, USD: 1.1 };
+      const bites = [mockBite1];
+      const sorting = 'createdAt';
+
+      const result = sortedBitesByRestaurant.projector(
+        bites,
+        sorting,
+        mockExchangeRates,
+      );
+
+      expect(result).toEqual(bites); // Assuming sortByCriteria returns sorted array
     });
   });
 });

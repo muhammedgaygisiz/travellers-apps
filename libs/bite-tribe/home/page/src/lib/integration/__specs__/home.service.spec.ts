@@ -8,6 +8,7 @@ import SpyInstance = jest.SpyInstance;
 class Mock {
   sortedHomeBites = (): never[] => [];
   myBites = (): never[] => [];
+  restaurantBites = (): never[] => [];
   bitesBySelectedBucketlist = (): never[] => [];
   allTags = (): never[] => [];
   homeFilters = (): never[] => [];
@@ -22,6 +23,7 @@ class Mock {
   exchangeRates = (): null => null;
   setHomeSorting = (): null => null;
   setMyBitesSorting = (): null => null;
+  setRestaurantBitesSorting = (): null => null;
   selectedBucketlistTitle = (): null => null;
   reloadGPSPosition = (): null => null;
   setFilters = (): null => null;
@@ -331,6 +333,26 @@ describe('HomeService', () => {
         service.myBitesSortingChange('distance');
 
         expect(setMyBitesSortingSpy).toHaveBeenCalledWith('distance');
+      },
+    ));
+  });
+
+  describe('restaurantBitesSortingChange', () => {
+    let setRestaurantBitesSortingSpy: SpyInstance;
+
+    beforeEach(() => {
+      setRestaurantBitesSortingSpy = jest.spyOn(
+        homeDataAccessService,
+        'setRestaurantBitesSorting',
+      );
+    });
+
+    it('should call setRestaurantBitesSorting', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.restaurantBitesSortingChange('createdAt');
+
+        expect(setRestaurantBitesSortingSpy).toHaveBeenCalledWith('createdAt');
       },
     ));
   });

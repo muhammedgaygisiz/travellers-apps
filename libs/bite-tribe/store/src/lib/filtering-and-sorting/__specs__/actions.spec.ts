@@ -17,6 +17,10 @@ describe('Filtering and Sorting Actions', () => {
     expect(FilteringAndSortingActions.setMyBitesSorting).toBeDefined();
   });
 
+  it('should have a setRestaurantBitesSorting action', () => {
+    expect(FilteringAndSortingActions.setRestaurantBitesSorting).toBeDefined();
+  });
+
   it('should have a clearHomeFilters action', () => {
     expect(FilteringAndSortingActions.clearHomeFilters).toBeDefined();
   });

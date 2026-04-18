@@ -122,5 +122,14 @@
   "close": "ዝጋ",
   "drag-and-drop-not-supported": "Drag & drop አይደገፍም። <br />ለመስቀል ወይም ፎቶ ለማንሳት ይንኩ።",
   "tap-into-box": "ለመስቀል <br />ወይም ፎቶ ለማንሳት በሳጥኑ ውስጥ ይንኩ።",
-  "image-upload-disabled": "ከመስመር ውጭ እንደሆኑ ይመስላል። ያለ ምስል እንኳን bite መፍጠር ትችላላችሁ እና መስመር ላይ ሲመለሱ በኋላ ምስል ማከል ትችላላችሁ።"
+  "image-upload-disabled": "ከመስመር ውጭ እንደሆኑ ይመስላል። ያለ ምስል እንኳን bite መፍጠር ትችላላችሁ እና መስመር ላይ ሲመለሱ በኋላ ምስል ማከል ትችላላችሁ።",
+  "not-verified-restaurant": "ይህ ምግብ ቤት ገና በ BiteTribe ላይ አልተረጋገጠም።",
+  "restaurant-rating": "({{ biteCount }} ደረጃዎች)",
+  "no-ratings-yet": "ገና ምንም ደረጃ የለም",
+  "no-social-media-links": "የማህበራዊ ሚዲያ አገናኞች የሉም",
+  "menu": "ሜኑ",
+  "bites": "Bites",
+  "add-category": "ምድብ ጨምር",
+  "save-menu": "ሜኑን አስቀምጥ",
+  "no-menu-yet": "ገና ምንም ሜኑ የለም"
 }

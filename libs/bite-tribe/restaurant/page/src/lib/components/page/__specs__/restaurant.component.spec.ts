@@ -5,6 +5,8 @@ import { ComponentRef } from '@angular/core';
 import { RestaurantComponent } from '../restaurant.component';
 import { Link, Restaurant } from 'model';
 import SpyInstance = jest.SpyInstance;
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('leaflet');
 
@@ -25,6 +27,14 @@ jest.mock('../../../utils/unique-bites-by-name', () => ({
 
 addNecessaryIcons();
 
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
+
 describe('RestaurantComponent', () => {
   let component: RestaurantComponent;
   let fixture: ComponentFixture<RestaurantComponent>;
@@ -32,7 +42,10 @@ describe('RestaurantComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     });
 
     fixture = TestBed.createComponent(RestaurantComponent);
@@ -42,6 +55,35 @@ describe('RestaurantComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('averageBiteRating', () => {
+    it('should return average rating', () => {
+      componentRef.setInput('bites', [
+        { rating: 4 },
+        { rating: 5 },
+        { rating: 3 },
+      ] as any);
+      expect(component.averageBiteRating()).toBe(4);
+    });
+
+    it('should return 0 if no bites', () => {
+      componentRef.setInput('bites', []);
+      expect(component.averageBiteRating()).toBe(0);
+    });
+
+    it('should return 0 if bites is undefined', () => {
+      componentRef.setInput('bites', undefined);
+      expect(component.averageBiteRating()).toBe(0);
+    });
+
+    it('should round if many decimals result from average', () => {
+      componentRef.setInput('bites', [
+        { rating: 4 },
+        { rating: 5.512312 },
+      ] as any);
+      expect(component.averageBiteRating()).toBe(4.8);
+    });
   });
 
   describe('links', () => {

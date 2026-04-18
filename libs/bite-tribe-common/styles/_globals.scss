@@ -89,3 +89,11 @@ input[type='number'] {
     background-color: var(--ion-color-primary);
   }
 }
+
+.text-small {
+  font-size: 0.875rem;
+}
+
+.text-secondary {
+  color: var(--ion-background-color-step-600);
+}

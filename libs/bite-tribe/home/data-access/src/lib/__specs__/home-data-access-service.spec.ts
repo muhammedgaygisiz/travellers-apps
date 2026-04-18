@@ -13,6 +13,8 @@ class Mock {
   imageUploads$ = of([]);
   sortedMyBites$ = of([]);
   myBitesSorting$ = of('distance');
+  sortedRestaurantBites$ = of([]);
+  restaurantBitesSorting$ = of('createdAt');
   bitesBySelectedBucketlist$ = of([]);
   allTags$ = of([]);
   homeFilters$ = of([]);
@@ -32,6 +34,7 @@ class Mock {
   submitDeleteBite = (): null => null;
   setHomeSorting = (): null => null;
   setMyBitesSorting = (): null => null;
+  setRestaurantBitesSorting = (): null => null;
   setHomeFilters = (): null => null;
   clearHomeFilters = (): null => null;
   reloadGPSPosition = (): null => null;
@@ -234,6 +237,21 @@ describe('HomeDataAccessService', () => {
         service.setMyBitesSorting('sorting');
         expect(setMyBitesSortingSpy).toHaveBeenCalledTimes(1);
         expect(setMyBitesSortingSpy).toHaveBeenCalledWith('sorting');
+      },
+    ));
+  });
+
+  describe('setRestaurantBitesSorting', () => {
+    it('should call setRestaurantBitesSorting on BiteTribeStoreService', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        const setRestaurantBitesSortingSpy = jest.spyOn(
+          biteTribeStoreService,
+          'setRestaurantBitesSorting',
+        );
+        service.setRestaurantBitesSorting('sorting');
+        expect(setRestaurantBitesSortingSpy).toHaveBeenCalledTimes(1);
+        expect(setRestaurantBitesSortingSpy).toHaveBeenCalledWith('sorting');
       },
     ));
   });

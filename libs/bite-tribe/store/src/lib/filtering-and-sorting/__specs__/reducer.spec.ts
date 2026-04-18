@@ -184,21 +184,45 @@ describe('Filtering And Sorting Reducer', () => {
     });
   });
 
-  describe('loadedFromPreferences', () => {
-    it('should take incoming slice', () => {
-      const INITIAL_STATE: FilteringAndSortingSlice = {};
-
-      const NEW_STATE: FilteringAndSortingSlice = {
-        sorting: { bucketlists: 'likes' },
+  describe('setRestaurantBitesSorting', () => {
+    it('should set restaurant bites sorting', () => {
+      const INITIAL_STATE: FilteringAndSortingSlice = {
+        sorting: { restaurantBites: 'createdAt' },
       };
-      const setBucketlistSortingAction =
-        FilteringAndSortingActions.setBucketlistSorting({
+      const NEW_STATE: FilteringAndSortingSlice = {
+        sorting: { restaurantBites: 'likes' },
+      };
+
+      const setRestaurantBitesSortingAction =
+        FilteringAndSortingActions.setRestaurantBitesSorting({
           sorting: 'likes',
         });
 
-      expect(reducer(INITIAL_STATE, setBucketlistSortingAction)).toEqual({
+      expect(reducer(INITIAL_STATE, setRestaurantBitesSortingAction)).toEqual({
         ...NEW_STATE,
       });
+    });
+  });
+
+  describe('loadedFromPreferences', () => {
+    it('should replace the state with the incoming slice', () => {
+      const INITIAL_STATE: FilteringAndSortingSlice = {
+        sorting: { home: 'distance' },
+      };
+
+      const NEW_SLICE: FilteringAndSortingSlice = {
+        sorting: { bucketlists: 'likes' },
+        filtering: { home: { filters: ['#test'] } },
+      };
+
+      const loadedFromPreferencesAction =
+        FilteringAndSortingActions.loadedFromPreferences({
+          slice: NEW_SLICE,
+        });
+
+      expect(reducer(INITIAL_STATE, loadedFromPreferencesAction)).toEqual(
+        NEW_SLICE,
+      );
     });
   });
 });

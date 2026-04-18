@@ -2,6 +2,7 @@ export type FilteringAndSortingSlice = {
   sorting?: {
     home?: string;
     myBites?: string;
+    restaurantBites?: string;
     bucketlists?: string;
   };
   filtering?: {

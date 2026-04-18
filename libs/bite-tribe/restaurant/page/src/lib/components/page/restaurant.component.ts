@@ -18,15 +18,12 @@ import {
   IonItem,
   IonLabel,
   IonList,
-  IonSegment,
-  IonSegmentButton,
   IonSelect,
   IonSelectOption,
   IonText,
 } from '@ionic/angular/standalone';
 import { Bite, Like, Link, Menu, MenuItem, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
-import { BiteComponent } from 'bite-tribe-common/bite';
 import {
   FormArray,
   FormBuilder,
@@ -37,12 +34,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TitleCasePipe } from '@angular/common';
 import { EnsureProtocolPipe } from '../../pipes/ensure-protocol.pipe';
-import { MenuItemComponent } from '../menu-item/menu-item.component';
 import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
 import { getPosition } from '../../utils/get-position';
 import { getDistance } from '../../utils/get-distance';
 import { DistanceComponent } from 'common/distance';
 import { uniqueBitesByName } from '../../utils/unique-bites-by-name';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'restaurant',
@@ -54,7 +51,6 @@ import { uniqueBitesByName } from '../../utils/unique-bites-by-name';
     IonButton,
     IonIcon,
     MapComponent,
-    BiteComponent,
     IonList,
     ReactiveFormsModule,
     IonItem,
@@ -65,11 +61,9 @@ import { uniqueBitesByName } from '../../utils/unique-bites-by-name';
     IonLabel,
     TitleCasePipe,
     EnsureProtocolPipe,
-    IonSegment,
-    IonSegmentButton,
-    MenuItemComponent,
     RestaurantImageComponent,
     DistanceComponent,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -86,10 +80,21 @@ export class RestaurantComponent {
 
   readonly createBiteClick = output<MenuItem>();
   readonly showMenuClick = output<Restaurant | undefined>();
+  readonly showBitesClick = output<Restaurant | undefined>();
   readonly biteClick = output<Bite>();
   readonly submitSocialMediaLinks = output<Partial<{ links: Link[] }>>();
   readonly likeButtonClick = output<Like>();
   readonly selectedSegment = signal<'bites' | 'menu'>('bites');
+
+  averageBiteRating = computed(() => {
+    const bites = this.bites() || [];
+    const totalRating = bites.reduce(
+      (acc, bite) => acc + (bite.rating || 0),
+      0,
+    );
+    const average = bites.length > 0 ? totalRating / bites.length : 0;
+    return Math.round(average * 10) / 10;
+  });
 
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),

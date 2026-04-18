@@ -42,12 +42,37 @@ describe(MarketPlaceDataAccessService.name, () => {
       ];
 
       beforeEach(() => {
-        jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
-          snapshots: mockBiteTrails.map(({ id, ...data }) => ({
-            id,
-            data,
-          })),
-        } as any);
+        jest
+          .spyOn(FirebaseFirestore, 'getCollection')
+          .mockImplementation(({ reference }) => {
+            if (reference === 'biteTrails') {
+              return Promise.resolve({
+                snapshots: mockBiteTrails.map(({ id, ...data }) => ({
+                  id,
+                  data,
+                })),
+              } as any);
+            }
+
+            if (reference === 'biteTrails/trail-1/sells') {
+              return Promise.resolve({
+                snapshots: [
+                  { id: 'sell-1', data: {} },
+                  { id: 'sell-2', data: {} },
+                ],
+              } as any);
+            }
+
+            if (reference === 'biteTrails/trail-2/sells') {
+              return Promise.resolve({
+                snapshots: [{ id: 'sell-1', data: {} }],
+              } as any);
+            }
+
+            return Promise.resolve({
+              snapshots: [],
+            } as any);
+          });
       });
 
       it('should call getCollection with biteTrails reference', async () => {
@@ -61,7 +86,27 @@ describe(MarketPlaceDataAccessService.name, () => {
       it('should return mapped bite trails', async () => {
         const result = await service.biteTrailsLoader({} as any);
 
-        expect(result).toEqual(mockBiteTrails);
+        expect(result).toEqual([
+          {
+            ...mockBiteTrails[0],
+            soldCount: 2,
+          },
+          {
+            ...mockBiteTrails[1],
+            soldCount: 1,
+          },
+        ]);
+      });
+
+      it('should load sells from each bite trail and map soldCount', async () => {
+        await service.biteTrailsLoader({} as any);
+
+        expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
+          reference: 'biteTrails/trail-1/sells',
+        });
+        expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
+          reference: 'biteTrails/trail-2/sells',
+        });
       });
     });
 

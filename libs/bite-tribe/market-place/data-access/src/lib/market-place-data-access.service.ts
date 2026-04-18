@@ -13,12 +13,25 @@ export class MarketPlaceDataAccessService {
       reference: BITE_TRAIL_COLLECTION,
     });
 
-    return data.snapshots.map(
+    const biteTrails = data.snapshots.map(
       (doc) =>
         ({
           id: doc.id,
           ...doc.data,
         }) as BiteTrail,
+    );
+
+    return Promise.all(
+      biteTrails.map(async (biteTrail) => {
+        const sells = await FirebaseFirestore.getCollection({
+          reference: `${BITE_TRAIL_COLLECTION}/${biteTrail.id}/sells`,
+        });
+
+        return {
+          ...biteTrail,
+          soldCount: sells.snapshots.length,
+        };
+      }),
     );
   };
 

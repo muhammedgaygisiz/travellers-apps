@@ -82,7 +82,10 @@
               <ion-icon name="flame-outline" />
               <ng-container>{{ 'best-seller' | transloco }}</ng-container>
             </ion-badge>
-            <ion-text>{{ 'sold-231-times' | transloco }}</ion-text>
+            <ion-text>
+              {{ ('sold-231-times' | transloco).replace('231',
+              (biteTrailData.soldCount ?? 231).toString()) }}
+            </ion-text>
           </div>
         </div>
 

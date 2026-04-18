@@ -45,7 +45,7 @@ export const dispatchGpsPosition = (
   store: Store,
 ): UnaryFunction<Observable<any>, Observable<any>> =>
   pipe(
-    switchMap((args: unknown) =>
+    switchMap((args) =>
       getCurrentPosition().pipe(
         withLatestFrom(store.select(gpsPosition).pipe(take(1))),
         map(([currentPosition, previousPosition]) => {
@@ -53,6 +53,8 @@ export const dispatchGpsPosition = (
             store.dispatch(
               AppActions.loadedGPSPosition({ position: currentPosition }),
             );
+
+            return args;
           }
 
           store.dispatch(
@@ -60,6 +62,8 @@ export const dispatchGpsPosition = (
               reason: 'No meaningful movement detected',
             }),
           );
+
+          return args;
         }),
         catchError((error) => {
           console.error(error);

@@ -119,7 +119,6 @@ export class BiteApiService {
     } catch (error) {
       console.error('Error deleting image:', error);
       this.errorHandler.handleError(error);
-      return Promise.reject(error);
     }
 
     try {

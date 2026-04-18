@@ -248,7 +248,7 @@ describe(BiteApiService.name, () => {
           (FirebaseFirestore.deleteDocument as any).mockReset();
         });
 
-        it('should handle the error and not call FirebaseFirestore.deleteDocument', async () => {
+        it('should handle the error and call FirebaseFirestore.deleteDocument', async () => {
           (deleteFileInFirebaseStorage as jest.Mock).mockRejectedValueOnce(
             new Error('Failed to delete image'),
           );
@@ -262,7 +262,7 @@ describe(BiteApiService.name, () => {
           expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(
             expect.any(Error),
           );
-          expect(FirebaseFirestore.deleteDocument).not.toHaveBeenCalled();
+          expect(FirebaseFirestore.deleteDocument).toHaveBeenCalled();
         });
       });
 

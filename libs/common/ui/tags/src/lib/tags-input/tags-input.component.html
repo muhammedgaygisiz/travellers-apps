@@ -2,7 +2,7 @@
 @let readonlyData = readonly();
 
 <label id="tags-label" class="ion-margin-bottom">{{
-  readonly() ? 'Tags' : 'Tags?'
+  readonly() ? ('tags' | transloco) : ('tags-label' | transloco)
 }}</label>
 
 <div class="container">

@@ -12,8 +12,18 @@ import { imageOutline } from 'ionicons/icons';
 import { ComponentRef, signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 jest.mock('@capacitor/camera', () => ({
   Camera: {
@@ -88,6 +98,7 @@ describe('ImageUploadComponent', () => {
         { provide: Platform, useValue: platformMock },
         { provide: NavController, useValue: navControllerMock },
         { provide: AlertController, useValue: alertControllerMock },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     }).compileComponents();
 

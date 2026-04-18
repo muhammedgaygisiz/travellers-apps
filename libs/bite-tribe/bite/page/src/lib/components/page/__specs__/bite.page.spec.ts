@@ -407,7 +407,7 @@ describe('BitePage', () => {
       componentRef.setInput('position', undefined as any);
 
       expect(component.getGpsErrorMessage()).toContain(
-        'No GPS position found in the image',
+        'no-gps-position-error-message',
       );
     });
 
@@ -416,7 +416,7 @@ describe('BitePage', () => {
       componentRef.setInput('position', undefined as any);
 
       expect(component.getGpsErrorMessage()).toContain(
-        'Please choose a GPS position',
+        'chose-gps-position-error-message',
       );
     });
 

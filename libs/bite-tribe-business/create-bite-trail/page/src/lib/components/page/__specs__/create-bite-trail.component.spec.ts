@@ -4,6 +4,8 @@ import { IonModal, provideIonicAngular } from '@ionic/angular/standalone';
 import { Bite, PublicUser } from 'model';
 import { ComponentRef } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('@capacitor-firebase/firestore');
 
@@ -15,6 +17,14 @@ jest.mock('image-compression', () => ({
 
 addNecessaryIcons();
 
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
+
 describe('CreateBiteTrailComponent', () => {
   let component: CreateBiteTrailComponent;
   let compRef: ComponentRef<CreateBiteTrailComponent>;
@@ -22,7 +32,10 @@ describe('CreateBiteTrailComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular()],
+      providers: [
+        provideIonicAngular(),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     });
 
     fixture = TestBed.createComponent(CreateBiteTrailComponent);

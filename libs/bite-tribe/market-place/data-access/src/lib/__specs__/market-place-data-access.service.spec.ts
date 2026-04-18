@@ -7,6 +7,7 @@ import { BiteTrail } from 'model';
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
     getCollection: jest.fn(),
+    getCountFromServer: jest.fn(),
   },
 }));
 
@@ -84,6 +85,25 @@ describe(MarketPlaceDataAccessService.name, () => {
               snapshots: [],
             } as any);
           });
+        jest
+          .spyOn(FirebaseFirestore, 'getCountFromServer')
+          .mockImplementation(({ reference }) => {
+            if (reference === 'biteTrails/trail-1/sells') {
+              return Promise.resolve({
+                count: 2,
+              } as any);
+            }
+
+            if (reference === 'biteTrails/trail-2/sells') {
+              return Promise.resolve({
+                count: 1,
+              } as any);
+            }
+
+            return Promise.resolve({
+              count: 0,
+            } as any);
+          });
       });
 
       it('should call getCollection with biteTrails reference', async () => {
@@ -112,39 +132,52 @@ describe(MarketPlaceDataAccessService.name, () => {
       it('should load sells from each bite trail and map soldCount', async () => {
         await service.biteTrailsLoader({} as any);
 
-        expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
+        expect(FirebaseFirestore.getCountFromServer).toHaveBeenCalledWith({
           reference: 'biteTrails/trail-1/sells',
         });
-        expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
+        expect(FirebaseFirestore.getCountFromServer).toHaveBeenCalledWith({
           reference: 'biteTrails/trail-2/sells',
         });
       });
 
       it('should return soldCount as 0 and handle error when sells loading fails', async () => {
-        jest.spyOn(FirebaseFirestore, 'getCollection').mockImplementation(({ reference }) => {
-          if (reference === 'biteTrails') {
+        jest
+          .spyOn(FirebaseFirestore, 'getCollection')
+          .mockImplementation(({ reference }) => {
+            if (reference === 'biteTrails') {
+              return Promise.resolve({
+                snapshots: mockBiteTrails.map(({ id, ...data }) => ({
+                  id,
+                  data,
+                })),
+              } as any);
+            }
+
+            if (reference === 'biteTrails/trail-1/sells') {
+              return Promise.reject(new Error('sells failed'));
+            }
+
             return Promise.resolve({
-              snapshots: mockBiteTrails.map(({ id, ...data }) => ({
-                id,
-                data,
-              })),
+              snapshots: [],
             } as any);
-          }
+          });
+        jest
+          .spyOn(FirebaseFirestore, 'getCountFromServer')
+          .mockImplementation(({ reference }) => {
+            if (reference === 'biteTrails/trail-1/sells') {
+              return Promise.reject(new Error('sells failed'));
+            }
 
-          if (reference === 'biteTrails/trail-1/sells') {
-            return Promise.reject(new Error('sells failed'));
-          }
+            if (reference === 'biteTrails/trail-2/sells') {
+              return Promise.resolve({
+                count: 1,
+              } as any);
+            }
 
-          if (reference === 'biteTrails/trail-2/sells') {
             return Promise.resolve({
-              snapshots: [{ id: 'sell-1', data: {} }],
+              count: 0,
             } as any);
-          }
-
-          return Promise.resolve({
-            snapshots: [],
-          } as any);
-        });
+          });
 
         const result = await service.biteTrailsLoader({} as any);
 
@@ -158,7 +191,9 @@ describe(MarketPlaceDataAccessService.name, () => {
             soldCount: 1,
           },
         ]);
-        expect(errorHandlerMock.handleError).toHaveBeenCalledWith(expect.any(Error));
+        expect(errorHandlerMock.handleError).toHaveBeenCalledWith(
+          expect.any(Error),
+        );
       });
     });
 

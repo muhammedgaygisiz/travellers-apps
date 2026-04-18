@@ -9,11 +9,22 @@ const navigateForwardMock = jest.fn();
 const deleteBucketlistMock = jest.fn();
 const updateBucketlistNameMock = jest.fn();
 const removeBiteFromBucketlistMock = jest.fn();
+const getDocumentMock = jest.fn();
+const setDocumentMock = jest.fn();
+
+jest.mock('@capacitor-firebase/firestore', () => ({
+  FirebaseFirestore: {
+    getDocument: (...args: unknown[]): unknown => getDocumentMock(...args),
+    setDocument: (...args: unknown[]): unknown => setDocumentMock(...args),
+  },
+}));
+
 const Mock = {
   sortedBucketlists$: of(undefined),
   bucketlistSorting$: of(undefined),
   selectedBucketlist$: of(undefined),
   bitesBySelectedBucketlist$: of([]),
+  userId$: of('user-123'),
   createBucketList: createBucketListMock,
   setBucketlistSorting: setBucketlistSortingMock,
   navigateForward: navigateForwardMock,
@@ -26,6 +37,9 @@ describe('BucketlistsDataAccessService', () => {
   let service: BucketlistsDataAccessService;
 
   beforeEach(() => {
+    getDocumentMock.mockReset();
+    setDocumentMock.mockReset();
+
     TestBed.configureTestingModule({
       providers: [{ provide: BiteTribeStoreService, useValue: Mock }],
     }).compileComponents();
@@ -73,6 +87,67 @@ describe('BucketlistsDataAccessService', () => {
       const params = { biteId: 'bite-123', bucketlistId: 'bucket-123' };
       service.removeBiteFromBucketlist(params);
       expect(removeBiteFromBucketlistMock).toHaveBeenCalledWith(params);
+    });
+  });
+
+  describe('getOwnBiteTrailRating', () => {
+    it('should return undefined when no rating exists', async () => {
+      getDocumentMock.mockResolvedValue({ snapshot: { data: undefined } });
+
+      const result = await service.getOwnBiteTrailRating('trail-1');
+
+      expect(result).toBeUndefined();
+      expect(getDocumentMock).toHaveBeenCalledWith({
+        reference: 'biteTrails/trail-1/ratings/user-123',
+      });
+    });
+
+    it('should return rating when document exists', async () => {
+      getDocumentMock.mockResolvedValue({
+        snapshot: { data: { rating: 5, review: 'Great!' } },
+      });
+
+      const result = await service.getOwnBiteTrailRating('trail-1');
+
+      expect(result).toEqual({ rating: 5, review: 'Great!' });
+    });
+  });
+
+  describe('createOwnBiteTrailRating', () => {
+    it('should return false when rating already exists', async () => {
+      getDocumentMock.mockResolvedValue({
+        snapshot: { data: { rating: 4, review: 'Existing' } },
+      });
+
+      const result = await service.createOwnBiteTrailRating({
+        biteTrailId: 'trail-1',
+        rating: 5,
+        review: 'Great!',
+      });
+
+      expect(result).toBe(false);
+      expect(setDocumentMock).not.toHaveBeenCalled();
+    });
+
+    it('should create rating when no rating exists', async () => {
+      getDocumentMock.mockResolvedValue({ snapshot: { data: undefined } });
+
+      const result = await service.createOwnBiteTrailRating({
+        biteTrailId: 'trail-1',
+        rating: 5,
+        review: 'Great!',
+      });
+
+      expect(result).toBe(true);
+      expect(setDocumentMock).toHaveBeenCalledWith({
+        reference: 'biteTrails/trail-1/ratings/user-123',
+        data: expect.objectContaining({
+          biteTrailId: 'trail-1',
+          authorId: 'user-123',
+          rating: 5,
+          review: 'Great!',
+        }),
+      });
     });
   });
 });

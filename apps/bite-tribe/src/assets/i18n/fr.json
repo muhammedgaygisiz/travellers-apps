@@ -117,5 +117,10 @@
   "chose-gps-position-error-message": "Veuillez choisir une position GPS sur la carte ou activer la position GPS.",
   "post": "Publier",
   "we-could-not-access-your-location": "Nous n'avons pas pu accéder à votre position. La distance jusqu'aux Bites ne peut pas être affichée ou n'est pas à jour.",
-  "you-are-offline": "Il semble que vous soyez hors ligne. Veuillez vérifier votre connexion Internet."
+  "you-are-offline": "Il semble que vous soyez hors ligne. Veuillez vérifier votre connexion Internet.",
+  "retry": "RÉESSAYER",
+  "close": "FERMER",
+  "drag-and-drop-not-supported": "Le glisser-déposer n'est pas pris en charge. <br />Appuie pour téléverser ou prendre une photo.",
+  "tap-into-box": "Appuie dans la zone pour téléverser <br />ou prendre une photo.",
+  "image-upload-disabled": "Il semble que tu sois hors ligne. Tu peux quand même créer un Bite sans image et en ajouter une plus tard, quand tu seras de nouveau en ligne."
 }

@@ -117,5 +117,10 @@
   "chose-gps-position-error-message": "Por favor, elige una posición GPS en el mapa o activa la ubicación GPS.",
   "post": "Publicar",
   "we-could-not-access-your-location": "No pudimos acceder a tu ubicación. La distancia a los Bites no se puede mostrar o no está actualizada.",
-  "you-are-offline": "Parece que estás sin conexión. Por favor, revisa tu conexión a internet."
+  "you-are-offline": "Parece que estás sin conexión. Por favor, revisa tu conexión a internet.",
+  "retry": "REINTENTAR",
+  "close": "CERRAR",
+  "drag-and-drop-not-supported": "Arrastrar y soltar no es compatible. <br />Toca para subir o tomar una foto.",
+  "tap-into-box": "Toca dentro del recuadro para subir <br />o tomar una foto.",
+  "image-upload-disabled": "Parece que estás sin conexión. Aun así puedes crear un Bite sin imagen y añadir una más tarde cuando vuelvas a estar en línea."
 }

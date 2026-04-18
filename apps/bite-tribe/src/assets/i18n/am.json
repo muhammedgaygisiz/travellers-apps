@@ -117,5 +117,10 @@
   "chose-gps-position-error-message": "እባክዎ ከካርታው የGPS ቦታ ይምረጡ ወይም GPS ቦታን ያንቁ።",
   "post": "ፖስት",
   "we-could-not-access-your-location": "ወደ አካባቢዎ መዳረስ አልቻልንም። ወደ Bites ያለው ርቀት ሊታይ አይችልም ወይም ወቅታዊ አይደለም።",
-  "you-are-offline": "ከመስመር ውጭ እንደሆኑ ይመስላል። እባክዎ የኢንተርኔት ግንኙነትዎን ያረጋግጡ።"
+  "you-are-offline": "ከመስመር ውጭ እንደሆኑ ይመስላል። እባክዎ የኢንተርኔት ግንኙነትዎን ያረጋግጡ።",
+  "retry": "እንደገና ሞክር",
+  "close": "ዝጋ",
+  "drag-and-drop-not-supported": "Drag & drop አይደገፍም። <br />ለመስቀል ወይም ፎቶ ለማንሳት ይንኩ።",
+  "tap-into-box": "ለመስቀል <br />ወይም ፎቶ ለማንሳት በሳጥኑ ውስጥ ይንኩ።",
+  "image-upload-disabled": "ከመስመር ውጭ እንደሆኑ ይመስላል። ያለ ምስል እንኳን bite መፍጠር ትችላላችሁ እና መስመር ላይ ሲመለሱ በኋላ ምስል ማከል ትችላላችሁ።"
 }

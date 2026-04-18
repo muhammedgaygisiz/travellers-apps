@@ -155,8 +155,12 @@
         </ion-text>
       </ion-card-content>
 
-      <ion-button fill="clear" (click)="refresh.emit()">RETRY</ion-button>
-      <ion-button fill="clear" (click)="closeGpsError.emit()">CLOSE</ion-button>
+      <ion-button fill="clear" (click)="refresh.emit()">{{
+        'retry' | transloco
+      }}</ion-button>
+      <ion-button fill="clear" (click)="closeGpsError.emit()">{{
+        'close' | transloco
+      }}</ion-button>
     </ion-card>
   }
 

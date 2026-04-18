@@ -117,5 +117,10 @@
   "chose-gps-position-error-message": "Silakan pilih posisi GPS dari peta atau aktifkan posisi GPS.",
   "post": "Posting",
   "we-could-not-access-your-location": "Kami tidak dapat mengakses lokasimu. Jarak ke Bites tidak dapat ditampilkan atau tidak terbaru.",
-  "you-are-offline": "Sepertinya kamu sedang offline. Silakan periksa koneksi internetmu."
+  "you-are-offline": "Sepertinya kamu sedang offline. Silakan periksa koneksi internetmu.",
+  "retry": "COBA LAGI",
+  "close": "TUTUP",
+  "drag-and-drop-not-supported": "Drag & drop tidak didukung. <br />Ketuk untuk mengunggah atau mengambil foto.",
+  "tap-into-box": "Ketuk kotaknya untuk mengunggah <br />atau mengambil foto.",
+  "image-upload-disabled": "Sepertinya kamu sedang offline. Kamu tetap bisa membuat Bite tanpa gambar dan menambahkannya nanti saat kamu kembali online."
 }

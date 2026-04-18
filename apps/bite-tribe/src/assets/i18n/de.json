@@ -117,5 +117,10 @@
   "chose-gps-position-error-message": "Bitte wähle eine GPS-Position auf der Karte oder aktiviere die GPS-Position.",
   "post": "Posten",
   "we-could-not-access-your-location": "Wir konnten nicht auf deinen Standort zugreifen. Die Entfernung zu den Bites kann nicht angezeigt werden oder ist nicht aktuell.",
-  "you-are-offline": "Du scheinst offline zu sein. Bitte überprüfe deine Internetverbindung."
+  "you-are-offline": "Du scheinst offline zu sein. Bitte überprüfe deine Internetverbindung.",
+  "retry": "ERNEUT VERSUCHEN",
+  "close": "SCHLIESSEN",
+  "drag-and-drop-not-supported": "Drag-and-drop wird nicht unterstützt. <br />Tippe, um ein Bild hochzuladen oder ein Foto aufzunehmen.",
+  "tap-into-box": "Tippe in das Feld, um ein Bild hochzuladen <br />oder ein Foto aufzunehmen.",
+  "image-upload-disabled": "Du scheinst offline zu sein. Du kannst trotzdem einen Bite ohne Bild erstellen und später eines hinzufügen, wenn du wieder online bist."
 }

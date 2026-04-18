@@ -2,14 +2,14 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { BiteTribeHomeComponent } from '../components/page/home.component';
 import { HomeService } from './home.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <bt-home
       class="ion-page"
-      title="My Bites"
-      i18n-title
+      title="{{ 'my-bites' | transloco }}"
       [showFooter]="false"
       [showAddButton]="false"
       [enableBackButton]="true"
@@ -38,7 +38,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (closeGpsError)="service.closeGpsError()"
     />
   `,
-  imports: [BiteTribeHomeComponent],
+  imports: [BiteTribeHomeComponent, TranslocoPipe],
 })
 export class MyBitesContainer {
   service = inject(HomeService);

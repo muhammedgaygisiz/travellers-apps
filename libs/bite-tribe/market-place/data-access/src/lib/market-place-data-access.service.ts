@@ -1,4 +1,4 @@
-import { Injectable, resource, ResourceLoader } from '@angular/core';
+import { ErrorHandler, inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { BiteTrail } from 'model';
 
@@ -8,6 +8,8 @@ const BITE_TRAIL_COLLECTION = 'biteTrails';
   providedIn: 'root',
 })
 export class MarketPlaceDataAccessService {
+  private readonly errorHandler = inject(ErrorHandler);
+
   biteTrailsLoader: ResourceLoader<BiteTrail[], unknown> = async () => {
     const data = await FirebaseFirestore.getCollection({
       reference: BITE_TRAIL_COLLECTION,
@@ -23,14 +25,23 @@ export class MarketPlaceDataAccessService {
 
     return Promise.all(
       biteTrails.map(async (biteTrail) => {
-        const sells = await FirebaseFirestore.getCollection({
-          reference: `${BITE_TRAIL_COLLECTION}/${biteTrail.id}/sells`,
-        });
+        try {
+          const sells = await FirebaseFirestore.getCollection({
+            reference: `${BITE_TRAIL_COLLECTION}/${biteTrail.id}/sells`,
+          });
 
-        return {
-          ...biteTrail,
-          soldCount: sells.snapshots.length,
-        };
+          return {
+            ...biteTrail,
+            soldCount: sells.snapshots.length,
+          };
+        } catch (error) {
+          this.errorHandler.handleError(error);
+
+          return {
+            ...biteTrail,
+            soldCount: 0,
+          };
+        }
       }),
     );
   };

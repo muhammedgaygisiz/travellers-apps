@@ -16,6 +16,7 @@ import { gpsPosition } from '../selectors';
 import { haversineDistance } from 'utils';
 import type { Geopoint } from 'model';
 import type { Position } from '@capacitor/geolocation/dist/esm/definitions';
+import type { Action } from '@ngrx/store';
 
 export const GPS_MEANINGFUL_MOVEMENT_THRESHOLD_METERS = 100;
 
@@ -40,18 +41,15 @@ const hasMeaningfulMovement = (
   return distanceInMeters >= GPS_MEANINGFUL_MOVEMENT_THRESHOLD_METERS;
 };
 
-const isReloadGpsPositionAction = (args: unknown): boolean =>
-  typeof args === 'object' &&
-  args !== null &&
-  'type' in args &&
+const isReloadGpsPositionAction = (args: Action): boolean =>
   args.type === AppActions.reloadGPSPosition.type;
 
 /** Dispatches the GPS position to the store */
 export const dispatchGpsPosition = (
   store: Store,
-): UnaryFunction<Observable<any>, Observable<any>> =>
+): UnaryFunction<Observable<Action>, Observable<Action>> =>
   pipe(
-    switchMap((args: unknown) =>
+    switchMap((args: Action) =>
       getCurrentPosition().pipe(
         withLatestFrom(store.select(gpsPosition).pipe(take(1))),
         map(([currentPosition, previousPosition]) => {

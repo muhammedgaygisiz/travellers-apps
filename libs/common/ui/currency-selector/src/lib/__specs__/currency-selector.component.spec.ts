@@ -63,6 +63,42 @@ describe('CurrencySelectorComponent', () => {
     expect(selectedCode).toBe('EUR');
   });
 
+  it('should place favorite currencies at the top', () => {
+    fixture.componentRef.setInput('favoriteCurrencies', ['USD']);
+    fixture.detectChanges();
+
+    const filtered = component.filteredCurrencies();
+    expect(filtered[0].code).toBe('USD');
+  });
+
+  it('should prioritize favorite currencies in searched results', () => {
+    fixture.componentRef.setInput('favoriteCurrencies', ['USD']);
+    fixture.detectChanges();
+    component.rawSearchTerm.set('d');
+
+    const filtered = component.filteredCurrencies();
+    expect(filtered[0].code).toBe('USD');
+  });
+
+  it('should emit favoriteCurrencyToggled when favorite is toggled', () => {
+    const stopPropagation = jest.fn();
+    let toggledCode = '';
+
+    component.favoriteCurrencyToggled.subscribe((code) => {
+      toggledCode = code;
+    });
+
+    component.toggleFavorite(
+      {
+        stopPropagation,
+      } as unknown as Event,
+      'EUR',
+    );
+
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(toggledCode).toBe('EUR');
+  });
+
   it('should emit selectionCancel when cancel is called', () => {
     let cancelled = false;
     component.selectionCancel.subscribe(() => {

@@ -40,6 +40,7 @@ import type {
 import {
   currency,
   exchangeRates,
+  favCurrencies,
   gpsPosition,
   hasErrorLoadingGpsPosition,
   imageUploads,
@@ -123,6 +124,7 @@ export class BiteTribeStoreService implements StoreService {
   reviews$ = this.store.select(reviews);
   bucketlists$ = this.store.select(bucketlists);
   currencyFromSettings$ = this.store.select(currency);
+  favCurrenciesFromSettings$ = this.store.select(favCurrencies);
   restaurantToCreate$ = this.store.select(restaurantToCreate);
   exchangeRates$ = this.store.select(exchangeRates);
   preferedCurrency$ = this.store.select(preferredCurrency);

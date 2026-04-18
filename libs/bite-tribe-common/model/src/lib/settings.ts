@@ -3,6 +3,7 @@ export interface Settings {
   emailUpdates: boolean;
   theme: 'light' | 'dark';
   currency: string;
+  favoriteCurrencies?: string[];
   nearby?: number;
   language: string;
   updatedAt?: string;

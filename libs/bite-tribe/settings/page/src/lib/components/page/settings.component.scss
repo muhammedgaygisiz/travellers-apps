@@ -59,4 +59,16 @@
     --padding-start: 0;
     margin-top: 4px;
   }
+
+  .favorite-currencies-value {
+    max-width: 40%;
+
+    div {
+      text-align: end;
+
+      ion-icon {
+        min-width: 1em;
+      }
+    }
+  }
 }

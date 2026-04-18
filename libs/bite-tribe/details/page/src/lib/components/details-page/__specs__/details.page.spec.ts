@@ -13,6 +13,8 @@ import { addNecessaryIcons } from 'utils';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { Platform } from '@ionic/angular';
 import type { Bite } from 'model';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
@@ -22,8 +24,16 @@ class MockToBlobUrlPipe implements PipeTransform {
 }
 
 jest.mock('heic2any', () => jest.fn());
-jest.mock('localization');
+
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 // Properly mock the AppLauncher module
 jest.mock('@capacitor/app-launcher', () => ({
@@ -46,6 +56,7 @@ describe('DetailsPage', () => {
         ReactiveFormsModule,
         PageComponent,
         DetailsPage,
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     })
       .overrideComponent(DetailsPage, {

@@ -71,14 +71,16 @@
         }
         @if (showEditButton()) {
           <div class="bite-actions ion-margin-top">
-            <ion-button (click)="gotoEdit.emit(biteData)">Edit</ion-button>
+            <ion-button (click)="gotoEdit.emit(biteData)">{{
+              'edit' | transloco
+            }}</ion-button>
             <ion-button
               color="danger"
               fill="outline"
               expand="block"
               (click)="openConfirmationDialog()"
             >
-              Delete
+              {{ 'delete' | transloco }}
             </ion-button>
           </div>
         }
@@ -89,8 +91,8 @@
 
 <ion-alert
   [isOpen]="isOpen()"
-  header="Delete Bite"
-  message="Are you sure you want to delete this bite?"
+  header="{{ 'delete-bite' | transloco }}"
+  message="{{ 'are-you-sure-you-want-to-delete-this-bite' | transloco }}"
   [buttons]="confirmationButtons"
   (didDismiss)="handleConfirmationDismiss($event)"
 />

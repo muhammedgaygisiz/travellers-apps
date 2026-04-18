@@ -2,7 +2,7 @@
   [showHeaderMenu]="false"
   [showFooter]="isFree()"
   [showAddButton]="isFree()"
-  [addButtonText]="savedBucketlistId() ? 'Go to saved Bucket list' : 'Get BiteTrail for free'"
+  [addButtonText]="toggleAddButtonText()"
   [enableBackButton]="true"
   (addButtonClick)="savedBucketlistId() ? goToSavedBucketList.emit() : getForFree.emit()"
 >
@@ -35,14 +35,17 @@
             size="large"
           />
           <ion-text color="secondary"
-            >You already saved this BiteTrail to your Bucket list.</ion-text
+            >{{ 'you-already-saved-this-bite-trail-to-your-bucket-list' |
+            transloco }}</ion-text
           >
         </ion-card-content>
       </ion-card>
       } @if (!bites().length) {
       <ion-card>
         <ion-card-content>
-          <ion-text color="primary">No bites found in this trail.</ion-text>
+          <ion-text color="primary"
+            >{{ 'no-bites-found-in-this-trail' | transloco }}</ion-text
+          >
         </ion-card-content>
       </ion-card>
       } @for (bite of bites(); track bite.id) {

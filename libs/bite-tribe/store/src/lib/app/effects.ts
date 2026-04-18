@@ -108,18 +108,6 @@ export class AppEffect {
     { dispatch: false },
   );
 
-  saveSettingsToFirestore$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AppActions.saveSettings),
-        tap(({ settings }) => {
-          this.api.saveSettings(settings);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
-
   saveUserAfterLogin$ = createEffect(
     () => {
       return this.actions$.pipe(

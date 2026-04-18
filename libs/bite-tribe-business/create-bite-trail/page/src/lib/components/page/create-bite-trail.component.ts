@@ -189,7 +189,7 @@ export class CreateBiteTrailComponent {
     });
   }
 
-  protected resetImagePath(): void {
+  resetImagePath(): void {
     this.biteTrailFormGroup.get('imagePath')?.reset();
   }
 }

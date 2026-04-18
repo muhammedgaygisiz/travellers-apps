@@ -10,7 +10,6 @@ import { ComponentRef } from '@angular/core';
 
 addNecessaryIcons();
 
-jest.mock('localization');
 jest.mock('@capacitor-firebase/storage');
 jest.mock('@capacitor-firebase/firestore');
 

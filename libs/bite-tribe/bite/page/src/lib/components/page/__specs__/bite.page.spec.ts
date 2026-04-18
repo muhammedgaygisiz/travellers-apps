@@ -15,8 +15,9 @@ import {
 } from 'ionicons/icons';
 import type { Bite } from 'model';
 import { FormGroup } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
+import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('leaflet');
 
@@ -25,11 +26,19 @@ jest.mock('image-compression', () => ({
   compressFile: jest.fn(),
   compressPhoto: jest.fn(),
 }));
-jest.mock('localization');
+
 addNecessaryIcons();
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
+};
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
 };
 
 describe('BitePage', () => {
@@ -69,6 +78,7 @@ describe('BitePage', () => {
         provideIonicAngular(getIonicConfig()),
         provideRouter([]),
         { provide: Platform, useValue: platformMock },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 
@@ -397,7 +407,7 @@ describe('BitePage', () => {
       componentRef.setInput('position', undefined as any);
 
       expect(component.getGpsErrorMessage()).toContain(
-        'No GPS position found in the image',
+        'no-gps-position-error-message',
       );
     });
 
@@ -406,7 +416,7 @@ describe('BitePage', () => {
       componentRef.setInput('position', undefined as any);
 
       expect(component.getGpsErrorMessage()).toContain(
-        'Please choose a GPS position',
+        'chose-gps-position-error-message',
       );
     });
 

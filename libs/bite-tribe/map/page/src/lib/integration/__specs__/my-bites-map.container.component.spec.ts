@@ -4,7 +4,6 @@ import { addNecessaryIcons } from 'utils';
 import { MyBitesMapContainerComponent } from '../my-bites-map.container.component';
 import { MapService } from '../map.service';
 
-jest.mock('localization');
 addNecessaryIcons();
 
 class Mock {}

@@ -8,11 +8,11 @@
   <ion-content>
     <div slot="fixed" class="container ion-padding">
       <div>
-        <h1 class="ion-margin-bottom">Log in</h1>
+        <h1 class="ion-margin-bottom">{{ 'log-in' | transloco }}</h1>
         <div
           class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
         >
-          <ion-text> Log in with</ion-text>
+          <ion-text>{{ 'log-in-with' | transloco }}</ion-text>
         </div>
 
         <div class="registration-options">
@@ -27,12 +27,12 @@
         <div
           class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
         >
-          <ion-text> or with your Email</ion-text>
+          <ion-text>{{ 'or-with-your-email' | transloco }}</ion-text>
         </div>
 
         <form [formGroup]="authFormGroup">
           <ion-input
-            label="Email"
+            label="{{ 'email' | transloco }}"
             formControlName="email"
             fill="outline"
             mode="md"
@@ -43,7 +43,7 @@
           />
 
           <ion-input
-            label="Password"
+            label="{{ 'password' | transloco }}"
             formControlName="password"
             fill="outline"
             mode="md"
@@ -60,14 +60,14 @@
             expand="block"
             (click)="submitAuth.emit(authFormGroup.value)"
             data-cy="submit"
-            >Log In
-          </ion-button>
+            >{{ 'log-in' | transloco }}</ion-button
+          >
 
           @if (loginFailed()) {
             <div class="ion-margin-top">
-              <ion-text color="danger">
-                Something went wrong. Please try again.
-              </ion-text>
+              <ion-text color="danger">{{
+                'something-went-wrong-please-try-again' | transloco
+              }}</ion-text>
             </div>
           }
         </form>
@@ -76,16 +76,17 @@
         <div
           class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
         >
-          <ion-text> or, if you don't have an account yet:</ion-text>
+          <ion-text>{{
+            'or-if-you-dont-have-an-account-yet' | transloco
+          }}</ion-text>
         </div>
         <ion-button
           class="ion-margin-top"
           expand="block"
           (click)="signup.emit()"
           data-cy="signup"
+          >{{ 'sign-up' | transloco }}</ion-button
         >
-          Sign up
-        </ion-button>
       </div>
     </div>
   </ion-content>

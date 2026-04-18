@@ -5,8 +5,6 @@ import { provideRouter } from '@angular/router';
 import { LoginService } from '../login.service';
 import { STORE_SERVICE, StoreService } from 'utils';
 
-jest.mock('localization');
-
 describe('LoginService', () => {
   let service: LoginService;
   let navController: NavController;

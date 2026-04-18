@@ -20,6 +20,7 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { currencyCodes, getSimilarityScore, normalize } from 'utils';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'currency-selector',
@@ -37,6 +38,7 @@ import { currencyCodes, getSimilarityScore, normalize } from 'utils';
     IonSearchbar,
     IonTitle,
     IonToolbar,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

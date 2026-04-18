@@ -5,13 +5,22 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { of } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('@capacitor-firebase/analytics');
 
 jest.mock('heic2any', () => jest.fn());
 
-jest.mock('localization');
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe(DetailsContainer.name, () => {
   let component: DetailsContainer;
@@ -46,6 +55,7 @@ describe(DetailsContainer.name, () => {
             isAuthenticated: (): void => {},
           },
         },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 

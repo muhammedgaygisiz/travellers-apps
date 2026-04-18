@@ -1,13 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MenuComponent } from '../menu.component';
-import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
-import { SupportedLang } from 'localization';
-import { addNecessaryIcons } from 'utils';
+import {
+  ComponentRef,
+  Pipe,
+  PipeTransform,
+  provideZonelessChangeDetection,
+} from '@angular/core';
+import { addNecessaryIcons, SupportedLang } from 'utils';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 addNecessaryIcons();
-
-jest.mock('localization');
 
 global.fetch = jest.fn(() =>
   Promise.resolve({
@@ -15,6 +19,21 @@ global.fetch = jest.fn(() =>
     text: () => Promise.resolve({}),
   }),
 ) as jest.Mock;
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
+
+@Pipe({ name: 'transloco' })
+class MockTranslocoPipe implements PipeTransform {
+  transform(value: string): string {
+    return value;
+  }
+}
 
 describe('MenuComponent', () => {
   let component: MenuComponent;
@@ -24,7 +43,11 @@ describe('MenuComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+        { provide: TranslocoPipe, useValue: MockTranslocoPipe },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MenuComponent);

@@ -8,16 +8,19 @@ import {
 } from '@angular/core';
 import { IonIcon, IonNote } from '@ionic/angular/standalone';
 import { Platform } from '@ionic/angular';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'placeholder',
   template: `
-    <div class="container ion-text-center">
+    <div
+      class="ion-display-flex ion-flex-column ion-align-items-center ion-justify-content-center container ion-text-center"
+    >
       @if (isDragging()) {
         <ion-icon name="hand-right-outline" size="large" />
         <ion-note class="hint ion-margin-top">
           <b>
-            Drag & drop is not supported. <br />Tap to upload or take a photo.
+            {{ 'drag-and-drop-not-supported' | transloco }}
           </b>
         </ion-note>
       } @else {
@@ -31,13 +34,14 @@ import { Platform } from '@ionic/angular';
           <ion-icon name="cloud-offline-outline" size="large" />
         }
 
-        <ion-note class="hint ion-margin-top">
+        <ion-note
+          class="ion-display-inline-flex ion-align-items-center hint ion-margin-top"
+        >
           @if (!disabled()) {
-            <b> Tap into the box to upload <br />or take a photo. </b>
+            <b innerHtml="{{ 'tap-into-box' | transloco }}"></b>
           } @else {
             <b>
-              It seems you are offline. You can still create a bite without an
-              image and add one later when you are back online.
+              {{ 'image-upload-disabled' | transloco }}
             </b>
           }
         </ion-note>
@@ -46,16 +50,7 @@ import { Platform } from '@ionic/angular';
   `,
   styles: `
     :host {
-      .container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
-
       .hint {
-        display: inline-flex;
-        align-items: center;
         gap: 0.25rem;
 
         color: var(--ion-text-color-step-400);
@@ -63,7 +58,7 @@ import { Platform } from '@ionic/angular';
       }
     }
   `,
-  imports: [IonIcon, IonNote],
+  imports: [IonIcon, IonNote, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Placeholder {

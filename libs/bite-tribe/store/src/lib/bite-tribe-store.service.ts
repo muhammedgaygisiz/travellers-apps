@@ -226,8 +226,8 @@ export class BiteTribeStoreService implements StoreService {
     this.store?.dispatch(removeLike({ like: event }));
   }
 
-  saveSettings(settings: Settings): void {
-    this.store.dispatch(AppActions.saveSettings({ settings }));
+  notifySavedSettings(settings: Settings): void {
+    this.store.dispatch(AppActions.savedSettings({ settings }));
   }
 
   savePublicProfile(profile: PublicUser): void {

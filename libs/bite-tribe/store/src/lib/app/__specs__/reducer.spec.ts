@@ -1,7 +1,7 @@
 import { AppActions } from '../actions';
 import { reducer } from '../reducer';
 import { AppSlice } from '../app-slice.model';
-import type { PublicUser, Settings } from 'model';
+import type { PublicUser, Settings, UploadParams } from 'model';
 import { BiteActions } from '../../bites/actions';
 import { fromAuth } from 'ta-firestore';
 import { routerRequestAction } from '@ngrx/router-store';
@@ -32,6 +32,7 @@ describe('App Reducer', () => {
           theme: 'light',
           currency: 'EUR',
           nearby: 2000,
+          language: 'en',
         },
         loading: { home: true },
         exchangeRates: { EUR: 1 },
@@ -306,7 +307,7 @@ describe('App Reducer', () => {
             progress: 50,
             completed: false,
           },
-        },
+        } as UploadParams,
       });
 
       expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);

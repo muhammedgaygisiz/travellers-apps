@@ -14,9 +14,13 @@ export class SettingsService {
   publicUser = this.dataAccess.publicUser;
   settings = this.dataAccess.settings;
 
-  saveSettings(settings: Settings): void {
-    this.dataAccess.saveSettings(settings);
+  async saveSettings(settings: Settings): Promise<void> {
+    await this.dataAccess.saveSettings(settings);
 
-    this.navController.navigateBack(['home']);
+    void this.navController.navigateBack(['home']);
+  }
+
+  logout(): void {
+    this.dataAccess.logout();
   }
 }

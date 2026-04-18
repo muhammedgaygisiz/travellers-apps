@@ -16,6 +16,7 @@ import { map, Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { stringIncludesDelimiter } from './utils/string-includes-delimiter';
 import { removeDelimiterFromEndOfString } from './utils/remove-delimiter-from-end-of-string';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 const REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES = /^\s*$/;
 
@@ -30,6 +31,7 @@ const REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES = /^\s*$/;
     IonIcon,
     ReactiveFormsModule,
     AsyncPipe,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

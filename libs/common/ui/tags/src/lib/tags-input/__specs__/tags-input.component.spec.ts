@@ -2,6 +2,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TagsInputComponent } from '../tags-input.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ComponentRef } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('TagsInputComponent', () => {
   let component: TagsInputComponent;
@@ -11,6 +21,9 @@ describe('TagsInputComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TagsInputComponent, ReactiveFormsModule],
+      providers: [
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TagsInputComponent);

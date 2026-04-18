@@ -9,6 +9,7 @@ import { BucketlistActions } from '../actions';
 import SpyInstance = jest.SpyInstance;
 import { AuthService } from 'ta-firestore';
 import { NavController, ToastController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -37,6 +38,10 @@ const MockNavController = {
   navigateForward: mockNavigateForward,
 };
 
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+};
+
 describe('BucketListEffect', () => {
   let scheduler: TestScheduler;
   let actions$: Observable<any> = of({});
@@ -56,6 +61,7 @@ describe('BucketListEffect', () => {
         { provide: AuthService, useValue: MockedAuthService },
         { provide: ToastController, useValue: MockToastController },
         { provide: NavController, useValue: MockNavController },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 
@@ -229,6 +235,7 @@ describe('BucketListEffect', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: BucketlistActions.saveBiteTrailAsBucketList({
+            biteTrailId: '',
             bucketListName: 'My Trail',
             biteIds: ['bite-1', 'bite-2'],
           }),
@@ -241,6 +248,7 @@ describe('BucketListEffect', () => {
       expect(createBucketListFromBiteTrailSpy).toHaveBeenCalledWith({
         bucketListName: 'My Trail',
         biteIds: ['bite-1', 'bite-2'],
+        biteTrailId: '',
         type: BucketlistActions.saveBiteTrailAsBucketList.type,
       });
     });

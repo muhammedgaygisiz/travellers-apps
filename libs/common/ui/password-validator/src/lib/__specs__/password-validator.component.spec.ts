@@ -5,12 +5,21 @@ import { TestScheduler } from 'rxjs/internal/testing/TestScheduler';
 import { EMPTY, of } from 'rxjs';
 import { ComponentRef } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
+import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('memoizee');
 addNecessaryIcons();
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
+};
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
 };
 
 describe('PasswordValidatorComponent', () => {
@@ -21,6 +30,11 @@ describe('PasswordValidatorComponent', () => {
   let scheduler: TestScheduler;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
+    });
     fixture = TestBed.createComponent(PasswordValidatorComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
@@ -52,7 +66,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: 'success' }
+            { a: 'success' },
           );
         });
       });
@@ -66,7 +80,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: 'danger' }
+            { a: 'danger' },
           );
         });
       });
@@ -80,7 +94,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: '' }
+            { a: '' },
           );
         });
       });
@@ -96,7 +110,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'checkmark-outline' }
+            { a: 'checkmark-outline' },
           );
         });
       });
@@ -110,7 +124,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'close-outline' }
+            { a: 'close-outline' },
           );
         });
       });
@@ -124,7 +138,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasLowerCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'close-outline' }
+            { a: 'close-outline' },
           );
         });
       });
@@ -140,7 +154,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: 'success' }
+            { a: 'success' },
           );
         });
       });
@@ -154,7 +168,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: 'danger' }
+            { a: 'danger' },
           );
         });
       });
@@ -168,7 +182,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterColor$ || EMPTY).toBe(
             '(a|)',
-            { a: '' }
+            { a: '' },
           );
         });
       });
@@ -184,7 +198,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'checkmark-outline' }
+            { a: 'checkmark-outline' },
           );
         });
       });
@@ -198,7 +212,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'close-outline' }
+            { a: 'close-outline' },
           );
         });
       });
@@ -212,7 +226,7 @@ describe('PasswordValidatorComponent', () => {
 
           expectObservable(component.hasUpperCaseLetterIcon$ || EMPTY).toBe(
             '(a|)',
-            { a: 'close-outline' }
+            { a: 'close-outline' },
           );
         });
       });

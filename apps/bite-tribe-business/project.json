@@ -83,12 +83,6 @@
       "defaultConfiguration": "development",
       "continuous": true
     },
-    "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
-      "options": {
-        "buildTarget": "bite-tribe-business:build"
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },

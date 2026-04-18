@@ -1,5 +1,7 @@
 @let restaurantData = restaurant();
 @let positionData = position();
+@let biteCount = bites()?.length || 0;
+@let starIconPath = '/assets/custom-icons/star.svg';
 
 <ta-page
   [showHeaderMenu]="false"
@@ -16,12 +18,19 @@
     <div class="ion-padding">
       <div class="header-container">
         <h1>{{ placeName() }}</h1>
+      </div>
 
-        @if (restaurantData) {
-          <ion-button fill="clear" (click)="showMenuClick.emit(restaurantData)">
-            <ion-icon slot="start" name="restaurant-outline" />
-            Menu
-          </ion-button>
+      <div class="rating-container">
+        <ion-icon [src]="starIconPath" class="rating-icon" />
+        @if (biteCount) {
+          <span class="rating">{{ averageBiteRating() }}</span>
+          <span class="text-small text-secondary">
+            {{ 'restaurant-rating' | transloco: { biteCount } }}
+          </span>
+        } @else {
+          <span class="text-small text-secondary">{{
+            'no-ratings-yet' | transloco
+          }}</span>
         }
       </div>
 
@@ -30,7 +39,7 @@
       @if (editMode()) {
         <div class="ion-margin-top" [formGroup]="socialMediaForm">
           @if (links.length === 0) {
-            <ion-text>No Social Media Links</ion-text>
+            <ion-text>{{ 'no-social-media-links' | transloco }}</ion-text>
           }
 
           <ion-list lines="full" formArrayName="links">
@@ -43,15 +52,15 @@
                   formControlName="network"
                 >
                   <ion-select-option value="facebook"
-                    >Facebook</ion-select-option
-                  >
+                    >Facebook
+                  </ion-select-option>
                   <ion-select-option value="instagram"
-                    >Instagram</ion-select-option
-                  >
+                    >Instagram
+                  </ion-select-option>
                   <ion-select-option value="twitter">Twitter</ion-select-option>
                   <ion-select-option value="linkedin"
-                    >LinkedIn</ion-select-option
-                  >
+                    >LinkedIn
+                  </ion-select-option>
                   <ion-select-option value="website">Website</ion-select-option>
                 </ion-select>
                 <ion-input placeholder="Link" formControlName="url"></ion-input>
@@ -68,7 +77,8 @@
               class="ion-margin-top"
               [disabled]="isInvalid()"
               (click)="saveSocialMediaLinks()"
-              >Save
+            >
+              Save
             </ion-button>
           }
         </div>
@@ -99,40 +109,31 @@
       </div>
     </div>
 
-    <div class="ion-padding-start ion-padding-end">
-      <ion-segment
-        [value]="selectedSegment()"
-        (ionChange)="setSelectedSegment($event.detail.value)"
-      >
-        <ion-segment-button value="bites">
-          <ion-label>Bites</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="menu">
-          <ion-label>Menu</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-    </div>
-
-    <div class="bites ion-padding safe-padding-bottom">
-      @switch (selectedSegment()) {
-        @case ('bites') {
-          @for (bite of bites(); track bite.id) {
-            <bt-bite
-              [bite]="bite"
-              [userId]="userId()"
-              (biteClick)="biteClick.emit($event)"
-              (likeButtonClick)="likeButtonClick.emit($event)"
-            />
-          }
-        }
-        @case ('menu') {
-          <div class="ion-padding-bottom">
-            @for (bite of uniqueBites(); track bite.id) {
-              <bt-menu-item [bite]="bite" />
-            }
+    <div class="ion-padding safe-padding-bottom buttons-container">
+      <div class="ion-padding-bottom">
+        <ion-button
+          expand="full"
+          fill="outline"
+          (click)="showMenuClick.emit(restaurantData)"
+        >
+          <div class="fill-button-content">
+            <span>{{ 'menu' | transloco }}</span>
+            <ion-icon slot="end" name="chevron-forward-outline" />
           </div>
+        </ion-button>
+        @if (biteCount) {
+          <ion-button
+            expand="full"
+            fill="outline"
+            (click)="showBitesClick.emit(restaurantData)"
+          >
+            <div class="fill-button-content">
+              <span>{{ 'bites' | transloco }}</span>
+              <ion-icon slot="end" name="chevron-forward-outline" />
+            </div>
+          </ion-button>
         }
-      }
+      </div>
     </div>
   </ion-content>
 </ta-page>

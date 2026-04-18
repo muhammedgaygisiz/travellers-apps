@@ -122,5 +122,14 @@
   "close": "CLOSE",
   "drag-and-drop-not-supported": "Drag & drop is not supported. <br />Tap to upload or take a photo.",
   "tap-into-box": "Tap into the box to upload <br />or take a photo.",
-  "image-upload-disabled": "It seems you are offline. You can still create a bite without an image and add one later when you are back online."
+  "image-upload-disabled": "It seems you are offline. You can still create a bite without an image and add one later when you are back online.",
+  "not-verified-restaurant": "This restaurant is not verified on BiteTribe yet.",
+  "restaurant-rating": "({{ biteCount }} ratings)",
+  "no-ratings-yet": "No ratings yet",
+  "no-social-media-links": "No Social Media Links",
+  "menu": "Menu",
+  "bites": "Bites",
+  "no-menu-yet": "No item here yet, start by adding a category now.",
+  "save-menu": "Save Menu",
+  "add-category": "Add Category"
 }

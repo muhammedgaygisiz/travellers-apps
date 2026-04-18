@@ -7,12 +7,13 @@ import {
 import { IonIcon, IonImg } from '@ionic/angular/standalone';
 import { Restaurant } from 'model';
 import { NgxSkeletonLoaderComponent } from 'ngx-skeleton-loader';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'bt-restaurant-image',
   templateUrl: './restaurant-image.component.html',
   styleUrl: './restaurant-image.component.scss',
-  imports: [IonImg, IonIcon, NgxSkeletonLoaderComponent],
+  imports: [IonImg, IonIcon, NgxSkeletonLoaderComponent, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RestaurantImageComponent {

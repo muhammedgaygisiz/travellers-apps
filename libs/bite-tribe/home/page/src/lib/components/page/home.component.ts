@@ -88,6 +88,7 @@ export class BiteTribeHomeComponent {
   isAuthenticated = input(false);
   showAddButton = input(true);
   showHeaderMenu = input(true);
+  showMap = input(true);
   showSpinner = input<boolean>(false);
   isBitesLoading = input<boolean | undefined>();
   sorting = input<string>('distance');

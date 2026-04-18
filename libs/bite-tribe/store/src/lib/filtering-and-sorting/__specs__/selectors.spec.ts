@@ -145,4 +145,31 @@ describe('Filtering and Sorting Selectors', () => {
       expect(result).toBe('name');
     });
   });
+
+  describe('restaurantBitesSorting', () => {
+    it('should return the restaurant bites sorting method', () => {
+      const stateWithRestaurantBitesSorting: FilteringAndSortingSlice = {
+        ...mockState,
+        sorting: { restaurantBites: 'likes' },
+      };
+      const result = fromSelectors.restaurantBitesSorting.projector(
+        stateWithRestaurantBitesSorting,
+      );
+      expect(result).toBe('likes');
+    });
+
+    it('should return "createdAt" when restaurant bites sorting is not set', () => {
+      const stateWithoutSorting = { ...mockState, sorting: undefined };
+      const result =
+        fromSelectors.restaurantBitesSorting.projector(stateWithoutSorting);
+      expect(result).toBe('createdAt');
+    });
+
+    it('should return createdAt when slice is undefined', () => {
+      const result = fromSelectors.restaurantBitesSorting.projector(
+        undefined as any,
+      );
+      expect(result).toBe('createdAt');
+    });
+  });
 });

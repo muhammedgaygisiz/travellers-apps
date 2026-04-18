@@ -53,6 +53,7 @@ import {
   starOutline,
   storefrontOutline,
   trashOutline,
+  chevronForwardOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = (): void => {
@@ -110,5 +111,6 @@ export const addNecessaryIcons = (): void => {
     cropOutline,
     trashOutline,
     cloudOfflineOutline,
+    chevronForwardOutline,
   });
 };

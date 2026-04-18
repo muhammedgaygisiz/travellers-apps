@@ -53,12 +53,12 @@
               formControlName="theme"
               (ionChange)="onThemeChange($event)"
             >
-              <ion-select-option value="light">{{
-                'light' | transloco
-              }}</ion-select-option>
-              <ion-select-option value="dark">{{
-                'dark' | transloco
-              }}</ion-select-option>
+              <ion-select-option value="light"
+                >{{ 'light' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="dark"
+                >{{ 'dark' | transloco }}
+              </ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item id="currency-selector-trigger">
@@ -76,46 +76,49 @@
               interface="modal"
               formControlName="language"
             >
-              <ion-select-option value="am">{{
-                'amharic' | transloco
-              }}</ion-select-option>
-              <ion-select-option value="ar">{{
-                'arabic' | transloco
-              }}</ion-select-option>
-              <ion-select-option value="de">{{
-                'german' | transloco
-              }}</ion-select-option>
-              <ion-select-option value="es">{{
-                'spanish' | transloco
-              }}</ion-select-option>
-              <ion-select-option value="fr">{{
-                'french' | transloco
-              }}</ion-select-option>
-              <ion-select-option value="id">{{
-                'indonesian' | transloco
-              }}</ion-select-option>
-              <ion-select-option value="it">{{
-                'italian' | transloco
-              }}</ion-select-option>
-              <ion-select-option value="th">{{
-                'thai' | transloco
-              }}</ion-select-option>
-              <ion-select-option value="tr">{{
-                'turkish' | transloco
-              }}</ion-select-option>
+              <ion-select-option value="en"
+                >{{ 'english' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="am"
+                >{{ 'amharic' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="ar"
+                >{{ 'arabic' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="de"
+                >{{ 'german' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="es"
+                >{{ 'spanish' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="fr"
+                >{{ 'french' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="id"
+                >{{ 'indonesian' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="it"
+                >{{ 'italian' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="th"
+                >{{ 'thai' | transloco }}
+              </ion-select-option>
+              <ion-select-option value="tr"
+                >{{ 'turkish' | transloco }}
+              </ion-select-option>
             </ion-select>
           </ion-item>
         </section>
 
         <div class="button-container safe-padding-bottom">
-          <ion-button fill="outline" (click)="logout.emit()">{{
-            'logout' | transloco
-          }}</ion-button>
+          <ion-button fill="outline" (click)="logout.emit()"
+            >{{ 'logout' | transloco }}
+          </ion-button>
           <ion-button
             [disabled]="!settingsForm.valid || settingsForm.pristine"
             (click)="saveSettings()"
-            >{{ 'save-changes' | transloco }}</ion-button
-          >
+            >{{ 'save-changes' | transloco }}
+          </ion-button>
         </div>
       </form>
     </div>

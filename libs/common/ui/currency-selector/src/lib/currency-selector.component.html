@@ -22,22 +22,26 @@
         </ion-label>
         <ion-buttons slot="end">
           @if (selectedCurrency() === currency.code) {
-            <ion-icon name="checkmark" color="primary" />
+            <ion-icon name="checkmark-outline" color="primary" />
           }
-          <ion-button
-            fill="clear"
-            (click)="toggleFavorite($event, currency.code)"
-            [attr.aria-label]="
-              isFavorite(currency.code)
-                ? 'remove from favorite currencies'
-                : 'add to favorite currencies'
-            "
-          >
-            <ion-icon
-              [name]="isFavorite(currency.code) ? 'heart' : 'heart-outline'"
-              color="danger"
-            />
-          </ion-button>
+
+          @let heartName =
+            isFavorite(currency.code) ? 'heart' : 'heart-outline';
+          @if (disableFavChange()) {
+            <ion-icon [name]="heartName" color="danger" />
+          } @else {
+            <ion-button
+              fill="clear"
+              (click)="toggleFavorite($event, currency.code)"
+              [attr.aria-label]="
+                isFavorite(currency.code)
+                  ? 'remove from favorite currencies'
+                  : 'add to favorite currencies'
+              "
+            >
+              <ion-icon [name]="heartName" color="danger" />
+            </ion-button>
+          }
         </ion-buttons>
       </ion-item>
     } @empty {

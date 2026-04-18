@@ -44,7 +44,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
 })
 export class CurrencySelectorComponent {
   selectedCurrency = input<string>('EUR');
-  favoriteCurrencies = input<string[]>([]);
+  favoriteCurrencies = input<string[] | undefined>([]);
+  disableFavChange = input<boolean>(false);
 
   currencySelected = output<string>();
   favoriteCurrencyToggled = output<string>();
@@ -116,7 +117,7 @@ export class CurrencySelectorComponent {
   }
 
   isFavorite(currencyCode: string): boolean {
-    return this.favoriteCurrencies().includes(currencyCode);
+    return this.favoriteCurrencies()?.includes(currencyCode) || false;
   }
 
   cancel(): void {

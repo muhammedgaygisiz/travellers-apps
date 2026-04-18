@@ -13,6 +13,7 @@ export class BiteService {
 
   bite = this.dataAccess.bite;
   currency = this.dataAccess.currency;
+  favCurrencies = this.dataAccess.favCurrencies;
   position = this.dataAccess.position;
   cachedBite = this.dataAccess.cachedBite;
   nearbyRestaurants = this.dataAccess.nearbyRestaurants;

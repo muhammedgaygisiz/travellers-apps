@@ -254,6 +254,33 @@ describe(AppEffect.name, () => {
       );
     });
 
+    it('should dispatch loadedGpsPosition on reloadGpsPosition even when movement is below threshold', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        const previousPosition = { latitude: 10, longitude: 20 };
+        const smallMovementPosition = {
+          coords: { latitude: 10.00001, longitude: 20.00001 },
+        };
+
+        (store as MockStore).overrideSelector(gpsPosition, previousPosition);
+        getCurrentPositionMock.mockReturnValue(
+          cold('a|', { a: smallMovementPosition }),
+        );
+
+        actions$ = cold('a', { a: AppActions.reloadGPSPosition() });
+
+        const expected = 'a';
+        const output = { a: AppActions.reloadGPSPosition() };
+
+        expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
+      });
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        AppActions.loadedGPSPosition({
+          position: { coords: { latitude: 10.00001, longitude: 20.00001 } },
+        }),
+      );
+    });
+
     it('should emit errorLoadingGpsPosition and show alert on error', () => {
       const errorSpy = jest.spyOn(console, 'error').mockImplementation();
       const error = new Error('GPS Error');

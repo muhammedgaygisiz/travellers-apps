@@ -53,8 +53,6 @@ export const dispatchGpsPosition = (
             store.dispatch(
               AppActions.loadedGPSPosition({ position: currentPosition }),
             );
-
-            return args;
           }
 
           store.dispatch(
@@ -62,7 +60,6 @@ export const dispatchGpsPosition = (
               reason: 'No meaningful movement detected',
             }),
           );
-          return args;
         }),
         catchError((error) => {
           console.error(error);

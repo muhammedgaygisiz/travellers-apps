@@ -187,10 +187,7 @@ describe(AppEffect.name, () => {
 
         actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
 
-        const expected = 'a';
-        const output = { a: AppActions.fetchGPSPosition() };
-
-        expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
+        expectObservable(effects.fetchGpsPosition$);
       });
 
       expect(dispatchSpy).toHaveBeenCalledWith(
@@ -214,10 +211,7 @@ describe(AppEffect.name, () => {
 
         actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
 
-        const expected = 'a';
-        const output = { a: AppActions.fetchGPSPosition() };
-
-        expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
+        expectObservable(effects.fetchGpsPosition$);
       });
 
       expect(dispatchSpy).not.toHaveBeenCalledWith(
@@ -241,10 +235,7 @@ describe(AppEffect.name, () => {
 
         actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
 
-        const expected = 'a';
-        const output = { a: AppActions.fetchGPSPosition() };
-
-        expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
+        expectObservable(effects.fetchGpsPosition$);
       });
 
       expect(dispatchSpy).toHaveBeenCalledWith(
@@ -254,7 +245,7 @@ describe(AppEffect.name, () => {
       );
     });
 
-    it('should dispatch loadedGpsPosition on reloadGpsPosition even when movement is below threshold', () => {
+    it('should dispatch clearReloadGPSPosition if no meaningful movement', () => {
       scheduler.run(({ cold, expectObservable }) => {
         const previousPosition = { latitude: 10, longitude: 20 };
         const smallMovementPosition = {
@@ -266,17 +257,14 @@ describe(AppEffect.name, () => {
           cold('a|', { a: smallMovementPosition }),
         );
 
-        actions$ = cold('a', { a: AppActions.reloadGPSPosition() });
+        actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
 
-        const expected = 'a';
-        const output = { a: AppActions.reloadGPSPosition() };
-
-        expectObservable(effects.fetchGpsPosition$).toBe(expected, output);
+        expectObservable(effects.fetchGpsPosition$);
       });
 
       expect(dispatchSpy).toHaveBeenCalledWith(
-        AppActions.loadedGPSPosition({
-          position: { coords: { latitude: 10.00001, longitude: 20.00001 } },
+        AppActions.clearReloadGPSPosition({
+          reason: 'No meaningful movement detected',
         }),
       );
     });

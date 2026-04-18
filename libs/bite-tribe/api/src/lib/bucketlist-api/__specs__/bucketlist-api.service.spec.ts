@@ -161,6 +161,108 @@ describe(BucketlistApiService.name, () => {
     });
   });
 
+  describe('createBucketListFromBiteTrail', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should throw when user is not authenticated', async () => {
+      jest.clearAllMocks();
+
+      const getUserSpy = jest
+        .spyOn(MockedAuthService, 'getUser')
+        .mockReturnValue(undefined);
+      const addDocumentMock = jest.spyOn(FirebaseFirestore, 'addDocument');
+
+      await expect(
+        service.createBucketListFromBiteTrail({
+          bucketListName: 'Free Trail',
+          biteIds: ['bite-1'],
+          biteTrailId: 'trail-1',
+        }),
+      ).rejects.toThrow('User not authenticated');
+
+      expect(addDocumentMock).not.toHaveBeenCalled();
+    });
+
+    it('should create bucketlist and write sell in bite trail sub-collection', async () => {
+      jest.clearAllMocks();
+
+      const addDocumentMock = jest
+        .spyOn(FirebaseFirestore, 'addDocument')
+        .mockResolvedValueOnce({
+          reference: { path: 'bucketlists/new-bucketlist' },
+        } as any)
+        .mockResolvedValueOnce({
+          reference: { path: 'biteTrails/trail-1/sells/sell-1' },
+        } as any);
+
+      const getDocumentMock = jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockResolvedValue({
+          snapshot: { data: { id: 'new-bucketlist' } },
+        } as any);
+
+      await service.createBucketListFromBiteTrail({
+        bucketListName: 'Free Trail',
+        biteIds: ['bite-1', 'bite-2'],
+        biteTrailId: 'trail-1',
+      });
+
+      expect(addDocumentMock).toHaveBeenNthCalledWith(1, {
+        reference: 'bucketlists',
+        data: {
+          userId: '123',
+          name: 'Free Trail',
+          biteIds: ['bite-1', 'bite-2'],
+          biteTrailId: 'trail-1',
+          createdAt: '2024-03-15T12:00:00.000Z',
+          createdAtTimestamp: 1710504000000,
+        },
+      });
+
+      expect(addDocumentMock).toHaveBeenNthCalledWith(2, {
+        reference: 'biteTrails/trail-1/sells',
+        data: {
+          userId: '123',
+          soldAt: '2024-03-15T12:00:00.000Z',
+          soldAtTimestamp: 1710504000000,
+        },
+      });
+
+      expect(getDocumentMock).toHaveBeenCalledWith({
+        reference: 'bucketlists/new-bucketlist',
+      });
+    });
+
+    it('should rollback bucketlist creation if sell write fails', async () => {
+      jest.clearAllMocks();
+
+      const error = new Error('Failed to save sell');
+      const addDocumentMock = jest
+        .spyOn(FirebaseFirestore, 'addDocument')
+        .mockResolvedValueOnce({
+          reference: { path: 'bucketlists/new-bucketlist' },
+        } as any)
+        .mockRejectedValueOnce(error);
+      const deleteDocumentMock = jest
+        .spyOn(FirebaseFirestore, 'deleteDocument')
+        .mockResolvedValue({} as any);
+
+      await expect(
+        service.createBucketListFromBiteTrail({
+          bucketListName: 'Free Trail',
+          biteIds: ['bite-1', 'bite-2'],
+          biteTrailId: 'trail-1',
+        }),
+      ).rejects.toThrow('Failed to save sell');
+
+      expect(deleteDocumentMock).toHaveBeenCalledWith({
+        reference: 'bucketlists/new-bucketlist',
+      });
+    });
+  });
+
   describe('removeBiteFromBucketlist', () => {
     let getDocumentSpy: jest.SpyInstance;
     let updateDocumentMock: jest.SpyInstance;
@@ -263,7 +365,6 @@ describe(BucketlistApiService.name, () => {
           data: {
             userId: '123',
             name: 'My Bucketlist',
-            biteIds: [],
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
           },

@@ -66,6 +66,7 @@
   "by-before": "oleh",
   "by-after": "",
   "sold-231-times": "Terjual 231 kali",
+  "sold-times": "Terjual {{count}} kali",
   "view-bite-trail": "Lihat BiteTrail",
   "market-place": "Marketplace",
   "no-currencies-found": "Mata uang tidak ditemukan",

@@ -222,11 +222,11 @@ export class BitePage {
     const chosenImage = this.imageBase64();
 
     if (chosenImage && !position) {
-      return 'No GPS position found in the image. Please choose a GPS position from the map or enable GPS position.';
+      return 'no-gps-position-error-message';
     }
 
     if (!chosenImage && !position) {
-      return 'Please choose a GPS position from the map or enable GPS position.';
+      return 'chose-gps-position-error-message';
     }
 
     return '';

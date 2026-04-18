@@ -4,7 +4,7 @@ import { BitePage } from '../components/page/bite.page';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
-  selector: 'bite-container',
+  selector: 'create-bite-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <bite

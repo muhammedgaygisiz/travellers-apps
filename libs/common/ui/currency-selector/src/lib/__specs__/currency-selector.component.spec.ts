@@ -71,6 +71,15 @@ describe('CurrencySelectorComponent', () => {
     expect(filtered[0].code).toBe('USD');
   });
 
+  it('should prioritize favorite currencies in searched results', () => {
+    fixture.componentRef.setInput('favoriteCurrencies', ['USD']);
+    fixture.detectChanges();
+    component.rawSearchTerm.set('d');
+
+    const filtered = component.filteredCurrencies();
+    expect(filtered[0].code).toBe('USD');
+  });
+
   it('should emit favoriteCurrencyToggled when favorite is toggled', () => {
     const stopPropagation = jest.fn();
     let toggledCode = '';

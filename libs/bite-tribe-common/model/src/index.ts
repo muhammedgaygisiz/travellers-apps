@@ -12,6 +12,7 @@ export type * from './lib/create-bucket-list-from-bite-trail-params';
 export type * from './lib/remove-bite-from-bucketlist-params';
 export type * from './lib/bucketlist';
 export type * from './lib/bite-trail';
+export type * from './lib/bite-trail-rating';
 export type * from './lib/public-user';
 export type * from './lib/like';
 export type * from './lib/profile-meta-data';

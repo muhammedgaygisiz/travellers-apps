@@ -1,4 +1,5 @@
 import { BucketlistsDataAccessService } from '../bucketlists-data-access.service';
+import { ErrorHandler } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
@@ -11,6 +12,7 @@ const updateBucketlistNameMock = jest.fn();
 const removeBiteFromBucketlistMock = jest.fn();
 const getDocumentMock = jest.fn();
 const setDocumentMock = jest.fn();
+const handleErrorMock = jest.fn();
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
@@ -39,9 +41,13 @@ describe('BucketlistsDataAccessService', () => {
   beforeEach(() => {
     getDocumentMock.mockReset();
     setDocumentMock.mockReset();
+    handleErrorMock.mockReset();
 
     TestBed.configureTestingModule({
-      providers: [{ provide: BiteTribeStoreService, useValue: Mock }],
+      providers: [
+        { provide: BiteTribeStoreService, useValue: Mock },
+        { provide: ErrorHandler, useValue: { handleError: handleErrorMock } },
+      ],
     }).compileComponents();
 
     service = TestBed.inject<BucketlistsDataAccessService>(

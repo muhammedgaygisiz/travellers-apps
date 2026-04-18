@@ -53,4 +53,26 @@ describe('RateBucketlistPage', () => {
     expect(component.ratingFormGroup.disabled).toBe(true);
     expect(submitSpy).not.toHaveBeenCalled();
   });
+
+  it('should enable form again when existing rating is removed', () => {
+    componentRef.setInput('existingRating', {
+      rating: 4,
+      review: 'Already rated',
+    });
+    fixture.detectChanges();
+
+    componentRef.setInput('existingRating', undefined);
+    fixture.detectChanges();
+
+    expect(component.ratingFormGroup.enabled).toBe(true);
+  });
+
+  it('should not emit submitRating when form is invalid', () => {
+    const submitSpy = jest.spyOn(component.submitRating, 'emit');
+    component.ratingFormGroup.patchValue({ rating: 0, review: '' });
+
+    component.onSubmit();
+
+    expect(submitSpy).not.toHaveBeenCalled();
+  });
 });

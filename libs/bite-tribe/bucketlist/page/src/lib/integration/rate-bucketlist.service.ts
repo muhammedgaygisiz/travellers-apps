@@ -1,10 +1,6 @@
 import { effect, inject, Injectable, signal } from '@angular/core';
 import { BucketlistsDataAccessService } from 'bite-tribe/bucketlist-data-access';
-
-interface BiteTrailRating {
-  rating: number;
-  review: string;
-}
+import { BiteTrailRating } from 'model';
 
 @Injectable({
   providedIn: 'root',

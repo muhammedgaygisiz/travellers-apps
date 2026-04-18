@@ -7,7 +7,7 @@ import {
   output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { Bucketlist } from 'model';
+import { BiteTrailRating, Bucketlist } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import {
@@ -16,11 +16,6 @@ import {
   IonTextarea,
   IonText,
 } from '@ionic/angular/standalone';
-
-interface BiteTrailRatingFormValue {
-  rating: number;
-  review: string;
-}
 
 @Component({
   selector: 'rate-bucketlist-page',
@@ -41,10 +36,10 @@ export class RateBucketlistPage {
   private readonly formBuilder = inject(FormBuilder);
 
   bucketlist = input<Bucketlist | undefined>(undefined);
-  existingRating = input<BiteTrailRatingFormValue | undefined>(undefined);
+  existingRating = input<BiteTrailRating | undefined>(undefined);
   isSubmitting = input(false);
 
-  readonly submitRating = output<BiteTrailRatingFormValue>();
+  readonly submitRating = output<BiteTrailRating>();
 
   readonly ratingFormGroup = this.formBuilder.nonNullable.group({
     rating: [0, [Validators.required, Validators.min(1)]],
@@ -67,9 +62,10 @@ export class RateBucketlistPage {
       return;
     }
 
+    const { rating, review } = this.ratingFormGroup.getRawValue();
     this.submitRating.emit({
-      rating: this.ratingFormGroup.value.rating ?? 0,
-      review: this.ratingFormGroup.value.review ?? '',
+      rating,
+      review,
     });
   }
 }

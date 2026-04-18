@@ -9,7 +9,10 @@ import type {
   SaveToBucketListParams,
 } from 'model';
 import { loadBucketlistsByUserId } from './utils/load-bucketlists-by-user-id';
-import { BUCKETLIST_COLLECTION } from '../utils/constants';
+import {
+  BITE_TRAIL_COLLECTION,
+  BUCKETLIST_COLLECTION,
+} from '../utils/constants';
 
 @Injectable({ providedIn: 'root' })
 export class BucketlistApiService {
@@ -75,6 +78,8 @@ export class BucketlistApiService {
     params: CreateBucketListFromBiteTrailParams,
   ): Promise<Bucketlist> {
     const user = this.authService.getUser();
+    const soldAt = new Date().toISOString();
+    const soldAtTimestamp = Date.now();
 
     const docResult = await FirebaseFirestore.addDocument({
       reference: BUCKETLIST_COLLECTION,
@@ -85,6 +90,15 @@ export class BucketlistApiService {
         biteTrailId: params.biteTrailId,
         createdAt: new Date().toISOString(),
         createdAtTimestamp: Date.now(),
+      },
+    });
+
+    await FirebaseFirestore.addDocument({
+      reference: `${BITE_TRAIL_COLLECTION}/${params.biteTrailId}/sells`,
+      data: {
+        userId: user?.uid || '',
+        soldAt,
+        soldAtTimestamp,
       },
     });
 
@@ -131,6 +145,7 @@ export class BucketlistApiService {
         data: {
           userId: user?.uid || '',
           name: bucketlistName,
+          biteIds: [],
           createdAt: new Date().toISOString(),
           createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },

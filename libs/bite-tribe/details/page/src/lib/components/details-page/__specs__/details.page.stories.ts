@@ -83,3 +83,10 @@ export const myBite: Story = {
     userId: '1',
   },
 };
+
+export const noBite: Story = {
+  args: {
+    ...withDescription.args,
+    bite: undefined as unknown as Bite,
+  },
+};

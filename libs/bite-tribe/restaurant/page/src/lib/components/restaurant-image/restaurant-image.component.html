@@ -1,5 +1,4 @@
 @let restaurantData = restaurant();
-@let skeletonAnimationData = skeletonAnimation();
 @defer {
   @if (restaurantData?.image) {
     <ion-img [src]="restaurantData?.image" class="place-image" />
@@ -11,14 +10,6 @@
   }
 } @placeholder (minimum 1000ms) {
   <div class="image-loading-placeholder">
-    <ngx-skeleton-loader
-      appearance="line"
-      style="width: 100%"
-      [animation]="skeletonAnimationData"
-      [theme]="{
-        height: '200px',
-        width: '100%',
-      }"
-    />
+    <ion-skeleton-text [animated]="true" style="border-radius: 0; margin: 0" />
   </div>
 }

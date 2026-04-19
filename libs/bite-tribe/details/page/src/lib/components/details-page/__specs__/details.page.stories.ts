@@ -3,6 +3,7 @@ import { DetailsPage } from '../details.page';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { Bite, Like, PublicUser } from 'model';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { provideTransloco } from '@jsverse/transloco';
 
 addNecessaryIcons();
 
@@ -14,6 +15,12 @@ export default {
       providers: [
         provideIonicAngular(getIonicConfig()),
         { provide: APP_TITLE, useValue: 'Bite Tribe' },
+        provideTransloco({
+          config: {
+            availableLangs: ['en'],
+            fallbackLang: ['en'],
+          },
+        }),
       ],
     }),
   ],

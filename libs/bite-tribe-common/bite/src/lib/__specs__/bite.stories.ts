@@ -2,13 +2,22 @@ import { BiteComponent } from '../bite.component';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { provideTransloco } from '@jsverse/transloco';
 
 export default {
   title: 'Components/Bite',
   component: BiteComponent,
   decorators: [
     applicationConfig({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        provideTransloco({
+          config: {
+            availableLangs: ['en'],
+            fallbackLang: ['en'],
+          },
+        }),
+      ],
     }),
   ],
 } as Meta<BiteComponent>;

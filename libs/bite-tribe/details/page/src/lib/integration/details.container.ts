@@ -41,9 +41,16 @@ export class DetailsContainer {
       screenName: 'Bite Details',
     });
 
-    // Reset the resources otherwise error state will cause issues
-    this.service.bite.reload();
-    this.service.position.reload();
-    this.service.biteCreator.reload();
+    if (this.service.bite.error()) {
+      this.service.bite.reload();
+    }
+
+    if (this.service.position.error()) {
+      this.service.position.reload();
+    }
+
+    if (this.service.biteCreator.reload()) {
+      this.service.biteCreator.reload();
+    }
   }
 }

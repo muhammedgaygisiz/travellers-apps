@@ -132,5 +132,7 @@
   "bites": "Bites",
   "no-menu-yet": "No item here yet, start by adding a category now.",
   "save-menu": "Save Menu",
-  "add-category": "Add Category"
+  "add-category": "Add Category",
+  "you-already-rated-this-bite-trail": "You already rated this Bite Trail.",
+  "write-a-review": "Write a review"
 }

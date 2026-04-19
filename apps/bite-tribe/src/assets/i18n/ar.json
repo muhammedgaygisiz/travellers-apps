@@ -132,5 +132,7 @@
   "bites": "Bites",
   "add-category": "إضافة فئة",
   "save-menu": "حفظ القائمة",
-  "no-menu-yet": "لا توجد قائمة بعد"
+  "no-menu-yet": "لا توجد قائمة بعد",
+  "you-already-rated-this-bite-trail": "لقد قيّمت هذا المسار بالفعل.",
+  "write-a-review": "اكتب مراجعة"
 }

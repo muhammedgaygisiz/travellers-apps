@@ -132,5 +132,7 @@
   "bites": "Bites",
   "add-category": "Tambahkan kategori",
   "save-menu": "Simpan menu",
-  "no-menu-yet": "Belum ada menu"
+  "no-menu-yet": "Belum ada menu",
+  "you-already-rated-this-bite-trail": "Anda sudah memberi rating untuk Bite Trail ini.",
+  "write-a-review": "Tulis ulasan"
 }

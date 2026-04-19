@@ -3,8 +3,18 @@ import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { RateBucketlistPage } from '../rate-bucketlist.page';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('RateBucketlistPage', () => {
   let component: RateBucketlistPage;
@@ -16,6 +26,7 @@ describe('RateBucketlistPage', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 

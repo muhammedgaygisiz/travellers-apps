@@ -3,12 +3,14 @@ import {
   BiteTrailRating,
   BucketlistsDataAccessService,
 } from 'bite-tribe/bucketlist-data-access';
+import { NavController } from '@ionic/angular/standalone';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RateBucketlistService {
   private readonly dataAccess = inject(BucketlistsDataAccessService);
+  private readonly navController = inject(NavController);
 
   selectedBucketlist = this.dataAccess.selectedBucketlist;
   existingRating = signal<BiteTrailRating | undefined>(undefined);
@@ -42,6 +44,7 @@ export class RateBucketlistService {
 
       if (created) {
         this.existingRating.set(params);
+        this.navController.back();
       } else {
         await this.loadExistingRating(biteTrailId);
       }

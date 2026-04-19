@@ -8,19 +8,19 @@
 
     @if (existingRating()) {
     <ion-text color="secondary" class="ion-margin-bottom ion-display-block">
-      You already rated this Bite Trail.
+      {{ 'you-already-rated-this-bite-trail' | transloco }}
     </ion-text>
     }
 
     <form [formGroup]="ratingFormGroup">
       <star-rating
         formControlName="rating"
-        label="Your Rating?"
+        label="{{ 'rating-label' | transloco }}"
         [readonly]="!!existingRating()"
       />
 
       <ion-textarea
-        label="Write a review"
+        label="{{ 'write-a-review' | transloco }}"
         formControlName="review"
         fill="outline"
         mode="md"
@@ -33,7 +33,7 @@
         (click)="onSubmit()"
         [disabled]="!ratingFormGroup.valid || !!existingRating() || isSubmitting()"
       >
-        Save
+        {{ 'save' | transloco }}
       </ion-button>
     </form>
   </ion-content>

@@ -133,5 +133,7 @@
   "add-category": "เพิ่มหมวดหมู่",
   "save-menu": "บันทึกเมนู",
   "no-menu-yet": "ยังไม่มีเมนู",
-  "go-to-saved-bucket-list": "ไปที่รายการความฝันที่บันทึกไว้"
+  "go-to-saved-bucket-list": "ไปที่รายการความฝันที่บันทึกไว้",
+  "you-already-rated-this-bite-trail": "คุณได้ให้คะแนน Bite Trail นี้แล้ว",
+  "write-a-review": "เขียนรีวิว"
 }

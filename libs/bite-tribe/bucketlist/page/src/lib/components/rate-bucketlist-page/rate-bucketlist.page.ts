@@ -11,6 +11,7 @@ import { Bucketlist } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { BiteTrailRating } from 'bite-tribe/bucketlist-data-access';
+import { TranslocoPipe } from '@jsverse/transloco';
 import {
   IonButton,
   IonContent,
@@ -31,6 +32,7 @@ import {
     IonText,
     ReactiveFormsModule,
     StarRatingComponent,
+    TranslocoPipe,
   ],
 })
 export class RateBucketlistPage {

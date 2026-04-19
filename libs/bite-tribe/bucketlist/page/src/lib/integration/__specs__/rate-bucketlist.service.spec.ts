@@ -3,9 +3,11 @@ import { TestBed } from '@angular/core/testing';
 import { BucketlistsDataAccessService } from 'bite-tribe/bucketlist-data-access';
 import { Bucketlist } from 'model';
 import { RateBucketlistService } from '../rate-bucketlist.service';
+import { NavController } from '@ionic/angular/standalone';
 
 const getOwnBiteTrailRatingMock = jest.fn();
 const createOwnBiteTrailRatingMock = jest.fn();
+const backMock = jest.fn();
 const selectedBucketlistSignal = signal<Bucketlist>({
   id: 'bucket-1',
   userId: 'user-1',
@@ -20,6 +22,7 @@ describe('RateBucketlistService', () => {
   beforeEach(() => {
     getOwnBiteTrailRatingMock.mockReset();
     createOwnBiteTrailRatingMock.mockReset();
+    backMock.mockReset();
     getOwnBiteTrailRatingMock.mockResolvedValue(undefined);
     selectedBucketlistSignal.set({
       id: 'bucket-1',
@@ -37,6 +40,12 @@ describe('RateBucketlistService', () => {
             selectedBucketlist: selectedBucketlistSignal,
             getOwnBiteTrailRating: getOwnBiteTrailRatingMock,
             createOwnBiteTrailRating: createOwnBiteTrailRatingMock,
+          },
+        },
+        {
+          provide: NavController,
+          useValue: {
+            back: backMock,
           },
         },
       ],
@@ -57,6 +66,7 @@ describe('RateBucketlistService', () => {
       review: 'Great!',
     });
     expect(service.existingRating()).toEqual({ rating: 5, review: 'Great!' });
+    expect(backMock).toHaveBeenCalled();
   });
 
   it('should not create a new rating when one already exists', async () => {
@@ -67,6 +77,7 @@ describe('RateBucketlistService', () => {
     await service.submitRating({ rating: 5, review: 'Attempt' });
 
     expect(createOwnBiteTrailRatingMock).not.toHaveBeenCalled();
+    expect(backMock).not.toHaveBeenCalled();
   });
 
   it('should not create rating when bucketlist has no biteTrailId', async () => {
@@ -82,6 +93,7 @@ describe('RateBucketlistService', () => {
     await service.submitRating({ rating: 5, review: 'Attempt' });
 
     expect(createOwnBiteTrailRatingMock).not.toHaveBeenCalled();
+    expect(backMock).not.toHaveBeenCalled();
   });
 
   it('should load existing rating when create returns false', async () => {
@@ -96,6 +108,7 @@ describe('RateBucketlistService', () => {
 
     expect(getOwnBiteTrailRatingMock).toHaveBeenCalledWith('trail-1');
     expect(service.existingRating()).toEqual({ rating: 2, review: 'Existing' });
+    expect(backMock).not.toHaveBeenCalled();
   });
 
   it('should clear existing rating when selected bucketlist has no biteTrailId', async () => {

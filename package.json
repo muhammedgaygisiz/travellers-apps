@@ -161,7 +161,6 @@
     "jsonc-eslint-parser": "^2.1.0",
     "lint-staged": "16.1.5",
     "loki": "0.35.1",
-    "ngx-skeleton-loader": "11.2.1",
     "nx": "22.3.3",
     "nx-loki": "1.2.5",
     "nx-mcp": "0.3.0",

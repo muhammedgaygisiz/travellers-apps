@@ -25,6 +25,7 @@ import {
   IonList,
   IonListHeader,
   IonNote,
+  IonSkeletonText,
   IonText,
   IonTextarea,
   PopoverController,
@@ -78,6 +79,7 @@ import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-cur
     ConvertToPreferredCurrencyPipe,
     GetImagePipe,
     AsyncPipe,
+    IonSkeletonText,
   ],
 })
 export class DetailsPage {

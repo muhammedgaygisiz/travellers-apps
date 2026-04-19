@@ -3,6 +3,7 @@ import { BiteTribeHomeComponent } from '../home.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import type { Bite, Like } from 'model';
+import { provideTransloco } from '@jsverse/transloco';
 
 addNecessaryIcons();
 
@@ -14,6 +15,12 @@ export default {
       providers: [
         provideIonicAngular(getIonicConfig()),
         { provide: APP_TITLE, useValue: 'Bite Tribe' },
+        provideTransloco({
+          config: {
+            availableLangs: ['en'],
+            fallbackLang: ['en'],
+          },
+        }),
       ],
     }),
   ],

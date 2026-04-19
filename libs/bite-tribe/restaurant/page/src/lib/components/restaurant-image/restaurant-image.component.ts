@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { IonIcon, IonImg, IonSkeletonText } from '@ionic/angular/standalone';
 import { Restaurant } from 'model';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -19,9 +14,4 @@ export class RestaurantImageComponent {
   restaurant = input<Restaurant>();
 
   darkTheme = input<boolean>(false);
-
-  skeletonAnimation = computed((): 'pulse-dark' | 'pulse' => {
-    const isDark = this.darkTheme();
-    return isDark ? 'pulse-dark' : 'pulse';
-  });
 }

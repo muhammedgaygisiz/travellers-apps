@@ -49,7 +49,7 @@ export class DetailsContainer {
       this.service.position.reload();
     }
 
-    if (this.service.biteCreator.reload()) {
+    if (this.service.biteCreator.error()) {
       this.service.biteCreator.reload();
     }
   }

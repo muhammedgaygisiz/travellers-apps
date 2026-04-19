@@ -87,6 +87,6 @@ export const myBite: Story = {
 export const noBite: Story = {
   args: {
     ...withDescription.args,
-    bite: undefined as unknown as Bite,
+    bite: undefined,
   },
 };

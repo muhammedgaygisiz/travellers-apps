@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   input,
   output,
@@ -94,11 +93,6 @@ export class DetailsPage {
   position = input<Position>();
   exchangeRates = input<Record<string, number>>();
   preferredCurrency = input<string>();
-
-  _ = effect(() => {
-    const bite = this.bite();
-    console.log(bite);
-  });
 
   selectList = output<Bucketlist>();
   shareBite = output<Bite>();

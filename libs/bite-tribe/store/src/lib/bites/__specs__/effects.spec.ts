@@ -23,6 +23,7 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 const Mock = {
   bitesByUser: (): Observable<any> => of([]),
   bitesByPosition: (): Observable<any> => of([]),
+  biteById: (): Observable<any> => of({}),
   bitesByBucketlist: (): Observable<any> => of([]),
   saveNewBite: jest.fn(),
   uploadImage: (): Observable<any> => of({}),
@@ -39,6 +40,10 @@ const Mock = {
 
 const BITE_MOCK = {
   id: 'biteId',
+  position: {
+    latitude: 48.2082,
+    longitude: 16.3738,
+  },
 } as Bite;
 
 describe(BiteEffects.name, () => {
@@ -223,6 +228,70 @@ describe(BiteEffects.name, () => {
           output,
         );
       });
+    });
+  });
+
+  describe('loadBitesForRestaurantPage$', () => {
+    it('should load bites around source bite position on restaurant bites page entry', () => {
+      const bitesByPositionSpy = jest.spyOn(apiService, 'bitesByPosition');
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: routerNavigatedAction({
+            payload: {
+              event: { urlAfterRedirects: '/bite/biteId/restaurant/123/bites' },
+            } as any,
+          }),
+        });
+
+        const expected = 'a';
+        const output = {
+          a: BiteActions.loadedByGPSPositionFromAPI({ bites: [] }),
+        };
+
+        expectObservable(effects.loadBitesForRestaurantPage$).toBe(
+          expected,
+          output,
+        );
+      });
+
+      expect(bitesByPositionSpy).toHaveBeenCalledWith({
+        coords: {
+          latitude: 48.2082,
+          longitude: 16.3738,
+        },
+      });
+    });
+
+    it('should resolve source bite by id when bite selector has no source bite', () => {
+      store.overrideSelector(bite, undefined as any);
+      store.refreshState();
+      (effects as any)['sourceBiteId'] = (): string => 'biteId';
+      const biteByIdSpy = jest
+        .spyOn(apiService, 'biteById')
+        .mockReturnValue(of(BITE_MOCK) as any);
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: routerNavigatedAction({
+            payload: {
+              event: { urlAfterRedirects: '/bite/biteId/restaurant/123/bites' },
+            } as any,
+          }),
+        });
+
+        const expected = 'a';
+        const output = {
+          a: BiteActions.loadedByGPSPositionFromAPI({ bites: [] }),
+        };
+
+        expectObservable(effects.loadBitesForRestaurantPage$).toBe(
+          expected,
+          output,
+        );
+      });
+
+      expect(biteByIdSpy).toHaveBeenCalledWith('biteId');
     });
   });
 

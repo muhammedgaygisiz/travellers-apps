@@ -70,6 +70,7 @@ class ProfileApiMock {
 class BiteApiMock {
   loadBitesByLocation = jest.fn();
   loadBitesByUser = jest.fn();
+  loadBiteById = jest.fn();
   saveNewBite = jest.fn();
   saveEditedBite = jest.fn();
   deleteBite = jest.fn();
@@ -566,6 +567,20 @@ describe(BiteTribeApiService.name, () => {
         const user = 'user-id';
         service.bitesByUser(user);
         expect(loadBitesByUserSpy).toHaveBeenCalledWith(user);
+      },
+    ));
+  });
+
+  describe('biteById', () => {
+    it('should call loadBiteById on BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const loadBiteByIdSpy = jest
+          .spyOn(biteApiService, 'loadBiteById')
+          .mockReturnValue(Promise.resolve({ id: 'bite-1' } as any));
+
+        service.biteById('bite-1');
+        expect(loadBiteByIdSpy).toHaveBeenCalledWith('bite-1');
       },
     ));
   });

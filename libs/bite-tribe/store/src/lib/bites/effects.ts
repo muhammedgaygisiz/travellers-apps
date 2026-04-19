@@ -1,7 +1,17 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteActions } from './actions';
-import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  EMPTY,
+  filter,
+  from,
+  map,
+  Observable,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -11,9 +21,9 @@ import { AppActions } from '../app/actions';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { BucketlistActions } from '../bucketlists/actions';
 import { PATH } from 'utils';
-import { userId } from '../router/selectors';
+import { biteId, userId } from '../router/selectors';
 import { fromAuth } from 'ta-firestore';
-import { CreateAndUploadImageCallbackParams } from 'model';
+import { Bite, CreateAndUploadImageCallbackParams } from 'model';
 import { ToastController } from '@ionic/angular';
 
 @Injectable()
@@ -25,7 +35,25 @@ export class BiteEffects {
   private readonly toastController = inject(ToastController);
 
   bite = toSignal(this.store.select(bite));
+  sourceBiteId = toSignal(this.store.select(biteId));
   biteCreatorId = toSignal(this.store.select(userId));
+
+  private loadBitesBySourceBitePosition(sourceBite: Bite): Observable<Bite[]> {
+    const position = sourceBite.position;
+
+    if (!position) {
+      return of([]);
+    }
+
+    return from(
+      this.api.bitesByPosition({
+        coords: {
+          latitude: position.latitude,
+          longitude: position.longitude,
+        },
+      } as GeolocationPosition),
+    );
+  }
 
   listenToLatest20Bites$ = createEffect(() => {
     return this.actions$.pipe(
@@ -83,6 +111,43 @@ export class BiteEffects {
         const position = action.position;
 
         return from(this.api.bitesByPosition(position));
+      }),
+      map((bites) => BiteActions.loadedByGPSPositionFromAPI({ bites })),
+    );
+  });
+
+  loadBitesForRestaurantPage$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(routerNavigatedAction),
+      filter(({ payload }) => {
+        const url = payload.event.urlAfterRedirects;
+        return (
+          url.includes(`/${PATH.RESTAURANT}/`) && url.includes(`/${PATH.BITES}`)
+        );
+      }),
+      switchMap(() => {
+        const sourceBite = this.bite();
+
+        if (sourceBite?.position) {
+          return this.loadBitesBySourceBitePosition(sourceBite);
+        }
+
+        const sourceBiteId = this.sourceBiteId();
+
+        if (!sourceBiteId) {
+          return EMPTY;
+        }
+
+        return from(this.api.biteById(sourceBiteId)).pipe(
+          switchMap((loadedSourceBite) => {
+            if (!loadedSourceBite?.position) {
+              return EMPTY;
+            }
+
+            return this.loadBitesBySourceBitePosition(loadedSourceBite);
+          }),
+          catchError(() => EMPTY),
+        );
       }),
       map((bites) => BiteActions.loadedByGPSPositionFromAPI({ bites })),
     );

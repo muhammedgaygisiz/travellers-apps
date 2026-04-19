@@ -38,21 +38,23 @@ export class BiteEffects {
   sourceBiteId = toSignal(this.store.select(biteId));
   biteCreatorId = toSignal(this.store.select(userId));
 
+  private hasCoordinates(sourceBite?: Bite): sourceBite is Bite {
+    return (
+      !!sourceBite &&
+      sourceBite.position?.latitude !== undefined &&
+      sourceBite.position?.longitude !== undefined
+    );
+  }
+
   private loadBitesBySourceBitePosition(sourceBite: Bite): Observable<Bite[]> {
-    const position = sourceBite.position;
-
-    if (!position) {
-      return of([]);
-    }
-
     return from(
       this.api.bitesByPosition({
         coords: {
-          latitude: position.latitude,
-          longitude: position.longitude,
+          latitude: sourceBite.position.latitude,
+          longitude: sourceBite.position.longitude,
         },
       } as GeolocationPosition),
-    );
+    ).pipe(catchError(() => of([])));
   }
 
   listenToLatest20Bites$ = createEffect(() => {
@@ -110,7 +112,9 @@ export class BiteEffects {
       switchMap((action) => {
         const position = action.position;
 
-        return from(this.api.bitesByPosition(position));
+        return from(this.api.bitesByPosition(position)).pipe(
+          catchError(() => of([])),
+        );
       }),
       map((bites) => BiteActions.loadedByGPSPositionFromAPI({ bites })),
     );
@@ -128,7 +132,7 @@ export class BiteEffects {
       switchMap(() => {
         const sourceBite = this.bite();
 
-        if (sourceBite?.position) {
+        if (this.hasCoordinates(sourceBite)) {
           return this.loadBitesBySourceBitePosition(sourceBite);
         }
 
@@ -140,7 +144,7 @@ export class BiteEffects {
 
         return from(this.api.biteById(sourceBiteId)).pipe(
           switchMap((loadedSourceBite) => {
-            if (!loadedSourceBite?.position) {
+            if (!this.hasCoordinates(loadedSourceBite)) {
               return EMPTY;
             }
 

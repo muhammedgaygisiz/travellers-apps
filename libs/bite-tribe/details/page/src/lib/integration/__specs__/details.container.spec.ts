@@ -51,6 +51,7 @@ describe(DetailsContainer.name, () => {
             userId: signal(undefined),
             biteCreator: {
               value: signal(undefined),
+              error: signal(undefined),
               reload: jest.fn(),
             },
             // eslint-disable-next-line @typescript-eslint/no-empty-function

@@ -5,8 +5,18 @@ import { of } from 'rxjs';
 import type { Bite, Like } from 'model';
 import { provideMockStore } from '@ngrx/store/testing';
 import SpyInstance = jest.SpyInstance;
+import { BiteTribeApiService } from 'bite-tribe/api';
 
-class Mock {
+const BITE_WITH_POSITION: Bite = {
+  id: 'biteId',
+  name: 'Test Bite',
+  image: '',
+  place: 'Test Place',
+  price: 10,
+  position: { latitude: 48.2082, longitude: 16.3738 },
+};
+
+class StoreMock {
   sortedHomeBites$ = of([]);
   homeSorting$ = of('distance');
   mybites$ = of([]);
@@ -29,6 +39,8 @@ class Mock {
   maxPriceHome$ = of(0);
   isReloadingHome$ = of(false);
   hasErrorLoadingGpsPosition$ = of(false);
+  biteIdFromUrl = (): string | undefined => undefined;
+  restaurantIdFromUrl = (): string | undefined => undefined;
   logout = (): null => null;
   submitLikeOrDislikeClick = (): null => null;
   submitDeleteBite = (): null => null;
@@ -41,15 +53,26 @@ class Mock {
   clearGpsError = (): null => null;
 }
 
+const ApiMock = {
+  biteById: jest.fn(),
+  bitesByPosition: jest.fn(),
+  loadRestaurant: jest.fn(),
+};
+
 describe('HomeDataAccessService', () => {
   let biteTribeStoreService: BiteTribeStoreService;
 
   beforeEach(() => {
+    ApiMock.biteById.mockResolvedValue(undefined);
+    ApiMock.bitesByPosition.mockResolvedValue([]);
+    ApiMock.loadRestaurant.mockResolvedValue(undefined);
+
     TestBed.configureTestingModule({
       providers: [
         HomeDataAccessService,
         provideMockStore(),
-        { provide: BiteTribeStoreService, useClass: Mock },
+        { provide: BiteTribeStoreService, useClass: StoreMock },
+        { provide: BiteTribeApiService, useValue: ApiMock },
       ],
     }).compileComponents();
     biteTribeStoreService = TestBed.inject(BiteTribeStoreService);
@@ -314,6 +337,88 @@ describe('HomeDataAccessService', () => {
         );
         service.clearGpsError();
         expect(biteTribeStoreServiceSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('restaurantBitesLoader', () => {
+    it('should return empty array when no sourceBiteId', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: undefined, restaurantIdOrName: undefined },
+        } as any);
+        expect(result).toEqual([]);
+      },
+    ));
+
+    it('should return empty array when biteById throws', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.biteById.mockRejectedValue(new Error('not found'));
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'id1', restaurantIdOrName: undefined },
+        } as any);
+        expect(result).toEqual([]);
+      },
+    ));
+
+    it('should return empty array when source bite has no position', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.biteById.mockResolvedValue({ id: 'id1' } as Bite);
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'id1', restaurantIdOrName: undefined },
+        } as any);
+        expect(result).toEqual([]);
+      },
+    ));
+
+    it('should return only source bite when bitesByPosition throws', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockRejectedValue(new Error('network error'));
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
+        } as any);
+        expect(result).toEqual([BITE_WITH_POSITION]);
+      },
+    ));
+
+    it('should call bitesByPosition with source bite coordinates', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([]);
+        await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'biteId', restaurantIdOrName: 'place123' },
+        } as any);
+        expect(ApiMock.bitesByPosition).toHaveBeenCalledWith(
+          expect.objectContaining({
+            coords: {
+              latitude: BITE_WITH_POSITION.position.latitude,
+              longitude: BITE_WITH_POSITION.position.longitude,
+            },
+          }),
+        );
+      },
+    ));
+
+    it('should include source bite at the top when not in matched list', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        const otherBite: Bite = {
+          ...BITE_WITH_POSITION,
+          id: 'otherId',
+          place: 'Test Place',
+        };
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([otherBite]);
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'biteId', restaurantIdOrName: 'TestPlace' },
+        } as any);
+        expect(result[0]).toEqual(BITE_WITH_POSITION);
       },
     ));
   });

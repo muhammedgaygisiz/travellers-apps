@@ -8,14 +8,12 @@ import { BiteEffects } from '../effects';
 import { BiteActions } from '../actions';
 import type { Bite } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { bite } from '../selectors';
 import { AppActions } from '../../app/actions';
 import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import { signal, WritableSignal } from '@angular/core';
 import { BucketlistActions } from '../../bucketlists/actions';
 import { PATH } from 'utils';
 import { fromAuth } from 'ta-firestore';
-import { biteId as routeBiteId } from '../../router/selectors';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -76,7 +74,6 @@ describe(BiteEffects.name, () => {
     });
 
     store = TestBed.inject(MockStore);
-    store.overrideSelector(bite, BITE_MOCK);
     effects = TestBed.inject(BiteEffects);
     apiService = TestBed.inject(BiteTribeApiService);
     storeService = TestBed.inject(BiteTribeStoreService);
@@ -228,145 +225,6 @@ describe(BiteEffects.name, () => {
           expected,
           output,
         );
-      });
-    });
-  });
-
-  describe('loadBitesForRestaurantPage$', () => {
-    it('should load bites around source bite position on restaurant bites page entry', () => {
-      const bitesByPositionSpy = jest.spyOn(apiService, 'bitesByPosition');
-
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: routerNavigatedAction({
-            payload: {
-              event: { urlAfterRedirects: '/bite/biteId/restaurant/123/bites' },
-            } as any,
-          }),
-        });
-
-        const expected = 'a';
-        const output = {
-          a: BiteActions.loadedByGPSPositionFromAPI({ bites: [] }),
-        };
-
-        expectObservable(effects.loadBitesForRestaurantPage$).toBe(
-          expected,
-          output,
-        );
-      });
-
-      expect(bitesByPositionSpy).toHaveBeenCalledWith({
-        coords: {
-          latitude: 48.2082,
-          longitude: 16.3738,
-        },
-      });
-    });
-
-    it('should resolve source bite by id when bite selector has no source bite', () => {
-      store.overrideSelector(bite, undefined as any);
-      store.overrideSelector(routeBiteId, 'biteId');
-      store.refreshState();
-      const biteByIdSpy = jest
-        .spyOn(apiService, 'biteById')
-        .mockReturnValue(of(BITE_MOCK) as any);
-
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: routerNavigatedAction({
-            payload: {
-              event: { urlAfterRedirects: '/bite/biteId/restaurant/123/bites' },
-            } as any,
-          }),
-        });
-
-        const expected = 'a';
-        const output = {
-          a: BiteActions.loadedByGPSPositionFromAPI({ bites: [] }),
-        };
-
-        expectObservable(effects.loadBitesForRestaurantPage$).toBe(
-          expected,
-          output,
-        );
-      });
-
-      expect(biteByIdSpy).toHaveBeenCalledWith('biteId');
-    });
-
-    it('should fall back to route bite id when source bite has no position', () => {
-      store.overrideSelector(bite, { id: 'biteId' } as Bite);
-      store.overrideSelector(routeBiteId, 'biteId');
-      store.refreshState();
-
-      const biteByIdSpy = jest
-        .spyOn(apiService, 'biteById')
-        .mockReturnValue(of(BITE_MOCK) as any);
-
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: routerNavigatedAction({
-            payload: {
-              event: { urlAfterRedirects: '/bite/biteId/restaurant/123/bites' },
-            } as any,
-          }),
-        });
-
-        const expected = 'a';
-        const output = {
-          a: BiteActions.loadedByGPSPositionFromAPI({ bites: [] }),
-        };
-
-        expectObservable(effects.loadBitesForRestaurantPage$).toBe(
-          expected,
-          output,
-        );
-      });
-
-      expect(biteByIdSpy).toHaveBeenCalledWith('biteId');
-    });
-
-    it('should emit no action when loaded source bite has no position', () => {
-      store.overrideSelector(bite, undefined as any);
-      store.overrideSelector(routeBiteId, 'biteId');
-      store.refreshState();
-      jest
-        .spyOn(apiService, 'biteById')
-        .mockReturnValue(of({ id: 'biteId' } as Bite) as any);
-
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: routerNavigatedAction({
-            payload: {
-              event: { urlAfterRedirects: '/bite/biteId/restaurant/123/bites' },
-            } as any,
-          }),
-        });
-
-        expectObservable(effects.loadBitesForRestaurantPage$).toBe('');
-      });
-    });
-
-    it('should emit no action when loading source bite by id fails', () => {
-      store.overrideSelector(bite, undefined as any);
-      store.overrideSelector(routeBiteId, 'biteId');
-      store.refreshState();
-
-      scheduler.run(({ cold, expectObservable }) => {
-        jest
-          .spyOn(apiService, 'biteById')
-          .mockReturnValue(cold('#', {}, new Error('load failed')) as any);
-
-        actions$ = cold('a', {
-          a: routerNavigatedAction({
-            payload: {
-              event: { urlAfterRedirects: '/bite/biteId/restaurant/123/bites' },
-            } as any,
-          }),
-        });
-
-        expectObservable(effects.loadBitesForRestaurantPage$).toBe('');
       });
     });
   });

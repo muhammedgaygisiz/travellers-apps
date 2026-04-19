@@ -35,10 +35,12 @@ describe(DetailsContainer.name, () => {
           useValue: {
             bite: {
               value: signal(undefined),
+              error: signal(undefined),
               reload: jest.fn(),
             },
             position: {
               value: signal(undefined),
+              error: signal(undefined),
               reload: jest.fn(),
             },
             reviews: signal(undefined),

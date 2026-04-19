@@ -133,5 +133,7 @@
   "bites": "Bite'lar",
   "add-category": "Kategori ekle",
   "save-menu": "Menüyü kaydet",
-  "no-menu-yet": "Henüz menü yok"
+  "no-menu-yet": "Henüz menü yok",
+  "you-already-rated-this-bite-trail": "Bu Bite Trail'i zaten puanladınız.",
+  "write-a-review": "Bir değerlendirme yazın"
 }

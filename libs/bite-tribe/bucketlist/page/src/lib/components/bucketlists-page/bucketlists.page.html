@@ -67,6 +67,15 @@
             >
               {{ 'delete' | transloco }}
             </ion-button>
+            @if (bucketlist.biteTrailId) {
+            <ion-button
+              size="small"
+              color="tertiary"
+              (click)="onRateBucketlist(bucketlist.id, $event)"
+            >
+              {{ 'rating' | transloco }}
+            </ion-button>
+            }
           </div>
         </div>
         <ion-badge>{{ bucketlist.biteIds | count }}</ion-badge>

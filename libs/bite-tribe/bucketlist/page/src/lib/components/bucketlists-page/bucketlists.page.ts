@@ -75,6 +75,7 @@ export class BucketlistsPage {
   readonly sortingChange = output<string>();
   readonly editBucketlist = output<string>();
   readonly deleteBucketlist = output<string>();
+  readonly rateBucketlist = output<string>();
 
   isAlertOpen = signal<boolean>(false);
   isDeleteAlertOpen = signal<boolean>(false);
@@ -156,5 +157,10 @@ export class BucketlistsPage {
   onEditBucketlist(bucketlistId: string, event: Event): void {
     event.stopPropagation();
     this.editBucketlist.emit(bucketlistId);
+  }
+
+  onRateBucketlist(bucketlistId: string, event: Event): void {
+    event.stopPropagation();
+    this.rateBucketlist.emit(bucketlistId);
   }
 }

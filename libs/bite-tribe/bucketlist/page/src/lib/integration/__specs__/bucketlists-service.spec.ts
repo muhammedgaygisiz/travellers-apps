@@ -51,6 +51,18 @@ describe('BucketlistsService', () => {
     });
   });
 
+  describe('gotoRateBucketlist', () => {
+    it('should call navigateForward with correct parameters', () => {
+      const bucketlistId = '12345';
+      service.gotoRateBucketlist(bucketlistId);
+      expect(navigateForwardMock).toHaveBeenCalledWith([
+        'my-bucketlists',
+        bucketlistId,
+        'rate',
+      ]);
+    });
+  });
+
   describe('createAndSaveToBucketList', () => {
     it('should call createAndSaveToBucketList with correct value', () => {
       const bucketListName = 'New Bucket List';

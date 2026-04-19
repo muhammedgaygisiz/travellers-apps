@@ -40,6 +40,7 @@ describe('BucketlistsContainerComponent', () => {
             sortingChange: jest.fn(),
             gotoEditBucketlist: jest.fn(),
             deleteBucketlist: jest.fn(),
+            gotoRateBucketlist: jest.fn(),
           },
         },
         { provide: TranslocoService, useValue: MockTranslocoService },

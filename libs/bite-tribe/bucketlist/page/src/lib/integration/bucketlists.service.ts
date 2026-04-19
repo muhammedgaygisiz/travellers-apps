@@ -24,6 +24,14 @@ export class BucketlistsService {
     ]);
   }
 
+  gotoRateBucketlist(bucketlistId: string): void {
+    this.navController.navigateForward([
+      'my-bucketlists',
+      bucketlistId,
+      'rate',
+    ]);
+  }
+
   createAndSaveToBucketList(bucketListName: string): void {
     this.dataAccess.createAndSaveToBucketList(bucketListName);
   }

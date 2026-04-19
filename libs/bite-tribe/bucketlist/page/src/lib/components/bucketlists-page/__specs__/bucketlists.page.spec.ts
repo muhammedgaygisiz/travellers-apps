@@ -179,4 +179,21 @@ describe('BucketlistsPage', () => {
       expect(editBucketlistEmitSpy).toHaveBeenCalledWith(bucketlistId);
     });
   });
+
+  describe('onRateBucketlist', () => {
+    it('should stop event propagation and emit rateBucketlist', () => {
+      const bucketlistId = '123';
+      const event = new Event('click');
+      jest.spyOn(event, 'stopPropagation');
+      const rateBucketlistEmitSpy = jest.spyOn(
+        component.rateBucketlist,
+        'emit',
+      );
+
+      component.onRateBucketlist(bucketlistId, event);
+
+      expect(event.stopPropagation).toHaveBeenCalled();
+      expect(rateBucketlistEmitSpy).toHaveBeenCalledWith(bucketlistId);
+    });
+  });
 });

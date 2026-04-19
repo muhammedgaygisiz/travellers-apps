@@ -1,0 +1,40 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+  [enableBackButton]="true"
+>
+  <ion-content class="ion-padding">
+    <h1 class="ion-margin-bottom">{{ bucketlist()?.name }}</h1>
+
+    @if (existingRating()) {
+    <ion-text color="secondary" class="ion-margin-bottom ion-display-block">
+      {{ 'you-already-rated-this-bite-trail' | transloco }}
+    </ion-text>
+    }
+
+    <form [formGroup]="ratingFormGroup">
+      <star-rating
+        formControlName="rating"
+        label="{{ 'rating-label' | transloco }}"
+        [readonly]="!!existingRating()"
+      />
+
+      <ion-textarea
+        label="{{ 'write-a-review' | transloco }}"
+        formControlName="review"
+        fill="outline"
+        mode="md"
+        rows="5"
+      />
+
+      <ion-button
+        expand="block"
+        class="ion-margin-top"
+        (click)="onSubmit()"
+        [disabled]="!ratingFormGroup.valid || !!existingRating() || isSubmitting()"
+      >
+        {{ 'save' | transloco }}
+      </ion-button>
+    </form>
+  </ion-content>
+</ta-page>

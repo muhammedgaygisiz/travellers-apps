@@ -16,3 +16,4 @@ export type * from './lib/public-user';
 export type * from './lib/like';
 export type * from './lib/profile-meta-data';
 export type * from './lib/create-and-upload-image-callback-params';
+export type * from './lib/bite-trail-rating';

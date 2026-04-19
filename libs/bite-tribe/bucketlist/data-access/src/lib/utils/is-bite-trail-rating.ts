@@ -1,4 +1,4 @@
-import { BiteTrailRating } from './bite-trail-rating';
+import { BiteTrailRating } from 'model';
 
 export const isBiteTrailRating = (data: unknown): data is BiteTrailRating => {
   if (!data || typeof data !== 'object') {

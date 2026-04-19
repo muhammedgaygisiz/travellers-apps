@@ -1,9 +1,13 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
+import {
+  Bite,
+  BiteTrailRating,
+  Bucketlist,
+  RemoveBiteFromBucketlistParams,
+} from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BiteTrailRating } from './utils/bite-trail-rating';
 import { isBiteTrailRating } from './utils/is-bite-trail-rating';
 
 const BITE_TRAIL_COLLECTION = 'biteTrails';

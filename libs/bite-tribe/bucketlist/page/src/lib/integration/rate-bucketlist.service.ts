@@ -1,9 +1,7 @@
 import { effect, inject, Injectable, signal } from '@angular/core';
-import {
-  BiteTrailRating,
-  BucketlistsDataAccessService,
-} from 'bite-tribe/bucketlist-data-access';
+import { BucketlistsDataAccessService } from 'bite-tribe/bucketlist-data-access';
 import { NavController } from '@ionic/angular/standalone';
+import { BiteTrailRating } from 'model';
 
 @Injectable({
   providedIn: 'root',

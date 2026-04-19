@@ -7,10 +7,9 @@ import {
   output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { Bucketlist } from 'model';
+import { BiteTrailRating, Bucketlist } from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StarRatingComponent } from 'common/ui/star-rating';
-import { BiteTrailRating } from 'bite-tribe/bucketlist-data-access';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
   IonButton,

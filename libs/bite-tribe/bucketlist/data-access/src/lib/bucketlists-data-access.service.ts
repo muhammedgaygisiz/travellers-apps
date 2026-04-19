@@ -3,30 +3,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-
-export interface BiteTrailRating {
-  rating: number;
-  review: string;
-}
+import { BiteTrailRating } from './utils/bite-trail-rating';
+import { isBiteTrailRating } from './utils/is-bite-trail-rating';
 
 const BITE_TRAIL_COLLECTION = 'biteTrails';
 const RATINGS_COLLECTION = 'ratings';
-
-function isBiteTrailRating(data: unknown): data is BiteTrailRating {
-  if (!data || typeof data !== 'object') {
-    return false;
-  }
-
-  const rating = (data as { rating?: unknown }).rating;
-  const review = (data as { review?: unknown }).review;
-
-  return (
-    typeof rating === 'number' &&
-    rating >= 1 &&
-    rating <= 5 &&
-    typeof review === 'string'
-  );
-}
 
 @Injectable({ providedIn: 'root' })
 export class BucketlistsDataAccessService {
@@ -36,15 +17,19 @@ export class BucketlistsDataAccessService {
   bucketlists = toSignal(this.storeService.sortedBucketlists$, {
     initialValue: [] as Bucketlist[],
   });
+
   sorting = toSignal(this.storeService.bucketlistSorting$, {
     initialValue: 'name',
   });
+
   userId = toSignal(this.storeService.userId$, {
     initialValue: '',
   });
+
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     initialValue: undefined as Bucketlist | undefined,
   });
+
   bitesBySelectedBucketlist = toSignal(
     this.storeService.bitesBySelectedBucketlist$,
     { initialValue: [] as Bite[] },

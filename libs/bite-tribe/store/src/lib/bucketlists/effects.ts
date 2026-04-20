@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { BucketlistActions } from './actions';
-import { from, map, switchMap } from 'rxjs';
+import { catchError, from, map, of, switchMap } from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { AuthService } from 'ta-firestore';
 import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
@@ -134,7 +134,10 @@ export class BucketListEffect {
             biteId,
             checked,
           }),
-        ).pipe(map(() => BucketlistActions.setBiteTriedOutStatusSucceeded())),
+        ).pipe(
+          map(() => BucketlistActions.setBiteTriedOutStatusSucceeded()),
+          catchError(() => of(BucketlistActions.setBiteTriedOutStatusFailed())),
+        ),
       ),
     );
   });

@@ -143,7 +143,7 @@ export class BucketlistApiService {
         'biteIds'
       ]?.filter((currBiteId: string) => currBiteId !== biteId);
 
-      const newTriedOutBites = bucketListDoc?.snapshot?.data?.[
+      const remainingTriedOutBites = bucketListDoc?.snapshot?.data?.[
         'triedOutBites'
       ]?.filter((currBite: { biteId: string }) => currBite.biteId !== biteId);
 
@@ -151,7 +151,7 @@ export class BucketlistApiService {
         reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
         data: {
           biteIds: newBiteIdListInBucketList,
-          triedOutBites: newTriedOutBites,
+          triedOutBites: remainingTriedOutBites,
           updatedAt: new Date().toISOString(),
           updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
@@ -211,6 +211,11 @@ export class BucketlistApiService {
     }
   }
 
+  /**
+   * Updates tried-out status for a bite within a bucketlist.
+   * Adds/updates an entry in `triedOutBites` when checked is true,
+   * and removes it when checked is false.
+   */
   async updateBucketlistTriedOutStatus(params: {
     bucketlistId: string;
     biteId: string;
@@ -254,7 +259,6 @@ export class BucketlistApiService {
         },
       });
     } catch (error) {
-      console.error('Error updating bucket list tried out status:', error);
       this.errorHandler.handleError(error);
     }
   }

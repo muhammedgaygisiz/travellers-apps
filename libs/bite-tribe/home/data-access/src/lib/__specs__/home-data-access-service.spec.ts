@@ -411,6 +411,21 @@ describe('HomeDataAccessService', () => {
         expect(setBiteTriedOutStatusSpy).not.toHaveBeenCalled();
       },
     ));
+
+    it('should not dispatch when selected bucketlist is null', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        jest.spyOn(service, 'selectedBucketlist').mockReturnValue(null as any);
+        const setBiteTriedOutStatusSpy = jest.spyOn(
+          biteTribeStoreService,
+          'setBiteTriedOutStatus',
+        );
+
+        service.markBiteAsTriedOut({ biteId: 'bite-1', checked: true });
+
+        expect(setBiteTriedOutStatusSpy).not.toHaveBeenCalled();
+      },
+    ));
   });
 
   describe('restaurantBitesLoader', () => {

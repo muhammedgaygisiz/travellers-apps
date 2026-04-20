@@ -1,5 +1,5 @@
 import { TestScheduler } from 'rxjs/testing';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
@@ -283,6 +283,26 @@ describe('BucketListEffect', () => {
         bucketlistId: 'bucketlistId',
         biteId: 'biteId',
         checked: true,
+      });
+    });
+
+    it('should dispatch failed action when updateBucketlistTriedOutStatus fails', () => {
+      updateBucketlistTriedOutStatusSpy.mockImplementationOnce(() => {
+        return throwError(() => new Error('Failed')) as any;
+      });
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: BucketlistActions.setBiteTriedOutStatus({
+            bucketlistId: 'bucketlistId',
+            biteId: 'biteId',
+            checked: true,
+          }),
+        });
+
+        expectObservable(effects.setBiteTriedOutStatusEffect$).toBe('a', {
+          a: BucketlistActions.setBiteTriedOutStatusFailed(),
+        });
       });
     });
   });

@@ -31,6 +31,7 @@ export const BucketlistActions = createActionGroup({
       checked: boolean;
     }>(),
     'Set Bite Tried Out Status Succeeded': emptyProps(),
+    'Set Bite Tried Out Status Failed': emptyProps(),
     'Save Bite Trail as Bucket List':
       props<CreateBucketListFromBiteTrailParams>(),
     'Saved Bite Trail as Bucket List': emptyProps(),

@@ -375,6 +375,20 @@ describe('HomeDataAccessService', () => {
       },
     ));
 
+    it('should return empty array when source bite has latitude but no longitude', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.biteById.mockResolvedValue({
+          id: 'id1',
+          position: { latitude: 48.0 },
+        } as Bite);
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'id1', restaurantIdOrName: undefined },
+        } as any);
+        expect(result).toEqual([]);
+      },
+    ));
+
     it('should return only source bite when bitesByPosition throws', inject(
       [HomeDataAccessService],
       async (service: HomeDataAccessService) => {
@@ -420,6 +434,152 @@ describe('HomeDataAccessService', () => {
           params: { sourceBiteId: 'biteId', restaurantIdOrName: 'TestPlace' },
         } as any);
         expect(result[0]).toEqual(BITE_WITH_POSITION);
+      },
+    ));
+
+    it('should filter out nearby bites that have no position', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        const biteNoPosition: Bite = {
+          ...BITE_WITH_POSITION,
+          id: 'noPos',
+          position: undefined as any,
+        };
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([biteNoPosition]);
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
+        } as any);
+        expect(result).toEqual([BITE_WITH_POSITION]);
+        expect(result).not.toContain(biteNoPosition);
+      },
+    ));
+
+    it('should match bites by restaurant name when restaurant entity is resolved', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        const matchingBite: Bite = {
+          ...BITE_WITH_POSITION,
+          id: 'matching',
+          place: 'Test Place',
+        };
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([matchingBite]);
+        ApiMock.loadRestaurant.mockResolvedValue({
+          name: 'Test Place',
+          id: 'r1',
+        });
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'biteId', restaurantIdOrName: 'r1' },
+        } as any);
+        expect(result).toContain(matchingBite);
+      },
+    ));
+
+    it('should match bite by restaurantId when restaurant entity is resolved', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        const matchingBite: Bite = {
+          ...BITE_WITH_POSITION,
+          id: 'byRestaurantId',
+          place: 'some unrelated place',
+          restaurantId: 'restaurants/r1',
+        };
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([matchingBite]);
+        ApiMock.loadRestaurant.mockResolvedValue({
+          name: 'My Restaurant',
+          id: 'r1',
+        });
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'biteId', restaurantIdOrName: 'r1' },
+        } as any);
+        expect(result).toContain(matchingBite);
+      },
+    ));
+
+    it('should return true for exact normalized place name match', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        const exactBite: Bite = {
+          ...BITE_WITH_POSITION,
+          id: 'exact',
+          place: 'myrestaurant',
+        };
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([exactBite]);
+        ApiMock.loadRestaurant.mockResolvedValue(undefined);
+        const result = await service.restaurantBitesLoader({
+          params: {
+            sourceBiteId: 'biteId',
+            restaurantIdOrName: 'myrestaurant',
+          },
+        } as any);
+        expect(result).toContain(exactBite);
+      },
+    ));
+
+    it('should match bite by restaurantId when place name does not match by name or fuzzy', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        const restaurantIdBite: Bite = {
+          ...BITE_WITH_POSITION,
+          id: 'byResId',
+          place: 'xyz',
+          restaurantId: 'restaurants/uniqueplace/sub',
+        };
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([restaurantIdBite]);
+        ApiMock.loadRestaurant.mockResolvedValue(undefined);
+        const result = await service.restaurantBitesLoader({
+          params: {
+            sourceBiteId: 'biteId',
+            restaurantIdOrName: 'uniqueplace',
+          },
+        } as any);
+        expect(result).toContain(restaurantIdBite);
+      },
+    ));
+
+    it('should return all close bites when no restaurantIdOrName is provided', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        const nearbyBite: Bite = { ...BITE_WITH_POSITION, id: 'nearby1' };
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([nearbyBite]);
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
+        } as any);
+        expect(result).toContain(nearbyBite);
+      },
+    ));
+
+    it('should not prepend source bite when it is already in matched list', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([BITE_WITH_POSITION]);
+        const result = await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
+        } as any);
+        expect(result.filter((b: Bite) => b.id === 'biteId').length).toBe(1);
+      },
+    ));
+  });
+
+  describe('restaurantBites', () => {
+    it('should return an empty array as the initial value', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        expect(service.restaurantBites()).toEqual([]);
+      },
+    ));
+
+    it('should apply sortByCriteria to a loaded resource value', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        service.restaurantBitesResource.set([BITE_WITH_POSITION]);
+        expect(service.restaurantBites()).toContain(BITE_WITH_POSITION);
       },
     ));
   });

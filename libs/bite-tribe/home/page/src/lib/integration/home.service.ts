@@ -24,6 +24,7 @@ export class HomeService {
   userId = this.dataAccess.userId;
   isAuthenticated = this.dataAccess.isAuthenticated;
   isBitesLoading = this.dataAccess.isBitesLoading;
+  biteById = this.dataAccess.biteById;
 
   selectedBucketlist = this.dataAccess.selectedBucketlist;
 

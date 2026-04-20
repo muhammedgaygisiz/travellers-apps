@@ -84,6 +84,7 @@ export class HomeDataAccessService {
     this.storeService.hasErrorLoadingGpsPosition$,
     { initialValue: false },
   );
+  biteById = toSignal(this.storeService.bite$);
 
   networkStatus = this.networkStatusService.status;
 

@@ -16,6 +16,7 @@ import {
   IonButtons,
   IonCard,
   IonCardContent,
+  IonCheckbox,
   IonChip,
   IonContent,
   IonIcon,
@@ -60,6 +61,7 @@ const PAGE_SIZE = 50;
     NgTemplateOutlet,
     IonIcon,
     IonButton,
+    IonCheckbox,
     IonButtons,
     IonSelect,
     IonSelectOption,
@@ -98,6 +100,7 @@ export class BiteTribeHomeComponent {
   isReloading = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
   showSearch = input(false, { transform: booleanAttribute });
+  showTriedOutCheckbox = input(false, { transform: booleanAttribute });
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -122,6 +125,7 @@ export class BiteTribeHomeComponent {
   readonly filterCleared = output<void>();
   readonly refresh = output<void>();
   readonly closeGpsError = output<void>();
+  readonly triedOutChange = output<{ bite: Bite; checked: boolean }>();
 
   ionContent = viewChild(IonContent);
 
@@ -280,5 +284,13 @@ export class BiteTribeHomeComponent {
         event.target.complete();
       }
     }, 2000);
+  }
+
+  isBiteTriedOut(bite: Bite): boolean {
+    return bite.triedOut?.biteId === bite.id;
+  }
+
+  onTriedOutChange(event: { detail: { checked: boolean } }, bite: Bite): void {
+    this.triedOutChange.emit({ bite, checked: event.detail.checked });
   }
 }

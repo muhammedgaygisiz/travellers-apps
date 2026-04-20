@@ -29,6 +29,7 @@ class Mock {
   setFilters = (): null => null;
   clearFilters = (): null => null;
   clearGpsError = (): null => null;
+  markBiteAsTriedOut = (): null => null;
 }
 
 describe('HomeService', () => {
@@ -493,6 +494,31 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.onGotoMyProfileClick();
         expect(navigateForwardSpy).toHaveBeenCalledWith(['my-profile']);
+      },
+    ));
+  });
+
+  describe('toggleTriedOut', () => {
+    let markBiteAsTriedOutSpy: SpyInstance;
+
+    beforeEach(() => {
+      markBiteAsTriedOutSpy = jest.spyOn(
+        homeDataAccessService,
+        'markBiteAsTriedOut',
+      );
+    });
+
+    it('should call markBiteAsTriedOut on HomeDataAccessService', inject(
+      [HomeService],
+      (service: HomeService) => {
+        const params = {
+          bite: { id: 'bite-id' } as Bite,
+          checked: true,
+        };
+
+        service.toggleTriedOut(params);
+
+        expect(markBiteAsTriedOutSpy).toHaveBeenCalledWith(params);
       },
     ));
   });

@@ -51,6 +51,7 @@ class StoreMock {
   clearHomeFilters = (): null => null;
   reloadGPSPosition = (): null => null;
   clearGpsError = (): null => null;
+  save = (): null => null;
   bite$ = of(undefined);
 }
 
@@ -338,6 +339,58 @@ describe('HomeDataAccessService', () => {
         );
         service.clearGpsError();
         expect(biteTribeStoreServiceSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('markBiteAsTriedOut', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-04-20T10:11:12.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should persist triedOut object when checked is true', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        const saveSpy = jest.spyOn(biteTribeStoreService, 'save');
+        const bite = { id: 'bite-1' } as Bite;
+        const now = new Date();
+
+        service.markBiteAsTriedOut({ bite, checked: true });
+
+        expect(saveSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'bite-1',
+            triedOut: {
+              biteId: 'bite-1',
+              date: now.toISOString().split('T')[0],
+              time: now.toTimeString().split(' ')[0],
+            },
+          }),
+          'bite',
+        );
+      },
+    ));
+
+    it('should clear triedOut object when checked is false', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        const saveSpy = jest.spyOn(biteTribeStoreService, 'save');
+        const bite = { id: 'bite-1' } as Bite;
+
+        service.markBiteAsTriedOut({ bite, checked: false });
+
+        expect(saveSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'bite-1',
+            triedOut: undefined,
+          }),
+          'bite',
+        );
       },
     ));
   });

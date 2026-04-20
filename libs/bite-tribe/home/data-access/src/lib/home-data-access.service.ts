@@ -254,4 +254,25 @@ export class HomeDataAccessService {
   clearGpsError(): void {
     this.storeService.clearGpsError();
   }
+
+  markBiteAsTriedOut(params: { bite: Bite; checked: boolean }): void {
+    const { bite, checked } = params;
+
+    const now = new Date();
+    const triedOut = checked
+      ? {
+          biteId: bite.id,
+          date: now.toISOString().split('T')[0],
+          time: now.toTimeString().split(' ')[0],
+        }
+      : undefined;
+
+    this.storeService.save(
+      {
+        ...bite,
+        triedOut,
+      },
+      'bite',
+    );
+  }
 }

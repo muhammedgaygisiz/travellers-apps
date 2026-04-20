@@ -156,6 +156,10 @@ export class HomeService {
     this.dataAccess.clearGpsError();
   }
 
+  toggleTriedOut(params: { bite: Bite; checked: boolean }): void {
+    this.dataAccess.markBiteAsTriedOut(params);
+  }
+
   onGotoMyProfileClick(): void {
     this.navController.navigateForward(['my-profile']);
   }

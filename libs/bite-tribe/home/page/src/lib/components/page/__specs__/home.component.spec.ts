@@ -334,4 +334,28 @@ describe('BiteTribeHomeComponent', () => {
       expect(component.displayedBites()[0].name).toBe('Burger');
     });
   });
+
+  describe('tried out checkbox', () => {
+    it('should return true when bite is marked as tried out', () => {
+      const bite = {
+        id: 'bite-1',
+        triedOut: {
+          biteId: 'bite-1',
+          date: '2026-04-20',
+          time: '12:00:00',
+        },
+      } as any;
+
+      expect(component.isBiteTriedOut(bite)).toBe(true);
+    });
+
+    it('should emit triedOutChange when checkbox changes', () => {
+      const bite = { id: 'bite-1' } as any;
+      const emitSpy = jest.spyOn(component.triedOutChange, 'emit');
+
+      component.onTriedOutChange({ detail: { checked: true } }, bite);
+
+      expect(emitSpy).toHaveBeenCalledWith({ bite, checked: true });
+    });
+  });
 });

@@ -51,6 +51,7 @@ class StoreMock {
   clearHomeFilters = (): null => null;
   reloadGPSPosition = (): null => null;
   clearGpsError = (): null => null;
+  bite$ = of(undefined);
 }
 
 const ApiMock = {

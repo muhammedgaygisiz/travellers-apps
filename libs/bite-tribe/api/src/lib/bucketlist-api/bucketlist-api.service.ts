@@ -143,10 +143,15 @@ export class BucketlistApiService {
         'biteIds'
       ]?.filter((currBiteId: string) => currBiteId !== biteId);
 
+      const newTriedOutBites = bucketListDoc?.snapshot?.data?.[
+        'triedOutBites'
+      ]?.filter((currBite: { biteId: string }) => currBite.biteId !== biteId);
+
       await FirebaseFirestore.updateDocument({
         reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
         data: {
           biteIds: newBiteIdListInBucketList,
+          triedOutBites: newTriedOutBites,
           updatedAt: new Date().toISOString(),
           updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
         },
@@ -202,6 +207,54 @@ export class BucketlistApiService {
       });
     } catch (error) {
       console.error('Error updating bucket list name:', error);
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async updateBucketlistTriedOutStatus(params: {
+    bucketlistId: string;
+    biteId: string;
+    checked: boolean;
+  }): Promise<void> {
+    const { bucketlistId, biteId, checked } = params;
+    try {
+      const bucketListDoc = await FirebaseFirestore.getDocument({
+        reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
+      });
+
+      const existingTriedOutBites =
+        (bucketListDoc.snapshot.data?.['triedOutBites'] as {
+          biteId: string;
+          date: string;
+          time: string;
+        }[]) || [];
+
+      const now = new Date();
+      const triedOutBites = checked
+        ? [
+            ...existingTriedOutBites.filter(
+              (triedOutBite) => triedOutBite.biteId !== biteId,
+            ),
+            {
+              biteId,
+              date: now.toISOString().split('T')[0],
+              time: now.toTimeString().split(' ')[0],
+            },
+          ]
+        : existingTriedOutBites.filter(
+            (triedOutBite) => triedOutBite.biteId !== biteId,
+          );
+
+      await FirebaseFirestore.updateDocument({
+        reference: `${BUCKETLIST_COLLECTION}/${bucketlistId}`,
+        data: {
+          triedOutBites,
+          updatedAt: now.toISOString(),
+          updatedAtTimestamp: now.getTime(),
+        },
+      });
+    } catch (error) {
+      console.error('Error updating bucket list tried out status:', error);
       this.errorHandler.handleError(error);
     }
   }

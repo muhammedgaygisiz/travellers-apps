@@ -1,12 +1,6 @@
 import type { Geopoint } from './geopoint';
 import type { Like } from './like';
 
-export interface TriedOutBite {
-  biteId: string;
-  date: string;
-  time: string;
-}
-
 export interface Bite {
   userId?: string;
   id: string;
@@ -33,5 +27,4 @@ export interface Bite {
   likes?: Like[];
   priceInPreferredCurrency?: number;
   priceInPreferredCurrencySymbol?: string;
-  triedOut?: TriedOutBite;
 }

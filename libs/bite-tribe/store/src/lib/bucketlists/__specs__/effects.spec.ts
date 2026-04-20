@@ -21,6 +21,7 @@ const BiteTribeApiServiceMock = {
   createBucketListAndSaveBiteIdToBucketList: jest.fn(),
   removeBiteFromBucketlist: jest.fn(),
   createBucketList: jest.fn(),
+  updateBucketlistTriedOutStatus: jest.fn(),
   createBucketListFromBiteTrail: jest.fn(),
 };
 
@@ -250,6 +251,38 @@ describe('BucketListEffect', () => {
         biteIds: ['bite-1', 'bite-2'],
         biteTrailId: '',
         type: BucketlistActions.saveBiteTrailAsBucketList.type,
+      });
+    });
+  });
+
+  describe('setBiteTriedOutStatusEffect$', () => {
+    let updateBucketlistTriedOutStatusSpy: SpyInstance;
+
+    beforeEach(() => {
+      updateBucketlistTriedOutStatusSpy = jest
+        .spyOn(apiService, 'updateBucketlistTriedOutStatus')
+        .mockImplementation(() => of({}) as any);
+    });
+
+    it('should call updateBucketlistTriedOutStatus and dispatch success action', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: BucketlistActions.setBiteTriedOutStatus({
+            bucketlistId: 'bucketlistId',
+            biteId: 'biteId',
+            checked: true,
+          }),
+        });
+
+        expectObservable(effects.setBiteTriedOutStatusEffect$).toBe('a', {
+          a: BucketlistActions.setBiteTriedOutStatusSucceeded(),
+        });
+      });
+
+      expect(updateBucketlistTriedOutStatusSpy).toHaveBeenCalledWith({
+        bucketlistId: 'bucketlistId',
+        biteId: 'biteId',
+        checked: true,
       });
     });
   });

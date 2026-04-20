@@ -14,6 +14,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [showFooter]="false"
       [enableBackButton]="true"
       [showTriedOutCheckbox]="true"
+      [triedOutBiteIds]="service.triedOutBiteIds()"
       [userId]="service.userId()"
       [isAuthenticated]="service.isAuthenticated()"
       [showAddButton]="false"

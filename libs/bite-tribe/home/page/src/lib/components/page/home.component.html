@@ -196,7 +196,7 @@
           class="tried-out-checkbox"
           aria-label="Mark bite as tried out"
           [checked]="isBiteTriedOut(bite)"
-          (ionChange)="onTriedOutChange($event, bite)"
+          (ionChange)="onTriedOutChange($event, bite.id)"
         />
       }
       <bt-bite

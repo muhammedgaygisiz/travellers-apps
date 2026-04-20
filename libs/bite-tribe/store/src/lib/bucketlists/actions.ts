@@ -25,6 +25,12 @@ export const BucketlistActions = createActionGroup({
     'Deleted Bucketlist': emptyProps(),
     'Update Bucketlist Name': props<{ bucketlistId: string; name: string }>(),
     'Updated Bucketlist Name': emptyProps(),
+    'Set Bite Tried Out Status': props<{
+      bucketlistId: string;
+      biteId: string;
+      checked: boolean;
+    }>(),
+    'Set Bite Tried Out Status Succeeded': emptyProps(),
     'Save Bite Trail as Bucket List':
       props<CreateBucketListFromBiteTrailParams>(),
     'Saved Bite Trail as Bucket List': emptyProps(),

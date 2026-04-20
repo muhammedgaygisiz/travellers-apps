@@ -29,6 +29,7 @@ class Mock {
   setFilters = (): null => null;
   clearFilters = (): null => null;
   clearGpsError = (): null => null;
+  triedOutBiteIds = (): string[] => [];
   markBiteAsTriedOut = (): null => null;
 }
 
@@ -512,7 +513,7 @@ describe('HomeService', () => {
       [HomeService],
       (service: HomeService) => {
         const params = {
-          bite: { id: 'bite-id' } as Bite,
+          biteId: 'bite-id',
           checked: true,
         };
 

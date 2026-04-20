@@ -27,6 +27,7 @@ export class HomeService {
   biteById = this.dataAccess.biteById;
 
   selectedBucketlist = this.dataAccess.selectedBucketlist;
+  triedOutBiteIds = this.dataAccess.triedOutBiteIds;
 
   homeDistance = this.dataAccess.homeDistance;
 
@@ -156,7 +157,7 @@ export class HomeService {
     this.dataAccess.clearGpsError();
   }
 
-  toggleTriedOut(params: { bite: Bite; checked: boolean }): void {
+  toggleTriedOut(params: { biteId: string; checked: boolean }): void {
     this.dataAccess.markBiteAsTriedOut(params);
   }
 

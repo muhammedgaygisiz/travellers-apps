@@ -57,6 +57,13 @@ export class HomeDataAccessService {
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     requireSync: true,
   });
+  triedOutBiteIds = computed(() => {
+    return (
+      this.selectedBucketlist()?.triedOutBites?.map(
+        (triedOutBite) => triedOutBite.biteId,
+      ) || []
+    );
+  });
   selectedBucketlistTitle = toSignal(
     this.storeService.selectedBucketlistTitle$,
     {
@@ -255,24 +262,16 @@ export class HomeDataAccessService {
     this.storeService.clearGpsError();
   }
 
-  markBiteAsTriedOut(params: { bite: Bite; checked: boolean }): void {
-    const { bite, checked } = params;
+  markBiteAsTriedOut(params: { biteId: string; checked: boolean }): void {
+    const bucketlistId = this.selectedBucketlist()?.id;
 
-    const now = new Date();
-    const triedOut = checked
-      ? {
-          biteId: bite.id,
-          date: now.toISOString().split('T')[0],
-          time: now.toTimeString().split(' ')[0],
-        }
-      : undefined;
+    if (!bucketlistId) {
+      return;
+    }
 
-    this.storeService.save(
-      {
-        ...bite,
-        triedOut,
-      },
-      'bite',
-    );
+    this.storeService.setBiteTriedOutStatus({
+      bucketlistId,
+      ...params,
+    });
   }
 }

@@ -28,6 +28,7 @@ export class BucketListEffect {
         BucketlistActions.createdBucketlistAndSavedBiteToIt,
         BucketlistActions.createdBucketlist,
         BucketlistActions.deletedBucketlist,
+        BucketlistActions.setBiteTriedOutStatusSucceeded,
       ),
       shouldLoadBucketlists(),
       switchMap(() => {
@@ -119,6 +120,21 @@ export class BucketListEffect {
             return BucketlistActions.updatedBucketlistName();
           }),
         ),
+      ),
+    );
+  });
+
+  setBiteTriedOutStatusEffect$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BucketlistActions.setBiteTriedOutStatus),
+      switchMap(({ bucketlistId, biteId, checked }) =>
+        from(
+          this.api.updateBucketlistTriedOutStatus({
+            bucketlistId,
+            biteId,
+            checked,
+          }),
+        ).pipe(map(() => BucketlistActions.setBiteTriedOutStatusSucceeded())),
       ),
     );
   });

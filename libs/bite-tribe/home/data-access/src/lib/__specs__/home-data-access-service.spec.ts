@@ -51,7 +51,7 @@ class StoreMock {
   clearHomeFilters = (): null => null;
   reloadGPSPosition = (): null => null;
   clearGpsError = (): null => null;
-  save = (): null => null;
+  setBiteTriedOutStatus = (): null => null;
   bite$ = of(undefined);
 }
 
@@ -353,44 +353,62 @@ describe('HomeDataAccessService', () => {
       jest.useRealTimers();
     });
 
-    it('should persist triedOut object when checked is true', inject(
+    it('should dispatch bucketlist tried-out status when checked is true', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const saveSpy = jest.spyOn(biteTribeStoreService, 'save');
-        const bite = { id: 'bite-1' } as Bite;
-        const now = new Date();
-
-        service.markBiteAsTriedOut({ bite, checked: true });
-
-        expect(saveSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: 'bite-1',
-            triedOut: {
-              biteId: 'bite-1',
-              date: now.toISOString().split('T')[0],
-              time: now.toTimeString().split(' ')[0],
-            },
-          }),
-          'bite',
+        jest.spyOn(service, 'selectedBucketlist').mockReturnValue({
+          id: 'bucketlist-1',
+        } as any);
+        const setBiteTriedOutStatusSpy = jest.spyOn(
+          biteTribeStoreService,
+          'setBiteTriedOutStatus',
         );
+
+        service.markBiteAsTriedOut({ biteId: 'bite-1', checked: true });
+
+        expect(setBiteTriedOutStatusSpy).toHaveBeenCalledWith({
+          bucketlistId: 'bucketlist-1',
+          biteId: 'bite-1',
+          checked: true,
+        });
       },
     ));
 
-    it('should clear triedOut object when checked is false', inject(
+    it('should dispatch bucketlist tried-out status when checked is false', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        const saveSpy = jest.spyOn(biteTribeStoreService, 'save');
-        const bite = { id: 'bite-1' } as Bite;
-
-        service.markBiteAsTriedOut({ bite, checked: false });
-
-        expect(saveSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: 'bite-1',
-            triedOut: undefined,
-          }),
-          'bite',
+        jest.spyOn(service, 'selectedBucketlist').mockReturnValue({
+          id: 'bucketlist-1',
+        } as any);
+        const setBiteTriedOutStatusSpy = jest.spyOn(
+          biteTribeStoreService,
+          'setBiteTriedOutStatus',
         );
+
+        service.markBiteAsTriedOut({ biteId: 'bite-1', checked: false });
+
+        expect(setBiteTriedOutStatusSpy).toHaveBeenCalledWith({
+          bucketlistId: 'bucketlist-1',
+          biteId: 'bite-1',
+          checked: false,
+        });
+      },
+    ));
+
+    it('should not dispatch when no bucketlist is selected', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        jest
+          .spyOn(service, 'selectedBucketlist')
+          .mockReturnValue(undefined as any);
+        const setBiteTriedOutStatusSpy = jest.spyOn(
+          biteTribeStoreService,
+          'setBiteTriedOutStatus',
+        );
+
+        service.markBiteAsTriedOut({ biteId: 'bite-1', checked: true });
+
+        expect(setBiteTriedOutStatusSpy).not.toHaveBeenCalled();
       },
     ));
   });

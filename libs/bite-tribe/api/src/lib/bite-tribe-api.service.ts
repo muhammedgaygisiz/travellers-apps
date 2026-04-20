@@ -223,6 +223,14 @@ export class BiteTribeApiService {
     return this.bucketlistApiService.updateBucketlistName(bucketlistId, name);
   }
 
+  updateBucketlistTriedOutStatus(params: {
+    bucketlistId: string;
+    biteId: string;
+    checked: boolean;
+  }): Promise<void> {
+    return this.bucketlistApiService.updateBucketlistTriedOutStatus(params);
+  }
+
   createBucketListFromBiteTrail(
     params: CreateBucketListFromBiteTrailParams,
   ): Promise<Bucketlist> {

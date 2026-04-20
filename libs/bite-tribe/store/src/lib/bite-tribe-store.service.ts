@@ -302,6 +302,14 @@ export class BiteTribeStoreService implements StoreService {
     );
   }
 
+  setBiteTriedOutStatus(params: {
+    bucketlistId: string;
+    biteId: string;
+    checked: boolean;
+  }): void {
+    this.store.dispatch(BucketlistActions.setBiteTriedOutStatus(params));
+  }
+
   setHomeSorting(sorting: string): void {
     this.store.dispatch(FilteringAndSortingActions.setHomeSorting({ sorting }));
   }

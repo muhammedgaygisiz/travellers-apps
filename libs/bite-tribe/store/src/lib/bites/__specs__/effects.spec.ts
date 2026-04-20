@@ -8,7 +8,6 @@ import { BiteEffects } from '../effects';
 import { BiteActions } from '../actions';
 import type { Bite } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { bite } from '../selectors';
 import { AppActions } from '../../app/actions';
 import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import { signal, WritableSignal } from '@angular/core';
@@ -23,6 +22,7 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 const Mock = {
   bitesByUser: (): Observable<any> => of([]),
   bitesByPosition: (): Observable<any> => of([]),
+  biteById: (): Observable<any> => of({}),
   bitesByBucketlist: (): Observable<any> => of([]),
   saveNewBite: jest.fn(),
   uploadImage: (): Observable<any> => of({}),
@@ -39,6 +39,10 @@ const Mock = {
 
 const BITE_MOCK = {
   id: 'biteId',
+  position: {
+    latitude: 48.2082,
+    longitude: 16.3738,
+  },
 } as Bite;
 
 describe(BiteEffects.name, () => {
@@ -70,7 +74,6 @@ describe(BiteEffects.name, () => {
     });
 
     store = TestBed.inject(MockStore);
-    store.overrideSelector(bite, BITE_MOCK);
     effects = TestBed.inject(BiteEffects);
     apiService = TestBed.inject(BiteTribeApiService);
     storeService = TestBed.inject(BiteTribeStoreService);

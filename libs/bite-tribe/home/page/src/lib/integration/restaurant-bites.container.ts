@@ -8,7 +8,7 @@ import { BiteTribeHomeComponent } from '../components/page/home.component';
   template: `
     <bt-home
       class="ion-page"
-      title="Restaurant Bites"
+      [title]="service.biteById()?.place || 'Restaurant Bites'"
       [showFooter]="false"
       [showAddButton]="false"
       [enableBackButton]="true"

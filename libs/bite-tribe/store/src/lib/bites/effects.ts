@@ -6,7 +6,6 @@ import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { bite } from './selectors';
 import { AppActions } from '../app/actions';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { BucketlistActions } from '../bucketlists/actions';
@@ -24,7 +23,6 @@ export class BiteEffects {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly toastController = inject(ToastController);
 
-  bite = toSignal(this.store.select(bite));
   biteCreatorId = toSignal(this.store.select(userId));
 
   listenToLatest20Bites$ = createEffect(() => {
@@ -82,7 +80,9 @@ export class BiteEffects {
       switchMap((action) => {
         const position = action.position;
 
-        return from(this.api.bitesByPosition(position));
+        return from(this.api.bitesByPosition(position)).pipe(
+          catchError(() => of([])),
+        );
       }),
       map((bites) => BiteActions.loadedByGPSPositionFromAPI({ bites })),
     );

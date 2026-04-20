@@ -44,6 +44,10 @@ export class BiteApiService {
     return loadBitesByUser(userUid);
   }
 
+  public async loadBiteById(biteId: string): Promise<Bite> {
+    return loadBiteById(biteId);
+  }
+
   public async saveNewBite(biteWithoutImage: Bite): Promise<Bite> {
     const user = this.authService.getUser();
 

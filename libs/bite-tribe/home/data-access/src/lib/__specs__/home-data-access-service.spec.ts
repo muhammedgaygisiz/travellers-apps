@@ -51,6 +51,7 @@ class StoreMock {
   clearHomeFilters = (): null => null;
   reloadGPSPosition = (): null => null;
   clearGpsError = (): null => null;
+  setBiteTriedOutStatus = (): null => null;
   bite$ = of(undefined);
 }
 
@@ -338,6 +339,91 @@ describe('HomeDataAccessService', () => {
         );
         service.clearGpsError();
         expect(biteTribeStoreServiceSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('markBiteAsTriedOut', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-04-20T10:11:12.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should dispatch bucketlist tried-out status when checked is true', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        jest.spyOn(service, 'selectedBucketlist').mockReturnValue({
+          id: 'bucketlist-1',
+        } as any);
+        const setBiteTriedOutStatusSpy = jest.spyOn(
+          biteTribeStoreService,
+          'setBiteTriedOutStatus',
+        );
+
+        service.markBiteAsTriedOut({ biteId: 'bite-1', checked: true });
+
+        expect(setBiteTriedOutStatusSpy).toHaveBeenCalledWith({
+          bucketlistId: 'bucketlist-1',
+          biteId: 'bite-1',
+          checked: true,
+        });
+      },
+    ));
+
+    it('should dispatch bucketlist tried-out status when checked is false', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        jest.spyOn(service, 'selectedBucketlist').mockReturnValue({
+          id: 'bucketlist-1',
+        } as any);
+        const setBiteTriedOutStatusSpy = jest.spyOn(
+          biteTribeStoreService,
+          'setBiteTriedOutStatus',
+        );
+
+        service.markBiteAsTriedOut({ biteId: 'bite-1', checked: false });
+
+        expect(setBiteTriedOutStatusSpy).toHaveBeenCalledWith({
+          bucketlistId: 'bucketlist-1',
+          biteId: 'bite-1',
+          checked: false,
+        });
+      },
+    ));
+
+    it('should not dispatch when no bucketlist is selected', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        jest
+          .spyOn(service, 'selectedBucketlist')
+          .mockReturnValue(undefined as any);
+        const setBiteTriedOutStatusSpy = jest.spyOn(
+          biteTribeStoreService,
+          'setBiteTriedOutStatus',
+        );
+
+        service.markBiteAsTriedOut({ biteId: 'bite-1', checked: true });
+
+        expect(setBiteTriedOutStatusSpy).not.toHaveBeenCalled();
+      },
+    ));
+
+    it('should not dispatch when selected bucketlist is null', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        jest.spyOn(service, 'selectedBucketlist').mockReturnValue(null as any);
+        const setBiteTriedOutStatusSpy = jest.spyOn(
+          biteTribeStoreService,
+          'setBiteTriedOutStatus',
+        );
+
+        service.markBiteAsTriedOut({ biteId: 'bite-1', checked: true });
+
+        expect(setBiteTriedOutStatusSpy).not.toHaveBeenCalled();
       },
     ));
   });

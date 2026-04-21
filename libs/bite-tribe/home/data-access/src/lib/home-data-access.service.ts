@@ -57,6 +57,13 @@ export class HomeDataAccessService {
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     requireSync: true,
   });
+  triedOutBiteIds = computed(() => {
+    return (
+      this.selectedBucketlist()?.triedOutBites?.map(
+        (triedOutBite) => triedOutBite.biteId,
+      ) || []
+    );
+  });
   selectedBucketlistTitle = toSignal(
     this.storeService.selectedBucketlistTitle$,
     {
@@ -253,5 +260,18 @@ export class HomeDataAccessService {
 
   clearGpsError(): void {
     this.storeService.clearGpsError();
+  }
+
+  markBiteAsTriedOut(params: { biteId: string; checked: boolean }): void {
+    const bucketlistId = this.selectedBucketlist()?.id;
+
+    if (!bucketlistId) {
+      return;
+    }
+
+    this.storeService.setBiteTriedOutStatus({
+      bucketlistId,
+      ...params,
+    });
   }
 }

@@ -16,6 +16,7 @@ import {
   IonButtons,
   IonCard,
   IonCardContent,
+  IonCheckbox,
   IonChip,
   IonContent,
   IonIcon,
@@ -41,6 +42,7 @@ import {
 import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
 
 const PAGE_SIZE = 50;
 
@@ -60,6 +62,7 @@ const PAGE_SIZE = 50;
     NgTemplateOutlet,
     IonIcon,
     IonButton,
+    IonCheckbox,
     IonButtons,
     IonSelect,
     IonSelectOption,
@@ -72,6 +75,7 @@ const PAGE_SIZE = 50;
     IonRefresherContent,
     IonSearchbar,
     TranslocoPipe,
+    IsBiteTriedOutPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -98,6 +102,8 @@ export class BiteTribeHomeComponent {
   isReloading = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
   showSearch = input(false, { transform: booleanAttribute });
+  showTriedOutCheckbox = input(false, { transform: booleanAttribute });
+  triedOutBiteIds = input<string[]>([]);
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -122,6 +128,7 @@ export class BiteTribeHomeComponent {
   readonly filterCleared = output<void>();
   readonly refresh = output<void>();
   readonly closeGpsError = output<void>();
+  readonly triedOutChange = output<{ biteId: string; checked: boolean }>();
 
   ionContent = viewChild(IonContent);
 
@@ -280,5 +287,12 @@ export class BiteTribeHomeComponent {
         event.target.complete();
       }
     }, 2000);
+  }
+
+  onTriedOutChange(
+    event: { detail: { checked: boolean } },
+    biteId: string,
+  ): void {
+    this.triedOutChange.emit({ biteId, checked: event.detail.checked });
   }
 }

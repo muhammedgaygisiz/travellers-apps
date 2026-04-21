@@ -85,6 +85,7 @@ import {
   biteId as biteIdFromUrl,
   biteTrailId as biteTrailIdFromUrlSelector,
   followType,
+  restaurantId as restaurantIdFromUrlSelector,
   userId as userIdFromUrl,
   organisationId as organisationIdFromUrlSelector,
 } from './router/selectors';
@@ -152,6 +153,7 @@ export class BiteTribeStoreService implements StoreService {
   type$ = this.store.select(followType);
   userIdFromUrl$ = this.store.select(userIdFromUrl);
   biteIdFromUrl$ = this.store.select(biteIdFromUrl);
+  restaurantIdFromUrl$ = this.store.select(restaurantIdFromUrlSelector);
   biteTrailIdFromUrl$ = this.store.select(biteTrailIdFromUrlSelector);
   organisationIdFromUrl$ = this.store.select(organisationIdFromUrlSelector);
 
@@ -162,6 +164,7 @@ export class BiteTribeStoreService implements StoreService {
   type = toSignal(this.type$);
   userIdFromUrl = toSignal(this.userIdFromUrl$);
   biteIdFromUrl = toSignal(this.biteIdFromUrl$);
+  restaurantIdFromUrl = toSignal(this.restaurantIdFromUrl$);
   biteTrailIdFromUrl = toSignal(this.biteTrailIdFromUrl$);
   organisationIdFromUrl = toSignal(this.organisationIdFromUrl$);
 

@@ -112,6 +112,14 @@ describe(BiteApiService.name, () => {
     });
   });
 
+  describe('loadBiteById', () => {
+    it('should call loadBiteById', async () => {
+      await service.loadBiteById('bite-123');
+
+      expect(loadBiteById).toHaveBeenCalledWith('bite-123');
+    });
+  });
+
   describe('saveNewBite', () => {
     it('should save the bite and return the saved bite', async () => {
       const mockedBiteWithoutImage = {

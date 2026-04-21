@@ -108,31 +108,8 @@
     padding-top: 80px;
   }
 
-  .bite-row {
+  bt-bite {
+    display: block;
     margin-bottom: 1rem;
-
-    .bite-card {
-      display: block;
-    }
-
-    &.with-tried-checkbox {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-
-      .tried-out-checkbox {
-        margin-top: 0.75rem;
-      }
-
-      .bite-card {
-        flex: 1;
-        min-width: 0;
-      }
-
-      .bite-card::ng-deep ion-card {
-        min-width: 297px;
-        width: 100%;
-      }
-    }
   }
 }

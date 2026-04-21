@@ -190,29 +190,28 @@
   }
 
   @for (bite of displayedBites(); track bite.id) {
-    <div class="bite-row" [class.with-tried-checkbox]="showTriedOutCheckbox()">
-      @if (showTriedOutCheckbox()) {
-        <ion-checkbox
-          class="tried-out-checkbox"
-          aria-label="Mark bite as tried out"
-          [checked]="isBiteTriedOut(bite)"
-          (ionChange)="onTriedOutChange($event, bite.id)"
-        />
-      }
-      <bt-bite
-        class="bite-card"
-        [bite]="bite"
-        [uploadState]="uploadData[bite.id]"
-        [userId]="userId()"
-        [showEditButton]="editableBites()"
-        [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
-        (biteClick)="biteClick.emit($event)"
-        (restaurantClick)="restaurantClick.emit($event)"
-        (likeButtonClick)="likeButtonClick.emit($event)"
-        (gotoEdit)="gotoEdit.emit($event)"
-        (deleteBite)="deleteBite.emit($event)"
-      />
-    </div>
+    @if (showTriedOutCheckbox()) {
+      <ion-checkbox
+        labelPlacement="end"
+        class="ion-margin-start ion-margin-bottom"
+        [checked]="isBiteTriedOut(bite)"
+        (ionChange)="onTriedOutChange($event, bite.id)"
+      >
+        {{ 'mark-bite-as-tried-out' | transloco }}
+      </ion-checkbox>
+    }
+    <bt-bite
+      [bite]="bite"
+      [uploadState]="uploadData[bite.id]"
+      [userId]="userId()"
+      [showEditButton]="editableBites()"
+      [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
+      (biteClick)="biteClick.emit($event)"
+      (restaurantClick)="restaurantClick.emit($event)"
+      (likeButtonClick)="likeButtonClick.emit($event)"
+      (gotoEdit)="gotoEdit.emit($event)"
+      (deleteBite)="deleteBite.emit($event)"
+    />
   } @empty {
     <div class="ion-display-flex ion-justify-content-center ion-padding-top">
       <ion-text color="primary"> No bites found. Be the first one.</ion-text>

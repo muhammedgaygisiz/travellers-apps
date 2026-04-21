@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { Bite, Like, Link, Restaurant } from 'model';
 import { NavController } from '@ionic/angular/standalone';
@@ -8,10 +9,11 @@ import { NavController } from '@ionic/angular/standalone';
 })
 export class RestaurantService {
   dataAccess = inject(RestaurantDataAccessService);
+  private readonly homeDataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
 
   bite = this.dataAccess.bite;
-  bites = this.dataAccess.bites;
+  bites = this.homeDataAccess.restaurantBites;
   userId = this.dataAccess.userId;
   restaurant = this.dataAccess.restaurant;
   darkTheme = this.dataAccess.darkTheme;

@@ -84,6 +84,12 @@ describe('RestaurantComponent', () => {
       ] as any);
       expect(component.averageBiteRating()).toBe(4.8);
     });
+
+    it('should ignore bites without rating when calculating average', () => {
+      componentRef.setInput('bites', [{ rating: 4 }, {}, { rating: 2 }] as any);
+      expect(component.averageBiteRating()).toBe(3);
+      expect(component.ratedBiteCount()).toBe(2);
+    });
   });
 
   describe('links', () => {

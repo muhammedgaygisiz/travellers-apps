@@ -86,13 +86,19 @@ export class RestaurantComponent {
   readonly likeButtonClick = output<Like>();
   readonly selectedSegment = signal<'bites' | 'menu'>('bites');
 
+  ratedBites = computed(() =>
+    (this.bites() || []).filter(
+      (bite): bite is Bite & { rating: number } =>
+        bite.rating !== undefined && bite.rating !== null,
+    ),
+  );
+
+  ratedBiteCount = computed(() => this.ratedBites().length);
+
   averageBiteRating = computed(() => {
-    const bites = this.bites() || [];
-    const totalRating = bites.reduce(
-      (acc, bite) => acc + (bite.rating || 0),
-      0,
-    );
-    const average = bites.length > 0 ? totalRating / bites.length : 0;
+    const ratedBites = this.ratedBites();
+    const totalRating = ratedBites.reduce((acc, bite) => acc + bite.rating, 0);
+    const average = ratedBites.length > 0 ? totalRating / ratedBites.length : 0;
     return Math.round(average * 10) / 10;
   });
 

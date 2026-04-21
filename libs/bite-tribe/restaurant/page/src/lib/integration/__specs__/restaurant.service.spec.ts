@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { Bite, Like, Restaurant } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import { TestBed } from '@angular/core/testing';
+import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { RestaurantService } from '../restaurant.service';
 
@@ -42,14 +43,20 @@ const createNavControllerMock = (): any => ({
   setTopOutlet: jest.fn(),
 });
 
+const createMockHomeDataAccess = (): any => ({
+  restaurantBites: signal([mockBite]),
+});
+
 describe('RestaurantService', () => {
   let service: RestaurantService;
   let mockDataAccessService: Partial<RestaurantDataAccessService>;
+  let mockHomeDataAccessService: Partial<HomeDataAccessService>;
   let mockNavController: Partial<NavController>;
 
   beforeEach(() => {
     TestBed.resetTestingModule();
     mockDataAccessService = createMockDataAccess();
+    mockHomeDataAccessService = createMockHomeDataAccess();
     mockNavController = createNavControllerMock();
 
     TestBed.configureTestingModule({
@@ -58,6 +65,10 @@ describe('RestaurantService', () => {
         {
           provide: RestaurantDataAccessService,
           useValue: mockDataAccessService,
+        },
+        {
+          provide: HomeDataAccessService,
+          useValue: mockHomeDataAccessService,
         },
         {
           provide: NavController,
@@ -71,6 +82,10 @@ describe('RestaurantService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  it('should expose restaurant bites from home data access', () => {
+    expect(service.bites()).toEqual([mockBite]);
   });
 
   describe('navigateToMenu', () => {

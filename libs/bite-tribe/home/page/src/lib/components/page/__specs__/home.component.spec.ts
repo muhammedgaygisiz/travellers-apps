@@ -336,13 +336,6 @@ describe('BiteTribeHomeComponent', () => {
   });
 
   describe('tried out checkbox', () => {
-    it('should return true when bite id exists in triedOutBiteIds', () => {
-      const bite = { id: 'bite-1' } as any;
-      componentRef.setInput('triedOutBiteIds', ['bite-1']);
-
-      expect(component.isBiteTriedOut(bite)).toBe(true);
-    });
-
     it('should emit triedOutChange when checkbox changes', () => {
       const emitSpy = jest.spyOn(component.triedOutChange, 'emit');
 

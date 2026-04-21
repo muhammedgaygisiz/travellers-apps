@@ -42,6 +42,7 @@ import {
 import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
 
 const PAGE_SIZE = 50;
 
@@ -74,6 +75,7 @@ const PAGE_SIZE = 50;
     IonRefresherContent,
     IonSearchbar,
     TranslocoPipe,
+    IsBiteTriedOutPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -285,10 +287,6 @@ export class BiteTribeHomeComponent {
         event.target.complete();
       }
     }, 2000);
-  }
-
-  isBiteTriedOut(bite: Bite): boolean {
-    return this.triedOutBiteIds().includes(bite.id);
   }
 
   onTriedOutChange(

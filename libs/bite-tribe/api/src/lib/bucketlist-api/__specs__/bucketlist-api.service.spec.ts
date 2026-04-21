@@ -281,7 +281,10 @@ describe(BucketlistApiService.name, () => {
       it('should remove biteId from the bucketlist', async () => {
         getDocumentSpy.mockResolvedValue({
           snapshot: {
-            data: { biteIds: ['bite1', 'bite2', 'bite3'] },
+            data: {
+              biteIds: ['bite1', 'bite2', 'bite3'],
+              triedOutBites: [{ biteId: 'bite2' }, { biteId: 'bite3' }],
+            },
           },
         } as any);
 
@@ -294,6 +297,7 @@ describe(BucketlistApiService.name, () => {
           reference: `bucketlists/1`,
           data: {
             biteIds: ['bite1', 'bite3'],
+            triedOutBites: [{ biteId: 'bite3' }],
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -314,6 +318,7 @@ describe(BucketlistApiService.name, () => {
           reference: `bucketlists/1`,
           data: {
             biteIds: undefined,
+            triedOutBites: undefined,
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -489,6 +494,98 @@ describe(BucketlistApiService.name, () => {
           'Error updating bucket list name:',
           expect.any(Error),
         );
+      });
+    });
+  });
+
+  describe('updateBucketlistTriedOutStatus', () => {
+    it('should add tried out bite when checked is true', async () => {
+      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        snapshot: {
+          data: {
+            triedOutBites: [
+              {
+                biteId: 'bite2',
+                date: '2024-03-15T12:00:00.000Z',
+                timestamp: 1710504000000,
+              },
+            ],
+          },
+        },
+      } as any);
+
+      const updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
+      updateDocumentSpy.mockResolvedValue({} as any);
+
+      await service.updateBucketlistTriedOutStatus({
+        bucketlistId: '1',
+        biteId: 'bite1',
+        checked: true,
+      });
+
+      expect(updateDocumentSpy).toHaveBeenCalledWith({
+        reference: 'bucketlists/1',
+        data: {
+          triedOutBites: [
+            {
+              biteId: 'bite2',
+              date: '2024-03-15T12:00:00.000Z',
+              timestamp: 1710504000000,
+            },
+            {
+              biteId: 'bite1',
+              date: '2024-03-15T12:00:00.000Z',
+              timestamp: 1710504000000,
+            },
+          ],
+          updatedAt: '2024-03-15T12:00:00.000Z',
+          updatedAtTimestamp: 1710504000000,
+        },
+      });
+    });
+
+    it('should remove tried out bite when checked is false', async () => {
+      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        snapshot: {
+          data: {
+            triedOutBites: [
+              {
+                biteId: 'bite1',
+                date: '2024-03-14T10:00:00.000Z',
+                timestamp: 1710410400000,
+              },
+              {
+                biteId: 'bite2',
+                date: '2024-03-14T11:00:00.000Z',
+                timestamp: 1710414000000,
+              },
+            ],
+          },
+        },
+      } as any);
+
+      const updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
+      updateDocumentSpy.mockResolvedValue({} as any);
+
+      await service.updateBucketlistTriedOutStatus({
+        bucketlistId: '1',
+        biteId: 'bite1',
+        checked: false,
+      });
+
+      expect(updateDocumentSpy).toHaveBeenCalledWith({
+        reference: 'bucketlists/1',
+        data: {
+          triedOutBites: [
+            {
+              biteId: 'bite2',
+              date: '2024-03-14T11:00:00.000Z',
+              timestamp: 1710414000000,
+            },
+          ],
+          updatedAt: '2024-03-15T12:00:00.000Z',
+          updatedAtTimestamp: 1710504000000,
+        },
       });
     });
   });

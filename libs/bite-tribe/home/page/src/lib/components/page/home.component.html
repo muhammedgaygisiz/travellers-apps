@@ -190,6 +190,16 @@
   }
 
   @for (bite of displayedBites(); track bite.id) {
+    @if (showTriedOutCheckbox()) {
+      <ion-checkbox
+        labelPlacement="end"
+        class="ion-margin-start ion-margin-bottom"
+        [checked]="bite.id | isBiteTriedOut: triedOutBiteIds()"
+        (ionChange)="onTriedOutChange($event, bite.id)"
+      >
+        {{ 'mark-bite-as-tried-out' | transloco }}
+      </ion-checkbox>
+    }
     <bt-bite
       [bite]="bite"
       [uploadState]="uploadData[bite.id]"

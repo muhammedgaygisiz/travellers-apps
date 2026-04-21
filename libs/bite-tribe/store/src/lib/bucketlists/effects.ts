@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { BucketlistActions } from './actions';
-import { from, map, switchMap } from 'rxjs';
+import { catchError, from, map, of, switchMap } from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { AuthService } from 'ta-firestore';
 import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
@@ -28,6 +28,7 @@ export class BucketListEffect {
         BucketlistActions.createdBucketlistAndSavedBiteToIt,
         BucketlistActions.createdBucketlist,
         BucketlistActions.deletedBucketlist,
+        BucketlistActions.setBiteTriedOutStatusSucceeded,
       ),
       shouldLoadBucketlists(),
       switchMap(() => {
@@ -118,6 +119,24 @@ export class BucketListEffect {
             );
             return BucketlistActions.updatedBucketlistName();
           }),
+        ),
+      ),
+    );
+  });
+
+  setBiteTriedOutStatusEffect$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BucketlistActions.setBiteTriedOutStatus),
+      switchMap(({ bucketlistId, biteId, checked }) =>
+        from(
+          this.api.updateBucketlistTriedOutStatus({
+            bucketlistId,
+            biteId,
+            checked,
+          }),
+        ).pipe(
+          map(() => BucketlistActions.setBiteTriedOutStatusSucceeded()),
+          catchError(() => of(BucketlistActions.setBiteTriedOutStatusFailed())),
         ),
       ),
     );

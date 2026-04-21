@@ -13,6 +13,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [showHeaderMenu]="false"
       [showFooter]="false"
       [enableBackButton]="true"
+      [showTriedOutCheckbox]="true"
+      [triedOutBiteIds]="service.triedOutBiteIds()"
       [userId]="service.userId()"
       [isAuthenticated]="service.isAuthenticated()"
       [showAddButton]="false"
@@ -31,6 +33,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (openMapView)="service.openMapView('my-bucketlists')"
       (refresh)="service.refresh()"
       (closeGpsError)="service.closeGpsError()"
+      (triedOutChange)="service.toggleTriedOut($event)"
     />
   `,
   imports: [BiteTribeHomeComponent],

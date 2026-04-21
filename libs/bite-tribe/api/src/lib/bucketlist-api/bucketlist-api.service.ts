@@ -7,6 +7,7 @@ import type {
   CreateBucketListFromBiteTrailParams,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
+  TriedOutBucketlistBite,
 } from 'model';
 import { loadBucketlistsByUserId } from './utils/load-bucketlists-by-user-id';
 import {
@@ -211,11 +212,6 @@ export class BucketlistApiService {
     }
   }
 
-  /**
-   * Updates tried-out status for a bite within a bucketlist.
-   * Adds/updates an entry in `triedOutBites` when checked is true,
-   * and removes it when checked is false.
-   */
   async updateBucketlistTriedOutStatus(params: {
     bucketlistId: string;
     biteId: string;
@@ -228,13 +224,12 @@ export class BucketlistApiService {
       });
 
       const existingTriedOutBites =
-        (bucketListDoc.snapshot.data?.['triedOutBites'] as {
-          biteId: string;
-          date: string;
-          time: string;
-        }[]) || [];
+        (bucketListDoc.snapshot.data?.[
+          'triedOutBites'
+        ] as TriedOutBucketlistBite[]) || [];
 
       const now = new Date();
+      const nowTimestamp = Date.now();
       const triedOutBites = checked
         ? [
             ...existingTriedOutBites.filter(
@@ -242,8 +237,8 @@ export class BucketlistApiService {
             ),
             {
               biteId,
-              date: now.toISOString().split('T')[0],
-              time: now.toTimeString().split(' ')[0],
+              date: now.toISOString(),
+              timestamp: nowTimestamp,
             },
           ]
         : existingTriedOutBites.filter(
@@ -255,7 +250,7 @@ export class BucketlistApiService {
         data: {
           triedOutBites,
           updatedAt: now.toISOString(),
-          updatedAtTimestamp: now.getTime(),
+          updatedAtTimestamp: nowTimestamp,
         },
       });
     } catch (error) {

@@ -1,7 +1,7 @@
 export interface TriedOutBucketlistBite {
   biteId: string;
   date: string;
-  time: string;
+  timestamp: number;
 }
 
 export interface Bucketlist {

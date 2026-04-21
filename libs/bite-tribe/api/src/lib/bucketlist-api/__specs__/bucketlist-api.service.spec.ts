@@ -504,7 +504,11 @@ describe(BucketlistApiService.name, () => {
         snapshot: {
           data: {
             triedOutBites: [
-              { biteId: 'bite2', date: '2024-03-14', time: '10:00:00' },
+              {
+                biteId: 'bite2',
+                date: '2024-03-15T12:00:00.000Z',
+                timestamp: 1710504000000,
+              },
             ],
           },
         },
@@ -523,8 +527,16 @@ describe(BucketlistApiService.name, () => {
         reference: 'bucketlists/1',
         data: {
           triedOutBites: [
-            { biteId: 'bite2', date: '2024-03-14', time: '10:00:00' },
-            { biteId: 'bite1', date: '2024-03-15', time: '12:00:00' },
+            {
+              biteId: 'bite2',
+              date: '2024-03-15T12:00:00.000Z',
+              timestamp: 1710504000000,
+            },
+            {
+              biteId: 'bite1',
+              date: '2024-03-15T12:00:00.000Z',
+              timestamp: 1710504000000,
+            },
           ],
           updatedAt: '2024-03-15T12:00:00.000Z',
           updatedAtTimestamp: 1710504000000,
@@ -537,8 +549,16 @@ describe(BucketlistApiService.name, () => {
         snapshot: {
           data: {
             triedOutBites: [
-              { biteId: 'bite1', date: '2024-03-14', time: '10:00:00' },
-              { biteId: 'bite2', date: '2024-03-14', time: '11:00:00' },
+              {
+                biteId: 'bite1',
+                date: '2024-03-14T10:00:00.000Z',
+                timestamp: 1710410400000,
+              },
+              {
+                biteId: 'bite2',
+                date: '2024-03-14T11:00:00.000Z',
+                timestamp: 1710414000000,
+              },
             ],
           },
         },
@@ -557,7 +577,11 @@ describe(BucketlistApiService.name, () => {
         reference: 'bucketlists/1',
         data: {
           triedOutBites: [
-            { biteId: 'bite2', date: '2024-03-14', time: '11:00:00' },
+            {
+              biteId: 'bite2',
+              date: '2024-03-14T11:00:00.000Z',
+              timestamp: 1710414000000,
+            },
           ],
           updatedAt: '2024-03-15T12:00:00.000Z',
           updatedAtTimestamp: 1710504000000,

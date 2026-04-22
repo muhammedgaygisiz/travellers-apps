@@ -9,6 +9,7 @@ import {
   map,
   of,
   switchMap,
+  take,
   tap,
 } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -38,6 +39,7 @@ export class BiteEffects {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loginSucceeded),
       debounceTime(200),
+      take(1),
       switchMap(() => this.api.latestBites$(20)),
       debounceTime(200),
       map((bites) => BiteActions.loadedLatestFromAPI({ bites })),

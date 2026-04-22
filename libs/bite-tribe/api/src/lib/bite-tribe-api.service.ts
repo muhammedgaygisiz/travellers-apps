@@ -238,7 +238,7 @@ export class BiteTribeApiService {
   }
 
   latestBites$(number: number): Observable<Bite[]> {
-    this.biteApiService.startlatestBitesListener(number);
+    void this.biteApiService.startlatestBitesListener(number);
 
     return this.biteApiService.latestBites$;
   }

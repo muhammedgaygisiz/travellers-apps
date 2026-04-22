@@ -1,7 +1,17 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteActions } from './actions';
-import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  filter,
+  from,
+  map,
+  of,
+  switchMap,
+  take,
+  tap,
+} from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -28,7 +38,10 @@ export class BiteEffects {
   listenToLatest20Bites$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loginSucceeded),
+      debounceTime(200),
+      take(1),
       switchMap(() => this.api.latestBites$(20)),
+      debounceTime(200),
       map((bites) => BiteActions.loadedLatestFromAPI({ bites })),
     );
   });

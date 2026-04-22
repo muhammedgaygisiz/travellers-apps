@@ -38,11 +38,11 @@ export class FilteringAndSortingEffects {
     () => {
       return this.actions$.pipe(
         ofType(fromAuth.AuthActions.loginSucceeded),
-        tap(async (_) => {
+        debounceTime(200),
+        tap(async () => {
           const { value: previousFilteringAndSorting } = await Preferences.get({
             key,
           });
-
 
           if (previousFilteringAndSorting) {
             try {
@@ -51,7 +51,10 @@ export class FilteringAndSortingEffects {
                 FilteringAndSortingActions.loadedFromPreferences({ slice }),
               );
             } catch (err) {
-              console.error('Failed to parse filteringAndSorting from preferences:', err);
+              console.error(
+                'Failed to parse filteringAndSorting from preferences:',
+                err,
+              );
               // Optionally, clear the corrupted preference or dispatch an error action here
             }
           }

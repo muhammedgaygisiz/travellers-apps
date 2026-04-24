@@ -186,6 +186,48 @@ describe(RestaurantApiService.name, () => {
     });
   });
 
+  describe('createMenuForRestaurant', () => {
+    let addDocumentSpy: jest.SpyInstance;
+    let updateDocumentSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      addDocumentSpy = jest.spyOn(FirebaseFirestore, 'addDocument');
+      updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
+    });
+
+    afterEach(() => {
+      addDocumentSpy.mockClear();
+      updateDocumentSpy.mockClear();
+    });
+
+    it('should create an empty menu and update the restaurant with the menuId', async () => {
+      addDocumentSpy.mockResolvedValueOnce({ reference: { id: 'new-menu-id' } } as any);
+      updateDocumentSpy.mockResolvedValueOnce({} as any);
+
+      const result = await service.createMenuForRestaurant('resto-123');
+
+      expect(result).toBe('new-menu-id');
+
+      expect(addDocumentSpy).toHaveBeenCalledWith({
+        reference: 'menus',
+        data: {
+          categories: [],
+          createdAt: '2024-03-15T12:00:00.000Z',
+          createdAtTimestamp: 1710504000000,
+        },
+      });
+
+      expect(updateDocumentSpy).toHaveBeenCalledWith({
+        reference: 'restaurants/resto-123',
+        data: {
+          menuId: '/menus/new-menu-id',
+          updatedAt: '2024-03-15T12:00:00.000Z',
+          updatedAtTimestamp: 1710504000000,
+        },
+      });
+    });
+  });
+
   describe('saveSocialMediaLinksForRestaurant', () => {
     it('should update the restaurant with social media links', async () => {
       const updateDocumentSpy = jest

@@ -59,6 +59,8 @@ export class EditRestaurantComponent {
 
   readonly submitSocialMediaLinks = output<Partial<{ links: Link[] }>>();
 
+  readonly createMenu = output<void>();
+
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),
   });
@@ -101,6 +103,8 @@ export class EditRestaurantComponent {
   placeName = computed(() => this.restaurant()?.name);
 
   position = computed(() => this.restaurant()?.position);
+
+  hasMenu = computed(() => !!this.restaurant()?.menuId);
 
   addSocialMedia(): void {
     this.links.push(

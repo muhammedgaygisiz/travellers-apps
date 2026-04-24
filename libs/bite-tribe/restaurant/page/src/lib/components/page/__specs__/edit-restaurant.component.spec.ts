@@ -123,6 +123,38 @@ describe('EditRestaurantComponent', () => {
     });
   });
 
+  describe('hasMenu', () => {
+    it('should return true if restaurant has a menuId', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        menuId: '/menus/menu123',
+      } as Restaurant);
+      expect(component.hasMenu()).toBe(true);
+    });
+
+    it('should return false if restaurant has no menuId', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+      } as Restaurant);
+      expect(component.hasMenu()).toBe(false);
+    });
+
+    it('should return false if restaurant is undefined', () => {
+      componentRef.setInput('restaurant', undefined);
+      expect(component.hasMenu()).toBe(false);
+    });
+  });
+
+  describe('createMenu', () => {
+    it('should emit createMenu event', () => {
+      const emitSpy = jest.spyOn(component.createMenu, 'emit');
+      component.createMenu.emit();
+      expect(emitSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('saveSocialMediaLinks', () => {
     let emitSpy: SpyInstance;
 

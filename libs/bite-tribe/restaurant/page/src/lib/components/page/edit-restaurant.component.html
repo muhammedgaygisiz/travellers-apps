@@ -58,6 +58,15 @@
           </div>
         </div>
 
+        @if (!hasMenu()) {
+          <ion-button
+            class="ion-margin-top"
+            (click)="createMenu.emit()"
+          >
+            Create Menu
+          </ion-button>
+        }
+
         @if (links.length) {
           <ion-button
             class="ion-margin-top"

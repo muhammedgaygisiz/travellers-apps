@@ -150,6 +150,20 @@ export class RestaurantService {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
+  async createMenu(): Promise<void> {
+    const restaurant = this.restaurant();
+    if (!restaurant) {
+      return;
+    }
+
+    try {
+      const menuId = await this.dataAccess.createMenuForRestaurant(restaurant.id);
+      this.gotoEditMenu(restaurant.id, menuId);
+    } catch {
+      await this.showToast('Something went wrong. Please try again.', 'danger');
+    }
+  }
+
   async submitSocialMediaLinks({ links }: Partial<{ links: Link[] }>): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant && links) {

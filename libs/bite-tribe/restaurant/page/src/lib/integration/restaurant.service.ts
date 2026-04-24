@@ -2,7 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { Bite, Like, Link, Restaurant } from 'model';
-import { NavController } from '@ionic/angular/standalone';
+import { NavController, ToastController } from '@ionic/angular/standalone';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,8 @@ export class RestaurantService {
   dataAccess = inject(RestaurantDataAccessService);
   private readonly homeDataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly toastController = inject(ToastController);
+  private readonly transloco = inject(TranslocoService);
 
   bite = this.dataAccess.bite;
   bites = this.homeDataAccess.restaurantBites;
@@ -149,11 +152,26 @@ export class RestaurantService {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
-  submitSocialMediaLinks({ links }: Partial<{ links: Link[] }>): void {
+  async submitSocialMediaLinks({ links }: Partial<{ links: Link[] }>): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant && links) {
-      this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
+      try {
+        await this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
+        await this.showToast('social-media-links-saved', 'success');
+      } catch {
+        await this.showToast('something-went-wrong-please-try-again', 'danger');
+      }
     }
+  }
+
+  private async showToast(messageKey: string, color: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message: this.transloco.translate(messageKey),
+      duration: 3000,
+      position: 'bottom',
+      color,
+    });
+    await toast.present();
   }
 
   likeButtonClicked(likeClick: Like): void {

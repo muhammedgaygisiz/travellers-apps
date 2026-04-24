@@ -61,8 +61,11 @@ export class BiteTribeApiService {
     return this.reviewApiService.reviewsByBiteId(biteId);
   }
 
-  saveSocialMediaLinksForRestaurant(restaurantId: string, links: Link[]): void {
-    this.restaurantApiService.saveSocialMediaLinksForRestaurant(
+  saveSocialMediaLinksForRestaurant(
+    restaurantId: string,
+    links: Link[],
+  ): Promise<void> {
+    return this.restaurantApiService.saveSocialMediaLinksForRestaurant(
       restaurantId,
       links,
     );

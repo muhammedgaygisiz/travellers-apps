@@ -53,7 +53,6 @@ export class RestaurantComponent {
   userId = input<string>();
   restaurant = input<Restaurant>();
   menu = input<Menu>();
-  darkTheme = input<boolean>(false);
 
   readonly createBiteClick = output<MenuItem>();
   readonly showMenuClick = output<Restaurant | undefined>();

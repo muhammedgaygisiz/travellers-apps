@@ -60,6 +60,7 @@ export class EditRestaurantComponent {
   readonly submitSocialMediaLinks = output<Partial<{ links: Link[] }>>();
 
   readonly createMenu = output<void>();
+  readonly editMenu = output<Restaurant>();
 
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),
@@ -119,6 +120,13 @@ export class EditRestaurantComponent {
     if (this.socialMediaForm.valid) {
       const socialMediaLinks = this.socialMediaForm.value;
       this.submitSocialMediaLinks.emit(socialMediaLinks as { links: Link[] });
+    }
+  }
+
+  protected gotoEditMenu(): void {
+    const restaurant = this.restaurant();
+    if (restaurant) {
+      this.editMenu.emit(restaurant);
     }
   }
 }

@@ -66,6 +66,14 @@
           >
             Create Menu
           </ion-button>
+        } @else {
+          <ion-button
+            class="ion-margin-top"
+            aria-label="Edit the menu for this restaurant"
+            (click)="gotoEditMenu()"
+          >
+            Edit Menu
+          </ion-button>
         }
 
         @if (links.length) {

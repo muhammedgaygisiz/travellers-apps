@@ -10,6 +10,7 @@ import { RestaurantService } from './restaurant.service';
       [restaurant]="service.restaurant()"
       (submitSocialMediaLinks)="service.submitSocialMediaLinks($event)"
       (createMenu)="service.createMenu()"
+      (editMenu)="service.gotoEditMenu($event.id, $event.menuId)"
     />
   `,
   imports: [EditRestaurantComponent],

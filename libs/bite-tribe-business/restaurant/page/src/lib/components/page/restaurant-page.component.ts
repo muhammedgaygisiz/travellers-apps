@@ -130,8 +130,8 @@ export class RestaurantPageComponent {
       const biteIds = this.restaurant()?.biteIds || [];
 
       this.submitNewRestaurant.emit({
-        image: image ?? '',
-        name: name ?? '',
+        image: image as string,
+        name: name as string,
         position: position as Geopoint,
         biteIds,
       } as Restaurant);

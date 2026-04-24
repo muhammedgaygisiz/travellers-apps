@@ -29,6 +29,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { MapComponent } from 'bite-tribe-common/map';
 
 @Component({
   selector: 'edit-restaurant',
@@ -47,6 +48,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     IonText,
     RestaurantImageComponent,
     TranslocoPipe,
+    MapComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -97,6 +99,8 @@ export class EditRestaurantComponent {
   );
 
   placeName = computed(() => this.restaurant()?.name);
+
+  position = computed(() => this.restaurant()?.position);
 
   addSocialMedia(): void {
     this.links.push(

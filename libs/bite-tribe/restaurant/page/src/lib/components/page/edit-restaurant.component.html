@@ -1,3 +1,5 @@
+@let positionData = position();
+
 <ta-page
   [showHeaderMenu]="false"
   [showAddButton]="false"
@@ -39,6 +41,10 @@
               <ion-input placeholder="Link" formControlName="url"></ion-input>
             </ion-item>
           }
+
+          <div class="ion-margin-top">
+            <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
+          </div>
 
           <ion-button class="ion-margin-top" (click)="addSocialMedia()"
             >Add Link

@@ -70,6 +70,23 @@
             </ion-list>
           </ion-card-content>
         </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Bite Places</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="full">
+              @for (place of bitePlaces(); track place) {
+                <ion-item>
+                  <ion-label>{{ place }}</ion-label>
+                </ion-item>
+              } @empty {
+                <p>No bite places found.</p>
+              }
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
       </div>
       <div
         class="ion-display-flex ion-flex-column column ion-flex-1 ion-padding"

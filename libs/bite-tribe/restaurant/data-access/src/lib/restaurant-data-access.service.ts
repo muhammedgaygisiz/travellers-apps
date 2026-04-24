@@ -14,6 +14,10 @@ export class RestaurantDataAccessService {
   userId = toSignal(this.storeService.userId$);
   restaurant = toSignal(this.storeService.restaurant$);
 
+  createMenuForRestaurant(restaurantId: string): Promise<string> {
+    return this.api.createMenuForRestaurant(restaurantId);
+  }
+
   async submitSocialMediaLinks(restaurantId: string, links: Link[]): Promise<void> {
     await this.api.saveSocialMediaLinksForRestaurant(restaurantId, links);
   }

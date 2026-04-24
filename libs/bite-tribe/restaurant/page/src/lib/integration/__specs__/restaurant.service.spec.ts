@@ -25,6 +25,7 @@ const createMockDataAccess = (overrides = {}): any => {
     restaurant: signal(mockRestaurant),
     submitSocialMediaLinks: jest.fn().mockResolvedValue(undefined),
     submitLikeClick: jest.fn(),
+    createMenuForRestaurant: jest.fn().mockResolvedValue('menu-id-new'),
   };
   return { ...base, ...overrides };
 };
@@ -217,6 +218,47 @@ describe('RestaurantService', () => {
         'bite',
         bite.id,
       ]);
+    });
+  });
+
+  describe('createMenu', () => {
+    it('should create a menu and navigate to the edit menu page', async () => {
+      (mockDataAccessService.createMenuForRestaurant as jest.Mock).mockResolvedValue('menu-new-id');
+
+      await service.createMenu();
+
+      expect(mockDataAccessService.createMenuForRestaurant).toHaveBeenCalledWith(mockRestaurant.id);
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'restaurant',
+        mockRestaurant.id,
+        'menu',
+        'menu-new-id',
+      ]);
+    });
+
+    it('should show error toast if createMenuForRestaurant throws', async () => {
+      (mockDataAccessService.createMenuForRestaurant as jest.Mock).mockRejectedValueOnce(
+        new Error('Network error'),
+      );
+
+      await service.createMenu();
+
+      expect(mockToastController.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Something went wrong. Please try again.',
+          color: 'danger',
+          duration: 3000,
+        }),
+      );
+    });
+
+    it('should do nothing if restaurant is not set', async () => {
+      service.restaurant = signal(undefined);
+
+      await service.createMenu();
+
+      expect(mockDataAccessService.createMenuForRestaurant).not.toHaveBeenCalled();
+      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
     });
   });
 

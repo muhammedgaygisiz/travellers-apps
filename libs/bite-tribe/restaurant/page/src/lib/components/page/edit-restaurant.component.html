@@ -61,6 +61,7 @@
         @if (!hasMenu()) {
           <ion-button
             class="ion-margin-top"
+            aria-label="Create a new menu for this restaurant"
             (click)="createMenu.emit()"
           >
             Create Menu

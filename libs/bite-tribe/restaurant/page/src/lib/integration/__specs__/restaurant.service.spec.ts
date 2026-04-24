@@ -23,7 +23,6 @@ const createMockDataAccess = (overrides = {}): any => {
     bite: signal(mockBite),
     bites: signal([mockBite]),
     restaurant: signal(mockRestaurant),
-    darkTheme: signal(true),
     submitSocialMediaLinks: jest.fn(),
     submitLikeClick: jest.fn(),
   };

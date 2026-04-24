@@ -45,7 +45,6 @@ import {
   hasErrorLoadingGpsPosition,
   imageUploads,
   isBitesLoading,
-  isDarkTheme,
   isPublicProfile,
   isReloadingHome,
   preferredCurrency,
@@ -132,7 +131,6 @@ export class BiteTribeStoreService implements StoreService {
   maxPriceHome$ = this.store.select(homeMaxPriceFilter);
   isReloadingHome$ = this.store.select(isReloadingHome);
   hasErrorLoadingGpsPosition$ = this.store.select(hasErrorLoadingGpsPosition);
-  darkTheme$ = this.store.select(isDarkTheme);
 
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);

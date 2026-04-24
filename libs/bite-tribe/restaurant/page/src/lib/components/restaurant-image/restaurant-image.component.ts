@@ -12,6 +12,4 @@ import { TranslocoPipe } from '@jsverse/transloco';
 })
 export class RestaurantImageComponent {
   restaurant = input<Restaurant>();
-
-  darkTheme = input<boolean>(false);
 }

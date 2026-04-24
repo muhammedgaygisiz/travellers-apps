@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { Bite, Like, Link, Restaurant } from 'model';
-import { NavController } from '@ionic/angular/standalone';
+import { NavController, ToastController } from '@ionic/angular/standalone';
 
 @Injectable({
   providedIn: 'root',
@@ -11,12 +11,12 @@ export class RestaurantService {
   dataAccess = inject(RestaurantDataAccessService);
   private readonly homeDataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly toastController = inject(ToastController);
 
   bite = this.dataAccess.bite;
   bites = this.homeDataAccess.restaurantBites;
   userId = this.dataAccess.userId;
   restaurant = this.dataAccess.restaurant;
-  darkTheme = this.dataAccess.darkTheme;
 
   navigateToMenu(restaurant: Restaurant | undefined): void {
     const bite = this.bite();
@@ -150,11 +150,29 @@ export class RestaurantService {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
-  submitSocialMediaLinks({ links }: Partial<{ links: Link[] }>): void {
+  async submitSocialMediaLinks({ links }: Partial<{ links: Link[] }>): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant && links) {
-      this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
+      try {
+        await this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
+        await this.showToast('Social media links saved successfully.', 'success');
+      } catch {
+        await this.showToast('Something went wrong. Please try again.', 'danger');
+      }
     }
+  }
+
+  private async showToast(
+    message: string,
+    color: 'success' | 'danger',
+  ): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      position: 'bottom',
+      color,
+    });
+    await toast.present();
   }
 
   likeButtonClicked(likeClick: Like): void {

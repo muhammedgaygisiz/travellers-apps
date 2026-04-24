@@ -12,7 +12,6 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [bites]="service.bites()"
       [userId]="service.userId()"
       [restaurant]="service.restaurant()"
-      [darkTheme]="service.darkTheme()"
       (showMenuClick)="service.navigateToMenu($event)"
       (showBitesClick)="service.navigateToBites($event)"
       (biteClick)="service.biteClicked($event)"

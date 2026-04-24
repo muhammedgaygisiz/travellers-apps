@@ -1,7 +1,7 @@
 import * as fromSelectors from '../selectors';
+import { imageUploads, profileMetadata } from '../selectors';
 import type { Geopoint, PublicUser, Settings } from 'model';
 import { AppSlice } from '../app-slice.model';
-import { imageUploads, profileMetadata } from '../selectors';
 
 describe('App Selectors', () => {
   const mockPosition: Geopoint = {
@@ -154,27 +154,6 @@ describe('App Selectors', () => {
       const settings = undefined as any;
       const result = fromSelectors.preferredCurrency.projector(settings);
       expect(result).toBe('EUR');
-    });
-  });
-
-  describe('isDarkTheme', () => {
-    it('should return dark theme true', () => {
-      const result = fromSelectors.isDarkTheme.projector(mockState);
-      expect(result).toBe(true);
-    });
-
-    it('should return dark theme false', () => {
-      const stateWithLightTheme = {
-        ...mockState,
-        settings: { ...mockState.settings, theme: 'light' },
-      } as AppSlice;
-      const result = fromSelectors.isDarkTheme.projector(stateWithLightTheme);
-      expect(result).toBe(false);
-    });
-
-    it('should return false when slice is undefined', () => {
-      const result = fromSelectors.isDarkTheme.projector(undefined as any);
-      expect(result).toBe(false);
     });
   });
 

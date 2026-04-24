@@ -1,0 +1,60 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showAddButton]="false"
+  [enableBackButton]="true"
+  [showFooter]="false"
+>
+  <ion-content>
+    <bt-restaurant-image [restaurant]="restaurant()" />
+
+    <div class="ion-padding">
+      <h1>{{ placeName() }}</h1>
+
+      <div [formGroup]="socialMediaForm">
+        @if (links.length === 0) {
+          <ion-text>{{ 'no-social-media-links' | transloco }}</ion-text>
+        }
+
+        <ion-list lines="full" formArrayName="links">
+          @for (socialMedia of links.controls; track $index; let i = $index) {
+            <ion-item [formGroupName]="i">
+              <ion-select
+                class="ion-margin-end"
+                placeholder="Social Network"
+                interface="popover"
+                formControlName="network"
+              >
+                <ion-select-option value="facebook"
+                  >Facebook
+                </ion-select-option>
+                <ion-select-option value="instagram"
+                  >Instagram
+                </ion-select-option>
+                <ion-select-option value="twitter">Twitter</ion-select-option>
+                <ion-select-option value="linkedin"
+                  >LinkedIn
+                </ion-select-option>
+                <ion-select-option value="website">Website</ion-select-option>
+              </ion-select>
+              <ion-input placeholder="Link" formControlName="url"></ion-input>
+            </ion-item>
+          }
+
+          <ion-button class="ion-margin-top" (click)="addSocialMedia()"
+            >Add Link
+          </ion-button>
+        </ion-list>
+
+        @if (links.length) {
+          <ion-button
+            class="ion-margin-top"
+            [disabled]="isInvalid()"
+            (click)="saveSocialMediaLinks()"
+          >
+            Save
+          </ion-button>
+        }
+      </div>
+    </div>
+  </ion-content>
+</ta-page>

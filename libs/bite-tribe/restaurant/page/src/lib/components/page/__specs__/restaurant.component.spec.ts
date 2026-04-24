@@ -3,8 +3,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { RestaurantComponent } from '../restaurant.component';
-import { Link, Restaurant } from 'model';
-import SpyInstance = jest.SpyInstance;
+import { Restaurant } from 'model';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -89,66 +88,6 @@ describe('RestaurantComponent', () => {
       componentRef.setInput('bites', [{ rating: 4 }, {}, { rating: 2 }] as any);
       expect(component.averageBiteRating()).toBe(3);
       expect(component.ratedBiteCount()).toBe(2);
-    });
-  });
-
-  describe('links', () => {
-    it('should return empty array if no links', () => {
-      componentRef.setInput('restaurant', {
-        id: '1',
-        name: 'Test Restaurant',
-      } as Restaurant);
-      expect(component.links.length).toBe(0);
-    });
-  });
-
-  describe('initSocialMediaLinks', () => {
-    it('should initialize social media links', () => {
-      componentRef.setInput('restaurant', {
-        id: '1',
-        name: 'Test Restaurant',
-        socialMediaLinks: [
-          { network: 'facebook', url: 'https://facebook.com/test' },
-          { network: 'instagram', url: 'https://instagram.com/test' },
-          { network: 'twitter', url: 'https://twitter.com/test' },
-          { network: 'website', url: 'https://test.com' },
-        ] as Link[],
-      } as Restaurant);
-      componentRef.changeDetectorRef.detectChanges();
-      expect(component.links.length).toBe(4);
-    });
-
-    it('should handle no social media links', () => {
-      componentRef.setInput('restaurant', {
-        id: '1',
-        name: 'Test Restaurant',
-      } as Restaurant);
-      componentRef.changeDetectorRef.detectChanges();
-      expect(component.links.length).toBe(0);
-    });
-  });
-
-  describe('isInvalid', () => {
-    it('should be false if valid links', () => {
-      componentRef.setInput('restaurant', {
-        id: '1',
-        name: 'Test Restaurant',
-        socialMediaLinks: [
-          { network: 'facebook', url: 'https://facebook.com/test' },
-        ] as Link[],
-      } as Restaurant);
-      componentRef.changeDetectorRef.detectChanges();
-      expect(component.isInvalid()).toBe(false);
-    });
-
-    it('should be true if invalid links', () => {
-      componentRef.setInput('restaurant', {
-        id: '1',
-        name: 'Test Restaurant',
-        socialMediaLinks: [{ network: '', url: '' }] as Link[],
-      } as Restaurant);
-      componentRef.changeDetectorRef.detectChanges();
-      expect(component.isInvalid()).toBe(true);
     });
   });
 
@@ -241,48 +180,6 @@ describe('RestaurantComponent', () => {
     });
   });
 
-  describe('addSocialMedia', () => {
-    it('should add a new social media link', () => {
-      const initialLength = component.links.length;
-      component.addSocialMedia();
-      expect(component.links.length).toBe(initialLength + 1);
-    });
-  });
-
-  describe('saveSocialMediaLinks', () => {
-    let emitSpy: SpyInstance;
-
-    beforeEach(() => {
-      emitSpy = jest.spyOn(component.submitSocialMediaLinks, 'emit');
-    });
-
-    it('should emit save event if form is valid', () => {
-      componentRef.setInput('restaurant', {
-        id: '1',
-        name: 'Test Restaurant',
-        socialMediaLinks: [
-          { network: 'facebook', url: 'https://facebook.com/test' },
-        ] as Link[],
-      } as Restaurant);
-      componentRef.changeDetectorRef.detectChanges();
-      component.saveSocialMediaLinks();
-      expect(emitSpy).toHaveBeenCalledWith({
-        links: [{ network: 'facebook', url: 'https://facebook.com/test' }],
-      });
-    });
-
-    it('should not emit save event if form is invalid', () => {
-      componentRef.setInput('restaurant', {
-        id: '1',
-        name: 'Test Restaurant',
-        socialMediaLinks: [{ network: '', url: '' }] as Link[],
-      } as Restaurant);
-      componentRef.changeDetectorRef.detectChanges();
-      component.saveSocialMediaLinks();
-      expect(emitSpy).not.toHaveBeenCalled();
-    });
-  });
-
   describe('setSelectedSegment', () => {
     it('should set the selected segment', () => {
       component.setSelectedSegment('menu');
@@ -297,3 +194,4 @@ describe('RestaurantComponent', () => {
     });
   });
 });
+

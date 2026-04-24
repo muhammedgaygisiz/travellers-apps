@@ -36,73 +36,25 @@
 
       <bt-distance [distance]="placeDistance()" />
 
-      @if (editMode()) {
-        <div class="ion-margin-top" [formGroup]="socialMediaForm">
-          @if (links.length === 0) {
-            <ion-text>{{ 'no-social-media-links' | transloco }}</ion-text>
-          }
-
-          <ion-list lines="full" formArrayName="links">
-            @for (socialMedia of links.controls; track $index; let i = $index) {
-              <ion-item [formGroupName]="i">
-                <ion-select
-                  class="ion-margin-end"
-                  placeholder="Social Network"
-                  interface="popover"
-                  formControlName="network"
-                >
-                  <ion-select-option value="facebook"
-                    >Facebook
-                  </ion-select-option>
-                  <ion-select-option value="instagram"
-                    >Instagram
-                  </ion-select-option>
-                  <ion-select-option value="twitter">Twitter</ion-select-option>
-                  <ion-select-option value="linkedin"
-                    >LinkedIn
-                  </ion-select-option>
-                  <ion-select-option value="website">Website</ion-select-option>
-                </ion-select>
-                <ion-input placeholder="Link" formControlName="url"></ion-input>
+      <div class="ion-margin-top">
+        @if (restaurantData?.socialMediaLinks?.length) {
+          <ion-list lines="full">
+            @for (
+              link of restaurantData?.socialMediaLinks;
+              track link.network
+            ) {
+              <ion-item>
+                <ion-icon slot="start" [name]="'logo-' + link.network" />
+                <ion-label>
+                  <a [href]="link.url | ensureProtocol" target="_blank">{{
+                    link.network | titlecase
+                  }}</a>
+                </ion-label>
               </ion-item>
             }
-
-            <ion-button class="ion-margin-top" (click)="addSocialMedia()"
-              >Add Link
-            </ion-button>
           </ion-list>
-
-          @if (links.length) {
-            <ion-button
-              class="ion-margin-top"
-              [disabled]="isInvalid()"
-              (click)="saveSocialMediaLinks()"
-            >
-              Save
-            </ion-button>
-          }
-        </div>
-      } @else {
-        <div class="ion-margin-top">
-          @if (restaurantData?.socialMediaLinks?.length) {
-            <ion-list lines="full">
-              @for (
-                link of restaurantData?.socialMediaLinks;
-                track link.network
-              ) {
-                <ion-item>
-                  <ion-icon slot="start" [name]="'logo-' + link.network" />
-                  <ion-label>
-                    <a [href]="link.url | ensureProtocol" target="_blank">{{
-                      link.network | titlecase
-                    }}</a>
-                  </ion-label>
-                </ion-item>
-              }
-            </ion-list>
-          }
-        </div>
-      }
+        }
+      </div>
 
       <div class="ion-margin-top">
         <bt-map [geopoints]="positionData ? [positionData] : []" readonly />

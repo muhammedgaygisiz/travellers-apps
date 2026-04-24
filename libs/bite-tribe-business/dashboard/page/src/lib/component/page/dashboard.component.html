@@ -78,7 +78,7 @@
           <ion-card-content>
             <ion-list lines="full">
               @for (place of bitePlaces(); track place) {
-                <ion-item>
+                <ion-item [button]="true">
                   <ion-label>{{ place }}</ion-label>
                 </ion-item>
               } @empty {

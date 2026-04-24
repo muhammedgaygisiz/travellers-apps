@@ -75,10 +75,16 @@ export class DashboardDataAccessService {
             type: 'where',
             fieldPath: 'restaurantId',
             opStr: '==',
-            value: null,
+            value: '',
           },
         ],
       },
+      queryConstraints: [
+        {
+          type: 'limit',
+          limit: 10,
+        },
+      ],
     });
 
     if (!docs?.snapshots) {

@@ -164,7 +164,10 @@ export class RestaurantService {
     }
   }
 
-  private async showToast(messageKey: string, color: string): Promise<void> {
+  private async showToast(
+    messageKey: string,
+    color: 'success' | 'danger',
+  ): Promise<void> {
     const toast = await this.toastController.create({
       message: this.transloco.translate(messageKey),
       duration: 3000,

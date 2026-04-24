@@ -237,6 +237,9 @@ describe('RestaurantService', () => {
         mockRestaurant.id,
         links,
       );
+      expect(MockTranslocoService.translate).toHaveBeenCalledWith(
+        'social-media-links-saved',
+      );
       expect(mockToastController.create).toHaveBeenCalledWith(
         expect.objectContaining({ color: 'success', duration: 3000 }),
       );
@@ -248,6 +251,9 @@ describe('RestaurantService', () => {
       );
       const links = [{ url: 'https://example.com', network: 'facebook' }];
       await service.submitSocialMediaLinks({ links });
+      expect(MockTranslocoService.translate).toHaveBeenCalledWith(
+        'something-went-wrong-please-try-again',
+      );
       expect(mockToastController.create).toHaveBeenCalledWith(
         expect.objectContaining({ color: 'danger', duration: 3000 }),
       );

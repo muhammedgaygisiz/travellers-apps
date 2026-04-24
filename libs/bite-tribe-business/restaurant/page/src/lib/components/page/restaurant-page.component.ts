@@ -17,15 +17,14 @@ import {
   IonContent,
   IonIcon,
   IonInput,
-  IonItem,
-  IonList,
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Bite, Restaurant } from 'model';
+import { Bite, Geopoint, Restaurant } from 'model';
 import { map } from 'rxjs';
 import { compressFile } from 'image-compression';
 import { BiteComponent } from 'bite-tribe-common/bite';
+import { PositionComponent } from 'bite-tribe-common/map';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,13 +36,12 @@ import { BiteComponent } from 'bite-tribe-common/bite';
     IonContent,
     IonCard,
     IonIcon,
-    IonList,
     IonInput,
-    IonItem,
     ReactiveFormsModule,
     IonCardContent,
     IonButton,
     BiteComponent,
+    PositionComponent,
   ],
 })
 export class RestaurantPageComponent {
@@ -57,8 +55,7 @@ export class RestaurantPageComponent {
   restaurantFormGroup = this.formBuilder.group({
     image: ['', Validators.required],
     name: ['', Validators.required],
-    latitude: [0, Validators.required],
-    longitude: [0, Validators.required],
+    position: [null as Geopoint | null, Validators.required],
   });
 
   prefillEffect = effect(() => {
@@ -69,14 +66,9 @@ export class RestaurantPageComponent {
       this.restaurantFormGroup.controls['name'].patchValue(restaurant.name);
     }
 
-    if (firstBite) {
-      this.restaurantFormGroup.controls['latitude'].patchValue(
-        firstBite.position.latitude,
-      );
-
-      this.restaurantFormGroup.controls['longitude'].patchValue(
-        firstBite.position.longitude,
-      );
+    const position = restaurant?.position || firstBite?.position;
+    if (position) {
+      this.restaurantFormGroup.controls['position'].patchValue(position);
     }
   });
 
@@ -134,16 +126,13 @@ export class RestaurantPageComponent {
 
   saveNewRestaurant(): void {
     if (this.restaurantFormGroup.valid) {
-      const newRestaurant = this.restaurantFormGroup.value;
+      const { image, name, position } = this.restaurantFormGroup.value;
       const biteIds = this.restaurant()?.biteIds || [];
 
-      const { latitude, longitude, ...rest } = newRestaurant;
       this.submitNewRestaurant.emit({
-        ...rest,
-        position: {
-          latitude: latitude,
-          longitude: longitude,
-        },
+        image: image ?? '',
+        name: name ?? '',
+        position: position as Geopoint,
         biteIds,
       } as Restaurant);
     }

@@ -55,4 +55,15 @@ export class DashboardService {
   gotoMigrations(): void {
     this.navController.navigateForward(['migrations']);
   }
+
+  placeClicked(placeName: string): void {
+    const restaurant: Restaurant = {
+      id: '',
+      name: placeName,
+      position: { latitude: 0, longitude: 0 },
+      unsaved: true,
+    };
+
+    this.onCreateRestaurantClick(restaurant);
+  }
 }

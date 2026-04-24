@@ -24,29 +24,17 @@
       </ion-card>
       }
 
-      <ion-list lines="full" class="ion-padding-top ion-padding-bottom">
-        <ion-item>
-          <ion-input label="Restaurant Name" formControlName="name" />
-        </ion-item>
+      <ion-input
+        label="Restaurant Name"
+        formControlName="name"
+        fill="outline"
+        class="ion-margin-top"
+        mode="md"
+      />
 
-        <ion-item lines="full">
-          <ion-input
-            type="number"
-            formControlName="latitude"
-            inputmode="decimal"
-            label="Latitude"
-          />
-        </ion-item>
-
-        <ion-item lines="full">
-          <ion-input
-            type="number"
-            formControlName="longitude"
-            inputmode="decimal"
-            label="Longitude"
-          />
-        </ion-item>
-      </ion-list>
+      <div class="ion-padding-top">
+        <position formControlName="position" />
+      </div>
 
       @let bites = restaurant()?.bites || []; @for (bite of bites; track
       bite.id) {

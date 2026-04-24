@@ -35,10 +35,6 @@ export const preferredCurrency = createSelector(
   (settings) => settings?.currency || 'EUR',
 );
 
-export const isDarkTheme = createSelector(slice, (slice) => {
-  return slice?.settings?.theme === 'dark';
-});
-
 export const isReloadingHome = createSelector(
   slice,
   (state) => !!state?.reloading?.home,

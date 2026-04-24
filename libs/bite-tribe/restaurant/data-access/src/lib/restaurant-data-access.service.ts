@@ -1,20 +1,21 @@
 import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { BiteTribeApiService } from 'bite-tribe/api';
 import { Like, Link } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class RestaurantDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly api = inject(BiteTribeApiService);
 
   bite = toSignal(this.storeService.bite$);
   bites = toSignal(this.storeService.bitesByRestaurant$);
   userId = toSignal(this.storeService.userId$);
   restaurant = toSignal(this.storeService.restaurant$);
-  darkTheme = toSignal(this.storeService.darkTheme$, { initialValue: false });
 
-  submitSocialMediaLinks(restaurantId: string, links: Link[]): void {
-    this.storeService.saveSocialMediaLinks(restaurantId, links);
+  async submitSocialMediaLinks(restaurantId: string, links: Link[]): Promise<void> {
+    await this.api.saveSocialMediaLinksForRestaurant(restaurantId, links);
   }
 
   submitLikeClick(likeType: Like): void {

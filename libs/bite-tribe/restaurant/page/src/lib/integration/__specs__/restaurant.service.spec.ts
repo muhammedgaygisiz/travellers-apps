@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { Bite, Like, Restaurant } from 'model';
-import { NavController } from '@ionic/angular/standalone';
+import { NavController, ToastController } from '@ionic/angular/standalone';
 import { TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
@@ -23,8 +23,7 @@ const createMockDataAccess = (overrides = {}): any => {
     bite: signal(mockBite),
     bites: signal([mockBite]),
     restaurant: signal(mockRestaurant),
-    darkTheme: signal(true),
-    submitSocialMediaLinks: jest.fn(),
+    submitSocialMediaLinks: jest.fn().mockResolvedValue(undefined),
     submitLikeClick: jest.fn(),
   };
   return { ...base, ...overrides };
@@ -47,17 +46,25 @@ const createMockHomeDataAccess = (): any => ({
   restaurantBites: signal([mockBite]),
 });
 
+const createMockToastController = (): any => ({
+  create: jest.fn().mockResolvedValue({
+    present: jest.fn().mockResolvedValue(undefined),
+  }),
+});
+
 describe('RestaurantService', () => {
   let service: RestaurantService;
   let mockDataAccessService: Partial<RestaurantDataAccessService>;
   let mockHomeDataAccessService: Partial<HomeDataAccessService>;
   let mockNavController: Partial<NavController>;
+  let mockToastController: Partial<ToastController>;
 
   beforeEach(() => {
     TestBed.resetTestingModule();
     mockDataAccessService = createMockDataAccess();
     mockHomeDataAccessService = createMockHomeDataAccess();
     mockNavController = createNavControllerMock();
+    mockToastController = createMockToastController();
 
     TestBed.configureTestingModule({
       providers: [
@@ -73,6 +80,10 @@ describe('RestaurantService', () => {
         {
           provide: NavController,
           useValue: mockNavController,
+        },
+        {
+          provide: ToastController,
+          useValue: mockToastController,
         },
       ],
     });
@@ -210,12 +221,34 @@ describe('RestaurantService', () => {
   });
 
   describe('submitSocialMediaLinks', () => {
-    it('should call submitSocialMediaLinks on data access service', () => {
+    it('should call submitSocialMediaLinks on data access service and show success toast', async () => {
       const links = [{ url: 'https://example.com', network: 'facebook' }];
-      service.submitSocialMediaLinks({ links });
+      await service.submitSocialMediaLinks({ links });
       expect(mockDataAccessService.submitSocialMediaLinks).toHaveBeenCalledWith(
         mockRestaurant.id,
         links,
+      );
+      expect(mockToastController.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Social media links saved successfully.',
+          color: 'success',
+          duration: 3000,
+        }),
+      );
+    });
+
+    it('should show error toast if data access throws', async () => {
+      (mockDataAccessService.submitSocialMediaLinks as jest.Mock).mockRejectedValueOnce(
+        new Error('Network error'),
+      );
+      const links = [{ url: 'https://example.com', network: 'facebook' }];
+      await service.submitSocialMediaLinks({ links });
+      expect(mockToastController.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Something went wrong. Please try again.',
+          color: 'danger',
+          duration: 3000,
+        }),
       );
     });
   });

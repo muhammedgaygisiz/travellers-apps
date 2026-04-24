@@ -1,10 +1,5 @@
 :host {
   .header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-
     h1 {
       margin: 0;
     }
@@ -21,19 +16,10 @@
         border-top: 1px solid var(--ion-input-border-color);
       }
     }
-
-    .fill-button-content {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-    }
   }
 
   .rating-container {
-    display: flex;
-    align-items: center;
     white-space: nowrap;
-    margin-bottom: 0.5rem;
 
     .rating-icon {
       stroke: var(--border-color);

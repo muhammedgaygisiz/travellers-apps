@@ -5,7 +5,6 @@ import { TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { RestaurantService } from '../restaurant.service';
-import { TranslocoService } from '@jsverse/transloco';
 
 const mockBite: Bite = {
   id: 'bite123',
@@ -53,10 +52,6 @@ const createMockToastController = (): any => ({
   }),
 });
 
-const MockTranslocoService = {
-  translate: jest.fn((key: string): string => key),
-};
-
 describe('RestaurantService', () => {
   let service: RestaurantService;
   let mockDataAccessService: Partial<RestaurantDataAccessService>;
@@ -89,10 +84,6 @@ describe('RestaurantService', () => {
         {
           provide: ToastController,
           useValue: mockToastController,
-        },
-        {
-          provide: TranslocoService,
-          useValue: MockTranslocoService,
         },
       ],
     });
@@ -237,11 +228,12 @@ describe('RestaurantService', () => {
         mockRestaurant.id,
         links,
       );
-      expect(MockTranslocoService.translate).toHaveBeenCalledWith(
-        'social-media-links-saved',
-      );
       expect(mockToastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'success', duration: 3000 }),
+        expect.objectContaining({
+          message: 'Social media links saved successfully.',
+          color: 'success',
+          duration: 3000,
+        }),
       );
     });
 
@@ -251,11 +243,12 @@ describe('RestaurantService', () => {
       );
       const links = [{ url: 'https://example.com', network: 'facebook' }];
       await service.submitSocialMediaLinks({ links });
-      expect(MockTranslocoService.translate).toHaveBeenCalledWith(
-        'something-went-wrong-please-try-again',
-      );
       expect(mockToastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'danger', duration: 3000 }),
+        expect.objectContaining({
+          message: 'Something went wrong. Please try again.',
+          color: 'danger',
+          duration: 3000,
+        }),
       );
     });
   });

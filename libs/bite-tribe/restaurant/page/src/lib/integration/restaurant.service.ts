@@ -3,7 +3,6 @@ import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { Bite, Like, Link, Restaurant } from 'model';
 import { NavController, ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +12,6 @@ export class RestaurantService {
   private readonly homeDataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
   private readonly toastController = inject(ToastController);
-  private readonly transloco = inject(TranslocoService);
 
   bite = this.dataAccess.bite;
   bites = this.homeDataAccess.restaurantBites;
@@ -157,19 +155,19 @@ export class RestaurantService {
     if (restaurant && links) {
       try {
         await this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
-        await this.showToast('social-media-links-saved', 'success');
+        await this.showToast('Social media links saved successfully.', 'success');
       } catch {
-        await this.showToast('something-went-wrong-please-try-again', 'danger');
+        await this.showToast('Something went wrong. Please try again.', 'danger');
       }
     }
   }
 
   private async showToast(
-    messageKey: string,
+    message: string,
     color: 'success' | 'danger',
   ): Promise<void> {
     const toast = await this.toastController.create({
-      message: this.transloco.translate(messageKey),
+      message,
       duration: 3000,
       position: 'bottom',
       color,

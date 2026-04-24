@@ -65,6 +65,30 @@ export class RestaurantApiService {
     }
   }
 
+  async createMenuForRestaurant(restaurantId: string): Promise<string> {
+    const addMenuResult = await FirebaseFirestore.addDocument({
+      reference: MENU_COLLECTION,
+      data: {
+        categories: [],
+        createdAt: new Date().toISOString(),
+        createdAtTimestamp: Date.now(),
+      },
+    });
+
+    const menuId = addMenuResult.reference.id;
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        menuId: `/menus/${menuId}`,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
+
+    return menuId;
+  }
+
   async saveSocialMediaLinksForRestaurant(
     restaurantId: string,
     links: Link[],

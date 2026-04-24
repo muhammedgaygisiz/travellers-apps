@@ -53,13 +53,15 @@ export class RestaurantService {
     }
   }
 
-  gotoEditMenu(restaurantId: string, menuId: string): void {
-    void this.navController.navigateForward([
-      'restaurant',
-      restaurantId,
-      'menu',
-      menuId,
-    ]);
+  gotoEditMenu(restaurantId: string, menuId: string | undefined): void {
+    if (restaurantId && menuId) {
+      void this.navController.navigateForward([
+        'restaurant',
+        restaurantId,
+        'menu',
+        menuId,
+      ]);
+    }
   }
 
   private gotoMaintainedMenu(
@@ -150,14 +152,38 @@ export class RestaurantService {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
-  async submitSocialMediaLinks({ links }: Partial<{ links: Link[] }>): Promise<void> {
+  async createMenu(): Promise<void> {
+    const restaurant = this.restaurant();
+    if (!restaurant) {
+      return;
+    }
+
+    try {
+      const menuId = await this.dataAccess.createMenuForRestaurant(
+        restaurant.id,
+      );
+      this.gotoEditMenu(restaurant.id, menuId);
+    } catch {
+      await this.showToast('Something went wrong. Please try again.', 'danger');
+    }
+  }
+
+  async submitSocialMediaLinks({
+    links,
+  }: Partial<{ links: Link[] }>): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant && links) {
       try {
         await this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
-        await this.showToast('Social media links saved successfully.', 'success');
+        await this.showToast(
+          'Social media links saved successfully.',
+          'success',
+        );
       } catch {
-        await this.showToast('Something went wrong. Please try again.', 'danger');
+        await this.showToast(
+          'Something went wrong. Please try again.',
+          'danger',
+        );
       }
     }
   }

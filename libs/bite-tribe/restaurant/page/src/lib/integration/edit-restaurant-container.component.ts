@@ -9,6 +9,8 @@ import { RestaurantService } from './restaurant.service';
       class="ion-page"
       [restaurant]="service.restaurant()"
       (submitSocialMediaLinks)="service.submitSocialMediaLinks($event)"
+      (createMenu)="service.createMenu()"
+      (editMenu)="service.gotoEditMenu($event.id, $event.menuId)"
     />
   `,
   imports: [EditRestaurantComponent],

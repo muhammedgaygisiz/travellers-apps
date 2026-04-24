@@ -79,6 +79,10 @@ export class BiteTribeApiService {
     return this.restaurantApiService.loadRestaurantById(restaurantId);
   }
 
+  createMenuForRestaurant(restaurantId: string): Promise<string> {
+    return this.restaurantApiService.createMenuForRestaurant(restaurantId);
+  }
+
   saveMenu(menu: Menu): void {
     this.menuApiService.saveMenu(menu);
   }

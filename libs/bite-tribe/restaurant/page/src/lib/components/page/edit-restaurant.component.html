@@ -58,6 +58,24 @@
           </div>
         </div>
 
+        @if (!hasMenu()) {
+          <ion-button
+            class="ion-margin-top"
+            aria-label="Create a new menu for this restaurant"
+            (click)="createMenu.emit()"
+          >
+            Create Menu
+          </ion-button>
+        } @else {
+          <ion-button
+            class="ion-margin-top"
+            aria-label="Edit the menu for this restaurant"
+            (click)="gotoEditMenu()"
+          >
+            Edit Menu
+          </ion-button>
+        }
+
         @if (links.length) {
           <ion-button
             class="ion-margin-top"

@@ -1,3 +1,4 @@
+@let restaurantData = restaurant();
 @let positionData = position();
 
 <ta-page
@@ -7,10 +8,12 @@
   [showFooter]="false"
 >
   <ion-content>
-    <bt-restaurant-image [restaurant]="restaurant()" />
+    <bt-restaurant-image [restaurant]="restaurantData" />
 
     <div class="ion-padding">
-      <h1>{{ placeName() }}</h1>
+      <div class="header-container">
+        <h1>{{ placeName() }}</h1>
+      </div>
 
       <div [formGroup]="socialMediaForm">
         @if (links.length === 0) {

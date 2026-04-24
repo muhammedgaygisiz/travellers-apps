@@ -537,7 +537,7 @@ describe(BiteEffects.name, () => {
             a: fromAuth.AuthActions.loginSucceeded(),
           });
 
-          const expected = 'a';
+          const expected = '200ms (a|)';
           const output = {
             a: BiteActions.loadedLatestFromAPI({ bites: [] }),
           };

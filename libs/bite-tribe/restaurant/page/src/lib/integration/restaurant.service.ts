@@ -47,6 +47,19 @@ export class RestaurantService {
     if (bite) {
       this.gotoDynamicMenu(bite);
     }
+
+    if (menuId) {
+      this.gotoEditMenu(restaurant.id, menuId);
+    }
+  }
+
+  gotoEditMenu(restaurantId: string, menuId: string): void {
+    void this.navController.navigateForward([
+      'restaurant',
+      restaurantId,
+      'menu',
+      menuId,
+    ]);
   }
 
   private gotoMaintainedMenu(

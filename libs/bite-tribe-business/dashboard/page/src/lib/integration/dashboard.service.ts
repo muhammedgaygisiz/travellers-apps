@@ -12,6 +12,7 @@ export class DashboardService {
 
   organisations = this.dataAccess.organisations;
   restaurants = this.dataAccess.restaurants;
+  bitePlaces = this.dataAccess.bitePlaces;
   isAuthenticated = this.dataAccess.isAuthenticated;
   gpsPosition = this.dataAccess.gpsPosition;
 

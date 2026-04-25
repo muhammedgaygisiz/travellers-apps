@@ -24,7 +24,7 @@ export class RestaurantContainer {
   service = inject(RestaurantService);
 
   ionViewDidEnter(): void {
-    FirebaseAnalytics.setCurrentScreen({
+    void FirebaseAnalytics.setCurrentScreen({
       screenName: 'Restaurant',
     });
   }

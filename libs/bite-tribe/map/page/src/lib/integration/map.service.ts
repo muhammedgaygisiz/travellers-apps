@@ -37,20 +37,18 @@ export class MapService {
   }
 
   restaurantClicked(bite: Bite): void {
-    if (bite.restaurantId) {
-      const [, , restaurantId] = bite.restaurantId.split('/');
-
-      this.navController.navigateForward([
+    if (bite.id && bite.restaurantId) {
+      void this.navController.navigateForward([
         'bite',
         bite.id,
         'restaurant',
-        restaurantId,
+        bite.restaurantId,
       ]);
 
       return;
     }
 
-    this.navController.navigateForward([
+    void this.navController.navigateForward([
       'bite',
       bite.id,
       PATH.RESTAURANT,

@@ -60,21 +60,18 @@ export class HomeService {
   }
 
   restaurantClicked(bite: Bite): void {
-    if (bite.restaurantId) {
-      const [empty, collectionName, restaurantId] =
-        bite.restaurantId.split('/');
-
-      this.navController.navigateForward([
+    if (bite.id && bite.restaurantId) {
+      void this.navController.navigateForward([
         'bite',
         bite.id,
         'restaurant',
-        restaurantId,
+        bite.restaurantId,
       ]);
 
       return;
     }
 
-    this.navController.navigateForward([
+    void this.navController.navigateForward([
       'bite',
       bite.id,
       PATH.RESTAURANT,
@@ -84,38 +81,38 @@ export class HomeService {
   }
 
   onAddButtonClicked(): void {
-    this.navController.navigateForward(['new-bite']);
+    void this.navController.navigateForward(['new-bite']);
   }
 
   onGotoSettingsClick(): void {
-    this.navController.navigateForward(['settings']);
+    void this.navController.navigateForward(['settings']);
   }
 
   onGotoMyBitesClick(): void {
-    this.navController.navigateForward(['my-bites']);
+    void this.navController.navigateForward(['my-bites']);
   }
 
   onGotoMyBucketlists(): void {
-    this.navController.navigateForward(['my-bucketlists']);
+    void this.navController.navigateForward(['my-bucketlists']);
   }
 
   onGotoEditClick(biteToEdit: Bite): void {
-    this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
+    void this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
   }
 
   onGotoAboutClick(): void {
-    this.navController.navigateForward([PATH.ABOUT]);
+    void this.navController.navigateForward([PATH.ABOUT]);
   }
 
   onGotoMarketPlaceClick(): void {
-    this.navController.navigateForward([PATH.MARKET_PLACE]);
+    void this.navController.navigateForward([PATH.MARKET_PLACE]);
   }
 
   openMapView(mainPage: string): void {
     if (mainPage === 'my-bucketlists') {
       const selectedBucketlist = this.selectedBucketlist();
 
-      this.navController.navigateForward([
+      void this.navController.navigateForward([
         mainPage,
         selectedBucketlist?.id,
         'map-view',
@@ -123,7 +120,7 @@ export class HomeService {
       return;
     }
 
-    this.navController.navigateForward([mainPage, 'map-view']);
+    void this.navController.navigateForward([mainPage, 'map-view']);
   }
 
   sortingChange(value: string): void {
@@ -163,6 +160,6 @@ export class HomeService {
   }
 
   onGotoMyProfileClick(): void {
-    this.navController.navigateForward(['my-profile']);
+    void this.navController.navigateForward(['my-profile']);
   }
 }

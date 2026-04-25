@@ -22,21 +22,19 @@ export class BiteTrailService {
   }
 
   restaurantClicked(bite: Bite): void {
-    if (bite.restaurantId) {
-      const [, , restaurantId] = bite.restaurantId.split('/');
-
+    if (bite.id && bite.restaurantId) {
       void this.navController.navigateForward([
-        PATH.BITE,
+        'bite',
         bite.id,
-        PATH.RESTAURANT,
-        restaurantId,
+        'restaurant',
+        bite.restaurantId,
       ]);
 
       return;
     }
 
     void this.navController.navigateForward([
-      PATH.BITE,
+      'bite',
       bite.id,
       PATH.RESTAURANT,
       PATH.PLACE,

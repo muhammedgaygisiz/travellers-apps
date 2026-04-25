@@ -1,0 +1,48 @@
+@let categoryData = linkedCategory();
+
+<div class="menu-category ion-padding">
+  <h2>{{ categoryData?.title }}</h2>
+  @if (categoryData?.subtitle) {
+  <p class="subtitle">{{ categoryData?.subtitle }}</p>
+  } @if (categoryData?.items?.length) {
+  <ion-reorder-group
+    [disabled]="!editMode()"
+    (ionItemReorder)="handleReorder($any($event))"
+  >
+    @for (item of categoryData?.items; track item.name) {
+    <div class="{{ editMode() ? 'reorder-container' : 'menu-item' }}">
+      @if (editMode()) {
+      <div class="reorder-anchor">
+        <ion-reorder>
+          <ion-icon name="menu" size="large" />
+        </ion-reorder>
+      </div>
+      }
+      <menu-item
+        [item]="item"
+        [editMode]="editMode()"
+        (addedVariant)="onAddVariant($event)"
+        (createBiteClick)="createBiteClick.emit($event)"
+      />
+    </div>
+    }
+  </ion-reorder-group>
+  <ng-container [ngTemplateOutlet]="addItem" />
+  } @else {
+  <div class="menu-placeholder">
+    <p>No items in this category yet.</p>
+  </div>
+
+  <ng-container [ngTemplateOutlet]="addItem" />
+  }
+</div>
+
+<ng-template #addItem>
+  @if (shouldShowAddItem()) {
+  <add-item (addItem)="onAddItem($event)" (cancelAddItem)="onCancelAddItem()" />
+  } @if (editMode() && !shouldShowAddItem()) {
+  <ion-button (click)="showAddItem()" class="ion-margin-top">
+    Add Item
+  </ion-button>
+  }
+</ng-template>

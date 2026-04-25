@@ -1,18 +1,17 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MenuPage } from 'bite-tribe/menu';
+import { EditMenuPage } from '../components/page/edit-menu-page.component';
 import { EditMenuService } from './edit-menu.service';
 
 @Component({
   template: `
-    <menu-page
+    <edit-menu-page
       class="ion-page"
-      editMode
       [restaurant]="service.restaurant()"
       [menu]="service.menu()"
       (saveMenu)="service.saveMenu($event)"
     />
   `,
-  imports: [MenuPage],
+  imports: [EditMenuPage],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditMenuContainer {

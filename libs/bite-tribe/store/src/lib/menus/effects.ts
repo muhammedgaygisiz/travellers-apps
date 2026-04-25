@@ -6,7 +6,6 @@ import { filter, from, map, switchMap, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { menuId } from '../router/selectors';
 import { MenuActions } from './actions';
-import { fromAuth } from 'ta-firestore';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable()

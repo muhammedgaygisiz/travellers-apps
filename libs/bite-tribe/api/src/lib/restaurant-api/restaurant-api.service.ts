@@ -44,7 +44,7 @@ export class RestaurantApiService {
     await FirebaseFirestore.updateDocument({
       reference: `${RESTAURANT_COLLECTION}/${newRestaurantId}`,
       data: {
-        menuId: `/menus/${addMenuResult.reference.id}`,
+        menuId: `${addMenuResult.reference.id}`,
         updatedAt: new Date().toISOString(),
         updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
@@ -57,7 +57,7 @@ export class RestaurantApiService {
           FirebaseFirestore.updateDocument({
             reference: `${BITE_COLLECTION}/${biteId}`,
             data: {
-              restaurantId: `/restaurants/${newRestaurantId}`,
+              restaurantId: `${newRestaurantId}`,
               updatedAt: new Date().toISOString(),
               updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
             },
@@ -109,7 +109,7 @@ export class RestaurantApiService {
     await FirebaseFirestore.updateDocument({
       reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
       data: {
-        menuId: `/menus/${menuId}`,
+        menuId: `${menuId}`,
         updatedAt: new Date().toISOString(),
         updatedAtTimestamp: Date.now(),
       },

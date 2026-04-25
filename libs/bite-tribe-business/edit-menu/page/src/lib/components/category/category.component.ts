@@ -39,8 +39,6 @@ export class CategoryComponent {
 
   linkedCategory = linkedSignal(() => this.category());
 
-  editMode = input(false);
-
   addItemToCategory = output<{
     item: MenuItem;
     category: Category;
@@ -52,10 +50,7 @@ export class CategoryComponent {
   presentShowAddItem = signal(false);
 
   shouldShowAddItem = computed(() => {
-    const editModeEnabled = this.editMode();
-    const presentShowAddItem = this.presentShowAddItem();
-
-    return editModeEnabled && presentShowAddItem;
+    return this.presentShowAddItem();
   });
 
   createBiteClick = output<MenuItem>();

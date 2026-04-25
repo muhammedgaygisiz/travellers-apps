@@ -2,22 +2,16 @@
 
 <div class="menu-container">
   @if (menuData?.categories?.length) {
-    <ion-reorder-group
-      [disabled]="!editMode()"
-      (ionItemReorder)="handleReorder($event)"
-    >
+    <ion-reorder-group (ionItemReorder)="handleReorder($event)">
       @for (category of menuData?.categories; track category.title) {
-        <div class="{{ editMode() ? 'reorder-container' : 'menu-item' }}">
-          @if (editMode()) {
-            <div class="reorder-anchor">
-              <ion-reorder>
-                <ion-icon name="menu" size="large" />
-              </ion-reorder>
-            </div>
-          }
+        <div class="reorder-container">
+          <div class="reorder-anchor">
+            <ion-reorder>
+              <ion-icon name="menu" size="large" />
+            </ion-reorder>
+          </div>
           <category
             [category]="category"
-            [editMode]="editMode()"
             (addItemToCategory)="onAddItemToCategory($event)"
             (createBiteClick)="createBiteClick.emit($event)"
             (orderingInCategoryChanged)="updateCategory($event)"
@@ -34,13 +28,12 @@
       <ng-container [ngTemplateOutlet]="addCategory" />
     </div>
   }
-  @if (editMode()) {
-    <div class="save-menu-button-container">
-      <ion-button class="ion-margin-top" (click)="onSave()">{{
-        'save-menu' | transloco
-      }}</ion-button>
-    </div>
-  }
+
+  <div class="save-menu-button-container">
+    <ion-button class="ion-margin-top" (click)="onSave()">{{
+      'save-menu' | transloco
+    }}</ion-button>
+  </div>
 </div>
 
 <ng-template #addCategory>
@@ -50,7 +43,7 @@
       (cancelAddCategory)="onCancelAddCategory()"
     />
   }
-  @if (editMode() && !shouldShowAddCategory()) {
+  @if (!shouldShowAddCategory()) {
     <div class="ion-text-end">
       <ion-button (click)="showAddCategory()">
         {{ 'add-category' | transloco }}</ion-button

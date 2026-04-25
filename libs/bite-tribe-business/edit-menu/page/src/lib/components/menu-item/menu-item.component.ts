@@ -23,38 +23,13 @@ export class MenuItemComponent {
 
   isVariant = input(false, { transform: booleanAttribute });
 
-  editMode = input(false);
-
-  createBiteClick = output<MenuItem>();
-
   addedVariant = output<MenuItem>();
 
   presentAddVariant = signal(false);
 
   shouldShowAddVariant = computed(() => {
-    const editModeEnabled = this.editMode();
-    const presentAddVariant = this.presentAddVariant();
-
-    return editModeEnabled && presentAddVariant;
+    return this.presentAddVariant();
   });
-
-  shouldShowCreateBite = computed(() => {
-    const editModeEnabled = this.editMode();
-
-    const price = this.item()?.price;
-    const variants = this.item()?.variants || [];
-    if (price === 0 && variants.length > 0) {
-      return false;
-    }
-
-    return !editModeEnabled;
-  });
-
-  onCreateBiteClick(itemData: MenuItem | undefined): void {
-    if (itemData) {
-      this.createBiteClick.emit(itemData);
-    }
-  }
 
   onAddVariantClick(): void {
     this.presentAddVariant.set(true);

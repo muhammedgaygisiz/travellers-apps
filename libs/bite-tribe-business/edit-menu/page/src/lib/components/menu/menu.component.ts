@@ -1,5 +1,4 @@
 import {
-  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -42,8 +41,6 @@ export class MenuComponent {
 
   linkedMenu = linkedSignal(() => this.menu());
 
-  editMode = input(false, { transform: booleanAttribute });
-
   presentShowAddCategory = signal(false);
 
   createBiteClick = output<MenuItem>();
@@ -51,10 +48,7 @@ export class MenuComponent {
   saveMenu = output<Menu>();
 
   shouldShowAddCategory = computed(() => {
-    const editModeEnabled = this.editMode();
-    const presentShowAddCategory = this.presentShowAddCategory();
-
-    return editModeEnabled && presentShowAddCategory;
+    return this.presentShowAddCategory();
   });
 
   showAddCategory(): void {

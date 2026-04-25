@@ -18,11 +18,11 @@
     @if (itemData?.variants?.length) {
       <div class="ion-margin-top">
         @for (variant of itemData?.variants; track $index) {
-          <menu-item [item]="variant" [editMode]="editMode()" isVariant />
+          <menu-item [item]="variant" isVariant />
         }
       </div>
     }
-    @if (!isVariant() && editMode()) {
+    @if (!isVariant()) {
       <ion-button class="ion-margin-top" (click)="onAddVariantClick()">
         Add Variant
       </ion-button>
@@ -31,15 +31,6 @@
   <div class="price-actions">
     @if (itemData?.price !== 0) {
       <div class="price">{{ itemData?.price }} €</div>
-    }
-    @if (shouldShowCreateBite()) {
-      <ion-button
-        size="small"
-        fill="clear"
-        (click)="onCreateBiteClick(itemData)"
-      >
-        Create Bite
-      </ion-button>
     }
   </div>
 </div>

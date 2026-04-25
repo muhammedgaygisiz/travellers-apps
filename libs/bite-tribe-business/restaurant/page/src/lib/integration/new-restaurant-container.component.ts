@@ -7,6 +7,7 @@ import { NewRestaurantService } from './new-restaurant.service';
   imports: [NewRestaurantPageComponent],
   template: `
     <new-restaurant-page
+      class="ion-page"
       [restaurant]="service.restaurantToCreate()"
       (submitNewRestaurant)="service.submitNewRestaurant($event)"
       (biteClick)="service.biteClicked($event)"

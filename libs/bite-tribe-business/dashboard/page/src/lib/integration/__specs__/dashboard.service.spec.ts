@@ -10,7 +10,10 @@ jest.mock('@capacitor-firebase/firestore');
 describe('DashboardService', () => {
   let service: DashboardService;
   let dataAccessMock: jest.Mocked<DashboardDataAccessService>;
-  let navControllerMock: { navigateForward: jest.Mock; navigateBack: jest.Mock };
+  let navControllerMock: {
+    navigateForward: jest.Mock;
+    navigateBack: jest.Mock;
+  };
 
   beforeEach(() => {
     const mockResource = { value: jest.fn().mockReturnValue(undefined) };
@@ -52,7 +55,7 @@ describe('DashboardService', () => {
   });
 
   describe('placeClicked', () => {
-    it('should call selectRestaurantToCreate with a restaurant containing the place name', () => {
+    it('should call selectAndNavigateToCreateRestaurantPageClicked with a restaurant containing the place name', () => {
       service.placeClicked('Pizza Palace');
 
       expect(dataAccessMock.selectRestaurantToCreate).toHaveBeenCalledWith(

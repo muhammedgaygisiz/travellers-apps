@@ -14,7 +14,9 @@ import { DashboardService } from './dashboard.service';
       [isAuthenticated]="service.isAuthenticated()"
       [gpsPosition]="service.gpsPosition()"
       (logoutClick)="service.logout()"
-      (createRestaurantClick)="service.onCreateRestaurantClick($event)"
+      (createRestaurantClick)="
+        service.selectAndNavigateToCreateRestaurantPageClicked($event)
+      "
       (restaurantClick)="service.restaurantClicked($event)"
       (organisationClick)="service.organisationClicked($event)"
       (gotoMigrations)="service.gotoMigrations()"

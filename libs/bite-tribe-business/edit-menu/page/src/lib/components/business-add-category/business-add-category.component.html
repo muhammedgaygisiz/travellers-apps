@@ -1,0 +1,21 @@
+<ion-list>
+  <form [formGroup]="newCategoryForm">
+    <ion-item>
+      <ion-input label="Title" formControlName="title" />
+    </ion-item>
+    <ion-item>
+      <ion-input label="Subtitle" formControlName="subtitle" />
+    </ion-item>
+  </form>
+
+  <ion-button
+    class="ion-margin-top"
+    [disabled]="isInvalid()"
+    (click)="onAddCategory()"
+  >
+    Add Category
+  </ion-button>
+  <ion-button (click)="cancelAddCategory.emit()" class="ion-margin-top">
+    Cancel
+  </ion-button>
+</ion-list>

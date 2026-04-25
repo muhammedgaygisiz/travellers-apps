@@ -1,0 +1,52 @@
+@let menuData = linkedMenu();
+
+<div class="menu-container">
+  @if (menuData?.categories?.length) {
+    <ion-reorder-group (ionItemReorder)="handleReorder($event)">
+      @for (category of menuData?.categories; track category.title) {
+        <div class="reorder-container">
+          <div class="reorder-anchor">
+            <ion-reorder>
+              <ion-icon name="menu" size="large" />
+            </ion-reorder>
+          </div>
+          <business-category
+            [category]="category"
+            (addItemToCategory)="onAddItemToCategory($event)"
+            (orderingInCategoryChanged)="updateCategory($event)"
+          />
+        </div>
+      }
+    </ion-reorder-group>
+
+    <ng-container [ngTemplateOutlet]="addCategory" />
+  } @else {
+    <div class="menu-placeholder">
+      <p>{{ 'no-menu-yet' | transloco }}</p>
+
+      <ng-container [ngTemplateOutlet]="addCategory" />
+    </div>
+  }
+
+  <div class="save-menu-button-container">
+    <ion-button class="ion-margin-top" (click)="onSave()">{{
+      'save-menu' | transloco
+    }}</ion-button>
+  </div>
+</div>
+
+<ng-template #addCategory>
+  @if (shouldShowAddCategory()) {
+    <business-add-category
+      (addCategory)="onAddCategory($event)"
+      (cancelAddCategory)="onCancelAddCategory()"
+    />
+  }
+  @if (!shouldShowAddCategory()) {
+    <div class="ion-text-end">
+      <ion-button (click)="showAddCategory()">
+        {{ 'add-category' | transloco }}</ion-button
+      >
+    </div>
+  }
+</ng-template>

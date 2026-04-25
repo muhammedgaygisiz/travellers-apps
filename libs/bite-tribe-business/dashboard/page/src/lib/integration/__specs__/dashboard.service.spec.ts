@@ -54,6 +54,73 @@ describe('DashboardService', () => {
     expect(service).toBeTruthy();
   });
 
+  describe('logout', () => {
+    it('should call logout on data access layer', () => {
+      service.logout();
+
+      expect(dataAccessMock.logout).toHaveBeenCalled();
+    });
+  });
+
+  describe('restaurantClicked', () => {
+    describe('given a restaurant id', () => {
+      it('should navigate forward to restaurant with id', () => {
+        const restaurant = { id: '123', name: 'Testaurant' } as any;
+        service.restaurantClicked(restaurant);
+
+        expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+          'restaurant',
+          '123',
+        ]);
+      });
+    });
+
+    describe('given no restaurant id', () => {
+      it('should navigate forward to restaurant with encoded name', () => {
+        const restaurant = { id: '', name: 'Testaurant' } as any;
+        service.restaurantClicked(restaurant);
+
+        expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+          'restaurant',
+          'Testaurant',
+        ]);
+      });
+    });
+  });
+
+  describe('organisationClicked', () => {
+    describe('given an user id in organisation', () => {
+      it('should navigate forward to organisation dashboard with user id', () => {
+        const organisation = { userId: 'org123', name: 'OrgName' } as any;
+        service.organisationClicked(organisation);
+
+        expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+          'org123',
+          'dashboard',
+        ]);
+      });
+    });
+
+    describe('given no user id in organisation', () => {
+      it('should not navigate', () => {
+        const organisation = { userId: '', name: 'OrgName' } as any;
+        service.organisationClicked(organisation);
+
+        expect(navControllerMock.navigateForward).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('gotoMigrations', () => {
+    it('should navigate forward to migrations', () => {
+      service.gotoMigrations();
+
+      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+        'migrations',
+      ]);
+    });
+  });
+
   describe('placeClicked', () => {
     it('should call selectAndNavigateToCreateRestaurantPageClicked with a restaurant containing the place name', () => {
       service.placeClicked('Pizza Palace');

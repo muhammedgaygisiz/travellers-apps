@@ -17,12 +17,12 @@ import type { MenuItem } from 'model';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './add-item.component.html',
-  styleUrl: './add-item.component.scss',
+  templateUrl: './business-add-item.component.html',
+  styleUrl: './business-add-item.component.scss',
   imports: [IonButton, IonInput, IonList, IonItem, ReactiveFormsModule],
-  selector: 'add-item',
+  selector: 'business-add-item',
 })
-export class AddItemComponent {
+export class BusinessAddItemComponent {
   addItem = output<MenuItem>();
 
   cancelAddItem = output();

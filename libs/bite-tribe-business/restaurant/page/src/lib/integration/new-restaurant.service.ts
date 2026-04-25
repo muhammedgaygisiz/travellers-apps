@@ -4,7 +4,7 @@ import { Bite, Restaurant } from 'model';
 import { NavController } from '@ionic/angular';
 
 @Injectable({ providedIn: 'root' })
-export class RestaurantService {
+export class NewRestaurantService {
   private readonly dataAccess = inject(RestaurantDataAccessService);
   private readonly navController = inject(NavController);
 

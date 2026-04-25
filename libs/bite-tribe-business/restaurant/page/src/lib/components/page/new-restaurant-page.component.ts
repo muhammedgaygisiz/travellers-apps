@@ -28,9 +28,9 @@ import { PositionComponent } from 'bite-tribe-common/map';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'restaurant-page',
-  templateUrl: 'restaurant-page.component.html',
-  styleUrl: 'restaurant-page.component.scss',
+  selector: 'new-restaurant-page',
+  templateUrl: 'new-restaurant-page.component.html',
+  styleUrl: 'new-restaurant-page.component.scss',
   imports: [
     PageComponent,
     IonContent,
@@ -44,7 +44,7 @@ import { PositionComponent } from 'bite-tribe-common/map';
     PositionComponent,
   ],
 })
-export class RestaurantPageComponent {
+export class NewRestaurantPageComponent {
   restaurant = input<Restaurant>();
 
   private readonly formBuilder = inject(FormBuilder);
@@ -99,7 +99,7 @@ export class RestaurantPageComponent {
       const fileUpload = this.fileUpload();
 
       if (!fileUpload) {
-        console.error('File upload element not found');
+        console.error('NewRestaurantPageComponent: File upload element reference not found. Ensure the #fileUploader template reference is correctly defined.');
         return;
       }
 

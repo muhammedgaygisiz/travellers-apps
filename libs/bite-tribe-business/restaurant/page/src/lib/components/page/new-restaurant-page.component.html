@@ -13,7 +13,9 @@
   <ion-content class="ion-padding">
     <h1>Create Restaurant</h1>
 
+    @if (showImage()) {
     <img [src]="imageBase64()" alt="Restaurant Image" />
+    }
 
     <form [formGroup]="restaurantFormGroup">
       @if (!showImage()) {

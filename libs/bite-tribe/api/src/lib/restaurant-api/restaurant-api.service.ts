@@ -4,6 +4,8 @@ import type { Link, Restaurant } from 'model';
 import { MENU_COLLECTION } from '../menu-api/menu-api.service';
 import { BITE_COLLECTION, RESTAURANT_COLLECTION } from '../utils/constants';
 import { getRestaurantById } from './utils/get-restaurant-by-id';
+import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
+import { getDownloadUrlFromFirebaseStorage } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class RestaurantApiService {
@@ -12,11 +14,10 @@ export class RestaurantApiService {
   }
 
   async saveNewRestaurant(restaurant: Restaurant): Promise<void> {
-    // Remove biteIds from the restaurant object before saving
-    // console.debug('Restaurant to be saved: ', restaurant);
-    const { biteIds, ...restaurantToBeSaved } = restaurant;
+    // Remove biteIds and image from the restaurant object before saving
+    const { biteIds, image, ...restaurantToBeSaved } = restaurant;
 
-    // Add the new restaurant
+    // Add the new restaurant (without image base64)
     const addRestaurantResult = await FirebaseFirestore.addDocument({
       reference: RESTAURANT_COLLECTION,
       data: {
@@ -63,6 +64,33 @@ export class RestaurantApiService {
         ),
       );
     }
+
+    // Upload image to Firebase Storage and update the restaurant with the imagePath
+    if (image) {
+      await this.uploadAndSaveRestaurantImage(newRestaurantId, image);
+    }
+  }
+
+  private async uploadAndSaveRestaurantImage(
+    restaurantId: string,
+    image: string,
+  ): Promise<void> {
+    const storagePath = await uploadBase64ToFirebaseStorage({
+      base64: image,
+      docId: restaurantId,
+      collection: RESTAURANT_COLLECTION,
+    });
+
+    const imagePath = await getDownloadUrlFromFirebaseStorage(storagePath);
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        imagePath,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
   }
 
   async createMenuForRestaurant(restaurantId: string): Promise<string> {

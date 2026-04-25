@@ -14,10 +14,11 @@ export class RestaurantApiService {
   }
 
   async saveNewRestaurant(restaurant: Restaurant): Promise<void> {
-    // Remove biteIds and image from the restaurant object before saving
+    // Remove biteIds and image (base64) from the restaurant object before saving to Firestore.
+    // The image will be uploaded to Firebase Storage separately and linked via imagePath.
     const { biteIds, image, ...restaurantToBeSaved } = restaurant;
 
-    // Add the new restaurant (without image base64)
+    // Add the new restaurant document without the base64 image
     const addRestaurantResult = await FirebaseFirestore.addDocument({
       reference: RESTAURANT_COLLECTION,
       data: {

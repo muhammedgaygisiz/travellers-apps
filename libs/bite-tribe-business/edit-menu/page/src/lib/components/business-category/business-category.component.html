@@ -14,7 +14,10 @@
               <ion-icon name="menu" size="large" />
             </ion-reorder>
           </div>
-          <menu-item [item]="item" (addedVariant)="onAddVariant($event)" />
+          <business-menu-item
+            [item]="item"
+            (addedVariant)="onAddVariant($event)"
+          />
         </div>
       }
     </ion-reorder-group>
@@ -30,7 +33,7 @@
 
 <ng-template #addItem>
   @if (shouldShowAddItem()) {
-    <add-item
+    <business-add-item
       (addItem)="onAddItem($event)"
       (cancelAddItem)="onCancelAddItem()"
     />

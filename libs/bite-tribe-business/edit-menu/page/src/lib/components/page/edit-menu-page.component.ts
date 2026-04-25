@@ -8,13 +8,13 @@ import {
 import { PageComponent } from 'common/ui/page';
 import { IonContent, IonImg } from '@ionic/angular/standalone';
 import type { Menu, Restaurant } from 'model';
-import { MenuComponent } from '../menu/menu.component';
+import { BusinessMenuComponent } from '../business-menu/business-menu.component';
 
 @Component({
   selector: 'edit-menu-page',
   templateUrl: 'edit-menu-page.component.html',
   styleUrl: 'edit-menu-page.component.scss',
-  imports: [PageComponent, IonContent, IonImg, MenuComponent],
+  imports: [PageComponent, IonContent, IonImg, BusinessMenuComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditMenuPage {

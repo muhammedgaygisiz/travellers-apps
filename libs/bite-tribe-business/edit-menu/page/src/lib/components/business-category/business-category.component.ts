@@ -15,26 +15,26 @@ import {
 } from '@ionic/angular/standalone';
 import type { Category, MenuItem } from 'model';
 import { NgTemplateOutlet } from '@angular/common';
-import { AddItemComponent } from '../add-item/add-item.component';
-import { MenuItemComponent } from '../menu-item/menu-item.component';
+import { BusinessAddItemComponent } from '../business-add-item/business-add-item.component';
+import { BusinessMenuItemComponent } from '../business-menu-item/business-menu-item.component';
 import { ItemReorderEventDetail } from '@ionic/angular';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './category.component.html',
-  styleUrl: './category.component.scss',
+  templateUrl: './business-category.component.html',
+  styleUrl: './business-category.component.scss',
   imports: [
     IonButton,
     NgTemplateOutlet,
-    AddItemComponent,
-    MenuItemComponent,
+    BusinessAddItemComponent,
+    BusinessMenuItemComponent,
     IonReorderGroup,
     IonIcon,
     IonReorder,
   ],
-  selector: 'category',
+  selector: 'business-category',
 })
-export class CategoryComponent {
+export class BusinessCategoryComponent {
   category = input<Category>();
 
   linkedCategory = linkedSignal(() => this.category());
@@ -52,8 +52,6 @@ export class CategoryComponent {
   shouldShowAddItem = computed(() => {
     return this.presentShowAddItem();
   });
-
-  createBiteClick = output<MenuItem>();
 
   onAddItem(item: MenuItem, isVariant?: boolean): void {
     this.presentShowAddItem.set(false);

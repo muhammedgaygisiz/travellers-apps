@@ -14,21 +14,21 @@ import {
   IonReorder,
   IonReorderGroup,
 } from '@ionic/angular/standalone';
-import { AddCategoryComponent } from '../add-category/add-category.component';
-import { CategoryComponent } from '../category/category.component';
+import { BusinessAddCategoryComponent } from '../business-add-category/business-add-category.component';
+import { BusinessCategoryComponent } from '../business-category/business-category.component';
 import { NgTemplateOutlet } from '@angular/common';
 import { ItemReorderEventDetail } from '@ionic/angular';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
-  selector: 'bt-menu',
-  templateUrl: './menu.component.html',
-  styleUrl: './menu.component.scss',
+  selector: 'business-menu',
+  templateUrl: './business-menu.component.html',
+  styleUrl: './business-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     IonButton,
-    AddCategoryComponent,
-    CategoryComponent,
+    BusinessAddCategoryComponent,
+    BusinessCategoryComponent,
     NgTemplateOutlet,
     IonReorderGroup,
     IonReorder,
@@ -36,14 +36,12 @@ import { TranslocoPipe } from '@jsverse/transloco';
     TranslocoPipe,
   ],
 })
-export class MenuComponent {
+export class BusinessMenuComponent {
   menu = input<Menu>();
 
   linkedMenu = linkedSignal(() => this.menu());
 
   presentShowAddCategory = signal(false);
-
-  createBiteClick = output<MenuItem>();
 
   saveMenu = output<Menu>();
 

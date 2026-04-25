@@ -9,16 +9,16 @@ import {
 } from '@angular/core';
 import { IonButton } from '@ionic/angular/standalone';
 import type { MenuItem } from 'model';
-import { AddItemComponent } from '../add-item/add-item.component';
+import { BusinessAddItemComponent } from '../business-add-item/business-add-item.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'menu-item',
-  templateUrl: './menu-item.component.html',
-  styleUrl: './menu-item.component.scss',
-  imports: [IonButton, AddItemComponent],
+  selector: 'business-menu-item',
+  templateUrl: './business-menu-item.component.html',
+  styleUrl: './business-menu-item.component.scss',
+  imports: [IonButton, BusinessAddItemComponent],
 })
-export class MenuItemComponent {
+export class BusinessMenuItemComponent {
   item = input<MenuItem>();
 
   isVariant = input(false, { transform: booleanAttribute });

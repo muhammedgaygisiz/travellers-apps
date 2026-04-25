@@ -10,12 +10,16 @@ jest.mock('../utils/get-restaurant-by-id');
 jest.mock('@capacitor-firebase/firestore');
 
 jest.mock('../../utils/upload-base64-to-firebase-storage', () => ({
-  uploadBase64ToFirebaseStorage: jest.fn().mockResolvedValue('restaurants/resto-123.jpg'),
+  uploadBase64ToFirebaseStorage: jest
+    .fn()
+    .mockResolvedValue('restaurants/resto-123.jpg'),
 }));
 
 jest.mock('utils', () => ({
   ...jest.requireActual('utils'),
-  getDownloadUrlFromFirebaseStorage: jest.fn().mockResolvedValue('https://storage.example.com/restaurants/resto-123.jpg'),
+  getDownloadUrlFromFirebaseStorage: jest
+    .fn()
+    .mockResolvedValue('https://storage.example.com/restaurants/resto-123.jpg'),
 }));
 
 describe(RestaurantApiService.name, () => {
@@ -121,7 +125,7 @@ describe(RestaurantApiService.name, () => {
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(1, {
           reference: 'restaurants/New Resto',
           data: {
-            menuId: '/menus/menu-456',
+            menuId: 'menu-456',
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -130,7 +134,7 @@ describe(RestaurantApiService.name, () => {
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(2, {
           reference: 'bites/bite1',
           data: {
-            restaurantId: '/restaurants/New Resto',
+            restaurantId: 'New Resto',
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -139,7 +143,7 @@ describe(RestaurantApiService.name, () => {
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(3, {
           reference: 'bites/bite2',
           data: {
-            restaurantId: '/restaurants/New Resto',
+            restaurantId: 'New Resto',
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -188,7 +192,7 @@ describe(RestaurantApiService.name, () => {
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(1, {
           reference: 'restaurants/New Resto',
           data: {
-            menuId: '/menus/menu-456',
+            menuId: 'menu-456',
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -198,7 +202,10 @@ describe(RestaurantApiService.name, () => {
 
     describe('given an image', () => {
       it('should upload image to Firebase Storage and update restaurant with imagePath', async () => {
-        const uploadBase64Spy = jest.spyOn(uploadBase64Utils, 'uploadBase64ToFirebaseStorage');
+        const uploadBase64Spy = jest.spyOn(
+          uploadBase64Utils,
+          'uploadBase64ToFirebaseStorage',
+        );
         const mockedNewRestaurant = {
           name: 'New Resto',
           image: 'data:image/png;base64,abc',
@@ -236,7 +243,8 @@ describe(RestaurantApiService.name, () => {
           expect.objectContaining({
             reference: 'restaurants/resto-123',
             data: expect.objectContaining({
-              imagePath: 'https://storage.example.com/restaurants/resto-123.jpg',
+              imagePath:
+                'https://storage.example.com/restaurants/resto-123.jpg',
             }),
           }),
         );
@@ -259,7 +267,9 @@ describe(RestaurantApiService.name, () => {
     });
 
     it('should create an empty menu and update the restaurant with the menuId', async () => {
-      addDocumentSpy.mockResolvedValueOnce({ reference: { id: 'new-menu-id' } } as any);
+      addDocumentSpy.mockResolvedValueOnce({
+        reference: { id: 'new-menu-id' },
+      } as any);
       updateDocumentSpy.mockResolvedValueOnce({} as any);
 
       const result = await service.createMenuForRestaurant('resto-123');
@@ -278,7 +288,7 @@ describe(RestaurantApiService.name, () => {
       expect(updateDocumentSpy).toHaveBeenCalledWith({
         reference: 'restaurants/resto-123',
         data: {
-          menuId: '/menus/new-menu-id',
+          menuId: 'new-menu-id',
           updatedAt: '2024-03-15T12:00:00.000Z',
           updatedAtTimestamp: 1710504000000,
         },

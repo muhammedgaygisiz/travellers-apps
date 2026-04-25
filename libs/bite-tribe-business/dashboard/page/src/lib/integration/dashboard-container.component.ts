@@ -10,6 +10,7 @@ import { DashboardService } from './dashboard.service';
       class="ion-page"
       [organisations]="service.organisations.value()"
       [restaurants]="service.restaurants.value()"
+      [bitePlaces]="service.bitePlaces.value()"
       [isAuthenticated]="service.isAuthenticated()"
       [gpsPosition]="service.gpsPosition()"
       (logoutClick)="service.logout()"

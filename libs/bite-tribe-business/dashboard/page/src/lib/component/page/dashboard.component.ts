@@ -39,6 +39,7 @@ import { MapComponent } from 'bite-tribe-common/map';
 export class DashboardComponent {
   organisations = input<PublicUser[]>();
   restaurants = input<Restaurant[]>();
+  bitePlaces = input<string[]>();
 
   isAuthenticated = input(false);
   gpsPosition = input<Geopoint | null | undefined>();

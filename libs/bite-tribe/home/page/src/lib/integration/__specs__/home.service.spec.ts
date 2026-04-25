@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { HomeService } from '../home.service';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import type { Bite } from 'model';
+import type { Bite, Like } from 'model';
 import SpyInstance = jest.SpyInstance;
 
 class Mock {
@@ -91,7 +91,10 @@ describe('HomeService', () => {
     it('should call likeButtonClicked on HomeDataAccessService with correct parameters', inject(
       [HomeService],
       (service: HomeService) => {
-        const param = { likeType: 'likeType', biteId: 'biteId' };
+        const param = {
+          likeType: 'likeType',
+          biteId: 'biteId',
+        } as unknown as Like;
         service.likeButtonClicked(param);
         expect(submitLikeClickSpy).toHaveBeenCalledWith(param);
       },
@@ -142,13 +145,28 @@ describe('HomeService', () => {
     it('should navigate to restaurant page with correct parameters', inject(
       [HomeService],
       (service: HomeService) => {
-        const bite = { restaurantId: 'restaurant/test/123' } as Bite;
+        const bite = { id: '1', restaurantId: '123' } as Bite;
         service.restaurantClicked(bite);
         expect(navigateForwardSpy).toHaveBeenCalledWith([
           'bite',
           bite.id,
           'restaurant',
           '123',
+        ]);
+      },
+    ));
+
+    it('should navigate to unverified restaurant route with place segment when no restaurantId', inject(
+      [HomeService],
+      (service: HomeService) => {
+        const bite = { id: 'bite42', place: 'Nice Café' } as Bite;
+        service.restaurantClicked(bite);
+        expect(navigateForwardSpy).toHaveBeenCalledWith([
+          'bite',
+          'bite42',
+          'restaurant',
+          'place',
+          encodeURIComponent('Nice Café'),
         ]);
       },
     ));

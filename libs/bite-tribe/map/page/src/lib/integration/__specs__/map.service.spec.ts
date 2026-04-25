@@ -16,13 +16,13 @@ describe(MapService.name, () => {
       id: 'bite1',
       userId: 'user1',
       place: 'Restaurant A',
-      restaurantId: 'restaurants/collection/rest1',
+      restaurantId: 'rest1',
     } as Bite,
     {
       id: 'bite2',
       userId: 'user2',
       place: 'Restaurant B',
-      restaurantId: 'restaurants/collection/rest2',
+      restaurantId: 'rest2',
     } as Bite,
     {
       id: 'bite3',
@@ -165,6 +165,7 @@ describe(MapService.name, () => {
         'bite',
         'bite3',
         'restaurant',
+        'place',
         'Restaurant%20C',
       ]);
     });
@@ -182,23 +183,8 @@ describe(MapService.name, () => {
         'bite',
         'bite1',
         'restaurant',
+        'place',
         'Test%20Restaurant',
-      ]);
-    });
-
-    it('should handle different restaurantId format patterns', () => {
-      const biteWithDifferentFormat = {
-        ...mockBites[0],
-        restaurantId: 'prefix/middle/suffix',
-      };
-
-      service.restaurantClicked(biteWithDifferentFormat);
-
-      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
-        'bite',
-        'bite1',
-        'restaurant',
-        'suffix',
       ]);
     });
   });

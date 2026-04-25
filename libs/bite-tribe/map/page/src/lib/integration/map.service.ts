@@ -3,6 +3,7 @@ import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { Bite, Geopoint, Like } from 'model';
 import { BiteTrailDataAccessService } from 'bite-tribe/bite-trail-data-access';
+import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class MapService {
@@ -36,23 +37,22 @@ export class MapService {
   }
 
   restaurantClicked(bite: Bite): void {
-    if (bite.restaurantId) {
-      const [, , restaurantId] = bite.restaurantId.split('/');
-
-      this.navController.navigateForward([
+    if (bite.id && bite.restaurantId) {
+      void this.navController.navigateForward([
         'bite',
         bite.id,
         'restaurant',
-        restaurantId,
+        bite.restaurantId,
       ]);
 
       return;
     }
 
-    this.navController.navigateForward([
+    void this.navController.navigateForward([
       'bite',
       bite.id,
-      'restaurant',
+      PATH.RESTAURANT,
+      PATH.PLACE,
       encodeURIComponent(bite.place),
     ]);
   }

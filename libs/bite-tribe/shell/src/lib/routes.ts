@@ -53,6 +53,14 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard],
   },
   {
+    path: `${PATH.BITE}/:biteId/${PATH.RESTAURANT}/${PATH.PLACE}/:placeNameFromBite`,
+    loadComponent: () =>
+      import('bite-tribe/restaurant').then(
+        (m) => m.UnverifiedRestaurantContainer,
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: `${PATH.BITE}/:biteId/${PATH.RESTAURANT}/:restaurantId/${PATH.MENU}/:menuId`,
     loadComponent: () => import('bite-tribe/menu').then((m) => m.MenuContainer),
     canActivate: [authGuard],

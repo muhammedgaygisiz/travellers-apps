@@ -50,6 +50,5 @@ export class DashboardComponent {
 
   readonly restaurantClick = output<Restaurant>();
   readonly organisationClick = output<PublicUser>();
-  readonly createRestaurantClick = output<Restaurant>();
   readonly placeClick = output<string>();
 }

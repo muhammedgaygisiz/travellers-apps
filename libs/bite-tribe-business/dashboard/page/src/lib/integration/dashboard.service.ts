@@ -20,12 +20,6 @@ export class DashboardService {
     this.dataAccess.logout();
   }
 
-  selectAndNavigateToCreateRestaurantPageClicked(restaurant: Restaurant): void {
-    this.dataAccess.selectRestaurantToCreate(restaurant);
-
-    void this.navController.navigateForward(['new-restaurant']);
-  }
-
   restaurantClicked(restaurant: Restaurant): void {
     const restaurantId = restaurant.id;
 
@@ -64,6 +58,8 @@ export class DashboardService {
       unsaved: true,
     };
 
-    this.selectAndNavigateToCreateRestaurantPageClicked(restaurant);
+    this.dataAccess.selectRestaurantToCreate(restaurant);
+
+    void this.navController.navigateForward(['new-restaurant']);
   }
 }

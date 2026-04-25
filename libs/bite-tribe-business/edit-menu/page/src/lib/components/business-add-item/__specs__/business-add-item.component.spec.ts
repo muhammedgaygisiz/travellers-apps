@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AddItemComponent } from '../add-item.component';
+import { BusinessAddItemComponent } from '../business-add-item.component';
 
-describe('AddItemComponent', () => {
-  let component: AddItemComponent;
-  let fixture: ComponentFixture<AddItemComponent>;
+describe('BusinessAddItemComponent', () => {
+  let component: BusinessAddItemComponent;
+  let fixture: ComponentFixture<BusinessAddItemComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AddItemComponent],
+      imports: [BusinessAddItemComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AddItemComponent);
+    fixture = TestBed.createComponent(BusinessAddItemComponent);
     component = fixture.componentInstance;
   });
 
@@ -26,7 +26,7 @@ describe('AddItemComponent', () => {
     });
 
     it('should be false when form is valid', () => {
-      component.newItemForm.controls['name'].setValue('Valid Title');
+      component.newItemForm.controls['name'].setValue('Valid Name');
       fixture.detectChanges();
       expect(component.isInvalid()).toBe(false);
     });

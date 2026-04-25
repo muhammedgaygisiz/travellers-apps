@@ -10,9 +10,9 @@
     <div class="ion-padding">
       <h1>{{ placeName() }}</h1>
 
-      <bt-menu
+      <business-menu
         [menu]="menu()"
-        (createBiteClick)="createBiteClick.emit($event)"
+        (saveMenu)="saveMenu.emit($event)"
       />
     </div>
   </ion-content>

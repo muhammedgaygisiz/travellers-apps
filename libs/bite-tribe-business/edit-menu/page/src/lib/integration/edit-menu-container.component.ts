@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MenuPage } from '../components/page/menu-page.component';
-import { MenuService } from './menu.service';
+import { MenuPage } from 'bite-tribe/menu';
+import { EditMenuService } from './edit-menu.service';
 
 @Component({
   template: `
@@ -15,6 +15,6 @@ import { MenuService } from './menu.service';
   imports: [MenuPage],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MenuEditContainer {
-  service = inject(MenuService);
+export class EditMenuContainer {
+  service = inject(EditMenuService);
 }

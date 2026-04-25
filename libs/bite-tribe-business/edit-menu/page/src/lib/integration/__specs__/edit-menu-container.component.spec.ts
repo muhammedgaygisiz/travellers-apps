@@ -27,8 +27,8 @@ describe(EditMenuContainer.name, () => {
         {
           provide: EditMenuService,
           useValue: {
-            restaurant: () => undefined,
-            menu: () => undefined,
+            restaurant: (): void => undefined,
+            menu: (): void => undefined,
             saveMenu: jest.fn(),
           },
         },

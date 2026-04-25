@@ -54,23 +54,36 @@ describe('NewRestaurantPageComponent', () => {
     });
 
     it('should be true when image is set', () => {
-      component.restaurantFormGroup.controls['image'].setValue('data:image/png;base64,abc');
+      component.restaurantFormGroup.controls['image'].setValue(
+        'data:image/png;base64,abc',
+      );
       expect(component.showImage()).toBe(true);
     });
   });
 
   describe('prefillEffect', () => {
     it('should prefill name from restaurant input', () => {
-      componentRef.setInput('restaurant', { id: '1', name: 'My Place' } as Restaurant);
-      fixture.detectChanges();
-      expect(component.restaurantFormGroup.controls['name'].value).toBe('My Place');
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'My Place',
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.restaurantFormGroup.controls['name'].value).toBe(
+        'My Place',
+      );
     });
 
     it('should prefill position from restaurant input', () => {
       const position: Geopoint = { latitude: 10, longitude: 20 };
-      componentRef.setInput('restaurant', { id: '1', name: 'My Place', position } as Restaurant);
-      fixture.detectChanges();
-      expect(component.restaurantFormGroup.controls['position'].value).toEqual(position);
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'My Place',
+        position,
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.restaurantFormGroup.controls['position'].value).toEqual(
+        position,
+      );
     });
   });
 
@@ -84,7 +97,9 @@ describe('NewRestaurantPageComponent', () => {
     it('should emit restaurant when form is valid', () => {
       const emitSpy = jest.spyOn(component.submitNewRestaurant, 'emit');
       const position: Geopoint = { latitude: 10, longitude: 20 };
-      component.restaurantFormGroup.controls['image'].setValue('data:image/png;base64,abc');
+      component.restaurantFormGroup.controls['image'].setValue(
+        'data:image/png;base64,abc',
+      );
       component.restaurantFormGroup.controls['name'].setValue('My Restaurant');
       component.restaurantFormGroup.controls['position'].setValue(position);
 
@@ -98,7 +113,9 @@ describe('NewRestaurantPageComponent', () => {
 
   describe('onImageUploadClick', () => {
     it('should do nothing when image is already set', () => {
-      component.restaurantFormGroup.controls['image'].setValue('data:image/png;base64,abc');
+      component.restaurantFormGroup.controls['image'].setValue(
+        'data:image/png;base64,abc',
+      );
       expect(() => component.onImageUploadClick()).not.toThrow();
     });
   });

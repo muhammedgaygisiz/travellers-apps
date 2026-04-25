@@ -10,8 +10,7 @@
     <div class="ion-padding">
       <h1>{{ placeName() }}</h1>
 
-      <bt-menu
-        editMode
+      <business-menu
         [menu]="menu()"
         (saveMenu)="saveMenu.emit($event)"
       />

@@ -10,10 +10,9 @@
               <ion-icon name="menu" size="large" />
             </ion-reorder>
           </div>
-          <category
+          <business-category
             [category]="category"
             (addItemToCategory)="onAddItemToCategory($event)"
-            (createBiteClick)="createBiteClick.emit($event)"
             (orderingInCategoryChanged)="updateCategory($event)"
           />
         </div>
@@ -38,7 +37,7 @@
 
 <ng-template #addCategory>
   @if (shouldShowAddCategory()) {
-    <add-category
+    <business-add-category
       (addCategory)="onAddCategory($event)"
       (cancelAddCategory)="onCancelAddCategory()"
     />

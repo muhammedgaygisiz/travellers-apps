@@ -17,12 +17,12 @@ import type { Category } from 'model';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './add-category.component.html',
-  styleUrl: './add-category.component.scss',
+  templateUrl: './business-add-category.component.html',
+  styleUrl: './business-add-category.component.scss',
   imports: [IonButton, IonInput, IonList, IonItem, ReactiveFormsModule],
-  selector: 'add-category',
+  selector: 'business-add-category',
 })
-export class AddCategoryComponent {
+export class BusinessAddCategoryComponent {
   addCategory = output<Category>();
 
   cancelAddCategory = output();

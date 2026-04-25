@@ -13,12 +13,12 @@
       <p>{{ itemData?.notes }}</p>
     }
     @if (shouldShowAddVariant()) {
-      <add-item (addItem)="onAddVariant($event)" />
+      <business-add-item (addItem)="onAddVariant($event)" />
     }
     @if (itemData?.variants?.length) {
       <div class="ion-margin-top">
         @for (variant of itemData?.variants; track $index) {
-          <menu-item [item]="variant" isVariant />
+          <business-menu-item [item]="variant" isVariant />
         }
       </div>
     }

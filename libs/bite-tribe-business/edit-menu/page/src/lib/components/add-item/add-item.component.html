@@ -1,0 +1,36 @@
+<ion-list>
+  <form [formGroup]="newItemForm">
+    <ion-item>
+      <ion-input label="Name" formControlName="name" />
+    </ion-item>
+    <ion-item>
+      <ion-input label="Description" formControlName="description" />
+    </ion-item>
+    <ion-item>
+      <ion-input
+        type="number"
+        value=""
+        inputmode="decimal"
+        label="Price"
+        formControlName="price"
+      />
+    </ion-item>
+    <ion-item>
+      <ion-input label="Ingredients" formControlName="ingredients" />
+    </ion-item>
+    <ion-item>
+      <ion-input label="Notes" formControlName="notes" />
+    </ion-item>
+  </form>
+
+  <ion-button
+    class="ion-margin-top"
+    [disabled]="isInvalid()"
+    (click)="onAddItem()"
+  >
+    Add item
+  </ion-button>
+  <ion-button (click)="cancelAddItem.emit()" class="ion-margin-top">
+    Cancel
+  </ion-button>
+</ion-list>

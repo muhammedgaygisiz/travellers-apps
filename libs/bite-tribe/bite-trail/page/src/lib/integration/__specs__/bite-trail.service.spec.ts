@@ -53,7 +53,7 @@ describe(BiteTrailService.name, () => {
     it('should navigate with restaurantId extracted from restaurantId path', () => {
       const bite = {
         id: 'bite-1',
-        restaurantId: 'restaurants/col/rest-1',
+        restaurantId: 'rest-1',
         place: 'Test',
       } as Bite;
       service.restaurantClicked(bite);

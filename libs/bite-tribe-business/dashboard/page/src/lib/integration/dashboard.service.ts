@@ -20,23 +20,17 @@ export class DashboardService {
     this.dataAccess.logout();
   }
 
-  onCreateRestaurantClick(restaurant: Restaurant): void {
-    this.dataAccess.selectRestaurantToCreate(restaurant);
-
-    this.navController.navigateForward(['new-restaurant']);
-  }
-
   restaurantClicked(restaurant: Restaurant): void {
     const restaurantId = restaurant.id;
 
     if (restaurantId) {
-      this.navController.navigateForward(['restaurant', restaurantId]);
+      void this.navController.navigateForward(['restaurant', restaurantId]);
       return;
     }
 
     const restaurantName = restaurant.name;
     if (restaurantName) {
-      this.navController.navigateForward([
+      void this.navController.navigateForward([
         'restaurant',
         encodeURIComponent(restaurantName),
       ]);
@@ -48,11 +42,24 @@ export class DashboardService {
     const organisationId = organisation.userId;
 
     if (organisationId) {
-      this.navController.navigateForward([organisationId, 'dashboard']);
+      void this.navController.navigateForward([organisationId, 'dashboard']);
     }
   }
 
   gotoMigrations(): void {
-    this.navController.navigateForward(['migrations']);
+    void this.navController.navigateForward(['migrations']);
+  }
+
+  placeClicked(placeName: string): void {
+    const restaurant: Restaurant = {
+      id: '',
+      name: placeName,
+      position: { latitude: 0, longitude: 0 },
+      unsaved: true,
+    };
+
+    this.dataAccess.selectRestaurantToCreate(restaurant);
+
+    void this.navController.navigateForward(['new-restaurant']);
   }
 }

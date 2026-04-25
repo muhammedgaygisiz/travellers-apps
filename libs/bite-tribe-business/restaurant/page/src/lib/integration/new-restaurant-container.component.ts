@@ -1,18 +1,19 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RestaurantPageComponent } from '../components/page/restaurant-page.component';
-import { RestaurantService } from './restaurant.service';
+import { NewRestaurantPageComponent } from '../components/page/new-restaurant-page.component';
+import { NewRestaurantService } from './new-restaurant.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RestaurantPageComponent],
+  imports: [NewRestaurantPageComponent],
   template: `
-    <restaurant-page
+    <new-restaurant-page
+      class="ion-page"
       [restaurant]="service.restaurantToCreate()"
       (submitNewRestaurant)="service.submitNewRestaurant($event)"
       (biteClick)="service.biteClicked($event)"
     />
   `,
 })
-export class RestaurantContainer {
-  service = inject(RestaurantService);
+export class NewRestaurantContainer {
+  service = inject(NewRestaurantService);
 }

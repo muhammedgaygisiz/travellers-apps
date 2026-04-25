@@ -42,14 +42,14 @@ export const ROUTES: Routes = withAuthRoutes([
     path: 'new-restaurant',
     loadComponent: () =>
       import('bite-tribe-business/restaurant').then(
-        (m) => m.RestaurantContainer,
+        (m) => m.NewRestaurantContainer,
       ),
     canActivate: [authGuard],
   },
   {
     path: 'restaurant/:restaurantId',
     loadComponent: () =>
-      import('bite-tribe/restaurant').then((m) => m.EditRestaurantContainer),
+      import('bite-tribe-business/restaurant').then((m) => m.EditRestaurantContainer),
     canActivate: [authGuard],
   },
   {

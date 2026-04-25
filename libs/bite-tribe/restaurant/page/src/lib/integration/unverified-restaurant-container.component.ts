@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { RestaurantComponent } from '../components/page/restaurant.component';
 import { RestaurantService } from './restaurant.service';
-import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -12,7 +12,6 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [bites]="service.bites()"
       [userId]="service.userId()"
       [restaurant]="service.restaurant()"
-      (showMenuClick)="service.navigateToMenu($event)"
       (showBitesClick)="service.navigateToBites($event)"
       (biteClick)="service.biteClicked($event)"
       (likeButtonClick)="service.likeButtonClicked($event)"
@@ -20,12 +19,12 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   `,
   imports: [RestaurantComponent],
 })
-export class RestaurantContainer {
+export class UnverifiedRestaurantContainer {
   service = inject(RestaurantService);
 
   ionViewDidEnter(): void {
     void FirebaseAnalytics.setCurrentScreen({
-      screenName: 'Restaurant',
+      screenName: 'Unverified Restaurant',
     });
   }
 }

@@ -8,6 +8,7 @@ import {
   RemoveBiteFromBucketlistParams,
 } from 'model';
 import { NavController } from '@ionic/angular/standalone';
+import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -65,24 +66,22 @@ export class DetailsService {
   }
 
   onRestaurantClick(bite: Bite): void {
-    if (bite.restaurantId) {
-      const [empty, collectionName, restaurantId] =
-        bite.restaurantId.split('/');
-
-      this.navController.navigateForward([
+    if (bite.id && bite.restaurantId) {
+      void this.navController.navigateForward([
         'bite',
         bite.id,
         'restaurant',
-        restaurantId,
+        bite.restaurantId,
       ]);
 
       return;
     }
 
-    this.navController.navigateForward([
+    void this.navController.navigateForward([
       'bite',
       bite.id,
-      'restaurant',
+      PATH.RESTAURANT,
+      PATH.PLACE,
       encodeURIComponent(bite.place),
     ]);
   }

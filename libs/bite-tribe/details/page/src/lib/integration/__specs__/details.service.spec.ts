@@ -329,7 +329,7 @@ describe('DetailsService', () => {
       const bite: Bite = {
         id: 'bite123',
         name: 'Test Bite',
-        restaurantId: '/restaurants/resto123',
+        restaurantId: 'resto123',
       } as Bite;
 
       service.onRestaurantClick(bite);
@@ -355,6 +355,7 @@ describe('DetailsService', () => {
         'bite',
         'bite123',
         'restaurant',
+        'place',
         encodeURIComponent('Some Place'),
       ]);
     });

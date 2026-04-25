@@ -77,7 +77,8 @@ export class HomeService {
     this.navController.navigateForward([
       'bite',
       bite.id,
-      'restaurant',
+      PATH.RESTAURANT,
+      PATH.PLACE,
       encodeURIComponent(bite.place),
     ]);
   }

@@ -72,6 +72,7 @@ describe(BiteTrailService.name, () => {
         PATH.BITE,
         'bite-1',
         PATH.RESTAURANT,
+        PATH.PLACE,
         encodeURIComponent('Nice Place'),
       ]);
     });

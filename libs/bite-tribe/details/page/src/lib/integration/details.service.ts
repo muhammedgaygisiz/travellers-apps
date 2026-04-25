@@ -8,6 +8,7 @@ import {
   RemoveBiteFromBucketlistParams,
 } from 'model';
 import { NavController } from '@ionic/angular/standalone';
+import { PATH } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -82,7 +83,8 @@ export class DetailsService {
     this.navController.navigateForward([
       'bite',
       bite.id,
-      'restaurant',
+      PATH.RESTAURANT,
+      PATH.PLACE,
       encodeURIComponent(bite.place),
     ]);
   }

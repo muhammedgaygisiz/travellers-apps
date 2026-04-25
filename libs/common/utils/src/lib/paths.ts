@@ -12,6 +12,7 @@ export const PATH = {
   FOLLOWERS: 'followers',
   MY_BUCKETLISTS: 'my-bucketlists',
   RESTAURANT: 'restaurant',
+  PLACE: 'place',
   MENU: 'menu',
   PRIVACY_POLICY: 'privacy',
   ACCOUNT_DELETION: 'account-deletion',

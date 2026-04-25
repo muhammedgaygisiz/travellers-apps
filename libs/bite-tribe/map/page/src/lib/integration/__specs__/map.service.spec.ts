@@ -165,6 +165,7 @@ describe(MapService.name, () => {
         'bite',
         'bite3',
         'restaurant',
+        'place',
         'Restaurant%20C',
       ]);
     });
@@ -182,6 +183,7 @@ describe(MapService.name, () => {
         'bite',
         'bite1',
         'restaurant',
+        'place',
         'Test%20Restaurant',
       ]);
     });

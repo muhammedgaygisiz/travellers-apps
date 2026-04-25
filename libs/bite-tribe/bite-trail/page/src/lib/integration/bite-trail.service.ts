@@ -39,6 +39,7 @@ export class BiteTrailService {
       PATH.BITE,
       bite.id,
       PATH.RESTAURANT,
+      PATH.PLACE,
       encodeURIComponent(bite.place),
     ]);
   }

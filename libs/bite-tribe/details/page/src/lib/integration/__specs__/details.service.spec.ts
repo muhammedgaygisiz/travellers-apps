@@ -355,6 +355,7 @@ describe('DetailsService', () => {
         'bite',
         'bite123',
         'restaurant',
+        'place',
         encodeURIComponent('Some Place'),
       ]);
     });

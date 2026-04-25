@@ -14,10 +14,10 @@ import { DashboardService } from './dashboard.service';
       [isAuthenticated]="service.isAuthenticated()"
       [gpsPosition]="service.gpsPosition()"
       (logoutClick)="service.logout()"
-      (createRestaurantClick)="service.onCreateRestaurantClick($event)"
       (restaurantClick)="service.restaurantClicked($event)"
       (organisationClick)="service.organisationClicked($event)"
       (gotoMigrations)="service.gotoMigrations()"
+      (placeClick)="service.placeClicked($event)"
     />
   `,
 })

@@ -17,36 +17,34 @@ import {
   IonContent,
   IonIcon,
   IonInput,
-  IonItem,
-  IonList,
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Bite, Restaurant } from 'model';
+import { Bite, Geopoint, Restaurant } from 'model';
 import { map } from 'rxjs';
 import { compressFile } from 'image-compression';
 import { BiteComponent } from 'bite-tribe-common/bite';
+import { PositionComponent } from 'bite-tribe-common/map';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'restaurant-page',
-  templateUrl: 'restaurant-page.component.html',
-  styleUrl: 'restaurant-page.component.scss',
+  selector: 'new-restaurant-page',
+  templateUrl: 'new-restaurant-page.component.html',
+  styleUrl: 'new-restaurant-page.component.scss',
   imports: [
     PageComponent,
     IonContent,
     IonCard,
     IonIcon,
-    IonList,
     IonInput,
-    IonItem,
     ReactiveFormsModule,
     IonCardContent,
     IonButton,
     BiteComponent,
+    PositionComponent,
   ],
 })
-export class RestaurantPageComponent {
+export class NewRestaurantPageComponent {
   restaurant = input<Restaurant>();
 
   private readonly formBuilder = inject(FormBuilder);
@@ -57,8 +55,7 @@ export class RestaurantPageComponent {
   restaurantFormGroup = this.formBuilder.group({
     image: ['', Validators.required],
     name: ['', Validators.required],
-    latitude: [0, Validators.required],
-    longitude: [0, Validators.required],
+    position: [null as Geopoint | null, Validators.required],
   });
 
   prefillEffect = effect(() => {
@@ -69,14 +66,9 @@ export class RestaurantPageComponent {
       this.restaurantFormGroup.controls['name'].patchValue(restaurant.name);
     }
 
-    if (firstBite) {
-      this.restaurantFormGroup.controls['latitude'].patchValue(
-        firstBite.position.latitude,
-      );
-
-      this.restaurantFormGroup.controls['longitude'].patchValue(
-        firstBite.position.longitude,
-      );
+    const position = restaurant?.position || firstBite?.position;
+    if (position) {
+      this.restaurantFormGroup.controls['position'].patchValue(position);
     }
   });
 
@@ -107,7 +99,7 @@ export class RestaurantPageComponent {
       const fileUpload = this.fileUpload();
 
       if (!fileUpload) {
-        console.error('File upload element not found');
+        console.error('NewRestaurantPageComponent: File upload element reference not found. Ensure the #fileUploader template reference is correctly defined.');
         return;
       }
 
@@ -134,16 +126,13 @@ export class RestaurantPageComponent {
 
   saveNewRestaurant(): void {
     if (this.restaurantFormGroup.valid) {
-      const newRestaurant = this.restaurantFormGroup.value;
+      const { image, name, position } = this.restaurantFormGroup.value;
       const biteIds = this.restaurant()?.biteIds || [];
 
-      const { latitude, longitude, ...rest } = newRestaurant;
       this.submitNewRestaurant.emit({
-        ...rest,
-        position: {
-          latitude: latitude,
-          longitude: longitude,
-        },
+        image: image as string,
+        name: name as string,
+        position: position as Geopoint,
         biteIds,
       } as Restaurant);
     }

@@ -1,0 +1,91 @@
+@let restaurantData = restaurant();
+@let positionData = position();
+
+<ta-page
+  [showHeaderMenu]="false"
+  [showAddButton]="false"
+  [enableBackButton]="true"
+  [showFooter]="false"
+>
+  <ion-content>
+    <bt-restaurant-image [restaurant]="restaurantData" />
+
+    <div class="ion-padding">
+      <div
+        class="header-container ion-display-flex ion-justify-content-between ion-align-items-center ion-margin-bottom"
+      >
+        <h1>{{ placeName() }}</h1>
+      </div>
+
+      <div [formGroup]="socialMediaForm">
+        @if (links.length === 0) {
+          <ion-text>{{ 'no-social-media-links' | transloco }}</ion-text>
+        }
+
+        <div class="ion-margin-top">
+          <ion-list lines="full" formArrayName="links">
+            @for (socialMedia of links.controls; track $index; let i = $index) {
+              <ion-item [formGroupName]="i">
+                <ion-select
+                  class="ion-margin-end"
+                  placeholder="Social Network"
+                  interface="popover"
+                  formControlName="network"
+                >
+                  <ion-select-option value="facebook"
+                    >Facebook
+                  </ion-select-option>
+                  <ion-select-option value="instagram"
+                    >Instagram
+                  </ion-select-option>
+                  <ion-select-option value="twitter">Twitter</ion-select-option>
+                  <ion-select-option value="linkedin"
+                    >LinkedIn
+                  </ion-select-option>
+                  <ion-select-option value="website">Website</ion-select-option>
+                </ion-select>
+                <ion-input placeholder="Link" formControlName="url"></ion-input>
+              </ion-item>
+            }
+
+            <ion-button class="ion-margin-top" (click)="addSocialMedia()"
+              >Add Link
+            </ion-button>
+          </ion-list>
+
+          <div class="ion-margin-top">
+            <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
+          </div>
+        </div>
+
+        @if (!hasMenu()) {
+          <ion-button
+            class="ion-margin-top"
+            aria-label="Create a new menu for this restaurant"
+            (click)="createMenu.emit()"
+          >
+            Create Menu
+          </ion-button>
+        } @else {
+          <ion-button
+            class="ion-margin-top"
+            aria-label="Edit the menu for this restaurant"
+            (click)="gotoEditMenu()"
+          >
+            Edit Menu
+          </ion-button>
+        }
+
+        @if (links.length) {
+          <ion-button
+            class="ion-margin-top"
+            [disabled]="isInvalid()"
+            (click)="saveSocialMediaLinks()"
+          >
+            Save
+          </ion-button>
+        }
+      </div>
+    </div>
+  </ion-content>
+</ta-page>

@@ -51,4 +51,12 @@ describe(MenuDataAccessService.name, () => {
       expect(apiMock.saveMenu).toHaveBeenCalledWith(menu);
     });
   });
+
+  describe('prepareBiteFromMenuItem', () => {
+    it('should call cacheBite from store service', () => {
+      const menu = { id: 'menu-1', categories: [] } as unknown as Menu;
+      service.prepareBiteFromMenuItem(menu);
+      expect(storeMock.cacheBite).toHaveBeenCalledWith(menu);
+    });
+  });
 });

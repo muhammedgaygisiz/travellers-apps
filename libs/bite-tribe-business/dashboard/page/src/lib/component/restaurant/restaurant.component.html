@@ -4,9 +4,9 @@
   <div class="restaurant-container">
     <ion-card>
       <div class="card-content">
-        @if (restaurantData?.image) {
+        @if (restaurantData?.imagePath || restaurantData?.image) {
         <div class="card-image">
-          <img [src]="restaurantData?.image" alt="Restaurant" />
+          <img [src]="restaurantData?.imagePath || restaurantData?.image" alt="Restaurant" />
         </div>
         }
         <div class="card-details">

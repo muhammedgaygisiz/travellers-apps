@@ -3,28 +3,11 @@
   [showFooter]="false"
   [enableBackButton]="true"
 >
-  <input
-    type="file"
-    #fileUploader
-    class="ion-hide"
-    (change)="onFileSelected($event)"
-  />
-
   <ion-content class="ion-padding">
     <h1>Create Restaurant</h1>
 
-    @if (showImage()) {
-    <img [src]="imageBase64()" alt="Restaurant Image" />
-    }
-
     <form [formGroup]="restaurantFormGroup">
-      @if (!showImage()) {
-      <ion-card class="image-placeholder" (click)="onImageUploadClick()">
-        <ion-card-content>
-          <ion-icon name="image-outline" size="large" />
-        </ion-card-content>
-      </ion-card>
-      }
+      <image-upload formControlName="image" />
 
       <ion-input
         label="Restaurant Name"

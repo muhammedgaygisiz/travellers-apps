@@ -2,10 +2,25 @@ import { RestaurantApiService } from '../restaurant-api.service';
 import { TestBed } from '@angular/core/testing';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import * as getRestaurantByIdUtils from '../utils/get-restaurant-by-id';
+import * as uploadBase64Utils from '../../utils/upload-base64-to-firebase-storage';
+import { getDownloadUrlFromFirebaseStorage } from 'utils';
 
 jest.mock('../utils/get-restaurant-by-id');
 
 jest.mock('@capacitor-firebase/firestore');
+
+jest.mock('../../utils/upload-base64-to-firebase-storage', () => ({
+  uploadBase64ToFirebaseStorage: jest
+    .fn()
+    .mockResolvedValue('restaurants/resto-123.jpg'),
+}));
+
+jest.mock('utils', () => ({
+  ...jest.requireActual('utils'),
+  getDownloadUrlFromFirebaseStorage: jest
+    .fn()
+    .mockResolvedValue('https://storage.example.com/restaurants/resto-123.jpg'),
+}));
 
 describe(RestaurantApiService.name, () => {
   let service: RestaurantApiService;
@@ -110,7 +125,7 @@ describe(RestaurantApiService.name, () => {
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(1, {
           reference: 'restaurants/New Resto',
           data: {
-            menuId: '/menus/menu-456',
+            menuId: 'menu-456',
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -119,7 +134,7 @@ describe(RestaurantApiService.name, () => {
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(2, {
           reference: 'bites/bite1',
           data: {
-            restaurantId: '/restaurants/New Resto',
+            restaurantId: 'New Resto',
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -128,7 +143,7 @@ describe(RestaurantApiService.name, () => {
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(3, {
           reference: 'bites/bite2',
           data: {
-            restaurantId: '/restaurants/New Resto',
+            restaurantId: 'New Resto',
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -177,11 +192,62 @@ describe(RestaurantApiService.name, () => {
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(1, {
           reference: 'restaurants/New Resto',
           data: {
-            menuId: '/menus/menu-456',
+            menuId: 'menu-456',
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
         });
+      });
+    });
+
+    describe('given an image', () => {
+      it('should upload image to Firebase Storage and update restaurant with imagePath', async () => {
+        const uploadBase64Spy = jest.spyOn(
+          uploadBase64Utils,
+          'uploadBase64ToFirebaseStorage',
+        );
+        const mockedNewRestaurant = {
+          name: 'New Resto',
+          image: 'data:image/png;base64,abc',
+          biteIds: [],
+        } as any;
+
+        addDocumentSpy
+          .mockResolvedValueOnce({ reference: { id: 'resto-123' } } as any)
+          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+
+        updateDocumentSpy.mockResolvedValue({} as any);
+
+        await service.saveNewRestaurant(mockedNewRestaurant);
+
+        expect(addDocumentSpy).toHaveBeenNthCalledWith(1, {
+          reference: 'restaurants',
+          data: {
+            createdAt: '2024-03-15T12:00:00.000Z',
+            createdAtTimestamp: 1710504000000,
+            name: 'New Resto',
+          },
+        });
+
+        expect(uploadBase64Spy).toHaveBeenCalledWith({
+          base64: 'data:image/png;base64,abc',
+          docId: 'resto-123',
+          collection: 'restaurants',
+        });
+
+        expect(getDownloadUrlFromFirebaseStorage).toHaveBeenCalledWith(
+          'restaurants/resto-123.jpg',
+        );
+
+        expect(updateDocumentSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            reference: 'restaurants/resto-123',
+            data: expect.objectContaining({
+              imagePath:
+                'https://storage.example.com/restaurants/resto-123.jpg',
+            }),
+          }),
+        );
       });
     });
   });
@@ -201,7 +267,9 @@ describe(RestaurantApiService.name, () => {
     });
 
     it('should create an empty menu and update the restaurant with the menuId', async () => {
-      addDocumentSpy.mockResolvedValueOnce({ reference: { id: 'new-menu-id' } } as any);
+      addDocumentSpy.mockResolvedValueOnce({
+        reference: { id: 'new-menu-id' },
+      } as any);
       updateDocumentSpy.mockResolvedValueOnce({} as any);
 
       const result = await service.createMenuForRestaurant('resto-123');
@@ -220,7 +288,7 @@ describe(RestaurantApiService.name, () => {
       expect(updateDocumentSpy).toHaveBeenCalledWith({
         reference: 'restaurants/resto-123',
         data: {
-          menuId: '/menus/new-menu-id',
+          menuId: 'new-menu-id',
           updatedAt: '2024-03-15T12:00:00.000Z',
           updatedAtTimestamp: 1710504000000,
         },

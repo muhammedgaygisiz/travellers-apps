@@ -7,6 +7,7 @@ export interface Restaurant {
   name: string;
   distance?: string;
   image?: string;
+  imagePath?: string;
   position: Geopoint;
 
   menuId?: string;

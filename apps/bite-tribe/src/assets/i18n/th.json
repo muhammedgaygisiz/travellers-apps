@@ -136,5 +136,14 @@
   "go-to-saved-bucket-list": "ไปที่รายการความฝันที่บันทึกไว้",
   "you-already-rated-this-bite-trail": "คุณได้ให้คะแนน Bite Trail นี้แล้ว",
   "write-a-review": "เขียนรีวิว",
-  "mark-bite-as-tried-out": "ลองแล้ว!"
+  "mark-bite-as-tried-out": "ลองแล้ว!",
+  "opening-hours": "เวลาทำการ",
+  "day-monday": "วันจันทร์",
+  "day-tuesday": "วันอังคาร",
+  "day-wednesday": "วันพุธ",
+  "day-thursday": "วันพฤหัสบดี",
+  "day-friday": "วันศุกร์",
+  "day-saturday": "วันเสาร์",
+  "day-sunday": "วันอาทิตย์",
+  "closed": "ปิด"
 }

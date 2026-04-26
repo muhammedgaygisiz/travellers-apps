@@ -135,5 +135,14 @@
   "no-menu-yet": "ገና ምንም ሜኑ የለም",
   "you-already-rated-this-bite-trail": "ይህን Bite Trail አስቀድሞ ደረጃ ሰጥተሃል።",
   "write-a-review": "ግምገማ ጻፍ",
-  "mark-bite-as-tried-out": "ሞክሬበታለሁ!"
+  "mark-bite-as-tried-out": "ሞክሬበታለሁ!",
+  "opening-hours": "የሥራ ሰዓቶች",
+  "day-monday": "ሰኞ",
+  "day-tuesday": "ማክሰኞ",
+  "day-wednesday": "ረቡዕ",
+  "day-thursday": "ሐሙስ",
+  "day-friday": "አርብ",
+  "day-saturday": "ቅዳሜ",
+  "day-sunday": "እሑድ",
+  "closed": "ዝግ"
 }

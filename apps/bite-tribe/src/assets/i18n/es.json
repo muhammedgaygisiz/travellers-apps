@@ -135,5 +135,14 @@
   "no-menu-yet": "Aún no hay menú",
   "you-already-rated-this-bite-trail": "Ya calificaste este Bite Trail.",
   "write-a-review": "Escribe una reseña",
-  "mark-bite-as-tried-out": "¡Lo probé!"
+  "mark-bite-as-tried-out": "¡Lo probé!",
+  "opening-hours": "Horario de apertura",
+  "day-monday": "Lunes",
+  "day-tuesday": "Martes",
+  "day-wednesday": "Miércoles",
+  "day-thursday": "Jueves",
+  "day-friday": "Viernes",
+  "day-saturday": "Sábado",
+  "day-sunday": "Domingo",
+  "closed": "Cerrado"
 }

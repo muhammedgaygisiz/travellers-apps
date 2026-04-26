@@ -11,6 +11,7 @@ import {
   IonButton,
   IonContent,
   IonInput,
+  IonTextarea,
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -19,6 +20,7 @@ import { map } from 'rxjs';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +36,8 @@ import { ImageUploadComponent } from 'image-upload';
     BiteComponent,
     PositionComponent,
     ImageUploadComponent,
+    IonTextarea,
+    TranslocoPipe,
   ],
 })
 export class NewRestaurantPageComponent {
@@ -47,6 +51,7 @@ export class NewRestaurantPageComponent {
   restaurantFormGroup = this.formBuilder.group({
     image: ['', Validators.required],
     name: ['', Validators.required],
+    description: ['', Validators.required],
     position: [null as Geopoint | null, Validators.required],
   });
 
@@ -56,6 +61,12 @@ export class NewRestaurantPageComponent {
 
     if (restaurant?.name) {
       this.restaurantFormGroup.controls['name'].patchValue(restaurant.name);
+    }
+
+    if (restaurant?.description) {
+      this.restaurantFormGroup.controls['description'].patchValue(
+        restaurant.description,
+      );
     }
 
     const position = restaurant?.position || firstBite?.position;
@@ -75,12 +86,14 @@ export class NewRestaurantPageComponent {
 
   saveNewRestaurant(): void {
     if (this.restaurantFormGroup.valid) {
-      const { image, name, position } = this.restaurantFormGroup.value;
+      const { image, name, position, description } =
+        this.restaurantFormGroup.value;
       const biteIds = this.restaurant()?.biteIds || [];
 
       this.submitNewRestaurant.emit({
         image: image as string,
         name: name as string,
+        description: description as string,
         position: position as Geopoint,
         biteIds,
       } as Restaurant);

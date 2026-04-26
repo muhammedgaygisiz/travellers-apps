@@ -71,6 +71,16 @@ export class BiteTribeApiService {
     );
   }
 
+  saveDescriptionForRestaurant(
+    restaurantId: string,
+    description: string,
+  ): Promise<void> {
+    return this.restaurantApiService.saveDescriptionForRestaurant(
+      restaurantId,
+      description,
+    );
+  }
+
   saveNewRestaurant(restaurant: Restaurant): void {
     this.restaurantApiService.saveNewRestaurant(restaurant);
   }

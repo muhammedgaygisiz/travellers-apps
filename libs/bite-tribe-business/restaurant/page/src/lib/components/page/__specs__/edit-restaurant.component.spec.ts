@@ -175,7 +175,48 @@ describe('EditRestaurantComponent', () => {
     });
   });
 
-  describe('saveSocialMediaLinks', () => {
+  describe('initDescription', () => {
+    it('should populate description form from restaurant', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        description: 'A great place to eat',
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.descriptionForm.value.description).toBe(
+        'A great place to eat',
+      );
+    });
+
+    it('should set empty description when restaurant has no description', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.descriptionForm.value.description).toBe('');
+    });
+  });
+
+  describe('saveDescription', () => {
+    it('should emit submitDescription with description value', () => {
+      const emitSpy = jest.spyOn(component.submitDescription, 'emit');
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        description: 'A great place',
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+      component.saveDescription();
+      expect(emitSpy).toHaveBeenCalledWith('A great place');
+    });
+
+    it('should emit empty string when description is empty', () => {
+      const emitSpy = jest.spyOn(component.submitDescription, 'emit');
+      component.saveDescription();
+      expect(emitSpy).toHaveBeenCalledWith('');
+    });
+  });
     let emitSpy: SpyInstance;
 
     beforeEach(() => {

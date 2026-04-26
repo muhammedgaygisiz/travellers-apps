@@ -58,6 +58,21 @@ export class EditRestaurantService {
     }
   }
 
+  async submitDescription(description: string): Promise<void> {
+    const restaurant = this.restaurant();
+    if (restaurant) {
+      try {
+        await this.dataAccess.submitDescription(restaurant.id, description);
+        await this.showToast('About restaurant saved successfully.', 'success');
+      } catch {
+        await this.showToast(
+          'Something went wrong. Please try again.',
+          'danger',
+        );
+      }
+    }
+  }
+
   private async showToast(
     message: string,
     color: 'success' | 'danger',

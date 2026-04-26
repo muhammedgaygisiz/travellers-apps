@@ -22,6 +22,10 @@ export class RestaurantDataAccessService {
     await this.api.saveSocialMediaLinksForRestaurant(restaurantId, links);
   }
 
+  async submitDescription(restaurantId: string, description: string): Promise<void> {
+    await this.api.saveDescriptionForRestaurant(restaurantId, description);
+  }
+
   submitLikeClick(likeType: Like): void {
     const bites = this.bites();
     const userId = this.userId();

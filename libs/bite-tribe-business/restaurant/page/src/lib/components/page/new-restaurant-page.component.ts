@@ -51,7 +51,7 @@ export class NewRestaurantPageComponent {
   restaurantFormGroup = this.formBuilder.group({
     image: ['', Validators.required],
     name: ['', Validators.required],
-    description: ['', Validators.required],
+    description: [''],
     position: [null as Geopoint | null, Validators.required],
   });
 

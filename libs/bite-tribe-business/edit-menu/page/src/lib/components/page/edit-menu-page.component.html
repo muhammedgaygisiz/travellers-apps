@@ -5,7 +5,7 @@
   [showFooter]="false"
 >
   <ion-content>
-    <ion-img [src]="restaurant()?.image" class="place-image" />
+    <ion-img [src]="restaurant()?.imagePath || restaurant()?.image" class="place-image" />
 
     <div class="ion-padding">
       <h1>{{ placeName() }}</h1>

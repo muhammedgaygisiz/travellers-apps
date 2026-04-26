@@ -20,7 +20,6 @@ import {
   restaurantToCreate,
 } from './restaurants/selectors';
 import { menu } from './menus/selectors';
-import { MenuActions } from './menus/actions';
 import { AppActions } from './app/actions';
 import { reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -30,7 +29,6 @@ import type {
   CreateBucketListFromBiteTrailParams,
   Like,
   Link,
-  Menu,
   PublicUser,
   RemoveBiteFromBucketlistParams,
   Restaurant,
@@ -243,10 +241,6 @@ export class BiteTribeStoreService implements StoreService {
 
   selectRestaurantToCreate(restaurant: Restaurant): void {
     this.store.dispatch(setRestaurantToCreate({ restaurant }));
-  }
-
-  saveMenu(menu: Menu): void {
-    this.store.dispatch(MenuActions.saveMenu({ menu }));
   }
 
   cacheBite(bite: Partial<Bite>): void {

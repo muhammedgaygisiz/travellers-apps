@@ -2,11 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { filter, from, map, switchMap, tap } from 'rxjs';
+import { filter, from, map, switchMap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { menuId } from '../router/selectors';
 import { MenuActions } from './actions';
-import { fromAuth } from 'ta-firestore';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable()
@@ -38,16 +37,4 @@ export class MenuEffects {
       }),
     );
   });
-
-  saveMenuToFirestore$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(MenuActions.saveMenu),
-        tap(({ menu }) => {
-          this.api.saveMenu(menu);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
 }

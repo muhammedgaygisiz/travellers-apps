@@ -7,6 +7,5 @@ export const MenuActions = createActionGroup({
     'Loaded menus from API': props<{ menus: Menu[] }>(),
     'Loaded menu from API': props<{ menu: Menu }>(),
     'No menu found': emptyProps(),
-    'Save menu': props<{ menu: Menu }>(),
   },
 });

@@ -1,26 +1,4 @@
 :host {
-  .image-placeholder {
-    background-color: #f1ead9;
-    border: 2px dashed #ccc;
-    height: 200px;
-    margin: 0;
-
-    ion-card-content {
-      height: 100%;
-      padding: 0;
-
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
-    }
-  }
-
   bt-bite {
     display: block;
     margin-bottom: 1rem;

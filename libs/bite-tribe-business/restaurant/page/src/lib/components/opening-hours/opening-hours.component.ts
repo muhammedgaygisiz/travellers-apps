@@ -13,9 +13,7 @@ import {
   IonCheckbox,
   IonIcon,
   IonInput,
-  IonItem,
   IonLabel,
-  IonList,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 
@@ -36,8 +34,6 @@ const DAYS: DaySchedule['day'][] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
-    IonList,
-    IonItem,
     IonLabel,
     IonCheckbox,
     IonButton,

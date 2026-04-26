@@ -15,11 +15,11 @@
   }
 
   .day-cell {
-    min-width: 90px;
+    min-width: 120px;
   }
 
   .open-cell {
-    min-width: 60px;
+    min-width: 90px;
   }
 
   .times-cell {
@@ -28,16 +28,19 @@
 }
 
 .time-range-row {
-  display: flex;
-  align-items: center;
   gap: 4px;
   margin-bottom: 4px;
 
   .time-input {
+    --color: --ion-color;
     width: 110px;
   }
 
   .time-separator {
     padding: 0 4px;
   }
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }

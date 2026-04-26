@@ -10,6 +10,7 @@ import { EditRestaurantService } from './edit-restaurant.service';
       [restaurant]="service.restaurant()"
       (submitSocialMediaLinks)="service.submitSocialMediaLinks($event)"
       (submitDescription)="service.submitDescription($event)"
+      (submitOpeningHours)="service.submitOpeningHours($event)"
       (createMenu)="service.createMenu()"
       (editMenu)="service.gotoEditMenu($event.id, $event.menuId)"
     />

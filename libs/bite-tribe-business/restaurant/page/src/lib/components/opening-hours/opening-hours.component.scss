@@ -1,0 +1,43 @@
+.opening-hours-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 8px 4px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    font-weight: 600;
+    border-bottom: 1px solid var(--ion-color-medium);
+  }
+
+  .day-cell {
+    min-width: 90px;
+  }
+
+  .open-cell {
+    min-width: 60px;
+  }
+
+  .times-cell {
+    width: 100%;
+  }
+}
+
+.time-range-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+
+  .time-input {
+    width: 110px;
+  }
+
+  .time-separator {
+    padding: 0 4px;
+  }
+}

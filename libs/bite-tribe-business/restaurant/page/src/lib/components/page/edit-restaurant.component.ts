@@ -31,6 +31,8 @@ import { map } from 'rxjs';
 import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MapComponent } from 'bite-tribe-common/map';
+import { OpeningHoursComponent } from '../opening-hours/opening-hours.component';
+import { DaySchedule } from 'model';
 
 @Component({
   selector: 'edit-restaurant',
@@ -51,6 +53,7 @@ import { MapComponent } from 'bite-tribe-common/map';
     RestaurantImageComponent,
     TranslocoPipe,
     MapComponent,
+    OpeningHoursComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -62,6 +65,8 @@ export class EditRestaurantComponent {
   readonly submitSocialMediaLinks = output<Partial<{ links: Link[] }>>();
 
   readonly submitDescription = output<string>();
+
+  readonly submitOpeningHours = output<DaySchedule[]>();
 
   readonly createMenu = output<void>();
   readonly editMenu = output<Restaurant>();

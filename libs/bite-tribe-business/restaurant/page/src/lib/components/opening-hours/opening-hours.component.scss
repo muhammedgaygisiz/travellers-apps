@@ -1,0 +1,46 @@
+.opening-hours-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 8px 4px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    font-weight: 600;
+    border-bottom: 1px solid var(--ion-color-medium);
+  }
+
+  .day-cell {
+    min-width: 120px;
+  }
+
+  .open-cell {
+    min-width: 90px;
+  }
+
+  .times-cell {
+    width: 100%;
+  }
+}
+
+.time-range-row {
+  gap: 4px;
+  margin-bottom: 4px;
+
+  .time-input {
+    --color: --ion-color;
+    width: 110px;
+  }
+
+  .time-separator {
+    padding: 0 4px;
+  }
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}

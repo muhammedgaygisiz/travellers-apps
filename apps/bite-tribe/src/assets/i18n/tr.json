@@ -135,5 +135,14 @@
   "no-menu-yet": "Henüz menü yok",
   "you-already-rated-this-bite-trail": "Bu Bite Trail'i puanladın.",
   "write-a-review": "Bir değerlendirme yaz",
-  "mark-bite-as-tried-out": "Denedim!"
+  "mark-bite-as-tried-out": "Denedim!",
+  "opening-hours": "Çalışma saatleri",
+  "day-monday": "Pazartesi",
+  "day-tuesday": "Salı",
+  "day-wednesday": "Çarşamba",
+  "day-thursday": "Perşembe",
+  "day-friday": "Cuma",
+  "day-saturday": "Cumartesi",
+  "day-sunday": "Pazar",
+  "closed": "Kapalı"
 }

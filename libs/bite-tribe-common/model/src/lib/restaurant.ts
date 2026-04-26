@@ -1,6 +1,7 @@
 import type { Geopoint } from './geopoint';
 import type { Bite } from './bite';
 import type { Link } from './link';
+import type { DaySchedule } from './opening-hours';
 
 export interface Restaurant {
   id: string;
@@ -18,6 +19,7 @@ export interface Restaurant {
 
   socialMediaLinks?: Link[];
   description?: string;
+  openingHours?: DaySchedule[];
 
   createdAt?: string;
   createdAtTimestamp?: number;

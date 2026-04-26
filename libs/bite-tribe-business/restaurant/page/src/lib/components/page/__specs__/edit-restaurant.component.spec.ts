@@ -3,7 +3,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { EditRestaurantComponent } from '../edit-restaurant.component';
-import { Link, Restaurant } from 'model';
+import { DaySchedule, Link, Restaurant } from 'model';
 import SpyInstance = jest.SpyInstance;
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
@@ -249,6 +249,21 @@ describe('EditRestaurantComponent', () => {
       componentRef.changeDetectorRef.detectChanges();
       component.saveSocialMediaLinks();
       expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('submitOpeningHours', () => {
+    it('should have submitOpeningHours output', () => {
+      expect(component.submitOpeningHours).toBeDefined();
+    });
+
+    it('should emit opening hours when called', () => {
+      const emitSpy = jest.spyOn(component.submitOpeningHours, 'emit');
+      const hours: DaySchedule[] = [
+        { day: 'monday', isOpen: true, timeRanges: [{ from: '09:00', to: '17:00' }] },
+      ];
+      component.submitOpeningHours.emit(hours);
+      expect(emitSpy).toHaveBeenCalledWith(hours);
     });
   });
 });

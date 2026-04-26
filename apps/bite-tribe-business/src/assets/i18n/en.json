@@ -136,5 +136,17 @@
   "you-already-rated-this-bite-trail": "You already rated this Bite Trail.",
   "write-a-review": "Write a review",
   "mark-bite-as-tried-out": "Tried it out!",
-  "about-restaurant": "About Restaurant"
+  "about-restaurant": "About Restaurant",
+  "opening-hours": "Opening Hours",
+  "weekday": "Weekday",
+  "open": "Open",
+  "times": "Times",
+  "add-time-range": "Add",
+  "day-monday": "Monday",
+  "day-tuesday": "Tuesday",
+  "day-wednesday": "Wednesday",
+  "day-thursday": "Thursday",
+  "day-friday": "Friday",
+  "day-saturday": "Saturday",
+  "day-sunday": "Sunday"
 }

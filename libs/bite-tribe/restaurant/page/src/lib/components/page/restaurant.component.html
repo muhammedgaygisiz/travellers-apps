@@ -57,6 +57,42 @@
         }
       </div>
 
+      @if (restaurantData?.description) {
+        <div class="ion-margin-vertical">
+          <p>{{ restaurantData?.description }}</p>
+        </div>
+      }
+
+      @if (restaurantData?.openingHours?.length) {
+        <div class="ion-margin-top">
+          <h3>{{ 'opening-hours' | transloco }}</h3>
+          <ion-list lines="none" class="ion-display-flex ion-flex-column">
+            @for (day of restaurantData?.openingHours; track day.day) {
+              <ion-item
+                class="ion-display-inline-flex ion-flex-row ion-margin-bottom"
+              >
+                <ion-label class="ion-flex-1">
+                  <span>{{ 'day-' + day.day | transloco }}</span>
+                </ion-label>
+                <div class="ion-flex-1">
+                  @if (day.isOpen && day.timeRanges.length) {
+                    <span class="time-ranges">
+                      @for (range of day.timeRanges; track $index) {
+                        <div>
+                          <span>{{ range.from }}–{{ range.to }}</span>
+                        </div>
+                      }
+                    </span>
+                  } @else if (!day.isOpen) {
+                    <span class="closed">{{ 'closed' | transloco }}</span>
+                  }
+                </div>
+              </ion-item>
+            }
+          </ion-list>
+        </div>
+      }
+
       <div class="ion-margin-top">
         <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
       </div>

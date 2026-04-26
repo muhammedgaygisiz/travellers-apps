@@ -136,5 +136,14 @@
   "go-to-saved-bucket-list": "Vai alla lista dei desideri salvata",
   "you-already-rated-this-bite-trail": "Hai già valutato questo Bite Trail.",
   "write-a-review": "Scrivi una recensione",
-  "mark-bite-as-tried-out": "L'ho provato!"
+  "mark-bite-as-tried-out": "L'ho provato!",
+  "opening-hours": "Orari di apertura",
+  "day-monday": "Lunedì",
+  "day-tuesday": "Martedì",
+  "day-wednesday": "Mercoledì",
+  "day-thursday": "Giovedì",
+  "day-friday": "Venerdì",
+  "day-saturday": "Sabato",
+  "day-sunday": "Domenica",
+  "closed": "Chiuso"
 }

@@ -132,4 +132,18 @@ export class RestaurantApiService {
       },
     });
   }
+
+  async saveDescriptionForRestaurant(
+    restaurantId: string,
+    description: string,
+  ): Promise<void> {
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        description,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
+  }
 }

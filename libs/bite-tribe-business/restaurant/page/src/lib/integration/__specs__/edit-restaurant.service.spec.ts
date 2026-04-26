@@ -22,6 +22,7 @@ describe('EditRestaurantService', () => {
       restaurant: signal(undefined),
       createMenuForRestaurant: jest.fn(),
       submitSocialMediaLinks: jest.fn(),
+      submitDescription: jest.fn(),
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
 
     navControllerMock = { navigateForward: jest.fn() };
@@ -114,6 +115,41 @@ describe('EditRestaurantService', () => {
       (dataAccessMock.submitSocialMediaLinks as jest.Mock).mockRejectedValue(new Error('fail'));
 
       await service.submitSocialMediaLinks({ links: [{ network: 'facebook', url: 'https://fb.com' }] });
+
+      expect(toastControllerMock.create).toHaveBeenCalledWith(
+        expect.objectContaining({ color: 'danger' }),
+      );
+    });
+  });
+
+  describe('submitDescription', () => {
+    it('should do nothing when restaurant is undefined', async () => {
+      await service.submitDescription('A great place');
+      expect(dataAccessMock.submitDescription).not.toHaveBeenCalled();
+    });
+
+    it('should save description and show success toast', async () => {
+      const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
+      (dataAccessMock.submitDescription as jest.Mock).mockResolvedValue(undefined);
+
+      await service.submitDescription('A great place');
+
+      expect(dataAccessMock.submitDescription).toHaveBeenCalledWith(
+        'rest1',
+        'A great place',
+      );
+      expect(toastControllerMock.create).toHaveBeenCalledWith(
+        expect.objectContaining({ color: 'success' }),
+      );
+    });
+
+    it('should show danger toast on error', async () => {
+      const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
+      (dataAccessMock.submitDescription as jest.Mock).mockRejectedValue(new Error('fail'));
+
+      await service.submitDescription('A great place');
 
       expect(toastControllerMock.create).toHaveBeenCalledWith(
         expect.objectContaining({ color: 'danger' }),

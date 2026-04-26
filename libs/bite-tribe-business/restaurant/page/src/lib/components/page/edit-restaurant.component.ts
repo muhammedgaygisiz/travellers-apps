@@ -17,6 +17,7 @@ import {
   IonSelect,
   IonSelectOption,
   IonText,
+  IonTextarea,
 } from '@ionic/angular/standalone';
 import { Link, Restaurant } from 'model';
 import {
@@ -46,6 +47,7 @@ import { MapComponent } from 'bite-tribe-common/map';
     IonSelectOption,
     IonInput,
     IonText,
+    IonTextarea,
     RestaurantImageComponent,
     TranslocoPipe,
     MapComponent,
@@ -59,11 +61,17 @@ export class EditRestaurantComponent {
 
   readonly submitSocialMediaLinks = output<Partial<{ links: Link[] }>>();
 
+  readonly submitDescription = output<string>();
+
   readonly createMenu = output<void>();
   readonly editMenu = output<Restaurant>();
 
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),
+  });
+
+  readonly descriptionForm = this.formBuilder.group({
+    description: [''],
   });
 
   get links(): FormArray {
@@ -86,6 +94,11 @@ export class EditRestaurantComponent {
         }),
       );
     });
+  });
+
+  initDescription = effect(() => {
+    const description = this.restaurant()?.description ?? '';
+    this.descriptionForm.patchValue({ description });
   });
 
   isInvalid = toSignal(
@@ -121,6 +134,11 @@ export class EditRestaurantComponent {
       const socialMediaLinks = this.socialMediaForm.value;
       this.submitSocialMediaLinks.emit(socialMediaLinks as { links: Link[] });
     }
+  }
+
+  saveDescription(): void {
+    const description = this.descriptionForm.value.description ?? '';
+    this.submitDescription.emit(description);
   }
 
   protected gotoEditMenu(): void {

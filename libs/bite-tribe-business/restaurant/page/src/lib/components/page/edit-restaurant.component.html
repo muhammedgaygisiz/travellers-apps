@@ -53,6 +53,21 @@
             </ion-button>
           </ion-list>
 
+          <div class="ion-margin-top" [formGroup]="descriptionForm">
+            <ion-textarea
+              label="{{ 'about-restaurant' | transloco }}"
+              formControlName="description"
+              fill="outline"
+              auto-grow="true"
+              [maxlength]="500"
+              [rows]="6"
+              mode="md"
+            />
+            <ion-button class="ion-margin-top" (click)="saveDescription()">
+              {{ 'save' | transloco }}
+            </ion-button>
+          </div>
+
           <div class="ion-margin-top">
             <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
           </div>

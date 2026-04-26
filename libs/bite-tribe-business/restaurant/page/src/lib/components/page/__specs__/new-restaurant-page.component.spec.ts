@@ -57,6 +57,9 @@ describe('NewRestaurantPageComponent', () => {
       );
       component.restaurantFormGroup.controls['name'].setValue('My Restaurant');
       component.restaurantFormGroup.controls['position'].setValue(position);
+      component.restaurantFormGroup.controls['description'].setValue(
+        'Description',
+      );
 
       expect(component.isInvalid()).toBe(false);
     });
@@ -117,6 +120,9 @@ describe('NewRestaurantPageComponent', () => {
       );
       component.restaurantFormGroup.controls['name'].setValue('My Restaurant');
       component.restaurantFormGroup.controls['position'].setValue(position);
+      component.restaurantFormGroup.controls['description'].setValue(
+        'Description',
+      );
 
       component.saveNewRestaurant();
 
@@ -140,6 +146,9 @@ describe('NewRestaurantPageComponent', () => {
       );
       component.restaurantFormGroup.controls['name'].setValue('My Restaurant');
       component.restaurantFormGroup.controls['position'].setValue(position);
+      component.restaurantFormGroup.controls['description'].setValue(
+        'Description',
+      );
 
       component.saveNewRestaurant();
 

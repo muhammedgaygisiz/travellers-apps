@@ -181,7 +181,7 @@ describe('EditRestaurantComponent', () => {
         id: '1',
         name: 'Test Restaurant',
         description: 'A great place to eat',
-      } as Restaurant);
+      } as unknown as Restaurant);
       componentRef.changeDetectorRef.detectChanges();
       expect(component.descriptionForm.value.description).toBe(
         'A great place to eat',
@@ -205,7 +205,7 @@ describe('EditRestaurantComponent', () => {
         id: '1',
         name: 'Test Restaurant',
         description: 'A great place',
-      } as Restaurant);
+      } as unknown as Restaurant);
       componentRef.changeDetectorRef.detectChanges();
       component.saveDescription();
       expect(emitSpy).toHaveBeenCalledWith('A great place');
@@ -217,6 +217,8 @@ describe('EditRestaurantComponent', () => {
       expect(emitSpy).toHaveBeenCalledWith('');
     });
   });
+
+  describe('saveSocialMediaLinks', () => {
     let emitSpy: SpyInstance;
 
     beforeEach(() => {

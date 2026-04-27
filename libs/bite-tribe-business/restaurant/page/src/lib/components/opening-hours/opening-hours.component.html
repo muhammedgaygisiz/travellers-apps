@@ -1,0 +1,73 @@
+<div [formGroup]="form">
+  <table class="opening-hours-table">
+    <thead>
+      <tr>
+        <th>{{ 'weekday' | transloco }}</th>
+        <th>{{ 'open' | transloco }}</th>
+        <th>{{ 'times' | transloco }}</th>
+      </tr>
+    </thead>
+    <tbody formArrayName="schedule">
+      @for (dayGroup of schedule.controls; track $index; let i = $index) {
+        <tr [formGroupName]="i">
+          <td class="day-cell">
+            <ion-label>{{
+              'day-' + dayGroup.get('day')?.value | transloco
+            }}</ion-label>
+          </td>
+          <td class="open-cell">
+            <ion-checkbox formControlName="isOpen" />
+          </td>
+          <td class="times-cell">
+            @if (dayGroup.get('isOpen')?.value) {
+              <div formArrayName="timeRanges">
+                @for (
+                  range of getTimeRanges(i).controls;
+                  track $index;
+                  let j = $index
+                ) {
+                  <div
+                    class="time-range-row ion-display-flex ion-align-items-center"
+                    [formGroupName]="j"
+                  >
+                    <ion-input
+                      type="time"
+                      formControlName="from"
+                      class="time-input"
+                      fill="outline"
+                      mode="md"
+                    />
+                    <span class="time-separator">–</span>
+                    <ion-input
+                      type="time"
+                      formControlName="to"
+                      class="time-input"
+                      fill="outline"
+                      mode="md"
+                    />
+                    <ion-button
+                      fill="clear"
+                      size="small"
+                      color="danger"
+                      (click)="removeTimeRange(i, j)"
+                    >
+                      <ion-icon slot="icon-only" name="trash-outline" />
+                    </ion-button>
+                  </div>
+                }
+                <ion-button fill="clear" size="small" (click)="addTimeRange(i)">
+                  <ion-icon slot="start" name="add-outline" />
+                  {{ 'add-time-range' | transloco }}
+                </ion-button>
+              </div>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <ion-button class="ion-margin-top" (click)="save()">
+    {{ 'save' | transloco }}
+  </ion-button>
+</div>

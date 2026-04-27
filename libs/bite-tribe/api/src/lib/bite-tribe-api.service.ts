@@ -7,6 +7,7 @@ import {
   CreateAndSaveToBucketListParams,
   CreateAndUploadImageCallbackParams,
   CreateBucketListFromBiteTrailParams,
+  DaySchedule,
   Like,
   Link,
   Menu,
@@ -78,6 +79,16 @@ export class BiteTribeApiService {
     return this.restaurantApiService.saveDescriptionForRestaurant(
       restaurantId,
       description,
+    );
+  }
+
+  saveOpeningHoursForRestaurant(
+    restaurantId: string,
+    openingHours: DaySchedule[],
+  ): Promise<void> {
+    return this.restaurantApiService.saveOpeningHoursForRestaurant(
+      restaurantId,
+      openingHours,
     );
   }
 

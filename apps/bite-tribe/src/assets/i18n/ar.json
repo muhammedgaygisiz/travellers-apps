@@ -135,5 +135,14 @@
   "no-menu-yet": "لا توجد قائمة بعد",
   "you-already-rated-this-bite-trail": "لقد قيّمت هذا المسار بالفعل.",
   "write-a-review": "اكتب مراجعة",
-  "mark-bite-as-tried-out": "لقد جربته!"
+  "mark-bite-as-tried-out": "لقد جربته!",
+  "opening-hours": "ساعات العمل",
+  "day-monday": "الاثنين",
+  "day-tuesday": "الثلاثاء",
+  "day-wednesday": "الأربعاء",
+  "day-thursday": "الخميس",
+  "day-friday": "الجمعة",
+  "day-saturday": "السبت",
+  "day-sunday": "الأحد",
+  "closed": "مغلق"
 }

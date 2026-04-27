@@ -135,5 +135,14 @@
   "no-menu-yet": "Belum ada menu",
   "you-already-rated-this-bite-trail": "Anda sudah memberi rating untuk Bite Trail ini.",
   "write-a-review": "Tulis ulasan",
-  "mark-bite-as-tried-out": "Sudah dicoba!"
+  "mark-bite-as-tried-out": "Sudah dicoba!",
+  "opening-hours": "Jam buka",
+  "day-monday": "Senin",
+  "day-tuesday": "Selasa",
+  "day-wednesday": "Rabu",
+  "day-thursday": "Kamis",
+  "day-friday": "Jumat",
+  "day-saturday": "Sabtu",
+  "day-sunday": "Minggu",
+  "closed": "Tutup"
 }

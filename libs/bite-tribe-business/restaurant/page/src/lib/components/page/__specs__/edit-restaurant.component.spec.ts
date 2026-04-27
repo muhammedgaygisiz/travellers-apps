@@ -3,10 +3,12 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { EditRestaurantComponent } from '../edit-restaurant.component';
-import { DaySchedule, Link, Restaurant } from 'model';
+import { Address, DaySchedule, Geopoint, Link, Restaurant } from 'model';
 import SpyInstance = jest.SpyInstance;
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
+
+jest.mock('leaflet');
 
 addNecessaryIcons();
 
@@ -264,6 +266,107 @@ describe('EditRestaurantComponent', () => {
       ];
       component.submitOpeningHours.emit(hours);
       expect(emitSpy).toHaveBeenCalledWith(hours);
+    });
+  });
+
+  describe('initAddress', () => {
+    it('should populate address form from restaurant', () => {
+      const address: Address = {
+        street: '123 Main St',
+        postcode: '12345',
+        city: 'Berlin',
+        country: 'Germany',
+      };
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        address,
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.addressForm.value).toEqual(address);
+    });
+
+    it('should set empty address fields when restaurant has no address', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.addressForm.value).toEqual({
+        street: '',
+        postcode: '',
+        city: '',
+        country: '',
+      });
+    });
+  });
+
+  describe('saveAddress', () => {
+    it('should emit submitAddress with address values', () => {
+      const emitSpy = jest.spyOn(component.submitAddress, 'emit');
+      component.addressForm.patchValue({
+        street: '123 Main St',
+        postcode: '12345',
+        city: 'Berlin',
+        country: 'Germany',
+      });
+      component.saveAddress();
+      expect(emitSpy).toHaveBeenCalledWith({
+        street: '123 Main St',
+        postcode: '12345',
+        city: 'Berlin',
+        country: 'Germany',
+      });
+    });
+
+    it('should emit empty strings when address fields are empty', () => {
+      const emitSpy = jest.spyOn(component.submitAddress, 'emit');
+      component.saveAddress();
+      expect(emitSpy).toHaveBeenCalledWith({
+        street: '',
+        postcode: '',
+        city: '',
+        country: '',
+      });
+    });
+  });
+
+  describe('initPosition', () => {
+    it('should populate position form from restaurant', () => {
+      const position: Geopoint = { latitude: 52.52, longitude: 13.405 };
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        position,
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.positionForm.value.position).toEqual(position);
+    });
+
+    it('should set null position when restaurant has no position', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+      } as unknown as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.positionForm.value.position).toBeNull();
+    });
+  });
+
+  describe('savePosition', () => {
+    it('should emit submitPosition when position is set', () => {
+      const emitSpy = jest.spyOn(component.submitPosition, 'emit');
+      const position: Geopoint = { latitude: 52.52, longitude: 13.405 };
+      component.positionForm.patchValue({ position });
+      component.savePosition();
+      expect(emitSpy).toHaveBeenCalledWith(position);
+    });
+
+    it('should not emit submitPosition when position is null', () => {
+      const emitSpy = jest.spyOn(component.submitPosition, 'emit');
+      component.positionForm.patchValue({ position: null });
+      component.savePosition();
+      expect(emitSpy).not.toHaveBeenCalled();
     });
   });
 });

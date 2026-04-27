@@ -193,5 +193,37 @@ describe('RestaurantComponent', () => {
       expect(component.selectedSegment()).toBe('bites'); // default value
     });
   });
+
+  describe('address display', () => {
+    it('should render address when restaurant has address', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        address: {
+          street: 'Main Street 1',
+          postcode: '10115',
+          city: 'Berlin',
+          country: 'Germany',
+        },
+      } as Restaurant);
+      fixture.detectChanges();
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      const text = nativeEl.textContent ?? '';
+      expect(text).toContain('Main Street 1');
+      expect(text).toContain('Berlin');
+      expect(text).toContain('Germany');
+    });
+
+    it('should not render address section when restaurant has no address', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+      } as Restaurant);
+      fixture.detectChanges();
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      const text = nativeEl.textContent ?? '';
+      expect(text).not.toContain('Main Street');
+    });
+  });
 });
 

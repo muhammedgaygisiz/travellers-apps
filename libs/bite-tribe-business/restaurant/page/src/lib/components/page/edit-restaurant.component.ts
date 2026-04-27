@@ -19,7 +19,7 @@ import {
   IonText,
   IonTextarea,
 } from '@ionic/angular/standalone';
-import { Link, Restaurant } from 'model';
+import { Address, DaySchedule, Geopoint, Link, Restaurant } from 'model';
 import {
   FormArray,
   FormBuilder,
@@ -30,9 +30,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { MapComponent } from 'bite-tribe-common/map';
+import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
 import { OpeningHoursComponent } from '../opening-hours/opening-hours.component';
-import { DaySchedule } from 'model';
 
 @Component({
   selector: 'edit-restaurant',
@@ -54,6 +53,7 @@ import { DaySchedule } from 'model';
     TranslocoPipe,
     MapComponent,
     OpeningHoursComponent,
+    PositionComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -68,6 +68,10 @@ export class EditRestaurantComponent {
 
   readonly submitOpeningHours = output<DaySchedule[]>();
 
+  readonly submitAddress = output<Address>();
+
+  readonly submitPosition = output<Geopoint>();
+
   readonly createMenu = output<void>();
   readonly editMenu = output<Restaurant>();
 
@@ -77,6 +81,17 @@ export class EditRestaurantComponent {
 
   readonly descriptionForm = this.formBuilder.group({
     description: [''],
+  });
+
+  readonly addressForm = this.formBuilder.group({
+    street: [''],
+    postcode: [''],
+    city: [''],
+    country: [''],
+  });
+
+  readonly positionForm = this.formBuilder.group({
+    position: [null as Geopoint | null],
   });
 
   get links(): FormArray {
@@ -106,6 +121,21 @@ export class EditRestaurantComponent {
     this.descriptionForm.patchValue({ description });
   });
 
+  initAddress = effect(() => {
+    const address = this.restaurant()?.address;
+    this.addressForm.patchValue({
+      street: address?.street ?? '',
+      postcode: address?.postcode ?? '',
+      city: address?.city ?? '',
+      country: address?.country ?? '',
+    });
+  });
+
+  initPosition = effect(() => {
+    const position = this.restaurant()?.position ?? null;
+    this.positionForm.patchValue({ position });
+  });
+
   isInvalid = toSignal(
     this.socialMediaForm.valueChanges.pipe(
       map(() => {
@@ -120,8 +150,6 @@ export class EditRestaurantComponent {
   );
 
   placeName = computed(() => this.restaurant()?.name);
-
-  position = computed(() => this.restaurant()?.position);
 
   hasMenu = computed(() => !!this.restaurant()?.menuId);
 
@@ -144,6 +172,23 @@ export class EditRestaurantComponent {
   saveDescription(): void {
     const description = this.descriptionForm.value.description ?? '';
     this.submitDescription.emit(description);
+  }
+
+  saveAddress(): void {
+    const { street, postcode, city, country } = this.addressForm.value;
+    this.submitAddress.emit({
+      street: street ?? '',
+      postcode: postcode ?? '',
+      city: city ?? '',
+      country: country ?? '',
+    });
+  }
+
+  savePosition(): void {
+    const position = this.positionForm.value.position;
+    if (position) {
+      this.submitPosition.emit(position);
+    }
   }
 
   protected gotoEditMenu(): void {

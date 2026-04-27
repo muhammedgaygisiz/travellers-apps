@@ -1,5 +1,4 @@
 @let restaurantData = restaurant();
-@let positionData = position();
 
 <ta-page
   [showHeaderMenu]="false"
@@ -68,8 +67,47 @@
             </ion-button>
           </div>
 
-          <div class="ion-margin-top">
-            <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
+          <div class="ion-margin-top" [formGroup]="addressForm">
+            <ion-input
+              label="{{ 'street' | transloco }}"
+              formControlName="street"
+              fill="outline"
+              class="ion-margin-top"
+              mode="md"
+            />
+            <div class="ion-display-flex ion-gap-2 ion-margin-top">
+              <ion-input
+                label="{{ 'postcode' | transloco }}"
+                formControlName="postcode"
+                fill="outline"
+                mode="md"
+                class="postcode-input"
+              />
+              <ion-input
+                label="{{ 'city' | transloco }}"
+                formControlName="city"
+                fill="outline"
+                mode="md"
+                class="ion-flex-1"
+              />
+            </div>
+            <ion-input
+              label="{{ 'country' | transloco }}"
+              formControlName="country"
+              fill="outline"
+              class="ion-margin-top"
+              mode="md"
+            />
+            <ion-button class="ion-margin-top" (click)="saveAddress()">
+              {{ 'save' | transloco }}
+            </ion-button>
+          </div>
+
+          <div class="ion-margin-top" [formGroup]="positionForm">
+            <position formControlName="position" />
+            <ion-button class="ion-margin-top" (click)="savePosition()">
+              {{ 'save' | transloco }}
+            </ion-button>
           </div>
 
           <div class="ion-margin-top">

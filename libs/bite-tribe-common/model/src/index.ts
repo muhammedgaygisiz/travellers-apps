@@ -18,3 +18,4 @@ export type * from './lib/profile-meta-data';
 export type * from './lib/create-and-upload-image-callback-params';
 export type * from './lib/bite-trail-rating';
 export type * from './lib/opening-hours';
+export type * from './lib/address';

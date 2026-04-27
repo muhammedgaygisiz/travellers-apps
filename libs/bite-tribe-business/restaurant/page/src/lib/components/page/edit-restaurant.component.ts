@@ -30,7 +30,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
+import { PositionComponent } from 'bite-tribe-common/map';
 import { OpeningHoursComponent } from '../opening-hours/opening-hours.component';
 
 @Component({
@@ -51,7 +51,6 @@ import { OpeningHoursComponent } from '../opening-hours/opening-hours.component'
     IonTextarea,
     RestaurantImageComponent,
     TranslocoPipe,
-    MapComponent,
     OpeningHoursComponent,
     PositionComponent,
   ],

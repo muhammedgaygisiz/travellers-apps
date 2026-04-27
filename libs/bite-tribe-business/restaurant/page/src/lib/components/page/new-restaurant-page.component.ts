@@ -100,8 +100,16 @@ export class NewRestaurantPageComponent {
 
   saveNewRestaurant(): void {
     if (this.restaurantFormGroup.valid) {
-      const { image, name, position, description, street, postcode, city, country } =
-        this.restaurantFormGroup.value;
+      const {
+        image,
+        name,
+        position,
+        description,
+        street,
+        postcode,
+        city,
+        country,
+      } = this.restaurantFormGroup.value;
       const biteIds = this.restaurant()?.biteIds || [];
 
       const address: Address = {

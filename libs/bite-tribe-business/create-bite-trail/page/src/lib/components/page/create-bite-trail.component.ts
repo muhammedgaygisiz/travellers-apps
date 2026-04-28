@@ -184,6 +184,7 @@ export class CreateBiteTrailComponent {
       location: formValue.location,
       price: formValue.price,
       currency: formValue.currency,
+      image: formValue.image,
       imagePath: formValue.imagePath,
       biteIds: this.localSelectedBiteIds(),
     });

@@ -2,12 +2,14 @@ import { inject, Injectable } from '@angular/core';
 import { ReviewApiService } from './review-api/review-api.service';
 import { RestaurantApiService } from './restaurant-api/restaurant-api.service';
 import {
+  Address,
   Bite,
   Bucketlist,
   CreateAndSaveToBucketListParams,
   CreateAndUploadImageCallbackParams,
   CreateBucketListFromBiteTrailParams,
   DaySchedule,
+  Geopoint,
   Like,
   Link,
   Menu,
@@ -89,6 +91,26 @@ export class BiteTribeApiService {
     return this.restaurantApiService.saveOpeningHoursForRestaurant(
       restaurantId,
       openingHours,
+    );
+  }
+
+  saveAddressForRestaurant(
+    restaurantId: string,
+    address: Address,
+  ): Promise<void> {
+    return this.restaurantApiService.saveAddressForRestaurant(
+      restaurantId,
+      address,
+    );
+  }
+
+  savePositionForRestaurant(
+    restaurantId: string,
+    position: Geopoint,
+  ): Promise<void> {
+    return this.restaurantApiService.savePositionForRestaurant(
+      restaurantId,
+      position,
     );
   }
 

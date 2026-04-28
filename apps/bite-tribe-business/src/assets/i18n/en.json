@@ -148,5 +148,8 @@
   "day-thursday": "Thursday",
   "day-friday": "Friday",
   "day-saturday": "Saturday",
-  "day-sunday": "Sunday"
+  "day-sunday": "Sunday",
+  "street": "Street",
+  "postcode": "Postcode",
+  "country": "Country"
 }

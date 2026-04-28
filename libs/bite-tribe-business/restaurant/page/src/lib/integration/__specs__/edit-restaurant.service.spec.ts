@@ -3,7 +3,7 @@ import { EditRestaurantService } from '../edit-restaurant.service';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { NavController, ToastController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
-import { DaySchedule, Restaurant } from 'model';
+import { Address, DaySchedule, Geopoint, Restaurant } from 'model';
 
 jest.mock('bite-tribe/restaurant-data-access');
 jest.mock('@capacitor-firebase/firestore');
@@ -24,6 +24,8 @@ describe('EditRestaurantService', () => {
       submitSocialMediaLinks: jest.fn(),
       submitDescription: jest.fn(),
       submitOpeningHours: jest.fn(),
+      submitAddress: jest.fn(),
+      submitPosition: jest.fn(),
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
 
     navControllerMock = { navigateForward: jest.fn() };
@@ -187,6 +189,79 @@ describe('EditRestaurantService', () => {
       (dataAccessMock.submitOpeningHours as jest.Mock).mockRejectedValue(new Error('fail'));
 
       await service.submitOpeningHours([]);
+
+      expect(toastControllerMock.create).toHaveBeenCalledWith(
+        expect.objectContaining({ color: 'danger' }),
+      );
+    });
+  });
+
+  describe('submitAddress', () => {
+    const address: Address = {
+      street: '123 Main St',
+      postcode: '12345',
+      city: 'Berlin',
+      country: 'Germany',
+    };
+
+    it('should do nothing when restaurant is undefined', async () => {
+      await service.submitAddress(address);
+      expect(dataAccessMock.submitAddress).not.toHaveBeenCalled();
+    });
+
+    it('should save address and show success toast', async () => {
+      const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
+      (dataAccessMock.submitAddress as jest.Mock).mockResolvedValue(undefined);
+
+      await service.submitAddress(address);
+
+      expect(dataAccessMock.submitAddress).toHaveBeenCalledWith('rest1', address);
+      expect(toastControllerMock.create).toHaveBeenCalledWith(
+        expect.objectContaining({ color: 'success' }),
+      );
+    });
+
+    it('should show danger toast on error', async () => {
+      const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
+      (dataAccessMock.submitAddress as jest.Mock).mockRejectedValue(new Error('fail'));
+
+      await service.submitAddress(address);
+
+      expect(toastControllerMock.create).toHaveBeenCalledWith(
+        expect.objectContaining({ color: 'danger' }),
+      );
+    });
+  });
+
+  describe('submitPosition', () => {
+    const position: Geopoint = { latitude: 52.52, longitude: 13.405 };
+
+    it('should do nothing when restaurant is undefined', async () => {
+      await service.submitPosition(position);
+      expect(dataAccessMock.submitPosition).not.toHaveBeenCalled();
+    });
+
+    it('should save position and show success toast', async () => {
+      const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
+      (dataAccessMock.submitPosition as jest.Mock).mockResolvedValue(undefined);
+
+      await service.submitPosition(position);
+
+      expect(dataAccessMock.submitPosition).toHaveBeenCalledWith('rest1', position);
+      expect(toastControllerMock.create).toHaveBeenCalledWith(
+        expect.objectContaining({ color: 'success' }),
+      );
+    });
+
+    it('should show danger toast on error', async () => {
+      const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
+      (dataAccessMock.submitPosition as jest.Mock).mockRejectedValue(new Error('fail'));
+
+      await service.submitPosition(position);
 
       expect(toastControllerMock.create).toHaveBeenCalledWith(
         expect.objectContaining({ color: 'danger' }),

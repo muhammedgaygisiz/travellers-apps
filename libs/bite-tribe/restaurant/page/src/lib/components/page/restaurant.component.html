@@ -63,6 +63,23 @@
         </div>
       }
 
+      @if (restaurantData?.address) {
+        <div class="ion-margin-top">
+          @if (restaurantData?.address?.street) {
+            <p class="ion-no-margin">{{ restaurantData?.address?.street }}</p>
+          }
+          @if (restaurantData?.address?.postcode || restaurantData?.address?.city) {
+            <p class="ion-no-margin">
+              {{ restaurantData?.address?.postcode }}
+              {{ restaurantData?.address?.city }}
+            </p>
+          }
+          @if (restaurantData?.address?.country) {
+            <p class="ion-no-margin">{{ restaurantData?.address?.country }}</p>
+          }
+        </div>
+      }
+
       @if (restaurantData?.openingHours?.length) {
         <div class="ion-margin-top">
           <h3>{{ 'opening-hours' | transloco }}</h3>

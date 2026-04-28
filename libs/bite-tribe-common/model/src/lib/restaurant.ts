@@ -2,6 +2,7 @@ import type { Geopoint } from './geopoint';
 import type { Bite } from './bite';
 import type { Link } from './link';
 import type { DaySchedule } from './opening-hours';
+import type { Address } from './address';
 
 export interface Restaurant {
   id: string;
@@ -10,6 +11,7 @@ export interface Restaurant {
   image?: string;
   imagePath?: string;
   position: Geopoint;
+  address?: Address;
 
   menuId?: string;
 

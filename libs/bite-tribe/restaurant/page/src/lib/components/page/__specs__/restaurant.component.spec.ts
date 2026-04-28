@@ -206,7 +206,7 @@ describe('RestaurantComponent', () => {
           country: 'Germany',
         },
       } as Restaurant);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
       const nativeEl = fixture.nativeElement as HTMLElement;
       const text = nativeEl.textContent ?? '';
       expect(text).toContain('Main Street 1');
@@ -219,11 +219,10 @@ describe('RestaurantComponent', () => {
         id: '1',
         name: 'Test Restaurant',
       } as Restaurant);
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
       const nativeEl = fixture.nativeElement as HTMLElement;
       const text = nativeEl.textContent ?? '';
       expect(text).not.toContain('Main Street');
     });
   });
 });
-

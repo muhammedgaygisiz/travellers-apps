@@ -8,8 +8,7 @@ import {
 import { Bite, BiteTrail, PublicUser } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { uploadBase64ToFirebaseStorage } from 'bite-tribe/api';
-import { getDownloadUrlFromFirebaseStorage } from 'utils';
+import { BiteTribeApiService } from 'bite-tribe/api';
 
 export const USERS_COLLECTION = 'users';
 export const BITE_TRAIL_COLLECTION = 'biteTrails';
@@ -17,6 +16,7 @@ export const BITE_TRAIL_COLLECTION = 'biteTrails';
 @Injectable({ providedIn: 'root' })
 export class CreateBiteTrailDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly api = inject(BiteTribeApiService);
 
   selectedBites = signal<Bite[]>([]);
   employees = signal<PublicUser[]>([]);
@@ -49,7 +49,7 @@ export class CreateBiteTrailDataAccessService {
     loader: this.organisationLoader.bind(this),
   });
 
-  async createBiteTrail(
+  createBiteTrail(
     trailData: Omit<
       BiteTrail,
       | 'id'
@@ -59,44 +59,6 @@ export class CreateBiteTrailDataAccessService {
       | 'updatedAtTimestamp'
     >,
   ): Promise<void> {
-    const { image, ...trailDataWithoutImage } = trailData;
-    const now = new Date().toISOString();
-    const nowTimestamp = Date.now();
-    const addResult = await FirebaseFirestore.addDocument({
-      reference: BITE_TRAIL_COLLECTION,
-      data: {
-        ...trailDataWithoutImage,
-        createdAt: now,
-        createdAtTimestamp: nowTimestamp,
-        updatedAt: now,
-        updatedAtTimestamp: nowTimestamp,
-      },
-    });
-
-    if (image) {
-      await this.uploadAndSaveTrailImage(addResult.reference.id, image);
-    }
-  }
-
-  private async uploadAndSaveTrailImage(
-    trailId: string,
-    image: string,
-  ): Promise<void> {
-    const storagePath = await uploadBase64ToFirebaseStorage({
-      base64: image,
-      docId: trailId,
-      collection: BITE_TRAIL_COLLECTION,
-    });
-
-    const imagePath = await getDownloadUrlFromFirebaseStorage(storagePath);
-
-    await FirebaseFirestore.updateDocument({
-      reference: `${BITE_TRAIL_COLLECTION}/${trailId}`,
-      data: {
-        imagePath,
-        updatedAt: new Date().toISOString(),
-        updatedAtTimestamp: Date.now(),
-      },
-    });
+    return this.api.createBiteTrail(trailData);
   }
 }

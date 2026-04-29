@@ -161,7 +161,9 @@ export class NewRestaurantPageComponent {
       };
 
       const socialMediaLinks = this.socialMediaForm.valid && this.links.length > 0
-        ? (this.socialMediaForm.value.links as Link[])
+        ? (this.socialMediaForm.value.links as { network: string; url: string }[]).map(
+            (link): Link => ({ network: link.network, url: link.url }),
+          )
         : [];
 
       this.submitNewRestaurant.emit({

@@ -1,14 +1,21 @@
 import { inject, Injectable } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { Credentials } from '../../api/credentials.model';
 import { AuthService } from 'ta-firestore';
 import { NavController, ToastController } from '@ionic/angular';
 import { AuthErrorCodes } from 'firebase/auth';
 
+interface RegistrationError {
+  code?: string;
+  errorMessage?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class RegistrationService {
-  authService = inject(AuthService);
+  private readonly authService = inject(AuthService);
+  private readonly transloco = inject(TranslocoService);
   readonly toastController = inject(ToastController);
   readonly navController = inject(NavController);
 
@@ -22,25 +29,47 @@ export class RegistrationService {
       await this.authService.sendEmailVerification();
 
       await this.showRegistrationSuccessMessage(
-        'Registration successful! Please check your email to verify your account.',
+        this.transloco.translate(
+          'registration-success-check-your-email-to-verify-account',
+        ),
       );
 
       void this.navController.navigateBack(['/home']);
-    } catch (error: any) {
-      if (error?.code === AuthErrorCodes.EMAIL_EXISTS) {
+    } catch (error: unknown) {
+      if (this.getErrorCode(error) === AuthErrorCodes.EMAIL_EXISTS) {
         // Prevent user enumeration by showing a generic error message
         await this.showRegistrationErrorMessage(
-          'A error occurred during registration. Please try again.',
+          this.transloco.translate('registration-error-try-again'),
         );
 
         return;
       }
 
       await this.showRegistrationErrorMessage(
-        error?.errorMessage ||
-          'An unknown error occurred during registration. Please try again.',
+        this.getErrorMessage(error) ??
+          this.transloco.translate('registration-unknown-error-try-again'),
       );
     }
+  }
+
+  private getErrorCode(error: unknown): string | undefined {
+    if (!this.isRegistrationError(error)) {
+      return undefined;
+    }
+
+    return error.code;
+  }
+
+  private getErrorMessage(error: unknown): string | undefined {
+    if (!this.isRegistrationError(error)) {
+      return undefined;
+    }
+
+    return error.errorMessage;
+  }
+
+  private isRegistrationError(error: unknown): error is RegistrationError {
+    return typeof error === 'object' && error !== null;
   }
 
   private async showRegistrationSuccessMessage(message: string): Promise<void> {
@@ -50,7 +79,7 @@ export class RegistrationService {
       duration: 5000,
       buttons: [
         {
-          text: 'OK',
+          text: this.transloco.translate('ok'),
           role: 'confirm',
         },
       ],
@@ -65,7 +94,7 @@ export class RegistrationService {
       position: 'bottom',
       buttons: [
         {
-          text: 'OK',
+          text: this.transloco.translate('ok'),
           role: 'confirm',
         },
       ],

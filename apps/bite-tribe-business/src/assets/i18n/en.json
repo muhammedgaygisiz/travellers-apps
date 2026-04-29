@@ -151,5 +151,9 @@
   "day-sunday": "Sunday",
   "street": "Street",
   "postcode": "Postcode",
-  "country": "Country"
+  "country": "Country",
+  "ok": "OK",
+  "registration-success-check-your-email-to-verify-account": "Registration successful! Please check your email to verify your account.",
+  "registration-error-try-again": "An error occurred during registration. Please try again.",
+  "registration-unknown-error-try-again": "An unknown error occurred during registration. Please try again."
 }

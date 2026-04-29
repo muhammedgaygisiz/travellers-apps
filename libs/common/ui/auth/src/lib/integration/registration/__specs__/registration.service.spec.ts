@@ -1,7 +1,18 @@
 import { RegistrationService } from '../registration.service';
 import { TestBed } from '@angular/core/testing';
+import { TranslocoService } from '@jsverse/transloco';
 import { AuthService } from 'ta-firestore';
 import { NavController, ToastController } from '@ionic/angular';
+
+const translations: Record<string, string> = {
+  ok: 'OK',
+  'registration-error-try-again':
+    'An error occurred during registration. Please try again.',
+  'registration-success-check-your-email-to-verify-account':
+    'Registration successful! Please check your email to verify your account.',
+  'registration-unknown-error-try-again':
+    'An unknown error occurred during registration. Please try again.',
+};
 
 const MockedAuthService = {
   registerWithUsernameAndPassword: jest.fn(),
@@ -18,15 +29,32 @@ const MockedToastController = {
   }),
 };
 
+const MockedTranslocoService = {
+  translate: jest.fn(
+    (key: string): string => translations[key] ?? `missing-translation:${key}`,
+  ),
+};
+
+type RegistrationServiceWithPrivateMethods = RegistrationService & {
+  showRegistrationErrorMessage(message: string): Promise<void>;
+};
+
 describe(RegistrationService.name, () => {
   let service: RegistrationService;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    MockedAuthService.registerWithUsernameAndPassword.mockResolvedValue(
+      undefined,
+    );
+    MockedAuthService.sendEmailVerification.mockResolvedValue(undefined);
+
     TestBed.configureTestingModule({
       providers: [
         { provide: AuthService, useValue: MockedAuthService },
         { provide: NavController, useValue: MockedNavController },
         { provide: ToastController, useValue: MockedToastController },
+        { provide: TranslocoService, useValue: MockedTranslocoService },
       ],
     });
     service = TestBed.inject(RegistrationService);
@@ -69,7 +97,7 @@ describe(RegistrationService.name, () => {
           password: '12345678',
         });
         expect(sendEmailVerificationSpy).toHaveBeenCalled();
-        expect(navigateBackSpy).toHaveBeenCalledWith(['/login']);
+        expect(navigateBackSpy).toHaveBeenCalledWith(['/home']);
       });
     });
 
@@ -78,13 +106,13 @@ describe(RegistrationService.name, () => {
 
       beforeEach(() => {
         registerWithUsernameAndPasswordSpy.mockImplementation(() => {
-          const error: any = new Error('Email already exists');
-          error.code = 'auth/email-already-in-use';
-          throw error;
+          throw Object.assign(new Error('Email already exists'), {
+            code: 'auth/email-already-in-use',
+          }) as Error & { code: string };
         });
 
         showRegistrationErrorMessageSpy = jest.spyOn(
-          service as any,
+          service as RegistrationServiceWithPrivateMethods,
           'showRegistrationErrorMessage',
         );
       });
@@ -96,7 +124,7 @@ describe(RegistrationService.name, () => {
         });
 
         expect(showRegistrationErrorMessageSpy).toHaveBeenCalledWith(
-          'A error occurred during registration. Please try again.',
+          'An error occurred during registration. Please try again.',
         );
       });
     });
@@ -106,14 +134,14 @@ describe(RegistrationService.name, () => {
 
       beforeEach(() => {
         registerWithUsernameAndPasswordSpy.mockImplementation(() => {
-          const error: any = new Error('Some unknown error');
-          error.code = 'auth/some-unknown-error';
-          error.errorMessage = 'This is an unknown error';
-          throw error;
+          throw Object.assign(new Error('Some unknown error'), {
+            code: 'auth/some-unknown-error',
+            errorMessage: 'This is an unknown error',
+          }) as Error & { code: string; errorMessage: string };
         });
 
         showRegistrationErrorMessageSpy = jest.spyOn(
-          service as any,
+          service as RegistrationServiceWithPrivateMethods,
           'showRegistrationErrorMessage',
         );
       });
@@ -126,6 +154,38 @@ describe(RegistrationService.name, () => {
 
         expect(showRegistrationErrorMessageSpy).toHaveBeenCalledWith(
           'This is an unknown error',
+        );
+      });
+    });
+
+    describe('given an unknown error without error message is thrown', () => {
+      let showRegistrationErrorMessageSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        registerWithUsernameAndPasswordSpy.mockImplementation(() => {
+          const error = new Error('Some unknown error');
+
+          Object.assign(error, {
+            code: 'auth/some-unknown-error',
+          });
+
+          throw error;
+        });
+
+        showRegistrationErrorMessageSpy = jest.spyOn(
+          service as never,
+          'showRegistrationErrorMessage' as never,
+        );
+      });
+
+      it('should show the translated fallback error message', async () => {
+        await service.register({
+          email: 'q@q.de',
+          password: '12345678',
+        });
+
+        expect(showRegistrationErrorMessageSpy).toHaveBeenCalledWith(
+          'An unknown error occurred during registration. Please try again.',
         );
       });
     });

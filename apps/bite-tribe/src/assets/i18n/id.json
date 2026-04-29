@@ -64,7 +64,7 @@
   "best-seller": "Terlaris",
   "free": "Gratis",
   "by-before": "oleh",
-  "by-after": "",
+  "by-after": " ",
   "sold-times": "Terjual {{count}} kali",
   "view-bite-trail": "Lihat BiteTrail",
   "market-place": "Marketplace",
@@ -144,5 +144,9 @@
   "day-friday": "Jumat",
   "day-saturday": "Sabtu",
   "day-sunday": "Minggu",
-  "closed": "Tutup"
+  "closed": "Tutup",
+  "ok": "OK",
+  "registration-success-check-your-email-to-verify-account": "Pendaftaran berhasil! Cek emailmu untuk memverifikasi akunmu.",
+  "registration-error-try-again": "Terjadi kesalahan saat pendaftaran. Coba lagi, ya.",
+  "registration-unknown-error-try-again": "Terjadi kesalahan yang tidak diketahui saat pendaftaran. Coba lagi, ya."
 }

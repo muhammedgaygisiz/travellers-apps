@@ -64,7 +64,7 @@
   "best-seller": "Best Seller",
   "free": "Kostenlos",
   "by-before": "von",
-  "by-after": "",
+  "by-after": " ",
   "sold-times": "{{count}} mal verkauft",
   "view-bite-trail": "BiteTrail anzeigen",
   "market-place": "Marktplatz",
@@ -144,5 +144,9 @@
   "day-friday": "Freitag",
   "day-saturday": "Samstag",
   "day-sunday": "Sonntag",
-  "closed": "Geschlossen"
+  "closed": "Geschlossen",
+  "ok": "OK",
+  "registration-success-check-your-email-to-verify-account": "Registrierung erfolgreich! Bitte überprüfe deine E-Mail, um dein Konto zu verifizieren.",
+  "registration-error-try-again": "Bei der Registrierung ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+  "registration-unknown-error-try-again": "Bei der Registrierung ist ein unbekannter Fehler aufgetreten. Bitte versuche es erneut."
 }

@@ -63,8 +63,8 @@
   "are-you-sure-you-want-to-delete-this-bite": "Bu Bite'ı silmek istediğinden emin misin?",
   "best-seller": "En Çok Satanlar",
   "free": "Ücretsiz",
-  "by-before": "",
-  "by-after": "",
+  "by-before": " ",
+  "by-after": " ",
   "sold-times": "{{count}} kez satıldı",
   "view-bite-trail": "BiteTrail'i görüntüle",
   "market-place": "Pazar Yeri",
@@ -144,5 +144,9 @@
   "day-friday": "Cuma",
   "day-saturday": "Cumartesi",
   "day-sunday": "Pazar",
-  "closed": "Kapalı"
+  "closed": "Kapalı",
+  "ok": "Tamam",
+  "registration-success-check-your-email-to-verify-account": "Kayıt başarılı! Hesabını doğrulamak için e-postanı kontrol et.",
+  "registration-error-try-again": "Kayıt sırasında bir hata oluştu. Tekrar dene.",
+  "registration-unknown-error-try-again": "Kayıt sırasında bilinmeyen bir hata oluştu. Tekrar dene."
 }

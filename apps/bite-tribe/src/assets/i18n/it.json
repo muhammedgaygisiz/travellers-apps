@@ -64,7 +64,7 @@
   "best-seller": "Più venduto",
   "free": "Gratuito",
   "by-before": "di",
-  "by-after": "",
+  "by-after": " ",
   "sold-times": "Venduto {{count}} volte",
   "view-bite-trail": "Visualizza BiteTrail",
   "market-place": "Mercato",
@@ -145,5 +145,9 @@
   "day-friday": "Venerdì",
   "day-saturday": "Sabato",
   "day-sunday": "Domenica",
-  "closed": "Chiuso"
+  "closed": "Chiuso",
+  "ok": "OK",
+  "registration-success-check-your-email-to-verify-account": "Registrazione completata con successo! Controlla la tua e-mail per verificare il tuo account.",
+  "registration-error-try-again": "Si è verificato un errore durante la registrazione. Riprova.",
+  "registration-unknown-error-try-again": "Si è verificato un errore sconosciuto durante la registrazione. Riprova."
 }

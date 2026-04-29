@@ -64,7 +64,7 @@
   "best-seller": "ምርጥ ሽያጭ",
   "free": "ነፃ",
   "by-before": "በ",
-  "by-after": "",
+  "by-after": " ",
   "sold-times": "{{count}} ጊዜ ተሽጧል",
   "view-bite-trail": "BiteTrail ተመልከት",
   "market-place": "ገበያ",
@@ -144,5 +144,9 @@
   "day-friday": "አርብ",
   "day-saturday": "ቅዳሜ",
   "day-sunday": "እሑድ",
-  "closed": "ዝግ"
+  "closed": "ዝግ",
+  "ok": "እሺ",
+  "registration-success-check-your-email-to-verify-account": "ምዝገባው ተሳክቷል! መለያህን ለማረጋገጥ ኢሜይልህን ተመልከት።",
+  "registration-error-try-again": "በምዝገባ ጊዜ ስህተት ተፈጥሯል። እንደገና ሞክር።",
+  "registration-unknown-error-try-again": "በምዝገባ ጊዜ ያልታወቀ ስህተት ተፈጥሯል። እንደገና ሞክር።"
 }

@@ -118,6 +118,10 @@ export class AuthService {
     });
   }
 
+  public async sendEmailVerification(): Promise<void> {
+    await FirebaseAuthentication.sendEmailVerification();
+  }
+
   public async registerWithGoogleAccount(): Promise<SignInResult> {
     return await FirebaseAuthentication.signInWithGoogle({ mode: 'popup' });
   }

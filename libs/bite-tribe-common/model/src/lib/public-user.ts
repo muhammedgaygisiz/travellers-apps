@@ -14,4 +14,6 @@ export interface PublicUser {
   createdAtTimestamp?: number;
   updatedAt?: string;
   updatedAtTimestamp?: number;
+  lastSeen?: string;
+  lastSeenTimestamp?: number;
 }

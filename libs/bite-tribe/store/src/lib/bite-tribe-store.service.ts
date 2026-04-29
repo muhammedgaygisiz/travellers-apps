@@ -351,4 +351,8 @@ export class BiteTribeStoreService implements StoreService {
   unfollowUser(user: PublicUser): void {
     this.store.dispatch(AppActions.unfollowUser({ user }));
   }
+
+  updateLastSeen(): void {
+    this.store.dispatch(AppActions.updateLastSeen());
+  }
 }

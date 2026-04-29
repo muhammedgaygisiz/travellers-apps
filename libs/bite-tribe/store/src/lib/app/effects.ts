@@ -121,6 +121,30 @@ export class AppEffect {
     { dispatch: false },
   );
 
+  updateLastSeenAfterLogin$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(fromAuth.AuthActions.loginSucceeded),
+        tap(() => {
+          this.api.updateLastSeen();
+        }),
+      );
+    },
+    { dispatch: false },
+  );
+
+  updateLastSeen$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(AppActions.updateLastSeen),
+        tap(() => {
+          this.api.updateLastSeen();
+        }),
+      );
+    },
+    { dispatch: false },
+  );
+
   saveProfileToFirestore$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(AppActions.savePublicProfile),

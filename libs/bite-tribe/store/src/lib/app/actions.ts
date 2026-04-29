@@ -41,5 +41,6 @@ export const AppActions = createActionGroup({
     }>(),
     'Updated Photo Url in Profile': props<{ profile: PublicUser }>(),
     'Error Updating PhotoUrl in Profile': props<{ profile: PublicUser }>(),
+    'Update last seen': emptyProps(),
   },
 });

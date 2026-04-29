@@ -9,6 +9,7 @@ import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 import { Network } from '@capacitor/network';
 import { Preferences } from '@capacitor/preferences';
+import { fromAuth } from 'ta-firestore';
 
 jest.mock('@capacitor/app', () => ({
   App: {
@@ -54,7 +55,11 @@ describe(AppComponent.name, () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
-        provideMockStore(),
+        provideMockStore({
+          selectors: [
+            { selector: fromAuth.selectIsAuthenticated, value: false },
+          ],
+        }),
         { provide: TranslocoService, useValue: MockTranslocoService },
       ],
       imports: [AppComponent],
@@ -162,7 +167,8 @@ describe(AppComponent.name, () => {
 
         const testUrl = 'https://example.com/s/bite/123';
         const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
-        const whereAppUrlOpen = ([event]): boolean => event === 'appUrlOpen';
+        const whereAppUrlOpen = ([event]: [any]): boolean =>
+          event === 'appUrlOpen';
         const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
         appUrlOpenListener({ url: testUrl });
 
@@ -181,7 +187,8 @@ describe(AppComponent.name, () => {
 
         const testUrl = 'https://example.com/other/path';
         const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
-        const whereAppUrlOpen = ([event]): boolean => event === 'appUrlOpen';
+        const whereAppUrlOpen = ([event]: [any]): boolean =>
+          event === 'appUrlOpen';
         const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
         appUrlOpenListener({ url: testUrl });
 

@@ -8,6 +8,7 @@ import {
 import { Bite, BiteTrail, PublicUser } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { BiteTribeApiService } from 'bite-tribe/api';
 
 export const USERS_COLLECTION = 'users';
 export const BITE_TRAIL_COLLECTION = 'biteTrails';
@@ -15,6 +16,7 @@ export const BITE_TRAIL_COLLECTION = 'biteTrails';
 @Injectable({ providedIn: 'root' })
 export class CreateBiteTrailDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly api = inject(BiteTribeApiService);
 
   selectedBites = signal<Bite[]>([]);
   employees = signal<PublicUser[]>([]);
@@ -47,7 +49,7 @@ export class CreateBiteTrailDataAccessService {
     loader: this.organisationLoader.bind(this),
   });
 
-  async createBiteTrail(
+  createBiteTrail(
     trailData: Omit<
       BiteTrail,
       | 'id'
@@ -57,17 +59,6 @@ export class CreateBiteTrailDataAccessService {
       | 'updatedAtTimestamp'
     >,
   ): Promise<void> {
-    const now = new Date().toISOString();
-    const nowTimestamp = Date.now();
-    await FirebaseFirestore.addDocument({
-      reference: BITE_TRAIL_COLLECTION,
-      data: {
-        ...trailData,
-        createdAt: now,
-        createdAtTimestamp: nowTimestamp,
-        updatedAt: now,
-        updatedAtTimestamp: nowTimestamp,
-      },
-    });
+    return this.api.createBiteTrail(trailData);
   }
 }

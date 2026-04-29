@@ -10,9 +10,10 @@ import { ProfileApiService } from '../profile-api.service';
 import { BiteApiService } from '../bite-api/bite-api.service';
 import { SettingsApiService } from '../settings-api/settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
+import { BiteTrailApiService } from '../bite-trail-api/bite-trail-api.service';
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { Like } from 'model';
+import { BiteTrail, Like } from 'model';
 
 const assertEqual = (a: any, b: any): void => {
   expect(a).toEqual(b);
@@ -90,6 +91,10 @@ class ExchangeRatesApiMock {
   getExchangeRates = jest.fn();
 }
 
+class BiteTrailApiMock {
+  createBiteTrail = jest.fn().mockResolvedValue(undefined);
+}
+
 describe(BiteTribeApiService.name, () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -104,6 +109,7 @@ describe(BiteTribeApiService.name, () => {
         { provide: BiteApiService, useClass: BiteApiMock },
         { provide: SettingsApiService, useClass: SettingsApiMock },
         { provide: ExchangeRatesApiService, useClass: ExchangeRatesApiMock },
+        { provide: BiteTrailApiService, useClass: BiteTrailApiMock },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -803,6 +809,45 @@ describe(BiteTribeApiService.name, () => {
         await service.fetchFollowingWithDetails(userId);
 
         expect(fetchFollowingWithDetailsSpy).toHaveBeenCalledWith(userId);
+      },
+    ));
+  });
+
+  describe('createBiteTrail', () => {
+    it('should delegate to BiteTrailApiService.createBiteTrail', inject(
+      [BiteTribeApiService, BiteTrailApiService],
+      async (
+        service: BiteTribeApiService,
+        biteTrailApiService: BiteTrailApiService,
+      ) => {
+        const trailData: Omit<
+          BiteTrail,
+          | 'id'
+          | 'createdAt'
+          | 'createdAtTimestamp'
+          | 'updatedAt'
+          | 'updatedAtTimestamp'
+        > = {
+          ownerId: 'org-1',
+          ownerName: 'My Org',
+          ownerImagePath: 'photo.jpg',
+          name: 'My Trail',
+          biteIds: [],
+          imagePath: '',
+          location: 'Berlin',
+          description: 'A trail',
+          price: 0,
+          currency: 'EUR',
+        };
+
+        const createBiteTrailSpy = jest.spyOn(
+          biteTrailApiService,
+          'createBiteTrail',
+        );
+
+        await service.createBiteTrail(trailData);
+
+        expect(createBiteTrailSpy).toHaveBeenCalledWith(trailData);
       },
     ));
   });

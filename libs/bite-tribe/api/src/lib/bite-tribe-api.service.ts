@@ -4,6 +4,7 @@ import { RestaurantApiService } from './restaurant-api/restaurant-api.service';
 import {
   Address,
   Bite,
+  BiteTrail,
   Bucketlist,
   CreateAndSaveToBucketListParams,
   CreateAndUploadImageCallbackParams,
@@ -27,6 +28,7 @@ import { ProfileApiService } from './profile-api.service';
 import { BiteApiService } from './bite-api/bite-api.service';
 import { SettingsApiService } from './settings-api/settings-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
+import { BiteTrailApiService } from './bite-trail-api/bite-trail-api.service';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -42,6 +44,7 @@ export class BiteTribeApiService {
   private readonly profileApiService = inject(ProfileApiService);
   private readonly settingsApiService = inject(SettingsApiService);
   private readonly exchangeRatesApiService = inject(ExchangeRatesApiService);
+  private readonly biteTrailApiService = inject(BiteTrailApiService);
 
   publicProfile$ = this.profileApiService.publicProfile$;
 
@@ -116,6 +119,19 @@ export class BiteTribeApiService {
 
   saveNewRestaurant(restaurant: Restaurant): void {
     this.restaurantApiService.saveNewRestaurant(restaurant);
+  }
+
+  createBiteTrail(
+    trailData: Omit<
+      BiteTrail,
+      | 'id'
+      | 'createdAt'
+      | 'createdAtTimestamp'
+      | 'updatedAt'
+      | 'updatedAtTimestamp'
+    >,
+  ): Promise<void> {
+    return this.biteTrailApiService.createBiteTrail(trailData);
   }
 
   loadRestaurant(restaurantId: string): Promise<Restaurant | undefined> {

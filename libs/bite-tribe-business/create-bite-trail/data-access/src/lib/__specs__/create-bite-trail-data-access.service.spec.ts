@@ -8,13 +8,20 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { signal } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite, BiteTrail, PublicUser } from 'model';
+import { BiteTribeApiService } from 'bite-tribe/api';
 
 jest.mock('@capacitor-firebase/firestore');
+jest.mock('bite-tribe/api');
 
 describe('CreateBiteTrailDataAccessService', () => {
   let service: CreateBiteTrailDataAccessService;
+  let apiMock: jest.Mocked<BiteTribeApiService>;
 
   beforeEach(() => {
+    apiMock = {
+      createBiteTrail: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<BiteTribeApiService>;
+
     TestBed.configureTestingModule({
       providers: [
         CreateBiteTrailDataAccessService,
@@ -23,6 +30,10 @@ describe('CreateBiteTrailDataAccessService', () => {
           useValue: {
             organisationIdFromUrl: signal<string | undefined>(undefined),
           },
+        },
+        {
+          provide: BiteTribeApiService,
+          useValue: apiMock,
         },
       ],
     });
@@ -117,45 +128,37 @@ describe('CreateBiteTrailDataAccessService', () => {
   });
 
   describe('createBiteTrail', () => {
-    it('should call FirebaseFirestore.addDocument with the bite trail data', async () => {
-      const addDocumentSpy = jest
-        .spyOn(FirebaseFirestore, 'addDocument')
-        .mockResolvedValue({ id: 'new-trail-id' } as any);
+    const trailData: Omit<
+      BiteTrail,
+      | 'id'
+      | 'createdAt'
+      | 'createdAtTimestamp'
+      | 'updatedAt'
+      | 'updatedAtTimestamp'
+    > = {
+      ownerId: 'org-1',
+      ownerName: 'My Org',
+      ownerImagePath: 'photo.jpg',
+      name: 'My Trail',
+      biteIds: ['bite-1', 'bite-2'],
+      imagePath: '',
+      location: 'Berlin',
+      description: 'A trail',
+      price: 0,
+      currency: 'EUR',
+    };
 
-      const trailData: Omit<
-        BiteTrail,
-        | 'id'
-        | 'createdAt'
-        | 'createdAtTimestamp'
-        | 'updatedAt'
-        | 'updatedAtTimestamp'
-      > = {
-        ownerId: 'org-1',
-        ownerName: 'My Org',
-        ownerImagePath: 'photo.jpg',
-        name: 'My Trail',
-        biteIds: ['bite-1', 'bite-2'],
-        imagePath: '',
-        location: 'Berlin',
-        description: 'A trail',
-        price: 0,
-        currency: 'EUR',
-      };
-
+    it('should delegate to BiteTribeApiService.createBiteTrail', async () => {
       await service.createBiteTrail(trailData);
 
-      expect(addDocumentSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          reference: BITE_TRAIL_COLLECTION,
-          data: expect.objectContaining({
-            name: 'My Trail',
-            ownerId: 'org-1',
-            biteIds: ['bite-1', 'bite-2'],
-            updatedAt: expect.any(String),
-            updatedAtTimestamp: expect.any(Number),
-          }),
-        }),
-      );
+      expect(apiMock.createBiteTrail).toHaveBeenCalledWith(trailData);
+    });
+
+    it('should return the promise from the api', async () => {
+      const result = service.createBiteTrail(trailData);
+
+      expect(result).toBeInstanceOf(Promise);
     });
   });
 });
+

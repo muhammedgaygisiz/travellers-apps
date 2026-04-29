@@ -4,6 +4,7 @@ export interface BiteTrail {
   name: string;
   biteIds: string[];
   soldCount?: number;
+  image?: string;
   imagePath: string;
   ownerImagePath: string;
   ownerName: string;

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
-import { DaySchedule, Link } from 'model';
+import { Address, DaySchedule, Geopoint, Link } from 'model';
 import { NavController, ToastController } from '@ionic/angular/standalone';
 
 @Injectable({ providedIn: 'root' })
@@ -79,6 +79,36 @@ export class EditRestaurantService {
       try {
         await this.dataAccess.submitOpeningHours(restaurant.id, openingHours);
         await this.showToast('Opening hours saved successfully.', 'success');
+      } catch {
+        await this.showToast(
+          'Something went wrong. Please try again.',
+          'danger',
+        );
+      }
+    }
+  }
+
+  async submitAddress(address: Address): Promise<void> {
+    const restaurant = this.restaurant();
+    if (restaurant) {
+      try {
+        await this.dataAccess.submitAddress(restaurant.id, address);
+        await this.showToast('Address saved successfully.', 'success');
+      } catch {
+        await this.showToast(
+          'Something went wrong. Please try again.',
+          'danger',
+        );
+      }
+    }
+  }
+
+  async submitPosition(position: Geopoint): Promise<void> {
+    const restaurant = this.restaurant();
+    if (restaurant) {
+      try {
+        await this.dataAccess.submitPosition(restaurant.id, position);
+        await this.showToast('Location saved successfully.', 'success');
       } catch {
         await this.showToast(
           'Something went wrong. Please try again.',

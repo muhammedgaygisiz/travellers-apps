@@ -15,7 +15,7 @@ import {
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Bite, Geopoint, Restaurant } from 'model';
+import { Address, Bite, Geopoint, Restaurant } from 'model';
 import { map } from 'rxjs';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { PositionComponent } from 'bite-tribe-common/map';
@@ -53,6 +53,10 @@ export class NewRestaurantPageComponent {
     name: ['', Validators.required],
     description: [''],
     position: [null as Geopoint | null, Validators.required],
+    street: [''],
+    postcode: [''],
+    city: [''],
+    country: [''],
   });
 
   prefillEffect = effect(() => {
@@ -73,6 +77,16 @@ export class NewRestaurantPageComponent {
     if (position) {
       this.restaurantFormGroup.controls['position'].patchValue(position);
     }
+
+    if (restaurant?.address) {
+      const { street, postcode, city, country } = restaurant.address;
+      this.restaurantFormGroup.patchValue({
+        street: street ?? '',
+        postcode: postcode ?? '',
+        city: city ?? '',
+        country: country ?? '',
+      });
+    }
   });
 
   isInvalid = toSignal(
@@ -86,15 +100,31 @@ export class NewRestaurantPageComponent {
 
   saveNewRestaurant(): void {
     if (this.restaurantFormGroup.valid) {
-      const { image, name, position, description } =
-        this.restaurantFormGroup.value;
+      const {
+        image,
+        name,
+        position,
+        description,
+        street,
+        postcode,
+        city,
+        country,
+      } = this.restaurantFormGroup.value;
       const biteIds = this.restaurant()?.biteIds || [];
+
+      const address: Address = {
+        street: street ?? '',
+        postcode: postcode ?? '',
+        city: city ?? '',
+        country: country ?? '',
+      };
 
       this.submitNewRestaurant.emit({
         image: image as string,
         name: name as string,
         description: description as string,
         position: position as Geopoint,
+        address,
         biteIds,
       } as Restaurant);
     }

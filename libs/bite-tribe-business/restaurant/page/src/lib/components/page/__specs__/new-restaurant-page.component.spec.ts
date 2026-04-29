@@ -3,7 +3,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { NewRestaurantPageComponent } from '../new-restaurant-page.component';
-import { Bite, Geopoint, Restaurant } from 'model';
+import { Address, Bite, Geopoint, Restaurant } from 'model';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -12,6 +12,7 @@ jest.mock('image-compression', () => ({
   compressFile: jest.fn((f: File) => Promise.resolve(f)),
   compressPhoto: jest.fn((p: unknown) => Promise.resolve(p)),
 }));
+jest.mock('leaflet');
 
 addNecessaryIcons();
 
@@ -100,6 +101,34 @@ describe('NewRestaurantPageComponent', () => {
         bitePosition,
       );
     });
+
+    it('should prefill address fields from restaurant input', () => {
+      const address: Address = {
+        street: 'Main Street 1',
+        postcode: '10115',
+        city: 'Berlin',
+        country: 'Germany',
+      };
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'My Place',
+        address,
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.restaurantFormGroup.controls['street'].value).toBe(
+        'Main Street 1',
+      );
+      expect(component.restaurantFormGroup.controls['postcode'].value).toBe(
+        '10115',
+      );
+      expect(component.restaurantFormGroup.controls['city'].value).toBe(
+        'Berlin',
+      );
+      expect(component.restaurantFormGroup.controls['country'].value).toBe(
+        'Germany',
+      );
+    });
   });
 
   describe('saveNewRestaurant', () => {
@@ -122,6 +151,35 @@ describe('NewRestaurantPageComponent', () => {
 
       expect(emitSpy).toHaveBeenCalledWith(
         expect.objectContaining({ name: 'My Restaurant', position }),
+      );
+    });
+
+    it('should emit restaurant with address when address fields are filled', () => {
+      const emitSpy = jest.spyOn(component.submitNewRestaurant, 'emit');
+      const position: Geopoint = { latitude: 10, longitude: 20 };
+      component.restaurantFormGroup.controls['image'].setValue(
+        'data:image/png;base64,abc',
+      );
+      component.restaurantFormGroup.controls['name'].setValue('My Restaurant');
+      component.restaurantFormGroup.controls['position'].setValue(position);
+      component.restaurantFormGroup.controls['street'].setValue('Main St 1');
+      component.restaurantFormGroup.controls['postcode'].setValue('10115');
+      component.restaurantFormGroup.controls['city'].setValue('Berlin');
+      component.restaurantFormGroup.controls['country'].setValue('Germany');
+
+      component.saveNewRestaurant();
+
+      expect(emitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'My Restaurant',
+          position,
+          address: {
+            street: 'Main St 1',
+            postcode: '10115',
+            city: 'Berlin',
+            country: 'Germany',
+          },
+        }),
       );
     });
 

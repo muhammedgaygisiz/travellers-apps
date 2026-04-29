@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import type { DaySchedule, Link, Restaurant } from 'model';
+import type { Address, DaySchedule, Geopoint, Link, Restaurant } from 'model';
 import { MENU_COLLECTION } from '../menu-api/menu-api.service';
 import { BITE_COLLECTION, RESTAURANT_COLLECTION } from '../utils/constants';
 import { getRestaurantById } from './utils/get-restaurant-by-id';
@@ -155,6 +155,34 @@ export class RestaurantApiService {
       reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
       data: {
         openingHours,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
+  }
+
+  async saveAddressForRestaurant(
+    restaurantId: string,
+    address: Address,
+  ): Promise<void> {
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        address,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
+  }
+
+  async savePositionForRestaurant(
+    restaurantId: string,
+    position: Geopoint,
+  ): Promise<void> {
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        position,
         updatedAt: new Date().toISOString(),
         updatedAtTimestamp: Date.now(),
       },

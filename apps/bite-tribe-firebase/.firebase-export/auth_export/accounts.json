@@ -7,7 +7,7 @@
       "lastLoginAt": "1774180212582",
       "passwordHash": "fakeHash:salt=fakeSaltSiManBbkWVbN09ifE31v:password=Test4711",
       "salt": "fakeSaltSiManBbkWVbN09ifE31v",
-      "passwordUpdatedAt": 1774197727923,
+      "passwordUpdatedAt": 1777356822764,
       "providerUserInfo": [
         {
           "providerId": "password",
@@ -16,7 +16,7 @@
           "rawId": "organisation@test.com"
         }
       ],
-      "validSince": "1774197727",
+      "validSince": "1777356822",
       "email": "organisation@test.com",
       "emailVerified": false,
       "disabled": false
@@ -24,10 +24,10 @@
     {
       "localId": "helULN26hP9Qeig6NQLIEcEe3AP6",
       "createdAt": "1768318963883",
-      "lastLoginAt": "1774295766808",
+      "lastLoginAt": "1777356476148",
       "passwordHash": "fakeHash:salt=fakeSalt0X2Qe62iMEaEn2ncHKRf:password=Test4711",
       "salt": "fakeSalt0X2Qe62iMEaEn2ncHKRf",
-      "passwordUpdatedAt": 1774197727923,
+      "passwordUpdatedAt": 1777356822764,
       "providerUserInfo": [
         {
           "providerId": "password",
@@ -36,11 +36,10 @@
           "rawId": "test@test.com"
         }
       ],
-      "validSince": "1774197727",
+      "validSince": "1777356822",
       "email": "test@test.com",
       "emailVerified": false,
-      "disabled": false,
-      "lastRefreshAt": "2026-03-23T19:56:06.809Z"
+      "disabled": false
     },
     {
       "localId": "sKjq4POYpxuV27V3JIJfshUre4Cw",
@@ -48,7 +47,7 @@
       "lastLoginAt": "1768566470321",
       "passwordHash": "fakeHash:salt=fakeSaltNTo2Jz0URIQNNvgqbEL8:password=Test4711",
       "salt": "fakeSaltNTo2Jz0URIQNNvgqbEL8",
-      "passwordUpdatedAt": 1774197727923,
+      "passwordUpdatedAt": 1777356822764,
       "providerUserInfo": [
         {
           "providerId": "password",
@@ -57,7 +56,7 @@
           "rawId": "test2@test.com"
         }
       ],
-      "validSince": "1774197727",
+      "validSince": "1777356822",
       "email": "test2@test.com",
       "emailVerified": false,
       "disabled": false

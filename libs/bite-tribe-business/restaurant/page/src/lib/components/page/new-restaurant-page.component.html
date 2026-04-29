@@ -28,6 +28,39 @@
         mode="md"
       />
 
+      <ion-input
+        label="{{ 'street' | transloco }}"
+        formControlName="street"
+        fill="outline"
+        class="ion-margin-top"
+        mode="md"
+      />
+
+      <div class="ion-display-flex ion-gap-2 ion-margin-top">
+        <ion-input
+          label="{{ 'postcode' | transloco }}"
+          formControlName="postcode"
+          fill="outline"
+          mode="md"
+          class="ion-flex-1 ion-margin-end"
+        />
+        <ion-input
+          label="{{ 'city' | transloco }}"
+          formControlName="city"
+          fill="outline"
+          mode="md"
+          class="ion-flex-1"
+        />
+      </div>
+
+      <ion-input
+        label="{{ 'country' | transloco }}"
+        formControlName="country"
+        fill="outline"
+        class="ion-margin-top"
+        mode="md"
+      />
+
       <div class="ion-padding-top">
         <position formControlName="position" />
       </div>

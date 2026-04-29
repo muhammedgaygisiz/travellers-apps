@@ -5,22 +5,34 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
   IonContent,
   IonInput,
+  IonItem,
+  IonList,
+  IonSelect,
+  IonSelectOption,
+  IonText,
   IonTextarea,
 } from '@ionic/angular/standalone';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Address, Bite, Geopoint, Restaurant } from 'model';
+import { Address, Bite, DaySchedule, Geopoint, Link, Restaurant } from 'model';
 import { map } from 'rxjs';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { OpeningHoursComponent } from '../opening-hours/opening-hours.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +43,11 @@ import { TranslocoPipe } from '@jsverse/transloco';
     PageComponent,
     IonContent,
     IonInput,
+    IonItem,
+    IonList,
+    IonSelect,
+    IonSelectOption,
+    IonText,
     ReactiveFormsModule,
     IonButton,
     BiteComponent,
@@ -38,6 +55,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     ImageUploadComponent,
     IonTextarea,
     TranslocoPipe,
+    OpeningHoursComponent,
   ],
 })
 export class NewRestaurantPageComponent {
@@ -58,6 +76,16 @@ export class NewRestaurantPageComponent {
     city: [''],
     country: [''],
   });
+
+  readonly socialMediaForm = this.formBuilder.group({
+    links: this.formBuilder.array([]),
+  });
+
+  readonly openingHours = signal<DaySchedule[]>([]);
+
+  get links(): FormArray {
+    return this.socialMediaForm.get('links') as FormArray;
+  }
 
   prefillEffect = effect(() => {
     const restaurant = this.restaurant();
@@ -98,6 +126,19 @@ export class NewRestaurantPageComponent {
     { initialValue: !this.restaurantFormGroup.valid },
   );
 
+  addSocialMedia(): void {
+    this.links.push(
+      this.formBuilder.group({
+        network: ['', Validators.required],
+        url: ['', Validators.required],
+      }),
+    );
+  }
+
+  onOpeningHoursChange(hours: DaySchedule[]): void {
+    this.openingHours.set(hours);
+  }
+
   saveNewRestaurant(): void {
     if (this.restaurantFormGroup.valid) {
       const {
@@ -119,6 +160,12 @@ export class NewRestaurantPageComponent {
         country: country ?? '',
       };
 
+      const socialMediaLinks = this.socialMediaForm.valid && this.links.length > 0
+        ? (this.socialMediaForm.value.links as { network: string; url: string }[]).map(
+            (link): Link => ({ network: link.network, url: link.url }),
+          )
+        : [];
+
       this.submitNewRestaurant.emit({
         image: image as string,
         name: name as string,
@@ -126,6 +173,8 @@ export class NewRestaurantPageComponent {
         position: position as Geopoint,
         address,
         biteIds,
+        socialMediaLinks,
+        openingHours: this.openingHours(),
       } as Restaurant);
     }
   }

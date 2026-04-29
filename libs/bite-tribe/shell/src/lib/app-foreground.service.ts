@@ -16,6 +16,8 @@ export class AppForegroundService {
 
   handleAppStateChange(isActive: boolean): void {
     if (isActive) {
+      this.updateLastSeen();
+
       this.triggerRefreshIfNeeded();
     } else {
       this.lastBackgroundTimestamp = Date.now();
@@ -27,15 +29,17 @@ export class AppForegroundService {
       return;
     }
 
-    if (this.isAuthenticated()) {
-      this.storeService.updateLastSeen();
-    }
-
     const inactiveDuration = Date.now() - this.lastBackgroundTimestamp;
 
     if (inactiveDuration > FOREGROUND_REFRESH_THRESHOLD_MS) {
       this.lastBackgroundTimestamp = null;
       this.storeService.reloadGPSPosition();
+    }
+  }
+
+  private updateLastSeen(): void {
+    if (this.isAuthenticated()) {
+      this.storeService.updateLastSeen();
     }
   }
 }

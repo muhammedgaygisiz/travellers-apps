@@ -3,7 +3,6 @@ import { applicationConfig, StoryObj } from '@storybook/angular';
 import { StartComponent } from '../start.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
-import { provideTransloco } from '@jsverse/transloco';
 
 addNecessaryIcons();
 
@@ -16,12 +15,6 @@ export default {
         provideIonicAngular(getIonicConfig()),
         { provide: APP_TITLE, useValue: 'Bite Tribe' },
         provideRouter([]),
-        provideTransloco({
-          config: {
-            availableLangs: ['en'],
-            fallbackLang: ['en'],
-          },
-        }),
       ],
     }),
   ],

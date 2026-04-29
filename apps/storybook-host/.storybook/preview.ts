@@ -1,7 +1,45 @@
-import { componentWrapperDecorator, Preview } from '@storybook/angular';
+import {
+  applicationConfig,
+  componentWrapperDecorator,
+  Decorator,
+  Preview,
+  StoryContext,
+  StoryFn,
+} from '@storybook/angular';
 import { INITIAL_VIEWPORTS } from 'storybook/viewport';
+import { provideHttpClient } from '@angular/common/http';
+import { provideTransloco } from '@jsverse/transloco';
+import { TranslocoHttpLoader } from './transloco-loader';
 
 const IPHONE = 'iphone14';
+
+const SUPPORTED_LOCALES = [
+  { value: 'en', title: 'English' },
+  { value: 'de', title: 'German' },
+  { value: 'fr', title: 'French' },
+  { value: 'tr', title: 'Turkish' },
+  { value: 'es', title: 'Spanish' },
+  { value: 'it', title: 'Italian' },
+  { value: 'ar', title: 'Arabic' },
+  { value: 'am', title: 'Amharic' },
+  { value: 'id', title: 'Indonesian' },
+  { value: 'th', title: 'Thai' },
+];
+
+const withLocale: Decorator = (storyFn: StoryFn, context: StoryContext): ReturnType<StoryFn> =>
+  applicationConfig({
+    providers: [
+      provideHttpClient(),
+      provideTransloco({
+        config: {
+          availableLangs: SUPPORTED_LOCALES.map((l) => l.value),
+          defaultLang: (context.globals['locale'] as string) || 'en',
+          fallbackLang: 'en',
+        },
+        loader: TranslocoHttpLoader,
+      }),
+    ],
+  })(storyFn, context);
 
 const parameters = {
   layout: 'fullscreen',
@@ -19,6 +57,7 @@ const parameters = {
 };
 
 const decorators = [
+  withLocale,
   componentWrapperDecorator((story) => {
     setNxGraphIframeHeight();
     return story;
@@ -33,6 +72,21 @@ const setNxGraphIframeHeight = (): void => {
 const preview: Preview = {
   decorators,
   parameters,
+  globalTypes: {
+    locale: {
+      name: 'Locale',
+      description: 'Internationalization locale',
+      toolbar: {
+        icon: 'globe',
+        items: SUPPORTED_LOCALES,
+        showName: true,
+        dynamicTitle: true,
+      },
+    },
+  },
+  initialGlobals: {
+    locale: 'en',
+  },
 };
 
 export default preview;

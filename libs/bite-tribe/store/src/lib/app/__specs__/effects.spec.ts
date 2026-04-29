@@ -44,6 +44,7 @@ const BiteTribeApiServiceMock = {
   fetchFollowMetadata: jest.fn(),
   uploadProfileImage: jest.fn(),
   updatePhotoUrlInUser: jest.fn(),
+  updateLastSeen: jest.fn(),
 };
 
 const NavControllerMock = {};
@@ -652,6 +653,41 @@ describe(AppEffect.name, () => {
       });
 
       expect(unfollowUserSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('updateLastSeen effects', () => {
+    let updateLastSeenSpy: SpyInstance;
+
+    beforeEach(() => {
+      updateLastSeenSpy = jest
+        .spyOn(apiService, 'updateLastSeen')
+        .mockImplementation();
+    });
+
+    it('should call updateLastSeen on loginSucceeded', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: fromAuth.AuthActions.loginSucceeded(),
+        });
+
+        expectObservable(effects.updateLastSeenAfterLogin$);
+      });
+
+      expect(updateLastSeenSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call updateLastSeen on AppActions.updateLastSeen', () => {
+      updateLastSeenSpy.mockClear();
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: AppActions.updateLastSeen(),
+        });
+
+        expectObservable(effects.updateLastSeen$);
+      });
+
+      expect(updateLastSeenSpy).toHaveBeenCalledTimes(1);
     });
   });
 

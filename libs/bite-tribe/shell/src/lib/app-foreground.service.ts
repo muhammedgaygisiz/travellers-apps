@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 
 export const FOREGROUND_REFRESH_THRESHOLD_MS = 30_000;
@@ -7,6 +8,11 @@ export const FOREGROUND_REFRESH_THRESHOLD_MS = 30_000;
 export class AppForegroundService {
   private readonly storeService = inject(BiteTribeStoreService);
   private lastBackgroundTimestamp: number | null = null;
+
+  private readonly isAuthenticated = toSignal(
+    this.storeService.isAuthenticated$,
+    { initialValue: false },
+  );
 
   handleAppStateChange(isActive: boolean): void {
     if (isActive) {
@@ -19,6 +25,10 @@ export class AppForegroundService {
   private triggerRefreshIfNeeded(): void {
     if (this.lastBackgroundTimestamp === null) {
       return;
+    }
+
+    if (this.isAuthenticated()) {
+      this.storeService.updateLastSeen();
     }
 
     const inactiveDuration = Date.now() - this.lastBackgroundTimestamp;

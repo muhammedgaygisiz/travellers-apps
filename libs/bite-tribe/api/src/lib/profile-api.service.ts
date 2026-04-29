@@ -236,6 +236,27 @@ export class ProfileApiService {
     }
   }
 
+  async updateLastSeen(): Promise<void> {
+    try {
+      const user = this.authService.getUser();
+
+      if (!user?.uid) {
+        return;
+      }
+
+      await FirebaseFirestore.updateDocument({
+        reference: `${USERS_COLLECTION}/${user.uid}`,
+        data: {
+          lastSeen: new Date().toISOString(),
+          lastSeenTimestamp: Date.now(),
+        },
+      });
+    } catch (error) {
+      console.error('Error updating last seen:', error);
+      this.errorHandler.handleError(error);
+    }
+  }
+
   async saveUserIfNotExisting(): Promise<void> {
     const user = this.authService.getUser();
 

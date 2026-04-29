@@ -4,19 +4,28 @@ import {
   FOREGROUND_REFRESH_THRESHOLD_MS,
 } from '../app-foreground.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { fromAuth } from 'ta-firestore';
 
 describe(AppForegroundService.name, () => {
   let service: AppForegroundService;
   let storeService: BiteTribeStoreService;
+  let store: MockStore;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideMockStore()],
+      providers: [
+        provideMockStore({
+          selectors: [
+            { selector: fromAuth.selectIsAuthenticated, value: false },
+          ],
+        }),
+      ],
     });
 
     service = TestBed.inject(AppForegroundService);
     storeService = TestBed.inject(BiteTribeStoreService);
+    store = TestBed.inject(MockStore);
   });
 
   afterEach(() => {
@@ -115,6 +124,46 @@ describe(AppForegroundService.name, () => {
 
         expect(reloadSpy).not.toHaveBeenCalled();
       });
+
+      describe('updateLastSeen', () => {
+        it('should not call updateLastSeen if no background timestamp is set', () => {
+          const updateLastSeenSpy = jest
+            .spyOn(storeService, 'updateLastSeen')
+            .mockImplementation();
+
+          service.handleAppStateChange(true);
+
+          expect(updateLastSeenSpy).not.toHaveBeenCalled();
+        });
+
+        it('should not call updateLastSeen when user is not authenticated', () => {
+          store.overrideSelector(fromAuth.selectIsAuthenticated, false);
+          store.refreshState();
+
+          const updateLastSeenSpy = jest
+            .spyOn(storeService, 'updateLastSeen')
+            .mockImplementation();
+
+          service.handleAppStateChange(false);
+          service.handleAppStateChange(true);
+
+          expect(updateLastSeenSpy).not.toHaveBeenCalled();
+        });
+
+        it('should call updateLastSeen when user is authenticated and app returns to foreground', () => {
+          store.overrideSelector(fromAuth.selectIsAuthenticated, true);
+          store.refreshState();
+
+          const updateLastSeenSpy = jest
+            .spyOn(storeService, 'updateLastSeen')
+            .mockImplementation();
+
+          service.handleAppStateChange(false);
+          service.handleAppStateChange(true);
+
+          expect(updateLastSeenSpy).toHaveBeenCalledTimes(1);
+        });
+      });
     });
   });
 
@@ -124,3 +173,4 @@ describe(AppForegroundService.name, () => {
     });
   });
 });
+

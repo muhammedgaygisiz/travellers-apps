@@ -237,6 +237,10 @@ export class BiteTribeApiService {
     this.profileApiService.saveUserIfNotExisting();
   }
 
+  updateLastSeen(): Promise<void> {
+    return this.profileApiService.updateLastSeen();
+  }
+
   async followUser(user: PublicUser): Promise<void> {
     await this.profileApiService.followUser(user);
   }

@@ -22,10 +22,10 @@ export class RegistrationService {
       await this.authService.sendEmailVerification();
 
       await this.showRegistrationSuccessMessage(
-        'Registration successful! Please check your email to verify your account before signing in.',
+        'Registration successful! Please check your email to verify your account.',
       );
 
-      this.navController.navigateBack(['/login']);
+      void this.navController.navigateBack(['/home']);
     } catch (error: any) {
       if (error?.code === AuthErrorCodes.EMAIL_EXISTS) {
         // Prevent user enumeration by showing a generic error message
@@ -43,9 +43,7 @@ export class RegistrationService {
     }
   }
 
-  private async showRegistrationSuccessMessage(
-    message: string,
-  ): Promise<void> {
+  private async showRegistrationSuccessMessage(message: string): Promise<void> {
     const toast = await this.toastController.create({
       message,
       position: 'bottom',

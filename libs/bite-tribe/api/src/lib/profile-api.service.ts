@@ -252,7 +252,7 @@ export class ProfileApiService {
         },
       });
     } catch (error) {
-      console.error('Error updating last seen:', error);
+      console.warn('Error updating last seen:', error);
       this.errorHandler.handleError(error);
     }
   }

@@ -5,6 +5,7 @@ import { NavController, ToastController } from '@ionic/angular';
 
 const MockedAuthService = {
   registerWithUsernameAndPassword: jest.fn(),
+  sendEmailVerification: jest.fn(),
 };
 
 const MockedNavController = {
@@ -48,7 +49,16 @@ describe(RegistrationService.name, () => {
     });
 
     describe('given a successful registration', () => {
-      it('should delegate to auth service and should go back to home screen', async () => {
+      let sendEmailVerificationSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        sendEmailVerificationSpy = jest.spyOn(
+          MockedAuthService,
+          'sendEmailVerification',
+        );
+      });
+
+      it('should delegate to auth service, send verification email and navigate to login', async () => {
         await service.register({
           email: 'q@q.de',
           password: '12345678',
@@ -58,7 +68,8 @@ describe(RegistrationService.name, () => {
           email: 'q@q.de',
           password: '12345678',
         });
-        expect(navigateBackSpy).toHaveBeenCalledWith(['/home']);
+        expect(sendEmailVerificationSpy).toHaveBeenCalled();
+        expect(navigateBackSpy).toHaveBeenCalledWith(['/login']);
       });
     });
 

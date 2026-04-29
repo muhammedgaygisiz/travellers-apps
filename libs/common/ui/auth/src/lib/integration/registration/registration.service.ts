@@ -19,7 +19,13 @@ export class RegistrationService {
         password: registration.password,
       });
 
-      this.navController.navigateBack(['/home']);
+      await this.authService.sendEmailVerification();
+
+      await this.showRegistrationSuccessMessage(
+        'Registration successful! Please check your email to verify your account before signing in.',
+      );
+
+      this.navController.navigateBack(['/login']);
     } catch (error: any) {
       if (error?.code === AuthErrorCodes.EMAIL_EXISTS) {
         // Prevent user enumeration by showing a generic error message
@@ -35,6 +41,24 @@ export class RegistrationService {
           'An unknown error occurred during registration. Please try again.',
       );
     }
+  }
+
+  private async showRegistrationSuccessMessage(
+    message: string,
+  ): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      position: 'bottom',
+      duration: 5000,
+      buttons: [
+        {
+          text: 'OK',
+          role: 'confirm',
+        },
+      ],
+    });
+
+    await toast.present();
   }
 
   private async showRegistrationErrorMessage(message: string): Promise<void> {

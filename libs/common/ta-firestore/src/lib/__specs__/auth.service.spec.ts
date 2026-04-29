@@ -271,6 +271,22 @@ describe(AuthService.name, () => {
     });
   });
 
+  describe('sendEmailVerification', () => {
+    let sendEmailVerificationSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      sendEmailVerificationSpy = jest
+        .spyOn(FirebaseAuthentication, 'sendEmailVerification')
+        .mockResolvedValue(undefined);
+    });
+
+    it('should call sendEmailVerification', async () => {
+      await service.sendEmailVerification();
+
+      expect(sendEmailVerificationSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('registerWithGoogleAccount', () => {
     beforeEach(() => {
       jest

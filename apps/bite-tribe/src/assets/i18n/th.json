@@ -64,7 +64,7 @@
   "best-seller": "สินค้าขายดี",
   "free": "ฟรี",
   "by-before": "โดย",
-  "by-after": "",
+  "by-after": " ",
   "sold-times": "ขายแล้ว {{count}} ครั้ง",
   "view-bite-trail": "ดู BiteTrail",
   "market-place": "ตลาด",
@@ -145,5 +145,9 @@
   "day-friday": "วันศุกร์",
   "day-saturday": "วันเสาร์",
   "day-sunday": "วันอาทิตย์",
-  "closed": "ปิด"
+  "closed": "ปิด",
+  "ok": "ตกลง",
+  "registration-success-check-your-email-to-verify-account": "สมัครสมาชิกสำเร็จ! โปรดตรวจสอบอีเมลของคุณเพื่อยืนยันบัญชี",
+  "registration-error-try-again": "เกิดข้อผิดพลาดระหว่างการสมัครสมาชิก โปรดลองอีกครั้ง",
+  "registration-unknown-error-try-again": "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุระหว่างการสมัครสมาชิก โปรดลองอีกครั้ง"
 }

@@ -6,7 +6,7 @@ describe('getNearbyBites', () => {
       const bites = [
         { id: '1', distance: '0.5' },
         { id: '2', distance: '1.0' },
-        { id: '3', distance: '1.5' },
+        { id: '3', distance: '16' },
         { id: '4' }, // No distance provided
       ];
 
@@ -22,8 +22,8 @@ describe('getNearbyBites', () => {
   describe('given no nearby bites', () => {
     it('should return an empty array', () => {
       const bites = [
-        { id: '1', distance: '1.5' },
-        { id: '2', distance: '2.0' },
+        { id: '1', distance: '16' },
+        { id: '2', distance: '20' },
         { id: '3' }, // No distance provided
       ];
 

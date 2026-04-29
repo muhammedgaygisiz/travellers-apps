@@ -64,7 +64,7 @@
   "best-seller": "Best Seller",
   "free": "Free",
   "by-before": "by",
-  "by-after": "",
+  "by-after": " ",
   "sold-times": "Sold {{count}} times",
   "view-bite-trail": "View BiteTrail",
   "market-place": "Market Place",

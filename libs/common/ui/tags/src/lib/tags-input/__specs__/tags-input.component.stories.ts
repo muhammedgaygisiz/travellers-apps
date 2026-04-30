@@ -4,7 +4,6 @@ import { getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { closeCircle } from 'ionicons/icons';
-import { provideTransloco } from '@jsverse/transloco';
 
 export default {
   title: 'Components/Tags',
@@ -13,12 +12,6 @@ export default {
     applicationConfig({
       providers: [
         provideIonicAngular(getIonicConfig()),
-        provideTransloco({
-          config: {
-            availableLangs: ['en'],
-            fallbackLang: ['en'],
-          },
-        }),
       ],
     }),
   ],

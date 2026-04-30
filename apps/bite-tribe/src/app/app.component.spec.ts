@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
 import { AppForegroundService } from 'bite-tribe/shell';
@@ -15,6 +15,7 @@ jest.mock('@capacitor/app', () => ({
   App: {
     addListener: jest.fn(),
     exitApp: jest.fn(),
+    minimizeApp: jest.fn(),
     removeAllListeners: jest.fn(),
   },
 }));
@@ -141,16 +142,28 @@ describe(AppComponent.name, () => {
   });
 
   describe('handleBackButton', () => {
-    it('should call App.exitApp if canGoBack is false', () => {
-      const appExitAppSpy = jest.spyOn(App, 'exitApp');
+    it('should call App.minimizeApp if canGoBack is false', () => {
+      const appMinimizeAppSpy = jest.spyOn(App, 'minimizeApp');
 
       component['handleBackButton'](false);
 
-      expect(appExitAppSpy).toHaveBeenCalled();
+      expect(appMinimizeAppSpy).toHaveBeenCalled();
     });
 
-    it('should call window.history.back if canGoBack is true', () => {
+    it('should call App.minimizeApp if current route is home view', () => {
+      const appMinimizeAppSpy = jest.spyOn(App, 'minimizeApp');
+      jest.spyOn(TestBed.inject(Router), 'url', 'get').mockReturnValue('/home');
+
+      component['handleBackButton'](true);
+
+      expect(appMinimizeAppSpy).toHaveBeenCalled();
+    });
+
+    it('should call window.history.back if canGoBack is true and not on home view', () => {
       const windowHistoryBackSpy = jest.spyOn(window.history, 'back');
+      jest
+        .spyOn(TestBed.inject(Router), 'url', 'get')
+        .mockReturnValue('/bite/123');
 
       component['handleBackButton'](true);
 

@@ -23,8 +23,8 @@ describe('removeGpsMarker', () => {
 
   it('should remove layers tagged with GPS_MARKER_TAG', () => {
     const mockRemoveLayer = jest.fn();
-    const taggedLayer = { [GPS_MARKER_TAG]: true };
-    const untaggedLayer = {};
+    const taggedLayer = { [GPS_MARKER_TAG]: true } as unknown as L.Layer;
+    const untaggedLayer = {} as L.Layer;
 
     (map.eachLayer as jest.Mock).mockImplementation((callback) => {
       callback(taggedLayer);
@@ -40,7 +40,7 @@ describe('removeGpsMarker', () => {
 
   it('should not remove layers without GPS_MARKER_TAG', () => {
     const mockRemoveLayer = jest.fn();
-    const untaggedLayer = {};
+    const untaggedLayer = {} as L.Layer;
 
     (map.eachLayer as jest.Mock).mockImplementation((callback) => {
       callback(untaggedLayer);

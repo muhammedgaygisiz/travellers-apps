@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
 import { AppForegroundService } from 'bite-tribe/shell';
@@ -150,8 +150,20 @@ describe(AppComponent.name, () => {
       expect(appMinimizeAppSpy).toHaveBeenCalled();
     });
 
-    it('should call window.history.back if canGoBack is true', () => {
+    it('should call App.minimizeApp if current route is home view', () => {
+      const appMinimizeAppSpy = jest.spyOn(App, 'minimizeApp');
+      jest.spyOn(TestBed.inject(Router), 'url', 'get').mockReturnValue('/home');
+
+      component['handleBackButton'](true);
+
+      expect(appMinimizeAppSpy).toHaveBeenCalled();
+    });
+
+    it('should call window.history.back if canGoBack is true and not on home view', () => {
       const windowHistoryBackSpy = jest.spyOn(window.history, 'back');
+      jest
+        .spyOn(TestBed.inject(Router), 'url', 'get')
+        .mockReturnValue('/bite/123');
 
       component['handleBackButton'](true);
 

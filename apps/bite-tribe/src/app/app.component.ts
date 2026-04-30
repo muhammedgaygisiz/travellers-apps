@@ -14,6 +14,8 @@ import {
 import { addNecessaryIcons, AppForegroundService } from 'bite-tribe/shell';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
+import { Router } from '@angular/router';
+import { PATH } from 'utils';
 import { ConnectionStatus, Network } from '@capacitor/network';
 import { NetworkStatusService } from 'common/networkstatus';
 import { TranslocoService } from '@jsverse/transloco';
@@ -34,6 +36,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   platform = inject(Platform);
   navController = inject(NavController);
+  private readonly router = inject(Router);
   private readonly appForegroundService = inject(AppForegroundService);
   private readonly networkStatusService = inject(NetworkStatusService);
   private readonly transloco = inject(TranslocoService);
@@ -74,7 +77,9 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private handleBackButton(canGoBack: boolean): void {
-    if (!canGoBack) {
+    const isOnHomeView = this.router.url === `/${PATH.HOME}`;
+
+    if (!canGoBack || isOnHomeView) {
       void App.minimizeApp();
     } else {
       window.history.back();

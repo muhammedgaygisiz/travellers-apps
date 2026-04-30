@@ -6,6 +6,7 @@ import { MapService } from '../map.service';
 
 jest.mock('leaflet');
 jest.mock('leaflet.markercluster');
+jest.mock('leaflet-usermarker');
 
 addNecessaryIcons();
 

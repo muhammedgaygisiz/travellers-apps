@@ -1,5 +1,5 @@
 import { removeGpsMarker } from '../remove-gps-marker';
-import { GPS_MARKER_TAG } from '../add-gps-marker';
+import { GPS_MARKER_TAG } from '../gps-marker';
 import L from 'leaflet';
 
 jest.mock('leaflet');

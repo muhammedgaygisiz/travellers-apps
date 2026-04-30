@@ -1,12 +1,7 @@
 import L from 'leaflet';
 import { Geopoint } from 'model';
 import { geopointToLatLng } from './geopoint-to-lat-lng';
-
-export const GPS_MARKER_TAG = 'isGpsUserMarker';
-
-interface GpsMarker extends L.Marker {
-  [GPS_MARKER_TAG]: boolean;
-}
+import { GPS_MARKER_TAG, GpsMarker } from './gps-marker';
 
 const createUserMarkerIcon = (): L.DivIcon =>
   L.divIcon({
@@ -15,9 +10,6 @@ const createUserMarkerIcon = (): L.DivIcon =>
     iconAnchor: [17, 17],
     html: '<i class="inner"></i><i class="pulse"></i>',
   });
-
-export const isGpsMarker = (layer: L.Layer): layer is GpsMarker =>
-  GPS_MARKER_TAG in layer && (layer as GpsMarker)[GPS_MARKER_TAG] === true;
 
 export const addGpsMarker = (gpsPosition: Geopoint, map: L.Map): void => {
   if (!gpsPosition || !map) return;

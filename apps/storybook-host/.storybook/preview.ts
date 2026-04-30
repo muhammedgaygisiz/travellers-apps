@@ -3,7 +3,6 @@ import {
   componentWrapperDecorator,
   Decorator,
   Preview,
-  StoryContext,
   StoryFn,
 } from '@storybook/angular';
 import { INITIAL_VIEWPORTS } from 'storybook/viewport';
@@ -26,7 +25,7 @@ const SUPPORTED_LOCALES = [
   { value: 'th', title: 'Thai' },
 ];
 
-const withLocale: Decorator = (storyFn: StoryFn, context: StoryContext): ReturnType<StoryFn> =>
+const withLocale: Decorator = (storyFn, context): ReturnType<StoryFn> =>
   applicationConfig({
     providers: [
       provideHttpClient(),

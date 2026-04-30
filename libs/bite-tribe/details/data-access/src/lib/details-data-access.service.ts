@@ -120,7 +120,7 @@ export class DetailsDataAccessService {
         await Geolocation.requestPermissions();
       }
 
-      return Geolocation.getCurrentPosition({
+      return await Geolocation.getCurrentPosition({
         maximumAge: ONE_MINUTE,
       });
     } catch (error) {

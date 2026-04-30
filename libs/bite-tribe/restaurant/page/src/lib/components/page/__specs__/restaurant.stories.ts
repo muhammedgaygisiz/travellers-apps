@@ -4,7 +4,6 @@ import { RestaurantComponent } from '../restaurant.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { Bite, Like, Restaurant } from 'model';
 import { restaurantB64Image } from './restaurant-b64-image';
-import { provideTransloco } from '@jsverse/transloco';
 
 addNecessaryIcons();
 
@@ -16,12 +15,6 @@ export default {
       providers: [
         provideIonicAngular(getIonicConfig()),
         { provide: APP_TITLE, useValue: 'Bite Tribe' },
-        provideTransloco({
-          config: {
-            availableLangs: ['en'],
-            fallbackLang: ['en'],
-          },
-        }),
       ],
     }),
   ],

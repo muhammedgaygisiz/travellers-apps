@@ -1,8 +1,9 @@
 import * as L from 'leaflet';
+import { isGpsMarker } from './gps-marker';
 
 export const removeGpsMarker = (map: L.Map): void => {
   map.eachLayer((layer) => {
-    if (layer instanceof L.Circle) {
+    if (isGpsMarker(layer)) {
       map.removeLayer(layer);
     }
   });

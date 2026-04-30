@@ -169,9 +169,9 @@ export class HomeDataAccessService {
             bite.restaurantId?.includes(restaurant!.id!) || score.length > 0
           );
         });
-      } else if (restaurantIdOrName) {
+      } else if (restaurantIdOrName || sourceBite?.place) {
         const normalizedName = normalize(
-          decodeURIComponent(restaurantIdOrName),
+          decodeURIComponent(restaurantIdOrName || sourceBite.place),
         );
         matchedBites = closeBites.filter((bite) => {
           const normalizedBitePlace = normalize(bite.place);

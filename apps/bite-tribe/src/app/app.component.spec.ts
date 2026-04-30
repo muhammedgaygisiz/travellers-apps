@@ -15,6 +15,7 @@ jest.mock('@capacitor/app', () => ({
   App: {
     addListener: jest.fn(),
     exitApp: jest.fn(),
+    minimizeApp: jest.fn(),
     removeAllListeners: jest.fn(),
   },
 }));
@@ -141,12 +142,12 @@ describe(AppComponent.name, () => {
   });
 
   describe('handleBackButton', () => {
-    it('should call App.exitApp if canGoBack is false', () => {
-      const appExitAppSpy = jest.spyOn(App, 'exitApp');
+    it('should call App.minimizeApp if canGoBack is false', () => {
+      const appMinimizeAppSpy = jest.spyOn(App, 'minimizeApp');
 
       component['handleBackButton'](false);
 
-      expect(appExitAppSpy).toHaveBeenCalled();
+      expect(appMinimizeAppSpy).toHaveBeenCalled();
     });
 
     it('should call window.history.back if canGoBack is true', () => {

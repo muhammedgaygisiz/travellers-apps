@@ -75,7 +75,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private handleBackButton(canGoBack: boolean): void {
     if (!canGoBack) {
-      void App.exitApp();
+      void App.minimizeApp();
     } else {
       window.history.back();
     }

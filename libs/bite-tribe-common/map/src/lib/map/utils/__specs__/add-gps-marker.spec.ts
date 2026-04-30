@@ -22,7 +22,9 @@ describe('addGpsMarker', () => {
     } as any;
     mockGeopoint = { latitude: 51.505, longitude: -0.09 };
 
-    jest.spyOn(L, 'marker').mockReturnValue(mockMarker);
+    (L as unknown as { userMarker: jest.Mock }).userMarker = jest
+      .fn()
+      .mockReturnValue(mockMarker);
     geopointToLatLngMock.mockReturnValue([51.505, -0.09]);
   });
 
@@ -40,19 +42,23 @@ describe('addGpsMarker', () => {
     addGpsMarker(mockGeopoint, mockMap);
 
     expect(geopointToLatLngMock).toHaveBeenCalledWith(mockGeopoint);
-    expect(L.marker).toHaveBeenCalledWith([51.505, -0.09], expect.objectContaining({ icon: expect.anything() }));
+    expect(
+      (L as unknown as { userMarker: jest.Mock }).userMarker,
+    ).toHaveBeenCalledWith(
+      [51.505, -0.09],
+      expect.objectContaining({ pulsing: true, smallIcon: true }),
+    );
     expect(mockMarker.addTo).toHaveBeenCalledWith(mockMap);
   });
 
-  it('should use leaflet-usermarker CSS class for the icon', () => {
+  it('should create the GPS marker with leaflet-usermarker options', () => {
     addGpsMarker(mockGeopoint, mockMap);
 
-    expect(L.divIcon).toHaveBeenCalledWith(
-      expect.objectContaining({ className: 'leaflet-usermarker' }),
-    );
-    expect(L.marker).toHaveBeenCalledWith(
+    expect(
+      (L as unknown as { userMarker: jest.Mock }).userMarker,
+    ).toHaveBeenCalledWith(
       [51.505, -0.09],
-      expect.objectContaining({ icon: expect.anything() }),
+      expect.objectContaining({ pulsing: true, smallIcon: true }),
     );
   });
 

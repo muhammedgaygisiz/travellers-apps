@@ -100,3 +100,64 @@ export const registeredWithSocialMediaLinks: Story = {
     bites: [...(registered.args?.bites || [])],
   },
 };
+
+export const fullMaintained: Story = {
+  args: {
+    bites: [...(registered.args?.bites || [])],
+    restaurant: {
+      ...registered.args?.restaurant,
+      description:
+        'China Wok is a cozy family-run restaurant serving authentic Cantonese and Sichuan dishes. From hand-pulled noodles to dim sum, every dish is prepared fresh daily with high-quality ingredients. Perfect for a relaxed lunch or a lively dinner with friends.',
+      address: {
+        street: 'Schildergasse 12',
+        postcode: '50667',
+        city: 'Cologne',
+        country: 'Germany',
+      },
+      socialMediaLinks: [
+        { network: 'facebook', url: 'https://www.facebook.com' },
+        { network: 'instagram', url: 'https://www.instagram.com' },
+      ],
+      openingHours: [
+        {
+          day: 'monday',
+          isOpen: true,
+          timeRanges: [{ from: '11:30', to: '22:00' }],
+        },
+        {
+          day: 'tuesday',
+          isOpen: true,
+          timeRanges: [{ from: '11:30', to: '22:00' }],
+        },
+        {
+          day: 'wednesday',
+          isOpen: true,
+          timeRanges: [{ from: '11:30', to: '22:00' }],
+        },
+        {
+          day: 'thursday',
+          isOpen: true,
+          timeRanges: [{ from: '11:30', to: '22:00' }],
+        },
+        {
+          day: 'friday',
+          isOpen: true,
+          timeRanges: [
+            { from: '11:30', to: '15:00' },
+            { from: '17:00', to: '23:00' },
+          ],
+        },
+        {
+          day: 'saturday',
+          isOpen: true,
+          timeRanges: [{ from: '12:00', to: '23:00' }],
+        },
+        {
+          day: 'sunday',
+          isOpen: false,
+          timeRanges: [],
+        },
+      ],
+    } as unknown as Restaurant,
+  },
+};

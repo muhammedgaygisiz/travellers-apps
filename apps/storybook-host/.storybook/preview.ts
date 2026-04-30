@@ -10,6 +10,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideTransloco } from '@jsverse/transloco';
 import { TranslocoHttpLoader } from './transloco-loader';
 
+const LOCALE_STORAGE_KEY = 'storybook-active-locale';
+
 const IPHONE = 'iphone14';
 
 const SUPPORTED_LOCALES = [
@@ -25,8 +27,18 @@ const SUPPORTED_LOCALES = [
   { value: 'th', title: 'Thai' },
 ];
 
-const withLocale: Decorator = (storyFn, context): ReturnType<StoryFn> =>
-  applicationConfig({
+const withLocale: Decorator = (storyFn, context): ReturnType<StoryFn> => {
+  const locale = (context.globals['locale'] as string) || 'en';
+  const previousLocale = sessionStorage.getItem(LOCALE_STORAGE_KEY);
+
+  if (previousLocale !== null && previousLocale !== locale) {
+    sessionStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    window.location.reload();
+  } else {
+    sessionStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  }
+
+  return applicationConfig({
     providers: [
       provideHttpClient(),
       provideTransloco({
@@ -39,6 +51,7 @@ const withLocale: Decorator = (storyFn, context): ReturnType<StoryFn> =>
       }),
     ],
   })(storyFn, context);
+};
 
 const parameters = {
   layout: 'fullscreen',

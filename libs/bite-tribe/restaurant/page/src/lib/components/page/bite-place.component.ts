@@ -57,12 +57,14 @@ export class BitePlaceComponent {
   readonly likeButtonClick = output<Like>();
 
   ratedBites = computed(() =>
-    (this.bites() || []).filter(
-      (bite): bite is Bite & { rating: number } =>
-        bite.rating !== undefined && bite.rating !== null,
-    ),
+    (this.bites() || []).filter((bite): bite is Bite & { rating: number } => {
+      return (
+        bite.rating !== undefined && bite.rating !== null && bite.rating !== 0
+      );
+    }),
   );
 
+  bitesCount = computed(() => this.bites()?.length);
   ratedBiteCount = computed(() => this.ratedBites().length);
 
   averageBiteRating = computed(() => {

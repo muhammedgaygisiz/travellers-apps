@@ -27,7 +27,9 @@
         @if (ratedBiteCountData) {
           <span class="rating">{{ averageBiteRating() }}</span>
           <span class="text-small text-secondary">
-            {{ 'restaurant-rating' | transloco: { biteCount: biteCountData } }}
+            {{
+              'restaurant-rating' | transloco: { biteCount: ratedBiteCountData }
+            }}
           </span>
         } @else {
           <span class="text-small text-secondary">{{

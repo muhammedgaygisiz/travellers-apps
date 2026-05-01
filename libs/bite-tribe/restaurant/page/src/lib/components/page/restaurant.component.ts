@@ -61,14 +61,12 @@ export class RestaurantComponent {
   readonly likeButtonClick = output<Like>();
   readonly selectedSegment = signal<'bites' | 'menu'>('bites');
 
-  ratedBites = computed(() => {
-    console.log('bites', this.bites());
-
-    return (this.bites() || []).filter(
+  ratedBites = computed(() =>
+    (this.bites() || []).filter(
       (bite): bite is Bite & { rating: number } =>
         bite.rating !== undefined && bite.rating !== null && bite.rating !== 0,
-    );
-  });
+    ),
+  );
 
   ratedBiteCount = computed(() => this.ratedBites().length);
 

@@ -15,6 +15,7 @@ import { getDistance } from '../../utils/get-distance';
 import { DistanceComponent } from 'common/distance';
 import { uniqueBitesByName } from '../../utils/unique-bites-by-name';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { TagsInputComponent } from 'common/ui/tags';
 
 @Component({
   selector: 'bite-place',
@@ -29,6 +30,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     RestaurantImageComponent,
     DistanceComponent,
     TranslocoPipe,
+    TagsInputComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -70,5 +72,11 @@ export class BitePlaceComponent {
     return uniqueBitesByName(bites).sort(
       (a, b) => (a.price || 0) - (b.price || 0),
     );
+  });
+
+  uniqueTags = computed(() => {
+    const bites = this.bites() || [];
+    const allTags = bites.flatMap((bite) => bite.tags || []);
+    return [...new Set(allTags)];
   });
 }

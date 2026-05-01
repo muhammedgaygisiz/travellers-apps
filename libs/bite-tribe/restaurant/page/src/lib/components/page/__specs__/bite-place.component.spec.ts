@@ -113,4 +113,33 @@ describe('BitePlaceComponent', () => {
     ]);
     expect(uniqueBitesByNameMock).toHaveBeenCalledWith(bites);
   });
+
+  describe('uniqueTags', () => {
+    it('should return unique tags from all bites', () => {
+      componentRef.setInput('bites', [
+        { tags: ['vegan', 'spicy'] },
+        { tags: ['spicy', 'sweet'] },
+        { tags: ['vegan'] },
+      ] as Bite[]);
+      expect(component.uniqueTags()).toEqual(['vegan', 'spicy', 'sweet']);
+    });
+
+    it('should return empty array if no bites have tags', () => {
+      componentRef.setInput('bites', [{ name: 'Bite A' }, { name: 'Bite B' }] as Bite[]);
+      expect(component.uniqueTags()).toEqual([]);
+    });
+
+    it('should return empty array if bites is undefined', () => {
+      componentRef.setInput('bites', undefined);
+      expect(component.uniqueTags()).toEqual([]);
+    });
+
+    it('should handle bites with undefined tags gracefully', () => {
+      componentRef.setInput('bites', [
+        { tags: ['sushi'] },
+        { tags: undefined },
+      ] as Bite[]);
+      expect(component.uniqueTags()).toEqual(['sushi']);
+    });
+  });
 });

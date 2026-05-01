@@ -147,7 +147,6 @@ describe('RestaurantComponent', () => {
   });
 
   describe('uniqueBites', () => {
-    it('should return unique bites based on id', () => {
       const bites = [
         { id: '1', name: 'Bite 1' },
         { id: '2', name: 'Bite 2' },
@@ -191,6 +190,35 @@ describe('RestaurantComponent', () => {
     it('should not set invalid segment', () => {
       component.setSelectedSegment('invalid' as any);
       expect(component.selectedSegment()).toBe('bites'); // default value
+    });
+  });
+
+  describe('uniqueTags', () => {
+    it('should return unique tags from all bites', () => {
+      componentRef.setInput('bites', [
+        { tags: ['burger', 'spicy'] },
+        { tags: ['burger', 'vegan'] },
+        { tags: ['spicy'] },
+      ] as any);
+      expect(component.uniqueTags()).toEqual(['burger', 'spicy', 'vegan']);
+    });
+
+    it('should return empty array if no bites have tags', () => {
+      componentRef.setInput('bites', [{ name: 'Bite A' }, { name: 'Bite B' }] as any);
+      expect(component.uniqueTags()).toEqual([]);
+    });
+
+    it('should return empty array if bites is undefined', () => {
+      componentRef.setInput('bites', undefined);
+      expect(component.uniqueTags()).toEqual([]);
+    });
+
+    it('should handle bites with undefined tags gracefully', () => {
+      componentRef.setInput('bites', [
+        { tags: ['sushi'] },
+        { tags: undefined },
+      ] as any);
+      expect(component.uniqueTags()).toEqual(['sushi']);
     });
   });
 

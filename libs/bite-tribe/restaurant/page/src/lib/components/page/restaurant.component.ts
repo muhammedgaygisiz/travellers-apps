@@ -64,11 +64,13 @@ export class RestaurantComponent {
   ratedBites = computed(() =>
     (this.bites() || []).filter(
       (bite): bite is Bite & { rating: number } =>
-        bite.rating !== undefined && bite.rating !== null,
+        bite.rating !== undefined && bite.rating !== null && bite.rating !== 0,
     ),
   );
 
   ratedBiteCount = computed(() => this.ratedBites().length);
+
+  bitesCount = computed(() => this.uniqueBites().length);
 
   averageBiteRating = computed(() => {
     const ratedBites = this.ratedBites();

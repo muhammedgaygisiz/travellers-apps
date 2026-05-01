@@ -12,4 +12,5 @@ import { TranslocoPipe } from '@jsverse/transloco';
 })
 export class RestaurantImageComponent {
   restaurant = input<Restaurant>();
+  skipLoadingState = input<boolean>(false);
 }

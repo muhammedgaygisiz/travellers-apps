@@ -11,7 +11,6 @@ import { RestaurantService } from './restaurant.service';
       [bite]="service.bite()"
       [bites]="service.bites()"
       [userId]="service.userId()"
-      [restaurant]="service.restaurant()"
       (showBitesClick)="service.navigateToBites($event)"
       (biteClick)="service.biteClicked($event)"
       (likeButtonClick)="service.likeButtonClicked($event)"

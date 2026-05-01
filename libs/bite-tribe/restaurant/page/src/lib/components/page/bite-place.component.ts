@@ -51,15 +51,10 @@ export class BitePlaceComponent {
   bite = input<Bite>();
   bites = input<Bite[]>();
   userId = input<string>();
-  restaurant = input<Restaurant>();
-  menu = input<Menu>();
 
-  readonly createBiteClick = output<MenuItem>();
-  readonly showMenuClick = output<Restaurant | undefined>();
   readonly showBitesClick = output<Restaurant | undefined>();
   readonly biteClick = output<Bite>();
   readonly likeButtonClick = output<Like>();
-  readonly selectedSegment = signal<'bites' | 'menu'>('bites');
 
   ratedBites = computed(() =>
     (this.bites() || []).filter(
@@ -77,23 +72,11 @@ export class BitePlaceComponent {
     return Math.round(average * 10) / 10;
   });
 
-  placeName = computed(() => {
-    const bite = this.bite();
-    const restaurant = this.restaurant();
-    return restaurant?.name || bite?.place;
-  });
+  placeName = computed(() => this.bite()?.place);
 
-  placeDistance = computed(() => {
-    const bite = this.bite();
-    const restaurant = this.restaurant();
-    return getDistance(restaurant, bite);
-  });
+  placeDistance = computed(() => getDistance(undefined, this.bite()));
 
-  position = computed(() => {
-    const bite = this.bite();
-    const restaurant = this.restaurant();
-    return getPosition(restaurant, bite);
-  });
+  position = computed(() => getPosition(undefined, this.bite()));
 
   uniqueBites = computed(() => {
     const bites = this.bites() || [];
@@ -101,11 +84,4 @@ export class BitePlaceComponent {
       (a, b) => (a.price || 0) - (b.price || 0),
     );
   });
-
-  setSelectedSegment(selectedSegment: any): void {
-    if (selectedSegment != 'bites' && selectedSegment !== 'menu') {
-      return;
-    }
-    this.selectedSegment.set(selectedSegment);
-  }
 }

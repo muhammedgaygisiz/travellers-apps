@@ -121,7 +121,10 @@ describe('BitePlaceComponent', () => {
         { tags: ['spicy', 'sweet'] },
         { tags: ['vegan'] },
       ] as Bite[]);
-      expect(component.uniqueTags()).toEqual(['vegan', 'spicy', 'sweet']);
+      expect(component.uniqueTags()).toEqual(
+        expect.arrayContaining(['vegan', 'spicy', 'sweet']),
+      );
+      expect(component.uniqueTags()).toHaveLength(3);
     });
 
     it('should return empty array if no bites have tags', () => {

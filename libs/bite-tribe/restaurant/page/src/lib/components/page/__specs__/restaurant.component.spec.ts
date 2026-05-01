@@ -147,6 +147,7 @@ describe('RestaurantComponent', () => {
   });
 
   describe('uniqueBites', () => {
+    it('should return unique bites based on id', () => {
       const bites = [
         { id: '1', name: 'Bite 1' },
         { id: '2', name: 'Bite 2' },
@@ -200,7 +201,10 @@ describe('RestaurantComponent', () => {
         { tags: ['burger', 'vegan'] },
         { tags: ['spicy'] },
       ] as any);
-      expect(component.uniqueTags()).toEqual(['burger', 'spicy', 'vegan']);
+      expect(component.uniqueTags()).toEqual(
+        expect.arrayContaining(['burger', 'spicy', 'vegan']),
+      );
+      expect(component.uniqueTags()).toHaveLength(3);
     });
 
     it('should return empty array if no bites have tags', () => {

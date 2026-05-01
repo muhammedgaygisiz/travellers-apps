@@ -4,21 +4,11 @@ import {
   computed,
   input,
   output,
-  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import {
-  IonButton,
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-} from '@ionic/angular/standalone';
-import { Bite, Like, Menu, MenuItem, Restaurant } from 'model';
+import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
+import { Bite, Like, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
-import { TitleCasePipe } from '@angular/common';
-import { EnsureProtocolPipe } from '../../pipes/ensure-protocol.pipe';
 import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
 import { getPosition } from '../../utils/get-position';
 import { getDistance } from '../../utils/get-distance';
@@ -36,11 +26,6 @@ import { TranslocoPipe } from '@jsverse/transloco';
     IonButton,
     IonIcon,
     MapComponent,
-    IonList,
-    IonItem,
-    IonLabel,
-    TitleCasePipe,
-    EnsureProtocolPipe,
     RestaurantImageComponent,
     DistanceComponent,
     TranslocoPipe,

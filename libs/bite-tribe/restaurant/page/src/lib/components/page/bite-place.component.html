@@ -1,7 +1,7 @@
 @let biteData = bite();
 @let positionData = position();
-@let biteCount = bitesCount();
-@let ratedBiteCount = ratedBiteCount();
+@let biteCountData = bitesCount();
+@let ratedBiteCountData = ratedBiteCount();
 @let starIconPath = '/assets/custom-icons/star.svg';
 
 <ta-page
@@ -24,10 +24,10 @@
         class="rating-container ion-display-flex ion-align-items-center ion-margin-bottom"
       >
         <ion-icon [src]="starIconPath" class="rating-icon" />
-        @if (ratedBiteCount) {
+        @if (ratedBiteCountData) {
           <span class="rating">{{ averageBiteRating() }}</span>
           <span class="text-small text-secondary">
-            {{ 'restaurant-rating' | transloco: { biteCount } }}
+            {{ 'restaurant-rating' | transloco: { biteCount: biteCountData } }}
           </span>
         } @else {
           <span class="text-small text-secondary">{{
@@ -45,7 +45,7 @@
 
     <div class="ion-padding safe-padding-bottom buttons-container">
       <div class="ion-padding-bottom">
-        @if (biteCount) {
+        @if (biteCountData) {
           <ion-button
             expand="full"
             fill="outline"

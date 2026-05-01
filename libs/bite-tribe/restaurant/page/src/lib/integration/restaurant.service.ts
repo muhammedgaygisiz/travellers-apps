@@ -24,7 +24,7 @@ export class RestaurantService {
       const menuId = this.normaliseMenuId(restaurant, restaurant.menuId);
 
       if (menuId) {
-        this.navController.navigateForward([
+        void this.navController.navigateForward([
           'bite',
           bite.id,
           'restaurant',
@@ -92,47 +92,59 @@ export class RestaurantService {
     ]);
   };
 
-  navigateToBites(restaurant: Restaurant | undefined): void {
+  navigateToRestaurantBites(restaurant: Restaurant | undefined): void {
     const bite = this.bite();
-
-    if (bite?.restaurantId) {
-      const [empty, collectionName, restaurantId] =
-        bite.restaurantId.split('/');
-
-      if (restaurantId) {
-        this.navController.navigateForward([
-          'bite',
-          bite.id,
-          'restaurant',
-          restaurantId,
-          'bites',
-        ]);
-
-        return;
-      }
+    if (!bite) {
+      return;
     }
 
-    if (bite && restaurant?.menuId) {
-      this.navController.navigateForward([
+    const restaurantIdFromBite = this.normaliseRestaurantId(bite.restaurantId);
+    const restaurantId = restaurantIdFromBite ?? restaurant?.id;
+
+    if (restaurantId) {
+      void this.navController.navigateForward([
         'bite',
         bite.id,
         'restaurant',
-        restaurant.id,
+        restaurantId,
         'bites',
       ]);
 
       return;
     }
 
-    if (bite) {
-      this.navController.navigateForward([
-        'bite',
-        bite.id,
-        'restaurant',
-        encodeURIComponent(bite.place),
-        'bites',
-      ]);
+    void this.navController.navigateForward([
+      'bite',
+      bite.id,
+      'restaurant',
+      encodeURIComponent(bite.place),
+      'bites',
+    ]);
+  }
+
+  navigateToPlaceBites(bite: Bite | undefined): void {
+    if (!bite) {
+      return;
     }
+
+    void this.navController.navigateForward([
+      'bite',
+      bite.id,
+      'restaurant',
+      encodeURIComponent(bite.place),
+      'bites',
+    ]);
+  }
+
+  private normaliseRestaurantId(
+    restaurantPath: string | undefined,
+  ): string | undefined {
+    if (!restaurantPath) {
+      return undefined;
+    }
+
+    const segments = restaurantPath.split('/').filter(Boolean);
+    return segments[segments.length - 1];
   }
 
   private normaliseMenuId(
@@ -140,7 +152,7 @@ export class RestaurantService {
     fallbackMenuId?: string,
   ): string | undefined {
     if (restaurant?.menuId) {
-      const [empty, collectionName, menuId] = restaurant.menuId.split('/');
+      const menuId = restaurant.menuId.split('/').filter(Boolean).pop();
 
       return menuId ?? fallbackMenuId;
     }
@@ -149,7 +161,7 @@ export class RestaurantService {
   }
 
   biteClicked(bite: Bite): void {
-    this.navController.navigateForward(['bite', bite.id]);
+    void this.navController.navigateForward(['bite', bite.id]);
   }
 
   async createMenu(): Promise<void> {

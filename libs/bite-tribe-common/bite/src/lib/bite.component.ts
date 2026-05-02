@@ -2,6 +2,7 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   output,
@@ -10,12 +11,18 @@ import {
 import {
   IonAlert,
   IonButton,
+  IonButtons,
   IonCard,
   IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonContent,
+  IonHeader,
+  IonModal,
   IonText,
+  IonTitle,
+  IonToolbar,
 } from '@ionic/angular/standalone';
 import { Bite, Like, UploadParams } from 'model';
 import { LikesComponent } from './likes/likes.component';
@@ -42,10 +49,16 @@ const CANCEL = 'cancel';
     IonCardTitle,
     LikesComponent,
     IonButton,
+    IonButtons,
     IonText,
     WithFirstLetterUpperCasePipe,
     StarRatingComponent,
     IonAlert,
+    IonModal,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
     DistanceComponent,
     GetImagePipe,
     AsyncPipe,
@@ -68,8 +81,21 @@ export class BiteComponent {
   likeButtonClick = output<Like>();
   gotoEdit = output<Bite>();
   deleteBite = output<Bite>();
+  rateNowClick = output<{ bite: Bite; rating: number }>();
 
   isOpen = signal(false);
+  isRatingModalOpen = signal(false);
+  selectedRating = signal<number>(0);
+
+  isOwnUnratedBite = computed(() => {
+    const bite = this.bite();
+    const userId = this.userId();
+    return (
+      !!userId &&
+      bite.userId === userId &&
+      (!bite.rating || bite.rating === 0)
+    );
+  });
 
   confirmationButtons = [
     {
@@ -95,5 +121,29 @@ export class BiteComponent {
 
   openConfirmationDialog(): void {
     this.isOpen.set(true);
+  }
+
+  openRatingModal(): void {
+    this.selectedRating.set(0);
+    this.isRatingModalOpen.set(true);
+  }
+
+  onRatingChosen(rating: number): void {
+    this.selectedRating.set(rating);
+  }
+
+  saveRating(modal: IonModal): void {
+    const rating = this.selectedRating();
+    if (!rating) {
+      return;
+    }
+    this.rateNowClick.emit({ bite: this.bite(), rating });
+    void modal.dismiss();
+    this.isRatingModalOpen.set(false);
+  }
+
+  closeRatingModal(modal: IonModal): void {
+    void modal.dismiss();
+    this.isRatingModalOpen.set(false);
   }
 }

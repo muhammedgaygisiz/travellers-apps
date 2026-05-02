@@ -194,6 +194,38 @@ describe('RestaurantComponent', () => {
     });
   });
 
+  describe('uniqueTags', () => {
+    it('should return unique tags from all bites', () => {
+      componentRef.setInput('bites', [
+        { tags: ['burger', 'spicy'] },
+        { tags: ['burger', 'vegan'] },
+        { tags: ['spicy'] },
+      ] as any);
+      expect(component.uniqueTags()).toEqual(
+        expect.arrayContaining(['burger', 'spicy', 'vegan']),
+      );
+      expect(component.uniqueTags()).toHaveLength(3);
+    });
+
+    it('should return empty array if no bites have tags', () => {
+      componentRef.setInput('bites', [{ name: 'Bite A' }, { name: 'Bite B' }] as any);
+      expect(component.uniqueTags()).toEqual([]);
+    });
+
+    it('should return empty array if bites is undefined', () => {
+      componentRef.setInput('bites', undefined);
+      expect(component.uniqueTags()).toEqual([]);
+    });
+
+    it('should handle bites with undefined tags gracefully', () => {
+      componentRef.setInput('bites', [
+        { tags: ['sushi'] },
+        { tags: undefined },
+      ] as any);
+      expect(component.uniqueTags()).toEqual(['sushi']);
+    });
+  });
+
   describe('address display', () => {
     it('should render address when restaurant has address', () => {
       componentRef.setInput('restaurant', {

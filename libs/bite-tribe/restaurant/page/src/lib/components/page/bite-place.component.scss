@@ -1,0 +1,34 @@
+:host {
+  .header-container {
+    h1 {
+      margin: 0;
+    }
+  }
+
+  .buttons-container {
+    ion-button {
+      margin: 0;
+      --border-width: 0;
+      --color: white;
+      border-bottom: 1px solid var(--ion-input-border-color);
+
+      &:first-of-type {
+        border-top: 1px solid var(--ion-input-border-color);
+      }
+    }
+  }
+
+  .rating-container {
+    white-space: nowrap;
+
+    .rating-icon {
+      stroke: var(--border-color);
+      fill: var(--bite-tribe-color);
+      margin-right: 5px;
+    }
+
+    .rating {
+      margin-right: 0.5rem;
+    }
+  }
+}

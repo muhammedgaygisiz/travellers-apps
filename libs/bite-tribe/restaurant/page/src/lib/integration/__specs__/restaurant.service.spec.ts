@@ -152,14 +152,32 @@ describe('RestaurantService', () => {
     });
   });
 
-  describe('navigateToBites', () => {
-    it('should navigate to bites if bite and restaurant with menuId exist', () => {
+  describe('navigateToRestaurantBites', () => {
+    it('should navigate to bites using restaurant id from bite path when available', () => {
+      service.bite = signal({
+        ...mockBite,
+        restaurantId: '/restaurants/restaurant-from-bite',
+      } as Bite);
+
+      service.navigateToRestaurantBites(mockRestaurant);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        mockBite.id,
+        'restaurant',
+        'restaurant-from-bite',
+        'bites',
+      ]);
+    });
+
+    it('should navigate to bites using restaurant id from payload when bite path is missing', () => {
       const restaurant: Restaurant = {
         id: 'restaurant123',
         name: 'Test Restaurant',
-        menuId: 'empty/collections/menu456',
       } as Restaurant;
-      service.navigateToBites(restaurant);
+
+      service.navigateToRestaurantBites(restaurant);
+
       expect(mockNavController.navigateForward).toHaveBeenCalledWith([
         'bite',
         mockBite.id,
@@ -169,23 +187,9 @@ describe('RestaurantService', () => {
       ]);
     });
 
-    it('should navigate to dynamic bites page if no menuId', () => {
-      const restaurant: Restaurant = {
-        id: 'restaurant123',
-        name: 'Test Restaurant',
-      } as Restaurant;
-      service.navigateToBites(restaurant);
-      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
-        'bite',
-        mockBite.id,
-        'restaurant',
-        'Test%20place',
-        'bites',
-      ]);
-    });
+    it('should navigate to dynamic bites page if no restaurant id exists', () => {
+      service.navigateToRestaurantBites(undefined);
 
-    it('should navigate to dynamic bites page if no restaurant', () => {
-      service.navigateToBites(undefined as any);
       expect(mockNavController.navigateForward).toHaveBeenCalledWith([
         'bite',
         mockBite.id,
@@ -197,12 +201,34 @@ describe('RestaurantService', () => {
 
     it('should not navigate if no bite', () => {
       service.bite = signal(undefined);
-      const restaurant: Restaurant = {
-        id: 'restaurant123',
-        name: 'Test Restaurant',
-        menuId: 'empty/collections/menu456',
-      } as Restaurant;
-      service.navigateToBites(restaurant);
+
+      service.navigateToRestaurantBites(mockRestaurant);
+
+      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('navigateToPlaceBites', () => {
+    it('should navigate to unverified bites using bite payload', () => {
+      const bite: Bite = {
+        id: 'bite-unverified-123',
+        place: 'Unverified Place',
+      } as Bite;
+
+      service.navigateToPlaceBites(bite);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        'bite-unverified-123',
+        'restaurant',
+        'Unverified%20Place',
+        'bites',
+      ]);
+    });
+
+    it('should not navigate for undefined bite payload', () => {
+      service.navigateToPlaceBites(undefined);
+
       expect(mockNavController.navigateForward).not.toHaveBeenCalled();
     });
   });
@@ -223,11 +249,15 @@ describe('RestaurantService', () => {
 
   describe('createMenu', () => {
     it('should create a menu and navigate to the edit menu page', async () => {
-      (mockDataAccessService.createMenuForRestaurant as jest.Mock).mockResolvedValue('menu-new-id');
+      (
+        mockDataAccessService.createMenuForRestaurant as jest.Mock
+      ).mockResolvedValue('menu-new-id');
 
       await service.createMenu();
 
-      expect(mockDataAccessService.createMenuForRestaurant).toHaveBeenCalledWith(mockRestaurant.id);
+      expect(
+        mockDataAccessService.createMenuForRestaurant,
+      ).toHaveBeenCalledWith(mockRestaurant.id);
       expect(mockNavController.navigateForward).toHaveBeenCalledWith([
         'restaurant',
         mockRestaurant.id,
@@ -237,9 +267,9 @@ describe('RestaurantService', () => {
     });
 
     it('should show error toast if createMenuForRestaurant throws', async () => {
-      (mockDataAccessService.createMenuForRestaurant as jest.Mock).mockRejectedValueOnce(
-        new Error('Network error'),
-      );
+      (
+        mockDataAccessService.createMenuForRestaurant as jest.Mock
+      ).mockRejectedValueOnce(new Error('Network error'));
 
       await service.createMenu();
 
@@ -257,7 +287,9 @@ describe('RestaurantService', () => {
 
       await service.createMenu();
 
-      expect(mockDataAccessService.createMenuForRestaurant).not.toHaveBeenCalled();
+      expect(
+        mockDataAccessService.createMenuForRestaurant,
+      ).not.toHaveBeenCalled();
       expect(mockNavController.navigateForward).not.toHaveBeenCalled();
     });
   });
@@ -280,9 +312,9 @@ describe('RestaurantService', () => {
     });
 
     it('should show error toast if data access throws', async () => {
-      (mockDataAccessService.submitSocialMediaLinks as jest.Mock).mockRejectedValueOnce(
-        new Error('Network error'),
-      );
+      (
+        mockDataAccessService.submitSocialMediaLinks as jest.Mock
+      ).mockRejectedValueOnce(new Error('Network error'));
       const links = [{ url: 'https://example.com', network: 'facebook' }];
       await service.submitSocialMediaLinks({ links });
       expect(mockToastController.create).toHaveBeenCalledWith(

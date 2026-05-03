@@ -72,6 +72,9 @@
     },
     "serve": {
       "executor": "@nx/angular:dev-server",
+      "options": {
+        "port": 4300
+      },
       "configurations": {
         "production": {
           "buildTarget": "bite-tribe-business:build:production"

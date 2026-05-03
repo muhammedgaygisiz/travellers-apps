@@ -108,8 +108,8 @@ describe('BusinessMenuComponent', () => {
     });
 
     it('should emit saveMenu with the current menu', () => {
-      const menu = { categories: [] } as any;
-      componentRef.setInput('menu', menu);
+      const menu = { categories: [{ title: 'Pizza' }] } as any;
+      component.linkedMenu.set(menu);
 
       component.onSave();
 
@@ -117,7 +117,7 @@ describe('BusinessMenuComponent', () => {
     });
 
     it('should not emit saveMenu when menu is undefined', () => {
-      componentRef.setInput('menu', undefined);
+      component.linkedMenu.set(null as any);
 
       component.onSave();
 

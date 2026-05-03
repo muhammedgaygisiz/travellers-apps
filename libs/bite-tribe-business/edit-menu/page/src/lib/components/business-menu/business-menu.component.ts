@@ -19,6 +19,7 @@ import { BusinessCategoryComponent } from '../business-category/business-categor
 import { NgTemplateOutlet } from '@angular/common';
 import { ItemReorderEventDetail } from '@ionic/angular';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { link } from 'd3';
 
 @Component({
   selector: 'business-menu',
@@ -73,10 +74,10 @@ export class BusinessMenuComponent {
   }
 
   onSave(): void {
-    const menu = this.linkedMenu();
+    const linkedMenu = this.linkedMenu();
 
-    if (menu) {
-      this.saveMenu.emit(menu);
+    if (linkedMenu) {
+      this.saveMenu.emit(linkedMenu);
     }
   }
 

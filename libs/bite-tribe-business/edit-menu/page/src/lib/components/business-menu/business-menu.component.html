@@ -13,7 +13,7 @@
           <business-category
             [category]="category"
             (addItemToCategory)="onAddItemToCategory($event)"
-            (orderingInCategoryChanged)="updateCategory($event)"
+            (categoryChanged)="updateCategory($event)"
           />
         </div>
       }
@@ -44,9 +44,7 @@
   }
   @if (!shouldShowAddCategory()) {
     <div class="ion-text-end">
-      <ion-button (click)="showAddCategory()">
-        {{ 'add-category' | transloco }}</ion-button
-      >
+      <ion-button (click)="showAddCategory()" expand="block"> + </ion-button>
     </div>
   }
 </ng-template>

@@ -3,7 +3,8 @@
 :host {
   .menu-category {
     margin-bottom: 2rem;
-    @include globals.light-border;
+    display: flex;
+    flex-direction: column;
 
     .reorder-container {
       @include globals.reorder-container;

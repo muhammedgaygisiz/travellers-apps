@@ -1,10 +1,19 @@
 @let categoryData = linkedCategory();
-
 <div class="menu-category ion-padding">
-  <h2>{{ categoryData?.title }}</h2>
-  @if (categoryData?.subtitle) {
-    <p class="subtitle">{{ categoryData?.subtitle }}</p>
-  }
+  <h2>
+    <ion-input
+      [field]="categoryForm.title"
+      fill="outline"
+      mode="md"
+      class="ion-margin-top"
+    />
+  </h2>
+  <ion-input
+    [field]="categoryForm.subtitle"
+    fill="outline"
+    mode="md"
+    class="ion-margin-top"
+  />
   @if (categoryData?.items?.length) {
     <ion-reorder-group (ionItemReorder)="handleReorder($any($event))">
       @for (item of categoryData?.items; track item.name) {

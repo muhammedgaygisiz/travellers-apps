@@ -6,6 +6,7 @@
 
     .reorder-container {
       @include globals.reorder-container;
+      @include globals.light-border;
 
       business-category {
         width: 100%;

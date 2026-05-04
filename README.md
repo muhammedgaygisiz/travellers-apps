@@ -45,7 +45,15 @@ npm run development
 ```
 
 You can then access http://localhost:4200/start. Sometimes you can have problems with the firebase
-that still runs in the background. Currently it starts at port `8085`. You can use the commands:
+that still runs in the background. Currently it starts at port `8085`.
+
+If you have `kill-port` installed (an npm package), you can run the following command:
+
+```
+nx firebase-kill bite-tribe-firebase
+```
+
+Alternatively you can also use the following linux/mac-command:
 
 ```
 sudo lsof -i tcp:8085

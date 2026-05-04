@@ -2,24 +2,40 @@
   .menu-item {
     .item-container {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1rem;
-      gap: 1rem;
-      border-bottom: 1px solid var(--ion-color-medium);
+      flex-direction: column;
 
-      .item-details {
-        flex: 1;
+      .item-header {
+        display: flex;
+        justify-content: space-between;
+
+        .item-name {
+          font-weight: bold;
+          align-content: center;
+        }
+
+        span {
+          align-content: space-around;
+        }
 
         h3 {
           font-size: 1.1rem;
           margin: 0;
         }
+      }
+
+      .item-details {
+        flex: 1;
+        justify-content: space-between;
+        align-items: flex-start;
 
         p {
           color: var(--ion-color-medium);
           font-size: 0.9rem;
           margin: 0.25rem 0;
+        }
+
+        hr {
+          background-color: var(--ion-color-medium);
         }
       }
 
@@ -34,10 +50,11 @@
           flex-direction: column;
           align-items: flex-end;
 
-          .price {
+          .item-price {
             font-weight: bold;
             white-space: nowrap;
-            margin-bottom: 0.5rem;
+            align-content: center;
+            height: 100%;
           }
         }
 

@@ -1,49 +1,43 @@
 @let itemData = item();
+@let isVariantData = isVariant();
 
 <div class="menu-item">
-  <h3>
-    <ion-input
-      [field]="itemForm.name"
-      fill="outline"
-      mode="md"
-      class="ion-margin-top"
-    />
-  </h3>
-
   <div class="item-container">
-    <div>
-      <p>{{ itemData?.description }}</p>
-      <div class="item-details">
-        @if (itemData?.ingredients) {
-          <p>{{ itemData?.ingredients }}</p>
-        }
-        @if (itemData?.notes) {
-          <p>{{ itemData?.notes }}</p>
-        }
-        @if (shouldShowAddVariant()) {
-          <business-add-item (addItem)="onAddVariant($event)" />
-        }
-        @if (itemData?.variants?.length) {
-          <div class="ion-margin-top">
-            @for (variant of itemData?.variants; track $index) {
-              <business-menu-item [item]="variant" isVariant />
-            }
-          </div>
-        }
+    <div class="item-header">
+      <div class="item-name">{{ itemData?.name }}</div>
+      <div class="price-edit">
+        <div class="price-actions">
+          @if (itemData?.price !== 0) {
+            <div class="item-price">{{ itemData?.price }} €</div>
+          }
+        </div>
+        <ion-button fill="clear" (click)="onEditVariant()">
+          <ion-icon name="create-outline" />
+        </ion-button>
       </div>
     </div>
-    <div class="price-edit">
-      <div class="price-actions">
-        @if (itemData?.price !== 0) {
-          <p class="price">{{ itemData?.price }} €</p>
-        }
-      </div>
-      <ion-button fill="clear" (click)="onEditVariant()">
-        <ion-icon name="create-outline" />
-      </ion-button>
+    <i>{{ itemData?.description }}</i>
+    <div class="item-details">
+      @if (itemData?.ingredients) {
+        <p>{{ itemData?.ingredients }}</p>
+      }
+      @if (itemData?.notes) {
+        <p>{{ itemData?.notes }}</p>
+      }
+      <hr />
+      @if (shouldShowAddVariant()) {
+        <business-add-item (addItem)="onAddVariant($event)" />
+      }
+      @if (itemData?.variants?.length) {
+        <div class="ion-margin-top">
+          @for (variant of itemData?.variants; track $index) {
+            <business-menu-item [item]="variant" isVariant />
+          }
+        </div>
+      }
     </div>
   </div>
-  @if (!isVariant()) {
+  @if (!isVariantData) {
     <ion-button
       expand="block"
       class="ion-margin-top"

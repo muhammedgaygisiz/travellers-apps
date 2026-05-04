@@ -8,6 +8,16 @@
       @include globals.reorder-container;
       @include globals.light-border;
 
+      ion-reorder {
+        ion-icon {
+          cursor: grab;
+
+          &:active {
+            cursor: grabbing;
+          }
+        }
+      }
+
       business-category {
         width: 100%;
         margin-left: 1rem;

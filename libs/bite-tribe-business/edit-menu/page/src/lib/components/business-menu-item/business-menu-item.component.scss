@@ -23,15 +23,22 @@
         }
       }
 
-      .price-actions {
+      .price-edit {
+        flex-grow: 1;
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
+        justify-content: end;
+        gap: 1rem;
 
-        .price {
-          font-weight: bold;
-          white-space: nowrap;
-          margin-bottom: 0.5rem;
+        .price-actions {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+
+          .price {
+            font-weight: bold;
+            white-space: nowrap;
+            margin-bottom: 0.5rem;
+          }
         }
 
         ion-button {

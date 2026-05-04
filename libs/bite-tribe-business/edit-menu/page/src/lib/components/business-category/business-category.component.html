@@ -1,5 +1,5 @@
 @let categoryData = linkedCategory();
-<div class="menu-category ion-padding">
+<div class="menu-category">
   <h2>
     <ion-input
       [field]="categoryForm.title"
@@ -17,7 +17,7 @@
   @if (categoryData?.items?.length) {
     <ion-reorder-group (ionItemReorder)="handleReorder($any($event))">
       @for (item of categoryData?.items; track item.name) {
-        <div class="reorder-container">
+        <div class="reorder-container ion-padding">
           <div class="reorder-anchor">
             <ion-reorder>
               <ion-icon name="menu" size="large" color="primary" />

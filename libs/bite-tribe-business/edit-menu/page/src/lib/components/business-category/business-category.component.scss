@@ -1,8 +1,11 @@
 @use 'globals';
 
 :host {
+  h2 {
+    margin: unset;
+  }
+
   .menu-category {
-    margin-bottom: 2rem;
     display: flex;
     flex-direction: column;
 

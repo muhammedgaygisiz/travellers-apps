@@ -4,7 +4,7 @@
   @if (menuData?.categories?.length) {
     <ion-reorder-group (ionItemReorder)="handleReorder($event)">
       @for (category of menuData?.categories; track category.title) {
-        <div class="reorder-container">
+        <div class="reorder-container ion-padding">
           <div class="reorder-anchor">
             <ion-reorder>
               <ion-icon name="menu" size="large" color="primary" />
@@ -43,8 +43,10 @@
     />
   }
   @if (!shouldShowAddCategory()) {
-    <div class="ion-text-end">
-      <ion-button (click)="showAddCategory()" expand="block"> + </ion-button>
+    <div class="ion-text-end ion-margin-top">
+      <ion-button (click)="showAddCategory()" expand="block">
+        {{ 'add-category' | transloco }}
+      </ion-button>
     </div>
   }
 </ng-template>

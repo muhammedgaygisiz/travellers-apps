@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -18,14 +19,16 @@ import { debounce, Field, form, required } from '@angular/forms/signals';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './business-menu-variant.component.html',
-  styleUrl: './business-menu-variant.component.scss',
+  templateUrl: './business-menu-item-editor.component.html',
+  styleUrl: './business-menu-item-editor.component.scss',
   imports: [IonButton, IonInput, IonList, IonItem, Field],
   selector: 'business-menu-variant',
   standalone: true,
 })
 export class BusinessMenuVariantComponent {
   item = input<MenuItem>();
+
+  isVariant = input(false, { transform: booleanAttribute });
 
   itemChanged = output<MenuItem>();
 
@@ -46,6 +49,8 @@ export class BusinessMenuVariantComponent {
     required(schemaPath.price);
     debounce(schemaPath.name, 500);
     debounce(schemaPath.description, 500);
+    debounce(schemaPath.ingredients, 500);
+    debounce(schemaPath.notes, 500);
     debounce(schemaPath.price, 500);
   });
 

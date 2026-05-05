@@ -22,6 +22,23 @@ describe('BusinessMenuItemComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('onItemChange', () => {
+    it('should set value if item exists', () => {
+      const testItem = { id: 1, name: 'Test Item' } as any;
+      componentRef.setInput('item', testItem);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.itemForm.name().value()).toBe(testItem.name);
+    });
+
+    it('should not set value if item does not exist', () => {
+      componentRef.setInput('item', undefined);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.itemForm.name().value()).toBe('');
+    });
+  });
+
   describe('shouldShowAddVariant', () => {
     it('should return true when presentAddVariant is true', () => {
       component.presentAddVariant.set(true);

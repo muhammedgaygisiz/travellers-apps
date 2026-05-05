@@ -6,61 +6,9 @@
       display: flex;
       flex-direction: column;
 
-      .item-header {
-        display: flex;
-        justify-content: space-between;
-
-        .item-name {
-          font-weight: bold;
-          align-content: center;
-        }
-
-        span {
-          align-content: space-around;
-        }
-
-        h3 {
-          font-size: 1.1rem;
-          margin: 0;
-        }
-      }
-
-      .item-details {
-        flex: 1;
-        justify-content: space-between;
-        align-items: flex-start;
-
-        p {
-          color: var(--ion-color-medium);
-          font-size: 0.9rem;
-          margin: 0.25rem 0;
-        }
-      }
-
-      .price-edit {
-        flex-grow: 1;
-        display: flex;
-        justify-content: end;
-        gap: 1rem;
-
-        .price-actions {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-
-          .item-price {
-            font-weight: bold;
-            white-space: nowrap;
-            align-content: center;
-            height: 100%;
-          }
-        }
-
-        ion-button {
-          --padding-start: 0;
-          --padding-end: 0;
-          margin: 0;
-        }
+      h3 {
+        font-size: 1.1rem;
+        margin-top: 0;
       }
     }
   }

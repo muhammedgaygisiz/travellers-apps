@@ -1,10 +1,12 @@
 <div class="container">
   <ion-list class="list-margin">
-    <ion-item>
-      <ion-input [field]="itemForm.name">
-        <div class="label" slot="label">Name</div>
-      </ion-input>
-    </ion-item>
+    @if (!isVariant()) {
+      <ion-item>
+        <ion-input [field]="itemForm.name">
+          <div class="label" slot="label">Name</div>
+        </ion-input>
+      </ion-item>
+    }
     <ion-item>
       <ion-input [field]="itemForm.description">
         <div class="label" slot="label">Description</div>

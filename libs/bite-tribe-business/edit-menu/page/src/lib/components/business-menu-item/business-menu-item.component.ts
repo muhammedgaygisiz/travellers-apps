@@ -3,20 +3,22 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   output,
   signal,
 } from '@angular/core';
-import { IonButton } from '@ionic/angular/standalone';
+import { IonButton, IonInput, IonItem } from '@ionic/angular/standalone';
 import type { MenuItem } from 'model';
-import { BusinessMenuVariantComponent } from '../business-menu-variant/business-menu-variant.component';
+import { BusinessMenuVariantComponent } from '../business-menu-item-editor/business-menu-variant.component';
+import { debounce, Field, form, required } from '@angular/forms/signals';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'business-menu-item',
   templateUrl: './business-menu-item.component.html',
   styleUrl: './business-menu-item.component.scss',
-  imports: [IonButton, BusinessMenuVariantComponent],
+  imports: [IonButton, BusinessMenuVariantComponent, IonInput, IonItem, Field],
 })
 export class BusinessMenuItemComponent {
   item = input<MenuItem>();
@@ -28,6 +30,22 @@ export class BusinessMenuItemComponent {
   itemChanged = output<MenuItem>();
 
   presentAddVariant = signal(false);
+
+  itemModel = signal({
+    name: this.item()?.name || '',
+  });
+
+  itemForm = form(this.itemModel, (schemaPath) => {
+    required(schemaPath.name);
+    debounce(schemaPath.name, 500);
+  });
+
+  onItemChange = effect(() => {
+    const item = this.item();
+    if (item) {
+      this.itemForm.name().value.set(item?.name || '');
+    }
+  });
 
   shouldShowAddVariant = computed(() => {
     return this.presentAddVariant();

@@ -17,7 +17,7 @@ import {
 } from '@ionic/angular/standalone';
 import type { Category, MenuItem } from 'model';
 import { NgTemplateOutlet } from '@angular/common';
-import { BusinessMenuVariantComponent } from '../business-menu-variant/business-menu-variant.component';
+import { BusinessMenuVariantComponent } from '../business-menu-item-editor/business-menu-variant.component';
 import { BusinessMenuItemComponent } from '../business-menu-item/business-menu-item.component';
 import { ItemReorderEventDetail } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';

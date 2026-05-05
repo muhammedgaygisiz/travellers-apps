@@ -3,7 +3,20 @@
 
 <div class="menu-item">
   <div class="item-container">
-    <business-menu-variant [item]="itemData" (addItem)="onAddVariant($event)" />
+    <h3>
+      <ion-input
+        [field]="itemForm.name"
+        expand="block"
+        fill="outline"
+        mode="md"
+        class="ion-margin-top"
+      />
+    </h3>
+    <business-menu-variant
+      [item]="itemData"
+      (addItem)="onAddVariant($event)"
+      isVariant
+    />
     @if (itemData?.variants?.length) {
       <div class="ion-margin-top">
         @for (variant of itemData?.variants; track $index) {
@@ -14,6 +27,7 @@
   </div>
   @if (shouldShowAddVariant()) {
     <business-menu-variant
+      isVariant
       (addItem)="onAddVariant($event)"
       (cancelAddItem)="onCancelAddItem()"
     />

@@ -47,7 +47,7 @@ export class BusinessMenuItemComponent {
     }
   });
 
-  shouldShowAddVariant = computed(() => {
+  showNewVariantComponent = computed(() => {
     return this.presentAddVariant();
   });
 

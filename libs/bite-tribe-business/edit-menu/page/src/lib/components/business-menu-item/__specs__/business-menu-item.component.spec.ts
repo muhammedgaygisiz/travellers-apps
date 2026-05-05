@@ -42,12 +42,12 @@ describe('BusinessMenuItemComponent', () => {
   describe('shouldShowAddVariant', () => {
     it('should return true when presentAddVariant is true', () => {
       component.presentAddVariant.set(true);
-      expect(component.shouldShowAddVariant()).toBe(true);
+      expect(component.showNewVariantComponent()).toBe(true);
     });
 
     it('should return false when presentAddVariant is false', () => {
       component.presentAddVariant.set(false);
-      expect(component.shouldShowAddVariant()).toBe(false);
+      expect(component.showNewVariantComponent()).toBe(false);
     });
   });
 

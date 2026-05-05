@@ -1,14 +1,19 @@
 :host {
   .menu-item {
     .item-container {
-      padding-bottom: 1rem;
-
       display: flex;
       flex-direction: column;
 
       h3 {
         font-size: 1.1rem;
         margin-top: 0;
+      }
+
+      business-menu-variant {
+        &:not(:only-child),
+        &:not(:last-child) {
+          margin-bottom: 1rem;
+        }
       }
     }
   }

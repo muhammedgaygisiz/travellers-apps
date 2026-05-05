@@ -1,0 +1,52 @@
+<div class="container">
+  <ion-list class="list-margin">
+    <ion-item>
+      <ion-input [field]="itemForm.name">
+        <div class="label" slot="label">Name</div>
+      </ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input [field]="itemForm.description">
+        <div class="label" slot="label">Description</div>
+      </ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input type="number" inputmode="decimal" [field]="itemForm.price">
+        <div class="label" slot="label">Price</div>
+        <span slot="end">$</span>
+      </ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input [field]="itemForm.ingredients">
+        <div class="label" slot="label">Ingredients</div>
+      </ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input [field]="itemForm.notes">
+        <div class="label" slot="label">Notes</div>
+      </ion-input>
+    </ion-item>
+  </ion-list>
+
+  <div class="button-container">
+    @if (!item()) {
+      <ion-button fill="outline" (click)="cancelAddItem.emit()">
+        Cancel
+      </ion-button>
+      <ion-button [disabled]="isAddDisabled()" (click)="onAddItem()">
+        Add
+      </ion-button>
+    } @else if (!isSaveDisabled()) {
+      <ion-button
+        fill="outline"
+        [disabled]="!itemForm().dirty()"
+        (click)="resetForm()"
+      >
+        Cancel
+      </ion-button>
+      <ion-button [disabled]="isSaveDisabled()" (click)="onUpdateItem()">
+        Save
+      </ion-button>
+    }
+  </div>
+</div>

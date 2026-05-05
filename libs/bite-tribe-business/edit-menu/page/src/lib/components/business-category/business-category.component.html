@@ -43,7 +43,7 @@
 
 <ng-template #addItem>
   @if (shouldShowAddItem()) {
-    <business-add-item
+    <business-menu-variant
       (addItem)="onAddItem($event)"
       (cancelAddItem)="onCancelAddItem()"
     />

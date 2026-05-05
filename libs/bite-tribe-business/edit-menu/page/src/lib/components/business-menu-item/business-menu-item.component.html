@@ -3,40 +3,18 @@
 
 <div class="menu-item">
   <div class="item-container">
-    <div class="item-header">
-      <div class="item-name">{{ itemData?.name }}</div>
-      <div class="price-edit">
-        <div class="price-actions">
-          @if (itemData?.price !== 0) {
-            <div class="item-price">{{ itemData?.price }} €</div>
-          }
-        </div>
-        <ion-button fill="clear" (click)="onEditVariant()">
-          <ion-icon name="create-outline" />
-        </ion-button>
+    <business-menu-variant [item]="itemData" (addItem)="onAddVariant($event)" />
+    @if (itemData?.variants?.length) {
+      <div class="ion-margin-top">
+        @for (variant of itemData?.variants; track $index) {
+          <business-menu-variant [item]="variant" isVariant />
+        }
       </div>
-    </div>
-    <i>{{ itemData?.description }}</i>
-    <div class="item-details">
-      @if (itemData?.ingredients) {
-        <p>{{ itemData?.ingredients }}</p>
-      }
-      @if (itemData?.notes) {
-        <p>{{ itemData?.notes }}</p>
-      }
-      <hr />
-      @if (shouldShowAddVariant()) {
-        <business-add-item (addItem)="onAddVariant($event)" />
-      }
-      @if (itemData?.variants?.length) {
-        <div class="ion-margin-top">
-          @for (variant of itemData?.variants; track $index) {
-            <business-menu-item [item]="variant" isVariant />
-          }
-        </div>
-      }
-    </div>
+    }
   </div>
+  @if (shouldShowAddVariant()) {
+    <business-menu-variant (addItem)="onAddVariant($event)" />
+  }
   @if (!isVariantData) {
     <ion-button
       expand="block"

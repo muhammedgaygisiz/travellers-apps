@@ -76,4 +76,12 @@ describe('BusinessMenuItemComponent', () => {
       expect(emitSpy).not.toHaveBeenCalled();
     });
   });
+
+  describe('onCancelAddItem', () => {
+    it('should set presentAddVariant signal to false', () => {
+      component.presentAddVariant.set(true);
+      component.onCancelAddItem();
+      expect(component.presentAddVariant()).toBe(false);
+    });
+  });
 });

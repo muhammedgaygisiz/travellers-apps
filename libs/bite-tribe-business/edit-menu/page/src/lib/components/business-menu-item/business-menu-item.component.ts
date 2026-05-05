@@ -52,6 +52,10 @@ export class BusinessMenuItemComponent {
     }
   }
 
+  onCancelAddItem(): void {
+    this.presentAddVariant.set(false);
+  }
+
   onEditVariant(): void {
     // TODO
   }

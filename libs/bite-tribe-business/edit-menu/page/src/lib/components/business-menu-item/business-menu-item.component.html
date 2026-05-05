@@ -13,7 +13,10 @@
     }
   </div>
   @if (shouldShowAddVariant()) {
-    <business-menu-variant (addItem)="onAddVariant($event)" />
+    <business-menu-variant
+      (addItem)="onAddVariant($event)"
+      (cancelAddItem)="onCancelAddItem()"
+    />
   }
   @if (!isVariantData) {
     <ion-button

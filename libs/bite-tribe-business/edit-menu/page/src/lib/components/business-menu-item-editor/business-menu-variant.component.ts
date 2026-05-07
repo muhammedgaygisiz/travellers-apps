@@ -15,7 +15,7 @@ import {
   IonList,
 } from '@ionic/angular/standalone';
 import type { MenuItem } from 'model';
-import { debounce, Field, form, min, required } from '@angular/forms/signals';
+import { Field, form, min, required } from '@angular/forms/signals';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,27 +45,33 @@ export class BusinessMenuVariantComponent {
   });
 
   itemForm = form(this.itemModel, (schemaPath) => {
-    required(schemaPath.name);
-    required(schemaPath.price, {
-      message: 'Promo code is required for discounts',
+    required(schemaPath.name, {
+      message: 'Name is required',
+      when: () => !this.isVariant(),
     });
+    required(schemaPath.price, { message: 'Price is required' });
     min(schemaPath.price, 0);
   });
 
   onItemChange = effect(() => {
     const item = this.item();
     if (item) {
-      this.itemForm.name().value.set(item?.name || '');
-      this.itemForm.description().value.set(item?.description || '');
-      this.itemForm.ingredients().value.set(item?.ingredients || '');
-      this.itemForm.notes().value.set(item?.notes || '');
-      this.itemForm.price().value.set(item?.price || 0);
+      this.itemForm.name().value.set(item.name);
+      this.itemForm.description().value.set(item.description || '');
+      this.itemForm.ingredients().value.set(item.ingredients || '');
+      this.itemForm.notes().value.set(item.notes || '');
+      this.itemForm.price().value.set(item.price || 0);
     }
+  });
+
+  isChangeButtonsHidden = computed(() => {
+    const itemForm = this.itemForm();
+    return !itemForm.dirty();
   });
 
   isSaveDisabled = computed(() => {
     const itemForm = this.itemForm();
-    return !itemForm.valid() || !itemForm.dirty();
+    return !itemForm.valid() || this.isChangeButtonsHidden();
   });
 
   onUpdateItem(): void {

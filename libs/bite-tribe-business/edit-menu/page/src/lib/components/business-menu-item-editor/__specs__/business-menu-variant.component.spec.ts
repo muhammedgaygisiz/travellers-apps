@@ -123,7 +123,7 @@ describe('BusinessAddItemComponent', () => {
     });
 
     it('should not emit addItem event when form is invalid', () => {
-      component.itemForm.name().value.set('');
+      component.itemForm.price().value.set(-1);
 
       component.onAddItem();
 

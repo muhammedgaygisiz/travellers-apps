@@ -76,6 +76,31 @@ describe('BusinessCategoryComponent', () => {
     });
   });
 
+  describe('onChangeItem', () => {
+    let emitSpy: SpyInstance;
+    let mockMenuItem: any;
+    let mockCategory: any;
+
+    beforeEach(() => {
+      emitSpy = jest.spyOn(component.categoryChanged, 'emit');
+      mockMenuItem = { id: '1', name: 'Updated Item' } as any;
+      mockCategory = {
+        id: 'cat1',
+        items: [{ id: '1', name: 'Test Item' }],
+      } as any;
+      componentRef.setInput('category', mockCategory);
+    });
+
+    it('should emit categoryChanged with updated item in category', () => {
+      component.onChangeItem(mockMenuItem, 0);
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...mockCategory,
+        title: mockCategory.title || '',
+        items: [mockMenuItem],
+      });
+    });
+  });
+
   describe('onCancelAddItem', () => {
     it('should set presentShowAddItem to false', () => {
       component.presentShowAddItem.set(true);

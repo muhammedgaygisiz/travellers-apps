@@ -35,7 +35,7 @@
       <ion-button fill="outline" (click)="cancelAddItem.emit()">
         Cancel
       </ion-button>
-      <ion-button [disabled]="isAddDisabled()" (click)="onAddItem()">
+      <ion-button [disabled]="itemForm().valid()" (click)="onAddItem()">
         Add
       </ion-button>
     } @else if (!isSaveDisabled()) {

@@ -101,4 +101,63 @@ describe('BusinessMenuItemComponent', () => {
       expect(component.presentAddVariant()).toBe(false);
     });
   });
+
+  describe('onEditVariant', () => {
+    let itemChangedEmitSpy: SpyInstance;
+
+    beforeEach(() => {
+      itemChangedEmitSpy = jest.spyOn(component.itemChanged, 'emit');
+    });
+
+    it('should emit itemChanged event with updated item when index is not provided', () => {
+      const initialItem = { id: 1, name: 'Test Item' } as any;
+      const changes = { name: 'Updated Item' } as any;
+
+      componentRef.setInput('item', initialItem);
+
+      component.onEditVariant(changes);
+
+      expect(itemChangedEmitSpy).toHaveBeenCalledWith({
+        ...initialItem,
+        ...changes,
+      });
+    });
+
+    it('should not emit itemChanged event if item is undefined', () => {
+      const changes = { name: 'Updated Item' } as any;
+
+      componentRef.setInput('item', undefined);
+
+      component.onEditVariant(changes);
+
+      expect(itemChangedEmitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not emit itemChanged event on variant if no variants provided in original item', () => {
+      const initialItem = { id: 1, name: 'Variant 1' } as any;
+      const changes = { name: 'Updated Item' } as any;
+      componentRef.setInput('item', initialItem);
+      component.onEditVariant(changes, 0);
+      expect(itemChangedEmitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not emit itemChanged event on variant if no variants (empty array) provided in original item', () => {
+      const initialItem = { id: 1, name: 'Variant 1', variants: [] } as any;
+      const changes = { name: 'Updated Item' } as any;
+      componentRef.setInput('item', initialItem);
+      component.onEditVariant(changes, 0);
+      expect(itemChangedEmitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should emit itemChanged event for variant change if index is provided', () => {
+      const initialItem = { id: 1, name: 'Variant 1', variants: [{}] } as any;
+      const changes = { name: 'Updated Item' } as any;
+      componentRef.setInput('item', initialItem);
+      component.onEditVariant(changes, 0);
+      expect(itemChangedEmitSpy).toHaveBeenCalledWith({
+        ...initialItem,
+        variants: [changes],
+      });
+    });
+  });
 });

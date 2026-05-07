@@ -113,6 +113,17 @@ export class BusinessCategoryComponent {
     this.presentShowAddItem.set(true);
   }
 
+  onChangeItem(item: MenuItem, index: number): void {
+    const category = this.linkedCategory();
+    const updatedItems = category?.items ? [...category.items] : [];
+    updatedItems[index] = item;
+    this.categoryChanged.emit({
+      ...category,
+      title: category?.title || '',
+      items: updatedItems,
+    });
+  }
+
   onCancelAddItem(): void {
     this.presentShowAddItem.set(false);
   }

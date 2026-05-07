@@ -50,23 +50,7 @@ describe('BusinessAddItemComponent', () => {
       expect(component.itemForm.description().value()).toBe('');
       expect(component.itemForm.ingredients().value()).toBe('');
       expect(component.itemForm.notes().value()).toBe('');
-      expect(component.itemForm.price().value()).toBe('');
-    });
-  });
-
-  describe('isAddDisabled', () => {
-    it('should return true when form is invalid', () => {
-      component.itemForm.name().value.set('');
-      component.itemForm.price().value.set(0);
-
-      expect(component.isAddDisabled()).toBe(true);
-    });
-
-    it('should return false when form is valid', () => {
-      component.itemForm.name().value.set('test');
-      component.itemForm.price().value.set(10);
-
-      expect(component.isAddDisabled()).toBe(false);
+      expect(component.itemForm.price().value()).toBe(0);
     });
   });
 
@@ -110,7 +94,7 @@ describe('BusinessAddItemComponent', () => {
     });
 
     it('should not emit itemChanged event if form is invalid', () => {
-      component.itemForm.name().value.set('New Item');
+      component.itemForm.price().value.set(-1);
 
       component.onUpdateItem();
       expect(itemChangedEmitSpy).not.toHaveBeenCalled();
@@ -157,7 +141,7 @@ describe('BusinessAddItemComponent', () => {
       component.itemForm.description().value.set('description');
       component.itemForm.ingredients().value.set('ingredients');
       component.itemForm.notes().value.set('notes');
-      component.itemForm.price().value.set('price');
+      component.itemForm.price().value.set(10);
     });
 
     it('should reset form values if item is provided', () => {

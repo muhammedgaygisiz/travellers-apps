@@ -8,7 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { IonButton, IonInput, IonItem } from '@ionic/angular/standalone';
+import { IonButton, IonInput } from '@ionic/angular/standalone';
 import type { MenuItem } from 'model';
 import { BusinessMenuVariantComponent } from '../business-menu-item-editor/business-menu-variant.component';
 import { debounce, Field, form, required } from '@angular/forms/signals';
@@ -18,7 +18,7 @@ import { debounce, Field, form, required } from '@angular/forms/signals';
   selector: 'business-menu-item',
   templateUrl: './business-menu-item.component.html',
   styleUrl: './business-menu-item.component.scss',
-  imports: [IonButton, BusinessMenuVariantComponent, IonInput, IonItem, Field],
+  imports: [IonButton, BusinessMenuVariantComponent, IonInput, Field],
 })
 export class BusinessMenuItemComponent {
   item = input<MenuItem>();
@@ -74,7 +74,41 @@ export class BusinessMenuItemComponent {
     this.presentAddVariant.set(false);
   }
 
-  onEditVariant(): void {
-    // TODO
+  onEditVariant(changes: MenuItem, index?: number): void {
+    const item = this.item();
+
+    if (!item) {
+      return;
+    }
+
+    if (index != null) {
+      this.emitVariantChanges(item, changes, index);
+      return;
+    }
+    this.emitItemChanges(item, changes);
+  }
+
+  private emitItemChanges(item: MenuItem, changes: MenuItem): void {
+    this.itemChanged.emit({
+      ...item,
+      ...changes,
+    });
+  }
+
+  private emitVariantChanges(
+    item: MenuItem,
+    changes: MenuItem,
+    index: number,
+  ): void {
+    if (!item.variants || !item.variants.length) {
+      return;
+    }
+
+    const newVariants = [...item.variants];
+    newVariants[index] = changes;
+    this.itemChanged.emit({
+      ...item,
+      variants: newVariants,
+    });
   }
 }

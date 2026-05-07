@@ -19,6 +19,7 @@ import { BusinessMenuComponent } from '../business-menu/business-menu.component'
 })
 export class EditMenuPage {
   restaurant = input<Restaurant>();
+
   menu = input<Menu>();
 
   saveMenu = output<Menu>();

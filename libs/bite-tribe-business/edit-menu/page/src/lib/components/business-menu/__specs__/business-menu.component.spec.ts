@@ -100,31 +100,6 @@ describe('BusinessMenuComponent', () => {
     });
   });
 
-  describe('onSave', () => {
-    let emitSpy: SpyInstance;
-
-    beforeEach(() => {
-      emitSpy = jest.spyOn(component.saveMenu, 'emit');
-    });
-
-    it('should emit saveMenu with the current menu', () => {
-      const menu = { categories: [{ title: 'Pizza' }] } as any;
-      component.linkedMenu.set(menu);
-
-      component.onSave();
-
-      expect(emitSpy).toHaveBeenCalledWith(menu);
-    });
-
-    it('should not emit saveMenu when menu is undefined', () => {
-      component.linkedMenu.set(null as any);
-
-      component.onSave();
-
-      expect(emitSpy).not.toHaveBeenCalled();
-    });
-  });
-
   describe('onAddItemToCategory', () => {
     it('should add a new item to the matching category', () => {
       const category = { title: 'Pizza', items: [] } as any;

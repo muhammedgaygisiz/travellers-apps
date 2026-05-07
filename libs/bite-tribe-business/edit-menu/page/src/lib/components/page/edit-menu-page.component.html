@@ -12,6 +12,6 @@
 
     <h1>{{ placeName() }}</h1>
 
-    <business-menu [menu]="menu()" (saveMenu)="saveMenu.emit($event)" />
+    <business-menu [menu]="menu()" (menuChange)="saveMenu.emit($event)" />
   </ion-content>
 </ta-page>

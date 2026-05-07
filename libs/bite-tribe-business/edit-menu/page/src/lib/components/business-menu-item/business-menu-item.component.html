@@ -15,12 +15,17 @@
     <business-menu-variant
       [item]="itemData"
       (addItem)="onAddVariant($event)"
+      (itemChanged)="onEditVariant($event)"
       isVariant
     />
     @if (itemData?.variants?.length) {
       <div class="ion-margin-top">
         @for (variant of itemData?.variants; track $index) {
-          <business-menu-variant [item]="variant" isVariant />
+          <business-menu-variant
+            [item]="variant"
+            (itemChanged)="onEditVariant($event, $index)"
+            isVariant
+          />
         }
       </div>
     }

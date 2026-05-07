@@ -41,9 +41,9 @@ export class BusinessMenuComponent {
 
   linkedMenu = linkedSignal(() => this.menu());
 
-  presentShowAddCategory = signal(false);
+  menuChange = output<Menu>();
 
-  saveMenu = output<Menu>();
+  presentShowAddCategory = signal(false);
 
   shouldShowAddCategory = computed(() => {
     return this.presentShowAddCategory();
@@ -70,13 +70,10 @@ export class BusinessMenuComponent {
         categories: [...categories, newCategory],
       } as Menu;
     });
-  }
 
-  onSave(): void {
     const linkedMenu = this.linkedMenu();
-
     if (linkedMenu) {
-      this.saveMenu.emit(linkedMenu);
+      this.menuChange.emit(linkedMenu);
     }
   }
 
@@ -120,6 +117,11 @@ export class BusinessMenuComponent {
 
       return currMenu;
     });
+
+    const linkedMenu = this.linkedMenu();
+    if (linkedMenu) {
+      this.menuChange.emit(linkedMenu);
+    }
   }
 
   onCancelAddCategory(): void {
@@ -160,6 +162,11 @@ export class BusinessMenuComponent {
 
     // Complete the reorder operation
     event.detail.complete();
+
+    const linkedMenu = this.linkedMenu();
+    if (linkedMenu) {
+      this.menuChange.emit(linkedMenu);
+    }
   }
 
   updateCategory(categoryWithNewOrderOfItems: Category): void {
@@ -177,5 +184,10 @@ export class BusinessMenuComponent {
 
       return menu;
     });
+
+    const linkedMenu = this.linkedMenu();
+    if (linkedMenu) {
+      this.menuChange.emit(linkedMenu);
+    }
   }
 }

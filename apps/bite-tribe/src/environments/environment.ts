@@ -14,6 +14,7 @@ export const environment = {
       SupportedLang.TR,
       SupportedLang.FR,
       SupportedLang.ES,
+      SupportedLang.PT,
     ],
     defaultLang: SupportedLang.EN,
   },

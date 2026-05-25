@@ -72,7 +72,10 @@ export class BusinessMenuComponent {
     });
 
     const linkedMenu = this.linkedMenu();
-    this.menuChange.emit(!linkedMenu);
+    if (!linkedMenu) {
+      return;
+    }
+    this.menuChange.emit(linkedMenu);
   }
 
   onAddItemToCategory($event: {
@@ -184,8 +187,9 @@ export class BusinessMenuComponent {
     });
 
     const linkedMenu = this.linkedMenu();
-    if (linkedMenu) {
-      this.menuChange.emit(linkedMenu);
+    if (!linkedMenu) {
+      return;
     }
+    this.menuChange.emit(linkedMenu);
   }
 }

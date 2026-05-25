@@ -3,7 +3,6 @@ import { ComponentRef } from '@angular/core';
 import { BusinessMenuComponent } from '../business-menu.component';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
-import SpyInstance = jest.SpyInstance;
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
@@ -97,6 +96,14 @@ describe('BusinessMenuComponent', () => {
       expect(component.linkedMenu()).toEqual({
         categories: [{ title: 'Pizza', index: 0 }],
       });
+    });
+
+    it('should return if linkedMenu is undefined after update', () => {
+      jest.spyOn(component.linkedMenu, 'update').mockReturnValue(undefined);
+
+      component.onAddCategory({ title: 'Pizza' } as any);
+
+      expect(component.linkedMenu()).toBeUndefined();
     });
   });
 

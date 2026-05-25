@@ -22,6 +22,7 @@
       <div class="ion-margin-top">
         @for (variant of itemData?.variants; track $index) {
           <business-menu-variant
+            class="variant-margin"
             [item]="variant"
             (itemChanged)="onEditVariant($event, $index)"
             isVariant
@@ -33,6 +34,7 @@
   @if (showNewVariantComponent()) {
     <business-menu-variant
       isVariant
+      class="variant-margin"
       (addItem)="onAddVariant($event)"
       (cancelAddItem)="onCancelAddItem()"
     />

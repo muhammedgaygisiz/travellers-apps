@@ -11,11 +11,13 @@
 
       business-menu-variant {
         margin-top: 0;
-      }
-    }
 
-    business-menu-variant {
-      margin-top: 1rem;
+        &.variant-margin {
+          &:not(:first-of-type) {
+            margin-top: 1rem;
+          }
+        }
+      }
     }
   }
 }

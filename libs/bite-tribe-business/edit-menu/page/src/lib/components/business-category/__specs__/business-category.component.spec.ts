@@ -204,14 +204,14 @@ describe('BusinessCategoryComponent', () => {
       expect(component.categoryForm.subtitle().value()).toBe('Sub');
     });
 
-    it('should not set form values if form title has value', () => {
-      component.categoryForm.title().value.set('Existing');
-      component.categoryForm.subtitle().value.set('Existing');
-      const cat: Category = { title: 'New', subtitle: 'New', items: [] };
+    it('should set form title and subtitle as empty when form title is empty and no title or subtitle provided', () => {
+      component.categoryForm.title().value.set(null as any);
+      component.categoryForm.subtitle().value.set(null as any);
+      const cat: Category = { items: [] } as any;
       componentRef.setInput('category', cat);
       componentRef.changeDetectorRef.detectChanges();
-      expect(component.categoryForm.title().value()).toBe('Existing');
-      expect(component.categoryForm.subtitle().value()).toBe('Existing');
+      expect(component.categoryForm.title().value()).toBe('');
+      expect(component.categoryForm.subtitle().value()).toBe('');
     });
   });
 

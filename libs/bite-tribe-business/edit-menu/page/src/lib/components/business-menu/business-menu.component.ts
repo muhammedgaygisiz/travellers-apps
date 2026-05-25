@@ -72,9 +72,7 @@ export class BusinessMenuComponent {
     });
 
     const linkedMenu = this.linkedMenu();
-    if (linkedMenu) {
-      this.menuChange.emit(linkedMenu);
-    }
+    this.menuChange.emit(!linkedMenu);
   }
 
   onAddItemToCategory($event: {

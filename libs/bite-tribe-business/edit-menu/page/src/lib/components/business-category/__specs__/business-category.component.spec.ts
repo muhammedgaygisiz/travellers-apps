@@ -99,6 +99,16 @@ describe('BusinessCategoryComponent', () => {
         items: [mockMenuItem],
       });
     });
+
+    it('should add category items as empty array if none provided', () => {
+      component.onChangeItem(mockMenuItem, 0);
+      componentRef.setInput('category', { ...mockCategory, items: undefined });
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...mockCategory,
+        title: mockCategory.title || '',
+        items: [mockMenuItem],
+      });
+    });
   });
 
   describe('onCancelAddItem', () => {
@@ -179,6 +189,14 @@ describe('BusinessCategoryComponent', () => {
     it('should set form title and subtitle from category when form title is empty', () => {
       component.categoryForm.title().value.set('');
       component.categoryForm.subtitle().value.set('');
+      const cat: Category = { title: 'Test', subtitle: 'Sub', items: [] };
+      componentRef.setInput('category', cat);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.categoryForm.title().value()).toBe('Test');
+      expect(component.categoryForm.subtitle().value()).toBe('Sub');
+    });
+
+    it('should set form title and subtitle category if provided', () => {
       const cat: Category = { title: 'Test', subtitle: 'Sub', items: [] };
       componentRef.setInput('category', cat);
       componentRef.changeDetectorRef.detectChanges();

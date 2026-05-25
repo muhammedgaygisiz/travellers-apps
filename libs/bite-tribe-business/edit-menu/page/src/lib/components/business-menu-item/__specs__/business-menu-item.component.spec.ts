@@ -37,6 +37,13 @@ describe('BusinessMenuItemComponent', () => {
 
       expect(component.itemForm.name().value()).toBe('');
     });
+
+    it('should set value with empty name for variant', () => {
+      const testItem = { id: 1, price: 1 } as any;
+      componentRef.setInput('item', testItem);
+
+      expect(component.itemForm.name().value()).toBe('');
+    });
   });
 
   describe('shouldShowAddVariant', () => {

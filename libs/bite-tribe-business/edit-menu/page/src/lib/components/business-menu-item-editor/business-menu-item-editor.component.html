@@ -39,7 +39,7 @@
       >
         Cancel
       </ion-button>
-      <ion-button [disabled]="itemForm().valid()" (click)="onAddItem()">
+      <ion-button [disabled]="!itemForm().valid()" (click)="onAddItem()">
         Add
       </ion-button>
     } @else if (!isChangeButtonsHidden()) {

@@ -128,8 +128,14 @@ export class BusinessCategoryComponent {
     this.presentShowAddItem.set(false);
   }
 
-  onAddVariant(menuItem: MenuItem): void {
-    this.onAddItem(menuItem, true);
+  onAddVariant(newVariant: MenuItem, item: MenuItem): void {
+    this.onAddItem(
+      {
+        ...newVariant,
+        name: item.name,
+      },
+      true,
+    );
   }
 
   handleReorder(event: CustomEvent<ItemReorderEventDetail>): void {

@@ -117,9 +117,16 @@ describe('BusinessCategoryComponent', () => {
     });
 
     it('should call onAddItem with isVariant true', () => {
-      const mockMenuItem = { id: '1', name: 'Test Item' } as any;
-      component.onAddVariant(mockMenuItem);
-      expect(onAddItemSpy).toHaveBeenCalledWith(mockMenuItem, true);
+      const parentItem = { id: '1', name: 'Test Item' } as any;
+      const newVariant = { id: '1', price: 1 } as any;
+      component.onAddVariant(newVariant, parentItem);
+      expect(onAddItemSpy).toHaveBeenCalledWith(
+        {
+          ...newVariant,
+          name: parentItem.name,
+        },
+        true,
+      );
     });
   });
 

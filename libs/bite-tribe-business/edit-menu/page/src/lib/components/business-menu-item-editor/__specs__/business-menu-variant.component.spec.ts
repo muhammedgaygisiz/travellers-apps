@@ -87,7 +87,7 @@ describe('BusinessAddItemComponent', () => {
 
     it('should emit itemChanged event if form is valid', () => {
       component.itemForm.name().value.set('New Item');
-      component.itemForm.price().value.set(0);
+      component.itemForm.price().value.set(0.1);
 
       component.onUpdateItem();
       expect(itemChangedEmitSpy).toHaveBeenCalledTimes(1);
@@ -108,7 +108,7 @@ describe('BusinessAddItemComponent', () => {
 
     it('should emit addItem event when form is valid', () => {
       component.itemForm.name().value.set('New Item');
-      component.itemForm.price().value.set(0);
+      component.itemForm.price().value.set(0.1);
       component.itemForm.description().value.set('description');
 
       component.onAddItem();
@@ -118,7 +118,7 @@ describe('BusinessAddItemComponent', () => {
         description: 'description',
         ingredients: '',
         notes: '',
-        price: 0,
+        price: 0.1,
       });
     });
 

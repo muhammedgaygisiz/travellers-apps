@@ -50,7 +50,7 @@ export class BusinessMenuVariantComponent {
       when: () => !this.isVariant(),
     });
     required(schemaPath.price, { message: 'Price is required' });
-    min(schemaPath.price, 0);
+    min(schemaPath.price, 0.000001);
   });
 
   onItemChange = effect(() => {

@@ -165,9 +165,10 @@ export class BusinessMenuComponent {
     event.detail.complete();
 
     const linkedMenu = this.linkedMenu();
-    if (linkedMenu) {
-      this.menuChange.emit(linkedMenu);
+    if (!linkedMenu) {
+      return;
     }
+    this.menuChange.emit(linkedMenu);
   }
 
   updateCategory(categoryWithNewOrderOfItems: Category): void {

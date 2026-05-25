@@ -244,6 +244,18 @@ describe('BusinessMenuComponent', () => {
       ]);
       expect(complete).toHaveBeenCalled();
     });
+
+    it('should return if linkedMenu is undefined after update', () => {
+      jest.spyOn(component.linkedMenu, 'update').mockReturnValue(undefined);
+      const complete = jest.fn();
+
+      component.handleReorder({
+        detail: { from: 0, to: 1, complete },
+      } as any);
+
+      expect(component.linkedMenu()).toBeUndefined();
+      expect(complete).toHaveBeenCalled();
+    });
   });
 
   describe('updateCategory', () => {

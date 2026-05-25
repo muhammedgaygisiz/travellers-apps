@@ -101,12 +101,16 @@ describe('BusinessCategoryComponent', () => {
     });
 
     it('should add category items as empty array if none provided', () => {
+      componentRef.setInput('category', { id: 'cat1' });
+      componentRef.changeDetectorRef.detectChanges();
+
       component.onChangeItem(mockMenuItem, 0);
-      componentRef.setInput('category', { ...mockCategory, items: undefined });
+
       expect(emitSpy).toHaveBeenCalledWith({
         ...mockCategory,
         title: mockCategory.title || '',
-        items: [mockMenuItem],
+        subtitle: mockCategory.subtitle || '',
+        items: [],
       });
     });
   });

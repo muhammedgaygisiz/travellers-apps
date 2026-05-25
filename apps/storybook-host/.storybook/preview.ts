@@ -24,6 +24,7 @@ const SUPPORTED_LOCALES = [
   { value: 'ar', title: 'Arabic' },
   { value: 'am', title: 'Amharic' },
   { value: 'id', title: 'Indonesian' },
+  { value: 'pt', title: 'Portuguese' },
   { value: 'th', title: 'Thai' },
 ];
 

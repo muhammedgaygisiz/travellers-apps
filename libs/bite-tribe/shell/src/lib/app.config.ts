@@ -31,6 +31,7 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
           'ar',
           'am',
           'id',
+          'pt',
           'th',
         ],
         defaultLang: 'en',

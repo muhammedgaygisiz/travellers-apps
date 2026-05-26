@@ -230,6 +230,10 @@ export class HomeDataAccessService {
     this.storeService.submitDeleteBite(bite);
   }
 
+  updateBiteRating(params: { bite: Bite; rating: number }): void {
+    this.storeService.save({ ...params.bite, rating: params.rating }, 'bite');
+  }
+
   setHomeSorting(sorting: string): void {
     this.storeService.setHomeSorting(sorting);
   }

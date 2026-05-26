@@ -128,7 +128,10 @@ describe('BitePlaceComponent', () => {
     });
 
     it('should return empty array if no bites have tags', () => {
-      componentRef.setInput('bites', [{ name: 'Bite A' }, { name: 'Bite B' }] as Bite[]);
+      componentRef.setInput('bites', [
+        { name: 'Bite A' },
+        { name: 'Bite B' },
+      ] as Bite[]);
       expect(component.uniqueTags()).toEqual([]);
     });
 

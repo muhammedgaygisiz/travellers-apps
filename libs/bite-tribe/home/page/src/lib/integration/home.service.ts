@@ -59,6 +59,10 @@ export class HomeService {
     this.dataAccess.deleteBite(bite);
   }
 
+  rateNowClicked(params: { bite: Bite; rating: number }): void {
+    this.dataAccess.updateBiteRating(params);
+  }
+
   restaurantClicked(bite: Bite): void {
     if (bite.id && bite.restaurantId) {
       void this.navController.navigateForward([

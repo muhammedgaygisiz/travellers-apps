@@ -57,6 +57,14 @@
         <div class="rating-container ion-margin-top">
           @if (biteData?.rating) {
             <star-rating [rating]="biteData?.rating" readonly />
+          } @else if (isOwnUnratedBite()) {
+            <ion-button
+              fill="outline"
+              (click)="openRatingModal()"
+              class="ion-margin-start ion-margin-bottom"
+            >
+              {{ 'rate-now' | transloco }}
+            </ion-button>
           }
         </div>
 
@@ -71,9 +79,9 @@
         }
         @if (showEditButton()) {
           <div class="bite-actions ion-margin-top">
-            <ion-button (click)="gotoEdit.emit(biteData)">{{
-              'edit' | transloco
-            }}</ion-button>
+            <ion-button (click)="gotoEdit.emit(biteData)"
+              >{{ 'edit' | transloco }}
+            </ion-button>
             <ion-button
               color="danger"
               fill="outline"
@@ -96,3 +104,30 @@
   [buttons]="confirmationButtons"
   (didDismiss)="handleConfirmationDismiss($event)"
 />
+
+<ion-modal #ratingModal [isOpen]="isRatingModalOpen()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button fill="clear" (click)="closeRatingModal(ratingModal)"
+            >{{ 'cancel' | transloco }}
+          </ion-button>
+        </ion-buttons>
+        <ion-title>{{ 'rate-now' | transloco }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <p>{{ 'how-did-you-like-this-bite' | transloco }}</p>
+      <star-rating (rated)="onRatingChosen($event)" />
+      <ion-button
+        expand="block"
+        class="ion-margin-top"
+        [disabled]="!selectedRating()"
+        (click)="saveRating(ratingModal)"
+      >
+        {{ 'save' | transloco }}
+      </ion-button>
+    </ion-content>
+  </ng-template>
+</ion-modal>

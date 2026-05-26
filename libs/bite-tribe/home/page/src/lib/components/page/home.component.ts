@@ -118,6 +118,7 @@ export class BiteTribeHomeComponent {
   readonly restaurantClick = output<Bite>();
   readonly gotoEdit = output<Bite>();
   readonly deleteBite = output<Bite>();
+  readonly rateNowClick = output<{ bite: Bite; rating: number }>();
   readonly openMapView = output();
   readonly filtersChanged = output<{
     tagFilters: string[];

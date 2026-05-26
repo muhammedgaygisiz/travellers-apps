@@ -35,6 +35,7 @@ import { BiteTribeHomeComponent } from '../components/page/home.component';
       (sortingChange)="service.restaurantBitesSortingChange($event)"
       (refresh)="service.refresh()"
       (closeGpsError)="service.closeGpsError()"
+      (rateNowClick)="service.rateNowClicked($event)"
     />
   `,
   imports: [BiteTribeHomeComponent],

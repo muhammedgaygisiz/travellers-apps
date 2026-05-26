@@ -36,6 +36,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
       (sortingChange)="service.myBitesSortingChange($event)"
       (refresh)="service.refresh()"
       (closeGpsError)="service.closeGpsError()"
+      (rateNowClick)="service.rateNowClicked($event)"
     />
   `,
   imports: [BiteTribeHomeComponent, TranslocoPipe],

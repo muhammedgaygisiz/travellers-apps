@@ -8,7 +8,7 @@ import {
   Pipe,
   PipeTransform,
 } from '@angular/core';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import { IonModal, provideIonicAngular } from '@ionic/angular/standalone';
 import { ToBlobUrlPipe } from 'image-compression';
 import { OverlayEventDetail } from '@ionic/core';
 import { addNecessaryIcons } from 'utils';
@@ -181,6 +181,87 @@ describe('BiteComponent', () => {
       component.isOpen.set(false);
       component.openConfirmationDialog();
       expect(component.isOpen()).toBe(true);
+    });
+  });
+
+  describe('isOwnUnratedBite', () => {
+    it('should return true when bite belongs to current user and has no rating', () => {
+      componentRef.setInput('bite', { ...mockBite, userId: 'user1' });
+      componentRef.setInput('userId', 'user1');
+      expect(component.isOwnUnratedBite()).toBe(true);
+    });
+
+    it('should return false when bite belongs to another user', () => {
+      componentRef.setInput('bite', { ...mockBite, userId: 'other-user' });
+      componentRef.setInput('userId', 'user1');
+      expect(component.isOwnUnratedBite()).toBe(false);
+    });
+
+    it('should return false when bite already has a rating', () => {
+      componentRef.setInput('bite', { ...mockBite, userId: 'user1', rating: 4 });
+      componentRef.setInput('userId', 'user1');
+      expect(component.isOwnUnratedBite()).toBe(false);
+    });
+
+    it('should return false when userId is not provided', () => {
+      componentRef.setInput('bite', { ...mockBite, userId: 'user1' });
+      componentRef.setInput('userId', undefined);
+      expect(component.isOwnUnratedBite()).toBe(false);
+    });
+  });
+
+  describe('openRatingModal', () => {
+    it('should set isRatingModalOpen to true and reset selectedRating', () => {
+      component.selectedRating.set(3);
+      component.openRatingModal();
+      expect(component.isRatingModalOpen()).toBe(true);
+      expect(component.selectedRating()).toBe(0);
+    });
+  });
+
+  describe('onRatingChosen', () => {
+    it('should update selectedRating', () => {
+      component.onRatingChosen(4);
+      expect(component.selectedRating()).toBe(4);
+    });
+  });
+
+  describe('saveRating', () => {
+    it('should emit rateNowClick with bite and rating when rating is set', () => {
+      jest.spyOn(component.rateNowClick, 'emit');
+      const mockModal = { dismiss: jest.fn().mockResolvedValue(undefined) } as unknown as IonModal;
+
+      componentRef.setInput('bite', { ...mockBite, userId: 'user1' });
+      component.selectedRating.set(3);
+      component.saveRating(mockModal);
+
+      expect(component.rateNowClick.emit).toHaveBeenCalledWith({
+        bite: { ...mockBite, userId: 'user1' },
+        rating: 3,
+      });
+      expect(component.isRatingModalOpen()).toBe(false);
+    });
+
+    it('should not emit rateNowClick when no rating is selected', () => {
+      jest.spyOn(component.rateNowClick, 'emit');
+      const mockModal = { dismiss: jest.fn().mockResolvedValue(undefined) } as unknown as IonModal;
+
+      component.selectedRating.set(0);
+      component.saveRating(mockModal);
+
+      expect(component.rateNowClick.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('closeRatingModal', () => {
+    it('should close the modal and reset isRatingModalOpen', () => {
+      const mockModal = { dismiss: jest.fn().mockResolvedValue(undefined) } as unknown as IonModal;
+
+      component.isRatingModalOpen.set(true);
+      component.closeRatingModal(mockModal);
+
+      expect(mockModal.dismiss).toHaveBeenCalled();
+      expect(component.isRatingModalOpen()).toBe(false);
     });
   });
 });

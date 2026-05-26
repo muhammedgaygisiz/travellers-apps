@@ -8,9 +8,7 @@ export default {
   component: BiteComponent,
   decorators: [
     applicationConfig({
-      providers: [
-        provideIonicAngular(getIonicConfig()),
-      ],
+      providers: [provideIonicAngular(getIonicConfig())],
     }),
   ],
 } as Meta<BiteComponent>;
@@ -23,6 +21,7 @@ const template = `
       [bite]="bite"
       [uploadState]="uploadState"
       [showEditButton]="showEditButton"
+      [userId]="userId"
     />
   </div>
 `;
@@ -79,6 +78,53 @@ export const EditMode: Story = {
     bite: {
       ...Bite.args?.bite,
     } as any,
+    showEditButton: true,
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
+export const NoRating: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...Bite.args?.bite,
+      rating: 0,
+    } as any,
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
+export const QuickRating: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...Bite.args?.bite,
+      rating: 0,
+      userId: '1',
+    } as any,
+    userId: '1',
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
+export const QuickRatingForEditMode: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...Bite.args?.bite,
+      rating: 0,
+      userId: '1',
+    } as any,
+    userId: '1',
     showEditButton: true,
   },
   render: (args) => ({

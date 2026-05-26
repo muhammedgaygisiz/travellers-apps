@@ -1,4 +1,6 @@
 :host {
+  --border-color: var(--ion-color-tertiary-tint);
+
   .star-rating {
     display: flex;
     gap: 4px;

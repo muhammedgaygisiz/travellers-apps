@@ -208,7 +208,10 @@ describe('RestaurantComponent', () => {
     });
 
     it('should return empty array if no bites have tags', () => {
-      componentRef.setInput('bites', [{ name: 'Bite A' }, { name: 'Bite B' }] as any);
+      componentRef.setInput('bites', [
+        { name: 'Bite A' },
+        { name: 'Bite B' },
+      ] as any);
       expect(component.uniqueTags()).toEqual([]);
     });
 

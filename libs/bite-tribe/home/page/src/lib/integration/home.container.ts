@@ -39,6 +39,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (filterCleared)="service.filtersCleared()"
       (refresh)="service.refresh()"
       (closeGpsError)="service.closeGpsError()"
+      (rateNowClick)="service.rateNowClicked($event)"
     />
   `,
   imports: [BiteTribeHomeComponent],

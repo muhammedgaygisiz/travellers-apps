@@ -41,7 +41,7 @@ export class DetailsContainer {
       screenName: 'Bite Details',
     });
 
-    if (this.service.bite.error()) {
+    if (this.service.bite.value()?.id || this.service.bite.error()) {
       this.service.bite.reload();
     }
 

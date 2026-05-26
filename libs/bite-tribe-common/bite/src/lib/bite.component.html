@@ -58,7 +58,11 @@
           @if (biteData?.rating) {
             <star-rating [rating]="biteData?.rating" readonly />
           } @else if (isOwnUnratedBite()) {
-            <ion-button fill="clear" (click)="openRatingModal()">
+            <ion-button
+              fill="outline"
+              (click)="openRatingModal()"
+              class="ion-margin-start ion-margin-bottom"
+            >
               {{ 'rate-now' | transloco }}
             </ion-button>
           }
@@ -75,9 +79,9 @@
         }
         @if (showEditButton()) {
           <div class="bite-actions ion-margin-top">
-            <ion-button (click)="gotoEdit.emit(biteData)">{{
-              'edit' | transloco
-            }}</ion-button>
+            <ion-button (click)="gotoEdit.emit(biteData)"
+              >{{ 'edit' | transloco }}
+            </ion-button>
             <ion-button
               color="danger"
               fill="outline"
@@ -106,9 +110,9 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button fill="clear" (click)="closeRatingModal(ratingModal)">{{
-            'cancel' | transloco
-          }}</ion-button>
+          <ion-button fill="clear" (click)="closeRatingModal(ratingModal)"
+            >{{ 'cancel' | transloco }}
+          </ion-button>
         </ion-buttons>
         <ion-title>{{ 'rate-now' | transloco }}</ion-title>
       </ion-toolbar>

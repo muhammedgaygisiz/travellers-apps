@@ -40,6 +40,12 @@
 
       <bt-distance [distance]="placeDistance()" />
 
+      @if (uniqueTags().length) {
+        <div class="ion-margin-top">
+          <bt-tags-input [readonly]="true" [tags]="uniqueTags()" />
+        </div>
+      }
+
       <div class="ion-margin-top">
         <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
       </div>

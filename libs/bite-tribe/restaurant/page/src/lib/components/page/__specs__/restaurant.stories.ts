@@ -80,7 +80,16 @@ export const registeredWithSocialMediaLinks: Story = {
 
 export const fullMaintained: Story = {
   args: {
-    bites: [...(registered.args?.bites || [])],
+    bites: [
+      {
+        ...(registered.args?.bites?.[0] || {}),
+        tags: ['cocktail', 'refreshing', 'non-alcoholic'],
+      },
+      {
+        ...(registered.args?.bites?.[1] || {}),
+        tags: ['cocktail', 'aperitif', 'summer'],
+      },
+    ] as Bite[],
     restaurant: {
       ...registered.args?.restaurant,
       description:

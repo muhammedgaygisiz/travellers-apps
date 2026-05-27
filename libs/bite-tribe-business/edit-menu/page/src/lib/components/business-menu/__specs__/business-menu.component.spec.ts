@@ -3,7 +3,6 @@ import { ComponentRef } from '@angular/core';
 import { BusinessMenuComponent } from '../business-menu.component';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
-import SpyInstance = jest.SpyInstance;
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
@@ -98,30 +97,13 @@ describe('BusinessMenuComponent', () => {
         categories: [{ title: 'Pizza', index: 0 }],
       });
     });
-  });
 
-  describe('onSave', () => {
-    let emitSpy: SpyInstance;
+    it('should return if linkedMenu is undefined after update', () => {
+      jest.spyOn(component.linkedMenu, 'update').mockReturnValue(undefined);
 
-    beforeEach(() => {
-      emitSpy = jest.spyOn(component.saveMenu, 'emit');
-    });
+      component.onAddCategory({ title: 'Pizza' } as any);
 
-    it('should emit saveMenu with the current menu', () => {
-      const menu = { categories: [] } as any;
-      componentRef.setInput('menu', menu);
-
-      component.onSave();
-
-      expect(emitSpy).toHaveBeenCalledWith(menu);
-    });
-
-    it('should not emit saveMenu when menu is undefined', () => {
-      componentRef.setInput('menu', undefined);
-
-      component.onSave();
-
-      expect(emitSpy).not.toHaveBeenCalled();
+      expect(component.linkedMenu()).toBeUndefined();
     });
   });
 
@@ -260,6 +242,18 @@ describe('BusinessMenuComponent', () => {
         { title: 'Pizza', index: 0 },
         { title: 'Pasta', index: 1 },
       ]);
+      expect(complete).toHaveBeenCalled();
+    });
+
+    it('should return if linkedMenu is undefined after update', () => {
+      jest.spyOn(component.linkedMenu, 'update').mockReturnValue(undefined);
+      const complete = jest.fn();
+
+      component.handleReorder({
+        detail: { from: 0, to: 1, complete },
+      } as any);
+
+      expect(component.linkedMenu()).toBeUndefined();
       expect(complete).toHaveBeenCalled();
     });
   });

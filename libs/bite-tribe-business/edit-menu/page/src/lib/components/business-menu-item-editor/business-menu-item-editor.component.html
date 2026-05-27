@@ -1,0 +1,58 @@
+<form novalidate class="container">
+  <ion-list class="list-margin">
+    @if (!isVariant()) {
+      <ion-item>
+        <ion-input [field]="itemForm.name">
+          <div class="label" slot="label">Name</div>
+        </ion-input>
+      </ion-item>
+    }
+    <ion-item>
+      <ion-input [field]="itemForm.description">
+        <div class="label" slot="label">Description</div>
+      </ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input type="number" inputmode="decimal" [field]="itemForm.price">
+        <div class="label" slot="label">Price</div>
+        <span slot="end">$</span>
+      </ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input [field]="itemForm.ingredients">
+        <div class="label" slot="label">Ingredients</div>
+      </ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input [field]="itemForm.notes">
+        <div class="label" slot="label">Notes</div>
+      </ion-input>
+    </ion-item>
+  </ion-list>
+
+  <div class="button-container">
+    @if (!item()) {
+      <ion-button
+        fill="outline"
+        [disabled]="!itemForm().dirty()"
+        (click)="cancelAddItem.emit()"
+      >
+        Cancel
+      </ion-button>
+      <ion-button [disabled]="!itemForm().valid()" (click)="onAddItem()">
+        Add
+      </ion-button>
+    } @else if (!isChangeButtonsHidden()) {
+      <ion-button
+        fill="outline"
+        [disabled]="!itemForm().dirty()"
+        (click)="resetForm()"
+      >
+        Cancel
+      </ion-button>
+      <ion-button [disabled]="isSaveDisabled()" (click)="onUpdateItem()">
+        Save
+      </ion-button>
+    }
+  </div>
+</form>

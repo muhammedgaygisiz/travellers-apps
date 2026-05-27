@@ -1,6 +1,7 @@
 import { BusinessCategoryComponent } from '../business-category.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
+import { Category } from 'model';
 import SpyInstance = jest.SpyInstance;
 
 describe('BusinessCategoryComponent', () => {
@@ -75,6 +76,45 @@ describe('BusinessCategoryComponent', () => {
     });
   });
 
+  describe('onChangeItem', () => {
+    let emitSpy: SpyInstance;
+    let mockMenuItem: any;
+    let mockCategory: any;
+
+    beforeEach(() => {
+      emitSpy = jest.spyOn(component.categoryChanged, 'emit');
+      mockMenuItem = { id: '1', name: 'Updated Item' } as any;
+      mockCategory = {
+        id: 'cat1',
+        items: [{ id: '1', name: 'Test Item' }],
+      } as any;
+      componentRef.setInput('category', mockCategory);
+    });
+
+    it('should emit categoryChanged with updated item in category', () => {
+      component.onChangeItem(mockMenuItem, 0);
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...mockCategory,
+        title: mockCategory.title || '',
+        items: [mockMenuItem],
+      });
+    });
+
+    it('should add category items as empty array if none provided', () => {
+      componentRef.setInput('category', { id: 'cat1' });
+      componentRef.changeDetectorRef.detectChanges();
+
+      component.onChangeItem(mockMenuItem, 0);
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...mockCategory,
+        title: mockCategory.title || '',
+        subtitle: mockCategory.subtitle || '',
+        items: [],
+      });
+    });
+  });
+
   describe('onCancelAddItem', () => {
     it('should set presentShowAddItem to false', () => {
       component.presentShowAddItem.set(true);
@@ -91,9 +131,16 @@ describe('BusinessCategoryComponent', () => {
     });
 
     it('should call onAddItem with isVariant true', () => {
-      const mockMenuItem = { id: '1', name: 'Test Item' } as any;
-      component.onAddVariant(mockMenuItem);
-      expect(onAddItemSpy).toHaveBeenCalledWith(mockMenuItem, true);
+      const parentItem = { id: '1', name: 'Test Item' } as any;
+      const newVariant = { id: '1', price: 1 } as any;
+      component.onAddVariant(newVariant, parentItem);
+      expect(onAddItemSpy).toHaveBeenCalledWith(
+        {
+          ...newVariant,
+          name: parentItem.name,
+        },
+        true,
+      );
     });
   });
 
@@ -103,7 +150,7 @@ describe('BusinessCategoryComponent', () => {
     let mockCategory: any;
 
     beforeEach(() => {
-      emitSpy = jest.spyOn(component.orderingInCategoryChanged, 'emit');
+      emitSpy = jest.spyOn(component.categoryChanged, 'emit');
       mockEvent = {
         stopPropagation: jest.fn(),
         detail: {
@@ -139,6 +186,68 @@ describe('BusinessCategoryComponent', () => {
 
       expect(emitSpy).not.toHaveBeenCalled();
       expect(mockEvent.detail.complete).toHaveBeenCalled();
+    });
+  });
+
+  describe('onLinkedCategoryChange', () => {
+    it('should set form title and subtitle from category when form title is empty', () => {
+      component.categoryForm.title().value.set('');
+      component.categoryForm.subtitle().value.set('');
+      const cat: Category = { title: 'Test', subtitle: 'Sub', items: [] };
+      componentRef.setInput('category', cat);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.categoryForm.title().value()).toBe('Test');
+      expect(component.categoryForm.subtitle().value()).toBe('Sub');
+    });
+
+    it('should set form title and subtitle category if provided', () => {
+      const cat: Category = { title: 'Test', subtitle: 'Sub', items: [] };
+      componentRef.setInput('category', cat);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.categoryForm.title().value()).toBe('Test');
+      expect(component.categoryForm.subtitle().value()).toBe('Sub');
+    });
+
+    it('should set form title and subtitle as empty when form title is empty and no title or subtitle provided', () => {
+      component.categoryForm.title().value.set(null as any);
+      component.categoryForm.subtitle().value.set(null as any);
+      const cat: Category = { items: [] } as any;
+      componentRef.setInput('category', cat);
+      componentRef.changeDetectorRef.detectChanges();
+      expect(component.categoryForm.title().value()).toBe('');
+      expect(component.categoryForm.subtitle().value()).toBe('');
+    });
+  });
+
+  describe('onTitleSubtitleChange', () => {
+    let emitSpy: SpyInstance;
+
+    beforeEach(() => {
+      emitSpy = jest.spyOn(component.categoryChanged, 'emit');
+    });
+
+    it('should emit categoryChanged when title or subtitle changes', () => {
+      const cat: Category = { title: 'Test', subtitle: 'Sub', items: [] };
+      componentRef.setInput('category', cat);
+      component.categoryForm.title().value.set('New Title');
+      component.categoryForm.subtitle().value.set('New Subtitle');
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...cat,
+        title: 'New Title',
+        subtitle: 'New Subtitle',
+      });
+    });
+
+    it('should not emit categoryChanged if title and subtitle are unchanged', () => {
+      const cat: Category = { title: 'Test', subtitle: 'Sub', items: [] };
+      componentRef.setInput('category', cat);
+      component.categoryForm.title().value.set('Test');
+      component.categoryForm.subtitle().value.set('Sub');
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(emitSpy).not.toHaveBeenCalled();
     });
   });
 });

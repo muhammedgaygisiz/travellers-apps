@@ -5,15 +5,13 @@
   [showFooter]="false"
 >
   <ion-content>
-    <ion-img [src]="restaurant()?.imagePath || restaurant()?.image" class="place-image" />
+    <ion-img
+      [src]="restaurant()?.imagePath || restaurant()?.image"
+      class="place-image"
+    />
 
-    <div class="ion-padding">
-      <h1>{{ placeName() }}</h1>
+    <h1>{{ placeName() }}</h1>
 
-      <business-menu
-        [menu]="menu()"
-        (saveMenu)="saveMenu.emit($event)"
-      />
-    </div>
+    <business-menu [menu]="menu()" (menuChange)="saveMenu.emit($event)" />
   </ion-content>
 </ta-page>

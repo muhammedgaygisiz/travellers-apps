@@ -60,6 +60,15 @@ export class FollowersListComponent {
   unfollowClick = output<PublicUser>();
 
   isOpen = signal(false);
+  imageErroredUserIds = signal<Set<string>>(new Set());
+
+  onImageError(userId: string): void {
+    this.imageErroredUserIds.update((set) => new Set([...set, userId]));
+  }
+
+  isImageErrored(userId: string): boolean {
+    return this.imageErroredUserIds().has(userId);
+  }
 
   toggleTitleText = computed(() => {
     const type = this.type();

@@ -162,4 +162,29 @@ describe(FollowersListComponent.name, () => {
       expect(component.defaultHref).toBe('/my-profile');
     });
   });
+
+  describe('onImageError', () => {
+    it('should add userId to imageErroredUserIds set', () => {
+      component.onImageError('user123');
+      expect(component.imageErroredUserIds().has('user123')).toBe(true);
+    });
+
+    it('should add multiple userIds to imageErroredUserIds set', () => {
+      component.onImageError('user1');
+      component.onImageError('user2');
+      expect(component.imageErroredUserIds().has('user1')).toBe(true);
+      expect(component.imageErroredUserIds().has('user2')).toBe(true);
+    });
+  });
+
+  describe('isImageErrored', () => {
+    it('should return true when userId is in imageErroredUserIds', () => {
+      component.onImageError('user123');
+      expect(component.isImageErrored('user123')).toBe(true);
+    });
+
+    it('should return false when userId is not in imageErroredUserIds', () => {
+      expect(component.isImageErrored('unknown-user')).toBe(false);
+    });
+  });
 });

@@ -35,7 +35,14 @@
               class="ion-margin-vertical"
             >
               <ion-avatar slot="start">
-                <img [src]="user.photoUrl" />
+                @if (user.photoUrl && !isImageErrored(user.userId)) {
+                  <img
+                    [src]="user.photoUrl"
+                    (error)="onImageError(user.userId)"
+                  />
+                } @else {
+                  <ion-icon name="person-circle-outline" class="profile-image" />
+                }
               </ion-avatar>
               <ion-label>
                 <h2>{{ user.displayName }}</h2>

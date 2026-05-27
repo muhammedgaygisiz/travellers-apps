@@ -23,6 +23,7 @@ import { PATH } from 'utils';
 import { PageComponent } from 'common/ui/page';
 import { OverlayEventDetail } from '@ionic/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { ImageErroredPipe } from './pipes/image-errored.pipe';
 
 const UNFOLLOW = 'unfollow';
 const CANCEL = 'cancel';
@@ -42,6 +43,7 @@ const CANCEL = 'cancel';
     IonAlert,
     IonIcon,
     TranslocoPipe,
+    ImageErroredPipe,
   ],
   templateUrl: 'followers-list.component.html',
   styleUrls: ['followers-list.component.scss'],
@@ -60,6 +62,11 @@ export class FollowersListComponent {
   unfollowClick = output<PublicUser>();
 
   isOpen = signal(false);
+  imageErroredUserIds = signal<Set<string>>(new Set());
+
+  onImageError(userId: string): void {
+    this.imageErroredUserIds.update((set) => new Set([...set, userId]));
+  }
 
   toggleTitleText = computed(() => {
     const type = this.type();

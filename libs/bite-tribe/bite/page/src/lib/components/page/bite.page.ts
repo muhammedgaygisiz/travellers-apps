@@ -272,6 +272,8 @@ export class BitePage {
 
   isManualPositionModalOpen = signal(false);
 
+  shouldRenderMapInModal = signal(false);
+
   selectedCurrencyName = computed(() => {
     this.currencyValueChanges();
     const currencyCode = this.biteFormGroup.controls['currency'].value;
@@ -334,6 +336,11 @@ export class BitePage {
     const currentPosition = this.biteFormGroup.controls['position'].value;
     this.manualPosition.set(currentPosition ?? undefined);
     this.isManualPositionModalOpen.set(true);
+    this.shouldRenderMapInModal.set(false);
+  }
+
+  onModalDidPresent(): void {
+    this.shouldRenderMapInModal.set(true);
   }
 
   onManualPositionSelected(position: Geopoint): void {
@@ -346,13 +353,15 @@ export class BitePage {
       this.biteFormGroup.controls['position'].patchValue(pos);
       this.confirmedManualPosition.set(pos);
     }
-    modal.dismiss();
+    void modal.dismiss();
     this.isManualPositionModalOpen.set(false);
+    this.shouldRenderMapInModal.set(false);
   }
 
   cancelManualPosition(modal: IonModal): void {
-    modal.dismiss();
+    void modal.dismiss();
     this.isManualPositionModalOpen.set(false);
+    this.shouldRenderMapInModal.set(false);
   }
 
   setTags(tags: string[]): void {
@@ -369,11 +378,11 @@ export class BitePage {
 
   onCurrencySelected(currencyCode: string, modal: IonModal): void {
     this.biteFormGroup.patchValue({ currency: currencyCode });
-    modal.dismiss();
+    void modal.dismiss();
   }
 
   onRestaurantSelected(restaurantName: string, modal: IonModal): void {
     this.biteFormGroup.patchValue({ place: restaurantName });
-    modal.dismiss();
+    void modal.dismiss();
   }
 }

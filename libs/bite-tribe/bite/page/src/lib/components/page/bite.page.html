@@ -159,7 +159,11 @@
   </ng-template>
 </ion-modal>
 
-<ion-modal #manualPositionModal [isOpen]="isManualPositionModalOpen()">
+<ion-modal
+  #manualPositionModal
+  [isOpen]="isManualPositionModalOpen()"
+  (ionModalDidPresent)="onModalDidPresent()"
+>
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -184,11 +188,13 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
+      @if (shouldRenderMapInModal()) {
       <bt-map
         [geopoints]="manualPosition() ? [manualPosition()!] : []"
         [gpsPosition]="position()"
         (clickOnMap)="onManualPositionSelected($event)"
       />
+      }
     </ion-content>
   </ng-template>
 </ion-modal>

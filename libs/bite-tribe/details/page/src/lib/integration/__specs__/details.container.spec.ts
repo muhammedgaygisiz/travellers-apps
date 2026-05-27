@@ -7,6 +7,7 @@ import { addNecessaryIcons } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
+import { Bite } from 'model';
 
 jest.mock('@capacitor-firebase/analytics');
 
@@ -25,8 +26,13 @@ const MockTranslocoService = {
 describe(DetailsContainer.name, () => {
   let component: DetailsContainer;
   let fixture: ComponentFixture<DetailsContainer>;
+  const biteSignal = signal<Bite | undefined>(undefined);
+  const biteReloadSpy = jest.fn();
 
   beforeEach(() => {
+    biteSignal.set(undefined);
+    biteReloadSpy.mockClear();
+
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(),
@@ -34,9 +40,9 @@ describe(DetailsContainer.name, () => {
           provide: DetailsService,
           useValue: {
             bite: {
-              value: signal(undefined),
+              value: biteSignal,
               error: signal(undefined),
-              reload: jest.fn(),
+              reload: biteReloadSpy,
             },
             position: {
               value: signal(undefined),
@@ -83,6 +89,14 @@ describe(DetailsContainer.name, () => {
       expect(setCurrentScreenSpy).toHaveBeenCalledWith({
         screenName: 'Bite Details',
       });
+    });
+
+    it('should refresh bite when bite value already exists', () => {
+      biteSignal.set({ id: 'bite-1' } as Bite);
+
+      component.ionViewDidEnter();
+
+      expect(biteReloadSpy).toHaveBeenCalled();
     });
   });
 });

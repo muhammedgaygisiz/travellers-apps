@@ -38,6 +38,28 @@ nx serve bite-tribe
 nx firebase-serve bite-tribe-firebase
 ```
 
+## Start firebase emulators and frontend for local development
+
+```
+npm run development
+```
+
+You can then access http://localhost:4200/start. Sometimes you can have problems with the firebase
+that still runs in the background. Currently it starts at port `8085`.
+
+If you have `kill-port` installed (an npm package), you can run the following command:
+
+```
+nx firebase-kill bite-tribe-firebase
+```
+
+Alternatively you can also use the following linux/mac-command:
+
+```
+sudo lsof -i tcp:8085
+sudo kill -9 <procesIdFromStepAbove>
+```
+
 # Howto setup a new page
 
 - Create a page library with `<page-name>` the name of the page you want to create:

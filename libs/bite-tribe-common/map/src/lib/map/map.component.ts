@@ -71,7 +71,7 @@ export class MapComponent implements OnDestroy {
       return;
     }
 
-    this.map = createMap(mapElement, this.enableZoom());
+    this.map = createMap(mapElement, this.enableZoom(), !this.readonly());
     createOpenstreetmapLayer().addTo(this.map);
 
     const gpsPosition = this.gpsPosition();

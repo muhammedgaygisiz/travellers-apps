@@ -54,4 +54,24 @@ describe('createMap', () => {
     expect(map.options.touchZoom).toBe(false);
     expect(map.options.boxZoom).toBe(false);
   });
+
+  it('should create a map with dragging enabled by default', () => {
+    const mockElement = {
+      nativeElement: document.createElement('div'),
+    } as any;
+
+    const map = createMap(mockElement);
+
+    expect(map.options.dragging).toBe(true);
+  });
+
+  it('should create a map with dragging disabled when dragging is false', () => {
+    const mockElement = {
+      nativeElement: document.createElement('div'),
+    } as any;
+
+    const map = createMap(mockElement, true, false);
+
+    expect(map.options.dragging).toBe(false);
+  });
 });

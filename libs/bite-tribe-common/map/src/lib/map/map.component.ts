@@ -47,6 +47,7 @@ L.Marker.prototype.options.icon = iconDefault;
 export class MapComponent implements OnDestroy {
   geopoints = input<Geopoint[] | null | undefined>([]);
   readonly = input(false, { transform: booleanAttribute });
+  dragging = input(true, { transform: booleanAttribute });
   emitMarkerClick = input(false, { transform: booleanAttribute });
   enableZoom = input(true, { transform: booleanAttribute });
   clickOnMap = output<Geopoint>();
@@ -71,7 +72,7 @@ export class MapComponent implements OnDestroy {
       return;
     }
 
-    this.map = createMap(mapElement, this.enableZoom(), !this.readonly());
+    this.map = createMap(mapElement, this.enableZoom(), this.dragging());
     createOpenstreetmapLayer().addTo(this.map);
 
     const gpsPosition = this.gpsPosition();

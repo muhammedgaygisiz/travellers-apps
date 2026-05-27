@@ -11,6 +11,7 @@
     "nxgraph-html": "nx graph --file=apps/storybook-host/src/assets/temp/nxgraph.html",
     "loki": "nx loki",
     "start": "nx serve",
+    "development": "nx firebase-serve bite-tribe-firebase & nx serve bite-tribe",
     "build": "nx build",
     "build:storybook": "npm run nxgraph-html && nx run storybook-host:build-storybook",
     "test": "nx affected --base=develop -t test --parallel --coverage --coverageReporters=text",

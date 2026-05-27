@@ -6,6 +6,19 @@
 
     .reorder-container {
       @include globals.reorder-container;
+      @include globals.light-border;
+      padding-left: 0.5rem;
+      margin-top: 1rem;
+
+      ion-reorder {
+        ion-icon {
+          cursor: grab;
+
+          &:active {
+            cursor: grabbing;
+          }
+        }
+      }
 
       business-category {
         width: 100%;

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   linkedSignal,
   output,
@@ -10,14 +11,17 @@ import {
 import {
   IonButton,
   IonIcon,
+  IonInput,
   IonReorder,
   IonReorderGroup,
 } from '@ionic/angular/standalone';
 import type { Category, MenuItem } from 'model';
 import { NgTemplateOutlet } from '@angular/common';
-import { BusinessAddItemComponent } from '../business-add-item/business-add-item.component';
+import { BusinessMenuVariantComponent } from '../business-menu-item-editor/business-menu-variant.component';
 import { BusinessMenuItemComponent } from '../business-menu-item/business-menu-item.component';
 import { ItemReorderEventDetail } from '@ionic/angular';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { debounce, Field, form, required } from '@angular/forms/signals';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,11 +30,15 @@ import { ItemReorderEventDetail } from '@ionic/angular';
   imports: [
     IonButton,
     NgTemplateOutlet,
-    BusinessAddItemComponent,
+    BusinessMenuVariantComponent,
     BusinessMenuItemComponent,
     IonReorderGroup,
     IonIcon,
     IonReorder,
+    FormsModule,
+    IonInput,
+    ReactiveFormsModule,
+    Field,
   ],
   selector: 'business-category',
 })
@@ -45,9 +53,48 @@ export class BusinessCategoryComponent {
     isVariant?: boolean;
   }>();
 
-  orderingInCategoryChanged = output<Category>();
+  categoryChanged = output<Category>();
 
   presentShowAddItem = signal(false);
+
+  categoryModel = signal({
+    title: this.linkedCategory()?.title || '',
+    subtitle: this.linkedCategory()?.subtitle || '',
+  });
+
+  categoryForm = form(this.categoryModel, (schemaPath) => {
+    required(schemaPath.title);
+    debounce(schemaPath.title, 500);
+    debounce(schemaPath.subtitle, 500);
+  });
+
+  onLinkedCategoryChange = effect(() => {
+    const category = this.category();
+    const titleHasValue =
+      !!this.categoryForm.title().value() &&
+      this.categoryForm.title().value() !== '';
+    if (!titleHasValue) {
+      this.categoryForm.title().value.set(category?.title || '');
+      this.categoryForm.subtitle().value.set(category?.subtitle || '');
+    }
+  });
+
+  onTitleSubtitleChange = effect(() => {
+    const newTitle = this.categoryForm.title().value();
+    const newSubtitle = this.categoryForm.subtitle().value();
+    const linkedCategory = this.linkedCategory();
+    if (
+      newTitle !== linkedCategory?.title ||
+      newSubtitle !== linkedCategory?.subtitle
+    ) {
+      this.categoryChanged.emit({
+        ...this.linkedCategory(),
+        items: this.linkedCategory()?.items || [],
+        title: newTitle,
+        subtitle: newSubtitle,
+      });
+    }
+  });
 
   shouldShowAddItem = computed(() => {
     return this.presentShowAddItem();
@@ -66,12 +113,29 @@ export class BusinessCategoryComponent {
     this.presentShowAddItem.set(true);
   }
 
+  onChangeItem(item: MenuItem, index: number): void {
+    const category = this.linkedCategory();
+    const updatedItems = category?.items ? [...category.items] : [];
+    updatedItems[index] = item;
+    this.categoryChanged.emit({
+      ...category,
+      title: category?.title || '',
+      items: updatedItems,
+    });
+  }
+
   onCancelAddItem(): void {
     this.presentShowAddItem.set(false);
   }
 
-  onAddVariant(menuItem: MenuItem): void {
-    this.onAddItem(menuItem, true);
+  onAddVariant(newVariant: MenuItem, item: MenuItem): void {
+    this.onAddItem(
+      {
+        ...newVariant,
+        name: item.name,
+      },
+      true,
+    );
   }
 
   handleReorder(event: CustomEvent<ItemReorderEventDetail>): void {
@@ -112,7 +176,7 @@ export class BusinessCategoryComponent {
 
     const updatedCategory = this.linkedCategory();
     if (updatedCategory) {
-      this.orderingInCategoryChanged.emit(updatedCategory);
+      this.categoryChanged.emit(updatedCategory);
     }
   }
 }

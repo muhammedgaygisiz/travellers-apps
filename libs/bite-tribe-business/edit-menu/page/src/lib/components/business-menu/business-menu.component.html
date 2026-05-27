@@ -4,16 +4,16 @@
   @if (menuData?.categories?.length) {
     <ion-reorder-group (ionItemReorder)="handleReorder($event)">
       @for (category of menuData?.categories; track category.title) {
-        <div class="reorder-container">
+        <div class="reorder-container ion-padding">
           <div class="reorder-anchor">
             <ion-reorder>
-              <ion-icon name="menu" size="large" />
+              <ion-icon name="menu" size="large" color="primary" />
             </ion-reorder>
           </div>
           <business-category
             [category]="category"
             (addItemToCategory)="onAddItemToCategory($event)"
-            (orderingInCategoryChanged)="updateCategory($event)"
+            (categoryChanged)="updateCategory($event)"
           />
         </div>
       }
@@ -27,12 +27,6 @@
       <ng-container [ngTemplateOutlet]="addCategory" />
     </div>
   }
-
-  <div class="save-menu-button-container">
-    <ion-button class="ion-margin-top" (click)="onSave()">{{
-      'save-menu' | transloco
-    }}</ion-button>
-  </div>
 </div>
 
 <ng-template #addCategory>
@@ -43,10 +37,10 @@
     />
   }
   @if (!shouldShowAddCategory()) {
-    <div class="ion-text-end">
-      <ion-button (click)="showAddCategory()">
-        {{ 'add-category' | transloco }}</ion-button
-      >
+    <div class="ion-text-end ion-margin-top">
+      <ion-button (click)="showAddCategory()" expand="block">
+        {{ 'add-category' | transloco }}
+      </ion-button>
     </div>
   }
 </ng-template>

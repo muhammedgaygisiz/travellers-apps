@@ -15,6 +15,7 @@ import { Geopoint } from 'model';
   template: `
     <bt-map
       [readonly]="readonly()"
+      [dragging]="dragging()"
       [geopoints]="[value()!]"
       (clickOnMap)="setValue($event)"
     />
@@ -33,6 +34,7 @@ export class PositionComponent implements ControlValueAccessor {
   value = signal<Geopoint | null>(null);
   disabled = signal<boolean | null>(null);
   readonly = input(false, { transform: booleanAttribute });
+  dragging = input(true, { transform: booleanAttribute });
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   _onChange: (value: Geopoint | null) => void = () => {};

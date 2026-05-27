@@ -176,15 +176,4 @@ describe(FollowersListComponent.name, () => {
       expect(component.imageErroredUserIds().has('user2')).toBe(true);
     });
   });
-
-  describe('isImageErrored', () => {
-    it('should return true when userId is in imageErroredUserIds', () => {
-      component.onImageError('user123');
-      expect(component.isImageErrored('user123')).toBe(true);
-    });
-
-    it('should return false when userId is not in imageErroredUserIds', () => {
-      expect(component.isImageErrored('unknown-user')).toBe(false);
-    });
-  });
 });

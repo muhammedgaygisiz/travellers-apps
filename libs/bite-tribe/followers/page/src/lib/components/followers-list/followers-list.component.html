@@ -35,7 +35,7 @@
               class="ion-margin-vertical"
             >
               <ion-avatar slot="start">
-                @if (user.photoUrl && !isImageErrored(user.userId)) {
+                @if (user.photoUrl && !(user.userId | imageErrored: imageErroredUserIds())) {
                   <img
                     [src]="user.photoUrl"
                     (error)="onImageError(user.userId)"

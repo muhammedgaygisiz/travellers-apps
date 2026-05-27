@@ -1,11 +1,9 @@
 import { PositionComponent } from '../position.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ComponentRef } from '@angular/core';
 
 describe(PositionComponent.name, () => {
   let component: PositionComponent;
   let fixture: ComponentFixture<PositionComponent>;
-  let componentRef: ComponentRef<PositionComponent>;
 
   beforeEach(async () => {
     fixture = TestBed.createComponent(PositionComponent);

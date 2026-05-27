@@ -125,21 +125,33 @@ describe('MapComponent', () => {
     it('should pass enableZoom as true to createMap by default', () => {
       fixture.detectChanges();
 
-      expect(createMapMock).toHaveBeenCalledWith(expect.any(Object), true);
+      expect(createMapMock).toHaveBeenCalledWith(
+        expect.any(Object),
+        true,
+        true,
+      );
     });
 
     it('should pass enableZoom as true when explicitly set to true', () => {
       componentRef.setInput('enableZoom', true);
       fixture.detectChanges();
 
-      expect(createMapMock).toHaveBeenCalledWith(expect.any(Object), true);
+      expect(createMapMock).toHaveBeenCalledWith(
+        expect.any(Object),
+        true,
+        true,
+      );
     });
 
     it('should pass enableZoom as false when set to false', () => {
       componentRef.setInput('enableZoom', false);
       fixture.detectChanges();
 
-      expect(createMapMock).toHaveBeenCalledWith(expect.any(Object), false);
+      expect(createMapMock).toHaveBeenCalledWith(
+        expect.any(Object),
+        false,
+        true,
+      );
     });
   });
 
@@ -376,7 +388,7 @@ describe('MapComponent', () => {
 
         componentRef.setInput('emitMarkerClick', false);
         componentRef.setInput('geopoints', geopoints);
-        fixture.detectChanges();
+        componentRef.changeDetectorRef.detectChanges();
 
         expect(mockMarker1.on).not.toHaveBeenCalled();
         expect(mockMarker2.on).not.toHaveBeenCalled();
@@ -426,7 +438,7 @@ describe('MapComponent', () => {
         componentRef.setInput('emitMarkerClick', true);
         componentRef.setInput('geopoints', geopoints);
         component['markers'] = [mockMarker2];
-        fixture.detectChanges();
+        componentRef.changeDetectorRef.detectChanges();
 
         const clickHandler = mockMarker2.on;
         clickHandler();
@@ -490,7 +502,7 @@ describe('MapComponent', () => {
       it('should handle empty geopoints array when marker is clicked', () => {
         componentRef.setInput('emitMarkerClick', true);
         componentRef.setInput('geopoints', []);
-        fixture.detectChanges();
+        componentRef.changeDetectorRef.detectChanges();
 
         // Manually trigger marker click since no markers would be created
         geopointsToMarkersMock.mockImplementation(() => {
@@ -500,7 +512,7 @@ describe('MapComponent', () => {
 
         // Trigger createMapEffect again with markers but empty geopoints
         componentRef.setInput('geopoints', []);
-        fixture.detectChanges();
+        componentRef.changeDetectorRef.detectChanges();
 
         if (mockMarker1.on.mock.calls.length > 0) {
           const clickHandler = mockMarker1.on.mock.calls[0][1];
@@ -516,15 +528,18 @@ describe('MapComponent', () => {
       componentRef.setInput('geopoints', []);
       componentRef.setInput('gpsPosition', null);
 
-      fixture.detectChanges();
+      componentRef.changeDetectorRef.detectChanges();
 
       expect(mockMap.setView).toHaveBeenCalledWith([0, 0], 2);
     });
   });
 
   describe('setGeopointsEffect', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
       jest.clearAllMocks();
       mockMap.remove.mockClear();
       jest.useFakeTimers();

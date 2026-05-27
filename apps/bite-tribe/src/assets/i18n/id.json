@@ -151,5 +151,7 @@
   "registration-unknown-error-try-again": "Terjadi kesalahan yang tidak diketahui saat pendaftaran. Coba lagi, ya.",
   "rate-now": "Nilai sekarang",
   "how-did-you-like-this-bite": "Bagaimana pendapatmu tentang Bite ini?",
-  "portuguese": "Portuguese"
+  "portuguese": "Portuguese",
+  "set-manually": "Atur secara manual",
+  "location-label": "Lokasi:"
 }

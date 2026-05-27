@@ -13,13 +13,17 @@ import {
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
+  IonButtons,
   IonContent,
+  IonHeader,
   IonIcon,
   IonInput,
   IonLabel,
   IonModal,
   IonText,
   IonTextarea,
+  IonTitle,
+  IonToolbar,
 } from '@ionic/angular/standalone';
 import { CurrencySelectorComponent } from 'currency-selector';
 import { RestaurantSelectorComponent } from 'restaurant-selector';
@@ -27,7 +31,7 @@ import { Platform } from '@ionic/angular';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
-import { PositionComponent } from 'bite-tribe-common/map';
+import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
 import type { Bite, Geopoint } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
@@ -46,11 +50,16 @@ import { TranslocoPipe } from '@jsverse/transloco';
     PageComponent,
     IonInput,
     IonButton,
+    IonButtons,
     IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
     ReactiveFormsModule,
     IonText,
     ImageUploadComponent,
     PositionComponent,
+    MapComponent,
     StarRatingComponent,
     TagsInputComponent,
     IonTextarea,
@@ -256,6 +265,13 @@ export class BitePage {
 
   imagePosition: WritableSignal<Geopoint | undefined> = signal(undefined);
 
+  manualPosition: WritableSignal<Geopoint | undefined> = signal(undefined);
+
+  confirmedManualPosition: WritableSignal<Geopoint | undefined> =
+    signal(undefined);
+
+  isManualPositionModalOpen = signal(false);
+
   selectedCurrencyName = computed(() => {
     this.currencyValueChanges();
     const currencyCode = this.biteFormGroup.controls['currency'].value;
@@ -277,6 +293,16 @@ export class BitePage {
     return (
       currentValue?.latitude === position?.latitude &&
       currentValue?.longitude === position?.longitude
+    );
+  });
+
+  locationFromManual = computed(() => {
+    const currentValue = this.positionValueChanges();
+    const confirmed = this.confirmedManualPosition();
+    return !!(
+      confirmed &&
+      currentValue?.latitude === confirmed.latitude &&
+      currentValue?.longitude === confirmed.longitude
     );
   });
 
@@ -302,6 +328,31 @@ export class BitePage {
     if (position) {
       this.biteFormGroup.controls['position'].patchValue(position);
     }
+  }
+
+  openManualPositionModal(): void {
+    const currentPosition = this.biteFormGroup.controls['position'].value;
+    this.manualPosition.set(currentPosition ?? undefined);
+    this.isManualPositionModalOpen.set(true);
+  }
+
+  onManualPositionSelected(position: Geopoint): void {
+    this.manualPosition.set(position);
+  }
+
+  confirmManualPosition(modal: IonModal): void {
+    const pos = this.manualPosition();
+    if (pos) {
+      this.biteFormGroup.controls['position'].patchValue(pos);
+      this.confirmedManualPosition.set(pos);
+    }
+    modal.dismiss();
+    this.isManualPositionModalOpen.set(false);
+  }
+
+  cancelManualPosition(modal: IonModal): void {
+    modal.dismiss();
+    this.isManualPositionModalOpen.set(false);
   }
 
   setTags(tags: string[]): void {

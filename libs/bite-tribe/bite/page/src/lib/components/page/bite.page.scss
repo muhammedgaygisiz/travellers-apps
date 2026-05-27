@@ -38,10 +38,21 @@
     margin-bottom: 0.5rem;
 
     ion-button {
-      width: 50%;
-      &:first-child {
-        margin-right: 0.5rem;
+      flex: 1;
+      &:not(:last-child) {
+        margin-right: 0.25rem;
       }
+    }
+  }
+}
+
+ion-modal {
+  bt-map {
+    display: block;
+    height: 100%;
+
+    ::ng-deep .map-container {
+      height: 100%;
     }
   }
 }

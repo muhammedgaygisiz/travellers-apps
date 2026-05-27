@@ -1,7 +1,9 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   forwardRef,
+  input,
   signal,
 } from '@angular/core';
 import { MapComponent } from '../map/map.component';
@@ -11,7 +13,11 @@ import { Geopoint } from 'model';
 @Component({
   selector: 'position',
   template: `
-    <bt-map [geopoints]="[value()!]" (clickOnMap)="setValue($event)" />
+    <bt-map
+      [readonly]="readonly()"
+      [geopoints]="[value()!]"
+      (clickOnMap)="setValue($event)"
+    />
   `,
   imports: [MapComponent],
   providers: [
@@ -26,6 +32,7 @@ import { Geopoint } from 'model';
 export class PositionComponent implements ControlValueAccessor {
   value = signal<Geopoint | null>(null);
   disabled = signal<boolean | null>(null);
+  readonly = input(false, { transform: booleanAttribute });
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   _onChange: (value: Geopoint | null) => void = () => {};

@@ -151,5 +151,7 @@
   "registration-unknown-error-try-again": "Kayıt sırasında bilinmeyen bir hata oluştu. Tekrar dene.",
   "rate-now": "Şimdi değerlendir",
   "how-did-you-like-this-bite": "Bu Bite'ı nasıl buldunuz?",
-  "portuguese": "Portuguese"
+  "portuguese": "Portuguese",
+  "set-manually": "Manuel olarak ayarla",
+  "location-label": "Konum:"
 }

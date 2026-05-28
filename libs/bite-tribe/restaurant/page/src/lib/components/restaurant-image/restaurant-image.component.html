@@ -1,14 +1,16 @@
 @let imageSrc = restaurant()?.imagePath || restaurant()?.image;
 
 @if (imageSrc) {
-  @defer {
-    <ion-img [src]="imageSrc" class="place-image" />
-  } @placeholder (minimum 1000ms) {
-    <div class="image-loading-placeholder">
-      <ion-skeleton-text
-        [animated]="true"
-        style="border-radius: 0; margin: 0; width: 100%; height: 100%"
-      />
-    </div>
-  }
+  <ion-card>
+    @defer {
+      <ion-img [src]="imageSrc" class="place-image" />
+    } @placeholder (minimum 1000ms) {
+      <div class="image-loading-placeholder">
+        <ion-skeleton-text
+          [animated]="true"
+          style="border-radius: 0; margin: 0; width: 100%; height: 100%"
+        />
+      </div>
+    }
+  </ion-card>
 }

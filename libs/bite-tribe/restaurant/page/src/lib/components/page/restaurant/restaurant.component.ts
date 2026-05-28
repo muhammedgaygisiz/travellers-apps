@@ -12,6 +12,7 @@ import {
   IonContent,
   IonIcon,
   IonItem,
+  IonItemDivider,
   IonLabel,
   IonList,
 } from '@ionic/angular/standalone';

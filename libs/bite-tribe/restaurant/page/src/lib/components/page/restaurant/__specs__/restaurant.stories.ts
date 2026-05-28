@@ -71,7 +71,7 @@ export const registeredWithSocialMediaLinks: Story = {
       ...registered.args?.restaurant,
       socialMediaLinks: [
         { network: 'facebook', url: 'https://www.facebook.com' },
-        { network: 'google', url: 'https://www.instagram.com' },
+        { network: 'google', url: 'https://www.google.com' },
       ],
     } as unknown as Restaurant,
     bites: [...(registered.args?.bites || [])],
@@ -103,6 +103,8 @@ export const fullMaintained: Story = {
       socialMediaLinks: [
         { network: 'facebook', url: 'https://www.facebook.com' },
         { network: 'instagram', url: 'https://www.instagram.com' },
+        { network: 'google', url: 'https://www.google.com' },
+        { network: 'apple', url: 'https://www.apple.com' },
       ],
       openingHours: [
         {

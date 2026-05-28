@@ -530,6 +530,103 @@ describe('BitePage', () => {
     });
   });
 
+  describe('locationFromManual', () => {
+    it('should return true if position in form matches confirmed manual position', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.biteFormGroup.controls['position'].patchValue(position);
+      component.confirmedManualPosition.set(position);
+
+      expect(component.locationFromManual()).toBe(true);
+    });
+
+    it('should return false if position in form differs from confirmed manual position', () => {
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+      component.confirmedManualPosition.set({ latitude: 30, longitude: 40 });
+
+      expect(component.locationFromManual()).toBe(false);
+    });
+
+    it('should return false if confirmedManualPosition is undefined', () => {
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+      component.confirmedManualPosition.set(undefined);
+
+      expect(component.locationFromManual()).toBe(false);
+    });
+  });
+
+  describe('openManualPositionModal', () => {
+    it('should open the manual position modal', () => {
+      component.openManualPositionModal();
+      expect(component.isManualPositionModalOpen()).toBe(true);
+    });
+
+    it('should initialize manualPosition with current form position', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.biteFormGroup.controls['position'].patchValue(position);
+      component.openManualPositionModal();
+      expect(component.manualPosition()).toEqual(position);
+    });
+
+    it('should set manualPosition to undefined if form has no position', () => {
+      component.biteFormGroup.controls['position'].reset();
+      component.openManualPositionModal();
+      expect(component.manualPosition()).toBeUndefined();
+    });
+  });
+
+  describe('onManualPositionSelected', () => {
+    it('should set manualPosition to the selected position', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.onManualPositionSelected(position);
+      expect(component.manualPosition()).toEqual(position);
+    });
+  });
+
+  describe('confirmManualPosition', () => {
+    it('should set position in the form group and confirmedManualPosition, then dismiss modal', () => {
+      const position = { latitude: 10, longitude: 20 };
+      const dismissSpy = jest.fn();
+      component.manualPosition.set(position);
+      component.confirmManualPosition({ dismiss: dismissSpy } as any);
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        position,
+      );
+      expect(component.confirmedManualPosition()).toEqual(position);
+      expect(dismissSpy).toHaveBeenCalled();
+      expect(component.isManualPositionModalOpen()).toBe(false);
+    });
+
+    it('should not update form if manualPosition is undefined', () => {
+      const dismissSpy = jest.fn();
+      component.manualPosition.set(undefined);
+      component.biteFormGroup.controls['position'].reset();
+      component.confirmManualPosition({ dismiss: dismissSpy } as any);
+      expect(component.biteFormGroup.controls['position'].value).toBeNull();
+      expect(dismissSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('cancelManualPosition', () => {
+    it('should dismiss modal and close it without changing form position', () => {
+      const position = { latitude: 10, longitude: 20 };
+      const dismissSpy = jest.fn();
+      component.biteFormGroup.controls['position'].patchValue(position);
+      component.isManualPositionModalOpen.set(true);
+      component.cancelManualPosition({ dismiss: dismissSpy } as any);
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        position,
+      );
+      expect(dismissSpy).toHaveBeenCalled();
+      expect(component.isManualPositionModalOpen()).toBe(false);
+    });
+  });
+
   describe('placeValueChange', () => {
     describe('given a value change on the place form control', () => {
       let valueChangeEvents$: Observable<string | null>;

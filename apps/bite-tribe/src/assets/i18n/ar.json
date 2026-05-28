@@ -151,5 +151,7 @@
   "registration-unknown-error-try-again": "حدث خطأ غير معروف أثناء التسجيل. حاول مرة أخرى.",
   "rate-now": "قيّم الآن",
   "how-did-you-like-this-bite": "كيف أعجبك هذا الطبق؟",
-  "portuguese": "Portuguese"
+  "portuguese": "Portuguese",
+  "set-manually": "تحديد يدويًا",
+  "location-label": "الموقع:"
 }

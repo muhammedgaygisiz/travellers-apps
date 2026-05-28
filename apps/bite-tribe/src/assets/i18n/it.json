@@ -152,5 +152,7 @@
   "registration-unknown-error-try-again": "Si è verificato un errore sconosciuto durante la registrazione. Riprova.",
   "rate-now": "Valuta ora",
   "how-did-you-like-this-bite": "Come ti è piaciuto questo Bite?",
-  "portuguese": "Portuguese"
+  "portuguese": "Portuguese",
+  "set-manually": "Imposta manualmente",
+  "location-label": "Posizione:"
 }

@@ -149,5 +149,7 @@
   "ok": "OK",
   "registration-success-check-your-email-to-verify-account": "Conta criada! Verifique o seu e-mail para confirmar.",
   "registration-error-try-again": "Erro no registo. Tente novamente.",
-  "registration-unknown-error-try-again": "Ocorreu um erro inesperado. Tente novamente."
+  "registration-unknown-error-try-again": "Ocorreu um erro inesperado. Tente novamente.",
+  "set-manually": "Definir manualmente",
+  "location-label": "Localização:"
 }

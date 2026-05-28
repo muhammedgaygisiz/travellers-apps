@@ -85,7 +85,7 @@
 
       <div class="ion-padding-top">
         <ion-label class="ion-display-block map-label">
-          {{ 'location-tap-map-to-move-location-manually' | transloco }}
+          {{ 'location-label' | transloco }}
         </ion-label>
         <div
           class="ion-display-flex ion-justify-content-center position-button-container"
@@ -106,8 +106,13 @@
             <ion-icon name="checkmark-outline" />
             }
           </ion-button>
+          <ion-button (click)="openManualPositionModal()">
+            {{ 'set-manually' | transloco }} @if (locationFromManual()) {
+            <ion-icon name="checkmark-outline" />
+            }
+          </ion-button>
         </div>
-        <position formControlName="position" />
+        <position formControlName="position" [readonly]="true" [dragging]="false" />
         @if (biteFormGroup.get('position')?.invalid) {
         <ion-text color="danger">
           <p>{{ getGpsErrorMessage() | transloco }}</p>
@@ -151,5 +156,45 @@
       (restaurantSelected)="onRestaurantSelected($event, restaurantModalBite)"
       (selectionCancel)="restaurantModalBite.dismiss()"
     />
+  </ng-template>
+</ion-modal>
+
+<ion-modal
+  #manualPositionModal
+  [isOpen]="isManualPositionModalOpen()"
+  (ionModalDidPresent)="onModalDidPresent()"
+>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button
+            fill="clear"
+            (click)="cancelManualPosition(manualPositionModal)"
+          >
+            {{ 'cancel' | transloco }}
+          </ion-button>
+        </ion-buttons>
+        <ion-title>{{ 'set-manually' | transloco }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button
+            fill="clear"
+            [disabled]="!manualPosition()"
+            (click)="confirmManualPosition(manualPositionModal)"
+          >
+            {{ 'ok' | transloco }}
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      @if (shouldRenderMapInModal()) {
+      <bt-map
+        [geopoints]="manualPosition() ? [manualPosition()!] : []"
+        [gpsPosition]="position()"
+        (clickOnMap)="onManualPositionSelected($event)"
+      />
+      }
+    </ion-content>
   </ng-template>
 </ion-modal>

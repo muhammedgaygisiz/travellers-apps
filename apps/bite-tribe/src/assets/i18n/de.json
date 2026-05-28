@@ -151,5 +151,7 @@
   "registration-unknown-error-try-again": "Bei der Registrierung ist ein unbekannter Fehler aufgetreten. Bitte versuche es erneut.",
   "rate-now": "Jetzt bewerten",
   "how-did-you-like-this-bite": "Wie hat dir dieser Bite gefallen?",
-  "portuguese": "Portuguese"
+  "portuguese": "Portuguese",
+  "set-manually": "Manuell festlegen",
+  "location-label": "Standort:"
 }

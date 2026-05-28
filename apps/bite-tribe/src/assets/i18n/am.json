@@ -151,5 +151,7 @@
   "registration-unknown-error-try-again": "በምዝገባ ጊዜ ያልታወቀ ስህተት ተፈጥሯል። እንደገና ሞክር።",
   "rate-now": "አሁን ደረጃ ስጥ",
   "how-did-you-like-this-bite": "ይህን Bite እንዴት ወደዳህ?",
-  "portuguese": "Portuguese"
+  "portuguese": "Portuguese",
+  "set-manually": "በእጅ ያዘጋጁ",
+  "location-label": "ቦታ:"
 }

@@ -151,5 +151,7 @@
   "registration-error-try-again": "An error occurred during registration. Please try again.",
   "registration-unknown-error-try-again": "An unknown error occurred during registration. Please try again.",
   "rate-now": "Rate now",
-  "how-did-you-like-this-bite": "How did you like this Bite?"
+  "how-did-you-like-this-bite": "How did you like this Bite?",
+  "set-manually": "Set manually",
+  "location-label": "Location:"
 }

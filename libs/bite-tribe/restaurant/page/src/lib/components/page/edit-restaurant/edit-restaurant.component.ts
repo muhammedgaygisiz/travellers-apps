@@ -27,7 +27,7 @@ import {
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
+import { RestaurantImageComponent } from '../../restaurant-image/restaurant-image.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MapComponent } from 'bite-tribe-common/map';
 

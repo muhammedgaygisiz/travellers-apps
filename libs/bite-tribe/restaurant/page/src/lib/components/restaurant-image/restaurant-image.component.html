@@ -1,31 +1,8 @@
-@let restaurantData = restaurant();
-@let skipLoading = skipLoadingState();
+@let imageSrc = restaurant()?.imagePath || restaurant()?.image;
 
-@if (skipLoading) {
-  @if (restaurantData?.imagePath || restaurantData?.image) {
-    <ion-img
-      [src]="restaurantData?.imagePath || restaurantData?.image"
-      class="place-image"
-    />
-  } @else {
-    <div class="image-loading-placeholder">
-      <ion-icon name="pizza-outline" color="primary" />
-      <span>{{ 'not-verified-restaurant' | transloco }}</span>
-    </div>
-  }
-} @else {
+@if (imageSrc) {
   @defer {
-    @if (restaurantData?.imagePath || restaurantData?.image) {
-      <ion-img
-        [src]="restaurantData?.imagePath || restaurantData?.image"
-        class="place-image"
-      />
-    } @else {
-      <div class="image-loading-placeholder">
-        <ion-icon name="pizza-outline" color="primary" />
-        <span>{{ 'not-verified-restaurant' | transloco }}</span>
-      </div>
-    }
+    <ion-img [src]="imageSrc" class="place-image" />
   } @placeholder (minimum 1000ms) {
     <div class="image-loading-placeholder">
       <ion-skeleton-text

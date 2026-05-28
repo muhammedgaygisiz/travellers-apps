@@ -12,10 +12,6 @@ const restaurantWithImage: Restaurant = {
     'https://upload.wikimedia.org/wikipedia/commons/9/9e/Autumn_Red_peaches.jpg',
 } as Restaurant;
 
-const restaurantWithoutImage: Restaurant = {
-  name: 'Unverified Place',
-} as Restaurant;
-
 export default {
   title: 'Components/Restaurant Image',
   component: RestaurantImageComponent,
@@ -34,27 +30,5 @@ type Story = StoryObj<RestaurantImageComponent>;
 export const imageLoaded: Story = {
   args: {
     restaurant: restaurantWithImage,
-    skipLoadingState: true,
-  },
-};
-
-export const notVerifiedRestaurant: Story = {
-  args: {
-    restaurant: restaurantWithoutImage,
-    skipLoadingState: true,
-  },
-};
-
-export const loadingSkeleton: Story = {
-  args: {
-    restaurant: restaurantWithImage,
-    skipLoadingState: false,
-  },
-};
-
-export const loadingSkeletonWithoutImage: Story = {
-  args: {
-    restaurant: restaurantWithoutImage,
-    skipLoadingState: false,
   },
 };

@@ -9,7 +9,6 @@ import { PageComponent } from 'common/ui/page';
 import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
 import { Bite, Like } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
-import { RestaurantImageComponent } from '../../restaurant-image/restaurant-image.component';
 import { getPosition } from '../../../utils/get-position';
 import { getDistance } from '../../../utils/get-distance';
 import { DistanceComponent } from 'common/distance';
@@ -27,7 +26,6 @@ import { TagsInputComponent } from 'common/ui/tags';
     IonButton,
     IonIcon,
     MapComponent,
-    RestaurantImageComponent,
     DistanceComponent,
     TranslocoPipe,
     TagsInputComponent,

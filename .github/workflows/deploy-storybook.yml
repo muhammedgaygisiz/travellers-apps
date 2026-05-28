@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
 
       - name: Setup action
         uses: ./.github/actions/setup
@@ -26,7 +26,7 @@ jobs:
 
       - name: Bite Tribe Storybook Preview of Pull Request
         if: github.event.pull_request.base.ref == 'develop'
-        uses: FirebaseExtended/action-hosting-deploy@v0
+        uses: FirebaseExtended/action-hosting-deploy@v0.10.0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE }}'
@@ -37,7 +37,7 @@ jobs:
 
       - name: Bite Tribe Storybook Publish to Firebase
         if: github.ref == 'refs/heads/develop'
-        uses: FirebaseExtended/action-hosting-deploy@v0
+        uses: FirebaseExtended/action-hosting-deploy@v0.10.0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE }}'

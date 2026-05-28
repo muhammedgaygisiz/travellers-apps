@@ -24,6 +24,7 @@ concurrency:
 
 env:
   CI: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   NX_DAEMON: false
   NX_VERBOSE_LOGGING: ${{ github.event.inputs.nx_verbose_logging }}
   NX_BASE: develop
@@ -130,7 +131,7 @@ jobs:
   #    - run: npm run nx -- affected -t build-storybook --configuration=ci
   #
   #    - name: Cache Storybook Builds
-  #      uses: actions/cache@v6
+  #      uses: actions/cache@v4
   #      with:
   #        path: dist/storybook
   #        key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
@@ -153,7 +154,7 @@ jobs:
   #    - name: "Setup env"
   #      uses: ./.github/actions/setup-env-for-affected
   #
-  #    - uses: actions/cache/restore@v6
+  #    - uses: actions/cache/restore@v4
   #      with:
   #        path: dist/storybook/xxx
   #        key: storybooks-${{ hashFiles('**/**/*.stories.*') }}

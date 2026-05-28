@@ -19,7 +19,7 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true'
 
     - name: Cache NPM Dependencies
-      uses: actions/cache@v6
+      uses: actions/cache@v4
       if: steps.cache.outputs.cache-hit != 'true'
       with:
         path: node_modules

@@ -4,7 +4,7 @@ runs:
   using: "composite"
   steps:
     - name: Cache restore
-      uses: actions/cache/restore@v6
+      uses: actions/cache/restore@v4
       with:
         path: node_modules
         key: node-modules-${{ hashFiles('package-lock.json') }}

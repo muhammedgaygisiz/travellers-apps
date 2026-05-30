@@ -1,3 +1,5 @@
+@use 'globals';
+
 :host {
   .buttons-container {
     ion-button {
@@ -41,6 +43,15 @@
 
     .rating {
       margin-right: 0.5rem;
+    }
+  }
+
+  ion-input,
+  ion-textarea {
+    @include globals.input-styles;
+
+    &.ion-margin-top {
+      margin-top: 1.5rem;
     }
   }
 }

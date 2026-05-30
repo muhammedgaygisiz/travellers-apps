@@ -11,10 +11,8 @@ import {
   IonButton,
   IonContent,
   IonIcon,
-  IonItem,
-  IonItemDivider,
+  IonInput,
   IonLabel,
-  IonList,
 } from '@ionic/angular/standalone';
 import { Bite, Like, Menu, MenuItem, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
@@ -38,8 +36,6 @@ import { TagsInputComponent } from 'common/ui/tags';
     IonButton,
     IonIcon,
     MapComponent,
-    IonList,
-    IonItem,
     IonLabel,
     TitleCasePipe,
     EnsureProtocolPipe,
@@ -47,6 +43,7 @@ import { TagsInputComponent } from 'common/ui/tags';
     DistanceComponent,
     TranslocoPipe,
     TagsInputComponent,
+    IonInput,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

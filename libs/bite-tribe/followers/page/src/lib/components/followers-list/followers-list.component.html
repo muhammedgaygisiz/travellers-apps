@@ -26,7 +26,7 @@
       </div>
     } @else {
       <ion-list>
-        @for (user of users() ?? []; track user.userId) {
+        @for (user of sortedUsers(); track user.userId) {
           @let publicUser = !!user.public;
           @if (publicUser) {
             <ion-item

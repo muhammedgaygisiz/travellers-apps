@@ -495,6 +495,25 @@ describe(BiteEffects.name, () => {
           );
         });
       });
+
+      it('should show a success toast when bite is updated', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BiteActions.saveExistingBite({
+              bite: {} as Bite,
+            }),
+          });
+
+          expectObservable(effects.saveEditedBiteToFirestore$);
+        });
+
+        expect(mockToastCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'Bite updated successfully!',
+            color: 'success',
+          }),
+        );
+      });
     });
 
     describe('given an erroneous save call', () => {
@@ -549,6 +568,25 @@ describe(BiteEffects.name, () => {
 
           expectObservable(effects.deleteBite$).toBe(expected, output);
         });
+      });
+
+      it('should show a success toast when bite is deleted', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BiteActions.deleteBite({
+              bite: {} as Bite,
+            }),
+          });
+
+          expectObservable(effects.deleteBite$);
+        });
+
+        expect(mockToastCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'Bite deleted successfully!',
+            color: 'success',
+          }),
+        );
       });
     });
 

@@ -230,6 +230,9 @@ export class BiteEffects {
       ofType(BiteActions.saveExistingBite),
       switchMap(({ bite }) => {
         return from(this.api.saveEditedBite(bite)).pipe(
+          tap(() => {
+            void this.showToast('Bite updated successfully!', 'success');
+          }),
           map((bite) => BiteActions.savedBite({ bite })),
           catchError((err) => of(BiteActions.errorSavingBite({ bite }))),
         );
@@ -242,6 +245,9 @@ export class BiteEffects {
       ofType(BiteActions.deleteBite),
       switchMap(({ bite }) =>
         from(this.api.deleteBite(bite)).pipe(
+          tap(() => {
+            void this.showToast('Bite deleted successfully!', 'success');
+          }),
           map((bite) => BiteActions.deletedBite({ bite })),
           catchError(() => of(BiteActions.errorDeletingBite({ bite }))),
         ),

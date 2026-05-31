@@ -88,15 +88,6 @@
         <div class="ion-margin-top">
           <h3>{{ 'opening-hours' | transloco }}</h3>
           @for (day of restaurantData?.openingHours; track day.day) {
-            <ion-input
-              [readonly]="true"
-              [label]="'day-' + day.day | transloco"
-              [value]="'day'"
-              fill="outline"
-              class="ion-margin-top"
-              mode="md"
-            />
-
             <div class="ion-display-flex ion-flex-row ion-margin-bottom day">
               <ion-label class="ion-flex-1">
                 <span>{{ 'day-' + day.day | transloco }}</span>

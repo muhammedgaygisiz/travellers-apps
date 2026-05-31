@@ -24,6 +24,7 @@ import { userId } from '../router/selectors';
 import { fromAuth } from 'ta-firestore';
 import { CreateAndUploadImageCallbackParams } from 'model';
 import { ToastController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Injectable()
 export class BiteEffects {
@@ -32,6 +33,7 @@ export class BiteEffects {
   private readonly store = inject(Store);
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly toastController = inject(ToastController);
+  private readonly transloco = inject(TranslocoService);
 
   biteCreatorId = toSignal(this.store.select(userId));
 
@@ -144,7 +146,7 @@ export class BiteEffects {
                 bite,
               }),
             );
-            void this.showToast('Bite created successfully!', 'success');
+            void this.showToast('bite-created-successfully');
           }),
           catchError((err) => of(BiteActions.errorSavingBite({ bite }))),
         );
@@ -212,7 +214,7 @@ export class BiteEffects {
       switchMap(({ bite, imagePath }) => {
         return from(this.api.updateImagePathInBite(bite, imagePath)).pipe(
           tap(() => {
-            void this.showToast('Image uploaded successfully!', 'success');
+            void this.showToast('image-uploaded-successfully');
           }),
           map((updatedBite) =>
             BiteActions.updatedImagePathInBite({ bite: updatedBite }),
@@ -231,7 +233,7 @@ export class BiteEffects {
       switchMap(({ bite }) => {
         return from(this.api.saveEditedBite(bite)).pipe(
           tap(() => {
-            void this.showToast('Bite updated successfully!', 'success');
+            void this.showToast('bite-updated-successfully');
           }),
           map((bite) => BiteActions.savedBite({ bite })),
           catchError((err) => of(BiteActions.errorSavingBite({ bite }))),
@@ -246,7 +248,7 @@ export class BiteEffects {
       switchMap(({ bite }) =>
         from(this.api.deleteBite(bite)).pipe(
           tap(() => {
-            void this.showToast('Bite deleted successfully!', 'success');
+            void this.showToast('bite-deleted-successfully');
           }),
           map((bite) => BiteActions.deletedBite({ bite })),
           catchError(() => of(BiteActions.errorDeletingBite({ bite }))),
@@ -255,15 +257,12 @@ export class BiteEffects {
     );
   });
 
-  private async showToast(
-    message: string,
-    color: 'success' | 'danger',
-  ): Promise<void> {
+  private async showToast(key: string): Promise<void> {
     const toast = await this.toastController.create({
-      message,
+      message: this.transloco.translate(key),
       duration: 3000,
       position: 'bottom',
-      color,
+      color: 'success',
     });
     await toast.present();
   }

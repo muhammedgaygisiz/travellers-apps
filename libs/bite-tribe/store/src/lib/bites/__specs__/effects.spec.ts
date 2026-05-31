@@ -15,6 +15,7 @@ import { BucketlistActions } from '../../bucketlists/actions';
 import { PATH } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { ToastController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
@@ -26,6 +27,10 @@ const mockToastCreate = jest
   .mockResolvedValue({ present: mockToastPresent });
 const MockToastController = {
   create: mockToastCreate,
+};
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
 };
 
 const Mock = {
@@ -66,6 +71,7 @@ describe(BiteEffects.name, () => {
   beforeEach(() => {
     mockToastCreate.mockClear();
     mockToastPresent.mockClear();
+    MockTranslocoService.translate.mockClear();
     scheduler = new TestScheduler(assertDeepEqual);
     TestBed.configureTestingModule({
       providers: [
@@ -82,6 +88,7 @@ describe(BiteEffects.name, () => {
         { provide: BiteTribeApiService, useValue: Mock },
         { provide: BiteTribeStoreService, useValue: Mock },
         { provide: ToastController, useValue: MockToastController },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 
@@ -338,7 +345,7 @@ describe(BiteEffects.name, () => {
 
         expect(mockToastCreate).toHaveBeenCalledWith(
           expect.objectContaining({
-            message: 'Bite created successfully!',
+            message: 'bite-created-successfully',
             color: 'success',
           }),
         );
@@ -460,7 +467,7 @@ describe(BiteEffects.name, () => {
 
         expect(mockToastCreate).toHaveBeenCalledWith(
           expect.objectContaining({
-            message: 'Image uploaded successfully!',
+            message: 'image-uploaded-successfully',
             color: 'success',
           }),
         );
@@ -509,7 +516,7 @@ describe(BiteEffects.name, () => {
 
         expect(mockToastCreate).toHaveBeenCalledWith(
           expect.objectContaining({
-            message: 'Bite updated successfully!',
+            message: 'bite-updated-successfully',
             color: 'success',
           }),
         );
@@ -583,7 +590,7 @@ describe(BiteEffects.name, () => {
 
         expect(mockToastCreate).toHaveBeenCalledWith(
           expect.objectContaining({
-            message: 'Bite deleted successfully!',
+            message: 'bite-deleted-successfully',
             color: 'success',
           }),
         );

@@ -151,5 +151,9 @@
   "registration-error-try-again": "Erro no registo. Tente novamente.",
   "registration-unknown-error-try-again": "Ocorreu um erro inesperado. Tente novamente.",
   "set-manually": "Definir manualmente",
-  "location-label": "Localização:"
+  "location-label": "Localização:",
+  "bite-created-successfully": "Bite criado com sucesso!",
+  "image-uploaded-successfully": "Imagem enviada com sucesso!",
+  "bite-updated-successfully": "Bite atualizado com sucesso!",
+  "bite-deleted-successfully": "Bite excluído com sucesso!"
 }

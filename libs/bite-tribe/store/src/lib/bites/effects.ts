@@ -144,6 +144,7 @@ export class BiteEffects {
                 bite,
               }),
             );
+            void this.showToast('Bite created successfully!', 'success');
           }),
           catchError((err) => of(BiteActions.errorSavingBite({ bite }))),
         );
@@ -210,6 +211,9 @@ export class BiteEffects {
       ofType(BiteActions.uploadedImage),
       switchMap(({ bite, imagePath }) => {
         return from(this.api.updateImagePathInBite(bite, imagePath)).pipe(
+          tap(() => {
+            void this.showToast('Image uploaded successfully!', 'success');
+          }),
           map((updatedBite) =>
             BiteActions.updatedImagePathInBite({ bite: updatedBite }),
           ),
@@ -244,4 +248,17 @@ export class BiteEffects {
       ),
     );
   });
+
+  private async showToast(
+    message: string,
+    color: 'success' | 'danger',
+  ): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      position: 'bottom',
+      color,
+    });
+    await toast.present();
+  }
 }

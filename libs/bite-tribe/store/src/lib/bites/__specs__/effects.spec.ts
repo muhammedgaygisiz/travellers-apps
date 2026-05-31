@@ -14,9 +14,18 @@ import { signal, WritableSignal } from '@angular/core';
 import { BucketlistActions } from '../../bucketlists/actions';
 import { PATH } from 'utils';
 import { fromAuth } from 'ta-firestore';
+import { ToastController } from '@ionic/angular';
 
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
+};
+
+const mockToastPresent = jest.fn().mockResolvedValue(undefined);
+const mockToastCreate = jest
+  .fn()
+  .mockResolvedValue({ present: mockToastPresent });
+const MockToastController = {
+  create: mockToastCreate,
 };
 
 const Mock = {
@@ -55,6 +64,8 @@ describe(BiteEffects.name, () => {
   let dispatchSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    mockToastCreate.mockClear();
+    mockToastPresent.mockClear();
     scheduler = new TestScheduler(assertDeepEqual);
     TestBed.configureTestingModule({
       providers: [
@@ -70,6 +81,7 @@ describe(BiteEffects.name, () => {
         }),
         { provide: BiteTribeApiService, useValue: Mock },
         { provide: BiteTribeStoreService, useValue: Mock },
+        { provide: ToastController, useValue: MockToastController },
       ],
     });
 
@@ -312,6 +324,25 @@ describe(BiteEffects.name, () => {
           );
         });
       });
+
+      it('should show a success toast when bite is created', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BiteActions.saveNewBite({
+              bite: {} as Bite,
+            }),
+          });
+
+          expectObservable(effects.saveNewBiteToFirestore$);
+        });
+
+        expect(mockToastCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'Bite created successfully!',
+            color: 'success',
+          }),
+        );
+      });
     });
 
     describe('given a erroneous save call', () => {
@@ -412,6 +443,26 @@ describe(BiteEffects.name, () => {
         expect(updateImagePathInBiteSpy).toHaveBeenCalledWith(
           {} as Bite,
           'imagePath',
+        );
+      });
+
+      it('should show a success toast when image is uploaded', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BiteActions.uploadedImage({
+              bite: {} as Bite,
+              imagePath: 'imagePath',
+            }),
+          });
+
+          expectObservable(effects.updateImagePathInBite$);
+        });
+
+        expect(mockToastCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'Image uploaded successfully!',
+            color: 'success',
+          }),
         );
       });
     });

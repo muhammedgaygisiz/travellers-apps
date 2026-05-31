@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RestaurantComponent } from '../components/page/restaurant.component';
+import { RestaurantComponent } from '../components/page/restaurant/restaurant.component';
 import { RestaurantService } from './restaurant.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 

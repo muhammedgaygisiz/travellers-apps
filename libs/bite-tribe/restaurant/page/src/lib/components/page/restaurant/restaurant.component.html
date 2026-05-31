@@ -13,11 +13,13 @@
   <ion-content>
     <bt-restaurant-image [restaurant]="restaurantData" />
 
-    <div class="ion-padding">
+    <div class="ion-padding-horizontal">
       <div
-        class="header-container ion-display-flex ion-justify-content-between ion-align-items-center ion-margin-bottom"
+        class="ion-display-flex ion-justify-content-between ion-align-items-center"
       >
         <h1>{{ placeName() }}</h1>
+
+        <bt-distance [distance]="placeDistance()" />
       </div>
 
       <div
@@ -38,38 +40,77 @@
         }
       </div>
 
-      <bt-distance [distance]="placeDistance()" />
-
-      @if (uniqueTags().length) {
-        <div class="ion-margin-top">
-          <bt-tags-input [readonly]="true" [tags]="uniqueTags()" />
-        </div>
-      }
-
-      <div class="ion-margin-top">
-        @if (restaurantData?.socialMediaLinks?.length) {
-          <ion-list lines="full">
-            @for (
-              link of restaurantData?.socialMediaLinks;
-              track link.network
-            ) {
-              <ion-item>
-                <ion-icon slot="start" [name]="'logo-' + link.network" />
-                <ion-label>
-                  <a [href]="link.url | ensureProtocol" target="_blank">{{
-                    link.network | titlecase
-                  }}</a>
-                </ion-label>
-              </ion-item>
-            }
-          </ion-list>
-        }
-      </div>
+      <div class="seperator"></div>
 
       @if (restaurantData?.description) {
         <div class="ion-margin-vertical">
           <p>{{ restaurantData?.description }}</p>
         </div>
+      }
+
+      <div class="ion-margin-vertical">
+        @if (restaurantData?.socialMediaLinks?.length) {
+          <div class="ion-display-flex ion-flex-row ion-flex-wrap">
+            @for (
+              link of restaurantData?.socialMediaLinks;
+              track link.network
+            ) {
+              <div
+                class="social-link ion-display-flex ion-align-items-center ion-flex-1 ion-margin-top"
+              >
+                <ion-icon
+                  [name]="'logo-' + link.network"
+                  size="large"
+                  class="ion-margin-end"
+                />
+                <ion-label>
+                  <a [href]="link.url | ensureProtocol" target="_blank">{{
+                    link.network | titlecase
+                  }}</a>
+                </ion-label>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="seperator"></div>
+
+      @if (uniqueTags().length) {
+        <div class="ion-margin-vertical">
+          <bt-tags-input [readonly]="true" [tags]="uniqueTags()" />
+        </div>
+
+        <div class="seperator"></div>
+      }
+
+      @if (restaurantData?.openingHours?.length) {
+        <div class="ion-margin-top">
+          <h3>{{ 'opening-hours' | transloco }}</h3>
+          @for (day of restaurantData?.openingHours; track day.day) {
+            <div class="ion-display-flex ion-flex-row ion-margin-bottom day">
+              <ion-label class="ion-flex-1">
+                <span>{{ 'day-' + day.day | transloco }}</span>
+              </ion-label>
+
+              <div class="ion-flex-1">
+                @if (day.isOpen && day.timeRanges.length) {
+                  <span class="time-ranges">
+                    @for (range of day.timeRanges; track $index) {
+                      <div>
+                        <span>{{ range.from }}–{{ range.to }}</span>
+                      </div>
+                    }
+                  </span>
+                } @else if (!day.isOpen) {
+                  <span class="closed">{{ 'closed' | transloco }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="seperator"></div>
       }
 
       @if (restaurantData?.address) {
@@ -88,36 +129,6 @@
           @if (restaurantData?.address?.country) {
             <p class="ion-no-margin">{{ restaurantData?.address?.country }}</p>
           }
-        </div>
-      }
-
-      @if (restaurantData?.openingHours?.length) {
-        <div class="ion-margin-top">
-          <h3>{{ 'opening-hours' | transloco }}</h3>
-          <ion-list lines="none" class="ion-display-flex ion-flex-column">
-            @for (day of restaurantData?.openingHours; track day.day) {
-              <ion-item
-                class="ion-display-inline-flex ion-flex-row ion-margin-bottom"
-              >
-                <ion-label class="ion-flex-1">
-                  <span>{{ 'day-' + day.day | transloco }}</span>
-                </ion-label>
-                <div class="ion-flex-1">
-                  @if (day.isOpen && day.timeRanges.length) {
-                    <span class="time-ranges">
-                      @for (range of day.timeRanges; track $index) {
-                        <div>
-                          <span>{{ range.from }}–{{ range.to }}</span>
-                        </div>
-                      }
-                    </span>
-                  } @else if (!day.isOpen) {
-                    <span class="closed">{{ 'closed' | transloco }}</span>
-                  }
-                </div>
-              </ion-item>
-            }
-          </ion-list>
         </div>
       }
 

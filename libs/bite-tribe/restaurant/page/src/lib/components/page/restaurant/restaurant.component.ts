@@ -11,19 +11,17 @@ import {
   IonButton,
   IonContent,
   IonIcon,
-  IonItem,
   IonLabel,
-  IonList,
 } from '@ionic/angular/standalone';
 import { Bite, Like, Menu, MenuItem, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { TitleCasePipe } from '@angular/common';
-import { EnsureProtocolPipe } from '../../pipes/ensure-protocol.pipe';
-import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
-import { getPosition } from '../../utils/get-position';
-import { getDistance } from '../../utils/get-distance';
+import { EnsureProtocolPipe } from '../../../pipes/ensure-protocol.pipe';
+import { RestaurantImageComponent } from '../../restaurant-image/restaurant-image.component';
+import { getPosition } from '../../../utils/get-position';
+import { getDistance } from '../../../utils/get-distance';
 import { DistanceComponent } from 'common/distance';
-import { uniqueBitesByName } from '../../utils/unique-bites-by-name';
+import { uniqueBitesByName } from '../../../utils/unique-bites-by-name';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { TagsInputComponent } from 'common/ui/tags';
 
@@ -37,8 +35,6 @@ import { TagsInputComponent } from 'common/ui/tags';
     IonButton,
     IonIcon,
     MapComponent,
-    IonList,
-    IonItem,
     IonLabel,
     TitleCasePipe,
     EnsureProtocolPipe,

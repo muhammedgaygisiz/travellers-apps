@@ -11,7 +11,10 @@
   [showFooter]="false"
 >
   <ion-content>
-    <bt-restaurant-image [restaurant]="undefined" [skipLoadingState]="true" />
+    <div class="unverified-restaurant-image">
+      <ion-icon name="pizza-outline" color="primary" />
+      <span>{{ 'not-verified-restaurant' | transloco }}</span>
+    </div>
 
     <div class="ion-padding">
       <div

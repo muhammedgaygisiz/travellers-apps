@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { EditRestaurantComponent } from '../components/page/edit-restaurant.component';
+import { EditRestaurantComponent } from '../components/page/edit-restaurant/edit-restaurant.component';
 import { RestaurantService } from './restaurant.service';
 
 @Component({

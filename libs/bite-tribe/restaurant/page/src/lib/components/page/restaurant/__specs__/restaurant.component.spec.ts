@@ -10,17 +10,17 @@ import { TranslocoService } from '@jsverse/transloco';
 jest.mock('leaflet');
 
 const getDistanceMock = jest.fn();
-jest.mock('../../../utils/get-distance', () => ({
+jest.mock('../../../../utils/get-distance', () => ({
   getDistance: (...args: any): void => getDistanceMock(...args),
 }));
 
 const getPositionMock = jest.fn();
-jest.mock('../../../utils/get-position', () => ({
+jest.mock('../../../../utils/get-position', () => ({
   getPosition: (...args: any): void => getPositionMock(...args),
 }));
 
 const uniqueBitesByNameMock = jest.fn();
-jest.mock('../../../utils/unique-bites-by-name', () => ({
+jest.mock('../../../../utils/unique-bites-by-name', () => ({
   uniqueBitesByName: (...args: any): void => uniqueBitesByNameMock(...args),
 }));
 

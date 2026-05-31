@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
-import { BitePlaceComponent } from '../components/page/bite-place.component';
+import { BitePlaceComponent } from '../components/page/bite-place/bite-place.component';
 import { RestaurantService } from './restaurant.service';
 
 @Component({

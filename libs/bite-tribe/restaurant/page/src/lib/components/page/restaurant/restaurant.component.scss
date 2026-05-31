@@ -46,12 +46,13 @@
     }
   }
 
-  ion-input,
-  ion-textarea {
-    @include globals.input-styles;
+  .day {
+    border: 2px solid var(--ion-color-tertiary-tint);
+    border-radius: var(--border-radius);
+    padding: 16px 12px;
 
-    &.ion-margin-top {
-      margin-top: 1.5rem;
+    &:nth-child(even) {
+      background: var(--ion-color-tertiary);
     }
   }
 }

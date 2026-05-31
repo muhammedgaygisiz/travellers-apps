@@ -11,7 +11,6 @@ import {
   IonButton,
   IonContent,
   IonIcon,
-  IonInput,
   IonLabel,
 } from '@ionic/angular/standalone';
 import { Bite, Like, Menu, MenuItem, Restaurant } from 'model';
@@ -43,7 +42,6 @@ import { TagsInputComponent } from 'common/ui/tags';
     DistanceComponent,
     TranslocoPipe,
     TagsInputComponent,
-    IonInput,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

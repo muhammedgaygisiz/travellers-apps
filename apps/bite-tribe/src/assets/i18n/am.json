@@ -153,5 +153,9 @@
   "how-did-you-like-this-bite": "ይህን Bite እንዴት ወደዳህ?",
   "portuguese": "Portuguese",
   "set-manually": "በእጅ ያዘጋጁ",
-  "location-label": "ቦታ:"
+  "location-label": "ቦታ:",
+  "bite-created-successfully": "ባይት በተሳካ ሁኔታ ተፈጥሯል!",
+  "image-uploaded-successfully": "ምስሉ በተሳካ ሁኔታ ተጭኗል!",
+  "bite-updated-successfully": "ባይቱ በተሳካ ሁኔታ ተዘምኗል!",
+  "bite-deleted-successfully": "ባይቱ በተሳካ ሁኔታ ተሰርዟል!"
 }

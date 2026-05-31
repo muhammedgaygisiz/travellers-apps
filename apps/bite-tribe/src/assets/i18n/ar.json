@@ -153,5 +153,9 @@
   "how-did-you-like-this-bite": "كيف أعجبك هذا الطبق؟",
   "portuguese": "Portuguese",
   "set-manually": "تحديد يدويًا",
-  "location-label": "الموقع:"
+  "location-label": "الموقع:",
+  "bite-created-successfully": "تم إنشاء الوجبة بنجاح!",
+  "image-uploaded-successfully": "تم رفع الصورة بنجاح!",
+  "bite-updated-successfully": "تم تحديث الوجبة بنجاح!",
+  "bite-deleted-successfully": "تم حذف الوجبة بنجاح!"
 }

@@ -153,5 +153,9 @@
   "how-did-you-like-this-bite": "Bu Bite'ı nasıl buldunuz?",
   "portuguese": "Portuguese",
   "set-manually": "Manuel olarak ayarla",
-  "location-label": "Konum:"
+  "location-label": "Konum:",
+  "bite-created-successfully": "Bite başarıyla oluşturuldu!",
+  "image-uploaded-successfully": "Görsel başarıyla yüklendi!",
+  "bite-updated-successfully": "Bite başarıyla güncellendi!",
+  "bite-deleted-successfully": "Bite başarıyla silindi!"
 }

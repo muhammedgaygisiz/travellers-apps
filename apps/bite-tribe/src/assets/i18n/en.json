@@ -153,5 +153,9 @@
   "rate-now": "Rate now",
   "how-did-you-like-this-bite": "How did you like this Bite?",
   "set-manually": "Set manually",
-  "location-label": "Location:"
+  "location-label": "Location:",
+  "bite-created-successfully": "Bite created successfully!",
+  "image-uploaded-successfully": "Image uploaded successfully!",
+  "bite-updated-successfully": "Bite updated successfully!",
+  "bite-deleted-successfully": "Bite deleted successfully!"
 }

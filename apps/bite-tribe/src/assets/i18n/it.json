@@ -154,5 +154,9 @@
   "how-did-you-like-this-bite": "Come ti è piaciuto questo Bite?",
   "portuguese": "Portuguese",
   "set-manually": "Imposta manualmente",
-  "location-label": "Posizione:"
+  "location-label": "Posizione:",
+  "bite-created-successfully": "Bite creato con successo!",
+  "image-uploaded-successfully": "Immagine caricata con successo!",
+  "bite-updated-successfully": "Bite aggiornato con successo!",
+  "bite-deleted-successfully": "Bite eliminato con successo!"
 }

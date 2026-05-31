@@ -153,5 +153,9 @@
   "how-did-you-like-this-bite": "Bagaimana pendapatmu tentang Bite ini?",
   "portuguese": "Portuguese",
   "set-manually": "Atur secara manual",
-  "location-label": "Lokasi:"
+  "location-label": "Lokasi:",
+  "bite-created-successfully": "Bite berhasil dibuat!",
+  "image-uploaded-successfully": "Gambar berhasil diunggah!",
+  "bite-updated-successfully": "Bite berhasil diperbarui!",
+  "bite-deleted-successfully": "Bite berhasil dihapus!"
 }

@@ -154,5 +154,9 @@
   "how-did-you-like-this-bite": "คุณชอบ Bite นี้แค่ไหน?",
   "portuguese": "Portuguese",
   "set-manually": "ตั้งค่าด้วยตนเอง",
-  "location-label": "ตำแหน่ง:"
+  "location-label": "ตำแหน่ง:",
+  "bite-created-successfully": "สร้าง Bite สำเร็จแล้ว!",
+  "image-uploaded-successfully": "อัปโหลดรูปภาพสำเร็จแล้ว!",
+  "bite-updated-successfully": "อัปเดต Bite สำเร็จแล้ว!",
+  "bite-deleted-successfully": "ลบ Bite สำเร็จแล้ว!"
 }

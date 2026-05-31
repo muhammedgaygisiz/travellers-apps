@@ -64,6 +64,12 @@ export class FollowersListComponent {
   isOpen = signal(false);
   imageErroredUserIds = signal<Set<string>>(new Set());
 
+  sortedUsers = computed(() =>
+    [...(this.users() ?? [])].sort((a, b) =>
+      (a.displayName ?? '').localeCompare(b.displayName ?? ''),
+    ),
+  );
+
   onImageError(userId: string): void {
     this.imageErroredUserIds.update((set) => new Set([...set, userId]));
   }

@@ -148,6 +148,40 @@ describe(FollowersListComponent.name, () => {
     });
   });
 
+  describe('sortedUsers', () => {
+    it('should return users sorted by displayName', () => {
+      const mockUsers: PublicUser[] = [
+        { userId: 'user1', displayName: 'Charlie', email: '', photoUrl: '' },
+        { userId: 'user2', displayName: 'Alice', email: '', photoUrl: '' },
+        { userId: 'user3', displayName: 'Bob', email: '', photoUrl: '' },
+      ];
+      componentRef.setInput('users', mockUsers);
+      expect(component.sortedUsers().map((u) => u.displayName)).toEqual([
+        'Alice',
+        'Bob',
+        'Charlie',
+      ]);
+    });
+
+    it('should return empty array when users is undefined', () => {
+      componentRef.setInput('users', undefined);
+      expect(component.sortedUsers()).toEqual([]);
+    });
+
+    it('should not mutate the original users input', () => {
+      const mockUsers: PublicUser[] = [
+        { userId: 'user1', displayName: 'Charlie', email: '', photoUrl: '' },
+        { userId: 'user2', displayName: 'Alice', email: '', photoUrl: '' },
+      ];
+      componentRef.setInput('users', mockUsers);
+      component.sortedUsers();
+      expect(component.users()?.map((u) => u.displayName)).toEqual([
+        'Charlie',
+        'Alice',
+      ]);
+    });
+  });
+
   describe('confirmationButtons', () => {
     it('should have Cancel and Yes, unfollow buttons', () => {
       expect(component.confirmationButtons).toEqual([

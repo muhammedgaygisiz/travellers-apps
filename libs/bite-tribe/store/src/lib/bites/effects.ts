@@ -257,13 +257,21 @@ export class BiteEffects {
     );
   });
 
+  private currentToast: HTMLIonToastElement | null = null;
+
   private async showToast(key: string): Promise<void> {
-    const toast = await this.toastController.create({
+    if (this.currentToast) {
+      await this.currentToast.onDidDismiss();
+    }
+    this.currentToast = await this.toastController.create({
       message: this.transloco.translate(key),
       duration: 3000,
       position: 'bottom',
       color: 'success',
     });
-    await toast.present();
+    await this.currentToast.present();
+    void this.currentToast.onDidDismiss().then(() => {
+      this.currentToast = null;
+    });
   }
 }

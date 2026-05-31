@@ -22,9 +22,10 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 };
 
 const mockToastPresent = jest.fn().mockResolvedValue(undefined);
+const mockToastOnDidDismiss = jest.fn().mockResolvedValue(undefined);
 const mockToastCreate = jest
   .fn()
-  .mockResolvedValue({ present: mockToastPresent });
+  .mockResolvedValue({ present: mockToastPresent, onDidDismiss: mockToastOnDidDismiss });
 const MockToastController = {
   create: mockToastCreate,
 };
@@ -71,6 +72,7 @@ describe(BiteEffects.name, () => {
   beforeEach(() => {
     mockToastCreate.mockClear();
     mockToastPresent.mockClear();
+    mockToastOnDidDismiss.mockClear();
     MockTranslocoService.translate.mockClear();
     scheduler = new TestScheduler(assertDeepEqual);
     TestBed.configureTestingModule({

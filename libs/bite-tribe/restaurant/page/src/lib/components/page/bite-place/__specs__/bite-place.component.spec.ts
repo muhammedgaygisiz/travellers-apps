@@ -10,17 +10,17 @@ import { Bite } from 'model';
 jest.mock('leaflet');
 
 const getDistanceMock = jest.fn();
-jest.mock('../../../utils/get-distance', () => ({
+jest.mock('../../../../utils/get-distance', () => ({
   getDistance: (...args: unknown[]): void => getDistanceMock(...args),
 }));
 
 const getPositionMock = jest.fn();
-jest.mock('../../../utils/get-position', () => ({
+jest.mock('../../../../utils/get-position', () => ({
   getPosition: (...args: unknown[]): void => getPositionMock(...args),
 }));
 
 const uniqueBitesByNameMock = jest.fn();
-jest.mock('../../../utils/unique-bites-by-name', () => ({
+jest.mock('../../../../utils/unique-bites-by-name', () => ({
   uniqueBitesByName: (...args: unknown[]): void =>
     uniqueBitesByNameMock(...args),
 }));

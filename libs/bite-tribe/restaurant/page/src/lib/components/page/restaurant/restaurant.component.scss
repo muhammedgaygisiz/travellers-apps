@@ -1,10 +1,6 @@
-:host {
-  .header-container {
-    h1 {
-      margin: 0;
-    }
-  }
+@use 'globals';
 
+:host {
   .buttons-container {
     ion-button {
       margin: 0;
@@ -15,6 +11,24 @@
       &:first-of-type {
         border-top: 1px solid var(--ion-input-border-color);
       }
+    }
+  }
+
+  .seperator {
+    background-color: var(--ion-color-tertiary-tint);
+    height: 2px;
+  }
+
+  .social-link {
+    --ion-margin: 24px;
+
+    & > * {
+      --ion-margin: 8px;
+    }
+
+    a {
+      color: var(--ion-text-color);
+      text-decoration: none;
     }
   }
 
@@ -29,6 +43,16 @@
 
     .rating {
       margin-right: 0.5rem;
+    }
+  }
+
+  .day {
+    border: 2px solid var(--ion-color-tertiary-tint);
+    border-radius: var(--border-radius);
+    padding: 16px 12px;
+
+    &:nth-child(even) {
+      background: var(--ion-color-tertiary);
     }
   }
 }

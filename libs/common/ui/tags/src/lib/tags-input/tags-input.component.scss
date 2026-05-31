@@ -1,6 +1,13 @@
 @use 'globals';
 
 :host {
+  ion-chip {
+    &.chip-outline {
+      border-width: 2px;
+      background: var(--ion-color-tertiary);
+    }
+  }
+
   label {
     display: block;
   }

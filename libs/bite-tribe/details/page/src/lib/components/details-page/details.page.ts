@@ -47,6 +47,7 @@ import { TagsInputComponent } from 'common/ui/tags';
 import { Position } from '@capacitor/geolocation';
 import { CalcDistancePipe } from './pipes/calc-distance.pipe';
 import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-currency.pipe';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'details-page',
@@ -80,6 +81,7 @@ import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-cur
     GetImagePipe,
     AsyncPipe,
     IonSkeletonText,
+    TranslocoPipe,
   ],
 })
 export class DetailsPage {

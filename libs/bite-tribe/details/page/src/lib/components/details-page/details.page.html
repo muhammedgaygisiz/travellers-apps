@@ -231,7 +231,7 @@ uploadState();
 
       <ion-list lines="full">
         <ion-list-header lines="none">
-          <ion-label>Reviews</ion-label>
+          <ion-label>{{ 'reviews-label' | transloco }}</ion-label>
         </ion-list-header>
 
         @for (review of reviews(); track review.id) {
@@ -250,7 +250,7 @@ uploadState();
       <div class="ion-margin-vertical">
         <form [formGroup]="reviewFormGroup">
           <ion-textarea
-            label="Write a review"
+            label="{{ 'write-review-label' | transloco }}"
             formControlName="review"
             fill="outline"
             mode="md"
@@ -268,7 +268,7 @@ uploadState();
         [disabled]="isReviewFieldInvalid()"
         (click)="saveReview()"
       >
-        Add your Review
+        {{ 'add-your-review' | transloco }}
       </ion-button>
 
       @if (isOwnBite) {

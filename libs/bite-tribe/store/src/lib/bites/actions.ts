@@ -7,7 +7,7 @@ export const BiteActions = createActionGroup({
     'Loaded By GPS Position from API': props<{ bites: Bite[] }>(),
     'Loaded By User From API': props<{ bites: Bite[] }>(),
     'Loaded By Bucketlist From API': props<{ bites: Bite[] }>(),
-    'Save new bite': props<{ bite: Bite }>(),
+    'Save new bite': emptyProps(),
     'Save existing bite': props<{ bite: Bite }>(),
     'Saved bite': props<{ bite: Bite }>(),
     'Error saving bite': props<{ bite: Bite }>(),

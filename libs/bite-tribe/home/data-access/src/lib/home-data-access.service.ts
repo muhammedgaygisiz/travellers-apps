@@ -231,7 +231,7 @@ export class HomeDataAccessService {
   }
 
   updateBiteRating(params: { bite: Bite; rating: number }): void {
-    this.storeService.save({ ...params.bite, rating: params.rating }, 'bite');
+    this.storeService.saveEditedBite({ ...params.bite, rating: params.rating });
   }
 
   setHomeSorting(sorting: string): void {

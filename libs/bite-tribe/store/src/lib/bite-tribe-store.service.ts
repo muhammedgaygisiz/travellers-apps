@@ -62,6 +62,7 @@ import {
 } from './filtering-and-sorting/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
+  saveNewRestaurant,
   saveSocialMediaLinksForRestaurant,
   setRestaurantToCreate,
 } from './restaurants/actions';
@@ -76,7 +77,6 @@ import {
   selectedBucketlistTitle,
   sortedBucketlists,
 } from './bucketlists/selectors';
-import { getActionByDocType } from './utils/get-action-by-doc-type';
 import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
 import {
   biteId as biteIdFromUrl,
@@ -182,8 +182,16 @@ export class BiteTribeStoreService implements StoreService {
     );
   }
 
-  save(entity: any, docType: string): void {
-    this.store.dispatch(getActionByDocType(docType, entity));
+  saveNewRestaurant(entity: any): void {
+    this.store.dispatch(saveNewRestaurant({ restaurant: entity }));
+  }
+
+  saveNewBite(entity: any): void {
+    this.store.dispatch(BiteActions.saveNewBite({ bite: entity }));
+  }
+
+  saveEditedBite(entity: any): void {
+    this.store.dispatch(BiteActions.saveExistingBite({ bite: entity }));
   }
 
   setEditingBite(bite: Partial<Bite>): void {

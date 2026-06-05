@@ -23,13 +23,13 @@ export class BiteService {
   submitNewBite(newBite: any): void {
     const { id, ...biteData } = newBite;
 
-    this.dataAccess.submitBite(biteData);
+    void this.dataAccess.submitNewBite(biteData);
 
-    this.navController.navigateBack(['home']);
+    void this.navController.navigateBack(['home']);
   }
 
   submitEditedBite(editedBite: any): void {
-    this.dataAccess.submitBite(editedBite);
+    void this.dataAccess.submitEditedBite(editedBite);
 
     this.location.back();
   }

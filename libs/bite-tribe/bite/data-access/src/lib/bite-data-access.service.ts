@@ -43,8 +43,12 @@ export class BiteDataAccessService {
 
   networkStatus = this.networkStatusService.status;
 
-  async submitBite(bite: any): Promise<void> {
-    this.storeService.save(bite, 'bite');
+  async submitNewBite(bite: any): Promise<void> {
+    this.storeService.saveNewBite(bite);
+  }
+
+  async submitEditedBite(bite: any): Promise<void> {
+    this.storeService.saveEditedBite(bite);
   }
 
   setEditingBite(bite: Partial<any>): void {

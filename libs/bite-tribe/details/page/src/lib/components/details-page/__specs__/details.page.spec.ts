@@ -126,7 +126,7 @@ describe('DetailsPage', () => {
       );
 
       expect(editButton).toBeTruthy();
-      expect(MockTranslocoPipe.calls).toContain('edit');
+      expect(MockTranslocoPipe.calls).toContain('edit-bite');
     });
   });
 

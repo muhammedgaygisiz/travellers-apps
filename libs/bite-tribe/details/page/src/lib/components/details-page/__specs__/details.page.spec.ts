@@ -12,15 +12,24 @@ import { ToBlobUrlPipe } from 'image-compression';
 import { addNecessaryIcons } from 'utils';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { Platform } from '@ionic/angular';
-import type { Bite } from 'model';
+import type { Bite, PublicUser } from 'model';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
   transform(value: string): string {
+    return value;
+  }
+}
+
+@Pipe({ name: 'transloco' })
+class MockTranslocoPipe implements PipeTransform {
+  static calls: string[] = [];
+
+  transform(value: string): string {
+    MockTranslocoPipe.calls.push(value);
     return value;
   }
 }
@@ -62,8 +71,8 @@ describe('DetailsPage', () => {
       ],
     })
       .overrideComponent(DetailsPage, {
-        remove: { imports: [ToBlobUrlPipe] },
-        add: { imports: [MockToBlobUrlPipe] },
+        remove: { imports: [ToBlobUrlPipe, TranslocoPipe] },
+        add: { imports: [MockToBlobUrlPipe, MockTranslocoPipe] },
       })
       .compileComponents();
 
@@ -73,6 +82,7 @@ describe('DetailsPage', () => {
     platform = TestBed.inject(Platform);
     alertController = TestBed.inject(AlertController);
     fixture.detectChanges();
+    MockTranslocoPipe.calls = [];
   });
 
   it('should create', () => {
@@ -105,11 +115,18 @@ describe('DetailsPage', () => {
       expect(content).toContain('Italian Restaurant');
     });
 
-    it('should localize edit button label in template', () => {
-      const template = readFileSync(join(__dirname, '../details.page.html'), 'utf-8');
+    it('should render localized edit button for own bite', () => {
+      componentRef.setInput('bite', { id: '1', name: 'Pizza' } as Bite);
+      componentRef.setInput('biteCreator', { userId: 'user-1' } as PublicUser);
+      componentRef.setInput('userId', 'user-1');
+      componentRef.changeDetectorRef.detectChanges();
 
-      expect(template).toContain("{{ 'edit' | transloco }}");
-      expect(template).not.toContain('Edit Bite');
+      const editButton = fixture.debugElement.nativeElement.querySelector(
+        'ion-button.ion-margin-top.safe-padding-bottom',
+      );
+
+      expect(editButton).toBeTruthy();
+      expect(MockTranslocoPipe.calls).toContain('edit');
     });
   });
 

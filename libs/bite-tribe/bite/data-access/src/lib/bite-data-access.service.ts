@@ -9,17 +9,16 @@ export class BiteDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly networkStatusService = inject(NetworkStatusService);
 
-  biteLoader: ResourceLoader<any, any> = ({ params }) => {
+  biteLoader: ResourceLoader<any, any> = async ({ params }) => {
     const biteId = params.biteId;
     if (biteId) {
-      return FirebaseFirestore.getDocument({
+      const res = await FirebaseFirestore.getDocument({
         reference: `bites/${biteId}`,
-      }).then((res) => {
-        return {
-          ...res.snapshot.data,
-          id: res.snapshot.id,
-        };
       });
+      return {
+        ...res.snapshot.data,
+        id: res.snapshot.id,
+      };
     }
 
     return Promise.resolve();

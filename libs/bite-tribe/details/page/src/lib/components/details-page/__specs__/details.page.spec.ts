@@ -15,6 +15,8 @@ import { Platform } from '@ionic/angular';
 import type { Bite } from 'model';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 @Pipe({ name: 'toBlobUrl' })
 class MockToBlobUrlPipe implements PipeTransform {
@@ -101,6 +103,13 @@ describe('DetailsPage', () => {
       const content = fixture.debugElement.nativeElement.textContent;
       expect(content).toContain('Pizza');
       expect(content).toContain('Italian Restaurant');
+    });
+
+    it('should localize edit button label in template', () => {
+      const template = readFileSync(join(__dirname, '../details.page.html'), 'utf-8');
+
+      expect(template).toContain("{{ 'edit' | transloco }}");
+      expect(template).not.toContain('Edit Bite');
     });
   });
 

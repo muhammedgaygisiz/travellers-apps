@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { BiteService } from '../bite.service';
 import { NavController } from '@ionic/angular';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
+import { LoadingController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 
 const Mock = {
   navigateBack: jest.fn(),
@@ -15,15 +17,29 @@ const Mock = {
   setEditingBite: jest.fn(),
 };
 
+const LoadingMock = {
+  create: jest.fn().mockResolvedValue({
+    present: jest.fn().mockResolvedValue(undefined),
+    dismiss: jest.fn().mockResolvedValue(undefined),
+  }),
+};
+
+const TranslocoMock = {
+  translate: jest.fn((key: string): string => key),
+};
+
 describe('BiteService', () => {
   let service: BiteService;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     TestBed.configureTestingModule({
       providers: [
         { provide: BiteDataAccessService, useValue: Mock },
         { provide: NavController, useValue: Mock },
         { provide: Location, useValue: Mock },
+        { provide: LoadingController, useValue: LoadingMock },
+        { provide: TranslocoService, useValue: TranslocoMock },
       ],
     }).compileComponents();
 
@@ -31,16 +47,16 @@ describe('BiteService', () => {
   });
 
   describe('submitNewBite', () => {
-    it('should submit bite without id', () => {
+    it('should submit bite without id', async () => {
       const newBite = { id: '123', name: 'Test Bite' };
-      service.submitNewBite(newBite);
+      await service.submitNewBite(newBite);
 
       expect(Mock.submitNewBite).toHaveBeenCalledWith({ name: 'Test Bite' });
     });
 
-    it('should call navigateBack to home', () => {
+    it('should call navigateBack to home', async () => {
       const newBite = { id: '123', name: 'Test Bite' };
-      service.submitNewBite(newBite);
+      await service.submitNewBite(newBite);
 
       expect(Mock.navigateBack).toHaveBeenCalledWith(['home']);
     });

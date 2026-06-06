@@ -8,7 +8,6 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <details-page
       class="ion-page"
       [bite]="service.bite.value()"
-      [uploadState]="service.uploadState()"
       [reviews]="service.reviews()"
       [bucketlists]="service.bucketlists()"
       [userId]="service.userId()"

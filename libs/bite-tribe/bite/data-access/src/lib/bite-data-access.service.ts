@@ -1,8 +1,5 @@
 import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
-import {
-  BiteImageUploadStateService,
-  BiteTribeStoreService,
-} from 'bite-tribe/store';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { NetworkStatusService } from 'common/networkstatus';
@@ -15,7 +12,6 @@ import { TranslocoService } from '@jsverse/transloco';
 export class BiteDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly networkStatusService = inject(NetworkStatusService);
-  private readonly uploadStateService = inject(BiteImageUploadStateService);
 
   private readonly api = inject(BiteTribeApiService);
   private readonly toastController = inject(ToastController);
@@ -71,24 +67,13 @@ export class BiteDataAccessService {
     void this.api.uploadImage(
       { ...bite, id: newBite.id },
       (p: CreateAndUploadImageCallbackParams): void => {
-        const isInProgress = p.uploadParams?.evt?.completed === false;
-        if (isInProgress) {
-          this.uploadStateService.setProgress(
-            newBite.id,
-            p.uploadParams!,
-            p.imagePath,
-          );
-        } else {
-          const finishedUpload = p.uploadParams?.evt?.completed === true;
-          if (finishedUpload) {
-            this.uploadStateService.clearProgress(newBite.id);
-
-            void this.api
-              .updateImagePathInBite({ ...bite, id: newBite.id }, p.imagePath)
-              .then((updatedBite: Bite) => {
-                this.storeService.savedNewBite(updatedBite);
-              });
-          }
+        const finishedUpload = p.uploadParams?.evt?.completed === true;
+        if (finishedUpload) {
+          void this.api
+            .updateImagePathInBite({ ...bite, id: newBite.id }, p.imagePath)
+            .then((updatedBite: Bite) => {
+              this.storeService.savedNewBite(updatedBite);
+            });
         }
       },
     );

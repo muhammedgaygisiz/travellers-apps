@@ -160,5 +160,6 @@
   "bite-created-successfully": "تم إنشاء الوجبة بنجاح!",
   "image-uploaded-successfully": "تم رفع الصورة بنجاح!",
   "bite-updated-successfully": "تم تحديث الوجبة بنجاح!",
-  "bite-deleted-successfully": "تم حذف الوجبة بنجاح!"
+  "bite-deleted-successfully": "تم حذف الوجبة بنجاح!",
+  "creating-bite": "Bite is being created... ({{percentage}}% done)"
 }

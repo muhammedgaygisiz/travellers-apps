@@ -65,38 +65,37 @@ export class BiteDataAccessService {
     this.storeService.saveNewBite();
 
     const { image, ...biteDocWithoutImage } = bite;
-
     const savedBite = await this.api.saveNewBite(biteDocWithoutImage);
-
-    const newBite = {
-      ...savedBite,
-      image,
-    };
-
+    const newBite = { ...savedBite, image };
     this.storeService.savedNewBite(newBite);
 
-    void this.api.uploadImage(
-      { ...bite, id: newBite.id },
-      (p: CreateAndUploadImageCallbackParams): void => {
-        const isInProgress = p.uploadParams?.evt?.completed === false;
-        const finishedUpload = p.uploadParams?.evt?.completed === true;
+    if (image) {
+      await new Promise<void>((resolve, reject) => {
+        void this.api.uploadImage(
+          { ...bite, id: newBite.id },
+          (p: CreateAndUploadImageCallbackParams): void => {
+            const isInProgress = p.uploadParams?.evt?.completed === false;
+            const finishedUpload = p.uploadParams?.evt?.completed === true;
 
-        if (isInProgress) {
-          this.uploadProgress.set({
-            biteId: newBite.id,
-            progress: p.uploadParams!,
-          });
-        } else if (finishedUpload) {
-          this.uploadProgress.set(null);
-
-          void this.api
-            .updateImagePathInBite({ ...bite, id: newBite.id }, p.imagePath)
-            .then((updatedBite: Bite) => {
-              this.storeService.savedNewBite(updatedBite);
-            });
-        }
-      },
-    );
+            if (isInProgress && p.uploadParams) {
+              this.uploadProgress.set({
+                biteId: newBite.id,
+                progress: p.uploadParams,
+              });
+            } else if (finishedUpload) {
+              this.uploadProgress.set(null);
+              void this.api
+                .updateImagePathInBite({ ...bite, id: newBite.id }, p.imagePath)
+                .then((updatedBite: Bite) => {
+                  this.storeService.savedNewBite(updatedBite);
+                  resolve();
+                })
+                .catch(reject);
+            }
+          },
+        );
+      });
+    }
 
     void this.showToast('bite-created-successfully');
   }

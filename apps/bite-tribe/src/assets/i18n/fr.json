@@ -160,5 +160,6 @@
   "bite-created-successfully": "Bite créé avec succès !",
   "image-uploaded-successfully": "Image téléchargée avec succès !",
   "bite-updated-successfully": "Bite mis à jour avec succès !",
-  "bite-deleted-successfully": "Bite supprimé avec succès !"
+  "bite-deleted-successfully": "Bite supprimé avec succès !",
+  "creating-bite": "Creation de votre Bite... ({{percentage}}% termine)"
 }

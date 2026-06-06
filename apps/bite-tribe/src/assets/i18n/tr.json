@@ -160,5 +160,6 @@
   "bite-created-successfully": "Bite başarıyla oluşturuldu!",
   "image-uploaded-successfully": "Görsel başarıyla yüklendi!",
   "bite-updated-successfully": "Bite başarıyla güncellendi!",
-  "bite-deleted-successfully": "Bite başarıyla silindi!"
+  "bite-deleted-successfully": "Bite başarıyla silindi!",
+  "creating-bite": "Bite olusturuluyor... ({{percentage}}% tamamlandi)"
 }

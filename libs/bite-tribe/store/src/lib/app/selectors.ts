@@ -56,7 +56,3 @@ export const profileMetadata = createSelector(
   slice,
   (state) => state?.profileMetadata,
 );
-
-export const imageUploads = createSelector(slice, (state) => {
-  return state.uploadingProgressForBiteImage;
-});

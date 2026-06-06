@@ -5,7 +5,10 @@ import {
   resource,
   ResourceLoader,
 } from '@angular/core';
-import { BiteTribeStoreService } from 'bite-tribe/store';
+import {
+  BiteImageUploadStateService,
+  BiteTribeStoreService,
+} from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
@@ -27,6 +30,7 @@ const SHARE_BITE_URL = 'https://bite-tribe.web.app/s/bite';
 })
 export class DetailsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly uploadStateService = inject(BiteImageUploadStateService);
 
   biteLoader: ResourceLoader<any, any> = async ({ params }) => {
     const biteId = params.biteId;
@@ -62,9 +66,7 @@ export class DetailsDataAccessService {
     }),
     loader: this.biteLoader.bind(this),
   });
-  imageUploads = toSignal(this.storeService.imageUploads$, {
-    initialValue: <Record<string, Record<any, any>>>{},
-  });
+  imageUploads = this.uploadStateService.uploadProgress;
   reviews = toSignal(this.storeService.reviews$, { initialValue: [] as any });
   bucketlists = toSignal(this.storeService.bucketlists$, {
     initialValue: [] as any,

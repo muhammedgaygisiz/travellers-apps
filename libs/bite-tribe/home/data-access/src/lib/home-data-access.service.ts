@@ -5,7 +5,11 @@ import {
   resource,
   ResourceLoader,
 } from '@angular/core';
-import { BiteTribeStoreService, sortByCriteria } from 'bite-tribe/store';
+import {
+  BiteImageUploadStateService,
+  BiteTribeStoreService,
+  sortByCriteria,
+} from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import type { Bite, Like, Restaurant } from 'model';
 import { NetworkStatusService } from 'common/networkstatus';
@@ -24,13 +28,12 @@ export class HomeDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly networkStatusService = inject(NetworkStatusService);
   private readonly api = inject(BiteTribeApiService);
+  private readonly uploadStateService = inject(BiteImageUploadStateService);
 
   sortedHomeBites = toSignal(this.storeService.sortedHomeBites$, {
     initialValue: [] as Bite[],
   });
-  imageUploads = toSignal(this.storeService.imageUploads$, {
-    initialValue: {},
-  });
+  imageUploads = this.uploadStateService.uploadProgress;
   sorting = toSignal(this.storeService.homeSorting$, {
     initialValue: 'distance',
   });

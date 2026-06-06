@@ -22,7 +22,6 @@ import { BucketlistActions } from '../bucketlists/actions';
 import { PATH } from 'utils';
 import { userId } from '../router/selectors';
 import { fromAuth } from 'ta-firestore';
-import { CreateAndUploadImageCallbackParams } from 'model';
 import { ToastController } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
 

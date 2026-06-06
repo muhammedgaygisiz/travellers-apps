@@ -177,24 +177,24 @@ export class BiteEffects {
     { dispatch: false },
   );
 
-  updateImagePathInBite$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(BiteActions.uploadedImage),
-      switchMap(({ bite, imagePath }) => {
-        return from(this.api.updateImagePathInBite(bite, imagePath)).pipe(
-          tap(() => {
-            void this.showToast('image-uploaded-successfully');
-          }),
-          map((updatedBite) =>
-            BiteActions.updatedImagePathInBite({ bite: updatedBite }),
-          ),
-          catchError(() =>
-            of(BiteActions.errorUpdatingImagePathInBite({ bite })),
-          ),
-        );
-      }),
-    );
-  });
+  // updateImagePathInBite$ = createEffect(() => {
+  //   return this.actions$.pipe(
+  //     ofType(BiteActions.uploadedImage),
+  //     switchMap(({ bite, imagePath }) => {
+  //       return from(this.api.updateImagePathInBite(bite, imagePath)).pipe(
+  //         tap(() => {
+  //           void this.showToast('image-uploaded-successfully');
+  //         }),
+  //         map((updatedBite) =>
+  //           BiteActions.updatedImagePathInBite({ bite: updatedBite }),
+  //         ),
+  //         catchError(() =>
+  //           of(BiteActions.errorUpdatingImagePathInBite({ bite })),
+  //         ),
+  //       );
+  //     }),
+  //   );
+  // });
 
   saveEditedBiteToFirestore$ = createEffect(() => {
     return this.actions$.pipe(
@@ -235,7 +235,7 @@ export class BiteEffects {
     this.currentToast = await this.toastController.create({
       message: this.transloco.translate(key),
       duration: 3000,
-      position: 'bottom',
+      position: 'top',
       color: 'success',
     });
     await this.currentToast.present();

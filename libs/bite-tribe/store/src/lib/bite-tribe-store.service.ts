@@ -387,12 +387,11 @@ export class BiteTribeStoreService implements StoreService {
     );
   }
 
+  updatedImagePathInBite(bite: Bite): void {
+    this.store.dispatch(BiteActions.updatedImagePathInBite({ bite }));
+  }
+
   uploadedImage(bite: Bite, imagePath: string): void {
-    this.store.dispatch(
-      BiteActions.uploadedImage({
-        bite,
-        imagePath: imagePath,
-      }),
-    );
+    this.store.dispatch(BiteActions.uploadedImage({ bite, imagePath }));
   }
 }

@@ -67,17 +67,24 @@ export class BiteDataAccessService {
     void this.api.uploadImage(
       { ...bite, id: newBite.id },
       (p: CreateAndUploadImageCallbackParams): void => {
-        if (p.uploadParams?.evt?.completed === false) {
+        const isInProgress = p.uploadParams?.evt?.completed === false;
+        if (isInProgress) {
           this.storeService.uploadingImage(
-            p.uploadParams,
+            p.uploadParams!,
             newBite.id,
             p.imagePath,
           );
-        } else if (p.uploadParams?.evt?.completed === true) {
-          this.storeService.uploadedImage(
-            { ...bite, id: newBite.id },
-            p.imagePath,
-          );
+        } else {
+          const finishedUpload = p.uploadParams?.evt?.completed === true;
+          if (finishedUpload) {
+            this.storeService.uploadedImage(newBite, p.imagePath);
+
+            void this.api
+              .updateImagePathInBite({ ...bite, id: newBite.id }, p.imagePath)
+              .then((updatedBite: Bite) => {
+                this.storeService.updatedImagePathInBite(updatedBite);
+              });
+          }
         }
       },
     );

@@ -19,7 +19,6 @@ const template = `
   <div class="ion-margin">
     <bt-bite
       [bite]="bite"
-      [uploadState]="uploadState"
       [showEditButton]="showEditButton"
       [userId]="userId"
     />
@@ -40,31 +39,6 @@ export const Bite: Story = {
         },
       ],
     } as any,
-  },
-  render: (args) => ({
-    props: { ...args },
-    template,
-  }),
-};
-
-export const Loading: Story = {
-  args: {
-    ...Bite.args,
-    bite: {
-      ...Bite.args?.bite,
-    } as any,
-    uploadState: {
-      progress: {
-        evt: {
-          progress: 0,
-          bytesTransferred: 0,
-          totalBytes: 189428,
-          completed: false,
-        },
-        err: null,
-        offlineImagePath: '',
-      },
-    },
   },
   render: (args) => ({
     props: { ...args },

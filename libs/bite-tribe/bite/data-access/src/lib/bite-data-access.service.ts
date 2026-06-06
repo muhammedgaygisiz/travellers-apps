@@ -93,21 +93,13 @@ export class BiteDataAccessService {
     this.storeService.setEditingBite(bite);
   }
 
-  private currentToast: HTMLIonToastElement | null = null;
-
   private async showToast(key: string): Promise<void> {
-    if (this.currentToast) {
-      await this.currentToast.onDidDismiss();
-    }
-    this.currentToast = await this.toastController.create({
+    const currentToast = await this.toastController.create({
       message: this.transloco.translate(key),
       duration: 3000,
-      position: 'bottom',
+      position: 'top',
       color: 'success',
     });
-    await this.currentToast.present();
-    void this.currentToast.onDidDismiss().then(() => {
-      this.currentToast = null;
-    });
+    await currentToast.present();
   }
 }

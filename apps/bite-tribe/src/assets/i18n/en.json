@@ -161,5 +161,5 @@
   "image-uploaded-successfully": "Image uploaded successfully!",
   "bite-updated-successfully": "Bite updated successfully!",
   "bite-deleted-successfully": "Bite deleted successfully!",
-  "creating-bite": "Creating your Bite... ({{percentage}}% done)"
+  "creating-bite": "Creating your Bite..."
 }

@@ -161,5 +161,5 @@
   "image-uploaded-successfully": "Bild erfolgreich hochgeladen!",
   "bite-updated-successfully": "Bite erfolgreich aktualisiert!",
   "bite-deleted-successfully": "Bite erfolgreich gelöscht!",
-  "creating-bite": "Dein Bite wird erstellt... ({{percentage}}% fertig)"
+  "creating-bite": "Dein Bite wird erstellt..."
 }

@@ -162,5 +162,5 @@
   "image-uploaded-successfully": "อัปโหลดรูปภาพสำเร็จแล้ว!",
   "bite-updated-successfully": "อัปเดต Bite สำเร็จแล้ว!",
   "bite-deleted-successfully": "ลบ Bite สำเร็จแล้ว!",
-  "creating-bite": "Bite is being created... ({{percentage}}% done)"
+  "creating-bite": "Bite is being created..."
 }

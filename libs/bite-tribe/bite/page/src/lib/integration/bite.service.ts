@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { effect, inject, Injectable, Injector, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LoadingController, NavController } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
@@ -10,7 +10,6 @@ export class BiteService {
   private readonly navController = inject(NavController);
   private readonly location = inject(Location);
   private readonly loadingController = inject(LoadingController);
-  private readonly injector = inject(Injector);
   private readonly transloco = inject(TranslocoService);
 
   image = signal<string>('');
@@ -26,27 +25,16 @@ export class BiteService {
 
   async submitNewBite(newBite: any): Promise<void> {
     const loading = await this.loadingController.create({
-      message: this.buildMessage(0),
+      message: this.transloco.translate('creating-bite'),
       backdropDismiss: false,
+      cssClass: 'bite-creating-loading',
     });
     await loading.present();
-
-    const progressEffect = effect(
-      () => {
-        const upload = this.dataAccess.uploadProgress();
-        const percentage = upload?.progress?.evt
-          ? Math.round((upload.progress.evt.progress ?? 0) * 100)
-          : 0;
-        loading.message = this.buildMessage(percentage);
-      },
-      { injector: this.injector },
-    );
 
     const { id, ...biteData } = newBite;
     try {
       await this.dataAccess.submitNewBite(biteData);
     } finally {
-      progressEffect.destroy();
       await loading.dismiss();
     }
 
@@ -60,9 +48,5 @@ export class BiteService {
 
   setEditingBite(bite: Partial<any>): void {
     this.dataAccess.setEditingBite(bite);
-  }
-
-  private buildMessage(percentage: number): string {
-    return this.transloco.translate('creating-bite', { percentage });
   }
 }

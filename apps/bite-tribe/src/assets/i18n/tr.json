@@ -161,5 +161,5 @@
   "image-uploaded-successfully": "Görsel başarıyla yüklendi!",
   "bite-updated-successfully": "Bite başarıyla güncellendi!",
   "bite-deleted-successfully": "Bite başarıyla silindi!",
-  "creating-bite": "Bite olusturuluyor... ({{percentage}}% tamamlandi)"
+  "creating-bite": "Bite olusturuluyor..."
 }

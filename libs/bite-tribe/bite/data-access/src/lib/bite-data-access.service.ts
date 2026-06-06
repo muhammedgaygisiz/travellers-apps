@@ -70,31 +70,24 @@ export class BiteDataAccessService {
     this.storeService.savedNewBite(newBite);
 
     if (image) {
-      await new Promise<void>((resolve, reject) => {
-        void this.api.uploadImage(
-          { ...bite, id: newBite.id },
-          (p: CreateAndUploadImageCallbackParams): void => {
-            const isInProgress = p.uploadParams?.evt?.completed === false;
-            const finishedUpload = p.uploadParams?.evt?.completed === true;
+      // Fire-and-forget: the Cloud Function setBiteImagePathOnUpload
+      // will update the Firestore document with the download URL once complete.
+      void this.api.uploadImage(
+        { ...bite, id: newBite.id },
+        (p: CreateAndUploadImageCallbackParams): void => {
+          const isInProgress = p.uploadParams?.evt?.completed === false;
+          const finishedUpload = p.uploadParams?.evt?.completed === true;
 
-            if (isInProgress && p.uploadParams) {
-              this.uploadProgress.set({
-                biteId: newBite.id,
-                progress: p.uploadParams,
-              });
-            } else if (finishedUpload) {
-              this.uploadProgress.set(null);
-              void this.api
-                .updateImagePathInBite({ ...bite, id: newBite.id }, p.imagePath)
-                .then((updatedBite: Bite) => {
-                  this.storeService.savedNewBite(updatedBite);
-                  resolve();
-                })
-                .catch(reject);
-            }
-          },
-        );
-      });
+          if (isInProgress && p.uploadParams) {
+            this.uploadProgress.set({
+              biteId: newBite.id,
+              progress: p.uploadParams,
+            });
+          } else if (finishedUpload) {
+            this.uploadProgress.set(null);
+          }
+        },
+      );
     }
 
     void this.showToast('bite-created-successfully');

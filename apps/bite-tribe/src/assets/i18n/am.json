@@ -161,5 +161,5 @@
   "image-uploaded-successfully": "ምስሉ በተሳካ ሁኔታ ተጭኗል!",
   "bite-updated-successfully": "ባይቱ በተሳካ ሁኔታ ተዘምኗል!",
   "bite-deleted-successfully": "ባይቱ በተሳካ ሁኔታ ተሰርዟል!",
-  "creating-bite": "Bite is being created... ({{percentage}}% done)"
+  "creating-bite": "Bite is being created..."
 }

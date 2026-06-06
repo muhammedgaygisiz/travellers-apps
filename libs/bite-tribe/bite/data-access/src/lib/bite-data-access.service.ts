@@ -1,9 +1,15 @@
-import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
+import {
+  inject,
+  Injectable,
+  resource,
+  ResourceLoader,
+  signal,
+} from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { NetworkStatusService } from 'common/networkstatus';
-import { Bite, CreateAndUploadImageCallbackParams } from 'model';
+import { Bite, CreateAndUploadImageCallbackParams, UploadParams } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { ToastController } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
@@ -50,6 +56,11 @@ export class BiteDataAccessService {
 
   networkStatus = this.networkStatusService.status;
 
+  readonly uploadProgress = signal<{
+    biteId: string;
+    progress: UploadParams;
+  } | null>(null);
+
   async submitNewBite(bite: Bite): Promise<void> {
     this.storeService.saveNewBite();
 
@@ -67,8 +78,17 @@ export class BiteDataAccessService {
     void this.api.uploadImage(
       { ...bite, id: newBite.id },
       (p: CreateAndUploadImageCallbackParams): void => {
+        const isInProgress = p.uploadParams?.evt?.completed === false;
         const finishedUpload = p.uploadParams?.evt?.completed === true;
-        if (finishedUpload) {
+
+        if (isInProgress) {
+          this.uploadProgress.set({
+            biteId: newBite.id,
+            progress: p.uploadParams!,
+          });
+        } else if (finishedUpload) {
+          this.uploadProgress.set(null);
+
           void this.api
             .updateImagePathInBite({ ...bite, id: newBite.id }, p.imagePath)
             .then((updatedBite: Bite) => {

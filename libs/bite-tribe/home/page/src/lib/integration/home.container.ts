@@ -22,6 +22,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
       [networkStatus]="service.networkStatus()"
+      [showFilters]="false"
+      showSearchChip
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
@@ -33,6 +35,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoMyBucketlists)="service.onGotoMyBucketlists()"
       (gotoAbout)="service.onGotoAboutClick()"
       (gotoMarketPlace)="service.onGotoMarketPlaceClick()"
+      (gotoSearch)="service.onGotoSearchClick()"
       (openMapView)="service.openMapView('home')"
       (sortingChange)="service.sortingChange($event)"
       (filtersChanged)="service.filtersChanged($event)"

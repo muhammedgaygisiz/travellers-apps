@@ -1,0 +1,11 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+  [enableBackButton]="true"
+>
+  <ion-content class="ion-padding">
+    <h1>{{ 'search' | transloco }}</h1>
+
+    <ion-searchbar [debounce]="1000" [placeholder]="'search' | transloco" />
+  </ion-content>
+</ta-page>

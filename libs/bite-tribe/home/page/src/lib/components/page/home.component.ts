@@ -101,6 +101,8 @@ export class BiteTribeHomeComponent {
   preferedCurrency = input('EUR');
   isReloading = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
+  showFilters = input(true, { transform: booleanAttribute });
+  showSearchChip = input(false, { transform: booleanAttribute });
   showSearch = input(false, { transform: booleanAttribute });
   showTriedOutCheckbox = input(false, { transform: booleanAttribute });
   triedOutBiteIds = input<string[]>([]);
@@ -113,6 +115,7 @@ export class BiteTribeHomeComponent {
   readonly gotoAbout = output();
   readonly gotoMarketPlace = output();
   readonly gotoMyBucketlists = output();
+  readonly gotoSearch = output();
   readonly likeButtonClick = output<Like>();
   readonly biteClick = output<Bite>();
   readonly restaurantClick = output<Bite>();

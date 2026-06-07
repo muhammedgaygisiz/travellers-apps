@@ -66,6 +66,7 @@
       "bite-tribe/home-data-access": [
         "libs/bite-tribe/home/data-access/src/index.ts"
       ],
+      "bite-tribe/search": ["libs/bite-tribe/search/page/src/index.ts"],
       "bite-tribe/map": ["libs/bite-tribe/map/page/src/index.ts"],
       "bite-tribe/map-data-access": [
         "libs/bite-tribe/map/data-access/src/index.ts"

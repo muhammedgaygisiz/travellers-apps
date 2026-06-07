@@ -200,6 +200,31 @@ describe('BiteTribeHomeComponent', () => {
     });
   });
 
+  describe('filter and search chips', () => {
+    it('should show the filter chip by default', () => {
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('#select-tags')).toBeTruthy();
+    });
+
+    it('should hide the filter chip when showFilters is false', () => {
+      componentRef.setInput('showFilters', false);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('#select-tags')).toBeNull();
+    });
+
+    it('should emit gotoSearch when the search chip is clicked', () => {
+      componentRef.setInput('showSearchChip', true);
+      fixture.detectChanges();
+      const emitSpy = jest.spyOn(component.gotoSearch, 'emit');
+
+      fixture.nativeElement.querySelector('[data-cy="search-chip"]').click();
+
+      expect(emitSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('onFilterChange', () => {
     let modal: any;
 

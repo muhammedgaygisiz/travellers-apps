@@ -289,6 +289,22 @@ describe('HomeService', () => {
     ));
   });
 
+  describe('onGotoSearchClick', () => {
+    let navigateForwardSpy: SpyInstance;
+
+    beforeEach(() => {
+      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+    });
+
+    it('should navigate to search page', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.onGotoSearchClick();
+        expect(navigateForwardSpy).toHaveBeenCalledWith(['home', 'search']);
+      },
+    ));
+  });
+
   describe('openMapView', () => {
     let navigateForwardSpy: SpyInstance;
 

@@ -29,7 +29,7 @@ jest.mock('image-compression', () => ({
 
 addNecessaryIcons();
 
-const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {
+jest.spyOn(console, 'warn').mockImplementation(() => {
   // Mock implementation
 });
 

@@ -227,9 +227,7 @@ describe('Bite Reducer', () => {
         cachedBite: { id: '1', name: 'Bite 1' } as Bite,
       };
 
-      const saveNewBiteAction = BiteActions.saveNewBite({
-        bite: { id: '1', name: 'Bite 1' } as Bite,
-      });
+      const saveNewBiteAction = BiteActions.saveNewBite();
 
       expect(reducer(INITIAL_STATE, saveNewBiteAction)).toEqual({
         ...EMPTY_STATE,

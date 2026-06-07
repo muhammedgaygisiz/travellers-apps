@@ -1,11 +1,32 @@
 import { onObjectFinalized } from 'firebase-functions/v2/storage';
 import * as admin from 'firebase-admin';
 import { logger } from 'firebase-functions';
+import { FieldValue } from 'firebase-admin/firestore';
 
 const db = admin.firestore();
 
 // Matches: images/bites/{biteId}/{filename}
 const BITE_IMAGE_PATH_REGEX = /^images\/bites\/([^/]+)\/[^/]+$/;
+
+type FileMetadata = { metadata?: object | undefined };
+
+function normalizeStorageDownloadToken(rawToken?: string): string | undefined {
+  return rawToken
+    ?.split(',')
+    .map((token) => token.trim())
+    .filter(Boolean)[0];
+}
+
+const getToken = (metadata: FileMetadata): string | undefined => {
+  const tokens = (metadata.metadata as Record<string, string> | undefined)
+    ?.firebaseStorageDownloadTokens;
+
+  if (tokens) {
+    return normalizeStorageDownloadToken(tokens);
+  }
+
+  return undefined;
+};
 
 export const setBiteImagePathOnUpload = onObjectFinalized(async (event) => {
   const objectPath = event.data.name;
@@ -22,6 +43,15 @@ export const setBiteImagePathOnUpload = onObjectFinalized(async (event) => {
   }
 
   const biteId = match[1];
+
+  const biteRef = db.collection('bites').doc(biteId);
+  const biteSnap = await biteRef.get();
+
+  if (!biteSnap.exists) {
+    console.warn(`Bite ${biteId} does not exist. Skipping update.`);
+    return;
+  }
+
   const bucket = event.data.bucket;
 
   logger.info(
@@ -32,8 +62,7 @@ export const setBiteImagePathOnUpload = onObjectFinalized(async (event) => {
   // Use it to construct the same URL format the client SDK produces.
   const file = admin.storage().bucket(bucket).file(objectPath);
   const [metadata] = await file.getMetadata();
-  const token = (metadata.metadata as Record<string, string> | undefined)
-    ?.firebaseStorageDownloadTokens;
+  const token = getToken(metadata);
 
   // When the Storage emulator is running, FIREBASE_STORAGE_EMULATOR_HOST is set
   // automatically (e.g. "localhost:9199"). Use it so the generated URL resolves locally.
@@ -50,6 +79,7 @@ export const setBiteImagePathOnUpload = onObjectFinalized(async (event) => {
   await db.doc(`bites/${biteId}`).update({
     imagePath: downloadUrl,
     image: '',
+    updatedAt: FieldValue.serverTimestamp(),
   });
 
   logger.info(`setBiteImagePathOnUpload: imagePath set for bite ${biteId}`);

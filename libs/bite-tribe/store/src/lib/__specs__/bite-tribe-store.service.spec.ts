@@ -92,8 +92,7 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        const entity = {};
-        service.saveNewBite(entity);
+        service.saveNewBite();
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));

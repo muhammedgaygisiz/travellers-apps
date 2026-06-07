@@ -3,6 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LoadingController, NavController } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
+import { ToastController } from '@ionic/angular';
 
 @Injectable({ providedIn: 'root' })
 export class BiteService {
@@ -11,6 +12,7 @@ export class BiteService {
   private readonly location = inject(Location);
   private readonly loadingController = inject(LoadingController);
   private readonly transloco = inject(TranslocoService);
+  private readonly toastController = inject(ToastController);
 
   image = signal<string>('');
 
@@ -34,11 +36,13 @@ export class BiteService {
     const { id, ...biteData } = newBite;
     try {
       await this.dataAccess.submitNewBite(biteData);
+
+      void this.navController.navigateBack(['home']);
+
+      void this.showToast('bite-created-successfully');
     } finally {
       await loading.dismiss();
     }
-
-    void this.navController.navigateBack(['home']);
   }
 
   submitEditedBite(editedBite: any): void {
@@ -48,5 +52,15 @@ export class BiteService {
 
   setEditingBite(bite: Partial<any>): void {
     this.dataAccess.setEditingBite(bite);
+  }
+
+  private async showToast(key: string): Promise<void> {
+    const currentToast = await this.toastController.create({
+      message: this.transloco.translate(key),
+      duration: 3000,
+      position: 'top',
+      color: 'success',
+    });
+    await currentToast.present();
   }
 }

@@ -9,10 +9,12 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { NetworkStatusService } from 'common/networkstatus';
-import { Bite, CreateAndUploadImageCallbackParams, UploadParams } from 'model';
+import type {
+  Bite,
+  CreateAndUploadImageCallbackParams,
+  UploadParams,
+} from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { ToastController } from '@ionic/angular';
-import { TranslocoService } from '@jsverse/transloco';
 
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
@@ -20,8 +22,6 @@ export class BiteDataAccessService {
   private readonly networkStatusService = inject(NetworkStatusService);
 
   private readonly api = inject(BiteTribeApiService);
-  private readonly toastController = inject(ToastController);
-  private readonly transloco = inject(TranslocoService);
 
   biteLoader: ResourceLoader<any, any> = async ({ params }) => {
     const biteId = params.biteId;
@@ -89,8 +89,6 @@ export class BiteDataAccessService {
         },
       );
     }
-
-    void this.showToast('bite-created-successfully');
   }
 
   async submitEditedBite(bite: any): Promise<void> {
@@ -99,15 +97,5 @@ export class BiteDataAccessService {
 
   setEditingBite(bite: Partial<any>): void {
     this.storeService.setEditingBite(bite);
-  }
-
-  private async showToast(key: string): Promise<void> {
-    const currentToast = await this.toastController.create({
-      message: this.transloco.translate(key),
-      duration: 3000,
-      position: 'top',
-      color: 'success',
-    });
-    await currentToast.present();
   }
 }

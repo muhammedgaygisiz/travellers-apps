@@ -14,7 +14,7 @@ jest.mock('heic2any', () => jest.fn());
 
 addNecessaryIcons();
 
-const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {
+jest.spyOn(console, 'warn').mockImplementation(() => {
   // Mock implementation
 });
 

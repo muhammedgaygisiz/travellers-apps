@@ -26,7 +26,7 @@ export const ROUTES: Routes = withAuthRoutes([
     title: 'Bites',
   },
   {
-    path: `${PATH.HOME}/${PATH.SEARCH}`,
+    path: PATH.SEARCH,
     loadComponent: () =>
       import('bite-tribe/search').then((m) => m.SearchContainer),
     canActivate: [authGuard],

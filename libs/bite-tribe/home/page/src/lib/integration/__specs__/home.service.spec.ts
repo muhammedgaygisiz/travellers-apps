@@ -300,7 +300,7 @@ describe('HomeService', () => {
       [HomeService],
       (service: HomeService) => {
         service.onGotoSearchClick();
-        expect(navigateForwardSpy).toHaveBeenCalledWith(['home', 'search']);
+        expect(navigateForwardSpy).toHaveBeenCalledWith(['search']);
       },
     ));
   });

@@ -113,7 +113,7 @@ export class HomeService {
   }
 
   onGotoSearchClick(): void {
-    void this.navController.navigateForward([PATH.HOME, PATH.SEARCH]);
+    void this.navController.navigateForward([PATH.SEARCH]);
   }
 
   openMapView(mainPage: string): void {

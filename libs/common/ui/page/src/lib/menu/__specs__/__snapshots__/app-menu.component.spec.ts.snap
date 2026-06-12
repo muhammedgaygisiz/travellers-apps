@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`MenuComponent should emit loginClick when auth button is clicked 1`] = `
+exports[`AppMenuComponent should emit loginClick when auth button is clicked 1`] = `
 DebugElement {
   "nativeNode": <div>
     <ion-list
@@ -9,6 +9,13 @@ DebugElement {
       lines="none"
       role="list"
     >
+      <div
+        class="ion-padding-horizontal ion-padding-top"
+      >
+        <small>
+          Version  (Build )
+        </small>
+      </div>
       <ion-item-group>
         <ion-item-divider>
           <ion-icon

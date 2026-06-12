@@ -14,9 +14,16 @@ import {
 import { SupportedLang } from 'utils';
 import { TranslocoPipe } from '@jsverse/transloco';
 
+declare const process: {
+  env: {
+    version?: string;
+    buildNumber?: string;
+  };
+};
+
 @Component({
   selector: 'popover-menu',
-  templateUrl: 'menu.component.html',
+  templateUrl: 'app-menu.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     IonList,
@@ -27,14 +34,14 @@ import { TranslocoPipe } from '@jsverse/transloco';
     TranslocoPipe,
   ],
 })
-export class MenuComponent {
+export class AppMenuComponent {
+  protected readonly version = process.env['version'];
+  protected readonly buildNumber = process.env['buildNumber'];
   protected readonly SupportedLang = SupportedLang;
 
   isAuthenticated = input<boolean | null>(false);
 
   hideAuthButton = input<boolean | null>(false);
-
-  showLanguages = input<boolean | null>(true);
 
   showSettingsButton = input<boolean | null>(false);
 

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { MenuComponent } from '../menu.component';
+import { AppMenuComponent } from '../app-menu.component';
 import {
   ComponentRef,
   Pipe,
@@ -35,10 +35,10 @@ class MockTranslocoPipe implements PipeTransform {
   }
 }
 
-describe('MenuComponent', () => {
-  let component: MenuComponent;
-  let componentRef: ComponentRef<MenuComponent>;
-  let fixture: ComponentFixture<MenuComponent>;
+describe('AppMenuComponent', () => {
+  let component: AppMenuComponent;
+  let componentRef: ComponentRef<AppMenuComponent>;
+  let fixture: ComponentFixture<AppMenuComponent>;
   let languageChangeClickEmitSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -50,7 +50,7 @@ describe('MenuComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MenuComponent);
+    fixture = TestBed.createComponent(AppMenuComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
 

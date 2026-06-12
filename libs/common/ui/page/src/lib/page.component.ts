@@ -20,7 +20,7 @@ import {
   PopoverController,
 } from '@ionic/angular/standalone';
 import { AngularDelegate } from '@ionic/angular';
-import { MenuComponent } from './menu/menu.component';
+import { AppMenuComponent } from './menu/app-menu.component';
 import { APP_TITLE, SupportedLang } from 'utils';
 import { UpperCasePipe } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -123,7 +123,7 @@ export class PageComponent {
 
   async showMenuPopover($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
-      component: MenuComponent,
+      component: AppMenuComponent,
       event: $event,
       dismissOnSelect: true,
       componentProps: {

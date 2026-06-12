@@ -39,7 +39,6 @@ describe('AppMenuComponent', () => {
   let component: AppMenuComponent;
   let componentRef: ComponentRef<AppMenuComponent>;
   let fixture: ComponentFixture<AppMenuComponent>;
-  let languageChangeClickEmitSpy: jest.SpyInstance;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -53,28 +52,10 @@ describe('AppMenuComponent', () => {
     fixture = TestBed.createComponent(AppMenuComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-
-    languageChangeClickEmitSpy = jest.spyOn(
-      component.languageChangeClick,
-      'emit',
-    );
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('should emit languageChangeClick with SupportedLang.EN when English item is clicked', () => {
-    componentRef.setInput('showLanguages', true);
-    fixture.detectChanges();
-
-    const englishItem = fixture.debugElement.query(
-      By.css('ion-item:nth-child(2)'),
-    );
-
-    englishItem.triggerEventHandler('click', null);
-
-    expect(languageChangeClickEmitSpy).toHaveBeenCalledWith(SupportedLang.EN);
   });
 
   it('should emit loginClick when auth button is clicked', () => {

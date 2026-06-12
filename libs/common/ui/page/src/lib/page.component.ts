@@ -61,8 +61,6 @@ export class PageComponent {
 
   isAuthenticated = input(false);
 
-  showLanguages = input(false);
-
   title = input('');
 
   icon = input('');
@@ -129,7 +127,6 @@ export class PageComponent {
       componentProps: {
         isAuthenticated: this.isAuthenticated,
         hideAuthButton: this.hideAuthButton,
-        showLanguages: this.showLanguages,
         showSettingsButton: this.showSettingsButton,
         showAboutButton: this.showAboutButton,
         showMyBites: this.showMyBites,

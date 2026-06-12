@@ -9,60 +9,25 @@ DebugElement {
       lines="none"
       role="list"
     >
-      <div
-        class="ion-padding-horizontal ion-padding-top"
+      <ion-item-group
+        class="undefined item-group-undefined item hydrated"
+        role="group"
       >
-        <small>
-          Version  (Build )
-        </small>
-      </div>
-      <ion-item-group>
-        <ion-item-divider>
-          <ion-icon
-            color="dark"
-            name="language-outline"
-            slot="start"
-          />
-           Language 
-        </ion-item-divider>
         <ion-item
-          class="item-has-start-slot"
+          class="item undefined item-lines-default in-list ion-focusable hydrated"
+          role="listitem"
         >
           <ion-icon
+            class="md hydrated"
+            name="construct"
+            role="img"
             slot="start"
-            src="assets/gb.svg"
           />
-           English 
-        </ion-item>
-        <ion-item
-          class="item-has-start-slot"
-        >
-          <ion-icon
-            slot="start"
-            src="assets/fr.svg"
-          />
-           Français 
-        </ion-item>
-        <ion-item
-          class="item-has-start-slot"
-        >
-          <ion-icon
-            slot="start"
-            src="assets/de.svg"
-          />
-           Deutsch 
-        </ion-item>
-        <ion-item
-          class="item-has-start-slot"
-        >
-          <ion-icon
-            slot="start"
-            src="assets/tr.svg"
-          />
-           Türkçe 
+          <small>
+            Version  (Build )
+          </small>
         </ion-item>
       </ion-item-group>
-      
       <ion-item
         class="item-has-start-slot"
         data-cy="btn-login"

@@ -7,7 +7,6 @@ import {
 import {
   IonIcon,
   IonItem,
-  IonItemDivider,
   IonItemGroup,
   IonList,
 } from '@ionic/angular/standalone';
@@ -25,14 +24,7 @@ declare const process: {
   selector: 'popover-menu',
   templateUrl: 'app-menu.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    IonList,
-    IonItem,
-    IonIcon,
-    IonItemGroup,
-    IonItemDivider,
-    TranslocoPipe,
-  ],
+  imports: [IonList, IonItem, IonIcon, TranslocoPipe, IonItemGroup],
 })
 export class AppMenuComponent {
   protected readonly version = process.env['version'];
@@ -74,6 +66,4 @@ export class AppMenuComponent {
   gotoMyBucketlists = output();
 
   gotoMarketPlace = output();
-
-  languageChangeClick = output<SupportedLang>();
 }

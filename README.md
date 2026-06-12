@@ -199,28 +199,38 @@ npm list --all
 
 # Native app insights
 
+## Preparations
+
+Before building either native app, increment the shared Android and iOS build
+number:
+
+```
+npm run increment-build-number
+```
+
+Commit the updated native project files together with the release changes.
+
 ## iOS
 
 To create and upload a new version of the iOS app to TestFlight, following
 steps are required:
 
-- Build the web app via
+- Build the web app:
 
 ```
 nx build bite-tribe
 ```
 
-- Open the iOS project in Xcode
-
-```
-nx run bite-tribe-ios:open
-```
-
-- Increase the build number in Xcode
-- Sync the build result to the iOS project
+- Sync the build result to the iOS project:
 
 ```
 nx run bite-tribe-ios:sync
+```
+
+- Open the iOS project in Xcode:
+
+```
+nx run bite-tribe-ios:open
 ```
 
 - In Xcode select `Any iOS Device (arm64)` as target device
@@ -237,23 +247,22 @@ nx run bite-tribe-ios:sync
 To create and upload a new version of the Android app to the Play Store, following
 steps are required:
 
-- Build the web app via
+- Build the web app:
 
 ```
 nx build bite-tribe
 ```
 
-- Open the Android project in Android Studio
-
-```
-nx run bite-tribe-android:open
-```
-
-- Increase the `versionCode` in the root `build.gradle` file
-- Sync the build result to the Android project
+- Sync the build result to the Android project:
 
 ```
 nx run bite-tribe-android:sync
+```
+
+- Open the Android project in Android Studio:
+
+```
+nx run bite-tribe-android:open
 ```
 
 - In Android Studio select `Build` -> `Generate Signed Bundle / APK`

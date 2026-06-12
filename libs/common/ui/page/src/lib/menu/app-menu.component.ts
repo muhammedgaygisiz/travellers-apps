@@ -7,34 +7,33 @@ import {
 import {
   IonIcon,
   IonItem,
-  IonItemDivider,
   IonItemGroup,
   IonList,
 } from '@ionic/angular/standalone';
 import { SupportedLang } from 'utils';
 import { TranslocoPipe } from '@jsverse/transloco';
 
+declare const process: {
+  env: {
+    version?: string;
+    buildNumber?: string;
+  };
+};
+
 @Component({
   selector: 'popover-menu',
-  templateUrl: 'menu.component.html',
+  templateUrl: 'app-menu.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    IonList,
-    IonItem,
-    IonIcon,
-    IonItemGroup,
-    IonItemDivider,
-    TranslocoPipe,
-  ],
+  imports: [IonList, IonItem, IonIcon, TranslocoPipe, IonItemGroup],
 })
-export class MenuComponent {
+export class AppMenuComponent {
+  protected readonly version = process.env['version'];
+  protected readonly buildNumber = process.env['buildNumber'];
   protected readonly SupportedLang = SupportedLang;
 
   isAuthenticated = input<boolean | null>(false);
 
   hideAuthButton = input<boolean | null>(false);
-
-  showLanguages = input<boolean | null>(true);
 
   showSettingsButton = input<boolean | null>(false);
 
@@ -67,6 +66,4 @@ export class MenuComponent {
   gotoMyBucketlists = output();
 
   gotoMarketPlace = output();
-
-  languageChangeClick = output<SupportedLang>();
 }

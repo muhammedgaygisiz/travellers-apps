@@ -13,6 +13,7 @@
     "start": "nx serve",
     "development": "nx firebase-serve bite-tribe-firebase & nx serve bite-tribe",
     "build": "nx build",
+    "increment-build-number": "node tools/increment-build-number.mjs",
     "build:storybook": "npm run nxgraph-html && nx run storybook-host:build-storybook",
     "test": "nx affected --base=develop -t test --parallel --coverage --coverageReporters=text",
     "pwa-asset-generator": "pwa-asset-generator",

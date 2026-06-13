@@ -28,9 +28,6 @@ export class HomeDataAccessService {
   sortedHomeBites = toSignal(this.storeService.sortedHomeBites$, {
     initialValue: [] as Bite[],
   });
-  imageUploads = toSignal(this.storeService.imageUploads$, {
-    initialValue: {},
-  });
   sorting = toSignal(this.storeService.homeSorting$, {
     initialValue: 'distance',
   });
@@ -231,7 +228,7 @@ export class HomeDataAccessService {
   }
 
   updateBiteRating(params: { bite: Bite; rating: number }): void {
-    this.storeService.save({ ...params.bite, rating: params.rating }, 'bite');
+    this.storeService.saveEditedBite({ ...params.bite, rating: params.rating });
   }
 
   setHomeSorting(sorting: string): void {

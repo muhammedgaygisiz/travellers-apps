@@ -162,5 +162,6 @@
   "bite-created-successfully": "ባይት በተሳካ ሁኔታ ተፈጥሯል!",
   "image-uploaded-successfully": "ምስሉ በተሳካ ሁኔታ ተጭኗል!",
   "bite-updated-successfully": "ባይቱ በተሳካ ሁኔታ ተዘምኗል!",
-  "bite-deleted-successfully": "ባይቱ በተሳካ ሁኔታ ተሰርዟል!"
+  "bite-deleted-successfully": "ባይቱ በተሳካ ሁኔታ ተሰርዟል!",
+  "creating-bite": "ባይት እየተፈጠሩ ነው..."
 }

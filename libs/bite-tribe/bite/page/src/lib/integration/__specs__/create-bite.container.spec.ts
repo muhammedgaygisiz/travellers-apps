@@ -14,6 +14,10 @@ jest.mock('heic2any', () => jest.fn());
 
 addNecessaryIcons();
 
+jest.spyOn(console, 'warn').mockImplementation(() => {
+  // Mock implementation
+});
+
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
   config: {

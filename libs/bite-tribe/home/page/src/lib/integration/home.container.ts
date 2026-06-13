@@ -8,7 +8,6 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <bt-home
       class="ion-page"
       [bites]="service.sortedHomeBites()"
-      [uploads]="service.imageUploads()"
       [allTags]="service.allTags()"
       [selectedFilters]="service.homeFilters()"
       [userId]="service.userId()"

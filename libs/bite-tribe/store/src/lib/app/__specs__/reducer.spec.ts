@@ -1,7 +1,7 @@
 import { AppActions } from '../actions';
 import { reducer } from '../reducer';
 import { AppSlice } from '../app-slice.model';
-import type { PublicUser, Settings, UploadParams } from 'model';
+import type { PublicUser, Settings } from 'model';
 import { BiteActions } from '../../bites/actions';
 import { fromAuth } from 'ta-firestore';
 import { routerRequestAction } from '@ngrx/router-store';
@@ -11,7 +11,6 @@ describe('App Reducer', () => {
     it('should reset the state to initial values', () => {
       const INITIAL_STATE: AppSlice = {
         profile: { displayName: 'Test User' } as PublicUser,
-        uploadingProgressForBiteImage: {},
         settings: { pushNotifications: true } as Settings,
         loading: { home: true },
         exchangeRates: { EUR: 1 },
@@ -25,7 +24,6 @@ describe('App Reducer', () => {
 
       const NEW_STATE: AppSlice = {
         profile: undefined,
-        uploadingProgressForBiteImage: {},
         settings: {
           pushNotifications: false,
           emailUpdates: false,
@@ -276,68 +274,6 @@ describe('App Reducer', () => {
       } as AppSlice;
 
       const action = routerRequestAction({} as any);
-
-      expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
-    });
-  });
-
-  describe('uploadingImage', () => {
-    it('should set uploading progress for bite image', () => {
-      const INITIAL_STATE = {
-        uploadingProgressForBiteImage: {},
-      } as AppSlice;
-      const NEW_STATE = {
-        uploadingProgressForBiteImage: {
-          'bite-id-123': {
-            imagePath: 'path/to/image.jpg',
-            progress: {
-              evt: {
-                completed: false,
-                progress: 50,
-              },
-            },
-          },
-        },
-      } as unknown as AppSlice;
-
-      const action = BiteActions.uploadingImage({
-        biteId: 'bite-id-123',
-        imagePath: 'path/to/image.jpg',
-        progress: {
-          evt: {
-            progress: 50,
-            completed: false,
-          },
-        } as UploadParams,
-      });
-
-      expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
-    });
-  });
-
-  describe('uploadedImage', () => {
-    it('should remove uploading progress for bite image', () => {
-      const INITIAL_STATE = {
-        uploadingProgressForBiteImage: {
-          'bite-id-123': {
-            imagePath: 'path/to/image.jpg',
-            progress: {
-              evt: {
-                completed: false,
-                progress: 50,
-              },
-            },
-          },
-        },
-      } as unknown as AppSlice;
-      const NEW_STATE = {
-        uploadingProgressForBiteImage: {},
-      } as AppSlice;
-
-      const action = BiteActions.uploadedImage({
-        bite: { id: 'bite-id-123' } as any,
-        imagePath: 'path/to/image.jpg',
-      });
 
       expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
     });

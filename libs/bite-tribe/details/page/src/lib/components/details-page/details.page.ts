@@ -30,7 +30,7 @@ import {
   IonTextarea,
   PopoverController,
 } from '@ionic/angular/standalone';
-import { AsyncPipe, CurrencyPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -79,14 +79,12 @@ import { TranslocoPipe } from '@jsverse/transloco';
     CalcDistancePipe,
     ConvertToPreferredCurrencyPipe,
     GetImagePipe,
-    AsyncPipe,
     IonSkeletonText,
     TranslocoPipe,
   ],
 })
 export class DetailsPage {
   bite = input<Bite>();
-  uploadState = input<any>();
   reviews = input<Review[]>([]);
   bucketlists = input<Bucketlist[]>([]);
   userId = input<string>();

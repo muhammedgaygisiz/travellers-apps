@@ -1,5 +1,4 @@
-@let biteData = bite(); @let biteCreatorData = biteCreator(); @let uploadData =
-uploadState();
+@let biteData = bite(); @let biteCreatorData = biteCreator();
 <ta-page
   [showHeaderMenu]="false"
   [showFooter]="false"
@@ -13,14 +12,8 @@ uploadState();
       [animated]="true"
       style="width: 100vw; height: 40vh; border-radius: 0; margin: 0"
     />
-    } @let imageSrc = biteData | getImage : uploadData | async; @if (imageSrc) {
-    <img
-      [src]="imageSrc"
-      class="dish-image"
-      [class.loading]="uploadData?.progress?.evt?.completed === false"
-      loading="lazy"
-      alt="Dish Image"
-    />
+    } @let imageSrc = biteData | getImage; @if (imageSrc) {
+    <img [src]="imageSrc" class="dish-image" loading="lazy" alt="Dish Image" />
 
     }
 

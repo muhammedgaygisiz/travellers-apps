@@ -41,7 +41,6 @@ import {
   favCurrencies,
   gpsPosition,
   hasErrorLoadingGpsPosition,
-  imageUploads,
   isBitesLoading,
   isPublicProfile,
   isReloadingHome,
@@ -62,6 +61,7 @@ import {
 } from './filtering-and-sorting/selectors';
 import { removeLike, saveLike } from './likes/actions';
 import {
+  saveNewRestaurant,
   saveSocialMediaLinksForRestaurant,
   setRestaurantToCreate,
 } from './restaurants/actions';
@@ -76,7 +76,6 @@ import {
   selectedBucketlistTitle,
   sortedBucketlists,
 } from './bucketlists/selectors';
-import { getActionByDocType } from './utils/get-action-by-doc-type';
 import { FilteringAndSortingActions } from './filtering-and-sorting/actions';
 import {
   biteId as biteIdFromUrl,
@@ -103,7 +102,6 @@ export class BiteTribeStoreService implements StoreService {
     tagSuggestionsForEditingBite,
   );
   sortedHomeBites$ = this.store.select(sortedHomeBites);
-  imageUploads$ = this.store.select(imageUploads);
   sortedBucketlists$ = this.store.select(sortedBucketlists);
   homeSorting$ = this.store.select(homeSorting);
   bucketlistSorting$ = this.store.select(bucketlistSorting);
@@ -182,8 +180,12 @@ export class BiteTribeStoreService implements StoreService {
     );
   }
 
-  save(entity: any, docType: string): void {
-    this.store.dispatch(getActionByDocType(docType, entity));
+  saveNewRestaurant(entity: any): void {
+    this.store.dispatch(saveNewRestaurant({ restaurant: entity }));
+  }
+
+  saveEditedBite(entity: any): void {
+    this.store.dispatch(BiteActions.saveExistingBite({ bite: entity }));
   }
 
   setEditingBite(bite: Partial<Bite>): void {
@@ -354,5 +356,17 @@ export class BiteTribeStoreService implements StoreService {
 
   updateLastSeen(): void {
     this.store.dispatch(AppActions.updateLastSeen());
+  }
+
+  savedNewBite(newBite: Bite): void {
+    this.store.dispatch(
+      BiteActions.savedBite({
+        bite: newBite,
+      }),
+    );
+  }
+
+  saveNewBite(): void {
+    this.store.dispatch(BiteActions.saveNewBite());
   }
 }

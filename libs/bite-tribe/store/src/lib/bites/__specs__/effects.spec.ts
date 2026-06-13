@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { BiteEffects } from '../effects';
 import { BiteActions } from '../actions';
 import type { Bite } from 'model';
@@ -39,9 +39,6 @@ const Mock = {
   bitesByPosition: (): Observable<any> => of([]),
   biteById: (): Observable<any> => of({}),
   bitesByBucketlist: (): Observable<any> => of([]),
-  saveNewBite: jest.fn(),
-  uploadImage: (): Observable<any> => of({}),
-  updateImagePathInBite: (): Observable<any> => of([]),
   saveEditedBite: jest.fn(),
   saveTagsToExistingBite: jest.fn(),
   deleteBite: jest.fn(),
@@ -65,9 +62,7 @@ describe(BiteEffects.name, () => {
   let actions$: Observable<any> = of({});
   let effects: BiteEffects;
   let apiService: BiteTribeApiService;
-  let store: MockStore;
   let storeService: BiteTribeStoreService;
-  let dispatchSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockToastCreate.mockClear();
@@ -94,12 +89,9 @@ describe(BiteEffects.name, () => {
       ],
     });
 
-    store = TestBed.inject(MockStore);
     effects = TestBed.inject(BiteEffects);
     apiService = TestBed.inject(BiteTribeApiService);
     storeService = TestBed.inject(BiteTribeStoreService);
-
-    dispatchSpy = jest.spyOn(store, 'dispatch');
   });
 
   describe('loadBitesByCurrentUser$', () => {
@@ -302,177 +294,6 @@ describe(BiteEffects.name, () => {
             output,
           );
         });
-      });
-    });
-  });
-
-  describe('saveNewBiteToFirestore$', () => {
-    describe('given a successful save call', () => {
-      beforeEach(() => {
-        jest
-          .spyOn(apiService, 'saveNewBite')
-          .mockReturnValue(of(BITE_MOCK) as any);
-      });
-
-      it('should return savedBite on saveNewBite', () => {
-        scheduler.run(({ cold, expectObservable }) => {
-          actions$ = cold('a', {
-            a: BiteActions.saveNewBite({
-              bite: {} as Bite,
-            }),
-          });
-
-          const expected = 'a';
-          const output = {
-            a: BiteActions.savedBite({ bite: BITE_MOCK }),
-          };
-
-          expectObservable(effects.saveNewBiteToFirestore$).toBe(
-            expected,
-            output,
-          );
-        });
-      });
-
-      it('should show a success toast when bite is created', () => {
-        scheduler.run(({ cold, expectObservable }) => {
-          actions$ = cold('a', {
-            a: BiteActions.saveNewBite({
-              bite: {} as Bite,
-            }),
-          });
-
-          expectObservable(effects.saveNewBiteToFirestore$);
-        });
-
-        expect(mockToastCreate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: 'bite-created-successfully',
-            color: 'success',
-          }),
-        );
-      });
-    });
-
-    describe('given a erroneous save call', () => {
-      it('should return errorSavingBite on saveNewBite', () => {
-        scheduler.run(({ cold, expectObservable }) => {
-          jest
-            .spyOn(apiService, 'saveNewBite')
-            .mockReturnValue(
-              cold('#', {}, new Error('Error saving bite')) as any,
-            );
-
-          actions$ = cold('a', {
-            a: BiteActions.saveNewBite({
-              bite: {} as Bite,
-            }),
-          });
-
-          const expected = 'a';
-          const output = {
-            a: BiteActions.errorSavingBite({ bite: {} as Bite }),
-          };
-
-          expectObservable(effects.saveNewBiteToFirestore$).toBe(
-            expected,
-            output,
-          );
-        });
-      });
-    });
-  });
-
-  describe('uploadImage', () => {
-    describe('given a uploadImage action', () => {
-      it('should call uploadImage from api service', () => {
-        const uploadImageSpy = jest.spyOn(apiService, 'uploadImage');
-
-        scheduler.run(({ cold, expectObservable }) => {
-          actions$ = cold('a', {
-            a: BiteActions.uploadImage({
-              bite: {} as Bite,
-            }),
-          });
-
-          expectObservable(effects.uploadImage$);
-        });
-
-        expect(uploadImageSpy).toHaveBeenCalledTimes(1);
-        const callbackFn = uploadImageSpy.mock.calls[0][1];
-
-        // Call with not completed parameter
-        callbackFn({ uploadParams: { evt: { completed: false } } } as any);
-
-        expect(dispatchSpy).toHaveBeenCalledWith(
-          BiteActions.uploadingImage({
-            biteId: undefined,
-            imagePath: undefined,
-            progress: {
-              evt: {
-                completed: false,
-              },
-            },
-          } as any),
-        );
-
-        // Call with completed parameter
-        callbackFn({ uploadParams: { evt: { completed: true } } } as any);
-
-        expect(dispatchSpy).toHaveBeenCalledWith(
-          BiteActions.uploadedImage({
-            bite: {} as Bite,
-            imagePath: undefined,
-          } as any),
-        );
-      });
-    });
-  });
-
-  describe('updateImagePathInBite$', () => {
-    describe('given an uploadedImage action', () => {
-      it('should call updateImagePathInBite from api service', () => {
-        const updateImagePathInBiteSpy = jest.spyOn(
-          apiService,
-          'updateImagePathInBite',
-        );
-
-        scheduler.run(({ cold, expectObservable }) => {
-          actions$ = cold('a', {
-            a: BiteActions.uploadedImage({
-              bite: {} as Bite,
-              imagePath: 'imagePath',
-            }),
-          });
-
-          expectObservable(effects.updateImagePathInBite$);
-        });
-
-        expect(updateImagePathInBiteSpy).toHaveBeenCalledTimes(1);
-        expect(updateImagePathInBiteSpy).toHaveBeenCalledWith(
-          {} as Bite,
-          'imagePath',
-        );
-      });
-
-      it('should show a success toast when image is uploaded', () => {
-        scheduler.run(({ cold, expectObservable }) => {
-          actions$ = cold('a', {
-            a: BiteActions.uploadedImage({
-              bite: {} as Bite,
-              imagePath: 'imagePath',
-            }),
-          });
-
-          expectObservable(effects.updateImagePathInBite$);
-        });
-
-        expect(mockToastCreate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: 'image-uploaded-successfully',
-            color: 'success',
-          }),
-        );
       });
     });
   });

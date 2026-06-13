@@ -12,7 +12,6 @@ export class HomeService {
   private readonly navController = inject(NavController);
 
   sortedHomeBites = this.dataAccess.sortedHomeBites;
-  imageUploads = this.dataAccess.imageUploads;
   sorting = this.dataAccess.sorting;
   myBites = this.dataAccess.myBites;
   myBitesSorting = this.dataAccess.myBitesSorting;

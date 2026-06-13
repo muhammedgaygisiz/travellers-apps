@@ -28,30 +28,6 @@
           min-width: 180px;
           object-fit: cover;
         }
-
-        &.loading {
-          filter: blur(4px) brightness(1.1);
-          transform: scale(1.02); /* prevents visible edges from blur */
-
-          &:after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-
-            /* Soft white overlay */
-            background: radial-gradient(
-              circle at center,
-              rgba(255, 255, 255, 0.45) 0%,
-              rgba(255, 255, 255, 0.35) 40%,
-              rgba(255, 255, 255, 0.25) 70%,
-              rgba(255, 255, 255, 0.15) 100%
-            );
-
-            pointer-events: none;
-            transition: opacity 200ms ease;
-          }
-        }
       }
 
       .card-details {

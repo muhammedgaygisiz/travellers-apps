@@ -24,14 +24,13 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { Bite, Like, UploadParams } from 'model';
+import { Bite, Like } from 'model';
 import { LikesComponent } from './likes/likes.component';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
 import { DistanceComponent } from 'common/distance';
 import { GetImagePipe } from './pipes/get-image.pipe';
-import { AsyncPipe } from '@angular/common';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const DELETE = 'delete';
@@ -61,7 +60,6 @@ const CANCEL = 'cancel';
     IonContent,
     DistanceComponent,
     GetImagePipe,
-    AsyncPipe,
     TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,7 +71,6 @@ export class BiteComponent {
   userId = input<string>();
   showEditButton = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
-  uploadState = input<{ progress: UploadParams }>();
   readonly = input(false, { transform: booleanAttribute });
 
   biteClick = output<Bite>();
@@ -91,9 +88,7 @@ export class BiteComponent {
     const bite = this.bite();
     const userId = this.userId();
     return (
-      !!userId &&
-      bite.userId === userId &&
-      (!bite.rating || bite.rating === 0)
+      !!userId && bite.userId === userId && (!bite.rating || bite.rating === 0)
     );
   });
 

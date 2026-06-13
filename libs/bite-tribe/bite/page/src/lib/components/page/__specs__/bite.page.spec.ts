@@ -29,6 +29,10 @@ jest.mock('image-compression', () => ({
 
 addNecessaryIcons();
 
+jest.spyOn(console, 'warn').mockImplementation(() => {
+  // Mock implementation
+});
+
 const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
 };

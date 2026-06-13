@@ -75,54 +75,39 @@ describe(BiteTribeStoreService.name, () => {
     ));
   });
 
-  describe('save', () => {
-    describe('given docType "bite" with existing id in entity', () => {
-      it('should dispatch saveExistingBite', inject(
-        [BiteTribeStoreService],
-        (service: BiteTribeStoreService) => {
-          const dispatchSpy = jest.spyOn(store, 'dispatch');
-          const entity = { id: '123' };
-          service.save(entity, 'bite');
-          expect(dispatchSpy).toHaveBeenCalledTimes(1);
-        },
-      ));
-    });
+  describe('saveNewRestaurant', () => {
+    it('should dispatch saveNewRestaurant', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        const entity = {};
+        service.saveNewRestaurant(entity);
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
 
-    describe('given docType "bite" without id in entity', () => {
-      it('should dispatch saveNewBite', inject(
-        [BiteTribeStoreService],
-        (service: BiteTribeStoreService) => {
-          const dispatchSpy = jest.spyOn(store, 'dispatch');
-          const entity = {};
-          service.save(entity, 'bite');
-          expect(dispatchSpy).toHaveBeenCalledTimes(1);
-        },
-      ));
-    });
+  describe('saveNewBite', () => {
+    it('should dispatch saveNewBite', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        service.saveNewBite();
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
 
-    describe('given docType "restaurant"', () => {
-      it('should dispatch saveNewRestaurant', inject(
-        [BiteTribeStoreService],
-        (service: BiteTribeStoreService) => {
-          const dispatchSpy = jest.spyOn(store, 'dispatch');
-          const entity = {};
-          service.save(entity, 'restaurant');
-          expect(dispatchSpy).toHaveBeenCalledTimes(1);
-        },
-      ));
-    });
-
-    describe('given unknown docType', () => {
-      it('should dispatch unknownEntity', inject(
-        [BiteTribeStoreService],
-        (service: BiteTribeStoreService) => {
-          const dispatchSpy = jest.spyOn(store, 'dispatch');
-          const entity = {};
-          service.save(entity, 'unknownDocType');
-          expect(dispatchSpy).toHaveBeenCalledTimes(1);
-        },
-      ));
-    });
+  describe('saveEditedBite', () => {
+    it('should dispatch saveExistingBite', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        const entity = { id: '123' };
+        service.saveEditedBite(entity);
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
   });
 
   describe('logout', () => {

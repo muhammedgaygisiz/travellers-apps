@@ -8,3 +8,4 @@ export { notifyBiteCreatorOnReview } from './functions/notify-bite-creator-on-re
 export { notifyUserOnNewFollower } from './functions/notify-user-on-new-follower';
 export { handleSharedLinkToBite } from './functions/handle-shared-link-to-bite';
 export { sendWeeklyBiteNotification } from './functions/send-weekly-bite-notification';
+export { setBiteImagePathOnUpload } from './functions/set-bite-image-path-on-upload';

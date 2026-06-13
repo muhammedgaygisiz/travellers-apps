@@ -112,7 +112,11 @@
             }
           </ion-button>
         </div>
-        <position formControlName="position" [readonly]="true" [dragging]="false" />
+        <position
+          formControlName="position"
+          [readonly]="true"
+          [dragging]="false"
+        />
         @if (biteFormGroup.get('position')?.invalid) {
         <ion-text color="danger">
           <p>{{ getGpsErrorMessage() | transloco }}</p>

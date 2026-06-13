@@ -39,6 +39,7 @@ import { getExifDataFromPhoto } from './utils/get-exif-data-from-photo';
 import { getExifDataFromFile } from './utils/get-exif-data-from-file';
 import { FilePicker } from '@capawesome/capacitor-file-picker';
 import { getExifDataFromFilePath } from './utils/get-exif-data-from-file-path';
+import { TranslocoService } from '@jsverse/transloco';
 
 const photoOptions = {
   quality: 90,
@@ -85,6 +86,7 @@ const cameraOnlyOptions = {
 export class ImageUploadComponent implements ControlValueAccessor {
   private readonly platform = inject(Platform);
   private readonly alertController = inject(AlertController);
+  private readonly transloco = inject(TranslocoService);
   position = input<{
     latitude: number;
     longitude: number;
@@ -213,28 +215,33 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   async showImageSourceDialog(): Promise<void> {
     const alert = await this.alertController.create({
-      header: 'Choose Image Source',
+      header: this.transloco.translate('choose-image-source'),
       buttons: [
         {
-          text: 'Cancel',
+          text: this.transloco.translate('cancel'),
           role: 'cancel',
         },
         {
-          text: 'Take Photo',
-          handler: (): void => {
-            void this.takePhotoWithCamera();
-          },
+          text: this.transloco.translate('take-photo'),
+          role: 'camera',
         },
         {
-          text: 'Choose from Gallery',
-          handler: (): void => {
-            void this.pickImageFromGallery();
-          },
+          text: this.transloco.translate('choose-from-gallery'),
+          role: 'gallery',
         },
       ],
     });
 
     await alert.present();
+    const { role } = await alert.onDidDismiss();
+
+    if (role === 'camera') {
+      void this.takePhotoWithCamera();
+    }
+
+    if (role === 'gallery') {
+      void this.pickImageFromGallery();
+    }
   }
 
   private async takePhotoWithCamera(): Promise<void> {

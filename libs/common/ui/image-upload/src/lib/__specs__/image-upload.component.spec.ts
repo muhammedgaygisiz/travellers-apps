@@ -307,6 +307,7 @@ describe('ImageUploadComponent', () => {
     it('should create and present alert dialog', async () => {
       const alertMock = {
         present: jest.fn(),
+        onDidDismiss: jest.fn().mockResolvedValue({ role: 'cancel' }),
       };
       alertControllerMock.create = jest.fn().mockResolvedValue(alertMock);
 
@@ -314,28 +315,36 @@ describe('ImageUploadComponent', () => {
       await component.showImageSourceDialog();
 
       expect(alertControllerMock.create).toHaveBeenCalledWith({
-        header: 'Choose Image Source',
+        header: 'choose-image-source',
         buttons: [
           {
             role: 'cancel',
-            text: 'Cancel',
+            text: 'cancel',
           },
           {
-            handler: expect.any(Function),
-            text: 'Take Photo',
+            role: 'camera',
+            text: 'take-photo',
           },
           {
-            handler: expect.any(Function),
-            text: 'Choose from Gallery',
+            role: 'gallery',
+            text: 'choose-from-gallery',
           },
         ],
       });
       expect(alertMock.present).toHaveBeenCalled();
+      expect(alertMock.onDidDismiss).toHaveBeenCalled();
     });
 
-    it('should dismiss the dialog without waiting for image processing', async () => {
+    it('should start gallery processing after the dialog is dismissed', async () => {
+      let resolveDismiss!: (value: { role: string }) => void;
       const alertMock = {
         present: jest.fn(),
+        onDidDismiss: jest.fn(
+          () =>
+            new Promise<{ role: string }>((resolve) => {
+              resolveDismiss = resolve;
+            }),
+        ),
       };
       alertControllerMock.create = jest.fn().mockResolvedValue(alertMock);
       Object.defineProperty(component, 'alertController', {
@@ -345,14 +354,41 @@ describe('ImageUploadComponent', () => {
         .spyOn(component, 'pickImageFromGallery')
         .mockReturnValue(new Promise(() => undefined));
 
+      const dialog = component.showImageSourceDialog();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(alertMock.onDidDismiss).toHaveBeenCalled();
+      expect(component.pickImageFromGallery).not.toHaveBeenCalled();
+
+      resolveDismiss({ role: 'gallery' });
+      await dialog;
+
+      expect(component.pickImageFromGallery).toHaveBeenCalled();
+    });
+
+    it('should start camera processing after the dialog is dismissed', async () => {
+      const alertMock = {
+        present: jest.fn(),
+        onDidDismiss: jest.fn().mockResolvedValue({ role: 'camera' }),
+      };
+      alertControllerMock.create = jest.fn().mockResolvedValue(alertMock);
+      Object.defineProperty(component, 'alertController', {
+        value: alertControllerMock,
+      });
+      const takePhotoWithCamera = jest
+        .spyOn(
+          component as unknown as {
+            takePhotoWithCamera: () => Promise<void>;
+          },
+          'takePhotoWithCamera',
+        )
+        .mockReturnValue(new Promise(() => undefined));
+
       await component.showImageSourceDialog();
 
-      const alertOptions = (alertControllerMock.create as jest.Mock).mock
-        .calls[0][0];
-      const galleryButton = alertOptions.buttons[2];
-
-      expect(galleryButton.handler()).toBeUndefined();
-      expect(component.pickImageFromGallery).toHaveBeenCalled();
+      expect(alertMock.onDidDismiss).toHaveBeenCalled();
+      expect(takePhotoWithCamera).toHaveBeenCalled();
     });
   });
 

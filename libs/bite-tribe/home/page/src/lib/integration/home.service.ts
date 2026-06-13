@@ -111,6 +111,10 @@ export class HomeService {
     void this.navController.navigateForward([PATH.MARKET_PLACE]);
   }
 
+  onGotoGalleryClick(): void {
+    void this.navController.navigateForward([PATH.GALLERY]);
+  }
+
   onGotoSearchClick(): void {
     void this.navController.navigateForward([PATH.SEARCH]);
   }

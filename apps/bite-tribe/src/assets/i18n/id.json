@@ -1,5 +1,11 @@
 {
   "create-bite": "Buat Bite",
+  "gallery": "Galeri",
+  "delete-all": "Hapus semua",
+  "delete-all-images": "Hapus semua gambar",
+  "are-you-sure-you-want-to-delete-all-local-images": "Yakin ingin menghapus semua gambar yang tersimpan secara lokal?",
+  "no-local-images-found": "Tidak ada gambar lokal yang ditemukan.",
+  "locally-saved-image": "Gambar yang tersimpan secara lokal",
   "location-tap-map-to-move-location-manually": "Lokasi (ketuk peta untuk mengubah lokasi secara manual):",
   "find-it-try-it-share-it": "Temukan. Coba. Bagikan.",
   "log-in": "Masuk",

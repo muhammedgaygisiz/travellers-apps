@@ -1,5 +1,11 @@
 {
   "create-bite": "Bite ፍጠር",
+  "gallery": "ማዕከለ-ስዕላት",
+  "delete-all": "ሁሉንም ሰርዝ",
+  "delete-all-images": "ሁሉንም ምስሎች ሰርዝ",
+  "are-you-sure-you-want-to-delete-all-local-images": "በመሣሪያው ላይ የተቀመጡ ምስሎችን በሙሉ መሰረዝ ይፈልጋሉ?",
+  "no-local-images-found": "በመሣሪያው ላይ የተቀመጠ ምስል አልተገኘም።",
+  "locally-saved-image": "በመሣሪያው ላይ የተቀመጠ ምስል",
   "location-tap-map-to-move-location-manually": "ቦታ (ቦታን በእጅ ለማንቀሳቀስ ካርታን ነካ):",
   "find-it-try-it-share-it": "ፈልግ። ሞክር። አጋራ።",
   "log-in": "ግባ",

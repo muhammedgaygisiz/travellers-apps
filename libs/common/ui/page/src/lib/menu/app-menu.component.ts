@@ -49,6 +49,8 @@ export class AppMenuComponent {
 
   showMarketPlaceButton = input<boolean | null>(false);
 
+  showGalleryButton = input<boolean | null>(false);
+
   loginClick = output();
 
   logoutClick = output();
@@ -66,4 +68,6 @@ export class AppMenuComponent {
   gotoMyBucketlists = output();
 
   gotoMarketPlace = output();
+
+  gotoGallery = output();
 }

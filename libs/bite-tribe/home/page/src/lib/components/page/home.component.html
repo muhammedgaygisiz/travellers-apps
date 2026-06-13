@@ -7,6 +7,7 @@
   [showMyProfile]="true"
   [showAboutButton]="true"
   [showMarketPlaceButton]="true"
+  [showGalleryButton]="true"
   [enableBackButton]="enableBackButton()"
   [showFooter]="showFooter()"
   [isAuthenticated]="isAuthenticated()"
@@ -18,6 +19,7 @@
   (gotoMyBites)="gotoMyBites.emit()"
   (gotoAbout)="gotoAbout.emit()"
   (gotoMarketPlace)="gotoMarketPlace.emit()"
+  (gotoGallery)="gotoGallery.emit()"
 >
   @if (showSearch()) {
     <ion-buttons header-end slot="end">

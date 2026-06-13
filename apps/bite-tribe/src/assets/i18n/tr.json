@@ -1,5 +1,11 @@
 {
   "create-bite": "Bite Oluştur",
+  "gallery": "Galeri",
+  "delete-all": "Tümünü sil",
+  "delete-all-images": "Tüm görselleri sil",
+  "are-you-sure-you-want-to-delete-all-local-images": "Yerel olarak kaydedilen tüm görselleri silmek istediğinizden emin misiniz?",
+  "no-local-images-found": "Yerel olarak kaydedilmiş görsel bulunamadı.",
+  "locally-saved-image": "Yerel olarak kaydedilmiş görsel",
   "location-tap-map-to-move-location-manually": "Konum (haritaya dokunarak konumu manuel olarak değiştirebilirsin):",
   "find-it-try-it-share-it": "Bul. Dene. Paylaş.",
   "log-in": "Giriş yap",

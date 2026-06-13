@@ -1,5 +1,11 @@
 {
   "create-bite": "Create Bite",
+  "gallery": "Gallery",
+  "delete-all": "Delete all",
+  "delete-all-images": "Delete all images",
+  "are-you-sure-you-want-to-delete-all-local-images": "Are you sure you want to delete all locally saved images?",
+  "no-local-images-found": "No locally saved images found.",
+  "locally-saved-image": "Locally saved image",
   "location-tap-map-to-move-location-manually": "Location (tap map to move location manually):",
   "find-it-try-it-share-it": "Find it. Try it. Share it.",
   "log-in": "Log In",

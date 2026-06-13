@@ -42,6 +42,12 @@
           <ng-container>{{ 'market-place' | transloco }}</ng-container>
         </ion-item>
       }
+      @if (showGalleryButton()) {
+        <ion-item (click)="gotoGallery.emit()">
+          <ion-icon name="images-outline" slot="start" />
+          <ng-container>{{ 'gallery' | transloco }}</ng-container>
+        </ion-item>
+      }
       @if (showSettingsButton()) {
         <ion-item (click)="gotoSettings.emit()">
           <ion-icon name="settings-outline" slot="start" />

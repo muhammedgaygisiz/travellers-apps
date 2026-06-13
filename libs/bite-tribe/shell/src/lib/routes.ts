@@ -33,6 +33,13 @@ export const ROUTES: Routes = withAuthRoutes([
     title: 'Search',
   },
   {
+    path: PATH.GALLERY,
+    loadComponent: () =>
+      import('bite-tribe/gallery').then((m) => m.GalleryContainer),
+    canActivate: [authGuard],
+    title: 'Gallery',
+  },
+  {
     path: PATH.NEW_BITE,
     loadComponent: () =>
       import('bite-tribe/bite').then((m) => m.CreateBiteContainer),

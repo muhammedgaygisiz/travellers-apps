@@ -1,9 +1,12 @@
 import { Location } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
 import { BiteService } from '../bite.service';
-import { NavController } from '@ionic/angular';
+import {
+  LoadingController,
+  NavController,
+  ToastController,
+} from '@ionic/angular/standalone';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
-import { LoadingController } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
 
 const Mock = {
@@ -24,6 +27,12 @@ const LoadingMock = {
   }),
 };
 
+const ToastMock = {
+  create: jest.fn().mockResolvedValue({
+    present: jest.fn().mockResolvedValue(undefined),
+  }),
+};
+
 const TranslocoMock = {
   translate: jest.fn((key: string): string => key),
 };
@@ -39,6 +48,7 @@ describe('BiteService', () => {
         { provide: NavController, useValue: Mock },
         { provide: Location, useValue: Mock },
         { provide: LoadingController, useValue: LoadingMock },
+        { provide: ToastController, useValue: ToastMock },
         { provide: TranslocoService, useValue: TranslocoMock },
       ],
     }).compileComponents();

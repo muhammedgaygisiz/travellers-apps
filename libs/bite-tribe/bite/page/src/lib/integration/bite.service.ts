@@ -1,9 +1,12 @@
 import { Location } from '@angular/common';
 import { inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
-import { LoadingController, NavController } from '@ionic/angular';
+import {
+  LoadingController,
+  NavController,
+  ToastController,
+} from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
-import { ToastController } from '@ionic/angular';
 
 @Injectable({ providedIn: 'root' })
 export class BiteService {

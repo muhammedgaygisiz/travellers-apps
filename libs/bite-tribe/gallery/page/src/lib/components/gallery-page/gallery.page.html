@@ -1,0 +1,38 @@
+<ta-page
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+  [enableBackButton]="true"
+>
+  <ion-content class="ion-padding">
+    <div class="gallery-header">
+      <h1>{{ 'gallery' | transloco }}</h1>
+      <ion-button
+        color="danger"
+        fill="outline"
+        [disabled]="loading() || images().length === 0"
+        (click)="confirmDeleteAll()"
+      >
+        <ion-icon name="trash-outline" slot="start" />
+        {{ 'delete-all' | transloco }}
+      </ion-button>
+    </div>
+
+    @if (loading()) {
+    <div class="gallery-state">
+      <ion-spinner />
+    </div>
+    } @else if (images().length === 0) {
+    <p class="gallery-state">{{ 'no-local-images-found' | transloco }}</p>
+    } @else {
+    <div class="gallery-grid">
+      @for (image of images(); track image.name) {
+      <img
+        [src]="image.src"
+        [alt]="'locally-saved-image' | transloco"
+        loading="lazy"
+      />
+      }
+    </div>
+    }
+  </ion-content>
+</ta-page>

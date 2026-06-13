@@ -305,6 +305,22 @@ describe('HomeService', () => {
     ));
   });
 
+  describe('onGotoGalleryClick', () => {
+    let navigateForwardSpy: SpyInstance;
+
+    beforeEach(() => {
+      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+    });
+
+    it('should navigate to gallery page', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.onGotoGalleryClick();
+        expect(navigateForwardSpy).toHaveBeenCalledWith(['gallery']);
+      },
+    ));
+  });
+
   describe('openMapView', () => {
     let navigateForwardSpy: SpyInstance;
 

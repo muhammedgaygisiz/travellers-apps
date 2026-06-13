@@ -19,4 +19,5 @@ export const PATH = {
   MARKET_PLACE: 'market-place',
   BITE_TRAIL: 'bite-trail',
   SEARCH: 'search',
+  GALLERY: 'gallery',
 };

@@ -1,0 +1,38 @@
+.gallery-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.gallery-header h1 {
+  margin: 0;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.gallery-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+.gallery-state {
+  display: flex;
+  min-height: 12rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+@media (max-width: 420px) {
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

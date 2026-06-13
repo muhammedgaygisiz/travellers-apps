@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`AppMenuComponent should emit loginClick when auth button is clicked 1`] = `
+DebugElement {
+  "nativeNode": <div>
+    <ion-list
+      class="undefined list-undefined list-lines-none list-undefined-lines-none hydrated"
+      data-cy="menu-list"
+      lines="none"
+      role="list"
+    >
+      <ion-item-group
+        class="undefined item-group-undefined item hydrated"
+        role="group"
+      >
+        <ion-item
+          class="item undefined item-lines-default in-list ion-focusable hydrated"
+          role="listitem"
+        >
+          <ion-icon
+            class="md hydrated"
+            name="construct"
+            role="img"
+            slot="start"
+          />
+          <small>
+            Version  (Build )
+          </small>
+        </ion-item>
+      </ion-item-group>
+      <ion-item
+        class="item-has-start-slot"
+        data-cy="btn-login"
+      >
+        <ion-icon
+          name="log-in-outline"
+          slot="start"
+        />
+         Login 
+      </ion-item>
+      
+      
+      
+    </ion-list>
+  </div>,
+}
+`;

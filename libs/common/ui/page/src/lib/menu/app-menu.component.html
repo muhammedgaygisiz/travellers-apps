@@ -1,41 +1,11 @@
 <ion-list lines="none" data-cy="menu-list">
-  @if (showLanguages()) {
-    <ion-item-group>
-      <ion-item-divider>
-        <ion-icon color="dark" name="language-outline" slot="start" />
-        Language
-      </ion-item-divider>
+  <ion-item-group>
+    <ion-item>
+      <ion-icon name="construct" slot="start"></ion-icon>
+      <small>Version {{ version }} (Build {{ buildNumber }})</small>
+    </ion-item>
+  </ion-item-group>
 
-      <ion-item
-        [detail]="false"
-        (click)="languageChangeClick.emit(SupportedLang.EN)"
-      >
-        <ion-icon src="assets/gb.svg" slot="start" />
-        English
-      </ion-item>
-      <ion-item
-        [detail]="false"
-        (click)="languageChangeClick.emit(SupportedLang.FR)"
-      >
-        <ion-icon src="assets/fr.svg" slot="start" />
-        Français
-      </ion-item>
-      <ion-item
-        [detail]="false"
-        (click)="languageChangeClick.emit(SupportedLang.DE)"
-      >
-        <ion-icon src="assets/de.svg" slot="start" />
-        Deutsch
-      </ion-item>
-      <ion-item
-        [detail]="false"
-        (click)="languageChangeClick.emit(SupportedLang.TR)"
-      >
-        <ion-icon src="assets/tr.svg" slot="start" />
-        Türkçe
-      </ion-item>
-    </ion-item-group>
-  }
   @if (!hideAuthButton()) {
     @if (!isAuthenticated()) {
       <ion-item

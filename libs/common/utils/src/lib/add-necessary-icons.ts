@@ -19,6 +19,7 @@ import {
   closeCircle,
   closeOutline,
   cloudOfflineOutline,
+  construct,
   createOutline,
   cropOutline,
   downloadOutline,
@@ -120,5 +121,6 @@ export const addNecessaryIcons = (): void => {
     cloudOfflineOutline,
     chevronForwardOutline,
     createOutline,
+    construct,
   });
 };

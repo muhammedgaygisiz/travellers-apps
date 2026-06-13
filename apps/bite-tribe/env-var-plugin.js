@@ -1,3 +1,8 @@
+const { readFileSync } = require('node:fs');
+const { join } = require('node:path');
+const { readBuildNumber } = require('./read-build-number');
+
+const workspaceRoot = join(__dirname, '../..');
 const myOrgEnvRegex = /^NX_/i;
 
 const envVarPlugin = {
@@ -12,6 +17,13 @@ const envVarPlugin = {
       }
     }
 
+    const { version } = JSON.parse(
+      readFileSync(join(workspaceRoot, 'package.json'), 'utf8'),
+    );
+    envVars.version = version;
+    envVars.buildNumber = readBuildNumber(workspaceRoot);
+
+    options.define ??= {};
     options.define['process.env'] = JSON.stringify(envVars);
   },
 };

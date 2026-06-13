@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { MenuComponent } from '../menu.component';
+import { AppMenuComponent } from '../app-menu.component';
 import {
   ComponentRef,
   Pipe,
@@ -35,11 +35,10 @@ class MockTranslocoPipe implements PipeTransform {
   }
 }
 
-describe('MenuComponent', () => {
-  let component: MenuComponent;
-  let componentRef: ComponentRef<MenuComponent>;
-  let fixture: ComponentFixture<MenuComponent>;
-  let languageChangeClickEmitSpy: jest.SpyInstance;
+describe('AppMenuComponent', () => {
+  let component: AppMenuComponent;
+  let componentRef: ComponentRef<AppMenuComponent>;
+  let fixture: ComponentFixture<AppMenuComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -50,31 +49,13 @@ describe('MenuComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MenuComponent);
+    fixture = TestBed.createComponent(AppMenuComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-
-    languageChangeClickEmitSpy = jest.spyOn(
-      component.languageChangeClick,
-      'emit',
-    );
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('should emit languageChangeClick with SupportedLang.EN when English item is clicked', () => {
-    componentRef.setInput('showLanguages', true);
-    fixture.detectChanges();
-
-    const englishItem = fixture.debugElement.query(
-      By.css('ion-item:nth-child(2)'),
-    );
-
-    englishItem.triggerEventHandler('click', null);
-
-    expect(languageChangeClickEmitSpy).toHaveBeenCalledWith(SupportedLang.EN);
   });
 
   it('should emit loginClick when auth button is clicked', () => {

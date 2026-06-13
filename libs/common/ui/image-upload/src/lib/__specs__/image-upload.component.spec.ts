@@ -63,6 +63,25 @@ type MockFileReader = {
   DONE: 2;
 };
 
+const createMockFileReader = (autoLoad = true): MockFileReader => {
+  const reader: MockFileReader = {
+    readAsDataURL: jest.fn(),
+    onload: null,
+    result: 'data:image/jpeg;base64,abc',
+    EMPTY: 0,
+    LOADING: 1,
+    DONE: 2,
+  };
+
+  if (autoLoad) {
+    reader.readAsDataURL.mockImplementation(() => {
+      queueMicrotask(() => reader.onload?.());
+    });
+  }
+
+  return reader;
+};
+
 describe('ImageUploadComponent', () => {
   let component: ImageUploadComponent;
   let compRef: ComponentRef<ImageUploadComponent>;
@@ -120,15 +139,7 @@ describe('ImageUploadComponent', () => {
     });
 
     // @ts-expect-error - Mocking FileReader
-    global.FileReader = jest.fn(() => ({
-      readAsDataURL: jest.fn(),
-      addEventListener: jest.fn((_, cb) => cb()),
-      onload: null,
-      result: 'data:image/jpeg;base64,abc',
-      EMPTY: 0,
-      LOADING: 1,
-      DONE: 2,
-    }));
+    global.FileReader = jest.fn(() => createMockFileReader());
 
     component.value.set(null);
     component.disabled.set(false);
@@ -256,14 +267,7 @@ describe('ImageUploadComponent', () => {
         );
 
         // Mock FileReader
-        const mockFileReader: MockFileReader = {
-          readAsDataURL: jest.fn(),
-          onload: null,
-          result: 'data:image/jpeg;base64,abc',
-          EMPTY: 0,
-          LOADING: 1,
-          DONE: 2,
-        };
+        const mockFileReader = createMockFileReader();
 
         // @ts-expect-error - Mocking FileReader
         global.FileReader = jest.fn(() => mockFileReader);
@@ -327,6 +331,74 @@ describe('ImageUploadComponent', () => {
         ],
       });
       expect(alertMock.present).toHaveBeenCalled();
+    });
+
+    it('should dismiss the dialog without waiting for image processing', async () => {
+      const alertMock = {
+        present: jest.fn(),
+      };
+      alertControllerMock.create = jest.fn().mockResolvedValue(alertMock);
+      Object.defineProperty(component, 'alertController', {
+        value: alertControllerMock,
+      });
+      jest
+        .spyOn(component, 'pickImageFromGallery')
+        .mockReturnValue(new Promise(() => undefined));
+
+      await component.showImageSourceDialog();
+
+      const alertOptions = (alertControllerMock.create as jest.Mock).mock
+        .calls[0][0];
+      const galleryButton = alertOptions.buttons[2];
+
+      expect(galleryButton.handler()).toBeUndefined();
+      expect(component.pickImageFromGallery).toHaveBeenCalled();
+    });
+  });
+
+  describe('loading state', () => {
+    it('should show a skeleton while a selected file is processed', async () => {
+      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+      let resolveCompression!: (file: File) => void;
+      (compressFile as jest.Mock).mockReturnValue(
+        new Promise<File>((resolve) => {
+          resolveCompression = resolve;
+        }),
+      );
+
+      const processing = component.onFileSelected({
+        target: { files: [file] },
+      } as unknown as Event);
+      fixture.detectChanges();
+
+      expect(component.isLoading()).toBe(true);
+      expect(
+        fixture.nativeElement.querySelector('ion-skeleton-text'),
+      ).not.toBeNull();
+
+      resolveCompression(file);
+      await processing;
+      fixture.detectChanges();
+
+      expect(component.isLoading()).toBe(false);
+      expect(
+        fixture.nativeElement.querySelector('ion-skeleton-text'),
+      ).toBeNull();
+    });
+
+    it('should clear the loading state when processing fails', async () => {
+      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+      (compressFile as jest.Mock).mockRejectedValue(
+        new Error('Compression failed'),
+      );
+
+      await expect(
+        component.onFileSelected({
+          target: { files: [file] },
+        } as unknown as Event),
+      ).rejects.toThrow('Compression failed');
+
+      expect(component.isLoading()).toBe(false);
     });
   });
 
@@ -520,14 +592,7 @@ describe('ImageUploadComponent', () => {
       component._onTouch = onTouch;
 
       // Mock FileReader
-      const mockFileReader: MockFileReader = {
-        readAsDataURL: jest.fn(),
-        onload: null,
-        result: 'data:image/jpeg;base64,abc',
-        EMPTY: 0,
-        LOADING: 1,
-        DONE: 2,
-      };
+      const mockFileReader = createMockFileReader(false);
 
       // @ts-expect-error - Mocking FileReader
       global.FileReader = jest.fn(() => mockFileReader);
@@ -777,14 +842,7 @@ describe('ImageUploadComponent', () => {
         );
 
         // Mock FileReader
-        const mockFileReader: MockFileReader = {
-          readAsDataURL: jest.fn(),
-          onload: null,
-          result: 'data:image/jpeg;base64,abc',
-          EMPTY: 0,
-          LOADING: 1,
-          DONE: 2,
-        };
+        const mockFileReader = createMockFileReader();
         // @ts-expect-error - Mocking FileReader
         global.FileReader = jest.fn(() => mockFileReader);
 
@@ -833,14 +891,7 @@ describe('ImageUploadComponent', () => {
           });
 
           // Mock FileReader
-          const mockFileReader: MockFileReader = {
-            readAsDataURL: jest.fn(),
-            onload: null,
-            result: 'data:image/jpeg;base64,abc',
-            EMPTY: 0,
-            LOADING: 1,
-            DONE: 2,
-          };
+          const mockFileReader = createMockFileReader();
           // @ts-expect-error - Mocking FileReader
           global.FileReader = jest.fn(() => mockFileReader);
 

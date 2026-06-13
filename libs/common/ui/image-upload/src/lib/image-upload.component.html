@@ -7,7 +7,9 @@
   />
 }
 
-@if (showImage()) {
+@if (isLoading()) {
+  <ion-skeleton-text class="image-loading" [animated]="true" />
+} @else if (showImage()) {
   <div class="image-preview">
     <img [src]="value() || imageUrl()" alt="Image" />
     <div class="image-actions-overlay">

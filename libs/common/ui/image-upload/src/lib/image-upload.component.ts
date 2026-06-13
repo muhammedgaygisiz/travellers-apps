@@ -19,6 +19,7 @@ import {
   IonHeader,
   IonIcon,
   IonModal,
+  IonSkeletonText,
   IonTitle,
   IonToolbar,
   AlertController,
@@ -38,6 +39,7 @@ import { getExifDataFromPhoto } from './utils/get-exif-data-from-photo';
 import { getExifDataFromFile } from './utils/get-exif-data-from-file';
 import { FilePicker } from '@capawesome/capacitor-file-picker';
 import { getExifDataFromFilePath } from './utils/get-exif-data-from-file-path';
+import { TranslocoService } from '@jsverse/transloco';
 
 const photoOptions = {
   quality: 90,
@@ -64,6 +66,7 @@ const cameraOnlyOptions = {
     IonButton,
     IonIcon,
     IonModal,
+    IonSkeletonText,
     ImageCropperComponent,
     IonHeader,
     IonToolbar,
@@ -83,6 +86,7 @@ const cameraOnlyOptions = {
 export class ImageUploadComponent implements ControlValueAccessor {
   private readonly platform = inject(Platform);
   private readonly alertController = inject(AlertController);
+  private readonly transloco = inject(TranslocoService);
   position = input<{
     latitude: number;
     longitude: number;
@@ -106,6 +110,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
   disabled = signal<boolean | null>(null);
   croppedImage = signal<string | null | undefined>(null);
   canvasRotation = signal(0);
+  isLoading = signal(false);
 
   showImage = computed(() => {
     return !!this.value() || !!this.imageUrl();
@@ -150,24 +155,30 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
     // On Android, show a dialog to choose between camera and gallery
     if (this.platform.is('android')) {
-      this.showImageSourceDialog();
+      void this.showImageSourceDialog();
       return;
     }
 
     // On iOS and other platforms, use the default camera prompt
-    this.getImageFromNative();
+    void this.getImageFromNative();
   }
 
   async onFileSelected(event: Event): Promise<void> {
     const file = (event.target as HTMLInputElement).files?.[0];
 
-    await this.patchPositionFromFile(file);
+    if (!file) {
+      return;
+    }
 
-    if (file) {
+    this.isLoading.set(true);
+    try {
+      await this.patchPositionFromFile(file);
       const compressedFile = await compressFile(file);
 
-      this.setValueAndTriggerChange(compressedFile);
+      await this.setValueAndTriggerChange(compressedFile);
       this.imageFile = compressedFile;
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
@@ -188,37 +199,49 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
       const photo = await Camera.getPhoto(photoOptions);
 
+      this.isLoading.set(true);
       this.readAndEmitPositionFrom(photo);
 
       const compressedPhoto = await compressPhoto(photo);
 
-      this.setValueAndTriggerChange(compressedPhoto);
+      await this.setValueAndTriggerChange(compressedPhoto);
     } catch (e) {
       console.error('Error taking photo:', e);
       throw e;
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
   async showImageSourceDialog(): Promise<void> {
     const alert = await this.alertController.create({
-      header: 'Choose Image Source',
+      header: this.transloco.translate('choose-image-source'),
       buttons: [
         {
-          text: 'Cancel',
+          text: this.transloco.translate('cancel'),
           role: 'cancel',
         },
         {
-          text: 'Take Photo',
-          handler: this.takePhotoWithCamera.bind(this),
+          text: this.transloco.translate('take-photo'),
+          role: 'camera',
         },
         {
-          text: 'Choose from Gallery',
-          handler: this.pickImageFromGallery.bind(this),
+          text: this.transloco.translate('choose-from-gallery'),
+          role: 'gallery',
         },
       ],
     });
 
     await alert.present();
+    const { role } = await alert.onDidDismiss();
+
+    if (role === 'camera') {
+      void this.takePhotoWithCamera();
+    }
+
+    if (role === 'gallery') {
+      void this.pickImageFromGallery();
+    }
   }
 
   private async takePhotoWithCamera(): Promise<void> {
@@ -227,13 +250,16 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
       const photo = await Camera.getPhoto(cameraOnlyOptions);
 
+      this.isLoading.set(true);
       this.readAndEmitPositionFrom(photo);
 
       const compressedPhoto = await compressPhoto(photo);
 
-      this.setValueAndTriggerChange(compressedPhoto);
+      await this.setValueAndTriggerChange(compressedPhoto);
     } catch (e) {
       console.error('Error taking photo:', e);
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
@@ -251,6 +277,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
       }
 
       const pickedFile = result.files[0];
+      this.isLoading.set(true);
 
       // Extract EXIF data from the file path
       if (pickedFile.path) {
@@ -268,11 +295,13 @@ export class ImageUploadComponent implements ControlValueAccessor {
         });
 
         const compressedFile = await compressFile(file);
-        this.setValueAndTriggerChange(compressedFile);
+        await this.setValueAndTriggerChange(compressedFile);
         this.imageFile = compressedFile;
       }
     } catch (e) {
       console.error('Error picking image from gallery:', e);
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
@@ -321,15 +350,19 @@ export class ImageUploadComponent implements ControlValueAccessor {
     }
   }
 
-  private setValueAndTriggerChange(compressedPhoto: File): void {
-    const reader = new FileReader();
-    reader.onload = (): void => {
-      const result = reader.result as string;
-      this.value.set(result);
-      this._onChange(result);
-      this._onTouch();
-    };
-    reader.readAsDataURL(compressedPhoto);
+  private setValueAndTriggerChange(compressedPhoto: File): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (): void => {
+        const result = reader.result as string;
+        this.value.set(result);
+        this._onChange(result);
+        this._onTouch();
+        resolve();
+      };
+      reader.onerror = (): void => reject(reader.error);
+      reader.readAsDataURL(compressedPhoto);
+    });
   }
 
   clearImage(): void {

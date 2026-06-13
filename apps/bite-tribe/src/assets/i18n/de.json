@@ -1,5 +1,11 @@
 {
   "create-bite": "Bite erstellen",
+  "gallery": "Galerie",
+  "delete-all": "Alle löschen",
+  "delete-all-images": "Alle Bilder löschen",
+  "are-you-sure-you-want-to-delete-all-local-images": "Möchtest du wirklich alle lokal gespeicherten Bilder löschen?",
+  "no-local-images-found": "Keine lokal gespeicherten Bilder gefunden.",
+  "locally-saved-image": "Lokal gespeichertes Bild",
   "location-tap-map-to-move-location-manually": "Standort (auf die Karte tippen, um den Standort manuell zu verschieben):",
   "find-it-try-it-share-it": "Entdecken. Probieren. Teilen.",
   "log-in": "Log In",

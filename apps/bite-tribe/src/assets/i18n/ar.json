@@ -1,5 +1,11 @@
 {
   "create-bite": "Bite إنشاء",
+  "gallery": "المعرض",
+  "delete-all": "حذف الكل",
+  "delete-all-images": "حذف جميع الصور",
+  "are-you-sure-you-want-to-delete-all-local-images": "هل أنت متأكد من حذف جميع الصور المحفوظة محليًا؟",
+  "no-local-images-found": "لم يتم العثور على صور محفوظة محليًا.",
+  "locally-saved-image": "صورة محفوظة محليًا",
   "location-tap-map-to-move-location-manually": "الموقع (اضغط على الخريطة لتحريك الموقع يدوياً):",
   "find-it-try-it-share-it": "ابحث عنه. جربه. شاركه.",
   "log-in": "تسجيل الدخول",

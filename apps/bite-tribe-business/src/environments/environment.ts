@@ -20,6 +20,7 @@ export const environment = {
   emulators: {
     host: 'localhost',
     firestorePort: 8080,
+    functionsPort: 5001,
     storagePort: 9199,
     authUrl: 'http://localhost:9099',
   },

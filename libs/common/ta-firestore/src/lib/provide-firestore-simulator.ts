@@ -10,11 +10,13 @@ import { FirebaseApp } from '@firebase/app';
 import { connectFirestoreEmulator, Firestore } from 'firebase/firestore';
 import { connectStorageEmulator } from 'firebase/storage';
 import { FirebaseStorage } from '@firebase/storage';
+import { connectFunctionsEmulator } from './connect-functions-emulator';
 
 export const provideFirestoreSimulator = (
   emulators: Emulators | undefined = {
     host: '',
     firestorePort: 0,
+    functionsPort: 0,
     storagePort: 0,
     authUrl: '',
   },
@@ -23,6 +25,10 @@ export const provideFirestoreSimulator = (
   storage: FirebaseStorage,
 ): Provider[] => {
   const auth = getAuth();
+  void connectFunctionsEmulator({
+    host: emulators.host,
+    port: emulators.functionsPort,
+  });
 
   connectAuthEmulator(auth, emulators.authUrl, { disableWarnings: true });
   connectFirestoreEmulator(firestore, emulators.host, emulators.firestorePort);

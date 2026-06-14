@@ -1242,6 +1242,9 @@ PODS:
   - CapacitorFirebaseFirestore (8.0.1):
     - Capacitor
     - FirebaseFirestore (~> 12.7.0)
+  - CapacitorFirebaseFunctions (8.3.0):
+    - Capacitor
+    - FirebaseFunctions (~> 12.7.0)
   - CapacitorFirebaseMessaging (8.0.0):
     - Capacitor
     - FirebaseMessaging (~> 12.7.0)
@@ -1335,6 +1338,14 @@ PODS:
     - gRPC-Core (~> 1.69.0)
     - leveldb-library (~> 1.22)
     - nanopb (~> 3.30910.0)
+  - FirebaseFunctions (12.7.0):
+    - FirebaseAppCheckInterop (~> 12.7.0)
+    - FirebaseAuthInterop (~> 12.7.0)
+    - FirebaseCore (~> 12.7.0)
+    - FirebaseCoreExtension (~> 12.7.0)
+    - FirebaseMessagingInterop (~> 12.7.0)
+    - FirebaseSharedSwift (~> 12.7.0)
+    - GTMSessionFetcher/Core (< 6.0, >= 3.4)
   - FirebaseInstallations (12.7.0):
     - FirebaseCore (~> 12.7.0)
     - GoogleUtilities/Environment (~> 8.1)
@@ -1349,6 +1360,7 @@ PODS:
     - GoogleUtilities/Reachability (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - nanopb (~> 3.30910.0)
+  - FirebaseMessagingInterop (12.7.0)
   - FirebaseRemoteConfigInterop (12.7.0)
   - FirebaseSessions (12.7.0):
     - FirebaseCore (~> 12.7.0)
@@ -1537,6 +1549,7 @@ DEPENDENCIES:
   - "CapacitorFirebaseAuthentication/Google (from `../../../../node_modules/@capacitor-firebase/authentication`)"
   - "CapacitorFirebaseCrashlytics (from `../../../../node_modules/@capacitor-firebase/crashlytics`)"
   - "CapacitorFirebaseFirestore (from `../../../../node_modules/@capacitor-firebase/firestore`)"
+  - "CapacitorFirebaseFunctions (from `../../../../node_modules/@capacitor-firebase/functions`)"
   - "CapacitorFirebaseMessaging (from `../../../../node_modules/@capacitor-firebase/messaging`)"
   - "CapacitorFirebaseStorage (from `../../../../node_modules/@capacitor-firebase/storage`)"
   - "CapacitorGeolocation (from `../../../../node_modules/@capacitor/geolocation`)"
@@ -1567,8 +1580,10 @@ SPEC REPOS:
     - FirebaseCrashlytics
     - FirebaseFirestore
     - FirebaseFirestoreInternal
+    - FirebaseFunctions
     - FirebaseInstallations
     - FirebaseMessaging
+    - FirebaseMessagingInterop
     - FirebaseRemoteConfigInterop
     - FirebaseSessions
     - FirebaseSharedSwift
@@ -1610,6 +1625,8 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor-firebase/crashlytics"
   CapacitorFirebaseFirestore:
     :path: "../../../../node_modules/@capacitor-firebase/firestore"
+  CapacitorFirebaseFunctions:
+    :path: "../../../../node_modules/@capacitor-firebase/functions"
   CapacitorFirebaseMessaging:
     :path: "../../../../node_modules/@capacitor-firebase/messaging"
   CapacitorFirebaseStorage:
@@ -1650,6 +1667,7 @@ SPEC CHECKSUMS:
   CapacitorFirebaseAuthentication: cb5ddfd40d28ae8522b9af25741ba62eaa939501
   CapacitorFirebaseCrashlytics: 9498eaa61bdcc42971392747c221a407c38ddc5e
   CapacitorFirebaseFirestore: 7037e8a30f1ac9cb4c77ee629f115847dc74256f
+  CapacitorFirebaseFunctions: 0e87aac3c607922a0d7b263cbf456ef2cab8f2d5
   CapacitorFirebaseMessaging: cd18e49885a34360561372c5bdb093cab4177ce2
   CapacitorFirebaseStorage: dd1182dfa6c5515db5bd19a6630da2becf4c88b1
   CapacitorGeolocation: 8a405e707de9aff6ac9eca7f408966a370f7ca33
@@ -1672,8 +1690,10 @@ SPEC CHECKSUMS:
   FirebaseCrashlytics: 9ce9ce4bb179e31ab91a937d0a73d302a9752d1b
   FirebaseFirestore: 7a9554afcc2084cb03a50e447dfaa4d82dc00135
   FirebaseFirestoreInternal: 11f040c76de2d5f3ea81b15a63cd347199e11aed
+  FirebaseFunctions: 951b5b587920b7405edbc18b7ad0302530a71cbf
   FirebaseInstallations: 6d05424a046b68ca146b4de4376f05b4e9262fc3
   FirebaseMessaging: b5f7bdc62b91b6102015991fb7bc6fa75f643908
+  FirebaseMessagingInterop: 34627f93a4694d51188dd8ecf28e29795028cf23
   FirebaseRemoteConfigInterop: 0bae7d21510b3a0a79af727961c4973aac585add
   FirebaseSessions: bc59e7d0ba90f96f40325fd1defbdec86ba26f20
   FirebaseSharedSwift: a652f2174ce29ce333d1f67df955499d2db009f6
@@ -1694,6 +1714,6 @@ SPEC CHECKSUMS:
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
 
-PODFILE CHECKSUM: 546eb3686631c8e27eeb11eb6254d2c3963578f0
+PODFILE CHECKSUM: 2bb4b9b72a06ab5d7b35b818c0e38a036a95f1a5
 
 COCOAPODS: 1.16.2

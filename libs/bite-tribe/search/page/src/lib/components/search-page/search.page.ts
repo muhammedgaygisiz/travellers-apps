@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, output } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonContent, IonSearchbar } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { SearchbarInputEventDetail } from '@ionic/core';
 
 @Component({
   selector: 'search-page',
@@ -9,4 +10,10 @@ import { TranslocoPipe } from '@jsverse/transloco';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [PageComponent, IonContent, IonSearchbar, TranslocoPipe],
 })
-export class SearchPage {}
+export class SearchPage {
+  searchTextChange = output<string>();
+
+  searchbarInput(event: CustomEvent<SearchbarInputEventDetail>): void {
+    this.searchTextChange.emit(event.detail.value ?? '');
+  }
+}

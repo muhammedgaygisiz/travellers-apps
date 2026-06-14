@@ -6,6 +6,10 @@
   <ion-content class="ion-padding">
     <h1>{{ 'search' | transloco }}</h1>
 
-    <ion-searchbar [debounce]="1000" [placeholder]="'search' | transloco" />
+    <ion-searchbar
+      [debounce]="1000"
+      [placeholder]="'search' | transloco"
+      (ionInput)="searchbarInput($event)"
+    />
   </ion-content>
 </ta-page>

@@ -4,6 +4,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
+import { signal } from '@angular/core';
+import type { PublicUser } from 'model';
 import { SearchContainer } from '../search.container';
 import { SearchService } from '../search.service';
 
@@ -19,8 +21,17 @@ const MockTranslocoService = {
   langChanges$: of(),
 };
 
+const users = signal<PublicUser[]>([]);
+const isLoading = signal(false);
+const hasSearched = signal(false);
 const MockSearchService = {
+  users: {
+    value: users,
+    isLoading,
+  },
+  hasSearched,
   searchUsers: jest.fn(),
+  userClicked: jest.fn(),
 };
 
 describe(SearchContainer.name, () => {
@@ -28,6 +39,10 @@ describe(SearchContainer.name, () => {
   let fixture: ComponentFixture<SearchContainer>;
 
   beforeEach(() => {
+    users.set([]);
+    isLoading.set(false);
+    hasSearched.set(false);
+
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(getIonicConfig()),
@@ -67,6 +82,59 @@ describe(SearchContainer.name, () => {
     );
 
     expect(MockSearchService.searchUsers).toHaveBeenCalledWith('Daniel');
+  });
+
+  it('should not show the empty state before a search', () => {
+    expect(
+      fixture.nativeElement.querySelector('[data-cy="search-empty"]'),
+    ).toBeNull();
+  });
+
+  it('should show a loading state while searching', () => {
+    isLoading.set(true);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-cy="search-loading"]'),
+    ).toBeTruthy();
+  });
+
+  it('should show an empty state when a search has no results', () => {
+    hasSearched.set(true);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-cy="search-empty"]'),
+    ).toBeTruthy();
+  });
+
+  it('should show sorted results and pass a clicked user to the service', () => {
+    const daniel = {
+      userId: 'user-1',
+      displayName: 'Daniel Langone',
+      email: 'daniel@example.com',
+      photoUrl: '',
+    };
+    users.set([
+      {
+        userId: 'user-2',
+        displayName: 'Zoe',
+        email: 'zoe@example.com',
+        photoUrl: '',
+      },
+      daniel,
+    ]);
+    hasSearched.set(true);
+    fixture.detectChanges();
+
+    const items = fixture.nativeElement.querySelectorAll('ion-item');
+    expect(items).toHaveLength(2);
+    expect(items[0].textContent).toContain('Daniel Langone');
+    expect(items[0].textContent).toContain('daniel@example.com');
+
+    items[0].click();
+
+    expect(MockSearchService.userClicked).toHaveBeenCalledWith(daniel);
   });
 
   it('should set current screen to Search', () => {

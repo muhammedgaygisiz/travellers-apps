@@ -9,7 +9,11 @@ import { SearchService } from './search.service';
   template: `
     <search-page
       class="ion-page"
+      [users]="service.users.value()"
+      [isLoading]="service.users.isLoading()"
+      [hasSearched]="service.hasSearched()"
       (searchTextChange)="service.searchUsers($event)"
+      (userClick)="service.userClicked($event)"
     />
   `,
   imports: [SearchPage],

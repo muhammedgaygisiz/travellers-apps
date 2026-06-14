@@ -63,6 +63,25 @@ type MockFileReader = {
   DONE: 2;
 };
 
+const createMockFileReader = (autoLoad = true): MockFileReader => {
+  const reader: MockFileReader = {
+    readAsDataURL: jest.fn(),
+    onload: null,
+    result: 'data:image/jpeg;base64,abc',
+    EMPTY: 0,
+    LOADING: 1,
+    DONE: 2,
+  };
+
+  if (autoLoad) {
+    reader.readAsDataURL.mockImplementation(() => {
+      queueMicrotask(() => reader.onload?.());
+    });
+  }
+
+  return reader;
+};
+
 describe('ImageUploadComponent', () => {
   let component: ImageUploadComponent;
   let compRef: ComponentRef<ImageUploadComponent>;
@@ -120,15 +139,7 @@ describe('ImageUploadComponent', () => {
     });
 
     // @ts-expect-error - Mocking FileReader
-    global.FileReader = jest.fn(() => ({
-      readAsDataURL: jest.fn(),
-      addEventListener: jest.fn((_, cb) => cb()),
-      onload: null,
-      result: 'data:image/jpeg;base64,abc',
-      EMPTY: 0,
-      LOADING: 1,
-      DONE: 2,
-    }));
+    global.FileReader = jest.fn(() => createMockFileReader());
 
     component.value.set(null);
     component.disabled.set(false);
@@ -256,14 +267,7 @@ describe('ImageUploadComponent', () => {
         );
 
         // Mock FileReader
-        const mockFileReader: MockFileReader = {
-          readAsDataURL: jest.fn(),
-          onload: null,
-          result: 'data:image/jpeg;base64,abc',
-          EMPTY: 0,
-          LOADING: 1,
-          DONE: 2,
-        };
+        const mockFileReader = createMockFileReader();
 
         // @ts-expect-error - Mocking FileReader
         global.FileReader = jest.fn(() => mockFileReader);
@@ -303,6 +307,7 @@ describe('ImageUploadComponent', () => {
     it('should create and present alert dialog', async () => {
       const alertMock = {
         present: jest.fn(),
+        onDidDismiss: jest.fn().mockResolvedValue({ role: 'cancel' }),
       };
       alertControllerMock.create = jest.fn().mockResolvedValue(alertMock);
 
@@ -310,23 +315,126 @@ describe('ImageUploadComponent', () => {
       await component.showImageSourceDialog();
 
       expect(alertControllerMock.create).toHaveBeenCalledWith({
-        header: 'Choose Image Source',
+        header: 'choose-image-source',
         buttons: [
           {
             role: 'cancel',
-            text: 'Cancel',
+            text: 'cancel',
           },
           {
-            handler: expect.any(Function),
-            text: 'Take Photo',
+            role: 'camera',
+            text: 'take-photo',
           },
           {
-            handler: expect.any(Function),
-            text: 'Choose from Gallery',
+            role: 'gallery',
+            text: 'choose-from-gallery',
           },
         ],
       });
       expect(alertMock.present).toHaveBeenCalled();
+      expect(alertMock.onDidDismiss).toHaveBeenCalled();
+    });
+
+    it('should start gallery processing after the dialog is dismissed', async () => {
+      let resolveDismiss!: (value: { role: string }) => void;
+      const alertMock = {
+        present: jest.fn(),
+        onDidDismiss: jest.fn(
+          () =>
+            new Promise<{ role: string }>((resolve) => {
+              resolveDismiss = resolve;
+            }),
+        ),
+      };
+      alertControllerMock.create = jest.fn().mockResolvedValue(alertMock);
+      Object.defineProperty(component, 'alertController', {
+        value: alertControllerMock,
+      });
+      jest
+        .spyOn(component, 'pickImageFromGallery')
+        .mockReturnValue(new Promise(() => undefined));
+
+      const dialog = component.showImageSourceDialog();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(alertMock.onDidDismiss).toHaveBeenCalled();
+      expect(component.pickImageFromGallery).not.toHaveBeenCalled();
+
+      resolveDismiss({ role: 'gallery' });
+      await dialog;
+
+      expect(component.pickImageFromGallery).toHaveBeenCalled();
+    });
+
+    it('should start camera processing after the dialog is dismissed', async () => {
+      const alertMock = {
+        present: jest.fn(),
+        onDidDismiss: jest.fn().mockResolvedValue({ role: 'camera' }),
+      };
+      alertControllerMock.create = jest.fn().mockResolvedValue(alertMock);
+      Object.defineProperty(component, 'alertController', {
+        value: alertControllerMock,
+      });
+      const takePhotoWithCamera = jest
+        .spyOn(
+          component as unknown as {
+            takePhotoWithCamera: () => Promise<void>;
+          },
+          'takePhotoWithCamera',
+        )
+        .mockReturnValue(new Promise(() => undefined));
+
+      await component.showImageSourceDialog();
+
+      expect(alertMock.onDidDismiss).toHaveBeenCalled();
+      expect(takePhotoWithCamera).toHaveBeenCalled();
+    });
+  });
+
+  describe('loading state', () => {
+    it('should show a skeleton while a selected file is processed', async () => {
+      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+      let resolveCompression!: (file: File) => void;
+      (compressFile as jest.Mock).mockReturnValue(
+        new Promise<File>((resolve) => {
+          resolveCompression = resolve;
+        }),
+      );
+
+      const processing = component.onFileSelected({
+        target: { files: [file] },
+      } as unknown as Event);
+      fixture.detectChanges();
+
+      expect(component.isLoading()).toBe(true);
+      expect(
+        fixture.nativeElement.querySelector('ion-skeleton-text'),
+      ).not.toBeNull();
+
+      resolveCompression(file);
+      await processing;
+      fixture.detectChanges();
+
+      expect(component.isLoading()).toBe(false);
+      expect(
+        fixture.nativeElement.querySelector('ion-skeleton-text'),
+      ).toBeNull();
+    });
+
+    it('should clear the loading state when processing fails', async () => {
+      const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+      (compressFile as jest.Mock).mockRejectedValue(
+        new Error('Compression failed'),
+      );
+
+      await expect(
+        component.onFileSelected({
+          target: { files: [file] },
+        } as unknown as Event),
+      ).rejects.toThrow('Compression failed');
+
+      expect(component.isLoading()).toBe(false);
     });
   });
 
@@ -520,14 +628,7 @@ describe('ImageUploadComponent', () => {
       component._onTouch = onTouch;
 
       // Mock FileReader
-      const mockFileReader: MockFileReader = {
-        readAsDataURL: jest.fn(),
-        onload: null,
-        result: 'data:image/jpeg;base64,abc',
-        EMPTY: 0,
-        LOADING: 1,
-        DONE: 2,
-      };
+      const mockFileReader = createMockFileReader(false);
 
       // @ts-expect-error - Mocking FileReader
       global.FileReader = jest.fn(() => mockFileReader);
@@ -777,14 +878,7 @@ describe('ImageUploadComponent', () => {
         );
 
         // Mock FileReader
-        const mockFileReader: MockFileReader = {
-          readAsDataURL: jest.fn(),
-          onload: null,
-          result: 'data:image/jpeg;base64,abc',
-          EMPTY: 0,
-          LOADING: 1,
-          DONE: 2,
-        };
+        const mockFileReader = createMockFileReader();
         // @ts-expect-error - Mocking FileReader
         global.FileReader = jest.fn(() => mockFileReader);
 
@@ -833,14 +927,7 @@ describe('ImageUploadComponent', () => {
           });
 
           // Mock FileReader
-          const mockFileReader: MockFileReader = {
-            readAsDataURL: jest.fn(),
-            onload: null,
-            result: 'data:image/jpeg;base64,abc',
-            EMPTY: 0,
-            LOADING: 1,
-            DONE: 2,
-          };
+          const mockFileReader = createMockFileReader();
           // @ts-expect-error - Mocking FileReader
           global.FileReader = jest.fn(() => mockFileReader);
 

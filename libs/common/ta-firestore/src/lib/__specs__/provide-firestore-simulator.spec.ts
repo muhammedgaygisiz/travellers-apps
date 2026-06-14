@@ -2,6 +2,7 @@ import { provideFirestoreSimulator } from '../provide-firestore-simulator';
 import * as connectFirestoreEmulatorUtils from 'firebase/firestore';
 import * as connectStorageEmulatorUtils from 'firebase/storage';
 import * as connectAuthEmulatorUtils from 'firebase/auth';
+import * as connectFunctionsEmulatorUtils from '../connect-functions-emulator';
 import {
   FIREBASE_APP,
   FIREBASE_AUTH,
@@ -18,13 +19,18 @@ jest.mock('firebase/auth', () => ({
   connectAuthEmulator: jest.fn(),
   getAuth: jest.fn(() => ({})),
 }));
+jest.mock('../connect-functions-emulator', () => ({
+  connectFunctionsEmulator: jest.fn(() => Promise.resolve()),
+}));
 
 describe(provideFirestoreSimulator.name, () => {
   let connectFirestoreEmulatorSpy: jest.SpyInstance;
   let connectStorageEmulatorSpy: jest.SpyInstance;
   let connectAuthEmulatorSpy: jest.SpyInstance;
+  let connectFunctionsEmulatorSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     connectFirestoreEmulatorSpy = jest.spyOn(
       connectFirestoreEmulatorUtils,
       'connectFirestoreEmulator',
@@ -37,13 +43,18 @@ describe(provideFirestoreSimulator.name, () => {
       connectAuthEmulatorUtils,
       'connectAuthEmulator',
     );
+    connectFunctionsEmulatorSpy = jest.spyOn(
+      connectFunctionsEmulatorUtils,
+      'connectFunctionsEmulator',
+    );
   });
 
-  it('should call auth, firestore and storage connect emulator functions with given parameters', () => {
+  it('should connect Firebase services to their emulators', () => {
     const result = provideFirestoreSimulator(
       {
         host: 'localhost',
         firestorePort: 8080,
+        functionsPort: 5001,
         storagePort: 9199,
         authUrl: 'http://localhost:9099',
       } as any,
@@ -67,6 +78,10 @@ describe(provideFirestoreSimulator.name, () => {
       'localhost',
       9199,
     );
+    expect(connectFunctionsEmulatorSpy).toHaveBeenCalledWith({
+      host: 'localhost',
+      port: 5001,
+    });
 
     expect(result).toEqual([
       { provide: FIREBASE_APP, useFactory: expect.any(Function) },

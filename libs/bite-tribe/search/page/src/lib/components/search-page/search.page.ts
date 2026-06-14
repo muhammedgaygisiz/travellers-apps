@@ -7,6 +7,7 @@ import { SearchbarInputEventDetail } from '@ionic/core';
 @Component({
   selector: 'search-page',
   templateUrl: 'search.page.html',
+  styleUrl: 'search.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [PageComponent, IonContent, IonSearchbar, TranslocoPipe],
 })

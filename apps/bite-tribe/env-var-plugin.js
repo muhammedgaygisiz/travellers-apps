@@ -17,6 +17,10 @@ const envVarPlugin = {
       }
     }
 
+    if (process.env.NX_TASK_TARGET_CONFIGURATION === 'production') {
+      delete envVars.NX_APP_BITE_TRIBE_IS_DEV;
+    }
+
     const { version } = JSON.parse(
       readFileSync(join(workspaceRoot, 'package.json'), 'utf8'),
     );

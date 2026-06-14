@@ -6,6 +6,46 @@
   <ion-content class="ion-padding">
     <h1>{{ 'search' | transloco }}</h1>
 
-    <ion-searchbar [debounce]="1000" [placeholder]="'search' | transloco" />
+    <ion-searchbar
+      [debounce]="1000"
+      [placeholder]="'search' | transloco"
+      (ionInput)="searchbarInput($event)"
+    />
+
+    @if (isLoading()) {
+    <div class="spinner-container" data-cy="search-loading">
+      <ion-spinner color="primary" />
+    </div>
+    } @else if (hasSearched() && users().length === 0) {
+    <div class="empty-container" data-cy="search-empty">
+      <ion-label>{{ 'no-search-results-found' | transloco }}</ion-label>
+    </div>
+    } @else if (users().length > 0) {
+    <ion-list data-cy="search-results">
+      @for (user of sortedUsers(); track user.userId) {
+      <ion-item
+        [button]="true"
+        class="ion-margin-vertical"
+        (click)="userClick.emit(user)"
+      >
+        <ion-avatar slot="start">
+          @if ( user.photoUrl && !imageErroredUserIds().has(user.userId) ) {
+          <img
+            [src]="user.photoUrl"
+            [alt]="user.displayName"
+            (error)="onImageError(user.userId)"
+          />
+          } @else {
+          <ion-icon name="person-circle-outline" class="profile-image" />
+          }
+        </ion-avatar>
+        <ion-label>
+          <h2>{{ user.displayName }}</h2>
+          <p>{{ user.email }}</p>
+        </ion-label>
+      </ion-item>
+      }
+    </ion-list>
+    }
   </ion-content>
 </ta-page>

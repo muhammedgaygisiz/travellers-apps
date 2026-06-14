@@ -15,6 +15,8 @@ jest.mock('@capacitor/core', () => ({
   Capacitor: {
     isNativePlatform: jest.fn(),
   },
+  registerPlugin: jest.fn(() => ({})),
+  WebPlugin: class {},
 }));
 
 jest.mock('@capacitor-firebase/authentication');
@@ -43,6 +45,7 @@ describe(AuthService.name, () => {
   let navigateRootMock: jest.Mock;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     scheduler = new TestScheduler(assertEqual);
     navigateRootMock = jest.fn();
     TestBed.configureTestingModule({
@@ -85,6 +88,14 @@ describe(AuthService.name, () => {
       it('should return null', async () => {
         const user = service.getUser();
         expect(user).toBeNull();
+      });
+    });
+
+    describe('given no auth state', () => {
+      it('should return undefined', () => {
+        jest.spyOn(service, 'authState').mockReturnValue(undefined);
+
+        expect(service.getUser()).toBeUndefined();
       });
     });
   });
@@ -247,6 +258,79 @@ describe(AuthService.name, () => {
       expect(navigateRootMock).toHaveBeenCalledWith('login');
       expect(reloadPageSpy).toHaveBeenCalled();
     });
+
+    it('should not clear persistence on a native platform', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+
+      await service.logout();
+
+      expect(clearPersistanceSpy).not.toHaveBeenCalled();
+      expect(navigateRootMock).toHaveBeenCalledWith('login');
+      expect(reloadPageSpy).toHaveBeenCalled();
+    });
+
+    it('should continue logout when Firebase cleanup operations fail', async () => {
+      const removeListenersError = new Error('remove listeners failed');
+      const signOutError = new Error('sign out failed');
+      const terminateError = new Error('terminate failed');
+      const clearPersistenceError = new Error('clear persistence failed');
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+      removeAllListenersSpy.mockRejectedValue(removeListenersError);
+      jest
+        .spyOn(FirebaseAuthentication, 'signOut')
+        .mockRejectedValue(signOutError);
+      terminateSpy.mockRejectedValue(terminateError);
+      clearPersistanceSpy.mockRejectedValue(clearPersistenceError);
+
+      await service.logout();
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error removing Firestore listeners during logout:',
+        removeListenersError,
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error signing out:',
+        signOutError,
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error terminating Firestore:',
+        terminateError,
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error clearing Firestore persistence:',
+        clearPersistenceError,
+      );
+      expect(navigateRootMock).toHaveBeenCalledWith('login');
+      expect(reloadPageSpy).toHaveBeenCalled();
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should clear the current auth state', async () => {
+      const authStateChangeNextSpy = jest.spyOn(
+        (service as any)._authStateChange$,
+        'next',
+      );
+
+      await service.logout();
+
+      expect(authStateChangeNextSpy).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe('reloadPage', () => {
+    it('should reload the browser window', () => {
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+
+      expect(() => service.reloadPage()).not.toThrow();
+
+      consoleErrorSpy.mockRestore();
+    });
   });
 
   describe('registerWithUsernameAndPassword', () => {
@@ -322,14 +406,25 @@ describe(AuthService.name, () => {
   });
 
   describe('setupAnalyticsAndCrashlytics', () => {
+    const originalBusinessFlag = process.env['NX_APP_BITE_TRIBE_IS_BUSINESS'];
+
     beforeEach(() => {
+      delete process.env['NX_APP_BITE_TRIBE_IS_BUSINESS'];
       jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
     });
 
+    afterEach(() => {
+      if (originalBusinessFlag === undefined) {
+        delete process.env['NX_APP_BITE_TRIBE_IS_BUSINESS'];
+      } else {
+        process.env['NX_APP_BITE_TRIBE_IS_BUSINESS'] = originalBusinessFlag;
+      }
+    });
+
     describe('given a user', () => {
-      it('should set userid on analytics', () => {
+      it('should set userid on analytics', async () => {
         const user = { uid: '123' } as any;
-        service.setupAnalyticsAndCrashlytics(user);
+        await service.setupAnalyticsAndCrashlytics(user);
 
         expect(FirebaseAnalytics.setUserId).toHaveBeenCalledWith({
           userId: '123',
@@ -338,15 +433,52 @@ describe(AuthService.name, () => {
     });
 
     describe('given it is native platform', () => {
-      it('should set userid on crashlytics', () => {
+      it('should set userid on crashlytics', async () => {
         jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
 
         const user = { uid: '123' } as any;
-        service.setupAnalyticsAndCrashlytics(user);
+        await service.setupAnalyticsAndCrashlytics(user);
 
         expect(FirebaseCrashlytics.setUserId).toHaveBeenCalledWith({
           userId: '123',
         });
+      });
+    });
+
+    describe('given it is a web platform', () => {
+      it('should not set userid on crashlytics', async () => {
+        jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+
+        await service.setupAnalyticsAndCrashlytics({
+          uid: '123',
+        } as any);
+
+        expect(FirebaseAnalytics.setUserId).toHaveBeenCalledWith({
+          userId: '123',
+        });
+        expect(FirebaseCrashlytics.setUserId).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('given no user', () => {
+      it('should not configure analytics or crashlytics', async () => {
+        await service.setupAnalyticsAndCrashlytics(null as any);
+
+        expect(FirebaseAnalytics.setUserId).not.toHaveBeenCalled();
+        expect(FirebaseCrashlytics.setUserId).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('given the business app', () => {
+      it('should not configure analytics or crashlytics', async () => {
+        process.env['NX_APP_BITE_TRIBE_IS_BUSINESS'] = 'true';
+
+        await service.setupAnalyticsAndCrashlytics({
+          uid: '123',
+        } as any);
+
+        expect(FirebaseAnalytics.setUserId).not.toHaveBeenCalled();
+        expect(FirebaseCrashlytics.setUserId).not.toHaveBeenCalled();
       });
     });
   });

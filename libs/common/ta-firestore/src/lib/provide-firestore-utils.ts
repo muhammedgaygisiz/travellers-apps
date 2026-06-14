@@ -35,22 +35,35 @@ export const provideFirestoreUtils = (
   const app = initializeApp(firebaseOptions || {});
   const firestore: Firestore = initializeFirestore(app, {});
 
-  if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] === 'true') {
-    console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
-
-    console.log('DISABLING ANALYTICS');
-    FirebaseAnalytics.setEnabled({ enabled: false });
-
-    if (emulators) {
-      const storage = getStorage(app);
-      return provideFirestoreSimulator(emulators, app, firestore, storage);
-    }
-
-    console.warn(
-      'DEV ENVIRONMENT - NX_APP_BITE_TRIBE_IS_DEV is true, but no emulators configuration was provided. Falling back to standard Firestore initialization.',
+  if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] !== 'true') {
+    return provideStandardFirestoreUtils(
+      app,
+      firestore,
+      Boolean(withAnalytics),
     );
   }
 
+  console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
+  console.log('DISABLING ANALYTICS');
+  FirebaseAnalytics.setEnabled({ enabled: false });
+
+  if (emulators) {
+    const storage = getStorage(app);
+    return provideFirestoreSimulator(emulators, app, firestore, storage);
+  }
+
+  console.warn(
+    'DEV ENVIRONMENT - NX_APP_BITE_TRIBE_IS_DEV is true, but no emulators configuration was provided. Falling back to standard Firestore initialization.',
+  );
+
+  return provideStandardFirestoreUtils(app, firestore, Boolean(withAnalytics));
+};
+
+const provideStandardFirestoreUtils = (
+  app: ReturnType<typeof initializeApp>,
+  firestore: Firestore,
+  withAnalytics: boolean,
+): Provider[] => {
   try {
     enableMultiTabIndexedDbPersistence(firestore);
   } catch (err) {

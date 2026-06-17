@@ -11,6 +11,7 @@ interface SearchUsersRequest {
 interface SearchUser {
   userId: string;
   displayName: string;
+  fullName?: string;
   email: string;
   photoUrl: string;
   city?: string;
@@ -29,6 +30,9 @@ const toSearchUser = (
     userId: typeof user['userId'] === 'string' ? user['userId'] : doc.id,
     displayName:
       typeof user['displayName'] === 'string' ? user['displayName'] : '',
+    ...(typeof user['fullName'] === 'string'
+      ? { fullName: user['fullName'] }
+      : {}),
     email: typeof user['email'] === 'string' ? user['email'] : '',
     photoUrl: typeof user['photoUrl'] === 'string' ? user['photoUrl'] : '',
     ...(typeof user['city'] === 'string' ? { city: user['city'] } : {}),
@@ -70,8 +74,21 @@ export const searchUsers = onCall<SearchUsersRequest>(async (request) => {
         typeof user['displayName'] === 'string'
           ? user['displayName'].toLocaleLowerCase()
           : '';
+      const email =
+        typeof user['email'] === 'string'
+          ? user['email'].toLocaleLowerCase()
+          : '';
+      const fullName =
+        typeof user['fullName'] === 'string'
+          ? user['fullName'].toLocaleLowerCase()
+          : '';
 
-      return user['public'] === true && displayName.includes(searchText);
+      return (
+        user['public'] === true &&
+        (displayName.includes(searchText) ||
+          email.includes(searchText) ||
+          fullName.includes(searchText))
+      );
     })
     .slice(0, MAX_RESULTS)
     .map(toSearchUser);

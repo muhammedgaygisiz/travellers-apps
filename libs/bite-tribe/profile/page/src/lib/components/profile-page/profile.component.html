@@ -62,6 +62,9 @@
     </h1>
 
     <span class="profile-location">
+      @if (userData?.fullName) {
+        {{ userData?.fullName }},
+      }
       {{ userData?.city || ('no-location' | transloco) }}
     </span>
     <p class="profile-about">

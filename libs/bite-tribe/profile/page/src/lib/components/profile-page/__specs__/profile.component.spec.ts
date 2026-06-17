@@ -202,6 +202,43 @@ describe('ProfileComponent', () => {
     });
   });
 
+  describe('profile location', () => {
+    it('should show fullName before city separated by a comma', () => {
+      compRef.setInput('user', {
+        displayName: 'mo',
+        fullName: 'Muhammed Gaygisiz',
+        city: 'Zurich',
+        userId: 'user1',
+      } as any);
+
+      fixture.detectChanges();
+
+      const location = fixture.nativeElement.querySelector(
+        '.profile-location',
+      ) as HTMLElement;
+
+      expect(location.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        'Muhammed Gaygisiz, Zurich',
+      );
+    });
+
+    it('should show only city when fullName is not present', () => {
+      compRef.setInput('user', {
+        displayName: 'mo',
+        city: 'Zurich',
+        userId: 'user1',
+      } as any);
+
+      fixture.detectChanges();
+
+      const location = fixture.nativeElement.querySelector(
+        '.profile-location',
+      ) as HTMLElement;
+
+      expect(location.textContent?.replace(/\s+/g, ' ').trim()).toBe('Zurich');
+    });
+  });
+
   describe('onFollow', () => {
     it('should emit followClick with user when user is defined', () => {
       const userMock = { userId: 'user1' } as any;

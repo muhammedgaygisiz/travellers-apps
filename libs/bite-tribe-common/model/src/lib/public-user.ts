@@ -1,5 +1,6 @@
 export interface PublicUser {
   displayName: string;
+  fullName?: string;
   email: string;
   photoUrl: string;
   userId: string;

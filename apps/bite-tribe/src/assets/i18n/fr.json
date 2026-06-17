@@ -41,6 +41,8 @@
   "save-changes": "Enregistrer les modifications",
   "display-name": "Nom affiché",
   "enter-display-name": "Entrer le nom affiché",
+  "full-name": "Nom complet",
+  "enter-full-name": "Entrer le nom complet",
   "email": "E-mail",
   "city": "Ville",
   "about": "À propos",

@@ -41,6 +41,8 @@
   "save-changes": "Guardar cambios",
   "display-name": "Nombre de perfil",
   "enter-display-name": "Introduce el nombre de perfil",
+  "full-name": "Nombre completo",
+  "enter-full-name": "Introduce tu nombre completo",
   "email": "Correo electrónico",
   "city": "Ciudad",
   "about": "Acerca de",

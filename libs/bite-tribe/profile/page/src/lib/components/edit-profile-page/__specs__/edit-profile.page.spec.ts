@@ -49,6 +49,7 @@ describe(EditProfilePage.name, () => {
       expect(formValue).toEqual({
         city: '',
         displayName: '',
+        fullName: '',
         about: '',
         email: '',
         photoUrl: '',
@@ -80,6 +81,7 @@ describe(EditProfilePage.name, () => {
     it('should patch about field from publicUser input', () => {
       const publicUser: PublicUser = {
         displayName: 'Test User',
+        fullName: 'Test Full Name',
         email: 'test@example.com',
         photoUrl: 'photo.jpg',
         userId: 'user123',
@@ -118,6 +120,7 @@ describe(EditProfilePage.name, () => {
     it('should return publicUser displayName when available', () => {
       const publicUser: PublicUser = {
         displayName: 'Public Name',
+        fullName: 'Public Full Name',
         email: 'test@example.com',
         photoUrl: 'photo.jpg',
         userId: 'user123',
@@ -139,6 +142,7 @@ describe(EditProfilePage.name, () => {
       it('should patch form values from publicUser input', () => {
         const publicUser: PublicUser = {
           displayName: 'Test User',
+          fullName: 'Test Full Name',
           email: 'e@mail.com',
           photoUrl: 'photo.jpg',
           userId: 'user123',
@@ -154,6 +158,7 @@ describe(EditProfilePage.name, () => {
           about: 'About me text',
           city: 'Test City',
           displayName: 'Test User',
+          fullName: 'Test Full Name',
           email: 'e@mail.com',
           photoUrl: 'photo.jpg',
           public: true,
@@ -170,6 +175,7 @@ describe(EditProfilePage.name, () => {
           about: '',
           city: '',
           displayName: 'Anonymous',
+          fullName: '',
           email: '',
           photoUrl: '',
           public: false,
@@ -226,6 +232,7 @@ describe(EditProfilePage.name, () => {
     beforeEach(() => {
       const mockPublicUser: PublicUser = {
         displayName: 'Test User',
+        fullName: 'Test Full Name',
         email: 'test@example.com',
         photoUrl: 'photo.jpg',
         userId: 'user123',
@@ -242,6 +249,7 @@ describe(EditProfilePage.name, () => {
         about: aboutText,
         city: 'Berlin',
         displayName: 'New Name',
+        fullName: 'New Full Name',
       });
 
       let emittedPublicUser: PublicUser | undefined;
@@ -253,6 +261,24 @@ describe(EditProfilePage.name, () => {
 
       expect(emittedPublicUser).toBeDefined();
       expect(emittedPublicUser?.about).toBe(aboutText);
+      expect(emittedPublicUser?.fullName).toBe('New Full Name');
+    });
+
+    it('should save empty string for fullName when not provided', () => {
+      component.profileForm.patchValue({
+        city: 'Berlin',
+        fullName: '',
+      });
+
+      let emittedPublicUser: PublicUser | undefined;
+      component.submitPublicUser.subscribe((user) => {
+        emittedPublicUser = user;
+      });
+
+      component.saveProfile();
+
+      expect(emittedPublicUser).toBeDefined();
+      expect(emittedPublicUser?.fullName).toBe('');
     });
 
     it('should save empty string for about when not provided', () => {

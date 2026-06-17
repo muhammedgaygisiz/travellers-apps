@@ -1,0 +1,4 @@
+interface:
+  display_name: "Travellers Apps Tests"
+  short_description: "Reliable test workflow for travellers-apps"
+  default_prompt: "Use $travellers-apps-tests to choose and run focused tests for this travellers-apps change."

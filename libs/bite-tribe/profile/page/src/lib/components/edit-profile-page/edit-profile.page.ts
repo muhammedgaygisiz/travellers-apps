@@ -96,6 +96,7 @@ export class EditProfilePage {
   isOpen = signal(false);
   profileForm = this.formBuilder.group({
     displayName: [''],
+    fullName: [''],
     city: [''],
     about: [''],
     email: ['', Validators.required],
@@ -142,6 +143,7 @@ export class EditProfilePage {
     const {
       city,
       displayName,
+      fullName,
       about,
       public: isPublic,
       email,
@@ -154,6 +156,7 @@ export class EditProfilePage {
         ...publicUser,
         city: city ?? '',
         displayName: displayName ? displayName : publicUser.displayName,
+        fullName: fullName || '',
         about: about || '',
         email: email || '',
         public: isPublic || false,

@@ -108,6 +108,7 @@ export class ProfileApiService {
         data: {
           userId: user?.uid || '',
           displayName: user?.displayName || '',
+          fullName: user?.displayName || '',
           email: user?.email || '',
           photoUrl: photoUrl || '',
           public: isPublic,
@@ -145,6 +146,7 @@ export class ProfileApiService {
           ...restOfPublicUser,
           photoUrl: newPhotoUrl || '',
           displayName: publicUser.displayName,
+          fullName: publicUser.fullName || '',
           email: publicUser.email,
           city: publicUser.city || '',
           about: publicUser.about || '',
@@ -163,6 +165,7 @@ export class ProfileApiService {
 
       const updatedUser: Omit<PublicUser, 'userId' | 'followers'> = {
         displayName: publicUser.displayName,
+        fullName: publicUser.fullName || '',
         email: publicUser.email,
         photoUrl: publicUser.photoUrl,
         city: publicUser.city || '',

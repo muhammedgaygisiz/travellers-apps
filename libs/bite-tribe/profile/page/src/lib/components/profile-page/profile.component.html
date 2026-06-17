@@ -24,23 +24,36 @@
       (followingClick)="followingClick.emit($event)"
     />
 
-    <h1 class="profile-name">
-      {{ userData?.displayName }}
+    <div class="profile-summary">
+      <div class="profile-info">
+        <h1 class="profile-name">
+          <span class="profile-display-name">{{ userData?.displayName }}</span>
 
-      @if (userData?.isOrganisation) {
-      } @else {
-        <ion-badge class="subscription-badge">
-          @if (subscriptionTierData === 0) {
-            FREE
+          @if (!userData?.isOrganisation) {
+            <ion-badge class="subscription-badge">
+              @if (subscriptionTierData === 0) {
+                FREE
+              }
+              @if (subscriptionTierData === 1) {
+                PRO
+              }
+              @if (subscriptionTierData === 2) {
+                ULTRA
+              }
+            </ion-badge>
           }
-          @if (subscriptionTierData === 1) {
-            PRO
+        </h1>
+
+        <div class="profile-meta">
+          @if (userData?.fullName) {
+            {{ userData?.fullName }},
           }
-          @if (subscriptionTierData === 2) {
-            ULTRA
-          }
-        </ion-badge>
-        <div class="buttons">
+          {{ userData?.city || ('no-location' | transloco) }}
+        </div>
+      </div>
+
+      @if (!userData?.isOrganisation) {
+        <div class="profile-actions">
           @if (!!currentUserId && userData?.userId === currentUserId) {
             <ion-button (click)="gotoEditProfile.emit()"
               >{{ 'edit-profile' | transloco }}
@@ -59,14 +72,7 @@
           }
         </div>
       }
-    </h1>
-
-    <span class="profile-location">
-      @if (userData?.fullName) {
-        {{ userData?.fullName }},
-      }
-      {{ userData?.city || ('no-location' | transloco) }}
-    </span>
+    </div>
     <p class="profile-about">
       {{ userData?.about || ('no-description-available' | transloco) }}
     </p>

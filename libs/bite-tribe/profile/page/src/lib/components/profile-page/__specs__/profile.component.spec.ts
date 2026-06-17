@@ -214,7 +214,7 @@ describe('ProfileComponent', () => {
       fixture.detectChanges();
 
       const location = fixture.nativeElement.querySelector(
-        '.profile-location',
+        '.profile-meta',
       ) as HTMLElement;
 
       expect(location.textContent?.replace(/\s+/g, ' ').trim()).toBe(
@@ -232,7 +232,7 @@ describe('ProfileComponent', () => {
       fixture.detectChanges();
 
       const location = fixture.nativeElement.querySelector(
-        '.profile-location',
+        '.profile-meta',
       ) as HTMLElement;
 
       expect(location.textContent?.replace(/\s+/g, ' ').trim()).toBe('Zurich');

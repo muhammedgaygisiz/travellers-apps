@@ -41,6 +41,8 @@
   "save-changes": "Save Changes",
   "display-name": "Display Name",
   "enter-display-name": "Enter display name",
+  "full-name": "Full Name",
+  "enter-full-name": "Enter full name",
   "email": "Email",
   "city": "City",
   "about": "About",

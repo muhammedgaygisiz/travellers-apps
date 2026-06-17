@@ -3,14 +3,36 @@ $SILVER: #c0c0c0;
 $GOLD: #ffd700;
 
 :host {
+  .profile-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: start;
+    margin-top: 1rem;
+  }
+
+  .profile-info {
+    min-width: 0;
+  }
+
   .profile-name {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
+    align-items: center;
+    min-width: 0;
+    margin: 0;
 
     font-size: 1.25rem;
     font-weight: bold;
 
+    .profile-display-name {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
     .subscription-badge {
+      flex: 0 0 auto;
       background: var(--ion-color-tertiary-tint);
       color: var(--ion-color-tertiary-contrast);
     }
@@ -36,8 +58,9 @@ $GOLD: #ffd700;
     }
   }
 
-  .profile-location {
+  .profile-meta {
     color: gray;
+    overflow-wrap: anywhere;
   }
 
   .profile-about {
@@ -45,9 +68,15 @@ $GOLD: #ffd700;
     font-style: italic;
   }
 
-  .buttons {
-    position: absolute;
-    right: 1rem;
+  .profile-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+
+    ion-button {
+      white-space: nowrap;
+    }
   }
 
   .about-section,

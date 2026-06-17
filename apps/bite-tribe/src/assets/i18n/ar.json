@@ -41,6 +41,8 @@
   "save-changes": "حفظ التغييرات",
   "display-name": "الاسم المعروض",
   "enter-display-name": "أدخل الاسم المعروض",
+  "full-name": "الاسم الكامل",
+  "enter-full-name": "أدخل الاسم الكامل",
   "email": "البريد الإلكتروني",
   "city": "المدينة",
   "about": "حول",

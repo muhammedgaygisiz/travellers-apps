@@ -12,59 +12,19 @@
       (ionInput)="searchbarInput($event)"
     />
 
-    <div class="category-chips" data-cy="search-categories">
-      @for (category of categories; track category.value) {
-      <bt-chip
-        [label]="category.labelKey | transloco"
-        [selected]="selectedCategory() === category.value"
-        [attr.aria-pressed]="selectedCategory() === category.value"
-        (chipClick)="categoryChange.emit(category.value)"
-      />
-      }
-    </div>
+    <bt-chip-radio-group
+      class="ion-margin-vertical"
+      data-cy="search-categories"
+      [options]="categoryOptions()"
+      [selectedValue]="selectedCategory()"
+      (valueChange)="categoryValueChange($event)"
+    />
 
-    @if (isLoading()) {
-    <div class="spinner-container" data-cy="search-loading">
-      <ion-spinner color="primary" />
-    </div>
-    } @else if (hasSearched() && results().length === 0) {
-    <div class="empty-container" data-cy="search-empty">
-      <ion-label>{{ 'no-search-results-found' | transloco }}</ion-label>
-    </div>
-    } @else if (results().length > 0) {
-    <ion-list data-cy="search-results">
-      @for (result of sortedResults(); track getResultId(result)) {
-      <ion-item
-        [button]="true"
-        class="ion-margin-vertical"
-        (click)="resultClick.emit(result)"
-      >
-        <ion-avatar slot="start">
-          @if ( getResultImage(result) &&
-          !imageErroredResultIds().has(getResultId(result)) ) {
-          <img
-            [src]="getResultImage(result)"
-            [alt]="getResultTitle(result)"
-            (error)="onResultImageError(getResultId(result))"
-          />
-          } @else {
-          <ion-icon
-            [name]="getResultFallbackIcon(result)"
-            class="result-image"
-          />
-          }
-        </ion-avatar>
-        <ion-label>
-          <h2>{{ getResultTitle(result) }}</h2>
-          @if (getResultSubtitle(result); as subtitle) {
-          <p>{{ subtitle }}</p>
-          } @if (isUnverifiedRestaurant(result)) {
-          <p>{{ 'not-verified-restaurant' | transloco }}</p>
-          }
-        </ion-label>
-      </ion-item>
-      }
-    </ion-list>
-    }
+    <search-list
+      [results]="results()"
+      [isLoading]="isLoading()"
+      [hasSearched]="hasSearched()"
+      (resultClick)="resultClick.emit($event)"
+    />
   </ion-content>
 </ta-page>

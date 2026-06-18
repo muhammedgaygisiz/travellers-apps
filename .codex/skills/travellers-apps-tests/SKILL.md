@@ -36,6 +36,7 @@ Common feature flow:
 - For result lists, prefer discriminated unions over guessing from object shape. This keeps click handling and display helpers explicit.
 - For images, follow the repo convention `imagePath || image || ''`. `imagePath` often contains the usable Firebase Storage download URL.
 - For Ionic icons, check `libs/common/utils/src/lib/add-necessary-icons.ts`; register new icon names there if they are not already included.
+- Prefer Ionic layout helper classes such as `ion-display-flex`, `ion-flex-column`, `ion-flex-row`, and `ion-justify-content-*` in templates for simple flex layout before adding component CSS with `display: flex` or `flex-direction`.
 - For dialogs/labels/buttons, use Transloco keys. Avoid hardcoded visible English in templates or alert config.
 - For route assembly, reuse `PATH` from `libs/common/utils/src/lib/paths.ts` where possible and mirror existing services for route conventions.
 - Avoid broad refactors while implementing an issue. Touch the layer that owns the behavior and adjacent tests.

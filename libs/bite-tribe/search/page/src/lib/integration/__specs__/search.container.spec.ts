@@ -5,10 +5,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { signal } from '@angular/core';
-import type {
-  SearchCategory,
-  SearchResult,
-} from 'bite-tribe/search-data-access';
+import type { SearchCategory, SearchResult } from 'model';
 import { SearchContainer } from '../search.container';
 import { SearchService } from '../search.service';
 

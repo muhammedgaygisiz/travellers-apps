@@ -1,11 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  SearchDataAccessService,
-  type SearchCategory,
-  type SearchResult,
-} from 'bite-tribe/search-data-access';
+import { SearchDataAccessService } from 'bite-tribe/search-data-access';
 import { signal } from '@angular/core';
 import { NavController } from '@ionic/angular/standalone';
+import type { SearchCategory, SearchResult } from 'model';
 import { SearchService } from '../search.service';
 
 describe(SearchService.name, () => {

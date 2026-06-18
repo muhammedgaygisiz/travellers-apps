@@ -1,12 +1,12 @@
 import { Injectable, resource, ResourceLoader, signal } from '@angular/core';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
-import type { PublicUser } from 'model';
 import type {
+  PublicUser,
   SearchBite,
   SearchCategory,
   SearchRestaurant,
   SearchResult,
-} from './search-result';
+} from 'model';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 

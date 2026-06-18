@@ -1,31 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
+  inject,
   input,
   output,
-  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import {
-  IonAvatar,
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonSearchbar,
-  IonSpinner,
-} from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { IonContent, IonSearchbar } from '@ionic/angular/standalone';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { SearchbarInputEventDetail } from '@ionic/core';
-import { ChipComponent } from 'common/ui/chip';
-import type {
-  SearchBite,
-  SearchCategory,
-  SearchRestaurant,
-  SearchResult,
-} from 'bite-tribe/search-data-access';
+import { ChipRadioGroupComponent, type ChipRadioOption } from 'common/ui/chip';
+import type { SearchCategory, SearchResult } from 'model';
+import { SearchListComponent } from '../search-list/search-list.component';
 
 interface SearchCategoryOption {
   labelKey: string;
@@ -39,20 +25,17 @@ interface SearchCategoryOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PageComponent,
-    IonAvatar,
     IonContent,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
     IonSearchbar,
-    IonSpinner,
     TranslocoPipe,
-    ChipComponent,
+    ChipRadioGroupComponent,
+    SearchListComponent,
   ],
 })
 export class SearchPage {
-  categories: SearchCategoryOption[] = [
+  private readonly translocoService = inject(TranslocoService);
+
+  readonly categories: SearchCategoryOption[] = [
     { labelKey: 'search-category-user', value: 'user' },
     { labelKey: 'search-category-bite', value: 'bite' },
     { labelKey: 'search-category-restaurant', value: 'restaurant' },
@@ -67,84 +50,18 @@ export class SearchPage {
   categoryChange = output<SearchCategory>();
   resultClick = output<SearchResult>();
 
-  imageErroredResultIds = signal<Set<string>>(new Set());
-  sortedResults = computed(() =>
-    [...this.results()].sort((a, b) =>
-      this.getResultTitle(a).localeCompare(this.getResultTitle(b)),
-    ),
-  );
-
   searchbarInput(event: CustomEvent<SearchbarInputEventDetail>): void {
     this.searchTextChange.emit(event.detail.value ?? '');
   }
 
-  onResultImageError(resultId: string): void {
-    this.imageErroredResultIds.update((ids) => new Set([...ids, resultId]));
+  categoryOptions(): ChipRadioOption[] {
+    return this.categories.map(({ labelKey, value }) => ({
+      label: this.translocoService.translate(labelKey),
+      value,
+    }));
   }
 
-  getResultId(result: SearchResult): string {
-    if (result.category === 'user') {
-      return `${result.category}-${result.value.userId}`;
-    }
-
-    return `${result.category}-${result.value.id}`;
-  }
-
-  getResultTitle(result: SearchResult): string {
-    if (result.category === 'user') {
-      return result.value.displayName ?? '';
-    }
-
-    return result.value.name;
-  }
-
-  getResultSubtitle(result: SearchResult): string | undefined {
-    if (result.category === 'user') {
-      return result.value.fullName;
-    }
-
-    if (result.category === 'bite') {
-      return this.getBiteSubtitle(result.value);
-    }
-
-    return this.getRestaurantSubtitle(result.value);
-  }
-
-  getResultImage(result: SearchResult): string | undefined {
-    if (result.category === 'user') {
-      return result.value.photoUrl;
-    }
-
-    return result.value.imagePath || result.value.image;
-  }
-
-  getResultFallbackIcon(result: SearchResult): string {
-    if (result.category === 'user') {
-      return 'person-circle-outline';
-    }
-
-    if (result.category === 'bite') {
-      return 'restaurant-outline';
-    }
-
-    return 'storefront-outline';
-  }
-
-  isUnverifiedRestaurant(result: SearchResult): boolean {
-    return result.category === 'restaurant' && !result.value.restaurantId;
-  }
-
-  private getBiteSubtitle(bite: SearchBite): string | undefined {
-    if (bite.place && bite.description) {
-      return `${bite.place} - ${bite.description}`;
-    }
-
-    return bite.place || bite.description;
-  }
-
-  private getRestaurantSubtitle(
-    restaurant: SearchRestaurant,
-  ): string | undefined {
-    return restaurant.place;
+  categoryValueChange(category: string): void {
+    this.categoryChange.emit(category as SearchCategory);
   }
 }

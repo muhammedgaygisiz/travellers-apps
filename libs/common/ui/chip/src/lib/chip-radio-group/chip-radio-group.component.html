@@ -1,0 +1,11 @@
+<div class="ion-display-flex ion-flex-wrap chip-radio-group" role="radiogroup">
+  @for (option of options(); track option.value) {
+    <bt-chip
+      role="radio"
+      [label]="option.label"
+      [selected]="selectedValue() === option.value"
+      [attr.aria-checked]="selectedValue() === option.value"
+      (chipClick)="valueChange.emit(option.value)"
+    />
+  }
+</div>

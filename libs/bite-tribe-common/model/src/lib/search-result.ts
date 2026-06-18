@@ -1,4 +1,4 @@
-import type { PublicUser } from 'model';
+import type { PublicUser } from './public-user';
 
 export type SearchCategory = 'user' | 'bite' | 'restaurant';
 

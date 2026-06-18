@@ -1,10 +1,7 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { NavController } from '@ionic/angular/standalone';
-import {
-  SearchDataAccessService,
-  type SearchCategory,
-  type SearchResult,
-} from 'bite-tribe/search-data-access';
+import { SearchDataAccessService } from 'bite-tribe/search-data-access';
+import type { SearchCategory, SearchResult } from 'model';
 import { PATH } from 'utils';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;

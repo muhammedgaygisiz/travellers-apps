@@ -1,13 +1,67 @@
 ---
 name: travellers-apps-tests
-description: Reliable testing workflow for the muhammedgaygisiz/travellers-apps Nx workspace. Use when Codex works in this repository and needs to choose, run, debug, or report tests for Angular/Ionic libraries, Firebase functions, shared model changes, profile/API/store changes, or when Nx project graph/daemon behavior hangs or obscures test output.
+description: Architecture and validation workflow for the muhammedgaygisiz/travellers-apps Nx workspace. Use when Codex implements or validates Angular/Ionic features, Firebase functions, shared model/data-access changes, profile/API/store/search flows, linting, or when Nx project graph/daemon behavior hangs or obscures test output.
 ---
 
-# Travellers Apps Tests
+# Travellers Apps
 
 ## Purpose
 
-Use this skill to validate changes in `travellers-apps` without getting stuck on Nx graph/daemon behavior or using the wrong project names.
+Use this skill to implement and validate changes in `travellers-apps` while preserving the repo's feature layering and avoiding known Nx/lint/test traps.
+
+## Feature Architecture
+
+Prefer the existing Nx library boundaries instead of widening a layer casually:
+
+- `libs/**/page`: presentation and integration. Component files own template/state rendering; `integration/*.container.ts` wires components to services; `integration/*.service.ts` owns UI workflow and navigation.
+- `libs/**/data-access`: resource signals, callable/API wrappers, Firestore/API access, and typed request/result shapes used by the feature.
+- `libs/bite-tribe-common/model`: shared app models only when multiple libraries need the same domain type. For feature-local result shapes, prefer colocated exported types in that feature's data-access library.
+- `libs/bite-tribe/store`: NgRx state, router selectors, derived selectors, effects, and app-wide state transformations.
+- `libs/bite-tribe/api`: client-side Firebase/Firestore API services and storage helpers used by app features.
+- `apps/bite-tribe-firebase/functions`: backend callable/storage/pubsub functions. Export new functions from `src/index.ts`.
+- `apps/bite-tribe/src/assets/i18n/*.json`: Bite Tribe app translations. If visible UI text is added, add keys for every app locale, not only English.
+
+Common feature flow:
+
+1. Read the current feature's component, container, service, data-access service, tests, and any related Firebase/API function before editing.
+2. Keep UI-only display logic in the page component unless it drives navigation or persistence.
+3. Keep navigation and workflow decisions in the integration service.
+4. Keep remote calls and resource params in data-access. Add typed request/result interfaces there when the shape is feature-local.
+5. Keep backend filtering/mapping in Firebase functions when a callable owns the query semantics.
+
+## Implementation Patterns
+
+- Angular/Ionic pages generally use standalone components, signals, `input()`, `output()`, `computed()`, and HTML control flow (`@if`, `@for`).
+- Containers should stay thin: pass service signals/resource values into the page and route page outputs back to service methods.
+- For result lists, prefer discriminated unions over guessing from object shape. This keeps click handling and display helpers explicit.
+- For images, follow the repo convention `imagePath || image || ''`. `imagePath` often contains the usable Firebase Storage download URL.
+- For Ionic icons, check `libs/common/utils/src/lib/add-necessary-icons.ts`; register new icon names there if they are not already included.
+- Prefer Ionic layout helper classes such as `ion-display-flex`, `ion-flex-column`, `ion-flex-row`, and `ion-justify-content-*` in templates for simple flex layout before adding component CSS with `display: flex` or `flex-direction`.
+- For dialogs/labels/buttons, use Transloco keys. Avoid hardcoded visible English in templates or alert config.
+- For route assembly, reuse `PATH` from `libs/common/utils/src/lib/paths.ts` where possible and mirror existing services for route conventions.
+- Avoid broad refactors while implementing an issue. Touch the layer that owns the behavior and adjacent tests.
+
+## Linting Structure
+
+- Most Angular/Nx libraries use repo-root ESLint through each library's `eslint.config.mjs` or Nx `lint` target.
+- Firebase functions have their own Node/TypeScript lint setup under `apps/bite-tribe-firebase/functions`:
+
+```bash
+npm run lint
+```
+
+- Firebase functions lint uses Google style and single quotes are accepted by the current formatter/lint setup after repo Prettier. Run lint from the functions directory after adding or editing function files.
+- Prefer targeted ESLint for touched Angular files when validating small changes:
+
+```bash
+npx eslint libs/bite-tribe/search/page/src/lib/integration/search.service.ts
+```
+
+- Run Prettier only on touched files to avoid formatting churn:
+
+```bash
+npx prettier --write path/to/file.ts path/to/file.html path/to/file.scss
+```
 
 ## Workflow
 
@@ -15,7 +69,7 @@ Use this skill to validate changes in `travellers-apps` without getting stuck on
    - Expected root: `/Users/mo/DEV/travellers-apps`
    - Check status with `git status --short --branch`.
 
-2. Identify touched projects before testing:
+2. Identify touched projects before testing/linting:
    - Prefer `git diff --name-only` and map changed files to the nearest `project.json`.
    - Project names may contain slashes, for example `bite-tribe/profile` and `bite-tribe/api`.
    - Do not infer Nx project names by replacing slashes with hyphens.
@@ -45,6 +99,11 @@ npx jest --config libs/bite-tribe/api/jest.config.ts --runInBand
 node -e "for (const f of process.argv.slice(1)) JSON.parse(require('fs').readFileSync(f,'utf8'))" apps/bite-tribe/src/assets/i18n/*.json apps/bite-tribe-business/src/assets/i18n/en.json
 ```
 
+7. For Firebase functions changes:
+   - Run `npm run build` from `apps/bite-tribe-firebase/functions`.
+   - Run `npm run lint` from `apps/bite-tribe-firebase/functions`.
+   - If only callable filtering/mapping changed, these checks are often the highest-signal validation unless function specs already exist.
+
 ## Known Project Paths
 
 - `libs/bite-tribe/profile/page/project.json`
@@ -54,6 +113,14 @@ node -e "for (const f of process.argv.slice(1)) JSON.parse(require('fs').readFil
 - `libs/bite-tribe/api/project.json`
   - Name: `bite-tribe/api`
   - Jest config: `libs/bite-tribe/api/jest.config.ts`
+
+- `libs/bite-tribe/search/page/project.json`
+  - Name: `bite-tribe/search`
+  - Jest config: `libs/bite-tribe/search/page/jest.config.cts`
+
+- `libs/bite-tribe/search/data-access/project.json`
+  - Name: `bite-tribe/search-data-access`
+  - Jest config: `libs/bite-tribe/search/data-access/jest.config.ts`
 
 ## Reporting
 

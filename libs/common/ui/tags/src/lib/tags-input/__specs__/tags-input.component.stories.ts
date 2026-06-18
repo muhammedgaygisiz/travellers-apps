@@ -3,16 +3,14 @@ import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeCircle } from 'ionicons/icons';
+import { addCircleOutline, closeCircle } from 'ionicons/icons';
 
 export default {
   title: 'Components/Tags',
   component: TagsInputComponent,
   decorators: [
     applicationConfig({
-      providers: [
-        provideIonicAngular(getIonicConfig()),
-      ],
+      providers: [provideIonicAngular(getIonicConfig())],
     }),
   ],
 } as Meta<TagsInputComponent>;
@@ -20,6 +18,7 @@ export default {
 type Story = StoryObj<TagsInputComponent>;
 
 addIcons({
+  addCircleOutline,
   closeCircle,
 });
 

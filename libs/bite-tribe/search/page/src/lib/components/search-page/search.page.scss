@@ -1,52 +1,5 @@
-@use 'globals';
-
 :host {
   ion-searchbar {
     padding: 0;
-  }
-
-  .spinner-container,
-  .empty-container {
-    display: flex;
-    justify-content: center;
-    padding: 2rem;
-  }
-
-  .empty-container {
-    color: var(--ion-color-medium);
-    text-align: center;
-  }
-
-  ion-spinner {
-    width: 48px;
-    height: 48px;
-  }
-
-  ion-item {
-    --padding-start: 16px;
-    --padding-end: 16px;
-
-    ion-avatar {
-      width: 48px;
-      height: 48px;
-
-      .profile-image {
-        @include globals.profile-image;
-      }
-    }
-
-    h2 {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    p {
-      color: var(--ion-color-medium);
-      font-size: 0.875rem;
-    }
-
-    img {
-      background-color: white;
-    }
   }
 }

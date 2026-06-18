@@ -8,12 +8,11 @@
 <div class="container">
   <!-- Do not move to label attr of ion-input since it causes wrong positioning of the label -->
   @for (tag of tags(); track tag) {
-    <ion-chip [outline]="true">
-      <ion-label>{{ tag }}</ion-label>
-      @if (!readonlyData) {
-        <ion-icon name="close-circle" (click)="removeTag(tag)"></ion-icon>
-      }
-    </ion-chip>
+    <bt-chip
+      [label]="tag"
+      [removable]="!readonlyData"
+      (removeClick)="removeTag(tag)"
+    />
   }
   @if (!readonlyData) {
     <ng-container [formGroup]="formGroup">
@@ -33,14 +32,12 @@
     <div class="suggestions">
       @for (suggestedTag of suggestedTags(); track suggestedTag) {
         @if (!tags().includes(suggestedTag)) {
-          <ion-chip
-            [outline]="true"
+          <bt-chip
+            [label]="suggestedTag"
+            icon="add-circle-outline"
             class="suggestion"
-            (click)="addSuggestedTag(suggestedTag)"
-          >
-            <ion-icon name="add-circle-outline"></ion-icon>
-            <ion-label>{{ suggestedTag }}</ion-label>
-          </ion-chip>
+            (chipClick)="addSuggestedTag(suggestedTag)"
+          />
         }
       }
     </div>

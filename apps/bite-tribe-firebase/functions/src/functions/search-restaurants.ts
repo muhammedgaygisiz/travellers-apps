@@ -1,0 +1,186 @@
+import * as admin from 'firebase-admin';
+import { HttpsError, onCall } from 'firebase-functions/https';
+
+const MIN_SEARCH_TEXT_LENGTH = 3;
+const MAX_RESULTS = 20;
+
+interface SearchRestaurantsRequest {
+  searchText?: unknown;
+}
+
+interface SearchRestaurant {
+  id: string;
+  name: string;
+  biteId: string;
+  restaurantId?: string;
+  place?: string;
+  image?: string;
+  imagePath?: string;
+}
+
+const getString = (
+  data: admin.firestore.DocumentData,
+  field: string,
+): string => (typeof data[field] === 'string' ? data[field] : '');
+
+const getStringArray = (
+  data: admin.firestore.DocumentData,
+  field: string,
+): string[] => {
+  const value = data[field];
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
+};
+
+const matchesSearchText = (value: string, searchText: string): boolean =>
+  value.toLocaleLowerCase().includes(searchText);
+
+const idFromPath = (value: string): string => {
+  const segments = value.split('/').filter(Boolean);
+  return segments[segments.length - 1] ?? value;
+};
+
+const getBiteId = (bite: admin.firestore.QueryDocumentSnapshot): string =>
+  getString(bite.data(), 'id') || bite.id;
+
+const getNormalizedRestaurantId = (
+  data: admin.firestore.DocumentData,
+): string => {
+  const restaurantId = getString(data, 'restaurantId');
+  return restaurantId ? idFromPath(restaurantId) : '';
+};
+
+const toVerifiedRestaurant = (
+  restaurant: admin.firestore.QueryDocumentSnapshot,
+  biteId: string,
+  place?: string,
+): SearchRestaurant => {
+  const data = restaurant.data();
+  const image = getString(data, 'image');
+  const imagePath = getString(data, 'imagePath');
+
+  return {
+    id: restaurant.id,
+    name: getString(data, 'name'),
+    biteId,
+    restaurantId: restaurant.id,
+    ...(place ? { place } : {}),
+    ...(image ? { image } : {}),
+    ...(imagePath ? { imagePath } : {}),
+  };
+};
+
+const toUnverifiedRestaurant = (
+  bite: admin.firestore.QueryDocumentSnapshot,
+): SearchRestaurant => {
+  const data = bite.data();
+  const place = getString(data, 'place');
+  const image = getString(data, 'image');
+  const imagePath = getString(data, 'imagePath');
+
+  return {
+    id: `place-${getBiteId(bite)}-${place}`,
+    name: place,
+    biteId: getBiteId(bite),
+    place,
+    ...(image ? { image } : {}),
+    ...(imagePath ? { imagePath } : {}),
+  };
+};
+
+export const searchRestaurants = onCall<SearchRestaurantsRequest>(
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError(
+        'unauthenticated',
+        'You must be signed in to search for restaurants.',
+      );
+    }
+
+    if (typeof request.data.searchText !== 'string') {
+      throw new HttpsError('invalid-argument', 'searchText must be a string.');
+    }
+
+    const searchText = request.data.searchText.trim().toLocaleLowerCase();
+
+    if (searchText.length < MIN_SEARCH_TEXT_LENGTH) {
+      return [];
+    }
+
+    const [restaurantsSnapshot, bitesSnapshot] = await Promise.all([
+      admin.firestore().collection('restaurants').get(),
+      admin.firestore().collection('bites').get(),
+    ]);
+    const bites = bitesSnapshot.docs;
+    const results = new Map<string, SearchRestaurant>();
+
+    restaurantsSnapshot.docs
+      .filter((doc) =>
+        matchesSearchText(getString(doc.data(), 'name'), searchText),
+      )
+      .forEach((restaurant) => {
+        const restaurantBiteIds = getStringArray(
+          restaurant.data(),
+          'biteIds',
+        ).map(idFromPath);
+        const sourceBite =
+          bites.find(
+            (bite) => getNormalizedRestaurantId(bite.data()) === restaurant.id,
+          ) ??
+          bites.find((bite) => restaurantBiteIds.includes(getBiteId(bite)));
+        const biteId = sourceBite
+          ? getBiteId(sourceBite)
+          : restaurantBiteIds[0];
+
+        if (biteId) {
+          results.set(
+            `restaurant-${restaurant.id}`,
+            toVerifiedRestaurant(
+              restaurant,
+              biteId,
+              sourceBite ? getString(sourceBite.data(), 'place') : undefined,
+            ),
+          );
+        }
+      });
+
+    bites
+      .filter((bite) =>
+        matchesSearchText(getString(bite.data(), 'place'), searchText),
+      )
+      .forEach((bite) => {
+        const data = bite.data();
+        const restaurantId = getNormalizedRestaurantId(data);
+
+        if (restaurantId) {
+          const restaurant = restaurantsSnapshot.docs.find(
+            (doc) => doc.id === restaurantId,
+          );
+
+          if (restaurant) {
+            results.set(
+              `restaurant-${restaurant.id}`,
+              toVerifiedRestaurant(
+                restaurant,
+                getBiteId(bite),
+                getString(data, 'place'),
+              ),
+            );
+          }
+
+          return;
+        }
+
+        const place = getString(data, 'place');
+        if (place) {
+          results.set(
+            `place-${place.toLocaleLowerCase()}`,
+            toUnverifiedRestaurant(bite),
+          );
+        }
+      });
+
+    return [...results.values()].slice(0, MAX_RESULTS);
+  },
+);

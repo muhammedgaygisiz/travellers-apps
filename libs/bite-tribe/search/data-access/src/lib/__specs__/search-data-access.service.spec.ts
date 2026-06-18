@@ -22,17 +22,17 @@ describe(SearchDataAccessService.name, () => {
     return TestBed.inject(SearchDataAccessService);
   };
 
-  it('should not call the Firebase function for short search text', async () => {
+  it('should not call a Firebase function for short search text', async () => {
     const service = createService();
-    const result = await service.usersLoader({
-      params: { searchText: 'ab' },
+    const result = await service.resultsLoader({
+      params: { searchText: 'ab', category: 'user' },
     } as never);
 
     expect(FirebaseFunctions.callByName).not.toHaveBeenCalled();
     expect(result).toEqual([]);
   });
 
-  it('should return users from the Firebase function', async () => {
+  it('should return mapped user results from the Firebase function', async () => {
     const service = createService();
     const users = [
       {
@@ -46,8 +46,8 @@ describe(SearchDataAccessService.name, () => {
       .mocked(FirebaseFunctions.callByName)
       .mockResolvedValue({ data: users });
 
-    const result = await service.usersLoader({
-      params: { searchText: 'Langone' },
+    const result = await service.resultsLoader({
+      params: { searchText: 'Langone', category: 'user' },
     } as never);
 
     expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
@@ -56,6 +56,59 @@ describe(SearchDataAccessService.name, () => {
         searchText: 'Langone',
       },
     });
-    expect(result).toEqual(users);
+    expect(result).toEqual([{ category: 'user', value: users[0] }]);
+  });
+
+  it('should return mapped bite results from the Firebase function', async () => {
+    const service = createService();
+    const bites = [
+      {
+        id: 'bite-1',
+        name: 'Butter Chicken',
+        place: 'Tandoori House',
+      },
+    ];
+    jest
+      .mocked(FirebaseFunctions.callByName)
+      .mockResolvedValue({ data: bites });
+
+    const result = await service.resultsLoader({
+      params: { searchText: 'chicken', category: 'bite' },
+    } as never);
+
+    expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+      name: 'searchBites',
+      data: {
+        searchText: 'chicken',
+      },
+    });
+    expect(result).toEqual([{ category: 'bite', value: bites[0] }]);
+  });
+
+  it('should return mapped restaurant results from the Firebase function', async () => {
+    const service = createService();
+    const restaurants = [
+      {
+        id: 'restaurant-1',
+        name: 'Italian Restaurant Bern',
+        biteId: 'bite-1',
+        restaurantId: 'restaurant-1',
+      },
+    ];
+    jest
+      .mocked(FirebaseFunctions.callByName)
+      .mockResolvedValue({ data: restaurants });
+
+    const result = await service.resultsLoader({
+      params: { searchText: 'italian', category: 'restaurant' },
+    } as never);
+
+    expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+      name: 'searchRestaurants',
+      data: {
+        searchText: 'italian',
+      },
+    });
+    expect(result).toEqual([{ category: 'restaurant', value: restaurants[0] }]);
   });
 });

@@ -4,7 +4,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 import type { SearchbarInputEventDetail } from '@ionic/core';
-import type { PublicUser } from 'model';
+import type { SearchResult } from 'bite-tribe/search-data-access';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { SearchPage } from '../search.page';
 
@@ -39,42 +39,52 @@ describe(SearchPage.name, () => {
 
   it('should create with default input values', () => {
     expect(component).toBeTruthy();
-    expect(component.users()).toEqual([]);
+    expect(component.results()).toEqual([]);
+    expect(component.selectedCategory()).toBe('user');
     expect(component.isLoading()).toBe(false);
     expect(component.hasSearched()).toBe(false);
   });
 
-  describe('sortedUsers', () => {
-    it('should sort users by display name without mutating the input', () => {
-      const users: PublicUser[] = [
+  describe('sortedResults', () => {
+    it('should sort results by title without mutating the input', () => {
+      const results: SearchResult[] = [
         {
-          userId: 'charlie',
-          displayName: 'Charlie',
-          email: 'charlie@example.com',
-          photoUrl: '',
+          category: 'user',
+          value: {
+            userId: 'charlie',
+            displayName: 'Charlie',
+            email: 'charlie@example.com',
+            photoUrl: '',
+          },
         },
         {
-          userId: 'alice',
-          displayName: 'Alice',
-          email: 'alice@example.com',
-          photoUrl: '',
+          category: 'user',
+          value: {
+            userId: 'alice',
+            displayName: 'Alice',
+            email: 'alice@example.com',
+            photoUrl: '',
+          },
         },
         {
-          userId: 'bob',
-          displayName: 'Bob',
-          email: 'bob@example.com',
-          photoUrl: '',
+          category: 'user',
+          value: {
+            userId: 'bob',
+            displayName: 'Bob',
+            email: 'bob@example.com',
+            photoUrl: '',
+          },
         },
       ];
-      componentRef.setInput('users', users);
+      componentRef.setInput('results', results);
 
-      expect(component.sortedUsers().map((user) => user.displayName)).toEqual([
+      expect(component.sortedResults().map(component.getResultTitle)).toEqual([
         'Alice',
         'Bob',
         'Charlie',
       ]);
-      expect(component.users()).toBe(users);
-      expect(users.map((user) => user.displayName)).toEqual([
+      expect(component.results()).toBe(results);
+      expect(results.map(component.getResultTitle)).toEqual([
         'Charlie',
         'Alice',
         'Bob',
@@ -82,24 +92,40 @@ describe(SearchPage.name, () => {
     });
 
     it('should treat a missing display name as an empty string', () => {
-      componentRef.setInput('users', [
+      componentRef.setInput('results', [
         {
-          userId: 'named',
-          displayName: 'Alice',
-          email: 'alice@example.com',
-          photoUrl: '',
+          category: 'user',
+          value: {
+            userId: 'named',
+            displayName: 'Alice',
+            email: 'alice@example.com',
+            photoUrl: '',
+          },
         },
         {
-          userId: 'unnamed',
-          email: 'unnamed@example.com',
-          photoUrl: '',
-        } as PublicUser,
+          category: 'user',
+          value: {
+            userId: 'unnamed',
+            email: 'unnamed@example.com',
+            photoUrl: '',
+          },
+        } as SearchResult,
       ]);
 
-      expect(component.sortedUsers().map((user) => user.userId)).toEqual([
-        'unnamed',
-        'named',
+      expect(component.sortedResults().map(component.getResultId)).toEqual([
+        'user-unnamed',
+        'user-named',
       ]);
+    });
+  });
+
+  describe('category selection', () => {
+    it('should emit the selected category', () => {
+      const emitSpy = jest.spyOn(component.categoryChange, 'emit');
+
+      component.categoryChange.emit('restaurant');
+
+      expect(emitSpy).toHaveBeenCalledWith('restaurant');
     });
   });
 
@@ -125,25 +151,85 @@ describe(SearchPage.name, () => {
     });
   });
 
-  describe('onImageError', () => {
-    it('should add the user id without mutating the previous set', () => {
-      const previousIds = component.imageErroredUserIds();
+  describe('onResultImageError', () => {
+    it('should add the result id without mutating the previous set', () => {
+      const previousIds = component.imageErroredResultIds();
 
-      component.onImageError('user-1');
+      component.onResultImageError('user-1');
 
-      expect(component.imageErroredUserIds()).not.toBe(previousIds);
+      expect(component.imageErroredResultIds()).not.toBe(previousIds);
       expect(previousIds.size).toBe(0);
-      expect(component.imageErroredUserIds().has('user-1')).toBe(true);
+      expect(component.imageErroredResultIds().has('user-1')).toBe(true);
     });
 
-    it('should retain user ids from previous image errors', () => {
-      component.onImageError('user-1');
-      component.onImageError('user-2');
+    it('should retain result ids from previous image errors', () => {
+      component.onResultImageError('user-1');
+      component.onResultImageError('user-2');
 
-      expect([...component.imageErroredUserIds()]).toEqual([
+      expect([...component.imageErroredResultIds()]).toEqual([
         'user-1',
         'user-2',
       ]);
+    });
+  });
+
+  describe('result display helpers', () => {
+    it('should describe bite results', () => {
+      const result: SearchResult = {
+        category: 'bite',
+        value: {
+          id: 'bite-1',
+          name: 'Butter Chicken',
+          place: 'Tandoori House',
+          image: 'legacy-image',
+          imagePath: 'bite-image-path',
+          description: 'Creamy chicken curry',
+        },
+      };
+
+      expect(component.getResultId(result)).toBe('bite-bite-1');
+      expect(component.getResultTitle(result)).toBe('Butter Chicken');
+      expect(component.getResultSubtitle(result)).toBe(
+        'Tandoori House - Creamy chicken curry',
+      );
+      expect(component.getResultFallbackIcon(result)).toBe(
+        'restaurant-outline',
+      );
+      expect(component.getResultImage(result)).toBe('bite-image-path');
+    });
+
+    it('should fall back to the legacy image when imagePath is missing', () => {
+      const result: SearchResult = {
+        category: 'bite',
+        value: {
+          id: 'bite-1',
+          name: 'Butter Chicken',
+          place: 'Tandoori House',
+          image: 'legacy-image',
+        },
+      };
+
+      expect(component.getResultImage(result)).toBe('legacy-image');
+    });
+
+    it('should identify unverified restaurant results', () => {
+      const result: SearchResult = {
+        category: 'restaurant',
+        value: {
+          id: 'place-1',
+          name: 'Yalkottu',
+          biteId: 'bite-1',
+          place: 'Yalkottu',
+        },
+      };
+
+      expect(component.getResultId(result)).toBe('restaurant-place-1');
+      expect(component.getResultTitle(result)).toBe('Yalkottu');
+      expect(component.getResultSubtitle(result)).toBe('Yalkottu');
+      expect(component.getResultFallbackIcon(result)).toBe(
+        'storefront-outline',
+      );
+      expect(component.isUnverifiedRestaurant(result)).toBe(true);
     });
   });
 });

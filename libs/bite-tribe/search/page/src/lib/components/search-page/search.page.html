@@ -12,37 +12,56 @@
       (ionInput)="searchbarInput($event)"
     />
 
+    <div class="category-chips" data-cy="search-categories">
+      @for (category of categories; track category.value) {
+      <ion-chip
+        [color]="selectedCategory() === category.value ? 'primary' : 'medium'"
+        [outline]="selectedCategory() !== category.value"
+        [attr.aria-pressed]="selectedCategory() === category.value"
+        (click)="categoryChange.emit(category.value)"
+      >
+        {{ category.labelKey | transloco }}
+      </ion-chip>
+      }
+    </div>
+
     @if (isLoading()) {
     <div class="spinner-container" data-cy="search-loading">
       <ion-spinner color="primary" />
     </div>
-    } @else if (hasSearched() && users().length === 0) {
+    } @else if (hasSearched() && results().length === 0) {
     <div class="empty-container" data-cy="search-empty">
       <ion-label>{{ 'no-search-results-found' | transloco }}</ion-label>
     </div>
-    } @else if (users().length > 0) {
+    } @else if (results().length > 0) {
     <ion-list data-cy="search-results">
-      @for (user of sortedUsers(); track user.userId) {
+      @for (result of sortedResults(); track getResultId(result)) {
       <ion-item
         [button]="true"
         class="ion-margin-vertical"
-        (click)="userClick.emit(user)"
+        (click)="resultClick.emit(result)"
       >
         <ion-avatar slot="start">
-          @if ( user.photoUrl && !imageErroredUserIds().has(user.userId) ) {
+          @if ( getResultImage(result) &&
+          !imageErroredResultIds().has(getResultId(result)) ) {
           <img
-            [src]="user.photoUrl"
-            [alt]="user.displayName"
-            (error)="onImageError(user.userId)"
+            [src]="getResultImage(result)"
+            [alt]="getResultTitle(result)"
+            (error)="onResultImageError(getResultId(result))"
           />
           } @else {
-          <ion-icon name="person-circle-outline" class="profile-image" />
+          <ion-icon
+            [name]="getResultFallbackIcon(result)"
+            class="result-image"
+          />
           }
         </ion-avatar>
         <ion-label>
-          <h2>{{ user.displayName }}</h2>
-          @if (user.fullName) {
-          <p>{{ user.fullName }}</p>
+          <h2>{{ getResultTitle(result) }}</h2>
+          @if (getResultSubtitle(result); as subtitle) {
+          <p>{{ subtitle }}</p>
+          } @if (isUnverifiedRestaurant(result)) {
+          <p>{{ 'not-verified-restaurant' | transloco }}</p>
           }
         </ion-label>
       </ion-item>

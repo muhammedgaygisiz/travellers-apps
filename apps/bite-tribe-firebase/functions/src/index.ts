@@ -10,3 +10,5 @@ export { handleSharedLinkToBite } from './functions/handle-shared-link-to-bite';
 export { sendWeeklyBiteNotification } from './functions/send-weekly-bite-notification';
 export { setBiteImagePathOnUpload } from './functions/set-bite-image-path-on-upload';
 export { searchUsers } from './functions/search-users';
+export { searchBites } from './functions/search-bites';
+export { searchRestaurants } from './functions/search-restaurants';

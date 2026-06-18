@@ -1,25 +1,22 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
+  inject,
   input,
   output,
-  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import {
-  IonAvatar,
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonSearchbar,
-  IonSpinner,
-} from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { IonContent, IonSearchbar } from '@ionic/angular/standalone';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { SearchbarInputEventDetail } from '@ionic/core';
-import type { PublicUser } from 'model';
+import { ChipRadioGroupComponent, type ChipRadioOption } from 'common/ui/chip';
+import type { SearchCategory, SearchResult } from 'model';
+import { SearchListComponent } from '../search-list/search-list.component';
+
+interface SearchCategoryOption {
+  labelKey: string;
+  value: SearchCategory;
+}
 
 @Component({
   selector: 'search-page',
@@ -28,37 +25,43 @@ import type { PublicUser } from 'model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PageComponent,
-    IonAvatar,
     IonContent,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
     IonSearchbar,
-    IonSpinner,
     TranslocoPipe,
+    ChipRadioGroupComponent,
+    SearchListComponent,
   ],
 })
 export class SearchPage {
-  users = input<PublicUser[]>([]);
+  private readonly translocoService = inject(TranslocoService);
+
+  readonly categories: SearchCategoryOption[] = [
+    { labelKey: 'search-category-user', value: 'user' },
+    { labelKey: 'search-category-bite', value: 'bite' },
+    { labelKey: 'search-category-restaurant', value: 'restaurant' },
+  ];
+
+  results = input<SearchResult[]>([]);
+  selectedCategory = input<SearchCategory>('user');
   isLoading = input(false);
   hasSearched = input(false);
 
   searchTextChange = output<string>();
-  userClick = output<PublicUser>();
-
-  imageErroredUserIds = signal<Set<string>>(new Set());
-  sortedUsers = computed(() =>
-    [...this.users()].sort((a, b) =>
-      (a.displayName ?? '').localeCompare(b.displayName ?? ''),
-    ),
-  );
+  categoryChange = output<SearchCategory>();
+  resultClick = output<SearchResult>();
 
   searchbarInput(event: CustomEvent<SearchbarInputEventDetail>): void {
     this.searchTextChange.emit(event.detail.value ?? '');
   }
 
-  onImageError(userId: string): void {
-    this.imageErroredUserIds.update((ids) => new Set([...ids, userId]));
+  categoryOptions(): ChipRadioOption[] {
+    return this.categories.map(({ labelKey, value }) => ({
+      label: this.translocoService.translate(labelKey),
+      value,
+    }));
+  }
+
+  categoryValueChange(category: string): void {
+    this.categoryChange.emit(category as SearchCategory);
   }
 }

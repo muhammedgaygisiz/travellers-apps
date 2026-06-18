@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons } from 'utils';
 import { EditRestaurantContainer } from '../edit-restaurant-container.component';
-import { RestaurantService } from '../restaurant.service';
+import { EditRestaurantService } from '../edit-restaurant.service';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -29,7 +29,7 @@ describe(EditRestaurantContainer.name, () => {
       providers: [
         provideIonicAngular(),
         {
-          provide: RestaurantService,
+          provide: EditRestaurantService,
           useValue: {},
         },
         { provide: TranslocoService, useValue: MockTranslocoService },

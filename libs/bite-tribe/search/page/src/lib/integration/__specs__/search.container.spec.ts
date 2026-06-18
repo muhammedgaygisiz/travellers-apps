@@ -5,7 +5,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { signal } from '@angular/core';
-import type { PublicUser } from 'model';
+import type { SearchCategory, SearchResult } from 'model';
 import { SearchContainer } from '../search.container';
 import { SearchService } from '../search.service';
 
@@ -21,17 +21,20 @@ const MockTranslocoService = {
   langChanges$: of(),
 };
 
-const users = signal<PublicUser[]>([]);
+const results = signal<SearchResult[]>([]);
 const isLoading = signal(false);
 const hasSearched = signal(false);
+const selectedCategory = signal<SearchCategory>('user');
 const MockSearchService = {
-  users: {
-    value: users,
+  results: {
+    value: results,
     isLoading,
   },
+  selectedCategory,
   hasSearched,
-  searchUsers: jest.fn(),
-  userClicked: jest.fn(),
+  search: jest.fn(),
+  selectCategory: jest.fn(),
+  resultClicked: jest.fn(),
 };
 
 describe(SearchContainer.name, () => {
@@ -39,9 +42,10 @@ describe(SearchContainer.name, () => {
   let fixture: ComponentFixture<SearchContainer>;
 
   beforeEach(() => {
-    users.set([]);
+    results.set([]);
     isLoading.set(false);
     hasSearched.set(false);
+    selectedCategory.set('user');
 
     TestBed.configureTestingModule({
       providers: [
@@ -81,7 +85,15 @@ describe(SearchContainer.name, () => {
       }),
     );
 
-    expect(MockSearchService.searchUsers).toHaveBeenCalledWith('Daniel');
+    expect(MockSearchService.search).toHaveBeenCalledWith('Daniel');
+  });
+
+  it('should pass the selected category to the search service', () => {
+    const chips = fixture.nativeElement.querySelectorAll('ion-chip');
+
+    chips[1].click();
+
+    expect(MockSearchService.selectCategory).toHaveBeenCalledWith('bite');
   });
 
   it('should not show the empty state before a search', () => {
@@ -108,20 +120,26 @@ describe(SearchContainer.name, () => {
     ).toBeTruthy();
   });
 
-  it('should show sorted results and pass a clicked user to the service', () => {
-    const daniel = {
-      userId: 'user-1',
-      displayName: 'Daniel Langone',
-      fullName: 'Daniel Joseph Langone',
-      email: 'daniel@example.com',
-      photoUrl: '',
-    };
-    users.set([
-      {
-        userId: 'user-2',
-        displayName: 'Zoe',
-        email: 'zoe@example.com',
+  it('should show sorted results and pass a clicked result to the service', () => {
+    const daniel: SearchResult = {
+      category: 'user',
+      value: {
+        userId: 'user-1',
+        displayName: 'Daniel Langone',
+        fullName: 'Daniel Joseph Langone',
+        email: 'daniel@example.com',
         photoUrl: '',
+      },
+    };
+    results.set([
+      {
+        category: 'user',
+        value: {
+          userId: 'user-2',
+          displayName: 'Zoe',
+          email: 'zoe@example.com',
+          photoUrl: '',
+        },
       },
       daniel,
     ]);
@@ -136,7 +154,7 @@ describe(SearchContainer.name, () => {
 
     items[0].click();
 
-    expect(MockSearchService.userClicked).toHaveBeenCalledWith(daniel);
+    expect(MockSearchService.resultClicked).toHaveBeenCalledWith(daniel);
   });
 
   it('should set current screen to Search', () => {

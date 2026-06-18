@@ -46,6 +46,12 @@
         <div class="ion-margin-vertical">
           <p>{{ restaurantData?.description }}</p>
         </div>
+      } @else {
+        <div class="ion-margin-vertical">
+          <p class="text-secondary" data-cy="restaurant-description-empty">
+            {{ 'no-description-available' | transloco }}
+          </p>
+        </div>
       }
 
       <div class="ion-margin-vertical">
@@ -71,6 +77,10 @@
               </div>
             }
           </div>
+        } @else {
+          <p class="text-secondary" data-cy="restaurant-social-links-empty">
+            {{ 'no-social-media-links' | transloco }}
+          </p>
         }
       </div>
 

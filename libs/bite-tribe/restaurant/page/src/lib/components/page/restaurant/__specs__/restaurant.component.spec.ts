@@ -40,6 +40,10 @@ describe('RestaurantComponent', () => {
   let componentRef: ComponentRef<RestaurantComponent>;
 
   beforeEach(() => {
+    getDistanceMock.mockReturnValue(undefined);
+    getPositionMock.mockReturnValue(undefined);
+    uniqueBitesByNameMock.mockReturnValue([]);
+
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(getIonicConfig()),
@@ -258,6 +262,49 @@ describe('RestaurantComponent', () => {
       const nativeEl = fixture.nativeElement as HTMLElement;
       const text = nativeEl.textContent ?? '';
       expect(text).not.toContain('Main Street');
+    });
+  });
+
+  describe('empty restaurant details', () => {
+    it('should render placeholder text when description and social media links are missing', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+      } as Restaurant);
+
+      componentRef.changeDetectorRef.detectChanges();
+
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      expect(
+        nativeEl.querySelector('[data-cy="restaurant-description-empty"]'),
+      ).toBeTruthy();
+      expect(
+        nativeEl.querySelector('[data-cy="restaurant-social-links-empty"]'),
+      ).toBeTruthy();
+    });
+
+    it('should render maintained description and social media links instead of placeholders', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        description: 'Fresh seasonal dishes.',
+        socialMediaLinks: [
+          { network: 'instagram', url: 'instagram.com/test-restaurant' },
+        ],
+      } as Restaurant);
+
+      componentRef.changeDetectorRef.detectChanges();
+
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      const text = nativeEl.textContent ?? '';
+      expect(text).toContain('Fresh seasonal dishes.');
+      expect(text).toContain('Instagram');
+      expect(
+        nativeEl.querySelector('[data-cy="restaurant-description-empty"]'),
+      ).toBeNull();
+      expect(
+        nativeEl.querySelector('[data-cy="restaurant-social-links-empty"]'),
+      ).toBeNull();
     });
   });
 });

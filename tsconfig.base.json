@@ -103,6 +103,7 @@
         "libs/common/ui/password-validator/src/index.ts"
       ],
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
+      "common/ui/chip": ["libs/common/ui/chip/src/index.ts"],
       "currency-selector": ["libs/common/ui/currency-selector/src/index.ts"],
       "restaurant-selector": [
         "libs/common/ui/restaurant-selector/src/index.ts"

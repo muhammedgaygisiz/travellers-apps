@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { EditRestaurantComponent } from '../components/page/edit-restaurant/edit-restaurant.component';
-import { RestaurantService } from './restaurant.service';
+import { EditRestaurantService } from './edit-restaurant.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,5 +16,5 @@ import { RestaurantService } from './restaurant.service';
   imports: [EditRestaurantComponent],
 })
 export class EditRestaurantContainer {
-  service = inject(RestaurantService);
+  service = inject(EditRestaurantService);
 }

@@ -1,0 +1,17 @@
+<ion-chip
+  [outline]="true"
+  [class.selected]="selected()"
+  (click)="chipClick.emit()"
+>
+  @if (icon(); as iconName) {
+    <ion-icon [name]="iconName" class="start-icon" />
+  }
+  <ion-label>{{ label() }}</ion-label>
+  @if (removable()) {
+    <ion-icon
+      name="close-circle"
+      class="remove-icon"
+      (click)="removeClick.emit(); $event.stopPropagation()"
+    />
+  }
+</ion-chip>

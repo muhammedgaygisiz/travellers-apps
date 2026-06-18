@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
-import { Bite, Like, Link, Restaurant } from 'model';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import { Bite, Like, Restaurant } from 'model';
+import { NavController } from '@ionic/angular/standalone';
+import { PATH } from 'utils';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,6 @@ export class RestaurantService {
   dataAccess = inject(RestaurantDataAccessService);
   private readonly homeDataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
-  private readonly toastController = inject(ToastController);
 
   bite = this.dataAccess.bite;
   bites = this.homeDataAccess.restaurantBites;
@@ -20,74 +20,38 @@ export class RestaurantService {
 
   navigateToMenu(restaurant: Restaurant | undefined): void {
     const bite = this.bite();
-    if (bite && restaurant?.menuId) {
-      const menuId = this.normaliseMenuId(restaurant, restaurant.menuId);
+    const biteId = this.currentBiteId();
+    const menuId = this.normaliseMenuId(restaurant, restaurant?.menuId);
 
-      if (menuId) {
-        void this.navController.navigateForward([
-          'bite',
-          bite.id,
-          'restaurant',
-          restaurant.id,
-          'menu',
-          menuId,
-        ]);
-
-        return;
-      }
-    }
-
-    const menuId = restaurant?.menuId;
-    if (menuId && bite) {
-      this.gotoMaintainedMenu(bite, restaurant);
+    if (restaurant?.id && biteId && menuId) {
+      this.gotoMenu(biteId, restaurant.id, menuId);
 
       return;
     }
 
-    if (bite) {
+    if (!menuId && bite) {
       this.gotoDynamicMenu(bite);
     }
-
-    if (menuId) {
-      this.gotoEditMenu(restaurant.id, menuId);
-    }
   }
 
-  gotoEditMenu(restaurantId: string, menuId: string | undefined): void {
-    if (restaurantId && menuId) {
-      void this.navController.navigateForward([
-        'restaurant',
-        restaurantId,
-        'menu',
-        menuId,
-      ]);
-    }
-  }
-
-  private gotoMaintainedMenu(
-    bite: Bite,
-    restaurant: Restaurant | undefined,
-  ): void {
-    const normalisedMenuId = this.normaliseMenuId(restaurant);
-    if (restaurant && normalisedMenuId) {
-      void this.navController.navigateForward([
-        'bite',
-        bite.id,
-        'restaurant',
-        restaurant.id,
-        'menu',
-        normalisedMenuId,
-      ]);
-    }
+  private gotoMenu(biteId: string, restaurantId: string, menuId: string): void {
+    void this.navController.navigateForward([
+      PATH.BITE,
+      biteId,
+      PATH.RESTAURANT,
+      restaurantId,
+      PATH.MENU,
+      menuId,
+    ]);
   }
 
   private gotoDynamicMenu = (bite: Bite): void => {
     void this.navController.navigateForward([
-      'bite',
+      PATH.BITE,
       bite.id,
-      'restaurant',
+      PATH.RESTAURANT,
       encodeURIComponent(bite.place),
-      'menu',
+      PATH.MENU,
       'default',
     ]);
   };
@@ -151,8 +115,10 @@ export class RestaurantService {
     restaurant: Restaurant | undefined,
     fallbackMenuId?: string,
   ): string | undefined {
-    if (restaurant?.menuId) {
-      const menuId = restaurant.menuId.split('/').filter(Boolean).pop();
+    const menuPath = restaurant?.menuId ?? fallbackMenuId;
+
+    if (menuPath) {
+      const menuId = menuPath.split('/').filter(Boolean).pop();
 
       return menuId ?? fallbackMenuId;
     }
@@ -160,57 +126,12 @@ export class RestaurantService {
     return fallbackMenuId;
   }
 
+  private currentBiteId(): string | undefined {
+    return this.bite()?.id ?? this.dataAccess.biteIdFromUrl();
+  }
+
   biteClicked(bite: Bite): void {
     void this.navController.navigateForward(['bite', bite.id]);
-  }
-
-  async createMenu(): Promise<void> {
-    const restaurant = this.restaurant();
-    if (!restaurant) {
-      return;
-    }
-
-    try {
-      const menuId = await this.dataAccess.createMenuForRestaurant(
-        restaurant.id,
-      );
-      this.gotoEditMenu(restaurant.id, menuId);
-    } catch {
-      await this.showToast('Something went wrong. Please try again.', 'danger');
-    }
-  }
-
-  async submitSocialMediaLinks({
-    links,
-  }: Partial<{ links: Link[] }>): Promise<void> {
-    const restaurant = this.restaurant();
-    if (restaurant && links) {
-      try {
-        await this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
-        await this.showToast(
-          'Social media links saved successfully.',
-          'success',
-        );
-      } catch {
-        await this.showToast(
-          'Something went wrong. Please try again.',
-          'danger',
-        );
-      }
-    }
-  }
-
-  private async showToast(
-    message: string,
-    color: 'success' | 'danger',
-  ): Promise<void> {
-    const toast = await this.toastController.create({
-      message,
-      duration: 3000,
-      position: 'bottom',
-      color,
-    });
-    await toast.present();
   }
 
   likeButtonClicked(likeClick: Like): void {

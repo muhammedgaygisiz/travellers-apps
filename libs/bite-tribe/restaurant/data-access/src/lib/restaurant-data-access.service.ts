@@ -10,6 +10,7 @@ export class RestaurantDataAccessService {
   private readonly api = inject(BiteTribeApiService);
 
   bite = toSignal(this.storeService.bite$);
+  biteIdFromUrl = this.storeService.biteIdFromUrl;
   bites = toSignal(this.storeService.bitesByRestaurant$);
   userId = toSignal(this.storeService.userId$);
   restaurant = toSignal(this.storeService.restaurant$);
@@ -18,15 +19,24 @@ export class RestaurantDataAccessService {
     return this.api.createMenuForRestaurant(restaurantId);
   }
 
-  async submitSocialMediaLinks(restaurantId: string, links: Link[]): Promise<void> {
+  async submitSocialMediaLinks(
+    restaurantId: string,
+    links: Link[],
+  ): Promise<void> {
     await this.api.saveSocialMediaLinksForRestaurant(restaurantId, links);
   }
 
-  async submitDescription(restaurantId: string, description: string): Promise<void> {
+  async submitDescription(
+    restaurantId: string,
+    description: string,
+  ): Promise<void> {
     await this.api.saveDescriptionForRestaurant(restaurantId, description);
   }
 
-  async submitOpeningHours(restaurantId: string, openingHours: DaySchedule[]): Promise<void> {
+  async submitOpeningHours(
+    restaurantId: string,
+    openingHours: DaySchedule[],
+  ): Promise<void> {
     await this.api.saveOpeningHoursForRestaurant(restaurantId, openingHours);
   }
 
@@ -34,7 +44,10 @@ export class RestaurantDataAccessService {
     await this.api.saveAddressForRestaurant(restaurantId, address);
   }
 
-  async submitPosition(restaurantId: string, position: Geopoint): Promise<void> {
+  async submitPosition(
+    restaurantId: string,
+    position: Geopoint,
+  ): Promise<void> {
     await this.api.savePositionForRestaurant(restaurantId, position);
   }
 

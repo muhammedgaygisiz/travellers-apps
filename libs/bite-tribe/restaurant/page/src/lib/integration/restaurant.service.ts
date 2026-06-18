@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
-import { Bite, Like, Link, Restaurant } from 'model';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import { Bite, Like, Restaurant } from 'model';
+import { NavController } from '@ionic/angular/standalone';
 import { PATH } from 'utils';
 
 @Injectable({
@@ -12,7 +12,6 @@ export class RestaurantService {
   dataAccess = inject(RestaurantDataAccessService);
   private readonly homeDataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
-  private readonly toastController = inject(ToastController);
 
   bite = this.dataAccess.bite;
   bites = this.homeDataAccess.restaurantBites;
@@ -32,15 +31,6 @@ export class RestaurantService {
 
     if (!menuId && bite) {
       this.gotoDynamicMenu(bite);
-    }
-  }
-
-  gotoEditMenu(restaurantId: string, menuId: string | undefined): void {
-    const biteId = this.currentBiteId();
-    const normalisedMenuId = this.normaliseMenuId(undefined, menuId);
-
-    if (restaurantId && biteId && normalisedMenuId) {
-      this.gotoMenu(biteId, restaurantId, normalisedMenuId);
     }
   }
 
@@ -142,55 +132,6 @@ export class RestaurantService {
 
   biteClicked(bite: Bite): void {
     void this.navController.navigateForward(['bite', bite.id]);
-  }
-
-  async createMenu(): Promise<void> {
-    const restaurant = this.restaurant();
-    if (!restaurant) {
-      return;
-    }
-
-    try {
-      const menuId = await this.dataAccess.createMenuForRestaurant(
-        restaurant.id,
-      );
-      this.gotoEditMenu(restaurant.id, menuId);
-    } catch {
-      await this.showToast('Something went wrong. Please try again.', 'danger');
-    }
-  }
-
-  async submitSocialMediaLinks({
-    links,
-  }: Partial<{ links: Link[] }>): Promise<void> {
-    const restaurant = this.restaurant();
-    if (restaurant && links) {
-      try {
-        await this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
-        await this.showToast(
-          'Social media links saved successfully.',
-          'success',
-        );
-      } catch {
-        await this.showToast(
-          'Something went wrong. Please try again.',
-          'danger',
-        );
-      }
-    }
-  }
-
-  private async showToast(
-    message: string,
-    color: 'success' | 'danger',
-  ): Promise<void> {
-    const toast = await this.toastController.create({
-      message,
-      duration: 3000,
-      position: 'bottom',
-      color,
-    });
-    await toast.present();
   }
 
   likeButtonClicked(likeClick: Like): void {

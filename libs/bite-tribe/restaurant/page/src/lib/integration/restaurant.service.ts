@@ -3,6 +3,7 @@ import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { Bite, Like, Link, Restaurant } from 'model';
 import { NavController, ToastController } from '@ionic/angular/standalone';
+import { PATH } from 'utils';
 
 @Injectable({
   providedIn: 'root',
@@ -20,74 +21,47 @@ export class RestaurantService {
 
   navigateToMenu(restaurant: Restaurant | undefined): void {
     const bite = this.bite();
-    if (bite && restaurant?.menuId) {
-      const menuId = this.normaliseMenuId(restaurant, restaurant.menuId);
+    const biteId = this.currentBiteId();
+    const menuId = this.normaliseMenuId(restaurant, restaurant?.menuId);
 
-      if (menuId) {
-        void this.navController.navigateForward([
-          'bite',
-          bite.id,
-          'restaurant',
-          restaurant.id,
-          'menu',
-          menuId,
-        ]);
-
-        return;
-      }
-    }
-
-    const menuId = restaurant?.menuId;
-    if (menuId && bite) {
-      this.gotoMaintainedMenu(bite, restaurant);
+    if (restaurant?.id && biteId && menuId) {
+      this.gotoMenu(biteId, restaurant.id, menuId);
 
       return;
     }
 
-    if (bite) {
+    if (!menuId && bite) {
       this.gotoDynamicMenu(bite);
-    }
-
-    if (menuId) {
-      this.gotoEditMenu(restaurant.id, menuId);
     }
   }
 
   gotoEditMenu(restaurantId: string, menuId: string | undefined): void {
-    if (restaurantId && menuId) {
-      void this.navController.navigateForward([
-        'restaurant',
-        restaurantId,
-        'menu',
-        menuId,
-      ]);
+    const biteId = this.currentBiteId();
+    const normalisedMenuId = this.normaliseMenuId(undefined, menuId);
+
+    if (restaurantId && biteId && normalisedMenuId) {
+      this.gotoMenu(biteId, restaurantId, normalisedMenuId);
     }
   }
 
-  private gotoMaintainedMenu(
-    bite: Bite,
-    restaurant: Restaurant | undefined,
-  ): void {
-    const normalisedMenuId = this.normaliseMenuId(restaurant);
-    if (restaurant && normalisedMenuId) {
-      void this.navController.navigateForward([
-        'bite',
-        bite.id,
-        'restaurant',
-        restaurant.id,
-        'menu',
-        normalisedMenuId,
-      ]);
-    }
+  private gotoMenu(biteId: string, restaurantId: string, menuId: string): void {
+    void this.navController.navigateForward([
+      PATH.BITE,
+      biteId,
+      PATH.RESTAURANT,
+      restaurantId,
+      PATH.MENU,
+      menuId,
+    ]);
   }
 
   private gotoDynamicMenu = (bite: Bite): void => {
     void this.navController.navigateForward([
-      'bite',
+      PATH.BITE,
       bite.id,
-      'restaurant',
+      PATH.RESTAURANT,
       encodeURIComponent(bite.place),
-      'menu',
+      PATH.MENU,
       'default',
     ]);
   };
@@ -151,13 +125,19 @@ export class RestaurantService {
     restaurant: Restaurant | undefined,
     fallbackMenuId?: string,
   ): string | undefined {
-    if (restaurant?.menuId) {
-      const menuId = restaurant.menuId.split('/').filter(Boolean).pop();
+    const menuPath = restaurant?.menuId ?? fallbackMenuId;
+
+    if (menuPath) {
+      const menuId = menuPath.split('/').filter(Boolean).pop();
 
       return menuId ?? fallbackMenuId;
     }
 
     return fallbackMenuId;
+  }
+
+  private currentBiteId(): string | undefined {
+    return this.bite()?.id ?? this.dataAccess.biteIdFromUrl();
   }
 
   biteClicked(bite: Bite): void {

@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { Bite, Like, Restaurant } from 'model';
 import { NavController, ToastController } from '@ionic/angular/standalone';
 import { TestBed } from '@angular/core/testing';
@@ -21,6 +21,7 @@ const mockRestaurant: Restaurant = {
 const createMockDataAccess = (overrides = {}): any => {
   const base = {
     bite: signal(mockBite),
+    biteIdFromUrl: signal(mockBite.id),
     bites: signal([mockBite]),
     restaurant: signal(mockRestaurant),
     submitSocialMediaLinks: jest.fn().mockResolvedValue(undefined),
@@ -133,6 +134,34 @@ describe('RestaurantService', () => {
         'menu',
         'menu456',
       ]);
+    });
+
+    it('should use the route bite id when the bite has not loaded yet', () => {
+      service.bite = signal(undefined);
+
+      service.navigateToMenu(mockRestaurant);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        mockBite.id,
+        'restaurant',
+        mockRestaurant.id,
+        'menu',
+        'menu456',
+      ]);
+    });
+
+    it('should not navigate to a restaurant-only menu route when the bite id is unavailable', () => {
+      service.bite = signal(undefined);
+      (
+        mockDataAccessService as Partial<RestaurantDataAccessService> & {
+          biteIdFromUrl: WritableSignal<string | undefined>;
+        }
+      ).biteIdFromUrl.set(undefined);
+
+      service.navigateToMenu(mockRestaurant);
+
+      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
     });
 
     it('should navigate to dynamic menu if no menuId', () => {
@@ -259,6 +288,8 @@ describe('RestaurantService', () => {
         mockDataAccessService.createMenuForRestaurant,
       ).toHaveBeenCalledWith(mockRestaurant.id);
       expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        mockBite.id,
         'restaurant',
         mockRestaurant.id,
         'menu',

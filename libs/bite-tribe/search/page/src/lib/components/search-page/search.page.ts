@@ -9,7 +9,6 @@ import {
 import { PageComponent } from 'common/ui/page';
 import {
   IonAvatar,
-  IonChip,
   IonContent,
   IonIcon,
   IonItem,
@@ -20,6 +19,7 @@ import {
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { SearchbarInputEventDetail } from '@ionic/core';
+import { ChipComponent } from 'common/ui/chip';
 import type {
   SearchBite,
   SearchCategory,
@@ -40,7 +40,6 @@ interface SearchCategoryOption {
   imports: [
     PageComponent,
     IonAvatar,
-    IonChip,
     IonContent,
     IonIcon,
     IonItem,
@@ -49,6 +48,7 @@ interface SearchCategoryOption {
     IonSearchbar,
     IonSpinner,
     TranslocoPipe,
+    ChipComponent,
   ],
 })
 export class SearchPage {

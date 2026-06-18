@@ -5,18 +5,14 @@ import {
   OnInit,
   output,
 } from '@angular/core';
-import {
-  IonChip,
-  IonIcon,
-  IonInput,
-  IonLabel,
-} from '@ionic/angular/standalone';
+import { IonInput } from '@ionic/angular/standalone';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { map, Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { stringIncludesDelimiter } from './utils/string-includes-delimiter';
 import { removeDelimiterFromEndOfString } from './utils/remove-delimiter-from-end-of-string';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { ChipComponent } from 'common/ui/chip';
 
 const REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES = /^\s*$/;
 
@@ -26,12 +22,10 @@ const REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES = /^\s*$/;
   styleUrl: './tags-input.component.scss',
   imports: [
     IonInput,
-    IonChip,
-    IonLabel,
-    IonIcon,
     ReactiveFormsModule,
     AsyncPipe,
     TranslocoPipe,
+    ChipComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -45,7 +39,7 @@ export class TagsInputComponent implements OnInit {
     tagInput: new FormControl(''),
   });
 
-  tagInputValueChanges$: Observable<any> | null = null;
+  tagInputValueChanges$: Observable<void> | null = null;
 
   ngOnInit(): void {
     const control = this.formGroup.get('tagInput');

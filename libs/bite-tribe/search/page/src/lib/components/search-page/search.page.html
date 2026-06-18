@@ -14,14 +14,12 @@
 
     <div class="category-chips" data-cy="search-categories">
       @for (category of categories; track category.value) {
-      <ion-chip
-        [color]="selectedCategory() === category.value ? 'primary' : 'medium'"
-        [outline]="selectedCategory() !== category.value"
+      <bt-chip
+        [label]="category.labelKey | transloco"
+        [selected]="selectedCategory() === category.value"
         [attr.aria-pressed]="selectedCategory() === category.value"
-        (click)="categoryChange.emit(category.value)"
-      >
-        {{ category.labelKey | transloco }}
-      </ion-chip>
+        (chipClick)="categoryChange.emit(category.value)"
+      />
       }
     </div>
 

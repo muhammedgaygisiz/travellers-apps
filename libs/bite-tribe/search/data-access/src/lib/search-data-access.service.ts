@@ -27,36 +27,40 @@ export class SearchDataAccessService {
       return [];
     }
 
-    if (params.category === 'user') {
+    try {
+      if (params.category === 'user') {
+        const result = await FirebaseFunctions.callByName<
+          Omit<SearchParams, 'category'>,
+          PublicUser[]
+        >({
+          name: 'searchUsers',
+          data: { searchText: params.searchText },
+        });
+        return result.data.map((value) => ({ category: 'user', value }));
+      }
+
+      if (params.category === 'bite') {
+        const result = await FirebaseFunctions.callByName<
+          Omit<SearchParams, 'category'>,
+          SearchBite[]
+        >({
+          name: 'searchBites',
+          data: { searchText: params.searchText },
+        });
+        return result.data.map((value) => ({ category: 'bite', value }));
+      }
+
       const result = await FirebaseFunctions.callByName<
         Omit<SearchParams, 'category'>,
-        PublicUser[]
+        SearchRestaurant[]
       >({
-        name: 'searchUsers',
+        name: 'searchRestaurants',
         data: { searchText: params.searchText },
       });
-      return result.data.map((value) => ({ category: 'user', value }));
+      return result.data.map((value) => ({ category: 'restaurant', value }));
+    } catch {
+      return [];
     }
-
-    if (params.category === 'bite') {
-      const result = await FirebaseFunctions.callByName<
-        Omit<SearchParams, 'category'>,
-        SearchBite[]
-      >({
-        name: 'searchBites',
-        data: { searchText: params.searchText },
-      });
-      return result.data.map((value) => ({ category: 'bite', value }));
-    }
-
-    const result = await FirebaseFunctions.callByName<
-      Omit<SearchParams, 'category'>,
-      SearchRestaurant[]
-    >({
-      name: 'searchRestaurants',
-      data: { searchText: params.searchText },
-    });
-    return result.data.map((value) => ({ category: 'restaurant', value }));
   };
 
   readonly results = resource({

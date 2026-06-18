@@ -111,4 +111,23 @@ describe(SearchDataAccessService.name, () => {
     });
     expect(result).toEqual([{ category: 'restaurant', value: restaurants[0] }]);
   });
+
+  it('should return empty results when a Firebase function fails', async () => {
+    const service = createService();
+    jest
+      .mocked(FirebaseFunctions.callByName)
+      .mockRejectedValue(new Error('Function not found'));
+
+    const result = await service.resultsLoader({
+      params: { searchText: 'chicken', category: 'bite' },
+    } as never);
+
+    expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+      name: 'searchBites',
+      data: {
+        searchText: 'chicken',
+      },
+    });
+    expect(result).toEqual([]);
+  });
 });

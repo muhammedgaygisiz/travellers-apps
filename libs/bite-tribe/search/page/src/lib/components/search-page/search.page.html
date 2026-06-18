@@ -41,7 +41,9 @@
         </ion-avatar>
         <ion-label>
           <h2>{{ user.displayName }}</h2>
-          <p>{{ user.email }}</p>
+          @if (user.fullName) {
+          <p>{{ user.fullName }}</p>
+          }
         </ion-label>
       </ion-item>
       }

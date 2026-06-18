@@ -112,6 +112,7 @@ describe(SearchContainer.name, () => {
     const daniel = {
       userId: 'user-1',
       displayName: 'Daniel Langone',
+      fullName: 'Daniel Joseph Langone',
       email: 'daniel@example.com',
       photoUrl: '',
     };
@@ -130,7 +131,8 @@ describe(SearchContainer.name, () => {
     const items = fixture.nativeElement.querySelectorAll('ion-item');
     expect(items).toHaveLength(2);
     expect(items[0].textContent).toContain('Daniel Langone');
-    expect(items[0].textContent).toContain('daniel@example.com');
+    expect(items[0].textContent).toContain('Daniel Joseph Langone');
+    expect(items[0].textContent).not.toContain('daniel@example.com');
 
     items[0].click();
 

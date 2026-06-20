@@ -13,3 +13,4 @@ export { searchUsers } from './functions/search-users';
 export { searchBites } from './functions/search-bites';
 export { searchRestaurants } from './functions/search-restaurants';
 export { updateLastSeen } from './functions/update-last-seen';
+export { loadBitesByLocation } from './functions/load-bites-by-location';

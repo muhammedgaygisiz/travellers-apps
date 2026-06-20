@@ -6,6 +6,8 @@ import * as storageUtils from 'firebase/storage';
 import * as simulatorUtils from '../provide-firestore-simulator';
 import * as firestoreUtils from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
+import * as appCheckUtils from '../initialize-firebase-app-check';
+import { FirebaseOptions } from 'firebase/app';
 
 jest.mock('firebase/app');
 jest.mock('firebase/firestore');
@@ -15,6 +17,9 @@ jest.mock('firebase/storage', () => ({
 }));
 
 jest.mock('@capacitor-firebase/analytics');
+jest.mock('../initialize-firebase-app-check', () => ({
+  initializeFirebaseAppCheck: jest.fn().mockResolvedValue(undefined),
+}));
 
 jest.mock('../provide-firestore-simulator', () => ({
   provideFirestoreSimulator: jest.fn().mockResolvedValue([]),
@@ -23,6 +28,24 @@ jest.mock('../provide-firestore-simulator', () => ({
 jest.mock('@capacitor/core');
 
 describe(provideFirestoreUtils.name, () => {
+  it('should initialize App Check before Firestore', () => {
+    const initializeAppCheckSpy = jest.spyOn(
+      appCheckUtils,
+      'initializeFirebaseAppCheck',
+    );
+    const initializeFirestoreSpy = jest.spyOn(
+      firestoreUtils,
+      'initializeFirestore',
+    );
+
+    provideFirestoreUtils({} as FirebaseOptions);
+
+    expect(initializeAppCheckSpy).toHaveBeenCalled();
+    expect(initializeAppCheckSpy.mock.invocationCallOrder[0]).toBeLessThan(
+      initializeFirestoreSpy.mock.invocationCallOrder[0],
+    );
+  });
+
   describe('given prod mode', () => {
     beforeAll(() => {
       process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';

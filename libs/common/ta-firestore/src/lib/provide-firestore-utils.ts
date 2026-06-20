@@ -15,6 +15,7 @@ import {
 import { getStorage } from 'firebase/storage';
 
 import { provideFirestoreAnalytics } from './analytics/provide-firestore-analytics';
+import { initializeFirebaseAppCheck } from './initialize-firebase-app-check';
 import { provideFirestoreSimulator } from './provide-firestore-simulator';
 import { Emulators } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -33,6 +34,7 @@ export const provideFirestoreUtils = (
   emulators?: Emulators,
 ): Provider[] => {
   const app = initializeApp(firebaseOptions || {});
+  initializeFirebaseAppCheck();
   const firestore: Firestore = initializeFirestore(app, {});
 
   if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] !== 'true') {

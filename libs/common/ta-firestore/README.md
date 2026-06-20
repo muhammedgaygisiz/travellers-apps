@@ -4,14 +4,23 @@ This library was generated with [Nx](https://nx.dev).
 
 ## Firebase App Check
 
-BiteTribe web initializes Firebase App Check from
+BiteTribe initializes Firebase App Check from
 `src/lib/initialize-firebase-app-check.ts`. `provideFirestoreUtils` calls the
 initializer immediately after `initializeApp(...)` and before Firestore, Auth,
 Storage, or Firebase simulator setup is used.
 
 The web app uses the Capawesome `@capacitor-firebase/app-check` plugin with
-Firebase's `ReCaptchaEnterpriseProvider`. The reCAPTCHA Enterprise score-based
-site key is read from:
+Firebase's `ReCaptchaEnterpriseProvider`. The iOS app installs the native App
+Attest provider before `FirebaseApp.configure()` in
+`apps/bite-tribe-ios/ios/App/App/AppDelegate.swift`, then the JavaScript SDK is
+initialized with a `CustomProvider` that retrieves native tokens through
+`FirebaseAppCheck.getToken(...)`.
+
+Android App Check is intentionally not enabled yet. The shared initializer has
+an explicit Android branch so Play Integrity can be added later without changing
+the web or iOS behavior.
+
+The web reCAPTCHA Enterprise score-based site key is read from:
 
 ```bash
 NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY
@@ -31,11 +40,13 @@ build.
 
 ### Runtime modes
 
-| Mode                      | Required environment                                                             | App Check behavior                                                                                                           |
-| ------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Local simulators          | `NX_APP_BITE_TRIBE_IS_DEV=true`                                                  | Skipped. No site key or debug token is needed.                                                                               |
-| Local production Firebase | `NX_APP_BITE_TRIBE_IS_DEV=false` plus `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY=...` | Runs with the regular site key. Use `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN=...` for `localhost`.                           |
-| Production build          | `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY=...`                                       | Runs with the regular site key. Do not provide a debug token. `NX_APP_BITE_TRIBE_IS_DEV` is omitted from production bundles. |
+| Mode                          | Required environment                                                             | App Check behavior                                                                                                           |
+| ----------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Web local simulators          | `NX_APP_BITE_TRIBE_IS_DEV=true`                                                  | Skipped. No site key or debug token is needed.                                                                               |
+| Web local production Firebase | `NX_APP_BITE_TRIBE_IS_DEV=false` plus `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY=...` | Runs with the regular site key. Use `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN=...` for `localhost`.                           |
+| Web production build          | `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY=...`                                       | Runs with the regular site key. Do not provide a debug token. `NX_APP_BITE_TRIBE_IS_DEV` is omitted from production bundles. |
+| iOS production/TestFlight     | Firebase Console iOS App Check registration plus App Attest capability           | Uses native App Attest tokens bridged into the Firebase JavaScript SDK.                                                      |
+| Android                       | Deferred                                                                         | Skipped until Play Integrity integration is implemented.                                                                     |
 
 When `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY` is not configured, initialization is
 also skipped with an `[AppCheck]` info log. This keeps localhost development
@@ -45,9 +56,48 @@ Initialization success and failure are logged with the `[AppCheck]` prefix. A
 failure is caught and does not block application startup.
 
 After deploying a build with the site key configured, verify requests in
-Firebase Console under **Build > App Check** for the BiteTribe web app. Use the
-request metrics there to confirm valid App Check traffic before enabling any
+Firebase Console under **Build > App Check** for the relevant BiteTribe app. Use
+the request metrics there to confirm valid App Check traffic before enabling any
 enforcement.
+
+### iOS App Attest setup
+
+Register the BiteTribe iOS app in Firebase Console under
+**Build > App Check** and select the App Attest provider. App Check enforcement
+must remain disabled until all platforms are validated.
+
+In Xcode, confirm the BiteTribe app target has the App Attest capability:
+
+```text
+Target
+-> Signing & Capabilities
+-> App Attest
+```
+
+The checked-in entitlement is:
+
+```xml
+<key>com.apple.developer.devicecheck.appattest-environment</key>
+<string>production</string>
+```
+
+Firebase App Check currently expects App Attest production tokens, so this value
+should not be changed to a sandbox environment.
+
+The iOS startup order is:
+
+```text
+AppDelegate
+-> AppCheck.setAppCheckProviderFactory(...)
+-> FirebaseApp.configure()
+-> Angular provideFirestoreUtils(...)
+-> Firebase JS SDK initializeAppCheck(...) with CustomProvider
+-> Firestore / Storage / Functions
+```
+
+The native debug provider is not enabled in code. If debug tokens are needed for
+a future local-device workflow, register them in Firebase Console and keep token
+values in local developer configuration only. Never commit debug token values.
 
 ### Local production Firebase testing
 

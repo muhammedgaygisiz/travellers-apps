@@ -34,7 +34,7 @@ export const provideFirestoreUtils = (
   emulators?: Emulators,
 ): Provider[] => {
   const app = initializeApp(firebaseOptions || {});
-  initializeFirebaseAppCheck();
+  initializeFirebaseAppCheck(app);
   const firestore: Firestore = initializeFirestore(app, {});
 
   if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] !== 'true') {

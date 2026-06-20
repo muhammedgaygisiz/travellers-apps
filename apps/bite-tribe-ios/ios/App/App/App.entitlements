@@ -12,5 +12,7 @@
 	<array>
 		<string>applinks:bite-tribe.web.app</string>
 	</array>
+	<key>com.apple.developer.devicecheck.appattest-environment</key>
+	<string>production</string>
 </dict>
 </plist>

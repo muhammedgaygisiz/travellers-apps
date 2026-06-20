@@ -40,7 +40,7 @@ describe(provideFirestoreUtils.name, () => {
 
     provideFirestoreUtils({} as FirebaseOptions);
 
-    expect(initializeAppCheckSpy).toHaveBeenCalled();
+    expect(initializeAppCheckSpy).toHaveBeenCalledWith(undefined);
     expect(initializeAppCheckSpy.mock.invocationCallOrder[0]).toBeLessThan(
       initializeFirestoreSpy.mock.invocationCallOrder[0],
     );

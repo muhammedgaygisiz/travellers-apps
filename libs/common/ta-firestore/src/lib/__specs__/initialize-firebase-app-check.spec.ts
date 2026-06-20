@@ -68,7 +68,26 @@ describe(initializeFirebaseAppCheck.name, () => {
     });
   });
 
+  it('should warn when local production Firebase runs without a debug token', async () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
+    process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
+
+    await initializeFirebaseAppCheck();
+
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      '[AppCheck] NX_APP_BITE_TRIBE_IS_DEV is false but NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN is not configured. Localhost production-Firebase testing may fail App Check token exchange.',
+    );
+    expect(FirebaseAppCheck.initialize).toHaveBeenCalledWith({
+      provider: { siteKey: 'site-key' },
+      isTokenAutoRefreshEnabled: true,
+    });
+
+    consoleWarnSpy.mockRestore();
+  });
+
   it('should pass the configured debug token when present', async () => {
+    process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'] = 'debug-token';
 
@@ -82,22 +101,23 @@ describe(initializeFirebaseAppCheck.name, () => {
   });
 
   it('should skip initialization when the site key is not configured', async () => {
-    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
     await initializeFirebaseAppCheck();
 
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
-      '[AppCheck] Skipping Firebase App Check because NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY is not configured',
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      '[AppCheck] Skipping Firebase App Check because NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY is not configured. NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN does not replace the site key.',
     );
 
-    consoleInfoSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   it('should skip initialization when the client connects to simulators', async () => {
     const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
     process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'true';
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
+    process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'] = 'debug-token';
 
     await initializeFirebaseAppCheck();
 

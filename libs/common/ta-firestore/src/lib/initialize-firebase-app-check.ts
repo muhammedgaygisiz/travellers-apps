@@ -40,18 +40,24 @@ const initializeFirebaseAppCheckOnce = async (): Promise<void> => {
   const siteKey = process.env[APP_CHECK_SITE_KEY_ENV];
 
   if (!siteKey) {
-    console.info(
-      `[AppCheck] Skipping Firebase App Check because ${APP_CHECK_SITE_KEY_ENV} is not configured`,
+    console.warn(
+      `[AppCheck] Skipping Firebase App Check because ${APP_CHECK_SITE_KEY_ENV} is not configured. ${APP_CHECK_DEBUG_TOKEN_ENV} does not replace the site key.`,
     );
     return;
+  }
+
+  const debugToken = process.env[APP_CHECK_DEBUG_TOKEN_ENV];
+
+  if (process.env[IS_DEV_ENV] === 'false' && !debugToken) {
+    console.warn(
+      `[AppCheck] ${IS_DEV_ENV} is false but ${APP_CHECK_DEBUG_TOKEN_ENV} is not configured. Localhost production-Firebase testing may fail App Check token exchange.`,
+    );
   }
 
   try {
     console.info('[AppCheck] Initializing Firebase App Check');
 
-    await FirebaseAppCheck.initialize(
-      toInitializeOptions(siteKey, process.env[APP_CHECK_DEBUG_TOKEN_ENV]),
-    );
+    await FirebaseAppCheck.initialize(toInitializeOptions(siteKey, debugToken));
 
     console.info('[AppCheck] Firebase App Check initialized');
   } catch (error) {

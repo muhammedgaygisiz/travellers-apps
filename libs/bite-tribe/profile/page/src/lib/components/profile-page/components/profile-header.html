@@ -29,16 +29,24 @@
     class="header-column ion-display-flex ion-flex-column ion-justify-content-center"
   >
     <strong>{{ 'following' | transloco }}</strong>
-    <span class="clickable" (click)="handleFollowingClick()"
-      >{{ followingCount() }}</span
-    >
+    @if ((followingCount() || 0) > 0) {
+    <span class="clickable" (click)="handleFollowingClick()">
+      {{ followingCount() }}
+    </span>
+    } @else {
+    <span>{{ followingCount() }}</span>
+    }
   </div>
   <div
     class="header-column ion-display-flex ion-flex-column ion-justify-content-center"
   >
     <strong>{{ 'followers' | transloco }}</strong>
-    <span class="clickable" (click)="handleFollowersClick()"
-      >{{ followerCount() }}</span
-    >
+    @if ((followerCount() || 0) > 0) {
+    <span class="clickable" (click)="handleFollowersClick()">
+      {{ followerCount() }}
+    </span>
+    } @else {
+    <span>{{ followerCount() }}</span>
+    }
   </div>
 </div>

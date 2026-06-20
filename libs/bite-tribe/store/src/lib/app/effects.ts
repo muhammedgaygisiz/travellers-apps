@@ -138,7 +138,7 @@ export class AppEffect {
       return this.actions$.pipe(
         ofType(AppActions.updateLastSeen),
         tap(() => {
-          this.api.updateLastSeen();
+          void this.api.updateLastSeen();
         }),
       );
     },

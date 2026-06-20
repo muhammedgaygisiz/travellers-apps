@@ -172,6 +172,26 @@ describe(initializeFirebaseAppCheck.name, () => {
     });
   });
 
+  it('should add a short expiry fallback when native token expiry is unavailable', async () => {
+    jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
+    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000);
+    jest.spyOn(FirebaseAppCheck, 'getToken').mockResolvedValueOnce({
+      token: 'native-token-without-expiry',
+    });
+
+    await initializeFirebaseAppCheck(firebaseApp);
+
+    const customProviderOptions = (CustomProvider as jest.Mock).mock
+      .calls[0][0];
+
+    await expect(customProviderOptions.getToken()).resolves.toEqual({
+      token: 'native-token-without-expiry',
+      expireTimeMillis: 301_000,
+    });
+
+    dateNowSpy.mockRestore();
+  });
+
   it('should skip Android initialization until Android App Check is implemented', async () => {
     const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');

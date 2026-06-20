@@ -5,11 +5,13 @@ import {
   CustomProvider,
   initializeAppCheck,
   ReCaptchaEnterpriseProvider,
+  type AppCheckToken,
 } from 'firebase/app-check';
 
 const APP_CHECK_SITE_KEY_ENV = 'NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY';
 const APP_CHECK_DEBUG_TOKEN_ENV = 'NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN';
 const IS_DEV_ENV = 'NX_APP_BITE_TRIBE_IS_DEV';
+const NATIVE_TOKEN_EXPIRY_FALLBACK_MS = 5 * 60 * 1000;
 
 let appCheckInitialization: Promise<void> | null = null;
 
@@ -115,6 +117,14 @@ const initializeNativeFirebaseAppCheckBridge = async (
   }
 };
 
-const getNativeFirebaseAppCheckToken = (): ReturnType<
-  typeof FirebaseAppCheck.getToken
-> => FirebaseAppCheck.getToken({ forceRefresh: false });
+const getNativeFirebaseAppCheckToken = async (): Promise<AppCheckToken> => {
+  const { token, expireTimeMillis } = await FirebaseAppCheck.getToken({
+    forceRefresh: false,
+  });
+
+  return {
+    token,
+    expireTimeMillis:
+      expireTimeMillis ?? Date.now() + NATIVE_TOKEN_EXPIRY_FALLBACK_MS,
+  };
+};

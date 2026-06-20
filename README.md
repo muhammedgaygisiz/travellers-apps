@@ -208,7 +208,21 @@ number:
 npm run increment-build-number
 ```
 
-Commit the updated native project files together with the release changes.
+Generate the changelog from conventional commit messages with the shared build
+number as the release identifier:
+
+```
+npm run generate-changelog
+```
+
+To increment the build number and then generate the changelog in one step, run:
+
+```
+npm run increment-build-number-and-generate-changelog
+```
+
+Commit the updated native project files and `CHANGELOG.md` together with the
+release changes.
 
 ## iOS
 

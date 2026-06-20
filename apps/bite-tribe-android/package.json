@@ -3,6 +3,7 @@
   "devDependencies": {
     "@capacitor/cli": "../../node_modules/@capacitor/cli",
     "@capacitor/android": "../../node_modules/@capacitor/android",
+    "@capacitor-firebase/app-check": "../../node_modules/@capacitor-firebase/app-check",
     "@capacitor-firebase/authentication": "../../node_modules/@capacitor-firebase/authentication",
     "@capacitor-firebase/firestore": "../../node_modules/@capacitor-firebase/firestore",
     "@capacitor-firebase/functions": "../../node_modules/@capacitor-firebase/functions",

@@ -1,6 +1,11 @@
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAppCheck } from '@capacitor-firebase/app-check';
-import { ReCaptchaEnterpriseProvider } from 'firebase/app-check';
+import {
+  CustomProvider,
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider,
+} from 'firebase/app-check';
+import { FirebaseApp } from 'firebase/app';
 
 import {
   initializeFirebaseAppCheck,
@@ -11,15 +16,25 @@ jest.mock('@capacitor/core');
 jest.mock('@capacitor-firebase/app-check', () => ({
   FirebaseAppCheck: {
     initialize: jest.fn().mockResolvedValue(undefined),
+    getToken: jest.fn().mockResolvedValue({
+      token: 'native-token',
+      expireTimeMillis: 123,
+    }),
+    setTokenAutoRefreshEnabled: jest.fn().mockResolvedValue(undefined),
   },
 }));
 jest.mock('firebase/app-check', () => ({
+  CustomProvider: jest.fn().mockImplementation((options) => ({
+    getToken: options.getToken,
+  })),
+  initializeAppCheck: jest.fn(),
   ReCaptchaEnterpriseProvider: jest.fn().mockImplementation((siteKey) => ({
     siteKey,
   })),
 }));
 
 describe(initializeFirebaseAppCheck.name, () => {
+  const firebaseApp = { name: 'bite-tribe' } as FirebaseApp;
   const originalSiteKey = process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'];
   const originalDebugToken =
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'];
@@ -59,7 +74,7 @@ describe(initializeFirebaseAppCheck.name, () => {
   it('should initialize Firebase App Check on web with reCAPTCHA Enterprise', async () => {
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
 
-    await initializeFirebaseAppCheck();
+    await initializeFirebaseAppCheck(firebaseApp);
 
     expect(ReCaptchaEnterpriseProvider).toHaveBeenCalledWith('site-key');
     expect(FirebaseAppCheck.initialize).toHaveBeenCalledWith({
@@ -73,7 +88,7 @@ describe(initializeFirebaseAppCheck.name, () => {
     process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
 
-    await initializeFirebaseAppCheck();
+    await initializeFirebaseAppCheck(firebaseApp);
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       '[AppCheck] NX_APP_BITE_TRIBE_IS_DEV is false but NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN is not configured. Localhost production-Firebase testing may fail App Check token exchange.',
@@ -91,7 +106,7 @@ describe(initializeFirebaseAppCheck.name, () => {
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'] = 'debug-token';
 
-    await initializeFirebaseAppCheck();
+    await initializeFirebaseAppCheck(firebaseApp);
 
     expect(FirebaseAppCheck.initialize).toHaveBeenCalledWith({
       provider: { siteKey: 'site-key' },
@@ -103,7 +118,7 @@ describe(initializeFirebaseAppCheck.name, () => {
   it('should skip initialization when the site key is not configured', async () => {
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
-    await initializeFirebaseAppCheck();
+    await initializeFirebaseAppCheck(firebaseApp);
 
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
     expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -119,7 +134,7 @@ describe(initializeFirebaseAppCheck.name, () => {
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'] = 'debug-token';
 
-    await initializeFirebaseAppCheck();
+    await initializeFirebaseAppCheck(firebaseApp);
 
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
     expect(consoleInfoSpy).toHaveBeenCalledWith(
@@ -129,20 +144,91 @@ describe(initializeFirebaseAppCheck.name, () => {
     consoleInfoSpy.mockRestore();
   });
 
-  it('should skip initialization on native platforms', async () => {
+  it('should initialize the iOS Firebase JS SDK bridge with native tokens', async () => {
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
-    process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
 
-    await initializeFirebaseAppCheck();
+    await initializeFirebaseAppCheck(firebaseApp);
 
+    expect(FirebaseAppCheck.setTokenAutoRefreshEnabled).toHaveBeenCalledWith({
+      enabled: true,
+    });
+    expect(CustomProvider).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
+    expect(initializeAppCheck).toHaveBeenCalledWith(firebaseApp, {
+      provider: { getToken: expect.any(Function) },
+      isTokenAutoRefreshEnabled: true,
+    });
+
+    const customProviderOptions = (CustomProvider as jest.Mock).mock
+      .calls[0][0];
+
+    await expect(customProviderOptions.getToken()).resolves.toEqual({
+      token: 'native-token',
+      expireTimeMillis: 123,
+    });
+    expect(FirebaseAppCheck.getToken).toHaveBeenCalledWith({
+      forceRefresh: false,
+    });
+  });
+
+  it('should add a short expiry fallback when native token expiry is unavailable', async () => {
+    jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
+    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000);
+    jest.spyOn(FirebaseAppCheck, 'getToken').mockResolvedValueOnce({
+      token: 'native-token-without-expiry',
+    });
+
+    await initializeFirebaseAppCheck(firebaseApp);
+
+    const customProviderOptions = (CustomProvider as jest.Mock).mock
+      .calls[0][0];
+
+    await expect(customProviderOptions.getToken()).resolves.toEqual({
+      token: 'native-token-without-expiry',
+      expireTimeMillis: 301_000,
+    });
+
+    dateNowSpy.mockRestore();
+  });
+
+  it('should skip Android initialization until Android App Check is implemented', async () => {
+    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
+    jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
+
+    await initializeFirebaseAppCheck(firebaseApp);
+
+    expect(initializeAppCheck).not.toHaveBeenCalled();
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
+      '[AppCheck] Skipping Android Firebase App Check for now',
+    );
+
+    consoleInfoSpy.mockRestore();
+  });
+
+  it('should skip initialization on unsupported native platforms', async () => {
+    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
+    jest
+      .spyOn(Capacitor, 'getPlatform')
+      .mockReturnValue('electron' as ReturnType<typeof Capacitor.getPlatform>);
+
+    await initializeFirebaseAppCheck(firebaseApp);
+
+    expect(initializeAppCheck).not.toHaveBeenCalled();
+    expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
+      '[AppCheck] Skipping Firebase App Check on unsupported platform: electron',
+    );
+
+    consoleInfoSpy.mockRestore();
   });
 
   it('should initialize App Check only once', async () => {
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
 
-    await initializeFirebaseAppCheck();
-    await initializeFirebaseAppCheck();
+    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp);
 
     expect(FirebaseAppCheck.initialize).toHaveBeenCalledTimes(1);
   });
@@ -153,13 +239,33 @@ describe(initializeFirebaseAppCheck.name, () => {
     jest.spyOn(FirebaseAppCheck, 'initialize').mockRejectedValueOnce(error);
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
 
-    await expect(initializeFirebaseAppCheck()).resolves.toBeUndefined();
+    await expect(
+      initializeFirebaseAppCheck(firebaseApp),
+    ).resolves.toBeUndefined();
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       '[AppCheck] Firebase App Check initialization failed',
       error,
     );
 
+    consoleWarnSpy.mockRestore();
+  });
+
+  it('should not log native App Check token values', async () => {
+    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
+
+    await initializeFirebaseAppCheck(firebaseApp);
+
+    const loggedValues = [
+      ...consoleInfoSpy.mock.calls.flat(),
+      ...consoleWarnSpy.mock.calls.flat(),
+    ];
+
+    expect(loggedValues).not.toContain('native-token');
+
+    consoleInfoSpy.mockRestore();
     consoleWarnSpy.mockRestore();
   });
 });

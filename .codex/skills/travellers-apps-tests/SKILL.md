@@ -1,6 +1,6 @@
 ---
 name: travellers-apps-tests
-description: Architecture and validation workflow for the muhammedgaygisiz/travellers-apps Nx workspace. Use when Codex implements or validates Angular/Ionic features, Firebase functions, shared model/data-access changes, profile/API/store/search flows, linting, or when Nx project graph/daemon behavior hangs or obscures test output.
+description: Architecture and validation workflow for the muhammedgaygisiz/travellers-apps Nx workspace. Use when Codex implements or validates Angular/Ionic features, Capacitor native plugin dependencies or sync flows, Firebase functions, shared model/data-access changes, profile/API/store/search flows, linting, or when Nx project graph/daemon behavior hangs or obscures test output.
 ---
 
 # Travellers Apps
@@ -103,6 +103,18 @@ node -e "for (const f of process.argv.slice(1)) JSON.parse(require('fs').readFil
    - Run `npm run build` from `apps/bite-tribe-firebase/functions`.
    - Run `npm run lint` from `apps/bite-tribe-firebase/functions`.
    - If only callable filtering/mapping changed, these checks are often the highest-signal validation unless function specs already exist.
+
+## Capacitor Native Plugin Changes
+
+When adding or removing native Capacitor plugins, treat the app wrapper package files as the durable source for native plugin discovery:
+
+1. Add the plugin to the root `package.json` if it is not already installed.
+2. Add the plugin to the relevant wrapper `package.json`, for example `apps/bite-tribe-ios/package.json` or `apps/bite-tribe-android/package.json`.
+3. Regenerate the corresponding wrapper `package-lock.json` with `npm install --package-lock-only --ignore-scripts` from that wrapper directory.
+4. Run the platform sync target, such as `nx run bite-tribe-ios:sync`, so Capacitor updates generated native dependency files like the iOS `Podfile`.
+5. Review the generated native diffs and lockfiles. Prefer the sync workflow over hand-editing generated native dependency blocks as the primary path.
+
+If Android native setup is intentionally deferred but shared TypeScript/native bridge code is Android-ready, still consider adding the Android wrapper package entry so future Android sync/update work can discover the plugin consistently.
 
 ## Known Project Paths
 

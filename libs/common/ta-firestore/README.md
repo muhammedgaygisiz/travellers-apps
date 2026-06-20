@@ -22,9 +22,15 @@ environment instead of being hardcoded in frontend code. The BiteTribe
 `env-var-plugin.js` exposes `NX_*` variables to `process.env` during the web
 build.
 
+When `NX_APP_BITE_TRIBE_IS_DEV=true`, the client connects to Firebase
+simulators and App Check initialization is skipped even if a site key is
+configured. When the flag is absent or any value other than `true`, the client
+uses the production Firebase path and App Check initializes if
+`NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY` is configured.
+
 When `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY` is not configured, initialization is
-skipped with an `[AppCheck]` info log. This keeps localhost development working
-while Firebase App Check enforcement remains disabled.
+also skipped with an `[AppCheck]` info log. This keeps localhost development
+working while Firebase App Check enforcement remains disabled.
 
 Initialization success and failure are logged with the `[AppCheck]` prefix. A
 failure is caught and does not block application startup.

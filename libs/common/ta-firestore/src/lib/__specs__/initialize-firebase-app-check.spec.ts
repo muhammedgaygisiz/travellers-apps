@@ -23,6 +23,7 @@ describe(initializeFirebaseAppCheck.name, () => {
   const originalSiteKey = process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'];
   const originalDebugToken =
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'];
+  const originalIsDev = process.env['NX_APP_BITE_TRIBE_IS_DEV'];
 
   beforeEach(() => {
     resetFirebaseAppCheckInitializationForTesting();
@@ -31,6 +32,7 @@ describe(initializeFirebaseAppCheck.name, () => {
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('web');
     delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'];
     delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'];
+    delete process.env['NX_APP_BITE_TRIBE_IS_DEV'];
   });
 
   afterAll(() => {
@@ -45,6 +47,12 @@ describe(initializeFirebaseAppCheck.name, () => {
     } else {
       process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'] =
         originalDebugToken;
+    }
+
+    if (originalIsDev === undefined) {
+      delete process.env['NX_APP_BITE_TRIBE_IS_DEV'];
+    } else {
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = originalIsDev;
     }
   });
 
@@ -81,6 +89,21 @@ describe(initializeFirebaseAppCheck.name, () => {
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
     expect(consoleInfoSpy).toHaveBeenCalledWith(
       '[AppCheck] Skipping Firebase App Check because NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY is not configured',
+    );
+
+    consoleInfoSpy.mockRestore();
+  });
+
+  it('should skip initialization when the client connects to simulators', async () => {
+    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
+    process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'true';
+    process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
+
+    await initializeFirebaseAppCheck();
+
+    expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
+      '[AppCheck] Skipping Firebase App Check because NX_APP_BITE_TRIBE_IS_DEV is true',
     );
 
     consoleInfoSpy.mockRestore();

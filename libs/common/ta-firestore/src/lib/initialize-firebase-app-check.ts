@@ -7,6 +7,7 @@ import { ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 
 const APP_CHECK_SITE_KEY_ENV = 'NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY';
 const APP_CHECK_DEBUG_TOKEN_ENV = 'NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN';
+const IS_DEV_ENV = 'NX_APP_BITE_TRIBE_IS_DEV';
 
 let appCheckInitialization: Promise<void> | null = null;
 
@@ -26,6 +27,13 @@ export const resetFirebaseAppCheckInitializationForTesting = (): void => {
 const initializeFirebaseAppCheckOnce = async (): Promise<void> => {
   if (Capacitor.getPlatform() !== 'web') {
     console.info('[AppCheck] Skipping Firebase App Check on native platform');
+    return;
+  }
+
+  if (process.env[IS_DEV_ENV] === 'true') {
+    console.info(
+      `[AppCheck] Skipping Firebase App Check because ${IS_DEV_ENV} is true`,
+    );
     return;
   }
 

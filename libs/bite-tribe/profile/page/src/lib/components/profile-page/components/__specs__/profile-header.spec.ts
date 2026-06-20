@@ -101,19 +101,43 @@ describe(ProfileHeader.name, () => {
     it('should emit followingClick with userId', () => {
       jest.spyOn(component.followingClick, 'emit');
       compRef.setInput('user', { userId: '123' } as PublicUser);
+      compRef.setInput('followingCount', 1);
 
       component.handleFollowingClick();
 
       expect(component.followingClick.emit).toHaveBeenCalledWith('123');
     });
 
-    it('should not emit followingClick if userId is missing', () => {
+    it('should not emit followingClick if followingCount is 0', () => {
       jest.spyOn(component.followingClick, 'emit');
-      compRef.setInput('user', {} as PublicUser);
+      compRef.setInput('user', { userId: '123' } as PublicUser);
+      compRef.setInput('followingCount', 0);
 
       component.handleFollowingClick();
 
       expect(component.followingClick.emit).not.toHaveBeenCalled();
+    });
+
+    it('should not emit followingClick if userId is missing', () => {
+      jest.spyOn(component.followingClick, 'emit');
+      compRef.setInput('user', {} as PublicUser);
+      compRef.setInput('followingCount', 1);
+
+      component.handleFollowingClick();
+
+      expect(component.followingClick.emit).not.toHaveBeenCalled();
+    });
+
+    it('should not render followingCount as clickable if it is 0', () => {
+      compRef.setInput('followingCount', 0);
+
+      fixture.detectChanges();
+
+      const clickableCount = fixture.nativeElement.querySelector(
+        '.clickable',
+      ) as HTMLElement | null;
+
+      expect(clickableCount).toBeNull();
     });
   });
 
@@ -121,15 +145,27 @@ describe(ProfileHeader.name, () => {
     it('should emit followersClick with userId', () => {
       jest.spyOn(component.followersClick, 'emit');
       compRef.setInput('user', { userId: '123' } as PublicUser);
+      compRef.setInput('followerCount', 1);
 
       component.handleFollowersClick();
 
       expect(component.followersClick.emit).toHaveBeenCalledWith('123');
     });
 
+    it('should not emit followersClick if followerCount is 0', () => {
+      jest.spyOn(component.followersClick, 'emit');
+      compRef.setInput('user', { userId: '123' } as PublicUser);
+      compRef.setInput('followerCount', 0);
+
+      component.handleFollowersClick();
+
+      expect(component.followersClick.emit).not.toHaveBeenCalled();
+    });
+
     it('should not emit followersClick if userId is missing', () => {
       jest.spyOn(component.followersClick, 'emit');
       compRef.setInput('user', {} as PublicUser);
+      compRef.setInput('followerCount', 1);
 
       component.handleFollowersClick();
 

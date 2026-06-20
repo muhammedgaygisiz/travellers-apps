@@ -108,25 +108,13 @@ export class AppEffect {
     { dispatch: false },
   );
 
-  saveUserAfterLogin$ = createEffect(
+  updateLastSeenAfterLogin$ = createEffect(
     () => {
       return this.actions$.pipe(
         ofType(fromAuth.AuthActions.loadedUser),
         stopIfUserIsUndefined(),
         tap(() => {
-          this.api.saveUserIfNotExisting();
-        }),
-      );
-    },
-    { dispatch: false },
-  );
-
-  updateLastSeenAfterLogin$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(fromAuth.AuthActions.loginSucceeded),
-        tap(() => {
-          this.api.updateLastSeen();
+          void this.api.updateLastSeen();
         }),
       );
     },

@@ -60,6 +60,19 @@ export class ProfileComponent {
   subscriptionTier = computed((): number => {
     return this.user()?.subscriptionTier || 0;
   });
+  displayName = computed((): string => {
+    return (
+      this.user()?.displayName || this.transloco.translate('no-display-name')
+    );
+  });
+  emptyBitesMessage = computed((): string => {
+    return this.transloco.translate(
+      this.user()?.isOrganisation ? 'no-bite-trails-yet' : 'no-bites-yet',
+    );
+  });
+  city = computed((): string => {
+    return this.user()?.city || this.transloco.translate('no-location');
+  });
   biteTrails = input<BiteTrail[]>();
 
   readonly logoutClick = output();

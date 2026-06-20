@@ -233,10 +233,6 @@ export class BiteTribeApiService {
     return this.settingsApiService.saveSettings(settings);
   }
 
-  saveUserIfNotExisting(): void {
-    this.profileApiService.saveUserIfNotExisting();
-  }
-
   updateLastSeen(): Promise<void> {
     return this.profileApiService.updateLastSeen();
   }

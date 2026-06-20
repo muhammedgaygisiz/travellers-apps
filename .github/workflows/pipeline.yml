@@ -209,6 +209,7 @@ jobs:
           NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID }}
           NX_APP_BITE_TRIBE_MEASSUREMENT_ID: ${{ secrets.NX_APP_BITE_TRIBE_MEASSUREMENT_ID }}
           NX_APP_BITE_TRIBE_APP_ID: ${{ secrets.NX_APP_BITE_TRIBE_APP_ID }}
+          NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY: ${{ secrets.NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY }}
 
       - name: Bite Tribe Publish to Firebase
         if: github.ref == 'refs/heads/develop'

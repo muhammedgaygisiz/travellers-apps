@@ -41,6 +41,7 @@
     "@awesome-cordova-plugins/core": "8.1.0",
     "@awesome-cordova-plugins/geolocation": "8.1.0",
     "@capacitor-firebase/analytics": "8.0.1",
+    "@capacitor-firebase/app-check": "8.0.1",
     "@capacitor-firebase/authentication": "8.0.1",
     "@capacitor-firebase/crashlytics": "8.0.1",
     "@capacitor-firebase/firestore": "8.0.1",

@@ -3,6 +3,7 @@ import { AuthService } from 'ta-firestore';
 import { inject, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type { PublicUser } from 'model';
 import { TestScheduler } from 'rxjs/testing';
 import { ErrorHandler } from '@angular/core';
@@ -17,6 +18,11 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 };
 
 jest.mock('@capacitor-firebase/firestore');
+jest.mock('@capacitor-firebase/functions', () => ({
+  FirebaseFunctions: {
+    callByName: jest.fn(),
+  },
+}));
 
 jest.mock('utils', () => ({
   isBase64String: jest.fn(),
@@ -353,6 +359,47 @@ describe(ProfileApiService.name, () => {
           const result = await service.updateUser(publicUser);
 
           expect(result).toEqual(publicUser);
+        },
+      ));
+    });
+  });
+
+  describe('updateLastSeen', () => {
+    beforeEach(() => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: undefined,
+      });
+    });
+
+    it('should call updateLastSeen firebase function', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const updateDocumentMock = jest.mocked(
+          FirebaseFirestore.updateDocument,
+        );
+        const updateDocumentCallCount = updateDocumentMock.mock.calls.length;
+
+        await service.updateLastSeen();
+
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'updateLastSeen',
+        });
+        expect(updateDocumentMock).toHaveBeenCalledTimes(
+          updateDocumentCallCount,
+        );
+      },
+    ));
+
+    describe('given an error', () => {
+      it('should handle the error', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const error = new Error('Failed to update last seen');
+          jest.mocked(FirebaseFunctions.callByName).mockRejectedValue(error);
+
+          await service.updateLastSeen();
+
+          expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(error);
         },
       ));
     });

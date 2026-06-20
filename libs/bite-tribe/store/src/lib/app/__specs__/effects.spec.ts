@@ -34,7 +34,6 @@ const BiteTribeApiServiceMock = {
   saveUser: jest.fn(),
   updateUser: jest.fn(),
   deleteUser: jest.fn(),
-  saveUserIfNotExisting: jest.fn(),
   getExchangeRates: jest.fn(),
   reloadGPSPosition: jest.fn(),
   followUser: jest.fn(),
@@ -535,28 +534,6 @@ describe(AppEffect.name, () => {
           expectedOutput,
         );
       });
-    });
-  });
-
-  describe('saveUserAfterLogin$', () => {
-    let saveUserIfNotExistingSpy: SpyInstance;
-
-    beforeEach(() => {
-      saveUserIfNotExistingSpy = jest
-        .spyOn(apiService, 'saveUserIfNotExisting')
-        .mockImplementation();
-    });
-
-    it('should save user if not existing on loadedUser', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        actions$ = cold('a', {
-          a: fromAuth.AuthActions.loadedUser({ user: {} as any }),
-        });
-
-        expectObservable(effects.saveUserAfterLogin$);
-      });
-
-      expect(saveUserIfNotExistingSpy).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -251,42 +251,6 @@ export class ProfileApiService {
     }
   }
 
-  async saveUserIfNotExisting(): Promise<void> {
-    const user = this.authService.getUser();
-
-    const userFromDB = await FirebaseFirestore.getDocument({
-      reference: `${USERS_COLLECTION}/${user?.uid}`,
-    });
-
-    const userInDb = userFromDB?.snapshot.data;
-
-    if (!userInDb) {
-      await this.saveUser(false);
-    }
-
-    if (userInDb && userInDb['public'] === undefined) {
-      await this.setUserPublicFlag(user?.uid);
-    }
-  }
-
-  async setUserPublicFlag(uid: string | undefined): Promise<void> {
-    try {
-      if (uid) {
-        await FirebaseFirestore.updateDocument({
-          reference: `${USERS_COLLECTION}/${uid}`,
-          data: {
-            public: true,
-            updatedAt: new Date().toISOString(),
-            updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Error updating public user:', error);
-      this.errorHandler.handleError(error);
-    }
-  }
-
   async followUser(user: PublicUser): Promise<void> {
     try {
       const currentUser = this.authService.getUser();

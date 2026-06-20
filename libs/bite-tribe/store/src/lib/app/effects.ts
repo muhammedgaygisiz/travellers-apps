@@ -111,9 +111,10 @@ export class AppEffect {
   updateLastSeenAfterLogin$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(fromAuth.AuthActions.loginSucceeded),
+        ofType(fromAuth.AuthActions.loadedUser),
+        stopIfUserIsUndefined(),
         tap(() => {
-          this.api.updateLastSeen();
+          void this.api.updateLastSeen();
         }),
       );
     },

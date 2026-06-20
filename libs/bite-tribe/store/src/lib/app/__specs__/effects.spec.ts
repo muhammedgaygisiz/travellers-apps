@@ -640,18 +640,31 @@ describe(AppEffect.name, () => {
       updateLastSeenSpy = jest
         .spyOn(apiService, 'updateLastSeen')
         .mockImplementation();
+      updateLastSeenSpy.mockClear();
     });
 
-    it('should call updateLastSeen on loginSucceeded', () => {
+    it('should call updateLastSeen on loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loginSucceeded(),
+          a: fromAuth.AuthActions.loadedUser({ user: {} as any }),
         });
 
         expectObservable(effects.updateLastSeenAfterLogin$);
       });
 
       expect(updateLastSeenSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call updateLastSeen when loadedUser has no user', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: fromAuth.AuthActions.loadedUser({ user: null }),
+        });
+
+        expectObservable(effects.updateLastSeenAfterLogin$);
+      });
+
+      expect(updateLastSeenSpy).not.toHaveBeenCalled();
     });
 
     it('should call updateLastSeen on AppActions.updateLastSeen', () => {

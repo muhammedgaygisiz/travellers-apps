@@ -57,7 +57,6 @@ class ProfileApiMock {
   updateUser = jest.fn();
   getUserByBiteId = jest.fn();
   getUserById = jest.fn();
-  saveUserIfNotExisting = jest.fn();
   followUser = jest.fn();
   unfollowUser = jest.fn();
   getTotalNumberOfUsers = jest.fn();
@@ -496,20 +495,6 @@ describe(BiteTribeApiService.name, () => {
         const settings = { theme: 'dark' } as any;
         service.saveSettings(settings);
         expect(saveSettingsSpy).toHaveBeenCalledWith(settings);
-      },
-    ));
-  });
-
-  describe('saveUserIfNotExisting', () => {
-    it('should call saveUserIfNotExisting on ProfileApiService', inject(
-      [BiteTribeApiService, ProfileApiService],
-      (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
-        const saveUserIfNotExistingSpy = jest.spyOn(
-          profileApiService,
-          'saveUserIfNotExisting',
-        );
-        service.saveUserIfNotExisting();
-        expect(saveUserIfNotExistingSpy).toHaveBeenCalled();
       },
     ));
   });

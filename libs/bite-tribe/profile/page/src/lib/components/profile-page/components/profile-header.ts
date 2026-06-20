@@ -69,14 +69,14 @@ export class ProfileHeader {
 
   handleFollowingClick(): void {
     const userId = this.user()?.userId;
-    if (userId) {
+    if (userId && (this.followingCount() || 0) > 0) {
       this.followingClick.emit(userId);
     }
   }
 
   handleFollowersClick(): void {
     const userId = this.user()?.userId;
-    if (userId) {
+    if (userId && (this.followerCount() || 0) > 0) {
       this.followersClick.emit(userId);
     }
   }

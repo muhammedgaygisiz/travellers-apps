@@ -175,6 +175,45 @@ describe('ProfileComponent', () => {
     });
   });
 
+  describe('emptyBitesMessage', () => {
+    it('should show a placeholder when the user has no bites', () => {
+      compRef.setInput('user', {
+        displayName: 'mo',
+        userId: 'user1',
+      } as any);
+      compRef.setInput('bites', []);
+
+      fixture.detectChanges();
+
+      const emptyBitesMessage = fixture.nativeElement.querySelector(
+        '.empty-bites-message',
+      ) as HTMLElement;
+
+      expect(emptyBitesMessage.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        'no-bites-yet',
+      );
+    });
+
+    it('should show a placeholder when the organisation has no Bite Trails', () => {
+      compRef.setInput('user', {
+        displayName: 'mo',
+        isOrganisation: true,
+        userId: 'user1',
+      } as any);
+      compRef.setInput('biteTrails', []);
+
+      fixture.detectChanges();
+
+      const emptyBitesMessage = fixture.nativeElement.querySelector(
+        '.empty-bites-message',
+      ) as HTMLElement;
+
+      expect(emptyBitesMessage.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        'no-bite-trails-yet',
+      );
+    });
+  });
+
   describe('isUnfollowedUser', () => {
     const userMock = { userId: 'user1' } as any;
     beforeEach(() => {
@@ -203,6 +242,39 @@ describe('ProfileComponent', () => {
   });
 
   describe('profile location', () => {
+    it('should show displayName when present', () => {
+      compRef.setInput('user', {
+        displayName: 'mo',
+        city: 'Zurich',
+        userId: 'user1',
+      } as any);
+
+      fixture.detectChanges();
+
+      const displayName = fixture.nativeElement.querySelector(
+        '.profile-display-name',
+      ) as HTMLElement;
+
+      expect(displayName.textContent?.replace(/\s+/g, ' ').trim()).toBe('mo');
+    });
+
+    it('should show displayName placeholder when displayName is not present', () => {
+      compRef.setInput('user', {
+        city: 'Zurich',
+        userId: 'user1',
+      } as any);
+
+      fixture.detectChanges();
+
+      const displayName = fixture.nativeElement.querySelector(
+        '.profile-display-name',
+      ) as HTMLElement;
+
+      expect(displayName.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        'no-display-name',
+      );
+    });
+
     it('should show fullName before city separated by a comma', () => {
       compRef.setInput('user', {
         displayName: 'mo',
@@ -236,6 +308,23 @@ describe('ProfileComponent', () => {
       ) as HTMLElement;
 
       expect(location.textContent?.replace(/\s+/g, ' ').trim()).toBe('Zurich');
+    });
+
+    it('should show only location placeholder when fullName and city are empty', () => {
+      compRef.setInput('user', {
+        displayName: 'mo',
+        userId: 'user1',
+      } as any);
+
+      fixture.detectChanges();
+
+      const location = fixture.nativeElement.querySelector(
+        '.profile-meta',
+      ) as HTMLElement;
+
+      expect(location.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        'no-location',
+      );
     });
   });
 

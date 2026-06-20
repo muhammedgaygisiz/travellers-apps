@@ -12,13 +12,11 @@ Storage, or Firebase simulator setup is used.
 The web app uses the Capawesome `@capacitor-firebase/app-check` plugin with
 Firebase's `ReCaptchaEnterpriseProvider`. The iOS app installs the native App
 Attest provider before `FirebaseApp.configure()` in
-`apps/bite-tribe-ios/ios/App/App/AppDelegate.swift`, then the JavaScript SDK is
-initialized with a `CustomProvider` that retrieves native tokens through
-`FirebaseAppCheck.getToken(...)`.
-
-Android App Check is intentionally not enabled yet. The shared initializer has
-an explicit Android branch so Play Integrity can be added later without changing
-the web or iOS behavior.
+`apps/bite-tribe-ios/ios/App/App/AppDelegate.swift`. The Android app installs
+the native Play Integrity provider in
+`apps/bite-tribe-android/android/app/src/main/java/com/bitetribe/app/MainActivity.java`.
+The JavaScript SDK is then initialized with a `CustomProvider` that retrieves
+native tokens through `FirebaseAppCheck.getToken(...)` on both native platforms.
 
 The web reCAPTCHA Enterprise score-based site key is read from:
 
@@ -46,7 +44,7 @@ build.
 | Web local production Firebase | `NX_APP_BITE_TRIBE_IS_DEV=false` plus `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY=...` | Runs with the regular site key. Use `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN=...` for `localhost`.                           |
 | Web production build          | `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY=...`                                       | Runs with the regular site key. Do not provide a debug token. `NX_APP_BITE_TRIBE_IS_DEV` is omitted from production bundles. |
 | iOS production/TestFlight     | Firebase Console iOS App Check registration plus App Attest capability           | Uses native App Attest tokens bridged into the Firebase JavaScript SDK.                                                      |
-| Android                       | Deferred                                                                         | Skipped until Play Integrity integration is implemented.                                                                     |
+| Android production/internal   | Firebase Console Android App Check registration plus Play Integrity provider     | Uses native Play Integrity tokens bridged into the Firebase JavaScript SDK.                                                  |
 
 When `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY` is not configured, initialization is
 also skipped with an `[AppCheck]` info log. This keeps localhost development
@@ -98,6 +96,26 @@ AppDelegate
 The native debug provider is not enabled in code. If debug tokens are needed for
 a future local-device workflow, register them in Firebase Console and keep token
 values in local developer configuration only. Never commit debug token values.
+
+### Android Play Integrity setup
+
+Register or verify the BiteTribe Android app in Firebase Console under
+**Build > App Check** and select the Play Integrity provider. App Check
+enforcement must remain disabled until request metrics are healthy after
+deployment.
+
+The Android startup order is:
+
+```text
+MainActivity
+-> FirebaseAppCheck.installAppCheckProviderFactory(...)
+-> Angular provideFirestoreUtils(...)
+-> Firebase JS SDK initializeAppCheck(...) with CustomProvider
+-> Firestore / Storage / Functions
+```
+
+After deployment, verify App Check request metrics for the Android app in
+Firebase Console before enabling enforcement.
 
 ### Local production Firebase testing
 

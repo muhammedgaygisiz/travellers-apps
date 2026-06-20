@@ -40,13 +40,8 @@ const initializeFirebaseAppCheckOnce = async (
 
   const platform = Capacitor.getPlatform();
 
-  if (platform === 'ios') {
-    await initializeNativeFirebaseAppCheckBridge(app);
-    return;
-  }
-
-  if (platform === 'android') {
-    console.info('[AppCheck] Skipping Android Firebase App Check for now');
+  if (platform === 'ios' || platform === 'android') {
+    await initializeNativeFirebaseAppCheckBridge(app, platform);
     return;
   }
 
@@ -95,9 +90,14 @@ const initializeWebFirebaseAppCheck = async (): Promise<void> => {
 
 const initializeNativeFirebaseAppCheckBridge = async (
   app: FirebaseApp,
+  platform: 'ios' | 'android',
 ): Promise<void> => {
+  const platformLabel = getNativePlatformLabel(platform);
+
   try {
-    console.info('[AppCheck] Initializing iOS Firebase App Check bridge');
+    console.info(
+      `[AppCheck] Initializing ${platformLabel} Firebase App Check bridge`,
+    );
 
     await FirebaseAppCheck.setTokenAutoRefreshEnabled({ enabled: true });
 
@@ -108,14 +108,19 @@ const initializeNativeFirebaseAppCheckBridge = async (
       isTokenAutoRefreshEnabled: true,
     });
 
-    console.info('[AppCheck] iOS Firebase App Check bridge initialized');
+    console.info(
+      `[AppCheck] ${platformLabel} Firebase App Check bridge initialized`,
+    );
   } catch (error) {
     console.warn(
-      '[AppCheck] iOS Firebase App Check bridge initialization failed',
+      `[AppCheck] ${platformLabel} Firebase App Check bridge initialization failed`,
       error,
     );
   }
 };
+
+const getNativePlatformLabel = (platform: 'ios' | 'android'): string =>
+  platform === 'ios' ? 'iOS' : 'Android';
 
 const getNativeFirebaseAppCheckToken = async (): Promise<AppCheckToken> => {
   const { token, expireTimeMillis } = await FirebaseAppCheck.getToken({

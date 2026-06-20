@@ -13,6 +13,7 @@ import {
   DocumentSnapshot,
   FirebaseFirestore,
 } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type {
   Bite,
   CreateAndUploadImageCallbackParams,
@@ -241,18 +242,8 @@ export class ProfileApiService {
 
   async updateLastSeen(): Promise<void> {
     try {
-      const user = this.authService.getUser();
-
-      if (!user?.uid) {
-        return;
-      }
-
-      await FirebaseFirestore.updateDocument({
-        reference: `${USERS_COLLECTION}/${user.uid}`,
-        data: {
-          lastSeen: new Date().toISOString(),
-          lastSeenTimestamp: Date.now(),
-        },
+      await FirebaseFunctions.callByName<void, void>({
+        name: 'updateLastSeen',
       });
     } catch (error) {
       console.warn('Error updating last seen:', error);

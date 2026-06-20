@@ -172,6 +172,35 @@ describe(initializeFirebaseAppCheck.name, () => {
     });
   });
 
+  it('should initialize the Android Firebase JS SDK bridge with native tokens', async () => {
+    jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
+
+    await initializeFirebaseAppCheck(firebaseApp);
+
+    expect(FirebaseAppCheck.setTokenAutoRefreshEnabled).toHaveBeenCalledWith({
+      enabled: true,
+    });
+    expect(CustomProvider).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
+    expect(initializeAppCheck).toHaveBeenCalledWith(firebaseApp, {
+      provider: { getToken: expect.any(Function) },
+      isTokenAutoRefreshEnabled: true,
+    });
+
+    const customProviderOptions = (CustomProvider as jest.Mock).mock
+      .calls[0][0];
+
+    await expect(customProviderOptions.getToken()).resolves.toEqual({
+      token: 'native-token',
+      expireTimeMillis: 123,
+    });
+    expect(FirebaseAppCheck.getToken).toHaveBeenCalledWith({
+      forceRefresh: false,
+    });
+    expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
+  });
+
   it('should add a short expiry fallback when native token expiry is unavailable', async () => {
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
     const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000);
@@ -190,21 +219,6 @@ describe(initializeFirebaseAppCheck.name, () => {
     });
 
     dateNowSpy.mockRestore();
-  });
-
-  it('should skip Android initialization until Android App Check is implemented', async () => {
-    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
-    jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
-
-    await initializeFirebaseAppCheck(firebaseApp);
-
-    expect(initializeAppCheck).not.toHaveBeenCalled();
-    expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
-      '[AppCheck] Skipping Android Firebase App Check for now',
-    );
-
-    consoleInfoSpy.mockRestore();
   });
 
   it('should skip initialization on unsupported native platforms', async () => {
@@ -233,6 +247,18 @@ describe(initializeFirebaseAppCheck.name, () => {
     expect(FirebaseAppCheck.initialize).toHaveBeenCalledTimes(1);
   });
 
+  it('should initialize native App Check bridge only once', async () => {
+    jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
+
+    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp);
+
+    expect(FirebaseAppCheck.setTokenAutoRefreshEnabled).toHaveBeenCalledTimes(
+      1,
+    );
+    expect(initializeAppCheck).toHaveBeenCalledTimes(1);
+  });
+
   it('should log initialization failures without throwing', async () => {
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
     const error = new Error('App Check failed');
@@ -251,21 +277,45 @@ describe(initializeFirebaseAppCheck.name, () => {
     consoleWarnSpy.mockRestore();
   });
 
-  it('should not log native App Check token values', async () => {
-    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
+  it('should log native bridge initialization failures without throwing', async () => {
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-    jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
+    const error = new Error('Native App Check failed');
+    jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
+    jest
+      .spyOn(FirebaseAppCheck, 'setTokenAutoRefreshEnabled')
+      .mockRejectedValueOnce(error);
 
-    await initializeFirebaseAppCheck(firebaseApp);
+    await expect(
+      initializeFirebaseAppCheck(firebaseApp),
+    ).resolves.toBeUndefined();
 
-    const loggedValues = [
-      ...consoleInfoSpy.mock.calls.flat(),
-      ...consoleWarnSpy.mock.calls.flat(),
-    ];
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      '[AppCheck] Android Firebase App Check bridge initialization failed',
+      error,
+    );
+    expect(initializeAppCheck).not.toHaveBeenCalled();
 
-    expect(loggedValues).not.toContain('native-token');
-
-    consoleInfoSpy.mockRestore();
     consoleWarnSpy.mockRestore();
   });
+
+  it.each(['ios', 'android'] as const)(
+    'should not log native App Check token values on %s',
+    async (platform) => {
+      const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      jest.spyOn(Capacitor, 'getPlatform').mockReturnValue(platform);
+
+      await initializeFirebaseAppCheck(firebaseApp);
+
+      const loggedValues = [
+        ...consoleInfoSpy.mock.calls.flat(),
+        ...consoleWarnSpy.mock.calls.flat(),
+      ];
+
+      expect(loggedValues).not.toContain('native-token');
+
+      consoleInfoSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
+    },
+  );
 });

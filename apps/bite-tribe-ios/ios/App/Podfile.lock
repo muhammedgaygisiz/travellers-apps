@@ -1225,6 +1225,9 @@ PODS:
     - FirebaseAnalytics/IdentitySupport (~> 12.7.0)
   - CapacitorFirebaseAnalytics/Lite (8.0.1):
     - Capacitor
+  - CapacitorFirebaseAppCheck (8.0.1):
+    - Capacitor
+    - FirebaseAppCheck (~> 12.7.0)
   - CapacitorFirebaseAuthentication (8.0.1):
     - Capacitor
     - CapacitorFirebaseAuthentication/Lite (= 8.0.1)
@@ -1290,6 +1293,12 @@ PODS:
     - GoogleUtilities/Network (~> 8.1)
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
     - nanopb (~> 3.30910.0)
+  - FirebaseAppCheck (12.7.0):
+    - AppCheckCore (~> 11.0)
+    - FirebaseAppCheckInterop (~> 12.7.0)
+    - FirebaseCore (~> 12.7.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
   - FirebaseAppCheckInterop (12.7.0)
   - FirebaseAuth (12.7.0):
     - FirebaseAppCheckInterop (~> 12.7.0)
@@ -1545,6 +1554,7 @@ DEPENDENCIES:
   - "CapacitorFilesystem (from `../../../../node_modules/@capacitor/filesystem`)"
   - "CapacitorFirebaseAnalytics (from `../../../../node_modules/@capacitor-firebase/analytics`)"
   - "CapacitorFirebaseAnalytics/Analytics (from `../../../../node_modules/@capacitor-firebase/analytics`)"
+  - "CapacitorFirebaseAppCheck (from `../../../../node_modules/@capacitor-firebase/app-check`)"
   - "CapacitorFirebaseAuthentication (from `../../../../node_modules/@capacitor-firebase/authentication`)"
   - "CapacitorFirebaseAuthentication/Google (from `../../../../node_modules/@capacitor-firebase/authentication`)"
   - "CapacitorFirebaseCrashlytics (from `../../../../node_modules/@capacitor-firebase/crashlytics`)"
@@ -1571,6 +1581,7 @@ SPEC REPOS:
     - AppCheckCore
     - BoringSSL-GRPC
     - FirebaseAnalytics
+    - FirebaseAppCheck
     - FirebaseAppCheckInterop
     - FirebaseAuth
     - FirebaseAuthInterop
@@ -1619,6 +1630,8 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor/filesystem"
   CapacitorFirebaseAnalytics:
     :path: "../../../../node_modules/@capacitor-firebase/analytics"
+  CapacitorFirebaseAppCheck:
+    :path: "../../../../node_modules/@capacitor-firebase/app-check"
   CapacitorFirebaseAuthentication:
     :path: "../../../../node_modules/@capacitor-firebase/authentication"
   CapacitorFirebaseCrashlytics:
@@ -1664,6 +1677,7 @@ SPEC CHECKSUMS:
   CapacitorCordova: 5dc3912d25ef770a3fe0f431bb65c9fbfa2e92f9
   CapacitorFilesystem: 2cb7c29536024668f333266a2177f8c10bbd9c98
   CapacitorFirebaseAnalytics: 19a1c90af1b9eb4c290fd026418f961f3fd0e548
+  CapacitorFirebaseAppCheck: e1ab5175432eae536315c99c492195db4823a25b
   CapacitorFirebaseAuthentication: cb5ddfd40d28ae8522b9af25741ba62eaa939501
   CapacitorFirebaseCrashlytics: 9498eaa61bdcc42971392747c221a407c38ddc5e
   CapacitorFirebaseFirestore: 7037e8a30f1ac9cb4c77ee629f115847dc74256f
@@ -1681,6 +1695,7 @@ SPEC CHECKSUMS:
   CapacitorStatusBar: 312e2e67928dfe9514c4a8916a1fd610552f5f35
   CapawesomeCapacitorFilePicker: cbd96b593d2bfdceb353ed161f9462ce4a9d67a9
   FirebaseAnalytics: e423129866107aeacf6010a280b9c9829f9ea50d
+  FirebaseAppCheck: ca32814649d879d81589ac925ef1c3f833f8453f
   FirebaseAppCheckInterop: d58366471f1dadf2ed998b15f85c658458a10142
   FirebaseAuth: 88beaef7c688a2950541552b6dd195d22137c41a
   FirebaseAuthInterop: deb2638881b5d98c88c4371dd0de65b6110f217b
@@ -1714,6 +1729,6 @@ SPEC CHECKSUMS:
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
 
-PODFILE CHECKSUM: 2bb4b9b72a06ab5d7b35b818c0e38a036a95f1a5
+PODFILE CHECKSUM: 3da3f7f1c4956053314d67be2d5f19f62b70cc33
 
 COCOAPODS: 1.16.2

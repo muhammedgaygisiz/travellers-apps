@@ -16,6 +16,7 @@ def capacitor_pods
   pod 'CapacitorFirebaseFunctions', :path => '../../../../node_modules/@capacitor-firebase/functions'
   pod 'CapacitorFirebaseStorage', :path => '../../../../node_modules/@capacitor-firebase/storage'
   pod 'CapacitorFirebaseAnalytics', :path => '../../../../node_modules/@capacitor-firebase/analytics'
+  pod 'CapacitorFirebaseAppCheck', :path => '../../../../node_modules/@capacitor-firebase/app-check'
   pod 'CapacitorGeolocation', :path => '../../../../node_modules/@capacitor/geolocation'
   pod 'CapacitorCamera', :path => '../../../../node_modules/@capacitor/camera'
   pod 'CapacitorAppLauncher', :path => '../../../../node_modules/@capacitor/app-launcher'

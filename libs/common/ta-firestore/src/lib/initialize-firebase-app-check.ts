@@ -1,9 +1,11 @@
 import { Capacitor } from '@capacitor/core';
+import { FirebaseAppCheck } from '@capacitor-firebase/app-check';
+import { FirebaseApp } from 'firebase/app';
 import {
-  FirebaseAppCheck,
-  InitializeOptions,
-} from '@capacitor-firebase/app-check';
-import { ReCaptchaEnterpriseProvider } from 'firebase/app-check';
+  CustomProvider,
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider,
+} from 'firebase/app-check';
 
 const APP_CHECK_SITE_KEY_ENV = 'NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY';
 const APP_CHECK_DEBUG_TOKEN_ENV = 'NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN';
@@ -11,12 +13,12 @@ const IS_DEV_ENV = 'NX_APP_BITE_TRIBE_IS_DEV';
 
 let appCheckInitialization: Promise<void> | null = null;
 
-export const initializeFirebaseAppCheck = (): Promise<void> => {
+export const initializeFirebaseAppCheck = (app: FirebaseApp): Promise<void> => {
   if (appCheckInitialization) {
     return appCheckInitialization;
   }
 
-  appCheckInitialization = initializeFirebaseAppCheckOnce();
+  appCheckInitialization = initializeFirebaseAppCheckOnce(app);
   return appCheckInitialization;
 };
 
@@ -24,12 +26,9 @@ export const resetFirebaseAppCheckInitializationForTesting = (): void => {
   appCheckInitialization = null;
 };
 
-const initializeFirebaseAppCheckOnce = async (): Promise<void> => {
-  if (Capacitor.getPlatform() !== 'web') {
-    console.info('[AppCheck] Skipping Firebase App Check on native platform');
-    return;
-  }
-
+const initializeFirebaseAppCheckOnce = async (
+  app: FirebaseApp,
+): Promise<void> => {
   if (process.env[IS_DEV_ENV] === 'true') {
     console.info(
       `[AppCheck] Skipping Firebase App Check because ${IS_DEV_ENV} is true`,
@@ -37,6 +36,29 @@ const initializeFirebaseAppCheckOnce = async (): Promise<void> => {
     return;
   }
 
+  const platform = Capacitor.getPlatform();
+
+  if (platform === 'ios') {
+    await initializeNativeFirebaseAppCheckBridge(app);
+    return;
+  }
+
+  if (platform === 'android') {
+    console.info('[AppCheck] Skipping Android Firebase App Check for now');
+    return;
+  }
+
+  if (platform !== 'web') {
+    console.info(
+      `[AppCheck] Skipping Firebase App Check on unsupported platform: ${platform}`,
+    );
+    return;
+  }
+
+  await initializeWebFirebaseAppCheck();
+};
+
+const initializeWebFirebaseAppCheck = async (): Promise<void> => {
   const siteKey = process.env[APP_CHECK_SITE_KEY_ENV];
 
   if (!siteKey) {
@@ -57,7 +79,11 @@ const initializeFirebaseAppCheckOnce = async (): Promise<void> => {
   try {
     console.info('[AppCheck] Initializing Firebase App Check');
 
-    await FirebaseAppCheck.initialize(toInitializeOptions(siteKey, debugToken));
+    await FirebaseAppCheck.initialize({
+      provider: new ReCaptchaEnterpriseProvider(siteKey),
+      isTokenAutoRefreshEnabled: true,
+      ...(debugToken ? { debugToken } : {}),
+    });
 
     console.info('[AppCheck] Firebase App Check initialized');
   } catch (error) {
@@ -65,11 +91,30 @@ const initializeFirebaseAppCheckOnce = async (): Promise<void> => {
   }
 };
 
-const toInitializeOptions = (
-  siteKey: string,
-  debugToken?: string,
-): InitializeOptions => ({
-  provider: new ReCaptchaEnterpriseProvider(siteKey),
-  isTokenAutoRefreshEnabled: true,
-  ...(debugToken ? { debugToken } : {}),
-});
+const initializeNativeFirebaseAppCheckBridge = async (
+  app: FirebaseApp,
+): Promise<void> => {
+  try {
+    console.info('[AppCheck] Initializing iOS Firebase App Check bridge');
+
+    await FirebaseAppCheck.setTokenAutoRefreshEnabled({ enabled: true });
+
+    initializeAppCheck(app, {
+      provider: new CustomProvider({
+        getToken: getNativeFirebaseAppCheckToken,
+      }),
+      isTokenAutoRefreshEnabled: true,
+    });
+
+    console.info('[AppCheck] iOS Firebase App Check bridge initialized');
+  } catch (error) {
+    console.warn(
+      '[AppCheck] iOS Firebase App Check bridge initialization failed',
+      error,
+    );
+  }
+};
+
+const getNativeFirebaseAppCheckToken = (): ReturnType<
+  typeof FirebaseAppCheck.getToken
+> => FirebaseAppCheck.getToken({ forceRefresh: false });

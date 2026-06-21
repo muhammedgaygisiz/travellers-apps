@@ -94,6 +94,20 @@ describe('DetailsPage', () => {
   });
 
   describe('Bite Display', () => {
+    it('should show a review field skeleton while bite is loading', () => {
+      const nativeElement = fixture.debugElement.nativeElement as HTMLElement;
+
+      const reviewSkeleton = nativeElement.querySelector(
+        'ion-skeleton-text.review-field-skeleton',
+      );
+      const reviewField = nativeElement.querySelector(
+        'ion-textarea[formControlName="review"]',
+      );
+
+      expect(reviewSkeleton).toBeTruthy();
+      expect(reviewField).toBeFalsy();
+    });
+
     it('should display bite details when bite input is provided', () => {
       // Arrange
       const mockBite = {

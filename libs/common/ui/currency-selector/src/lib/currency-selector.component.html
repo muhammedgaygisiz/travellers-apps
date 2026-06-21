@@ -19,7 +19,7 @@
     @for (currency of filteredCurrencies(); track currency.code) {
       <ion-item [detail]="false" (click)="selectCurrency(currency.code)">
         <ion-label>
-          <h2>{{ currency.name }}</h2>
+          <h2>{{ getCurrencyName(currency) }}</h2>
           <p>{{ currency.code }} - {{ currency.symbol }}</p>
         </ion-label>
         <ion-buttons slot="end">

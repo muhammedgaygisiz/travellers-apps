@@ -32,8 +32,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { Bite, BiteTrail, PublicUser } from 'model';
 import { CurrencySelectorComponent } from 'currency-selector';
-import { currencyCodes } from 'utils';
+import { currencyCodes, getLocalizedCurrencyName } from 'utils';
 import { ImageUploadComponent } from 'image-upload';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,6 +66,7 @@ import { ImageUploadComponent } from 'image-upload';
 })
 export class CreateBiteTrailComponent {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly transloco = inject(TranslocoService);
 
   selectedBites = input<Bite[]>([]);
   employees = input<PublicUser[]>([]);
@@ -111,11 +113,18 @@ export class CreateBiteTrailComponent {
   currencyValueChanges = toSignal(
     this.biteTrailFormGroup.controls['currency'].valueChanges,
   );
+  activeLang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
+  });
 
   selectedCurrencyName = computed(() => {
     this.currencyValueChanges();
+    const activeLang = this.activeLang();
     const currencyCode = this.biteTrailFormGroup.controls['currency'].value;
-    return this.currencies.find((c) => c.code === currencyCode)?.name;
+    const currency = this.currencies.find((c) => c.code === currencyCode);
+    return currency
+      ? getLocalizedCurrencyName(currency.code, activeLang, currency.name)
+      : undefined;
   });
 
   displayedBites = computed(() => {

@@ -19,6 +19,7 @@ addNecessaryIcons();
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
+  getActiveLang: jest.fn(() => 'en'),
   config: {
     reRenderOnLangChange: jest.fn(),
   },
@@ -31,6 +32,7 @@ describe('CreateBiteTrailComponent', () => {
   let fixture: ComponentFixture<CreateBiteTrailComponent>;
 
   beforeEach(() => {
+    MockTranslocoService.getActiveLang.mockReturnValue('en');
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(),
@@ -179,6 +181,19 @@ describe('CreateBiteTrailComponent', () => {
 
       expect(component.biteTrailFormGroup.get('currency')?.value).toBe('USD');
       expect(modal.dismiss).toHaveBeenCalled();
+    });
+  });
+
+  describe('selectedCurrencyName', () => {
+    it('should return the localized selected currency name', () => {
+      MockTranslocoService.getActiveLang.mockReturnValue('de');
+      fixture = TestBed.createComponent(CreateBiteTrailComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      component.biteTrailFormGroup.controls['currency'].patchValue('USD');
+
+      expect(component.selectedCurrencyName()).toBe('US-Dollar');
     });
   });
 

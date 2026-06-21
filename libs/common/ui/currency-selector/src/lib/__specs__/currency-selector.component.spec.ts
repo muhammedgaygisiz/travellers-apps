@@ -8,6 +8,7 @@ addNecessaryIcons();
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
+  getActiveLang: jest.fn(() => 'en'),
   config: {
     reRenderOnLangChange: jest.fn(),
   },
@@ -19,6 +20,7 @@ describe('CurrencySelectorComponent', () => {
   let fixture: ComponentFixture<CurrencySelectorComponent>;
 
   beforeEach(() => {
+    MockTranslocoService.getActiveLang.mockReturnValue('en');
     TestBed.configureTestingModule({
       providers: [
         { provide: TranslocoService, useValue: MockTranslocoService },
@@ -44,6 +46,34 @@ describe('CurrencySelectorComponent', () => {
       expect(filtered.length).toBeGreaterThan(0);
       expect(filtered[0].code).toBe('MDL');
     });
+
+    it('should search by localized currency name', () => {
+      MockTranslocoService.getActiveLang.mockReturnValue('de');
+      fixture = TestBed.createComponent(CurrencySelectorComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      component.rawSearchTerm.set('US-Dollar');
+      const filtered = component.filteredCurrencies();
+
+      expect(filtered[0].code).toBe('USD');
+    });
+  });
+
+  it('should return the localized currency name', () => {
+    MockTranslocoService.getActiveLang.mockReturnValue('de');
+    fixture = TestBed.createComponent(CurrencySelectorComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const usd = component.currencies.find(
+      (currency) => currency.code === 'USD',
+    );
+
+    expect(usd).toBeDefined();
+    expect(component.getCurrencyName(usd ?? component.currencies[0])).toBe(
+      'US-Dollar',
+    );
   });
 
   it('should filter currencies based on search term', () => {

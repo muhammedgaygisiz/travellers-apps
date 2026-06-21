@@ -9,6 +9,7 @@ addNecessaryIcons();
 
 const MockTranslocoService = {
   translate: (key: string): string => key,
+  getActiveLang: (): string => 'en',
   config: {
     reRenderOnLangChange: (): boolean => true,
   },

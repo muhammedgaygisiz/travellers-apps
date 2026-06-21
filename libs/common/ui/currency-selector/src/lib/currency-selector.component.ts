@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   IonButton,
   IonButtons,
@@ -19,8 +21,13 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { currencyCodes, getSimilarityScore, normalize } from 'utils';
-import { TranslocoPipe } from '@jsverse/transloco';
+import {
+  currencyCodes,
+  getLocalizedCurrencyName,
+  getSimilarityScore,
+  normalize,
+} from 'utils';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'currency-selector',
@@ -43,6 +50,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CurrencySelectorComponent {
+  private readonly transloco = inject(TranslocoService);
+
   selectedCurrency = input<string>('EUR');
   favoriteCurrencies = input<string[] | undefined>([]);
   disableFavChange = input<boolean>(false);
@@ -55,6 +64,9 @@ export class CurrencySelectorComponent {
 
   currencies = currencyCodes;
   rawSearchTerm = signal('');
+  activeLang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
+  });
 
   filteredCurrencies = computed(() => {
     const searchTerm = this.rawSearchTerm();
@@ -72,9 +84,10 @@ export class CurrencySelectorComponent {
 
     return this.currencies
       .map((currency) => {
+        const localizedName = this.getCurrencyName(currency);
         const nameMatches = getSimilarityScore(
           normalizedSearchTerm,
-          normalize(currency.name),
+          normalize(localizedName),
         );
         const codeMatches = getSimilarityScore(
           normalizedSearchTerm,
@@ -103,6 +116,14 @@ export class CurrencySelectorComponent {
       })
       .map(({ currency }) => currency);
   });
+
+  getCurrencyName(currency: (typeof currencyCodes)[number]): string {
+    return getLocalizedCurrencyName(
+      currency.code,
+      this.activeLang(),
+      currency.name,
+    );
+  }
 
   searchbarInput(event: Event): void {
     const target = event.target as HTMLIonSearchbarElement;

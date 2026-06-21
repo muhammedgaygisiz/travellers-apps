@@ -1,3 +1,11 @@
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+ion-content {
+  --padding-bottom: calc(16px + var(--ion-safe-area-bottom, 0px));
+
+  flex: 1;
 }

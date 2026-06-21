@@ -1,32 +1,41 @@
-import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import {
+  applicationConfig,
+  Meta,
+  moduleMetadata,
+  StoryObj,
+} from '@storybook/angular';
+import { IonApp, provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { CurrencySelectorComponent } from '../currency-selector.component';
-import { TranslocoService } from '@jsverse/transloco';
-import { of } from 'rxjs';
 
 addNecessaryIcons();
-
-const MockTranslocoService = {
-  translate: (key: string): string => key,
-  getActiveLang: (): string => 'en',
-  config: {
-    reRenderOnLangChange: (): boolean => true,
-  },
-  langChanges$: of(),
-};
 
 export default {
   title: 'Components/Currency Selector',
   component: CurrencySelectorComponent,
   decorators: [
     applicationConfig({
-      providers: [
-        provideIonicAngular(getIonicConfig()),
-        { provide: TranslocoService, useValue: MockTranslocoService },
-      ],
+      providers: [provideIonicAngular(getIonicConfig())],
+    }),
+    moduleMetadata({
+      imports: [CurrencySelectorComponent, IonApp],
     }),
   ],
+  render: (args) => ({
+    props: args,
+    template: `
+      <ion-app>
+        <div style="height: 100vh">
+        <currency-selector
+          [selectedCurrency]="selectedCurrency"
+          [favoriteCurrencies]="favoriteCurrencies"
+          [disableFavChange]="disableFavChange"
+          [leftButtonLangCode]="leftButtonLangCode"
+        />
+        </div>
+      </ion-app>
+    `,
+  }),
 } as Meta<CurrencySelectorComponent>;
 
 type Story = StoryObj<CurrencySelectorComponent>;
@@ -34,17 +43,23 @@ type Story = StoryObj<CurrencySelectorComponent>;
 export const Default: Story = {
   args: {
     selectedCurrency: 'EUR',
+    favoriteCurrencies: [],
+    disableFavChange: false,
+    leftButtonLangCode: 'cancel',
   },
 };
 
-export const WithUSD: Story = {
+export const WithFavorites: Story = {
   args: {
-    selectedCurrency: 'USD',
+    ...Default.args,
+    selectedCurrency: 'EUR',
+    favoriteCurrencies: ['USD', 'CHF', 'THB'],
   },
 };
 
-export const WithGBP: Story = {
+export const ReadonlyFavorites: Story = {
   args: {
-    selectedCurrency: 'GBP',
+    ...WithFavorites.args,
+    disableFavChange: true,
   },
 };

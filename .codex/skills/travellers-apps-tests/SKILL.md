@@ -40,6 +40,8 @@ Common feature flow:
 - For dialogs/labels/buttons, use Transloco keys. Avoid hardcoded visible English in templates or alert config.
 - For route assembly, reuse `PATH` from `libs/common/utils/src/lib/paths.ts` where possible and mirror existing services for route conventions.
 - Avoid broad refactors while implementing an issue. Touch the layer that owns the behavior and adjacent tests.
+- When a shared UI component gets a new visible state, input, mode, loading/empty branch, or important layout behavior, check whether its Storybook stories still cover the useful variants. Add or adjust stories for the state set instead of relying only on unit tests.
+- Storybook renders components outside some app/runtime contexts. For Ionic components that normally live inside pages or modals, stories may need an Ionic shell such as `ion-app` and an explicit viewport-height wrapper so `ion-content` has a real height. Keep app-only mocks out of stories when the Storybook host already provides the global service, for example the locale-aware Transloco setup.
 
 ## Linting Structure
 
@@ -103,6 +105,31 @@ node -e "for (const f of process.argv.slice(1)) JSON.parse(require('fs').readFil
    - Run `npm run build` from `apps/bite-tribe-firebase/functions`.
    - Run `npm run lint` from `apps/bite-tribe-firebase/functions`.
    - If only callable filtering/mapping changed, these checks are often the highest-signal validation unless function specs already exist.
+
+## Storybook Workflow
+
+Use Storybook as part of validation when changing shared components or user-visible component states:
+
+1. Locate the component story under `libs/**/__specs__/*.stories.ts`.
+2. If the change introduces a new meaningful state, add or update a story for it. Useful states include default, empty, loading, disabled/read-only, selected/favorited, error, and important responsive/layout cases.
+3. For Ionic stories, prefer the app-like setup already used in this workspace:
+   - `provideIonicAngular(getIonicConfig())`
+   - `addNecessaryIcons()` or targeted `addIcons(...)` when icons render in the component
+   - `ion-app` plus a height wrapper when rendering standalone `ion-content`
+4. Do not replace the Storybook host's global Transloco provider with a partial local mock unless the story is intentionally isolated. The host config at `apps/storybook-host/.storybook/preview.ts` provides locale switching and translation loading for library stories.
+5. Validate Storybook story typing with:
+
+```bash
+npx tsc -p apps/storybook-host/.storybook/tsconfig.json --noEmit
+```
+
+6. If a full Storybook build is needed, use the Angular builder path:
+
+```bash
+NX_DAEMON=false npx nx run storybook-host:build-storybook --configuration=ci
+```
+
+If that Nx command sits silent on startup, stop it after a reasonable interval and report that it was blocked by Nx/project-graph behavior. Do not use direct `npx storybook build` as a fallback in this workspace; Storybook 10 with Angular requires the configured Angular builder and the direct CLI exits with the Angular legacy build-options error.
 
 ## Capacitor Native Plugin Changes
 

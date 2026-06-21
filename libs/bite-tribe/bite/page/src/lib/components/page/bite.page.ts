@@ -35,14 +35,14 @@ import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
 import type { Bite, Geopoint } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
-import { currencyCodes } from 'utils';
+import { currencyCodes, getLocalizedCurrencyName } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
 import { normalizePriceForBackend } from './utils/normalize-price-for-backend';
 import { ImageValidator } from './utils/image-validator';
 import { normalizePriceForForm } from './utils/normalize-price-for-form';
 import { ConnectionStatus } from '@capacitor/network';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'bite',
@@ -77,6 +77,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 export class BitePage {
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly transloco = inject(TranslocoService);
 
   bite = input<Bite>();
 
@@ -258,6 +259,9 @@ export class BitePage {
   currencyValueChanges = toSignal(
     this.biteFormGroup.controls['currency'].valueChanges,
   );
+  activeLang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
+  });
 
   positionValueChanges = toSignal(
     this.biteFormGroup.controls['position'].valueChanges,
@@ -276,8 +280,12 @@ export class BitePage {
 
   selectedCurrencyName = computed(() => {
     this.currencyValueChanges();
+    const activeLang = this.activeLang();
     const currencyCode = this.biteFormGroup.controls['currency'].value;
-    return this.currencies.find((c) => c.code === currencyCode)?.name;
+    const currency = this.currencies.find((c) => c.code === currencyCode);
+    return currency
+      ? getLocalizedCurrencyName(currency.code, activeLang, currency.name)
+      : undefined;
   });
 
   locationFromImage = computed(() => {

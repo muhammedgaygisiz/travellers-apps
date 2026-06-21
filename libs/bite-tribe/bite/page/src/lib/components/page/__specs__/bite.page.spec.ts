@@ -39,6 +39,7 @@ const assertDeepEqual = (actual: any, expected: any): void => {
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
+  getActiveLang: jest.fn(() => 'en'),
   config: {
     reRenderOnLangChange: jest.fn(),
   },
@@ -54,6 +55,7 @@ describe('BitePage', () => {
   let scheduler: TestScheduler;
 
   beforeEach(() => {
+    MockTranslocoService.getActiveLang.mockReturnValue('en');
     scheduler = new TestScheduler(assertDeepEqual);
     platformMock = {
       is: jest.fn((key: string) => key === 'web'),
@@ -518,6 +520,21 @@ describe('BitePage', () => {
       component.onCurrencySelected('USD', { dismiss: dismissSpy } as any);
       expect(component.biteFormGroup.controls['currency'].value).toBe('USD');
       expect(dismissSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('selectedCurrencyName', () => {
+    it('should return the localized selected currency name', () => {
+      MockTranslocoService.getActiveLang.mockReturnValue('de');
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      componentRef.setInput('networkStatus', { connected: true });
+      componentRef.changeDetectorRef.detectChanges();
+
+      component.biteFormGroup.controls['currency'].patchValue('USD');
+
+      expect(component.selectedCurrencyName()).toBe('US-Dollar');
     });
   });
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Travellers Apps"
+  short_description: "Repo guide for Travellers Apps"
+  default_prompt: "Use $travellers-apps to implement and validate this travellers-apps change."

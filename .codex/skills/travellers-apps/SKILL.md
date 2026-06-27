@@ -13,6 +13,7 @@ Read only the references relevant to the current task:
 
 - [architecture.md](references/architecture.md): feature layering, implementation ownership, shared model boundaries, and common Angular/Ionic patterns.
 - [validation.md](references/validation.md): focused Jest/Nx workflow, direct Jest fallback, linting, Firebase functions checks, and cheap consistency checks.
+- [firebase-functions.md](references/firebase-functions.md): callable/trigger patterns, Firestore query gotchas, aggregate migrations, and operational logging.
 - [storybook.md](references/storybook.md): when and how to update Storybook stories, Ionic story wrappers, Storybook host Transloco setup, and Storybook validation commands.
 - [capacitor.md](references/capacitor.md): native plugin dependency and sync workflow for iOS/Android wrappers.
 

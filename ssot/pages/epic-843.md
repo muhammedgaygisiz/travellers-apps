@@ -1,0 +1,20 @@
+- [epic: search in BiteTribe](https://github.com/muhammedgaygisiz/travellers-apps/issues/843) (Issue \#843)
+- Description
+  - As a user I want to find specific version as fast as possible to display only content that is interesting to me.
+  - Topics:
+  - Search for persons (by name, username, e-mail) in a "google-alike" way.
+  - Search for bites by its name, restaraurant, in a "google-alike" way
+  - Search for bites by its description or other informations
+  - Allow user to select specific topics to search, i.e. just name, just e-mail, just restaurant etc. Inspired by Instagram and stuff
+  - Use fuzzy comparision in search to also deliver results that have typos or if search itself contains typos.
+- Related issues
+  - [A concept for fuzzy search is done](https://github.com/muhammedgaygisiz/travellers-apps/issues/848) (Issue \#848)
+  - [style: UX Decission for "universal" search bar](https://github.com/muhammedgaygisiz/travellers-apps/issues/847) (Issue \#847)
+  - [feat: user wants to see search categories under the search input and search for bites and restaurants](https://github.com/muhammedgaygisiz/travellers-apps/issues/875) (Issue \#875)
+  - [feat: user wants to be found in the search via email address or full name (besides display name as we have it today)](https://github.com/muhammedgaygisiz/travellers-apps/issues/872) (Issue \#872)
+  - [feat: Search for restaurants](https://github.com/muhammedgaygisiz/travellers-apps/issues/846) (Issue \#846)
+  - [Search for bites](https://github.com/muhammedgaygisiz/travellers-apps/issues/849) (Issue \#849)
+  - [feat: Search for persons](https://github.com/muhammedgaygisiz/travellers-apps/issues/844) (Issue \#844)
+  - [feat: user wants to maintain full name in profile (fullName property)](https://github.com/muhammedgaygisiz/travellers-apps/issues/871) (Issue \#871)
+  - [feat: initial setup for search](https://github.com/muhammedgaygisiz/travellers-apps/issues/861) (Issue \#861)
+  - [feat: pass search text and pass it to firebase function](https://github.com/muhammedgaygisiz/travellers-apps/issues/869) (Issue \#869)

@@ -1,0 +1,8 @@
+- [epic: BiteTrail Gamification](https://github.com/muhammedgaygisiz/travellers-apps/issues/770) (Issue \#770)
+- Description
+  - No description provided.
+- Related issues
+  - [feat: dev wants to have an aggregate for bite counts](https://github.com/muhammedgaygisiz/travellers-apps/issues/884) (Issue \#884)
+  - [feat: user wants to see a leader board](https://github.com/muhammedgaygisiz/travellers-apps/issues/883) (Issue \#883)
+  - [feat: user wants to receive a badge when completing a bucket list (created from a BiteTrail)](https://github.com/muhammedgaygisiz/travellers-apps/issues/769) (Issue \#769)
+  - [feat: User wants to have monthly BiteTrail contest](https://github.com/muhammedgaygisiz/travellers-apps/issues/771) (Issue \#771)

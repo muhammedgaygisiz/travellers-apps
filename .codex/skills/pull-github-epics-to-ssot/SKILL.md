@@ -5,7 +5,7 @@ description: Pull GitHub issues whose titles start with "epic:" into the repo SS
 
 # Pull GitHub Epics To SSOT
 
-Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq page at `ssot/pages/Epics.md` from GitHub issues in `muhammedgaygisiz/travellers-apps` whose titles start with `epic:`.
+Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic index at `ssot/pages/Epics.md` and one detail page per epic from GitHub issues in `muhammedgaygisiz/travellers-apps` whose titles start with `epic:`.
 
 ## Workflow
 
@@ -16,21 +16,38 @@ Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq page at 
    - sort: `created`
    - order: `asc`
    - topn: at least `100`
-3. Render the result into `ssot/pages/Epics.md` as a flat Logseq list:
+3. Render `ssot/pages/Epics.md` as a flat Logseq index:
    - one root bullet per epic
-   - Markdown link text is the GitHub issue title
-   - link target is the issue URL
+   - link text is the GitHub issue title
+   - link target is `[[epic-<issue-number>]]`
    - suffix is `(Issue \#123)` with `#` escaped so Logseq does not create issue-number pages
+4. Render each epic page as `ssot/pages/epic-<issue-number>.md`:
+   - first bullet links to the GitHub epic issue
+   - `Description` contains the GitHub issue body as nested bullets
+   - `Related issues` contains issues that belong to the epic
+   - if there is no description, write `No description provided.`
+   - if no related issues are found, write `No linked issues found.`
+5. Determine related issues from explicit metadata/references only:
+   - first use GitHub GraphQL `Issue.subIssues` for each epic issue
+   - if `subIssues` is unavailable or empty, fall back to explicit references:
+   - issue title/body contains `#<epic-number>`
+   - issue title/body contains `epic-<epic-number>`
+   - issue label is `epic:<epic-number>` or `epic-<epic-number>`
+   - issue milestone contains the epic number or exactly matches the epic title without the `epic:` prefix
+   - do not infer membership from similar wording alone
+6. Keep Logseq graph clean:
    - do not use Logseq properties such as `date::`, `github-issue::`, or `status::`
-4. Ensure `ssot/pages/contents.md` contains exactly one `- [[Epics]]` entry and no dangling empty bullet.
-5. Remove `ssot/logseq/bak` if Logseq recreated backup pages during the refresh.
-6. Run `git diff --check`.
+   - escape `#` in displayed text as `\#`
+   - avoid namespaces like `epics/...` or `releases/...` unless the user explicitly asks
+7. Ensure `ssot/pages/contents.md` contains exactly one `- [[Epics]]` entry and no dangling empty bullet.
+8. Remove `ssot/logseq/bak` if Logseq recreated backup pages during the refresh.
+9. Run `git diff --check`.
 
 ## Script
 
 Use `scripts/render_epics_page.mjs` when possible. It can either:
 
-- call GitHub through `gh issue list`, which may require network approval:
+- call GitHub through `gh issue list` plus GraphQL `Issue.subIssues`, which may require network approval:
 
 ```bash
 node .codex/skills/pull-github-epics-to-ssot/scripts/render_epics_page.mjs
@@ -42,14 +59,24 @@ node .codex/skills/pull-github-epics-to-ssot/scripts/render_epics_page.mjs
 node .codex/skills/pull-github-epics-to-ssot/scripts/render_epics_page.mjs --input /tmp/issues.json
 ```
 
-The input JSON may be either an array of issue objects or an object with an `issues` array. Recognized issue fields are `title`, `url`, `display_url`, `html_url`, `number`, and `issue_number`.
+The input JSON may be either an array of issue objects or an object with an `issues` array. Recognized issue fields are `title`, `body`, `url`, `display_url`, `html_url`, `number`, `issue_number`, `labels`, and `milestone`.
 
 ## Output Contract
 
 `ssot/pages/Epics.md` should look like:
 
 ```markdown
-- [epic: Example title](https://github.com/muhammedgaygisiz/travellers-apps/issues/123) (Issue \#123)
+- [epic: Example title]([[epic-123]]) (Issue \#123)
 ```
 
-Keep it flat. Avoid tags, namespaces, properties, and unescaped `#` characters because they pollute Logseq graph view.
+`ssot/pages/epic-123.md` should look like:
+
+```markdown
+- [epic: Example title](https://github.com/muhammedgaygisiz/travellers-apps/issues/123) (Issue \#123)
+- Description
+  - GitHub description text
+- Related issues
+  - [feat: Child issue](https://github.com/muhammedgaygisiz/travellers-apps/issues/124) (Issue \#124)
+```
+
+Keep pages flat. Avoid tags, namespaces, properties, and unescaped `#` characters because they pollute Logseq graph view.

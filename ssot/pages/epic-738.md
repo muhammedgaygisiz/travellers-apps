@@ -1,0 +1,28 @@
+- [epic: Check localization / translation of App](https://github.com/muhammedgaygisiz/travellers-apps/issues/738) (Issue \#738)
+- Description
+  - As a user of the application I want to have correct spelling and grammar, as well as indications in my language
+  - The translations were generated with AI and need manual check. You will find them in the corresponding json file:
+  - https://github.com/muhammedgaygisiz/travellers-apps/tree/develop/apps/bite-tribe/src/assets/i18n
+  - Currently the following languages need check:
+  - am: Amharic -> Sam
+  - ar: Arabic
+  - de: German
+  - en: Engilsh -> Sam
+  - es: Spanish -> Daniel
+  - fr: French
+  - id: Indonesian
+  - it: Italian
+  - th: Thai
+  - tr: Turkish -> Mo
+- Related issues
+  - [chore: Check Amharic](https://github.com/muhammedgaygisiz/travellers-apps/issues/739) (Issue \#739)
+  - [chore: Check Italian](https://github.com/muhammedgaygisiz/travellers-apps/issues/746) (Issue \#746)
+  - [chore: check Arabic](https://github.com/muhammedgaygisiz/travellers-apps/issues/740) (Issue \#740)
+  - [chore: Check English](https://github.com/muhammedgaygisiz/travellers-apps/issues/742) (Issue \#742)
+  - [chore: Check French](https://github.com/muhammedgaygisiz/travellers-apps/issues/744) (Issue \#744)
+  - [chore: introduce portuguese](https://github.com/muhammedgaygisiz/travellers-apps/issues/805) (Issue \#805)
+  - [chore: Check Thai](https://github.com/muhammedgaygisiz/travellers-apps/issues/747) (Issue \#747)
+  - [chore: Check Spanish](https://github.com/muhammedgaygisiz/travellers-apps/issues/743) (Issue \#743)
+  - [chore: Check German](https://github.com/muhammedgaygisiz/travellers-apps/issues/741) (Issue \#741)
+  - [Check Turkish](https://github.com/muhammedgaygisiz/travellers-apps/issues/748) (Issue \#748)
+  - [chore: check Indonesian](https://github.com/muhammedgaygisiz/travellers-apps/issues/745) (Issue \#745)

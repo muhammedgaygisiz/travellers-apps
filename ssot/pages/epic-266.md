@@ -1,0 +1,23 @@
+- [epic: Organisation/Food Vlogger wants to offer packages of bites (BiteTrails)](https://github.com/muhammedgaygisiz/travellers-apps/issues/266) (Issue \#266)
+- Description
+  - This Epic represents the Eid Campagne. It will result in an MVP of the Market Place Feature and will enable us technically to assist the Eid Campagne.
+- Related issues
+  - [chore: organise meeting with organisation and showcase feature](https://github.com/muhammedgaygisiz/travellers-apps/issues/681) (Issue \#681)
+  - [feat: rating of bucket list](https://github.com/muhammedgaygisiz/travellers-apps/issues/687) (Issue \#687)
+  - [feat: counter for "sold" badge](https://github.com/muhammedgaygisiz/travellers-apps/issues/686) (Issue \#686)
+  - [feat: User wants to use the app in turkish (DE)](https://github.com/muhammedgaygisiz/travellers-apps/issues/463) (Issue \#463)
+  - [feat: show existing bite trails of an organisation](https://github.com/muhammedgaygisiz/travellers-apps/issues/709) (Issue \#709)
+  - [feat: setup page to create a bite trail with selected bites](https://github.com/muhammedgaygisiz/travellers-apps/issues/706) (Issue \#706)
+  - [feat(business-app): selection of bites to create a bite trail](https://github.com/muhammedgaygisiz/travellers-apps/issues/682) (Issue \#682)
+  - [feat: "Get for free" button on free bite trail detail page](https://github.com/muhammedgaygisiz/travellers-apps/issues/685) (Issue \#685)
+  - [feat(business-app): Show list of bites from assigned users](https://github.com/muhammedgaygisiz/travellers-apps/issues/680) (Issue \#680)
+  - [feat(business-app): show business assigned users list](https://github.com/muhammedgaygisiz/travellers-apps/issues/679) (Issue \#679)
+  - [feat: assign examaple user to business](https://github.com/muhammedgaygisiz/travellers-apps/issues/678) (Issue \#678)
+  - [feat: adjust profile page for organisation profile](https://github.com/muhammedgaygisiz/travellers-apps/issues/677) (Issue \#677)
+  - [feat: create a business profile (with isBusiness flag) and set as owner in example bite trail](https://github.com/muhammedgaygisiz/travellers-apps/issues/676) (Issue \#676)
+  - [feat: make free bite trails content visible like a bucket list](https://github.com/muhammedgaygisiz/travellers-apps/issues/683) (Issue \#683)
+  - [feat: navigate from bite trail owner to profile](https://github.com/muhammedgaygisiz/travellers-apps/issues/674) (Issue \#674)
+  - [feat: implement Market Place example](https://github.com/muhammedgaygisiz/travellers-apps/issues/667) (Issue \#667)
+  - [feat: load bite trails and show in market place page](https://github.com/muhammedgaygisiz/travellers-apps/issues/665) (Issue \#665)
+  - [feat: base setup for market place](https://github.com/muhammedgaygisiz/travellers-apps/issues/661) (Issue \#661)
+  - [feat: read price of bite trail from backend entity](https://github.com/muhammedgaygisiz/travellers-apps/issues/673) (Issue \#673)

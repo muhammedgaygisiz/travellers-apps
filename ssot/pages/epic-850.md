@@ -1,0 +1,6 @@
+- [epic: Onboading assistant for new users](https://github.com/muhammedgaygisiz/travellers-apps/issues/850) (Issue \#850)
+- Description
+  - Rough Idea: A user should be guided after the registration process to provide appllication specific information, such as a meaningfull username, motivation to use public profile, default currency, favorite currencies, etc.
+  - TBD
+- Related issues
+  - No linked issues found.

@@ -1,6 +1,6 @@
 - date:: 2025-09-13
-- git-tag:: build-35
-- git-commit:: a5fd777e
+- git-tag:: `build-35`
+- git-commit:: `a5fd777e`
 - [[Changelog]]
 - Commits
   - chore: update nx to 20.8.2 (34ebad6d)
@@ -39,7 +39,7 @@
   - chore: deps (b5c79131)
   - refactor: align firebase usage (664e204e)
   - chore: finalize deps (8a835501)
-  - 398 deleting existing tags by owner of bite (#428) (539624b0)
+  - 398 deleting existing tags by owner of bite (\#428) (539624b0)
   - refactor: uninstall angular/fire for less deps and point-of-failures (2b3da56b)
   - refactor: remove angular/fire (f4e902bd)
   - test: fix tests (aba1be5f)

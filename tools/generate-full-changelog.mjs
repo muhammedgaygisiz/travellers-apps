@@ -80,8 +80,8 @@ function buildReleases(allTags) {
 function renderRelease({ commits, tag }) {
   const lines = [
     `- date:: ${tag.date}`,
-    `- git-tag:: ${tag.name}`,
-    `- git-commit:: ${tag.commit.slice(0, 8)}`,
+    `- git-tag:: \`${tag.name}\``,
+    `- git-commit:: \`${tag.commit.slice(0, 8)}\``,
     '- [[Changelog]]',
     '- Commits',
   ];
@@ -116,7 +116,11 @@ function getCommitsForTag(tagCommit, previousTagCommits) {
 }
 
 function renderCommit(commit) {
-  return `  - ${commit.subject.replace(/\s+/g, ' ')} (${commit.hash})`;
+  return `  - ${renderText(commit.subject)} (${commit.hash})`;
+}
+
+function renderText(value) {
+  return value.replace(/\s+/g, ' ').replaceAll('#', '\\#');
 }
 
 function git(args) {

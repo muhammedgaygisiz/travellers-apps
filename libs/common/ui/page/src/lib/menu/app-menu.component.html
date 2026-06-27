@@ -48,6 +48,12 @@
           <ng-container>{{ 'gallery' | transloco }}</ng-container>
         </ion-item>
       }
+      @if (showLeaderboardButton()) {
+        <ion-item (click)="gotoLeaderboard.emit()">
+          <ion-icon name="star-outline" slot="start" />
+          <ng-container>{{ 'leaderboard' | transloco }}</ng-container>
+        </ion-item>
+      }
       @if (showSettingsButton()) {
         <ion-item (click)="gotoSettings.emit()">
           <ion-icon name="settings-outline" slot="start" />

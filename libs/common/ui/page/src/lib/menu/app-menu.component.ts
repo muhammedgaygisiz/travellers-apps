@@ -51,6 +51,8 @@ export class AppMenuComponent {
 
   showGalleryButton = input<boolean | null>(false);
 
+  showLeaderboardButton = input<boolean | null>(false);
+
   loginClick = output();
 
   logoutClick = output();
@@ -70,4 +72,6 @@ export class AppMenuComponent {
   gotoMarketPlace = output();
 
   gotoGallery = output();
+
+  gotoLeaderboard = output();
 }

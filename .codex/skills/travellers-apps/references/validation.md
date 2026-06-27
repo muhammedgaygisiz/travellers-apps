@@ -33,6 +33,8 @@ npx jest --config libs/bite-tribe/api/jest.config.ts --runInBand
 
 Use direct Jest configs as the preferred fallback for small edits. This avoids waiting on Nx daemon/graph startup while preserving each library's Jest transform/setup.
 
+Prefer scaffolding new Angular libraries with the repo's Nx generators so `project.json`, tsconfigs, Jest setup, tags, and path mappings are created consistently. If generator use is impractical or a generated config fails, compare against the nearest sibling library's `jest.config.ts`, `tsconfig.json`, `tsconfig.lib.json`, `tsconfig.spec.json`, and `src/test-setup.ts`; bare Jest configs often fail to transform Angular/Ionic `.mjs` packages without the existing `jest-preset-angular` transform and `transformIgnorePatterns`.
+
 ## Linting And Formatting
 
 - Most Angular/Nx libraries use repo-root ESLint through each library's `eslint.config.mjs` or Nx `lint` target.

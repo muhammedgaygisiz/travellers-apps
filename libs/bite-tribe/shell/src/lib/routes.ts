@@ -40,6 +40,13 @@ export const ROUTES: Routes = withAuthRoutes([
     title: 'Gallery',
   },
   {
+    path: PATH.LEADERBOARD,
+    loadComponent: () =>
+      import('bite-tribe/leaderboard').then((m) => m.LeaderboardContainer),
+    canActivate: [authGuard],
+    title: 'Leaderboard',
+  },
+  {
     path: PATH.NEW_BITE,
     loadComponent: () =>
       import('bite-tribe/bite').then((m) => m.CreateBiteContainer),

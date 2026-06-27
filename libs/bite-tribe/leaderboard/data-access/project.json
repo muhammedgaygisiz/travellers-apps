@@ -1,0 +1,21 @@
+{
+  "name": "bite-tribe/leaderboard-data-access",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe/leaderboard/data-access/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:bite-tribe", "type:data-access"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/bite-tribe/leaderboard/data-access/jest.config.ts",
+        "tsConfig": "libs/bite-tribe/leaderboard/data-access/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

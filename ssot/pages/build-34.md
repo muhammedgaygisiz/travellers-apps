@@ -1,6 +1,6 @@
-- date:: 2025-08-02
-- git-tag:: `build-34`
-- git-commit:: `f2a04e6c`
+- Date: 2025-08-02
+- Git tag: `build-34`
+- Git commit: `f2a04e6c`
 - [[Changelog]]
 - Commits
   - feat(393): sorting possiblities for bites (\#421) (d5abbc15)

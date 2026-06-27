@@ -1,6 +1,6 @@
-- date:: 2025-07-19
-- git-tag:: `build-31`
-- git-commit:: `1b42cf7c`
+- Date: 2025-07-19
+- Git tag: `build-31`
+- Git commit: `1b42cf7c`
 - [[Changelog]]
 - Commits
   - initial commit (fa9edb89)

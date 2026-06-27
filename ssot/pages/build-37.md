@@ -1,6 +1,6 @@
-- date:: 2025-09-16
-- git-tag:: `build-37`
-- git-commit:: `f0611b84`
+- Date: 2025-09-16
+- Git tag: `build-37`
+- Git commit: `f0611b84`
 - [[Changelog]]
 - Commits
   - chore: update dependencies (\#429) (03643410)

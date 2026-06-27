@@ -1,6 +1,6 @@
-- date:: 2025-07-26
-- git-tag:: `build-33`
-- git-commit:: `77964e6d`
+- Date: 2025-07-26
+- Git tag: `build-33`
+- Git commit: `77964e6d`
 - [[Changelog]]
 - Commits
   - refactor: better error handling and logging to analytics (\#420) (37b4d118)

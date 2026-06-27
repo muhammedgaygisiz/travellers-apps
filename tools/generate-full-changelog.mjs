@@ -37,14 +37,17 @@ function clearReleasePages() {
   rmSync(oldReleasesPath, { force: true, recursive: true });
 
   for (const entry of readdirSync(pagesPath, { withFileTypes: true })) {
-    if (entry.isFile() && /^releases___.+\.md$/.test(entry.name)) {
+    if (
+      entry.isFile() &&
+      (/^releases___.+\.md$/.test(entry.name) || /^build-.+\.md$/.test(entry.name))
+    ) {
       rmSync(join(pagesPath, entry.name));
     }
   }
 }
 
 function getReleaseFileName(tagName) {
-  return `releases___${tagName}.md`;
+  return `${tagName}.md`;
 }
 
 function renderIndex(allTags) {
@@ -57,7 +60,7 @@ function renderIndex(allTags) {
   }
 
   lines.push(
-    ...allTags.map((tag) => `- [${tag.name}]([[releases/${tag.name}]]) (${tag.date})`),
+    ...allTags.map((tag) => `- [[${tag.name}]] (${tag.date})`),
   );
 
   return `${lines.join('\n')}\n`;
@@ -79,9 +82,9 @@ function buildReleases(allTags) {
 
 function renderRelease({ commits, tag }) {
   const lines = [
-    `- date:: ${tag.date}`,
-    `- git-tag:: \`${tag.name}\``,
-    `- git-commit:: \`${tag.commit.slice(0, 8)}\``,
+    `- Date: ${tag.date}`,
+    `- Git tag: \`${tag.name}\``,
+    `- Git commit: \`${tag.commit.slice(0, 8)}\``,
     '- [[Changelog]]',
     '- Commits',
   ];

@@ -1,6 +1,6 @@
-- date:: 2025-09-13
-- git-tag:: `build-35`
-- git-commit:: `a5fd777e`
+- Date: 2025-09-13
+- Git tag: `build-35`
+- Git commit: `a5fd777e`
 - [[Changelog]]
 - Commits
   - chore: update nx to 20.8.2 (34ebad6d)

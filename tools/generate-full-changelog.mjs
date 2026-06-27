@@ -2,25 +2,23 @@ import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
+const pagesPath = resolve('ssot/pages');
 const outputPath = resolve('ssot/pages/Changelog.md');
-const releasesPath = resolve('ssot/pages/releases');
+const oldReleasesPath = resolve('ssot/pages/releases');
 const tags = getTags();
 
-mkdirSync(resolve('ssot/pages'), { recursive: true });
-mkdirSync(releasesPath, { recursive: true });
+mkdirSync(pagesPath, { recursive: true });
 clearReleasePages();
 writeFileSync(outputPath, renderIndex(tags));
 
 for (const release of buildReleases(tags)) {
   writeFileSync(
-    join(releasesPath, `${release.tag.name}.md`),
+    join(pagesPath, getReleaseFileName(release.tag.name)),
     renderRelease(release),
   );
 }
 
-console.log(
-  `Full changelog generated at ${outputPath} and ${releasesPath}.`,
-);
+console.log(`Full changelog generated at ${outputPath}.`);
 
 function getTags() {
   return git(['tag', '--sort=creatordate'])
@@ -36,11 +34,17 @@ function getTags() {
 }
 
 function clearReleasePages() {
-  for (const entry of readdirSync(releasesPath, { withFileTypes: true })) {
-    if (entry.isFile() && entry.name.endsWith('.md')) {
-      rmSync(join(releasesPath, entry.name));
+  rmSync(oldReleasesPath, { force: true, recursive: true });
+
+  for (const entry of readdirSync(pagesPath, { withFileTypes: true })) {
+    if (entry.isFile() && /^releases___.+\.md$/.test(entry.name)) {
+      rmSync(join(pagesPath, entry.name));
     }
   }
+}
+
+function getReleaseFileName(tagName) {
+  return `releases___${tagName}.md`;
 }
 
 function renderIndex(allTags) {
@@ -75,16 +79,15 @@ function buildReleases(allTags) {
 
 function renderRelease({ commits, tag }) {
   const lines = [
-    `- ${tag.name}`,
-    `  - date:: ${tag.date}`,
-    `  - git-tag:: ${tag.name}`,
-    `  - git-commit:: ${tag.commit.slice(0, 8)}`,
-    '  - [[Changelog]]',
-    '  - Commits',
+    `- date:: ${tag.date}`,
+    `- git-tag:: ${tag.name}`,
+    `- git-commit:: ${tag.commit.slice(0, 8)}`,
+    '- [[Changelog]]',
+    '- Commits',
   ];
 
   if (commits.length === 0) {
-    lines.push('    - No new commits since the previous tag.');
+    lines.push('  - No new commits since the previous tag.');
   } else {
     lines.push(...commits.map(renderCommit));
   }
@@ -113,7 +116,7 @@ function getCommitsForTag(tagCommit, previousTagCommits) {
 }
 
 function renderCommit(commit) {
-  return `    - ${commit.subject.replace(/\s+/g, ' ')} (${commit.hash})`;
+  return `  - ${commit.subject.replace(/\s+/g, ' ')} (${commit.hash})`;
 }
 
 function git(args) {

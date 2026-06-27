@@ -50,6 +50,14 @@
                 'leaderboard-bite-count' | transloco: { count: user.biteCount }
               }}
             </ion-badge>
+            @if (!publicUser) {
+              <ion-icon
+                slot="end"
+                name="chevron-forward-outline"
+                class="detail-placeholder"
+                aria-hidden="true"
+              />
+            }
           </ion-item>
         }
       </ion-list>

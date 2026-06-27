@@ -70,4 +70,12 @@
   .bite-count {
     white-space: nowrap;
   }
+
+  .detail-placeholder {
+    width: 16px;
+    height: 16px;
+    margin-inline-start: 8px;
+    opacity: 0;
+    flex-shrink: 0;
+  }
 }

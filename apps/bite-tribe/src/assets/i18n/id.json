@@ -181,5 +181,8 @@
   "image-uploaded-successfully": "Gambar berhasil diunggah!",
   "bite-updated-successfully": "Bite berhasil diperbarui!",
   "bite-deleted-successfully": "Bite berhasil dihapus!",
-  "creating-bite": "Membuat Bite-mu..."
+  "creating-bite": "Membuat Bite-mu...",
+  "leaderboard": "Papan peringkat",
+  "no-leaderboard-users-yet": "Belum ada pengguna di papan peringkat",
+  "leaderboard-bite-count": "{{ count }} Bite"
 }

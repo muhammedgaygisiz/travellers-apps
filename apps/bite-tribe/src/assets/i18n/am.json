@@ -181,5 +181,8 @@
   "image-uploaded-successfully": "ምስሉ በተሳካ ሁኔታ ተጭኗል!",
   "bite-updated-successfully": "ባይቱ በተሳካ ሁኔታ ተዘምኗል!",
   "bite-deleted-successfully": "ባይቱ በተሳካ ሁኔታ ተሰርዟል!",
-  "creating-bite": "ባይት እየተፈጠሩ ነው..."
+  "creating-bite": "ባይት እየተፈጠሩ ነው...",
+  "leaderboard": "የመሪዎች ሰሌዳ",
+  "no-leaderboard-users-yet": "በመሪዎች ሰሌዳ ላይ ገና ተጠቃሚዎች የሉም",
+  "leaderboard-bite-count": "{{ count }} Bites"
 }

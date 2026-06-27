@@ -62,6 +62,12 @@
       "bite-tribe/followers-data-access": [
         "libs/bite-tribe/followers/data-access/src/index.ts"
       ],
+      "bite-tribe/leaderboard": [
+        "libs/bite-tribe/leaderboard/page/src/index.ts"
+      ],
+      "bite-tribe/leaderboard-data-access": [
+        "libs/bite-tribe/leaderboard/data-access/src/index.ts"
+      ],
       "bite-tribe/home": ["libs/bite-tribe/home/page/src/index.ts"],
       "bite-tribe/home-data-access": [
         "libs/bite-tribe/home/data-access/src/index.ts"

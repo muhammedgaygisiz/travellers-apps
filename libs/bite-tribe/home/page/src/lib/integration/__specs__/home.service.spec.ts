@@ -118,6 +118,22 @@ describe('HomeService', () => {
     ));
   });
 
+  describe('onGotoLeaderboardClick', () => {
+    let navigateForwardSpy: SpyInstance;
+
+    beforeEach(() => {
+      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+    });
+
+    it('should navigate to leaderboard', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.onGotoLeaderboardClick();
+        expect(navigateForwardSpy).toHaveBeenCalledWith(['leaderboard']);
+      },
+    ));
+  });
+
   describe('onDeleteBiteClick', () => {
     let deleteBiteSpy: SpyInstance;
 
@@ -328,7 +344,7 @@ describe('HomeService', () => {
       navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
       jest.spyOn(homeDataAccessService, 'selectedBucketlist').mockReturnValue({
         id: '1',
-      } as any);
+      } as never);
     });
 
     it('should navigate to map view with correct parameters', inject(
@@ -436,7 +452,7 @@ describe('HomeService', () => {
     beforeEach(() => {
       selectedBucketlistSpy = jest
         .spyOn(homeDataAccessService, 'selectedBucketlistTitle')
-        .mockReturnValue(null as any);
+        .mockReturnValue(null as never);
     });
 
     it('should return My Bucketlist string if selectedBucketlist is null', inject(

@@ -181,5 +181,8 @@
   "image-uploaded-successfully": "Image téléchargée avec succès !",
   "bite-updated-successfully": "Bite mis à jour avec succès !",
   "bite-deleted-successfully": "Bite supprimé avec succès !",
-  "creating-bite": "Création de ton Bite..."
+  "creating-bite": "Création de ton Bite...",
+  "leaderboard": "Classement",
+  "no-leaderboard-users-yet": "Aucun utilisateur dans le classement pour le moment",
+  "leaderboard-bite-count": "{{ count }} Bites"
 }

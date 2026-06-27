@@ -181,5 +181,8 @@
   "image-uploaded-successfully": "Görsel başarıyla yüklendi!",
   "bite-updated-successfully": "Bite başarıyla güncellendi!",
   "bite-deleted-successfully": "Bite başarıyla silindi!",
-  "creating-bite": "Bite oluşturuluyor..."
+  "creating-bite": "Bite oluşturuluyor...",
+  "leaderboard": "Lider tablosu",
+  "no-leaderboard-users-yet": "Lider tablosunda henüz kullanıcı yok",
+  "leaderboard-bite-count": "{{ count }} Bite"
 }

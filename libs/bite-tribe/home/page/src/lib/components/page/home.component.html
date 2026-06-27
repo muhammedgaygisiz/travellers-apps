@@ -8,6 +8,7 @@
   [showAboutButton]="true"
   [showMarketPlaceButton]="true"
   [showGalleryButton]="true"
+  [showLeaderboardButton]="true"
   [enableBackButton]="enableBackButton()"
   [showFooter]="showFooter()"
   [isAuthenticated]="isAuthenticated()"
@@ -20,6 +21,7 @@
   (gotoAbout)="gotoAbout.emit()"
   (gotoMarketPlace)="gotoMarketPlace.emit()"
   (gotoGallery)="gotoGallery.emit()"
+  (gotoLeaderboard)="gotoLeaderboard.emit()"
 >
   @if (showSearch()) {
     <ion-buttons header-end slot="end">

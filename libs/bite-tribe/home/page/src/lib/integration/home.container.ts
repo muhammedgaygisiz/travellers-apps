@@ -35,6 +35,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoAbout)="service.onGotoAboutClick()"
       (gotoMarketPlace)="service.onGotoMarketPlaceClick()"
       (gotoGallery)="service.onGotoGalleryClick()"
+      (gotoLeaderboard)="service.onGotoLeaderboardClick()"
       (gotoSearch)="service.onGotoSearchClick()"
       (openMapView)="service.openMapView('home')"
       (sortingChange)="service.sortingChange($event)"

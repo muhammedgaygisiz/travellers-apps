@@ -1,0 +1,13 @@
+- [feat: setup page to create a bite trail with selected bites](https://github.com/muhammedgaygisiz/travellers-apps/issues/706) (Issue \#706)
+- Description
+  - in the organisation dashboard the user can select bites from which a bite trail will be created.
+  - setup a page, with own page and data-access like other pages
+  - this new page should receive the list of selected bites from the organisation dashboard
+  - It should offer a form to fill out the fields that are necessary for a bite trail
+  - The owner fields should be filled out with the organisation
+  - The biteIds of the bite trail are going to be the bites that were selected in the previous page and are also shown on this page
+  - The bites list should be a ion-list like in the organisation dashboard (checkbox, label and note)
+  - With the checkboxes the user should have the possibility to deselect bites on this page
+  - With the still selected bites the biteIds list should be filled
+  - The form on this page should be signal based
+  - The form should have the same style like on the create bite page

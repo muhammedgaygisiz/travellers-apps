@@ -1,0 +1,3 @@
+- [feat: user wants to maintain full name in profile (fullName property)](https://github.com/muhammedgaygisiz/travellers-apps/issues/871) (Issue \#871)
+- Description
+  - No description provided.

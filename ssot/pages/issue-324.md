@@ -1,0 +1,3 @@
+- [feat(business): business would like to maintain "about restaurant" tab](https://github.com/muhammedgaygisiz/travellers-apps/issues/324) (Issue \#324)
+- Description
+  - In the edit-restaurant component (business), there should be a description field (similar to bite). It should be labeled as "About restaurant" and positioned after the "Add Link" button.

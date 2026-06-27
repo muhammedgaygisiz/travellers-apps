@@ -1,0 +1,5 @@
+- [feat: initial setup for search](https://github.com/muhammedgaygisiz/travellers-apps/issues/861) (Issue \#861)
+- Description
+  - The filter chips of a page should be extended by a chip named "Search" with the ionic icon "search-outline". This chip should only be visible on the home screen. The filters chip on the home screen should not be visible any more. It should stay visible if so, on the other pages.
+  - The click on the search icon should lead to a sub new page "search". This will be a new module under libs/bite-tribe named search. It has the same architectural pattern like any other module with a container and a page.
+  - The content of the page should be simple for the moment, without any backend integration yet. Under the header, in the content an ion-searchbar should be visible. The example from the ionic docs is (https://ionicframework.com/docs/api/searchbar\#debounce).

@@ -1,0 +1,3 @@
+- [feat: user wants to be found in the search via email address or full name (besides display name as we have it today)](https://github.com/muhammedgaygisiz/travellers-apps/issues/872) (Issue \#872)
+- Description
+  - No description provided.

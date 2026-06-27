@@ -1,0 +1,10 @@
+- [feat: base setup for market place](https://github.com/muhammedgaygisiz/travellers-apps/issues/661) (Issue \#661)
+- Description
+  - A new page should be setup.
+  - It should be accessable via the menu
+  - The page should use the page component
+  - The page should have the possibility to navigate back via the back button (exist in page component)
+  - The header menu should not be available like in the other sub-pages
+  - The content should have the placeholder "Coming up soon..." (i will take care of it in a later issue)
+  - The page should have its own libraries under lib/bite-tribe/market-place
+  - In the dedicated lib folder (previous point) it should have the page library and the data-access library

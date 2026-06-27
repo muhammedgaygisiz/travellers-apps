@@ -1,0 +1,4 @@
+- [A concept for fuzzy search is done](https://github.com/muhammedgaygisiz/travellers-apps/issues/848) (Issue \#848)
+- Description
+  - Idea: In case of typos in the data or in the search, the user is still able to find what he is searching for
+  - TBD

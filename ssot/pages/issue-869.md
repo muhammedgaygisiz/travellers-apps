@@ -1,0 +1,3 @@
+- [feat: pass search text and pass it to firebase function](https://github.com/muhammedgaygisiz/travellers-apps/issues/869) (Issue \#869)
+- Description
+  - The search text, was the user entered, should be passed to a new firebase function. In this function users with the display name matching to the search text should be returned.

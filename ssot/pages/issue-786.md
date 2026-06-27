@@ -1,0 +1,8 @@
+- [feat: create restaurant page](https://github.com/muhammedgaygisiz/travellers-apps/issues/786) (Issue \#786)
+- Description
+  - A new page should be introduced. The page is similar to the create bite page, but to create a restaurant. When clicked on a place in the dashboard, the app should navigate to this page. The user can
+  - pick an image,
+  - enter a restaurant name (prefilled with the place name he selected in the dashboard)
+  - Can set a position via the map (like in create bite)
+  - Save button (like in create bite)
+  - Like other document, when created, the createdAt and createdAtTimestamp properties should be set.

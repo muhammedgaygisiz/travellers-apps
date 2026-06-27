@@ -1,0 +1,3 @@
+- [chore: Check German](https://github.com/muhammedgaygisiz/travellers-apps/issues/741) (Issue \#741)
+- Description
+  - No description provided.

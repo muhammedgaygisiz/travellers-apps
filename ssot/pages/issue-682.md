@@ -1,0 +1,7 @@
+- [feat(business-app): selection of bites to create a bite trail](https://github.com/muhammedgaygisiz/travellers-apps/issues/682) (Issue \#682)
+- Description
+  - change the employee list in the organisation dashboard, so that the user can select multiple employees
+  - extend the loading bites by employee implementation, so that the bites can be loaded for a list of bites
+  - the pure selection of a employee should not trigger the loading of the bites, but the card should get a action button that reads "Load Bites". its click should trigger the loading
+  - The displayed bites should get an ion-note with the name of the employee who created the bite. In that way the user can identify which bites where created by which employee
+  - An additional action button in the card for the bites, that reads "Create Bite Trail" should be implemented too. The button should do nothing at the moment. We will implement it later in another story.

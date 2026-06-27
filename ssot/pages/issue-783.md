@@ -1,0 +1,3 @@
+- [feat: admin wants to see bite places in dashboard](https://github.com/muhammedgaygisiz/travellers-apps/issues/783) (Issue \#783)
+- Description
+  - in the dashboard (bite-tribe-business) another card should be added under the restaurant's card. Here the admin can see the places derived from bites, but do not have a restaurant saved yet.

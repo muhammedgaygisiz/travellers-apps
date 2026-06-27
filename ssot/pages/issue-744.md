@@ -1,0 +1,3 @@
+- [chore: Check French](https://github.com/muhammedgaygisiz/travellers-apps/issues/744) (Issue \#744)
+- Description
+  - No description provided.

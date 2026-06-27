@@ -1,0 +1,7 @@
+- [refactor: dev wants to have dedicated restaurant page for editing purposes](https://github.com/muhammedgaygisiz/travellers-apps/issues/776) (Issue \#776)
+- Description
+  - At the moment the restaurant page is used by the app and the business app, which brings unnecessary logic into one page.
+  - A new page should be introduced (e.g. 'edit-restaurant')
+  - The edit functionality in the restaurant page should be removed and
+  - The edit functionality should move to the new edit-restaurant page.
+  - The edit-restaurant-container should use that new edit-restaurant page

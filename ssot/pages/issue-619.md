@@ -1,0 +1,3 @@
+- [feat(bitetribe): merge restaurant menu and dynamic menu to one view](https://github.com/muhammedgaygisiz/travellers-apps/issues/619) (Issue \#619)
+- Description
+  - No description provided.

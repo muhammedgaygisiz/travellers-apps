@@ -1,0 +1,3 @@
+- [feat: read price of bite trail from backend entity](https://github.com/muhammedgaygisiz/travellers-apps/issues/673) (Issue \#673)
+- Description
+  - No description provided.

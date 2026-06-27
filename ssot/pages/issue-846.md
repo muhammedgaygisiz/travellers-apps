@@ -1,0 +1,16 @@
+- [feat: Search for restaurants](https://github.com/muhammedgaygisiz/travellers-apps/issues/846) (Issue \#846)
+- Description
+  - As a user I want to search for restaurants in order to see the nearest restaurant I already know (i.e. a chain, or a suggestion from a friend, etc.)
+  - **Acceptance Criteria**:
+  - A search bar can be opened from the home section
+  - A text can be inserted in the search bar and search starts after 3 non-blank characters
+  - A restaurant can be found by its restaurant-name
+  - When a search is done, the results are shown as a list below the search bar (ordered by distance).
+  - Each result shows the following information "Restaurant-Name (Distance)"
+  - In the search bar there is an "X" to cancel or close the search and its results
+  - When clickin on a result in the result-list the corresponding Restaurant-Page is opened.
+  - When clicking Enter you will get a list of restaurant, initially sorted by distance.
+  - Each entry is described as "Restaurant-Name (Distance)"
+  - When clickin on a result in the result-list the corresponding Restaurant-Page is opened.
+  - **Testcases**:
+  - TBD

@@ -1,0 +1,3 @@
+- [feat: User wants to have monthly BiteTrail contest](https://github.com/muhammedgaygisiz/travellers-apps/issues/771) (Issue \#771)
+- Description
+  - No description provided.

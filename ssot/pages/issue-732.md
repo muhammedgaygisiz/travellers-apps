@@ -1,0 +1,3 @@
+- [feat(business): cleanup menu editing page](https://github.com/muhammedgaygisiz/travellers-apps/issues/732) (Issue \#732)
+- Description
+  - No description provided.

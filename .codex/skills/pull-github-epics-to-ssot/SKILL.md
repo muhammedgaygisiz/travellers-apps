@@ -24,10 +24,15 @@ Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic ind
 4. Render each epic page as `ssot/pages/epic-<issue-number>.md`:
    - first bullet links to the GitHub epic issue
    - `Description` contains the GitHub issue body as nested bullets
-   - `Related issues` contains issues that belong to the epic
+   - `Related issues` contains local links to sub-issue pages
    - if there is no description, write `No description provided.`
    - if no related issues are found, write `No linked issues found.`
-5. Determine related issues from explicit metadata/references only:
+5. Render each sub-issue page as `ssot/pages/issue-<issue-number>.md`:
+   - first bullet links to the GitHub issue
+   - `Description` contains the GitHub issue body as nested bullets
+   - do not include a sub-issues/related-issues section on sub-issue pages
+   - if there is no description, write `No description provided.`
+6. Determine related issues from explicit metadata/references only:
    - first use GitHub GraphQL `Issue.subIssues` for each epic issue
    - if `subIssues` is unavailable or empty, fall back to explicit references:
    - issue title/body contains `#<epic-number>`
@@ -35,13 +40,13 @@ Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic ind
    - issue label is `epic:<epic-number>` or `epic-<epic-number>`
    - issue milestone contains the epic number or exactly matches the epic title without the `epic:` prefix
    - do not infer membership from similar wording alone
-6. Keep Logseq graph clean:
+7. Keep Logseq graph clean:
    - do not use Logseq properties such as `date::`, `github-issue::`, or `status::`
    - escape `#` in displayed text as `\#`
    - avoid namespaces like `epics/...` or `releases/...` unless the user explicitly asks
-7. Ensure `ssot/pages/contents.md` contains exactly one `- [[Epics]]` entry and no dangling empty bullet.
-8. Remove `ssot/logseq/bak` if Logseq recreated backup pages during the refresh.
-9. Run `git diff --check`.
+8. Ensure `ssot/pages/contents.md` contains exactly one `- [[Epics]]` entry and no dangling empty bullet.
+9. Remove `ssot/logseq/bak` if Logseq recreated backup pages during the refresh.
+10. Run `git diff --check`.
 
 ## Script
 
@@ -76,7 +81,15 @@ The input JSON may be either an array of issue objects or an object with an `iss
 - Description
   - GitHub description text
 - Related issues
-  - [feat: Child issue](https://github.com/muhammedgaygisiz/travellers-apps/issues/124) (Issue \#124)
+  - [feat: Child issue]([[issue-124]]) (Issue \#124)
+```
+
+`ssot/pages/issue-124.md` should look like:
+
+```markdown
+- [feat: Child issue](https://github.com/muhammedgaygisiz/travellers-apps/issues/124) (Issue \#124)
+- Description
+  - GitHub issue description text
 ```
 
 Keep pages flat. Avoid tags, namespaces, properties, and unescaped `#` characters because they pollute Logseq graph view.

@@ -1,0 +1,3 @@
+- [ci: dev wants to merge deploy-bite-tribe-business workflow to pipeline.yaml](https://github.com/muhammedgaygisiz/travellers-apps/issues/784) (Issue \#784)
+- Description
+  - The deployment workflow for bite tribe business is at the moment separated. It should be merged to the pipeline.yml. Same like the web app the pipeline.yml should deploy the business app parallel to the web app.

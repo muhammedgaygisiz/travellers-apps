@@ -1,0 +1,3 @@
+- [chore: Check Spanish](https://github.com/muhammedgaygisiz/travellers-apps/issues/743) (Issue \#743)
+- Description
+  - No description provided.

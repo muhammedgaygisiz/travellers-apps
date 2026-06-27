@@ -1,0 +1,6 @@
+- [feat: user wants to see a leader board](https://github.com/muhammedgaygisiz/travellers-apps/issues/883) (Issue \#883)
+- Description
+  - I want to introduce a new page. The leader board. It should show a list of 10 users with most bites. The list should respect if the user is private or not like we have it for the followers list.
+  - Because of this feature, a aggregate field "biteCount" should be added to the user. Whenever a user creates a bite this counter should be in creased. The list is going to be delivered by a firebase function.
+  - For migration purposes the function that delivers the list should first check if there are users who do not have a biteCount property. If so, it should process all users and add a biteCount with the actual number of their bites.
+  - Another firebase function should increate the biteCount of the user whenever he/she creates a bite.

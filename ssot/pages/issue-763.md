@@ -1,0 +1,5 @@
+- [feat: user wants to see average rating and number of ratings of all bites of a restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/763) (Issue \#763)
+- Description
+  - When entering the restaurant page, currently only the source bite and evtl. already loaded bites are used to calculate the rating of the restaurant. We already have the logic to load all the bites that belong to that restaurant (restaurant bites page - restaurantBites signal). So we have to align the rating of the restaurant with all the bites belonging to that restaurant. For that these bites should be loaded when the user enters the restaurant page (reuse restaurantBites from home-data-access).
+  - Other than that a fix should be done. The Bites that do not have a rating should be ignored for the calculation of the rating of the restaurant.
+  - The way the rating and number of bites used to calculate the rating should not be changed (we are quiet happy with it <3)

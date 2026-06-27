@@ -1,0 +1,3 @@
+- [feat: when 5 bites were created within a radius of 200m and the restaurant name is fuzzy compared the same, the restaurant should be shown as candidate for a verified restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/778) (Issue \#778)
+- Description
+  - No description provided.

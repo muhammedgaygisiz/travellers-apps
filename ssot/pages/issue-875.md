@@ -1,0 +1,10 @@
+- [feat: user wants to see search categories under the search input and search for bites and restaurants](https://github.com/muhammedgaygisiz/travellers-apps/issues/875) (Issue \#875)
+- Description
+  - On the search page, the user wants to select a search category.
+  - The categories are:
+  - User
+  - Bite
+  - Restaurant
+  - The categories should be shown as chips (like the chips in the tags-input component). The user can select by click in which category he/she wants to search. The selected category determines which firebase function is triggered, so we will introduce two new firebase functions besides search-user: search-bite and search restaurant.
+  - The search-bite should search similar to the search-users. Bites that contain the text in their description or in their tags. So chick for example would match a bite with the description "Butter Chicken" or to a Bite with the description "Tavuk Dürüm" with the tags "chicken" and "wrap", because the search string mathes to the tag chicken.
+  - For the restaurant search we check restaurant documents with a match in their name or bites with a match in their place. For example "italian" would serve the restaurant with the name "Italian Restaurant Bern" (verified restaurant) or a bite which place is "Italian Brasserie" (unverified restaurant). Independent of source, the result list's items have the same minimal structure. Clicking on unverified restaurant will lead to the unverified restaurant page with the path "/bite/cc323a75-4e86-4cd0-ba7a-95972d03d7b1/restaurant/place/Yalkottu" so bite/bite-id/restaurant/place/place-name. Click on a verified restaurant will lead to /bite/bite-id/restaurant/restaurant-id

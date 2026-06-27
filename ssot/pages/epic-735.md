@@ -2,4 +2,4 @@
 - Description
   - This feature will enable users to use menu elements to process or steps like creating a bite, contact resturant, create reservations, plan vist to location etc. (This Task will consider sub-tasks and will be discussed futher in ref. sessions)
 - Related issues
-  - [Kavi wants to offer QR Code at the table to order digitally bites](https://github.com/muhammedgaygisiz/travellers-apps/issues/345) (Issue \#345)
+  - [Kavi wants to offer QR Code at the table to order digitally bites]([[issue-345]]) (Issue \#345)

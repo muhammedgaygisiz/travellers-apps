@@ -1,0 +1,6 @@
+- [feat(business): business wants to add the address and pin the location](https://github.com/muhammedgaygisiz/travellers-apps/issues/333) (Issue \#333)
+- Description
+  - On the new restaurant page, we already have the posibility to pin the location of the restaurant. On the edit page it is not possible at the moment. This should be possible. Other than that, the user should have the possibility to enter the address of the restaurant while creating or editing a restaurant in the form of
+  - Street
+  - Postcode City
+  - Country

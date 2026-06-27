@@ -1,0 +1,3 @@
+- [feat: user wants to enter social media links and opening hours also when creating a new restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/804) (Issue \#804)
+- Description
+  - When editing a restaurant it is possible to enter the social media links and the opening hours. These inputs are missing when creating a restaurant. It should be possible to enter these informations also when creating a new restaurant.

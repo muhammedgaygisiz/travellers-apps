@@ -1,0 +1,3 @@
+- [feat: user wants to see tags on restaurant and place page derived from its bites](https://github.com/muhammedgaygisiz/travellers-apps/issues/827) (Issue \#827)
+- Description
+  - On the restaurant and place page the user should see which tags were added to its bites.

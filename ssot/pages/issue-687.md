@@ -1,0 +1,7 @@
+- [feat: rating of bucket list](https://github.com/muhammedgaygisiz/travellers-apps/issues/687) (Issue \#687)
+- Description
+  - If a user purchased a bite trail and the bucket list was created for it in the user's context, on the bucket list overview page an additional button "Rate" should be shown
+  - Here the user gets a rating page with the existing star rating and a text area for a review
+  - When filled out and submitted, it will create a doc in the rating sub-collection of the original bite-trail
+  - Each user can give only 1 rating and it can not be modified afterwards
+  - An average rating of the bite trail will be calculated and shown in the market place (another story)

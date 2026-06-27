@@ -1,0 +1,4 @@
+- [feat: user wants to see difference between verified and unverified restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/813) (Issue \#813)
+- Description
+  - At the moment we have the restaurant page component "libs/bite-tribe/restaurant/page/src/lib/components/page/restaurant.component.ts" which is used by verified and unverified containers (RestaurantContainer and UnverifiedRestaurantContainer). To differenciate both a restaurant (verified) and unverified (just a bite place) we want to introduce a bite-place page component. An obvious think is for example that a bite place has no menu, so that item is unnecessary on that page.
+  - With the split and of the page components and introducing the small difference we want to start.

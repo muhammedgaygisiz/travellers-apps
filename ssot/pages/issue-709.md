@@ -1,0 +1,4 @@
+- [feat: show existing bite trails of an organisation](https://github.com/muhammedgaygisiz/travellers-apps/issues/709) (Issue \#709)
+- Description
+  - in the organisations dashboard, under the employees card, there should be another card, that shows the existing bite trails of an organisation
+  - for now it should not be selectable, just a list without checkboxes and card without action button.

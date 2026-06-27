@@ -1,0 +1,4 @@
+- [feat: admin wants to create a menu for a restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/781) (Issue \#781)
+- Description
+  - In the edit restaurant page, a "Create Menu" button should be added above the save button. This button triggers the creation of an empty menu for the restaurant. The id of the created menu should be saved to the restaurant's menuId property.
+  - After creating the menu and updating the restaurant with the menuId, the user should be navigated to the menu page in edit mode.

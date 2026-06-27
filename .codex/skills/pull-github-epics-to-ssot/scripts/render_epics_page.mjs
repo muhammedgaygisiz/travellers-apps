@@ -17,6 +17,7 @@ const subIssuesQuery = `
       issue(number:$number) {
         subIssues(first:100, after:$cursor) {
           nodes {
+            body
             number
             title
             url
@@ -32,6 +33,7 @@ const subIssuesQuery = `
 `;
 const issues = getIssues();
 const epics = getEpics(issues);
+const subIssues = getUniqueSubIssues(epics);
 
 clearGeneratedEpicPages();
 writeFileSync(epicsIndexPath, renderEpicsIndex(epics));
@@ -43,9 +45,15 @@ for (const epic of epics) {
   );
 }
 
+for (const issue of subIssues) {
+  writeFileSync(join(pagesPath, getIssueFileName(issue)), renderIssuePage(issue));
+}
+
 rmSync(backupPath, { force: true, recursive: true });
 
-console.log(`Rendered ${epics.length} epics to ${epicsIndexPath}.`);
+console.log(
+  `Rendered ${epics.length} epics and ${subIssues.length} sub-issues to ${pagesPath}.`,
+);
 
 function getIssues() {
   const inputPath = getOptionValue('--input');
@@ -156,6 +164,7 @@ function normalizeIssues(payload) {
 function normalizeSubIssues(subIssues) {
   return subIssues
     .map((issue) => ({
+      body: issue.body ?? '',
       number: issue.number ?? issue.issue_number,
       title: issue.title,
       url: issue.url ?? issue.display_url ?? issue.html_url,
@@ -179,7 +188,7 @@ function getEpics(allIssues) {
 
 function clearGeneratedEpicPages() {
   for (const entry of readdirSync(pagesPath, { withFileTypes: true })) {
-    if (entry.isFile() && /^epic-\d+\.md$/.test(entry.name)) {
+    if (entry.isFile() && /^(epic|issue)-\d+\.md$/.test(entry.name)) {
       rmSync(join(pagesPath, entry.name));
     }
   }
@@ -232,7 +241,29 @@ function renderRelatedIssues(relatedIssues) {
 
   return relatedIssues.map(
     (issue) =>
-      `  - [${renderLinkText(issue.title)}](${issue.url}) (Issue \\#${issue.number})`,
+      `  - [${renderLinkText(issue.title)}]([[${getIssuePageName(issue)}]]) (Issue \\#${issue.number})`,
+  );
+}
+
+function renderIssuePage(issue) {
+  return [
+    `- [${renderLinkText(issue.title)}](${issue.url}) (Issue \\#${issue.number})`,
+    '- Description',
+    ...renderDescription(issue.body),
+  ].join('\n') + '\n';
+}
+
+function getUniqueSubIssues(allEpics) {
+  const issuesByNumber = new Map();
+
+  for (const epic of allEpics) {
+    for (const issue of epic.subIssues) {
+      issuesByNumber.set(issue.number, issue);
+    }
+  }
+
+  return [...issuesByNumber.values()].sort(
+    (left, right) => left.number - right.number,
   );
 }
 
@@ -270,6 +301,14 @@ function getEpicFileName(epic) {
 
 function getEpicPageName(epic) {
   return `epic-${epic.number}`;
+}
+
+function getIssueFileName(issue) {
+  return `${getIssuePageName(issue)}.md`;
+}
+
+function getIssuePageName(issue) {
+  return `issue-${issue.number}`;
 }
 
 function renderText(value) {

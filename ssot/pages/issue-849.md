@@ -1,0 +1,4 @@
+- [Search for bites](https://github.com/muhammedgaygisiz/travellers-apps/issues/849) (Issue \#849)
+- Description
+  - Idea: The user can search for bites. Currently by its name, depending maybe also on tags or other information.
+  - TBD

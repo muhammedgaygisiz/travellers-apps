@@ -1,0 +1,3 @@
+- [chore: introduce portuguese](https://github.com/muhammedgaygisiz/travellers-apps/issues/805) (Issue \#805)
+- Description
+  - No description provided.

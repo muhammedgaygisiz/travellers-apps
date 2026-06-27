@@ -4,7 +4,6 @@ import { execFileSync } from 'node:child_process';
 
 const outputPath = resolve('ssot/pages/Changelog.md');
 const releasesPath = resolve('ssot/pages/releases');
-const today = new Date().toISOString().slice(0, 10);
 const tags = getTags();
 
 mkdirSync(resolve('ssot/pages'), { recursive: true });
@@ -45,16 +44,16 @@ function clearReleasePages() {
 }
 
 function renderIndex(allTags) {
-  const lines = ['- Changelog', `  - Generated on ${today}`, '  - Releases'];
+  const lines = [];
 
   if (allTags.length === 0) {
-    lines.push('    - No git tags found.');
+    lines.push('- No git tags found.');
 
     return `${lines.join('\n')}\n`;
   }
 
   lines.push(
-    ...allTags.map((tag) => `    - [[releases/${tag.name}]] (${tag.date})`),
+    ...allTags.map((tag) => `- [${tag.name}]([[releases/${tag.name}]]) (${tag.date})`),
   );
 
   return `${lines.join('\n')}\n`;
@@ -114,7 +113,7 @@ function getCommitsForTag(tagCommit, previousTagCommits) {
 }
 
 function renderCommit(commit) {
-  return `    - ${commit.subject} (${commit.hash})`;
+  return `    - ${commit.subject.replace(/\s+/g, ' ')} (${commit.hash})`;
 }
 
 function git(args) {

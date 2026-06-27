@@ -1,8 +1,5 @@
-- Changelog
-  - Generated on 2026-06-27
-  - Releases
-    - [[releases/build-31]] (2025-07-19)
-    - [[releases/build-33]] (2025-07-26)
-    - [[releases/build-34]] (2025-08-02)
-    - [[releases/build-35]] (2025-09-13)
-    - [[releases/build-37]] (2025-09-16)
+- [build-31]([[releases/build-31]]) (2025-07-19)
+- [build-33]([[releases/build-33]]) (2025-07-26)
+- [build-34]([[releases/build-34]]) (2025-08-02)
+- [build-35]([[releases/build-35]]) (2025-09-13)
+- [build-37]([[releases/build-37]]) (2025-09-16)

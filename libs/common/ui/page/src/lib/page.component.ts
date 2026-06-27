@@ -85,6 +85,8 @@ export class PageComponent {
 
   showGalleryButton = input(false);
 
+  showLeaderboardButton = input(false);
+
   fullWidth = input(false);
 
   appTitle = computed(() => {
@@ -121,6 +123,8 @@ export class PageComponent {
 
   public gotoGallery = output();
 
+  public gotoLeaderboard = output();
+
   public addButtonClick = output<MouseEvent>();
 
   async showMenuPopover($event: MouseEvent): Promise<void> {
@@ -139,6 +143,7 @@ export class PageComponent {
         showMigrationsButton: this.showMigrationsButton,
         showMarketPlaceButton: this.showMarketPlaceButton,
         showGalleryButton: this.showGalleryButton,
+        showLeaderboardButton: this.showLeaderboardButton,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
         languageChangeClick: this.languageChangeClick,
@@ -150,6 +155,7 @@ export class PageComponent {
         gotoProfile: this.gotoProfile,
         gotoMarketPlace: this.gotoMarketPlace,
         gotoGallery: this.gotoGallery,
+        gotoLeaderboard: this.gotoLeaderboard,
       },
     });
 

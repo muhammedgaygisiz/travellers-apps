@@ -1,0 +1,66 @@
+<ta-page
+  [enableBackButton]="true"
+  [showHeaderMenu]="false"
+  [showFooter]="false"
+>
+  <ion-content class="ion-padding">
+    <h1 class="ion-margin-bottom">{{ 'leaderboard' | transloco }}</h1>
+
+    @if (isLoading()) {
+      <div class="spinner-container">
+        <ion-spinner color="primary" />
+      </div>
+    } @else if (rankedUsers().length === 0) {
+      <div class="empty-container">
+        <ion-label>{{ 'no-leaderboard-users-yet' | transloco }}</ion-label>
+      </div>
+    } @else {
+      <ion-list>
+        @for (user of rankedUsers(); track user.userId) {
+          @let publicUser = !!user.public;
+          <ion-item
+            class="ion-margin-vertical leaderboard-item"
+            [button]="publicUser"
+            [detail]="publicUser"
+            (click)="publicUser ? userClick.emit(user) : undefined"
+          >
+            <ion-badge slot="start" color="primary" class="rank-badge">
+              {{ $index + 1 }}
+            </ion-badge>
+            <ion-avatar slot="start">
+              @if (publicUser && hasImage(user)) {
+                <img
+                  [src]="user.photoUrl"
+                  (error)="onImageError(user.userId)"
+                />
+              } @else {
+                <ion-icon name="person-circle-outline" class="profile-image" />
+              }
+            </ion-avatar>
+            <ion-label>
+              <h2>
+                {{ publicUser ? user.displayName : ('anonymous' | transloco) }}
+              </h2>
+              @if (publicUser && user.city) {
+                <p>{{ user.city }}</p>
+              }
+            </ion-label>
+            <ion-badge slot="end" color="secondary" class="bite-count">
+              {{
+                'leaderboard-bite-count' | transloco: { count: user.biteCount }
+              }}
+            </ion-badge>
+            @if (!publicUser) {
+              <ion-icon
+                slot="end"
+                name="chevron-forward-outline"
+                class="detail-placeholder"
+                aria-hidden="true"
+              />
+            }
+          </ion-item>
+        }
+      </ion-list>
+    }
+  </ion-content>
+</ta-page>

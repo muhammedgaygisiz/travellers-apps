@@ -182,5 +182,8 @@
   "image-uploaded-successfully": "อัปโหลดรูปภาพสำเร็จแล้ว!",
   "bite-updated-successfully": "อัปเดต Bite สำเร็จแล้ว!",
   "bite-deleted-successfully": "ลบ Bite สำเร็จแล้ว!",
-  "creating-bite": "กำลังสร้าง Bite..."
+  "creating-bite": "กำลังสร้าง Bite...",
+  "leaderboard": "กระดานผู้นำ",
+  "no-leaderboard-users-yet": "ยังไม่มีผู้ใช้ในกระดานผู้นำ",
+  "leaderboard-bite-count": "{{ count }} Bites"
 }

@@ -181,5 +181,8 @@
   "image-uploaded-successfully": "تم رفع الصورة بنجاح!",
   "bite-updated-successfully": "تم تحديث الوجبة بنجاح!",
   "bite-deleted-successfully": "تم حذف الوجبة بنجاح!",
-  "creating-bite": "جارٍ إنشاء الوجبة..."
+  "creating-bite": "جارٍ إنشاء الوجبة...",
+  "leaderboard": "لوحة المتصدرين",
+  "no-leaderboard-users-yet": "لا يوجد مستخدمون في لوحة المتصدرين بعد",
+  "leaderboard-bite-count": "{{ count }} Bites"
 }

@@ -7,6 +7,7 @@ export interface PublicUser {
   city?: string;
   about?: string;
   public?: boolean;
+  biteCount?: number;
   subscriptionTier?: number;
   isOrganisation?: boolean;
   isRestaurant?: boolean;

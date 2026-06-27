@@ -20,4 +20,5 @@ export const PATH = {
   BITE_TRAIL: 'bite-trail',
   SEARCH: 'search',
   GALLERY: 'gallery',
+  LEADERBOARD: 'leaderboard',
 };

@@ -26,7 +26,6 @@ export class LeaderboardDataAccessService {
         data: undefined,
       });
 
-      console.log(result);
       return result.data;
     } catch {
       return [];

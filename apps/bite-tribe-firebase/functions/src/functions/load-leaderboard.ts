@@ -31,8 +31,6 @@ const getActualBiteCount = async (userId: string): Promise<number> => {
 };
 
 const refreshBiteCountsIfNeeded = async (): Promise<void> => {
-  logger.info('loadLeaderboard: checking user biteCount migration state');
-
   const usersSnapshot = await db.collection(USERS_COLLECTION).get();
   const usersWithoutBiteCount = usersSnapshot.docs.filter((userDoc) => {
     const user = userDoc.data();
@@ -43,13 +41,9 @@ const refreshBiteCountsIfNeeded = async (): Promise<void> => {
   logger.info('loadLeaderboard: user biteCount migration check finished', {
     totalUsers: usersSnapshot.size,
     usersWithoutBiteCount: usersWithoutBiteCount.length,
-    missingUserSample: usersWithoutBiteCount
-      .slice(0, 10)
-      .map((userDoc) => userDoc.id),
   });
 
   if (usersWithoutBiteCount.length === 0) {
-    logger.info('loadLeaderboard: all users already have biteCount');
     return;
   }
 
@@ -73,9 +67,6 @@ const refreshBiteCountsIfNeeded = async (): Promise<void> => {
 
     if (batchSize === WRITE_BATCH_LIMIT) {
       await batch.commit();
-      logger.info('loadLeaderboard: committed biteCount refresh batch', {
-        processedUsers,
-      });
       batch = db.batch();
       batchSize = 0;
     }
@@ -83,9 +74,6 @@ const refreshBiteCountsIfNeeded = async (): Promise<void> => {
 
   if (batchSize > 0) {
     await batch.commit();
-    logger.info('loadLeaderboard: committed final biteCount refresh batch', {
-      processedUsers,
-    });
   }
 
   logger.info('loadLeaderboard: biteCount refresh complete', {
@@ -131,6 +119,7 @@ export const loadLeaderboard = onCall<void>(async (request) => {
     uid: request.auth.uid,
   });
 
+  // TODO(#905): Remove this temporary backfill after the first production migration run.
   await refreshBiteCountsIfNeeded();
 
   const leaderboardSnapshot = await db

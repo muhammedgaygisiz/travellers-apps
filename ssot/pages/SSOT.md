@@ -1,3 +1,7 @@
+- Overview
+  collapsed:: true
+  - [[Traceability Map]]
+  - [[Spec To Code Workflow]]
 - Product
   collapsed:: true
   - [[Vision]]
@@ -87,6 +91,7 @@
   - [[ADR-0002 Firebase Backend]]
   - [[ADR-0003 Nx Monorepo]]
 - Current State
+  collapsed:: true
   - [[Current State - Roadmap]]
   - [[Current State - Known Issues]]
   - [[Current State - Open Questions]]

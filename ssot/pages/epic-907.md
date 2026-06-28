@@ -1,0 +1,28 @@
+- [epic: Launch Readiness](https://github.com/muhammedgaygisiz/travellers-apps/issues/907) (Issue \#907)
+- Description
+  - \# Epic: Launch Readiness
+  - Prepare BiteTribe for a public launch in the 6-8 week window derived from the SSOT roadmap.
+  - \#\# Goal
+  - Reach the first few hundred real users by completing launch-blocking backend work, product intelligence, production readiness, launch execution, and post-launch learning loops.
+  - \#\# Roadmap source
+  - SSOT: Current State - Roadmap
+  - Baseline date: 26 June 2026
+  - Target public launch period: 3 August 2026 to 16 August 2026
+  - \#\# Scope
+  - Phase 1: Launch Preparation
+  - Phase 2: Product Intelligence
+  - Phase 3: Public Launch
+  - Phase 4: Learn
+  - \#\# Success criteria
+  - Launch-blocking backend work is complete.
+  - Release Candidate is ready.
+  - Soft launch and public launch are executed.
+  - Crashlytics, Analytics, onboarding, retention, and user feedback are monitored after launch.
+- Related issues
+  - [launch: harden Firebase App Check for enforcement]([[issue-908]]) (Issue \#908)
+  - [launch: improve location and currency quality]([[issue-909]]) (Issue \#909)
+  - [launch: define analytics events and dashboard]([[issue-910]]) (Issue \#910)
+  - [launch: complete production readiness testing and store assets]([[issue-911]]) (Issue \#911)
+  - [launch: execute soft launch and monitor daily]([[issue-912]]) (Issue \#912)
+  - [launch: run public launch campaign]([[issue-913]]) (Issue \#913)
+  - [launch: run post-launch learning loop]([[issue-914]]) (Issue \#914)

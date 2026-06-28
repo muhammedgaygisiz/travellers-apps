@@ -1,0 +1,15 @@
+- [launch: run post-launch learning loop](https://github.com/muhammedgaygisiz/travellers-apps/issues/914) (Issue \#914)
+- Description
+  - \# Launch task: Learn
+  - \#\# Roadmap phase
+  - Phase 4 - Learn, August to September.
+  - \#\# Scope
+  - Resist adding major new features.
+  - Improve onboarding.
+  - Fix bugs.
+  - Improve retention.
+  - Watch analytics every day.
+  - Talk to users.
+  - \#\# Acceptance criteria
+  - Product changes are guided by real usage signals.
+  - Onboarding and retention improvements are prioritized from analytics and user conversations.

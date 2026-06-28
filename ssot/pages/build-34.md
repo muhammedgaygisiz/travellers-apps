@@ -1,0 +1,7 @@
+- Date: 2025-08-02
+- Git tag: `build-34`
+- Git commit: `f2a04e6c`
+- [[Changelog]]
+- Commits
+  - feat(393): sorting possiblities for bites (\#421) (d5abbc15)
+  - feat(394): optimize filtering (\#427) (f2a04e6c)

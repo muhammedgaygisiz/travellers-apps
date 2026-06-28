@@ -1,0 +1,131 @@
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+
+const pagesPath = resolve('ssot/pages');
+const outputPath = resolve('ssot/pages/Changelog.md');
+const oldReleasesPath = resolve('ssot/pages/releases');
+const tags = getTags();
+
+mkdirSync(pagesPath, { recursive: true });
+clearReleasePages();
+writeFileSync(outputPath, renderIndex(tags));
+
+for (const release of buildReleases(tags)) {
+  writeFileSync(
+    join(pagesPath, getReleaseFileName(release.tag.name)),
+    renderRelease(release),
+  );
+}
+
+console.log(`Full changelog generated at ${outputPath}.`);
+
+function getTags() {
+  return git(['tag', '--sort=creatordate'])
+    .split('\n')
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((name) => {
+      const commit = git(['rev-list', '-n', '1', name]);
+      const date = git(['log', '-1', '--format=%cs', commit]);
+
+      return { commit, date, name };
+    });
+}
+
+function clearReleasePages() {
+  rmSync(oldReleasesPath, { force: true, recursive: true });
+
+  for (const entry of readdirSync(pagesPath, { withFileTypes: true })) {
+    if (
+      entry.isFile() &&
+      (/^releases___.+\.md$/.test(entry.name) || /^build-.+\.md$/.test(entry.name))
+    ) {
+      rmSync(join(pagesPath, entry.name));
+    }
+  }
+}
+
+function getReleaseFileName(tagName) {
+  return `${tagName}.md`;
+}
+
+function renderIndex(allTags) {
+  const lines = [];
+
+  if (allTags.length === 0) {
+    lines.push('- No git tags found.');
+
+    return `${lines.join('\n')}\n`;
+  }
+
+  lines.push(
+    ...allTags.map((tag) => `- [[${tag.name}]] (${tag.date})`),
+  );
+
+  return `${lines.join('\n')}\n`;
+}
+
+function buildReleases(allTags) {
+  const releases = [];
+  const previousTagCommits = [];
+
+  for (const tag of allTags) {
+    const commits = getCommitsForTag(tag.commit, previousTagCommits);
+
+    releases.push({ commits, tag });
+    previousTagCommits.push(tag.commit);
+  }
+
+  return releases;
+}
+
+function renderRelease({ commits, tag }) {
+  const lines = [
+    `- Date: ${tag.date}`,
+    `- Git tag: \`${tag.name}\``,
+    `- Git commit: \`${tag.commit.slice(0, 8)}\``,
+    '- [[Changelog]]',
+    '- Commits',
+  ];
+
+  if (commits.length === 0) {
+    lines.push('  - No new commits since the previous tag.');
+  } else {
+    lines.push(...commits.map(renderCommit));
+  }
+
+  return `${lines.join('\n')}\n`;
+}
+
+function getCommitsForTag(tagCommit, previousTagCommits) {
+  const args = [
+    'log',
+    '--reverse',
+    '--format=%h%x00%s',
+    tagCommit,
+    ...previousTagCommits.map((commit) => `^${commit}`),
+  ];
+
+  return git(args)
+    .split('\n')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const [hash, subject] = entry.split('\x00');
+
+      return { hash, subject };
+    });
+}
+
+function renderCommit(commit) {
+  return `  - ${renderText(commit.subject)} (${commit.hash})`;
+}
+
+function renderText(value) {
+  return value.replace(/\s+/g, ' ').replaceAll('#', '\\#');
+}
+
+function git(args) {
+  return execFileSync('git', args, { encoding: 'utf8' }).trim();
+}

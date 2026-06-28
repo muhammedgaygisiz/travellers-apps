@@ -1,0 +1,66 @@
+- BiteTribe
+  - Definition: Community-driven food discovery product focused on real dishes people ate, not only restaurants they visited.
+  - Business relevance: Core product and brand. The promise is authentic food discovery through user-generated bite experiences.
+- Bite
+  - Definition: A shared food experience for a specific dish, including context such as photo, review, price, location, restaurant, and creator.
+  - Business relevance: Primary content unit. More high-quality bites increase discovery value, engagement, and data quality.
+- Bite creator
+  - Definition: A user who creates and publishes bites.
+  - Business relevance: Supply-side contributor. Creator motivation, trust, and retention directly affect content growth.
+- Food discovery
+  - Definition: The process of finding what to eat based on real experiences, location, taste, price, and social proof.
+  - Business relevance: Main user value proposition. BiteTribe should help people decide what to eat faster and with more confidence.
+- Restaurant profile
+  - Definition: Public restaurant presence that groups business information, location, menu-related content, and bites connected to that restaurant.
+  - Business relevance: Anchor for business-side value, discovery, and potential monetization.
+- Organisation profile
+  - Definition: A business or creator-owned profile representing an organisation rather than an individual user.
+  - Business relevance: Enables food creators, businesses, and partners to publish curated experiences and manage a branded presence.
+- Menu item
+  - Definition: A dish or product offered by a restaurant or organisation.
+  - Business relevance: Connects business inventory to user-generated bite content and can support conversion flows such as creating a bite from a menu item.
+- BiteTrail
+  - Definition: Curated package or route of bites that can be offered by an organisation, food vlogger, or business.
+  - Business relevance: Marketplace concept for packaging local food knowledge into a product-like experience.
+- Marketplace
+  - Definition: Product area where curated food experiences such as BiteTrails can be discovered, claimed, purchased, or consumed.
+  - Business relevance: Potential monetization surface for BiteTribe and for external food creators or organisations.
+- Bucket list
+  - Definition: Personal saved list of bites or food experiences a user wants to remember or try later.
+  - Business relevance: Retention feature that turns discovery into intent and future engagement.
+- Public profile
+  - Definition: User profile visible to other users, including selected identity and activity information.
+  - Business relevance: Supports trust, social discovery, creator identity, and community-building.
+- Private profile
+  - Definition: User profile with restricted public visibility.
+  - Business relevance: Privacy option that keeps participation accessible for users who do not want a public creator identity.
+- Review
+  - Definition: User-written opinion or evaluation attached to a bite.
+  - Business relevance: Adds qualitative trust and helps other users decide whether a dish is worth trying.
+- Like
+  - Definition: Lightweight positive signal on bite content.
+  - Business relevance: Engagement signal that can support ranking, recommendations, and creator feedback.
+- Star
+  - Definition: Stronger save, favorite, or rating-like signal depending on product context.
+  - Business relevance: Helps distinguish casual engagement from stronger intent or preference.
+- Leaderboard
+  - Definition: Ranked list of users, usually based on contribution volume such as bite count.
+  - Business relevance: Gamification surface that can motivate creators and highlight active community members.
+- Search
+  - Definition: Capability to find users, bites, restaurants, or other food content by text and filters.
+  - Business relevance: Essential discovery mechanism once content volume grows.
+- Location-based discovery
+  - Definition: Discovery experience using the user's location or a selected place to find nearby bites and restaurants.
+  - Business relevance: Core travel and local-use scenario. Location quality affects trust and relevance.
+- Currency
+  - Definition: Monetary unit used for bite prices.
+  - Business relevance: Supports international usage and price comparability across travel contexts.
+- App Check
+  - Definition: Firebase protection mechanism that helps verify backend requests come from legitimate app instances.
+  - Business relevance: Reduces fraud and protects backend cost, data, and service quality.
+- Content quality
+  - Definition: Usefulness, authenticity, completeness, and trustworthiness of bites and related profile data.
+  - Business relevance: Determines whether discovery feels reliable enough for users and businesses.
+- Local food culture
+  - Definition: The patterns, dishes, places, and stories that represent what people actually eat in a location.
+  - Business relevance: Long-term strategic differentiator for BiteTribe compared with generic restaurant directories.

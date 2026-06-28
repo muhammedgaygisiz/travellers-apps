@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pull GitHub Epics to SSOT"
+  short_description: "Generate the Logseq Epics page from GitHub issues titled epic:."
+  default_prompt: "Pull GitHub epic issues into the SSOT Epics page."

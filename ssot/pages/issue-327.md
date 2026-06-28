@@ -1,0 +1,3 @@
+- [feat(business): app should show the latest bite's image in the menu](https://github.com/muhammedgaygisiz/travellers-apps/issues/327) (Issue \#327)
+- Description
+  - to have them all the same

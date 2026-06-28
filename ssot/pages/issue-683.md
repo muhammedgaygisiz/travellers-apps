@@ -1,8 +1,0 @@
-- [feat: make free bite trails content visible like a bucket list](https://github.com/muhammedgaygisiz/travellers-apps/issues/683) (Issue \#683)
-- Description
-  - Given the price is 0, instead of the price like it is now, the text "Free" should be shown.
-  - A new page should be introduced similar to the bucket list page. It will be opened when clicked on the "View Bite Trail" button next to price.
-  - The page should have an own page and data-access libs.
-  - The page loads the bites from the selected bite trail via the resource api and shows it.
-  - The title inside the page should be the name of the bite trail
-  - Consider the filters, the map view and sorting in the page too.

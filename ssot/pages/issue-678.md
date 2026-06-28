@@ -1,3 +1,0 @@
-- [feat: assign examaple user to business](https://github.com/muhammedgaygisiz/travellers-apps/issues/678) (Issue \#678)
-- Description
-  - No description provided.

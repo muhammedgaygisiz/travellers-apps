@@ -1,3 +1,0 @@
-- [bug: admin wants to see restaurant edit page in business app](https://github.com/muhammedgaygisiz/travellers-apps/issues/772) (Issue \#772)
-- Description
-  - No description provided.

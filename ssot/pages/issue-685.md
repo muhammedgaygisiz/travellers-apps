@@ -1,5 +1,0 @@
-- [feat: "Get for free" button on free bite trail detail page](https://github.com/muhammedgaygisiz/travellers-apps/issues/685) (Issue \#685)
-- Description
-  - If the bite trail is for free, the user should see a button with "Get for free" text in the bitetrail bites page. It should be positioned in the footer like the "Create Bite" button in the home screen.
-  - when clicked the bite trail is saved as a bucket list in the user's context
-  - After created the user should get toast that explains the user that the bite trail was saved as a bucket list with a link to navigate to the bucket list.

@@ -1,3 +1,0 @@
-- [feat(business-app): Show list of bites from assigned users](https://github.com/muhammedgaygisiz/travellers-apps/issues/680) (Issue \#680)
-- Description
-  - on the organisation dashboard page when an item in the employees list is clicked, the bites that the clicked user created should be loaded and shown in the bite list in the second column. The loading should be done like the employees are loaded with the userId of the clicked user as a parameter.

@@ -59,7 +59,7 @@ Release state and changelog
 
 | Use Case Area                       | Epic Links                                                                        |
 | ----------------------------------- | --------------------------------------------------------------------------------- |
-| Bite creation and quality           | [[epic-266]], [[epic-734]], [[epic-850]]                                          |
+| Bite creation and quality           | [[epic-734]], [[epic-850]]                                                        |
 | Discovery, search, and navigation   | [[epic-735]], [[epic-738]], [[epic-841]], [[epic-843]]                            |
 | Restaurant and menu context         | [[epic-770]], [[epic-790]]                                                        |
 | Marketplace and BiteTrails          | [[epic-738]], [[epic-790]]                                                        |

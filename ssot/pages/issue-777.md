@@ -1,3 +1,0 @@
-- [refactor: dev wants to have dedicated menu page for editing purposes](https://github.com/muhammedgaygisiz/travellers-apps/issues/777) (Issue \#777)
-- Description
-  - At the moment the menu page is in the scope of bite-tribe and combines showing the menu and in bite-tribe-business editing the menu. This should change (like we did with the restaurant page before) and there should be the menu page which belongs to the bite-tribe scope and shows the menu. New there should be an edit-menu page in the scope of bite-tribe-business. All the edit logic in the current menu page should move there.

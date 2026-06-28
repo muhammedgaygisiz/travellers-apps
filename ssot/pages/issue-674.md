@@ -1,3 +1,0 @@
-- [feat: navigate from bite trail owner to profile](https://github.com/muhammedgaygisiz/travellers-apps/issues/674) (Issue \#674)
-- Description
-  - No description provided.

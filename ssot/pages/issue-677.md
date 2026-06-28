@@ -1,3 +1,0 @@
-- [feat: adjust profile page for organisation profile](https://github.com/muhammedgaygisiz/travellers-apps/issues/677) (Issue \#677)
-- Description
-  - No description provided.

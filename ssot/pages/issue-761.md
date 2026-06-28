@@ -1,3 +1,0 @@
-- [feat: user wants to see restaurant name as restaurant bites pages title](https://github.com/muhammedgaygisiz/travellers-apps/issues/761) (Issue \#761)
-- Description
-  - No description provided.

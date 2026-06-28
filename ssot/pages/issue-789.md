@@ -1,3 +1,0 @@
-- [refactor: dev wants to replace restaurant-image component with image-upload component](https://github.com/muhammedgaygisiz/travellers-apps/issues/789) (Issue \#789)
-- Description
-  - The restaurant-image component should be replaced with the image-upload component. At the moment the base64 string is still saved into the firebase document (check if that is true), but it should work like for bites (except that the image upload and doc save logic should be in the data-access layer).

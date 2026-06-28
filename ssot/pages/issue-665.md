@@ -1,7 +1,0 @@
-- [feat: load bite trails and show in market place page](https://github.com/muhammedgaygisiz/travellers-apps/issues/665) (Issue \#665)
-- Description
-  - In this issue, we want to implement the loading and initial presentation of a Bite Trail. To do so:
-  - The Bite Trails should be loaded. The Collections name is "biteTrails"
-  - The structure is the same like Bucket Lists but the field userId. For Bite Trails there is the field ownerId (string)
-  - The Bite Trails should be loaded via resource api in the data access layer instead of in an effect
-  - For the moment the bite trails name should be shown in a div, we will implement the presentation of the bite trail later when the concept is done.

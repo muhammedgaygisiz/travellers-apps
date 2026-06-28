@@ -1,3 +1,0 @@
-- [chore: organise meeting with organisation and showcase feature](https://github.com/muhammedgaygisiz/travellers-apps/issues/681) (Issue \#681)
-- Description
-  - No description provided.

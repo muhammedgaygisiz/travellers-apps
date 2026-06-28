@@ -1,4 +1,0 @@
-- [feat: User wants to use the app in turkish (DE)](https://github.com/muhammedgaygisiz/travellers-apps/issues/463) (Issue \#463)
-- Description
-  - User wants to switch the language to turkish (tr).
-  - This is besides the displayed language crucial to enter prices in DE format "nn,nn".

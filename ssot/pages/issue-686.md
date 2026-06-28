@@ -1,3 +1,0 @@
-- [feat: counter for "sold" badge](https://github.com/muhammedgaygisiz/travellers-apps/issues/686) (Issue \#686)
-- Description
-  - when a user clicks "Get for free" and a bucket list in his context was created (previous story) a doc should be saved to the bite trails document (sub-collection). The document should include the user's id, date and time of sell. Based on the count of this subcollection, the "sold x times" logic will be implemented.

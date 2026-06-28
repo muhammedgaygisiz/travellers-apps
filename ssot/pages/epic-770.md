@@ -3,6 +3,5 @@
   - No description provided.
 - Related issues
   - [feat: dev wants to have an aggregate for bite counts]([[issue-884]]) (Issue \#884)
-  - [feat: user wants to see a leader board]([[issue-883]]) (Issue \#883)
   - [feat: user wants to receive a badge when completing a bucket list (created from a BiteTrail)]([[issue-769]]) (Issue \#769)
   - [feat: User wants to have monthly BiteTrail contest]([[issue-771]]) (Issue \#771)

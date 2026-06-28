@@ -5,20 +5,22 @@ description: Pull GitHub issues whose titles start with "epic:" into the repo SS
 
 # Pull GitHub Epics To SSOT
 
-Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic section in `ssot/pages/SSOT.md` and one detail page per epic from GitHub issues in `muhammedgaygisiz/travellers-apps` whose titles start with `epic:`.
+Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic section in `ssot/pages/SSOT.md` and one detail page per open Priority P0 epic from GitHub issues in `muhammedgaygisiz/travellers-apps` whose titles start with `epic:`.
 
 ## Workflow
 
 1. Inspect `git status --short --branch`.
 2. Prefer the GitHub connector issue search:
    - repository: `muhammedgaygisiz/travellers-apps`
-   - query: `is:issue epic: in:title`
+   - query: `is:issue is:open epic: in:title`
    - sort: `created`
    - order: `asc`
    - topn: at least `100`
+   - Priority must be `P0` in GitHub Projects, or mirrored as an issue label such as `Priority P0`
+   - reading GitHub Project priority requires `gh` auth with `read:project`
 3. Render the `Epics` section in `ssot/pages/SSOT.md` and `ssot/pages/contents.md`:
    - `Epics` is a plain bullet, not `[[Epics]]`
-   - one nested bullet per epic
+   - one nested bullet per open Priority P0 epic
    - each nested bullet links to `[[epic-<issue-number>]]`
    - do not create `ssot/pages/Epics.md`
 4. Render each epic page as `ssot/pages/epic-<issue-number>.md`:
@@ -27,12 +29,12 @@ Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic sec
    - `Related issues` contains local links to sub-issue pages
    - if there is no description, write `No description provided.`
    - if no related issues are found, write `No linked issues found.`
-5. Render each sub-issue page as `ssot/pages/issue-<issue-number>.md`:
+5. Render each open Priority P0 sub-issue page as `ssot/pages/issue-<issue-number>.md`:
    - first bullet links to the GitHub issue
    - `Description` contains the GitHub issue body as nested bullets
    - do not include a sub-issues/related-issues section on sub-issue pages
    - if there is no description, write `No description provided.`
-6. Determine related issues from explicit metadata/references only:
+6. Determine related issues from explicit metadata/references only, and keep only open Priority P0 issues:
    - first use GitHub GraphQL `Issue.subIssues` for each epic issue
    - if `subIssues` is unavailable or empty, fall back to explicit references:
    - issue title/body contains `#<epic-number>`
@@ -40,6 +42,7 @@ Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic sec
    - issue label is `epic:<epic-number>` or `epic-<epic-number>`
    - issue milestone contains the epic number or exactly matches the epic title without the `epic:` prefix
    - do not infer membership from similar wording alone
+   - remove generated pages for closed epics, non-P0 epics, closed sub-issues, and non-P0 sub-issues during each refresh
 7. Keep Logseq graph clean:
    - do not use Logseq properties such as `date::`, `github-issue::`, or `status::`
    - escape `#` in displayed text as `\#`
@@ -64,7 +67,7 @@ node .codex/skills/pull-github-epics-to-ssot/scripts/render_epics_page.mjs
 node .codex/skills/pull-github-epics-to-ssot/scripts/render_epics_page.mjs --input /tmp/issues.json
 ```
 
-The input JSON may be either an array of issue objects or an object with an `issues` array. Recognized issue fields are `title`, `body`, `url`, `display_url`, `html_url`, `number`, `issue_number`, `labels`, and `milestone`.
+The input JSON may be either an array of issue objects or an object with an `issues` array. Recognized issue fields are `title`, `body`, `url`, `display_url`, `html_url`, `number`, `issue_number`, `labels`, `milestone`, `state`, and `projectItems`.
 
 ## Output Contract
 

@@ -1,3 +1,0 @@
-- [feat: user wants to see all bites of a restaurant when navigating to the restaurant's bite page](https://github.com/muhammedgaygisiz/travellers-apps/issues/758) (Issue \#758)
-- Description
-  - When the page is opened, the bites ca. 500m around the source bite should be loaded. In these bites the ones with fuzzy compared same place name should be shown on this page.

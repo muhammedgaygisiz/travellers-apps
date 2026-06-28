@@ -1,3 +1,0 @@
-- [feat(business-app): show business assigned users list](https://github.com/muhammedgaygisiz/travellers-apps/issues/679) (Issue \#679)
-- Description
-  - No description provided.

@@ -1,16 +1,13 @@
 - Overview
-  collapsed:: true
   - [[Traceability Map]]
   - [[Spec To Code Workflow]]
 - Product
-  collapsed:: true
   - [[Vision]]
   - [[Mission]]
   - [[Principles]]
   - [[Glossary]]
   - [[Personas]]
 - Domain
-  collapsed:: true
   - [[Bite]]
   - [[User]]
   - [[Restaurant]]
@@ -18,7 +15,6 @@
   - [[Bite Trail]]
   - [[Market Place]]
 - Use Cases
-  collapsed:: true
   - Supported today
     collapsed:: true
     - [[UC - Discover Bites]]
@@ -50,8 +46,6 @@
     - [[UC - Strengthen Location Currency And Data Quality Guidance]]
     - [[UC - Harden Platform And Backend Trust]]
 - Epics
-  collapsed:: true
-  - [[epic-266]]
   - [[epic-734]]
   - [[epic-735]]
   - [[epic-738]]
@@ -61,7 +55,6 @@
   - [[epic-843]]
   - [[epic-850]]
 - Architecture
-  collapsed:: true
   - [[Architecture - Overview]]
   - [[Architecture - Firebase]]
   - [[Architecture - Nx Workspace]]
@@ -74,7 +67,6 @@
   - [[Architecture - Internationalization]]
   - [[Architecture - Testing]]
 - Implementation
-  collapsed:: true
   - [[Implementation - Overview]]
   - [[Implementation - Code Map]]
   - [[Implementation - Libraries]]
@@ -86,12 +78,10 @@
   - [[Implementation - Testing]]
   - [[Implementation - Release And Build Workflow]]
 - Decisions
-  collapsed:: true
   - [[ADR-0001 Dish First Product]]
   - [[ADR-0002 Firebase Backend]]
   - [[ADR-0003 Nx Monorepo]]
 - Current State
-  collapsed:: true
   - [[Current State - Roadmap]]
   - [[Current State - Known Issues]]
   - [[Current State - Open Questions]]

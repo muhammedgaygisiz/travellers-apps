@@ -13,6 +13,7 @@ const epicsIndexPath = join(pagesPath, 'Epics.md');
 const ssotPath = join(pagesPath, 'SSOT.md');
 const contentsPath = join(pagesPath, 'contents.md');
 const backupPath = resolve('ssot/logseq/bak');
+const priorityP0Names = new Set(['p0', 'priority p0', 'priority:p0', 'priority-p0']);
 const subIssuesQuery = `
   query($owner:String!, $name:String!, $number:Int!, $cursor:String) {
     repository(owner:$owner, name:$name) {
@@ -20,7 +21,13 @@ const subIssuesQuery = `
         subIssues(first:100, after:$cursor) {
           nodes {
             body
+            labels(first:20) {
+              nodes {
+                name
+              }
+            }
             number
+            state
             title
             url
           }
@@ -56,7 +63,7 @@ for (const issue of subIssues) {
 rmSync(backupPath, { force: true, recursive: true });
 
 console.log(
-  `Rendered ${epics.length} epics and ${subIssues.length} sub-issues to ${pagesPath}.`,
+  `Rendered ${epics.length} open Priority P0 epics and ${subIssues.length} open Priority P0 sub-issues to ${pagesPath}.`,
 );
 
 function getIssues() {
@@ -78,8 +85,10 @@ function getIssues() {
 }
 
 function fetchIssuesWithGh() {
-  const issues = JSON.parse(
-    execFileSync(
+  let issues;
+
+  try {
+    issues = JSON.parse(execFileSync(
       'gh',
       [
         'issue',
@@ -87,15 +96,18 @@ function fetchIssuesWithGh() {
         '--repo',
         repo,
         '--state',
-        'all',
+        'open',
         '--limit',
         '1000',
         '--json',
-        'number,title,url,body,labels,milestone',
+        'number,title,url,body,labels,milestone,state,projectItems',
       ],
       { encoding: 'utf8' },
-    ),
-  );
+    ));
+  } catch (error) {
+    handleProjectScopeError(error);
+    throw error;
+  }
 
   for (const epic of issues.filter((issue) =>
     issue.title.toLowerCase().startsWith('epic:'),
@@ -139,7 +151,28 @@ function fetchSubIssuesWithGh(epicNumber) {
       : undefined;
   } while (cursor);
 
-  return subIssues;
+  return subIssues.map((issue) => enrichIssueWithGhProjectData(issue.number));
+}
+
+function enrichIssueWithGhProjectData(issueNumber) {
+  try {
+    return JSON.parse(execFileSync(
+      'gh',
+      [
+        'issue',
+        'view',
+        String(issueNumber),
+        '--repo',
+        repo,
+        '--json',
+        'number,title,url,body,labels,state,projectItems',
+      ],
+      { encoding: 'utf8' },
+    ));
+  } catch (error) {
+    handleProjectScopeError(error);
+    throw error;
+  }
 }
 
 function normalizeIssues(payload) {
@@ -152,16 +185,18 @@ function normalizeIssues(payload) {
   return rawIssues
     .map((issue) => ({
       body: issue.body ?? '',
-      labels: (issue.labels ?? []).map((label) =>
-        typeof label === 'string' ? label : label.name,
-      ),
+      labels: normalizeLabels(issue.labels),
       milestone: getMilestoneTitle(issue.milestone),
       number: issue.number ?? issue.issue_number,
+      projectItems: issue.projectItems ?? issue.project_items ?? [],
       subIssues: normalizeSubIssues(issue.subIssues ?? issue.sub_issues ?? []),
+      state: issue.state,
       title: issue.title,
       url: issue.url ?? issue.display_url ?? issue.html_url,
     }))
     .filter((issue) => issue.number && issue.title && issue.url)
+    .filter((issue) => isOpenIssue(issue))
+    .filter((issue) => hasPriorityP0(issue))
     .sort((left, right) => left.number - right.number);
 }
 
@@ -169,11 +204,58 @@ function normalizeSubIssues(subIssues) {
   return subIssues
     .map((issue) => ({
       body: issue.body ?? '',
+      labels: normalizeLabels(issue.labels),
       number: issue.number ?? issue.issue_number,
+      projectItems: issue.projectItems ?? issue.project_items ?? [],
+      state: issue.state,
       title: issue.title,
       url: issue.url ?? issue.display_url ?? issue.html_url,
     }))
-    .filter((issue) => issue.number && issue.title && issue.url);
+    .filter((issue) => issue.number && issue.title && issue.url)
+    .filter((issue) => isOpenIssue(issue))
+    .filter((issue) => hasPriorityP0(issue));
+}
+
+function isOpenIssue(issue) {
+  if (!issue.state) {
+    return true;
+  }
+
+  return issue.state.toLowerCase() === 'open';
+}
+
+function hasPriorityP0(issue) {
+  const labels = issue.labels.map((label) => normalizeText(label));
+
+  if (labels.some((label) => priorityP0Names.has(label))) {
+    return true;
+  }
+
+  return projectItemsContainPriorityP0(issue.projectItems);
+}
+
+function projectItemsContainPriorityP0(projectItems) {
+  const projectItemsText = JSON.stringify(projectItems ?? {}).toLowerCase();
+
+  return projectItemsText.includes('priority') && /\bp0\b/.test(projectItemsText);
+}
+
+function normalizeLabels(labels) {
+  return (labels ?? []).map((label) =>
+    typeof label === 'string' ? label : label.name,
+  ).filter(Boolean);
+}
+
+function handleProjectScopeError(error) {
+  const message = `${error.stderr ?? ''}\n${error.stdout ?? ''}\n${error.message ?? ''}`;
+
+  if (!message.includes('read:project')) {
+    return;
+  }
+
+  throw new Error(
+    'Cannot filter epics/issues by GitHub Project Priority P0 because gh lacks the read:project scope. Run `gh auth refresh -s read:project` and retry the epics refresh.',
+  );
 }
 
 function getMilestoneTitle(milestone) {

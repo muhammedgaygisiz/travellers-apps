@@ -1,3 +1,0 @@
-- [feat: create a business profile (with isBusiness flag) and set as owner in example bite trail](https://github.com/muhammedgaygisiz/travellers-apps/issues/676) (Issue \#676)
-- Description
-  - No description provided.

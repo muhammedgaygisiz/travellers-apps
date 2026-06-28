@@ -1,3 +1,0 @@
-- [feat: implement Market Place example](https://github.com/muhammedgaygisiz/travellers-apps/issues/667) (Issue \#667)
-- Description
-  - No description provided.

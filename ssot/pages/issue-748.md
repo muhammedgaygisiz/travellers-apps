@@ -1,3 +1,0 @@
-- [Check Turkish](https://github.com/muhammedgaygisiz/travellers-apps/issues/748) (Issue \#748)
-- Description
-  - No description provided.

@@ -1,3 +1,0 @@
-- [chore: check Indonesian](https://github.com/muhammedgaygisiz/travellers-apps/issues/745) (Issue \#745)
-- Description
-  - No description provided.

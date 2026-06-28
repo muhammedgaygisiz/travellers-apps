@@ -1,5 +1,0 @@
-- [epic: user wants to search in the app](https://github.com/muhammedgaygisiz/travellers-apps/issues/790) (Issue \#790)
-- Description
-  - No description provided.
-- Related issues
-  - No linked issues found.

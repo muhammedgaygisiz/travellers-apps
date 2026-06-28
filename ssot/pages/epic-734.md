@@ -5,4 +5,3 @@
   - [feat(business): Kristina would like to have the disable function for the menu items]([[issue-326]]) (Issue \#326)
   - [feat(business): app should show the latest bite's image in the menu]([[issue-327]]) (Issue \#327)
   - [feat: when 5 bites were created within a radius of 200m and the restaurant name is fuzzy compared the same, the restaurant should be shown as candidate for a verified restaurant]([[issue-778]]) (Issue \#778)
-  - [ci: dev wants to merge deploy-bite-tribe-business workflow to pipeline.yaml]([[issue-784]]) (Issue \#784)

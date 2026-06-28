@@ -1,0 +1,13 @@
+- [launch: improve location and currency quality](https://github.com/muhammedgaygisiz/travellers-apps/issues/909) (Issue \#909)
+- Description
+  - \# Launch task: Location and currency quality
+  - \#\# Roadmap phase
+  - Phase 1 - Launch Preparation, Week 2.
+  - \#\# Scope
+  - Enrich Bite location using Google Places.
+  - Validate currency against location.
+  - Test edge cases for vacation usage, posting later, and missing location.
+  - \#\# Acceptance criteria
+  - Bite location enrichment is reliable enough for launch.
+  - Currency validation behaves correctly for normal and edge-case creation flows.
+  - Launch-blocking backend quality work is complete.

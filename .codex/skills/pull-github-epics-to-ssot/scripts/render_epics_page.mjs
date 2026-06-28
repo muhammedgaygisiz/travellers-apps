@@ -13,7 +13,10 @@ const epicsIndexPath = join(pagesPath, 'Epics.md');
 const ssotPath = join(pagesPath, 'SSOT.md');
 const contentsPath = join(pagesPath, 'contents.md');
 const backupPath = resolve('ssot/logseq/bak');
+const projectNumber = '4';
+const projectOwner = 'muhammedgaygisiz';
 const priorityP0Names = new Set(['p0', 'priority p0', 'priority:p0', 'priority-p0']);
+let priorityP0IssueNumbers;
 const subIssuesQuery = `
   query($owner:String!, $name:String!, $number:Int!, $cursor:String) {
     repository(owner:$owner, name:$name) {
@@ -86,6 +89,7 @@ function getIssues() {
 
 function fetchIssuesWithGh() {
   let issues;
+  const p0IssueNumbers = getPriorityP0IssueNumbers();
 
   try {
     issues = JSON.parse(execFileSync(
@@ -104,6 +108,10 @@ function fetchIssuesWithGh() {
       ],
       { encoding: 'utf8' },
     ));
+    issues = issues.map((issue) => ({
+      ...issue,
+      priorityP0: p0IssueNumbers.has(issue.number),
+    }));
   } catch (error) {
     handleProjectScopeError(error);
     throw error;
@@ -156,7 +164,7 @@ function fetchSubIssuesWithGh(epicNumber) {
 
 function enrichIssueWithGhProjectData(issueNumber) {
   try {
-    return JSON.parse(execFileSync(
+    const issue = JSON.parse(execFileSync(
       'gh',
       [
         'issue',
@@ -169,6 +177,47 @@ function enrichIssueWithGhProjectData(issueNumber) {
       ],
       { encoding: 'utf8' },
     ));
+
+    return {
+      ...issue,
+      priorityP0: getPriorityP0IssueNumbers().has(issue.number),
+    };
+  } catch (error) {
+    handleProjectScopeError(error);
+    throw error;
+  }
+}
+
+function getPriorityP0IssueNumbers() {
+  if (priorityP0IssueNumbers) {
+    return priorityP0IssueNumbers;
+  }
+
+  try {
+    const projectItems = JSON.parse(execFileSync(
+      'gh',
+      [
+        'project',
+        'item-list',
+        projectNumber,
+        '--owner',
+        projectOwner,
+        '--format',
+        'json',
+        '--limit',
+        '1000',
+      ],
+      { encoding: 'utf8' },
+    )).items;
+
+    priorityP0IssueNumbers = new Set(
+      projectItems
+        .filter((item) => item.priority === 'P0')
+        .map((item) => item.content?.number)
+        .filter(Boolean),
+    );
+
+    return priorityP0IssueNumbers;
   } catch (error) {
     handleProjectScopeError(error);
     throw error;
@@ -188,6 +237,7 @@ function normalizeIssues(payload) {
       labels: normalizeLabels(issue.labels),
       milestone: getMilestoneTitle(issue.milestone),
       number: issue.number ?? issue.issue_number,
+      priorityP0: issue.priorityP0 ?? issue.priority_p0,
       projectItems: issue.projectItems ?? issue.project_items ?? [],
       subIssues: normalizeSubIssues(issue.subIssues ?? issue.sub_issues ?? []),
       state: issue.state,
@@ -206,6 +256,7 @@ function normalizeSubIssues(subIssues) {
       body: issue.body ?? '',
       labels: normalizeLabels(issue.labels),
       number: issue.number ?? issue.issue_number,
+      priorityP0: issue.priorityP0 ?? issue.priority_p0,
       projectItems: issue.projectItems ?? issue.project_items ?? [],
       state: issue.state,
       title: issue.title,
@@ -225,6 +276,10 @@ function isOpenIssue(issue) {
 }
 
 function hasPriorityP0(issue) {
+  if (issue.priorityP0) {
+    return true;
+  }
+
   const labels = issue.labels.map((label) => normalizeText(label));
 
   if (labels.some((label) => priorityP0Names.has(label))) {

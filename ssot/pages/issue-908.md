@@ -1,0 +1,13 @@
+- [launch: harden Firebase App Check for enforcement](https://github.com/muhammedgaygisiz/travellers-apps/issues/908) (Issue \#908)
+- Description
+  - \# Launch task: Firebase App Check
+  - \#\# Roadmap phase
+  - Phase 1 - Launch Preparation, Week 1.
+  - \#\# Scope
+  - Monitor verified request ratio.
+  - Fix remaining App Check issues.
+  - Enable enforcement when request quality is acceptable.
+  - \#\# Acceptance criteria
+  - Verified request ratio is understood and launch-safe.
+  - Remaining App Check issues are fixed or explicitly accepted.
+  - Enforcement is enabled without blocking legitimate app traffic.

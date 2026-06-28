@@ -15,8 +15,4 @@
   - th: Thai
   - tr: Turkish -> Mo
 - Related issues
-  - [chore: Check Amharic]([[issue-739]]) (Issue \#739)
-  - [chore: Check Italian]([[issue-746]]) (Issue \#746)
   - [chore: check Arabic]([[issue-740]]) (Issue \#740)
-  - [chore: Check English]([[issue-742]]) (Issue \#742)
-  - [chore: Check French]([[issue-744]]) (Issue \#744)

@@ -1,3 +1,0 @@
-- [chore: Check Amharic](https://github.com/muhammedgaygisiz/travellers-apps/issues/739) (Issue \#739)
-- Description
-  - No description provided.

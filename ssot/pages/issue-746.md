@@ -1,3 +1,0 @@
-- [chore: Check Italian](https://github.com/muhammedgaygisiz/travellers-apps/issues/746) (Issue \#746)
-- Description
-  - No description provided.

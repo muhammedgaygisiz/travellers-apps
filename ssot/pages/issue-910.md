@@ -1,0 +1,14 @@
+- [launch: define analytics events and dashboard](https://github.com/muhammedgaygisiz/travellers-apps/issues/910) (Issue \#910)
+- Description
+  - \# Launch task: Analytics
+  - \#\# Roadmap phase
+  - Phase 2 - Product Intelligence, Week 3.
+  - \#\# Scope
+  - Define launch-critical Firebase Analytics events.
+  - Implement Firebase Analytics event tracking.
+  - Verify events in DebugView.
+  - Build a dashboard for key metrics.
+  - \#\# Acceptance criteria
+  - Activation, retention, creation, discovery, and launch monitoring events are defined.
+  - Events are visible in DebugView.
+  - A launch dashboard exists for daily monitoring.

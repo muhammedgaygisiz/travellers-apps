@@ -49,11 +49,7 @@
   - [[epic-734]]
   - [[epic-735]]
   - [[epic-738]]
-  - [[epic-770]]
-  - [[epic-790]]
-  - [[epic-841]]
-  - [[epic-843]]
-  - [[epic-850]]
+  - [[epic-907]]
 - Architecture
   - [[Architecture - Overview]]
   - [[Architecture - Firebase]]

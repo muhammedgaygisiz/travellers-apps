@@ -1,3 +1,0 @@
-- [feat: dev wants to have an aggregate for bite counts](https://github.com/muhammedgaygisiz/travellers-apps/issues/884) (Issue \#884)
-- Description
-  - No description provided.

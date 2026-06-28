@@ -1,3 +1,0 @@
-- [feat: user wants to receive a badge when completing a bucket list (created from a BiteTrail)](https://github.com/muhammedgaygisiz/travellers-apps/issues/769) (Issue \#769)
-- Description
-  - No description provided.

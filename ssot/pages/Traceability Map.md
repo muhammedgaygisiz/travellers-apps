@@ -55,15 +55,15 @@ Release state and changelog
 | [[Bite Trail]]   | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Create And Operate BiteTrails In The Business App]]                       |
 | [[Market Place]] | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Mature BiteTrail Marketplace Packages]]                                   |
 
-## Use Cases To Epics
+## Use Cases To Open P0 Epics
 
 | Use Case Area                       | Epic Links                                                                        |
 | ----------------------------------- | --------------------------------------------------------------------------------- |
-| Bite creation and quality           | [[epic-734]], [[epic-850]]                                                        |
-| Discovery, search, and navigation   | [[epic-735]], [[epic-738]], [[epic-841]], [[epic-843]]                            |
-| Restaurant and menu context         | [[epic-770]], [[epic-790]]                                                        |
-| Marketplace and BiteTrails          | [[epic-738]], [[epic-790]]                                                        |
-| Platform readiness and data quality | [[epic-850]], [[Current State - Known Issues]], [[Current State - Release State]] |
+| Bite creation and quality           | [[epic-907]]                                                                      |
+| Discovery, search, and navigation   | [[epic-735]], [[epic-738]]                                                        |
+| Restaurant and menu context         | [[epic-734]]                                                                      |
+| Marketplace and BiteTrails          | [[epic-738]]                                                                      |
+| Platform readiness and data quality | [[epic-907]], [[Current State - Known Issues]], [[Current State - Release State]] |
 
 ## Decisions To Constraints
 

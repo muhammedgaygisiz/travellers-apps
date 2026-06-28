@@ -3,6 +3,7 @@
   - [[Mission]]
   - [[Principles]]
   - [[Glossary]]
+  - [[Personas]]
 - [[Use Cases]]
 - [[Epics]]
 - [[Changelog]]

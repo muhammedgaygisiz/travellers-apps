@@ -1,11 +1,11 @@
 ---
 name: pull-github-epics-to-ssot
-description: Pull GitHub issues whose titles start with "epic:" into the repo SSOT Logseq graph. Use when the user asks to refresh, generate, update, or maintain the Epics page in /Users/mo/DEV/travellers-apps from GitHub issues, especially for ssot/pages/Epics.md or GitHub epic issue indexing.
+description: Pull GitHub issues whose titles start with "epic:" into the repo SSOT Logseq graph. Use when the user asks to refresh, generate, update, or maintain the Epics section in /Users/mo/DEV/travellers-apps from GitHub issues, especially for SSOT epic indexing.
 ---
 
 # Pull GitHub Epics To SSOT
 
-Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic index at `ssot/pages/Epics.md` and one detail page per epic from GitHub issues in `muhammedgaygisiz/travellers-apps` whose titles start with `epic:`.
+Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic section in `ssot/pages/SSOT.md` and one detail page per epic from GitHub issues in `muhammedgaygisiz/travellers-apps` whose titles start with `epic:`.
 
 ## Workflow
 
@@ -16,11 +16,11 @@ Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic ind
    - sort: `created`
    - order: `asc`
    - topn: at least `100`
-3. Render `ssot/pages/Epics.md` as a flat Logseq index:
-   - one root bullet per epic
-   - link text is the GitHub issue title
-   - link target is `[[epic-<issue-number>]]`
-   - suffix is `(Issue \#123)` with `#` escaped so Logseq does not create issue-number pages
+3. Render the `Epics` section in `ssot/pages/SSOT.md` and `ssot/pages/contents.md`:
+   - `Epics` is a plain bullet, not `[[Epics]]`
+   - one nested bullet per epic
+   - each nested bullet links to `[[epic-<issue-number>]]`
+   - do not create `ssot/pages/Epics.md`
 4. Render each epic page as `ssot/pages/epic-<issue-number>.md`:
    - first bullet links to the GitHub epic issue
    - `Description` contains the GitHub issue body as nested bullets
@@ -44,7 +44,7 @@ Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic ind
    - do not use Logseq properties such as `date::`, `github-issue::`, or `status::`
    - escape `#` in displayed text as `\#`
    - avoid namespaces like `epics/...` or `releases/...` unless the user explicitly asks
-8. Ensure `ssot/pages/contents.md` contains exactly one `- [[Epics]]` entry and no dangling empty bullet.
+8. Ensure `ssot/pages/contents.md` contains exactly one plain `- Epics` section and no `[[Epics]]` page link.
 9. Remove `ssot/logseq/bak` if Logseq recreated backup pages during the refresh.
 10. Run `git diff --check`.
 
@@ -68,10 +68,11 @@ The input JSON may be either an array of issue objects or an object with an `iss
 
 ## Output Contract
 
-`ssot/pages/Epics.md` should look like:
+The Epics section in `ssot/pages/SSOT.md` should look like:
 
 ```markdown
-- [epic: Example title]([[epic-123]]) (Issue \#123)
+- Epics
+  - [[epic-123]]
 ```
 
 `ssot/pages/epic-123.md` should look like:

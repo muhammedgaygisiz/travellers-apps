@@ -1,10 +1,12 @@
 - Product
+  collapsed:: true
   - [[Vision]]
   - [[Mission]]
   - [[Principles]]
   - [[Glossary]]
   - [[Personas]]
 - Domain
+  collapsed:: true
   - [[Bite]]
   - [[User]]
   - [[Restaurant]]
@@ -12,7 +14,9 @@
   - [[Bite Trail]]
   - [[Market Place]]
 - Use Cases
+  collapsed:: true
   - Supported today
+    collapsed:: true
     - [[UC - Discover Bites]]
     - [[UC - Create And Maintain Personal Bites]]
     - [[UC - Inspect Bite Details]]
@@ -31,6 +35,7 @@
     - [[UC - Create And Operate BiteTrails In The Business App]]
     - [[UC - Run Operational Migrations]]
   - Next to implement
+    collapsed:: true
     - [[UC - Guide New Users After Registration]]
     - [[UC - Complete Universal Search]]
     - [[UC - Expand Restaurant Menus Into Actionable Menu Journeys]]
@@ -40,6 +45,15 @@
     - [[UC - Improve Localization Quality]]
     - [[UC - Strengthen Location Currency And Data Quality Guidance]]
     - [[UC - Harden Platform And Backend Trust]]
-- [[Epics]]
+- Epics
+  collapsed:: true
+  - [[epic-266]]
+  - [[epic-734]]
+  - [[epic-735]]
+  - [[epic-738]]
+  - [[epic-770]]
+  - [[epic-790]]
+  - [[epic-841]]
+  - [[epic-843]]
+  - [[epic-850]]
 - [[Changelog]]
--

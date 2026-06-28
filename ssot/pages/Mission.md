@@ -50,4 +50,4 @@
   - [[Vision]]
   - [[Glossary]]
   - Use Cases section in [[SSOT]]
-  - [[Epics]]
+  - Epics section in [[SSOT]]

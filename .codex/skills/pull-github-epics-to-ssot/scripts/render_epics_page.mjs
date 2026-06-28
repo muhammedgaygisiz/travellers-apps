@@ -10,6 +10,8 @@ import { join, resolve } from 'node:path';
 const repo = 'muhammedgaygisiz/travellers-apps';
 const pagesPath = resolve('ssot/pages');
 const epicsIndexPath = join(pagesPath, 'Epics.md');
+const ssotPath = join(pagesPath, 'SSOT.md');
+const contentsPath = join(pagesPath, 'contents.md');
 const backupPath = resolve('ssot/logseq/bak');
 const subIssuesQuery = `
   query($owner:String!, $name:String!, $number:Int!, $cursor:String) {
@@ -36,7 +38,9 @@ const epics = getEpics(issues);
 const subIssues = getUniqueSubIssues(epics);
 
 clearGeneratedEpicPages();
-writeFileSync(epicsIndexPath, renderEpicsIndex(epics));
+rmSync(epicsIndexPath, { force: true });
+writeFileSync(ssotPath, replaceRootSection(readFileSync(ssotPath, 'utf8'), 'Epics', renderEpicsSection(epics, '\t')));
+writeFileSync(contentsPath, replaceRootSection(readFileSync(contentsPath, 'utf8'), 'Epics', renderEpicsSection(epics, '  ')));
 
 for (const epic of epics) {
   writeFileSync(
@@ -194,16 +198,16 @@ function clearGeneratedEpicPages() {
   }
 }
 
-function renderEpicsIndex(allEpics) {
+function renderEpicsSection(allEpics, indent) {
   if (allEpics.length === 0) {
-    return '- No GitHub issues with titles starting with `epic:` found.\n';
+    return `- Epics\n${indent}- No GitHub issues with titles starting with \`epic:\` found.\n`;
   }
 
-  return `${allEpics.map(renderEpicIndexItem).join('\n')}\n`;
+  return `- Epics\n${allEpics.map((epic) => renderEpicSectionItem(epic, indent)).join('\n')}\n`;
 }
 
-function renderEpicIndexItem(epic) {
-  return `- [${renderLinkText(epic.title)}]([[${getEpicPageName(epic)}]]) (Issue \\#${epic.number})`;
+function renderEpicSectionItem(epic, indent) {
+  return `${indent}- [[${getEpicPageName(epic)}]]`;
 }
 
 function renderEpicPage(epic, relatedIssues) {
@@ -325,6 +329,25 @@ function normalizeText(value) {
 
 function escapeLinkText(value) {
   return value.replaceAll('[', '\\[').replaceAll(']', '\\]');
+}
+
+function replaceRootSection(content, sectionTitle, renderedSection) {
+  const lines = content.trimEnd().split('\n');
+  const start = lines.findIndex((line) => line.trim() === `- ${sectionTitle}` || line.trim() === `- [[${sectionTitle}]]`);
+
+  if (start === -1) {
+    return `${content.trimEnd()}\n${renderedSection}`;
+  }
+
+  let end = start + 1;
+
+  while (end < lines.length && !lines[end].startsWith('- ')) {
+    end += 1;
+  }
+
+  lines.splice(start, end - start, ...renderedSection.trimEnd().split('\n'));
+
+  return `${lines.join('\n')}\n`;
 }
 
 function getOptionValue(optionName) {

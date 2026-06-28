@@ -2,6 +2,7 @@
 - [[Mission]]
 - [[Glossary]]
 - Use Cases
+  collapsed:: true
   - Supported today
     - [[UC - Discover Bites]]
     - [[UC - Create And Maintain Personal Bites]]
@@ -30,5 +31,15 @@
     - [[UC - Improve Localization Quality]]
     - [[UC - Strengthen Location Currency And Data Quality Guidance]]
     - [[UC - Harden Platform And Backend Trust]]
-- [[Epics]]
+- Epics
+  collapsed:: true
+  - [[epic-266]]
+  - [[epic-734]]
+  - [[epic-735]]
+  - [[epic-738]]
+  - [[epic-770]]
+  - [[epic-790]]
+  - [[epic-841]]
+  - [[epic-843]]
+  - [[epic-850]]
 - [[Changelog]]

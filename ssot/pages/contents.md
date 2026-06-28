@@ -42,4 +42,17 @@
   - [[epic-841]]
   - [[epic-843]]
   - [[epic-850]]
+- Architecture
+  collapsed:: true
+  - [[Architecture - Overview]]
+  - [[Architecture - Firebase]]
+  - [[Architecture - Nx Workspace]]
+  - [[Architecture - Capacitor]]
+  - [[Architecture - Auth]]
+  - [[Architecture - Storage]]
+  - [[Architecture - Analytics]]
+  - [[Architecture - State Management]]
+  - [[Architecture - Data Access]]
+  - [[Architecture - Internationalization]]
+  - [[Architecture - Testing]]
 - [[Changelog]]

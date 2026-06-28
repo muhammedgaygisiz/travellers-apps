@@ -1,5 +1,9 @@
-- [[Vision]]
-- [[Glossar]]
+- Product
+  - [[Vision]]
+  - [[Mission]]
+  - [[Principles]]
+  - [[Glossary]]
+- [[Use Cases]]
 - [[Epics]]
 - [[Changelog]]
 -

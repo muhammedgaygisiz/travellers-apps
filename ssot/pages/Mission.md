@@ -1,0 +1,53 @@
+- Help people decide what to eat by showing them real dishes through the experiences of other people.
+- Mission statement
+  - BiteTribe exists to make food discovery more authentic, local, and useful.
+  - We turn individual food experiences into a shared map of what people actually ate, where they ate it, what it cost, how they felt about it, and why it is worth trying.
+  - The product should help travelers, locals, and food lovers move from "Where should I go?" to "What should I eat?" with confidence.
+- What we serve
+  - Food lovers
+    - Find real dishes nearby or in a destination before deciding where to eat.
+    - Compare experiences through photos, reviews, prices, places, creators, and social proof.
+    - Save food experiences and follow curated BiteTrails for later.
+  - Bite creators
+    - Share authentic food experiences and build trust through a public profile.
+    - Receive feedback through likes, reviews, followers, and leaderboard-style contribution signals.
+    - Eventually turn local food knowledge into curated journeys and creator-led recommendations.
+  - Restaurants and organisations
+    - Benefit from authentic recommendations created around real dishes.
+    - Maintain restaurant, menu, and organisation information where it helps users understand the food experience.
+    - Package local knowledge into BiteTrails and marketplace offerings.
+- How we create value
+  - Dish-first discovery
+    - The core content unit is the bite, not the restaurant.
+    - Restaurants, menus, profiles, and maps exist to make the bite easier to understand and act on.
+  - Authenticity over marketing
+    - BiteTribe should show food through real experiences, not polished claims.
+    - The most valuable content is specific, contextual, and useful for deciding what to eat.
+  - Local context
+    - Location, currency, restaurant/place data, menu context, and creator identity should help users understand whether a bite is relevant for them.
+  - Community trust
+    - Profiles, followers, likes, reviews, and leaderboards should make contributions feel human and trustworthy.
+  - Curated journeys
+    - BiteTrails and bucket lists should turn discovery into intent, progress, and memorable food journeys.
+  - Business enablement
+    - Business tools should support the same authentic discovery loop instead of replacing it with traditional advertising.
+- Product direction implied by the current sources
+  - Strengthen the bite creation and discovery loop.
+    - Make it easy to create high-quality bites and easy to discover relevant bites by feed, map, search, profile, restaurant, and BiteTrail.
+  - Improve search and navigation.
+    - Users should be able to find people, bites, restaurants, menus, and curated journeys quickly, even as content grows.
+  - Make restaurant and menu data actionable.
+    - Restaurant profiles and menu items should connect users from discovery to a clear next action, such as trying a dish, planning a visit, or creating a bite from a menu item.
+  - Mature the BiteTrail ecosystem.
+    - Organisations and creators should be able to curate, publish, and eventually monetize food journeys.
+  - Build trust and quality controls.
+    - Location, currency, profile, translation, App Check, and backend data quality work all support the mission by keeping discovery reliable.
+- Strategic boundary
+  - BiteTribe should not become a generic restaurant directory.
+  - Restaurant pages, menus, business tools, and marketplace features are valuable when they help users understand and act on real food experiences.
+  - The mission stays centered on the bite: what was eaten, by whom, where, and why it matters.
+- Sources used
+  - [[Vision]]
+  - [[Glossary]]
+  - [[Use Cases]]
+  - [[Epics]]

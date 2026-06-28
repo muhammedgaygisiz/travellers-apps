@@ -1,0 +1,104 @@
+- Supported use cases so far
+  - Discover bites
+    - Food lovers can browse a feed of bites and switch to a map view to discover food around them.
+    - The current app supports a home feed, map views, tag/text filtering in the feed, and backend-assisted location loading.
+    - Evidence from code: `home`, `home/map-view`, `loadBitesByLocation`, bite API loading by location.
+  - Create and maintain personal bites
+    - Users can create a bite with food details, location/restaurant context, price/currency, image, tags, and review-like content.
+    - Existing bites can be opened, edited, and enriched with uploaded images.
+    - Evidence from code: `new-bite`, `bite/:biteId`, `bite/:biteId/edit`, bite API create/edit/upload utilities.
+  - Inspect bite details
+    - Users can open a bite detail page and see the food experience in context, including creator/profile context, restaurant/place context, likes, reviews, image, and related data.
+    - Evidence from code: bite details route, details page/data-access, like API, review API.
+  - Search in BiteTribe
+    - Users can search for people, bites, and restaurants from a dedicated search page.
+    - Current implementation includes callable-backed searches for users, bites, and restaurants, plus search categories in the UI.
+    - Evidence from code: `search`, `searchUsers`, `searchBites`, `searchRestaurants`.
+    - Related GitHub scope: Issue \#843 describes broader universal search, fuzzy matching, and topic-specific search.
+  - Manage profile and social graph
+    - Users can view their own profile, edit profile data, open public profiles, and inspect followers/following lists.
+    - Profiles include public-user data and support search by identity fields such as display name, full name, and email.
+    - Evidence from code: `my-profile`, `edit-profile`, `profile/:userId`, `followers/:userId/:type`, profile API, public-user conversion.
+  - Browse restaurants and places
+    - Users can navigate from a bite to a verified restaurant profile or an unverified place page.
+    - Restaurant pages can show restaurant-related bites, ratings derived from bites, tags, menu entry points, and verification distinctions.
+    - Evidence from code: restaurant/place routes, restaurant API, restaurant page components, restaurant bites route.
+    - Related GitHub scope: Issue \#734 covers richer restaurant menu and restaurant profile behavior.
+  - View restaurant menus
+    - Users can open a restaurant menu from a bite and inspect menu information.
+    - The business app also has routes for editing menus.
+    - Evidence from code: `bite/:biteId/restaurant/:restaurantId/menu/:menuId`, menu API, business `restaurant/:restaurantId/menu/:menuId`.
+    - Related GitHub scope: Issue \#734 and Issue \#735 show that menu functionality exists but is expected to grow into more actions around menu items.
+  - Save and rate BiteTrails through bucket lists
+    - Users can manage bucket lists, open a bucket list, view it on a map, edit it, and rate it.
+    - BiteTrails can be opened from the marketplace and represented as bucket-list-like content.
+    - Evidence from code: `my-bucketlists`, bucket list detail/edit/rate/map routes, bucketlist API, BiteTrail API.
+  - Discover BiteTrails in the marketplace
+    - Users can open a marketplace page, view BiteTrails, open a BiteTrail detail page, and inspect a BiteTrail map view.
+    - This supports the first marketplace/BiteTrail package experience for organisations and food creators.
+    - Evidence from code: `market-place`, `bite-trail/:biteTrailId`, `bite-trail/:biteTrailId/map-view`, BiteTrail API.
+    - Related GitHub scope: Issue \#266 describes the marketplace MVP for organisation or food-vlogger BiteTrail packages.
+  - Use gamification signals
+    - Users can see a leaderboard based on bite counts.
+    - Backend functions maintain bite counts and load leaderboard users.
+    - Evidence from code: `leaderboard`, `loadLeaderboard`, `incrementBiteCountOnBiteCreate`.
+    - Related GitHub scope: Issue \#770 expands this into badges, contests, and completion rewards.
+  - Use local gallery support
+    - Users can access a local gallery page for locally stored BiteTribe images.
+    - Evidence from code: `gallery` route and gallery feature library.
+  - Configure personal settings
+    - Users can open settings and maintain user-specific preferences such as app-specific configuration and currency-related choices.
+    - Evidence from code: `settings` route, settings API, exchange-rates API, currency selector assets.
+  - Use account and legal flows
+    - Users can access privacy policy and account deletion pages.
+    - Evidence from code: `privacy`, `account-deletion`.
+  - Receive app notifications and engagement updates
+    - Backend functions support follower notifications, like/review notifications, weekly bite notifications, and shared bite links.
+    - Evidence from code: `notifyFollowersOnNewBite`, `notifyBiteCreatorOnLike`, `notifyBiteCreatorOnReview`, `notifyUserOnNewFollower`, `sendWeeklyBiteNotification`, `handleSharedLinkToBite`.
+  - Maintain restaurants in the business app
+    - Business users or admins can open a business dashboard, create restaurants, edit restaurants, and maintain restaurant menus.
+    - Evidence from code: business `dashboard`, `new-restaurant`, `restaurant/:restaurantId`, `restaurant/:restaurantId/menu/:menuId`.
+    - Related GitHub scope: Issue \#734 includes opening hours, social links, verified/unverified restaurant handling, menu cleanup, and admin restaurant workflows.
+  - Create and operate BiteTrails in the business app
+    - Organisations can access an organisation dashboard and create BiteTrails.
+    - This is the operational side of marketplace packages.
+    - Evidence from code: business `:organisationId/dashboard`, `:organisationId/create-bite-trail`.
+    - Related GitHub scope: Issue \#266 includes assigned users, organisation profile handling, BiteTrail creation from selected bites, free BiteTrail access, and marketplace listing.
+  - Run operational migrations
+    - Admin/business tooling has a migrations page for operational maintenance.
+    - Evidence from code: business `migrations`.
+- Next use cases to implement
+  - Guide new users after registration
+    - New users should be guided to choose a meaningful username, explain whether they want a public profile, and define defaults such as currency preferences.
+    - Related GitHub scope: Issue \#850 and Issue \#841.
+  - Complete universal search
+    - Search should become more Google-like across people, bites, and restaurants, including fuzzy matching, typo tolerance, scoped search categories, and richer searchable fields.
+    - Related GitHub scope: Issue \#843 and Issue \#790.
+  - Expand restaurant menus into actionable menu journeys
+    - Menu items should become starting points for user actions such as creating a bite from a menu item, contacting the restaurant, planning a visit, checking availability, or reserving.
+    - Related GitHub scope: Issue \#735.
+  - Finish restaurant profile and menu completeness
+    - Restaurant pages should cover opening hours, social links, about sections, verified versus unverified state, address/location pinning, restaurant tags, menu item states, and better business editing workflows.
+    - Related GitHub scope: Issue \#734.
+  - Mature BiteTrail marketplace packages
+    - Organisations and food creators should be able to package bites into BiteTrails, show existing BiteTrails, assign users, expose free BiteTrails, show sold counters, and connect BiteTrails to organisation profiles.
+    - Related GitHub scope: Issue \#266.
+  - Add BiteTrail gamification
+    - Completing BiteTrails should lead to visible progress, badges, contests, and reward-like moments.
+    - Related GitHub scope: Issue \#770.
+  - Improve localization quality
+    - AI-generated translations should be manually checked across supported languages and Portuguese should be maintained as a supported locale.
+    - Related GitHub scope: Issue \#738.
+  - Strengthen location, currency, and data-quality guidance
+    - The app should help users avoid mismatches between selected currency, bite location, user location, Google Places location, and restaurant metadata.
+    - This supports more trustworthy food discovery and cleaner restaurant/place data.
+  - Harden platform and backend trust
+    - App Check, callable backend boundaries, user creation, leaderboard aggregation, search callables, and location queries should keep moving toward reliable production enforcement.
+    - This is mostly an enabling use case for safer public app growth rather than a visible user workflow.
+- Evidence used for this page
+  - Consumer app routes in `libs/bite-tribe/shell/src/lib/routes.ts`.
+  - Business app routes in `libs/bite-tribe-business/shell/src/lib/routes.ts`.
+  - Shared paths in `libs/common/utils/src/lib/paths.ts`.
+  - BiteTribe API modules for bites, profiles, restaurants, menus, likes, reviews, settings, exchange rates, BiteTrails, and bucket lists.
+  - Firebase functions exported from `apps/bite-tribe-firebase/functions/src/index.ts`.
+  - Generated SSOT epic pages under `ssot/pages/epic-*.md`.

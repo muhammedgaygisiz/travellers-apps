@@ -10,8 +10,10 @@ Agents should use the SSOT before making changes so product intent, domain langu
 
 1. Read `ssot/pages/SSOT.md`.
 2. Use `ssot/pages/Traceability Map.md` to connect the request to product, domain, use case, epic, architecture, implementation, testing, and release context.
-3. Follow `ssot/pages/Spec To Code Workflow.md` for implementation work.
-4. Use `.codex/skills/travellers-apps/SKILL.md` for repo-specific operating guidance.
+3. Follow `ssot/pages/Feature Delivery Workflow.md` for normal issue-to-merge work.
+4. Follow `ssot/pages/Release Workflow.md` for Sunday release work.
+5. Use `ssot/pages/Spec To Code Workflow.md` for implementation details.
+6. Use `.codex/skills/travellers-apps/SKILL.md` for repo-specific operating guidance.
 
 ## Core Rules
 
@@ -62,6 +64,8 @@ Preferred order:
 ssot/pages/SSOT.md
 ssot/pages/Traceability Map.md
 ssot/pages/Spec To Code Workflow.md
+ssot/pages/Feature Delivery Workflow.md
+ssot/pages/Release Workflow.md
 .codex/skills/travellers-apps/SKILL.md
 apps/bite-tribe
 apps/bite-tribe-business

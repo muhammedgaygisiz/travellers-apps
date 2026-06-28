@@ -32,7 +32,9 @@ npm run ios-asset-generator:generate-ios:bite-tribe
 
 - Use the existing build-number scripts instead of editing generated release state manually.
 - Use the changelog scripts for SSOT changelog pages.
+- Use closed Priority P0 issue titles from the release week as the source for short TestFlight and Google Play build notes.
 - Use Capacitor sync commands when native dependency or wrapper state changes.
+- Keep source maps and native build artifacts traceable to the release build number and future git tag.
 - Treat generated native files as outputs unless the requested change specifically targets native wrapper source.
 
 ## Related Pages

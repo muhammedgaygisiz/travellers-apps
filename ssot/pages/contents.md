@@ -2,6 +2,8 @@
   collapsed:: true
   - [[Traceability Map]]
   - [[Spec To Code Workflow]]
+  - [[Feature Delivery Workflow]]
+  - [[Release Workflow]]
 - [[Vision]]
 - [[Mission]]
 - [[Glossary]]

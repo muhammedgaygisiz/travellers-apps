@@ -36,6 +36,7 @@
     - [[UC - Strengthen Location Currency And Data Quality Guidance]]
     - [[UC - Harden Platform And Backend Trust]]
 - Epics
+  collapsed:: true
   - [[epic-734]]
   - [[epic-735]]
   - [[epic-738]]
@@ -75,7 +76,6 @@
   - [[ADR-0002 Firebase Backend]]
   - [[ADR-0003 Nx Monorepo]]
 - Current State
-  collapsed:: true
   - [[Current State - Roadmap]]
   - [[Current State - Known Issues]]
   - [[Current State - Open Questions]]

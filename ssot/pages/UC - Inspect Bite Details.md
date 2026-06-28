@@ -1,0 +1,34 @@
+# UC - Inspect Bite Details
+
+## Status
+
+Supported today.
+
+## Goal
+
+Users can inspect one Bite deeply enough to decide whether the dish is relevant.
+
+## Actors
+
+- Food lover
+- Traveler
+- Bite creator
+
+## Current Flow
+
+- User opens a Bite detail page.
+- The page shows the food experience in context.
+- User can understand creator/profile context, restaurant/place context, image, likes, reviews, and related data.
+
+## Supported Evidence
+
+- `bite/:biteId`
+- Bite details page and data-access.
+- Like API.
+- Review API.
+
+## Related Domains
+
+- [[Bite]]
+- [[User]]
+- [[Restaurant]]

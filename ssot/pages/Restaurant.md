@@ -199,6 +199,6 @@ images/restaurants/{restaurantId}/{filename}
 - [[Mission]]
 - [[Principles]]
 - [[Glossary]]
-- [[Use Cases]]
+- Use Cases section in [[SSOT]]
 - [[Personas]]
 - [[Bite]]

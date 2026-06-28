@@ -49,5 +49,5 @@
 - Sources used
   - [[Vision]]
   - [[Glossary]]
-  - [[Use Cases]]
+  - Use Cases section in [[SSOT]]
   - [[Epics]]

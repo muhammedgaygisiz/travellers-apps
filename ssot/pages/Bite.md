@@ -249,5 +249,5 @@ images/bites/{biteId}/{filename}
 - [[Mission]]
 - [[Principles]]
 - [[Glossary]]
-- [[Use Cases]]
+- Use Cases section in [[SSOT]]
 - [[Personas]]

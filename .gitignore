@@ -55,3 +55,6 @@ apps/storybook-host/src/assets/temp/**/*
 
 # Husky backup hooks
 .husky/*.bak
+
+# Logseq backup pages
+ssot/logseq/bak/

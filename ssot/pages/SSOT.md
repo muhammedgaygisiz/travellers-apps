@@ -4,6 +4,13 @@
   - [[Principles]]
   - [[Glossary]]
   - [[Personas]]
+- Domain
+  - [[Bite]]
+  - [[User]]
+  - [[Restaurant]]
+  - [[Bucket List]]
+  - [[Bite Trail]]
+  - [[Market Place]]
 - [[Use Cases]]
 - [[Epics]]
 - [[Changelog]]

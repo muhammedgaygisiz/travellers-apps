@@ -67,4 +67,9 @@
   - [[Implementation - Storybook]]
   - [[Implementation - Testing]]
   - [[Implementation - Release And Build Workflow]]
+- Decisions
+  collapsed:: true
+  - [[ADR-0001 Dish First Product]]
+  - [[ADR-0002 Firebase Backend]]
+  - [[ADR-0003 Nx Monorepo]]
 - [[Changelog]]

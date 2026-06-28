@@ -72,4 +72,10 @@
   - [[ADR-0001 Dish First Product]]
   - [[ADR-0002 Firebase Backend]]
   - [[ADR-0003 Nx Monorepo]]
+- Current State
+  collapsed:: true
+  - [[Current State - Roadmap]]
+  - [[Current State - Known Issues]]
+  - [[Current State - Open Questions]]
+  - [[Current State - Release State]]
 - [[Changelog]]

@@ -1,0 +1,14 @@
+- [launch: run public launch campaign](https://github.com/muhammedgaygisiz/travellers-apps/issues/913) (Issue \#913)
+- Description
+  - \# Launch task: Public launch
+  - \#\# Roadmap phase
+  - Phase 3 - Public Launch, Week 6.
+  - \#\# Scope
+  - Instagram posts.
+  - Reddit where appropriate.
+  - LinkedIn.
+  - Friends and family.
+  - Travel communities.
+  - \#\# Acceptance criteria
+  - Public launch communication is executed across selected channels.
+  - Early growth target is tracked toward the first few hundred real users.

@@ -1,0 +1,14 @@
+- [launch: execute soft launch and monitor daily](https://github.com/muhammedgaygisiz/travellers-apps/issues/912) (Issue \#912)
+- Description
+  - \# Launch task: Soft launch
+  - \#\# Roadmap phase
+  - Phase 3 - Public Launch, Week 5.
+  - \#\# Scope
+  - Publish the app.
+  - Announce to existing testers.
+  - Invite already-contacted influencers.
+  - Monitor Crashlytics and Analytics daily.
+  - \#\# Acceptance criteria
+  - The app is published for soft launch.
+  - Initial tester and influencer groups are invited.
+  - Crashlytics and Analytics are reviewed daily during the soft-launch window.

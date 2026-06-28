@@ -1,0 +1,15 @@
+- [launch: complete production readiness testing and store assets](https://github.com/muhammedgaygisiz/travellers-apps/issues/911) (Issue \#911)
+- Description
+  - \# Launch task: Production readiness
+  - \#\# Roadmap phase
+  - Phase 2 - Product Intelligence, Week 4.
+  - \#\# Scope
+  - Android testing.
+  - iOS testing.
+  - Web testing.
+  - Fix remaining launch blockers.
+  - Prepare App Store and Google Play assets.
+  - \#\# Acceptance criteria
+  - Release Candidate is ready.
+  - Supported platforms have been tested.
+  - Store assets are ready for publishing.

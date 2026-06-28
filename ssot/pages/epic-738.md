@@ -1,0 +1,18 @@
+- [epic: Check localization / translation of App](https://github.com/muhammedgaygisiz/travellers-apps/issues/738) (Issue \#738)
+- Description
+  - As a user of the application I want to have correct spelling and grammar, as well as indications in my language
+  - The translations were generated with AI and need manual check. You will find them in the corresponding json file:
+  - https://github.com/muhammedgaygisiz/travellers-apps/tree/develop/apps/bite-tribe/src/assets/i18n
+  - Currently the following languages need check:
+  - am: Amharic -> Sam
+  - ar: Arabic
+  - de: German
+  - en: Engilsh -> Sam
+  - es: Spanish -> Daniel
+  - fr: French
+  - id: Indonesian
+  - it: Italian
+  - th: Thai
+  - tr: Turkish -> Mo
+- Related issues
+  - [chore: check Arabic]([[issue-740]]) (Issue \#740)

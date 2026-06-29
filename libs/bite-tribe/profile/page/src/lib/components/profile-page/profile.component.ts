@@ -83,7 +83,6 @@ export class ProfileComponent {
   readonly gotoEditProfile = output();
 
   readonly biteClick = output<Bite>();
-  readonly restaurantClick = output<Bite>();
   readonly likeButtonClick = output<Like>();
   readonly followButtonClick = output<PublicUser>();
   readonly unfollowButtonClick = output<PublicUser>();

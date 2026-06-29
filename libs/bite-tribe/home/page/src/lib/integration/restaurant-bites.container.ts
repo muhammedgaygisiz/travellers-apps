@@ -23,7 +23,6 @@ import { BiteTribeHomeComponent } from '../components/page/home.component';
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
-      (restaurantClick)="service.restaurantClicked($event)"
       (addButtonClick)="service.onAddButtonClicked()"
       (gotoSettings)="service.onGotoSettingsClick()"
       (gotoMyProfile)="service.onGotoMyProfileClick()"

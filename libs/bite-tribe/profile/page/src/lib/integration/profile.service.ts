@@ -54,29 +54,6 @@ export class ProfileService {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
-  restaurantClicked(bite: Bite): void {
-    if (bite.restaurantId) {
-      const [empty, collectionName, restaurantId] =
-        bite.restaurantId.split('/');
-
-      this.navController.navigateForward([
-        'bite',
-        bite.id,
-        'restaurant',
-        restaurantId,
-      ]);
-
-      return;
-    }
-
-    this.navController.navigateForward([
-      'bite',
-      bite.id,
-      'restaurant',
-      encodeURIComponent(bite.place),
-    ]);
-  }
-
   saveProfile(publicUser: PublicUser): void {
     this.dataAccess.savePublicProfile(publicUser);
 

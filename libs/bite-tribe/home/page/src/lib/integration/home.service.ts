@@ -62,27 +62,6 @@ export class HomeService {
     this.dataAccess.updateBiteRating(params);
   }
 
-  restaurantClicked(bite: Bite): void {
-    if (bite.id && bite.restaurantId) {
-      void this.navController.navigateForward([
-        'bite',
-        bite.id,
-        'restaurant',
-        bite.restaurantId,
-      ]);
-
-      return;
-    }
-
-    void this.navController.navigateForward([
-      'bite',
-      bite.id,
-      PATH.RESTAURANT,
-      PATH.PLACE,
-      encodeURIComponent(bite.place),
-    ]);
-  }
-
   onAddButtonClicked(): void {
     void this.navController.navigateForward(['new-bite']);
   }

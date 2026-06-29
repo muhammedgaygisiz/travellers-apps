@@ -74,7 +74,6 @@ export class BiteComponent {
   readonly = input(false, { transform: booleanAttribute });
 
   biteClick = output<Bite>();
-  restaurantClick = output<Bite>();
   likeButtonClick = output<Like>();
   gotoEdit = output<Bite>();
   deleteBite = output<Bite>();

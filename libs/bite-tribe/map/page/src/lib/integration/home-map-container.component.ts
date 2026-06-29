@@ -19,7 +19,6 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
-      (restaurantClick)="service.restaurantClicked($event)"
     />
   `,
 })

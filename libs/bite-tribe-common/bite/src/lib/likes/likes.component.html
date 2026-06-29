@@ -1,8 +1,6 @@
-@let biteData = bite();
-
 <div class="like-container {{ inCard() ? 'in-card' : '' }}">
   <ion-chip class="{{ calcClass() }}" (click)="openLikeOptions($event)">
-    @if (biteData?.likes?.length) {
+    @if (totalLikeCount()) {
       @for (
         emoji of getLikeEmojis();
         let index = $index, last = $last;
@@ -12,7 +10,7 @@
           emoji
         }}</ion-label>
       }
-      <ion-label class="like-nr">{{ biteData.likes?.length }}</ion-label>
+      <ion-label class="like-nr">{{ totalLikeCount() }}</ion-label>
     } @else {
       <ion-label class="ion-margin-horizontal">👍</ion-label>
     }

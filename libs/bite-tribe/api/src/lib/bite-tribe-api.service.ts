@@ -237,6 +237,10 @@ export class BiteTribeApiService {
     return this.profileApiService.updateLastSeen();
   }
 
+  updateUserMetadata(): Promise<void> {
+    return this.profileApiService.updateUserMetadata();
+  }
+
   async followUser(user: PublicUser): Promise<void> {
     await this.profileApiService.followUser(user);
   }

@@ -251,6 +251,24 @@ export class ProfileApiService {
     }
   }
 
+  async updateUserMetadata(): Promise<void> {
+    try {
+      await FirebaseFunctions.callByName<
+        { version?: string; buildNumber?: string },
+        void
+      >({
+        name: 'updateUserMetadata',
+        data: {
+          version: process.env['version'],
+          buildNumber: process.env['buildNumber'],
+        },
+      });
+    } catch (error) {
+      console.warn('Error updating user metadata:', error);
+      this.errorHandler.handleError(error);
+    }
+  }
+
   async followUser(user: PublicUser): Promise<void> {
     try {
       const currentUser = this.authService.getUser();

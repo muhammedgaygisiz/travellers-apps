@@ -43,6 +43,7 @@ searchUsers
 searchBites
 searchRestaurants
 updateLastSeen
+updateUserMetadata
 loadLeaderboard
 incrementBiteCountOnBiteCreate
 incrementBiteLikeCountOnLikeCreate

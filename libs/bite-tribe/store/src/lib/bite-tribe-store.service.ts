@@ -358,6 +358,10 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(AppActions.updateLastSeen());
   }
 
+  updateUserMetadata(): void {
+    this.store.dispatch(AppActions.updateUserMetadata());
+  }
+
   savedNewBite(newBite: Bite): void {
     this.store.dispatch(
       BiteActions.savedBite({

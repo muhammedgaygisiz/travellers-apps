@@ -17,3 +17,8 @@ export { loadBitesByLocation } from './functions/load-bites-by-location';
 export { createUserOnAuthCreate } from './functions/create-user-on-auth-create';
 export { loadLeaderboard } from './functions/load-leaderboard';
 export { incrementBiteCountOnBiteCreate } from './functions/increment-bite-count-on-bite-create';
+export {
+  decrementBiteLikeCountOnLikeDelete,
+  incrementBiteLikeCountOnLikeCreate,
+  updateBiteLikeCountOnLikeUpdate,
+} from './functions/update-bite-like-count-on-like-write';

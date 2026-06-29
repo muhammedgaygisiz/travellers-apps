@@ -30,6 +30,20 @@ describe('sortBitesByLikes', () => {
     expect(sortedBites[2].id).toBe(2);
   });
 
+  it('should prefer aggregate counts when present', () => {
+    const bites = [
+      { id: 1, likes: ['user1', 'user2'], thumbup: 0 } as unknown as Bite,
+      { id: 2, likes: [], thumbup: 2, drooling: 1 } as unknown as Bite,
+      { id: 3, likes: ['user1'] } as unknown as Bite,
+    ];
+
+    const sortedBites = sortBitesByLikes(bites);
+
+    expect(sortedBites[0].id).toBe(2);
+    expect(sortedBites[1].id).toBe(3);
+    expect(sortedBites[2].id).toBe(1);
+  });
+
   it('should return an empty array when input is empty', () => {
     const sortedBites = sortBitesByLikes([]);
     expect(sortedBites.length).toBe(0);

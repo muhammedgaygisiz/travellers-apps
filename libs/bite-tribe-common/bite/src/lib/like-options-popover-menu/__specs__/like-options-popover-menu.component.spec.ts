@@ -62,6 +62,38 @@ describe('LikeOptionsPopoverMenuComponent', () => {
     expect(chips[2].textContent).toContain('🤯');
   });
 
+  it('should use aggregate counts when present', () => {
+    componentRef.setInput('bite', {
+      id: '123',
+      name: 'Test Bite',
+      likes: [],
+      thumbup: 2,
+      drooling: 3,
+      mindblown: 4,
+    });
+    fixture.detectChanges();
+
+    expect(component.thumbupCount()).toBe(2);
+    expect(component.droolingCount()).toBe(3);
+    expect(component.mindblownCount()).toBe(4);
+  });
+
+  it('should ignore likes when aggregate counts are absent', () => {
+    componentRef.setInput('bite', {
+      id: '123',
+      name: 'Test Bite',
+      likes: [
+        { userId: 'user1', likeType: 'thumbup' },
+        { userId: 'user2', likeType: 'drooling' },
+      ],
+    });
+    fixture.detectChanges();
+
+    expect(component.thumbupCount()).toBe(0);
+    expect(component.droolingCount()).toBe(0);
+    expect(component.mindblownCount()).toBe(0);
+  });
+
   it('should emit correct like type for each emoji click', () => {
     // Arrange
     const mockBite = { id: '123', name: 'Test Bite' };

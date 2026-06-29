@@ -18,7 +18,7 @@ apps/bite-tribe-firebase/functions/src/index.ts
 | Auth           | `create-user-on-auth-create.ts`                                                                       |
 | Search         | `search-bites.ts`, `search-restaurants.ts`, `search-users.ts`                                         |
 | Discovery      | `load-bites-by-location.ts`, `load-leaderboard.ts`                                                    |
-| Aggregates     | `increment-bite-count-on-bite-create.ts`                                                              |
+| Aggregates     | `increment-bite-count-on-bite-create.ts`, `update-bite-like-count-on-like-write.ts`                   |
 | Storage        | `set-bite-image-path-on-upload.ts`                                                                    |
 | Notifications  | `notify-bite-creator-on-like.ts`, `notify-followers-on-new-bite.ts`, `notify-user-on-new-follower.ts` |
 | Scheduled jobs | `send-weekly-bite-notification.ts`                                                                    |
@@ -31,6 +31,7 @@ apps/bite-tribe-firebase/functions/src/index.ts
 - Preserve client-safe fallback behavior where the UI expects empty lists instead of hard failures.
 - Add structured logs for operationally important branches.
 - Export new functions from `src/index.ts`.
+- Trigger-maintained Bite like aggregates must migrate old Bite documents that are missing `thumbup`, `drooling`, or `mindblown` by recomputing counts from the `likes` subcollection before using increment/decrement deltas.
 
 ## Validation
 

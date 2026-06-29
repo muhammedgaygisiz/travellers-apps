@@ -66,7 +66,13 @@ describe(LikesComponent.name, () => {
 
     describe('given bite without likes', () => {
       it('should return empty array', () => {
-        const noLikesBite = { ...mockBite, likes: [] };
+        const noLikesBite = {
+          ...mockBite,
+          likes: [],
+          thumbup: undefined,
+          drooling: undefined,
+          mindblown: undefined,
+        };
         componentRef.setInput('bite', noLikesBite);
         componentRef.changeDetectorRef.detectChanges();
         expect(component.getLikeEmojis()).toEqual([]);
@@ -82,15 +88,70 @@ describe(LikesComponent.name, () => {
     });
   });
 
+  it('should use aggregate counts for total likes', () => {
+    componentRef.setInput('bite', {
+      ...mockBite,
+      likes: [],
+      thumbup: 2,
+      drooling: 1,
+      mindblown: 3,
+    });
+    fixture.detectChanges();
+
+    expect(component.totalLikeCount()).toBe(6);
+  });
+
+  it('should use aggregate counts for displayed emojis', () => {
+    componentRef.setInput('bite', {
+      ...mockBite,
+      likes: [],
+      thumbup: 0,
+      drooling: 2,
+      mindblown: 1,
+    });
+    fixture.detectChanges();
+
+    expect(component.getLikeEmojis()).toEqual(['🤤', '🤯']);
+  });
+
+  it('should ignore likes for total count when aggregate counts are absent', () => {
+    componentRef.setInput('bite', {
+      ...mockBite,
+      likes: [
+        { userId: 'user1', likeType: 'thumbup' },
+        { userId: 'user2', likeType: 'drooling' },
+      ],
+      thumbup: undefined,
+      drooling: undefined,
+      mindblown: undefined,
+    });
+    fixture.detectChanges();
+
+    expect(component.totalLikeCount()).toBe(0);
+    expect(component.getLikeEmojis()).toEqual([]);
+  });
+
   it('should handle empty likes array', () => {
-    const emptyLikesBite = { ...mockBite, likes: [] };
+    const emptyLikesBite = {
+      ...mockBite,
+      likes: [],
+      thumbup: undefined,
+      drooling: undefined,
+      mindblown: undefined,
+    };
     componentRef.setInput('bite', emptyLikesBite);
     fixture.detectChanges();
     expect(component.getLikeEmojis()).toHaveLength(0);
   });
 
   it('should handle null likes', () => {
-    const nullLikesBite = { ...mockBite, likes: null };
+    const nullLikesBite = {
+      ...mockBite,
+      likes: null,
+      thumbup: undefined,
+      drooling: undefined,
+      mindblown: undefined,
+    };
     componentRef.setInput('bite', nullLikesBite);
     fixture.detectChanges();
     expect(component.getLikeEmojis()).toHaveLength(0);

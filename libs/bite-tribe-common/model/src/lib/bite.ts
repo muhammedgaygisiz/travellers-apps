@@ -25,6 +25,9 @@ export interface Bite {
   //derived attribute
   distance?: string;
   likes?: Like[];
+  thumbup?: number;
+  drooling?: number;
+  mindblown?: number;
   priceInPreferredCurrency?: number;
   priceInPreferredCurrencySymbol?: string;
 }

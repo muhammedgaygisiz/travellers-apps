@@ -49,35 +49,6 @@ describe(BiteTrailService.name, () => {
     });
   });
 
-  describe('restaurantClicked', () => {
-    it('should navigate with restaurantId extracted from restaurantId path', () => {
-      const bite = {
-        id: 'bite-1',
-        restaurantId: 'rest-1',
-        place: 'Test',
-      } as Bite;
-      service.restaurantClicked(bite);
-      expect(mockNavigateForward).toHaveBeenCalledWith([
-        PATH.BITE,
-        'bite-1',
-        PATH.RESTAURANT,
-        'rest-1',
-      ]);
-    });
-
-    it('should navigate with encoded place name when no restaurantId', () => {
-      const bite = { id: 'bite-1', place: 'Nice Place' } as Bite;
-      service.restaurantClicked(bite);
-      expect(mockNavigateForward).toHaveBeenCalledWith([
-        PATH.BITE,
-        'bite-1',
-        PATH.RESTAURANT,
-        PATH.PLACE,
-        encodeURIComponent('Nice Place'),
-      ]);
-    });
-  });
-
   describe('openMapView', () => {
     it('should navigate to map view when biteTrailId is set', () => {
       service.openMapView();

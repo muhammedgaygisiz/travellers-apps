@@ -30,11 +30,7 @@
         <ion-card-subtitle
           class="ion-display-flex ion-justify-content-between ion-align-items-center restaurant-name smalltext"
         >
-          <ion-text
-            color="secondary"
-            class="cursor-pointer"
-            (click)="restaurantClick.emit(biteData)"
-          >
+          <ion-text color="secondary">
             {{ biteData?.place }}
           </ion-text>
           <bt-distance

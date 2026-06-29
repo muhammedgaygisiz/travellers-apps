@@ -101,13 +101,12 @@ describe('BiteComponent', () => {
     component.biteClick.emit(mockBite);
   });
 
-  it('should emit restaurantClick when restaurant is clicked', (done) => {
-    component.restaurantClick.subscribe((emittedBite) => {
-      expect(emittedBite).toEqual(mockBite);
-      done();
-    });
+  it('should render restaurant text without clickable styling', () => {
+    const restaurantText: HTMLElement = fixture.nativeElement.querySelector(
+      'ion-card-subtitle ion-text',
+    );
 
-    component.restaurantClick.emit(mockBite);
+    expect(restaurantText.classList.contains('cursor-pointer')).toBe(false);
   });
 
   it('should emit likeButtonClick with correct data', (done) => {
@@ -198,7 +197,11 @@ describe('BiteComponent', () => {
     });
 
     it('should return false when bite already has a rating', () => {
-      componentRef.setInput('bite', { ...mockBite, userId: 'user1', rating: 4 });
+      componentRef.setInput('bite', {
+        ...mockBite,
+        userId: 'user1',
+        rating: 4,
+      });
       componentRef.setInput('userId', 'user1');
       expect(component.isOwnUnratedBite()).toBe(false);
     });
@@ -229,7 +232,9 @@ describe('BiteComponent', () => {
   describe('saveRating', () => {
     it('should emit rateNowClick with bite and rating when rating is set', () => {
       jest.spyOn(component.rateNowClick, 'emit');
-      const mockModal = { dismiss: jest.fn().mockResolvedValue(undefined) } as unknown as IonModal;
+      const mockModal = {
+        dismiss: jest.fn().mockResolvedValue(undefined),
+      } as unknown as IonModal;
 
       componentRef.setInput('bite', { ...mockBite, userId: 'user1' });
       component.selectedRating.set(3);
@@ -244,7 +249,9 @@ describe('BiteComponent', () => {
 
     it('should not emit rateNowClick when no rating is selected', () => {
       jest.spyOn(component.rateNowClick, 'emit');
-      const mockModal = { dismiss: jest.fn().mockResolvedValue(undefined) } as unknown as IonModal;
+      const mockModal = {
+        dismiss: jest.fn().mockResolvedValue(undefined),
+      } as unknown as IonModal;
 
       component.selectedRating.set(0);
       component.saveRating(mockModal);
@@ -255,7 +262,9 @@ describe('BiteComponent', () => {
 
   describe('closeRatingModal', () => {
     it('should close the modal and reset isRatingModalOpen', () => {
-      const mockModal = { dismiss: jest.fn().mockResolvedValue(undefined) } as unknown as IonModal;
+      const mockModal = {
+        dismiss: jest.fn().mockResolvedValue(undefined),
+      } as unknown as IonModal;
 
       component.isRatingModalOpen.set(true);
       component.closeRatingModal(mockModal);

@@ -21,27 +21,6 @@ export class BiteTrailService {
     void this.navController.navigateForward([PATH.BITE, bite.id]);
   }
 
-  restaurantClicked(bite: Bite): void {
-    if (bite.id && bite.restaurantId) {
-      void this.navController.navigateForward([
-        'bite',
-        bite.id,
-        'restaurant',
-        bite.restaurantId,
-      ]);
-
-      return;
-    }
-
-    void this.navController.navigateForward([
-      'bite',
-      bite.id,
-      PATH.RESTAURANT,
-      PATH.PLACE,
-      encodeURIComponent(bite.place),
-    ]);
-  }
-
   openMapView(): void {
     const biteTrailId = this.biteTrailId();
 

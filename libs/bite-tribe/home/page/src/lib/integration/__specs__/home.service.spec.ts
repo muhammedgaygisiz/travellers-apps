@@ -151,43 +151,6 @@ describe('HomeService', () => {
     ));
   });
 
-  describe('restaurantClicked', () => {
-    let navigateForwardSpy: SpyInstance;
-
-    beforeEach(() => {
-      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
-    });
-
-    it('should navigate to restaurant page with correct parameters', inject(
-      [HomeService],
-      (service: HomeService) => {
-        const bite = { id: '1', restaurantId: '123' } as Bite;
-        service.restaurantClicked(bite);
-        expect(navigateForwardSpy).toHaveBeenCalledWith([
-          'bite',
-          bite.id,
-          'restaurant',
-          '123',
-        ]);
-      },
-    ));
-
-    it('should navigate to unverified restaurant route with place segment when no restaurantId', inject(
-      [HomeService],
-      (service: HomeService) => {
-        const bite = { id: 'bite42', place: 'Nice Café' } as Bite;
-        service.restaurantClicked(bite);
-        expect(navigateForwardSpy).toHaveBeenCalledWith([
-          'bite',
-          'bite42',
-          'restaurant',
-          'place',
-          encodeURIComponent('Nice Café'),
-        ]);
-      },
-    ));
-  });
-
   describe('onAddButtonClicked', () => {
     let navigateForwardSpy: SpyInstance;
 

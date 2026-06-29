@@ -34,7 +34,6 @@ describe('RestaurantBitesContainer', () => {
           useValue: {
             likeButtonClicked: (): void => {},
             biteClicked: (): void => {},
-            restaurantClicked: (): void => {},
             onAddButtonClicked: (): void => {},
             onGotoSettingsClick: (): void => {},
             onGotoMyProfileClick: (): void => {},

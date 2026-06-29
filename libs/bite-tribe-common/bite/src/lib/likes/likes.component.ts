@@ -10,6 +10,11 @@ import { IonChip, IonLabel } from '@ionic/angular/standalone';
 import { Bite, Like } from 'model';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
 import { PopoverController } from '@ionic/angular';
+import {
+  getLikeCount,
+  getTotalLikeCount,
+  likeTypes,
+} from '../utils/like-counts';
 
 const emojiMap: Record<string, string> = {
   thumbup: '👍',
@@ -34,11 +39,13 @@ export class LikesComponent {
 
   likeButtonClick = output<Like>();
 
+  totalLikeCount = computed(() => getTotalLikeCount(this.bite()));
+
   calcClass = computed(() => {
     const bite = this.bite();
     const userId = this.userId();
 
-    if (!bite?.likes?.length) {
+    if (!this.totalLikeCount()) {
       return 'unliked';
     }
 
@@ -53,9 +60,9 @@ export class LikesComponent {
 
   getLikeEmojis = computed(() => {
     const bite = this.bite();
-    if (!bite?.likes) return [];
-
-    return [...new Set(bite.likes.map((like) => emojiMap[like.likeType]))];
+    return likeTypes
+      .filter((likeType) => getLikeCount(bite, likeType) > 0)
+      .map((likeType) => emojiMap[likeType]);
   });
 
   async openLikeOptions($event: MouseEvent): Promise<void> {

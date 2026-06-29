@@ -8,32 +8,36 @@ import {
 import { IonBadge, IonChip } from '@ionic/angular/standalone';
 import { Bite } from 'model';
 import { CalcClassPipe } from './pipe/calc-class.pipe';
+import { getLikeCount } from '../utils/like-counts';
 
 @Component({
   template: `
     <div class="like-options-container">
       <ion-chip
-        class="{{ bite() | calcClass : userId() : 'thumbup' }}"
+        class="{{ bite() | calcClass: userId() : 'thumbup' }}"
         (click)="onLikeButtonClicked('thumbup')"
       >
-        👍 @if (thumbupCount() > 0) {
-        <ion-badge>{{ thumbupCount() }}</ion-badge>
+        👍
+        @if (thumbupCount() > 0) {
+          <ion-badge>{{ thumbupCount() }}</ion-badge>
         }
       </ion-chip>
       <ion-chip
-        class="{{ bite() | calcClass : userId() : 'drooling' }}"
+        class="{{ bite() | calcClass: userId() : 'drooling' }}"
         (click)="onLikeButtonClicked('drooling')"
       >
-        🤤 @if (droolingCount() > 0) {
-        <ion-badge>{{ droolingCount() }}</ion-badge>
+        🤤
+        @if (droolingCount() > 0) {
+          <ion-badge>{{ droolingCount() }}</ion-badge>
         }
       </ion-chip>
       <ion-chip
-        class="{{ bite() | calcClass : userId() : 'mindblown' }}"
+        class="{{ bite() | calcClass: userId() : 'mindblown' }}"
         (click)="onLikeButtonClicked('mindblown')"
       >
-        🤯 @if (mindblownCount() > 0) {
-        <ion-badge>{{ mindblownCount() }}</ion-badge>
+        🤯
+        @if (mindblownCount() > 0) {
+          <ion-badge>{{ mindblownCount() }}</ion-badge>
         }
       </ion-chip>
     </div>
@@ -68,23 +72,11 @@ export class LikeOptionsPopoverMenuComponent {
     biteId: string;
   }>();
 
-  thumbupCount = computed(
-    () =>
-      this.bite()?.likes?.filter((like) => like.likeType === 'thumbup')
-        .length || 0
-  );
+  thumbupCount = computed(() => getLikeCount(this.bite(), 'thumbup'));
 
-  droolingCount = computed(
-    () =>
-      this.bite()?.likes?.filter((like) => like.likeType === 'drooling')
-        .length || 0
-  );
+  droolingCount = computed(() => getLikeCount(this.bite(), 'drooling'));
 
-  mindblownCount = computed(
-    () =>
-      this.bite()?.likes?.filter((like) => like.likeType === 'mindblown')
-        .length || 0
-  );
+  mindblownCount = computed(() => getLikeCount(this.bite(), 'mindblown'));
 
   onLikeButtonClicked(likeType: string): void {
     const biteId = this.bite()?.id;

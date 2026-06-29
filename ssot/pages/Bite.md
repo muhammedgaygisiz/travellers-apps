@@ -69,6 +69,9 @@ Required by product intent, but optional or not strictly enforced in the shared 
 - `updatedAtTimestamp`
 - `distance`
 - `likes`
+- `thumbup`
+- `drooling`
+- `mindblown`
 - `priceInPreferredCurrency`
 - `priceInPreferredCurrencySymbol`
 
@@ -209,6 +212,9 @@ searchBites
 setBiteImagePathOnUpload
 notifyFollowersOnNewBite
 notifyBiteCreatorOnLike
+incrementBiteLikeCountOnLikeCreate
+decrementBiteLikeCountOnLikeDelete
+updateBiteLikeCountOnLikeUpdate
 notifyBiteCreatorOnReview
 incrementBiteCountOnBiteCreate
 handleSharedLinkToBite
@@ -230,6 +236,7 @@ images/bites/{biteId}/{filename}
 - City and country are not part of the current Bite model.
 - Menu item linking is not part of the current Bite model.
 - Historical behavior for deleted Bites needs a clearer product rule.
+- Older Bite documents may not have like aggregate fields. Like-count triggers migrate missing `thumbup`, `drooling`, and `mindblown` fields by recomputing counts from the Bite's `likes` subcollection before applying ongoing delta maintenance.
 - Guest permissions and admin moderation are not clearly expressed as current Bite-domain capabilities.
 
 ## Future Ideas

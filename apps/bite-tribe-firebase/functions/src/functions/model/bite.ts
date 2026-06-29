@@ -7,4 +7,7 @@ export type Bite = {
   currency?: string;
   rating?: number;
   imagePath?: string;
+  thumbup?: number;
+  drooling?: number;
+  mindblown?: number;
 };

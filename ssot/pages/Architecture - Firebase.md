@@ -45,6 +45,9 @@ searchRestaurants
 updateLastSeen
 loadLeaderboard
 incrementBiteCountOnBiteCreate
+incrementBiteLikeCountOnLikeCreate
+decrementBiteLikeCountOnLikeDelete
+updateBiteLikeCountOnLikeUpdate
 setBiteImagePathOnUpload
 notifyFollowersOnNewBite
 notifyBiteCreatorOnLike

@@ -115,39 +115,6 @@ describe(ProfileService.name, () => {
     });
   });
 
-  describe('restaurantClicked', () => {
-    it('should navigate to the correct restaurant by ID', () => {
-      const bite = {
-        id: 'bite123',
-        restaurantId: '/restaurants/resto456',
-      } as any;
-      const navigateSpy = jest
-        .spyOn(service['navController'], 'navigateForward')
-        .mockImplementation();
-      service.restaurantClicked(bite);
-      expect(navigateSpy).toHaveBeenCalledWith([
-        'bite',
-        'bite123',
-        'restaurant',
-        'resto456',
-      ]);
-    });
-
-    it('should navigate to the correct restaurant by place name', () => {
-      const bite = { id: 'bite123', place: 'Some Place' } as any;
-      const navigateSpy = jest
-        .spyOn(service['navController'], 'navigateForward')
-        .mockImplementation();
-      service.restaurantClicked(bite);
-      expect(navigateSpy).toHaveBeenCalledWith([
-        'bite',
-        'bite123',
-        'restaurant',
-        encodeURIComponent('Some Place'),
-      ]);
-    });
-  });
-
   describe('saveProfile', () => {
     it('should call savePublicProfile on dataAccess with correct parameters', () => {
       const publicUser = { id: 'user123' } as any;

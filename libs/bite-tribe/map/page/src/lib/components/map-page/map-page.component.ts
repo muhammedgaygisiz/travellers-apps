@@ -35,7 +35,6 @@ export class MapPageComponent {
   readonly logoutClick = output();
   readonly likeButtonClick = output<Like>();
   readonly biteClick = output<Bite>();
-  readonly restaurantClick = output<Bite>();
 
   selectedBite: Bite | undefined | null;
 

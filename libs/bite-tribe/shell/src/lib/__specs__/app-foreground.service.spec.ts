@@ -125,43 +125,43 @@ describe(AppForegroundService.name, () => {
         expect(reloadSpy).not.toHaveBeenCalled();
       });
 
-      describe('updateLastSeen', () => {
-        it('should not call updateLastSeen if no background timestamp is set', () => {
-          const updateLastSeenSpy = jest
-            .spyOn(storeService, 'updateLastSeen')
+      describe('updateUserMetadata', () => {
+        it('should not call updateUserMetadata if no background timestamp is set', () => {
+          const updateUserMetadataSpy = jest
+            .spyOn(storeService, 'updateUserMetadata')
             .mockImplementation();
 
           service.handleAppStateChange(true);
 
-          expect(updateLastSeenSpy).not.toHaveBeenCalled();
+          expect(updateUserMetadataSpy).not.toHaveBeenCalled();
         });
 
-        it('should not call updateLastSeen when user is not authenticated', () => {
+        it('should not call updateUserMetadata when user is not authenticated', () => {
           store.overrideSelector(fromAuth.selectIsAuthenticated, false);
           store.refreshState();
 
-          const updateLastSeenSpy = jest
-            .spyOn(storeService, 'updateLastSeen')
+          const updateUserMetadataSpy = jest
+            .spyOn(storeService, 'updateUserMetadata')
             .mockImplementation();
 
           service.handleAppStateChange(false);
           service.handleAppStateChange(true);
 
-          expect(updateLastSeenSpy).not.toHaveBeenCalled();
+          expect(updateUserMetadataSpy).not.toHaveBeenCalled();
         });
 
-        it('should call updateLastSeen when user is authenticated and app returns to foreground', () => {
+        it('should call updateUserMetadata when user is authenticated and app returns to foreground', () => {
           store.overrideSelector(fromAuth.selectIsAuthenticated, true);
           store.refreshState();
 
-          const updateLastSeenSpy = jest
-            .spyOn(storeService, 'updateLastSeen')
+          const updateUserMetadataSpy = jest
+            .spyOn(storeService, 'updateUserMetadata')
             .mockImplementation();
 
           service.handleAppStateChange(false);
           service.handleAppStateChange(true);
 
-          expect(updateLastSeenSpy).toHaveBeenCalledTimes(1);
+          expect(updateUserMetadataSpy).toHaveBeenCalledTimes(1);
         });
       });
     });
@@ -173,4 +173,3 @@ describe(AppForegroundService.name, () => {
     });
   });
 });
-

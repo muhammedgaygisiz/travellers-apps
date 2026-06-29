@@ -18,4 +18,6 @@ export interface PublicUser {
   updatedAtTimestamp?: number;
   lastSeen?: string;
   lastSeenTimestamp?: number;
+  appVersion?: string;
+  appBuildNumber?: string;
 }

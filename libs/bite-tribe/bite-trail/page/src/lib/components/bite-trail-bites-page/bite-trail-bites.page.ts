@@ -46,7 +46,6 @@ export class BiteTrailBitesPage {
   savedBucketlistId = input<string | null>(null);
 
   readonly biteClick = output<Bite>();
-  readonly restaurantClick = output<Bite>();
   readonly openMapView = output<void>();
   readonly getForFree = output<void>();
   readonly goToSavedBucketList = output<void>();

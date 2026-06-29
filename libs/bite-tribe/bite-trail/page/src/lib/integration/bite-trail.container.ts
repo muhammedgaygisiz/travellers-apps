@@ -15,7 +15,6 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isFree]="service.isFree()"
       [savedBucketlistId]="service.savedBucketlistId()"
       (biteClick)="service.biteClicked($event)"
-      (restaurantClick)="service.restaurantClicked($event)"
       (openMapView)="service.openMapView()"
       (getForFree)="service.getForFree()"
       (goToSavedBucketList)="service.goToSavedBucketList()"

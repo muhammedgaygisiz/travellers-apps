@@ -16,7 +16,7 @@ export class AppForegroundService {
 
   handleAppStateChange(isActive: boolean): void {
     if (isActive) {
-      this.updateLastSeen();
+      this.updateUserMetadata();
 
       this.triggerRefreshIfNeeded();
     } else {
@@ -37,9 +37,9 @@ export class AppForegroundService {
     }
   }
 
-  private updateLastSeen(): void {
+  private updateUserMetadata(): void {
     if (this.isAuthenticated()) {
-      this.storeService.updateLastSeen();
+      this.storeService.updateUserMetadata();
     }
   }
 }

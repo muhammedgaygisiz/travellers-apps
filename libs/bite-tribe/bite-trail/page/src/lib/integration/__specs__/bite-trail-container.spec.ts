@@ -24,7 +24,6 @@ const mockBiteTrailService = {
   isFree: signal(false),
   savedBucketlistId: signal<string | null>(null),
   biteClicked: jest.fn(),
-  restaurantClicked: jest.fn(),
   likeButtonClicked: jest.fn(),
   sortingChange: jest.fn(),
   openMapView: jest.fn(),

@@ -114,6 +114,23 @@ describe(LikesComponent.name, () => {
     expect(component.getLikeEmojis()).toEqual(['🤤', '🤯']);
   });
 
+  it('should ignore likes for total count when aggregate counts are absent', () => {
+    componentRef.setInput('bite', {
+      ...mockBite,
+      likes: [
+        { userId: 'user1', likeType: 'thumbup' },
+        { userId: 'user2', likeType: 'drooling' },
+      ],
+      thumbup: undefined,
+      drooling: undefined,
+      mindblown: undefined,
+    });
+    fixture.detectChanges();
+
+    expect(component.totalLikeCount()).toBe(0);
+    expect(component.getLikeEmojis()).toEqual([]);
+  });
+
   it('should handle empty likes array', () => {
     const emptyLikesBite = {
       ...mockBite,

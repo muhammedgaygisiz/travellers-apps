@@ -27,7 +27,8 @@ Backend callables validate request.auth where required
 - `authGuard` protects authenticated routes.
 - `startGuard` controls the start route.
 - `createUserOnAuthCreate` initializes profile-related backend behavior.
-- `updateLastSeen` records activity through a callable.
+- `updateLastSeen` records activity through a legacy callable for older app versions.
+- `updateUserMetadata` records current app activity and client version/build metadata through a callable.
 
 ## Supported Auth Modes
 
@@ -48,6 +49,7 @@ libs/bite-tribe/shell/src/lib/routes.ts
 libs/bite-tribe-business/shell/src/lib/routes.ts
 apps/bite-tribe-firebase/functions/src/functions/create-user-on-auth-create.ts
 apps/bite-tribe-firebase/functions/src/functions/update-last-seen.ts
+apps/bite-tribe-firebase/functions/src/functions/update-user-metadata.ts
 ```
 
 ## Current Limitations

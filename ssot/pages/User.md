@@ -53,6 +53,8 @@ Current profile model fields:
 - `updatedAtTimestamp`
 - `lastSeen`
 - `lastSeenTimestamp`
+- `appVersion`
+- `appBuildNumber`
 
 ## Relationships
 
@@ -91,7 +93,8 @@ Current implementation notes:
 - A public user document is stored in `/users/{userId}`.
 - `saveUser` initializes profile data from the authenticated user.
 - Profile images can be uploaded and mirrored into Firebase-backed URLs.
-- `updateLastSeen` is handled through a backend callable.
+- `updateLastSeen` remains available as the legacy backend callable for older app versions.
+- `updateUserMetadata` records the latest activity timestamp plus reported app version/build number for current app versions.
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
 
 ## Permissions
@@ -121,6 +124,7 @@ Supported today:
 - View followers and following.
 - Search users by display name, full name, or email.
 - Update last seen.
+- Track latest reported app version and build number.
 - Show bite count in leaderboard.
 
 Related future or expanding use cases:
@@ -166,6 +170,7 @@ Cloud Functions:
 ```text
 createUserOnAuthCreate
 updateLastSeen
+updateUserMetadata
 searchUsers
 loadLeaderboard
 incrementBiteCountOnBiteCreate

@@ -108,25 +108,25 @@ export class AppEffect {
     { dispatch: false },
   );
 
-  updateLastSeenAfterLogin$ = createEffect(
+  updateUserMetadataAfterLogin$ = createEffect(
     () => {
       return this.actions$.pipe(
         ofType(fromAuth.AuthActions.loadedUser),
         stopIfUserIsUndefined(),
         tap(() => {
-          void this.api.updateLastSeen();
+          void this.api.updateUserMetadata();
         }),
       );
     },
     { dispatch: false },
   );
 
-  updateLastSeen$ = createEffect(
+  updateUserMetadata$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(AppActions.updateLastSeen),
+        ofType(AppActions.updateUserMetadata),
         tap(() => {
-          void this.api.updateLastSeen();
+          void this.api.updateUserMetadata();
         }),
       );
     },

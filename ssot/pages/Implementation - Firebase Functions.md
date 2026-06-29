@@ -15,7 +15,7 @@ apps/bite-tribe-firebase/functions/src/index.ts
 
 | Area           | Examples                                                                                              |
 | -------------- | ----------------------------------------------------------------------------------------------------- |
-| Auth           | `create-user-on-auth-create.ts`                                                                       |
+| Auth           | `create-user-on-auth-create.ts`, `update-last-seen.ts`, `update-user-metadata.ts`                     |
 | Search         | `search-bites.ts`, `search-restaurants.ts`, `search-users.ts`                                         |
 | Discovery      | `load-bites-by-location.ts`, `load-leaderboard.ts`                                                    |
 | Aggregates     | `increment-bite-count-on-bite-create.ts`, `update-bite-like-count-on-like-write.ts`                   |

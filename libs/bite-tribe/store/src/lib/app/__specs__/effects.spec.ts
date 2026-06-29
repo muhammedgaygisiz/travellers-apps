@@ -44,6 +44,7 @@ const BiteTribeApiServiceMock = {
   uploadProfileImage: jest.fn(),
   updatePhotoUrlInUser: jest.fn(),
   updateLastSeen: jest.fn(),
+  updateUserMetadata: jest.fn(),
 };
 
 const NavControllerMock = {};
@@ -633,51 +634,51 @@ describe(AppEffect.name, () => {
     });
   });
 
-  describe('updateLastSeen effects', () => {
-    let updateLastSeenSpy: SpyInstance;
+  describe('updateUserMetadata effects', () => {
+    let updateUserMetadataSpy: SpyInstance;
 
     beforeEach(() => {
-      updateLastSeenSpy = jest
-        .spyOn(apiService, 'updateLastSeen')
+      updateUserMetadataSpy = jest
+        .spyOn(apiService, 'updateUserMetadata')
         .mockImplementation();
-      updateLastSeenSpy.mockClear();
+      updateUserMetadataSpy.mockClear();
     });
 
-    it('should call updateLastSeen on loadedUser', () => {
+    it('should call updateUserMetadata on loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: fromAuth.AuthActions.loadedUser({ user: {} as any }),
         });
 
-        expectObservable(effects.updateLastSeenAfterLogin$);
+        expectObservable(effects.updateUserMetadataAfterLogin$);
       });
 
-      expect(updateLastSeenSpy).toHaveBeenCalledTimes(1);
+      expect(updateUserMetadataSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should not call updateLastSeen when loadedUser has no user', () => {
+    it('should not call updateUserMetadata when loadedUser has no user', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: fromAuth.AuthActions.loadedUser({ user: null }),
         });
 
-        expectObservable(effects.updateLastSeenAfterLogin$);
+        expectObservable(effects.updateUserMetadataAfterLogin$);
       });
 
-      expect(updateLastSeenSpy).not.toHaveBeenCalled();
+      expect(updateUserMetadataSpy).not.toHaveBeenCalled();
     });
 
-    it('should call updateLastSeen on AppActions.updateLastSeen', () => {
-      updateLastSeenSpy.mockClear();
+    it('should call updateUserMetadata on AppActions.updateUserMetadata', () => {
+      updateUserMetadataSpy.mockClear();
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: AppActions.updateLastSeen(),
+          a: AppActions.updateUserMetadata(),
         });
 
-        expectObservable(effects.updateLastSeen$);
+        expectObservable(effects.updateUserMetadata$);
       });
 
-      expect(updateLastSeenSpy).toHaveBeenCalledTimes(1);
+      expect(updateUserMetadataSpy).toHaveBeenCalledTimes(1);
     });
   });
 

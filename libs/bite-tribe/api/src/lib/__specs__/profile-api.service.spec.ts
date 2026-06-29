@@ -405,6 +405,51 @@ describe(ProfileApiService.name, () => {
     });
   });
 
+  describe('updateUserMetadata', () => {
+    beforeEach(() => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: undefined,
+      });
+    });
+
+    it('should call updateUserMetadata firebase function', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const updateDocumentMock = jest.mocked(
+          FirebaseFirestore.updateDocument,
+        );
+        const updateDocumentCallCount = updateDocumentMock.mock.calls.length;
+
+        await service.updateUserMetadata();
+
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'updateUserMetadata',
+          data: {
+            version: process.env['version'],
+            buildNumber: process.env['buildNumber'],
+          },
+        });
+        expect(updateDocumentMock).toHaveBeenCalledTimes(
+          updateDocumentCallCount,
+        );
+      },
+    ));
+
+    describe('given an error', () => {
+      it('should handle the error', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const error = new Error('Failed to update user metadata');
+          jest.mocked(FirebaseFunctions.callByName).mockRejectedValue(error);
+
+          await service.updateUserMetadata();
+
+          expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(error);
+        },
+      ));
+    });
+  });
+
   describe('getUserByBiteId', () => {
     describe('given no bite', () => {
       it('should return empty observable', inject(

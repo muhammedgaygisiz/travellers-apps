@@ -1,7 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { MenuItemComponent } from '../menu-item.component';
 import SpyInstance = jest.SpyInstance;
+
+@Pipe({
+  name: 'transloco',
+})
+class MockTranslocoPipe implements PipeTransform {
+  transform(value: string): string {
+    return value;
+  }
+}
 
 describe('MenuItemComponent', () => {
   let component: MenuItemComponent;
@@ -11,7 +21,12 @@ describe('MenuItemComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MenuItemComponent],
-    }).compileComponents();
+    })
+      .overrideComponent(MenuItemComponent, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(MenuItemComponent);
     component = fixture.componentInstance;
@@ -41,6 +56,29 @@ describe('MenuItemComponent', () => {
       component.onCreateBiteClick(undefined);
 
       expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not emit createBiteClick event when itemData is unavailable', () => {
+      const mockItemData = {
+        id: 1,
+        name: 'Test Item',
+        price: 10,
+        isAvailable: false,
+      } as any;
+
+      component.onCreateBiteClick(mockItemData);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isUnavailable', () => {
+    it('should treat missing availability as available', () => {
+      expect(component.isUnavailable({ name: 'Test Item' } as any)).toBe(false);
+    });
+
+    it('should return true when item is explicitly unavailable', () => {
+      expect(component.isUnavailable({ isAvailable: false } as any)).toBe(true);
     });
   });
 });

@@ -28,6 +28,11 @@
         <div class="label" slot="label">Notes</div>
       </ion-input>
     </ion-item>
+    <ion-item>
+      <ion-toggle [field]="itemForm.isAvailable">
+        {{ 'menu-item-available' | transloco }}
+      </ion-toggle>
+    </ion-item>
   </ion-list>
 
   <div class="button-container">

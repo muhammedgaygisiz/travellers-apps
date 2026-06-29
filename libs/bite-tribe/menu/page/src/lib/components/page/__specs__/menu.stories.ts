@@ -49,6 +49,7 @@ export const withMenu: Story = {
               name: 'Salami',
               description: 'Salami (Rind)',
               price: 8.5,
+              isAvailable: false,
             },
           ],
         },

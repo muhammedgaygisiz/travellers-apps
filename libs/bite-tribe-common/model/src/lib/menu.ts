@@ -4,6 +4,7 @@ export interface MenuItem {
   ingredients?: string;
   notes?: string;
   price: number;
+  isAvailable?: boolean;
   variants?: MenuItem[];
 }
 

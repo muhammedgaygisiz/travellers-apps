@@ -123,11 +123,11 @@
       </div>
     </div>
     <div class="home-scrolling-content-container">
-      <ng-container
-        *ngTemplateOutlet="
-          showSpinner() ? withLoadingTemplate : withoutLoadingTemplate
-        "
-      />
+      @if (showSpinner() && isBitesLoading()) {
+        <bt-bite-skeleton-list />
+      } @else {
+        <ng-container *ngTemplateOutlet="withoutLoadingTemplate" />
+      }
     </div>
   </ion-content>
 </ta-page>
@@ -148,14 +148,6 @@
     />
   </ng-template>
 </ion-modal>
-
-<ng-template #withLoadingTemplate>
-  @defer (when !isBitesLoading()) {
-    <ng-container *ngTemplateOutlet="withoutLoadingTemplate" />
-  } @placeholder (minimum 1000ms) {
-    <bt-bite-skeleton-list />
-  }
-</ng-template>
 
 <ng-template #withoutLoadingTemplate>
   @if (hasErrorLoadingGpsPosition()) {

@@ -41,6 +41,10 @@
   }
 
   ion-footer {
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+
     ion-toolbar {
       --border-width: 0;
       --background: var(--ion-footer-color-background);

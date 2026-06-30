@@ -1,0 +1,76 @@
+:host {
+  --border-radius: 46px;
+
+  display: block;
+  margin-bottom: 1rem;
+
+  .bite-loading-card {
+    min-width: 345px;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-radius: var(--border-radius);
+
+    ion-skeleton-text {
+      margin: 0;
+      border-radius: 999px;
+    }
+  }
+
+  .bite-loading-image {
+    height: 220px;
+    border: var(--border-width) solid var(--ion-color-card-border);
+    border-bottom: unset;
+
+    ion-skeleton-text {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+  }
+
+  .bite-loading-details {
+    border: var(--border-width) solid var(--ion-color-card-border);
+    border-top: unset;
+    background-color: var(--ion-color-card-border);
+
+    ion-card-header {
+      padding: 10px 15px 0;
+      background-color: var(--ion-color-card-background);
+
+      gap: 8px;
+    }
+
+    ion-card-content {
+      display: flex;
+      min-height: 80px;
+      margin: 0;
+      padding: 8px 16px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom-left-radius: var(--border-radius);
+      border-bottom-right-radius: var(--border-radius);
+      background-color: var(--ion-color-card-background);
+    }
+  }
+
+  .bite-loading-title {
+    width: 68%;
+    height: 24px;
+  }
+
+  .bite-loading-place {
+    width: 48%;
+    height: 16px;
+    margin-top: 0.75rem;
+  }
+
+  .bite-loading-rating {
+    width: 40%;
+    height: 18px;
+  }
+
+  .bite-loading-action {
+    width: 32px;
+    height: 32px;
+  }
+}

@@ -28,11 +28,13 @@ import {
   IonSearchbar,
   IonSelect,
   IonSelectOption,
-  IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
 import type { Bite, Like } from 'model';
-import { BiteComponent } from 'bite-tribe-common/bite';
+import {
+  BiteComponent,
+  BiteSkeletonListComponent,
+} from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
 import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
 import {
@@ -58,7 +60,7 @@ const PAGE_SIZE = 50;
     IonCard,
     IonCardContent,
     IonText,
-    IonSpinner,
+    BiteSkeletonListComponent,
     NgTemplateOutlet,
     IonIcon,
     IonButton,

@@ -153,9 +153,7 @@
   @defer (when !isBitesLoading()) {
     <ng-container *ngTemplateOutlet="withoutLoadingTemplate" />
   } @placeholder (minimum 1000ms) {
-    <div class="spinner-container ion-display-flex ion-justify-content-center">
-      <ion-spinner color="primary" />
-    </div>
+    <bt-bite-skeleton-list />
   }
 </ng-template>
 

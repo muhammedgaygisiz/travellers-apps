@@ -88,6 +88,18 @@ describe('BiteTribeHomeComponent', () => {
     expect(component.bites()).toEqual(mockBites);
   });
 
+  it('should show the bite skeleton list while bites are loading', async () => {
+    componentRef.setInput('showSpinner', true);
+    componentRef.setInput('isBitesLoading', true);
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeTruthy();
+  });
+
   it('should call scrollToTop on ionContent when scrollToTop is called', () => {
     const scrollToTopMock = jest.fn();
     component.ionContent = signal({

@@ -44,3 +44,11 @@ export const withBites: Story = {
     ],
   },
 };
+
+export const Loading: Story = {
+  args: {
+    ...Empty.args,
+    showSpinner: true,
+    isBitesLoading: true,
+  },
+};

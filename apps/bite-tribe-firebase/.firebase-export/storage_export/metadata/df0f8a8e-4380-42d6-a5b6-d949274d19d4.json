@@ -7,7 +7,7 @@
   "storageClass": "STANDARD",
   "contentDisposition": "inline",
   "cacheControl": "public,max-age=31536000,immutable",
-  "downloadTokens": ["1c69216b-08da-49a9-b6c7-21b49d68621f"],
+  "downloadTokens": ["local-emulator-download-token"],
   "etag": "glruJx+MFjaYoC8PM+Kxglni8Do",
   "customMetadata": {},
   "timeCreated": "2026-01-13T19:09:04.532Z",

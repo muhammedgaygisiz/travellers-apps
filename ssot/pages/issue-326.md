@@ -1,4 +1,0 @@
-- [feat(business): Kristina would like to have the disable function for the menu items](https://github.com/muhammedgaygisiz/travellers-apps/issues/326) (Issue \#326)
-- Description
-  - in case something is out of stock or removed from the item
-  - Maybe the create bite can be linked, and item will have a logo that is it old menu etc too?

@@ -1,0 +1,66 @@
+<div
+  class="chip-sort-filter-container ion-display-flex ion-flex-row ion-justify-content-center"
+>
+  @if (showFilters()) {
+    <div
+      class="filter-container ion-display-flex ion-flex-row ion-align-items-center"
+    >
+      <ion-chip id="select-tags">
+        <ion-icon src="assets/custom-icons/filter.svg" class="icon" />
+        @if (hasActiveFilters()) {
+          <ion-badge color="danger">{{ numberOfFilters() }}</ion-badge>
+        }
+        <ion-text color="secondary">{{ 'filter' | transloco }}</ion-text>
+      </ion-chip>
+    </div>
+  }
+
+  @if (showSearchChip()) {
+    <div class="chip-container ion-display-flex ion-flex-wrap">
+      <ion-chip data-cy="search-chip" (click)="gotoSearch.emit()">
+        <ion-icon name="search-outline" />
+        <ion-text color="secondary">{{ 'search' | transloco }}</ion-text>
+      </ion-chip>
+    </div>
+  }
+
+  @if (showMap()) {
+    <div class="chip-container ion-display-flex ion-flex-wrap">
+      <ion-chip (click)="openMapView.emit()">
+        <ion-icon src="assets/custom-icons/map.svg" />
+        <ion-text color="secondary">Bitemap</ion-text>
+      </ion-chip>
+    </div>
+  }
+
+  <div
+    class="sort-container ion-display-flex ion-flex-row ion-align-items-center"
+  >
+    <ion-chip id="select-sorting">
+      <ion-select
+        interface="modal"
+        toggleIcon="chevron-down-outline"
+        [value]="sorting()"
+        [placeholder]="sortingLabelKey() | transloco"
+        [selectedText]="sortingLabelKey() | transloco"
+        (ionChange)="emitSortingChange($event)"
+      >
+        <ion-select-option value="distance">
+          {{ 'distance' | transloco }}
+        </ion-select-option>
+        <ion-select-option value="createdAt">
+          {{ 'date' | transloco }}
+        </ion-select-option>
+        <ion-select-option value="likes">
+          {{ 'likes' | transloco }}
+        </ion-select-option>
+        <ion-select-option value="rating">
+          {{ 'rating' | transloco }}
+        </ion-select-option>
+        <ion-select-option value="price">
+          {{ 'price' | transloco }}
+        </ion-select-option>
+      </ion-select>
+    </ion-chip>
+  </div>
+</div>

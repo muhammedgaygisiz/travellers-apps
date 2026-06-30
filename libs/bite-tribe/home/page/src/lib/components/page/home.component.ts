@@ -11,13 +11,11 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
-  IonBadge,
   IonButton,
   IonButtons,
   IonCard,
   IonCardContent,
   IonCheckbox,
-  IonChip,
   IonContent,
   IonIcon,
   IonInfiniteScroll,
@@ -26,13 +24,13 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSearchbar,
-  IonSelect,
-  IonSelectOption,
-  IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
 import type { Bite, Like } from 'model';
-import { BiteComponent } from 'bite-tribe-common/bite';
+import {
+  BiteComponent,
+  BiteSkeletonListComponent,
+} from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
 import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
 import {
@@ -43,8 +41,10 @@ import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
+import { HomeFeedControlsComponent } from './home-feed-controls.component';
 
 const PAGE_SIZE = 50;
+const MIN_SKELETON_VISIBLE_MS = 2000;
 
 @Component({
   selector: 'bt-home',
@@ -53,22 +53,18 @@ const PAGE_SIZE = 50;
   imports: [
     PageComponent,
     IonContent,
-    IonChip,
     BiteComponent,
     IonCard,
     IonCardContent,
     IonText,
-    IonSpinner,
+    BiteSkeletonListComponent,
     NgTemplateOutlet,
     IonIcon,
     IonButton,
     IonCheckbox,
     IonButtons,
-    IonSelect,
-    IonSelectOption,
     IonModal,
     TypeaheadComponent,
-    IonBadge,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
     IonRefresher,
@@ -76,6 +72,7 @@ const PAGE_SIZE = 50;
     IonSearchbar,
     TranslocoPipe,
     IsBiteTriedOutPipe,
+    HomeFeedControlsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -140,8 +137,39 @@ export class BiteTribeHomeComponent {
 
   isSearchVisible = signal(false);
   searchTerm = signal('');
+  showBiteSkeleton = signal(false);
+  private skeletonShownAt = 0;
+  private hideSkeletonTimeout: ReturnType<typeof setTimeout> | undefined;
 
   refreshEvent: RefresherCustomEvent | null = null;
+  syncBiteSkeleton = effect((onCleanup) => {
+    const shouldShowSkeleton =
+      this.showSpinner() && (this.isBitesLoading() || this.isReloading());
+
+    clearTimeout(this.hideSkeletonTimeout);
+
+    if (shouldShowSkeleton) {
+      this.skeletonShownAt = Date.now();
+      this.showBiteSkeleton.set(true);
+      return;
+    }
+
+    if (!this.showBiteSkeleton()) {
+      return;
+    }
+
+    const elapsed = Date.now() - this.skeletonShownAt;
+    const remaining = Math.max(MIN_SKELETON_VISIBLE_MS - elapsed, 0);
+
+    this.hideSkeletonTimeout = setTimeout(() => {
+      this.showBiteSkeleton.set(false);
+    }, remaining);
+
+    onCleanup(() => {
+      clearTimeout(this.hideSkeletonTimeout);
+    });
+  });
+
   onRefresh = effect(() => {
     const isReloading = this.isReloading();
 
@@ -155,32 +183,6 @@ export class BiteTribeHomeComponent {
   moreThen5Bites = computed(() => {
     const bites = this.bites();
     return bites && bites?.length > 5;
-  });
-
-  sortingLabel = computed(() => {
-    const sorting = this.sorting();
-    switch (sorting) {
-      case 'distance':
-        return 'Distance';
-      case 'likes':
-        return 'Likes';
-      case 'createdAt':
-        return 'Date';
-      case 'price':
-        return 'Price';
-      default:
-        return 'Distance';
-    }
-  });
-
-  numberOfFilters = computed(() => {
-    const selectedFilters = this.selectedFilters();
-    const distance = this.distance();
-    const priceFilter = this.maxPriceFilter();
-
-    return (
-      selectedFilters.length + (distance ? 1 : 0) + (priceFilter > 0 ? 1 : 0)
-    );
   });
 
   onFilterChange(
@@ -203,12 +205,6 @@ export class BiteTribeHomeComponent {
 
     if (ionContent) {
       ionContent.scrollToTop(300);
-    }
-  }
-
-  emitSortingChange(event: { detail: { value: string } }): void {
-    if (event.detail) {
-      this.sortingChange.emit(event.detail.value);
     }
   }
 

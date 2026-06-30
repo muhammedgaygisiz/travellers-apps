@@ -1,7 +1,13 @@
 import { BiteComponent } from '../bite.component';
-import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
+import {
+  applicationConfig,
+  Meta,
+  moduleMetadata,
+  StoryObj,
+} from '@storybook/angular';
 import { getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { BiteSkeletonListComponent } from '../bite-skeleton-list/bite-skeleton-list.component';
 
 export default {
   title: 'Components/Bite',
@@ -9,6 +15,9 @@ export default {
   decorators: [
     applicationConfig({
       providers: [provideIonicAngular(getIonicConfig())],
+    }),
+    moduleMetadata({
+      imports: [BiteSkeletonListComponent],
     }),
   ],
 } as Meta<BiteComponent>;
@@ -104,5 +113,15 @@ export const QuickRatingForEditMode: Story = {
   render: (args) => ({
     props: { ...args },
     template,
+  }),
+};
+
+export const LoadingSkeletonList: Story = {
+  render: () => ({
+    template: `
+      <div class="ion-margin">
+        <bt-bite-skeleton-list />
+      </div>
+    `,
   }),
 };

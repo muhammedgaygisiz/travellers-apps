@@ -88,6 +88,52 @@ describe('BiteTribeHomeComponent', () => {
     expect(component.bites()).toEqual(mockBites);
   });
 
+  it('should show the bite skeleton list while bites are loading', async () => {
+    componentRef.setInput('showSpinner', true);
+    componentRef.setInput('isBitesLoading', true);
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeTruthy();
+  });
+
+  it('should keep the bite skeleton list visible for at least two seconds', () => {
+    componentRef.setInput('showSpinner', true);
+    componentRef.setInput('isBitesLoading', true);
+    fixture.detectChanges();
+
+    componentRef.setInput('isBitesLoading', false);
+    fixture.detectChanges();
+    jest.advanceTimersByTime(1999);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeTruthy();
+
+    jest.advanceTimersByTime(1);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeNull();
+  });
+
+  it('should show the bite skeleton list while bites are reloading', () => {
+    componentRef.setInput('showSpinner', true);
+    componentRef.setInput('isBitesLoading', false);
+    componentRef.setInput('isReloading', true);
+
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeTruthy();
+  });
+
   it('should call scrollToTop on ionContent when scrollToTop is called', () => {
     const scrollToTopMock = jest.fn();
     component.ionContent = signal({
@@ -133,70 +179,6 @@ describe('BiteTribeHomeComponent', () => {
       jest.runAllTimers();
 
       expect(completeSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('selectedSortingLabel', () => {
-    it('should return "Distance" when selectedSorting is "distance"', () => {
-      componentRef.setInput('sorting', 'distance');
-      expect(component.sortingLabel()).toBe('Distance');
-    });
-
-    it('should return "Likes" when selectedSorting is "likes"', () => {
-      componentRef.setInput('sorting', 'likes');
-      expect(component.sortingLabel()).toBe('Likes');
-    });
-
-    it('should return "Date" when selectedSorting is "date"', () => {
-      componentRef.setInput('sorting', 'createdAt');
-      expect(component.sortingLabel()).toBe('Date');
-    });
-
-    it('should return "Distance" when selectedSorting is unknown', () => {
-      componentRef.setInput('sorting', 'randomValue');
-      expect(component.sortingLabel()).toBe('Distance');
-    });
-
-    it('should return "Price" when selectedSorting is "price"', () => {
-      componentRef.setInput('sorting', 'price');
-      expect(component.sortingLabel()).toBe('Price');
-    });
-  });
-
-  describe('emitSortingChange', () => {
-    let sortingChangeSpy: SpyInstance;
-
-    beforeEach(() => {
-      sortingChangeSpy = jest.spyOn(component.sortingChange, 'emit');
-    });
-
-    it('should emit sortingChange with the new value', () => {
-      const event = { detail: { value: 'likes' } };
-      component.emitSortingChange(event);
-      expect(sortingChangeSpy).toHaveBeenCalledWith('likes');
-    });
-
-    it('should not emit sortingChange if event.detail is undefined', () => {
-      const event = { detail: undefined };
-      component.emitSortingChange(event as any);
-      expect(sortingChangeSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('numberOfFilters', () => {
-    it('should return the correct number of filters', () => {
-      componentRef.setInput('selectedFilters', ['filter1', 'filter2']);
-      componentRef.setInput('distance', '5');
-      expect(component.numberOfFilters()).toBe(3); // 2 filters + 1 distance filter
-
-      componentRef.setInput('distance', '');
-      expect(component.numberOfFilters()).toBe(2); // Only the two selected filters
-    });
-
-    it('should return 0 when no filters are applied', () => {
-      componentRef.setInput('selectedFilters', []);
-      componentRef.setInput('distance', '');
-      expect(component.numberOfFilters()).toBe(0);
     });
   });
 

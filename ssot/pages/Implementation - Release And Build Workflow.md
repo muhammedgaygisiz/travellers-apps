@@ -31,6 +31,8 @@ npm run ios-asset-generator:generate-ios:bite-tribe
 ## Rules
 
 - Use the existing build-number scripts instead of editing generated release state manually.
+- Generate changelog and release notes after the current native build is published, but before incrementing the shared build number for the next development week.
+- Run the build-number increment only after the current build has been built, released, and published to native stores.
 - Use the changelog scripts for SSOT changelog pages.
 - Use closed Priority P0 issue titles from the release week as the source for short TestFlight and Google Play build notes.
 - Use Capacitor sync commands when native dependency or wrapper state changes.

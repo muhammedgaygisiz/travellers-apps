@@ -1,7 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
 import { BusinessMenuItemComponent } from '../business-menu-item.component';
+import { BusinessMenuVariantComponent } from '../../business-menu-item-editor/business-menu-variant.component';
+import { TranslocoPipe } from '@jsverse/transloco';
 import SpyInstance = jest.SpyInstance;
+
+@Pipe({
+  name: 'transloco',
+})
+class MockTranslocoPipe implements PipeTransform {
+  transform(value: string): string {
+    return value;
+  }
+}
 
 describe('BusinessMenuItemComponent', () => {
   let component: BusinessMenuItemComponent;
@@ -11,7 +22,12 @@ describe('BusinessMenuItemComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BusinessMenuItemComponent],
-    }).compileComponents();
+    })
+      .overrideComponent(BusinessMenuVariantComponent, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(BusinessMenuItemComponent);
     component = fixture.componentInstance;

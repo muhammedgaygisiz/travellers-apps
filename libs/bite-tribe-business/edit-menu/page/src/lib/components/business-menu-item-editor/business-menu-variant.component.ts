@@ -13,15 +13,25 @@ import {
   IonInput,
   IonItem,
   IonList,
+  IonToggle,
 } from '@ionic/angular/standalone';
 import type { MenuItem } from 'model';
 import { Field, form, min, required } from '@angular/forms/signals';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './business-menu-item-editor.component.html',
   styleUrl: './business-menu-item-editor.component.scss',
-  imports: [IonButton, IonInput, IonList, IonItem, Field],
+  imports: [
+    IonButton,
+    IonInput,
+    IonList,
+    IonItem,
+    IonToggle,
+    Field,
+    TranslocoPipe,
+  ],
   selector: 'business-menu-variant',
   standalone: true,
 })
@@ -42,6 +52,7 @@ export class BusinessMenuVariantComponent {
     ingredients: this.item()?.ingredients || '',
     notes: this.item()?.notes || '',
     price: this.item()?.price || 0,
+    isAvailable: this.item()?.isAvailable !== false,
   });
 
   itemForm = form(this.itemModel, (schemaPath) => {
@@ -61,6 +72,7 @@ export class BusinessMenuVariantComponent {
       this.itemForm.ingredients().value.set(item.ingredients || '');
       this.itemForm.notes().value.set(item.notes || '');
       this.itemForm.price().value.set(item.price || 0);
+      this.itemForm.isAvailable().value.set(item.isAvailable !== false);
     }
   });
 
@@ -95,6 +107,7 @@ export class BusinessMenuVariantComponent {
         ingredients: item.ingredients || '',
         notes: item.notes || '',
         price: item.price,
+        isAvailable: item.isAvailable !== false,
       });
     }
   }

@@ -20,20 +20,20 @@ type Story = StoryObj<HomeFeedControlsComponent>;
 export const Default: Story = {
   args: {
     showFilters: true,
-    hasActiveFilters: false,
-    numberOfFilters: 0,
+    selectedFilters: [],
+    distance: undefined,
+    maxPriceFilter: 0,
     showSearchChip: false,
     showMap: true,
     sorting: 'distance',
-    sortingLabel: 'Distance',
   },
 };
 
 export const ActiveFilters: Story = {
   args: {
     ...Default.args,
-    hasActiveFilters: true,
-    numberOfFilters: 3,
+    selectedFilters: ['vegan', 'spicy'],
+    distance: 5,
   },
 };
 
@@ -50,6 +50,5 @@ export const RestaurantBites: Story = {
     ...Default.args,
     showMap: false,
     sorting: 'rating',
-    sortingLabel: 'Rating',
   },
 };

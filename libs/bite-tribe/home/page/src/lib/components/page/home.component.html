@@ -59,12 +59,12 @@
 
       <bt-home-feed-controls
         [showFilters]="showFilters()"
-        [hasActiveFilters]="numberOfFilters() > 0"
-        [numberOfFilters]="numberOfFilters()"
+        [selectedFilters]="selectedFilters()"
+        [distance]="distance()"
+        [maxPriceFilter]="maxPriceFilter()"
         [showSearchChip]="showSearchChip()"
         [showMap]="showMap()"
         [sorting]="sorting()"
-        [sortingLabel]="sortingLabel()"
         (gotoSearch)="gotoSearch.emit()"
         (openMapView)="openMapView.emit()"
         (sortingChange)="sortingChange.emit($event)"

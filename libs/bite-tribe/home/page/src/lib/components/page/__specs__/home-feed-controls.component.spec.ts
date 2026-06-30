@@ -49,13 +49,53 @@ describe('HomeFeedControlsComponent', () => {
   });
 
   it('should show the number of active filters', () => {
-    fixture.componentRef.setInput('hasActiveFilters', true);
-    fixture.componentRef.setInput('numberOfFilters', 3);
+    fixture.componentRef.setInput('selectedFilters', ['filter1', 'filter2']);
+    fixture.componentRef.setInput('distance', 5);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('ion-badge').textContent).toBe(
       '3',
     );
+  });
+
+  it('should count price filters as active filters', () => {
+    fixture.componentRef.setInput('maxPriceFilter', 20);
+    fixture.detectChanges();
+
+    expect(component.numberOfFilters()).toBe(1);
+    expect(component.hasActiveFilters()).toBe(true);
+  });
+
+  describe('sortingLabelKey', () => {
+    it('should return "distance" when sorting is "distance"', () => {
+      fixture.componentRef.setInput('sorting', 'distance');
+      expect(component.sortingLabelKey()).toBe('distance');
+    });
+
+    it('should return "likes" when sorting is "likes"', () => {
+      fixture.componentRef.setInput('sorting', 'likes');
+      expect(component.sortingLabelKey()).toBe('likes');
+    });
+
+    it('should return "date" when sorting is "createdAt"', () => {
+      fixture.componentRef.setInput('sorting', 'createdAt');
+      expect(component.sortingLabelKey()).toBe('date');
+    });
+
+    it('should return "distance" when sorting is unknown', () => {
+      fixture.componentRef.setInput('sorting', 'randomValue');
+      expect(component.sortingLabelKey()).toBe('distance');
+    });
+
+    it('should return "price" when sorting is "price"', () => {
+      fixture.componentRef.setInput('sorting', 'price');
+      expect(component.sortingLabelKey()).toBe('price');
+    });
+
+    it('should return "rating" when sorting is "rating"', () => {
+      fixture.componentRef.setInput('sorting', 'rating');
+      expect(component.sortingLabelKey()).toBe('rating');
+    });
   });
 
   it('should emit gotoSearch when the search chip is clicked', () => {

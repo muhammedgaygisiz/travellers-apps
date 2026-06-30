@@ -185,32 +185,6 @@ export class BiteTribeHomeComponent {
     return bites && bites?.length > 5;
   });
 
-  sortingLabel = computed(() => {
-    const sorting = this.sorting();
-    switch (sorting) {
-      case 'distance':
-        return 'Distance';
-      case 'likes':
-        return 'Likes';
-      case 'createdAt':
-        return 'Date';
-      case 'price':
-        return 'Price';
-      default:
-        return 'Distance';
-    }
-  });
-
-  numberOfFilters = computed(() => {
-    const selectedFilters = this.selectedFilters();
-    const distance = this.distance();
-    const priceFilter = this.maxPriceFilter();
-
-    return (
-      selectedFilters.length + (distance ? 1 : 0) + (priceFilter > 0 ? 1 : 0)
-    );
-  });
-
   onFilterChange(
     filterSelection: {
       tagFilters: string[];

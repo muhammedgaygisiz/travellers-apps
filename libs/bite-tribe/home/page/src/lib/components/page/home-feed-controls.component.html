@@ -41,7 +41,8 @@
         interface="modal"
         toggleIcon="chevron-down-outline"
         [value]="sorting()"
-        [placeholder]="sortingLabel()"
+        [placeholder]="sortingLabelKey() | transloco"
+        [selectedText]="sortingLabelKey() | transloco"
         (ionChange)="emitSortingChange($event)"
       >
         <ion-select-option value="distance">

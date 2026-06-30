@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   output,
 } from '@angular/core';
@@ -31,16 +32,45 @@ import { TranslocoPipe } from '@jsverse/transloco';
 })
 export class HomeFeedControlsComponent {
   showFilters = input(true);
-  hasActiveFilters = input(false);
-  numberOfFilters = input(0);
+  selectedFilters = input<string[]>([]);
+  distance = input<number | string | undefined>();
+  maxPriceFilter = input(0);
   showSearchChip = input(false);
   showMap = input(true);
   sorting = input<string>('distance');
-  sortingLabel = input('Distance');
 
   readonly gotoSearch = output<void>();
   readonly openMapView = output<void>();
   readonly sortingChange = output<string>();
+
+  sortingLabelKey = computed(() => {
+    switch (this.sorting()) {
+      case 'distance':
+        return 'distance';
+      case 'likes':
+        return 'likes';
+      case 'createdAt':
+        return 'date';
+      case 'price':
+        return 'price';
+      case 'rating':
+        return 'rating';
+      default:
+        return 'distance';
+    }
+  });
+
+  numberOfFilters = computed(() => {
+    const selectedFilters = this.selectedFilters();
+    const distance = this.distance();
+    const priceFilter = this.maxPriceFilter();
+
+    return (
+      selectedFilters.length + (distance ? 1 : 0) + (priceFilter > 0 ? 1 : 0)
+    );
+  });
+
+  hasActiveFilters = computed(() => this.numberOfFilters() > 0);
 
   emitSortingChange(event: { detail?: { value: string } }): void {
     if (event.detail) {

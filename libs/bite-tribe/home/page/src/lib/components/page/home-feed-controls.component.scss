@@ -1,0 +1,53 @@
+:host {
+  ion-chip {
+    --background: var(--background-color);
+    border: 1px solid var(--border-color);
+
+    ion-icon {
+      margin-left: 0;
+      margin-right: 0.5rem;
+      fill: transparent;
+      stroke: var(--ion-color-secondary);
+    }
+  }
+
+  .chip-sort-filter-container {
+    position: relative;
+    margin-bottom: 1rem;
+
+    .filter-container {
+      ion-chip {
+        overflow: visible;
+
+        ion-badge {
+          position: absolute;
+          top: -10px;
+          right: -10px;
+        }
+      }
+    }
+
+    .chip-container {
+      ion-chip {
+        cursor: pointer;
+      }
+    }
+
+    .sort-container {
+      ion-text {
+        margin-right: 0.5rem;
+      }
+
+      ion-icon {
+        margin-right: 0;
+      }
+
+      ion-select {
+        --placeholder-color: var(--ion-color-secondary);
+        --placeholder-opacity: 1;
+
+        min-height: unset;
+      }
+    }
+  }
+}

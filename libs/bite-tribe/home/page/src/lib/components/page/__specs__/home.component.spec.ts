@@ -209,26 +209,6 @@ describe('BiteTribeHomeComponent', () => {
     });
   });
 
-  describe('emitSortingChange', () => {
-    let sortingChangeSpy: SpyInstance;
-
-    beforeEach(() => {
-      sortingChangeSpy = jest.spyOn(component.sortingChange, 'emit');
-    });
-
-    it('should emit sortingChange with the new value', () => {
-      const event = { detail: { value: 'likes' } };
-      component.emitSortingChange(event);
-      expect(sortingChangeSpy).toHaveBeenCalledWith('likes');
-    });
-
-    it('should not emit sortingChange if event.detail is undefined', () => {
-      const event = { detail: undefined };
-      component.emitSortingChange(event as any);
-      expect(sortingChangeSpy).not.toHaveBeenCalled();
-    });
-  });
-
   describe('numberOfFilters', () => {
     it('should return the correct number of filters', () => {
       componentRef.setInput('selectedFilters', ['filter1', 'filter2']);

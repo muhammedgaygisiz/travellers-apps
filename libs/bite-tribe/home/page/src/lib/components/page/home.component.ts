@@ -11,13 +11,11 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
-  IonBadge,
   IonButton,
   IonButtons,
   IonCard,
   IonCardContent,
   IonCheckbox,
-  IonChip,
   IonContent,
   IonIcon,
   IonInfiniteScroll,
@@ -26,8 +24,6 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSearchbar,
-  IonSelect,
-  IonSelectOption,
   IonText,
 } from '@ionic/angular/standalone';
 import type { Bite, Like } from 'model';
@@ -45,6 +41,7 @@ import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
+import { HomeFeedControlsComponent } from './home-feed-controls.component';
 
 const PAGE_SIZE = 50;
 const MIN_SKELETON_VISIBLE_MS = 2000;
@@ -56,7 +53,6 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
   imports: [
     PageComponent,
     IonContent,
-    IonChip,
     BiteComponent,
     IonCard,
     IonCardContent,
@@ -67,11 +63,8 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     IonButton,
     IonCheckbox,
     IonButtons,
-    IonSelect,
-    IonSelectOption,
     IonModal,
     TypeaheadComponent,
-    IonBadge,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
     IonRefresher,
@@ -79,6 +72,7 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     IonSearchbar,
     TranslocoPipe,
     IsBiteTriedOutPipe,
+    HomeFeedControlsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -237,12 +231,6 @@ export class BiteTribeHomeComponent {
 
     if (ionContent) {
       ionContent.scrollToTop(300);
-    }
-  }
-
-  emitSortingChange(event: { detail: { value: string } }): void {
-    if (event.detail) {
-      this.sortingChange.emit(event.detail.value);
     }
   }
 

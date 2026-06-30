@@ -1,0 +1,16 @@
+- [launch: fix intermittent Bite photo upload failures](https://github.com/muhammedgaygisiz/travellers-apps/issues/927) (Issue \#927)
+- Description
+  - \# Launch bug: Bite photo upload reliability
+  - \#\# Problem
+  - Production occasionally creates a Bite document while the intended photo never appears in Firebase Storage or on the Bite.
+  - This is launch-critical because Bite creation with photos is a core user experience.
+  - \#\# Current understanding
+  - The Bite document is saved first.
+  - The image upload runs afterward through `FirebaseStorage.uploadFile(...)`.
+  - The upload path depends on the Storage callback and `setBiteImagePathOnUpload` Storage-finalization function to patch the Bite with `imagePath`.
+  - App backgrounding, network drops, stale auth or Storage token state, or Storage callback errors can leave a Bite without a photo.
+  - \#\# Acceptance criteria
+  - Bites cannot silently remain published without their intended photo after posting with an image.
+  - Upload failures are observable with enough detail to diagnose auth, permission, network, retry, and background-suspend cases.
+  - Failed upload or retry state is handled in the user experience instead of looking like a successful Bite post with missing media.
+  - The launch checklist treats this as fixed before public launch.

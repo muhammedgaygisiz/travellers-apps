@@ -1,5 +1,42 @@
 # Changelog
 
+## build-79 (2026-06-30)
+
+<!-- changelog-start-rev: 665e1022 -->
+<!-- changelog-end-rev: 8e54d501 -->
+
+### Features
+
+- **592**: switch spinner to loading skeleton (#926) (6be3781e)
+- unavailable menu items (#923) (8b65cba5)
+- track build and version per user (#921) (d11454e6)
+- **883**: leaderboard (#904) (00e5a5f7)
+- **892**: setup conventional changelog (#893) (40c073b2)
+
+### Bug Fixes
+
+- **898**: fix localization of currencies (#900) (e84ca315)
+- fix review not showing loading when bite is not received yet (#899) (1209674c)
+
+### Refactoring
+
+- cleanup (#922) (e5aeee5d)
+- **916**: introduce aggregate for like type count (#919) (8541364f)
+
+### Documentation
+
+- doc #927 (8e54d501)
+
+### Tests
+
+- adjust test (24f540e6)
+
+### Chores
+
+- update sspot (#924) (70009772)
+- increment build number (#920) (48945085)
+- fix folder structure (0b3230dd)
+
 ## build-78 (2026-06-20)
 
 <!-- changelog-start-rev: 69ada466 -->

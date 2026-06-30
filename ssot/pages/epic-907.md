@@ -26,3 +26,4 @@
   - [launch: execute soft launch and monitor daily]([[issue-912]]) (Issue \#912)
   - [launch: run public launch campaign]([[issue-913]]) (Issue \#913)
   - [launch: run post-launch learning loop]([[issue-914]]) (Issue \#914)
+  - [launch: fix intermittent Bite photo upload failures]([[issue-927]]) (Issue \#927)

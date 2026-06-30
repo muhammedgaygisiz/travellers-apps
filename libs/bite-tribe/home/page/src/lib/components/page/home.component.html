@@ -123,7 +123,7 @@
       </div>
     </div>
     <div class="home-scrolling-content-container">
-      @if (showSpinner() && isBitesLoading()) {
+      @if (showBiteSkeleton()) {
         <bt-bite-skeleton-list />
       } @else {
         <ng-container *ngTemplateOutlet="withoutLoadingTemplate" />

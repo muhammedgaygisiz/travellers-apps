@@ -47,6 +47,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
 
 const PAGE_SIZE = 50;
+const MIN_SKELETON_VISIBLE_MS = 2000;
 
 @Component({
   selector: 'bt-home',
@@ -142,8 +143,39 @@ export class BiteTribeHomeComponent {
 
   isSearchVisible = signal(false);
   searchTerm = signal('');
+  showBiteSkeleton = signal(false);
+  private skeletonShownAt = 0;
+  private hideSkeletonTimeout: ReturnType<typeof setTimeout> | undefined;
 
   refreshEvent: RefresherCustomEvent | null = null;
+  syncBiteSkeleton = effect((onCleanup) => {
+    const shouldShowSkeleton =
+      this.showSpinner() && (this.isBitesLoading() || this.isReloading());
+
+    clearTimeout(this.hideSkeletonTimeout);
+
+    if (shouldShowSkeleton) {
+      this.skeletonShownAt = Date.now();
+      this.showBiteSkeleton.set(true);
+      return;
+    }
+
+    if (!this.showBiteSkeleton()) {
+      return;
+    }
+
+    const elapsed = Date.now() - this.skeletonShownAt;
+    const remaining = Math.max(MIN_SKELETON_VISIBLE_MS - elapsed, 0);
+
+    this.hideSkeletonTimeout = setTimeout(() => {
+      this.showBiteSkeleton.set(false);
+    }, remaining);
+
+    onCleanup(() => {
+      clearTimeout(this.hideSkeletonTimeout);
+    });
+  });
+
   onRefresh = effect(() => {
     const isReloading = this.isReloading();
 

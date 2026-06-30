@@ -100,6 +100,40 @@ describe('BiteTribeHomeComponent', () => {
     ).toBeTruthy();
   });
 
+  it('should keep the bite skeleton list visible for at least two seconds', () => {
+    componentRef.setInput('showSpinner', true);
+    componentRef.setInput('isBitesLoading', true);
+    fixture.detectChanges();
+
+    componentRef.setInput('isBitesLoading', false);
+    fixture.detectChanges();
+    jest.advanceTimersByTime(1999);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeTruthy();
+
+    jest.advanceTimersByTime(1);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeNull();
+  });
+
+  it('should show the bite skeleton list while bites are reloading', () => {
+    componentRef.setInput('showSpinner', true);
+    componentRef.setInput('isBitesLoading', false);
+    componentRef.setInput('isReloading', true);
+
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeTruthy();
+  });
+
   it('should call scrollToTop on ionContent when scrollToTop is called', () => {
     const scrollToTopMock = jest.fn();
     component.ionContent = signal({

@@ -1,7 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BusinessMenuVariantComponent } from '../business-menu-variant.component';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import SpyInstance = jest.SpyInstance;
+
+@Pipe({
+  name: 'transloco',
+})
+class MockTranslocoPipe implements PipeTransform {
+  transform(value: string): string {
+    return value;
+  }
+}
 
 describe('BusinessAddItemComponent', () => {
   let component: BusinessMenuVariantComponent;
@@ -11,7 +21,12 @@ describe('BusinessAddItemComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BusinessMenuVariantComponent],
-    }).compileComponents();
+    })
+      .overrideComponent(BusinessMenuVariantComponent, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(BusinessMenuVariantComponent);
     component = fixture.componentInstance;
@@ -30,6 +45,7 @@ describe('BusinessAddItemComponent', () => {
         ingredients: 'Test Ingredients',
         notes: 'Test Notes',
         price: 10,
+        isAvailable: false,
       };
 
       componentRef.setInput('item', newItem);
@@ -40,6 +56,7 @@ describe('BusinessAddItemComponent', () => {
       expect(component.itemForm.ingredients().value()).toBe('Test Ingredients');
       expect(component.itemForm.notes().value()).toBe('Test Notes');
       expect(component.itemForm.price().value()).toBe(10);
+      expect(component.itemForm.isAvailable().value()).toBe(false);
     });
 
     it('should not update form values without item', () => {
@@ -51,6 +68,7 @@ describe('BusinessAddItemComponent', () => {
       expect(component.itemForm.ingredients().value()).toBe('');
       expect(component.itemForm.notes().value()).toBe('');
       expect(component.itemForm.price().value()).toBe(0);
+      expect(component.itemForm.isAvailable().value()).toBe(true);
     });
   });
 
@@ -119,6 +137,7 @@ describe('BusinessAddItemComponent', () => {
         ingredients: '',
         notes: '',
         price: 0.1,
+        isAvailable: true,
       });
     });
 
@@ -142,11 +161,13 @@ describe('BusinessAddItemComponent', () => {
       component.itemForm.ingredients().value.set('ingredients');
       component.itemForm.notes().value.set('notes');
       component.itemForm.price().value.set(10);
+      component.itemForm.isAvailable().value.set(false);
     });
 
     it('should reset form values if item is provided', () => {
       component.resetForm();
       expect(component.itemForm.name().value()).toEqual('');
+      expect(component.itemForm.isAvailable().value()).toEqual(true);
     });
 
     it('should not reset form values if item is missing', () => {

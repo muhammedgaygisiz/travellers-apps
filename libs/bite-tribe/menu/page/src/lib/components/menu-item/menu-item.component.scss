@@ -1,13 +1,21 @@
 :host {
   .menu-item {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: flex-start;
+    column-gap: 1rem;
+    row-gap: 0.75rem;
     margin-bottom: 1rem;
-    gap: 1rem;
 
     .item-details {
-      flex: 1;
+      min-width: 0;
+
+      .title-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
 
       h3 {
         font-size: 1.1rem;
@@ -25,6 +33,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
+      flex-shrink: 0;
 
       .price {
         font-weight: bold;
@@ -32,10 +41,44 @@
         margin-bottom: 0.5rem;
       }
 
+      .availability-label {
+        border: 1px solid var(--ion-color-medium);
+        border-radius: var(--border-radius);
+        color: var(--ion-color-medium);
+        font-size: 0.75rem;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        max-width: 7rem;
+        padding: 0.25rem 0.4rem;
+        text-align: center;
+      }
+
       ion-button {
         --padding-start: 0;
         --padding-end: 0;
         margin: 0;
+      }
+    }
+
+    .variants {
+      border-left: 1px solid var(--ion-color-tertiary-tint);
+      grid-column: 1 / -1;
+      padding-left: 0.75rem;
+    }
+
+    &.menu-item-variant {
+      margin-bottom: 0.75rem;
+
+      .item-details h3 {
+        font-size: 1rem;
+      }
+    }
+
+    &.menu-item-unavailable {
+      opacity: 0.65;
+
+      .price {
+        text-decoration: line-through;
       }
     }
   }

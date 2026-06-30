@@ -1,8 +1,15 @@
 @let itemData = item();
+@let isItemUnavailable = isUnavailable(itemData);
 
-<div class="menu-item">
+<div
+  class="menu-item"
+  [class.menu-item-unavailable]="isItemUnavailable"
+  [class.menu-item-variant]="isVariant()"
+>
   <div class="item-details">
-    <h3>{{ itemData?.name }}</h3>
+    <div class="title-row">
+      <h3>{{ itemData?.name }}</h3>
+    </div>
 
     <p>{{ itemData?.description }}</p>
 
@@ -12,20 +19,30 @@
     @if (itemData?.notes) {
       <p>{{ itemData?.notes }}</p>
     }
-    @if (itemData?.variants?.length) {
-      <div class="ion-margin-top">
-        @for (variant of itemData?.variants; track $index) {
-          <menu-item [item]="variant" isVariant />
-        }
-      </div>
-    }
   </div>
   <div class="price-actions">
     @if (itemData?.price !== 0) {
       <div class="price">{{ itemData?.price }} €</div>
     }
-    <ion-button size="small" fill="clear" (click)="onCreateBiteClick(itemData)">
-      Create Bite
+    @if (isItemUnavailable) {
+      <span class="availability-label">
+        {{ 'menu-item-not-available' | transloco }}
+      </span>
+    }
+    <ion-button
+      size="small"
+      fill="clear"
+      [disabled]="isItemUnavailable"
+      (click)="onCreateBiteClick(itemData)"
+    >
+      {{ 'create-bite' | transloco }}
     </ion-button>
   </div>
+  @if (itemData?.variants?.length) {
+    <div class="variants">
+      @for (variant of itemData?.variants; track $index) {
+        <menu-item [item]="variant" isVariant />
+      }
+    </div>
+  }
 </div>

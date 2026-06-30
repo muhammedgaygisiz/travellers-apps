@@ -2,6 +2,5 @@
 - Description
   - At the moment there are few ways that the menu of a restaurant is shown in the App. This menu Items and other further functionalities (for e.g. Creating a bite out of a menu item, checking avilablity of dish / tabel in resturant etc. )need to be included. (This Business Feature need to be broken dowm to further tasks & sub-tasks in ref. sessions)
 - Related issues
-  - [feat(business): Kristina would like to have the disable function for the menu items]([[issue-326]]) (Issue \#326)
   - [feat(business): app should show the latest bite's image in the menu]([[issue-327]]) (Issue \#327)
   - [feat: when 5 bites were created within a radius of 200m and the restaurant name is fuzzy compared the same, the restaurant should be shown as candidate for a verified restaurant]([[issue-778]]) (Issue \#778)

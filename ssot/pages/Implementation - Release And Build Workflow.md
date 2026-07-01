@@ -6,20 +6,20 @@ Release and build workflow describes the implementation-facing scripts that supp
 
 ## Npm Scripts
 
-| Script                                                  | Purpose                                                |
-| ------------------------------------------------------- | ------------------------------------------------------ |
-| `npm run start`                                         | Serve an Nx app through the default serve target       |
-| `npm run development`                                   | Start Firebase serve and the BiteTribe app together    |
-| `npm run build`                                         | Run Nx build                                           |
-| `npm run test`                                          | Run affected Nx tests against `develop`                |
-| `npm run storybook`                                     | Start Storybook host                                   |
-| `npm run build:storybook`                               | Build Storybook and refresh the Nx graph asset         |
-| `npm run increment-build-number`                        | Increment the shared build number                      |
-| `npm run generate-changelog`                            | Generate incremental changelog output                  |
-| `npm run generate-full-changelog`                       | Generate full Logseq changelog output                  |
-| `npm run increment-build-number-and-generate-changelog` | Increment build number and generate changelog together |
-| `npm run cap:run:ios`                                   | Run Capacitor iOS                                      |
-| `npm run cap:run:android`                               | Run Capacitor Android                                  |
+| Script                                                  | Purpose                                             |
+| ------------------------------------------------------- | --------------------------------------------------- |
+| `npm run start`                                         | Serve an Nx app through the default serve target    |
+| `npm run development`                                   | Start Firebase serve and the BiteTribe app together |
+| `npm run build`                                         | Run Nx build                                        |
+| `npm run test`                                          | Run affected Nx tests against `develop`             |
+| `npm run storybook`                                     | Start Storybook host                                |
+| `npm run build:storybook`                               | Build Storybook and refresh the Nx graph asset      |
+| `npm run increment-build-number`                        | Increment the shared build number                   |
+| `npm run generate-changelog`                            | Generate incremental changelog output               |
+| `npm run generate-full-changelog`                       | Generate full Logseq changelog output               |
+| `npm run increment-build-number-and-generate-changelog` | Generate changelog, then increment build number     |
+| `npm run cap:run:ios`                                   | Run Capacitor iOS                                   |
+| `npm run cap:run:android`                               | Run Capacitor Android                               |
 
 ## Native Asset Scripts
 

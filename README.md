@@ -201,13 +201,6 @@ npm list --all
 
 ## Preparations
 
-Before building either native app, increment the shared Android and iOS build
-number:
-
-```
-npm run increment-build-number
-```
-
 Generate the changelog from conventional commit messages with the shared build
 number as the release identifier:
 
@@ -215,7 +208,14 @@ number as the release identifier:
 npm run generate-changelog
 ```
 
-To increment the build number and then generate the changelog in one step, run:
+After native apps are published and release notes are generated, increment the
+shared Android and iOS build number for the next development cycle:
+
+```
+npm run increment-build-number
+```
+
+To generate the changelog and then increment the build number in one step, run:
 
 ```
 npm run increment-build-number-and-generate-changelog

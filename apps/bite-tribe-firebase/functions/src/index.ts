@@ -17,7 +17,10 @@ export { updateUserMetadata } from './functions/update-user-metadata';
 export { loadBitesByLocation } from './functions/load-bites-by-location';
 export { createUserOnAuthCreate } from './functions/create-user-on-auth-create';
 export { loadLeaderboard } from './functions/load-leaderboard';
-export { incrementBiteCountOnBiteCreate } from './functions/increment-bite-count-on-bite-create';
+export {
+  decrementBiteCountOnBiteDelete,
+  incrementBiteCountOnBiteCreate,
+} from './functions/increment-bite-count-on-bite-create';
 export {
   decrementBiteLikeCountOnLikeDelete,
   incrementBiteLikeCountOnLikeCreate,

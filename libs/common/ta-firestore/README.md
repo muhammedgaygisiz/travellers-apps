@@ -59,8 +59,11 @@ initialization attempt, records telemetry when available, and continues startup
 if initialization fails. App Check enforcement must not be enabled until the
 future blocking/retry behavior is implemented.
 
-App Check emits Firebase Analytics events in production-like modes when
-Analytics is available:
+App Check emits Firebase Analytics events in production-like modes. Web uses the
+Firebase Web Analytics SDK when available. iOS and Android use the native
+Capacitor Firebase Analytics plugin so startup telemetry can be inspected in
+native Firebase Analytics and DebugView without relying on
+`capacitor://localhost` web measurement requests.
 
 - `app_check_startup_started`
 - `app_check_startup_completed`

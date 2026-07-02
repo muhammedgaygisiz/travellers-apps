@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAppCheck } from '@capacitor-firebase/app-check';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseApp } from 'firebase/app';
 import {
   CustomProvider,
@@ -265,8 +266,10 @@ const createTelemetry = (
   options?: FirebaseAppCheckTelemetryOptions,
 ): AppCheckTelemetry => {
   const runtimeMode = options?.runtimeMode ?? getRuntimeMode();
+  const platform = getAppCheckPlatform();
   const shouldEmitTelemetry = runtimeMode !== 'dev_simulator';
   const shouldLogToConsole = runtimeMode === 'local_prod_firebase';
+  const shouldUseNativeAnalytics = platform === 'ios' || platform === 'android';
   const baseParams: AppCheckTelemetryParams = {
     has_debug_token: Boolean(process.env[APP_CHECK_DEBUG_TOKEN_ENV]),
     has_site_key: Boolean(process.env[APP_CHECK_SITE_KEY_ENV]),
@@ -275,18 +278,33 @@ const createTelemetry = (
 
   return {
     emit: (eventName, params = {}): void => {
-      if (!shouldEmitTelemetry || !options?.analytics) {
+      if (!shouldEmitTelemetry) {
         return;
       }
 
-      logEvent(
-        options.analytics,
-        eventName,
-        compactParams({
-          ...baseParams,
-          ...params,
-        }),
-      );
+      const eventParams = compactParams({
+        ...baseParams,
+        ...params,
+      });
+
+      if (shouldUseNativeAnalytics) {
+        void FirebaseAnalytics.logEvent({
+          name: eventName,
+          params: eventParams,
+        }).catch((error) => {
+          if (shouldLogToConsole) {
+            console.warn(
+              '[AppCheck] Failed to emit native Analytics telemetry',
+              error,
+            );
+          }
+        });
+        return;
+      }
+
+      if (options?.analytics) {
+        logEvent(options.analytics, eventName, eventParams);
+      }
     },
     info: (message): void => {
       if (shouldLogToConsole) {

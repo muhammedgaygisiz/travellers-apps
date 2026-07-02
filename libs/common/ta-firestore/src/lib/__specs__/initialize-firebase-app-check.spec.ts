@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAppCheck } from '@capacitor-firebase/app-check';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import {
   CustomProvider,
   initializeAppCheck,
@@ -22,6 +23,11 @@ jest.mock('@capacitor-firebase/app-check', () => ({
       expireTimeMillis: 123,
     }),
     setTokenAutoRefreshEnabled: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+jest.mock('@capacitor-firebase/analytics', () => ({
+  FirebaseAnalytics: {
+    logEvent: jest.fn().mockResolvedValue(undefined),
   },
 }));
 jest.mock('firebase/app-check', () => ({
@@ -49,6 +55,7 @@ describe(initializeFirebaseAppCheck.name, () => {
     resetFirebaseAppCheckInitializationForTesting();
     jest.clearAllMocks();
     jest.spyOn(FirebaseAppCheck, 'initialize').mockResolvedValue(undefined);
+    jest.spyOn(FirebaseAnalytics, 'logEvent').mockResolvedValue(undefined);
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('web');
     delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'];
     delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'];
@@ -214,6 +221,7 @@ describe(initializeFirebaseAppCheck.name, () => {
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
     expect(consoleInfoSpy).not.toHaveBeenCalled();
     expect(logEvent).not.toHaveBeenCalled();
+    expect(FirebaseAnalytics.logEvent).not.toHaveBeenCalled();
 
     consoleInfoSpy.mockRestore();
   });
@@ -247,6 +255,26 @@ describe(initializeFirebaseAppCheck.name, () => {
     expect(FirebaseAppCheck.getToken).toHaveBeenCalledWith({
       forceRefresh: false,
     });
+    expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+      name: 'app_check_startup_started',
+      params: {
+        has_debug_token: false,
+        has_site_key: false,
+        runtime_mode: 'local_prod_firebase',
+      },
+    });
+    expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+      name: 'app_check_startup_completed',
+      params: expect.objectContaining({
+        duration_ms: expect.any(Number),
+        has_debug_token: false,
+        has_site_key: false,
+        platform: 'ios',
+        provider: 'native_bridge',
+        runtime_mode: 'local_prod_firebase',
+      }),
+    });
+    expect(logEvent).not.toHaveBeenCalled();
   });
 
   it('should initialize the Android Firebase JS SDK bridge with native tokens', async () => {
@@ -279,6 +307,15 @@ describe(initializeFirebaseAppCheck.name, () => {
       forceRefresh: false,
     });
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
+    expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+      name: 'app_check_startup_completed',
+      params: expect.objectContaining({
+        platform: 'android',
+        provider: 'native_bridge',
+        runtime_mode: 'local_prod_firebase',
+      }),
+    });
+    expect(logEvent).not.toHaveBeenCalled();
   });
 
   it('should add a short expiry fallback when native token expiry is unavailable', async () => {

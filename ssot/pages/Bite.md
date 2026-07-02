@@ -34,6 +34,7 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A Bite can be part of BiteTrail-based journeys.
 - A Bite should have an image because the image is a core trust signal.
 - Deleting a Bite currently deletes the Firestore document and attempts to delete its stored image.
+- Deleting a Bite must decrement the creator's `biteCount` aggregate because Bite creation increments it.
 - Historical references after deletion are a product question, not a fully established current rule.
 
 ## Required Data
@@ -236,6 +237,7 @@ images/bites/{biteId}/{filename}
 - City and country are not part of the current Bite model.
 - Menu item linking is not part of the current Bite model.
 - Historical behavior for deleted Bites needs a clearer product rule.
+- Counter aggregates must stay symmetric across create/delete lifecycles. If a future aggregate increments when a Bite, like, review, or related counted document is created, add the matching decrement behavior when that counted document can be deleted.
 - Older Bite documents may not have like aggregate fields. Like-count triggers migrate missing `thumbup`, `drooling`, and `mindblown` fields by recomputing counts from the Bite's `likes` subcollection before applying ongoing delta maintenance.
 - Guest permissions and admin moderation are not clearly expressed as current Bite-domain capabilities.
 

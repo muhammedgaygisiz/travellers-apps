@@ -1,16 +1,26 @@
 - [launch: fix intermittent Bite photo upload failures](https://github.com/muhammedgaygisiz/travellers-apps/issues/927) (Issue \#927)
 - Description
-  - \# Launch bug: Bite photo upload reliability
   - \#\# Problem
-  - Production occasionally creates a Bite document while the intended photo never appears in Firebase Storage or on the Bite.
-  - This is launch-critical because Bite creation with photos is a core user experience.
+  - Production occasionally shows a Bite document created in Firestore, but the photo never appears in Firebase Storage or on the Bite.
+  - This is launch-critical: posting a Bite with a missing photo breaks the core creation experience and can make public launch feedback unreliable.
   - \#\# Current understanding
   - The Bite document is saved first.
   - The image upload runs afterward through `FirebaseStorage.uploadFile(...)`.
-  - The upload path depends on the Storage callback and `setBiteImagePathOnUpload` Storage-finalization function to patch the Bite with `imagePath`.
-  - App backgrounding, network drops, stale auth or Storage token state, or Storage callback errors can leave a Bite without a photo.
+  - The upload path currently depends on the Storage callback and the `setBiteImagePathOnUpload` Storage-finalization function to patch the Bite with the final `imagePath`.
+  - If the app backgrounds, network drops, auth/storage token state is stale, or the Storage upload callback reports an error after the Bite document is already saved, we can end up with a Bite without a photo.
+  - \#\# Relevant code surfaces
+  - `libs/bite-tribe/api/src/lib/bite-api/bite-api.service.ts`
+  - `libs/bite-tribe/api/src/lib/utils/upload-base64-to-firebase-storage.ts`
+  - `libs/bite-tribe/api/src/lib/utils/upload-blob-to-firebasestorage.ts`
+  - `apps/bite-tribe-firebase/functions/src/functions/set-bite-image-path-on-upload.ts`
+  - \#\# Things to verify
+  - Capture/log the `FirebaseStorage.uploadFile(...)` callback error object and code in production-safe telemetry.
+  - Distinguish Storage failures such as `storage/unauthenticated`, `storage/unauthorized`, `storage/retry-limit-exceeded`, and `storage/canceled`.
+  - Runtime-test the app-background/suspend scenario immediately after posting a Bite.
+  - Verify whether foreground auth token refresh reduces `storage/unauthenticated` failures.
+  - Verify the Storage finalization function runs and patches `imagePath` for every completed upload.
   - \#\# Acceptance criteria
-  - Bites cannot silently remain published without their intended photo after posting with an image.
+  - A Bite cannot silently remain published without its intended photo after the user posts with an image.
   - Upload failures are observable with enough detail to diagnose auth, permission, network, retry, and background-suspend cases.
-  - Failed upload or retry state is handled in the user experience instead of looking like a successful Bite post with missing media.
+  - The user experience handles failed upload/retry state instead of looking like a successful Bite post with missing media.
   - The launch checklist treats this as fixed before public launch.

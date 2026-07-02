@@ -215,14 +215,17 @@ shared Android and iOS build number for the next development cycle:
 npm run increment-build-number
 ```
 
-To generate the changelog and then increment the build number in one step, run:
+To generate the changelog, increment the build number, commit those release
+changes, tag the captured release version and build number, and push the commit
+and tag in one step, run:
 
 ```
 npm run increment-build-number-and-generate-changelog
 ```
 
-Commit the updated native project files and `CHANGELOG.md` together with the
-release changes.
+The script captures the current native version and build number before
+incrementing, then creates a tag such as `build-1.0.1-81` after the release
+commit.
 
 ## iOS
 

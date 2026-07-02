@@ -1,5 +1,27 @@
 # Changelog
 
+## build-80 (2026-07-02)
+
+<!-- changelog-start-rev: 8e54d501 -->
+<!-- changelog-end-rev: 91988ac8 -->
+
+### Features
+
+- impl missing decrement function on delete bite (#936) (8c3ff700)
+
+### Bug Fixes
+
+- **929**: fix styling of bite skeleton (#930) (642e9701)
+
+### Refactoring
+
+- **932**: gate firebase startup on app check initialization (#935) (075740be)
+
+### Chores
+
+- update ssot (#931) (5e33dc58)
+- bump version (#928) (7aba60ac)
+
 ## build-79 (2026-06-30)
 
 <!-- changelog-start-rev: 665e1022 -->

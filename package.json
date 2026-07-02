@@ -16,7 +16,7 @@
     "increment-build-number": "node tools/increment-build-number.mjs",
     "generate-changelog": "node tools/generate-changelog.mjs",
     "generate-full-changelog": "node tools/generate-full-changelog.mjs",
-    "increment-build-number-and-generate-changelog": "npm run generate-changelog && npm run increment-build-number",
+    "increment-build-number-and-generate-changelog": "node tools/increment-build-number-and-generate-changelog.mjs",
     "build:storybook": "npm run nxgraph-html && nx run storybook-host:build-storybook",
     "test": "nx affected --base=develop -t test --parallel --coverage --coverageReporters=text",
     "pwa-asset-generator": "pwa-asset-generator",

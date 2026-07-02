@@ -46,6 +46,7 @@ updateLastSeen
 updateUserMetadata
 loadLeaderboard
 incrementBiteCountOnBiteCreate
+decrementBiteCountOnBiteDelete
 incrementBiteLikeCountOnLikeCreate
 decrementBiteLikeCountOnLikeDelete
 updateBiteLikeCountOnLikeUpdate

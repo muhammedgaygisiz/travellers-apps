@@ -15,6 +15,7 @@ const contentsPath = join(pagesPath, 'contents.md');
 const backupPath = resolve('ssot/logseq/bak');
 const projectNumber = '4';
 const projectOwner = 'muhammedgaygisiz';
+const projectOwnerFallback = '@me';
 const priorityP0Names = new Set(['p0', 'priority p0', 'priority:p0', 'priority-p0']);
 let priorityP0IssueNumbers;
 const subIssuesQuery = `
@@ -49,7 +50,7 @@ const subIssues = getUniqueSubIssues(epics);
 
 clearGeneratedEpicPages();
 rmSync(epicsIndexPath, { force: true });
-writeFileSync(ssotPath, replaceRootSection(readFileSync(ssotPath, 'utf8'), 'Epics', renderEpicsSection(epics, '\t')));
+writeFileSync(ssotPath, replaceRootSection(readFileSync(ssotPath, 'utf8'), 'Epics', renderEpicsSection(epics, '  ')));
 writeFileSync(contentsPath, replaceRootSection(readFileSync(contentsPath, 'utf8'), 'Epics', renderEpicsSection(epics, '  ')));
 
 for (const epic of epics) {
@@ -194,21 +195,7 @@ function getPriorityP0IssueNumbers() {
   }
 
   try {
-    const projectItems = JSON.parse(execFileSync(
-      'gh',
-      [
-        'project',
-        'item-list',
-        projectNumber,
-        '--owner',
-        projectOwner,
-        '--format',
-        'json',
-        '--limit',
-        '1000',
-      ],
-      { encoding: 'utf8' },
-    )).items;
+    const projectItems = getProjectItems(projectOwner);
 
     priorityP0IssueNumbers = new Set(
       projectItems
@@ -220,6 +207,34 @@ function getPriorityP0IssueNumbers() {
     return priorityP0IssueNumbers;
   } catch (error) {
     handleProjectScopeError(error);
+    throw error;
+  }
+}
+
+function getProjectItems(owner) {
+  try {
+    return JSON.parse(execFileSync(
+      'gh',
+      [
+        'project',
+        'item-list',
+        projectNumber,
+        '--owner',
+        owner,
+        '--format',
+        'json',
+        '--limit',
+        '1000',
+      ],
+      { encoding: 'utf8' },
+    )).items;
+  } catch (error) {
+    const message = `${error.stderr ?? ''}\n${error.stdout ?? ''}\n${error.message ?? ''}`;
+
+    if (owner !== projectOwnerFallback && message.includes('unknown owner type')) {
+      return getProjectItems(projectOwnerFallback);
+    }
+
     throw error;
   }
 }

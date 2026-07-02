@@ -1,5 +1,6 @@
 import {
   createFirebaseAppCheckInitializer,
+  createFirebaseStartupInitializer,
   FIREBASE_APP,
   FIREBASE_AUTH,
   FIREBASE_FIRESTORE,
@@ -53,7 +54,7 @@ describe(provideFirestoreUtils.name, () => {
       .mockResolvedValue(undefined);
   });
 
-  it('should create an App Check startup initializer without calling App Check during provider construction', async () => {
+  it('should create a Firebase startup initializer without calling App Check during provider construction', async () => {
     const initializeAppCheckSpy = jest.spyOn(
       appCheckUtils,
       'initializeFirebaseAppCheck',
@@ -76,6 +77,31 @@ describe(provideFirestoreUtils.name, () => {
       analytics,
       runtimeMode: 'production',
     });
+  });
+
+  it('should initialize App Check before restored auth startup', async () => {
+    const calls: string[] = [];
+    jest
+      .mocked(appCheckUtils.initializeFirebaseAppCheck)
+      .mockImplementationOnce(async () => {
+        calls.push('app-check');
+      });
+    const authService = {
+      initialize: jest.fn(async () => {
+        calls.push('auth');
+      }),
+    };
+
+    const initializer = createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      {} as any,
+      authService,
+    );
+
+    await initializer();
+
+    expect(calls).toEqual(['app-check', 'auth']);
   });
 
   describe('given prod mode', () => {

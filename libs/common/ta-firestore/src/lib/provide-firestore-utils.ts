@@ -32,6 +32,7 @@ import { provideFirestoreSimulator } from './provide-firestore-simulator';
 import { Emulators } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { Analytics } from 'firebase/analytics';
+import { AuthService } from './auth.service';
 
 export const FIREBASE_APP = new InjectionToken<'FIREBASE_APP' | null>(
   'FIREBASE_APP',
@@ -53,26 +54,26 @@ export const provideFirestoreUtils = (
 ): (EnvironmentProviders | Provider)[] => {
   const app = initializeApp(firebaseOptions || {});
   const firestore: Firestore = initializeFirestore(app, {});
-  const appCheckInitializer = provideFirebaseAppCheckInitializer(
+  const startupInitializer = provideFirebaseStartupInitializer(
     app,
     appCheckRuntimeContext,
   );
 
   if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] !== 'true') {
     return [
-      appCheckInitializer,
+      startupInitializer,
       ...provideStandardFirestoreUtils(app, firestore, Boolean(withAnalytics)),
     ];
   }
 
   console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
   console.log('DISABLING ANALYTICS');
-  FirebaseAnalytics.setEnabled({ enabled: false });
+  void FirebaseAnalytics.setEnabled({ enabled: false });
 
   if (emulators) {
     const storage = getStorage(app);
     return [
-      appCheckInitializer,
+      startupInitializer,
       ...provideFirestoreSimulator(emulators, app, firestore, storage),
     ];
   }
@@ -82,12 +83,12 @@ export const provideFirestoreUtils = (
   );
 
   return [
-    appCheckInitializer,
+    startupInitializer,
     ...provideStandardFirestoreUtils(app, firestore, Boolean(withAnalytics)),
   ];
 };
 
-const provideFirebaseAppCheckInitializer = (
+const provideFirebaseStartupInitializer = (
   app: ReturnType<typeof initializeApp>,
   runtimeContext?: FirebaseAppCheckRuntimeContext,
 ): EnvironmentProviders =>
@@ -95,9 +96,27 @@ const provideFirebaseAppCheckInitializer = (
     const analytics = inject(FIREBASE_ANALYTICS, {
       optional: true,
     }) as Analytics | null;
+    const authService = inject(AuthService);
 
-    return createFirebaseAppCheckInitializer(app, runtimeContext, analytics)();
+    return createFirebaseStartupInitializer(
+      app,
+      runtimeContext,
+      analytics,
+      authService,
+    )();
   });
+
+export const createFirebaseStartupInitializer =
+  (
+    app: ReturnType<typeof initializeApp>,
+    runtimeContext: FirebaseAppCheckRuntimeContext | undefined,
+    analytics: Analytics | null | undefined,
+    authService: Pick<AuthService, 'initialize'>,
+  ): (() => Promise<void>) =>
+  async () => {
+    await createFirebaseAppCheckInitializer(app, runtimeContext, analytics)();
+    await authService.initialize();
+  };
 
 export const createFirebaseAppCheckInitializer =
   (

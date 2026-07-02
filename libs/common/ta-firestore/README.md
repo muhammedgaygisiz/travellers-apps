@@ -6,9 +6,10 @@ This library was generated with [Nx](https://nx.dev).
 
 BiteTribe initializes Firebase App Check from
 `src/lib/initialize-firebase-app-check.ts`. `provideFirestoreUtils` registers an
-Angular app initializer that waits for the App Check initialization attempt
-before normal app bootstrap continues into NgRx effects and Firebase-backed
-feature code.
+Angular app initializer that waits for the App Check initialization attempt and
+only then restores the native Firebase auth session. NgRx effects and
+Firebase-backed feature code must not start restored-session Firebase work from
+constructors.
 
 The web app uses the Capawesome `@capacitor-firebase/app-check` plugin with
 Firebase's `ReCaptchaEnterpriseProvider`. The iOS app installs the native App

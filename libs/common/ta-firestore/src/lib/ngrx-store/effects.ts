@@ -46,10 +46,6 @@ export class AuthEffects {
     optional: true,
   });
 
-  constructor() {
-    this.authService.initialize();
-  }
-
   checkAuthStatus$ = createEffect(
     () =>
       this.actions$.pipe(

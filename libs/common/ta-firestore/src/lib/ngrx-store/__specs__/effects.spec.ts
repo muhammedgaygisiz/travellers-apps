@@ -81,6 +81,10 @@ describe(AuthEffects.name, () => {
     dispatchSpy = jest.spyOn(store, 'dispatch');
   });
 
+  it('should not initialize auth from the NgRx effect constructor', () => {
+    expect(AuthServiceMock.initialize).not.toHaveBeenCalled();
+  });
+
   describe('checkAuthStatus$', () => {
     describe('given a ROOT_EFFECTS_INIT', () => {
       it('should dispatch loginSucceeded if isLoggedIn$ emits true', () => {

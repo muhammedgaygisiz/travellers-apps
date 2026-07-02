@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAppCheck } from '@capacitor-firebase/app-check';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import {
   CustomProvider,
   initializeAppCheck,
@@ -11,6 +12,7 @@ import {
   initializeFirebaseAppCheck,
   resetFirebaseAppCheckInitializationForTesting,
 } from '../initialize-firebase-app-check';
+import { logEvent } from 'firebase/analytics';
 
 jest.mock('@capacitor/core');
 jest.mock('@capacitor-firebase/app-check', () => ({
@@ -23,6 +25,11 @@ jest.mock('@capacitor-firebase/app-check', () => ({
     setTokenAutoRefreshEnabled: jest.fn().mockResolvedValue(undefined),
   },
 }));
+jest.mock('@capacitor-firebase/analytics', () => ({
+  FirebaseAnalytics: {
+    logEvent: jest.fn().mockResolvedValue(undefined),
+  },
+}));
 jest.mock('firebase/app-check', () => ({
   CustomProvider: jest.fn().mockImplementation((options) => ({
     getToken: options.getToken,
@@ -32,9 +39,13 @@ jest.mock('firebase/app-check', () => ({
     siteKey,
   })),
 }));
+jest.mock('firebase/analytics', () => ({
+  logEvent: jest.fn(),
+}));
 
 describe(initializeFirebaseAppCheck.name, () => {
   const firebaseApp = { name: 'bite-tribe' } as FirebaseApp;
+  const analytics = { app: firebaseApp } as any;
   const originalSiteKey = process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'];
   const originalDebugToken =
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'];
@@ -44,6 +55,7 @@ describe(initializeFirebaseAppCheck.name, () => {
     resetFirebaseAppCheckInitializationForTesting();
     jest.clearAllMocks();
     jest.spyOn(FirebaseAppCheck, 'initialize').mockResolvedValue(undefined);
+    jest.spyOn(FirebaseAnalytics, 'logEvent').mockResolvedValue(undefined);
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('web');
     delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'];
     delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'];
@@ -74,13 +86,59 @@ describe(initializeFirebaseAppCheck.name, () => {
   it('should initialize Firebase App Check on web with reCAPTCHA Enterprise', async () => {
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
 
-    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp, {
+      analytics,
+      runtimeMode: 'production',
+    });
 
     expect(ReCaptchaEnterpriseProvider).toHaveBeenCalledWith('site-key');
     expect(FirebaseAppCheck.initialize).toHaveBeenCalledWith({
       provider: { siteKey: 'site-key' },
       isTokenAutoRefreshEnabled: true,
     });
+    expect(logEvent).toHaveBeenCalledWith(
+      analytics,
+      'app_check_startup_started',
+      {
+        has_debug_token: false,
+        has_site_key: true,
+        runtime_mode: 'production',
+      },
+    );
+    expect(logEvent).toHaveBeenCalledWith(
+      analytics,
+      'app_check_startup_completed',
+      expect.objectContaining({
+        duration_ms: expect.any(Number),
+        has_debug_token: false,
+        has_site_key: true,
+        platform: 'web',
+        provider: 'recaptcha_enterprise',
+        runtime_mode: 'production',
+      }),
+    );
+  });
+
+  it('should not write App Check console logs in production mode', async () => {
+    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
+
+    await initializeFirebaseAppCheck(firebaseApp, {
+      analytics,
+      runtimeMode: 'production',
+    });
+
+    expect(consoleInfoSpy).not.toHaveBeenCalled();
+    expect(consoleWarnSpy).not.toHaveBeenCalled();
+    expect(logEvent).toHaveBeenCalledWith(
+      analytics,
+      'app_check_startup_completed',
+      expect.anything(),
+    );
+
+    consoleInfoSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   it('should warn when local production Firebase runs without a debug token', async () => {
@@ -88,7 +146,10 @@ describe(initializeFirebaseAppCheck.name, () => {
     process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
 
-    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp, {
+      analytics,
+      runtimeMode: 'local_prod_firebase',
+    });
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       '[AppCheck] NX_APP_BITE_TRIBE_IS_DEV is false but NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN is not configured. Localhost production-Firebase testing may fail App Check token exchange.',
@@ -106,7 +167,10 @@ describe(initializeFirebaseAppCheck.name, () => {
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'] = 'debug-token';
 
-    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp, {
+      analytics,
+      runtimeMode: 'local_prod_firebase',
+    });
 
     expect(FirebaseAppCheck.initialize).toHaveBeenCalledWith({
       provider: { siteKey: 'site-key' },
@@ -118,28 +182,46 @@ describe(initializeFirebaseAppCheck.name, () => {
   it('should skip initialization when the site key is not configured', async () => {
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
-    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp, {
+      analytics,
+      runtimeMode: 'local_prod_firebase',
+    });
 
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       '[AppCheck] Skipping Firebase App Check because NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY is not configured. NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN does not replace the site key.',
     );
+    expect(logEvent).toHaveBeenCalledWith(
+      analytics,
+      'app_check_skipped',
+      expect.objectContaining({
+        has_debug_token: false,
+        has_site_key: false,
+        platform: 'web',
+        provider: 'none',
+        reason: 'missing_site_key',
+        runtime_mode: 'local_prod_firebase',
+      }),
+    );
 
     consoleWarnSpy.mockRestore();
   });
 
-  it('should skip initialization when the client connects to simulators', async () => {
+  it('should skip initialization quietly when the client connects to simulators', async () => {
     const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
     process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'true';
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'] = 'debug-token';
 
-    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp, {
+      analytics,
+      runtimeMode: 'dev_simulator',
+    });
 
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
-      '[AppCheck] Skipping Firebase App Check because NX_APP_BITE_TRIBE_IS_DEV is true',
-    );
+    expect(consoleInfoSpy).not.toHaveBeenCalled();
+    expect(logEvent).not.toHaveBeenCalled();
+    expect(FirebaseAnalytics.logEvent).not.toHaveBeenCalled();
 
     consoleInfoSpy.mockRestore();
   });
@@ -147,7 +229,10 @@ describe(initializeFirebaseAppCheck.name, () => {
   it('should initialize the iOS Firebase JS SDK bridge with native tokens', async () => {
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
 
-    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp, {
+      analytics,
+      runtimeMode: 'local_prod_firebase',
+    });
 
     expect(FirebaseAppCheck.setTokenAutoRefreshEnabled).toHaveBeenCalledWith({
       enabled: true,
@@ -170,12 +255,35 @@ describe(initializeFirebaseAppCheck.name, () => {
     expect(FirebaseAppCheck.getToken).toHaveBeenCalledWith({
       forceRefresh: false,
     });
+    expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+      name: 'app_check_startup_started',
+      params: {
+        has_debug_token: false,
+        has_site_key: false,
+        runtime_mode: 'local_prod_firebase',
+      },
+    });
+    expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+      name: 'app_check_startup_completed',
+      params: expect.objectContaining({
+        duration_ms: expect.any(Number),
+        has_debug_token: false,
+        has_site_key: false,
+        platform: 'ios',
+        provider: 'native_bridge',
+        runtime_mode: 'local_prod_firebase',
+      }),
+    });
+    expect(logEvent).not.toHaveBeenCalled();
   });
 
   it('should initialize the Android Firebase JS SDK bridge with native tokens', async () => {
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
 
-    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp, {
+      analytics,
+      runtimeMode: 'local_prod_firebase',
+    });
 
     expect(FirebaseAppCheck.setTokenAutoRefreshEnabled).toHaveBeenCalledWith({
       enabled: true,
@@ -199,6 +307,15 @@ describe(initializeFirebaseAppCheck.name, () => {
       forceRefresh: false,
     });
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
+    expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+      name: 'app_check_startup_completed',
+      params: expect.objectContaining({
+        platform: 'android',
+        provider: 'native_bridge',
+        runtime_mode: 'local_prod_firebase',
+      }),
+    });
+    expect(logEvent).not.toHaveBeenCalled();
   });
 
   it('should add a short expiry fallback when native token expiry is unavailable', async () => {
@@ -208,7 +325,10 @@ describe(initializeFirebaseAppCheck.name, () => {
       token: 'native-token-without-expiry',
     });
 
-    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp, {
+      analytics,
+      runtimeMode: 'local_prod_firebase',
+    });
 
     const customProviderOptions = (CustomProvider as jest.Mock).mock
       .calls[0][0];
@@ -227,12 +347,15 @@ describe(initializeFirebaseAppCheck.name, () => {
       .spyOn(Capacitor, 'getPlatform')
       .mockReturnValue('electron' as ReturnType<typeof Capacitor.getPlatform>);
 
-    await initializeFirebaseAppCheck(firebaseApp);
+    await initializeFirebaseAppCheck(firebaseApp, {
+      analytics,
+      runtimeMode: 'local_prod_firebase',
+    });
 
     expect(initializeAppCheck).not.toHaveBeenCalled();
     expect(FirebaseAppCheck.initialize).not.toHaveBeenCalled();
     expect(consoleInfoSpy).toHaveBeenCalledWith(
-      '[AppCheck] Skipping Firebase App Check on unsupported platform: electron',
+      '[AppCheck] Skipping Firebase App Check on unsupported platform: other',
     );
 
     consoleInfoSpy.mockRestore();
@@ -266,12 +389,26 @@ describe(initializeFirebaseAppCheck.name, () => {
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
 
     await expect(
-      initializeFirebaseAppCheck(firebaseApp),
+      initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'local_prod_firebase',
+      }),
     ).resolves.toBeUndefined();
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      '[AppCheck] Firebase App Check initialization failed',
+      '[AppCheck] Firebase App Check initialization failed; continuing under transitional policy',
       error,
+    );
+    expect(logEvent).toHaveBeenCalledWith(
+      analytics,
+      'app_check_initialization_failed',
+      expect.objectContaining({
+        platform: 'web',
+        provider: 'recaptcha_enterprise',
+        reason: 'initialization_error',
+        runtime_mode: 'local_prod_firebase',
+        transitional_policy: 'continue_after_failure',
+      }),
     );
 
     consoleWarnSpy.mockRestore();
@@ -286,11 +423,14 @@ describe(initializeFirebaseAppCheck.name, () => {
       .mockRejectedValueOnce(error);
 
     await expect(
-      initializeFirebaseAppCheck(firebaseApp),
+      initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'local_prod_firebase',
+      }),
     ).resolves.toBeUndefined();
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      '[AppCheck] Android Firebase App Check bridge initialization failed',
+      '[AppCheck] Android Firebase App Check bridge initialization failed; continuing under transitional policy',
       error,
     );
     expect(initializeAppCheck).not.toHaveBeenCalled();

@@ -1,4 +1,10 @@
-import { InjectionToken, Provider } from '@angular/core';
+import {
+  EnvironmentProviders,
+  inject,
+  InjectionToken,
+  provideAppInitializer,
+  Provider,
+} from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseOptions, initializeApp } from 'firebase/app';
 import {
@@ -14,11 +20,19 @@ import {
 } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 
-import { provideFirestoreAnalytics } from './analytics/provide-firestore-analytics';
-import { initializeFirebaseAppCheck } from './initialize-firebase-app-check';
+import {
+  FIREBASE_ANALYTICS,
+  provideFirestoreAnalytics,
+} from './analytics/provide-firestore-analytics';
+import {
+  FirebaseAppCheckRuntimeMode,
+  initializeFirebaseAppCheck,
+} from './initialize-firebase-app-check';
 import { provideFirestoreSimulator } from './provide-firestore-simulator';
 import { Emulators } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { Analytics } from 'firebase/analytics';
+import { AuthService } from './auth.service';
 
 export const FIREBASE_APP = new InjectionToken<'FIREBASE_APP' | null>(
   'FIREBASE_APP',
@@ -28,37 +42,102 @@ export const FIREBASE_FIRESTORE = new InjectionToken<Firestore>(
 );
 export const FIREBASE_AUTH = new InjectionToken<Auth>('FIREBASE_AUTH');
 
+export type FirebaseAppCheckRuntimeContext = {
+  production?: boolean;
+};
+
 export const provideFirestoreUtils = (
   firebaseOptions: FirebaseOptions,
   withAnalytics?: boolean,
   emulators?: Emulators,
-): Provider[] => {
+  appCheckRuntimeContext?: FirebaseAppCheckRuntimeContext,
+): (EnvironmentProviders | Provider)[] => {
   const app = initializeApp(firebaseOptions || {});
-  initializeFirebaseAppCheck(app);
   const firestore: Firestore = initializeFirestore(app, {});
+  const startupInitializer = provideFirebaseStartupInitializer(
+    app,
+    appCheckRuntimeContext,
+  );
 
   if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] !== 'true') {
-    return provideStandardFirestoreUtils(
-      app,
-      firestore,
-      Boolean(withAnalytics),
-    );
+    return [
+      startupInitializer,
+      ...provideStandardFirestoreUtils(app, firestore, Boolean(withAnalytics)),
+    ];
   }
 
   console.log('DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS');
   console.log('DISABLING ANALYTICS');
-  FirebaseAnalytics.setEnabled({ enabled: false });
+  void FirebaseAnalytics.setEnabled({ enabled: false });
 
   if (emulators) {
     const storage = getStorage(app);
-    return provideFirestoreSimulator(emulators, app, firestore, storage);
+    return [
+      startupInitializer,
+      ...provideFirestoreSimulator(emulators, app, firestore, storage),
+    ];
   }
 
   console.warn(
     'DEV ENVIRONMENT - NX_APP_BITE_TRIBE_IS_DEV is true, but no emulators configuration was provided. Falling back to standard Firestore initialization.',
   );
 
-  return provideStandardFirestoreUtils(app, firestore, Boolean(withAnalytics));
+  return [
+    startupInitializer,
+    ...provideStandardFirestoreUtils(app, firestore, Boolean(withAnalytics)),
+  ];
+};
+
+const provideFirebaseStartupInitializer = (
+  app: ReturnType<typeof initializeApp>,
+  runtimeContext?: FirebaseAppCheckRuntimeContext,
+): EnvironmentProviders =>
+  provideAppInitializer(() => {
+    const analytics = inject(FIREBASE_ANALYTICS, {
+      optional: true,
+    }) as Analytics | null;
+    const authService = inject(AuthService);
+
+    return createFirebaseStartupInitializer(
+      app,
+      runtimeContext,
+      analytics,
+      authService,
+    )();
+  });
+
+export const createFirebaseStartupInitializer =
+  (
+    app: ReturnType<typeof initializeApp>,
+    runtimeContext: FirebaseAppCheckRuntimeContext | undefined,
+    analytics: Analytics | null | undefined,
+    authService: Pick<AuthService, 'initialize'>,
+  ): (() => Promise<void>) =>
+  async () => {
+    await createFirebaseAppCheckInitializer(app, runtimeContext, analytics)();
+    await authService.initialize();
+  };
+
+export const createFirebaseAppCheckInitializer =
+  (
+    app: ReturnType<typeof initializeApp>,
+    runtimeContext?: FirebaseAppCheckRuntimeContext,
+    analytics?: Analytics | null,
+  ): (() => Promise<void>) =>
+  () =>
+    initializeFirebaseAppCheck(app, {
+      analytics,
+      runtimeMode: getAppCheckRuntimeMode(runtimeContext),
+    });
+
+const getAppCheckRuntimeMode = (
+  runtimeContext?: FirebaseAppCheckRuntimeContext,
+): FirebaseAppCheckRuntimeMode => {
+  if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] === 'true') {
+    return 'dev_simulator';
+  }
+
+  return runtimeContext?.production ? 'production' : 'local_prod_firebase';
 };
 
 const provideStandardFirestoreUtils = (

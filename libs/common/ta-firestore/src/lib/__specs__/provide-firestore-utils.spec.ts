@@ -1,13 +1,23 @@
-import { provideFirestoreUtils } from '../provide-firestore-utils';
-import { ErrorHandler, InjectionToken } from '@angular/core';
+import {
+  createFirebaseAppCheckInitializer,
+  FIREBASE_APP,
+  FIREBASE_AUTH,
+  FIREBASE_FIRESTORE,
+  provideFirestoreUtils,
+} from '../provide-firestore-utils';
+import { ErrorHandler } from '@angular/core';
 import { FirebaseErrorHandlerService } from '../analytics/firebase-error-handler.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import * as storageUtils from 'firebase/storage';
 import * as simulatorUtils from '../provide-firestore-simulator';
-import * as firestoreUtils from 'firebase/firestore';
+import {
+  enableMultiTabIndexedDbPersistence,
+  initializeFirestore,
+} from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import * as appCheckUtils from '../initialize-firebase-app-check';
-import { FirebaseOptions } from 'firebase/app';
+import { FirebaseOptions, initializeApp } from 'firebase/app';
+import { FIREBASE_ANALYTICS } from '../analytics/provide-firestore-analytics';
 
 jest.mock('firebase/app');
 jest.mock('firebase/firestore');
@@ -28,22 +38,44 @@ jest.mock('../provide-firestore-simulator', () => ({
 jest.mock('@capacitor/core');
 
 describe(provideFirestoreUtils.name, () => {
-  it('should initialize App Check before Firestore', () => {
+  const firebaseApp = { name: 'bite-tribe' } as any;
+  const firestore = { app: firebaseApp } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(initializeApp).mockReturnValue(firebaseApp);
+    jest.mocked(initializeFirestore).mockReturnValue(firestore);
+    jest
+      .mocked(enableMultiTabIndexedDbPersistence)
+      .mockImplementation(jest.fn());
+    jest
+      .mocked(appCheckUtils.initializeFirebaseAppCheck)
+      .mockResolvedValue(undefined);
+  });
+
+  it('should create an App Check startup initializer without calling App Check during provider construction', async () => {
     const initializeAppCheckSpy = jest.spyOn(
       appCheckUtils,
       'initializeFirebaseAppCheck',
     );
-    const initializeFirestoreSpy = jest.spyOn(
-      firestoreUtils,
-      'initializeFirestore',
-    );
 
     provideFirestoreUtils({} as FirebaseOptions);
 
-    expect(initializeAppCheckSpy).toHaveBeenCalledWith(undefined);
-    expect(initializeAppCheckSpy.mock.invocationCallOrder[0]).toBeLessThan(
-      initializeFirestoreSpy.mock.invocationCallOrder[0],
+    expect(initializeAppCheckSpy).not.toHaveBeenCalled();
+
+    const analytics = {} as any;
+    const initializer = createFirebaseAppCheckInitializer(
+      firebaseApp,
+      { production: true },
+      analytics,
     );
+
+    await initializer();
+
+    expect(initializeAppCheckSpy).toHaveBeenCalledWith(firebaseApp, {
+      analytics,
+      runtimeMode: 'production',
+    });
   });
 
   describe('given prod mode', () => {
@@ -69,19 +101,20 @@ describe(provideFirestoreUtils.name, () => {
           FIREBASE_OPTIONS,
           WITHOUT_ANALYTICS,
           EMULATORS,
+          { production: true },
         );
 
-        expect(providers).toEqual([
+        expect(getRegularProviders(providers)).toEqual([
           {
-            provide: new InjectionToken('FIREBASE_APP'),
+            provide: FIREBASE_APP,
             useFactory: expect.anything(),
           },
           {
-            provide: new InjectionToken('FIREBASE_FIRESTORE'),
+            provide: FIREBASE_FIRESTORE,
             useFactory: expect.anything(),
           },
           {
-            provide: new InjectionToken('FIREBASE_AUTH'),
+            provide: FIREBASE_AUTH,
             useFactory: expect.anything(),
           },
         ]);
@@ -102,23 +135,24 @@ describe(provideFirestoreUtils.name, () => {
           FIREBASE_OPTIONS,
           WITH_ANALYTICS,
           EMULATORS,
+          { production: true },
         );
 
-        expect(providers).toEqual([
+        expect(getRegularProviders(providers)).toEqual([
           {
-            provide: new InjectionToken('FIREBASE_APP'),
+            provide: FIREBASE_APP,
             useFactory: expect.anything(),
           },
           {
-            provide: new InjectionToken('FIREBASE_FIRESTORE'),
+            provide: FIREBASE_FIRESTORE,
             useFactory: expect.anything(),
           },
           {
-            provide: new InjectionToken('FIREBASE_AUTH'),
+            provide: FIREBASE_AUTH,
             useFactory: expect.anything(),
           },
           {
-            provide: new InjectionToken('FIREBASE_ANALYTICS'),
+            provide: FIREBASE_ANALYTICS,
             useFactory: expect.anything(),
           },
           {
@@ -172,12 +206,12 @@ describe(provideFirestoreUtils.name, () => {
           firestore: { host: 'localhost', port: 8080 },
           storage: { host: 'localhost', port: 9199 },
         },
-        undefined,
-        undefined,
+        firebaseApp,
+        firestore,
         undefined,
       );
 
-      expect(providers).toEqual([]);
+      expect(getRegularProviders(providers)).toEqual([]);
     });
 
     it('should fall back to standard initialization when no emulators provided', () => {
@@ -200,18 +234,18 @@ describe(provideFirestoreUtils.name, () => {
         'DEV ENVIRONMENT - NX_APP_BITE_TRIBE_IS_DEV is true, but no emulators configuration was provided. Falling back to standard Firestore initialization.',
       );
 
-      expect(providers).toEqual(
+      expect(getRegularProviders(providers)).toEqual(
         expect.arrayContaining([
           {
-            provide: new InjectionToken('FIREBASE_APP'),
+            provide: FIREBASE_APP,
             useFactory: expect.anything(),
           },
           {
-            provide: new InjectionToken('FIREBASE_FIRESTORE'),
+            provide: FIREBASE_FIRESTORE,
             useFactory: expect.anything(),
           },
           {
-            provide: new InjectionToken('FIREBASE_AUTH'),
+            provide: FIREBASE_AUTH,
             useFactory: expect.anything(),
           },
         ]),
@@ -230,11 +264,9 @@ describe(provideFirestoreUtils.name, () => {
       const consoleWarnSpy = jest.spyOn(console, 'warn');
 
       const persistenceError = new Error('Persistence failed');
-      jest
-        .spyOn(firestoreUtils, 'enableMultiTabIndexedDbPersistence')
-        .mockImplementation(() => {
-          throw persistenceError;
-        });
+      jest.mocked(enableMultiTabIndexedDbPersistence).mockImplementation(() => {
+        throw persistenceError;
+      });
 
       const FIREBASE_OPTIONS = {} as any;
       const WITHOUT_ANALYTICS = false;
@@ -249,10 +281,10 @@ describe(provideFirestoreUtils.name, () => {
         expect.anything(),
       );
 
-      expect(providers).toEqual(
+      expect(getRegularProviders(providers)).toEqual(
         expect.arrayContaining([
           {
-            provide: new InjectionToken('FIREBASE_APP'),
+            provide: FIREBASE_APP,
             useFactory: expect.anything(),
           },
         ]),
@@ -278,10 +310,10 @@ describe(provideFirestoreUtils.name, () => {
         WITHOUT_ANALYTICS,
       );
 
-      expect(providers).toEqual(
+      expect(getRegularProviders(providers)).toEqual(
         expect.arrayContaining([
           {
-            provide: new InjectionToken('FIREBASE_AUTH'),
+            provide: FIREBASE_AUTH,
             useFactory: expect.anything(),
           },
         ]),
@@ -299,10 +331,10 @@ describe(provideFirestoreUtils.name, () => {
         WITHOUT_ANALYTICS,
       );
 
-      expect(providers).toEqual(
+      expect(getRegularProviders(providers)).toEqual(
         expect.arrayContaining([
           {
-            provide: new InjectionToken('FIREBASE_AUTH'),
+            provide: FIREBASE_AUTH,
             useFactory: expect.anything(),
           },
         ]),
@@ -310,3 +342,6 @@ describe(provideFirestoreUtils.name, () => {
     });
   });
 });
+
+const getRegularProviders = (providers: any[]): any[] =>
+  providers.filter((provider) => 'provide' in provider);

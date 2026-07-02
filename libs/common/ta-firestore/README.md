@@ -5,9 +5,10 @@ This library was generated with [Nx](https://nx.dev).
 ## Firebase App Check
 
 BiteTribe initializes Firebase App Check from
-`src/lib/initialize-firebase-app-check.ts`. `provideFirestoreUtils` calls the
-initializer immediately after `initializeApp(...)` and before Firestore, Auth,
-Storage, or Firebase simulator setup is used.
+`src/lib/initialize-firebase-app-check.ts`. `provideFirestoreUtils` registers an
+Angular app initializer that waits for the App Check initialization attempt
+before normal app bootstrap continues into NgRx effects and Firebase-backed
+feature code.
 
 The web app uses the Capawesome `@capacitor-firebase/app-check` plugin with
 Firebase's `ReCaptchaEnterpriseProvider`. The iOS app installs the native App
@@ -40,18 +41,42 @@ build.
 
 | Mode                          | Required environment                                                             | App Check behavior                                                                                                           |
 | ----------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Web local simulators          | `NX_APP_BITE_TRIBE_IS_DEV=true`                                                  | Skipped. No site key or debug token is needed.                                                                               |
+| Web local simulators          | `NX_APP_BITE_TRIBE_IS_DEV=true`                                                  | Skipped quietly. No site key or debug token is needed.                                                                       |
 | Web local production Firebase | `NX_APP_BITE_TRIBE_IS_DEV=false` plus `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY=...` | Runs with the regular site key. Use `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN=...` for `localhost`.                           |
 | Web production build          | `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY=...`                                       | Runs with the regular site key. Do not provide a debug token. `NX_APP_BITE_TRIBE_IS_DEV` is omitted from production bundles. |
 | iOS production/TestFlight     | Firebase Console iOS App Check registration plus App Attest capability           | Uses native App Attest tokens bridged into the Firebase JavaScript SDK.                                                      |
 | Android production/internal   | Firebase Console Android App Check registration plus Play Integrity provider     | Uses native Play Integrity tokens bridged into the Firebase JavaScript SDK.                                                  |
 
 When `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY` is not configured, initialization is
-also skipped with an `[AppCheck]` info log. This keeps localhost development
-working while Firebase App Check enforcement remains disabled.
+also skipped. This keeps localhost development working while Firebase App Check
+enforcement remains disabled.
 
-Initialization success and failure are logged with the `[AppCheck]` prefix. A
-failure is caught and does not block application startup.
+### Transitional startup telemetry
+
+The current startup policy is transitional: the app waits for the App Check
+initialization attempt, records telemetry when available, and continues startup
+if initialization fails. App Check enforcement must not be enabled until the
+future blocking/retry behavior is implemented.
+
+App Check emits Firebase Analytics events in production-like modes when
+Analytics is available:
+
+- `app_check_startup_started`
+- `app_check_startup_completed`
+- `app_check_skipped`
+- `app_check_initialization_failed`
+
+Event parameters are limited to startup metadata such as platform, runtime mode,
+provider, reason, duration, site-key/debug-token presence booleans, and the
+transitional policy. Token values, debug token values, user IDs, and raw
+attestation payloads must never be logged.
+
+Console logs are intentionally limited:
+
+- dev/simulator mode emits no App Check logging noise.
+- local production-Firebase testing may emit `[AppCheck]` console logs for
+  debugging.
+- production builds emit Analytics events but no App Check console logs.
 
 After deploying a build with the site key configured, verify requests in
 Firebase Console under **Build > App Check** for the relevant BiteTribe app. Use

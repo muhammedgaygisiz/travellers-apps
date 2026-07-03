@@ -2,14 +2,25 @@
 - Status
   - GitHub project status: In progress
 - Child issues
-  - [feat: add restaurant candidate model and clustering helpers](https://github.com/muhammedgaygisiz/travellers-apps/issues/938) (Issue \#938)
-  - [feat(business): list restaurant-clustering eligible bites in migrations](https://github.com/muhammedgaygisiz/travellers-apps/issues/939) (Issue \#939)
-  - [feat: add manual restaurant candidate clustering backfill](https://github.com/muhammedgaygisiz/travellers-apps/issues/940) (Issue \#940)
-  - [feat(business): show restaurant candidates on dashboard](https://github.com/muhammedgaygisiz/travellers-apps/issues/941) (Issue \#941)
-  - [feat(business): verify restaurant candidate into restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/942) (Issue \#942)
-  - [feat: suggest verified restaurant match after bite creation](https://github.com/muhammedgaygisiz/travellers-apps/issues/943) (Issue \#943)
-  - [feat: create restaurant candidates from new bite trigger](https://github.com/muhammedgaygisiz/travellers-apps/issues/944) (Issue \#944)
-  - [test: harden restaurant candidate duplicate and idempotency paths](https://github.com/muhammedgaygisiz/travellers-apps/issues/945) (Issue \#945)
+  - [01 - feat: add restaurant candidate model and clustering helpers](https://github.com/muhammedgaygisiz/travellers-apps/issues/938) (Issue \#938)
+  - [02 - feat(business): list restaurant-clustering eligible bites in migrations](https://github.com/muhammedgaygisiz/travellers-apps/issues/939) (Issue \#939)
+  - [03 - feat: add manual restaurant candidate clustering backfill](https://github.com/muhammedgaygisiz/travellers-apps/issues/940) (Issue \#940)
+  - [04 - feat(business): show restaurant candidates on dashboard](https://github.com/muhammedgaygisiz/travellers-apps/issues/941) (Issue \#941)
+  - [05 - feat(business): verify restaurant candidate into restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/942) (Issue \#942)
+  - [06 - feat: suggest verified restaurant match after bite creation](https://github.com/muhammedgaygisiz/travellers-apps/issues/943) (Issue \#943)
+  - [07 - feat: create restaurant candidates from new bite trigger](https://github.com/muhammedgaygisiz/travellers-apps/issues/944) (Issue \#944)
+  - [08 - test: harden restaurant candidate duplicate and idempotency paths](https://github.com/muhammedgaygisiz/travellers-apps/issues/945) (Issue \#945)
+- Implementation order
+  - Start with the manual backfill path before the automatic trigger and user-facing prompt.
+  - This keeps the first implementation slices inspectable in the Business app and reduces risk before enabling automatic candidate creation.
+  - 1. Candidate model and reusable clustering helpers.
+  - 2. Business migrations page eligible Bite listing.
+  - 3. Manual clustering callable and migration action.
+  - 4. Business dashboard candidate card.
+  - 5. Candidate verification into a real restaurant.
+  - 6. Verified restaurant suggestion after Bite creation.
+  - 7. Automatic new-Bite candidate trigger.
+  - 8. Duplicate and idempotency hardening pass.
 - Product goal
   - Improve restaurant data quality by turning repeated Bite evidence into reviewable restaurant candidates.
   - Help users attach new Bites to already verified restaurants when the backend finds a likely match.

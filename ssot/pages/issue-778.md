@@ -17,6 +17,17 @@
   - A candidate should be created or updated when at least 5 Bites are within 200m and their restaurant/place names fuzzy-match the same normalized name.
   - Geohash should be used to reduce the Firestore query scope, but exact distance checking remains required.
   - Candidate creation must be idempotent so repeated trigger runs update one candidate instead of creating duplicates.
+- Duplicate handling workflow
+  - Candidate creation must check nearby verified restaurants before creating or updating a candidate.
+  - If a nearby verified restaurant exists within 200m and fuzzy-matches the normalized place name, do not create a candidate.
+  - For a live Bite creation flow, return or surface the verified restaurant match through the user confirmation workflow.
+  - For a manual migration flow, return the verified restaurant match as a warning or result so the business user can handle the Bite through the verified-restaurant flow.
+  - Candidate creation must check nearby pending candidates before creating a new candidate.
+  - If a nearby pending candidate exists within 200m and fuzzy-matches the normalized place name, update that candidate's `biteIds`, evidence count, and timestamps instead of creating a duplicate.
+  - Candidate creation should ignore candidates whose status is `verified`, `merged`, or `dismissed` when deciding whether a pending candidate should be updated.
+  - Candidate verification must guard against double-submit or parallel dashboard sessions by re-checking that the candidate is still `pending` before creating a verified restaurant.
+  - When a candidate is verified, store the resulting `verifiedRestaurantId`, verification metadata, and final status on the candidate.
+  - If the same candidate was already verified or merged, do not create another restaurant; return the existing `verifiedRestaurantId`.
 - Backfill and migration workflow
   - Keep the automatic live trigger for new Bites, but add a manual migration path for historical Bites.
   - The business app migrations page should show up to 50 Bites that are eligible for restaurant clustering.
@@ -70,6 +81,9 @@
   - Manual clustering stores matched Bite IDs on the candidate only and does not modify the matched Bite documents.
   - Manual clustering updates an existing nearby matching pending candidate instead of creating a duplicate.
   - Manual clustering does not create a candidate when a nearby matching verified restaurant already exists; it returns that verified match for follow-up.
+  - Automatic candidate creation does not create a candidate when a nearby matching verified restaurant already exists; it routes the match through the verified-restaurant confirmation path.
+  - Verifying a candidate is idempotent: repeated or parallel verify attempts must not create duplicate restaurants.
+  - Already verified, merged, or dismissed candidates are not reused as pending candidates for new clustering.
   - Similar names are grouped after normalization and fuzzy matching.
   - Candidates do not appear as verified restaurants before business review.
   - Business dashboard shows up to 5 pending restaurant candidates.

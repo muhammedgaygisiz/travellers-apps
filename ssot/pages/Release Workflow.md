@@ -54,12 +54,14 @@ npm run build
    - Keep source maps available for future production issue monitoring.
    - Do not expose source maps publicly unless the monitoring setup explicitly requires it.
 
-6. Future release tagging.
+6. Release tagging.
    - Create a git tag for the release build.
-   - Publish the release on GitHub.
+   - Use the native version and current build number before the next build-number increment.
+   - Use the `build-<version>-<build-number>` tag convention, for example `build-1.0.1-81`.
+   - Push the release commit and tag.
+   - Publish the release on GitHub when needed.
    - Attach native build artifacts to the tag or GitHub release when the artifact packaging convention is finalized.
    - Include the matching source maps in the release package or monitoring upload path.
-   - This is a future required step and should become part of the release checklist once the tag/release convention is finalized.
 
 7. Build native apps.
    - Build the iOS app for the current build number.
@@ -98,6 +100,13 @@ npm run generate-changelog
 npm run increment-build-number
 ```
 
+The combined helper can be used after native publish when the release state is
+ready to be committed and pushed:
+
+```bash
+npm run increment-build-number-and-generate-changelog
+```
+
 12. Merge the next-build branch.
 
 - Create a pull request back to `develop`.
@@ -118,8 +127,9 @@ Each release should produce:
 - production source maps retained for issue monitoring
 - iOS build uploaded to TestFlight
 - Android build uploaded to Google Play Open Testing
+- git tag pushed with the released native version and build number
 - next-build PR back to `develop` that only increments the shared build number
-- future: git tag and GitHub release with packaged native artifacts and source maps
+- future: GitHub release with packaged native artifacts and source maps
 
 ## Checks
 
@@ -133,6 +143,7 @@ Each release should produce:
 - Source maps are generated or the missing source-map path is explicitly documented.
 - Native uploads complete before release notes are generated.
 - Release notes are generated before the next build number is incremented.
+- Release tag uses the native version and build number captured before the increment.
 - Pull request back to `develop` contains only the next build-number bump.
 
 ## Related Pages

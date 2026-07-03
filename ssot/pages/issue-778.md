@@ -1,3 +1,81 @@
-- [feat: when 5 bites were created within a radius of 200m and the restaurant name is fuzzy compared the same, the restaurant should be shown as candidate for a verified restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/778) (Issue \#778)
-- Description
-  - No description provided.
+- [feat: surface and verify restaurant candidates from repeated nearby bites](https://github.com/muhammedgaygisiz/travellers-apps/issues/778) (Issue \#778)
+- Status
+  - GitHub project status: In progress
+- Product goal
+  - Improve restaurant data quality by turning repeated Bite evidence into reviewable restaurant candidates.
+  - Help users attach new Bites to already verified restaurants when the backend finds a likely match.
+  - Let business users review candidate restaurants before they become verified public restaurants.
+- User Bite creation workflow
+  - After a Bite is created, backend matching should search nearby verified restaurants.
+  - Use the Bite `geohash` as the first query filter, then calculate exact distance and keep matches within 200m.
+  - Fuzzy-match the Bite `place` against verified restaurant names.
+  - If a likely verified restaurant is found, ask the user whether the Bite belongs to that restaurant.
+  - When the user confirms, update the Bite with the matched `restaurantId`.
+  - When the user rejects or dismisses the suggestion, leave the Bite unchanged.
+- Candidate detection workflow
+  - For Bites that are not attached to a verified restaurant, backend detection should group nearby Bite evidence.
+  - A candidate should be created or updated when at least 5 Bites are within 200m and their restaurant/place names fuzzy-match the same normalized name.
+  - Geohash should be used to reduce the Firestore query scope, but exact distance checking remains required.
+  - Candidate creation must be idempotent so repeated trigger runs update one candidate instead of creating duplicates.
+- Backfill and migration workflow
+  - Keep the automatic live trigger for new Bites, but add a manual migration path for historical Bites.
+  - The business app migrations page should show up to 50 Bites that are eligible for restaurant clustering.
+  - Eligible Bites have no verified `restaurantId`, are not already referenced by an active restaurant candidate, and have valid `place`, `position`, and ideally `geohash`.
+  - Each migration row should show enough context for review, including Bite name or image, place name, location, and current clustering state.
+  - Add a manual action such as `Cluster restaurant candidate` for each eligible Bite.
+  - Triggering the action should call a Firebase callable with the selected `biteId`.
+  - The callable should load and validate the selected Bite, then use geohash bounds, exact 200m distance filtering, and fuzzy place-name matching to collect matching unverified and unclustered Bites.
+  - Manual backfill does not require the automatic 5-Bite threshold, because a business user explicitly initiated the clustering workflow.
+  - The callable should create or update a `restaurantCandidates` document that references matched Bite IDs, and return a summary with candidate ID, evidence count, matched Bite IDs, and skipped counts.
+  - If a nearby matching pending candidate already exists, update that candidate instead of creating a duplicate.
+  - If a nearby matching verified restaurant already exists, return that verified match as a warning or result instead of creating a duplicate candidate.
+- Candidate lifecycle
+  - Store detected candidates separately from verified restaurants, for example in `restaurantCandidates`.
+  - Candidate fields should include suggested name, normalized name, position, geohash, biteIds, evidenceCount, status, source, createdAt, updatedAt, and migration/backfill metadata when created manually.
+  - Candidate links are unidirectional: the candidate references Bites through `biteIds`, but Bites should not be updated with `restaurantCandidateId`.
+  - Bites should only receive a `restaurantId` when a user confirms an existing verified restaurant match or when a business user verifies a candidate into a real restaurant.
+  - Suggested status values: `pending`, `verified`, `dismissed`, or `merged`.
+  - Do not create menus for candidates during automatic detection.
+- Business app verification workflow
+  - Add a dashboard card for the top 5 restaurant candidates.
+  - Candidate items should show the suggested restaurant name, evidence count, nearby Bite evidence, and enough location context for review.
+  - Selecting a candidate should reuse the existing `new-restaurant` flow by passing a prefilled restaurant with `biteIds` and `bites`.
+  - The business user checks the candidate, adds missing restaurant details, and saves it as a verified restaurant.
+  - On save, create the real restaurant, attach all candidate Bite IDs to the verified `restaurantId`, create the menu, and mark the candidate as verified or merged.
+- Suggested implementation surfaces
+  - Firebase Functions
+    - Add a callable to find a verified restaurant match for a newly created Bite.
+    - Add a callable to confirm a Bite-to-restaurant match and update the Bite after ownership and restaurant validation.
+    - Add a Firestore trigger on Bite creation to create or update restaurant candidates.
+    - Add a callable to cluster a restaurant candidate from a selected historical Bite for the business migration workflow.
+  - Bite Tribe app
+    - After Bite creation, call the verified-match callable.
+    - Show the user a confirmation prompt when a likely verified restaurant is found.
+    - Confirming the prompt calls the backend to attach the Bite to the restaurant.
+  - Bite Tribe Business app
+    - Extend dashboard data access to load pending restaurant candidates.
+    - Add a Restaurant Candidates dashboard card limited to 5 candidates.
+    - Route candidate selection into the existing `new-restaurant` workflow.
+    - Reuse the new restaurant form because it already accepts a prefilled restaurant and preserves `biteIds`.
+    - Extend the migrations page to list up to 50 eligible unclustered Bites and expose the manual clustering action.
+- Acceptance criteria
+  - Creating a Bite near a matching verified restaurant prompts the user to confirm the match.
+  - Confirming the prompt updates the Bite with the verified restaurant ID.
+  - Rejecting or dismissing the prompt does not change the Bite's restaurant ID.
+  - Fewer than 5 similar nearby unverified Bites do not create a candidate.
+  - 5 or more similar unverified Bites within 200m create or update one restaurant candidate.
+  - The automatic live trigger remains responsible for threshold-based candidate creation for new Bites.
+  - The migration page shows up to 50 Bites that have no verified restaurant ID and are not already referenced by an active restaurant candidate.
+  - Manually clustering a migration Bite can create or update a candidate with fewer than 5 matching Bites.
+  - Manual clustering stores matched Bite IDs on the candidate only and does not modify the matched Bite documents.
+  - Manual clustering updates an existing nearby matching pending candidate instead of creating a duplicate.
+  - Manual clustering does not create a candidate when a nearby matching verified restaurant already exists; it returns that verified match for follow-up.
+  - Similar names are grouped after normalization and fuzzy matching.
+  - Candidates do not appear as verified restaurants before business review.
+  - Business dashboard shows up to 5 pending restaurant candidates.
+  - Saving a candidate through the business app creates a verified restaurant, links candidate Bites, creates the menu, and closes the candidate lifecycle.
+- Validation notes
+  - Firebase Functions build and lint should cover backend changes.
+  - Focused Angular/Jest checks should cover Bite creation prompt behavior and business dashboard candidate routing.
+  - Focused migration-page checks should cover eligible Bite listing and manual cluster action wiring.
+  - Emulator verification should seed nearby Bites, manual backfill candidates, and confirmed restaurant matches to prove Firestore state transitions.

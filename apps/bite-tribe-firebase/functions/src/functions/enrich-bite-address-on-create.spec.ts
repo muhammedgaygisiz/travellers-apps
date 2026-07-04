@@ -24,7 +24,14 @@ jest.mock('firebase-functions', () => ({
 }));
 
 jest.mock('firebase-functions/firestore', () => ({
-  onDocumentCreated: jest.fn((_path, handler) => handler),
+  onDocumentCreated: jest.fn((_options, handler) => handler),
+}));
+
+jest.mock('firebase-functions/params', () => ({
+  defineSecret: jest.fn((name: string) => ({
+    name,
+    value: jest.fn(() => 'secret-value'),
+  })),
 }));
 
 describe('enrich bite address helpers', () => {

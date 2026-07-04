@@ -2,12 +2,14 @@ import * as admin from 'firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onDocumentCreated } from 'firebase-functions/firestore';
+import { defineSecret } from 'firebase-functions/params';
 import { Bite } from './model/bite';
 
 const db = admin.firestore();
 const GOOGLE_GEOCODING_API_KEY_ENV = 'GOOGLE_GEOCODING_API_KEY';
 const GOOGLE_GEOCODING_BASE_URL =
   'https://maps.googleapis.com/maps/api/geocode/json';
+const googleGeocodingApiKey = defineSecret(GOOGLE_GEOCODING_API_KEY_ENV);
 
 type AddressStatus = 'pending' | 'resolved' | 'failed';
 
@@ -104,7 +106,7 @@ export const buildBiteAddressUpdate = (
 });
 
 const loadBiteAddress = async (position: Position): Promise<BiteAddress> => {
-  const apiKey = process.env[GOOGLE_GEOCODING_API_KEY_ENV];
+  const apiKey = googleGeocodingApiKey.value();
 
   if (!apiKey) {
     throw new Error(`${GOOGLE_GEOCODING_API_KEY_ENV} is not configured.`);
@@ -138,7 +140,10 @@ const loadBiteAddress = async (position: Position): Promise<BiteAddress> => {
 };
 
 export const enrichBiteAddressOnCreate = onDocumentCreated(
-  'bites/{biteId}',
+  {
+    document: 'bites/{biteId}',
+    secrets: [googleGeocodingApiKey],
+  },
   async (event) => {
     const snap = event.data;
     const biteId = event.params.biteId;

@@ -4,6 +4,7 @@ import {
   computed,
   input,
 } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
 import { IonButton, IonContent, IonText } from '@ionic/angular/standalone';
 import { Bite } from 'model';
@@ -23,11 +24,12 @@ const BITE_COLLECTION = 'bites';
   selector: 'btb-migrations',
   templateUrl: './migrations.html',
   styleUrl: './migrations.scss',
-  imports: [PageComponent, IonContent, IonButton, IonText],
+  imports: [PageComponent, IonContent, IonButton, IonText, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Migrations {
   bites = input<Bite[]>();
+  restaurantClusteringEligibleBites = input<Bite[]>([]);
   isAuthenticated = input(false);
 
   bitesNeedingMigration = computed(() => {
@@ -41,6 +43,12 @@ export class Migrations {
 
     return bites?.filter((bite) => !bite.geohash);
   });
+
+  restaurantClusteringState(bite: Bite): string {
+    return bite.geohash
+      ? 'restaurant-clustering-state-ready'
+      : 'restaurant-clustering-state-missing-geohash';
+  }
 
   async migrate(bite: Bite): Promise<void> {
     console.log('START MIGRATION FOR BITE', bite.name);
@@ -82,7 +90,7 @@ export class Migrations {
             await this.updateBiteWithImagePath(objectPath, bite, docId);
           }
           // event.progress (0..1) is available if you want a UI
-        }
+        },
       );
     } catch (e) {
       console.error(e);
@@ -92,7 +100,7 @@ export class Migrations {
   private async updateBiteWithImagePath(
     objectPath: string,
     bite: Bite,
-    docId: string
+    docId: string,
   ): Promise<void> {
     const downloadUrl = await getDownloadUrlFromFirebaseStorage(objectPath);
 

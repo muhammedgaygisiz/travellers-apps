@@ -10,8 +10,13 @@
     "strict": true,
     "target": "es2017",
     "types": ["node"],
-    "typeRoots": ["./src/types", "./node_modules/@types", "../../../node_modules/@types"]
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types",
+      "../../../node_modules/@types"
+    ]
   },
   "compileOnSave": true,
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/**/*.spec.ts"]
 }

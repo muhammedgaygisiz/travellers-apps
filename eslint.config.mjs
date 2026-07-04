@@ -5,7 +5,7 @@ export default [
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
   {
-    ignores: ['**/dist']
+    ignores: ['**/dist'],
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
@@ -18,7 +18,11 @@ export default [
           depConstraints: [
             {
               sourceTag: 'type:app',
-              onlyDependOnLibsWithTags: ['type:shell', 'scope:common']
+              onlyDependOnLibsWithTags: ['type:shell', 'scope:common'],
+            },
+            {
+              sourceTag: 'type:backend',
+              onlyDependOnLibsWithTags: ['type:model'],
             },
             {
               sourceTag: 'type:shell',
@@ -26,8 +30,8 @@ export default [
                 'type:feature',
                 'type:store',
                 'scope:common',
-                'type:model'
-              ]
+                'type:model',
+              ],
             },
             {
               sourceTag: 'type:feature',
@@ -36,8 +40,8 @@ export default [
                 'type:data-access',
                 'type:model',
                 'type:store',
-                'scope:common'
-              ]
+                'scope:common',
+              ],
             },
             {
               sourceTag: 'type:data-access',
@@ -45,47 +49,47 @@ export default [
                 'type:store',
                 'scope:common',
                 'type:api',
-                'type:model'
-              ]
+                'type:model',
+              ],
             },
             {
               sourceTag: 'type:store',
               onlyDependOnLibsWithTags: [
                 'scope:common',
                 'type:api',
-                'type:model'
-              ]
+                'type:model',
+              ],
             },
             {
               sourceTag: 'scope:common',
-              onlyDependOnLibsWithTags: ['scope:common']
+              onlyDependOnLibsWithTags: ['scope:common'],
             },
             {
               sourceTag: 'type:ui',
               onlyDependOnLibsWithTags: [
                 'type:ui',
                 'scope:common',
-                'type:model'
-              ]
+                'type:model',
+              ],
             },
             {
               sourceTag: 'scope:bite-tribe',
               onlyDependOnLibsWithTags: [
                 'scope:bite-tribe',
                 'scope:common',
-                'type:ui'
-              ]
-            }
-          ]
-        }
-      ]
-    }
+                'type:ui',
+              ],
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
-      '@typescript-eslint/explicit-function-return-type': 'error'
-    }
+      '@typescript-eslint/explicit-function-return-type': 'error',
+    },
   },
   {
     files: [
@@ -98,18 +102,18 @@ export default [
       '**/*.cjs',
       '**/*.mjs',
     ],
-    rules: {}
+    rules: {},
   },
   {
-    'files': ['*.js', '*.jsx'],
-    'extends': ['plugin:@nx/javascript'],
-    'rules': {
+    files: ['*.js', '*.jsx'],
+    extends: ['plugin:@nx/javascript'],
+    rules: {
       '@typescript-eslint/no-extra-semi': 'error',
-      'no-extra-semi': 'off'
-    }
+      'no-extra-semi': 'off',
+    },
   },
   {
-    'files': ['*.stories.*', 'main.js'],
-    'extends': ['plugin:storybook/recommended']
-  }
+    files: ['*.stories.*', 'main.js'],
+    extends: ['plugin:storybook/recommended'],
+  },
 ];

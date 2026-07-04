@@ -1,3 +1,9 @@
 {
-  "include": [".eslintrc.js"]
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": ["node", "jest"]
+  },
+  "include": [".eslintrc.js", "src/**/*.spec.ts"]
 }

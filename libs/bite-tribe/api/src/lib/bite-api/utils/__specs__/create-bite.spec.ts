@@ -35,6 +35,7 @@ describe('createBite', () => {
           data: {
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
+            addressStatus: 'pending',
             geohash: '123',
             position: {
               latitude: 10,
@@ -56,6 +57,7 @@ describe('createBite', () => {
           data: {
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
+            addressStatus: 'pending',
             geohash: '123',
             position: {
               latitude: 10,

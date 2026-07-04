@@ -12,6 +12,12 @@ export interface Bite {
   currency?: string;
   position: Geopoint;
   geohash?: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  countryCode?: string;
+  formatted?: string;
+  addressStatus?: 'pending' | 'resolved' | 'failed';
   restaurantId?: string;
   tags?: string[];
   rating?: number;

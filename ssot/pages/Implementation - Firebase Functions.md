@@ -28,6 +28,7 @@ apps/bite-tribe-firebase/functions/src/index.ts
 
 - Put backend-owned query semantics in functions when the client should not duplicate filtering logic.
 - Keep callable request and result shapes typed.
+- Use `onAppCheck` from `callable-options.ts` for frontend callable functions so App Check enforcement is applied consistently.
 - Preserve client-safe fallback behavior where the UI expects empty lists instead of hard failures.
 - Add structured logs for operationally important branches.
 - Export new functions from `src/index.ts`.

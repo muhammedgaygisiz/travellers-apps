@@ -1,7 +1,8 @@
 import * as admin from 'firebase-admin';
-import { HttpsError, onCall } from 'firebase-functions/https';
+import { HttpsError } from 'firebase-functions/https';
+import { onAppCheck } from './callable-options';
 
-export const updateLastSeen = onCall(async (request) => {
+export const updateLastSeen = onAppCheck(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
       'unauthenticated',

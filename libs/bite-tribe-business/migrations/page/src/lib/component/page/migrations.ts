@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   input,
+  output,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
@@ -31,6 +32,7 @@ export class Migrations {
   bites = input<Bite[]>();
   restaurantClusteringEligibleBites = input<Bite[]>([]);
   isAuthenticated = input(false);
+  clusterRestaurantCandidate = output<Bite>();
 
   bitesNeedingMigration = computed(() => {
     const bites = this.bites();
@@ -48,6 +50,10 @@ export class Migrations {
     return bite.geohash
       ? 'restaurant-clustering-state-ready'
       : 'restaurant-clustering-state-missing-geohash';
+  }
+
+  clusterCandidate(bite: Bite): void {
+    this.clusterRestaurantCandidate.emit(bite);
   }
 
   async migrate(bite: Bite): Promise<void> {

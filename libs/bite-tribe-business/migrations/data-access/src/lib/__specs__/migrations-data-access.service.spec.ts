@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { Bite, RestaurantCandidate } from 'model';
 import {
@@ -12,6 +13,11 @@ import {
 } from '../migrations-data-access.service';
 
 jest.mock('@capacitor-firebase/firestore');
+jest.mock('@capacitor-firebase/functions', () => ({
+  FirebaseFunctions: {
+    callByName: jest.fn(),
+  },
+}));
 jest.mock('bite-tribe/store', () => ({
   BiteTribeStoreService: class BiteTribeStoreService {},
 }));
@@ -159,6 +165,57 @@ describe(MigrationsDataAccessService.name, () => {
           [{ id: 'candidate-1' } as RestaurantCandidate],
         ),
       );
+    });
+  });
+
+  describe('clusterRestaurantCandidateForBite', () => {
+    it('should call the manual restaurant candidate clustering callable and refresh migration resources', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: {
+          candidateId: 'candidate-1',
+          evidenceCount: 1,
+          matchedBiteIds: ['bite-1'],
+          skippedCounts: {
+            invalidPosition: 0,
+            verifiedBite: 0,
+            outsideRadius: 0,
+            nameMismatch: 0,
+          },
+          status: 'created',
+        },
+      });
+      const service = TestBed.inject(MigrationsDataAccessService);
+      const activeCandidatesReloadSpy = jest.spyOn(
+        service.activeRestaurantCandidates,
+        'reload',
+      );
+      const clusteringBitesReloadSpy = jest.spyOn(
+        service.restaurantClusteringBites,
+        'reload',
+      );
+
+      const result = await service.clusterRestaurantCandidateForBite(
+        bite({ id: 'bite-1' }),
+      );
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'clusterRestaurantCandidateForBite',
+        data: { biteId: 'bite-1' },
+      });
+      expect(activeCandidatesReloadSpy).toHaveBeenCalled();
+      expect(clusteringBitesReloadSpy).toHaveBeenCalled();
+      expect(result).toEqual({
+        candidateId: 'candidate-1',
+        evidenceCount: 1,
+        matchedBiteIds: ['bite-1'],
+        skippedCounts: {
+          invalidPosition: 0,
+          verifiedBite: 0,
+          outsideRadius: 0,
+          nameMismatch: 0,
+        },
+        status: 'created',
+      });
     });
   });
 });

@@ -161,5 +161,14 @@
   "ok": "OK",
   "registration-success-check-your-email-to-verify-account": "Registration successful! Please check your email to verify your account.",
   "registration-error-try-again": "An error occurred during registration. Please try again.",
-  "registration-unknown-error-try-again": "An unknown error occurred during registration. Please try again."
+  "registration-unknown-error-try-again": "An unknown error occurred during registration. Please try again.",
+  "restaurant-clustering-migration": "Restaurant Clustering Migration",
+  "bite": "Bite",
+  "location": "Location",
+  "current-clustering-state": "Current Clustering State",
+  "action": "Action",
+  "restaurant-clustering-state-ready": "Ready for manual clustering",
+  "restaurant-clustering-state-missing-geohash": "Eligible, but geohash is missing",
+  "cluster-restaurant-candidate": "Cluster restaurant candidate",
+  "no-restaurant-clustering-eligible-bites": "No restaurant-clustering eligible Bites found."
 }

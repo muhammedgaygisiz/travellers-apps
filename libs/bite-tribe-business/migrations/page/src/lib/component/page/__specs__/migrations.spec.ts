@@ -6,7 +6,8 @@ import * as utilsModule from 'utils';
 import { addNecessaryIcons } from 'utils';
 import { FirebaseStorage } from '@capacitor-firebase/storage';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 addNecessaryIcons();
 
@@ -20,6 +21,15 @@ jest
   .spyOn(utilsModule, 'dataUrlToBlob')
   .mockImplementation((arg) => actualUtils.dataUrlToBlob(arg));
 
+@Pipe({
+  name: 'transloco',
+})
+class MockTranslocoPipe implements PipeTransform {
+  transform(value: string): string {
+    return value;
+  }
+}
+
 describe('Migrations', () => {
   let component: Migrations;
   let fixture: ComponentFixture<Migrations>;
@@ -29,7 +39,12 @@ describe('Migrations', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideIonicAngular()],
-    }).compileComponents();
+    })
+      .overrideComponent(Migrations, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
+      .compileComponents();
 
     updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
 
@@ -82,6 +97,46 @@ describe('Migrations', () => {
         bites[2],
         bites[3],
       ]);
+    });
+  });
+
+  describe('restaurant clustering migration', () => {
+    it('should render eligible Bites with review context and action placeholder', () => {
+      const eligibleBite = {
+        id: 'bite-1',
+        name: 'Arepa',
+        image: '',
+        imagePath: 'image-path',
+        place: 'Cafe Central',
+        position: { latitude: 46.948, longitude: 7.4474 },
+        geohash: 'u0m',
+      } as Bite;
+
+      compRef.setInput('restaurantClusteringEligibleBites', [eligibleBite]);
+      fixture.detectChanges();
+
+      const textContent = fixture.nativeElement.textContent;
+      const clusterButton = Array.from(
+        fixture.nativeElement.querySelectorAll('ion-button'),
+      ).find((button) =>
+        (button as HTMLElement).textContent?.includes(
+          'cluster-restaurant-candidate',
+        ),
+      ) as HTMLIonButtonElement | undefined;
+
+      expect(textContent).toContain('restaurant-clustering-migration');
+      expect(textContent).toContain('Arepa');
+      expect(textContent).toContain('Cafe Central');
+      expect(textContent).toContain('46.948, 7.4474');
+      expect(textContent).toContain('restaurant-clustering-state-ready');
+      expect(textContent).toContain('cluster-restaurant-candidate');
+      expect(clusterButton?.disabled).toBe(true);
+    });
+
+    it('should show missing geohash as the current clustering state', () => {
+      expect(component.restaurantClusteringState({ geohash: '' } as Bite)).toBe(
+        'restaurant-clustering-state-missing-geohash',
+      );
     });
   });
 

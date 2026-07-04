@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
-import { HttpsError, onCall } from 'firebase-functions/https';
+import { HttpsError } from 'firebase-functions/https';
+import { onAppCheck } from './callable-options';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -56,7 +57,7 @@ const toSearchBite = (
   };
 };
 
-export const searchBites = onCall<SearchBitesRequest>(async (request) => {
+export const searchBites = onAppCheck<SearchBitesRequest>(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
       'unauthenticated',

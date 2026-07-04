@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import { logger } from 'firebase-functions';
-import { HttpsError, onCall } from 'firebase-functions/https';
+import { HttpsError } from 'firebase-functions/https';
+import { onAppCheck } from './callable-options';
 import type { RestaurantCandidate } from './model/restaurant-candidate';
 import {
   aggregateRestaurantCandidateEvidence,
@@ -297,7 +298,7 @@ const buildCandidateUpdate = (
 };
 
 export const clusterRestaurantCandidateForBite =
-  onCall<ClusterRestaurantCandidateForBiteRequest>(async (request) => {
+  onAppCheck<ClusterRestaurantCandidateForBiteRequest>(async (request) => {
     if (!request.auth) {
       throw new HttpsError(
         'unauthenticated',

@@ -15,6 +15,7 @@ export { searchRestaurants } from './functions/search-restaurants';
 export { updateLastSeen } from './functions/update-last-seen';
 export { updateUserMetadata } from './functions/update-user-metadata';
 export { loadBitesByLocation } from './functions/load-bites-by-location';
+export { clusterRestaurantCandidateForBite } from './functions/cluster-restaurant-candidate-for-bite';
 export { createUserOnAuthCreate } from './functions/create-user-on-auth-create';
 export { loadLeaderboard } from './functions/load-leaderboard';
 export {

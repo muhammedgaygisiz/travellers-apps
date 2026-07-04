@@ -46,7 +46,7 @@
             <td>{{ bite.position.latitude }}, {{ bite.position.longitude }}</td>
             <td>{{ restaurantClusteringState(bite) | transloco }}</td>
             <td>
-              <ion-button fill="outline" [disabled]="true">
+              <ion-button fill="outline" (click)="clusterCandidate(bite)">
                 {{ 'cluster-restaurant-candidate' | transloco }}
               </ion-button>
             </td>

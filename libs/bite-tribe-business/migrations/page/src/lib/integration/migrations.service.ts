@@ -8,4 +8,12 @@ export class MigrationsService {
   bites = this.dataAccess.bites;
   restaurantClusteringEligibleBites =
     this.dataAccess.restaurantClusteringEligibleBites;
+
+  async clusterRestaurantCandidateForBite(
+    bite: Parameters<
+      MigrationsDataAccessService['clusterRestaurantCandidateForBite']
+    >[0],
+  ): Promise<void> {
+    await this.dataAccess.clusterRestaurantCandidateForBite(bite);
+  }
 }

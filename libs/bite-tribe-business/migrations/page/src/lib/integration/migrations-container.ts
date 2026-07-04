@@ -12,6 +12,9 @@ import { MigrationsService } from './migrations.service';
       [restaurantClusteringEligibleBites]="
         service.restaurantClusteringEligibleBites()
       "
+      (clusterRestaurantCandidate)="
+        service.clusterRestaurantCandidateForBite($event)
+      "
     />
   `,
 })

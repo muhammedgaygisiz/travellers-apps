@@ -21,10 +21,6 @@ export default [
               onlyDependOnLibsWithTags: ['type:shell', 'scope:common'],
             },
             {
-              sourceTag: 'type:backend',
-              onlyDependOnLibsWithTags: ['type:model'],
-            },
-            {
               sourceTag: 'type:shell',
               onlyDependOnLibsWithTags: [
                 'type:feature',

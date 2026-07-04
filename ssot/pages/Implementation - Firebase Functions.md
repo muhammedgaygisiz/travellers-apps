@@ -18,6 +18,7 @@ apps/bite-tribe-firebase/functions/src/index.ts
 | Auth           | `create-user-on-auth-create.ts`, `update-last-seen.ts`, `update-user-metadata.ts`                     |
 | Search         | `search-bites.ts`, `search-restaurants.ts`, `search-users.ts`                                         |
 | Discovery      | `load-bites-by-location.ts`, `load-leaderboard.ts`                                                    |
+| Enrichment     | `enrich-bite-address-on-create.ts`, `backfillBiteAddress`                                             |
 | Aggregates     | `increment-bite-count-on-bite-create.ts`, `update-bite-like-count-on-like-write.ts`                   |
 | Storage        | `set-bite-image-path-on-upload.ts`                                                                    |
 | Notifications  | `notify-bite-creator-on-like.ts`, `notify-followers-on-new-bite.ts`, `notify-user-on-new-follower.ts` |
@@ -32,6 +33,9 @@ apps/bite-tribe-firebase/functions/src/index.ts
 - Preserve client-safe fallback behavior where the UI expects empty lists instead of hard failures.
 - Add structured logs for operationally important branches.
 - Export new functions from `src/index.ts`.
+- Backend-only third-party API keys should live in the functions runtime environment; Bite address enrichment expects `GOOGLE_GEOCODING_API_KEY`.
+- Use the `bite-tribe-firebase:firebase-set-geocoding-secret` Nx target to set the production Google Geocoding secret before deploying functions that bind it; the target prompts for the secret value at execution time and must not store the value in `project.json`.
+- Migration callables that can invoke paid APIs should operate on explicit records, such as a selected `biteId`, so operators can repeat the migration deliberately without broad accidental API usage.
 - Trigger-maintained counters must handle every lifecycle path that can change the count. If the counted entity can be deleted, add a matching delete-side decrement trigger when the create path increments.
 - Trigger-maintained Bite like aggregates must migrate old Bite documents that are missing `thumbup`, `drooling`, or `mindblown` by recomputing counts from the `likes` subcollection before using increment/decrement deltas.
 

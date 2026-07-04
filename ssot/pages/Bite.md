@@ -52,12 +52,13 @@ Current model fields:
 
 Required by product intent, but optional or not strictly enforced in the shared TypeScript model today:
 
-| Field             | Current name in code              | Description                                                               |
-| ----------------- | --------------------------------- | ------------------------------------------------------------------------- |
-| Creator           | `userId`                          | User who created the Bite. It is set when the Bite is created.            |
-| Created timestamp | `createdAt`, `createdAtTimestamp` | Created during Bite creation for display, sorting, and queries.           |
-| Currency          | `currency`                        | Original currency of the entered price.                                   |
-| Rating            | `rating`                          | Optional user evaluation signal today, but important for content quality. |
+| Field             | Current name in code              | Description                                                                        |
+| ----------------- | --------------------------------- | ---------------------------------------------------------------------------------- |
+| Creator           | `userId`                          | User who created the Bite. It is set when the Bite is created.                     |
+| Created timestamp | `createdAt`, `createdAtTimestamp` | Created during Bite creation for display, sorting, and queries.                    |
+| Currency          | `currency`                        | Original currency of the entered price.                                            |
+| Rating            | `rating`                          | Optional user evaluation signal today, but important for content quality.          |
+| Address status    | `addressStatus`                   | New Bites start as `pending`; backend geocoding marks them `resolved` or `failed`. |
 
 ## Optional Data
 
@@ -68,6 +69,11 @@ Required by product intent, but optional or not strictly enforced in the shared 
 - `imagePath`
 - `updatedAt`
 - `updatedAtTimestamp`
+- `city`
+- `region`
+- `country`
+- `countryCode`
+- `formatted`
 - `distance`
 - `likes`
 - `thumbup`
@@ -78,8 +84,6 @@ Required by product intent, but optional or not strictly enforced in the shared 
 
 Future or not currently part of the Bite model:
 
-- `city`
-- `country`
 - menu item id
 - duplicate-detection metadata
 - generated dish description
@@ -123,6 +127,8 @@ Current implementation notes:
 
 - The app creates the Bite document id locally before image upload so the image can reference the Bite id.
 - `geohash` is derived from the Bite position at creation.
+- New Bite documents are written with `addressStatus = pending`; `enrichBiteAddressOnCreate` reverse-geocodes the Bite position asynchronously and writes `city`, `region`, `country`, `countryCode`, `formatted`, and a final address status.
+- Older Bite documents without address enrichment are migrated through the business migrations backfill path, which calls `backfillBiteAddress` for the selected Bite.
 - Uploaded Bite images are stored below `images/bites/{biteId}/{filename}`.
 - `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized.
 - The current delete flow removes the Bite document and attempts to remove the image file.
@@ -211,6 +217,8 @@ Cloud Functions:
 loadBitesByLocation
 searchBites
 setBiteImagePathOnUpload
+enrichBiteAddressOnCreate
+backfillBiteAddress
 notifyFollowersOnNewBite
 notifyBiteCreatorOnLike
 incrementBiteLikeCountOnLikeCreate

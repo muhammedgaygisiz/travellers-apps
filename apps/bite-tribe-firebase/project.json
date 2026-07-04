@@ -31,6 +31,13 @@
         "command": "npm run deploy"
       }
     },
+    "firebase-set-geocoding-secret": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase",
+        "command": "node scripts/set-geocoding-secret.mjs"
+      }
+    },
     "firebase-kill": {
       "executor": "nx:run-commands",
       "options": {

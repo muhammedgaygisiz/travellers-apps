@@ -33,6 +33,7 @@ export class Migrations {
   restaurantClusteringEligibleBites = input<Bite[]>([]);
   isAuthenticated = input(false);
   clusterRestaurantCandidate = output<Bite>();
+  backfillBiteAddress = output<Bite>();
 
   bitesNeedingMigration = computed(() => {
     const bites = this.bites();
@@ -46,6 +47,12 @@ export class Migrations {
     return bites?.filter((bite) => !bite.geohash);
   });
 
+  bitesNeedingAddressBackfill = computed(() => {
+    const bites = this.bites();
+
+    return bites?.filter((bite) => bite.addressStatus !== 'resolved');
+  });
+
   restaurantClusteringState(bite: Bite): string {
     return bite.geohash
       ? 'restaurant-clustering-state-ready'
@@ -54,6 +61,10 @@ export class Migrations {
 
   clusterCandidate(bite: Bite): void {
     this.clusterRestaurantCandidate.emit(bite);
+  }
+
+  backfillAddress(bite: Bite): void {
+    this.backfillBiteAddress.emit(bite);
   }
 
   async migrate(bite: Bite): Promise<void> {

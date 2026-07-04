@@ -16,4 +16,10 @@ export class MigrationsService {
   ): Promise<void> {
     await this.dataAccess.clusterRestaurantCandidateForBite(bite);
   }
+
+  async backfillBiteAddress(
+    bite: Parameters<MigrationsDataAccessService['backfillBiteAddress']>[0],
+  ): Promise<void> {
+    await this.dataAccess.backfillBiteAddress(bite);
+  }
 }

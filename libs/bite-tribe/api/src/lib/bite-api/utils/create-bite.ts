@@ -26,6 +26,7 @@ export const createBite = (
     data: {
       ...biteDoc,
       geohash: gh,
+      addressStatus: 'pending',
       userId: user?.uid || '',
       createdAt: new Date().toISOString(),
       createdAtTimestamp: Date.now(), // numeric timestamp for easier queries

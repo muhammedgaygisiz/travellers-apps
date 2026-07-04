@@ -11,6 +11,56 @@
         <h1>Bites</h1>
       </div>
 
+      <h2>{{ 'restaurant-clustering-migration' | transloco }}</h2>
+      <table class="migration-table" border="1">
+        <thead>
+          <tr>
+            <th>{{ 'bite' | transloco }}</th>
+            <th>{{ 'place-name-label' | transloco }}</th>
+            <th>{{ 'location' | transloco }}</th>
+            <th>{{ 'current-clustering-state' | transloco }}</th>
+            <th>{{ 'action' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (bite of restaurantClusteringEligibleBites(); let index = $index;
+          track bite.id || index) {
+          <tr>
+            <td>
+              <div class="bite-review-cell">
+                @if (bite.imagePath || bite.image) {
+                <img
+                  class="bite-review-image"
+                  alt="{{ bite.name }}"
+                  [src]="bite.imagePath || bite.image"
+                />
+                }
+                <div>
+                  <strong>{{ bite.name || bite.id }}</strong>
+                  <br />
+                  <span>{{ bite.id }}</span>
+                </div>
+              </div>
+            </td>
+            <td>{{ bite.place }}</td>
+            <td>{{ bite.position.latitude }}, {{ bite.position.longitude }}</td>
+            <td>{{ restaurantClusteringState(bite) | transloco }}</td>
+            <td>
+              <ion-button fill="outline" [disabled]="true">
+                {{ 'cluster-restaurant-candidate' | transloco }}
+              </ion-button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="5">
+              {{ 'no-restaurant-clustering-eligible-bites' | transloco }}
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+
       <h2>Image Migration</h2>
       <table border="1" style="width: 100%">
         @for (bite of bitesNeedingMigration(); let index = $index; track bite.id

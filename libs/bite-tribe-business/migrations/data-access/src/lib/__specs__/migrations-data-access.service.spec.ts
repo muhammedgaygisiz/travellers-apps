@@ -1,0 +1,221 @@
+import { TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { BiteTribeStoreService } from 'bite-tribe/store';
+import { Bite, RestaurantCandidate } from 'model';
+import {
+  BITE_COLLECTION,
+  getRestaurantClusteringEligibleBites,
+  MigrationsDataAccessService,
+  RESTAURANT_CANDIDATES_COLLECTION,
+  RESTAURANT_CLUSTERING_ELIGIBLE_BITES_LIMIT,
+} from '../migrations-data-access.service';
+
+jest.mock('@capacitor-firebase/firestore');
+jest.mock('bite-tribe/store', () => ({
+  BiteTribeStoreService: class BiteTribeStoreService {},
+}));
+
+const bite = (override: Partial<Bite>): Bite =>
+  ({
+    id: 'bite-id',
+    name: 'Bite',
+    image: '',
+    place: 'Cafe Central',
+    price: 12,
+    position: { latitude: 46.948, longitude: 7.4474 },
+    ...override,
+  }) as Bite;
+
+describe(MigrationsDataAccessService.name, () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        MigrationsDataAccessService,
+        {
+          provide: BiteTribeStoreService,
+          useValue: {
+            bites$: of([]),
+          },
+        },
+      ],
+    });
+  });
+
+  it('should be created', () => {
+    const service = TestBed.inject(MigrationsDataAccessService);
+
+    expect(service).toBeTruthy();
+  });
+
+  describe('activeRestaurantCandidatesLoader', () => {
+    it('should load pending restaurant candidates from Firestore', async () => {
+      jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
+        snapshots: [
+          {
+            id: 'candidate-1',
+            data: {
+              status: 'pending',
+              biteIds: ['bite-1'],
+            },
+          },
+        ],
+      } as any);
+
+      const service = TestBed.inject(MigrationsDataAccessService);
+      const result = await service.activeRestaurantCandidatesLoader({} as any);
+
+      expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
+        reference: RESTAURANT_CANDIDATES_COLLECTION,
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            {
+              type: 'where',
+              fieldPath: 'status',
+              opStr: '==',
+              value: 'pending',
+            },
+          ],
+        },
+      });
+      expect(result).toEqual([
+        {
+          id: 'candidate-1',
+          status: 'pending',
+          biteIds: ['bite-1'],
+        },
+      ]);
+    });
+
+    it('should return an empty list when Firestore returns no snapshots', async () => {
+      jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
+        snapshots: [],
+      } as any);
+
+      const service = TestBed.inject(MigrationsDataAccessService);
+      const result = await service.activeRestaurantCandidatesLoader({} as any);
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('restaurantClusteringBitesLoader', () => {
+    it('should load historical Bites from Firestore', async () => {
+      jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
+        snapshots: [
+          {
+            id: 'bite-1',
+            data: {
+              name: 'Arepa',
+              place: 'Cafe Central',
+            },
+          },
+        ],
+      } as any);
+
+      const service = TestBed.inject(MigrationsDataAccessService);
+      const result = await service.restaurantClusteringBitesLoader({} as any);
+
+      expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
+        reference: BITE_COLLECTION,
+      });
+      expect(result).toEqual([
+        {
+          id: 'bite-1',
+          name: 'Arepa',
+          place: 'Cafe Central',
+        },
+      ]);
+    });
+
+    it('should return an empty list when no Bite snapshots are found', async () => {
+      jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
+        snapshots: [],
+      } as any);
+
+      const service = TestBed.inject(MigrationsDataAccessService);
+      const result = await service.restaurantClusteringBitesLoader({} as any);
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('restaurantClusteringEligibleBites', () => {
+    it('should call getRestaurantClusteringEligibleBites with restaurantClusteringBites and activeRestaurantCandidates values', async () => {
+      const service = TestBed.inject(MigrationsDataAccessService);
+      const eligibleBitesSpy = jest.spyOn(
+        service,
+        'restaurantClusteringEligibleBites',
+      );
+
+      // Access the computed property to trigger the computation
+      const result = service.restaurantClusteringEligibleBites();
+
+      expect(eligibleBitesSpy).toHaveBeenCalled();
+      expect(result).toEqual(
+        getRestaurantClusteringEligibleBites(
+          [{ id: 'bite-1' } as Bite],
+          [{ id: 'candidate-1' } as RestaurantCandidate],
+        ),
+      );
+    });
+  });
+});
+
+describe(getRestaurantClusteringEligibleBites.name, () => {
+  it('should exclude verified, active-candidate, invalid-place, and invalid-position Bites', () => {
+    const bites = [
+      bite({ id: 'eligible' }),
+      bite({ id: 'verified', restaurantId: 'restaurant-1' }),
+      bite({ id: 'active-candidate' }),
+      bite({ id: 'empty-place', place: ' ' }),
+      bite({
+        id: 'invalid-position',
+        position: { latitude: Number.NaN, longitude: 7.4474 },
+      }),
+    ];
+    const candidates = [
+      {
+        id: 'candidate-1',
+        status: 'pending',
+        biteIds: ['active-candidate'],
+      },
+    ] as RestaurantCandidate[];
+
+    expect(getRestaurantClusteringEligibleBites(bites, candidates)).toEqual([
+      bites[0],
+    ]);
+  });
+
+  it('should ignore inactive candidates when excluding referenced Bites', () => {
+    const bites = [bite({ id: 'dismissed-candidate-bite' })];
+    const candidates = [
+      {
+        id: 'candidate-1',
+        status: 'dismissed',
+        biteIds: ['dismissed-candidate-bite'],
+      },
+    ] as RestaurantCandidate[];
+
+    expect(getRestaurantClusteringEligibleBites(bites, candidates)).toEqual(
+      bites,
+    );
+  });
+
+  it('should keep Bites without geohash eligible and limit the list to 50 Bites', () => {
+    const bites = Array.from(
+      { length: RESTAURANT_CLUSTERING_ELIGIBLE_BITES_LIMIT + 1 },
+      (_, index) =>
+        bite({
+          id: `bite-${index}`,
+          geohash: index === 0 ? undefined : `geohash-${index}`,
+        }),
+    );
+
+    const result = getRestaurantClusteringEligibleBites(bites, []);
+
+    expect(result).toHaveLength(RESTAURANT_CLUSTERING_ELIGIBLE_BITES_LIMIT);
+    expect(result[0].id).toBe('bite-0');
+  });
+});

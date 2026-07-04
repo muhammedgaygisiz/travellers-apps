@@ -6,4 +6,6 @@ export class MigrationsService {
   private readonly dataAccess = inject(MigrationsDataAccessService);
 
   bites = this.dataAccess.bites;
+  restaurantClusteringEligibleBites =
+    this.dataAccess.restaurantClusteringEligibleBites;
 }

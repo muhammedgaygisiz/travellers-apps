@@ -27,7 +27,7 @@ const bite = (override: Partial<Bite>): Bite =>
     ...override,
   }) as Bite;
 
-describe('MigrationsDataAccessService', () => {
+describe(MigrationsDataAccessService.name, () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
@@ -140,9 +140,30 @@ describe('MigrationsDataAccessService', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('restaurantClusteringEligibleBites', () => {
+    it('should call getRestaurantClusteringEligibleBites with restaurantClusteringBites and activeRestaurantCandidates values', async () => {
+      const service = TestBed.inject(MigrationsDataAccessService);
+      const eligibleBitesSpy = jest.spyOn(
+        service,
+        'restaurantClusteringEligibleBites',
+      );
+
+      // Access the computed property to trigger the computation
+      const result = service.restaurantClusteringEligibleBites();
+
+      expect(eligibleBitesSpy).toHaveBeenCalled();
+      expect(result).toEqual(
+        getRestaurantClusteringEligibleBites(
+          [{ id: 'bite-1' } as Bite],
+          [{ id: 'candidate-1' } as RestaurantCandidate],
+        ),
+      );
+    });
+  });
 });
 
-describe('getRestaurantClusteringEligibleBites', () => {
+describe(getRestaurantClusteringEligibleBites.name, () => {
   it('should exclude verified, active-candidate, invalid-place, and invalid-position Bites', () => {
     const bites = [
       bite({ id: 'eligible' }),

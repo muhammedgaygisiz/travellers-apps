@@ -1,5 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { DashboardDataAccessService } from 'bite-tribe-business/dashboard-data-access';
+import {
+  DashboardDataAccessService,
+  DashboardRestaurantCandidate,
+} from 'bite-tribe-business/dashboard-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { PublicUser, Restaurant } from 'model';
 
@@ -13,6 +16,7 @@ export class DashboardService {
   organisations = this.dataAccess.organisations;
   restaurants = this.dataAccess.restaurants;
   bitePlaces = this.dataAccess.bitePlaces;
+  restaurantCandidates = this.dataAccess.restaurantCandidates;
   isAuthenticated = this.dataAccess.isAuthenticated;
   gpsPosition = this.dataAccess.gpsPosition;
 
@@ -55,6 +59,21 @@ export class DashboardService {
       id: '',
       name: placeName,
       position: { latitude: 0, longitude: 0 },
+      unsaved: true,
+    };
+
+    this.dataAccess.selectRestaurantToCreate(restaurant);
+
+    void this.navController.navigateForward(['new-restaurant']);
+  }
+
+  restaurantCandidateClicked(candidate: DashboardRestaurantCandidate): void {
+    const restaurant: Restaurant = {
+      id: '',
+      name: candidate.name,
+      position: candidate.position,
+      biteIds: candidate.biteIds ?? [],
+      bites: candidate.bites,
       unsaved: true,
     };
 

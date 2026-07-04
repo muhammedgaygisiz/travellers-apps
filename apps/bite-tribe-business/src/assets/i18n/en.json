@@ -170,5 +170,11 @@
   "restaurant-clustering-state-ready": "Ready for manual clustering",
   "restaurant-clustering-state-missing-geohash": "Eligible, but geohash is missing",
   "cluster-restaurant-candidate": "Cluster restaurant candidate",
-  "no-restaurant-clustering-eligible-bites": "No restaurant-clustering eligible Bites found."
+  "no-restaurant-clustering-eligible-bites": "No restaurant-clustering eligible Bites found.",
+  "restaurants": "Restaurants",
+  "no-restaurants-found": "No restaurants found.",
+  "restaurant-candidates": "Restaurant candidates",
+  "candidate-evidence-count": "{{count}} Bite evidence",
+  "candidate-nearby-bite-evidence": "Nearby Bite evidence",
+  "no-restaurant-candidates-found": "No pending restaurant candidates found."
 }

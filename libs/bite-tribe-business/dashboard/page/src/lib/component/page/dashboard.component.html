@@ -53,7 +53,7 @@
 
         <ion-card>
           <ion-card-header>
-            <ion-card-title>Restaurants</ion-card-title>
+            <ion-card-title>{{ 'restaurants' | transloco }}</ion-card-title>
           </ion-card-header>
           <ion-card-content>
             <ion-list lines="full">
@@ -65,7 +65,50 @@
                   <ion-label>{{ restaurant.name }}</ion-label>
                 </ion-item>
               } @empty {
-                <p>No restaurants found.</p>
+                <p>{{ 'no-restaurants-found' | transloco }}</p>
+              }
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              {{ 'restaurant-candidates' | transloco }}
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="full">
+              @for (candidate of restaurantCandidates(); track candidate.id) {
+                <ion-item
+                  [button]="true"
+                  (click)="restaurantCandidateClick.emit(candidate)"
+                >
+                  <ion-label>
+                    <h2>{{ candidate.name }}</h2>
+                    <p>
+                      {{
+                        'candidate-evidence-count'
+                          | transloco
+                            : { count: candidateEvidenceCount(candidate) }
+                      }}
+                    </p>
+                    @if (candidateBiteEvidence(candidate)) {
+                      <p>
+                        {{ 'candidate-nearby-bite-evidence' | transloco }}:
+                        {{ candidateBiteEvidence(candidate) }}
+                      </p>
+                    }
+                    @if (candidateLocation(candidate)) {
+                      <ion-text color="medium">
+                        {{ 'location' | transloco }}:
+                        {{ candidateLocation(candidate) }}
+                      </ion-text>
+                    }
+                  </ion-label>
+                </ion-item>
+              } @empty {
+                <p>{{ 'no-restaurant-candidates-found' | transloco }}</p>
               }
             </ion-list>
           </ion-card-content>

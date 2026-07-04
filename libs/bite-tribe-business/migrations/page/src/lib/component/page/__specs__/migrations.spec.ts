@@ -100,6 +100,55 @@ describe('Migrations', () => {
     });
   });
 
+  describe('bite address backfill', () => {
+    it('should return Bites that still need address enrichment', () => {
+      const bites = [
+        { id: 'resolved', addressStatus: 'resolved' },
+        { id: 'failed', addressStatus: 'failed' },
+        { id: 'pending', addressStatus: 'pending' },
+        { id: 'missing-status' },
+      ] as Bite[];
+
+      compRef.setInput('bites', bites);
+
+      expect(component.bitesNeedingAddressBackfill()).toEqual([
+        bites[1],
+        bites[2],
+        bites[3],
+      ]);
+    });
+
+    it('should render the address backfill action and emit when triggered', () => {
+      const emitSpy = jest.spyOn(component.backfillBiteAddress, 'emit');
+      const bite = {
+        id: 'pending',
+        name: 'Pizza',
+        addressStatus: 'pending',
+        position: { latitude: 40.1, longitude: 14.2 },
+      } as Bite;
+
+      compRef.setInput('bites', [bite]);
+      fixture.detectChanges();
+
+      const textContent = fixture.nativeElement.textContent;
+      const backfillButton = Array.from(
+        fixture.nativeElement.querySelectorAll('ion-button'),
+      ).find((button) =>
+        (button as HTMLElement).textContent?.includes('backfill-bite-address'),
+      ) as HTMLIonButtonElement | undefined;
+
+      expect(textContent).toContain('bite-address-backfill');
+      expect(textContent).toContain('Pizza');
+      expect(textContent).toContain('pending');
+      expect(textContent).toContain('40.1, 14.2');
+      expect(backfillButton?.disabled).toBe(false);
+
+      component.backfillAddress(bite);
+
+      expect(emitSpy).toHaveBeenCalledWith(bite);
+    });
+  });
+
   describe('restaurant clustering migration', () => {
     it('should render eligible Bites with review context and enabled action', () => {
       const eligibleBite = {

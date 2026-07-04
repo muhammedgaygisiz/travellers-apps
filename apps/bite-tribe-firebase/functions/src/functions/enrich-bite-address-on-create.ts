@@ -2,10 +2,12 @@ import * as admin from 'firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onDocumentCreated } from 'firebase-functions/firestore';
+import { HttpsError, onCall } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
 import { Bite } from './model/bite';
 
 const db = admin.firestore();
+const BITE_COLLECTION = 'bites';
 const GOOGLE_GEOCODING_API_KEY_ENV = 'GOOGLE_GEOCODING_API_KEY';
 const GOOGLE_GEOCODING_BASE_URL =
   'https://maps.googleapis.com/maps/api/geocode/json';
@@ -33,6 +35,15 @@ interface GoogleGeocodingResponse {
   status?: string;
   error_message?: string;
   results?: GoogleGeocodingResult[];
+}
+
+interface BackfillBiteAddressRequest {
+  biteId?: unknown;
+}
+
+interface BackfillBiteAddressResult {
+  biteId: string;
+  status: 'resolved' | 'failed' | 'skipped';
 }
 
 export interface BiteAddress {
@@ -139,6 +150,51 @@ const loadBiteAddress = async (position: Position): Promise<BiteAddress> => {
   return extractBiteAddress(result);
 };
 
+const enrichBiteAddress = async (
+  biteId: string,
+  bite: Bite,
+  biteRef: admin.firestore.DocumentReference,
+): Promise<'resolved' | 'failed' | 'skipped'> => {
+  if (bite.addressStatus === 'resolved') {
+    logger.info('enrichBiteAddress: bite already resolved', {
+      biteId,
+    });
+    return 'skipped';
+  }
+
+  const position = getBitePosition(bite);
+
+  if (!position) {
+    logger.warn('enrichBiteAddress: bite has no valid position', {
+      biteId,
+    });
+    await biteRef.update(buildBiteAddressUpdate('failed'));
+    return 'failed';
+  }
+
+  try {
+    const address = await loadBiteAddress(position);
+
+    await biteRef.update(buildBiteAddressUpdate('resolved', address));
+
+    logger.info('enrichBiteAddress: resolved bite address', {
+      biteId,
+      hasCity: Boolean(address.city),
+      hasCountry: Boolean(address.country),
+    });
+
+    return 'resolved';
+  } catch (error) {
+    logger.warn('enrichBiteAddress: failed to resolve bite address', {
+      biteId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    await biteRef.update(buildBiteAddressUpdate('failed'));
+    return 'failed';
+  }
+};
+
 export const enrichBiteAddressOnCreate = onDocumentCreated(
   {
     document: 'bites/{biteId}',
@@ -153,42 +209,50 @@ export const enrichBiteAddressOnCreate = onDocumentCreated(
       return;
     }
 
-    const bite = snap.data() as Bite;
+    await enrichBiteAddress(biteId, snap.data() as Bite, snap.ref);
+  },
+);
 
-    if (bite.addressStatus === 'resolved') {
-      logger.info('enrichBiteAddressOnCreate: bite already resolved', {
-        biteId,
-      });
-      return;
+export const backfillBiteAddress = onCall<BackfillBiteAddressRequest>(
+  {
+    enforceAppCheck: true,
+    secrets: [googleGeocodingApiKey],
+  },
+  async (request): Promise<BackfillBiteAddressResult> => {
+    if (!request.auth) {
+      logger.warn('backfillBiteAddress: unauthenticated request rejected');
+      throw new HttpsError(
+        'unauthenticated',
+        'You must be signed in to backfill Bite addresses.',
+      );
     }
 
-    const position = getBitePosition(bite);
-
-    if (!position) {
-      logger.warn('enrichBiteAddressOnCreate: bite has no valid position', {
-        biteId,
-      });
-      await snap.ref.update(buildBiteAddressUpdate('failed'));
-      return;
+    if (typeof request.data?.biteId !== 'string' || !request.data.biteId) {
+      throw new HttpsError('invalid-argument', 'biteId must be a string.');
     }
 
-    try {
-      const address = await loadBiteAddress(position);
+    const biteId = request.data.biteId;
+    const biteRef = db.collection(BITE_COLLECTION).doc(biteId);
+    const biteSnap = await biteRef.get();
 
-      await snap.ref.update(buildBiteAddressUpdate('resolved', address));
-
-      logger.info('enrichBiteAddressOnCreate: resolved bite address', {
-        biteId,
-        hasCity: Boolean(address.city),
-        hasCountry: Boolean(address.country),
-      });
-    } catch (error) {
-      logger.warn('enrichBiteAddressOnCreate: failed to resolve bite address', {
-        biteId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-
-      await db.doc(`bites/${biteId}`).update(buildBiteAddressUpdate('failed'));
+    if (!biteSnap.exists) {
+      throw new HttpsError('not-found', 'Bite was not found.');
     }
+
+    logger.info('backfillBiteAddress: started', {
+      uid: request.auth.uid,
+      biteId,
+    });
+
+    const status = await enrichBiteAddress(
+      biteSnap.id,
+      biteSnap.data() as Bite,
+      biteSnap.ref,
+    );
+    const backfillResult = { biteId, status };
+
+    logger.info('backfillBiteAddress: finished', backfillResult);
+
+    return backfillResult;
   },
 );

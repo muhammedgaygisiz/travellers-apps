@@ -33,6 +33,15 @@ export interface ClusterRestaurantCandidateForBiteResult {
   status: 'created' | 'updated' | 'verified-restaurant-match';
 }
 
+export interface BackfillBiteAddressRequest {
+  biteId: string;
+}
+
+export interface BackfillBiteAddressResult {
+  biteId: string;
+  status: 'resolved' | 'failed' | 'skipped';
+}
+
 const hasVerifiedRestaurant = (bite: Bite): boolean =>
   !!bite.restaurantId?.trim();
 
@@ -83,7 +92,7 @@ export class MigrationsDataAccessService {
 
   activeRestaurantCandidatesLoader: ResourceLoader<
     RestaurantCandidate[] | undefined,
-    any
+    unknown
   > = async () => {
     const docs = await FirebaseFirestore.getCollection({
       reference: RESTAURANT_CANDIDATES_COLLECTION,
@@ -117,7 +126,7 @@ export class MigrationsDataAccessService {
     loader: this.activeRestaurantCandidatesLoader.bind(this),
   });
 
-  restaurantClusteringBitesLoader: ResourceLoader<Bite[] | undefined, any> =
+  restaurantClusteringBitesLoader: ResourceLoader<Bite[] | undefined, unknown> =
     async () => {
       const docs = await FirebaseFirestore.getCollection({
         reference: BITE_COLLECTION,
@@ -159,6 +168,20 @@ export class MigrationsDataAccessService {
     });
 
     this.activeRestaurantCandidates.reload();
+    this.restaurantClusteringBites.reload();
+
+    return result.data;
+  }
+
+  async backfillBiteAddress(bite: Bite): Promise<BackfillBiteAddressResult> {
+    const result = await FirebaseFunctions.callByName<
+      BackfillBiteAddressRequest,
+      BackfillBiteAddressResult
+    >({
+      name: 'backfillBiteAddress',
+      data: { biteId: bite.id },
+    });
+
     this.restaurantClusteringBites.reload();
 
     return result.data;

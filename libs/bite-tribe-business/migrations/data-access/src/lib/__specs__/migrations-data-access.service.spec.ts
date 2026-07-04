@@ -218,6 +218,34 @@ describe(MigrationsDataAccessService.name, () => {
       });
     });
   });
+
+  describe('backfillBiteAddress', () => {
+    it('should call the address backfill callable with the selected Bite and refresh migration Bites', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: {
+          biteId: 'bite-1',
+          status: 'resolved',
+        },
+      });
+      const service = TestBed.inject(MigrationsDataAccessService);
+      const clusteringBitesReloadSpy = jest.spyOn(
+        service.restaurantClusteringBites,
+        'reload',
+      );
+
+      const result = await service.backfillBiteAddress(bite({ id: 'bite-1' }));
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'backfillBiteAddress',
+        data: { biteId: 'bite-1' },
+      });
+      expect(clusteringBitesReloadSpy).toHaveBeenCalled();
+      expect(result).toEqual({
+        biteId: 'bite-1',
+        status: 'resolved',
+      });
+    });
+  });
 });
 
 describe(getRestaurantClusteringEligibleBites.name, () => {

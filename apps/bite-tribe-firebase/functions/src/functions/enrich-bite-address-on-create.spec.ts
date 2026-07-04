@@ -27,6 +27,18 @@ jest.mock('firebase-functions/firestore', () => ({
   onDocumentCreated: jest.fn((_options, handler) => handler),
 }));
 
+jest.mock('firebase-functions/https', () => ({
+  HttpsError: class HttpsError extends Error {
+    constructor(
+      public code: string,
+      message: string,
+    ) {
+      super(message);
+    }
+  },
+  onCall: jest.fn((_options, handler) => handler),
+}));
+
 jest.mock('firebase-functions/params', () => ({
   defineSecret: jest.fn((name: string) => ({
     name,

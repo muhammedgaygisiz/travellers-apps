@@ -15,6 +15,7 @@ import { MigrationsService } from './migrations.service';
       (clusterRestaurantCandidate)="
         service.clusterRestaurantCandidateForBite($event)
       "
+      (backfillBiteAddress)="service.backfillBiteAddress($event)"
     />
   `,
 })

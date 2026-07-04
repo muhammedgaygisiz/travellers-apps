@@ -128,6 +128,7 @@ Current implementation notes:
 - The app creates the Bite document id locally before image upload so the image can reference the Bite id.
 - `geohash` is derived from the Bite position at creation.
 - New Bite documents are written with `addressStatus = pending`; `enrichBiteAddressOnCreate` reverse-geocodes the Bite position asynchronously and writes `city`, `region`, `country`, `countryCode`, `formatted`, and a final address status.
+- Older Bite documents without address enrichment are migrated through the business migrations backfill path, which calls `backfillBiteAddress` for the selected Bite.
 - Uploaded Bite images are stored below `images/bites/{biteId}/{filename}`.
 - `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized.
 - The current delete flow removes the Bite document and attempts to remove the image file.
@@ -217,6 +218,7 @@ loadBitesByLocation
 searchBites
 setBiteImagePathOnUpload
 enrichBiteAddressOnCreate
+backfillBiteAddress
 notifyFollowersOnNewBite
 notifyBiteCreatorOnLike
 incrementBiteLikeCountOnLikeCreate

@@ -263,11 +263,13 @@ export const findVerifiedRestaurantDuplicate = (
     (restaurant) => restaurant.name ?? '',
   );
 
-export const findPendingRestaurantCandidateDuplicate = (
-  candidates: PendingCandidate[],
+export const findPendingRestaurantCandidateDuplicate = <
+  T extends PendingCandidate,
+>(
+  candidates: T[],
   placeName: string,
   center: CandidatePosition,
-): RestaurantCandidateDuplicate<PendingCandidate> | undefined =>
+): RestaurantCandidateDuplicate<T> | undefined =>
   findNearbyDuplicate(
     candidates.filter((candidate) => candidate.status === 'pending'),
     placeName,

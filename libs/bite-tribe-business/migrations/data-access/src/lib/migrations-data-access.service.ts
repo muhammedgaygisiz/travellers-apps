@@ -9,10 +9,29 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Bite, RestaurantCandidate } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 
 export const RESTAURANT_CANDIDATES_COLLECTION = 'restaurantCandidates';
 export const BITE_COLLECTION = 'bites';
 export const RESTAURANT_CLUSTERING_ELIGIBLE_BITES_LIMIT = 50;
+
+export interface ClusterRestaurantCandidateForBiteRequest {
+  biteId: string;
+}
+
+export interface ClusterRestaurantCandidateForBiteResult {
+  candidateId?: string;
+  verifiedRestaurantId?: string;
+  evidenceCount: number;
+  matchedBiteIds: string[];
+  skippedCounts: {
+    invalidPosition: number;
+    verifiedBite: number;
+    outsideRadius: number;
+    nameMismatch: number;
+  };
+  status: 'created' | 'updated' | 'verified-restaurant-match';
+}
 
 const hasVerifiedRestaurant = (bite: Bite): boolean =>
   !!bite.restaurantId?.trim();
@@ -127,4 +146,21 @@ export class MigrationsDataAccessService {
       this.activeRestaurantCandidates.value() ?? [],
     ),
   );
+
+  async clusterRestaurantCandidateForBite(
+    bite: Bite,
+  ): Promise<ClusterRestaurantCandidateForBiteResult> {
+    const result = await FirebaseFunctions.callByName<
+      ClusterRestaurantCandidateForBiteRequest,
+      ClusterRestaurantCandidateForBiteResult
+    >({
+      name: 'clusterRestaurantCandidateForBite',
+      data: { biteId: bite.id },
+    });
+
+    this.activeRestaurantCandidates.reload();
+    this.restaurantClusteringBites.reload();
+
+    return result.data;
+  }
 }

@@ -101,7 +101,7 @@ describe('Migrations', () => {
   });
 
   describe('restaurant clustering migration', () => {
-    it('should render eligible Bites with review context and action placeholder', () => {
+    it('should render eligible Bites with review context and enabled action', () => {
       const eligibleBite = {
         id: 'bite-1',
         name: 'Arepa',
@@ -130,13 +130,26 @@ describe('Migrations', () => {
       expect(textContent).toContain('46.948, 7.4474');
       expect(textContent).toContain('restaurant-clustering-state-ready');
       expect(textContent).toContain('cluster-restaurant-candidate');
-      expect(clusterButton?.disabled).toBe(true);
+      expect(clusterButton?.disabled).toBe(false);
     });
 
     it('should show missing geohash as the current clustering state', () => {
       expect(component.restaurantClusteringState({ geohash: '' } as Bite)).toBe(
         'restaurant-clustering-state-missing-geohash',
       );
+    });
+
+    it('should emit the selected Bite when clustering is triggered', () => {
+      const eligibleBite = {
+        id: 'bite-1',
+        place: 'Cafe Central',
+        position: { latitude: 46.948, longitude: 7.4474 },
+      } as Bite;
+      const emitSpy = jest.spyOn(component.clusterRestaurantCandidate, 'emit');
+
+      component.clusterCandidate(eligibleBite);
+
+      expect(emitSpy).toHaveBeenCalledWith(eligibleBite);
     });
   });
 

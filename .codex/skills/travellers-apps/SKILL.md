@@ -20,6 +20,7 @@ Read only the references relevant to the current task:
 ## Core Defaults
 
 - Inspect local status first: `git status --short --branch`.
+- When a task starts from a GitHub issue URL/number and network is restricted, go straight to a scoped approval request for `gh issue view <number> --repo muhammedgaygisiz/travellers-apps --json number,title,body,labels,state,url` instead of first running an unauthorised network probe.
 - Read the current feature's component, container, service/data-access layer, tests, and nearby integration points before editing.
 - Use Transloco keys for visible text and update every relevant app locale when adding user-facing copy.
 - When a shared UI component gains a visible state, input, mode, loading/empty branch, or layout behavior, update or verify its Storybook stories as well as tests.

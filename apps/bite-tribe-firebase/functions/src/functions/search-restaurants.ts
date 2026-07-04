@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
-import { HttpsError, onCall } from 'firebase-functions/https';
+import { HttpsError } from 'firebase-functions/https';
+import { onAppCheck } from './callable-options';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -89,7 +90,7 @@ const toUnverifiedRestaurant = (
   };
 };
 
-export const searchRestaurants = onCall<SearchRestaurantsRequest>(
+export const searchRestaurants = onAppCheck<SearchRestaurantsRequest>(
   async (request) => {
     if (!request.auth) {
       throw new HttpsError(

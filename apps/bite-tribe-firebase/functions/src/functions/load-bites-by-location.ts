@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
-import { HttpsError, onCall } from 'firebase-functions/https';
+import { HttpsError } from 'firebase-functions/https';
 import { distanceBetween, geohashQueryBounds, Geopoint } from 'geofire-common';
+import { onAppCheck } from './callable-options';
 
 const BITE_COLLECTION = 'bites';
 const DEFAULT_SEARCH_RADIUS_IN_M = 15 * 1000;
@@ -63,7 +64,7 @@ const getPosition = (
   return undefined;
 };
 
-export const loadBitesByLocation = onCall<LoadBitesByLocationRequest>(
+export const loadBitesByLocation = onAppCheck<LoadBitesByLocationRequest>(
   async (request) => {
     if (!request.auth) {
       throw new HttpsError(

@@ -1,7 +1,8 @@
 import * as admin from 'firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
-import { HttpsError, onCall } from 'firebase-functions/https';
+import { HttpsError } from 'firebase-functions/https';
+import { onAppCheck } from './callable-options';
 
 const USERS_COLLECTION = 'users';
 const BITES_COLLECTION = 'bites';
@@ -106,7 +107,7 @@ const toLeaderboardUser = (
   };
 };
 
-export const loadLeaderboard = onCall<void>(async (request) => {
+export const loadLeaderboard = onAppCheck<void>(async (request) => {
   if (!request.auth) {
     logger.warn('loadLeaderboard: unauthenticated request rejected');
     throw new HttpsError(

@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
-import { HttpsError, onCall } from 'firebase-functions/https';
+import { HttpsError } from 'firebase-functions/https';
+import { onAppCheck } from './callable-options';
 
 interface UpdateUserMetadataRequest {
   version?: string;
@@ -16,7 +17,7 @@ const toOptionalString = (value: unknown): string | undefined => {
   return trimmedValue ? trimmedValue : undefined;
 };
 
-export const updateUserMetadata = onCall<UpdateUserMetadataRequest>(
+export const updateUserMetadata = onAppCheck<UpdateUserMetadataRequest>(
   async (request) => {
     if (!request.auth) {
       throw new HttpsError(

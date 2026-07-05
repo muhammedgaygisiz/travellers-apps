@@ -47,7 +47,8 @@ import { TagsInputComponent } from 'common/ui/tags';
 import { Position } from '@capacitor/geolocation';
 import { CalcDistancePipe } from './pipes/calc-distance.pipe';
 import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-currency.pipe';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { getLocalizedRegionName } from 'bite-tribe-common/bite';
 
 @Component({
   selector: 'details-page',
@@ -110,6 +111,22 @@ export class DetailsPage {
   private popoverController = inject(PopoverController);
   private readonly platform = inject(Platform);
   private readonly alertController = inject(AlertController);
+  private readonly transloco = inject(TranslocoService);
+
+  activeLang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
+  });
+
+  protected readonly biteLocation = computed(() => {
+    const bite = this.bite();
+    const lang = this.activeLang();
+
+    if (bite) {
+      return getLocalizedRegionName(bite, lang);
+    }
+
+    return '';
+  });
 
   reviewFormGroup = this.formBuilder.nonNullable.group({
     review: ['', Validators.required],

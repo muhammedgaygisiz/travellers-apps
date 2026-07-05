@@ -38,6 +38,8 @@ export const Default: Story = {
       tags: ['alkoholfrei', 'non-alcohol', 'bern', 'drink', 'halal'],
       price: '9',
       currency: 'CHF',
+      city: 'Bern',
+      countryCode: 'CH',
     } as unknown as Bite,
     biteCreator: {
       userId: '1',
@@ -45,6 +47,12 @@ export const Default: Story = {
       photoUrl:
         'https://lh3.googleusercontent.com/a/ACg8ocKHFN9hwLoWCBJfmCvVTe7e52JATaD9YpcXPwQ6ucMTEiqOuarL=s96-c',
     } as PublicUser,
+    position: {
+      coords: {
+        latitude: 37.17314784498405,
+        longitude: -3.607173030385677,
+      } as any,
+    } as any,
   },
 };
 

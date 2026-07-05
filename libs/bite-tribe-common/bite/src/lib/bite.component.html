@@ -33,11 +33,15 @@
           <ion-text color="secondary">
             {{ biteData?.place }}
           </ion-text>
-          <bt-distance
-            class="distance"
-            [distance]="biteData?.distance"
-            [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
-          />
+
+          <div class="ion-display-flex ion-flex-column ion-align-items-end">
+            <bt-distance
+              class="distance"
+              [distance]="biteData?.distance"
+              [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
+            />
+            {{ biteLocation() }}
+          </div>
         </ion-card-subtitle>
       </ion-card-header>
 

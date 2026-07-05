@@ -169,6 +169,16 @@ describe(MigrationsDataAccessService.name, () => {
     });
   });
 
+  describe('addressBackfillBites', () => {
+    it('should call getBitesNeedingAddressBackfill', async () => {
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      const bites = service.addressBackfillBites();
+
+      expect(bites).toEqual([]);
+    });
+  });
+
   describe('clusterRestaurantCandidateForBite', () => {
     it('should call the manual restaurant candidate clustering callable and refresh migration resources', async () => {
       jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({

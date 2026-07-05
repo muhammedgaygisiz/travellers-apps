@@ -47,6 +47,8 @@ export const Bite: Story = {
           likeType: 'thumbup',
         },
       ],
+      city: 'Bern',
+      countryCode: 'CH',
     } as any,
   },
   render: (args) => ({

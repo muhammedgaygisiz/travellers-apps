@@ -32,9 +32,19 @@ import type { OverlayEventDetail } from '@ionic/core';
 import { DistanceComponent } from 'common/distance';
 import { GetImagePipe } from './pipes/get-image.pipe';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
+
+const getLocalizedRegionName = (
+  region: string,
+  lang: string,
+): string | undefined => {
+  const regionDisplayNames = new Intl.DisplayNames([lang], { type: 'region' });
+
+  return regionDisplayNames.of(region) || region;
+};
 
 @Component({
   selector: 'bt-bite',
@@ -66,6 +76,9 @@ const CANCEL = 'cancel';
 })
 export class BiteComponent {
   private readonly transloco = inject(TranslocoService);
+  activeLang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
+  });
 
   bite = input.required<Bite>();
   userId = input<string>();
@@ -101,6 +114,25 @@ export class BiteComponent {
       role: DELETE,
     },
   ];
+
+  protected readonly biteLocation = computed(() => {
+    const bite = this.bite();
+    const lang = this.activeLang();
+
+    if (bite.city && bite.countryCode) {
+      return `${bite.city}, ${getLocalizedRegionName(bite.countryCode, lang)}`;
+    }
+
+    if (bite.city && !bite.countryCode) {
+      return `${bite.city}`;
+    }
+
+    if (!bite.city && bite.countryCode) {
+      return `${getLocalizedRegionName(bite.countryCode, lang)}`;
+    }
+
+    return '';
+  });
 
   handleConfirmationDismiss(event: CustomEvent<OverlayEventDetail>): void {
     const role = event.detail.role;

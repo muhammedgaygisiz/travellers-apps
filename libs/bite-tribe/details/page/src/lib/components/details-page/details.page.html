@@ -76,7 +76,7 @@
       </div>
 
       <div
-        class="restaurant-distance-price fields ion-display-flex ion-flex-row ion-justify-content-between ion-margin-bottom"
+        class="restaurant-distance-price fields ion-display-flex ion-flex-row ion-justify-content-between"
       >
         <span class="restaurant-distance">
           @if (!biteData) {
@@ -119,6 +119,10 @@
           </span>
           }
         </div>
+      </div>
+
+      <div class="ion-margin-bottom">
+        @if (biteLocation()) { {{ biteLocation() }} }
       </div>
 
       <div class="age-bar ion-margin-bottom">

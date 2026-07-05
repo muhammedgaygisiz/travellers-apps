@@ -32,6 +32,8 @@ import type { OverlayEventDetail } from '@ionic/core';
 import { DistanceComponent } from 'common/distance';
 import { GetImagePipe } from './pipes/get-image.pipe';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { getLocalizedRegionName } from './utils/getLocalizedCityAndCountry';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
@@ -66,6 +68,9 @@ const CANCEL = 'cancel';
 })
 export class BiteComponent {
   private readonly transloco = inject(TranslocoService);
+  activeLang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
+  });
 
   bite = input.required<Bite>();
   userId = input<string>();
@@ -101,6 +106,13 @@ export class BiteComponent {
       role: DELETE,
     },
   ];
+
+  protected readonly biteLocation = computed(() => {
+    const bite = this.bite();
+    const lang = this.activeLang();
+
+    return getLocalizedRegionName(bite, lang);
+  });
 
   handleConfirmationDismiss(event: CustomEvent<OverlayEventDetail>): void {
     const role = event.detail.role;

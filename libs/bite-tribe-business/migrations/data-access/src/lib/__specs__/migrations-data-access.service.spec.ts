@@ -6,6 +6,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { Bite, RestaurantCandidate } from 'model';
 import {
   BITE_COLLECTION,
+  getBitesNeedingAddressBackfill,
   getRestaurantClusteringEligibleBites,
   MigrationsDataAccessService,
   RESTAURANT_CANDIDATES_COLLECTION,
@@ -302,5 +303,22 @@ describe(getRestaurantClusteringEligibleBites.name, () => {
 
     expect(result).toHaveLength(RESTAURANT_CLUSTERING_ELIGIBLE_BITES_LIMIT);
     expect(result[0].id).toBe('bite-0');
+  });
+});
+
+describe(getBitesNeedingAddressBackfill.name, () => {
+  it('should return unresolved, failed, pending, and missing-status Bites from the provided historical list', () => {
+    const bites = [
+      bite({ id: 'resolved', addressStatus: 'resolved' }),
+      bite({ id: 'failed', addressStatus: 'failed' }),
+      bite({ id: 'pending', addressStatus: 'pending' }),
+      bite({ id: 'missing-status', addressStatus: undefined }),
+    ];
+
+    expect(getBitesNeedingAddressBackfill(bites)).toEqual([
+      bites[1],
+      bites[2],
+      bites[3],
+    ]);
   });
 });

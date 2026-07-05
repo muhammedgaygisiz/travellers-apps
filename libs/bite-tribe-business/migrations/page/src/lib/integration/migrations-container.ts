@@ -9,6 +9,7 @@ import { MigrationsService } from './migrations.service';
     <btb-migrations
       class="ion-page"
       [bites]="service.bites()"
+      [addressBackfillBites]="service.addressBackfillBites()"
       [restaurantClusteringEligibleBites]="
         service.restaurantClusteringEligibleBites()
       "

@@ -109,13 +109,37 @@ describe('Migrations', () => {
         { id: 'missing-status' },
       ] as Bite[];
 
-      compRef.setInput('bites', bites);
+      compRef.setInput('addressBackfillBites', bites);
 
       expect(component.bitesNeedingAddressBackfill()).toEqual([
         bites[1],
         bites[2],
         bites[3],
       ]);
+    });
+
+    it('should ignore store Bites when rendering address backfill rows', () => {
+      const storeBite = {
+        id: 'store-bite',
+        name: 'Store Bite',
+        addressStatus: 'pending',
+        geohash: 'u0m',
+      } as Bite;
+      const historicalBite = {
+        id: 'historical-bite',
+        name: 'Historical Bite',
+        addressStatus: 'failed',
+      } as Bite;
+
+      compRef.setInput('bites', [storeBite]);
+      compRef.setInput('addressBackfillBites', [historicalBite]);
+      fixture.detectChanges();
+
+      const textContent =
+        fixture.nativeElement.querySelector('.migration-table').textContent;
+
+      expect(textContent).toContain('Historical Bite');
+      expect(textContent).not.toContain('Store Bite');
     });
 
     it('should render the address backfill action and emit when triggered', () => {
@@ -127,7 +151,7 @@ describe('Migrations', () => {
         position: { latitude: 40.1, longitude: 14.2 },
       } as Bite;
 
-      compRef.setInput('bites', [bite]);
+      compRef.setInput('addressBackfillBites', [bite]);
       fixture.detectChanges();
 
       const textContent = fixture.nativeElement.textContent;

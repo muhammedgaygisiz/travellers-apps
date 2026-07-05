@@ -53,6 +53,9 @@ const hasValidPosition = (bite: Bite): boolean => {
   return Number.isFinite(latitude) && Number.isFinite(longitude);
 };
 
+export const getBitesNeedingAddressBackfill = (bites: Bite[]): Bite[] =>
+  bites.filter((bite) => bite.addressStatus !== 'resolved');
+
 const getActiveRestaurantCandidateBiteIds = (
   candidates: RestaurantCandidate[],
 ): Set<string> =>
@@ -153,6 +156,12 @@ export class MigrationsDataAccessService {
     getRestaurantClusteringEligibleBites(
       this.restaurantClusteringBites.value() ?? [],
       this.activeRestaurantCandidates.value() ?? [],
+    ),
+  );
+
+  addressBackfillBites = computed(() =>
+    getBitesNeedingAddressBackfill(
+      this.restaurantClusteringBites.value() ?? [],
     ),
   );
 

@@ -30,6 +30,7 @@ const BITE_COLLECTION = 'bites';
 })
 export class Migrations {
   bites = input<Bite[]>();
+  addressBackfillBites = input<Bite[]>([]);
   restaurantClusteringEligibleBites = input<Bite[]>([]);
   isAuthenticated = input(false);
   clusterRestaurantCandidate = output<Bite>();
@@ -48,7 +49,7 @@ export class Migrations {
   });
 
   bitesNeedingAddressBackfill = computed(() => {
-    const bites = this.bites();
+    const bites = this.addressBackfillBites();
 
     return bites?.filter((bite) => bite.addressStatus !== 'resolved');
   });

@@ -263,6 +263,8 @@ jobs:
           NX_APP_BITE_TRIBE_PROJECT_ID: ${{ secrets.NX_APP_BITE_TRIBE_PROJECT_ID }}
           NX_APP_BITE_TRIBE_STORAGE_BUCKET: ${{ secrets.NX_APP_BITE_TRIBE_STORAGE_BUCKET }}
           NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID }}
+          NX_APP_BITE_TRIBE_APP_ID: ${{ secrets.NX_APP_BITE_TRIBE_APP_ID }}
+          NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY: ${{ secrets.NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY }}
 
       - name: Bite Tribe Business Publish to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0.10.0

@@ -1,5 +1,37 @@
 # Changelog
 
+## build-81 (2026-07-05)
+
+<!-- changelog-start-rev: 91988ac8 -->
+<!-- changelog-end-rev: 565cacd7 -->
+
+### Features
+
+- show city and country (#958) (97487bdd)
+- **894**: enrich bites with city and country (#955) (587c1ed7)
+- **941**: show resto cancidates in dashboard (#951) (33029c83)
+- cluster places from business tool (#949) (147847e6)
+- **939**: list restaurant cluster candidates from eligible bites (#948) (7374bd71)
+- **938**: preps for restaurant candidates (#947) (1b3242cc)
+
+### Refactoring
+
+- enable app check on firebase functions (#953) (71da0bd2)
+
+### Documentation
+
+- **778**: refinement (#946) (d9ca3ddd)
+
+### Continuous Integration
+
+- fix business app check (#956) (36bbfbb3)
+- merge workflow (#950) (d2318bae)
+
+### Chores
+
+- minor adjustments (#957) (e0aa806b)
+- build 80 (#937) (fd6f568e)
+
 ## build-80 (2026-07-02)
 
 <!-- changelog-start-rev: 8e54d501 -->

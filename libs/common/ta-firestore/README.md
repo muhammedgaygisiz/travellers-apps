@@ -42,7 +42,7 @@ build.
 
 | Mode                          | Required environment                                                             | App Check behavior                                                                                                           |
 | ----------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Web local simulators          | `NX_APP_BITE_TRIBE_IS_DEV=true`                                                  | Skipped quietly. No site key or debug token is needed.                                                                       |
+| Web local simulators          | `NX_APP_BITE_TRIBE_IS_DEV=true`                                                  | Skipped quietly. No site key or debug token is needed. Functions emulator callables disable App Check enforcement.           |
 | Web local production Firebase | `NX_APP_BITE_TRIBE_IS_DEV=false` plus `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY=...` | Runs with the regular site key. Use `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN=...` for `localhost`.                           |
 | Web production build          | `NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY=...`                                       | Runs with the regular site key. Do not provide a debug token. `NX_APP_BITE_TRIBE_IS_DEV` is omitted from production bundles. |
 | iOS production/TestFlight     | Firebase Console iOS App Check registration plus App Attest capability           | Uses native App Attest tokens bridged into the Firebase JavaScript SDK.                                                      |
@@ -175,7 +175,9 @@ normal reCAPTCHA Enterprise attestation. Store it only in your local shell or a
 local ignored env file. Do not commit it, and revoke it from Firebase Console if
 it is exposed.
 
-Simulator mode does not need a debug token.
+Simulator mode does not need a debug token. The Functions emulator sets
+`FUNCTIONS_EMULATOR=true`, and BiteTribe callables use that runtime flag to
+keep App Check enforcement disabled only inside the simulator.
 
 The debug token is passed through:
 

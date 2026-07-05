@@ -6,9 +6,11 @@ import {
   CallableFunction,
 } from 'firebase-functions/https';
 
-const appCheckCallableOptions: CallableOptions = {
-  enforceAppCheck: true,
-};
+const FUNCTIONS_EMULATOR_ENV = 'FUNCTIONS_EMULATOR';
+
+export const getAppCheckCallableOptions = (): CallableOptions => ({
+  enforceAppCheck: process.env[FUNCTIONS_EMULATOR_ENV] !== 'true',
+});
 
 export const onAppCheck = <T = unknown, Return = unknown, Stream = unknown>(
   handler: (
@@ -19,4 +21,4 @@ export const onAppCheck = <T = unknown, Return = unknown, Stream = unknown>(
   T,
   Return extends Promise<unknown> ? Return : Promise<Return>,
   Stream
-> => onCall<T, Return, Stream>(appCheckCallableOptions, handler);
+> => onCall<T, Return, Stream>(getAppCheckCallableOptions(), handler);

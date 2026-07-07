@@ -19,6 +19,7 @@ import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
 @Component({
   selector: 'bt-bite-list',
   templateUrl: 'bite-list.component.html',
+  styleUrl: 'bite-list.component.scss',
   imports: [
     BiteComponent,
     IonCheckbox,

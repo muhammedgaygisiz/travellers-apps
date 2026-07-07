@@ -99,34 +99,14 @@
 
 <ng-template #withoutLoadingTemplate>
   @if (hasErrorLoadingGpsPosition()) {
-    <ion-card>
-      <ion-card-content>
-        <ion-text color="warning">
-          {{ 'we-could-not-access-your-location' | transloco }}
-        </ion-text>
-      </ion-card-content>
-
-      <ion-button fill="clear" (click)="refresh.emit()">{{
-        'retry' | transloco
-      }}</ion-button>
-      <ion-button fill="clear" (click)="closeGpsError.emit()">{{
-        'close' | transloco
-      }}</ion-button>
-    </ion-card>
+    <bt-gps-error-card
+      (retryClick)="refresh.emit()"
+      (closeClick)="closeGpsError.emit()"
+    />
   }
 
   @if (networkStatus()?.connected === false) {
-    <ion-card>
-      <ion-card-content>
-        <div class="ion-display-flex ion-flex-row ion-align-items-center">
-          <ion-icon name="cloud-offline-outline" color="warning" size="large" />
-
-          <ion-text color="warning" class="ion-padding-start">
-            {{ 'you-are-offline' | transloco }}
-          </ion-text>
-        </div>
-      </ion-card-content>
-    </ion-card>
+    <bt-network-error-box />
   }
 
   @if (isSearchVisible()) {

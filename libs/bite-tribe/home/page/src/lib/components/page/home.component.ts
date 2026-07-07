@@ -13,8 +13,6 @@ import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
   IonButtons,
-  IonCard,
-  IonCardContent,
   IonCheckbox,
   IonContent,
   IonIcon,
@@ -41,7 +39,9 @@ import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
-import { HomeFeedControlsComponent } from './home-feed-controls.component';
+import { HomeFeedControlsComponent } from './home-feed-controls/home-feed-controls.component';
+import { GpsErrorCardComponent } from './gps-error-card/gps-error-card.component';
+import { NetworkErrorBoxComponent } from './network-error-box/network-error-box.component';
 
 const PAGE_SIZE = 50;
 const MIN_SKELETON_VISIBLE_MS = 2000;
@@ -54,8 +54,6 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     PageComponent,
     IonContent,
     BiteComponent,
-    IonCard,
-    IonCardContent,
     IonText,
     BiteSkeletonListComponent,
     NgTemplateOutlet,
@@ -73,6 +71,8 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     TranslocoPipe,
     IsBiteTriedOutPipe,
     HomeFeedControlsComponent,
+    GpsErrorCardComponent,
+    NetworkErrorBoxComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

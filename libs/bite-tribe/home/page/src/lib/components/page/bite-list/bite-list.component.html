@@ -1,0 +1,33 @@
+@for (bite of bites(); track bite.id) {
+  @if (showTriedOutCheckbox()) {
+    <ion-checkbox
+      labelPlacement="end"
+      class="ion-margin-start ion-margin-bottom"
+      [checked]="bite.id | isBiteTriedOut: triedOutBiteIds()"
+      (ionChange)="onTriedOutChange($event, bite.id)"
+    >
+      {{ 'mark-bite-as-tried-out' | transloco }}
+    </ion-checkbox>
+  }
+  <bt-bite
+    [bite]="bite"
+    [userId]="userId()"
+    [showEditButton]="editableBites()"
+    [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
+    (biteClick)="biteClick.emit($event)"
+    (likeButtonClick)="likeButtonClick.emit($event)"
+    (gotoEdit)="gotoEdit.emit($event)"
+    (deleteBite)="deleteBite.emit($event)"
+    (rateNowClick)="rateNowClick.emit($event)"
+  />
+} @empty {
+  <div class="ion-display-flex ion-justify-content-center ion-padding-top">
+    <ion-text color="primary"> No bites found. Be the first one.</ion-text>
+  </div>
+}
+
+@if (hasMore()) {
+  <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
+    <ion-infinite-scroll-content />
+  </ion-infinite-scroll>
+}

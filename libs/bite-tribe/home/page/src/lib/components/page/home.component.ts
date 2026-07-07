@@ -13,11 +13,8 @@ import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
   IonButtons,
-  IonCheckbox,
   IonContent,
   IonIcon,
-  IonInfiniteScroll,
-  IonInfiniteScrollContent,
   IonModal,
   IonRefresher,
   IonRefresherContent,
@@ -25,23 +22,17 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import type { Bite, Like } from 'model';
-import {
-  BiteComponent,
-  BiteSkeletonListComponent,
-} from 'bite-tribe-common/bite';
+import { BiteSkeletonListComponent } from 'bite-tribe-common/bite';
 import { NgTemplateOutlet } from '@angular/common';
 import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
-import {
-  InfiniteScrollCustomEvent,
-  RefresherCustomEvent,
-} from '@ionic/angular';
+import { RefresherCustomEvent } from '@ionic/angular';
 import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
 import { HomeFeedControlsComponent } from './home-feed-controls/home-feed-controls.component';
 import { GpsErrorCardComponent } from './gps-error-card/gps-error-card.component';
 import { NetworkErrorBoxComponent } from './network-error-box/network-error-box.component';
+import { BiteListComponent } from './bite-list/bite-list.component';
 
 const PAGE_SIZE = 50;
 const MIN_SKELETON_VISIBLE_MS = 2000;
@@ -53,26 +44,22 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
   imports: [
     PageComponent,
     IonContent,
-    BiteComponent,
     IonText,
     BiteSkeletonListComponent,
     NgTemplateOutlet,
     IonIcon,
     IonButton,
-    IonCheckbox,
     IonButtons,
     IonModal,
     TypeaheadComponent,
-    IonInfiniteScroll,
-    IonInfiniteScrollContent,
     IonRefresher,
     IonRefresherContent,
     IonSearchbar,
     TranslocoPipe,
-    IsBiteTriedOutPipe,
     HomeFeedControlsComponent,
     GpsErrorCardComponent,
     NetworkErrorBoxComponent,
+    BiteListComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -268,12 +255,10 @@ export class BiteTribeHomeComponent {
 
   networkStatus = input<ConnectionStatus | undefined>();
 
-  onIonInfinite(event: InfiniteScrollCustomEvent): void {
+  onLoadMore(): void {
     if (this.hasMore()) {
       this.currentPage.update((curr) => curr + 1);
     }
-
-    event.target.complete();
   }
 
   refreshBites(event: RefresherCustomEvent): void {
@@ -287,12 +272,5 @@ export class BiteTribeHomeComponent {
         event.target.complete();
       }
     }, 2000);
-  }
-
-  onTriedOutChange(
-    event: { detail: { checked: boolean } },
-    biteId: string,
-  ): void {
-    this.triedOutChange.emit({ biteId, checked: event.detail.checked });
   }
 }

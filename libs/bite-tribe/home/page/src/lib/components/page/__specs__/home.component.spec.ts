@@ -11,10 +11,7 @@ import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
 import { of, Subject } from 'rxjs';
-import {
-  InfiniteScrollCustomEvent,
-  RefresherCustomEvent,
-} from '@ionic/angular';
+import { RefresherCustomEvent } from '@ionic/angular';
 import SpyInstance = jest.SpyInstance;
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -244,19 +241,18 @@ describe('BiteTribeHomeComponent', () => {
     });
   });
 
-  describe('onIonInfinite', () => {
-    it('should load more bites and complete the event', () => {
-      const infiniteScrollEvent = {
-        target: {
-          complete: jest.fn(),
-        },
-      } as unknown as InfiniteScrollCustomEvent;
-
+  describe('onLoadMore', () => {
+    it('should load more bites when there are more to show', () => {
       const bites = new Array(100).fill({});
       componentRef.setInput('bites', bites);
-      component.onIonInfinite(infiniteScrollEvent);
+      component.onLoadMore();
       expect(component.currentPage()).toBe(2);
-      expect(infiniteScrollEvent.target.complete).toHaveBeenCalled();
+    });
+
+    it('should not advance the page when there are no more bites to show', () => {
+      componentRef.setInput('bites', []);
+      component.onLoadMore();
+      expect(component.currentPage()).toBe(1);
     });
   });
 
@@ -339,16 +335,6 @@ describe('BiteTribeHomeComponent', () => {
       component.searchTerm.set('Burger');
       expect(component.displayedBites().length).toBe(1);
       expect(component.displayedBites()[0].name).toBe('Burger');
-    });
-  });
-
-  describe('tried out checkbox', () => {
-    it('should emit triedOutChange when checkbox changes', () => {
-      const emitSpy = jest.spyOn(component.triedOutChange, 'emit');
-
-      component.onTriedOutChange({ detail: { checked: true } }, 'bite-1');
-
-      expect(emitSpy).toHaveBeenCalledWith({ biteId: 'bite-1', checked: true });
     });
   });
 });

@@ -1,11 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  IonModal,
-  NavController,
-  provideIonicAngular,
-} from '@ionic/angular/standalone';
+import { NavController, provideIonicAngular } from '@ionic/angular/standalone';
+import { By } from '@angular/platform-browser';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { BiteTribeHomeComponent } from '../home.component';
+import { HomeFeedControlsComponent } from '../home-feed-controls/home-feed-controls.component';
 import { ComponentRef, signal } from '@angular/core';
 import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
@@ -204,40 +202,34 @@ describe('BiteTribeHomeComponent', () => {
     });
   });
 
-  describe('onFilterChange', () => {
-    let modal: any;
-
-    beforeEach(() => {
-      modal = {
-        dismiss: jest.fn(),
-      };
-    });
-
-    it('should dismiss the modal and emit filter changes', () => {
+  describe('filters', () => {
+    it('should emit filtersChanged when bt-home-feed-controls emits filtersChanged', () => {
+      fixture.detectChanges();
+      const emitSpy = jest.spyOn(component.filtersChanged, 'emit');
       const filterSelection = {
         tagFilters: ['filter1'],
         distanceFilter: '10',
         priceFilter: 20,
       };
 
-      const filtersChangedSpy = jest.spyOn(component.filtersChanged, 'emit');
+      const homeFeedControls = fixture.debugElement.query(
+        By.directive(HomeFeedControlsComponent),
+      );
+      homeFeedControls.componentInstance.filtersChanged.emit(filterSelection);
 
-      component.onFilterChange(filterSelection, modal);
-      expect(modal.dismiss).toHaveBeenCalled();
-      expect(filtersChangedSpy).toHaveBeenCalledWith(filterSelection);
+      expect(emitSpy).toHaveBeenCalledWith(filterSelection);
     });
-  });
 
-  describe('onFiltersClear', () => {
-    it('should emit filterCleared output', () => {
-      const modal = {
-        dismiss: jest.fn(),
-      } as unknown as IonModal;
-      const filterClearedSpy = jest.spyOn(component.filterCleared, 'emit');
+    it('should emit filterCleared when bt-home-feed-controls emits filterCleared', () => {
+      fixture.detectChanges();
+      const emitSpy = jest.spyOn(component.filterCleared, 'emit');
 
-      component.onFiltersClear(modal);
-      expect(modal.dismiss).toHaveBeenCalled();
-      expect(filterClearedSpy).toHaveBeenCalled();
+      const homeFeedControls = fixture.debugElement.query(
+        By.directive(HomeFeedControlsComponent),
+      );
+      homeFeedControls.componentInstance.filterCleared.emit();
+
+      expect(emitSpy).toHaveBeenCalled();
     });
   });
 

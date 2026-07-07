@@ -15,14 +15,12 @@ import {
   IonButtons,
   IonContent,
   IonIcon,
-  IonModal,
   IonRefresher,
   IonRefresherContent,
   IonSearchbar,
   IonText,
 } from '@ionic/angular/standalone';
 import type { Bite, Like } from 'model';
-import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
 import { RefresherCustomEvent } from '@ionic/angular';
 import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
@@ -46,8 +44,6 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     IonIcon,
     IonButton,
     IonButtons,
-    IonModal,
-    TypeaheadComponent,
     IonRefresher,
     IonRefresherContent,
     IonSearchbar,
@@ -168,32 +164,12 @@ export class BiteTribeHomeComponent {
     return bites && bites?.length > 5;
   });
 
-  onFilterChange(
-    filterSelection: {
-      tagFilters: string[];
-      distanceFilter: string;
-      priceFilter: number;
-    },
-    modal: IonModal,
-  ): void {
-    modal.dismiss();
-
-    if (filterSelection) {
-      this.filtersChanged.emit(filterSelection);
-    }
-  }
-
   scrollToTop(): void {
     const ionContent = this.ionContent();
 
     if (ionContent) {
       ionContent.scrollToTop(300);
     }
-  }
-
-  onFiltersClear(modal: IonModal): void {
-    modal.dismiss();
-    this.filterCleared.emit();
   }
 
   toggleSearch(): void {

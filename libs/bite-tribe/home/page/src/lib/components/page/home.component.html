@@ -65,9 +65,13 @@
         [showSearchChip]="showSearchChip()"
         [showMap]="showMap()"
         [sorting]="sorting()"
+        [allTags]="allTags()"
+        [preferedCurrency]="preferedCurrency()"
         (gotoSearch)="gotoSearch.emit()"
         (openMapView)="openMapView.emit()"
         (sortingChange)="sortingChange.emit($event)"
+        (filtersChanged)="filtersChanged.emit($event)"
+        (filterCleared)="filterCleared.emit()"
       />
     </div>
 
@@ -113,20 +117,3 @@
     </div>
   </ion-content>
 </ta-page>
-
-<ion-modal trigger="select-tags" #modal>
-  <ng-template>
-    <app-type-ahead
-      class="ion-page"
-      title="Filters"
-      [items]="allTags()"
-      [selectedItems]="selectedFilters()"
-      [distance]="distance()"
-      [currency]="preferedCurrency()"
-      [price]="maxPriceFilter()"
-      (selectionChange)="onFilterChange($event, modal)"
-      (selectionCancel)="modal.dismiss()"
-      (clearFilters)="onFiltersClear(modal)"
-    />
-  </ng-template>
-</ion-modal>

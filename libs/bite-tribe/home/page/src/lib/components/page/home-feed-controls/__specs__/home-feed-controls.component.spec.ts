@@ -134,4 +134,41 @@ describe('HomeFeedControlsComponent', () => {
 
     expect(emitSpy).not.toHaveBeenCalled();
   });
+
+  describe('onFilterChange', () => {
+    let modal: any;
+
+    beforeEach(() => {
+      modal = {
+        dismiss: jest.fn(),
+      };
+    });
+
+    it('should dismiss the modal and emit filter changes', () => {
+      const filterSelection = {
+        tagFilters: ['filter1'],
+        distanceFilter: '10',
+        priceFilter: 20,
+      };
+
+      const filtersChangedSpy = jest.spyOn(component.filtersChanged, 'emit');
+
+      component.onFilterChange(filterSelection, modal);
+      expect(modal.dismiss).toHaveBeenCalled();
+      expect(filtersChangedSpy).toHaveBeenCalledWith(filterSelection);
+    });
+  });
+
+  describe('onFiltersClear', () => {
+    it('should dismiss the modal and emit filterCleared', () => {
+      const modal = {
+        dismiss: jest.fn(),
+      } as any;
+      const filterClearedSpy = jest.spyOn(component.filterCleared, 'emit');
+
+      component.onFiltersClear(modal);
+      expect(modal.dismiss).toHaveBeenCalled();
+      expect(filterClearedSpy).toHaveBeenCalled();
+    });
+  });
 });

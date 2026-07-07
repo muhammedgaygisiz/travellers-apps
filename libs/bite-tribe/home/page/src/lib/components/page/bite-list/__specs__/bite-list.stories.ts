@@ -67,3 +67,10 @@ export const HasMore: Story = {
     hasMore: true,
   },
 };
+
+export const Loading: Story = {
+  args: {
+    bites,
+    showSkeleton: true,
+  },
+};

@@ -57,6 +57,17 @@ describe('BiteListComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('bt-bite').length).toBe(2);
   });
 
+  it('should show the skeleton list and hide the bites while loading', () => {
+    componentRef.setInput('bites', [{ id: 'bite-1', name: 'Burger' }] as any);
+    componentRef.setInput('showSkeleton', true);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('bt-bite')).toBeNull();
+  });
+
   describe('onTriedOutChange', () => {
     it('should emit triedOutChange with the bite id and checked state', () => {
       const emitSpy = jest.spyOn(component.triedOutChange, 'emit');

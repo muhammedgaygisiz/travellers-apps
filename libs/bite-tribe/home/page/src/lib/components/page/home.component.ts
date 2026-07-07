@@ -22,8 +22,6 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import type { Bite, Like } from 'model';
-import { BiteSkeletonListComponent } from 'bite-tribe-common/bite';
-import { NgTemplateOutlet } from '@angular/common';
 import { TypeaheadComponent } from '../type-ahead/type-ahead.component';
 import { RefresherCustomEvent } from '@ionic/angular';
 import { getSimilarityScore, normalize } from 'utils';
@@ -45,8 +43,6 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     PageComponent,
     IonContent,
     IonText,
-    BiteSkeletonListComponent,
-    NgTemplateOutlet,
     IonIcon,
     IonButton,
     IonButtons,

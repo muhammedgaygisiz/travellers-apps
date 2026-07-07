@@ -12,7 +12,10 @@ import {
 } from '@ionic/angular/standalone';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import type { Bite, Like } from 'model';
-import { BiteComponent } from 'bite-tribe-common/bite';
+import {
+  BiteComponent,
+  BiteSkeletonListComponent,
+} from 'bite-tribe-common/bite';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
 
@@ -22,6 +25,7 @@ import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
   styleUrl: 'bite-list.component.scss',
   imports: [
     BiteComponent,
+    BiteSkeletonListComponent,
     IonCheckbox,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
@@ -39,6 +43,7 @@ export class BiteListComponent {
   showTriedOutCheckbox = input(false);
   triedOutBiteIds = input<string[]>([]);
   hasMore = input(false);
+  showSkeleton = input(false);
 
   readonly biteClick = output<Bite>();
   readonly likeButtonClick = output<Like>();

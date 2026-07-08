@@ -11,6 +11,7 @@ import {
 import { Platform } from '@ionic/angular';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
 import { searchPlaces } from './utils/search-places';
+import { getCurrencyByPosition } from './utils/get-currency-by-position';
 import { BITE_COLLECTION } from '../utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
 import { createBite } from './utils/create-bite';
@@ -56,6 +57,12 @@ export class BiteApiService {
     position?: Geopoint,
   ): Promise<GooglePlace[]> {
     return searchPlaces(searchText, position);
+  }
+
+  public async getCurrencyByPosition(
+    position?: Geopoint,
+  ): Promise<string | undefined> {
+    return getCurrencyByPosition(position);
   }
 
   public async loadBiteById(biteId: string): Promise<Bite> {

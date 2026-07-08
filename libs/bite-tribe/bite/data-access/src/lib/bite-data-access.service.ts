@@ -13,6 +13,7 @@ import type {
   Bite,
   CreateAndUploadImageCallbackParams,
   GooglePlace,
+  Geopoint,
   UploadParams,
 } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -123,5 +124,9 @@ export class BiteDataAccessService {
 
   searchGooglePlaces(searchText: string): void {
     this.googlePlaceSearchText.set(searchText);
+  }
+
+  getCurrencyByPosition(position?: Geopoint): Promise<string | undefined> {
+    return this.api.getCurrencyByPosition(position);
   }
 }

@@ -18,6 +18,8 @@ const Mock = {
   submitBite: jest.fn(),
   back: jest.fn(),
   setEditingBite: jest.fn(),
+  getCurrencyByPosition: jest.fn(),
+  currency: (): string => 'EUR',
 };
 
 const LoadingMock = {
@@ -94,6 +96,45 @@ describe('BiteService', () => {
       service.setEditingBite(bite);
 
       expect(Mock.setEditingBite).toHaveBeenCalledWith(bite);
+    });
+  });
+
+  describe('determineCurrencyForPosition', () => {
+    it('prefills the currency resolved for the position', async () => {
+      Mock.getCurrencyByPosition.mockResolvedValue('KHR');
+
+      await service.determineCurrencyForPosition({
+        latitude: 11.55,
+        longitude: 104.91,
+      });
+
+      expect(service.effectiveCurrency()).toBe('KHR');
+    });
+
+    it('falls back to the preferred currency when none is resolved', async () => {
+      Mock.getCurrencyByPosition.mockResolvedValue(undefined);
+
+      await service.determineCurrencyForPosition({
+        latitude: 1,
+        longitude: 2,
+      });
+
+      expect(service.effectiveCurrency()).toBe('EUR');
+    });
+
+    it('does not look up the same position twice', async () => {
+      Mock.getCurrencyByPosition.mockResolvedValue('USD');
+
+      await service.determineCurrencyForPosition({ latitude: 1, longitude: 2 });
+      await service.determineCurrencyForPosition({ latitude: 1, longitude: 2 });
+
+      expect(Mock.getCurrencyByPosition).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores an undefined position', async () => {
+      await service.determineCurrencyForPosition(undefined);
+
+      expect(Mock.getCurrencyByPosition).not.toHaveBeenCalled();
     });
   });
 });

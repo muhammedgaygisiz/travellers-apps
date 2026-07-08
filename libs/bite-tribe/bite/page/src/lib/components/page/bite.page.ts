@@ -30,7 +30,7 @@ import { RestaurantSelectorComponent } from 'restaurant-selector';
 import { Platform } from '@ionic/angular';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, map, tap } from 'rxjs';
 import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
 import type { Bite, Geopoint, GooglePlace } from 'model';
@@ -106,6 +106,8 @@ export class BitePage {
   placeChange = output<string>();
 
   searchGooglePlaces = output<string>();
+
+  positionChange = output<Geopoint>();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -271,6 +273,16 @@ export class BitePage {
 
   positionValueChanges = toSignal(
     this.biteFormGroup.controls['position'].valueChanges,
+  );
+
+  positionChangeEmitter = toSignal(
+    this.biteFormGroup.controls['position'].valueChanges.pipe(
+      filter((position): position is Geopoint => !!position),
+      distinctUntilChanged(
+        (a, b) => a.latitude === b.latitude && a.longitude === b.longitude,
+      ),
+      tap((position) => this.positionChange.emit(position)),
+    ),
   );
 
   imagePosition: WritableSignal<Geopoint | undefined> = signal(undefined);

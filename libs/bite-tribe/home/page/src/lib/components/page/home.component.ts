@@ -24,7 +24,6 @@ import type { Bite, LikeClick } from 'model';
 import { RefresherCustomEvent } from '@ionic/angular';
 import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
-import { TranslocoPipe } from '@jsverse/transloco';
 import { HomeFeedControlsComponent } from './home-feed-controls/home-feed-controls.component';
 import { GpsErrorCardComponent } from './gps-error-card/gps-error-card.component';
 import { NetworkErrorBoxComponent } from './network-error-box/network-error-box.component';
@@ -47,7 +46,6 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     IonRefresher,
     IonRefresherContent,
     IonSearchbar,
-    TranslocoPipe,
     HomeFeedControlsComponent,
     GpsErrorCardComponent,
     NetworkErrorBoxComponent,

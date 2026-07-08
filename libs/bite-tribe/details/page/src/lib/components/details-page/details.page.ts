@@ -10,7 +10,7 @@ import { PageComponent } from 'common/ui/page';
 import {
   Bite,
   Bucketlist,
-  Like,
+  LikeClick,
   PublicUser,
   RemoveBiteFromBucketlistParams,
   Review,
@@ -39,7 +39,12 @@ import { RoundDistancePipe, ToMetricPipe } from 'common/distance';
 import { MapComponent } from 'bite-tribe-common/map';
 import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';
 import { GetBucketlistsIconPipe } from '../../pipes/get-bucketlists-icon.pipe';
-import { GetImagePipe, LikesComponent } from 'bite-tribe-common/bite';
+import {
+  GetImagePipe,
+  getLikeCounts,
+  getUserLikeType,
+  LikesComponent,
+} from 'bite-tribe-common/bite';
 import { Platform } from '@ionic/angular';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { StarRatingComponent } from 'common/ui/star-rating';
@@ -100,7 +105,7 @@ export class DetailsPage {
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
   newList = output<string>();
   submitNewReview = output<{ review: string; biteId: string }>();
-  likeButtonClick = output<Like>();
+  likeButtonClick = output<LikeClick>();
   readonly logoutClick = output();
   readonly restaurantClick = output<Bite>();
   readonly goToProfile = output<PublicUser>();
@@ -116,6 +121,9 @@ export class DetailsPage {
   activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang?.() || 'en',
   });
+
+  likeCounts = computed(() => getLikeCounts(this.bite()));
+  userLikeType = computed(() => getUserLikeType(this.bite(), this.userId()));
 
   protected readonly biteLocation = computed(() => {
     const bite = this.bite();

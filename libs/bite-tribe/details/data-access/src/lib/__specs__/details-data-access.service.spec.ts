@@ -4,7 +4,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Geolocation } from '@capacitor/geolocation';
-import { Bite } from 'model';
+import { Bite, LikeClick } from 'model';
 import { Share } from '@capacitor/share';
 
 jest.mock('bite-tribe/store');
@@ -47,7 +47,6 @@ describe(DetailsDataAccessService.name, () => {
             removeBiteFromBucketlist: jest.fn(),
             logout: jest.fn(),
             submitLikeClick: jest.fn(),
-            removeLike: jest.fn(),
             biteIdFromUrl: jest.fn(),
             cacheBite: jest.fn(),
           },
@@ -71,15 +70,10 @@ describe(DetailsDataAccessService.name, () => {
       });
     });
 
-    describe('given a bite id', () => {
-      let getCollectionSpy: jest.SpyInstance;
+    describe('given a bite id and a user id', () => {
       let getDocumentSpy: jest.SpyInstance;
 
       beforeEach(() => {
-        getCollectionSpy = jest
-          .spyOn(FirebaseFirestore, 'getCollection')
-          .mockResolvedValue({ snapshots: [] } as any);
-
         getDocumentSpy = jest
           .spyOn(FirebaseFirestore, 'getDocument')
           .mockResolvedValue({
@@ -87,15 +81,16 @@ describe(DetailsDataAccessService.name, () => {
           });
       });
 
-      it('should load the bite with likes', async () => {
+      it("should load the bite and the current user's like", async () => {
         await service.biteLoader({
           params: {
             biteId: 'test-bite-id',
+            userId: 'user1',
           },
         } as any);
 
-        expect(getCollectionSpy).toHaveBeenCalledWith({
-          reference: 'bites/test-bite-id/likes',
+        expect(getDocumentSpy).toHaveBeenCalledWith({
+          reference: 'bites/test-bite-id/likes/user1',
         });
 
         expect(getDocumentSpy).toHaveBeenCalledWith({
@@ -104,15 +99,47 @@ describe(DetailsDataAccessService.name, () => {
       });
     });
 
-    describe('given bite has likes', () => {
+    describe('given the user liked the bite', () => {
       beforeEach(() => {
-        jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
-          snapshots: [
-            { data: { userId: 'user1', likeType: 'like' } },
-            { data: { userId: 'user2', likeType: 'dislike' } },
-          ],
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockImplementation((options: { reference: string }) => {
+            if (options.reference === 'bites/test-bite-id/likes/user1') {
+              return Promise.resolve({
+                snapshot: {
+                  data: { userId: 'user1', likeType: 'thumbup' },
+                } as any,
+              });
+            }
+
+            return Promise.resolve({
+              snapshot: {
+                data: { name: 'Test Bite' },
+                id: 'test-bite-id',
+              } as unknown as any,
+            });
+          });
+      });
+
+      it("should return the bite with the user's like", async () => {
+        const result = await service.biteLoader({
+          params: {
+            biteId: 'test-bite-id',
+            userId: 'user1',
+          },
         } as any);
 
+        expect(result).toEqual({
+          name: 'Test Bite',
+          id: 'test-bite-id',
+          likes: [{ userId: 'user1', likeType: 'thumbup' }],
+        });
+      });
+    });
+
+    describe('given no user id', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
         jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
           snapshot: {
             data: { name: 'Test Bite' },
@@ -121,20 +148,18 @@ describe(DetailsDataAccessService.name, () => {
         });
       });
 
-      it('should return bite with likes', async () => {
+      it('should return the bite without likes', async () => {
         const result = await service.biteLoader({
           params: {
             biteId: 'test-bite-id',
           },
         } as any);
 
+        expect(FirebaseFirestore.getDocument).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           name: 'Test Bite',
           id: 'test-bite-id',
-          likes: [
-            { userId: 'user1', likeType: 'like' },
-            { userId: 'user2', likeType: 'dislike' },
-          ],
+          likes: [],
         });
       });
     });
@@ -338,58 +363,17 @@ describe(DetailsDataAccessService.name, () => {
   });
 
   describe('submitLikeClick', () => {
-    describe('given no bite and user id', () => {
-      let submitLikeClickSpy: jest.SpyInstance;
+    it('should forward the like click to BiteTribeStoreService', () => {
+      const submitLikeClickSpy = jest.spyOn(storeService, 'submitLikeClick');
+      const likeClick: LikeClick = {
+        likeType: 'thumbup',
+        biteId: 'test-bite-id',
+        action: 'save',
+      };
 
-      beforeEach(() => {
-        submitLikeClickSpy = jest.spyOn(storeService, 'submitLikeClick');
-      });
+      service.submitLikeClick(likeClick);
 
-      it('should not call submitLikeClick', () => {
-        service.submitLikeClick({ likeType: 'like' } as any);
-
-        expect(submitLikeClickSpy).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('given a bite without likes', () => {
-      let submitLikeClickSpy: jest.SpyInstance;
-
-      beforeEach(() => {
-        submitLikeClickSpy = jest.spyOn(storeService, 'submitLikeClick');
-        service.bite = {
-          value: () => ({ id: 'test-bite-id' }) as any,
-        } as any;
-        jest.spyOn(service, 'userId').mockReturnValue('test-user-id');
-      });
-
-      it('should call submitLikeClick with like type', () => {
-        service.submitLikeClick({ likeType: 'like' } as any);
-
-        expect(submitLikeClickSpy).toHaveBeenCalledWith({ likeType: 'like' });
-      });
-    });
-
-    describe('given a like from user exists', () => {
-      let removeLikeSpy: jest.SpyInstance;
-
-      beforeEach(() => {
-        removeLikeSpy = jest.spyOn(storeService, 'removeLike');
-        service.bite = {
-          value: () =>
-            ({
-              id: 'test-bite-id',
-              likes: [{ userId: 'test-user-id', likeType: 'like' }],
-            }) as any,
-        } as any;
-        jest.spyOn(service, 'userId').mockReturnValue('test-user-id');
-      });
-
-      it('should call removeLike with like type', () => {
-        service.submitLikeClick({ likeType: 'like' } as any);
-
-        expect(removeLikeSpy).toHaveBeenCalledWith({ likeType: 'like' });
-      });
+      expect(submitLikeClickSpy).toHaveBeenCalledWith(likeClick);
     });
   });
 

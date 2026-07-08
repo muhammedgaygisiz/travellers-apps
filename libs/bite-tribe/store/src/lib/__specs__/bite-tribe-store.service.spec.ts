@@ -1,9 +1,10 @@
 import { inject, TestBed } from '@angular/core/testing';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
-import { Like } from 'model';
+import { LikeClick } from 'model';
+import { removeLike as removeLikeAction, saveLike } from '../likes/actions';
 
 describe(BiteTribeStoreService.name, () => {
   let store: Store;
@@ -121,108 +122,67 @@ describe(BiteTribeStoreService.name, () => {
     ));
   });
 
-  describe('submitLikeOrDislikeClick', () => {
-    const userId = 'user1';
-    const likeType: Like = {
-      likeType: 'thumbup',
+  describe('submitLikeClick', () => {
+    const likeClick: LikeClick = {
       biteId: '123',
-      userId: 'user1',
-      createdAt: '2024-01-01T00:00:00.000Z',
+      likeType: 'thumbup',
+      action: 'save',
     };
 
-    it('should call removeLike if likeFromUser exists', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const removeLikeSpy = jest.spyOn(service, 'removeLike');
-        const bite = {
-          likes: [
-            {
-              userId: 'user1',
-              likeType: 'thumbup',
-            },
-          ],
-        } as any;
-        service.submitLikeOrDislikeClick(bite, userId, likeType);
-        expect(removeLikeSpy).toHaveBeenCalledTimes(1);
-        expect(removeLikeSpy).toHaveBeenCalledWith(likeType);
-      },
-    ));
-
-    it('should call submitLikeClick if likeFromUser does not exist', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const submitLikeClickSpy = jest.spyOn(service, 'submitLikeClick');
-        const bite = {
-          likes: [{ userId: 'user2', likeType: 'like' }],
-        } as any;
-        service.submitLikeOrDislikeClick(bite, userId, likeType);
-        expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
-        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
-      },
-    ));
-
-    it('should call submitLikeClick if bite is null', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const submitLikeClickSpy = jest.spyOn(service, 'submitLikeClick');
-        service.submitLikeOrDislikeClick(null, userId, likeType);
-        expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
-        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
-      },
-    ));
-
-    it('should call submitLikeClick if bite likes is undefined', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const submitLikeClickSpy = jest.spyOn(service, 'submitLikeClick');
-        const bite = {} as any;
-        service.submitLikeOrDislikeClick(bite, userId, likeType);
-        expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
-        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
-      },
-    ));
-  });
-
-  describe('submitLikeClick', () => {
-    it('should dispatch submitLikeClick on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const likeType: Like = {
-          likeType: 'thumbup',
-          biteId: '123',
-          userId: 'user1',
-          createdAt: '2024-01-01T00:00:00.000Z',
-        };
-        const submitLikeClickSpy = jest.spyOn(service, 'submitLikeClick');
-        service.submitLikeClick(likeType);
-        expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
-        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeType);
-      },
-    ));
-  });
-
-  describe('removeLike', () => {
-    describe('given store is defined', () => {
-      it('should dispatch removeLike on BiteTribeStoreService', inject(
-        [BiteTribeStoreService],
-        (service: BiteTribeStoreService) => {
-          const dispatchSpy = jest.spyOn(store, 'dispatch');
-          service.removeLike({} as any);
-          expect(dispatchSpy).toHaveBeenCalledTimes(1);
-        },
-      ));
+    afterEach(() => {
+      (store as MockStore).resetSelectors();
     });
 
-    describe('given store is undefined', () => {
-      it('should not ditpatch', inject(
-        [BiteTribeStoreService],
-        (service: BiteTribeStoreService) => {
-          service['store'] = undefined as any;
-          const dispatchSpy = jest.spyOn(store, 'dispatch');
-          service.removeLike({} as any);
-          expect(dispatchSpy).toHaveBeenCalledTimes(0);
-        },
-      ));
+    it('should dispatch saveLike with the enriched like when action is save', () => {
+      const mockStore = TestBed.inject(MockStore);
+      mockStore.overrideSelector(fromAuth.selectUserId, 'user1');
+      const service = TestBed.inject(BiteTribeStoreService);
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+      service.submitLikeClick({ ...likeClick, previousLikeType: 'drooling' });
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        saveLike({
+          like: {
+            biteId: '123',
+            likeType: 'thumbup',
+            userId: 'user1',
+            createdAt: expect.any(String),
+          },
+          previousLikeType: 'drooling',
+        }),
+      );
+    });
+
+    it('should dispatch removeLike when action is remove', () => {
+      const mockStore = TestBed.inject(MockStore);
+      mockStore.overrideSelector(fromAuth.selectUserId, 'user1');
+      const service = TestBed.inject(BiteTribeStoreService);
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+      service.submitLikeClick({ ...likeClick, action: 'remove' });
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        removeLikeAction({
+          like: {
+            biteId: '123',
+            likeType: 'thumbup',
+            userId: 'user1',
+            createdAt: expect.any(String),
+          },
+        }),
+      );
+    });
+
+    it('should not dispatch when there is no user', () => {
+      const mockStore = TestBed.inject(MockStore);
+      mockStore.overrideSelector(fromAuth.selectUserId, undefined);
+      const service = TestBed.inject(BiteTribeStoreService);
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+      service.submitLikeClick(likeClick);
+
+      expect(dispatchSpy).not.toHaveBeenCalled();
     });
   });
 

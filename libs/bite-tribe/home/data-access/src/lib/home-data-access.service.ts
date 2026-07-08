@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { BiteTribeStoreService, sortByCriteria } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import type { Bite, Like, Restaurant } from 'model';
+import type { Bite, LikeClick, Restaurant } from 'model';
 import { NetworkStatusService } from 'common/networkstatus';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { getSimilarityScore, haversineDistance, normalize } from 'utils';
@@ -211,16 +211,8 @@ export class HomeDataAccessService {
     this.storeService.logout();
   }
 
-  submitLikeClick(likeType: Like): void {
-    const bites = this.sortedHomeBites();
-    const userId = this.userId();
-    const bite = bites?.find((bite: Bite) => bite.id === likeType.biteId);
-
-    if (!userId) {
-      return;
-    }
-
-    this.storeService.submitLikeOrDislikeClick(bite, userId, likeType);
+  submitLikeClick(likeClick: LikeClick): void {
+    this.storeService.submitLikeClick(likeClick);
   }
 
   deleteBite(bite: Bite): void {

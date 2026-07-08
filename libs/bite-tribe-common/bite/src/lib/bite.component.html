@@ -63,8 +63,9 @@
         @if (!showEditButton() && !readonly()) {
           <bt-likes
             class="ion-margin-top"
-            [bite]="biteData"
-            [userId]="userId()"
+            [biteId]="biteData.id"
+            [likeCounts]="likeCounts()"
+            [userLikeType]="userLikeType()"
             [inCard]="true"
             (likeButtonClick)="likeButtonClick.emit($event)"
           />

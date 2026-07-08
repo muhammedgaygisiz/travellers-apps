@@ -1,7 +1,7 @@
 import { inject, Injectable, Signal } from '@angular/core';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import type { Bite, Geopoint, Like } from 'model';
+import type { Bite, Geopoint, LikeClick } from 'model';
 import { BiteTrailDataAccessService } from 'bite-tribe/bite-trail-data-access';
 
 @Injectable({ providedIn: 'root' })
@@ -27,7 +27,7 @@ export class MapService {
     this.dataAccess.logout();
   }
 
-  likeButtonClicked(likeClick: Like): void {
+  likeButtonClicked(likeClick: LikeClick): void {
     this.dataAccess.submitLikeClick(likeClick);
   }
 

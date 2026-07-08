@@ -269,8 +269,8 @@ export class BiteTribeApiService {
     return this.biteApiService.deleteBite(bite);
   }
 
-  async loadLikesForBites(bites: Bite[]): Promise<Like[]> {
-    return this.likeApiService.loadLikesForBites(bites);
+  async loadLikesForBites(bites: Bite[], userId: string): Promise<Like[]> {
+    return this.likeApiService.loadLikesForBites(bites, userId);
   }
 
   restaurants(restaurantId: string): Promise<Restaurant | undefined> {

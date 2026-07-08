@@ -147,8 +147,9 @@
         } @if (biteData) {
         <div class="ion-text-start">
           <bt-likes
-            [bite]="biteData"
-            [userId]="userId()"
+            [biteId]="biteData.id"
+            [likeCounts]="likeCounts()"
+            [userLikeType]="userLikeType()"
             (likeButtonClick)="likeButtonClick.emit($event)"
           />
         </div>

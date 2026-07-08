@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { ProfileDataAccessService } from '../profile-data-access.service';
 import SpyInstance = jest.SpyInstance;
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { Like } from 'model';
+import { LikeClick } from 'model';
 
 class Mock {
   isAuthenticated$ = of(true);
@@ -17,7 +17,6 @@ class Mock {
   profileMetadata$ = of(true);
   sortedMyBites$ = of(null);
   logout = jest.fn();
-  removeLike = jest.fn();
   submitLikeClick = jest.fn();
   savePublicProfile = jest.fn();
   followUser = jest.fn();
@@ -133,48 +132,21 @@ describe('ProfileDataAccessService', () => {
   });
 
   describe('submitLikeClick', () => {
-    it('should call submitLikeClick on storeService', inject(
+    it('should forward the like click to BiteTribeStoreService', inject(
       [ProfileDataAccessService],
       (service: ProfileDataAccessService) => {
         const submitLikeClickSpy = jest.spyOn(storeService, 'submitLikeClick');
-        service.submitLikeClick({
+        const likeClick: LikeClick = {
           likeType: 'thumbup',
           biteId: 'bite-id',
-        } as Like);
-        expect(submitLikeClickSpy).toHaveBeenCalledWith({
-          likeType: 'thumbup',
-          biteId: 'bite-id',
-        });
+          action: 'save',
+        };
+
+        service.submitLikeClick(likeClick);
+
+        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeClick);
       },
     ));
-
-    describe('with an already liked bite', () => {
-      let removeLikeSpy: SpyInstance;
-
-      beforeEach(() => {
-        removeLikeSpy = jest.spyOn(storeService, 'removeLike');
-        storeService.bites$ = of([
-          {
-            id: 'bite-id',
-            likes: [{ userId: 'user-id', likeType: 'thumbup' }],
-          } as any,
-        ]);
-      });
-
-      it('should removeLike', inject(
-        [ProfileDataAccessService],
-        (service: ProfileDataAccessService) => {
-          service.submitLikeClick({
-            likeType: 'thumbup',
-            biteId: 'bite-id',
-          } as Like);
-          expect(removeLikeSpy).toHaveBeenCalledWith({
-            likeType: 'thumbup',
-            biteId: 'bite-id',
-          });
-        },
-      ));
-    });
   });
 
   describe('savePublicProfile', () => {

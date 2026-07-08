@@ -7,14 +7,10 @@ import {
   output,
 } from '@angular/core';
 import { IonChip, IonLabel } from '@ionic/angular/standalone';
-import { Bite, Like } from 'model';
+import { LikeClick, LikeType } from 'model';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
 import { PopoverController } from '@ionic/angular';
-import {
-  getLikeCount,
-  getTotalLikeCount,
-  likeTypes,
-} from '../utils/like-counts';
+import { LikeCounts, likeTypes } from '../utils/like-counts';
 
 const emojiMap: Record<string, string> = {
   thumbup: '👍',
@@ -33,35 +29,37 @@ const emojiMap: Record<string, string> = {
 export class LikesComponent {
   popoverController = inject(PopoverController);
 
-  bite = input.required<Bite>();
-  userId = input<string>();
+  biteId = input.required<string>();
+  likeCounts = input.required<LikeCounts>();
+  userLikeType = input<LikeType | undefined>();
   inCard = input(false);
 
-  likeButtonClick = output<Like>();
+  likeButtonClick = output<LikeClick>();
 
-  totalLikeCount = computed(() => getTotalLikeCount(this.bite()));
+  totalLikeCount = computed(() => {
+    const likeCounts = this.likeCounts();
+    return likeTypes.reduce(
+      (total, likeType) => total + likeCounts[likeType],
+      0,
+    );
+  });
 
   calcClass = computed(() => {
-    const bite = this.bite();
-    const userId = this.userId();
+    if (this.userLikeType()) {
+      return 'liked';
+    }
 
     if (!this.totalLikeCount()) {
       return 'unliked';
-    }
-
-    const foundLike = bite?.likes?.find((like) => like.userId === userId);
-
-    if (foundLike) {
-      return 'liked';
     }
 
     return '';
   });
 
   getLikeEmojis = computed(() => {
-    const bite = this.bite();
+    const likeCounts = this.likeCounts();
     return likeTypes
-      .filter((likeType) => getLikeCount(bite, likeType) > 0)
+      .filter((likeType) => likeCounts[likeType] > 0)
       .map((likeType) => emojiMap[likeType]);
   });
 
@@ -71,9 +69,9 @@ export class LikesComponent {
       event: $event,
       dismissOnSelect: true,
       componentProps: {
-        bite: this.bite,
-        userId: this.userId,
-        likeButtonClick: this.likeButtonClick,
+        likeCounts: this.likeCounts(),
+        userLikeType: this.userLikeType(),
+        onSelect: (likeType: LikeType) => this.onLikeSelected(likeType),
       },
       cssClass: 'like-options-popover',
       alignment: 'center',
@@ -82,5 +80,25 @@ export class LikesComponent {
     });
 
     await popover.present();
+  }
+
+  onLikeSelected(likeType: LikeType): void {
+    const userLikeType = this.userLikeType();
+
+    if (likeType === userLikeType) {
+      this.likeButtonClick.emit({
+        biteId: this.biteId(),
+        likeType,
+        action: 'remove',
+      });
+      return;
+    }
+
+    this.likeButtonClick.emit({
+      biteId: this.biteId(),
+      likeType,
+      action: 'save',
+      previousLikeType: userLikeType,
+    });
   }
 }

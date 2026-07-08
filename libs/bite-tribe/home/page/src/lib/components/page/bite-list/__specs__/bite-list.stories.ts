@@ -1,7 +1,7 @@
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
-import type { Bite, Like } from 'model';
+import type { Bite } from 'model';
 import { BiteListComponent } from '../bite-list.component';
 
 addNecessaryIcons();
@@ -15,7 +15,7 @@ const bites: Bite[] = [
     place: 'Einstein au Jardin',
     distance: '0.6',
     rating: 3,
-    likes: [{ likeType: 'thumbup' } as Like],
+    thumbup: 1,
   } as Bite,
   {
     id: 'bite2',
@@ -25,7 +25,7 @@ const bites: Bite[] = [
     place: 'Sushi Bar',
     distance: '1.2',
     rating: 4,
-    likes: [] as Like[],
+    drooling: 1,
   } as Bite,
 ];
 

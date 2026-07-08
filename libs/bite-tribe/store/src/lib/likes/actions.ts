@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Like } from 'model';
+import { Like, LikeType } from 'model';
 
 export const loadedLikesFromApi = createAction(
   '[LIKES] Loaded from API',
@@ -8,7 +8,12 @@ export const loadedLikesFromApi = createAction(
 
 export const saveLike = createAction(
   '[BITES] Save like',
-  props<{ like: Like }>(),
+  props<{ like: Like; previousLikeType?: LikeType }>(),
+);
+
+export const saveLikeFailed = createAction(
+  '[BITES] Save like failed',
+  props<{ like: Like; previousLikeType?: LikeType }>(),
 );
 
 export const deletedLike = createAction(
@@ -18,5 +23,10 @@ export const deletedLike = createAction(
 
 export const removeLike = createAction(
   '[BITES] Remove like',
+  props<{ like: Like }>(),
+);
+
+export const removeLikeFailed = createAction(
+  '[BITES] Remove like failed',
   props<{ like: Like }>(),
 );

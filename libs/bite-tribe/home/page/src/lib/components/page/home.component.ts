@@ -20,7 +20,7 @@ import {
   IonSearchbar,
   IonText,
 } from '@ionic/angular/standalone';
-import type { Bite, Like } from 'model';
+import type { Bite, LikeClick } from 'model';
 import { RefresherCustomEvent } from '@ionic/angular';
 import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
@@ -93,7 +93,7 @@ export class BiteTribeHomeComponent {
   readonly gotoLeaderboard = output();
   readonly gotoMyBucketlists = output();
   readonly gotoSearch = output();
-  readonly likeButtonClick = output<Like>();
+  readonly likeButtonClick = output<LikeClick>();
   readonly biteClick = output<Bite>();
   readonly gotoEdit = output<Bite>();
   readonly deleteBite = output<Bite>();

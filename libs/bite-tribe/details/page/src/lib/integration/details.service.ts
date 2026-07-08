@@ -3,7 +3,7 @@ import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
 import {
   Bite,
   Bucketlist,
-  Like,
+  LikeClick,
   PublicUser,
   RemoveBiteFromBucketlistParams,
 } from 'model';
@@ -51,7 +51,7 @@ export class DetailsService {
     this.dataAccess.removeBiteFromBucketlist($event);
   }
 
-  likeButtonClicked(likeClick: Like): void {
+  likeButtonClicked(likeClick: LikeClick): void {
     this.dataAccess.submitLikeClick(likeClick);
 
     const timeout = setTimeout(() => {

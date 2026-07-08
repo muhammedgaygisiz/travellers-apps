@@ -28,6 +28,7 @@ import type {
   CreateAndSaveToBucketListParams,
   CreateBucketListFromBiteTrailParams,
   Like,
+  LikeClick,
   Link,
   PublicUser,
   RemoveBiteFromBucketlistParams,
@@ -154,6 +155,7 @@ export class BiteTribeStoreService implements StoreService {
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);
   followType = toSignal(this.type$);
+  private readonly userId = toSignal(this.userId$);
 
   type = toSignal(this.type$);
   userIdFromUrl = toSignal(this.userIdFromUrl$);
@@ -196,37 +198,28 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(fromAuth.AuthActions.logout());
   }
 
-  submitLikeOrDislikeClick(
-    bite: Bite | undefined | null,
-    userId: string,
-    likeType: Like,
-  ): void {
-    const likeFromUser = bite?.likes?.find(
-      (like: Like) =>
-        like.userId === userId && like.likeType === likeType.likeType,
-    );
+  submitLikeClick(likeClick: LikeClick): void {
+    const userId = this.userId();
 
-    if (likeFromUser) {
-      this.removeLike(likeType);
+    if (!userId) {
       return;
     }
 
-    this.submitLikeClick(likeType);
-  }
+    const like: Like = {
+      biteId: likeClick.biteId,
+      likeType: likeClick.likeType,
+      userId,
+      createdAt: new Date().toISOString(),
+    };
 
-  submitLikeClick(event: Like): void {
-    this.store?.dispatch(
-      saveLike({
-        like: {
-          ...event,
-          createdAt: new Date().toISOString(),
-        },
-      }),
+    if (likeClick.action === 'remove') {
+      this.store.dispatch(removeLike({ like }));
+      return;
+    }
+
+    this.store.dispatch(
+      saveLike({ like, previousLikeType: likeClick.previousLikeType }),
     );
-  }
-
-  removeLike(event: Like): void {
-    this.store?.dispatch(removeLike({ like: event }));
   }
 
   notifySavedSettings(settings: Settings): void {

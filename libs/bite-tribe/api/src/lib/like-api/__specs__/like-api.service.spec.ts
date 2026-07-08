@@ -42,10 +42,11 @@ describe(LikeApiService.name, () => {
     it('should call loadLikesByBites utility function', async () => {
       const bites = [{ id: 'bite1' }, { id: 'bite2' }] as any;
 
-      await service.loadLikesForBites(bites);
+      await service.loadLikesForBites(bites, 'user1');
 
       expect(loadLikesByBitesUtils.loadLikesByBites).toHaveBeenCalledWith(
         bites,
+        'user1',
       );
     });
   });

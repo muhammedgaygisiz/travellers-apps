@@ -11,7 +11,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
-import type { Bite, Like } from 'model';
+import type { Bite, LikeClick } from 'model';
 import {
   BiteComponent,
   BiteSkeletonListComponent,
@@ -46,7 +46,7 @@ export class BiteListComponent {
   showSkeleton = input(false);
 
   readonly biteClick = output<Bite>();
-  readonly likeButtonClick = output<Like>();
+  readonly likeButtonClick = output<LikeClick>();
   readonly gotoEdit = output<Bite>();
   readonly deleteBite = output<Bite>();
   readonly rateNowClick = output<{ bite: Bite; rating: number }>();

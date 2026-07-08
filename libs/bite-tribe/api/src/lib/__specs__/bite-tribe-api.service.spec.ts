@@ -615,8 +615,8 @@ describe(BiteTribeApiService.name, () => {
           .spyOn(likeApiService, 'loadLikesForBites')
           .mockReturnValue(Promise.resolve([]));
         const bites = [{ id: 'bite-id-1' }, { id: 'bite-id-2' }] as any;
-        service.loadLikesForBites(bites);
-        expect(loadLikesForBitesSpy).toHaveBeenCalledWith(bites);
+        service.loadLikesForBites(bites, 'user1');
+        expect(loadLikesForBitesSpy).toHaveBeenCalledWith(bites, 'user1');
       },
     ));
   });

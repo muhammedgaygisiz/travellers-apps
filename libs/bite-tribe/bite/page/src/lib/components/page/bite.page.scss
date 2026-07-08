@@ -35,13 +35,14 @@
   }
 
   .position-button-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.25rem;
     margin-bottom: 0.5rem;
 
     ion-button {
-      flex: 1;
-      &:not(:last-child) {
-        margin-right: 0.25rem;
-      }
+      width: 100%;
+      margin: 0;
     }
   }
 }

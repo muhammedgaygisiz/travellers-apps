@@ -43,12 +43,16 @@
     }
 
     @if (showGoogleSearchOption()) {
-      <ion-item [detail]="false" (click)="searchGoogleMaps()">
-        <ion-icon slot="start" name="logo-google" />
-        <ion-label>
-          <h2>Search for place in Google Maps</h2>
-          <p>Look up "{{ rawSearchTerm() }}" online</p>
+      <ion-item button [detail]="false" (click)="searchGoogleMaps()">
+        <ion-icon slot="start" name="logo-google" color="primary" />
+        <ion-label class="ion-text-wrap">
+          <h2>Search for "{{ rawSearchTerm() }}" in Google Maps</h2>
+          <p>
+            Tap to search online · add the city for better results, e.g. "Jabri
+            Amman"
+          </p>
         </ion-label>
+        <ion-icon slot="end" name="arrow-forward-outline" color="primary" />
       </ion-item>
     }
 

@@ -134,6 +134,7 @@
   "tags-label": "Etiketler? (boşlukla ayır)",
   "from-photo": "Fotoğraftan",
   "from-gps": "GPS'ten",
+  "from-google": "Google'dan",
   "no-gps-position-error-message": "Görselde GPS konumu bulunamadı. Lütfen haritadan bir GPS konumu seç veya GPS konumunu etkinleştir.",
   "chose-gps-position-error-message": "Lütfen haritadan bir GPS konumu seç veya GPS konumunu etkinleştir.",
   "post": "Paylaş",

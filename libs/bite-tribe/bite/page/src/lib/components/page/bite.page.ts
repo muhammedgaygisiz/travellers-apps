@@ -280,6 +280,8 @@ export class BitePage {
   confirmedManualPosition: WritableSignal<Geopoint | undefined> =
     signal(undefined);
 
+  googlePosition: WritableSignal<Geopoint | undefined> = signal(undefined);
+
   isManualPositionModalOpen = signal(false);
 
   shouldRenderMapInModal = signal(false);
@@ -319,6 +321,16 @@ export class BitePage {
       confirmed &&
       currentValue?.latitude === confirmed.latitude &&
       currentValue?.longitude === confirmed.longitude
+    );
+  });
+
+  locationFromGoogle = computed(() => {
+    const currentValue = this.positionValueChanges();
+    const google = this.googlePosition();
+    return !!(
+      google &&
+      currentValue?.latitude === google.latitude &&
+      currentValue?.longitude === google.longitude
     );
   });
 
@@ -405,7 +417,14 @@ export class BitePage {
       place: place.name,
       position: place.position,
     });
-    this.confirmedManualPosition.set(place.position);
+    this.googlePosition.set(place.position);
     void modal.dismiss();
+  }
+
+  onPositionFromGoogle(): void {
+    const position = this.googlePosition();
+    if (position) {
+      this.biteFormGroup.controls['position'].patchValue(position);
+    }
   }
 }

@@ -87,9 +87,7 @@
         <ion-label class="ion-display-block map-label">
           {{ 'location-label' | transloco }}
         </ion-label>
-        <div
-          class="ion-display-flex ion-justify-content-center position-button-container"
-        >
+        <div class="position-button-container">
           <ion-button
             [disabled]="!imagePosition()"
             (click)="onPositionFromImage(imagePosition())"
@@ -108,6 +106,14 @@
           </ion-button>
           <ion-button (click)="openManualPositionModal()">
             {{ 'set-manually' | transloco }} @if (locationFromManual()) {
+            <ion-icon name="checkmark-outline" />
+            }
+          </ion-button>
+          <ion-button
+            [disabled]="!googlePosition()"
+            (click)="onPositionFromGoogle()"
+          >
+            {{ 'from-google' | transloco }} @if (locationFromGoogle()) {
             <ion-icon name="checkmark-outline" />
             }
           </ion-button>

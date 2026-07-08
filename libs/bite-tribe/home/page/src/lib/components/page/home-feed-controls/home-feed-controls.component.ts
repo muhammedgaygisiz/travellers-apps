@@ -37,7 +37,7 @@ import { TypeaheadComponent } from '../../type-ahead/type-ahead.component';
 export class HomeFeedControlsComponent {
   showFilters = input(true);
   selectedFilters = input<string[]>([]);
-  distance = input<number | string | undefined>();
+  distance = input<number | undefined>();
   maxPriceFilter = input(0);
   showSearchChip = input(false);
   showMap = input(true);

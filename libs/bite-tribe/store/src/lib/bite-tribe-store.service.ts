@@ -60,7 +60,8 @@ import {
   myBitesSorting,
   restaurantBitesSorting,
 } from './filtering-and-sorting/selectors';
-import { removeLike, saveLike } from './likes/actions';
+import { loadedLikesFromApi, removeLike, saveLike } from './likes/actions';
+import { likes } from './likes/selectors';
 import {
   saveNewRestaurant,
   saveSocialMediaLinksForRestaurant,
@@ -129,6 +130,7 @@ export class BiteTribeStoreService implements StoreService {
   isReloadingHome$ = this.store.select(isReloadingHome);
   hasErrorLoadingGpsPosition$ = this.store.select(hasErrorLoadingGpsPosition);
 
+  likes$ = this.store.select(likes);
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
   userHasSubscriptionTierOne$ = this.store.select(userHasSubscriptionTierOne);
@@ -220,6 +222,10 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(
       saveLike({ like, previousLikeType: likeClick.previousLikeType }),
     );
+  }
+
+  notifyLikesLoaded(likes: Like[]): void {
+    this.store.dispatch(loadedLikesFromApi({ likes }));
   }
 
   notifySavedSettings(settings: Settings): void {

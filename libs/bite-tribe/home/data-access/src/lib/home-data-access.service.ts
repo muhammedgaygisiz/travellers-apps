@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { BiteTribeStoreService, sortByCriteria } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import type { Bite, LikeClick, Restaurant } from 'model';
+import type { Bite, Like, LikeClick, Restaurant } from 'model';
 import { NetworkStatusService } from 'common/networkstatus';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { getSimilarityScore, haversineDistance, normalize } from 'utils';
@@ -89,107 +89,126 @@ export class HomeDataAccessService {
     { initialValue: false },
   );
   biteById = toSignal(this.storeService.bite$);
+  private readonly likes = toSignal(this.storeService.likes$, {
+    initialValue: [] as Like[],
+  });
 
   networkStatus = this.networkStatusService.status;
 
-  restaurantBitesLoader: ResourceLoader<Bite[], RestaurantBitesParams> =
-    async ({ params }): Promise<Bite[]> => {
-      const { sourceBiteId, restaurantIdOrName } = params;
+  restaurantBitesLoader: ResourceLoader<Bite[], RestaurantBitesParams> = async (
+    loaderParams,
+  ): Promise<Bite[]> => {
+    const bites = await this.loadRestaurantBites(loaderParams);
+    this.seedUserLikes(bites);
+    return bites;
+  };
 
-      if (!sourceBiteId) {
-        return [];
+  private readonly loadRestaurantBites: ResourceLoader<
+    Bite[],
+    RestaurantBitesParams
+  > = async ({ params }): Promise<Bite[]> => {
+    const { sourceBiteId, restaurantIdOrName } = params;
+
+    if (!sourceBiteId) {
+      return [];
+    }
+
+    let sourceBite: Bite | undefined;
+    try {
+      sourceBite = await this.api.biteById(sourceBiteId);
+    } catch {
+      return [];
+    }
+
+    if (
+      sourceBite?.position?.latitude === undefined ||
+      sourceBite?.position?.longitude === undefined
+    ) {
+      return [];
+    }
+
+    let nearbyBites: Bite[];
+    try {
+      nearbyBites = await this.api.bitesByPosition({
+        coords: {
+          latitude: sourceBite.position.latitude,
+          longitude: sourceBite.position.longitude,
+        },
+      } as GeolocationPosition);
+    } catch {
+      return [sourceBite];
+    }
+
+    const closeBites = nearbyBites.filter((bite) => {
+      if (!bite.position) {
+        return false;
       }
 
-      let sourceBite: Bite | undefined;
-      try {
-        sourceBite = await this.api.biteById(sourceBiteId);
-      } catch {
-        return [];
+      const dist = Number(
+        haversineDistance(
+          sourceBite!.position.latitude,
+          sourceBite!.position.longitude,
+          bite.position.latitude,
+          bite.position.longitude,
+          'm',
+        ),
+      );
+
+      return dist <= MAX_RESTAURANT_DISTANCE_METERS;
+    });
+
+    let restaurant: Restaurant | undefined;
+    try {
+      if (restaurantIdOrName) {
+        restaurant = await this.api.loadRestaurant(restaurantIdOrName);
       }
+    } catch {
+      // fall through to name-based matching below
+    }
 
-      if (
-        sourceBite?.position?.latitude === undefined ||
-        sourceBite?.position?.longitude === undefined
-      ) {
-        return [];
-      }
+    let matchedBites: Bite[];
 
-      let nearbyBites: Bite[];
-      try {
-        nearbyBites = await this.api.bitesByPosition({
-          coords: {
-            latitude: sourceBite.position.latitude,
-            longitude: sourceBite.position.longitude,
-          },
-        } as GeolocationPosition);
-      } catch {
-        return [sourceBite];
-      }
-
-      const closeBites = nearbyBites.filter((bite) => {
-        if (!bite.position) {
-          return false;
-        }
-
-        const dist = Number(
-          haversineDistance(
-            sourceBite!.position.latitude,
-            sourceBite!.position.longitude,
-            bite.position.latitude,
-            bite.position.longitude,
-            'm',
-          ),
-        );
-
-        return dist <= MAX_RESTAURANT_DISTANCE_METERS;
+    if (restaurant?.name) {
+      const normalizedName = normalize(restaurant.name);
+      matchedBites = closeBites.filter((bite) => {
+        const score = getSimilarityScore(normalize(bite.place), normalizedName);
+        return bite.restaurantId?.includes(restaurant!.id!) || score.length > 0;
       });
-
-      let restaurant: Restaurant | undefined;
-      try {
-        if (restaurantIdOrName) {
-          restaurant = await this.api.loadRestaurant(restaurantIdOrName);
+    } else if (restaurantIdOrName || sourceBite?.place) {
+      const normalizedName = normalize(
+        decodeURIComponent(restaurantIdOrName || sourceBite.place),
+      );
+      matchedBites = closeBites.filter((bite) => {
+        const normalizedBitePlace = normalize(bite.place);
+        if (normalizedBitePlace === normalizedName) {
+          return true;
         }
-      } catch {
-        // fall through to name-based matching below
-      }
+        const score = getSimilarityScore(normalizedBitePlace, normalizedName);
+        return bite.restaurantId?.includes(normalizedName) || score.length > 0;
+      });
+    } else {
+      matchedBites = closeBites;
+    }
 
-      let matchedBites: Bite[];
+    if (!matchedBites.find((b) => b.id === sourceBite!.id)) {
+      return [sourceBite, ...matchedBites];
+    }
 
-      if (restaurant?.name) {
-        const normalizedName = normalize(restaurant.name);
-        matchedBites = closeBites.filter((bite) => {
-          const score = getSimilarityScore(
-            normalize(bite.place),
-            normalizedName,
-          );
-          return (
-            bite.restaurantId?.includes(restaurant!.id!) || score.length > 0
-          );
-        });
-      } else if (restaurantIdOrName || sourceBite?.place) {
-        const normalizedName = normalize(
-          decodeURIComponent(restaurantIdOrName || sourceBite.place),
-        );
-        matchedBites = closeBites.filter((bite) => {
-          const normalizedBitePlace = normalize(bite.place);
-          if (normalizedBitePlace === normalizedName) {
-            return true;
-          }
-          const score = getSimilarityScore(normalizedBitePlace, normalizedName);
-          return (
-            bite.restaurantId?.includes(normalizedName) || score.length > 0
-          );
-        });
-      } else {
-        matchedBites = closeBites;
-      }
+    return matchedBites;
+  };
 
-      if (!matchedBites.find((b) => b.id === sourceBite!.id)) {
-        return [sourceBite, ...matchedBites];
-      }
+  private seedUserLikes(bites: Bite[]): void {
+    const userId = this.userId();
 
-      return matchedBites;
-    };
+    if (!userId || bites.length === 0) {
+      return;
+    }
+
+    void this.api
+      .loadLikesForBites(bites, userId)
+      .then((likes) => this.storeService.notifyLikesLoaded(likes))
+      .catch(() => undefined);
+  }
 
   restaurantBitesResource = resource({
     params: () => ({
@@ -199,13 +218,19 @@ export class HomeDataAccessService {
     loader: this.restaurantBitesLoader.bind(this),
   });
 
-  restaurantBites = computed((): Bite[] =>
-    sortByCriteria(
-      this.restaurantBitesResource.value() ?? [],
+  restaurantBites = computed((): Bite[] => {
+    const likes = this.likes();
+    const bites = (this.restaurantBitesResource.value() ?? []).map((bite) => ({
+      ...bite,
+      likes: likes.filter((like) => like.biteId === bite.id),
+    }));
+
+    return sortByCriteria(
+      bites,
       this.restaurantBitesSorting(),
       this.exchangeRates(),
-    ),
-  );
+    );
+  });
 
   logout(): void {
     this.storeService.logout();

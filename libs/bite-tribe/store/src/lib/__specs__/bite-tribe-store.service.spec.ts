@@ -3,8 +3,12 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
-import { LikeClick } from 'model';
-import { removeLike as removeLikeAction, saveLike } from '../likes/actions';
+import { Like, LikeClick } from 'model';
+import {
+  loadedLikesFromApi,
+  removeLike as removeLikeAction,
+  saveLike,
+} from '../likes/actions';
 
 describe(BiteTribeStoreService.name, () => {
   let store: Store;
@@ -184,6 +188,27 @@ describe(BiteTribeStoreService.name, () => {
 
       expect(dispatchSpy).not.toHaveBeenCalled();
     });
+  });
+
+  describe('notifyLikesLoaded', () => {
+    it('should dispatch loadedLikesFromApi with the likes', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        const likes = [
+          {
+            biteId: '123',
+            userId: 'user1',
+            likeType: 'thumbup',
+            createdAt: '2026-01-01T00:00:00Z',
+          } as Like,
+        ];
+
+        service.notifyLikesLoaded(likes);
+
+        expect(dispatchSpy).toHaveBeenCalledWith(loadedLikesFromApi({ likes }));
+      },
+    ));
   });
 
   describe('notifySavedSettings', () => {

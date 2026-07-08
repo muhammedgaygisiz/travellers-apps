@@ -137,6 +137,42 @@ describe(DetailsDataAccessService.name, () => {
       });
     });
 
+    describe('given a bite id and a user id but no existing like', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockImplementation((options: { reference: string }) => {
+            if (options.reference === 'bites/test-bite-id/likes/user1') {
+              return Promise.resolve({
+                snapshot: { data: undefined } as any,
+              });
+            }
+
+            return Promise.resolve({
+              snapshot: {
+                data: { name: 'Test Bite' },
+                id: 'test-bite-id',
+              } as unknown as any,
+            });
+          });
+      });
+
+      it('should return the bite without any likes', async () => {
+        const result = await service.biteLoader({
+          params: {
+            biteId: 'test-bite-id',
+            userId: 'user1',
+          },
+        } as any);
+
+        expect(result).toEqual({
+          name: 'Test Bite',
+          id: 'test-bite-id',
+          likes: [],
+        });
+      });
+    });
+
     describe('given no user id', () => {
       beforeEach(() => {
         jest.clearAllMocks();
@@ -402,6 +438,45 @@ describe(DetailsDataAccessService.name, () => {
         title: 'Test Bite @ Test Place',
         url: 'https://bite-tribe.web.app/s/bite/test-bite-id',
       });
+    });
+
+    it('should use only the bite name as title when place is missing', () => {
+      const mockedBite = {
+        id: 'test-bite-id',
+        name: 'Test Bite',
+      } as Bite;
+
+      service.shareBite(mockedBite);
+
+      expect(shareSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Test Bite' }),
+      );
+    });
+
+    it('should use the default text when price and rating are missing', () => {
+      const mockedBite = {
+        id: 'test-bite-id',
+        name: 'Test Bite',
+        place: 'Test Place',
+      } as Bite;
+
+      service.shareBite(mockedBite);
+
+      expect(shareSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'Check out this Bite on BiteTribe 👇\nhttps://bite-tribe.web.app/s/bite/test-bite-id',
+        }),
+      );
+    });
+  });
+
+  describe('biteCreatorId', () => {
+    it('should return the userId of the currently loaded bite', () => {
+      jest
+        .spyOn(service.bite, 'value')
+        .mockReturnValue({ userId: 'test-user-id' } as any);
+
+      expect(service.biteCreatorId()).toBe('test-user-id');
     });
   });
 

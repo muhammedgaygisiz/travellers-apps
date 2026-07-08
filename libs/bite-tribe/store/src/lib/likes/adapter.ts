@@ -1,11 +1,11 @@
 import { createEntityAdapter, EntityState } from '@ngrx/entity';
+import type { Like } from 'model';
 
-const selectId = (like: any): string => {
-  return `${like.biteId}-${like.userId}`;
-};
+export const likeId = (like: Pick<Like, 'biteId' | 'userId'>): string =>
+  `${like.biteId}-${like.userId}`;
 
-export const adapter = createEntityAdapter<any>({
-  selectId,
+export const adapter = createEntityAdapter<Like>({
+  selectId: likeId,
 });
 
-export const initialState: EntityState<any> = adapter.getInitialState();
+export const initialState: EntityState<Like> = adapter.getInitialState();

@@ -1,45 +1,29 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { IonBadge, IonChip } from '@ionic/angular/standalone';
-import { Bite } from 'model';
-import { CalcClassPipe } from './pipe/calc-class.pipe';
-import { getLikeCount } from '../utils/like-counts';
+import { LikeType } from 'model';
+import { likeTypes } from '../utils/like-counts';
+import type { LikeCounts } from '../utils/like-counts';
+
+const emojiMap: Record<LikeType, string> = {
+  thumbup: '👍',
+  drooling: '🤤',
+  mindblown: '🤯',
+};
 
 @Component({
   template: `
     <div class="like-options-container">
-      <ion-chip
-        class="{{ bite() | calcClass: userId() : 'thumbup' }}"
-        (click)="onLikeButtonClicked('thumbup')"
-      >
-        👍
-        @if (thumbupCount() > 0) {
-          <ion-badge>{{ thumbupCount() }}</ion-badge>
-        }
-      </ion-chip>
-      <ion-chip
-        class="{{ bite() | calcClass: userId() : 'drooling' }}"
-        (click)="onLikeButtonClicked('drooling')"
-      >
-        🤤
-        @if (droolingCount() > 0) {
-          <ion-badge>{{ droolingCount() }}</ion-badge>
-        }
-      </ion-chip>
-      <ion-chip
-        class="{{ bite() | calcClass: userId() : 'mindblown' }}"
-        (click)="onLikeButtonClicked('mindblown')"
-      >
-        🤯
-        @if (mindblownCount() > 0) {
-          <ion-badge>{{ mindblownCount() }}</ion-badge>
-        }
-      </ion-chip>
+      @for (likeType of likeTypes; track likeType) {
+        <ion-chip
+          class="{{ likeType === userLikeType ? 'liked' : '' }}"
+          (click)="onSelect(likeType)"
+        >
+          {{ emojiMap[likeType] }}
+          @if (likeCounts[likeType] > 0) {
+            <ion-badge>{{ likeCounts[likeType] }}</ion-badge>
+          }
+        </ion-chip>
+      }
     </div>
   `,
   styles: `
@@ -61,31 +45,14 @@ import { getLikeCount } from '../utils/like-counts';
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonChip, CalcClassPipe, IonBadge],
+  imports: [IonChip, IonBadge],
 })
 export class LikeOptionsPopoverMenuComponent {
-  bite = input<Bite>();
-  userId = input<string>();
+  readonly likeTypes = likeTypes;
+  readonly emojiMap = emojiMap;
 
-  likeButtonClick = output<{
-    likeType: string;
-    biteId: string;
-  }>();
-
-  thumbupCount = computed(() => getLikeCount(this.bite(), 'thumbup'));
-
-  droolingCount = computed(() => getLikeCount(this.bite(), 'drooling'));
-
-  mindblownCount = computed(() => getLikeCount(this.bite(), 'mindblown'));
-
-  onLikeButtonClicked(likeType: string): void {
-    const biteId = this.bite()?.id;
-
-    if (biteId) {
-      this.likeButtonClick.emit({
-        likeType,
-        biteId,
-      });
-    }
-  }
+  likeCounts: LikeCounts = { thumbup: 0, drooling: 0, mindblown: 0 };
+  userLikeType?: LikeType;
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onSelect: (likeType: LikeType) => void = () => {};
 }

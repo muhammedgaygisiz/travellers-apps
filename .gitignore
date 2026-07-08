@@ -58,3 +58,4 @@ apps/storybook-host/src/assets/temp/**/*
 
 # Logseq backup pages
 ssot/logseq/bak/
+/.claude/

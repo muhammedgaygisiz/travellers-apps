@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
-import type { Bite, Like } from 'model';
+import type { Bite, LikeClick } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import { PATH } from 'utils';
 
@@ -46,7 +46,7 @@ export class HomeService {
     this.dataAccess.logout();
   }
 
-  likeButtonClicked(likeClick: Like): void {
+  likeButtonClicked(likeClick: LikeClick): void {
     this.dataAccess.submitLikeClick(likeClick);
   }
 

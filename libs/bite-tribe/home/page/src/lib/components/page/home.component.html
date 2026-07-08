@@ -65,111 +65,55 @@
         [showSearchChip]="showSearchChip()"
         [showMap]="showMap()"
         [sorting]="sorting()"
+        [allTags]="allTags()"
+        [preferedCurrency]="preferedCurrency()"
         (gotoSearch)="gotoSearch.emit()"
         (openMapView)="openMapView.emit()"
         (sortingChange)="sortingChange.emit($event)"
+        (filtersChanged)="filtersChanged.emit($event)"
+        (filterCleared)="filterCleared.emit()"
       />
     </div>
+
     <div class="home-scrolling-content-container">
-      @if (showBiteSkeleton()) {
-        <bt-bite-skeleton-list />
-      } @else {
-        <ng-container *ngTemplateOutlet="withoutLoadingTemplate" />
+      @if (hasErrorLoadingGpsPosition()) {
+        <bt-gps-error-card
+          (retryClick)="refresh.emit()"
+          (closeClick)="closeGpsError.emit()"
+        />
       }
+
+      @if (networkStatus()?.connected === false) {
+        <bt-network-error-box />
+      }
+
+      @if (isSearchVisible()) {
+        <ion-searchbar
+          data-cy="search-input"
+          placeholder="Search ..."
+          [value]="searchTerm()"
+          (ionInput)="onSearchInput($event)"
+          [animated]="true"
+        />
+      }
+
+      <bt-bite-list
+        [bites]="displayedBites()"
+        [userId]="userId()"
+        [editableBites]="editableBites()"
+        [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
+        [showTriedOutCheckbox]="showTriedOutCheckbox()"
+        [triedOutBiteIds]="triedOutBiteIds()"
+        [hasMore]="hasMore()"
+        [showSkeleton]="showBiteSkeleton()"
+        (biteClick)="biteClick.emit($event)"
+        (likeButtonClick)="likeButtonClick.emit($event)"
+        (gotoEdit)="gotoEdit.emit($event)"
+        (deleteBite)="deleteBite.emit($event)"
+        (rateNowClick)="rateNowClick.emit($event)"
+        (triedOutChange)="triedOutChange.emit($event)"
+        (loadMore)="onLoadMore()"
+      />
     </div>
   </ion-content>
 </ta-page>
-
-<ion-modal trigger="select-tags" #modal>
-  <ng-template>
-    <app-type-ahead
-      class="ion-page"
-      title="Filters"
-      [items]="allTags()"
-      [selectedItems]="selectedFilters()"
-      [distance]="distance()"
-      [currency]="preferedCurrency()"
-      [price]="maxPriceFilter()"
-      (selectionChange)="onFilterChange($event, modal)"
-      (selectionCancel)="modal.dismiss()"
-      (clearFilters)="onFiltersClear(modal)"
-    />
-  </ng-template>
-</ion-modal>
-
-<ng-template #withoutLoadingTemplate>
-  @if (hasErrorLoadingGpsPosition()) {
-    <ion-card>
-      <ion-card-content>
-        <ion-text color="warning">
-          {{ 'we-could-not-access-your-location' | transloco }}
-        </ion-text>
-      </ion-card-content>
-
-      <ion-button fill="clear" (click)="refresh.emit()">{{
-        'retry' | transloco
-      }}</ion-button>
-      <ion-button fill="clear" (click)="closeGpsError.emit()">{{
-        'close' | transloco
-      }}</ion-button>
-    </ion-card>
-  }
-
-  @if (networkStatus()?.connected === false) {
-    <ion-card>
-      <ion-card-content>
-        <div class="ion-display-flex ion-flex-row ion-align-items-center">
-          <ion-icon name="cloud-offline-outline" color="warning" size="large" />
-
-          <ion-text color="warning" class="ion-padding-start">
-            {{ 'you-are-offline' | transloco }}
-          </ion-text>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  }
-
-  @if (isSearchVisible()) {
-    <ion-searchbar
-      data-cy="search-input"
-      placeholder="Search ..."
-      [value]="searchTerm()"
-      (ionInput)="onSearchInput($event)"
-      [animated]="true"
-    />
-  }
-
-  @for (bite of displayedBites(); track bite.id) {
-    @if (showTriedOutCheckbox()) {
-      <ion-checkbox
-        labelPlacement="end"
-        class="ion-margin-start ion-margin-bottom"
-        [checked]="bite.id | isBiteTriedOut: triedOutBiteIds()"
-        (ionChange)="onTriedOutChange($event, bite.id)"
-      >
-        {{ 'mark-bite-as-tried-out' | transloco }}
-      </ion-checkbox>
-    }
-    <bt-bite
-      [bite]="bite"
-      [userId]="userId()"
-      [showEditButton]="editableBites()"
-      [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
-      (biteClick)="biteClick.emit($event)"
-      (likeButtonClick)="likeButtonClick.emit($event)"
-      (gotoEdit)="gotoEdit.emit($event)"
-      (deleteBite)="deleteBite.emit($event)"
-      (rateNowClick)="rateNowClick.emit($event)"
-    />
-  } @empty {
-    <div class="ion-display-flex ion-justify-content-center ion-padding-top">
-      <ion-text color="primary"> No bites found. Be the first one.</ion-text>
-    </div>
-  }
-
-  @if (hasMore()) {
-    <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
-      <ion-infinite-scroll-content />
-    </ion-infinite-scroll>
-  }
-</ng-template>

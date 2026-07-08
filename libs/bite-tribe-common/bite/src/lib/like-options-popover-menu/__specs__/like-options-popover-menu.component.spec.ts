@@ -1,12 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonChip } from '@ionic/angular/standalone';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu.component';
-import { ComponentRef } from '@angular/core';
 
 describe('LikeOptionsPopoverMenuComponent', () => {
   let component: LikeOptionsPopoverMenuComponent;
   let fixture: ComponentFixture<LikeOptionsPopoverMenuComponent>;
-  let componentRef: ComponentRef<LikeOptionsPopoverMenuComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -15,109 +13,69 @@ describe('LikeOptionsPopoverMenuComponent', () => {
 
     fixture = TestBed.createComponent(LikeOptionsPopoverMenuComponent);
     component = fixture.componentInstance;
-    componentRef = fixture.componentRef;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit like event with correct data when bite exists', () => {
-    // Arrange
-    const mockBite = { id: '123', name: 'Test Bite' };
-    const emitSpy = jest.spyOn(component.likeButtonClick, 'emit');
-    componentRef.setInput('bite', mockBite);
-
-    // Act
-    component.onLikeButtonClicked('thumbup');
-
-    // Assert
-    expect(emitSpy).toHaveBeenCalledWith({
-      likeType: 'thumbup',
-      biteId: '123',
-    });
-  });
-
-  it('should not emit like event when bite is undefined', () => {
-    // Arrange
-    const emitSpy = jest.spyOn(component.likeButtonClick, 'emit');
-    componentRef.setInput('bite', undefined);
-
-    // Act
-    component.onLikeButtonClicked('thumbup');
-
-    // Assert
-    expect(emitSpy).not.toHaveBeenCalled();
-  });
-
   it('should render three ion-chips with emojis', () => {
-    // Arrange
+    fixture.detectChanges();
+
     const chips = fixture.nativeElement.querySelectorAll('ion-chip');
 
-    // Assert
     expect(chips.length).toBe(3);
     expect(chips[0].textContent).toContain('👍');
     expect(chips[1].textContent).toContain('🤤');
     expect(chips[2].textContent).toContain('🤯');
   });
 
-  it('should use aggregate counts when present', () => {
-    componentRef.setInput('bite', {
-      id: '123',
-      name: 'Test Bite',
-      likes: [],
-      thumbup: 2,
-      drooling: 3,
-      mindblown: 4,
-    });
+  it('should render the counts as badges', () => {
+    component.likeCounts = { thumbup: 2, drooling: 3, mindblown: 4 };
     fixture.detectChanges();
 
-    expect(component.thumbupCount()).toBe(2);
-    expect(component.droolingCount()).toBe(3);
-    expect(component.mindblownCount()).toBe(4);
+    const badges = fixture.nativeElement.querySelectorAll('ion-badge');
+
+    expect(badges.length).toBe(3);
+    expect(badges[0].textContent).toContain('2');
+    expect(badges[1].textContent).toContain('3');
+    expect(badges[2].textContent).toContain('4');
   });
 
-  it('should ignore likes when aggregate counts are absent', () => {
-    componentRef.setInput('bite', {
-      id: '123',
-      name: 'Test Bite',
-      likes: [
-        { userId: 'user1', likeType: 'thumbup' },
-        { userId: 'user2', likeType: 'drooling' },
-      ],
-    });
+  it('should hide badges for zero counts', () => {
+    component.likeCounts = { thumbup: 1, drooling: 0, mindblown: 0 };
     fixture.detectChanges();
 
-    expect(component.thumbupCount()).toBe(0);
-    expect(component.droolingCount()).toBe(0);
-    expect(component.mindblownCount()).toBe(0);
+    const badges = fixture.nativeElement.querySelectorAll('ion-badge');
+
+    expect(badges.length).toBe(1);
   });
 
-  it('should emit correct like type for each emoji click', () => {
-    // Arrange
-    const mockBite = { id: '123', name: 'Test Bite' };
-    const emitSpy = jest.spyOn(component.likeButtonClick, 'emit');
-    componentRef.setInput('bite', mockBite);
+  it('should mark the chip of the user like type as liked', () => {
+    component.userLikeType = 'drooling';
+    fixture.detectChanges();
+
     const chips = fixture.nativeElement.querySelectorAll('ion-chip');
 
-    // Act & Assert
+    expect(chips[0].classList).not.toContain('liked');
+    expect(chips[1].classList).toContain('liked');
+    expect(chips[2].classList).not.toContain('liked');
+  });
+
+  it('should call onSelect with the like type for each chip click', () => {
+    const onSelect = jest.fn();
+    component.onSelect = onSelect;
+    fixture.detectChanges();
+
+    const chips = fixture.nativeElement.querySelectorAll('ion-chip');
+
     chips[0].click();
-    expect(emitSpy).toHaveBeenCalledWith({
-      likeType: 'thumbup',
-      biteId: '123',
-    });
+    expect(onSelect).toHaveBeenCalledWith('thumbup');
 
     chips[1].click();
-    expect(emitSpy).toHaveBeenCalledWith({
-      likeType: 'drooling',
-      biteId: '123',
-    });
+    expect(onSelect).toHaveBeenCalledWith('drooling');
 
     chips[2].click();
-    expect(emitSpy).toHaveBeenCalledWith({
-      likeType: 'mindblown',
-      biteId: '123',
-    });
+    expect(onSelect).toHaveBeenCalledWith('mindblown');
   });
 });

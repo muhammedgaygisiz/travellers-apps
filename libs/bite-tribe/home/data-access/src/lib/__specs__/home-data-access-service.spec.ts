@@ -2,9 +2,8 @@ import { inject, TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from '../home-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
-import type { Bite, Like } from 'model';
+import type { Bite, LikeClick } from 'model';
 import { provideMockStore } from '@ngrx/store/testing';
-import SpyInstance = jest.SpyInstance;
 import { BiteTribeApiService } from 'bite-tribe/api';
 
 const BITE_WITH_POSITION: Bite = {
@@ -41,8 +40,10 @@ class StoreMock {
   hasErrorLoadingGpsPosition$ = of(false);
   biteIdFromUrl = (): string | undefined => undefined;
   restaurantIdFromUrl = (): string | undefined => undefined;
+  likes$ = of([]);
   logout = (): null => null;
-  submitLikeOrDislikeClick = (): null => null;
+  submitLikeClick = (): null => null;
+  notifyLikesLoaded = jest.fn();
   submitDeleteBite = (): null => null;
   setHomeSorting = (): null => null;
   setMyBitesSorting = (): null => null;
@@ -59,15 +60,18 @@ const ApiMock = {
   biteById: jest.fn(),
   bitesByPosition: jest.fn(),
   loadRestaurant: jest.fn(),
+  loadLikesForBites: jest.fn(),
 };
 
 describe('HomeDataAccessService', () => {
   let biteTribeStoreService: BiteTribeStoreService;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     ApiMock.biteById.mockResolvedValue(undefined);
     ApiMock.bitesByPosition.mockResolvedValue([]);
     ApiMock.loadRestaurant.mockResolvedValue(undefined);
+    ApiMock.loadLikesForBites.mockResolvedValue([]);
 
     TestBed.configureTestingModule({
       providers: [
@@ -99,127 +103,24 @@ describe('HomeDataAccessService', () => {
   });
 
   describe('submitLikeClick', () => {
-    const likeType = { likeType: 'dislike', biteId: '456' };
-    const like = {
-      biteId: likeType.biteId,
-      userId: 'userId',
-      likeType: likeType.likeType,
-    } as unknown as Like;
-    const bite = {
-      id: like.biteId,
-      userId: like.userId,
-      likes: [like],
-    } as Bite;
-    let submitLikeOrDislikeClickSpy: SpyInstance;
-
-    beforeEach(inject(
-      [BiteTribeStoreService],
-      (storeService: BiteTribeStoreService) => {
-        storeService.sortedHomeBites$ = of([bite]);
-        storeService.userId$ = of('userId');
-        submitLikeOrDislikeClickSpy = jest
-          .spyOn(storeService, 'submitLikeOrDislikeClick')
+    it('should forward the like click to BiteTribeStoreService', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        const submitLikeClickSpy = jest
+          .spyOn(biteTribeStoreService, 'submitLikeClick')
           .mockImplementation();
-      },
-    ));
-
-    it('should call submitLikeOrDislikeClick when bite is found', inject(
-      [HomeDataAccessService],
-      (service: HomeDataAccessService) => {
-        const likeClick = { likeType: 'like', biteId: '456' };
+        const likeClick: LikeClick = {
+          likeType: 'thumbup',
+          biteId: '456',
+          action: 'save',
+        };
 
         service.submitLikeClick(likeClick);
 
-        expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledTimes(1);
-        expect(
-          biteTribeStoreService.submitLikeOrDislikeClick,
-        ).toHaveBeenCalledWith(bite, 'userId', likeClick);
+        expect(submitLikeClickSpy).toHaveBeenCalledTimes(1);
+        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeClick);
       },
     ));
-
-    it('should call submitLikeOrDislikeClick with undefined bite when bite is not found', inject(
-      [HomeDataAccessService],
-      (service: HomeDataAccessService) => {
-        const likeClick = { likeType: 'like', biteId: 'nonexistent-bite-id' };
-
-        service.submitLikeClick(likeClick);
-
-        expect(
-          biteTribeStoreService.submitLikeOrDislikeClick,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          biteTribeStoreService.submitLikeOrDislikeClick,
-        ).toHaveBeenCalledWith(undefined, 'userId', likeClick);
-      },
-    ));
-
-    describe('with empty bites', () => {
-      beforeEach(inject(
-        [BiteTribeStoreService],
-        (storeService: BiteTribeStoreService) => {
-          storeService.sortedHomeBites$ = of([]);
-        },
-      ));
-
-      it('should handle empty bites array', inject(
-        [HomeDataAccessService],
-        (service: HomeDataAccessService) => {
-          const likeClick = { likeType: 'like', biteId: '456' };
-
-          service.submitLikeClick(likeClick);
-
-          expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
-            undefined,
-            'userId',
-            likeClick,
-          );
-        },
-      ));
-    });
-
-    describe('with no bites', () => {
-      beforeEach(inject(
-        [BiteTribeStoreService],
-        (storeService: BiteTribeStoreService) => {
-          storeService.sortedHomeBites$ = of(undefined as any);
-        },
-      ));
-
-      it('should handle empty bites array', inject(
-        [HomeDataAccessService],
-        (service: HomeDataAccessService) => {
-          const likeClick = { likeType: 'like', biteId: '456' };
-
-          service.submitLikeClick(likeClick);
-
-          expect(submitLikeOrDislikeClickSpy).toHaveBeenCalledWith(
-            undefined,
-            'userId',
-            likeClick,
-          );
-        },
-      ));
-    });
-
-    describe('with no user id', () => {
-      beforeEach(inject(
-        [BiteTribeStoreService],
-        (storeService: BiteTribeStoreService) => {
-          storeService.userId$ = of('');
-        },
-      ));
-
-      it('should not call submitLikeOrDislikeClick', inject(
-        [HomeDataAccessService],
-        (service: HomeDataAccessService) => {
-          const likeClick = { likeType: 'like', biteId: '456' };
-
-          service.submitLikeClick(likeClick);
-
-          expect(submitLikeOrDislikeClickSpy).not.toHaveBeenCalled();
-        },
-      ));
-    });
   });
 
   describe('deleteBite', () => {
@@ -506,6 +407,45 @@ describe('HomeDataAccessService', () => {
       },
     ));
 
+    it('should seed the likes of the current user for the loaded bites', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        const like = {
+          biteId: 'biteId',
+          userId: 'test-user-id',
+          likeType: 'thumbup',
+          createdAt: '2026-01-01T00:00:00Z',
+        };
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([]);
+        ApiMock.loadLikesForBites.mockResolvedValue([like]);
+
+        await service.restaurantBitesLoader({
+          params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
+        } as any);
+        await Promise.resolve();
+
+        expect(ApiMock.loadLikesForBites).toHaveBeenCalledWith(
+          [BITE_WITH_POSITION],
+          'test-user-id',
+        );
+        expect(biteTribeStoreService.notifyLikesLoaded).toHaveBeenCalledWith([
+          like,
+        ]);
+      },
+    ));
+
+    it('should not load likes when the loader returns no bites', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        await service.restaurantBitesLoader({
+          params: { sourceBiteId: undefined, restaurantIdOrName: undefined },
+        } as any);
+
+        expect(ApiMock.loadLikesForBites).not.toHaveBeenCalled();
+      },
+    ));
+
     it('should include source bite at the top when not in matched list', inject(
       [HomeDataAccessService],
       async (service: HomeDataAccessService) => {
@@ -665,8 +605,43 @@ describe('HomeDataAccessService', () => {
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
         service.restaurantBitesResource.set([BITE_WITH_POSITION]);
-        expect(service.restaurantBites()).toContain(BITE_WITH_POSITION);
+        expect(service.restaurantBites()).toEqual([
+          { ...BITE_WITH_POSITION, likes: [] },
+        ]);
       },
     ));
+
+    describe('given the current user liked a loaded bite', () => {
+      const like = {
+        biteId: BITE_WITH_POSITION.id,
+        userId: 'test-user-id',
+        likeType: 'thumbup',
+        createdAt: '2026-01-01T00:00:00Z',
+      };
+
+      beforeEach(inject(
+        [BiteTribeStoreService],
+        (storeService: BiteTribeStoreService) => {
+          storeService.likes$ = of([like]) as any;
+        },
+      ));
+
+      it('should attach the like to the bite', inject(
+        [HomeDataAccessService],
+        (service: HomeDataAccessService) => {
+          service.restaurantBitesResource.set([
+            BITE_WITH_POSITION,
+            { ...BITE_WITH_POSITION, id: 'other-bite' },
+          ]);
+
+          const bites = service.restaurantBites();
+
+          expect(
+            bites.find((b) => b.id === BITE_WITH_POSITION.id)?.likes,
+          ).toEqual([like]);
+          expect(bites.find((b) => b.id === 'other-bite')?.likes).toEqual([]);
+        },
+      ));
+    });
   });
 });

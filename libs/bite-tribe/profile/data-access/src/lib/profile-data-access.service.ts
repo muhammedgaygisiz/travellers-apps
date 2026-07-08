@@ -1,7 +1,7 @@
 import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import type { Bite, BiteTrail, Like, PublicUser } from 'model';
+import type { Bite, BiteTrail, LikeClick, PublicUser } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 const BITE_TRAIL_COLLECTION = 'biteTrails';
@@ -103,22 +103,8 @@ export class ProfileDataAccessService {
     this.storeService.logout();
   }
 
-  submitLikeClick(likeType: Like): void {
-    const bites = this.bites();
-    const userId = this.userId();
-
-    const bite = bites?.find((bite) => bite.id === likeType.biteId);
-    const likeFromUser = bite?.likes?.find(
-      (like: Like) =>
-        like.userId === userId && like.likeType === likeType.likeType,
-    );
-
-    if (likeFromUser) {
-      this.storeService.removeLike(likeType);
-      return;
-    }
-
-    this.storeService.submitLikeClick(likeType);
+  submitLikeClick(likeClick: LikeClick): void {
+    this.storeService.submitLikeClick(likeClick);
   }
 
   savePublicProfile(publicUser: PublicUser): void {

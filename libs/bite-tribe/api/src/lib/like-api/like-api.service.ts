@@ -10,8 +10,8 @@ export class LikeApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
 
-  loadLikesForBites(bites: Bite[]): Promise<Like[]> {
-    return loadLikesByBites(bites);
+  loadLikesForBites(bites: Bite[], userId: string): Promise<Like[]> {
+    return loadLikesByBites(bites, userId);
   }
 
   async saveLike(like: {

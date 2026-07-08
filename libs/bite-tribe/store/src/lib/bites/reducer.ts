@@ -1,9 +1,31 @@
 import { createReducer, on } from '@ngrx/store';
 import { adapter, initialState } from './adapter';
 import { BiteActions } from './actions';
+import {
+  removeLike,
+  removeLikeFailed,
+  saveLike,
+  saveLikeFailed,
+} from '../likes/actions';
+import {
+  adjustBiteLikeCounts,
+  LikeCountDeltas,
+} from './utils/adjust-bite-like-counts';
 import { fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { PATH } from 'utils';
+import type { LikeType } from 'model';
+
+const saveLikeDeltas = (
+  likeType: LikeType,
+  previousLikeType: LikeType | undefined,
+  direction: 1 | -1,
+): LikeCountDeltas => ({
+  [likeType]: direction,
+  ...(previousLikeType && previousLikeType !== likeType
+    ? { [previousLikeType]: -direction }
+    : {}),
+});
 
 export const reducer = createReducer(
   initialState,
@@ -65,4 +87,24 @@ export const reducer = createReducer(
     ...state,
     bitesByBucketlist: bites,
   })),
+  on(saveLike, (state, { like, previousLikeType }) =>
+    adjustBiteLikeCounts(
+      state,
+      like.biteId,
+      saveLikeDeltas(like.likeType, previousLikeType, 1),
+    ),
+  ),
+  on(saveLikeFailed, (state, { like, previousLikeType }) =>
+    adjustBiteLikeCounts(
+      state,
+      like.biteId,
+      saveLikeDeltas(like.likeType, previousLikeType, -1),
+    ),
+  ),
+  on(removeLike, (state, { like }) =>
+    adjustBiteLikeCounts(state, like.biteId, { [like.likeType]: -1 }),
+  ),
+  on(removeLikeFailed, (state, { like }) =>
+    adjustBiteLikeCounts(state, like.biteId, { [like.likeType]: 1 }),
+  ),
 );

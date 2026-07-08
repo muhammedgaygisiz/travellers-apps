@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import type { Bite, Like, PublicUser } from 'model';
+import type { Bite, LikeClick, PublicUser } from 'model';
 import { PATH } from 'utils';
 import { Location } from '@angular/common';
 
@@ -46,7 +46,7 @@ export class ProfileService {
     this.navController.navigateForward(['my-profile']);
   }
 
-  likeButtonClicked(likeClick: Like): void {
+  likeButtonClicked(likeClick: LikeClick): void {
     this.dataAccess.submitLikeClick(likeClick);
   }
 

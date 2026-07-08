@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
-import { Bite, Like } from 'model';
+import { Bite, LikeClick } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { getPosition } from '../../../utils/get-position';
 import { getDistance } from '../../../utils/get-distance';
@@ -39,7 +39,7 @@ export class BitePlaceComponent {
 
   readonly showBitesClick = output<Bite | undefined>();
   readonly biteClick = output<Bite>();
-  readonly likeButtonClick = output<Like>();
+  readonly likeButtonClick = output<LikeClick>();
 
   ratedBites = computed(() =>
     (this.bites() || []).filter((bite): bite is Bite & { rating: number } => {

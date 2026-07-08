@@ -15,11 +15,24 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonListHeader,
   IonSearchbar,
+  IonSpinner,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { getSimilarityScore, normalize } from 'utils';
+
+/**
+ * View model for a place returned from an external maps provider.
+ * Kept local so this common UI component stays independent of app models.
+ */
+export interface GooglePlaceOption {
+  placeId: string;
+  name: string;
+  address: string;
+  position: { latitude: number; longitude: number };
+}
 
 @Component({
   selector: 'lib-restaurant-selector',
@@ -34,7 +47,9 @@ import { getSimilarityScore, normalize } from 'utils';
     IonItem,
     IonLabel,
     IonList,
+    IonListHeader,
     IonSearchbar,
+    IonSpinner,
     IonTitle,
     IonToolbar,
   ],
@@ -43,11 +58,16 @@ import { getSimilarityScore, normalize } from 'utils';
 export class RestaurantSelectorComponent {
   restaurants = input<string[]>([]);
   selectedRestaurant = input<string>('');
+  googlePlaces = input<GooglePlaceOption[]>([]);
+  googlePlacesLoading = input<boolean>(false);
 
   restaurantSelected = output<string>();
   selectionCancel = output<void>();
+  searchInGoogleMaps = output<string>();
+  googlePlaceSelected = output<GooglePlaceOption>();
 
   rawSearchTerm = signal('');
+  googleSearchTerm = signal('');
 
   filteredRestaurants = computed(() => {
     const searchTerm = this.rawSearchTerm();
@@ -97,6 +117,24 @@ export class RestaurantSelectorComponent {
     return !hasExactMatch && searchTerm.length > 0;
   });
 
+  hasLocalHits = computed(() => this.filteredRestaurants().length > 0);
+
+  // Offer the Google Maps search once there are no local hits for the
+  // current term and it has not been searched on Google yet.
+  showGoogleSearchOption = computed(
+    () =>
+      this.rawSearchTerm().length > 0 &&
+      !this.hasLocalHits() &&
+      this.googleSearchTerm() !== this.rawSearchTerm(),
+  );
+
+  // Show the Google results (or spinner) only for the term the user searched.
+  showGoogleResults = computed(
+    () =>
+      this.googleSearchTerm().length > 0 &&
+      this.googleSearchTerm() === this.rawSearchTerm(),
+  );
+
   searchbarInput(event: Event): void {
     const target = event.target as HTMLIonSearchbarElement;
     this.rawSearchTerm.set(target.value || '');
@@ -111,6 +149,18 @@ export class RestaurantSelectorComponent {
     if (searchTerm) {
       this.restaurantSelected.emit(searchTerm);
     }
+  }
+
+  searchGoogleMaps(): void {
+    const searchTerm = this.rawSearchTerm();
+    if (searchTerm) {
+      this.googleSearchTerm.set(searchTerm);
+      this.searchInGoogleMaps.emit(searchTerm);
+    }
+  }
+
+  selectGooglePlace(place: GooglePlaceOption): void {
+    this.googlePlaceSelected.emit(place);
   }
 
   cancel(): void {

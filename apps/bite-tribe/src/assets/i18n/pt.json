@@ -135,6 +135,7 @@
   "tags-label": "Etiquetas (separa com espaços)",
   "from-photo": "Da foto",
   "from-gps": "Do GPS",
+  "from-google": "Do Google",
   "no-gps-position-error-message": "Sem dados de GPS na imagem. Escolhe uma localização no mapa.",
   "chose-gps-position-error-message": "Escolhe uma posição no mapa ou ativa o GPS.",
   "post": "Publicar",

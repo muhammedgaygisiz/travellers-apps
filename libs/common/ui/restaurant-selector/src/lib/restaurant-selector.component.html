@@ -33,17 +33,52 @@
         }
       </ion-item>
     } @empty {
-      @if (!showCustomOption() && rawSearchTerm()) {
-        <ion-item>
-          <ion-label>No restaurants found</ion-label>
-        </ion-item>
-      }
       @if (!rawSearchTerm()) {
         <ion-item>
           <ion-label>
             <p>Start typing to search restaurants</p>
           </ion-label>
         </ion-item>
+      }
+    }
+
+    @if (showGoogleSearchOption()) {
+      <ion-item button [detail]="false" (click)="searchGoogleMaps()">
+        <ion-icon slot="start" name="logo-google" color="primary" />
+        <ion-label class="ion-text-wrap">
+          <h2>Search for "{{ rawSearchTerm() }}" in Google Maps</h2>
+          <p>
+            Tap to search online · add the city for better results, e.g. "Jabri
+            Amman"
+          </p>
+        </ion-label>
+        <ion-icon slot="end" name="arrow-forward-outline" color="primary" />
+      </ion-item>
+    }
+
+    @if (showGoogleResults()) {
+      @if (googlePlacesLoading()) {
+        <ion-item [detail]="false">
+          <ion-spinner slot="start" name="crescent" />
+          <ion-label>Searching Google Maps...</ion-label>
+        </ion-item>
+      } @else {
+        <ion-list-header>
+          <ion-label>Google Maps results</ion-label>
+        </ion-list-header>
+        @for (place of googlePlaces(); track place.placeId) {
+          <ion-item [detail]="false" (click)="selectGooglePlace(place)">
+            <ion-icon slot="start" name="location-outline" />
+            <ion-label>
+              <h2>{{ place.name }}</h2>
+              <p>{{ place.address }}</p>
+            </ion-label>
+          </ion-item>
+        } @empty {
+          <ion-item>
+            <ion-label>No places found on Google Maps</ion-label>
+          </ion-item>
+        }
       }
     }
   </ion-list>

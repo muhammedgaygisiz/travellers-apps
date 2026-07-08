@@ -134,6 +134,7 @@
   "tags-label": "መለያዎች? (በክፍተት ለይ)",
   "from-photo": "ከፎቶ",
   "from-gps": "ከGPS",
+  "from-google": "ከGoogle",
   "no-gps-position-error-message": "በምስሉ ውስጥ የGPS ቦታ አልተገኘም። እባክህ ከካርታው የGPS ቦታ ምረጥ ወይም GPS ቦታን አንቃ።",
   "chose-gps-position-error-message": "እባክህ ከካርታው የGPS ቦታ ምረጥ ወይም GPS ቦታን አንቃ።",
   "post": "ፖስት",

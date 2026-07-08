@@ -135,6 +135,7 @@
   "tags-label": "Tags? (separate with whitespace)",
   "from-photo": "From photo",
   "from-gps": "From GPS",
+  "from-google": "From Google",
   "no-gps-position-error-message": "No GPS position found in the image. Please choose a GPS position from the map or enable GPS position.",
   "chose-gps-position-error-message": "Please choose a GPS position from the map or enable GPS position.",
   "post": "Post",

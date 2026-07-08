@@ -83,6 +83,60 @@ describe('RestaurantSelectorComponent', () => {
     expect(emitSpy).toHaveBeenCalled();
   });
 
+  it('should offer the Google Maps search when there are no local hits', () => {
+    fixture.componentRef.setInput('restaurants', ['Pizza Place']);
+    component.rawSearchTerm.set('sushi corner');
+    fixture.detectChanges();
+
+    expect(component.hasLocalHits()).toBe(false);
+    expect(component.showGoogleSearchOption()).toBe(true);
+  });
+
+  it('should not offer the Google Maps search when there are local hits', () => {
+    fixture.componentRef.setInput('restaurants', ['Sushi Corner']);
+    component.rawSearchTerm.set('sushi');
+    fixture.detectChanges();
+
+    expect(component.hasLocalHits()).toBe(true);
+    expect(component.showGoogleSearchOption()).toBe(false);
+  });
+
+  it('should emit searchInGoogleMaps and remember the searched term', () => {
+    const emitSpy = jest.spyOn(component.searchInGoogleMaps, 'emit');
+    component.rawSearchTerm.set('sushi corner');
+
+    component.searchGoogleMaps();
+
+    expect(emitSpy).toHaveBeenCalledWith('sushi corner');
+    expect(component.googleSearchTerm()).toBe('sushi corner');
+    expect(component.showGoogleSearchOption()).toBe(false);
+    expect(component.showGoogleResults()).toBe(true);
+  });
+
+  it('should hide Google results again once the search term changes', () => {
+    component.rawSearchTerm.set('sushi corner');
+    component.searchGoogleMaps();
+    expect(component.showGoogleResults()).toBe(true);
+
+    component.rawSearchTerm.set('sushi');
+
+    expect(component.showGoogleResults()).toBe(false);
+  });
+
+  it('should emit googlePlaceSelected when a Google place is selected', () => {
+    const emitSpy = jest.spyOn(component.googlePlaceSelected, 'emit');
+    const place = {
+      placeId: 'place-1',
+      name: 'Sushi Corner',
+      address: 'Main Street 1',
+      position: { latitude: 1, longitude: 2 },
+    };
+
+    component.selectGooglePlace(place);
+
+    expect(emitSpy).toHaveBeenCalledWith(place);
+  });
+
   it('should update rawSearchTerm on searchbar input', () => {
     const searchValue = 'Test Restaurant';
     const mockEvent = {

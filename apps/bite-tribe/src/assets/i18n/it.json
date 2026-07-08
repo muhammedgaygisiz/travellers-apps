@@ -134,6 +134,7 @@
   "tags-label": "Tag? (separa con spazi)",
   "from-photo": "Dalla foto",
   "from-gps": "Dal GPS",
+  "from-google": "Da Google",
   "no-gps-position-error-message": "Nessuna posizione GPS trovata nell'immagine. Scegli una posizione GPS dalla mappa o abilita la posizione GPS.",
   "chose-gps-position-error-message": "Scegli una posizione GPS dalla mappa o abilita la posizione GPS.",
   "post": "Pubblica",

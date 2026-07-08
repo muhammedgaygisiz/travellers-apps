@@ -134,6 +134,7 @@
   "tags-label": "แท็ก? (คั่นด้วยช่องว่าง)",
   "from-photo": "จากรูปภาพ",
   "from-gps": "จาก GPS",
+  "from-google": "จาก Google",
   "no-gps-position-error-message": "ไม่พบตำแหน่ง GPS ในรูปภาพ โปรดเลือกตำแหน่ง GPS จากแผนที่หรือเปิดใช้งานตำแหน่ง GPS",
   "chose-gps-position-error-message": "โปรดเลือกตำแหน่ง GPS จากแผนที่หรือเปิดใช้งานตำแหน่ง GPS",
   "post": "โพสต์",

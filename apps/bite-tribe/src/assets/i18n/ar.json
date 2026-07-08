@@ -134,6 +134,7 @@
   "tags-label": "الوسوم؟ (افصل بمسافة)",
   "from-photo": "من الصورة",
   "from-gps": "من GPS",
+  "from-google": "من Google",
   "no-gps-position-error-message": "لم يتم العثور على موقع GPS في الصورة. يرجى اختيار موقع GPS من الخريطة أو تفعيل موقع GPS.",
   "chose-gps-position-error-message": "يرجى اختيار موقع GPS من الخريطة أو تفعيل موقع GPS.",
   "post": "نشر",

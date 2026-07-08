@@ -134,6 +134,7 @@
   "tags-label": "Tag? (pisahkan dengan spasi)",
   "from-photo": "Dari foto",
   "from-gps": "Dari GPS",
+  "from-google": "Dari Google",
   "no-gps-position-error-message": "Tidak ada posisi GPS yang ditemukan pada gambar. Pilih posisi GPS dari peta atau aktifkan posisi GPS.",
   "chose-gps-position-error-message": "Pilih posisi GPS dari peta atau aktifkan posisi GPS.",
   "post": "Posting",

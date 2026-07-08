@@ -33,7 +33,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
 import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
-import type { Bite, Geopoint } from 'model';
+import type { Bite, Geopoint, GooglePlace } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { currencyCodes, getLocalizedCurrencyName } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
@@ -97,9 +97,15 @@ export class BitePage {
 
   fallbackPosition = linkedSignal(() => this.position());
 
+  googlePlaces = input<GooglePlace[]>([]);
+
+  googlePlacesLoading = input<boolean>(false);
+
   submitBite = output<typeof this.biteFormGroup.value>();
 
   placeChange = output<string>();
+
+  searchGooglePlaces = output<string>();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -274,6 +280,8 @@ export class BitePage {
   confirmedManualPosition: WritableSignal<Geopoint | undefined> =
     signal(undefined);
 
+  googlePosition: WritableSignal<Geopoint | undefined> = signal(undefined);
+
   isManualPositionModalOpen = signal(false);
 
   shouldRenderMapInModal = signal(false);
@@ -313,6 +321,16 @@ export class BitePage {
       confirmed &&
       currentValue?.latitude === confirmed.latitude &&
       currentValue?.longitude === confirmed.longitude
+    );
+  });
+
+  locationFromGoogle = computed(() => {
+    const currentValue = this.positionValueChanges();
+    const google = this.googlePosition();
+    return !!(
+      google &&
+      currentValue?.latitude === google.latitude &&
+      currentValue?.longitude === google.longitude
     );
   });
 
@@ -392,5 +410,21 @@ export class BitePage {
   onRestaurantSelected(restaurantName: string, modal: IonModal): void {
     this.biteFormGroup.patchValue({ place: restaurantName });
     void modal.dismiss();
+  }
+
+  onGooglePlaceSelected(place: GooglePlace, modal: IonModal): void {
+    this.biteFormGroup.patchValue({
+      place: place.name,
+      position: place.position,
+    });
+    this.googlePosition.set(place.position);
+    void modal.dismiss();
+  }
+
+  onPositionFromGoogle(): void {
+    const position = this.googlePosition();
+    if (position) {
+      this.biteFormGroup.controls['position'].patchValue(position);
+    }
   }
 }

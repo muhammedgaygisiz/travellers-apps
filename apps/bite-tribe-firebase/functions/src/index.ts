@@ -16,6 +16,7 @@ export {
 export { searchUsers } from './functions/search-users';
 export { searchBites } from './functions/search-bites';
 export { searchRestaurants } from './functions/search-restaurants';
+export { searchPlaces } from './functions/search-places';
 export { updateLastSeen } from './functions/update-last-seen';
 export { updateUserMetadata } from './functions/update-user-metadata';
 export { loadBitesByLocation } from './functions/load-bites-by-location';

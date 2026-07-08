@@ -12,10 +12,13 @@ import { NetworkStatusService } from 'common/networkstatus';
 import type {
   Bite,
   CreateAndUploadImageCallbackParams,
+  GooglePlace,
   Geopoint,
   UploadParams,
 } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
+
+const MIN_GOOGLE_PLACE_SEARCH_TEXT_LENGTH = 3;
 
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
@@ -56,6 +59,25 @@ export class BiteDataAccessService {
   );
 
   networkStatus = this.networkStatusService.status;
+
+  readonly googlePlaceSearchText = signal('');
+
+  private readonly googlePlacesResource = resource<GooglePlace[], string>({
+    params: () => this.googlePlaceSearchText(),
+    loader: async ({ params }) => {
+      const searchText = params.trim();
+
+      if (searchText.length < MIN_GOOGLE_PLACE_SEARCH_TEXT_LENGTH) {
+        return [];
+      }
+
+      return this.api.searchPlaces(searchText, this.position());
+    },
+    defaultValue: [],
+  });
+
+  googlePlaces = this.googlePlacesResource.value;
+  googlePlacesLoading = this.googlePlacesResource.isLoading;
 
   readonly uploadProgress = signal<{
     biteId: string;
@@ -98,6 +120,10 @@ export class BiteDataAccessService {
 
   setEditingBite(bite: Partial<any>): void {
     this.storeService.setEditingBite(bite);
+  }
+
+  searchGooglePlaces(searchText: string): void {
+    this.googlePlaceSearchText.set(searchText);
   }
 
   getCurrencyByPosition(position?: Geopoint): Promise<string | undefined> {

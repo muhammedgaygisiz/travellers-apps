@@ -19,8 +19,11 @@ import type { Geopoint } from 'model';
       [nearbyRestaurants]="service.nearbyRestaurants() || []"
       [suggestedTags]="service.tagSuggestionsForEditingBite() || []"
       [networkStatus]="service.networkStatus()"
+      [googlePlaces]="service.googlePlaces()"
+      [googlePlacesLoading]="service.googlePlacesLoading()"
       (submitBite)="service.submitNewBite($event)"
       (placeChange)="onPlaceChange($event)"
+      (searchGooglePlaces)="service.searchGooglePlaces($event)"
       (positionChange)="onPositionChange($event)"
     />
   `,

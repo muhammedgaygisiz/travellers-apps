@@ -6,9 +6,11 @@ import {
   Bucketlist,
   CreateAndUploadImageCallbackParams,
   Geopoint,
+  GooglePlace,
 } from 'model';
 import { Platform } from '@ionic/angular';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
+import { searchPlaces } from './utils/search-places';
 import { getCurrencyByPosition } from './utils/get-currency-by-position';
 import { BITE_COLLECTION } from '../utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
@@ -48,6 +50,13 @@ export class BiteApiService {
 
   public async loadBitesByUser(userUid: string): Promise<Bite[]> {
     return loadBitesByUser(userUid);
+  }
+
+  public async searchPlaces(
+    searchText: string,
+    position?: Geopoint,
+  ): Promise<GooglePlace[]> {
+    return searchPlaces(searchText, position);
   }
 
   public async getCurrencyByPosition(

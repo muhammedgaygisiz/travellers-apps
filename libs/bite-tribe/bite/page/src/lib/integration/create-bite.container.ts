@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { BiteService } from './bite.service';
 import { BitePage } from '../components/page/bite.page';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import type { Geopoint } from 'model';
 
 @Component({
   selector: 'create-bite-container',
@@ -10,7 +11,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <bite
       class="ion-page"
       [bite]="service.cachedBite()"
-      [currency]="service.currency()"
+      [currency]="service.effectiveCurrency()"
       [favCurrencies]="service.favCurrencies()"
       [position]="service.position()"
       [image]="service.image() || ''"
@@ -23,6 +24,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (submitBite)="service.submitNewBite($event)"
       (placeChange)="onPlaceChange($event)"
       (searchGooglePlaces)="service.searchGooglePlaces($event)"
+      (positionChange)="onPositionChange($event)"
     />
   `,
   imports: [BitePage],
@@ -40,5 +42,9 @@ export class CreateBiteContainer {
     const currentBite = this.service.cachedBite() || {};
     const editingBiteWithCurrentPlace = { ...currentBite, place };
     this.service.setEditingBite(editingBiteWithCurrentPlace);
+  }
+
+  onPositionChange(position: Geopoint): void {
+    void this.service.determineCurrencyForPosition(position);
   }
 }

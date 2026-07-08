@@ -253,6 +253,27 @@ describe('BitePage', () => {
     });
   });
 
+  describe('positionChange output', () => {
+    it('should emit when the form position changes', () => {
+      const emitSpy = jest.spyOn(component.positionChange, 'emit');
+      const position = { latitude: 11.55, longitude: 104.91 };
+
+      component.biteFormGroup.controls['position'].patchValue(position);
+
+      expect(emitSpy).toHaveBeenCalledWith(position);
+    });
+
+    it('should not emit again for the same position', () => {
+      const emitSpy = jest.spyOn(component.positionChange, 'emit');
+      const position = { latitude: 1, longitude: 2 };
+
+      component.biteFormGroup.controls['position'].patchValue(position);
+      component.biteFormGroup.controls['position'].patchValue({ ...position });
+
+      expect(emitSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('Platform specific behavior', () => {
     it('should be web platform by default', () => {
       expect(component.isWeb()).toBe(true);

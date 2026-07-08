@@ -40,10 +40,12 @@ describe(CreateBiteContainer.name, () => {
           useValue: {
             cachedBite: signal(undefined),
             currency: signal(undefined),
+            effectiveCurrency: signal(undefined),
             position: signal(undefined),
             image: signal(undefined),
             submitNewBite: (): void => {},
             setEditingBite: (): jest.Mock => jest.fn(),
+            determineCurrencyForPosition: jest.fn(),
           },
         },
         { provide: TranslocoService, useValue: MockTranslocoService },
@@ -112,6 +114,18 @@ describe(CreateBiteContainer.name, () => {
           place: testPlace,
         });
       });
+    });
+  });
+
+  describe('onPositionChange', () => {
+    it('should ask the service to determine the currency for the position', () => {
+      const position = { latitude: 11.55, longitude: 104.91 };
+
+      component.onPositionChange(position);
+
+      expect(biteServiceMock.determineCurrencyForPosition).toHaveBeenCalledWith(
+        position,
+      );
     });
   });
 });

@@ -5,37 +5,17 @@ import { onDocumentCreated } from 'firebase-functions/firestore';
 import { HttpsError, onCall } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
 import { Bite } from './model/bite';
+import { BiteAddress, Position, reverseGeocode } from './utils/reverse-geocode';
+
+export { extractBiteAddress } from './utils/reverse-geocode';
+export type { BiteAddress } from './utils/reverse-geocode';
 
 const db = admin.firestore();
 const BITE_COLLECTION = 'bites';
 const GOOGLE_GEOCODING_API_KEY_ENV = 'GOOGLE_GEOCODING_API_KEY';
-const GOOGLE_GEOCODING_BASE_URL =
-  'https://maps.googleapis.com/maps/api/geocode/json';
 const googleGeocodingApiKey = defineSecret(GOOGLE_GEOCODING_API_KEY_ENV);
 
 type AddressStatus = 'pending' | 'resolved' | 'failed';
-
-interface Position {
-  latitude: number;
-  longitude: number;
-}
-
-interface GoogleAddressComponent {
-  long_name?: string;
-  short_name?: string;
-  types?: string[];
-}
-
-interface GoogleGeocodingResult {
-  formatted_address?: string;
-  address_components?: GoogleAddressComponent[];
-}
-
-interface GoogleGeocodingResponse {
-  status?: string;
-  error_message?: string;
-  results?: GoogleGeocodingResult[];
-}
 
 interface BackfillBiteAddressRequest {
   biteId?: unknown;
@@ -44,14 +24,6 @@ interface BackfillBiteAddressRequest {
 interface BackfillBiteAddressResult {
   biteId: string;
   status: 'resolved' | 'failed' | 'skipped';
-}
-
-export interface BiteAddress {
-  city?: string;
-  region?: string;
-  country?: string;
-  countryCode?: string;
-  formatted?: string;
 }
 
 const isValidCoordinate = (value: unknown): value is number =>
@@ -74,39 +46,6 @@ export const getBitePosition = (bite: Bite): Position | undefined => {
   return undefined;
 };
 
-const findAddressComponent = (
-  components: GoogleAddressComponent[],
-  types: string[],
-): GoogleAddressComponent | undefined =>
-  components.find((component) =>
-    types.some((type) => component.types?.includes(type)),
-  );
-
-export const extractBiteAddress = (
-  result: GoogleGeocodingResult,
-): BiteAddress => {
-  const components = result.address_components || [];
-  const city = findAddressComponent(components, [
-    'locality',
-    'postal_town',
-    'administrative_area_level_2',
-  ]);
-  const region = findAddressComponent(components, [
-    'administrative_area_level_1',
-  ]);
-  const country = findAddressComponent(components, ['country']);
-
-  return {
-    ...(city?.long_name ? { city: city.long_name } : {}),
-    ...(region?.long_name ? { region: region.long_name } : {}),
-    ...(country?.long_name ? { country: country.long_name } : {}),
-    ...(country?.short_name ? { countryCode: country.short_name } : {}),
-    ...(result.formatted_address
-      ? { formatted: result.formatted_address }
-      : {}),
-  };
-};
-
 export const buildBiteAddressUpdate = (
   addressStatus: AddressStatus,
   address: BiteAddress = {},
@@ -116,39 +55,8 @@ export const buildBiteAddressUpdate = (
   updatedAt: FieldValue.serverTimestamp(),
 });
 
-const loadBiteAddress = async (position: Position): Promise<BiteAddress> => {
-  const apiKey = googleGeocodingApiKey.value();
-
-  if (!apiKey) {
-    throw new Error(`${GOOGLE_GEOCODING_API_KEY_ENV} is not configured.`);
-  }
-
-  const url = new URL(GOOGLE_GEOCODING_BASE_URL);
-  url.searchParams.set('latlng', `${position.latitude},${position.longitude}`);
-  url.searchParams.set('key', apiKey);
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`Google Reverse Geocoding HTTP ${response.status}`);
-  }
-
-  const data = (await response.json()) as GoogleGeocodingResponse;
-
-  if (data.status !== 'OK') {
-    throw new Error(
-      `Google Reverse Geocoding returned ${data.status || 'unknown status'}.`,
-    );
-  }
-
-  const result = data.results?.[0];
-
-  if (!result) {
-    throw new Error('Google Reverse Geocoding returned no results.');
-  }
-
-  return extractBiteAddress(result);
-};
+const loadBiteAddress = (position: Position): Promise<BiteAddress> =>
+  reverseGeocode(position, googleGeocodingApiKey.value());
 
 const enrichBiteAddress = async (
   biteId: string,

@@ -9,11 +9,13 @@ import {
   IonBadge,
   IonChip,
   IonIcon,
+  IonModal,
   IonSelect,
   IonSelectOption,
   IonText,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { TypeaheadComponent } from '../../type-ahead/type-ahead.component';
 
 @Component({
   selector: 'bt-home-feed-controls',
@@ -23,25 +25,35 @@ import { TranslocoPipe } from '@jsverse/transloco';
     IonBadge,
     IonChip,
     IonIcon,
+    IonModal,
     IonSelect,
     IonSelectOption,
     IonText,
     TranslocoPipe,
+    TypeaheadComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeFeedControlsComponent {
   showFilters = input(true);
   selectedFilters = input<string[]>([]);
-  distance = input<number | string | undefined>();
+  distance = input<number | undefined>();
   maxPriceFilter = input(0);
   showSearchChip = input(false);
   showMap = input(true);
   sorting = input<string>('distance');
+  allTags = input<string[]>([]);
+  preferedCurrency = input('EUR');
 
   readonly gotoSearch = output<void>();
   readonly openMapView = output<void>();
   readonly sortingChange = output<string>();
+  readonly filtersChanged = output<{
+    tagFilters: string[];
+    distanceFilter: string;
+    priceFilter: number;
+  }>();
+  readonly filterCleared = output<void>();
 
   sortingLabelKey = computed(() => {
     switch (this.sorting()) {
@@ -76,5 +88,25 @@ export class HomeFeedControlsComponent {
     if (event.detail) {
       this.sortingChange.emit(event.detail.value);
     }
+  }
+
+  onFilterChange(
+    filterSelection: {
+      tagFilters: string[];
+      distanceFilter: string;
+      priceFilter: number;
+    },
+    modal: IonModal,
+  ): void {
+    modal.dismiss();
+
+    if (filterSelection) {
+      this.filtersChanged.emit(filterSelection);
+    }
+  }
+
+  onFiltersClear(modal: IonModal): void {
+    modal.dismiss();
+    this.filterCleared.emit();
   }
 }

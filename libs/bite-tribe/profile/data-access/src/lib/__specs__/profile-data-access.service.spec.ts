@@ -1,11 +1,12 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { ApplicationRef } from '@angular/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 import { ProfileDataAccessService } from '../profile-data-access.service';
 import SpyInstance = jest.SpyInstance;
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { Like } from 'model';
+import { LikeClick } from 'model';
 
 class Mock {
   isAuthenticated$ = of(true);
@@ -16,8 +17,9 @@ class Mock {
   isPublicProfile$ = of(true);
   profileMetadata$ = of(true);
   sortedMyBites$ = of(null);
+  user = jest.fn();
+  userIdFromUrl = jest.fn();
   logout = jest.fn();
-  removeLike = jest.fn();
   submitLikeClick = jest.fn();
   savePublicProfile = jest.fn();
   followUser = jest.fn();
@@ -133,48 +135,21 @@ describe('ProfileDataAccessService', () => {
   });
 
   describe('submitLikeClick', () => {
-    it('should call submitLikeClick on storeService', inject(
+    it('should forward the like click to BiteTribeStoreService', inject(
       [ProfileDataAccessService],
       (service: ProfileDataAccessService) => {
         const submitLikeClickSpy = jest.spyOn(storeService, 'submitLikeClick');
-        service.submitLikeClick({
+        const likeClick: LikeClick = {
           likeType: 'thumbup',
           biteId: 'bite-id',
-        } as Like);
-        expect(submitLikeClickSpy).toHaveBeenCalledWith({
-          likeType: 'thumbup',
-          biteId: 'bite-id',
-        });
+          action: 'save',
+        };
+
+        service.submitLikeClick(likeClick);
+
+        expect(submitLikeClickSpy).toHaveBeenCalledWith(likeClick);
       },
     ));
-
-    describe('with an already liked bite', () => {
-      let removeLikeSpy: SpyInstance;
-
-      beforeEach(() => {
-        removeLikeSpy = jest.spyOn(storeService, 'removeLike');
-        storeService.bites$ = of([
-          {
-            id: 'bite-id',
-            likes: [{ userId: 'user-id', likeType: 'thumbup' }],
-          } as any,
-        ]);
-      });
-
-      it('should removeLike', inject(
-        [ProfileDataAccessService],
-        (service: ProfileDataAccessService) => {
-          service.submitLikeClick({
-            likeType: 'thumbup',
-            biteId: 'bite-id',
-          } as Like);
-          expect(removeLikeSpy).toHaveBeenCalledWith({
-            likeType: 'thumbup',
-            biteId: 'bite-id',
-          });
-        },
-      ));
-    });
   });
 
   describe('savePublicProfile', () => {
@@ -214,6 +189,59 @@ describe('ProfileDataAccessService', () => {
         expect(unfollowUserSpy).toHaveBeenCalledWith(mockUser);
       },
     ));
+  });
+
+  describe('myBiteTrails', () => {
+    let getCollectionSpy: SpyInstance;
+
+    const settle = async (service: ProfileDataAccessService): Promise<void> => {
+      for (let i = 0; i < 5 && service.myBiteTrails.isLoading(); i++) {
+        await TestBed.inject(ApplicationRef).whenStable();
+      }
+    };
+
+    beforeEach(async () => {
+      getCollectionSpy = jest
+        .spyOn(FirebaseFirestore, 'getCollection')
+        .mockResolvedValue({ snapshots: [] } as any);
+
+      await TestBed.inject(ApplicationRef).whenStable();
+      getCollectionSpy.mockClear();
+    });
+
+    describe('given a logged in user', () => {
+      it('should request bite trails using the uid of the store user', async () => {
+        const service = TestBed.inject(ProfileDataAccessService);
+        jest
+          .spyOn(storeService, 'user')
+          .mockReturnValue({ uid: 'store-user-id' } as any);
+
+        service.myBiteTrails.value();
+        await settle(service);
+
+        expect(getCollectionSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            compositeFilter: expect.objectContaining({
+              queryConstraints: [
+                expect.objectContaining({ value: 'store-user-id' }),
+              ],
+            }),
+          }),
+        );
+      });
+    });
+
+    describe('given no logged in user', () => {
+      it('should not request bite trails', async () => {
+        const service = TestBed.inject(ProfileDataAccessService);
+        jest.spyOn(storeService, 'user').mockReturnValue(undefined);
+
+        service.myBiteTrails.value();
+        await settle(service);
+
+        expect(getCollectionSpy).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('userLoader', () => {

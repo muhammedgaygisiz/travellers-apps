@@ -13,7 +13,7 @@ import {
   IonIcon,
   IonLabel,
 } from '@ionic/angular/standalone';
-import { Bite, Like, Menu, MenuItem, Restaurant } from 'model';
+import { Bite, LikeClick, Menu, MenuItem, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { TitleCasePipe } from '@angular/common';
 import { EnsureProtocolPipe } from '../../../pipes/ensure-protocol.pipe';
@@ -56,7 +56,7 @@ export class RestaurantComponent {
   readonly showMenuClick = output<Restaurant | undefined>();
   readonly showBitesClick = output<Restaurant | undefined>();
   readonly biteClick = output<Bite>();
-  readonly likeButtonClick = output<Like>();
+  readonly likeButtonClick = output<LikeClick>();
   readonly selectedSegment = signal<'bites' | 'menu'>('bites');
 
   ratedBites = computed(() =>

@@ -1,28 +1,14 @@
 import { LikesComponent } from '../likes.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
-import { Bite } from 'model';
 import { LikeOptionsPopoverMenuComponent } from '../../like-options-popover-menu/like-options-popover-menu.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { LikeCounts } from '../../utils/like-counts';
 
-const mockBite: Bite = {
-  id: 'bite1',
-  name: 'Test Bite',
-  image: 'test-image.jpg',
-  place: 'Test Place',
-  price: 15.99,
-  currency: 'USD',
-  position: { longitude: 12.34, latitude: 56.78 } as any,
-  distance: '500',
-  restaurantId: 'rest1',
-  likes: [
-    { userId: 'user1', likeType: 'thumbup' },
-    { userId: 'user2', likeType: 'drooling' },
-  ],
+const likeCounts: LikeCounts = {
   thumbup: 1,
   drooling: 1,
   mindblown: 0,
-  tags: ['spicy', 'vegetarian'],
 };
 
 describe(LikesComponent.name, () => {
@@ -39,9 +25,9 @@ describe(LikesComponent.name, () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
 
-    // Set required inputs using setInput method
-    componentRef.setInput('bite', mockBite);
-    componentRef.setInput('userId', 'user1');
+    componentRef.setInput('biteId', 'bite1');
+    componentRef.setInput('likeCounts', likeCounts);
+    componentRef.setInput('userLikeType', 'thumbup');
   });
 
   it('should calculate class correctly for liked bite', () => {
@@ -49,49 +35,43 @@ describe(LikesComponent.name, () => {
   });
 
   it('should calculate class correctly for non-liked bite', () => {
-    componentRef.setInput('userId', 'user3');
+    componentRef.setInput('userLikeType', undefined);
     fixture.detectChanges();
     expect(component.calcClass()).toBe('');
   });
 
+  it('should calculate class correctly when there are no likes at all', () => {
+    componentRef.setInput('userLikeType', undefined);
+    componentRef.setInput('likeCounts', {
+      thumbup: 0,
+      drooling: 0,
+      mindblown: 0,
+    });
+    fixture.detectChanges();
+    expect(component.calcClass()).toBe('unliked');
+  });
+
   describe('getLikeEmojis', () => {
-    describe('given bite with liked', () => {
-      it('should map like types to emojis correctly', () => {
-        const emojis = component.getLikeEmojis();
-        expect(emojis).toContain('👍');
-        expect(emojis).toContain('🤤');
-        expect(emojis).toHaveLength(2);
-      });
+    it('should map like types with counts to emojis correctly', () => {
+      const emojis = component.getLikeEmojis();
+      expect(emojis).toContain('👍');
+      expect(emojis).toContain('🤤');
+      expect(emojis).toHaveLength(2);
     });
 
-    describe('given bite without likes', () => {
-      it('should return empty array', () => {
-        const noLikesBite = {
-          ...mockBite,
-          likes: [],
-          thumbup: undefined,
-          drooling: undefined,
-          mindblown: undefined,
-        };
-        componentRef.setInput('bite', noLikesBite);
-        componentRef.changeDetectorRef.detectChanges();
-        expect(component.getLikeEmojis()).toEqual([]);
+    it('should return empty array when there are no likes', () => {
+      componentRef.setInput('likeCounts', {
+        thumbup: 0,
+        drooling: 0,
+        mindblown: 0,
       });
-    });
-
-    describe('given bite is not defined', () => {
-      it('should return empty array', () => {
-        componentRef.setInput('bite', null as any);
-        componentRef.changeDetectorRef.detectChanges();
-        expect(component.getLikeEmojis()).toEqual([]);
-      });
+      fixture.detectChanges();
+      expect(component.getLikeEmojis()).toEqual([]);
     });
   });
 
-  it('should use aggregate counts for total likes', () => {
-    componentRef.setInput('bite', {
-      ...mockBite,
-      likes: [],
+  it('should sum the counts for total likes', () => {
+    componentRef.setInput('likeCounts', {
       thumbup: 2,
       drooling: 1,
       mindblown: 3,
@@ -99,62 +79,6 @@ describe(LikesComponent.name, () => {
     fixture.detectChanges();
 
     expect(component.totalLikeCount()).toBe(6);
-  });
-
-  it('should use aggregate counts for displayed emojis', () => {
-    componentRef.setInput('bite', {
-      ...mockBite,
-      likes: [],
-      thumbup: 0,
-      drooling: 2,
-      mindblown: 1,
-    });
-    fixture.detectChanges();
-
-    expect(component.getLikeEmojis()).toEqual(['🤤', '🤯']);
-  });
-
-  it('should ignore likes for total count when aggregate counts are absent', () => {
-    componentRef.setInput('bite', {
-      ...mockBite,
-      likes: [
-        { userId: 'user1', likeType: 'thumbup' },
-        { userId: 'user2', likeType: 'drooling' },
-      ],
-      thumbup: undefined,
-      drooling: undefined,
-      mindblown: undefined,
-    });
-    fixture.detectChanges();
-
-    expect(component.totalLikeCount()).toBe(0);
-    expect(component.getLikeEmojis()).toEqual([]);
-  });
-
-  it('should handle empty likes array', () => {
-    const emptyLikesBite = {
-      ...mockBite,
-      likes: [],
-      thumbup: undefined,
-      drooling: undefined,
-      mindblown: undefined,
-    };
-    componentRef.setInput('bite', emptyLikesBite);
-    fixture.detectChanges();
-    expect(component.getLikeEmojis()).toHaveLength(0);
-  });
-
-  it('should handle null likes', () => {
-    const nullLikesBite = {
-      ...mockBite,
-      likes: null,
-      thumbup: undefined,
-      drooling: undefined,
-      mindblown: undefined,
-    };
-    componentRef.setInput('bite', nullLikesBite);
-    fixture.detectChanges();
-    expect(component.getLikeEmojis()).toHaveLength(0);
   });
 
   it('should open like options popover when openLikeOptions is called', async () => {
@@ -168,14 +92,56 @@ describe(LikesComponent.name, () => {
       event: mockEvent,
       dismissOnSelect: true,
       componentProps: {
-        bite: component.bite,
-        userId: component.userId,
-        likeButtonClick: component.likeButtonClick,
+        likeCounts,
+        userLikeType: 'thumbup',
+        onSelect: expect.any(Function),
       },
       cssClass: 'like-options-popover',
       alignment: 'center',
       size: 'auto',
       arrow: true,
+    });
+  });
+
+  describe('onLikeSelected', () => {
+    it('should emit a remove intent when selecting the current like type', () => {
+      const emitSpy = jest.spyOn(component.likeButtonClick, 'emit');
+
+      component.onLikeSelected('thumbup');
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        biteId: 'bite1',
+        likeType: 'thumbup',
+        action: 'remove',
+      });
+    });
+
+    it('should emit a save intent with the previous type when switching', () => {
+      const emitSpy = jest.spyOn(component.likeButtonClick, 'emit');
+
+      component.onLikeSelected('drooling');
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        biteId: 'bite1',
+        likeType: 'drooling',
+        action: 'save',
+        previousLikeType: 'thumbup',
+      });
+    });
+
+    it('should emit a save intent without previous type when not liked yet', () => {
+      componentRef.setInput('userLikeType', undefined);
+      fixture.detectChanges();
+      const emitSpy = jest.spyOn(component.likeButtonClick, 'emit');
+
+      component.onLikeSelected('mindblown');
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        biteId: 'bite1',
+        likeType: 'mindblown',
+        action: 'save',
+        previousLikeType: undefined,
+      });
     });
   });
 });

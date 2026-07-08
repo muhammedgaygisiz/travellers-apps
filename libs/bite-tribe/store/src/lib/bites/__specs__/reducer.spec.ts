@@ -1,6 +1,12 @@
 import { reducer } from '../reducer';
 import { BiteActions } from '../actions';
-import type { Bite } from 'model';
+import {
+  removeLike,
+  removeLikeFailed,
+  saveLike,
+  saveLikeFailed,
+} from '../../likes/actions';
+import type { Bite, Like } from 'model';
 import { fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { PATH } from 'utils';
@@ -311,6 +317,62 @@ describe('Bite Reducer', () => {
       expect(reducer(EMPTY_STATE, loadedLatestFromApiAction)).toEqual({
         ...NEW_STATE,
       });
+    });
+  });
+
+  describe('optimistic like counts', () => {
+    const like: Like = {
+      biteId: '1',
+      userId: 'user1',
+      likeType: 'thumbup',
+      createdAt: '2026-01-01T00:00:00Z',
+    };
+
+    const STATE_WITH_BITE: BitesState = {
+      ...EMPTY_STATE,
+      ids: ['1'],
+      entities: { '1': { id: '1', name: 'Bite 1', thumbup: 2 } as Bite },
+      latestBites: [{ id: '1', name: 'Bite 1', thumbup: 2 } as Bite],
+    };
+
+    it('should increment the count on saveLike', () => {
+      const state = reducer(STATE_WITH_BITE, saveLike({ like }));
+
+      expect(state.entities['1']?.thumbup).toBe(3);
+      expect(state.latestBites[0].thumbup).toBe(3);
+    });
+
+    it('should move the count between types when switching the like', () => {
+      const state = reducer(
+        STATE_WITH_BITE,
+        saveLike({
+          like: { ...like, likeType: 'drooling' },
+          previousLikeType: 'thumbup',
+        }),
+      );
+
+      expect(state.entities['1']?.thumbup).toBe(1);
+      expect(state.entities['1']?.drooling).toBe(1);
+    });
+
+    it('should revert the count on saveLikeFailed', () => {
+      const afterSave = reducer(STATE_WITH_BITE, saveLike({ like }));
+      const state = reducer(afterSave, saveLikeFailed({ like }));
+
+      expect(state.entities['1']?.thumbup).toBe(2);
+    });
+
+    it('should decrement the count on removeLike', () => {
+      const state = reducer(STATE_WITH_BITE, removeLike({ like }));
+
+      expect(state.entities['1']?.thumbup).toBe(1);
+    });
+
+    it('should restore the count on removeLikeFailed', () => {
+      const afterRemove = reducer(STATE_WITH_BITE, removeLike({ like }));
+      const state = reducer(afterRemove, removeLikeFailed({ like }));
+
+      expect(state.entities['1']?.thumbup).toBe(2);
     });
   });
 });

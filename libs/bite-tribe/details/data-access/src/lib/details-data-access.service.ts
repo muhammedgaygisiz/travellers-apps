@@ -10,6 +10,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
   Like,
+  LikeClick,
   PublicUser,
   RemoveBiteFromBucketlistParams,
   SaveToBucketListParams,
@@ -28,19 +29,21 @@ const SHARE_BITE_URL = 'https://bite-tribe.web.app/s/bite';
 export class DetailsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
+  userId = toSignal(this.storeService.userId$, { initialValue: '' });
+
   biteLoader: ResourceLoader<any, any> = async ({ params }) => {
     const biteId = params.biteId;
     if (biteId) {
-      const likeDocs = await FirebaseFirestore.getCollection({
-        reference: `bites/${biteId}/likes`,
-      });
+      let likes: Like[] = [];
+      const userId = params.userId;
 
-      const likes = likeDocs.snapshots.map(
-        (like) =>
-          ({
-            ...like.data,
-          }) as Like,
-      );
+      if (userId) {
+        const likeDoc = await FirebaseFirestore.getDocument({
+          reference: `bites/${biteId}/likes/${userId}`,
+        });
+
+        likes = likeDoc.snapshot.data ? [likeDoc.snapshot.data as Like] : [];
+      }
 
       return FirebaseFirestore.getDocument({
         reference: `bites/${biteId}`,
@@ -59,6 +62,7 @@ export class DetailsDataAccessService {
   bite = resource({
     params: () => ({
       biteId: this.storeService.biteIdFromUrl(),
+      userId: this.userId(),
     }),
     loader: this.biteLoader.bind(this),
   });
@@ -69,7 +73,6 @@ export class DetailsDataAccessService {
   });
   exchangeRates = toSignal(this.storeService.exchangeRates$);
   preferredCurrency = toSignal(this.storeService.preferedCurrency$);
-  userId = toSignal(this.storeService.userId$, { initialValue: '' });
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
   });
@@ -138,25 +141,8 @@ export class DetailsDataAccessService {
     this.storeService.removeBiteFromBucketlist($event);
   }
 
-  submitLikeClick(likeType: Like): void {
-    const bite = this.bite.value();
-    const userId = this.userId();
-
-    if (!bite) {
-      return;
-    }
-
-    const likeFromUser = bite?.likes?.find(
-      (like: Like) =>
-        like.userId === userId && like.likeType === likeType.likeType,
-    );
-
-    if (likeFromUser) {
-      this.storeService.removeLike(likeType);
-      return;
-    }
-
-    this.storeService.submitLikeClick(likeType);
+  submitLikeClick(likeClick: LikeClick): void {
+    this.storeService.submitLikeClick(likeClick);
   }
 
   logout(): void {

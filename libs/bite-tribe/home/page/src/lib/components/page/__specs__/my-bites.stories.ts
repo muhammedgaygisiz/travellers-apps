@@ -2,7 +2,7 @@ import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { BiteTribeHomeComponent } from '../home.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
-import type { Bite, Like } from 'model';
+import type { Bite } from 'model';
 
 addNecessaryIcons();
 
@@ -38,7 +38,7 @@ export const MyBites: Story = {
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
-        likes: [{ likeType: 'thumbup' } as Like],
+        thumbup: 1,
       } as Bite,
       {
         id: '2',
@@ -48,7 +48,7 @@ export const MyBites: Story = {
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
-        likes: [{ likeType: 'thumbup' } as Like],
+        thumbup: 1,
       } as Bite,
       {
         id: '3',
@@ -58,7 +58,7 @@ export const MyBites: Story = {
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
-        likes: [{ likeType: 'thumbup' } as Like],
+        thumbup: 1,
       } as Bite,
       {
         id: '4',
@@ -68,7 +68,7 @@ export const MyBites: Story = {
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
-        likes: [{ likeType: 'thumbup' } as Like],
+        thumbup: 1,
       } as Bite,
       {
         id: '5',
@@ -78,7 +78,7 @@ export const MyBites: Story = {
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
-        likes: [{ likeType: 'thumbup' } as Like],
+        thumbup: 1,
       } as Bite,
       {
         id: '6',
@@ -88,7 +88,7 @@ export const MyBites: Story = {
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
-        likes: [{ likeType: 'thumbup' } as Like],
+        thumbup: 1,
       } as Bite,
     ],
   },

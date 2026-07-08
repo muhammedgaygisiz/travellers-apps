@@ -36,20 +36,34 @@ const template = `
 export const Bite: Story = {
   args: {
     bite: {
+      id: 'bite1',
       name: 'Peaches',
       imagePath:
         'https://upload.wikimedia.org/wikipedia/commons/9/9e/Autumn_Red_peaches.jpg',
       distance: '30.7',
       place: "Sam's",
       rating: 4,
-      likes: [
-        {
-          likeType: 'thumbup',
-        },
-      ],
+      thumbup: 1,
       city: 'Bern',
       countryCode: 'CH',
     } as any,
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
+export const LikedByMe: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...Bite.args?.bite,
+      thumbup: 2,
+      drooling: 1,
+      likes: [{ userId: '1', likeType: 'thumbup' }],
+    } as any,
+    userId: '1',
   },
   render: (args) => ({
     props: { ...args },

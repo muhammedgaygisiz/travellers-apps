@@ -1,20 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  IonModal,
-  NavController,
-  provideIonicAngular,
-} from '@ionic/angular/standalone';
+import { NavController, provideIonicAngular } from '@ionic/angular/standalone';
+import { By } from '@angular/platform-browser';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { BiteTribeHomeComponent } from '../home.component';
+import { HomeFeedControlsComponent } from '../home-feed-controls/home-feed-controls.component';
 import { ComponentRef, signal } from '@angular/core';
 import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
 import { of, Subject } from 'rxjs';
-import {
-  InfiniteScrollCustomEvent,
-  RefresherCustomEvent,
-} from '@ionic/angular';
+import { RefresherCustomEvent } from '@ionic/angular';
 import SpyInstance = jest.SpyInstance;
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -207,56 +202,49 @@ describe('BiteTribeHomeComponent', () => {
     });
   });
 
-  describe('onFilterChange', () => {
-    let modal: any;
-
-    beforeEach(() => {
-      modal = {
-        dismiss: jest.fn(),
-      };
-    });
-
-    it('should dismiss the modal and emit filter changes', () => {
+  describe('filters', () => {
+    it('should emit filtersChanged when bt-home-feed-controls emits filtersChanged', () => {
+      fixture.detectChanges();
+      const emitSpy = jest.spyOn(component.filtersChanged, 'emit');
       const filterSelection = {
         tagFilters: ['filter1'],
         distanceFilter: '10',
         priceFilter: 20,
       };
 
-      const filtersChangedSpy = jest.spyOn(component.filtersChanged, 'emit');
+      const homeFeedControls = fixture.debugElement.query(
+        By.directive(HomeFeedControlsComponent),
+      );
+      homeFeedControls.componentInstance.filtersChanged.emit(filterSelection);
 
-      component.onFilterChange(filterSelection, modal);
-      expect(modal.dismiss).toHaveBeenCalled();
-      expect(filtersChangedSpy).toHaveBeenCalledWith(filterSelection);
+      expect(emitSpy).toHaveBeenCalledWith(filterSelection);
+    });
+
+    it('should emit filterCleared when bt-home-feed-controls emits filterCleared', () => {
+      fixture.detectChanges();
+      const emitSpy = jest.spyOn(component.filterCleared, 'emit');
+
+      const homeFeedControls = fixture.debugElement.query(
+        By.directive(HomeFeedControlsComponent),
+      );
+      homeFeedControls.componentInstance.filterCleared.emit();
+
+      expect(emitSpy).toHaveBeenCalled();
     });
   });
 
-  describe('onFiltersClear', () => {
-    it('should emit filterCleared output', () => {
-      const modal = {
-        dismiss: jest.fn(),
-      } as unknown as IonModal;
-      const filterClearedSpy = jest.spyOn(component.filterCleared, 'emit');
-
-      component.onFiltersClear(modal);
-      expect(modal.dismiss).toHaveBeenCalled();
-      expect(filterClearedSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('onIonInfinite', () => {
-    it('should load more bites and complete the event', () => {
-      const infiniteScrollEvent = {
-        target: {
-          complete: jest.fn(),
-        },
-      } as unknown as InfiniteScrollCustomEvent;
-
+  describe('onLoadMore', () => {
+    it('should load more bites when there are more to show', () => {
       const bites = new Array(100).fill({});
       componentRef.setInput('bites', bites);
-      component.onIonInfinite(infiniteScrollEvent);
+      component.onLoadMore();
       expect(component.currentPage()).toBe(2);
-      expect(infiniteScrollEvent.target.complete).toHaveBeenCalled();
+    });
+
+    it('should not advance the page when there are no more bites to show', () => {
+      componentRef.setInput('bites', []);
+      component.onLoadMore();
+      expect(component.currentPage()).toBe(1);
     });
   });
 
@@ -339,16 +327,6 @@ describe('BiteTribeHomeComponent', () => {
       component.searchTerm.set('Burger');
       expect(component.displayedBites().length).toBe(1);
       expect(component.displayedBites()[0].name).toBe('Burger');
-    });
-  });
-
-  describe('tried out checkbox', () => {
-    it('should emit triedOutChange when checkbox changes', () => {
-      const emitSpy = jest.spyOn(component.triedOutChange, 'emit');
-
-      component.onTriedOutChange({ detail: { checked: true } }, 'bite-1');
-
-      expect(emitSpy).toHaveBeenCalledWith({ biteId: 'bite-1', checked: true });
     });
   });
 });

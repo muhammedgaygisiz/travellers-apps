@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { Address, DaySchedule, Geopoint, Like, Link } from 'model';
+import { Address, DaySchedule, Geopoint, LikeClick, Link } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class RestaurantDataAccessService {
@@ -51,21 +51,7 @@ export class RestaurantDataAccessService {
     await this.api.savePositionForRestaurant(restaurantId, position);
   }
 
-  submitLikeClick(likeType: Like): void {
-    const bites = this.bites();
-    const userId = this.userId();
-
-    const bite = bites?.find((bite) => bite.id === likeType.biteId);
-    const likeFromUser = bite?.likes?.find(
-      (like: any) =>
-        like.userId === userId && like.likeType === likeType.likeType,
-    );
-
-    if (likeFromUser) {
-      this.storeService.removeLike(likeType);
-      return;
-    }
-
-    this.storeService.submitLikeClick(likeType);
+  submitLikeClick(likeClick: LikeClick): void {
+    this.storeService.submitLikeClick(likeClick);
   }
 }

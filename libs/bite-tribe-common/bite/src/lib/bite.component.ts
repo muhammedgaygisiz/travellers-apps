@@ -24,8 +24,9 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { Bite, Like } from 'model';
+import { Bite, LikeClick } from 'model';
 import { LikesComponent } from './likes/likes.component';
+import { getLikeCounts, getUserLikeType } from './utils/like-counts';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
@@ -79,10 +80,13 @@ export class BiteComponent {
   readonly = input(false, { transform: booleanAttribute });
 
   biteClick = output<Bite>();
-  likeButtonClick = output<Like>();
+  likeButtonClick = output<LikeClick>();
   gotoEdit = output<Bite>();
   deleteBite = output<Bite>();
   rateNowClick = output<{ bite: Bite; rating: number }>();
+
+  likeCounts = computed(() => getLikeCounts(this.bite()));
+  userLikeType = computed(() => getUserLikeType(this.bite(), this.userId()));
 
   isOpen = signal(false);
   isRatingModalOpen = signal(false);

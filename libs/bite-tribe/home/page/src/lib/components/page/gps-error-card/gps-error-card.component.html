@@ -1,0 +1,14 @@
+<ion-card>
+  <ion-card-content>
+    <ion-text color="warning">
+      {{ 'we-could-not-access-your-location' | transloco }}
+    </ion-text>
+  </ion-card-content>
+
+  <ion-button fill="clear" (click)="retryClick.emit()">{{
+    'retry' | transloco
+  }}</ion-button>
+  <ion-button fill="clear" (click)="closeClick.emit()">{{
+    'close' | transloco
+  }}</ion-button>
+</ion-card>

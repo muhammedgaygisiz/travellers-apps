@@ -4,6 +4,8 @@ import { Bite } from 'model';
 
 jest.mock('@capacitor-firebase/firestore');
 
+const userId = 'user1';
+
 describe(loadLikesByBites.name, () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -11,7 +13,7 @@ describe(loadLikesByBites.name, () => {
 
   describe('given no bites', () => {
     it('should return an empty array', async () => {
-      const result = await loadLikesByBites([]);
+      const result = await loadLikesByBites([], userId);
       expect(result).toEqual([]);
     });
   });
@@ -19,44 +21,36 @@ describe(loadLikesByBites.name, () => {
   describe('given bites without id', () => {
     it('should return an empty array', async () => {
       const bites = [{} as any];
-      const result = await loadLikesByBites(bites);
+      const result = await loadLikesByBites(bites, userId);
       expect(result).toEqual([]);
     });
   });
 
   describe('given bites with id', () => {
-    it('should return likes for the bites', async () => {
+    it("should return the current user's like per bite", async () => {
       const bites = [{ id: 'bite1' }, { id: 'bite2' }] as Bite[];
 
-      const mockLikesBite1 = [
-        { id: 'like1', userId: 'user1' },
-        { id: 'like2', userId: 'user2' },
-      ];
-      const mockLikesBite2 = [{ id: 'like3', userId: 'user3' }];
+      const likeForBite1 = { userId, biteId: 'bite1', likeType: 'thumbup' };
 
       jest
-        .spyOn(FirebaseFirestore, 'getCollection')
+        .spyOn(FirebaseFirestore, 'getDocument')
         .mockImplementationOnce(async () => ({
-          snapshots: mockLikesBite1.map((like) => ({
-            data: like,
-          })) as any,
+          snapshot: { data: likeForBite1 } as any,
         }))
         .mockImplementationOnce(async () => ({
-          snapshots: mockLikesBite2.map((like) => ({
-            data: like,
-          })) as any,
+          snapshot: { data: null } as any,
         }));
 
-      const result = await loadLikesByBites(bites);
+      const result = await loadLikesByBites(bites, userId);
 
-      expect(result).toEqual([...mockLikesBite1, ...mockLikesBite2]);
+      expect(result).toEqual([likeForBite1]);
 
-      expect(FirebaseFirestore.getCollection).toHaveBeenCalledTimes(2);
-      expect(FirebaseFirestore.getCollection).toHaveBeenNthCalledWith(1, {
-        reference: 'bites/bite1/likes',
+      expect(FirebaseFirestore.getDocument).toHaveBeenCalledTimes(2);
+      expect(FirebaseFirestore.getDocument).toHaveBeenNthCalledWith(1, {
+        reference: `bites/bite1/likes/${userId}`,
       });
-      expect(FirebaseFirestore.getCollection).toHaveBeenNthCalledWith(2, {
-        reference: 'bites/bite2/likes',
+      expect(FirebaseFirestore.getDocument).toHaveBeenNthCalledWith(2, {
+        reference: `bites/bite2/likes/${userId}`,
       });
     });
   });

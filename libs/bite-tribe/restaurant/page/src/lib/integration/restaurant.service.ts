@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
-import { Bite, Like, Restaurant } from 'model';
+import { Bite, LikeClick, Restaurant } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import { PATH } from 'utils';
 
@@ -134,7 +134,7 @@ export class RestaurantService {
     void this.navController.navigateForward(['bite', bite.id]);
   }
 
-  likeButtonClicked(likeClick: Like): void {
+  likeButtonClicked(likeClick: LikeClick): void {
     this.dataAccess.submitLikeClick(likeClick);
   }
 }

@@ -253,6 +253,12 @@ export class BiteTribeApiService {
     return this.biteApiService.loadBitesByLocation(position);
   }
 
+  async getCurrencyByPosition(
+    position?: Geopoint,
+  ): Promise<string | undefined> {
+    return this.biteApiService.getCurrencyByPosition(position);
+  }
+
   async bitesByUser(userUid: string): Promise<Bite[]> {
     return this.biteApiService.loadBitesByUser(userUid);
   }

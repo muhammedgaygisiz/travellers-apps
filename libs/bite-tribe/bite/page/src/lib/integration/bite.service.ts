@@ -1,6 +1,7 @@
 import { Location } from '@angular/common';
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
+import type { Geopoint } from 'model';
 import {
   LoadingController,
   NavController,
@@ -27,6 +28,42 @@ export class BiteService {
   nearbyRestaurants = this.dataAccess.nearbyRestaurants;
   tagSuggestionsForEditingBite = this.dataAccess.tagSuggestionsForEditingBite;
   networkStatus = this.dataAccess.networkStatus;
+
+  /** Currency derived from the bite position; `undefined` until resolved. */
+  private readonly positionCurrency = signal<string | undefined>(undefined);
+
+  private lastLookedUpPosition?: Geopoint;
+
+  /**
+   * The currency to prefill: the position-derived currency when available,
+   * otherwise the user's preferred currency from settings (fallback).
+   */
+  readonly effectiveCurrency = computed(
+    () => this.positionCurrency() ?? this.currency(),
+  );
+
+  /**
+   * Resolves the currency for the given bite position via the Cloud Function
+   * and prefills it. Only overrides the fallback when a currency is found, so
+   * the preferred currency remains the fallback.
+   */
+  async determineCurrencyForPosition(position?: Geopoint): Promise<void> {
+    if (!position || this.isSamePosition(position, this.lastLookedUpPosition)) {
+      return;
+    }
+
+    this.lastLookedUpPosition = position;
+
+    const currency = await this.dataAccess.getCurrencyByPosition(position);
+
+    if (currency) {
+      this.positionCurrency.set(currency);
+    }
+  }
+
+  private isSamePosition(a: Geopoint, b?: Geopoint): boolean {
+    return !!b && a.latitude === b.latitude && a.longitude === b.longitude;
+  }
 
   async submitNewBite(newBite: any): Promise<void> {
     const loading = await this.loadingController.create({

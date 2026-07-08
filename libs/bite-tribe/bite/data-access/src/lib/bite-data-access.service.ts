@@ -12,6 +12,7 @@ import { NetworkStatusService } from 'common/networkstatus';
 import type {
   Bite,
   CreateAndUploadImageCallbackParams,
+  Geopoint,
   UploadParams,
 } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -97,5 +98,9 @@ export class BiteDataAccessService {
 
   setEditingBite(bite: Partial<any>): void {
     this.storeService.setEditingBite(bite);
+  }
+
+  getCurrencyByPosition(position?: Geopoint): Promise<string | undefined> {
+    return this.api.getCurrencyByPosition(position);
   }
 }

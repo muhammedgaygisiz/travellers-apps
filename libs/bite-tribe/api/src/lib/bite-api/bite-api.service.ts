@@ -1,9 +1,15 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
 import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { Bite, Bucketlist, CreateAndUploadImageCallbackParams } from 'model';
+import {
+  Bite,
+  Bucketlist,
+  CreateAndUploadImageCallbackParams,
+  Geopoint,
+} from 'model';
 import { Platform } from '@ionic/angular';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
+import { getCurrencyByPosition } from './utils/get-currency-by-position';
 import { BITE_COLLECTION } from '../utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
 import { createBite } from './utils/create-bite';
@@ -42,6 +48,12 @@ export class BiteApiService {
 
   public async loadBitesByUser(userUid: string): Promise<Bite[]> {
     return loadBitesByUser(userUid);
+  }
+
+  public async getCurrencyByPosition(
+    position?: Geopoint,
+  ): Promise<string | undefined> {
+    return getCurrencyByPosition(position);
   }
 
   public async loadBiteById(biteId: string): Promise<Bite> {

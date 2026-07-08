@@ -157,7 +157,11 @@
       class="ion-page"
       [restaurants]="nearbyRestaurants()"
       [selectedRestaurant]="biteFormGroup.get('place')?.value || ''"
+      [googlePlaces]="googlePlaces()"
+      [googlePlacesLoading]="googlePlacesLoading()"
       (restaurantSelected)="onRestaurantSelected($event, restaurantModalBite)"
+      (searchInGoogleMaps)="searchGooglePlaces.emit($event)"
+      (googlePlaceSelected)="onGooglePlaceSelected($event, restaurantModalBite)"
       (selectionCancel)="restaurantModalBite.dismiss()"
     />
   </ng-template>

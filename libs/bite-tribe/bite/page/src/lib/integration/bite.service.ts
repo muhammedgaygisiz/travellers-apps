@@ -27,6 +27,8 @@ export class BiteService {
   nearbyRestaurants = this.dataAccess.nearbyRestaurants;
   tagSuggestionsForEditingBite = this.dataAccess.tagSuggestionsForEditingBite;
   networkStatus = this.dataAccess.networkStatus;
+  googlePlaces = this.dataAccess.googlePlaces;
+  googlePlacesLoading = this.dataAccess.googlePlacesLoading;
 
   async submitNewBite(newBite: any): Promise<void> {
     const loading = await this.loadingController.create({
@@ -55,6 +57,10 @@ export class BiteService {
 
   setEditingBite(bite: Partial<any>): void {
     this.dataAccess.setEditingBite(bite);
+  }
+
+  searchGooglePlaces(searchText: string): void {
+    this.dataAccess.searchGooglePlaces(searchText);
   }
 
   private async showToast(key: string): Promise<void> {

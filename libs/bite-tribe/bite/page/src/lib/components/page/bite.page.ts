@@ -33,7 +33,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
 import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
-import type { Bite, Geopoint } from 'model';
+import type { Bite, Geopoint, GooglePlace } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { currencyCodes, getLocalizedCurrencyName } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
@@ -97,9 +97,15 @@ export class BitePage {
 
   fallbackPosition = linkedSignal(() => this.position());
 
+  googlePlaces = input<GooglePlace[]>([]);
+
+  googlePlacesLoading = input<boolean>(false);
+
   submitBite = output<typeof this.biteFormGroup.value>();
 
   placeChange = output<string>();
+
+  searchGooglePlaces = output<string>();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -391,6 +397,15 @@ export class BitePage {
 
   onRestaurantSelected(restaurantName: string, modal: IonModal): void {
     this.biteFormGroup.patchValue({ place: restaurantName });
+    void modal.dismiss();
+  }
+
+  onGooglePlaceSelected(place: GooglePlace, modal: IonModal): void {
+    this.biteFormGroup.patchValue({
+      place: place.name,
+      position: place.position,
+    });
+    this.confirmedManualPosition.set(place.position);
     void modal.dismiss();
   }
 }

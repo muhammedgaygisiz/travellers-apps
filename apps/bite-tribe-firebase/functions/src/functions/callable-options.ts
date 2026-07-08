@@ -12,13 +12,42 @@ export const getAppCheckCallableOptions = (): CallableOptions => ({
   enforceAppCheck: process.env[FUNCTIONS_EMULATOR_ENV] !== 'true',
 });
 
-export const onAppCheck = <T = unknown, Return = unknown, Stream = unknown>(
-  handler: (
-    request: CallableRequest<T>,
-    response?: CallableResponse<Stream>,
-  ) => Return,
+type AppCheckHandler<T, Return, Stream> = (
+  request: CallableRequest<T>,
+  response?: CallableResponse<Stream>,
+) => Return;
+
+export function onAppCheck<T = unknown, Return = unknown, Stream = unknown>(
+  handler: AppCheckHandler<T, Return, Stream>,
 ): CallableFunction<
   T,
   Return extends Promise<unknown> ? Return : Promise<Return>,
   Stream
-> => onCall<T, Return, Stream>(getAppCheckCallableOptions(), handler);
+>;
+export function onAppCheck<T = unknown, Return = unknown, Stream = unknown>(
+  options: CallableOptions,
+  handler: AppCheckHandler<T, Return, Stream>,
+): CallableFunction<
+  T,
+  Return extends Promise<unknown> ? Return : Promise<Return>,
+  Stream
+>;
+export function onAppCheck<T = unknown, Return = unknown, Stream = unknown>(
+  optionsOrHandler: CallableOptions | AppCheckHandler<T, Return, Stream>,
+  maybeHandler?: AppCheckHandler<T, Return, Stream>,
+): CallableFunction<
+  T,
+  Return extends Promise<unknown> ? Return : Promise<Return>,
+  Stream
+> {
+  const hasOptions = typeof optionsOrHandler !== 'function';
+  const options = hasOptions ? optionsOrHandler : {};
+  const handler = hasOptions
+    ? (maybeHandler as AppCheckHandler<T, Return, Stream>)
+    : optionsOrHandler;
+
+  return onCall<T, Return, Stream>(
+    { ...getAppCheckCallableOptions(), ...options },
+    handler,
+  );
+}

@@ -1,1 +1,4 @@
-export { RestaurantSelectorComponent } from './lib/restaurant-selector.component';
+export {
+  RestaurantSelectorComponent,
+  type GooglePlaceOption,
+} from './lib/restaurant-selector.component';

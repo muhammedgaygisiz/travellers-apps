@@ -11,6 +11,7 @@ import {
   CreateBucketListFromBiteTrailParams,
   DaySchedule,
   Geopoint,
+  GooglePlace,
   Like,
   Link,
   Menu,
@@ -255,6 +256,13 @@ export class BiteTribeApiService {
 
   async bitesByUser(userUid: string): Promise<Bite[]> {
     return this.biteApiService.loadBitesByUser(userUid);
+  }
+
+  async searchPlaces(
+    searchText: string,
+    position?: Geopoint,
+  ): Promise<GooglePlace[]> {
+    return this.biteApiService.searchPlaces(searchText, position);
   }
 
   async biteById(biteId: string): Promise<Bite> {

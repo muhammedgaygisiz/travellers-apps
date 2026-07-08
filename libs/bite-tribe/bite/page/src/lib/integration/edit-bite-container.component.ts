@@ -13,8 +13,11 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [image]="service.image() || ''"
       [nearbyRestaurants]="service.nearbyRestaurants() || []"
       [suggestedTags]="service.tagSuggestionsForEditingBite() || []"
+      [googlePlaces]="service.googlePlaces()"
+      [googlePlacesLoading]="service.googlePlacesLoading()"
       (submitBite)="service.submitEditedBite($event)"
       (placeChange)="onPlaceChange($event)"
+      (searchGooglePlaces)="service.searchGooglePlaces($event)"
     />
   `,
   imports: [BitePage],

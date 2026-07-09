@@ -6,6 +6,7 @@ import {
   onDocumentDeleted,
 } from 'firebase-functions/firestore';
 import { Bite } from './model/bite';
+import { rebuildLeaderboard } from './utils/leaderboard';
 
 const db = admin.firestore();
 
@@ -41,6 +42,8 @@ export const incrementBiteCountOnBiteCreate = onDocumentCreated(
     logger.info(
       `incrementBiteCountOnBiteCreate: incremented biteCount for ${authorUid}`,
     );
+
+    await rebuildLeaderboard(db);
   },
 );
 
@@ -90,5 +93,7 @@ export const decrementBiteCountOnBiteDelete = onDocumentDeleted(
     logger.info(
       `decrementBiteCountOnBiteDelete: decremented biteCount for ${authorUid}`,
     );
+
+    await rebuildLeaderboard(db);
   },
 );

@@ -112,6 +112,13 @@ export class ProfileComponent {
   });
 
   biteCount = computed(() => {
+    // Prefer the aggregate stored on the user document over counting the
+    // client-side loaded bites, which only reflects the paginated subset.
+    const aggregateBiteCount = this.user()?.biteCount;
+    if (typeof aggregateBiteCount === 'number') {
+      return aggregateBiteCount;
+    }
+
     const bites = this.bites();
 
     return bites ? bites.length : 0;

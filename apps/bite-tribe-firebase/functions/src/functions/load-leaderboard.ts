@@ -3,21 +3,16 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from './callable-options';
+import {
+  LeaderboardUser,
+  LEADERBOARD_DOC,
+  META_COLLECTION,
+  USERS_COLLECTION,
+  rebuildLeaderboard,
+} from './utils/leaderboard';
 
-const USERS_COLLECTION = 'users';
 const BITES_COLLECTION = 'bites';
-const LEADERBOARD_LIMIT = 10;
 const WRITE_BATCH_LIMIT = 500;
-
-interface LeaderboardUser {
-  userId: string;
-  displayName: string;
-  email: string;
-  photoUrl: string;
-  city?: string;
-  public?: boolean;
-  biteCount: number;
-}
 
 const db = admin.firestore();
 
@@ -82,29 +77,21 @@ const refreshBiteCountsIfNeeded = async (): Promise<void> => {
   });
 };
 
-const toLeaderboardUser = (
-  doc: admin.firestore.QueryDocumentSnapshot,
-): LeaderboardUser => {
-  const user = doc.data();
-  const publicUser = user['public'] === true;
+const readPersistedLeaderboard = async (): Promise<
+  LeaderboardUser[] | null
+> => {
+  const leaderboardDoc = await db
+    .collection(META_COLLECTION)
+    .doc(LEADERBOARD_DOC)
+    .get();
 
-  return {
-    userId: typeof user['userId'] === 'string' ? user['userId'] : doc.id,
-    displayName:
-      publicUser && typeof user['displayName'] === 'string'
-        ? user['displayName']
-        : '',
-    email: publicUser && typeof user['email'] === 'string' ? user['email'] : '',
-    photoUrl:
-      publicUser && typeof user['photoUrl'] === 'string'
-        ? user['photoUrl']
-        : '',
-    ...(publicUser && typeof user['city'] === 'string'
-      ? { city: user['city'] }
-      : {}),
-    public: publicUser,
-    biteCount: typeof user['biteCount'] === 'number' ? user['biteCount'] : 0,
-  };
+  if (!leaderboardDoc.exists) {
+    return null;
+  }
+
+  const users = leaderboardDoc.data()?.['users'];
+
+  return Array.isArray(users) ? (users as LeaderboardUser[]) : null;
 };
 
 export const loadLeaderboard = onAppCheck<void>(async (request) => {
@@ -123,13 +110,16 @@ export const loadLeaderboard = onAppCheck<void>(async (request) => {
   // TODO(#905): Remove this temporary backfill after the first production migration run.
   await refreshBiteCountsIfNeeded();
 
-  const leaderboardSnapshot = await db
-    .collection(USERS_COLLECTION)
-    .orderBy('biteCount', 'desc')
-    .limit(LEADERBOARD_LIMIT)
-    .get();
+  // Serve the persisted ranking from meta/leaderboard instead of querying the
+  // whole users collection on every request. The document is kept up to date by
+  // the bite create/delete triggers; rebuild it on demand when it is missing
+  // (e.g. before the first bite write after this feature ships).
+  let leaderboardUsers = await readPersistedLeaderboard();
 
-  const leaderboardUsers = leaderboardSnapshot.docs.map(toLeaderboardUser);
+  if (!leaderboardUsers) {
+    logger.info('loadLeaderboard: no persisted leaderboard found; rebuilding');
+    leaderboardUsers = await rebuildLeaderboard(db);
+  }
 
   logger.info('loadLeaderboard: query finished', {
     returnedUsers: leaderboardUsers.length,

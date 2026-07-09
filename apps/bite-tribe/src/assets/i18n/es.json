@@ -127,6 +127,7 @@
   "dish-name-label": "¿Nombre del plato?",
   "place-name-label": "¿Nombre del lugar?",
   "price-label": "¿Precio?",
+  "invalid-price-error-message": "Introduce un precio válido (p. ej., 12,50).",
   "rating-label": "¿Tu calificación?",
   "description-label": "¿Descripción?",
   "description-placeholder": "¿Qué te gustó de este plato? ¡Cuéntanos!",

@@ -128,6 +128,7 @@
   "dish-name-label": "Dish Name?",
   "place-name-label": "Place Name?",
   "price-label": "Price?",
+  "invalid-price-error-message": "Please enter a valid price (e.g. 12.50).",
   "rating-label": "Your Rating?",
   "description-label": "Description?",
   "description-placeholder": "What did you like about this dish, tell us about it!",

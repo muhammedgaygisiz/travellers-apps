@@ -127,6 +127,7 @@
   "dish-name-label": "Nama Hidangan?",
   "place-name-label": "Nama Tempat?",
   "price-label": "Harga?",
+  "invalid-price-error-message": "Masukkan harga yang valid (mis. 12.50).",
   "rating-label": "Penilaianmu?",
   "description-label": "Deskripsi?",
   "description-placeholder": "Apa yang kamu suka dari hidangan ini? Ceritakan kepada kami!",

@@ -127,6 +127,7 @@
   "dish-name-label": "اسم الطبق؟",
   "place-name-label": "اسم المكان؟",
   "price-label": "السعر؟",
+  "invalid-price-error-message": "الرجاء إدخال سعر صالح (مثال: 12.50).",
   "rating-label": "تقييمك؟",
   "description-label": "الوصف؟",
   "description-placeholder": "ماذا أعجبك في هذا الطبق؟ أخبرنا عنه!",

@@ -127,6 +127,7 @@
   "dish-name-label": "ชื่อเมนู?",
   "place-name-label": "ชื่อสถานที่?",
   "price-label": "ราคา?",
+  "invalid-price-error-message": "โปรดกรอกราคาที่ถูกต้อง (เช่น 12.50)",
   "rating-label": "คะแนนของคุณ?",
   "description-label": "คำอธิบาย?",
   "description-placeholder": "คุณชอบอะไรเกี่ยวกับเมนูนี้ บอกเราได้เลย!",

@@ -57,6 +57,13 @@
             </ion-text>
           </ion-input>
         </div>
+        @if ( biteFormGroup.get('price')?.invalid &&
+        (biteFormGroup.get('price')?.dirty ||
+        biteFormGroup.get('price')?.touched) ) {
+        <ion-text color="danger">
+          <p>{{ 'invalid-price-error-message' | transloco }}</p>
+        </ion-text>
+        }
       </div>
 
       <star-rating

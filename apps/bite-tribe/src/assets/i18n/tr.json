@@ -127,6 +127,7 @@
   "dish-name-label": "Yemek Adı?",
   "place-name-label": "Mekan Adı?",
   "price-label": "Fiyat?",
+  "invalid-price-error-message": "Lütfen geçerli bir fiyat girin (ör. 12.50).",
   "rating-label": "Puanın?",
   "description-label": "Açıklama?",
   "description-placeholder": "Bu yemekle ilgili neleri beğendin, bize anlat!",

@@ -127,6 +127,7 @@
   "dish-name-label": "የምግብ ስም?",
   "place-name-label": "የቦታ ስም?",
   "price-label": "ዋጋ?",
+  "invalid-price-error-message": "እባክዎ ትክክለኛ ዋጋ ያስገቡ (ለምሳሌ 12.50)።",
   "rating-label": "የአንተ ደረጃ?",
   "description-label": "መግለጫ?",
   "description-placeholder": "ስለዚህ ምግብ ምን ወደድክ? ንገረን!",

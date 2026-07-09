@@ -24,6 +24,7 @@ export { getCurrencyByPosition } from './functions/get-currency-by-position';
 export { clusterRestaurantCandidateForBite } from './functions/cluster-restaurant-candidate-for-bite';
 export { createUserOnAuthCreate } from './functions/create-user-on-auth-create';
 export { loadLeaderboard } from './functions/load-leaderboard';
+export { resyncBiteCounts } from './functions/resync-bite-counts';
 export {
   decrementBiteCountOnBiteDelete,
   incrementBiteCountOnBiteCreate,

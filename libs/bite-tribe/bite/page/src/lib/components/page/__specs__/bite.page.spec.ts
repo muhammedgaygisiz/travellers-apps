@@ -454,6 +454,35 @@ describe('BitePage', () => {
     });
   });
 
+  describe('price validation error message', () => {
+    const getPriceError = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '.price-container > ion-text[color="danger"]',
+      );
+
+    it('should not show error message initially when untouched', () => {
+      expect(getPriceError()).toBeNull();
+    });
+
+    it('should show error message when price is invalid and touched', () => {
+      const priceControl = component.biteFormGroup.controls['price'];
+      priceControl.setValue('Char');
+      priceControl.markAsTouched();
+      fixture.detectChanges();
+
+      expect(getPriceError()).not.toBeNull();
+    });
+
+    it('should not show error message when price is valid', () => {
+      const priceControl = component.biteFormGroup.controls['price'];
+      priceControl.setValue('9.99');
+      priceControl.markAsTouched();
+      fixture.detectChanges();
+
+      expect(getPriceError()).toBeNull();
+    });
+  });
+
   describe('setTags', () => {
     it('should set tags in the form group', () => {
       const tags = ['tag1', 'tag2'];

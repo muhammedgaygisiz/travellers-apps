@@ -127,6 +127,7 @@
   "dish-name-label": "Gerichtsname?",
   "place-name-label": "Restaurantname?",
   "price-label": "Preis?",
+  "invalid-price-error-message": "Bitte gib einen gültigen Preis ein (z. B. 12,50).",
   "rating-label": "Deine Bewertung?",
   "description-label": "Beschreibung?",
   "description-placeholder": "Was hat dir an diesem Gericht gefallen? Erzähl uns davon!",

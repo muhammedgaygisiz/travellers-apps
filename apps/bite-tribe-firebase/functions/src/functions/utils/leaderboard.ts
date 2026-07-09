@@ -5,6 +5,10 @@ import { logger } from 'firebase-functions';
 export const USERS_COLLECTION = 'users';
 export const META_COLLECTION = 'meta';
 export const LEADERBOARD_DOC = 'leaderboard';
+// Snapshot of the ranking as of the last daily notification run. The daily
+// scheduled job compares the live leaderboard against this baseline to decide
+// who moved, then overwrites it with the current ranking.
+export const LEADERBOARD_DAILY_DOC = 'leaderboardDaily';
 export const LEADERBOARD_LIMIT = 10;
 
 // Number of users read per page while scanning for the top public users. A page
@@ -25,6 +29,99 @@ export interface LeaderboardUser {
 export interface Leaderboard {
   users: LeaderboardUser[];
 }
+
+/**
+ * Describes how a single user's ranking changed between two persisted
+ * leaderboard snapshots. `previousRank`/`currentRank` are 1-based; a `null`
+ * value means the user was outside the persisted top {@link LEADERBOARD_LIMIT}
+ * in that snapshot (i.e. a new entrant or someone who dropped out).
+ */
+export interface LeaderboardRankChange {
+  userId: string;
+  previousRank: number | null;
+  currentRank: number | null;
+  direction: 'up' | 'down';
+}
+
+const rankByUserId = (users: LeaderboardUser[]): Map<string, number> => {
+  const ranks = new Map<string, number>();
+
+  users.forEach((user, index) => {
+    if (user.userId) {
+      ranks.set(user.userId, index + 1);
+    }
+  });
+
+  return ranks;
+};
+
+/**
+ * Compares two persisted leaderboard snapshots (each ordered best-first) and
+ * returns one entry per user whose ranking changed: users who climbed up,
+ * dropped down, newly entered the top {@link LEADERBOARD_LIMIT}, or dropped out
+ * of it. Users whose rank is unchanged are omitted.
+ */
+export const computeRankChanges = (
+  previous: LeaderboardUser[],
+  current: LeaderboardUser[],
+): LeaderboardRankChange[] => {
+  const previousRanks = rankByUserId(previous);
+  const currentRanks = rankByUserId(current);
+  const changes: LeaderboardRankChange[] = [];
+
+  for (const [userId, currentRank] of currentRanks) {
+    const previousRank = previousRanks.get(userId) ?? null;
+
+    if (previousRank === null) {
+      changes.push({
+        userId,
+        previousRank: null,
+        currentRank,
+        direction: 'up',
+      });
+    } else if (currentRank < previousRank) {
+      changes.push({ userId, previousRank, currentRank, direction: 'up' });
+    } else if (currentRank > previousRank) {
+      changes.push({ userId, previousRank, currentRank, direction: 'down' });
+    }
+  }
+
+  for (const [userId, previousRank] of previousRanks) {
+    if (!currentRanks.has(userId)) {
+      changes.push({
+        userId,
+        previousRank,
+        currentRank: null,
+        direction: 'down',
+      });
+    }
+  }
+
+  return changes;
+};
+
+/**
+ * Builds the push-notification body describing a single user's rank change,
+ * covering the four cases: dropped out of the top {@link LEADERBOARD_LIMIT},
+ * newly entered it, climbed up, or slipped down.
+ */
+export const buildLeaderboardNotificationBody = (
+  change: LeaderboardRankChange,
+): string => {
+  if (change.currentRank === null) {
+    return `You dropped out of the top ${LEADERBOARD_LIMIT} on the leaderboard.`;
+  }
+
+  if (change.previousRank === null) {
+    return `You entered the top ${LEADERBOARD_LIMIT} at #${change.currentRank} on the leaderboard! 🎉`;
+  }
+
+  if (change.direction === 'up') {
+    return `You climbed up to #${change.currentRank} on the leaderboard! 🎉`;
+  }
+
+  return `You dropped to #${change.currentRank} on the leaderboard.`;
+};
 
 /**
  * A user is eligible for the leaderboard only when their profile is public.

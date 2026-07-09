@@ -124,6 +124,10 @@ export const initPush = async (
         if (data?.type === 'NEW_FOLLOWER' && data?.followerUid) {
           navController.navigateForward([PATH.PROFILE, data.followerUid]);
         }
+
+        if (data?.type === 'LEADERBOARD_RANK_CHANGE') {
+          navController.navigateForward([PATH.LEADERBOARD]);
+        }
       },
     );
 

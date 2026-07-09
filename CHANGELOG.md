@@ -1,5 +1,24 @@
 # Changelog
 
+## build-82 (2026-07-09)
+
+<!-- changelog-start-rev: 565cacd7 -->
+<!-- changelog-end-rev: e22b9720 -->
+
+### Features
+
+- notifications for change in ranking (#971) (b8e7ebdf)
+- **968**: persist leader board (#970) (64812068)
+- **966**: weekly resync for bite count (#969) (bdb263e4)
+- client side price validation (#967) (b3646bc5)
+- **909**: auto select currency by position (#965) (ec730941)
+- **800**: user wants to use google maps (#964) (dd66c733)
+- **961**: make like count faster (#963) (fb4c064b)
+
+### Chores
+
+- bump version (#962) (e56a3cde)
+
 ## build-81 (2026-07-05)
 
 <!-- changelog-start-rev: 91988ac8 -->

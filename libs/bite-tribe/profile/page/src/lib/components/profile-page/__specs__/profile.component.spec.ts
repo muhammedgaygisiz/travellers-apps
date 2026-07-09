@@ -102,6 +102,21 @@ describe('ProfileComponent', () => {
 
       expect(component.biteCount()).toBe(bitesArray.length);
     });
+
+    it('should prefer the aggregate biteCount from the user document', () => {
+      compRef.setInput('bites', [{}, {}, {}]);
+      compRef.setInput('user', { biteCount: 42 } as any);
+
+      expect(component.biteCount()).toBe(42);
+    });
+
+    it('should fall back to the loaded bites when the user has no aggregate', () => {
+      const bitesArray = [{}, {}];
+      compRef.setInput('bites', bitesArray);
+      compRef.setInput('user', {} as any);
+
+      expect(component.biteCount()).toBe(bitesArray.length);
+    });
   });
 
   describe('biteTrailCount', () => {

@@ -13,6 +13,10 @@ export class LeaderboardService {
 
   users = this.dataAccess.users;
 
+  reload(): void {
+    this.users.reload();
+  }
+
   userClicked(user: LeaderboardUser): void {
     if (user.public) {
       this.navController.navigateForward([PATH.PROFILE, user.userId]);

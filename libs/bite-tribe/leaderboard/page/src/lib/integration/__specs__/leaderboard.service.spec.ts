@@ -7,6 +7,7 @@ class MockDataAccess {
   users = {
     value: jest.fn(() => []),
     isLoading: jest.fn(() => false),
+    reload: jest.fn(),
   };
 }
 
@@ -31,6 +32,12 @@ describe(LeaderboardService.name, () => {
     navController = TestBed.inject(
       NavController,
     ) as unknown as MockNavController;
+  });
+
+  it('should reload the leaderboard resource', () => {
+    service.reload();
+
+    expect(service.users.reload).toHaveBeenCalledTimes(1);
   });
 
   it('should navigate to public user profiles', () => {

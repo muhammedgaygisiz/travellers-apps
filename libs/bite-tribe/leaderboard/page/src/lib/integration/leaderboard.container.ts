@@ -20,6 +20,8 @@ export class LeaderboardContainer {
   service = inject(LeaderboardService);
 
   ionViewDidEnter(): void {
+    this.service.reload();
+
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Leaderboard',
     });

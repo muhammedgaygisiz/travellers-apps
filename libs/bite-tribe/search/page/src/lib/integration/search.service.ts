@@ -36,7 +36,7 @@ export class SearchService {
       return;
     }
 
-    if (result.category === 'bite') {
+    if (result.category === 'bite' || result.category === 'city') {
       void this.navController.navigateForward([PATH.BITE, result.value.id]);
       return;
     }

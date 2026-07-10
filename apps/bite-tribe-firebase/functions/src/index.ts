@@ -15,6 +15,7 @@ export {
 } from './functions/enrich-bite-address-on-create';
 export { searchUsers } from './functions/search-users';
 export { searchBites } from './functions/search-bites';
+export { searchBitesByCity } from './functions/search-bites-by-city';
 export { searchRestaurants } from './functions/search-restaurants';
 export { searchPlaces } from './functions/search-places';
 export { updateLastSeen } from './functions/update-last-seen';

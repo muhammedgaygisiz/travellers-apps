@@ -39,6 +39,7 @@ export class SearchPage {
     { labelKey: 'search-category-user', value: 'user' },
     { labelKey: 'search-category-bite', value: 'bite' },
     { labelKey: 'search-category-restaurant', value: 'restaurant' },
+    { labelKey: 'search-category-city', value: 'city' },
   ];
 
   results = input<SearchResult[]>([]);

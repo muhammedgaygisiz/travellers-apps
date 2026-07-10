@@ -11,6 +11,7 @@ export interface PublicUser {
   subscriptionTier?: number;
   isOrganisation?: boolean;
   isRestaurant?: boolean;
+  countryCodes?: string[];
 
   createdAt?: string;
   createdAtTimestamp?: number;

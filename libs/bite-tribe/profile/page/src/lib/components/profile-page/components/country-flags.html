@@ -1,0 +1,12 @@
+@let countryFlags = flags(); @if (countryFlags.length) {
+<div class="country-flags" role="list">
+  @for (flag of countryFlags; track flag.countryCode) {
+  <span
+    role="listitem"
+    class="country-flag {{ flag.cssClass }}"
+    [title]="flag.name"
+    [attr.aria-label]="flag.name"
+  ></span>
+  }
+</div>
+}

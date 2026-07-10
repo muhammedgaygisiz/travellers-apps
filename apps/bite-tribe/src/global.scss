@@ -1,6 +1,15 @@
 @use 'globals';
 @use 'theme/variables.scss';
 
+// Only pull in the rectangular (4x3) flags. flag-icons ships each flag in both
+// `flags/1x1` and `flags/4x3` under the same filename; bundling both makes
+// esbuild emit two `media/<code>.svg` outputs with the same path but different
+// contents, which fails the build. We only use `.fi fi-xx` (rectangular), so
+// disabling the square variant avoids the collision.
+@use 'flag-icons/sass/flag-icons' with (
+  $flag-icons-use-square: false
+);
+
 @import 'leaflet/dist/leaflet.css';
 @import 'leaflet.markercluster/dist/MarkerCluster.css';
 @import 'leaflet.markercluster/dist/MarkerCluster.Default.css';

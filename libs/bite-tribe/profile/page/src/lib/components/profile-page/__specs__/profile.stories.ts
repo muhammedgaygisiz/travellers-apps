@@ -45,6 +45,7 @@ const baseUser: PublicUser = {
   photoUrl: '',
   public: true,
   subscriptionTier: 1,
+  countryCodes: ['CH', 'IT', 'DE', 'FR', 'JP'],
 };
 
 const bite: Bite = {

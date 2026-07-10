@@ -252,6 +252,42 @@ describe(RestaurantApiService.name, () => {
     });
   });
 
+  describe('saveRestaurantImage', () => {
+    it('should upload image and update restaurant with imagePath', async () => {
+      const uploadBase64Spy = jest.spyOn(
+        uploadBase64Utils,
+        'uploadBase64ToFirebaseStorage',
+      );
+      const updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
+
+      updateDocumentSpy.mockResolvedValue({} as any);
+
+      await service.saveRestaurantImage(
+        'resto-123',
+        'data:image/png;base64,abc',
+      );
+
+      expect(uploadBase64Spy).toHaveBeenCalledWith({
+        base64: 'data:image/png;base64,abc',
+        docId: 'resto-123',
+        collection: 'restaurants',
+      });
+      expect(getDownloadUrlFromFirebaseStorage).toHaveBeenCalledWith(
+        'restaurants/resto-123.jpg',
+      );
+      expect(updateDocumentSpy).toHaveBeenCalledWith({
+        reference: 'restaurants/resto-123',
+        data: {
+          imagePath: 'https://storage.example.com/restaurants/resto-123.jpg',
+          updatedAt: '2024-03-15T12:00:00.000Z',
+          updatedAtTimestamp: 1710504000000,
+        },
+      });
+
+      updateDocumentSpy.mockClear();
+    });
+  });
+
   describe('createMenuForRestaurant', () => {
     let addDocumentSpy: jest.SpyInstance;
     let updateDocumentSpy: jest.SpyInstance;

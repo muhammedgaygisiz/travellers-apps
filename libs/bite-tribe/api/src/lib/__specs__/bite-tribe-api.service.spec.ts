@@ -27,6 +27,7 @@ class ReviewApiMock {
 class RestaurantApiMock {
   loadRestaurantById = jest.fn();
   saveNewRestaurant = jest.fn();
+  saveRestaurantImage = jest.fn();
   saveSocialMediaLinksForRestaurant = jest.fn();
 }
 
@@ -231,6 +232,31 @@ describe(BiteTribeApiService.name, () => {
         } as any;
         service.saveNewRestaurant(restaurant);
         expect(saveNewRestaurantSpy).toHaveBeenCalledWith(restaurant);
+      },
+    ));
+  });
+
+  describe('saveRestaurantImage', () => {
+    it('should call saveRestaurantImage on RestaurantApiService', inject(
+      [BiteTribeApiService, RestaurantApiService],
+      (
+        service: BiteTribeApiService,
+        restaurantApiService: RestaurantApiService,
+      ) => {
+        const saveRestaurantImageSpy = jest.spyOn(
+          restaurantApiService,
+          'saveRestaurantImage',
+        );
+
+        service.saveRestaurantImage(
+          'restaurant-id',
+          'data:image/png;base64,abc',
+        );
+
+        expect(saveRestaurantImageSpy).toHaveBeenCalledWith(
+          'restaurant-id',
+          'data:image/png;base64,abc',
+        );
       },
     ));
   });

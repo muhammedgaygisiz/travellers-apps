@@ -16,6 +16,7 @@ export interface Restaurant {
   menuId?: string;
 
   unsaved?: boolean;
+  restaurantCandidateId?: string;
   biteIds?: string[];
   bites?: Bite[];
 

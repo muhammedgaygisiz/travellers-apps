@@ -7,6 +7,7 @@ import {
 } from 'firebase-functions/firestore';
 import { Bite } from './model/bite';
 import { rebuildLeaderboard } from './utils/leaderboard';
+import { removeCountryCodeFromUser } from './utils/user-country-codes';
 
 const db = admin.firestore();
 
@@ -93,6 +94,8 @@ export const decrementBiteCountOnBiteDelete = onDocumentDeleted(
     logger.info(
       `decrementBiteCountOnBiteDelete: decremented biteCount for ${authorUid}`,
     );
+
+    await removeCountryCodeFromUser(db, authorUid, bite.countryCode);
 
     await rebuildLeaderboard(db);
   },

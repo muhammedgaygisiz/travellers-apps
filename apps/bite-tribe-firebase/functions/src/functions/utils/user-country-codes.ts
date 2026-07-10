@@ -152,3 +152,64 @@ export const addCountryCodeToUser = async (
     countryCode: normalizedCountryCode,
   });
 };
+
+/**
+ * Removes the given country code from the user's `countryCodes` list, but only
+ * when the user has no remaining bites in that country. Called when a bite is
+ * deleted so a badge disappears once the user's last bite in a country is gone.
+ *
+ * We look up the user's remaining bites by `userId` alone (a single-field,
+ * automatically indexed query) and recompute the country codes, instead of
+ * filtering by country as well, which would require a composite index.
+ */
+export const removeCountryCodeFromUser = async (
+  db: admin.firestore.Firestore,
+  userId: string,
+  countryCode: unknown,
+): Promise<void> => {
+  const normalizedCountryCode = normalizeCountryCode(countryCode);
+
+  if (!normalizedCountryCode) {
+    return;
+  }
+
+  const userRef = db.collection(USERS_COLLECTION).doc(userId);
+  const userSnap = await userRef.get();
+
+  if (!userSnap.exists) {
+    logger.warn('removeCountryCodeFromUser: user not found', { userId });
+    return;
+  }
+
+  // Don't create the property before the feature has been backfilled for this
+  // user; the add path is responsible for the initial backfill.
+  if (userSnap.get(COUNTRY_CODES_FIELD) === undefined) {
+    return;
+  }
+
+  const remainingBitesSnapshot = await db
+    .collection(BITES_COLLECTION)
+    .where('userId', '==', userId)
+    .select('countryCode')
+    .get();
+
+  const remainingCountryCodes = new Set(
+    extractCountryCodesFromBites(
+      remainingBitesSnapshot.docs.map((doc) => doc.data() as Bite),
+    ),
+  );
+
+  if (remainingCountryCodes.has(normalizedCountryCode)) {
+    return;
+  }
+
+  await userRef.update({
+    [COUNTRY_CODES_FIELD]: FieldValue.arrayRemove(normalizedCountryCode),
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+
+  logger.info('removeCountryCodeFromUser: removed country code', {
+    userId,
+    countryCode: normalizedCountryCode,
+  });
+};

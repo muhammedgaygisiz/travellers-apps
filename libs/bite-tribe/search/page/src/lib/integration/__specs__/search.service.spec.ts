@@ -98,6 +98,24 @@ describe(SearchService.name, () => {
     ]);
   });
 
+  it('should navigate to the selected city bite', () => {
+    const service = TestBed.inject(SearchService);
+
+    service.resultClicked({
+      category: 'city',
+      value: {
+        id: 'bite-2',
+        name: 'Margherita',
+        place: 'Napoli',
+      },
+    });
+
+    expect(navController.navigateForward).toHaveBeenCalledWith([
+      'bite',
+      'bite-2',
+    ]);
+  });
+
   it('should navigate to a verified restaurant', () => {
     const service = TestBed.inject(SearchService);
 

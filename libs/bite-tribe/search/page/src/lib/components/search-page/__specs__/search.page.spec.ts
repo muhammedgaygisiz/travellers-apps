@@ -55,6 +55,7 @@ describe(SearchPage.name, () => {
         { label: 'search-category-user', value: 'user' },
         { label: 'search-category-bite', value: 'bite' },
         { label: 'search-category-restaurant', value: 'restaurant' },
+        { label: 'search-category-city', value: 'city' },
       ]);
     });
   });

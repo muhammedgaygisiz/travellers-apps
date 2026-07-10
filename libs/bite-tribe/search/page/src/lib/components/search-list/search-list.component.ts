@@ -71,7 +71,7 @@ export class SearchListComponent {
       return result.value.fullName;
     }
 
-    if (result.category === 'bite') {
+    if (result.category === 'bite' || result.category === 'city') {
       return this.getBiteSubtitle(result.value);
     }
 
@@ -89,6 +89,10 @@ export class SearchListComponent {
   getResultFallbackIcon(result: SearchResult): string {
     if (result.category === 'user') {
       return 'person-circle-outline';
+    }
+
+    if (result.category === 'city') {
+      return 'location-outline';
     }
 
     if (result.category === 'bite') {

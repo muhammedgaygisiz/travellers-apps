@@ -50,6 +50,17 @@ export class SearchDataAccessService {
         return result.data.map((value) => ({ category: 'bite', value }));
       }
 
+      if (params.category === 'city') {
+        const result = await FirebaseFunctions.callByName<
+          Omit<SearchParams, 'category'>,
+          SearchBite[]
+        >({
+          name: 'searchBitesByCity',
+          data: { searchText: params.searchText },
+        });
+        return result.data.map((value) => ({ category: 'city', value }));
+      }
+
       const result = await FirebaseFunctions.callByName<
         Omit<SearchParams, 'category'>,
         SearchRestaurant[]

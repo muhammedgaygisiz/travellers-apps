@@ -23,6 +23,7 @@ export { updateUserMetadata } from './functions/update-user-metadata';
 export { loadBitesByLocation } from './functions/load-bites-by-location';
 export { getCurrencyByPosition } from './functions/get-currency-by-position';
 export { clusterRestaurantCandidateForBite } from './functions/cluster-restaurant-candidate-for-bite';
+export { verifyRestaurantCandidate } from './functions/verify-restaurant-candidate';
 export { createUserOnAuthCreate } from './functions/create-user-on-auth-create';
 export { loadLeaderboard } from './functions/load-leaderboard';
 export { sendDailyLeaderboardNotification } from './functions/send-daily-leaderboard-notification';

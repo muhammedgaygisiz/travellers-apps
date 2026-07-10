@@ -148,7 +148,11 @@ describe('NewRestaurantPageComponent', () => {
   describe('onOpeningHoursChange', () => {
     it('should update the openingHours signal', () => {
       const hours: DaySchedule[] = [
-        { day: 'monday', isOpen: true, timeRanges: [{ from: '09:00', to: '17:00' }] },
+        {
+          day: 'monday',
+          isOpen: true,
+          timeRanges: [{ from: '09:00', to: '17:00' }],
+        },
       ];
       component.onOpeningHoursChange(hours);
       expect(component.openingHours()).toEqual(hours);
@@ -234,6 +238,31 @@ describe('NewRestaurantPageComponent', () => {
       );
     });
 
+    it('should emit restaurantCandidateId from input restaurant', () => {
+      const emitSpy = jest.spyOn(component.submitNewRestaurant, 'emit');
+      const position: Geopoint = { latitude: 10, longitude: 20 };
+
+      componentRef.setInput('restaurant', {
+        id: '',
+        restaurantCandidateId: 'candidate-1',
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      component.restaurantFormGroup.controls['image'].setValue(
+        'data:image/png;base64,abc',
+      );
+      component.restaurantFormGroup.controls['name'].setValue('My Restaurant');
+      component.restaurantFormGroup.controls['position'].setValue(position);
+
+      component.saveNewRestaurant();
+
+      expect(emitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          restaurantCandidateId: 'candidate-1',
+        }),
+      );
+    });
+
     it('should emit restaurant with social media links when valid links are added', () => {
       const emitSpy = jest.spyOn(component.submitNewRestaurant, 'emit');
       const position: Geopoint = { latitude: 10, longitude: 20 };
@@ -244,13 +273,18 @@ describe('NewRestaurantPageComponent', () => {
       component.restaurantFormGroup.controls['position'].setValue(position);
 
       component.addSocialMedia();
-      component.links.at(0).patchValue({ network: 'instagram', url: 'https://instagram.com/test' });
+      component.links.at(0).patchValue({
+        network: 'instagram',
+        url: 'https://instagram.com/test',
+      });
 
       component.saveNewRestaurant();
 
       expect(emitSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          socialMediaLinks: [{ network: 'instagram', url: 'https://instagram.com/test' }],
+          socialMediaLinks: [
+            { network: 'instagram', url: 'https://instagram.com/test' },
+          ],
         }),
       );
     });
@@ -281,7 +315,11 @@ describe('NewRestaurantPageComponent', () => {
       component.restaurantFormGroup.controls['position'].setValue(position);
 
       const hours: DaySchedule[] = [
-        { day: 'monday', isOpen: true, timeRanges: [{ from: '09:00', to: '17:00' }] },
+        {
+          day: 'monday',
+          isOpen: true,
+          timeRanges: [{ from: '09:00', to: '17:00' }],
+        },
       ];
       component.onOpeningHoursChange(hours);
 

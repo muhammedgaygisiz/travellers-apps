@@ -72,6 +72,7 @@ export class DashboardService {
       id: '',
       name: candidate.name,
       position: candidate.position,
+      restaurantCandidateId: candidate.id,
       biteIds: candidate.biteIds ?? [],
       bites: candidate.bites,
       unsaved: true,

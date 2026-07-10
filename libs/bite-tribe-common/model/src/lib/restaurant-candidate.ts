@@ -23,6 +23,9 @@ export interface RestaurantCandidate {
   biteIds: string[];
   evidence: RestaurantCandidateEvidence;
   verifiedRestaurantId?: string;
+  verifiedAt?: string;
+  verifiedAtTimestamp?: number;
+  verifiedByUserId?: string;
   mergedIntoCandidateId?: string;
   createdAt?: string;
   createdAtTimestamp?: number;

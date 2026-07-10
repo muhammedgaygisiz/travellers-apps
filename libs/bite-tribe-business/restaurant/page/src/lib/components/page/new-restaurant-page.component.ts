@@ -152,6 +152,7 @@ export class NewRestaurantPageComponent {
         country,
       } = this.restaurantFormGroup.value;
       const biteIds = this.restaurant()?.biteIds || [];
+      const restaurantCandidateId = this.restaurant()?.restaurantCandidateId;
 
       const address: Address = {
         street: street ?? '',
@@ -160,11 +161,15 @@ export class NewRestaurantPageComponent {
         country: country ?? '',
       };
 
-      const socialMediaLinks = this.socialMediaForm.valid && this.links.length > 0
-        ? (this.socialMediaForm.value.links as { network: string; url: string }[]).map(
-            (link): Link => ({ network: link.network, url: link.url }),
-          )
-        : [];
+      const socialMediaLinks =
+        this.socialMediaForm.valid && this.links.length > 0
+          ? (
+              this.socialMediaForm.value.links as {
+                network: string;
+                url: string;
+              }[]
+            ).map((link): Link => ({ network: link.network, url: link.url }))
+          : [];
 
       this.submitNewRestaurant.emit({
         image: image as string,
@@ -172,6 +177,7 @@ export class NewRestaurantPageComponent {
         description: description as string,
         position: position as Geopoint,
         address,
+        restaurantCandidateId,
         biteIds,
         socialMediaLinks,
         openingHours: this.openingHours(),

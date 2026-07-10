@@ -11,12 +11,20 @@ jest.mock('@capacitor-firebase/firestore');
 describe('NewRestaurantService', () => {
   let service: NewRestaurantService;
   let dataAccessMock: jest.Mocked<RestaurantDataAccessService>;
-  let navControllerMock: { navigateForward: jest.Mock; navigateBack: jest.Mock };
+  let navControllerMock: {
+    navigateForward: jest.Mock;
+    navigateBack: jest.Mock;
+  };
 
   beforeEach(() => {
     dataAccessMock = {
       restaurantToCreate: signal(undefined),
       submitNewRestaurant: jest.fn(),
+      verifyRestaurantCandidate: jest.fn().mockResolvedValue({
+        restaurantId: 'restaurant-1',
+        candidateId: 'candidate-1',
+        status: 'created',
+      }),
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
 
     navControllerMock = {
@@ -40,16 +48,35 @@ describe('NewRestaurantService', () => {
   });
 
   describe('submitNewRestaurant', () => {
-    it('should call dataAccess.submitNewRestaurant with the restaurant', () => {
+    it('should call dataAccess.submitNewRestaurant with the restaurant', async () => {
       const restaurant = { id: '1', name: 'Test' } as Restaurant;
-      service.submitNewRestaurant(restaurant);
-      expect(dataAccessMock.submitNewRestaurant).toHaveBeenCalledWith(restaurant);
+      await service.submitNewRestaurant(restaurant);
+      expect(dataAccessMock.submitNewRestaurant).toHaveBeenCalledWith(
+        restaurant,
+      );
     });
 
-    it('should navigate back to dashboard', () => {
+    it('should verify the restaurant candidate instead of using the normal save path', async () => {
+      const restaurant = {
+        id: '',
+        name: 'Test',
+        restaurantCandidateId: 'candidate-1',
+      } as Restaurant;
+
+      await service.submitNewRestaurant(restaurant);
+
+      expect(dataAccessMock.verifyRestaurantCandidate).toHaveBeenCalledWith(
+        restaurant,
+      );
+      expect(dataAccessMock.submitNewRestaurant).not.toHaveBeenCalled();
+    });
+
+    it('should navigate back to dashboard', async () => {
       const restaurant = { id: '1', name: 'Test' } as Restaurant;
-      service.submitNewRestaurant(restaurant);
-      expect(navControllerMock.navigateBack).toHaveBeenCalledWith(['dashboard']);
+      await service.submitNewRestaurant(restaurant);
+      expect(navControllerMock.navigateBack).toHaveBeenCalledWith([
+        'dashboard',
+      ]);
     });
   });
 
@@ -57,7 +84,10 @@ describe('NewRestaurantService', () => {
     it('should navigate forward to bite/:id', () => {
       const bite = { id: 'bite1' } as Bite;
       service.biteClicked(bite);
-      expect(navControllerMock.navigateForward).toHaveBeenCalledWith(['bite', 'bite1']);
+      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        'bite1',
+      ]);
     });
   });
 });

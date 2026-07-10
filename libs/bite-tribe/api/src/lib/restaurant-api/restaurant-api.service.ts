@@ -94,6 +94,10 @@ export class RestaurantApiService {
     });
   }
 
+  saveRestaurantImage(restaurantId: string, image: string): Promise<void> {
+    return this.uploadAndSaveRestaurantImage(restaurantId, image);
+  }
+
   async createMenuForRestaurant(restaurantId: string): Promise<string> {
     const addMenuResult = await FirebaseFirestore.addDocument({
       reference: MENU_COLLECTION,

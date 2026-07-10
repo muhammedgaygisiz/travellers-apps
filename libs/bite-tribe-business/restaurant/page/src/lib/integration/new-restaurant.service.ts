@@ -10,8 +10,12 @@ export class NewRestaurantService {
 
   restaurantToCreate = this.dataAccess.restaurantToCreate;
 
-  submitNewRestaurant(restaurant: Restaurant): void {
-    this.dataAccess.submitNewRestaurant(restaurant);
+  async submitNewRestaurant(restaurant: Restaurant): Promise<void> {
+    if (restaurant.restaurantCandidateId) {
+      await this.dataAccess.verifyRestaurantCandidate(restaurant);
+    } else {
+      this.dataAccess.submitNewRestaurant(restaurant);
+    }
 
     this.navController.navigateBack(['dashboard']);
   }

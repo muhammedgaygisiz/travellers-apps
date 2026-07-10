@@ -175,6 +175,7 @@ describe('DashboardService', () => {
         id: '',
         name: 'Pizza Palace',
         position: { latitude: 46.948, longitude: 7.4474 },
+        restaurantCandidateId: 'candidate-1',
         biteIds: ['bite-1'],
         bites: [{ id: 'bite-1', name: 'Margherita' }],
         unsaved: true,

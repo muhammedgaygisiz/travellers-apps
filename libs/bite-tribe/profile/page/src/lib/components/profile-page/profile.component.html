@@ -50,6 +50,8 @@
           }
           {{ city() }}
         </div>
+
+        <country-flags [countryCodes]="userData?.countryCodes" />
       </div>
 
       @if (!userData?.isOrganisation) {

@@ -6,6 +6,7 @@ import { HttpsError, onCall } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
 import { Bite } from './model/bite';
 import { BiteAddress, Position, reverseGeocode } from './utils/reverse-geocode';
+import { addCountryCodeToUser } from './utils/user-country-codes';
 
 export { extractBiteAddress } from './utils/reverse-geocode';
 export type { BiteAddress } from './utils/reverse-geocode';
@@ -84,6 +85,10 @@ const enrichBiteAddress = async (
     const address = await loadBiteAddress(position);
 
     await biteRef.update(buildBiteAddressUpdate('resolved', address));
+
+    if (bite.userId) {
+      await addCountryCodeToUser(db, bite.userId, address.countryCode);
+    }
 
     logger.info('enrichBiteAddress: resolved bite address', {
       biteId,

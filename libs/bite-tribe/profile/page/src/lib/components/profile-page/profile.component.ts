@@ -23,6 +23,7 @@ import { OverlayEventDetail } from '@ionic/core';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { BiteTrailComponent } from 'bite-trail';
 import { ProfileHeader } from './components/profile-header';
+import { CountryFlags } from './components/country-flags';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const UNFOLLOW = 'unfollow';
@@ -46,6 +47,7 @@ const PAGE_SIZE = 50;
     IonInfiniteScrollContent,
     BiteTrailComponent,
     ProfileHeader,
+    CountryFlags,
     TranslocoPipe,
   ],
 })

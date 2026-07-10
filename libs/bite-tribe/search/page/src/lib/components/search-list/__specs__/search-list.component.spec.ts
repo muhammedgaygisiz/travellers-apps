@@ -154,6 +154,25 @@ describe(SearchListComponent.name, () => {
     expect(component.getResultImage(result)).toBe('bite-image-path');
   });
 
+  it('should describe city results like bites with a location icon', () => {
+    const result: SearchResult = {
+      category: 'city',
+      value: {
+        id: 'bite-2',
+        name: 'Margherita',
+        place: 'Napoli',
+        imagePath: 'bite-image-path',
+        description: 'Classic pizza',
+      },
+    };
+
+    expect(component.getResultId(result)).toBe('city-bite-2');
+    expect(component.getResultTitle(result)).toBe('Margherita');
+    expect(component.getResultSubtitle(result)).toBe('Napoli - Classic pizza');
+    expect(component.getResultFallbackIcon(result)).toBe('location-outline');
+    expect(component.isUnverifiedRestaurant(result)).toBe(false);
+  });
+
   it('should identify unverified restaurant results', () => {
     const result: SearchResult = {
       category: 'restaurant',

@@ -1,6 +1,6 @@
 import type { PublicUser } from './public-user';
 
-export type SearchCategory = 'user' | 'bite' | 'restaurant';
+export type SearchCategory = 'user' | 'bite' | 'restaurant' | 'city';
 
 export interface SearchBite {
   id: string;
@@ -25,4 +25,5 @@ export interface SearchRestaurant {
 export type SearchResult =
   | { category: 'user'; value: PublicUser }
   | { category: 'bite'; value: SearchBite }
-  | { category: 'restaurant'; value: SearchRestaurant };
+  | { category: 'restaurant'; value: SearchRestaurant }
+  | { category: 'city'; value: SearchBite };

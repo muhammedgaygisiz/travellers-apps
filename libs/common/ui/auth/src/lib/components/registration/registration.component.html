@@ -48,7 +48,7 @@
           expand="block"
           [disabled]="!registrationFormGroup.valid"
           (click)="submitRegistration.emit(registrationFormGroup.value)"
-          data-cy="submit"
+          data-testid="submit"
           >{{ 'sign-up' | transloco }}</ion-button
         >
 

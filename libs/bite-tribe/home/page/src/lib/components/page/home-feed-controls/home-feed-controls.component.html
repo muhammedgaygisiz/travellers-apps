@@ -17,7 +17,7 @@
 
   @if (showSearchChip()) {
     <div class="chip-container ion-display-flex ion-flex-wrap">
-      <ion-chip data-cy="search-chip" (click)="gotoSearch.emit()">
+      <ion-chip data-testid="search-chip" (click)="gotoSearch.emit()">
         <ion-icon name="search-outline" />
         <ion-text color="secondary">{{ 'search' | transloco }}</ion-text>
       </ion-chip>

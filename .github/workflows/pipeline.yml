@@ -2,9 +2,9 @@ name: BiteTribe CI
 
 on:
   push:
-    branches: [ develop ]
+    branches: [develop]
   pull_request:
-    branches: [ develop ]
+    branches: [develop]
   workflow_dispatch:
     inputs:
       nx_verbose_logging:
@@ -52,10 +52,10 @@ jobs:
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags
 
-      - name: "Restore Cache"
+      - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
-      - name: "Setup env"
+      - name: 'Setup env'
         uses: ./.github/actions/setup-env-for-affected
 
       - name: Run Linter
@@ -72,10 +72,10 @@ jobs:
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags
 
-      - name: "Restore Cache"
+      - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
-      - name: "Setup env"
+      - name: 'Setup env'
         uses: ./.github/actions/setup-env-for-affected
 
       - name: Run Stylelint
@@ -92,10 +92,10 @@ jobs:
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags
 
-      - name: "Restore Cache"
+      - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
-      - name: "Setup env"
+      - name: 'Setup env'
         uses: ./.github/actions/setup-env-for-affected
 
       - name: Run Unit Tests
@@ -167,6 +167,43 @@ jobs:
   #        name: loki-diffs
   #        path: apps/**/.loki/difference
 
+  e2e:
+    runs-on: ubuntu-latest
+    needs:
+      - tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+
+      - name: 'Restore Cache'
+        uses: ./.github/actions/restore-cache
+
+      # The Firestore emulator requires a JVM.
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # Boots the Firebase emulators + Angular dev server (see
+      # apps/bite-tribe-e2e/playwright.config.ts) and runs the suite.
+      - name: Run E2E Tests
+        run: npm run nx -- e2e bite-tribe-e2e
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: dist/.playwright/apps/bite-tribe-e2e
+          retention-days: 7
+
   # Bite Tribe
 
   bite-tribe-build:
@@ -180,7 +217,7 @@ jobs:
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags
 
-      - name: "Restore Cache"
+      - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
       - name: Build Bite Tribe App
@@ -236,7 +273,7 @@ jobs:
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags
 
-      - name: "Restore Cache"
+      - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
       - name: Build Bite Tribe Business App

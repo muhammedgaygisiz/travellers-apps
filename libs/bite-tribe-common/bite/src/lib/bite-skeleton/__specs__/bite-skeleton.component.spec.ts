@@ -17,7 +17,7 @@ describe('BiteSkeletonComponent', () => {
 
   it('should render a bite shaped loading card', () => {
     expect(
-      fixture.nativeElement.querySelector('[data-cy="bite-loading-card"]'),
+      fixture.nativeElement.querySelector('[data-testid="bite-loading-card"]'),
     ).toBeTruthy();
     expect(
       fixture.nativeElement.querySelectorAll('ion-skeleton-text'),

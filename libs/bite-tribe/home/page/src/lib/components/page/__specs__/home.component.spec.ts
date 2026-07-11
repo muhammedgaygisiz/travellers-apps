@@ -196,7 +196,9 @@ describe('BiteTribeHomeComponent', () => {
       fixture.detectChanges();
       const emitSpy = jest.spyOn(component.gotoSearch, 'emit');
 
-      fixture.nativeElement.querySelector('[data-cy="search-chip"]').click();
+      fixture.nativeElement
+        .querySelector('[data-testid="search-chip"]')
+        .click();
 
       expect(emitSpy).toHaveBeenCalledTimes(1);
     });

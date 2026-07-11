@@ -68,7 +68,7 @@ describe('AppMenuComponent', () => {
 
     jest.spyOn(component.loginClick, 'emit');
     const loginButton = fixture.debugElement.query(
-      By.css('[data-cy="btn-login"]'),
+      By.css('[data-testid="btn-login"]'),
     );
 
     loginButton.triggerEventHandler('click', null);
@@ -82,7 +82,7 @@ describe('AppMenuComponent', () => {
 
     jest.spyOn(component.logoutClick, 'emit');
     const logoutButton = fixture.debugElement.query(
-      By.css('[data-cy="btn-logout"]'),
+      By.css('[data-testid="btn-logout"]'),
     );
     logoutButton.triggerEventHandler('click', null);
     expect(component.logoutClick.emit).toHaveBeenCalled();
@@ -92,10 +92,10 @@ describe('AppMenuComponent', () => {
     componentRef.setInput('hideAuthButton', true);
 
     const loginButton = fixture.debugElement.query(
-      By.css('[data-cy="btn-auth"]'),
+      By.css('[data-testid="btn-auth"]'),
     );
     const logoutButton = fixture.debugElement.query(
-      By.css('[data-cy="btn-logout"]'),
+      By.css('[data-testid="btn-logout"]'),
     );
     expect(loginButton).toBeNull();
     expect(logoutButton).toBeNull();

@@ -592,6 +592,44 @@ describe('BitePage', () => {
       );
     });
 
+    it('should patch the restaurantId when a verified restaurant is selected', () => {
+      fixture.componentRef.setInput('nearbyRestaurants', [
+        {
+          name: 'Verified Restaurant',
+          position: { latitude: 12, longitude: 34 },
+          restaurantId: 'restaurant-123',
+        },
+      ]);
+
+      component.onRestaurantSelected('Verified Restaurant');
+
+      expect(component.biteFormGroup.controls['restaurantId'].value).toBe(
+        'restaurant-123',
+      );
+    });
+
+    it('should clear the restaurantId when an unverified restaurant is selected', () => {
+      component.biteFormGroup.controls['restaurantId'].patchValue('stale-id');
+      fixture.componentRef.setInput('nearbyRestaurants', [
+        {
+          name: 'Unverified Restaurant',
+          position: { latitude: 12, longitude: 34 },
+        },
+      ]);
+
+      component.onRestaurantSelected('Unverified Restaurant');
+
+      expect(component.biteFormGroup.controls['restaurantId'].value).toBe('');
+    });
+
+    it('should clear the restaurantId for a custom fallback selection', () => {
+      component.biteFormGroup.controls['restaurantId'].patchValue('stale-id');
+
+      component.onRestaurantSelected('Some Custom Place');
+
+      expect(component.biteFormGroup.controls['restaurantId'].value).toBe('');
+    });
+
     it('should keep the current position for a custom fallback with no match', () => {
       const currentPosition = { latitude: 1, longitude: 2 };
       component.biteFormGroup.controls['position'].patchValue(currentPosition);
@@ -607,6 +645,29 @@ describe('BitePage', () => {
       expect(component.biteFormGroup.controls['position'].value).toEqual(
         currentPosition,
       );
+    });
+  });
+
+  describe('onGooglePlaceSelected', () => {
+    it('should patch place and position and clear the restaurantId', () => {
+      component.biteFormGroup.controls['restaurantId'].patchValue('stale-id');
+      const place = {
+        placeId: 'place-1',
+        name: 'Google Bistro',
+        address: 'Main Street 1',
+        position: { latitude: 5, longitude: 6 },
+      };
+
+      component.onGooglePlaceSelected(place);
+
+      expect(component.biteFormGroup.controls['place'].value).toBe(
+        'Google Bistro',
+      );
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        place.position,
+      );
+      expect(component.biteFormGroup.controls['restaurantId'].value).toBe('');
+      expect(component.isRestaurantModalOpen()).toBe(false);
     });
   });
 

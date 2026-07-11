@@ -431,9 +431,11 @@ export class BitePage {
 
     // Mirror the Google place selection: patch the position of the selected
     // restaurant when we know it. The custom `Use: "abc"` fallback has no match,
-    // so it keeps the current form position.
+    // so it keeps the current form position. Only verified restaurants carry a
+    // restaurantId; unverified/local and fallback picks clear it.
     this.biteFormGroup.patchValue({
       place: restaurantName,
+      restaurantId: selectedRestaurant?.restaurantId ?? '',
       ...(selectedRestaurant?.position
         ? { position: selectedRestaurant.position }
         : {}),
@@ -445,6 +447,7 @@ export class BitePage {
     this.biteFormGroup.patchValue({
       place: place.name,
       position: place.position,
+      restaurantId: '',
     });
     this.googlePosition.set(place.position);
     this.isRestaurantModalOpen.set(false);

@@ -181,12 +181,12 @@ jobs:
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
-      # The Firestore emulator requires a JVM.
+      # The Firebase emulators require a JVM; firebase-tools needs JDK 21+.
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

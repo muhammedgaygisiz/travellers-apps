@@ -10,7 +10,8 @@
       "executor": "@nx/playwright:playwright",
       "outputs": ["{workspaceRoot}/dist/.playwright/apps/bite-tribe-e2e"],
       "options": {
-        "config": "apps/bite-tribe-e2e/playwright.config.ts"
+        "config": "apps/bite-tribe-e2e/playwright.config.ts",
+        "skipInstall": true
       },
       "dependsOn": ["bite-tribe-firebase:firebase-build"]
     },

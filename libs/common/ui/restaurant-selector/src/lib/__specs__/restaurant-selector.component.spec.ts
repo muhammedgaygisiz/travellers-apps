@@ -135,6 +135,55 @@ describe('RestaurantSelectorComponent', () => {
     expect(component.formatDistance('not-a-number')).toBe('');
   });
 
+  it('should sort Google Maps results nearest first', () => {
+    fixture.componentRef.setInput('googlePlaces', [
+      {
+        placeId: 'place-far',
+        name: 'Far Sushi',
+        address: 'Far Street 1',
+        position: { latitude: 1, longitude: 2 },
+        distance: '3.2',
+      },
+      {
+        placeId: 'place-near',
+        name: 'Near Sushi',
+        address: 'Near Street 1',
+        position: { latitude: 1, longitude: 2 },
+        distance: '0.4',
+      },
+    ]);
+    fixture.detectChanges();
+
+    expect(component.sortedGooglePlaces().map((place) => place.name)).toEqual([
+      'Near Sushi',
+      'Far Sushi',
+    ]);
+  });
+
+  it('should sort nearby Google places nearest first', () => {
+    fixture.componentRef.setInput('nearbyGooglePlaces', [
+      {
+        placeId: 'place-mid',
+        name: 'Mid Bistro',
+        address: 'Mid Street 1',
+        position: { latitude: 1, longitude: 2 },
+        distance: '1.5',
+      },
+      {
+        placeId: 'place-near',
+        name: 'Near Bistro',
+        address: 'Near Street 1',
+        position: { latitude: 1, longitude: 2 },
+        distance: '0.2',
+      },
+    ]);
+    fixture.detectChanges();
+
+    expect(
+      component.sortedNearbyGooglePlaces().map((place) => place.name),
+    ).toEqual(['Near Bistro', 'Mid Bistro']);
+  });
+
   it('should emit searchInGoogleMaps and remember the searched term', () => {
     const emitSpy = jest.spyOn(component.searchInGoogleMaps, 'emit');
     component.rawSearchTerm.set('sushi corner');

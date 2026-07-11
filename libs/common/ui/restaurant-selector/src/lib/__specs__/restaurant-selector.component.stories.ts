@@ -56,12 +56,14 @@ const googlePlaces = [
     name: 'Sushi Corner',
     address: 'Hauptstraße 12, 10827 Berlin, Germany',
     position: { latitude: 52.49, longitude: 13.35 },
+    distance: '0.4',
   },
   {
     placeId: 'place-2',
     name: 'Sushi Palace',
     address: 'Kantstraße 45, 10625 Berlin, Germany',
     position: { latitude: 52.5, longitude: 13.32 },
+    distance: '1.8',
   },
 ];
 

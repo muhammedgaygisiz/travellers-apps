@@ -32,6 +32,7 @@ export interface GooglePlaceOption {
   name: string;
   address: string;
   position: { latitude: number; longitude: number };
+  distance?: string;
 }
 
 /**
@@ -161,6 +162,18 @@ export class RestaurantSelectorComponent {
       (this.nearbyGooglePlacesLoading() ||
         this.nearbyGooglePlaces().length > 0),
   );
+
+  sortedGooglePlaces = computed(() => this.sortByDistance(this.googlePlaces()));
+
+  sortedNearbyGooglePlaces = computed(() =>
+    this.sortByDistance(this.nearbyGooglePlaces()),
+  );
+
+  private sortByDistance<T extends { distance?: string }>(items: T[]): T[] {
+    return [...items].sort(
+      (a, b) => this.toDistance(a.distance) - this.toDistance(b.distance),
+    );
+  }
 
   private toDistance(distance?: string): number {
     const parsed = distance ? parseFloat(distance) : NaN;

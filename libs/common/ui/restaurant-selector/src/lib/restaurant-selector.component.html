@@ -55,12 +55,15 @@
         <ion-list-header>
           <ion-label>Nearby on Google Maps</ion-label>
         </ion-list-header>
-        @for (place of nearbyGooglePlaces(); track place.placeId) {
+        @for (place of sortedNearbyGooglePlaces(); track place.placeId) {
           <ion-item [detail]="false" (click)="selectGooglePlace(place)">
             <ion-icon slot="start" name="location-outline" />
             <ion-label>
               <h2>{{ place.name }}</h2>
               <p>{{ place.address }}</p>
+              @if (formatDistance(place.distance)) {
+                <p>{{ formatDistance(place.distance) }}</p>
+              }
             </ion-label>
           </ion-item>
         }
@@ -91,12 +94,15 @@
         <ion-list-header>
           <ion-label>Google Maps results</ion-label>
         </ion-list-header>
-        @for (place of googlePlaces(); track place.placeId) {
+        @for (place of sortedGooglePlaces(); track place.placeId) {
           <ion-item [detail]="false" (click)="selectGooglePlace(place)">
             <ion-icon slot="start" name="location-outline" />
             <ion-label>
               <h2>{{ place.name }}</h2>
               <p>{{ place.address }}</p>
+              @if (formatDistance(place.distance)) {
+                <p>{{ formatDistance(place.distance) }}</p>
+              }
             </ion-label>
           </ion-item>
         } @empty {

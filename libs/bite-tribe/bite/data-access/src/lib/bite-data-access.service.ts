@@ -17,6 +17,7 @@ import type {
   UploadParams,
 } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { withGooglePlaceDistance } from './utils/with-google-place-distance';
 
 const MIN_GOOGLE_PLACE_SEARCH_TEXT_LENGTH = 3;
 
@@ -71,7 +72,10 @@ export class BiteDataAccessService {
         return [];
       }
 
-      return this.api.searchPlaces(searchText, this.position());
+      const position = this.position();
+      const places = await this.api.searchPlaces(searchText, position);
+
+      return withGooglePlaceDistance(places, position);
     },
     defaultValue: [],
   });
@@ -96,7 +100,9 @@ export class BiteDataAccessService {
         return [];
       }
 
-      return this.api.searchNearbyPlaces(params);
+      const places = await this.api.searchNearbyPlaces(params);
+
+      return withGooglePlaceDistance(places, params);
     },
     defaultValue: [],
   });

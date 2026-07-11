@@ -60,6 +60,21 @@ describe(DashboardComponent.name, () => {
     expect(textContent).toContain('46.948, 7.4474');
   });
 
+  it('should render candidates that lack evidence, names and position', () => {
+    const sparseCandidate = {
+      id: 'candidate-2',
+      name: 'Nameless Spot',
+      bites: [{ id: 'bite-3', name: '', place: '' }],
+    } as DashboardRestaurantCandidate;
+
+    compRef.setInput('restaurantCandidates', [sparseCandidate]);
+    fixture.detectChanges();
+
+    expect(component.candidateEvidenceCount(sparseCandidate)).toBe(0);
+    expect(component.candidateBiteEvidence(sparseCandidate)).toBe('');
+    expect(component.candidateLocation(sparseCandidate)).toBe('');
+  });
+
   it('should emit the selected candidate', () => {
     const candidate = {
       id: 'candidate-1',

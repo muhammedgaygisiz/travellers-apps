@@ -604,6 +604,45 @@ describe('MapComponent', () => {
       );
       expect(fitMapToMarkersMock).toHaveBeenCalled();
     });
+
+    it('should not move the camera when geopoints change after the first fit', () => {
+      // First data load fits the camera once.
+      componentRef.setInput('geopoints', [mockGeopoint]);
+      fixture.detectChanges();
+      jest.runAllTimers();
+
+      zoomToGeopointMock.mockClear();
+      fitMapToMarkersMock.mockClear();
+
+      // A new bite arriving must update markers without touching the camera.
+      componentRef.setInput('geopoints', mockMultipleGeopoints);
+      fixture.detectChanges();
+      jest.runAllTimers();
+
+      expect(geopointsToMarkersMock).toHaveBeenCalled();
+      expect(zoomToGeopointMock).not.toHaveBeenCalled();
+      expect(fitMapToMarkersMock).not.toHaveBeenCalled();
+    });
+
+    it('should fit the camera again after geopoints are cleared and repopulated', () => {
+      componentRef.setInput('geopoints', [mockGeopoint]);
+      fixture.detectChanges();
+      jest.runAllTimers();
+
+      // Clearing resets the one-time fit guard.
+      componentRef.setInput('geopoints', []);
+      fixture.detectChanges();
+
+      zoomToGeopointMock.mockClear();
+
+      componentRef.setInput('geopoints', [mockGeopoint]);
+      fixture.detectChanges();
+
+      expect(zoomToGeopointMock).toHaveBeenCalledWith(
+        mockGeopoint,
+        expect.any(Object),
+      );
+    });
   });
 
   describe('ngOnDestroy', () => {

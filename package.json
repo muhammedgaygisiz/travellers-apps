@@ -12,6 +12,8 @@
     "loki": "nx loki",
     "start": "nx serve",
     "development": "nx firebase-serve bite-tribe-firebase & nx serve bite-tribe",
+    "e2e": "nx e2e bite-tribe-e2e",
+    "e2e:install": "playwright install chromium",
     "build": "nx build",
     "increment-build-number": "node tools/increment-build-number.mjs",
     "generate-changelog": "node tools/generate-changelog.mjs",

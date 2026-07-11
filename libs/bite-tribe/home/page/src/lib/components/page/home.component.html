@@ -23,7 +23,7 @@
   @if (showSearch()) {
     <ion-buttons header-end slot="end">
       <ion-button
-        data-cy="btn-search"
+        data-testid="btn-search"
         (click)="toggleSearch()"
         [attr.aria-pressed]="isSearchVisible()"
       >
@@ -86,7 +86,7 @@
 
       @if (isSearchVisible()) {
         <ion-searchbar
-          data-cy="search-input"
+          data-testid="search-input"
           placeholder="Search ..."
           [value]="searchTerm()"
           (ionInput)="onSearchInput($event)"

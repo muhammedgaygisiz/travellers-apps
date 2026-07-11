@@ -1,4 +1,4 @@
-<ion-list lines="none" data-cy="menu-list">
+<ion-list lines="none" data-testid="menu-list">
   <ion-item-group>
     <ion-item>
       <ion-icon name="construct" slot="start"></ion-icon>
@@ -9,7 +9,7 @@
   @if (!hideAuthButton()) {
     @if (!isAuthenticated()) {
       <ion-item
-        data-cy="btn-login"
+        data-testid="btn-login"
         [button]="true"
         [detail]="false"
         (click)="loginClick.emit()"
@@ -73,7 +73,7 @@
         </ion-item>
       }
       <ion-item
-        data-cy="btn-logout"
+        data-testid="btn-logout"
         [button]="true"
         [detail]="false"
         (click)="logoutClick.emit()"

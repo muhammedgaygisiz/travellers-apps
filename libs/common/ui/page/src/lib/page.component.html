@@ -22,7 +22,7 @@
 
       @if (chromeConfig().showHeaderMenu) {
         <ion-buttons slot="end">
-          <ion-button data-cy="btn-menu" (click)="showMenuPopover($event)">
+          <ion-button data-testid="btn-menu" (click)="showMenuPopover($event)">
             <ion-icon slot="icon-only" name="menu-outline" />
           </ion-button>
         </ion-buttons>
@@ -52,6 +52,7 @@
               class="button"
               expand="block"
               (click)="addButtonClick.emit($event)"
+              data-testid="footer-add-button"
             >
               {{ addButtonText() ?? ('create-bite' | transloco) }}
             </ion-button>

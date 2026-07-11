@@ -1,19 +1,19 @@
 @if (isLoading()) {
   <div
     class="ion-display-flex ion-justify-content-center state-container"
-    data-cy="search-loading"
+    data-testid="search-loading"
   >
     <ion-spinner color="primary" />
   </div>
 } @else if (hasSearched() && results().length === 0) {
   <div
     class="ion-display-flex ion-justify-content-center state-container empty-container"
-    data-cy="search-empty"
+    data-testid="search-empty"
   >
     <ion-label>{{ 'no-search-results-found' | transloco }}</ion-label>
   </div>
 } @else if (results().length > 0) {
-  <ion-list data-cy="search-results">
+  <ion-list data-testid="search-results">
     @for (result of sortedResults(); track getResultId(result)) {
       <ion-item
         [button]="true"

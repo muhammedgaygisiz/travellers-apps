@@ -276,10 +276,10 @@ describe('RestaurantComponent', () => {
 
       const nativeEl = fixture.nativeElement as HTMLElement;
       expect(
-        nativeEl.querySelector('[data-cy="restaurant-description-empty"]'),
+        nativeEl.querySelector('[data-testid="restaurant-description-empty"]'),
       ).toBeTruthy();
       expect(
-        nativeEl.querySelector('[data-cy="restaurant-social-links-empty"]'),
+        nativeEl.querySelector('[data-testid="restaurant-social-links-empty"]'),
       ).toBeTruthy();
     });
 
@@ -300,10 +300,10 @@ describe('RestaurantComponent', () => {
       expect(text).toContain('Fresh seasonal dishes.');
       expect(text).toContain('Instagram');
       expect(
-        nativeEl.querySelector('[data-cy="restaurant-description-empty"]'),
+        nativeEl.querySelector('[data-testid="restaurant-description-empty"]'),
       ).toBeNull();
       expect(
-        nativeEl.querySelector('[data-cy="restaurant-social-links-empty"]'),
+        nativeEl.querySelector('[data-testid="restaurant-social-links-empty"]'),
       ).toBeNull();
     });
   });

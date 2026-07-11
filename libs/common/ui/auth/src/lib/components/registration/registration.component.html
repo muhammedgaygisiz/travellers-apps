@@ -19,6 +19,7 @@
           class="ion-margin-top"
           autocomplete="email"
           inputmode="email"
+          data-testid="email"
         />
 
         <ion-input
@@ -28,6 +29,7 @@
           fill="outline"
           mode="md"
           class="ion-margin-top"
+          data-testid="password"
         >
           <ion-input-password-toggle slot="end" />
         </ion-input>
@@ -39,6 +41,7 @@
           fill="outline"
           mode="md"
           class="ion-margin-top"
+          data-testid="password-confirm"
         >
           <ion-input-password-toggle slot="end" />
         </ion-input>
@@ -48,7 +51,7 @@
           expand="block"
           [disabled]="!registrationFormGroup.valid"
           (click)="submitRegistration.emit(registrationFormGroup.value)"
-          data-cy="submit"
+          data-testid="submit"
           >{{ 'sign-up' | transloco }}</ion-button
         >
 

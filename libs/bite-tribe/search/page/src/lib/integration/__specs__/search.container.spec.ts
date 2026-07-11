@@ -98,7 +98,7 @@ describe(SearchContainer.name, () => {
 
   it('should not show the empty state before a search', () => {
     expect(
-      fixture.nativeElement.querySelector('[data-cy="search-empty"]'),
+      fixture.nativeElement.querySelector('[data-testid="search-empty"]'),
     ).toBeNull();
   });
 
@@ -107,7 +107,7 @@ describe(SearchContainer.name, () => {
     fixture.detectChanges();
 
     expect(
-      fixture.nativeElement.querySelector('[data-cy="search-loading"]'),
+      fixture.nativeElement.querySelector('[data-testid="search-loading"]'),
     ).toBeTruthy();
   });
 
@@ -116,7 +116,7 @@ describe(SearchContainer.name, () => {
     fixture.detectChanges();
 
     expect(
-      fixture.nativeElement.querySelector('[data-cy="search-empty"]'),
+      fixture.nativeElement.querySelector('[data-testid="search-empty"]'),
     ).toBeTruthy();
   });
 

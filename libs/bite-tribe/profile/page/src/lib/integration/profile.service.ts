@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
+import type { PageMenuTarget } from 'common/ui/page';
 import type { Bite, LikeClick, PublicUser } from 'model';
 import { PATH } from 'utils';
 import { Location } from '@angular/common';
@@ -44,6 +45,23 @@ export class ProfileService {
 
   gotoMyProfileClicked(): void {
     this.navController.navigateForward(['my-profile']);
+  }
+
+  onMenuNavigate(target: PageMenuTarget): void {
+    switch (target) {
+      case 'settings':
+        this.gotoSettings();
+        break;
+      case 'profile':
+        this.gotoMyProfileClicked();
+        break;
+      case 'my-bites':
+        this.gotoMyBites();
+        break;
+      case 'my-bucketlists':
+        this.gotoMyBucketlists();
+        break;
+    }
   }
 
   likeButtonClicked(likeClick: LikeClick): void {

@@ -82,14 +82,7 @@ export class BiteTribeHomeComponent {
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
-  readonly gotoSettings = output();
-  readonly gotoMyProfile = output();
-  readonly gotoMyBites = output();
-  readonly gotoAbout = output();
-  readonly gotoMarketPlace = output();
-  readonly gotoGallery = output();
-  readonly gotoLeaderboard = output();
-  readonly gotoMyBucketlists = output();
+  readonly menuNavigate = output<PageMenuTarget>();
   readonly gotoSearch = output();
   readonly likeButtonClick = output<LikeClick>();
   readonly biteClick = output<Bite>();
@@ -161,35 +154,6 @@ export class BiteTribeHomeComponent {
     const bites = this.bites();
     return bites && bites?.length > 5;
   });
-
-  onMenuNavigate(target: PageMenuTarget): void {
-    switch (target) {
-      case 'settings':
-        this.gotoSettings.emit();
-        break;
-      case 'profile':
-        this.gotoMyProfile.emit();
-        break;
-      case 'my-bites':
-        this.gotoMyBites.emit();
-        break;
-      case 'my-bucketlists':
-        this.gotoMyBucketlists.emit();
-        break;
-      case 'about':
-        this.gotoAbout.emit();
-        break;
-      case 'market-place':
-        this.gotoMarketPlace.emit();
-        break;
-      case 'gallery':
-        this.gotoGallery.emit();
-        break;
-      case 'leaderboard':
-        this.gotoLeaderboard.emit();
-        break;
-    }
-  }
 
   scrollToTop(): void {
     const ionContent = this.ionContent();

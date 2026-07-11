@@ -18,7 +18,7 @@
   [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
-  (menuNavigate)="onMenuNavigate($event)"
+  (menuNavigate)="menuNavigate.emit($event)"
 >
   @if (showSearch()) {
     <ion-buttons header-end slot="end">

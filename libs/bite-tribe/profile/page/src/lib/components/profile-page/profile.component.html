@@ -10,7 +10,7 @@
   }"
   [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
-  (menuNavigate)="onMenuNavigate($event)"
+  (menuNavigate)="menuNavigate.emit($event)"
 >
   <ion-content class="ion-padding">
     <profile-header

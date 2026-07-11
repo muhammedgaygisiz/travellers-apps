@@ -78,10 +78,7 @@ export class ProfileComponent {
   biteTrails = input<BiteTrail[]>();
 
   readonly logoutClick = output();
-  readonly gotoSettings = output();
-  readonly gotoMyBucketlists = output();
-  readonly gotoMyBites = output();
-  readonly gotoMyProfile = output();
+  readonly menuNavigate = output<PageMenuTarget>();
   readonly gotoEditProfile = output();
 
   readonly biteClick = output<Bite>();
@@ -90,23 +87,6 @@ export class ProfileComponent {
   readonly unfollowButtonClick = output<PublicUser>();
   readonly followersClick = output<string>();
   readonly followingClick = output<string>();
-
-  onMenuNavigate(target: PageMenuTarget): void {
-    switch (target) {
-      case 'settings':
-        this.gotoSettings.emit();
-        break;
-      case 'profile':
-        this.gotoMyProfile.emit();
-        break;
-      case 'my-bites':
-        this.gotoMyBites.emit();
-        break;
-      case 'my-bucketlists':
-        this.gotoMyBucketlists.emit();
-        break;
-    }
-  }
 
   isOpen = signal(false);
   currentPage = signal<number>(1);

@@ -51,24 +51,12 @@ export class DashboardComponent {
   gpsPosition = input<Geopoint | null | undefined>();
 
   readonly logoutClick = output();
-  readonly gotoSettings = output();
-  readonly gotoMigrations = output();
+  readonly menuNavigate = output<PageMenuTarget>();
 
   readonly restaurantClick = output<Restaurant>();
   readonly restaurantCandidateClick = output<DashboardRestaurantCandidate>();
   readonly organisationClick = output<PublicUser>();
   readonly placeClick = output<string>();
-
-  onMenuNavigate(target: PageMenuTarget): void {
-    switch (target) {
-      case 'settings':
-        this.gotoSettings.emit();
-        break;
-      case 'migrations':
-        this.gotoMigrations.emit();
-        break;
-    }
-  }
 
   candidateEvidenceCount(candidate: DashboardRestaurantCandidate): number {
     return candidate.evidence?.biteCount ?? candidate.biteIds?.length ?? 0;

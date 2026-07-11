@@ -13,11 +13,16 @@
   <ion-searchbar
     (ionInput)="searchbarInput($event)"
     [placeholder]="'restaurant-selector-search-placeholder' | transloco"
+    data-testid="restaurant-search"
   />
 
   <ion-list [inset]="true">
     @if (showCustomOption()) {
-      <ion-item [detail]="false" (click)="selectCustomRestaurant()">
+      <ion-item
+        [detail]="false"
+        (click)="selectCustomRestaurant()"
+        data-testid="restaurant-custom-option"
+      >
         <ion-label>
           <h2>
             {{

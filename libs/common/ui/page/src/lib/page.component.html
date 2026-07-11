@@ -52,6 +52,7 @@
               class="button"
               expand="block"
               (click)="addButtonClick.emit($event)"
+              data-testid="footer-add-button"
             >
               {{ addButtonText() ?? ('create-bite' | transloco) }}
             </ion-button>

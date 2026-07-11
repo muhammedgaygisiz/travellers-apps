@@ -22,6 +22,11 @@ export default defineConfig({
   use: {
     baseURL,
     trace: 'on-first-retry',
+    // The app resolves the current position via the browser Geolocation API
+    // (@capacitor/geolocation on web). Grant it and pin a fixed location so the
+    // "from GPS" flow is deterministic. Roughly central Munich.
+    permissions: ['geolocation'],
+    geolocation: { latitude: 48.137154, longitude: 11.576124 },
   },
   webServer: [
     {

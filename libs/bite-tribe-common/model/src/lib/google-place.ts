@@ -5,4 +5,5 @@ export interface GooglePlace {
   name: string;
   address: string;
   position: Geopoint;
+  distance?: string;
 }

@@ -22,9 +22,12 @@ import type { Geopoint } from 'model';
       [networkStatus]="service.networkStatus()"
       [googlePlaces]="service.googlePlaces()"
       [googlePlacesLoading]="service.googlePlacesLoading()"
+      [nearbyGooglePlaces]="service.nearbyGooglePlaces()"
+      [nearbyGooglePlacesLoading]="service.nearbyGooglePlacesLoading()"
       (submitBite)="service.submitNewBite($event)"
       (placeChange)="onPlaceChange($event)"
       (searchGooglePlaces)="service.searchGooglePlaces($event)"
+      (requestNearbyGooglePlaces)="service.loadNearbyGooglePlaces($event)"
       (positionChange)="onPositionChange($event)"
     />
   `,

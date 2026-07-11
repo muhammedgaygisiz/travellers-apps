@@ -21,6 +21,14 @@ export default {
       imports: [RestaurantSelectorComponent, IonApp],
     }),
   ],
+  args: {
+    restaurants: [],
+    selectedRestaurant: '',
+    googlePlaces: [],
+    googlePlacesLoading: false,
+    nearbyGooglePlaces: [],
+    nearbyGooglePlacesLoading: false,
+  },
   render: (args) => ({
     props: args,
     template: `
@@ -31,6 +39,8 @@ export default {
             [selectedRestaurant]="selectedRestaurant"
             [googlePlaces]="googlePlaces"
             [googlePlacesLoading]="googlePlacesLoading"
+            [nearbyGooglePlaces]="nearbyGooglePlaces"
+            [nearbyGooglePlacesLoading]="nearbyGooglePlacesLoading"
           />
         </div>
       </ion-app>
@@ -46,18 +56,24 @@ const googlePlaces = [
     name: 'Sushi Corner',
     address: 'Hauptstraße 12, 10827 Berlin, Germany',
     position: { latitude: 52.49, longitude: 13.35 },
+    distance: '0.4',
   },
   {
     placeId: 'place-2',
     name: 'Sushi Palace',
     address: 'Kantstraße 45, 10625 Berlin, Germany',
     position: { latitude: 52.5, longitude: 13.32 },
+    distance: '1.8',
   },
 ];
 
 export const Default: Story = {
   args: {
-    restaurants: ['Pizza Place', 'Burger Joint', 'Sushi Bar'],
+    restaurants: [
+      { name: 'Burger Joint', distance: '2.1' },
+      { name: 'Pizza Place', distance: '0.4' },
+      { name: 'Sushi Bar', distance: '1.3' },
+    ],
     selectedRestaurant: '',
     googlePlaces: [],
     googlePlacesLoading: false,
@@ -79,5 +95,27 @@ export const GoogleSearchLoading: Story = {
     selectedRestaurant: '',
     googlePlaces: [],
     googlePlacesLoading: true,
+  },
+};
+
+export const NearbyGooglePlaces: Story = {
+  args: {
+    restaurants: [],
+    selectedRestaurant: '',
+    googlePlaces: [],
+    googlePlacesLoading: false,
+    nearbyGooglePlaces: googlePlaces,
+    nearbyGooglePlacesLoading: false,
+  },
+};
+
+export const NearbyGooglePlacesLoading: Story = {
+  args: {
+    restaurants: [],
+    selectedRestaurant: '',
+    googlePlaces: [],
+    googlePlacesLoading: false,
+    nearbyGooglePlaces: [],
+    nearbyGooglePlacesLoading: true,
   },
 };

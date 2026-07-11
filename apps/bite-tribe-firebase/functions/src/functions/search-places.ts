@@ -5,10 +5,15 @@ import { onAppCheck } from './callable-options';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
+const MAX_NEARBY_RESULTS = 5;
 const LOCATION_BIAS_RADIUS_METERS = 20000;
+const NEARBY_SEARCH_RADIUS_METERS = 20000;
+const NEARBY_INCLUDED_TYPES = ['restaurant'];
 const GOOGLE_GEOCODING_API_KEY_ENV = 'GOOGLE_GEOCODING_API_KEY';
 const GOOGLE_PLACES_TEXT_SEARCH_URL =
   'https://places.googleapis.com/v1/places:searchText';
+const GOOGLE_PLACES_NEARBY_SEARCH_URL =
+  'https://places.googleapis.com/v1/places:searchNearby';
 const GOOGLE_PLACES_FIELD_MASK =
   'places.id,places.displayName,places.formattedAddress,places.location';
 
@@ -62,7 +67,10 @@ export const parsePosition = (value: unknown): Position | undefined => {
   return undefined;
 };
 
-export const toGooglePlaces = (response: GooglePlacesResponse): GooglePlace[] =>
+export const toGooglePlaces = (
+  response: GooglePlacesResponse,
+  limit: number = MAX_RESULTS,
+): GooglePlace[] =>
   (response.places ?? [])
     .map((place): GooglePlace | undefined => {
       const position = parsePosition(place.location);
@@ -80,7 +88,7 @@ export const toGooglePlaces = (response: GooglePlacesResponse): GooglePlace[] =>
       };
     })
     .filter((place): place is GooglePlace => place !== undefined)
-    .slice(0, MAX_RESULTS);
+    .slice(0, limit);
 
 export const buildRequestBody = (
   searchText: string,
@@ -98,6 +106,20 @@ export const buildRequestBody = (
         },
       }
     : {}),
+});
+
+export const buildNearbyRequestBody = (
+  position: Position,
+): Record<string, unknown> => ({
+  includedTypes: NEARBY_INCLUDED_TYPES,
+  maxResultCount: MAX_NEARBY_RESULTS,
+  rankPreference: 'DISTANCE',
+  locationRestriction: {
+    circle: {
+      center: position,
+      radius: NEARBY_SEARCH_RADIUS_METERS,
+    },
+  },
 });
 
 const loadGooglePlaces = async (
@@ -122,6 +144,29 @@ const loadGooglePlaces = async (
   const data = (await response.json()) as GooglePlacesResponse;
 
   return toGooglePlaces(data);
+};
+
+const loadNearbyGooglePlaces = async (
+  position: Position,
+  apiKey: string,
+): Promise<GooglePlace[]> => {
+  const response = await fetch(GOOGLE_PLACES_NEARBY_SEARCH_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask': GOOGLE_PLACES_FIELD_MASK,
+    },
+    body: JSON.stringify(buildNearbyRequestBody(position)),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Google Places Nearby Search HTTP ${response.status}`);
+  }
+
+  const data = (await response.json()) as GooglePlacesResponse;
+
+  return toGooglePlaces(data, MAX_NEARBY_RESULTS);
 };
 
 export const searchPlaces = onAppCheck<SearchPlacesRequest>(
@@ -158,6 +203,49 @@ export const searchPlaces = onAppCheck<SearchPlacesRequest>(
       return await loadGooglePlaces(searchText, position, apiKey);
     } catch (error) {
       logger.warn('searchPlaces: failed to load places from Google', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      return [];
+    }
+  },
+);
+
+interface SearchNearbyPlacesRequest {
+  position?: unknown;
+}
+
+export const searchNearbyPlaces = onAppCheck<SearchNearbyPlacesRequest>(
+  {
+    secrets: [googleMapsApiKey],
+  },
+  async (request): Promise<GooglePlace[]> => {
+    if (!request.auth) {
+      throw new HttpsError(
+        'unauthenticated',
+        'You must be signed in to search for places.',
+      );
+    }
+
+    const position = parsePosition(request.data.position);
+
+    if (!position) {
+      throw new HttpsError(
+        'invalid-argument',
+        'position with valid coordinates is required.',
+      );
+    }
+
+    const apiKey = googleMapsApiKey.value();
+
+    if (!apiKey) {
+      throw new Error(`${GOOGLE_GEOCODING_API_KEY_ENV} is not configured.`);
+    }
+
+    try {
+      return await loadNearbyGooglePlaces(position, apiKey);
+    } catch (error) {
+      logger.warn('searchNearbyPlaces: failed to load places from Google', {
         error: error instanceof Error ? error.message : String(error),
       });
 

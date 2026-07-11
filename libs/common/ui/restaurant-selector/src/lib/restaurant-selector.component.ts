@@ -22,6 +22,7 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { getSimilarityScore, normalize } from 'utils';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 /**
  * View model for a place returned from an external maps provider.
@@ -32,6 +33,19 @@ export interface GooglePlaceOption {
   name: string;
   address: string;
   position: { latitude: number; longitude: number };
+  distance?: string;
+}
+
+/**
+ * View model for a local restaurant row. Kept local so this common UI component
+ * stays independent of app models; callers pass their own structurally-compatible
+ * type. `distance` is a raw km value as a string; `undefined` sorts last.
+ */
+export interface RestaurantOption {
+  name: string;
+  distance?: string;
+  position?: { latitude: number; longitude: number };
+  restaurantId?: string;
 }
 
 @Component({
@@ -52,14 +66,17 @@ export interface GooglePlaceOption {
     IonSpinner,
     IonTitle,
     IonToolbar,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RestaurantSelectorComponent {
-  restaurants = input<string[]>([]);
+  restaurants = input<RestaurantOption[]>([]);
   selectedRestaurant = input<string>('');
   googlePlaces = input<GooglePlaceOption[]>([]);
   googlePlacesLoading = input<boolean>(false);
+  nearbyGooglePlaces = input<GooglePlaceOption[]>([]);
+  nearbyGooglePlacesLoading = input<boolean>(false);
 
   restaurantSelected = output<string>();
   selectionCancel = output<void>();
@@ -74,7 +91,10 @@ export class RestaurantSelectorComponent {
     const restaurants = this.restaurants();
 
     if (!searchTerm) {
-      return restaurants;
+      // Default view: nearest first.
+      return [...restaurants].sort(
+        (a, b) => this.toDistance(a.distance) - this.toDistance(b.distance),
+      );
     }
 
     const normalizedSearchTerm = normalize(searchTerm);
@@ -83,7 +103,7 @@ export class RestaurantSelectorComponent {
       .map((restaurant) => {
         const nameMatches = getSimilarityScore(
           normalizedSearchTerm,
-          normalize(restaurant),
+          normalize(restaurant.name),
         );
 
         const score = nameMatches.length > 0 ? nameMatches[0].score : 0;
@@ -111,7 +131,7 @@ export class RestaurantSelectorComponent {
 
     // Check if there's an exact match (normalized)
     const hasExactMatch = filteredRestaurants.some(
-      (restaurant) => normalize(restaurant) === normalizedSearchTerm,
+      (restaurant) => normalize(restaurant.name) === normalizedSearchTerm,
     );
 
     return !hasExactMatch && searchTerm.length > 0;
@@ -134,6 +154,38 @@ export class RestaurantSelectorComponent {
       this.googleSearchTerm().length > 0 &&
       this.googleSearchTerm() === this.rawSearchTerm(),
   );
+
+  // Show nearby Google suggestions in the default view (before typing) when
+  // they are loading or available. The host only provides these when there are
+  // no local restaurants, so this stays a fallback for empty local results.
+  showNearbyGooglePlaces = computed(
+    () =>
+      this.rawSearchTerm().length === 0 &&
+      (this.nearbyGooglePlacesLoading() ||
+        this.nearbyGooglePlaces().length > 0),
+  );
+
+  sortedGooglePlaces = computed(() => this.sortByDistance(this.googlePlaces()));
+
+  sortedNearbyGooglePlaces = computed(() =>
+    this.sortByDistance(this.nearbyGooglePlaces()),
+  );
+
+  private sortByDistance<T extends { distance?: string }>(items: T[]): T[] {
+    return [...items].sort(
+      (a, b) => this.toDistance(a.distance) - this.toDistance(b.distance),
+    );
+  }
+
+  private toDistance(distance?: string): number {
+    const parsed = distance ? parseFloat(distance) : NaN;
+    return Number.isNaN(parsed) ? Infinity : parsed;
+  }
+
+  formatDistance(distance?: string): string {
+    const km = this.toDistance(distance);
+    return Number.isFinite(km) ? `${km.toFixed(1)} km` : '';
+  }
 
   searchbarInput(event: Event): void {
     const target = event.target as HTMLIonSearchbarElement;

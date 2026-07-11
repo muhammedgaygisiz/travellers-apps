@@ -32,7 +32,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, filter, map, tap } from 'rxjs';
 import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
-import type { Bite, Geopoint, GooglePlace } from 'model';
+import type { Bite, Geopoint, GooglePlace, NearbyRestaurant } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
@@ -101,17 +101,23 @@ export class BitePage {
 
   googlePlacesLoading = input<boolean>(false);
 
+  nearbyGooglePlaces = input<GooglePlace[]>([]);
+
+  nearbyGooglePlacesLoading = input<boolean>(false);
+
   submitBite = output<typeof this.biteFormGroup.value>();
 
   placeChange = output<string>();
 
   searchGooglePlaces = output<string>();
 
+  requestNearbyGooglePlaces = output<Geopoint>();
+
   positionChange = output<Geopoint>();
 
   isWeb = signal(!this.platform.is('hybrid'));
 
-  nearbyRestaurants = input<string[]>([]);
+  nearbyRestaurants = input<NearbyRestaurant[]>([]);
 
   biteFormGroup = this.formBuilder.group(
     {
@@ -200,6 +206,12 @@ export class BitePage {
       }),
     ),
   );
+
+  selectedPlace = toSignal(this.biteFormGroup.controls['place'].valueChanges, {
+    initialValue: this.biteFormGroup.controls['place'].value,
+  });
+
+  isRestaurantModalOpen = signal(false);
 
   positionInitFromInputEffect = effect(() => {
     const bite = this.bite();
@@ -395,18 +407,46 @@ export class BitePage {
     this.imagePosition.set(undefined);
   }
 
-  onRestaurantSelected(restaurantName: string, modal: IonModal): void {
-    this.biteFormGroup.patchValue({ place: restaurantName });
-    void modal.dismiss();
+  openRestaurantSelector(): void {
+    this.isRestaurantModalOpen.set(true);
+
+    // Only fall back to Google nearby suggestions when we have no local
+    // restaurants to offer, so the Google callable is hit on demand.
+    const hasLocalRestaurants = this.nearbyRestaurants().length > 0;
+    const position = this.biteFormGroup.controls['position'].value;
+
+    if (!hasLocalRestaurants && position) {
+      this.requestNearbyGooglePlaces.emit(position);
+    }
   }
 
-  onGooglePlaceSelected(place: GooglePlace, modal: IonModal): void {
+  onRestaurantSelected(restaurantName: string): void {
+    const selectedRestaurant = this.nearbyRestaurants().find(
+      (restaurant) => restaurant.name === restaurantName,
+    );
+
+    // Mirror the Google place selection: patch the position of the selected
+    // restaurant when we know it. The custom `Use: "abc"` fallback has no match,
+    // so it keeps the current form position. Only verified restaurants carry a
+    // restaurantId; unverified/local and fallback picks clear it.
+    this.biteFormGroup.patchValue({
+      place: restaurantName,
+      restaurantId: selectedRestaurant?.restaurantId ?? '',
+      ...(selectedRestaurant?.position
+        ? { position: selectedRestaurant.position }
+        : {}),
+    });
+    this.isRestaurantModalOpen.set(false);
+  }
+
+  onGooglePlaceSelected(place: GooglePlace): void {
     this.biteFormGroup.patchValue({
       place: place.name,
       position: place.position,
+      restaurantId: '',
     });
     this.googlePosition.set(place.position);
-    void modal.dismiss();
+    this.isRestaurantModalOpen.set(false);
   }
 
   onPositionFromGoogle(): void {

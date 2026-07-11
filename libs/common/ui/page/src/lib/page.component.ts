@@ -21,6 +21,12 @@ import {
 } from '@ionic/angular/standalone';
 import { AngularDelegate } from '@ionic/angular';
 import { AppMenuComponent } from './menu/app-menu.component';
+import {
+  DEFAULT_PAGE_CHROME_CONFIG,
+  DEFAULT_PAGE_MENU_CONFIG,
+  PageChromeConfig,
+  PageMenuConfig,
+} from './page-config';
 import { APP_TITLE, SupportedLang } from 'utils';
 import { UpperCasePipe } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -51,43 +57,31 @@ export class PageComponent {
 
   popoverController = inject(PopoverController);
 
-  enableBackButton = input(false);
+  menuConfig = input<PageMenuConfig>({});
 
-  showAddButton = input<boolean | null>(false);
+  chrome = input<PageChromeConfig>({});
+
+  // Merge partial configs over the defaults so unspecified flags keep their
+  // default value (Angular replaces the whole object on partial input).
+  protected readonly chromeConfig = computed<Required<PageChromeConfig>>(
+    () => ({
+      ...DEFAULT_PAGE_CHROME_CONFIG,
+      ...this.chrome(),
+    }),
+  );
+
+  private readonly menu = computed<Required<PageMenuConfig>>(() => ({
+    ...DEFAULT_PAGE_MENU_CONFIG,
+    ...this.menuConfig(),
+  }));
 
   addButtonText = input<string | null>();
-
-  hideAuthButton = input(false);
 
   isAuthenticated = input(false);
 
   title = input('');
 
   icon = input('');
-
-  showFooter = input(true);
-
-  showHeaderMenu = input(true);
-
-  showSettingsButton = input(false);
-
-  showAboutButton = input(false);
-
-  showMyBites = input(false);
-
-  showMyBucketlists = input(false);
-
-  showMyProfile = input(false);
-
-  showMigrationsButton = input(false);
-
-  showMarketPlaceButton = input(false);
-
-  showGalleryButton = input(false);
-
-  showLeaderboardButton = input(false);
-
-  fullWidth = input(false);
 
   appTitle = computed(() => {
     const title = this.title();
@@ -126,6 +120,28 @@ export class PageComponent {
   public gotoLeaderboard = output();
 
   public addButtonClick = output<MouseEvent>();
+
+  // Ionic assigns componentProps onto the menu instance via Object.assign, so
+  // each menu flag is forwarded as a callable signal derived from the merged
+  // menu config.
+  private readonly showSettingsButton = computed(() => this.menu().settings);
+  private readonly showAboutButton = computed(() => this.menu().about);
+  private readonly showMyBites = computed(() => this.menu().myBites);
+  private readonly showMyBucketlists = computed(
+    () => this.menu().myBucketlists,
+  );
+  private readonly showMyProfile = computed(() => this.menu().myProfile);
+  private readonly showMigrationsButton = computed(
+    () => this.menu().migrations,
+  );
+  private readonly showMarketPlaceButton = computed(
+    () => this.menu().marketPlace,
+  );
+  private readonly showGalleryButton = computed(() => this.menu().gallery);
+  private readonly showLeaderboardButton = computed(
+    () => this.menu().leaderboard,
+  );
+  private readonly hideAuthButton = computed(() => this.menu().hideAuth);
 
   async showMenuPopover($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({

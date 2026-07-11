@@ -1,10 +1,7 @@
 <ta-page
-  [showHeaderMenu]="false"
-  [showFooter]="true"
-  [showAddButton]="true"
+  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showAddButton: true }"
   addButtonText="{{'create-new-bucket-list' | transloco}}"
   (addButtonClick)="openAlert()"
-  [enableBackButton]="true"
 >
   <ion-content class="ion-padding">
     <div class="bucketlists-header-container" slot="fixed">

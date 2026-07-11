@@ -1,7 +1,9 @@
 <ta-page
-  [showHeaderMenu]="false"
-  [enableBackButton]="true"
-  [showFooter]="false"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
 >
   <ion-content class="ion-padding">
     <h1 class="ion-margin-bottom">{{ 'settings' | transloco }}</h1>

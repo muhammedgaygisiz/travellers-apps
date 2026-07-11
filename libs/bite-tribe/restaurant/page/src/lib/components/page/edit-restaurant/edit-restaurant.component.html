@@ -2,10 +2,11 @@
 @let positionData = position();
 
 <ta-page
-  [showHeaderMenu]="false"
-  [showAddButton]="false"
-  [enableBackButton]="true"
-  [showFooter]="false"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
 >
   <ion-content>
     <bt-restaurant-image [restaurant]="restaurantData" />

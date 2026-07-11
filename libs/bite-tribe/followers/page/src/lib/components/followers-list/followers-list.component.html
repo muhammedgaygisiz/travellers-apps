@@ -1,7 +1,9 @@
 <ta-page
-  [enableBackButton]="true"
-  [showHeaderMenu]="false"
-  [showFooter]="false"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
 >
   <ion-content class="ion-padding">
     <h1 class="ion-margin-bottom">
@@ -35,13 +37,19 @@
               class="ion-margin-vertical"
             >
               <ion-avatar slot="start">
-                @if (user.photoUrl && !(user.userId | imageErrored: imageErroredUserIds())) {
+                @if (
+                  user.photoUrl &&
+                  !(user.userId | imageErrored: imageErroredUserIds())
+                ) {
                   <img
                     [src]="user.photoUrl"
                     (error)="onImageError(user.userId)"
                   />
                 } @else {
-                  <ion-icon name="person-circle-outline" class="profile-image" />
+                  <ion-icon
+                    name="person-circle-outline"
+                    class="profile-image"
+                  />
                 }
               </ion-avatar>
               <ion-label>

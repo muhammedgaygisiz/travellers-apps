@@ -60,6 +60,8 @@ export class RestaurantSelectorComponent {
   selectedRestaurant = input<string>('');
   googlePlaces = input<GooglePlaceOption[]>([]);
   googlePlacesLoading = input<boolean>(false);
+  nearbyGooglePlaces = input<GooglePlaceOption[]>([]);
+  nearbyGooglePlacesLoading = input<boolean>(false);
 
   restaurantSelected = output<string>();
   selectionCancel = output<void>();
@@ -133,6 +135,16 @@ export class RestaurantSelectorComponent {
     () =>
       this.googleSearchTerm().length > 0 &&
       this.googleSearchTerm() === this.rawSearchTerm(),
+  );
+
+  // Show nearby Google suggestions in the default view (before typing) when
+  // they are loading or available. The host only provides these when there are
+  // no local restaurants, so this stays a fallback for empty local results.
+  showNearbyGooglePlaces = computed(
+    () =>
+      this.rawSearchTerm().length === 0 &&
+      (this.nearbyGooglePlacesLoading() ||
+        this.nearbyGooglePlaces().length > 0),
   );
 
   searchbarInput(event: Event): void {

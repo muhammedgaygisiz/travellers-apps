@@ -79,6 +79,31 @@ export class BiteDataAccessService {
   googlePlaces = this.googlePlacesResource.value;
   googlePlacesLoading = this.googlePlacesResource.isLoading;
 
+  /**
+   * Position to load nearby Google places for. Left `undefined` until a caller
+   * explicitly requests nearby suggestions (e.g. the restaurant selector opens
+   * without any local restaurants), so the Google callable is only hit on demand.
+   */
+  readonly nearbyGooglePlacesPosition = signal<Geopoint | undefined>(undefined);
+
+  private readonly nearbyGooglePlacesResource = resource<
+    GooglePlace[],
+    Geopoint | undefined
+  >({
+    params: () => this.nearbyGooglePlacesPosition(),
+    loader: async ({ params }) => {
+      if (!params) {
+        return [];
+      }
+
+      return this.api.searchNearbyPlaces(params);
+    },
+    defaultValue: [],
+  });
+
+  nearbyGooglePlaces = this.nearbyGooglePlacesResource.value;
+  nearbyGooglePlacesLoading = this.nearbyGooglePlacesResource.isLoading;
+
   readonly uploadProgress = signal<{
     biteId: string;
     progress: UploadParams;
@@ -124,6 +149,10 @@ export class BiteDataAccessService {
 
   searchGooglePlaces(searchText: string): void {
     this.googlePlaceSearchText.set(searchText);
+  }
+
+  loadNearbyGooglePlaces(position: Geopoint): void {
+    this.nearbyGooglePlacesPosition.set(position);
   }
 
   getCurrencyByPosition(position?: Geopoint): Promise<string | undefined> {

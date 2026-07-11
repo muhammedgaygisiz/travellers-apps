@@ -31,6 +31,8 @@ export default {
             [selectedRestaurant]="selectedRestaurant"
             [googlePlaces]="googlePlaces"
             [googlePlacesLoading]="googlePlacesLoading"
+            [nearbyGooglePlaces]="nearbyGooglePlaces"
+            [nearbyGooglePlacesLoading]="nearbyGooglePlacesLoading"
           />
         </div>
       </ion-app>
@@ -79,5 +81,27 @@ export const GoogleSearchLoading: Story = {
     selectedRestaurant: '',
     googlePlaces: [],
     googlePlacesLoading: true,
+  },
+};
+
+export const NearbyGooglePlaces: Story = {
+  args: {
+    restaurants: [],
+    selectedRestaurant: '',
+    googlePlaces: [],
+    googlePlacesLoading: false,
+    nearbyGooglePlaces: googlePlaces,
+    nearbyGooglePlacesLoading: false,
+  },
+};
+
+export const NearbyGooglePlacesLoading: Story = {
+  args: {
+    restaurants: [],
+    selectedRestaurant: '',
+    googlePlaces: [],
+    googlePlacesLoading: false,
+    nearbyGooglePlaces: [],
+    nearbyGooglePlacesLoading: true,
   },
 };

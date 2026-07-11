@@ -21,20 +21,31 @@
         mode="md"
       />
 
-      <ion-input
-        label="{{ 'place-name-label' | transloco }}"
-        formControlName="place"
-        fill="outline"
-        class="ion-margin-top"
-        mode="md"
-      >
-        <ion-icon
-          id="restaurant-selector-trigger-bite"
-          slot="end"
-          name="search-outline"
-          aria-label="Search for restaurant"
-        />
-      </ion-input>
+      <div class="place-field ion-margin-top">
+        @if (selectedPlace()) {
+        <div class="selected-place">
+          <ion-label class="selected-place-name">
+            {{ selectedPlace() }}
+          </ion-label>
+          <ion-button
+            fill="clear"
+            class="reselect-button"
+            aria-label="{{ 'change-restaurant' | transloco }}"
+            (click)="openRestaurantSelector()"
+          >
+            <ion-icon slot="icon-only" name="repeat" />
+          </ion-button>
+        </div>
+        } @else {
+        <ion-button
+          expand="block"
+          fill="outline"
+          (click)="openRestaurantSelector()"
+        >
+          {{ 'set-restaurant' | transloco }}
+        </ion-button>
+        }
+      </div>
 
       <bt-price-input
         [currencyLoading]="currencyLoading()"
@@ -126,7 +137,10 @@
   </ion-content>
 </ta-page>
 
-<ion-modal trigger="restaurant-selector-trigger-bite" #restaurantModalBite>
+<ion-modal
+  [isOpen]="isRestaurantModalOpen()"
+  (didDismiss)="isRestaurantModalOpen.set(false)"
+>
   <ng-template>
     <lib-restaurant-selector
       class="ion-page"
@@ -134,10 +148,12 @@
       [selectedRestaurant]="biteFormGroup.get('place')?.value || ''"
       [googlePlaces]="googlePlaces()"
       [googlePlacesLoading]="googlePlacesLoading()"
-      (restaurantSelected)="onRestaurantSelected($event, restaurantModalBite)"
+      [nearbyGooglePlaces]="nearbyGooglePlaces()"
+      [nearbyGooglePlacesLoading]="nearbyGooglePlacesLoading()"
+      (restaurantSelected)="onRestaurantSelected($event)"
       (searchInGoogleMaps)="searchGooglePlaces.emit($event)"
-      (googlePlaceSelected)="onGooglePlaceSelected($event, restaurantModalBite)"
-      (selectionCancel)="restaurantModalBite.dismiss()"
+      (googlePlaceSelected)="onGooglePlaceSelected($event)"
+      (selectionCancel)="isRestaurantModalOpen.set(false)"
     />
   </ng-template>
 </ion-modal>

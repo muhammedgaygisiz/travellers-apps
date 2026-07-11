@@ -127,6 +127,8 @@
   "user-profile-not-available": "Profil pengguna tidak tersedia.",
   "dish-name-label": "Nama Hidangan?",
   "place-name-label": "Nama Tempat?",
+  "set-restaurant": "Pilih restoran",
+  "change-restaurant": "Ganti restoran",
   "price-label": "Harga?",
   "invalid-price-error-message": "Masukkan harga yang valid (mis. 12.50).",
   "rating-label": "Penilaianmu?",

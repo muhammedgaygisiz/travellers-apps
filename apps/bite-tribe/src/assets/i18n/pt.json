@@ -128,6 +128,8 @@
   "user-profile-not-available": "Perfil não disponível.",
   "dish-name-label": "Nome do prato?",
   "place-name-label": "Nome do local?",
+  "set-restaurant": "Escolher restaurante",
+  "change-restaurant": "Alterar restaurante",
   "price-label": "Preço?",
   "invalid-price-error-message": "Insira um preço válido (ex.: 12,50).",
   "rating-label": "A tua avaliação?",

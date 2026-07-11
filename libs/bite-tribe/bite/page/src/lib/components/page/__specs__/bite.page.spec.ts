@@ -565,15 +565,59 @@ describe('BitePage', () => {
   });
 
   describe('onRestaurantSelected', () => {
-    it('should set place in the form group and should call dismiss on modal', () => {
-      const dismissSpy = jest.fn();
-      component.onRestaurantSelected('Test Restaurant', {
-        dismiss: dismissSpy,
-      } as any);
+    it('should set place in the form group and close the selector modal', () => {
+      component.isRestaurantModalOpen.set(true);
+
+      component.onRestaurantSelected('Test Restaurant');
+
       expect(component.biteFormGroup.controls['place'].value).toBe(
         'Test Restaurant',
       );
-      expect(dismissSpy).toHaveBeenCalled();
+      expect(component.isRestaurantModalOpen()).toBe(false);
+    });
+  });
+
+  describe('openRestaurantSelector', () => {
+    it('should open the selector modal', () => {
+      component.isRestaurantModalOpen.set(false);
+
+      component.openRestaurantSelector();
+
+      expect(component.isRestaurantModalOpen()).toBe(true);
+    });
+
+    it('should request nearby Google places when there are no local restaurants and a position exists', () => {
+      const emitSpy = jest.spyOn(component.requestNearbyGooglePlaces, 'emit');
+      const position = { latitude: 10, longitude: 20 };
+      fixture.componentRef.setInput('nearbyRestaurants', []);
+      component.biteFormGroup.controls['position'].patchValue(position);
+
+      component.openRestaurantSelector();
+
+      expect(emitSpy).toHaveBeenCalledWith(position);
+    });
+
+    it('should not request nearby Google places when local restaurants exist', () => {
+      const emitSpy = jest.spyOn(component.requestNearbyGooglePlaces, 'emit');
+      fixture.componentRef.setInput('nearbyRestaurants', ['Local Place']);
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+
+      component.openRestaurantSelector();
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not request nearby Google places when no position is available', () => {
+      const emitSpy = jest.spyOn(component.requestNearbyGooglePlaces, 'emit');
+      fixture.componentRef.setInput('nearbyRestaurants', []);
+      component.biteFormGroup.controls['position'].patchValue(null);
+
+      component.openRestaurantSelector();
+
+      expect(emitSpy).not.toHaveBeenCalled();
     });
   });
 

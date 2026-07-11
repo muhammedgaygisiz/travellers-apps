@@ -137,6 +137,48 @@ describe('RestaurantSelectorComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(place);
   });
 
+  it('should show nearby Google places in the default view when available', () => {
+    fixture.componentRef.setInput('nearbyGooglePlaces', [
+      {
+        placeId: 'place-1',
+        name: 'Corner Bistro',
+        address: 'Main Street 1',
+        position: { latitude: 1, longitude: 2 },
+      },
+    ]);
+    fixture.detectChanges();
+
+    expect(component.showNearbyGooglePlaces()).toBe(true);
+  });
+
+  it('should show nearby Google places while they are loading', () => {
+    fixture.componentRef.setInput('nearbyGooglePlacesLoading', true);
+    fixture.detectChanges();
+
+    expect(component.showNearbyGooglePlaces()).toBe(true);
+  });
+
+  it('should hide nearby Google places once the user starts typing', () => {
+    fixture.componentRef.setInput('nearbyGooglePlaces', [
+      {
+        placeId: 'place-1',
+        name: 'Corner Bistro',
+        address: 'Main Street 1',
+        position: { latitude: 1, longitude: 2 },
+      },
+    ]);
+    component.rawSearchTerm.set('pizza');
+    fixture.detectChanges();
+
+    expect(component.showNearbyGooglePlaces()).toBe(false);
+  });
+
+  it('should not show nearby Google places when none are provided', () => {
+    fixture.detectChanges();
+
+    expect(component.showNearbyGooglePlaces()).toBe(false);
+  });
+
   it('should update rawSearchTerm on searchbar input', () => {
     const searchValue = 'Test Restaurant';
     const mockEvent = {

@@ -127,6 +127,8 @@
   "user-profile-not-available": "ไม่มีโปรไฟล์ผู้ใช้",
   "dish-name-label": "ชื่อเมนู?",
   "place-name-label": "ชื่อสถานที่?",
+  "set-restaurant": "เลือกร้านอาหาร",
+  "change-restaurant": "เปลี่ยนร้านอาหาร",
   "price-label": "ราคา?",
   "invalid-price-error-message": "โปรดกรอกราคาที่ถูกต้อง (เช่น 12.50)",
   "rating-label": "คะแนนของคุณ?",

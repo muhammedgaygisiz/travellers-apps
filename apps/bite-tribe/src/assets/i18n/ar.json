@@ -127,6 +127,8 @@
   "user-profile-not-available": "الملف الشخصي للمستخدم غير متاح.",
   "dish-name-label": "اسم الطبق؟",
   "place-name-label": "اسم المكان؟",
+  "set-restaurant": "اختر مطعمًا",
+  "change-restaurant": "تغيير المطعم",
   "price-label": "السعر؟",
   "invalid-price-error-message": "الرجاء إدخال سعر صالح (مثال: 12.50).",
   "rating-label": "تقييمك؟",

@@ -101,11 +101,17 @@ export class BitePage {
 
   googlePlacesLoading = input<boolean>(false);
 
+  nearbyGooglePlaces = input<GooglePlace[]>([]);
+
+  nearbyGooglePlacesLoading = input<boolean>(false);
+
   submitBite = output<typeof this.biteFormGroup.value>();
 
   placeChange = output<string>();
 
   searchGooglePlaces = output<string>();
+
+  requestNearbyGooglePlaces = output<Geopoint>();
 
   positionChange = output<Geopoint>();
 
@@ -200,6 +206,12 @@ export class BitePage {
       }),
     ),
   );
+
+  selectedPlace = toSignal(this.biteFormGroup.controls['place'].valueChanges, {
+    initialValue: this.biteFormGroup.controls['place'].value,
+  });
+
+  isRestaurantModalOpen = signal(false);
 
   positionInitFromInputEffect = effect(() => {
     const bite = this.bite();
@@ -395,18 +407,31 @@ export class BitePage {
     this.imagePosition.set(undefined);
   }
 
-  onRestaurantSelected(restaurantName: string, modal: IonModal): void {
-    this.biteFormGroup.patchValue({ place: restaurantName });
-    void modal.dismiss();
+  openRestaurantSelector(): void {
+    this.isRestaurantModalOpen.set(true);
+
+    // Only fall back to Google nearby suggestions when we have no local
+    // restaurants to offer, so the Google callable is hit on demand.
+    const hasLocalRestaurants = this.nearbyRestaurants().length > 0;
+    const position = this.biteFormGroup.controls['position'].value;
+
+    if (!hasLocalRestaurants && position) {
+      this.requestNearbyGooglePlaces.emit(position);
+    }
   }
 
-  onGooglePlaceSelected(place: GooglePlace, modal: IonModal): void {
+  onRestaurantSelected(restaurantName: string): void {
+    this.biteFormGroup.patchValue({ place: restaurantName });
+    this.isRestaurantModalOpen.set(false);
+  }
+
+  onGooglePlaceSelected(place: GooglePlace): void {
     this.biteFormGroup.patchValue({
       place: place.name,
       position: place.position,
     });
     this.googlePosition.set(place.position);
-    void modal.dismiss();
+    this.isRestaurantModalOpen.set(false);
   }
 
   onPositionFromGoogle(): void {

@@ -127,6 +127,8 @@
   "user-profile-not-available": "Kullanıcı profili mevcut değil.",
   "dish-name-label": "Yemek Adı?",
   "place-name-label": "Mekan Adı?",
+  "set-restaurant": "Restoran seç",
+  "change-restaurant": "Restoranı değiştir",
   "price-label": "Fiyat?",
   "invalid-price-error-message": "Lütfen geçerli bir fiyat girin (ör. 12.50).",
   "rating-label": "Puanın?",

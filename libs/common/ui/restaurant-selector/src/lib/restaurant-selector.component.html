@@ -33,12 +33,34 @@
         }
       </ion-item>
     } @empty {
-      @if (!rawSearchTerm()) {
+      @if (!rawSearchTerm() && !showNearbyGooglePlaces()) {
         <ion-item>
           <ion-label>
             <p>Start typing to search restaurants</p>
           </ion-label>
         </ion-item>
+      }
+    }
+
+    @if (showNearbyGooglePlaces()) {
+      @if (nearbyGooglePlacesLoading()) {
+        <ion-item [detail]="false">
+          <ion-spinner slot="start" name="crescent" />
+          <ion-label>Finding places nearby...</ion-label>
+        </ion-item>
+      } @else {
+        <ion-list-header>
+          <ion-label>Nearby on Google Maps</ion-label>
+        </ion-list-header>
+        @for (place of nearbyGooglePlaces(); track place.placeId) {
+          <ion-item [detail]="false" (click)="selectGooglePlace(place)">
+            <ion-icon slot="start" name="location-outline" />
+            <ion-label>
+              <h2>{{ place.name }}</h2>
+              <p>{{ place.address }}</p>
+            </ion-label>
+          </ion-item>
+        }
       }
     }
 

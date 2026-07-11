@@ -127,6 +127,8 @@
   "user-profile-not-available": "የተጠቃሚ መገለጫ አይገኝም።",
   "dish-name-label": "የምግብ ስም?",
   "place-name-label": "የቦታ ስም?",
+  "set-restaurant": "ምግብ ቤት ይምረጡ",
+  "change-restaurant": "ምግብ ቤት ይቀይሩ",
   "price-label": "ዋጋ?",
   "invalid-price-error-message": "እባክዎ ትክክለኛ ዋጋ ያስገቡ (ለምሳሌ 12.50)።",
   "rating-label": "የአንተ ደረጃ?",

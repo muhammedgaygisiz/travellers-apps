@@ -1,0 +1,35 @@
+- [feat: select Bite restaurant/place before saving](https://github.com/muhammedgaygisiz/travellers-apps/issues/943) (Issue \#943)
+- Status
+  - Specification updated after Google Places became part of Bite creation.
+- Parent
+  - [[issue-778]]
+- Goal
+  - Replace direct free-text place entry during Bite creation with a mandatory restaurant/place picker row.
+  - Let users choose nearby verified/unverified restaurants or likely Google Places before saving the Bite.
+  - Keep the explicit `Use: "abc"` fallback inside the selector modal for cases where no result is correct.
+- Form UI
+  - Empty state shows one outlined `Set Restaurant` button.
+  - Selected state shows the selected restaurant/place name as text plus a repeat-icon button to choose again.
+  - No clear action is needed because place is mandatory.
+  - The form itself should not expose a directly editable free-text place input.
+- Selector modal behavior
+  - Keep the existing selector modal as the place where searching happens.
+  - Keep `Use: "abc"` as the explicit fallback option in the modal.
+  - Nearby verified and unverified restaurants should show distance and sort nearest first.
+  - The modal should also show up to 5 nearest Google Maps places for the current Bite/user position without requiring typed search.
+  - Manual Google Places search remains available.
+- Selection behavior
+  - Verified restaurant selection patches `place`, `position`, and `restaurantId`.
+  - Unverified/local restaurant selection patches `place` and `position`.
+  - Google Place selection patches `place` and `position`.
+  - `Use: "abc"` patches the typed place and the current Bite/user position when available; if no position is available, posting still requires setting a position.
+- Related SSOT
+  - [[issue-778]]
+  - [[Bite]]
+  - [[Restaurant]]
+  - [[UC - Create And Maintain Personal Bites]]
+  - [[UC - Browse Restaurants And Places]]
+- Validation
+  - Focused Bite page/container tests should cover the `Set Restaurant` empty state, selected-name display, repeat-icon reselection, and required selected-place state.
+  - Restaurant selector tests should cover fallback behavior, distance rendering, nearest-first sorting, top Google suggestions, and selection payloads with position.
+  - Google Places callable/data-access tests should cover any new position-only nearby mode.

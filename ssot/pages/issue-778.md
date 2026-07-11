@@ -11,7 +11,7 @@
   - [03 - feat: add manual restaurant candidate clustering backfill](https://github.com/muhammedgaygisiz/travellers-apps/issues/940) (Issue \#940)
   - [04 - feat(business): show restaurant candidates on dashboard](https://github.com/muhammedgaygisiz/travellers-apps/issues/941) (Issue \#941)
   - [05 - feat(business): verify restaurant candidate into restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/942) (Issue \#942)
-  - [06 - feat: suggest verified restaurant match after bite creation](https://github.com/muhammedgaygisiz/travellers-apps/issues/943) (Issue \#943)
+  - [06 - feat: select Bite restaurant/place before saving]([[issue-943]]) (Issue \#943)
   - [07 - feat: create restaurant candidates from new bite trigger](https://github.com/muhammedgaygisiz/travellers-apps/issues/944) (Issue \#944)
   - [08 - test: harden restaurant candidate duplicate and idempotency paths](https://github.com/muhammedgaygisiz/travellers-apps/issues/945) (Issue \#945)
 - Implementation order
@@ -30,12 +30,15 @@
   - Help users attach new Bites to already verified restaurants when the backend finds a likely match.
   - Let business users review candidate restaurants before they become verified public restaurants.
 - User Bite creation workflow
-  - After a Bite is created, backend matching should search nearby verified restaurants.
-  - Use the Bite `geohash` as the first query filter, then calculate exact distance and keep matches within 200m.
-  - Fuzzy-match the Bite `place` against verified restaurant names.
-  - If a likely verified restaurant is found, ask the user whether the Bite belongs to that restaurant.
-  - When the user confirms, update the Bite with the matched `restaurantId`.
-  - When the user rejects or dismisses the suggestion, leave the Bite unchanged.
+  - During Bite creation, users should select the place before saving rather than typing free text directly in the form.
+  - Empty state shows one outlined `Set Restaurant` button.
+  - Selected state shows the selected restaurant/place name plus a repeat-icon action to choose again.
+  - The selector modal lists nearby verified/unverified restaurants with distance, sorted nearest first.
+  - The selector modal also shows up to 5 nearest Google Maps places for the current position without requiring typed search.
+  - The modal keeps the explicit `Use: "abc"` fallback when no local or Google result is right.
+  - Verified restaurant selection patches `place`, `position`, and `restaurantId`.
+  - Unverified/local restaurant and Google Place selection patch `place` and `position`.
+  - Fallback selection patches the typed place and current Bite/user position when available.
 - Candidate detection workflow
   - For Bites that are not attached to a verified restaurant, backend detection should group nearby Bite evidence.
   - A candidate should be created or updated when at least 5 Bites are within 200m and their restaurant/place names fuzzy-match the same normalized name.

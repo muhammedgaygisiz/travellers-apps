@@ -1,6 +1,10 @@
 - [epic: surface and verify restaurant candidates from repeated nearby bites](https://github.com/muhammedgaygisiz/travellers-apps/issues/778) (Issue \#778)
 - Status
   - GitHub project status: In progress
+  - Implemented slices
+    - Issue \#938: shared RestaurantCandidate model and backend clustering helpers.
+    - Issue \#939: Business migrations page eligible Bite listing.
+    - Issue \#942 / PR \#977: Business app candidate verification into a real Restaurant.
 - Child issues
   - [01 - feat: add restaurant candidate model and clustering helpers](https://github.com/muhammedgaygisiz/travellers-apps/issues/938) (Issue \#938)
   - [02 - feat(business): list restaurant-clustering eligible bites in migrations](https://github.com/muhammedgaygisiz/travellers-apps/issues/939) (Issue \#939)
@@ -73,6 +77,12 @@
   - Selecting a candidate should reuse the existing `new-restaurant` flow by passing a prefilled restaurant with `biteIds` and `bites`.
   - The business user checks the candidate, adds missing restaurant details, and saves it as a verified restaurant.
   - On save, create the real restaurant, attach all candidate Bite IDs to the verified `restaurantId`, create the menu, and mark the candidate as verified or merged.
+  - Current implementation:
+    - `libs/bite-tribe-business/dashboard/page/src/lib/integration/dashboard.service.ts` turns a selected dashboard candidate into an unsaved `Restaurant` with `restaurantCandidateId`, `biteIds`, and Bite evidence, then routes to `new-restaurant`.
+    - `libs/bite-tribe-business/restaurant/page/src/lib/components/page/new-restaurant-page.component.ts` preserves `restaurantCandidateId` and `biteIds` when the reviewed restaurant form is saved.
+    - `libs/bite-tribe-business/restaurant/data-access/src/lib/restaurant-data-access.service.ts` calls the `verifyRestaurantCandidate` Firebase callable for candidate-backed restaurants and uploads the reviewed base64 restaurant image after the restaurant is created.
+    - `apps/bite-tribe-firebase/functions/src/functions/verify-restaurant-candidate.ts` validates auth and restaurant data, creates the verified restaurant and empty menu in a transaction, updates all candidate Bite documents with `restaurantId`, and marks the candidate `verified` with `verifiedRestaurantId`, `verifiedAt`, and `verifiedByUserId`.
+    - If the candidate is no longer pending but already has or resolves to a `verifiedRestaurantId`, the callable returns `already-verified` without creating duplicate restaurants.
 - Suggested implementation surfaces
   - Firebase Functions
     - Add a callable to find a verified restaurant match for a newly created Bite.
@@ -112,4 +122,5 @@
   - Firebase Functions build and lint should cover backend changes.
   - Focused Angular/Jest checks should cover Bite creation prompt behavior and business dashboard candidate routing.
   - Focused migration-page checks should cover eligible Bite listing and manual cluster action wiring.
+  - Candidate verification should cover the callable transaction, business restaurant data-access callable wrapper, new-restaurant service save branch, dashboard candidate routing, and form preservation of `restaurantCandidateId` plus `biteIds`.
   - Emulator verification should seed nearby Bites, manual backfill candidates, and confirmed restaurant matches to prove Firestore state transitions.

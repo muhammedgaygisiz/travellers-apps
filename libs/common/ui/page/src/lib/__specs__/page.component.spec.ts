@@ -38,6 +38,72 @@ describe('PageComponent', () => {
 
       expect(popoverControllerCreateSpy).toHaveBeenCalledTimes(1);
     });
+
+    it('forwards the merged menu flags to the popover', async () => {
+      componentRef.setInput('menuConfig', {
+        settings: true,
+        about: true,
+        myBites: true,
+        myBucketlists: true,
+        myProfile: true,
+        migrations: true,
+        marketPlace: true,
+        gallery: true,
+        leaderboard: true,
+        hideAuth: true,
+      });
+      const createSpy = jest
+        .spyOn(component.popoverController, 'create')
+        .mockReturnValue({ present: jest.fn() } as any);
+
+      await component.showMenuPopover({} as MouseEvent);
+
+      const props = createSpy.mock.calls[0][0].componentProps as Record<
+        string,
+        () => boolean
+      >;
+      expect(props['showSettingsButton']()).toBe(true);
+      expect(props['showAboutButton']()).toBe(true);
+      expect(props['showMyBites']()).toBe(true);
+      expect(props['showMyBucketlists']()).toBe(true);
+      expect(props['showMyProfile']()).toBe(true);
+      expect(props['showMigrationsButton']()).toBe(true);
+      expect(props['showMarketPlaceButton']()).toBe(true);
+      expect(props['showGalleryButton']()).toBe(true);
+      expect(props['showLeaderboardButton']()).toBe(true);
+      expect(props['hideAuthButton']()).toBe(true);
+    });
+
+    it('defaults unspecified menu flags to false', async () => {
+      componentRef.setInput('menuConfig', { settings: true });
+      const createSpy = jest
+        .spyOn(component.popoverController, 'create')
+        .mockReturnValue({ present: jest.fn() } as any);
+
+      await component.showMenuPopover({} as MouseEvent);
+
+      const props = createSpy.mock.calls[0][0].componentProps as Record<
+        string,
+        () => boolean
+      >;
+      expect(props['showSettingsButton']()).toBe(true);
+      expect(props['showAboutButton']()).toBe(false);
+      expect(props['showLeaderboardButton']()).toBe(false);
+    });
+  });
+
+  describe('chrome config', () => {
+    it('merges a partial chrome config over the defaults', () => {
+      componentRef.setInput('chrome', { enableBackButton: true });
+
+      expect(component['chromeConfig']()).toEqual({
+        enableBackButton: true,
+        showHeaderMenu: true,
+        showFooter: true,
+        showAddButton: false,
+        fullWidth: false,
+      });
+    });
   });
 
   describe('app title', () => {

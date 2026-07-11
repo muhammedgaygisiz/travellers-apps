@@ -4,7 +4,7 @@
   - Implemented slices
     - Issue \#938: shared RestaurantCandidate model and backend clustering helpers.
     - Issue \#939: Business migrations page eligible Bite listing.
-    - Issue \#942 / PR \#977: Business app candidate verification into a real Restaurant.
+    - [[issue-942]] / PR \#977: Business app candidate verification into a real Restaurant.
 - Child issues
   - [01 - feat: add restaurant candidate model and clustering helpers](https://github.com/muhammedgaygisiz/travellers-apps/issues/938) (Issue \#938)
   - [02 - feat(business): list restaurant-clustering eligible bites in migrations](https://github.com/muhammedgaygisiz/travellers-apps/issues/939) (Issue \#939)

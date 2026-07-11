@@ -13,18 +13,18 @@ apps/bite-tribe-firebase/functions/src/index.ts
 
 ## Current Function Areas
 
-| Area           | Examples                                                                                              |
-| -------------- | ----------------------------------------------------------------------------------------------------- |
-| Auth           | `create-user-on-auth-create.ts`, `update-last-seen.ts`, `update-user-metadata.ts`                     |
-| Search         | `search-bites.ts`, `search-restaurants.ts`, `search-users.ts`, `search-places.ts`                     |
-| Discovery      | `load-bites-by-location.ts`, `load-leaderboard.ts`                                                    |
-| Enrichment     | `enrich-bite-address-on-create.ts`, `backfillBiteAddress`                                             |
-| Aggregates     | `increment-bite-count-on-bite-create.ts`, `update-bite-like-count-on-like-write.ts`                   |
-| Storage        | `set-bite-image-path-on-upload.ts`                                                                    |
-| Notifications  | `notify-bite-creator-on-like.ts`, `notify-followers-on-new-bite.ts`, `notify-user-on-new-follower.ts` |
-| Restaurants    | `cluster-restaurant-candidate-for-bite.ts`, `verify-restaurant-candidate.ts`                          |
-| Scheduled jobs | `send-weekly-bite-notification.ts`                                                                    |
-| Deep links     | `handle-shared-link-to-bite.ts`                                                                       |
+| Area           | Examples                                                                                                                                        |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth           | `create-user-on-auth-create.ts`, `update-last-seen.ts`, `update-user-metadata.ts`                                                               |
+| Search         | `search-bites.ts`, `search-bites-by-city.ts`, `search-restaurants.ts`, `search-users.ts`, `search-places.ts`                                    |
+| Discovery      | `load-bites-by-location.ts`, `load-leaderboard.ts`                                                                                              |
+| Enrichment     | `enrich-bite-address-on-create.ts`, `backfillBiteAddress`                                                                                       |
+| Aggregates     | `increment-bite-count-on-bite-create.ts`, `resync-bite-counts.ts`, `update-bite-like-count-on-like-write.ts`                                    |
+| Storage        | `set-bite-image-path-on-upload.ts`                                                                                                              |
+| Notifications  | `notify-bite-creator-on-like.ts`, `notify-followers-on-new-bite.ts`, `notify-user-on-new-follower.ts`, `send-daily-leaderboard-notification.ts` |
+| Restaurants    | `cluster-restaurant-candidate-for-bite.ts`, `verify-restaurant-candidate.ts`                                                                    |
+| Scheduled jobs | `send-weekly-bite-notification.ts`                                                                                                              |
+| Deep links     | `handle-shared-link-to-bite.ts`                                                                                                                 |
 
 ## Implementation Rules
 

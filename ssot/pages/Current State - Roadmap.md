@@ -10,6 +10,22 @@
 
   Dates: 26 June 2026 to 17 July 2026.
 
+- ### Status as of 11 July 2026
+
+  BiteTribe is still in Phase 1 launch preparation, inside the Week 2 location and currency quality window.
+
+- Completed or landed toward this phase:
+  - Firebase App Check bootstrap and telemetry work is in place, but enforcement readiness still depends on monitoring verified request quality.
+  - Bite address enrichment and city search have landed through [[issue-974]].
+  - Client-side suspicious price validation has landed through [[issue-967]].
+  - Leaderboard reliability work has landed through [[issue-966]] and [[issue-968]].
+  - Daily ranking-change notifications have landed through [[issue-971]].
+  - Profile badge display has landed through [[issue-975]].
+  - Restaurant candidate verification has landed through [[issue-942]] as part of [[issue-778]].
+
+- Current gap to the 17 July 2026 milestone:
+  - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, Bite photo upload reliability, notification delivery, city search quality, suspicious-price UX, and restaurant candidate verification state transitions.
+
 - ### Week 1
 
   Focus: Firebase App Check.

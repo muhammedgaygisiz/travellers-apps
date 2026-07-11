@@ -6,16 +6,17 @@ Known issues are the current launch risks or unfinished areas that should be vis
 
 ## Launch-Blocking Or Launch-Relevant Issues
 
-| Area                 | Issue                                                                                                   | Why It Matters                                                                     |
-| -------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Firebase App Check   | Verified request ratio still needs monitoring and remaining issues need fixing before enforcement.      | Backend protection should be enabled without blocking legitimate app traffic.      |
-| Location quality     | Bite location should be enriched using Google Places.                                                   | Discovery, search, restaurant context, and trust depend on usable location data.   |
-| Currency quality     | Currency should be validated against location.                                                          | Prices should make sense for the place where a Bite was created or experienced.    |
-| Bite photo upload    | [[issue-927]]: production can create a Bite document while the intended photo upload does not complete. | Bite creation is core to launch; missing photos make successful posts look broken. |
-| Edge cases           | Vacation usage, posting later, and missing location need explicit testing.                              | Real users will create Bites outside the ideal happy path.                         |
-| Analytics            | Events need to be defined, implemented, and verified.                                                   | Launch learning depends on reliable usage data.                                    |
-| Production readiness | Android, iOS, and web testing remain before release candidate.                                          | Public launch requires confidence across supported platforms.                      |
-| Store assets         | App Store and Google Play assets need preparation.                                                      | Publishing cannot complete without store-ready material.                           |
+| Area                 | Issue                                                                                                                    | Why It Matters                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Firebase App Check   | Verified request ratio still needs monitoring and remaining issues need fixing before enforcement.                       | Backend protection should be enabled without blocking legitimate app traffic.      |
+| Location quality     | City search and address enrichment have landed, but real-world location quality still needs testing.                     | Discovery, search, restaurant context, and trust depend on usable location data.   |
+| Currency quality     | [[issue-967]] added client-side suspicious price validation; location-aware currency validation still needs final proof. | Prices should make sense for the place where a Bite was created or experienced.    |
+| Bite photo upload    | [[issue-927]]: production can create a Bite document while the intended photo upload does not complete.                  | Bite creation is core to launch; missing photos make successful posts look broken. |
+| Edge cases           | Vacation usage, posting later, and missing location need explicit testing.                                               | Real users will create Bites outside the ideal happy path.                         |
+| Notifications        | [[issue-971]] added daily ranking-change notifications; delivery still needs device verification.                        | Launch learning and retention signals depend on reliable notifications.            |
+| Analytics            | Events need to be defined, implemented, and verified.                                                                    | Launch learning depends on reliable usage data.                                    |
+| Production readiness | Android, iOS, and web testing remain before release candidate.                                                           | Public launch requires confidence across supported platforms.                      |
+| Store assets         | App Store and Google Play assets need preparation.                                                                       | Publishing cannot complete without store-ready material.                           |
 
 ## Operational Issues To Watch
 

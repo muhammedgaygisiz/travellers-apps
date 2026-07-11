@@ -4,7 +4,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { PageComponent } from 'common/ui/page';
+import { PageComponent, PageMenuTarget } from 'common/ui/page';
 import {
   IonCard,
   IonCardContent,
@@ -51,8 +51,7 @@ export class DashboardComponent {
   gpsPosition = input<Geopoint | null | undefined>();
 
   readonly logoutClick = output();
-  readonly gotoSettings = output();
-  readonly gotoMigrations = output();
+  readonly menuNavigate = output<PageMenuTarget>();
 
   readonly restaurantClick = output<Restaurant>();
   readonly restaurantCandidateClick = output<DashboardRestaurantCandidate>();

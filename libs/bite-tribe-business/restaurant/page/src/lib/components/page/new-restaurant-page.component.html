@@ -1,7 +1,9 @@
 <ta-page
-  [showHeaderMenu]="false"
-  [showFooter]="false"
-  [enableBackButton]="true"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
 >
   <ion-content class="ion-padding">
     <h1>Create Restaurant</h1>
@@ -87,7 +89,9 @@
                 formControlName="network"
               >
                 <ion-select-option value="facebook">Facebook</ion-select-option>
-                <ion-select-option value="instagram">Instagram</ion-select-option>
+                <ion-select-option value="instagram"
+                  >Instagram</ion-select-option
+                >
                 <ion-select-option value="twitter">Twitter</ion-select-option>
                 <ion-select-option value="linkedin">LinkedIn</ion-select-option>
                 <ion-select-option value="website">Website</ion-select-option>
@@ -104,9 +108,7 @@
     </div>
 
     <div class="ion-margin-top">
-      <bt-opening-hours
-        (submitOpeningHours)="onOpeningHoursChange($event)"
-      />
+      <bt-opening-hours (submitOpeningHours)="onOpeningHoursChange($event)" />
     </div>
 
     <ion-button

@@ -19,55 +19,55 @@
       </ion-item>
     } @else {
       @if (showMyProfile()) {
-        <ion-item (click)="gotoProfile.emit()">
+        <ion-item (click)="menuNavigate.emit('profile')">
           <ion-icon name="person-circle-outline" slot="start" />
           <ng-container>{{ 'my-profile' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showMyBites()) {
-        <ion-item (click)="gotoMyBites.emit()">
+        <ion-item (click)="menuNavigate.emit('my-bites')">
           <ion-icon name="pizza-outline" slot="start" />
           <ng-container>{{ 'my-bites' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showMyBucketlists()) {
-        <ion-item (click)="gotoMyBucketlists.emit()">
+        <ion-item (click)="menuNavigate.emit('my-bucketlists')">
           <ion-icon name="bookmark-outline" slot="start" />
           <ng-container>{{ 'my-bucket-lists' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showMarketPlaceButton()) {
-        <ion-item (click)="gotoMarketPlace.emit()">
+        <ion-item (click)="menuNavigate.emit('market-place')">
           <ion-icon name="storefront-outline" slot="start" />
           <ng-container>{{ 'market-place' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showGalleryButton()) {
-        <ion-item (click)="gotoGallery.emit()">
+        <ion-item (click)="menuNavigate.emit('gallery')">
           <ion-icon name="images-outline" slot="start" />
           <ng-container>{{ 'gallery' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showLeaderboardButton()) {
-        <ion-item (click)="gotoLeaderboard.emit()">
+        <ion-item (click)="menuNavigate.emit('leaderboard')">
           <ion-icon name="star-outline" slot="start" />
           <ng-container>{{ 'leaderboard' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showSettingsButton()) {
-        <ion-item (click)="gotoSettings.emit()">
+        <ion-item (click)="menuNavigate.emit('settings')">
           <ion-icon name="settings-outline" slot="start" />
           <ng-container>{{ 'settings' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showAboutButton()) {
-        <ion-item (click)="gotoAbout.emit()">
+        <ion-item (click)="menuNavigate.emit('about')">
           <ion-icon name="information-circle-outline" slot="start" />
           <ng-container>{{ 'about' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showMigrationsButton()) {
-        <ion-item (click)="gotoMigrations.emit()">
+        <ion-item (click)="menuNavigate.emit('migrations')">
           <ion-icon name="hammer-outline" slot="start" />
           Migrations
         </ion-item>

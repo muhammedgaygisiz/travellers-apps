@@ -1,7 +1,9 @@
 <ta-page
-  [showHeaderMenu]="false"
-  [showFooter]="false"
-  [enableBackButton]="true"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
 >
   <ion-content class="ion-padding">
     <h1 class="ion-margin-bottom">Create Bite Trail</h1>

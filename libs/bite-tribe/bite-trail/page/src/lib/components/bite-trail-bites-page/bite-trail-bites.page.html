@@ -1,9 +1,6 @@
 <ta-page
-  [showHeaderMenu]="false"
-  [showFooter]="isFree()"
-  [showAddButton]="isFree()"
+  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: isFree(), showAddButton: isFree() }"
   [addButtonText]="toggleAddButtonText()"
-  [enableBackButton]="true"
   (addButtonClick)="savedBucketlistId() ? goToSavedBucketList.emit() : getForFree.emit()"
 >
   <ion-content class="ion-padding">

@@ -37,3 +37,14 @@ export const WithTagSuggestions: Story = {
     suggestedTags: ['vegan', 'spicy', 'gluten-free', 'dessert', 'quick'],
   },
 };
+
+export const CurrencyLoading: Story = {
+  args: {
+    position: {
+      latitude: 46.9422564444011,
+      longitude: 7.457160053942448,
+    },
+    currency: 'EUR',
+    currencyLoading: true,
+  },
+};

@@ -122,6 +122,48 @@ export const NewUserEmptyProfile: Story = {
   },
 };
 
+export const WithManyFlags: Story = {
+  args: {
+    user: {
+      ...baseUser,
+      countryCodes: [
+        'DE',
+        'CH',
+        'TR',
+        'ES',
+        'PT',
+        'PS',
+        'TN',
+        'TH',
+        'JP',
+        'VN',
+        'KH',
+        'IT',
+        'HK',
+        'FR',
+        'IE',
+        'PE',
+        'MT',
+        'SE',
+        'CN',
+        'MA',
+        'BE',
+        'EE',
+        'FI',
+        'DK',
+        'KR',
+        'NO',
+        'SG',
+        'MY',
+        'US',
+      ],
+    },
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
 export const NoFollowersOrFollowing: Story = {
   args: {
     user: baseUser,

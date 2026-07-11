@@ -21,7 +21,14 @@ import {
 } from '@ionic/angular/standalone';
 import { AngularDelegate } from '@ionic/angular';
 import { AppMenuComponent } from './menu/app-menu.component';
-import { APP_TITLE, SupportedLang } from 'utils';
+import {
+  DEFAULT_PAGE_CHROME_CONFIG,
+  DEFAULT_PAGE_MENU_CONFIG,
+  PageChromeConfig,
+  PageMenuConfig,
+  PageMenuTarget,
+} from './page-config';
+import { APP_TITLE } from 'utils';
 import { UpperCasePipe } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
 
@@ -51,43 +58,31 @@ export class PageComponent {
 
   popoverController = inject(PopoverController);
 
-  enableBackButton = input(false);
+  menuConfig = input<PageMenuConfig>({});
 
-  showAddButton = input<boolean | null>(false);
+  chrome = input<PageChromeConfig>({});
+
+  // Merge partial configs over the defaults so unspecified flags keep their
+  // default value (Angular replaces the whole object on partial input).
+  protected readonly chromeConfig = computed<Required<PageChromeConfig>>(
+    () => ({
+      ...DEFAULT_PAGE_CHROME_CONFIG,
+      ...this.chrome(),
+    }),
+  );
+
+  private readonly menu = computed<Required<PageMenuConfig>>(() => ({
+    ...DEFAULT_PAGE_MENU_CONFIG,
+    ...this.menuConfig(),
+  }));
 
   addButtonText = input<string | null>();
-
-  hideAuthButton = input(false);
 
   isAuthenticated = input(false);
 
   title = input('');
 
   icon = input('');
-
-  showFooter = input(true);
-
-  showHeaderMenu = input(true);
-
-  showSettingsButton = input(false);
-
-  showAboutButton = input(false);
-
-  showMyBites = input(false);
-
-  showMyBucketlists = input(false);
-
-  showMyProfile = input(false);
-
-  showMigrationsButton = input(false);
-
-  showMarketPlaceButton = input(false);
-
-  showGalleryButton = input(false);
-
-  showLeaderboardButton = input(false);
-
-  fullWidth = input(false);
 
   appTitle = computed(() => {
     const title = this.title();
@@ -99,33 +94,35 @@ export class PageComponent {
     return this.appTitleToken;
   });
 
-  public addItemClick = output();
-
   public loginClick = output();
 
   public logoutClick = output();
 
-  public languageChangeClick = output<SupportedLang>();
-
-  public gotoSettings = output();
-
-  public gotoAbout = output();
-
-  public gotoProfile = output();
-
-  public gotoMigrations = output();
-
-  public gotoMyBites = output();
-
-  public gotoMyBucketlists = output();
-
-  public gotoMarketPlace = output();
-
-  public gotoGallery = output();
-
-  public gotoLeaderboard = output();
+  public menuNavigate = output<PageMenuTarget>();
 
   public addButtonClick = output<MouseEvent>();
+
+  // Ionic assigns componentProps onto the menu instance via Object.assign, so
+  // each menu flag is forwarded as a callable signal derived from the merged
+  // menu config.
+  private readonly showSettingsButton = computed(() => this.menu().settings);
+  private readonly showAboutButton = computed(() => this.menu().about);
+  private readonly showMyBites = computed(() => this.menu().myBites);
+  private readonly showMyBucketlists = computed(
+    () => this.menu().myBucketlists,
+  );
+  private readonly showMyProfile = computed(() => this.menu().myProfile);
+  private readonly showMigrationsButton = computed(
+    () => this.menu().migrations,
+  );
+  private readonly showMarketPlaceButton = computed(
+    () => this.menu().marketPlace,
+  );
+  private readonly showGalleryButton = computed(() => this.menu().gallery);
+  private readonly showLeaderboardButton = computed(
+    () => this.menu().leaderboard,
+  );
+  private readonly hideAuthButton = computed(() => this.menu().hideAuth);
 
   async showMenuPopover($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
@@ -146,16 +143,7 @@ export class PageComponent {
         showLeaderboardButton: this.showLeaderboardButton,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
-        languageChangeClick: this.languageChangeClick,
-        gotoSettings: this.gotoSettings,
-        gotoAbout: this.gotoAbout,
-        gotoMyBites: this.gotoMyBites,
-        gotoMyBucketlists: this.gotoMyBucketlists,
-        gotoMigrations: this.gotoMigrations,
-        gotoProfile: this.gotoProfile,
-        gotoMarketPlace: this.gotoMarketPlace,
-        gotoGallery: this.gotoGallery,
-        gotoLeaderboard: this.gotoLeaderboard,
+        menuNavigate: this.menuNavigate,
       },
     });
 

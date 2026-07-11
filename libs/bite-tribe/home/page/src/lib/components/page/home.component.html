@@ -1,27 +1,24 @@
 <ta-page
-  [showHeaderMenu]="showHeaderMenu()"
-  [showAddButton]="showAddButton()"
-  [showSettingsButton]="true"
-  [showMyBites]="true"
-  [showMyBucketlists]="true"
-  [showMyProfile]="true"
-  [showAboutButton]="true"
-  [showMarketPlaceButton]="true"
-  [showGalleryButton]="true"
-  [showLeaderboardButton]="true"
-  [enableBackButton]="enableBackButton()"
-  [showFooter]="showFooter()"
+  [chrome]="{
+    enableBackButton: enableBackButton(),
+    showHeaderMenu: showHeaderMenu(),
+    showFooter: showFooter(),
+    showAddButton: showAddButton(),
+  }"
+  [menuConfig]="{
+    settings: true,
+    about: true,
+    myBites: true,
+    myBucketlists: true,
+    myProfile: true,
+    marketPlace: true,
+    gallery: true,
+    leaderboard: true,
+  }"
   [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
-  (gotoSettings)="gotoSettings.emit()"
-  (gotoProfile)="gotoMyProfile.emit()"
-  (gotoMyBucketlists)="gotoMyBucketlists.emit()"
-  (gotoMyBites)="gotoMyBites.emit()"
-  (gotoAbout)="gotoAbout.emit()"
-  (gotoMarketPlace)="gotoMarketPlace.emit()"
-  (gotoGallery)="gotoGallery.emit()"
-  (gotoLeaderboard)="gotoLeaderboard.emit()"
+  (menuNavigate)="menuNavigate.emit($event)"
 >
   @if (showSearch()) {
     <ion-buttons header-end slot="end">

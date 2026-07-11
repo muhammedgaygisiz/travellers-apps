@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import type { Bite, LikeClick } from 'model';
 import { NavController } from '@ionic/angular/standalone';
+import type { PageMenuTarget } from 'common/ui/page';
 import { PATH } from 'utils';
 
 @Injectable({
@@ -100,6 +101,35 @@ export class HomeService {
 
   onGotoSearchClick(): void {
     void this.navController.navigateForward([PATH.SEARCH]);
+  }
+
+  onMenuNavigate(target: PageMenuTarget): void {
+    switch (target) {
+      case 'settings':
+        this.onGotoSettingsClick();
+        break;
+      case 'profile':
+        this.onGotoMyProfileClick();
+        break;
+      case 'my-bites':
+        this.onGotoMyBitesClick();
+        break;
+      case 'my-bucketlists':
+        this.onGotoMyBucketlists();
+        break;
+      case 'about':
+        this.onGotoAboutClick();
+        break;
+      case 'market-place':
+        this.onGotoMarketPlaceClick();
+        break;
+      case 'gallery':
+        this.onGotoGalleryClick();
+        break;
+      case 'leaderboard':
+        this.onGotoLeaderboardClick();
+        break;
+    }
   }
 
   openMapView(mainPage: string): void {

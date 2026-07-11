@@ -1,9 +1,10 @@
 <ta-page
-  [showHeaderMenu]="false"
-  [enableBackButton]="true"
-  [showAddButton]="false"
-  [hideAuthButton]="true"
-  [showFooter]="false"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
+  [menuConfig]="{ hideAuth: true }"
 >
   <ion-content>
     <div slot="fixed" class="container ion-padding">

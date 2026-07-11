@@ -9,7 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { PageComponent } from 'common/ui/page';
+import { PageComponent, PageMenuTarget } from 'common/ui/page';
 import {
   IonButton,
   IonButtons,
@@ -82,14 +82,7 @@ export class BiteTribeHomeComponent {
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
-  readonly gotoSettings = output();
-  readonly gotoMyProfile = output();
-  readonly gotoMyBites = output();
-  readonly gotoAbout = output();
-  readonly gotoMarketPlace = output();
-  readonly gotoGallery = output();
-  readonly gotoLeaderboard = output();
-  readonly gotoMyBucketlists = output();
+  readonly menuNavigate = output<PageMenuTarget>();
   readonly gotoSearch = output();
   readonly likeButtonClick = output<LikeClick>();
   readonly biteClick = output<Bite>();

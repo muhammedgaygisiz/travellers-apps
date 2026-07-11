@@ -3,15 +3,14 @@
 @let currentUserId = userId();
 
 <ta-page
-  [showHeaderMenu]="false"
-  [showFooter]="false"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
   [isAuthenticated]="isAuthenticated()"
-  [enableBackButton]="true"
   (logoutClick)="logoutClick.emit()"
-  (gotoSettings)="gotoSettings.emit()"
-  (gotoMyBucketlists)="gotoMyBucketlists.emit()"
-  (gotoMyBites)="gotoMyBites.emit()"
-  (gotoProfile)="gotoMyProfile.emit()"
+  (menuNavigate)="menuNavigate.emit($event)"
 >
   <ion-content class="ion-padding">
     <profile-header
@@ -50,8 +49,6 @@
           }
           {{ city() }}
         </div>
-
-        <country-flags [countryCodes]="userData?.countryCodes" />
       </div>
 
       @if (!userData?.isOrganisation) {
@@ -78,6 +75,8 @@
     <p class="profile-about">
       {{ userData?.about || ('no-description-available' | transloco) }}
     </p>
+
+    <country-flags [countryCodes]="userData?.countryCodes" />
 
     <div class="bites-section">
       <h2>{{ userData?.isOrganisation ? 'Bite Trails' : 'Bites' }}</h2>

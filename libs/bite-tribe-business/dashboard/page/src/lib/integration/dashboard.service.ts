@@ -4,6 +4,7 @@ import {
   DashboardRestaurantCandidate,
 } from 'bite-tribe-business/dashboard-data-access';
 import { NavController } from '@ionic/angular/standalone';
+import type { PageMenuTarget } from 'common/ui/page';
 import { PublicUser, Restaurant } from 'model';
 
 @Injectable({
@@ -52,6 +53,12 @@ export class DashboardService {
 
   gotoMigrations(): void {
     void this.navController.navigateForward(['migrations']);
+  }
+
+  onMenuNavigate(target: PageMenuTarget): void {
+    if (target === 'migrations') {
+      this.gotoMigrations();
+    }
   }
 
   placeClicked(placeName: string): void {

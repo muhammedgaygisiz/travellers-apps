@@ -138,6 +138,22 @@ describe('DashboardService', () => {
     });
   });
 
+  describe('onMenuNavigate', () => {
+    it('should navigate to migrations for the migrations target', () => {
+      service.onMenuNavigate('migrations');
+
+      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+        'migrations',
+      ]);
+    });
+
+    it('should not navigate for any other target', () => {
+      service.onMenuNavigate('settings');
+
+      expect(navControllerMock.navigateForward).not.toHaveBeenCalled();
+    });
+  });
+
   describe('placeClicked', () => {
     it('should call selectAndNavigateToCreateRestaurantPageClicked with a restaurant containing the place name', () => {
       service.placeClicked('Pizza Palace');

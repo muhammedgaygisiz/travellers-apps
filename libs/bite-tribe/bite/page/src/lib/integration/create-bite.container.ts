@@ -12,6 +12,7 @@ import type { Geopoint } from 'model';
       class="ion-page"
       [bite]="service.cachedBite()"
       [currency]="service.effectiveCurrency()"
+      [currencyLoading]="service.isCurrencyLoading()"
       [favCurrencies]="service.favCurrencies()"
       [position]="service.position()"
       [image]="service.image() || ''"

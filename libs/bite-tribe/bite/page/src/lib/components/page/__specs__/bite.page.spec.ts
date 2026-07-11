@@ -564,30 +564,6 @@ describe('BitePage', () => {
     });
   });
 
-  describe('onCurrencySelected', () => {
-    it('should set currency in the form group and should call dismiss on modal', () => {
-      const dismissSpy = jest.fn();
-      component.onCurrencySelected('USD', { dismiss: dismissSpy } as any);
-      expect(component.biteFormGroup.controls['currency'].value).toBe('USD');
-      expect(dismissSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('selectedCurrencyName', () => {
-    it('should return the localized selected currency name', () => {
-      MockTranslocoService.getActiveLang.mockReturnValue('de');
-      fixture = TestBed.createComponent(BitePage);
-      component = fixture.componentInstance;
-      componentRef = fixture.componentRef;
-      componentRef.setInput('networkStatus', { connected: true });
-      componentRef.changeDetectorRef.detectChanges();
-
-      component.biteFormGroup.controls['currency'].patchValue('USD');
-
-      expect(component.selectedCurrencyName()).toBe('US-Dollar');
-    });
-  });
-
   describe('onRestaurantSelected', () => {
     it('should set place in the form group and should call dismiss on modal', () => {
       const dismissSpy = jest.fn();

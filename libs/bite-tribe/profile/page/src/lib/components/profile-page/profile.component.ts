@@ -7,7 +7,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { PageComponent } from 'common/ui/page';
+import { PageComponent, PageMenuTarget } from 'common/ui/page';
 import {
   IonAlert,
   IonBadge,
@@ -78,10 +78,7 @@ export class ProfileComponent {
   biteTrails = input<BiteTrail[]>();
 
   readonly logoutClick = output();
-  readonly gotoSettings = output();
-  readonly gotoMyBucketlists = output();
-  readonly gotoMyBites = output();
-  readonly gotoMyProfile = output();
+  readonly menuNavigate = output<PageMenuTarget>();
   readonly gotoEditProfile = output();
 
   readonly biteClick = output<Bite>();

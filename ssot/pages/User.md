@@ -44,6 +44,7 @@ Current profile model fields:
 - `about`
 - `public`
 - `biteCount`
+- `countryCodes`
 - `subscriptionTier`
 - `isOrganisation`
 - `isRestaurant`
@@ -96,6 +97,7 @@ Current implementation notes:
 - `updateLastSeen` remains available as the legacy backend callable for older app versions.
 - `updateUserMetadata` records the latest activity timestamp plus reported app version/build number for current app versions.
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
+- Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
 
 ## Permissions
 
@@ -126,6 +128,8 @@ Supported today:
 - Update last seen.
 - Track latest reported app version and build number.
 - Show bite count in leaderboard.
+- Show contribution badges on profile.
+- Receive ranking-change notifications.
 
 Related future or expanding use cases:
 
@@ -174,6 +178,8 @@ updateUserMetadata
 searchUsers
 loadLeaderboard
 incrementBiteCountOnBiteCreate
+resyncBiteCounts
+sendDailyLeaderboardNotification
 notifyUserOnNewFollower
 ```
 

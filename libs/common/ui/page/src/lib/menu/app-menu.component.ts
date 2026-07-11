@@ -11,6 +11,7 @@ import {
   IonList,
 } from '@ionic/angular/standalone';
 import { SupportedLang } from 'utils';
+import { PageMenuTarget } from '../page-config';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 declare const process: {
@@ -57,21 +58,5 @@ export class AppMenuComponent {
 
   logoutClick = output();
 
-  gotoSettings = output();
-
-  gotoAbout = output();
-
-  gotoProfile = output();
-
-  gotoMigrations = output();
-
-  gotoMyBites = output();
-
-  gotoMyBucketlists = output();
-
-  gotoMarketPlace = output();
-
-  gotoGallery = output();
-
-  gotoLeaderboard = output();
+  menuNavigate = output<PageMenuTarget>();
 }

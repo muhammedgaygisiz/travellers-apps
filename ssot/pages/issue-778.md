@@ -1,13 +1,17 @@
 - [epic: surface and verify restaurant candidates from repeated nearby bites](https://github.com/muhammedgaygisiz/travellers-apps/issues/778) (Issue \#778)
 - Status
   - GitHub project status: In progress
+  - Implemented slices
+    - Issue \#938: shared RestaurantCandidate model and backend clustering helpers.
+    - Issue \#939: Business migrations page eligible Bite listing.
+    - [[issue-942]] / PR \#977: Business app candidate verification into a real Restaurant.
 - Child issues
   - [01 - feat: add restaurant candidate model and clustering helpers](https://github.com/muhammedgaygisiz/travellers-apps/issues/938) (Issue \#938)
   - [02 - feat(business): list restaurant-clustering eligible bites in migrations](https://github.com/muhammedgaygisiz/travellers-apps/issues/939) (Issue \#939)
   - [03 - feat: add manual restaurant candidate clustering backfill](https://github.com/muhammedgaygisiz/travellers-apps/issues/940) (Issue \#940)
   - [04 - feat(business): show restaurant candidates on dashboard](https://github.com/muhammedgaygisiz/travellers-apps/issues/941) (Issue \#941)
   - [05 - feat(business): verify restaurant candidate into restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/942) (Issue \#942)
-  - [06 - feat: suggest verified restaurant match after bite creation](https://github.com/muhammedgaygisiz/travellers-apps/issues/943) (Issue \#943)
+  - [06 - feat: select Bite restaurant/place before saving]([[issue-943]]) (Issue \#943)
   - [07 - feat: create restaurant candidates from new bite trigger](https://github.com/muhammedgaygisiz/travellers-apps/issues/944) (Issue \#944)
   - [08 - test: harden restaurant candidate duplicate and idempotency paths](https://github.com/muhammedgaygisiz/travellers-apps/issues/945) (Issue \#945)
 - Implementation order
@@ -26,12 +30,15 @@
   - Help users attach new Bites to already verified restaurants when the backend finds a likely match.
   - Let business users review candidate restaurants before they become verified public restaurants.
 - User Bite creation workflow
-  - After a Bite is created, backend matching should search nearby verified restaurants.
-  - Use the Bite `geohash` as the first query filter, then calculate exact distance and keep matches within 200m.
-  - Fuzzy-match the Bite `place` against verified restaurant names.
-  - If a likely verified restaurant is found, ask the user whether the Bite belongs to that restaurant.
-  - When the user confirms, update the Bite with the matched `restaurantId`.
-  - When the user rejects or dismisses the suggestion, leave the Bite unchanged.
+  - During Bite creation, users should select the place before saving rather than typing free text directly in the form.
+  - Empty state shows one outlined `Set Restaurant` button.
+  - Selected state shows the selected restaurant/place name plus a repeat-icon action to choose again.
+  - The selector modal lists nearby verified/unverified restaurants with distance, sorted nearest first.
+  - The selector modal also shows up to 5 nearest Google Maps places for the current position without requiring typed search.
+  - The modal keeps the explicit `Use: "abc"` fallback when no local or Google result is right.
+  - Verified restaurant selection patches `place`, `position`, and `restaurantId`.
+  - Unverified/local restaurant and Google Place selection patch `place` and `position`.
+  - Fallback selection patches the typed place and current Bite/user position when available.
 - Candidate detection workflow
   - For Bites that are not attached to a verified restaurant, backend detection should group nearby Bite evidence.
   - A candidate should be created or updated when at least 5 Bites are within 200m and their restaurant/place names fuzzy-match the same normalized name.
@@ -73,6 +80,12 @@
   - Selecting a candidate should reuse the existing `new-restaurant` flow by passing a prefilled restaurant with `biteIds` and `bites`.
   - The business user checks the candidate, adds missing restaurant details, and saves it as a verified restaurant.
   - On save, create the real restaurant, attach all candidate Bite IDs to the verified `restaurantId`, create the menu, and mark the candidate as verified or merged.
+  - Current implementation:
+    - `libs/bite-tribe-business/dashboard/page/src/lib/integration/dashboard.service.ts` turns a selected dashboard candidate into an unsaved `Restaurant` with `restaurantCandidateId`, `biteIds`, and Bite evidence, then routes to `new-restaurant`.
+    - `libs/bite-tribe-business/restaurant/page/src/lib/components/page/new-restaurant-page.component.ts` preserves `restaurantCandidateId` and `biteIds` when the reviewed restaurant form is saved.
+    - `libs/bite-tribe-business/restaurant/data-access/src/lib/restaurant-data-access.service.ts` calls the `verifyRestaurantCandidate` Firebase callable for candidate-backed restaurants and uploads the reviewed base64 restaurant image after the restaurant is created.
+    - `apps/bite-tribe-firebase/functions/src/functions/verify-restaurant-candidate.ts` validates auth and restaurant data, creates the verified restaurant and empty menu in a transaction, updates all candidate Bite documents with `restaurantId`, and marks the candidate `verified` with `verifiedRestaurantId`, `verifiedAt`, and `verifiedByUserId`.
+    - If the candidate is no longer pending but already has or resolves to a `verifiedRestaurantId`, the callable returns `already-verified` without creating duplicate restaurants.
 - Suggested implementation surfaces
   - Firebase Functions
     - Add a callable to find a verified restaurant match for a newly created Bite.
@@ -112,4 +125,5 @@
   - Firebase Functions build and lint should cover backend changes.
   - Focused Angular/Jest checks should cover Bite creation prompt behavior and business dashboard candidate routing.
   - Focused migration-page checks should cover eligible Bite listing and manual cluster action wiring.
+  - Candidate verification should cover the callable transaction, business restaurant data-access callable wrapper, new-restaurant service save branch, dashboard candidate routing, and form preservation of `restaurantCandidateId` plus `biteIds`.
   - Emulator verification should seed nearby Bites, manual backfill candidates, and confirmed restaurant matches to prove Firestore state transitions.

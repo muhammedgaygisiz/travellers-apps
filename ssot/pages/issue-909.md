@@ -3,11 +3,21 @@
   - \# Launch task: Location and currency quality
   - \#\# Roadmap phase
   - Phase 1 - Launch Preparation, Week 2.
+  - \#\# Current status
+  - The main currency-quality interaction has shifted from warning-first validation to location-based currency prefill.
+  - `feat(909): auto select currency by position` (PR \#965) added a backend `getCurrencyByPosition` callable and Bite creation wiring that prefills the currency from the selected Bite position when possible.
+  - The user's preferred currency remains the fallback when no currency can be resolved.
+  - [[issue-967]] adds a separate suspicious-price warning, so the remaining currency work should avoid duplicating warning noise unless testing proves users still save wrong-currency Bites.
+  - [[issue-978]] tracks the remaining launch verification for fallback, manual override, travel/posting-later, failed-geocode, and border-region edge cases.
   - \#\# Scope
   - Enrich Bite location using Google Places.
-  - Validate currency against location.
+  - Prefill Bite currency from location when possible.
+  - Preserve manual user override when the auto-selected currency is wrong.
+  - Validate the edge cases around missing location, failed geocoding, border/vacation scenarios, and posting later.
   - Test edge cases for vacation usage, posting later, and missing location.
   - \#\# Acceptance criteria
   - Bite location enrichment is reliable enough for launch.
-  - Currency validation behaves correctly for normal and edge-case creation flows.
+  - Currency prefill behaves correctly for normal and edge-case creation flows.
+  - Failed currency resolution falls back to the user's preferred currency without blocking Bite creation.
+  - The user can still correct the currency before saving.
   - Launch-blocking backend quality work is complete.

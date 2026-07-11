@@ -1,8 +1,10 @@
 <ta-page
-  [showHeaderMenu]="false"
-  [enableBackButton]="true"
-  [hideAuthButton]="true"
-  [showFooter]="false"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
+  [menuConfig]="{ hideAuth: true }"
 >
   <ion-content class="ion-padding">
     <h1 class="ion-margin-bottom">{{ 'sign-up' | transloco }}</h1>

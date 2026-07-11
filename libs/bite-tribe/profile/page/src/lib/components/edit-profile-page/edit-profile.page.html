@@ -1,8 +1,6 @@
 <ta-page
-  [showHeaderMenu]="false"
-  [showFooter]="false"
+  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
   [isAuthenticated]="isAuthenticated()"
-  [enableBackButton]="true"
 >
   <ion-content class="ion-padding">
     <h1 class="ion-margin-bottom">{{ 'edit-profile' | transloco }}</h1>

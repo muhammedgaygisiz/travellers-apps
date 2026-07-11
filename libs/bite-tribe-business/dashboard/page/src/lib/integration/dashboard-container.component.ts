@@ -18,7 +18,7 @@ import { DashboardService } from './dashboard.service';
       (restaurantClick)="service.restaurantClicked($event)"
       (restaurantCandidateClick)="service.restaurantCandidateClicked($event)"
       (organisationClick)="service.organisationClicked($event)"
-      (gotoMigrations)="service.gotoMigrations()"
+      (menuNavigate)="service.onMenuNavigate($event)"
       (placeClick)="service.placeClicked($event)"
     />
   `,

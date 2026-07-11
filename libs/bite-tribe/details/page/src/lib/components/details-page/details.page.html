@@ -1,9 +1,7 @@
 @let biteData = bite(); @let biteCreatorData = biteCreator();
 <ta-page
-  [showHeaderMenu]="false"
-  [showFooter]="false"
+  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
   [isAuthenticated]="isAuthenticated()"
-  [enableBackButton]="true"
   (logoutClick)="logoutClick.emit()"
 >
   <ion-content>

@@ -2,7 +2,7 @@
   <ion-header>
     <ion-toolbar>
       <ion-buttons slot="start">
-        @if (enableBackButton()) {
+        @if (chromeConfig().enableBackButton) {
           <ion-back-button defaultHref="/" />
         }
       </ion-buttons>
@@ -20,7 +20,7 @@
         </div>
       </ion-title>
 
-      @if (showHeaderMenu()) {
+      @if (chromeConfig().showHeaderMenu) {
         <ion-buttons slot="end">
           <ion-button data-cy="btn-menu" (click)="showMenuPopover($event)">
             <ion-icon slot="icon-only" name="menu-outline" />
@@ -35,7 +35,7 @@
     <div class="outer-content-container">
       <div
         class="inner-content-container {{
-          fullWidth() ? 'full-width' : 'mobile-style'
+          chromeConfig().fullWidth ? 'full-width' : 'mobile-style'
         }}"
       >
         <ng-content></ng-content>
@@ -44,10 +44,10 @@
   </ion-content>
 
   <ng-container>
-    @if (showFooter()) {
+    @if (chromeConfig().showFooter) {
       <ion-footer>
         <ion-toolbar>
-          @if (showAddButton()) {
+          @if (chromeConfig().showAddButton) {
             <ion-button
               class="button"
               expand="block"

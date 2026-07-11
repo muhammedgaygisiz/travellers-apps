@@ -1,0 +1,21 @@
+- [feat(business): verify restaurant candidate into restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/942) (Issue \#942, implemented by PR \#977)
+- Status
+  - Implemented locally.
+- Roadmap context
+  - Part of [[issue-778]], the restaurant-candidate epic for improving restaurant data quality before broader launch.
+- Product intent
+  - Let a business user review a pending restaurant candidate and turn it into a real verified Restaurant.
+  - Close the candidate lifecycle by linking candidate Bites to the verified Restaurant.
+  - Keep verification idempotent so parallel dashboard sessions or repeated saves do not create duplicate Restaurants.
+- Current implementation
+  - `libs/bite-tribe-business/dashboard/page/src/lib/integration/dashboard.service.ts` routes selected candidates into `new-restaurant` with candidate Bite evidence.
+  - `libs/bite-tribe-business/restaurant/page/src/lib/components/page/new-restaurant-page.component.ts` preserves `restaurantCandidateId` and `biteIds` through the form save.
+  - `libs/bite-tribe-business/restaurant/data-access/src/lib/restaurant-data-access.service.ts` calls `verifyRestaurantCandidate`.
+  - `apps/bite-tribe-firebase/functions/src/functions/verify-restaurant-candidate.ts` creates the Restaurant and Menu, links Bites, and marks the candidate verified in one transaction.
+- Related SSOT
+  - [[issue-778]]
+  - [[UC - Maintain Restaurants In The Business App]]
+  - [[Restaurant]]
+  - [[Implementation - Firebase Functions]]
+- Validation
+  - Covered by focused business dashboard, restaurant page/data-access, and functions package tests.

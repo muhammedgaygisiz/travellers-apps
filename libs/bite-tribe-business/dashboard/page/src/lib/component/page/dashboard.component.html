@@ -1,13 +1,9 @@
 <ta-page
-  [showHeaderMenu]="true"
-  [showFooter]="false"
-  [showSettingsButton]="false"
-  [showMigrationsButton]="true"
-  [fullWidth]="true"
+  [chrome]="{ showFooter: false, fullWidth: true }"
+  [menuConfig]="{ migrations: true }"
   [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
-  (gotoSettings)="gotoSettings.emit()"
-  (gotoMigrations)="gotoMigrations.emit()"
+  (menuNavigate)="menuNavigate.emit($event)"
 >
   <ion-content class="ion-padding">
     <div class="ion-display-flex ion-flex-row">

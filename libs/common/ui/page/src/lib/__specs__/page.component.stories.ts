@@ -36,6 +36,8 @@ export default {
 type Story = StoryObj<PageComponent>;
 export const Primary: Story = {
   args: {
-    enableBackButton: false,
+    chrome: {
+      enableBackButton: false,
+    },
   },
 };

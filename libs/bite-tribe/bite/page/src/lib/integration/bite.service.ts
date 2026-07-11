@@ -30,6 +30,8 @@ export class BiteService {
   networkStatus = this.dataAccess.networkStatus;
   googlePlaces = this.dataAccess.googlePlaces;
   googlePlacesLoading = this.dataAccess.googlePlacesLoading;
+  nearbyGooglePlaces = this.dataAccess.nearbyGooglePlaces;
+  nearbyGooglePlacesLoading = this.dataAccess.nearbyGooglePlacesLoading;
 
   /** Currency derived from the bite position; `undefined` until resolved. */
   private readonly positionCurrency = signal<string | undefined>(undefined);
@@ -109,6 +111,10 @@ export class BiteService {
 
   searchGooglePlaces(searchText: string): void {
     this.dataAccess.searchGooglePlaces(searchText);
+  }
+
+  loadNearbyGooglePlaces(position: Geopoint): void {
+    this.dataAccess.loadNearbyGooglePlaces(position);
   }
 
   private async showToast(key: string): Promise<void> {

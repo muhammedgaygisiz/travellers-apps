@@ -443,7 +443,7 @@ describe('Bites Selectors', () => {
   });
 
   describe('nearbyRestaurants', () => {
-    it('should return sorted place names from nearby bites', () => {
+    it('should return sorted restaurants from nearby bites', () => {
       const PLACE_1 = 'Fish & Chips Deli';
       const PLACE_2 = 'Beef Burger Lovers Place';
       const bitesWithMetadata = [
@@ -454,7 +454,10 @@ describe('Bites Selectors', () => {
       const result =
         fromSelectors.nearbyRestaurants.projector(bitesWithMetadata);
 
-      expect(result).toEqual([PLACE_2, PLACE_1]);
+      expect(result.map((restaurant) => restaurant.name)).toEqual([
+        PLACE_2,
+        PLACE_1,
+      ]);
     });
   });
 

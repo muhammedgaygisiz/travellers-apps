@@ -275,6 +275,10 @@ export class BiteTribeApiService {
     return this.biteApiService.searchPlaces(searchText, position);
   }
 
+  async searchNearbyPlaces(position: Geopoint): Promise<GooglePlace[]> {
+    return this.biteApiService.searchNearbyPlaces(position);
+  }
+
   async biteById(biteId: string): Promise<Bite> {
     return this.biteApiService.loadBiteById(biteId);
   }

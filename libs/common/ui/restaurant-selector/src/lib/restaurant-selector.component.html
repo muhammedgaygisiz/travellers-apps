@@ -1,44 +1,83 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="cancel()">Cancel</ion-button>
+      <ion-button (click)="cancel()">
+        {{ 'restaurant-selector-cancel' | transloco }}
+      </ion-button>
     </ion-buttons>
-    <ion-title>Select Restaurant</ion-title>
+    <ion-title>{{ 'restaurant-selector-title' | transloco }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-searchbar
     (ionInput)="searchbarInput($event)"
-    placeholder="Search restaurants..."
+    [placeholder]="'restaurant-selector-search-placeholder' | transloco"
   />
 
   <ion-list [inset]="true">
     @if (showCustomOption()) {
       <ion-item [detail]="false" (click)="selectCustomRestaurant()">
         <ion-label>
-          <h2>Use: "{{ rawSearchTerm() }}"</h2>
-          <p>Add as new restaurant</p>
+          <h2>
+            {{
+              'restaurant-selector-use-custom'
+                | transloco: { searchTerm: rawSearchTerm() }
+            }}
+          </h2>
+          <p>{{ 'restaurant-selector-add-as-new' | transloco }}</p>
         </ion-label>
       </ion-item>
     }
 
-    @for (restaurant of filteredRestaurants(); track restaurant) {
-      <ion-item [detail]="false" (click)="selectRestaurant(restaurant)">
+    @for (restaurant of filteredRestaurants(); track restaurant.name) {
+      <ion-item [detail]="false" (click)="selectRestaurant(restaurant.name)">
         <ion-label>
-          <h2>{{ restaurant }}</h2>
+          <h2>{{ restaurant.name }}</h2>
+          @if (formatDistance(restaurant.distance)) {
+            <p>{{ formatDistance(restaurant.distance) }}</p>
+          }
         </ion-label>
-        @if (selectedRestaurant() === restaurant) {
+        @if (selectedRestaurant() === restaurant.name) {
           <ion-icon slot="end" name="checkmark" color="primary" />
         }
       </ion-item>
     } @empty {
-      @if (!rawSearchTerm()) {
+      @if (!rawSearchTerm() && !showNearbyGooglePlaces()) {
         <ion-item>
           <ion-label>
-            <p>Start typing to search restaurants</p>
+            <p>{{ 'restaurant-selector-start-typing' | transloco }}</p>
           </ion-label>
         </ion-item>
+      }
+    }
+
+    @if (showNearbyGooglePlaces()) {
+      @if (nearbyGooglePlacesLoading()) {
+        <ion-item [detail]="false">
+          <ion-spinner slot="start" name="crescent" />
+          <ion-label>
+            {{ 'restaurant-selector-finding-nearby' | transloco }}
+          </ion-label>
+        </ion-item>
+      } @else {
+        <ion-list-header>
+          <ion-label>
+            {{ 'restaurant-selector-nearby-google' | transloco }}
+          </ion-label>
+        </ion-list-header>
+        @for (place of sortedNearbyGooglePlaces(); track place.placeId) {
+          <ion-item [detail]="false" (click)="selectGooglePlace(place)">
+            <ion-icon slot="start" name="location-outline" />
+            <ion-label>
+              <h2>{{ place.name }}</h2>
+              <p>{{ place.address }}</p>
+              @if (formatDistance(place.distance)) {
+                <p>{{ formatDistance(place.distance) }}</p>
+              }
+            </ion-label>
+          </ion-item>
+        }
       }
     }
 
@@ -46,10 +85,14 @@
       <ion-item button [detail]="false" (click)="searchGoogleMaps()">
         <ion-icon slot="start" name="logo-google" color="primary" />
         <ion-label class="ion-text-wrap">
-          <h2>Search for "{{ rawSearchTerm() }}" in Google Maps</h2>
+          <h2>
+            {{
+              'restaurant-selector-search-google-title'
+                | transloco: { searchTerm: rawSearchTerm() }
+            }}
+          </h2>
           <p>
-            Tap to search online · add the city for better results, e.g. "Jabri
-            Amman"
+            {{ 'restaurant-selector-search-google-hint' | transloco }}
           </p>
         </ion-label>
         <ion-icon slot="end" name="arrow-forward-outline" color="primary" />
@@ -60,23 +103,32 @@
       @if (googlePlacesLoading()) {
         <ion-item [detail]="false">
           <ion-spinner slot="start" name="crescent" />
-          <ion-label>Searching Google Maps...</ion-label>
+          <ion-label>
+            {{ 'restaurant-selector-searching-google' | transloco }}
+          </ion-label>
         </ion-item>
       } @else {
         <ion-list-header>
-          <ion-label>Google Maps results</ion-label>
+          <ion-label>
+            {{ 'restaurant-selector-google-results' | transloco }}
+          </ion-label>
         </ion-list-header>
-        @for (place of googlePlaces(); track place.placeId) {
+        @for (place of sortedGooglePlaces(); track place.placeId) {
           <ion-item [detail]="false" (click)="selectGooglePlace(place)">
             <ion-icon slot="start" name="location-outline" />
             <ion-label>
               <h2>{{ place.name }}</h2>
               <p>{{ place.address }}</p>
+              @if (formatDistance(place.distance)) {
+                <p>{{ formatDistance(place.distance) }}</p>
+              }
             </ion-label>
           </ion-item>
         } @empty {
           <ion-item>
-            <ion-label>No places found on Google Maps</ion-label>
+            <ion-label>
+              {{ 'restaurant-selector-no-google-results' | transloco }}
+            </ion-label>
           </ion-item>
         }
       }

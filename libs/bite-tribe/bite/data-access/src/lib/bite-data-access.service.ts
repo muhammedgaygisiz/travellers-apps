@@ -17,6 +17,7 @@ import type {
   UploadParams,
 } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { withGooglePlaceDistance } from './utils/with-google-place-distance';
 
 const MIN_GOOGLE_PLACE_SEARCH_TEXT_LENGTH = 3;
 
@@ -71,13 +72,43 @@ export class BiteDataAccessService {
         return [];
       }
 
-      return this.api.searchPlaces(searchText, this.position());
+      const position = this.position();
+      const places = await this.api.searchPlaces(searchText, position);
+
+      return withGooglePlaceDistance(places, position);
     },
     defaultValue: [],
   });
 
   googlePlaces = this.googlePlacesResource.value;
   googlePlacesLoading = this.googlePlacesResource.isLoading;
+
+  /**
+   * Position to load nearby Google places for. Left `undefined` until a caller
+   * explicitly requests nearby suggestions (e.g. the restaurant selector opens
+   * without any local restaurants), so the Google callable is only hit on demand.
+   */
+  readonly nearbyGooglePlacesPosition = signal<Geopoint | undefined>(undefined);
+
+  private readonly nearbyGooglePlacesResource = resource<
+    GooglePlace[],
+    Geopoint | undefined
+  >({
+    params: () => this.nearbyGooglePlacesPosition(),
+    loader: async ({ params }) => {
+      if (!params) {
+        return [];
+      }
+
+      const places = await this.api.searchNearbyPlaces(params);
+
+      return withGooglePlaceDistance(places, params);
+    },
+    defaultValue: [],
+  });
+
+  nearbyGooglePlaces = this.nearbyGooglePlacesResource.value;
+  nearbyGooglePlacesLoading = this.nearbyGooglePlacesResource.isLoading;
 
   readonly uploadProgress = signal<{
     biteId: string;
@@ -124,6 +155,10 @@ export class BiteDataAccessService {
 
   searchGooglePlaces(searchText: string): void {
     this.googlePlaceSearchText.set(searchText);
+  }
+
+  loadNearbyGooglePlaces(position: Geopoint): void {
+    this.nearbyGooglePlacesPosition.set(position);
   }
 
   getCurrencyByPosition(position?: Geopoint): Promise<string | undefined> {

@@ -1,4 +1,5 @@
 import {
+  buildNearbyRequestBody,
   buildRequestBody,
   parsePosition,
   toGooglePlaces,
@@ -113,6 +114,43 @@ describe('search-places helpers', () => {
         textQuery: 'pizza',
         maxResultCount: 20,
       });
+    });
+  });
+
+  describe('buildNearbyRequestBody', () => {
+    it('builds a distance-ranked restaurant search restricted to the position', () => {
+      const body = buildNearbyRequestBody({
+        latitude: 40.85,
+        longitude: 14.26,
+      });
+
+      expect(body).toEqual({
+        includedTypes: ['restaurant'],
+        maxResultCount: 5,
+        rankPreference: 'DISTANCE',
+        locationRestriction: {
+          circle: {
+            center: { latitude: 40.85, longitude: 14.26 },
+            radius: 20000,
+          },
+        },
+      });
+    });
+  });
+
+  describe('toGooglePlaces with a limit', () => {
+    it('caps the number of returned places', () => {
+      const places = Array.from({ length: 8 }, (_, index) => ({
+        id: `place-${index}`,
+        displayName: { text: `Place ${index}` },
+        formattedAddress: `Address ${index}`,
+        location: { latitude: index, longitude: index },
+      }));
+
+      const result = toGooglePlaces({ places }, 5);
+
+      expect(result).toHaveLength(5);
+      expect(result[0].placeId).toBe('place-0');
     });
   });
 });

@@ -20,6 +20,30 @@
     font-size: 0.8rem;
   }
 
+  .place-field {
+    .selected-place {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+
+      .selected-place-name {
+        min-width: 0;
+        font-weight: 500;
+      }
+
+      .reselect-button {
+        --border-radius: 8px;
+        --padding-end: 0;
+        --padding-start: 0;
+        width: 47px;
+        height: 47px;
+        margin: 0;
+        flex-shrink: 0;
+      }
+    }
+  }
+
   .map-label {
     margin-bottom: 0.5rem;
   }

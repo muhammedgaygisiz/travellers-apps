@@ -6,7 +6,7 @@ import { biteId } from '../router/selectors';
 import { exchangeRates, preferredCurrency } from '../app/selectors';
 import { enrichByPriceInPreferredCurrency } from './utils/enrich-by-price-in-preferred-currency';
 import { getNearbyBites } from './utils/get-nearby-bites';
-import { getNearbyRestaurantNamesByPosition } from './utils/get-nearby-restaurant-names-by-position';
+import { getNearbyRestaurantsByPosition } from './utils/get-nearby-restaurants-by-position';
 import { getTagSuggestionsByPlace } from './utils/get-tag-suggestions-by-place';
 import { bitesWithMetadata } from './home-bites.selector';
 
@@ -51,7 +51,7 @@ export const bite = createSelector(
 );
 
 export const nearbyRestaurants = createSelector(bitesWithMetadata, (bites) =>
-  getNearbyRestaurantNamesByPosition(bites),
+  getNearbyRestaurantsByPosition(bites),
 );
 
 export const editingBite = createSelector(slice, (state) => state?.editingBite);

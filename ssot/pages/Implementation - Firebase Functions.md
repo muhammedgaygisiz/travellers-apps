@@ -18,7 +18,7 @@ apps/bite-tribe-firebase/functions/src/index.ts
 | Auth           | `create-user-on-auth-create.ts`, `update-last-seen.ts`, `update-user-metadata.ts`                                                               |
 | Search         | `search-bites.ts`, `search-bites-by-city.ts`, `search-restaurants.ts`, `search-users.ts`, `search-places.ts`                                    |
 | Discovery      | `load-bites-by-location.ts`, `load-leaderboard.ts`                                                                                              |
-| Enrichment     | `enrich-bite-address-on-create.ts`, `backfillBiteAddress`                                                                                       |
+| Enrichment     | `enrich-bite-address-on-create.ts`, `backfillBiteAddress`, `get-currency-by-position.ts`                                                        |
 | Aggregates     | `increment-bite-count-on-bite-create.ts`, `resync-bite-counts.ts`, `update-bite-like-count-on-like-write.ts`                                    |
 | Storage        | `set-bite-image-path-on-upload.ts`                                                                                                              |
 | Notifications  | `notify-bite-creator-on-like.ts`, `notify-followers-on-new-bite.ts`, `notify-user-on-new-follower.ts`, `send-daily-leaderboard-notification.ts` |

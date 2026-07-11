@@ -17,6 +17,7 @@
 - Completed or landed toward this phase:
   - Firebase App Check bootstrap and telemetry work is in place, but enforcement readiness still depends on monitoring verified request quality.
   - Bite address enrichment and city search have landed through [[issue-974]].
+  - Location-based Bite currency prefill has landed through [[issue-909]] / PR \#965.
   - Client-side suspicious price validation has landed through [[issue-967]].
   - Leaderboard reliability work has landed through [[issue-966]] and [[issue-968]].
   - Daily ranking-change notifications have landed through [[issue-971]].
@@ -24,7 +25,7 @@
   - Restaurant candidate verification has landed through [[issue-942]] as part of [[issue-778]].
 
 - Current gap to the 17 July 2026 milestone:
-  - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, Bite photo upload reliability, notification delivery, city search quality, suspicious-price UX, and restaurant candidate verification state transitions.
+  - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, Bite photo upload reliability, notification delivery, city search quality, currency prefill and manual override, suspicious-price UX, and restaurant candidate verification state transitions.
 
 - ### Week 1
 
@@ -38,7 +39,7 @@
   Focus: Location and currency quality.
 
 - Enrich Bite location using Google Places.
-- Validate currency against location.
+- Prefill currency from Bite location and validate the fallback/override edge cases.
 - Test edge cases:
   - vacation usage
   - posting later

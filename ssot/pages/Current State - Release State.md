@@ -31,6 +31,7 @@ The product is not yet in public launch mode. The current focus is proving the r
 ## Recent Completed Work
 
 - [[issue-967]] added client-side suspicious price validation.
+- [[issue-909]] / PR \#965 added location-based currency prefill for Bite creation.
 - [[issue-974]] added city search through backend search functions and search UI wiring.
 - [[issue-966]] added weekly Bite count resync for leaderboard/profile aggregate repair.
 - [[issue-968]] persisted leaderboard ranking/contribution display behavior.
@@ -45,8 +46,9 @@ The product is not yet in public launch mode. The current focus is proving the r
 - App Check enforcement enabled.
 - Bite location enriched with Google Places.
 - City search backed by enriched Bite location data implemented.
+- Location-based Bite currency prefill implemented.
 - Client-side suspicious price validation implemented.
-- Currency validation against location implemented and tested.
+- Currency prefill fallback and manual override tested.
 - Leaderboard aggregate resync implemented.
 - Ranking-change notifications implemented and device-tested.
 - Profile badges implemented.

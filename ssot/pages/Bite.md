@@ -130,6 +130,7 @@ Current implementation notes:
 - New Bite documents are written with `addressStatus = pending`; `enrichBiteAddressOnCreate` reverse-geocodes the Bite position asynchronously and writes `city`, `region`, `country`, `countryCode`, `formatted`, and a final address status.
 - Older Bite documents without address enrichment are migrated through the business migrations backfill path, which calls `backfillBiteAddress` for the selected Bite.
 - Enriched city data powers `searchBitesByCity`.
+- During Bite creation, `getCurrencyByPosition` can resolve the selected position to a country currency and prefill the form currency; the user's preferred currency remains the fallback.
 - The Bite page warns users when the entered price looks suspiciously high.
 - Uploaded Bite images are stored below `images/bites/{biteId}/{filename}`.
 - `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized.
@@ -220,6 +221,7 @@ Cloud Functions:
 loadBitesByLocation
 searchBites
 searchBitesByCity
+getCurrencyByPosition
 setBiteImagePathOnUpload
 enrichBiteAddressOnCreate
 backfillBiteAddress
@@ -260,7 +262,7 @@ images/bites/{biteId}/{filename}
 - Duplicate Bite detection.
 - Food recognition.
 - Stronger restaurant/place matching.
-- Location and currency mismatch warnings.
+- More evidence around whether location/currency mismatch warnings are needed beyond prefill, fallback, and manual override.
 - Bite completeness score.
 - Bite quality signals for ranking in feed, map, search, and BiteTrails.
 - Menu-item-to-Bite creation flow.

@@ -57,6 +57,7 @@ export class MapComponent implements OnDestroy {
   private map!: L.Map;
   private markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup();
   private markers: L.Marker[] = [];
+  private hasAutoFitted = false;
   private readonly mapChild = viewChild<ElementRef>('map');
 
   isReadonly = computed(() => {
@@ -81,6 +82,7 @@ export class MapComponent implements OnDestroy {
     if (geopoints && geopoints.length > 0) {
       this.updateMarkers(geopoints);
       zoomToMarkers(gpsPosition, geopoints, this.markers, this.map);
+      this.hasAutoFitted = true;
     } else if (gpsPosition) {
       zoomToGpsOrDefault(gpsPosition, this.markers, geopoints, this.map);
     } else {
@@ -105,11 +107,24 @@ export class MapComponent implements OnDestroy {
       this.map.setView([0, 0], 2);
       clearMarkers(this.markerClusterGroup, this.map);
       this.markers = [];
+      this.hasAutoFitted = false;
       return;
     }
 
     this.updateMarkers(geopoints);
 
+    // Only fit the camera to the markers on the first data load. Subsequent
+    // updates (e.g. a new bite arriving via the live stream) must leave the
+    // camera untouched so the user keeps their current pan/zoom.
+    if (this.hasAutoFitted) {
+      return;
+    }
+
+    this.fitCameraToGeopoints(geopoints);
+    this.hasAutoFitted = true;
+  });
+
+  private fitCameraToGeopoints(geopoints: Geopoint[]): void {
     const firstPosition = geopoints[0];
 
     // First focus on the first position briefly
@@ -121,7 +136,7 @@ export class MapComponent implements OnDestroy {
         fitMapToMarkers(this.markers, geopoints, this.map);
       }, 100);
     }
-  });
+  }
 
   ngOnDestroy(): void {
     if (this.map) {

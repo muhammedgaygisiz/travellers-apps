@@ -129,6 +129,9 @@ Current implementation notes:
 - `geohash` is derived from the Bite position at creation.
 - New Bite documents are written with `addressStatus = pending`; `enrichBiteAddressOnCreate` reverse-geocodes the Bite position asynchronously and writes `city`, `region`, `country`, `countryCode`, `formatted`, and a final address status.
 - Older Bite documents without address enrichment are migrated through the business migrations backfill path, which calls `backfillBiteAddress` for the selected Bite.
+- Enriched city data powers `searchBitesByCity`.
+- During Bite creation, `getCurrencyByPosition` can resolve the selected position to a country currency and prefill the form currency; the user's preferred currency remains the fallback.
+- The Bite page warns users when the entered price looks suspiciously high.
 - Uploaded Bite images are stored below `images/bites/{biteId}/{filename}`.
 - `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized.
 - The current delete flow removes the Bite document and attempts to remove the image file.
@@ -160,6 +163,7 @@ Supported today:
 - Discover nearby Bites.
 - View Bite details.
 - Search for Bites.
+- Search for Bites by city.
 - Like Bite.
 - Review Bite.
 - Add Bite to bucket list.
@@ -216,6 +220,8 @@ Cloud Functions:
 ```text
 loadBitesByLocation
 searchBites
+searchBitesByCity
+getCurrencyByPosition
 setBiteImagePathOnUpload
 enrichBiteAddressOnCreate
 backfillBiteAddress
@@ -242,7 +248,7 @@ images/bites/{biteId}/{filename}
 - Currency conversion is represented as derived presentation data, not as the canonical price.
 - Image upload and image path synchronization are separate steps.
 - Image upload can fail or become fragile when the app is backgrounded.
-- City and country are not part of the current Bite model.
+- City and country are enriched asynchronously and may be missing on older or failed-enrichment Bite documents.
 - Menu item linking is not part of the current Bite model.
 - Historical behavior for deleted Bites needs a clearer product rule.
 - Counter aggregates must stay symmetric across create/delete lifecycles. If a future aggregate increments when a Bite, like, review, or related counted document is created, add the matching decrement behavior when that counted document can be deleted.
@@ -256,7 +262,7 @@ images/bites/{biteId}/{filename}
 - Duplicate Bite detection.
 - Food recognition.
 - Stronger restaurant/place matching.
-- Location and currency mismatch warnings.
+- More evidence around whether location/currency mismatch warnings are needed beyond prefill, fallback, and manual override.
 - Bite completeness score.
 - Bite quality signals for ranking in feed, map, search, and BiteTrails.
 - Menu-item-to-Bite creation flow.

@@ -23,6 +23,8 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - A Restaurant can have an address and GPS position.
 - A Restaurant can have social media links, opening hours, description, and image.
 - Creating a Restaurant can update selected Bites with the new `restaurantId`.
+- Verifying a Restaurant candidate creates the Restaurant through the backend, creates its empty Menu, updates all candidate Bites with the new `restaurantId`, and records the verification on the candidate.
+- Candidate-backed Restaurant creation should be idempotent: repeated verification of an already verified or merged candidate must return the existing verified Restaurant instead of creating another one.
 - Verified versus unverified restaurant behavior is an active product area.
 
 ## Required Data
@@ -43,6 +45,7 @@ Current model fields:
 - `address`
 - `menuId`
 - `unsaved`
+- `restaurantCandidateId`
 - `biteIds`
 - `bites`
 - `socialMediaLinks`
@@ -97,6 +100,8 @@ Current implementation notes:
 - Restaurants are stored in `/restaurants/{restaurantId}`.
 - Creating a restaurant also creates an empty menu document and stores the `menuId` on the restaurant.
 - If `biteIds` are provided during creation, those Bites are updated with the new `restaurantId`.
+- Candidate-backed creation uses `verifyRestaurantCandidate` so restaurant creation, menu creation, Bite linking, and candidate status changes happen in one backend transaction.
+- Candidate verification stores `verifiedRestaurantId`, `verifiedAt`, `verifiedAtTimestamp`, and `verifiedByUserId` on `/restaurantCandidates/{candidateId}`.
 - Restaurant image upload stores an `imagePath`.
 
 ## Permissions
@@ -123,6 +128,7 @@ Supported today:
 - View Restaurant menu.
 - Search Restaurants.
 - Create Restaurant in business app.
+- Verify Restaurant candidate in business app.
 - Edit Restaurant in business app.
 - Maintain address, position, social links, opening hours, description, image, and menu.
 
@@ -149,6 +155,7 @@ Firestore:
 /restaurants/{restaurantId}
 /menus/{menuId}
 /bites/{biteId}
+/restaurantCandidates/{candidateId}
 ```
 
 Frontend and shared model:
@@ -168,6 +175,7 @@ Cloud Functions:
 
 ```text
 searchRestaurants
+verifyRestaurantCandidate
 ```
 
 Storage:
@@ -181,6 +189,7 @@ images/restaurants/{restaurantId}/{filename}
 - Verified versus unverified Restaurant rules are still evolving.
 - A Bite can use `place` without a `restaurantId`, so restaurant matching can be fuzzy or incomplete.
 - Restaurant ownership is not clearly represented in the Restaurant model.
+- Candidate verification currently relies on a business-user workflow and callable auth; explicit role/organisation authorization is not fully modeled here.
 - Menu item actions are not yet connected to Bite creation, reservation, or contact flows.
 - Aggregate rating/tag behavior is derived from Bites and not fully formalized in the Restaurant model.
 

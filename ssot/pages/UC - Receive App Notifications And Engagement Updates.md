@@ -17,6 +17,7 @@ Users and creators can receive engagement signals around Bites and social activi
 ## Current Flow
 
 - Backend functions react to new Bites, likes, reviews, followers, and weekly activity.
+- Backend functions can notify users about meaningful leaderboard ranking changes.
 - Notifications or shared-link behavior keep users connected to activity.
 
 ## Supported Evidence
@@ -26,6 +27,7 @@ Users and creators can receive engagement signals around Bites and social activi
 - `notifyBiteCreatorOnReview`
 - `notifyUserOnNewFollower`
 - `sendWeeklyBiteNotification`
+- `sendDailyLeaderboardNotification`
 - `handleSharedLinkToBite`
 
 ## Related Domains

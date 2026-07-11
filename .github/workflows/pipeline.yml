@@ -193,8 +193,23 @@ jobs:
 
       # Boots the Firebase emulators + Angular dev server (see
       # apps/bite-tribe-e2e/playwright.config.ts) and runs the suite.
+      #
+      # apps/bite-tribe/.env is gitignored, so these NX_* vars are absent in CI.
+      # env-var-plugin.js inlines them into the served bundle at build time.
+      # NX_APP_BITE_TRIBE_IS_DEV=true routes the app to the Firebase emulators
+      # (and skips App Check); without it the app targets production Firebase and
+      # hangs headless. All traffic stays on the local emulators, so the values
+      # below only need a matching projectId — the rest are throwaway demo values.
       - name: Run E2E Tests
         run: npm run nx -- e2e bite-tribe-e2e
+        env:
+          NX_APP_BITE_TRIBE_IS_DEV: 'true'
+          NX_APP_BITE_TRIBE_PROJECT_ID: bite-tribe
+          NX_APP_BITE_TRIBE_API_KEY: demo-api-key
+          NX_APP_BITE_TRIBE_AUTH_DOMAIN: bite-tribe.firebaseapp.com
+          NX_APP_BITE_TRIBE_STORAGE_BUCKET: bite-tribe.appspot.com
+          NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID: '000000000000'
+          NX_APP_BITE_TRIBE_APP_ID: demo-app-id
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

@@ -50,8 +50,6 @@
           }
           {{ city() }}
         </div>
-
-        <country-flags [countryCodes]="userData?.countryCodes" />
       </div>
 
       @if (!userData?.isOrganisation) {
@@ -78,6 +76,8 @@
     <p class="profile-about">
       {{ userData?.about || ('no-description-available' | transloco) }}
     </p>
+
+    <country-flags [countryCodes]="userData?.countryCodes" />
 
     <div class="bites-section">
       <h2>{{ userData?.isOrganisation ? 'Bite Trails' : 'Bites' }}</h2>

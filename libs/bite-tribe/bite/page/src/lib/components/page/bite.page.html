@@ -144,7 +144,7 @@
   <ng-template>
     <lib-restaurant-selector
       class="ion-page"
-      [restaurants]="restaurantNames()"
+      [restaurants]="nearbyRestaurants()"
       [selectedRestaurant]="biteFormGroup.get('place')?.value || ''"
       [googlePlaces]="googlePlaces()"
       [googlePlacesLoading]="googlePlacesLoading()"

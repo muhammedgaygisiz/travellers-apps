@@ -119,10 +119,6 @@ export class BitePage {
 
   nearbyRestaurants = input<NearbyRestaurant[]>([]);
 
-  restaurantNames = computed(() =>
-    this.nearbyRestaurants().map((restaurant) => restaurant.name),
-  );
-
   biteFormGroup = this.formBuilder.group(
     {
       id: [''],

@@ -23,12 +23,15 @@
       </ion-item>
     }
 
-    @for (restaurant of filteredRestaurants(); track restaurant) {
-      <ion-item [detail]="false" (click)="selectRestaurant(restaurant)">
+    @for (restaurant of filteredRestaurants(); track restaurant.name) {
+      <ion-item [detail]="false" (click)="selectRestaurant(restaurant.name)">
         <ion-label>
-          <h2>{{ restaurant }}</h2>
+          <h2>{{ restaurant.name }}</h2>
+          @if (formatDistance(restaurant.distance)) {
+            <p>{{ formatDistance(restaurant.distance) }}</p>
+          }
         </ion-label>
-        @if (selectedRestaurant() === restaurant) {
+        @if (selectedRestaurant() === restaurant.name) {
           <ion-icon slot="end" name="checkmark" color="primary" />
         }
       </ion-item>

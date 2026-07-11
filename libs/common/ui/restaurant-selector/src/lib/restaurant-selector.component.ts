@@ -34,6 +34,18 @@ export interface GooglePlaceOption {
   position: { latitude: number; longitude: number };
 }
 
+/**
+ * View model for a local restaurant row. Kept local so this common UI component
+ * stays independent of app models; callers pass their own structurally-compatible
+ * type. `distance` is a raw km value as a string; `undefined` sorts last.
+ */
+export interface RestaurantOption {
+  name: string;
+  distance?: string;
+  position?: { latitude: number; longitude: number };
+  restaurantId?: string;
+}
+
 @Component({
   selector: 'lib-restaurant-selector',
   templateUrl: './restaurant-selector.component.html',
@@ -56,7 +68,7 @@ export interface GooglePlaceOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RestaurantSelectorComponent {
-  restaurants = input<string[]>([]);
+  restaurants = input<RestaurantOption[]>([]);
   selectedRestaurant = input<string>('');
   googlePlaces = input<GooglePlaceOption[]>([]);
   googlePlacesLoading = input<boolean>(false);
@@ -76,7 +88,10 @@ export class RestaurantSelectorComponent {
     const restaurants = this.restaurants();
 
     if (!searchTerm) {
-      return restaurants;
+      // Default view: nearest first.
+      return [...restaurants].sort(
+        (a, b) => this.toDistance(a.distance) - this.toDistance(b.distance),
+      );
     }
 
     const normalizedSearchTerm = normalize(searchTerm);
@@ -85,7 +100,7 @@ export class RestaurantSelectorComponent {
       .map((restaurant) => {
         const nameMatches = getSimilarityScore(
           normalizedSearchTerm,
-          normalize(restaurant),
+          normalize(restaurant.name),
         );
 
         const score = nameMatches.length > 0 ? nameMatches[0].score : 0;
@@ -113,7 +128,7 @@ export class RestaurantSelectorComponent {
 
     // Check if there's an exact match (normalized)
     const hasExactMatch = filteredRestaurants.some(
-      (restaurant) => normalize(restaurant) === normalizedSearchTerm,
+      (restaurant) => normalize(restaurant.name) === normalizedSearchTerm,
     );
 
     return !hasExactMatch && searchTerm.length > 0;
@@ -146,6 +161,16 @@ export class RestaurantSelectorComponent {
       (this.nearbyGooglePlacesLoading() ||
         this.nearbyGooglePlaces().length > 0),
   );
+
+  private toDistance(distance?: string): number {
+    const parsed = distance ? parseFloat(distance) : NaN;
+    return Number.isNaN(parsed) ? Infinity : parsed;
+  }
+
+  formatDistance(distance?: string): string {
+    const km = this.toDistance(distance);
+    return Number.isFinite(km) ? `${km.toFixed(1)} km` : '';
+  }
 
   searchbarInput(event: Event): void {
     const target = event.target as HTMLIonSearchbarElement;

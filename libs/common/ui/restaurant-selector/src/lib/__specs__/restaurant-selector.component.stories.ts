@@ -21,6 +21,14 @@ export default {
       imports: [RestaurantSelectorComponent, IonApp],
     }),
   ],
+  args: {
+    restaurants: [],
+    selectedRestaurant: '',
+    googlePlaces: [],
+    googlePlacesLoading: false,
+    nearbyGooglePlaces: [],
+    nearbyGooglePlacesLoading: false,
+  },
   render: (args) => ({
     props: args,
     template: `
@@ -59,7 +67,11 @@ const googlePlaces = [
 
 export const Default: Story = {
   args: {
-    restaurants: ['Pizza Place', 'Burger Joint', 'Sushi Bar'],
+    restaurants: [
+      { name: 'Burger Joint', distance: '2.1' },
+      { name: 'Pizza Place', distance: '0.4' },
+      { name: 'Sushi Bar', distance: '1.3' },
+    ],
     selectedRestaurant: '',
     googlePlaces: [],
     googlePlacesLoading: false,

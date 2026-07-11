@@ -19,26 +19,54 @@ describe('RestaurantSelectorComponent', () => {
   });
 
   it('should show all restaurants when search term is empty', () => {
-    const restaurants = ['Restaurant A', 'Restaurant B', 'Restaurant C'];
+    const restaurants = [
+      { name: 'Restaurant A' },
+      { name: 'Restaurant B' },
+      { name: 'Restaurant C' },
+    ];
     fixture.componentRef.setInput('restaurants', restaurants);
     fixture.detectChanges();
 
-    expect(component.filteredRestaurants()).toEqual(restaurants);
+    expect(component.filteredRestaurants().map((r) => r.name)).toEqual([
+      'Restaurant A',
+      'Restaurant B',
+      'Restaurant C',
+    ]);
+  });
+
+  it('should sort restaurants nearest first in the default view', () => {
+    const restaurants = [
+      { name: 'Far Away', distance: '5' },
+      { name: 'Close By', distance: '0.3' },
+      { name: 'Mid Range', distance: '2' },
+    ];
+    fixture.componentRef.setInput('restaurants', restaurants);
+    fixture.detectChanges();
+
+    expect(component.filteredRestaurants().map((r) => r.name)).toEqual([
+      'Close By',
+      'Mid Range',
+      'Far Away',
+    ]);
   });
 
   it('should filter restaurants based on search term', () => {
-    const restaurants = ['Pizza Place', 'Burger Joint', 'Sushi Bar'];
+    const restaurants = [
+      { name: 'Pizza Place' },
+      { name: 'Burger Joint' },
+      { name: 'Sushi Bar' },
+    ];
     fixture.componentRef.setInput('restaurants', restaurants);
     component.rawSearchTerm.set('pizza');
     fixture.detectChanges();
 
-    const filtered = component.filteredRestaurants();
+    const filtered = component.filteredRestaurants().map((r) => r.name);
     expect(filtered).toContain('Pizza Place');
     expect(filtered.length).toBeGreaterThan(0);
   });
 
   it('should show custom option when search term does not match any restaurant', () => {
-    const restaurants = ['Restaurant A', 'Restaurant B'];
+    const restaurants = [{ name: 'Restaurant A' }, { name: 'Restaurant B' }];
     fixture.componentRef.setInput('restaurants', restaurants);
     component.rawSearchTerm.set('new restaurant');
     fixture.detectChanges();
@@ -47,7 +75,7 @@ describe('RestaurantSelectorComponent', () => {
   });
 
   it('should not show custom option when search term matches a restaurant', () => {
-    const restaurants = ['Restaurant A', 'Restaurant B'];
+    const restaurants = [{ name: 'Restaurant A' }, { name: 'Restaurant B' }];
     fixture.componentRef.setInput('restaurants', restaurants);
     component.rawSearchTerm.set('restaurant a');
     fixture.detectChanges();
@@ -84,7 +112,7 @@ describe('RestaurantSelectorComponent', () => {
   });
 
   it('should offer the Google Maps search when there are no local hits', () => {
-    fixture.componentRef.setInput('restaurants', ['Pizza Place']);
+    fixture.componentRef.setInput('restaurants', [{ name: 'Pizza Place' }]);
     component.rawSearchTerm.set('sushi corner');
     fixture.detectChanges();
 
@@ -93,12 +121,18 @@ describe('RestaurantSelectorComponent', () => {
   });
 
   it('should not offer the Google Maps search when there are local hits', () => {
-    fixture.componentRef.setInput('restaurants', ['Sushi Corner']);
+    fixture.componentRef.setInput('restaurants', [{ name: 'Sushi Corner' }]);
     component.rawSearchTerm.set('sushi');
     fixture.detectChanges();
 
     expect(component.hasLocalHits()).toBe(true);
     expect(component.showGoogleSearchOption()).toBe(false);
+  });
+
+  it('should format the distance shown on restaurant rows', () => {
+    expect(component.formatDistance('0.34')).toBe('0.3 km');
+    expect(component.formatDistance(undefined)).toBe('');
+    expect(component.formatDistance('not-a-number')).toBe('');
   });
 
   it('should emit searchInGoogleMaps and remember the searched term', () => {

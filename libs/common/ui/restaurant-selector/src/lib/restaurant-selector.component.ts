@@ -22,6 +22,7 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { getSimilarityScore, normalize } from 'utils';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 /**
  * View model for a place returned from an external maps provider.
@@ -65,6 +66,7 @@ export interface RestaurantOption {
     IonSpinner,
     IonTitle,
     IonToolbar,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

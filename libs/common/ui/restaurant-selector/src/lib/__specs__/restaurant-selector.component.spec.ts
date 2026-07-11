@@ -1,5 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RestaurantSelectorComponent } from '../restaurant-selector.component';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string, params?: Record<string, string>): string => {
+    if (!params) {
+      return key;
+    }
+
+    return Object.entries(params).reduce(
+      (translation, [name, value]) => translation.replace(`{{${name}}}`, value),
+      key,
+    );
+  }),
+  getActiveLang: jest.fn(() => 'en'),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of('en'),
+};
 
 describe('RestaurantSelectorComponent', () => {
   let component: RestaurantSelectorComponent;
@@ -8,6 +28,9 @@ describe('RestaurantSelectorComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RestaurantSelectorComponent],
+      providers: [
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RestaurantSelectorComponent);

@@ -28,10 +28,16 @@
       gap: 0.5rem;
 
       .selected-place-name {
+        min-width: 0;
         font-weight: 500;
       }
 
       .reselect-button {
+        --border-radius: 8px;
+        --padding-end: 0;
+        --padding-start: 0;
+        width: 47px;
+        height: 47px;
         margin: 0;
         flex-shrink: 0;
       }

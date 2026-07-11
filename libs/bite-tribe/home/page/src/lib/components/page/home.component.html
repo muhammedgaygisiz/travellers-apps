@@ -18,14 +18,7 @@
   [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
-  (gotoSettings)="gotoSettings.emit()"
-  (gotoProfile)="gotoMyProfile.emit()"
-  (gotoMyBucketlists)="gotoMyBucketlists.emit()"
-  (gotoMyBites)="gotoMyBites.emit()"
-  (gotoAbout)="gotoAbout.emit()"
-  (gotoMarketPlace)="gotoMarketPlace.emit()"
-  (gotoGallery)="gotoGallery.emit()"
-  (gotoLeaderboard)="gotoLeaderboard.emit()"
+  (menuNavigate)="onMenuNavigate($event)"
 >
   @if (showSearch()) {
     <ion-buttons header-end slot="end">

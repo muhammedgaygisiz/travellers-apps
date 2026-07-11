@@ -1,3 +1,15 @@
+/** Navigation targets emitted by the page's header menu. */
+export type PageMenuTarget =
+  | 'settings'
+  | 'about'
+  | 'profile'
+  | 'migrations'
+  | 'my-bites'
+  | 'my-bucketlists'
+  | 'market-place'
+  | 'gallery'
+  | 'leaderboard';
+
 /**
  * Toggles for the items shown in the page's header menu popover.
  * Unspecified fields fall back to {@link DEFAULT_PAGE_MENU_CONFIG} (all off).

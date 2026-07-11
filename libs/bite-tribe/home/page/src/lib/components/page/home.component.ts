@@ -9,7 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { PageComponent } from 'common/ui/page';
+import { PageComponent, PageMenuTarget } from 'common/ui/page';
 import {
   IonButton,
   IonButtons,
@@ -161,6 +161,35 @@ export class BiteTribeHomeComponent {
     const bites = this.bites();
     return bites && bites?.length > 5;
   });
+
+  onMenuNavigate(target: PageMenuTarget): void {
+    switch (target) {
+      case 'settings':
+        this.gotoSettings.emit();
+        break;
+      case 'profile':
+        this.gotoMyProfile.emit();
+        break;
+      case 'my-bites':
+        this.gotoMyBites.emit();
+        break;
+      case 'my-bucketlists':
+        this.gotoMyBucketlists.emit();
+        break;
+      case 'about':
+        this.gotoAbout.emit();
+        break;
+      case 'market-place':
+        this.gotoMarketPlace.emit();
+        break;
+      case 'gallery':
+        this.gotoGallery.emit();
+        break;
+      case 'leaderboard':
+        this.gotoLeaderboard.emit();
+        break;
+    }
+  }
 
   scrollToTop(): void {
     const ionContent = this.ionContent();

@@ -7,7 +7,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { PageComponent } from 'common/ui/page';
+import { PageComponent, PageMenuTarget } from 'common/ui/page';
 import {
   IonAlert,
   IonBadge,
@@ -90,6 +90,23 @@ export class ProfileComponent {
   readonly unfollowButtonClick = output<PublicUser>();
   readonly followersClick = output<string>();
   readonly followingClick = output<string>();
+
+  onMenuNavigate(target: PageMenuTarget): void {
+    switch (target) {
+      case 'settings':
+        this.gotoSettings.emit();
+        break;
+      case 'profile':
+        this.gotoMyProfile.emit();
+        break;
+      case 'my-bites':
+        this.gotoMyBites.emit();
+        break;
+      case 'my-bucketlists':
+        this.gotoMyBucketlists.emit();
+        break;
+    }
+  }
 
   isOpen = signal(false);
   currentPage = signal<number>(1);

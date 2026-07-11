@@ -4,7 +4,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { PageComponent } from 'common/ui/page';
+import { PageComponent, PageMenuTarget } from 'common/ui/page';
 import {
   IonCard,
   IonCardContent,
@@ -58,6 +58,17 @@ export class DashboardComponent {
   readonly restaurantCandidateClick = output<DashboardRestaurantCandidate>();
   readonly organisationClick = output<PublicUser>();
   readonly placeClick = output<string>();
+
+  onMenuNavigate(target: PageMenuTarget): void {
+    switch (target) {
+      case 'settings':
+        this.gotoSettings.emit();
+        break;
+      case 'migrations':
+        this.gotoMigrations.emit();
+        break;
+    }
+  }
 
   candidateEvidenceCount(candidate: DashboardRestaurantCandidate): number {
     return candidate.evidence?.biteCount ?? candidate.biteIds?.length ?? 0;

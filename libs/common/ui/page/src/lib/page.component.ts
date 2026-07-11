@@ -26,8 +26,9 @@ import {
   DEFAULT_PAGE_MENU_CONFIG,
   PageChromeConfig,
   PageMenuConfig,
+  PageMenuTarget,
 } from './page-config';
-import { APP_TITLE, SupportedLang } from 'utils';
+import { APP_TITLE } from 'utils';
 import { UpperCasePipe } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
 
@@ -93,31 +94,11 @@ export class PageComponent {
     return this.appTitleToken;
   });
 
-  public addItemClick = output();
-
   public loginClick = output();
 
   public logoutClick = output();
 
-  public languageChangeClick = output<SupportedLang>();
-
-  public gotoSettings = output();
-
-  public gotoAbout = output();
-
-  public gotoProfile = output();
-
-  public gotoMigrations = output();
-
-  public gotoMyBites = output();
-
-  public gotoMyBucketlists = output();
-
-  public gotoMarketPlace = output();
-
-  public gotoGallery = output();
-
-  public gotoLeaderboard = output();
+  public menuNavigate = output<PageMenuTarget>();
 
   public addButtonClick = output<MouseEvent>();
 
@@ -162,16 +143,7 @@ export class PageComponent {
         showLeaderboardButton: this.showLeaderboardButton,
         loginClick: this.loginClick,
         logoutClick: this.logoutClick,
-        languageChangeClick: this.languageChangeClick,
-        gotoSettings: this.gotoSettings,
-        gotoAbout: this.gotoAbout,
-        gotoMyBites: this.gotoMyBites,
-        gotoMyBucketlists: this.gotoMyBucketlists,
-        gotoMigrations: this.gotoMigrations,
-        gotoProfile: this.gotoProfile,
-        gotoMarketPlace: this.gotoMarketPlace,
-        gotoGallery: this.gotoGallery,
-        gotoLeaderboard: this.gotoLeaderboard,
+        menuNavigate: this.menuNavigate,
       },
     });
 

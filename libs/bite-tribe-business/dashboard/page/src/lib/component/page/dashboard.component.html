@@ -3,8 +3,7 @@
   [menuConfig]="{ migrations: true }"
   [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
-  (gotoSettings)="gotoSettings.emit()"
-  (gotoMigrations)="gotoMigrations.emit()"
+  (menuNavigate)="onMenuNavigate($event)"
 >
   <ion-content class="ion-padding">
     <div class="ion-display-flex ion-flex-row">

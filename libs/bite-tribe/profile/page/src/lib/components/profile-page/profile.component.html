@@ -10,10 +10,7 @@
   }"
   [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
-  (gotoSettings)="gotoSettings.emit()"
-  (gotoMyBucketlists)="gotoMyBucketlists.emit()"
-  (gotoMyBites)="gotoMyBites.emit()"
-  (gotoProfile)="gotoMyProfile.emit()"
+  (menuNavigate)="onMenuNavigate($event)"
 >
   <ion-content class="ion-padding">
     <profile-header

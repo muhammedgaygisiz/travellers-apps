@@ -575,6 +575,39 @@ describe('BitePage', () => {
       );
       expect(component.isRestaurantModalOpen()).toBe(false);
     });
+
+    it('should patch the position of the selected restaurant', () => {
+      const position = { latitude: 12, longitude: 34 };
+      fixture.componentRef.setInput('nearbyRestaurants', [
+        { name: 'Test Restaurant', position },
+      ]);
+
+      component.onRestaurantSelected('Test Restaurant');
+
+      expect(component.biteFormGroup.controls['place'].value).toBe(
+        'Test Restaurant',
+      );
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        position,
+      );
+    });
+
+    it('should keep the current position for a custom fallback with no match', () => {
+      const currentPosition = { latitude: 1, longitude: 2 };
+      component.biteFormGroup.controls['position'].patchValue(currentPosition);
+      fixture.componentRef.setInput('nearbyRestaurants', [
+        { name: 'Known Place', position: { latitude: 9, longitude: 9 } },
+      ]);
+
+      component.onRestaurantSelected('Some Custom Place');
+
+      expect(component.biteFormGroup.controls['place'].value).toBe(
+        'Some Custom Place',
+      );
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        currentPosition,
+      );
+    });
   });
 
   describe('openRestaurantSelector', () => {
@@ -599,7 +632,9 @@ describe('BitePage', () => {
 
     it('should not request nearby Google places when local restaurants exist', () => {
       const emitSpy = jest.spyOn(component.requestNearbyGooglePlaces, 'emit');
-      fixture.componentRef.setInput('nearbyRestaurants', ['Local Place']);
+      fixture.componentRef.setInput('nearbyRestaurants', [
+        { name: 'Local Place', position: { latitude: 10, longitude: 20 } },
+      ]);
       component.biteFormGroup.controls['position'].patchValue({
         latitude: 10,
         longitude: 20,

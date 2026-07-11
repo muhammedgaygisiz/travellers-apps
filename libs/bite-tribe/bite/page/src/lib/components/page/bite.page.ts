@@ -32,7 +32,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, filter, map, tap } from 'rxjs';
 import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
-import type { Bite, Geopoint, GooglePlace } from 'model';
+import type { Bite, Geopoint, GooglePlace, NearbyRestaurant } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
@@ -117,7 +117,11 @@ export class BitePage {
 
   isWeb = signal(!this.platform.is('hybrid'));
 
-  nearbyRestaurants = input<string[]>([]);
+  nearbyRestaurants = input<NearbyRestaurant[]>([]);
+
+  restaurantNames = computed(() =>
+    this.nearbyRestaurants().map((restaurant) => restaurant.name),
+  );
 
   biteFormGroup = this.formBuilder.group(
     {
@@ -421,7 +425,19 @@ export class BitePage {
   }
 
   onRestaurantSelected(restaurantName: string): void {
-    this.biteFormGroup.patchValue({ place: restaurantName });
+    const selectedRestaurant = this.nearbyRestaurants().find(
+      (restaurant) => restaurant.name === restaurantName,
+    );
+
+    // Mirror the Google place selection: patch the position of the selected
+    // restaurant when we know it. The custom `Use: "abc"` fallback has no match,
+    // so it keeps the current form position.
+    this.biteFormGroup.patchValue({
+      place: restaurantName,
+      ...(selectedRestaurant?.position
+        ? { position: selectedRestaurant.position }
+        : {}),
+    });
     this.isRestaurantModalOpen.set(false);
   }
 

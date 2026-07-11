@@ -27,6 +27,7 @@
   - [launch: run public launch campaign]([[issue-913]]) (Issue \#913)
   - [launch: run post-launch learning loop]([[issue-914]]) (Issue \#914)
   - [launch: fix intermittent Bite photo upload failures]([[issue-927]]) (Issue \#927)
+  - [launch: verify currency prefill edge cases]([[issue-978]]) (Issue \#978)
   - [feat: client side price validation]([[issue-967]]) (Issue \#967)
   - [feat: search city]([[issue-974]]) (Issue \#974)
   - [feat: add weekly resync for Bite count]([[issue-966]]) (Issue \#966)

@@ -25,7 +25,7 @@
   - Restaurant candidate verification has landed through [[issue-942]] as part of [[issue-778]].
 
 - Current gap to the 17 July 2026 milestone:
-  - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, Bite photo upload reliability, notification delivery, city search quality, currency prefill and manual override, suspicious-price UX, and restaurant candidate verification state transitions.
+  - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, Bite photo upload reliability, notification delivery, city search quality, [[issue-978]] currency prefill and manual override, suspicious-price UX, and restaurant candidate verification state transitions.
 
 - ### Week 1
 

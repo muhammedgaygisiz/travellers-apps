@@ -31,6 +31,7 @@ The app should help users avoid misleading Bite and Restaurant context.
 
 - [[issue-909]] covers launch location and currency quality.
 - [[issue-967]] covers suspicious price validation.
+- [[issue-978]] covers currency prefill edge-case verification.
 
 ## Related Domains
 

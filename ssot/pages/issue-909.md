@@ -8,6 +8,7 @@
   - `feat(909): auto select currency by position` (PR \#965) added a backend `getCurrencyByPosition` callable and Bite creation wiring that prefills the currency from the selected Bite position when possible.
   - The user's preferred currency remains the fallback when no currency can be resolved.
   - [[issue-967]] adds a separate suspicious-price warning, so the remaining currency work should avoid duplicating warning noise unless testing proves users still save wrong-currency Bites.
+  - [[issue-978]] tracks the remaining launch verification for fallback, manual override, travel/posting-later, failed-geocode, and border-region edge cases.
   - \#\# Scope
   - Enrich Bite location using Google Places.
   - Prefill Bite currency from location when possible.

@@ -1,0 +1,30 @@
+@use 'globals';
+
+:host {
+  display: block;
+
+  ion-input {
+    @include globals.input-styles;
+  }
+
+  .price-container {
+    margin-top: 1.5rem;
+
+    .price {
+      ion-text {
+        column-gap: 0.25rem;
+
+        &.is-loading {
+          pointer-events: none;
+        }
+
+        .currency-skeleton {
+          width: 5rem;
+          height: 1rem;
+          margin: 0;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+}

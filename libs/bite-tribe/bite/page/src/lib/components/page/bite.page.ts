@@ -25,7 +25,6 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { CurrencySelectorComponent } from 'currency-selector';
 import { RestaurantSelectorComponent } from 'restaurant-selector';
 import { Platform } from '@ionic/angular';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -35,14 +34,14 @@ import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
 import type { Bite, Geopoint, GooglePlace } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
-import { currencyCodes, getLocalizedCurrencyName } from 'utils';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
 import { normalizePriceForBackend } from './utils/normalize-price-for-backend';
 import { ImageValidator } from './utils/image-validator';
 import { normalizePriceForForm } from './utils/normalize-price-for-form';
 import { ConnectionStatus } from '@capacitor/network';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { PriceInputComponent } from './price-input/price-input.component';
 
 @Component({
   selector: 'bite',
@@ -64,7 +63,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
     TagsInputComponent,
     IonTextarea,
     IonModal,
-    CurrencySelectorComponent,
+    PriceInputComponent,
     RestaurantSelectorComponent,
     IonIcon,
     IonLabel,
@@ -77,7 +76,6 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 export class BitePage {
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
-  private readonly transloco = inject(TranslocoService);
 
   bite = input<Bite>();
 
@@ -86,6 +84,8 @@ export class BitePage {
   isNew = input<boolean>(false);
 
   currency = input<string>();
+
+  currencyLoading = input<boolean>(false);
 
   favCurrencies = input<string[]>();
 
@@ -110,8 +110,6 @@ export class BitePage {
   positionChange = output<Geopoint>();
 
   isWeb = signal(!this.platform.is('hybrid'));
-
-  currencies = currencyCodes;
 
   nearbyRestaurants = input<string[]>([]);
 
@@ -264,13 +262,6 @@ export class BitePage {
     return imagePathValue || undefined;
   });
 
-  currencyValueChanges = toSignal(
-    this.biteFormGroup.controls['currency'].valueChanges,
-  );
-  activeLang = toSignal(this.transloco.langChanges$, {
-    initialValue: this.transloco.getActiveLang?.() || 'en',
-  });
-
   positionValueChanges = toSignal(
     this.biteFormGroup.controls['position'].valueChanges,
   );
@@ -297,16 +288,6 @@ export class BitePage {
   isManualPositionModalOpen = signal(false);
 
   shouldRenderMapInModal = signal(false);
-
-  selectedCurrencyName = computed(() => {
-    this.currencyValueChanges();
-    const activeLang = this.activeLang();
-    const currencyCode = this.biteFormGroup.controls['currency'].value;
-    const currency = this.currencies.find((c) => c.code === currencyCode);
-    return currency
-      ? getLocalizedCurrencyName(currency.code, activeLang, currency.name)
-      : undefined;
-  });
 
   locationFromImage = computed(() => {
     const currentValue = this.positionValueChanges();
@@ -412,11 +393,6 @@ export class BitePage {
   resetImagePath(): void {
     this.biteFormGroup.get('imagePath')?.reset();
     this.imagePosition.set(undefined);
-  }
-
-  onCurrencySelected(currencyCode: string, modal: IonModal): void {
-    this.biteFormGroup.patchValue({ currency: currencyCode });
-    void modal.dismiss();
   }
 
   onRestaurantSelected(restaurantName: string, modal: IonModal): void {

@@ -1,0 +1,46 @@
+<div class="ion-flex-1 price-container ion-margin-bottom">
+  <div class="price">
+    <ion-input
+      label="{{ 'price-label' | transloco }}"
+      formControlName="price"
+      fill="outline"
+      inputmode="decimal"
+      mode="md"
+    >
+      <ion-text
+        id="currency-selector-trigger-bite"
+        slot="end"
+        class="ion-display-flex ion-align-items-center"
+        [class.is-loading]="currencyLoading()"
+      >
+        @if (currencyLoading()) {
+          <ion-skeleton-text [animated]="true" class="currency-skeleton" />
+        } @else {
+          {{ selectedCurrencyName() }}
+          <ion-icon name="chevron-expand-outline" />
+        }
+      </ion-text>
+    </ion-input>
+  </div>
+  @if (
+    form.get('price')?.invalid &&
+    (form.get('price')?.dirty || form.get('price')?.touched)
+  ) {
+    <ion-text color="danger">
+      <p>{{ 'invalid-price-error-message' | transloco }}</p>
+    </ion-text>
+  }
+</div>
+
+<ion-modal trigger="currency-selector-trigger-bite" #currencyModalBite>
+  <ng-template>
+    <currency-selector
+      class="ion-page"
+      [disableFavChange]="true"
+      [selectedCurrency]="form.get('currency')?.value || 'EUR'"
+      [favoriteCurrencies]="favCurrencies()"
+      (currencySelected)="onCurrencySelected($event, currencyModalBite)"
+      (selectionCancel)="currencyModalBite.dismiss()"
+    />
+  </ng-template>
+</ion-modal>

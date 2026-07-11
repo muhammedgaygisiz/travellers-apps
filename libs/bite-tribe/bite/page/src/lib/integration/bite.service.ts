@@ -34,6 +34,9 @@ export class BiteService {
   /** Currency derived from the bite position; `undefined` until resolved. */
   private readonly positionCurrency = signal<string | undefined>(undefined);
 
+  /** `true` while the position-based currency lookup is in flight. */
+  private readonly currencyLoading = signal(false);
+
   private lastLookedUpPosition?: Geopoint;
 
   /**
@@ -43,6 +46,9 @@ export class BiteService {
   readonly effectiveCurrency = computed(
     () => this.positionCurrency() ?? this.currency(),
   );
+
+  /** Whether the position-based currency lookup is currently running. */
+  readonly isCurrencyLoading = this.currencyLoading.asReadonly();
 
   /**
    * Resolves the currency for the given bite position via the Cloud Function
@@ -55,11 +61,16 @@ export class BiteService {
     }
 
     this.lastLookedUpPosition = position;
+    this.currencyLoading.set(true);
 
-    const currency = await this.dataAccess.getCurrencyByPosition(position);
+    try {
+      const currency = await this.dataAccess.getCurrencyByPosition(position);
 
-    if (currency) {
-      this.positionCurrency.set(currency);
+      if (currency) {
+        this.positionCurrency.set(currency);
+      }
+    } finally {
+      this.currencyLoading.set(false);
     }
   }
 

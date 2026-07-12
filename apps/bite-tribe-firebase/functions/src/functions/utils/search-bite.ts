@@ -8,6 +8,10 @@ export interface SearchBite {
   imagePath?: string;
   description?: string;
   tags?: string[];
+  position?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export const getString = (
@@ -25,6 +29,24 @@ export const getStringArray = (
     : [];
 };
 
+const getPosition = (
+  data: admin.firestore.DocumentData,
+): SearchBite['position'] => {
+  const position = data.position;
+
+  if (
+    typeof position?.latitude !== 'number' ||
+    typeof position?.longitude !== 'number'
+  ) {
+    return undefined;
+  }
+
+  return {
+    latitude: position.latitude,
+    longitude: position.longitude,
+  };
+};
+
 export const toSearchBite = (
   doc: admin.firestore.QueryDocumentSnapshot,
 ): SearchBite => {
@@ -33,6 +55,7 @@ export const toSearchBite = (
   const image = getString(bite, 'image');
   const imagePath = getString(bite, 'imagePath');
   const tags = getStringArray(bite, 'tags');
+  const position = getPosition(bite);
 
   return {
     id: getString(bite, 'id') || doc.id,
@@ -42,5 +65,6 @@ export const toSearchBite = (
     ...(imagePath ? { imagePath } : {}),
     ...(description ? { description } : {}),
     ...(tags.length > 0 ? { tags } : {}),
+    ...(position ? { position } : {}),
   };
 };

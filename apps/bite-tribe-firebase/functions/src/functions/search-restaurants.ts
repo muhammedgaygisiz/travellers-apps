@@ -17,6 +17,10 @@ interface SearchRestaurant {
   place?: string;
   image?: string;
   imagePath?: string;
+  position?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 const getString = (
@@ -32,6 +36,24 @@ const getStringArray = (
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === 'string')
     : [];
+};
+
+const getPosition = (
+  data: admin.firestore.DocumentData,
+): SearchRestaurant['position'] => {
+  const position = data.position;
+
+  if (
+    typeof position?.latitude !== 'number' ||
+    typeof position?.longitude !== 'number'
+  ) {
+    return undefined;
+  }
+
+  return {
+    latitude: position.latitude,
+    longitude: position.longitude,
+  };
 };
 
 const matchesSearchText = (value: string, searchText: string): boolean =>
@@ -56,6 +78,7 @@ const toVerifiedRestaurant = (
   restaurant: admin.firestore.QueryDocumentSnapshot,
   biteId: string,
   place?: string,
+  position?: SearchRestaurant['position'],
 ): SearchRestaurant => {
   const data = restaurant.data();
   const image = getString(data, 'image');
@@ -69,6 +92,7 @@ const toVerifiedRestaurant = (
     ...(place ? { place } : {}),
     ...(image ? { image } : {}),
     ...(imagePath ? { imagePath } : {}),
+    ...(position ? { position } : {}),
   };
 };
 
@@ -79,6 +103,7 @@ const toUnverifiedRestaurant = (
   const place = getString(data, 'place');
   const image = getString(data, 'image');
   const imagePath = getString(data, 'imagePath');
+  const position = getPosition(data);
 
   return {
     id: `place-${getBiteId(bite)}-${place}`,
@@ -87,6 +112,7 @@ const toUnverifiedRestaurant = (
     place,
     ...(image ? { image } : {}),
     ...(imagePath ? { imagePath } : {}),
+    ...(position ? { position } : {}),
   };
 };
 
@@ -141,6 +167,7 @@ export const searchRestaurants = onAppCheck<SearchRestaurantsRequest>(
               restaurant,
               biteId,
               sourceBite ? getString(sourceBite.data(), 'place') : undefined,
+              sourceBite ? getPosition(sourceBite.data()) : undefined,
             ),
           );
         }
@@ -166,6 +193,7 @@ export const searchRestaurants = onAppCheck<SearchRestaurantsRequest>(
                 restaurant,
                 getBiteId(bite),
                 getString(data, 'place'),
+                getPosition(data),
               ),
             );
           }

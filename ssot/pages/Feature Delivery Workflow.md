@@ -19,7 +19,8 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
    - Check out the branch locally.
    - Confirm local state with `git status --short --branch`.
 
-3. Implement with GPT 5.5 Medium.
+3. Implement with the assigned coding agent.
+   - Follow [[Agent Operating Contract]].
    - Use [[Traceability Map]] to find the relevant SSOT context.
    - Use [[Spec To Code Workflow]] for code ownership, implementation, and validation details.
    - Keep the change scoped to the issue.
@@ -40,7 +41,7 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
 6. Review on GitHub.
    - Perform a code review in GitHub.
    - Comment directly on the PR where adjustments are needed.
-   - Let GPT make the fixes and adjustments.
+   - Let the assigned coding agent make the fixes and adjustments.
    - Re-run the relevant local checks after fixes.
 
 7. Merge.

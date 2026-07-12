@@ -5,6 +5,7 @@
     - Issue \#938: shared RestaurantCandidate model and backend clustering helpers.
     - Issue \#939: Business migrations page eligible Bite listing.
     - [[issue-942]] / PR \#977: Business app candidate verification into a real Restaurant.
+    - [[issue-943]] / PR \#981: required Bite restaurant/place picker before saving.
 - Child issues
   - [01 - feat: add restaurant candidate model and clustering helpers](https://github.com/muhammedgaygisiz/travellers-apps/issues/938) (Issue \#938)
   - [02 - feat(business): list restaurant-clustering eligible bites in migrations](https://github.com/muhammedgaygisiz/travellers-apps/issues/939) (Issue \#939)
@@ -22,7 +23,7 @@
   - 3. Manual clustering callable and migration action.
   - 4. Business dashboard candidate card.
   - 5. Candidate verification into a real restaurant.
-  - 6. Verified restaurant suggestion after Bite creation.
+  - 6. Bite restaurant/place selection before saving.
   - 7. Automatic new-Bite candidate trigger.
   - 8. Duplicate and idempotency hardening pass.
 - Product goal

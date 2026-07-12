@@ -131,6 +131,7 @@ Current implementation notes:
 - Older Bite documents without address enrichment are migrated through the business migrations backfill path, which calls `backfillBiteAddress` for the selected Bite.
 - Enriched city data powers `searchBitesByCity`.
 - During Bite creation, `getCurrencyByPosition` can resolve the selected position to a country currency and prefill the form currency; the user's preferred currency remains the fallback.
+- During Bite creation, the user selects the Bite place through the restaurant selector before saving. The selector can use nearby verified restaurants, unverified restaurants, nearby Google Places, or the explicit custom-place fallback.
 - The Bite page warns users when the entered price looks suspiciously high.
 - Uploaded Bite images are stored below `images/bites/{biteId}/{filename}`.
 - `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized.
@@ -221,6 +222,7 @@ Cloud Functions:
 loadBitesByLocation
 searchBites
 searchBitesByCity
+searchNearbyPlaces
 getCurrencyByPosition
 setBiteImagePathOnUpload
 enrichBiteAddressOnCreate

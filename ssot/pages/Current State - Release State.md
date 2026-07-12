@@ -14,7 +14,7 @@ Target public launch period: 3 August 2026 to 16 August 2026.
 
 ## Current Release Stage
 
-BiteTribe is in launch preparation as of 11 July 2026.
+BiteTribe is in launch preparation as of 12 July 2026.
 
 The product is not yet in public launch mode. The current focus is proving the recently landed backend trust, location, currency, gamification, notification, and restaurant data-quality work in realistic testing before the release-candidate phase.
 
@@ -38,6 +38,9 @@ The product is not yet in public launch mode. The current focus is proving the r
 - [[issue-971]] added daily ranking-change notifications.
 - [[issue-975]] added profile country badges and supporting country-code derivation.
 - [[issue-942]] added Business app restaurant candidate verification into real Restaurants.
+- [[issue-943]] / PR \#981 replaced direct Bite place text entry with required restaurant/place selection before saving.
+- [[issue-982]] fixed map camera jumps when live Bite marker updates arrive.
+- [[issue-983]] replaced the consumer E2E baseline with Playwright login, registration, and create-Bite coverage.
 
 ## Release Readiness Checklist
 
@@ -53,6 +56,9 @@ The product is not yet in public launch mode. The current focus is proving the r
 - Ranking-change notifications implemented and device-tested.
 - Profile badges implemented.
 - Restaurant candidate verification implemented and emulator-tested.
+- Mandatory restaurant/place picker implemented for Bite creation.
+- Map camera remains stable when new Bites arrive through live updates.
+- Playwright E2E smoke coverage exists for login, registration, and create Bite.
 - Edge cases tested:
   - vacation usage
   - posting later

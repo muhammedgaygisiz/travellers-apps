@@ -1,0 +1,26 @@
+- [test: setup playwright and initiate e2e test login and create bite](https://github.com/muhammedgaygisiz/travellers-apps/pull/983) (PR \#983)
+- Status
+  - Implemented.
+- Product intent
+  - Add realistic consumer-app smoke coverage for launch-critical flows.
+  - Make login, registration, and Bite creation executable against the local app plus Firebase emulators.
+- Scope
+  - Replace the old consumer Cypress baseline with Playwright for `apps/bite-tribe-e2e`.
+  - Configure Playwright to start the Firebase emulators and Angular dev server.
+  - Add page objects/support utilities for login, registration, and Bite creation.
+  - Add a Bite image fixture and deterministic geolocation for create-Bite tests.
+  - Update test ids and nearby templates so E2E selectors can target stable UI.
+- Implementation
+  - `apps/bite-tribe-e2e/playwright.config.ts` uses the Nx Playwright preset.
+  - `apps/bite-tribe-e2e/project.json` exposes the `e2e` target through `@nx/playwright:playwright`.
+  - Playwright starts `npx nx firebase-serve bite-tribe-firebase` and `npx nx serve bite-tribe`.
+  - Tests live under `apps/bite-tribe-e2e/src/tests`.
+  - Page objects live under `apps/bite-tribe-e2e/src/pages`.
+- Related SSOT
+  - [[Architecture - Testing]]
+  - [[Implementation - Testing]]
+  - [[UC - Create And Maintain Personal Bites]]
+  - [[Current State - Release State]]
+- Validation
+  - Run with `NX_DAEMON=false npx nx e2e bite-tribe-e2e` when validating the full browser/emulator path.
+  - The suite depends on the Firebase functions build target and the local emulator/dev-server startup path.

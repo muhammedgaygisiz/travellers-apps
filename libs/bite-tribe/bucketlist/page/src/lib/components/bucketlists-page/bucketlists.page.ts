@@ -19,11 +19,13 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonProgressBar,
   IonSelect,
   IonSelectOption,
   IonText,
 } from '@ionic/angular/standalone';
 import { CountPipe } from '../../pipes/count.pipe';
+import { ProgressPipe } from '../../pipes/progress.pipe';
 import type { OverlayEventDetail } from '@ionic/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
@@ -42,7 +44,9 @@ const CANCEL = 'cancel';
     IonLabel,
     IonContent,
     IonIcon,
+    IonProgressBar,
     CountPipe,
+    ProgressPipe,
     IonBadge,
     IonAlert,
     IonChip,

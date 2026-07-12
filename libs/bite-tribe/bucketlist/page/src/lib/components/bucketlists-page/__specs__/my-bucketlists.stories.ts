@@ -43,6 +43,7 @@ export const withBucketlists: Story = {
         userId: 'user-1',
         name: 'Kosovo',
         biteIds: ['1', '2'],
+        triedOutBites: [{ biteId: '1', date: '', timestamp: 0 }],
         biteTrailId: 'trail-1',
       } as Bucketlist,
       {
@@ -50,6 +51,13 @@ export const withBucketlists: Story = {
         userId: 'user-1',
         name: 'Malta',
         biteIds: ['1', '2', '3', '4', '5'],
+        triedOutBites: [
+          { biteId: '1', date: '', timestamp: 0 },
+          { biteId: '2', date: '', timestamp: 0 },
+          { biteId: '3', date: '', timestamp: 0 },
+          { biteId: '4', date: '', timestamp: 0 },
+          { biteId: '5', date: '', timestamp: 0 },
+        ],
       } as Bucketlist,
       {
         id: '5',

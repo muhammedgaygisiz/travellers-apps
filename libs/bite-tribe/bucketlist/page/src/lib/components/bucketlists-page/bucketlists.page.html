@@ -47,9 +47,17 @@
         <div
           class="ion-display-flex ion-flex-column ion-flex-1 bucketlist-content"
         >
-          <ion-label class="ion-margin-bottom ion-margin-top title-margin"
-            >{{ bucketlist.name }}</ion-label
-          >
+          <ion-label class="ion-margin-bottom ion-margin-top title-margin">
+            <span>{{ bucketlist.name }}</span>
+            @if ((bucketlist | progress) === 1) {
+            <ion-icon
+              name="checkmark-circle-outline"
+              color="success"
+              class="completed-icon"
+              aria-hidden="true"
+            />
+            }
+          </ion-label>
           <div class="ion-display-flex ion-margin-bottom bucketlist-actions">
             <ion-button
               size="small"
@@ -76,6 +84,12 @@
           </div>
         </div>
         <ion-badge>{{ bucketlist.biteIds | count }}</ion-badge>
+        @if (bucketlist.biteIds | count) {
+        <ion-progress-bar
+          class="bucketlist-progress"
+          [value]="bucketlist | progress"
+        />
+        }
       </ion-item>
       }
     </ion-list>

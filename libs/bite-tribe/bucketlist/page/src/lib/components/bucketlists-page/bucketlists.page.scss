@@ -57,11 +57,35 @@
     }
   }
 
+  ion-item {
+    position: relative;
+    overflow: hidden;
+    --inner-padding-bottom: 1.25rem;
+
+    .bucketlist-progress {
+      position: absolute;
+      bottom: 0.85rem;
+      left: 0;
+      right: 2.5rem;
+      width: auto;
+      height: 6px;
+      border-radius: 3px;
+    }
+  }
+
   .bucketlist-content {
     padding: 0.25rem 0;
 
     .title-margin {
       --ion-margin: 0.5rem;
+
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+
+      .completed-icon {
+        font-size: 1.15rem;
+      }
     }
 
     .bucketlist-actions {

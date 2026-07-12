@@ -1,6 +1,8 @@
 @use 'globals';
 
 :host {
+  display: block;
+
   .state-container {
     padding: 2rem;
   }
@@ -13,6 +15,10 @@
   ion-spinner {
     width: 48px;
     height: 48px;
+  }
+
+  ion-item:first-of-type {
+    margin-top: 0;
   }
 
   ion-item {

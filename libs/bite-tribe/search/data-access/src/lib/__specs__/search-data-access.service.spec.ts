@@ -66,6 +66,7 @@ describe(SearchDataAccessService.name, () => {
         id: 'bite-1',
         name: 'Butter Chicken',
         place: 'Tandoori House',
+        position: { latitude: 46.948, longitude: 7.447 },
       },
     ];
     jest

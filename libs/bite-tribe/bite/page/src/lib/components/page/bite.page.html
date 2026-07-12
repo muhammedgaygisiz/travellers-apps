@@ -19,6 +19,7 @@
         fill="outline"
         class="ion-margin-top"
         mode="md"
+        data-testid="bite-name"
       />
 
       <div class="place-field ion-margin-top">
@@ -41,6 +42,7 @@
           expand="block"
           fill="outline"
           (click)="openRestaurantSelector()"
+          data-testid="set-restaurant"
         >
           {{ 'set-restaurant' | transloco }}
         </ion-button>
@@ -92,6 +94,7 @@
           <ion-button
             [disabled]="!position()"
             (click)="onPositionFromNavigator()"
+            data-testid="position-from-gps"
           >
             {{ 'from-gps' | transloco }} @if (locationFromGps()) {
             <ion-icon name="checkmark-outline" />
@@ -130,6 +133,7 @@
         class="ion-margin-top safe-padding-bottom"
         [disabled]="isInvalid()"
         (click)="saveBite()"
+        data-testid="post-bite"
       >
         {{ 'post' | transloco }}
       </ion-button>

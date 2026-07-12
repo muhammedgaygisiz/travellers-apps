@@ -40,7 +40,7 @@
             class="ion-margin-top"
             autocomplete="email"
             inputmode="email"
-            data-cy="email"
+            data-testid="email"
           />
 
           <ion-input
@@ -50,7 +50,7 @@
             mode="md"
             class="ion-margin-top"
             type="password"
-            data-cy="password"
+            data-testid="password"
           >
             <ion-input-password-toggle slot="end" color="secondary" />
           </ion-input>
@@ -60,7 +60,7 @@
             fill="outline"
             expand="block"
             (click)="submitAuth.emit(authFormGroup.value)"
-            data-cy="submit"
+            data-testid="submit"
             >{{ 'log-in' | transloco }}</ion-button
           >
 
@@ -85,7 +85,7 @@
           class="ion-margin-top"
           expand="block"
           (click)="signup.emit()"
-          data-cy="signup"
+          data-testid="signup"
           >{{ 'sign-up' | transloco }}</ion-button
         >
       </div>

@@ -5,7 +5,7 @@ DebugElement {
   "nativeNode": <div>
     <ion-list
       class="undefined list-undefined list-lines-none list-undefined-lines-none hydrated"
-      data-cy="menu-list"
+      data-testid="menu-list"
       lines="none"
       role="list"
     >
@@ -30,7 +30,7 @@ DebugElement {
       </ion-item-group>
       <ion-item
         class="item-has-start-slot"
-        data-cy="btn-login"
+        data-testid="btn-login"
       >
         <ion-icon
           name="log-in-outline"

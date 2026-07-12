@@ -41,7 +41,7 @@ describe(SearchListComponent.name, () => {
     fixture.detectChanges();
 
     expect(
-      fixture.nativeElement.querySelector('[data-cy="search-loading"]'),
+      fixture.nativeElement.querySelector('[data-testid="search-loading"]'),
     ).toBeTruthy();
   });
 
@@ -50,7 +50,7 @@ describe(SearchListComponent.name, () => {
     fixture.detectChanges();
 
     expect(
-      fixture.nativeElement.querySelector('[data-cy="search-empty"]'),
+      fixture.nativeElement.querySelector('[data-testid="search-empty"]'),
     ).toBeTruthy();
   });
 

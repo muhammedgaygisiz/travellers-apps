@@ -4,20 +4,16 @@
   "projectType": "application",
   "sourceRoot": "apps/bite-tribe-e2e/src",
   "tags": ["scope:bite-tribe"],
-  "implicitDependencies": ["bite-tribe"],
+  "implicitDependencies": ["bite-tribe", "bite-tribe-firebase"],
   "targets": {
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/bite-tribe-e2e"],
       "options": {
-        "cypressConfig": "apps/bite-tribe-e2e/cypress.config.ts",
-        "testingType": "e2e",
-        "devServerTarget": "bite-tribe:serve"
+        "config": "apps/bite-tribe-e2e/playwright.config.ts",
+        "skipInstall": true
       },
-      "configurations": {
-        "production": {
-          "devServerTarget": "bite-tribe:serve:production"
-        }
-      }
+      "dependsOn": ["bite-tribe-firebase:firebase-build"]
     },
     "lint": {
       "executor": "@nx/eslint:lint"

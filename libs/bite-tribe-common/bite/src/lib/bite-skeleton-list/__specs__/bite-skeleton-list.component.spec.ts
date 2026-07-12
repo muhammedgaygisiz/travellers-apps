@@ -17,7 +17,9 @@ describe('BiteSkeletonListComponent', () => {
 
   it('should render three bite skeleton cards', () => {
     expect(
-      fixture.nativeElement.querySelectorAll('[data-cy="bite-loading-card"]'),
+      fixture.nativeElement.querySelectorAll(
+        '[data-testid="bite-loading-card"]',
+      ),
     ).toHaveLength(3);
   });
 });

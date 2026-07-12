@@ -89,6 +89,7 @@ export class HomeDataAccessService {
     { initialValue: false },
   );
   biteById = toSignal(this.storeService.bite$);
+  private readonly gpsPosition = toSignal(this.storeService.position$);
   private readonly likes = toSignal(this.storeService.likes$, {
     initialValue: [] as Like[],
   });
@@ -220,9 +221,17 @@ export class HomeDataAccessService {
 
   restaurantBites = computed((): Bite[] => {
     const likes = this.likes();
+    const gpsPosition = this.gpsPosition();
     const bites = (this.restaurantBitesResource.value() ?? []).map((bite) => ({
       ...bite,
       likes: likes.filter((like) => like.biteId === bite.id),
+      distance: haversineDistance(
+        bite.position?.latitude,
+        bite.position?.longitude,
+        gpsPosition?.latitude,
+        gpsPosition?.longitude,
+        'km',
+      ),
     }));
 
     return sortByCriteria(

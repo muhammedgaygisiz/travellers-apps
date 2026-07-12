@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import type { Bite, LikeClick } from 'model';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { haversineDistance } from 'utils';
 
 const BITE_WITH_POSITION: Bite = {
   id: 'biteId',
@@ -38,6 +39,7 @@ class StoreMock {
   maxPriceHome$ = of(0);
   isReloadingHome$ = of(false);
   hasErrorLoadingGpsPosition$ = of(false);
+  position$ = of(undefined);
   biteIdFromUrl = (): string | undefined => undefined;
   restaurantIdFromUrl = (): string | undefined => undefined;
   likes$ = of([]);
@@ -610,6 +612,37 @@ describe('HomeDataAccessService', () => {
         ]);
       },
     ));
+
+    describe('given a known gps position', () => {
+      beforeEach(inject(
+        [BiteTribeStoreService],
+        (storeService: BiteTribeStoreService) => {
+          storeService.position$ = of({
+            latitude: 48.2,
+            longitude: 16.37,
+          }) as any;
+        },
+      ));
+
+      it('should enrich each loaded bite with the distance to the gps position', inject(
+        [HomeDataAccessService],
+        (service: HomeDataAccessService) => {
+          service.restaurantBitesResource.set([BITE_WITH_POSITION]);
+
+          const bite = service.restaurantBites()[0];
+
+          expect(bite.distance).toBe(
+            haversineDistance(
+              BITE_WITH_POSITION.position?.latitude,
+              BITE_WITH_POSITION.position?.longitude,
+              48.2,
+              16.37,
+              'km',
+            ),
+          );
+        },
+      ));
+    });
 
     describe('given the current user liked a loaded bite', () => {
       const like = {

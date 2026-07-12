@@ -4,10 +4,12 @@ import { BucketlistsDataAccessService } from 'bite-tribe/bucketlist-data-access'
 import { Bucketlist } from 'model';
 import { RateBucketlistService } from '../rate-bucketlist.service';
 import { NavController } from '@ionic/angular/standalone';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 const getOwnBiteTrailRatingMock = jest.fn();
 const createOwnBiteTrailRatingMock = jest.fn();
 const backMock = jest.fn();
+const logEventMock = jest.fn();
 const selectedBucketlistSignal = signal<Bucketlist>({
   id: 'bucket-1',
   userId: 'user-1',
@@ -23,6 +25,7 @@ describe('RateBucketlistService', () => {
     getOwnBiteTrailRatingMock.mockReset();
     createOwnBiteTrailRatingMock.mockReset();
     backMock.mockReset();
+    logEventMock.mockReset();
     getOwnBiteTrailRatingMock.mockResolvedValue(undefined);
     selectedBucketlistSignal.set({
       id: 'bucket-1',
@@ -48,6 +51,10 @@ describe('RateBucketlistService', () => {
             back: backMock,
           },
         },
+        {
+          provide: AnalyticsService,
+          useValue: { logEvent: logEventMock },
+        },
       ],
     });
 
@@ -67,6 +74,19 @@ describe('RateBucketlistService', () => {
     });
     expect(service.existingRating()).toEqual({ rating: 5, review: 'Great!' });
     expect(backMock).toHaveBeenCalled();
+    expect(logEventMock).toHaveBeenCalledWith(AnalyticsEvent.BucketListRated, {
+      rating: 5,
+    });
+  });
+
+  it('should not log a rating event when submission is a no-op', async () => {
+    getOwnBiteTrailRatingMock.mockResolvedValue(undefined);
+    createOwnBiteTrailRatingMock.mockResolvedValue(false);
+    service.existingRating.set(undefined);
+
+    await service.submitRating({ rating: 5, review: 'Attempt' });
+
+    expect(logEventMock).not.toHaveBeenCalled();
   });
 
   it('should not create a new rating when one already exists', async () => {

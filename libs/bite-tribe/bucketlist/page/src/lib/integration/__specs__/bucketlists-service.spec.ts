@@ -2,11 +2,13 @@ import { BucketlistsService } from '../bucketlists.service';
 import { TestBed } from '@angular/core/testing';
 import { NavController } from '@ionic/angular';
 import { BucketlistsDataAccessService } from 'bite-tribe/bucketlist-data-access';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 const setBucketlistSortingMock = jest.fn();
 const navigateForwardMock = jest.fn();
 const createAndSaveToBucketListMock = jest.fn();
 const deleteBucketlistMock = jest.fn();
+const logEventMock = jest.fn();
 const Mock = {
   setBucketlistSorting: setBucketlistSortingMock,
   createAndSaveToBucketList: createAndSaveToBucketListMock,
@@ -22,6 +24,10 @@ describe('BucketlistsService', () => {
       providers: [
         { provide: BucketlistsDataAccessService, useValue: Mock },
         { provide: NavController, useValue: Mock },
+        {
+          provide: AnalyticsService,
+          useValue: { logEvent: logEventMock },
+        },
       ],
     }).compileComponents();
 
@@ -69,6 +75,13 @@ describe('BucketlistsService', () => {
       service.createAndSaveToBucketList(bucketListName);
       expect(createAndSaveToBucketListMock).toHaveBeenCalledWith(
         bucketListName,
+      );
+    });
+
+    it('should log the bucketlist_created analytics event', () => {
+      service.createAndSaveToBucketList('New Bucket List');
+      expect(logEventMock).toHaveBeenCalledWith(
+        AnalyticsEvent.BucketListCreated,
       );
     });
   });

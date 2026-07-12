@@ -1,0 +1,67 @@
+name: Analytics digest
+
+# Posts the daily launch-analytics digest (tools/analytics/digest.mjs) as a
+# comment on a tracking GitHub issue. See tools/analytics/README.md for the
+# required secret/variable.
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily at 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Window length in days'
+        required: false
+        default: '7'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: analytics-digest
+  cancel-in-progress: false
+
+env:
+  GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID }}
+  GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/tools/analytics/service-account.json
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup action
+        uses: ./.github/actions/setup
+
+      - name: Write service account key
+        run: printf '%s' "$GA4_SA_KEY" > "$GOOGLE_APPLICATION_CREDENTIALS"
+        env:
+          GA4_SA_KEY: ${{ secrets.GA4_SA_KEY }}
+
+      - name: Generate digest
+        run: node tools/analytics/digest.mjs --days="${DAYS:-7}" > digest.md
+        env:
+          DAYS: ${{ github.event.inputs.days }}
+
+      - name: Post digest to tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TITLE="Daily analytics digest"
+          NUMBER=$(gh issue list --state open --search "$TITLE in:title" \
+            --json number,title \
+            --jq "[.[] | select(.title==\"$TITLE\")][0].number // empty")
+          if [ -z "$NUMBER" ]; then
+            URL=$(gh issue create --title "$TITLE" \
+              --body "Automated daily launch-analytics digest (tools/analytics/digest.mjs). One comment per run.")
+            NUMBER="${URL##*/}"
+          fi
+          gh issue comment "$NUMBER" --body-file digest.md
+
+      - name: Remove service account key
+        if: always()
+        run: rm -f "$GOOGLE_APPLICATION_CREDENTIALS"

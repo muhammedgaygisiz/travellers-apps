@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { BitePlaceComponent } from '../components/page/bite-place/bite-place.component';
 import { RestaurantService } from './restaurant.service';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,10 +21,14 @@ import { RestaurantService } from './restaurant.service';
 })
 export class UnverifiedRestaurantContainer {
   service = inject(RestaurantService);
+  private readonly analytics = inject(AnalyticsService);
 
   ionViewDidEnter(): void {
     void FirebaseAnalytics.setCurrentScreen({
       screenName: 'Unverified Restaurant',
+    });
+    this.analytics.logEvent(AnalyticsEvent.RestaurantViewed, {
+      verified: false,
     });
   }
 }

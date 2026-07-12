@@ -1,7 +1,7 @@
 import { RegistrationService } from '../registration.service';
 import { TestBed } from '@angular/core/testing';
 import { TranslocoService } from '@jsverse/transloco';
-import { AuthService } from 'ta-firestore';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 import { NavController, ToastController } from '@ionic/angular';
 
 const translations: Record<string, string> = {
@@ -21,6 +21,10 @@ const MockedAuthService = {
 
 const MockedNavController = {
   navigateBack: jest.fn(),
+};
+
+const MockedAnalyticsService = {
+  logEvent: jest.fn(),
 };
 
 const MockedToastController = {
@@ -52,6 +56,7 @@ describe(RegistrationService.name, () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: AuthService, useValue: MockedAuthService },
+        { provide: AnalyticsService, useValue: MockedAnalyticsService },
         { provide: NavController, useValue: MockedNavController },
         { provide: ToastController, useValue: MockedToastController },
         { provide: TranslocoService, useValue: MockedTranslocoService },
@@ -98,6 +103,18 @@ describe(RegistrationService.name, () => {
         });
         expect(sendEmailVerificationSpy).toHaveBeenCalled();
         expect(navigateBackSpy).toHaveBeenCalledWith(['/home']);
+      });
+
+      it('should log the sign_up analytics event', async () => {
+        await service.register({
+          email: 'q@q.de',
+          password: '12345678',
+        });
+
+        expect(MockedAnalyticsService.logEvent).toHaveBeenCalledWith(
+          AnalyticsEvent.SignUp,
+          { method: 'password' },
+        );
       });
     });
 

@@ -1,5 +1,42 @@
 # Changelog
 
+## build-84 (2026-07-12)
+
+<!-- changelog-start-rev: e22b9720 -->
+<!-- changelog-end-rev: d4809c5b -->
+
+### Features
+
+- list/map view on search (#995) (35313356)
+- progress bar for bucket list (#994) (65b7845b)
+- **910**: analytics events and dashboard (#990) (f6e56f84)
+- **943**: switch from free input to restaurant select (#981) (34665389)
+- verify restaurant from business app (#977) (4de3753a)
+- **975**: add badges to profile (#976) (f8cd9982)
+- search city (#974) (3544e0b2)
+
+### Bug Fixes
+
+- GA4 custom dimension display name cannot contain hyphen (#993) (2f91e51f)
+- jumping camera in map on new bite coming in (#982) (da520de9)
+
+### Documentation
+
+- update todos (#985) (032740f5)
+- model agnostic ssot (#984) (59be516f)
+
+### Tests
+
+- setup playwright and initiate e2e test login and create bite (#983) (1601ff84)
+
+### Styles
+
+- minor style and ux adjustments (#979) (883d9374)
+
+### Chores
+
+- bump version (#996) (dff9eca4)
+
 ## build-82 (2026-07-09)
 
 <!-- changelog-start-rev: 565cacd7 -->

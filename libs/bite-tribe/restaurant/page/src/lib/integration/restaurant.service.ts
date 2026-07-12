@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { Bite, LikeClick, Restaurant } from 'model';
@@ -13,8 +13,10 @@ export class RestaurantService {
   private readonly homeDataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
 
-  bite = this.dataAccess.bite;
   bites = this.homeDataAccess.restaurantBites;
+  bite = computed(
+    () => this.dataAccess.bite() ?? this.sourceBiteFromLoadedBites(),
+  );
   userId = this.dataAccess.userId;
   restaurant = this.dataAccess.restaurant;
 
@@ -87,17 +89,25 @@ export class RestaurantService {
   }
 
   navigateToPlaceBites(bite: Bite | undefined): void {
-    if (!bite) {
+    const sourceBite = bite ?? this.bite();
+    if (!sourceBite) {
       return;
     }
 
     void this.navController.navigateForward([
       'bite',
-      bite.id,
+      sourceBite.id,
       'restaurant',
-      encodeURIComponent(bite.place),
+      encodeURIComponent(sourceBite.place),
       'bites',
     ]);
+  }
+
+  private sourceBiteFromLoadedBites(): Bite | undefined {
+    const biteId = this.dataAccess.biteIdFromUrl();
+    const bites = this.bites();
+
+    return bites.find((bite) => bite.id === biteId) ?? bites[0];
   }
 
   private normaliseRestaurantId(

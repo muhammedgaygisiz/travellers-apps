@@ -92,6 +92,31 @@ describe('RestaurantService', () => {
     expect(service.bites()).toEqual([mockBite]);
   });
 
+  describe('bite', () => {
+    it('should expose the store bite when available', () => {
+      expect(service.bite()).toEqual(mockBite);
+    });
+
+    it('should fall back to the loaded source bite when the store bite is missing', () => {
+      const searchedBite: Bite = {
+        id: 'searched-bite-123',
+        place: 'Toro Toro',
+      } as Bite;
+      mockDataAccessService.bite.set(undefined);
+      mockDataAccessService.biteIdFromUrl.set(searchedBite.id);
+      mockHomeDataAccessService.restaurantBites.set([searchedBite]);
+
+      expect(service.bite()).toEqual(searchedBite);
+    });
+
+    it('should be undefined when neither store nor loaded bites resolve', () => {
+      mockDataAccessService.bite.set(undefined);
+      mockHomeDataAccessService.restaurantBites.set([]);
+
+      expect(service.bite()).toBeUndefined();
+    });
+  });
+
   describe('navigateToMenu', () => {
     it('should navigate to menu if bite and restaurant with menuId exist', () => {
       const restaurant: Restaurant = {
@@ -242,7 +267,42 @@ describe('RestaurantService', () => {
       ]);
     });
 
-    it('should not navigate for undefined bite payload', () => {
+    it('should navigate using the store bite when no payload is provided', () => {
+      service.navigateToPlaceBites(undefined);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        mockBite.id,
+        'restaurant',
+        'Test%20place',
+        'bites',
+      ]);
+    });
+
+    it('should resolve the source bite from loaded bites when the store bite is missing', () => {
+      const searchedBite: Bite = {
+        id: 'searched-bite-123',
+        place: 'Toro Toro',
+      } as Bite;
+      mockDataAccessService.bite.set(undefined);
+      mockDataAccessService.biteIdFromUrl.set(searchedBite.id);
+      mockHomeDataAccessService.restaurantBites.set([searchedBite]);
+
+      service.navigateToPlaceBites(undefined);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'bite',
+        'searched-bite-123',
+        'restaurant',
+        'Toro%20Toro',
+        'bites',
+      ]);
+    });
+
+    it('should not navigate when no bite can be resolved', () => {
+      mockDataAccessService.bite.set(undefined);
+      mockHomeDataAccessService.restaurantBites.set([]);
+
       service.navigateToPlaceBites(undefined);
 
       expect(mockNavController.navigateForward).not.toHaveBeenCalled();

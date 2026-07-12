@@ -173,6 +173,94 @@ describe(DetailsDataAccessService.name, () => {
       });
     });
 
+    describe('given the like read fails', () => {
+      let getDocumentSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        getDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockImplementation((options: { reference: string }) => {
+            if (options.reference === 'bites/test-bite-id/likes/user1') {
+              return Promise.reject(new Error('permission-denied'));
+            }
+
+            return Promise.resolve({
+              snapshot: {
+                data: { name: 'Test Bite' },
+                id: 'test-bite-id',
+              } as unknown as any,
+            });
+          });
+      });
+
+      it('should still load the bite without likes', async () => {
+        const result = await service.biteLoader({
+          params: {
+            biteId: 'test-bite-id',
+            userId: 'user1',
+          },
+        } as any);
+
+        expect(getDocumentSpy).toHaveBeenCalledWith({
+          reference: 'bites/test-bite-id',
+        });
+        expect(result).toEqual({
+          name: 'Test Bite',
+          id: 'test-bite-id',
+          likes: [],
+        });
+      });
+    });
+
+    describe('given the bite read fails transiently', () => {
+      it('should retry and resolve the bite without surfacing an error', async () => {
+        let biteAttempts = 0;
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockImplementation((options: { reference: string }) => {
+            if (options.reference === 'bites/test-bite-id') {
+              biteAttempts++;
+
+              if (biteAttempts < 3) {
+                return Promise.reject(new Error('unavailable'));
+              }
+
+              return Promise.resolve({
+                snapshot: {
+                  data: { name: 'Test Bite' },
+                  id: 'test-bite-id',
+                } as unknown as any,
+              });
+            }
+
+            return Promise.resolve({ snapshot: { data: undefined } as any });
+          });
+
+        const result = await service.biteLoader({
+          params: { biteId: 'test-bite-id' },
+        } as any);
+
+        expect(biteAttempts).toBe(3);
+        expect(result).toEqual({
+          name: 'Test Bite',
+          id: 'test-bite-id',
+          likes: [],
+        });
+      }, 15000);
+    });
+
+    describe('given the bite read keeps failing', () => {
+      it('should reject after exhausting the retries', async () => {
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockRejectedValue(new Error('unavailable'));
+
+        await expect(
+          service.biteLoader({ params: { biteId: 'test-bite-id' } } as any),
+        ).rejects.toThrow('unavailable');
+      }, 15000);
+    });
+
     describe('given no user id', () => {
       beforeEach(() => {
         jest.clearAllMocks();

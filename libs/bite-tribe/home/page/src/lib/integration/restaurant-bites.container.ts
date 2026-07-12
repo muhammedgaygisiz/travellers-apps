@@ -15,6 +15,8 @@ import { BiteTribeHomeComponent } from '../components/page/home.component';
       [bites]="service.restaurantBites()"
       [userId]="service.userId()"
       [showHeaderMenu]="false"
+      [showSpinner]="true"
+      [isBitesLoading]="service.restaurantBitesLoading()"
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
       [sorting]="service.restaurantBitesSorting()"

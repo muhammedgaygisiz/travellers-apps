@@ -26,10 +26,8 @@
   - Mandatory Bite restaurant/place selection has landed through [[issue-943]] / PR \#981.
   - Map live-update camera stability has landed through [[issue-982]].
   - Playwright login, registration, and create-Bite E2E coverage has landed through [[issue-983]].
-
 - Current gap to the 17 July 2026 milestone:
   - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, Bite photo upload reliability, notification delivery, city search quality, [[issue-978]] currency prefill and manual override, suspicious-price UX, restaurant/place picker behavior, map camera stability, Playwright E2E reliability, and restaurant candidate verification state transitions.
-
 - ### Week 1
 
   Focus: Firebase App Check.
@@ -63,6 +61,7 @@
 - Implement Firebase Analytics.
 - Verify events in DebugView.
 - Build a dashboard with key metrics.
+- Status: launch event taxonomy (`AnalyticsService` + activation/creation/discovery events) and its SSOT spec have landed through [[issue-910]]. DebugView verification and the launch dashboard are console follow-ups tracked in [[Implementation - Analytics Events]].
 - ### Week 4
 
   Focus: Production readiness.

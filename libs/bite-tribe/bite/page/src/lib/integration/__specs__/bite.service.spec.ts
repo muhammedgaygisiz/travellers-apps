@@ -8,6 +8,7 @@ import {
 } from '@ionic/angular/standalone';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { TranslocoService } from '@jsverse/transloco';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 const Mock = {
   navigateBack: jest.fn(),
@@ -39,6 +40,10 @@ const TranslocoMock = {
   translate: jest.fn((key: string): string => key),
 };
 
+const AnalyticsMock = {
+  logEvent: jest.fn(),
+};
+
 describe('BiteService', () => {
   let service: BiteService;
 
@@ -52,6 +57,7 @@ describe('BiteService', () => {
         { provide: LoadingController, useValue: LoadingMock },
         { provide: ToastController, useValue: ToastMock },
         { provide: TranslocoService, useValue: TranslocoMock },
+        { provide: AnalyticsService, useValue: AnalyticsMock },
       ],
     }).compileComponents();
 
@@ -71,6 +77,15 @@ describe('BiteService', () => {
       await service.submitNewBite(newBite);
 
       expect(Mock.navigateBack).toHaveBeenCalledWith(['home']);
+    });
+
+    it('should log the bite_created analytics event', async () => {
+      const newBite = { id: '123', name: 'Test Bite' };
+      await service.submitNewBite(newBite);
+
+      expect(AnalyticsMock.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.BiteCreated,
+      );
     });
   });
 

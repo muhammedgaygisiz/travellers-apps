@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { Credentials } from '../../api/credentials.model';
-import { AuthService } from 'ta-firestore';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 import { NavController, ToastController } from '@ionic/angular';
 import { AuthErrorCodes } from 'firebase/auth';
 
@@ -15,6 +15,7 @@ interface RegistrationError {
 })
 export class RegistrationService {
   private readonly authService = inject(AuthService);
+  private readonly analytics = inject(AnalyticsService);
   private readonly transloco = inject(TranslocoService);
   readonly toastController = inject(ToastController);
   readonly navController = inject(NavController);
@@ -25,6 +26,8 @@ export class RegistrationService {
         email: registration.email,
         password: registration.password,
       });
+
+      this.analytics.logEvent(AnalyticsEvent.SignUp, { method: 'password' });
 
       await this.authService.sendEmailVerification();
 

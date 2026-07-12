@@ -3,6 +3,7 @@ import { NavController } from '@ionic/angular/standalone';
 import { SearchDataAccessService } from 'bite-tribe/search-data-access';
 import type { SearchCategory, SearchResult } from 'model';
 import { PATH } from 'utils';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 
@@ -10,6 +11,7 @@ const MIN_SEARCH_TEXT_LENGTH = 3;
 export class SearchService {
   private readonly dataAccessService = inject(SearchDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly analytics = inject(AnalyticsService);
 
   readonly results = this.dataAccessService.results;
   readonly selectedCategory = this.dataAccessService.searchCategory;
@@ -20,7 +22,14 @@ export class SearchService {
   );
 
   search(searchText: string): void {
+    const wasSearching = this.hasSearched();
     this.dataAccessService.searchText.set(searchText);
+
+    // Emit once per search session, when the query first becomes meaningful,
+    // to avoid a per-keystroke flood.
+    if (!wasSearching && this.hasSearched()) {
+      this.analytics.logEvent(AnalyticsEvent.SearchPerformed);
+    }
   }
 
   selectCategory(category: SearchCategory): void {

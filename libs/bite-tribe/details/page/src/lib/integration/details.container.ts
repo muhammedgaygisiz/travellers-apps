@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DetailsPage } from '../components/details-page/details.page';
 import { DetailsService } from './details.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 @Component({
   template: `
@@ -34,11 +35,13 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 })
 export class DetailsContainer {
   service = inject(DetailsService);
+  private readonly analytics = inject(AnalyticsService);
 
   ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Bite Details',
     });
+    this.analytics.logEvent(AnalyticsEvent.BiteViewed);
 
     if (this.service.bite.value()?.id || this.service.bite.error()) {
       this.service.bite.reload();

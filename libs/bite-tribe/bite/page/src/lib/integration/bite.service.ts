@@ -8,6 +8,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 @Injectable({ providedIn: 'root' })
 export class BiteService {
@@ -17,6 +18,7 @@ export class BiteService {
   private readonly loadingController = inject(LoadingController);
   private readonly transloco = inject(TranslocoService);
   private readonly toastController = inject(ToastController);
+  private readonly analytics = inject(AnalyticsService);
 
   image = signal<string>('');
 
@@ -91,6 +93,8 @@ export class BiteService {
     const { id, ...biteData } = newBite;
     try {
       await this.dataAccess.submitNewBite(biteData);
+
+      this.analytics.logEvent(AnalyticsEvent.BiteCreated);
 
       void this.navController.navigateBack(['home']);
 

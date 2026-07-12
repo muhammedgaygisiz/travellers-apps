@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BucketlistsDataAccessService } from 'bite-tribe/bucketlist-data-access';
 import { NavController } from '@ionic/angular/standalone';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -8,6 +9,7 @@ import { NavController } from '@ionic/angular/standalone';
 export class BucketlistsService {
   dataAccess = inject(BucketlistsDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly analytics = inject(AnalyticsService);
 
   bucketlists = this.dataAccess.bucketlists;
   sorting = this.dataAccess.sorting;
@@ -34,6 +36,7 @@ export class BucketlistsService {
 
   createAndSaveToBucketList(bucketListName: string): void {
     this.dataAccess.createAndSaveToBucketList(bucketListName);
+    this.analytics.logEvent(AnalyticsEvent.BucketListCreated);
   }
 
   deleteBucketlist(bucketlistId: string): void {

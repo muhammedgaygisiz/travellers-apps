@@ -21,6 +21,7 @@ Food lovers can discover real dishes nearby or in a broader feed before deciding
 - User can switch to map view.
 - User can filter or search within the feed.
 - Nearby Bites can be loaded through backend-assisted location loading.
+- When live Bite updates add markers, the map should preserve the user's current pan and zoom after the initial marker fit.
 
 ## Supported Evidence
 
@@ -28,6 +29,7 @@ Food lovers can discover real dishes nearby or in a broader feed before deciding
 - `home/map-view`
 - `loadBitesByLocation`
 - Bite API loading by location.
+- Shared `bt-map` marker update behavior.
 
 ## Related Domains
 

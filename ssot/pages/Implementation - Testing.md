@@ -40,8 +40,15 @@ npx jest --config libs/bite-tribe/search/data-access/jest.config.ts --runInBand
 | Firebase Functions               | `npm run build` and `npm run lint` from `apps/bite-tribe-firebase/functions` |
 | Locale JSON                      | Parse all touched locale files with Node                                     |
 | Storybook UI                     | `npm run build:storybook`                                                    |
+| Consumer app E2E                 | `NX_DAEMON=false npx nx e2e bite-tribe-e2e`                                  |
 | Capacitor native wrapper changes | `npx cap sync android` or the relevant Capacitor sync target                 |
 | Markdown/docs                    | `git diff --check`                                                           |
+
+## Playwright E2E
+
+`apps/bite-tribe-e2e` uses Playwright for consumer app smoke coverage.
+
+The E2E target starts the Firebase emulators and the Angular dev server before running browser tests. Use it when validating launch-critical flows such as login, registration, and creating a Bite through the real UI.
 
 ## Related Pages
 

@@ -14,7 +14,7 @@ The code map helps contributors find the right implementation surface quickly.
 | `apps/bite-tribe-ios`                | Capacitor iOS wrapper                                                     |
 | `apps/bite-tribe-android`            | Capacitor Android wrapper                                                 |
 | `apps/storybook-host`                | Storybook host for shared and feature UI states                           |
-| `apps/bite-tribe-e2e`                | Consumer app end-to-end tests                                             |
+| `apps/bite-tribe-e2e`                | Consumer app Playwright end-to-end tests                                  |
 | `apps/bite-tribe-business-e2e`       | Business app end-to-end tests                                             |
 
 ## Consumer Feature Libraries

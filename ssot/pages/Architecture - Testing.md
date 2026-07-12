@@ -10,6 +10,7 @@ Testing protects feature behavior, shared UI states, store effects/selectors, Fi
 - Use direct Jest when Nx graph or daemon behavior is noisy.
 - Update Storybook stories when shared UI states or component behavior change.
 - Validate Firebase functions with focused function build/test commands when backend contracts change.
+- Use Playwright E2E for launch-critical consumer flows that need the real app, browser APIs, and Firebase emulators together.
 - Always run `git diff --check`.
 
 ## Common Test Locations
@@ -19,6 +20,7 @@ libs/**/__specs__
 libs/**/jest.config.ts
 libs/**/jest.config.cts
 apps/bite-tribe-firebase/functions/src/**/*.spec.ts
+apps/bite-tribe-e2e/src/tests
 ```
 
 ## Architecture Risk Areas
@@ -28,6 +30,7 @@ apps/bite-tribe-firebase/functions/src/**/*.spec.ts
 - Store effects and selectors.
 - Image upload and storage update flows.
 - Auth and restored-session flows.
+- Browser/emulator launch flows such as login, registration, and Bite creation.
 - Shared UI components used across many pages.
 
 ## Code Anchors
@@ -37,6 +40,7 @@ apps/bite-tribe-firebase/functions/src/**/*.spec.ts
 libs/bite-tribe/store
 libs/bite-tribe/api
 apps/bite-tribe-firebase/functions
+apps/bite-tribe-e2e
 libs/common/ui
 ```
 

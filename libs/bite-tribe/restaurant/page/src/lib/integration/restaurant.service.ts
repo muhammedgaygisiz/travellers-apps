@@ -87,17 +87,30 @@ export class RestaurantService {
   }
 
   navigateToPlaceBites(bite: Bite | undefined): void {
-    if (!bite) {
+    const sourceBite = bite ?? this.resolveSourceBite();
+    if (!sourceBite) {
       return;
     }
 
     void this.navController.navigateForward([
       'bite',
-      bite.id,
+      sourceBite.id,
       'restaurant',
-      encodeURIComponent(bite.place),
+      encodeURIComponent(sourceBite.place),
       'bites',
     ]);
+  }
+
+  private resolveSourceBite(): Bite | undefined {
+    const biteFromStore = this.bite();
+    if (biteFromStore) {
+      return biteFromStore;
+    }
+
+    const biteId = this.dataAccess.biteIdFromUrl();
+    const bites = this.bites();
+
+    return bites.find((bite) => bite.id === biteId) ?? bites[0];
   }
 
   private normaliseRestaurantId(

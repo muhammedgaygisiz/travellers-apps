@@ -4,7 +4,9 @@
 
 This workflow describes how an agent should move from a product/spec request to a validated code change in this repository.
 
-It exists to make agentic engineering repeatable, traceable, and safe.
+It exists to make agentic engineering repeatable, traceable, safe, and model-agnostic.
+
+Use this workflow with Codex, Claude, GPT, local IDE agents, or any other coding assistant. Tool-specific instruction files should point here instead of defining separate implementation rules.
 
 ## Step 1 - Intake
 
@@ -13,6 +15,7 @@ It exists to make agentic engineering repeatable, traceable, and safe.
 - If a GitHub issue or PR is referenced, fetch and read the current source before editing.
 - Check local status with `git status --short --branch`.
 - Do not revert unrelated local changes.
+- Follow [[Agent Operating Contract]].
 
 ## Step 2 - Trace The Spec
 
@@ -110,6 +113,7 @@ A change is done when:
 ## Related Pages
 
 - [[Traceability Map]]
+- [[Agent Operating Contract]]
 - [[Feature Delivery Workflow]]
 - [[Release Workflow]]
 - [[Implementation - Code Map]]

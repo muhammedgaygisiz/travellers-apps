@@ -32,3 +32,7 @@
   - [feat: search city]([[issue-974]]) (Issue \#974)
   - [feat: add weekly resync for Bite count]([[issue-966]]) (Issue \#966)
   - [feat: notifications for change in ranking]([[issue-971]]) (Issue \#971)
+  - [ops: BigQuery export as analytics foundation]([[issue-986]]) (Issue \#986)
+  - [ops: activation funnel and retention cohorts]([[issue-987]]) (Issue \#987)
+  - [ops: unified growth and stability daily digest]([[issue-988]]) (Issue \#988)
+  - [ops: GDPR consent mode and PII/retention review]([[issue-989]]) (Issue \#989)

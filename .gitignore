@@ -59,3 +59,7 @@ apps/storybook-host/src/assets/temp/**/*
 # Logseq backup pages
 ssot/logseq/bak/
 /.claude/
+
+# Analytics service-account credentials (never commit keys)
+service-account*.json
+*-service-account.json

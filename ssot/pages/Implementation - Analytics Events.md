@@ -64,6 +64,26 @@ owner against the logged-in console; the taxonomy above drives it.
 
 Keep the dashboard scoped to launch signals; resist adding vanity metrics.
 
+## Agent-Operable Metrics
+
+The dashboard spec above is also **dashboard-as-code** so agents (and humans)
+can check metrics without opening the console:
+
+- `tools/analytics/dashboard.config.mjs` — the tiles as data, derived from this
+  page. Single source of truth for the report CLI.
+- `tools/analytics/report.mjs` — queries the tiles against the GA4 Data API.
+  Run `npm run analytics:report` (flags: `--days=<n>`, `--json`, `--dry-run`).
+- `npm run analytics:report -- --dry-run` prints the planned queries and needs
+  no credentials — safe for any agent to run.
+- Live runs need `GA4_PROPERTY_ID` + a service-account key in
+  `GOOGLE_APPLICATION_CREDENTIALS`; setup is in
+  [`tools/analytics/README.md`](../../tools/analytics/README.md).
+
+GA4 has no API to create the visual dashboard/exploration, so the config +
+report is the reproducible substitute. Provisioning event **parameters** as GA4
+custom dimensions and registering key events via the Analytics **Admin API** is
+a documented follow-up (needs Editor access on the property).
+
 ## DebugView Verification Steps
 
 1. Build and run the app on a device/emulator (or web) signed into the Firebase

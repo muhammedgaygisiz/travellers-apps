@@ -81,6 +81,8 @@
   - [[ADR-0001 Dish First Product]]
   - [[ADR-0002 Firebase Backend]]
   - [[ADR-0003 Nx Monorepo]]
+- Operations
+  - [[Analytics Operations]]
 - Current State
   - [[Current State - Roadmap]]
   - [[Current State - Known Issues]]

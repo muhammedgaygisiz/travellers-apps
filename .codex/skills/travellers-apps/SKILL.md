@@ -30,6 +30,7 @@ Read only the references relevant to the current task:
 - [firebase-functions.md](references/firebase-functions.md): callable/trigger patterns, Firestore query gotchas, aggregate migrations, and operational logging.
 - [storybook.md](references/storybook.md): when and how to update Storybook stories, Ionic story wrappers, Storybook host Transloco setup, and Storybook validation commands.
 - [capacitor.md](references/capacitor.md): native plugin dependency and sync workflow for iOS/Android wrappers.
+- [analytics.md](references/analytics.md): product event taxonomy, how to emit events, and how to check launch metrics via the `analytics:report` CLI (GA4 Data API).
 
 ## Core Defaults
 

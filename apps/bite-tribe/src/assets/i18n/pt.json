@@ -15,6 +15,8 @@
   "filter": "Filtrar",
   "search": "Pesquisar",
   "no-search-results-found": "Nenhum resultado encontrado.",
+  "search-list-view": "Vista de lista",
+  "search-map-view": "Vista de mapa",
   "search-category-user": "Utilizador",
   "search-category-bite": "Bite",
   "search-category-restaurant": "Restaurante",

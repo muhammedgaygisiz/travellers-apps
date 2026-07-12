@@ -1,28 +1,75 @@
 <ta-page
   [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
 >
-  <ion-content class="ion-padding">
-    <h1>{{ 'search' | transloco }}</h1>
+  <ion-content [class.map-view]="viewMode() === 'map' && canShowMap()">
+    <div class="search-controls ion-padding">
+      <div class="search-title">
+        <h1>{{ 'search' | transloco }}</h1>
+        @if (canShowMap()) {
+        <div class="view-toggle">
+          <ion-icon
+            name="list-outline"
+            [class.active]="viewMode() === 'list'"
+            aria-hidden="true"
+          />
+          <ion-toggle
+            [checked]="viewMode() === 'map'"
+            [attr.aria-label]="'search-map-view' | transloco"
+            (ionChange)="viewModeChange($event.detail.checked ? 'map' : 'list')"
+          />
+          <ion-icon
+            name="map-outline"
+            [class.active]="viewMode() === 'map'"
+            aria-hidden="true"
+          />
+        </div>
+        }
+      </div>
 
-    <ion-searchbar
-      [debounce]="1000"
-      [placeholder]="'search' | transloco"
-      (ionInput)="searchbarInput($event)"
+      <ion-searchbar
+        [debounce]="1000"
+        [placeholder]="'search' | transloco"
+        (ionInput)="searchbarInput($event)"
+      />
+
+      <bt-chip-radio-group
+        class="ion-margin-vertical"
+        data-testid="search-categories"
+        [options]="categoryOptions()"
+        [selectedValue]="selectedCategory()"
+        (valueChange)="categoryValueChange($event)"
+      />
+    </div>
+
+    @if (viewMode() === 'map' && canShowMap()) { @if (isLoading()) {
+    <div
+      class="ion-display-flex ion-justify-content-center state-container"
+      data-testid="search-map-loading"
+    >
+      <ion-spinner color="primary" />
+    </div>
+    } @else if (hasSearched() && results().length === 0) {
+    <div
+      class="ion-display-flex ion-justify-content-center state-container"
+      data-testid="search-map-empty"
+    >
+      <ion-label>{{ 'no-search-results-found' | transloco }}</ion-label>
+    </div>
+    } @else {
+    <bt-map
+      class="search-map"
+      readonly
+      emitMarkerClick
+      [geopoints]="mapPositions()"
+      (clickOnMarker)="mapMarkerClick($event)"
     />
-
-    <bt-chip-radio-group
-      class="ion-margin-vertical"
-      data-testid="search-categories"
-      [options]="categoryOptions()"
-      [selectedValue]="selectedCategory()"
-      (valueChange)="categoryValueChange($event)"
-    />
-
+    } } @else {
     <search-list
       [results]="results()"
       [isLoading]="isLoading()"
       [hasSearched]="hasSearched()"
       (resultClick)="resultClick.emit($event)"
     />
+    }
   </ion-content>
 </ta-page>

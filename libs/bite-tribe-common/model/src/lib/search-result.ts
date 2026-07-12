@@ -1,4 +1,5 @@
 import type { PublicUser } from './public-user';
+import type { Geopoint } from './geopoint';
 
 export type SearchCategory = 'user' | 'bite' | 'restaurant' | 'city';
 
@@ -10,6 +11,7 @@ export interface SearchBite {
   imagePath?: string;
   description?: string;
   tags?: string[];
+  position?: Geopoint;
 }
 
 export interface SearchRestaurant {
@@ -20,6 +22,7 @@ export interface SearchRestaurant {
   place?: string;
   image?: string;
   imagePath?: string;
+  position?: Geopoint;
 }
 
 export type SearchResult =

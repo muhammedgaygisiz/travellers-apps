@@ -1,5 +1,63 @@
 :host {
+  .search-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    h1 {
+      margin: 0;
+    }
+
+    .view-toggle {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      ion-icon {
+        font-size: 1.375rem;
+        color: var(--ion-color-medium);
+        transition: color 0.2s ease-in-out;
+
+        &.active {
+          color: var(--ion-color-primary);
+        }
+      }
+
+      ion-toggle {
+        padding: 0;
+        // Keep the track a constant neutral colour; the handle position and
+        // the active icon convey the selected view, not the track colour.
+        --track-background-checked: var(--track-background);
+      }
+    }
+  }
+
   ion-searchbar {
     padding: 0;
+  }
+
+  .search-map {
+    display: block;
+    flex: 1;
+    min-height: 0;
+
+    ::ng-deep .map-container {
+      height: 100%;
+      border-radius: 0;
+    }
+  }
+
+  .state-container {
+    flex: 1;
+    min-height: 8rem;
+    align-items: center;
+  }
+
+  ion-content.map-view::part(scroll) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 }

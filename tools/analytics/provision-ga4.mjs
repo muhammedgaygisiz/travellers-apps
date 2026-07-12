@@ -31,7 +31,7 @@ const KEY_EVENTS = [
 
 /** Event parameters promoted to event-scoped custom dimensions. */
 const CUSTOM_DIMENSIONS = [
-  { parameterName: 'method', displayName: 'Sign-up method' },
+  { parameterName: 'method', displayName: 'Sign up method' },
   { parameterName: 'verified', displayName: 'Restaurant verified' },
   { parameterName: 'rating', displayName: 'BiteTrail rating' },
 ];

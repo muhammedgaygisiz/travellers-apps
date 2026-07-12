@@ -83,7 +83,7 @@ Release state and changelog
 | [[Architecture - Capacitor]]            | [[Implementation - Testing]], [[Implementation - Release And Build Workflow]]  |
 | [[Architecture - Auth]]                 | [[Implementation - Code Map]], [[Implementation - Feature Patterns]]           |
 | [[Architecture - Storage]]              | [[Implementation - Firebase Functions]], [[Implementation - Feature Patterns]] |
-| [[Architecture - Analytics]]            | [[Current State - Roadmap]], [[Current State - Release State]]                 |
+| [[Architecture - Analytics]]            | [[Implementation - Analytics Events]], [[Current State - Roadmap]]             |
 | [[Architecture - State Management]]     | [[Implementation - Feature Patterns]], [[Implementation - Testing]]            |
 | [[Architecture - Data Access]]          | [[Implementation - Feature Patterns]], [[Implementation - Libraries]]          |
 | [[Architecture - Internationalization]] | [[Implementation - Localization]]                                              |

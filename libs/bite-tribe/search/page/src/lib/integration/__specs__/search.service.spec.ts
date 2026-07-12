@@ -4,6 +4,7 @@ import { signal } from '@angular/core';
 import { NavController } from '@ionic/angular/standalone';
 import type { SearchCategory, SearchResult } from 'model';
 import { SearchService } from '../search.service';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 describe(SearchService.name, () => {
   const results = { value: signal([]) };
@@ -11,6 +12,9 @@ describe(SearchService.name, () => {
   const searchCategory = signal<SearchCategory>('user');
   const navController = {
     navigateForward: jest.fn(),
+  };
+  const analytics = {
+    logEvent: jest.fn(),
   };
 
   beforeEach(() => {
@@ -21,6 +25,7 @@ describe(SearchService.name, () => {
     TestBed.configureTestingModule({
       providers: [
         SearchService,
+        { provide: AnalyticsService, useValue: analytics },
         { provide: NavController, useValue: navController },
         {
           provide: SearchDataAccessService,
@@ -42,6 +47,24 @@ describe(SearchService.name, () => {
     service.search('Daniel');
 
     expect(searchText()).toBe('Daniel');
+  });
+
+  it('should log search_performed once a query becomes meaningful', () => {
+    const service = TestBed.inject(SearchService);
+
+    service.search('Daniel');
+
+    expect(analytics.logEvent).toHaveBeenCalledWith(
+      AnalyticsEvent.SearchPerformed,
+    );
+  });
+
+  it('should not log search_performed for a too-short query', () => {
+    const service = TestBed.inject(SearchService);
+
+    service.search('Da');
+
+    expect(analytics.logEvent).not.toHaveBeenCalled();
   });
 
   it('should pass selected category to data access', () => {

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RestaurantComponent } from '../components/page/restaurant/restaurant.component';
 import { RestaurantService } from './restaurant.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,10 +23,14 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 })
 export class RestaurantContainer {
   service = inject(RestaurantService);
+  private readonly analytics = inject(AnalyticsService);
 
   ionViewDidEnter(): void {
     void FirebaseAnalytics.setCurrentScreen({
       screenName: 'Restaurant',
+    });
+    this.analytics.logEvent(AnalyticsEvent.RestaurantViewed, {
+      verified: true,
     });
   }
 }

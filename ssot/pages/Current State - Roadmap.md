@@ -63,6 +63,7 @@
 - Implement Firebase Analytics.
 - Verify events in DebugView.
 - Build a dashboard with key metrics.
+- Status: launch event taxonomy (`AnalyticsService` + activation/creation/discovery events) and its SSOT spec have landed through [[issue-910]]. DebugView verification and the launch dashboard are console follow-ups tracked in [[Implementation - Analytics Events]].
 - ### Week 4
 
   Focus: Production readiness.

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { UnverifiedRestaurantContainer } from '../unverified-restaurant-container.component';
+import { RestaurantContainer } from '../restaurant-container.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { RestaurantService } from '../restaurant.service';
 import { TranslocoService } from '@jsverse/transloco';
@@ -16,9 +16,9 @@ const MockTranslocoService = {
   langChanges$: of(),
 };
 
-describe(UnverifiedRestaurantContainer.name, () => {
-  let component: UnverifiedRestaurantContainer;
-  let fixture: ComponentFixture<UnverifiedRestaurantContainer>;
+describe(RestaurantContainer.name, () => {
+  let component: RestaurantContainer;
+  let fixture: ComponentFixture<RestaurantContainer>;
   const logEventMock = jest.fn();
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe(UnverifiedRestaurantContainer.name, () => {
       ],
     });
 
-    fixture = TestBed.createComponent(UnverifiedRestaurantContainer);
+    fixture = TestBed.createComponent(RestaurantContainer);
     component = fixture.componentInstance;
   });
 
@@ -53,15 +53,15 @@ describe(UnverifiedRestaurantContainer.name, () => {
     component.ionViewDidEnter();
 
     expect(FirebaseAnalytics.setCurrentScreen).toHaveBeenCalledWith({
-      screenName: 'Unverified Restaurant',
+      screenName: 'Restaurant',
     });
   });
 
-  it('should log the restaurant_viewed event as unverified on ionViewDidEnter', () => {
+  it('should log the restaurant_viewed event as verified on ionViewDidEnter', () => {
     component.ionViewDidEnter();
 
     expect(logEventMock).toHaveBeenCalledWith(AnalyticsEvent.RestaurantViewed, {
-      verified: false,
+      verified: true,
     });
   });
 });

@@ -2,6 +2,7 @@ import { effect, inject, Injectable, signal } from '@angular/core';
 import { BucketlistsDataAccessService } from 'bite-tribe/bucketlist-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { BiteTrailRating } from 'model';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -9,6 +10,7 @@ import { BiteTrailRating } from 'model';
 export class RateBucketlistService {
   private readonly dataAccess = inject(BucketlistsDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly analytics = inject(AnalyticsService);
 
   selectedBucketlist = this.dataAccess.selectedBucketlist;
   existingRating = signal<BiteTrailRating | undefined>(undefined);
@@ -41,6 +43,9 @@ export class RateBucketlistService {
       });
 
       if (created) {
+        this.analytics.logEvent(AnalyticsEvent.BucketListRated, {
+          rating: params.rating,
+        });
         this.existingRating.set(params);
         this.navController.back();
       } else {

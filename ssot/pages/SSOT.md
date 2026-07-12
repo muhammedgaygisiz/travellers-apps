@@ -72,6 +72,7 @@
   - [[Implementation - Naming Conventions]]
   - [[Implementation - Feature Patterns]]
   - [[Implementation - Firebase Functions]]
+  - [[Implementation - Analytics Events]]
   - [[Implementation - Localization]]
   - [[Implementation - Storybook]]
   - [[Implementation - Testing]]

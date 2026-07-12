@@ -8,6 +8,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 import { Bite } from 'model';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 jest.mock('@capacitor-firebase/analytics');
 
@@ -28,10 +29,12 @@ describe(DetailsContainer.name, () => {
   let fixture: ComponentFixture<DetailsContainer>;
   const biteSignal = signal<Bite | undefined>(undefined);
   const biteReloadSpy = jest.fn();
+  const logEventMock = jest.fn();
 
   beforeEach(() => {
     biteSignal.set(undefined);
     biteReloadSpy.mockClear();
+    logEventMock.mockClear();
 
     TestBed.configureTestingModule({
       providers: [
@@ -65,6 +68,7 @@ describe(DetailsContainer.name, () => {
           },
         },
         { provide: TranslocoService, useValue: MockTranslocoService },
+        { provide: AnalyticsService, useValue: { logEvent: logEventMock } },
       ],
     });
 
@@ -89,6 +93,12 @@ describe(DetailsContainer.name, () => {
       expect(setCurrentScreenSpy).toHaveBeenCalledWith({
         screenName: 'Bite Details',
       });
+    });
+
+    it('should log the bite_viewed analytics event', () => {
+      component.ionViewDidEnter();
+
+      expect(logEventMock).toHaveBeenCalledWith(AnalyticsEvent.BiteViewed);
     });
 
     it('should refresh bite when bite value already exists', () => {

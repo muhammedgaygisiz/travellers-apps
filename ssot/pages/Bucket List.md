@@ -110,10 +110,10 @@ Supported today:
 - Mark Bites as tried out.
 - Save BiteTrail as Bucket List.
 - Rate BiteTrail.
+- View tried-out progress per Bucket List (progress bar on the Bucket Lists page).
 
 Related future or expanding use cases:
 
-- Progress visualization.
 - Completion badges.
 - Shared Bucket Lists.
 - Better BiteTrail completion journey.

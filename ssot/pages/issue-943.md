@@ -1,6 +1,6 @@
 - [feat: select Bite restaurant/place before saving](https://github.com/muhammedgaygisiz/travellers-apps/issues/943) (Issue \#943)
 - Status
-  - Specification updated after Google Places became part of Bite creation.
+  - Implemented through PR \#981.
 - Parent
   - [[issue-778]]
 - Goal
@@ -23,6 +23,13 @@
   - Unverified/local restaurant selection patches `place` and `position`.
   - Google Place selection patches `place` and `position`.
   - `Use: "abc"` patches the typed place and the current Bite/user position when available; if no position is available, posting still requires setting a position.
+- Current implementation
+  - `libs/bite-tribe/bite/page` shows the required picker row, selected-place text, and repeat-icon reselection action.
+  - `libs/common/ui/restaurant-selector` renders nearby verified/unverified restaurants, nearby Google Places, and explicit custom-place fallback choices.
+  - `libs/bite-tribe/bite/data-access` loads nearby Google Places through the shared API.
+  - `libs/bite-tribe/api` exposes `searchNearbyPlaces`.
+  - `apps/bite-tribe-firebase/functions/src/functions/search-places.ts` supports nearby place search by position.
+  - `libs/bite-tribe/store` exposes nearby restaurant payloads with distance instead of restaurant names only.
 - Related SSOT
   - [[issue-778]]
   - [[Bite]]
@@ -30,6 +37,6 @@
   - [[UC - Create And Maintain Personal Bites]]
   - [[UC - Browse Restaurants And Places]]
 - Validation
-  - Focused Bite page/container tests should cover the `Set Restaurant` empty state, selected-name display, repeat-icon reselection, and required selected-place state.
-  - Restaurant selector tests should cover fallback behavior, distance rendering, nearest-first sorting, top Google suggestions, and selection payloads with position.
-  - Google Places callable/data-access tests should cover any new position-only nearby mode.
+  - Focused Bite page/container tests cover the `Set Restaurant` empty state, selected-name display, repeat-icon reselection, and required selected-place state.
+  - Restaurant selector tests cover fallback behavior, distance rendering, Google suggestions, and selection payloads with position.
+  - Google Places callable/data-access tests cover the nearby-position mode.

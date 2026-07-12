@@ -6,14 +6,17 @@ This repository is set up for agentic engineering.
 
 Agents should use the SSOT before making changes so product intent, domain language, architecture decisions, implementation rules, and release state stay connected.
 
+This contract is model-agnostic. Codex, Claude, GPT, local IDE agents, and future assistants should all follow the same SSOT workflow.
+
 ## Start Here
 
 1. Read `ssot/pages/SSOT.md`.
-2. Use `ssot/pages/Traceability Map.md` to connect the request to product, domain, use case, epic, architecture, implementation, testing, and release context.
-3. Follow `ssot/pages/Feature Delivery Workflow.md` for normal issue-to-merge work.
-4. Follow `ssot/pages/Release Workflow.md` for Sunday release work.
-5. Use `ssot/pages/Spec To Code Workflow.md` for implementation details.
-6. Use `.codex/skills/travellers-apps/SKILL.md` for repo-specific operating guidance.
+2. Read `ssot/pages/Agent Operating Contract.md`.
+3. Use `ssot/pages/Traceability Map.md` to connect the request to product, domain, use case, epic, architecture, implementation, testing, and release context.
+4. Follow `ssot/pages/Feature Delivery Workflow.md` for normal issue-to-merge work.
+5. Follow `ssot/pages/Release Workflow.md` for Sunday release work.
+6. Use `ssot/pages/Spec To Code Workflow.md` for implementation details.
+7. Use tool-specific guidance, such as `.codex/skills/travellers-apps/SKILL.md` or `CLAUDE.md`, only as an adapter to this shared workflow.
 
 ## Core Rules
 
@@ -62,11 +65,13 @@ Preferred order:
 
 ```text
 ssot/pages/SSOT.md
+ssot/pages/Agent Operating Contract.md
 ssot/pages/Traceability Map.md
 ssot/pages/Spec To Code Workflow.md
 ssot/pages/Feature Delivery Workflow.md
 ssot/pages/Release Workflow.md
 .codex/skills/travellers-apps/SKILL.md
+CLAUDE.md
 apps/bite-tribe
 apps/bite-tribe-business
 apps/bite-tribe-firebase/functions

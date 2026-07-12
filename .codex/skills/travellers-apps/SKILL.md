@@ -7,6 +7,20 @@ description: Repo operating guide for muhammedgaygisiz/travellers-apps. Use when
 
 Use this skill when working in `/Users/mo/DEV/travellers-apps`. Keep changes scoped to the requested surface, preserve existing behavior unless the user asks otherwise, and prefer the repo's established Nx library boundaries.
 
+## Start Here
+
+This skill is a Codex adapter to the shared, model-agnostic contract. It does not define a separate product or implementation truth. Follow these first:
+
+1. Read `AGENTS.md`.
+2. Read `ssot/pages/SSOT.md`.
+3. Read `ssot/pages/Agent Operating Contract.md`.
+4. Use `ssot/pages/Traceability Map.md` to connect the request to product, domain, use case, epic, architecture, implementation, testing, and release context.
+5. Follow `ssot/pages/Spec To Code Workflow.md` for implementation work.
+6. Follow `ssot/pages/Feature Delivery Workflow.md` for issue-to-merge work.
+7. Follow `ssot/pages/Release Workflow.md` for Sunday release work.
+
+The sections below are Codex-specific operational notes. When they seem to conflict with the SSOT, the SSOT wins.
+
 ## Reference Map
 
 Read only the references relevant to the current task:

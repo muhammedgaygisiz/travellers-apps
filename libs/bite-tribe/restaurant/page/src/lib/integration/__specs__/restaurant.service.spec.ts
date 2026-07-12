@@ -92,6 +92,31 @@ describe('RestaurantService', () => {
     expect(service.bites()).toEqual([mockBite]);
   });
 
+  describe('bite', () => {
+    it('should expose the store bite when available', () => {
+      expect(service.bite()).toEqual(mockBite);
+    });
+
+    it('should fall back to the loaded source bite when the store bite is missing', () => {
+      const searchedBite: Bite = {
+        id: 'searched-bite-123',
+        place: 'Toro Toro',
+      } as Bite;
+      mockDataAccessService.bite.set(undefined);
+      mockDataAccessService.biteIdFromUrl.set(searchedBite.id);
+      mockHomeDataAccessService.restaurantBites.set([searchedBite]);
+
+      expect(service.bite()).toEqual(searchedBite);
+    });
+
+    it('should be undefined when neither store nor loaded bites resolve', () => {
+      mockDataAccessService.bite.set(undefined);
+      mockHomeDataAccessService.restaurantBites.set([]);
+
+      expect(service.bite()).toBeUndefined();
+    });
+  });
+
   describe('navigateToMenu', () => {
     it('should navigate to menu if bite and restaurant with menuId exist', () => {
       const restaurant: Restaurant = {
@@ -259,7 +284,7 @@ describe('RestaurantService', () => {
         id: 'searched-bite-123',
         place: 'Toro Toro',
       } as Bite;
-      service.bite = signal(undefined);
+      mockDataAccessService.bite.set(undefined);
       mockDataAccessService.biteIdFromUrl.set(searchedBite.id);
       mockHomeDataAccessService.restaurantBites.set([searchedBite]);
 
@@ -275,7 +300,7 @@ describe('RestaurantService', () => {
     });
 
     it('should not navigate when no bite can be resolved', () => {
-      service.bite = signal(undefined);
+      mockDataAccessService.bite.set(undefined);
       mockHomeDataAccessService.restaurantBites.set([]);
 
       service.navigateToPlaceBites(undefined);

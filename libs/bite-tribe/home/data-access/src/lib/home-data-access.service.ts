@@ -241,6 +241,10 @@ export class HomeDataAccessService {
     );
   });
 
+  restaurantBitesLoading = computed(() =>
+    this.restaurantBitesResource.isLoading(),
+  );
+
   logout(): void {
     this.storeService.logout();
   }

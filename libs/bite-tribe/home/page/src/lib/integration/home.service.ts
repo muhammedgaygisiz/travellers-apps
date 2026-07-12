@@ -17,6 +17,7 @@ export class HomeService {
   myBites = this.dataAccess.myBites;
   myBitesSorting = this.dataAccess.myBitesSorting;
   restaurantBites = this.dataAccess.restaurantBites;
+  restaurantBitesLoading = this.dataAccess.restaurantBitesLoading;
   restaurantBitesSorting = this.dataAccess.restaurantBitesSorting;
   bitesBySelectedBucketlist = this.dataAccess.bitesBySelectedBucketlist;
   allTags = this.dataAccess.allTags;

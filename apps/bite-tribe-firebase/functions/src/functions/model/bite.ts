@@ -19,6 +19,7 @@ export type Bite = {
   currency?: string;
   rating?: number;
   imagePath?: string;
+  imageStatus?: 'pending' | 'uploaded' | 'failed';
   thumbup?: number;
   drooling?: number;
   mindblown?: number;

@@ -79,6 +79,7 @@ export const setBiteImagePathOnUpload = onObjectFinalized(async (event) => {
   await db.doc(`bites/${biteId}`).update({
     imagePath: downloadUrl,
     image: '',
+    imageStatus: 'uploaded',
     updatedAt: FieldValue.serverTimestamp(),
   });
 

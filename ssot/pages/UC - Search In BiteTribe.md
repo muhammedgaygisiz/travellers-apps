@@ -30,6 +30,7 @@ Users can find people, Bites, and restaurants quickly.
 - `searchBites`
 - `searchBitesByCity`
 - `searchRestaurants`
+- Playwright Bite and Restaurant search E2E smoke coverage.
 
 ## Related GitHub Scope
 

@@ -34,7 +34,7 @@ Users can receive lightweight motivation and recognition for food contributions.
 ## Related GitHub Scope
 
 - Issue \#770 expands this into badges, contests, and completion rewards.
-- [[issue-966]], [[issue-968]], [[issue-971]], and [[issue-975]] cover the current leaderboard, notification, and profile-badge slices.
+- Issues 966, 968, 971, and 975 cover the current leaderboard, notification, and profile-badge slices.
 
 ## Related Domains
 

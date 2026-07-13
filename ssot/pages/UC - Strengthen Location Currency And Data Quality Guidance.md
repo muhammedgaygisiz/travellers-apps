@@ -29,9 +29,9 @@ The app should help users avoid misleading Bite and Restaurant context.
 
 ## Related GitHub Scope
 
-- [[issue-909]] covers launch location and currency quality.
-- [[issue-967]] covers suspicious price validation.
-- [[issue-978]] covers currency prefill edge-case verification.
+- Issue 909 covers launch location and currency quality.
+- Issue 967 covers suspicious price validation.
+- Issue 978 covers currency prefill edge-case verification.
 
 ## Related Domains
 

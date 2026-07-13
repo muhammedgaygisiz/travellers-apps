@@ -18,21 +18,24 @@
   - Release Candidate is ready.
   - Soft launch and public launch are executed.
   - Crashlytics, Analytics, onboarding, retention, and user feedback are monitored after launch.
+  - \#\# Related issues
+  - \#908 - launch: harden Firebase App Check for enforcement
+  - \#909 - launch: improve currency selection
+  - \#910 - launch: define analytics events and dashboard
+  - \#911 - launch: complete production readiness testing and store assets
+  - \#912 - launch: execute soft launch and monitor daily
+  - \#913 - launch: run public launch campaign
+  - \#914 - launch: run post-launch learning loop
+  - \#927 - launch: fix intermittent Bite photo upload failures
+  - \#978 - launch: verify currency prefill edge cases
+  - \#967 - feat: client side price validation
+  - \#974 - feat: search city
+  - \#966 - feat: add weekly resync for Bite count
+  - \#971 - feat: notifications for change in ranking
 - Related issues
-  - [launch: harden Firebase App Check for enforcement]([[issue-908]]) (Issue \#908)
-  - [launch: improve location and currency quality]([[issue-909]]) (Issue \#909)
-  - [launch: define analytics events and dashboard]([[issue-910]]) (Issue \#910)
+  - [launch: fix intermittent Bite photo upload failures]([[issue-927]]) (Issue \#927)
   - [launch: complete production readiness testing and store assets]([[issue-911]]) (Issue \#911)
   - [launch: execute soft launch and monitor daily]([[issue-912]]) (Issue \#912)
   - [launch: run public launch campaign]([[issue-913]]) (Issue \#913)
   - [launch: run post-launch learning loop]([[issue-914]]) (Issue \#914)
-  - [launch: fix intermittent Bite photo upload failures]([[issue-927]]) (Issue \#927)
-  - [launch: verify currency prefill edge cases]([[issue-978]]) (Issue \#978)
-  - [feat: client side price validation]([[issue-967]]) (Issue \#967)
-  - [feat: search city]([[issue-974]]) (Issue \#974)
-  - [feat: add weekly resync for Bite count]([[issue-966]]) (Issue \#966)
-  - [feat: notifications for change in ranking]([[issue-971]]) (Issue \#971)
-  - [ops: BigQuery export as analytics foundation]([[issue-986]]) (Issue \#986)
-  - [ops: activation funnel and retention cohorts]([[issue-987]]) (Issue \#987)
-  - [ops: unified growth and stability daily digest]([[issue-988]]) (Issue \#988)
-  - [ops: GDPR consent mode and PII/retention review]([[issue-989]]) (Issue \#989)
+  - [launch: switch App Check startup failure to blocking behavior before enforcement]([[issue-933]]) (Issue \#933)

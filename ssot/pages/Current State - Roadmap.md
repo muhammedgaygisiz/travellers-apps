@@ -16,19 +16,19 @@
 
 - Completed or landed toward this phase:
   - Firebase App Check bootstrap and telemetry work is in place, but enforcement readiness still depends on monitoring verified request quality.
-  - Bite address enrichment and city search have landed through [[issue-974]].
-  - Location-based Bite currency prefill has landed through [[issue-909]] / PR \#965.
-  - Client-side suspicious price validation has landed through [[issue-967]].
-  - Leaderboard reliability work has landed through [[issue-966]] and [[issue-968]].
-  - Daily ranking-change notifications have landed through [[issue-971]].
-  - Profile badge display has landed through [[issue-975]].
-  - Restaurant candidate verification has landed through [[issue-942]] as part of [[issue-778]].
-  - Mandatory Bite restaurant/place selection has landed through [[issue-943]] / PR \#981.
-  - Map live-update camera stability has landed through [[issue-982]].
-  - Playwright login, registration, and create-Bite E2E coverage has landed through [[issue-983]].
+  - Bite address enrichment and city search have landed through issue 974.
+  - Location-based Bite currency prefill has landed through issue 909 / PR \#965.
+  - Client-side suspicious price validation has landed through issue 967.
+  - Leaderboard reliability work has landed through issues 966 and 968.
+  - Daily ranking-change notifications have landed through issue 971.
+  - Profile badge display has landed through issue 975.
+  - Restaurant candidate verification has landed through issue 942 as part of [[epic-778]].
+  - Mandatory Bite restaurant/place selection has landed through issue 943 / PR \#981.
+  - Map live-update camera stability has landed through issue 982.
+  - Playwright login, registration, and create-Bite E2E coverage has landed through issue 983.
 
 - Current gap to the 17 July 2026 milestone:
-  - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, Bite photo upload reliability, notification delivery, city search quality, [[issue-978]] currency prefill and manual override, suspicious-price UX, restaurant/place picker behavior, map camera stability, Playwright E2E reliability, and restaurant candidate verification state transitions.
+  - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, Bite photo upload reliability, notification delivery, city search quality, issue 978 currency prefill and manual override, suspicious-price UX, restaurant/place picker behavior, map camera stability, Playwright E2E reliability, and restaurant candidate verification state transitions.
 
 - ### Week 1
 
@@ -63,7 +63,7 @@
 - Implement Firebase Analytics.
 - Verify events in DebugView.
 - Build a dashboard with key metrics.
-- Status: launch event taxonomy (`AnalyticsService` + activation/creation/discovery events) and its SSOT spec have landed through [[issue-910]]. DebugView verification and the launch dashboard are console follow-ups tracked in [[Implementation - Analytics Events]].
+- Status: launch event taxonomy (`AnalyticsService` + activation/creation/discovery events) and its SSOT spec have landed through issue 910. DebugView verification and the launch dashboard are console follow-ups tracked in [[Implementation - Analytics Events]].
 - ### Week 4
 
   Focus: Production readiness.

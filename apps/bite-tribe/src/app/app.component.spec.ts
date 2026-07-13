@@ -48,6 +48,10 @@ const MockTranslocoService = {
   setActiveLang: jest.fn(),
 };
 
+const MockAppForegroundService = {
+  handleAppStateChange: jest.fn(),
+};
+
 describe(AppComponent.name, () => {
   let fixture: ComponentFixture<AppComponent>;
   let component: AppComponent;
@@ -62,6 +66,7 @@ describe(AppComponent.name, () => {
           ],
         }),
         { provide: TranslocoService, useValue: MockTranslocoService },
+        { provide: AppForegroundService, useValue: MockAppForegroundService },
       ],
       imports: [AppComponent],
     }).compileComponents();

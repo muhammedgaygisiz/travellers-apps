@@ -48,6 +48,22 @@ export class AuthService {
     return this.authState()?.user;
   }
 
+  /**
+   * Force-refreshes the current user's ID token. Returns `true` when the token
+   * was refreshed, `false` when the session is no longer valid (e.g. the
+   * refresh token was revoked, or went stale after long inactivity or an app
+   * update). Never throws — callers decide how to react to an invalid session.
+   */
+  async refreshSession(): Promise<boolean> {
+    try {
+      await FirebaseAuthentication.getIdToken({ forceRefresh: true });
+      return true;
+    } catch (error) {
+      console.warn('Failed to refresh auth session:', error);
+      return false;
+    }
+  }
+
   async initialize(): Promise<void> {
     const currentUser = await FirebaseAuthentication.getCurrentUser();
     this._authStateChange$.next(currentUser);

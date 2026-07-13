@@ -1,4 +1,7 @@
 - [DRAFT: feat: detect and warn about bite location mismatches using selected place source](https://github.com/muhammedgaygisiz/travellers-apps/issues/902) (Issue \#902)
+- Status
+  - Closed as obsolete/superseded on 13 July 2026.
+  - Issue \#943 / PR \#981 made the selected restaurant/place authoritative when it carries a position, so the original location-mismatch problem is no longer a required launch feature.
 - Description
   - \#\# Context
   - Issue \#943 / PR \#981 changed Bite creation from form-level free-text restaurant entry to mandatory restaurant/place selection before saving.
@@ -8,6 +11,7 @@
     - a Google Place with `placeId`, address, and position
     - an explicit custom text fallback through `Use: "abc"`
   - Issue \#902 should therefore validate the selected place source against the current Bite position instead of resolving every restaurant name through Google Places after the user types it.
+  - After review, no immediate implementation is needed because selecting a Google Place or nearby/local restaurant already patches the Bite position. Remaining custom-text/manual-position edge cases are non-launch follow-up material rather than issue \#902 scope.
   - \#\# Goal
   - Help users avoid publishing a Bite at the wrong map position when they create it later, travel away from the restaurant, use a photo location, or manually choose a position that does not match the selected restaurant/place.
   - \#\# Desired User Flow

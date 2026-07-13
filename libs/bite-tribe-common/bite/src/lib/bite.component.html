@@ -3,10 +3,18 @@
 <ion-card>
   <div class="card-content">
     <div class="card-image">
-      @if (biteData.image || biteData.imagePath) {
+      @if (biteData.imageStatus === 'pending') {
+        <div class="upload-progress" role="status" aria-live="polite">
+          <ion-spinner name="crescent" />
+          <ion-text class="upload-progress-text smalltext">
+            {{ 'uploading-keep-app-open' | transloco }}
+          </ion-text>
+        </div>
+      } @else if (biteData.image || biteData.imagePath) {
         <img
           alt="Dish"
           class="cursor-pointer"
+          [class.fade-in]="imageJustUploaded()"
           [src]="biteData | getImage"
           height="220"
           loading="lazy"

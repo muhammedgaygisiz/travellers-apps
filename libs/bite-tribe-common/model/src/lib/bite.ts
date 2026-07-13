@@ -7,6 +7,7 @@ export interface Bite {
   name: string;
   image: string;
   imagePath?: string;
+  imageStatus?: 'pending' | 'uploaded' | 'failed';
   place: string;
   price: number;
   currency?: string;

@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -20,6 +21,7 @@ import {
   IonContent,
   IonHeader,
   IonModal,
+  IonSpinner,
   IonText,
   IonTitle,
   IonToolbar,
@@ -57,6 +59,7 @@ const CANCEL = 'cancel';
     StarRatingComponent,
     IonAlert,
     IonModal,
+    IonSpinner,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -91,6 +94,25 @@ export class BiteComponent {
   isOpen = signal(false);
   isRatingModalOpen = signal(false);
   selectedRating = signal<number>(0);
+
+  /**
+   * Set once the image transitions from a pending upload to uploaded while this
+   * card is mounted, so we can fade the photo in instead of hard-cutting from
+   * the "uploading" overlay. Scoped to the live transition — images that were
+   * already uploaded when the card rendered are not animated.
+   */
+  readonly imageJustUploaded = signal(false);
+  private previousImageStatus: Bite['imageStatus'];
+
+  private readonly trackImageUploadTransition = effect(() => {
+    const status = this.bite().imageStatus;
+
+    if (this.previousImageStatus === 'pending' && status === 'uploaded') {
+      this.imageJustUploaded.set(true);
+    }
+
+    this.previousImageStatus = status;
+  });
 
   isOwnUnratedBite = computed(() => {
     const bite = this.bite();

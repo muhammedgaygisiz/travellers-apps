@@ -30,12 +30,13 @@ Users can find people, Bites, and restaurants quickly.
 - `searchBites`
 - `searchBitesByCity`
 - `searchRestaurants`
+- Playwright Bite and Restaurant search E2E smoke coverage.
 
 ## Related GitHub Scope
 
 - Issue \#843 covers broader universal search, fuzzy matching, and topic-specific search.
 - Issue \#903 adds a list/map switch for location-aware search results.
-- [[issue-974]] adds city search.
+- Issue 974 adds city search.
 
 ## Related Domains
 

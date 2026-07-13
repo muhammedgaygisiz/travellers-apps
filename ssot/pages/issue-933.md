@@ -1,0 +1,18 @@
+- [launch: switch App Check startup failure to blocking behavior before enforcement](https://github.com/muhammedgaygisiz/travellers-apps/issues/933) (Issue \#933)
+- Description
+  - \#\# Problem
+  - The transitional App Check startup behavior logs initialization failure and continues startup.
+  - That is acceptable before enforcement, but once Firebase App Check enforcement is enabled, continuing without usable App Check readiness can lead to broken Firebase-backed app flows.
+  - \#\# Scope
+  - Implement the enforced future policy before enabling App Check enforcement in Firebase Console.
+  - \#\# Desired behavior
+  - App Check provider registration and token readiness are checked before Firebase-backed app flows begin.
+  - If App Check readiness fails in enforced mode, protected Firebase interactions are blocked.
+  - The user sees a retry/error state instead of partial broken Firebase screens.
+  - Firebase App Check enforcement is not enabled until this behavior is implemented and validated.
+  - \#\# Acceptance criteria
+  - Enforced mode has an explicit config/runtime switch.
+  - App Check token readiness is preflighted before protected Firebase traffic.
+  - Failure blocks Firebase-backed app startup with a retry path.
+  - The app does not show empty/broken Firebase screens caused by missing App Check tokens.
+  - Web, iOS, Android, and local production-Firebase testing paths are validated.

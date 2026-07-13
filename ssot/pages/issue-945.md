@@ -1,0 +1,22 @@
+- [08 - test: harden restaurant candidate duplicate and idempotency paths](https://github.com/muhammedgaygisiz/travellers-apps/issues/945) (Issue \#945)
+- Description
+  - Parent: \#778
+  - \#\# Goal
+  - Harden duplicate handling, idempotency, and race-condition behavior across the restaurant-candidate workflow.
+  - \#\# Scope
+  - Verify duplicate handling across:
+  - existing verified restaurants
+  - existing pending candidates
+  - already verified or merged candidates
+  - dismissed candidates
+  - Add transaction or guard behavior where needed.
+  - Ensure parallel trigger/callable runs do not create duplicate candidates.
+  - Ensure repeated candidate verification does not create duplicate restaurants.
+  - \#\# Acceptance Criteria
+  - Candidate creation checks verified restaurants first.
+  - Candidate creation updates nearby pending candidates instead of creating duplicates.
+  - Verified, merged, and dismissed candidates are not reused as pending candidates.
+  - Candidate verification is idempotent under repeated or parallel calls.
+  - \#\# Validation Notes
+  - Focused helper and function tests should cover duplicate/idempotency cases.
+  - Emulator verification should include duplicate and parallel-ish scenarios.

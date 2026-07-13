@@ -30,17 +30,18 @@ The product is not yet in public launch mode. The current focus is proving the r
 
 ## Recent Completed Work
 
-- [[issue-967]] added client-side suspicious price validation.
-- [[issue-909]] / PR \#965 added location-based currency prefill for Bite creation.
-- [[issue-974]] added city search through backend search functions and search UI wiring.
-- [[issue-966]] added weekly Bite count resync for leaderboard/profile aggregate repair.
-- [[issue-968]] persisted leaderboard ranking/contribution display behavior.
-- [[issue-971]] added daily ranking-change notifications.
-- [[issue-975]] added profile country badges and supporting country-code derivation.
-- [[issue-942]] added Business app restaurant candidate verification into real Restaurants.
-- [[issue-943]] / PR \#981 replaced direct Bite place text entry with required restaurant/place selection before saving.
-- [[issue-982]] fixed map camera jumps when live Bite marker updates arrive.
-- [[issue-983]] replaced the consumer E2E baseline with Playwright login, registration, and create-Bite coverage.
+- Issue 967 added client-side suspicious price validation.
+- Issue 909 / PR \#965 added location-based currency prefill for Bite creation.
+- Issue 974 added city search through backend search functions and search UI wiring.
+- Issue 966 added weekly Bite count resync for leaderboard/profile aggregate repair.
+- Issue 968 persisted leaderboard ranking/contribution display behavior.
+- Issue 971 added daily ranking-change notifications.
+- Issue 975 added profile country badges and supporting country-code derivation.
+- Issue 942 added Business app restaurant candidate verification into real Restaurants.
+- Issue 943 / PR \#981 replaced direct Bite place text entry with required restaurant/place selection before saving.
+- Issue 902 was respecified after issue 943 so future mismatch warnings compare the selected place source with the Bite position instead of treating the place as plain restaurant text.
+- Issue 982 fixed map camera jumps when live Bite marker updates arrive.
+- Issue 983 replaced the consumer E2E baseline with Playwright login, registration, and create-Bite coverage.
 
 ## Release Readiness Checklist
 

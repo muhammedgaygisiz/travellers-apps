@@ -3,7 +3,7 @@
 ## Purpose
 
 This page is the source of truth for the launch-critical product analytics
-taxonomy defined in [[issue-910]] (part of [[epic-907]], Phase 2 / Week 3). It
+taxonomy defined in issue 910 (part of [[epic-907]], Phase 2 / Week 3). It
 documents each event, how it is emitted in code, the launch dashboard to build
 in the GA4/Firebase console, and how to verify events in DebugView.
 

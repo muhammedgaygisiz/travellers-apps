@@ -1,0 +1,47 @@
+- [DRAFT: feat: detect and warn about bite location mismatches using selected place source](https://github.com/muhammedgaygisiz/travellers-apps/issues/902) (Issue \#902)
+- Description
+  - \#\# Context
+  - Issue \#943 / PR \#981 changed Bite creation from form-level free-text restaurant entry to mandatory restaurant/place selection before saving.
+  - The selector can now return:
+    - a nearby verified restaurant with `restaurantId` and a representative position
+    - a nearby unverified/local restaurant name with a representative position
+    - a Google Place with `placeId`, address, and position
+    - an explicit custom text fallback through `Use: "abc"`
+  - Issue \#902 should therefore validate the selected place source against the current Bite position instead of resolving every restaurant name through Google Places after the user types it.
+  - \#\# Goal
+  - Help users avoid publishing a Bite at the wrong map position when they create it later, travel away from the restaurant, use a photo location, or manually choose a position that does not match the selected restaurant/place.
+  - \#\# Desired User Flow
+  - User selects the Bite place through the existing selector.
+  - If the selected row has a known place position, compare it with the current Bite `position`.
+  - If the distance is above a configurable threshold, show a warning before publishing.
+  - User can choose:
+    - use selected place location
+    - keep current Bite location
+    - manually adjust location
+  - If the user selected a Google Place, the existing `From Google` location affordance should remain available and the mismatch prompt may reuse that position.
+  - If the user selected a nearby verified or unverified local restaurant with a known position, the prompt should use that restaurant position.
+  - If the user used the custom fallback and no trustworthy place position exists, the flow should not block Bite creation.
+  - \#\# Data Rules
+  - Keep the existing Bite fields as the compatibility baseline: `place`, `position`, `geohash`, and optional `restaurantId`.
+  - Preserve `restaurantId` when a verified restaurant is selected.
+  - Store source-aware place metadata only if the implementation adds it deliberately, for example Google `placeId`, formatted address, selected source, and validation result.
+  - Do not require Google Places resolution for verified/local restaurant selections that already carry a position.
+  - Do not require Google Places resolution for custom text fallback before publishing.
+  - Recompute `geohash` from the final Bite position that the user confirms.
+  - \#\# Acceptance Criteria
+  - Bite creation still requires selection through the restaurant/place picker rather than form-level free text.
+  - Selecting a Google Place can compare the Bite position with the Google Place position.
+  - Selecting a verified restaurant can compare the Bite position with the restaurant position and preserves `restaurantId`.
+  - Selecting an unverified/local restaurant with a known position can compare the Bite position with that representative position.
+  - Selecting custom text keeps the current fallback behavior and does not block saving when no place position is available.
+  - A mismatch above the configured threshold warns the user before publishing.
+  - User can switch to the selected place location, keep the current Bite location, or manually adjust the location.
+  - The saved Bite uses the final user-confirmed position and geohash.
+  - Existing photo, GPS, manual map, and `From Google` position controls continue to work.
+  - Existing Bite creation continues to work when Google Places search fails or returns no useful result.
+  - Focused tests cover Google Place, verified/local restaurant, and custom fallback behavior.
+  - \#\# Validation Notes
+  - Focused Bite page tests should cover source-specific mismatch decisions and the final position submitted.
+  - Restaurant selector tests should be updated only if the selector contract changes.
+  - Locale files should be updated if new warning copy is added.
+  - `git diff --check` should pass.

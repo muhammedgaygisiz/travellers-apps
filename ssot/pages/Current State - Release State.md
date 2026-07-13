@@ -39,6 +39,7 @@ The product is not yet in public launch mode. The current focus is proving the r
 - Issue 975 added profile country badges and supporting country-code derivation.
 - Issue 942 added Business app restaurant candidate verification into real Restaurants.
 - Issue 943 / PR \#981 replaced direct Bite place text entry with required restaurant/place selection before saving.
+- Issue 902 was respecified after issue 943 so future mismatch warnings compare the selected place source with the Bite position instead of treating the place as plain restaurant text.
 - Issue 982 fixed map camera jumps when live Bite marker updates arrive.
 - Issue 983 replaced the consumer E2E baseline with Playwright login, registration, and create-Bite coverage.
 

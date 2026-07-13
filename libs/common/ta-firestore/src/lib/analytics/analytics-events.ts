@@ -14,6 +14,8 @@ export const AnalyticsEvent = {
   SignUp: 'sign_up',
   // Creation
   BiteCreated: 'bite_created',
+  BiteImageUploaded: 'bite_image_uploaded',
+  BiteImageUploadFailed: 'bite_image_upload_failed',
   BucketListCreated: 'bucketlist_created',
   BucketListRated: 'bucketlist_rated',
   // Discovery
@@ -32,6 +34,8 @@ export type AnalyticsEventName =
 export interface AnalyticsEventParamMap {
   [AnalyticsEvent.SignUp]: { method: string };
   [AnalyticsEvent.BiteCreated]: never;
+  [AnalyticsEvent.BiteImageUploaded]: never;
+  [AnalyticsEvent.BiteImageUploadFailed]: { code: string };
   [AnalyticsEvent.BucketListCreated]: never;
   [AnalyticsEvent.BucketListRated]: { rating: number };
   [AnalyticsEvent.SearchPerformed]: never;

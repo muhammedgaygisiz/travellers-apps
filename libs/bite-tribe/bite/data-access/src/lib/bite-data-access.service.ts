@@ -17,7 +17,9 @@ import type {
   UploadParams,
 } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { withGooglePlaceDistance } from './utils/with-google-place-distance';
+import { toUploadErrorCode } from './utils/to-upload-error-code';
 
 const MIN_GOOGLE_PLACE_SEARCH_TEXT_LENGTH = 3;
 
@@ -27,6 +29,7 @@ export class BiteDataAccessService {
   private readonly networkStatusService = inject(NetworkStatusService);
 
   private readonly api = inject(BiteTribeApiService);
+  private readonly analytics = inject(AnalyticsService);
 
   biteLoader: ResourceLoader<any, any> = async ({ params }) => {
     const biteId = params.biteId;
@@ -135,15 +138,22 @@ export class BiteDataAccessService {
       void this.api.uploadImage(
         { ...bite, id: newBite.id },
         (p: CreateAndUploadImageCallbackParams): void => {
+          const uploadError = p.uploadParams?.err;
           const isInProgress = p.uploadParams?.evt?.completed === false;
           const finishedUpload = p.uploadParams?.evt?.completed === true;
 
-          if (isInProgress && p.uploadParams) {
+          if (uploadError) {
+            this.analytics.logEvent(AnalyticsEvent.BiteImageUploadFailed, {
+              code: toUploadErrorCode(uploadError),
+            });
+            this.uploadProgress.set(null);
+          } else if (isInProgress && p.uploadParams) {
             this.uploadProgress.set({
               biteId: newBite.id,
               progress: p.uploadParams,
             });
           } else if (finishedUpload) {
+            this.analytics.logEvent(AnalyticsEvent.BiteImageUploaded);
             this.uploadProgress.set(null);
           }
         },

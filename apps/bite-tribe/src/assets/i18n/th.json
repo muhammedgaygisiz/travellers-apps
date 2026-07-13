@@ -201,6 +201,7 @@
   "location-label": "ตำแหน่ง:",
   "bite-created-successfully": "สร้าง Bite สำเร็จแล้ว!",
   "image-uploaded-successfully": "อัปโหลดรูปภาพสำเร็จแล้ว!",
+  "uploading-keep-app-open": "กำลังอัปโหลดรูปภาพ — โปรดเปิดแอปไว้",
   "bite-updated-successfully": "อัปเดต Bite สำเร็จแล้ว!",
   "bite-deleted-successfully": "ลบ Bite สำเร็จแล้ว!",
   "creating-bite": "กำลังสร้าง Bite...",

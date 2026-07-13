@@ -1,5 +1,9 @@
 import { ProfileApiService } from '../profile-api.service';
 import { AuthService } from 'ta-firestore';
+import {
+  markUserMetadataUpdated,
+  shouldUpdateUserMetadata,
+} from '../utils/user-metadata-throttle';
 import { inject, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
@@ -46,6 +50,11 @@ jest.mock(
 
 jest.mock('../bite-api/utils/load-profile-by-id', () => ({
   loadProfileById: jest.fn(),
+}));
+
+jest.mock('../utils/user-metadata-throttle', () => ({
+  shouldUpdateUserMetadata: jest.fn().mockResolvedValue(true),
+  markUserMetadataUpdated: jest.fn().mockResolvedValue(undefined),
 }));
 
 const MockedAuthService = {
@@ -435,10 +444,36 @@ describe(ProfileApiService.name, () => {
       },
     ));
 
+    it('should mark the metadata as updated after a successful call', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        (shouldUpdateUserMetadata as jest.Mock).mockResolvedValue(true);
+
+        await service.updateUserMetadata();
+
+        expect(markUserMetadataUpdated).toHaveBeenCalledWith('123');
+      },
+    ));
+
+    it('should skip the Cloud Function when throttled', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        (shouldUpdateUserMetadata as jest.Mock).mockResolvedValue(false);
+        jest.mocked(FirebaseFunctions.callByName).mockClear();
+        (markUserMetadataUpdated as jest.Mock).mockClear();
+
+        await service.updateUserMetadata();
+
+        expect(FirebaseFunctions.callByName).not.toHaveBeenCalled();
+        expect(markUserMetadataUpdated).not.toHaveBeenCalled();
+      },
+    ));
+
     describe('given an error', () => {
       it('should handle the error', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
+          (shouldUpdateUserMetadata as jest.Mock).mockResolvedValue(true);
           const error = new Error('Failed to update user metadata');
           jest.mocked(FirebaseFunctions.callByName).mockRejectedValue(error);
 

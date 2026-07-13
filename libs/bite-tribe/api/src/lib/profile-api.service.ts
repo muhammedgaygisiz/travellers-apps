@@ -28,6 +28,10 @@ import { deleteCurrentImage } from './utils/delete-current-image';
 import { uploadBase64ToFirebaseStorage } from './utils/upload-base64-to-firebase-storage';
 import { updateProfileWithImagePathFromFirebaseStorage } from './bite-api/utils/update-profile-with-image-path-from-firestorage';
 import { loadProfileById } from './bite-api/utils/load-profile-by-id';
+import {
+  markUserMetadataUpdated,
+  shouldUpdateUserMetadata,
+} from './utils/user-metadata-throttle';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileApiService {
@@ -252,6 +256,17 @@ export class ProfileApiService {
   }
 
   async updateUserMetadata(): Promise<void> {
+    const uid = this.authService.getUser()?.uid;
+    if (!uid) {
+      return;
+    }
+
+    // Throttled to once per day per user: this only refreshes `lastSeen`, so
+    // there's no value in calling the Cloud Function on every foreground/login.
+    if (!(await shouldUpdateUserMetadata(uid))) {
+      return;
+    }
+
     try {
       await FirebaseFunctions.callByName<
         { version?: string; buildNumber?: string },
@@ -263,6 +278,8 @@ export class ProfileApiService {
           buildNumber: process.env['buildNumber'],
         },
       });
+
+      await markUserMetadataUpdated(uid);
     } catch (error) {
       console.warn('Error updating user metadata:', error);
       this.errorHandler.handleError(error);

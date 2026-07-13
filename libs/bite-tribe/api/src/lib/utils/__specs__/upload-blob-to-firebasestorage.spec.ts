@@ -32,7 +32,7 @@ describe(uploadBlobToFirebasestorage.name, () => {
 
     expect(writeBlobToFileSystem).toHaveBeenCalledWith(
       new Blob(),
-      'mocked-uuid.jpg',
+      'test-collection_test-doc-id.jpg',
     );
 
     expect(imagePath).toBe(

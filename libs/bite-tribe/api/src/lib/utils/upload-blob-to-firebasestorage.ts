@@ -5,6 +5,7 @@ import {
 import { writeBlobToFileSystem } from './write-blob-to-file-system';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateAndUploadImageCallbackParams } from 'model';
+import { localImageFileName } from './local-image-file';
 
 const uploadToFirebase = (
   fileUploadOptions: UploadFileOptions,
@@ -65,7 +66,9 @@ export const uploadBlobToFirebasestorage = async ({
     },
   };
 
-  const fileName = `${imageId}.${extension}`;
+  // Local copy is named after the document so it can be found again from the id
+  // alone (see local-image-file.ts); the Storage object keeps the UUID above.
+  const fileName = localImageFileName(collection, docId, extension);
   const writeFileResult = await writeBlobToFileSystem(blob, fileName);
   fileUploadOptions.uri = writeFileResult.uri;
 

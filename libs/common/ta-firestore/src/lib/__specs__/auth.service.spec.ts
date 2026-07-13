@@ -100,6 +100,35 @@ describe(AuthService.name, () => {
     });
   });
 
+  describe('refreshSession', () => {
+    let getIdTokenMock: jest.Mock;
+
+    beforeEach(() => {
+      getIdTokenMock = jest.fn();
+      (
+        FirebaseAuthentication as unknown as { getIdToken: jest.Mock }
+      ).getIdToken = getIdTokenMock;
+    });
+
+    it('returns true when the ID token refreshes successfully', async () => {
+      getIdTokenMock.mockResolvedValue({ token: 'fresh-token' });
+
+      await expect(service.refreshSession()).resolves.toBe(true);
+      expect(getIdTokenMock).toHaveBeenCalledWith({ forceRefresh: true });
+    });
+
+    it('returns false when the token refresh fails', async () => {
+      const consoleWarnSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => undefined);
+      getIdTokenMock.mockRejectedValue(new Error('no current user'));
+
+      await expect(service.refreshSession()).resolves.toBe(false);
+
+      consoleWarnSpy.mockRestore();
+    });
+  });
+
   describe('initialize', () => {
     let authStateChangeNextSpy: jest.SpyInstance;
 

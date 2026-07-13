@@ -5,14 +5,30 @@ import {
 } from '../app-foreground.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { fromAuth } from 'ta-firestore';
+import { AuthService, fromAuth } from 'ta-firestore';
+import { NavController } from '@ionic/angular';
+import { Network } from '@capacitor/network';
+
+jest.mock('@capacitor/network', () => ({
+  Network: { getStatus: jest.fn() },
+}));
+
+const getStatus = Network.getStatus as jest.Mock;
+const flushPromises = (): Promise<unknown> =>
+  new Promise((resolve) => setTimeout(resolve, 0));
 
 describe(AppForegroundService.name, () => {
   let service: AppForegroundService;
   let storeService: BiteTribeStoreService;
   let store: MockStore;
+  let refreshSession: jest.Mock;
+  let navigateRoot: jest.Mock;
 
   beforeEach(() => {
+    refreshSession = jest.fn().mockResolvedValue(true);
+    navigateRoot = jest.fn();
+    getStatus.mockResolvedValue({ connected: true });
+
     TestBed.configureTestingModule({
       providers: [
         provideMockStore({
@@ -20,6 +36,8 @@ describe(AppForegroundService.name, () => {
             { selector: fromAuth.selectIsAuthenticated, value: false },
           ],
         }),
+        { provide: AuthService, useValue: { refreshSession } },
+        { provide: NavController, useValue: { navigateRoot } },
       ],
     });
 
@@ -164,6 +182,71 @@ describe(AppForegroundService.name, () => {
           expect(updateUserMetadataSpy).toHaveBeenCalledTimes(1);
         });
       });
+    });
+  });
+
+  describe('session refresh on significant foreground', () => {
+    const triggerSignificantForeground = (): void => {
+      jest.spyOn(storeService, 'reloadGPSPosition').mockImplementation();
+      service['lastBackgroundTimestamp'] =
+        Date.now() - (FOREGROUND_REFRESH_THRESHOLD_MS + 1_000);
+      service.handleAppStateChange(true);
+    };
+
+    const setAuthenticated = (value: boolean): void => {
+      store.overrideSelector(fromAuth.selectIsAuthenticated, value);
+      store.refreshState();
+    };
+
+    it('refreshes the session when authenticated and online', async () => {
+      setAuthenticated(true);
+
+      triggerSignificantForeground();
+      await flushPromises();
+
+      expect(refreshSession).toHaveBeenCalledTimes(1);
+      expect(navigateRoot).not.toHaveBeenCalled();
+    });
+
+    it('routes to /start when the session is no longer valid', async () => {
+      setAuthenticated(true);
+      refreshSession.mockResolvedValue(false);
+
+      triggerSignificantForeground();
+      await flushPromises();
+
+      expect(navigateRoot).toHaveBeenCalledWith('/start');
+    });
+
+    it('does not refresh when the user is not authenticated', async () => {
+      setAuthenticated(false);
+
+      triggerSignificantForeground();
+      await flushPromises();
+
+      expect(getStatus).not.toHaveBeenCalled();
+      expect(refreshSession).not.toHaveBeenCalled();
+    });
+
+    it('does not refresh when offline', async () => {
+      setAuthenticated(true);
+      getStatus.mockResolvedValue({ connected: false });
+
+      triggerSignificantForeground();
+      await flushPromises();
+
+      expect(refreshSession).not.toHaveBeenCalled();
+    });
+
+    it('does not refresh below the inactivity threshold', async () => {
+      setAuthenticated(true);
+      jest.spyOn(storeService, 'reloadGPSPosition').mockImplementation();
+
+      service['lastBackgroundTimestamp'] = Date.now();
+      service.handleAppStateChange(true);
+      await flushPromises();
+
+      expect(refreshSession).not.toHaveBeenCalled();
     });
   });
 

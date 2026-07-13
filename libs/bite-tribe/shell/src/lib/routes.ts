@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
-import { authGuard, startGuard } from 'ta-firestore';
+import { authGuard, freshSessionGuard, startGuard } from 'ta-firestore';
 import { biteTitleResolver } from 'bite-tribe/store';
 import { PATH } from 'utils';
 
@@ -50,7 +50,7 @@ export const ROUTES: Routes = withAuthRoutes([
     path: PATH.NEW_BITE,
     loadComponent: () =>
       import('bite-tribe/bite').then((m) => m.CreateBiteContainer),
-    canActivate: [authGuard],
+    canActivate: [authGuard, freshSessionGuard],
     title: 'New',
   },
   {

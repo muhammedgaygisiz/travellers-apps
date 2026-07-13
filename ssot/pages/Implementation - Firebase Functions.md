@@ -22,7 +22,7 @@ apps/bite-tribe-firebase/functions/src/index.ts
 | Aggregates     | `increment-bite-count-on-bite-create.ts`, `resync-bite-counts.ts`, `update-bite-like-count-on-like-write.ts`                                    |
 | Storage        | `set-bite-image-path-on-upload.ts`                                                                                                              |
 | Notifications  | `notify-bite-creator-on-like.ts`, `notify-followers-on-new-bite.ts`, `notify-user-on-new-follower.ts`, `send-daily-leaderboard-notification.ts` |
-| Restaurants    | `cluster-restaurant-candidate-for-bite.ts`, `verify-restaurant-candidate.ts`                                                                    |
+| Restaurants    | `cluster-restaurant-candidate-for-bite.ts`, `create-restaurant-candidate-on-bite-create.ts`, `verify-restaurant-candidate.ts`                   |
 | Scheduled jobs | `send-weekly-bite-notification.ts`                                                                                                              |
 | Deep links     | `handle-shared-link-to-bite.ts`                                                                                                                 |
 
@@ -41,6 +41,7 @@ apps/bite-tribe-firebase/functions/src/index.ts
 - Candidate verification must be idempotent for already verified or merged candidates and return the existing `verifiedRestaurantId` rather than creating duplicates.
 - Trigger-maintained counters must handle every lifecycle path that can change the count. If the counted entity can be deleted, add a matching delete-side decrement trigger when the create path increments.
 - Trigger-maintained Bite like aggregates must migrate old Bite documents that are missing `thumbup`, `drooling`, or `mindblown` by recomputing counts from the `likes` subcollection before using increment/decrement deltas.
+- Automatic restaurant-candidate detection (`create-restaurant-candidate-on-bite-create.ts`) only fires for Bites without a verified `restaurantId`, requires at least `5` matching nearby unverified Bites within `200m`, skips creation when a nearby verified restaurant matches, updates a nearby pending candidate instead of duplicating, and never writes back to Bite documents. Reuse the shared clustering helpers in `utils/restaurant-candidate-store.ts` and `utils/restaurant-candidates.ts` rather than duplicating query, matching, or candidate-build logic across the manual callable and the trigger.
 
 ## Validation
 

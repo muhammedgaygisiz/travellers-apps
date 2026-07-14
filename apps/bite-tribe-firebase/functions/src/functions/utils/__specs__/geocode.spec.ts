@@ -1,4 +1,4 @@
-import { extractPosition, geocodeAddress } from './geocode';
+import { extractPosition, geocodeAddress } from '../geocode';
 
 describe('geocode', () => {
   describe('extractPosition', () => {

@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
 import { logger } from 'firebase-functions';
-import { HttpsError } from 'firebase-functions/https';
+import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { geohashForLocation } from 'geofire-common';
 import { onAppCheck } from './callable-options';
 
@@ -168,107 +168,113 @@ const getExistingVerifiedRestaurantId = async (
   return mergedVerifiedRestaurantId;
 };
 
-export const verifyRestaurantCandidate =
-  onAppCheck<VerifyRestaurantCandidateRequest>(async (request) => {
-    if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to verify restaurant candidates.',
-      );
-    }
+export const verifyRestaurantCandidateHandler = async (
+  request: CallableRequest<VerifyRestaurantCandidateRequest>,
+): Promise<VerifyRestaurantCandidateResult> => {
+  if (!request.auth) {
+    throw new HttpsError(
+      'unauthenticated',
+      'You must be signed in to verify restaurant candidates.',
+    );
+  }
 
-    if (
-      typeof request.data.candidateId !== 'string' ||
-      !request.data.candidateId.trim()
-    ) {
-      throw new HttpsError('invalid-argument', 'candidateId must be a string.');
-    }
+  if (
+    typeof request.data.candidateId !== 'string' ||
+    !request.data.candidateId.trim()
+  ) {
+    throw new HttpsError('invalid-argument', 'candidateId must be a string.');
+  }
 
-    const candidateId = request.data.candidateId.trim();
-    const userId = request.auth.uid;
-    const db = admin.firestore();
-    const candidateRef = db
-      .collection(RESTAURANT_CANDIDATES_COLLECTION)
-      .doc(candidateId);
+  const candidateId = request.data.candidateId.trim();
+  const userId = request.auth.uid;
+  const db = admin.firestore();
+  const candidateRef = db
+    .collection(RESTAURANT_CANDIDATES_COLLECTION)
+    .doc(candidateId);
 
-    logger.info('restaurant candidate verification started', { candidateId });
+  logger.info('restaurant candidate verification started', { candidateId });
 
-    const result = await db.runTransaction<VerifyRestaurantCandidateResult>(
-      async (transaction) => {
-        const candidateSnapshot = await transaction.get(candidateRef);
+  const result = await db.runTransaction<VerifyRestaurantCandidateResult>(
+    async (transaction) => {
+      const candidateSnapshot = await transaction.get(candidateRef);
 
-        if (!candidateSnapshot.exists) {
-          throw new HttpsError(
-            'not-found',
-            'Restaurant candidate was not found.',
-          );
-        }
-
-        const candidateData = candidateSnapshot.data() ?? {};
-        const status = getString(candidateData, 'status');
-
-        if (status !== 'pending') {
-          const existingRestaurantId = await getExistingVerifiedRestaurantId(
-            transaction,
-            candidateData,
-          );
-
-          return {
-            restaurantId: existingRestaurantId,
-            candidateId,
-            status: 'already-verified',
-          };
-        }
-
-        const now = new Date();
-        const restaurantRef = db.collection(RESTAURANT_COLLECTION).doc();
-        const menuRef = db.collection(MENU_COLLECTION).doc();
-        const restaurantDocument = toRestaurantDocument(
-          request.data.restaurant,
-          menuRef.id,
-          now,
+      if (!candidateSnapshot.exists) {
+        throw new HttpsError(
+          'not-found',
+          'Restaurant candidate was not found.',
         );
-        const biteIds = getStringArray(candidateData, 'biteIds');
+      }
 
-        transaction.create(restaurantRef, restaurantDocument);
-        transaction.create(menuRef, {
-          categories: [],
-          createdAt: now.toISOString(),
-          createdAtTimestamp: now.getTime(),
-        });
+      const candidateData = candidateSnapshot.data() ?? {};
+      const status = getString(candidateData, 'status');
 
-        biteIds.forEach((biteId) => {
-          transaction.update(db.collection(BITE_COLLECTION).doc(biteId), {
-            restaurantId: restaurantRef.id,
-            updatedAt: now.toISOString(),
-            updatedAtTimestamp: now.getTime(),
-          });
-        });
+      if (status !== 'pending') {
+        const existingRestaurantId = await getExistingVerifiedRestaurantId(
+          transaction,
+          candidateData,
+        );
 
-        transaction.update(candidateRef, {
-          status: 'verified',
-          verifiedRestaurantId: restaurantRef.id,
-          verifiedAt: now.toISOString(),
-          verifiedAtTimestamp: now.getTime(),
-          verifiedByUserId: userId,
+        return {
+          restaurantId: existingRestaurantId,
+          candidateId,
+          status: 'already-verified',
+        };
+      }
+
+      const now = new Date();
+      const restaurantRef = db.collection(RESTAURANT_COLLECTION).doc();
+      const menuRef = db.collection(MENU_COLLECTION).doc();
+      const restaurantDocument = toRestaurantDocument(
+        request.data.restaurant,
+        menuRef.id,
+        now,
+      );
+      const biteIds = getStringArray(candidateData, 'biteIds');
+
+      transaction.create(restaurantRef, restaurantDocument);
+      transaction.create(menuRef, {
+        categories: [],
+        createdAt: now.toISOString(),
+        createdAtTimestamp: now.getTime(),
+      });
+
+      biteIds.forEach((biteId) => {
+        transaction.update(db.collection(BITE_COLLECTION).doc(biteId), {
+          restaurantId: restaurantRef.id,
           updatedAt: now.toISOString(),
           updatedAtTimestamp: now.getTime(),
         });
+      });
 
-        return {
-          restaurantId: restaurantRef.id,
-          menuId: menuRef.id,
-          candidateId,
-          status: 'created',
-        };
-      },
-    );
+      transaction.update(candidateRef, {
+        status: 'verified',
+        verifiedRestaurantId: restaurantRef.id,
+        verifiedAt: now.toISOString(),
+        verifiedAtTimestamp: now.getTime(),
+        verifiedByUserId: userId,
+        updatedAt: now.toISOString(),
+        updatedAtTimestamp: now.getTime(),
+      });
 
-    logger.info('restaurant candidate verification finished', {
-      candidateId,
-      restaurantId: result.restaurantId,
-      status: result.status,
-    });
+      return {
+        restaurantId: restaurantRef.id,
+        menuId: menuRef.id,
+        candidateId,
+        status: 'created',
+      };
+    },
+  );
 
-    return result;
+  logger.info('restaurant candidate verification finished', {
+    candidateId,
+    restaurantId: result.restaurantId,
+    status: result.status,
   });
+
+  return result;
+};
+
+export const verifyRestaurantCandidate =
+  onAppCheck<VerifyRestaurantCandidateRequest>(
+    verifyRestaurantCandidateHandler,
+  );

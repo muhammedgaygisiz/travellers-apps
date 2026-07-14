@@ -1,7 +1,7 @@
 import {
   RESTAURANT_CANDIDATE_EVIDENCE_THRESHOLD,
   createRestaurantCandidateOnBiteCreate,
-} from './create-restaurant-candidate-on-bite-create';
+} from '../create-restaurant-candidate-on-bite-create';
 
 jest.mock('firebase-functions', () => ({
   logger: {

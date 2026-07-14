@@ -7,7 +7,7 @@ import {
   getPlaceNameMatchScore,
   normalizePlaceName,
   planRestaurantCandidateGeohashBounds,
-} from './restaurant-candidates';
+} from '../restaurant-candidates';
 
 describe('restaurant candidate helpers', () => {
   const center = { latitude: 52.52, longitude: 13.405 };

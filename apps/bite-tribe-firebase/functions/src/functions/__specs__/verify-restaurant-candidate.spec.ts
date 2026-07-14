@@ -1,4 +1,4 @@
-import { verifyRestaurantCandidate } from './verify-restaurant-candidate';
+import { verifyRestaurantCandidate } from '../verify-restaurant-candidate';
 
 jest.mock('firebase-functions', () => ({
   logger: {
@@ -21,7 +21,7 @@ jest.mock('geofire-common', () => ({
   geohashForLocation: jest.fn(() => 'geohash-1'),
 }));
 
-jest.mock('./callable-options', () => ({
+jest.mock('../callable-options', () => ({
   onAppCheck: jest.fn((handler) => handler),
 }));
 

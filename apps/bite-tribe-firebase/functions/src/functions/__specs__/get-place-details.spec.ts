@@ -2,7 +2,7 @@ import {
   parseAddress,
   toOpeningHours,
   toPlaceDetails,
-} from './get-place-details';
+} from '../get-place-details';
 
 jest.mock('firebase-functions', () => ({
   logger: {
@@ -29,7 +29,7 @@ jest.mock('firebase-functions/params', () => ({
   })),
 }));
 
-jest.mock('./callable-options', () => ({
+jest.mock('../callable-options', () => ({
   onAppCheck: jest.fn((_options, handler) => handler),
 }));
 

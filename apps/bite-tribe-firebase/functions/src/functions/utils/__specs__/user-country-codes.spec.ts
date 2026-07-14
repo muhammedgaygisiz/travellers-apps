@@ -2,7 +2,7 @@ import {
   extractCountryCodesFromBites,
   normalizeCountryCode,
   removeCountryCodeFromUser,
-} from './user-country-codes';
+} from '../user-country-codes';
 
 jest.mock('firebase-admin', () => ({
   firestore: jest.fn(),

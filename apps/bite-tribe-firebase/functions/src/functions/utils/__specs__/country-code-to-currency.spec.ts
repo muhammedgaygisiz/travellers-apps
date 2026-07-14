@@ -1,4 +1,4 @@
-import { getCurrencyByCountryCode } from './country-code-to-currency';
+import { getCurrencyByCountryCode } from '../country-code-to-currency';
 
 describe('getCurrencyByCountryCode', () => {
   it('resolves the currency for a known country code', () => {

@@ -1,4 +1,4 @@
-import { toSearchBite } from './search-bite';
+import { toSearchBite } from '../search-bite';
 
 describe('toSearchBite', () => {
   it('includes a valid Bite position in the search result', () => {

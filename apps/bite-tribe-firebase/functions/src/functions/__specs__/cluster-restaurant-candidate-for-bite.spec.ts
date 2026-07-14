@@ -1,4 +1,4 @@
-import { clusterRestaurantCandidateForBite } from './cluster-restaurant-candidate-for-bite';
+import { clusterRestaurantCandidateForBite } from '../cluster-restaurant-candidate-for-bite';
 
 jest.mock('firebase-functions', () => ({
   logger: {
@@ -18,7 +18,7 @@ jest.mock('firebase-functions/https', () => ({
   },
 }));
 
-jest.mock('./callable-options', () => ({
+jest.mock('../callable-options', () => ({
   onAppCheck: jest.fn((handler) => handler),
 }));
 

@@ -4,7 +4,7 @@ import {
   isPublicUser,
   LeaderboardUser,
   toLeaderboardUser,
-} from './leaderboard';
+} from '../leaderboard';
 
 jest.mock('firebase-admin', () => ({
   firestore: jest.fn(() => ({})),

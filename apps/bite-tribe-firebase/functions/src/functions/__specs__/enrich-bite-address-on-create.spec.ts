@@ -2,7 +2,7 @@ import {
   buildBiteAddressUpdate,
   extractBiteAddress,
   getBitePosition,
-} from './enrich-bite-address-on-create';
+} from '../enrich-bite-address-on-create';
 
 jest.mock('firebase-admin', () => ({
   firestore: jest.fn(() => ({

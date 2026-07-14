@@ -1,4 +1,4 @@
-import { getCurrencyByPosition } from './get-currency-by-position';
+import { getCurrencyByPosition } from '../get-currency-by-position';
 
 jest.mock('firebase-functions', () => ({
   logger: {

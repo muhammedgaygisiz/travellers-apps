@@ -1,4 +1,4 @@
-import { getStoredBiteCount } from './resync-bite-counts';
+import { getStoredBiteCount } from '../resync-bite-counts';
 
 jest.mock('firebase-admin', () => ({
   firestore: jest.fn(() => ({

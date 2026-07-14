@@ -1,6 +1,6 @@
 import { onCall } from 'firebase-functions/https';
 
-import { getAppCheckCallableOptions, onAppCheck } from './callable-options';
+import { getAppCheckCallableOptions, onAppCheck } from '../callable-options';
 
 jest.mock('firebase-functions/https', () => ({
   onCall: jest.fn((_options, handler) => ({ handler })),

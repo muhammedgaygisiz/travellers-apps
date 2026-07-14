@@ -53,6 +53,7 @@ class TranslocoMock {
 describe('HomeService', () => {
   let homeDataAccessService: HomeDataAccessService;
   let navController: NavController;
+  let toastController: ToastController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -66,6 +67,7 @@ describe('HomeService', () => {
     }).compileComponents();
     homeDataAccessService = TestBed.inject(HomeDataAccessService);
     navController = TestBed.inject(NavController);
+    toastController = TestBed.inject(ToastController);
   });
 
   it('should create the service', inject(
@@ -351,6 +353,31 @@ describe('HomeService', () => {
     ));
   });
 
+  describe('onMenuNavigate', () => {
+    let navigateForwardSpy: SpyInstance;
+
+    beforeEach(() => {
+      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+    });
+
+    it.each([
+      ['settings', ['settings']],
+      ['profile', ['my-profile']],
+      ['my-bites', ['my-bites']],
+      ['my-bucketlists', ['my-bucketlists']],
+      ['about', ['about']],
+      ['market-place', ['market-place']],
+      ['gallery', ['gallery']],
+      ['leaderboard', ['leaderboard']],
+    ] as const)('should navigate for menu target %s', (target, route) => {
+      const service = TestBed.inject(HomeService);
+
+      service.onMenuNavigate(target);
+
+      expect(navigateForwardSpy).toHaveBeenCalledWith(route);
+    });
+  });
+
   describe('sortingChange', () => {
     let setHomeSortingSpy: SpyInstance;
 
@@ -549,6 +576,18 @@ describe('HomeService', () => {
   });
 
   describe('email verification prompt analytics', () => {
+    it('should not log prompt shown when the prompt is hidden', inject(
+      [HomeService, AnalyticsService],
+      (service: HomeService, analytics: AnalyticsService) => {
+        service.trackEmailVerificationPromptShown('home');
+
+        expect(analytics.logEvent).not.toHaveBeenCalledWith(
+          AnalyticsEvent.EmailVerificationPromptShown,
+          expect.anything(),
+        );
+      },
+    ));
+
     it('should log prompt shown when the prompt is visible', inject(
       [HomeService, AnalyticsService],
       (service: HomeService, analytics: AnalyticsService) => {
@@ -575,6 +614,49 @@ describe('HomeService', () => {
         expect(analytics.logEvent).toHaveBeenCalledWith(
           AnalyticsEvent.EmailVerificationResendSucceeded,
           { surface: 'home' },
+        );
+      },
+    ));
+
+    it('should log failed resend analytics and show the rate limited toast', inject(
+      [HomeService, AnalyticsService],
+      async (service: HomeService, analytics: AnalyticsService) => {
+        const toast = { present: jest.fn() };
+        jest
+          .spyOn(homeDataAccessService, 'resendEmailVerification')
+          .mockRejectedValue({ message: 'rate_limited' });
+        jest.spyOn(toastController, 'create').mockResolvedValue(toast as never);
+
+        await service.resendEmailVerification('home');
+
+        expect(analytics.logEvent).toHaveBeenCalledWith(
+          AnalyticsEvent.EmailVerificationResendFailed,
+          { surface: 'home', reason: 'rate_limited' },
+        );
+        expect(toastController.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'please-wait-before-requesting-another-verification-email',
+          }),
+        );
+        expect(toast.present).toHaveBeenCalledTimes(1);
+      },
+    ));
+
+    it('should show the default resend error toast for unknown failures', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        jest
+          .spyOn(homeDataAccessService, 'resendEmailVerification')
+          .mockRejectedValue(new Error('boom'));
+        const toast = { present: jest.fn() };
+        jest.spyOn(toastController, 'create').mockResolvedValue(toast as never);
+
+        await service.resendEmailVerification('home');
+
+        expect(toastController.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'verification-email-could-not-be-sent',
+          }),
         );
       },
     ));

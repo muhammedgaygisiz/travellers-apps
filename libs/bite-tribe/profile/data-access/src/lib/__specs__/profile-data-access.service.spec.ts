@@ -2,17 +2,19 @@ import { inject, TestBed } from '@angular/core/testing';
 import { ApplicationRef } from '@angular/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { ProfileDataAccessService } from '../profile-data-access.service';
 import SpyInstance = jest.SpyInstance;
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { LikeClick } from 'model';
+import { LikeClick, PublicUser } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
+
+let mockPublicUser$: BehaviorSubject<PublicUser | null>;
 
 class Mock {
   isAuthenticated$ = of(true);
   bitesByUser$ = of([]);
-  publicUser$ = of(null);
+  publicUser$ = mockPublicUser$.asObservable();
   bites$ = of([]);
   userId$ = of('user-id');
   isPublicProfile$ = of(true);
@@ -37,6 +39,9 @@ describe('ProfileDataAccessService', () => {
   let storeService: BiteTribeStoreService;
 
   beforeEach(() => {
+    mockPublicUser$ = new BehaviorSubject<PublicUser | null>(null);
+    ApiMock.resendEmailVerification.mockResolvedValue(undefined);
+
     TestBed.configureTestingModule({
       providers: [
         ProfileDataAccessService,
@@ -193,6 +198,56 @@ describe('ProfileDataAccessService', () => {
         const mockUser = { id: 'user-id', name: 'Test User' } as any;
         service.submitUnfollowClick(mockUser);
         expect(unfollowUserSpy).toHaveBeenCalledWith(mockUser);
+      },
+    ));
+  });
+
+  describe('emailVerificationPromptVisible', () => {
+    it('should return false when no public user is loaded', inject(
+      [ProfileDataAccessService],
+      (service: ProfileDataAccessService) => {
+        expect(service.emailVerificationPromptVisible()).toBe(false);
+      },
+    ));
+
+    it('should return true for unverified users that require verification', () => {
+      mockPublicUser$.next({
+        emailVerified: false,
+        emailVerificationRequired: true,
+      } as PublicUser);
+      const service = TestBed.inject(ProfileDataAccessService);
+
+      expect(service.emailVerificationPromptVisible()).toBe(true);
+    });
+
+    it('should return false when verification is already complete', () => {
+      mockPublicUser$.next({
+        emailVerified: true,
+        emailVerificationRequired: true,
+      } as PublicUser);
+      const service = TestBed.inject(ProfileDataAccessService);
+
+      expect(service.emailVerificationPromptVisible()).toBe(false);
+    });
+
+    it('should return false when verification is not required', () => {
+      mockPublicUser$.next({
+        emailVerified: false,
+        emailVerificationRequired: false,
+      } as PublicUser);
+      const service = TestBed.inject(ProfileDataAccessService);
+
+      expect(service.emailVerificationPromptVisible()).toBe(false);
+    });
+  });
+
+  describe('resendEmailVerification', () => {
+    it('should delegate to the API service', inject(
+      [ProfileDataAccessService],
+      async (service: ProfileDataAccessService) => {
+        await service.resendEmailVerification();
+
+        expect(ApiMock.resendEmailVerification).toHaveBeenCalledTimes(1);
       },
     ));
   });

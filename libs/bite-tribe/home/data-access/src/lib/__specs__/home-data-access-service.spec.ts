@@ -1,8 +1,8 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from '../home-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { of } from 'rxjs';
-import type { Bite, LikeClick } from 'model';
+import { BehaviorSubject, of } from 'rxjs';
+import type { Bite, LikeClick, PublicUser } from 'model';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { haversineDistance } from 'utils';
@@ -15,6 +15,8 @@ const BITE_WITH_POSITION: Bite = {
   price: 10,
   position: { latitude: 48.2082, longitude: 16.3738 },
 };
+
+let mockPublicUser$: BehaviorSubject<PublicUser | null>;
 
 class StoreMock {
   sortedHomeBites$ = of([]);
@@ -29,7 +31,7 @@ class StoreMock {
   allTags$ = of([]);
   homeFilters$ = of([]);
   userId$ = of('test-user-id');
-  publicUser$ = of(null);
+  publicUser$ = mockPublicUser$.asObservable();
   selectedBucketlist$ = of(null);
   selectedBucketlistTitle$ = of('');
   isAuthenticated$ = of(false);
@@ -72,6 +74,7 @@ describe('HomeDataAccessService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPublicUser$ = new BehaviorSubject<PublicUser | null>(null);
     ApiMock.biteById.mockResolvedValue(undefined);
     ApiMock.bitesByPosition.mockResolvedValue([]);
     ApiMock.loadRestaurant.mockResolvedValue(undefined);
@@ -104,6 +107,45 @@ describe('HomeDataAccessService', () => {
         expect(logoutSpy).toHaveBeenCalledTimes(1);
       },
     ));
+  });
+
+  describe('emailVerificationPromptVisible', () => {
+    it('should return false when no public user is loaded', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        expect(service.emailVerificationPromptVisible()).toBe(false);
+      },
+    ));
+
+    it('should return true for unverified users that require verification', () => {
+      mockPublicUser$.next({
+        emailVerified: false,
+        emailVerificationRequired: true,
+      } as PublicUser);
+      const service = TestBed.inject(HomeDataAccessService);
+
+      expect(service.emailVerificationPromptVisible()).toBe(true);
+    });
+
+    it('should return false when verification is already complete', () => {
+      mockPublicUser$.next({
+        emailVerified: true,
+        emailVerificationRequired: true,
+      } as PublicUser);
+      const service = TestBed.inject(HomeDataAccessService);
+
+      expect(service.emailVerificationPromptVisible()).toBe(false);
+    });
+
+    it('should return false when verification is not required', () => {
+      mockPublicUser$.next({
+        emailVerified: false,
+        emailVerificationRequired: false,
+      } as PublicUser);
+      const service = TestBed.inject(HomeDataAccessService);
+
+      expect(service.emailVerificationPromptVisible()).toBe(false);
+    });
   });
 
   describe('submitLikeClick', () => {
@@ -244,6 +286,17 @@ describe('HomeDataAccessService', () => {
         );
         service.clearGpsError();
         expect(biteTribeStoreServiceSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('resendEmailVerification', () => {
+    it('should delegate to the API service', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        await service.resendEmailVerification();
+
+        expect(ApiMock.resendEmailVerification).toHaveBeenCalledTimes(1);
       },
     ));
   });

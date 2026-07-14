@@ -207,8 +207,8 @@
   "leaderboard-bite-count": "{{ count }} Bites",
   "forgot-password": "Esqueceu a senha",
   "forgot-password-question": "Esqueceu a senha?",
-  "send-password-reset-link": "Enviar link de redefinicao",
-  "password-reset-requested-check-your-email": "Se existir uma conta para este email, enviamos um link para redefinir a senha.",
-  "password-reset-request-failed-try-again": "Nao foi possivel enviar o email de redefinicao. Tente novamente.",
+  "send-password-reset-link": "Enviar link de redefinição",
+  "password-reset-requested-check-your-email": "Se existir uma conta para este e-mail, enviamos um link para redefinir a senha.",
+  "password-reset-request-failed-try-again": "Não foi possível enviar o e-mail de redefinição. Tente novamente.",
   "back-to-log-in": "Voltar ao login"
 }

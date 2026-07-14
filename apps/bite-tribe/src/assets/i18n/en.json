@@ -207,10 +207,10 @@
   "leaderboard": "Leaderboard",
   "no-leaderboard-users-yet": "No leaderboard users yet",
   "leaderboard-bite-count": "{{ count }} Bites",
-  "forgot-password": "Forgot Password",
+  "forgot-password": "Forgot password",
   "forgot-password-question": "Forgot password?",
-  "send-password-reset-link": "Send Password Reset Link",
-  "password-reset-requested-check-your-email": "If an account exists for this email, we sent a password reset link.",
-  "password-reset-request-failed-try-again": "We could not send the reset email. Please try again.",
-  "back-to-log-in": "Back to Log In"
+  "send-password-reset-link": "Send reset link",
+  "password-reset-requested-check-your-email": "If an account exists for this email, we've sent a password reset link.",
+  "password-reset-request-failed-try-again": "We couldn't send the reset email. Please try again.",
+  "back-to-log-in": "Back to log in"
 }

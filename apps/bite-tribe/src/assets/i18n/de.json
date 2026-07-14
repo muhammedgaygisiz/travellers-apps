@@ -209,8 +209,8 @@
   "leaderboard-bite-count": "{{ count }} Bites",
   "forgot-password": "Passwort vergessen",
   "forgot-password-question": "Passwort vergessen?",
-  "send-password-reset-link": "Link zum Zuruecksetzen senden",
-  "password-reset-requested-check-your-email": "Wenn ein Konto fuer diese E-Mail existiert, haben wir einen Link zum Zuruecksetzen des Passworts gesendet.",
-  "password-reset-request-failed-try-again": "Wir konnten die E-Mail zum Zuruecksetzen nicht senden. Bitte versuche es erneut.",
-  "back-to-log-in": "Zurueck zum Login"
+  "send-password-reset-link": "Link zum Zurücksetzen senden",
+  "password-reset-requested-check-your-email": "Wenn ein Konto mit dieser E-Mail-Adresse existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet.",
+  "password-reset-request-failed-try-again": "Wir konnten die E-Mail zum Zurücksetzen nicht senden. Bitte versuche es erneut.",
+  "back-to-log-in": "Zurück zur Anmeldung"
 }

@@ -206,5 +206,11 @@
   "creating-bite": "Dein Bite wird erstellt...",
   "leaderboard": "Bestenliste",
   "no-leaderboard-users-yet": "Noch keine Nutzer in der Bestenliste",
-  "leaderboard-bite-count": "{{ count }} Bites"
+  "leaderboard-bite-count": "{{ count }} Bites",
+  "forgot-password": "Passwort vergessen",
+  "forgot-password-question": "Passwort vergessen?",
+  "send-password-reset-link": "Link zum Zurücksetzen senden",
+  "password-reset-requested-check-your-email": "Wenn ein Konto mit dieser E-Mail-Adresse existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet.",
+  "password-reset-request-failed-try-again": "Wir konnten die E-Mail zum Zurücksetzen nicht senden. Bitte versuche es erneut.",
+  "back-to-log-in": "Zurück zur Anmeldung"
 }

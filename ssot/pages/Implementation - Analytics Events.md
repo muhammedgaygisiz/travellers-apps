@@ -26,15 +26,17 @@ See [[Architecture - Analytics]] for how this fits the wider analytics surface.
 
 ## Event Reference
 
-| Category   | Event                | Params                          | Trigger                                                      | Owner                                                                        |
-| ---------- | -------------------- | ------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| Activation | `sign_up`            | `method: string` (`'password'`) | Registration succeeds                                        | `libs/common/ui/auth/.../registration/registration.service.ts`               |
-| Creation   | `bite_created`       | –                               | New Bite persisted                                           | `libs/bite-tribe/bite/page/.../integration/bite.service.ts`                  |
-| Creation   | `bucketlist_created` | –                               | Bucket list created                                          | `libs/bite-tribe/bucketlist/page/.../integration/bucketlists.service.ts`     |
-| Creation   | `bucketlist_rated`   | `rating: number`                | BiteTrail rating submitted                                   | `libs/bite-tribe/bucketlist/page/.../integration/rate-bucketlist.service.ts` |
-| Discovery  | `search_performed`   | –                               | Query first reaches the min length (once per search session) | `libs/bite-tribe/search/page/.../integration/search.service.ts`              |
-| Discovery  | `restaurant_viewed`  | `verified: boolean`             | Restaurant / place page entered                              | `libs/bite-tribe/restaurant/page/.../integration/*restaurant-container*.ts`  |
-| Discovery  | `bite_viewed`        | –                               | Bite details page entered                                    | `libs/bite-tribe/details/page/.../integration/details.container.ts`          |
+| Category   | Event                           | Params                          | Trigger                                                      | Owner                                                                        |
+| ---------- | ------------------------------- | ------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Activation | `sign_up`                       | `method: string` (`'password'`) | Registration succeeds                                        | `libs/common/ui/auth/.../registration/registration.service.ts`               |
+| Activation | `password_reset_requested`      | –                               | Forgot-password form submitted                               | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`         |
+| Activation | `password_reset_request_failed` | `code: string`                  | Firebase rejects a forgot-password request                   | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`         |
+| Creation   | `bite_created`                  | –                               | New Bite persisted                                           | `libs/bite-tribe/bite/page/.../integration/bite.service.ts`                  |
+| Creation   | `bucketlist_created`            | –                               | Bucket list created                                          | `libs/bite-tribe/bucketlist/page/.../integration/bucketlists.service.ts`     |
+| Creation   | `bucketlist_rated`              | `rating: number`                | BiteTrail rating submitted                                   | `libs/bite-tribe/bucketlist/page/.../integration/rate-bucketlist.service.ts` |
+| Discovery  | `search_performed`              | –                               | Query first reaches the min length (once per search session) | `libs/bite-tribe/search/page/.../integration/search.service.ts`              |
+| Discovery  | `restaurant_viewed`             | `verified: boolean`             | Restaurant / place page entered                              | `libs/bite-tribe/restaurant/page/.../integration/*restaurant-container*.ts`  |
+| Discovery  | `bite_viewed`                   | –                               | Bite details page entered                                    | `libs/bite-tribe/details/page/.../integration/details.container.ts`          |
 
 ### Auto-collected (no code)
 

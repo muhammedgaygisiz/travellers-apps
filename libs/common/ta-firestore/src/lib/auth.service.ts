@@ -138,6 +138,10 @@ export class AuthService {
     await FirebaseAuthentication.sendEmailVerification();
   }
 
+  public async sendPasswordResetEmail(email: string): Promise<void> {
+    await FirebaseAuthentication.sendPasswordResetEmail({ email });
+  }
+
   public async registerWithGoogleAccount(): Promise<SignInResult> {
     return await FirebaseAuthentication.signInWithGoogle({ mode: 'popup' });
   }

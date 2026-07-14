@@ -400,6 +400,29 @@ describe(AuthService.name, () => {
     });
   });
 
+  describe('sendPasswordResetEmail', () => {
+    let sendPasswordResetEmailSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      (
+        FirebaseAuthentication as unknown as {
+          sendPasswordResetEmail: jest.Mock;
+        }
+      ).sendPasswordResetEmail = jest.fn();
+      sendPasswordResetEmailSpy = jest
+        .spyOn(FirebaseAuthentication, 'sendPasswordResetEmail')
+        .mockResolvedValue(undefined);
+    });
+
+    it('should call sendPasswordResetEmail with the given email', async () => {
+      await service.sendPasswordResetEmail('q@q.de');
+
+      expect(sendPasswordResetEmailSpy).toHaveBeenCalledWith({
+        email: 'q@q.de',
+      });
+    });
+  });
+
   describe('registerWithGoogleAccount', () => {
     beforeEach(() => {
       jest

@@ -206,5 +206,11 @@
   "creating-bite": "ባይት እየተፈጠሩ ነው...",
   "leaderboard": "የመሪዎች ሰሌዳ",
   "no-leaderboard-users-yet": "በመሪዎች ሰሌዳ ላይ ገና ተጠቃሚዎች የሉም",
-  "leaderboard-bite-count": "{{ count }} Bites"
+  "leaderboard-bite-count": "{{ count }} Bites",
+  "forgot-password": "የይለፍ ቃል ረሱ",
+  "forgot-password-question": "የይለፍ ቃል ረሱ?",
+  "send-password-reset-link": "የይለፍ ቃል ማደሻ አገናኝ ላክ",
+  "password-reset-requested-check-your-email": "ለዚህ ኢሜይል መለያ ካለ፣ የይለፍ ቃል ማደሻ አገናኝ ልከናል።",
+  "password-reset-request-failed-try-again": "የማደሻ ኢሜይል መላክ አልቻልንም። እባክዎ እንደገና ይሞክሩ።",
+  "back-to-log-in": "ወደ መግባት ተመለስ"
 }

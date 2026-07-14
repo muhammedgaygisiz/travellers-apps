@@ -12,6 +12,8 @@
 export const AnalyticsEvent = {
   // Activation
   SignUp: 'sign_up',
+  PasswordResetRequested: 'password_reset_requested',
+  PasswordResetRequestFailed: 'password_reset_request_failed',
   // Creation
   BiteCreated: 'bite_created',
   BiteImageUploaded: 'bite_image_uploaded',
@@ -33,6 +35,8 @@ export type AnalyticsEventName =
  */
 export interface AnalyticsEventParamMap {
   [AnalyticsEvent.SignUp]: { method: string };
+  [AnalyticsEvent.PasswordResetRequested]: never;
+  [AnalyticsEvent.PasswordResetRequestFailed]: { code: string };
   [AnalyticsEvent.BiteCreated]: never;
   [AnalyticsEvent.BiteImageUploaded]: never;
   [AnalyticsEvent.BiteImageUploadFailed]: { code: string };

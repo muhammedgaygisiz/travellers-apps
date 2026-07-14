@@ -206,5 +206,11 @@
   "creating-bite": "Création de ton Bite...",
   "leaderboard": "Classement",
   "no-leaderboard-users-yet": "Aucun utilisateur dans le classement pour le moment",
-  "leaderboard-bite-count": "{{ count }} Bites"
+  "leaderboard-bite-count": "{{ count }} Bites",
+  "forgot-password": "Mot de passe oublié",
+  "forgot-password-question": "Mot de passe oublié ?",
+  "send-password-reset-link": "Envoyer le lien de réinitialisation",
+  "password-reset-requested-check-your-email": "Si un compte existe pour cet e-mail, nous avons envoyé un lien de réinitialisation du mot de passe.",
+  "password-reset-request-failed-try-again": "Nous n'avons pas pu envoyer l'e-mail de réinitialisation. Réessaie.",
+  "back-to-log-in": "Retour à la connexion"
 }

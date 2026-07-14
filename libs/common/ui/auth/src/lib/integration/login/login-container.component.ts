@@ -14,6 +14,7 @@ import { Credentials } from '../../api/credentials.model';
     [loginFailed]="loginFailed()"
     (submitAuth)="login($event)"
     (signup)="gotoSignup()"
+    (forgotPassword)="gotoForgotPassword($event)"
     (submitSignupWithGoogle)="onSignupWithGoogle()"
     (submitSignupWithApple)="onSignupWithApple()"
   />`,
@@ -37,6 +38,10 @@ export class LoginContainerComponent {
 
   public async gotoSignup(): Promise<void> {
     await this.loginService?.gotoSignUp();
+  }
+
+  public async gotoForgotPassword(email: string | null): Promise<void> {
+    await this.loginService?.gotoForgotPassword(email);
   }
 
   onSignupWithGoogle(): void {

@@ -206,5 +206,11 @@
   "creating-bite": "Membuat Bite-mu...",
   "leaderboard": "Papan peringkat",
   "no-leaderboard-users-yet": "Belum ada pengguna di papan peringkat",
-  "leaderboard-bite-count": "{{ count }} Bite"
+  "leaderboard-bite-count": "{{ count }} Bite",
+  "forgot-password": "Lupa kata sandi",
+  "forgot-password-question": "Lupa kata sandi?",
+  "send-password-reset-link": "Kirim tautan reset kata sandi",
+  "password-reset-requested-check-your-email": "Jika ada akun untuk email ini, kami telah mengirim tautan reset kata sandi.",
+  "password-reset-request-failed-try-again": "Kami tidak dapat mengirim email reset. Silakan coba lagi.",
+  "back-to-log-in": "Kembali ke login"
 }

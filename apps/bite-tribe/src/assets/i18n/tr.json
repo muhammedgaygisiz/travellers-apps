@@ -206,5 +206,11 @@
   "creating-bite": "Bite oluşturuluyor...",
   "leaderboard": "Lider tablosu",
   "no-leaderboard-users-yet": "Lider tablosunda henüz kullanıcı yok",
-  "leaderboard-bite-count": "{{ count }} Bite"
+  "leaderboard-bite-count": "{{ count }} Bite",
+  "forgot-password": "Şifremi unuttum",
+  "forgot-password-question": "Şifreni mi unuttun?",
+  "send-password-reset-link": "Şifre sıfırlama bağlantısı gönder",
+  "password-reset-requested-check-your-email": "Bu e-posta için bir hesap varsa, şifre sıfırlama bağlantısı gönderdik.",
+  "password-reset-request-failed-try-again": "Şifre sıfırlama e-postası gönderilemedi. Lütfen tekrar dene.",
+  "back-to-log-in": "Giriş yapmaya dön"
 }

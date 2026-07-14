@@ -20,5 +20,10 @@
         flex-grow: 1;
       }
     }
+
+    .forgot-password-action {
+      display: flex;
+      justify-content: flex-end;
+    }
   }
 }

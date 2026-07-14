@@ -29,6 +29,7 @@ describe('LoginContainerComponent', () => {
       loginFailed: signal(false) as unknown as any,
       login: jest.fn(),
       gotoSignUp: jest.fn(),
+      gotoForgotPassword: jest.fn(),
       loginWithGoogleAccount: jest.fn(),
       loginWithAppleAccount: jest.fn(),
       loginWithFacebookAccount: jest.fn(),
@@ -84,6 +85,13 @@ describe('LoginContainerComponent', () => {
   it('should call gotoSignUp on service when gotoSignup is called', async () => {
     await component.gotoSignup();
     expect(mockLoginService.gotoSignUp).toHaveBeenCalled();
+  });
+
+  it('should call gotoForgotPassword on service when gotoForgotPassword is called', async () => {
+    await component.gotoForgotPassword('test@example.com');
+    expect(mockLoginService.gotoForgotPassword).toHaveBeenCalledWith(
+      'test@example.com',
+    );
   });
 
   it('should call loginWithGoogleAccount on service when onSignupWithGoogle is called', () => {

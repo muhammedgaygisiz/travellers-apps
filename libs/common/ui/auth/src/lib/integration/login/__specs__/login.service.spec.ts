@@ -15,7 +15,10 @@ describe('LoginService', () => {
     TestBed.configureTestingModule({
       providers: [
         provideMockStore({ initialState }),
-        provideRouter([{ path: 'registration', redirectTo: '' }]),
+        provideRouter([
+          { path: 'registration', redirectTo: '' },
+          { path: 'forgot-password', redirectTo: '' },
+        ]),
         {
           provide: STORE_SERVICE,
           useValue: {
@@ -79,6 +82,29 @@ describe('LoginService', () => {
       await service.gotoSignUp();
 
       expect(navigateForwardSpy).toHaveBeenCalledWith(['/registration']);
+    });
+  });
+
+  describe('gotoForgotPassword', () => {
+    it('should call navigateForward with trimmed email query param', async () => {
+      const navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+
+      await service.gotoForgotPassword('  test@example.com  ');
+
+      expect(navigateForwardSpy).toHaveBeenCalledWith(['/forgot-password'], {
+        queryParams: { email: 'test@example.com' },
+      });
+    });
+
+    it('should call navigateForward without query params when email is empty', async () => {
+      const navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+
+      await service.gotoForgotPassword(' ');
+
+      expect(navigateForwardSpy).toHaveBeenCalledWith(
+        ['/forgot-password'],
+        undefined,
+      );
     });
   });
 

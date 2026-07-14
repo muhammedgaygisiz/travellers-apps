@@ -55,6 +55,17 @@
             <ion-input-password-toggle slot="end" color="secondary" />
           </ion-input>
 
+          <div class="forgot-password-action">
+            <ion-button
+              fill="clear"
+              size="small"
+              type="button"
+              (click)="onForgotPassword()"
+              data-testid="forgot-password"
+              >{{ 'forgot-password-question' | transloco }}</ion-button
+            >
+          </div>
+
           <ion-button
             class="ion-margin-top"
             fill="outline"

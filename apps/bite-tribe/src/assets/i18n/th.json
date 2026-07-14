@@ -207,5 +207,11 @@
   "creating-bite": "กำลังสร้าง Bite...",
   "leaderboard": "กระดานผู้นำ",
   "no-leaderboard-users-yet": "ยังไม่มีผู้ใช้ในกระดานผู้นำ",
-  "leaderboard-bite-count": "{{ count }} Bites"
+  "leaderboard-bite-count": "{{ count }} Bites",
+  "forgot-password": "ลืมรหัสผ่าน",
+  "forgot-password-question": "ลืมรหัสผ่าน?",
+  "send-password-reset-link": "ส่งลิงก์รีเซ็ตรหัสผ่าน",
+  "password-reset-requested-check-your-email": "หากมีบัญชีสำหรับอีเมลนี้ เราได้ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว",
+  "password-reset-request-failed-try-again": "เราไม่สามารถส่งอีเมลรีเซ็ตได้ โปรดลองอีกครั้ง",
+  "back-to-log-in": "กลับไปเข้าสู่ระบบ"
 }

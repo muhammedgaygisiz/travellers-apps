@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import type { AuthUserRecord } from 'firebase-functions/v2/identity';
+import { buildEmailVerificationMetadata } from './email-verification-utils';
 
 const USERS_COLLECTION = 'users';
 
@@ -33,6 +34,7 @@ export const createUserOnAuthCreate = beforeUserCreated(async (event) => {
       photoUrl: getPhotoUrl(user),
       public: false,
       subscriptionTier: 1,
+      ...buildEmailVerificationMetadata(user),
       createdAt: now.toISOString(),
       createdAtTimestamp: now.getTime(),
     });

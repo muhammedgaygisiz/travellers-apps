@@ -213,5 +213,14 @@
   "send-password-reset-link": "Invia link di reimpostazione",
   "password-reset-requested-check-your-email": "Se esiste un account per questa e-mail, abbiamo inviato un link per reimpostare la password.",
   "password-reset-request-failed-try-again": "Non siamo riusciti a inviare l'e-mail di reimpostazione. Riprova.",
+  "verify-your-email-address": "Verify your email address",
+  "verify-your-email-address-body": "Please verify your email address so your account stays secure and you can receive important account messages.",
+  "resend-email": "Resend email",
+  "resend-verification-email": "Resend verification email",
+  "email-verified": "Email verified",
+  "email-not-verified": "Email not verified",
+  "verification-email-sent-check-your-inbox": "Verification email sent. Please check your inbox.",
+  "please-wait-before-requesting-another-verification-email": "Please wait before requesting another verification email.",
+  "verification-email-could-not-be-sent": "We couldn't send the verification email. Please try again.",
   "back-to-log-in": "Torna all'accesso"
 }

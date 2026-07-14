@@ -3,7 +3,16 @@ import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import type { Bite, LikeClick } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import type { PageMenuTarget } from 'common/ui/page';
-import { PATH } from 'utils';
+import {
+  getEmailVerificationFailureReason,
+  PATH,
+  type EmailVerificationFailureReason,
+} from 'utils';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { ToastController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
+
+type EmailVerificationSurface = 'home' | 'settings' | 'profile_edit';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +20,9 @@ import { PATH } from 'utils';
 export class HomeService {
   dataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly analytics = inject(AnalyticsService);
+  private readonly toastController = inject(ToastController);
+  private readonly transloco = inject(TranslocoService);
 
   sortedHomeBites = this.dataAccess.sortedHomeBites;
   sorting = this.dataAccess.sorting;
@@ -43,6 +55,8 @@ export class HomeService {
   hasErrorLoadingGpsPosition = this.dataAccess.hasErrorLoadingGpsPosition;
 
   networkStatus = this.dataAccess.networkStatus;
+  emailVerificationPromptVisible =
+    this.dataAccess.emailVerificationPromptVisible;
 
   logout(): void {
     this.dataAccess.logout();
@@ -186,5 +200,64 @@ export class HomeService {
 
   onGotoMyProfileClick(): void {
     void this.navController.navigateForward(['my-profile']);
+  }
+
+  trackEmailVerificationPromptShown(surface: EmailVerificationSurface): void {
+    if (!this.emailVerificationPromptVisible()) {
+      return;
+    }
+
+    this.analytics.logEvent(AnalyticsEvent.EmailVerificationPromptShown, {
+      surface,
+    });
+  }
+
+  async resendEmailVerification(
+    surface: EmailVerificationSurface,
+  ): Promise<void> {
+    this.analytics.logEvent(AnalyticsEvent.EmailVerificationResendTapped, {
+      surface,
+    });
+
+    try {
+      await this.dataAccess.resendEmailVerification();
+      this.analytics.logEvent(AnalyticsEvent.EmailVerificationResendSucceeded, {
+        surface,
+      });
+      await this.showEmailVerificationToast(
+        'verification-email-sent-check-your-inbox',
+      );
+    } catch (error) {
+      const reason = getEmailVerificationFailureReason(error);
+      this.analytics.logEvent(AnalyticsEvent.EmailVerificationResendFailed, {
+        surface,
+        reason,
+      });
+      await this.showEmailVerificationToast(this.getResendErrorKey(reason));
+    }
+  }
+
+  private getResendErrorKey(reason: EmailVerificationFailureReason): string {
+    if (reason === 'rate_limited') {
+      return 'please-wait-before-requesting-another-verification-email';
+    }
+
+    return 'verification-email-could-not-be-sent';
+  }
+
+  private async showEmailVerificationToast(messageKey: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message: this.transloco.translate(messageKey),
+      position: 'bottom',
+      duration: 5000,
+      buttons: [
+        {
+          text: this.transloco.translate('ok'),
+          role: 'confirm',
+        },
+      ],
+    });
+
+    await toast.present();
   }
 }

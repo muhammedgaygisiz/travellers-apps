@@ -3,6 +3,9 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { ProfileService } from '../profile.service';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { ToastController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 
 class Mock {
   logout = jest.fn();
@@ -11,6 +14,20 @@ class Mock {
   submitFollowClick = jest.fn();
   savePublicProfile = jest.fn();
   submitUnfollowClick = jest.fn();
+  emailVerificationPromptVisible = jest.fn(() => false);
+  resendEmailVerification = jest.fn().mockResolvedValue(undefined);
+}
+
+class AnalyticsMock {
+  logEvent = jest.fn();
+}
+
+class ToastControllerMock {
+  create = jest.fn().mockResolvedValue({ present: jest.fn() });
+}
+
+class TranslocoMock {
+  translate = jest.fn((key: string) => key);
 }
 
 describe(ProfileService.name, () => {
@@ -23,6 +40,9 @@ describe(ProfileService.name, () => {
         ProfileService,
         NavController,
         { provide: ProfileDataAccessService, useClass: Mock },
+        { provide: AnalyticsService, useClass: AnalyticsMock },
+        { provide: ToastController, useClass: ToastControllerMock },
+        { provide: TranslocoService, useClass: TranslocoMock },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -178,6 +198,37 @@ describe(ProfileService.name, () => {
         userId,
         'following',
       ]);
+    });
+  });
+
+  describe('email verification prompt analytics', () => {
+    it('should log prompt shown when the prompt is visible', () => {
+      jest
+        .spyOn(profileDataAccessService, 'emailVerificationPromptVisible')
+        .mockReturnValue(true);
+      const analytics = TestBed.inject(AnalyticsService);
+
+      service.trackEmailVerificationPromptShown('profile_edit');
+
+      expect(analytics.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.EmailVerificationPromptShown,
+        { surface: 'profile_edit' },
+      );
+    });
+
+    it('should send resend analytics around the backend call', async () => {
+      const analytics = TestBed.inject(AnalyticsService);
+
+      await service.resendEmailVerification('profile_edit');
+
+      expect(analytics.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.EmailVerificationResendTapped,
+        { surface: 'profile_edit' },
+      );
+      expect(analytics.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.EmailVerificationResendSucceeded,
+        { surface: 'profile_edit' },
+      );
     });
   });
 });

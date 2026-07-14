@@ -12,6 +12,8 @@ import {
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
+  IonCard,
+  IonCardContent,
   IonCardHeader,
   IonCardTitle,
   IonContent,
@@ -44,6 +46,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
     IonLabel,
     IonToggle,
     IonButton,
+    IonCard,
+    IonCardContent,
     IonSelect,
     IonSelectOption,
     ReactiveFormsModule,
@@ -62,9 +66,11 @@ export class PageSettings {
   user = input<User | null | undefined>();
   publicUser = input<PublicUser>();
   settings = input<Settings>();
+  showEmailVerificationPrompt = input(false);
 
   submitSettings = output<Settings>();
   logout = output<void>();
+  resendEmailVerification = output<void>();
 
   private readonly formBuilder = inject(FormBuilder);
 

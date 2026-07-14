@@ -7,6 +7,7 @@ import { ProfileDataAccessService } from '../profile-data-access.service';
 import SpyInstance = jest.SpyInstance;
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { LikeClick } from 'model';
+import { BiteTribeApiService } from 'bite-tribe/api';
 
 class Mock {
   isAuthenticated$ = of(true);
@@ -26,6 +27,10 @@ class Mock {
   unfollowUser = jest.fn();
 }
 
+const ApiMock = {
+  resendEmailVerification: jest.fn(),
+};
+
 jest.mock('@capacitor-firebase/firestore');
 
 describe('ProfileDataAccessService', () => {
@@ -36,6 +41,7 @@ describe('ProfileDataAccessService', () => {
       providers: [
         ProfileDataAccessService,
         { provide: BiteTribeStoreService, useClass: Mock },
+        { provide: BiteTribeApiService, useValue: ApiMock },
         provideMockStore(),
       ],
     }).compileComponents();

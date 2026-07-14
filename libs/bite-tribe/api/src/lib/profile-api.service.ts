@@ -286,6 +286,45 @@ export class ProfileApiService {
     }
   }
 
+  async syncEmailVerificationStatus(): Promise<
+    Pick<
+      PublicUser,
+      | 'emailVerified'
+      | 'emailVerificationRequired'
+      | 'emailVerificationProvider'
+      | 'emailVerificationReminderCount'
+      | 'emailVerificationLastSentAt'
+      | 'emailVerificationLastSentAtTimestamp'
+      | 'emailVerificationManualLastSentAt'
+      | 'emailVerificationManualLastSentAtTimestamp'
+    >
+  > {
+    const result = await FirebaseFunctions.callByName<
+      void,
+      Pick<
+        PublicUser,
+        | 'emailVerified'
+        | 'emailVerificationRequired'
+        | 'emailVerificationProvider'
+        | 'emailVerificationReminderCount'
+        | 'emailVerificationLastSentAt'
+        | 'emailVerificationLastSentAtTimestamp'
+        | 'emailVerificationManualLastSentAt'
+        | 'emailVerificationManualLastSentAtTimestamp'
+      >
+    >({
+      name: 'syncEmailVerificationStatus',
+    });
+
+    return result.data;
+  }
+
+  async resendEmailVerification(): Promise<void> {
+    await FirebaseFunctions.callByName<void, { status: 'sent' }>({
+      name: 'resendEmailVerification',
+    });
+  }
+
   async followUser(user: PublicUser): Promise<void> {
     try {
       const currentUser = this.authService.getUser();

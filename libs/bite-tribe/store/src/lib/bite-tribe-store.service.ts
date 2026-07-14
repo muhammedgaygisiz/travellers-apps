@@ -200,6 +200,10 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(fromAuth.AuthActions.logout());
   }
 
+  syncEmailVerificationStatus(): void {
+    this.store.dispatch(AppActions.syncEmailVerificationStatus());
+  }
+
   submitLikeClick(likeClick: LikeClick): void {
     const userId = this.userId();
 

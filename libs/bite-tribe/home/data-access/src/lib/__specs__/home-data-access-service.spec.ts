@@ -29,6 +29,7 @@ class StoreMock {
   allTags$ = of([]);
   homeFilters$ = of([]);
   userId$ = of('test-user-id');
+  publicUser$ = of(null);
   selectedBucketlist$ = of(null);
   selectedBucketlistTitle$ = of('');
   isAuthenticated$ = of(false);
@@ -63,6 +64,7 @@ const ApiMock = {
   bitesByPosition: jest.fn(),
   loadRestaurant: jest.fn(),
   loadLikesForBites: jest.fn(),
+  resendEmailVerification: jest.fn(),
 };
 
 describe('HomeDataAccessService', () => {

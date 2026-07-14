@@ -247,6 +247,26 @@ export class BiteTribeApiService {
     return this.profileApiService.updateUserMetadata();
   }
 
+  syncEmailVerificationStatus(): Promise<
+    Pick<
+      PublicUser,
+      | 'emailVerified'
+      | 'emailVerificationRequired'
+      | 'emailVerificationProvider'
+      | 'emailVerificationReminderCount'
+      | 'emailVerificationLastSentAt'
+      | 'emailVerificationLastSentAtTimestamp'
+      | 'emailVerificationManualLastSentAt'
+      | 'emailVerificationManualLastSentAtTimestamp'
+    >
+  > {
+    return this.profileApiService.syncEmailVerificationStatus();
+  }
+
+  resendEmailVerification(): Promise<void> {
+    return this.profileApiService.resendEmailVerification();
+  }
+
   async followUser(user: PublicUser): Promise<void> {
     await this.profileApiService.followUser(user);
   }

@@ -10,8 +10,10 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [user]="service.user()"
       [publicUser]="service.publicUser()"
       [settings]="service.settings()"
+      [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
       (submitSettings)="service.saveSettings($event)"
       (logout)="service.logout()"
+      (resendEmailVerification)="service.resendEmailVerification('settings')"
     />
   `,
   imports: [PageSettings],
@@ -24,5 +26,6 @@ export class SettingsContainer {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Settings',
     });
+    this.service.trackEmailVerificationPromptShown('settings');
   }
 }

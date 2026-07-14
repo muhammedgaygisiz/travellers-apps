@@ -71,6 +71,24 @@
         class="ion-margin-top"
       />
 
+      @if (publicUser()) {
+      <div class="email-verification-state ion-margin-top">
+        @if (publicUser()?.emailVerified === true) {
+        <ion-text color="success">
+          {{ 'email-verified' | transloco }}
+        </ion-text>
+        } @else {
+        <ion-text color="warning">
+          {{ 'email-not-verified' | transloco }}
+        </ion-text>
+        } @if (showEmailVerificationPrompt()) {
+        <ion-button fill="clear" (click)="resendEmailVerification.emit()">
+          {{ 'resend-verification-email' | transloco }}
+        </ion-button>
+        }
+      </div>
+      }
+
       <ion-input
         label="{{ 'city' | transloco }}"
         formControlName="city"

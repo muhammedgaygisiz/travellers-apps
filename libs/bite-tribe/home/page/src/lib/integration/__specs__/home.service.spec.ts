@@ -4,6 +4,9 @@ import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { Bite, Like } from 'model';
 import SpyInstance = jest.SpyInstance;
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { ToastController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 
 class Mock {
   sortedHomeBites = (): never[] => [];
@@ -31,6 +34,20 @@ class Mock {
   clearGpsError = (): null => null;
   triedOutBiteIds = (): string[] => [];
   markBiteAsTriedOut = (): null => null;
+  emailVerificationPromptVisible = (): boolean => false;
+  resendEmailVerification = jest.fn().mockResolvedValue(undefined);
+}
+
+class AnalyticsMock {
+  logEvent = jest.fn();
+}
+
+class ToastControllerMock {
+  create = jest.fn().mockResolvedValue({ present: jest.fn() });
+}
+
+class TranslocoMock {
+  translate = jest.fn((key: string) => key);
 }
 
 describe('HomeService', () => {
@@ -42,6 +59,9 @@ describe('HomeService', () => {
       providers: [
         { provide: HomeDataAccessService, useClass: Mock },
         { provide: NavController, useClass: Mock },
+        { provide: AnalyticsService, useClass: AnalyticsMock },
+        { provide: ToastController, useClass: ToastControllerMock },
+        { provide: TranslocoService, useClass: TranslocoMock },
       ],
     }).compileComponents();
     homeDataAccessService = TestBed.inject(HomeDataAccessService);
@@ -524,6 +544,38 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.onGotoMyProfileClick();
         expect(navigateForwardSpy).toHaveBeenCalledWith(['my-profile']);
+      },
+    ));
+  });
+
+  describe('email verification prompt analytics', () => {
+    it('should log prompt shown when the prompt is visible', inject(
+      [HomeService, AnalyticsService],
+      (service: HomeService, analytics: AnalyticsService) => {
+        service.emailVerificationPromptVisible = (): boolean => true;
+
+        service.trackEmailVerificationPromptShown('home');
+
+        expect(analytics.logEvent).toHaveBeenCalledWith(
+          AnalyticsEvent.EmailVerificationPromptShown,
+          { surface: 'home' },
+        );
+      },
+    ));
+
+    it('should send resend analytics around the backend call', inject(
+      [HomeService, AnalyticsService],
+      async (service: HomeService, analytics: AnalyticsService) => {
+        await service.resendEmailVerification('home');
+
+        expect(analytics.logEvent).toHaveBeenCalledWith(
+          AnalyticsEvent.EmailVerificationResendTapped,
+          { surface: 'home' },
+        );
+        expect(analytics.logEvent).toHaveBeenCalledWith(
+          AnalyticsEvent.EmailVerificationResendSucceeded,
+          { surface: 'home' },
+        );
       },
     ));
   });

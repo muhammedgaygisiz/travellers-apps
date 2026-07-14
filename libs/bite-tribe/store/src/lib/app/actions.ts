@@ -43,5 +43,19 @@ export const AppActions = createActionGroup({
     'Error Updating PhotoUrl in Profile': props<{ profile: PublicUser }>(),
     'Update last seen': emptyProps(),
     'Update user metadata': emptyProps(),
+    'Sync email verification status': emptyProps(),
+    'Synced email verification status': props<{
+      metadata: Pick<
+        PublicUser,
+        | 'emailVerified'
+        | 'emailVerificationRequired'
+        | 'emailVerificationProvider'
+        | 'emailVerificationReminderCount'
+        | 'emailVerificationLastSentAt'
+        | 'emailVerificationLastSentAtTimestamp'
+        | 'emailVerificationManualLastSentAt'
+        | 'emailVerificationManualLastSentAtTimestamp'
+      >;
+    }>(),
   },
 });

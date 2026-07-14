@@ -12,7 +12,11 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       class="ion-page"
       [isAuthenticated]="service.isAuthenticated()"
       [publicUser]="service.myUser()"
+      [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
       (submitPublicUser)="service.saveProfile($event)"
+      (resendEmailVerification)="
+        service.resendEmailVerification('profile_edit')
+      "
     />
   `,
 })
@@ -23,5 +27,6 @@ export class EditProfileContainer {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Edit Profile',
     });
+    this.service.trackEmailVerificationPromptShown('profile_edit');
   }
 }

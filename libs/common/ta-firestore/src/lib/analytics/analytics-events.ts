@@ -14,6 +14,11 @@ export const AnalyticsEvent = {
   SignUp: 'sign_up',
   PasswordResetRequested: 'password_reset_requested',
   PasswordResetRequestFailed: 'password_reset_request_failed',
+  EmailVerificationPromptShown: 'email_verification_prompt_shown',
+  EmailVerificationResendTapped: 'email_verification_resend_tapped',
+  EmailVerificationResendSucceeded: 'email_verification_resend_succeeded',
+  EmailVerificationResendFailed: 'email_verification_resend_failed',
+  EmailVerificationSynced: 'email_verification_synced',
   // Creation
   BiteCreated: 'bite_created',
   BiteImageUploaded: 'bite_image_uploaded',
@@ -37,6 +42,28 @@ export interface AnalyticsEventParamMap {
   [AnalyticsEvent.SignUp]: { method: string };
   [AnalyticsEvent.PasswordResetRequested]: never;
   [AnalyticsEvent.PasswordResetRequestFailed]: { code: string };
+  [AnalyticsEvent.EmailVerificationPromptShown]: {
+    surface: 'home' | 'settings' | 'profile_edit';
+  };
+  [AnalyticsEvent.EmailVerificationResendTapped]: {
+    surface: 'home' | 'settings' | 'profile_edit';
+  };
+  [AnalyticsEvent.EmailVerificationResendSucceeded]: {
+    surface: 'home' | 'settings' | 'profile_edit';
+  };
+  [AnalyticsEvent.EmailVerificationResendFailed]: {
+    surface: 'home' | 'settings' | 'profile_edit';
+    reason:
+      | 'rate_limited'
+      | 'already_verified'
+      | 'unsupported_provider'
+      | 'send_failed'
+      | 'unknown';
+  };
+  [AnalyticsEvent.EmailVerificationSynced]: {
+    verified: boolean;
+    source: 'app_start' | 'app_resume' | 'profile_edit';
+  };
   [AnalyticsEvent.BiteCreated]: never;
   [AnalyticsEvent.BiteImageUploaded]: never;
   [AnalyticsEvent.BiteImageUploadFailed]: { code: string };

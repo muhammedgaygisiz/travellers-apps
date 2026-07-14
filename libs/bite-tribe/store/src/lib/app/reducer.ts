@@ -123,6 +123,15 @@ export const reducer = createReducer<AppSlice>(
     ...state,
     exchangeRates,
   })),
+  on(AppActions.syncedEmailVerificationStatus, (state, { metadata }) => ({
+    ...state,
+    profile: state.profile
+      ? {
+          ...state.profile,
+          ...metadata,
+        }
+      : state.profile,
+  })),
   on(AppActions.loadedProfileMetadata, (state, { type, ...metadata }) => ({
     ...state,
     profileMetadata: {

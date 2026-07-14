@@ -21,6 +21,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
       [networkStatus]="service.networkStatus()"
+      [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
       [showFilters]="false"
       showSearchChip
       (logoutClick)="service.logout()"
@@ -36,6 +37,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (refresh)="service.refresh()"
       (closeGpsError)="service.closeGpsError()"
       (rateNowClick)="service.rateNowClicked($event)"
+      (resendEmailVerification)="service.resendEmailVerification('home')"
     />
   `,
   imports: [BiteTribeHomeComponent],
@@ -48,5 +50,6 @@ export class HomeContainer {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Home',
     });
+    this.service.trackEmailVerificationPromptShown('home');
   }
 }

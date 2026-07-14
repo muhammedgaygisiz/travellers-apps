@@ -29,3 +29,7 @@ export { isBase64String } from './lib/is-base64-string';
 export { isPrivacyPage } from './lib/is-privacy-page';
 export { isAccountDeletionPage } from './lib/is-account-deletion-page';
 export { getBitePriceInPreferredCurrency } from './lib/get-bite-price-in-preferred-currency';
+export {
+  getEmailVerificationFailureReason,
+  type EmailVerificationFailureReason,
+} from './lib/email-verification-error-reason';

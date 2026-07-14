@@ -93,6 +93,16 @@ export class HomeDataAccessService {
   private readonly likes = toSignal(this.storeService.likes$, {
     initialValue: [] as Like[],
   });
+  private readonly publicUser = toSignal(this.storeService.publicUser$);
+
+  emailVerificationPromptVisible = computed(() => {
+    const publicUser = this.publicUser();
+
+    return (
+      publicUser?.emailVerificationRequired === true &&
+      publicUser.emailVerified !== true
+    );
+  });
 
   networkStatus = this.networkStatusService.status;
 
@@ -291,6 +301,10 @@ export class HomeDataAccessService {
 
   clearGpsError(): void {
     this.storeService.clearGpsError();
+  }
+
+  async resendEmailVerification(): Promise<void> {
+    await this.api.resendEmailVerification();
   }
 
   markBiteAsTriedOut(params: { biteId: string; checked: boolean }): void {

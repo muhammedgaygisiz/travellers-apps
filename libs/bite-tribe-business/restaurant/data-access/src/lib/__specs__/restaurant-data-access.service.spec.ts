@@ -32,6 +32,8 @@ describe('RestaurantDataAccessService', () => {
       saveNewRestaurant: jest.fn(),
     } as unknown as jest.Mocked<BiteTribeStoreService>;
     apiMock = {
+      getPlaceDetails: jest.fn(),
+      searchPlaces: jest.fn(),
       saveRestaurantImage: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<BiteTribeApiService>;
 
@@ -64,6 +66,45 @@ describe('RestaurantDataAccessService', () => {
       expect(storeServiceMock.saveNewRestaurant).toHaveBeenCalledWith(
         restaurant,
       );
+    });
+  });
+
+  describe('searchPlaces', () => {
+    it('should search places through the API', async () => {
+      const position = { latitude: 46.948, longitude: 7.4474 };
+      const places = [
+        {
+          id: 'place-1',
+          name: 'Pizza Palace',
+          position,
+        },
+      ];
+      apiMock.searchPlaces.mockResolvedValue(places);
+
+      const result = await service.searchPlaces('Pizza', position);
+
+      expect(apiMock.searchPlaces).toHaveBeenCalledWith('Pizza', position);
+      expect(result).toBe(places);
+    });
+  });
+
+  describe('getPlaceDetails', () => {
+    it('should load place details through the API', async () => {
+      const details = {
+        name: 'Pizza Palace',
+        address: {
+          street: 'Main St',
+          postcode: '12345',
+          city: 'Bern',
+          country: 'Switzerland',
+        },
+      };
+      apiMock.getPlaceDetails.mockResolvedValue(details);
+
+      const result = await service.getPlaceDetails('place-1');
+
+      expect(apiMock.getPlaceDetails).toHaveBeenCalledWith('place-1');
+      expect(result).toBe(details);
     });
   });
 

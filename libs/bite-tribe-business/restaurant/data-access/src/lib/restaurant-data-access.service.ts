@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Restaurant } from 'model';
+import { Geopoint, GooglePlace, PlaceDetails, Restaurant } from 'model';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { isBase64String } from 'utils';
@@ -29,6 +29,17 @@ export class RestaurantDataAccessService {
 
   submitNewRestaurant(restaurant: Restaurant): void {
     this.storeService.saveNewRestaurant(restaurant);
+  }
+
+  async searchPlaces(
+    searchText: string,
+    position?: Geopoint,
+  ): Promise<GooglePlace[]> {
+    return this.api.searchPlaces(searchText, position);
+  }
+
+  async getPlaceDetails(placeId: string): Promise<PlaceDetails | undefined> {
+    return this.api.getPlaceDetails(placeId);
   }
 
   async verifyRestaurantCandidate(

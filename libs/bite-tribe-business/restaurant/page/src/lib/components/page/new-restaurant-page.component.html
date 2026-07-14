@@ -3,119 +3,159 @@
     enableBackButton: true,
     showHeaderMenu: false,
     showFooter: false,
+    fullWidth: true,
   }"
 >
   <ion-content class="ion-padding">
     <h1>Create Restaurant</h1>
 
-    <form [formGroup]="restaurantFormGroup">
-      <image-upload formControlName="image" />
+    <form [formGroup]="restaurantFormGroup" class="layout">
+      <div class="left-column">
+        <image-upload formControlName="image" />
 
-      <ion-input
-        label="Restaurant Name"
-        formControlName="name"
-        fill="outline"
-        class="ion-margin-top"
-        mode="md"
-      />
-
-      <ion-textarea
-        class="ion-margin-top"
-        label="{{ 'about-restaurant' | transloco }}"
-        formControlName="description"
-        fill="outline"
-        auto-grow="true"
-        [maxlength]="500"
-        [rows]="6"
-        mode="md"
-      />
-
-      <ion-input
-        label="{{ 'street' | transloco }}"
-        formControlName="street"
-        fill="outline"
-        class="ion-margin-top"
-        mode="md"
-      />
-
-      <div class="ion-display-flex ion-gap-2 ion-margin-top">
         <ion-input
-          label="{{ 'postcode' | transloco }}"
-          formControlName="postcode"
+          label="Restaurant Name"
+          formControlName="name"
           fill="outline"
+          class="ion-margin-top"
           mode="md"
-          class="ion-flex-1 ion-margin-end"
         />
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          class="ion-margin-top prefill-button"
+          [disabled]="placeDetailsLoading()"
+          (click)="openPrefillSelector()"
+        >
+          @if (placeDetailsLoading()) {
+            <ion-spinner slot="start" name="crescent" />
+          }
+          {{ 'prefill-from-google-places' | transloco }}
+        </ion-button>
+
+        <ion-textarea
+          class="ion-margin-top"
+          label="{{ 'about-restaurant' | transloco }}"
+          formControlName="description"
+          fill="outline"
+          auto-grow="true"
+          [maxlength]="500"
+          [rows]="6"
+          mode="md"
+        />
+
         <ion-input
-          label="{{ 'city' | transloco }}"
-          formControlName="city"
+          label="{{ 'street' | transloco }}"
+          formControlName="street"
           fill="outline"
+          class="ion-margin-top"
           mode="md"
-          class="ion-flex-1"
         />
-      </div>
 
-      <ion-input
-        label="{{ 'country' | transloco }}"
-        formControlName="country"
-        fill="outline"
-        class="ion-margin-top"
-        mode="md"
-      />
+        <div class="ion-display-flex ion-gap-2 ion-margin-top">
+          <ion-input
+            label="{{ 'postcode' | transloco }}"
+            formControlName="postcode"
+            fill="outline"
+            mode="md"
+            class="ion-flex-1 ion-margin-end"
+          />
+          <ion-input
+            label="{{ 'city' | transloco }}"
+            formControlName="city"
+            fill="outline"
+            mode="md"
+            class="ion-flex-1"
+          />
+        </div>
 
-      <div class="ion-padding-top">
-        <position formControlName="position" />
-      </div>
+        <ion-input
+          label="{{ 'country' | transloco }}"
+          formControlName="country"
+          fill="outline"
+          class="ion-margin-top"
+          mode="md"
+        />
 
-      @let bites = restaurant()?.bites || [];
-      @for (bite of bites; track bite.id) {
-        <bt-bite [bite]="bite" (biteClick)="biteClick.emit($event)" />
-      }
-    </form>
-
-    <div [formGroup]="socialMediaForm" class="ion-margin-top">
-      @if (links.length === 0) {
-        <ion-text>{{ 'no-social-media-links' | transloco }}</ion-text>
-      }
-
-      <div class="ion-margin-top">
-        <ion-list lines="full" formArrayName="links">
-          @for (socialMedia of links.controls; track $index; let i = $index) {
-            <ion-item [formGroupName]="i">
-              <ion-select
-                class="ion-margin-end"
-                placeholder="Social Network"
-                interface="popover"
-                formControlName="network"
-              >
-                <ion-select-option value="facebook">Facebook</ion-select-option>
-                <ion-select-option value="instagram"
-                  >Instagram</ion-select-option
-                >
-                <ion-select-option value="twitter">Twitter</ion-select-option>
-                <ion-select-option value="linkedin">LinkedIn</ion-select-option>
-                <ion-select-option value="website">Website</ion-select-option>
-              </ion-select>
-              <ion-input placeholder="Link" formControlName="url"></ion-input>
-            </ion-item>
+        <div [formGroup]="socialMediaForm" class="ion-margin-top">
+          @if (links.length === 0) {
+            <ion-text>{{ 'no-social-media-links' | transloco }}</ion-text>
           }
 
-          <ion-button class="ion-margin-top" (click)="addSocialMedia()">
-            Add Link
-          </ion-button>
-        </ion-list>
-      </div>
-    </div>
+          <div class="ion-margin-top">
+            <ion-list lines="full" formArrayName="links">
+              @for (
+                socialMedia of links.controls;
+                track $index;
+                let i = $index
+              ) {
+                <ion-item [formGroupName]="i">
+                  <ion-select
+                    class="ion-margin-end"
+                    placeholder="Social Network"
+                    interface="popover"
+                    formControlName="network"
+                  >
+                    <ion-select-option value="facebook"
+                      >Facebook</ion-select-option
+                    >
+                    <ion-select-option value="instagram"
+                      >Instagram</ion-select-option
+                    >
+                    <ion-select-option value="twitter"
+                      >Twitter</ion-select-option
+                    >
+                    <ion-select-option value="linkedin"
+                      >LinkedIn</ion-select-option
+                    >
+                    <ion-select-option value="website"
+                      >Website</ion-select-option
+                    >
+                  </ion-select>
+                  <ion-input
+                    placeholder="Link"
+                    formControlName="url"
+                  ></ion-input>
+                </ion-item>
+              }
 
-    <div class="ion-margin-top">
-      <bt-opening-hours (submitOpeningHours)="onOpeningHoursChange($event)" />
-    </div>
+              <ion-button class="ion-margin-top" (click)="addSocialMedia()">
+                Add Link
+              </ion-button>
+            </ion-list>
+          </div>
+        </div>
+
+        <div class="ion-margin-top">
+          <bt-opening-hours
+            [openingHours]="openingHours()"
+            [showSubmit]="false"
+          />
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="ion-padding-top">
+          <position formControlName="position" />
+        </div>
+
+        @let bites = restaurant()?.bites || [];
+        @if (bites.length > 0) {
+          <div class="bite-list">
+            @for (bite of bites; track bite.id) {
+              <bt-bite [bite]="bite" (biteClick)="biteClick.emit($event)" />
+            }
+          </div>
+        }
+      </div>
+    </form>
 
     <ion-button
       expand="block"
       color="primary"
       routerDirection="back"
-      class="ion-margin-top"
+      class="ion-margin-top save-button"
       [disabled]="isInvalid()"
       (click)="saveNewRestaurant()"
     >
@@ -123,3 +163,22 @@
     </ion-button>
   </ion-content>
 </ta-page>
+
+<ion-modal
+  [isOpen]="isPrefillModalOpen()"
+  (didDismiss)="isPrefillModalOpen.set(false)"
+>
+  <ng-template>
+    <lib-restaurant-selector
+      class="ion-page"
+      [selectedRestaurant]="restaurantFormGroup.get('name')?.value || ''"
+      [googlePlaces]="googlePlaces()"
+      [googlePlacesLoading]="googlePlacesLoading()"
+      [nearbyGooglePlaces]="googlePlaces()"
+      [nearbyGooglePlacesLoading]="googlePlacesLoading()"
+      (searchInGoogleMaps)="searchGooglePlaces.emit($event)"
+      (googlePlaceSelected)="onGooglePlaceSelected($event)"
+      (selectionCancel)="isPrefillModalOpen.set(false)"
+    />
+  </ng-template>
+</ion-modal>

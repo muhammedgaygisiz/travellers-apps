@@ -1,6 +1,63 @@
 :host {
+  h1,
+  .layout,
+  .save-button {
+    max-width: 78rem;
+    margin-inline: auto;
+  }
+
+  .save-button {
+    display: block;
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .left-column,
+  .right-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  // Give the bite list breathing room from the map above it.
+  .bite-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
   bt-bite {
     display: block;
-    margin-bottom: 1rem;
+  }
+
+  // Two columns from the Ionic `lg` breakpoint (>= 992px): form fields and
+  // opening hours on the left, map and bite list on the right.
+  @media (min-width: 992px) {
+    .layout {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+
+    // The map and bite evidence benefit from width more than the form fields.
+    .left-column {
+      flex: 2;
+    }
+
+    .right-column {
+      flex: 3;
+    }
+
+    // Bite evidence reads better as compact cards next to the map than as a
+    // single full-width feed column. 345px matches the bt-bite minimum width,
+    // so tracks never force the card below its own floor.
+    .bite-list {
+      grid-template-columns: repeat(auto-fill, minmax(345px, 1fr));
+    }
   }
 }

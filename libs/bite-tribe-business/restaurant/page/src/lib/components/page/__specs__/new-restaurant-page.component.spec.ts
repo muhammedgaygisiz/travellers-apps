@@ -3,7 +3,14 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { NewRestaurantPageComponent } from '../new-restaurant-page.component';
-import { Address, Bite, DaySchedule, Geopoint, Link, Restaurant } from 'model';
+import {
+  Address,
+  Bite,
+  DaySchedule,
+  Geopoint,
+  PlaceDetails,
+  Restaurant,
+} from 'model';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -142,20 +149,6 @@ describe('NewRestaurantPageComponent', () => {
       component.addSocialMedia();
       component.addSocialMedia();
       expect(component.links.length).toBe(2);
-    });
-  });
-
-  describe('onOpeningHoursChange', () => {
-    it('should update the openingHours signal', () => {
-      const hours: DaySchedule[] = [
-        {
-          day: 'monday',
-          isOpen: true,
-          timeRanges: [{ from: '09:00', to: '17:00' }],
-        },
-      ];
-      component.onOpeningHoursChange(hours);
-      expect(component.openingHours()).toEqual(hours);
     });
   });
 
@@ -305,7 +298,7 @@ describe('NewRestaurantPageComponent', () => {
       );
     });
 
-    it('should emit restaurant with opening hours when set', () => {
+    it('should emit restaurant with the opening hours from the editor', () => {
       const emitSpy = jest.spyOn(component.submitNewRestaurant, 'emit');
       const position: Geopoint = { latitude: 10, longitude: 20 };
       component.restaurantFormGroup.controls['image'].setValue(
@@ -314,6 +307,9 @@ describe('NewRestaurantPageComponent', () => {
       component.restaurantFormGroup.controls['name'].setValue('My Restaurant');
       component.restaurantFormGroup.controls['position'].setValue(position);
 
+      // Seed the opening-hours editor through its input, then render so the
+      // editor's form is populated. saveNewRestaurant reads it back directly —
+      // no intermediate "Save opening hours" click is required.
       const hours: DaySchedule[] = [
         {
           day: 'monday',
@@ -321,12 +317,21 @@ describe('NewRestaurantPageComponent', () => {
           timeRanges: [{ from: '09:00', to: '17:00' }],
         },
       ];
-      component.onOpeningHoursChange(hours);
+      component.openingHours.set(hours);
+      componentRef.changeDetectorRef.detectChanges();
 
       component.saveNewRestaurant();
 
       expect(emitSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ openingHours: hours }),
+        expect.objectContaining({
+          openingHours: expect.arrayContaining([
+            expect.objectContaining({
+              day: 'monday',
+              isOpen: true,
+              timeRanges: [{ from: '09:00', to: '17:00' }],
+            }),
+          ]),
+        }),
       );
     });
   });
@@ -337,6 +342,177 @@ describe('NewRestaurantPageComponent', () => {
       const bite = { id: 'b1' } as Bite;
       component.biteClick.emit(bite);
       expect(emitSpy).toHaveBeenCalledWith(bite);
+    });
+  });
+
+  // Flush pending microtasks (the confirm-dialog promise chain) without
+  // advancing timers, so the leaflet map redraw timer is not triggered.
+  const flushMicrotasks = async (): Promise<void> => {
+    for (let i = 0; i < 5; i++) {
+      await Promise.resolve();
+    }
+  };
+
+  const placeDetailsFixture = (
+    overrides: Partial<PlaceDetails> = {},
+  ): PlaceDetails => ({
+    placeId: 'place-1',
+    name: 'Google Name',
+    description: 'Google About',
+    address: {
+      street: 'Google Street 5',
+      postcode: '99999',
+      city: 'Munich',
+      country: 'Germany',
+    },
+    openingHours: [
+      {
+        day: 'monday',
+        isOpen: true,
+        timeRanges: [{ from: '09:00', to: '17:00' }],
+      },
+    ],
+    ...overrides,
+  });
+
+  describe('openPrefillSelector', () => {
+    it('opens the selector and requests places seeded with name and position', () => {
+      const emitSpy = jest.spyOn(component.requestPrefillPlaces, 'emit');
+      const position: Geopoint = { latitude: 10, longitude: 20 };
+      component.restaurantFormGroup.controls['name'].setValue('My Place');
+      component.restaurantFormGroup.controls['position'].setValue(position);
+
+      component.openPrefillSelector();
+
+      expect(component.isPrefillModalOpen()).toBe(true);
+      expect(emitSpy).toHaveBeenCalledWith({ name: 'My Place', position });
+    });
+
+    it('does not request places when the name is empty', () => {
+      const emitSpy = jest.spyOn(component.requestPrefillPlaces, 'emit');
+
+      component.openPrefillSelector();
+
+      expect(component.isPrefillModalOpen()).toBe(true);
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onGooglePlaceSelected', () => {
+    it('emits the placeId and closes the modal', () => {
+      const emitSpy = jest.spyOn(component.googlePlaceSelected, 'emit');
+      component.isPrefillModalOpen.set(true);
+
+      component.onGooglePlaceSelected({
+        placeId: 'place-42',
+        name: 'X',
+        address: 'addr',
+        position: { latitude: 1, longitude: 2 },
+      });
+
+      expect(emitSpy).toHaveBeenCalledWith('place-42');
+      expect(component.isPrefillModalOpen()).toBe(false);
+    });
+  });
+
+  describe('applying place details', () => {
+    it('fills the prefillable fields on a clean form without a confirm dialog', () => {
+      const alertSpy = jest.spyOn(component['alertController'], 'create');
+      const details = placeDetailsFixture();
+
+      componentRef.setInput('placeDetails', details);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(alertSpy).not.toHaveBeenCalled();
+      expect(component.restaurantFormGroup.controls['name'].value).toBe(
+        'Google Name',
+      );
+      expect(component.restaurantFormGroup.controls['description'].value).toBe(
+        'Google About',
+      );
+      expect(component.restaurantFormGroup.controls['street'].value).toBe(
+        'Google Street 5',
+      );
+      expect(component.restaurantFormGroup.controls['postcode'].value).toBe(
+        '99999',
+      );
+      expect(component.restaurantFormGroup.controls['city'].value).toBe(
+        'Munich',
+      );
+      expect(component.restaurantFormGroup.controls['country'].value).toBe(
+        'Germany',
+      );
+      expect(component.openingHours()).toEqual(details.openingHours);
+    });
+
+    it('never touches the position or image fields', () => {
+      const position: Geopoint = { latitude: 10, longitude: 20 };
+      component.restaurantFormGroup.controls['position'].setValue(position);
+      component.restaurantFormGroup.controls['image'].setValue('img');
+
+      componentRef.setInput('placeDetails', placeDetailsFixture());
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.restaurantFormGroup.controls['position'].value).toEqual(
+        position,
+      );
+      expect(component.restaurantFormGroup.controls['image'].value).toBe('img');
+    });
+
+    it('leaves the About field untouched when Google returns no description', () => {
+      component.restaurantFormGroup.controls['description'].patchValue(
+        'Existing about',
+      );
+
+      componentRef.setInput(
+        'placeDetails',
+        placeDetailsFixture({ description: undefined }),
+      );
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.restaurantFormGroup.controls['description'].value).toBe(
+        'Existing about',
+      );
+    });
+
+    it('shows a confirm dialog before overwriting a dirty field', async () => {
+      const createSpy = jest
+        .spyOn(component['alertController'], 'create')
+        .mockResolvedValue({
+          present: jest.fn().mockResolvedValue(undefined),
+          onDidDismiss: jest.fn().mockResolvedValue({ role: 'cancel' }),
+        } as never);
+
+      component.restaurantFormGroup.controls['name'].setValue('Edited Name');
+      component.restaurantFormGroup.controls['name'].markAsDirty();
+
+      componentRef.setInput('placeDetails', placeDetailsFixture());
+      componentRef.changeDetectorRef.detectChanges();
+      await flushMicrotasks();
+
+      expect(createSpy).toHaveBeenCalled();
+      // Cancel role keeps the edited value.
+      expect(component.restaurantFormGroup.controls['name'].value).toBe(
+        'Edited Name',
+      );
+    });
+
+    it('applies the details when the confirm dialog is accepted', async () => {
+      jest.spyOn(component['alertController'], 'create').mockResolvedValue({
+        present: jest.fn().mockResolvedValue(undefined),
+        onDidDismiss: jest.fn().mockResolvedValue({ role: 'confirm' }),
+      } as never);
+
+      component.restaurantFormGroup.controls['name'].setValue('Edited Name');
+      component.restaurantFormGroup.controls['name'].markAsDirty();
+
+      componentRef.setInput('placeDetails', placeDetailsFixture());
+      componentRef.changeDetectorRef.detectChanges();
+      await flushMicrotasks();
+
+      expect(component.restaurantFormGroup.controls['name'].value).toBe(
+        'Google Name',
+      );
     });
   });
 });

@@ -15,6 +15,7 @@ import {
   Like,
   Link,
   Menu,
+  PlaceDetails,
   PublicUser,
   RemoveBiteFromBucketlistParams,
   Restaurant,
@@ -277,6 +278,10 @@ export class BiteTribeApiService {
 
   async searchNearbyPlaces(position: Geopoint): Promise<GooglePlace[]> {
     return this.biteApiService.searchNearbyPlaces(position);
+  }
+
+  async getPlaceDetails(placeId: string): Promise<PlaceDetails | undefined> {
+    return this.biteApiService.getPlaceDetails(placeId);
   }
 
   async biteById(biteId: string): Promise<Bite> {

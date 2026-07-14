@@ -16,7 +16,9 @@ git diff --name-only
 
 Map changed files to the nearest `project.json`. Project names may contain slashes, for example `bite-tribe/profile` and `bite-tribe/api`; do not infer names by replacing slashes with hyphens.
 
-3. Try focused Nx tests when the project name is known:
+3. For narrow Jest-only library changes, prefer the direct Jest command from the owning project's `jestConfig`. This avoids the recurring Nx daemon/project-graph startup stall while still using the library's real Jest setup.
+
+4. Try focused Nx tests when the project graph behavior itself needs coverage, when the target has no direct equivalent, or when the user explicitly asks for Nx:
 
 ```bash
 NX_DAEMON=false npx nx test "<project-name>" --runInBand
@@ -24,7 +26,9 @@ NX_DAEMON=false npx nx test "<project-name>" --runInBand
 
 Run one Nx target at a time. Parallel Nx runs may block each other on project graph construction.
 
-4. If Nx is silent, hangs, or reports project graph trouble, stop early. Read the touched project `project.json` for `targets.test.options.jestConfig`, then run Jest directly:
+If Nx starts without useful output for roughly 10 seconds, stop it and use the direct command for the touched project. Report that Nx was bypassed because of the recurring silent startup/project-graph stall.
+
+5. If Nx is silent, hangs, or reports project graph trouble, stop early. Read the touched project `project.json` for `targets.test.options.jestConfig`, then run Jest directly:
 
 ```bash
 npx jest --config libs/bite-tribe/profile/page/jest.config.ts --runInBand

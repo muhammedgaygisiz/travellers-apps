@@ -5,6 +5,8 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "jest --config jest.config.cjs --runInBand",
+    "test:emulator:jest": "jest --config jest.emulator.config.cjs --runInBand",
+    "test:emulator": "firebase --config ../firebase.emulator-test.json emulators:exec --project bite-tribe-emulator-tests --only firestore \"npm run test:emulator:jest\"",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",

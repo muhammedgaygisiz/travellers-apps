@@ -51,6 +51,8 @@ export class LoginComponent {
 
   public readonly signup = output();
 
+  public readonly forgotPassword = output<string | null>();
+
   public readonly submitSignupWithGoogle = output();
   public readonly submitSignupWithApple = output();
 
@@ -65,5 +67,9 @@ export class LoginComponent {
 
   public onAppleSignUp(): void {
     this.submitSignupWithApple.emit();
+  }
+
+  public onForgotPassword(): void {
+    this.forgotPassword.emit(this.authFormGroup.controls['email'].value);
   }
 }

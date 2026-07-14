@@ -36,6 +36,12 @@ Before editing code or SSOT content, an agent must:
 
 For analysis-only requests, stop after evidence gathering and report concrete findings without changing files.
 
+## GitHub Operations
+
+Use the authenticated `gh` CLI for GitHub issue, pull request, project, label, and status reads or writes in this repository.
+
+Connector-backed GitHub tools may be used only as supplementary read helpers when they are already available and clearly sufficient, but durable issue or PR updates should go through `gh` so repository permissions match the user's local setup.
+
 ## Traceability Requirement
 
 Every implementation should be traceable through this chain:

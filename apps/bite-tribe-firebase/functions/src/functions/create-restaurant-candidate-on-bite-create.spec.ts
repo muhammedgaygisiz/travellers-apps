@@ -109,9 +109,7 @@ describe('createRestaurantCandidateOnBiteCreate', () => {
     await runTrigger('bite-new', { place: 'Pizza Palace', position: CENTER });
 
     expect(writes).toHaveLength(1);
-    expect(writes[0].path).toBe(
-      'restaurantCandidates/restaurantCandidates-new-id',
-    );
+    expect(writes[0].path).toMatch(/^restaurantCandidates\/pizza-palace-/);
     expect(writes[0].options).toEqual({ merge: true });
     expect(writes[0].data.status).toBe('pending');
     expect(writes[0].data.biteIds).toHaveLength(
@@ -201,6 +199,53 @@ describe('createRestaurantCandidateOnBiteCreate', () => {
     expect((writes[0].data.evidence as { biteCount: number }).biteCount).toBe(
       RESTAURANT_CANDIDATE_EVIDENCE_THRESHOLD + 1,
     );
+  });
+
+  it('stores repeated candidate creation attempts in the same deterministic document', async () => {
+    seed['bites'] = [
+      biteDoc('bite-1', 'Pizza Palace', nearby(1)),
+      biteDoc('bite-2', 'Pizza Palace', nearby(2)),
+      biteDoc('bite-3', 'Pizza Palace', nearby(3)),
+      biteDoc('bite-4', 'Pizza Palace', nearby(4)),
+    ];
+
+    await Promise.all([
+      runTrigger('bite-new', { place: 'Pizza Palace', position: CENTER }),
+      runTrigger('bite-new', { place: 'Pizza Palace', position: CENTER }),
+    ]);
+
+    expect(writes).toHaveLength(2);
+    expect(writes[0].path).toBe(writes[1].path);
+    expect(writes[0].path).toMatch(/^restaurantCandidates\/pizza-palace-/);
+  });
+
+  it('does not reuse verified, merged, or dismissed candidates as pending duplicates', async () => {
+    seed['bites'] = [
+      biteDoc('bite-1', 'Pizza Palace', nearby(1)),
+      biteDoc('bite-2', 'Pizza Palace', nearby(2)),
+      biteDoc('bite-3', 'Pizza Palace', nearby(3)),
+      biteDoc('bite-4', 'Pizza Palace', nearby(4)),
+    ];
+    seed['restaurantCandidates'] = ['verified', 'merged', 'dismissed'].map(
+      (status) => ({
+        id: `candidate-${status}`,
+        data: {
+          name: 'Pizza Palace',
+          normalizedName: 'pizza palace',
+          status,
+          position: nearby(1),
+          geohash: 'geohash-1',
+          biteIds: ['bite-existing'],
+          evidence: { biteCount: 1, placeNames: { 'Pizza Palace': 1 } },
+        },
+      }),
+    );
+
+    await runTrigger('bite-new', { place: 'Pizza Palace', position: CENTER });
+
+    expect(writes).toHaveLength(1);
+    expect(writes[0].path).toMatch(/^restaurantCandidates\/pizza-palace-/);
+    expect(writes[0].path).not.toContain('candidate-');
   });
 
   it('ignores bites without a place name or position', async () => {

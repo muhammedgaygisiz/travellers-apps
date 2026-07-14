@@ -10,6 +10,7 @@ import {
 import {
   RESTAURANT_CANDIDATES_COLLECTION,
   buildCandidateUpdate,
+  buildRestaurantCandidateDocumentId,
   getMatchingBites,
   getNearbyBites,
   getNearbyPendingCandidates,
@@ -98,7 +99,10 @@ export const createRestaurantCandidateOnBiteCreate = onDocumentCreated(
           .firestore()
           .collection(RESTAURANT_CANDIDATES_COLLECTION)
           .doc(pendingDuplicate.item.id)
-      : admin.firestore().collection(RESTAURANT_CANDIDATES_COLLECTION).doc();
+      : admin
+          .firestore()
+          .collection(RESTAURANT_CANDIDATES_COLLECTION)
+          .doc(buildRestaurantCandidateDocumentId(draft));
     const candidateUpdate = buildCandidateUpdate(draft, pendingDuplicate?.item);
 
     await candidateRef.set(candidateUpdate, { merge: true });

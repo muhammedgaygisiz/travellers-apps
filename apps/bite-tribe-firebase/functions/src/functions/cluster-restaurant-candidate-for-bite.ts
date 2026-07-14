@@ -13,6 +13,7 @@ import {
   RESTAURANT_CANDIDATES_COLLECTION,
   RestaurantCandidateMatchSkippedCounts,
   buildCandidateUpdate,
+  buildRestaurantCandidateDocumentId,
   getMatchingBites,
   getNearbyBites,
   getNearbyPendingCandidates,
@@ -121,7 +122,10 @@ export const clusterRestaurantCandidateForBite =
           .firestore()
           .collection(RESTAURANT_CANDIDATES_COLLECTION)
           .doc(pendingDuplicate.item.id)
-      : admin.firestore().collection(RESTAURANT_CANDIDATES_COLLECTION).doc();
+      : admin
+          .firestore()
+          .collection(RESTAURANT_CANDIDATES_COLLECTION)
+          .doc(buildRestaurantCandidateDocumentId(draft));
     const candidateUpdate = buildCandidateUpdate(draft, pendingDuplicate?.item);
 
     await candidateRef.set(candidateUpdate, { merge: true });

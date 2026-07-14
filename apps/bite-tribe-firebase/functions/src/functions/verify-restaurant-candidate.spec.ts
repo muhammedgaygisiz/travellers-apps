@@ -164,4 +164,87 @@ describe('verifyRestaurantCandidate', () => {
       status: 'already-verified',
     });
   });
+
+  it('returns the merged candidate restaurant without creating duplicates', async () => {
+    firestoreMock.runTransaction.mockImplementation((handler) =>
+      handler({
+        get: jest.fn(async (ref: DocRef) => {
+          if (ref.path === 'restaurantCandidates/candidate-1') {
+            return {
+              exists: true,
+              data: (): {
+                status: string;
+                mergedIntoCandidateId: string;
+              } => ({
+                status: 'merged',
+                mergedIntoCandidateId: 'candidate-verified',
+              }),
+            };
+          }
+
+          if (ref.path === 'restaurantCandidates/candidate-verified') {
+            return {
+              exists: true,
+              data: (): { verifiedRestaurantId: string } => ({
+                verifiedRestaurantId: 'restaurant-merged',
+              }),
+            };
+          }
+
+          return { exists: false, data: (): any => undefined };
+        }),
+        create: createMock,
+        update: updateMock,
+      }),
+    );
+
+    const result = await verifyRestaurantCandidate(
+      request({
+        candidateId: 'candidate-1',
+        restaurant: {
+          name: 'Pizza Palace',
+          position: { latitude: 46.948, longitude: 7.4474 },
+        },
+      }),
+    );
+
+    expect(createMock).not.toHaveBeenCalled();
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      restaurantId: 'restaurant-merged',
+      candidateId: 'candidate-1',
+      status: 'already-verified',
+    });
+  });
+
+  it('rejects dismissed candidates without creating a restaurant', async () => {
+    firestoreMock.runTransaction.mockImplementation((handler) =>
+      handler({
+        get: jest.fn(async () => ({
+          exists: true,
+          data: (): { status: string } => ({
+            status: 'dismissed',
+          }),
+        })),
+        create: createMock,
+        update: updateMock,
+      }),
+    );
+
+    await expect(
+      verifyRestaurantCandidate(
+        request({
+          candidateId: 'candidate-1',
+          restaurant: {
+            name: 'Pizza Palace',
+            position: { latitude: 46.948, longitude: 7.4474 },
+          },
+        }),
+      ),
+    ).rejects.toMatchObject({
+      code: 'failed-precondition',
+    });
+    expect(createMock).not.toHaveBeenCalled();
+    expect(updateMock).not.toHaveBeenCalled();
+  });
 });

@@ -289,3 +289,15 @@ export const buildCandidateUpdate = (
         }),
   };
 };
+
+export const buildRestaurantCandidateDocumentId = (
+  draft: RestaurantCandidateDraft,
+): string => {
+  const normalizedName = draft.normalizedName
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 80);
+  const geohashBucket = draft.geohash.slice(0, 7);
+
+  return `${normalizedName || 'restaurant-candidate'}-${geohashBucket}`;
+};

@@ -1,12 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { NewRestaurantService } from '../new-restaurant.service';
 import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
-import { NavController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
-import { Bite, Restaurant } from 'model';
+import { Bite, GooglePlace, PlaceDetails, Restaurant } from 'model';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 jest.mock('bite-tribe-business/restaurant-data-access');
 jest.mock('@capacitor-firebase/firestore');
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: { reRenderOnLangChange: jest.fn() },
+  langChanges$: of(),
+};
 
 describe('NewRestaurantService', () => {
   let service: NewRestaurantService;
@@ -15,6 +23,8 @@ describe('NewRestaurantService', () => {
     navigateForward: jest.Mock;
     navigateBack: jest.Mock;
   };
+  let toastPresent: jest.Mock;
+  let toastControllerMock: { create: jest.Mock };
 
   beforeEach(() => {
     dataAccessMock = {
@@ -25,6 +35,8 @@ describe('NewRestaurantService', () => {
         candidateId: 'candidate-1',
         status: 'created',
       }),
+      searchPlaces: jest.fn().mockResolvedValue([]),
+      getPlaceDetails: jest.fn(),
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
 
     navControllerMock = {
@@ -32,11 +44,18 @@ describe('NewRestaurantService', () => {
       navigateBack: jest.fn(),
     };
 
+    toastPresent = jest.fn().mockResolvedValue(undefined);
+    toastControllerMock = {
+      create: jest.fn().mockResolvedValue({ present: toastPresent }),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         NewRestaurantService,
         { provide: RestaurantDataAccessService, useValue: dataAccessMock },
         { provide: NavController, useValue: navControllerMock },
+        { provide: ToastController, useValue: toastControllerMock },
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 
@@ -88,6 +107,83 @@ describe('NewRestaurantService', () => {
         'bite',
         'bite1',
       ]);
+    });
+  });
+
+  describe('searchPrefillPlaces', () => {
+    it('searches Google places with the candidate name and position', async () => {
+      const position = { latitude: 1, longitude: 2 };
+      const places: GooglePlace[] = [
+        {
+          placeId: 'p1',
+          name: 'Found',
+          address: 'addr',
+          position,
+        },
+      ];
+      dataAccessMock.searchPlaces.mockResolvedValue(places);
+
+      await service.searchPrefillPlaces({ name: 'Trattoria', position });
+
+      expect(dataAccessMock.searchPlaces).toHaveBeenCalledWith(
+        'Trattoria',
+        position,
+      );
+      expect(service.googlePlaces()).toEqual(places);
+      expect(service.googlePlacesLoading()).toBe(false);
+    });
+  });
+
+  describe('searchGooglePlaces', () => {
+    it('reuses the candidate position from the last prefill search', async () => {
+      const position = { latitude: 1, longitude: 2 };
+      await service.searchPrefillPlaces({ name: 'Trattoria', position });
+
+      await service.searchGooglePlaces('Pizzeria');
+
+      expect(dataAccessMock.searchPlaces).toHaveBeenLastCalledWith(
+        'Pizzeria',
+        position,
+      );
+    });
+  });
+
+  describe('loadPlaceDetails', () => {
+    it('stores the loaded place details', async () => {
+      const details: PlaceDetails = {
+        placeId: 'p1',
+        name: 'Found',
+        address: { street: '', postcode: '', city: '', country: '' },
+        openingHours: [],
+      };
+      dataAccessMock.getPlaceDetails.mockResolvedValue(details);
+
+      await service.loadPlaceDetails('p1');
+
+      expect(dataAccessMock.getPlaceDetails).toHaveBeenCalledWith('p1');
+      expect(service.placeDetails()).toEqual(details);
+      expect(service.placeDetailsLoading()).toBe(false);
+      expect(toastControllerMock.create).not.toHaveBeenCalled();
+    });
+
+    it('shows an error toast and leaves details unset when nothing is returned', async () => {
+      dataAccessMock.getPlaceDetails.mockResolvedValue(undefined);
+
+      await service.loadPlaceDetails('p1');
+
+      expect(service.placeDetails()).toBeUndefined();
+      expect(toastControllerMock.create).toHaveBeenCalled();
+      expect(toastPresent).toHaveBeenCalled();
+    });
+
+    it('shows an error toast when the lookup throws', async () => {
+      dataAccessMock.getPlaceDetails.mockRejectedValue(new Error('boom'));
+
+      await service.loadPlaceDetails('p1');
+
+      expect(service.placeDetails()).toBeUndefined();
+      expect(toastControllerMock.create).toHaveBeenCalled();
+      expect(service.placeDetailsLoading()).toBe(false);
     });
   });
 });

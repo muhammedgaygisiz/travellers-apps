@@ -21,6 +21,7 @@ export type * from './lib/create-and-upload-image-callback-params';
 export type * from './lib/bite-trail-rating';
 export type * from './lib/opening-hours';
 export type * from './lib/address';
+export type * from './lib/place-details';
 export type * from './lib/search-result';
 export type * from './lib/google-place';
 export type * from './lib/nearby-restaurant';

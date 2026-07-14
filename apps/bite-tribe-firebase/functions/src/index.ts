@@ -18,6 +18,7 @@ export { searchBites } from './functions/search-bites';
 export { searchBitesByCity } from './functions/search-bites-by-city';
 export { searchRestaurants } from './functions/search-restaurants';
 export { searchPlaces, searchNearbyPlaces } from './functions/search-places';
+export { getPlaceDetails } from './functions/get-place-details';
 export { updateLastSeen } from './functions/update-last-seen';
 export { updateUserMetadata } from './functions/update-user-metadata';
 export { loadBitesByLocation } from './functions/load-bites-by-location';

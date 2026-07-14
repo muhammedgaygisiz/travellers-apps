@@ -67,7 +67,9 @@
     </tbody>
   </table>
 
-  <ion-button class="ion-margin-top" (click)="save()">
-    {{ 'save' | transloco }}
-  </ion-button>
+  @if (showSubmit()) {
+    <ion-button class="ion-margin-top" (click)="save()">
+      {{ 'save' | transloco }}
+    </ion-button>
+  }
 </div>

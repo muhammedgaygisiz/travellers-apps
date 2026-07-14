@@ -68,9 +68,7 @@ describe('OpeningHoursComponent', () => {
       const mondayGroup = component.schedule.at(0);
       expect(mondayGroup.get('isOpen')?.value).toBe(true);
       expect(component.getTimeRanges(0).length).toBe(1);
-      expect(component.getTimeRanges(0).at(0).get('from')?.value).toBe(
-        '10:00',
-      );
+      expect(component.getTimeRanges(0).at(0).get('from')?.value).toBe('10:00');
     });
 
     it('should keep days not in input as closed', () => {
@@ -118,7 +116,10 @@ describe('OpeningHoursComponent', () => {
       const mondayGroup = component.schedule.at(0);
       mondayGroup.patchValue({ isOpen: true });
       component.addTimeRange(0);
-      component.getTimeRanges(0).at(0).patchValue({ from: '09:00', to: '17:00' });
+      component
+        .getTimeRanges(0)
+        .at(0)
+        .patchValue({ from: '09:00', to: '17:00' });
 
       component.save();
 
@@ -130,6 +131,52 @@ describe('OpeningHoursComponent', () => {
             timeRanges: [{ from: '09:00', to: '17:00' }],
           }),
         ]),
+      );
+    });
+  });
+
+  describe('getOpeningHours', () => {
+    it('should return the current schedule without emitting', () => {
+      const emitSpy = jest.spyOn(component.submitOpeningHours, 'emit');
+
+      const mondayGroup = component.schedule.at(0);
+      mondayGroup.patchValue({ isOpen: true });
+      component.addTimeRange(0);
+      component
+        .getTimeRanges(0)
+        .at(0)
+        .patchValue({ from: '09:00', to: '17:00' });
+
+      const result = component.getOpeningHours();
+
+      expect(result).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            day: 'monday',
+            isOpen: true,
+            timeRanges: [{ from: '09:00', to: '17:00' }],
+          }),
+        ]),
+      );
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('showSubmit', () => {
+    // With every day closed by default, the save button is the only ion-button
+    // rendered (add/remove-time-range buttons appear only for open days).
+    it('should render the save button by default', () => {
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelectorAll('ion-button').length).toBe(
+        1,
+      );
+    });
+
+    it('should hide the save button when showSubmit is false', () => {
+      componentRef.setInput('showSubmit', false);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelectorAll('ion-button').length).toBe(
+        0,
       );
     });
   });

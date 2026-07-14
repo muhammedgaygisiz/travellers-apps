@@ -9,8 +9,15 @@ import { NewRestaurantService } from './new-restaurant.service';
     <new-restaurant-page
       class="ion-page"
       [restaurant]="service.restaurantToCreate()"
+      [googlePlaces]="service.googlePlaces()"
+      [googlePlacesLoading]="service.googlePlacesLoading()"
+      [placeDetails]="service.placeDetails()"
+      [placeDetailsLoading]="service.placeDetailsLoading()"
       (submitNewRestaurant)="service.submitNewRestaurant($event)"
       (biteClick)="service.biteClicked($event)"
+      (requestPrefillPlaces)="service.searchPrefillPlaces($event)"
+      (searchGooglePlaces)="service.searchGooglePlaces($event)"
+      (googlePlaceSelected)="service.loadPlaceDetails($event)"
     />
   `,
 })

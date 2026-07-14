@@ -56,6 +56,15 @@ describe('LoginComponent', () => {
     expect(submitSignupWithAppleEmitSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('should emit forgotPassword with the typed email', () => {
+    const forgotPasswordEmitSpy = jest.spyOn(component.forgotPassword, 'emit');
+    component.authFormGroup.controls.email.setValue('test@example.com');
+
+    component.onForgotPassword();
+
+    expect(forgotPasswordEmitSpy).toHaveBeenCalledWith('test@example.com');
+  });
+
   it('should have invalid form when password is empty', () => {
     component.authFormGroup.setValue({
       email: 'test@example.com',

@@ -206,5 +206,11 @@
   "creating-bite": "جارٍ إنشاء الوجبة...",
   "leaderboard": "لوحة المتصدرين",
   "no-leaderboard-users-yet": "لا يوجد مستخدمون في لوحة المتصدرين بعد",
-  "leaderboard-bite-count": "{{ count }} Bites"
+  "leaderboard-bite-count": "{{ count }} Bites",
+  "forgot-password": "نسيت كلمة المرور",
+  "forgot-password-question": "هل نسيت كلمة المرور؟",
+  "send-password-reset-link": "إرسال رابط إعادة تعيين كلمة المرور",
+  "password-reset-requested-check-your-email": "إذا كان هناك حساب لهذا البريد الإلكتروني، فقد أرسلنا رابط إعادة تعيين كلمة المرور.",
+  "password-reset-request-failed-try-again": "تعذر إرسال بريد إعادة التعيين. يرجى المحاولة مرة أخرى.",
+  "back-to-log-in": "العودة إلى تسجيل الدخول"
 }

@@ -198,5 +198,11 @@
   "prefill-confirm-title": "Replace edited fields?",
   "prefill-confirm-message": "Replace the fields you edited with data from Google?",
   "prefill-confirm-replace": "Replace",
-  "prefill-error": "Could not load place details from Google. Please try again."
+  "prefill-error": "Could not load place details from Google. Please try again.",
+  "forgot-password": "Forgot Password",
+  "forgot-password-question": "Forgot password?",
+  "send-password-reset-link": "Send Password Reset Link",
+  "password-reset-requested-check-your-email": "If an account exists for this email, we sent a password reset link.",
+  "password-reset-request-failed-try-again": "We could not send the reset email. Please try again.",
+  "back-to-log-in": "Back to Log In"
 }

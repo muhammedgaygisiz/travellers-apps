@@ -33,6 +33,7 @@ Backend callables validate request.auth where required
 ## Supported Auth Modes
 
 - Email and password.
+- Password reset email for email/password accounts.
 - Google account.
 - Apple account.
 - Email verification.

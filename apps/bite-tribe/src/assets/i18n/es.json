@@ -206,5 +206,11 @@
   "creating-bite": "Creando tu Bite...",
   "leaderboard": "Clasificación",
   "no-leaderboard-users-yet": "Aún no hay usuarios en la clasificación",
-  "leaderboard-bite-count": "{{ count }} Bites"
+  "leaderboard-bite-count": "{{ count }} Bites",
+  "forgot-password": "Olvidaste la contrasena",
+  "forgot-password-question": "Olvidaste la contrasena?",
+  "send-password-reset-link": "Enviar enlace para restablecer",
+  "password-reset-requested-check-your-email": "Si existe una cuenta para este email, enviamos un enlace para restablecer la contrasena.",
+  "password-reset-request-failed-try-again": "No pudimos enviar el email de restablecimiento. Intentalo de nuevo.",
+  "back-to-log-in": "Volver a iniciar sesion"
 }

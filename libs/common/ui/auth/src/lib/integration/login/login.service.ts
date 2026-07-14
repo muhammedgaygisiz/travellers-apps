@@ -26,6 +26,15 @@ export class LoginService {
     await this.navController.navigateForward(['/registration']);
   }
 
+  public async gotoForgotPassword(email: string | null): Promise<void> {
+    const trimmedEmail = email?.trim();
+
+    await this.navController.navigateForward(
+      ['/forgot-password'],
+      trimmedEmail ? { queryParams: { email: trimmedEmail } } : undefined,
+    );
+  }
+
   public loginWithGoogleAccount(): void {
     this.store?.loginWithGoogleAccount();
   }

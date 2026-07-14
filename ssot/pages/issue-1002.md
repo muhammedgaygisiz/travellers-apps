@@ -1,0 +1,61 @@
+- [08 Autofill Restaurant data from Google Places](https://github.com/muhammedgaygisiz/travellers-apps/issues/1002) (Issue \#1002)
+- Description
+  - Parent: \#778
+  - \#\# Summary
+  - When a restaurant candidate is clicked in the business app and the create-restaurant page opens, the operator can prefill the form from Google Places. A button **"Prefill from Google Places"** opens the existing restaurant selector (reused from the create-bite flow), seeded with the candidate's name and position. The operator picks the matching place; a new Place Details lookup then fills **name, About, address, and opening hours**. The page layout also moves to two columns with opening hours above the bite list.
+  - \#\# User flow
+  - 1. Operator clicks a restaurant candidate → create-restaurant page opens (prefilled with candidate name + position, as today).
+  - 2. Operator clicks **"Prefill from Google Places"**.
+  - 3. The existing restaurant selector (`common/ui/restaurant-selector`) opens, pre-seeded with a text search for the candidate name, biased by the candidate position (existing `searchPlaces` callable).
+  - 4. Operator picks a place → `googlePlaceSelected` provides the `placeId`.
+  - 5. A new callable `getPlaceDetails(placeId)` fetches the detail fields.
+  - 6. If any prefillable form field is dirty (operator already edited it), show a confirm dialog ("Replace edited fields with Google data?") before applying. Clean form → apply directly.
+  - 7. Form fields are filled. Picking a different place later repeats the same flow (including the confirm when dirty).
+  - \#\# Field mapping
+  - Name ← `displayName.text`; overwrite (after confirm when dirty).
+  - About ← `editorialSummary.text`; fill if present; if Google has none, leave the field untouched.
+  - Street ← `addressComponents`: `route` + `street_number`; overwrite.
+  - Postcode ← `addressComponents`: `postal_code`; overwrite.
+  - City ← `addressComponents`: `locality` (fallback `postal_town`); overwrite.
+  - Country ← `addressComponents`: `country` (long name); overwrite.
+  - Opening hours ← `regularOpeningHours.periods` mapped to `DaySchedule[]`; overwrite; see mapping rules below.
+  - Position ← never touched; the candidate's clustered position stays ground truth.
+  - Image ← out of scope for v1 (Google Places photo ToS/attribution); operator uploads their own.
+  - \#\#\# Opening hours mapping rules
+  - Map `periods` to `DaySchedule[]` (`day`, `isOpen`, `timeRanges: {from, to}[]`).
+  - Overnight ranges split at midnight: Fri 18:00–02:00 → Fri `18:00–23:59` + Sat `00:00–02:00`.
+  - 24h open → single range `00:00–23:59` for that day.
+  - Multiple periods per day → multiple `timeRanges` entries (model already supports this).
+  - Days without periods → `isOpen: false`, empty `timeRanges`.
+  - Prefetched hours must be displayed in the opening-hours editor: bind the existing `openingHours` input of `OpeningHoursComponent` (currently the page only listens to `submitOpeningHours`).
+  - \#\# Backend
+  - New callable `getPlaceDetails` in `apps/bite-tribe-firebase/functions`, following the `searchPlaces` pattern (`onAppCheck`, `GOOGLE_GEOCODING_API_KEY` secret, auth required, warn-and-degrade on Google errors).
+  - Endpoint: `GET https://places.googleapis.com/v1/places/{placeId}`
+  - Field mask (exact, keep it minimal — cost is per-field SKU): `id,displayName,editorialSummary,addressComponents,regularOpeningHours`
+  - No `photos` in the mask (image is out of scope).
+  - Validate `placeId` is a non-empty string; return a mapped, app-shaped result (address already parsed into street/postcode/city/country, hours already mapped to `DaySchedule[]`) so the mapping logic lives server-side next to its tests.
+  - Register in `functions/src/index.ts`; add `get-place-details.spec.ts` covering the address-component parsing and all opening-hours edge cases above.
+  - \#\# Layout changes
+  - Two columns from the `lg` breakpoint (≥992px): form fields + opening hours in the left column, map + bite list in the right column.
+  - Below `lg`: single column, order: form fields → opening hours → map → bites.
+  - Opening hours always come before the bite list (both layouts).
+  - Bite list gets top spacing to the element above it (currently touches the map).
+  - Storybook: add the first story for the new-restaurant page (`__specs__`), covering the two-column and stacked variants, per the shared-UI layout rule in AGENTS.md.
+  - \#\# UX details
+  - Button shows a loading state while the details call runs.
+  - If the details call fails or returns nothing usable, show an error toast and leave the form unchanged.
+  - All new visible copy via Transloco keys in the business app locale (`en.json`): button label, confirm dialog title/message/actions, error toast.
+  - \#\# Out of scope / future
+  - Prefilling the restaurant image from Google Places photos (ToS + attribution + upload-pipeline work; revisit deliberately if ever).
+  - Persisting `placeId` on bites/candidates at creation time to make matching deterministic (would remove the manual pick for future candidates).
+  - Storing the chosen `placeId` on the created restaurant for later re-sync.
+  - \#\# Acceptance criteria
+  - "Prefill from Google Places" button on the create-restaurant page opens the restaurant selector seeded with candidate name + position.
+  - Picking a place fills name, About (when available), street/postcode/city/country, and opening hours; position and image are untouched.
+  - Confirm dialog appears before overwriting when any prefillable field was edited; clean form fills without a dialog.
+  - Overnight/24h/multi-period opening hours map per the rules above and appear inside the opening-hours editor.
+  - `getPlaceDetails` callable with the exact field mask above, registered and covered by a spec file.
+  - Two-column layout ≥992px, stacked below; opening hours before bites in both; bite list has top spacing.
+  - Storybook story for the page layout variants.
+  - New copy behind Transloco keys.
+  - Traceability: this issue is linked from [[epic-778]].

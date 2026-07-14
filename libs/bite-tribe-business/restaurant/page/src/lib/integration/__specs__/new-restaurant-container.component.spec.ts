@@ -8,7 +8,9 @@ import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('heic2any', () => jest.fn());
-jest.mock('image-compression', () => ({ compressFile: jest.fn((f: File) => Promise.resolve(f)) }));
+jest.mock('image-compression', () => ({
+  compressFile: jest.fn((f: File) => Promise.resolve(f)),
+}));
 
 addNecessaryIcons();
 
@@ -28,7 +30,18 @@ describe(NewRestaurantContainer.name, () => {
         provideIonicAngular(),
         {
           provide: NewRestaurantService,
-          useValue: { restaurantToCreate: signal(undefined), submitNewRestaurant: jest.fn(), biteClicked: jest.fn() },
+          useValue: {
+            restaurantToCreate: signal(undefined),
+            googlePlaces: signal([]),
+            googlePlacesLoading: signal(false),
+            placeDetails: signal(undefined),
+            placeDetailsLoading: signal(false),
+            submitNewRestaurant: jest.fn(),
+            biteClicked: jest.fn(),
+            searchPrefillPlaces: jest.fn(),
+            searchGooglePlaces: jest.fn(),
+            loadPlaceDetails: jest.fn(),
+          },
         },
         { provide: TranslocoService, useValue: MockTranslocoService },
       ],

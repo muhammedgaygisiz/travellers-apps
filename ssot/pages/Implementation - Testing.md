@@ -8,10 +8,11 @@ Testing should prove the changed contract with the smallest reliable command.
 
 1. Identify touched projects with `git diff --name-only`.
 2. Read the nearest `project.json` for the actual Nx project name.
-3. Run focused Nx tests when the project graph behaves.
-4. Fall back to direct Jest when Nx is silent, slow, or blocked by project graph issues.
-5. Run specialized validation for Firebase Functions, locale JSON, Storybook, or native sync when the touched files require it.
-6. Finish with `git diff --check`.
+3. For narrow Jest-only library changes, prefer the direct Jest command from the owning project's `jestConfig`.
+4. Run focused Nx tests when the project graph behavior itself needs coverage or when a target has no direct equivalent.
+5. Fall back to direct Jest when Nx is silent, slow, or blocked by project graph issues.
+6. Run specialized validation for Firebase Functions, locale JSON, Storybook, or native sync when the touched files require it.
+7. Finish with `git diff --check`.
 
 ## Focused Nx Test
 
@@ -21,9 +22,13 @@ NX_DAEMON=false npx nx test "<project-name>" --runInBand
 
 Run one Nx target at a time.
 
+If Nx starts without useful output for roughly 10 seconds, stop it and use the direct command for the touched project. Report that Nx was bypassed because of the recurring silent startup/project-graph stall.
+
 ## Direct Jest Fallback
 
 Read the touched project's `project.json`, then run its Jest config directly.
+
+For small Angular/Ionic library edits, this direct Jest path is acceptable as the primary validation command. It preserves the project's Jest transform/setup while avoiding the recurring Nx daemon/project-graph startup stall.
 
 Examples:
 

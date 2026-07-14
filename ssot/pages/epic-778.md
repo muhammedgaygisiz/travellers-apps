@@ -83,14 +83,17 @@
   - ```text
 
     ```
+
   - restaurantCandidates/{candidateId}
   - ```
 
     ```
+
   - Suggested fields:
   - ```ts
 
     ```
+
   - {
   - suggestedName: string;
   - normalizedName: string;
@@ -111,6 +114,7 @@
   - ```
 
     ```
+
   - Candidate links are unidirectional: the candidate references Bites through `biteIds`, but Bites should not be updated with `restaurantCandidateId`.
   - Bites should only receive a `restaurantId` when a user confirms an existing verified restaurant match or when a business user verifies a candidate into a real restaurant.
   - Do not create menus for candidates during automatic detection or manual clustering. Menus should be created only when a business user verifies/saves the restaurant.
@@ -154,6 +158,8 @@
   - Focused Angular/Jest checks should cover Bite creation prompt behavior and business dashboard candidate routing.
   - Focused migration-page checks should cover eligible Bite listing and manual cluster action wiring.
   - Emulator verification should seed nearby Bites, manual backfill candidates, duplicate conditions, and confirmed restaurant matches to prove Firestore state transitions.
+
 - Related issues
   - [07 - feat: create restaurant candidates from new bite trigger]([[issue-944]]) (Issue \#944)
   - [08 - test: harden restaurant candidate duplicate and idempotency paths]([[issue-945]]) (Issue \#945)
+  - [08 Autofill Restaurant data from Google Places]([[issue-1002]]) (Issue \#1002)

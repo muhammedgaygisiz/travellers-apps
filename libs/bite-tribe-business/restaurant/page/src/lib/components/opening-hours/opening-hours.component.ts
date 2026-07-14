@@ -47,6 +47,14 @@ export class OpeningHoursComponent {
 
   openingHours = input<DaySchedule[]>();
 
+  /**
+   * Shows the standalone "Save" button. The edit-restaurant page persists
+   * opening hours on their own via {@link submitOpeningHours}, so it keeps the
+   * button. The create page submits everything through its own single Save and
+   * reads the schedule back via {@link getOpeningHours}, so it hides it.
+   */
+  readonly showSubmit = input<boolean>(true);
+
   readonly submitOpeningHours = output<DaySchedule[]>();
 
   readonly form = this.formBuilder.group({
@@ -107,9 +115,10 @@ export class OpeningHoursComponent {
     this.getTimeRanges(dayIndex).removeAt(rangeIndex);
   }
 
-  save(): void {
+  /** Returns the current schedule. Read by the create page at save time. */
+  getOpeningHours(): DaySchedule[] {
     const scheduleValue = this.form.value.schedule ?? [];
-    const result: DaySchedule[] = scheduleValue.map((entry: any) => ({
+    return scheduleValue.map((entry: any) => ({
       day: entry.day,
       isOpen: entry.isOpen ?? false,
       timeRanges: (entry.timeRanges ?? []).map((r: any) => ({
@@ -117,6 +126,9 @@ export class OpeningHoursComponent {
         to: r.to ?? '',
       })),
     }));
-    this.submitOpeningHours.emit(result);
+  }
+
+  save(): void {
+    this.submitOpeningHours.emit(this.getOpeningHours());
   }
 }

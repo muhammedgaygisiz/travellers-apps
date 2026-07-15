@@ -94,13 +94,13 @@ describe('LoginContainerComponent', () => {
     );
   });
 
-  it('should call loginWithGoogleAccount on service when onSignupWithGoogle is called', () => {
-    component.onSignupWithGoogle();
+  it('should call loginWithGoogleAccount on service when onLoginWithGoogle is called', () => {
+    component.onLoginWithGoogle();
     expect(mockLoginService.loginWithGoogleAccount).toHaveBeenCalled();
   });
 
-  it('should call loginWithAppleAccount on service when onSignupWithApple is called', () => {
-    component.onSignupWithApple();
+  it('should call loginWithAppleAccount on service when onLoginWithApple is called', () => {
+    component.onLoginWithApple();
     expect(mockLoginService.loginWithAppleAccount).toHaveBeenCalled();
   });
 

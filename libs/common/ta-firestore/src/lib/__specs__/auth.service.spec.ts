@@ -423,7 +423,7 @@ describe(AuthService.name, () => {
     });
   });
 
-  describe('registerWithGoogleAccount', () => {
+  describe('signInWithGoogleAccount', () => {
     beforeEach(() => {
       jest
         .spyOn(FirebaseAuthentication, 'signInWithGoogle')
@@ -431,7 +431,7 @@ describe(AuthService.name, () => {
     });
 
     it('should call signInWithGoogle with popup mode', async () => {
-      const result = await service.registerWithGoogleAccount();
+      const result = await service.signInWithGoogleAccount();
 
       expect(FirebaseAuthentication.signInWithGoogle).toHaveBeenCalledWith({
         mode: 'popup',
@@ -440,7 +440,7 @@ describe(AuthService.name, () => {
     });
   });
 
-  describe('registerWithAppleAccount', () => {
+  describe('signInWithAppleAccount', () => {
     beforeEach(() => {
       jest
         .spyOn(FirebaseAuthentication, 'signInWithApple')
@@ -448,7 +448,7 @@ describe(AuthService.name, () => {
     });
 
     it('should call signInWithApple with popup mode', async () => {
-      const result = await service.registerWithAppleAccount();
+      const result = await service.signInWithAppleAccount();
 
       expect(FirebaseAuthentication.signInWithApple).toHaveBeenCalledWith({
         mode: 'popup',

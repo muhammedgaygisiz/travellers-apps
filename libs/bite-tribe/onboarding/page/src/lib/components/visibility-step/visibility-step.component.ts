@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   input,
+  linkedSignal,
   output,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -28,7 +29,18 @@ export class VisibilityStepComponent {
   selectedPublic = input<boolean | null>(false);
   visibilityChange = output<boolean>();
 
+  /**
+   * Local mirror of the selection so the highlight and checked state update the
+   * instant the user clicks, without waiting for the choice to round-trip back
+   * through the parent. It re-syncs whenever the `selectedPublic` input changes,
+   * so external updates still win.
+   */
+  protected readonly isPublicSelected = linkedSignal(
+    () => this.selectedPublic() === true,
+  );
+
   selectVisibility(isPublic: boolean): void {
+    this.isPublicSelected.set(isPublic);
     this.visibilityChange.emit(isPublic);
   }
 }

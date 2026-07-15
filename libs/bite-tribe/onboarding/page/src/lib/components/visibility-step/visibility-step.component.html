@@ -17,14 +17,14 @@
   >
     <label
       class="visibility-option"
-      [class.visibility-option--selected]="selectedPublic() !== true"
+      [class.visibility-option--selected]="!isPublicSelected()"
       data-testid="onboarding-visibility-private"
     >
       <input
         type="radio"
         class="visibility-option__input"
         name="onboarding-visibility"
-        [checked]="selectedPublic() !== true"
+        [checked]="!isPublicSelected()"
         (click)="selectVisibility(false)"
         (change)="selectVisibility(false)"
       />
@@ -37,14 +37,14 @@
 
     <label
       class="visibility-option"
-      [class.visibility-option--selected]="selectedPublic() === true"
+      [class.visibility-option--selected]="isPublicSelected()"
       data-testid="onboarding-visibility-public"
     >
       <input
         type="radio"
         class="visibility-option__input"
         name="onboarding-visibility"
-        [checked]="selectedPublic() === true"
+        [checked]="isPublicSelected()"
         (click)="selectVisibility(true)"
         (change)="selectVisibility(true)"
       />

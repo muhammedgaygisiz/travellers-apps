@@ -1,0 +1,58 @@
+<div class="visibility-step">
+  <p class="onboarding-step-copy">
+    {{ 'onboarding-visibility-copy' | transloco }}
+  </p>
+
+  <ul class="visibility-step__benefits">
+    <li>{{ 'onboarding-visibility-benefit-leaderboard' | transloco }}</li>
+    <li>{{ 'onboarding-visibility-benefit-followers' | transloco }}</li>
+    <li>{{ 'onboarding-visibility-benefit-trust' | transloco }}</li>
+  </ul>
+
+  <div
+    class="visibility-step__choices"
+    role="radiogroup"
+    [attr.aria-label]="'onboarding-visibility-copy' | transloco"
+    data-testid="onboarding-visibility-choice"
+  >
+    <label
+      class="visibility-option"
+      [class.visibility-option--selected]="selectedPublic() !== true"
+      data-testid="onboarding-visibility-private"
+    >
+      <input
+        type="radio"
+        class="visibility-option__input"
+        name="onboarding-visibility"
+        [checked]="selectedPublic() !== true"
+        (click)="selectVisibility(false)"
+        (change)="selectVisibility(false)"
+      />
+      <span class="visibility-option__indicator" aria-hidden="true"></span>
+      <span class="visibility-option__label">
+        <strong>{{ 'onboarding-visibility-private-title' | transloco }}</strong>
+        <span>{{ 'onboarding-visibility-private-copy' | transloco }}</span>
+      </span>
+    </label>
+
+    <label
+      class="visibility-option"
+      [class.visibility-option--selected]="selectedPublic() === true"
+      data-testid="onboarding-visibility-public"
+    >
+      <input
+        type="radio"
+        class="visibility-option__input"
+        name="onboarding-visibility"
+        [checked]="selectedPublic() === true"
+        (click)="selectVisibility(true)"
+        (change)="selectVisibility(true)"
+      />
+      <span class="visibility-option__indicator" aria-hidden="true"></span>
+      <span class="visibility-option__label">
+        <strong>{{ 'onboarding-visibility-public-title' | transloco }}</strong>
+        <span>{{ 'onboarding-visibility-public-copy' | transloco }}</span>
+      </span>
+    </label>
+  </div>
+</div>

@@ -5,12 +5,17 @@ import type { PageMenuTarget } from 'common/ui/page';
 import type { Bite, LikeClick, PublicUser } from 'model';
 import { PATH } from 'utils';
 import { Location } from '@angular/common';
+import {
+  EmailVerificationService,
+  type EmailVerificationSurface,
+} from 'bite-tribe/email-verification-data-access';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private readonly dataAccess = inject(ProfileDataAccessService);
   private readonly navController = inject(NavController);
   private readonly location = inject(Location);
+  private readonly emailVerification = inject(EmailVerificationService);
 
   isAuthenticated = this.dataAccess.isAuthenticated;
   myUser = this.dataAccess.myUser;
@@ -22,6 +27,7 @@ export class ProfileService {
   myBiteTrails = this.dataAccess.myBiteTrails;
   isPublicProfile = this.dataAccess.isPublicProfile;
   profileMetadata = this.dataAccess.profileMetadata;
+  emailVerificationPromptVisible = this.emailVerification.promptVisible;
 
   logout(): void {
     this.dataAccess.logout();
@@ -92,5 +98,13 @@ export class ProfileService {
 
   gotoFollowing(userId: string): void {
     this.navController.navigateForward([PATH.FOLLOWERS, userId, 'following']);
+  }
+
+  trackEmailVerificationPromptShown(surface: EmailVerificationSurface): void {
+    this.emailVerification.trackPromptShown(surface);
+  }
+
+  resendEmailVerification(surface: EmailVerificationSurface): Promise<void> {
+    return this.emailVerification.resend(surface);
   }
 }

@@ -485,6 +485,46 @@ describe(ProfileApiService.name, () => {
     });
   });
 
+  describe('syncEmailVerificationStatus', () => {
+    it('should call syncEmailVerificationStatus firebase function and return metadata', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const metadata = {
+          emailVerified: false,
+          emailVerificationRequired: true,
+          emailVerificationProvider: 'password',
+        } as const;
+        jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+          data: metadata,
+        });
+
+        const result = await service.syncEmailVerificationStatus();
+
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'syncEmailVerificationStatus',
+        });
+        expect(result).toEqual(metadata);
+      },
+    ));
+  });
+
+  describe('resendEmailVerification', () => {
+    it('should call resendEmailVerification firebase function', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+          data: { status: 'sent' },
+        });
+
+        await service.resendEmailVerification();
+
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'resendEmailVerification',
+        });
+      },
+    ));
+  });
+
   describe('getUserByBiteId', () => {
     describe('given no bite', () => {
       it('should return empty observable', inject(

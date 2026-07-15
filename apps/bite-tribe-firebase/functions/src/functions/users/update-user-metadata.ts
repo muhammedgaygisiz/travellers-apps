@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { buildEmailVerificationMetadata } from './email-verification-utils';
 
 interface UpdateUserMetadataRequest {
   version?: string;
@@ -38,10 +39,13 @@ export const updateUserMetadata = onAppCheck<UpdateUserMetadataRequest>(
 
     const appVersion = toOptionalString(request.data?.version);
     const appBuildNumber = toOptionalString(request.data?.buildNumber);
+    const authUser = await admin.auth().getUser(request.auth.uid);
     const userUpdate: admin.firestore.UpdateData<admin.firestore.DocumentData> =
       {
         lastSeen: new Date().toISOString(),
         lastSeenTimestamp: Date.now(),
+        email: authUser.email || userSnapshot.data()?.['email'] || '',
+        ...buildEmailVerificationMetadata(authUser, userSnapshot.data() || {}),
       };
 
     if (appVersion) {

@@ -58,6 +58,9 @@
       "bite-tribe/details-data-access": [
         "libs/bite-tribe/details/data-access/src/index.ts"
       ],
+      "bite-tribe/email-verification-data-access": [
+        "libs/bite-tribe/email-verification/data-access/src/index.ts"
+      ],
       "bite-tribe/followers": ["libs/bite-tribe/followers/page/src/index.ts"],
       "bite-tribe/followers-data-access": [
         "libs/bite-tribe/followers/data-access/src/index.ts"

@@ -25,6 +25,7 @@ A Bite without creator context is weaker because BiteTribe depends on human food
 - A User can rate a BiteTrail once.
 - A User can represent an individual, organisation, or restaurant-like profile.
 - Public profile quality affects trust in Bites and BiteTrails.
+- Email/password users should verify their email address; linked Google or Apple provider accounts are treated as trusted for this lifecycle.
 
 ## Required Data
 
@@ -56,6 +57,14 @@ Current profile model fields:
 - `lastSeenTimestamp`
 - `appVersion`
 - `appBuildNumber`
+- `emailVerified`
+- `emailVerificationRequired`
+- `emailVerificationProvider`
+- `emailVerificationReminderCount`
+- `emailVerificationLastSentAt`
+- `emailVerificationLastSentAtTimestamp`
+- `emailVerificationManualLastSentAt`
+- `emailVerificationManualLastSentAtTimestamp`
 
 ## Relationships
 
@@ -96,6 +105,8 @@ Current implementation notes:
 - Profile images can be uploaded and mirrored into Firebase-backed URLs.
 - `updateLastSeen` remains available as the legacy backend callable for older app versions.
 - `updateUserMetadata` records the latest activity timestamp plus reported app version/build number for current app versions.
+- Email verification metadata is stored on the public user document so the app can show non-blocking prompts and other users can see whether the profile email is verified.
+- Email verification reminders are only required for email/password accounts without a trusted linked provider.
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
 
@@ -127,6 +138,7 @@ Supported today:
 - Search users by display name, full name, or email.
 - Update last seen.
 - Track latest reported app version and build number.
+- Show and resend email verification prompts for eligible email/password accounts.
 - Show bite count in leaderboard.
 - Show contribution badges on profile.
 - Receive ranking-change notifications.
@@ -175,6 +187,9 @@ Cloud Functions:
 createUserOnAuthCreate
 updateLastSeen
 updateUserMetadata
+syncEmailVerificationStatus
+resendEmailVerification
+sendEmailVerificationReminders
 searchUsers
 loadLeaderboard
 incrementBiteCountOnBiteCreate

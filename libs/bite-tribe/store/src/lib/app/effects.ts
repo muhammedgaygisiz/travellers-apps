@@ -14,7 +14,7 @@ import {
 } from 'rxjs';
 import { NavController, Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { fromAuth } from 'ta-firestore';
+import { AnalyticsEvent, AnalyticsService, fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { isBase64String, PATH } from 'utils';
@@ -36,6 +36,7 @@ export class AppEffect {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly store = inject(Store);
   private readonly navController = inject(NavController);
+  private readonly analytics = inject(AnalyticsService);
 
   private readonly userId = toSignal(this.store.select(userId));
 
@@ -115,6 +116,7 @@ export class AppEffect {
         stopIfUserIsUndefined(),
         tap(() => {
           void this.api.updateUserMetadata();
+          void this.syncEmailVerificationStatus('app_start');
         }),
       );
     },
@@ -132,6 +134,38 @@ export class AppEffect {
     },
     { dispatch: false },
   );
+
+  syncEmailVerificationStatus$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(AppActions.syncEmailVerificationStatus),
+        tap(() => {
+          void this.syncEmailVerificationStatus('app_resume');
+        }),
+      );
+    },
+    { dispatch: false },
+  );
+
+  private async syncEmailVerificationStatus(
+    source: 'app_start' | 'app_resume',
+  ): Promise<void> {
+    try {
+      const metadata = await this.api.syncEmailVerificationStatus();
+      this.store.dispatch(
+        AppActions.syncedEmailVerificationStatus({ metadata }),
+      );
+      this.analytics.logEvent(AnalyticsEvent.EmailVerificationSynced, {
+        verified: !!metadata.emailVerified,
+        source,
+      });
+    } catch (error) {
+      console.warn(
+        `Error syncing email verification status (${source}):`,
+        error,
+      );
+    }
+  }
 
   saveProfileToFirestore$ = createEffect(() => {
     return this.actions$.pipe(

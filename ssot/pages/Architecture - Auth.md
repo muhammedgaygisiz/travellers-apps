@@ -29,6 +29,9 @@ Backend callables validate request.auth where required
 - `createUserOnAuthCreate` initializes profile-related backend behavior.
 - `updateLastSeen` records activity through a legacy callable for older app versions.
 - `updateUserMetadata` records current app activity and client version/build metadata through a callable.
+- `syncEmailVerificationStatus` mirrors Firebase Auth verification state into the public user document on app start/resume.
+- `resendEmailVerification` lets eligible email/password users request a Firebase email verification link through the backend.
+- `sendEmailVerificationReminders` sends monthly backend reminders for eligible unverified email/password accounts.
 
 ## Supported Auth Modes
 
@@ -38,6 +41,8 @@ Backend callables validate request.auth where required
 - Apple account.
 - Email verification.
 - Logout.
+
+Email verification is non-blocking. Password-only accounts require verification prompts and reminders; accounts with trusted Google or Apple provider links are considered verified enough for this lifecycle. Unknown provider combinations are logged but do not receive automatic reminders.
 
 ## Code Anchors
 
@@ -51,6 +56,9 @@ libs/bite-tribe-business/shell/src/lib/routes.ts
 apps/bite-tribe-firebase/functions/src/functions/create-user-on-auth-create.ts
 apps/bite-tribe-firebase/functions/src/functions/update-last-seen.ts
 apps/bite-tribe-firebase/functions/src/functions/update-user-metadata.ts
+apps/bite-tribe-firebase/functions/src/functions/users/resend-email-verification.ts
+apps/bite-tribe-firebase/functions/src/functions/users/sync-email-verification-status.ts
+apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-reminders.ts
 ```
 
 ## Current Limitations

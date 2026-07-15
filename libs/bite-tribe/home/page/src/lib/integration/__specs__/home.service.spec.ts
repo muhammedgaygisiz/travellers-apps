@@ -4,6 +4,13 @@ import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { Bite, Like } from 'model';
 import SpyInstance = jest.SpyInstance;
+import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
+
+const emailVerificationMock = {
+  promptVisible: jest.fn(() => false),
+  trackPromptShown: jest.fn(),
+  resend: jest.fn().mockResolvedValue(undefined),
+};
 
 class Mock {
   sortedHomeBites = (): never[] => [];
@@ -38,10 +45,15 @@ describe('HomeService', () => {
   let navController: NavController;
 
   beforeEach(() => {
+    emailVerificationMock.promptVisible.mockReturnValue(false);
+    emailVerificationMock.trackPromptShown.mockReset();
+    emailVerificationMock.resend.mockReset().mockResolvedValue(undefined);
+
     TestBed.configureTestingModule({
       providers: [
         { provide: HomeDataAccessService, useClass: Mock },
         { provide: NavController, useClass: Mock },
+        { provide: EmailVerificationService, useValue: emailVerificationMock },
       ],
     }).compileComponents();
     homeDataAccessService = TestBed.inject(HomeDataAccessService);
@@ -331,6 +343,31 @@ describe('HomeService', () => {
     ));
   });
 
+  describe('onMenuNavigate', () => {
+    let navigateForwardSpy: SpyInstance;
+
+    beforeEach(() => {
+      navigateForwardSpy = jest.spyOn(navController, 'navigateForward');
+    });
+
+    it.each([
+      ['settings', ['settings']],
+      ['profile', ['my-profile']],
+      ['my-bites', ['my-bites']],
+      ['my-bucketlists', ['my-bucketlists']],
+      ['about', ['about']],
+      ['market-place', ['market-place']],
+      ['gallery', ['gallery']],
+      ['leaderboard', ['leaderboard']],
+    ] as const)('should navigate for menu target %s', (target, route) => {
+      const service = TestBed.inject(HomeService);
+
+      service.onMenuNavigate(target);
+
+      expect(navigateForwardSpy).toHaveBeenCalledWith(route);
+    });
+  });
+
   describe('sortingChange', () => {
     let setHomeSortingSpy: SpyInstance;
 
@@ -524,6 +561,37 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.onGotoMyProfileClick();
         expect(navigateForwardSpy).toHaveBeenCalledWith(['my-profile']);
+      },
+    ));
+  });
+
+  describe('email verification', () => {
+    it('should expose the shared prompt-visible signal', inject(
+      [HomeService],
+      (service: HomeService) => {
+        expect(service.emailVerificationPromptVisible).toBe(
+          emailVerificationMock.promptVisible,
+        );
+      },
+    ));
+
+    it('should delegate prompt tracking to the email verification service', inject(
+      [HomeService],
+      (service: HomeService) => {
+        service.trackEmailVerificationPromptShown('home');
+
+        expect(emailVerificationMock.trackPromptShown).toHaveBeenCalledWith(
+          'home',
+        );
+      },
+    ));
+
+    it('should delegate resend to the email verification service', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        await service.resendEmailVerification('home');
+
+        expect(emailVerificationMock.resend).toHaveBeenCalledWith('home');
       },
     ));
   });

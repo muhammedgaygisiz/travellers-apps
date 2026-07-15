@@ -212,5 +212,16 @@
   "send-password-reset-link": "Send reset link",
   "password-reset-requested-check-your-email": "If an account exists for this email, we've sent a password reset link.",
   "password-reset-request-failed-try-again": "We couldn't send the reset email. Please try again.",
+  "verify-your-email-address": "Verify your email address",
+  "verify-your-email-address-body": "Please verify your email address so your account stays secure and you can receive important account messages.",
+  "resend-email": "Resend email",
+  "resend-verification-email": "Resend verification email",
+  "email-verified": "Email verified",
+  "email-not-verified": "Email not verified",
+  "verification-email-sent-check-your-inbox": "Verification email sent. Please check your inbox.",
+  "please-wait-before-requesting-another-verification-email": "Please wait before requesting another verification email.",
+  "verification-email-could-not-be-sent": "We couldn't send the verification email. Please try again.",
+  "email-already-verified": "Your email address is already verified.",
+  "email-verification-not-available": "Email verification isn't available for this account.",
   "back-to-log-in": "Back to log in"
 }

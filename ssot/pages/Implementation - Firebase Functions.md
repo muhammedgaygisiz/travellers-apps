@@ -13,18 +13,18 @@ apps/bite-tribe-firebase/functions/src/index.ts
 
 ## Current Function Areas
 
-| Area           | Examples                                                                                                                                        |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Auth           | `create-user-on-auth-create.ts`, `update-last-seen.ts`, `update-user-metadata.ts`                                                               |
-| Search         | `search-bites.ts`, `search-bites-by-city.ts`, `search-restaurants.ts`, `search-users.ts`, `search-places.ts`                                    |
-| Discovery      | `load-bites-by-location.ts`, `load-leaderboard.ts`                                                                                              |
-| Enrichment     | `enrich-bite-address-on-create.ts`, `backfillBiteAddress`, `get-currency-by-position.ts`                                                        |
-| Aggregates     | `increment-bite-count-on-bite-create.ts`, `resync-bite-counts.ts`, `update-bite-like-count-on-like-write.ts`                                    |
-| Storage        | `set-bite-image-path-on-upload.ts`                                                                                                              |
-| Notifications  | `notify-bite-creator-on-like.ts`, `notify-followers-on-new-bite.ts`, `notify-user-on-new-follower.ts`, `send-daily-leaderboard-notification.ts` |
-| Restaurants    | `cluster-restaurant-candidate-for-bite.ts`, `create-restaurant-candidate-on-bite-create.ts`, `verify-restaurant-candidate.ts`                   |
-| Scheduled jobs | `send-weekly-bite-notification.ts`                                                                                                              |
-| Deep links     | `handle-shared-link-to-bite.ts`                                                                                                                 |
+| Area           | Examples                                                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Auth           | `create-user-on-auth-create.ts`, `update-last-seen.ts`, `update-user-metadata.ts`, `sync-email-verification-status.ts`, `resend-email-verification.ts` |
+| Search         | `search-bites.ts`, `search-bites-by-city.ts`, `search-restaurants.ts`, `search-users.ts`, `search-places.ts`                                           |
+| Discovery      | `load-bites-by-location.ts`, `load-leaderboard.ts`                                                                                                     |
+| Enrichment     | `enrich-bite-address-on-create.ts`, `backfillBiteAddress`, `get-currency-by-position.ts`                                                               |
+| Aggregates     | `increment-bite-count-on-bite-create.ts`, `resync-bite-counts.ts`, `update-bite-like-count-on-like-write.ts`                                           |
+| Storage        | `set-bite-image-path-on-upload.ts`                                                                                                                     |
+| Notifications  | `notify-bite-creator-on-like.ts`, `notify-followers-on-new-bite.ts`, `notify-user-on-new-follower.ts`, `send-daily-leaderboard-notification.ts`        |
+| Restaurants    | `cluster-restaurant-candidate-for-bite.ts`, `create-restaurant-candidate-on-bite-create.ts`, `verify-restaurant-candidate.ts`                          |
+| Scheduled jobs | `send-weekly-bite-notification.ts`, `send-email-verification-reminders.ts`                                                                             |
+| Deep links     | `handle-shared-link-to-bite.ts`                                                                                                                        |
 
 ## Implementation Rules
 
@@ -42,6 +42,8 @@ apps/bite-tribe-firebase/functions/src/index.ts
 - Trigger-maintained counters must handle every lifecycle path that can change the count. If the counted entity can be deleted, add a matching delete-side decrement trigger when the create path increments.
 - Trigger-maintained Bite like aggregates must migrate old Bite documents that are missing `thumbup`, `drooling`, or `mindblown` by recomputing counts from the `likes` subcollection before using increment/decrement deltas.
 - Automatic restaurant-candidate detection (`create-restaurant-candidate-on-bite-create.ts`) only fires for Bites without a verified `restaurantId`, requires at least `5` matching nearby unverified Bites within `200m`, skips creation when a nearby verified restaurant matches, updates a nearby pending candidate instead of duplicating, and never writes back to Bite documents. Reuse the shared clustering helpers in `utils/restaurant-candidate-store.ts` and `utils/restaurant-candidates.ts` rather than duplicating query, matching, or candidate-build logic across the manual callable and the trigger.
+- Email verification callables must use Firebase Admin Auth as the source of truth and mirror only derived metadata to `/users/{uid}`. Manual resend requests are throttled for one hour. Automatic reminders run monthly at 10:00 Europe/Zurich, stop after three successful sends, and exclude accounts that have trusted Google or Apple provider links.
+- Email verification delivery uses Firebase Admin verification links and the Google Workspace/Gmail API credentials from the functions runtime environment: `GOOGLE_WORKSPACE_CLIENT_EMAIL`, `GOOGLE_WORKSPACE_PRIVATE_KEY`, and `GOOGLE_WORKSPACE_DELEGATED_USER`.
 
 ## Validation
 

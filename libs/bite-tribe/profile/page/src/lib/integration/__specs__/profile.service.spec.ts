@@ -3,6 +3,13 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { ProfileService } from '../profile.service';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
+import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
+
+const emailVerificationMock = {
+  promptVisible: jest.fn(() => false),
+  trackPromptShown: jest.fn(),
+  resend: jest.fn().mockResolvedValue(undefined),
+};
 
 class Mock {
   logout = jest.fn();
@@ -18,11 +25,16 @@ describe(ProfileService.name, () => {
   let profileDataAccessService: ProfileDataAccessService;
 
   beforeEach(() => {
+    emailVerificationMock.promptVisible.mockReturnValue(false);
+    emailVerificationMock.trackPromptShown.mockReset();
+    emailVerificationMock.resend.mockReset().mockResolvedValue(undefined);
+
     TestBed.configureTestingModule({
       providers: [
         ProfileService,
         NavController,
         { provide: ProfileDataAccessService, useClass: Mock },
+        { provide: EmailVerificationService, useValue: emailVerificationMock },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -178,6 +190,28 @@ describe(ProfileService.name, () => {
         userId,
         'following',
       ]);
+    });
+  });
+
+  describe('email verification', () => {
+    it('should expose the shared prompt-visible signal', () => {
+      expect(service.emailVerificationPromptVisible).toBe(
+        emailVerificationMock.promptVisible,
+      );
+    });
+
+    it('should delegate prompt tracking to the email verification service', () => {
+      service.trackEmailVerificationPromptShown('profile_edit');
+
+      expect(emailVerificationMock.trackPromptShown).toHaveBeenCalledWith(
+        'profile_edit',
+      );
+    });
+
+    it('should delegate resend to the email verification service', async () => {
+      await service.resendEmailVerification('profile_edit');
+
+      expect(emailVerificationMock.resend).toHaveBeenCalledWith('profile_edit');
     });
   });
 });

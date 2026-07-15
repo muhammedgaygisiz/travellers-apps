@@ -212,5 +212,16 @@
   "send-password-reset-link": "إرسال رابط إعادة تعيين كلمة المرور",
   "password-reset-requested-check-your-email": "إذا كان هناك حساب لهذا البريد الإلكتروني، فقد أرسلنا رابط إعادة تعيين كلمة المرور.",
   "password-reset-request-failed-try-again": "تعذر إرسال بريد إعادة التعيين. يرجى المحاولة مرة أخرى.",
+  "verify-your-email-address": "تحقق من عنوان بريدك الإلكتروني",
+  "verify-your-email-address-body": "يرجى التحقق من عنوان بريدك الإلكتروني حتى يبقى حسابك آمنًا وتتمكن من تلقي رسائل الحساب المهمة.",
+  "resend-email": "إعادة إرسال البريد الإلكتروني",
+  "resend-verification-email": "إعادة إرسال بريد التحقق",
+  "email-verified": "تم التحقق من البريد الإلكتروني",
+  "email-not-verified": "لم يتم التحقق من البريد الإلكتروني",
+  "verification-email-sent-check-your-inbox": "تم إرسال بريد التحقق. يرجى التحقق من صندوق الوارد.",
+  "please-wait-before-requesting-another-verification-email": "يرجى الانتظار قبل طلب بريد تحقق آخر.",
+  "verification-email-could-not-be-sent": "تعذّر إرسال بريد التحقق. يرجى المحاولة مرة أخرى.",
+  "email-already-verified": "تم التحقق من بريدك الإلكتروني بالفعل.",
+  "email-verification-not-available": "التحقق من البريد الإلكتروني غير متاح لهذا الحساب.",
   "back-to-log-in": "العودة إلى تسجيل الدخول"
 }

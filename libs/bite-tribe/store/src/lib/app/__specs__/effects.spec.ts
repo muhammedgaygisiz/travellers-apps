@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { NavController, Platform } from '@ionic/angular';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
-import { fromAuth } from 'ta-firestore';
+import { AnalyticsService, fromAuth } from 'ta-firestore';
 import { AppActions } from '../actions';
 import { AppEffect } from '../effects';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
@@ -45,9 +45,13 @@ const BiteTribeApiServiceMock = {
   updatePhotoUrlInUser: jest.fn(),
   updateLastSeen: jest.fn(),
   updateUserMetadata: jest.fn(),
+  syncEmailVerificationStatus: jest.fn(),
 };
 
 const NavControllerMock = {};
+const AnalyticsServiceMock = {
+  logEvent: jest.fn(),
+};
 
 describe(AppEffect.name, () => {
   let scheduler: TestScheduler;
@@ -67,6 +71,7 @@ describe(AppEffect.name, () => {
         { provide: BiteTribeApiService, useValue: BiteTribeApiServiceMock },
         { provide: Platform, useValue: PlatformMock },
         { provide: NavController, useValue: NavControllerMock },
+        { provide: AnalyticsService, useValue: AnalyticsServiceMock },
         provideMockStore(),
       ],
     });
@@ -76,6 +81,10 @@ describe(AppEffect.name, () => {
     storeService = TestBed.inject(BiteTribeStoreService);
     store = TestBed.inject(MockStore);
 
+    BiteTribeApiServiceMock.syncEmailVerificationStatus.mockResolvedValue({
+      emailVerified: false,
+      emailVerificationRequired: true,
+    });
     jest.spyOn(storeService, 'user').mockReturnValue({ uid: '1' } as any);
     dispatchSpy = jest.spyOn(store, 'dispatch').mockImplementation();
   });

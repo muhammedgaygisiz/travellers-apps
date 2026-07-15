@@ -45,7 +45,7 @@ export class OnboardingContainerComponent {
   }
 
   ionViewDidEnter(): void {
-    FirebaseAnalytics.setCurrentScreen({
+    void FirebaseAnalytics.setCurrentScreen({
       screenName: 'Onboarding',
     });
   }

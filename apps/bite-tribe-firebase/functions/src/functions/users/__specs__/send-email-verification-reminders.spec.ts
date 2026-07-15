@@ -101,12 +101,12 @@ describe('sendEmailVerificationRemindersForUsers', () => {
         authUser({ uid: 'max-user', email: 'max@example.com' }),
       ],
     });
-    getMock
-      .mockResolvedValueOnce({ exists: true, data: () => ({}) })
-      .mockResolvedValueOnce({
-        exists: true,
-        data: () => ({ emailVerificationReminderCount: 3 }),
-      });
+    // Only the eligible password user (max-user) triggers a Firestore read;
+    // the trusted-provider user is skipped before touching Firestore.
+    getMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ emailVerificationReminderCount: 3 }),
+    });
     const sender = jest.fn();
 
     const result = await sendEmailVerificationRemindersForUsers(sender);

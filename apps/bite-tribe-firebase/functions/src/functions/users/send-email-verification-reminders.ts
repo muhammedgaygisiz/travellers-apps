@@ -17,7 +17,6 @@ export type VerificationEmailSender = (
 
 interface ReminderSummary {
   scanned: number;
-  bootstrapped: number;
   sent: number;
   skippedVerified: number;
   skippedTrustedProvider: number;
@@ -28,7 +27,6 @@ interface ReminderSummary {
 
 const createSummary = (): ReminderSummary => ({
   scanned: 0,
-  bootstrapped: 0,
   sent: 0,
   skippedVerified: 0,
   skippedTrustedProvider: 0,
@@ -72,26 +70,9 @@ export const sendEmailVerificationRemindersForUsers = async (
     for (const authUser of usersPage.users) {
       summary.scanned += 1;
 
-      const userReference = admin
-        .firestore()
-        .collection('users')
-        .doc(authUser.uid);
-      const userSnapshot = await userReference.get();
-      const existingData = userSnapshot.data() || {};
-      const metadata = buildEmailVerificationMetadata(authUser, existingData);
+      // Classify from Firebase Auth (source of truth) before touching Firestore
+      // so non-candidates cost no reads or writes.
       const classification = classifyEmailVerificationUser(authUser);
-
-      await userReference.set(
-        {
-          email: authUser.email || existingData['email'] || '',
-          ...metadata,
-        },
-        { merge: true },
-      );
-
-      if (!userSnapshot.exists || !existingData['emailVerificationProvider']) {
-        summary.bootstrapped += 1;
-      }
 
       if (!classification.eligibleForReminder || !authUser.email) {
         incrementSkipReason(summary, classification.reason);
@@ -107,6 +88,14 @@ export const sendEmailVerificationRemindersForUsers = async (
         continue;
       }
 
+      const userReference = admin
+        .firestore()
+        .collection('users')
+        .doc(authUser.uid);
+      const userSnapshot = await userReference.get();
+      const existingData = userSnapshot.data() || {};
+      const metadata = buildEmailVerificationMetadata(authUser, existingData);
+
       if (!isAutomaticReminderDue(metadata)) {
         summary.skippedMaxReminders += 1;
         continue;
@@ -121,6 +110,8 @@ export const sendEmailVerificationRemindersForUsers = async (
 
         await userReference.set(
           {
+            email: authUser.email,
+            ...metadata,
             emailVerificationReminderCount:
               metadata.emailVerificationReminderCount + 1,
             emailVerificationLastSentAt: now.toISOString(),

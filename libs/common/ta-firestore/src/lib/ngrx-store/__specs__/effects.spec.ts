@@ -27,8 +27,8 @@ const AuthServiceMock = {
   loginWithUsernameAndPassword: jest.fn(),
   logout: jest.fn(() => Promise.resolve()),
   registerWithUsernameAndPassword: jest.fn(() => Promise.resolve()),
-  registerWithGoogleAccount: jest.fn(() => Promise.resolve()),
-  registerWithAppleAccount: jest.fn(() => Promise.resolve()),
+  signInWithGoogleAccount: jest.fn(() => Promise.resolve()),
+  signInWithAppleAccount: jest.fn(() => Promise.resolve()),
   authState: jest.fn(),
   setupAnalyticsAndCrashlytics: jest.fn(),
 };
@@ -59,10 +59,10 @@ describe(AuthEffects.name, () => {
     AuthServiceMock.registerWithUsernameAndPassword.mockResolvedValue({
       user: { uid: '123' },
     } as any);
-    AuthServiceMock.registerWithGoogleAccount.mockResolvedValue({
+    AuthServiceMock.signInWithGoogleAccount.mockResolvedValue({
       user: { uid: '123' },
     } as any);
-    AuthServiceMock.registerWithAppleAccount.mockResolvedValue({
+    AuthServiceMock.signInWithAppleAccount.mockResolvedValue({
       user: { uid: '123' },
     } as any);
 
@@ -175,7 +175,7 @@ describe(AuthEffects.name, () => {
 
   describe('loginWithGoogleAccountEffect$', () => {
     describe('given a loginWithGoogleAccount action', () => {
-      it('should call registerWithGoogleAccount$', () => {
+      it('should call signInWithGoogleAccount$', () => {
         scheduler.run(({ cold, expectObservable }) => {
           actions$ = cold('-a', {
             a: AuthActions.loginWithGoogleAccount(),
@@ -184,13 +184,13 @@ describe(AuthEffects.name, () => {
           expectObservable(effects.loginWithGoogleAccountEffect$);
         });
 
-        expect(AuthServiceMock.registerWithGoogleAccount).toHaveBeenCalled();
+        expect(AuthServiceMock.signInWithGoogleAccount).toHaveBeenCalled();
       });
     });
 
     describe('given an error occurs', () => {
       it('should dispatch loginFailed action', () => {
-        AuthServiceMock.registerWithGoogleAccount.mockRejectedValue(
+        AuthServiceMock.signInWithGoogleAccount.mockRejectedValue(
           new Error('Google login error'),
         );
 
@@ -212,7 +212,7 @@ describe(AuthEffects.name, () => {
 
   describe('loginWithAppleAccountEffect$', () => {
     describe('given a loginWithAppleAccount action', () => {
-      it('should call registerWithAppleAccount$', () => {
+      it('should call signInWithAppleAccount$', () => {
         scheduler.run(({ cold, expectObservable }) => {
           actions$ = cold('-a', {
             a: AuthActions.loginWithAppleAccount(),
@@ -221,7 +221,7 @@ describe(AuthEffects.name, () => {
           expectObservable(effects.loginWithAppleAccountEffect$);
         });
 
-        expect(AuthServiceMock.registerWithAppleAccount).toHaveBeenCalled();
+        expect(AuthServiceMock.signInWithAppleAccount).toHaveBeenCalled();
       });
     });
   });

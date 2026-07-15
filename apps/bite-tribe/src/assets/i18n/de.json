@@ -223,5 +223,8 @@
   "verification-email-could-not-be-sent": "Wir konnten die Bestätigungs-E-Mail nicht senden. Bitte versuche es erneut.",
   "email-already-verified": "Deine E-Mail-Adresse ist bereits bestätigt.",
   "email-verification-not-available": "E-Mail-Bestätigung ist für dieses Konto nicht verfügbar.",
-  "back-to-log-in": "Zurück zur Anmeldung"
+  "back-to-log-in": "Zurück zur Anmeldung",
+  "onboarding": "Einführung",
+  "onboarding-assistant-coming-soon": "Hier erscheint bald ein Einführungsassistent - dies ist ein Zwischenstand. Bitte schließen und fortfahren...",
+  "dismiss-and-continue": "Schließen und fortfahren"
 }

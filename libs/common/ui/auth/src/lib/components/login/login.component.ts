@@ -53,20 +53,20 @@ export class LoginComponent {
 
   public readonly forgotPassword = output<string | null>();
 
-  public readonly submitSignupWithGoogle = output();
-  public readonly submitSignupWithApple = output();
+  public readonly submitLoginWithGoogle = output();
+  public readonly submitLoginWithApple = output();
 
   public authFormGroup: FormGroup = new FormGroup<AuthCredentialFields>({
     email: new FormControl<string>('', [Validators.required, Validators.email]),
     password: new FormControl<string>('', Validators.required),
   });
 
-  public onGoogleSignUp(): void {
-    this.submitSignupWithGoogle.emit();
+  public onGoogleLogin(): void {
+    this.submitLoginWithGoogle.emit();
   }
 
-  public onAppleSignUp(): void {
-    this.submitSignupWithApple.emit();
+  public onAppleLogin(): void {
+    this.submitLoginWithApple.emit();
   }
 
   public onForgotPassword(): void {

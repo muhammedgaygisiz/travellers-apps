@@ -223,5 +223,8 @@
   "verification-email-could-not-be-sent": "Doğrulama e-postasını gönderemedik. Lütfen tekrar dene.",
   "email-already-verified": "E-posta adresin zaten doğrulanmış.",
   "email-verification-not-available": "E-posta doğrulaması bu hesap için kullanılamıyor.",
-  "back-to-log-in": "Giriş yapmaya dön"
+  "back-to-log-in": "Giriş yapmaya dön",
+  "onboarding": "Başlangıç",
+  "onboarding-assistant-coming-soon": "Yakında burada bir başlangıç asistanı görünecek - bu geçici bir durumdur. Lütfen kapatıp devam edin...",
+  "dismiss-and-continue": "Kapat ve devam et"
 }

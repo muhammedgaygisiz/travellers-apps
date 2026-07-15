@@ -223,5 +223,8 @@
   "verification-email-could-not-be-sent": "تعذّر إرسال بريد التحقق. يرجى المحاولة مرة أخرى.",
   "email-already-verified": "تم التحقق من بريدك الإلكتروني بالفعل.",
   "email-verification-not-available": "التحقق من البريد الإلكتروني غير متاح لهذا الحساب.",
-  "back-to-log-in": "العودة إلى تسجيل الدخول"
+  "back-to-log-in": "العودة إلى تسجيل الدخول",
+  "onboarding": "الإعداد",
+  "onboarding-assistant-coming-soon": "سيظهر مساعد الإعداد هنا قريبًا - هذه حالة مؤقتة. يرجى الإغلاق والمتابعة...",
+  "dismiss-and-continue": "إغلاق ومتابعة"
 }

@@ -224,5 +224,8 @@
   "verification-email-could-not-be-sent": "Non siamo riusciti a inviare l'e-mail di verifica. Riprova.",
   "email-already-verified": "Il tuo indirizzo e-mail è già verificato.",
   "email-verification-not-available": "La verifica dell'e-mail non è disponibile per questo account.",
-  "back-to-log-in": "Torna all'accesso"
+  "back-to-log-in": "Torna all'accesso",
+  "onboarding": "Introduzione",
+  "onboarding-assistant-coming-soon": "Presto qui apparirà un assistente di introduzione - questo è uno stato intermedio. Chiudi e continua...",
+  "dismiss-and-continue": "Chiudi e continua"
 }

@@ -223,5 +223,8 @@
   "verification-email-could-not-be-sent": "Nous n'avons pas pu envoyer l'e-mail de vérification. Réessaie.",
   "email-already-verified": "Ton adresse e-mail est déjà vérifiée.",
   "email-verification-not-available": "La vérification de l'e-mail n'est pas disponible pour ce compte.",
-  "back-to-log-in": "Retour à la connexion"
+  "back-to-log-in": "Retour à la connexion",
+  "onboarding": "Intégration",
+  "onboarding-assistant-coming-soon": "Un assistant d'intégration apparaîtra bientôt ici - il s'agit d'un état intermédiaire. Veuillez fermer et continuer...",
+  "dismiss-and-continue": "Fermer et continuer"
 }

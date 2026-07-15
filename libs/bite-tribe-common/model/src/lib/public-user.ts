@@ -29,4 +29,8 @@ export interface PublicUser {
   emailVerificationLastSentAtTimestamp?: number;
   emailVerificationManualLastSentAt?: string;
   emailVerificationManualLastSentAtTimestamp?: number;
+
+  onboardingCompletedAt?: string;
+  onboardingCompletedAtTimestamp?: number;
+  onboardingVersion?: number;
 }

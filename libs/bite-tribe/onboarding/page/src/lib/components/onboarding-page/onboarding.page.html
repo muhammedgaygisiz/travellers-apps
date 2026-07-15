@@ -5,21 +5,47 @@
     showFooter: false,
   }"
 >
-  <ion-content class="ion-padding">
-    <div class="onboarding-placeholder">
-      <h1>{{ 'onboarding' | transloco }}</h1>
+  <div class="onboarding-shell">
+    <header class="onboarding-shell__progress">
+      <p class="onboarding-shell__step-count">
+        {{ 'onboarding-progress' | transloco: { current: stepNumber(), total:
+        stepCount() } }}
+      </p>
 
-      <ion-text>
-        <p>{{ 'onboarding-assistant-coming-soon' | transloco }}</p>
-      </ion-text>
+      <h1 class="onboarding-shell__title">
+        {{ currentStep().titleKey | transloco }}
+      </h1>
+
+      <ion-progress-bar
+        [value]="progress()"
+        data-testid="onboarding-progress"
+      />
+    </header>
+
+    <section class="onboarding-shell__content">
+      <ng-content />
+    </section>
+
+    <footer class="onboarding-shell__nav">
+      @if (!isFirstStep()) {
+      <ion-button
+        fill="outline"
+        data-testid="onboarding-back"
+        (click)="back.emit()"
+      >
+        {{ 'onboarding-back' | transloco }}
+      </ion-button>
+      }
 
       <ion-button
-        expand="block"
-        data-testid="dismiss-onboarding"
-        (click)="dismiss.emit()"
+        class="onboarding-shell__next"
+        data-testid="onboarding-next"
+        [disabled]="!canAdvance()"
+        (click)="next.emit()"
       >
-        {{ 'dismiss-and-continue' | transloco }}
+        {{ (isLastStep() ? 'onboarding-finish' : 'onboarding-next') | transloco
+        }}
       </ion-button>
-    </div>
-  </ion-content>
+    </footer>
+  </div>
 </ta-page>

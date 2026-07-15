@@ -17,9 +17,9 @@ test.describe('Login', () => {
     );
 
     // The seeded user has not completed onboarding, so the entry gate blocks
-    // authenticated routes until the placeholder is dismissed for this session.
+    // authenticated routes until the assistant is walked to completion.
     await onboarding.expectVisible();
-    await onboarding.dismiss();
+    await onboarding.complete();
     await expect(page).toHaveURL(/\/home$/);
   });
 });

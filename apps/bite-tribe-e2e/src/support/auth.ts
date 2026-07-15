@@ -6,8 +6,8 @@ import { TEST_USERS } from './test-users';
 /**
  * Logs in as the default seeded emulator user and waits until the app has
  * navigated to the authenticated home page. The seeded user is intentionally
- * incomplete for onboarding, so the temporary onboarding placeholder is
- * dismissed for the browser session before journey specs continue.
+ * incomplete for onboarding, so the onboarding assistant is walked to
+ * completion for the browser session before journey specs continue.
  */
 export async function loginAsTestUser(page: Page): Promise<void> {
   const loginPage = new LoginPage(page);
@@ -27,6 +27,5 @@ export async function continuePastOnboardingIfNeeded(
   }
 
   const onboarding = new OnboardingPage(page);
-  await onboarding.expectVisible();
-  await onboarding.dismiss();
+  await onboarding.complete();
 }

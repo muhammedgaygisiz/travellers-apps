@@ -17,14 +17,14 @@ test.describe('Registration', () => {
     await registrationPage.register(email, password);
 
     // On success the user is signed in, then the onboarding gate catches the
-    // attempted /home navigation until the placeholder is dismissed.
+    // attempted /home navigation until the assistant is completed.
     await onboarding.expectVisible();
     await expect(
       page.getByText(
         'Registration successful! Please check your email to verify your account.',
       ),
     ).toBeVisible();
-    await onboarding.dismiss();
+    await onboarding.complete();
     await expect(page).toHaveURL(/\/home$/);
   });
 });

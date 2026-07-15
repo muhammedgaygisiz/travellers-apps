@@ -267,6 +267,12 @@ export class BiteTribeApiService {
     return this.profileApiService.resendEmailVerification();
   }
 
+  claimDisplayName(
+    displayName: string,
+  ): Promise<{ displayName: string; normalizedDisplayName: string }> {
+    return this.profileApiService.claimDisplayName(displayName);
+  }
+
   async followUser(user: PublicUser): Promise<void> {
     await this.profileApiService.followUser(user);
   }

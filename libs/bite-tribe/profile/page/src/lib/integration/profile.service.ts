@@ -1,14 +1,22 @@
 import { inject, Injectable } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
+import { ToastController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 import type { PageMenuTarget } from 'common/ui/page';
 import type { Bite, LikeClick, PublicUser } from 'model';
-import { PATH } from 'utils';
+import {
+  PATH,
+  getDisplayNameFailureReason,
+  type DisplayNameFailureReason,
+} from 'utils';
 import { Location } from '@angular/common';
 import {
   EmailVerificationService,
   type EmailVerificationSurface,
 } from 'bite-tribe/email-verification-data-access';
+
+const TOAST_DURATION_MS = 5000;
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -16,6 +24,8 @@ export class ProfileService {
   private readonly navController = inject(NavController);
   private readonly location = inject(Location);
   private readonly emailVerification = inject(EmailVerificationService);
+  private readonly toastController = inject(ToastController);
+  private readonly transloco = inject(TranslocoService);
 
   isAuthenticated = this.dataAccess.isAuthenticated;
   myUser = this.dataAccess.myUser;
@@ -78,10 +88,53 @@ export class ProfileService {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
-  saveProfile(publicUser: PublicUser): void {
+  async saveProfile(publicUser: PublicUser): Promise<void> {
+    const previousDisplayName = this.myUser()?.displayName ?? '';
+    const displayNameChanged =
+      (publicUser.displayName ?? '').trim() !== previousDisplayName.trim();
+
+    if (displayNameChanged) {
+      try {
+        await this.dataAccess.claimDisplayName(publicUser.displayName);
+      } catch (error) {
+        await this.showToast(
+          this.getDisplayNameErrorKey(getDisplayNameFailureReason(error)),
+        );
+
+        return;
+      }
+    }
+
     this.dataAccess.savePublicProfile(publicUser);
 
     this.location.back();
+  }
+
+  private getDisplayNameErrorKey(reason: DisplayNameFailureReason): string {
+    switch (reason) {
+      case 'taken':
+        return 'display-name-already-taken';
+      case 'invalid':
+        return 'display-name-invalid';
+      default:
+        return 'display-name-could-not-be-saved';
+    }
+  }
+
+  private async showToast(messageKey: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message: this.transloco.translate(messageKey),
+      position: 'bottom',
+      duration: TOAST_DURATION_MS,
+      buttons: [
+        {
+          text: this.transloco.translate('ok'),
+          role: 'confirm',
+        },
+      ],
+    });
+
+    await toast.present();
   }
 
   followButtonClicked(user: PublicUser): void {

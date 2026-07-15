@@ -3,12 +3,23 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { ProfileService } from '../profile.service';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
+import { ToastController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
 
 const emailVerificationMock = {
   promptVisible: jest.fn(() => false),
   trackPromptShown: jest.fn(),
   resend: jest.fn().mockResolvedValue(undefined),
+};
+
+const toastPresent = jest.fn().mockResolvedValue(undefined);
+const toastControllerMock = {
+  create: jest.fn().mockResolvedValue({ present: toastPresent }),
+};
+
+const translocoMock = {
+  translate: jest.fn((key: string) => key),
 };
 
 class Mock {
@@ -18,6 +29,11 @@ class Mock {
   submitFollowClick = jest.fn();
   savePublicProfile = jest.fn();
   submitUnfollowClick = jest.fn();
+  claimDisplayName = jest.fn().mockResolvedValue({
+    displayName: '',
+    normalizedDisplayName: '',
+  });
+  myUser = jest.fn(() => undefined);
 }
 
 describe(ProfileService.name, () => {
@@ -28,6 +44,8 @@ describe(ProfileService.name, () => {
     emailVerificationMock.promptVisible.mockReturnValue(false);
     emailVerificationMock.trackPromptShown.mockReset();
     emailVerificationMock.resend.mockReset().mockResolvedValue(undefined);
+    toastControllerMock.create.mockClear();
+    toastPresent.mockClear();
 
     TestBed.configureTestingModule({
       providers: [
@@ -35,6 +53,8 @@ describe(ProfileService.name, () => {
         NavController,
         { provide: ProfileDataAccessService, useClass: Mock },
         { provide: EmailVerificationService, useValue: emailVerificationMock },
+        { provide: ToastController, useValue: toastControllerMock },
+        { provide: TranslocoService, useValue: translocoMock },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -128,14 +148,52 @@ describe(ProfileService.name, () => {
   });
 
   describe('saveProfile', () => {
-    it('should call savePublicProfile on dataAccess with correct parameters', () => {
+    it('should save the profile without claiming when the display name is unchanged', async () => {
       const publicUser = { id: 'user123' } as any;
       const savePublicProfileSpy = jest.spyOn(
         profileDataAccessService,
         'savePublicProfile',
       );
-      service.saveProfile(publicUser);
+      const claimSpy = jest.spyOn(profileDataAccessService, 'claimDisplayName');
+
+      await service.saveProfile(publicUser);
+
+      expect(claimSpy).not.toHaveBeenCalled();
       expect(savePublicProfileSpy).toHaveBeenCalledWith(publicUser);
+    });
+
+    it('should claim a changed display name before saving', async () => {
+      const publicUser = { displayName: 'NewName' } as any;
+      const savePublicProfileSpy = jest.spyOn(
+        profileDataAccessService,
+        'savePublicProfile',
+      );
+      const claimSpy = jest.spyOn(profileDataAccessService, 'claimDisplayName');
+
+      await service.saveProfile(publicUser);
+
+      expect(claimSpy).toHaveBeenCalledWith('NewName');
+      expect(savePublicProfileSpy).toHaveBeenCalledWith(publicUser);
+    });
+
+    it('should show a localized error and not save when the display name is taken', async () => {
+      const publicUser = { displayName: 'Taken' } as any;
+      jest
+        .spyOn(profileDataAccessService, 'claimDisplayName')
+        .mockRejectedValueOnce({ message: 'display_name_taken' });
+      const savePublicProfileSpy = jest.spyOn(
+        profileDataAccessService,
+        'savePublicProfile',
+      );
+
+      await service.saveProfile(publicUser);
+
+      expect(savePublicProfileSpy).not.toHaveBeenCalled();
+      expect(translocoMock.translate).toHaveBeenCalledWith(
+        'display-name-already-taken',
+      );
+      expect(toastControllerMock.create).toHaveBeenCalled();
+      expect(toastPresent).toHaveBeenCalled();
     });
   });
 

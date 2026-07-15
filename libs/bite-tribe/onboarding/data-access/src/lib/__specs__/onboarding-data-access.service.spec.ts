@@ -155,6 +155,79 @@ describe('OnboardingDataAccessService', () => {
     expect(getDocument).not.toHaveBeenCalled();
   });
 
+  it('maps all stored fields when the document is fully populated', async () => {
+    setup();
+    getDocument.mockResolvedValue({
+      snapshot: {
+        data: {
+          userId: 'user-1',
+          displayName: 'Stored Name',
+          normalizedDisplayName: 'stored name',
+          fullName: 'Stored Full Name',
+          email: 'stored@example.com',
+          photoUrl: 'stored-photo',
+          city: 'Stored City',
+          about: 'Stored bio',
+          public: true,
+        },
+      },
+    });
+
+    await expect(service.loadCurrentProfile()).resolves.toEqual(
+      expect.objectContaining({
+        fullName: 'Stored Full Name',
+        normalizedDisplayName: 'stored name',
+        city: 'Stored City',
+        about: 'Stored bio',
+      }),
+    );
+  });
+
+  it('uses the auth provider photo when the document has none', async () => {
+    setup();
+    getUser.mockReturnValue({
+      uid: 'user-1',
+      providerData: [{ photoURL: 'provider-photo' }],
+    });
+    getDocument.mockResolvedValue({ snapshot: { data: {} } });
+
+    await expect(service.loadCurrentProfile()).resolves.toEqual(
+      expect.objectContaining({
+        userId: 'user-1',
+        displayName: '',
+        fullName: '',
+        email: '',
+        photoUrl: 'provider-photo',
+      }),
+    );
+  });
+
+  it('prefers a provider entry that exposes photoUrl', async () => {
+    setup();
+    getUser.mockReturnValue({
+      uid: 'user-1',
+      providerData: [{ photoUrl: 'lower-case-photo' }],
+    });
+    getDocument.mockResolvedValue({ snapshot: { data: {} } });
+
+    await expect(service.loadCurrentProfile()).resolves.toEqual(
+      expect.objectContaining({ photoUrl: 'lower-case-photo' }),
+    );
+  });
+
+  it('falls back to empty strings when the provider entry has no photo', async () => {
+    setup();
+    getUser.mockReturnValue({
+      uid: 'user-1',
+      providerData: [{ label: 'no-photo-here' }],
+    });
+    getDocument.mockResolvedValue({ snapshot: { data: {} } });
+
+    await expect(service.loadCurrentProfile()).resolves.toEqual(
+      expect.objectContaining({ userId: 'user-1', photoUrl: '' }),
+    );
+  });
+
   it('checks display name availability through the profile API', async () => {
     setup();
 

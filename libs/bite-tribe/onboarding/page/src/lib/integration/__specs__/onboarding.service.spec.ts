@@ -257,7 +257,53 @@ describe('OnboardingService', () => {
     });
   });
 
+  describe('updateIdentity', () => {
+    it('resets availability and invalidates the step for a blank name', () => {
+      setup();
+
+      service.updateIdentity({ displayName: '   ', photoUrl: '' });
+
+      expect(service.displayNameAvailability()).toBe('idle');
+      expect(service.isCurrentStepValid()).toBe(false);
+    });
+  });
+
   describe('checkDisplayNameAvailability', () => {
+    it('resets to idle without calling the backend for a blank name', async () => {
+      setup();
+
+      await service.checkDisplayNameAvailability('   ');
+
+      expect(service.displayNameAvailability()).toBe('idle');
+      expect(checkDisplayNameAvailability).not.toHaveBeenCalled();
+    });
+
+    it('reports invalid when the check rejects with an invalid-name error', async () => {
+      setup();
+      checkDisplayNameAvailability.mockRejectedValue(
+        Object.assign(new Error('invalid_display_name'), {
+          code: 'invalid-argument',
+        }),
+      );
+
+      service.updateIdentity({ displayName: 'Bad Name', photoUrl: '' });
+      await service.checkDisplayNameAvailability('Bad Name');
+
+      expect(service.displayNameAvailability()).toBe('invalid');
+      expect(service.isCurrentStepValid()).toBe(false);
+    });
+
+    it('reports a generic error when the check fails unexpectedly', async () => {
+      setup();
+      checkDisplayNameAvailability.mockRejectedValue(new Error('network down'));
+
+      service.updateIdentity({ displayName: 'SomeName', photoUrl: '' });
+      await service.checkDisplayNameAvailability('SomeName');
+
+      expect(service.displayNameAvailability()).toBe('error');
+      expect(service.isCurrentStepValid()).toBe(false);
+    });
+
     it('marks identity valid when the current display name is available', async () => {
       setup();
       await service.initialize();

@@ -212,5 +212,16 @@
   "send-password-reset-link": "Enviar enlace de restablecimiento",
   "password-reset-requested-check-your-email": "Si existe una cuenta con este correo electrónico, hemos enviado un enlace para restablecer la contraseña.",
   "password-reset-request-failed-try-again": "No pudimos enviar el correo de restablecimiento. Inténtalo de nuevo.",
+  "verify-your-email-address": "Verifica tu correo electrónico",
+  "verify-your-email-address-body": "Verifica tu correo electrónico para mantener tu cuenta segura y poder recibir mensajes importantes de la cuenta.",
+  "resend-email": "Reenviar correo",
+  "resend-verification-email": "Reenviar correo de verificación",
+  "email-verified": "Correo verificado",
+  "email-not-verified": "Correo no verificado",
+  "verification-email-sent-check-your-inbox": "Correo de verificación enviado. Revisa tu bandeja de entrada.",
+  "please-wait-before-requesting-another-verification-email": "Espera antes de solicitar otro correo de verificación.",
+  "verification-email-could-not-be-sent": "No pudimos enviar el correo de verificación. Inténtalo de nuevo.",
+  "email-already-verified": "Tu correo electrónico ya está verificado.",
+  "email-verification-not-available": "La verificación de correo no está disponible para esta cuenta.",
   "back-to-log-in": "Volver a iniciar sesión"
 }

@@ -213,5 +213,16 @@
   "send-password-reset-link": "ส่งลิงก์รีเซ็ตรหัสผ่าน",
   "password-reset-requested-check-your-email": "หากมีบัญชีสำหรับอีเมลนี้ เราได้ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว",
   "password-reset-request-failed-try-again": "เราไม่สามารถส่งอีเมลรีเซ็ตได้ โปรดลองอีกครั้ง",
+  "verify-your-email-address": "ยืนยันที่อยู่อีเมลของคุณ",
+  "verify-your-email-address-body": "โปรดยืนยันที่อยู่อีเมลของคุณเพื่อให้บัญชีของคุณปลอดภัยและสามารถรับข้อความสำคัญเกี่ยวกับบัญชีได้",
+  "resend-email": "ส่งอีเมลอีกครั้ง",
+  "resend-verification-email": "ส่งอีเมลยืนยันอีกครั้ง",
+  "email-verified": "ยืนยันอีเมลแล้ว",
+  "email-not-verified": "ยังไม่ได้ยืนยันอีเมล",
+  "verification-email-sent-check-your-inbox": "ส่งอีเมลยืนยันแล้ว โปรดตรวจสอบกล่องจดหมายของคุณ",
+  "please-wait-before-requesting-another-verification-email": "โปรดรอสักครู่ก่อนขออีเมลยืนยันอีกครั้ง",
+  "verification-email-could-not-be-sent": "เราไม่สามารถส่งอีเมลยืนยันได้ โปรดลองอีกครั้ง",
+  "email-already-verified": "ที่อยู่อีเมลของคุณได้รับการยืนยันแล้ว",
+  "email-verification-not-available": "การยืนยันอีเมลไม่พร้อมใช้งานสำหรับบัญชีนี้",
   "back-to-log-in": "กลับไปเข้าสู่ระบบ"
 }

@@ -69,6 +69,7 @@ export class AppForegroundService {
   private updateUserMetadata(): void {
     if (this.isAuthenticated()) {
       this.storeService.updateUserMetadata();
+      this.storeService.syncEmailVerificationStatus();
     }
   }
 }

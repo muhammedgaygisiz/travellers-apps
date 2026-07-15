@@ -13,6 +13,8 @@ import { PageComponent, PageMenuTarget } from 'common/ui/page';
 import {
   IonButton,
   IonButtons,
+  IonCard,
+  IonCardContent,
   IonContent,
   IonIcon,
   IonRefresher,
@@ -28,6 +30,7 @@ import { HomeFeedControlsComponent } from './home-feed-controls/home-feed-contro
 import { GpsErrorCardComponent } from './gps-error-card/gps-error-card.component';
 import { NetworkErrorBoxComponent } from './network-error-box/network-error-box.component';
 import { BiteListComponent } from './bite-list/bite-list.component';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 const PAGE_SIZE = 50;
 const MIN_SKELETON_VISIBLE_MS = 2000;
@@ -43,6 +46,8 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     IonIcon,
     IonButton,
     IonButtons,
+    IonCard,
+    IonCardContent,
     IonRefresher,
     IonRefresherContent,
     IonSearchbar,
@@ -50,6 +55,7 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     GpsErrorCardComponent,
     NetworkErrorBoxComponent,
     BiteListComponent,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -79,6 +85,7 @@ export class BiteTribeHomeComponent {
   showSearch = input(false, { transform: booleanAttribute });
   showTriedOutCheckbox = input(false, { transform: booleanAttribute });
   triedOutBiteIds = input<string[]>([]);
+  showEmailVerificationPrompt = input(false, { transform: booleanAttribute });
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -100,6 +107,7 @@ export class BiteTribeHomeComponent {
   readonly refresh = output<void>();
   readonly closeGpsError = output<void>();
   readonly triedOutChange = output<{ biteId: string; checked: boolean }>();
+  readonly resendEmailVerification = output<void>();
 
   ionContent = viewChild(IonContent);
 

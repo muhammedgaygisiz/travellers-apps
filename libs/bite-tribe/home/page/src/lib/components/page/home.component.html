@@ -84,6 +84,38 @@
         <bt-network-error-box />
       }
 
+      @if (showEmailVerificationPrompt()) {
+        <ion-card>
+          <ion-card-content>
+            <div class="ion-display-flex ion-flex-column">
+              <div class="ion-display-flex ion-flex-row ion-align-items-center">
+                <ion-icon
+                  name="shield-checkmark-outline"
+                  color="warning"
+                  size="large"
+                />
+
+                <ion-text color="warning" class="ion-padding-start">
+                  <strong>{{ 'verify-your-email-address' | transloco }}</strong>
+                </ion-text>
+              </div>
+
+              <ion-text class="ion-margin-top">
+                {{ 'verify-your-email-address-body' | transloco }}
+              </ion-text>
+
+              <ion-button
+                fill="clear"
+                class="ion-align-self-start"
+                (click)="resendEmailVerification.emit()"
+              >
+                {{ 'resend-email' | transloco }}
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      }
+
       @if (isSearchVisible()) {
         <ion-searchbar
           data-testid="search-input"

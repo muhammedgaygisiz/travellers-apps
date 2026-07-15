@@ -21,4 +21,12 @@ export interface PublicUser {
   lastSeenTimestamp?: number;
   appVersion?: string;
   appBuildNumber?: string;
+  emailVerified?: boolean;
+  emailVerificationRequired?: boolean;
+  emailVerificationProvider?: 'password' | 'trusted-provider' | 'unknown';
+  emailVerificationReminderCount?: number;
+  emailVerificationLastSentAt?: string;
+  emailVerificationLastSentAtTimestamp?: number;
+  emailVerificationManualLastSentAt?: string;
+  emailVerificationManualLastSentAtTimestamp?: number;
 }

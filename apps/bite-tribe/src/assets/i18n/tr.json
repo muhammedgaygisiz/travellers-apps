@@ -212,5 +212,16 @@
   "send-password-reset-link": "Şifre sıfırlama bağlantısı gönder",
   "password-reset-requested-check-your-email": "Bu e-posta için bir hesap varsa, şifre sıfırlama bağlantısı gönderdik.",
   "password-reset-request-failed-try-again": "Şifre sıfırlama e-postası gönderilemedi. Lütfen tekrar dene.",
+  "verify-your-email-address": "E-posta adresini doğrula",
+  "verify-your-email-address-body": "Hesabının güvende kalması ve önemli hesap mesajlarını alabilmen için lütfen e-posta adresini doğrula.",
+  "resend-email": "E-postayı yeniden gönder",
+  "resend-verification-email": "Doğrulama e-postasını yeniden gönder",
+  "email-verified": "E-posta doğrulandı",
+  "email-not-verified": "E-posta doğrulanmadı",
+  "verification-email-sent-check-your-inbox": "Doğrulama e-postası gönderildi. Lütfen gelen kutunu kontrol et.",
+  "please-wait-before-requesting-another-verification-email": "Başka bir doğrulama e-postası istemeden önce lütfen bekle.",
+  "verification-email-could-not-be-sent": "Doğrulama e-postasını gönderemedik. Lütfen tekrar dene.",
+  "email-already-verified": "E-posta adresin zaten doğrulanmış.",
+  "email-verification-not-available": "E-posta doğrulaması bu hesap için kullanılamıyor.",
   "back-to-log-in": "Giriş yapmaya dön"
 }

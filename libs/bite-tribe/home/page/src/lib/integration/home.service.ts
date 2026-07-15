@@ -4,6 +4,10 @@ import type { Bite, LikeClick } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import type { PageMenuTarget } from 'common/ui/page';
 import { PATH } from 'utils';
+import {
+  EmailVerificationService,
+  type EmailVerificationSurface,
+} from 'bite-tribe/email-verification-data-access';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +15,7 @@ import { PATH } from 'utils';
 export class HomeService {
   dataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly emailVerification = inject(EmailVerificationService);
 
   sortedHomeBites = this.dataAccess.sortedHomeBites;
   sorting = this.dataAccess.sorting;
@@ -43,6 +48,7 @@ export class HomeService {
   hasErrorLoadingGpsPosition = this.dataAccess.hasErrorLoadingGpsPosition;
 
   networkStatus = this.dataAccess.networkStatus;
+  emailVerificationPromptVisible = this.emailVerification.promptVisible;
 
   logout(): void {
     this.dataAccess.logout();
@@ -186,5 +192,13 @@ export class HomeService {
 
   onGotoMyProfileClick(): void {
     void this.navController.navigateForward(['my-profile']);
+  }
+
+  trackEmailVerificationPromptShown(surface: EmailVerificationSurface): void {
+    this.emailVerification.trackPromptShown(surface);
+  }
+
+  resendEmailVerification(surface: EmailVerificationSurface): Promise<void> {
+    return this.emailVerification.resend(surface);
   }
 }

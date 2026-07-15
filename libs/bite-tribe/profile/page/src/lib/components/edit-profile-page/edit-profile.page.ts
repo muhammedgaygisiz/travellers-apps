@@ -22,6 +22,7 @@ import {
   IonLabel,
   IonModal,
   IonTextarea,
+  IonText,
   IonTitle,
   IonToggle,
   IonToolbar,
@@ -52,6 +53,7 @@ const GO_PRIVATE = 'go-private';
     IonInput,
     IonLabel,
     IonTextarea,
+    IonText,
     IonButton,
     IonAlert,
     IonToggle,
@@ -75,8 +77,10 @@ export class EditProfilePage {
   isAuthenticated = input(false);
 
   publicUser = input<PublicUser>();
+  showEmailVerificationPrompt = input(false);
 
   submitPublicUser = output<PublicUser>();
+  resendEmailVerification = output<void>();
 
   setDisplayNameEffect = effect(() => {
     const publicUser = this.publicUser();

@@ -210,5 +210,16 @@
   "send-password-reset-link": "Enviar link de redefinição",
   "password-reset-requested-check-your-email": "Se existir uma conta para este e-mail, enviamos um link para redefinir a senha.",
   "password-reset-request-failed-try-again": "Não foi possível enviar o e-mail de redefinição. Tente novamente.",
+  "verify-your-email-address": "Verifique seu e-mail",
+  "verify-your-email-address-body": "Verifique seu e-mail para manter sua conta segura e poder receber mensagens importantes da conta.",
+  "resend-email": "Reenviar e-mail",
+  "resend-verification-email": "Reenviar e-mail de verificação",
+  "email-verified": "E-mail verificado",
+  "email-not-verified": "E-mail não verificado",
+  "verification-email-sent-check-your-inbox": "E-mail de verificação enviado. Verifique sua caixa de entrada.",
+  "please-wait-before-requesting-another-verification-email": "Aguarde antes de solicitar outro e-mail de verificação.",
+  "verification-email-could-not-be-sent": "Não foi possível enviar o e-mail de verificação. Tente novamente.",
+  "email-already-verified": "Seu e-mail já está verificado.",
+  "email-verification-not-available": "A verificação de e-mail não está disponível para esta conta.",
   "back-to-log-in": "Voltar ao login"
 }

@@ -2,6 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import { SettingsDataAccessService } from 'bite-tribe/settings-data-access';
 import { PublicUser, Settings } from 'model';
 import { NavController } from '@ionic/angular';
+import {
+  EmailVerificationService,
+  type EmailVerificationSurface,
+} from 'bite-tribe/email-verification-data-access';
 
 @Injectable({
   providedIn: 'root',
@@ -9,10 +13,12 @@ import { NavController } from '@ionic/angular';
 export class SettingsService {
   dataAccess = inject(SettingsDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly emailVerification = inject(EmailVerificationService);
 
   user = this.dataAccess.user;
   publicUser = this.dataAccess.publicUser;
   settings = this.dataAccess.settings;
+  emailVerificationPromptVisible = this.emailVerification.promptVisible;
 
   async saveSettings(settings: Settings): Promise<void> {
     await this.dataAccess.saveSettings(settings);
@@ -22,5 +28,13 @@ export class SettingsService {
 
   logout(): void {
     this.dataAccess.logout();
+  }
+
+  trackEmailVerificationPromptShown(surface: EmailVerificationSurface): void {
+    this.emailVerification.trackPromptShown(surface);
+  }
+
+  resendEmailVerification(surface: EmailVerificationSurface): Promise<void> {
+    return this.emailVerification.resend(surface);
   }
 }

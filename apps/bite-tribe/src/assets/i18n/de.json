@@ -212,5 +212,16 @@
   "send-password-reset-link": "Link zum Zurücksetzen senden",
   "password-reset-requested-check-your-email": "Wenn ein Konto mit dieser E-Mail-Adresse existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet.",
   "password-reset-request-failed-try-again": "Wir konnten die E-Mail zum Zurücksetzen nicht senden. Bitte versuche es erneut.",
+  "verify-your-email-address": "Bestätige deine E-Mail-Adresse",
+  "verify-your-email-address-body": "Bitte bestätige deine E-Mail-Adresse, damit dein Konto sicher bleibt und du wichtige Kontonachrichten erhalten kannst.",
+  "resend-email": "E-Mail erneut senden",
+  "resend-verification-email": "Bestätigungs-E-Mail erneut senden",
+  "email-verified": "E-Mail bestätigt",
+  "email-not-verified": "E-Mail nicht bestätigt",
+  "verification-email-sent-check-your-inbox": "Bestätigungs-E-Mail gesendet. Bitte prüfe deinen Posteingang.",
+  "please-wait-before-requesting-another-verification-email": "Bitte warte, bevor du eine weitere Bestätigungs-E-Mail anforderst.",
+  "verification-email-could-not-be-sent": "Wir konnten die Bestätigungs-E-Mail nicht senden. Bitte versuche es erneut.",
+  "email-already-verified": "Deine E-Mail-Adresse ist bereits bestätigt.",
+  "email-verification-not-available": "E-Mail-Bestätigung ist für dieses Konto nicht verfügbar.",
   "back-to-log-in": "Zurück zur Anmeldung"
 }

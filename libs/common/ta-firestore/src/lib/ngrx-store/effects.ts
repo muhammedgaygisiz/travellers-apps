@@ -111,7 +111,7 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.loginWithGoogleAccount),
       mergeMap(() =>
-        from(this.registerWithGoogleAccount()).pipe(
+        from(this.signInWithGoogleAccount()).pipe(
           map((result) => {
             console.debug('#mo signInResult', result);
             return AuthActions.loginSucceeded();
@@ -129,7 +129,7 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.loginWithAppleAccount),
       mergeMap(() =>
-        from(this.registerWithAppleAccount()).pipe(
+        from(this.signInWithAppleAccount()).pipe(
           map(() => AuthActions.loginSucceeded()),
           tap(() => this.navController.navigateBack(['/'])),
           catchError((err) =>
@@ -192,11 +192,11 @@ export class AuthEffects {
     return this.authService.loginWithUsernameAndPassword(authCreds);
   }
 
-  private registerWithGoogleAccount(): Promise<SignInResult> {
-    return this.authService.registerWithGoogleAccount();
+  private signInWithGoogleAccount(): Promise<SignInResult> {
+    return this.authService.signInWithGoogleAccount();
   }
 
-  private registerWithAppleAccount(): Promise<SignInResult> {
-    return this.authService.registerWithAppleAccount();
+  private signInWithAppleAccount(): Promise<SignInResult> {
+    return this.authService.signInWithAppleAccount();
   }
 }

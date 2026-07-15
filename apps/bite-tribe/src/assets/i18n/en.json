@@ -223,5 +223,8 @@
   "verification-email-could-not-be-sent": "We couldn't send the verification email. Please try again.",
   "email-already-verified": "Your email address is already verified.",
   "email-verification-not-available": "Email verification isn't available for this account.",
-  "back-to-log-in": "Back to log in"
+  "back-to-log-in": "Back to log in",
+  "onboarding": "Onboarding",
+  "onboarding-assistant-coming-soon": "An onboarding assistant will be visible here soon - this is an intermediate state. Please dismiss and continue...",
+  "dismiss-and-continue": "Dismiss and continue"
 }

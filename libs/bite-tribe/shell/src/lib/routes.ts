@@ -1,10 +1,15 @@
-import { Routes } from '@angular/router';
+import { Route, Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
 import { authGuard, freshSessionGuard, startGuard } from 'ta-firestore';
 import { biteTitleResolver } from 'bite-tribe/store';
+import {
+  gateAuthenticatedRoutes,
+  OnboardingContainerComponent,
+  onboardingCompletedGuard,
+} from 'bite-tribe/onboarding';
 import { PATH } from 'utils';
 
-export const ROUTES: Routes = withAuthRoutes([
+const APP_ROUTES: Routes = [
   {
     path: PATH.START,
     loadComponent: () =>
@@ -227,4 +232,20 @@ export const ROUTES: Routes = withAuthRoutes([
     redirectTo: 'start',
     pathMatch: 'full',
   },
+];
+
+// The onboarding entry-gate guards must be imported statically (like the other
+// route guards), so the placeholder component from the same library is imported
+// statically too rather than lazily — mixing both for one library is forbidden.
+// The real assistant shell arrives in a follow-up issue and can be split out.
+const ONBOARDING_ROUTE: Route = {
+  path: PATH.ONBOARDING,
+  component: OnboardingContainerComponent,
+  title: 'Onboarding',
+  canActivate: [authGuard, onboardingCompletedGuard],
+};
+
+export const ROUTES: Routes = withAuthRoutes([
+  ...gateAuthenticatedRoutes(APP_ROUTES, authGuard),
+  ONBOARDING_ROUTE,
 ]);

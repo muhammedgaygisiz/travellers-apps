@@ -65,6 +65,9 @@ Current profile model fields:
 - `emailVerificationLastSentAtTimestamp`
 - `emailVerificationManualLastSentAt`
 - `emailVerificationManualLastSentAtTimestamp`
+- `onboardingCompletedAt`
+- `onboardingCompletedAtTimestamp`
+- `onboardingVersion`
 
 ## Relationships
 
@@ -107,6 +110,8 @@ Current implementation notes:
 - `updateUserMetadata` records the latest activity timestamp plus reported app version/build number for current app versions.
 - Email verification metadata is stored on the public user document so the app can show non-blocking prompts and other users can see whether the profile email is verified.
 - Email verification reminders are only required for email/password accounts without a trusted linked provider.
+- Onboarding completion is stored on the public user document (`onboardingCompletedAt`, `onboardingCompletedAtTimestamp`, `onboardingVersion`). The absence of the flag routes an authenticated user into the blocking onboarding assistant; the finish step writes it. `onboardingVersion` leaves room for future re-onboarding.
+- An auth-scoped entry gate (`onboardingGuard`) redirects users without the completion flag to the onboarding route and blocks every other authenticated route until completion; `onboardingCompletedGuard` keeps completed users out of the route. See [[epic-850]].
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
 

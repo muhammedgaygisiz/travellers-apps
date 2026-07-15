@@ -223,5 +223,8 @@
   "verification-email-could-not-be-sent": "No pudimos enviar el correo de verificación. Inténtalo de nuevo.",
   "email-already-verified": "Tu correo electrónico ya está verificado.",
   "email-verification-not-available": "La verificación de correo no está disponible para esta cuenta.",
-  "back-to-log-in": "Volver a iniciar sesión"
+  "back-to-log-in": "Volver a iniciar sesión",
+  "onboarding": "Introducción",
+  "onboarding-assistant-coming-soon": "Pronto aparecerá aquí un asistente de introducción: este es un estado intermedio. Cierra y continúa...",
+  "dismiss-and-continue": "Cerrar y continuar"
 }

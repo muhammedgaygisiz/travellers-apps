@@ -36,24 +36,24 @@ describe('LoginComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit submitSignupWithGoogle on button click', () => {
-    const submitSignupWithGoogleEmitSpy = jest.spyOn(
-      component.submitSignupWithGoogle,
+  it('should emit submitLoginWithGoogle on button click', () => {
+    const submitLoginWithGoogleEmitSpy = jest.spyOn(
+      component.submitLoginWithGoogle,
       'emit',
     );
-    component.onGoogleSignUp();
+    component.onGoogleLogin();
 
-    expect(submitSignupWithGoogleEmitSpy).toHaveBeenCalledTimes(1);
+    expect(submitLoginWithGoogleEmitSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should emit submitSignupWithApple on button click', () => {
-    const submitSignupWithAppleEmitSpy = jest.spyOn(
-      component.submitSignupWithApple,
+  it('should emit submitLoginWithApple on button click', () => {
+    const submitLoginWithAppleEmitSpy = jest.spyOn(
+      component.submitLoginWithApple,
       'emit',
     );
-    component.onAppleSignUp();
+    component.onAppleLogin();
 
-    expect(submitSignupWithAppleEmitSpy).toHaveBeenCalledTimes(1);
+    expect(submitLoginWithAppleEmitSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should emit forgotPassword with the typed email', () => {

@@ -15,8 +15,8 @@ import { Credentials } from '../../api/credentials.model';
     (submitAuth)="login($event)"
     (signup)="gotoSignup()"
     (forgotPassword)="gotoForgotPassword($event)"
-    (submitSignupWithGoogle)="onSignupWithGoogle()"
-    (submitSignupWithApple)="onSignupWithApple()"
+    (submitLoginWithGoogle)="onLoginWithGoogle()"
+    (submitLoginWithApple)="onLoginWithApple()"
   />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [LoginComponent],
@@ -44,11 +44,11 @@ export class LoginContainerComponent {
     await this.loginService?.gotoForgotPassword(email);
   }
 
-  onSignupWithGoogle(): void {
+  onLoginWithGoogle(): void {
     this.loginService?.loginWithGoogleAccount();
   }
 
-  onSignupWithApple(): void {
+  onLoginWithApple(): void {
     this.loginService?.loginWithAppleAccount();
   }
 }

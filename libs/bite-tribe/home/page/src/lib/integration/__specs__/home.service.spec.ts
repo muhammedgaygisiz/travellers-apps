@@ -660,6 +660,44 @@ describe('HomeService', () => {
         );
       },
     ));
+
+    it('should show the already-verified toast for already_verified failures', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        jest
+          .spyOn(homeDataAccessService, 'resendEmailVerification')
+          .mockRejectedValue({ message: 'already_verified' });
+        const toast = { present: jest.fn() };
+        jest.spyOn(toastController, 'create').mockResolvedValue(toast as never);
+
+        await service.resendEmailVerification('home');
+
+        expect(toastController.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'email-already-verified',
+          }),
+        );
+      },
+    ));
+
+    it('should show the not-available toast for unsupported_provider failures', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        jest
+          .spyOn(homeDataAccessService, 'resendEmailVerification')
+          .mockRejectedValue({ message: 'unsupported_provider' });
+        const toast = { present: jest.fn() };
+        jest.spyOn(toastController, 'create').mockResolvedValue(toast as never);
+
+        await service.resendEmailVerification('home');
+
+        expect(toastController.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'email-verification-not-available',
+          }),
+        );
+      },
+    ));
   });
 
   describe('toggleTriedOut', () => {

@@ -221,5 +221,7 @@
   "verification-email-sent-check-your-inbox": "Doğrulama e-postası gönderildi. Lütfen gelen kutunu kontrol et.",
   "please-wait-before-requesting-another-verification-email": "Başka bir doğrulama e-postası istemeden önce lütfen bekle.",
   "verification-email-could-not-be-sent": "Doğrulama e-postasını gönderemedik. Lütfen tekrar dene.",
+  "email-already-verified": "E-posta adresin zaten doğrulanmış.",
+  "email-verification-not-available": "E-posta doğrulaması bu hesap için kullanılamıyor.",
   "back-to-log-in": "Giriş yapmaya dön"
 }

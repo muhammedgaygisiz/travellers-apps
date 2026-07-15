@@ -221,5 +221,7 @@
   "verification-email-sent-check-your-inbox": "Bestätigungs-E-Mail gesendet. Bitte prüfe deinen Posteingang.",
   "please-wait-before-requesting-another-verification-email": "Bitte warte, bevor du eine weitere Bestätigungs-E-Mail anforderst.",
   "verification-email-could-not-be-sent": "Wir konnten die Bestätigungs-E-Mail nicht senden. Bitte versuche es erneut.",
+  "email-already-verified": "Deine E-Mail-Adresse ist bereits bestätigt.",
+  "email-verification-not-available": "E-Mail-Bestätigung ist für dieses Konto nicht verfügbar.",
   "back-to-log-in": "Zurück zur Anmeldung"
 }

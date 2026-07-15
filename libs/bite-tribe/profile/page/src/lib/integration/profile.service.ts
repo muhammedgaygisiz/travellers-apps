@@ -144,11 +144,16 @@ export class ProfileService {
   }
 
   private getResendErrorKey(reason: EmailVerificationFailureReason): string {
-    if (reason === 'rate_limited') {
-      return 'please-wait-before-requesting-another-verification-email';
+    switch (reason) {
+      case 'rate_limited':
+        return 'please-wait-before-requesting-another-verification-email';
+      case 'already_verified':
+        return 'email-already-verified';
+      case 'unsupported_provider':
+        return 'email-verification-not-available';
+      default:
+        return 'verification-email-could-not-be-sent';
     }
-
-    return 'verification-email-could-not-be-sent';
   }
 
   private async showEmailVerificationToast(messageKey: string): Promise<void> {

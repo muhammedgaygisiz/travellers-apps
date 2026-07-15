@@ -221,5 +221,7 @@
   "verification-email-sent-check-your-inbox": "Verification email sent. Please check your inbox.",
   "please-wait-before-requesting-another-verification-email": "Please wait before requesting another verification email.",
   "verification-email-could-not-be-sent": "We couldn't send the verification email. Please try again.",
+  "email-already-verified": "Your email address is already verified.",
+  "email-verification-not-available": "Email verification isn't available for this account.",
   "back-to-log-in": "Back to log in"
 }

@@ -325,6 +325,21 @@ export class ProfileApiService {
     });
   }
 
+  async claimDisplayName(displayName: string): Promise<{
+    displayName: string;
+    normalizedDisplayName: string;
+  }> {
+    const result = await FirebaseFunctions.callByName<
+      { displayName: string },
+      { displayName: string; normalizedDisplayName: string }
+    >({
+      name: 'claimDisplayName',
+      data: { displayName },
+    });
+
+    return result.data;
+  }
+
   async followUser(user: PublicUser): Promise<void> {
     try {
       const currentUser = this.authService.getUser();

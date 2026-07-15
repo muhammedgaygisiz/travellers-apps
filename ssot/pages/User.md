@@ -112,6 +112,7 @@ Current implementation notes:
 - Email verification reminders are only required for email/password accounts without a trusted linked provider.
 - Onboarding completion is stored on the public user document (`onboardingCompletedAt`, `onboardingCompletedAtTimestamp`, `onboardingVersion`). The absence of the flag routes an authenticated user into the blocking onboarding assistant; the finish step writes it. `onboardingVersion` leaves room for future re-onboarding.
 - An auth-scoped entry gate (`onboardingGuard`) redirects users without the completion flag to the onboarding route and blocks every other authenticated route until completion; `onboardingCompletedGuard` keeps completed users out of the route. See [[epic-850]].
+- Display names are unique, enforced case-insensitively (normalized by trim + lowercase; original casing preserved for display). A claim document `/displayNames/{normalizedDisplayName}` is written transactionally by the `claimDisplayName` callable so two users cannot take the same normalized name concurrently; renaming releases the old claim and takes the new one in the same transaction and keeps `/users/{uid}.displayName` plus `normalizedDisplayName` in sync. `checkDisplayNameAvailability` is a read-only advisory check. The profile edit flow claims the name before saving and shows a localized error when it is taken. `backfillDisplayNameClaimsCallable` claims existing users' names oldest-first (first-come keeps the name on a normalization collision) so enforcement can be switched on safely. See [[epic-850]].
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
 
@@ -172,6 +173,7 @@ Firestore:
 /users/{userId}
 /users/{userId}/followers/{followerUserId}
 /users/{userId}/following/{followedUserId}
+/displayNames/{normalizedDisplayName}
 /biteTrails/{biteTrailId}/ratings/{userId}
 ```
 
@@ -190,6 +192,9 @@ Cloud Functions:
 
 ```text
 createUserOnAuthCreate
+claimDisplayName
+checkDisplayNameAvailability
+backfillDisplayNameClaimsCallable
 updateLastSeen
 updateUserMetadata
 syncEmailVerificationStatus

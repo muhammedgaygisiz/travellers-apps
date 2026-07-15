@@ -226,5 +226,8 @@
   "back-to-log-in": "Giriş yapmaya dön",
   "onboarding": "Başlangıç",
   "onboarding-assistant-coming-soon": "Yakında burada bir başlangıç asistanı görünecek - bu geçici bir durumdur. Lütfen kapatıp devam edin...",
-  "dismiss-and-continue": "Kapat ve devam et"
+  "dismiss-and-continue": "Kapat ve devam et",
+  "display-name-already-taken": "Bu görünen ad zaten kullanılıyor. Lütfen başka bir ad seçin.",
+  "display-name-invalid": "Lütfen geçerli bir görünen ad girin.",
+  "display-name-could-not-be-saved": "Görünen adınız kaydedilemedi. Lütfen tekrar deneyin."
 }

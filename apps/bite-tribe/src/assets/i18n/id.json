@@ -226,5 +226,8 @@
   "back-to-log-in": "Kembali ke login",
   "onboarding": "Orientasi",
   "onboarding-assistant-coming-soon": "Asisten orientasi akan segera muncul di sini - ini adalah keadaan sementara. Silakan tutup dan lanjutkan...",
-  "dismiss-and-continue": "Tutup dan lanjutkan"
+  "dismiss-and-continue": "Tutup dan lanjutkan",
+  "display-name-already-taken": "Nama tampilan itu sudah digunakan. Silakan pilih yang lain.",
+  "display-name-invalid": "Masukkan nama tampilan yang valid.",
+  "display-name-could-not-be-saved": "Nama tampilan Anda tidak dapat disimpan. Silakan coba lagi."
 }

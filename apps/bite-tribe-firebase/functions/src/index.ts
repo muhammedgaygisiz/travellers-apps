@@ -33,6 +33,9 @@ export { clusterRestaurantCandidateForBite } from './functions/restaurants/clust
 export { createRestaurantCandidateOnBiteCreate } from './functions/restaurants/create-restaurant-candidate-on-bite-create';
 export { verifyRestaurantCandidate } from './functions/restaurants/verify-restaurant-candidate';
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';
+export { claimDisplayName } from './functions/users/claim-display-name';
+export { checkDisplayNameAvailability } from './functions/users/check-display-name-availability';
+export { backfillDisplayNameClaimsCallable } from './functions/users/backfill-display-name-claims';
 export { loadLeaderboard } from './functions/leaderboard/load-leaderboard';
 export { sendDailyLeaderboardNotification } from './functions/leaderboard/send-daily-leaderboard-notification';
 export { resyncBiteCounts } from './functions/leaderboard/resync-bite-counts';

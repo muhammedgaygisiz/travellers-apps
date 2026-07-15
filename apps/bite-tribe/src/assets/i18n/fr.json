@@ -226,5 +226,8 @@
   "back-to-log-in": "Retour à la connexion",
   "onboarding": "Intégration",
   "onboarding-assistant-coming-soon": "Un assistant d'intégration apparaîtra bientôt ici - il s'agit d'un état intermédiaire. Veuillez fermer et continuer...",
-  "dismiss-and-continue": "Fermer et continuer"
+  "dismiss-and-continue": "Fermer et continuer",
+  "display-name-already-taken": "Ce nom d'affichage est déjà pris. Veuillez en choisir un autre.",
+  "display-name-invalid": "Veuillez saisir un nom d'affichage valide.",
+  "display-name-could-not-be-saved": "Impossible d'enregistrer votre nom d'affichage. Veuillez réessayer."
 }

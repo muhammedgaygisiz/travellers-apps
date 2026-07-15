@@ -60,6 +60,7 @@ Release state and changelog
 | Use Case Area                       | Epic Links                                                                        |
 | ----------------------------------- | --------------------------------------------------------------------------------- |
 | Bite creation and quality           | [[epic-907]]                                                                      |
+| New user onboarding                 | [[epic-850]]                                                                      |
 | Discovery, search, and navigation   | [[epic-735]], [[epic-738]]                                                        |
 | Restaurant and menu context         | [[epic-734]]                                                                      |
 | Marketplace and BiteTrails          | [[epic-738]]                                                                      |

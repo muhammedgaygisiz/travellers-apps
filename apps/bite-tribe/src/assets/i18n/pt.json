@@ -224,5 +224,8 @@
   "back-to-log-in": "Voltar ao login",
   "onboarding": "Integração",
   "onboarding-assistant-coming-soon": "Em breve um assistente de integração aparecerá aqui - este é um estado intermediário. Por favor, dispense e continue...",
-  "dismiss-and-continue": "Dispensar e continuar"
+  "dismiss-and-continue": "Dispensar e continuar",
+  "display-name-already-taken": "Esse nome de exibição já está em uso. Escolha outro.",
+  "display-name-invalid": "Insira um nome de exibição válido.",
+  "display-name-could-not-be-saved": "Não foi possível salvar seu nome de exibição. Tente novamente."
 }

@@ -7,6 +7,7 @@ import { ProfileDataAccessService } from '../profile-data-access.service';
 import SpyInstance = jest.SpyInstance;
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { LikeClick } from 'model';
+import { BiteTribeApiService } from 'bite-tribe/api';
 
 class Mock {
   isAuthenticated$ = of(true);
@@ -26,6 +27,10 @@ class Mock {
   unfollowUser = jest.fn();
 }
 
+const ApiMock = {
+  claimDisplayName: jest.fn(),
+};
+
 jest.mock('@capacitor-firebase/firestore');
 
 describe('ProfileDataAccessService', () => {
@@ -36,10 +41,12 @@ describe('ProfileDataAccessService', () => {
       providers: [
         ProfileDataAccessService,
         { provide: BiteTribeStoreService, useClass: Mock },
+        { provide: BiteTribeApiService, useValue: ApiMock },
         provideMockStore(),
       ],
     }).compileComponents();
 
+    jest.clearAllMocks();
     storeService = TestBed.inject(BiteTribeStoreService);
   });
 
@@ -163,6 +170,24 @@ describe('ProfileDataAccessService', () => {
         const mockUser = { id: 'user-id', name: 'Test User' } as any;
         service.savePublicProfile(mockUser);
         expect(savePublicProfileSpy).toHaveBeenCalledWith(mockUser);
+      },
+    ));
+  });
+
+  describe('claimDisplayName', () => {
+    it('should call claimDisplayName on BiteTribeApiService', inject(
+      [ProfileDataAccessService],
+      async (service: ProfileDataAccessService) => {
+        ApiMock.claimDisplayName.mockResolvedValue({
+          displayName: 'Test User',
+          normalizedDisplayName: 'testuser',
+        });
+
+        await expect(service.claimDisplayName('Test User')).resolves.toEqual({
+          displayName: 'Test User',
+          normalizedDisplayName: 'testuser',
+        });
+        expect(ApiMock.claimDisplayName).toHaveBeenCalledWith('Test User');
       },
     ));
   });

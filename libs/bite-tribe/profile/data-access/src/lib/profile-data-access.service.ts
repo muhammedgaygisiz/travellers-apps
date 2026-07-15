@@ -1,6 +1,7 @@
 import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { BiteTribeApiService } from 'bite-tribe/api';
 import type { Bite, BiteTrail, LikeClick, PublicUser } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
@@ -9,6 +10,7 @@ const BITE_TRAIL_COLLECTION = 'biteTrails';
 @Injectable({ providedIn: 'root' })
 export class ProfileDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly api = inject(BiteTribeApiService);
 
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
@@ -109,6 +111,12 @@ export class ProfileDataAccessService {
 
   savePublicProfile(publicUser: PublicUser): void {
     this.storeService.savePublicProfile(publicUser);
+  }
+
+  claimDisplayName(
+    displayName: string,
+  ): Promise<{ displayName: string; normalizedDisplayName: string }> {
+    return this.api.claimDisplayName(displayName);
   }
 
   submitFollowClick(user: PublicUser): void {

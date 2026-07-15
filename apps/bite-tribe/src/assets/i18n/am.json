@@ -226,5 +226,8 @@
   "back-to-log-in": "ወደ መግባት ተመለስ",
   "onboarding": "ማስተዋወቅ",
   "onboarding-assistant-coming-soon": "የማስተዋወቅ ረዳት በቅርቡ እዚህ ይታያል - ይህ ጊዜያዊ ሁኔታ ነው። እባክዎ ዘግተው ይቀጥሉ...",
-  "dismiss-and-continue": "ዝጋ እና ቀጥል"
+  "dismiss-and-continue": "ዝጋ እና ቀጥል",
+  "display-name-already-taken": "ይህ የማሳያ ስም አስቀድሞ ተይዟል። እባክዎ ሌላ ይምረጡ።",
+  "display-name-invalid": "እባክዎ ትክክለኛ የማሳያ ስም ያስገቡ።",
+  "display-name-could-not-be-saved": "የማሳያ ስምዎን ማስቀመጥ አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
 }

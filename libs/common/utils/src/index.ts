@@ -34,3 +34,7 @@ export {
   type EmailVerificationFailureReason,
 } from './lib/email-verification-error-reason';
 export { isEmailVerificationPromptVisible } from './lib/email-verification-prompt-visible';
+export {
+  getDisplayNameFailureReason,
+  type DisplayNameFailureReason,
+} from './lib/display-name-error-reason';

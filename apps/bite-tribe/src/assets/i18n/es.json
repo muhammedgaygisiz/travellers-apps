@@ -226,5 +226,8 @@
   "back-to-log-in": "Volver a iniciar sesión",
   "onboarding": "Introducción",
   "onboarding-assistant-coming-soon": "Pronto aparecerá aquí un asistente de introducción: este es un estado intermedio. Cierra y continúa...",
-  "dismiss-and-continue": "Cerrar y continuar"
+  "dismiss-and-continue": "Cerrar y continuar",
+  "display-name-already-taken": "Ese nombre visible ya está en uso. Elige otro.",
+  "display-name-invalid": "Introduce un nombre visible válido.",
+  "display-name-could-not-be-saved": "No pudimos guardar tu nombre visible. Inténtalo de nuevo."
 }

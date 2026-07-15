@@ -226,5 +226,8 @@
   "back-to-log-in": "Zurück zur Anmeldung",
   "onboarding": "Einführung",
   "onboarding-assistant-coming-soon": "Hier erscheint bald ein Einführungsassistent - dies ist ein Zwischenstand. Bitte schließen und fortfahren...",
-  "dismiss-and-continue": "Schließen und fortfahren"
+  "dismiss-and-continue": "Schließen und fortfahren",
+  "display-name-already-taken": "Dieser Anzeigename ist bereits vergeben. Bitte wähle einen anderen.",
+  "display-name-invalid": "Bitte gib einen gültigen Anzeigenamen ein.",
+  "display-name-could-not-be-saved": "Dein Anzeigename konnte nicht gespeichert werden. Bitte versuche es erneut."
 }

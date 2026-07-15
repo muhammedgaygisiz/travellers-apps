@@ -72,11 +72,9 @@ describe('email verification utilities', () => {
       },
     );
 
-    expect(result).toMatchObject({
-      emailVerificationReminderCount: 0,
-      emailVerificationLastSentAt: undefined,
-      emailVerificationLastSentAtTimestamp: undefined,
-    });
+    expect(result.emailVerificationReminderCount).toBe(0);
+    expect(result.emailVerificationLastSentAt).toBeUndefined();
+    expect(result.emailVerificationLastSentAtTimestamp).toBeUndefined();
   });
 
   it('keeps manual resend throttled for one hour', () => {

@@ -127,7 +127,7 @@ export const buildEmailVerificationMetadata = (
       ? existingData['emailVerificationReminderCount']
       : 0;
 
-  return {
+  const metadata: EmailVerificationMetadata = {
     emailVerified: classification.emailVerified,
     emailVerificationRequired: classification.emailVerificationRequired,
     emailVerificationProvider: classification.emailVerificationProvider,
@@ -135,27 +135,38 @@ export const buildEmailVerificationMetadata = (
       emailChanged && classification.emailVerificationRequired
         ? 0
         : existingReminderCount,
-    emailVerificationLastSentAt:
-      typeof existingData['emailVerificationLastSentAt'] === 'string' &&
-      !emailChanged
-        ? existingData['emailVerificationLastSentAt']
-        : undefined,
-    emailVerificationLastSentAtTimestamp:
-      typeof existingData['emailVerificationLastSentAtTimestamp'] ===
-        'number' && !emailChanged
-        ? existingData['emailVerificationLastSentAtTimestamp']
-        : undefined,
-    emailVerificationManualLastSentAt:
-      typeof existingData['emailVerificationManualLastSentAt'] === 'string' &&
-      !emailChanged
-        ? existingData['emailVerificationManualLastSentAt']
-        : undefined,
-    emailVerificationManualLastSentAtTimestamp:
-      typeof existingData['emailVerificationManualLastSentAtTimestamp'] ===
-        'number' && !emailChanged
-        ? existingData['emailVerificationManualLastSentAtTimestamp']
-        : undefined,
   };
+
+  // Carry over previously stored send timestamps unless the email changed.
+  // Optional fields are omitted (rather than set to `undefined`) so Firestore
+  // writes — including the blocking createUserOnAuthCreate — never reject an
+  // undefined value.
+  if (!emailChanged) {
+    const lastSentAt = existingData['emailVerificationLastSentAt'];
+    if (typeof lastSentAt === 'string') {
+      metadata.emailVerificationLastSentAt = lastSentAt;
+    }
+
+    const lastSentAtTimestamp =
+      existingData['emailVerificationLastSentAtTimestamp'];
+    if (typeof lastSentAtTimestamp === 'number') {
+      metadata.emailVerificationLastSentAtTimestamp = lastSentAtTimestamp;
+    }
+
+    const manualLastSentAt = existingData['emailVerificationManualLastSentAt'];
+    if (typeof manualLastSentAt === 'string') {
+      metadata.emailVerificationManualLastSentAt = manualLastSentAt;
+    }
+
+    const manualLastSentAtTimestamp =
+      existingData['emailVerificationManualLastSentAtTimestamp'];
+    if (typeof manualLastSentAtTimestamp === 'number') {
+      metadata.emailVerificationManualLastSentAtTimestamp =
+        manualLastSentAtTimestamp;
+    }
+  }
+
+  return metadata;
 };
 
 export const isManualResendRateLimited = (

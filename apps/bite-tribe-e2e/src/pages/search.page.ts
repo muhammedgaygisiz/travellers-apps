@@ -38,6 +38,11 @@ export class SearchPage {
   }
 
   async expectResult(title: string): Promise<void> {
-    await expect(this.results.getByText(title, { exact: true })).toBeVisible();
+    // Match the result title (<h2> → ARIA heading) specifically. A custom
+    // restaurant's subtitle can equal its name, so a plain getByText would
+    // resolve to both the title and subtitle and trip Playwright strict mode.
+    await expect(
+      this.results.getByRole('heading', { name: title, exact: true }),
+    ).toBeVisible();
   }
 }

@@ -15,6 +15,7 @@ const emojiMap: Record<LikeType, string> = {
     <div class="like-options-container">
       @for (likeType of likeTypes; track likeType) {
         <ion-chip
+          [attr.data-testid]="'like-option-' + likeType"
           class="{{ likeType === userLikeType ? 'liked' : '' }}"
           (click)="onSelect(likeType)"
         >

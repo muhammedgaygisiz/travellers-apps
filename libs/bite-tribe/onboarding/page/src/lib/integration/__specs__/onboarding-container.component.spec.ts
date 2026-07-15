@@ -3,7 +3,9 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoService } from '@jsverse/transloco';
+import { signal } from '@angular/core';
 import { of } from 'rxjs';
+import { ONBOARDING_STEPS } from '../../steps/onboarding-steps';
 import { OnboardingContainerComponent } from '../onboarding-container.component';
 import { OnboardingService } from '../onboarding.service';
 
@@ -20,16 +22,34 @@ const MockTranslocoService = {
 describe(OnboardingContainerComponent.name, () => {
   let component: OnboardingContainerComponent;
   let fixture: ComponentFixture<OnboardingContainerComponent>;
-  let dismiss: jest.Mock;
+  let serviceMock: {
+    steps: typeof ONBOARDING_STEPS;
+    currentIndex: ReturnType<typeof signal<number>>;
+    canAdvance: ReturnType<typeof signal<boolean>>;
+    isCurrentStepValid: ReturnType<typeof signal<boolean>>;
+    initialize: jest.Mock;
+    next: jest.Mock;
+    back: jest.Mock;
+    setCurrentStepValid: jest.Mock;
+  };
 
   beforeEach(() => {
-    dismiss = jest.fn();
+    serviceMock = {
+      steps: ONBOARDING_STEPS,
+      currentIndex: signal(0),
+      canAdvance: signal(false),
+      isCurrentStepValid: signal(false),
+      initialize: jest.fn().mockResolvedValue(undefined),
+      next: jest.fn(),
+      back: jest.fn(),
+      setCurrentStepValid: jest.fn(),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(getIonicConfig()),
         { provide: TranslocoService, useValue: MockTranslocoService },
-        { provide: OnboardingService, useValue: { dismiss } },
+        { provide: OnboardingService, useValue: serviceMock },
       ],
     }).compileComponents();
 
@@ -41,14 +61,30 @@ describe(OnboardingContainerComponent.name, () => {
     expect(component).toBeTruthy();
   });
 
-  it('dismisses through the service when the page emits', () => {
+  it('initializes the assistant when the view enters', async () => {
+    await component.ionViewWillEnter();
+
+    expect(serviceMock.initialize).toHaveBeenCalledTimes(1);
+  });
+
+  it('advances through the service when the shell emits next', () => {
     fixture.detectChanges();
 
     fixture.debugElement.nativeElement
       .querySelector('onboarding-page')
-      .dispatchEvent(new CustomEvent('dismiss'));
+      .dispatchEvent(new CustomEvent('next'));
 
-    expect(dismiss).toHaveBeenCalledTimes(1);
+    expect(serviceMock.next).toHaveBeenCalledTimes(1);
+  });
+
+  it('goes back through the service when the shell emits back', () => {
+    fixture.detectChanges();
+
+    fixture.debugElement.nativeElement
+      .querySelector('onboarding-page')
+      .dispatchEvent(new CustomEvent('back'));
+
+    expect(serviceMock.back).toHaveBeenCalledTimes(1);
   });
 
   describe('ionViewDidEnter', () => {

@@ -1,5 +1,6 @@
 export const PATH = {
   START: 'start',
+  ONBOARDING: 'onboarding',
   NEW_BITE: 'new-bite',
   MY_BITES: 'my-bites',
   BITES: 'bites',

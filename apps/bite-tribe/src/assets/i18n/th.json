@@ -224,5 +224,8 @@
   "verification-email-could-not-be-sent": "เราไม่สามารถส่งอีเมลยืนยันได้ โปรดลองอีกครั้ง",
   "email-already-verified": "ที่อยู่อีเมลของคุณได้รับการยืนยันแล้ว",
   "email-verification-not-available": "การยืนยันอีเมลไม่พร้อมใช้งานสำหรับบัญชีนี้",
-  "back-to-log-in": "กลับไปเข้าสู่ระบบ"
+  "back-to-log-in": "กลับไปเข้าสู่ระบบ",
+  "onboarding": "การเริ่มต้นใช้งาน",
+  "onboarding-assistant-coming-soon": "ผู้ช่วยเริ่มต้นใช้งานจะปรากฏที่นี่เร็ว ๆ นี้ - นี่เป็นสถานะชั่วคราว โปรดปิดและดำเนินการต่อ...",
+  "dismiss-and-continue": "ปิดและดำเนินการต่อ"
 }

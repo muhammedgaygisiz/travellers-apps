@@ -223,5 +223,8 @@
   "verification-email-could-not-be-sent": "Kami tidak dapat mengirim email verifikasi. Silakan coba lagi.",
   "email-already-verified": "Alamat email kamu sudah terverifikasi.",
   "email-verification-not-available": "Verifikasi email tidak tersedia untuk akun ini.",
-  "back-to-log-in": "Kembali ke login"
+  "back-to-log-in": "Kembali ke login",
+  "onboarding": "Orientasi",
+  "onboarding-assistant-coming-soon": "Asisten orientasi akan segera muncul di sini - ini adalah keadaan sementara. Silakan tutup dan lanjutkan...",
+  "dismiss-and-continue": "Tutup dan lanjutkan"
 }

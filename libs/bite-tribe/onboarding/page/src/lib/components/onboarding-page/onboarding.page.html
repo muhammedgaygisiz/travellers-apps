@@ -1,0 +1,21 @@
+<ta-page
+  [chrome]="{
+    enableBackButton: false,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
+>
+  <ion-content class="ion-padding">
+    <div class="onboarding-placeholder">
+      <h1>{{ 'onboarding' | transloco }}</h1>
+
+      <ion-text>
+        <p>{{ 'onboarding-assistant-coming-soon' | transloco }}</p>
+      </ion-text>
+
+      <ion-button expand="block" (click)="dismiss.emit()">
+        {{ 'dismiss-and-continue' | transloco }}
+      </ion-button>
+    </div>
+  </ion-content>
+</ta-page>

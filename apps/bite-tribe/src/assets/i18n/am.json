@@ -223,5 +223,8 @@
   "verification-email-could-not-be-sent": "የማረጋገጫ ኢሜይሉን መላክ አልቻልንም። እባክዎ እንደገና ይሞክሩ።",
   "email-already-verified": "የኢሜይል አድራሻዎ አስቀድሞ ተረጋግጧል።",
   "email-verification-not-available": "የኢሜይል ማረጋገጫ ለዚህ መለያ አይገኝም።",
-  "back-to-log-in": "ወደ መግባት ተመለስ"
+  "back-to-log-in": "ወደ መግባት ተመለስ",
+  "onboarding": "ማስተዋወቅ",
+  "onboarding-assistant-coming-soon": "የማስተዋወቅ ረዳት በቅርቡ እዚህ ይታያል - ይህ ጊዜያዊ ሁኔታ ነው። እባክዎ ዘግተው ይቀጥሉ...",
+  "dismiss-and-continue": "ዝጋ እና ቀጥል"
 }

@@ -13,7 +13,11 @@
         <p>{{ 'onboarding-assistant-coming-soon' | transloco }}</p>
       </ion-text>
 
-      <ion-button expand="block" (click)="dismiss.emit()">
+      <ion-button
+        expand="block"
+        data-testid="dismiss-onboarding"
+        (click)="dismiss.emit()"
+      >
         {{ 'dismiss-and-continue' | transloco }}
       </ion-button>
     </div>

@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Settings } from 'model';
@@ -17,14 +17,6 @@ export class SettingsDataAccessService {
   user = toSignal(this.storeService.user$);
   settings = toSignal(this.storeService.settings$);
   publicUser = toSignal(this.storeService.publicUser$);
-  emailVerificationPromptVisible = computed(() => {
-    const publicUser = this.publicUser();
-
-    return (
-      publicUser?.emailVerificationRequired === true &&
-      publicUser.emailVerified !== true
-    );
-  });
 
   async saveSettings(settings: Settings): Promise<void> {
     await this.saveLanguageToPreferences(settings.language);
@@ -51,9 +43,5 @@ export class SettingsDataAccessService {
 
   logout(): void {
     this.storeService.logout();
-  }
-
-  async resendEmailVerification(): Promise<void> {
-    await this.api.resendEmailVerification();
   }
 }

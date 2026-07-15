@@ -33,3 +33,4 @@ export {
   getEmailVerificationFailureReason,
   type EmailVerificationFailureReason,
 } from './lib/email-verification-error-reason';
+export { isEmailVerificationPromptVisible } from './lib/email-verification-prompt-visible';

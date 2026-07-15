@@ -1,22 +1,14 @@
-import {
-  computed,
-  inject,
-  Injectable,
-  resource,
-  ResourceLoader,
-} from '@angular/core';
+import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import type { Bite, BiteTrail, LikeClick, PublicUser } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BiteTribeApiService } from 'bite-tribe/api';
 
 const BITE_TRAIL_COLLECTION = 'biteTrails';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
-  private readonly api = inject(BiteTribeApiService);
 
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
@@ -106,14 +98,6 @@ export class ProfileDataAccessService {
   isPublicProfile = toSignal(this.storeService.isPublicProfile$);
 
   profileMetadata = toSignal(this.storeService.profileMetadata$);
-  emailVerificationPromptVisible = computed(() => {
-    const publicUser = this.myUser();
-
-    return (
-      publicUser?.emailVerificationRequired === true &&
-      publicUser.emailVerified !== true
-    );
-  });
 
   logout(): void {
     this.storeService.logout();
@@ -125,10 +109,6 @@ export class ProfileDataAccessService {
 
   savePublicProfile(publicUser: PublicUser): void {
     this.storeService.savePublicProfile(publicUser);
-  }
-
-  async resendEmailVerification(): Promise<void> {
-    await this.api.resendEmailVerification();
   }
 
   submitFollowClick(user: PublicUser): void {

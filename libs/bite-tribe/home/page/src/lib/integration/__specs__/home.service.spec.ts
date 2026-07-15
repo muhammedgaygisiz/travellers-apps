@@ -4,9 +4,13 @@ import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { Bite, Like } from 'model';
 import SpyInstance = jest.SpyInstance;
-import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
-import { ToastController } from '@ionic/angular';
-import { TranslocoService } from '@jsverse/transloco';
+import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
+
+const emailVerificationMock = {
+  promptVisible: jest.fn(() => false),
+  trackPromptShown: jest.fn(),
+  resend: jest.fn().mockResolvedValue(undefined),
+};
 
 class Mock {
   sortedHomeBites = (): never[] => [];
@@ -34,40 +38,26 @@ class Mock {
   clearGpsError = (): null => null;
   triedOutBiteIds = (): string[] => [];
   markBiteAsTriedOut = (): null => null;
-  emailVerificationPromptVisible = (): boolean => false;
-  resendEmailVerification = jest.fn().mockResolvedValue(undefined);
-}
-
-class AnalyticsMock {
-  logEvent = jest.fn();
-}
-
-class ToastControllerMock {
-  create = jest.fn().mockResolvedValue({ present: jest.fn() });
-}
-
-class TranslocoMock {
-  translate = jest.fn((key: string) => key);
 }
 
 describe('HomeService', () => {
   let homeDataAccessService: HomeDataAccessService;
   let navController: NavController;
-  let toastController: ToastController;
 
   beforeEach(() => {
+    emailVerificationMock.promptVisible.mockReturnValue(false);
+    emailVerificationMock.trackPromptShown.mockReset();
+    emailVerificationMock.resend.mockReset().mockResolvedValue(undefined);
+
     TestBed.configureTestingModule({
       providers: [
         { provide: HomeDataAccessService, useClass: Mock },
         { provide: NavController, useClass: Mock },
-        { provide: AnalyticsService, useClass: AnalyticsMock },
-        { provide: ToastController, useClass: ToastControllerMock },
-        { provide: TranslocoService, useClass: TranslocoMock },
+        { provide: EmailVerificationService, useValue: emailVerificationMock },
       ],
     }).compileComponents();
     homeDataAccessService = TestBed.inject(HomeDataAccessService);
     navController = TestBed.inject(NavController);
-    toastController = TestBed.inject(ToastController);
   });
 
   it('should create the service', inject(
@@ -575,127 +565,33 @@ describe('HomeService', () => {
     ));
   });
 
-  describe('email verification prompt analytics', () => {
-    it('should not log prompt shown when the prompt is hidden', inject(
-      [HomeService, AnalyticsService],
-      (service: HomeService, analytics: AnalyticsService) => {
+  describe('email verification', () => {
+    it('should expose the shared prompt-visible signal', inject(
+      [HomeService],
+      (service: HomeService) => {
+        expect(service.emailVerificationPromptVisible).toBe(
+          emailVerificationMock.promptVisible,
+        );
+      },
+    ));
+
+    it('should delegate prompt tracking to the email verification service', inject(
+      [HomeService],
+      (service: HomeService) => {
         service.trackEmailVerificationPromptShown('home');
 
-        expect(analytics.logEvent).not.toHaveBeenCalledWith(
-          AnalyticsEvent.EmailVerificationPromptShown,
-          expect.anything(),
+        expect(emailVerificationMock.trackPromptShown).toHaveBeenCalledWith(
+          'home',
         );
       },
     ));
 
-    it('should log prompt shown when the prompt is visible', inject(
-      [HomeService, AnalyticsService],
-      (service: HomeService, analytics: AnalyticsService) => {
-        service.emailVerificationPromptVisible = (): boolean => true;
-
-        service.trackEmailVerificationPromptShown('home');
-
-        expect(analytics.logEvent).toHaveBeenCalledWith(
-          AnalyticsEvent.EmailVerificationPromptShown,
-          { surface: 'home' },
-        );
-      },
-    ));
-
-    it('should send resend analytics around the backend call', inject(
-      [HomeService, AnalyticsService],
-      async (service: HomeService, analytics: AnalyticsService) => {
-        await service.resendEmailVerification('home');
-
-        expect(analytics.logEvent).toHaveBeenCalledWith(
-          AnalyticsEvent.EmailVerificationResendTapped,
-          { surface: 'home' },
-        );
-        expect(analytics.logEvent).toHaveBeenCalledWith(
-          AnalyticsEvent.EmailVerificationResendSucceeded,
-          { surface: 'home' },
-        );
-      },
-    ));
-
-    it('should log failed resend analytics and show the rate limited toast', inject(
-      [HomeService, AnalyticsService],
-      async (service: HomeService, analytics: AnalyticsService) => {
-        const toast = { present: jest.fn() };
-        jest
-          .spyOn(homeDataAccessService, 'resendEmailVerification')
-          .mockRejectedValue({ message: 'rate_limited' });
-        jest.spyOn(toastController, 'create').mockResolvedValue(toast as never);
-
-        await service.resendEmailVerification('home');
-
-        expect(analytics.logEvent).toHaveBeenCalledWith(
-          AnalyticsEvent.EmailVerificationResendFailed,
-          { surface: 'home', reason: 'rate_limited' },
-        );
-        expect(toastController.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: 'please-wait-before-requesting-another-verification-email',
-          }),
-        );
-        expect(toast.present).toHaveBeenCalledTimes(1);
-      },
-    ));
-
-    it('should show the default resend error toast for unknown failures', inject(
+    it('should delegate resend to the email verification service', inject(
       [HomeService],
       async (service: HomeService) => {
-        jest
-          .spyOn(homeDataAccessService, 'resendEmailVerification')
-          .mockRejectedValue(new Error('boom'));
-        const toast = { present: jest.fn() };
-        jest.spyOn(toastController, 'create').mockResolvedValue(toast as never);
-
         await service.resendEmailVerification('home');
 
-        expect(toastController.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: 'verification-email-could-not-be-sent',
-          }),
-        );
-      },
-    ));
-
-    it('should show the already-verified toast for already_verified failures', inject(
-      [HomeService],
-      async (service: HomeService) => {
-        jest
-          .spyOn(homeDataAccessService, 'resendEmailVerification')
-          .mockRejectedValue({ message: 'already_verified' });
-        const toast = { present: jest.fn() };
-        jest.spyOn(toastController, 'create').mockResolvedValue(toast as never);
-
-        await service.resendEmailVerification('home');
-
-        expect(toastController.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: 'email-already-verified',
-          }),
-        );
-      },
-    ));
-
-    it('should show the not-available toast for unsupported_provider failures', inject(
-      [HomeService],
-      async (service: HomeService) => {
-        jest
-          .spyOn(homeDataAccessService, 'resendEmailVerification')
-          .mockRejectedValue({ message: 'unsupported_provider' });
-        const toast = { present: jest.fn() };
-        jest.spyOn(toastController, 'create').mockResolvedValue(toast as never);
-
-        await service.resendEmailVerification('home');
-
-        expect(toastController.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: 'email-verification-not-available',
-          }),
-        );
+        expect(emailVerificationMock.resend).toHaveBeenCalledWith('home');
       },
     ));
   });

@@ -3,9 +3,13 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { ProfileService } from '../profile.service';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
-import { ToastController } from '@ionic/angular';
-import { TranslocoService } from '@jsverse/transloco';
+import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
+
+const emailVerificationMock = {
+  promptVisible: jest.fn(() => false),
+  trackPromptShown: jest.fn(),
+  resend: jest.fn().mockResolvedValue(undefined),
+};
 
 class Mock {
   logout = jest.fn();
@@ -14,20 +18,6 @@ class Mock {
   submitFollowClick = jest.fn();
   savePublicProfile = jest.fn();
   submitUnfollowClick = jest.fn();
-  emailVerificationPromptVisible = jest.fn(() => false);
-  resendEmailVerification = jest.fn().mockResolvedValue(undefined);
-}
-
-class AnalyticsMock {
-  logEvent = jest.fn();
-}
-
-class ToastControllerMock {
-  create = jest.fn().mockResolvedValue({ present: jest.fn() });
-}
-
-class TranslocoMock {
-  translate = jest.fn((key: string) => key);
 }
 
 describe(ProfileService.name, () => {
@@ -35,14 +25,16 @@ describe(ProfileService.name, () => {
   let profileDataAccessService: ProfileDataAccessService;
 
   beforeEach(() => {
+    emailVerificationMock.promptVisible.mockReturnValue(false);
+    emailVerificationMock.trackPromptShown.mockReset();
+    emailVerificationMock.resend.mockReset().mockResolvedValue(undefined);
+
     TestBed.configureTestingModule({
       providers: [
         ProfileService,
         NavController,
         { provide: ProfileDataAccessService, useClass: Mock },
-        { provide: AnalyticsService, useClass: AnalyticsMock },
-        { provide: ToastController, useClass: ToastControllerMock },
-        { provide: TranslocoService, useClass: TranslocoMock },
+        { provide: EmailVerificationService, useValue: emailVerificationMock },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -201,34 +193,25 @@ describe(ProfileService.name, () => {
     });
   });
 
-  describe('email verification prompt analytics', () => {
-    it('should log prompt shown when the prompt is visible', () => {
-      jest
-        .spyOn(profileDataAccessService, 'emailVerificationPromptVisible')
-        .mockReturnValue(true);
-      const analytics = TestBed.inject(AnalyticsService);
-
-      service.trackEmailVerificationPromptShown('profile_edit');
-
-      expect(analytics.logEvent).toHaveBeenCalledWith(
-        AnalyticsEvent.EmailVerificationPromptShown,
-        { surface: 'profile_edit' },
+  describe('email verification', () => {
+    it('should expose the shared prompt-visible signal', () => {
+      expect(service.emailVerificationPromptVisible).toBe(
+        emailVerificationMock.promptVisible,
       );
     });
 
-    it('should send resend analytics around the backend call', async () => {
-      const analytics = TestBed.inject(AnalyticsService);
+    it('should delegate prompt tracking to the email verification service', () => {
+      service.trackEmailVerificationPromptShown('profile_edit');
 
+      expect(emailVerificationMock.trackPromptShown).toHaveBeenCalledWith(
+        'profile_edit',
+      );
+    });
+
+    it('should delegate resend to the email verification service', async () => {
       await service.resendEmailVerification('profile_edit');
 
-      expect(analytics.logEvent).toHaveBeenCalledWith(
-        AnalyticsEvent.EmailVerificationResendTapped,
-        { surface: 'profile_edit' },
-      );
-      expect(analytics.logEvent).toHaveBeenCalledWith(
-        AnalyticsEvent.EmailVerificationResendSucceeded,
-        { surface: 'profile_edit' },
-      );
+      expect(emailVerificationMock.resend).toHaveBeenCalledWith('profile_edit');
     });
   });
 });

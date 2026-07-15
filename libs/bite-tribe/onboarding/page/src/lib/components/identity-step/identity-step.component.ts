@@ -7,7 +7,11 @@ import {
   input,
   output,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  type ValidatorFn,
+} from '@angular/forms';
 import { IonInput, IonSpinner, IonText } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { PublicUser } from 'model';
@@ -53,7 +57,7 @@ export class IdentityStepComponent {
   checkDisplayName = output<string>();
 
   readonly form = this.formBuilder.nonNullable.group({
-    displayName: [''],
+    displayName: ['', this.displayNameAvailabilityValidator()],
     photoUrl: [''],
   });
 
@@ -67,6 +71,36 @@ export class IdentityStepComponent {
       { emitEvent: true },
     );
   });
+
+  /**
+   * Re-run validation whenever the service-owned availability result changes so
+   * the display-name control reflects it and Ionic's native invalid styling
+   * drives the input frame. The check itself lives in the service; the validator
+   * only mirrors its outcome. Marking the control touched lets Ionic show the
+   * state immediately instead of waiting for a blur.
+   */
+  private readonly availabilityEffect = effect(() => {
+    this.availability();
+    const control = this.form.controls.displayName;
+    control.updateValueAndValidity({ emitEvent: false });
+    if (control.invalid) {
+      control.markAsTouched();
+    }
+  });
+
+  /**
+   * Maps the availability signal to a control error. It is a validator rather
+   * than an imperative `setErrors` so a value change re-derives the error from
+   * the current availability instead of silently clearing it.
+   */
+  private displayNameAvailabilityValidator(): ValidatorFn {
+    return () => {
+      const state = this.availability();
+      return state === 'taken' || state === 'invalid' || state === 'error'
+        ? { [state]: true }
+        : null;
+    };
+  }
 
   constructor() {
     this.form.valueChanges

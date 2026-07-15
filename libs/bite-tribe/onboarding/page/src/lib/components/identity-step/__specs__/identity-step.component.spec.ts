@@ -106,4 +106,32 @@ describe(IdentityStepComponent.name, () => {
 
     expect(checkDisplayName).not.toHaveBeenCalled();
   });
+
+  it.each(['taken', 'invalid', 'error'] as const)(
+    'marks the control invalid and touched when availability is %s',
+    (state) => {
+      fixture.componentRef.setInput('availability', state);
+      fixture.detectChanges();
+
+      const control = component.form.controls.displayName;
+      expect(control.invalid).toBe(true);
+      expect(control.errors).toEqual({ [state]: true });
+      expect(control.touched).toBe(true);
+    },
+  );
+
+  it.each(['idle', 'checking', 'available'] as const)(
+    'clears the control error when availability is %s',
+    (state) => {
+      fixture.componentRef.setInput('availability', 'taken');
+      fixture.detectChanges();
+      expect(component.form.controls.displayName.invalid).toBe(true);
+
+      fixture.componentRef.setInput('availability', state);
+      fixture.detectChanges();
+
+      expect(component.form.controls.displayName.errors).toBeNull();
+      expect(component.form.controls.displayName.valid).toBe(true);
+    },
+  );
 });

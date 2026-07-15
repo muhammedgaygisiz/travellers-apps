@@ -6,7 +6,11 @@ import {
   output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { IonButton, IonProgressBar } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonContent,
+  IonProgressBar,
+} from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { OnboardingStepDefinition } from '../../steps/onboarding-steps';
 
@@ -22,7 +26,13 @@ import { OnboardingStepDefinition } from '../../steps/onboarding-steps';
   templateUrl: 'onboarding.page.html',
   styleUrl: 'onboarding.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageComponent, IonButton, IonProgressBar, TranslocoPipe],
+  imports: [
+    PageComponent,
+    IonButton,
+    IonProgressBar,
+    TranslocoPipe,
+    IonContent,
+  ],
 })
 export class OnboardingPage {
   steps = input.required<readonly OnboardingStepDefinition[]>();

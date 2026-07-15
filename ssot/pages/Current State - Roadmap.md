@@ -73,9 +73,19 @@
 - Web testing.
 - Fix remaining launch blockers.
 - Prepare App Store and Google Play assets.
+- ### Onboarding assistant
+
+  The onboarding assistant ([[epic-850]]) must land before the public launch so the first real users onboard through it.
+
+- Blocking assistant after registration: unique display name, public/private decision, currency, language, notification priming (issues 1011 to 1015).
+- Completion flag plus must-dismiss feature coach marks (issue 1016).
+- Onboarding funnel analytics (issue 1017).
+- Existing users without the completion flag get the assistant once, prefilled.
 - ### Milestone
 
   Release Candidate ready.
+
+  Onboarding assistant landed.
 
 - ## Phase 3 - Public Launch
 

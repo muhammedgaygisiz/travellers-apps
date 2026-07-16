@@ -73,6 +73,7 @@
   - [[Implementation - Libraries]]
   - [[Implementation - Naming Conventions]]
   - [[Implementation - Feature Patterns]]
+  - [[Implementation - Ionic Patterns]]
   - [[Implementation - Firebase Functions]]
   - [[Implementation - Analytics Events]]
   - [[Implementation - Localization]]

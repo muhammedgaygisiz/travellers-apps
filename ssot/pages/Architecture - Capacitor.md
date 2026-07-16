@@ -36,6 +36,17 @@ When adding or removing native plugins:
 
 Prefer Capacitor sync over hand-editing generated native dependency files.
 
+## Push Permission Rule
+
+The OS shows its push permission prompt once per install, so the ask is owned by exactly one surface: the onboarding notification step, which explains the value first (epic \#850, issue \#1015).
+
+`libs/common/push-notifications` splits this in two:
+
+- `initPushListeners` - registers listeners and refreshes the FCM token when permission was already granted. Runs on login (`initAfterLogin$` in the store app effects) and never prompts.
+- `requestPushPermission` - shows the prompt and registers on grant. Called only from the onboarding notification step, and returns `granted` / `denied` / `unsupported` so the choice can be recorded in settings.
+
+Do not call `requestPushPermission` from app startup or a login path. A cold ask there spends the single OS prompt before the user has any context, and the onboarding step can then never prompt.
+
 ## Code Anchors
 
 ```text

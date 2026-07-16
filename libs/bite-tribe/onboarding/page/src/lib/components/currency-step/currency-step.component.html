@@ -1,0 +1,65 @@
+<div class="currency-step">
+  <p class="onboarding-step-copy">
+    {{ 'onboarding-currency-copy' | transloco }}
+  </p>
+
+  <ion-item
+    button
+    detail="false"
+    data-testid="onboarding-currency-default"
+    (click)="currencyModal.present()"
+  >
+    <ion-label>
+      <strong>{{ 'onboarding-currency-default' | transloco }}</strong>
+      <p>{{ 'onboarding-currency-default-hint' | transloco }}</p>
+    </ion-label>
+    <ion-text slot="end" data-testid="onboarding-currency-default-value">
+      {{ selectedCurrencyName() }}
+      <ion-icon name="chevron-expand-outline" aria-hidden="true" />
+    </ion-text>
+  </ion-item>
+
+  <ion-item
+    button
+    detail="false"
+    data-testid="onboarding-currency-favorites"
+    (click)="favoriteModal.present()"
+  >
+    <ion-label>
+      <strong>{{ 'onboarding-currency-favorites' | transloco }}</strong>
+      <p>{{ 'onboarding-currency-favorites-hint' | transloco }}</p>
+    </ion-label>
+    <ion-text slot="end" data-testid="onboarding-currency-favorites-value">
+      {{
+        favoriteCurrencyNames() ||
+          ('onboarding-currency-favorites-empty' | transloco)
+      }}
+      <ion-icon name="chevron-expand-outline" aria-hidden="true" />
+    </ion-text>
+  </ion-item>
+</div>
+
+<ion-modal #currencyModal>
+  <ng-template>
+    <currency-selector
+      class="ion-page"
+      [selectedCurrency]="currency()"
+      [favoriteCurrencies]="favoriteCurrencyList()"
+      [disableFavChange]="true"
+      (currencySelected)="selectCurrency($event, currencyModal)"
+      (selectionCancel)="currencyModal.dismiss()"
+    />
+  </ng-template>
+</ion-modal>
+
+<ion-modal #favoriteModal>
+  <ng-template>
+    <currency-selector
+      class="ion-page"
+      leftButtonLangCode="save"
+      [favoriteCurrencies]="favoriteCurrencyList()"
+      (favoriteCurrencyToggled)="toggleFavorite($event)"
+      (selectionCancel)="favoriteModal.dismiss()"
+    />
+  </ng-template>
+</ion-modal>

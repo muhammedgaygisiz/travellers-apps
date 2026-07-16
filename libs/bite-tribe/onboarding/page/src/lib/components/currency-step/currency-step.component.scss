@@ -1,0 +1,31 @@
+.currency-step {
+  display: grid;
+  gap: 1rem;
+}
+
+.onboarding-step-copy {
+  margin: 0;
+  color: var(--ion-color-medium);
+  line-height: 1.45;
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+
+  ion-label p {
+    color: var(--ion-color-medium);
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  ion-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: 55%;
+    color: var(--ion-color-medium);
+    font-size: 0.875rem;
+    text-align: end;
+  }
+}

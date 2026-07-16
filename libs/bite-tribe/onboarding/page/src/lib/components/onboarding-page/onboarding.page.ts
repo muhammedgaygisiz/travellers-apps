@@ -20,6 +20,10 @@ import type {
   OnboardingIdentityDraft,
 } from '../identity-step/identity-step.component';
 import { VisibilityStepComponent } from '../visibility-step/visibility-step.component';
+import { CurrencyStepComponent } from '../currency-step/currency-step.component';
+import { LanguageStepComponent } from '../language-step/language-step.component';
+import { NotificationStepComponent } from '../notification-step/notification-step.component';
+import type { NotificationPermissionState } from '../notification-step/notification-step.component';
 import type { PublicUser } from 'model';
 
 /**
@@ -40,6 +44,9 @@ import type { PublicUser } from 'model';
     IonText,
     IdentityStepComponent,
     VisibilityStepComponent,
+    CurrencyStepComponent,
+    LanguageStepComponent,
+    NotificationStepComponent,
   ],
 })
 export class OnboardingPage {
@@ -50,12 +57,21 @@ export class OnboardingPage {
   profile = input<PublicUser | undefined>();
   displayNameAvailability = input<DisplayNameAvailabilityState>('idle');
   selectedVisibility = input<boolean | null>(false);
+  selectedCurrency = input<string>('EUR');
+  favoriteCurrencies = input<readonly string[]>([]);
+  selectedLanguage = input<string>('en');
+  notificationPermission = input<NotificationPermissionState>('idle');
 
   next = output<void>();
   back = output<void>();
   identityChange = output<OnboardingIdentityDraft>();
   checkDisplayName = output<string>();
   visibilityChange = output<boolean>();
+  currencyChange = output<string>();
+  favoriteCurrencyToggle = output<string>();
+  languageChange = output<string>();
+  enableNotifications = output<void>();
+  skipNotifications = output<void>();
   placeholderValidityChange = output<boolean>();
 
   readonly stepCount = computed(() => this.steps().length);

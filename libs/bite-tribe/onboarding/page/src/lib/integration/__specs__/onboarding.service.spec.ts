@@ -5,6 +5,7 @@ import {
   OnboardingProgressService,
   OnboardingStepId,
 } from 'bite-tribe/onboarding-data-access';
+import type { Settings } from 'model';
 import { PATH } from 'utils';
 import { OnboardingService } from '../onboarding.service';
 import { ONBOARDING_STEPS } from '../../steps/onboarding-steps';
@@ -18,12 +19,26 @@ describe('OnboardingService', () => {
   let checkDisplayNameAvailability: jest.Mock;
   let claimDisplayName: jest.Mock;
   let saveProfile: jest.Mock;
+  let loadSettings: jest.Mock;
+  let saveSettings: jest.Mock;
+  let applyLanguage: jest.Mock;
+  let requestPushPermission: jest.Mock;
   let navigateRoot: jest.Mock;
+
+  /** Device locale backing the currency and language prefill. */
+  const mockDeviceLocale = (locale: string): void => {
+    Object.defineProperty(navigator, 'language', {
+      value: locale,
+      configurable: true,
+    });
+  };
 
   const setup = (
     completed: OnboardingStepId[] = [],
     profile: Record<string, unknown> = {},
+    settings: Settings | undefined = undefined,
   ): void => {
+    mockDeviceLocale('en-US');
     loadCompletedSteps = jest.fn().mockResolvedValue(completed);
     saveCompletedSteps = jest.fn().mockResolvedValue(undefined);
     dismissForSession = jest.fn();
@@ -46,6 +61,10 @@ describe('OnboardingService', () => {
       normalizedDisplayName: 'newname',
     });
     saveProfile = jest.fn(async (profile) => profile);
+    loadSettings = jest.fn().mockResolvedValue(settings);
+    saveSettings = jest.fn().mockResolvedValue(undefined);
+    applyLanguage = jest.fn().mockResolvedValue(undefined);
+    requestPushPermission = jest.fn().mockResolvedValue('granted');
     navigateRoot = jest.fn();
 
     TestBed.configureTestingModule({
@@ -59,6 +78,10 @@ describe('OnboardingService', () => {
             checkDisplayNameAvailability,
             claimDisplayName,
             saveProfile,
+            loadSettings,
+            saveSettings,
+            applyLanguage,
+            requestPushPermission,
           },
         },
         {
@@ -399,6 +422,293 @@ describe('OnboardingService', () => {
       await firstCheck;
 
       expect(service.displayNameAvailability()).toBe('available');
+      expect(service.canAdvance()).toBe(true);
+    });
+  });
+
+  const storedSettings = (overrides: Partial<Settings> = {}): Settings => ({
+    pushNotifications: false,
+    emailUpdates: true,
+    theme: 'dark',
+    currency: 'CHF',
+    favoriteCurrencies: ['GBP'],
+    nearby: 25,
+    language: 'fr',
+    ...overrides,
+  });
+
+  describe('currency step', () => {
+    it('prefills the default currency from the device locale for a new user', async () => {
+      setup(['identity', 'visibility']);
+      mockDeviceLocale('de-AT');
+
+      await service.initialize();
+
+      expect(service.currentStep().id).toBe('currency');
+      expect(service.selectedCurrency()).toBe('EUR');
+      expect(service.favoriteCurrencies()).toEqual([]);
+    });
+
+    it('prefills from persisted settings when the user already has them', async () => {
+      setup(['identity', 'visibility'], {}, storedSettings());
+      mockDeviceLocale('de-AT');
+
+      await service.initialize();
+
+      expect(service.selectedCurrency()).toBe('CHF');
+      expect(service.favoriteCurrencies()).toEqual(['GBP']);
+    });
+
+    it('is satisfiable straight from the prefill, with favorites left empty', async () => {
+      setup(['identity', 'visibility']);
+      await service.initialize();
+
+      expect(service.canAdvance()).toBe(true);
+
+      await service.next();
+
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ currency: 'USD', favoriteCurrencies: [] }),
+      );
+      expect(service.currentStep().id).toBe('language');
+    });
+
+    it('persists the chosen currency and de-duplicated favorites', async () => {
+      setup(['identity', 'visibility']);
+      await service.initialize();
+
+      service.updateCurrency('JPY');
+      service.toggleFavoriteCurrency('USD');
+      service.toggleFavoriteCurrency('EUR');
+      await service.next();
+
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          currency: 'JPY',
+          favoriteCurrencies: ['USD', 'EUR'],
+        }),
+      );
+    });
+
+    it('toggles a favorite off again', async () => {
+      setup(['identity', 'visibility']);
+      await service.initialize();
+
+      service.toggleFavoriteCurrency('USD');
+      service.toggleFavoriteCurrency('EUR');
+      service.toggleFavoriteCurrency('USD');
+
+      expect(service.favoriteCurrencies()).toEqual(['EUR']);
+    });
+
+    it('ignores an empty currency rather than clearing a valid one', async () => {
+      setup(['identity', 'visibility']);
+      await service.initialize();
+
+      service.updateCurrency('');
+
+      expect(service.selectedCurrency()).toBe('USD');
+      expect(service.canAdvance()).toBe(true);
+    });
+
+    it('does not advance when the settings write fails', async () => {
+      setup(['identity', 'visibility']);
+      saveSettings.mockRejectedValue(new Error('offline'));
+      await service.initialize();
+
+      await service.next();
+
+      expect(service.currentStep().id).toBe('currency');
+      expect(saveCompletedSteps).not.toHaveBeenCalled();
+    });
+
+    it('preserves settings it does not own, since the write replaces the document', async () => {
+      setup(['identity', 'visibility'], {}, storedSettings());
+      await service.initialize();
+
+      service.updateCurrency('JPY');
+      await service.next();
+
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          currency: 'JPY',
+          emailUpdates: true,
+          theme: 'dark',
+          nearby: 25,
+          language: 'fr',
+        }),
+      );
+    });
+  });
+
+  describe('language step', () => {
+    it('prefills from the device locale, ignoring the region', async () => {
+      setup(['identity', 'visibility', 'currency']);
+      mockDeviceLocale('de-CH');
+
+      await service.initialize();
+
+      expect(service.currentStep().id).toBe('language');
+      expect(service.selectedLanguage()).toBe('de');
+    });
+
+    it('falls back to English for a locale the app has no translations for', async () => {
+      setup(['identity', 'visibility', 'currency']);
+      mockDeviceLocale('ja-JP');
+
+      await service.initialize();
+
+      expect(service.selectedLanguage()).toBe('en');
+    });
+
+    it('prefills from persisted settings over the device locale', async () => {
+      setup(['identity', 'visibility', 'currency'], {}, storedSettings());
+      mockDeviceLocale('de-CH');
+
+      await service.initialize();
+
+      expect(service.selectedLanguage()).toBe('fr');
+      expect(applyLanguage).toHaveBeenCalledWith('fr');
+    });
+
+    it('switches the app language immediately on selection', async () => {
+      setup(['identity', 'visibility', 'currency']);
+      await service.initialize();
+      applyLanguage.mockClear();
+
+      await service.updateLanguage('tr');
+
+      expect(service.selectedLanguage()).toBe('tr');
+      expect(applyLanguage).toHaveBeenCalledWith('tr');
+      // Applying is immediate; the settings write waits for the step to be left.
+      expect(saveSettings).not.toHaveBeenCalled();
+    });
+
+    it('persists the language when the step is left', async () => {
+      setup(['identity', 'visibility', 'currency']);
+      await service.initialize();
+
+      await service.updateLanguage('tr');
+      await service.next();
+
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ language: 'tr' }),
+      );
+      expect(service.currentStep().id).toBe('notifications');
+    });
+
+    it('does not re-apply the language already active', async () => {
+      setup(['identity', 'visibility', 'currency']);
+      await service.initialize();
+      applyLanguage.mockClear();
+
+      await service.updateLanguage('en');
+
+      expect(applyLanguage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('notification step', () => {
+    it('does not prompt before the user asks for it', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+
+      await service.initialize();
+
+      expect(service.currentStep().id).toBe('notifications');
+      expect(service.notificationPermission()).toBe('idle');
+      expect(requestPushPermission).not.toHaveBeenCalled();
+      // The explanation has to be acknowledged before the step can be left.
+      expect(service.canAdvance()).toBe(false);
+    });
+
+    it('records a granted permission and continues', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+      await service.initialize();
+
+      await service.requestNotifications();
+
+      expect(service.notificationPermission()).toBe('granted');
+      expect(service.canAdvance()).toBe(true);
+
+      await service.next();
+
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ pushNotifications: true }),
+      );
+      expect(service.currentStep().id).toBe('finish');
+    });
+
+    it('accepts a denial and continues the flow', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+      requestPushPermission.mockResolvedValue('denied');
+      await service.initialize();
+
+      await service.requestNotifications();
+
+      expect(service.notificationPermission()).toBe('denied');
+      expect(service.canAdvance()).toBe(true);
+
+      await service.next();
+
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ pushNotifications: false }),
+      );
+      expect(service.currentStep().id).toBe('finish');
+    });
+
+    it('records no push for a surface without an OS prompt', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+      requestPushPermission.mockResolvedValue('unsupported');
+      await service.initialize();
+
+      await service.requestNotifications();
+      await service.next();
+
+      expect(service.notificationPermission()).toBe('unsupported');
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ pushNotifications: false }),
+      );
+    });
+
+    it('treats skipping as an explicit no without opening the prompt', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+      await service.initialize();
+
+      service.skipNotifications();
+
+      expect(service.notificationPermission()).toBe('denied');
+      expect(requestPushPermission).not.toHaveBeenCalled();
+      expect(service.canAdvance()).toBe(true);
+    });
+
+    it('ignores a second request while one is in flight', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+      let resolvePermission!: (value: string) => void;
+      requestPushPermission.mockReturnValue(
+        new Promise((resolve) => {
+          resolvePermission = resolve;
+        }),
+      );
+      await service.initialize();
+
+      const first = service.requestNotifications();
+      const second = service.requestNotifications();
+      resolvePermission('granted');
+      await Promise.all([first, second]);
+
+      expect(requestPushPermission).toHaveBeenCalledTimes(1);
+    });
+
+    it('prefills a stored grant so a returning user is not asked again', async () => {
+      setup(
+        ['identity', 'visibility', 'currency', 'language'],
+        {},
+        storedSettings({ pushNotifications: true }),
+      );
+
+      await service.initialize();
+
+      expect(service.notificationPermission()).toBe('granted');
       expect(service.canAdvance()).toBe(true);
     });
   });

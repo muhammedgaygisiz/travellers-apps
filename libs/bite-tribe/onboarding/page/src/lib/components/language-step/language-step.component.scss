@@ -1,0 +1,22 @@
+.language-step {
+  display: grid;
+  gap: 1rem;
+}
+
+.onboarding-step-copy {
+  margin: 0;
+  color: var(--ion-color-medium);
+  line-height: 1.45;
+}
+
+ion-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 0.75rem;
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.language-step__hint {
+  font-size: 0.875rem;
+}

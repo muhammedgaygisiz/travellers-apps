@@ -1,7 +1,7 @@
 - [epic: Onboarding assistant for new users](https://github.com/muhammedgaygisiz/travellers-apps/issues/850) (Issue \#850)
 - Description
   - \# Epic: Onboarding assistant for new users
-  - Guide every user through a blocking onboarding assistant after registration so display name, profile visibility, currency, language, and notification preferences are complete before they use BiteTribe, then teach the essential features through must-dismiss coach marks.
+  - Guide every user through a blocking onboarding assistant after registration so display name, profile visibility, currency, language, location, and notification preferences are complete before they use BiteTribe, then teach the essential features through must-dismiss coach marks.
   - \#\# Goal
   - Every active user has a complete, trustworthy profile and knows how to create and discover Bites before the public launch.
   - \#\# Context
@@ -15,14 +15,16 @@
   - Every step must be visited and explicitly acknowledged. Profile photo and favorite currencies are optional inputs; display name, visibility, default currency, and language require explicit values.
   - Display names become unique, enforced case-insensitively (normalized by trim + lowercase). Working assumption: existing display names are already unique; on a normalization collision, first-come keeps the name.
   - Profile visibility defaults to private, but the step actively promotes the benefits of going public (leaderboard, followers, trust in Bites). The user decides after being made aware of the benefits.
+  - The assistant owns every OS permission ask. The OS prompts once per install, so location and notifications are asked in context after the step explains the value, never cold from the login path. Both denials are accepted and recorded. See the push permission rule in [[Architecture - Capacitor]].
   - Feature education happens through interactive coach marks after the assistant, not slides inside it.
   - \#\# Assistant Steps
   - 1. Identity - display name prefilled and checked for case-insensitive availability; optional profile photo.
   - 2. Visibility - private preselected; benefits of public explained; explicit choice required.
   - 3. Currency - default currency mandatory, prefilled from device locale; favorite currencies optional.
   - 4. Language - prefilled from device locale; confirming switches the app language immediately.
-  - 5. Notifications - value explanation before the OS permission prompt; denial accepted, flow continues.
-  - 6. Finish - completion flag written, user lands in the app.
+  - 5. Location - value explanation (nearby Bites, map, distance, tagging new Bites) before the OS permission prompt; denial accepted, flow continues.
+  - 6. Notifications - value explanation before the OS permission prompt; denial accepted, flow continues.
+  - 7. Finish - completion flag written, user lands in the app.
   - \#\# Coach Marks
   - After the assistant, interactive coach marks appear on the first visit of each key surface: home feed, create-Bite button, map, bucket lists, leaderboard.
   - Each coach mark must be explicitly dismissed; seen state is tracked per surface, separately from assistant completion.
@@ -34,14 +36,17 @@
   - 3. \#1013 - Assistant shell and step navigation.
   - 4. \#1014 - Identity and visibility steps.
   - 5. \#1015 - Currency, language, and notification steps.
-  - 6. \#1016 - Completion and feature coach marks.
-  - 7. \#1017 - Onboarding funnel analytics.
+  - 6. \#1023 - Location step.
+  - 7. \#1016 - Completion and feature coach marks.
+  - 8. \#1017 - Onboarding funnel analytics.
+  - \#1023 was split out after \#1015: the location prompt has the same cold-ask problem the notification prompt had, and \#1015 established the pattern for moving a permission ask off the login path into the assistant.
   - \#\# Subtasks
   - \#1011
   - \#1012
   - \#1013
   - \#1014
   - \#1015
+  - \#1023
   - \#1016
   - \#1017
   - \#\# Acceptance Criteria
@@ -51,7 +56,8 @@
   - Display name uniqueness is enforced case-insensitively wherever display names are set, with no duplicates possible under concurrent claims.
   - Every step requires an explicit acknowledgment; photo and favorite currencies can be left empty; display name, visibility, default currency, and language cannot.
   - The visibility step preselects private and presents the benefits of public before the user decides.
-  - The notification step asks for the OS permission in context and continues gracefully on denial.
+  - The location and notification steps each ask for their OS permission in context, after explaining the value, and continue gracefully on denial.
+  - No OS permission is requested from the login path; the assistant is the only surface that prompts.
   - Coach marks appear on the first visit of home feed, create-Bite button, map, bucket lists, and leaderboard, and each requires an explicit dismissal.
   - The full onboarding funnel is measurable in Firebase Analytics.
   - All visible copy uses Transloco keys and every relevant locale file is updated.
@@ -59,5 +65,6 @@
   - Focused Nx/Jest checks for the onboarding libs, guard, and step components.
   - Firebase Functions build and lint for the display name uniqueness backend.
   - Emulator verification for the uniqueness claim under concurrent writes and the completion flag lifecycle.
+  - Device/emulator verification of the location and notification permission prompts, including denial.
   - Storybook coverage for the assistant shell, steps, and coach mark overlay.
   - Playwright registration E2E extended to walk through the assistant.

@@ -1,0 +1,65 @@
+<div class="notification-step">
+  <p class="onboarding-step-copy">
+    {{ 'onboarding-notifications-copy' | transloco }}
+  </p>
+
+  <ul class="notification-step__benefits">
+    <li>{{ 'onboarding-notifications-benefit-ranking' | transloco }}</li>
+    <li>{{ 'onboarding-notifications-benefit-followers' | transloco }}</li>
+    <li>{{ 'onboarding-notifications-benefit-control' | transloco }}</li>
+  </ul>
+
+  @switch (permission()) {
+    @case ('granted') {
+      <p
+        class="notification-step__outcome notification-step__outcome--granted"
+        data-testid="onboarding-notifications-outcome"
+      >
+        <ion-icon name="checkmark-circle-outline" aria-hidden="true" />
+        {{ 'onboarding-notifications-granted' | transloco }}
+      </p>
+    }
+    @case ('denied') {
+      <p
+        class="notification-step__outcome"
+        data-testid="onboarding-notifications-outcome"
+      >
+        {{ 'onboarding-notifications-denied' | transloco }}
+      </p>
+    }
+    @case ('unsupported') {
+      <p
+        class="notification-step__outcome"
+        data-testid="onboarding-notifications-outcome"
+      >
+        {{ 'onboarding-notifications-unsupported' | transloco }}
+      </p>
+    }
+  }
+
+  @if (!isDecided()) {
+    <div class="notification-step__actions">
+      <ion-button
+        expand="block"
+        data-testid="onboarding-notifications-enable"
+        [disabled]="isRequesting()"
+        (click)="enableNotifications.emit()"
+      >
+        @if (isRequesting()) {
+          <ion-spinner name="dots" slot="start" />
+        }
+        {{ 'onboarding-notifications-enable' | transloco }}
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        fill="clear"
+        data-testid="onboarding-notifications-skip"
+        [disabled]="isRequesting()"
+        (click)="skipNotifications.emit()"
+      >
+        {{ 'onboarding-notifications-skip' | transloco }}
+      </ion-button>
+    </div>
+  }
+</div>

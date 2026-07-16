@@ -18,6 +18,11 @@ Known issues are the current launch risks or unfinished areas that should be vis
 | Production readiness | Playwright login, registration, and create-Bite coverage now exists through issue 983, but Android, iOS, web, and CI reliability testing remain before release candidate.                                                             | Public launch requires confidence across supported platforms.                      |
 | Store assets         | App Store and Google Play assets need preparation.                                                                                                                                                                                    | Publishing cannot complete without store-ready material.                           |
 
+## Developer Experience Issues
+
+- Local Playwright runs are flaky. `nxE2EPreset` only pins `workers: 1` when `CI` is set, so a local `npm run e2e` runs every spec in parallel against one Firebase emulator and the same seeded users. CI is unaffected. Run `npx nx e2e bite-tribe-e2e --workers=1` for a trustworthy local result; see [[Implementation - Testing]].
+- `npx nx lint bite-tribe-firebase` reports several hundred phantom problems. The project defines no lint target, so Nx infers one that lints the gitignored `functions/lib` build output with the root config. The project's real lint is `npm run lint` inside `apps/bite-tribe-firebase/functions`, which is clean. Wiring the inferred target into CI would fail immediately.
+
 ## Operational Issues To Watch
 
 - Crashlytics should be monitored daily during soft launch.

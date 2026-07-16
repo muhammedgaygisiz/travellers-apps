@@ -438,6 +438,46 @@ describe('ImageUploadComponent', () => {
     });
   });
 
+  describe('image preview errors', () => {
+    it('should hide the preview when the current image source fails to load', () => {
+      compRef.setInput('imageUrl', 'https://example.com/missing-profile.jpg');
+      fixture.detectChanges();
+
+      expect(component.showImage()).toBe(true);
+
+      component.onImageError();
+      fixture.detectChanges();
+
+      expect(component.failedImageSource()).toBe(
+        'https://example.com/missing-profile.jpg',
+      );
+      expect(component.showImage()).toBe(false);
+      expect(fixture.nativeElement.querySelector('ion-card')).not.toBeNull();
+    });
+
+    it('should show the preview again when a new image value is selected', () => {
+      compRef.setInput('imageUrl', 'https://example.com/missing-profile.jpg');
+      fixture.detectChanges();
+
+      component.onImageError();
+      component.writeValue('data:image/jpeg;base64,new');
+      fixture.detectChanges();
+
+      expect(component.showImage()).toBe(true);
+      expect(component.imageSource()).toBe('data:image/jpeg;base64,new');
+    });
+
+    it('should clear the failed source after an image loads', () => {
+      compRef.setInput('imageUrl', 'https://example.com/profile.jpg');
+      component.failedImageSource.set('https://example.com/profile.jpg');
+
+      component.onImageLoad();
+
+      expect(component.failedImageSource()).toBeNull();
+      expect(component.showImage()).toBe(true);
+    });
+  });
+
   describe('readAndEmitPositionFrom', () => {
     describe('given a photo', () => {
       it('should emit position from photo', () => {

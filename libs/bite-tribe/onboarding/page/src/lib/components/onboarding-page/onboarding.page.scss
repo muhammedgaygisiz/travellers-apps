@@ -1,7 +1,14 @@
 .onboarding-shell {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  width: min(100%, 40rem);
+  min-height: calc(
+    100dvh - var(--ion-safe-area-top, 0px) - var(--ion-safe-area-bottom, 0px) -
+      4.5rem
+  );
+  margin-inline: auto;
+  padding: 1rem;
 
   &__step-count {
     margin: 0 0 0.25rem;
@@ -11,18 +18,55 @@
 
   &__content {
     flex: 1;
-    margin-top: 1.5rem;
+    margin-top: 1.25rem;
+    padding-bottom: 1rem;
   }
 
   &__nav {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
     display: flex;
     gap: 0.75rem;
     align-items: center;
     margin-top: auto;
-    padding-top: 1.5rem;
+    padding: 1rem 0 calc(1rem + var(--ion-safe-area-bottom, 0px));
+    background: var(--ion-background-color);
   }
 
   &__next {
     margin-left: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .onboarding-shell {
+    min-height: calc(
+      100dvh - var(--ion-safe-area-top, 0px) - var(
+          --ion-safe-area-bottom,
+          0px
+        ) -
+        4rem
+    );
+    padding: 0.875rem;
+
+    h1 {
+      margin-top: 0.25rem;
+      font-size: 1.5rem;
+      line-height: 1.2;
+    }
+
+    &__nav {
+      gap: 0.5rem;
+
+      ion-button {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+
+    &__next {
+      margin-left: 0;
+    }
   }
 }

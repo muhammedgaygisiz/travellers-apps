@@ -273,6 +273,12 @@ export class BiteTribeApiService {
     return this.profileApiService.claimDisplayName(displayName);
   }
 
+  checkDisplayNameAvailability(
+    displayName: string,
+  ): Promise<{ available: boolean; normalizedDisplayName: string }> {
+    return this.profileApiService.checkDisplayNameAvailability(displayName);
+  }
+
   async followUser(user: PublicUser): Promise<void> {
     await this.profileApiService.followUser(user);
   }

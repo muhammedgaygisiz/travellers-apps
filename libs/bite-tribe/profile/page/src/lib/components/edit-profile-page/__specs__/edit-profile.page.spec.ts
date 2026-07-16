@@ -192,6 +192,43 @@ describe(EditProfilePage.name, () => {
     });
   });
 
+  describe('profile image preview', () => {
+    it('should show the fallback icon when the saved profile image fails to load', () => {
+      component.profileForm.patchValue({
+        photoUrl: 'https://example.com/missing-profile.jpg',
+      });
+      fixture.detectChanges();
+
+      expect(
+        component.shouldShowProfileImage(component.profileForm.value.photoUrl),
+      ).toBe(true);
+
+      component.handleProfileImageError(component.profileForm.value.photoUrl);
+      fixture.detectChanges();
+
+      expect(component.profileForm.value.photoUrl).toBe(
+        'https://example.com/missing-profile.jpg',
+      );
+      expect(
+        component.shouldShowProfileImage(component.profileForm.value.photoUrl),
+      ).toBe(false);
+      expect(fixture.nativeElement.querySelector('ion-icon')).not.toBeNull();
+    });
+
+    it('should show the profile image again after a different URL is selected', () => {
+      component.handleProfileImageError(
+        'https://example.com/missing-profile.jpg',
+      );
+      component.profileForm.patchValue({
+        photoUrl: 'data:image/jpeg;base64,new-profile',
+      });
+
+      expect(
+        component.shouldShowProfileImage(component.profileForm.value.photoUrl),
+      ).toBe(true);
+    });
+  });
+
   describe('openConfirmationDialog', () => {
     it('should set isOpen to true', () => {
       component.openConfirmationDialog();

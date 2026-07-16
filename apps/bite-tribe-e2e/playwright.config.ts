@@ -19,6 +19,19 @@ const baseURL = process.env['BASE_URL'] ?? 'http://localhost:4200';
  */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src/tests' }),
+  // The Nx preset leaves the html reporter on Playwright's default
+  // `open: 'on-failure'`, which serves the report and never exits when a test
+  // fails — that hangs CI and keeps the emulator ports held locally.
+  reporter: [
+    [
+      'html',
+      {
+        outputFolder:
+          '../../dist/.playwright/apps/bite-tribe-e2e/playwright-report',
+        open: 'never',
+      },
+    ],
+  ],
   use: {
     baseURL,
     trace: 'on-first-retry',

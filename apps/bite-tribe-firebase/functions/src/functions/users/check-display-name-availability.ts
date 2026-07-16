@@ -3,6 +3,7 @@ import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import {
   DISPLAY_NAMES_COLLECTION,
+  USERS_COLLECTION,
   isValidNormalizedDisplayName,
   normalizeDisplayName,
 } from './display-name-utils';
@@ -26,22 +27,40 @@ export const checkDisplayNameAvailabilityForUser = async (
   uid: string,
   requestedDisplayName: string,
 ): Promise<CheckDisplayNameAvailabilityResult> => {
+  const displayName = requestedDisplayName.trim();
   const normalizedDisplayName = normalizeDisplayName(requestedDisplayName);
 
   if (!isValidNormalizedDisplayName(normalizedDisplayName)) {
     return { available: false, normalizedDisplayName };
   }
 
-  const claimSnapshot = await admin
-    .firestore()
-    .collection(DISPLAY_NAMES_COLLECTION)
-    .doc(normalizedDisplayName)
-    .get();
+  const db = admin.firestore();
+  const [claimSnapshot, normalizedUserSnapshot, exactUserSnapshot] =
+    await Promise.all([
+      db.collection(DISPLAY_NAMES_COLLECTION).doc(normalizedDisplayName).get(),
+      db
+        .collection(USERS_COLLECTION)
+        .where('normalizedDisplayName', '==', normalizedDisplayName)
+        .limit(2)
+        .get(),
+      db
+        .collection(USERS_COLLECTION)
+        .where('displayName', '==', displayName)
+        .limit(2)
+        .get(),
+    ]);
 
   const claimedByOtherUser =
     claimSnapshot.exists && claimSnapshot.data()?.['userId'] !== uid;
+  const legacyOwnedByOtherUser = [
+    ...normalizedUserSnapshot.docs,
+    ...exactUserSnapshot.docs,
+  ].some((userDoc) => userDoc.id !== uid);
 
-  return { available: !claimedByOtherUser, normalizedDisplayName };
+  return {
+    available: !claimedByOtherUser && !legacyOwnedByOtherUser,
+    normalizedDisplayName,
+  };
 };
 
 export const checkDisplayNameAvailabilityHandler = async (

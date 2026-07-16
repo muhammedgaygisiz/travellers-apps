@@ -52,9 +52,26 @@ export const claimDisplayNameForUser = async (
 
   const result = await db.runTransaction<ClaimDisplayNameResult>(
     async (transaction) => {
-      const [userSnapshot, newClaimSnapshot] = await Promise.all([
+      const [
+        userSnapshot,
+        newClaimSnapshot,
+        normalizedUserSnapshot,
+        exactUserSnapshot,
+      ] = await Promise.all([
         transaction.get(userRef),
         transaction.get(newClaimRef),
+        transaction.get(
+          db
+            .collection(USERS_COLLECTION)
+            .where('normalizedDisplayName', '==', normalizedDisplayName)
+            .limit(2),
+        ),
+        transaction.get(
+          db
+            .collection(USERS_COLLECTION)
+            .where('displayName', '==', displayName)
+            .limit(2),
+        ),
       ]);
 
       const currentDisplayName = getStoredString(
@@ -67,6 +84,15 @@ export const claimDisplayNameForUser = async (
         newClaimSnapshot.exists &&
         getStoredString(newClaimSnapshot.data(), 'userId') !== uid
       ) {
+        throw new HttpsError('already-exists', 'display_name_taken');
+      }
+
+      const legacyOwnedByOtherUser = [
+        ...normalizedUserSnapshot.docs,
+        ...exactUserSnapshot.docs,
+      ].some((userDoc) => userDoc.id !== uid);
+
+      if (legacyOwnedByOtherUser) {
         throw new HttpsError('already-exists', 'display_name_taken');
       }
 

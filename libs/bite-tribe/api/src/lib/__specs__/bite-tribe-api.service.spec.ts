@@ -56,6 +56,8 @@ class ProfileApiMock {
   publicProfile$ = of(null);
   saveUser = jest.fn();
   updateUser = jest.fn();
+  claimDisplayName = jest.fn();
+  checkDisplayNameAvailability = jest.fn();
   getUserByBiteId = jest.fn();
   getUserById = jest.fn();
   followUser = jest.fn();
@@ -506,6 +508,34 @@ describe(BiteTribeApiService.name, () => {
         const saveUserSpy = jest.spyOn(profileApiService, 'saveUser');
         service.saveUser();
         expect(saveUserSpy).toHaveBeenCalledWith(true);
+      },
+    ));
+  });
+
+  describe('claimDisplayName', () => {
+    it('should call claimDisplayName on ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
+        const claimDisplayNameSpy = jest.spyOn(
+          profileApiService,
+          'claimDisplayName',
+        );
+        service.claimDisplayName('Foodie');
+        expect(claimDisplayNameSpy).toHaveBeenCalledWith('Foodie');
+      },
+    ));
+  });
+
+  describe('checkDisplayNameAvailability', () => {
+    it('should call checkDisplayNameAvailability on ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
+        const checkAvailabilitySpy = jest.spyOn(
+          profileApiService,
+          'checkDisplayNameAvailability',
+        );
+        service.checkDisplayNameAvailability('Foodie');
+        expect(checkAvailabilitySpy).toHaveBeenCalledWith('Foodie');
       },
     ));
   });

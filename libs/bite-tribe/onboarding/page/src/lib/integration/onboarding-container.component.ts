@@ -1,15 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
-import { IonCheckbox, IonText } from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
 import { OnboardingPage } from '../components/onboarding-page/onboarding.page';
 import { OnboardingService } from './onboarding.service';
 
 /**
- * Binds onboarding navigation state to the shell and routes its outputs back
- * into the service. The step body is a placeholder acknowledgment for now; the
- * concrete step content is projected here by follow-up issues (#1014, #1015,
- * #1016).
+ * Binds onboarding service state to the presentational page and routes page
+ * events back into the service.
  */
 @Component({
   selector: 'onboarding-container',
@@ -19,23 +15,18 @@ import { OnboardingService } from './onboarding.service';
     [steps]="service.steps"
     [currentIndex]="service.currentIndex()"
     [canAdvance]="service.canAdvance()"
+    [isCurrentStepValid]="service.isCurrentStepValid()"
+    [profile]="service.profile()"
+    [displayNameAvailability]="service.displayNameAvailability()"
+    [selectedVisibility]="service.selectedVisibility()"
     (next)="service.next()"
     (back)="service.back()"
-  >
-    <ion-text>
-      <p>{{ 'onboarding-step-placeholder' | transloco }}</p>
-    </ion-text>
-
-    <ion-checkbox
-      labelPlacement="end"
-      data-testid="onboarding-acknowledge"
-      [checked]="service.isCurrentStepValid()"
-      (ionChange)="service.setCurrentStepValid($event.detail.checked)"
-    >
-      {{ 'onboarding-acknowledge' | transloco }}
-    </ion-checkbox>
-  </onboarding-page>`,
-  imports: [OnboardingPage, IonText, IonCheckbox, TranslocoPipe],
+    (identityChange)="service.updateIdentity($event)"
+    (checkDisplayName)="service.checkDisplayNameAvailability($event)"
+    (visibilityChange)="service.updateVisibility($event)"
+    (placeholderValidityChange)="service.setCurrentStepValid($event)"
+  />`,
+  imports: [OnboardingPage],
 })
 export class OnboardingContainerComponent {
   service = inject(OnboardingService);

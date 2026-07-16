@@ -12,7 +12,12 @@
   <ion-skeleton-text class="image-loading" [animated]="true" />
 } @else if (showImage()) {
   <div class="image-preview">
-    <img [src]="value() || imageUrl()" alt="Image" />
+    <img
+      [src]="imageSource()"
+      alt="Image"
+      (load)="onImageLoad()"
+      (error)="onImageError()"
+    />
     <div class="image-actions-overlay">
       <ion-button id="edit-button" fill="solid" aria-label="Edit image">
         <ion-icon name="crop-outline" />

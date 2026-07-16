@@ -14,7 +14,7 @@
       <p>{{ 'onboarding-currency-default-hint' | transloco }}</p>
     </ion-label>
     <ion-text slot="end" data-testid="onboarding-currency-default-value">
-      {{ selectedCurrencyName() }}
+      <span class="currency-step__value">{{ selectedCurrencyName() }}</span>
       <ion-icon name="chevron-expand-outline" aria-hidden="true" />
     </ion-text>
   </ion-item>
@@ -30,10 +30,12 @@
       <p>{{ 'onboarding-currency-favorites-hint' | transloco }}</p>
     </ion-label>
     <ion-text slot="end" data-testid="onboarding-currency-favorites-value">
-      {{
-        favoriteCurrencyNames() ||
-          ('onboarding-currency-favorites-empty' | transloco)
-      }}
+      <span class="currency-step__value">
+        {{
+          favoriteCurrencyNames() ||
+            ('onboarding-currency-favorites-empty' | transloco)
+        }}
+      </span>
       <ion-icon name="chevron-expand-outline" aria-hidden="true" />
     </ion-text>
   </ion-item>

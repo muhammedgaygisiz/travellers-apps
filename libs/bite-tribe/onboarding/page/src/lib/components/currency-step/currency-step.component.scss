@@ -19,13 +19,26 @@ ion-item {
     line-height: 1.4;
   }
 
+  // The favorites list has no length limit, so the value must never compete
+  // with the label for width: it stays on one line and truncates. Without this
+  // a long list squeezes the label until its hint wraps alongside the value and
+  // the two read as one run-on sentence at phone widths.
   ion-text {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    max-width: 55%;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 45%;
+    margin-inline-start: 0.75rem;
     color: var(--ion-color-medium);
     font-size: 0.875rem;
     text-align: end;
+
+    .currency-step__value {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
   }
 }

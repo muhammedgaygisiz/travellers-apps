@@ -329,6 +329,35 @@ describe('OnboardingService', () => {
       expect(service.canAdvance()).toBe(true);
     });
 
+    it('keeps identity valid when only the selected photo changes after the display name is available', async () => {
+      setup();
+      await service.initialize();
+
+      service.updateIdentity({ displayName: 'NewName', photoUrl: '' });
+      await service.checkDisplayNameAvailability('NewName');
+      expect(service.canAdvance()).toBe(true);
+
+      service.updateIdentity({
+        displayName: 'NewName',
+        photoUrl: 'data:image/jpeg;base64,new-photo',
+      });
+
+      expect(service.canAdvance()).toBe(true);
+    });
+
+    it('does not allow a changed display name to reuse an earlier available result', async () => {
+      setup();
+      await service.initialize();
+
+      service.updateIdentity({ displayName: 'FirstName', photoUrl: '' });
+      await service.checkDisplayNameAvailability('FirstName');
+      expect(service.canAdvance()).toBe(true);
+
+      service.updateIdentity({ displayName: 'SecondName', photoUrl: '' });
+
+      expect(service.canAdvance()).toBe(false);
+    });
+
     it('ignores stale availability responses', async () => {
       setup([], { displayName: '' });
       let resolveFirst!: (value: {

@@ -37,6 +37,7 @@ export class OnboardingService {
   });
   readonly displayNameAvailability =
     signal<DisplayNameAvailabilityState>('idle');
+  private readonly availableDisplayName = signal<string | null>(null);
   readonly selectedVisibility = signal<boolean | null>(false);
   readonly visibilitySelectionExplicit = signal(false);
 
@@ -106,20 +107,19 @@ export class OnboardingService {
     const displayName = draft.displayName.trim();
     if (!displayName) {
       this.displayNameAvailability.set('idle');
+      this.availableDisplayName.set(null);
       this.setStepValid('identity', false);
       return;
     }
 
-    this.setStepValid(
-      'identity',
-      this.displayNameAvailability() === 'available',
-    );
+    this.setStepValid('identity', this.availableDisplayName() === displayName);
   }
 
   async checkDisplayNameAvailability(displayName: string): Promise<void> {
     const requestedDisplayName = displayName.trim();
     if (!requestedDisplayName) {
       this.displayNameAvailability.set('idle');
+      this.availableDisplayName.set(null);
       this.setStepValid('identity', false);
       return;
     }
@@ -139,9 +139,13 @@ export class OnboardingService {
       this.displayNameAvailability.set(
         result.available ? 'available' : 'taken',
       );
+      this.availableDisplayName.set(
+        result.available ? requestedDisplayName : null,
+      );
       this.setStepValid('identity', result.available);
     } catch (error) {
       const reason = getDisplayNameFailureReason(error);
+      this.availableDisplayName.set(null);
       this.displayNameAvailability.set(
         reason === 'invalid' ? 'invalid' : 'error',
       );
@@ -251,6 +255,7 @@ export class OnboardingService {
             ? 'invalid'
             : 'error',
       );
+      this.availableDisplayName.set(null);
       this.setStepValid('identity', false);
       return false;
     }

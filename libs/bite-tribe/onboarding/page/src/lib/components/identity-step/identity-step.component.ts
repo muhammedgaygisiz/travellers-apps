@@ -6,6 +6,7 @@ import {
   inject,
   input,
   output,
+  untracked,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -63,13 +64,15 @@ export class IdentityStepComponent {
 
   private readonly profileEffect = effect(() => {
     const profile = this.profile();
-    this.form.patchValue(
-      {
-        displayName: profile?.displayName || '',
-        photoUrl: profile?.photoUrl || '',
-      },
-      { emitEvent: false },
-    );
+    untracked(() => {
+      this.form.patchValue(
+        {
+          displayName: profile?.displayName || '',
+          photoUrl: profile?.photoUrl || '',
+        },
+        { emitEvent: false },
+      );
+    });
   });
 
   /**

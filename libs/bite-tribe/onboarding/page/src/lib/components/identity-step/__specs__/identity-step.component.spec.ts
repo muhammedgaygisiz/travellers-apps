@@ -96,6 +96,29 @@ describe(IdentityStepComponent.name, () => {
     expect(checkDisplayName).not.toHaveBeenCalled();
   });
 
+  it('does not overwrite edited identity values when availability changes', () => {
+    fixture.componentRef.setInput('profile', {
+      displayName: 'Mo',
+      photoUrl: 'profile-photo',
+    });
+    fixture.detectChanges();
+
+    component.form.patchValue({
+      displayName: 'Mohammed',
+      photoUrl: 'data:image/jpeg;base64,new-photo',
+    });
+
+    fixture.componentRef.setInput('availability', 'checking');
+    fixture.detectChanges();
+    fixture.componentRef.setInput('availability', 'available');
+    fixture.detectChanges();
+
+    expect(component.form.getRawValue()).toEqual({
+      displayName: 'Mohammed',
+      photoUrl: 'data:image/jpeg;base64,new-photo',
+    });
+  });
+
   it('emits the identity draft and asks for availability after input settles', () => {
     const identityChange = jest.spyOn(component.identityChange, 'emit');
     const checkDisplayName = jest.spyOn(component.checkDisplayName, 'emit');

@@ -1,0 +1,51 @@
+.currency-step {
+  display: grid;
+  gap: 1rem;
+}
+
+.onboarding-step-copy {
+  margin: 0;
+  color: var(--ion-color-medium);
+  line-height: 1.45;
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+
+  ion-label p {
+    color: var(--ion-color-medium);
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  // The favorites list has no length limit, so the value must never compete
+  // with the label for width: it stays on one line and truncates. Without this
+  // a long list squeezes the label until its hint wraps alongside the value and
+  // the two read as one run-on sentence at phone widths.
+  ion-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 45%;
+    margin-inline-start: 0.75rem;
+    color: var(--ion-color-medium);
+    font-size: 0.875rem;
+    text-align: end;
+
+    .currency-step__value {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    // The chevron is the row's only affordance, so it must not be the thing
+    // that gives way when the value is long.
+    ion-icon {
+      flex-shrink: 0;
+      min-width: 1em;
+    }
+  }
+}

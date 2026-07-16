@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -8,8 +9,10 @@ import { of } from 'rxjs';
 import { ONBOARDING_STEPS } from '../../steps/onboarding-steps';
 import { OnboardingContainerComponent } from '../onboarding-container.component';
 import { OnboardingService } from '../onboarding.service';
+import { OnboardingPage } from '../../components/onboarding-page/onboarding.page';
 import type { PublicUser } from 'model';
 import type { DisplayNameAvailabilityState } from '../../components/identity-step/identity-step.component';
+import type { NotificationPermissionState } from '../../components/notification-step/notification-step.component';
 
 jest.mock('@capacitor-firebase/analytics');
 
@@ -35,6 +38,12 @@ describe(OnboardingContainerComponent.name, () => {
       typeof signal<DisplayNameAvailabilityState>
     >;
     selectedVisibility: ReturnType<typeof signal<boolean | null>>;
+    selectedCurrency: ReturnType<typeof signal<string>>;
+    favoriteCurrencies: ReturnType<typeof signal<readonly string[]>>;
+    selectedLanguage: ReturnType<typeof signal<string>>;
+    notificationPermission: ReturnType<
+      typeof signal<NotificationPermissionState>
+    >;
     initialize: jest.Mock;
     next: jest.Mock;
     back: jest.Mock;
@@ -42,6 +51,11 @@ describe(OnboardingContainerComponent.name, () => {
     updateIdentity: jest.Mock;
     checkDisplayNameAvailability: jest.Mock;
     updateVisibility: jest.Mock;
+    updateCurrency: jest.Mock;
+    toggleFavoriteCurrency: jest.Mock;
+    updateLanguage: jest.Mock;
+    requestNotifications: jest.Mock;
+    skipNotifications: jest.Mock;
   };
 
   beforeEach(() => {
@@ -54,6 +68,10 @@ describe(OnboardingContainerComponent.name, () => {
       profile: signal<PublicUser | undefined>(undefined),
       displayNameAvailability: signal<DisplayNameAvailabilityState>('idle'),
       selectedVisibility: signal<boolean | null>(false),
+      selectedCurrency: signal('EUR'),
+      favoriteCurrencies: signal<readonly string[]>([]),
+      selectedLanguage: signal('en'),
+      notificationPermission: signal<NotificationPermissionState>('idle'),
       initialize: jest.fn().mockResolvedValue(undefined),
       next: jest.fn(),
       back: jest.fn(),
@@ -61,6 +79,11 @@ describe(OnboardingContainerComponent.name, () => {
       updateIdentity: jest.fn(),
       checkDisplayNameAvailability: jest.fn(),
       updateVisibility: jest.fn(),
+      updateCurrency: jest.fn(),
+      toggleFavoriteCurrency: jest.fn(),
+      updateLanguage: jest.fn(),
+      requestNotifications: jest.fn(),
+      skipNotifications: jest.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -120,9 +143,25 @@ describe(OnboardingContainerComponent.name, () => {
     ).toBeTruthy();
   });
 
-  it('keeps the acknowledgement placeholder for follow-up steps', () => {
-    serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[2]);
-    serviceMock.currentIndex.set(2);
+  it.each([
+    [2, 'onboarding-currency-step'],
+    [3, 'onboarding-language-step'],
+    [4, 'onboarding-notification-step'],
+  ])('renders the step component for step index %i', (index, selector) => {
+    serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[index]);
+    serviceMock.currentIndex.set(index);
+
+    fixture.detectChanges();
+
+    expect(
+      fixture.debugElement.nativeElement.querySelector(selector),
+    ).toBeTruthy();
+  });
+
+  it('keeps the acknowledgement placeholder for the steps still to come', () => {
+    // Only the finish step (#1016) is still a placeholder.
+    serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[5]);
+    serviceMock.currentIndex.set(5);
 
     fixture.detectChanges();
 
@@ -131,6 +170,27 @@ describe(OnboardingContainerComponent.name, () => {
         '[data-testid="onboarding-acknowledge"]',
       ),
     ).toBeTruthy();
+  });
+
+  it('routes currency, language, and notification events into the service', () => {
+    serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[2]);
+    serviceMock.currentIndex.set(2);
+    fixture.detectChanges();
+
+    const page = fixture.debugElement.query(By.directive(OnboardingPage))
+      .componentInstance as OnboardingPage;
+
+    page.currencyChange.emit('JPY');
+    page.favoriteCurrencyToggle.emit('USD');
+    page.languageChange.emit('tr');
+    page.enableNotifications.emit();
+    page.skipNotifications.emit();
+
+    expect(serviceMock.updateCurrency).toHaveBeenCalledWith('JPY');
+    expect(serviceMock.toggleFavoriteCurrency).toHaveBeenCalledWith('USD');
+    expect(serviceMock.updateLanguage).toHaveBeenCalledWith('tr');
+    expect(serviceMock.requestNotifications).toHaveBeenCalledTimes(1);
+    expect(serviceMock.skipNotifications).toHaveBeenCalledTimes(1);
   });
 
   it('goes back through the service when the shell emits back', () => {

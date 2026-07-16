@@ -1,22 +1,42 @@
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { Preferences } from '@capacitor/preferences';
+import { Platform } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { BiteTribeStoreService } from 'bite-tribe/store';
+import { requestPushPermission } from 'push-notifications';
 import { OnboardingDataAccessService } from '../onboarding-data-access.service';
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: { getDocument: jest.fn() },
 }));
 
+jest.mock('@capacitor/preferences', () => ({
+  Preferences: { set: jest.fn() },
+}));
+
+jest.mock('push-notifications', () => ({
+  requestPushPermission: jest.fn(),
+}));
+
 const getDocument = FirebaseFirestore.getDocument as jest.Mock;
+const preferencesSet = Preferences.set as jest.Mock;
+const requestPushPermissionMock = requestPushPermission as jest.Mock;
 
 describe('OnboardingDataAccessService', () => {
   let service: OnboardingDataAccessService;
   let getUser: jest.Mock;
+  let setActiveLang: jest.Mock;
+  let notifySavedSettings: jest.Mock;
+  let platformMock: Platform;
   let apiMock: {
     checkDisplayNameAvailability: jest.Mock;
     claimDisplayName: jest.Mock;
     updateUser: jest.Mock;
+    loadSettings: jest.Mock;
+    saveSettings: jest.Mock;
   };
 
   const setup = (uid: string | null = 'user-1'): void => {
@@ -40,13 +60,21 @@ describe('OnboardingDataAccessService', () => {
         normalizedDisplayName: 'foodie',
       }),
       updateUser: jest.fn(async (profile) => profile),
+      loadSettings: jest.fn().mockResolvedValue({}),
+      saveSettings: jest.fn().mockResolvedValue(undefined),
     };
+    setActiveLang = jest.fn();
+    notifySavedSettings = jest.fn();
+    platformMock = { is: jest.fn(() => true) } as unknown as Platform;
 
     TestBed.configureTestingModule({
       providers: [
         OnboardingDataAccessService,
         { provide: AuthService, useValue: { getUser } },
         { provide: BiteTribeApiService, useValue: apiMock },
+        { provide: BiteTribeStoreService, useValue: { notifySavedSettings } },
+        { provide: TranslocoService, useValue: { setActiveLang } },
+        { provide: Platform, useValue: platformMock },
       ],
     });
 
@@ -261,5 +289,81 @@ describe('OnboardingDataAccessService', () => {
 
     await expect(service.saveProfile(profile)).resolves.toBe(profile);
     expect(apiMock.updateUser).toHaveBeenCalledWith(profile);
+  });
+
+  describe('loadSettings', () => {
+    it('returns the stored settings', async () => {
+      setup();
+      const settings = { currency: 'CHF', language: 'fr' };
+      apiMock.loadSettings.mockResolvedValue(settings);
+
+      await expect(service.loadSettings()).resolves.toBe(settings);
+    });
+
+    it('treats an empty document as no settings, so the locale prefill wins', async () => {
+      setup();
+      apiMock.loadSettings.mockResolvedValue({});
+
+      await expect(service.loadSettings()).resolves.toBeUndefined();
+    });
+
+    it('treats a read failure as no settings rather than blocking the step', async () => {
+      setup();
+      apiMock.loadSettings.mockRejectedValue(new Error('offline'));
+
+      await expect(service.loadSettings()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('saveSettings', () => {
+    it('writes through the API and syncs the store', async () => {
+      setup();
+      const settings = { currency: 'EUR', language: 'en' } as any;
+
+      await service.saveSettings(settings);
+
+      expect(apiMock.saveSettings).toHaveBeenCalledWith(settings);
+      expect(notifySavedSettings).toHaveBeenCalledWith(settings);
+    });
+
+    it('does not sync the store when the write fails', async () => {
+      setup();
+      apiMock.saveSettings.mockRejectedValue(new Error('offline'));
+
+      await expect(service.saveSettings({} as any)).rejects.toThrow('offline');
+      expect(notifySavedSettings).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('applyLanguage', () => {
+    it('switches the active language and persists it for the next start', async () => {
+      setup();
+
+      await service.applyLanguage('tr');
+
+      expect(preferencesSet).toHaveBeenCalledWith({ key: 'lang', value: 'tr' });
+      expect(setActiveLang).toHaveBeenCalledWith('tr');
+    });
+
+    it('still switches the language when the preference write fails', async () => {
+      // The in-progress flow must stay translated even if the device storage
+      // is unavailable; only the next cold start would lose the choice.
+      setup();
+      preferencesSet.mockRejectedValue(new Error('storage full'));
+
+      await service.applyLanguage('de');
+
+      expect(setActiveLang).toHaveBeenCalledWith('de');
+    });
+  });
+
+  describe('requestPushPermission', () => {
+    it('delegates to the shared push registration', async () => {
+      setup();
+      requestPushPermissionMock.mockResolvedValue('granted');
+
+      await expect(service.requestPushPermission()).resolves.toBe('granted');
+      expect(requestPushPermissionMock).toHaveBeenCalledWith(platformMock);
+    });
   });
 });

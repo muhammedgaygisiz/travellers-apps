@@ -1,0 +1,24 @@
+<div class="language-step">
+  <p class="onboarding-step-copy">
+    {{ 'onboarding-language-copy' | transloco }}
+  </p>
+
+  <ion-select
+    label="{{ 'language' | transloco }}"
+    labelPlacement="stacked"
+    interface="modal"
+    data-testid="onboarding-language-select"
+    [value]="language()"
+    (ionChange)="selectLanguage($event)"
+  >
+    @for (option of languages; track option.code) {
+      <ion-select-option [value]="option.code">
+        {{ option.labelKey | transloco }}
+      </ion-select-option>
+    }
+  </ion-select>
+
+  <p class="onboarding-step-copy language-step__hint">
+    {{ 'onboarding-language-hint' | transloco }}
+  </p>
+</div>

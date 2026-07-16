@@ -98,6 +98,7 @@ export class EditProfilePage {
   });
 
   isOpen = signal(false);
+  failedProfileImageUrl = signal<string | null>(null);
   profileForm = this.formBuilder.group({
     displayName: [''],
     fullName: [''],
@@ -185,5 +186,17 @@ export class EditProfilePage {
 
   dismissImageModal(): void {
     this.profileImageSelectionModal()?.dismiss();
+  }
+
+  shouldShowProfileImage(photoUrl: string | null | undefined): boolean {
+    return !!photoUrl && photoUrl !== this.failedProfileImageUrl();
+  }
+
+  handleProfileImageLoad(): void {
+    this.failedProfileImageUrl.set(null);
+  }
+
+  handleProfileImageError(photoUrl: string | null | undefined): void {
+    this.failedProfileImageUrl.set(photoUrl || null);
   }
 }

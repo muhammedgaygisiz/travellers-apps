@@ -340,6 +340,21 @@ export class ProfileApiService {
     return result.data;
   }
 
+  async checkDisplayNameAvailability(displayName: string): Promise<{
+    available: boolean;
+    normalizedDisplayName: string;
+  }> {
+    const result = await FirebaseFunctions.callByName<
+      { displayName: string },
+      { available: boolean; normalizedDisplayName: string }
+    >({
+      name: 'checkDisplayNameAvailability',
+      data: { displayName },
+    });
+
+    return result.data;
+  }
+
   async followUser(user: PublicUser): Promise<void> {
     try {
       const currentUser = this.authService.getUser();

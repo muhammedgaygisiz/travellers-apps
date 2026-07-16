@@ -1,12 +1,17 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { NavController } from '@ionic/angular';
-import { PATH } from 'utils';
+import { getDisplayNameFailureReason, PATH } from 'utils';
 import {
   OnboardingDataAccessService,
   OnboardingProgressService,
   OnboardingStepId,
 } from 'bite-tribe/onboarding-data-access';
+import type { PublicUser } from 'model';
 import { ONBOARDING_STEPS } from '../steps/onboarding-steps';
+import type {
+  DisplayNameAvailabilityState,
+  OnboardingIdentityDraft,
+} from '../components/identity-step/identity-step.component';
 
 /**
  * Owns onboarding assistant navigation: the ordered step registry, per-step
@@ -24,6 +29,17 @@ export class OnboardingService {
   private readonly navController = inject(NavController);
 
   readonly steps = ONBOARDING_STEPS;
+
+  readonly profile = signal<PublicUser | undefined>(undefined);
+  readonly identityDraft = signal<OnboardingIdentityDraft>({
+    displayName: '',
+    photoUrl: '',
+  });
+  readonly displayNameAvailability =
+    signal<DisplayNameAvailabilityState>('idle');
+  private readonly availableDisplayName = signal<string | null>(null);
+  readonly selectedVisibility = signal<boolean | null>(false);
+  readonly visibilitySelectionExplicit = signal(false);
 
   private readonly completedSteps = signal<ReadonlySet<OnboardingStepId>>(
     new Set(),
@@ -45,6 +61,9 @@ export class OnboardingService {
 
   private initialized = false;
 
+  /** Display name of the most recent availability check still awaiting a result. */
+  private pendingDisplayNameCheck = '';
+
   /**
    * Loads persisted progress and positions the assistant at the first
    * incomplete step. Runs once per app session; re-entering the route does not
@@ -65,10 +84,105 @@ export class OnboardingService {
     // Already-completed steps stay valid so a returning user can move forward.
     this.validSteps.set(new Set(completedSet));
     this.currentIndex.set(this.firstIncompleteIndex(completedSet));
+
+    const profile = await this.dataAccess.loadCurrentProfile();
+    this.profile.set(profile);
+    this.identityDraft.set({
+      displayName: profile?.displayName || '',
+      photoUrl: profile?.photoUrl || '',
+    });
+    this.selectedVisibility.set(profile?.public ?? false);
+
+    const displayName = this.identityDraft().displayName.trim();
+    if (this.currentStep().id === 'identity' && displayName) {
+      await this.checkDisplayNameAvailability(displayName);
+    }
   }
 
   setCurrentStepValid(valid: boolean): void {
     const id = this.currentStep().id;
+    this.setStepValid(id, valid);
+  }
+
+  updateIdentity(draft: OnboardingIdentityDraft): void {
+    this.identityDraft.set(draft);
+
+    const displayName = draft.displayName.trim();
+    if (!displayName) {
+      this.pendingDisplayNameCheck = '';
+      this.displayNameAvailability.set('idle');
+      this.availableDisplayName.set(null);
+      this.setStepValid('identity', false);
+      return;
+    }
+
+    this.setStepValid('identity', this.availableDisplayName() === displayName);
+  }
+
+  async checkDisplayNameAvailability(displayName: string): Promise<void> {
+    const requestedDisplayName = displayName.trim();
+    if (!requestedDisplayName) {
+      this.pendingDisplayNameCheck = '';
+      this.displayNameAvailability.set('idle');
+      this.availableDisplayName.set(null);
+      this.setStepValid('identity', false);
+      return;
+    }
+
+    this.pendingDisplayNameCheck = requestedDisplayName;
+    this.displayNameAvailability.set('checking');
+
+    try {
+      const result =
+        await this.dataAccess.checkDisplayNameAvailability(
+          requestedDisplayName,
+        );
+
+      if (this.isSupersededCheck(requestedDisplayName)) {
+        return;
+      }
+
+      this.displayNameAvailability.set(
+        result.available ? 'available' : 'taken',
+      );
+      this.availableDisplayName.set(
+        result.available ? requestedDisplayName : null,
+      );
+      this.setStepValid('identity', result.available);
+    } catch (error) {
+      if (this.isSupersededCheck(requestedDisplayName)) {
+        return;
+      }
+
+      const reason = getDisplayNameFailureReason(error);
+      this.availableDisplayName.set(null);
+      this.displayNameAvailability.set(
+        reason === 'invalid' ? 'invalid' : 'error',
+      );
+      this.setStepValid('identity', false);
+    }
+  }
+
+  /**
+   * A response only counts as stale once a newer check has started. The step
+   * emits the identity draft and the availability check on two independent
+   * debounced streams, so comparing against the draft would discard fresh
+   * results and leave the step stuck on "checking" forever.
+   */
+  private isSupersededCheck(requestedDisplayName: string): boolean {
+    return this.pendingDisplayNameCheck !== requestedDisplayName;
+  }
+
+  updateVisibility(isPublic: boolean): void {
+    this.selectedVisibility.set(isPublic);
+    this.visibilitySelectionExplicit.set(true);
+    this.setStepValid('visibility', true);
+  }
+
+  private setStepValid(id: OnboardingStepId, valid: boolean): void {
+    if (id === 'visibility' && !this.visibilitySelectionExplicit()) {
+      valid = false;
+    }
 
     this.validSteps.update((set) => {
       const next = new Set(set);
@@ -83,6 +197,10 @@ export class OnboardingService {
 
   async next(): Promise<void> {
     if (!this.canAdvance()) {
+      return;
+    }
+
+    if (!(await this.persistCurrentStep())) {
       return;
     }
 
@@ -111,6 +229,72 @@ export class OnboardingService {
   private async markComplete(id: OnboardingStepId): Promise<void> {
     this.completedSteps.update((set) => new Set(set).add(id));
     await this.progress.saveCompletedSteps([...this.completedSteps()]);
+  }
+
+  private async persistCurrentStep(): Promise<boolean> {
+    const id = this.currentStep().id;
+
+    if (id === 'identity') {
+      return this.persistIdentityStep();
+    }
+
+    if (id === 'visibility') {
+      return this.persistVisibilityStep();
+    }
+
+    return true;
+  }
+
+  private async persistIdentityStep(): Promise<boolean> {
+    const profile = this.profile();
+    const draft = this.identityDraft();
+    const displayName = draft.displayName.trim();
+
+    if (!profile || !displayName) {
+      this.setStepValid('identity', false);
+      return false;
+    }
+
+    try {
+      const claim = await this.dataAccess.claimDisplayName(displayName);
+      const updated = await this.dataAccess.saveProfile({
+        ...profile,
+        displayName: claim.displayName,
+        normalizedDisplayName: claim.normalizedDisplayName,
+        fullName: profile.fullName || claim.displayName,
+        photoUrl: draft.photoUrl || '',
+      });
+      this.profile.set(updated);
+      return true;
+    } catch (error) {
+      const reason = getDisplayNameFailureReason(error);
+      this.displayNameAvailability.set(
+        reason === 'taken'
+          ? 'taken'
+          : reason === 'invalid'
+            ? 'invalid'
+            : 'error',
+      );
+      this.availableDisplayName.set(null);
+      this.setStepValid('identity', false);
+      return false;
+    }
+  }
+
+  private async persistVisibilityStep(): Promise<boolean> {
+    const profile = this.profile();
+
+    if (!profile || !this.visibilitySelectionExplicit()) {
+      this.setStepValid('visibility', false);
+      return false;
+    }
+
+    const updated = await this.dataAccess.saveProfile({
+      ...profile,
+      public: this.selectedVisibility() === true,
+    });
+    this.profile.set(updated);
+    return true;
   }
 
   private firstIncompleteIndex(

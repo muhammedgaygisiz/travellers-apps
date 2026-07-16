@@ -17,11 +17,13 @@ const seedUser = async (
   uid: string,
   displayName: string,
   createdAtTimestamp: number,
+  extraData: Record<string, unknown> = {},
 ): Promise<void> => {
   await userRef(uid).set({
     userId: uid,
     displayName,
     createdAtTimestamp,
+    ...extraData,
   });
 };
 
@@ -142,6 +144,48 @@ describe('display name claims emulator integration', () => {
     expect(
       await checkDisplayNameAvailabilityForUser('user-2', 'Free'),
     ).toMatchObject({ available: true });
+  });
+
+  it('treats a legacy user display name without a claim as unavailable', async () => {
+    await Promise.all([
+      seedUser('user-1', 'Organisation A', 1),
+      seedUser('user-2', '', 2),
+    ]);
+
+    expect(
+      await checkDisplayNameAvailabilityForUser('user-2', 'Organisation A'),
+    ).toMatchObject({
+      available: false,
+      normalizedDisplayName: 'organisation a',
+    });
+
+    await expect(
+      claimDisplayNameForUser('user-2', 'Organisation A'),
+    ).rejects.toMatchObject({
+      message: 'display_name_taken',
+    });
+  });
+
+  it('treats a legacy normalized display name without a claim as unavailable', async () => {
+    await Promise.all([
+      seedUser('user-1', 'organisation a', 1, {
+        normalizedDisplayName: 'organisation a',
+      }),
+      seedUser('user-2', '', 2),
+    ]);
+
+    expect(
+      await checkDisplayNameAvailabilityForUser('user-2', 'Organisation A'),
+    ).toMatchObject({
+      available: false,
+      normalizedDisplayName: 'organisation a',
+    });
+
+    await expect(
+      claimDisplayNameForUser('user-2', 'Organisation A'),
+    ).rejects.toMatchObject({
+      message: 'display_name_taken',
+    });
   });
 
   it('backfills existing names first-come, leaving later collisions unclaimed', async () => {

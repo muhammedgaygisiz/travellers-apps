@@ -1,0 +1,53 @@
+<form [formGroup]="form" class="identity-step">
+  <p class="onboarding-step-copy">
+    {{ 'onboarding-identity-copy' | transloco }}
+  </p>
+
+  <div class="identity-step__photo">
+    <image-upload formControlName="photoUrl" />
+    <p>{{ 'onboarding-identity-photo-optional' | transloco }}</p>
+  </div>
+
+  <ion-input
+    label="{{ 'display-name' | transloco }}"
+    placeholder="{{ 'enter-display-name' | transloco }}"
+    formControlName="displayName"
+    fill="outline"
+    mode="md"
+    data-testid="onboarding-display-name"
+  />
+
+  <div
+    class="identity-step__status"
+    data-testid="onboarding-display-name-status"
+  >
+    @switch (availability()) {
+      @case ('checking') {
+        <ion-spinner name="dots" />
+        <ion-text color="medium">
+          {{ 'onboarding-display-name-checking' | transloco }}
+        </ion-text>
+      }
+      @case ('available') {
+        <ion-text color="success">
+          {{ 'onboarding-display-name-available' | transloco }}
+        </ion-text>
+      }
+      @case ('taken') {
+        <ion-text color="danger">
+          {{ 'onboarding-display-name-taken' | transloco }}
+        </ion-text>
+      }
+      @case ('invalid') {
+        <ion-text color="danger">
+          {{ 'onboarding-display-name-invalid' | transloco }}
+        </ion-text>
+      }
+      @case ('error') {
+        <ion-text color="danger">
+          {{ 'onboarding-display-name-error' | transloco }}
+        </ion-text>
+      }
+    }
+  </div>
+</form>

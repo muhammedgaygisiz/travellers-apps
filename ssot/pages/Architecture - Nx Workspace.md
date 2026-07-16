@@ -39,6 +39,28 @@ libs/common
 
 Prefer existing library boundaries over new abstractions. Add a new abstraction only when it removes real complexity or matches an existing local pattern.
 
+## Bundle Budget Rule
+
+`apps/bite-tribe` enforces an initial bundle budget of 3 MB (error) and 500 kB (warning). The error budget fails the production build in CI.
+
+Every consumer route is lazy through `loadComponent`. A route that references its component statically pulls that component's whole dependency chain into the initial bundle, so route components should stay lazy.
+
+Keep large optional dependencies out of the initial bundle at their source rather than through routing. Import them on demand inside the function that needs them:
+
+```ts
+const { default: heic2any } = await import('heic2any');
+```
+
+This is preferred over lazy routing because it benefits every consumer of the shared library at once. Loading `heic2any` on demand removed roughly 1.4 MB from the initial bundle and helps every feature that uploads an image.
+
+## Lazy Library Rule
+
+Nx forbids statically importing a library that is also lazily loaded (`@nx/enforce-module-boundaries`: _"Static imports of lazy-loaded libraries are forbidden"_). The rule applies per **project**, not per file, so a second entry point inside the same project does not satisfy it.
+
+Route guards must be imported statically to build the route config. A lazily loaded feature library therefore cannot also export that route's guards: the guards belong in their own project. `bite-tribe/onboarding-guards` is the split that exists for this pattern.
+
+Before reaching for lazy routing to fix a bundle, prefer the on-demand dependency import above: it is cheaper, has no module-boundary consequences, and helps every consumer.
+
 ## Validation Rule
 
 Use focused Nx targets when they are reliable. If Nx daemon or graph behavior hangs, use direct Jest/build/lint commands for the touched project and still run `git diff --check`.

@@ -53,6 +53,31 @@ Use `libs/bite-tribe/api` for shared Firebase, Firestore, and Storage operations
 
 Do not duplicate shared Firebase access logic inside unrelated feature libraries.
 
+## Signals And Reactive Forms
+
+Effects that write to a reactive form need care. These have all caused real defects.
+
+**Wrap form writes in `untracked()`.** An `effect` tracks every signal read while it runs, including signals read indirectly. `patchValue` runs the control's validators, so a validator that reads a signal makes the effect depend on it. The effect then re-runs whenever that signal changes, patches again, and loops — which can mean an endless stream of backend requests.
+
+```ts
+effect(() => {
+  const profile = this.profile();
+  untracked(() => this.form.patchValue({ ... }, { emitEvent: false }));
+});
+```
+
+**Never let an async prefill overwrite user input.** Profile data resolves after the form renders, so a prefill effect can land while the user is already typing. Guard on `dirty`:
+
+```ts
+if (this.form.dirty) {
+  return;
+}
+```
+
+**Guard stale async results against the latest request, not against other state.** A "discard if the value changed" check that compares against a signal fed by a _different_ stream will discard fresh results whenever the streams land out of order, leaving the UI stuck in its pending state forever. Track the most recent request and only discard when a newer one has superseded it.
+
+**Reflect external state into the form through a validator, not `setErrors`.** A manual `setErrors` is wiped the next time the control's value updates, because Angular re-runs validation and finds no validators. A validator re-derives the error on every value change instead. Trigger it with `updateValueAndValidity({ emitEvent: false })` when the external state changes. This is how Ionic's native invalid styling is driven; see [[Implementation - Ionic Patterns]].
+
 ## Image Pattern
 
 For Bite images, prefer this display fallback:

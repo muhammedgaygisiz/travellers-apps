@@ -47,6 +47,9 @@
       "bite-tribe-common/map": ["libs/bite-tribe-common/map/src/index.ts"],
       "bite-tribe/api": ["libs/bite-tribe/api/src/index.ts"],
       "bite-tribe/onboarding": ["libs/bite-tribe/onboarding/page/src/index.ts"],
+      "bite-tribe/onboarding-guards": [
+        "libs/bite-tribe/onboarding/guards/src/index.ts"
+      ],
       "bite-tribe/onboarding-data-access": [
         "libs/bite-tribe/onboarding/data-access/src/index.ts"
       ],

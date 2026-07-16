@@ -525,6 +525,52 @@ describe(ProfileApiService.name, () => {
     ));
   });
 
+  describe('claimDisplayName', () => {
+    it('should call claimDisplayName firebase function and return the claim', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const claim = {
+          displayName: 'Foodie',
+          normalizedDisplayName: 'foodie',
+        };
+        jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+          data: claim,
+        });
+
+        const result = await service.claimDisplayName('Foodie');
+
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'claimDisplayName',
+          data: { displayName: 'Foodie' },
+        });
+        expect(result).toEqual(claim);
+      },
+    ));
+  });
+
+  describe('checkDisplayNameAvailability', () => {
+    it('should call checkDisplayNameAvailability firebase function', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const availability = {
+          available: true,
+          normalizedDisplayName: 'foodie',
+        };
+        jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+          data: availability,
+        });
+
+        const result = await service.checkDisplayNameAvailability('Foodie');
+
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'checkDisplayNameAvailability',
+          data: { displayName: 'Foodie' },
+        });
+        expect(result).toEqual(availability);
+      },
+    ));
+  });
+
   describe('getUserByBiteId', () => {
     describe('given no bite', () => {
       it('should return empty observable', inject(

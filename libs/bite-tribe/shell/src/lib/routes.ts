@@ -4,9 +4,9 @@ import { authGuard, freshSessionGuard, startGuard } from 'ta-firestore';
 import { biteTitleResolver } from 'bite-tribe/store';
 import {
   gateAuthenticatedRoutes,
-  OnboardingContainerComponent,
   onboardingCompletedGuard,
-} from 'bite-tribe/onboarding';
+} from 'bite-tribe/onboarding-guards';
+import { OnboardingContainerComponent } from 'bite-tribe/onboarding';
 import { PATH } from 'utils';
 
 const APP_ROUTES: Routes = [
@@ -234,10 +234,10 @@ const APP_ROUTES: Routes = [
   },
 ];
 
-// The onboarding entry-gate guards must be imported statically (like the other
-// route guards), so the placeholder component from the same library is imported
-// statically too rather than lazily — mixing both for one library is forbidden.
-// The real assistant shell arrives in a follow-up issue and can be split out.
+// The entry-gate guards must be imported statically (like every other route
+// guard), but the assistant itself is lazy: it pulls in the profile image
+// upload chain (image compression, cropper, EXIF), which must not sit in the
+// initial bundle for a flow each user sees once.
 const ONBOARDING_ROUTE: Route = {
   path: PATH.ONBOARDING,
   component: OnboardingContainerComponent,

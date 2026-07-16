@@ -6,6 +6,7 @@ import {
   gateAuthenticatedRoutes,
   onboardingCompletedGuard,
 } from 'bite-tribe/onboarding-guards';
+import { OnboardingContainerComponent } from 'bite-tribe/onboarding';
 import { PATH } from 'utils';
 
 const APP_ROUTES: Routes = [
@@ -239,8 +240,7 @@ const APP_ROUTES: Routes = [
 // initial bundle for a flow each user sees once.
 const ONBOARDING_ROUTE: Route = {
   path: PATH.ONBOARDING,
-  loadComponent: () =>
-    import('bite-tribe/onboarding').then((m) => m.OnboardingContainerComponent),
+  component: OnboardingContainerComponent,
   title: 'Onboarding',
   canActivate: [authGuard, onboardingCompletedGuard],
 };

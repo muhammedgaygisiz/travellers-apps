@@ -61,6 +61,9 @@ export class OnboardingService {
 
   private initialized = false;
 
+  /** Display name of the most recent availability check still awaiting a result. */
+  private pendingDisplayNameCheck = '';
+
   /**
    * Loads persisted progress and positions the assistant at the first
    * incomplete step. Runs once per app session; re-entering the route does not
@@ -106,6 +109,7 @@ export class OnboardingService {
 
     const displayName = draft.displayName.trim();
     if (!displayName) {
+      this.pendingDisplayNameCheck = '';
       this.displayNameAvailability.set('idle');
       this.availableDisplayName.set(null);
       this.setStepValid('identity', false);
@@ -118,12 +122,14 @@ export class OnboardingService {
   async checkDisplayNameAvailability(displayName: string): Promise<void> {
     const requestedDisplayName = displayName.trim();
     if (!requestedDisplayName) {
+      this.pendingDisplayNameCheck = '';
       this.displayNameAvailability.set('idle');
       this.availableDisplayName.set(null);
       this.setStepValid('identity', false);
       return;
     }
 
+    this.pendingDisplayNameCheck = requestedDisplayName;
     this.displayNameAvailability.set('checking');
 
     try {
@@ -132,7 +138,7 @@ export class OnboardingService {
           requestedDisplayName,
         );
 
-      if (this.identityDraft().displayName !== requestedDisplayName) {
+      if (this.isSupersededCheck(requestedDisplayName)) {
         return;
       }
 
@@ -144,6 +150,10 @@ export class OnboardingService {
       );
       this.setStepValid('identity', result.available);
     } catch (error) {
+      if (this.isSupersededCheck(requestedDisplayName)) {
+        return;
+      }
+
       const reason = getDisplayNameFailureReason(error);
       this.availableDisplayName.set(null);
       this.displayNameAvailability.set(
@@ -151,6 +161,16 @@ export class OnboardingService {
       );
       this.setStepValid('identity', false);
     }
+  }
+
+  /**
+   * A response only counts as stale once a newer check has started. The step
+   * emits the identity draft and the availability check on two independent
+   * debounced streams, so comparing against the draft would discard fresh
+   * results and leave the step stuck on "checking" forever.
+   */
+  private isSupersededCheck(requestedDisplayName: string): boolean {
+    return this.pendingDisplayNameCheck !== requestedDisplayName;
   }
 
   updateVisibility(isPublic: boolean): void {

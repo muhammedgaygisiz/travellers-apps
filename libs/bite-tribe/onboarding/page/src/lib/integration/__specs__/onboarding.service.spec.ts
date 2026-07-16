@@ -358,6 +358,21 @@ describe('OnboardingService', () => {
       expect(service.canAdvance()).toBe(false);
     });
 
+    it('applies the result when the check resolves before the draft update', async () => {
+      // The step emits the availability check and the identity draft on two
+      // independent debounced streams, so the check can resolve before the
+      // draft lands. The result must still be applied, otherwise the step
+      // stays stuck on "checking" and can never be completed.
+      setup();
+      await service.initialize();
+
+      await service.checkDisplayNameAvailability('NewName');
+      service.updateIdentity({ displayName: 'NewName', photoUrl: '' });
+
+      expect(service.displayNameAvailability()).toBe('available');
+      expect(service.canAdvance()).toBe(true);
+    });
+
     it('ignores stale availability responses', async () => {
       setup([], { displayName: '' });
       let resolveFirst!: (value: {

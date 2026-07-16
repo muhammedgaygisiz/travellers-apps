@@ -65,6 +65,14 @@ export class IdentityStepComponent {
   private readonly profileEffect = effect(() => {
     const profile = this.profile();
     untracked(() => {
+      // The profile resolves asynchronously, so it can land after the user has
+      // already started typing. Prefilling then would silently overwrite their
+      // input and leave the availability check racing a value they never
+      // entered, so only prefill while the form is still untouched.
+      if (this.form.dirty) {
+        return;
+      }
+
       this.form.patchValue(
         {
           displayName: profile?.displayName || '',

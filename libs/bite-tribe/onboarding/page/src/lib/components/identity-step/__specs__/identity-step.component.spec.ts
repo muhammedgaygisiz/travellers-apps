@@ -119,6 +119,23 @@ describe(IdentityStepComponent.name, () => {
     });
   });
 
+  it('keeps a name the user typed before the profile arrives', () => {
+    fixture.detectChanges();
+
+    // The user starts typing while the profile is still loading. Angular marks
+    // the control dirty on real input, which is what protects it here.
+    component.form.controls.displayName.setValue('Typed Name');
+    component.form.controls.displayName.markAsDirty();
+
+    fixture.componentRef.setInput('profile', {
+      displayName: 'Stored Name',
+      photoUrl: 'stored-photo',
+    });
+    fixture.detectChanges();
+
+    expect(component.form.controls.displayName.value).toBe('Typed Name');
+  });
+
   it('emits the identity draft and asks for availability after input settles', () => {
     const identityChange = jest.spyOn(component.identityChange, 'emit');
     const checkDisplayName = jest.spyOn(component.checkDisplayName, 'emit');

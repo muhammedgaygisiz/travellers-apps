@@ -40,5 +40,12 @@ ion-item {
       white-space: nowrap;
       text-overflow: ellipsis;
     }
+
+    // The chevron is the row's only affordance, so it must not be the thing
+    // that gives way when the value is long.
+    ion-icon {
+      flex-shrink: 0;
+      min-width: 1em;
+    }
   }
 }

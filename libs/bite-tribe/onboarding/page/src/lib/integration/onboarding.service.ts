@@ -88,6 +88,11 @@ export class OnboardingService {
       photoUrl: profile?.photoUrl || '',
     });
     this.selectedVisibility.set(profile?.public ?? false);
+
+    const displayName = this.identityDraft().displayName.trim();
+    if (this.currentStep().id === 'identity' && displayName) {
+      await this.checkDisplayNameAvailability(displayName);
+    }
   }
 
   setCurrentStepValid(valid: boolean): void {

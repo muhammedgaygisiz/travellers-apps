@@ -111,9 +111,16 @@ export class ImageUploadComponent implements ControlValueAccessor {
   croppedImage = signal<string | null | undefined>(null);
   canvasRotation = signal(0);
   isLoading = signal(false);
+  failedImageSource = signal<string | null>(null);
+
+  imageSource = computed(() => {
+    return this.value() || this.imageUrl() || null;
+  });
 
   showImage = computed(() => {
-    return !!this.value() || !!this.imageUrl();
+    const imageSource = this.imageSource();
+
+    return !!imageSource && imageSource !== this.failedImageSource();
   });
 
   imageFile?: File;
@@ -367,6 +374,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   clearImage(): void {
     this.value.set(null);
+    this.failedImageSource.set(null);
     this._onChange(null);
 
     const fallbackPosition = this.position();
@@ -424,5 +432,13 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
   onImageCrop($event: ImageCroppedEvent): void {
     this.croppedImage.set($event.base64);
+  }
+
+  onImageLoad(): void {
+    this.failedImageSource.set(null);
+  }
+
+  onImageError(): void {
+    this.failedImageSource.set(this.imageSource());
   }
 }

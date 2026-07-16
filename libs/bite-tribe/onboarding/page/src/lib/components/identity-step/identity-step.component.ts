@@ -15,7 +15,7 @@ import {
 import { IonInput, IonSpinner, IonText } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { PublicUser } from 'model';
-import { debounceTime, startWith } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ImageUploadComponent } from 'image-upload';
 
@@ -68,7 +68,7 @@ export class IdentityStepComponent {
         displayName: profile?.displayName || '',
         photoUrl: profile?.photoUrl || '',
       },
-      { emitEvent: true },
+      { emitEvent: false },
     );
   });
 
@@ -104,11 +104,7 @@ export class IdentityStepComponent {
 
   constructor() {
     this.form.valueChanges
-      .pipe(
-        startWith(this.form.getRawValue()),
-        debounceTime(250),
-        takeUntilDestroyed(this.destroyRef),
-      )
+      .pipe(debounceTime(250), takeUntilDestroyed(this.destroyRef))
       .subscribe((value) => {
         const draft = {
           displayName: (value.displayName ?? '').trim(),
@@ -116,9 +112,18 @@ export class IdentityStepComponent {
         };
 
         this.identityChange.emit(draft);
+      });
 
-        if (draft.displayName) {
-          this.checkDisplayName.emit(draft.displayName);
+    this.form.controls.displayName.valueChanges
+      .pipe(
+        map((displayName) => displayName.trim()),
+        debounceTime(250),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((displayName) => {
+        if (displayName) {
+          this.checkDisplayName.emit(displayName);
         }
       });
   }

@@ -20,7 +20,10 @@ describe('OnboardingService', () => {
   let saveProfile: jest.Mock;
   let navigateRoot: jest.Mock;
 
-  const setup = (completed: OnboardingStepId[] = []): void => {
+  const setup = (
+    completed: OnboardingStepId[] = [],
+    profile: Record<string, unknown> = {},
+  ): void => {
     loadCompletedSteps = jest.fn().mockResolvedValue(completed);
     saveCompletedSteps = jest.fn().mockResolvedValue(undefined);
     dismissForSession = jest.fn();
@@ -32,6 +35,7 @@ describe('OnboardingService', () => {
       email: 'current@example.com',
       photoUrl: 'current-photo',
       public: false,
+      ...profile,
     });
     checkDisplayNameAvailability = jest.fn().mockResolvedValue({
       available: true,
@@ -90,8 +94,9 @@ describe('OnboardingService', () => {
       await service.initialize();
 
       expect(service.currentIndex()).toBe(0);
-      expect(service.canAdvance()).toBe(false);
+      expect(service.canAdvance()).toBe(true);
       expect(loadCurrentProfile).toHaveBeenCalledTimes(1);
+      expect(checkDisplayNameAvailability).toHaveBeenCalledWith('CurrentName');
     });
 
     it('resumes at the first incomplete step', async () => {
@@ -136,11 +141,20 @@ describe('OnboardingService', () => {
 
       expect(loadCompletedSteps).toHaveBeenCalledTimes(1);
     });
+
+    it('does not validate identity during initialization when no display name is available', async () => {
+      setup([], { displayName: '' });
+
+      await service.initialize();
+
+      expect(service.canAdvance()).toBe(false);
+      expect(checkDisplayNameAvailability).not.toHaveBeenCalled();
+    });
   });
 
   describe('next', () => {
     it('does not advance while the current step is invalid', async () => {
-      setup();
+      setup([], { displayName: '' });
       await service.initialize();
 
       await service.next();
@@ -316,7 +330,7 @@ describe('OnboardingService', () => {
     });
 
     it('ignores stale availability responses', async () => {
-      setup();
+      setup([], { displayName: '' });
       let resolveFirst!: (value: {
         available: boolean;
         normalizedDisplayName: string;

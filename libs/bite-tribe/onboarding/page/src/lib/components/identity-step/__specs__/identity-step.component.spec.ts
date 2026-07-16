@@ -81,6 +81,21 @@ describe(IdentityStepComponent.name, () => {
     });
   });
 
+  it('does not emit draft or availability events when profile data hydrates the form', () => {
+    const identityChange = jest.spyOn(component.identityChange, 'emit');
+    const checkDisplayName = jest.spyOn(component.checkDisplayName, 'emit');
+
+    fixture.componentRef.setInput('profile', {
+      displayName: 'Mo',
+      photoUrl: 'profile-photo',
+    });
+    fixture.detectChanges();
+    jest.advanceTimersByTime(250);
+
+    expect(identityChange).not.toHaveBeenCalled();
+    expect(checkDisplayName).not.toHaveBeenCalled();
+  });
+
   it('emits the identity draft and asks for availability after input settles', () => {
     const identityChange = jest.spyOn(component.identityChange, 'emit');
     const checkDisplayName = jest.spyOn(component.checkDisplayName, 'emit');
@@ -104,6 +119,31 @@ describe(IdentityStepComponent.name, () => {
     component.form.patchValue({ displayName: '   ' });
     jest.advanceTimersByTime(250);
 
+    expect(checkDisplayName).not.toHaveBeenCalled();
+  });
+
+  it('does not ask for availability again when only the photo changes', () => {
+    const checkDisplayName = jest.spyOn(component.checkDisplayName, 'emit');
+
+    component.form.patchValue({ displayName: 'NewName' });
+    jest.advanceTimersByTime(250);
+    expect(checkDisplayName).toHaveBeenCalledTimes(1);
+
+    component.form.patchValue({ photoUrl: 'new-photo' });
+    jest.advanceTimersByTime(250);
+
+    expect(checkDisplayName).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not emit form changes when availability changes revalidate the control', () => {
+    const identityChange = jest.spyOn(component.identityChange, 'emit');
+    const checkDisplayName = jest.spyOn(component.checkDisplayName, 'emit');
+
+    fixture.componentRef.setInput('availability', 'taken');
+    fixture.detectChanges();
+    jest.advanceTimersByTime(250);
+
+    expect(identityChange).not.toHaveBeenCalled();
     expect(checkDisplayName).not.toHaveBeenCalled();
   });
 

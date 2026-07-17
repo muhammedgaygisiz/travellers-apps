@@ -17,6 +17,7 @@ export const ONBOARDING_STEPS: readonly OnboardingStepDefinition[] = [
   { id: 'visibility', titleKey: 'onboarding-step-visibility' },
   { id: 'currency', titleKey: 'onboarding-step-currency' },
   { id: 'language', titleKey: 'onboarding-step-language' },
+  { id: 'location', titleKey: 'onboarding-step-location' },
   { id: 'notifications', titleKey: 'onboarding-step-notifications' },
   { id: 'finish', titleKey: 'onboarding-step-finish' },
 ];

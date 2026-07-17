@@ -1,0 +1,66 @@
+<div class="location-step">
+  <p class="onboarding-step-copy">
+    {{ 'onboarding-location-copy' | transloco }}
+  </p>
+
+  <ul class="location-step__benefits">
+    <li>{{ 'onboarding-location-benefit-feed' | transloco }}</li>
+    <li>{{ 'onboarding-location-benefit-map' | transloco }}</li>
+    <li>{{ 'onboarding-location-benefit-distance' | transloco }}</li>
+    <li>{{ 'onboarding-location-benefit-create' | transloco }}</li>
+  </ul>
+
+  @switch (permission()) {
+    @case ('granted') {
+      <p
+        class="location-step__outcome location-step__outcome--granted"
+        data-testid="onboarding-location-outcome"
+      >
+        <ion-icon name="checkmark-circle-outline" aria-hidden="true" />
+        {{ 'onboarding-location-granted' | transloco }}
+      </p>
+    }
+    @case ('denied') {
+      <p
+        class="location-step__outcome"
+        data-testid="onboarding-location-outcome"
+      >
+        {{ 'onboarding-location-denied' | transloco }}
+      </p>
+    }
+    @case ('unsupported') {
+      <p
+        class="location-step__outcome"
+        data-testid="onboarding-location-outcome"
+      >
+        {{ 'onboarding-location-unsupported' | transloco }}
+      </p>
+    }
+  }
+
+  @if (!isDecided()) {
+    <div class="location-step__actions">
+      <ion-button
+        expand="block"
+        data-testid="onboarding-location-enable"
+        [disabled]="isRequesting()"
+        (click)="enableLocation.emit()"
+      >
+        @if (isRequesting()) {
+          <ion-spinner name="dots" slot="start" />
+        }
+        {{ 'onboarding-location-enable' | transloco }}
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        fill="clear"
+        data-testid="onboarding-location-skip"
+        [disabled]="isRequesting()"
+        (click)="skipLocation.emit()"
+      >
+        {{ 'onboarding-location-skip' | transloco }}
+      </ion-button>
+    </div>
+  }
+</div>

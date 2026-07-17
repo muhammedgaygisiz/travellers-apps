@@ -168,6 +168,10 @@ export class PageSettings {
     this.submitSettings.emit({
       ...newSettings,
       pushNotifications: !!newSettings.pushNotifications,
+      // The location grant is recorded by onboarding and has no control on this
+      // page. It is carried through explicitly because the settings write
+      // replaces the document, so anything the form does not know about is lost.
+      location: !!this.settings()?.location,
       emailUpdates: !!newSettings.emailUpdates,
       theme,
       currency: newSettings.currency || 'EUR',

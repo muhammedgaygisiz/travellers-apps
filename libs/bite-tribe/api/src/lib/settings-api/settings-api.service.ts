@@ -20,7 +20,7 @@ export class SettingsApiService {
     return loadSettingsByUserId(userId);
   }
 
-  async saveSettings(settings: any): Promise<void> {
+  async saveSettings(settings: object): Promise<void> {
     try {
       const user = this.authService.getUser();
       if (!user?.uid) {

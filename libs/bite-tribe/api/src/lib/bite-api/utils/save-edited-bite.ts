@@ -9,8 +9,10 @@ export const saveEditedBite = async (
   isWeb: boolean,
   bite: Bite,
 ): Promise<void> => {
+  void isWeb;
   if (bite.imagePath && bite.image) {
     const { image, ...biteWithoutImage } = bite;
+    void image;
 
     await replaceImageInFirestoreStorage(
       image,
@@ -24,6 +26,7 @@ export const saveEditedBite = async (
 
   if (bite.imagePath && !bite.image) {
     const { image, ...biteWithoutImage } = bite;
+    void image;
 
     await FirebaseFirestore.updateDocument({
       reference: `${BITE_COLLECTION}/${bite.id}`,
@@ -57,6 +60,7 @@ export const saveEditedBite = async (
     // Bite created in old style only with base64 image
     // so we do not have a imagePath yet
     const { image, imagePath, ...biteWithoutImage } = bite;
+    void imagePath;
     await uploadImageAndUpdateBite({
       imageBase64: image,
       biteId: bite.id,

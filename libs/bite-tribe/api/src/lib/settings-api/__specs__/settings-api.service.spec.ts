@@ -185,7 +185,7 @@ describe(SettingsApiService.name, () => {
 
           try {
             await service.saveSettings(settingsToSave);
-          } catch (error) {
+          } catch {
             // Expected to throw
           }
 

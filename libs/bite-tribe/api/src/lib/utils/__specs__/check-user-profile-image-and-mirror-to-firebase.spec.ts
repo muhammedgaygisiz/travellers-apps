@@ -45,15 +45,13 @@ describe(checkUserProfileImageAndMirrorToFirebase.name, () => {
     let fetchSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      fetchSpy = jest
-        .spyOn(global, 'fetch')
-        .mockImplementation(async (url: any) => {
-          return {
-            ok: true,
-            blob: async () =>
-              new Blob(['avatar content'], { type: 'image/jpeg' }),
-          } as Response;
-        });
+      fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(async () => {
+        return {
+          ok: true,
+          blob: async () =>
+            new Blob(['avatar content'], { type: 'image/jpeg' }),
+        } as Response;
+      });
 
       (uploadBlobToFirebasestorage as jest.Mock).mockResolvedValue(
         'https://url-to-mirrored-image.com/avatar.jpg',
@@ -90,13 +88,11 @@ describe(checkUserProfileImageAndMirrorToFirebase.name, () => {
     let fetchSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      fetchSpy = jest
-        .spyOn(global, 'fetch')
-        .mockImplementation(async (url: any) => {
-          return {
-            ok: false,
-          } as Response;
-        });
+      fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(async () => {
+        return {
+          ok: false,
+        } as Response;
+      });
     });
 
     it('should return the same user without mirroring', async () => {

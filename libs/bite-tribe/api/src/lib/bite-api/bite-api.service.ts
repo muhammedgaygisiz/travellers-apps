@@ -102,6 +102,7 @@ export class BiteApiService {
     callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
   ): Promise<void> {
     const { image, ...biteDocWithoutImage } = bite;
+    void biteDocWithoutImage;
 
     uploadBase64ToFirebaseStorage({
       base64: image,
@@ -116,6 +117,7 @@ export class BiteApiService {
     imagePath: string,
   ): Promise<Bite> {
     const { image, ...biteWithoutImage } = bite;
+    void image;
 
     await updateBiteWithImagePathFromFirestorage(
       imagePath,

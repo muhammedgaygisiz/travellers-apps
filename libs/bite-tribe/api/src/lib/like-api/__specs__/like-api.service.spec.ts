@@ -144,7 +144,7 @@ describe(LikeApiService.name, () => {
 
         try {
           await service.removeLike(like);
-        } catch (error) {
+        } catch {
           // Expected to throw
         }
 

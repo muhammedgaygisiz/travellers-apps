@@ -14,14 +14,15 @@ const ONE_PIXEL_PNG = Buffer.from(
  * an index-based walk breaks every time a step is inserted; presence-based
  * dispatch survives it.
  *
- * Identity, visibility, currency, language, location, and notifications have
- * real inputs. The finish step still uses the placeholder acknowledgement until
- * #1016 lands.
+ * Every step now has a real component: identity, visibility, currency,
+ * language, location, notifications, and the finish step. The finish step
+ * gathers nothing — it confirms and, on Next, writes the completion flag and
+ * routes to /home (#1016).
  */
 export class OnboardingPage {
   readonly page: Page;
   readonly stepCount: Locator;
-  readonly acknowledgeCheckbox: Locator;
+  readonly finishStep: Locator;
   readonly displayNameInput: Locator;
   readonly displayNameStatus: Locator;
   readonly photoInput: Locator;
@@ -38,7 +39,7 @@ export class OnboardingPage {
   constructor(page: Page) {
     this.page = page;
     this.stepCount = page.locator('.onboarding-shell__step-count');
-    this.acknowledgeCheckbox = page.getByTestId('onboarding-acknowledge');
+    this.finishStep = page.locator('onboarding-finish-step');
     this.displayNameInput = page
       .getByTestId('onboarding-display-name')
       .locator('input');
@@ -114,7 +115,7 @@ export class OnboardingPage {
       return this.completeNotificationStep();
     }
 
-    return this.completeAcknowledgementStep();
+    return this.completeFinishStep();
   }
 
   private async readProgress(): Promise<[current: number, total: number]> {
@@ -206,20 +207,14 @@ export class OnboardingPage {
     await this.expectNextEnabled();
   }
 
-  private async completeAcknowledgementStep(): Promise<void> {
-    // Only act once the freshly rendered step is unacknowledged, so we never
-    // click a checkbox that is still bound to the previous step.
-    await this.waitForAcknowledged(false);
-    await this.acknowledgeCheckbox.click();
-  }
-
-  private async waitForAcknowledged(expected: boolean): Promise<void> {
-    await expect
-      .poll(() =>
-        this.acknowledgeCheckbox.evaluate(
-          (el) => (el as unknown as { checked: boolean }).checked,
-        ),
-      )
-      .toBe(expected);
+  /**
+   * The finish step gathers nothing, so it is ready to complete the moment it
+   * renders. Asserting Next is enabled here keeps the "finish confirms and
+   * completes without extra input" contract covered; clicking Next writes the
+   * completion flag and routes to /home.
+   */
+  private async completeFinishStep(): Promise<void> {
+    await expect(this.finishStep).toBeVisible();
+    await this.expectNextEnabled();
   }
 }

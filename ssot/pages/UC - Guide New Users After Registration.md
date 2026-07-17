@@ -32,6 +32,7 @@ New users should understand BiteTribe and configure the basics needed for useful
 - The Bite details introduction explains creator attribution for public profiles, distance from the user's current position, and preferred-currency pricing after the Bite has loaded.
 - The next Bite details mark highlights sharing through the device share sheet, including WhatsApp when available.
 - The Bite details navigation mark then highlights opening directions to the Bite's place in the platform navigation experience.
+- The Bite details bucket-list mark finishes the sequence by highlighting how to save a Bite to an existing or new bucket list.
 
 ## Related GitHub Scope
 

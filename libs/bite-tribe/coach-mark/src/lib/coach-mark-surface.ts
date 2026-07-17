@@ -15,6 +15,7 @@ export type CoachMarkSurface =
   | 'bite-details'
   | 'bite-details-share'
   | 'bite-details-navigation'
+  | 'bite-details-bucket-list'
   | 'map'
   | 'bucket-lists'
   | 'leaderboard';

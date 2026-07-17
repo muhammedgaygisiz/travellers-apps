@@ -57,6 +57,7 @@ describe('CoachMarkStateService', () => {
           'bite-details',
           'bite-details-share',
           'bite-details-navigation',
+          'bite-details-bucket-list',
           'map',
         ]),
       });
@@ -64,6 +65,9 @@ describe('CoachMarkStateService', () => {
       await expect(service.hasSeen('bite-details')).resolves.toBe(true);
       await expect(service.hasSeen('bite-details-share')).resolves.toBe(true);
       await expect(service.hasSeen('bite-details-navigation')).resolves.toBe(
+        true,
+      );
+      await expect(service.hasSeen('bite-details-bucket-list')).resolves.toBe(
         true,
       );
       await expect(service.hasSeen('home-menu')).resolves.toBe(true);

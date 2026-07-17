@@ -110,6 +110,14 @@ describe('DetailsPage', () => {
       ).toBeTruthy();
     });
 
+    it('exposes the bucket-list action as a coach-mark anchor', () => {
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="bite-details-bucket-list"]',
+        ),
+      ).toBeTruthy();
+    });
+
     it('should show a review field skeleton while bite is loading', () => {
       const nativeElement = fixture.debugElement.nativeElement as HTMLElement;
 

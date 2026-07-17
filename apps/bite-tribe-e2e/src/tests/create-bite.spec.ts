@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 import { CreateBitePage } from '../pages/create-bite.page';
 import { loginAsTestUser } from '../support/auth';
 import { dismissCoachMarks } from '../support/coach-marks';
+import { completeOnboardingIfNeeded } from '../support/onboarding';
 
 const IMAGE_FIXTURE = join(__dirname, '..', 'fixtures', 'bite.jpg');
 
@@ -11,6 +12,7 @@ test.describe('Create bite', () => {
     page,
   }) => {
     await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
     await dismissCoachMarks(page);
 
     // Unique per run: the emulator persists created bites for the session, so a

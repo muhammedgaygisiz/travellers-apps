@@ -4,6 +4,7 @@ import { CreateBitePage } from '../pages/create-bite.page';
 import { HomePage } from '../pages/home.page';
 import { loginAsTestUser } from '../support/auth';
 import { dismissCoachMarks } from '../support/coach-marks';
+import { completeOnboardingIfNeeded } from '../support/onboarding';
 
 const IMAGE_FIXTURE = join(__dirname, '..', 'fixtures', 'bite.jpg');
 
@@ -12,6 +13,7 @@ test.describe('Like a bite', () => {
     page,
   }) => {
     await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
     await dismissCoachMarks(page);
 
     // Create the Bite we are going to like so the feed deterministically has a

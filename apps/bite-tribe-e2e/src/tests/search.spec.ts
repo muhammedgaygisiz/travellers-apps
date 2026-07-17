@@ -4,6 +4,7 @@ import { CreateBitePage } from '../pages/create-bite.page';
 import { SearchPage } from '../pages/search.page';
 import { loginAsTestUser } from '../support/auth';
 import { dismissCoachMarks } from '../support/coach-marks';
+import { completeOnboardingIfNeeded } from '../support/onboarding';
 
 const IMAGE_FIXTURE = join(__dirname, '..', 'fixtures', 'bite.jpg');
 
@@ -12,6 +13,7 @@ test.describe('Search', () => {
     page,
   }) => {
     await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
     await dismissCoachMarks(page);
 
     const runId = Date.now();

@@ -4,6 +4,14 @@
  * Keep in sync with that export.
  */
 export const TEST_USERS = {
-  default: { email: 'test@test.com', password: 'Test4711' },
-  organisation: { email: 'organisation@test.com', password: 'Test4711' },
+  default: {
+    uid: 'helULN26hP9Qeig6NQLIEcEe3AP6',
+    email: 'test@test.com',
+    password: 'Test4711',
+  },
+  organisation: {
+    uid: 'gSJki3B6jFSYQWlZZSUtb58iN7tA',
+    email: 'organisation@test.com',
+    password: 'Test4711',
+  },
 } as const;

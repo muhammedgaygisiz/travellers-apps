@@ -6,12 +6,12 @@ import { DistanceComponent } from '../distance.component';
 
 const toMetricMock = jest.fn();
 jest.mock('../../../utils/to-metric', () => ({
-  toMetric: (...args: any): void => toMetricMock(...args),
+  toMetric: (...args: unknown[]): void => toMetricMock(...args),
 }));
 
 const roundDistanceMock = jest.fn();
 jest.mock('../../../utils/round-distance', () => ({
-  roundDistance: (...args: any): void => roundDistanceMock(...args),
+  roundDistance: (...args: unknown[]): void => roundDistanceMock(...args),
 }));
 
 describe('DistanceComponent', () => {

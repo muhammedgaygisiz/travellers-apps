@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService } from 'ta-firestore';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 import { Preferences } from '@capacitor/preferences';
 import { CoachMarkStateService } from '../coach-mark-state.service';
 
@@ -12,11 +12,15 @@ const set = Preferences.set as jest.Mock;
 
 describe('CoachMarkStateService', () => {
   let service: CoachMarkStateService;
+  let logEvent: jest.Mock;
 
   const setup = (uid: string | null = 'user-1'): void => {
+    logEvent = jest.fn();
+
     TestBed.configureTestingModule({
       providers: [
         CoachMarkStateService,
+        { provide: AnalyticsService, useValue: { logEvent } },
         {
           provide: AuthService,
           useValue: {
@@ -113,6 +117,47 @@ describe('CoachMarkStateService', () => {
       await service.markSeen('map');
 
       expect(set).not.toHaveBeenCalled();
+    });
+
+    it('logs a dismissal event with the surface on a first-time dismissal', async () => {
+      setup();
+      get.mockResolvedValue({ value: JSON.stringify(['home-feed']) });
+      set.mockResolvedValue(undefined);
+
+      await service.markSeen('map');
+
+      expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.CoachMarkDismissed, {
+        surface: 'map',
+      });
+    });
+
+    it('logs the dismissal even when persisting the seen state fails', async () => {
+      setup();
+      get.mockResolvedValue({ value: null });
+      set.mockRejectedValue(new Error('storage unavailable'));
+
+      await service.markSeen('leaderboard');
+
+      expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.CoachMarkDismissed, {
+        surface: 'leaderboard',
+      });
+    });
+
+    it('does not log again for a surface already seen', async () => {
+      setup();
+      get.mockResolvedValue({ value: JSON.stringify(['map']) });
+
+      await service.markSeen('map');
+
+      expect(logEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not log without an authenticated user', async () => {
+      setup(null);
+
+      await service.markSeen('map');
+
+      expect(logEvent).not.toHaveBeenCalled();
     });
   });
 });

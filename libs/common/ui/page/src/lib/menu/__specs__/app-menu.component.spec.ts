@@ -7,7 +7,7 @@ import {
   PipeTransform,
   provideZonelessChangeDetection,
 } from '@angular/core';
-import { addNecessaryIcons, SupportedLang } from 'utils';
+import { addNecessaryIcons } from 'utils';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 

@@ -8,8 +8,9 @@ import { expect, Locator, Page } from '@playwright/test';
  * an index-based walk breaks every time a step is inserted; presence-based
  * dispatch survives it.
  *
- * Identity, visibility, currency, language, and notifications have real inputs.
- * The finish step still uses the placeholder acknowledgement until #1016 lands.
+ * Identity, visibility, currency, language, location, and notifications have
+ * real inputs. The finish step still uses the placeholder acknowledgement until
+ * #1016 lands.
  */
 export class OnboardingPage {
   readonly page: Page;
@@ -21,6 +22,8 @@ export class OnboardingPage {
   readonly currencyStep: Locator;
   readonly currencyDefaultValue: Locator;
   readonly languageStep: Locator;
+  readonly locationStep: Locator;
+  readonly locationSkipButton: Locator;
   readonly notificationStep: Locator;
   readonly notificationSkipButton: Locator;
   readonly nextButton: Locator;
@@ -39,6 +42,8 @@ export class OnboardingPage {
       'onboarding-currency-default-value',
     );
     this.languageStep = page.locator('onboarding-language-step');
+    this.locationStep = page.locator('onboarding-location-step');
+    this.locationSkipButton = page.getByTestId('onboarding-location-skip');
     this.notificationStep = page.locator('onboarding-notification-step');
     this.notificationSkipButton = page.getByTestId(
       'onboarding-notifications-skip',
@@ -91,6 +96,10 @@ export class OnboardingPage {
 
     if (await this.languageStep.isVisible()) {
       return this.completeLanguageStep();
+    }
+
+    if (await this.locationStep.isVisible()) {
+      return this.completeLocationStep();
     }
 
     if (await this.notificationStep.isVisible()) {
@@ -148,6 +157,19 @@ export class OnboardingPage {
   /** Prefilled from the device locale, so no selection is required. */
   private async completeLanguageStep(): Promise<void> {
     await expect(this.languageStep).toBeVisible();
+    await this.expectNextEnabled();
+  }
+
+  /**
+   * Declines location. Skipping is an explicit "no" that needs no OS prompt,
+   * which keeps the walk deterministic in a browser, and it exercises the
+   * contract that a denial still lets the flow continue (#1023).
+   */
+  private async completeLocationStep(): Promise<void> {
+    // The step must be decided before it can be left, so this also proves the
+    // explanation is not silently skippable.
+    await this.expectNextDisabled();
+    await this.locationSkipButton.click();
     await this.expectNextEnabled();
   }
 

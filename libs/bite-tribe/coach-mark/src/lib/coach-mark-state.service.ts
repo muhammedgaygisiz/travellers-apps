@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Preferences } from '@capacitor/preferences';
-import { AuthService } from 'ta-firestore';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 import type { CoachMarkSurface } from './coach-mark-surface';
 
 const SEEN_KEY_PREFIX = 'coach-marks-seen:';
@@ -17,6 +17,7 @@ const SEEN_KEY_PREFIX = 'coach-marks-seen:';
 @Injectable({ providedIn: 'root' })
 export class CoachMarkStateService {
   private readonly authService = inject(AuthService);
+  private readonly analytics = inject(AnalyticsService);
 
   async hasSeen(surface: CoachMarkSurface): Promise<boolean> {
     const seen = await this.loadSeen();
@@ -33,6 +34,10 @@ export class CoachMarkStateService {
     if (seen.includes(surface)) {
       return;
     }
+
+    // A genuine first-time dismissal for this user; log it before persisting so
+    // a storage failure below still records the funnel signal.
+    this.analytics.logEvent(AnalyticsEvent.CoachMarkDismissed, { surface });
 
     try {
       await Preferences.set({

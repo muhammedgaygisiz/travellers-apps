@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { NavController } from '@ionic/angular';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { getCurrencyForLocale, getDisplayNameFailureReason, PATH } from 'utils';
 import {
   OnboardingDataAccessService,
@@ -32,6 +33,7 @@ export class OnboardingService {
   private readonly dataAccess = inject(OnboardingDataAccessService);
   private readonly progress = inject(OnboardingProgressService);
   private readonly navController = inject(NavController);
+  private readonly analytics = inject(AnalyticsService);
 
   readonly steps = ONBOARDING_STEPS;
 
@@ -86,6 +88,9 @@ export class OnboardingService {
       return;
     }
     this.initialized = true;
+
+    // Funnel entry: emitted once per session, when the assistant first loads.
+    this.analytics.logEvent(AnalyticsEvent.OnboardingAssistantStarted);
 
     const completed = (await this.progress.loadCompletedSteps()).filter((id) =>
       this.isKnownStep(id),
@@ -363,7 +368,11 @@ export class OnboardingService {
       return;
     }
 
-    await this.markComplete(this.currentStep().id);
+    const completedStep = this.currentStep().id;
+    await this.markComplete(completedStep);
+    this.analytics.logEvent(AnalyticsEvent.OnboardingStepCompleted, {
+      step: completedStep,
+    });
 
     if (this.currentIndex() >= this.steps.length - 1) {
       await this.finish();
@@ -390,6 +399,9 @@ export class OnboardingService {
       console.warn('Failed to complete onboarding:', error);
       return;
     }
+
+    // Funnel exit: only after the durable completion flag is written.
+    this.analytics.logEvent(AnalyticsEvent.OnboardingAssistantCompleted);
 
     this.dataAccess.dismissForSession();
     void this.navController.navigateRoot([`/${PATH.HOME}`]);

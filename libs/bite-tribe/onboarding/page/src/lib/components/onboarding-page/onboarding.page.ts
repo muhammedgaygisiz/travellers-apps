@@ -26,6 +26,7 @@ import { LocationStepComponent } from '../location-step/location-step.component'
 import type { LocationPermissionState } from '../location-step/location-step.component';
 import { NotificationStepComponent } from '../notification-step/notification-step.component';
 import type { NotificationPermissionState } from '../notification-step/notification-step.component';
+import { FinishStepComponent } from '../finish-step/finish-step.component';
 import type { PublicUser } from 'model';
 
 /**
@@ -50,6 +51,7 @@ import type { PublicUser } from 'model';
     LanguageStepComponent,
     LocationStepComponent,
     NotificationStepComponent,
+    FinishStepComponent,
   ],
 })
 export class OnboardingPage {

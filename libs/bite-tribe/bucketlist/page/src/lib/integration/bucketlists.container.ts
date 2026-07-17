@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { CoachMarkComponent } from 'bite-tribe/coach-mark';
 import { BucketlistsPage } from '../components/bucketlists-page/bucketlists.page';
 import { BucketlistsService } from './bucketlists.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -17,8 +18,14 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (deleteBucketlist)="service.deleteBucketlist($event)"
       (rateBucketlist)="service.gotoRateBucketlist($event)"
     />
+
+    <bt-coach-mark
+      surface="bucket-lists"
+      titleKey="coach-bucket-lists-title"
+      bodyKey="coach-bucket-lists-body"
+    />
   `,
-  imports: [BucketlistsPage],
+  imports: [BucketlistsPage, CoachMarkComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BucketlistsContainerComponent {

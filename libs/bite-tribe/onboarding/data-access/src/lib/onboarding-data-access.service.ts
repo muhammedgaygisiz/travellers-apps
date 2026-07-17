@@ -19,22 +19,30 @@ import {
 const USERS_COLLECTION = 'users';
 const LANGUAGE_PREFERENCE_KEY = 'lang';
 
+/**
+ * Version of the assistant flow a finishing user has completed. Stored with the
+ * completion flag so a later flow revision can tell an already-onboarded user
+ * apart from one who finished the current flow.
+ */
+export const ONBOARDING_VERSION = 1;
+
 export interface DisplayNameAvailability {
   available: boolean;
   normalizedDisplayName: string;
 }
 
 /**
- * Reads the onboarding completion state for the current user.
+ * Owns the onboarding completion state for the current user.
  *
  * Completion is marked on the `/users/{userId}` document
- * (`onboardingCompletedAt`). The write happens in the finish step of the
- * assistant (completion issue); this service only reads the flag so the entry
- * gate can decide whether the assistant must be shown.
+ * (`onboardingCompletedAt`). {@link completeOnboarding} writes the flag when the
+ * assistant's finish step is reached (epic #850, issue #1016), and
+ * {@link isOnboardingComplete} reads it so the entry gate can decide whether the
+ * assistant must be shown.
  *
- * The result is cached for the session once completion is observed, and a
- * session-scoped dismissal lets the placeholder page release the gate while the
- * real assistant is still a follow-up (epic #850, issue #1011).
+ * The result is cached for the session once completion is observed or written,
+ * and a session-scoped dismissal lets the flow release the gate immediately on
+ * finish (issue #1011).
  */
 @Injectable({ providedIn: 'root' })
 export class OnboardingDataAccessService {
@@ -78,6 +86,17 @@ export class OnboardingDataAccessService {
 
   dismissForSession(): void {
     this.dismissedForSession.set(true);
+  }
+
+  /**
+   * Marks onboarding complete for the current user by writing the durable
+   * completion flag on `/users/{userId}`. Once the write succeeds the session
+   * cache is set, so the entry gate treats the assistant as done without a
+   * re-read for the rest of the session.
+   */
+  async completeOnboarding(): Promise<void> {
+    await this.api.markOnboardingComplete(ONBOARDING_VERSION);
+    this.completed.set(true);
   }
 
   async loadCurrentProfile(): Promise<PublicUser | undefined> {

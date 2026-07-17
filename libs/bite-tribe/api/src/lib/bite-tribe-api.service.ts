@@ -235,6 +235,10 @@ export class BiteTribeApiService {
     this.profileApiService.saveUser(true);
   }
 
+  markOnboardingComplete(version: number): Promise<void> {
+    return this.profileApiService.markOnboardingComplete(version);
+  }
+
   saveSettings(settings: Settings): Promise<void> {
     return this.settingsApiService.saveSettings(settings);
   }

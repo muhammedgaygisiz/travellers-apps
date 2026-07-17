@@ -166,8 +166,7 @@ describe(OnboardingContainerComponent.name, () => {
     ).toBeTruthy();
   });
 
-  it('keeps the acknowledgement placeholder for the steps still to come', () => {
-    // Only the finish step (#1016) is still a placeholder.
+  it('renders the finish step on the final step', () => {
     serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[6]);
     serviceMock.currentIndex.set(6);
 
@@ -175,9 +174,16 @@ describe(OnboardingContainerComponent.name, () => {
 
     expect(
       fixture.debugElement.nativeElement.querySelector(
-        '[data-testid="onboarding-acknowledge"]',
+        'onboarding-finish-step',
       ),
     ).toBeTruthy();
+    // Every step now has a real component, so the acknowledgement placeholder is
+    // no longer reachable.
+    expect(
+      fixture.debugElement.nativeElement.querySelector(
+        '[data-testid="onboarding-acknowledge"]',
+      ),
+    ).toBeNull();
   });
 
   it('routes currency, language, location, and notification events into the service', () => {

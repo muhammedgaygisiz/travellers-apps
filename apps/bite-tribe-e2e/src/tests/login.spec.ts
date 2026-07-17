@@ -12,12 +12,12 @@ test.describe('Login', () => {
 
     await loginPage.goto();
     await loginPage.login(
-      TEST_USERS.default.email,
-      TEST_USERS.default.password,
+      TEST_USERS.organisation.email,
+      TEST_USERS.organisation.password,
     );
 
-    // The seeded user has not completed onboarding, so the entry gate blocks
-    // authenticated routes until the assistant is walked to completion.
+    // Use the otherwise-unused organisation account so journey setup cannot
+    // complete onboarding for this login-specific fixture before this test.
     await onboarding.expectVisible();
     await onboarding.complete();
     await expect(page).toHaveURL(/\/home$/);

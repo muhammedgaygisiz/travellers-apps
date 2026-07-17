@@ -46,6 +46,7 @@
       "bite-tribe-common/bite": ["libs/bite-tribe-common/bite/src/index.ts"],
       "bite-tribe-common/map": ["libs/bite-tribe-common/map/src/index.ts"],
       "bite-tribe/api": ["libs/bite-tribe/api/src/index.ts"],
+      "bite-tribe/coach-mark": ["libs/bite-tribe/coach-mark/src/index.ts"],
       "bite-tribe/onboarding": ["libs/bite-tribe/onboarding/page/src/index.ts"],
       "bite-tribe/onboarding-guards": [
         "libs/bite-tribe/onboarding/guards/src/index.ts"
@@ -120,6 +121,7 @@
       ],
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
       "common/ui/chip": ["libs/common/ui/chip/src/index.ts"],
+      "common/ui/coach-mark": ["libs/common/ui/coach-mark/src/index.ts"],
       "currency-selector": ["libs/common/ui/currency-selector/src/index.ts"],
       "restaurant-selector": [
         "libs/common/ui/restaurant-selector/src/index.ts"

@@ -8,7 +8,10 @@ import { BiteTribeApiService } from 'bite-tribe/api';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { requestPushPermission } from 'push-notifications';
 import { requestLocationPermission } from 'geolocation';
-import { OnboardingDataAccessService } from '../onboarding-data-access.service';
+import {
+  ONBOARDING_VERSION,
+  OnboardingDataAccessService,
+} from '../onboarding-data-access.service';
 
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: { getDocument: jest.fn() },
@@ -44,6 +47,7 @@ describe('OnboardingDataAccessService', () => {
     updateUser: jest.Mock;
     loadSettings: jest.Mock;
     saveSettings: jest.Mock;
+    markOnboardingComplete: jest.Mock;
   };
 
   const setup = (uid: string | null = 'user-1'): void => {
@@ -69,6 +73,7 @@ describe('OnboardingDataAccessService', () => {
       updateUser: jest.fn(async (profile) => profile),
       loadSettings: jest.fn().mockResolvedValue({}),
       saveSettings: jest.fn().mockResolvedValue(undefined),
+      markOnboardingComplete: jest.fn().mockResolvedValue(undefined),
     };
     setActiveLang = jest.fn();
     notifySavedSettings = jest.fn();
@@ -144,6 +149,38 @@ describe('OnboardingDataAccessService', () => {
     service.dismissForSession();
 
     expect(service.dismissedForSession()).toBe(true);
+  });
+
+  describe('completeOnboarding', () => {
+    it('writes the completion flag through the API with the current version', async () => {
+      setup();
+
+      await service.completeOnboarding();
+
+      expect(apiMock.markOnboardingComplete).toHaveBeenCalledWith(
+        ONBOARDING_VERSION,
+      );
+    });
+
+    it('caches completion for the session once the write succeeds', async () => {
+      setup();
+
+      await service.completeOnboarding();
+
+      // A cached completion answers the gate without re-reading the document.
+      await expect(service.isOnboardingComplete()).resolves.toBe(true);
+      expect(getDocument).not.toHaveBeenCalled();
+    });
+
+    it('does not cache completion when the write fails', async () => {
+      setup();
+      apiMock.markOnboardingComplete.mockRejectedValue(new Error('offline'));
+
+      await expect(service.completeOnboarding()).rejects.toThrow('offline');
+
+      getDocument.mockResolvedValue({ snapshot: { data: {} } });
+      await expect(service.isOnboardingComplete()).resolves.toBe(false);
+    });
   });
 
   it('loads the current profile from the user document', async () => {

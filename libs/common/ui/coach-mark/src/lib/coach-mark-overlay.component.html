@@ -1,0 +1,42 @@
+<div
+  class="coach-mark"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="titleId"
+  [attr.aria-describedby]="bodyId"
+  (keydown.escape)="dismiss.emit()"
+>
+  @if (hasAnchor()) {
+    <div
+      class="coach-mark-spotlight"
+      aria-hidden="true"
+      [style.top.px]="spotlightTop()"
+      [style.left.px]="spotlightLeft()"
+      [style.width.px]="spotlightWidth()"
+      [style.height.px]="spotlightHeight()"
+    ></div>
+  } @else {
+    <div class="coach-mark-scrim" aria-hidden="true"></div>
+  }
+
+  <div
+    class="coach-mark-card"
+    [class.coach-mark-card-centered]="!hasAnchor()"
+    [class.coach-mark-card-above]="cardAbove()"
+    [style.top.px]="cardTop()"
+    data-testid="coach-mark-card"
+  >
+    <h2 class="coach-mark-title" [id]="titleId">{{ title() }}</h2>
+    <p class="coach-mark-body" [id]="bodyId">{{ body() }}</p>
+
+    <ion-button
+      #dismissButton
+      expand="block"
+      class="coach-mark-dismiss"
+      data-testid="coach-mark-dismiss"
+      (click)="dismiss.emit()"
+    >
+      {{ dismissLabel() }}
+    </ion-button>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+<div class="finish-step">
+  <div class="finish-step__badge" aria-hidden="true">
+    <ion-icon name="checkmark-circle-outline" />
+  </div>
+
+  <h2 class="finish-step__title">
+    @if (displayName()) {
+      <span data-testid="onboarding-finish-title-named">
+        {{
+          'onboarding-finish-title-named' | transloco: { name: displayName() }
+        }}
+      </span>
+    } @else {
+      <span data-testid="onboarding-finish-title">
+        {{ 'onboarding-finish-title' | transloco }}
+      </span>
+    }
+  </h2>
+
+  <p class="onboarding-step-copy">
+    {{ 'onboarding-finish-copy' | transloco }}
+  </p>
+
+  <ul class="finish-step__highlights">
+    <li>{{ 'onboarding-finish-highlight-discover' | transloco }}</li>
+    <li>{{ 'onboarding-finish-highlight-create' | transloco }}</li>
+    <li>{{ 'onboarding-finish-highlight-explore' | transloco }}</li>
+  </ul>
+</div>

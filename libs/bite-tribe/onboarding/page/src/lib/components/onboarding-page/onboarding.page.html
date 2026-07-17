@@ -59,6 +59,8 @@
         (enableNotifications)="enableNotifications.emit()"
         (skipNotifications)="skipNotifications.emit()"
       />
+      } @case ('finish') {
+      <onboarding-finish-step [displayName]="profile()?.displayName ?? ''" />
       } @default {
       <ion-text>
         <p>{{ 'onboarding-step-placeholder' | transloco }}</p>

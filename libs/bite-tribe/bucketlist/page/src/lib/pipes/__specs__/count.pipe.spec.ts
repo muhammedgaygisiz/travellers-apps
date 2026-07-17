@@ -13,12 +13,12 @@ describe('CountPipe', () => {
   });
 
   it('should return 0 for an empty array', () => {
-    const array: any[] = [];
+    const array: unknown[] = [];
     expect(pipe.transform(array)).toBe(0);
   });
 
   it('should return 0 for null or undefined', () => {
-    expect(pipe.transform(null as any)).toBe(0);
-    expect(pipe.transform(undefined as any)).toBe(0);
+    expect(pipe.transform(null)).toBe(0);
+    expect(pipe.transform(undefined)).toBe(0);
   });
 });

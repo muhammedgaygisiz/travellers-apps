@@ -340,13 +340,50 @@ describe(ProfileApiService.name, () => {
               displayName: undefined,
               fullName: '',
               email: undefined,
-              name: 'Updated User',
               photoUrl: 'download-url',
               public: false,
               updatedAt: '2024-03-15T12:00:00.000Z',
               updatedAtTimestamp: 1710504000000,
-              userId: '123',
             },
+          });
+        },
+      ));
+
+      it('should not write the server-owned fields the caller happens to carry', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          // Reading a user document that never had these fields yields keys
+          // whose value is `undefined`. Forwarding them makes Firestore reject
+          // the whole update, which silently loses the new photo and name.
+          const publicUser = {
+            userId: '123',
+            displayName: 'Super Mario',
+            email: 'mario@test.com',
+            photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            biteCount: undefined,
+            subscriptionTier: undefined,
+            normalizedDisplayName: undefined,
+            createdAt: undefined,
+          } as unknown as PublicUser;
+
+          await service.updateUser(publicUser);
+
+          // The shared spy accumulates calls across this describe, so read the
+          // one this test just made rather than the first ever recorded.
+          const calls = jest.mocked(FirebaseFirestore.updateDocument).mock
+            .calls;
+          const written = calls[calls.length - 1][0].data as Record<
+            string,
+            unknown
+          >;
+
+          expect(Object.keys(written)).not.toContain('biteCount');
+          expect(Object.keys(written)).not.toContain('subscriptionTier');
+          expect(Object.keys(written)).not.toContain('normalizedDisplayName');
+          expect(Object.keys(written)).not.toContain('createdAt');
+          expect(written).toMatchObject({
+            displayName: 'Super Mario',
+            photoUrl: 'download-url',
           });
         },
       ));

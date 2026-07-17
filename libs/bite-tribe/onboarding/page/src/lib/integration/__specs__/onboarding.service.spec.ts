@@ -283,6 +283,33 @@ describe('OnboardingService', () => {
 
       expect(service.currentIndex()).toBe(0);
     });
+
+    /**
+     * A returning user resumes past the identity step, so no availability check
+     * runs for their prefilled name. Stepping back to identity must not make the
+     * step depend on a check that never happened: their own stored name is
+     * already theirs, and a photo edit says nothing about it.
+     */
+    it('keeps a completed identity step valid when only the photo changes', async () => {
+      setup(['identity'], { displayName: 'Super Mario' });
+      await service.initialize();
+
+      expect(service.currentStep().id).toBe('visibility');
+      expect(checkDisplayNameAvailability).not.toHaveBeenCalled();
+
+      service.back();
+
+      expect(service.currentStep().id).toBe('identity');
+      expect(service.canAdvance()).toBe(true);
+
+      // Adding a photo re-emits the whole draft; the name is untouched.
+      service.updateIdentity({
+        displayName: 'Super Mario',
+        photoUrl: 'data:image/png;base64,AAAA',
+      });
+
+      expect(service.canAdvance()).toBe(true);
+    });
   });
 
   describe('setCurrentStepValid', () => {

@@ -137,9 +137,8 @@ export class ProfileApiService {
 
         await deleteCurrentImage(publicUser);
 
-        const { photoUrl: base64Image, ...restOfPublicUser } = publicUser;
         const newPhotoRef = await uploadBase64ToFirebaseStorage({
-          base64: base64Image,
+          base64: photoUrl,
           docId: publicUser.userId,
           collection: USERS_COLLECTION,
         });
@@ -147,18 +146,7 @@ export class ProfileApiService {
         const newPhotoUrl =
           await getDownloadUrlFromFirebaseStorage(newPhotoRef);
 
-        const updatedUser: PublicUser = {
-          ...restOfPublicUser,
-          photoUrl: newPhotoUrl || '',
-          displayName: publicUser.displayName,
-          fullName: publicUser.fullName || '',
-          email: publicUser.email,
-          city: publicUser.city || '',
-          about: publicUser.about || '',
-          public: publicUser.public || false,
-          updatedAt: new Date().toISOString(),
-          updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-        };
+        const updatedUser = this.toProfileUpdate(publicUser, newPhotoUrl || '');
 
         await FirebaseFirestore.updateDocument({
           reference: `${USERS_COLLECTION}/${publicUser.userId}`,
@@ -168,17 +156,7 @@ export class ProfileApiService {
         return { ...publicUser, ...updatedUser } as PublicUser;
       }
 
-      const updatedUser: Omit<PublicUser, 'userId' | 'followers'> = {
-        displayName: publicUser.displayName,
-        fullName: publicUser.fullName || '',
-        email: publicUser.email,
-        photoUrl: publicUser.photoUrl,
-        city: publicUser.city || '',
-        about: publicUser.about || '',
-        public: publicUser.public || false,
-        updatedAt: new Date().toISOString(),
-        updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-      };
+      const updatedUser = this.toProfileUpdate(publicUser, publicUser.photoUrl);
 
       await FirebaseFirestore.updateDocument({
         reference: `${USERS_COLLECTION}/${publicUser.userId}`,
@@ -192,6 +170,35 @@ export class ProfileApiService {
 
       return publicUser;
     }
+  }
+
+  /**
+   * The user-owned fields a profile update may write, for both the plain and the
+   * upload path.
+   *
+   * It lists the fields explicitly rather than spreading the caller's object:
+   * the rest of a `PublicUser` is server-owned (`biteCount`, `subscriptionTier`,
+   * the created/last-seen stamps) or written elsewhere (`normalizedDisplayName`,
+   * by the `claimDisplayName` transaction), so a client write has no business
+   * carrying it. Spreading also forwarded keys whose value is `undefined` —
+   * which a caller produces just by reading a document that never had the field
+   * — and Firestore rejects the whole update for those.
+   */
+  private toProfileUpdate(
+    publicUser: PublicUser,
+    photoUrl: string,
+  ): Omit<PublicUser, 'userId' | 'followers'> {
+    return {
+      displayName: publicUser.displayName,
+      fullName: publicUser.fullName || '',
+      email: publicUser.email,
+      photoUrl,
+      city: publicUser.city || '',
+      about: publicUser.about || '',
+      public: publicUser.public || false,
+      updatedAt: new Date().toISOString(),
+      updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
+    };
   }
 
   async getUserByBiteId(bite: Bite | undefined): Promise<PublicUser | void> {

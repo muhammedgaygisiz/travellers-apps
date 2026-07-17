@@ -169,6 +169,7 @@ export class OnboardingService {
   }
 
   updateIdentity(draft: OnboardingIdentityDraft): void {
+    const previousDisplayName = this.identityDraft().displayName.trim();
     this.identityDraft.set(draft);
 
     const displayName = draft.displayName.trim();
@@ -177,6 +178,16 @@ export class OnboardingService {
       this.displayNameAvailability.set('idle');
       this.availableDisplayName.set(null);
       this.setStepValid('identity', false);
+      return;
+    }
+
+    // The step re-emits the whole draft on any edit, so a photo change lands
+    // here with an untouched name. Only a changed name may invalidate the name:
+    // availability is confirmed by a check that runs on a name change or on
+    // entering the step, so re-deriving validity from it on every edit would
+    // invalidate a step that is valid from persisted completion — where no
+    // check ran this session and no later edit would repair it.
+    if (displayName === previousDisplayName) {
       return;
     }
 

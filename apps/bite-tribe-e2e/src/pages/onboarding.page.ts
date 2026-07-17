@@ -1,5 +1,11 @@
 import { expect, Locator, Page } from '@playwright/test';
 
+/** Smallest thing the upload accepts: it compresses a real image, not a stub. */
+const ONE_PIXEL_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+);
+
 /**
  * Page object for the onboarding assistant shell (route: /onboarding).
  *
@@ -18,6 +24,7 @@ export class OnboardingPage {
   readonly acknowledgeCheckbox: Locator;
   readonly displayNameInput: Locator;
   readonly displayNameStatus: Locator;
+  readonly photoInput: Locator;
   readonly visibilityChoice: Locator;
   readonly currencyStep: Locator;
   readonly currencyDefaultValue: Locator;
@@ -36,6 +43,7 @@ export class OnboardingPage {
       .getByTestId('onboarding-display-name')
       .locator('input');
     this.displayNameStatus = page.getByTestId('onboarding-display-name-status');
+    this.photoInput = page.getByTestId('image-file-input');
     this.visibilityChoice = page.getByTestId('onboarding-visibility-choice');
     this.currencyStep = page.locator('onboarding-currency-step');
     this.currencyDefaultValue = page.getByTestId(
@@ -133,6 +141,18 @@ export class OnboardingPage {
   private async completeIdentityStep(): Promise<void> {
     await this.displayNameInput.fill(`E2E Foodie ${Date.now()}`);
     await expect(this.displayNameStatus).toContainText(/available/i);
+    await this.expectNextEnabled();
+
+    // The photo is optional, but adding one is what routes the profile write
+    // through the upload path, so leaving it out never exercises that path.
+    await this.photoInput.setInputFiles({
+      name: 'avatar.png',
+      mimeType: 'image/png',
+      buffer: ONE_PIXEL_PNG,
+    });
+
+    // A photo says nothing about the display name, so it must not undo the
+    // availability the step just confirmed (#1023 follow-up).
     await this.expectNextEnabled();
   }
 

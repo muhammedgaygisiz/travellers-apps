@@ -2,7 +2,7 @@ import { ChartData } from '../api/chart-data';
 
 const DAY_IN_MILLIS = 86400000;
 
-const dayBefore = (firstDay: any): ChartData => {
+const dayBefore = (firstDay: ChartData): ChartData => {
   const date = new Date(firstDay.date);
 
   return {
@@ -12,7 +12,7 @@ const dayBefore = (firstDay: any): ChartData => {
   };
 };
 
-const addDayAfter = (lastDay: any): ChartData => {
+const addDayAfter = (lastDay: ChartData): ChartData => {
   const date = new Date(lastDay.date);
 
   return {

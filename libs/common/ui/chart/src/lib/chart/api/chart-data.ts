@@ -1,5 +1,5 @@
 export interface ChartData {
-  date: any;
+  date: Date;
   amount: number;
   balance?: number;
 }

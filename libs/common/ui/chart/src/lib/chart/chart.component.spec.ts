@@ -21,7 +21,7 @@ describe('ChartComponent', () => {
       unobserve(): void {}
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       disconnect(): void {}
-    } as any;
+    } as unknown as typeof ResizeObserver;
 
     fixture = TestBed.createComponent(ChartComponent);
     component = fixture.componentInstance;
@@ -111,7 +111,7 @@ describe('ChartComponent', () => {
   it('should disconnect resize observer on destroy', () => {
     const disconnectSpy = jest.spyOn(
       global.ResizeObserver.prototype,
-      'disconnect'
+      'disconnect',
     );
     component.ngOnDestroy();
     expect(disconnectSpy).toHaveBeenCalled();

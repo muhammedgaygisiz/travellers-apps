@@ -1,12 +1,11 @@
 import { createMap } from '../create-map';
+import { ElementRef } from '@angular/core';
 
 jest.mock('leaflet');
 
 describe('createMap', () => {
   it('should create a Leaflet map instance', () => {
-    const mockElement = {
-      nativeElement: document.createElement('div'),
-    } as any;
+    const mockElement = new ElementRef(document.createElement('div'));
 
     const map = createMap(mockElement);
 
@@ -14,9 +13,7 @@ describe('createMap', () => {
   });
 
   it('should create a map with zoom enabled by default', () => {
-    const mockElement = {
-      nativeElement: document.createElement('div'),
-    } as any;
+    const mockElement = new ElementRef(document.createElement('div'));
 
     const map = createMap(mockElement);
 
@@ -28,9 +25,7 @@ describe('createMap', () => {
   });
 
   it('should create a map with zoom enabled when enableZoom is true', () => {
-    const mockElement = {
-      nativeElement: document.createElement('div'),
-    } as any;
+    const mockElement = new ElementRef(document.createElement('div'));
 
     const map = createMap(mockElement, true);
 
@@ -42,9 +37,7 @@ describe('createMap', () => {
   });
 
   it('should create a map with zoom disabled when enableZoom is false', () => {
-    const mockElement = {
-      nativeElement: document.createElement('div'),
-    } as any;
+    const mockElement = new ElementRef(document.createElement('div'));
 
     const map = createMap(mockElement, false);
 
@@ -56,9 +49,7 @@ describe('createMap', () => {
   });
 
   it('should create a map with dragging enabled by default', () => {
-    const mockElement = {
-      nativeElement: document.createElement('div'),
-    } as any;
+    const mockElement = new ElementRef(document.createElement('div'));
 
     const map = createMap(mockElement);
 
@@ -66,9 +57,7 @@ describe('createMap', () => {
   });
 
   it('should create a map with dragging disabled when dragging is false', () => {
-    const mockElement = {
-      nativeElement: document.createElement('div'),
-    } as any;
+    const mockElement = new ElementRef(document.createElement('div'));
 
     const map = createMap(mockElement, true, false);
 

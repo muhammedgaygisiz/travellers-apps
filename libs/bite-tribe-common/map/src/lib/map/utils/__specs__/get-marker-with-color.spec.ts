@@ -15,7 +15,7 @@ describe('getMarkerWithColor', () => {
   });
 
   it('should return a DivIcon with default color when no color is provided', () => {
-    const icon = getMarkerWithColor(null as any);
+    const icon = getMarkerWithColor(null);
 
     expect(icon).toBeDefined();
     expect(icon.options.html).toContain(`background-color: ${MarkerColor.RED}`); // Default to red

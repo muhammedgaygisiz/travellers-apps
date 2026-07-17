@@ -1,5 +1,6 @@
 import { zoomToMarkers } from '../zoom-to-markers';
 import { DEFAULT_ZOOM } from '../../model/default-zoom';
+import * as L from 'leaflet';
 
 const zoomToGpsOrDefaultMock = jest.fn();
 jest.mock('../zoom-to-gps-or-default', () => ({
@@ -7,16 +8,16 @@ jest.mock('../zoom-to-gps-or-default', () => ({
 }));
 
 describe('zoomToMarkers', () => {
-  let mockMap: any;
-  let mockMarkers: any[];
+  let mockMap: L.Map & { setView: jest.Mock };
+  let mockMarkers: L.Marker[];
 
   beforeEach(() => {
     mockMap = {
       setView: jest.fn(),
       fitBounds: jest.fn(),
       getZoom: jest.fn(),
-    };
-    mockMarkers = [{}, {}]; // Mock markers
+    } as unknown as L.Map & { setView: jest.Mock };
+    mockMarkers = [{} as L.Marker, {} as L.Marker];
     jest.useFakeTimers();
   });
 

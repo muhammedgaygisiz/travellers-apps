@@ -41,15 +41,15 @@ export class PositionComponent implements ControlValueAccessor {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   _onTouch: () => void = () => {};
 
-  writeValue(obj: any): void {
+  writeValue(obj: Geopoint | null): void {
     this.value.set(obj);
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: Geopoint | null) => void): void {
     this._onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this._onTouch = fn;
   }
 

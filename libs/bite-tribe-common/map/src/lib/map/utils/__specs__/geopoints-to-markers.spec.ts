@@ -1,5 +1,4 @@
 import { geopointsToMarkers } from '../geopoints-to-markers';
-import L from 'leaflet';
 import { MarkerColor } from '../../model/marker-color.enum';
 import { Geopoint } from 'model';
 
@@ -7,18 +6,14 @@ jest.mock('leaflet');
 
 const getMarkerWithColorMock = jest.fn();
 jest.mock('../get-marker-with-color', () => ({
-  getMarkerWithColor: (...args: any): void => getMarkerWithColorMock(...args),
+  getMarkerWithColor: (...args: unknown[]): void =>
+    getMarkerWithColorMock(...args),
 }));
 
 describe('geopointsToMarkers', () => {
-  let map: L.Map;
   let geopoints: Geopoint[];
 
   beforeEach(() => {
-    map = {
-      addLayer: jest.fn(),
-    } as any;
-
     geopoints = [
       { latitude: 40.7128, longitude: -74.006, rating: 1 },
       { latitude: 34.0522, longitude: -118.2437, rating: 1 },

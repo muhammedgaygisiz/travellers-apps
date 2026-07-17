@@ -9,7 +9,7 @@ export const zoomToGpsOrDefault = (
   gpsPosition: Geopoint | null | undefined,
   markers: L.Marker[],
   positions: Geopoint[] | null | undefined,
-  map: L.Map,
+  map: L.Map | null,
 ): void => {
   if (!map) {
     return;

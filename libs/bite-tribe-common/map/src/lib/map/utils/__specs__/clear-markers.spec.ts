@@ -6,13 +6,13 @@ jest.mock('leaflet');
 jest.mock('leaflet.markercluster');
 
 describe('clearMarkers', () => {
-  let map: any;
+  let map: L.Map & { removeLayer: jest.Mock };
   let markers: L.MarkerClusterGroup;
 
   beforeEach(() => {
     map = {
       removeLayer: jest.fn(),
-    };
+    } as unknown as L.Map & { removeLayer: jest.Mock };
     markers = L.markerClusterGroup();
   });
 
@@ -22,7 +22,7 @@ describe('clearMarkers', () => {
   });
 
   it('should not call removeLayer if there are no markers', () => {
-    clearMarkers(null as any, map);
+    clearMarkers(null, map);
     expect(map.removeLayer).not.toHaveBeenCalled();
   });
 });

@@ -6,54 +6,24 @@
   </div>
 }
 
-<div class="star-rating">
-  <ion-icon
-    [src]="starIconPath"
-    [class]="(1 | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
-    size="large"
-    (click)="onRate(1)"
-    (mouseover)="onHover(1)"
-    (mouseleave)="onLeave()"
-    [class.read-only]="readonly()"
-  />
-
-  <ion-icon
-    [src]="starIconPath"
-    [class]="(2 | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
-    size="large"
-    (click)="onRate(2)"
-    (mouseover)="onHover(2)"
-    (mouseleave)="onLeave()"
-    [class.read-only]="readonly()"
-  />
-
-  <ion-icon
-    [src]="starIconPath"
-    [class]="(3 | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
-    size="large"
-    (click)="onRate(3)"
-    (mouseover)="onHover(3)"
-    (mouseleave)="onLeave()"
-    [class.read-only]="readonly()"
-  />
-
-  <ion-icon
-    [src]="starIconPath"
-    [class]="(4 | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
-    size="large"
-    (click)="onRate(4)"
-    (mouseover)="onHover(4)"
-    (mouseleave)="onLeave()"
-    [class.read-only]="readonly()"
-  />
-
-  <ion-icon
-    [src]="starIconPath"
-    [class]="(5 | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
-    size="large"
-    (click)="onRate(5)"
-    (mouseover)="onHover(5)"
-    (mouseleave)="onLeave()"
-    [class.read-only]="readonly()"
-  />
+<div class="star-rating" role="radiogroup" [attr.aria-label]="label()">
+  @for (star of stars; track star) {
+    <ion-icon
+      [src]="starIconPath"
+      [class]="(star | isFilled: hoveredIndex() : getRating()) ? 'filled' : ''"
+      size="large"
+      role="radio"
+      [attr.aria-checked]="getRating() === star"
+      [attr.aria-label]="star + ' star'"
+      [attr.tabindex]="readonly() ? null : 0"
+      (click)="onRate(star)"
+      (keydown.enter)="onRate(star)"
+      (keydown.space)="onRate(star); $event.preventDefault()"
+      (mouseover)="onHover(star)"
+      (focus)="onHover(star)"
+      (mouseleave)="onLeave()"
+      (blur)="onLeave()"
+      [class.read-only]="readonly()"
+    />
+  }
 </div>

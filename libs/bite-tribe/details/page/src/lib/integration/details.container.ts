@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { DetailsPage } from '../components/details-page/details.page';
 import { DetailsService } from './details.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -36,6 +41,15 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       titleKey="coach-bite-details-title"
       bodyKey="coach-bite-details-body"
       [enabled]="!!service.bite.value()"
+      (settled)="detailsCoachSettled.set(true)"
+    />
+
+    <bt-coach-mark
+      surface="bite-details-share"
+      titleKey="coach-bite-details-share-title"
+      bodyKey="coach-bite-details-share-body"
+      anchorTestId="bite-details-share"
+      [enabled]="detailsCoachSettled()"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,6 +58,8 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
 export class DetailsContainer {
   service = inject(DetailsService);
   private readonly analytics = inject(AnalyticsService);
+
+  protected readonly detailsCoachSettled = signal(false);
 
   ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({

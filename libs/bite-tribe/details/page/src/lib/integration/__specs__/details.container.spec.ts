@@ -93,21 +93,35 @@ describe(DetailsContainer.name, () => {
     expect(component).toBeTruthy();
   });
 
-  it('enables the centered Bite-details introduction after the Bite loads', () => {
+  it('queues the centered introduction before the share coach mark', () => {
     fixture.detectChanges();
 
-    const mark = fixture.debugElement.query(By.directive(CoachMarkComponent))
-      .componentInstance as CoachMarkComponent;
+    const marks = fixture.debugElement
+      .queryAll(By.directive(CoachMarkComponent))
+      .map(
+        (debugElement) => debugElement.componentInstance as CoachMarkComponent,
+      );
 
-    expect(mark.surface()).toBe('bite-details');
-    expect(mark.anchor()).toBeNull();
-    expect(mark.anchorTestId()).toBeNull();
-    expect(mark.enabled()).toBe(false);
+    expect(marks.map((mark) => mark.surface())).toEqual([
+      'bite-details',
+      'bite-details-share',
+    ]);
+    expect(marks[0].anchor()).toBeNull();
+    expect(marks[0].anchorTestId()).toBeNull();
+    expect(marks[0].enabled()).toBe(false);
+    expect(marks[1].anchorTestId()).toBe('bite-details-share');
+    expect(marks[1].enabled()).toBe(false);
 
     biteSignal.set({ id: 'bite-1', name: 'Pizza' } as Bite);
     fixture.detectChanges();
 
-    expect(mark.enabled()).toBe(true);
+    expect(marks[0].enabled()).toBe(true);
+    expect(marks[1].enabled()).toBe(false);
+
+    marks[0].settled.emit();
+    fixture.detectChanges();
+
+    expect(marks[1].enabled()).toBe(true);
   });
 
   describe('ionViewDidEnter', () => {

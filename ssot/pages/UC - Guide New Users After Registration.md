@@ -30,6 +30,7 @@ New users should understand BiteTribe and configure the basics needed for useful
 - The home menu mark introduces the header menu as the route to the profile, bucket lists, leaderboard, gallery, marketplace, and settings.
 - The home feed controls mark explains Search and Bitemap, and distinguishes Distance (closest Bites) from Date (newest Bites from anywhere).
 - The Bite details introduction explains creator attribution for public profiles, distance from the user's current position, and preferred-currency pricing after the Bite has loaded.
+- The next Bite details mark highlights sharing through the device share sheet, including WhatsApp when available.
 
 ## Related GitHub Scope
 

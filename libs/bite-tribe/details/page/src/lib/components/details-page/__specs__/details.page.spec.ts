@@ -94,6 +94,14 @@ describe('DetailsPage', () => {
   });
 
   describe('Bite Display', () => {
+    it('exposes the share action as a coach-mark anchor', () => {
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="bite-details-share"]',
+        ),
+      ).toBeTruthy();
+    });
+
     it('should show a review field skeleton while bite is loading', () => {
       const nativeElement = fixture.debugElement.nativeElement as HTMLElement;
 

@@ -13,6 +13,7 @@ export type CoachMarkSurface =
   | 'home-feed-controls'
   | 'create-bite'
   | 'bite-details'
+  | 'bite-details-share'
   | 'map'
   | 'bucket-lists'
   | 'leaderboard';

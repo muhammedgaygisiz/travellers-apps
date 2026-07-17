@@ -93,7 +93,7 @@ describe(DetailsContainer.name, () => {
     expect(component).toBeTruthy();
   });
 
-  it('queues the centered introduction before the share coach mark', () => {
+  it('queues the introduction, share, and navigation coach marks', () => {
     fixture.detectChanges();
 
     const marks = fixture.debugElement
@@ -105,23 +105,33 @@ describe(DetailsContainer.name, () => {
     expect(marks.map((mark) => mark.surface())).toEqual([
       'bite-details',
       'bite-details-share',
+      'bite-details-navigation',
     ]);
     expect(marks[0].anchor()).toBeNull();
     expect(marks[0].anchorTestId()).toBeNull();
     expect(marks[0].enabled()).toBe(false);
     expect(marks[1].anchorTestId()).toBe('bite-details-share');
     expect(marks[1].enabled()).toBe(false);
+    expect(marks[2].anchorTestId()).toBe('bite-details-navigation');
+    expect(marks[2].enabled()).toBe(false);
 
     biteSignal.set({ id: 'bite-1', name: 'Pizza' } as Bite);
     fixture.detectChanges();
 
     expect(marks[0].enabled()).toBe(true);
     expect(marks[1].enabled()).toBe(false);
+    expect(marks[2].enabled()).toBe(false);
 
     marks[0].settled.emit();
     fixture.detectChanges();
 
     expect(marks[1].enabled()).toBe(true);
+    expect(marks[2].enabled()).toBe(false);
+
+    marks[1].settled.emit();
+    fixture.detectChanges();
+
+    expect(marks[2].enabled()).toBe(true);
   });
 
   describe('ionViewDidEnter', () => {

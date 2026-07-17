@@ -56,12 +56,16 @@ describe('CoachMarkStateService', () => {
           'home-feed-controls',
           'bite-details',
           'bite-details-share',
+          'bite-details-navigation',
           'map',
         ]),
       });
 
       await expect(service.hasSeen('bite-details')).resolves.toBe(true);
       await expect(service.hasSeen('bite-details-share')).resolves.toBe(true);
+      await expect(service.hasSeen('bite-details-navigation')).resolves.toBe(
+        true,
+      );
       await expect(service.hasSeen('home-menu')).resolves.toBe(true);
       await expect(service.hasSeen('home-feed-controls')).resolves.toBe(true);
       await expect(service.hasSeen('map')).resolves.toBe(true);

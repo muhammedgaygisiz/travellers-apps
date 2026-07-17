@@ -31,6 +31,7 @@
   - The home feed controls mark explains Search and Bitemap, and distinguishes Distance (closest Bites) from Date (newest Bites from anywhere).
   - The Bite details introduction appears after the Bite has loaded and explains creator attribution for public profiles, distance from the user's current position, and preferred-currency pricing.
   - The Bite details share mark follows the introduction and highlights sharing through the device share sheet, including WhatsApp when available.
+  - The Bite details navigation mark follows sharing and highlights opening directions to the Bite's place in the platform navigation experience.
   - Each coach mark must be explicitly dismissed; seen state is tracked per surface, separately from assistant completion.
   - \#\# Analytics
   - Full funnel in the existing `AnalyticsService` taxonomy: assistant started, step completed (step id), assistant completed, coach mark dismissed (surface id).

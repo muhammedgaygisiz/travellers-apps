@@ -50,6 +50,15 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       bodyKey="coach-bite-details-share-body"
       anchorTestId="bite-details-share"
       [enabled]="detailsCoachSettled()"
+      (settled)="shareCoachSettled.set(true)"
+    />
+
+    <bt-coach-mark
+      surface="bite-details-navigation"
+      titleKey="coach-bite-details-navigation-title"
+      bodyKey="coach-bite-details-navigation-body"
+      anchorTestId="bite-details-navigation"
+      [enabled]="shareCoachSettled()"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,6 +69,7 @@ export class DetailsContainer {
   private readonly analytics = inject(AnalyticsService);
 
   protected readonly detailsCoachSettled = signal(false);
+  protected readonly shareCoachSettled = signal(false);
 
   ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({

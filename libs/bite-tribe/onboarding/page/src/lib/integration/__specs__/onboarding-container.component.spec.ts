@@ -12,6 +12,7 @@ import { OnboardingService } from '../onboarding.service';
 import { OnboardingPage } from '../../components/onboarding-page/onboarding.page';
 import type { PublicUser } from 'model';
 import type { DisplayNameAvailabilityState } from '../../components/identity-step/identity-step.component';
+import type { LocationPermissionState } from '../../components/location-step/location-step.component';
 import type { NotificationPermissionState } from '../../components/notification-step/notification-step.component';
 
 jest.mock('@capacitor-firebase/analytics');
@@ -41,6 +42,7 @@ describe(OnboardingContainerComponent.name, () => {
     selectedCurrency: ReturnType<typeof signal<string>>;
     favoriteCurrencies: ReturnType<typeof signal<readonly string[]>>;
     selectedLanguage: ReturnType<typeof signal<string>>;
+    locationPermission: ReturnType<typeof signal<LocationPermissionState>>;
     notificationPermission: ReturnType<
       typeof signal<NotificationPermissionState>
     >;
@@ -54,6 +56,8 @@ describe(OnboardingContainerComponent.name, () => {
     updateCurrency: jest.Mock;
     toggleFavoriteCurrency: jest.Mock;
     updateLanguage: jest.Mock;
+    requestLocation: jest.Mock;
+    skipLocation: jest.Mock;
     requestNotifications: jest.Mock;
     skipNotifications: jest.Mock;
   };
@@ -71,6 +75,7 @@ describe(OnboardingContainerComponent.name, () => {
       selectedCurrency: signal('EUR'),
       favoriteCurrencies: signal<readonly string[]>([]),
       selectedLanguage: signal('en'),
+      locationPermission: signal<LocationPermissionState>('idle'),
       notificationPermission: signal<NotificationPermissionState>('idle'),
       initialize: jest.fn().mockResolvedValue(undefined),
       next: jest.fn(),
@@ -82,6 +87,8 @@ describe(OnboardingContainerComponent.name, () => {
       updateCurrency: jest.fn(),
       toggleFavoriteCurrency: jest.fn(),
       updateLanguage: jest.fn(),
+      requestLocation: jest.fn(),
+      skipLocation: jest.fn(),
       requestNotifications: jest.fn(),
       skipNotifications: jest.fn(),
     };
@@ -146,7 +153,8 @@ describe(OnboardingContainerComponent.name, () => {
   it.each([
     [2, 'onboarding-currency-step'],
     [3, 'onboarding-language-step'],
-    [4, 'onboarding-notification-step'],
+    [4, 'onboarding-location-step'],
+    [5, 'onboarding-notification-step'],
   ])('renders the step component for step index %i', (index, selector) => {
     serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[index]);
     serviceMock.currentIndex.set(index);
@@ -160,8 +168,8 @@ describe(OnboardingContainerComponent.name, () => {
 
   it('keeps the acknowledgement placeholder for the steps still to come', () => {
     // Only the finish step (#1016) is still a placeholder.
-    serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[5]);
-    serviceMock.currentIndex.set(5);
+    serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[6]);
+    serviceMock.currentIndex.set(6);
 
     fixture.detectChanges();
 
@@ -172,7 +180,7 @@ describe(OnboardingContainerComponent.name, () => {
     ).toBeTruthy();
   });
 
-  it('routes currency, language, and notification events into the service', () => {
+  it('routes currency, language, location, and notification events into the service', () => {
     serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[2]);
     serviceMock.currentIndex.set(2);
     fixture.detectChanges();
@@ -183,12 +191,16 @@ describe(OnboardingContainerComponent.name, () => {
     page.currencyChange.emit('JPY');
     page.favoriteCurrencyToggle.emit('USD');
     page.languageChange.emit('tr');
+    page.enableLocation.emit();
+    page.skipLocation.emit();
     page.enableNotifications.emit();
     page.skipNotifications.emit();
 
     expect(serviceMock.updateCurrency).toHaveBeenCalledWith('JPY');
     expect(serviceMock.toggleFavoriteCurrency).toHaveBeenCalledWith('USD');
     expect(serviceMock.updateLanguage).toHaveBeenCalledWith('tr');
+    expect(serviceMock.requestLocation).toHaveBeenCalledTimes(1);
+    expect(serviceMock.skipLocation).toHaveBeenCalledTimes(1);
     expect(serviceMock.requestNotifications).toHaveBeenCalledTimes(1);
     expect(serviceMock.skipNotifications).toHaveBeenCalledTimes(1);
   });

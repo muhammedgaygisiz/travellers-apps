@@ -11,6 +11,10 @@ import {
   requestPushPermission,
   type PushPermissionResult,
 } from 'push-notifications';
+import {
+  requestLocationPermission,
+  type LocationPermissionResult,
+} from 'geolocation';
 
 const USERS_COLLECTION = 'users';
 const LANGUAGE_PREFERENCE_KEY = 'lang';
@@ -107,8 +111,20 @@ export class OnboardingDataAccessService {
     return this.api.claimDisplayName(displayName);
   }
 
-  saveProfile(profile: PublicUser): Promise<PublicUser> {
-    return this.api.updateUser(profile);
+  /**
+   * Writes the profile and syncs the store, so surfaces reading the profile
+   * (the profile page's avatar and display name) show the onboarding choice
+   * without a reload.
+   *
+   * The assistant writes through the API rather than the store's save action,
+   * so nothing else dispatches the result. The store profile is only loaded at
+   * login, which would otherwise leave it on the pre-onboarding snapshot.
+   */
+  async saveProfile(profile: PublicUser): Promise<PublicUser> {
+    const updated = await this.api.updateUser(profile);
+    this.storeService.notifySavedProfile(updated);
+
+    return updated;
   }
 
   async loadSettings(): Promise<Settings | undefined> {
@@ -158,6 +174,10 @@ export class OnboardingDataAccessService {
 
   requestPushPermission(): Promise<PushPermissionResult> {
     return requestPushPermission(this.platform);
+  }
+
+  requestLocationPermission(): Promise<LocationPermissionResult> {
+    return requestLocationPermission();
   }
 
   private toPublicUser(

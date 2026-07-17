@@ -7,6 +7,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { requestPushPermission } from 'push-notifications';
+import { requestLocationPermission } from 'geolocation';
 import { OnboardingDataAccessService } from '../onboarding-data-access.service';
 
 jest.mock('@capacitor-firebase/firestore', () => ({
@@ -21,15 +22,21 @@ jest.mock('push-notifications', () => ({
   requestPushPermission: jest.fn(),
 }));
 
+jest.mock('geolocation', () => ({
+  requestLocationPermission: jest.fn(),
+}));
+
 const getDocument = FirebaseFirestore.getDocument as jest.Mock;
 const preferencesSet = Preferences.set as jest.Mock;
 const requestPushPermissionMock = requestPushPermission as jest.Mock;
+const requestLocationPermissionMock = requestLocationPermission as jest.Mock;
 
 describe('OnboardingDataAccessService', () => {
   let service: OnboardingDataAccessService;
   let getUser: jest.Mock;
   let setActiveLang: jest.Mock;
   let notifySavedSettings: jest.Mock;
+  let notifySavedProfile: jest.Mock;
   let platformMock: Platform;
   let apiMock: {
     checkDisplayNameAvailability: jest.Mock;
@@ -65,6 +72,7 @@ describe('OnboardingDataAccessService', () => {
     };
     setActiveLang = jest.fn();
     notifySavedSettings = jest.fn();
+    notifySavedProfile = jest.fn();
     platformMock = { is: jest.fn(() => true) } as unknown as Platform;
 
     TestBed.configureTestingModule({
@@ -72,7 +80,10 @@ describe('OnboardingDataAccessService', () => {
         OnboardingDataAccessService,
         { provide: AuthService, useValue: { getUser } },
         { provide: BiteTribeApiService, useValue: apiMock },
-        { provide: BiteTribeStoreService, useValue: { notifySavedSettings } },
+        {
+          provide: BiteTribeStoreService,
+          useValue: { notifySavedSettings, notifySavedProfile },
+        },
         { provide: TranslocoService, useValue: { setActiveLang } },
         { provide: Platform, useValue: platformMock },
       ],
@@ -291,6 +302,26 @@ describe('OnboardingDataAccessService', () => {
     expect(apiMock.updateUser).toHaveBeenCalledWith(profile);
   });
 
+  it('syncs the saved profile into the store', async () => {
+    setup();
+    const profile = {
+      userId: 'user-1',
+      displayName: 'Foodie',
+      email: 'foodie@example.com',
+      photoUrl: 'data:image/png;base64,AAAA',
+    } as any;
+    // The API resolves the uploaded photo to its storage URL, and that is what
+    // the rest of the app has to read — not the base64 the step held.
+    const persisted = { ...profile, photoUrl: 'https://storage/photo.jpg' };
+    apiMock.updateUser.mockResolvedValue(persisted);
+
+    await service.saveProfile(profile);
+
+    // The store profile is only loaded at login, so without this the profile
+    // page keeps showing the pre-onboarding avatar until a reload.
+    expect(notifySavedProfile).toHaveBeenCalledWith(persisted);
+  });
+
   describe('loadSettings', () => {
     it('returns the stored settings', async () => {
       setup();
@@ -364,6 +395,16 @@ describe('OnboardingDataAccessService', () => {
 
       await expect(service.requestPushPermission()).resolves.toBe('granted');
       expect(requestPushPermissionMock).toHaveBeenCalledWith(platformMock);
+    });
+  });
+
+  describe('requestLocationPermission', () => {
+    it('delegates to the shared geolocation permission ask', async () => {
+      setup();
+      requestLocationPermissionMock.mockResolvedValue('denied');
+
+      await expect(service.requestLocationPermission()).resolves.toBe('denied');
+      expect(requestLocationPermissionMock).toHaveBeenCalled();
     });
   });
 });

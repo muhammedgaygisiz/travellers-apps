@@ -26,6 +26,7 @@ describe('App Reducer', () => {
         profile: undefined,
         settings: {
           pushNotifications: false,
+          location: false,
           emailUpdates: false,
           theme: 'light',
           currency: 'EUR',

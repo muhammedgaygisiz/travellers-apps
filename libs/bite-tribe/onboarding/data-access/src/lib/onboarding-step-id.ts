@@ -9,5 +9,6 @@ export type OnboardingStepId =
   | 'visibility'
   | 'currency'
   | 'language'
+  | 'location'
   | 'notifications'
   | 'finish';

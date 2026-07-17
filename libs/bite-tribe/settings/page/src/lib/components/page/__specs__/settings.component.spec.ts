@@ -95,6 +95,7 @@ describe(PageSettings.name, () => {
     it('should emit submitSettings with form values', () => {
       const mockSettings: Settings = {
         pushNotifications: true,
+        location: false,
         emailUpdates: false,
         theme: 'dark',
         currency: 'USD',
@@ -116,6 +117,27 @@ describe(PageSettings.name, () => {
       component.saveSettings();
 
       expect(submitSettingsEmitSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should keep the location grant this page has no control for', () => {
+      // The settings write replaces the document, so the grant recorded by
+      // onboarding has to survive a save made from this form (#1023).
+      compRef.setInput('settings', {
+        pushNotifications: true,
+        location: true,
+        emailUpdates: true,
+        theme: 'dark',
+        currency: 'USD',
+        favoriteCurrencies: [],
+        language: 'de',
+      } satisfies Settings);
+      fixture.detectChanges();
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ location: true }),
+      );
     });
 
     it('should not emit if form is invalid', () => {
@@ -191,6 +213,7 @@ describe(PageSettings.name, () => {
     it('should patch form with settings when settings input is provided', () => {
       const mockSettings: Settings = {
         pushNotifications: true,
+        location: true,
         emailUpdates: true,
         theme: 'dark',
         currency: 'USD',

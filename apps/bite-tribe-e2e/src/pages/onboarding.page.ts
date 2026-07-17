@@ -1,5 +1,11 @@
 import { expect, Locator, Page } from '@playwright/test';
 
+/** Smallest thing the upload accepts: it compresses a real image, not a stub. */
+const ONE_PIXEL_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+);
+
 /**
  * Page object for the onboarding assistant shell (route: /onboarding).
  *
@@ -8,8 +14,9 @@ import { expect, Locator, Page } from '@playwright/test';
  * an index-based walk breaks every time a step is inserted; presence-based
  * dispatch survives it.
  *
- * Identity, visibility, currency, language, and notifications have real inputs.
- * The finish step still uses the placeholder acknowledgement until #1016 lands.
+ * Identity, visibility, currency, language, location, and notifications have
+ * real inputs. The finish step still uses the placeholder acknowledgement until
+ * #1016 lands.
  */
 export class OnboardingPage {
   readonly page: Page;
@@ -17,10 +24,13 @@ export class OnboardingPage {
   readonly acknowledgeCheckbox: Locator;
   readonly displayNameInput: Locator;
   readonly displayNameStatus: Locator;
+  readonly photoInput: Locator;
   readonly visibilityChoice: Locator;
   readonly currencyStep: Locator;
   readonly currencyDefaultValue: Locator;
   readonly languageStep: Locator;
+  readonly locationStep: Locator;
+  readonly locationSkipButton: Locator;
   readonly notificationStep: Locator;
   readonly notificationSkipButton: Locator;
   readonly nextButton: Locator;
@@ -33,12 +43,15 @@ export class OnboardingPage {
       .getByTestId('onboarding-display-name')
       .locator('input');
     this.displayNameStatus = page.getByTestId('onboarding-display-name-status');
+    this.photoInput = page.getByTestId('image-file-input');
     this.visibilityChoice = page.getByTestId('onboarding-visibility-choice');
     this.currencyStep = page.locator('onboarding-currency-step');
     this.currencyDefaultValue = page.getByTestId(
       'onboarding-currency-default-value',
     );
     this.languageStep = page.locator('onboarding-language-step');
+    this.locationStep = page.locator('onboarding-location-step');
+    this.locationSkipButton = page.getByTestId('onboarding-location-skip');
     this.notificationStep = page.locator('onboarding-notification-step');
     this.notificationSkipButton = page.getByTestId(
       'onboarding-notifications-skip',
@@ -93,6 +106,10 @@ export class OnboardingPage {
       return this.completeLanguageStep();
     }
 
+    if (await this.locationStep.isVisible()) {
+      return this.completeLocationStep();
+    }
+
     if (await this.notificationStep.isVisible()) {
       return this.completeNotificationStep();
     }
@@ -125,6 +142,18 @@ export class OnboardingPage {
     await this.displayNameInput.fill(`E2E Foodie ${Date.now()}`);
     await expect(this.displayNameStatus).toContainText(/available/i);
     await this.expectNextEnabled();
+
+    // The photo is optional, but adding one is what routes the profile write
+    // through the upload path, so leaving it out never exercises that path.
+    await this.photoInput.setInputFiles({
+      name: 'avatar.png',
+      mimeType: 'image/png',
+      buffer: ONE_PIXEL_PNG,
+    });
+
+    // A photo says nothing about the display name, so it must not undo the
+    // availability the step just confirmed (#1023 follow-up).
+    await this.expectNextEnabled();
   }
 
   private async completeVisibilityStep(): Promise<void> {
@@ -148,6 +177,19 @@ export class OnboardingPage {
   /** Prefilled from the device locale, so no selection is required. */
   private async completeLanguageStep(): Promise<void> {
     await expect(this.languageStep).toBeVisible();
+    await this.expectNextEnabled();
+  }
+
+  /**
+   * Declines location. Skipping is an explicit "no" that needs no OS prompt,
+   * which keeps the walk deterministic in a browser, and it exercises the
+   * contract that a denial still lets the flow continue (#1023).
+   */
+  private async completeLocationStep(): Promise<void> {
+    // The step must be decided before it can be left, so this also proves the
+    // explanation is not silently skippable.
+    await this.expectNextDisabled();
+    await this.locationSkipButton.click();
     await this.expectNextEnabled();
   }
 

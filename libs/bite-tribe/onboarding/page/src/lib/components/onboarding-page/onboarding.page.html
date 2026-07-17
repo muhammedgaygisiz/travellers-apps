@@ -47,6 +47,12 @@
         [language]="selectedLanguage()"
         (languageChange)="languageChange.emit($event)"
       />
+      } @case ('location') {
+      <onboarding-location-step
+        [permission]="locationPermission()"
+        (enableLocation)="enableLocation.emit()"
+        (skipLocation)="skipLocation.emit()"
+      />
       } @case ('notifications') {
       <onboarding-notification-step
         [permission]="notificationPermission()"

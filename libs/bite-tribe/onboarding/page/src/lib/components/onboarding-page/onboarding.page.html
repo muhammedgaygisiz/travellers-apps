@@ -35,6 +35,24 @@
         [selectedPublic]="selectedVisibility()"
         (visibilityChange)="visibilityChange.emit($event)"
       />
+      } @case ('currency') {
+      <onboarding-currency-step
+        [currency]="selectedCurrency()"
+        [favoriteCurrencies]="favoriteCurrencies()"
+        (currencyChange)="currencyChange.emit($event)"
+        (favoriteCurrencyToggle)="favoriteCurrencyToggle.emit($event)"
+      />
+      } @case ('language') {
+      <onboarding-language-step
+        [language]="selectedLanguage()"
+        (languageChange)="languageChange.emit($event)"
+      />
+      } @case ('notifications') {
+      <onboarding-notification-step
+        [permission]="notificationPermission()"
+        (enableNotifications)="enableNotifications.emit()"
+        (skipNotifications)="skipNotifications.emit()"
+      />
       } @default {
       <ion-text>
         <p>{{ 'onboarding-step-placeholder' | transloco }}</p>

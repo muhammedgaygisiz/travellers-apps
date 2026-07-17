@@ -3,9 +3,13 @@ import { expect, Locator, Page } from '@playwright/test';
 /**
  * Page object for the onboarding assistant shell (route: /onboarding).
  *
- * The assistant renders its steps in order. Identity and visibility now have
- * real inputs, while later steps still use the placeholder acknowledgement
- * until their follow-up issues land.
+ * Steps are handled by whichever step component is rendered, not by their
+ * position in the flow. The order and count change as the epic lands (#850), so
+ * an index-based walk breaks every time a step is inserted; presence-based
+ * dispatch survives it.
+ *
+ * Identity, visibility, currency, language, and notifications have real inputs.
+ * The finish step still uses the placeholder acknowledgement until #1016 lands.
  */
 export class OnboardingPage {
   readonly page: Page;
@@ -14,6 +18,11 @@ export class OnboardingPage {
   readonly displayNameInput: Locator;
   readonly displayNameStatus: Locator;
   readonly visibilityChoice: Locator;
+  readonly currencyStep: Locator;
+  readonly currencyDefaultValue: Locator;
+  readonly languageStep: Locator;
+  readonly notificationStep: Locator;
+  readonly notificationSkipButton: Locator;
   readonly nextButton: Locator;
 
   constructor(page: Page) {
@@ -25,6 +34,15 @@ export class OnboardingPage {
       .locator('input');
     this.displayNameStatus = page.getByTestId('onboarding-display-name-status');
     this.visibilityChoice = page.getByTestId('onboarding-visibility-choice');
+    this.currencyStep = page.locator('onboarding-currency-step');
+    this.currencyDefaultValue = page.getByTestId(
+      'onboarding-currency-default-value',
+    );
+    this.languageStep = page.locator('onboarding-language-step');
+    this.notificationStep = page.locator('onboarding-notification-step');
+    this.notificationSkipButton = page.getByTestId(
+      'onboarding-notifications-skip',
+    );
     this.nextButton = page.getByTestId('onboarding-next');
   }
 
@@ -43,17 +61,7 @@ export class OnboardingPage {
     for (;;) {
       const [current, total] = await this.readProgress();
 
-      if (current === 1) {
-        await this.completeIdentityStep();
-      } else if (current === 2) {
-        await this.completeVisibilityStep();
-      } else {
-        // Only act once the freshly rendered step is unacknowledged, so we never
-        // click a checkbox that is still bound to the previous step.
-        await this.waitForAcknowledged(false);
-        await this.acknowledgeCheckbox.click();
-      }
-
+      await this.completeCurrentStep();
       await this.nextButton.click();
 
       if (current >= total) {
@@ -68,23 +76,99 @@ export class OnboardingPage {
     }
   }
 
+  private async completeCurrentStep(): Promise<void> {
+    if (await this.displayNameInput.isVisible()) {
+      return this.completeIdentityStep();
+    }
+
+    if (await this.visibilityChoice.isVisible()) {
+      return this.completeVisibilityStep();
+    }
+
+    if (await this.currencyStep.isVisible()) {
+      return this.completeCurrencyStep();
+    }
+
+    if (await this.languageStep.isVisible()) {
+      return this.completeLanguageStep();
+    }
+
+    if (await this.notificationStep.isVisible()) {
+      return this.completeNotificationStep();
+    }
+
+    return this.completeAcknowledgementStep();
+  }
+
   private async readProgress(): Promise<[current: number, total: number]> {
     const text = (await this.stepCount.textContent()) ?? '';
     const numbers = (text.match(/\d+/g) ?? []).map(Number);
     return [numbers[0] ?? 1, numbers[1] ?? 1];
   }
 
+  /**
+   * `ion-button` is a custom element rather than a native control, so
+   * Playwright's toBeEnabled/toBeDisabled always read it as enabled and assert
+   * nothing. Ionic reflects the real state onto `aria-disabled`, so match on
+   * that instead. Negating the "true" match keeps this correct whether Ionic
+   * renders `aria-disabled="false"` or drops the attribute entirely.
+   */
+  private async expectNextEnabled(): Promise<void> {
+    await expect(this.nextButton).not.toHaveAttribute('aria-disabled', 'true');
+  }
+
+  private async expectNextDisabled(): Promise<void> {
+    await expect(this.nextButton).toHaveAttribute('aria-disabled', 'true');
+  }
+
   private async completeIdentityStep(): Promise<void> {
     await this.displayNameInput.fill(`E2E Foodie ${Date.now()}`);
     await expect(this.displayNameStatus).toContainText(/available/i);
-    await expect(this.nextButton).toBeEnabled();
+    await this.expectNextEnabled();
   }
 
   private async completeVisibilityStep(): Promise<void> {
     await this.visibilityChoice
       .getByTestId('onboarding-visibility-private')
       .click();
-    await expect(this.nextButton).toBeEnabled();
+    await this.expectNextEnabled();
+  }
+
+  /**
+   * The default currency is prefilled from the device locale, so the step is
+   * already satisfiable and favorites can stay empty. Asserting the prefill
+   * resolved keeps the "mandatory default currency" contract covered rather than
+   * blindly clicking through.
+   */
+  private async completeCurrencyStep(): Promise<void> {
+    await expect(this.currencyDefaultValue).not.toBeEmpty();
+    await this.expectNextEnabled();
+  }
+
+  /** Prefilled from the device locale, so no selection is required. */
+  private async completeLanguageStep(): Promise<void> {
+    await expect(this.languageStep).toBeVisible();
+    await this.expectNextEnabled();
+  }
+
+  /**
+   * Declines notifications. Skipping is an explicit "no" that needs no OS
+   * prompt, which keeps the walk deterministic in a browser, and it exercises
+   * the contract that a denial still lets the flow continue.
+   */
+  private async completeNotificationStep(): Promise<void> {
+    // The step must be decided before it can be left, so this also proves the
+    // explanation is not silently skippable.
+    await this.expectNextDisabled();
+    await this.notificationSkipButton.click();
+    await this.expectNextEnabled();
+  }
+
+  private async completeAcknowledgementStep(): Promise<void> {
+    // Only act once the freshly rendered step is unacknowledged, so we never
+    // click a checkbox that is still bound to the previous step.
+    await this.waitForAcknowledged(false);
+    await this.acknowledgeCheckbox.click();
   }
 
   private async waitForAcknowledged(expected: boolean): Promise<void> {

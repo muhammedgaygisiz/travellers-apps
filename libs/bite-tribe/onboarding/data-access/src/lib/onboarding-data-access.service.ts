@@ -1,10 +1,19 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { AuthService } from 'ta-firestore';
-import type { PublicUser } from 'model';
+import type { PublicUser, Settings } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { BiteTribeStoreService } from 'bite-tribe/store';
+import { Preferences } from '@capacitor/preferences';
+import { TranslocoService } from '@jsverse/transloco';
+import { Platform } from '@ionic/angular';
+import {
+  requestPushPermission,
+  type PushPermissionResult,
+} from 'push-notifications';
 
 const USERS_COLLECTION = 'users';
+const LANGUAGE_PREFERENCE_KEY = 'lang';
 
 export interface DisplayNameAvailability {
   available: boolean;
@@ -27,6 +36,9 @@ export interface DisplayNameAvailability {
 export class OnboardingDataAccessService {
   private readonly authService = inject(AuthService);
   private readonly api = inject(BiteTribeApiService);
+  private readonly storeService = inject(BiteTribeStoreService);
+  private readonly transloco = inject(TranslocoService);
+  private readonly platform = inject(Platform);
 
   private readonly completed = signal(false);
   readonly dismissedForSession = signal(false);
@@ -97,6 +109,55 @@ export class OnboardingDataAccessService {
 
   saveProfile(profile: PublicUser): Promise<PublicUser> {
     return this.api.updateUser(profile);
+  }
+
+  async loadSettings(): Promise<Settings | undefined> {
+    try {
+      const settings = await this.api.loadSettings();
+      // A user without a settings document yet reads back as an empty object.
+      return settings && Object.keys(settings).length > 0
+        ? settings
+        : undefined;
+    } catch (error) {
+      console.warn('Failed to read onboarding settings:', error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Writes the full settings document and syncs the store so surfaces reading
+   * settings (currency formatting, language) see the onboarding choice at once.
+   *
+   * The caller must pass complete settings: the settings API replaces the
+   * document rather than merging, so a partial write would drop unrelated keys.
+   */
+  async saveSettings(settings: Settings): Promise<void> {
+    await this.api.saveSettings(settings);
+    this.storeService.notifySavedSettings(settings);
+  }
+
+  /**
+   * Switches the app language immediately and persists it for the next start.
+   *
+   * The settings page reloads the document to apply a language change; the
+   * assistant cannot, because a reload would tear down the in-progress flow.
+   * Transloco swaps the active language in place instead.
+   */
+  async applyLanguage(language: string): Promise<void> {
+    try {
+      await Preferences.set({
+        key: LANGUAGE_PREFERENCE_KEY,
+        value: language,
+      });
+    } catch (error) {
+      console.warn('Failed to persist onboarding language preference:', error);
+    }
+
+    this.transloco.setActiveLang(language);
+  }
+
+  requestPushPermission(): Promise<PushPermissionResult> {
+    return requestPushPermission(this.platform);
   }
 
   private toPublicUser(

@@ -65,7 +65,25 @@ const getFcmToken = async (): Promise<string | null> => {
   }
 };
 
-export const initPush = async (
+/**
+ * Outcome of an in-context push permission request.
+ *
+ * `unsupported` means no OS prompt exists to answer — the web build or a
+ * signed-out user — and is deliberately distinct from `denied` so callers do
+ * not record a refusal the user never made.
+ */
+export type PushPermissionResult = 'granted' | 'denied' | 'unsupported';
+
+/**
+ * Registers push listeners and, when permission was already granted, refreshes
+ * the FCM token. It never shows the OS permission prompt.
+ *
+ * The prompt is owned by the onboarding notification step
+ * ({@link requestPushPermission}), which explains why notifications matter
+ * first. Asking here — on every login — would burn the OS's single prompt
+ * before the user has any context for the decision (epic #850, issue #1015).
+ */
+export const initPushListeners = async (
   platform: Platform,
   userUid: string | undefined,
   navController: NavController,
@@ -131,12 +149,47 @@ export const initPush = async (
       },
     );
 
-    const permissions = await PushNotifications.requestPermissions();
+    // Only re-register an existing grant. `checkPermissions` never prompts,
+    // so a user who has not decided yet is left untouched until onboarding
+    // asks in context.
+    const permissions = await PushNotifications.checkPermissions();
 
     if (permissions.receive !== 'granted') {
       return;
     }
 
     await PushNotifications.register();
+  }
+};
+
+/**
+ * Shows the OS push permission prompt and registers for push when it is
+ * granted. Call this only after the user has been told what notifications are
+ * for; the OS shows its prompt once per install, so a cold ask is spent for
+ * good.
+ *
+ * Returns the outcome so the caller can record the choice. Denial is a normal
+ * result, not an error — the onboarding flow continues either way.
+ */
+export const requestPushPermission = async (
+  platform: Platform,
+): Promise<PushPermissionResult> => {
+  if (!platform.is('capacitor')) {
+    return 'unsupported';
+  }
+
+  try {
+    const permissions = await PushNotifications.requestPermissions();
+
+    if (permissions.receive !== 'granted') {
+      return 'denied';
+    }
+
+    await PushNotifications.register();
+
+    return 'granted';
+  } catch (error) {
+    console.error('Push permission request failed: ', error);
+    return 'denied';
   }
 };

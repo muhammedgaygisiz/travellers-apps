@@ -1,17 +1,21 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { NavController } from '@ionic/angular';
-import { getDisplayNameFailureReason, PATH } from 'utils';
+import { getCurrencyForLocale, getDisplayNameFailureReason, PATH } from 'utils';
 import {
   OnboardingDataAccessService,
   OnboardingProgressService,
   OnboardingStepId,
 } from 'bite-tribe/onboarding-data-access';
-import type { PublicUser } from 'model';
+import type { PublicUser, Settings } from 'model';
 import { ONBOARDING_STEPS } from '../steps/onboarding-steps';
 import type {
   DisplayNameAvailabilityState,
   OnboardingIdentityDraft,
 } from '../components/identity-step/identity-step.component';
+import { ONBOARDING_LANGUAGES } from '../components/language-step/language-step.component';
+import type { NotificationPermissionState } from '../components/notification-step/notification-step.component';
+
+const DEFAULT_LANGUAGE = 'en';
 
 /**
  * Owns onboarding assistant navigation: the ordered step registry, per-step
@@ -40,6 +44,12 @@ export class OnboardingService {
   private readonly availableDisplayName = signal<string | null>(null);
   readonly selectedVisibility = signal<boolean | null>(false);
   readonly visibilitySelectionExplicit = signal(false);
+
+  readonly settings = signal<Settings | undefined>(undefined);
+  readonly selectedCurrency = signal<string>('EUR');
+  readonly favoriteCurrencies = signal<readonly string[]>([]);
+  readonly selectedLanguage = signal<string>(DEFAULT_LANGUAGE);
+  readonly notificationPermission = signal<NotificationPermissionState>('idle');
 
   private readonly completedSteps = signal<ReadonlySet<OnboardingStepId>>(
     new Set(),
@@ -93,10 +103,56 @@ export class OnboardingService {
     });
     this.selectedVisibility.set(profile?.public ?? false);
 
+    await this.initializePreferences();
+
     const displayName = this.identityDraft().displayName.trim();
     if (this.currentStep().id === 'identity' && displayName) {
       await this.checkDisplayNameAvailability(displayName);
     }
+  }
+
+  /**
+   * Prefills the currency, language, and notification steps. Persisted settings
+   * win so a returning user sees their own choices; a first-time user gets the
+   * device locale's best guess, which already makes both steps satisfiable.
+   */
+  private async initializePreferences(): Promise<void> {
+    const settings = await this.dataAccess.loadSettings();
+    this.settings.set(settings);
+
+    const locale = this.deviceLocale();
+
+    this.selectedCurrency.set(
+      settings?.currency || getCurrencyForLocale(locale),
+    );
+    this.favoriteCurrencies.set(settings?.favoriteCurrencies ?? []);
+    this.setStepValid('currency', true);
+
+    const language = settings?.language || this.languageForLocale(locale);
+    this.selectedLanguage.set(language);
+    this.setStepValid('language', true);
+    await this.dataAccess.applyLanguage(language);
+
+    // Only a stored grant is treated as decided. A stored `false` is
+    // indistinguishable from "never asked" on a fresh settings document, so the
+    // step still offers the choice rather than recording a refusal the user
+    // never gave.
+    if (settings?.pushNotifications) {
+      this.notificationPermission.set('granted');
+      this.setStepValid('notifications', true);
+    }
+  }
+
+  private deviceLocale(): string {
+    return navigator.language || navigator.languages?.[0] || DEFAULT_LANGUAGE;
+  }
+
+  private languageForLocale(locale: string): string {
+    const language = locale.replace(/_/g, '-').split('-')[0].toLowerCase();
+
+    return ONBOARDING_LANGUAGES.some((option) => option.code === language)
+      ? language
+      : DEFAULT_LANGUAGE;
   }
 
   setCurrentStepValid(valid: boolean): void {
@@ -179,6 +235,62 @@ export class OnboardingService {
     this.setStepValid('visibility', true);
   }
 
+  updateCurrency(currency: string): void {
+    if (!currency) {
+      return;
+    }
+
+    this.selectedCurrency.set(currency);
+    this.setStepValid('currency', true);
+  }
+
+  toggleFavoriteCurrency(currency: string): void {
+    this.favoriteCurrencies.update((currencies) =>
+      currencies.includes(currency)
+        ? currencies.filter((code) => code !== currency)
+        : [...currencies, currency],
+    );
+  }
+
+  /**
+   * Applies the language the moment it is picked, so the rest of the assistant
+   * is already translated when the user reads it. The settings write happens on
+   * advance, together with the other preference steps.
+   */
+  async updateLanguage(language: string): Promise<void> {
+    if (!language || language === this.selectedLanguage()) {
+      return;
+    }
+
+    this.selectedLanguage.set(language);
+    this.setStepValid('language', true);
+    await this.dataAccess.applyLanguage(language);
+  }
+
+  /**
+   * Asks the OS for push permission after the step has explained why. The
+   * answer — grant or denial — completes the step either way; only the request
+   * still being in flight blocks advancing.
+   */
+  async requestNotifications(): Promise<void> {
+    if (this.notificationPermission() === 'requesting') {
+      return;
+    }
+
+    this.notificationPermission.set('requesting');
+
+    const result = await this.dataAccess.requestPushPermission();
+
+    this.notificationPermission.set(result);
+    this.setStepValid('notifications', true);
+  }
+
+  /** Declining without opening the OS prompt is an explicit "no". */
+  skipNotifications(): void {
+    this.notificationPermission.set('denied');
+    this.setStepValid('notifications', true);
+  }
+
   private setStepValid(id: OnboardingStepId, valid: boolean): void {
     if (id === 'visibility' && !this.visibilitySelectionExplicit()) {
       valid = false;
@@ -242,7 +354,70 @@ export class OnboardingService {
       return this.persistVisibilityStep();
     }
 
+    if (id === 'currency') {
+      return this.persistSettings({
+        currency: this.selectedCurrency(),
+        favoriteCurrencies: [...new Set(this.favoriteCurrencies())],
+      });
+    }
+
+    if (id === 'language') {
+      return this.persistSettings({ language: this.selectedLanguage() });
+    }
+
+    if (id === 'notifications') {
+      return this.persistSettings({
+        pushNotifications: this.notificationPermission() === 'granted',
+      });
+    }
+
     return true;
+  }
+
+  /**
+   * Writes the given preference changes on top of the full settings document.
+   *
+   * The settings API replaces the document instead of merging, so every write
+   * has to carry the complete object; sending only the changed keys would drop
+   * the rest of the user's settings.
+   */
+  private async persistSettings(changes: Partial<Settings>): Promise<boolean> {
+    const settings = this.buildSettings(changes);
+
+    try {
+      await this.dataAccess.saveSettings(settings);
+      this.settings.set(settings);
+      return true;
+    } catch (error) {
+      console.warn('Failed to persist onboarding settings:', error);
+      return false;
+    }
+  }
+
+  private buildSettings(changes: Partial<Settings>): Settings {
+    const current = this.settings();
+
+    return {
+      ...current,
+      pushNotifications: current?.pushNotifications ?? false,
+      emailUpdates: current?.emailUpdates ?? false,
+      theme: current?.theme ?? this.systemTheme(),
+      currency: current?.currency || 'EUR',
+      favoriteCurrencies: current?.favoriteCurrencies ?? [],
+      language: current?.language || DEFAULT_LANGUAGE,
+      ...changes,
+    };
+  }
+
+  /**
+   * Theme for a user with no settings document yet. Onboarding has no theme
+   * step, but it writes the first settings document, so it must not persist a
+   * light default over a device that is in dark mode.
+   */
+  private systemTheme(): 'light' | 'dark' {
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
   }
 
   private async persistIdentityStep(): Promise<boolean> {

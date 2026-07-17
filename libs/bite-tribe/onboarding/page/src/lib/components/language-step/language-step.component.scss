@@ -1,0 +1,27 @@
+.language-step {
+  display: grid;
+  gap: 1rem;
+}
+
+.onboarding-step-copy {
+  margin: 0;
+  color: var(--ion-color-medium);
+  line-height: 1.45;
+}
+
+// Ionic already reserves a 56px min-height for the stacked label plus value, so
+// the card treatment must not add vertical padding on the host: it would stack
+// on top of that height instead of filling it. Horizontal inset goes through
+// Ionic's own custom properties for the same reason.
+ion-select {
+  width: 100%;
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 0.75rem;
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.language-step__hint {
+  font-size: 0.875rem;
+}

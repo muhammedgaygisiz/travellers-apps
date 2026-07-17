@@ -3,7 +3,9 @@ import {
   Component,
   effect,
   inject,
+  signal,
 } from '@angular/core';
+import { CoachMarkComponent } from 'bite-tribe/coach-mark';
 import { BiteTribeHomeComponent } from '../components/page/home.component';
 import { HomeService } from './home.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -44,12 +46,34 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (rateNowClick)="service.rateNowClicked($event)"
       (resendEmailVerification)="service.resendEmailVerification('home')"
     />
+
+    <bt-coach-mark
+      surface="home-feed"
+      titleKey="coach-home-feed-title"
+      bodyKey="coach-home-feed-body"
+      (settled)="feedCoachSettled.set(true)"
+    />
+
+    <bt-coach-mark
+      surface="create-bite"
+      titleKey="coach-create-bite-title"
+      bodyKey="coach-create-bite-body"
+      anchorTestId="footer-add-button"
+      [enabled]="feedCoachSettled()"
+    />
   `,
-  imports: [BiteTribeHomeComponent],
+  imports: [BiteTribeHomeComponent, CoachMarkComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeContainer {
   service = inject(HomeService);
+
+  /**
+   * Gates the create-Bite coach mark so the two home marks never overlap: it is
+   * held back until the feed mark has settled — dismissed, or skipped because it
+   * was already seen.
+   */
+  protected readonly feedCoachSettled = signal(false);
 
   private hasTrackedPrompt = false;
 

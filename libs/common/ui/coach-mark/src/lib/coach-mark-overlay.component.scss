@@ -1,0 +1,57 @@
+.coach-mark {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.coach-mark-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 60%);
+}
+
+// A single element sized to the anchor; the huge spread shadow darkens the rest
+// of the screen and leaves the anchor itself untouched (the "spotlight").
+.coach-mark-spotlight {
+  position: absolute;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 0 9999px rgb(0 0 0 / 60%);
+  pointer-events: none;
+}
+
+.coach-mark-card {
+  position: absolute;
+  left: 50%;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: var(--ion-background-color, #fff);
+  color: var(--ion-text-color, #000);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 25%);
+  transform: translateX(-50%);
+
+  &.coach-mark-card-above {
+    transform: translate(-50%, -100%);
+  }
+
+  &.coach-mark-card-centered {
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.coach-mark-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.coach-mark-body {
+  margin: 0 0 1rem;
+  color: var(--ion-color-medium);
+  line-height: 1.45;
+}
+
+.coach-mark-dismiss {
+  margin: 0;
+}

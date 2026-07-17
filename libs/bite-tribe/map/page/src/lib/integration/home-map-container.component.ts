@@ -3,11 +3,12 @@ import { MapService } from './map.service';
 
 import { MapPageComponent } from '../components/map-page/map-page.component';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { CoachMarkComponent } from 'bite-tribe/coach-mark';
 
 @Component({
   selector: 'home-map-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MapPageComponent],
+  imports: [MapPageComponent, CoachMarkComponent],
   template: `
     <map-page
       class="ion-page"
@@ -19,6 +20,12 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
+    />
+
+    <bt-coach-mark
+      surface="map"
+      titleKey="coach-map-title"
+      bodyKey="coach-map-body"
     />
   `,
 })

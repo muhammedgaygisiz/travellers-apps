@@ -3,7 +3,17 @@ import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
 import { BusinessMenuItemComponent } from '../business-menu-item.component';
 import { BusinessMenuVariantComponent } from '../../business-menu-item-editor/business-menu-variant.component';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { MenuItem } from 'model';
 import SpyInstance = jest.SpyInstance;
+
+const createMenuItem = (
+  overrides: Partial<MenuItem> & Record<string, unknown> = {},
+): MenuItem => ({
+  name: 'Test Item',
+  description: '',
+  price: 0,
+  ...overrides,
+});
 
 @Pipe({
   name: 'transloco',
@@ -40,7 +50,7 @@ describe('BusinessMenuItemComponent', () => {
 
   describe('onItemChange', () => {
     it('should set value if item exists', () => {
-      const testItem = { id: 1, name: 'Test Item' } as any;
+      const testItem = createMenuItem({ id: 1 });
       componentRef.setInput('item', testItem);
       componentRef.changeDetectorRef.detectChanges();
 
@@ -55,7 +65,7 @@ describe('BusinessMenuItemComponent', () => {
     });
 
     it('should set value with empty name for variant', () => {
-      const testItem = { id: 1, price: 1 } as any;
+      const testItem = createMenuItem({ id: 1, name: '', price: 1 });
       componentRef.setInput('item', testItem);
 
       expect(component.itemForm.name().value()).toBe('');
@@ -92,8 +102,8 @@ describe('BusinessMenuItemComponent', () => {
     });
 
     it('should add variant to item and emit addedVariant event', () => {
-      const initialItem = { id: 1, name: 'Test Item', variants: [] } as any;
-      const newVariant = { id: 2, name: 'Variant 1' } as any;
+      const initialItem = createMenuItem({ id: 1, variants: [] });
+      const newVariant = createMenuItem({ id: 2, name: 'Variant 1' });
 
       componentRef.setInput('item', initialItem);
 
@@ -107,7 +117,7 @@ describe('BusinessMenuItemComponent', () => {
     });
 
     it('should not emit addedVariant event if item is undefined', () => {
-      const newVariant = { id: 2, name: 'Variant 1' } as any;
+      const newVariant = createMenuItem({ id: 2, name: 'Variant 1' });
       componentRef.setInput('item', undefined);
 
       component.onAddVariant(newVariant);
@@ -133,8 +143,8 @@ describe('BusinessMenuItemComponent', () => {
     });
 
     it('should emit itemChanged event with updated item when index is not provided', () => {
-      const initialItem = { id: 1, name: 'Test Item' } as any;
-      const changes = { name: 'Updated Item' } as any;
+      const initialItem = createMenuItem({ id: 1 });
+      const changes = createMenuItem({ name: 'Updated Item' });
 
       componentRef.setInput('item', initialItem);
 
@@ -147,7 +157,7 @@ describe('BusinessMenuItemComponent', () => {
     });
 
     it('should not emit itemChanged event if item is undefined', () => {
-      const changes = { name: 'Updated Item' } as any;
+      const changes = createMenuItem({ name: 'Updated Item' });
 
       componentRef.setInput('item', undefined);
 
@@ -157,24 +167,32 @@ describe('BusinessMenuItemComponent', () => {
     });
 
     it('should not emit itemChanged event on variant if no variants provided in original item', () => {
-      const initialItem = { id: 1, name: 'Variant 1' } as any;
-      const changes = { name: 'Updated Item' } as any;
+      const initialItem = createMenuItem({ id: 1, name: 'Variant 1' });
+      const changes = createMenuItem({ name: 'Updated Item' });
       componentRef.setInput('item', initialItem);
       component.onEditVariant(changes, 0);
       expect(itemChangedEmitSpy).not.toHaveBeenCalled();
     });
 
     it('should not emit itemChanged event on variant if no variants (empty array) provided in original item', () => {
-      const initialItem = { id: 1, name: 'Variant 1', variants: [] } as any;
-      const changes = { name: 'Updated Item' } as any;
+      const initialItem = createMenuItem({
+        id: 1,
+        name: 'Variant 1',
+        variants: [],
+      });
+      const changes = createMenuItem({ name: 'Updated Item' });
       componentRef.setInput('item', initialItem);
       component.onEditVariant(changes, 0);
       expect(itemChangedEmitSpy).not.toHaveBeenCalled();
     });
 
     it('should emit itemChanged event for variant change if index is provided', () => {
-      const initialItem = { id: 1, name: 'Variant 1', variants: [{}] } as any;
-      const changes = { name: 'Updated Item' } as any;
+      const initialItem = createMenuItem({
+        id: 1,
+        name: 'Variant 1',
+        variants: [{} as MenuItem],
+      });
+      const changes = createMenuItem({ name: 'Updated Item' });
       componentRef.setInput('item', initialItem);
       component.onEditVariant(changes, 0);
       expect(itemChangedEmitSpy).toHaveBeenCalledWith({

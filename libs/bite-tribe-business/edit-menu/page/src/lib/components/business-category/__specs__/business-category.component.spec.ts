@@ -1,8 +1,34 @@
 import { BusinessCategoryComponent } from '../business-category.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
-import { Category } from 'model';
+import { Category, MenuItem } from 'model';
+import { ItemReorderEventDetail } from '@ionic/angular';
 import SpyInstance = jest.SpyInstance;
+
+const createMenuItem = (
+  overrides: Partial<MenuItem> & Record<string, unknown> = {},
+): MenuItem => ({
+  name: 'Test Item',
+  description: '',
+  price: 0,
+  ...overrides,
+});
+
+const createCategory = (
+  overrides: Partial<Category> & Record<string, unknown> = {},
+): Category => ({
+  title: 'Test Category',
+  items: [],
+  ...overrides,
+});
+
+const createReorderEvent = (
+  from: number,
+  to: number,
+): CustomEvent<ItemReorderEventDetail> =>
+  new CustomEvent<ItemReorderEventDetail>('ionItemReorder', {
+    detail: { from, to, complete: jest.fn() },
+  });
 
 describe('BusinessCategoryComponent', () => {
   let component: BusinessCategoryComponent;
@@ -37,13 +63,13 @@ describe('BusinessCategoryComponent', () => {
 
   describe('onAddItem', () => {
     let emitSpy: SpyInstance;
-    let mockMenuItem: any;
-    let mockCategory: any;
+    let mockMenuItem: MenuItem;
+    let mockCategory: Category;
 
     beforeEach(() => {
       emitSpy = jest.spyOn(component.addItemToCategory, 'emit');
-      mockMenuItem = { id: '1', name: 'Test Item' } as any;
-      mockCategory = { id: 'cat1', items: [] } as any;
+      mockMenuItem = createMenuItem({ id: '1' });
+      mockCategory = createCategory({ id: 'cat1' });
       componentRef.setInput('category', mockCategory);
     });
 
@@ -78,16 +104,16 @@ describe('BusinessCategoryComponent', () => {
 
   describe('onChangeItem', () => {
     let emitSpy: SpyInstance;
-    let mockMenuItem: any;
-    let mockCategory: any;
+    let mockMenuItem: MenuItem;
+    let mockCategory: Category;
 
     beforeEach(() => {
       emitSpy = jest.spyOn(component.categoryChanged, 'emit');
-      mockMenuItem = { id: '1', name: 'Updated Item' } as any;
+      mockMenuItem = createMenuItem({ id: '1', name: 'Updated Item' });
       mockCategory = {
         id: 'cat1',
-        items: [{ id: '1', name: 'Test Item' }],
-      } as any;
+        items: [createMenuItem({ id: '1' })],
+      } as unknown as Category;
       componentRef.setInput('category', mockCategory);
     });
 
@@ -101,7 +127,7 @@ describe('BusinessCategoryComponent', () => {
     });
 
     it('should add category items as empty array if none provided', () => {
-      componentRef.setInput('category', { id: 'cat1' });
+      componentRef.setInput('category', { id: 'cat1' } as unknown as Category);
       componentRef.changeDetectorRef.detectChanges();
 
       component.onChangeItem(mockMenuItem, 0);
@@ -131,8 +157,8 @@ describe('BusinessCategoryComponent', () => {
     });
 
     it('should call onAddItem with isVariant true', () => {
-      const parentItem = { id: '1', name: 'Test Item' } as any;
-      const newVariant = { id: '1', price: 1 } as any;
+      const parentItem = createMenuItem({ id: '1' });
+      const newVariant = createMenuItem({ id: '1', name: '', price: 1 });
       component.onAddVariant(newVariant, parentItem);
       expect(onAddItemSpy).toHaveBeenCalledWith(
         {
@@ -146,22 +172,18 @@ describe('BusinessCategoryComponent', () => {
 
   describe('handleReorder', () => {
     let emitSpy: SpyInstance;
-    let mockEvent: any;
-    let mockCategory: any;
+    let mockEvent: CustomEvent<ItemReorderEventDetail>;
+    let mockCategory: Category;
 
     beforeEach(() => {
       emitSpy = jest.spyOn(component.categoryChanged, 'emit');
-      mockEvent = {
-        stopPropagation: jest.fn(),
-        detail: {
-          from: 0,
-          to: 1,
-          complete: jest.fn(),
-        },
-      } as any;
-      mockCategory = {
-        items: [{ id: '1' }, { id: '2' }],
-      } as any;
+      mockEvent = createReorderEvent(0, 1);
+      mockCategory = createCategory({
+        items: [
+          { id: '1' } as unknown as MenuItem,
+          { id: '2' } as unknown as MenuItem,
+        ],
+      });
     });
 
     it('should emit orderingInCategoryChanged with updated category', () => {
@@ -209,9 +231,9 @@ describe('BusinessCategoryComponent', () => {
     });
 
     it('should set form title and subtitle as empty when form title is empty and no title or subtitle provided', () => {
-      component.categoryForm.title().value.set(null as any);
-      component.categoryForm.subtitle().value.set(null as any);
-      const cat: Category = { items: [] } as any;
+      component.categoryForm.title().value.set(null as unknown as string);
+      component.categoryForm.subtitle().value.set(null as unknown as string);
+      const cat = { items: [] } as unknown as Category;
       componentRef.setInput('category', cat);
       componentRef.changeDetectorRef.detectChanges();
       expect(component.categoryForm.title().value()).toBe('');

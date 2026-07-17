@@ -3,12 +3,23 @@ import { ComponentRef } from '@angular/core';
 import { BusinessMenuComponent } from '../business-menu.component';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
+import { ItemReorderEventDetail } from '@ionic/angular';
+import { Category, Menu, MenuItem } from 'model';
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
   config: { reRenderOnLangChange: jest.fn() },
   langChanges$: of(),
 };
+
+const createReorderEvent = (
+  from: number,
+  to: number,
+  complete: jest.Mock,
+): CustomEvent<ItemReorderEventDetail> =>
+  new CustomEvent<ItemReorderEventDetail>('ionItemReorder', {
+    detail: { from, to, complete },
+  });
 
 describe('BusinessMenuComponent', () => {
   let component: BusinessMenuComponent;
@@ -61,11 +72,14 @@ describe('BusinessMenuComponent', () => {
 
   describe('onAddCategory', () => {
     it('should add the category to the menu and hide the add-category form', () => {
-      const initialMenu = { categories: [] } as any;
+      const initialMenu = { categories: [] } as unknown as Menu;
       componentRef.setInput('menu', initialMenu);
       component.presentShowAddCategory.set(true);
 
-      const newCategory = { title: 'Pizza', subtitle: 'Sourdough' } as any;
+      const newCategory = {
+        title: 'Pizza',
+        subtitle: 'Sourdough',
+      } as unknown as Category;
       component.onAddCategory(newCategory);
 
       expect(component.presentShowAddCategory()).toBe(false);
@@ -77,10 +91,10 @@ describe('BusinessMenuComponent', () => {
     it('should append a category with the next index when menu already has categories', () => {
       const initialMenu = {
         categories: [{ title: 'Pasta', index: 0 }],
-      } as any;
+      } as unknown as Menu;
       componentRef.setInput('menu', initialMenu);
 
-      component.onAddCategory({ title: 'Dessert' } as any);
+      component.onAddCategory({ title: 'Dessert' } as unknown as Category);
 
       expect(component.linkedMenu()?.categories).toEqual([
         { title: 'Pasta', index: 0 },
@@ -91,7 +105,7 @@ describe('BusinessMenuComponent', () => {
     it('should create a menu shape when menu is initially undefined', () => {
       componentRef.setInput('menu', undefined);
 
-      component.onAddCategory({ title: 'Pizza' } as any);
+      component.onAddCategory({ title: 'Pizza' } as unknown as Category);
 
       expect(component.linkedMenu()).toEqual({
         categories: [{ title: 'Pizza', index: 0 }],
@@ -101,7 +115,7 @@ describe('BusinessMenuComponent', () => {
     it('should return if linkedMenu is undefined after update', () => {
       jest.spyOn(component.linkedMenu, 'update').mockReturnValue(undefined);
 
-      component.onAddCategory({ title: 'Pizza' } as any);
+      component.onAddCategory({ title: 'Pizza' } as unknown as Category);
 
       expect(component.linkedMenu()).toBeUndefined();
     });
@@ -109,11 +123,14 @@ describe('BusinessMenuComponent', () => {
 
   describe('onAddItemToCategory', () => {
     it('should add a new item to the matching category', () => {
-      const category = { title: 'Pizza', items: [] } as any;
-      const menu = { categories: [category] } as any;
+      const category = { title: 'Pizza', items: [] } as Category;
+      const menu = { categories: [category] } as unknown as Menu;
       componentRef.setInput('menu', menu);
 
-      const newItem = { name: 'Margherita', price: 8 } as any;
+      const newItem = {
+        name: 'Margherita',
+        price: 8,
+      } as unknown as MenuItem;
       component.onAddItemToCategory({ item: newItem, category });
 
       expect(component.linkedMenu()?.categories[0].items).toEqual([newItem]);
@@ -123,14 +140,16 @@ describe('BusinessMenuComponent', () => {
       const category = {
         title: 'Pizza',
         items: [{ name: 'Margherita', variants: [{ name: 'S', price: 8 }] }],
-      } as any;
-      componentRef.setInput('menu', { categories: [category] } as any);
+      } as unknown as Category;
+      componentRef.setInput('menu', {
+        categories: [category],
+      } as unknown as Menu);
 
       component.onAddItemToCategory({
         item: {
           name: 'Margherita',
           variants: [{ name: 'L', price: 12 }],
-        } as any,
+        } as unknown as MenuItem,
         category,
         isVariant: true,
       });
@@ -144,18 +163,20 @@ describe('BusinessMenuComponent', () => {
       const originalItem = {
         name: 'Margherita',
         variants: [{ name: 'S', price: 8 }],
-      } as any;
+      } as unknown as MenuItem;
       const category = {
         title: 'Pizza',
         items: [originalItem],
-      } as any;
-      componentRef.setInput('menu', { categories: [category] } as any);
+      } as Category;
+      componentRef.setInput('menu', {
+        categories: [category],
+      } as unknown as Menu);
 
       component.onAddItemToCategory({
         item: {
           name: 'Pepperoni',
           variants: [{ name: 'L', price: 12 }],
-        } as any,
+        } as unknown as MenuItem,
         category,
         isVariant: true,
       });
@@ -166,13 +187,13 @@ describe('BusinessMenuComponent', () => {
     });
 
     it('should keep menu unchanged when no matching category title exists', () => {
-      const existingCategory = { title: 'Pasta', items: [] } as any;
-      const menu = { categories: [existingCategory] } as any;
+      const existingCategory = { title: 'Pasta', items: [] } as Category;
+      const menu = { categories: [existingCategory] } as unknown as Menu;
       componentRef.setInput('menu', menu);
 
       component.onAddItemToCategory({
-        item: { name: 'Margherita', price: 8 } as any,
-        category: { title: 'Pizza' } as any,
+        item: { name: 'Margherita', price: 8 } as unknown as MenuItem,
+        category: { title: 'Pizza' } as unknown as Category,
       });
 
       expect(component.linkedMenu()).toEqual(menu);
@@ -182,8 +203,8 @@ describe('BusinessMenuComponent', () => {
       componentRef.setInput('menu', undefined);
 
       component.onAddItemToCategory({
-        item: { name: 'Margherita', price: 8 } as any,
-        category: { title: 'Pizza' } as any,
+        item: { name: 'Margherita', price: 8 } as unknown as MenuItem,
+        category: { title: 'Pizza' } as unknown as Category,
       });
 
       expect(component.linkedMenu()).toBeUndefined();
@@ -198,12 +219,10 @@ describe('BusinessMenuComponent', () => {
           { title: 'Pasta', index: 1 },
           { title: 'Dessert', index: 2 },
         ],
-      } as any);
+      } as unknown as Menu);
 
       const complete = jest.fn();
-      component.handleReorder({
-        detail: { from: 2, to: 0, complete },
-      } as any);
+      component.handleReorder(createReorderEvent(2, 0, complete));
 
       expect(component.linkedMenu()?.categories).toEqual([
         { title: 'Dessert', index: 0 },
@@ -214,12 +233,10 @@ describe('BusinessMenuComponent', () => {
     });
 
     it('should call complete even when categories are missing', () => {
-      componentRef.setInput('menu', {} as any);
+      componentRef.setInput('menu', {} as Menu);
       const complete = jest.fn();
 
-      component.handleReorder({
-        detail: { from: 0, to: 1, complete },
-      } as any);
+      component.handleReorder(createReorderEvent(0, 1, complete));
 
       expect(component.linkedMenu()).toEqual({});
       expect(complete).toHaveBeenCalled();
@@ -231,12 +248,10 @@ describe('BusinessMenuComponent', () => {
           { title: 'Pizza', index: 0 },
           { title: 'Pasta', index: 1 },
         ],
-      } as any);
+      } as unknown as Menu);
       const complete = jest.fn();
 
-      component.handleReorder({
-        detail: { from: 1, to: 1, complete },
-      } as any);
+      component.handleReorder(createReorderEvent(1, 1, complete));
 
       expect(component.linkedMenu()?.categories).toEqual([
         { title: 'Pizza', index: 0 },
@@ -249,9 +264,7 @@ describe('BusinessMenuComponent', () => {
       jest.spyOn(component.linkedMenu, 'update').mockReturnValue(undefined);
       const complete = jest.fn();
 
-      component.handleReorder({
-        detail: { from: 0, to: 1, complete },
-      } as any);
+      component.handleReorder(createReorderEvent(0, 1, complete));
 
       expect(component.linkedMenu()).toBeUndefined();
       expect(complete).toHaveBeenCalled();
@@ -260,8 +273,14 @@ describe('BusinessMenuComponent', () => {
 
   describe('updateCategory', () => {
     it('should replace the category with the same title', () => {
-      const original = { title: 'Pizza', items: [{ name: 'Old' }] } as any;
-      const updated = { title: 'Pizza', items: [{ name: 'New' }] } as any;
+      const original = {
+        title: 'Pizza',
+        items: [{ name: 'Old' }],
+      } as unknown as Category;
+      const updated = {
+        title: 'Pizza',
+        items: [{ name: 'New' }],
+      } as unknown as Category;
       componentRef.setInput('menu', { categories: [original] });
 
       component.updateCategory(updated);
@@ -270,11 +289,14 @@ describe('BusinessMenuComponent', () => {
     });
 
     it('should keep menu unchanged when category title does not match', () => {
-      const original = { title: 'Pizza', items: [{ name: 'Old' }] } as any;
-      const menu = { categories: [original] } as any;
+      const original = {
+        title: 'Pizza',
+        items: [{ name: 'Old' }],
+      } as unknown as Category;
+      const menu = { categories: [original] } as unknown as Menu;
       componentRef.setInput('menu', menu);
 
-      component.updateCategory({ title: 'Pasta', items: [] } as any);
+      component.updateCategory({ title: 'Pasta', items: [] });
 
       expect(component.linkedMenu()).toEqual(menu);
     });
@@ -282,7 +304,7 @@ describe('BusinessMenuComponent', () => {
     it('should handle undefined menu safely', () => {
       componentRef.setInput('menu', undefined);
 
-      component.updateCategory({ title: 'Pizza', items: [] } as any);
+      component.updateCategory({ title: 'Pizza', items: [] });
 
       expect(component.linkedMenu()).toBeUndefined();
     });

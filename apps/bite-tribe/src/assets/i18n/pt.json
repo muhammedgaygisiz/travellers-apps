@@ -280,6 +280,12 @@
   "onboarding-notifications-granted": "As notificações estão ativadas.",
   "onboarding-notifications-denied": "Sem notificações por agora. Podes ativá-las mais tarde nas definições.",
   "onboarding-notifications-unsupported": "As notificações não estão disponíveis neste dispositivo. Podes ativá-las mais tarde na aplicação.",
+  "onboarding-finish-title": "Tudo pronto!",
+  "onboarding-finish-title-named": "Tudo pronto, {{name}}!",
+  "onboarding-finish-copy": "O teu perfil está pronto. Eis o que podes fazer a seguir.",
+  "onboarding-finish-highlight-discover": "Descobre Bites partilhados por amantes da comida perto de ti",
+  "onboarding-finish-highlight-create": "Partilha os teus próprios Bites com apenas alguns toques",
+  "onboarding-finish-highlight-explore": "Explora o mapa, as listas de desejos e o ranking",
   "display-name-already-taken": "Esse nome de exibição já está em uso. Escolha outro.",
   "display-name-invalid": "Insira um nome de exibição válido.",
   "display-name-could-not-be-saved": "Não foi possível salvar seu nome de exibição. Tente novamente."

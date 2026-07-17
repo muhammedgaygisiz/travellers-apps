@@ -280,6 +280,12 @@
   "onboarding-notifications-granted": "Notifications are on.",
   "onboarding-notifications-denied": "No notifications for now. You can turn them on later in settings.",
   "onboarding-notifications-unsupported": "Notifications are not available on this device. You can turn them on later in the app.",
+  "onboarding-finish-title": "You're all set!",
+  "onboarding-finish-title-named": "You're all set, {{name}}!",
+  "onboarding-finish-copy": "Your profile is ready. Here's what you can do next.",
+  "onboarding-finish-highlight-discover": "Discover Bites shared by food lovers near you",
+  "onboarding-finish-highlight-create": "Share your own Bites in just a couple of taps",
+  "onboarding-finish-highlight-explore": "Explore the map, bucket lists, and the leaderboard",
   "display-name-already-taken": "That display name is already taken. Please choose another.",
   "display-name-invalid": "Please enter a valid display name.",
   "display-name-could-not-be-saved": "We couldn't save your display name. Please try again."

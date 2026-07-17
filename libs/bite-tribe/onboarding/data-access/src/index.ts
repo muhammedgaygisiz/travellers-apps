@@ -1,5 +1,6 @@
 export {
   OnboardingDataAccessService,
+  ONBOARDING_VERSION,
   type DisplayNameAvailability,
 } from './lib/onboarding-data-access.service';
 export { OnboardingProgressService } from './lib/onboarding-progress.service';

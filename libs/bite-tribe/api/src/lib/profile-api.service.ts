@@ -173,6 +173,36 @@ export class ProfileApiService {
   }
 
   /**
+   * Stamps the onboarding completion fields on the current user's document.
+   *
+   * This is a dedicated write rather than part of {@link updateUser}: the
+   * completion fields are set once, at the end of the assistant, and must not be
+   * carried on every ordinary profile edit. The `onboardingVersion` records
+   * which assistant flow the user finished, so a future flow change can decide
+   * whether an already-onboarded user should be shown a delta.
+   */
+  async markOnboardingComplete(version: number): Promise<void> {
+    const uid = this.authService.getUser()?.uid;
+
+    if (!uid) {
+      throw new Error(
+        'Cannot complete onboarding without an authenticated user',
+      );
+    }
+
+    const now = new Date();
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${USERS_COLLECTION}/${uid}`,
+      data: {
+        onboardingCompletedAt: now.toISOString(),
+        onboardingCompletedAtTimestamp: now.getTime(),
+        onboardingVersion: version,
+      },
+    });
+  }
+
+  /**
    * The user-owned fields a profile update may write, for both the plain and the
    * upload path.
    *

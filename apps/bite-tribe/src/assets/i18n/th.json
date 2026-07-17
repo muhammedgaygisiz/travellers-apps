@@ -280,6 +280,12 @@
   "onboarding-notifications-granted": "เปิดการแจ้งเตือนแล้ว",
   "onboarding-notifications-denied": "ยังไม่เปิดการแจ้งเตือน คุณเปิดได้ภายหลังในการตั้งค่า",
   "onboarding-notifications-unsupported": "อุปกรณ์นี้ไม่รองรับการแจ้งเตือน คุณเปิดได้ภายหลังในแอป",
+  "onboarding-finish-title": "พร้อมแล้ว!",
+  "onboarding-finish-title-named": "พร้อมแล้ว {{name}}!",
+  "onboarding-finish-copy": "โปรไฟล์ของคุณพร้อมแล้ว นี่คือสิ่งที่คุณทำต่อได้",
+  "onboarding-finish-highlight-discover": "ค้นพบ Bite ที่คนรักอาหารใกล้คุณแบ่งปัน",
+  "onboarding-finish-highlight-create": "แชร์ Bite ของคุณเองได้ในไม่กี่แตะ",
+  "onboarding-finish-highlight-explore": "สำรวจแผนที่ บักเก็ตลิสต์ และกระดานผู้นำ",
   "display-name-already-taken": "ชื่อที่แสดงนี้ถูกใช้งานแล้ว โปรดเลือกชื่ออื่น",
   "display-name-invalid": "โปรดป้อนชื่อที่แสดงที่ถูกต้อง",
   "display-name-could-not-be-saved": "ไม่สามารถบันทึกชื่อที่แสดงของคุณได้ โปรดลองอีกครั้ง"

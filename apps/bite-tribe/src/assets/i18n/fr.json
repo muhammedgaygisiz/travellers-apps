@@ -280,6 +280,12 @@
   "onboarding-notifications-granted": "Les notifications sont activées.",
   "onboarding-notifications-denied": "Pas de notifications pour l'instant. Tu pourras les activer plus tard dans les réglages.",
   "onboarding-notifications-unsupported": "Les notifications ne sont pas disponibles sur cet appareil. Tu pourras les activer plus tard dans l'application.",
+  "onboarding-finish-title": "Tout est prêt !",
+  "onboarding-finish-title-named": "Tout est prêt, {{name}} !",
+  "onboarding-finish-copy": "Ton profil est prêt. Voici ce que tu peux faire ensuite.",
+  "onboarding-finish-highlight-discover": "Découvre les Bites partagés par des gourmands près de toi",
+  "onboarding-finish-highlight-create": "Partage tes propres Bites en quelques touches",
+  "onboarding-finish-highlight-explore": "Explore la carte, les listes d’envies et le classement",
   "display-name-already-taken": "Ce nom d'affichage est déjà pris. Veuillez en choisir un autre.",
   "display-name-invalid": "Veuillez saisir un nom d'affichage valide.",
   "display-name-could-not-be-saved": "Impossible d'enregistrer votre nom d'affichage. Veuillez réessayer."

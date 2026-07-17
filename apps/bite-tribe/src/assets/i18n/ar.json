@@ -280,6 +280,12 @@
   "onboarding-notifications-granted": "الإشعارات مفعّلة.",
   "onboarding-notifications-denied": "لا إشعارات في الوقت الحالي. يمكنك تفعيلها لاحقاً من الإعدادات.",
   "onboarding-notifications-unsupported": "الإشعارات غير متاحة على هذا الجهاز. يمكنك تفعيلها لاحقاً في التطبيق.",
+  "onboarding-finish-title": "كل شيء جاهز!",
+  "onboarding-finish-title-named": "كل شيء جاهز يا {{name}}!",
+  "onboarding-finish-copy": "ملفك الشخصي جاهز. إليك ما يمكنك فعله الآن.",
+  "onboarding-finish-highlight-discover": "اكتشف الـ Bites التي يشاركها محبو الطعام بالقرب منك",
+  "onboarding-finish-highlight-create": "شارك الـ Bites الخاصة بك بنقرات قليلة",
+  "onboarding-finish-highlight-explore": "استكشف الخريطة وقوائم الرغبات ولوحة المتصدرين",
   "display-name-already-taken": "اسم العرض هذا مستخدم بالفعل. يرجى اختيار اسم آخر.",
   "display-name-invalid": "يرجى إدخال اسم عرض صالح.",
   "display-name-could-not-be-saved": "تعذّر حفظ اسم العرض الخاص بك. يرجى المحاولة مرة أخرى."

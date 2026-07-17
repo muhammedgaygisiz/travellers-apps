@@ -1,0 +1,38 @@
+.finish-step {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.finish-step__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  color: var(--ion-color-success);
+}
+
+.finish-step__title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+.onboarding-step-copy {
+  margin: 0;
+  color: var(--ion-color-medium);
+  line-height: 1.45;
+}
+
+.finish-step__highlights {
+  display: grid;
+  gap: 0.375rem;
+  justify-items: start;
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--ion-color-medium);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  text-align: left;
+}

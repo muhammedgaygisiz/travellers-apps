@@ -105,6 +105,10 @@ export class OnboardingService {
     });
     this.selectedVisibility.set(profile?.public ?? false);
 
+    // The finish step only confirms and completes; it gathers nothing, so it is
+    // valid the moment the user reaches it and the Finish button is enabled.
+    this.setStepValid('finish', true);
+
     await this.initializePreferences();
 
     const displayName = this.identityDraft().displayName.trim();
@@ -362,7 +366,7 @@ export class OnboardingService {
     await this.markComplete(this.currentStep().id);
 
     if (this.currentIndex() >= this.steps.length - 1) {
-      this.finish();
+      await this.finish();
       return;
     }
 
@@ -373,10 +377,20 @@ export class OnboardingService {
     this.currentIndex.update((index) => Math.max(0, index - 1));
   }
 
-  private finish(): void {
-    // The durable completion flag write lands with the finish step (#1016).
-    // Until then, completing the flow releases the session gate and enters the
-    // app so the shell is usable end to end.
+  /**
+   * Writes the durable completion flag, then releases the session gate and
+   * enters the app. A failed write keeps the user on the finish step so they can
+   * retry, rather than dropping them into the app with the assistant unmarked
+   * and set to reappear on the next start.
+   */
+  private async finish(): Promise<void> {
+    try {
+      await this.dataAccess.completeOnboarding();
+    } catch (error) {
+      console.warn('Failed to complete onboarding:', error);
+      return;
+    }
+
     this.dataAccess.dismissForSession();
     void this.navController.navigateRoot([`/${PATH.HOME}`]);
   }

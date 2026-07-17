@@ -280,6 +280,12 @@
   "onboarding-notifications-granted": "Bildirimler açık.",
   "onboarding-notifications-denied": "Şimdilik bildirim yok. Daha sonra ayarlardan açabilirsin.",
   "onboarding-notifications-unsupported": "Bu cihazda bildirimler kullanılamıyor. Daha sonra uygulamadan açabilirsin.",
+  "onboarding-finish-title": "Her şey hazır!",
+  "onboarding-finish-title-named": "Her şey hazır, {{name}}!",
+  "onboarding-finish-copy": "Profilin hazır. İşte şimdi yapabileceklerin.",
+  "onboarding-finish-highlight-discover": "Yakınındaki yemek tutkunlarının paylaştığı Bite’ları keşfet",
+  "onboarding-finish-highlight-create": "Kendi Bite’larını birkaç dokunuşla paylaş",
+  "onboarding-finish-highlight-explore": "Haritayı, kova listelerini ve lider tablosunu keşfet",
   "display-name-already-taken": "Bu görünen ad zaten kullanılıyor. Lütfen başka bir ad seçin.",
   "display-name-invalid": "Lütfen geçerli bir görünen ad girin.",
   "display-name-could-not-be-saved": "Görünen adınız kaydedilemedi. Lütfen tekrar deneyin."

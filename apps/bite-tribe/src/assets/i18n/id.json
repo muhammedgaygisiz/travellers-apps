@@ -280,6 +280,12 @@
   "onboarding-notifications-granted": "Notifikasi aktif.",
   "onboarding-notifications-denied": "Belum ada notifikasi. Kamu bisa mengaktifkannya nanti di pengaturan.",
   "onboarding-notifications-unsupported": "Notifikasi tidak tersedia di perangkat ini. Kamu bisa mengaktifkannya nanti di aplikasi.",
+  "onboarding-finish-title": "Semua siap!",
+  "onboarding-finish-title-named": "Semua siap, {{name}}!",
+  "onboarding-finish-copy": "Profilmu sudah siap. Berikut yang bisa kamu lakukan selanjutnya.",
+  "onboarding-finish-highlight-discover": "Temukan Bite yang dibagikan pecinta kuliner di dekatmu",
+  "onboarding-finish-highlight-create": "Bagikan Bite milikmu hanya dengan beberapa ketukan",
+  "onboarding-finish-highlight-explore": "Jelajahi peta, bucket list, dan papan peringkat",
   "display-name-already-taken": "Nama tampilan itu sudah digunakan. Silakan pilih yang lain.",
   "display-name-invalid": "Masukkan nama tampilan yang valid.",
   "display-name-could-not-be-saved": "Nama tampilan Anda tidak dapat disimpan. Silakan coba lagi."

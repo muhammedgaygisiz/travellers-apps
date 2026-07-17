@@ -280,6 +280,12 @@
   "onboarding-notifications-granted": "ማሳወቂያዎች በርተዋል።",
   "onboarding-notifications-denied": "ለአሁን ማሳወቂያ የለም። ቆይተህ ከቅንብሮች ማብራት ትችላለህ።",
   "onboarding-notifications-unsupported": "በዚህ መሣሪያ ላይ ማሳወቂያዎች አይገኙም። ቆይተህ በመተግበሪያው ውስጥ ማብራት ትችላለህ።",
+  "onboarding-finish-title": "ሁሉም ተዘጋጅቷል!",
+  "onboarding-finish-title-named": "ሁሉም ተዘጋጅቷል፣ {{name}}!",
+  "onboarding-finish-copy": "መገለጫህ ዝግጁ ነው። ቀጥሎ ማድረግ የምትችለው ይህ ነው።",
+  "onboarding-finish-highlight-discover": "በአቅራቢያህ ያሉ የምግብ አፍቃሪዎች ያጋሩትን Bites አግኝ",
+  "onboarding-finish-highlight-create": "የራስህን Bites በጥቂት ንክኪዎች አጋራ",
+  "onboarding-finish-highlight-explore": "ካርታውን፣ የባልዲ ዝርዝሮችንና የመሪዎች ሰሌዳን አስስ",
   "display-name-already-taken": "ይህ የማሳያ ስም አስቀድሞ ተይዟል። እባክዎ ሌላ ይምረጡ።",
   "display-name-invalid": "እባክዎ ትክክለኛ የማሳያ ስም ያስገቡ።",
   "display-name-could-not-be-saved": "የማሳያ ስምዎን ማስቀመጥ አልተቻለም። እባክዎ እንደገና ይሞክሩ።"

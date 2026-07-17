@@ -280,6 +280,12 @@
   "onboarding-notifications-granted": "Benachrichtigungen sind aktiviert.",
   "onboarding-notifications-denied": "Vorerst keine Benachrichtigungen. Du kannst sie später in den Einstellungen aktivieren.",
   "onboarding-notifications-unsupported": "Benachrichtigungen sind auf diesem Gerät nicht verfügbar. Du kannst sie später in der App aktivieren.",
+  "onboarding-finish-title": "Alles bereit!",
+  "onboarding-finish-title-named": "Alles bereit, {{name}}!",
+  "onboarding-finish-copy": "Dein Profil ist fertig. Das kannst du als Nächstes tun.",
+  "onboarding-finish-highlight-discover": "Entdecke Bites von Foodies in deiner Nähe",
+  "onboarding-finish-highlight-create": "Teile deine eigenen Bites mit wenigen Tipps",
+  "onboarding-finish-highlight-explore": "Erkunde die Karte, Bucket-Listen und das Leaderboard",
   "display-name-already-taken": "Dieser Anzeigename ist bereits vergeben. Bitte wähle einen anderen.",
   "display-name-invalid": "Bitte gib einen gültigen Anzeigenamen ein.",
   "display-name-could-not-be-saved": "Dein Anzeigename konnte nicht gespeichert werden. Bitte versuche es erneut."

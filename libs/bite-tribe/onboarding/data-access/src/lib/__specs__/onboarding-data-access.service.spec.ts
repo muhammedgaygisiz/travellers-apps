@@ -36,6 +36,7 @@ describe('OnboardingDataAccessService', () => {
   let getUser: jest.Mock;
   let setActiveLang: jest.Mock;
   let notifySavedSettings: jest.Mock;
+  let notifySavedProfile: jest.Mock;
   let platformMock: Platform;
   let apiMock: {
     checkDisplayNameAvailability: jest.Mock;
@@ -71,6 +72,7 @@ describe('OnboardingDataAccessService', () => {
     };
     setActiveLang = jest.fn();
     notifySavedSettings = jest.fn();
+    notifySavedProfile = jest.fn();
     platformMock = { is: jest.fn(() => true) } as unknown as Platform;
 
     TestBed.configureTestingModule({
@@ -78,7 +80,10 @@ describe('OnboardingDataAccessService', () => {
         OnboardingDataAccessService,
         { provide: AuthService, useValue: { getUser } },
         { provide: BiteTribeApiService, useValue: apiMock },
-        { provide: BiteTribeStoreService, useValue: { notifySavedSettings } },
+        {
+          provide: BiteTribeStoreService,
+          useValue: { notifySavedSettings, notifySavedProfile },
+        },
         { provide: TranslocoService, useValue: { setActiveLang } },
         { provide: Platform, useValue: platformMock },
       ],
@@ -295,6 +300,26 @@ describe('OnboardingDataAccessService', () => {
 
     await expect(service.saveProfile(profile)).resolves.toBe(profile);
     expect(apiMock.updateUser).toHaveBeenCalledWith(profile);
+  });
+
+  it('syncs the saved profile into the store', async () => {
+    setup();
+    const profile = {
+      userId: 'user-1',
+      displayName: 'Foodie',
+      email: 'foodie@example.com',
+      photoUrl: 'data:image/png;base64,AAAA',
+    } as any;
+    // The API resolves the uploaded photo to its storage URL, and that is what
+    // the rest of the app has to read — not the base64 the step held.
+    const persisted = { ...profile, photoUrl: 'https://storage/photo.jpg' };
+    apiMock.updateUser.mockResolvedValue(persisted);
+
+    await service.saveProfile(profile);
+
+    // The store profile is only loaded at login, so without this the profile
+    // page keeps showing the pre-onboarding avatar until a reload.
+    expect(notifySavedProfile).toHaveBeenCalledWith(persisted);
   });
 
   describe('loadSettings', () => {

@@ -15,7 +15,7 @@
   - Every step must be visited and explicitly acknowledged. Profile photo and favorite currencies are optional inputs; display name, visibility, default currency, and language require explicit values.
   - Display names become unique, enforced case-insensitively (normalized by trim + lowercase). Working assumption: existing display names are already unique; on a normalization collision, first-come keeps the name.
   - Profile visibility defaults to private, but the step actively promotes the benefits of going public (leaderboard, followers, trust in Bites). The user decides after being made aware of the benefits.
-  - The assistant owns every OS permission ask. The OS prompts once per install, so location and notifications are asked in context after the step explains the value, never cold from the login path. Both denials are accepted and recorded. See the push permission rule in [[Architecture - Capacitor]].
+  - The assistant owns every OS permission ask. The OS prompts once per install, so location and notifications are asked in context after the step explains the value, never cold from the login path. Both denials are accepted and recorded. See the push and location permission rules in [[Architecture - Capacitor]].
   - Feature education happens through interactive coach marks after the assistant, not slides inside it.
   - \#\# Assistant Steps
   - 1. Identity - display name prefilled and checked for case-insensitive availability; optional profile photo.

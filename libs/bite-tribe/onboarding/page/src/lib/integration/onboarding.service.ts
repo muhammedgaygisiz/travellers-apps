@@ -13,6 +13,7 @@ import type {
   OnboardingIdentityDraft,
 } from '../components/identity-step/identity-step.component';
 import { ONBOARDING_LANGUAGES } from '../components/language-step/language-step.component';
+import type { LocationPermissionState } from '../components/location-step/location-step.component';
 import type { NotificationPermissionState } from '../components/notification-step/notification-step.component';
 
 const DEFAULT_LANGUAGE = 'en';
@@ -49,6 +50,7 @@ export class OnboardingService {
   readonly selectedCurrency = signal<string>('EUR');
   readonly favoriteCurrencies = signal<readonly string[]>([]);
   readonly selectedLanguage = signal<string>(DEFAULT_LANGUAGE);
+  readonly locationPermission = signal<LocationPermissionState>('idle');
   readonly notificationPermission = signal<NotificationPermissionState>('idle');
 
   private readonly completedSteps = signal<ReadonlySet<OnboardingStepId>>(
@@ -112,9 +114,10 @@ export class OnboardingService {
   }
 
   /**
-   * Prefills the currency, language, and notification steps. Persisted settings
-   * win so a returning user sees their own choices; a first-time user gets the
-   * device locale's best guess, which already makes both steps satisfiable.
+   * Prefills the currency, language, location, and notification steps.
+   * Persisted settings win so a returning user sees their own choices; a
+   * first-time user gets the device locale's best guess, which already makes
+   * both preference steps satisfiable.
    */
   private async initializePreferences(): Promise<void> {
     const settings = await this.dataAccess.loadSettings();
@@ -136,7 +139,12 @@ export class OnboardingService {
     // Only a stored grant is treated as decided. A stored `false` is
     // indistinguishable from "never asked" on a fresh settings document, so the
     // step still offers the choice rather than recording a refusal the user
-    // never gave.
+    // never gave. The location step follows the same rule.
+    if (settings?.location) {
+      this.locationPermission.set('granted');
+      this.setStepValid('location', true);
+    }
+
     if (settings?.pushNotifications) {
       this.notificationPermission.set('granted');
       this.setStepValid('notifications', true);
@@ -268,6 +276,30 @@ export class OnboardingService {
   }
 
   /**
+   * Asks the OS for location permission after the step has explained what the
+   * position is used for. The answer — grant or denial — completes the step
+   * either way; only the request still being in flight blocks advancing.
+   */
+  async requestLocation(): Promise<void> {
+    if (this.locationPermission() === 'requesting') {
+      return;
+    }
+
+    this.locationPermission.set('requesting');
+
+    const result = await this.dataAccess.requestLocationPermission();
+
+    this.locationPermission.set(result);
+    this.setStepValid('location', true);
+  }
+
+  /** Declining without opening the OS prompt is an explicit "no". */
+  skipLocation(): void {
+    this.locationPermission.set('denied');
+    this.setStepValid('location', true);
+  }
+
+  /**
    * Asks the OS for push permission after the step has explained why. The
    * answer — grant or denial — completes the step either way; only the request
    * still being in flight blocks advancing.
@@ -365,6 +397,12 @@ export class OnboardingService {
       return this.persistSettings({ language: this.selectedLanguage() });
     }
 
+    if (id === 'location') {
+      return this.persistSettings({
+        location: this.locationPermission() === 'granted',
+      });
+    }
+
     if (id === 'notifications') {
       return this.persistSettings({
         pushNotifications: this.notificationPermission() === 'granted',
@@ -400,6 +438,7 @@ export class OnboardingService {
     return {
       ...current,
       pushNotifications: current?.pushNotifications ?? false,
+      location: current?.location ?? false,
       emailUpdates: current?.emailUpdates ?? false,
       theme: current?.theme ?? this.systemTheme(),
       currency: current?.currency || 'EUR',

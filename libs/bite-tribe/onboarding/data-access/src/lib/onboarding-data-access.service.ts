@@ -11,6 +11,10 @@ import {
   requestPushPermission,
   type PushPermissionResult,
 } from 'push-notifications';
+import {
+  requestLocationPermission,
+  type LocationPermissionResult,
+} from 'geolocation';
 
 const USERS_COLLECTION = 'users';
 const LANGUAGE_PREFERENCE_KEY = 'lang';
@@ -158,6 +162,10 @@ export class OnboardingDataAccessService {
 
   requestPushPermission(): Promise<PushPermissionResult> {
     return requestPushPermission(this.platform);
+  }
+
+  requestLocationPermission(): Promise<LocationPermissionResult> {
+    return requestLocationPermission();
   }
 
   private toPublicUser(

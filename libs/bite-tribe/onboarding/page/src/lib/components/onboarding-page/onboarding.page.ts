@@ -22,6 +22,8 @@ import type {
 import { VisibilityStepComponent } from '../visibility-step/visibility-step.component';
 import { CurrencyStepComponent } from '../currency-step/currency-step.component';
 import { LanguageStepComponent } from '../language-step/language-step.component';
+import { LocationStepComponent } from '../location-step/location-step.component';
+import type { LocationPermissionState } from '../location-step/location-step.component';
 import { NotificationStepComponent } from '../notification-step/notification-step.component';
 import type { NotificationPermissionState } from '../notification-step/notification-step.component';
 import type { PublicUser } from 'model';
@@ -46,6 +48,7 @@ import type { PublicUser } from 'model';
     VisibilityStepComponent,
     CurrencyStepComponent,
     LanguageStepComponent,
+    LocationStepComponent,
     NotificationStepComponent,
   ],
 })
@@ -60,6 +63,7 @@ export class OnboardingPage {
   selectedCurrency = input<string>('EUR');
   favoriteCurrencies = input<readonly string[]>([]);
   selectedLanguage = input<string>('en');
+  locationPermission = input<LocationPermissionState>('idle');
   notificationPermission = input<NotificationPermissionState>('idle');
 
   next = output<void>();
@@ -70,6 +74,8 @@ export class OnboardingPage {
   currencyChange = output<string>();
   favoriteCurrencyToggle = output<string>();
   languageChange = output<string>();
+  enableLocation = output<void>();
+  skipLocation = output<void>();
   enableNotifications = output<void>();
   skipNotifications = output<void>();
   placeholderValidityChange = output<boolean>();

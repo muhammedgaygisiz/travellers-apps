@@ -23,6 +23,7 @@ describe('OnboardingService', () => {
   let saveSettings: jest.Mock;
   let applyLanguage: jest.Mock;
   let requestPushPermission: jest.Mock;
+  let requestLocationPermission: jest.Mock;
   let navigateRoot: jest.Mock;
 
   /** Device locale backing the currency and language prefill. */
@@ -65,6 +66,7 @@ describe('OnboardingService', () => {
     saveSettings = jest.fn().mockResolvedValue(undefined);
     applyLanguage = jest.fn().mockResolvedValue(undefined);
     requestPushPermission = jest.fn().mockResolvedValue('granted');
+    requestLocationPermission = jest.fn().mockResolvedValue('granted');
     navigateRoot = jest.fn();
 
     TestBed.configureTestingModule({
@@ -82,6 +84,7 @@ describe('OnboardingService', () => {
             saveSettings,
             applyLanguage,
             requestPushPermission,
+            requestLocationPermission,
           },
         },
         {
@@ -105,6 +108,7 @@ describe('OnboardingService', () => {
       'visibility',
       'currency',
       'language',
+      'location',
       'notifications',
       'finish',
     ]);
@@ -428,6 +432,7 @@ describe('OnboardingService', () => {
 
   const storedSettings = (overrides: Partial<Settings> = {}): Settings => ({
     pushNotifications: false,
+    location: false,
     emailUpdates: true,
     theme: 'dark',
     currency: 'CHF',
@@ -594,7 +599,7 @@ describe('OnboardingService', () => {
       expect(saveSettings).toHaveBeenCalledWith(
         expect.objectContaining({ language: 'tr' }),
       );
-      expect(service.currentStep().id).toBe('notifications');
+      expect(service.currentStep().id).toBe('location');
     });
 
     it('does not re-apply the language already active', async () => {
@@ -608,9 +613,157 @@ describe('OnboardingService', () => {
     });
   });
 
-  describe('notification step', () => {
+  describe('location step', () => {
     it('does not prompt before the user asks for it', async () => {
       setup(['identity', 'visibility', 'currency', 'language']);
+
+      await service.initialize();
+
+      expect(service.currentStep().id).toBe('location');
+      expect(service.locationPermission()).toBe('idle');
+      expect(requestLocationPermission).not.toHaveBeenCalled();
+      // The explanation has to be acknowledged before the step can be left.
+      expect(service.canAdvance()).toBe(false);
+    });
+
+    it('records a granted permission and continues', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+      await service.initialize();
+
+      await service.requestLocation();
+
+      expect(service.locationPermission()).toBe('granted');
+      expect(service.canAdvance()).toBe(true);
+
+      await service.next();
+
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ location: true }),
+      );
+      expect(service.currentStep().id).toBe('notifications');
+    });
+
+    it('accepts a denial and continues to the notification step', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+      requestLocationPermission.mockResolvedValue('denied');
+      await service.initialize();
+
+      await service.requestLocation();
+
+      expect(service.locationPermission()).toBe('denied');
+      expect(service.canAdvance()).toBe(true);
+
+      await service.next();
+
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ location: false }),
+      );
+      expect(service.currentStep().id).toBe('notifications');
+    });
+
+    it('records no location for a surface without an OS prompt', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+      requestLocationPermission.mockResolvedValue('unsupported');
+      await service.initialize();
+
+      await service.requestLocation();
+      await service.next();
+
+      expect(service.locationPermission()).toBe('unsupported');
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ location: false }),
+      );
+    });
+
+    it('treats skipping as an explicit no without opening the prompt', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+      await service.initialize();
+
+      service.skipLocation();
+
+      expect(service.locationPermission()).toBe('denied');
+      expect(requestLocationPermission).not.toHaveBeenCalled();
+      expect(service.canAdvance()).toBe(true);
+    });
+
+    it('ignores a second request while one is in flight', async () => {
+      setup(['identity', 'visibility', 'currency', 'language']);
+      let resolvePermission!: (value: string) => void;
+      requestLocationPermission.mockReturnValue(
+        new Promise((resolve) => {
+          resolvePermission = resolve;
+        }),
+      );
+      await service.initialize();
+
+      const first = service.requestLocation();
+      const second = service.requestLocation();
+      resolvePermission('granted');
+      await Promise.all([first, second]);
+
+      expect(requestLocationPermission).toHaveBeenCalledTimes(1);
+    });
+
+    it('prefills a stored grant so a returning user is not asked again', async () => {
+      setup(
+        ['identity', 'visibility', 'currency', 'language'],
+        {},
+        storedSettings({ location: true }),
+      );
+
+      await service.initialize();
+
+      expect(service.locationPermission()).toBe('granted');
+      expect(service.canAdvance()).toBe(true);
+      expect(requestLocationPermission).not.toHaveBeenCalled();
+    });
+
+    it('still offers the choice when nothing was ever recorded', async () => {
+      // A stored `false` cannot be told apart from "never asked", so the step
+      // asks rather than reporting a refusal the user never gave.
+      setup(
+        ['identity', 'visibility', 'currency', 'language'],
+        {},
+        storedSettings({ location: false }),
+      );
+
+      await service.initialize();
+
+      expect(service.locationPermission()).toBe('idle');
+      expect(service.canAdvance()).toBe(false);
+    });
+
+    it('carries the full settings document through the location write', async () => {
+      setup(
+        ['identity', 'visibility', 'currency', 'language'],
+        {},
+        storedSettings({ pushNotifications: true }),
+      );
+      await service.initialize();
+
+      await service.requestLocation();
+      await service.next();
+
+      // The settings API replaces the document, so a partial write here would
+      // drop the user's unrelated settings.
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          location: true,
+          pushNotifications: true,
+          emailUpdates: true,
+          theme: 'dark',
+          currency: 'CHF',
+          favoriteCurrencies: ['GBP'],
+          nearby: 25,
+          language: 'fr',
+        }),
+      );
+    });
+  });
+
+  describe('notification step', () => {
+    it('does not prompt before the user asks for it', async () => {
+      setup(['identity', 'visibility', 'currency', 'language', 'location']);
 
       await service.initialize();
 
@@ -622,7 +775,7 @@ describe('OnboardingService', () => {
     });
 
     it('records a granted permission and continues', async () => {
-      setup(['identity', 'visibility', 'currency', 'language']);
+      setup(['identity', 'visibility', 'currency', 'language', 'location']);
       await service.initialize();
 
       await service.requestNotifications();
@@ -639,7 +792,7 @@ describe('OnboardingService', () => {
     });
 
     it('accepts a denial and continues the flow', async () => {
-      setup(['identity', 'visibility', 'currency', 'language']);
+      setup(['identity', 'visibility', 'currency', 'language', 'location']);
       requestPushPermission.mockResolvedValue('denied');
       await service.initialize();
 
@@ -657,7 +810,7 @@ describe('OnboardingService', () => {
     });
 
     it('records no push for a surface without an OS prompt', async () => {
-      setup(['identity', 'visibility', 'currency', 'language']);
+      setup(['identity', 'visibility', 'currency', 'language', 'location']);
       requestPushPermission.mockResolvedValue('unsupported');
       await service.initialize();
 
@@ -671,7 +824,7 @@ describe('OnboardingService', () => {
     });
 
     it('treats skipping as an explicit no without opening the prompt', async () => {
-      setup(['identity', 'visibility', 'currency', 'language']);
+      setup(['identity', 'visibility', 'currency', 'language', 'location']);
       await service.initialize();
 
       service.skipNotifications();
@@ -682,7 +835,7 @@ describe('OnboardingService', () => {
     });
 
     it('ignores a second request while one is in flight', async () => {
-      setup(['identity', 'visibility', 'currency', 'language']);
+      setup(['identity', 'visibility', 'currency', 'language', 'location']);
       let resolvePermission!: (value: string) => void;
       requestPushPermission.mockReturnValue(
         new Promise((resolve) => {
@@ -701,7 +854,7 @@ describe('OnboardingService', () => {
 
     it('prefills a stored grant so a returning user is not asked again', async () => {
       setup(
-        ['identity', 'visibility', 'currency', 'language'],
+        ['identity', 'visibility', 'currency', 'language', 'location'],
         {},
         storedSettings({ pushNotifications: true }),
       );

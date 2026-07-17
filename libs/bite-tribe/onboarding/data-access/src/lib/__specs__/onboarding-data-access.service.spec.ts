@@ -7,6 +7,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { requestPushPermission } from 'push-notifications';
+import { requestLocationPermission } from 'geolocation';
 import { OnboardingDataAccessService } from '../onboarding-data-access.service';
 
 jest.mock('@capacitor-firebase/firestore', () => ({
@@ -21,9 +22,14 @@ jest.mock('push-notifications', () => ({
   requestPushPermission: jest.fn(),
 }));
 
+jest.mock('geolocation', () => ({
+  requestLocationPermission: jest.fn(),
+}));
+
 const getDocument = FirebaseFirestore.getDocument as jest.Mock;
 const preferencesSet = Preferences.set as jest.Mock;
 const requestPushPermissionMock = requestPushPermission as jest.Mock;
+const requestLocationPermissionMock = requestLocationPermission as jest.Mock;
 
 describe('OnboardingDataAccessService', () => {
   let service: OnboardingDataAccessService;
@@ -364,6 +370,16 @@ describe('OnboardingDataAccessService', () => {
 
       await expect(service.requestPushPermission()).resolves.toBe('granted');
       expect(requestPushPermissionMock).toHaveBeenCalledWith(platformMock);
+    });
+  });
+
+  describe('requestLocationPermission', () => {
+    it('delegates to the shared geolocation permission ask', async () => {
+      setup();
+      requestLocationPermissionMock.mockResolvedValue('denied');
+
+      await expect(service.requestLocationPermission()).resolves.toBe('denied');
+      expect(requestLocationPermissionMock).toHaveBeenCalled();
     });
   });
 });

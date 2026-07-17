@@ -47,6 +47,19 @@ The OS shows its push permission prompt once per install, so the ask is owned by
 
 Do not call `requestPushPermission` from app startup or a login path. A cold ask there spends the single OS prompt before the user has any context, and the onboarding step can then never prompt.
 
+## Location Permission Rule
+
+Location follows the same rule as push, for the same reason: the OS asks once per install, so the ask is owned by the onboarding location step, which explains what the position is used for first (epic \#850, issue \#1023).
+
+`libs/common/geolocation` splits this in two:
+
+- `getCurrentPosition` - reads the position on an existing grant. Runs on login (`dispatchGpsPosition` in `initAfterLogin$`) and never prompts; it errors instead when permission is not granted, and callers already treat a missing position as non-fatal.
+- `requestLocationPermission` - shows the prompt. Called only from the onboarding location step, and returns `granted` / `denied` / `unsupported` so the choice can be recorded in settings (`Settings.location`).
+
+`getCurrentPosition` bails out before reading when permission is undecided on a native platform. `checkPermissions` never prompts, but `getCurrentPosition` does — the native plugin asks the OS itself — so the guard, not the absence of a `requestPermissions` call, is what keeps the login path silent.
+
+Do not call `requestLocationPermission` from app startup or a login path.
+
 ## Code Anchors
 
 ```text

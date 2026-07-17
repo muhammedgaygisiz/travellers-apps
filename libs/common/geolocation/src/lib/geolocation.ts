@@ -50,9 +50,7 @@ const readCurrentPosition = async (): Promise<Position> => {
  * Errors when permission is not granted; callers already treat a missing
  * position as a non-fatal outcome.
  */
-export const getCurrentPosition = (): Observable<
-  GeolocationPosition | Position
-> => {
+export const getCurrentPosition = (): Observable<Position> => {
   return from(readCurrentPosition());
 };
 

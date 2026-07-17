@@ -53,7 +53,7 @@ Location follows the same rule as push, for the same reason: the OS asks once pe
 
 `libs/common/geolocation` splits this in two:
 
-- `getCurrentPosition` - reads the position on an existing grant. Runs on login (`dispatchGpsPosition` in `initAfterLogin$`) and never prompts; it errors instead when permission is not granted, and callers already treat a missing position as non-fatal.
+- `getCurrentPosition` - reads the position on an existing grant and never prompts; it errors instead when permission is not granted, and callers already treat a missing position as non-fatal. Every position read goes through it: the login path (`dispatchGpsPosition` in `initAfterLogin$`) and the Bite details distance (`positionLoader` in `libs/bite-tribe/details/data-access`). Do not re-implement the check/read inline — that is how a stray `requestPermissions` call gets reintroduced.
 - `requestLocationPermission` - shows the prompt. Called only from the onboarding location step, and returns `granted` / `denied` / `unsupported` so the choice can be recorded in settings (`Settings.location`).
 
 `getCurrentPosition` bails out before reading when permission is undecided on a native platform. `checkPermissions` never prompts, but `getCurrentPosition` does — the native plugin asks the OS itself — so the guard, not the absence of a `requestPermissions` call, is what keeps the login path silent.

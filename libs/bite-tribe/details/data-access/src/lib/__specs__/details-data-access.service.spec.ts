@@ -1,9 +1,10 @@
 import { DetailsDataAccessService } from '../details-data-access.service';
 import { TestBed } from '@angular/core/testing';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Geolocation } from '@capacitor/geolocation';
+import { getCurrentPosition } from 'geolocation';
 import { Bite, LikeClick } from 'model';
 import { Share } from '@capacitor/share';
 
@@ -21,7 +22,12 @@ jest.mock('@capacitor/geolocation', () => ({
     requestPermissions: jest.fn(),
   },
 }));
+jest.mock('geolocation', () => ({
+  getCurrentPosition: jest.fn(),
+}));
 jest.mock('@capacitor/share');
+
+const getCurrentPositionMock = getCurrentPosition as jest.Mock;
 
 describe(DetailsDataAccessService.name, () => {
   let service: DetailsDataAccessService;
@@ -323,80 +329,43 @@ describe(DetailsDataAccessService.name, () => {
   });
 
   describe('positionLoader', () => {
+    const mockPosition = {
+      coords: { latitude: 48.137154, longitude: 11.576124 },
+      timestamp: 1234567890,
+    };
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    describe('given no permissions', () => {
-      let checkPermissionsSpy: jest.SpyInstance;
-      let requestPermissionsSpy: jest.SpyInstance;
-      let getCurrentPositionSpy: jest.SpyInstance;
+    it('should read the position through the shared reader', async () => {
+      getCurrentPositionMock.mockReturnValue(of(mockPosition));
 
-      beforeEach(() => {
-        checkPermissionsSpy = jest
-          .spyOn(Geolocation, 'checkPermissions')
-          .mockReturnValue({ location: 'denied' } as any);
-        requestPermissionsSpy = jest
-          .spyOn(Geolocation, 'requestPermissions')
-          .mockResolvedValue({} as any);
-        getCurrentPositionSpy = jest
-          .spyOn(Geolocation, 'getCurrentPosition')
-          .mockReturnValue({} as any);
-      });
+      const result = await service.positionLoader({} as any);
 
-      it('should call request permissions and get current position', async () => {
-        await service.positionLoader({} as any);
-
-        expect(checkPermissionsSpy).toHaveBeenCalled();
-        expect(requestPermissionsSpy).toHaveBeenCalled();
-        expect(getCurrentPositionSpy).toHaveBeenCalled();
-      });
+      expect(getCurrentPositionMock).toHaveBeenCalled();
+      expect(result).toEqual(mockPosition);
     });
 
-    describe('given permission is granted', () => {
-      let checkPermissionsSpy: jest.SpyInstance;
-      let getCurrentPositionSpy: jest.SpyInstance;
-      let requestPermissionsSpy: jest.SpyInstance;
+    it('should never ask for the permission itself', async () => {
+      // The OS ask belongs to the onboarding location step (#1023); this
+      // surface only reads what an existing grant allows.
+      getCurrentPositionMock.mockReturnValue(of(mockPosition));
 
-      beforeEach(() => {
-        checkPermissionsSpy = jest
-          .spyOn(Geolocation, 'checkPermissions')
-          .mockReturnValue({ location: 'granted' } as any);
-        getCurrentPositionSpy = jest
-          .spyOn(Geolocation, 'getCurrentPosition')
-          .mockReturnValue({} as any);
-        requestPermissionsSpy = jest
-          .spyOn(Geolocation, 'requestPermissions')
-          .mockResolvedValue({} as any);
-      });
+      await service.positionLoader({} as any);
 
-      it('should not request permissions', async () => {
-        await service.positionLoader({} as any);
-
-        expect(checkPermissionsSpy).toHaveBeenCalled();
-        expect(getCurrentPositionSpy).toHaveBeenCalled();
-        expect(requestPermissionsSpy).not.toHaveBeenCalled();
-      });
+      expect(Geolocation.requestPermissions).not.toHaveBeenCalled();
     });
 
-    describe('given checkPermission throws', () => {
-      let checkPermissionsSpy: jest.SpyInstance;
-      let getCurrentPositionSpy: jest.SpyInstance;
+    describe('given the position cannot be read', () => {
+      it('should return undefined so the page just shows no distance', async () => {
+        jest.spyOn(console, 'error').mockImplementation();
+        getCurrentPositionMock.mockReturnValue(
+          throwError(() => new Error('Location permission is not granted')),
+        );
 
-      beforeEach(() => {
-        checkPermissionsSpy = jest
-          .spyOn(Geolocation, 'checkPermissions')
-          .mockRejectedValue(new Error('Permission error'));
-        getCurrentPositionSpy = jest
-          .spyOn(Geolocation, 'getCurrentPosition')
-          .mockReturnValue({} as any);
-      });
-
-      it('should return undefined', async () => {
         const result = await service.positionLoader({} as any);
 
-        expect(checkPermissionsSpy).toHaveBeenCalled();
-        expect(getCurrentPositionSpy).not.toHaveBeenCalled();
         expect(result).toBeUndefined();
       });
     });

@@ -16,11 +16,11 @@ import {
   SaveToBucketListParams,
 } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { Geolocation, Position } from '@capacitor/geolocation';
+import { Position } from '@capacitor/geolocation';
 import { Share } from '@capacitor/share';
+import { lastValueFrom } from 'rxjs';
+import { getCurrentPosition } from 'geolocation';
 import { retry, withTimeout } from './async-retry';
-
-const ONE_MINUTE = 60 * 1000;
 
 const SHARE_BITE_URL = 'https://bite-tribe.web.app/s/bite';
 
@@ -118,17 +118,16 @@ export class DetailsDataAccessService {
     return Promise.resolve();
   };
 
+  /**
+   * Reads the position for the distance shown on a Bite. The shared reader only
+   * resolves on an existing grant and never prompts: the OS ask belongs to the
+   * onboarding location step (epic #850, issue #1023). An undecided or denied
+   * permission surfaces as an error here, which is the same non-fatal outcome as
+   * any other position failure — the page simply shows no distance.
+   */
   positionLoader: ResourceLoader<any, Position> = async () => {
     try {
-      const permissionStatus = await Geolocation.checkPermissions();
-
-      if (permissionStatus.location !== 'granted') {
-        await Geolocation.requestPermissions();
-      }
-
-      return await Geolocation.getCurrentPosition({
-        maximumAge: ONE_MINUTE,
-      });
+      return await lastValueFrom(getCurrentPosition());
     } catch (error) {
       console.error('Error getting position:', error);
 

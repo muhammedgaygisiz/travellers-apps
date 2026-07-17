@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 import { CreateBitePage } from '../pages/create-bite.page';
 import { HomePage } from '../pages/home.page';
 import { loginAsTestUser } from '../support/auth';
+import { dismissCoachMarks } from '../support/coach-marks';
 
 const IMAGE_FIXTURE = join(__dirname, '..', 'fixtures', 'bite.jpg');
 
@@ -11,6 +12,7 @@ test.describe('Like a bite', () => {
     page,
   }) => {
     await loginAsTestUser(page);
+    await dismissCoachMarks(page);
 
     // Create the Bite we are going to like so the feed deterministically has a
     // likeable card at the pinned GPS position, instead of depending on seeded

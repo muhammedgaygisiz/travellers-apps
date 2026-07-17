@@ -1,7 +1,7 @@
 import { Location } from '@angular/common';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
-import type { Geopoint } from 'model';
+import type { Bite, Geopoint } from 'model';
 import {
   LoadingController,
   NavController,
@@ -82,7 +82,7 @@ export class BiteService {
     return !!b && a.latitude === b.latitude && a.longitude === b.longitude;
   }
 
-  async submitNewBite(newBite: any): Promise<void> {
+  async submitNewBite(newBite: Partial<Bite>): Promise<void> {
     const loading = await this.loadingController.create({
       message: this.transloco.translate('creating-bite'),
       backdropDismiss: false,
@@ -91,8 +91,9 @@ export class BiteService {
     await loading.present();
 
     const { id, ...biteData } = newBite;
+    void id;
     try {
-      await this.dataAccess.submitNewBite(biteData);
+      await this.dataAccess.submitNewBite(biteData as Bite);
 
       this.analytics.logEvent(AnalyticsEvent.BiteCreated);
 
@@ -104,12 +105,12 @@ export class BiteService {
     }
   }
 
-  submitEditedBite(editedBite: any): void {
-    void this.dataAccess.submitEditedBite(editedBite);
+  submitEditedBite(editedBite: Partial<Bite>): void {
+    void this.dataAccess.submitEditedBite(editedBite as Bite);
     this.location.back();
   }
 
-  setEditingBite(bite: Partial<any>): void {
+  setEditingBite(bite: Partial<Bite>): void {
     this.dataAccess.setEditingBite(bite);
   }
 

@@ -1,35 +1,33 @@
 import { ImageValidator } from '../image-validator';
+import type { AbstractControl } from '@angular/forms';
+
+const controlWithValues = (values: Record<string, string>): AbstractControl =>
+  ({
+    get: (key: string) =>
+      Object.hasOwn(values, key) ? { value: values[key] } : null,
+  }) as unknown as AbstractControl;
 
 describe(ImageValidator.name, () => {
   it('should return null if image or imagePath is provided', () => {
-    const formGroupWithImage = {
-      get: (key: string) => {
-        if (key === 'image') return { value: 'some-image-data' };
-        if (key === 'imagePath') return { value: '' };
-        return null;
-      },
-    } as any;
+    const formGroupWithImage = controlWithValues({
+      image: 'some-image-data',
+      imagePath: '',
+    });
 
-    const formGroupWithImagePath = {
-      get: (key: string) => {
-        if (key === 'image') return { value: '' };
-        if (key === 'imagePath') return { value: 'some/image/path.jpg' };
-        return null;
-      },
-    } as any;
+    const formGroupWithImagePath = controlWithValues({
+      image: '',
+      imagePath: 'some/image/path.jpg',
+    });
 
     expect(ImageValidator(formGroupWithImage)).toBeNull();
     expect(ImageValidator(formGroupWithImagePath)).toBeNull();
   });
 
   it('should return an error if image nor imagePath is empty', () => {
-    const formGroupWithoutImageAndPath = {
-      get: (key: string) => {
-        if (key === 'image') return { value: '' };
-        if (key === 'imagePath') return { value: '' };
-        return null;
-      },
-    } as any;
+    const formGroupWithoutImageAndPath = controlWithValues({
+      image: '',
+      imagePath: '',
+    });
 
     expect(ImageValidator(formGroupWithoutImageAndPath)).toEqual({
       imageRequired: true,
@@ -38,9 +36,7 @@ describe(ImageValidator.name, () => {
 
   describe('given image and imagePath form controls are not defined', () => {
     it('should return an error', () => {
-      const formGroupWithoutControls = {
-        get: (key: string) => null,
-      } as any;
+      const formGroupWithoutControls = controlWithValues({});
 
       expect(ImageValidator(formGroupWithoutControls)).toEqual({
         imageRequired: true,

@@ -178,6 +178,14 @@ describe('BiteTribeHomeComponent', () => {
   });
 
   describe('filter and search chips', () => {
+    it('exposes the header menu as a coach-mark anchor', () => {
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="btn-menu"]'),
+      ).toBeTruthy();
+    });
+
     it('exposes the feed controls as a coach-mark anchor', () => {
       fixture.detectChanges();
 

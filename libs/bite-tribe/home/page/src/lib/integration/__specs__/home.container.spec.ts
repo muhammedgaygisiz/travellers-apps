@@ -75,7 +75,7 @@ describe(HomeContainer.name, () => {
     fixture.detectChanges();
   });
 
-  it('queues feed, feed-controls, and create-Bite coach marks in order', () => {
+  it('queues the Home coach marks from the page intro to the footer', () => {
     const marks = fixture.debugElement
       .queryAll(By.directive(CoachMarkComponent))
       .map(
@@ -84,22 +84,32 @@ describe(HomeContainer.name, () => {
 
     expect(marks.map((mark) => mark.surface())).toEqual([
       'home-feed',
+      'home-menu',
       'home-feed-controls',
       'create-bite',
     ]);
-    expect(marks[1].anchorTestId()).toBe('home-feed-controls');
+    expect(marks[1].anchorTestId()).toBe('btn-menu');
+    expect(marks[2].anchorTestId()).toBe('home-feed-controls');
     expect(marks[1].enabled()).toBe(false);
     expect(marks[2].enabled()).toBe(false);
+    expect(marks[3].enabled()).toBe(false);
 
     marks[0].settled.emit();
     fixture.detectChanges();
 
     expect(marks[1].enabled()).toBe(true);
     expect(marks[2].enabled()).toBe(false);
+    expect(marks[3].enabled()).toBe(false);
 
     marks[1].settled.emit();
     fixture.detectChanges();
 
     expect(marks[2].enabled()).toBe(true);
+    expect(marks[3].enabled()).toBe(false);
+
+    marks[2].settled.emit();
+    fixture.detectChanges();
+
+    expect(marks[3].enabled()).toBe(true);
   });
 });

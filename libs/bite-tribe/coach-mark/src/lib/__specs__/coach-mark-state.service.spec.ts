@@ -50,9 +50,15 @@ describe('CoachMarkStateService', () => {
     it('is true only for a surface already recorded as seen', async () => {
       setup();
       get.mockResolvedValue({
-        value: JSON.stringify(['home-feed', 'home-feed-controls', 'map']),
+        value: JSON.stringify([
+          'home-feed',
+          'home-menu',
+          'home-feed-controls',
+          'map',
+        ]),
       });
 
+      await expect(service.hasSeen('home-menu')).resolves.toBe(true);
       await expect(service.hasSeen('home-feed-controls')).resolves.toBe(true);
       await expect(service.hasSeen('map')).resolves.toBe(true);
       await expect(service.hasSeen('leaderboard')).resolves.toBe(false);

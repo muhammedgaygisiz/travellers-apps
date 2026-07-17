@@ -55,11 +55,20 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     />
 
     <bt-coach-mark
+      surface="home-menu"
+      titleKey="coach-home-menu-title"
+      bodyKey="coach-home-menu-body"
+      anchorTestId="btn-menu"
+      [enabled]="feedCoachSettled()"
+      (settled)="menuCoachSettled.set(true)"
+    />
+
+    <bt-coach-mark
       surface="home-feed-controls"
       titleKey="coach-home-feed-controls-title"
       bodyKey="coach-home-feed-controls-body"
       anchorTestId="home-feed-controls"
-      [enabled]="feedCoachSettled()"
+      [enabled]="menuCoachSettled()"
       (settled)="feedControlsCoachSettled.set(true)"
     />
 
@@ -82,6 +91,7 @@ export class HomeContainer {
    * dismissed or skipped because it had already been seen.
    */
   protected readonly feedCoachSettled = signal(false);
+  protected readonly menuCoachSettled = signal(false);
   protected readonly feedControlsCoachSettled = signal(false);
 
   private hasTrackedPrompt = false;

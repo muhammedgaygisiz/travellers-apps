@@ -6,7 +6,7 @@ import { getTotalLikeCount } from '../utils/like-counts';
   name: 'countLikes',
 })
 export class CountLikesPipe implements PipeTransform {
-  transform(bite: Bite): number {
+  transform(bite: Bite | null | undefined): number {
     return getTotalLikeCount(bite);
   }
 }

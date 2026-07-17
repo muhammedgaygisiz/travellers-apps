@@ -9,15 +9,20 @@ import {
 import { getIonicConfig } from 'utils';
 import { IonButton, provideIonicAngular } from '@ionic/angular/standalone';
 import { BiteSkeletonListComponent } from '../bite-skeleton-list/bite-skeleton-list.component';
+import { Bite as BiteModel } from 'model';
 
 const PEACH_IMAGE =
   'https://upload.wikimedia.org/wikipedia/commons/9/9e/Autumn_Red_peaches.jpg';
 
-const demoBiteBase = {
+const demoBiteBase: BiteModel = {
   id: 'bite1',
   name: 'Peaches',
+  image: '',
+  imagePath: PEACH_IMAGE,
   distance: '30.7',
   place: "Sam's",
+  price: 0,
+  position: { latitude: 46.948, longitude: 7.4474 },
   rating: 4,
   thumbup: 1,
   city: 'Bern',
@@ -37,7 +42,7 @@ const demoBiteBase = {
   `,
 })
 class BiteUploadDemoComponent {
-  readonly bite = signal<any>({
+  readonly bite = signal<BiteModel>({
     ...demoBiteBase,
     image: '',
     imagePath: undefined,
@@ -80,18 +85,7 @@ const template = `
 `;
 export const Bite: Story = {
   args: {
-    bite: {
-      id: 'bite1',
-      name: 'Peaches',
-      imagePath:
-        'https://upload.wikimedia.org/wikipedia/commons/9/9e/Autumn_Red_peaches.jpg',
-      distance: '30.7',
-      place: "Sam's",
-      rating: 4,
-      thumbup: 1,
-      city: 'Bern',
-      countryCode: 'CH',
-    } as any,
+    bite: demoBiteBase,
   },
   render: (args) => ({
     props: { ...args },
@@ -103,11 +97,18 @@ export const LikedByMe: Story = {
   args: {
     ...Bite.args,
     bite: {
-      ...Bite.args?.bite,
+      ...demoBiteBase,
       thumbup: 2,
       drooling: 1,
-      likes: [{ userId: '1', likeType: 'thumbup' }],
-    } as any,
+      likes: [
+        {
+          userId: '1',
+          likeType: 'thumbup',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          biteId: demoBiteBase.id,
+        },
+      ],
+    },
     userId: '1',
   },
   render: (args) => ({
@@ -120,8 +121,8 @@ export const EditMode: Story = {
   args: {
     ...Bite.args,
     bite: {
-      ...Bite.args?.bite,
-    } as any,
+      ...demoBiteBase,
+    },
     showEditButton: true,
   },
   render: (args) => ({
@@ -134,9 +135,9 @@ export const NoRating: Story = {
   args: {
     ...Bite.args,
     bite: {
-      ...Bite.args?.bite,
+      ...demoBiteBase,
       rating: 0,
-    } as any,
+    },
   },
   render: (args) => ({
     props: { ...args },
@@ -148,10 +149,10 @@ export const QuickRating: Story = {
   args: {
     ...Bite.args,
     bite: {
-      ...Bite.args?.bite,
+      ...demoBiteBase,
       rating: 0,
       userId: '1',
-    } as any,
+    },
     userId: '1',
   },
   render: (args) => ({
@@ -164,10 +165,10 @@ export const QuickRatingForEditMode: Story = {
   args: {
     ...Bite.args,
     bite: {
-      ...Bite.args?.bite,
+      ...demoBiteBase,
       rating: 0,
       userId: '1',
-    } as any,
+    },
     userId: '1',
     showEditButton: true,
   },
@@ -181,11 +182,11 @@ export const PendingUpload: Story = {
   args: {
     ...Bite.args,
     bite: {
-      ...Bite.args?.bite,
+      ...demoBiteBase,
       imagePath: undefined,
       image: '',
       imageStatus: 'pending',
-    } as any,
+    },
   },
   render: (args) => ({
     props: { ...args },
@@ -197,9 +198,9 @@ export const UploadedState: Story = {
   args: {
     ...Bite.args,
     bite: {
-      ...Bite.args?.bite,
+      ...demoBiteBase,
       imageStatus: 'uploaded',
-    } as any,
+    },
   },
   render: (args) => ({
     props: { ...args },

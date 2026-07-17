@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { NavController } from '@ionic/angular';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import {
   OnboardingDataAccessService,
   OnboardingProgressService,
@@ -26,6 +27,7 @@ describe('OnboardingService', () => {
   let requestLocationPermission: jest.Mock;
   let completeOnboarding: jest.Mock;
   let navigateRoot: jest.Mock;
+  let logEvent: jest.Mock;
 
   /** Device locale backing the currency and language prefill. */
   const mockDeviceLocale = (locale: string): void => {
@@ -70,10 +72,12 @@ describe('OnboardingService', () => {
     requestLocationPermission = jest.fn().mockResolvedValue('granted');
     completeOnboarding = jest.fn().mockResolvedValue(undefined);
     navigateRoot = jest.fn();
+    logEvent = jest.fn();
 
     TestBed.configureTestingModule({
       providers: [
         OnboardingService,
+        { provide: AnalyticsService, useValue: { logEvent } },
         {
           provide: OnboardingDataAccessService,
           useValue: {
@@ -288,6 +292,76 @@ describe('OnboardingService', () => {
       expect(dismissForSession).not.toHaveBeenCalled();
       expect(navigateRoot).not.toHaveBeenCalled();
       expect(service.currentStep().id).toBe('finish');
+    });
+  });
+
+  describe('funnel analytics', () => {
+    it('logs the assistant start once per session', async () => {
+      setup();
+
+      await service.initialize();
+      await service.initialize();
+
+      expect(logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.OnboardingAssistantStarted,
+      );
+      expect(
+        logEvent.mock.calls.filter(
+          ([event]) => event === AnalyticsEvent.OnboardingAssistantStarted,
+        ),
+      ).toHaveLength(1);
+    });
+
+    it('logs the completed step with its identifier when advancing', async () => {
+      setup(['identity']);
+      await service.initialize();
+
+      service.updateVisibility(true);
+      await service.next();
+
+      expect(logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.OnboardingStepCompleted,
+        { step: 'visibility' },
+      );
+    });
+
+    it('does not log a step completion while the step is invalid', async () => {
+      setup([], { displayName: '' });
+      await service.initialize();
+
+      await service.next();
+
+      expect(logEvent).not.toHaveBeenCalledWith(
+        AnalyticsEvent.OnboardingStepCompleted,
+        expect.anything(),
+      );
+    });
+
+    it('logs the assistant completion after the finish step is written', async () => {
+      setup(ONBOARDING_STEPS.slice(0, -1).map((step) => step.id));
+      await service.initialize();
+
+      await service.next();
+
+      expect(logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.OnboardingStepCompleted,
+        { step: 'finish' },
+      );
+      expect(logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.OnboardingAssistantCompleted,
+      );
+    });
+
+    it('does not log completion when the finish write fails', async () => {
+      setup(ONBOARDING_STEPS.slice(0, -1).map((step) => step.id));
+      completeOnboarding.mockRejectedValue(new Error('offline'));
+      await service.initialize();
+
+      await service.next();
+
+      expect(logEvent).not.toHaveBeenCalledWith(
+        AnalyticsEvent.OnboardingAssistantCompleted,
+      );
     });
   });
 

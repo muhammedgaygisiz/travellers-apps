@@ -42,6 +42,18 @@ See [[Architecture - Analytics]] for how this fits the wider analytics surface.
 | Discovery  | `search_performed`                    | –                                                                            | Query first reaches the min length (once per search session) | `libs/bite-tribe/search/page/.../integration/search.service.ts`              |
 | Discovery  | `restaurant_viewed`                   | `verified: boolean`                                                          | Restaurant / place page entered                              | `libs/bite-tribe/restaurant/page/.../integration/*restaurant-container*.ts`  |
 | Discovery  | `bite_viewed`                         | –                                                                            | Bite details page entered                                    | `libs/bite-tribe/details/page/.../integration/details.container.ts`          |
+| Onboarding | `onboarding_assistant_started`        | –                                                                            | Assistant loads for the first time in a session              | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`      |
+| Onboarding | `onboarding_step_completed`           | `step: OnboardingStepId`                                                     | A step is persisted and marked complete on advance           | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`      |
+| Onboarding | `onboarding_assistant_completed`      | –                                                                            | Completion flag is written on the finish step                | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`      |
+| Onboarding | `coach_mark_dismissed`                | `surface: CoachMarkSurface`                                                  | A coach mark is dismissed for the first time                 | `libs/bite-tribe/coach-mark/src/lib/coach-mark-state.service.ts`             |
+
+The onboarding funnel events belong to the onboarding assistant epic ([[epic-850]],
+issue #1017), not to the launch taxonomy of issue 910. `onboarding_step_completed`
+fires once per step in order (`identity`, `visibility`, `currency`, `language`,
+`location`, `notifications`, `finish`); `onboarding_assistant_completed` fires
+once, after the `finish` step's completion write succeeds. `coach_mark_dismissed`
+carries the dismissed `CoachMarkSurface` id and fires only on the first dismissal
+per user, so re-entering a surface whose mark was already seen emits nothing.
 
 ### Auto-collected (no code)
 
@@ -109,6 +121,10 @@ a documented follow-up (needs Editor access on the property).
      `bucketlist_rated`.
    - Type a search query (≥ 3 chars) → `search_performed`.
    - Open a restaurant/place → `restaurant_viewed`; open a Bite → `bite_viewed`.
+   - Enter the onboarding assistant → `onboarding_assistant_started`; advance
+     each step → `onboarding_step_completed` with the matching `step`; finish →
+     `onboarding_assistant_completed`.
+   - Dismiss a coach mark → `coach_mark_dismissed` with the matching `surface`.
 5. Disable debug mode when done (Android: set the prop to `.none`).
 
 ## Related Pages

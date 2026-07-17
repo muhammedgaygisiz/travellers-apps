@@ -29,6 +29,11 @@ export const AnalyticsEvent = {
   SearchPerformed: 'search_performed',
   RestaurantViewed: 'restaurant_viewed',
   BiteViewed: 'bite_viewed',
+  // Onboarding funnel (epic #850)
+  OnboardingAssistantStarted: 'onboarding_assistant_started',
+  OnboardingStepCompleted: 'onboarding_step_completed',
+  OnboardingAssistantCompleted: 'onboarding_assistant_completed',
+  CoachMarkDismissed: 'coach_mark_dismissed',
 } as const;
 
 export type AnalyticsEventName =
@@ -72,4 +77,35 @@ export interface AnalyticsEventParamMap {
   [AnalyticsEvent.SearchPerformed]: never;
   [AnalyticsEvent.RestaurantViewed]: { verified: boolean };
   [AnalyticsEvent.BiteViewed]: never;
+  [AnalyticsEvent.OnboardingAssistantStarted]: never;
+  // `step` mirrors `OnboardingStepId` from `bite-tribe/onboarding-data-access`.
+  // The union is inlined so this launch-critical taxonomy stays in the common
+  // analytics layer without depending on a feature library.
+  [AnalyticsEvent.OnboardingStepCompleted]: {
+    step:
+      | 'identity'
+      | 'visibility'
+      | 'currency'
+      | 'language'
+      | 'location'
+      | 'notifications'
+      | 'finish';
+  };
+  [AnalyticsEvent.OnboardingAssistantCompleted]: never;
+  // `surface` mirrors `CoachMarkSurface` from `bite-tribe/coach-mark`, inlined
+  // for the same reason as the onboarding step union above.
+  [AnalyticsEvent.CoachMarkDismissed]: {
+    surface:
+      | 'home-feed'
+      | 'home-menu'
+      | 'home-feed-controls'
+      | 'create-bite'
+      | 'bite-details'
+      | 'bite-details-share'
+      | 'bite-details-navigation'
+      | 'bite-details-bucket-list'
+      | 'map'
+      | 'bucket-lists'
+      | 'leaderboard';
+  };
 }

@@ -26,7 +26,8 @@ New users should understand BiteTribe and configure the basics needed for useful
   - push notification priming before the OS permission prompt
 - Every OS permission is asked here and nowhere else. The prompt appears once per install, so a cold ask from the login path would spend it before the user knows why it matters. Denial is accepted for both.
 - Completion is marked on the user profile; the assistant never shows again.
-- After the assistant, must-dismiss coach marks teach the essential features on first visit: home feed, create-Bite button, map, bucket lists, leaderboard.
+- After the assistant, must-dismiss coach marks teach the essential features on first visit: home feed, home feed controls, create-Bite button, map, bucket lists, leaderboard.
+- The home feed controls mark explains Search and Bitemap, and distinguishes Distance (closest Bites) from Date (newest Bites from anywhere).
 
 ## Related GitHub Scope
 

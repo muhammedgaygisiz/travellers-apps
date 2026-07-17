@@ -178,6 +178,16 @@ describe('BiteTribeHomeComponent', () => {
   });
 
   describe('filter and search chips', () => {
+    it('exposes the feed controls as a coach-mark anchor', () => {
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="home-feed-controls"]',
+        ),
+      ).toBeTruthy();
+    });
+
     it('should show the filter chip by default', () => {
       fixture.detectChanges();
 

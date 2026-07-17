@@ -55,11 +55,20 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     />
 
     <bt-coach-mark
+      surface="home-feed-controls"
+      titleKey="coach-home-feed-controls-title"
+      bodyKey="coach-home-feed-controls-body"
+      anchorTestId="home-feed-controls"
+      [enabled]="feedCoachSettled()"
+      (settled)="feedControlsCoachSettled.set(true)"
+    />
+
+    <bt-coach-mark
       surface="create-bite"
       titleKey="coach-create-bite-title"
       bodyKey="coach-create-bite-body"
       anchorTestId="footer-add-button"
-      [enabled]="feedCoachSettled()"
+      [enabled]="feedControlsCoachSettled()"
     />
   `,
   imports: [BiteTribeHomeComponent, CoachMarkComponent],
@@ -69,11 +78,11 @@ export class HomeContainer {
   service = inject(HomeService);
 
   /**
-   * Gates the create-Bite coach mark so the two home marks never overlap: it is
-   * held back until the feed mark has settled — dismissed, or skipped because it
-   * was already seen.
+   * Advances the Home coach marks one at a time. A settled mark was either
+   * dismissed or skipped because it had already been seen.
    */
   protected readonly feedCoachSettled = signal(false);
+  protected readonly feedControlsCoachSettled = signal(false);
 
   private hasTrackedPrompt = false;
 

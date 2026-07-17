@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { DetailsContainer } from '../details.container';
 import { DetailsService } from '../details.service';
 import { provideIonicAngular } from '@ionic/angular/standalone';
@@ -9,6 +10,10 @@ import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 import { Bite } from 'model';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import {
+  CoachMarkComponent,
+  CoachMarkStateService,
+} from 'bite-tribe/coach-mark';
 
 jest.mock('@capacitor-firebase/analytics');
 
@@ -52,19 +57,27 @@ describe(DetailsContainer.name, () => {
               error: signal(undefined),
               reload: jest.fn(),
             },
-            reviews: signal(undefined),
+            reviews: signal([]),
             currentPosition: {
               value: signal(undefined),
             },
-            bucketlists: signal(undefined),
-            userId: signal(undefined),
+            bucketlists: signal([]),
+            userId: signal('user-1'),
             biteCreator: {
               value: signal(undefined),
               error: signal(undefined),
               reload: jest.fn(),
             },
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            isAuthenticated: (): void => {},
+            exchangeRates: signal({}),
+            preferredCurrency: signal('EUR'),
+            isAuthenticated: signal(true),
+          },
+        },
+        {
+          provide: CoachMarkStateService,
+          useValue: {
+            hasSeen: jest.fn(() => new Promise<boolean>(() => undefined)),
+            markSeen: jest.fn(),
           },
         },
         { provide: TranslocoService, useValue: MockTranslocoService },
@@ -78,6 +91,58 @@ describe(DetailsContainer.name, () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('queues the introduction, share, navigation, and bucket-list coach marks', () => {
+    fixture.detectChanges();
+
+    const marks = fixture.debugElement
+      .queryAll(By.directive(CoachMarkComponent))
+      .map(
+        (debugElement) => debugElement.componentInstance as CoachMarkComponent,
+      );
+
+    expect(marks.map((mark) => mark.surface())).toEqual([
+      'bite-details',
+      'bite-details-share',
+      'bite-details-navigation',
+      'bite-details-bucket-list',
+    ]);
+    expect(marks[0].anchor()).toBeNull();
+    expect(marks[0].anchorTestId()).toBeNull();
+    expect(marks[0].enabled()).toBe(false);
+    expect(marks[1].anchorTestId()).toBe('bite-details-share');
+    expect(marks[1].enabled()).toBe(false);
+    expect(marks[2].anchorTestId()).toBe('bite-details-navigation');
+    expect(marks[2].enabled()).toBe(false);
+    expect(marks[3].anchorTestId()).toBe('bite-details-bucket-list');
+    expect(marks[3].enabled()).toBe(false);
+
+    biteSignal.set({ id: 'bite-1', name: 'Pizza' } as Bite);
+    fixture.detectChanges();
+
+    expect(marks[0].enabled()).toBe(true);
+    expect(marks[1].enabled()).toBe(false);
+    expect(marks[2].enabled()).toBe(false);
+    expect(marks[3].enabled()).toBe(false);
+
+    marks[0].settled.emit();
+    fixture.detectChanges();
+
+    expect(marks[1].enabled()).toBe(true);
+    expect(marks[2].enabled()).toBe(false);
+    expect(marks[3].enabled()).toBe(false);
+
+    marks[1].settled.emit();
+    fixture.detectChanges();
+
+    expect(marks[2].enabled()).toBe(true);
+    expect(marks[3].enabled()).toBe(false);
+
+    marks[2].settled.emit();
+    fixture.detectChanges();
+
+    expect(marks[3].enabled()).toBe(true);
   });
 
   describe('ionViewDidEnter', () => {

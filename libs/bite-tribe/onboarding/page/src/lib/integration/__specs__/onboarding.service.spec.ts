@@ -24,6 +24,7 @@ describe('OnboardingService', () => {
   let applyLanguage: jest.Mock;
   let requestPushPermission: jest.Mock;
   let requestLocationPermission: jest.Mock;
+  let completeOnboarding: jest.Mock;
   let navigateRoot: jest.Mock;
 
   /** Device locale backing the currency and language prefill. */
@@ -67,6 +68,7 @@ describe('OnboardingService', () => {
     applyLanguage = jest.fn().mockResolvedValue(undefined);
     requestPushPermission = jest.fn().mockResolvedValue('granted');
     requestLocationPermission = jest.fn().mockResolvedValue('granted');
+    completeOnboarding = jest.fn().mockResolvedValue(undefined);
     navigateRoot = jest.fn();
 
     TestBed.configureTestingModule({
@@ -85,6 +87,7 @@ describe('OnboardingService', () => {
             applyLanguage,
             requestPushPermission,
             requestLocationPermission,
+            completeOnboarding,
           },
         },
         {
@@ -248,19 +251,43 @@ describe('OnboardingService', () => {
       expect(service.currentStep().id).toBe('currency');
     });
 
-    it('finishes on the last step by releasing the gate and entering the app', async () => {
+    it('lands on the finish step ready to complete without extra input', async () => {
+      setup(ONBOARDING_STEPS.slice(0, -1).map((step) => step.id));
+
+      await service.initialize();
+
+      expect(service.currentStep().id).toBe('finish');
+      // The finish step gathers nothing, so the Finish button is enabled at once.
+      expect(service.canAdvance()).toBe(true);
+    });
+
+    it('finishes on the last step by writing the flag and entering the app', async () => {
       setup(ONBOARDING_STEPS.slice(0, -1).map((step) => step.id));
       await service.initialize();
 
       expect(service.currentStep().id).toBe('finish');
-      service.setCurrentStepValid(true);
       await service.next();
 
       expect(saveCompletedSteps).toHaveBeenCalledWith(
         ONBOARDING_STEPS.map((step) => step.id),
       );
+      expect(completeOnboarding).toHaveBeenCalledTimes(1);
       expect(dismissForSession).toHaveBeenCalledTimes(1);
       expect(navigateRoot).toHaveBeenCalledWith([`/${PATH.HOME}`]);
+    });
+
+    it('keeps the user on the finish step when the completion write fails', async () => {
+      setup(ONBOARDING_STEPS.slice(0, -1).map((step) => step.id));
+      completeOnboarding.mockRejectedValue(new Error('offline'));
+      await service.initialize();
+
+      await service.next();
+
+      // Without a durable flag the assistant would reappear on next start, so
+      // the flow must not drop the user into the app.
+      expect(dismissForSession).not.toHaveBeenCalled();
+      expect(navigateRoot).not.toHaveBeenCalled();
+      expect(service.currentStep().id).toBe('finish');
     });
   });
 

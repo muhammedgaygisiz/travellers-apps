@@ -6,6 +6,7 @@ import { addNecessaryIcons } from 'utils';
 import { BucketlistsService } from '../bucketlists.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoService } from '@jsverse/transloco';
+import { CoachMarkStateService } from 'bite-tribe/coach-mark';
 import { of } from 'rxjs';
 
 jest.mock('@capacitor-firebase/analytics');
@@ -44,6 +45,14 @@ describe('BucketlistsContainerComponent', () => {
           },
         },
         { provide: TranslocoService, useValue: MockTranslocoService },
+        {
+          // The coach mark stays hidden here, keeping the container test focused.
+          provide: CoachMarkStateService,
+          useValue: {
+            hasSeen: jest.fn().mockResolvedValue(true),
+            markSeen: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     });
 

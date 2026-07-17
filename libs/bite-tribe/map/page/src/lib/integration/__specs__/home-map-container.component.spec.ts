@@ -3,6 +3,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons } from 'utils';
 import { HomeMapContainerComponent } from '../home-map-container.component';
 import { MapService } from '../map.service';
+import { CoachMarkStateService } from 'bite-tribe/coach-mark';
 
 jest.mock('leaflet');
 jest.mock('leaflet.markercluster');
@@ -23,6 +24,13 @@ describe('HomeMapContainerComponent', () => {
         {
           provide: MapService,
           useValue: Mock,
+        },
+        {
+          provide: CoachMarkStateService,
+          useValue: {
+            hasSeen: jest.fn().mockResolvedValue(true),
+            markSeen: jest.fn().mockResolvedValue(undefined),
+          },
         },
       ],
     });

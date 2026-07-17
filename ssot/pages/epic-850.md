@@ -26,7 +26,13 @@
   - 6. Notifications - value explanation before the OS permission prompt; denial accepted, flow continues.
   - 7. Finish - completion flag written, user lands in the app.
   - \#\# Coach Marks
-  - After the assistant, interactive coach marks appear on the first visit of each key surface: home feed, create-Bite button, map, bucket lists, leaderboard.
+  - After the assistant, interactive coach marks appear on the first visit of each key surface: home feed, home menu, home feed controls, create-Bite button, Bite details, map, bucket lists, leaderboard.
+  - The home menu mark introduces the header menu as the route to the profile, bucket lists, leaderboard, gallery, marketplace, and settings.
+  - The home feed controls mark explains Search and Bitemap, and distinguishes Distance (closest Bites) from Date (newest Bites from anywhere).
+  - The Bite details introduction appears after the Bite has loaded and explains creator attribution for public profiles, distance from the user's current position, and preferred-currency pricing.
+  - The Bite details share mark follows the introduction and highlights sharing through the device share sheet, including WhatsApp when available.
+  - The Bite details navigation mark follows sharing and highlights opening directions to the Bite's place in the platform navigation experience.
+  - The Bite details bucket-list mark finishes the sequence and highlights saving the Bite to an existing or new bucket list.
   - Each coach mark must be explicitly dismissed; seen state is tracked per surface, separately from assistant completion.
   - \#\# Analytics
   - Full funnel in the existing `AnalyticsService` taxonomy: assistant started, step completed (step id), assistant completed, coach mark dismissed (surface id).
@@ -58,7 +64,7 @@
   - The visibility step preselects private and presents the benefits of public before the user decides.
   - The location and notification steps each ask for their OS permission in context, after explaining the value, and continue gracefully on denial.
   - No OS permission is requested from the login path; the assistant is the only surface that prompts.
-  - Coach marks appear on the first visit of home feed, create-Bite button, map, bucket lists, and leaderboard, and each requires an explicit dismissal.
+  - Coach marks appear on the first visit of home feed, home menu, home feed controls, create-Bite button, Bite details, map, bucket lists, and leaderboard, and each requires an explicit dismissal.
   - The full onboarding funnel is measurable in Firebase Analytics.
   - All visible copy uses Transloco keys and every relevant locale file is updated.
   - \#\# Validation Notes

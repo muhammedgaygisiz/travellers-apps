@@ -1,8 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { DetailsPage } from '../components/details-page/details.page';
 import { DetailsService } from './details.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { CoachMarkComponent } from 'bite-tribe/coach-mark';
 
 @Component({
   template: `
@@ -29,13 +35,51 @@ import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
       (gotoNew)="service.onGotoNewClick($event)"
       (shareBite)="service.onShareBiteClick($event)"
     />
+
+    <bt-coach-mark
+      surface="bite-details"
+      titleKey="coach-bite-details-title"
+      bodyKey="coach-bite-details-body"
+      [enabled]="!!service.bite.value()"
+      (settled)="detailsCoachSettled.set(true)"
+    />
+
+    <bt-coach-mark
+      surface="bite-details-share"
+      titleKey="coach-bite-details-share-title"
+      bodyKey="coach-bite-details-share-body"
+      anchorTestId="bite-details-share"
+      [enabled]="detailsCoachSettled()"
+      (settled)="shareCoachSettled.set(true)"
+    />
+
+    <bt-coach-mark
+      surface="bite-details-navigation"
+      titleKey="coach-bite-details-navigation-title"
+      bodyKey="coach-bite-details-navigation-body"
+      anchorTestId="bite-details-navigation"
+      [enabled]="shareCoachSettled()"
+      (settled)="navigationCoachSettled.set(true)"
+    />
+
+    <bt-coach-mark
+      surface="bite-details-bucket-list"
+      titleKey="coach-bite-details-bucket-list-title"
+      bodyKey="coach-bite-details-bucket-list-body"
+      anchorTestId="bite-details-bucket-list"
+      [enabled]="navigationCoachSettled()"
+    />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DetailsPage],
+  imports: [DetailsPage, CoachMarkComponent],
 })
 export class DetailsContainer {
   service = inject(DetailsService);
   private readonly analytics = inject(AnalyticsService);
+
+  protected readonly detailsCoachSettled = signal(false);
+  protected readonly shareCoachSettled = signal(false);
+  protected readonly navigationCoachSettled = signal(false);
 
   ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({

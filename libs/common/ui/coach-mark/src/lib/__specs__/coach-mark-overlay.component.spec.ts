@@ -90,6 +90,34 @@ describe(CoachMarkOverlayComponent.name, () => {
     ).toBe(true);
   });
 
+  it('reports zeroed spotlight geometry when there is no anchor', () => {
+    fixture.detectChanges();
+
+    // With no anchor the geometry collapses to just the padding; the spotlight
+    // is not rendered, but the fallbacks must stay defined.
+    expect(component.spotlightTop()).toBe(-8);
+    expect(component.spotlightLeft()).toBe(-8);
+    expect(component.spotlightWidth()).toBe(16);
+    expect(component.spotlightHeight()).toBe(16);
+  });
+
+  it('treats an unknown viewport height as zero when placing the card', () => {
+    Object.defineProperty(window, 'innerHeight', {
+      value: 0,
+      configurable: true,
+    });
+    fixture.componentRef.setInput(
+      'anchor',
+      rect({ top: 10, height: 5, bottom: 15 }),
+    );
+
+    fixture.detectChanges();
+
+    // A zero viewport height makes any anchor count as "near the bottom", so the
+    // card lifts above rather than dropping off an unknown-height screen.
+    expect(component.cardAbove()).toBe(true);
+  });
+
   it('drops the card below an anchor near the top of the viewport', () => {
     Object.defineProperty(window, 'innerHeight', {
       value: 800,

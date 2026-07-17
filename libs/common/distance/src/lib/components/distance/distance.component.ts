@@ -9,7 +9,7 @@ import { toMetric } from '../../utils/to-metric';
 import { roundDistance } from '../../utils/round-distance';
 
 @Component({
-  selector: 'bite-distance',
+  selector: 'bt-distance',
   templateUrl: './distance.component.html',
   styleUrls: ['./distance.component.scss'],
   imports: [IonIcon, IonText],

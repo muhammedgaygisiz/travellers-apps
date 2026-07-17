@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { DetailsContainer } from '../details.container';
 import { DetailsService } from '../details.service';
 import { provideIonicAngular } from '@ionic/angular/standalone';
@@ -9,6 +10,10 @@ import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 import { Bite } from 'model';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import {
+  CoachMarkComponent,
+  CoachMarkStateService,
+} from 'bite-tribe/coach-mark';
 
 jest.mock('@capacitor-firebase/analytics');
 
@@ -52,19 +57,27 @@ describe(DetailsContainer.name, () => {
               error: signal(undefined),
               reload: jest.fn(),
             },
-            reviews: signal(undefined),
+            reviews: signal([]),
             currentPosition: {
               value: signal(undefined),
             },
-            bucketlists: signal(undefined),
-            userId: signal(undefined),
+            bucketlists: signal([]),
+            userId: signal('user-1'),
             biteCreator: {
               value: signal(undefined),
               error: signal(undefined),
               reload: jest.fn(),
             },
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            isAuthenticated: (): void => {},
+            exchangeRates: signal({}),
+            preferredCurrency: signal('EUR'),
+            isAuthenticated: signal(true),
+          },
+        },
+        {
+          provide: CoachMarkStateService,
+          useValue: {
+            hasSeen: jest.fn(() => new Promise<boolean>(() => undefined)),
+            markSeen: jest.fn(),
           },
         },
         { provide: TranslocoService, useValue: MockTranslocoService },
@@ -78,6 +91,23 @@ describe(DetailsContainer.name, () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('enables the centered Bite-details introduction after the Bite loads', () => {
+    fixture.detectChanges();
+
+    const mark = fixture.debugElement.query(By.directive(CoachMarkComponent))
+      .componentInstance as CoachMarkComponent;
+
+    expect(mark.surface()).toBe('bite-details');
+    expect(mark.anchor()).toBeNull();
+    expect(mark.anchorTestId()).toBeNull();
+    expect(mark.enabled()).toBe(false);
+
+    biteSignal.set({ id: 'bite-1', name: 'Pizza' } as Bite);
+    fixture.detectChanges();
+
+    expect(mark.enabled()).toBe(true);
   });
 
   describe('ionViewDidEnter', () => {

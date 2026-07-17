@@ -3,6 +3,7 @@ import { DetailsPage } from '../components/details-page/details.page';
 import { DetailsService } from './details.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { CoachMarkComponent } from 'bite-tribe/coach-mark';
 
 @Component({
   template: `
@@ -29,9 +30,16 @@ import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
       (gotoNew)="service.onGotoNewClick($event)"
       (shareBite)="service.onShareBiteClick($event)"
     />
+
+    <bt-coach-mark
+      surface="bite-details"
+      titleKey="coach-bite-details-title"
+      bodyKey="coach-bite-details-body"
+      [enabled]="!!service.bite.value()"
+    />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DetailsPage],
+  imports: [DetailsPage, CoachMarkComponent],
 })
 export class DetailsContainer {
   service = inject(DetailsService);

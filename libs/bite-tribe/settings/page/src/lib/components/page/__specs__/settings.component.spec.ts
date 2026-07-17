@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PageSettings } from '../settings.component';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import { IonModal, provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { PublicUser, Settings } from 'model';
@@ -278,7 +278,7 @@ describe(PageSettings.name, () => {
       const mockCurrencyCode = 'GBP';
       const mockModal = {
         dismiss: jest.fn(),
-      } as any;
+      } as unknown as IonModal;
 
       component.onCurrencySelected(mockCurrencyCode, mockModal);
 

@@ -2,16 +2,28 @@ import { TestBed } from '@angular/core/testing';
 import {
   CreateBiteTrailDataAccessService,
   USERS_COLLECTION,
-  BITE_TRAIL_COLLECTION,
 } from '../create-bite-trail-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { signal } from '@angular/core';
+import { ResourceLoaderParams, signal } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite, BiteTrail, PublicUser } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
 
 jest.mock('@capacitor-firebase/firestore');
 jest.mock('bite-tribe/api');
+
+const createLoaderParams = (
+  organisationId?: string,
+): ResourceLoaderParams<{ organisationId: string | undefined }> => ({
+  params: { organisationId },
+  abortSignal: new AbortController().signal,
+  previous: { status: 'idle' },
+});
+
+const snapshotMetadata = {
+  fromCache: false,
+  hasPendingWrites: false,
+};
 
 describe('CreateBiteTrailDataAccessService', () => {
   let service: CreateBiteTrailDataAccessService;
@@ -87,18 +99,23 @@ describe('CreateBiteTrailDataAccessService', () => {
 
   describe('organisationLoader', () => {
     it('should return undefined when organisationId is not provided', async () => {
-      const result = await service.organisationLoader({ params: {} } as any);
+      const result = await service.organisationLoader(createLoaderParams());
       expect(result).toBeUndefined();
     });
 
     it('should return undefined when document has no data', async () => {
       jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
-        snapshot: { id: 'org-1', data: null },
-      } as any);
+        snapshot: {
+          id: 'org-1',
+          path: `${USERS_COLLECTION}/org-1`,
+          data: null,
+          metadata: snapshotMetadata,
+        },
+      });
 
-      const result = await service.organisationLoader({
-        params: { organisationId: 'org-1' },
-      } as any);
+      const result = await service.organisationLoader(
+        createLoaderParams('org-1'),
+      );
 
       expect(result).toBeUndefined();
     });
@@ -109,13 +126,15 @@ describe('CreateBiteTrailDataAccessService', () => {
         .mockResolvedValue({
           snapshot: {
             id: 'org-1',
+            path: `${USERS_COLLECTION}/org-1`,
             data: { displayName: 'My Org', photoUrl: 'photo.jpg' },
+            metadata: snapshotMetadata,
           },
-        } as any);
+        });
 
-      const result = await service.organisationLoader({
-        params: { organisationId: 'org-1' },
-      } as any);
+      const result = await service.organisationLoader(
+        createLoaderParams('org-1'),
+      );
 
       expect(getDocumentSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -161,4 +180,3 @@ describe('CreateBiteTrailDataAccessService', () => {
     });
   });
 });
-

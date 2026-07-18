@@ -168,7 +168,7 @@ export default {
 
 - **Tool**: Loki (upstream `oblador/loki` CLI, invoked directly — no Nx adapter)
 - **Configuration**: `loki.config.js` at the repository root
-- **Scripts**: `npm run loki:test`, `npm run loki:update`, `npm run loki:approve` (build Storybook first via `npm run build:storybook`)
+- **Scripts**: `npm run loki:test`, `npm run loki:update`, `npm run loki:approve` (build Storybook first via `npm run build:storybook`). These run `tools/loki.mjs`, which serves the static build and targets `host.docker.internal` so the same command works locally and in CI.
 - **Storybook**: Components documented in Storybook
 
 ## State Management

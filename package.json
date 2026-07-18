@@ -34,6 +34,10 @@
     "ios-asset-generator:generate-ios:bite-tribe": "capacitor-assets generate --ios --iosProject apps/bite-tribe-ios/ios/App --assetPath apps/bite-tribe-ios/assets"
   },
   "private": true,
+  "engines": {
+    "node": ">=24.15.0 <25.0.0",
+    "npm": ">=11.0.0"
+  },
   "dependencies": {
     "@angular/animations": "21.0.6",
     "@angular/cdk": "21.0.5",

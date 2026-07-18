@@ -28,7 +28,7 @@ As of 18 July 2026:
 | Nx                  | `22.3.3` across the official top-level packages                  | Upgrade through the latest 22.7 release before Nx 23.                  |
 | Angular             | `21.0.x`                                                         | Supported by Nx 23; retain during the Nx migration.                    |
 | TypeScript          | `5.9.3`                                                          | Correct for Angular 21; retain until Angular 22.                       |
-| Node.js             | Local `24.13.0`; CI uses the floating `22.x` line                | Align and pin before Angular 22.                                       |
+| Node.js             | Pinned to `24.15.0`+ (`24.18.0`) via `.nvmrc`, `package.json` engines, and CI `node-version-file` | Aligned and pinned (issue #1030); inside the supported Node 24 line for Nx 22.7/23 and Angular 21. |
 | NgRx                | `21.0.1`                                                         | Stable NgRx 21 requires Angular 21, so it currently blocks Angular 22. |
 | Capacitor Nx plugin | `@nxext/capacitor@21.0.0`                                        | Loads Nx 21 internally; upgrade to v23 with Nx 23.                     |
 | Visual regression   | `loki@0.35.1` invoked directly via repository scripts; `nx-loki` removed | Nx adapter removed (issue #1040); Loki now runs through `loki.config.js`. |
@@ -71,15 +71,26 @@ Status: complete (issue #1040). The steps below are done; keep them for context.
 
 ### Node.js alignment
 
-- Move local development and CI to the same explicitly pinned Node.js `24.15.0` or newer release within the supported Node 24 line.
-- Record the selected version in a repository runtime file such as `.nvmrc` or `.node-version`, in `package.json` engines, and in the shared CI setup action instead of leaving CI on a floating `22.x` selector.
-- Complete this early because Angular 21, Nx 22.7, and Nx 23 can all run on the selected Node 24 line; it then ceases to be an Angular 22 prerequisite risk.
+Status: complete (issue #1030). The steps below are done; keep them for context.
+
+- Selected Node.js `24.18.0` (Krypton LTS), the newest patch in the supported Node 24 line and above the `24.15.0` floor.
+- Recorded the pinned version in `.nvmrc` (`24.18.0`), in `package.json` `engines` (`node: ">=24.15.0 <25.0.0"`, `npm: ">=11.0.0"`), and in the shared CI setup action `.github/actions/setup/action.yml` via `node-version-file: '.nvmrc'` instead of the floating `22.x` selector. `apps/bite-tribe-firebase/functions/package.json` already declares `engines.node: "24"`, so the deploy runtime is consistent.
+- Local development and CI now resolve the same explicit Node version because the CI setup action reads `.nvmrc`.
+- Completed early because Angular 21, Nx 22.7, and Nx 23 can all run on the selected Node 24 line; it then ceases to be an Angular 22 prerequisite risk.
+- Validated by a clean `npm ci` from the lockfile under Node `24.18.0` (only the environmental `sharp` prebuilt-binary download was blocked by egress policy, not a Node 24 incompatibility), `nx show projects`, and a focused Jest suite.
 
 ### Dependency inventory
 
-- Confirm whether `nx-mcp` is still intentionally used before upgrading it; do not upgrade it merely because a newer version exists.
-- Record the latest `@ionic/angular-toolkit` constraint. It currently brings an older Angular Devkit for schematics and needs generator validation, even though it is not an application runtime dependency.
-- Keep `nx-stylelint@18` and the Stylelint 16 configuration together until the dedicated Stylelint migration.
+Package-tree audit under Node `24.18.0` records the following non-official Nx / older-Devkit loaders and their keep/upgrade/remove decisions:
+
+| Package | Installed | Older generation it loads | Decision |
+| ------- | --------- | ------------------------- | -------- |
+| `@nxext/capacitor` | `21.0.0` | nested `nx@21.6.10` + `@nx/devkit@21.6.10` (hard peer `nx@^21`); also pulls transitive `@nxext/common@21.0.0` with the same nested Nx 21 | Upgrade to `@nxext/capacitor@23` in Phase 2 (issue #1033) so it loads Nx 23; do not upgrade independently. |
+| `@ionic/angular-toolkit` | `12.3.0` | nested `@angular-devkit/core@20.3.20` (peer `@angular-devkit/*@^20`), one generation behind the workspace's `21.0.4` | Keep; schematics-only, not an application runtime dependency. Validate generators before any Angular major bump; do not upgrade blindly. |
+| `nx-stylelint` | `18.0.0` | none nested (peer `@nx/devkit >=19` satisfied by the hoisted `@nx/devkit@22.3.3`) | Keep with the Stylelint 16 configuration until the dedicated Stylelint migration track. |
+| `nx-mcp` | `0.3.0` | none (no `nx`/`@nx` dependency; no repository MCP config references it) | Keep pinned as an optional developer aid; confirm intentional use before upgrading, do not upgrade merely because a newer version exists. |
+
+Only `@nxext/capacitor`/`@nxext/common` (Nx 21) and `@ionic/angular-toolkit` (Angular Devkit 20) load an older generation; both have explicit follow-up decisions. Multiple Nx generations therefore remain in the tree solely because of `@nxext/capacitor`, which is the documented project-graph risk resolved in Phase 2.
 
 ### Phase 0 validation gate
 

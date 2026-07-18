@@ -1,0 +1,19 @@
+- [05 - chore: upgrade Nx and the Capacitor plugin to version 23](https://github.com/muhammedgaygisiz/travellers-apps/issues/1033) (Issue \#1033)
+- Description
+  - Part of \#1029.
+  - \#\# Goal
+  - Move the supported workspace toolchain to Nx 23.1 while retaining Angular 21.
+  - \#\# Scope
+  - Upgrade `nx` and every official `@nx/*` package together to one exact 23.1.x version.
+  - Select required Nx migrations only; do not accept the optional Angular 22 dependency set.
+  - Upgrade `@nxext/capacitor` to v23 in the same change.
+  - Keep Angular 21 and TypeScript 5.9.
+  - Do not introduce Cypress, `nx-loki`, inferred-task conversion, TypeScript 6, or Stylelint 17.
+  - \#\# Acceptance criteria
+  - The workspace and Capacitor executor integration use Nx 23.
+  - Generated migrations have been reviewed and applied intentionally.
+  - Nx graph/report commands and every Phase 2 validation surface work reliably.
+  - \#\# Validation
+  - Repeat the complete Nx 22.7 validation gate on Nx 23.
+  - Run Capacitor doctor/sync and the relevant native builds.
+  - Run `git diff --check`.

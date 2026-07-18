@@ -1,0 +1,18 @@
+- [03 - chore: pin Node.js and audit migration constraints](https://github.com/muhammedgaygisiz/travellers-apps/issues/1030) (Issue \#1030)
+- Description
+  - Part of \#1029.
+  - \#\# Goal
+  - Align the Node.js runtime and record the remaining third-party constraints before changing Nx.
+  - \#\# Scope
+  - Select and pin Node.js 24.15.0 or newer within the supported Node 24 line.
+  - Add/update the repository runtime-version file, `package.json` engines, and shared CI setup action.
+  - Verify local development, CI, Angular 21, Nx 22/23, Firebase tooling, and Capacitor tooling under the selected runtime.
+  - Record decisions for `nx-mcp`, `@ionic/angular-toolkit`, `nx-stylelint`, and other non-official Nx integrations; do not upgrade them blindly.
+  - \#\# Acceptance criteria
+  - Local development and CI resolve the same explicit Node version.
+  - Dependency inventory identifies every package that loads an older Nx or Angular Devkit generation.
+  - Follow-up migrations have explicit keep/upgrade/remove decisions.
+  - \#\# Validation
+  - Install from the lockfile under the selected Node version.
+  - Run package-tree/peer-dependency checks and representative build/test commands.
+  - Run `git diff --check`.

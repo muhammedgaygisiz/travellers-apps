@@ -1,0 +1,20 @@
+- [02 - chore: replace nx-loki with direct oblador/loki](https://github.com/muhammedgaygisiz/travellers-apps/issues/1040) (Issue \#1040)
+- Description
+  - Part of \#1029.
+  - \#\# Goal
+  - Use upstream `oblador/loki` directly for Storybook visual regression and remove the stale Nx adapter.
+  - \#\# Scope
+  - Remove `nx-loki` from dependencies and the `nx.json` plugin list.
+  - Replace the `nx loki` script and inferred targets with direct repository scripts for `loki test` and `loki update`.
+  - Update `.github/workflows/loki-references-update.yml` to invoke Loki directly.
+  - Preserve reference images, diff artifacts, and the existing reference-update pull-request workflow.
+  - Resolve any direct Loki/Angular Storybook 10 compatibility issue without introducing another Nx adapter.
+  - \#\# Acceptance criteria
+  - `nx-loki` is no longer installed or loaded by Nx.
+  - Direct Loki comparison and reference-update commands work against the Storybook host.
+  - The automated reference-update workflow still creates reviewable changes.
+  - \#\# Validation
+  - Build Storybook.
+  - Run direct Loki comparison and reference update commands.
+  - Confirm no active `nx-loki` or Nx `update-loki` invocation remains.
+  - Run `git diff --check`.

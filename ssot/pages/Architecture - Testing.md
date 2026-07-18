@@ -16,8 +16,8 @@ Testing protects feature behavior, shared UI states, store effects/selectors, Fi
 
 ## E2E And Visual Regression Decisions
 
-- Do not add new Cypress coverage.
-- Migrate any unique legacy Cypress scenarios to Playwright, then remove the Cypress project and dependencies.
+- Do not add Cypress coverage; the legacy Cypress project has been removed.
+- Keep all consumer and business E2E coverage in Playwright.
 - Keep Playwright emulator-backed suites serial when they share seeded users and emulator state.
 - Keep Storybook as the visual fixture surface and Loki as the screenshot comparison tool.
 - Invoke Loki directly through repository scripts so Nx plugin compatibility cannot block visual regression.
@@ -58,7 +58,7 @@ libs/common/ui
 
 - Broad Nx commands can be slower or hang due to project graph behavior.
 - Focused validation is preferred until the touched surface requires broader checks.
-- The legacy Cypress and `nx-loki` surfaces remain until Phase 0 of [[Current State - Nx And Dependency Migration Roadmap]] is implemented.
+- The legacy `nx-loki` surface remains until Phase 0 of [[Current State - Nx And Dependency Migration Roadmap]] is implemented; the legacy Cypress project has already been removed.
 
 ## Related Pages
 

@@ -145,7 +145,7 @@ The list of versions can be found [here](https://github.com/nrwl/nx/releases)
 (Release notes).
 
 After running the command the dependencies in `package.json` will be updated.
-nx will also update Angular, Typescript, Ngrx, Jest, Cypress and Storybook.
+nx will also update Angular, Typescript, Ngrx, Jest, Playwright and Storybook.
 
 It is also possible that nx creates a `migrations.json` file, which should not be
 checked in or at least should be deleted before the branch is merged into develop.

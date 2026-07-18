@@ -32,7 +32,7 @@ As of 18 July 2026:
 | NgRx                | `21.0.1`                                                         | Stable NgRx 21 requires Angular 21, so it currently blocks Angular 22. |
 | Capacitor Nx plugin | `@nxext/capacitor@21.0.0`                                        | Loads Nx 21 internally; upgrade to v23 with Nx 23.                     |
 | Visual regression   | `loki@0.35.1` through `nx-loki@1.2.5`                            | Remove the Nx adapter and invoke Loki directly.                        |
-| E2E                 | Playwright consumer suite plus a legacy Cypress business project | Remove Cypress; place all new E2E coverage in Playwright.              |
+| E2E                 | Playwright consumer suite; legacy Cypress business project removed | Cypress removed; place all E2E coverage in Playwright.                |
 
 The installed dependency tree currently contains multiple Nx generations because `@nxext/capacitor` loads Nx 21 and `nx-loki` loads an older Nx Devkit. This is a project-graph risk, but it is not yet proven to be the sole cause of silent Nx startup or graph stalls.
 
@@ -49,6 +49,8 @@ The installed dependency tree currently contains multiple Nx generations because
 ## Phase 0 - Remove Obsolete Tooling Constraints
 
 ### Cypress removal
+
+Status: complete (issue #1032). The steps below are done; keep them for context.
 
 - Remove `apps/bite-tribe-business-e2e` and its Cypress configuration.
 - Remove Cypress-specific lint, TypeScript, executor, and dependency references.

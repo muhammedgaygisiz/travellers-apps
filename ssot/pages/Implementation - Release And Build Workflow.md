@@ -39,8 +39,11 @@ npm run ios-asset-generator:generate-ios:bite-tribe
 - Use Capacitor sync commands when native dependency or wrapper state changes.
 - Keep source maps and native build artifacts traceable to the release build number and future git tag.
 - Treat generated native files as outputs unless the requested change specifically targets native wrapper source.
+- Keep local and CI Node.js versions explicitly aligned as defined by [[Current State - Nx And Dependency Migration Roadmap]].
+- Keep visual regression scripts as direct `oblador/loki` CLI wrappers; do not route them through `nx-loki` or inferred Nx targets.
 
 ## Related Pages
 
 - [[Architecture - Capacitor]]
 - [[Implementation - Testing]]
+- [[Current State - Nx And Dependency Migration Roadmap]]

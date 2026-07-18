@@ -1,0 +1,18 @@
+- [04 - chore: stabilize the workspace on Nx 22.7](https://github.com/muhammedgaygisiz/travellers-apps/issues/1035) (Issue \#1035)
+- Description
+  - Part of \#1029.
+  - \#\# Goal
+  - Stabilize the workspace on the latest Nx 22.7 release before crossing the Nx 23 major boundary.
+  - \#\# Scope
+  - Upgrade `nx` and every official `@nx/*` package from 22.3.3 to one exact latest 22.7.x version.
+  - Generate, review, and run all required Nx migrations.
+  - Keep Angular 21, TypeScript 5.9, and `@nxext/capacitor@21` during this intermediate phase.
+  - Do not convert the workspace to inferred tasks as part of this issue.
+  - \#\# Acceptance criteria
+  - All official Nx packages are aligned on the same 22.7.x version.
+  - Nx report, project listing, and graph generation complete without a silent stall.
+  - Existing application, test, Storybook, Playwright, Firebase, Loki, and native target contracts remain intact.
+  - \#\# Validation
+  - Run the full Phase 1 gate from the SSOT migration roadmap.
+  - Include Nx and direct Jest coverage for representative projects.
+  - Run `git diff --check`.

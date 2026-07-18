@@ -1,21 +1,18 @@
 # UC - Guide New Users After Registration
 
-## Status
+- ## Status
 
-Next to implement, specified through [[epic-850]].
+  Next to implement, specified through [[epic-850]].
 
-## Goal
+- ## Goal
 
-New users should understand BiteTribe and configure the basics needed for useful discovery and contribution.
+  New users should understand BiteTribe and configure the basics needed for useful discovery and contribution.
 
-## Actors
-
+- ## Actors
 - New user
 - Existing user without a completed onboarding
 - Privacy-conscious participant
-
-## Target Flow
-
+- ## Target Flow
 - User registers or logs in without the onboarding completion flag.
 - A blocking assistant guides the user through:
   - a unique display name (case-insensitive) with an optional profile photo
@@ -33,13 +30,9 @@ New users should understand BiteTribe and configure the basics needed for useful
 - The next Bite details mark highlights sharing through the device share sheet, including WhatsApp when available.
 - The Bite details navigation mark then highlights opening directions to the Bite's place in the platform navigation experience.
 - The Bite details bucket-list mark finishes the sequence by highlighting how to save a Bite to an existing or new bucket list.
-
-## Related GitHub Scope
-
+- ## Related GitHub Scope
 - Issue \#850 (epic, supersedes closed \#841)
 - Issues \#1011, \#1012, \#1013, \#1014, \#1015, \#1023, \#1016, \#1017
-
-## Related Domains
-
+- ## Related Domains
 - [[User]]
 - [[Bite]]

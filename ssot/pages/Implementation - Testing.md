@@ -40,18 +40,20 @@ npx jest --config libs/bite-tribe/search/data-access/jest.config.ts --runInBand
 
 ## Other Checks
 
-| Change Type                      | Check                                                                        |
-| -------------------------------- | ---------------------------------------------------------------------------- |
-| Firebase Functions               | `npm run build` and `npm run lint` from `apps/bite-tribe-firebase/functions` |
-| Locale JSON                      | Parse all touched locale files with Node                                     |
-| Storybook UI                     | `npm run build:storybook`                                                    |
-| Consumer app E2E                 | `NX_DAEMON=false npx nx e2e bite-tribe-e2e`                                  |
-| Capacitor native wrapper changes | `npx cap sync android` or the relevant Capacitor sync target                 |
-| Markdown/docs                    | `git diff --check`                                                           |
+| Change Type                      | Check                                                                            |
+| -------------------------------- | -------------------------------------------------------------------------------- |
+| Firebase Functions               | `npm run build` and `npm run lint` from `apps/bite-tribe-firebase/functions`     |
+| Locale JSON                      | Parse all touched locale files with Node                                         |
+| Storybook UI                     | `npm run build:storybook`; add direct `npx loki test` when visual output matters |
+| Consumer app E2E                 | `NX_DAEMON=false npx nx e2e bite-tribe-e2e`                                      |
+| Capacitor native wrapper changes | `npx cap sync android` or the relevant Capacitor sync target                     |
+| Markdown/docs                    | `git diff --check`                                                               |
 
 ## Playwright E2E
 
 `apps/bite-tribe-e2e` uses Playwright for consumer app smoke coverage.
+
+Playwright is the only supported E2E framework. Put new consumer and business-app E2E scenarios in Playwright. Before removing the legacy Cypress project, port any scenario that still represents required behavior; do not migrate its Cypress executor or dependencies.
 
 The E2E target starts the Firebase emulators and the Angular dev server before running browser tests. Use it when validating launch-critical flows such as login, registration, and creating a Bite through the real UI.
 
@@ -77,8 +79,22 @@ npx nx firebase-kill bite-tribe-firebase
 
 Never run two E2E suites at once. They share the emulator ports and the dev server, and the results of both become meaningless.
 
+## Loki Visual Regression
+
+Storybook visual regression uses the upstream `loki` package from `oblador/loki` directly.
+
+Target command contract:
+
+```bash
+npx loki test
+npx loki update
+```
+
+Expose these through repository scripts and use those scripts in CI. Do not register `nx-loki`, infer Loki targets, or route Loki through `nx run-many`. Preserve the existing reference-update pull-request workflow when replacing the invocation.
+
 ## Related Pages
 
 - [[Architecture - Testing]]
 - [[Implementation - Firebase Functions]]
 - [[Implementation - Storybook]]
+- [[Current State - Nx And Dependency Migration Roadmap]]

@@ -71,6 +71,9 @@ The product is not yet in public launch mode. The current focus is proving the r
 - Android testing completed.
 - iOS testing completed.
 - Web testing completed.
+- Phases 0 to 2 of the Nx and dependency migration roadmap completed with their validation gates, without making Angular 22 an artificial launch prerequisite.
+- Cypress removed after required E2E scenarios are represented in Playwright.
+- Visual regression runs directly through `oblador/loki` without the `nx-loki` adapter.
 - Remaining launch blockers fixed.
 - App Store assets prepared.
 - Google Play assets prepared.
@@ -86,3 +89,4 @@ Before public launch, the release should be stable enough to learn from real use
 - [[Current State - Known Issues]]
 - [[Current State - Open Questions]]
 - [[Implementation - Release And Build Workflow]]
+- [[Current State - Nx And Dependency Migration Roadmap]]

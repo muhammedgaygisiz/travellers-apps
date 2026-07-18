@@ -33,7 +33,6 @@
   - \#966 - feat: add weekly resync for Bite count
   - \#971 - feat: notifications for change in ranking
 - Related issues
-  - [launch: fix intermittent Bite photo upload failures]([[issue-927]]) (Issue \#927)
   - [launch: complete production readiness testing and store assets]([[issue-911]]) (Issue \#911)
   - [launch: execute soft launch and monitor daily]([[issue-912]]) (Issue \#912)
   - [launch: run public launch campaign]([[issue-913]]) (Issue \#913)

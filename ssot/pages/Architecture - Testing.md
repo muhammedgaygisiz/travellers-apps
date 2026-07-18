@@ -10,8 +10,17 @@ Testing protects feature behavior, shared UI states, store effects/selectors, Fi
 - Use direct Jest when Nx graph or daemon behavior is noisy.
 - Update Storybook stories when shared UI states or component behavior change.
 - Validate Firebase functions with focused function build/test commands when backend contracts change.
-- Use Playwright E2E for launch-critical consumer flows that need the real app, browser APIs, and Firebase emulators together.
+- Use Playwright as the workspace's only E2E framework for launch-critical consumer and business flows that need the real app, browser APIs, and Firebase emulators together.
+- Use the upstream `oblador/loki` CLI directly for Storybook visual regression; do not couple visual testing to an Nx plugin.
 - Always run `git diff --check`.
+
+## E2E And Visual Regression Decisions
+
+- Do not add new Cypress coverage.
+- Migrate any unique legacy Cypress scenarios to Playwright, then remove the Cypress project and dependencies.
+- Keep Playwright emulator-backed suites serial when they share seeded users and emulator state.
+- Keep Storybook as the visual fixture surface and Loki as the screenshot comparison tool.
+- Invoke Loki directly through repository scripts so Nx plugin compatibility cannot block visual regression.
 
 ## Common Test Locations
 
@@ -21,6 +30,7 @@ libs/**/jest.config.ts
 libs/**/jest.config.cts
 apps/bite-tribe-firebase/functions/src/**/*.spec.ts
 apps/bite-tribe-e2e/src/tests
+apps/storybook-host/.storybook
 ```
 
 ## Architecture Risk Areas
@@ -48,3 +58,9 @@ libs/common/ui
 
 - Broad Nx commands can be slower or hang due to project graph behavior.
 - Focused validation is preferred until the touched surface requires broader checks.
+- The legacy Cypress and `nx-loki` surfaces remain until Phase 0 of [[Current State - Nx And Dependency Migration Roadmap]] is implemented.
+
+## Related Pages
+
+- [[Implementation - Testing]]
+- [[Current State - Nx And Dependency Migration Roadmap]]

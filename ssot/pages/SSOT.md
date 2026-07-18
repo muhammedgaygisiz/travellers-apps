@@ -49,12 +49,10 @@
     - [[UC - Strengthen Location Currency And Data Quality Guidance]]
     - [[UC - Harden Platform And Backend Trust]]
 - Epics
-  - [[epic-734]]
   - [[epic-735]]
   - [[epic-738]]
-  - [[epic-778]]
-  - [[epic-850]]
   - [[epic-907]]
+  - [[epic-1029]]
 - Architecture
   - [[Architecture - Overview]]
   - [[Architecture - Firebase]]
@@ -88,6 +86,7 @@
   - [[Analytics Operations]]
 - Current State
   - [[Current State - Roadmap]]
+  - [[Current State - Nx And Dependency Migration Roadmap]]
   - [[Current State - Known Issues]]
   - [[Current State - Open Questions]]
   - [[Current State - Release State]]

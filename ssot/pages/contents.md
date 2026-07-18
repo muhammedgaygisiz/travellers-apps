@@ -38,11 +38,10 @@
     - [[UC - Strengthen Location Currency And Data Quality Guidance]]
     - [[UC - Harden Platform And Backend Trust]]
 - Epics
-  - [[epic-734]]
   - [[epic-735]]
   - [[epic-738]]
-  - [[epic-778]]
   - [[epic-907]]
+  - [[epic-1029]]
 - Architecture
   collapsed:: true
   - [[Architecture - Overview]]

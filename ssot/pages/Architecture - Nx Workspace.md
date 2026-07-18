@@ -13,7 +13,7 @@ apps/bite-tribe-firebase
 apps/bite-tribe-ios
 apps/bite-tribe-android
 apps/bite-tribe-e2e
-apps/bite-tribe-business-e2e
+apps/bite-tribe-business-e2e # legacy Cypress surface pending removal
 apps/storybook-host
 ```
 
@@ -65,6 +65,13 @@ Before reaching for lazy routing to fix a bundle, prefer the on-demand dependenc
 
 Use focused Nx targets when they are reliable. If Nx daemon or graph behavior hangs, use direct Jest/build/lint commands for the touched project and still run `git diff --check`.
 
+## Toolchain Direction
+
+- Keep `nx` and all official `@nx/*` packages on one exact version.
+- Use Playwright as the only E2E framework; remove the legacy Cypress project instead of migrating its executor.
+- Invoke `oblador/loki` directly and do not load visual regression through an Nx plugin.
+- Follow [[Current State - Nx And Dependency Migration Roadmap]] for the staged Nx 22.7, Nx 23, Node.js, and Angular migration sequence.
+
 ## Code Anchors
 
 ```text
@@ -80,3 +87,9 @@ libs/bite-tribe-business/shell/src/lib/routes.ts
 
 - The workspace is broad, so targeted validation is preferred over broad test runs.
 - Some shared models and data-access boundaries are still evolving as product domains become clearer.
+
+## Related Pages
+
+- [[Architecture - Testing]]
+- [[Implementation - Testing]]
+- [[Current State - Nx And Dependency Migration Roadmap]]

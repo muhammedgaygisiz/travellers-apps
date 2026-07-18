@@ -11,7 +11,7 @@ import { BiteTribeApiService } from 'bite-tribe/api';
 import type { PublicUser, Settings } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../../bite-tribe-store.service';
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { getEffectsMetadata } from '@ngrx/effects';
 import SpyInstance = jest.SpyInstance;
 import { gpsPosition } from '../selectors';
@@ -21,7 +21,7 @@ jest.mock('geolocation', () => ({
   getCurrentPosition: (): void => getCurrentPositionMock(),
 }));
 
-const assertDeepEqual = (actual: any, expected: any): void => {
+const assertDeepEqual = (actual: unknown, expected: unknown): void => {
   expect(actual).toEqual(expected);
 };
 
@@ -55,7 +55,7 @@ const AnalyticsServiceMock = {
 
 describe(AppEffect.name, () => {
   let scheduler: TestScheduler;
-  let actions$: Observable<any> = of({});
+  let actions$: Observable<Action> = of({ type: 'INIT' });
   let effects: AppEffect;
   let apiService: BiteTribeApiService;
   let storeService: BiteTribeStoreService;
@@ -81,11 +81,20 @@ describe(AppEffect.name, () => {
     storeService = TestBed.inject(BiteTribeStoreService);
     store = TestBed.inject(MockStore);
 
-    BiteTribeApiServiceMock.syncEmailVerificationStatus.mockResolvedValue({
+    const emailVerificationMetadata: Awaited<
+      ReturnType<BiteTribeApiService['syncEmailVerificationStatus']>
+    > = {
       emailVerified: false,
       emailVerificationRequired: true,
-    });
-    jest.spyOn(storeService, 'user').mockReturnValue({ uid: '1' } as any);
+    };
+    BiteTribeApiServiceMock.syncEmailVerificationStatus.mockResolvedValue(
+      emailVerificationMetadata,
+    );
+    jest
+      .spyOn(storeService, 'user')
+      .mockReturnValue({ uid: '1' } as unknown as ReturnType<
+        typeof storeService.user
+      >);
     dispatchSpy = jest.spyOn(store, 'dispatch').mockImplementation();
   });
 
@@ -99,7 +108,11 @@ describe(AppEffect.name, () => {
       beforeEach(() => {
         jest
           .spyOn(apiService, 'loadSettings')
-          .mockReturnValue(of({ theme: 'dark' }) as any);
+          .mockReturnValue(
+            of({ theme: 'dark' }) as unknown as ReturnType<
+              BiteTribeApiService['loadSettings']
+            >,
+          );
       });
 
       it('should load settings from API on fromAuth.AuthActions.loadedUser', () => {
@@ -135,7 +148,11 @@ describe(AppEffect.name, () => {
       beforeEach(() => {
         jest
           .spyOn(apiService, 'loadSettings')
-          .mockReturnValue(of({} as Settings) as any);
+          .mockReturnValue(
+            of({} as Settings) as unknown as ReturnType<
+              BiteTribeApiService['loadSettings']
+            >,
+          );
       });
 
       it('should not set theme on document element', () => {
@@ -167,13 +184,19 @@ describe(AppEffect.name, () => {
     it('should load public profile on fromAuth.loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loadedUser({ user: {} as any }),
+          a: fromAuth.AuthActions.loadedUser({
+            user: {} as unknown as Parameters<
+              typeof fromAuth.AuthActions.loadedUser
+            >[0]['user'],
+          }),
         });
 
         const expected = 'a';
         const output = {
           a: AppActions.setPublicProfile({
-            profile: { displayName: 'test' } as any,
+            profile: { displayName: 'test' } as unknown as Parameters<
+              typeof AppActions.setPublicProfile
+            >[0]['profile'],
           }),
         };
 
@@ -306,7 +329,13 @@ describe(AppEffect.name, () => {
     describe('given no photo change', () => {
       describe('and user was updated successfully', () => {
         beforeEach(() => {
-          jest.spyOn(apiService, 'updateUser').mockReturnValue(of({}) as any);
+          jest
+            .spyOn(apiService, 'updateUser')
+            .mockReturnValue(
+              of({}) as unknown as ReturnType<
+                BiteTribeApiService['updateUser']
+              >,
+            );
         });
 
         it('should save profile to firestore on savePublicProfile', () => {
@@ -333,7 +362,7 @@ describe(AppEffect.name, () => {
             jest.spyOn(apiService, 'updateUser').mockReturnValue(
               new Observable((subscriber) => {
                 subscriber.error(new Error('Update failed'));
-              }) as any,
+              }) as unknown as ReturnType<BiteTribeApiService['updateUser']>,
             );
           });
 
@@ -361,7 +390,11 @@ describe(AppEffect.name, () => {
 
     describe('given a new photo', () => {
       beforeEach(() => {
-        jest.spyOn(apiService, 'updateUser').mockReturnValue(of({}) as any);
+        jest
+          .spyOn(apiService, 'updateUser')
+          .mockReturnValue(
+            of({}) as unknown as ReturnType<BiteTribeApiService['updateUser']>,
+          );
       });
 
       it('should save profile to firestore and dispatch uploadProfileImage on savePublicProfile', () => {
@@ -427,7 +460,10 @@ describe(AppEffect.name, () => {
         it('should dispatch uploadedProfileImage with image path', () => {
           const callbackFn = jest.fn();
           uploadProfileImageSpy.mockImplementation(
-            (profile: PublicUser, cb: (p: any) => void): void => {
+            (
+              profile: PublicUser,
+              cb: Parameters<BiteTribeApiService['uploadProfileImage']>[1],
+            ): void => {
               callbackFn(profile, cb);
               cb({
                 uploadParams: { evt: { completed: true } },
@@ -454,7 +490,10 @@ describe(AppEffect.name, () => {
         it('should dispatch uploadingProfileImage with progress', () => {
           const callbackFn = jest.fn();
           uploadProfileImageSpy.mockImplementation(
-            (profile: PublicUser, cb: (p: any) => void): void => {
+            (
+              profile: PublicUser,
+              cb: Parameters<BiteTribeApiService['uploadProfileImage']>[1],
+            ): void => {
               callbackFn(profile, cb);
               cb({
                 uploadParams: { evt: { completed: false, progress: 50 } },
@@ -477,7 +516,11 @@ describe(AppEffect.name, () => {
 
           expect(dispatchSpy).toHaveBeenCalledWith(
             AppActions.uploadingProfileImage({
-              progress: { evt: { completed: false, progress: 50 } } as any,
+              progress: {
+                evt: { completed: false, progress: 50 },
+              } as unknown as Parameters<
+                typeof AppActions.uploadingProfileImage
+              >[0]['progress'],
               profile: {
                 displayName: 'test',
                 photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
@@ -527,7 +570,11 @@ describe(AppEffect.name, () => {
 
         jest
           .spyOn(apiService, 'updatePhotoUrlInUser')
-          .mockReturnValue(of(updatedUser) as any);
+          .mockReturnValue(
+            of(updatedUser) as unknown as ReturnType<
+              BiteTribeApiService['updatePhotoUrlInUser']
+            >,
+          );
 
         actions$ = cold('a', {
           a: AppActions.uploadedProfileImage({ profile, imagePath }),
@@ -551,13 +598,21 @@ describe(AppEffect.name, () => {
     beforeEach(() => {
       jest
         .spyOn(apiService, 'getExchangeRates')
-        .mockReturnValue(of({ USD: 1, EUR: 0.85 }) as any);
+        .mockReturnValue(
+          of({ USD: 1, EUR: 0.85 }) as unknown as ReturnType<
+            BiteTribeApiService['getExchangeRates']
+          >,
+        );
     });
 
     it('should load exchange rates from API on fromAuth.loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loadedUser({ user: {} as any }),
+          a: fromAuth.AuthActions.loadedUser({
+            user: {} as unknown as Parameters<
+              typeof fromAuth.AuthActions.loadedUser
+            >[0]['user'],
+          }),
         });
 
         const expected = 'a';
@@ -589,7 +644,7 @@ describe(AppEffect.name, () => {
         actions$ = cold('a', {
           a: routerNavigatedAction({
             payload: { event: { urlAfterRedirects: '/new-bite' } },
-          } as any),
+          } as unknown as Parameters<typeof routerNavigatedAction>[0]),
         });
 
         expectObservable(effects.reloadGpsOnPageChangeToCreateBite$);
@@ -656,7 +711,11 @@ describe(AppEffect.name, () => {
     it('should call updateUserMetadata on loadedUser', () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: fromAuth.AuthActions.loadedUser({ user: {} as any }),
+          a: fromAuth.AuthActions.loadedUser({
+            user: {} as unknown as Parameters<
+              typeof fromAuth.AuthActions.loadedUser
+            >[0]['user'],
+          }),
         });
 
         expectObservable(effects.updateUserMetadataAfterLogin$);
@@ -705,7 +764,7 @@ describe(AppEffect.name, () => {
         actions$ = cold('a', {
           a: routerNavigatedAction({
             payload: { event: { urlAfterRedirects: '/profile/user-id' } },
-          } as any),
+          } as unknown as Parameters<typeof routerNavigatedAction>[0]),
         });
 
         expectObservable(effects.fetchFollowMetadata$);

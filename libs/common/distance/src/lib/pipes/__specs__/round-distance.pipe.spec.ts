@@ -2,7 +2,7 @@ import { RoundDistancePipe } from '../round-distance.pipe';
 
 const roundDistanceMock = jest.fn();
 jest.mock('../../utils/round-distance', () => ({
-  roundDistance: (...args: any): void => roundDistanceMock(...args),
+  roundDistance: (...args: unknown[]): void => roundDistanceMock(...args),
 }));
 
 describe('RoundDistancePipe', () => {

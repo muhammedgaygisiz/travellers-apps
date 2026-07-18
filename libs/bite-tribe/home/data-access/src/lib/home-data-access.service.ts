@@ -128,6 +128,9 @@ export class HomeDataAccessService {
       return [];
     }
 
+    const sourcePosition = sourceBite.position;
+    const loadedSourceBiteId = sourceBite.id;
+
     let nearbyBites: Bite[];
     try {
       nearbyBites = await this.api.bitesByPosition({
@@ -147,8 +150,8 @@ export class HomeDataAccessService {
 
       const dist = Number(
         haversineDistance(
-          sourceBite!.position.latitude,
-          sourceBite!.position.longitude,
+          sourcePosition.latitude,
+          sourcePosition.longitude,
           bite.position.latitude,
           bite.position.longitude,
           'm',
@@ -171,9 +174,14 @@ export class HomeDataAccessService {
 
     if (restaurant?.name) {
       const normalizedName = normalize(restaurant.name);
+      const restaurantId = restaurant.id;
       matchedBites = closeBites.filter((bite) => {
         const score = getSimilarityScore(normalize(bite.place), normalizedName);
-        return bite.restaurantId?.includes(restaurant!.id!) || score.length > 0;
+        return (
+          (restaurantId !== undefined &&
+            bite.restaurantId?.includes(restaurantId)) ||
+          score.length > 0
+        );
       });
     } else if (restaurantIdOrName || sourceBite?.place) {
       const normalizedName = normalize(
@@ -191,7 +199,7 @@ export class HomeDataAccessService {
       matchedBites = closeBites;
     }
 
-    if (!matchedBites.find((b) => b.id === sourceBite!.id)) {
+    if (!matchedBites.find((b) => b.id === loadedSourceBiteId)) {
       return [sourceBite, ...matchedBites];
     }
 

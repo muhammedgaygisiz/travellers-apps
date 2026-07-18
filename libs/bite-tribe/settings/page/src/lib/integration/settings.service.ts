@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { SettingsDataAccessService } from 'bite-tribe/settings-data-access';
-import { PublicUser, Settings } from 'model';
+import { Settings } from 'model';
 import { NavController } from '@ionic/angular';
 import {
   EmailVerificationService,

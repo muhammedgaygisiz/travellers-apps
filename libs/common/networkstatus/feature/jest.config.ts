@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'common-networkstatus-feature',
   preset: '../../../../jest.preset.js',

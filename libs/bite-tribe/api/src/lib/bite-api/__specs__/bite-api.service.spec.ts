@@ -144,7 +144,7 @@ describe(BiteApiService.name, () => {
 
         try {
           await service.saveNewBite({} as Bite);
-        } catch (error) {
+        } catch {
           // Expected to throw
         }
 
@@ -218,7 +218,7 @@ describe(BiteApiService.name, () => {
 
         try {
           await service.saveEditedBite({} as Bite);
-        } catch (error) {
+        } catch {
           // Expected to throw
         }
 
@@ -263,7 +263,7 @@ describe(BiteApiService.name, () => {
 
           try {
             await service.deleteBite(bite);
-          } catch (error) {
+          } catch {
             // Expected to throw
           }
 
@@ -282,7 +282,7 @@ describe(BiteApiService.name, () => {
 
           try {
             await service.deleteBite(bite);
-          } catch (error) {
+          } catch {
             // Expected to throw
           }
 

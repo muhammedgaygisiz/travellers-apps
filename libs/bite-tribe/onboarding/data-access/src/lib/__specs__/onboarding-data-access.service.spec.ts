@@ -6,6 +6,7 @@ import { Platform } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { PublicUser, Settings } from 'model';
 import { requestPushPermission } from 'push-notifications';
 import { requestLocationPermission } from 'geolocation';
 import {
@@ -328,12 +329,12 @@ describe('OnboardingDataAccessService', () => {
 
   it('saves the profile through the profile API', async () => {
     setup();
-    const profile = {
+    const profile: PublicUser = {
       userId: 'user-1',
       displayName: 'Foodie',
       email: 'foodie@example.com',
       photoUrl: '',
-    } as any;
+    };
 
     await expect(service.saveProfile(profile)).resolves.toBe(profile);
     expect(apiMock.updateUser).toHaveBeenCalledWith(profile);
@@ -341,12 +342,12 @@ describe('OnboardingDataAccessService', () => {
 
   it('syncs the saved profile into the store', async () => {
     setup();
-    const profile = {
+    const profile: PublicUser = {
       userId: 'user-1',
       displayName: 'Foodie',
       email: 'foodie@example.com',
       photoUrl: 'data:image/png;base64,AAAA',
-    } as any;
+    };
     // The API resolves the uploaded photo to its storage URL, and that is what
     // the rest of the app has to read — not the base64 the step held.
     const persisted = { ...profile, photoUrl: 'https://storage/photo.jpg' };
@@ -386,7 +387,10 @@ describe('OnboardingDataAccessService', () => {
   describe('saveSettings', () => {
     it('writes through the API and syncs the store', async () => {
       setup();
-      const settings = { currency: 'EUR', language: 'en' } as any;
+      const settings = {
+        currency: 'EUR',
+        language: 'en',
+      } as unknown as Settings;
 
       await service.saveSettings(settings);
 
@@ -398,7 +402,9 @@ describe('OnboardingDataAccessService', () => {
       setup();
       apiMock.saveSettings.mockRejectedValue(new Error('offline'));
 
-      await expect(service.saveSettings({} as any)).rejects.toThrow('offline');
+      await expect(
+        service.saveSettings({} as unknown as Settings),
+      ).rejects.toThrow('offline');
       expect(notifySavedSettings).not.toHaveBeenCalled();
     });
   });

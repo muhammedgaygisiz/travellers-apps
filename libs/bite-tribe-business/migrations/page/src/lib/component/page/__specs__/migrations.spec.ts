@@ -30,6 +30,14 @@ class MockTranslocoPipe implements PipeTransform {
   }
 }
 
+interface TestableMigrations {
+  updateBiteWithImagePath(
+    objectPath: string,
+    bite: Bite,
+    docId: string,
+  ): Promise<void>;
+}
+
 describe('Migrations', () => {
   let component: Migrations;
   let fixture: ComponentFixture<Migrations>;
@@ -245,15 +253,17 @@ describe('Migrations', () => {
 
         expect(firebaseStorageUploadFile).toHaveBeenCalled();
 
-        const uploadFileCallback = firebaseStorageUploadFile.mock
-          .calls[0][1] as any;
+        const uploadFileCallback = firebaseStorageUploadFile.mock.calls[0][1];
         expect(uploadFileCallback).toBeInstanceOf(Function);
 
         const updateBiteWithImagePathSpy = jest
-          .spyOn<any, any>(component, 'updateBiteWithImagePath')
-          .mockImplementation();
+          .spyOn(
+            component as unknown as TestableMigrations,
+            'updateBiteWithImagePath',
+          )
+          .mockResolvedValue();
 
-        await uploadFileCallback({ completed: true }, undefined);
+        await uploadFileCallback({ completed: true, progress: 1 }, undefined);
 
         expect(updateBiteWithImagePathSpy).toHaveBeenCalledWith(
           expect.stringContaining('images/bites/bite-id/'),
@@ -272,11 +282,10 @@ describe('Migrations', () => {
 
         await component.migrate(oldBite);
 
-        const uploadFileCallback = firebaseStorageUploadFile.mock
-          .calls[0][1] as any;
+        const uploadFileCallback = firebaseStorageUploadFile.mock.calls[0][1];
         expect(uploadFileCallback).toBeInstanceOf(Function);
 
-        await uploadFileCallback(undefined, 'Upload error');
+        await uploadFileCallback(null, 'Upload error');
 
         expect(consoleLogSpy).toHaveBeenCalledWith('Upload error');
       });
@@ -305,13 +314,14 @@ describe('Migrations', () => {
 
   describe('updateBiteWithImagePath', () => {
     it('should update the image path to the image', async () => {
-      jest.spyOn<any, any>(component, 'updateBiteWithImagePath');
+      const testableComponent = component as unknown as TestableMigrations;
+      jest.spyOn(testableComponent, 'updateBiteWithImagePath');
 
       jest
         .spyOn(utilsModule, 'getDownloadUrlFromFirebaseStorage')
         .mockResolvedValue('download-url');
 
-      await component['updateBiteWithImagePath'](
+      await testableComponent.updateBiteWithImagePath(
         'object/path',
         {} as Bite,
         '1',

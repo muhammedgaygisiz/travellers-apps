@@ -2,7 +2,11 @@ import { DetailsDataAccessService } from '../details-data-access.service';
 import { TestBed } from '@angular/core/testing';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of, throwError } from 'rxjs';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import {
+  FirebaseFirestore,
+  type DocumentData,
+  type GetDocumentResult,
+} from '@capacitor-firebase/firestore';
 import { Geolocation } from '@capacitor/geolocation';
 import { getCurrentPosition } from 'geolocation';
 import { Bite, LikeClick } from 'model';
@@ -28,6 +32,30 @@ jest.mock('geolocation', () => ({
 jest.mock('@capacitor/share');
 
 const getCurrentPositionMock = getCurrentPosition as jest.Mock;
+
+const loaderParams = <T>(
+  params: T,
+): {
+  params: T;
+  abortSignal: AbortSignal;
+  previous: { status: 'idle' };
+} => ({
+  params,
+  abortSignal: new AbortController().signal,
+  previous: { status: 'idle' },
+});
+
+const getDocumentResult = <T extends DocumentData>(
+  data: T | null,
+  id = '',
+): GetDocumentResult<T> => ({
+  snapshot: {
+    data,
+    id,
+    path: '',
+    metadata: { fromCache: false, hasPendingWrites: false },
+  },
+});
 
 describe(DetailsDataAccessService.name, () => {
   let service: DetailsDataAccessService;
@@ -71,7 +99,7 @@ describe(DetailsDataAccessService.name, () => {
   describe('biteLoader', () => {
     describe('given no bite id', () => {
       it('should return undefined', async () => {
-        const result = await service.biteLoader({ params: {} } as any);
+        const result = await service.biteLoader(loaderParams({}));
         expect(result).toBeUndefined();
       });
     });
@@ -82,18 +110,16 @@ describe(DetailsDataAccessService.name, () => {
       beforeEach(() => {
         getDocumentSpy = jest
           .spyOn(FirebaseFirestore, 'getDocument')
-          .mockResolvedValue({
-            snapshot: { data: {}, id: '' } as unknown as any,
-          });
+          .mockResolvedValue(getDocumentResult({}));
       });
 
       it("should load the bite and the current user's like", async () => {
-        await service.biteLoader({
-          params: {
+        await service.biteLoader(
+          loaderParams({
             biteId: 'test-bite-id',
             userId: 'user1',
-          },
-        } as any);
+          }),
+        );
 
         expect(getDocumentSpy).toHaveBeenCalledWith({
           reference: 'bites/test-bite-id/likes/user1',
@@ -111,29 +137,24 @@ describe(DetailsDataAccessService.name, () => {
           .spyOn(FirebaseFirestore, 'getDocument')
           .mockImplementation((options: { reference: string }) => {
             if (options.reference === 'bites/test-bite-id/likes/user1') {
-              return Promise.resolve({
-                snapshot: {
-                  data: { userId: 'user1', likeType: 'thumbup' },
-                } as any,
-              });
+              return Promise.resolve(
+                getDocumentResult({ userId: 'user1', likeType: 'thumbup' }),
+              );
             }
 
-            return Promise.resolve({
-              snapshot: {
-                data: { name: 'Test Bite' },
-                id: 'test-bite-id',
-              } as unknown as any,
-            });
+            return Promise.resolve(
+              getDocumentResult({ name: 'Test Bite' }, 'test-bite-id'),
+            );
           });
       });
 
       it("should return the bite with the user's like", async () => {
-        const result = await service.biteLoader({
-          params: {
+        const result = await service.biteLoader(
+          loaderParams({
             biteId: 'test-bite-id',
             userId: 'user1',
-          },
-        } as any);
+          }),
+        );
 
         expect(result).toEqual({
           name: 'Test Bite',
@@ -149,27 +170,22 @@ describe(DetailsDataAccessService.name, () => {
           .spyOn(FirebaseFirestore, 'getDocument')
           .mockImplementation((options: { reference: string }) => {
             if (options.reference === 'bites/test-bite-id/likes/user1') {
-              return Promise.resolve({
-                snapshot: { data: undefined } as any,
-              });
+              return Promise.resolve(getDocumentResult(null));
             }
 
-            return Promise.resolve({
-              snapshot: {
-                data: { name: 'Test Bite' },
-                id: 'test-bite-id',
-              } as unknown as any,
-            });
+            return Promise.resolve(
+              getDocumentResult({ name: 'Test Bite' }, 'test-bite-id'),
+            );
           });
       });
 
       it('should return the bite without any likes', async () => {
-        const result = await service.biteLoader({
-          params: {
+        const result = await service.biteLoader(
+          loaderParams({
             biteId: 'test-bite-id',
             userId: 'user1',
-          },
-        } as any);
+          }),
+        );
 
         expect(result).toEqual({
           name: 'Test Bite',
@@ -190,22 +206,19 @@ describe(DetailsDataAccessService.name, () => {
               return Promise.reject(new Error('permission-denied'));
             }
 
-            return Promise.resolve({
-              snapshot: {
-                data: { name: 'Test Bite' },
-                id: 'test-bite-id',
-              } as unknown as any,
-            });
+            return Promise.resolve(
+              getDocumentResult({ name: 'Test Bite' }, 'test-bite-id'),
+            );
           });
       });
 
       it('should still load the bite without likes', async () => {
-        const result = await service.biteLoader({
-          params: {
+        const result = await service.biteLoader(
+          loaderParams({
             biteId: 'test-bite-id',
             userId: 'user1',
-          },
-        } as any);
+          }),
+        );
 
         expect(getDocumentSpy).toHaveBeenCalledWith({
           reference: 'bites/test-bite-id',
@@ -231,20 +244,17 @@ describe(DetailsDataAccessService.name, () => {
                 return Promise.reject(new Error('unavailable'));
               }
 
-              return Promise.resolve({
-                snapshot: {
-                  data: { name: 'Test Bite' },
-                  id: 'test-bite-id',
-                } as unknown as any,
-              });
+              return Promise.resolve(
+                getDocumentResult({ name: 'Test Bite' }, 'test-bite-id'),
+              );
             }
 
-            return Promise.resolve({ snapshot: { data: undefined } as any });
+            return Promise.resolve(getDocumentResult(null));
           });
 
-        const result = await service.biteLoader({
-          params: { biteId: 'test-bite-id' },
-        } as any);
+        const result = await service.biteLoader(
+          loaderParams({ biteId: 'test-bite-id' }),
+        );
 
         expect(biteAttempts).toBe(3);
         expect(result).toEqual({
@@ -262,7 +272,7 @@ describe(DetailsDataAccessService.name, () => {
           .mockRejectedValue(new Error('unavailable'));
 
         await expect(
-          service.biteLoader({ params: { biteId: 'test-bite-id' } } as any),
+          service.biteLoader(loaderParams({ biteId: 'test-bite-id' })),
         ).rejects.toThrow('unavailable');
       }, 15000);
     });
@@ -270,20 +280,19 @@ describe(DetailsDataAccessService.name, () => {
     describe('given no user id', () => {
       beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
-          snapshot: {
-            data: { name: 'Test Bite' },
-            id: 'test-bite-id',
-          } as unknown as any,
-        });
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockResolvedValue(
+            getDocumentResult({ name: 'Test Bite' }, 'test-bite-id'),
+          );
       });
 
       it('should return the bite without likes', async () => {
-        const result = await service.biteLoader({
-          params: {
+        const result = await service.biteLoader(
+          loaderParams({
             biteId: 'test-bite-id',
-          },
-        } as any);
+          }),
+        );
 
         expect(FirebaseFirestore.getDocument).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
@@ -298,7 +307,7 @@ describe(DetailsDataAccessService.name, () => {
   describe('biteCreatorLoader', () => {
     describe('given no user id', () => {
       it('should return undefined', async () => {
-        const result = await service.biteCreatorLoader({ params: {} } as any);
+        const result = await service.biteCreatorLoader(loaderParams({}));
         expect(result).toBeUndefined();
       });
     });
@@ -309,17 +318,15 @@ describe(DetailsDataAccessService.name, () => {
       beforeEach(() => {
         getDocumentSpy = jest
           .spyOn(FirebaseFirestore, 'getDocument')
-          .mockResolvedValue({
-            snapshot: { data: {}, id: '' } as unknown as any,
-          });
+          .mockResolvedValue(getDocumentResult({}));
       });
 
       it('should load the user document', async () => {
-        await service.biteCreatorLoader({
-          params: {
+        await service.biteCreatorLoader(
+          loaderParams({
             userId: 'test-user-id',
-          },
-        } as any);
+          }),
+        );
 
         expect(getDocumentSpy).toHaveBeenCalledWith({
           reference: 'users/test-user-id',
@@ -341,7 +348,7 @@ describe(DetailsDataAccessService.name, () => {
     it('should read the position through the shared reader', async () => {
       getCurrentPositionMock.mockReturnValue(of(mockPosition));
 
-      const result = await service.positionLoader({} as any);
+      const result = await service.positionLoader(loaderParams(undefined));
 
       expect(getCurrentPositionMock).toHaveBeenCalled();
       expect(result).toEqual(mockPosition);
@@ -352,7 +359,7 @@ describe(DetailsDataAccessService.name, () => {
       // surface only reads what an existing grant allows.
       getCurrentPositionMock.mockReturnValue(of(mockPosition));
 
-      await service.positionLoader({} as any);
+      await service.positionLoader(loaderParams(undefined));
 
       expect(Geolocation.requestPermissions).not.toHaveBeenCalled();
     });
@@ -364,7 +371,7 @@ describe(DetailsDataAccessService.name, () => {
           throwError(() => new Error('Location permission is not granted')),
         );
 
-        const result = await service.positionLoader({} as any);
+        const result = await service.positionLoader(loaderParams(undefined));
 
         expect(result).toBeUndefined();
       });
@@ -434,10 +441,10 @@ describe(DetailsDataAccessService.name, () => {
 
     it('should call removeBiteFromBucketlist on store service', () => {
       const event = {
-        bucketListId: 'test-bucketlist-id',
+        bucketlistId: 'test-bucketlist-id',
         biteId: 'test-bite-id',
       };
-      service.removeBiteFromBucketlist(event as any);
+      service.removeBiteFromBucketlist(event);
       expect(removeBiteFromBucketlistSpy).toHaveBeenCalledWith(event);
     });
   });
@@ -531,7 +538,7 @@ describe(DetailsDataAccessService.name, () => {
     it('should return the userId of the currently loaded bite', () => {
       jest
         .spyOn(service.bite, 'value')
-        .mockReturnValue({ userId: 'test-user-id' } as any);
+        .mockReturnValue({ userId: 'test-user-id' } as Bite);
 
       expect(service.biteCreatorId()).toBe('test-user-id');
     });

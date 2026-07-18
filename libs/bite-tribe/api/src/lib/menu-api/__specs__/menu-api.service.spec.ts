@@ -50,11 +50,11 @@ describe(MenuApiService.name, () => {
           it('should call getMenuById', async () => {
             jest
               .spyOn(getMenuByIdUtil, 'getMenuById')
-              .mockResolvedValue({ id: 'menuId', name: 'Test Menu' });
+              .mockResolvedValue({ id: 'menuId', categories: [] });
 
             const result = await service.loadMenu('menuId');
 
-            expect(result).toEqual({ id: 'menuId', name: 'Test Menu' });
+            expect(result).toEqual({ id: 'menuId', categories: [] });
           });
         });
 
@@ -70,8 +70,8 @@ describe(MenuApiService.name, () => {
 
           it('should return EMPTY', async () => {
             try {
-              const result = await service.loadMenu('menuId');
-            } catch (error) {
+              await service.loadMenu('menuId');
+            } catch {
               // do nothing
             }
 
@@ -88,7 +88,7 @@ describe(MenuApiService.name, () => {
 
       try {
         service.handleError(new Error('Test error'));
-      } catch (e) {
+      } catch {
         // do nothing
       }
 

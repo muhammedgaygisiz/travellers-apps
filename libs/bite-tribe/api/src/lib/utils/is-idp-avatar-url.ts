@@ -11,7 +11,7 @@ export const isIdpAvatarUrl = (url: string): boolean => {
       hostname.endsWith('.googleusercontent.com') ||
       hostname === 'googleusercontent.com'
     );
-  } catch (e) {
+  } catch {
     return false;
   }
 };

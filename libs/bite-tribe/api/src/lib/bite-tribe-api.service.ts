@@ -156,7 +156,7 @@ export class BiteTribeApiService {
     return this.menuApiService.loadMenu(menuId);
   }
 
-  async removeLike(like: any): Promise<Like> {
+  async removeLike(like: Like): Promise<Like> {
     return this.likeApiService.removeLike(like);
   }
 
@@ -164,7 +164,7 @@ export class BiteTribeApiService {
     return this.likeApiService.saveLike(like);
   }
 
-  createBucketList(bucketlistName: any): Promise<void> {
+  createBucketList(bucketlistName: string): Promise<void> {
     return this.bucketlistApiService.createBucketList(bucketlistName);
   }
 
@@ -194,23 +194,23 @@ export class BiteTribeApiService {
     return this.profileApiService.getUserById(biteCreatorId);
   }
 
-  saveEditedBite(bite: any): Promise<Bite> {
+  saveEditedBite(bite: Bite): Promise<Bite> {
     return this.biteApiService.saveEditedBite(bite);
   }
 
-  saveNewBite(biteWithoutImage: any): Promise<Bite> {
+  saveNewBite(biteWithoutImage: Omit<Bite, 'image'>): Promise<Bite> {
     return this.biteApiService.saveNewBite(biteWithoutImage);
   }
 
   uploadImage(
-    bite: any,
+    bite: Bite,
     callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
   ): Promise<void> {
     return this.biteApiService.uploadImage(bite, callbackFn);
   }
 
   uploadProfileImage(
-    profile: any,
+    profile: PublicUser,
     callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
   ): Promise<void> {
     return this.profileApiService.uploadImage(profile, callbackFn);
@@ -393,11 +393,11 @@ export class BiteTribeApiService {
     };
   }
 
-  fetchFollowersWithDetails(userId: any): Promise<PublicUser[]> {
+  fetchFollowersWithDetails(userId: string): Promise<PublicUser[]> {
     return this.profileApiService.fetchFollowersWithDetails(userId);
   }
 
-  fetchFollowingWithDetails(userId: any): Promise<PublicUser[]> {
+  fetchFollowingWithDetails(userId: string): Promise<PublicUser[]> {
     return this.profileApiService.fetchFollowingWithDetails(userId);
   }
 }

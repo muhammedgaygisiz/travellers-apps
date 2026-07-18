@@ -6,10 +6,60 @@ import {
   USERS_COLLECTION,
 } from '../organisation-dashboard-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { signal } from '@angular/core';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { ResourceLoaderParams, signal } from '@angular/core';
+import {
+  DocumentSnapshot,
+  FirebaseFirestore,
+} from '@capacitor-firebase/firestore';
+import { Bite, BiteTrail, PublicUser } from 'model';
 
 jest.mock('@capacitor-firebase/firestore');
+
+const createLoaderParams = <T extends object>(
+  params: T,
+): ResourceLoaderParams<T> => ({
+  params,
+  abortSignal: new AbortController().signal,
+  previous: { status: 'idle' },
+});
+
+const createSnapshot = <T>(id: string, data: T): DocumentSnapshot<T> => ({
+  id,
+  path: `test/${id}`,
+  data,
+  metadata: { fromCache: false, hasPendingWrites: false },
+});
+
+const createBite = (id: string, name: string, userId: string): Bite => ({
+  id,
+  name,
+  userId,
+  image: '',
+  place: '',
+  price: 0,
+  position: { latitude: 0, longitude: 0 },
+});
+
+const createEmployee = (): PublicUser => ({
+  userId: 'user-1',
+  displayName: 'Alice',
+  email: 'alice@example.com',
+  photoUrl: '',
+});
+
+const createBiteTrail = (): BiteTrail => ({
+  id: 'trail-1',
+  ownerId: 'org-1',
+  name: 'Trail One',
+  biteIds: [],
+  imagePath: '',
+  ownerImagePath: '',
+  ownerName: '',
+  location: '',
+  description: '',
+  price: 0,
+  currency: 'EUR',
+});
 
 describe('OrganisationDashboardDataAccessService', () => {
   let service: OrganisationDashboardDataAccessService;
@@ -36,15 +86,17 @@ describe('OrganisationDashboardDataAccessService', () => {
 
   describe('bitesLoader', () => {
     it('should return empty array when userIds is not provided', async () => {
-      const result = await service.bitesLoader({ params: {} } as any);
+      const result = await service.bitesLoader(
+        createLoaderParams({ userIds: undefined }),
+      );
 
       expect(result).toEqual([]);
     });
 
     it('should return empty array when userIds is an empty array', async () => {
       const result = await service.bitesLoader({
-        params: { userIds: [] },
-      } as any);
+        ...createLoaderParams({ userIds: [] }),
+      });
 
       expect(result).toEqual([]);
     });
@@ -54,47 +106,39 @@ describe('OrganisationDashboardDataAccessService', () => {
         .spyOn(FirebaseFirestore, 'getCollection')
         .mockResolvedValue({
           snapshots: [
-            { id: 'bite-1', data: { name: 'Pasta', userId: 'user-1' } },
+            createSnapshot('bite-1', createBite('bite-1', 'Pasta', 'user-1')),
           ],
-        } as any);
+        });
 
-      const result = await service.bitesLoader({
-        params: { userIds: ['user-1'] },
-      } as any);
+      const result = await service.bitesLoader(
+        createLoaderParams({ userIds: ['user-1'] }),
+      );
 
       expect(getCollectionSpy).toHaveBeenCalledWith(
         expect.objectContaining({ reference: BITE_COLLECTION }),
       );
       expect(result).toHaveLength(1);
-      expect((result as any)[0].id).toBe('bite-1');
-      expect((result as any)[0].name).toBe('Pasta');
+      expect(result?.[0].id).toBe('bite-1');
+      expect(result?.[0].name).toBe('Pasta');
     });
 
     it('should aggregate bites from multiple users', async () => {
       jest
         .spyOn(FirebaseFirestore, 'getCollection')
-        .mockImplementation(({ compositeFilter }: any) => {
-          const userId = compositeFilter.queryConstraints[0].value;
-          if (userId === 'user-1') {
-            return Promise.resolve({
-              snapshots: [
-                { id: 'bite-1', data: { name: 'Pasta', userId: 'user-1' } },
-              ],
-            } as any);
-          }
-          if (userId === 'user-2') {
-            return Promise.resolve({
-              snapshots: [
-                { id: 'bite-2', data: { name: 'Pizza', userId: 'user-2' } },
-              ],
-            } as any);
-          }
-          return Promise.resolve({ snapshots: [] } as any);
+        .mockResolvedValueOnce({
+          snapshots: [
+            createSnapshot('bite-1', createBite('bite-1', 'Pasta', 'user-1')),
+          ],
+        })
+        .mockResolvedValueOnce({
+          snapshots: [
+            createSnapshot('bite-2', createBite('bite-2', 'Pizza', 'user-2')),
+          ],
         });
 
-      const result = await service.bitesLoader({
-        params: { userIds: ['user-1', 'user-2'] },
-      } as any);
+      const result = await service.bitesLoader(
+        createLoaderParams({ userIds: ['user-1', 'user-2'] }),
+      );
 
       expect(result).toHaveLength(2);
     });
@@ -102,11 +146,11 @@ describe('OrganisationDashboardDataAccessService', () => {
     it('should return empty array when no bites snapshots found', async () => {
       jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
         snapshots: [],
-      } as any);
+      });
 
-      const result = await service.bitesLoader({
-        params: { userIds: ['user-1'] },
-      } as any);
+      const result = await service.bitesLoader(
+        createLoaderParams({ userIds: ['user-1'] }),
+      );
 
       expect(result).toEqual([]);
     });
@@ -114,7 +158,9 @@ describe('OrganisationDashboardDataAccessService', () => {
 
   describe('employeesLoader', () => {
     it('should return empty array when organisationId is not provided', async () => {
-      const result = await service.employeesLoader({ params: {} } as any);
+      const result = await service.employeesLoader(
+        createLoaderParams({ organisationId: undefined }),
+      );
 
       expect(result).toEqual([]);
     });
@@ -123,17 +169,12 @@ describe('OrganisationDashboardDataAccessService', () => {
       const getCollectionSpy = jest
         .spyOn(FirebaseFirestore, 'getCollection')
         .mockResolvedValue({
-          snapshots: [
-            {
-              id: 'user-1',
-              data: { displayName: 'Alice', organisationId: 'org-1' },
-            },
-          ],
-        } as any);
+          snapshots: [createSnapshot('user-1', createEmployee())],
+        });
 
-      const result = await service.employeesLoader({
-        params: { organisationId: 'org-1' },
-      } as any);
+      const result = await service.employeesLoader(
+        createLoaderParams({ organisationId: 'org-1' }),
+      );
 
       expect(getCollectionSpy).toHaveBeenCalledWith(
         expect.objectContaining({ reference: USERS_COLLECTION }),
@@ -144,11 +185,11 @@ describe('OrganisationDashboardDataAccessService', () => {
     it('should return empty array when no user snapshots found', async () => {
       jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
         snapshots: [],
-      } as any);
+      });
 
-      const result = await service.employeesLoader({
-        params: { organisationId: 'org-1' },
-      } as any);
+      const result = await service.employeesLoader(
+        createLoaderParams({ organisationId: 'org-1' }),
+      );
 
       expect(result).toEqual([]);
     });
@@ -156,7 +197,9 @@ describe('OrganisationDashboardDataAccessService', () => {
 
   describe('biteTrailsLoader', () => {
     it('should return empty array when organisationId is not provided', async () => {
-      const result = await service.biteTrailsLoader({ params: {} } as any);
+      const result = await service.biteTrailsLoader(
+        createLoaderParams({ organisationId: undefined }),
+      );
 
       expect(result).toEqual([]);
     });
@@ -165,34 +208,29 @@ describe('OrganisationDashboardDataAccessService', () => {
       const getCollectionSpy = jest
         .spyOn(FirebaseFirestore, 'getCollection')
         .mockResolvedValue({
-          snapshots: [
-            {
-              id: 'trail-1',
-              data: { name: 'Trail One', ownerId: 'org-1' },
-            },
-          ],
-        } as any);
+          snapshots: [createSnapshot('trail-1', createBiteTrail())],
+        });
 
-      const result = await service.biteTrailsLoader({
-        params: { organisationId: 'org-1' },
-      } as any);
+      const result = await service.biteTrailsLoader(
+        createLoaderParams({ organisationId: 'org-1' }),
+      );
 
       expect(getCollectionSpy).toHaveBeenCalledWith(
         expect.objectContaining({ reference: BITE_TRAIL_COLLECTION }),
       );
       expect(result).toHaveLength(1);
-      expect((result as any)[0].id).toBe('trail-1');
-      expect((result as any)[0].name).toBe('Trail One');
+      expect(result?.[0].id).toBe('trail-1');
+      expect(result?.[0].name).toBe('Trail One');
     });
 
     it('should return empty array when no bite trail snapshots found', async () => {
       jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
         snapshots: [],
-      } as any);
+      });
 
-      const result = await service.biteTrailsLoader({
-        params: { organisationId: 'org-1' },
-      } as any);
+      const result = await service.biteTrailsLoader(
+        createLoaderParams({ organisationId: 'org-1' }),
+      );
 
       expect(result).toEqual([]);
     });

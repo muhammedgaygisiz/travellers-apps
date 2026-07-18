@@ -1,9 +1,12 @@
 import { getRestaurant } from '../get-restaurant';
 import type { Restaurant } from 'model';
+import type { normalize } from 'utils';
 
 const normalizeMock = jest.fn();
 jest.mock('utils', () => ({
-  normalize: (...args: any): void => normalizeMock(...args),
+  normalize: (
+    ...args: Parameters<typeof normalize>
+  ): ReturnType<typeof normalize> => normalizeMock(...args),
 }));
 
 describe('getRestaurant', () => {

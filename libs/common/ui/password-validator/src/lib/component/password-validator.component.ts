@@ -93,7 +93,10 @@ export class PasswordValidatorComponent implements OnChanges {
     );
   }
 
-  private test(password: string | null): any {
+  private test(password: string | null): {
+    forPattern: (pattern: RegExp) => boolean | null;
+    forLength: (length: number) => boolean | null;
+  } {
     return {
       forPattern: (pattern: RegExp): boolean | null => {
         if (!password) {

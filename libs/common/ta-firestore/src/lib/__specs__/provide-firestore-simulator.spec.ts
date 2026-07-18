@@ -1,4 +1,8 @@
 import { provideFirestoreSimulator } from '../provide-firestore-simulator';
+import { Emulators } from 'utils';
+import { FirebaseApp } from 'firebase/app';
+import { Firestore } from 'firebase/firestore';
+import { FirebaseStorage } from 'firebase/storage';
 import * as connectFirestoreEmulatorUtils from 'firebase/firestore';
 import * as connectStorageEmulatorUtils from 'firebase/storage';
 import * as connectAuthEmulatorUtils from 'firebase/auth';
@@ -57,10 +61,10 @@ describe(provideFirestoreSimulator.name, () => {
         functionsPort: 5001,
         storagePort: 9199,
         authUrl: 'http://localhost:9099',
-      } as any,
-      {} as any,
-      {} as any,
-      {} as any,
+      } as Emulators,
+      {} as unknown as FirebaseApp,
+      {} as unknown as Firestore,
+      {} as unknown as FirebaseStorage,
     );
 
     expect(connectAuthEmulatorSpy).toHaveBeenCalledWith(
@@ -90,21 +94,23 @@ describe(provideFirestoreSimulator.name, () => {
     ]);
 
     const appProvider = result.find(
-      (prov: any) => prov.provide === FIREBASE_APP,
+      (prov: { provide?: unknown }) => prov.provide === FIREBASE_APP,
     );
-    const app = (appProvider as any).useFactory();
+    const app = (appProvider as { useFactory: () => unknown }).useFactory();
     expect(app).toEqual({});
 
     const firestoreProvider = result.find(
-      (prov: any) => prov.provide === FIREBASE_FIRESTORE,
+      (prov: { provide?: unknown }) => prov.provide === FIREBASE_FIRESTORE,
     );
-    const firestore = (firestoreProvider as any).useFactory();
+    const firestore = (
+      firestoreProvider as { useFactory: () => unknown }
+    ).useFactory();
     expect(firestore).toEqual({});
 
     const authProvider = result.find(
-      (prov: any) => prov.provide === FIREBASE_AUTH,
+      (prov: { provide?: unknown }) => prov.provide === FIREBASE_AUTH,
     );
-    const auth = (authProvider as any).useFactory();
+    const auth = (authProvider as { useFactory: () => unknown }).useFactory();
     expect(auth).toEqual({});
   });
 });

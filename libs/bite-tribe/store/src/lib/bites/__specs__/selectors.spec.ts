@@ -61,7 +61,11 @@ describe('Bites Selectors', () => {
     });
 
     it('should return undefined if slice is undefined', () => {
-      const result = fromSelectors.cachedBite.projector(undefined as any);
+      const result = fromSelectors.cachedBite.projector(
+        undefined as unknown as Parameters<
+          typeof fromSelectors.cachedBite.projector
+        >[0],
+      );
       expect(result).toBeUndefined();
     });
   });
@@ -71,7 +75,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromHomeSelectors.bites.projector(
         bitesWithMetadata,
@@ -90,7 +94,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromHomeSelectors.bites.projector(
         bitesWithMetadata,
@@ -110,7 +114,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0', price: 10 },
         { ...mockBite2, likes: [], distance: '0.01', price: 20 },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromHomeSelectors.bites.projector(
         bitesWithMetadata,
@@ -130,7 +134,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite2, likes: [], distance: '0' },
         { ...mockBite1, likes: mockLikes, distance: '0.01' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromHomeSelectors.bites.projector(
         bitesWithMetadata,
@@ -149,7 +153,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromHomeSelectors.bites.projector(
         bitesWithMetadata,
@@ -172,7 +176,7 @@ describe('Bites Selectors', () => {
           const bitesWithMetadata = [
             { ...mockBite1, likes: mockLikes, distance: '0' },
             { ...mockBite2, likes: [], distance: '0.01' },
-          ] as any[];
+          ] as Bite[];
 
           const result = fromSelectors.allTags.projector(bitesWithMetadata);
           expect(result).toEqual(['coffee', 'drink', 'food', 'vienna']);
@@ -184,7 +188,7 @@ describe('Bites Selectors', () => {
           const bitesWithMetadata = [
             { ...mockBite1, likes: mockLikes, distance: '0', tags: [] },
             { ...mockBite2, likes: [], distance: '0.01', tags: [] },
-          ] as any[];
+          ] as Bite[];
 
           const result = fromSelectors.allTags.projector(bitesWithMetadata);
           expect(result).toEqual([]);
@@ -196,7 +200,7 @@ describe('Bites Selectors', () => {
           const bitesWithMetadata = [
             { ...mockBite1, likes: mockLikes, distance: '0', tags: null },
             { ...mockBite2, likes: [], distance: '0.01', tags: undefined },
-          ] as any[];
+          ] as Bite[];
 
           const result = fromSelectors.allTags.projector(bitesWithMetadata);
           expect(result).toEqual([]);
@@ -213,7 +217,7 @@ describe('Bites Selectors', () => {
               tags: ['#', '##'],
             },
             { ...mockBite2, likes: [], distance: '0.01', tags: ['###'] },
-          ] as any[];
+          ] as Bite[];
 
           const result = fromSelectors.allTags.projector(bitesWithMetadata);
           expect(result).toEqual([]);
@@ -227,7 +231,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromSelectors.bite.projector(
         '1',
@@ -245,7 +249,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromSelectors.bite.projector(
         '3',
@@ -308,7 +312,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0', userId: 'User-1' },
         { ...mockBite2, likes: [], distance: '0.01', userId: 'User-1' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromBitesByIdSelectors.mybites.projector(
         bitesWithMetadata,
@@ -345,7 +349,7 @@ describe('Bites Selectors', () => {
       const myBites = [
         { ...mockBite2, likes: [], distance: 10, userId: 'User-1' },
         { ...mockBite1, likes: mockLikes, distance: 5, userId: 'User-1' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromBitesByIdSelectors.sortedBitesByUser.projector(
         myBites,
@@ -361,7 +365,7 @@ describe('Bites Selectors', () => {
       const myBites = [
         { ...mockBite1, likes: mockLikes, distance: 5, userId: 'User-1' },
         { ...mockBite2, likes: [], distance: 10, userId: 'User-1' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromBitesByIdSelectors.sortedBitesByUser.projector(
         myBites,
@@ -388,7 +392,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite2, likes: [], distance: '0' },
         { ...mockBite1, likes: mockLikes, distance: '0.01' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromHomeSelectors.sortedHomeBites.projector(
         bitesWithMetadata,
@@ -414,7 +418,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0', userId: 'User-1' },
         { ...mockBite2, likes: [], distance: '0.01', userId: 'User-2' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromBitesByIdSelectors.bitesByUser.projector(
         bitesWithMetadata,
@@ -429,7 +433,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0' },
         { ...mockBite2, likes: [], distance: '0.01' },
-      ] as any[];
+      ] as Bite[];
 
       const result = fromBitesByIdSelectors.bitesByUser.projector(
         bitesWithMetadata,
@@ -449,7 +453,7 @@ describe('Bites Selectors', () => {
       const bitesWithMetadata = [
         { ...mockBite1, likes: mockLikes, distance: '0', place: PLACE_1 },
         { ...mockBite2, likes: [], distance: '0.01', place: PLACE_2 },
-      ] as any[];
+      ] as Bite[];
 
       const result =
         fromSelectors.nearbyRestaurants.projector(bitesWithMetadata);
@@ -490,9 +494,9 @@ describe('Bites Selectors', () => {
 
     it('should return bites that have tags', () => {
       const bitesWithMetadata = [
-        { ...mockBite1, tags: ['tag1'], distance: '0' } as any,
-        { ...mockBite2, tags: [], distance: '0.01' } as any,
-        { ...mockBite2, tags: ['tag2'], distance: '0.02' } as any,
+        { ...mockBite1, tags: ['tag1'], distance: '0' } as Bite,
+        { ...mockBite2, tags: [], distance: '0.01' } as Bite,
+        { ...mockBite2, tags: ['tag2'], distance: '0.02' } as Bite,
       ];
 
       const result =
@@ -517,7 +521,7 @@ describe('Bites Selectors', () => {
           place: 'Pizza Hut',
           tags: ['pasta', 'italian'],
         },
-      ] as any[];
+      ] as Bite[];
 
       const editingBite = {
         place: 'Pizza Hut',
@@ -534,7 +538,7 @@ describe('Bites Selectors', () => {
     });
 
     it('should return empty array if editing bite has no place', () => {
-      const bitesWithMetadata = [mockBite1, mockBite2] as any[];
+      const bitesWithMetadata = [mockBite1, mockBite2] as Bite[];
       const editingBite = {} as Bite;
 
       const result = fromSelectors.tagSuggestionsForEditingBite.projector(
@@ -546,10 +550,12 @@ describe('Bites Selectors', () => {
     });
 
     it('should return empty array if editing bite is null', () => {
-      const bitesWithMetadata = [mockBite1, mockBite2] as any[];
+      const bitesWithMetadata = [mockBite1, mockBite2] as Bite[];
 
       const result = fromSelectors.tagSuggestionsForEditingBite.projector(
-        null as any,
+        null as unknown as Parameters<
+          typeof fromSelectors.tagSuggestionsForEditingBite.projector
+        >[0],
         bitesWithMetadata,
       );
 
@@ -557,7 +563,7 @@ describe('Bites Selectors', () => {
     });
 
     it('should return empty array if no matching bites found', () => {
-      const bitesWithMetadata = [mockBite1, mockBite2] as any[];
+      const bitesWithMetadata = [mockBite1, mockBite2] as Bite[];
       const editingBite = {
         place: 'Non-existent Restaurant',
       } as Bite;

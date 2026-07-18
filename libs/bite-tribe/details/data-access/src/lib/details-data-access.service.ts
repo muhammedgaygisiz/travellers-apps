@@ -40,7 +40,10 @@ export class DetailsDataAccessService {
 
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
 
-  biteLoader: ResourceLoader<any, any> = async ({ params }) => {
+  biteLoader: ResourceLoader<
+    Bite | undefined,
+    { biteId?: string; userId?: string }
+  > = async ({ params }) => {
     const biteId = params.biteId;
     if (biteId) {
       let likes: Like[] = [];
@@ -81,7 +84,7 @@ export class DetailsDataAccessService {
       } as Bite;
     }
 
-    return Promise.resolve();
+    return undefined;
   };
 
   bite = resource({
@@ -92,9 +95,9 @@ export class DetailsDataAccessService {
     loader: this.biteLoader.bind(this),
   });
 
-  reviews = toSignal(this.storeService.reviews$, { initialValue: [] as any });
+  reviews = toSignal(this.storeService.reviews$, { initialValue: [] });
   bucketlists = toSignal(this.storeService.bucketlists$, {
-    initialValue: [] as any,
+    initialValue: [],
   });
   exchangeRates = toSignal(this.storeService.exchangeRates$);
   preferredCurrency = toSignal(this.storeService.preferedCurrency$);
@@ -107,7 +110,10 @@ export class DetailsDataAccessService {
     return bite?.userId;
   });
 
-  biteCreatorLoader: ResourceLoader<any, any> = ({ params }) => {
+  biteCreatorLoader: ResourceLoader<
+    PublicUser | undefined,
+    { userId?: string }
+  > = ({ params }) => {
     const userId = params.userId;
     if (userId) {
       return FirebaseFirestore.getDocument({
@@ -115,7 +121,7 @@ export class DetailsDataAccessService {
       }).then((res) => res.snapshot.data as PublicUser);
     }
 
-    return Promise.resolve();
+    return Promise.resolve(undefined);
   };
 
   /**
@@ -125,7 +131,7 @@ export class DetailsDataAccessService {
    * permission surfaces as an error here, which is the same non-fatal outcome as
    * any other position failure — the page simply shows no distance.
    */
-  positionLoader: ResourceLoader<any, Position> = async () => {
+  positionLoader: ResourceLoader<Position | undefined, unknown> = async () => {
     try {
       return await lastValueFrom(getCurrentPosition());
     } catch (error) {

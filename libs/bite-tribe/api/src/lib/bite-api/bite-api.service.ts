@@ -82,7 +82,9 @@ export class BiteApiService {
     return loadBiteById(biteId);
   }
 
-  public async saveNewBite(biteWithoutImage: Bite): Promise<Bite> {
+  public async saveNewBite(
+    biteWithoutImage: Omit<Bite, 'image'>,
+  ): Promise<Bite> {
     const user = this.authService.getUser();
 
     try {
@@ -102,6 +104,7 @@ export class BiteApiService {
     callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
   ): Promise<void> {
     const { image, ...biteDocWithoutImage } = bite;
+    void biteDocWithoutImage;
 
     uploadBase64ToFirebaseStorage({
       base64: image,
@@ -116,6 +119,7 @@ export class BiteApiService {
     imagePath: string,
   ): Promise<Bite> {
     const { image, ...biteWithoutImage } = bite;
+    void image;
 
     await updateBiteWithImagePathFromFirestorage(
       imagePath,

@@ -84,6 +84,9 @@ export class AppEffect {
       ofType(fromAuth.AuthActions.loadedUser),
       stopIfUserIsUndefined(),
       switchMap(() => this.api.publicProfile$.pipe(take(1))),
+      filter(
+        (profile): profile is NonNullable<typeof profile> => profile !== null,
+      ),
       map((profile) => AppActions.setPublicProfile({ profile })),
     );
   });

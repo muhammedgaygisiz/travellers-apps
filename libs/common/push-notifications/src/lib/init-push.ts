@@ -91,7 +91,7 @@ export const initPushListeners = async (
   if (platform.is('capacitor')) {
     try {
       await PushNotifications.removeAllListeners();
-    } catch (error) {
+    } catch {
       console.warn('No previous PushNotifications listeners to remove');
     }
 

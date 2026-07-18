@@ -48,9 +48,7 @@ describe('GetBucketlistIconPipe', () => {
 
   describe('given bucketlist is undefined', () => {
     it('should return "bookmark-outline"', () => {
-      expect(pipe.transform(mockBite, undefined as unknown as Bucketlist)).toBe(
-        'bookmark-outline',
-      );
+      expect(pipe.transform(mockBite, undefined)).toBe('bookmark-outline');
     });
   });
 
@@ -58,7 +56,7 @@ describe('GetBucketlistIconPipe', () => {
     it('should return "bookmark-outline"', () => {
       const bucketlistWithoutBiteIds = {
         ...mockBucketlist,
-        biteIds: undefined as any,
+        biteIds: undefined,
       };
 
       expect(pipe.transform(mockBite, bucketlistWithoutBiteIds)).toBe(
@@ -69,9 +67,7 @@ describe('GetBucketlistIconPipe', () => {
 
   describe('given bite and bucketlist are undefined', () => {
     it('should return "bookmark-outline"', () => {
-      expect(
-        pipe.transform(undefined, undefined as unknown as Bucketlist),
-      ).toBe('bookmark-outline');
+      expect(pipe.transform(undefined, undefined)).toBe('bookmark-outline');
     });
   });
 });

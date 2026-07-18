@@ -89,7 +89,11 @@ describe('Filtering and Sorting Selectors', () => {
     });
 
     it('should return distance when slice is undefined', () => {
-      const result = fromSelectors.homeSorting.projector(undefined as any);
+      const result = fromSelectors.homeSorting.projector(
+        undefined as unknown as Parameters<
+          typeof fromSelectors.homeSorting.projector
+        >[0],
+      );
       expect(result).toBe('distance');
     });
   });
@@ -114,7 +118,11 @@ describe('Filtering and Sorting Selectors', () => {
     });
 
     it('should return distance when slice is undefined', () => {
-      const result = fromSelectors.myBitesSorting.projector(undefined as any);
+      const result = fromSelectors.myBitesSorting.projector(
+        undefined as unknown as Parameters<
+          typeof fromSelectors.myBitesSorting.projector
+        >[0],
+      );
       expect(result).toBe('distance');
     });
   });
@@ -140,7 +148,9 @@ describe('Filtering and Sorting Selectors', () => {
 
     it('should return name when slice is undefined', () => {
       const result = fromSelectors.bucketlistSorting.projector(
-        undefined as any,
+        undefined as unknown as Parameters<
+          typeof fromSelectors.bucketlistSorting.projector
+        >[0],
       );
       expect(result).toBe('name');
     });
@@ -167,7 +177,9 @@ describe('Filtering and Sorting Selectors', () => {
 
     it('should return createdAt when slice is undefined', () => {
       const result = fromSelectors.restaurantBitesSorting.projector(
-        undefined as any,
+        undefined as unknown as Parameters<
+          typeof fromSelectors.restaurantBitesSorting.projector
+        >[0],
       );
       expect(result).toBe('createdAt');
     });

@@ -1,4 +1,5 @@
 import { FirebaseOptions } from 'firebase/app';
+import { SupportedLang } from './supported-lang';
 
 export type Emulators = {
   host: string;
@@ -11,7 +12,10 @@ export type Emulators = {
 export type Environment = {
   production: boolean;
   firebaseConfig?: FirebaseOptions;
-  i18n?: any;
+  i18n?: {
+    locales: SupportedLang[];
+    defaultLang: SupportedLang;
+  };
   isBusiness?: boolean;
   emulators?: Emulators;
 };

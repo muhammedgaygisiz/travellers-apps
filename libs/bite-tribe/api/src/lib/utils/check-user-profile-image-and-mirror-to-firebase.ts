@@ -6,7 +6,6 @@ import { USERS_COLLECTION } from './user-collection-key';
 
 const mirrorUserProfileImage = async (
   user: PublicUser,
-  isWeb: boolean,
 ): Promise<PublicUser> => {
   const avatarUrl = user.photoUrl;
 
@@ -40,12 +39,13 @@ export const checkUserProfileImageAndMirrorToFirebase = (
   user: PublicUser,
   isWeb: boolean,
 ): Promise<PublicUser> => {
+  void isWeb;
   if (!user.photoUrl) {
     return Promise.resolve(user);
   }
 
   if (isIdpAvatarUrl(user.photoUrl)) {
-    return mirrorUserProfileImage(user, isWeb);
+    return mirrorUserProfileImage(user);
   }
 
   return Promise.resolve(user);

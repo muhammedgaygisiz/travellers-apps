@@ -94,9 +94,13 @@ export class BiteEffects {
       switchMap((action) => {
         const position = action.position;
 
-        return from(this.api.bitesByPosition(position)).pipe(
-          catchError(() => of([])),
-        );
+        return from(
+          this.api.bitesByPosition(
+            position as unknown as Parameters<
+              BiteTribeApiService['bitesByPosition']
+            >[0],
+          ),
+        ).pipe(catchError(() => of([])));
       }),
       map((bites) => BiteActions.loadedByGPSPositionFromAPI({ bites })),
     );
@@ -131,7 +135,7 @@ export class BiteEffects {
             void this.showToast('bite-updated-successfully');
           }),
           map((bite) => BiteActions.savedBite({ bite })),
-          catchError((err) => of(BiteActions.errorSavingBite({ bite }))),
+          catchError(() => of(BiteActions.errorSavingBite({ bite }))),
         );
       }),
     );

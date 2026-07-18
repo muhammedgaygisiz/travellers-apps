@@ -2,6 +2,14 @@ import { TypeaheadComponent } from '../type-ahead.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 
+const createInputEvent = (value: string): CustomEvent => {
+  const input = document.createElement('input');
+  input.value = value;
+  const event = new CustomEvent('input');
+  Object.defineProperty(event, 'target', { value: input });
+  return event;
+};
+
 describe(TypeaheadComponent.name, () => {
   let component: TypeaheadComponent;
   let fixture: ComponentFixture<TypeaheadComponent>;
@@ -44,7 +52,7 @@ describe(TypeaheadComponent.name, () => {
 
   describe('searchbarInput', () => {
     it('should filter list based on input value', () => {
-      const event = { target: { value: 'banana' } } as any;
+      const event = createInputEvent('banana');
 
       compRef.setInput('items', ['apple', 'banana', 'cherry']);
       component.searchbarInput(event);
@@ -52,7 +60,7 @@ describe(TypeaheadComponent.name, () => {
     });
 
     it('should reset filtered items if no input value is provided', () => {
-      const event = { target: { value: '' } } as any;
+      const event = createInputEvent('');
 
       compRef.setInput('items', ['apple', 'banana', 'cherry']);
       component.searchbarInput(event);
@@ -75,14 +83,18 @@ describe(TypeaheadComponent.name, () => {
   describe('checkboxChange', () => {
     it('should add value to workingSelectedValues if checked', () => {
       component.workingSelectedValues.set(['apple']);
-      const event = { detail: { checked: true, value: 'banana' } } as any;
+      const event = new CustomEvent('ionChange', {
+        detail: { checked: true, value: 'banana' },
+      });
       component.checkboxChange(event);
       expect(component.workingSelectedValues()).toEqual(['apple', 'banana']);
     });
 
     it('should remove value from workingSelectedValues if unchecked', () => {
       component.workingSelectedValues.set(['apple', 'banana']);
-      const event = { detail: { checked: false, value: 'banana' } } as any;
+      const event = new CustomEvent('ionChange', {
+        detail: { checked: false, value: 'banana' },
+      });
       component.checkboxChange(event);
       expect(component.workingSelectedValues()).toEqual(['apple']);
     });
@@ -91,7 +103,7 @@ describe(TypeaheadComponent.name, () => {
   describe('distanceInput', () => {
     describe('given input value', () => {
       it('should update distanceValue on input event', () => {
-        const event = { target: { value: '100' } } as any;
+        const event = createInputEvent('100');
         component.distanceInput(event);
         expect(component.distanceValue()).toBe('100');
       });
@@ -99,7 +111,7 @@ describe(TypeaheadComponent.name, () => {
 
     describe('given empty input', () => {
       it('should not update distanceValue if input is empty', () => {
-        const event = { target: { value: '' } } as any;
+        const event = createInputEvent('');
         component.distanceInput(event);
         expect(component.distanceValue()).toBe('');
       });
@@ -117,7 +129,7 @@ describe(TypeaheadComponent.name, () => {
 
   describe('priceInput', () => {
     it('should update priceValue on input event', () => {
-      const event = { target: { value: '50' } } as any;
+      const event = createInputEvent('50');
       component.priceInput(event);
       expect(component.priceValue()).toBe(50);
     });

@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { HomeService } from '../home.service';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import type { Bite, Like } from 'model';
+import type { Bite, LikeClick } from 'model';
 import SpyInstance = jest.SpyInstance;
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
 
@@ -103,10 +103,11 @@ describe('HomeService', () => {
     it('should call likeButtonClicked on HomeDataAccessService with correct parameters', inject(
       [HomeService],
       (service: HomeService) => {
-        const param = {
-          likeType: 'likeType',
+        const param: LikeClick = {
+          likeType: 'thumbup',
           biteId: 'biteId',
-        } as unknown as Like;
+          action: 'save',
+        };
         service.likeButtonClicked(param);
         expect(submitLikeClickSpy).toHaveBeenCalledWith(param);
       },

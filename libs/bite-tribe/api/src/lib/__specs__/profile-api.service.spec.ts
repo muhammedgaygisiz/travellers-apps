@@ -108,7 +108,7 @@ describe(ProfileApiService.name, () => {
           .spyOn((service as any).profileChannel$, 'next')
           .mockImplementation();
 
-        scheduler.run(({ cold, expectObservable }) => {
+        scheduler.run(({ expectObservable }) => {
           const expected = '';
 
           expectObservable(service.publicProfile$).toBe(expected);
@@ -247,7 +247,7 @@ describe(ProfileApiService.name, () => {
 
           try {
             await service.saveUser(true);
-          } catch (error) {
+          } catch {
             // Expected to throw
           }
 
@@ -800,7 +800,7 @@ describe(ProfileApiService.name, () => {
 
           try {
             await service.followUser(publicUser);
-          } catch (error) {
+          } catch {
             // Expected to throw
           }
 
@@ -865,7 +865,7 @@ describe(ProfileApiService.name, () => {
 
           try {
             await service.unfollowUser(publicUser);
-          } catch (error) {
+          } catch {
             // Expected to throw
           }
 

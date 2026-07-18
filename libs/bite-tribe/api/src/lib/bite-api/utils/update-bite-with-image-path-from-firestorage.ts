@@ -11,10 +11,10 @@ export const updateBiteWithImagePathFromFirestorage = async (
 ): Promise<Bite> => {
   const downloadUrl = await getDownloadUrlFromFirebaseStorage(imagePath);
 
-  const data = {
+  const data: Partial<Bite> & Pick<Bite, 'imagePath'> = {
     ...(biteWithoutImage || {}),
     imagePath: downloadUrl,
-  } as any;
+  };
 
   if (clearBase64Image) {
     data.image = '';

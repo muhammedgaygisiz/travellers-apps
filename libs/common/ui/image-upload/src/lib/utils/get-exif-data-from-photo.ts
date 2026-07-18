@@ -1,6 +1,11 @@
 import { Photo } from '@capacitor/camera';
 
 type Coords = { latitude: number; longitude: number };
+type ExifRecord = Record<string, unknown>;
+
+const isExifRecord = (value: unknown): value is ExifRecord =>
+  typeof value === 'object' && value !== null;
+
 const normalizeGps = (
   lat: number,
   latRef: string,
@@ -17,21 +22,25 @@ export const getExifDataFromPhoto = (photo: Photo): Coords | undefined => {
     return undefined;
   }
 
-  const exif: any = photo.exif;
+  const exif: unknown = photo.exif;
+  if (!isExifRecord(exif)) {
+    return undefined;
+  }
+
   const exifGps = exif['GPS'];
 
-  const isValidIosExif =
-    exifGps &&
-    typeof exifGps.Latitude === 'number' &&
-    typeof exifGps.LatitudeRef === 'string' &&
-    typeof exifGps.Longitude === 'number' &&
-    typeof exifGps.LongitudeRef === 'string';
-  if (isValidIosExif) {
+  if (
+    isExifRecord(exifGps) &&
+    typeof exifGps['Latitude'] === 'number' &&
+    typeof exifGps['LatitudeRef'] === 'string' &&
+    typeof exifGps['Longitude'] === 'number' &&
+    typeof exifGps['LongitudeRef'] === 'string'
+  ) {
     return normalizeGps(
-      exifGps.Latitude,
-      exifGps.LatitudeRef,
-      exifGps.Longitude,
-      exifGps.LongitudeRef,
+      exifGps['Latitude'],
+      exifGps['LatitudeRef'],
+      exifGps['Longitude'],
+      exifGps['LongitudeRef'],
     );
   }
 

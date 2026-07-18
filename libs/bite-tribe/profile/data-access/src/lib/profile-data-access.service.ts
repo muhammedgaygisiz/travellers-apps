@@ -7,6 +7,10 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 const BITE_TRAIL_COLLECTION = 'biteTrails';
 
+interface ProfileResourceParams {
+  userId: string | undefined;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProfileDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
@@ -30,21 +34,22 @@ export class ProfileDataAccessService {
     initialValue: [] as Bite[],
   });
 
-  userLoader: ResourceLoader<any, any> = async ({ params }) => {
-    if (!params.userId) {
-      return Promise.resolve({});
-    }
+  userLoader: ResourceLoader<PublicUser | undefined, ProfileResourceParams> =
+    async ({ params }) => {
+      if (!params.userId) {
+        return undefined;
+      }
 
-    const userDoc = await FirebaseFirestore.getDocument({
-      reference: `users/${params.userId}`,
-    });
+      const userDoc = await FirebaseFirestore.getDocument({
+        reference: `users/${params.userId}`,
+      });
 
-    if (!userDoc.snapshot?.data) {
-      return Promise.resolve({});
-    }
+      if (!userDoc.snapshot?.data) {
+        return undefined;
+      }
 
-    return userDoc.snapshot.data as PublicUser;
-  };
+      return userDoc.snapshot.data as PublicUser;
+    };
 
   user = resource({
     params: () => ({
@@ -53,7 +58,9 @@ export class ProfileDataAccessService {
     loader: this.userLoader.bind(this),
   });
 
-  biteTrailLoader: ResourceLoader<any, any> = async ({ params }) => {
+  biteTrailLoader: ResourceLoader<BiteTrail[], ProfileResourceParams> = async ({
+    params,
+  }) => {
     if (!params.userId) {
       return Promise.resolve([]);
     }

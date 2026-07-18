@@ -59,8 +59,9 @@ export class BucketListSelectionComponent {
   bite = input<Bite>();
 
   selectList = output<Bucketlist>();
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onNewList = (newListName: string): void => {};
+  onNewList = (newListName: string): void => {
+    void newListName;
+  };
 
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
 
@@ -78,9 +79,12 @@ export class BucketListSelectionComponent {
     },
   ];
 
-  onAlertDidDismiss($event: any): void {
-    const newListName = $event[0];
-    this.onNewList(newListName);
+  onAlertDidDismiss(event: unknown): void {
+    if (!Array.isArray(event) || typeof event[0] !== 'string') {
+      return;
+    }
+
+    this.onNewList(event[0]);
   }
 
   onBucketlistSelected(bucketList: Bucketlist): void {

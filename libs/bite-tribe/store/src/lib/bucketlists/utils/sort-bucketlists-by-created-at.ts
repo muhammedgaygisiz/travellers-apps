@@ -22,6 +22,6 @@ export const sortBucketlistsByCreatedAt = (
     if (!a.createdAt && !b.createdAt) {
       return 1;
     }
-    return new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime();
+    return Date.parse(b.createdAt ?? '') - Date.parse(a.createdAt ?? '');
   });
 };

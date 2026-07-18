@@ -7,6 +7,8 @@ import { of } from 'rxjs';
 import { PublicUser } from 'model';
 import { signal } from '@angular/core';
 
+type UsersLoaderArg = Parameters<FollowersDataAccessService['usersLoader']>[0];
+
 class MockBiteTribeStoreService {
   type$ = of('followers');
   userIdFromUrl = signal(null);
@@ -49,7 +51,7 @@ describe('FollowersDataAccessService', () => {
         (service: FollowersDataAccessService) => {
           const result = service.usersLoader({
             params: { type: 'followers' },
-          } as any);
+          } as unknown as UsersLoaderArg);
 
           expect(result).resolves.toEqual([]);
         },
@@ -60,7 +62,7 @@ describe('FollowersDataAccessService', () => {
         (service: FollowersDataAccessService) => {
           const result = service.usersLoader({
             params: { type: 'following' },
-          } as any);
+          } as unknown as UsersLoaderArg);
 
           expect(result).resolves.toEqual([]);
         },
@@ -73,7 +75,7 @@ describe('FollowersDataAccessService', () => {
         (service: FollowersDataAccessService) => {
           const result = service.usersLoader({
             params: { type: 'unknown', userId: 'some-user-id' },
-          } as any);
+          } as unknown as UsersLoaderArg);
 
           expect(result).resolves.toEqual([]);
         },
@@ -88,7 +90,7 @@ describe('FollowersDataAccessService', () => {
             const userId = 'some-user-id';
             service.usersLoader({
               params: { type: 'followers', userId },
-            } as any);
+            } as unknown as UsersLoaderArg);
 
             expect(
               profileApiService.fetchFollowersWithDetails,
@@ -104,7 +106,7 @@ describe('FollowersDataAccessService', () => {
             const userId = 'some-user-id';
             service.usersLoader({
               params: { type: 'following', userId },
-            } as any);
+            } as unknown as UsersLoaderArg);
 
             expect(
               profileApiService.fetchFollowingWithDetails,
@@ -138,7 +140,7 @@ describe('FollowersDataAccessService', () => {
           (service: FollowersDataAccessService) => {
             service.usersLoader({
               params: { type: 'followers', userId },
-            } as any);
+            } as unknown as UsersLoaderArg);
 
             expect(fetchFollowersWithDetailsSpy).toHaveBeenCalledWith(userId);
           },
@@ -151,7 +153,7 @@ describe('FollowersDataAccessService', () => {
           (service: FollowersDataAccessService) => {
             service.usersLoader({
               params: { type: 'followers' },
-            } as any);
+            } as unknown as UsersLoaderArg);
 
             expect(fetchFollowersWithDetailsSpy).not.toHaveBeenCalled();
           },
@@ -166,7 +168,7 @@ describe('FollowersDataAccessService', () => {
           (service: FollowersDataAccessService) => {
             service.usersLoader({
               params: { type: 'following', userId },
-            } as any);
+            } as unknown as UsersLoaderArg);
 
             expect(fetchFollowingWithDetailsSpy).toHaveBeenCalledWith(userId);
           },
@@ -179,7 +181,7 @@ describe('FollowersDataAccessService', () => {
           (service: FollowersDataAccessService) => {
             service.usersLoader({
               params: { type: 'following' },
-            } as any);
+            } as unknown as UsersLoaderArg);
 
             expect(fetchFollowingWithDetailsSpy).not.toHaveBeenCalled();
           },

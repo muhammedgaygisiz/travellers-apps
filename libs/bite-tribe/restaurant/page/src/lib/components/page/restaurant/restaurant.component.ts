@@ -108,8 +108,8 @@ export class RestaurantComponent {
     return [...new Set(allTags)];
   });
 
-  setSelectedSegment(selectedSegment: any): void {
-    if (selectedSegment != 'bites' && selectedSegment !== 'menu') {
+  setSelectedSegment(selectedSegment: unknown): void {
+    if (selectedSegment !== 'bites' && selectedSegment !== 'menu') {
       return;
     }
     this.selectedSegment.set(selectedSegment);

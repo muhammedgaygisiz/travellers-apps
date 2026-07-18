@@ -2,16 +2,34 @@ import { TestBed } from '@angular/core/testing';
 import { DetailsService } from '../details.service';
 import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
 import { signal } from '@angular/core';
-import { Bite, Bucketlist, RemoveBiteFromBucketlistParams } from 'model';
+import {
+  Bite,
+  Bucketlist,
+  LikeClick,
+  PublicUser,
+  RemoveBiteFromBucketlistParams,
+} from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import SpyInstance = jest.SpyInstance;
+
+type MockDetailsDataAccessService = Omit<
+  Partial<DetailsDataAccessService>,
+  'bite'
+> & {
+  bite?: {
+    value: ReturnType<typeof signal<Bite | undefined>>;
+    reload?: jest.Mock;
+  };
+};
 
 const mockBite: Bite = {
   id: 'bite123',
   name: 'Test Bite',
 } as Bite;
 
-const createMockDataAccess = (overrides = {}): any => {
+const createMockDataAccess = (
+  overrides: MockDetailsDataAccessService = {},
+): MockDetailsDataAccessService => {
   const base = {
     bite: {
       value: signal(mockBite),
@@ -32,25 +50,16 @@ const createMockDataAccess = (overrides = {}): any => {
     cacheBite: jest.fn(),
     shareBite: jest.fn(),
   };
-  return { ...base, ...overrides };
+  return { ...base, ...overrides } as MockDetailsDataAccessService;
 };
 
-const createNavControllerMock = (): any => ({
+const createNavControllerMock = (): Partial<NavController> => ({
   navigateForward: jest.fn().mockResolvedValue(true),
-  navigateBack: jest.fn().mockResolvedValue(true),
-  navigateRoot: jest.fn().mockResolvedValue(true),
-  back: jest.fn(),
-  pop: jest.fn().mockResolvedValue(true),
-  getRouteId: jest.fn(),
-  isTransitioning: jest.fn(),
-  consumeTransition: jest.fn(),
-  setDirection: jest.fn(),
-  setTopOutlet: jest.fn(),
 });
 
 describe('DetailsService', () => {
   let service: DetailsService;
-  let mockDataAccessService: Partial<DetailsDataAccessService>;
+  let mockDataAccessService: MockDetailsDataAccessService;
   let mockNavController: Partial<NavController>;
 
   beforeEach(() => {
@@ -119,7 +128,7 @@ describe('DetailsService', () => {
           value: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
         },
         saveToBucketList: jest.fn(),
-      } as any;
+      };
 
       TestBed.configureTestingModule({
         providers: [
@@ -150,7 +159,7 @@ describe('DetailsService', () => {
           value: signal(undefined),
         },
         saveToBucketList: jest.fn(),
-      } as any;
+      };
 
       TestBed.configureTestingModule({
         providers: [
@@ -188,7 +197,7 @@ describe('DetailsService', () => {
           value: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
         },
         createAndSaveToBucketList: jest.fn(),
-      } as any;
+      };
 
       TestBed.configureTestingModule({
         providers: [
@@ -223,7 +232,7 @@ describe('DetailsService', () => {
           value: signal(undefined),
         },
         createAndSaveToBucketList: jest.fn(),
-      } as any;
+      };
 
       TestBed.configureTestingModule({
         providers: [
@@ -262,7 +271,7 @@ describe('DetailsService', () => {
       // Arrange
       mockDataAccessService = {
         removeBiteFromBucketlist: jest.fn(),
-      } as any;
+      };
 
       TestBed.configureTestingModule({
         providers: [
@@ -295,7 +304,11 @@ describe('DetailsService', () => {
 
   describe('likeButtonClicked', () => {
     it('should call dataAccess.submitLikeClick with correct parameters', () => {
-      const likeClick = { likeType: 'like', biteId: 'bite123' } as any;
+      const likeClick: LikeClick = {
+        likeType: 'thumbup',
+        biteId: 'bite123',
+        action: 'save',
+      };
       service.likeButtonClicked(likeClick);
 
       expect(mockDataAccessService.submitLikeClick).toHaveBeenCalledWith(
@@ -306,7 +319,11 @@ describe('DetailsService', () => {
 
     it('should trigger reload of bite after 1 sec', () => {
       jest.useFakeTimers();
-      const likeClick = { likeType: 'like', biteId: 'bite123' } as any;
+      const likeClick: LikeClick = {
+        likeType: 'thumbup',
+        biteId: 'bite123',
+        action: 'save',
+      };
       service.likeButtonClicked(likeClick);
 
       // Fast-forward time
@@ -363,7 +380,7 @@ describe('DetailsService', () => {
 
   describe('onGoToProfileClick', () => {
     it('should navigate to user profile page with userId', () => {
-      const publicUser = { userId: 'user123' } as any;
+      const publicUser = { userId: 'user123' } as PublicUser;
       service.onGoToProfileClick(publicUser);
       expect(mockNavController.navigateForward).toHaveBeenCalledWith([
         'profile',
@@ -401,7 +418,7 @@ describe('DetailsService', () => {
         price: 25,
         currency: 'CHF',
         restaurantId: '123',
-        position: {} as any,
+        position: { latitude: 0, longitude: 0 },
       } as Bite;
       service.onGotoNewClick(originalBite);
       expect(cacheBiteSpy).toHaveBeenCalledTimes(1);

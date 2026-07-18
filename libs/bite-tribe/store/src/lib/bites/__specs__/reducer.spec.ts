@@ -280,7 +280,9 @@ describe('Bite Reducer', () => {
         biteCreator: { id: 'creator1', name: 'Creator 1' },
       };
 
-      const payload = { payload: { event: { url: PATH.HOME } } } as any;
+      const payload = {
+        payload: { event: { url: PATH.HOME } },
+      } as unknown as Parameters<typeof routerNavigatedAction>[0];
 
       expect(reducer(INITIAL_STATE, routerNavigatedAction(payload))).toEqual({
         ...EMPTY_STATE,
@@ -294,7 +296,9 @@ describe('Bite Reducer', () => {
       };
 
       const action = routerNavigatedAction({
-        payload: { event: { url: PATH.BITE } } as any,
+        payload: { event: { url: PATH.BITE } } as unknown as Parameters<
+          typeof routerNavigatedAction
+        >[0]['payload'],
       });
 
       expect(reducer(INITIAL_STATE, action)).toEqual({

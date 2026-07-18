@@ -1,8 +1,11 @@
 import { findClosestSnap } from '../find-closest-snap';
+import { getLowestSnap } from '../get-lowest-snap';
 
 const getLowestSnapMock = jest.fn();
 jest.mock('../get-lowest-snap', () => ({
-  getLowestSnap: (...args: any): void => getLowestSnapMock(...args),
+  getLowestSnap: (
+    ...args: Parameters<typeof getLowestSnap>
+  ): ReturnType<typeof getLowestSnap> => getLowestSnapMock(...args),
 }));
 
 describe('findClosestSnap', () => {

@@ -11,7 +11,7 @@ describe('createOpenstreetmapLayer', () => {
     expect(layer).toBeDefined();
     expect(layer.options).toBeDefined();
 
-    const options = layer.options as any;
+    const options = layer.options as L.TileLayerOptions;
     expect(options.maxZoom).toBe(19);
     expect(options.attribution).toContain('© OpenStreetMap contributors');
     expect(options.noWrap).toBe(true);

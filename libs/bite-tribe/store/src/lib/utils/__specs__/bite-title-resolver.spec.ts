@@ -7,7 +7,7 @@ import { bite } from '../../bites/selectors';
 import type { Bite } from 'model';
 import { Observable } from 'rxjs';
 
-const assertDeepEqual = (actual: any, expected: any): void => {
+const assertDeepEqual = (actual: unknown, expected: unknown): void => {
   expect(actual).toEqual(expected);
 };
 

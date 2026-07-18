@@ -136,7 +136,7 @@ describe('HomeFeedControlsComponent', () => {
   });
 
   describe('onFilterChange', () => {
-    let modal: any;
+    let modal: { dismiss: jest.Mock };
 
     beforeEach(() => {
       modal = {
@@ -163,7 +163,7 @@ describe('HomeFeedControlsComponent', () => {
     it('should dismiss the modal and emit filterCleared', () => {
       const modal = {
         dismiss: jest.fn(),
-      } as any;
+      };
       const filterClearedSpy = jest.spyOn(component.filterCleared, 'emit');
 
       component.onFiltersClear(modal);

@@ -22,7 +22,7 @@ describe('provideFirestoreAnalytics', () => {
   });
 
   describe('FIREBASE_ANALYTICS factory', () => {
-    const factory = (providers[0] as any).useFactory;
+    const factory = (providers[0] as { useFactory: () => unknown }).useFactory;
 
     it('should call getApp and getAnalytics', () => {
       factory();
@@ -40,7 +40,7 @@ describe('provideFirestoreAnalytics', () => {
       const result = factory();
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'Firebase Analytics is not supported in this environment.'
+        'Firebase Analytics is not supported in this environment.',
       );
 
       consoleWarnSpy.mockRestore();

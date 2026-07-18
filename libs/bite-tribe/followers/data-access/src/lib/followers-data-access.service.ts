@@ -10,7 +10,10 @@ export class FollowersDataAccessService {
 
   type = this.storeService.type;
 
-  usersLoader: ResourceLoader<any, any> = ({ params }: any) => {
+  usersLoader: ResourceLoader<
+    PublicUser[],
+    { userId: string | undefined; type: string | undefined }
+  > = ({ params }) => {
     const type = params.type;
     const userId = params.userId;
 

@@ -169,9 +169,7 @@ describe(BucketlistApiService.name, () => {
     it('should throw when user is not authenticated', async () => {
       jest.clearAllMocks();
 
-      const getUserSpy = jest
-        .spyOn(MockedAuthService, 'getUser')
-        .mockReturnValue(undefined);
+      jest.spyOn(MockedAuthService, 'getUser').mockReturnValue(undefined);
       const addDocumentMock = jest.spyOn(FirebaseFirestore, 'addDocument');
 
       await expect(
@@ -239,7 +237,7 @@ describe(BucketlistApiService.name, () => {
       jest.clearAllMocks();
 
       const error = new Error('Failed to save sell');
-      const addDocumentMock = jest
+      jest
         .spyOn(FirebaseFirestore, 'addDocument')
         .mockResolvedValueOnce({
           reference: { path: 'bucketlists/new-bucketlist' },
@@ -336,7 +334,7 @@ describe(BucketlistApiService.name, () => {
 
         try {
           await service.removeBiteFromBucketlist({} as any);
-        } catch (e) {
+        } catch {
           // do nothing
         }
 
@@ -387,7 +385,7 @@ describe(BucketlistApiService.name, () => {
 
         try {
           await service.createBucketList('My Bucketlist');
-        } catch (e) {
+        } catch {
           // do nothing
         }
 
@@ -434,7 +432,7 @@ describe(BucketlistApiService.name, () => {
 
         try {
           await service.deleteBucketlist('1');
-        } catch (e) {
+        } catch {
           // do nothing
         }
 
@@ -486,7 +484,7 @@ describe(BucketlistApiService.name, () => {
 
         try {
           await service.updateBucketlistName('1', 'New Name');
-        } catch (e) {
+        } catch {
           // do nothing
         }
 

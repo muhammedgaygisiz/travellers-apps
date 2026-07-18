@@ -10,8 +10,9 @@ import SpyInstance = jest.SpyInstance;
 import { AuthService } from 'ta-firestore';
 import { NavController, ToastController } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
+import type { Action } from '@ngrx/store';
 
-const assertDeepEqual = (actual: any, expected: any): void => {
+const assertDeepEqual = (actual: unknown, expected: unknown): void => {
   expect(actual).toEqual(expected);
 };
 
@@ -26,7 +27,8 @@ const BiteTribeApiServiceMock = {
 };
 
 const MockedAuthService = {
-  getUser: (): any => ({}),
+  getUser: (): ReturnType<AuthService['getUser']> =>
+    ({ uid: '123' }) as ReturnType<AuthService['getUser']>,
 };
 
 const mockToastCreate = jest.fn().mockResolvedValue({ present: jest.fn() });
@@ -45,7 +47,7 @@ const MockTranslocoService = {
 
 describe('BucketListEffect', () => {
   let scheduler: TestScheduler;
-  let actions$: Observable<any> = of({});
+  let actions$: Observable<Action> = of({ type: 'INIT' });
   let effects: BucketListEffect;
   let apiService: BiteTribeApiService;
   let authService: AuthService;
@@ -72,7 +74,9 @@ describe('BucketListEffect', () => {
 
     jest
       .spyOn(authService, 'getUser')
-      .mockImplementation(() => ({ uid: '123' }) as any);
+      .mockImplementation(
+        () => ({ uid: '123' }) as unknown as ReturnType<AuthService['getUser']>,
+      );
   });
 
   afterEach(() => {
@@ -100,7 +104,11 @@ describe('BucketListEffect', () => {
       it('should load bucketlists by user id', () => {
         const loadBucketlistsByUserIdSpy = jest
           .spyOn(apiService, 'loadBucketlistsByUserId')
-          .mockReturnValue(of([]) as any);
+          .mockReturnValue(
+            of([]) as unknown as ReturnType<
+              BiteTribeApiService['loadBucketlistsByUserId']
+            >,
+          );
 
         scheduler.run(({ cold, expectObservable }) => {
           actions$ = cold('a', {
@@ -123,7 +131,11 @@ describe('BucketListEffect', () => {
     beforeEach(() => {
       saveBiteIdToBucketListSpy = jest
         .spyOn(apiService, 'saveBiteIdToBucketList')
-        .mockReturnValue(of({}) as any);
+        .mockReturnValue(
+          of({}) as unknown as ReturnType<
+            BiteTribeApiService['saveBiteIdToBucketList']
+          >,
+        );
     });
 
     it('should run saveBiteIdToBucketList on saveBiteIdToBucketList', () => {
@@ -136,7 +148,11 @@ describe('BucketListEffect', () => {
         });
 
         expectObservable(effects.saveBiteIdToBucketListEffect$).toBe('a', {
-          a: BucketlistActions.savedBiteToBucketlist({ bucketlist: {} as any }),
+          a: BucketlistActions.savedBiteToBucketlist({
+            bucketlist: {} as unknown as Parameters<
+              typeof BucketlistActions.savedBiteToBucketlist
+            >[0]['bucketlist'],
+          }),
         });
       });
 
@@ -150,7 +166,12 @@ describe('BucketListEffect', () => {
     beforeEach(() => {
       createBucketListAndSaveBiteIdToBucketListSpy = jest
         .spyOn(apiService, 'createBucketListAndSaveBiteIdToBucketList')
-        .mockImplementation(() => of({}) as any);
+        .mockImplementation(
+          () =>
+            of({}) as unknown as ReturnType<
+              BiteTribeApiService['createBucketListAndSaveBiteIdToBucketList']
+            >,
+        );
     });
 
     it('should run createBucketListAndSaveBiteIdToBucketList on createAndSaveBiteIdToBucketList', () => {
@@ -180,7 +201,12 @@ describe('BucketListEffect', () => {
     beforeEach(() => {
       removeBiteFromBucketlistSpy = jest
         .spyOn(apiService, 'removeBiteFromBucketlist')
-        .mockImplementation(() => of({}) as any);
+        .mockImplementation(
+          () =>
+            of({}) as unknown as ReturnType<
+              BiteTribeApiService['removeBiteFromBucketlist']
+            >,
+        );
     });
 
     it('should run removeBiteFromBucketlist on removeBiteFromBucketlist', () => {
@@ -229,7 +255,12 @@ describe('BucketListEffect', () => {
     beforeEach(() => {
       createBucketListFromBiteTrailSpy = jest
         .spyOn(apiService, 'createBucketListFromBiteTrail')
-        .mockImplementation(() => of({}) as any);
+        .mockImplementation(
+          () =>
+            of({}) as unknown as ReturnType<
+              BiteTribeApiService['createBucketListFromBiteTrail']
+            >,
+        );
     });
 
     it('should call createBucketListFromBiteTrail and dispatch savedBiteTrailAsBucketList', () => {
@@ -261,7 +292,12 @@ describe('BucketListEffect', () => {
     beforeEach(() => {
       updateBucketlistTriedOutStatusSpy = jest
         .spyOn(apiService, 'updateBucketlistTriedOutStatus')
-        .mockImplementation(() => of({}) as any);
+        .mockImplementation(
+          () =>
+            of({}) as unknown as ReturnType<
+              BiteTribeApiService['updateBucketlistTriedOutStatus']
+            >,
+        );
     });
 
     it('should call updateBucketlistTriedOutStatus and dispatch success action', () => {
@@ -288,7 +324,9 @@ describe('BucketListEffect', () => {
 
     it('should dispatch failed action when updateBucketlistTriedOutStatus fails', () => {
       updateBucketlistTriedOutStatusSpy.mockImplementationOnce(() => {
-        return throwError(() => new Error('Failed')) as any;
+        return throwError(() => new Error('Failed')) as unknown as ReturnType<
+          BiteTribeApiService['updateBucketlistTriedOutStatus']
+        >;
       });
 
       scheduler.run(({ cold, expectObservable }) => {

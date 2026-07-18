@@ -1,7 +1,9 @@
 import { Bite } from 'model';
 import { normalize } from 'utils';
 
-export const uniqueBitesByName = (bites: Bite[]): Bite[] => {
+export const uniqueBitesByName = <T extends Pick<Bite, 'name'>>(
+  bites: T[],
+): T[] => {
   const seenNames = new Map<string, boolean>();
 
   return [...bites].filter((bite) => {

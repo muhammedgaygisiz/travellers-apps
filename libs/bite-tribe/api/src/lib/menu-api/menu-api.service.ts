@@ -14,7 +14,7 @@ export class MenuApiService {
     return getMenuById(menuId);
   }
 
-  handleError(err: any): typeof EMPTY {
+  handleError(err: unknown): typeof EMPTY {
     console.error('Error fetching menu:', err);
     this.errorHandler.handleError(err);
     return EMPTY;

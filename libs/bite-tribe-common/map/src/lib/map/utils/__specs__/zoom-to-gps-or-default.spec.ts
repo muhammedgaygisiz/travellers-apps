@@ -14,17 +14,17 @@ const COORD_LOS_ANGELES: L.LatLngTuple = [34.0522, -118.2437];
 
 const addGpsMarkerMock = jest.fn();
 jest.mock('../add-gps-marker', () => ({
-  addGpsMarker: (...args: any): void => addGpsMarkerMock(...args),
+  addGpsMarker: (...args: unknown[]): void => addGpsMarkerMock(...args),
 }));
 
 const removeGpsMarkerMock = jest.fn();
 jest.mock('../remove-gps-marker', () => ({
-  removeGpsMarker: (...args: any): void => removeGpsMarkerMock(...args),
+  removeGpsMarker: (...args: unknown[]): void => removeGpsMarkerMock(...args),
 }));
 
 const zoomToGeopointMock = jest.fn();
 jest.mock('../zoom-to-geopoint', () => ({
-  zoomToGeopoint: (...args: any): void => zoomToGeopointMock(...args),
+  zoomToGeopoint: (...args: unknown[]): void => zoomToGeopointMock(...args),
 }));
 
 describe('zoomToGpsOrDefault', () => {
@@ -37,10 +37,7 @@ describe('zoomToGpsOrDefault', () => {
     map = L.map(document.createElement('div')).setView([0, 0], 2);
     jest.spyOn(map, 'setView');
     jest.spyOn(map, 'getZoom').mockReturnValue(10);
-    fitBoundsSpy = jest
-      .spyOn(map, 'fitBounds')
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      .mockImplementation((() => {}) as any);
+    fitBoundsSpy = jest.spyOn(map, 'fitBounds').mockImplementation(() => map);
 
     markers = [];
     positions = [];
@@ -54,7 +51,7 @@ describe('zoomToGpsOrDefault', () => {
 
   it('should do nothing if map is null', () => {
     const gpsPosition = GEOPOINT_SAN_FRANCISCO;
-    const nullMap = null as any;
+    const nullMap = null;
 
     zoomToGpsOrDefault(gpsPosition, markers, positions, nullMap);
 
@@ -121,7 +118,10 @@ describe('zoomToGpsOrDefault', () => {
   });
 
   it('should fit map to markers if GPS position is missing latitude', () => {
-    const gpsPosition = { latitude: null as any, longitude: -122.4194 };
+    const gpsPosition = {
+      latitude: null as unknown as number,
+      longitude: -122.4194,
+    };
 
     markers.push(L.marker(COORD_SAN_FRANCISCO));
     markers.push(L.marker(COORD_LOS_ANGELES));

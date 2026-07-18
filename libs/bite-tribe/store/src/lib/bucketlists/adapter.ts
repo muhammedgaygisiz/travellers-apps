@@ -3,4 +3,4 @@ import type { Bucketlist } from 'model';
 
 export const adapter = createEntityAdapter<Bucketlist>();
 
-export const initialState: EntityState<any> = adapter.getInitialState();
+export const initialState: EntityState<Bucketlist> = adapter.getInitialState();

@@ -26,7 +26,7 @@ describe('LoginContainerComponent', () => {
 
   beforeEach(() => {
     mockLoginService = {
-      loginFailed: signal(false) as unknown as any,
+      loginFailed: signal(false) as unknown as LoginService['loginFailed'],
       login: jest.fn(),
       gotoSignUp: jest.fn(),
       gotoForgotPassword: jest.fn(),
@@ -74,12 +74,16 @@ describe('LoginContainerComponent', () => {
   it('should not call login on service when service is not given', () => {
     const credentials = { email: 'test@test.com', password: 'password' };
     const loginService = component['loginService'];
-    (component as any)['loginService'] = null;
+    (component as unknown as { loginService: LoginService | null })[
+      'loginService'
+    ] = null;
 
     component.login(credentials);
     expect(mockLoginService.login).not.toHaveBeenCalled();
 
-    (component as any)['loginService'] = loginService;
+    (component as unknown as { loginService: LoginService | null })[
+      'loginService'
+    ] = loginService;
   });
 
   it('should call gotoSignUp on service when gotoSignup is called', async () => {
@@ -117,7 +121,11 @@ describe('LoginContainerComponent', () => {
       LoginContainerComponent,
     );
     const componentWithoutService = fixtureWithoutService.componentInstance;
-    (componentWithoutService as any)['loginService'] = null;
+    (
+      componentWithoutService as unknown as {
+        loginService: LoginService | null;
+      }
+    )['loginService'] = null;
 
     expect(componentWithoutService.loginFailed()).toBeFalsy();
   });

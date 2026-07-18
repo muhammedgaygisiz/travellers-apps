@@ -2,10 +2,19 @@
 
 A subset of [Noto Color Emoji](https://github.com/googlefonts/noto-emoji)
 (SIL Open Font License 1.1), containing only the emoji that can render in
-Storybook stories. It is loaded **only in Storybook** (see
-`.storybook/preview-head.html`) so that Loki visual-regression references show
-consistent colour emoji regardless of the fonts installed in the Docker Chrome
-that captures them. Production emoji rendering is unchanged.
+Storybook stories. This `.woff2` is the **source**; it is inlined as a base64
+`data:` URI in the `@font-face` in `.storybook/preview-head.html` so it loads
+with no extra request and no dependency on static-dir serving. It is loaded
+**only in Storybook**, so that Loki visual-regression references show consistent
+colour emoji regardless of the fonts installed in the Docker Chrome that
+captures them. Production emoji rendering is unchanged.
+
+If you regenerate this file, re-inline it into `preview-head.html`:
+
+```sh
+base64 -w0 noto-color-emoji-subset.woff2
+# paste after `data:font/woff2;base64,` in the @font-face src
+```
 
 ## Covered codepoints
 

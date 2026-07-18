@@ -82,7 +82,9 @@ export class BiteApiService {
     return loadBiteById(biteId);
   }
 
-  public async saveNewBite(biteWithoutImage: Bite): Promise<Bite> {
+  public async saveNewBite(
+    biteWithoutImage: Omit<Bite, 'image'>,
+  ): Promise<Bite> {
     const user = this.authService.getUser();
 
     try {

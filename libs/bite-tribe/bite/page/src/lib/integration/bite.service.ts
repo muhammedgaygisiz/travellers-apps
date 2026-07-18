@@ -2,6 +2,7 @@ import { Location } from '@angular/common';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import type { Bite, Geopoint } from 'model';
+import type { BiteFormValue } from '../components/page/bite.page';
 import {
   LoadingController,
   NavController,
@@ -82,7 +83,7 @@ export class BiteService {
     return !!b && a.latitude === b.latitude && a.longitude === b.longitude;
   }
 
-  async submitNewBite(newBite: Partial<Bite>): Promise<void> {
+  async submitNewBite(newBite: BiteFormValue): Promise<void> {
     const loading = await this.loadingController.create({
       message: this.transloco.translate('creating-bite'),
       backdropDismiss: false,
@@ -93,7 +94,7 @@ export class BiteService {
     const { id, ...biteData } = newBite;
     void id;
     try {
-      await this.dataAccess.submitNewBite(biteData as Bite);
+      await this.dataAccess.submitNewBite(biteData as unknown as Bite);
 
       this.analytics.logEvent(AnalyticsEvent.BiteCreated);
 
@@ -105,8 +106,8 @@ export class BiteService {
     }
   }
 
-  submitEditedBite(editedBite: Partial<Bite>): void {
-    void this.dataAccess.submitEditedBite(editedBite as Bite);
+  submitEditedBite(editedBite: BiteFormValue): void {
+    void this.dataAccess.submitEditedBite(editedBite as unknown as Bite);
     this.location.back();
   }
 

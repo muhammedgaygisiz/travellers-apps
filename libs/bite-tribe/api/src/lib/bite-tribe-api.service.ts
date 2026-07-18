@@ -198,7 +198,7 @@ export class BiteTribeApiService {
     return this.biteApiService.saveEditedBite(bite);
   }
 
-  saveNewBite(biteWithoutImage: Bite): Promise<Bite> {
+  saveNewBite(biteWithoutImage: Omit<Bite, 'image'>): Promise<Bite> {
     return this.biteApiService.saveNewBite(biteWithoutImage);
   }
 

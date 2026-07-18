@@ -16,14 +16,6 @@ export default [
           style: 'camelCase',
         },
       ],
-      '@angular-eslint/component-selector': [
-        'warn',
-        {
-          type: 'element',
-          prefix: 'bite',
-          style: 'kebab-case',
-        },
-      ],
     },
   },
   {
@@ -31,7 +23,7 @@ export default [
     // Override or add rules here
     rules: {
       '@angular-eslint/template/click-events-have-key-events': 'warn',
-      '@angular-eslint/template/interactive-supports-focus': 'warn'
+      '@angular-eslint/template/interactive-supports-focus': 'warn',
     },
   },
 ];

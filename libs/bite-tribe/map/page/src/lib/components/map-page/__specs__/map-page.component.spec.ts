@@ -3,8 +3,24 @@ import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { MapPageComponent } from '../map-page.component';
+import type { Bite } from 'model';
 
 addNecessaryIcons();
+
+const createBite = (
+  id: string,
+  latitude: number,
+  longitude: number,
+  rating?: number,
+): Bite => ({
+  id,
+  name: `Bite ${id}`,
+  image: '',
+  place: 'Test Place',
+  price: 0,
+  position: { latitude, longitude },
+  rating,
+});
 
 describe('MapPageComponent', () => {
   let component: MapPageComponent;
@@ -39,49 +55,47 @@ describe('MapPageComponent', () => {
     });
 
     it('should return array of positions if bites has positions', () => {
-      const bites = [
-        { id: '1', position: { lat: 1, lng: 2 } },
-        { id: '2', position: { lat: 3, lng: 4 } },
-      ];
+      const bites = [createBite('1', 1, 2), createBite('2', 3, 4)];
       componentRef.setInput('bites', bites);
       expect(component.positions()).toEqual([
-        { id: '1', lat: 1, lng: 2 },
-        { id: '2', lat: 3, lng: 4 },
+        { id: '1', latitude: 1, longitude: 2 },
+        { id: '2', latitude: 3, longitude: 4 },
       ]);
     });
 
     it('should include rating if bite has rating', () => {
       const bites = [
-        { id: '1', position: { lat: 1, lng: 2 }, rating: 5 },
-        { id: '2', position: { lat: 3, lng: 4 }, rating: 0 },
-        { id: '3', position: { lat: 5, lng: 6 } },
+        createBite('1', 1, 2, 5),
+        createBite('2', 3, 4, 0),
+        createBite('3', 5, 6),
       ];
       componentRef.setInput('bites', bites);
       expect(component.positions()).toEqual([
-        { id: '1', lat: 1, lng: 2, rating: 5 },
-        { id: '2', lat: 3, lng: 4 },
-        { id: '3', lat: 5, lng: 6 },
+        { id: '1', latitude: 1, longitude: 2, rating: 5 },
+        { id: '2', latitude: 3, longitude: 4 },
+        { id: '3', latitude: 5, longitude: 6 },
       ]);
     });
 
     it('should not include rating if bite has rating = 0', () => {
-      const bites = [{ id: '1', position: { lat: 1, lng: 2 }, rating: 0 }];
+      const bites = [createBite('1', 1, 2, 0)];
       componentRef.setInput('bites', bites);
-      expect(component.positions()).toEqual([{ id: '1', lat: 1, lng: 2 }]);
+      expect(component.positions()).toEqual([
+        { id: '1', latitude: 1, longitude: 2 },
+      ]);
     });
 
     it('should not include rating if bite is missing rating', () => {
-      const bites = [{ id: '1', position: { lat: 1, lng: 2 } }];
+      const bites = [createBite('1', 1, 2)];
       componentRef.setInput('bites', bites);
-      expect(component.positions()).toEqual([{ id: '1', lat: 1, lng: 2 }]);
+      expect(component.positions()).toEqual([
+        { id: '1', latitude: 1, longitude: 2 },
+      ]);
     });
   });
 
   describe('onGeopointSelection', () => {
-    const bites = [
-      { id: '1', position: { lat: 1, lng: 2 } },
-      { id: '2', position: { lat: 3, lng: 4 } },
-    ];
+    const bites = [createBite('1', 1, 2), createBite('2', 3, 4)];
 
     it('should set selectedBite if bite with geopoint id is found', () => {
       componentRef.setInput('bites', bites);
@@ -102,7 +116,7 @@ describe('MapPageComponent', () => {
     });
 
     it('should set selectedBite to undefined if bite is missing', () => {
-      component.selectedBite = bites[0] as any;
+      component.selectedBite = bites[0];
       component.onGeopointSelection(undefined);
       expect(component.selectedBite).toBeUndefined();
     });

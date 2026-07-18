@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { NavController } from '@ionic/angular/standalone';
 import { MapDataAccessService } from 'bite-tribe/map-data-access';
 import { MapService } from '../map.service';
-import type { Bite, Bucketlist, Geopoint, Like } from 'model';
+import type { Bite, Bucketlist, Geopoint, LikeClick } from 'model';
 import { BiteTrailDataAccessService } from 'bite-tribe/bite-trail-data-access';
 
 describe(MapService.name, () => {
@@ -28,7 +28,6 @@ describe(MapService.name, () => {
       id: 'bite3',
       userId: 'user1',
       place: 'Restaurant C',
-      restaurantId: null as any,
     } as Bite,
   ];
 
@@ -116,11 +115,10 @@ describe(MapService.name, () => {
 
   describe('likeButtonClicked', () => {
     it('should submit like click through dataAccess', () => {
-      const likeClick: Like = {
+      const likeClick: LikeClick = {
         likeType: 'thumbup',
         biteId: 'bite1',
-        userId: 'user1',
-        createdAt: '2024-06-01T12:00:00Z',
+        action: 'save',
       };
 
       service.likeButtonClicked(likeClick);

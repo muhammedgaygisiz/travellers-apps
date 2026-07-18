@@ -34,7 +34,19 @@ describe(MarketPlaceService.name, () => {
 
   describe('onViewBiteTrail', () => {
     it('should navigate to the bite trail page with the correct biteTrail id', () => {
-      const biteTrail = { id: 'bite-trail-123' } as any;
+      const biteTrail: Parameters<MarketPlaceService['onViewBiteTrail']>[0] = {
+        id: 'bite-trail-123',
+        ownerId: 'owner-123',
+        name: 'Test Bite Trail',
+        biteIds: [],
+        imagePath: '',
+        ownerImagePath: '',
+        ownerName: 'Test Owner',
+        location: 'Test Location',
+        description: 'Test Description',
+        price: 0,
+        currency: 'EUR',
+      };
       service.onViewBiteTrail(biteTrail);
       expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
         'bite-trail',

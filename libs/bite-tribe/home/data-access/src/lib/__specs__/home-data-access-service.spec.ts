@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from '../home-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
-import type { Bite, LikeClick } from 'model';
+import type { Bite, Bucketlist, Like, LikeClick } from 'model';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { haversineDistance } from 'utils';
@@ -15,6 +15,25 @@ const BITE_WITH_POSITION: Bite = {
   price: 10,
   position: { latitude: 48.2082, longitude: 16.3738 },
 };
+
+const SELECTED_BUCKETLIST: Bucketlist = {
+  id: 'bucketlist-1',
+  userId: 'test-user-id',
+  name: 'Test Bucketlist',
+  biteIds: [],
+};
+
+type RestaurantBitesLoaderParams = Parameters<
+  HomeDataAccessService['restaurantBitesLoader']
+>[0];
+
+const createLoaderParams = (
+  request: Pick<RestaurantBitesLoaderParams, 'params'>,
+): RestaurantBitesLoaderParams => ({
+  params: request.params,
+  abortSignal: new AbortController().signal,
+  previous: { status: 'idle' },
+});
 
 class StoreMock {
   sortedHomeBites$ = of([]);
@@ -259,9 +278,9 @@ describe('HomeDataAccessService', () => {
     it('should dispatch bucketlist tried-out status when checked is true', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        jest.spyOn(service, 'selectedBucketlist').mockReturnValue({
-          id: 'bucketlist-1',
-        } as any);
+        jest
+          .spyOn(service, 'selectedBucketlist')
+          .mockReturnValue(SELECTED_BUCKETLIST);
         const setBiteTriedOutStatusSpy = jest.spyOn(
           biteTribeStoreService,
           'setBiteTriedOutStatus',
@@ -280,9 +299,9 @@ describe('HomeDataAccessService', () => {
     it('should dispatch bucketlist tried-out status when checked is false', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        jest.spyOn(service, 'selectedBucketlist').mockReturnValue({
-          id: 'bucketlist-1',
-        } as any);
+        jest
+          .spyOn(service, 'selectedBucketlist')
+          .mockReturnValue(SELECTED_BUCKETLIST);
         const setBiteTriedOutStatusSpy = jest.spyOn(
           biteTribeStoreService,
           'setBiteTriedOutStatus',
@@ -301,9 +320,7 @@ describe('HomeDataAccessService', () => {
     it('should not dispatch when no bucketlist is selected', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        jest
-          .spyOn(service, 'selectedBucketlist')
-          .mockReturnValue(undefined as any);
+        jest.spyOn(service, 'selectedBucketlist').mockReturnValue(undefined);
         const setBiteTriedOutStatusSpy = jest.spyOn(
           biteTribeStoreService,
           'setBiteTriedOutStatus',
@@ -318,7 +335,6 @@ describe('HomeDataAccessService', () => {
     it('should not dispatch when selected bucketlist is null', inject(
       [HomeDataAccessService],
       (service: HomeDataAccessService) => {
-        jest.spyOn(service, 'selectedBucketlist').mockReturnValue(null as any);
         const setBiteTriedOutStatusSpy = jest.spyOn(
           biteTribeStoreService,
           'setBiteTriedOutStatus',
@@ -335,9 +351,11 @@ describe('HomeDataAccessService', () => {
     it('should return empty array when no sourceBiteId', inject(
       [HomeDataAccessService],
       async (service: HomeDataAccessService) => {
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: undefined, restaurantIdOrName: undefined },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: undefined, restaurantIdOrName: undefined },
+          }),
+        );
         expect(result).toEqual([]);
       },
     ));
@@ -346,9 +364,11 @@ describe('HomeDataAccessService', () => {
       [HomeDataAccessService],
       async (service: HomeDataAccessService) => {
         ApiMock.biteById.mockRejectedValue(new Error('not found'));
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'id1', restaurantIdOrName: undefined },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'id1', restaurantIdOrName: undefined },
+          }),
+        );
         expect(result).toEqual([]);
       },
     ));
@@ -357,9 +377,11 @@ describe('HomeDataAccessService', () => {
       [HomeDataAccessService],
       async (service: HomeDataAccessService) => {
         ApiMock.biteById.mockResolvedValue({ id: 'id1' } as Bite);
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'id1', restaurantIdOrName: undefined },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'id1', restaurantIdOrName: undefined },
+          }),
+        );
         expect(result).toEqual([]);
       },
     ));
@@ -371,9 +393,11 @@ describe('HomeDataAccessService', () => {
           id: 'id1',
           position: { latitude: 48.0 },
         } as Bite);
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'id1', restaurantIdOrName: undefined },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'id1', restaurantIdOrName: undefined },
+          }),
+        );
         expect(result).toEqual([]);
       },
     ));
@@ -383,9 +407,11 @@ describe('HomeDataAccessService', () => {
       async (service: HomeDataAccessService) => {
         ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
         ApiMock.bitesByPosition.mockRejectedValue(new Error('network error'));
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
+          }),
+        );
         expect(result).toEqual([BITE_WITH_POSITION]);
       },
     ));
@@ -395,9 +421,11 @@ describe('HomeDataAccessService', () => {
       async (service: HomeDataAccessService) => {
         ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
         ApiMock.bitesByPosition.mockResolvedValue([]);
-        await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'biteId', restaurantIdOrName: 'place123' },
-        } as any);
+        await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'biteId', restaurantIdOrName: 'place123' },
+          }),
+        );
         expect(ApiMock.bitesByPosition).toHaveBeenCalledWith(
           expect.objectContaining({
             coords: {
@@ -422,9 +450,11 @@ describe('HomeDataAccessService', () => {
         ApiMock.bitesByPosition.mockResolvedValue([]);
         ApiMock.loadLikesForBites.mockResolvedValue([like]);
 
-        await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
-        } as any);
+        await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
+          }),
+        );
         await Promise.resolve();
 
         expect(ApiMock.loadLikesForBites).toHaveBeenCalledWith(
@@ -440,9 +470,11 @@ describe('HomeDataAccessService', () => {
     it('should not load likes when the loader returns no bites', inject(
       [HomeDataAccessService],
       async (service: HomeDataAccessService) => {
-        await service.restaurantBitesLoader({
-          params: { sourceBiteId: undefined, restaurantIdOrName: undefined },
-        } as any);
+        await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: undefined, restaurantIdOrName: undefined },
+          }),
+        );
 
         expect(ApiMock.loadLikesForBites).not.toHaveBeenCalled();
       },
@@ -458,9 +490,11 @@ describe('HomeDataAccessService', () => {
         };
         ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
         ApiMock.bitesByPosition.mockResolvedValue([otherBite]);
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'biteId', restaurantIdOrName: 'TestPlace' },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'biteId', restaurantIdOrName: 'TestPlace' },
+          }),
+        );
         expect(result[0]).toEqual(BITE_WITH_POSITION);
       },
     ));
@@ -468,16 +502,18 @@ describe('HomeDataAccessService', () => {
     it('should filter out nearby bites that have no position', inject(
       [HomeDataAccessService],
       async (service: HomeDataAccessService) => {
-        const biteNoPosition: Bite = {
+        const biteNoPosition: Partial<Bite> = {
           ...BITE_WITH_POSITION,
           id: 'noPos',
-          position: undefined as any,
+          position: undefined,
         };
         ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
         ApiMock.bitesByPosition.mockResolvedValue([biteNoPosition]);
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
+          }),
+        );
         expect(result).toEqual([BITE_WITH_POSITION]);
         expect(result).not.toContain(biteNoPosition);
       },
@@ -497,9 +533,11 @@ describe('HomeDataAccessService', () => {
           name: 'Test Place',
           id: 'r1',
         });
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'biteId', restaurantIdOrName: 'r1' },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'biteId', restaurantIdOrName: 'r1' },
+          }),
+        );
         expect(result).toContain(matchingBite);
       },
     ));
@@ -519,9 +557,11 @@ describe('HomeDataAccessService', () => {
           name: 'My Restaurant',
           id: 'r1',
         });
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'biteId', restaurantIdOrName: 'r1' },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'biteId', restaurantIdOrName: 'r1' },
+          }),
+        );
         expect(result).toContain(matchingBite);
       },
     ));
@@ -537,12 +577,14 @@ describe('HomeDataAccessService', () => {
         ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
         ApiMock.bitesByPosition.mockResolvedValue([exactBite]);
         ApiMock.loadRestaurant.mockResolvedValue(undefined);
-        const result = await service.restaurantBitesLoader({
-          params: {
-            sourceBiteId: 'biteId',
-            restaurantIdOrName: 'myrestaurant',
-          },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: {
+              sourceBiteId: 'biteId',
+              restaurantIdOrName: 'myrestaurant',
+            },
+          }),
+        );
         expect(result).toContain(exactBite);
       },
     ));
@@ -559,12 +601,14 @@ describe('HomeDataAccessService', () => {
         ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
         ApiMock.bitesByPosition.mockResolvedValue([restaurantIdBite]);
         ApiMock.loadRestaurant.mockResolvedValue(undefined);
-        const result = await service.restaurantBitesLoader({
-          params: {
-            sourceBiteId: 'biteId',
-            restaurantIdOrName: 'uniqueplace',
-          },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: {
+              sourceBiteId: 'biteId',
+              restaurantIdOrName: 'uniqueplace',
+            },
+          }),
+        );
         expect(result).toContain(restaurantIdBite);
       },
     ));
@@ -575,9 +619,11 @@ describe('HomeDataAccessService', () => {
         const nearbyBite: Bite = { ...BITE_WITH_POSITION, id: 'nearby1' };
         ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
         ApiMock.bitesByPosition.mockResolvedValue([nearbyBite]);
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
+          }),
+        );
         expect(result).toContain(nearbyBite);
       },
     ));
@@ -587,9 +633,11 @@ describe('HomeDataAccessService', () => {
       async (service: HomeDataAccessService) => {
         ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
         ApiMock.bitesByPosition.mockResolvedValue([BITE_WITH_POSITION]);
-        const result = await service.restaurantBitesLoader({
-          params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
-        } as any);
+        const result = await service.restaurantBitesLoader(
+          createLoaderParams({
+            params: { sourceBiteId: 'biteId', restaurantIdOrName: undefined },
+          }),
+        );
         expect(result.filter((b: Bite) => b.id === 'biteId').length).toBe(1);
       },
     ));
@@ -620,7 +668,7 @@ describe('HomeDataAccessService', () => {
           storeService.position$ = of({
             latitude: 48.2,
             longitude: 16.37,
-          }) as any;
+          });
         },
       ));
 
@@ -645,7 +693,7 @@ describe('HomeDataAccessService', () => {
     });
 
     describe('given the current user liked a loaded bite', () => {
-      const like = {
+      const like: Like = {
         biteId: BITE_WITH_POSITION.id,
         userId: 'test-user-id',
         likeType: 'thumbup',
@@ -655,7 +703,7 @@ describe('HomeDataAccessService', () => {
       beforeEach(inject(
         [BiteTribeStoreService],
         (storeService: BiteTribeStoreService) => {
-          storeService.likes$ = of([like]) as any;
+          storeService.likes$ = of([like]);
         },
       ));
 

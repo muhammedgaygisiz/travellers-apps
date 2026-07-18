@@ -38,10 +38,10 @@ export const restaurants = createSelector(
 
     const unsavedRestaurants =
       bites
-        .filter((bite: any) => !bite.restaurantId)
-        .reduce((uniqueRestaurants: any, bite: any) => {
+        .filter((bite) => !bite.restaurantId)
+        .reduce((uniqueRestaurants, bite) => {
           const existingRestaurant = uniqueRestaurants.find(
-            (r: any) =>
+            (r) =>
               r.name.toLowerCase().trim() === bite.place.toLowerCase().trim(),
           );
 
@@ -64,7 +64,7 @@ export const restaurants = createSelector(
           return uniqueRestaurants;
         }, [] as Restaurant[])
         .filter(
-          (restaurant: any) =>
+          (restaurant) =>
             !savedRestaurantNames.includes(restaurant.name.trim()),
         ) || [];
 

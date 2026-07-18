@@ -1,5 +1,5 @@
 import { signal, WritableSignal } from '@angular/core';
-import { Bite, Like, Restaurant } from 'model';
+import { Bite, LikeClick, Restaurant } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import { TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
@@ -325,11 +325,10 @@ describe('RestaurantService', () => {
 
   describe('likeButtonClicked', () => {
     it('should call submitLikeClick on data access service', () => {
-      const likeClick: Like = {
-        userId: 'user123',
+      const likeClick: LikeClick = {
         likeType: 'thumbup',
-        createdAt: 'createdAt',
         biteId: 'bite123',
+        action: 'save',
       };
       service.likeButtonClicked(likeClick);
       expect(mockDataAccessService.submitLikeClick).toHaveBeenCalledWith(

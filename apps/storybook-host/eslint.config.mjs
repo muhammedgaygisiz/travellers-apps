@@ -2,6 +2,9 @@ import nx from '@nx/eslint-plugin';
 import baseConfig from '../../eslint.config.mjs';
 
 export default [
+  {
+    ignores: ['apps/storybook-host/src/assets/temp/**'],
+  },
   ...baseConfig,
   ...nx.configs['flat/angular'],
   ...nx.configs['flat/angular-template'],

@@ -71,7 +71,11 @@ describe('App Selectors', () => {
 
     describe('given no slice', () => {
       it('should return undefined', () => {
-        const result = fromSelectors.currency.projector(undefined as any);
+        const result = fromSelectors.currency.projector(
+          undefined as unknown as Parameters<
+            typeof fromSelectors.currency.projector
+          >[0],
+        );
         expect(result).toBeUndefined();
       });
     });
@@ -91,7 +95,11 @@ describe('App Selectors', () => {
     });
 
     it('should return undefined when slice is undefined', () => {
-      const result = fromSelectors.isBitesLoading.projector(undefined as any);
+      const result = fromSelectors.isBitesLoading.projector(
+        undefined as unknown as Parameters<
+          typeof fromSelectors.isBitesLoading.projector
+        >[0],
+      );
       expect(result).toBeUndefined();
     });
   });
@@ -149,7 +157,9 @@ describe('App Selectors', () => {
     });
 
     it('should return "EUR" when settings or currency is not set', () => {
-      const settings = undefined as any;
+      const settings = undefined as unknown as Parameters<
+        typeof fromSelectors.preferredCurrency.projector
+      >[0];
       const result = fromSelectors.preferredCurrency.projector(settings);
       expect(result).toBe('EUR');
     });
@@ -204,7 +214,7 @@ describe('App Selectors', () => {
     it('should return false if subscriptionTier is not provided', () => {
       const stateWithoutSubscriptionTier = {
         ...mockState,
-        profile: {} as any,
+        profile: {} as unknown as AppSlice['profile'],
       };
       const result = fromSelectors.userHasSubscriptionTierOne.projector(
         stateWithoutSubscriptionTier,
@@ -224,7 +234,9 @@ describe('App Selectors', () => {
 
     it('should return false if state is not provided', () => {
       const result = fromSelectors.userHasSubscriptionTierOne.projector(
-        undefined as any,
+        undefined as unknown as Parameters<
+          typeof fromSelectors.userHasSubscriptionTierOne.projector
+        >[0],
       );
       expect(result).toBe(false);
     });
@@ -232,7 +244,7 @@ describe('App Selectors', () => {
     it('should return false if subscriptionTier is lower than 1', () => {
       const stateWithSubscriptionTier0 = {
         ...mockState,
-        profile: { subscriptionTier: 0 } as any,
+        profile: { subscriptionTier: 0 } as unknown as AppSlice['profile'],
       };
       const result = fromSelectors.userHasSubscriptionTierOne.projector(
         stateWithSubscriptionTier0,
@@ -243,7 +255,7 @@ describe('App Selectors', () => {
     it('should return true if subscriptionTier is 1', () => {
       const stateWithSubscriptionTier1 = {
         ...mockState,
-        profile: { subscriptionTier: 1 } as any,
+        profile: { subscriptionTier: 1 } as unknown as AppSlice['profile'],
       };
       const result = fromSelectors.userHasSubscriptionTierOne.projector(
         stateWithSubscriptionTier1,
@@ -254,7 +266,7 @@ describe('App Selectors', () => {
     it('should return true if subscriptionTier is more than 1', () => {
       const stateWithSubscriptionTier2 = {
         ...mockState,
-        profile: { subscriptionTier: 2 } as any,
+        profile: { subscriptionTier: 2 } as unknown as AppSlice['profile'],
       };
       const result = fromSelectors.userHasSubscriptionTierOne.projector(
         stateWithSubscriptionTier2,
@@ -277,7 +289,9 @@ describe('App Selectors', () => {
       const stateWithoutProfileMetadata = {
         ...mockState,
         profileMetadata: undefined,
-      } as any;
+      } as unknown as Parameters<
+        typeof fromSelectors.profileMetadata.projector
+      >[0];
       const result = fromSelectors.profileMetadata.projector(
         stateWithoutProfileMetadata,
       );

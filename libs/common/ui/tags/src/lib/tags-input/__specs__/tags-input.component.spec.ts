@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TagsInputComponent } from '../tags-input.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ComponentRef } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
@@ -69,7 +69,7 @@ describe('TagsInputComponent', () => {
 
     describe('given no control', () => {
       test('tagInputValueChanges should be null', () => {
-        (component.formGroup as any).removeControl('tagInput');
+        (component.formGroup as FormGroup).removeControl('tagInput');
         component.ngOnInit();
         expect(component.tagInputValueChanges$).toBeNull();
       });

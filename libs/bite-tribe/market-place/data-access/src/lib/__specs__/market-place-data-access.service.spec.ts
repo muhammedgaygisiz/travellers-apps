@@ -4,6 +4,16 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { MarketPlaceDataAccessService } from '../market-place-data-access.service';
 import { BiteTrail } from 'model';
 
+type CollectionResult = Awaited<
+  ReturnType<typeof FirebaseFirestore.getCollection>
+>;
+type CountResult = Awaited<
+  ReturnType<typeof FirebaseFirestore.getCountFromServer>
+>;
+type BiteTrailsLoaderArg = Parameters<
+  MarketPlaceDataAccessService['biteTrailsLoader']
+>[0];
+
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
     getCollection: jest.fn(),
@@ -63,7 +73,7 @@ describe(MarketPlaceDataAccessService.name, () => {
                   id,
                   data,
                 })),
-              } as any);
+              } as unknown as CollectionResult);
             }
 
             if (reference === 'biteTrails/trail-1/sells') {
@@ -72,18 +82,18 @@ describe(MarketPlaceDataAccessService.name, () => {
                   { id: 'sell-1', data: {} },
                   { id: 'sell-2', data: {} },
                 ],
-              } as any);
+              } as unknown as CollectionResult);
             }
 
             if (reference === 'biteTrails/trail-2/sells') {
               return Promise.resolve({
                 snapshots: [{ id: 'sell-1', data: {} }],
-              } as any);
+              } as unknown as CollectionResult);
             }
 
             return Promise.resolve({
               snapshots: [],
-            } as any);
+            } as unknown as CollectionResult);
           });
         jest
           .spyOn(FirebaseFirestore, 'getCountFromServer')
@@ -91,23 +101,23 @@ describe(MarketPlaceDataAccessService.name, () => {
             if (reference === 'biteTrails/trail-1/sells') {
               return Promise.resolve({
                 count: 2,
-              } as any);
+              } as unknown as CountResult);
             }
 
             if (reference === 'biteTrails/trail-2/sells') {
               return Promise.resolve({
                 count: 1,
-              } as any);
+              } as unknown as CountResult);
             }
 
             return Promise.resolve({
               count: 0,
-            } as any);
+            } as unknown as CountResult);
           });
       });
 
       it('should call getCollection with biteTrails reference', async () => {
-        await service.biteTrailsLoader({} as any);
+        await service.biteTrailsLoader({} as unknown as BiteTrailsLoaderArg);
 
         expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
           reference: 'biteTrails',
@@ -115,7 +125,9 @@ describe(MarketPlaceDataAccessService.name, () => {
       });
 
       it('should return mapped bite trails', async () => {
-        const result = await service.biteTrailsLoader({} as any);
+        const result = await service.biteTrailsLoader(
+          {} as unknown as BiteTrailsLoaderArg,
+        );
 
         expect(result).toEqual([
           {
@@ -130,7 +142,7 @@ describe(MarketPlaceDataAccessService.name, () => {
       });
 
       it('should load sells from each bite trail and map soldCount', async () => {
-        await service.biteTrailsLoader({} as any);
+        await service.biteTrailsLoader({} as unknown as BiteTrailsLoaderArg);
 
         expect(FirebaseFirestore.getCountFromServer).toHaveBeenCalledWith({
           reference: 'biteTrails/trail-1/sells',
@@ -150,7 +162,7 @@ describe(MarketPlaceDataAccessService.name, () => {
                   id,
                   data,
                 })),
-              } as any);
+              } as unknown as CollectionResult);
             }
 
             if (reference === 'biteTrails/trail-1/sells') {
@@ -159,7 +171,7 @@ describe(MarketPlaceDataAccessService.name, () => {
 
             return Promise.resolve({
               snapshots: [],
-            } as any);
+            } as unknown as CollectionResult);
           });
         jest
           .spyOn(FirebaseFirestore, 'getCountFromServer')
@@ -171,15 +183,17 @@ describe(MarketPlaceDataAccessService.name, () => {
             if (reference === 'biteTrails/trail-2/sells') {
               return Promise.resolve({
                 count: 1,
-              } as any);
+              } as unknown as CountResult);
             }
 
             return Promise.resolve({
               count: 0,
-            } as any);
+            } as unknown as CountResult);
           });
 
-        const result = await service.biteTrailsLoader({} as any);
+        const result = await service.biteTrailsLoader(
+          {} as unknown as BiteTrailsLoaderArg,
+        );
 
         expect(result).toEqual([
           {
@@ -201,11 +215,13 @@ describe(MarketPlaceDataAccessService.name, () => {
       beforeEach(() => {
         jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
           snapshots: [],
-        } as any);
+        } as unknown as CollectionResult);
       });
 
       it('should return empty array', async () => {
-        const result = await service.biteTrailsLoader({} as any);
+        const result = await service.biteTrailsLoader(
+          {} as unknown as BiteTrailsLoaderArg,
+        );
 
         expect(result).toEqual([]);
       });

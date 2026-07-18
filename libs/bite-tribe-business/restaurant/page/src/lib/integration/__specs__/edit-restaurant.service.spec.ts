@@ -3,7 +3,7 @@ import { EditRestaurantService } from '../edit-restaurant.service';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { NavController, ToastController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
-import { Address, DaySchedule, Geopoint, Restaurant } from 'model';
+import { Address, Geopoint, Restaurant } from 'model';
 
 jest.mock('bite-tribe/restaurant-data-access');
 jest.mock('@capacitor-firebase/firestore');
@@ -51,7 +51,10 @@ describe('EditRestaurantService', () => {
     it('should navigate when menuId is provided', () => {
       service.gotoEditMenu('rest1', 'menu1');
       expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
-        'restaurant', 'rest1', 'menu', 'menu1',
+        'restaurant',
+        'rest1',
+        'menu',
+        'menu1',
       ]);
     });
 
@@ -70,18 +73,24 @@ describe('EditRestaurantService', () => {
     it('should create menu and navigate on success', async () => {
       const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
       (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
-      (dataAccessMock.createMenuForRestaurant as jest.Mock).mockResolvedValue('menu1');
+      (dataAccessMock.createMenuForRestaurant as jest.Mock).mockResolvedValue(
+        'menu1',
+      );
 
       await service.createMenu();
 
-      expect(dataAccessMock.createMenuForRestaurant).toHaveBeenCalledWith('rest1');
+      expect(dataAccessMock.createMenuForRestaurant).toHaveBeenCalledWith(
+        'rest1',
+      );
       expect(navControllerMock.navigateForward).toHaveBeenCalled();
     });
 
     it('should show danger toast on error', async () => {
       const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
       (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
-      (dataAccessMock.createMenuForRestaurant as jest.Mock).mockRejectedValue(new Error('fail'));
+      (dataAccessMock.createMenuForRestaurant as jest.Mock).mockRejectedValue(
+        new Error('fail'),
+      );
 
       await service.createMenu();
 
@@ -100,13 +109,18 @@ describe('EditRestaurantService', () => {
     it('should save links and show success toast', async () => {
       const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
       (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
-      (dataAccessMock.submitSocialMediaLinks as jest.Mock).mockResolvedValue(undefined);
+      (dataAccessMock.submitSocialMediaLinks as jest.Mock).mockResolvedValue(
+        undefined,
+      );
 
-      await service.submitSocialMediaLinks({ links: [{ network: 'facebook', url: 'https://fb.com' }] });
+      await service.submitSocialMediaLinks({
+        links: [{ network: 'facebook', url: 'https://fb.com' }],
+      });
 
-      expect(dataAccessMock.submitSocialMediaLinks).toHaveBeenCalledWith('rest1', [
-        { network: 'facebook', url: 'https://fb.com' },
-      ]);
+      expect(dataAccessMock.submitSocialMediaLinks).toHaveBeenCalledWith(
+        'rest1',
+        [{ network: 'facebook', url: 'https://fb.com' }],
+      );
       expect(toastControllerMock.create).toHaveBeenCalledWith(
         expect.objectContaining({ color: 'success' }),
       );
@@ -115,9 +129,13 @@ describe('EditRestaurantService', () => {
     it('should show danger toast on error', async () => {
       const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
       (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
-      (dataAccessMock.submitSocialMediaLinks as jest.Mock).mockRejectedValue(new Error('fail'));
+      (dataAccessMock.submitSocialMediaLinks as jest.Mock).mockRejectedValue(
+        new Error('fail'),
+      );
 
-      await service.submitSocialMediaLinks({ links: [{ network: 'facebook', url: 'https://fb.com' }] });
+      await service.submitSocialMediaLinks({
+        links: [{ network: 'facebook', url: 'https://fb.com' }],
+      });
 
       expect(toastControllerMock.create).toHaveBeenCalledWith(
         expect.objectContaining({ color: 'danger' }),
@@ -134,7 +152,9 @@ describe('EditRestaurantService', () => {
     it('should save description and show success toast', async () => {
       const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
       (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
-      (dataAccessMock.submitDescription as jest.Mock).mockResolvedValue(undefined);
+      (dataAccessMock.submitDescription as jest.Mock).mockResolvedValue(
+        undefined,
+      );
 
       await service.submitDescription('A great place');
 
@@ -150,7 +170,9 @@ describe('EditRestaurantService', () => {
     it('should show danger toast on error', async () => {
       const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
       (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
-      (dataAccessMock.submitDescription as jest.Mock).mockRejectedValue(new Error('fail'));
+      (dataAccessMock.submitDescription as jest.Mock).mockRejectedValue(
+        new Error('fail'),
+      );
 
       await service.submitDescription('A great place');
 
@@ -169,14 +191,24 @@ describe('EditRestaurantService', () => {
     it('should save opening hours and show success toast', async () => {
       const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
       (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
-      (dataAccessMock.submitOpeningHours as jest.Mock).mockResolvedValue(undefined);
+      (dataAccessMock.submitOpeningHours as jest.Mock).mockResolvedValue(
+        undefined,
+      );
 
       await service.submitOpeningHours([
-        { day: 'monday', isOpen: true, timeRanges: [{ from: '09:00', to: '17:00' }] },
+        {
+          day: 'monday',
+          isOpen: true,
+          timeRanges: [{ from: '09:00', to: '17:00' }],
+        },
       ]);
 
       expect(dataAccessMock.submitOpeningHours).toHaveBeenCalledWith('rest1', [
-        { day: 'monday', isOpen: true, timeRanges: [{ from: '09:00', to: '17:00' }] },
+        {
+          day: 'monday',
+          isOpen: true,
+          timeRanges: [{ from: '09:00', to: '17:00' }],
+        },
       ]);
       expect(toastControllerMock.create).toHaveBeenCalledWith(
         expect.objectContaining({ color: 'success' }),
@@ -186,7 +218,9 @@ describe('EditRestaurantService', () => {
     it('should show danger toast on error', async () => {
       const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
       (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
-      (dataAccessMock.submitOpeningHours as jest.Mock).mockRejectedValue(new Error('fail'));
+      (dataAccessMock.submitOpeningHours as jest.Mock).mockRejectedValue(
+        new Error('fail'),
+      );
 
       await service.submitOpeningHours([]);
 
@@ -216,7 +250,10 @@ describe('EditRestaurantService', () => {
 
       await service.submitAddress(address);
 
-      expect(dataAccessMock.submitAddress).toHaveBeenCalledWith('rest1', address);
+      expect(dataAccessMock.submitAddress).toHaveBeenCalledWith(
+        'rest1',
+        address,
+      );
       expect(toastControllerMock.create).toHaveBeenCalledWith(
         expect.objectContaining({ color: 'success' }),
       );
@@ -225,7 +262,9 @@ describe('EditRestaurantService', () => {
     it('should show danger toast on error', async () => {
       const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
       (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
-      (dataAccessMock.submitAddress as jest.Mock).mockRejectedValue(new Error('fail'));
+      (dataAccessMock.submitAddress as jest.Mock).mockRejectedValue(
+        new Error('fail'),
+      );
 
       await service.submitAddress(address);
 
@@ -250,7 +289,10 @@ describe('EditRestaurantService', () => {
 
       await service.submitPosition(position);
 
-      expect(dataAccessMock.submitPosition).toHaveBeenCalledWith('rest1', position);
+      expect(dataAccessMock.submitPosition).toHaveBeenCalledWith(
+        'rest1',
+        position,
+      );
       expect(toastControllerMock.create).toHaveBeenCalledWith(
         expect.objectContaining({ color: 'success' }),
       );
@@ -259,7 +301,9 @@ describe('EditRestaurantService', () => {
     it('should show danger toast on error', async () => {
       const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
       (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
-      (dataAccessMock.submitPosition as jest.Mock).mockRejectedValue(new Error('fail'));
+      (dataAccessMock.submitPosition as jest.Mock).mockRejectedValue(
+        new Error('fail'),
+      );
 
       await service.submitPosition(position);
 

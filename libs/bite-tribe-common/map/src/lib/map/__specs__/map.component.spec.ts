@@ -3,7 +3,13 @@ import { ComponentRef } from '@angular/core';
 import { MapComponent } from '../map.component';
 import { Geopoint } from 'model';
 import { DEFAULT_ZOOM } from '../model/default-zoom';
+import L from 'leaflet';
 import SpyInstance = jest.SpyInstance;
+
+interface MockMarker {
+  on: jest.Mock;
+  options: L.MarkerOptions;
+}
 
 const mockMap = {
   setView: jest.fn(),
@@ -17,48 +23,50 @@ const mockMap = {
 
 const zoomToGpsOrDefaultMock = jest.fn();
 jest.mock('../utils/zoom-to-gps-or-default', () => ({
-  zoomToGpsOrDefault: (...args: any): void => zoomToGpsOrDefaultMock(...args),
+  zoomToGpsOrDefault: (...args: unknown[]): void =>
+    zoomToGpsOrDefaultMock(...args),
 }));
 
 const fitMapToMarkersMock = jest.fn();
 jest.mock('../utils/fit-map-to-markers', () => ({
-  fitMapToMarkers: (...args: any): void => fitMapToMarkersMock(...args),
+  fitMapToMarkers: (...args: unknown[]): void => fitMapToMarkersMock(...args),
 }));
 
 const geopointsToMarkersMock = jest.fn();
 jest.mock('../utils/geopoints-to-markers', () => ({
-  geopointsToMarkers: (...args: any): void => geopointsToMarkersMock(...args),
+  geopointsToMarkers: (...args: unknown[]): void =>
+    geopointsToMarkersMock(...args),
 }));
 
 const clearMarkersMock = jest.fn();
 jest.mock('../utils/clear-markers', () => ({
-  clearMarkers: (...args: any): void => clearMarkersMock(...args),
+  clearMarkers: (...args: unknown[]): void => clearMarkersMock(...args),
 }));
 
 const createMapMock = jest.fn();
 jest.mock('../utils/create-map', () => ({
-  createMap: (...args: any): void => createMapMock(...args),
+  createMap: (...args: unknown[]): void => createMapMock(...args),
 }));
 
 const createOpenstreetmapLayerMock = jest.fn();
 jest.mock('../utils/create-openstreetmap-layer', () => ({
-  createOpenstreetmapLayer: (...args: any): void =>
+  createOpenstreetmapLayer: (...args: unknown[]): void =>
     createOpenstreetmapLayerMock(...args),
 }));
 
 const zoomToMarkersMock = jest.fn();
 jest.mock('../utils/zoom-to-markers', () => ({
-  zoomToMarkers: (...args: any): void => zoomToMarkersMock(...args),
+  zoomToMarkers: (...args: unknown[]): void => zoomToMarkersMock(...args),
 }));
 
 const zoomToGeopointMock = jest.fn();
 jest.mock('../utils/zoom-to-geopoint', () => ({
-  zoomToGeopoint: (...args: any): void => zoomToGeopointMock(...args),
+  zoomToGeopoint: (...args: unknown[]): void => zoomToGeopointMock(...args),
 }));
 
 const focusMarkerMock = jest.fn();
 jest.mock('../utils/focus-marker', () => ({
-  focusMarker: (...args: any): void => focusMarkerMock(...args),
+  focusMarker: (...args: unknown[]): void => focusMarkerMock(...args),
 }));
 
 describe('MapComponent', () => {
@@ -113,7 +121,7 @@ describe('MapComponent', () => {
   });
 
   describe('enableZoom', () => {
-    let mapDiv: any;
+    let mapDiv: HTMLDivElement;
 
     beforeEach(() => {
       mapDiv = document.createElement('div');
@@ -156,7 +164,7 @@ describe('MapComponent', () => {
   });
 
   describe('createMapEffect', () => {
-    let mapDiv: any;
+    let mapDiv: HTMLDivElement;
     let emitMarkerClickSpy: SpyInstance;
 
     beforeEach(() => {
@@ -214,8 +222,8 @@ describe('MapComponent', () => {
     });
 
     describe('addMapClickEvent via createMapEffect', () => {
-      let mapDiv: any;
-      let mockClickEvent: any;
+      let mapDiv: HTMLDivElement;
+      let mockClickEvent: { latlng: { lat: number; lng: number } };
       let emitClickOnMapSpy: SpyInstance;
       let emitClickOnMarkerSpy: SpyInstance;
 
@@ -329,9 +337,9 @@ describe('MapComponent', () => {
     });
 
     describe('addMarkerClickEvent via createMapEffect', () => {
-      let mapDiv: any;
-      let mockMarker1: any;
-      let mockMarker2: any;
+      let mapDiv: HTMLDivElement;
+      let mockMarker1: MockMarker;
+      let mockMarker2: MockMarker;
 
       beforeEach(() => {
         mapDiv = document.createElement('div');
@@ -352,7 +360,10 @@ describe('MapComponent', () => {
           .mockImplementation();
 
         geopointsToMarkersMock.mockImplementation(() => {
-          component['markers'] = [mockMarker1, mockMarker2];
+          component['markers'] = [
+            mockMarker1 as unknown as L.Marker,
+            mockMarker2 as unknown as L.Marker,
+          ];
           return [mockMarker1, mockMarker2];
         });
 
@@ -433,11 +444,11 @@ describe('MapComponent', () => {
       });
 
       it('should not emit clickOnMarker when geopoints is undefined', () => {
-        const geopoints = undefined as any;
+        const geopoints: Geopoint[] | undefined = undefined;
 
         componentRef.setInput('emitMarkerClick', true);
         componentRef.setInput('geopoints', geopoints);
-        component['markers'] = [mockMarker2];
+        component['markers'] = [mockMarker2 as unknown as L.Marker];
         componentRef.changeDetectorRef.detectChanges();
 
         const clickHandler = mockMarker2.on;
@@ -454,7 +465,10 @@ describe('MapComponent', () => {
         };
 
         geopointsToMarkersMock.mockImplementation(() => {
-          component['markers'] = [mockMarker1, mockMarkerWithoutTitle];
+          component['markers'] = [
+            mockMarker1 as unknown as L.Marker,
+            mockMarkerWithoutTitle as unknown as L.Marker,
+          ];
           return [mockMarker1, mockMarkerWithoutTitle];
         });
 
@@ -506,7 +520,7 @@ describe('MapComponent', () => {
 
         // Manually trigger marker click since no markers would be created
         geopointsToMarkersMock.mockImplementation(() => {
-          component['markers'] = [mockMarker1];
+          component['markers'] = [mockMarker1 as unknown as L.Marker];
           return [mockMarker1];
         });
 
@@ -651,7 +665,7 @@ describe('MapComponent', () => {
     });
 
     it('should remove map when map exists', () => {
-      component['map'] = mockMap as any;
+      component['map'] = mockMap as unknown as L.Map;
 
       component.ngOnDestroy();
 
@@ -659,7 +673,7 @@ describe('MapComponent', () => {
     });
 
     it('should not throw error when map does not exist', () => {
-      component['map'] = undefined as any;
+      component['map'] = undefined as unknown as L.Map;
 
       expect(() => component.ngOnDestroy()).not.toThrow();
       expect(mockMap.remove).not.toHaveBeenCalled();

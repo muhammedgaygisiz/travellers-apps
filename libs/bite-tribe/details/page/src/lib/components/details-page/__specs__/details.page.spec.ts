@@ -3,6 +3,7 @@ import { DetailsPage } from '../details.page';
 import { PageComponent } from 'common/ui/page';
 import { ReactiveFormsModule } from '@angular/forms';
 import {
+  AlertButton,
   AlertController,
   PopoverController,
   provideIonicAngular,
@@ -368,7 +369,8 @@ describe('DetailsPage', () => {
         (AppLauncher.canOpenUrl as jest.Mock).mockResolvedValue({
           value: true,
         });
-        const alert = { present: jest.fn() } as any;
+        const alert = document.createElement('ion-alert');
+        jest.spyOn(alert, 'present').mockResolvedValue();
         const createSpy = jest
           .spyOn(alertController, 'create')
           .mockResolvedValue(alert);
@@ -474,15 +476,13 @@ describe('DetailsPage', () => {
       componentRef.setInput('bite', mockBite);
 
       // Mock alert controller to capture the buttons
-      let capturedButtons: any[] = [];
-      jest
-        .spyOn(alertController, 'create')
-        .mockImplementation((options: any) => {
-          capturedButtons = options.buttons;
-          return Promise.resolve({
-            present: jest.fn(),
-          } as any);
-        });
+      let capturedButtons: AlertButton[] = [];
+      jest.spyOn(alertController, 'create').mockImplementation((options) => {
+        capturedButtons = (options?.buttons ?? []).filter(
+          (button): button is AlertButton => typeof button !== 'string',
+        );
+        return Promise.resolve(document.createElement('ion-alert'));
+      });
 
       // Start navigation flow to trigger alert creation
       await component.openNavigation();
@@ -494,7 +494,7 @@ describe('DetailsPage', () => {
       expect(appleMapsButton).toBeDefined();
 
       // Call the handler
-      appleMapsButton.handler();
+      appleMapsButton?.handler?.(undefined);
 
       // Check if window.open was called with correct URL
       expect(window.open).toHaveBeenCalledWith(
@@ -508,15 +508,13 @@ describe('DetailsPage', () => {
       componentRef.setInput('bite', mockBite);
 
       // Mock alert controller to capture the buttons
-      let capturedButtons: any[] = [];
-      jest
-        .spyOn(alertController, 'create')
-        .mockImplementation((options: any) => {
-          capturedButtons = options.buttons;
-          return Promise.resolve({
-            present: jest.fn(),
-          } as any);
-        });
+      let capturedButtons: AlertButton[] = [];
+      jest.spyOn(alertController, 'create').mockImplementation((options) => {
+        capturedButtons = (options?.buttons ?? []).filter(
+          (button): button is AlertButton => typeof button !== 'string',
+        );
+        return Promise.resolve(document.createElement('ion-alert'));
+      });
 
       await component.openNavigation();
 
@@ -525,7 +523,7 @@ describe('DetailsPage', () => {
       );
       expect(googleMapsButton).toBeDefined();
 
-      googleMapsButton.handler();
+      googleMapsButton?.handler?.(undefined);
 
       expect(window.open).toHaveBeenCalledWith(
         'comgooglemaps://?daddr=10,20&directionsmode=driving',

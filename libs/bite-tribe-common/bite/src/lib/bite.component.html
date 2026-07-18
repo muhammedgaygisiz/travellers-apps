@@ -18,7 +18,10 @@
           [src]="biteData | getImage"
           height="220"
           loading="lazy"
+          role="button"
+          tabindex="0"
           (click)="biteClick.emit(biteData)"
+          (keydown.enter)="biteClick.emit(biteData)"
         />
       }
     </div>

@@ -46,7 +46,7 @@ describe('ProfileComponent', () => {
 
     describe('given a user without subscriptionTier', () => {
       it('should return 0', () => {
-        compRef.setInput('user', {} as any);
+        compRef.setInput('user', {});
 
         expect(component.subscriptionTier()).toBe(0);
       });
@@ -54,7 +54,7 @@ describe('ProfileComponent', () => {
 
     describe('given a user with subscriptionTier 1', () => {
       it('should return 1', () => {
-        compRef.setInput('user', { subscriptionTier: 1 } as any);
+        compRef.setInput('user', { subscriptionTier: 1 });
 
         expect(component.subscriptionTier()).toBe(1);
       });
@@ -63,13 +63,13 @@ describe('ProfileComponent', () => {
 
   describe('followerCount', () => {
     it('should return 0 if followers is 0', () => {
-      compRef.setInput('profileMetadata', { followers: 0 } as any);
+      compRef.setInput('profileMetadata', { followers: 0 });
 
       expect(component.followerCount()).toBe(0);
     });
 
     it('should return the length of followers if followers is defined', () => {
-      compRef.setInput('profileMetadata', { followers: 3 } as any);
+      compRef.setInput('profileMetadata', { followers: 3 });
 
       expect(component.followerCount()).toBe(3);
     });
@@ -77,13 +77,13 @@ describe('ProfileComponent', () => {
 
   describe('followingCount', () => {
     it('should return 0 if following is 0', () => {
-      compRef.setInput('profileMetadata', { following: 0 } as any);
+      compRef.setInput('profileMetadata', { following: 0 });
 
       expect(component.followingCount()).toBe(0);
     });
 
     it('should return the length of following if following is defined', () => {
-      compRef.setInput('profileMetadata', { following: 5 } as any);
+      compRef.setInput('profileMetadata', { following: 5 });
 
       expect(component.followingCount()).toBe(5);
     });
@@ -105,7 +105,7 @@ describe('ProfileComponent', () => {
 
     it('should prefer the aggregate biteCount from the user document', () => {
       compRef.setInput('bites', [{}, {}, {}]);
-      compRef.setInput('user', { biteCount: 42 } as any);
+      compRef.setInput('user', { biteCount: 42 });
 
       expect(component.biteCount()).toBe(42);
     });
@@ -113,7 +113,7 @@ describe('ProfileComponent', () => {
     it('should fall back to the loaded bites when the user has no aggregate', () => {
       const bitesArray = [{}, {}];
       compRef.setInput('bites', bitesArray);
-      compRef.setInput('user', {} as any);
+      compRef.setInput('user', {});
 
       expect(component.biteCount()).toBe(bitesArray.length);
     });
@@ -195,7 +195,7 @@ describe('ProfileComponent', () => {
       compRef.setInput('user', {
         displayName: 'mo',
         userId: 'user1',
-      } as any);
+      });
       compRef.setInput('bites', []);
 
       fixture.detectChanges();
@@ -214,7 +214,7 @@ describe('ProfileComponent', () => {
         displayName: 'mo',
         isOrganisation: true,
         userId: 'user1',
-      } as any);
+      });
       compRef.setInput('biteTrails', []);
 
       fixture.detectChanges();
@@ -230,7 +230,7 @@ describe('ProfileComponent', () => {
   });
 
   describe('isUnfollowedUser', () => {
-    const userMock = { userId: 'user1' } as any;
+    const userMock = { userId: 'user1' };
     beforeEach(() => {
       compRef.setInput('user', userMock);
       compRef.setInput('userId', userMock.userId);
@@ -251,7 +251,7 @@ describe('ProfileComponent', () => {
     });
 
     it('should return false if profile owners userId in not defined', () => {
-      compRef.setInput('user', {} as any);
+      compRef.setInput('user', {});
       expect(component.isUnfollowedUser()).toBe(false);
     });
   });
@@ -262,7 +262,7 @@ describe('ProfileComponent', () => {
         displayName: 'mo',
         city: 'Zurich',
         userId: 'user1',
-      } as any);
+      });
 
       fixture.detectChanges();
 
@@ -277,7 +277,7 @@ describe('ProfileComponent', () => {
       compRef.setInput('user', {
         city: 'Zurich',
         userId: 'user1',
-      } as any);
+      });
 
       fixture.detectChanges();
 
@@ -296,7 +296,7 @@ describe('ProfileComponent', () => {
         fullName: 'Muhammed Gaygisiz',
         city: 'Zurich',
         userId: 'user1',
-      } as any);
+      });
 
       fixture.detectChanges();
 
@@ -314,7 +314,7 @@ describe('ProfileComponent', () => {
         displayName: 'mo',
         city: 'Zurich',
         userId: 'user1',
-      } as any);
+      });
 
       fixture.detectChanges();
 
@@ -329,7 +329,7 @@ describe('ProfileComponent', () => {
       compRef.setInput('user', {
         displayName: 'mo',
         userId: 'user1',
-      } as any);
+      });
 
       fixture.detectChanges();
 
@@ -345,7 +345,7 @@ describe('ProfileComponent', () => {
 
   describe('onFollow', () => {
     it('should emit followClick with user when user is defined', () => {
-      const userMock = { userId: 'user1' } as any;
+      const userMock = { userId: 'user1' };
       compRef.setInput('user', userMock);
       const followClickSpy = jest.spyOn(component.followButtonClick, 'emit');
 
@@ -366,7 +366,7 @@ describe('ProfileComponent', () => {
 
   describe('unfollow', () => {
     it('should emit unfollowClick with user when user is defined', () => {
-      const userMock = { userId: 'user1' } as any;
+      const userMock = { userId: 'user1' };
       compRef.setInput('user', userMock);
       const unfollowClickSpy = jest.spyOn(
         component.unfollowButtonClick,
@@ -438,7 +438,7 @@ describe('ProfileComponent', () => {
         target: {
           complete: completeSpy,
         },
-      } as any;
+      } as unknown as Parameters<ProfileComponent['onIonInfinite']>[0];
 
       component.onIonInfinite(event);
 

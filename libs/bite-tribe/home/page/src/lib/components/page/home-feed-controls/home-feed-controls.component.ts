@@ -96,7 +96,7 @@ export class HomeFeedControlsComponent {
       distanceFilter: string;
       priceFilter: number;
     },
-    modal: IonModal,
+    modal: Pick<IonModal, 'dismiss'>,
   ): void {
     modal.dismiss();
 
@@ -105,7 +105,7 @@ export class HomeFeedControlsComponent {
     }
   }
 
-  onFiltersClear(modal: IonModal): void {
+  onFiltersClear(modal: Pick<IonModal, 'dismiss'>): void {
     modal.dismiss();
     this.filterCleared.emit();
   }

@@ -3,25 +3,37 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { RestaurantComponent } from '../restaurant.component';
-import { Restaurant } from 'model';
+import type { Bite, Geopoint, Restaurant } from 'model';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
+import type { getDistance } from '../../../../utils/get-distance';
+import type { getPosition } from '../../../../utils/get-position';
 
 jest.mock('leaflet');
 
-const getDistanceMock = jest.fn();
+const getDistanceMock = jest.fn<
+  ReturnType<typeof getDistance>,
+  Parameters<typeof getDistance>
+>();
 jest.mock('../../../../utils/get-distance', () => ({
-  getDistance: (...args: any): void => getDistanceMock(...args),
+  getDistance: (
+    ...args: Parameters<typeof getDistance>
+  ): ReturnType<typeof getDistance> => getDistanceMock(...args),
 }));
 
-const getPositionMock = jest.fn();
+const getPositionMock = jest.fn<
+  ReturnType<typeof getPosition>,
+  Parameters<typeof getPosition>
+>();
 jest.mock('../../../../utils/get-position', () => ({
-  getPosition: (...args: any): void => getPositionMock(...args),
+  getPosition: (
+    ...args: Parameters<typeof getPosition>
+  ): ReturnType<typeof getPosition> => getPositionMock(...args),
 }));
 
-const uniqueBitesByNameMock = jest.fn();
+const uniqueBitesByNameMock = jest.fn<Bite[], [Bite[]]>();
 jest.mock('../../../../utils/unique-bites-by-name', () => ({
-  uniqueBitesByName: (...args: any): void => uniqueBitesByNameMock(...args),
+  uniqueBitesByName: (bites: Bite[]): Bite[] => uniqueBitesByNameMock(bites),
 }));
 
 addNecessaryIcons();
@@ -33,6 +45,23 @@ const MockTranslocoService = {
   },
   langChanges$: of(),
 };
+
+const createBite = (overrides: Partial<Bite> = {}): Bite => ({
+  id: 'bite-1',
+  name: 'Bite',
+  image: '',
+  place: 'Bite Place',
+  price: 0,
+  position: { latitude: 0, longitude: 0 },
+  ...overrides,
+});
+
+const createRestaurant = (overrides: Partial<Restaurant> = {}): Restaurant => ({
+  id: 'restaurant-1',
+  name: 'Restaurant',
+  position: { latitude: 0, longitude: 0 },
+  ...overrides,
+});
 
 describe('RestaurantComponent', () => {
   let component: RestaurantComponent;
@@ -63,10 +92,10 @@ describe('RestaurantComponent', () => {
   describe('averageBiteRating', () => {
     it('should return average rating', () => {
       componentRef.setInput('bites', [
-        { rating: 4 },
-        { rating: 5 },
-        { rating: 3 },
-      ] as any);
+        createBite({ rating: 4 }),
+        createBite({ rating: 5 }),
+        createBite({ rating: 3 }),
+      ]);
       expect(component.averageBiteRating()).toBe(4);
     });
 
@@ -82,14 +111,18 @@ describe('RestaurantComponent', () => {
 
     it('should round if many decimals result from average', () => {
       componentRef.setInput('bites', [
-        { rating: 4 },
-        { rating: 5.512312 },
-      ] as any);
+        createBite({ rating: 4 }),
+        createBite({ rating: 5.512312 }),
+      ]);
       expect(component.averageBiteRating()).toBe(4.8);
     });
 
     it('should ignore bites without rating when calculating average', () => {
-      componentRef.setInput('bites', [{ rating: 4 }, {}, { rating: 2 }] as any);
+      componentRef.setInput('bites', [
+        createBite({ rating: 4 }),
+        createBite(),
+        createBite({ rating: 2 }),
+      ]);
       expect(component.averageBiteRating()).toBe(3);
       expect(component.ratedBiteCount()).toBe(2);
     });
@@ -101,15 +134,15 @@ describe('RestaurantComponent', () => {
       componentRef.setInput('restaurant', undefined);
     });
     it('should return restaurant name if available', () => {
-      componentRef.setInput('restaurant', {
-        id: '1',
-        name: 'Test Restaurant',
-      } as Restaurant);
+      componentRef.setInput(
+        'restaurant',
+        createRestaurant({ id: '1', name: 'Test Restaurant' }),
+      );
       expect(component.placeName()).toBe('Test Restaurant');
     });
 
     it('should return bite place if restaurant name not available', () => {
-      componentRef.setInput('bite', { place: 'Bite Place' });
+      componentRef.setInput('bite', createBite({ place: 'Bite Place' }));
       expect(component.placeName()).toBe('Bite Place');
     });
 
@@ -121,51 +154,45 @@ describe('RestaurantComponent', () => {
   describe('placeDistance', () => {
     it('should return distance from getDistance', () => {
       getDistanceMock.mockReturnValue('5 km');
-      componentRef.setInput('restaurant', {
+      const restaurant = createRestaurant({
         id: '1',
         name: 'Test Restaurant',
-      } as Restaurant);
-      componentRef.setInput('bite', { place: 'Bite Place' });
+      });
+      const bite = createBite({ place: 'Bite Place' });
+      componentRef.setInput('restaurant', restaurant);
+      componentRef.setInput('bite', bite);
       expect(component.placeDistance()).toBe('5 km');
-      expect(getDistanceMock).toHaveBeenCalledWith(
-        { id: '1', name: 'Test Restaurant' },
-        { place: 'Bite Place' },
-      );
+      expect(getDistanceMock).toHaveBeenCalledWith(restaurant, bite);
     });
   });
 
   describe('position', () => {
     it('should return position from getPosition', () => {
-      getPositionMock.mockReturnValue({ lat: 10, lng: 20 });
-      componentRef.setInput('restaurant', {
+      const position: Geopoint = { latitude: 10, longitude: 20 };
+      getPositionMock.mockReturnValue(position);
+      const restaurant = createRestaurant({
         id: '1',
         name: 'Test Restaurant',
-      } as Restaurant);
-      componentRef.setInput('bite', { place: 'Bite Place' });
-      expect(component.position()).toEqual({ lat: 10, lng: 20 });
-      expect(getPositionMock).toHaveBeenCalledWith(
-        { id: '1', name: 'Test Restaurant' },
-        { place: 'Bite Place' },
-      );
+      });
+      const bite = createBite({ place: 'Bite Place' });
+      componentRef.setInput('restaurant', restaurant);
+      componentRef.setInput('bite', bite);
+      expect(component.position()).toEqual(position);
+      expect(getPositionMock).toHaveBeenCalledWith(restaurant, bite);
     });
   });
 
   describe('uniqueBites', () => {
     it('should return unique bites based on id', () => {
       const bites = [
-        { id: '1', name: 'Bite 1' },
-        { id: '2', name: 'Bite 2' },
-        { id: '1', name: 'Bite 1 Duplicate' },
+        createBite({ id: '1', name: 'Bite 1' }),
+        createBite({ id: '2', name: 'Bite 2' }),
+        createBite({ id: '1', name: 'Bite 1 Duplicate' }),
       ];
-      uniqueBitesByNameMock.mockReturnValue([
-        { id: '1', name: 'Bite 1' },
-        { id: '2', name: 'Bite 2' },
-      ]);
+      const uniqueBites = [bites[0], bites[1]];
+      uniqueBitesByNameMock.mockReturnValue(uniqueBites);
       componentRef.setInput('bites', bites);
-      expect(component.uniqueBites()).toEqual([
-        { id: '1', name: 'Bite 1' },
-        { id: '2', name: 'Bite 2' },
-      ]);
+      expect(component.uniqueBites()).toEqual(uniqueBites);
       expect(uniqueBitesByNameMock).toHaveBeenCalledWith(bites);
     });
 
@@ -193,7 +220,7 @@ describe('RestaurantComponent', () => {
     });
 
     it('should not set invalid segment', () => {
-      component.setSelectedSegment('invalid' as any);
+      component.setSelectedSegment('invalid');
       expect(component.selectedSegment()).toBe('bites'); // default value
     });
   });
@@ -201,10 +228,10 @@ describe('RestaurantComponent', () => {
   describe('uniqueTags', () => {
     it('should return unique tags from all bites', () => {
       componentRef.setInput('bites', [
-        { tags: ['burger', 'spicy'] },
-        { tags: ['burger', 'vegan'] },
-        { tags: ['spicy'] },
-      ] as any);
+        createBite({ tags: ['burger', 'spicy'] }),
+        createBite({ tags: ['burger', 'vegan'] }),
+        createBite({ tags: ['spicy'] }),
+      ]);
       expect(component.uniqueTags()).toEqual(
         expect.arrayContaining(['burger', 'spicy', 'vegan']),
       );
@@ -213,9 +240,9 @@ describe('RestaurantComponent', () => {
 
     it('should return empty array if no bites have tags', () => {
       componentRef.setInput('bites', [
-        { name: 'Bite A' },
-        { name: 'Bite B' },
-      ] as any);
+        createBite({ name: 'Bite A' }),
+        createBite({ name: 'Bite B' }),
+      ]);
       expect(component.uniqueTags()).toEqual([]);
     });
 
@@ -226,9 +253,9 @@ describe('RestaurantComponent', () => {
 
     it('should handle bites with undefined tags gracefully', () => {
       componentRef.setInput('bites', [
-        { tags: ['sushi'] },
-        { tags: undefined },
-      ] as any);
+        createBite({ tags: ['sushi'] }),
+        createBite({ tags: undefined }),
+      ]);
       expect(component.uniqueTags()).toEqual(['sushi']);
     });
   });

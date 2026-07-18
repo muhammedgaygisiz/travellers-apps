@@ -15,7 +15,10 @@ type LeafletWithUserMarker = typeof L & {
   ) => L.Marker;
 };
 
-export const addGpsMarker = (gpsPosition: Geopoint, map: L.Map): void => {
+export const addGpsMarker = (
+  gpsPosition: Geopoint | null,
+  map: L.Map | null,
+): void => {
   if (!gpsPosition || !map) return;
 
   const latLng = geopointToLatLng(gpsPosition);

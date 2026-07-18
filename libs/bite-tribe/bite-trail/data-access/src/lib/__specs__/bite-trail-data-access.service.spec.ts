@@ -3,7 +3,7 @@ import { BiteTrailDataAccessService } from '../bite-trail-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { signal } from '@angular/core';
 import { of } from 'rxjs';
-import type { Bite } from 'model';
+import type { Bite, BiteTrail, Bucketlist, Geopoint } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 
 const biteTrailIdSignal = signal<string | undefined>(undefined);
@@ -30,8 +30,44 @@ const makeBite = (overrides: Partial<Bite> = {}): Bite =>
     ...overrides,
   }) as unknown as Bite;
 
+const makeBiteTrail = (overrides: Partial<BiteTrail> = {}): BiteTrail => ({
+  id: 'trail-1',
+  ownerId: 'owner-1',
+  name: 'My Trail',
+  biteIds: [],
+  imagePath: '',
+  ownerImagePath: '',
+  ownerName: 'Owner',
+  location: 'Zurich',
+  description: '',
+  price: 0,
+  currency: 'CHF',
+  ...overrides,
+});
+
+const loaderParams = <T>(
+  params: T,
+): {
+  params: T;
+  abortSignal: AbortSignal;
+  previous: { status: 'idle' };
+} => ({
+  params,
+  abortSignal: new AbortController().signal,
+  previous: { status: 'idle' as const },
+});
+
+type TestResource<T> = { value: () => T | undefined };
+type MutableService = {
+  biteTrail: TestResource<BiteTrail>;
+  bites: TestResource<Bite[]>;
+  gpsPosition: () => Geopoint | null | undefined;
+  bucketlists: () => Bucketlist[];
+};
+
 describe(BiteTrailDataAccessService.name, () => {
   let service: BiteTrailDataAccessService;
+  let mutableService: MutableService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -42,6 +78,7 @@ describe(BiteTrailDataAccessService.name, () => {
     });
 
     service = TestBed.inject(BiteTrailDataAccessService);
+    mutableService = service as unknown as MutableService;
     biteTrailIdSignal.set(undefined);
     jest.clearAllMocks();
   });
@@ -62,31 +99,35 @@ describe(BiteTrailDataAccessService.name, () => {
     });
 
     it('should return true when bite trail price is 0', () => {
-      (service as any).biteTrail = { value: signal({ price: 0 }) };
+      mutableService.biteTrail = {
+        value: signal(makeBiteTrail({ price: 0 })),
+      };
       expect(service.isFree()).toBe(true);
     });
 
     it('should return false when bite trail price is greater than 0', () => {
-      (service as any).biteTrail = { value: signal({ price: 10 }) };
+      mutableService.biteTrail = {
+        value: signal(makeBiteTrail({ price: 10 })),
+      };
       expect(service.isFree()).toBe(false);
     });
   });
 
   describe('saveBiteTrailAsBucketList', () => {
     it('should do nothing when bite trail is undefined', () => {
-      (service as any).biteTrail = { value: signal(undefined) };
+      mutableService.biteTrail = { value: signal(undefined) };
       service.saveBiteTrailAsBucketList();
       expect(mockStoreService.saveBiteTrailAsBucketList).not.toHaveBeenCalled();
     });
 
     it('should dispatch saveBiteTrailAsBucketList with trail name, biteIds and biteTrailId', () => {
-      const trail = {
+      const trail = makeBiteTrail({
         id: 'trail-1',
         name: 'My Trail',
         biteIds: ['b1', 'b2'],
         price: 0,
-      };
-      (service as any).biteTrail = { value: signal(trail) };
+      });
+      mutableService.biteTrail = { value: signal(trail) };
       service.saveBiteTrailAsBucketList();
       expect(mockStoreService.saveBiteTrailAsBucketList).toHaveBeenCalledWith({
         bucketListName: 'My Trail',
@@ -98,13 +139,13 @@ describe(BiteTrailDataAccessService.name, () => {
 
   describe('savedBucketlistId', () => {
     it('should return null when no bucketlists exist', () => {
-      (service as any).bucketlists = signal([]);
+      mutableService.bucketlists = signal([]);
       expect(service.savedBucketlistId()).toBeNull();
     });
 
     it('should return null when no bucketlist matches the current bite trail', () => {
       biteTrailIdSignal.set('trail-1');
-      (service as any).bucketlists = signal([
+      mutableService.bucketlists = signal([
         {
           id: 'bl-1',
           biteTrailId: 'other-trail',
@@ -118,7 +159,7 @@ describe(BiteTrailDataAccessService.name, () => {
 
     it('should return bucketlist id when a bucketlist matches the current bite trail', () => {
       biteTrailIdSignal.set('trail-1');
-      (service as any).bucketlists = signal([
+      mutableService.bucketlists = signal([
         {
           id: 'bl-42',
           biteTrailId: 'trail-1',
@@ -133,12 +174,9 @@ describe(BiteTrailDataAccessService.name, () => {
 
   describe('biteTrailLoader', () => {
     it('should return undefined when biteTrailId is undefined', async () => {
-      const result = await service.biteTrailLoader({
-        params: { biteTrailId: undefined },
-        abortSignal: new AbortController().signal,
-        request: undefined as any,
-        previous: { status: 'idle' } as any,
-      });
+      const result = await service.biteTrailLoader(
+        loaderParams({ biteTrailId: undefined }),
+      );
       expect(result).toBeUndefined();
     });
 
@@ -146,12 +184,9 @@ describe(BiteTrailDataAccessService.name, () => {
       (FirebaseFirestore.getDocument as jest.Mock).mockResolvedValue({
         snapshot: { id: 'trail-1', data: null },
       });
-      const result = await service.biteTrailLoader({
-        params: { biteTrailId: 'trail-1' },
-        abortSignal: new AbortController().signal,
-        request: undefined as any,
-        previous: { status: 'idle' } as any,
-      });
+      const result = await service.biteTrailLoader(
+        loaderParams({ biteTrailId: 'trail-1' }),
+      );
       expect(result).toBeUndefined();
     });
 
@@ -160,34 +195,23 @@ describe(BiteTrailDataAccessService.name, () => {
       (FirebaseFirestore.getDocument as jest.Mock).mockResolvedValue({
         snapshot: { id: 'trail-1', data: trailData },
       });
-      const result = await service.biteTrailLoader({
-        params: { biteTrailId: 'trail-1' },
-        abortSignal: new AbortController().signal,
-        request: undefined as any,
-        previous: { status: 'idle' } as any,
-      });
+      const result = await service.biteTrailLoader(
+        loaderParams({ biteTrailId: 'trail-1' }),
+      );
       expect(result).toEqual({ id: 'trail-1', ...trailData });
     });
   });
 
   describe('bitesLoader', () => {
     it('should return empty array when biteIds is empty', async () => {
-      const result = await service.bitesLoader({
-        params: { biteIds: [] },
-        abortSignal: new AbortController().signal,
-        request: undefined as any,
-        previous: { status: 'idle' } as any,
-      });
+      const result = await service.bitesLoader(loaderParams({ biteIds: [] }));
       expect(result).toEqual([]);
     });
 
     it('should return empty array when biteIds is undefined', async () => {
-      const result = await service.bitesLoader({
-        params: { biteIds: undefined },
-        abortSignal: new AbortController().signal,
-        request: undefined as any,
-        previous: { status: 'idle' } as any,
-      });
+      const result = await service.bitesLoader(
+        loaderParams({ biteIds: undefined }),
+      );
       expect(result).toEqual([]);
     });
 
@@ -196,12 +220,9 @@ describe(BiteTrailDataAccessService.name, () => {
       (FirebaseFirestore.getDocument as jest.Mock).mockResolvedValue({
         snapshot: { id: 'bite-1', data: biteData },
       });
-      const result = await service.bitesLoader({
-        params: { biteIds: ['bite-1'] },
-        abortSignal: new AbortController().signal,
-        request: undefined as any,
-        previous: { status: 'idle' } as any,
-      });
+      const result = await service.bitesLoader(
+        loaderParams({ biteIds: ['bite-1'] }),
+      );
       expect(result).toEqual([{ id: 'bite-1', ...biteData }]);
     });
 
@@ -209,12 +230,9 @@ describe(BiteTrailDataAccessService.name, () => {
       (FirebaseFirestore.getDocument as jest.Mock).mockResolvedValue({
         snapshot: { id: 'bite-1', data: null },
       });
-      const result = await service.bitesLoader({
-        params: { biteIds: ['bite-1'] },
-        abortSignal: new AbortController().signal,
-        request: undefined as any,
-        previous: { status: 'idle' } as any,
-      });
+      const result = await service.bitesLoader(
+        loaderParams({ biteIds: ['bite-1'] }),
+      );
       expect(result).toEqual([]);
     });
   });
@@ -224,8 +242,8 @@ describe(BiteTrailDataAccessService.name, () => {
       const mockBites = [
         makeBite({ id: 'b1', position: { latitude: 47.38, longitude: 8.55 } }),
       ];
-      (service as any).bites = { value: signal(mockBites) };
-      (service as any).gpsPosition = signal({
+      mutableService.bites = { value: signal(mockBites) };
+      mutableService.gpsPosition = signal({
         latitude: 47.38,
         longitude: 8.55,
       });
@@ -239,8 +257,8 @@ describe(BiteTrailDataAccessService.name, () => {
       const mockBites = [
         makeBite({ id: 'b1', position: { latitude: 47.38, longitude: 8.55 } }),
       ];
-      (service as any).bites = { value: signal(mockBites) };
-      (service as any).gpsPosition = signal(null);
+      mutableService.bites = { value: signal(mockBites) };
+      mutableService.gpsPosition = signal(null);
 
       const result = service.bitesWithDistance();
       expect(result.length).toBe(1);
@@ -248,8 +266,8 @@ describe(BiteTrailDataAccessService.name, () => {
 
     it('should return bites with distance when bite has no position', () => {
       const mockBites = [makeBite({ id: 'b1', position: undefined })];
-      (service as any).bites = { value: signal(mockBites) };
-      (service as any).gpsPosition = signal({
+      mutableService.bites = { value: signal(mockBites) };
+      mutableService.gpsPosition = signal({
         latitude: 47.38,
         longitude: 8.55,
       });
@@ -259,7 +277,7 @@ describe(BiteTrailDataAccessService.name, () => {
     });
 
     it('should return empty when bites resource returns undefined', () => {
-      (service as any).bites = { value: signal(undefined) };
+      mutableService.bites = { value: signal(undefined) };
       const result = service.bitesWithDistance();
       expect(result).toEqual([]);
     });

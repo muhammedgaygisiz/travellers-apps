@@ -66,7 +66,9 @@ describe('BucketlistsPage', () => {
 
     it('should not emit sortingChange event if detail is missing', () => {
       jest.spyOn(component.sortingChange, 'emit');
-      const event = { detail: null } as any;
+      const event = { detail: null } as unknown as Parameters<
+        BucketlistsPage['emitSortingChange']
+      >[0];
       component.emitSortingChange(event);
       expect(component.sortingChange.emit).not.toHaveBeenCalled();
     });

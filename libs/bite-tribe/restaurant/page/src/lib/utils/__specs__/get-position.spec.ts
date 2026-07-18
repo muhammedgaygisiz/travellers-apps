@@ -2,22 +2,22 @@ import { getPosition } from '../get-position';
 
 describe('getPosition', () => {
   it('should return restaurant position if available', () => {
-    const restaurant = { position: { lat: 1, lng: 2 } } as any;
-    const bite = { position: { lat: 3, lng: 4 } } as any;
+    const restaurant = { position: { latitude: 1, longitude: 2 } };
+    const bite = { position: { latitude: 3, longitude: 4 } };
     const result = getPosition(restaurant, bite);
-    expect(result).toEqual({ lat: 1, lng: 2 });
+    expect(result).toEqual({ latitude: 1, longitude: 2 });
   });
 
   it('should return bite position if restaurant position is not available', () => {
-    const restaurant = {} as any;
-    const bite = { position: { lat: 3, lng: 4 } } as any;
+    const restaurant = {};
+    const bite = { position: { latitude: 3, longitude: 4 } };
     const result = getPosition(restaurant, bite);
-    expect(result).toEqual({ lat: 3, lng: 4 });
+    expect(result).toEqual({ latitude: 3, longitude: 4 });
   });
 
   it('should return null if neither restaurant nor bite position is available', () => {
-    const restaurant = {} as any;
-    const bite = {} as any;
+    const restaurant = {};
+    const bite = {};
     const result = getPosition(restaurant, bite);
     expect(result).toBeNull();
   });

@@ -90,7 +90,9 @@ describe('BitesByRestaurant Selectors', () => {
           const result = bitesByRestaurant.projector(
             [],
             undefined,
-            mockRestaurant as any,
+            mockRestaurant as unknown as Parameters<
+              typeof bitesByRestaurant.projector
+            >[2],
             mockBite1,
           );
           expect(result).toEqual([mockBite1, anotherBite]);
@@ -127,7 +129,7 @@ describe('BitesByRestaurant Selectors', () => {
         const result = bitesByRestaurant.projector(
           [],
           undefined,
-          {} as any,
+          {} as unknown as Parameters<typeof bitesByRestaurant.projector>[2],
           mockBite1,
         );
         expect(result).toEqual([]);
@@ -138,7 +140,7 @@ describe('BitesByRestaurant Selectors', () => {
       const result = bitesByRestaurant.projector(
         [],
         '123',
-        {} as any,
+        {} as unknown as Parameters<typeof bitesByRestaurant.projector>[2],
         mockBite1,
       );
       expect(result).toEqual([mockBite1]);

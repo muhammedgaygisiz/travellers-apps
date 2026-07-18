@@ -9,7 +9,7 @@ const COLORS = {
 
 export const createChart = (
   chartElement: HTMLElement,
-  currentData: ChartData[]
+  currentData: ChartData[],
 ): void => {
   const preparedData = prepareData(currentData);
 
@@ -43,7 +43,7 @@ export const createChart = (
   const xAxis = d3
     .axisBottom(x)
     .ticks(5)
-    .tickFormat((d: any) => d3.timeFormat('%d.%m.%Y')(d));
+    .tickFormat((d) => d3.timeFormat('%d.%m.%Y')(d as Date));
 
   const currentBalance = preparedData[preparedData.length - 1]?.balance || 0;
 
@@ -61,7 +61,7 @@ export const createChart = (
       ...d3.ticks(
         Math.min(0, d3.min(preparedData, (d) => d.balance) || 0),
         Math.max(0, d3.max(preparedData, (d) => d.balance) || 0),
-        5
+        5,
       ),
       currentBalance, // Add current balance to ticks
     ])
@@ -72,7 +72,7 @@ export const createChart = (
   const line = d3
     .line<ChartData>()
     .x((d) => x(d.date))
-    .y((d) => y(d.balance!))
+    .y((d) => y(d.balance ?? 0))
     .curve(d3.curveStepAfter);
 
   const today = new Date();
@@ -119,7 +119,7 @@ export const createChart = (
     .enter()
     .append('circle')
     .attr('cx', (d) => x(d.date))
-    .attr('cy', (d) => y(d.balance!))
+    .attr('cy', (d) => y(d.balance ?? 0))
     .attr('r', 4)
     .attr('fill', COLORS.primary);
 
@@ -138,6 +138,6 @@ export const createChart = (
     .call(yAxis)
     .selectAll('.tick text')
     .attr('fill', (d) =>
-      d === currentBalance ? COLORS.primary : 'currentColor'
+      d === currentBalance ? COLORS.primary : 'currentColor',
     );
 };

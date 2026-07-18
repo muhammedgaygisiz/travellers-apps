@@ -3,4 +3,4 @@ import type { Menu } from 'model';
 
 export const adapter = createEntityAdapter<Menu>();
 
-export const initialState: EntityState<any> = adapter.getInitialState();
+export const initialState: EntityState<Menu> = adapter.getInitialState();

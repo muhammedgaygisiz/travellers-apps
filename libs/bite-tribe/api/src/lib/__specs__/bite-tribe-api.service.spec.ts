@@ -12,12 +12,7 @@ import { SettingsApiService } from '../settings-api/settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
 import { BiteTrailApiService } from '../bite-trail-api/bite-trail-api.service';
 import { of } from 'rxjs';
-import { TestScheduler } from 'rxjs/testing';
 import { BiteTrail, Like } from 'model';
-
-const assertEqual = (a: any, b: any): void => {
-  expect(a).toEqual(b);
-};
 
 class ReviewApiMock {
   reviewsByBiteId = jest.fn();
@@ -125,7 +120,6 @@ describe(BiteTribeApiService.name, () => {
   ));
 
   describe('settings$', () => {
-    const scheduler = new TestScheduler(assertEqual);
     const classListSpy = jest.spyOn(
       document.documentElement.classList,
       'toggle',
@@ -311,7 +305,12 @@ describe(BiteTribeApiService.name, () => {
       [BiteTribeApiService, LikeApiService],
       (service: BiteTribeApiService, likeApiService: LikeApiService) => {
         const removeLikeSpy = jest.spyOn(likeApiService, 'removeLike');
-        const like = { userId: 'user-id', biteId: 'bite-id', likeType: 'like' };
+        const like: Like = {
+          userId: 'user-id',
+          biteId: 'bite-id',
+          likeType: 'thumbup',
+          createdAt: '',
+        };
         service.removeLike(like);
         expect(removeLikeSpy).toHaveBeenCalledWith(like);
       },

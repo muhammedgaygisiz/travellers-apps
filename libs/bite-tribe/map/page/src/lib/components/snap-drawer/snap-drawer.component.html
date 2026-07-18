@@ -6,6 +6,13 @@
   (pointerup)="onPointerUp($event)"
   (pointercancel)="onPointerUp($event)"
 >
-  <div class="handle" (click)="snapOpenOrClosed()"></div>
+  <div
+    class="handle"
+    role="button"
+    tabindex="0"
+    (click)="snapOpenOrClosed()"
+    (keydown.enter)="snapOpenOrClosed()"
+    (keydown.space)="snapOpenOrClosed()"
+  ></div>
   <ng-content></ng-content>
 </div>

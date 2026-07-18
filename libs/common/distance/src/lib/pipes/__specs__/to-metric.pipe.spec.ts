@@ -2,7 +2,7 @@ import { ToMetricPipe } from '../to-metric.pipe';
 
 const toMetricMock = jest.fn();
 jest.mock('../../utils/to-metric', () => ({
-  toMetric: (...args: any): void => toMetricMock(...args),
+  toMetric: (...args: unknown[]): void => toMetricMock(...args),
 }));
 
 describe('ToMetricPipe', () => {

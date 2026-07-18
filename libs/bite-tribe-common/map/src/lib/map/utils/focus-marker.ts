@@ -5,7 +5,7 @@ import { MarkerColor } from '../model/marker-color.enum';
 export const focusMarker = (
   marker: L.Marker | undefined,
   markers: L.Marker[],
-  map: L.Map,
+  map: L.Map | undefined,
 ): void => {
   if (!map) {
     return;

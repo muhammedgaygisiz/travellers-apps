@@ -3,7 +3,7 @@ import { MenuDataAccessService } from '../menu-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { Menu } from 'model';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 jest.mock('@capacitor-firebase/firestore');
 jest.mock('@capacitor-firebase/analytics');
@@ -12,9 +12,9 @@ describe(MenuDataAccessService.name, () => {
   let service: MenuDataAccessService;
   let apiMock: { saveMenu: jest.Mock };
   let storeMock: {
-    bite$: any;
-    restaurant$: any;
-    menu$: any;
+    bite$: Observable<unknown>;
+    restaurant$: Observable<unknown>;
+    menu$: Observable<unknown>;
     cacheBite: jest.Mock;
   };
 

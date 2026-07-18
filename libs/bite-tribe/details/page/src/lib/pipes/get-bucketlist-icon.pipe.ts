@@ -5,7 +5,10 @@ import { Bite, Bucketlist } from 'model';
   name: 'getBucketlistIcon',
 })
 export class GetBucketlistIconPipe implements PipeTransform {
-  transform(bite: Bite | undefined, list: Bucketlist): string {
+  transform(
+    bite: Bite | undefined,
+    list: Partial<Bucketlist> | undefined,
+  ): string {
     if (!list || !bite) {
       return 'bookmark-outline';
     }

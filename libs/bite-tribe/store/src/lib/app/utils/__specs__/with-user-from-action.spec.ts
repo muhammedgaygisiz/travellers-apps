@@ -3,12 +3,13 @@ import { TestScheduler } from 'rxjs/testing';
 import { createEffect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs';
 import { fromAuth } from 'ta-firestore';
+import type { Action } from '@ngrx/store';
 
-const assertEqual = (a: any, b: any): void => {
+const assertEqual = (a: unknown, b: unknown): void => {
   expect(a).toEqual(b);
 };
 
-const wrapInTestAction = (userUid: string): any => {
+const wrapInTestAction = (userUid: string): Action & { userUid: string } => {
   return { type: 'TEST_ACTION', userUid };
 };
 
@@ -24,7 +25,9 @@ describe('withUserFromAction', () => {
       scheduler.run(({ expectObservable, cold }) => {
         const action$ = cold('--a--', {
           a: fromAuth.AuthActions.loadedUser({
-            user: { uid: 'user-123' } as any,
+            user: { uid: 'user-123' } as unknown as Parameters<
+              typeof fromAuth.AuthActions.loadedUser
+            >[0]['user'],
           }),
         });
 

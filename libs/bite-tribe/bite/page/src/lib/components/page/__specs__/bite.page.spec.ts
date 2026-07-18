@@ -2,7 +2,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BitePage } from '../bite.page';
 import { Platform } from '@ionic/angular';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import { IonModal, provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { provideRouter } from '@angular/router';
 import { Camera } from '@capacitor/camera';
@@ -13,7 +13,6 @@ import {
   imageOutline,
   pricetagOutline,
 } from 'ionicons/icons';
-import type { Bite } from 'model';
 import { FormGroup } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
@@ -33,7 +32,9 @@ jest.spyOn(console, 'warn').mockImplementation(() => {
   // Mock implementation
 });
 
-const assertDeepEqual = (actual: any, expected: any): void => {
+type BiteFormValue = ReturnType<BitePage['biteFormGroup']['getRawValue']>;
+
+const assertDeepEqual = (actual: unknown, expected: unknown): void => {
   expect(actual).toEqual(expected);
 };
 
@@ -61,7 +62,7 @@ describe('BitePage', () => {
       is: jest.fn((key: string) => key === 'web'),
       backButton: {
         subscribeWithPriority: () => {},
-      } as any,
+      } as unknown as Platform['backButton'],
     };
 
     // Save original console.error and mock it
@@ -115,8 +116,8 @@ describe('BitePage', () => {
         image: 'data:image/jpeg;base64,test',
         name: 'Test Burger',
         place: 'Test Place',
-        tags: 'fish healthy',
-        price: 9.99,
+        tags: ['fish', 'healthy'],
+        price: '9.99',
         currency: 'EUR',
         position: {
           latitude: 10,
@@ -124,7 +125,7 @@ describe('BitePage', () => {
         },
       };
 
-      component.biteFormGroup.patchValue(validBite as any);
+      component.biteFormGroup.patchValue(validBite);
       expect(component.isInvalid()).toBe(false);
     });
   });
@@ -191,7 +192,7 @@ describe('BitePage', () => {
 
   describe('saveBite', () => {
     it('should emit form value on saveBite when valid', () => {
-      const validBite: Bite = {
+      const validBite: BiteFormValue = {
         id: '',
         image: 'data:image/jpeg;base64,test',
         imagePath: '',
@@ -199,7 +200,7 @@ describe('BitePage', () => {
         name: 'Test Burger',
         place: 'Test Place',
         tags: ['fish healthy'],
-        price: '9.99' as any,
+        price: '9.99',
         rating: 0,
         currency: 'EUR',
         restaurantId: '',
@@ -210,7 +211,7 @@ describe('BitePage', () => {
       };
 
       const emitSpy = jest.spyOn(component.submitBite, 'emit');
-      component.biteFormGroup.patchValue(validBite as any);
+      component.biteFormGroup.patchValue(validBite);
       component.saveBite();
 
       expect(emitSpy).toHaveBeenCalledWith(validBite);
@@ -226,7 +227,7 @@ describe('BitePage', () => {
       componentRef.setInput('networkStatus', { connected: false });
       componentRef.changeDetectorRef.detectChanges();
 
-      const validBite: Bite = {
+      const validBite: BiteFormValue = {
         id: '',
         image: '',
         imagePath: '',
@@ -234,7 +235,7 @@ describe('BitePage', () => {
         name: 'Test Burger',
         place: 'Test Place',
         tags: ['fish healthy'],
-        price: '9.99' as any,
+        price: '9.99',
         rating: 0,
         currency: 'EUR',
         restaurantId: '',
@@ -245,10 +246,11 @@ describe('BitePage', () => {
       };
 
       const emitSpy = jest.spyOn(component.submitBite, 'emit');
-      component.biteFormGroup.patchValue(validBite as any);
+      component.biteFormGroup.patchValue(validBite);
       component.saveBite();
 
       const { image, ...expectedBite } = validBite;
+      void image;
       expect(emitSpy).toHaveBeenCalledWith(expectedBite);
     });
   });
@@ -308,12 +310,13 @@ describe('BitePage', () => {
 
       componentRef.changeDetectorRef.detectChanges();
 
-      const expected: Bite = {
+      const expected: BiteFormValue = {
         id: '1',
         image: 'test.jpg',
+        imagePath: undefined,
         name: 'Test Bite',
         place: 'Test Place',
-        price: '10' as any,
+        price: '10',
         rating: 0,
         currency: 'USD',
         restaurantId: '',
@@ -431,7 +434,7 @@ describe('BitePage', () => {
         'data:image/jpeg;base64,test',
       );
       // Simulate no position
-      componentRef.setInput('position', undefined as any);
+      componentRef.setInput('position', undefined);
 
       expect(component.getGpsErrorMessage()).toContain(
         'no-gps-position-error-message',
@@ -440,7 +443,7 @@ describe('BitePage', () => {
 
     it('should return message if no image and no position', () => {
       component.biteFormGroup.controls['image'].reset();
-      componentRef.setInput('position', undefined as any);
+      componentRef.setInput('position', undefined);
 
       expect(component.getGpsErrorMessage()).toContain(
         'chose-gps-position-error-message',
@@ -491,7 +494,9 @@ describe('BitePage', () => {
     });
 
     it('should not set tags if control is missing', () => {
-      component.biteFormGroup = new FormGroup({}) as any;
+      component.biteFormGroup = new FormGroup(
+        {},
+      ) as unknown as typeof component.biteFormGroup;
       const tags = ['tag1', 'tag2'];
       expect(() => component.setTags(tags)).not.toThrow();
     });
@@ -515,7 +520,7 @@ describe('BitePage', () => {
     it('should do nothing if no position provided', () => {
       component.biteFormGroup.controls['position'].reset();
       component.imagePosition.set({ latitude: 10, longitude: 20 });
-      component.onPositionFromImage(undefined as any);
+      component.onPositionFromImage(undefined);
       expect(component.biteFormGroup.controls['position'].value).toBeNull();
       expect(component.imagePosition()).toEqual({
         latitude: 10,
@@ -535,7 +540,7 @@ describe('BitePage', () => {
     });
 
     it('should do nothing if no position input value', () => {
-      componentRef.setInput('position', undefined as any);
+      componentRef.setInput('position', undefined);
       component.biteFormGroup.controls['position'].reset();
       component.onPositionFromNavigator();
       expect(component.biteFormGroup.controls['position'].value).toBeNull();
@@ -558,7 +563,9 @@ describe('BitePage', () => {
 
     it('should do nothing if imagePath formControl is not initialized', () => {
       component.imagePosition.set({ latitude: 10, longitude: 20 });
-      component.biteFormGroup = new FormGroup({}) as any;
+      component.biteFormGroup = new FormGroup(
+        {},
+      ) as unknown as typeof component.biteFormGroup;
       component.resetImagePath();
       expect(component.biteFormGroup.get('imagePath')).toBeNull();
     });
@@ -780,7 +787,9 @@ describe('BitePage', () => {
       const position = { latitude: 10, longitude: 20 };
       const dismissSpy = jest.fn();
       component.manualPosition.set(position);
-      component.confirmManualPosition({ dismiss: dismissSpy } as any);
+      component.confirmManualPosition({
+        dismiss: dismissSpy,
+      } as unknown as IonModal);
       expect(component.biteFormGroup.controls['position'].value).toEqual(
         position,
       );
@@ -793,7 +802,9 @@ describe('BitePage', () => {
       const dismissSpy = jest.fn();
       component.manualPosition.set(undefined);
       component.biteFormGroup.controls['position'].reset();
-      component.confirmManualPosition({ dismiss: dismissSpy } as any);
+      component.confirmManualPosition({
+        dismiss: dismissSpy,
+      } as unknown as IonModal);
       expect(component.biteFormGroup.controls['position'].value).toBeNull();
       expect(dismissSpy).toHaveBeenCalled();
     });
@@ -805,7 +816,9 @@ describe('BitePage', () => {
       const dismissSpy = jest.fn();
       component.biteFormGroup.controls['position'].patchValue(position);
       component.isManualPositionModalOpen.set(true);
-      component.cancelManualPosition({ dismiss: dismissSpy } as any);
+      component.cancelManualPosition({
+        dismiss: dismissSpy,
+      } as unknown as IonModal);
       expect(component.biteFormGroup.controls['position'].value).toEqual(
         position,
       );
@@ -862,7 +875,9 @@ describe('BitePage', () => {
 
           const source$ = cold('--a--', values);
           const subscription = source$.subscribe((val) => {
-            component.biteFormGroup.controls['place'].setValue(val as any);
+            component.biteFormGroup.controls['place'].setValue(
+              val as unknown as string,
+            );
           });
 
           expectObservable(valueChangeEvents$).toBe('--a', values);

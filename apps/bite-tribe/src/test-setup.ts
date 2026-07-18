@@ -4,14 +4,20 @@ import { setupZonelessTestEnv } from 'jest-preset-angular/setup-env/zoneless';
 // so app-level specs eagerly evaluate image-upload -> image-compression ->
 // heic2any, which touches Worker/canvas at module load. jsdom provides neither,
 // so stub them the same way the onboarding library's test-setup does.
-/* eslint-disable @typescript-eslint/no-empty-function */
-(globalThis as typeof globalThis & { Worker?: unknown }).Worker ??= class {
-  postMessage(): void {}
-  terminate(): void {}
-  addEventListener(): void {}
-  removeEventListener(): void {}
-};
-/* eslint-enable @typescript-eslint/no-empty-function */
+if (typeof globalThis.Worker === 'undefined') {
+  /* eslint-disable @typescript-eslint/no-empty-function */
+  Object.defineProperty(globalThis, 'Worker', {
+    configurable: true,
+    writable: true,
+    value: class {
+      postMessage(): void {}
+      terminate(): void {}
+      addEventListener(): void {}
+      removeEventListener(): void {}
+    },
+  });
+  /* eslint-enable @typescript-eslint/no-empty-function */
+}
 
 URL.createObjectURL ??= jest.fn(() => 'blob:mock');
 URL.revokeObjectURL ??= jest.fn();

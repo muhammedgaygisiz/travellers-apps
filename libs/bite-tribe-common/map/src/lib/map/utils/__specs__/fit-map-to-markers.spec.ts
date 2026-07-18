@@ -8,7 +8,7 @@ describe('fitMapToMarkers', () => {
     it('should not call fitBounds', () => {
       const map = {
         fitBounds: jest.fn(),
-      } as any;
+      } as unknown as L.Map;
 
       fitMapToMarkers([], null, map);
       expect(map.fitBounds).not.toHaveBeenCalled();
@@ -19,9 +19,9 @@ describe('fitMapToMarkers', () => {
     it('should not call fitBounds', () => {
       const map = {
         fitBounds: jest.fn(),
-      } as any;
+      } as unknown as L.Map;
 
-      fitMapToMarkers([{} as any, {} as any], null, map);
+      fitMapToMarkers([{} as L.Marker, {} as L.Marker], null, map);
       expect(map.fitBounds).not.toHaveBeenCalled();
     });
   });
@@ -32,20 +32,20 @@ describe('fitMapToMarkers', () => {
         jest.spyOn(L, 'latLngBounds').mockReturnValue({
           getWest: () => -190,
           getEast: () => 190,
-        } as any);
+        } as unknown as L.LatLngBounds);
       });
 
       it('should normalize longitudes and call fitBounds', () => {
         const map = {
           fitBounds: jest.fn(),
-        } as any;
+        } as unknown as L.Map;
 
         const positions = [
           { latitude: 10, longitude: 170 },
           { latitude: -10, longitude: -170 },
         ];
 
-        fitMapToMarkers([{} as any, {} as any], positions, map);
+        fitMapToMarkers([{} as L.Marker, {} as L.Marker], positions, map);
         expect(map.fitBounds).toHaveBeenCalled();
       });
     });
@@ -55,20 +55,20 @@ describe('fitMapToMarkers', () => {
         jest.spyOn(L, 'latLngBounds').mockReturnValue({
           getWest: () => -100,
           getEast: () => 100,
-        } as any);
+        } as unknown as L.LatLngBounds);
       });
 
       it('should call fitBounds with original bounds', () => {
         const map = {
           fitBounds: jest.fn(),
-        } as any;
+        } as unknown as L.Map;
 
         const positions = [
           { latitude: 10, longitude: 50 },
           { latitude: -10, longitude: -50 },
         ];
 
-        fitMapToMarkers([{} as any, {} as any], positions, map);
+        fitMapToMarkers([{} as L.Marker, {} as L.Marker], positions, map);
         expect(map.fitBounds).toHaveBeenCalled();
       });
     });

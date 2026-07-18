@@ -60,7 +60,9 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const loginSpy = jest.spyOn(fromAuth.AuthActions, 'login');
-        service.login({} as any);
+        service.login(
+          {} as unknown as Parameters<BiteTribeStoreService['login']>[0],
+        );
         expect(loginSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -74,7 +76,9 @@ describe(BiteTribeStoreService.name, () => {
           fromAuth.AuthActions,
           'registerWithEmail',
         );
-        service.register({} as any);
+        service.register(
+          {} as unknown as Parameters<BiteTribeStoreService['register']>[0],
+        );
         expect(registerSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -85,7 +89,9 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        const entity = {};
+        const entity = {} as unknown as Parameters<
+          BiteTribeStoreService['saveNewRestaurant']
+        >[0];
         service.saveNewRestaurant(entity);
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
@@ -108,7 +114,9 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        const entity = { id: '123' };
+        const entity = { id: '123' } as unknown as Parameters<
+          BiteTribeStoreService['saveEditedBite']
+        >[0];
         service.saveEditedBite(entity);
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
@@ -216,7 +224,11 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.notifySavedSettings({} as any);
+        service.notifySavedSettings(
+          {} as unknown as Parameters<
+            BiteTribeStoreService['notifySavedSettings']
+          >[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -227,7 +239,11 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.savePublicProfile({} as any);
+        service.savePublicProfile(
+          {} as unknown as Parameters<
+            BiteTribeStoreService['savePublicProfile']
+          >[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -238,7 +254,9 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.saveReview({} as any);
+        service.saveReview(
+          {} as unknown as Parameters<BiteTribeStoreService['saveReview']>[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -249,7 +267,11 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.selectRestaurantToCreate({} as any);
+        service.selectRestaurantToCreate(
+          {} as unknown as Parameters<
+            BiteTribeStoreService['selectRestaurantToCreate']
+          >[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -260,7 +282,7 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.cacheBite({} as any);
+        service.cacheBite({});
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -282,7 +304,11 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.saveToBucketList({} as any);
+        service.saveToBucketList(
+          {} as unknown as Parameters<
+            BiteTribeStoreService['saveToBucketList']
+          >[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -293,7 +319,11 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.createAndSaveToBucketList({} as any);
+        service.createAndSaveToBucketList(
+          {} as unknown as Parameters<
+            BiteTribeStoreService['createAndSaveToBucketList']
+          >[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -304,7 +334,11 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.removeBiteFromBucketlist({} as any);
+        service.removeBiteFromBucketlist(
+          {} as unknown as Parameters<
+            BiteTribeStoreService['removeBiteFromBucketlist']
+          >[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -315,7 +349,11 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.submitDeleteBite({} as any);
+        service.submitDeleteBite(
+          {} as unknown as Parameters<
+            BiteTribeStoreService['submitDeleteBite']
+          >[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -326,7 +364,7 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.createBucketList({} as any);
+        service.createBucketList('');
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -337,7 +375,7 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.setHomeSorting({} as any);
+        service.setHomeSorting('');
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -348,7 +386,7 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.setMyBitesSorting({} as any);
+        service.setMyBitesSorting('');
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -370,7 +408,11 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.setHomeFilters({} as any);
+        service.setHomeFilters(
+          {} as unknown as Parameters<
+            BiteTribeStoreService['setHomeFilters']
+          >[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -414,7 +456,7 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.setBucketlistSorting({} as any);
+        service.setBucketlistSorting('');
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -425,7 +467,7 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.setEditingBite({} as any);
+        service.setEditingBite({});
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -436,7 +478,9 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.followUser({} as any);
+        service.followUser(
+          {} as unknown as Parameters<BiteTribeStoreService['followUser']>[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));
@@ -447,7 +491,9 @@ describe(BiteTribeStoreService.name, () => {
       [BiteTribeStoreService],
       (service: BiteTribeStoreService) => {
         const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.unfollowUser({} as any);
+        service.unfollowUser(
+          {} as unknown as Parameters<BiteTribeStoreService['unfollowUser']>[0],
+        );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
       },
     ));

@@ -3,7 +3,7 @@ import type { Restaurant } from 'model';
 
 export const adapter = createEntityAdapter<Restaurant>();
 
-export const initialState: EntityState<any> = adapter.getInitialState();
+export const initialState: EntityState<Restaurant> = adapter.getInitialState();
 
 export interface RestaurantState extends EntityState<Restaurant> {
   restaurantToCreate: Restaurant;

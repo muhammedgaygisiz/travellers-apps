@@ -35,7 +35,9 @@ jest.mock('firebase/firestore');
 
 jest.mock('firebase/auth');
 
-const assertEqual = (a: any, b: any): void => {
+type SetupUserArg = Parameters<AuthService['setupAnalyticsAndCrashlytics']>[0];
+
+const assertEqual = (a: unknown, b: unknown): void => {
   expect(a).toEqual(b);
 };
 
@@ -71,7 +73,9 @@ describe(AuthService.name, () => {
       beforeEach(() => {
         jest
           .spyOn(service, 'authState')
-          .mockReturnValue({ user: { uid: '123' } } as any);
+          .mockReturnValue({ user: { uid: '123' } } as unknown as ReturnType<
+            typeof service.authState
+          >);
       });
 
       it('should return the user', async () => {
@@ -82,7 +86,11 @@ describe(AuthService.name, () => {
 
     describe('given no user', () => {
       beforeEach(() => {
-        jest.spyOn(service, 'authState').mockReturnValue({ user: null } as any);
+        jest
+          .spyOn(service, 'authState')
+          .mockReturnValue({ user: null } as unknown as ReturnType<
+            typeof service.authState
+          >);
       });
 
       it('should return null', async () => {
@@ -135,7 +143,9 @@ describe(AuthService.name, () => {
     beforeEach(() => {
       jest
         .spyOn(FirebaseAuthentication, 'getCurrentUser')
-        .mockResolvedValue({ user: { uid: '123' } } as any);
+        .mockResolvedValue({ user: { uid: '123' } } as unknown as Awaited<
+          ReturnType<typeof FirebaseAuthentication.getCurrentUser>
+        >);
       (FirebaseAuthentication.addListener as jest.Mock).mockImplementation(
         (event, callback) => {
           if (event === 'authStateChange') {
@@ -143,10 +153,7 @@ describe(AuthService.name, () => {
           }
         },
       );
-      authStateChangeNextSpy = jest.spyOn(
-        (service as any)._authStateChange$,
-        'next',
-      );
+      authStateChangeNextSpy = jest.spyOn(service._authStateChange$, 'next');
     });
 
     it('should initialize auth state and set up listener', async () => {
@@ -174,9 +181,7 @@ describe(AuthService.name, () => {
             a: null,
             b: null,
           })
-            .pipe(
-              tap((value) => (service as any)._authStateChange$.next(value)),
-            )
+            .pipe(tap((value) => service._authStateChange$.next(value)))
             .subscribe();
 
           expectObservable(service.isLoggedIn$).toBe('-a', { a: false });
@@ -191,9 +196,7 @@ describe(AuthService.name, () => {
             a: null,
             b: { user: null },
           })
-            .pipe(
-              tap((value) => (service as any)._authStateChange$.next(value)),
-            )
+            .pipe(tap((value) => service._authStateChange$.next(value)))
             .subscribe();
 
           expectObservable(service.isLoggedIn$).toBe('-a', { a: false });
@@ -209,9 +212,7 @@ describe(AuthService.name, () => {
             b: { user: null },
             c: { user: {} },
           })
-            .pipe(
-              tap((value) => (service as any)._authStateChange$.next(value)),
-            )
+            .pipe(tap((value) => service._authStateChange$.next(value)))
             .subscribe();
 
           expectObservable(service.isLoggedIn$).toBe('-ab', {
@@ -226,7 +227,7 @@ describe(AuthService.name, () => {
   describe('authStateChangeListener', () => {
     it('should emit auth state changes', () => {
       const authStateChangeNextSpy = jest.spyOn(
-        (service as any)._authStateChange$,
+        service._authStateChange$,
         'next',
       );
 
@@ -241,7 +242,9 @@ describe(AuthService.name, () => {
     beforeEach(() => {
       jest
         .spyOn(FirebaseAuthentication, 'signInWithEmailAndPassword')
-        .mockResolvedValue({ user: { uid: '123' } } as any);
+        .mockResolvedValue({ user: { uid: '123' } } as unknown as Awaited<
+          ReturnType<typeof FirebaseAuthentication.signInWithEmailAndPassword>
+        >);
     });
 
     it('should call signInWithEmailAndPassword with correct credentials', async () => {
@@ -340,7 +343,7 @@ describe(AuthService.name, () => {
 
     it('should clear the current auth state', async () => {
       const authStateChangeNextSpy = jest.spyOn(
-        (service as any)._authStateChange$,
+        service._authStateChange$,
         'next',
       );
 
@@ -368,7 +371,11 @@ describe(AuthService.name, () => {
     beforeEach(() => {
       createUserWithEmailAndPasswordSpy = jest
         .spyOn(FirebaseAuthentication, 'createUserWithEmailAndPassword')
-        .mockResolvedValue({ user: { uid: '123' } } as any);
+        .mockResolvedValue({ user: { uid: '123' } } as unknown as Awaited<
+          ReturnType<
+            typeof FirebaseAuthentication.createUserWithEmailAndPassword
+          >
+        >);
     });
 
     it('should call createUserWithEmailAndPassword with correct registration data', async () => {
@@ -427,7 +434,9 @@ describe(AuthService.name, () => {
     beforeEach(() => {
       jest
         .spyOn(FirebaseAuthentication, 'signInWithGoogle')
-        .mockResolvedValue({ user: { uid: '123' } } as any);
+        .mockResolvedValue({ user: { uid: '123' } } as unknown as Awaited<
+          ReturnType<typeof FirebaseAuthentication.signInWithGoogle>
+        >);
     });
 
     it('should call signInWithGoogle with popup mode', async () => {
@@ -444,7 +453,9 @@ describe(AuthService.name, () => {
     beforeEach(() => {
       jest
         .spyOn(FirebaseAuthentication, 'signInWithApple')
-        .mockResolvedValue({ user: { uid: '123' } } as any);
+        .mockResolvedValue({ user: { uid: '123' } } as unknown as Awaited<
+          ReturnType<typeof FirebaseAuthentication.signInWithApple>
+        >);
     });
 
     it('should call signInWithApple with popup mode', async () => {
@@ -475,7 +486,7 @@ describe(AuthService.name, () => {
 
     describe('given a user', () => {
       it('should set userid on analytics', async () => {
-        const user = { uid: '123' } as any;
+        const user = { uid: '123' } as unknown as SetupUserArg;
         await service.setupAnalyticsAndCrashlytics(user);
 
         expect(FirebaseAnalytics.setUserId).toHaveBeenCalledWith({
@@ -488,7 +499,7 @@ describe(AuthService.name, () => {
       it('should set userid on crashlytics', async () => {
         jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
 
-        const user = { uid: '123' } as any;
+        const user = { uid: '123' } as unknown as SetupUserArg;
         await service.setupAnalyticsAndCrashlytics(user);
 
         expect(FirebaseCrashlytics.setUserId).toHaveBeenCalledWith({
@@ -503,7 +514,7 @@ describe(AuthService.name, () => {
 
         await service.setupAnalyticsAndCrashlytics({
           uid: '123',
-        } as any);
+        } as unknown as SetupUserArg);
 
         expect(FirebaseAnalytics.setUserId).toHaveBeenCalledWith({
           userId: '123',
@@ -514,7 +525,9 @@ describe(AuthService.name, () => {
 
     describe('given no user', () => {
       it('should not configure analytics or crashlytics', async () => {
-        await service.setupAnalyticsAndCrashlytics(null as any);
+        await service.setupAnalyticsAndCrashlytics(
+          null as unknown as SetupUserArg,
+        );
 
         expect(FirebaseAnalytics.setUserId).not.toHaveBeenCalled();
         expect(FirebaseCrashlytics.setUserId).not.toHaveBeenCalled();
@@ -527,7 +540,7 @@ describe(AuthService.name, () => {
 
         await service.setupAnalyticsAndCrashlytics({
           uid: '123',
-        } as any);
+        } as unknown as SetupUserArg);
 
         expect(FirebaseAnalytics.setUserId).not.toHaveBeenCalled();
         expect(FirebaseCrashlytics.setUserId).not.toHaveBeenCalled();

@@ -10,10 +10,10 @@ export const updateProfileWithImagePathFromFirebaseStorage = async (
 ): Promise<PublicUser> => {
   const downloadUrl = await getDownloadUrlFromFirebaseStorage(photoUrl);
 
-  const data = {
+  const data: Partial<PublicUser> & Pick<PublicUser, 'photoUrl'> = {
     ...(profileWithoutPhotoUrl || {}),
-    photoUrl: downloadUrl,
-  } as any;
+    photoUrl: downloadUrl as string,
+  };
 
   await FirebaseFirestore.updateDocument({
     reference: `${USERS_COLLECTION}/${userId}`,

@@ -30,7 +30,10 @@ describe('removeGpsMarker', () => {
       callback(taggedLayer);
       callback(untaggedLayer);
     });
-    (map as any).removeLayer = mockRemoveLayer;
+    Object.defineProperty(map, 'removeLayer', {
+      configurable: true,
+      value: mockRemoveLayer,
+    });
 
     removeGpsMarker(map);
 
@@ -45,7 +48,10 @@ describe('removeGpsMarker', () => {
     (map.eachLayer as jest.Mock).mockImplementation((callback) => {
       callback(untaggedLayer);
     });
-    (map as any).removeLayer = mockRemoveLayer;
+    Object.defineProperty(map, 'removeLayer', {
+      configurable: true,
+      value: mockRemoveLayer,
+    });
 
     removeGpsMarker(map);
 

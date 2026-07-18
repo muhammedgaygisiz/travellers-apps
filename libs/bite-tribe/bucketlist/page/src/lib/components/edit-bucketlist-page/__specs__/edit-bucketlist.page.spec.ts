@@ -2,6 +2,7 @@ import { EditBucketlistPage } from '../edit-bucketlist.page';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { Bucketlist } from 'model';
 
 describe(EditBucketlistPage.name, () => {
   let comp: EditBucketlistPage;
@@ -101,7 +102,9 @@ describe(EditBucketlistPage.name, () => {
         const biteId = 'bite-123';
         const bucketlistId = 'bucketlist-456';
         comp.biteToRemove.set(biteId);
-        compRef.setInput('bucketlist', { id: bucketlistId } as any);
+        compRef.setInput('bucketlist', {
+          id: bucketlistId,
+        } as unknown as Bucketlist);
 
         const event = new CustomEvent('dismiss', {
           detail: { role: 'delete' },

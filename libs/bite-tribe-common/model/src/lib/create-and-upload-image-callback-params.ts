@@ -2,7 +2,7 @@ import { UploadFileCallbackEvent } from '@capacitor-firebase/storage';
 
 export interface UploadParams {
   evt: UploadFileCallbackEvent | null;
-  err: any;
+  err: unknown;
   offlineImagePath: string;
 }
 

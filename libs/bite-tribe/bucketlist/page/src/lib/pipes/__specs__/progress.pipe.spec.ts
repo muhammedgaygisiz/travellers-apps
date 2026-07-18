@@ -45,7 +45,7 @@ describe('ProgressPipe', () => {
   });
 
   it('should return 0 for null or undefined', () => {
-    expect(pipe.transform(null as any)).toBe(0);
-    expect(pipe.transform(undefined as any)).toBe(0);
+    expect(pipe.transform(null as unknown as Bucketlist)).toBe(0);
+    expect(pipe.transform(undefined as unknown as Bucketlist)).toBe(0);
   });
 });

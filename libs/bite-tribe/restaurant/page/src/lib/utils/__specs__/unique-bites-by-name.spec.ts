@@ -9,7 +9,7 @@ describe('uniqueBitesByName', () => {
       { name: 'Bite 3', price: 30 },
       { name: 'Bite 2', price: 25 },
     ];
-    const uniqueBites = uniqueBitesByName(bites as any);
+    const uniqueBites = uniqueBitesByName(bites);
     expect(uniqueBites.length).toBe(3);
     expect(uniqueBites).toEqual([
       { name: 'Bite 1', price: 10 },
@@ -19,7 +19,7 @@ describe('uniqueBitesByName', () => {
   });
 
   it('should return an empty array when given an empty array', () => {
-    const bites: any[] = [];
+    const bites: { name: string }[] = [];
     const uniqueBites = uniqueBitesByName(bites);
     expect(uniqueBites.length).toBe(0);
     expect(uniqueBites).toEqual([]);
@@ -31,7 +31,7 @@ describe('uniqueBitesByName', () => {
       { name: 'Bite 2', price: 20 },
       { name: 'Bite 3', price: 30 },
     ];
-    const uniqueBites = uniqueBitesByName(bites as any);
+    const uniqueBites = uniqueBitesByName(bites);
     expect(uniqueBites.length).toBe(3);
     expect(uniqueBites).toEqual(bites);
   });
@@ -42,7 +42,7 @@ describe('uniqueBitesByName', () => {
         { name: 'Chicken', price: 10 },
         { name: 'chicken', price: 20 },
       ];
-      const uniqueBites = uniqueBitesByName(bites as any);
+      const uniqueBites = uniqueBitesByName(bites);
       expect(uniqueBites.length).toBe(1);
       // This is a lack in the conception of the dynamic menu. We have to give further thoughts which price should be shown.
       // The latest or a range of prices. For now, we will just show the first one.

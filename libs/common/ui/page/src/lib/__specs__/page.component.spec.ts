@@ -32,7 +32,9 @@ describe('PageComponent', () => {
     it('should show menu popover', async () => {
       const popoverControllerCreateSpy = jest
         .spyOn(component.popoverController, 'create')
-        .mockReturnValue({ present: jest.fn() } as any);
+        .mockReturnValue({ present: jest.fn() } as unknown as ReturnType<
+          typeof component.popoverController.create
+        >);
 
       await component.showMenuPopover({} as MouseEvent);
 
@@ -54,7 +56,9 @@ describe('PageComponent', () => {
       });
       const createSpy = jest
         .spyOn(component.popoverController, 'create')
-        .mockReturnValue({ present: jest.fn() } as any);
+        .mockReturnValue({ present: jest.fn() } as unknown as ReturnType<
+          typeof component.popoverController.create
+        >);
 
       await component.showMenuPopover({} as MouseEvent);
 
@@ -78,7 +82,9 @@ describe('PageComponent', () => {
       componentRef.setInput('menuConfig', { settings: true });
       const createSpy = jest
         .spyOn(component.popoverController, 'create')
-        .mockReturnValue({ present: jest.fn() } as any);
+        .mockReturnValue({ present: jest.fn() } as unknown as ReturnType<
+          typeof component.popoverController.create
+        >);
 
       await component.showMenuPopover({} as MouseEvent);
 

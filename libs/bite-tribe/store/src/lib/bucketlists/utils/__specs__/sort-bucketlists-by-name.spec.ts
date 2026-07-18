@@ -19,7 +19,7 @@ describe('sortBucketlistsByName', () => {
   });
 
   it('should handle an empty array', () => {
-    const bucketlists: any[] = [];
+    const bucketlists: Bucketlist[] = [];
 
     const sortedBucketlists = sortBucketlistsByName(bucketlists);
 

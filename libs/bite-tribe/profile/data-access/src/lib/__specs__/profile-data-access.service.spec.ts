@@ -4,9 +4,8 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 import { ProfileDataAccessService } from '../profile-data-access.service';
-import SpyInstance = jest.SpyInstance;
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { LikeClick } from 'model';
+import { LikeClick, PublicUser } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
 
 class Mock {
@@ -30,6 +29,31 @@ class Mock {
 const ApiMock = {
   claimDisplayName: jest.fn(),
 };
+
+const MOCK_PUBLIC_USER: PublicUser = {
+  userId: 'user-id',
+  displayName: 'Test User',
+  email: 'test@example.com',
+  photoUrl: '',
+};
+
+type LoaderParams = Parameters<ProfileDataAccessService['userLoader']>[0];
+type CollectionResult = Awaited<
+  ReturnType<typeof FirebaseFirestore.getCollection>
+>;
+type DocumentResult = Awaited<ReturnType<typeof FirebaseFirestore.getDocument>>;
+
+const createLoaderParams = (userId: string): LoaderParams => ({
+  params: { userId },
+  abortSignal: new AbortController().signal,
+  previous: { status: 'idle' },
+});
+
+const createCollectionResult = (snapshots: unknown[]): CollectionResult =>
+  ({ snapshots }) as unknown as CollectionResult;
+
+const createDocumentResult = (snapshot: unknown): DocumentResult =>
+  ({ snapshot }) as unknown as DocumentResult;
 
 jest.mock('@capacitor-firebase/firestore');
 
@@ -58,21 +82,21 @@ describe('ProfileDataAccessService', () => {
   ));
 
   describe('biteTrailLoader', () => {
-    let getCollectionSpy: SpyInstance;
+    let getCollectionSpy: jest.SpiedFunction<
+      typeof FirebaseFirestore.getCollection
+    >;
 
     beforeEach(() => {
       getCollectionSpy = jest
         .spyOn(FirebaseFirestore, 'getCollection')
-        .mockResolvedValue({ snapshots: [] } as any);
+        .mockResolvedValue(createCollectionResult([]));
     });
 
     describe('given no bite trails', () => {
       it('should load bite trail data from FirebaseFirestore', inject(
         [ProfileDataAccessService],
         async (service: ProfileDataAccessService) => {
-          await service.biteTrailLoader({
-            params: { userId: 'user-id' },
-          } as any);
+          await service.biteTrailLoader(createLoaderParams('user-id'));
 
           expect(getCollectionSpy).toHaveBeenCalledWith({
             reference: 'biteTrails',
@@ -96,18 +120,18 @@ describe('ProfileDataAccessService', () => {
       it('should return bite trails in the correct format', inject(
         [ProfileDataAccessService],
         async (service: ProfileDataAccessService) => {
-          getCollectionSpy.mockResolvedValue({
-            snapshots: [
+          getCollectionSpy.mockResolvedValue(
+            createCollectionResult([
               {
                 id: 'bite-trail-id',
                 data: { name: 'Bite Trail 1' },
               },
-            ],
-          } as any);
+            ]),
+          );
 
-          const result = await service.biteTrailLoader({
-            params: { userId: 'user-id' },
-          } as any);
+          const result = await service.biteTrailLoader(
+            createLoaderParams('user-id'),
+          );
 
           expect(result).toEqual([
             { id: 'bite-trail-id', name: 'Bite Trail 1' },
@@ -120,9 +144,7 @@ describe('ProfileDataAccessService', () => {
       it('should return an empty array', inject(
         [ProfileDataAccessService],
         async (service: ProfileDataAccessService) => {
-          const result = await service.biteTrailLoader({
-            params: { userId: '' },
-          } as any);
+          const result = await service.biteTrailLoader(createLoaderParams(''));
 
           expect(result).toEqual([]);
         },
@@ -167,7 +189,7 @@ describe('ProfileDataAccessService', () => {
           storeService,
           'savePublicProfile',
         );
-        const mockUser = { id: 'user-id', name: 'Test User' } as any;
+        const mockUser = MOCK_PUBLIC_USER;
         service.savePublicProfile(mockUser);
         expect(savePublicProfileSpy).toHaveBeenCalledWith(mockUser);
       },
@@ -197,7 +219,7 @@ describe('ProfileDataAccessService', () => {
       [ProfileDataAccessService],
       (service: ProfileDataAccessService) => {
         const followUserSpy = jest.spyOn(storeService, 'followUser');
-        const mockUser = { id: 'user-id', name: 'Test User' } as any;
+        const mockUser = MOCK_PUBLIC_USER;
         service.submitFollowClick(mockUser);
         expect(followUserSpy).toHaveBeenCalledWith(mockUser);
       },
@@ -209,7 +231,7 @@ describe('ProfileDataAccessService', () => {
       [ProfileDataAccessService],
       (service: ProfileDataAccessService) => {
         const unfollowUserSpy = jest.spyOn(storeService, 'unfollowUser');
-        const mockUser = { id: 'user-id', name: 'Test User' } as any;
+        const mockUser = MOCK_PUBLIC_USER;
         service.submitUnfollowClick(mockUser);
         expect(unfollowUserSpy).toHaveBeenCalledWith(mockUser);
       },
@@ -217,7 +239,9 @@ describe('ProfileDataAccessService', () => {
   });
 
   describe('myBiteTrails', () => {
-    let getCollectionSpy: SpyInstance;
+    let getCollectionSpy: jest.SpiedFunction<
+      typeof FirebaseFirestore.getCollection
+    >;
 
     const settle = async (service: ProfileDataAccessService): Promise<void> => {
       for (let i = 0; i < 5 && service.myBiteTrails.isLoading(); i++) {
@@ -228,7 +252,7 @@ describe('ProfileDataAccessService', () => {
     beforeEach(async () => {
       getCollectionSpy = jest
         .spyOn(FirebaseFirestore, 'getCollection')
-        .mockResolvedValue({ snapshots: [] } as any);
+        .mockResolvedValue(createCollectionResult([]));
 
       await TestBed.inject(ApplicationRef).whenStable();
       getCollectionSpy.mockClear();
@@ -237,9 +261,9 @@ describe('ProfileDataAccessService', () => {
     describe('given a logged in user', () => {
       it('should request bite trails using the uid of the store user', async () => {
         const service = TestBed.inject(ProfileDataAccessService);
-        jest
-          .spyOn(storeService, 'user')
-          .mockReturnValue({ uid: 'store-user-id' } as any);
+        jest.spyOn(storeService, 'user').mockReturnValue({
+          uid: 'store-user-id',
+        } as unknown as ReturnType<BiteTribeStoreService['user']>);
 
         service.myBiteTrails.value();
         await settle(service);
@@ -270,21 +294,21 @@ describe('ProfileDataAccessService', () => {
   });
 
   describe('userLoader', () => {
-    let getDocumentSpy: SpyInstance;
+    let getDocumentSpy: jest.SpiedFunction<
+      typeof FirebaseFirestore.getDocument
+    >;
 
     beforeEach(() => {
       getDocumentSpy = jest
         .spyOn(FirebaseFirestore, 'getDocument')
-        .mockResolvedValue({ snapshot: { data: {} } } as any);
+        .mockResolvedValue(createDocumentResult({ data: {} }));
     });
 
     describe('given a user id', () => {
       it('should load user data from FirebaseFirestore', inject(
         [ProfileDataAccessService],
         async (service: ProfileDataAccessService) => {
-          await service.userLoader({
-            params: { userId: 'user-id' },
-          } as any);
+          await service.userLoader(createLoaderParams('user-id'));
 
           expect(getDocumentSpy).toHaveBeenCalledWith({
             reference: 'users/user-id',
@@ -297,11 +321,9 @@ describe('ProfileDataAccessService', () => {
       it('should return an empty object', inject(
         [ProfileDataAccessService],
         async (service: ProfileDataAccessService) => {
-          const result = await service.userLoader({
-            params: { userId: '' },
-          } as any);
+          const result = await service.userLoader(createLoaderParams(''));
 
-          expect(result).toEqual({});
+          expect(result).toBeUndefined();
         },
       ));
     });
@@ -310,13 +332,13 @@ describe('ProfileDataAccessService', () => {
       it('should return an empty object', inject(
         [ProfileDataAccessService],
         async (service: ProfileDataAccessService) => {
-          getDocumentSpy.mockResolvedValue({ snapshot: null } as any);
+          getDocumentSpy.mockResolvedValue(createDocumentResult(null));
 
-          const result = await service.userLoader({
-            params: { userId: 'user-id' },
-          } as any);
+          const result = await service.userLoader(
+            createLoaderParams('user-id'),
+          );
 
-          expect(result).toEqual({});
+          expect(result).toBeUndefined();
         },
       ));
     });
@@ -325,13 +347,15 @@ describe('ProfileDataAccessService', () => {
       it('should return an empty object', inject(
         [ProfileDataAccessService],
         async (service: ProfileDataAccessService) => {
-          getDocumentSpy.mockResolvedValue({ snapshot: { data: null } } as any);
+          getDocumentSpy.mockResolvedValue(
+            createDocumentResult({ data: null }),
+          );
 
-          const result = await service.userLoader({
-            params: { userId: 'user-id' },
-          } as any);
+          const result = await service.userLoader(
+            createLoaderParams('user-id'),
+          );
 
-          expect(result).toEqual({});
+          expect(result).toBeUndefined();
         },
       ));
     });

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { loadedReviewsFromApi, saveNewReview } from './actions';
-import { filter, map, of, switchMap, tap } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';

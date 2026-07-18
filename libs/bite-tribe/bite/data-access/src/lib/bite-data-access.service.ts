@@ -31,20 +31,21 @@ export class BiteDataAccessService {
   private readonly api = inject(BiteTribeApiService);
   private readonly analytics = inject(AnalyticsService);
 
-  biteLoader: ResourceLoader<any, any> = async ({ params }) => {
-    const biteId = params.biteId;
-    if (biteId) {
-      const res = await FirebaseFirestore.getDocument({
-        reference: `bites/${biteId}`,
-      });
-      return {
-        ...res.snapshot.data,
-        id: res.snapshot.id,
-      };
-    }
+  biteLoader: ResourceLoader<Bite | undefined, { biteId: string | undefined }> =
+    async ({ params }) => {
+      const biteId = params.biteId;
+      if (biteId) {
+        const res = await FirebaseFirestore.getDocument({
+          reference: `bites/${biteId}`,
+        });
+        return {
+          ...res.snapshot.data,
+          id: res.snapshot.id,
+        } as Bite;
+      }
 
-    return Promise.resolve();
-  };
+      return undefined;
+    };
 
   bite = resource({
     params: () => ({
@@ -161,11 +162,11 @@ export class BiteDataAccessService {
     }
   }
 
-  async submitEditedBite(bite: any): Promise<void> {
+  async submitEditedBite(bite: Bite): Promise<void> {
     this.storeService.saveEditedBite(bite);
   }
 
-  setEditingBite(bite: Partial<any>): void {
+  setEditingBite(bite: Partial<Bite>): void {
     this.storeService.setEditingBite(bite);
   }
 

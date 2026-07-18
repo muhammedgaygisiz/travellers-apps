@@ -7,7 +7,6 @@ import {
   pipe,
   switchMap,
   take,
-  UnaryFunction,
 } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { AppActions } from '../actions';
@@ -43,7 +42,7 @@ const hasMeaningfulMovement = (
 /** Dispatches the GPS position to the store */
 export const dispatchGpsPosition = (
   store: Store,
-): UnaryFunction<Observable<any>, Observable<any>> =>
+): (<T>(source: Observable<T>) => Observable<T>) =>
   pipe(
     switchMap((args) =>
       getCurrentPosition().pipe(

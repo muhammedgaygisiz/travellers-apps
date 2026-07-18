@@ -38,6 +38,8 @@ export const withBites: Story = {
       {
         id: 'bite1',
         name: 'Botanic Breeze',
+        image: '',
+        price: 0,
         imagePath:
           'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2F5RaqIaqErWatltveDVAf%2Fd37622f5-1423-43ea-a16e-f64d71b8b08e.jpg?alt=media&token=8f22c176-6680-424e-97fa-09864cfe30a2',
         place: 'Einstein au Jardin',
@@ -48,7 +50,7 @@ export const withBites: Story = {
           longitude: 7.452407777309418,
           latitude: 46.94654339581695,
         },
-      } as Bite,
+      } satisfies Bite,
       {
         position: {
           longitude: 7.459679245948792,
@@ -62,7 +64,9 @@ export const withBites: Story = {
         id: 'VTVuwUoOTFqrN3VRnwOO',
         likes: [],
         name: 'Brausmeisterplatte',
-      },
+        image: '',
+        price: 0,
+      } satisfies Bite,
     ],
   },
 };

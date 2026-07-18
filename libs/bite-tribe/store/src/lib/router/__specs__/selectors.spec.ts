@@ -1,8 +1,10 @@
 import * as fromSelectors from '../selectors';
 
 jest.mock('@ngrx/router-store', () => ({
-  getRouterSelectors: (): any => ({
-    selectRouteParams: (state: any): any => state,
+  getRouterSelectors: (): {
+    selectRouteParams: (state: unknown) => unknown;
+  } => ({
+    selectRouteParams: (state: unknown): unknown => state,
   }),
 }));
 
@@ -25,7 +27,9 @@ describe('Router Selectors', () => {
     });
 
     it('should return undefined when params is undefined', () => {
-      const params = undefined as any;
+      const params = undefined as unknown as Parameters<
+        typeof fromSelectors.biteId.projector
+      >[0];
       const result = fromSelectors.biteId.projector(params);
       expect(result).toBeUndefined();
     });
@@ -45,7 +49,9 @@ describe('Router Selectors', () => {
     });
 
     it('should return undefined when params is undefined', () => {
-      const params = undefined as any;
+      const params = undefined as unknown as Parameters<
+        typeof fromSelectors.restaurantId.projector
+      >[0];
       const result = fromSelectors.restaurantId.projector(params);
       expect(result).toBeUndefined();
     });
@@ -65,7 +71,9 @@ describe('Router Selectors', () => {
     });
 
     it('should return undefined when params is undefined', () => {
-      const params = undefined as any;
+      const params = undefined as unknown as Parameters<
+        typeof fromSelectors.menuId.projector
+      >[0];
       const result = fromSelectors.menuId.projector(params);
       expect(result).toBeUndefined();
     });
@@ -85,7 +93,9 @@ describe('Router Selectors', () => {
     });
 
     it('should return undefined when params is undefined', () => {
-      const params = undefined as any;
+      const params = undefined as unknown as Parameters<
+        typeof fromSelectors.bucketlistId.projector
+      >[0];
       const result = fromSelectors.bucketlistId.projector(params);
       expect(result).toBeUndefined();
     });

@@ -17,42 +17,87 @@ class Mock {
   };
 }
 
-const computeSnapOffsetsMock = jest.fn();
+type ComputeSnapOffsets =
+  (typeof import('../utils/compute-snap-offsets'))['computeSnapOffsets'];
+type GetLowestSnap =
+  (typeof import('../utils/get-lowest-snap'))['getLowestSnap'];
+type GetHighestSnap =
+  (typeof import('../utils/get-highest-snap'))['getHighestSnap'];
+type FindNextSnapDown =
+  (typeof import('../utils/find-next-snap-down'))['findNextSnapDown'];
+type FindClosestSnap =
+  (typeof import('../utils/find-closest-snap'))['findClosestSnap'];
+
+const computeSnapOffsetsMock = jest.fn<
+  ReturnType<ComputeSnapOffsets>,
+  Parameters<ComputeSnapOffsets>
+>();
 jest.mock('../utils/compute-snap-offsets', () => ({
-  computeSnapOffsets: (...args: any): void => computeSnapOffsetsMock(...args),
+  computeSnapOffsets: (
+    ...args: Parameters<ComputeSnapOffsets>
+  ): ReturnType<ComputeSnapOffsets> => computeSnapOffsetsMock(...args),
 }));
 
-const getLowestSnapMock = jest.fn();
+const getLowestSnapMock = jest.fn<
+  ReturnType<GetLowestSnap>,
+  Parameters<GetLowestSnap>
+>();
 jest.mock('../utils/get-lowest-snap', () => ({
-  getLowestSnap: (...args: any): void => getLowestSnapMock(...args),
+  getLowestSnap: (
+    ...args: Parameters<GetLowestSnap>
+  ): ReturnType<GetLowestSnap> => getLowestSnapMock(...args),
 }));
 
-const getHighestSnapMock = jest.fn();
+const getHighestSnapMock = jest.fn<
+  ReturnType<GetHighestSnap>,
+  Parameters<GetHighestSnap>
+>();
 jest.mock('../utils/get-highest-snap', () => ({
-  getHighestSnap: (...args: any): void => getHighestSnapMock(...args),
+  getHighestSnap: (
+    ...args: Parameters<GetHighestSnap>
+  ): ReturnType<GetHighestSnap> => getHighestSnapMock(...args),
 }));
 
-const findNextSnapDownMock = jest.fn();
+const findNextSnapDownMock = jest.fn<
+  ReturnType<FindNextSnapDown>,
+  Parameters<FindNextSnapDown>
+>();
 jest.mock('../utils/find-next-snap-down', () => ({
-  findNextSnapDown: (...args: any): void => findNextSnapDownMock(...args),
+  findNextSnapDown: (
+    ...args: Parameters<FindNextSnapDown>
+  ): ReturnType<FindNextSnapDown> => findNextSnapDownMock(...args),
 }));
 
-const findClosestSnapMock = jest.fn();
+const findClosestSnapMock = jest.fn<
+  ReturnType<FindClosestSnap>,
+  Parameters<FindClosestSnap>
+>();
 jest.mock('../utils/find-closest-snap', () => ({
-  findClosestSnap: (...args: any): void => findClosestSnapMock(...args),
+  findClosestSnap: (
+    ...args: Parameters<FindClosestSnap>
+  ): ReturnType<FindClosestSnap> => findClosestSnapMock(...args),
 }));
 
 describe('SnapDrawerComponent', () => {
   let component: SnapDrawerComponent;
   let fixture: ComponentFixture<SnapDrawerComponent>;
   let componentRef: ComponentRef<SnapDrawerComponent>;
-  let mockDrawerElement: jest.Mocked<HTMLElement>;
+  let mockDrawerElement: HTMLElement;
+
+  const createPointerEvent = (
+    overrides: Partial<PointerEvent> = {},
+  ): PointerEvent =>
+    ({
+      pointerId: 1,
+      clientY: 0,
+      target: mockDrawerElement,
+      ...overrides,
+    }) as unknown as PointerEvent;
 
   beforeEach(() => {
-    mockDrawerElement = {
-      setPointerCapture: jest.fn(),
-      releasePointerCapture: jest.fn(),
-    } as any;
+    mockDrawerElement = document.createElement('div');
+    mockDrawerElement.setPointerCapture = jest.fn();
+    mockDrawerElement.releasePointerCapture = jest.fn();
 
     TestBed.configureTestingModule({
       imports: [SnapDrawerComponent],
@@ -120,7 +165,7 @@ describe('SnapDrawerComponent', () => {
       expect(setStyleSpy).toHaveBeenCalledWith(
         mockDrawerElement,
         'transition',
-        'transform 0.3s ease'
+        'transform 0.3s ease',
       );
     });
   });
@@ -160,16 +205,12 @@ describe('SnapDrawerComponent', () => {
   });
 
   describe('onPointerDown', () => {
-    let mockEvent: jest.Mocked<PointerEvent>;
+    let mockEvent: PointerEvent;
     let setPointerCaptureSpy: SpyInstance;
     let setStyleSpy: SpyInstance;
 
     beforeEach(() => {
-      mockEvent = {
-        pointerId: 1,
-        clientY: 400,
-        target: mockDrawerElement,
-      } as any;
+      mockEvent = createPointerEvent({ clientY: 400 });
 
       setPointerCaptureSpy = jest.spyOn(mockDrawerElement, 'setPointerCapture');
 
@@ -197,7 +238,7 @@ describe('SnapDrawerComponent', () => {
 
     it('should not move when not dragging', () => {
       const initialY = component.translateY;
-      const moveEvent = { clientY: 500 } as any;
+      const moveEvent = createPointerEvent({ clientY: 500 });
 
       component.onPointerMove(moveEvent);
 
@@ -205,42 +246,30 @@ describe('SnapDrawerComponent', () => {
     });
 
     it('should update translateY when dragging', () => {
-      const downEvent = {
-        pointerId: 1,
-        clientY: 400,
-        target: mockDrawerElement,
-      } as any;
+      const downEvent = createPointerEvent({ clientY: 400 });
       component.onPointerDown(downEvent);
 
-      const moveEvent = { clientY: 450 } as any;
+      const moveEvent = createPointerEvent({ clientY: 450 });
       component.onPointerMove(moveEvent);
 
       expect(component.translateY).toBe(740);
     });
 
     it('should constrain movement to minimum bound when dragging beyond highest snap', () => {
-      const downEvent = {
-        pointerId: 1,
-        clientY: 400,
-        target: mockDrawerElement,
-      } as any;
+      const downEvent = createPointerEvent({ clientY: 400 });
       component.onPointerDown(downEvent);
 
-      const extremeMoveEvent = { clientY: -1000 } as any;
+      const extremeMoveEvent = createPointerEvent({ clientY: -1000 });
       component.onPointerMove(extremeMoveEvent);
 
       expect(component.translateY).toBe(320); // Clamped to minimum
     });
 
     it('should constrain movement to maximum bound when dragging beyond lowest snap', () => {
-      const downEvent = {
-        pointerId: 1,
-        clientY: 400,
-        target: mockDrawerElement,
-      } as any;
+      const downEvent = createPointerEvent({ clientY: 400 });
       component.onPointerDown(downEvent);
 
-      const extremeMoveEvent = { clientY: 2000 } as any;
+      const extremeMoveEvent = createPointerEvent({ clientY: 2000 });
       component.onPointerMove(extremeMoveEvent);
 
       expect(component.translateY).toBe(740); // Clamped to maximum
@@ -257,10 +286,7 @@ describe('SnapDrawerComponent', () => {
     });
 
     it('should not process when not dragging', () => {
-      const upEvent = {
-        pointerId: 1,
-        target: mockDrawerElement,
-      } as any;
+      const upEvent = createPointerEvent();
 
       component.onPointerUp(upEvent);
 
@@ -268,17 +294,10 @@ describe('SnapDrawerComponent', () => {
     });
 
     it('should release pointer capture and enable transition when dragging', () => {
-      const downEvent = {
-        pointerId: 1,
-        clientY: 400,
-        target: mockDrawerElement,
-      } as any;
+      const downEvent = createPointerEvent({ clientY: 400 });
       component.onPointerDown(downEvent);
 
-      const upEvent = {
-        pointerId: 1,
-        target: mockDrawerElement,
-      } as any;
+      const upEvent = createPointerEvent();
       findClosestSnapMock.mockReturnValue(320);
 
       component.onPointerUp(upEvent);
@@ -292,20 +311,13 @@ describe('SnapDrawerComponent', () => {
       findClosestSnapMock.mockReturnValue(320);
       fixture.detectChanges();
 
-      const downEvent = {
-        pointerId: 1,
-        clientY: 400,
-        target: mockDrawerElement,
-      } as any;
+      const downEvent = createPointerEvent({ clientY: 400 });
       component.onPointerDown(downEvent);
 
-      const moveEvent = { clientY: 410 } as any; // Small movement (10px)
+      const moveEvent = createPointerEvent({ clientY: 410 }); // Small movement (10px)
       component.onPointerMove(moveEvent);
 
-      const upEvent = {
-        pointerId: 1,
-        target: mockDrawerElement,
-      } as any;
+      const upEvent = createPointerEvent();
       component.onPointerUp(upEvent);
 
       expect(findClosestSnapMock).toHaveBeenCalled();
@@ -317,20 +329,13 @@ describe('SnapDrawerComponent', () => {
       getHighestSnapMock.mockReturnValue(320);
       fixture.detectChanges();
 
-      const downEvent = {
-        pointerId: 1,
-        clientY: 500,
-        target: mockDrawerElement,
-      } as any;
+      const downEvent = createPointerEvent({ clientY: 500 });
       component.onPointerDown(downEvent);
 
-      const moveEvent = { clientY: 350 } as any; // 150px up
+      const moveEvent = createPointerEvent({ clientY: 350 }); // 150px up
       component.onPointerMove(moveEvent);
 
-      const upEvent = {
-        pointerId: 1,
-        target: mockDrawerElement,
-      } as any;
+      const upEvent = createPointerEvent();
       component.onPointerUp(upEvent);
 
       expect(component.translateY).toBe(320);

@@ -27,6 +27,14 @@ const DAYS: DaySchedule['day'][] = [
   'sunday',
 ];
 
+/** Raw, partially-typed values as produced by the reactive form. */
+type RawTimeRange = { from?: string | null; to?: string | null };
+type RawDayEntry = {
+  day: DaySchedule['day'];
+  isOpen?: boolean | null;
+  timeRanges?: RawTimeRange[] | null;
+};
+
 @Component({
   selector: 'bt-opening-hours',
   templateUrl: 'opening-hours.component.html',
@@ -117,11 +125,11 @@ export class OpeningHoursComponent {
 
   /** Returns the current schedule. Read by the create page at save time. */
   getOpeningHours(): DaySchedule[] {
-    const scheduleValue = this.form.value.schedule ?? [];
-    return scheduleValue.map((entry: any) => ({
+    const scheduleValue = (this.form.value.schedule ?? []) as RawDayEntry[];
+    return scheduleValue.map((entry) => ({
       day: entry.day,
       isOpen: entry.isOpen ?? false,
-      timeRanges: (entry.timeRanges ?? []).map((r: any) => ({
+      timeRanges: (entry.timeRanges ?? []).map((r) => ({
         from: r.from ?? '',
         to: r.to ?? '',
       })),

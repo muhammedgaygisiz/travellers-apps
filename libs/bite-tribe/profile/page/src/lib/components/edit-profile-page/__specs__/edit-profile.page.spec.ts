@@ -351,7 +351,9 @@ describe(EditProfilePage.name, () => {
           'openConfirmationDialog',
         );
 
-        component.handlePubicChange({ detail: { checked: false } } as any);
+        component.handlePubicChange({
+          detail: { checked: false },
+        } as unknown as Parameters<EditProfilePage['handlePubicChange']>[0]);
 
         expect(openConfirmationDialogSpy).toHaveBeenCalled();
       });
@@ -364,7 +366,9 @@ describe(EditProfilePage.name, () => {
           'openConfirmationDialog',
         );
 
-        component.handlePubicChange({ detail: { checked: true } } as any);
+        component.handlePubicChange({
+          detail: { checked: true },
+        } as unknown as Parameters<EditProfilePage['handlePubicChange']>[0]);
 
         expect(openConfirmationDialogSpy).not.toHaveBeenCalled();
       });
@@ -377,7 +381,7 @@ describe(EditProfilePage.name, () => {
         const dismissSpy = jest.fn();
         component.profileImageSelectionModal = signal({
           dismiss: dismissSpy,
-        }) as any;
+        }) as unknown as EditProfilePage['profileImageSelectionModal'];
 
         component.cancel();
 
@@ -387,7 +391,9 @@ describe(EditProfilePage.name, () => {
 
     describe('given modal is undefined', () => {
       it('should not throw when dismissing modal', () => {
-        component.profileImageSelectionModal = signal(undefined) as any;
+        component.profileImageSelectionModal = signal(
+          undefined,
+        ) as unknown as EditProfilePage['profileImageSelectionModal'];
 
         expect(() => component.cancel()).not.toThrow();
       });
@@ -400,7 +406,7 @@ describe(EditProfilePage.name, () => {
         const dismissSpy = jest.fn();
         component.profileImageSelectionModal = signal({
           dismiss: dismissSpy,
-        }) as any;
+        }) as unknown as EditProfilePage['profileImageSelectionModal'];
 
         component.dismissImageModal();
 
@@ -410,7 +416,9 @@ describe(EditProfilePage.name, () => {
 
     describe('given modal is undefined', () => {
       it('should not throw when dismissing modal', () => {
-        component.profileImageSelectionModal = signal(undefined) as any;
+        component.profileImageSelectionModal = signal(
+          undefined,
+        ) as unknown as EditProfilePage['profileImageSelectionModal'];
 
         expect(() => component.dismissImageModal()).not.toThrow();
       });

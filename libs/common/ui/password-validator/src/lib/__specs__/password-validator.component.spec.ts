@@ -10,7 +10,7 @@ import { TranslocoService } from '@jsverse/transloco';
 jest.mock('memoizee');
 addNecessaryIcons();
 
-const assertDeepEqual = (actual: any, expected: any): void => {
+const assertDeepEqual = (actual: unknown, expected: unknown): void => {
   expect(actual).toEqual(expected);
 };
 
@@ -49,7 +49,10 @@ describe('PasswordValidatorComponent', () => {
 
   describe('ngOnChanges', () => {
     it('should call initStreams', () => {
-      const initStreamsSpy = jest.spyOn(component as any, 'initStreams');
+      const initStreamsSpy = jest.spyOn(
+        component as unknown as { initStreams: () => void },
+        'initStreams',
+      );
 
       component.ngOnChanges();
 

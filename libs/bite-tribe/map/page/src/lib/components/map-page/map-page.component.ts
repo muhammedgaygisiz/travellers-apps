@@ -26,7 +26,7 @@ import { SnapDrawerComponent } from '../snap-drawer/snap-drawer.component';
   ],
 })
 export class MapPageComponent {
-  bites = input<any[]>();
+  bites = input<Bite[]>();
   isAuthenticated = input(false);
   gpsPosition = input<Geopoint | null | undefined>();
   userId = input<string>();

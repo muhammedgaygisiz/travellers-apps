@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MenuItemComponent } from '../menu-item.component';
+import { MenuItem } from 'model';
 import SpyInstance = jest.SpyInstance;
 
 @Pipe({
@@ -16,7 +17,6 @@ class MockTranslocoPipe implements PipeTransform {
 describe('MenuItemComponent', () => {
   let component: MenuItemComponent;
   let fixture: ComponentFixture<MenuItemComponent>;
-  let componentRef: ComponentRef<MenuItemComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -30,7 +30,6 @@ describe('MenuItemComponent', () => {
 
     fixture = TestBed.createComponent(MenuItemComponent);
     component = fixture.componentInstance;
-    componentRef = fixture.componentRef;
   });
 
   it('should create', () => {
@@ -45,7 +44,11 @@ describe('MenuItemComponent', () => {
     });
 
     it('should emit createBiteClick event with item data when itemData is defined', () => {
-      const mockItemData = { id: 1, name: 'Test Item', price: 10 } as any;
+      const mockItemData = {
+        id: 1,
+        name: 'Test Item',
+        price: 10,
+      } as unknown as MenuItem;
 
       component.onCreateBiteClick(mockItemData);
 
@@ -64,7 +67,7 @@ describe('MenuItemComponent', () => {
         name: 'Test Item',
         price: 10,
         isAvailable: false,
-      } as any;
+      } as unknown as MenuItem;
 
       component.onCreateBiteClick(mockItemData);
 
@@ -74,11 +77,15 @@ describe('MenuItemComponent', () => {
 
   describe('isUnavailable', () => {
     it('should treat missing availability as available', () => {
-      expect(component.isUnavailable({ name: 'Test Item' } as any)).toBe(false);
+      expect(
+        component.isUnavailable({ name: 'Test Item' } as unknown as MenuItem),
+      ).toBe(false);
     });
 
     it('should return true when item is explicitly unavailable', () => {
-      expect(component.isUnavailable({ isAvailable: false } as any)).toBe(true);
+      expect(
+        component.isUnavailable({ isAvailable: false } as unknown as MenuItem),
+      ).toBe(true);
     });
   });
 });

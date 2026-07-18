@@ -14,7 +14,6 @@ jest.mock('../upload-image-and-update-bite', () => ({
 describe('replaceImageInFirestoreStorage', () => {
   it('should call deleteFile and uploadImageAndUpdateBite', async () => {
     await replaceImageInFirestoreStorage(
-      true,
       'imageBase64String',
       'https://firebasestorage.googleapis.com/v0/b/bucket/o/images%2Fphoto.jpg?alt=media',
       'bite123',

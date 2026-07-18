@@ -13,6 +13,14 @@ export const USERS_COLLECTION = 'users';
 export const BITE_COLLECTION = 'bites';
 export const BITE_TRAIL_COLLECTION = 'biteTrails';
 
+interface OrganisationLoaderParams {
+  organisationId: string | undefined;
+}
+
+interface BitesLoaderParams {
+  userIds: string[] | undefined;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OrganisationDashboardDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
@@ -22,29 +30,31 @@ export class OrganisationDashboardDataAccessService {
   loadBitesTrigger = signal<string[]>([]);
   organisationId = this.storeService.organisationIdFromUrl;
 
-  employeesLoader: ResourceLoader<PublicUser[] | undefined, any> = async ({
-    params,
-  }) => {
+  employeesLoader: ResourceLoader<
+    PublicUser[] | undefined,
+    OrganisationLoaderParams
+  > = async ({ params }) => {
     const { organisationId } = params;
 
     if (!organisationId) {
       return [];
     }
 
-    const userDocsByOrganisationId = await FirebaseFirestore.getCollection({
-      reference: USERS_COLLECTION,
-      compositeFilter: {
-        type: 'and',
-        queryConstraints: [
-          {
-            type: 'where',
-            fieldPath: 'organisationId',
-            opStr: '==',
-            value: organisationId,
-          },
-        ],
-      },
-    });
+    const userDocsByOrganisationId =
+      await FirebaseFirestore.getCollection<PublicUser>({
+        reference: USERS_COLLECTION,
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            {
+              type: 'where',
+              fieldPath: 'organisationId',
+              opStr: '==',
+              value: organisationId,
+            },
+          ],
+        },
+      });
 
     if (!userDocsByOrganisationId?.snapshots?.length) {
       return [];
@@ -55,7 +65,9 @@ export class OrganisationDashboardDataAccessService {
     );
   };
 
-  bitesLoader: ResourceLoader<Bite[] | undefined, any> = async ({ params }) => {
+  bitesLoader: ResourceLoader<Bite[] | undefined, BitesLoaderParams> = async ({
+    params,
+  }) => {
     const { userIds } = params;
 
     if (!userIds || userIds.length === 0) {
@@ -64,7 +76,7 @@ export class OrganisationDashboardDataAccessService {
 
     const allBitesPromises: Promise<Bite[]>[] = userIds.map(
       async (userId: string) => {
-        const biteDocsByUserId = await FirebaseFirestore.getCollection({
+        const biteDocsByUserId = await FirebaseFirestore.getCollection<Bite>({
           reference: BITE_COLLECTION,
           compositeFilter: {
             type: 'and',
@@ -95,16 +107,17 @@ export class OrganisationDashboardDataAccessService {
       .reduce((acc, bites) => [...acc, ...bites], []);
   };
 
-  biteTrailsLoader: ResourceLoader<BiteTrail[] | undefined, any> = async ({
-    params,
-  }) => {
+  biteTrailsLoader: ResourceLoader<
+    BiteTrail[] | undefined,
+    OrganisationLoaderParams
+  > = async ({ params }) => {
     const { organisationId } = params;
 
     if (!organisationId) {
       return [];
     }
 
-    const biteTrailDocs = await FirebaseFirestore.getCollection({
+    const biteTrailDocs = await FirebaseFirestore.getCollection<BiteTrail>({
       reference: BITE_TRAIL_COLLECTION,
       compositeFilter: {
         type: 'and',

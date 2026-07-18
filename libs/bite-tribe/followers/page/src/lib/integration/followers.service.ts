@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { NavController } from '@ionic/angular/standalone';
 import { FollowersDataAccessService } from 'bite-tribe/followers-data-access';
 import type { PublicUser } from 'model';

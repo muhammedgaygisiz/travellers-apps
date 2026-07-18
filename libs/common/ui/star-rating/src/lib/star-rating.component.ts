@@ -37,6 +37,8 @@ export class StarRatingComponent implements ControlValueAccessor {
 
   hoveredIndex = signal(-1);
 
+  protected readonly stars = [1, 2, 3, 4, 5];
+
   getRating = computed(() => {
     const value = this.value();
 
@@ -74,7 +76,7 @@ export class StarRatingComponent implements ControlValueAccessor {
 
   value = signal<number | null>(null);
 
-  writeValue(obj: any): void {
+  writeValue(obj: number | null): void {
     this.value.set(obj);
   }
 
@@ -83,11 +85,11 @@ export class StarRatingComponent implements ControlValueAccessor {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   _onTouch: () => void = () => {};
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: number | null) => void): void {
     this._onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this._onTouch = fn;
   }
 }

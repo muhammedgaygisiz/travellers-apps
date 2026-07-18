@@ -456,3 +456,6 @@ export class BitePage {
     }
   }
 }
+
+/** Raw value emitted by {@link BitePage.submitBite} (reactive form value). */
+export type BiteFormValue = BitePage['biteFormGroup']['value'];

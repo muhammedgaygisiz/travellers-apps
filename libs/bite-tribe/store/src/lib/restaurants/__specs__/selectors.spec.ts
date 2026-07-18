@@ -3,7 +3,7 @@ import { restaurant, restaurants, restaurantToCreate } from '../selectors';
 describe('restaurant Selectors', () => {
   describe('restaurants', () => {
     it('should return restaurants with distances and unsaved restaurants from bites', () => {
-      const state: any = {
+      const state = {
         restaurants: [
           {
             id: '1',
@@ -68,7 +68,7 @@ describe('restaurant Selectors', () => {
     });
 
     it('should handle empty restaurants and bites', () => {
-      const state: any = {
+      const state = {
         restaurants: [],
         gpsPosition: { latitude: 37.7749, longitude: -122.4194 },
         bites: [],
@@ -84,7 +84,7 @@ describe('restaurant Selectors', () => {
     });
 
     it('should handle undefined gpsPosition', () => {
-      const state: any = {
+      const state = {
         restaurants: [
           {
             id: '1',
@@ -129,7 +129,7 @@ describe('restaurant Selectors', () => {
 
   describe('restaurant', () => {
     it('should return the restaurant by ID with distance', () => {
-      const state: any = {
+      const state = {
         restaurants: [
           {
             id: '1',
@@ -157,7 +157,7 @@ describe('restaurant Selectors', () => {
     });
 
     it('should return undefined if restaurant ID not found', () => {
-      const state: any = {
+      const state = {
         restaurants: [
           {
             id: '1',
@@ -178,7 +178,7 @@ describe('restaurant Selectors', () => {
     });
 
     it('should return undefined if gpsPosition is undefined', () => {
-      const state: any = {
+      const state = {
         restaurants: [
           {
             id: '1',
@@ -201,7 +201,7 @@ describe('restaurant Selectors', () => {
 
   describe('restaurantToCreate', () => {
     it('should return the restaurant to create from state', () => {
-      const state: any = {
+      const state = {
         restaurantToCreate: {
           name: 'New Restaurant',
           position: { latitude: 51.5074, longitude: -0.1278 },
@@ -220,7 +220,7 @@ describe('restaurant Selectors', () => {
     });
 
     it('should include bites of restaurant', () => {
-      const state: any = {
+      const state = {
         restaurantToCreate: {
           name: 'New Restaurant',
           position: { latitude: 51.5074, longitude: -0.1278 },

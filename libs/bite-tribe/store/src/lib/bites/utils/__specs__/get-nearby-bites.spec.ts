@@ -10,7 +10,9 @@ describe('getNearbyBites', () => {
         { id: '4' }, // No distance provided
       ];
 
-      const nearbyBites = getNearbyBites(bites as any);
+      const nearbyBites = getNearbyBites(
+        bites as unknown as Parameters<typeof getNearbyBites>[0],
+      );
 
       expect(nearbyBites).toEqual([
         { id: '1', distance: '0.5' },
@@ -27,7 +29,9 @@ describe('getNearbyBites', () => {
         { id: '3' }, // No distance provided
       ];
 
-      const nearbyBites = getNearbyBites(bites as any);
+      const nearbyBites = getNearbyBites(
+        bites as unknown as Parameters<typeof getNearbyBites>[0],
+      );
 
       expect(nearbyBites).toEqual([]);
     });

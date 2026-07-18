@@ -257,7 +257,7 @@ export class DetailsPage {
           );
           return;
         }
-      } catch (e) {
+      } catch {
         url = `maps://?daddr=${destination}`;
       }
     } else if (this.platform.is('android')) {

@@ -38,7 +38,9 @@ export class ProfileApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
   private readonly platform = inject(Platform);
-  private readonly profileChannel$ = new BehaviorSubject<any>(null);
+  private readonly profileChannel$ = new BehaviorSubject<
+    (PublicUser & { id?: string }) | null
+  >(null);
 
   isWeb = signal(!this.platform.is('hybrid'));
 
@@ -56,7 +58,9 @@ export class ProfileApiService {
     }),
   );
 
-  async startListener(): Promise<any> {
+  async startListener(): Promise<
+    BehaviorSubject<(PublicUser & { id?: string }) | null>
+  > {
     const user = this.authService.getUser();
 
     this.profileCallbackId =
@@ -75,21 +79,25 @@ export class ProfileApiService {
             ],
           },
         },
-        (publicProfileDoc: any) => this.handleResponse(publicProfileDoc),
+        (publicProfileDoc) => this.handleResponse(publicProfileDoc),
       );
 
     return this.profileChannel$;
   }
 
-  handleResponse(publicProfileDoc: any): void {
-    const isPublicProfile = publicProfileDoc?.snapshots?.length > 0;
+  handleResponse(
+    publicProfileDoc: {
+      snapshots?: Array<{ id?: string; data?: DocumentData | null }>;
+    } | null,
+  ): void {
+    const snapshot = publicProfileDoc?.snapshots?.[0];
+    const publicProfile = snapshot?.data;
 
-    if (isPublicProfile) {
-      const publicProfile = publicProfileDoc.snapshots[0].data;
+    if (publicProfile) {
       this.profileChannel$.next({
         ...publicProfile,
-        id: publicProfileDoc.snapshots[0].id,
-      });
+        ...(snapshot.id ? { id: snapshot.id } : {}),
+      } as PublicUser & { id?: string });
     }
   }
 
@@ -104,7 +112,7 @@ export class ProfileApiService {
     try {
       const user = this.authService.getUser();
 
-      const photoUrl = ((user as any)?.providerData as any[]).find(
+      const photoUrl = user?.providerData.find(
         (data) => data.photoUrl?.length,
       )?.photoUrl;
 
@@ -521,7 +529,7 @@ export class ProfileApiService {
       const following = await this.fetchFollowing(userId);
       const followingData = following.map((doc) => doc.data);
       const userIds = followingData
-        .map((data: any) => data?.followedUid)
+        .map((data) => (data as { followedUid?: string })?.followedUid)
         .filter(Boolean);
 
       if (userIds.length === 0) {
@@ -552,6 +560,7 @@ export class ProfileApiService {
     callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
   ): Promise<void> {
     const { photoUrl, ...profileWithoutImage } = profile;
+    void profileWithoutImage;
 
     uploadBase64ToFirebaseStorage({
       base64: photoUrl,
@@ -566,6 +575,7 @@ export class ProfileApiService {
     photoUrl: string,
   ): Promise<PublicUser> {
     const { photoUrl: base64Photo, ...profileWithoutImage } = profile;
+    void base64Photo;
 
     await updateProfileWithImagePathFromFirebaseStorage(
       photoUrl,

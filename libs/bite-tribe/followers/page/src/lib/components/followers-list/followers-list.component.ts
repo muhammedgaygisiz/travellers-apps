@@ -95,7 +95,7 @@ export class FollowersListComponent {
 
   readonly defaultHref = `/${PATH.MY_PROFILE}`;
 
-  openConfirmationDialog(event: any): void {
+  openConfirmationDialog(event: Pick<Event, 'stopPropagation'>): void {
     event.stopPropagation();
     this.isOpen.set(true);
   }

@@ -9,7 +9,7 @@ const getAnchorY = (size: 'big' | 'small' = 'small'): number =>
   size === 'big' ? 35 : 25;
 
 export const getMarkerWithColor = (
-  color: MarkerColor,
+  color: MarkerColor | null,
   options?: { size?: 'big' | 'small'; rating?: string },
 ): L.DivIcon => {
   const styleSize = getSize(options?.size);

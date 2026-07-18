@@ -13,6 +13,16 @@ import {
   RESTAURANT_CLUSTERING_ELIGIBLE_BITES_LIMIT,
 } from '../migrations-data-access.service';
 
+type CollectionResult = Awaited<
+  ReturnType<typeof FirebaseFirestore.getCollection>
+>;
+type CandidatesLoaderArg = Parameters<
+  MigrationsDataAccessService['activeRestaurantCandidatesLoader']
+>[0];
+type ClusteringLoaderArg = Parameters<
+  MigrationsDataAccessService['restaurantClusteringBitesLoader']
+>[0];
+
 jest.mock('@capacitor-firebase/firestore');
 jest.mock('@capacitor-firebase/functions', () => ({
   FirebaseFunctions: {
@@ -67,10 +77,12 @@ describe(MigrationsDataAccessService.name, () => {
             },
           },
         ],
-      } as any);
+      } as unknown as CollectionResult);
 
       const service = TestBed.inject(MigrationsDataAccessService);
-      const result = await service.activeRestaurantCandidatesLoader({} as any);
+      const result = await service.activeRestaurantCandidatesLoader(
+        {} as unknown as CandidatesLoaderArg,
+      );
 
       expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
         reference: RESTAURANT_CANDIDATES_COLLECTION,
@@ -98,10 +110,12 @@ describe(MigrationsDataAccessService.name, () => {
     it('should return an empty list when Firestore returns no snapshots', async () => {
       jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
         snapshots: [],
-      } as any);
+      } as unknown as CollectionResult);
 
       const service = TestBed.inject(MigrationsDataAccessService);
-      const result = await service.activeRestaurantCandidatesLoader({} as any);
+      const result = await service.activeRestaurantCandidatesLoader(
+        {} as unknown as CandidatesLoaderArg,
+      );
 
       expect(result).toEqual([]);
     });
@@ -119,10 +133,12 @@ describe(MigrationsDataAccessService.name, () => {
             },
           },
         ],
-      } as any);
+      } as unknown as CollectionResult);
 
       const service = TestBed.inject(MigrationsDataAccessService);
-      const result = await service.restaurantClusteringBitesLoader({} as any);
+      const result = await service.restaurantClusteringBitesLoader(
+        {} as unknown as ClusteringLoaderArg,
+      );
 
       expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
         reference: BITE_COLLECTION,
@@ -139,10 +155,12 @@ describe(MigrationsDataAccessService.name, () => {
     it('should return an empty list when no Bite snapshots are found', async () => {
       jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
         snapshots: [],
-      } as any);
+      } as unknown as CollectionResult);
 
       const service = TestBed.inject(MigrationsDataAccessService);
-      const result = await service.restaurantClusteringBitesLoader({} as any);
+      const result = await service.restaurantClusteringBitesLoader(
+        {} as unknown as ClusteringLoaderArg,
+      );
 
       expect(result).toEqual([]);
     });

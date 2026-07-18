@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BiteComponent } from '../bite.component';
 import { ToMetricPipe } from 'common/distance';
-import { Bite, Like } from 'model';
+import { Bite, Like, LikeClick } from 'model';
 import {
   ComponentRef,
   CUSTOM_ELEMENTS_SCHEMA,
@@ -110,11 +110,10 @@ describe('BiteComponent', () => {
   });
 
   it('should emit likeButtonClick with correct data', (done) => {
-    const expectedData: Like = {
-      createdAt: '',
-      userId: '',
+    const expectedData: LikeClick = {
       likeType: 'thumbup',
       biteId: 'bite1',
+      action: 'save',
     };
 
     component.likeButtonClick.subscribe((data) => {

@@ -16,16 +16,18 @@ import { PATH } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { ToastController } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
+import type { Action } from '@ngrx/store';
 
-const assertDeepEqual = (actual: any, expected: any): void => {
+const assertDeepEqual = (actual: unknown, expected: unknown): void => {
   expect(actual).toEqual(expected);
 };
 
 const mockToastPresent = jest.fn().mockResolvedValue(undefined);
 const mockToastOnDidDismiss = jest.fn().mockResolvedValue(undefined);
-const mockToastCreate = jest
-  .fn()
-  .mockResolvedValue({ present: mockToastPresent, onDidDismiss: mockToastOnDidDismiss });
+const mockToastCreate = jest.fn().mockResolvedValue({
+  present: mockToastPresent,
+  onDidDismiss: mockToastOnDidDismiss,
+});
 const MockToastController = {
   create: mockToastCreate,
 };
@@ -35,18 +37,24 @@ const MockTranslocoService = {
 };
 
 const Mock = {
-  bitesByUser: (): Observable<any> => of([]),
-  bitesByPosition: (): Observable<any> => of([]),
-  biteById: (): Observable<any> => of({}),
-  bitesByBucketlist: (): Observable<any> => of([]),
+  bitesByUser: (): ReturnType<BiteTribeApiService['bitesByUser']> =>
+    of([]) as unknown as ReturnType<BiteTribeApiService['bitesByUser']>,
+  bitesByPosition: (): ReturnType<BiteTribeApiService['bitesByPosition']> =>
+    of([]) as unknown as ReturnType<BiteTribeApiService['bitesByPosition']>,
+  biteById: (): ReturnType<BiteTribeApiService['biteById']> =>
+    of(undefined) as unknown as ReturnType<BiteTribeApiService['biteById']>,
+  bitesByBucketlist: (): ReturnType<BiteTribeApiService['bitesByBucketlist']> =>
+    of([]) as unknown as ReturnType<BiteTribeApiService['bitesByBucketlist']>,
   saveEditedBite: jest.fn(),
   saveTagsToExistingBite: jest.fn(),
   deleteBite: jest.fn(),
   getUserByBiteId: jest.fn(),
   bucketlist: (): WritableSignal<string> => signal(''),
   user: jest.fn(),
-  latestBites$: (): Observable<any> => of([]),
-  getUserById: (): Observable<any> => of({}),
+  latestBites$: (): ReturnType<BiteTribeApiService['latestBites$']> =>
+    of([]) as unknown as ReturnType<BiteTribeApiService['latestBites$']>,
+  getUserById: (): ReturnType<BiteTribeApiService['getUserById']> =>
+    of() as unknown as ReturnType<BiteTribeApiService['getUserById']>,
 };
 
 const BITE_MOCK = {
@@ -59,7 +67,7 @@ const BITE_MOCK = {
 
 describe(BiteEffects.name, () => {
   let scheduler: TestScheduler;
-  let actions$: Observable<any> = of({});
+  let actions$: Observable<Action> = of({ type: 'INIT' });
   let effects: BiteEffects;
   let apiService: BiteTribeApiService;
   let storeService: BiteTribeStoreService;
@@ -97,14 +105,22 @@ describe(BiteEffects.name, () => {
   describe('loadBitesByCurrentUser$', () => {
     describe('given a user', () => {
       beforeEach(() => {
-        jest.spyOn(storeService, 'user').mockReturnValue({} as any);
+        jest
+          .spyOn(storeService, 'user')
+          .mockReturnValue(
+            {} as unknown as ReturnType<typeof storeService.user>,
+          );
       });
 
       it('should load bites from API on my-bites page entry', () => {
         scheduler.run(({ cold, expectObservable }) => {
           actions$ = cold('a', {
             a: routerNavigatedAction({
-              payload: { event: { urlAfterRedirects: PATH.MY_BITES } } as any,
+              payload: {
+                event: { urlAfterRedirects: PATH.MY_BITES },
+              } as unknown as Parameters<
+                typeof routerNavigatedAction
+              >[0]['payload'],
             }),
           });
 
@@ -124,7 +140,11 @@ describe(BiteEffects.name, () => {
         scheduler.run(({ cold, expectObservable }) => {
           actions$ = cold('a', {
             a: routerNavigatedAction({
-              payload: { event: { urlAfterRedirects: PATH.MY_PROFILE } } as any,
+              payload: {
+                event: { urlAfterRedirects: PATH.MY_PROFILE },
+              } as unknown as Parameters<
+                typeof routerNavigatedAction
+              >[0]['payload'],
             }),
           });
 
@@ -150,7 +170,11 @@ describe(BiteEffects.name, () => {
         scheduler.run(({ cold, expectObservable }) => {
           actions$ = cold('a', {
             a: routerNavigatedAction({
-              payload: { event: { urlAfterRedirects: PATH.MY_PROFILE } } as any,
+              payload: {
+                event: { urlAfterRedirects: PATH.MY_PROFILE },
+              } as unknown as Parameters<
+                typeof routerNavigatedAction
+              >[0]['payload'],
             }),
           });
 
@@ -171,7 +195,9 @@ describe(BiteEffects.name, () => {
   describe('loadBitesForBiteCreatorProfile', () => {
     describe('given a bite creator profile page entry', () => {
       const BITE_CREATOR_PROFILE_PAGE_ENTRY = routerNavigatedAction({
-        payload: { event: { urlAfterRedirects: PATH.PROFILE } } as any,
+        payload: {
+          event: { urlAfterRedirects: PATH.PROFILE },
+        } as unknown as Parameters<typeof routerNavigatedAction>[0]['payload'],
       });
 
       describe('and no bite creator id', () => {
@@ -196,7 +222,9 @@ describe(BiteEffects.name, () => {
 
       describe('and a bite creator id is defined', () => {
         beforeEach(() => {
-          (effects as any)['biteCreatorId'] = (): string => 'biteCreatorId';
+          (
+            effects as unknown as { biteCreatorId: () => string }
+          ).biteCreatorId = (): string => 'biteCreatorId';
         });
 
         it('should load bites from API', () => {
@@ -225,7 +253,9 @@ describe(BiteEffects.name, () => {
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
           a: AppActions.loadedGPSPosition({
-            position: {} as any,
+            position: {} as unknown as Parameters<
+              typeof AppActions.loadedGPSPosition
+            >[0]['position'],
           }),
         });
 
@@ -250,7 +280,9 @@ describe(BiteEffects.name, () => {
             a: routerNavigatedAction({
               payload: {
                 event: { urlAfterRedirects: '/my-bucketlists/123' },
-              } as any,
+              } as unknown as Parameters<
+                typeof routerNavigatedAction
+              >[0]['payload'],
             }),
           });
 
@@ -271,7 +303,9 @@ describe(BiteEffects.name, () => {
       beforeEach(() => {
         jest
           .spyOn(storeService, 'bucketlist')
-          .mockReturnValue(undefined as any);
+          .mockReturnValue(
+            undefined as unknown as ReturnType<typeof storeService.bucketlist>,
+          );
       });
 
       it('should return noBucketlistFound on navigating to bucketlist url', () => {
@@ -280,7 +314,9 @@ describe(BiteEffects.name, () => {
             a: routerNavigatedAction({
               payload: {
                 event: { urlAfterRedirects: '/my-bucketlists/123' },
-              } as any,
+              } as unknown as Parameters<
+                typeof routerNavigatedAction
+              >[0]['payload'],
             }),
           });
 
@@ -303,7 +339,11 @@ describe(BiteEffects.name, () => {
       beforeEach(() => {
         jest
           .spyOn(apiService, 'saveEditedBite')
-          .mockReturnValue(of(BITE_MOCK) as any);
+          .mockReturnValue(
+            of(BITE_MOCK) as unknown as ReturnType<
+              BiteTribeApiService['saveEditedBite']
+            >,
+          );
       });
 
       it('should return savedBite on saveExistingBite', () => {
@@ -352,7 +392,11 @@ describe(BiteEffects.name, () => {
           jest
             .spyOn(apiService, 'saveEditedBite')
             .mockReturnValue(
-              cold('#', {}, new Error('Error saving bite')) as any,
+              cold(
+                '#',
+                {},
+                new Error('Error saving bite'),
+              ) as unknown as ReturnType<BiteTribeApiService['saveEditedBite']>,
             );
 
           actions$ = cold('a', {
@@ -380,7 +424,11 @@ describe(BiteEffects.name, () => {
       beforeEach(() => {
         jest
           .spyOn(apiService, 'deleteBite')
-          .mockReturnValue(of(BITE_MOCK) as any);
+          .mockReturnValue(
+            of(BITE_MOCK) as unknown as ReturnType<
+              BiteTribeApiService['deleteBite']
+            >,
+          );
       });
 
       it('should return deletedBite on deleteBite', () => {
@@ -426,7 +474,11 @@ describe(BiteEffects.name, () => {
           jest
             .spyOn(apiService, 'deleteBite')
             .mockReturnValue(
-              cold('#', {}, new Error('Error deleting bite')) as any,
+              cold(
+                '#',
+                {},
+                new Error('Error deleting bite'),
+              ) as unknown as ReturnType<BiteTribeApiService['deleteBite']>,
             );
 
           actions$ = cold('a', {

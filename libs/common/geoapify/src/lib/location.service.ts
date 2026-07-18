@@ -14,23 +14,23 @@ export class LocationService {
   private readonly geolocation = inject(Geolocation);
 
   getLocation$: Observable<string> = from(this.getLocation()).pipe(
-    switchMap((geolocation) => this.getCityForCoordinates(geolocation.coords))
+    switchMap((geolocation) => this.getCityForCoordinates(geolocation.coords)),
   );
 
   private getLocation(): Promise<Geoposition> {
     return this.geolocation.getCurrentPosition();
   }
 
-  private getCityForCoordinates(coords: Coordinates): Observable<any> {
+  private getCityForCoordinates(coords: Coordinates): Observable<string> {
     return fromFetch(
-      `https://api.geoapify.com/v1/geocode/reverse?lat=${coords.latitude}&lon=${coords.longitude}&apiKey=${process.env['NX_APP_GEOAPIFY_API_KEY']}`
+      `https://api.geoapify.com/v1/geocode/reverse?lat=${coords.latitude}&lon=${coords.longitude}&apiKey=${process.env['NX_APP_GEOAPIFY_API_KEY']}`,
     ).pipe(
       switchMap((response) =>
         response.ok
           ? response.json()
-          : of({ error: true, message: `Error ${response.status}` })
+          : of({ error: true, message: `Error ${response.status}` }),
       ),
-      map((response) => response.features[0].properties.city)
+      map((response) => response.features[0].properties.city),
     );
   }
 }

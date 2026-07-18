@@ -8,6 +8,7 @@ import { CreateBiteContainer } from '../create-bite.container';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
+import type { Bite } from 'model';
 
 jest.mock('@capacitor-firebase/analytics');
 jest.mock('heic2any', () => jest.fn());
@@ -26,6 +27,8 @@ const MockTranslocoService = {
   langChanges$: of(),
 };
 
+const mockCachedBite = signal<Partial<Bite> | undefined>(undefined);
+
 describe(CreateBiteContainer.name, () => {
   let component: CreateBiteContainer;
   let fixture: ComponentFixture<CreateBiteContainer>;
@@ -38,7 +41,7 @@ describe(CreateBiteContainer.name, () => {
         {
           provide: BiteService,
           useValue: {
-            cachedBite: signal(undefined),
+            cachedBite: mockCachedBite,
             currency: signal(undefined),
             effectiveCurrency: signal(undefined),
             position: signal(undefined),
@@ -55,6 +58,7 @@ describe(CreateBiteContainer.name, () => {
     fixture = TestBed.createComponent(CreateBiteContainer);
     component = fixture.componentInstance;
     biteServiceMock = TestBed.inject(BiteService);
+    mockCachedBite.set(undefined);
   });
 
   it('should create', () => {
@@ -89,7 +93,7 @@ describe(CreateBiteContainer.name, () => {
       const existingBite = { id: '123', place: 'Old Place' };
 
       beforeEach(() => {
-        (biteServiceMock.cachedBite as any) = signal(existingBite);
+        mockCachedBite.set(existingBite);
       });
 
       it('should call setEditingBite with updated place', () => {
@@ -104,7 +108,7 @@ describe(CreateBiteContainer.name, () => {
 
     describe('given no cached bite', () => {
       beforeEach(() => {
-        (biteServiceMock.cachedBite as any) = signal(undefined);
+        mockCachedBite.set(undefined);
       });
 
       it('should call setEditingBite with new bite containing place', () => {

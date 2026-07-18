@@ -89,8 +89,8 @@ export class PageSettings {
     const settings = this.settings();
 
     if (settings) {
-      const { updatedAt, ...rest } = settings;
-      this.settingsForm.patchValue(rest);
+      // patchValue ignores keys without a matching control (e.g. updatedAt).
+      this.settingsForm.patchValue(settings);
     }
   });
 

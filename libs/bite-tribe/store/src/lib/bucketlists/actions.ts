@@ -10,7 +10,7 @@ import type {
 export const BucketlistActions = createActionGroup({
   source: 'BUCKETLIST',
   events: {
-    'Loaded from API': props<{ bucketlists: any }>(),
+    'Loaded from API': props<{ bucketlists: Bucketlist[] }>(),
     'Save bite to bucketlist': props<SaveToBucketListParams>(),
     'Saved bite to bucketlist': props<{ bucketlist: Bucketlist }>(),
     'Create and save BiteId to Bucketlist':

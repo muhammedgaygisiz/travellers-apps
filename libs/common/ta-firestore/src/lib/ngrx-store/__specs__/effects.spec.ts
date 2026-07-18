@@ -7,6 +7,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { AuthService } from '../../auth.service';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { AuthActions } from '../actions';
+import { Action } from '@ngrx/store';
 import { NavController } from '@ionic/angular';
 import { isBiteDetailsPage } from 'utils';
 
@@ -17,7 +18,7 @@ jest.mock('utils', () => ({
 
 jest.mock('@ionic/angular');
 
-const assertDeepEqual = (actual: any, expected: any): void => {
+const assertDeepEqual = (actual: unknown, expected: unknown): void => {
   expect(actual).toEqual(expected);
 };
 
@@ -41,7 +42,7 @@ const MockNavController = {
 describe(AuthEffects.name, () => {
   let scheduler: TestScheduler;
   let effects: AuthEffects;
-  let actions$: Observable<any>;
+  let actions$: Observable<Action>;
   let store: MockStore;
   let dispatchSpy: jest.SpyInstance;
 
@@ -54,17 +55,17 @@ describe(AuthEffects.name, () => {
     // Set default implementations
     AuthServiceMock.loginWithUsernameAndPassword.mockResolvedValue({
       user: { uid: '123' },
-    } as any);
+    });
     AuthServiceMock.logout.mockResolvedValue(undefined);
     AuthServiceMock.registerWithUsernameAndPassword.mockResolvedValue({
       user: { uid: '123' },
-    } as any);
+    });
     AuthServiceMock.signInWithGoogleAccount.mockResolvedValue({
       user: { uid: '123' },
-    } as any);
+    });
     AuthServiceMock.signInWithAppleAccount.mockResolvedValue({
       user: { uid: '123' },
-    } as any);
+    });
 
     TestBed.configureTestingModule({
       providers: [
@@ -203,7 +204,9 @@ describe(AuthEffects.name, () => {
 
           await firstValueFrom(effects.loginWithGoogleAccountEffect$);
           expectObservable(effects.loginWithGoogleAccountEffect$).toEqual(
-            expected as any,
+            expected as unknown as Parameters<
+              ReturnType<typeof expectObservable>['toEqual']
+            >[0],
           );
         });
       });
@@ -239,7 +242,11 @@ describe(AuthEffects.name, () => {
           actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
 
           const expected = cold('-b', {
-            b: AuthActions.loadedUser({ user: { uid: '123' } as any }),
+            b: AuthActions.loadedUser({
+              user: { uid: '123' } as unknown as Parameters<
+                typeof AuthActions.loadedUser
+              >[0]['user'],
+            }),
           });
 
           expectObservable(effects.loadUser$).toEqual(expected);
@@ -328,7 +335,12 @@ describe(AuthEffects.name, () => {
         });
 
         it('should do nothing', () => {
-          (effects as any).pageAfterLogin = '/bites/123';
+          (
+            effects as unknown as {
+              pageAfterLogin?: string;
+              pageAfterLogout?: string;
+            }
+          ).pageAfterLogin = '/bites/123';
 
           scheduler.run(({ cold, expectObservable }) => {
             actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
@@ -346,7 +358,12 @@ describe(AuthEffects.name, () => {
         });
 
         it('should navigate to pageAfterLogin', () => {
-          (effects as any).pageAfterLogin = '/custom-login-page';
+          (
+            effects as unknown as {
+              pageAfterLogin?: string;
+              pageAfterLogout?: string;
+            }
+          ).pageAfterLogin = '/custom-login-page';
 
           scheduler.run(({ cold, expectObservable }) => {
             actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
@@ -392,7 +409,12 @@ describe(AuthEffects.name, () => {
 
       describe('and pageAfterLogout is defined', () => {
         it('should navigate to pageAfterLogout', () => {
-          (effects as any).pageAfterLogout = '/custom-logout-page';
+          (
+            effects as unknown as {
+              pageAfterLogin?: string;
+              pageAfterLogout?: string;
+            }
+          ).pageAfterLogout = '/custom-logout-page';
 
           scheduler.run(({ cold, expectObservable }) => {
             actions$ = cold('-a', { a: AuthActions.logoutSucceeded() });

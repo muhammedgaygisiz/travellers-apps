@@ -40,7 +40,7 @@ export class AuthService {
 
   authState = toSignal(this.authStateChange$);
 
-  authStateChangeListener = (result: any): void => {
+  authStateChangeListener = (result: AuthStateChange): void => {
     this._authStateChange$.next(result);
   };
 

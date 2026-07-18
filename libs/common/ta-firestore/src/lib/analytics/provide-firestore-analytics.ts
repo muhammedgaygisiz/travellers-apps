@@ -4,7 +4,7 @@ import { Analytics, getAnalytics } from 'firebase/analytics';
 import { FirebaseErrorHandlerService } from './firebase-error-handler.service';
 
 export const FIREBASE_ANALYTICS = new InjectionToken<Analytics>(
-  'FIREBASE_ANALYTICS'
+  'FIREBASE_ANALYTICS',
 );
 
 export const provideFirestoreAnalytics = (): Provider[] => {
@@ -19,9 +19,9 @@ export const provideFirestoreAnalytics = (): Provider[] => {
         try {
           const app = getApp();
           return getAnalytics(app);
-        } catch (e) {
+        } catch {
           console.warn(
-            'Firebase Analytics is not supported in this environment.'
+            'Firebase Analytics is not supported in this environment.',
           );
           return null;
         }

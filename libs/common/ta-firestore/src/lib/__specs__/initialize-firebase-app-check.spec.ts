@@ -12,7 +12,7 @@ import {
   initializeFirebaseAppCheck,
   resetFirebaseAppCheckInitializationForTesting,
 } from '../initialize-firebase-app-check';
-import { logEvent } from 'firebase/analytics';
+import { Analytics, logEvent } from 'firebase/analytics';
 
 jest.mock('@capacitor/core');
 jest.mock('@capacitor-firebase/app-check', () => ({
@@ -45,7 +45,7 @@ jest.mock('firebase/analytics', () => ({
 
 describe(initializeFirebaseAppCheck.name, () => {
   const firebaseApp = { name: 'bite-tribe' } as FirebaseApp;
-  const analytics = { app: firebaseApp } as any;
+  const analytics = { app: firebaseApp } as unknown as Analytics;
   const originalSiteKey = process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'];
   const originalDebugToken =
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'];

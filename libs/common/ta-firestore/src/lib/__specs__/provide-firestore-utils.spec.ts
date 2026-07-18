@@ -6,7 +6,7 @@ import {
   FIREBASE_FIRESTORE,
   provideFirestoreUtils,
 } from '../provide-firestore-utils';
-import { ErrorHandler } from '@angular/core';
+import { EnvironmentProviders, ErrorHandler, Provider } from '@angular/core';
 import { FirebaseErrorHandlerService } from '../analytics/firebase-error-handler.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import * as storageUtils from 'firebase/storage';
@@ -17,7 +17,10 @@ import {
 } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import * as appCheckUtils from '../initialize-firebase-app-check';
-import { FirebaseOptions, initializeApp } from 'firebase/app';
+import { FirebaseApp, FirebaseOptions, initializeApp } from 'firebase/app';
+import { Firestore } from 'firebase/firestore';
+import { Analytics } from 'firebase/analytics';
+import { Emulators } from 'utils';
 import { FIREBASE_ANALYTICS } from '../analytics/provide-firestore-analytics';
 
 jest.mock('firebase/app');
@@ -39,8 +42,8 @@ jest.mock('../provide-firestore-simulator', () => ({
 jest.mock('@capacitor/core');
 
 describe(provideFirestoreUtils.name, () => {
-  const firebaseApp = { name: 'bite-tribe' } as any;
-  const firestore = { app: firebaseApp } as any;
+  const firebaseApp = { name: 'bite-tribe' } as unknown as FirebaseApp;
+  const firestore = { app: firebaseApp } as unknown as Firestore;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -64,7 +67,7 @@ describe(provideFirestoreUtils.name, () => {
 
     expect(initializeAppCheckSpy).not.toHaveBeenCalled();
 
-    const analytics = {} as any;
+    const analytics = {} as unknown as Analytics;
     const initializer = createFirebaseAppCheckInitializer(
       firebaseApp,
       { production: true },
@@ -95,7 +98,7 @@ describe(provideFirestoreUtils.name, () => {
     const initializer = createFirebaseStartupInitializer(
       firebaseApp,
       { production: true },
-      {} as any,
+      {} as unknown as Analytics,
       authService,
     );
 
@@ -115,13 +118,13 @@ describe(provideFirestoreUtils.name, () => {
 
     describe('without analytics', () => {
       it('should initialize firestore utils without connecting to emulators', () => {
-        const FIREBASE_OPTIONS = {} as any;
+        const FIREBASE_OPTIONS = {};
         const WITHOUT_ANALYTICS = false;
         const EMULATORS = {
           auth: { host: 'localhost', port: 9099 },
           firestore: { host: 'localhost', port: 8080 },
           storage: { host: 'localhost', port: 9199 },
-        } as any;
+        } as unknown as Emulators;
 
         const providers = provideFirestoreUtils(
           FIREBASE_OPTIONS,
@@ -149,13 +152,13 @@ describe(provideFirestoreUtils.name, () => {
 
     describe('with analytics', () => {
       it('should initialize firestore utils without connecting to emulators', () => {
-        const FIREBASE_OPTIONS = {} as any;
+        const FIREBASE_OPTIONS = {};
         const WITH_ANALYTICS = true;
         const EMULATORS = {
           auth: { host: 'localhost', port: 9099 },
           firestore: { host: 'localhost', port: 8080 },
           storage: { host: 'localhost', port: 9199 },
-        } as any;
+        } as unknown as Emulators;
 
         const providers = provideFirestoreUtils(
           FIREBASE_OPTIONS,
@@ -210,13 +213,13 @@ describe(provideFirestoreUtils.name, () => {
     });
 
     it('should initialize firestore utils connecting to emulators', () => {
-      const FIREBASE_OPTIONS = {} as any;
+      const FIREBASE_OPTIONS = {};
       const WITHOUT_ANALYTICS = false;
       const EMULATORS = {
         auth: { host: 'localhost', port: 9099 },
         firestore: { host: 'localhost', port: 8080 },
         storage: { host: 'localhost', port: 9199 },
-      } as any;
+      } as unknown as Emulators;
 
       const providers = provideFirestoreUtils(
         FIREBASE_OPTIONS,
@@ -247,7 +250,7 @@ describe(provideFirestoreUtils.name, () => {
           // Mock implementation
         });
 
-      const FIREBASE_OPTIONS = {} as any;
+      const FIREBASE_OPTIONS = {};
       const WITHOUT_ANALYTICS = false;
 
       const providers = provideFirestoreUtils(
@@ -294,7 +297,7 @@ describe(provideFirestoreUtils.name, () => {
         throw persistenceError;
       });
 
-      const FIREBASE_OPTIONS = {} as any;
+      const FIREBASE_OPTIONS = {};
       const WITHOUT_ANALYTICS = false;
 
       const providers = provideFirestoreUtils(
@@ -328,7 +331,7 @@ describe(provideFirestoreUtils.name, () => {
     it('should use initializeAuth when on native platform', () => {
       jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
 
-      const FIREBASE_OPTIONS = {} as any;
+      const FIREBASE_OPTIONS = {};
       const WITHOUT_ANALYTICS = false;
 
       const providers = provideFirestoreUtils(
@@ -349,7 +352,7 @@ describe(provideFirestoreUtils.name, () => {
     it('should use getAuth when not on native platform', () => {
       jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
 
-      const FIREBASE_OPTIONS = {} as any;
+      const FIREBASE_OPTIONS = {};
       const WITHOUT_ANALYTICS = false;
 
       const providers = provideFirestoreUtils(
@@ -369,5 +372,7 @@ describe(provideFirestoreUtils.name, () => {
   });
 });
 
-const getRegularProviders = (providers: any[]): any[] =>
+const getRegularProviders = (
+  providers: (EnvironmentProviders | Provider)[],
+): (EnvironmentProviders | Provider)[] =>
   providers.filter((provider) => 'provide' in provider);

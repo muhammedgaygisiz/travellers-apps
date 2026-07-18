@@ -22,6 +22,9 @@ Known issues are the current launch risks or unfinished areas that should be vis
 
 - Local Playwright runs are flaky. `nxE2EPreset` only pins `workers: 1` when `CI` is set, so a local `npm run e2e` runs every spec in parallel against one Firebase emulator and the same seeded users. CI is unaffected. Run `npx nx e2e bite-tribe-e2e --workers=1` for a trustworthy local result; see [[Implementation - Testing]].
 - `npx nx lint bite-tribe-firebase` reports several hundred phantom problems. The project defines no lint target, so Nx infers one that lints the gitignored `functions/lib` build output with the root config. The project's real lint is `npm run lint` inside `apps/bite-tribe-firebase/functions`, which is clean. Wiring the inferred target into CI would fail immediately.
+- Nx commands can start silently or stall while constructing the project graph, even with the daemon disabled. The installed tree currently mixes the workspace's Nx 22 toolchain with older Nx/Devkit copies loaded by `@nxext/capacitor@21` and `nx-loki`; this is a credible risk but not a proven single cause. Follow [[Current State - Nx And Dependency Migration Roadmap]].
+- `apps/bite-tribe-business-e2e` is a legacy Cypress surface while Playwright is the selected E2E architecture. Preserve any unique scenarios in Playwright, then remove the Cypress project rather than migrating its Nx executor.
+- Visual regression still runs through the stale `nx-loki` adapter. The selected target state is direct `oblador/loki` CLI usage with the existing reference-image review workflow preserved.
 
 ## Operational Issues To Watch
 
@@ -37,3 +40,4 @@ Known issues are the current launch risks or unfinished areas that should be vis
 - [[Current State - Release State]]
 - [[Architecture - Firebase]]
 - [[Architecture - Analytics]]
+- [[Current State - Nx And Dependency Migration Roadmap]]

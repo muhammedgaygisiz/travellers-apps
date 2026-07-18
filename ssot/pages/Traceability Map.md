@@ -92,12 +92,13 @@ Release state and changelog
 
 ## Current State To Work Selection
 
-| Current State Page                 | Use In Planning                                                                              |
-| ---------------------------------- | -------------------------------------------------------------------------------------------- |
-| [[Current State - Roadmap]]        | Prioritize launch preparation, product intelligence, public launch, and learning work.       |
-| [[Current State - Known Issues]]   | Check whether a requested change touches an existing launch risk.                            |
-| [[Current State - Open Questions]] | Identify unclear product, analytics, or release decisions before implementation.             |
-| [[Current State - Release State]]  | Decide whether a change is launch-blocking, release-candidate work, or post-launch learning. |
+| Current State Page                                      | Use In Planning                                                                                                  |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| [[Current State - Roadmap]]                             | Prioritize launch preparation, product intelligence, public launch, and learning work.                           |
+| [[Current State - Nx And Dependency Migration Roadmap]] | Sequence Nx, Node.js, Angular, test-tooling, and dependency upgrades without combining unrelated migration risk. |
+| [[Current State - Known Issues]]                        | Check whether a requested change touches an existing launch risk.                                                |
+| [[Current State - Open Questions]]                      | Identify unclear product, analytics, or release decisions before implementation.                                 |
+| [[Current State - Release State]]                       | Decide whether a change is launch-blocking, release-candidate work, or post-launch learning.                     |
 
 ## Work Output Trace
 

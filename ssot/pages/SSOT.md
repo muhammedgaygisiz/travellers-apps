@@ -88,6 +88,7 @@
   - [[Analytics Operations]]
 - Current State
   - [[Current State - Roadmap]]
+  - [[Current State - Nx And Dependency Migration Roadmap]]
   - [[Current State - Known Issues]]
   - [[Current State - Open Questions]]
   - [[Current State - Release State]]

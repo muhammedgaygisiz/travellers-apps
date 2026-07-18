@@ -73,6 +73,9 @@
 - Web testing.
 - Fix remaining launch blockers.
 - Prepare App Store and Google Play assets.
+- Execute Phases 0 to 2 of [[Current State - Nx And Dependency Migration Roadmap]] without combining Nx, Angular, native, and backend major upgrades into one change.
+- Remove the legacy Cypress E2E surface in favor of Playwright and replace the `nx-loki` adapter with direct `oblador/loki` usage.
+- Angular 22 is not a release-candidate prerequisite; it follows only after the Nx 23 workspace is stable and the Angular 22 dependency prerequisites are available.
 - ### Onboarding assistant
 
   The onboarding assistant ([[epic-850]]) must land before the public launch so the first real users onboard through it.
@@ -131,5 +134,6 @@
 - [[Mission]]
 - [[Current State - Known Issues]]
 - [[Current State - Release State]]
+- [[Current State - Nx And Dependency Migration Roadmap]]
 - [[Architecture - Analytics]]
 - [[Architecture - Firebase]]

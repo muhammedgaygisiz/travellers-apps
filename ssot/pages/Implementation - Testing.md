@@ -92,6 +92,11 @@ npx loki update
 
 Expose these through repository scripts and use those scripts in CI. Do not register `nx-loki`, infer Loki targets, or route Loki through `nx run-many`. Preserve the existing reference-update pull-request workflow when replacing the invocation.
 
+Two boundary details keep direct Loki working against the Angular Storybook 10 host; do not remove them without a replacement:
+
+- `tools/loki.mjs` serves the built Storybook and points Loki at `host.docker.internal`, so the same `loki:*` script works locally and in CI regardless of the machine's network interfaces.
+- `apps/storybook-host/.storybook/loki-getstories-shim.ts` re-exposes the `storyStore.raw()` method that Loki 0.35's story enumeration expects but Storybook 10 removed. Without it, `loki test`/`loki update` fail with "Unable to get stories".
+
 ## Related Pages
 
 - [[Architecture - Testing]]

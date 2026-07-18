@@ -12,7 +12,7 @@ jest.mock('../utils/load-review-by-bite-id', () => ({
 jest.mock('@capacitor-firebase/firestore');
 
 const MockedAuthService = {
-  getUser: (): any => ({ uid: '123', displayName: 'El Mo' }),
+  getUser: (): unknown => ({ uid: '123', displayName: 'El Mo' }),
   isLoggedIn$: of(false),
 };
 
@@ -53,7 +53,7 @@ describe(ReviewApiService.name, () => {
       async (service: ReviewApiService) => {
         const addDocumentSpy = jest
           .spyOn(FirebaseFirestore, 'addDocument')
-          .mockResolvedValue({} as any);
+          .mockResolvedValue({} as unknown as never);
 
         const payload = {
           review: 'Great food!',

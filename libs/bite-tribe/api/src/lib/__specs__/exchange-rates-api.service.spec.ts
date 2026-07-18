@@ -22,7 +22,7 @@ describe(ExchangeRatesApiService.name, () => {
         .mockResolvedValue({
           snapshot: {
             data: { USD: 1.1, GBP: 0.9 },
-          } as any,
+          } as unknown as never,
         });
 
       await service.getExchangeRates();
@@ -35,7 +35,7 @@ describe(ExchangeRatesApiService.name, () => {
     describe('given no exchange rates', () => {
       it('should return default exchange rate', async () => {
         jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
-          snapshot: {} as any,
+          snapshot: {} as unknown as never,
         });
 
         const rates = await service.getExchangeRates();
@@ -48,7 +48,7 @@ describe(ExchangeRatesApiService.name, () => {
       it('should return default exchange rate', async () => {
         jest
           .spyOn(FirebaseFirestore, 'getDocument')
-          .mockResolvedValue(undefined as any);
+          .mockResolvedValue(undefined as unknown as never);
 
         const rates = await service.getExchangeRates();
 

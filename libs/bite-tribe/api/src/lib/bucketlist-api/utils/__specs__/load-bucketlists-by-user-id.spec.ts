@@ -40,7 +40,7 @@ describe(loadBucketlistsByUserId.name, () => {
 
     beforeEach(() => {
       jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
-        snapshots: mockBucketlists as any,
+        snapshots: mockBucketlists as unknown as never,
       });
     });
 

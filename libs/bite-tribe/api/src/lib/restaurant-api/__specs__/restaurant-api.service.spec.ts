@@ -54,7 +54,7 @@ describe(RestaurantApiService.name, () => {
             .mockResolvedValue({
               id: 'resto-123',
               name: 'Test Restaurant',
-            } as any);
+            } as unknown as never);
 
           const result = await service.loadRestaurantById('resto-123');
 
@@ -88,16 +88,22 @@ describe(RestaurantApiService.name, () => {
         const mockedNewRestaurant = {
           name: 'New Resto',
           biteIds: ['bite1', 'bite2'],
-        } as any;
+        } as unknown as never;
 
         addDocumentSpy
-          .mockResolvedValueOnce({ reference: { id: 'New Resto' } } as any)
-          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+          .mockResolvedValueOnce({
+            reference: { id: 'New Resto' },
+          } as unknown as never)
+          .mockResolvedValueOnce({
+            reference: { id: 'menu-456' },
+          } as unknown as never);
 
         updateDocumentSpy
-          .mockResolvedValueOnce({ reference: { id: 'menu-789' } } as any)
-          .mockResolvedValueOnce({} as any)
-          .mockResolvedValueOnce({} as any);
+          .mockResolvedValueOnce({
+            reference: { id: 'menu-789' },
+          } as unknown as never)
+          .mockResolvedValueOnce({} as unknown as never)
+          .mockResolvedValueOnce({} as unknown as never);
 
         await service.saveNewRestaurant(mockedNewRestaurant);
 
@@ -156,15 +162,19 @@ describe(RestaurantApiService.name, () => {
         const mockedNewRestaurant = {
           name: 'New Resto',
           biteIds: [],
-        } as any;
+        } as unknown as never;
 
         addDocumentSpy
-          .mockResolvedValueOnce({ reference: { id: 'New Resto' } } as any)
-          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+          .mockResolvedValueOnce({
+            reference: { id: 'New Resto' },
+          } as unknown as never)
+          .mockResolvedValueOnce({
+            reference: { id: 'menu-456' },
+          } as unknown as never);
 
         updateDocumentSpy.mockResolvedValueOnce({
           reference: { id: 'menu-789' },
-        } as any);
+        } as unknown as never);
 
         await service.saveNewRestaurant(mockedNewRestaurant);
 
@@ -210,13 +220,17 @@ describe(RestaurantApiService.name, () => {
           name: 'New Resto',
           image: 'data:image/png;base64,abc',
           biteIds: [],
-        } as any;
+        } as unknown as never;
 
         addDocumentSpy
-          .mockResolvedValueOnce({ reference: { id: 'resto-123' } } as any)
-          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+          .mockResolvedValueOnce({
+            reference: { id: 'resto-123' },
+          } as unknown as never)
+          .mockResolvedValueOnce({
+            reference: { id: 'menu-456' },
+          } as unknown as never);
 
-        updateDocumentSpy.mockResolvedValue({} as any);
+        updateDocumentSpy.mockResolvedValue({} as unknown as never);
 
         await service.saveNewRestaurant(mockedNewRestaurant);
 
@@ -260,7 +274,7 @@ describe(RestaurantApiService.name, () => {
       );
       const updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
 
-      updateDocumentSpy.mockResolvedValue({} as any);
+      updateDocumentSpy.mockResolvedValue({} as unknown as never);
 
       await service.saveRestaurantImage(
         'resto-123',
@@ -305,8 +319,8 @@ describe(RestaurantApiService.name, () => {
     it('should create an empty menu and update the restaurant with the menuId', async () => {
       addDocumentSpy.mockResolvedValueOnce({
         reference: { id: 'new-menu-id' },
-      } as any);
-      updateDocumentSpy.mockResolvedValueOnce({} as any);
+      } as unknown as never);
+      updateDocumentSpy.mockResolvedValueOnce({} as unknown as never);
 
       const result = await service.createMenuForRestaurant('resto-123');
 
@@ -336,13 +350,13 @@ describe(RestaurantApiService.name, () => {
     it('should update the restaurant with social media links', async () => {
       const updateDocumentSpy = jest
         .spyOn(FirebaseFirestore, 'updateDocument')
-        .mockResolvedValue({} as any);
+        .mockResolvedValue({} as unknown as never);
 
       const restaurantId = 'resto-123';
       const links = [
         { platform: 'Facebook', url: 'https://facebook.com/resto' },
         { platform: 'Instagram', url: 'https://instagram.com/resto' },
-      ] as any;
+      ] as unknown as never;
 
       await service.saveSocialMediaLinksForRestaurant(restaurantId, links);
 

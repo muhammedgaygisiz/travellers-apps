@@ -61,7 +61,7 @@ jest.mock('../utils/update-bite-with-image-path-from-firestorage', () => ({
 
 const mockedUser = { uid: '123' };
 const MockedAuthService = {
-  getUser: (): any => mockedUser,
+  getUser: (): unknown => mockedUser,
   isLoggedIn$: of(false),
 };
 
@@ -253,7 +253,7 @@ describe(BiteApiService.name, () => {
 
       describe('given an error in deleteFileInFirebaseStorage', () => {
         beforeEach(() => {
-          (FirebaseFirestore.deleteDocument as any).mockReset();
+          (FirebaseFirestore.deleteDocument as jest.Mock).mockReset();
         });
 
         it('should handle the error and call FirebaseFirestore.deleteDocument', async () => {
@@ -379,7 +379,7 @@ describe(BiteApiService.name, () => {
         const listenerCallback =
           addCollectionSnapshotListenerSpy.mock.calls[0][1];
 
-        const mockSnapshot = { snapshots: [] } as any;
+        const mockSnapshot = { snapshots: [] } as unknown as never;
         listenerCallback(mockSnapshot, null);
 
         // Since the actual implementation of the callback is not defined,
@@ -394,11 +394,11 @@ describe(BiteApiService.name, () => {
       const mockSnapshot1 = {
         id: 'bite1',
         data: () => ({ name: 'Bite 1' }),
-      } as any;
+      } as unknown as never;
       const mockSnapshot2 = {
         id: 'bite2',
         data: () => ({ name: 'Bite 2' }),
-      } as any;
+      } as unknown as never;
 
       const mockEvent = {
         snapshots: [mockSnapshot1, mockSnapshot2],

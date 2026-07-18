@@ -15,7 +15,9 @@ describe(deleteCurrentImage.name, () => {
       const getDocumentSpy = jest
         .spyOn(FirebaseFirestore, 'getDocument')
         .mockResolvedValue({
-          snapshot: { data: { photoUrl: 'path/to/image.jpg' } } as any,
+          snapshot: {
+            data: { photoUrl: 'path/to/image.jpg' },
+          } as unknown as never,
         });
 
       const user = {

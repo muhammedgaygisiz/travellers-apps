@@ -15,7 +15,7 @@ describe('getRestaurantById', () => {
               name: 'Test Restaurant',
             },
           },
-        } as any);
+        } as unknown as never);
 
       const restaurant = await getRestaurantById('resto-123');
 
@@ -49,13 +49,13 @@ describe('getRestaurantById', () => {
             snapshot: {
               data: undefined,
             },
-          } as any);
+          } as unknown as never);
 
         const getCollectionSpy = jest
           .spyOn(FirebaseFirestore, 'getCollection')
           .mockResolvedValue({
             snapshots: RESTAURANTS_WITH_MATCHING_NAME,
-          } as any);
+          } as unknown as never);
 
         const restaurant = await getRestaurantById(
           encodeURIComponent('Test Restaurant'),
@@ -85,13 +85,13 @@ describe('getRestaurantById', () => {
             snapshot: {
               data: undefined,
             },
-          } as any);
+          } as unknown as never);
 
         const getCollectionSpy = jest
           .spyOn(FirebaseFirestore, 'getCollection')
           .mockResolvedValue({
             snapshots: [],
-          } as any);
+          } as unknown as never);
 
         const restaurant = await getRestaurantById(
           encodeURIComponent('Nonexistent Restaurant'),
@@ -118,13 +118,13 @@ describe('getRestaurantById', () => {
             snapshot: {
               data: undefined,
             },
-          } as any);
+          } as unknown as never);
 
         const getCollectionSpy = jest
           .spyOn(FirebaseFirestore, 'getCollection')
           .mockResolvedValue({
             snapshots: undefined,
-          } as any);
+          } as unknown as never);
 
         const restaurant = await getRestaurantById(
           encodeURIComponent('Another Nonexistent Restaurant'),

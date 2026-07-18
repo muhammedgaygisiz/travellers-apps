@@ -13,7 +13,7 @@ jest.mock('../utils/load-likes-by-bites', () => ({
 jest.mock('@capacitor-firebase/firestore');
 
 const MockedAuthService = {
-  getUser: (): any => ({ uid: '123' }),
+  getUser: (): unknown => ({ uid: '123' }),
 };
 
 const ErrorHandlerMock = {
@@ -40,7 +40,7 @@ describe(LikeApiService.name, () => {
 
   describe('loadLikesForBites', () => {
     it('should call loadLikesByBites utility function', async () => {
-      const bites = [{ id: 'bite1' }, { id: 'bite2' }] as any;
+      const bites = [{ id: 'bite1' }, { id: 'bite2' }] as unknown as never;
 
       await service.loadLikesForBites(bites, 'user1');
 
@@ -65,7 +65,7 @@ describe(LikeApiService.name, () => {
             createdAt: '2024-06-01T00:00:00Z',
             userId: '123',
           },
-        } as any,
+        } as unknown as never,
       });
 
       const like = {

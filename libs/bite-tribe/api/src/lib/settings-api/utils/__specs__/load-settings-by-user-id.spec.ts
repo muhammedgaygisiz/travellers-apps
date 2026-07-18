@@ -15,7 +15,7 @@ describe(loadSettingsByUserId.name, () => {
             theme: 'dark',
             notificationsEnabled: true,
           },
-        } as any,
+        } as unknown as never,
       });
   });
 

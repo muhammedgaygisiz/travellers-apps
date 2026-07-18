@@ -11,7 +11,7 @@ jest.mock('../utils/get-menu-by-id');
 jest.mock('@capacitor-firebase/firestore');
 
 const MockedAuthService = {
-  authState: (): any => ({
+  authState: (): unknown => ({
     user: { uid: '123' },
   }),
   isLoggedIn$: of(true),
@@ -103,7 +103,7 @@ describe(MenuApiService.name, () => {
     it('should call FirebaseFirestore.updateDocument', async () => {
       const updateDocumentSpy = jest
         .spyOn(FirebaseFirestore, 'updateDocument')
-        .mockResolvedValue({} as any);
+        .mockResolvedValue({} as unknown as never);
 
       const menuData = {
         id: 'menuId',

@@ -7,7 +7,7 @@ describe('toPublicUser', () => {
         someField: 'someValue',
       },
       id: 'user123',
-    } as any);
+    } as unknown as never);
 
     expect(result).toEqual({
       someField: 'someValue',

@@ -158,14 +158,14 @@ jobs:
   #        path: dist/storybook/xxx
   #        key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
   #
-  #    - run: npm run nx -- affected -t test-loki
+  #    - run: npm run loki:test
   #
   #    - name: Upload xxx Diffs
   #      uses: actions/upload-artifact@v4
   #      if: failure()
   #      with:
   #        name: loki-diffs
-  #        path: apps/**/.loki/difference
+  #        path: .loki/difference
 
   e2e:
     runs-on: ubuntu-latest

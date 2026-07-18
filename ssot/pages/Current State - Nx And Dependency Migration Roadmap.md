@@ -31,10 +31,10 @@ As of 18 July 2026:
 | Node.js             | Local `24.13.0`; CI uses the floating `22.x` line                | Align and pin before Angular 22.                                       |
 | NgRx                | `21.0.1`                                                         | Stable NgRx 21 requires Angular 21, so it currently blocks Angular 22. |
 | Capacitor Nx plugin | `@nxext/capacitor@21.0.0`                                        | Loads Nx 21 internally; upgrade to v23 with Nx 23.                     |
-| Visual regression   | `loki@0.35.1` through `nx-loki@1.2.5`                            | Remove the Nx adapter and invoke Loki directly.                        |
+| Visual regression   | `loki@0.35.1` invoked directly via repository scripts; `nx-loki` removed | Nx adapter removed (issue #1040); Loki now runs through `loki.config.js`. |
 | E2E                 | Playwright consumer suite; legacy Cypress business project removed | Cypress removed; place all E2E coverage in Playwright.                |
 
-The installed dependency tree currently contains multiple Nx generations because `@nxext/capacitor` loads Nx 21 and `nx-loki` loads an older Nx Devkit. This is a project-graph risk, but it is not yet proven to be the sole cause of silent Nx startup or graph stalls.
+The installed dependency tree still contains multiple Nx generations because `@nxext/capacitor` loads Nx 21 (the `nx-loki` adapter, which loaded an older Nx Devkit, has been removed). This is a project-graph risk, but it is not yet proven to be the sole cause of silent Nx startup or graph stalls.
 
 ## Migration Principles
 
@@ -59,6 +59,8 @@ Status: complete (issue #1032). The steps below are done; keep them for context.
 - Keep consumer and business E2E coverage under the Playwright testing architecture.
 
 ### Direct Loki adoption
+
+Status: complete (issue #1040). The steps below are done; keep them for context.
 
 - Remove `nx-loki` from dependencies and from the `nx.json` plugin list.
 - Keep the upstream `loki` package from `oblador/loki`.

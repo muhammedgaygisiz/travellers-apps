@@ -14,7 +14,7 @@ describe('loadBiteById', () => {
           snapshot: {
             data: {},
             id: '123',
-          } as unknown as never,
+          } as any,
         }),
       );
   });

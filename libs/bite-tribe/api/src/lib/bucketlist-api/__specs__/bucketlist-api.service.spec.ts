@@ -11,7 +11,7 @@ jest.mock('../utils/load-bucketlists-by-user-id', () => ({
 jest.mock('@capacitor-firebase/firestore');
 
 const MockedAuthService = {
-  getUser: (): unknown => ({ uid: '123' }),
+  getUser: (): any => ({ uid: '123' }),
 };
 
 describe(BucketlistApiService.name, () => {
@@ -57,7 +57,7 @@ describe(BucketlistApiService.name, () => {
     it('should call FirebaseFirestore.getDocument', async () => {
       getDocumentSpy.mockResolvedValue({
         snapshot: { data: { biteIds: [] } },
-      } as unknown as never);
+      } as any);
 
       await service.saveBiteIdToBucketList({
         bucketListId: '1',
@@ -76,7 +76,7 @@ describe(BucketlistApiService.name, () => {
             data: { biteIds: ['bite0'] },
             path: 'bucketlists/1',
           },
-        } as unknown as never);
+        } as any);
 
         await service.saveBiteIdToBucketList({
           bucketListId: '1',
@@ -100,15 +100,13 @@ describe(BucketlistApiService.name, () => {
       it('should create a new bucketlist and save biteId to it', async () => {
         const addDocumentMock = jest
           .spyOn(FirebaseFirestore, 'addDocument')
-          .mockResolvedValue({
-            reference: { path: 'path' },
-          } as unknown as never);
+          .mockResolvedValue({ reference: { path: 'path' } } as any);
 
         const getDocumentMock = jest
           .spyOn(FirebaseFirestore, 'getDocument')
           .mockResolvedValue({
             snapshot: { data: {} },
-          } as unknown as never);
+          } as any);
 
         await service.createBucketListAndSaveBiteIdToBucketList({
           bucketListName: 'My Bucketlist',
@@ -136,12 +134,10 @@ describe(BucketlistApiService.name, () => {
       it('should create a new bucketlist with empty biteIds', async () => {
         const addDocumentMock = jest
           .spyOn(FirebaseFirestore, 'addDocument')
-          .mockResolvedValue({
-            reference: { path: 'path' },
-          } as unknown as never);
+          .mockResolvedValue({ reference: { path: 'path' } } as any);
 
         jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
-          snapshot: { data: {} } as unknown as never,
+          snapshot: { data: {} } as any,
         });
 
         const result = await service.createBucketListAndSaveBiteIdToBucketList({
@@ -194,16 +190,16 @@ describe(BucketlistApiService.name, () => {
         .spyOn(FirebaseFirestore, 'addDocument')
         .mockResolvedValueOnce({
           reference: { path: 'bucketlists/new-bucketlist' },
-        } as unknown as never)
+        } as any)
         .mockResolvedValueOnce({
           reference: { path: 'biteTrails/trail-1/sells/sell-1' },
-        } as unknown as never);
+        } as any);
 
       const getDocumentMock = jest
         .spyOn(FirebaseFirestore, 'getDocument')
         .mockResolvedValue({
           snapshot: { data: { id: 'new-bucketlist' } },
-        } as unknown as never);
+        } as any);
 
       await service.createBucketListFromBiteTrail({
         bucketListName: 'Free Trail',
@@ -245,11 +241,11 @@ describe(BucketlistApiService.name, () => {
         .spyOn(FirebaseFirestore, 'addDocument')
         .mockResolvedValueOnce({
           reference: { path: 'bucketlists/new-bucketlist' },
-        } as unknown as never)
+        } as any)
         .mockRejectedValueOnce(error);
       const deleteDocumentMock = jest
         .spyOn(FirebaseFirestore, 'deleteDocument')
-        .mockResolvedValue({} as unknown as never);
+        .mockResolvedValue({} as any);
 
       await expect(
         service.createBucketListFromBiteTrail({
@@ -288,7 +284,7 @@ describe(BucketlistApiService.name, () => {
               triedOutBites: [{ biteId: 'bite2' }, { biteId: 'bite3' }],
             },
           },
-        } as unknown as never);
+        } as any);
 
         await service.removeBiteFromBucketlist({
           bucketlistId: '1',
@@ -309,7 +305,7 @@ describe(BucketlistApiService.name, () => {
 
     describe('given no bucektlist doc', () => {
       it('should call updateDocument with biteIds undefined', async () => {
-        getDocumentSpy.mockResolvedValue(undefined as unknown as never);
+        getDocumentSpy.mockResolvedValue(undefined as any);
 
         await service.removeBiteFromBucketlist({
           bucketlistId: '1',
@@ -337,7 +333,7 @@ describe(BucketlistApiService.name, () => {
         getDocumentSpy.mockRejectedValue(new Error('Failed to get document'));
 
         try {
-          await service.removeBiteFromBucketlist({} as unknown as never);
+          await service.removeBiteFromBucketlist({} as any);
         } catch {
           // do nothing
         }
@@ -363,7 +359,7 @@ describe(BucketlistApiService.name, () => {
 
     describe('given no error', () => {
       it('should create a new bucketlist', async () => {
-        addDocumentMock.mockResolvedValue({} as unknown as never);
+        addDocumentMock.mockResolvedValue({} as any);
         await service.createBucketList('My Bucketlist');
 
         expect(addDocumentMock).toHaveBeenCalled();
@@ -414,7 +410,7 @@ describe(BucketlistApiService.name, () => {
 
     describe('given no error', () => {
       it('should delete the bucketlist', async () => {
-        deleteDocumentMock.mockResolvedValue({} as unknown as never);
+        deleteDocumentMock.mockResolvedValue({} as any);
         await service.deleteBucketlist('1');
 
         expect(deleteDocumentMock).toHaveBeenCalled();
@@ -461,7 +457,7 @@ describe(BucketlistApiService.name, () => {
 
     describe('given no error', () => {
       it('should update the bucketlist name', async () => {
-        updateDocumentMock.mockResolvedValue({} as unknown as never);
+        updateDocumentMock.mockResolvedValue({} as any);
         await service.updateBucketlistName('1', 'New Name');
 
         expect(updateDocumentMock).toHaveBeenCalled();
@@ -514,10 +510,10 @@ describe(BucketlistApiService.name, () => {
             ],
           },
         },
-      } as unknown as never);
+      } as any);
 
       const updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
-      updateDocumentSpy.mockResolvedValue({} as unknown as never);
+      updateDocumentSpy.mockResolvedValue({} as any);
 
       await service.updateBucketlistTriedOutStatus({
         bucketlistId: '1',
@@ -564,10 +560,10 @@ describe(BucketlistApiService.name, () => {
             ],
           },
         },
-      } as unknown as never);
+      } as any);
 
       const updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
-      updateDocumentSpy.mockResolvedValue({} as unknown as never);
+      updateDocumentSpy.mockResolvedValue({} as any);
 
       await service.updateBucketlistTriedOutStatus({
         bucketlistId: '1',

@@ -14,7 +14,7 @@ describe('getMenuById', () => {
             name: 'Test Menu',
           },
         },
-      } as unknown as never);
+      } as any);
 
     const result = await getMenuById('menuId');
 
@@ -31,7 +31,7 @@ describe('getMenuById', () => {
         snapshot: {
           data: null,
         },
-      } as unknown as never);
+      } as any);
 
       const result = await getMenuById('menuId');
 
@@ -58,7 +58,7 @@ describe('getMenuById', () => {
             name: 'Test Menu',
           },
         },
-      } as unknown as never);
+      } as any);
 
       const result = await getMenuById('menuId');
 

@@ -12,7 +12,7 @@ jest.mock('../utils/load-settings-by-user-id', () => ({
 jest.mock('@capacitor-firebase/firestore');
 
 const MockedAuthService = {
-  getUser: (): unknown => ({ uid: '123' }),
+  getUser: (): any => ({ uid: '123' }),
   isLoggedIn$: of(false),
 };
 
@@ -46,7 +46,7 @@ describe(SettingsApiService.name, () => {
           async (service: SettingsApiService) => {
             const loadSettingsByUserIdSpy = jest
               .spyOn(loadFn, 'loadSettingsByUserId')
-              .mockResolvedValue({ theme: 'dark' } as unknown as never);
+              .mockResolvedValue({ theme: 'dark' } as any);
 
             const settings = await service.loadSettingsByUserId();
 
@@ -72,7 +72,7 @@ describe(SettingsApiService.name, () => {
             const settings = await service.loadSettingsByUserId();
 
             expect(loadSettingsByUserIdSpy).not.toHaveBeenCalled();
-            expect(settings).toEqual({} as unknown as never);
+            expect(settings).toEqual({} as any);
           },
         ));
       });

@@ -12,7 +12,7 @@ import { SettingsApiService } from '../settings-api/settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
 import { BiteTrailApiService } from '../bite-trail-api/bite-trail-api.service';
 import { of } from 'rxjs';
-import { Bite, BiteTrail, Like } from 'model';
+import { BiteTrail, Like } from 'model';
 
 class ReviewApiMock {
   reviewsByBiteId = jest.fn();
@@ -135,9 +135,7 @@ describe(BiteTribeApiService.name, () => {
       ) => {
         const loadSettingsByUserIdSpy = jest
           .spyOn(settingsApiService, 'loadSettingsByUserId')
-          .mockReturnValue(
-            Promise.resolve({ theme: 'dark' } as unknown as never),
-          );
+          .mockReturnValue(Promise.resolve({ theme: 'dark' } as any));
 
         const settings = await service.loadSettings();
 
@@ -227,7 +225,7 @@ describe(BiteTribeApiService.name, () => {
         const restaurant = {
           id: 'restaurant-id',
           name: 'Test Restaurant',
-        } as unknown as never;
+        } as any;
         service.saveNewRestaurant(restaurant);
         expect(saveNewRestaurantSpy).toHaveBeenCalledWith(restaurant);
       },
@@ -281,7 +279,7 @@ describe(BiteTribeApiService.name, () => {
       [BiteTribeApiService, MenuApiService],
       (service: BiteTribeApiService, menuApiService: MenuApiService) => {
         const saveMenuSpy = jest.spyOn(menuApiService, 'saveMenu');
-        const menu = { id: 'menu-id', items: [] } as unknown as never;
+        const menu = { id: 'menu-id', items: [] } as any;
         service.saveMenu(menu);
         expect(saveMenuSpy).toHaveBeenCalledWith(menu);
       },
@@ -415,8 +413,8 @@ describe(BiteTribeApiService.name, () => {
       (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
         const getUserByBiteIdSpy = jest
           .spyOn(profileApiService, 'getUserByBiteId')
-          .mockReturnValue(of(undefined) as unknown as never);
-        const bite = { id: 'bite-id' } as unknown as never;
+          .mockReturnValue(of(undefined) as any);
+        const bite = { id: 'bite-id' } as any;
         service.getUserByBiteId(bite);
         expect(getUserByBiteIdSpy).toHaveBeenCalledWith(bite);
       },
@@ -442,10 +440,7 @@ describe(BiteTribeApiService.name, () => {
       [BiteTribeApiService, BiteApiService],
       (service: BiteTribeApiService, biteApiService: BiteApiService) => {
         const saveEditedBiteSpy = jest.spyOn(biteApiService, 'saveEditedBite');
-        const bite = {
-          id: 'bite-id',
-          content: 'Updated content',
-        } as unknown as never;
+        const bite = { id: 'bite-id', content: 'Updated content' } as any;
         service.saveEditedBite(bite);
         expect(saveEditedBiteSpy).toHaveBeenCalledWith(bite);
       },
@@ -457,7 +452,7 @@ describe(BiteTribeApiService.name, () => {
       [BiteTribeApiService, BiteApiService],
       (service: BiteTribeApiService, biteApiService: BiteApiService) => {
         const saveNewBiteSpy = jest.spyOn(biteApiService, 'saveNewBite');
-        const bite = { content: 'New bite content' } as unknown as never;
+        const bite = { content: 'New bite content' } as any;
         service.saveNewBite(bite);
         expect(saveNewBiteSpy).toHaveBeenCalledWith(bite);
       },
@@ -469,10 +464,7 @@ describe(BiteTribeApiService.name, () => {
       [BiteTribeApiService, BiteApiService],
       (service: BiteTribeApiService, biteApiService: BiteApiService) => {
         const uploadImageSpy = jest.spyOn(biteApiService, 'uploadImage');
-        const bite = {
-          id: 'bite-id',
-          content: 'Bite with image',
-        } as unknown as never;
+        const bite = { id: 'bite-id', content: 'Bite with image' } as any;
         const callbackFn = jest.fn();
         service.uploadImage(bite, callbackFn);
         expect(uploadImageSpy).toHaveBeenCalledWith(bite, callbackFn);
@@ -488,10 +480,7 @@ describe(BiteTribeApiService.name, () => {
           biteApiService,
           'updateImagePathInBite',
         );
-        const bite = {
-          id: 'bite-id',
-          content: 'Bite with image',
-        } as unknown as never;
+        const bite = { id: 'bite-id', content: 'Bite with image' } as any;
         const imagePath = 'path/to/image.jpg';
         service.updateImagePathInBite(bite, imagePath);
         expect(updateImagePathInBiteSpy).toHaveBeenCalledWith(bite, imagePath);
@@ -504,10 +493,7 @@ describe(BiteTribeApiService.name, () => {
       [BiteTribeApiService, ProfileApiService],
       (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
         const updateUserSpy = jest.spyOn(profileApiService, 'updateUser');
-        const publicUser = {
-          id: 'user-id',
-          name: 'Updated Name',
-        } as unknown as never;
+        const publicUser = { id: 'user-id', name: 'Updated Name' } as any;
         service.updateUser(publicUser);
         expect(updateUserSpy).toHaveBeenCalledWith(publicUser);
       },
@@ -561,7 +547,7 @@ describe(BiteTribeApiService.name, () => {
         settingsApiService: SettingsApiService,
       ) => {
         const saveSettingsSpy = jest.spyOn(settingsApiService, 'saveSettings');
-        const settings = { theme: 'dark' } as unknown as never;
+        const settings = { theme: 'dark' } as any;
         service.saveSettings(settings);
         expect(saveSettingsSpy).toHaveBeenCalledWith(settings);
       },
@@ -573,7 +559,7 @@ describe(BiteTribeApiService.name, () => {
       [BiteTribeApiService, ProfileApiService],
       (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
         const followUserSpy = jest.spyOn(profileApiService, 'followUser');
-        const user = { id: 'user-id', name: 'Test User' } as unknown as never;
+        const user = { id: 'user-id', name: 'Test User' } as any;
         service.followUser(user);
         expect(followUserSpy).toHaveBeenCalledWith(user);
       },
@@ -585,7 +571,7 @@ describe(BiteTribeApiService.name, () => {
       [BiteTribeApiService, ProfileApiService],
       (service: BiteTribeApiService, profileApiService: ProfileApiService) => {
         const unfollowUserSpy = jest.spyOn(profileApiService, 'unfollowUser');
-        const user = { id: 'user-id', name: 'Test User' } as unknown as never;
+        const user = { id: 'user-id', name: 'Test User' } as any;
         service.unfollowUser(user);
         expect(unfollowUserSpy).toHaveBeenCalledWith(user);
       },
@@ -637,9 +623,7 @@ describe(BiteTribeApiService.name, () => {
       (service: BiteTribeApiService, biteApiService: BiteApiService) => {
         const loadBiteByIdSpy = jest
           .spyOn(biteApiService, 'loadBiteById')
-          .mockReturnValue(
-            Promise.resolve({ id: 'bite-1' } as unknown as never),
-          );
+          .mockReturnValue(Promise.resolve({ id: 'bite-1' } as any));
 
         service.biteById('bite-1');
         expect(loadBiteByIdSpy).toHaveBeenCalledWith('bite-1');
@@ -657,7 +641,7 @@ describe(BiteTribeApiService.name, () => {
         const bucketlist = {
           id: 'bucketlist-id',
           name: 'My Bucketlist',
-        } as unknown as never;
+        } as any;
         service.bitesByBucketlist(bucketlist);
         expect(loadBitesByBucketlistSpy).toHaveBeenCalledWith(bucketlist);
       },
@@ -670,8 +654,8 @@ describe(BiteTribeApiService.name, () => {
       (service: BiteTribeApiService, biteApiService: BiteApiService) => {
         const deleteBiteSpy = jest
           .spyOn(biteApiService, 'deleteBite')
-          .mockReturnValue(Promise.resolve({} as unknown as never));
-        const bite = { id: 'bite-id' } as unknown as never;
+          .mockReturnValue(Promise.resolve({} as any));
+        const bite = { id: 'bite-id' } as any;
         service.deleteBite(bite);
         expect(deleteBiteSpy).toHaveBeenCalledWith(bite);
       },
@@ -685,10 +669,7 @@ describe(BiteTribeApiService.name, () => {
         const loadLikesForBitesSpy = jest
           .spyOn(likeApiService, 'loadLikesForBites')
           .mockReturnValue(Promise.resolve([]));
-        const bites = [
-          { id: 'bite-id-1' },
-          { id: 'bite-id-2' },
-        ] as unknown as never;
+        const bites = [{ id: 'bite-id-1' }, { id: 'bite-id-2' }] as any;
         service.loadLikesForBites(bites, 'user1');
         expect(loadLikesForBitesSpy).toHaveBeenCalledWith(bites, 'user1');
       },
@@ -789,9 +770,7 @@ describe(BiteTribeApiService.name, () => {
           biteApiService,
           'startlatestBitesListener',
         );
-        const latestBitesObservable: typeof biteApiService.latestBites$ = of([
-          { id: 'bite-id' } as Bite,
-        ]);
+        const latestBitesObservable = of([{ id: 'bite-id' }] as any);
         biteApiService.latestBites$ = latestBitesObservable;
         const numberOfBites = 5;
         const latestBites$ = service.latestBites$(numberOfBites);
@@ -810,10 +789,10 @@ describe(BiteTribeApiService.name, () => {
       ) => {
         const fetchFollowersSpy = jest
           .spyOn(profileApiService, 'fetchFollowers')
-          .mockResolvedValue(['follower1', 'follower2'] as unknown as never);
+          .mockResolvedValue(['follower1', 'follower2'] as any);
         const fetchFollowingSpy = jest
           .spyOn(profileApiService, 'fetchFollowing')
-          .mockResolvedValue(['following1'] as unknown as never);
+          .mockResolvedValue(['following1'] as any);
         const isCurrentUserFollowingSpy = jest
           .spyOn(profileApiService, 'isCurrentUserFollowing')
           .mockReturnValue(Promise.resolve(true));
@@ -845,7 +824,7 @@ describe(BiteTribeApiService.name, () => {
       ) => {
         const fetchFollowersWithDetailsSpy = jest
           .spyOn(profileApiService, 'fetchFollowersWithDetails')
-          .mockResolvedValue([] as unknown as never);
+          .mockResolvedValue([] as any);
 
         const userId = 'user-id';
         await service.fetchFollowersWithDetails(userId);
@@ -864,7 +843,7 @@ describe(BiteTribeApiService.name, () => {
       ) => {
         const fetchFollowingWithDetailsSpy = jest
           .spyOn(profileApiService, 'fetchFollowingWithDetails')
-          .mockResolvedValue([] as unknown as never);
+          .mockResolvedValue([] as any);
 
         const userId = 'user-id';
         await service.fetchFollowingWithDetails(userId);

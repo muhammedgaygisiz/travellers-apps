@@ -5,7 +5,7 @@ import {
   shouldUpdateUserMetadata,
 } from '../utils/user-metadata-throttle';
 import { inject, TestBed } from '@angular/core/testing';
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type { PublicUser } from 'model';
@@ -17,7 +17,7 @@ import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebas
 import { updateProfileWithImagePathFromFirebaseStorage } from '../bite-api/utils/update-profile-with-image-path-from-firestorage';
 import { loadProfileById } from '../bite-api/utils/load-profile-by-id';
 
-const assertDeepEqual = (actual: unknown, expected: unknown): void => {
+const assertDeepEqual = (actual: any, expected: any): void => {
   expect(actual).toEqual(expected);
 };
 
@@ -58,7 +58,7 @@ jest.mock('../utils/user-metadata-throttle', () => ({
 }));
 
 const MockedAuthService = {
-  getUser: (): unknown => ({
+  getUser: (): any => ({
     uid: '123',
     providerData: [{ photoUrl: 'photo-url' }],
   }),
@@ -68,13 +68,6 @@ const MockedAuthService = {
 const MockedErrorHandler = {
   handleError: jest.fn(),
 };
-
-type ProfileChannel = BehaviorSubject<(PublicUser & { id?: string }) | null>;
-type ProfileServiceWithChannel = {
-  profileChannel$: ProfileChannel;
-};
-type Followers = Awaited<ReturnType<ProfileApiService['fetchFollowers']>>;
-type Following = Awaited<ReturnType<ProfileApiService['fetchFollowing']>>;
 
 describe(ProfileApiService.name, () => {
   let scheduler: TestScheduler;
@@ -112,10 +105,7 @@ describe(ProfileApiService.name, () => {
       [ProfileApiService],
       (service: ProfileApiService) => {
         nextSpy = jest
-          .spyOn(
-            (service as unknown as ProfileServiceWithChannel).profileChannel$,
-            'next',
-          )
+          .spyOn((service as any).profileChannel$, 'next')
           .mockImplementation();
 
         scheduler.run(({ expectObservable }) => {
@@ -178,10 +168,7 @@ describe(ProfileApiService.name, () => {
       [ProfileApiService],
       (service: ProfileApiService) => {
         nextSpy = jest
-          .spyOn(
-            (service as unknown as ProfileServiceWithChannel).profileChannel$,
-            'next',
-          )
+          .spyOn((service as any).profileChannel$, 'next')
           .mockImplementation();
 
         const mockDoc = {
@@ -644,7 +631,7 @@ describe(ProfileApiService.name, () => {
                 name: 'Bite User',
               },
             },
-          } as unknown as never;
+          } as any;
 
           const getDocumentSpy = jest
             .spyOn(FirebaseFirestore, 'getDocument')
@@ -654,7 +641,7 @@ describe(ProfileApiService.name, () => {
             .spyOn(FirebaseFirestore, 'setDocument')
             .mockResolvedValue(mockedData);
 
-          const bite = { userId: 'bite-user-id' } as unknown as never;
+          const bite = { userId: 'bite-user-id' } as any;
 
           const result = await service.getUserByBiteId(bite);
 
@@ -688,7 +675,7 @@ describe(ProfileApiService.name, () => {
             .spyOn(FirebaseFirestore, 'getDocument')
             .mockRejectedValue(new Error('Failed to fetch user'));
 
-          const bite = { userId: 'bite-user-id' } as unknown as never;
+          const bite = { userId: 'bite-user-id' } as any;
 
           const result = await service.getUserByBiteId(bite);
 
@@ -721,7 +708,7 @@ describe(ProfileApiService.name, () => {
                 name: 'Test User',
               },
             },
-          } as unknown as never;
+          } as any;
 
           const getDocumentSpy = jest
             .spyOn(FirebaseFirestore, 'getDocument')
@@ -795,7 +782,7 @@ describe(ProfileApiService.name, () => {
         TestBed.overrideProvider(AuthService, {
           useValue: {
             ...MockedAuthService,
-            getUser: (): unknown => undefined,
+            getUser: (): any => undefined,
           },
         });
       });
@@ -896,15 +883,13 @@ describe(ProfileApiService.name, () => {
       [ProfileApiService],
       async (service: ProfileApiService) => {
         const mockedSnapshots = [
-          { id: 'follower1', data: (): unknown => ({}) },
-          { id: 'follower2', data: (): unknown => ({}) },
+          { id: 'follower1', data: (): any => ({}) },
+          { id: 'follower2', data: (): any => ({}) },
         ];
 
         const getCollectionSpy = jest
           .spyOn(FirebaseFirestore, 'getCollection')
-          .mockResolvedValue({
-            snapshots: mockedSnapshots,
-          } as unknown as never);
+          .mockResolvedValue({ snapshots: mockedSnapshots } as any);
 
         const result = await service.fetchFollowers('user-id-123');
 
@@ -944,15 +929,13 @@ describe(ProfileApiService.name, () => {
       [ProfileApiService],
       async (service: ProfileApiService) => {
         const mockedSnapshots = [
-          { id: 'following1', data: (): unknown => ({}) },
-          { id: 'following2', data: (): unknown => ({}) },
+          { id: 'following1', data: (): any => ({}) },
+          { id: 'following2', data: (): any => ({}) },
         ];
 
         const getCollectionSpy = jest
           .spyOn(FirebaseFirestore, 'getCollection')
-          .mockResolvedValue({
-            snapshots: mockedSnapshots,
-          } as unknown as never);
+          .mockResolvedValue({ snapshots: mockedSnapshots } as any);
 
         const result = await service.fetchFollowing('user-id-123');
 
@@ -993,7 +976,7 @@ describe(ProfileApiService.name, () => {
         TestBed.overrideProvider(AuthService, {
           useValue: {
             ...MockedAuthService,
-            getUser: (): unknown => ({ uid: 'current-user-id' }),
+            getUser: (): any => ({ uid: 'current-user-id' }),
           },
         });
       });
@@ -1005,7 +988,7 @@ describe(ProfileApiService.name, () => {
             { id: 'follower1' },
             { id: 'current-user-id' },
             { id: 'follower3' },
-          ] as unknown as never;
+          ] as any;
 
           const result = await service.isCurrentUserFollowing(followers);
 
@@ -1026,7 +1009,7 @@ describe(ProfileApiService.name, () => {
             { id: 'follower1' },
             { id: 'follower2' },
             { id: 'follower3' },
-          ] as unknown as never;
+          ] as any;
 
           const result = await service.isCurrentUserFollowing(followers);
 
@@ -1040,7 +1023,7 @@ describe(ProfileApiService.name, () => {
         TestBed.overrideProvider(AuthService, {
           useValue: {
             ...MockedAuthService,
-            authState: (): unknown => ({ user: undefined }),
+            authState: (): any => ({ user: undefined }),
           },
         });
       });
@@ -1054,7 +1037,7 @@ describe(ProfileApiService.name, () => {
             { id: 'follower1' },
             { id: 'follower2' },
             { id: 'follower3' },
-          ] as unknown as never;
+          ] as any;
 
           const result = await service.isCurrentUserFollowing(followers);
 
@@ -1077,7 +1060,7 @@ describe(ProfileApiService.name, () => {
             const mockedFollowers = [
               { id: 'follower1', name: 'User follower1' },
               { id: 'follower2', name: 'User follower2' },
-            ] as unknown as Followers;
+            ] as any;
 
             const fetchFollowersSpy = jest
               .spyOn(service, 'fetchFollowers')
@@ -1091,10 +1074,10 @@ describe(ProfileApiService.name, () => {
                   snapshot: {
                     id: userId,
                     data: {
-                      ...mockedFollowers.find((f) => f.id === userId),
+                      ...mockedFollowers.find((f: any) => f.id === userId),
                     },
                   },
-                } as unknown as never);
+                } as any);
               });
 
             const result =
@@ -1117,7 +1100,7 @@ describe(ProfileApiService.name, () => {
             const mockedFollowers = [
               { id: 'follower1', name: 'User follower1' },
               { id: 'follower2', name: 'User follower2' },
-            ] as unknown as Followers;
+            ] as any;
 
             const fetchFollowersSpy = jest
               .spyOn(service, 'fetchFollowers')
@@ -1130,16 +1113,16 @@ describe(ProfileApiService.name, () => {
                 if (userId === 'follower1') {
                   return Promise.resolve({
                     snapshot: null,
-                  } as unknown as never);
+                  } as any);
                 }
                 return Promise.resolve({
                   snapshot: {
                     id: userId,
                     data: {
-                      ...mockedFollowers.find((f) => f.id === userId),
+                      ...mockedFollowers.find((f: any) => f.id === userId),
                     },
                   },
-                } as unknown as never);
+                } as any);
               });
 
             const result =
@@ -1213,7 +1196,7 @@ describe(ProfileApiService.name, () => {
             const mockedFollowing = [
               { data: { followedUid: 'following1', name: 'User following1' } },
               { data: { followedUid: 'following2', name: 'User following2' } },
-            ] as unknown as Following;
+            ] as any;
 
             const fetchFollowingSpy = jest
               .spyOn(service, 'fetchFollowing')
@@ -1223,10 +1206,9 @@ describe(ProfileApiService.name, () => {
               .spyOn(FirebaseFirestore, 'getDocument')
               .mockImplementation(({ reference }) => {
                 const userId = reference.split('/')[1];
-                const followingData = mockedFollowing.find(
-                  (f) => f.data?.['followedUid'] === userId,
-                )?.data as { followedUid: string; name: string };
-                const { followedUid, ...rest } = followingData;
+                const { followedUid, ...rest } = mockedFollowing.find(
+                  (f: any) => f.data.followedUid === userId,
+                ).data;
                 return Promise.resolve({
                   snapshot: {
                     id: userId,
@@ -1235,7 +1217,7 @@ describe(ProfileApiService.name, () => {
                       id: followedUid,
                     },
                   },
-                } as unknown as never);
+                } as any);
               });
 
             const result =
@@ -1258,7 +1240,7 @@ describe(ProfileApiService.name, () => {
             const mockedFollowing = [
               { data: { followedUid: 'following1', name: 'User following1' } },
               { data: null },
-            ] as unknown as Following;
+            ] as any;
 
             const fetchFollowingSpy = jest
               .spyOn(service, 'fetchFollowing')
@@ -1268,10 +1250,9 @@ describe(ProfileApiService.name, () => {
               .spyOn(FirebaseFirestore, 'getDocument')
               .mockImplementation(({ reference }) => {
                 const userId = reference.split('/')[1];
-                const followingData = mockedFollowing.find(
-                  (f) => f.data?.['followedUid'] === userId,
-                )?.data as { followedUid: string; name: string };
-                const { followedUid, ...rest } = followingData;
+                const { followedUid, ...rest } = mockedFollowing.find(
+                  (f: any) => f.data && f.data.followedUid === userId,
+                ).data;
                 return Promise.resolve({
                   snapshot: {
                     id: userId,
@@ -1280,7 +1261,7 @@ describe(ProfileApiService.name, () => {
                       id: followedUid,
                     },
                   },
-                } as unknown as never);
+                } as any);
               });
 
             const result =

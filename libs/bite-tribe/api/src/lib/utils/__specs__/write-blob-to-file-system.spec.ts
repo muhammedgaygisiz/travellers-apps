@@ -2,11 +2,11 @@ import { writeBlobToFileSystem } from '../write-blob-to-file-system';
 
 const toBase64Mock = jest.fn();
 jest.mock('../to-base-64', () => ({
-  toBase64: (): unknown => toBase64Mock,
+  toBase64: (): any => toBase64Mock,
 }));
 
 jest.mock('@capacitor/filesystem', () => ({
-  Directory: { Cache: {} as unknown as never },
+  Directory: { Cache: {} as any },
   Filesystem: {
     writeFile: jest.fn().mockReturnValue({ uri: 'uri' }),
   },

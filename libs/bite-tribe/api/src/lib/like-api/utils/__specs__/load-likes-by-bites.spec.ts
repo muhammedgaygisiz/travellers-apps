@@ -20,7 +20,7 @@ describe(loadLikesByBites.name, () => {
 
   describe('given bites without id', () => {
     it('should return an empty array', async () => {
-      const bites = [{} as unknown as never];
+      const bites = [{} as any];
       const result = await loadLikesByBites(bites, userId);
       expect(result).toEqual([]);
     });
@@ -35,10 +35,10 @@ describe(loadLikesByBites.name, () => {
       jest
         .spyOn(FirebaseFirestore, 'getDocument')
         .mockImplementationOnce(async () => ({
-          snapshot: { data: likeForBite1 } as unknown as never,
+          snapshot: { data: likeForBite1 } as any,
         }))
         .mockImplementationOnce(async () => ({
-          snapshot: { data: null } as unknown as never,
+          snapshot: { data: null } as any,
         }));
 
       const result = await loadLikesByBites(bites, userId);

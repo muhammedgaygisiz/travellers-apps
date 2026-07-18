@@ -49,12 +49,10 @@ describe('BiteTrailApiService', () => {
     beforeEach(() => {
       addDocumentSpy = jest
         .spyOn(FirebaseFirestore, 'addDocument')
-        .mockResolvedValue({
-          reference: { id: 'trail-123' },
-        } as unknown as never);
+        .mockResolvedValue({ reference: { id: 'trail-123' } } as any);
       updateDocumentSpy = jest
         .spyOn(FirebaseFirestore, 'updateDocument')
-        .mockResolvedValue({} as unknown as never);
+        .mockResolvedValue({} as any);
     });
 
     afterEach(() => {
@@ -176,7 +174,8 @@ describe('BiteTrailApiService', () => {
         expect.objectContaining({
           reference: `${BITE_TRAIL_COLLECTION}/trail-123`,
           data: expect.objectContaining({
-            imagePath: 'https://storage.example.com/biteTrails/trail-123.jpg',
+            imagePath:
+              'https://storage.example.com/biteTrails/trail-123.jpg',
           }),
         }),
       );

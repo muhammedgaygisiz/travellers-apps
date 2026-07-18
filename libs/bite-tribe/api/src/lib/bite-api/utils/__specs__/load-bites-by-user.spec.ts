@@ -6,7 +6,7 @@ jest.mock('@capacitor-firebase/firestore');
 describe('loadBitesByUser', () => {
   beforeEach(() => {
     jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
-      snapshots: [{} as unknown as never],
+      snapshots: [{} as any],
     });
   });
 

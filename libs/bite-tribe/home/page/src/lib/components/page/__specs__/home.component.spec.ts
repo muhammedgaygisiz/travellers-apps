@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { BiteTribeHomeComponent } from '../home.component';
 import { HomeFeedControlsComponent } from '../home-feed-controls/home-feed-controls.component';
-import { ComponentRef, signal } from '@angular/core';
+import { ComponentRef } from '@angular/core';
 import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
 import { Dialog } from '@angular/cdk/dialog';
@@ -12,6 +12,7 @@ import { of, Subject } from 'rxjs';
 import { RefresherCustomEvent } from '@ionic/angular';
 import SpyInstance = jest.SpyInstance;
 import { TranslocoService } from '@jsverse/transloco';
+import type { Bite } from 'model';
 
 addNecessaryIcons();
 
@@ -23,12 +24,22 @@ const MockTranslocoService = {
   langChanges$: of(),
 };
 
+const createBite = (overrides: Partial<Bite> = {}): Bite => ({
+  id: 'bite-1',
+  name: 'Bite',
+  image: '',
+  place: 'Bite Place',
+  price: 0,
+  position: { latitude: 0, longitude: 0 },
+  ...overrides,
+});
+
 describe('BiteTribeHomeComponent', () => {
   let component: BiteTribeHomeComponent;
   let fixture: ComponentFixture<BiteTribeHomeComponent>;
   let navController: NavController;
   let componentRef: ComponentRef<BiteTribeHomeComponent>;
-  let closedSubject: Subject<any>;
+  let closedSubject: Subject<unknown>;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -37,7 +48,7 @@ describe('BiteTribeHomeComponent', () => {
       navigateForward: jest.fn(),
     } as Partial<NavController> as NavController;
 
-    closedSubject = new Subject<any>();
+    closedSubject = new Subject<unknown>();
     const dialogMock = {
       open: jest.fn().mockReturnValue({
         closed: closedSubject.asObservable(),
@@ -73,8 +84,8 @@ describe('BiteTribeHomeComponent', () => {
 
   it('should update bites when input changes', () => {
     const mockBites = [
-      { id: 1, name: 'Burger' },
-      { id: 2, name: 'Pizza' },
+      createBite({ id: '1', name: 'Burger' }),
+      createBite({ id: '2', name: 'Pizza' }),
     ];
 
     componentRef.setInput('bites', mockBites);
@@ -130,10 +141,14 @@ describe('BiteTribeHomeComponent', () => {
   });
 
   it('should call scrollToTop on ionContent when scrollToTop is called', () => {
-    const scrollToTopMock = jest.fn();
-    component.ionContent = signal({
-      scrollToTop: scrollToTopMock,
-    } as any) as any;
+    fixture.detectChanges();
+    const ionContent = component.ionContent();
+    if (!ionContent) {
+      throw new Error('Expected ion-content to be available');
+    }
+    const scrollToTopMock = jest
+      .spyOn(ionContent, 'scrollToTop')
+      .mockResolvedValue();
 
     component.scrollToTop();
     expect(scrollToTopMock).toHaveBeenCalledWith(300);
@@ -255,7 +270,9 @@ describe('BiteTribeHomeComponent', () => {
 
   describe('onLoadMore', () => {
     it('should load more bites when there are more to show', () => {
-      const bites = new Array(100).fill({});
+      const bites = Array.from({ length: 100 }, (_, index) =>
+        createBite({ id: `${index}` }),
+      );
       componentRef.setInput('bites', bites);
       component.onLoadMore();
       expect(component.currentPage()).toBe(2);
@@ -292,10 +309,10 @@ describe('BiteTribeHomeComponent', () => {
 
   describe('search functionality', () => {
     const mockBites = [
-      { id: '1', name: 'Burger', place: 'Burger Place' },
-      { id: '2', name: 'Pizza', place: 'Pizza Place' },
-      { id: '3', name: 'Sushi', place: 'Sushi Bar' },
-    ] as any[];
+      createBite({ id: '1', name: 'Burger', place: 'Burger Place' }),
+      createBite({ id: '2', name: 'Pizza', place: 'Pizza Place' }),
+      createBite({ id: '3', name: 'Sushi', place: 'Sushi Bar' }),
+    ];
 
     beforeEach(() => {
       componentRef.setInput('bites', mockBites);
@@ -337,7 +354,10 @@ describe('BiteTribeHomeComponent', () => {
 
     it('should update searchTerm and reset page on onSearchInput', () => {
       component.currentPage.set(3);
-      const event = { target: { value: 'Sushi' } } as any;
+      const input = document.createElement('input');
+      input.value = 'Sushi';
+      const event = new Event('input');
+      Object.defineProperty(event, 'target', { value: input });
       component.onSearchInput(event);
       expect(component.searchTerm()).toBe('Sushi');
       expect(component.currentPage()).toBe(1);

@@ -6,6 +6,7 @@ import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { of } from 'rxjs';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { BiteListComponent } from '../bite-list.component';
+import type { Bite } from 'model';
 
 addNecessaryIcons();
 
@@ -16,6 +17,15 @@ const MockTranslocoService = {
   },
   langChanges$: of(),
 };
+
+const createBite = (id: string, name: string): Bite => ({
+  id,
+  name,
+  image: '',
+  place: 'Bite Place',
+  price: 0,
+  position: { latitude: 0, longitude: 0 },
+});
 
 describe('BiteListComponent', () => {
   let component: BiteListComponent;
@@ -49,16 +59,16 @@ describe('BiteListComponent', () => {
 
   it('should render a bt-bite for each bite', () => {
     componentRef.setInput('bites', [
-      { id: 'bite-1', name: 'Burger' },
-      { id: 'bite-2', name: 'Pizza' },
-    ] as any);
+      createBite('bite-1', 'Burger'),
+      createBite('bite-2', 'Pizza'),
+    ]);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelectorAll('bt-bite').length).toBe(2);
   });
 
   it('should show the skeleton list and hide the bites while loading', () => {
-    componentRef.setInput('bites', [{ id: 'bite-1', name: 'Burger' }] as any);
+    componentRef.setInput('bites', [createBite('bite-1', 'Burger')]);
     componentRef.setInput('showSkeleton', true);
     fixture.detectChanges();
 

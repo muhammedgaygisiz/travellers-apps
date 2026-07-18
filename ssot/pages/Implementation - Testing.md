@@ -96,6 +96,7 @@ Two boundary details keep direct Loki working against the Angular Storybook 10 h
 
 - `tools/loki.mjs` serves the built Storybook and points Loki at `host.docker.internal`, so the same `loki:*` script works locally and in CI regardless of the machine's network interfaces.
 - `apps/storybook-host/.storybook/loki-getstories-shim.ts` re-exposes the `storyStore.raw()` method that Loki 0.35's story enumeration expects but Storybook 10 removed. Without it, `loki test`/`loki update` fail with "Unable to get stories".
+- `apps/storybook-host/src/assets/fonts/noto-color-emoji-subset.woff2` is a self-hosted Noto Color Emoji subset loaded only in Storybook (via `.storybook/preview-head.html`), so references show consistent colour emoji regardless of the Docker Chrome's installed fonts. `'Noto Color Emoji'` is listed in the app emoji font stack (`theme/variables.scss`); production ships no `@font-face` for it, so production emoji rendering is unchanged. Extend the subset (see the font folder README) if a new story renders a new emoji.
 - `loki.config.js` sets `fetchFailIgnore` to ignore failed requests from every host except the served Storybook build. Loki fails a story on any failed request, and stories legitimately load third-party resources (OpenStreetMap tiles, web fonts, remote images) that visual references must not depend on. A genuinely missing bundled asset (same origin) still fails. Note: references stay deterministic only while those external resources render consistently; mock them in stories if that becomes flaky.
 
 ## Related Pages

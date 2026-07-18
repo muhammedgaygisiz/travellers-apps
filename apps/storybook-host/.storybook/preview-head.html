@@ -1,4 +1,20 @@
 <style>
+  /*
+   * Self-hosted subset of Noto Color Emoji, loaded only in Storybook so that
+   * Loki visual-regression references render consistent colour emoji regardless
+   * of the fonts installed in the Docker Chrome that captures them. The
+   * 'Noto Color Emoji' family is listed in the app emoji font stack
+   * (theme/variables.scss); production ships no @font-face for it, so production
+   * emoji rendering is unchanged. See src/assets/fonts/README.md.
+   */
+  @font-face {
+    font-family: 'Noto Color Emoji';
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url('/assets/fonts/noto-color-emoji-subset.woff2') format('woff2');
+  }
+
   #root {
     height: 100%;
   }

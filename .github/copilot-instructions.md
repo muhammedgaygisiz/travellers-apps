@@ -166,8 +166,9 @@ export default {
 
 ### Visual Regression Testing
 
-- **Tool**: Loki for visual regression testing
-- **Configuration**: `loki.config.js` in storybook-host library
+- **Tool**: Loki (upstream `oblador/loki` CLI, invoked directly — no Nx adapter)
+- **Configuration**: `loki.config.js` at the repository root
+- **Scripts**: `npm run loki:test`, `npm run loki:update`, `npm run loki:approve` (build Storybook first via `npm run build:storybook`)
 - **Storybook**: Components documented in Storybook
 
 ## State Management

@@ -52,6 +52,11 @@ Thumbs.db
 storybook-static
 apps/storybook-host/src/assets/temp/**/*
 
+### loki visual regression ###
+# Keep committed reference images (.loki/reference); ignore transient run output.
+.loki/current
+.loki/difference
+
 # Husky backup hooks
 .husky/*.bak
 

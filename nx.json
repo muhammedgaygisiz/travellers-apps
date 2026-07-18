@@ -90,12 +90,6 @@
         "staticStorybookTargetName": "static-storybook"
       }
     },
-    {
-      "plugin": "nx-loki",
-      "options": {
-        "chromeRetries": 5
-      }
-    },
     "@nxext/capacitor/plugin"
   ],
   "pluginsConfig": {

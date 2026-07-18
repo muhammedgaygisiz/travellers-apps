@@ -27,14 +27,18 @@ jobs:
         - name: Setup action
           uses: ./.github/actions/setup
 
+        - name: Build Storybook
+          shell: bash
+          run: npm run build:storybook
+
         - name: Generate Loki References
           shell: bash
           run: |
-            npm run nx -- run-many --target=update-loki --all
+            npm run loki:update
 
             HAS_CHANGES=$( [[ -n "$(git status --porcelain)" ]] && echo "true" || echo "false" )
 
-            if ["$HAS_CHANGES" = "true"]; then
+            if [ "$HAS_CHANGES" = "true" ]; then
               git add .
               git commit -m "chore: update loki references"
 

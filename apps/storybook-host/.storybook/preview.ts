@@ -78,8 +78,11 @@ const decorators = [
 ];
 
 const setNxGraphIframeHeight = (): void => {
-  const graphIframe = document.getElementById('storybook-root') as any;
-  graphIframe.style = 'height: 100vh';
+  const storybookRoot = document.getElementById('storybook-root');
+
+  if (storybookRoot) {
+    storybookRoot.style.height = '100vh';
+  }
 };
 
 const preview: Preview = {

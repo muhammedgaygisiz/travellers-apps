@@ -104,7 +104,9 @@ describe('BucketListSelectionComponent', () => {
 
   it('should have correct save button configuration', () => {
     expect(component.saveButton).toHaveLength(2);
-    expect((component.saveButton[0] as any).text).toBe('Save');
-    expect(typeof (component.saveButton[0] as any).handler).toBe('function');
+    const saveButton = component.saveButton[0];
+    expect(saveButton).toEqual(
+      expect.objectContaining({ text: 'Save', handler: expect.any(Function) }),
+    );
   });
 });

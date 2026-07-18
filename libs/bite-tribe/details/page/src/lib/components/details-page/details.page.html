@@ -86,7 +86,13 @@
           />
           }
 
-          <span class="link" (click)="onRestaurantClick(biteData)">
+          <span
+            class="link"
+            role="button"
+            tabindex="0"
+            (click)="onRestaurantClick(biteData)"
+            (keydown.enter)="onRestaurantClick(biteData)"
+          >
             {{ biteData?.place }}
           </span>
           @let positionData = position(); @if (positionData) { · {{

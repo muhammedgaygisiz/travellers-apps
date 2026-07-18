@@ -10,6 +10,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { Network } from '@capacitor/network';
 import { Preferences } from '@capacitor/preferences';
 import { fromAuth } from 'ta-firestore';
+import { NetworkStatusService } from 'common/networkstatus';
 
 jest.mock('@capacitor/app', () => ({
   App: {
@@ -35,7 +36,8 @@ jest.mock('@capacitor/network', () => ({
 
 jest.mock('@capacitor/preferences', () => ({
   Preferences: {
-    get: (): any => Promise.resolve({ value: null }),
+    get: (): ReturnType<typeof Preferences.get> =>
+      Promise.resolve({ value: null }),
   },
 }));
 
@@ -85,15 +87,12 @@ describe(AppComponent.name, () => {
 
   describe('backButtonHandler', () => {
     it('should call handleBackButton with correct canGoBack value', () => {
-      const handleBackButtonSpy = jest.spyOn(
-        component as any,
-        'handleBackButton',
-      );
+      const minimizeAppSpy = jest.spyOn(App, 'minimizeApp');
 
-      const testCanGoBack = true;
+      const testCanGoBack = false;
       component.backButtonHandler({ canGoBack: testCanGoBack });
 
-      expect(handleBackButtonSpy).toHaveBeenCalledWith(testCanGoBack);
+      expect(minimizeAppSpy).toHaveBeenCalled();
     });
   });
 
@@ -185,7 +184,7 @@ describe(AppComponent.name, () => {
 
         const testUrl = 'https://example.com/s/bite/123';
         const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
-        const whereAppUrlOpen = ([event]: [any]): boolean =>
+        const whereAppUrlOpen = ([event]: [string]): boolean =>
           event === 'appUrlOpen';
         const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
         appUrlOpenListener({ url: testUrl });
@@ -205,7 +204,7 @@ describe(AppComponent.name, () => {
 
         const testUrl = 'https://example.com/other/path';
         const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
-        const whereAppUrlOpen = ([event]: [any]): boolean =>
+        const whereAppUrlOpen = ([event]: [string]): boolean =>
           event === 'appUrlOpen';
         const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
         appUrlOpenListener({ url: testUrl });
@@ -239,7 +238,7 @@ describe(AppComponent.name, () => {
       const addListenerCalls = (Network.addListener as jest.Mock).mock.calls;
 
       const setNetworkStatusSpy = jest.spyOn(
-        (component as any).networkStatusService,
+        TestBed.inject(NetworkStatusService),
         'setNetworkStatus',
       );
       addListenerCalls.find(([event]) => event === 'networkStatusChange')[1]({

@@ -6,6 +6,7 @@ import { NavController } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
+import { Bite, PublicUser } from 'model';
 
 const emailVerificationMock = {
   promptVisible: jest.fn(() => false),
@@ -138,7 +139,7 @@ describe(ProfileService.name, () => {
 
   describe('biteClicked', () => {
     it('should navigate to the correct bite', () => {
-      const bite = { id: 'bite123' } as any;
+      const bite = { id: 'bite123' } as unknown as Bite;
       const navigateSpy = jest
         .spyOn(service['navController'], 'navigateForward')
         .mockImplementation();
@@ -149,7 +150,7 @@ describe(ProfileService.name, () => {
 
   describe('saveProfile', () => {
     it('should save the profile without claiming when the display name is unchanged', async () => {
-      const publicUser = { id: 'user123' } as any;
+      const publicUser = { id: 'user123' } as unknown as PublicUser;
       const savePublicProfileSpy = jest.spyOn(
         profileDataAccessService,
         'savePublicProfile',
@@ -163,7 +164,7 @@ describe(ProfileService.name, () => {
     });
 
     it('should claim a changed display name before saving', async () => {
-      const publicUser = { displayName: 'NewName' } as any;
+      const publicUser = { displayName: 'NewName' } as unknown as PublicUser;
       const savePublicProfileSpy = jest.spyOn(
         profileDataAccessService,
         'savePublicProfile',
@@ -177,7 +178,7 @@ describe(ProfileService.name, () => {
     });
 
     it('should show a localized error and not save when the display name is taken', async () => {
-      const publicUser = { displayName: 'Taken' } as any;
+      const publicUser = { displayName: 'Taken' } as unknown as PublicUser;
       jest
         .spyOn(profileDataAccessService, 'claimDisplayName')
         .mockRejectedValueOnce({ message: 'display_name_taken' });
@@ -199,7 +200,7 @@ describe(ProfileService.name, () => {
 
   describe('followButtonClicked', () => {
     it('should call submitFollowClick on dataAccess with correct parameters', () => {
-      const user = { id: 'user123' } as any;
+      const user = { id: 'user123' } as unknown as PublicUser;
       const submitFollowClickSpy = jest.spyOn(
         profileDataAccessService,
         'submitFollowClick',
@@ -211,7 +212,7 @@ describe(ProfileService.name, () => {
 
   describe('unfollowButtonClicked', () => {
     it('should call submitUnfollowClick on dataAccess with correct parameters', () => {
-      const user = { id: 'user123' } as any;
+      const user = { id: 'user123' } as unknown as PublicUser;
       const submitUnfollowClickSpy = jest.spyOn(
         profileDataAccessService,
         'submitUnfollowClick',

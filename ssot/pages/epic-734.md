@@ -1,5 +1,0 @@
-- [epic: User wants to see a menu of a restaurant](https://github.com/muhammedgaygisiz/travellers-apps/issues/734) (Issue \#734)
-- Description
-  - At the moment there are few ways that the menu of a restaurant is shown in the App. This menu Items and other further functionalities (for e.g. Creating a bite out of a menu item, checking avilablity of dish / tabel in resturant etc. )need to be included. (This Business Feature need to be broken dowm to further tasks & sub-tasks in ref. sessions)
-- Related issues
-  - [feat(business): app should show the latest bite's image in the menu]([[issue-327]]) (Issue \#327)

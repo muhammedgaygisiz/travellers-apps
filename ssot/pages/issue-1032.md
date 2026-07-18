@@ -1,0 +1,19 @@
+- [01 - chore: remove Cypress and consolidate E2E on Playwright](https://github.com/muhammedgaygisiz/travellers-apps/issues/1032) (Issue \#1032)
+- Description
+  - Part of \#1029.
+  - \#\# Goal
+  - Make Playwright the only supported E2E framework and remove the legacy Cypress surface without losing required business-app coverage.
+  - \#\# Scope
+  - Inventory `apps/bite-tribe-business-e2e` for unique behavioral coverage.
+  - Port any still-required scenarios to Playwright.
+  - Remove the Cypress project, configuration, support files, lint configuration, TypeScript references, executor references, scripts, and direct dependencies.
+  - Do not add `@nx/cypress` during later Nx migrations.
+  - Update the testing SSOT and known-issue state when the legacy surface is gone.
+  - \#\# Acceptance criteria
+  - All required consumer and business E2E scenarios are represented in Playwright.
+  - No first-party Cypress project, config, script, executor, or direct dependency remains.
+  - Playwright remains reliable against the shared Firebase emulators.
+  - \#\# Validation
+  - Run the affected Playwright suite serially with `--workers=1`.
+  - Confirm no first-party Cypress references remain outside historical changelog content.
+  - Run `git diff --check`.

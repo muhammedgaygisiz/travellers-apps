@@ -26,10 +26,8 @@
   - Mandatory Bite restaurant/place selection has landed through issue 943 / PR \#981.
   - Map live-update camera stability has landed through issue 982.
   - Playwright login, registration, and create-Bite E2E coverage has landed through issue 983.
-
 - Current gap to the 17 July 2026 milestone:
   - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, Bite photo upload reliability, notification delivery, city search quality, issue 978 currency prefill and manual override, suspicious-price UX, restaurant/place picker behavior, map camera stability, Playwright E2E reliability, and restaurant candidate verification state transitions.
-
 - ### Week 1
 
   Focus: Firebase App Check.
@@ -73,6 +71,9 @@
 - Web testing.
 - Fix remaining launch blockers.
 - Prepare App Store and Google Play assets.
+- Execute Phases 0 to 2 of [[Current State - Nx And Dependency Migration Roadmap]] without combining Nx, Angular, native, and backend major upgrades into one change.
+- Replace the `nx-loki` adapter with direct `oblador/loki` usage; the legacy Cypress E2E surface has been removed in favor of Playwright.
+- Angular 22 is not a release-candidate prerequisite; it follows only after the Nx 23 workspace is stable and the Angular 22 dependency prerequisites are available.
 - ### Onboarding assistant
 
   The onboarding assistant ([[epic-850]]) must land before the public launch so the first real users onboard through it.
@@ -131,5 +132,6 @@
 - [[Mission]]
 - [[Current State - Known Issues]]
 - [[Current State - Release State]]
+- [[Current State - Nx And Dependency Migration Roadmap]]
 - [[Architecture - Analytics]]
 - [[Architecture - Firebase]]

@@ -1,21 +1,20 @@
 # User
 
-## Purpose
+- ## Purpose
 
-A User represents a person, creator, organisation, or restaurant-facing profile participating in BiteTribe.
+  A User represents a person, creator, organisation, or restaurant-facing profile participating in BiteTribe.
 
-Users are the trust layer around Bites. They create Bites, follow each other, save food experiences, rate BiteTrails, and provide the social context that helps other people decide what to eat.
+  Users are the trust layer around Bites. They create Bites, follow each other, save food experiences, rate BiteTrails, and provide the social context that helps other people decide what to eat.
 
-## Why It Exists
+- ## Why It Exists
 
-The goal of a User is to answer:
+  The goal of a User is to answer:
 
-> Who shared this food experience, and can I trust their context?
+  > Who shared this food experience, and can I trust their context?
 
-A Bite without creator context is weaker because BiteTribe depends on human food experiences, not anonymous listings.
+  A Bite without creator context is weaker because BiteTribe depends on human food experiences, not anonymous listings.
 
-## Business Rules
-
+- ## Business Rules
 - A User can create many Bites.
 - A User can have a public or private profile.
 - A User can follow and be followed by other users.
@@ -26,20 +25,18 @@ A Bite without creator context is weaker because BiteTribe depends on human food
 - A User can represent an individual, organisation, or restaurant-like profile.
 - Public profile quality affects trust in Bites and BiteTrails.
 - Email/password users should verify their email address; linked Google or Apple provider accounts are treated as trusted for this lifecycle.
+- ## Required Data
 
-## Required Data
+  Current profile model fields:
 
-Current profile model fields:
+  | Field        | Current name in code | Description                                    |
+  | ------------ | -------------------- | ---------------------------------------------- |
+  | User id      | `userId`             | Auth/user identifier and profile document id.  |
+  | Display name | `displayName`        | Public display identity.                       |
+  | Email        | `email`              | Account email, also used in search.            |
+  | Photo        | `photoUrl`           | Profile image URL or uploaded image reference. |
 
-| Field        | Current name in code | Description                                    |
-| ------------ | -------------------- | ---------------------------------------------- |
-| User id      | `userId`             | Auth/user identifier and profile document id.  |
-| Display name | `displayName`        | Public display identity.                       |
-| Email        | `email`              | Account email, also used in search.            |
-| Photo        | `photoUrl`           | Profile image URL or uploaded image reference. |
-
-## Optional Data
-
+- ## Optional Data
 - `fullName`
 - `city`
 - `about`
@@ -68,40 +65,39 @@ Current profile model fields:
 - `onboardingCompletedAt`
 - `onboardingCompletedAtTimestamp`
 - `onboardingVersion`
+- ## Relationships
 
-## Relationships
+  ```text
+  User
+  |-- Bites (creator)
+  |-- Bucket Lists
+  |-- Likes
+  |-- Reviews
+  |-- Followers
+  |-- Following
+  |-- BiteTrails (owner, organisation, or curator)
+  |-- BiteTrail ratings
+  ```
 
-```text
-User
-|-- Bites (creator)
-|-- Bucket Lists
-|-- Likes
-|-- Reviews
-|-- Followers
-|-- Following
-|-- BiteTrails (owner, organisation, or curator)
-|-- BiteTrail ratings
-```
+- ## Lifecycle
 
-## Lifecycle
+  ```text
+  Authenticated
+  |
+  Profile created
+  |
+  Public/private profile chosen
+  |
+  Profile maintained
+  |
+  Creates or discovers Bites
+  |
+  Follows, likes, reviews, saves, or curates
+  |
+  Last seen and contribution signals updated
+  ```
 
-```text
-Authenticated
-|
-Profile created
-|
-Public/private profile chosen
-|
-Profile maintained
-|
-Creates or discovers Bites
-|
-Follows, likes, reviews, saves, or curates
-|
-Last seen and contribution signals updated
-```
-
-Current implementation notes:
+  Current implementation notes:
 
 - A public user document is stored in `/users/{userId}`.
 - `saveUser` initializes profile data from the authenticated user.
@@ -115,9 +111,7 @@ Current implementation notes:
 - Display names are unique, enforced case-insensitively (normalized by trim + lowercase; original casing preserved for display). A claim document `/displayNames/{normalizedDisplayName}` is written transactionally by the `claimDisplayName` callable so two users cannot take the same normalized name concurrently; renaming releases the old claim and takes the new one in the same transaction and keeps `/users/{uid}.displayName` plus `normalizedDisplayName` in sync. `checkDisplayNameAvailability` is a read-only advisory check. The profile edit flow claims the name before saving and shows a localized error when it is taken. `backfillDisplayNameClaimsCallable` claims existing users' names oldest-first (first-come keeps the name on a normalization collision) so enforcement can be switched on safely. See [[epic-850]].
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
-
-## Permissions
-
+- ## Permissions
 - Guest
   - Guest behavior is not the main authenticated app flow today.
 - Registered user
@@ -129,10 +123,9 @@ Current implementation notes:
   - Create bucket lists and save BiteTrails.
 - Admin
   - Moderation and user administration are future or operational capabilities, not clearly modeled in the current User domain code.
+- ## Use Cases
 
-## Use Cases
-
-Supported today:
+  Supported today:
 
 - Create public/private user profile.
 - Edit profile.
@@ -149,90 +142,82 @@ Supported today:
 - Show contribution badges on profile.
 - Receive ranking-change notifications.
 
-Related future or expanding use cases:
+  Related future or expanding use cases:
 
 - Onboarding assistant.
 - Better privacy guidance.
 - Organisation profile management.
 - Restaurant profile ownership.
 - Creator credibility and badges.
-
-## Related Epics
-
+- ## Related Epics
 - Onboarding assistant
 - Search
 - Marketplace
 - BiteTrail gamification
 - Organisation and BiteTrail packages
+- ## Technical Implementation
 
-## Technical Implementation
+  Firestore:
 
-Firestore:
+  ```text
+  /users/{userId}
+  /users/{userId}/followers/{followerUserId}
+  /users/{userId}/following/{followedUserId}
+  /displayNames/{normalizedDisplayName}
+  /biteTrails/{biteTrailId}/ratings/{userId}
+  ```
 
-```text
-/users/{userId}
-/users/{userId}/followers/{followerUserId}
-/users/{userId}/following/{followedUserId}
-/displayNames/{normalizedDisplayName}
-/biteTrails/{biteTrailId}/ratings/{userId}
-```
+  Frontend and shared model:
 
-Frontend and shared model:
+  ```text
+  libs/bite-tribe-common/model/src/lib/public-user.ts
+  libs/bite-tribe-common/model/src/lib/user.ts
+  libs/bite-tribe/api/src/lib/profile-api.service.ts
+  libs/bite-tribe/profile/page
+  libs/bite-tribe/followers/page
+  libs/bite-tribe/store/src/lib/app
+  ```
 
-```text
-libs/bite-tribe-common/model/src/lib/public-user.ts
-libs/bite-tribe-common/model/src/lib/user.ts
-libs/bite-tribe/api/src/lib/profile-api.service.ts
-libs/bite-tribe/profile/page
-libs/bite-tribe/followers/page
-libs/bite-tribe/store/src/lib/app
-```
+  Cloud Functions:
 
-Cloud Functions:
+  ```text
+  createUserOnAuthCreate
+  claimDisplayName
+  checkDisplayNameAvailability
+  backfillDisplayNameClaimsCallable
+  updateLastSeen
+  updateUserMetadata
+  syncEmailVerificationStatus
+  resendEmailVerification
+  sendEmailVerificationReminders
+  searchUsers
+  loadLeaderboard
+  incrementBiteCountOnBiteCreate
+  resyncBiteCounts
+  sendDailyLeaderboardNotification
+  notifyUserOnNewFollower
+  ```
 
-```text
-createUserOnAuthCreate
-claimDisplayName
-checkDisplayNameAvailability
-backfillDisplayNameClaimsCallable
-updateLastSeen
-updateUserMetadata
-syncEmailVerificationStatus
-resendEmailVerification
-sendEmailVerificationReminders
-searchUsers
-loadLeaderboard
-incrementBiteCountOnBiteCreate
-resyncBiteCounts
-sendDailyLeaderboardNotification
-notifyUserOnNewFollower
-```
+  Storage:
 
-Storage:
+  ```text
+  images/users/{userId}/{filename}
+  ```
 
-```text
-images/users/{userId}/{filename}
-```
-
-## Current Limitations
-
+- ## Current Limitations
 - Organisation and restaurant user profile behavior exists in fields but is still evolving as a product concept.
 - Public/private visibility needs clearer user-facing guidance.
 - Admin moderation is not clearly modeled.
 - Profile trust and creator credibility are mostly implicit.
 - Onboarding after registration is not complete.
-
-## Future Ideas
-
+- ## Future Ideas
 - Guided onboarding for username, public profile, currency, and first actions.
 - Creator profile completeness score.
 - Creator badges.
 - Organisation-owned creator teams.
 - Clearer public/private profile controls.
 - Better trust signals for search and Bite ranking.
-
-## Sources Used
-
+- ## Sources Used
 - [[Mission]]
 - [[Principles]]
 - [[Glossary]]

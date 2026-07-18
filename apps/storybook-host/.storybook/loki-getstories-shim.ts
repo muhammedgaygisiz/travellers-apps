@@ -64,6 +64,29 @@ const attachLokiRaw = (): boolean => {
   return true;
 };
 
+// Make Loki wait for the self-hosted emoji web font before it screenshots.
+// Loki sets up `window.loki` (with a ready-state manager) via
+// `evaluateOnNewDocument` before any page script runs, and awaits
+// `window.loki.awaitReady()` before capturing. Registering the font load as a
+// pending promise ensures `font-display: block` emoji glyphs are never captured
+// while still loading. No-op outside a Loki run (window.loki is undefined).
+const awaitEmojiFontForLoki = (): void => {
+  const loki = (window as any).loki;
+  const fonts = (document as any).fonts;
+  if (!loki || typeof loki.registerPendingPromise !== 'function' || !fonts) {
+    return;
+  }
+  try {
+    loki.registerPendingPromise(
+      Promise.resolve(fonts.load("16px 'Noto Color Emoji'"))
+        .catch(() => undefined)
+        .then(() => fonts.ready)
+    );
+  } catch {
+    /* ignore */
+  }
+};
+
 if (typeof window !== 'undefined') {
   if (!attachLokiRaw()) {
     const interval = window.setInterval(() => {
@@ -74,4 +97,5 @@ if (typeof window !== 'undefined') {
     // Safety cap so a preview that never initializes cannot poll forever.
     window.setTimeout(() => window.clearInterval(interval), 30000);
   }
+  awaitEmojiFontForLoki();
 }

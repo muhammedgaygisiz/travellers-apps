@@ -96,6 +96,7 @@ Two boundary details keep direct Loki working against the Angular Storybook 10 h
 
 - `tools/loki.mjs` serves the built Storybook and points Loki at `host.docker.internal`, so the same `loki:*` script works locally and in CI regardless of the machine's network interfaces.
 - `apps/storybook-host/.storybook/loki-getstories-shim.ts` re-exposes the `storyStore.raw()` method that Loki 0.35's story enumeration expects but Storybook 10 removed. Without it, `loki test`/`loki update` fail with "Unable to get stories".
+- `loki.config.js` sets `fetchFailIgnore` to ignore failed requests from every host except the served Storybook build. Loki fails a story on any failed request, and stories legitimately load third-party resources (OpenStreetMap tiles, web fonts, remote images) that visual references must not depend on. A genuinely missing bundled asset (same origin) still fails. Note: references stay deterministic only while those external resources render consistently; mock them in stories if that becomes flaky.
 
 ## Related Pages
 

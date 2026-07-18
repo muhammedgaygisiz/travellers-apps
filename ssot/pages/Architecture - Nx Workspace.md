@@ -13,7 +13,6 @@ apps/bite-tribe-firebase
 apps/bite-tribe-ios
 apps/bite-tribe-android
 apps/bite-tribe-e2e
-apps/bite-tribe-business-e2e # legacy Cypress surface pending removal
 apps/storybook-host
 ```
 
@@ -68,7 +67,7 @@ Use focused Nx targets when they are reliable. If Nx daemon or graph behavior ha
 ## Toolchain Direction
 
 - Keep `nx` and all official `@nx/*` packages on one exact version.
-- Use Playwright as the only E2E framework; remove the legacy Cypress project instead of migrating its executor.
+- Use Playwright as the only E2E framework; the legacy Cypress project has been removed and must not be reintroduced.
 - Invoke `oblador/loki` directly and do not load visual regression through an Nx plugin.
 - Follow [[Current State - Nx And Dependency Migration Roadmap]] for the staged Nx 22.7, Nx 23, Node.js, and Angular migration sequence.
 

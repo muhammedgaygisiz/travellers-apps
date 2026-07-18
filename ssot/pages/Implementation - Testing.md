@@ -53,7 +53,7 @@ npx jest --config libs/bite-tribe/search/data-access/jest.config.ts --runInBand
 
 `apps/bite-tribe-e2e` uses Playwright for consumer app smoke coverage.
 
-Playwright is the only supported E2E framework. Put new consumer and business-app E2E scenarios in Playwright. Before removing the legacy Cypress project, port any scenario that still represents required behavior; do not migrate its Cypress executor or dependencies.
+Playwright is the only supported E2E framework. Put new consumer and business-app E2E scenarios in Playwright. The legacy Cypress business project has been removed; do not reintroduce Cypress or `@nx/cypress` during later Nx migrations.
 
 The E2E target starts the Firebase emulators and the Angular dev server before running browser tests. Use it when validating launch-critical flows such as login, registration, and creating a Bite through the real UI.
 

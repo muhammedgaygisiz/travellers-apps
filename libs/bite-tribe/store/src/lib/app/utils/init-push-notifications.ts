@@ -10,7 +10,7 @@ import { NavController, Platform } from '@ionic/angular';
 export const initPushNotifications = (
   platform: Platform,
   navController: NavController,
-): UnaryFunction<Observable<string>, any> =>
+): UnaryFunction<Observable<string>, Observable<string>> =>
   pipe(
     tap(
       async (uid: string) =>

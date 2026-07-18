@@ -133,12 +133,17 @@ export const reducer = createReducer<AppSlice>(
         }
       : state.profile,
   })),
-  on(AppActions.loadedProfileMetadata, (state, { type, ...metadata }) => ({
-    ...state,
-    profileMetadata: {
-      ...metadata,
-    },
-  })),
+  on(
+    AppActions.loadedProfileMetadata,
+    (state, { followers, following, isFollowedByMe }) => ({
+      ...state,
+      profileMetadata: {
+        followers,
+        following,
+        isFollowedByMe,
+      },
+    }),
+  ),
   on(routerRequestAction, (state) => ({
     ...state,
     profileMetadata: { ...CLEAN_PROFILE_METADATA },

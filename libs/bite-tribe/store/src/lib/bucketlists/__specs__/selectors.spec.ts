@@ -1,10 +1,13 @@
 import * as fromSelectors from '../selectors';
 import { EntityState } from '@ngrx/entity';
 import type { Bucketlist } from 'model';
+import type { sortByCriteria } from '../utils/sort-by-criteria';
 
 const sortByCriteriaMock = jest.fn();
 jest.mock('../utils/sort-by-criteria', () => ({
-  sortByCriteria: (...args: any): any => sortByCriteriaMock(...args),
+  sortByCriteria: (
+    ...args: Parameters<typeof sortByCriteria>
+  ): ReturnType<typeof sortByCriteria> => sortByCriteriaMock(...args),
 }));
 
 describe('Bucketlists - selectors', () => {
@@ -43,7 +46,9 @@ describe('Bucketlists - selectors', () => {
 
     it('should return undefined if slice is undefined', () => {
       const result = fromSelectors.selectedBucketlist.projector(
-        undefined as any,
+        undefined as unknown as Parameters<
+          typeof fromSelectors.selectedBucketlist.projector
+        >[0],
         [BUCKETLIST_1],
       );
       expect(result).toBeUndefined();

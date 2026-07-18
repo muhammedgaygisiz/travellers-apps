@@ -2,14 +2,20 @@ import { filter, Observable, pipe, UnaryFunction } from 'rxjs';
 import { BucketlistActions } from '../actions';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { PATH } from 'utils';
+import type { Action } from '@ngrx/store';
+
+const isRouterNavigatedAction = (
+  action: Action,
+): action is ReturnType<typeof routerNavigatedAction> =>
+  action.type === routerNavigatedAction.type;
 
 export const shouldLoadBucketlists = (): UnaryFunction<
-  Observable<{ type: string; payload?: any }>,
-  Observable<any>
+  Observable<Action>,
+  Observable<Action>
 > => {
   return pipe(
     filter((action) => {
-      if (action.type === routerNavigatedAction.type) {
+      if (isRouterNavigatedAction(action)) {
         const { payload } = action;
         const urlAfterRedirects = payload.event.urlAfterRedirects;
         return (

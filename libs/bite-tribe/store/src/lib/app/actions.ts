@@ -5,6 +5,7 @@ import type {
   Settings,
   UploadParams,
 } from 'model';
+import type { Position } from '@capacitor/geolocation';
 
 export const AppActions = createActionGroup({
   source: 'APP',
@@ -12,9 +13,9 @@ export const AppActions = createActionGroup({
     'Fetch GPS position': emptyProps(),
     'Reload GPS position': emptyProps(),
     'Clear GPS error': emptyProps(),
-    'Loaded GPS position': props<{ position: any }>(),
+    'Loaded GPS position': props<{ position: Position }>(),
     'Clear Reload GPS position': props<{ reason: string }>(),
-    'Error loading GPS position': props<{ error: any }>(),
+    'Error loading GPS position': props<{ error: unknown }>(),
     'Saved settings': props<{ settings: Settings }>(),
     'Save public profile': props<{ profile: PublicUser }>(),
     'Saved public profile': props<{ profile: PublicUser }>(),

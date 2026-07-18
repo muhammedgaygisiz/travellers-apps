@@ -65,9 +65,7 @@ export class BucketListEffect {
       ofType(BucketlistActions.createAndSaveBiteIdToBucketlist),
       switchMap((params) =>
         from(this.api.createBucketListAndSaveBiteIdToBucketList(params)).pipe(
-          map((bucketlist) =>
-            BucketlistActions.createdBucketlistAndSavedBiteToIt(),
-          ),
+          map(() => BucketlistActions.createdBucketlistAndSavedBiteToIt()),
         ),
       ),
     );

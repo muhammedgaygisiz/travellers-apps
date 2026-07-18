@@ -10,7 +10,7 @@ describe('Bucketlists Reducer', () => {
       const INITIAL_STATE = {
         ids: ['id'],
         entities: {
-          id: { id: 'id' } as any,
+          id: { id: 'id' } as unknown as Bucketlist,
         },
       } as EntityState<Bucketlist>;
       const NEW_STATE = { ids: [], entities: {} } as EntityState<Bucketlist>;
@@ -32,12 +32,12 @@ describe('Bucketlists Reducer', () => {
       const NEW_STATE = {
         ids: ['id'],
         entities: {
-          id: { id: 'id' } as any,
+          id: { id: 'id' } as unknown as Bucketlist,
         },
       } as EntityState<Bucketlist>;
 
       const loadedBucketlistsFromApiAction = BucketlistActions.loadedFromAPI({
-        bucketlists: [{ id: 'id' }],
+        bucketlists: [{ id: 'id' } as unknown as Bucketlist],
       });
 
       expect(reducer(INITIAL_STATE, loadedBucketlistsFromApiAction)).toEqual({

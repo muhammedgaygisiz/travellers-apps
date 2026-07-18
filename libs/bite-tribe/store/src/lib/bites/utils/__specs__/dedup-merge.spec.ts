@@ -12,7 +12,10 @@ describe('replaceWithLatestBites', () => {
         { id: '4', content: 'Latest Bite 2' },
       ];
 
-      const result = dedupMerge(bites as any, latestBites as any);
+      const result = dedupMerge(
+        bites as unknown as Parameters<typeof dedupMerge>[0],
+        latestBites as unknown as Parameters<typeof dedupMerge>[1],
+      );
 
       expect(result).toEqual([...latestBites, ...bites]);
     });
@@ -29,7 +32,10 @@ describe('replaceWithLatestBites', () => {
         { id: '3', content: 'Latest Bite 1' },
       ];
 
-      const result = dedupMerge(bites as any, latestBites as any);
+      const result = dedupMerge(
+        bites as unknown as Parameters<typeof dedupMerge>[0],
+        latestBites as unknown as Parameters<typeof dedupMerge>[1],
+      );
 
       expect(result).toEqual([
         { id: '2', content: 'Latest Bite 2' },

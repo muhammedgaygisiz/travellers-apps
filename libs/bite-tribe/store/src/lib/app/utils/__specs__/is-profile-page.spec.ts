@@ -3,7 +3,7 @@ import { routerNavigatedAction } from '@ngrx/router-store';
 import { createEffect, ofType } from '@ngrx/effects';
 import { isProfilePage } from '../is-profile-page';
 
-const assertEqual = (a: any, b: any): void => {
+const assertEqual = (a: unknown, b: unknown): void => {
   expect(a).toEqual(b);
 };
 
@@ -20,7 +20,7 @@ describe('isProfilePage', () => {
         scheduler.run(({ expectObservable, cold }) => {
           const sourceEvent = routerNavigatedAction({
             payload: { event: { urlAfterRedirects: '/profile/123' } },
-          } as any);
+          } as unknown as Parameters<typeof routerNavigatedAction>[0]);
           const action$ = cold('a', {
             a: sourceEvent,
           });
@@ -41,7 +41,7 @@ describe('isProfilePage', () => {
         scheduler.run(({ expectObservable, cold }) => {
           const sourceEvent = routerNavigatedAction({
             payload: { event: { urlAfterRedirects: '/my-profile' } },
-          } as any);
+          } as unknown as Parameters<typeof routerNavigatedAction>[0]);
           const action$ = cold('a', {
             a: sourceEvent,
           });
@@ -62,7 +62,7 @@ describe('isProfilePage', () => {
         scheduler.run(({ expectObservable, cold }) => {
           const sourceEvent = routerNavigatedAction({
             payload: { event: { urlAfterRedirects: '/home' } },
-          } as any);
+          } as unknown as Parameters<typeof routerNavigatedAction>[0]);
           const action$ = cold('a', {
             a: sourceEvent,
           });

@@ -1,4 +1,5 @@
 import { Environment, getMetaReducers, STORE_SERVICE } from 'utils';
+import type { EnvironmentProviders, Provider } from '@angular/core';
 import { Action, provideState, provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import {
@@ -36,6 +37,19 @@ import { fromBucketlists } from './bucketlists';
 import { ServiceWorkerEffects } from './service-worker/effects';
 import { fromFilteringAndSorting } from './filtering-and-sorting';
 import { FilteringAndSortingEffects } from './filtering-and-sorting/effects';
+import type { Restaurant } from 'model';
+
+type ActionSanitizer = (action: Action, id: number) => Action;
+
+interface SanitizableRestaurantState {
+  ids: string[];
+  entities: Record<string, Restaurant | undefined>;
+}
+
+interface SanitizableState {
+  restaurants?: SanitizableRestaurantState;
+  [key: string]: unknown;
+}
 
 const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   apiKey: process.env['NX_APP_BITE_TRIBE_API_KEY'],
@@ -49,15 +63,19 @@ const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
   appId: process.env['NX_APP_BITE_TRIBE_APP_ID'],
 });
 
-const actionSanitizer: any = (action: Action) => {
+const isLoadedRestaurantsAction = (
+  action: Action,
+): action is ReturnType<typeof loadedRestaurantsFromApi> =>
+  action.type === loadedRestaurantsFromApi.type;
+
+const actionSanitizer: ActionSanitizer = (action) => {
   const isLoadedRestaurantsWithData =
-    action.type === loadedRestaurantsFromApi.type &&
-    (action as any).restaurants.length > 0;
+    isLoadedRestaurantsAction(action) && action.restaurants.length > 0;
 
   if (isLoadedRestaurantsWithData) {
     return {
       ...action,
-      restaurants: (action as any).restaurants.map((restaurant: any) => ({
+      restaurants: action.restaurants.map((restaurant) => ({
         ...restaurant,
         image: restaurant.image ? '...' : null,
       })),
@@ -67,16 +85,25 @@ const actionSanitizer: any = (action: Action) => {
   return action;
 };
 
-const stateSanitizer: any = (state: any) => {
-  let sanitizedState = { ...state };
+const isSanitizableState = (state: unknown): state is SanitizableState =>
+  typeof state === 'object' && state !== null;
 
-  if (state.restaurants?.ids.length > 0) {
-    sanitizedState = {
+const stateSanitizer = (state: unknown): unknown => {
+  if (!isSanitizableState(state)) {
+    return state;
+  }
+
+  if (state.restaurants && state.restaurants.ids.length > 0) {
+    return {
       ...state,
       restaurants: {
         ...state.restaurants,
         entities: state.restaurants.ids.map((id: string) => {
-          const restaurant = state.restaurants.entities[id];
+          const restaurant = state.restaurants?.entities[id];
+          if (!restaurant) {
+            return restaurant;
+          }
+
           return {
             ...restaurant,
             image: restaurant.image ? '...' : restaurant.image, // Sanitize image data
@@ -84,14 +111,14 @@ const stateSanitizer: any = (state: any) => {
         }),
       },
     };
-
-    return sanitizedState;
   }
 
-  return sanitizedState;
+  return { ...state };
 };
 
-export const provideBiteTribeStore = (environment: Environment): any => [
+export const provideBiteTribeStore = (
+  environment: Environment,
+): Array<Provider | EnvironmentProviders | []> => [
   { provide: STORE_SERVICE, useClass: BiteTribeStoreService },
   provideStore(
     { router: routerReducer },

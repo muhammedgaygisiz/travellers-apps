@@ -184,11 +184,11 @@ export class BiteTribeStoreService implements StoreService {
     );
   }
 
-  saveNewRestaurant(entity: any): void {
+  saveNewRestaurant(entity: Restaurant): void {
     this.store.dispatch(saveNewRestaurant({ restaurant: entity }));
   }
 
-  saveEditedBite(entity: any): void {
+  saveEditedBite(entity: Bite): void {
     this.store.dispatch(BiteActions.saveExistingBite({ bite: entity }));
   }
 

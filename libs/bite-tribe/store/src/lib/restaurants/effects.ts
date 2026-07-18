@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { filter, from, map, skipWhile, switchMap, tap } from 'rxjs';
+import { filter, from, map, switchMap, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { restaurantId } from '../router/selectors';
 import {

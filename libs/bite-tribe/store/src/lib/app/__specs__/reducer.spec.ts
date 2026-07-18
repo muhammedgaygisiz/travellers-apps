@@ -274,7 +274,9 @@ describe('App Reducer', () => {
         },
       } as AppSlice;
 
-      const action = routerRequestAction({} as any);
+      const action = routerRequestAction(
+        {} as unknown as Parameters<typeof routerRequestAction>[0],
+      );
 
       expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
     });

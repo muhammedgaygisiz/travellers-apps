@@ -1,5 +1,4 @@
 import { Bite } from 'model';
-import { getBitesByRestaurantIdOrName } from './get-bites-by-restaurant-id-or-name';
 import { normalize, getSimilarityScore } from 'utils';
 import { isSimilar } from './is-similar';
 

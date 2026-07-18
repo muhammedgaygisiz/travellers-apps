@@ -5,7 +5,7 @@ import { routerNavigatedAction } from '@ngrx/router-store';
 import { tap } from 'rxjs';
 import { BucketlistActions } from '../../actions';
 
-const assertEqual = (a: any, b: any): void => {
+const assertEqual = (a: unknown, b: unknown): void => {
   expect(a).toEqual(b);
 };
 
@@ -23,7 +23,7 @@ describe('shouldLoadBucketlists', () => {
           event: {
             urlAfterRedirects: '/my-bucketlists',
           },
-        } as any,
+        } as unknown as Parameters<typeof routerNavigatedAction>[0]['payload'],
       });
 
       it('should return true', () => {
@@ -53,7 +53,9 @@ describe('shouldLoadBucketlists', () => {
             event: {
               urlAfterRedirects: '/bite/123',
             },
-          } as any,
+          } as unknown as Parameters<
+            typeof routerNavigatedAction
+          >[0]['payload'],
         });
 
         it('should return true', () => {
@@ -82,7 +84,9 @@ describe('shouldLoadBucketlists', () => {
             event: {
               urlAfterRedirects: '/bite/123/restaurant/456',
             },
-          } as any,
+          } as unknown as Parameters<
+            typeof routerNavigatedAction
+          >[0]['payload'],
         });
 
         it('should return false', () => {
@@ -133,7 +137,9 @@ describe('shouldLoadBucketlists', () => {
 
   describe('given a savedBiteToBucketlist', () => {
     const ACTION = BucketlistActions.savedBiteToBucketlist({
-      bucketlist: {} as any,
+      bucketlist: {} as unknown as Parameters<
+        typeof BucketlistActions.savedBiteToBucketlist
+      >[0]['bucketlist'],
     });
 
     it('should return true', () => {

@@ -3,4 +3,4 @@ import type { Review } from 'model';
 
 export const adapter = createEntityAdapter<Review>();
 
-export const initialState: EntityState<any> = adapter.getInitialState();
+export const initialState: EntityState<Review> = adapter.getInitialState();

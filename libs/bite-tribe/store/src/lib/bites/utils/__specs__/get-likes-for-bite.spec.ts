@@ -3,12 +3,17 @@ import type { Bite, Like } from 'model';
 
 describe('getLikesForBite', () => {
   it('should return an empty array if likes is undefined', () => {
-    const result = getLikesForBite(undefined, { id: '1' } as any);
+    const result = getLikesForBite(undefined, {
+      id: '1',
+    } as unknown as Parameters<typeof getLikesForBite>[1]);
     expect(result).toEqual([]);
   });
 
   it('should return an empty array if bite is undefined', () => {
-    const result = getLikesForBite([], undefined as any);
+    const result = getLikesForBite(
+      [],
+      undefined as unknown as Parameters<typeof getLikesForBite>[1],
+    );
     expect(result).toEqual([]);
   });
 

@@ -40,8 +40,7 @@ export const withBites: Story = {
         name: 'Botanic Breeze',
         image: '',
         price: 0,
-        imagePath:
-          'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2F5RaqIaqErWatltveDVAf%2Fd37622f5-1423-43ea-a16e-f64d71b8b08e.jpg?alt=media&token=8f22c176-6680-424e-97fa-09864cfe30a2',
+        imagePath: 'assets/demo/bite-demo.png',
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
@@ -59,8 +58,7 @@ export const withBites: Story = {
         distance: '0.62',
         place: 'Altes Tramdepot',
         rating: 0,
-        imagePath:
-          'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2FVTVuwUoOTFqrN3VRnwOO%2F0809ff1d-09cd-4e21-a7b3-b17ba912e060.jpg?alt=media&token=aa72c9d3-e8c6-4d4c-8a6d-ed37947e99fe',
+        imagePath: 'assets/demo/bite-demo.png',
         id: 'VTVuwUoOTFqrN3VRnwOO',
         likes: [],
         name: 'Brausmeisterplatte',

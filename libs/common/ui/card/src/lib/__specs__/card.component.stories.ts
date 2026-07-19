@@ -19,7 +19,7 @@ export const Example: Story = {
   args: {
     entry: {
       id: 'some-id',
-      src: 'https://upload.wikimedia.org/wikipedia/commons/9/9e/Autumn_Red_peaches.jpg',
+      src: 'assets/demo/bite-demo.png',
       name: 'Peaches',
       price: 0.2,
     },

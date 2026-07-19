@@ -33,8 +33,7 @@ export const MyBites: Story = {
       {
         id: '1',
         name: 'Botanic Breeze',
-        imagePath:
-          'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2F5RaqIaqErWatltveDVAf%2Fd37622f5-1423-43ea-a16e-f64d71b8b08e.jpg?alt=media&token=8f22c176-6680-424e-97fa-09864cfe30a2',
+        imagePath: 'assets/demo/bite-demo.png',
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
@@ -43,8 +42,7 @@ export const MyBites: Story = {
       {
         id: '2',
         name: 'Botanic Breeze',
-        imagePath:
-          'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2F5RaqIaqErWatltveDVAf%2Fd37622f5-1423-43ea-a16e-f64d71b8b08e.jpg?alt=media&token=8f22c176-6680-424e-97fa-09864cfe30a2',
+        imagePath: 'assets/demo/bite-demo.png',
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
@@ -53,8 +51,7 @@ export const MyBites: Story = {
       {
         id: '3',
         name: 'Botanic Breeze',
-        imagePath:
-          'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2F5RaqIaqErWatltveDVAf%2Fd37622f5-1423-43ea-a16e-f64d71b8b08e.jpg?alt=media&token=8f22c176-6680-424e-97fa-09864cfe30a2',
+        imagePath: 'assets/demo/bite-demo.png',
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
@@ -63,8 +60,7 @@ export const MyBites: Story = {
       {
         id: '4',
         name: 'Botanic Breeze',
-        imagePath:
-          'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2F5RaqIaqErWatltveDVAf%2Fd37622f5-1423-43ea-a16e-f64d71b8b08e.jpg?alt=media&token=8f22c176-6680-424e-97fa-09864cfe30a2',
+        imagePath: 'assets/demo/bite-demo.png',
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
@@ -73,8 +69,7 @@ export const MyBites: Story = {
       {
         id: '5',
         name: 'Botanic Breeze',
-        imagePath:
-          'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2F5RaqIaqErWatltveDVAf%2Fd37622f5-1423-43ea-a16e-f64d71b8b08e.jpg?alt=media&token=8f22c176-6680-424e-97fa-09864cfe30a2',
+        imagePath: 'assets/demo/bite-demo.png',
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,
@@ -83,8 +78,7 @@ export const MyBites: Story = {
       {
         id: '6',
         name: 'Botanic Breeze',
-        imagePath:
-          'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2F5RaqIaqErWatltveDVAf%2Fd37622f5-1423-43ea-a16e-f64d71b8b08e.jpg?alt=media&token=8f22c176-6680-424e-97fa-09864cfe30a2',
+        imagePath: 'assets/demo/bite-demo.png',
         place: 'Einstein au Jardin',
         distance: '0.6',
         rating: 3,

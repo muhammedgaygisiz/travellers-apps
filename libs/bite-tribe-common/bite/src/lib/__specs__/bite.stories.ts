@@ -11,8 +11,11 @@ import { IonButton, provideIonicAngular } from '@ionic/angular/standalone';
 import { BiteSkeletonListComponent } from '../bite-skeleton-list/bite-skeleton-list.component';
 import { Bite as BiteModel } from 'model';
 
-const PEACH_IMAGE =
-  'https://upload.wikimedia.org/wikipedia/commons/9/9e/Autumn_Red_peaches.jpg';
+// Local, bundled demo image served from the Storybook static build's /assets
+// dir. Visual-regression references must not depend on live third-party images
+// (Wikimedia, Firebase Storage, ...), which load nondeterministically inside the
+// Loki docker Chrome and otherwise leave the card photo blank on a failed fetch.
+const PEACH_IMAGE = 'assets/demo/bite-demo.png';
 
 const demoBiteBase: BiteModel = {
   id: 'bite1',

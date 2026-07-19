@@ -120,6 +120,13 @@ export const NewUserEmptyProfile: Story = {
   },
 };
 
+// This story covers how a long list of flags wraps, so the specific countries
+// are arbitrary padding. Keep them to flat-colour, straight-edged flags: the
+// emblem-bearing ones (Portugal's armillary sphere, Cambodia's Angkor Wat)
+// rasterize fine white line-art into a ~25x19px box, where a sub-pixel
+// difference between renderers swings a pixel clean across a colour boundary
+// and exceeds any sane `chromeTolerance`. They were the sole cause of this
+// story's visual-regression failures.
 export const WithManyFlags: Story = {
   args: {
     user: {
@@ -129,13 +136,13 @@ export const WithManyFlags: Story = {
         'CH',
         'TR',
         'ES',
-        'PT',
+        'NL',
         'PS',
         'TN',
         'TH',
         'JP',
         'VN',
-        'KH',
+        'AT',
         'IT',
         'HK',
         'FR',

@@ -16,7 +16,7 @@ import {
   IonToggle,
 } from '@ionic/angular/standalone';
 import type { MenuItem } from 'model';
-import { Field, form, min, required } from '@angular/forms/signals';
+import { FormField, form, min, required } from '@angular/forms/signals';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
@@ -29,7 +29,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     IonList,
     IonItem,
     IonToggle,
-    Field,
+    FormField,
     TranslocoPipe,
   ],
   selector: 'business-menu-variant',

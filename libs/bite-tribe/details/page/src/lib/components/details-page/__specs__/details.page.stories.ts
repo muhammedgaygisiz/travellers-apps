@@ -27,8 +27,7 @@ export const Default: Story = {
     bite: {
       id: 'botanic-breeze',
       image: '',
-      imagePath:
-        'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2F5RaqIaqErWatltveDVAf%2Fd37622f5-1423-43ea-a16e-f64d71b8b08e.jpg?alt=media&token=8f22c176-6680-424e-97fa-09864cfe30a2',
+      imagePath: 'assets/demo/bite-demo.png',
       name: 'Botanic Breeze',
       rating: 3,
       place: 'Einstein au Jardin',
@@ -47,8 +46,7 @@ export const Default: Story = {
     biteCreator: {
       userId: '1',
       displayName: 'Mo',
-      photoUrl:
-        'https://lh3.googleusercontent.com/a/ACg8ocKHFN9hwLoWCBJfmCvVTe7e52JATaD9YpcXPwQ6ucMTEiqOuarL=s96-c',
+      photoUrl: 'assets/demo/avatar-demo.png',
     } as PublicUser,
     position: {
       timestamp: Date.now(),

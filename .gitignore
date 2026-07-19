@@ -67,3 +67,6 @@ ssot/logseq/bak/
 # Analytics service-account credentials (never commit keys)
 service-account*.json
 *-service-account.json
+
+.nx/polygraph
+.nx/self-healing

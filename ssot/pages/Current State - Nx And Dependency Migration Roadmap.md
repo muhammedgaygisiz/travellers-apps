@@ -21,18 +21,18 @@ The goal is to improve project-graph reliability and keep the toolchain supporte
 
 ## Current Baseline
 
-As of 18 July 2026:
+As of 19 July 2026:
 
-| Area                | Current State                                                    | Migration Relevance                                                    |
-| ------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Nx                  | `22.3.3` across the official top-level packages                  | Upgrade through the latest 22.7 release before Nx 23.                  |
-| Angular             | `21.0.x`                                                         | Supported by Nx 23; retain during the Nx migration.                    |
-| TypeScript          | `5.9.3`                                                          | Correct for Angular 21; retain until Angular 22.                       |
+| Area                | Current State                                                                                     | Migration Relevance                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Nx                  | `22.7.7` across the official top-level packages (issue #1035)                                     | Phase 1 complete; next boundary is Nx 23.                                                          |
+| Angular             | `21.0.x`                                                                                          | Supported by Nx 23; retain during the Nx migration.                                                |
+| TypeScript          | `5.9.3`                                                                                           | Correct for Angular 21; retain until Angular 22.                                                   |
 | Node.js             | Pinned to `24.15.0`+ (`24.18.0`) via `.nvmrc`, `package.json` engines, and CI `node-version-file` | Aligned and pinned (issue #1030); inside the supported Node 24 line for Nx 22.7/23 and Angular 21. |
-| NgRx                | `21.0.1`                                                         | Stable NgRx 21 requires Angular 21, so it currently blocks Angular 22. |
-| Capacitor Nx plugin | `@nxext/capacitor@21.0.0`                                        | Loads Nx 21 internally; upgrade to v23 with Nx 23.                     |
-| Visual regression   | `loki@0.35.1` invoked directly via repository scripts; `nx-loki` removed | Nx adapter removed (issue #1040); Loki now runs through `loki.config.js`. |
-| E2E                 | Playwright consumer suite; legacy Cypress business project removed | Cypress removed; place all E2E coverage in Playwright.                |
+| NgRx                | `21.0.1`                                                                                          | Stable NgRx 21 requires Angular 21, so it currently blocks Angular 22.                             |
+| Capacitor Nx plugin | `@nxext/capacitor@21.0.0`                                                                         | Loads Nx 21 internally; upgrade to v23 with Nx 23.                                                 |
+| Visual regression   | `loki@0.35.1` invoked directly via repository scripts; `nx-loki` removed                          | Nx adapter removed (issue #1040); Loki now runs through `loki.config.js`.                          |
+| E2E                 | Playwright consumer suite; legacy Cypress business project removed                                | Cypress removed; place all E2E coverage in Playwright.                                             |
 
 The installed dependency tree still contains multiple Nx generations because `@nxext/capacitor` loads Nx 21 (the `nx-loki` adapter, which loaded an older Nx Devkit, has been removed). This is a project-graph risk, but it is not yet proven to be the sole cause of silent Nx startup or graph stalls.
 
@@ -83,12 +83,12 @@ Status: complete (issue #1030). The steps below are done; keep them for context.
 
 Package-tree audit under Node `24.18.0` records the following non-official Nx / older-Devkit loaders and their keep/upgrade/remove decisions:
 
-| Package | Installed | Older generation it loads | Decision |
-| ------- | --------- | ------------------------- | -------- |
-| `@nxext/capacitor` | `21.0.0` | nested `nx@21.6.10` + `@nx/devkit@21.6.10` (hard peer `nx@^21`); also pulls transitive `@nxext/common@21.0.0` with the same nested Nx 21 | Upgrade to `@nxext/capacitor@23` in Phase 2 (issue #1033) so it loads Nx 23; do not upgrade independently. |
-| `@ionic/angular-toolkit` | `12.3.0` | nested `@angular-devkit/core@20.3.20` (peer `@angular-devkit/*@^20`), one generation behind the workspace's `21.0.4` | Keep; schematics-only, not an application runtime dependency. Validate generators before any Angular major bump; do not upgrade blindly. |
-| `nx-stylelint` | `18.0.0` | none nested (peer `@nx/devkit >=19` satisfied by the hoisted `@nx/devkit@22.3.3`) | Keep with the Stylelint 16 configuration until the dedicated Stylelint migration track. |
-| `nx-mcp` | `0.3.0` | none (no `nx`/`@nx` dependency; no repository MCP config references it) | Keep pinned as an optional developer aid; confirm intentional use before upgrading, do not upgrade merely because a newer version exists. |
+| Package                  | Installed | Older generation it loads                                                                                                                | Decision                                                                                                                                  |
+| ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `@nxext/capacitor`       | `21.0.0`  | nested `nx@21.6.10` + `@nx/devkit@21.6.10` (hard peer `nx@^21`); also pulls transitive `@nxext/common@21.0.0` with the same nested Nx 21 | Upgrade to `@nxext/capacitor@23` in Phase 2 (issue #1033) so it loads Nx 23; do not upgrade independently.                                |
+| `@ionic/angular-toolkit` | `12.3.0`  | nested `@angular-devkit/core@20.3.20` (peer `@angular-devkit/*@^20`), one generation behind the workspace's `21.0.4`                     | Keep; schematics-only, not an application runtime dependency. Validate generators before any Angular major bump; do not upgrade blindly.  |
+| `nx-stylelint`           | `18.0.0`  | none nested (peer `@nx/devkit >=19` satisfied by the hoisted `@nx/devkit@22.3.3`)                                                        | Keep with the Stylelint 16 configuration until the dedicated Stylelint migration track.                                                   |
+| `nx-mcp`                 | `0.3.0`   | none (no `nx`/`@nx` dependency; no repository MCP config references it)                                                                  | Keep pinned as an optional developer aid; confirm intentional use before upgrading, do not upgrade merely because a newer version exists. |
 
 Only `@nxext/capacitor`/`@nxext/common` (Nx 21) and `@ionic/angular-toolkit` (Angular Devkit 20) load an older generation; both have explicit follow-up decisions. Multiple Nx generations therefore remain in the tree solely because of `@nxext/capacitor`, which is the documented project-graph risk resolved in Phase 2.
 
@@ -103,6 +103,8 @@ Only `@nxext/capacitor`/`@nxext/common` (Nx 21) and `@ionic/angular-toolkit` (An
 - No `nx-loki` dependency, plugin registration, script, or workflow invocation remains outside historical changelog pages.
 
 ## Phase 1 - Stabilize On Nx 22.7
+
+Status: complete (issue #1035). `nx` and every official `@nx/*` package are aligned on `22.7.7`. `nx migrate 22.7.7` generated only Nx-scoped migrations (gitignore/prettierignore entries for `.nx/polygraph` and `.nx/self-healing`, and `@nx/eslint:lint` executor input defaults in `nx.json`); no inferred-task conversion. The Angular 21.0.x -> 21.2.x, `angular-eslint`, and other ecosystem bumps that `nx migrate` proposed were reverted and left for their dedicated Phase 3 tracks. The Nx-coupled `@swc/*` build-tooling bumps were kept. Angular 21.0.x, TypeScript 5.9.3, and `@nxext/capacitor@21` are unchanged.
 
 - Upgrade `nx` and every official `@nx/*` package from `22.3.3` to the same latest `22.7.x` version.
 - Run all generated Nx migrations before continuing.
@@ -128,6 +130,8 @@ Expected benefits relevant to this workspace:
 - Storybook build and direct Loki tests pass.
 - Playwright E2E passes serially.
 - Capacitor doctor/sync and the relevant native builds pass.
+
+Validation run for issue #1035 (Node 24.13.0 locally; the repo pins 24.18.0): `nx report` and `nx show projects` (88 projects, unchanged set) and file-based graph generation completed with no stall; `bite-tribe` and `bite-tribe-business` production builds passed; focused Jest (`bite-tribe/bite-data-access`, `common-ui-card`) passed through Nx and directly through Jest; the Firebase Functions `tsc` build passed and the project's real lint (`npm run lint` inside `apps/bite-tribe-firebase/functions`) is clean; the Storybook host build passed; `bite-tribe` and `bite-tribe-business` flat-config lint passed; `git diff --check` is clean. The inferred `nx lint bite-tribe-firebase` phantom problems remain the pre-existing known issue tracked in [[Current State - Known Issues]] and are unaffected by the Nx version. Playwright E2E, direct Loki visual tests, and Capacitor sync/native builds were deferred to CI/device runs because they need emulators, reference images, and native toolchains.
 
 ## Phase 2 - Upgrade To Nx 23.1
 

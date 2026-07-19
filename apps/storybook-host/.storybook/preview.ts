@@ -8,11 +8,25 @@ import {
 import { INITIAL_VIEWPORTS } from 'storybook/viewport';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTransloco } from '@jsverse/transloco';
+import {
+  TILE_LAYER_FACTORY,
+  createBlankTileLayer,
+  createOpenstreetmapLayer,
+} from 'bite-tribe-common/map';
 import { TranslocoHttpLoader } from './transloco-loader';
 // Re-exposes the story-store API that direct oblador/loki needs on Storybook 10.
 import './loki-getstories-shim';
 
 const LOCALE_STORAGE_KEY = 'storybook-active-locale';
+
+// Loki sets `window.loki.isRunning` before the story loads (see
+// @loki/target-chrome-core). Under Loki the map must render a deterministic
+// blank tile layer instead of live OpenStreetMap tiles, which are blocked/flaky
+// and non-deterministic in the docker Chrome. Manual Storybook keeps real tiles.
+type LokiWindow = Window & { loki?: { isRunning?: boolean } };
+
+const isRunningUnderLoki = (): boolean =>
+  Boolean((window as LokiWindow).loki?.isRunning);
 
 const IPHONE = 'iphone14';
 
@@ -52,6 +66,13 @@ const withLocale: Decorator = (storyFn, context): ReturnType<StoryFn> => {
         },
         loader: TranslocoHttpLoader,
       }),
+      {
+        provide: TILE_LAYER_FACTORY,
+        useValue: () =>
+          isRunningUnderLoki()
+            ? createBlankTileLayer()
+            : createOpenstreetmapLayer(),
+      },
     ],
   })(storyFn, context);
 };

@@ -24,8 +24,7 @@ type Story = StoryObj<RestaurantComponent>;
 
 const verifiedBites: Bite[] = [
   {
-    imagePath:
-      'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2F5RaqIaqErWatltveDVAf%2Fd37622f5-1423-43ea-a16e-f64d71b8b08e.jpg?alt=media&token=8f22c176-6680-424e-97fa-09864cfe30a2',
+    imagePath: 'assets/demo/bite-demo.png',
     name: 'Botanic Breeze',
     place: 'Einstein au Jardin',
     rating: 3,
@@ -35,8 +34,7 @@ const verifiedBites: Bite[] = [
     currency: 'CHF',
   } as unknown as Bite,
   {
-    imagePath:
-      'https://firebasestorage.googleapis.com/v0/b/bite-tribe.firebasestorage.app/o/images%2Fbites%2FjYmma48ToHXcsb3z8NpV%2F74e139dd-86f2-450c-bfd5-e9f974f0c1bf.jpg?alt=media&token=a3ae7571-8247-474a-acde-ad46e286890a',
+    imagePath: 'assets/demo/bite-demo.png',
     name: 'Aperol Spritz',
     place: 'Einstein au Jardin',
     distance: '0.6',

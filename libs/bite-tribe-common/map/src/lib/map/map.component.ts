@@ -6,6 +6,7 @@ import {
   computed,
   effect,
   ElementRef,
+  inject,
   input,
   OnDestroy,
   output,
@@ -20,7 +21,7 @@ import { clearMarkers } from './utils/clear-markers';
 import { geopointsToMarkers } from './utils/geopoints-to-markers';
 import { zoomToGeopoint } from './utils/zoom-to-geopoint';
 import { createMap } from './utils/create-map';
-import { createOpenstreetmapLayer } from './utils/create-openstreetmap-layer';
+import { TILE_LAYER_FACTORY } from './tile-layer.token';
 import { zoomToMarkers } from './utils/zoom-to-markers';
 import { focusMarker } from './utils/focus-marker';
 
@@ -54,6 +55,7 @@ export class MapComponent implements OnDestroy {
   clickOnMarker = output<Geopoint | undefined>();
   gpsPosition = input<Geopoint | null | undefined>();
 
+  private readonly createTileLayer = inject(TILE_LAYER_FACTORY);
   private map!: L.Map;
   private markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup();
   private markers: L.Marker[] = [];
@@ -74,7 +76,7 @@ export class MapComponent implements OnDestroy {
     }
 
     this.map = createMap(mapElement, this.enableZoom(), this.dragging());
-    createOpenstreetmapLayer().addTo(this.map);
+    this.createTileLayer().addTo(this.map);
 
     const gpsPosition = this.gpsPosition();
     const geopoints = this.cleanUpPoints();

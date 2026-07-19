@@ -15,7 +15,7 @@ import {
 } from 'bite-tribe-common/map';
 import { TranslocoHttpLoader } from './transloco-loader';
 // Re-exposes the story-store API that direct oblador/loki needs on Storybook 10.
-import './loki-getstories-shim';
+import { registerLokiSettle } from './loki-getstories-shim';
 
 const LOCALE_STORAGE_KEY = 'storybook-active-locale';
 
@@ -92,7 +92,15 @@ const parameters = {
   },
 };
 
+// Registered per story render so Loki waits for deferred content (Angular
+// `@defer` with a `@placeholder (minimum ...)`) and images before capturing.
+const withLokiSettle: Decorator = (storyFn, context): ReturnType<StoryFn> => {
+  registerLokiSettle();
+  return storyFn(context);
+};
+
 const decorators = [
+  withLokiSettle,
   withLocale,
   componentWrapperDecorator((story) => {
     setNxGraphIframeHeight();

@@ -22,4 +22,5 @@
   - TypeScript stays `5.9.3` and `zone.js` stays `0.16.0`. No Angular 22 or TypeScript 6 direct dependency.
   - Angular 21.2 renamed the signal-forms `Field` directive to `FormField`; the three `libs/bite-tribe-business/edit-menu` components and templates were updated.
   - Ionic `8.7.18`+ patches `childNodes`/`textContent` under jsdom, which required reworking one snapshot and two `textContent` assertions. Browser behavior is unaffected. See [[Current State - Known Issues]].
+  - Direct Loki visual regression was flaky on the restaurant `@defer` image stories, and seven references had been approved in the skeleton state. Root-caused to a capture race (not an Angular/Ionic regression) and fixed with a per-story settle gate; three consecutive full runs are now clean.
   - Details and the validation run are recorded in [[Current State - Nx And Dependency Migration Roadmap]].

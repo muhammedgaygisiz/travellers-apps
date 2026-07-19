@@ -21,7 +21,7 @@ import { BusinessMenuVariantComponent } from '../business-menu-item-editor/busin
 import { BusinessMenuItemComponent } from '../business-menu-item/business-menu-item.component';
 import { ItemReorderEventDetail } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { debounce, Field, form, required } from '@angular/forms/signals';
+import { debounce, FormField, form, required } from '@angular/forms/signals';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,7 +38,7 @@ import { debounce, Field, form, required } from '@angular/forms/signals';
     FormsModule,
     IonInput,
     ReactiveFormsModule,
-    Field,
+    FormField,
   ],
   selector: 'business-category',
 })

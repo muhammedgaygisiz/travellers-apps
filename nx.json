@@ -113,5 +113,6 @@
     "@nx/angular:component": {
       "style": "css"
     }
-  }
+  },
+  "analytics": false
 }

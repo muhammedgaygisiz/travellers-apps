@@ -8,8 +8,7 @@ addNecessaryIcons();
 
 const restaurantWithImage: Restaurant = {
   name: 'China Wok',
-  imagePath:
-    'https://upload.wikimedia.org/wikipedia/commons/9/9e/Autumn_Red_peaches.jpg',
+  imagePath: 'assets/demo/bite-demo.png',
 } as Restaurant;
 
 export default {

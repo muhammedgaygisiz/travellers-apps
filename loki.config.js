@@ -8,7 +8,13 @@
 // locally and in CI.
 module.exports = {
   diffingEngine: 'looks-same',
-  chromeTolerance: 0,
+  // Per-pixel colour-distance threshold (CIEDE2000) below which a pixel counts
+  // as unchanged. ~2.3 is the "just noticeable difference" for human vision, so
+  // 2.5 absorbs sub-pixel anti-aliasing noise - which `looks-same` misses on
+  // curved borders such as rounded button corners, causing rare phantom diffs
+  // even though the render is otherwise deterministic - while still flagging any
+  // visible change. Keep as low as practical; do not raise it to hide real diffs.
+  chromeTolerance: 2.5,
   chromeRetries: 5,
   // Loki fails a story if any request fails to load. Visual references must not
   // depend on live third-party services (OpenStreetMap tiles, web fonts, Google

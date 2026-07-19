@@ -110,62 +110,40 @@ jobs:
           fail_ci_if_error: false # optional (default = false)
           verbose: false # optional (default = false)
 
-  #build-storybooks:
-  #  runs-on: ubuntu-latest
-  #  needs:
-  #    - tests
-  #
-  #  steps:
-  #    - name: Checkout repository
-  #      uses: actions/checkout@v5
-  #      with:
-  #        fetch-depth: 0 # Fetch all history for all branches and tags
-  #
-  #    - name: "Restore Cache"
-  #      uses: ./.github/actions/restore-cache
-  #
-  #    - name: "Setup env"
-  #      uses: ./.github/actions/setup-env-for-affected
-  #
-  #    - run: npm run nx -- affected -t build-storybook --configuration=ci
-  #
-  #    - name: Cache Storybook Builds
-  #      uses: actions/cache@v5
-  #      with:
-  #        path: dist/storybook
-  #        key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
+  loki:
+    runs-on: ubuntu-latest
+    needs:
+      - tests
 
-  #loki:
-  #  runs-on: ubuntu-latest
-  #  continue-on-error: true
-  #  needs:
-  #    - build-storybooks
-  #
-  #  steps:
-  #    - name: Checkout repository
-  #      uses: actions/checkout@v5
-  #      with:
-  #        fetch-depth: 0 # Fetch all history for all branches and tags
-  #
-  #    - name: "Restore Cache"
-  #      uses: ./.github/actions/restore-cache
-  #
-  #    - name: "Setup env"
-  #      uses: ./.github/actions/setup-env-for-affected
-  #
-  #    - uses: actions/cache/restore@v5
-  #      with:
-  #        path: dist/storybook/xxx
-  #        key: storybooks-${{ hashFiles('**/**/*.stories.*') }}
-  #
-  #    - run: npm run loki:test
-  #
-  #    - name: Upload xxx Diffs
-  #      uses: actions/upload-artifact@v4
-  #      if: failure()
-  #      with:
-  #        name: loki-diffs
-  #        path: .loki/difference
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+
+      - name: 'Restore Cache'
+        uses: ./.github/actions/restore-cache
+
+      # Build the static Storybook (dist/storybook/storybook-host) the same way
+      # as the manual Loki reference-update workflow, so captures match the
+      # committed references.
+      - name: Build Storybook
+        run: npm run build:storybook
+
+      # Run the full visual-regression suite through the upstream oblador/loki
+      # CLI (tools/loki.mjs) against the committed .loki/reference images. Loki
+      # drives a headless Chrome inside Docker, which is available on
+      # ubuntu-latest. A visual diff fails the job (blocking check).
+      - name: Run Loki visual tests
+        run: npm run loki:test
+
+      - name: Upload Loki diffs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: loki-diffs
+          path: .loki/difference
+          retention-days: 7
 
   e2e:
     runs-on: ubuntu-latest
@@ -218,6 +196,69 @@ jobs:
           name: playwright-report
           path: dist/.playwright/apps/bite-tribe-e2e
           retention-days: 7
+
+  # Surfaces the e2e and Loki outcomes on the PR as a single sticky comment.
+  # Runs after both regardless of their result so a failure is still reported.
+  report:
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    needs:
+      - e2e
+      - loki
+
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Post e2e and Loki results to the PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = {
+              e2e: '${{ needs.e2e.result }}',
+              loki: '${{ needs.loki.result }}',
+            };
+            const icon = (r) =>
+              r === 'success'
+                ? '✅ passed'
+                : r === 'failure'
+                  ? '❌ failed'
+                  : `⚠️ ${r}`;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const marker = '<!-- ci-e2e-visual-results -->';
+            const body = [
+              marker,
+              '### E2E & visual regression',
+              '',
+              '| Check | Result |',
+              '| --- | --- |',
+              `| E2E (Playwright) | ${icon(results.e2e)} |`,
+              `| Visual regression (Loki) | ${icon(results.loki)} |`,
+              '',
+              `Artifacts on the [workflow run](${runUrl}): \`playwright-report\`, plus \`loki-diffs\` when Loki finds visual changes.`,
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
 
   # Bite Tribe
 

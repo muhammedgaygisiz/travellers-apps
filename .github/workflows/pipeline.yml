@@ -58,6 +58,9 @@ jobs:
       - name: 'Setup env'
         uses: ./.github/actions/setup-env-for-affected
 
+      - name: 'Nx cache'
+        uses: ./.github/actions/nx-cache
+
       - name: Run Linter
         run: npm run nx -- affected -t lint
 
@@ -78,6 +81,9 @@ jobs:
       - name: 'Setup env'
         uses: ./.github/actions/setup-env-for-affected
 
+      - name: 'Nx cache'
+        uses: ./.github/actions/nx-cache
+
       - name: Run Stylelint
         run: npm run nx -- affected -t stylelint
 
@@ -97,6 +103,9 @@ jobs:
 
       - name: 'Setup env'
         uses: ./.github/actions/setup-env-for-affected
+
+      - name: 'Nx cache'
+        uses: ./.github/actions/nx-cache
 
       - name: Run Unit Tests
         run: npm run nx -- affected -t test --coverage --coverageReporters=cobertura
@@ -276,6 +285,9 @@ jobs:
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
+      - name: 'Nx cache'
+        uses: ./.github/actions/nx-cache
+
       - name: Build Bite Tribe App
         run: npm run nx -- build bite-tribe
 
@@ -331,6 +343,9 @@ jobs:
 
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
+
+      - name: 'Nx cache'
+        uses: ./.github/actions/nx-cache
 
       - name: Build Bite Tribe Business App
         run: npm run nx -- build bite-tribe-business

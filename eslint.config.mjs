@@ -104,7 +104,6 @@ export default [
     files: ['*.js', '*.jsx'],
     extends: ['plugin:@nx/javascript'],
     rules: {
-      '@typescript-eslint/no-extra-semi': 'error',
       'no-extra-semi': 'off',
     },
   },

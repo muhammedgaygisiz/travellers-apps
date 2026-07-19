@@ -1,0 +1,17 @@
+name: "Nx computation cache"
+description: "Persist the Nx task cache (.nx/cache) across CI runs so unchanged targets are restored instead of re-executed."
+runs:
+  using: "composite"
+  steps:
+    # Restores the most recent .nx/cache via the restore-keys prefix and saves
+    # this job's cache under a unique key in a post step. Nx keys its entries by
+    # a content hash, so restoring a slightly stale cache is safe: matching
+    # tasks are replayed, everything else is recomputed. Persisting it lets
+    # unchanged projects skip re-running between CI runs (no remote cache needed).
+    - name: Cache Nx task results
+      uses: actions/cache@v5
+      with:
+        path: .nx/cache
+        key: nx-cache-${{ runner.os }}-${{ github.run_id }}-${{ github.job }}
+        restore-keys: |
+          nx-cache-${{ runner.os }}-

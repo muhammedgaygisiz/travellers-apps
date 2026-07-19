@@ -1,0 +1,25 @@
+- [06 - chore: update Angular, NgRx, and Ionic within current majors](https://github.com/muhammedgaygisiz/travellers-apps/issues/1031) (Issue \#1031)
+- Description
+  - Part of \#1029.
+  - \#\# Goal
+  - Bring the Angular 21 application ecosystem to current supported same-major releases before attempting Angular 22.
+  - \#\# Scope
+  - Upgrade the complete Angular framework/CLI/Devkit/Material/CDK family from 21.0.x to the selected 21.2.x release through Nx/Angular migrations.
+  - Upgrade all NgRx packages and schematics to the latest compatible 21.x release.
+  - Upgrade Ionic Angular within the compatible 8.x line.
+  - Keep TypeScript in Angular 21's supported 5.9 range.
+  - Do not use raw `npm update` for Angular packages.
+  - \#\# Acceptance criteria
+  - Angular and NgRx package families are internally aligned.
+  - No Angular 22 or TypeScript 6 package enters the lockfile as a direct dependency.
+  - All applications retain their current runtime behavior.
+  - \#\# Validation
+  - Production builds for all Angular applications.
+  - Focused/affected Jest, Storybook, Playwright, Firebase, and native checks appropriate to the migration.
+  - Run `git diff --check`.
+- Outcome
+  - Angular framework `21.0.6` -> `21.2.18`; Angular CLI/Devkit/`@angular/build`/`pwa`/`@schematics/angular` `21.0.4` -> `21.2.19`; Material/CDK `21.0.5` -> `21.2.14`; all `@ngrx/*` `21.0.1` -> `21.1.1`; `@ionic/angular` `8.7.16` -> `8.8.14`.
+  - TypeScript stays `5.9.3` and `zone.js` stays `0.16.0`. No Angular 22 or TypeScript 6 direct dependency.
+  - Angular 21.2 renamed the signal-forms `Field` directive to `FormField`; the three `libs/bite-tribe-business/edit-menu` components and templates were updated.
+  - Ionic `8.7.18`+ patches `childNodes`/`textContent` under jsdom, which required reworking one snapshot and two `textContent` assertions. Browser behavior is unaffected. See [[Current State - Known Issues]].
+  - Details and the validation run are recorded in [[Current State - Nx And Dependency Migration Roadmap]].

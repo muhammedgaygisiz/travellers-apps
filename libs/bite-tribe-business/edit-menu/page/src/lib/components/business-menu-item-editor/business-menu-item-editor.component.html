@@ -2,34 +2,34 @@
   <ion-list class="list-margin">
     @if (!isVariant()) {
       <ion-item>
-        <ion-input [field]="itemForm.name">
+        <ion-input [formField]="itemForm.name">
           <div class="label" slot="label">Name</div>
         </ion-input>
       </ion-item>
     }
     <ion-item>
-      <ion-input [field]="itemForm.description">
+      <ion-input [formField]="itemForm.description">
         <div class="label" slot="label">Description</div>
       </ion-input>
     </ion-item>
     <ion-item>
-      <ion-input type="number" inputmode="decimal" [field]="itemForm.price">
+      <ion-input type="number" inputmode="decimal" [formField]="itemForm.price">
         <div class="label" slot="label">Price</div>
         <span slot="end">$</span>
       </ion-input>
     </ion-item>
     <ion-item>
-      <ion-input [field]="itemForm.ingredients">
+      <ion-input [formField]="itemForm.ingredients">
         <div class="label" slot="label">Ingredients</div>
       </ion-input>
     </ion-item>
     <ion-item>
-      <ion-input [field]="itemForm.notes">
+      <ion-input [formField]="itemForm.notes">
         <div class="label" slot="label">Notes</div>
       </ion-input>
     </ion-item>
     <ion-item>
-      <ion-toggle [field]="itemForm.isAvailable">
+      <ion-toggle [formField]="itemForm.isAvailable">
         {{ 'menu-item-available' | transloco }}
       </ion-toggle>
     </ion-item>

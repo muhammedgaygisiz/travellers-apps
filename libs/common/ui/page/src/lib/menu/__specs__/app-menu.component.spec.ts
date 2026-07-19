@@ -64,7 +64,11 @@ describe('AppMenuComponent', () => {
 
     fixture.detectChanges();
 
-    expect(fixture.debugElement).toMatchSnapshot();
+    // Snapshot the rendered markup instead of the element tree: since Ionic
+    // 8.7.18 the bundled Stencil runtime patches `childNodes`, so both the
+    // debug-element and DOM-element serializers report an empty tree under
+    // jsdom. `innerHTML` is unaffected and still covers the rendered output.
+    expect(fixture.nativeElement.innerHTML).toMatchSnapshot();
 
     jest.spyOn(component.loginClick, 'emit');
     const loginButton = fixture.debugElement.query(

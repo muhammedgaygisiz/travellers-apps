@@ -11,14 +11,14 @@ import {
 import { IonButton, IonInput } from '@ionic/angular/standalone';
 import type { MenuItem } from 'model';
 import { BusinessMenuVariantComponent } from '../business-menu-item-editor/business-menu-variant.component';
-import { debounce, Field, form, required } from '@angular/forms/signals';
+import { debounce, FormField, form, required } from '@angular/forms/signals';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'business-menu-item',
   templateUrl: './business-menu-item.component.html',
   styleUrl: './business-menu-item.component.scss',
-  imports: [IonButton, BusinessMenuVariantComponent, IonInput, Field],
+  imports: [IonButton, BusinessMenuVariantComponent, IonInput, FormField],
 })
 export class BusinessMenuItemComponent {
   item = input<MenuItem>();

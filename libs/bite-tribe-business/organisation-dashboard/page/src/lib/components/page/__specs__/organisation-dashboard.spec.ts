@@ -6,6 +6,12 @@ import { ComponentRef } from '@angular/core';
 
 jest.mock('@capacitor-firebase/firestore');
 
+// Since Ionic 8.7.18 the bundled Stencil runtime patches `textContent` on
+// Ionic elements, which reads empty under jsdom even though the markup is
+// rendered. Read `innerHTML` instead and strip Angular's binding comments.
+const renderedText = (element: Element): string =>
+  element.innerHTML.replace(/<!--.*?-->/g, '').trim();
+
 describe('OrganisationDashboard', () => {
   let component: OrganisationDashboard;
   let fixture: ComponentFixture<OrganisationDashboard>;
@@ -173,9 +179,7 @@ describe('OrganisationDashboard', () => {
       const nativeElement: HTMLElement = fixture.nativeElement;
       const labels = nativeElement.querySelectorAll('ion-label');
 
-      const displayedNames = Array.from(labels).map((l) =>
-        l.textContent?.trim(),
-      );
+      const displayedNames = Array.from(labels).map(renderedText);
       expect(displayedNames).toContain('Alice');
       expect(displayedNames).toContain('Bob');
     });
@@ -200,9 +204,7 @@ describe('OrganisationDashboard', () => {
       const nativeElement: HTMLElement = fixture.nativeElement;
       const labels = nativeElement.querySelectorAll('ion-label');
 
-      const displayedNames = Array.from(labels).map((l) =>
-        l.textContent?.trim(),
-      );
+      const displayedNames = Array.from(labels).map(renderedText);
       expect(displayedNames).toContain('Delicious Pasta');
     });
 

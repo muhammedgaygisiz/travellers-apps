@@ -1,5 +1,48 @@
 # Changelog
 
+## build-85 (2026-07-19)
+
+<!-- changelog-start-rev: d4809c5b -->
+<!-- changelog-end-rev: 6edf96f6 -->
+
+### Features
+
+- onboarding funnel analytics (#1027) (845c9bf2)
+- **1016**: onboarding complete and coach marks (#1026) (dfcd2982)
+- **1023**: onboarding location step (#1025) (0ecbc474)
+- **1015**: onboarding currency language and notification steps (#1024) (17008434)
+- **1014**: identity and visibility steps (#1022) (fbccbf6b)
+- **1013**: onboarding assistant shell and step navigation (#1021) (a761c33f)
+- **1012**: enforce case insensitive unique display name (#1020) (9a08f08e)
+- **1011**: blocking entry gate for onboarding (#1019) (0bfc54b7)
+- **1008**: email for email verification (#1009) (9f9fc587)
+- **945**: harden restaurant candidate handling (#1005) (b2130e8e)
+- **1002**: fill restaurant data from google places (#1004) (78c2e620)
+- create resto candidate from create bite trigger (#1001) (a75abd44)
+- **927**: various points to reduce risk of failing photo upload (#1000) (8c78effc)
+
+### Bug Fixes
+
+- place page bugs and cold start loading stuck (#998) (99762ccb)
+
+### Refactoring
+
+- fix lint warnings (#1028) (c507976c)
+
+### Documentation
+
+- refine dependency upgrade epic (#1041) (9830ab54)
+- specify onboarding assistant epic 850 (#1018) (9450e997)
+- update ssot (#999) (900bf5e6)
+
+### Chores
+
+- **1035**: migrate nx to 22.7.7 (#1045) (9bccbe92)
+- pin Node.js 24 and audit migration constraints (#1044) (5c26812f)
+- replace nx-loki with direct oblador/loki (#1043) (0c19eeb3)
+- remove Cypress and consolidate E2E on Playwright (#1042) (b6e50afd)
+- bump version (#997) (93a4d6e8)
+
 ## build-84 (2026-07-12)
 
 <!-- changelog-start-rev: e22b9720 -->

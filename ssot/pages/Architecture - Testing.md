@@ -58,7 +58,7 @@ libs/common/ui
 
 - Broad Nx commands can be slower or hang due to project graph behavior.
 - Focused validation is preferred until the touched surface requires broader checks.
-- The legacy `nx-loki` surface remains until Phase 0 of [[Current State - Nx And Dependency Migration Roadmap]] is implemented; the legacy Cypress project has already been removed.
+- The legacy `nx-loki` adapter has been removed; visual regression now runs through the upstream `oblador/loki` CLI directly, as tracked in Phase 0 of [[Current State - Nx And Dependency Migration Roadmap]]. The legacy Cypress project has also already been removed.
 
 ## Related Pages
 

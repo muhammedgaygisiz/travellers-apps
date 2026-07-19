@@ -9,7 +9,9 @@
     "husky": "husky",
     "nx": "nx",
     "nxgraph-html": "nx graph --file=apps/storybook-host/src/assets/temp/nxgraph.html",
-    "loki": "nx loki",
+    "loki:test": "node tools/loki.mjs test",
+    "loki:update": "node tools/loki.mjs update",
+    "loki:approve": "node tools/loki.mjs approve",
     "start": "nx serve",
     "development": "nx firebase-serve bite-tribe-firebase & nx serve bite-tribe",
     "e2e": "nx e2e bite-tribe-e2e",
@@ -32,6 +34,10 @@
     "ios-asset-generator:generate-ios:bite-tribe": "capacitor-assets generate --ios --iosProject apps/bite-tribe-ios/ios/App --assetPath apps/bite-tribe-ios/assets"
   },
   "private": true,
+  "engines": {
+    "node": ">=24.15.0 <25.0.0",
+    "npm": ">=11.0.0"
+  },
   "dependencies": {
     "@angular/animations": "21.0.6",
     "@angular/cdk": "21.0.5",
@@ -177,7 +183,6 @@
     "lint-staged": "16.1.5",
     "loki": "0.35.1",
     "nx": "22.3.3",
-    "nx-loki": "1.2.5",
     "nx-mcp": "0.3.0",
     "nx-stylelint": "18.0.0",
     "prettier": "3.6.2",

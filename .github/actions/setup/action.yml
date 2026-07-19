@@ -10,7 +10,7 @@ runs:
       uses: actions/setup-node@v5
       if: steps.cache.outputs.cache-hit != 'true'
       with:
-        node-version: 22.x
+        node-version-file: '.nvmrc'
         cache: 'npm'
 
     - name: Install dependencies

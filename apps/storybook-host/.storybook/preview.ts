@@ -9,6 +9,8 @@ import { INITIAL_VIEWPORTS } from 'storybook/viewport';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTransloco } from '@jsverse/transloco';
 import { TranslocoHttpLoader } from './transloco-loader';
+// Re-exposes the story-store API that direct oblador/loki needs on Storybook 10.
+import './loki-getstories-shim';
 
 const LOCALE_STORAGE_KEY = 'storybook-active-locale';
 

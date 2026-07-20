@@ -152,6 +152,59 @@ describe(CoachMarkComponent.name, () => {
     expect(overlay()).not.toBeNull();
   });
 
+  it('scrolls an anchor below the fold into view before measuring it', async () => {
+    setup();
+    Object.defineProperty(window, 'innerHeight', {
+      value: 800,
+      configurable: true,
+    });
+    const element = anchorElement({
+      top: 1200,
+      left: 20,
+      width: 80,
+      height: 40,
+      bottom: 1240,
+    });
+    const scrollIntoView = jest.fn(() => {
+      // The scroll brings the control into the middle of the viewport.
+      element.getBoundingClientRect = (): DOMRect =>
+        rect({ top: 380, left: 20, width: 80, height: 40, bottom: 420 });
+    });
+    element.scrollIntoView = scrollIntoView;
+    fixture.componentRef.setInput('anchor', element);
+
+    await settle();
+
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      block: 'center',
+      inline: 'nearest',
+    });
+    // The overlay must spotlight where the control ended up, not where it was.
+    expect(fixture.componentInstance['anchorRect']()?.top).toBe(380);
+  });
+
+  it('leaves an already visible anchor where it is', async () => {
+    setup();
+    Object.defineProperty(window, 'innerHeight', {
+      value: 800,
+      configurable: true,
+    });
+    const element = anchorElement({
+      top: 100,
+      left: 20,
+      width: 80,
+      height: 40,
+      bottom: 140,
+    });
+    const scrollIntoView = jest.fn();
+    element.scrollIntoView = scrollIntoView;
+    fixture.componentRef.setInput('anchor', element);
+
+    await settle();
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
   it('falls back to a chrome-owned anchor looked up by test id', async () => {
     setup();
     const chromeAnchor = anchorElement({

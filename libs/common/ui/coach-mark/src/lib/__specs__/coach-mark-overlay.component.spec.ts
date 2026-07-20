@@ -24,6 +24,15 @@ describe(CoachMarkOverlayComponent.name, () => {
       `[data-testid="${testId}"]`,
     );
 
+  /** jsdom reports a zero layout box, so the card measures itself as 0 high. */
+  const stubCardHeight = (height: number): void => {
+    jest
+      .spyOn(HTMLElement.prototype, 'offsetHeight', 'get')
+      .mockReturnValue(height);
+  };
+
+  afterEach(() => jest.restoreAllMocks());
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [CoachMarkOverlayComponent],
@@ -148,10 +157,66 @@ describe(CoachMarkOverlayComponent.name, () => {
     fixture.detectChanges();
 
     expect(component.cardAbove()).toBe(true);
-    // Anchor top (700) - 16px gap; CSS lifts it by its own height.
+    // Anchor top (700) - 16px gap - the card's own height (0 in jsdom).
     expect(component.cardTop()).toBe(684);
-    expect(
-      query('coach-mark-card')?.classList.contains('coach-mark-card-above'),
-    ).toBe(true);
+  });
+
+  it('keeps the card on screen when the anchor sits below the fold', () => {
+    Object.defineProperty(window, 'innerHeight', {
+      value: 800,
+      configurable: true,
+    });
+    stubCardHeight(240);
+    // An anchor scrolled past the bottom edge would otherwise place the card
+    // (and the only dismiss action) off screen entirely.
+    fixture.componentRef.setInput(
+      'anchor',
+      rect({ top: 1200, height: 40, bottom: 1240 }),
+    );
+
+    fixture.detectChanges();
+
+    // Clamped to viewport (800) - 16px margin - card height (240).
+    expect(component.cardTop()).toBe(544);
+  });
+
+  it('keeps the card clear of the bottom safe area inset', () => {
+    Object.defineProperty(window, 'innerHeight', {
+      value: 800,
+      configurable: true,
+    });
+    document.documentElement.style.setProperty(
+      '--ion-safe-area-bottom',
+      '48px',
+    );
+    stubCardHeight(240);
+    fixture.componentRef.setInput(
+      'anchor',
+      rect({ top: 1200, height: 40, bottom: 1240 }),
+    );
+
+    fixture.detectChanges();
+
+    // The 48px system bar is excluded from the usable viewport.
+    expect(component.cardTop()).toBe(496);
+
+    document.documentElement.style.removeProperty('--ion-safe-area-bottom');
+  });
+
+  it('favours the top edge when the card is taller than the viewport', () => {
+    Object.defineProperty(window, 'innerHeight', {
+      value: 300,
+      configurable: true,
+    });
+    stubCardHeight(400);
+    fixture.componentRef.setInput(
+      'anchor',
+      rect({ top: 250, height: 40, bottom: 290 }),
+    );
+
+    fixture.detectChanges();
+
+    // Title and body stay readable rather than being pushed off the top.
+    expect(component.cardTop()).toBe(16);
   });
 });

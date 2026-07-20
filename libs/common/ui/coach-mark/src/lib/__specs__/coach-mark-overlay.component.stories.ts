@@ -58,6 +58,22 @@ export const SpotlightAbove: Story = {
   },
 };
 
+/**
+ * An anchor scrolled past the bottom edge: the card stays fully on screen
+ * instead of following the anchor out of the viewport.
+ */
+export const AnchorOffScreen: Story = {
+  args: {
+    anchor: anchorRect({
+      top: 1200,
+      left: 24,
+      width: 200,
+      height: 48,
+      bottom: 1248,
+    }),
+  },
+};
+
 export const Centered: Story = {
   args: {
     anchor: null,

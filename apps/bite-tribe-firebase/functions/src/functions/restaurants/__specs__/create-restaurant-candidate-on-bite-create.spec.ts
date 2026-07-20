@@ -57,8 +57,8 @@ const firestoreMock = {
   collection: jest.fn((name: string) => makeCollection(name)),
 };
 
-jest.mock('firebase-admin', () => ({
-  firestore: jest.fn(() => firestoreMock),
+jest.mock('firebase-admin/firestore', () => ({
+  getFirestore: jest.fn(() => firestoreMock),
 }));
 
 const CENTER = { latitude: 52.52, longitude: 13.405 };

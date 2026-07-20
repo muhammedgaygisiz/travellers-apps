@@ -1,13 +1,10 @@
 import { getStoredBiteCount } from '../resync-bite-counts';
 
-jest.mock('firebase-admin', () => ({
-  firestore: jest.fn(() => ({
+jest.mock('firebase-admin/firestore', () => ({
+  getFirestore: jest.fn(() => ({
     collection: jest.fn(),
     batch: jest.fn(),
   })),
-}));
-
-jest.mock('firebase-admin/firestore', () => ({
   FieldValue: {
     serverTimestamp: jest.fn(() => 'server-timestamp'),
   },

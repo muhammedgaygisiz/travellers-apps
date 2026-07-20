@@ -1,5 +1,4 @@
-import * as admin from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { Bite } from '../model/bite';
 
@@ -55,7 +54,7 @@ export const extractCountryCodesFromBites = (
  * feature runs, so existing users immediately get their country badges.
  */
 export const backfillUserCountryCodes = async (
-  db: admin.firestore.Firestore,
+  db: Firestore,
 ): Promise<void> => {
   logger.info('backfillUserCountryCodes: starting country codes backfill');
 
@@ -112,7 +111,7 @@ export const backfillUserCountryCodes = async (
  * of only touching the current one.
  */
 export const addCountryCodeToUser = async (
-  db: admin.firestore.Firestore,
+  db: Firestore,
   userId: string,
   countryCode: unknown,
 ): Promise<void> => {
@@ -163,7 +162,7 @@ export const addCountryCodeToUser = async (
  * filtering by country as well, which would require a composite index.
  */
 export const removeCountryCodeFromUser = async (
-  db: admin.firestore.Firestore,
+  db: Firestore,
   userId: string,
   countryCode: unknown,
 ): Promise<void> => {

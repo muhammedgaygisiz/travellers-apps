@@ -1,8 +1,8 @@
 import { logger } from 'firebase-functions';
 import { PushToken } from '../model/push-token';
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 
-const db = admin.firestore();
+const db = getFirestore();
 
 export const getTokens = async (uids: string[]): Promise<string[]> => {
   const tokenDocs = await Promise.all(

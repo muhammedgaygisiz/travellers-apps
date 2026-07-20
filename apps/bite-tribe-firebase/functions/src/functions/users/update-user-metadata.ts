@@ -1,4 +1,5 @@
-import * as admin from 'firebase-admin';
+import { getAuth } from 'firebase-admin/auth';
+import { DocumentData, UpdateData, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { buildEmailVerificationMetadata } from './email-verification-utils';
@@ -27,8 +28,7 @@ export const updateUserMetadata = onAppCheck<UpdateUserMetadataRequest>(
       );
     }
 
-    const userReference = admin
-      .firestore()
+    const userReference = getFirestore()
       .collection('users')
       .doc(request.auth.uid);
     const userSnapshot = await userReference.get();
@@ -39,8 +39,8 @@ export const updateUserMetadata = onAppCheck<UpdateUserMetadataRequest>(
 
     const appVersion = toOptionalString(request.data?.version);
     const appBuildNumber = toOptionalString(request.data?.buildNumber);
-    const authUser = await admin.auth().getUser(request.auth.uid);
-    const userUpdate: admin.firestore.UpdateData<admin.firestore.DocumentData> =
+    const authUser = await getAuth().getUser(request.auth.uid);
+    const userUpdate: UpdateData<DocumentData> =
       {
         lastSeen: new Date().toISOString(),
         lastSeenTimestamp: Date.now(),

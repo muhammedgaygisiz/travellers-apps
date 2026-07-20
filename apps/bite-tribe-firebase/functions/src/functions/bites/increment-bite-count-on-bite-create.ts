@@ -1,5 +1,4 @@
-import * as admin from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import {
   onDocumentCreated,
@@ -9,7 +8,7 @@ import { Bite } from '../shared/model/bite';
 import { rebuildLeaderboard } from '../shared/utils/leaderboard';
 import { removeCountryCodeFromUser } from '../shared/utils/user-country-codes';
 
-const db = admin.firestore();
+const db = getFirestore();
 
 export const incrementBiteCountOnBiteCreate = onDocumentCreated(
   'bites/{biteId}',

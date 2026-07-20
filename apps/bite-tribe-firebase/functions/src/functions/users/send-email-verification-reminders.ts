@@ -1,4 +1,5 @@
-import * as admin from 'firebase-admin';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onSchedule } from 'firebase-functions/scheduler';
 import {
@@ -64,7 +65,7 @@ export const sendEmailVerificationRemindersForUsers = async (
   logger.info('email verification reminder job started');
 
   do {
-    const usersPage = await admin.auth().listUsers(1000, pageToken);
+    const usersPage = await getAuth().listUsers(1000, pageToken);
     pageToken = usersPage.pageToken;
 
     for (const authUser of usersPage.users) {
@@ -88,8 +89,7 @@ export const sendEmailVerificationRemindersForUsers = async (
         continue;
       }
 
-      const userReference = admin
-        .firestore()
+      const userReference = getFirestore()
         .collection('users')
         .doc(authUser.uid);
       const userSnapshot = await userReference.get();
@@ -102,8 +102,7 @@ export const sendEmailVerificationRemindersForUsers = async (
       }
 
       try {
-        const verificationLink = await admin
-          .auth()
+        const verificationLink = await getAuth()
           .generateEmailVerificationLink(authUser.email);
 
         await sender({ to: authUser.email, verificationLink });

@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 
@@ -23,7 +23,7 @@ interface SearchUser {
 }
 
 const toSearchUser = (
-  doc: admin.firestore.QueryDocumentSnapshot,
+  doc: QueryDocumentSnapshot,
 ): SearchUser => {
   const user = doc.data();
 
@@ -66,7 +66,7 @@ export const searchUsers = onAppCheck<SearchUsersRequest>(async (request) => {
     return [];
   }
 
-  const usersSnapshot = await admin.firestore().collection('users').get();
+  const usersSnapshot = await getFirestore().collection('users').get();
 
   return usersSnapshot.docs
     .filter((doc) => {

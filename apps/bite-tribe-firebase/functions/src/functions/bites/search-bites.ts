@@ -1,5 +1,5 @@
 import { HttpsError } from 'firebase-functions/https';
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 import { onAppCheck } from '../shared/callable-options';
 import {
   getString,
@@ -35,7 +35,7 @@ export const searchBites = onAppCheck<SearchBitesRequest>(async (request) => {
     return [];
   }
 
-  const bitesSnapshot = await admin.firestore().collection('bites').get();
+  const bitesSnapshot = await getFirestore().collection('bites').get();
 
   return bitesSnapshot.docs
     .filter((doc) => {

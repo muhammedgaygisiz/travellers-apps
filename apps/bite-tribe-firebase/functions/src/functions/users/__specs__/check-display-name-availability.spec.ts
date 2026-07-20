@@ -13,8 +13,8 @@ const whereMock = jest.fn((field: string) => ({
 }));
 const collectionMock = jest.fn(() => ({ doc: docMock, where: whereMock }));
 
-jest.mock('firebase-admin', () => ({
-  firestore: (): any => ({ collection: collectionMock }),
+jest.mock('firebase-admin/firestore', () => ({
+  getFirestore: (): any => ({ collection: collectionMock }),
 }));
 
 jest.mock('firebase-functions/https', () => ({

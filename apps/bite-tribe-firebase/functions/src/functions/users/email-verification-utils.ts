@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentData } from 'firebase-admin/firestore';
 
 export type EmailVerificationProvider =
   | 'password'
@@ -114,7 +114,7 @@ export const classifyEmailVerificationUser = (
 
 export const buildEmailVerificationMetadata = (
   user: EmailVerificationUser,
-  existingData: admin.firestore.DocumentData = {},
+  existingData: DocumentData = {},
 ): EmailVerificationMetadata => {
   const classification = classifyEmailVerificationUser(user);
   const existingEmail =

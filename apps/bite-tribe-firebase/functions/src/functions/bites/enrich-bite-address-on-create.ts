@@ -1,5 +1,4 @@
-import * as admin from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { DocumentReference, FieldValue, UpdateData, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onDocumentCreated } from 'firebase-functions/firestore';
 import { HttpsError, onCall } from 'firebase-functions/https';
@@ -15,7 +14,7 @@ import { addCountryCodeToUser } from '../shared/utils/user-country-codes';
 export { extractBiteAddress } from '../shared/utils/reverse-geocode';
 export type { BiteAddress } from '../shared/utils/reverse-geocode';
 
-const db = admin.firestore();
+const db = getFirestore();
 const BITE_COLLECTION = 'bites';
 const GOOGLE_GEOCODING_API_KEY_ENV = 'GOOGLE_GEOCODING_API_KEY';
 const googleGeocodingApiKey = defineSecret(GOOGLE_GEOCODING_API_KEY_ENV);
@@ -54,7 +53,7 @@ export const getBitePosition = (bite: Bite): Position | undefined => {
 export const buildBiteAddressUpdate = (
   addressStatus: AddressStatus,
   address: BiteAddress = {},
-): admin.firestore.UpdateData<Bite> => ({
+): UpdateData<Bite> => ({
   ...address,
   addressStatus,
   updatedAt: FieldValue.serverTimestamp(),
@@ -66,7 +65,7 @@ const loadBiteAddress = (position: Position): Promise<BiteAddress> =>
 const enrichBiteAddress = async (
   biteId: string,
   bite: Bite,
-  biteRef: admin.firestore.DocumentReference,
+  biteRef: DocumentReference,
 ): Promise<'resolved' | 'failed' | 'skipped'> => {
   if (bite.addressStatus === 'resolved') {
     logger.info('enrichBiteAddress: bite already resolved', {

@@ -1,9 +1,9 @@
 import { onObjectFinalized } from 'firebase-functions/v2/storage';
-import * as admin from 'firebase-admin';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 import { logger } from 'firebase-functions';
-import { FieldValue } from 'firebase-admin/firestore';
 
-const db = admin.firestore();
+const db = getFirestore();
 
 // Matches: images/bites/{biteId}/{filename}
 const BITE_IMAGE_PATH_REGEX = /^images\/bites\/([^/]+)\/[^/]+$/;
@@ -60,7 +60,7 @@ export const setBiteImagePathOnUpload = onObjectFinalized(async (event) => {
 
   // Firebase Storage automatically adds a download token to the file metadata.
   // Use it to construct the same URL format the client SDK produces.
-  const file = admin.storage().bucket(bucket).file(objectPath);
+  const file = getStorage().bucket(bucket).file(objectPath);
   const [metadata] = await file.getMetadata();
   const token = getToken(metadata);
 

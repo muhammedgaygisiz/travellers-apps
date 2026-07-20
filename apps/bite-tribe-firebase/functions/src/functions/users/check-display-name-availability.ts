@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import {
@@ -34,7 +34,7 @@ export const checkDisplayNameAvailabilityForUser = async (
     return { available: false, normalizedDisplayName };
   }
 
-  const db = admin.firestore();
+  const db = getFirestore();
   const [claimSnapshot, normalizedUserSnapshot, exactUserSnapshot] =
     await Promise.all([
       db.collection(DISPLAY_NAMES_COLLECTION).doc(normalizedDisplayName).get(),

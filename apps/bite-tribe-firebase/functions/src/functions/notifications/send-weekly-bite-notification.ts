@@ -1,5 +1,6 @@
 import { onSchedule } from 'firebase-functions/scheduler';
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
 import { logger } from 'firebase-functions';
 import { getInvalidTokens } from '../shared/utils/get-invalid-tokens';
 import { cleanupInvalidTokens } from '../shared/utils/cleanup-invalid-tokens';
@@ -7,7 +8,7 @@ import { getTokens } from '../shared/utils/get-tokens';
 import { buildChunks } from '../shared/utils/build-chunks';
 import { CHUNK_SIZE } from '../shared/utils/chunk-size';
 
-const db = admin.firestore();
+const db = getFirestore();
 
 const ZURICH_TZ = 'Europe/Zurich';
 
@@ -184,7 +185,7 @@ export const sendWeeklyBiteNotification = onSchedule(
     logger.info('--- Chunks:', chunks);
 
     for (const chunk of chunks) {
-      const res = await admin.messaging().sendEachForMulticast({
+      const res = await getMessaging().sendEachForMulticast({
         tokens: chunk,
         notification: {
           title: "🍽️ This week's bites are here 🤩",

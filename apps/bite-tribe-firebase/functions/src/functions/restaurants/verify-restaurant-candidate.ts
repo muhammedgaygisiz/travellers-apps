@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, Transaction, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { geohashForLocation } from 'geofire-common';
@@ -48,7 +48,7 @@ const parsePosition = (value: unknown): RestaurantPosition | undefined => {
 };
 
 const getString = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
   field: string,
 ): string => (typeof data[field] === 'string' ? data[field] : '');
 
@@ -59,7 +59,7 @@ const toRestaurantDocument = (
   rawRestaurant: unknown,
   menuId: string,
   now: Date,
-): admin.firestore.DocumentData => {
+): DocumentData => {
   if (!isRecord(rawRestaurant)) {
     throw new HttpsError('invalid-argument', 'restaurant must be an object.');
   }
@@ -82,7 +82,7 @@ const toRestaurantDocument = (
   const imagePath =
     getString(rawRestaurant, 'imagePath') ||
     (image && !isBase64Image(image) ? image : '');
-  const document: admin.firestore.DocumentData = {
+  const document: DocumentData = {
     name,
     position,
     geohash: geohashForLocation([position.latitude, position.longitude]),
@@ -118,7 +118,7 @@ const toRestaurantDocument = (
 };
 
 const getStringArray = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
   field: string,
 ): string[] =>
   Array.isArray(data[field])
@@ -128,8 +128,8 @@ const getStringArray = (
     : [];
 
 const getExistingVerifiedRestaurantId = async (
-  transaction: admin.firestore.Transaction,
-  candidateData: admin.firestore.DocumentData,
+  transaction: Transaction,
+  candidateData: DocumentData,
 ): Promise<string> => {
   const verifiedRestaurantId = getString(candidateData, 'verifiedRestaurantId');
   if (verifiedRestaurantId) {
@@ -148,8 +148,7 @@ const getExistingVerifiedRestaurantId = async (
   }
 
   const mergedIntoCandidate = await transaction.get(
-    admin
-      .firestore()
+    getFirestore()
       .collection(RESTAURANT_CANDIDATES_COLLECTION)
       .doc(mergedIntoCandidateId),
   );
@@ -187,7 +186,7 @@ export const verifyRestaurantCandidateHandler = async (
 
   const candidateId = request.data.candidateId.trim();
   const userId = request.auth.uid;
-  const db = admin.firestore();
+  const db = getFirestore();
   const candidateRef = db
     .collection(RESTAURANT_CANDIDATES_COLLECTION)
     .doc(candidateId);

@@ -6,10 +6,6 @@ import {
   toLeaderboardUser,
 } from '../leaderboard';
 
-jest.mock('firebase-admin', () => ({
-  firestore: jest.fn(() => ({})),
-}));
-
 jest.mock('firebase-admin/firestore', () => ({
   FieldValue: {
     serverTimestamp: jest.fn(() => 'server-timestamp'),

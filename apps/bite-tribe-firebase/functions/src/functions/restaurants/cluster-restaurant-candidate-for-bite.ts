@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
@@ -47,8 +47,7 @@ export const clusterRestaurantCandidateForBite =
       throw new HttpsError('invalid-argument', 'biteId must be a string.');
     }
 
-    const selectedBiteDoc = await admin
-      .firestore()
+    const selectedBiteDoc = await getFirestore()
       .collection(BITE_COLLECTION)
       .doc(request.data.biteId)
       .get();
@@ -118,12 +117,10 @@ export const clusterRestaurantCandidateForBite =
       selectedBite.position,
     );
     const candidateRef = pendingDuplicate
-      ? admin
-          .firestore()
+      ? getFirestore()
           .collection(RESTAURANT_CANDIDATES_COLLECTION)
           .doc(pendingDuplicate.item.id)
-      : admin
-          .firestore()
+      : getFirestore()
           .collection(RESTAURANT_CANDIDATES_COLLECTION)
           .doc(buildRestaurantCandidateDocumentId(draft));
     const candidateUpdate = buildCandidateUpdate(draft, pendingDuplicate?.item);

@@ -87,8 +87,8 @@ Package-tree audit under Node `24.18.0` records the following non-official Nx / 
 | ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `@nxext/capacitor`       | `23.0.0`  | none nested; depends on `@nx/devkit@^23` and `nx@^23`, satisfied by the hoisted `23.1.0`, so `@nxext/common@23.0.0` no longer carries a nested Nx 21 | Upgraded to `@nxext/capacitor@23` in Phase 2 (issue #1033); the workspace now runs a single Nx 23 generation.                             |
 | `@ionic/angular-toolkit` | `12.3.0`  | nested `@angular-devkit/core@20.3.20` (peer `@angular-devkit/*@^20`), one generation behind the workspace's `21.0.4`                                 | Keep; schematics-only, not an application runtime dependency. Validate generators before any Angular major bump; do not upgrade blindly.  |
-| `nx-stylelint`           | `18.0.0`  | none nested (peer `@nx/devkit >=19` satisfied by the hoisted `@nx/devkit@22.3.3`)                                                                    | Keep with the Stylelint 16 configuration until the dedicated Stylelint migration track.                                                   |
-| `nx-mcp`                 | `0.3.0`   | none (no `nx`/`@nx` dependency; no repository MCP config references it)                                                                              | Keep pinned as an optional developer aid; confirm intentional use before upgrading, do not upgrade merely because a newer version exists. |
+| `nx-stylelint`           | `19.0.0`  | none nested; v19 declares `@nx/devkit@^22` as a direct dependency, so an override pins it to the hoisted `@nx/devkit@23.1.0` (issue #1039)            | Upgraded to `nx-stylelint@19` with Stylelint 17 in the dedicated Stylelint batch (issue #1039); the override keeps a single Nx generation. |
+| `nx-mcp`                 | `0.3.0`   | none (no `nx`/`@nx` dependency; no repository MCP config or script references it)                                                                    | Kept pinned at `0.3.0` in issue #1039; intended use is unverified, so it was not upgraded merely because `0.25.0` exists, and it adds no dependency or Nx-generation impact. |
 
 After Phase 2 (issue #1033), only `@ionic/angular-toolkit` (Angular Devkit 20) still loads an older generation, and it has an explicit follow-up decision. The `@nxext/capacitor` Nx 21 nesting that drove the documented multi-generation project-graph risk is resolved: the tree now carries a single Nx 23 generation.
 
@@ -164,10 +164,10 @@ Perform these as small, separately validated batches:
 - Angular 21.0.x to the latest supported Angular 21.2.x family. Status: complete (issue #1031).
 - NgRx 21.0.x to the latest NgRx 21.x family. Status: complete (issue #1031).
 - Ionic 8.7.x to the latest compatible Ionic 8.x release. Status: complete (issue #1031).
-- Storybook 10.1.x to the latest compatible Storybook 10.x release.
-- Jest 30.0.x and its environments/utilities to a consistent Jest 30 release.
-- `jest-preset-angular` to a release supporting Angular 21, Jest 30, and the selected TypeScript version.
-- Playwright to a current compatible release, followed by browser reinstallation and E2E validation.
+- Storybook 10.1.x to the latest compatible Storybook 10.x release. Status: complete (issue #1036).
+- Jest 30.0.x and its environments/utilities to a consistent Jest 30 release. Status: complete (issue #1036).
+- `jest-preset-angular` to a release supporting Angular 21, Jest 30, and the selected TypeScript version. Status: complete (issue #1036).
+- Playwright to a current compatible release, followed by browser reinstallation and E2E validation. Status: complete (issue #1036).
 
 Do not use raw `npm update` for Angular. Use Nx/Angular migrations so the Angular framework, CLI, Devkit, Material, CDK, compiler, and Zone.js remain compatible.
 
@@ -193,6 +193,28 @@ Two source-level adaptations were required:
 Validation run for issue #1031 (Node 24.18.0): `bite-tribe` and `bite-tribe-business` production builds passed; `nx run-many -t test --all` passed for all 81 projects; lint passed for `bite-tribe`, `bite-tribe-business`, `common-ui-page`, `bite-tribe-business/organisation-dashboard`, `bite-tribe-business/edit-menu`, and `storybook-host`; the Firebase Functions `tsc` build and the project's real `npm run lint` are clean; the Storybook host build passed and the Storybook dev server rendered Ionic components correctly in a real browser; direct Loki visual regression passed with zero differences across three consecutive full runs (244 stories per run); `git diff --check` is clean. Playwright E2E and native Capacitor Android/iOS builds were deferred to CI/device runs because they need emulators and native toolchains.
 
 Direct Loki initially reported failures on the restaurant `@defer` image stories. Investigation showed this was a pre-existing capture race rather than an Angular or Ionic regression: every diff was confined to the hero-image region while all surrounding layout, text, and map pixels matched exactly, and 237 of 244 stories passed untouched. Loki was capturing before the `@placeholder (minimum 1000ms)` block resolved, and seven references had been approved in the skeleton state. Fixed at the Loki/Storybook boundary with a per-story settle gate and re-recorded references; see [[Current State - Known Issues]].
+
+### Storybook, Jest, and Playwright batch (issue #1036)
+
+Landed together as the shared test/visual-regression toolchain, each kept inside its current major:
+
+| Package family                                                                | From      | To        |
+| ----------------------------------------------------------------------------- | --------- | --------- |
+| Storybook (`storybook`, `@storybook/angular`, `@storybook/addon-docs`)        | `10.1.11` | `10.5.2`  |
+| `eslint-plugin-storybook`                                                     | `10.1.11` | `10.5.2`  |
+| `@chromatic-com/storybook`                                                    | `5.0.0`   | `5.2.1`   |
+| Jest (`jest`, `jest-environment-jsdom`, `jest-environment-node`, `jest-util`) | `30.0.5`  | `30.4.1`  |
+| `ts-jest`                                                                     | `29.4.1`  | `29.4.11` |
+| `jest-preset-angular`                                                         | `16.0.0`  | `16.2.0`  |
+| `@playwright/test`                                                            | `1.54.2`  | `1.61.1`  |
+
+`@types/jest` was already at its latest `30.0.0` and is unchanged. The `@angular-devkit/build-angular` override that pins `jest`/`jest-environment-jsdom` was moved from `30.0.5` to `30.4.1` so the whole Jest set resolves to one version. No framework major changed: Storybook stays on 10, Jest on 30, `jest-preset-angular` on 16 (16.2.0 still declares `@angular/core >=19 <23`, `jest ^30`, and `typescript >=5.5`, so Angular 21 / Jest 30 / TypeScript 5.9 remain in range), and Playwright on 1.x. `jest-preset-angular@17` and `storybook@10.6`+ prereleases were deliberately not taken.
+
+One source-level adaptation was required:
+
+- Storybook 10.5 tightened the toolbar `globalTypes` type: `showName` was removed from `ToolbarConfig`, so `apps/storybook-host/.storybook/preview.ts` failed to compile with `TS2353`. Removed the `showName: true` entry from the `locale` toolbar; `dynamicTitle: true` already drives the selected-value title. This is Storybook manager chrome, not part of the story preview iframe Loki captures, so it does not change any visual-regression reference.
+
+Validation run for issue #1036 (Node 24 target; run locally under Node 22 in the agent sandbox): representative Angular Jest suites (`bite-tribe/bite-data-access`, `bite-tribe/store`, `common-ui-card`) and a non-Angular suite (`utils-common`) passed through Nx (55 suites / 425 tests); the Storybook host build passed after the `preview.ts` fix; `eslint-plugin-storybook` 10.5 flat-config lint for `storybook-host` passed; Playwright `1.61.1` loaded `apps/bite-tribe-e2e/playwright.config.ts` and enumerated its five specs; `git diff --check` is clean. Serial Playwright E2E against the Firebase emulators, CI browser (re)installation, and direct Loki visual regression were deferred to CI/device runs because they need the Firebase emulators, a downloaded browser binary, and the `sharp` prebuilt binary (blocked by the sandbox egress policy, the same limitation recorded for issue #1033). The Storybook build that Loki consumes is green and no story-facing render changed.
 
 ## Phase 4 - Angular 22
 
@@ -237,6 +259,92 @@ The following should not be bundled into the Nx or Angular major migrations:
 | Stylelint                                        | Upgrade `nx-stylelint`, Stylelint, and both shared configs as one dedicated batch.               |
 | Transloco                                        | Treat its major upgrade as an application compatibility change, not an Nx requirement.           |
 | Commitlint and formatting                        | Upgrade independently unless an Nx migration explicitly requires a compatible version.           |
+
+### Capacitor 8 native stack alignment (issue #1038)
+
+Status: complete (issue #1038). The Capacitor 8 family was moved off its mixed `8.0.0`/`8.0.1`/`8.3.0` pins onto one consistent set of compatible Capacitor 8 releases, kept separate from the Nx and Angular tracks. `@nxext/capacitor` stays on `23.0.0` (owned by the Nx track) and `@capacitor/assets` stays on `3.0.5` (a standalone asset-generation tool on its own major, not part of the Capacitor 8 runtime family).
+
+| Package group                                                                                          | From                                              | To      |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ------- |
+| Capacitor core, CLI, Android, iOS (`@capacitor/core`, `/cli`, `/android`, `/ios`)                      | `8.0.0`                                           | `8.4.2` |
+| `@capacitor/app`                                                                                       | `8.0.0`                                           | `8.1.1` |
+| `@capacitor/app-launcher`                                                                              | `8.0.0`                                           | `8.0.1` |
+| `@capacitor/camera`                                                                                    | `8.0.0`                                           | `8.2.1` |
+| `@capacitor/filesystem`                                                                                | `8.0.0`                                           | `8.1.2` |
+| `@capacitor/geolocation`                                                                               | `8.0.0`                                           | `8.2.0` |
+| `@capacitor/haptics`                                                                                   | `8.0.0`                                           | `8.0.2` |
+| `@capacitor/keyboard`                                                                                  | `8.0.0`                                           | `8.0.5` |
+| `@capacitor/preferences`                                                                               | `8.0.0`                                           | `8.0.1` |
+| `@capacitor/push-notifications`                                                                        | `8.0.0`                                           | `8.1.2` |
+| `@capacitor/splash-screen`                                                                             | `8.0.0`                                           | `8.0.2` |
+| `@capacitor/status-bar`                                                                                | `8.0.0`                                           | `8.0.3` |
+| `@capacitor/network`, `@capacitor/share`                                                               | `8.0.1`                                           | `8.0.1` |
+| `@capawesome/capacitor-file-picker`                                                                    | `8.0.1`                                           | `8.0.3` |
+| All eight `@capacitor-firebase/*` plugins (analytics, app-check, authentication, crashlytics, firestore, functions, messaging, storage) | mixed `8.0.0`/`8.0.1`/`8.3.0` | `8.3.0` |
+
+The eight `@capacitor-firebase/*` plugins were the only real drift risk: they were spread across `8.0.0`, `8.0.1`, and `8.3.0`, and are now on one release family (`8.3.0`). `@capacitor-firebase/*@8.3.0` peers `@capacitor/core >=8.0.0` (satisfied by `8.4.2`) and `firebase ^12.6.0`; the installed `firebase@12.6.0` and the existing `overrides` that pin `firebase` to `12.6.0` for the Firebase plugins both stay valid, so no `firebase` change was needed on this track (that is the separate issue #1034 backend/client track).
+
+Version pins live only in the root `package.json`; both wrapper `package.json` files (`apps/bite-tribe-android`, `apps/bite-tribe-ios`) reference the root `node_modules` by path, and the committed native manifests (`capacitor.settings.gradle`, `capacitor.build.gradle`, `Podfile`) reference each plugin by path rather than by version. Because no plugin was added or removed, a version-only bump within the Capacitor 8 family produces no native manifest diff.
+
+One source-level adaptation was required. `@capacitor/geolocation@8.2.0` added four fields to `Position.coords` (`magneticHeading`, `trueHeading`, `headingAccuracy`, `course`, each `number | null | undefined`, populated only during `watchPosition`). The details page Storybook story (`libs/bite-tribe/details/page/.../details.page.stories.ts`) builds a mock position with `satisfies Position`, so the missing keys failed the Storybook build with a `TS2739` compile error, which in turn failed the Loki visual-regression CI job that consumes that build. Added the four keys as `null` (correct for a static, non-watch position); no visual reference changed. Production code was unaffected because `libs/bite-tribe/home/data-access/src/lib/home-data-access.service.ts` constructs its geolocation object with an `as GeolocationPosition` cast, and the `.spec.ts` position mocks are not type-checked by the Storybook build.
+
+The tracked changes are therefore `package.json`, `package-lock.json`, and the one story mock.
+
+Validation run for issue #1038 (Node 24 target; run under Node 22 in the agent sandbox): `npm install` regenerated `package-lock.json` with every Capacitor 8 package resolved to the aligned versions above (the `sharp` prebuilt-binary postinstall stayed blocked by the sandbox egress policy, the same environmental limitation recorded for issues #1030/#1033, so the lockfile was settled with `--ignore-scripts`); `npx cap doctor` reports installed `@capacitor/{cli,core,android,ios}` at `8.4.2` matching latest with no problems; `npx cap update` from `apps/bite-tribe-android` enumerated all 22 Capacitor plugins at the aligned versions and rewrote the Android plugin manifests with no committed diff (it only failed writing the gitignored build-time `android/app/src/main/assets/capacitor.plugins.json`, which is not part of the committed tree); `git diff --check` is clean. Full `cap sync` copy (needs the web build in `dist/apps/bite-tribe`), the iOS `pod install`, and the Android/iOS device builds and Firebase-integration smoke checks were deferred to CI/device runs because they need the native toolchains, CocoaPods, and a macOS/Android build host, consistent with the deferrals recorded for the earlier phases.
+
+### Firebase client and backend tooling (issue #1034)
+
+Status: complete (issue #1034). The Firebase web client, the Functions/CLI tooling, and the Admin SDK backend major were upgraded as three separate commits by risk under the tracking issue, and kept off the Nx and Angular tracks.
+
+| Package                   | From     | To        | Track / risk                                |
+| ------------------------- | -------- | --------- | ------------------------------------------- |
+| `firebase` (web client)   | `12.6.0` | `12.16.0` | Frontend, within major 12                   |
+| `firebase-functions`      | `7.0.3`  | `7.3.0`   | Backend tooling, within major 7             |
+| `firebase-tools`          | `15.2.1` | `15.24.0` | Backend tooling, within major 15            |
+| `firebase-functions-test` | `3.4.1`  | `3.5.0`   | Backend dev tooling, within major 3         |
+| `firebase-admin`          | `13.6.0` | `14.2.0`  | Backend major (explicit step, API-reviewed) |
+
+Three commits landed so their differing risk stays separately reviewable and revertible:
+
+1. Frontend client `firebase` 12.6.0 -> 12.16.0. The six `@capacitor-firebase/*` `firebase` override pins were aligned to 12.16.0 so the plugins resolve the same hoisted client. Validated by the `bite-tribe` production build.
+2. Backend tooling `firebase-functions` 7.3.0, `firebase-tools` 15.24.0, `firebase-functions-test` 3.5.0, keeping `firebase-admin` on 13 so the low-risk change stays isolated from the Admin major.
+3. `firebase-admin` 13 -> 14. v14 removes the legacy `admin.*` namespace API, so all 41 namespace-using function files were migrated to the modular SDK: `admin.firestore()`/`auth()`/`messaging()`/`storage()` -> `getFirestore()`/`getAuth()`/`getMessaging()`/`getStorage()`, `admin.initializeApp`/`admin.apps` -> `initializeApp()`/`getApps()` from `firebase-admin/app`, `admin.firestore.<Type>` -> named type imports from `firebase-admin/firestore`, and the emulator-spec teardown `app?.delete()` -> `deleteApp(app)`. Unit-test mocks moved from the `firebase-admin` namespace to the matching modular subpaths (`getFirestore`/`getAuth`).
+
+Admin 14 API review:
+
+- v14 requires Node `>=22`; the workspace is pinned to Node 24, so the deploy runtime stays in range.
+- The functions use only stable APIs (`sendEachForMulticast`, `getFirestore`, `getAuth`, `getMessaging`, `getStorage`); none of the removed InstanceID or legacy messaging surfaces are used.
+- `firebase-functions-test@3.5.0` (dev-only) still peers `firebase-admin <=13`, one major behind the runtime. The published API is compatible, so `apps/bite-tribe-firebase/functions/.npmrc` mirrors the workspace root's `legacy-peer-deps=true` (the same mechanism introduced for the Nx 23 `@swc/cli` peer in Phase 2). Production function deploys omit devDependencies and never install `firebase-functions-test`, so the lag only affects local/CI test installs. Retire the setting once `firebase-functions-test` peers `firebase-admin 14`.
+
+Validation run for issue #1034 (Node 24 target; run under Node 22 in the agent sandbox): the `bite-tribe` production build passed on `firebase@12.16.0`; from `apps/bite-tribe-firebase/functions` the `tsc` build and `eslint` are clean and Jest passed (20 suites / 121 tests) against `firebase-admin@14.2.0`; `git diff --check` is clean. Emulator-backed and native Firebase integration checks (callable, trigger, scheduled, Auth, Firestore, Storage, App Check, and messaging behavior on the emulators and devices) remain deferred to CI/device runs, consistent with the earlier phases. A full strict `tsc` over the spec files surfaces pre-existing latent type issues in the restaurant and `user-country-codes` test helpers that predate this change and are not exercised by the project's build (specs excluded) or the ts-jest `isolatedModules` runner; they are unrelated to the Firebase upgrade and were left untouched to keep the change scoped.
+
+### Independent lint and localization tooling (issue #1039)
+
+Status: complete (issue #1039). The remaining independent developer tooling was upgraded in three separately reviewable commits by compatible package group, kept off the Nx and Angular tracks.
+
+| Package group                                                                                                    | From                              | To        |
+| ---------------------------------------------------------------------------------------------------------------- | --------------------------------- | --------- |
+| Stylelint (`stylelint`)                                                                                          | `16.18.0`                         | `17.14.1` |
+| `stylelint-config-standard`                                                                                      | `38.0.0`                          | `40.0.0`  |
+| `stylelint-config-standard-scss`                                                                                 | `14.0.0`                          | `17.0.0`  |
+| `nx-stylelint`                                                                                                   | `18.0.0`                          | `19.0.0`  |
+| `@jsverse/transloco`                                                                                             | `7.6.1`                           | `8.4.0`   |
+| `@commitlint/cli`, `@commitlint/config-nx-scopes`                                                               | `19.8.1`                          | `21.2.1` / `21.2.0` |
+| `prettier`                                                                                                       | `3.6.2`                           | `3.9.5`   |
+| `commitizen`                                                                                                     | `4.3.1`                           | `4.3.2`   |
+| `lint-staged`                                                                                                    | `16.1.5`                          | `17.1.0`  |
+| `eslint-plugin-playwright`                                                                                       | `1.8.3`                           | `2.10.5`  |
+| `jsonc-eslint-parser`                                                                                            | `^2.1.0`                          | `^3.1.0`  |
+
+Three source-level adaptations were required:
+
+- **Stylelint group.** `nx-stylelint@19` requires `stylelint@^17` (and `stylelint-config-standard >=40`, `stylelint-config-standard-scss >=17`), but it also moved `@nx/devkit` from a permissive `>=19.0.0` dependency to a pinned `^22.0.0`, which would nest an `@nx/devkit@22` generation under the hoisted `23.1.0`. An `overrides` entry (`nx-stylelint` -> `@nx/devkit@23.1.0`) keeps the workspace on a single Nx generation. Only the `nx-stylelint:lint` executor is used (the inference plugin is not registered in `nx.json`), and it consumes stable devkit utilities, so the override is safe. All five styled projects (`common-ui-page`, `password-validator`, `common-ui-coach-mark`, `auth`, `common-ui-card`) lint clean.
+- **Transloco.** v8 pulls in a new ESM-only transitive dependency (`@jsverse/utils`, `type: module` with a `.js` entry). Jest does not transform `node_modules` by default, so every spec importing Transloco failed to parse it. `@jsverse` was added to the existing `NODE_MODULES_TO_IGNORE` transform allow-list (the same mechanism already used for `@ionic`/`@stencil`/`@capacitor`) in the 63 project Jest configs that define it. The app uses only stable Transloco APIs (`provideTransloco`, `TranslocoLoader`, `TranslocoPipe`, `TranslocoService` with `translate`/`langChanges$`/`getActiveLang`/`setActiveLang`, `Translation`); there is no `TRANSLOCO_SCOPE`/scoped-lazy usage, so lazy loading remains the single-file HTTP loader per language.
+- **Prettier.** Prettier 3.7+ collapses short union/`extends` types that fit within `printWidth` onto one line. Eight source files were reformatted to that rule so the bump introduces no new formatting debt; the pre-existing unformatted files (identical count under 3.6.2 and 3.9.5) were left untouched as unrelated debt.
+
+`nx-mcp` was kept at `0.3.0` (see the dependency inventory table): its intended use is unverified, it has no `nx`/`@nx` dependency, and no committed MCP config or script references it, so it was not upgraded to `0.25.0`.
+
+Validation run for issue #1039 (Node 24 target; run under Node 22 in the agent sandbox, so `npm install` used `--ignore-scripts` because the `sharp` prebuilt-binary postinstall stays blocked by the egress policy, the same limitation recorded for the earlier phases): all five `stylelint` targets pass with no nested `@nx/devkit`; `nx run-many -t test --all` passes for all 81 projects (including component specs that render the Transloco pipe); the `bite-tribe` production build completes on Transloco 8; `nx lint bite-tribe-e2e` (eslint-plugin-playwright 2) and `nx lint push-notifications` (jsonc-eslint-parser 3) pass; commitlint 21 with config-nx-scopes 21 enforces the Nx-project scope-enum against Nx 23; `prettier --check` shows no new debt beyond the pre-existing files; lint-staged 17 loads its config; and `git diff --check` is clean. Native/emulator checks remain deferred to CI/device runs, consistent with the earlier phases.
 
 ## Completion Criteria
 

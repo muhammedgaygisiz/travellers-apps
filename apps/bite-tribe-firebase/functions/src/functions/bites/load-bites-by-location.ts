@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { distanceBetween, geohashQueryBounds, Geopoint } from 'geofire-common';
 import { onAppCheck } from '../shared/callable-options';
@@ -11,7 +11,7 @@ interface LoadBitesByLocationRequest {
   longitude?: unknown;
 }
 
-interface LocationBite extends admin.firestore.DocumentData {
+interface LocationBite extends DocumentData {
   id: string;
   likes: unknown[];
 }
@@ -21,10 +21,9 @@ const isValidCoordinate = (value: unknown): value is number =>
 
 const querySingleBound = async (
   bound: [string, string],
-): Promise<admin.firestore.QueryDocumentSnapshot[]> => {
+): Promise<QueryDocumentSnapshot[]> => {
   try {
-    const snapshot = await admin
-      .firestore()
+    const snapshot = await getFirestore()
       .collection(BITE_COLLECTION)
       .where('geohash', '>=', bound[0])
       .where('geohash', '<=', bound[1])
@@ -38,7 +37,7 @@ const querySingleBound = async (
 };
 
 const toLocationBite = (
-  doc: admin.firestore.QueryDocumentSnapshot,
+  doc: QueryDocumentSnapshot,
 ): LocationBite => ({
   ...doc.data(),
   id: doc.id,

@@ -6,13 +6,16 @@ const setMock = jest.fn();
 const docMock = jest.fn(() => ({ get: getMock, set: setMock }));
 const collectionMock = jest.fn(() => ({ doc: docMock }));
 
-jest.mock('firebase-admin', () => ({
-  auth: (): any => ({
+jest.mock('firebase-admin/auth', () => ({
+  getAuth: (): any => ({
     getUser: getUserMock,
     listUsers: listUsersMock,
     generateEmailVerificationLink: generateEmailVerificationLinkMock,
   }),
-  firestore: (): any => ({
+}));
+
+jest.mock('firebase-admin/firestore', () => ({
+  getFirestore: (): any => ({
     collection: collectionMock,
   }),
 }));

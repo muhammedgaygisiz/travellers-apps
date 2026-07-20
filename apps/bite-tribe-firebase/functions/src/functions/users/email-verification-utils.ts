@@ -1,9 +1,7 @@
-import * as admin from 'firebase-admin';
+import { DocumentData } from 'firebase-admin/firestore';
 
 export type EmailVerificationProvider =
-  | 'password'
-  | 'trusted-provider'
-  | 'unknown';
+  'password' | 'trusted-provider' | 'unknown';
 
 export interface EmailVerificationMetadata {
   emailVerified: boolean;
@@ -16,8 +14,7 @@ export interface EmailVerificationMetadata {
   emailVerificationManualLastSentAtTimestamp?: number;
 }
 
-export interface EmailVerificationClassification
-  extends EmailVerificationMetadata {
+export interface EmailVerificationClassification extends EmailVerificationMetadata {
   eligibleForReminder: boolean;
   reason:
     | 'eligible'
@@ -114,7 +111,7 @@ export const classifyEmailVerificationUser = (
 
 export const buildEmailVerificationMetadata = (
   user: EmailVerificationUser,
-  existingData: admin.firestore.DocumentData = {},
+  existingData: DocumentData = {},
 ): EmailVerificationMetadata => {
   const classification = classifyEmailVerificationUser(user);
   const existingEmail =

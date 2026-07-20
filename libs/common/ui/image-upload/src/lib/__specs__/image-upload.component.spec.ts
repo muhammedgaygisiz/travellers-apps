@@ -66,8 +66,7 @@ type MockFileReader = {
 type ImageUploadInternals = {
   alertController: Partial<AlertController>;
   fileUpload: () =>
-    | { nativeElement: Pick<HTMLInputElement, 'click' | 'value'> }
-    | undefined;
+    { nativeElement: Pick<HTMLInputElement, 'click' | 'value'> } | undefined;
   cropModal: () => { dismiss: jest.Mock } | undefined;
   getImageFromNative: () => Promise<void>;
   takePhotoWithCamera: () => Promise<void>;

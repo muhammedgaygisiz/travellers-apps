@@ -1,6 +1,6 @@
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 
-const db = admin.firestore();
+const db = getFirestore();
 import { logger } from 'firebase-functions';
 
 export const cleanupInvalidTokens = async (

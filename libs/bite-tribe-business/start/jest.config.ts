@@ -4,6 +4,7 @@ const NODE_MODULES_TO_IGNORE = [
   '@ionic',
   '@stencil',
   '@capacitor',
+  '@jsverse',
 ].join('|');
 
 export default {

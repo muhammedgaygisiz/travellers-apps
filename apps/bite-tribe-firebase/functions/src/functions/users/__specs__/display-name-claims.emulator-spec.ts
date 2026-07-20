@@ -1,4 +1,5 @@
-import * as admin from 'firebase-admin';
+import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
+import { DocumentReference, getFirestore } from 'firebase-admin/firestore';
 import { claimDisplayNameForUser } from '../claim-display-name';
 import { checkDisplayNameAvailabilityForUser } from '../check-display-name-availability';
 import { backfillDisplayNameClaims } from '../backfill-display-name-claims';
@@ -7,11 +8,11 @@ const PROJECT_ID = 'bite-tribe-emulator-tests';
 const DISPLAY_NAMES_COLLECTION = 'displayNames';
 const USERS_COLLECTION = 'users';
 
-const claimRef = (normalizedName: string): admin.firestore.DocumentReference =>
-  admin.firestore().collection(DISPLAY_NAMES_COLLECTION).doc(normalizedName);
+const claimRef = (normalizedName: string): DocumentReference =>
+  getFirestore().collection(DISPLAY_NAMES_COLLECTION).doc(normalizedName);
 
-const userRef = (uid: string): admin.firestore.DocumentReference =>
-  admin.firestore().collection(USERS_COLLECTION).doc(uid);
+const userRef = (uid: string): DocumentReference =>
+  getFirestore().collection(USERS_COLLECTION).doc(uid);
 
 const seedUser = async (
   uid: string,
@@ -28,11 +29,11 @@ const seedUser = async (
 };
 
 const clearCollection = async (collectionName: string): Promise<void> => {
-  const collectionRef = admin.firestore().collection(collectionName);
+  const collectionRef = getFirestore().collection(collectionName);
   const snapshot = await collectionRef.limit(1).get();
 
   if (!snapshot.empty) {
-    await admin.firestore().recursiveDelete(collectionRef);
+    await getFirestore().recursiveDelete(collectionRef);
   }
 };
 
@@ -43,7 +44,7 @@ const clearCollections = async (): Promise<void> => {
 };
 
 const queryCount = async (collectionName: string): Promise<number> =>
-  (await admin.firestore().collection(collectionName).count().get()).data()
+  (await getFirestore().collection(collectionName).count().get()).data()
     .count;
 
 describe('display name claims emulator integration', () => {
@@ -54,8 +55,8 @@ describe('display name claims emulator integration', () => {
       );
     }
 
-    if (!admin.apps.length) {
-      admin.initializeApp({ projectId: PROJECT_ID });
+    if (!getApps().length) {
+      initializeApp({ projectId: PROJECT_ID });
     }
   });
 
@@ -65,7 +66,7 @@ describe('display name claims emulator integration', () => {
 
   afterAll(async () => {
     await clearCollections();
-    await Promise.all(admin.apps.map((app) => app?.delete()));
+    await Promise.all(getApps().map((app) => deleteApp(app)));
   });
 
   it('only lets one of two concurrent claims of the same normalized name win', async () => {

@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 
@@ -10,8 +10,7 @@ export const updateLastSeen = onAppCheck(async (request) => {
     );
   }
 
-  const userReference = admin
-    .firestore()
+  const userReference = getFirestore()
     .collection('users')
     .doc(request.auth.uid);
   const userSnapshot = await userReference.get();

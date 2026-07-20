@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
@@ -24,10 +24,9 @@ const isValidCoordinate = (value: unknown): value is number =>
 
 const querySingleBound = async (
   bound: [string, string],
-): Promise<admin.firestore.QueryDocumentSnapshot[]> => {
+): Promise<QueryDocumentSnapshot[]> => {
   try {
-    const snapshot = await admin
-      .firestore()
+    const snapshot = await getFirestore()
       .collection(BITE_COLLECTION)
       .where('geohash', '>=', bound[0])
       .where('geohash', '<=', bound[1])
@@ -41,7 +40,7 @@ const querySingleBound = async (
 };
 
 const getBitePosition = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
 ): Position | undefined => {
   const position = data.position;
 

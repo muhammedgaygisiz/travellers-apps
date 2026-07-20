@@ -1,7 +1,7 @@
 import { onSchedule } from 'firebase-functions/scheduler';
-import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
-import * as admin from 'firebase-admin';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
 import { getInvalidTokens } from '../shared/utils/get-invalid-tokens';
 import { cleanupInvalidTokens } from '../shared/utils/cleanup-invalid-tokens';
 import { getTokens } from '../shared/utils/get-tokens';
@@ -17,7 +17,7 @@ import {
   META_COLLECTION,
 } from '../shared/utils/leaderboard';
 
-const db = admin.firestore();
+const db = getFirestore();
 
 const ZURICH_TZ = 'Europe/Zurich';
 
@@ -66,7 +66,7 @@ const notifyUser = async (change: LeaderboardRankChange): Promise<void> => {
   const chunks = buildChunks(tokens, CHUNK_SIZE);
 
   for (const chunk of chunks) {
-    const res = await admin.messaging().sendEachForMulticast({
+    const res = await getMessaging().sendEachForMulticast({
       tokens: chunk,
       notification: {
         title: 'Leaderboard Update',

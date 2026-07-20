@@ -1,0 +1,18 @@
+- [08 - chore: upgrade the Capacitor 8 native stack](https://github.com/muhammedgaygisiz/travellers-apps/issues/1038) (Issue \#1038)
+- Description
+  - Part of \#1029.
+  - \#\# Goal
+  - Upgrade the Capacitor 8 native stack independently from the Nx and Angular major migrations.
+  - \#\# Scope
+  - Align Capacitor core, CLI, Android, iOS, and official plugins on compatible Capacitor 8 releases.
+  - Align Capacitor Firebase plugins on one compatible release family.
+  - Review native Android/iOS dependency and configuration migrations.
+  - Use Capacitor sync; do not hand-edit generated wrapper output unless required by the migration.
+  - \#\# Acceptance criteria
+  - Android and iOS dependency trees resolve without incompatible plugin versions.
+  - Firebase Analytics, App Check, Auth, Crashlytics, Firestore, Functions, Messaging, and Storage integrations remain operational.
+  - Native wrapper state is reproducible through Capacitor sync.
+  - \#\# Validation
+  - Capacitor doctor and sync for both platforms.
+  - Android and iOS builds plus relevant device smoke checks.
+  - Run `git diff --check`.

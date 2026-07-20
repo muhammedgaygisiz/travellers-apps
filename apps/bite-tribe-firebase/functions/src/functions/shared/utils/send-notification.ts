@@ -1,5 +1,4 @@
-import { BatchResponse } from 'firebase-admin/messaging';
-import * as admin from 'firebase-admin';
+import { BatchResponse, getMessaging } from 'firebase-admin/messaging';
 
 export const sendNotification = async (
   chunk: string[],
@@ -7,7 +6,7 @@ export const sendNotification = async (
   biteId: string,
   authorUid: string,
 ): Promise<BatchResponse> =>
-  await admin.messaging().sendEachForMulticast({
+  await getMessaging().sendEachForMulticast({
     tokens: chunk,
     notification: {
       title: 'New Bite',

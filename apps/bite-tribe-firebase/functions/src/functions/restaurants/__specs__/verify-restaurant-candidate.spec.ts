@@ -46,8 +46,8 @@ const firestoreMock = {
   runTransaction: jest.fn(),
 };
 
-jest.mock('firebase-admin', () => ({
-  firestore: jest.fn(() => firestoreMock),
+jest.mock('firebase-admin/firestore', () => ({
+  getFirestore: jest.fn(() => firestoreMock),
 }));
 
 const request = (data: unknown): never =>

@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 
 export interface SearchBite {
   id: string;
@@ -15,12 +15,12 @@ export interface SearchBite {
 }
 
 export const getString = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
   field: string,
 ): string => (typeof data[field] === 'string' ? data[field] : '');
 
 export const getStringArray = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
   field: string,
 ): string[] => {
   const value = data[field];
@@ -30,7 +30,7 @@ export const getStringArray = (
 };
 
 const getPosition = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
 ): SearchBite['position'] => {
   const position = data.position;
 
@@ -48,7 +48,7 @@ const getPosition = (
 };
 
 export const toSearchBite = (
-  doc: admin.firestore.QueryDocumentSnapshot,
+  doc: QueryDocumentSnapshot,
 ): SearchBite => {
   const bite = doc.data();
   const description = getString(bite, 'description');

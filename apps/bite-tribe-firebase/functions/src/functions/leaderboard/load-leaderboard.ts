@@ -1,5 +1,4 @@
-import * as admin from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
@@ -14,7 +13,7 @@ import {
 const BITES_COLLECTION = 'bites';
 const WRITE_BATCH_LIMIT = 500;
 
-const db = admin.firestore();
+const db = getFirestore();
 
 const getActualBiteCount = async (userId: string): Promise<number> => {
   const countSnap = await db

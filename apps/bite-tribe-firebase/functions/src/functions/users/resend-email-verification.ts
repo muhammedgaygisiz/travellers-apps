@@ -1,4 +1,5 @@
-import * as admin from 'firebase-admin';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { logger } from 'firebase-functions';
 import { onAppCheck } from '../shared/callable-options';
@@ -25,7 +26,7 @@ export const resendEmailVerificationForUser = async (
   sender: VerificationEmailSender = sendGoogleWorkspaceVerificationEmail,
   now: Date = new Date(),
 ): Promise<ResendEmailVerificationResult> => {
-  const authUser = await admin.auth().getUser(uid);
+  const authUser = await getAuth().getUser(uid);
   const classification = classifyEmailVerificationUser(authUser);
 
   if (classification.reason === 'already-verified') {
@@ -46,7 +47,7 @@ export const resendEmailVerificationForUser = async (
     throw new HttpsError('failed-precondition', 'unsupported_provider');
   }
 
-  const userReference = admin.firestore().collection('users').doc(uid);
+  const userReference = getFirestore().collection('users').doc(uid);
   const userSnapshot = await userReference.get();
   const existingData = userSnapshot.data() || {};
   const metadata = buildEmailVerificationMetadata(authUser, existingData);
@@ -55,8 +56,7 @@ export const resendEmailVerificationForUser = async (
     throw new HttpsError('resource-exhausted', 'rate_limited');
   }
 
-  const verificationLink = await admin
-    .auth()
+  const verificationLink = await getAuth()
     .generateEmailVerificationLink(authUser.email);
 
   await sender({ to: authUser.email, verificationLink });

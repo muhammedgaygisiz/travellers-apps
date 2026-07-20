@@ -15,11 +15,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
  * acknowledged but nothing can be granted here.
  */
 export type LocationPermissionState =
-  | 'idle'
-  | 'requesting'
-  | 'granted'
-  | 'denied'
-  | 'unsupported';
+  'idle' | 'requesting' | 'granted' | 'denied' | 'unsupported';
 
 /**
  * Location onboarding step. It explains what the device position is used for —

@@ -164,10 +164,10 @@ Perform these as small, separately validated batches:
 - Angular 21.0.x to the latest supported Angular 21.2.x family. Status: complete (issue #1031).
 - NgRx 21.0.x to the latest NgRx 21.x family. Status: complete (issue #1031).
 - Ionic 8.7.x to the latest compatible Ionic 8.x release. Status: complete (issue #1031).
-- Storybook 10.1.x to the latest compatible Storybook 10.x release.
-- Jest 30.0.x and its environments/utilities to a consistent Jest 30 release.
-- `jest-preset-angular` to a release supporting Angular 21, Jest 30, and the selected TypeScript version.
-- Playwright to a current compatible release, followed by browser reinstallation and E2E validation.
+- Storybook 10.1.x to the latest compatible Storybook 10.x release. Status: complete (issue #1036).
+- Jest 30.0.x and its environments/utilities to a consistent Jest 30 release. Status: complete (issue #1036).
+- `jest-preset-angular` to a release supporting Angular 21, Jest 30, and the selected TypeScript version. Status: complete (issue #1036).
+- Playwright to a current compatible release, followed by browser reinstallation and E2E validation. Status: complete (issue #1036).
 
 Do not use raw `npm update` for Angular. Use Nx/Angular migrations so the Angular framework, CLI, Devkit, Material, CDK, compiler, and Zone.js remain compatible.
 
@@ -193,6 +193,28 @@ Two source-level adaptations were required:
 Validation run for issue #1031 (Node 24.18.0): `bite-tribe` and `bite-tribe-business` production builds passed; `nx run-many -t test --all` passed for all 81 projects; lint passed for `bite-tribe`, `bite-tribe-business`, `common-ui-page`, `bite-tribe-business/organisation-dashboard`, `bite-tribe-business/edit-menu`, and `storybook-host`; the Firebase Functions `tsc` build and the project's real `npm run lint` are clean; the Storybook host build passed and the Storybook dev server rendered Ionic components correctly in a real browser; direct Loki visual regression passed with zero differences across three consecutive full runs (244 stories per run); `git diff --check` is clean. Playwright E2E and native Capacitor Android/iOS builds were deferred to CI/device runs because they need emulators and native toolchains.
 
 Direct Loki initially reported failures on the restaurant `@defer` image stories. Investigation showed this was a pre-existing capture race rather than an Angular or Ionic regression: every diff was confined to the hero-image region while all surrounding layout, text, and map pixels matched exactly, and 237 of 244 stories passed untouched. Loki was capturing before the `@placeholder (minimum 1000ms)` block resolved, and seven references had been approved in the skeleton state. Fixed at the Loki/Storybook boundary with a per-story settle gate and re-recorded references; see [[Current State - Known Issues]].
+
+### Storybook, Jest, and Playwright batch (issue #1036)
+
+Landed together as the shared test/visual-regression toolchain, each kept inside its current major:
+
+| Package family                                                                | From      | To        |
+| ----------------------------------------------------------------------------- | --------- | --------- |
+| Storybook (`storybook`, `@storybook/angular`, `@storybook/addon-docs`)        | `10.1.11` | `10.5.2`  |
+| `eslint-plugin-storybook`                                                     | `10.1.11` | `10.5.2`  |
+| `@chromatic-com/storybook`                                                    | `5.0.0`   | `5.2.1`   |
+| Jest (`jest`, `jest-environment-jsdom`, `jest-environment-node`, `jest-util`) | `30.0.5`  | `30.4.1`  |
+| `ts-jest`                                                                     | `29.4.1`  | `29.4.11` |
+| `jest-preset-angular`                                                         | `16.0.0`  | `16.2.0`  |
+| `@playwright/test`                                                            | `1.54.2`  | `1.61.1`  |
+
+`@types/jest` was already at its latest `30.0.0` and is unchanged. The `@angular-devkit/build-angular` override that pins `jest`/`jest-environment-jsdom` was moved from `30.0.5` to `30.4.1` so the whole Jest set resolves to one version. No framework major changed: Storybook stays on 10, Jest on 30, `jest-preset-angular` on 16 (16.2.0 still declares `@angular/core >=19 <23`, `jest ^30`, and `typescript >=5.5`, so Angular 21 / Jest 30 / TypeScript 5.9 remain in range), and Playwright on 1.x. `jest-preset-angular@17` and `storybook@10.6`+ prereleases were deliberately not taken.
+
+One source-level adaptation was required:
+
+- Storybook 10.5 tightened the toolbar `globalTypes` type: `showName` was removed from `ToolbarConfig`, so `apps/storybook-host/.storybook/preview.ts` failed to compile with `TS2353`. Removed the `showName: true` entry from the `locale` toolbar; `dynamicTitle: true` already drives the selected-value title. This is Storybook manager chrome, not part of the story preview iframe Loki captures, so it does not change any visual-regression reference.
+
+Validation run for issue #1036 (Node 24 target; run locally under Node 22 in the agent sandbox): representative Angular Jest suites (`bite-tribe/bite-data-access`, `bite-tribe/store`, `common-ui-card`) and a non-Angular suite (`utils-common`) passed through Nx (55 suites / 425 tests); the Storybook host build passed after the `preview.ts` fix; `eslint-plugin-storybook` 10.5 flat-config lint for `storybook-host` passed; Playwright `1.61.1` loaded `apps/bite-tribe-e2e/playwright.config.ts` and enumerated its five specs; `git diff --check` is clean. Serial Playwright E2E against the Firebase emulators, CI browser (re)installation, and direct Loki visual regression were deferred to CI/device runs because they need the Firebase emulators, a downloaded browser binary, and the `sharp` prebuilt binary (blocked by the sandbox egress policy, the same limitation recorded for issue #1033). The Storybook build that Loki consumes is green and no story-facing render changed.
 
 ## Phase 4 - Angular 22
 

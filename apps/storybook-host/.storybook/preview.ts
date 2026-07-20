@@ -126,7 +126,6 @@ const preview: Preview = {
       toolbar: {
         icon: 'globe',
         items: SUPPORTED_LOCALES,
-        showName: true,
         dynamicTitle: true,
       },
     },

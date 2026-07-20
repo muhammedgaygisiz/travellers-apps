@@ -113,6 +113,26 @@ describe('App Reducer', () => {
     });
   });
 
+  describe('updatedGPSPositionWithoutReload', () => {
+    it('advances the position but leaves the loaded bites in place', () => {
+      const INITIAL_STATE = {
+        position: { latitude: 1, longitude: 2 },
+        bites: ['existing-bite'],
+        reloading: { home: true },
+      } as unknown as AppSlice;
+
+      const action = AppActions.updatedGPSPositionWithoutReload({
+        position: { coords: { latitude: 3, longitude: 4 } },
+      });
+
+      expect(reducer(INITIAL_STATE, action)).toEqual({
+        position: { latitude: 3, longitude: 4 },
+        bites: ['existing-bite'],
+        reloading: { home: false },
+      });
+    });
+  });
+
   describe('errorLoadingGpsPosition', () => {
     it('should keep old position', () => {
       const INITIAL_STATE = {

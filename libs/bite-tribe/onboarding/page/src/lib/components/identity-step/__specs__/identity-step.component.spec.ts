@@ -200,6 +200,47 @@ describe(IdentityStepComponent.name, () => {
     },
   );
 
+  it('shows the chosen photo in the avatar and falls back to the icon on failure', () => {
+    fixture.componentRef.setInput('profile', {
+      displayName: 'Mo',
+      photoUrl: 'profile-photo',
+    });
+    fixture.detectChanges();
+
+    const avatar = (): HTMLElement | null =>
+      (fixture.debugElement.nativeElement as HTMLElement).querySelector(
+        'img.profile-image',
+      );
+    const fallbackIcon = (): HTMLElement | null =>
+      (fixture.debugElement.nativeElement as HTMLElement).querySelector(
+        'ion-icon.profile-image',
+      );
+
+    expect(avatar()).not.toBeNull();
+    expect(fallbackIcon()).toBeNull();
+
+    // A broken image URL drops back to the person icon rather than a torn image.
+    component.handleProfileImageError('profile-photo');
+    fixture.detectChanges();
+
+    expect(avatar()).toBeNull();
+    expect(fallbackIcon()).not.toBeNull();
+  });
+
+  it('shows the fallback icon when the profile has no photo', () => {
+    fixture.componentRef.setInput('profile', {
+      displayName: 'Mo',
+      photoUrl: '',
+    });
+    fixture.detectChanges();
+
+    expect(
+      (fixture.debugElement.nativeElement as HTMLElement).querySelector(
+        'ion-icon.profile-image',
+      ),
+    ).not.toBeNull();
+  });
+
   it.each(['idle', 'checking', 'available'] as const)(
     'clears the control error when availability is %s',
     (state) => {

@@ -236,6 +236,7 @@
   "onboarding-back": "Voltar",
   "onboarding-next": "Avançar",
   "onboarding-finish": "Concluir",
+  "onboarding-advancing": "A guardar...",
   "onboarding-step-placeholder": "Esta etapa será concluída em uma próxima atualização.",
   "onboarding-acknowledge": "Eu entendi e quero continuar",
   "onboarding-identity-copy": "Escolhe o nome pelo qual outros exploradores de comida te reconhecerão. Podes adicionar uma foto de perfil agora ou saltar.",

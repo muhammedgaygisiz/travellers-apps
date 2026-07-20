@@ -278,12 +278,13 @@ describe(AppEffect.name, () => {
       );
     });
 
-    it('should dispatch clearReloadGPSPosition if no meaningful movement', () => {
+    it('refreshes the marker without a reload when movement is below threshold', () => {
+      const smallMovementPosition = {
+        coords: { latitude: 10.00001, longitude: 20.00001 },
+      };
+
       scheduler.run(({ cold, expectObservable }) => {
         const previousPosition = { latitude: 10, longitude: 20 };
-        const smallMovementPosition = {
-          coords: { latitude: 10.00001, longitude: 20.00001 },
-        };
 
         (store as MockStore).overrideSelector(gpsPosition, previousPosition);
         getCurrentPositionMock.mockReturnValue(
@@ -295,10 +296,15 @@ describe(AppEffect.name, () => {
         expectObservable(effects.fetchGpsPosition$);
       });
 
+      // The fresh position is applied so the map marker follows the user, but
+      // no bite refetch is triggered (that only rides on loadedGPSPosition).
       expect(dispatchSpy).toHaveBeenCalledWith(
-        AppActions.clearReloadGPSPosition({
-          reason: 'No meaningful movement detected',
+        AppActions.updatedGPSPositionWithoutReload({
+          position: smallMovementPosition,
         }),
+      );
+      expect(dispatchSpy).not.toHaveBeenCalledWith(
+        AppActions.loadedGPSPosition({ position: smallMovementPosition }),
       );
     });
 

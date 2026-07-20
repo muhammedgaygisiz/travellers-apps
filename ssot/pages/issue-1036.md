@@ -1,0 +1,28 @@
+- [07 - chore: update Storybook, Jest, and Playwright within current majors](https://github.com/muhammedgaygisiz/travellers-apps/issues/1036) (Issue \#1036)
+- Description
+  - Part of \#1029.
+  - \#\# Goal
+  - Stabilize Storybook, Jest, jest-preset-angular, and Playwright on current compatible releases without changing framework majors.
+  - \#\# Scope
+  - Upgrade the Storybook 10 package family together.
+  - Upgrade Jest 30, environments, utilities, and compatible ts-jest tooling as one set.
+  - Upgrade `jest-preset-angular` to a release compatible with Angular 21, Jest 30, and TypeScript 5.9.
+  - Upgrade Playwright and reinstall the selected browser binaries.
+  - Keep direct `oblador/loki` visual regression operational.
+  - \#\# Acceptance criteria
+  - Storybook and direct Loki work together.
+  - Jest configuration loads across representative Angular and non-Angular projects.
+  - Playwright remains deterministic with the Firebase emulators.
+  - \#\# Validation
+  - Storybook build and Loki visual regression.
+  - Representative Nx/direct Jest suites.
+  - Serial Playwright E2E and CI browser installation.
+  - Run `git diff --check`.
+- Outcome
+  - Storybook `10.1.11` -> `10.5.2` (`storybook`, `@storybook/angular`, `@storybook/addon-docs`, `eslint-plugin-storybook`); `@chromatic-com/storybook` `5.0.0` -> `5.2.1`.
+  - Jest `30.0.5` -> `30.4.1` (`jest`, `jest-environment-jsdom`, `jest-environment-node`, `jest-util`); `ts-jest` `29.4.1` -> `29.4.11`; the `@angular-devkit/build-angular` override for `jest`/`jest-environment-jsdom` moved to `30.4.1` so the Jest set resolves to one version. `@types/jest` was already `30.0.0`.
+  - `jest-preset-angular` `16.0.0` -> `16.2.0`; it still declares `@angular/core >=19 <23`, `jest ^30`, and `typescript >=5.5`, so Angular 21, Jest 30, and TypeScript 5.9 stay in range. `jest-preset-angular@17` was not taken.
+  - `@playwright/test` `1.54.2` -> `1.61.1`.
+  - No framework major changed: Storybook stays on 10, Jest on 30, `jest-preset-angular` on 16, Playwright on 1.x. No `storybook@10.6`+ prerelease entered the lockfile.
+  - Storybook 10.5 removed `showName` from the toolbar `ToolbarConfig` type; `apps/storybook-host/.storybook/preview.ts` failed to compile with `TS2353`. Removed `showName: true` from the `locale` toolbar (the existing `dynamicTitle: true` drives the selected-value title). This is Storybook manager chrome, not the story preview iframe Loki captures, so no visual-regression reference changed.
+  - Details and the validation run are recorded in [[Current State - Nx And Dependency Migration Roadmap]].

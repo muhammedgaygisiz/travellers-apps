@@ -4,10 +4,7 @@ interface RestaurantCandidatePosition {
 }
 
 export type RestaurantCandidateStatus =
-  | 'pending'
-  | 'verified'
-  | 'dismissed'
-  | 'merged';
+  'pending' | 'verified' | 'dismissed' | 'merged';
 
 export interface RestaurantCandidateEvidence {
   biteCount: number;

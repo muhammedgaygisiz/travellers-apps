@@ -15,11 +15,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
  * step still has to be acknowledged but nothing can be granted.
  */
 export type NotificationPermissionState =
-  | 'idle'
-  | 'requesting'
-  | 'granted'
-  | 'denied'
-  | 'unsupported';
+  'idle' | 'requesting' | 'granted' | 'denied' | 'unsupported';
 
 /**
  * Notification onboarding step. It explains what notifications are used for

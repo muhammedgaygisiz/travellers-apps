@@ -26,12 +26,7 @@ export interface OnboardingIdentityDraft {
 }
 
 export type DisplayNameAvailabilityState =
-  | 'idle'
-  | 'checking'
-  | 'available'
-  | 'taken'
-  | 'invalid'
-  | 'error';
+  'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'error';
 
 @Component({
   selector: 'onboarding-identity-step',

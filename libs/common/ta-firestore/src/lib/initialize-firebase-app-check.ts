@@ -17,9 +17,7 @@ const NATIVE_TOKEN_EXPIRY_FALLBACK_MS = 5 * 60 * 1000;
 const TRANSITIONAL_POLICY = 'continue_after_failure';
 
 export type FirebaseAppCheckRuntimeMode =
-  | 'dev_simulator'
-  | 'local_prod_firebase'
-  | 'production';
+  'dev_simulator' | 'local_prod_firebase' | 'production';
 
 export type FirebaseAppCheckTelemetryOptions = {
   analytics?: Analytics | null;

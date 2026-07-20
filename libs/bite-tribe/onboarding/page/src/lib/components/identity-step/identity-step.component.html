@@ -4,8 +4,56 @@
   </p>
 
   <div class="identity-step__photo">
-    <image-upload formControlName="photoUrl" />
+    <div class="profile-image-block" id="onboarding-select-image">
+      @let photoUrl = form.get('photoUrl')?.value;
+      @if (shouldShowProfileImage(photoUrl)) {
+        <img
+          [src]="photoUrl"
+          alt="Profile"
+          class="profile-image"
+          (load)="handleProfileImageLoad()"
+          (error)="handleProfileImageError(photoUrl)"
+        />
+      } @else {
+        <ion-icon name="person-circle-outline" class="profile-image" />
+      }
+      <ion-button fill="clear" data-testid="onboarding-edit-photo">
+        {{ 'edit' | transloco }}
+      </ion-button>
+    </div>
     <p>{{ 'onboarding-identity-photo-optional' | transloco }}</p>
+
+    <ion-modal
+      #imageModal
+      trigger="onboarding-select-image"
+      [backdropDismiss]="false"
+    >
+      <ng-template>
+        <ion-header>
+          <ion-toolbar>
+            <ion-buttons>
+              <ion-button (click)="cancelImageSelection()">
+                {{ 'cancel' | transloco }}
+              </ion-button>
+            </ion-buttons>
+            <ion-title>{{ 'profile-image' | transloco }}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+
+        <ion-content class="ion-padding">
+          <image-upload formControlName="photoUrl" />
+
+          <ion-button
+            expand="block"
+            class="ion-margin-top"
+            data-testid="onboarding-save-photo"
+            (click)="confirmImageSelection()"
+          >
+            {{ 'save' | transloco }}
+          </ion-button>
+        </ion-content>
+      </ng-template>
+    </ion-modal>
   </div>
 
   <ion-input

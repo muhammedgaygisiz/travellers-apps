@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { NavController } from '@ionic/angular';
+import { LoadingController, NavController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import {
   OnboardingDataAccessService,
@@ -28,6 +29,9 @@ describe('OnboardingService', () => {
   let completeOnboarding: jest.Mock;
   let navigateRoot: jest.Mock;
   let logEvent: jest.Mock;
+  let loadingPresent: jest.Mock;
+  let loadingDismiss: jest.Mock;
+  let createLoading: jest.Mock;
 
   /** Device locale backing the currency and language prefill. */
   const mockDeviceLocale = (locale: string): void => {
@@ -73,6 +77,11 @@ describe('OnboardingService', () => {
     completeOnboarding = jest.fn().mockResolvedValue(undefined);
     navigateRoot = jest.fn();
     logEvent = jest.fn();
+    loadingPresent = jest.fn().mockResolvedValue(undefined);
+    loadingDismiss = jest.fn().mockResolvedValue(undefined);
+    createLoading = jest
+      .fn()
+      .mockResolvedValue({ present: loadingPresent, dismiss: loadingDismiss });
 
     TestBed.configureTestingModule({
       providers: [
@@ -99,6 +108,11 @@ describe('OnboardingService', () => {
           useValue: { loadCompletedSteps, saveCompletedSteps },
         },
         { provide: NavController, useValue: { navigateRoot } },
+        { provide: LoadingController, useValue: { create: createLoading } },
+        {
+          provide: TranslocoService,
+          useValue: { translate: jest.fn((key: string) => key) },
+        },
       ],
     });
 
@@ -255,6 +269,19 @@ describe('OnboardingService', () => {
       expect(service.currentStep().id).toBe('currency');
     });
 
+    it('stays on the visibility step when the profile write fails', async () => {
+      setup(['identity']);
+      saveProfile.mockRejectedValue(new Error('offline'));
+      await service.initialize();
+
+      service.updateVisibility(true);
+      // The rejection must be swallowed, not thrown out of next().
+      await expect(service.next()).resolves.toBeUndefined();
+
+      expect(service.currentStep().id).toBe('visibility');
+      expect(saveCompletedSteps).not.toHaveBeenCalled();
+    });
+
     it('lands on the finish step ready to complete without extra input', async () => {
       setup(ONBOARDING_STEPS.slice(0, -1).map((step) => step.id));
 
@@ -362,6 +389,62 @@ describe('OnboardingService', () => {
       expect(logEvent).not.toHaveBeenCalledWith(
         AnalyticsEvent.OnboardingAssistantCompleted,
       );
+    });
+
+    it('covers the persisting step with a loading overlay', async () => {
+      setup(['identity']);
+      await service.initialize();
+      service.updateVisibility(true);
+
+      await service.next();
+
+      expect(createLoading).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'onboarding-advancing',
+          backdropDismiss: false,
+        }),
+      );
+      expect(loadingPresent).toHaveBeenCalledTimes(1);
+      expect(loadingDismiss).toHaveBeenCalledTimes(1);
+      expect(service.currentStep().id).toBe('currency');
+    });
+
+    it('ignores a second advance while the first is still persisting', async () => {
+      setup(['identity']);
+      let resolveSave: (value: unknown) => void = () => undefined;
+      saveProfile.mockReturnValue(
+        new Promise((resolve) => (resolveSave = resolve)),
+      );
+      await service.initialize();
+      service.updateVisibility(true);
+
+      const first = service.next();
+      // A double tap during the in-flight write must not persist or advance twice.
+      await service.next();
+
+      resolveSave({ userId: 'user-1', public: true });
+      await first;
+
+      const stepCompletions = logEvent.mock.calls.filter(
+        ([event]) => event === AnalyticsEvent.OnboardingStepCompleted,
+      );
+      expect(saveProfile).toHaveBeenCalledTimes(1);
+      expect(saveCompletedSteps).toHaveBeenCalledTimes(1);
+      expect(createLoading).toHaveBeenCalledTimes(1);
+      expect(stepCompletions).toHaveLength(1);
+      expect(service.currentStep().id).toBe('currency');
+    });
+
+    it('dismisses the overlay and stays put when a persist fails', async () => {
+      setup(['identity', 'visibility']);
+      saveSettings.mockRejectedValue(new Error('offline'));
+      await service.initialize();
+
+      expect(service.currentStep().id).toBe('currency');
+      await service.next();
+
+      expect(loadingDismiss).toHaveBeenCalledTimes(1);
+      expect(service.currentStep().id).toBe('currency');
     });
   });
 

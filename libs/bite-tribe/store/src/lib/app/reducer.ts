@@ -90,13 +90,20 @@ export const reducer = createReducer<AppSlice>(
       errorLoadingGpsPosition: false,
     };
   }),
-  on(AppActions.clearReloadGPSPosition, (state) => ({
-    ...state,
-    reloading: {
-      ...state.reloading,
-      home: false,
-    },
-  })),
+  on(AppActions.updatedGPSPositionWithoutReload, (state, { position }) => {
+    const { latitude, longitude } = position.coords;
+
+    // Keep the marker on the user's live position, but leave the bites (loaded
+    // for the last meaningful position) untouched so no backend refetch runs.
+    return {
+      ...state,
+      position: { latitude, longitude },
+      reloading: {
+        ...state.reloading,
+        home: false,
+      },
+    };
+  }),
   on(
     AppActions.loadedSettingsFromAPI,
     AppActions.savedSettings,

@@ -236,6 +236,7 @@
   "onboarding-back": "Retour",
   "onboarding-next": "Suivant",
   "onboarding-finish": "Terminer",
+  "onboarding-advancing": "Enregistrement...",
   "onboarding-step-placeholder": "Cette étape sera complétée dans une prochaine mise à jour.",
   "onboarding-acknowledge": "J'ai compris et je veux continuer",
   "onboarding-identity-copy": "Choisis le nom grâce auquel les autres explorateurs culinaires te reconnaîtront. Tu peux ajouter une photo de profil maintenant ou passer cette étape.",

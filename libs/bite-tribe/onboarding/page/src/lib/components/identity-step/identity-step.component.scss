@@ -11,7 +11,8 @@
 
 .identity-step__photo {
   display: grid;
-  gap: 0.5rem;
+  justify-items: center;
+  gap: 0.25rem;
 
   p {
     margin: 0;
@@ -20,14 +21,17 @@
   }
 }
 
-:host ::ng-deep image-upload {
-  .image-loading,
-  .image-placeholder {
-    height: clamp(8rem, 28dvh, 12rem);
-  }
+.profile-image-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-  .image-preview img {
-    max-height: clamp(8rem, 28dvh, 12rem);
+  .profile-image {
+    width: 8rem;
+    height: 8rem;
+    border-radius: 50%;
+    object-fit: cover;
+    color: var(--ion-color-medium);
   }
 }
 

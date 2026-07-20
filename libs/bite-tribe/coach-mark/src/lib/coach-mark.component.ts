@@ -109,10 +109,23 @@ export class CoachMarkComponent {
       return null;
     }
 
-    const rect = element.getBoundingClientRect();
+    let rect = element.getBoundingClientRect();
+
+    // Surfaces such as bite details anchor marks to controls that sit below the
+    // fold. Spotlighting them where they are would cut a hole nobody can see
+    // and push the card off screen, so scroll them in first and re-measure.
+    if (!this.isFullyVisible(rect)) {
+      element.scrollIntoView({ block: 'center', inline: 'nearest' });
+      rect = element.getBoundingClientRect();
+    }
+
     // A zero-size rect means the element is not laid out (or hidden); a centred
     // card reads better than a spotlight cut over nothing.
     return rect.width > 0 || rect.height > 0 ? rect : null;
+  }
+
+  private isFullyVisible(rect: DOMRect): boolean {
+    return rect.top >= 0 && rect.bottom <= (window.innerHeight || 0);
   }
 
   private resolveAnchorElement(): HTMLElement | null {

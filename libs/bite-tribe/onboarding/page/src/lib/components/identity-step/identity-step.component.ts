@@ -6,14 +6,28 @@ import {
   inject,
   input,
   output,
+  signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
   type ValidatorFn,
 } from '@angular/forms';
-import { IonInput, IonSpinner, IonText } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonInput,
+  IonModal,
+  IonSpinner,
+  IonText,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { PublicUser } from 'model';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs';
@@ -35,9 +49,17 @@ export type DisplayNameAvailabilityState =
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonHeader,
+    IonIcon,
     IonInput,
+    IonModal,
     IonSpinner,
     IonText,
+    IonTitle,
+    IonToolbar,
     ImageUploadComponent,
     TranslocoPipe,
   ],
@@ -51,6 +73,11 @@ export class IdentityStepComponent {
 
   identityChange = output<OnboardingIdentityDraft>();
   checkDisplayName = output<string>();
+
+  private readonly imageModal = viewChild<IonModal>('imageModal');
+
+  /** Latest photo URL that failed to load, so the avatar falls back to the icon. */
+  private readonly failedPhotoUrl = signal<string | null>(null);
 
   readonly form = this.formBuilder.nonNullable.group({
     displayName: ['', this.displayNameAvailabilityValidator()],
@@ -106,6 +133,29 @@ export class IdentityStepComponent {
         ? { [state]: true }
         : null;
     };
+  }
+
+  /** Shows the chosen photo unless it is missing or last failed to load. */
+  shouldShowProfileImage(photoUrl: string | null | undefined): boolean {
+    return !!photoUrl && photoUrl !== this.failedPhotoUrl();
+  }
+
+  handleProfileImageLoad(): void {
+    this.failedPhotoUrl.set(null);
+  }
+
+  handleProfileImageError(photoUrl: string | null | undefined): void {
+    this.failedPhotoUrl.set(photoUrl || null);
+  }
+
+  /** Dismisses without keeping edits made in the modal. */
+  cancelImageSelection(): void {
+    this.imageModal()?.dismiss(null, 'cancel');
+  }
+
+  /** Confirms the chosen photo; the form control already holds the value. */
+  confirmImageSelection(): void {
+    this.imageModal()?.dismiss();
   }
 
   constructor() {

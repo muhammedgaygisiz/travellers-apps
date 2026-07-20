@@ -25,7 +25,10 @@ export class OnboardingPage {
   readonly finishStep: Locator;
   readonly displayNameInput: Locator;
   readonly displayNameStatus: Locator;
+  readonly editPhotoButton: Locator;
   readonly photoInput: Locator;
+  readonly photoPreview: Locator;
+  readonly savePhotoButton: Locator;
   readonly visibilityChoice: Locator;
   readonly currencyStep: Locator;
   readonly currencyDefaultValue: Locator;
@@ -44,7 +47,12 @@ export class OnboardingPage {
       .getByTestId('onboarding-display-name')
       .locator('input');
     this.displayNameStatus = page.getByTestId('onboarding-display-name-status');
+    this.editPhotoButton = page.getByTestId('onboarding-edit-photo');
     this.photoInput = page.getByTestId('image-file-input');
+    this.photoPreview = page.locator(
+      'ion-modal image-upload .image-preview img',
+    );
+    this.savePhotoButton = page.getByTestId('onboarding-save-photo');
     this.visibilityChoice = page.getByTestId('onboarding-visibility-choice');
     this.currencyStep = page.locator('onboarding-currency-step');
     this.currencyDefaultValue = page.getByTestId(
@@ -145,12 +153,18 @@ export class OnboardingPage {
     await this.expectNextEnabled();
 
     // The photo is optional, but adding one is what routes the profile write
-    // through the upload path, so leaving it out never exercises that path.
+    // through the upload path, so leaving it out never exercises that path. The
+    // picker now lives behind the avatar's "Edit" modal, so open it, upload, and
+    // wait for the preview before confirming — dismissing too early would race
+    // the image processing that sets the form value.
+    await this.editPhotoButton.click();
     await this.photoInput.setInputFiles({
       name: 'avatar.png',
       mimeType: 'image/png',
       buffer: ONE_PIXEL_PNG,
     });
+    await expect(this.photoPreview).toBeVisible();
+    await this.savePhotoButton.click();
 
     // A photo says nothing about the display name, so it must not undo the
     // availability the step just confirmed (#1023 follow-up).

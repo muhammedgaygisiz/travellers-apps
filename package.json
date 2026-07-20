@@ -77,7 +77,7 @@
     "@capacitor/status-bar": "8.0.3",
     "@capawesome/capacitor-file-picker": "8.0.3",
     "@ionic/angular": "8.8.14",
-    "@jsverse/transloco": "7.6.1",
+    "@jsverse/transloco": "8.4.0",
     "@ngrx/component-store": "21.1.1",
     "@ngrx/effects": "21.1.1",
     "@ngrx/entity": "21.1.1",

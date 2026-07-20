@@ -4,13 +4,10 @@ import {
   getBitePosition,
 } from '../enrich-bite-address-on-create';
 
-jest.mock('firebase-admin', () => ({
-  firestore: jest.fn(() => ({
+jest.mock('firebase-admin/firestore', () => ({
+  getFirestore: jest.fn(() => ({
     doc: jest.fn(),
   })),
-}));
-
-jest.mock('firebase-admin/firestore', () => ({
   FieldValue: {
     serverTimestamp: jest.fn(() => 'server-timestamp'),
   },

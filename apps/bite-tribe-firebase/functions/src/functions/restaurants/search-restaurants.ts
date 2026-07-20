@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 
@@ -24,12 +24,12 @@ interface SearchRestaurant {
 }
 
 const getString = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
   field: string,
 ): string => (typeof data[field] === 'string' ? data[field] : '');
 
 const getStringArray = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
   field: string,
 ): string[] => {
   const value = data[field];
@@ -39,7 +39,7 @@ const getStringArray = (
 };
 
 const getPosition = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
 ): SearchRestaurant['position'] => {
   const position = data.position;
 
@@ -64,18 +64,18 @@ const idFromPath = (value: string): string => {
   return segments[segments.length - 1] ?? value;
 };
 
-const getBiteId = (bite: admin.firestore.QueryDocumentSnapshot): string =>
+const getBiteId = (bite: QueryDocumentSnapshot): string =>
   getString(bite.data(), 'id') || bite.id;
 
 const getNormalizedRestaurantId = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
 ): string => {
   const restaurantId = getString(data, 'restaurantId');
   return restaurantId ? idFromPath(restaurantId) : '';
 };
 
 const toVerifiedRestaurant = (
-  restaurant: admin.firestore.QueryDocumentSnapshot,
+  restaurant: QueryDocumentSnapshot,
   biteId: string,
   place?: string,
   position?: SearchRestaurant['position'],
@@ -97,7 +97,7 @@ const toVerifiedRestaurant = (
 };
 
 const toUnverifiedRestaurant = (
-  bite: admin.firestore.QueryDocumentSnapshot,
+  bite: QueryDocumentSnapshot,
 ): SearchRestaurant => {
   const data = bite.data();
   const place = getString(data, 'place');
@@ -136,8 +136,8 @@ export const searchRestaurants = onAppCheck<SearchRestaurantsRequest>(
     }
 
     const [restaurantsSnapshot, bitesSnapshot] = await Promise.all([
-      admin.firestore().collection('restaurants').get(),
-      admin.firestore().collection('bites').get(),
+      getFirestore().collection('restaurants').get(),
+      getFirestore().collection('bites').get(),
     ]);
     const bites = bitesSnapshot.docs;
     const results = new Map<string, SearchRestaurant>();

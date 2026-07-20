@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import type { AuthUserRecord } from 'firebase-functions/v2/identity';
 import { buildEmailVerificationMetadata } from './email-verification-utils';
@@ -22,8 +22,7 @@ export const createUserOnAuthCreate = beforeUserCreated(async (event) => {
 
   const now = new Date();
 
-  await admin
-    .firestore()
+  await getFirestore()
     .collection(USERS_COLLECTION)
     .doc(user.uid)
     .set({

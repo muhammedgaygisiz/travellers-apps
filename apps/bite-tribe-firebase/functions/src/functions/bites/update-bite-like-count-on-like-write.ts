@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, QuerySnapshot, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import {
   onDocumentCreated,
@@ -17,12 +17,12 @@ type LikeCounts = Record<LikeType, number>;
 const LIKE_TYPES: LikeType[] = ['thumbup', 'drooling', 'mindblown'];
 const BITE_COLLECTION = 'bites';
 
-const db = admin.firestore();
+const db = getFirestore();
 
 const isLikeType = (value: unknown): value is LikeType =>
   LIKE_TYPES.includes(value as LikeType);
 
-const hasAggregateLikeCounts = (bite: admin.firestore.DocumentData): boolean =>
+const hasAggregateLikeCounts = (bite: DocumentData): boolean =>
   LIKE_TYPES.every((likeType) => typeof bite[likeType] === 'number');
 
 const getEmptyLikeCounts = (): LikeCounts => ({
@@ -32,7 +32,7 @@ const getEmptyLikeCounts = (): LikeCounts => ({
 });
 
 const countLikes = (
-  likesSnap: admin.firestore.QuerySnapshot<admin.firestore.DocumentData>,
+  likesSnap: QuerySnapshot<DocumentData>,
 ): LikeCounts =>
   likesSnap.docs.reduce<LikeCounts>((counts, likeSnap) => {
     const like = likeSnap.data() as Like;

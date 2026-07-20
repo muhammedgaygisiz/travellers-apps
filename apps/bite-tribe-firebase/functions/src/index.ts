@@ -1,6 +1,6 @@
-import * as admin from 'firebase-admin';
+import { initializeApp } from 'firebase-admin/app';
 
-admin.initializeApp();
+initializeApp();
 
 export { notifyFollowersOnNewBite } from './functions/notifications/notify-followers-on-new-bite';
 export { notifyBiteCreatorOnLike } from './functions/notifications/notify-bite-creator-on-like';

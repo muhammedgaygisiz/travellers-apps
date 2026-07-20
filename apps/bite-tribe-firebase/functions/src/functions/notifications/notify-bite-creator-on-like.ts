@@ -1,6 +1,7 @@
 import { onDocumentCreated } from 'firebase-functions/firestore';
 import { logger } from 'firebase-functions';
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
 import { User } from '../shared/model/user';
 import { Bite } from '../shared/model/bite';
 import { getInvalidTokens } from '../shared/utils/get-invalid-tokens';
@@ -9,7 +10,7 @@ import { getTokens } from '../shared/utils/get-tokens';
 import { buildChunks } from '../shared/utils/build-chunks';
 import { CHUNK_SIZE } from '../shared/utils/chunk-size';
 
-const db = admin.firestore();
+const db = getFirestore();
 
 type Like = {
   biteId: string;
@@ -106,7 +107,7 @@ export const notifyBiteCreatorOnLike = onDocumentCreated(
 
     logger.info('--- Chunks:', chunks);
     for (const chunk of chunks) {
-      const res = await admin.messaging().sendEachForMulticast({
+      const res = await getMessaging().sendEachForMulticast({
         tokens: chunk,
         notification: {
           title: 'New Like on Your Bite!',

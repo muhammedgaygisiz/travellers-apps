@@ -292,6 +292,32 @@ The tracked changes are therefore `package.json`, `package-lock.json`, and the o
 
 Validation run for issue #1038 (Node 24 target; run under Node 22 in the agent sandbox): `npm install` regenerated `package-lock.json` with every Capacitor 8 package resolved to the aligned versions above (the `sharp` prebuilt-binary postinstall stayed blocked by the sandbox egress policy, the same environmental limitation recorded for issues #1030/#1033, so the lockfile was settled with `--ignore-scripts`); `npx cap doctor` reports installed `@capacitor/{cli,core,android,ios}` at `8.4.2` matching latest with no problems; `npx cap update` from `apps/bite-tribe-android` enumerated all 22 Capacitor plugins at the aligned versions and rewrote the Android plugin manifests with no committed diff (it only failed writing the gitignored build-time `android/app/src/main/assets/capacitor.plugins.json`, which is not part of the committed tree); `git diff --check` is clean. Full `cap sync` copy (needs the web build in `dist/apps/bite-tribe`), the iOS `pod install`, and the Android/iOS device builds and Firebase-integration smoke checks were deferred to CI/device runs because they need the native toolchains, CocoaPods, and a macOS/Android build host, consistent with the deferrals recorded for the earlier phases.
 
+### Firebase client and backend tooling (issue #1034)
+
+Status: complete (issue #1034). The Firebase web client, the Functions/CLI tooling, and the Admin SDK backend major were upgraded as three separate commits by risk under the tracking issue, and kept off the Nx and Angular tracks.
+
+| Package                   | From     | To        | Track / risk                                |
+| ------------------------- | -------- | --------- | ------------------------------------------- |
+| `firebase` (web client)   | `12.6.0` | `12.16.0` | Frontend, within major 12                   |
+| `firebase-functions`      | `7.0.3`  | `7.3.0`   | Backend tooling, within major 7             |
+| `firebase-tools`          | `15.2.1` | `15.24.0` | Backend tooling, within major 15            |
+| `firebase-functions-test` | `3.4.1`  | `3.5.0`   | Backend dev tooling, within major 3         |
+| `firebase-admin`          | `13.6.0` | `14.2.0`  | Backend major (explicit step, API-reviewed) |
+
+Three commits landed so their differing risk stays separately reviewable and revertible:
+
+1. Frontend client `firebase` 12.6.0 -> 12.16.0. The six `@capacitor-firebase/*` `firebase` override pins were aligned to 12.16.0 so the plugins resolve the same hoisted client. Validated by the `bite-tribe` production build.
+2. Backend tooling `firebase-functions` 7.3.0, `firebase-tools` 15.24.0, `firebase-functions-test` 3.5.0, keeping `firebase-admin` on 13 so the low-risk change stays isolated from the Admin major.
+3. `firebase-admin` 13 -> 14. v14 removes the legacy `admin.*` namespace API, so all 41 namespace-using function files were migrated to the modular SDK: `admin.firestore()`/`auth()`/`messaging()`/`storage()` -> `getFirestore()`/`getAuth()`/`getMessaging()`/`getStorage()`, `admin.initializeApp`/`admin.apps` -> `initializeApp()`/`getApps()` from `firebase-admin/app`, `admin.firestore.<Type>` -> named type imports from `firebase-admin/firestore`, and the emulator-spec teardown `app?.delete()` -> `deleteApp(app)`. Unit-test mocks moved from the `firebase-admin` namespace to the matching modular subpaths (`getFirestore`/`getAuth`).
+
+Admin 14 API review:
+
+- v14 requires Node `>=22`; the workspace is pinned to Node 24, so the deploy runtime stays in range.
+- The functions use only stable APIs (`sendEachForMulticast`, `getFirestore`, `getAuth`, `getMessaging`, `getStorage`); none of the removed InstanceID or legacy messaging surfaces are used.
+- `firebase-functions-test@3.5.0` (dev-only) still peers `firebase-admin <=13`, one major behind the runtime. The published API is compatible, so `apps/bite-tribe-firebase/functions/.npmrc` mirrors the workspace root's `legacy-peer-deps=true` (the same mechanism introduced for the Nx 23 `@swc/cli` peer in Phase 2). Production function deploys omit devDependencies and never install `firebase-functions-test`, so the lag only affects local/CI test installs. Retire the setting once `firebase-functions-test` peers `firebase-admin 14`.
+
+Validation run for issue #1034 (Node 24 target; run under Node 22 in the agent sandbox): the `bite-tribe` production build passed on `firebase@12.16.0`; from `apps/bite-tribe-firebase/functions` the `tsc` build and `eslint` are clean and Jest passed (20 suites / 121 tests) against `firebase-admin@14.2.0`; `git diff --check` is clean. Emulator-backed and native Firebase integration checks (callable, trigger, scheduled, Auth, Firestore, Storage, App Check, and messaging behavior on the emulators and devices) remain deferred to CI/device runs, consistent with the earlier phases. A full strict `tsc` over the spec files surfaces pre-existing latent type issues in the restaurant and `user-country-codes` test helpers that predate this change and are not exercised by the project's build (specs excluded) or the ts-jest `isolatedModules` runner; they are unrelated to the Firebase upgrade and were left untouched to keep the change scoped.
+
 ## Completion Criteria
 
 The roadmap is complete when:

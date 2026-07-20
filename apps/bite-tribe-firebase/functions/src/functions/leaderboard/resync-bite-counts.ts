@@ -1,5 +1,4 @@
-import * as admin from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { DocumentData, FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onSchedule } from 'firebase-functions/scheduler';
 
@@ -9,14 +8,14 @@ const WRITE_BATCH_LIMIT = 500;
 
 const ZURICH_TZ = 'Europe/Zurich';
 
-const db = admin.firestore();
+const db = getFirestore();
 
 /**
  * Reads the biteCount currently stored on a user document, defaulting to 0
  * when the field is missing or not a number.
  */
 export const getStoredBiteCount = (
-  user: admin.firestore.DocumentData,
+  user: DocumentData,
 ): number => (typeof user['biteCount'] === 'number' ? user['biteCount'] : 0);
 
 /**

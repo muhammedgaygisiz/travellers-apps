@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
@@ -24,7 +24,7 @@ interface BackfillCollision {
 }
 
 const getStoredString = (
-  data: admin.firestore.DocumentData | undefined,
+  data: DocumentData | undefined,
   field: string,
 ): string =>
   data && typeof data[field] === 'string' ? (data[field] as string) : '';
@@ -41,7 +41,7 @@ const getStoredString = (
  */
 export const backfillDisplayNameClaims =
   async (): Promise<BackfillDisplayNameClaimsResult> => {
-    const db = admin.firestore();
+    const db = getFirestore();
     const usersSnapshot = await db
       .collection(USERS_COLLECTION)
       .orderBy('createdAtTimestamp', 'asc')

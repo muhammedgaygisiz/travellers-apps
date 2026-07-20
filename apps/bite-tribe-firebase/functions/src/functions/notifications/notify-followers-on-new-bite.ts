@@ -1,5 +1,5 @@
 import { onDocumentCreated } from 'firebase-functions/firestore';
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { User } from '../shared/model/user';
 import { Bite } from '../shared/model/bite';
@@ -10,7 +10,7 @@ import { cleanupInvalidTokens } from '../shared/utils/cleanup-invalid-tokens';
 import { getTokens } from '../shared/utils/get-tokens';
 import { CHUNK_SIZE } from '../shared/utils/chunk-size';
 
-const db = admin.firestore();
+const db = getFirestore();
 
 const getFollowerUids = (
   followersSnap: FirebaseFirestore.QuerySnapshot<

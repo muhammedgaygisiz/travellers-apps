@@ -1,5 +1,4 @@
-import * as admin from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Firestore, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 
 export const USERS_COLLECTION = 'users';
@@ -128,14 +127,14 @@ export const buildLeaderboardNotificationBody = (
  * Anonymous (non-public) users are ignored entirely.
  */
 export const isPublicUser = (
-  doc: admin.firestore.QueryDocumentSnapshot,
+  doc: QueryDocumentSnapshot,
 ): boolean => doc.data()['public'] === true;
 
 /**
  * Maps a raw user document into the public leaderboard representation.
  */
 export const toLeaderboardUser = (
-  doc: admin.firestore.QueryDocumentSnapshot,
+  doc: QueryDocumentSnapshot,
 ): LeaderboardUser => {
   const user = doc.data();
   const publicUser = user['public'] === true;
@@ -168,10 +167,10 @@ export const toLeaderboardUser = (
  * requiring a composite index that the functions-only deploy would not create.
  */
 const collectTopPublicUsers = async (
-  db: admin.firestore.Firestore,
+  db: Firestore,
 ): Promise<LeaderboardUser[]> => {
   const users: LeaderboardUser[] = [];
-  let cursor: admin.firestore.QueryDocumentSnapshot | undefined;
+  let cursor: QueryDocumentSnapshot | undefined;
 
   while (users.length < LEADERBOARD_LIMIT) {
     let query = db
@@ -216,7 +215,7 @@ const collectTopPublicUsers = async (
  * the freshly computed ranking.
  */
 export const rebuildLeaderboard = async (
-  db: admin.firestore.Firestore,
+  db: Firestore,
 ): Promise<LeaderboardUser[]> => {
   const users = await collectTopPublicUsers(db);
 

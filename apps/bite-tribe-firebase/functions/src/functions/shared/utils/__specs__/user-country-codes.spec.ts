@@ -4,10 +4,6 @@ import {
   removeCountryCodeFromUser,
 } from '../user-country-codes';
 
-jest.mock('firebase-admin', () => ({
-  firestore: jest.fn(),
-}));
-
 jest.mock('firebase-admin/firestore', () => ({
   FieldValue: {
     serverTimestamp: jest.fn(() => 'server-timestamp'),

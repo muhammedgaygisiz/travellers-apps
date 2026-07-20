@@ -1,9 +1,9 @@
 import { onRequest } from 'firebase-functions/https';
 import { Bite } from '../shared/model/bite';
-import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 import { renderHtml } from '../shared/utils/render-html';
 
-const db = admin.firestore();
+const db = getFirestore();
 
 export const handleSharedLinkToBite = onRequest(async (req, res) => {
   try {

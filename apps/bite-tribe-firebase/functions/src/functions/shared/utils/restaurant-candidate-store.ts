@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, DocumentSnapshot, QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import type { RestaurantCandidate } from '../model/restaurant-candidate';
 import {
@@ -36,12 +36,12 @@ const isValidCoordinate = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
 
 const getString = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
   field: string,
 ): string => (typeof data[field] === 'string' ? data[field] : '');
 
 const getNumber = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
   field: string,
 ): number | undefined =>
   typeof data[field] === 'number' && Number.isFinite(data[field])
@@ -49,7 +49,7 @@ const getNumber = (
     : undefined;
 
 export const getPosition = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
 ): CandidatePosition | undefined => {
   const position = data['position'];
 
@@ -73,7 +73,7 @@ const idFromPath = (value: string): string => {
 };
 
 const getNormalizedRestaurantId = (
-  data: admin.firestore.DocumentData,
+  data: DocumentData,
 ): string => {
   const restaurantId = getString(data, 'restaurantId');
   return restaurantId ? idFromPath(restaurantId) : '';
@@ -82,12 +82,11 @@ const getNormalizedRestaurantId = (
 const queryCollectionByGeohashBounds = async (
   collectionName: string,
   bounds: [string, string][],
-): Promise<admin.firestore.QueryDocumentSnapshot[]> => {
+): Promise<QueryDocumentSnapshot[]> => {
   const snapshots = await Promise.all(
     bounds.map(async (bound) => {
       try {
-        const snapshot = await admin
-          .firestore()
+        const snapshot = await getFirestore()
           .collection(collectionName)
           .where('geohash', '>=', bound[0])
           .where('geohash', '<=', bound[1])
@@ -109,7 +108,7 @@ const queryCollectionByGeohashBounds = async (
 };
 
 export const toCandidateBite = (
-  doc: admin.firestore.QueryDocumentSnapshot | admin.firestore.DocumentSnapshot,
+  doc: QueryDocumentSnapshot | DocumentSnapshot,
 ): StoredCandidateBite => {
   const data = doc.data() ?? {};
   const imagePath = getString(data, 'imagePath');
@@ -126,7 +125,7 @@ export const toCandidateBite = (
 };
 
 const toCandidateRestaurant = (
-  doc: admin.firestore.QueryDocumentSnapshot,
+  doc: QueryDocumentSnapshot,
 ): CandidateRestaurant => {
   const data = doc.data();
 
@@ -138,7 +137,7 @@ const toCandidateRestaurant = (
 };
 
 const toPendingRestaurantCandidate = (
-  doc: admin.firestore.QueryDocumentSnapshot,
+  doc: QueryDocumentSnapshot,
 ): PendingRestaurantCandidate => {
   const data = doc.data();
 
@@ -171,7 +170,7 @@ export const getNearbyVerifiedRestaurants = async (
   );
   const docs = geohashMatchedDocs.length
     ? geohashMatchedDocs
-    : (await admin.firestore().collection(RESTAURANT_COLLECTION).get()).docs;
+    : (await getFirestore().collection(RESTAURANT_COLLECTION).get()).docs;
 
   return filterWithinRestaurantCandidateRadius(
     docs.map(toCandidateRestaurant),

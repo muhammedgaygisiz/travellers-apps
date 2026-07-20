@@ -1,4 +1,5 @@
-import * as admin from 'firebase-admin';
+import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 import { geohashForLocation } from 'geofire-common';
 import { handleCreateRestaurantCandidateOnBiteCreate } from '../create-restaurant-candidate-on-bite-create';
 import { verifyRestaurantCandidateHandler } from '../verify-restaurant-candidate';
@@ -27,8 +28,7 @@ const seedBite = async (
   place = 'Pizza Palace',
   position = CENTER,
 ): Promise<void> => {
-  await admin
-    .firestore()
+  await getFirestore()
     .collection('bites')
     .doc(id)
     .set({
@@ -41,11 +41,11 @@ const seedBite = async (
 };
 
 const clearCollection = async (collectionName: string): Promise<void> => {
-  const collectionRef = admin.firestore().collection(collectionName);
+  const collectionRef = getFirestore().collection(collectionName);
   const snapshot = await collectionRef.limit(1).get();
 
   if (!snapshot.empty) {
-    await admin.firestore().recursiveDelete(collectionRef);
+    await getFirestore().recursiveDelete(collectionRef);
   }
 };
 
@@ -58,7 +58,7 @@ const clearWorkflowCollections = async (): Promise<void> => {
 };
 
 const queryCount = async (collectionName: string): Promise<number> =>
-  (await admin.firestore().collection(collectionName).count().get()).data()
+  (await getFirestore().collection(collectionName).count().get()).data()
     .count;
 
 const verifyCandidate = (
@@ -86,8 +86,8 @@ describe('restaurant candidate workflow emulator integration', () => {
       );
     }
 
-    if (!admin.apps.length) {
-      admin.initializeApp({ projectId: PROJECT_ID });
+    if (!getApps().length) {
+      initializeApp({ projectId: PROJECT_ID });
     }
   });
 
@@ -97,7 +97,7 @@ describe('restaurant candidate workflow emulator integration', () => {
 
   afterAll(async () => {
     await clearWorkflowCollections();
-    await Promise.all(admin.apps.map((app) => app?.delete()));
+    await Promise.all(getApps().map((app) => deleteApp(app)));
   });
 
   it('keeps candidate creation and verification idempotent across repeated workflow runs', async () => {
@@ -109,8 +109,7 @@ describe('restaurant candidate workflow emulator integration', () => {
       seedBite('bite-4', 'Pizza Palace', nearby(4)),
     ]);
 
-    const selectedBiteSnapshot = await admin
-      .firestore()
+    const selectedBiteSnapshot = await getFirestore()
       .collection('bites')
       .doc('bite-new')
       .get();
@@ -120,8 +119,7 @@ describe('restaurant candidate workflow emulator integration', () => {
       handleCreateRestaurantCandidateOnBiteCreate(selectedBiteSnapshot),
     ]);
 
-    const candidateSnapshot = await admin
-      .firestore()
+    const candidateSnapshot = await getFirestore()
       .collection('restaurantCandidates')
       .get();
     const candidateDocs = candidateSnapshot.docs;
@@ -167,7 +165,7 @@ describe('restaurant candidate workflow emulator integration', () => {
 
     const linkedBiteSnapshots = await Promise.all(
       ['bite-new', 'bite-1', 'bite-2', 'bite-3', 'bite-4'].map((biteId) =>
-        admin.firestore().collection('bites').doc(biteId).get(),
+        getFirestore().collection('bites').doc(biteId).get(),
       ),
     );
 
@@ -183,8 +181,7 @@ describe('restaurant candidate workflow emulator integration', () => {
   });
 
   it('does not create a candidate when a matching verified restaurant already exists', async () => {
-    await admin
-      .firestore()
+    await getFirestore()
       .collection('restaurants')
       .doc('restaurant-1')
       .set({
@@ -199,8 +196,7 @@ describe('restaurant candidate workflow emulator integration', () => {
       seedBite('bite-4', 'Pizza Palace', nearby(4)),
     ]);
 
-    const selectedBiteSnapshot = await admin
-      .firestore()
+    const selectedBiteSnapshot = await getFirestore()
       .collection('bites')
       .doc('bite-new')
       .get();

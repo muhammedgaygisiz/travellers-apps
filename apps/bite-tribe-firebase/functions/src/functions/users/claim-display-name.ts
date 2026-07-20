@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
@@ -19,7 +19,7 @@ export interface ClaimDisplayNameResult {
 }
 
 const getStoredString = (
-  data: admin.firestore.DocumentData | undefined,
+  data: DocumentData | undefined,
   field: string,
 ): string =>
   data && typeof data[field] === 'string' ? (data[field] as string) : '';
@@ -44,7 +44,7 @@ export const claimDisplayNameForUser = async (
     throw new HttpsError('invalid-argument', 'invalid_display_name');
   }
 
-  const db = admin.firestore();
+  const db = getFirestore();
   const userRef = db.collection(USERS_COLLECTION).doc(uid);
   const newClaimRef = db
     .collection(DISPLAY_NAMES_COLLECTION)

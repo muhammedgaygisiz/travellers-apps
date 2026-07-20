@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import { DocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onDocumentCreated } from 'firebase-functions/firestore';
 import {
@@ -24,7 +24,7 @@ import {
 export const RESTAURANT_CANDIDATE_EVIDENCE_THRESHOLD = 5;
 
 export const handleCreateRestaurantCandidateOnBiteCreate = async (
-  snap: admin.firestore.DocumentSnapshot,
+  snap: DocumentSnapshot,
   biteId = snap.id,
 ): Promise<void> => {
   const selectedBite = toCandidateBite(snap);
@@ -87,12 +87,10 @@ export const handleCreateRestaurantCandidateOnBiteCreate = async (
     selectedBite.position,
   );
   const candidateRef = pendingDuplicate
-    ? admin
-        .firestore()
+    ? getFirestore()
         .collection(RESTAURANT_CANDIDATES_COLLECTION)
         .doc(pendingDuplicate.item.id)
-    : admin
-        .firestore()
+    : getFirestore()
         .collection(RESTAURANT_CANDIDATES_COLLECTION)
         .doc(buildRestaurantCandidateDocumentId(draft));
   const candidateUpdate = buildCandidateUpdate(draft, pendingDuplicate?.item);

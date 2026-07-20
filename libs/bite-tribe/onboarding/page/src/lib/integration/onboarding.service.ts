@@ -567,12 +567,19 @@ export class OnboardingService {
       return false;
     }
 
-    const updated = await this.dataAccess.saveProfile({
-      ...profile,
-      public: this.selectedVisibility() === true,
-    });
-    this.profile.set(updated);
-    return true;
+    try {
+      const updated = await this.dataAccess.saveProfile({
+        ...profile,
+        public: this.selectedVisibility() === true,
+      });
+      this.profile.set(updated);
+      return true;
+    } catch (error) {
+      // A failed write keeps the user on the visibility step to retry, instead
+      // of throwing an unhandled rejection out of next() and advancing anyway.
+      console.warn('Failed to persist onboarding visibility:', error);
+      return false;
+    }
   }
 
   private firstIncompleteIndex(

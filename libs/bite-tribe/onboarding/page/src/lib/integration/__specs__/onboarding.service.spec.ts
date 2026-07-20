@@ -269,6 +269,19 @@ describe('OnboardingService', () => {
       expect(service.currentStep().id).toBe('currency');
     });
 
+    it('stays on the visibility step when the profile write fails', async () => {
+      setup(['identity']);
+      saveProfile.mockRejectedValue(new Error('offline'));
+      await service.initialize();
+
+      service.updateVisibility(true);
+      // The rejection must be swallowed, not thrown out of next().
+      await expect(service.next()).resolves.toBeUndefined();
+
+      expect(service.currentStep().id).toBe('visibility');
+      expect(saveCompletedSteps).not.toHaveBeenCalled();
+    });
+
     it('lands on the finish step ready to complete without extra input', async () => {
       setup(ONBOARDING_STEPS.slice(0, -1).map((step) => step.id));
 

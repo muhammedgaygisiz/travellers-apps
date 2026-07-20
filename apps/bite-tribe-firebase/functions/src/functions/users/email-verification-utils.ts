@@ -1,9 +1,7 @@
 import { DocumentData } from 'firebase-admin/firestore';
 
 export type EmailVerificationProvider =
-  | 'password'
-  | 'trusted-provider'
-  | 'unknown';
+  'password' | 'trusted-provider' | 'unknown';
 
 export interface EmailVerificationMetadata {
   emailVerified: boolean;
@@ -16,8 +14,7 @@ export interface EmailVerificationMetadata {
   emailVerificationManualLastSentAtTimestamp?: number;
 }
 
-export interface EmailVerificationClassification
-  extends EmailVerificationMetadata {
+export interface EmailVerificationClassification extends EmailVerificationMetadata {
   eligibleForReminder: boolean;
   reason:
     | 'eligible'

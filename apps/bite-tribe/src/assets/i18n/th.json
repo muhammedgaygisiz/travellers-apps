@@ -236,6 +236,7 @@
   "onboarding-back": "ย้อนกลับ",
   "onboarding-next": "ถัดไป",
   "onboarding-finish": "เสร็จสิ้น",
+  "onboarding-advancing": "กำลังบันทึก...",
   "onboarding-step-placeholder": "ขั้นตอนนี้จะเสร็จสมบูรณ์ในการอัปเดตครั้งถัดไป",
   "onboarding-acknowledge": "ฉันเข้าใจและต้องการดำเนินการต่อ",
   "onboarding-identity-copy": "เลือกชื่อที่นักสำรวจอาหารคนอื่นจะจดจำคุณได้ คุณสามารถเพิ่มรูปโปรไฟล์ตอนนี้หรือข้ามได้",

@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { NavController } from '@ionic/angular';
+import { LoadingController, NavController } from '@ionic/angular';
+import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { getCurrencyForLocale, getDisplayNameFailureReason, PATH } from 'utils';
 import {
@@ -33,6 +34,8 @@ export class OnboardingService {
   private readonly dataAccess = inject(OnboardingDataAccessService);
   private readonly progress = inject(OnboardingProgressService);
   private readonly navController = inject(NavController);
+  private readonly loadingController = inject(LoadingController);
+  private readonly transloco = inject(TranslocoService);
   private readonly analytics = inject(AnalyticsService);
 
   readonly steps = ONBOARDING_STEPS;
@@ -74,6 +77,9 @@ export class OnboardingService {
   readonly canAdvance = this.isCurrentStepValid;
 
   private initialized = false;
+
+  /** Guards {@link next} against re-entry while a step is being persisted. */
+  private advancing = false;
 
   /** Display name of the most recent availability check still awaiting a result. */
   private pendingDisplayNameCheck = '';
@@ -359,27 +365,48 @@ export class OnboardingService {
     });
   }
 
+  /**
+   * Persists the current step and moves to the next one.
+   *
+   * The persist is a Firestore round-trip that can take a second or two, so a
+   * full-screen loading overlay covers the wait — otherwise the step just sits
+   * there looking frozen. The overlay's blocking backdrop and the re-entry guard
+   * together stop a second tap from completing the step, and logging its
+   * analytics event, twice.
+   */
   async next(): Promise<void> {
-    if (!this.canAdvance()) {
+    if (!this.canAdvance() || this.advancing) {
       return;
     }
 
-    if (!(await this.persistCurrentStep())) {
-      return;
-    }
-
-    const completedStep = this.currentStep().id;
-    await this.markComplete(completedStep);
-    this.analytics.logEvent(AnalyticsEvent.OnboardingStepCompleted, {
-      step: completedStep,
+    this.advancing = true;
+    const loading = await this.loadingController.create({
+      message: this.transloco.translate('onboarding-advancing'),
+      backdropDismiss: false,
     });
+    await loading.present();
 
-    if (this.currentIndex() >= this.steps.length - 1) {
-      await this.finish();
-      return;
+    try {
+      if (!(await this.persistCurrentStep())) {
+        return;
+      }
+
+      const completedStep = this.currentStep().id;
+      await this.markComplete(completedStep);
+      this.analytics.logEvent(AnalyticsEvent.OnboardingStepCompleted, {
+        step: completedStep,
+      });
+
+      if (this.currentIndex() >= this.steps.length - 1) {
+        await this.finish();
+        return;
+      }
+
+      this.currentIndex.update((index) => index + 1);
+    } finally {
+      this.advancing = false;
+      await loading.dismiss();
     }
-
-    this.currentIndex.update((index) => index + 1);
   }
 
   back(): void {

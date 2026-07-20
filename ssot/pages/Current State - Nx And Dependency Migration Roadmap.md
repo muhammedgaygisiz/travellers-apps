@@ -260,6 +260,38 @@ The following should not be bundled into the Nx or Angular major migrations:
 | Transloco                                        | Treat its major upgrade as an application compatibility change, not an Nx requirement.           |
 | Commitlint and formatting                        | Upgrade independently unless an Nx migration explicitly requires a compatible version.           |
 
+### Capacitor 8 native stack alignment (issue #1038)
+
+Status: complete (issue #1038). The Capacitor 8 family was moved off its mixed `8.0.0`/`8.0.1`/`8.3.0` pins onto one consistent set of compatible Capacitor 8 releases, kept separate from the Nx and Angular tracks. `@nxext/capacitor` stays on `23.0.0` (owned by the Nx track) and `@capacitor/assets` stays on `3.0.5` (a standalone asset-generation tool on its own major, not part of the Capacitor 8 runtime family).
+
+| Package group                                                                                          | From                                              | To      |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ------- |
+| Capacitor core, CLI, Android, iOS (`@capacitor/core`, `/cli`, `/android`, `/ios`)                      | `8.0.0`                                           | `8.4.2` |
+| `@capacitor/app`                                                                                       | `8.0.0`                                           | `8.1.1` |
+| `@capacitor/app-launcher`                                                                              | `8.0.0`                                           | `8.0.1` |
+| `@capacitor/camera`                                                                                    | `8.0.0`                                           | `8.2.1` |
+| `@capacitor/filesystem`                                                                                | `8.0.0`                                           | `8.1.2` |
+| `@capacitor/geolocation`                                                                               | `8.0.0`                                           | `8.2.0` |
+| `@capacitor/haptics`                                                                                   | `8.0.0`                                           | `8.0.2` |
+| `@capacitor/keyboard`                                                                                  | `8.0.0`                                           | `8.0.5` |
+| `@capacitor/preferences`                                                                               | `8.0.0`                                           | `8.0.1` |
+| `@capacitor/push-notifications`                                                                        | `8.0.0`                                           | `8.1.2` |
+| `@capacitor/splash-screen`                                                                             | `8.0.0`                                           | `8.0.2` |
+| `@capacitor/status-bar`                                                                                | `8.0.0`                                           | `8.0.3` |
+| `@capacitor/network`, `@capacitor/share`                                                               | `8.0.1`                                           | `8.0.1` |
+| `@capawesome/capacitor-file-picker`                                                                    | `8.0.1`                                           | `8.0.3` |
+| All eight `@capacitor-firebase/*` plugins (analytics, app-check, authentication, crashlytics, firestore, functions, messaging, storage) | mixed `8.0.0`/`8.0.1`/`8.3.0` | `8.3.0` |
+
+The eight `@capacitor-firebase/*` plugins were the only real drift risk: they were spread across `8.0.0`, `8.0.1`, and `8.3.0`, and are now on one release family (`8.3.0`). `@capacitor-firebase/*@8.3.0` peers `@capacitor/core >=8.0.0` (satisfied by `8.4.2`) and `firebase ^12.6.0`; the installed `firebase@12.6.0` and the existing `overrides` that pin `firebase` to `12.6.0` for the Firebase plugins both stay valid, so no `firebase` change was needed on this track (that is the separate issue #1034 backend/client track).
+
+Version pins live only in the root `package.json`; both wrapper `package.json` files (`apps/bite-tribe-android`, `apps/bite-tribe-ios`) reference the root `node_modules` by path, and the committed native manifests (`capacitor.settings.gradle`, `capacitor.build.gradle`, `Podfile`) reference each plugin by path rather than by version. Because no plugin was added or removed, a version-only bump within the Capacitor 8 family produces no native manifest diff.
+
+One source-level adaptation was required. `@capacitor/geolocation@8.2.0` added four fields to `Position.coords` (`magneticHeading`, `trueHeading`, `headingAccuracy`, `course`, each `number | null | undefined`, populated only during `watchPosition`). The details page Storybook story (`libs/bite-tribe/details/page/.../details.page.stories.ts`) builds a mock position with `satisfies Position`, so the missing keys failed the Storybook build with a `TS2739` compile error, which in turn failed the Loki visual-regression CI job that consumes that build. Added the four keys as `null` (correct for a static, non-watch position); no visual reference changed. Production code was unaffected because `libs/bite-tribe/home/data-access/src/lib/home-data-access.service.ts` constructs its geolocation object with an `as GeolocationPosition` cast, and the `.spec.ts` position mocks are not type-checked by the Storybook build.
+
+The tracked changes are therefore `package.json`, `package-lock.json`, and the one story mock.
+
+Validation run for issue #1038 (Node 24 target; run under Node 22 in the agent sandbox): `npm install` regenerated `package-lock.json` with every Capacitor 8 package resolved to the aligned versions above (the `sharp` prebuilt-binary postinstall stayed blocked by the sandbox egress policy, the same environmental limitation recorded for issues #1030/#1033, so the lockfile was settled with `--ignore-scripts`); `npx cap doctor` reports installed `@capacitor/{cli,core,android,ios}` at `8.4.2` matching latest with no problems; `npx cap update` from `apps/bite-tribe-android` enumerated all 22 Capacitor plugins at the aligned versions and rewrote the Android plugin manifests with no committed diff (it only failed writing the gitignored build-time `android/app/src/main/assets/capacitor.plugins.json`, which is not part of the committed tree); `git diff --check` is clean. Full `cap sync` copy (needs the web build in `dist/apps/bite-tribe`), the iOS `pod install`, and the Android/iOS device builds and Firebase-integration smoke checks were deferred to CI/device runs because they need the native toolchains, CocoaPods, and a macOS/Android build host, consistent with the deferrals recorded for the earlier phases.
+
 ## Completion Criteria
 
 The roadmap is complete when:

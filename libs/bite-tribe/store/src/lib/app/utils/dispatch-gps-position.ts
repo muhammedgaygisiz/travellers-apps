@@ -56,9 +56,11 @@ export const dispatchGpsPosition = (
             return args;
           }
 
+          // Under the movement threshold: still advance the marker to the fresh
+          // position, but skip the bite refetch to spare the backend.
           store.dispatch(
-            AppActions.clearReloadGPSPosition({
-              reason: 'No meaningful movement detected',
+            AppActions.updatedGPSPositionWithoutReload({
+              position: currentPosition,
             }),
           );
 

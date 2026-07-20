@@ -14,7 +14,10 @@ export const AppActions = createActionGroup({
     'Reload GPS position': emptyProps(),
     'Clear GPS error': emptyProps(),
     'Loaded GPS position': props<{ position: Position }>(),
-    'Clear Reload GPS position': props<{ reason: string }>(),
+    // Sub-threshold movement: refresh the stored position (so the map marker
+    // follows the user) without triggering the bite refetch that
+    // `Loaded GPS position` drives.
+    'Updated GPS position without reload': props<{ position: Position }>(),
     'Error loading GPS position': props<{ error: unknown }>(),
     'Saved settings': props<{ settings: Settings }>(),
     'Save public profile': props<{ profile: PublicUser }>(),

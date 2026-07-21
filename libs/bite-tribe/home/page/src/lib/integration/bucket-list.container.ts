@@ -29,6 +29,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (openMapView)="service.openMapView('my-bucketlists')"
       (refresh)="service.refresh()"
       (closeGpsError)="service.closeGpsError()"
+      (enableLocation)="service.enableLocation()"
       (triedOutChange)="service.toggleTriedOut($event)"
       (rateNowClick)="service.rateNowClicked($event)"
     />

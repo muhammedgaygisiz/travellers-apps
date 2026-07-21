@@ -163,6 +163,7 @@
   "we-could-not-access-your-location": "Konumuna erişemedik. Bite'lere olan mesafe gösterilemiyor veya güncel değil.",
   "you-are-offline": "Görünüşe göre çevrimdışısın. Lütfen internet bağlantını kontrol et.",
   "retry": "TEKRAR DENE",
+  "enable-location": "KONUMU ETKİNLEŞTİR",
   "close": "KAPAT",
   "drag-and-drop-not-supported": "Drag-and-drop desteklenmiyor. <br />Yüklemek veya fotoğraf çekmek için dokun.",
   "tap-into-box": "Yüklemek için kutuya dokun <br />veya fotoğraf çek.",

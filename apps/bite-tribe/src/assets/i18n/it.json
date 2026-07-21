@@ -162,6 +162,7 @@
   "we-could-not-access-your-location": "Non siamo riusciti ad accedere alla tua posizione. La distanza dai Bites non può essere mostrata o non è aggiornata.",
   "you-are-offline": "Sembra che tu sia offline. Controlla la tua connessione Internet.",
   "retry": "RIPROVA",
+  "enable-location": "ATTIVA POSIZIONE",
   "close": "CHIUDI",
   "drag-and-drop-not-supported": "Il trascinamento non è supportato. <br />Tocca per caricare o scattare una foto.",
   "tap-into-box": "Tocca nel riquadro per caricare <br />o scattare una foto.",

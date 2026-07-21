@@ -1,7 +1,9 @@
 module.exports = {
   displayName: 'push-notifications',
   preset: '../../../jest.preset.js',
-  testEnvironment: 'node',
+  // The shared preset's setup touches `window`, so the node environment cannot
+  // run a suite here. Matches every other lib in the workspace.
+  testEnvironment: 'jsdom',
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },

@@ -38,6 +38,9 @@ class Mock {
   clearGpsError = (): null => null;
   triedOutBiteIds = (): string[] => [];
   markBiteAsTriedOut = (): null => null;
+  getLocationPermissionState = async (): Promise<string> => 'granted';
+  requestLocationPermission = async (): Promise<string> => 'granted';
+  openLocationSettings = async (): Promise<boolean> => true;
 }
 
 describe('HomeService', () => {
@@ -546,6 +549,82 @@ describe('HomeService', () => {
       (service: HomeService) => {
         service.closeGpsError();
         expect(clearGpsErrorSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('enableLocation', () => {
+    let stateSpy: SpyInstance;
+    let requestSpy: SpyInstance;
+    let settingsSpy: SpyInstance;
+    let reloadSpy: SpyInstance;
+    let clearErrorSpy: SpyInstance;
+
+    beforeEach(() => {
+      stateSpy = jest.spyOn(
+        homeDataAccessService,
+        'getLocationPermissionState',
+      );
+      requestSpy = jest.spyOn(
+        homeDataAccessService,
+        'requestLocationPermission',
+      );
+      settingsSpy = jest.spyOn(homeDataAccessService, 'openLocationSettings');
+      reloadSpy = jest.spyOn(homeDataAccessService, 'reloadGPSPosition');
+      clearErrorSpy = jest.spyOn(homeDataAccessService, 'clearGpsError');
+    });
+
+    it('asks for permission when the OS prompt is still unspent', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        stateSpy.mockResolvedValue('prompt');
+        requestSpy.mockResolvedValue('granted');
+
+        await service.enableLocation();
+
+        expect(requestSpy).toHaveBeenCalledTimes(1);
+        expect(settingsSpy).not.toHaveBeenCalled();
+        expect(reloadSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+
+    it('does not reload when the user declines the prompt', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        stateSpy.mockResolvedValue('prompt');
+        requestSpy.mockResolvedValue('denied');
+
+        await service.enableLocation();
+
+        expect(reloadSpy).not.toHaveBeenCalled();
+      },
+    ));
+
+    it('opens system settings when location was already denied', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        // The OS ignores further requests once denied, so asking again would
+        // silently do nothing — settings is the only route back.
+        stateSpy.mockResolvedValue('denied');
+
+        await service.enableLocation();
+
+        expect(settingsSpy).toHaveBeenCalledTimes(1);
+        expect(requestSpy).not.toHaveBeenCalled();
+        expect(reloadSpy).not.toHaveBeenCalled();
+      },
+    ));
+
+    it('clears a stale error and re-reads when permission is already granted', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        stateSpy.mockResolvedValue('granted');
+
+        await service.enableLocation();
+
+        expect(requestSpy).not.toHaveBeenCalled();
+        expect(clearErrorSpy).toHaveBeenCalledTimes(1);
+        expect(reloadSpy).toHaveBeenCalledTimes(1);
       },
     ));
   });

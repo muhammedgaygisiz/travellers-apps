@@ -43,6 +43,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (filterCleared)="service.filtersCleared()"
       (refresh)="service.refresh()"
       (closeGpsError)="service.closeGpsError()"
+      (enableLocation)="service.enableLocation()"
       (rateNowClick)="service.rateNowClicked($event)"
       (resendEmailVerification)="service.resendEmailVerification('home')"
     />

@@ -11,6 +11,13 @@ import type { Bite, Like, LikeClick, Restaurant } from 'model';
 import { NetworkStatusService } from 'common/networkstatus';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { getSimilarityScore, haversineDistance, normalize } from 'utils';
+import {
+  getLocationPermissionState,
+  openLocationSettings,
+  requestLocationPermission,
+  type LocationPermissionResult,
+  type LocationPermissionState,
+} from 'geolocation';
 
 const MAX_RESTAURANT_DISTANCE_METERS = 200;
 
@@ -299,6 +306,18 @@ export class HomeDataAccessService {
 
   clearGpsError(): void {
     this.storeService.clearGpsError();
+  }
+
+  getLocationPermissionState(): Promise<LocationPermissionState> {
+    return getLocationPermissionState();
+  }
+
+  requestLocationPermission(): Promise<LocationPermissionResult> {
+    return requestLocationPermission();
+  }
+
+  openLocationSettings(): Promise<boolean> {
+    return openLocationSettings();
   }
 
   markBiteAsTriedOut(params: { biteId: string; checked: boolean }): void {

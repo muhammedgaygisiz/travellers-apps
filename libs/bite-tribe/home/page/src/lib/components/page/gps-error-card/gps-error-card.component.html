@@ -5,10 +5,23 @@
     </ion-text>
   </ion-card-content>
 
-  <ion-button fill="clear" (click)="retryClick.emit()">{{
-    'retry' | transloco
-  }}</ion-button>
-  <ion-button fill="clear" (click)="closeClick.emit()">{{
-    'close' | transloco
-  }}</ion-button>
+  <ion-button
+    fill="clear"
+    data-testid="gps-error-enable-location"
+    (click)="enableLocationClick.emit()"
+    >{{ 'enable-location' | transloco }}</ion-button
+  >
+
+  <ion-button
+    fill="clear"
+    data-testid="gps-error-retry"
+    (click)="retryClick.emit()"
+    >{{ 'retry' | transloco }}</ion-button
+  >
+  <ion-button
+    fill="clear"
+    data-testid="gps-error-close"
+    (click)="closeClick.emit()"
+    >{{ 'close' | transloco }}</ion-button
+  >
 </ion-card>

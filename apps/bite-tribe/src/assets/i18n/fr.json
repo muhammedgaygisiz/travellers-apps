@@ -163,6 +163,7 @@
   "we-could-not-access-your-location": "Nous n'avons pas pu accéder à ta position. La distance jusqu'aux Bites ne peut pas être affichée ou n'est pas à jour.",
   "you-are-offline": "Il semble que tu sois hors ligne. Vérifie ta connexion Internet.",
   "retry": "RÉESSAYER",
+  "enable-location": "ACTIVER LA LOCALISATION",
   "close": "FERMER",
   "drag-and-drop-not-supported": "Le glisser-déposer n'est pas pris en charge. <br />Appuie pour téléverser ou prendre une photo.",
   "tap-into-box": "Appuie dans la zone pour téléverser <br />ou prendre une photo.",

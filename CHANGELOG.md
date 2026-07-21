@@ -1,5 +1,38 @@
 # Changelog
 
+## build-86 (2026-07-21)
+
+<!-- changelog-start-rev: 6edf96f6 -->
+<!-- changelog-end-rev: 8b6028b1 -->
+
+### Bug Fixes
+
+- recover push notification after reinstall (b02e82ec)
+- recover location permission after deinstall (21de00a8)
+- failing cap sync (742df939)
+- **1053**: fix bugs from build 85 (#1056) (a4dd1f88)
+
+### Documentation
+
+- update loki references (cbb61b47)
+
+### Tests
+
+- fix e2e to loading behavior (8b6028b1)
+- increase test coverage (a2e83048)
+- increase test coverage (a43da21d)
+
+### Chores
+
+- sync android (5ea1d205)
+- **1039**: upgrade independent lint and localization tooling (#1052) (4efd32b0)
+- **1034**: upgrade Firebase client and backend tooling (incl. Admin 14 modular migration) (#1051) (1e0123ad)
+- align the Capacitor 8 native stack (#1038) (#1050) (834221e5)
+- update Storybook, Jest, and Playwright within current majors (#1049) (c96ae3c8)
+- **1031**: update angular ngrx ionic (#1048) (cf53e82d)
+- **1033**: upgrade Nx and Capacitor plugin to 23 (#1046) (6e53e734)
+- bump version 85 (#1047) (501d4fa0)
+
 ## build-85 (2026-07-19)
 
 <!-- changelog-start-rev: d4809c5b -->

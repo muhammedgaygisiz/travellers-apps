@@ -186,6 +186,37 @@ export class HomeService {
     this.dataAccess.clearGpsError();
   }
 
+  /**
+   * Recovers location access from the error card.
+   *
+   * The onboarding assistant owns the first ask, but it only runs once: a user
+   * who reinstalls, restores to a new device, or revokes access in system
+   * settings lands back here with no position and no way to fix it. Which route
+   * works depends on the OS state — an unspent prompt can still be asked for,
+   * while a denial is only reversible in the settings page.
+   */
+  async enableLocation(): Promise<void> {
+    const state = await this.dataAccess.getLocationPermissionState();
+
+    if (state === 'denied') {
+      await this.dataAccess.openLocationSettings();
+      return;
+    }
+
+    if (state === 'prompt') {
+      const result = await this.dataAccess.requestLocationPermission();
+
+      if (result !== 'granted') {
+        return;
+      }
+    }
+
+    // Granted here, or never gated (web asks on read): the error is stale, so
+    // clear it and re-read rather than leaving the card up.
+    this.dataAccess.clearGpsError();
+    this.dataAccess.reloadGPSPosition();
+  }
+
   toggleTriedOut(params: { biteId: string; checked: boolean }): void {
     this.dataAccess.markBiteAsTriedOut(params);
   }

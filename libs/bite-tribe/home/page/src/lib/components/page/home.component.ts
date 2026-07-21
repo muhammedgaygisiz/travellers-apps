@@ -106,6 +106,7 @@ export class BiteTribeHomeComponent {
   readonly filterCleared = output<void>();
   readonly refresh = output<void>();
   readonly closeGpsError = output<void>();
+  readonly enableLocation = output<void>();
   readonly triedOutChange = output<{ biteId: string; checked: boolean }>();
   readonly resendEmailVerification = output<void>();
 

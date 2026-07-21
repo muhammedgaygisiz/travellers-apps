@@ -417,6 +417,32 @@ describe('OnboardingService', () => {
       expect(service.currentStep().id).toBe('currency');
     });
 
+    it('does not expose the next step until the overlay is dismissed', async () => {
+      setup(['identity']);
+      let resolveDismiss: () => void = () => undefined;
+      let signalDismissStarted: () => void = () => undefined;
+      const dismissStarted = new Promise<void>(
+        (resolve) => (signalDismissStarted = resolve),
+      );
+      loadingDismiss.mockImplementation(() => {
+        signalDismissStarted();
+        return new Promise<void>((resolve) => (resolveDismiss = resolve));
+      });
+      await service.initialize();
+      service.updateVisibility(true);
+
+      const advance = service.next();
+      await dismissStarted;
+
+      expect(loadingDismiss).toHaveBeenCalledTimes(1);
+      expect(service.currentStep().id).toBe('visibility');
+
+      resolveDismiss();
+      await advance;
+
+      expect(service.currentStep().id).toBe('currency');
+    });
+
     it('releases the advance guard when the overlay cannot be opened', async () => {
       setup(['identity']);
       // A controller that fails to create must not wedge the guard: otherwise

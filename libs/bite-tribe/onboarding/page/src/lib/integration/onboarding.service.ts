@@ -392,6 +392,7 @@ export class OnboardingService {
     }
 
     this.advancing = true;
+    let advanceToNextStep = false;
     // The guard is released in an outer finally so a failure to even create or
     // present the overlay can never leave `advancing` stuck true — which would
     // silently no-op every later tap on Next.
@@ -418,12 +419,19 @@ export class OnboardingService {
           return;
         }
 
-        this.currentIndex.update((index) => index + 1);
+        // Do not expose the next step while this call still owns the re-entry
+        // guard. A fast click on the newly rendered Next button would otherwise
+        // be ignored while the previous overlay was still dismissing.
+        advanceToNextStep = true;
       } finally {
         await loading.dismiss();
       }
     } finally {
       this.advancing = false;
+    }
+
+    if (advanceToNextStep) {
+      this.currentIndex.update((index) => index + 1);
     }
   }
 

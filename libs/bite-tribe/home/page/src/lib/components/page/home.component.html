@@ -76,6 +76,7 @@
     <div class="home-scrolling-content-container">
       @if (hasErrorLoadingGpsPosition()) {
         <bt-gps-error-card
+          (enableLocationClick)="enableLocation.emit()"
           (retryClick)="refresh.emit()"
           (closeClick)="closeGpsError.emit()"
         />

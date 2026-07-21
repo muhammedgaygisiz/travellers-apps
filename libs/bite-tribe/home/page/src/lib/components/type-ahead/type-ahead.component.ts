@@ -149,7 +149,7 @@ export class TypeaheadComponent {
   }
 
   checkboxChange(
-    event: CustomEvent<{ checked: boolean; value: string }>
+    event: CustomEvent<{ checked: boolean; value: string }>,
   ): void {
     const { checked, value } = event.detail;
 
@@ -157,7 +157,7 @@ export class TypeaheadComponent {
       this.workingSelectedValues.update((curr) => [...curr, value]);
     } else {
       this.workingSelectedValues.update((curr) =>
-        curr.filter((item) => item !== value)
+        curr.filter((item) => item !== value),
       );
     }
   }

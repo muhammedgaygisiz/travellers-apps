@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { LoadingController, NavController } from '@ionic/angular';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { getCurrencyForLocale, getDisplayNameFailureReason, PATH } from 'utils';
@@ -154,8 +154,14 @@ export class OnboardingService {
     // Only a stored grant is treated as decided. A stored `false` is
     // indistinguishable from "never asked" on a fresh settings document, so the
     // step still offers the choice rather than recording a refusal the user
-    // never gave. The location step follows the same rule.
-    if (settings?.location) {
+    // never gave.
+    //
+    // The stored flag alone is not proof the OS still allows reads: it lives in
+    // Firestore and survives a reinstall or a revoke in system settings, which
+    // both reset the OS grant. Trusting it on its own showed a "granted" step
+    // that never prompted, leaving the app with no position at all — so the
+    // live permission has to agree before the step counts as decided.
+    if (settings?.location && (await this.dataAccess.hasLocationPermission())) {
       this.locationPermission.set('granted');
       this.setStepValid('location', true);
     }
@@ -380,32 +386,38 @@ export class OnboardingService {
     }
 
     this.advancing = true;
-    const loading = await this.loadingController.create({
-      message: this.transloco.translate('onboarding-advancing'),
-      backdropDismiss: false,
-    });
-    await loading.present();
-
+    // The guard is released in an outer finally so a failure to even create or
+    // present the overlay can never leave `advancing` stuck true — which would
+    // silently no-op every later tap on Next.
     try {
-      if (!(await this.persistCurrentStep())) {
-        return;
-      }
-
-      const completedStep = this.currentStep().id;
-      await this.markComplete(completedStep);
-      this.analytics.logEvent(AnalyticsEvent.OnboardingStepCompleted, {
-        step: completedStep,
+      const loading = await this.loadingController.create({
+        message: this.transloco.translate('onboarding-advancing'),
+        backdropDismiss: false,
       });
+      await loading.present();
 
-      if (this.currentIndex() >= this.steps.length - 1) {
-        await this.finish();
-        return;
+      try {
+        if (!(await this.persistCurrentStep())) {
+          return;
+        }
+
+        const completedStep = this.currentStep().id;
+        await this.markComplete(completedStep);
+        this.analytics.logEvent(AnalyticsEvent.OnboardingStepCompleted, {
+          step: completedStep,
+        });
+
+        if (this.currentIndex() >= this.steps.length - 1) {
+          await this.finish();
+          return;
+        }
+
+        this.currentIndex.update((index) => index + 1);
+      } finally {
+        await loading.dismiss();
       }
-
-      this.currentIndex.update((index) => index + 1);
     } finally {
       this.advancing = false;
-      await loading.dismiss();
     }
   }
 

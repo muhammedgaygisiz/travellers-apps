@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { LoadingController, NavController } from '@ionic/angular';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import {
@@ -26,6 +26,7 @@ describe('OnboardingService', () => {
   let applyLanguage: jest.Mock;
   let requestPushPermission: jest.Mock;
   let requestLocationPermission: jest.Mock;
+  let hasLocationPermission: jest.Mock;
   let completeOnboarding: jest.Mock;
   let navigateRoot: jest.Mock;
   let logEvent: jest.Mock;
@@ -74,6 +75,8 @@ describe('OnboardingService', () => {
     applyLanguage = jest.fn().mockResolvedValue(undefined);
     requestPushPermission = jest.fn().mockResolvedValue('granted');
     requestLocationPermission = jest.fn().mockResolvedValue('granted');
+    // Default: the OS still allows reads, so a stored grant stays trustworthy.
+    hasLocationPermission = jest.fn().mockResolvedValue(true);
     completeOnboarding = jest.fn().mockResolvedValue(undefined);
     navigateRoot = jest.fn();
     logEvent = jest.fn();
@@ -100,6 +103,7 @@ describe('OnboardingService', () => {
             applyLanguage,
             requestPushPermission,
             requestLocationPermission,
+            hasLocationPermission,
             completeOnboarding,
           },
         },
@@ -406,6 +410,22 @@ describe('OnboardingService', () => {
       );
       expect(loadingPresent).toHaveBeenCalledTimes(1);
       expect(loadingDismiss).toHaveBeenCalledTimes(1);
+      expect(service.currentStep().id).toBe('currency');
+    });
+
+    it('releases the advance guard when the overlay cannot be opened', async () => {
+      setup(['identity']);
+      // A controller that fails to create must not wedge the guard: otherwise
+      // the first tap sets `advancing` and every later Next silently no-ops.
+      createLoading.mockRejectedValueOnce(new Error('overlay unavailable'));
+      await service.initialize();
+      service.updateVisibility(true);
+
+      await service.next().catch(() => undefined);
+      expect(service.currentStep().id).toBe('visibility');
+
+      // The guard is released, so a subsequent tap advances normally.
+      await service.next();
       expect(service.currentStep().id).toBe('currency');
     });
 
@@ -927,6 +947,23 @@ describe('OnboardingService', () => {
       expect(service.locationPermission()).toBe('granted');
       expect(service.canAdvance()).toBe(true);
       expect(requestLocationPermission).not.toHaveBeenCalled();
+    });
+
+    it('re-asks when a stored grant outlived the OS permission', async () => {
+      // Reinstalling (or revoking access in system settings) resets the OS
+      // grant while the Firestore flag survives. Trusting the flag alone showed
+      // a "granted" step that never prompted, leaving the app with no position.
+      setup(
+        ['identity', 'visibility', 'currency', 'language'],
+        {},
+        storedSettings({ location: true }),
+      );
+      hasLocationPermission.mockResolvedValue(false);
+
+      await service.initialize();
+
+      expect(service.locationPermission()).toBe('idle');
+      expect(service.canAdvance()).toBe(false);
     });
 
     it('still offers the choice when nothing was ever recorded', async () => {

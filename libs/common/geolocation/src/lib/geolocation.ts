@@ -2,6 +2,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { from, Observable } from 'rxjs';
 import { Position } from '@capacitor/geolocation/dist/esm/definitions';
 import { Capacitor } from '@capacitor/core';
+import { AppLauncher } from '@capacitor/app-launcher';
 
 const ONE_MINUTE = 60 * 1000;
 
@@ -13,6 +14,16 @@ const ONE_MINUTE = 60 * 1000;
  * callers do not record a refusal the user never made.
  */
 export type LocationPermissionResult = 'granted' | 'denied' | 'unsupported';
+
+/**
+ * Current OS location permission, as reported without prompting.
+ *
+ * `prompt` still has an unspent OS prompt, so asking can recover access.
+ * `denied` cannot: the OS ignores further requests, and the only way back is
+ * the system settings page. Callers must branch on the two.
+ */
+export type LocationPermissionState =
+  'granted' | 'denied' | 'prompt' | 'unsupported';
 
 /** Thrown by {@link getCurrentPosition} instead of triggering a cold OS prompt. */
 export class LocationPermissionNotGrantedError extends Error {
@@ -52,6 +63,87 @@ const readCurrentPosition = async (): Promise<Position> => {
  */
 export const getCurrentPosition = (): Observable<Position> => {
   return from(readCurrentPosition());
+};
+
+/**
+ * Whether the OS currently allows reading the position. Never prompts.
+ *
+ * A stored `settings.location` flag records what the user once chose, not what
+ * the OS allows today: reinstalling the app or revoking access in system
+ * settings resets the OS grant while the stored preference survives. Callers
+ * must reconcile the two before treating location as available, otherwise they
+ * show a "granted" state for a permission that no longer exists.
+ *
+ * Web has no pre-checkable grant — the browser asks on read — so it reports
+ * `true` and leaves the decision to {@link getCurrentPosition}.
+ */
+export const hasLocationPermission = async (): Promise<boolean> => {
+  if (!Capacitor.isNativePlatform()) {
+    return true;
+  }
+
+  try {
+    const permissionStatus = await Geolocation.checkPermissions();
+
+    return permissionStatus.location === 'granted';
+  } catch (error) {
+    console.warn('Location permission check failed: ', error);
+
+    return false;
+  }
+};
+
+/**
+ * Reads the OS permission state without prompting, so a caller can tell a
+ * recoverable "never asked" apart from a "denied" that only the system settings
+ * page can undo.
+ */
+export const getLocationPermissionState =
+  async (): Promise<LocationPermissionState> => {
+    if (!Capacitor.isNativePlatform()) {
+      return 'unsupported';
+    }
+
+    try {
+      const { location } = await Geolocation.checkPermissions();
+
+      if (location === 'granted') {
+        return 'granted';
+      }
+
+      // `prompt-with-rationale` is Android's "ask again with an explanation",
+      // so it still has a prompt left to spend.
+      return location === 'denied' ? 'denied' : 'prompt';
+    } catch (error) {
+      console.warn('Location permission check failed: ', error);
+
+      return 'denied';
+    }
+  };
+
+/**
+ * Opens the app's own page in the OS settings, the only route back once
+ * location was denied — the OS silently ignores further permission requests.
+ *
+ * Returns whether the settings page was actually opened, so the caller can keep
+ * guiding the user instead of appearing to do nothing. iOS exposes the app's
+ * settings under a URL scheme; Android has no equivalent that App Launcher can
+ * open, so it reports `false` there and needs a native settings plugin.
+ */
+export const openLocationSettings = async (): Promise<boolean> => {
+  if (Capacitor.getPlatform() !== 'ios') {
+    return false;
+  }
+
+  try {
+    await AppLauncher.openUrl({ url: 'app-settings:' });
+
+    return true;
+  } catch (error) {
+    console.warn('Could not open location settings: ', error);
+
+    return false;
+  }
 };
 
 /**

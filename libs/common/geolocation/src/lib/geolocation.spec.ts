@@ -1,5 +1,17 @@
 import { Geolocation } from '@capacitor/geolocation';
-import { getCurrentPosition, requestLocationPermission } from './geolocation';
+import {
+  getCurrentPosition,
+  getLocationPermissionState,
+  hasLocationPermission,
+  openLocationSettings,
+  requestLocationPermission,
+} from './geolocation';
+import { AppLauncher } from '@capacitor/app-launcher';
+
+// Automocking this module yields an undefined `AppLauncher`, so stub it out.
+jest.mock('@capacitor/app-launcher', () => ({
+  AppLauncher: { openUrl: jest.fn(), canOpenUrl: jest.fn() },
+}));
 import { lastValueFrom } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 
@@ -154,4 +166,126 @@ describe(requestLocationPermission.name, () => {
       expect(Geolocation.requestPermissions).not.toHaveBeenCalled();
     });
   });
+});
+
+describe(hasLocationPermission.name, () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('given native platform', () => {
+    beforeEach(() => {
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    });
+
+    it('reports the grant without ever prompting', async () => {
+      (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({
+        location: 'granted',
+      });
+
+      await expect(hasLocationPermission()).resolves.toBe(true);
+      expect(Geolocation.requestPermissions).not.toHaveBeenCalled();
+    });
+
+    it.each(['denied', 'prompt', 'prompt-with-rationale'])(
+      'reports no permission when the OS says %s',
+      async (location) => {
+        // A stored preference can outlive the OS grant (reinstall, revoke), so
+        // anything short of "granted" must read as unavailable.
+        (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({
+          location,
+        });
+
+        await expect(hasLocationPermission()).resolves.toBe(false);
+      },
+    );
+
+    it('treats a failed check as no permission', async () => {
+      jest.spyOn(console, 'warn').mockImplementation();
+      (Geolocation.checkPermissions as jest.Mock).mockRejectedValue(
+        new Error('boom'),
+      );
+
+      await expect(hasLocationPermission()).resolves.toBe(false);
+    });
+  });
+
+  describe('given not native platform', () => {
+    beforeEach(() => {
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+    });
+
+    it('defers to the browser, which asks on read', async () => {
+      await expect(hasLocationPermission()).resolves.toBe(true);
+      expect(Geolocation.checkPermissions).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe(getLocationPermissionState.name, () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+  });
+
+  it.each([
+    ['granted', 'granted'],
+    ['denied', 'denied'],
+    ['prompt', 'prompt'],
+    // Android's "ask again with an explanation" still has a prompt to spend.
+    ['prompt-with-rationale', 'prompt'],
+  ])('maps an OS state of %s to %s', async (location, expected) => {
+    (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({ location });
+
+    await expect(getLocationPermissionState()).resolves.toBe(expected);
+    expect(Geolocation.requestPermissions).not.toHaveBeenCalled();
+  });
+
+  it('treats a failed check as denied so the caller offers settings', async () => {
+    jest.spyOn(console, 'warn').mockImplementation();
+    (Geolocation.checkPermissions as jest.Mock).mockRejectedValue(
+      new Error('boom'),
+    );
+
+    await expect(getLocationPermissionState()).resolves.toBe('denied');
+  });
+
+  it('reports unsupported off native, where the browser asks on read', async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+
+    await expect(getLocationPermissionState()).resolves.toBe('unsupported');
+  });
+});
+
+describe(openLocationSettings.name, () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('opens the app settings page on iOS', async () => {
+    (Capacitor.getPlatform as jest.Mock).mockReturnValue('ios');
+    (AppLauncher.openUrl as jest.Mock).mockResolvedValue({ completed: true });
+
+    await expect(openLocationSettings()).resolves.toBe(true);
+    expect(AppLauncher.openUrl).toHaveBeenCalledWith({ url: 'app-settings:' });
+  });
+
+  it('reports failure when the settings page cannot be opened', async () => {
+    jest.spyOn(console, 'warn').mockImplementation();
+    (Capacitor.getPlatform as jest.Mock).mockReturnValue('ios');
+    (AppLauncher.openUrl as jest.Mock).mockRejectedValue(new Error('boom'));
+
+    await expect(openLocationSettings()).resolves.toBe(false);
+  });
+
+  it.each(['android', 'web'])(
+    'reports no settings route on %s',
+    async (platform) => {
+      // Only iOS exposes an app-settings URL that App Launcher can open.
+      (Capacitor.getPlatform as jest.Mock).mockReturnValue(platform);
+
+      await expect(openLocationSettings()).resolves.toBe(false);
+      expect(AppLauncher.openUrl).not.toHaveBeenCalled();
+    },
+  );
 });

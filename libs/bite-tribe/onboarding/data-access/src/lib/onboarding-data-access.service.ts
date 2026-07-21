@@ -12,6 +12,7 @@ import {
   type PushPermissionResult,
 } from 'push-notifications';
 import {
+  hasLocationPermission,
   requestLocationPermission,
   type LocationPermissionResult,
 } from 'geolocation';
@@ -197,6 +198,11 @@ export class OnboardingDataAccessService {
 
   requestLocationPermission(): Promise<LocationPermissionResult> {
     return requestLocationPermission();
+  }
+
+  /** Whether the OS still allows location reads. Never prompts. */
+  hasLocationPermission(): Promise<boolean> {
+    return hasLocationPermission();
   }
 
   private toPublicUser(

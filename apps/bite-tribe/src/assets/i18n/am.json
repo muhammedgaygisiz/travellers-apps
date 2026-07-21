@@ -163,6 +163,7 @@
   "we-could-not-access-your-location": "ወደ አካባቢህ መዳረስ አልቻልንም። ወደ Bites ያለው ርቀት ሊታይ አይችልም ወይም ወቅታዊ አይደለም።",
   "you-are-offline": "ከመስመር ውጭ ያለህ ይመስላል። እባክህ የኢንተርኔት ግንኙነትህን አረጋግጥ።",
   "retry": "እንደገና ሞክር",
+  "enable-location": "አካባቢን አንቃ",
   "close": "ዝጋ",
   "drag-and-drop-not-supported": "Drag & drop አይደገፍም። <br />ለመስቀል ወይም ፎቶ ለማንሳት ንካ።",
   "tap-into-box": "ለመስቀል <br />ወይም ፎቶ ለማንሳት በሳጥኑ ውስጥ ንካ።",

@@ -25,6 +25,7 @@ describe('OnboardingService', () => {
   let saveSettings: jest.Mock;
   let applyLanguage: jest.Mock;
   let requestPushPermission: jest.Mock;
+  let hasPushPermission: jest.Mock;
   let requestLocationPermission: jest.Mock;
   let hasLocationPermission: jest.Mock;
   let completeOnboarding: jest.Mock;
@@ -74,6 +75,8 @@ describe('OnboardingService', () => {
     saveSettings = jest.fn().mockResolvedValue(undefined);
     applyLanguage = jest.fn().mockResolvedValue(undefined);
     requestPushPermission = jest.fn().mockResolvedValue('granted');
+    // Default: the OS still allows push, so a stored grant stays trustworthy.
+    hasPushPermission = jest.fn().mockResolvedValue(true);
     requestLocationPermission = jest.fn().mockResolvedValue('granted');
     // Default: the OS still allows reads, so a stored grant stays trustworthy.
     hasLocationPermission = jest.fn().mockResolvedValue(true);
@@ -102,6 +105,7 @@ describe('OnboardingService', () => {
             saveSettings,
             applyLanguage,
             requestPushPermission,
+            hasPushPermission,
             requestLocationPermission,
             hasLocationPermission,
             completeOnboarding,
@@ -1111,6 +1115,23 @@ describe('OnboardingService', () => {
 
       expect(service.notificationPermission()).toBe('granted');
       expect(service.canAdvance()).toBe(true);
+    });
+
+    it('re-asks when a stored grant outlived the OS permission', async () => {
+      // Reinstalling, or switching notifications off in system settings, resets
+      // the OS grant while the Firestore flag survives. Trusting the flag alone
+      // showed a "granted" step that never prompted, leaving push dead.
+      setup(
+        ['identity', 'visibility', 'currency', 'language', 'location'],
+        {},
+        storedSettings({ pushNotifications: true }),
+      );
+      hasPushPermission.mockResolvedValue(false);
+
+      await service.initialize();
+
+      expect(service.notificationPermission()).toBe('idle');
+      expect(service.canAdvance()).toBe(false);
     });
   });
 });

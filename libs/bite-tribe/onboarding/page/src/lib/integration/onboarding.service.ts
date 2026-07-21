@@ -166,7 +166,13 @@ export class OnboardingService {
       this.setStepValid('location', true);
     }
 
-    if (settings?.pushNotifications) {
+    // Same reconciliation as location: the stored flag outlives the OS grant on
+    // a reinstall or a turn-off in system settings, so believing it alone would
+    // show a "granted" step that never prompts and leave push silently dead.
+    if (
+      settings?.pushNotifications &&
+      (await this.dataAccess.hasPushPermission())
+    ) {
       this.notificationPermission.set('granted');
       this.setStepValid('notifications', true);
     }

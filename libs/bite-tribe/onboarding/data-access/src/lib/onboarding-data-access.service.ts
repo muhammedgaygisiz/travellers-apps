@@ -8,6 +8,7 @@ import { Preferences } from '@capacitor/preferences';
 import { TranslocoService } from '@jsverse/transloco';
 import { Platform } from '@ionic/angular';
 import {
+  hasPushPermission,
   requestPushPermission,
   type PushPermissionResult,
 } from 'push-notifications';
@@ -194,6 +195,11 @@ export class OnboardingDataAccessService {
 
   requestPushPermission(): Promise<PushPermissionResult> {
     return requestPushPermission(this.platform);
+  }
+
+  /** Whether the OS still allows delivering push. Never prompts. */
+  hasPushPermission(): Promise<boolean> {
+    return hasPushPermission(this.platform);
   }
 
   requestLocationPermission(): Promise<LocationPermissionResult> {

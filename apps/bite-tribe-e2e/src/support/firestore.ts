@@ -40,9 +40,11 @@ const decodeFields = (
     Object.entries(fields).map(([key, value]) => [key, decodeValue(value)]),
   );
 
-export const getBiteByName = async (
+export const getDocumentByStringField = async (
   page: Page,
-  biteName: string,
+  collectionId: string,
+  fieldPath: string,
+  value: string,
 ): Promise<Record<string, unknown> | undefined> => {
   const response = await page.request.post(
     `${FIRESTORE_EMULATOR_URL}:runQuery`,
@@ -50,12 +52,12 @@ export const getBiteByName = async (
       headers: { Authorization: 'Bearer owner' },
       data: {
         structuredQuery: {
-          from: [{ collectionId: 'bites' }],
+          from: [{ collectionId }],
           where: {
             fieldFilter: {
-              field: { fieldPath: 'name' },
+              field: { fieldPath },
               op: 'EQUAL',
-              value: { stringValue: biteName },
+              value: { stringValue: value },
             },
           },
           limit: 1,
@@ -73,6 +75,28 @@ export const getBiteByName = async (
   return document ? decodeFields(document.fields ?? {}) : undefined;
 };
 
+export const getBiteByName = (
+  page: Page,
+  biteName: string,
+): Promise<Record<string, unknown> | undefined> =>
+  getDocumentByStringField(page, 'bites', 'name', biteName);
+
+export const getFirestoreDocument = async (
+  page: Page,
+  documentPath: string,
+): Promise<Record<string, unknown> | undefined> => {
+  const response = await page.request.get(
+    `${FIRESTORE_EMULATOR_URL}/${documentPath}`,
+    { headers: { Authorization: 'Bearer owner' } },
+  );
+
+  if (response.status() === 404) return undefined;
+  if (!response.ok()) throw new Error(await response.text());
+
+  const document = (await response.json()) as FirestoreDocument;
+  return decodeFields(document.fields ?? {});
+};
+
 export const expectBiteFields = async (
   page: Page,
   biteName: string,
@@ -80,5 +104,15 @@ export const expectBiteFields = async (
 ): Promise<void> => {
   await expect
     .poll(() => getBiteByName(page, biteName), { timeout: 15_000 })
+    .toMatchObject(fields);
+};
+
+export const expectFirestoreDocument = async (
+  page: Page,
+  documentPath: string,
+  fields: Record<string, unknown>,
+): Promise<void> => {
+  await expect
+    .poll(() => getFirestoreDocument(page, documentPath), { timeout: 15_000 })
     .toMatchObject(fields);
 };

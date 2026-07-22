@@ -12,6 +12,34 @@ import { TEST_USERS } from '../support/test-users';
 
 const IMAGE_FIXTURE = join(__dirname, '..', 'fixtures', 'bite.jpg');
 const POSITION = { latitude: 48.137154, longitude: 11.576124 };
+const GOOGLE_POSITION = { latitude: 48.227154, longitude: 11.676124 };
+
+async function expectPositionMarkerInsideMap(page: Page): Promise<void> {
+  const map = page.locator('position bt-map .leaflet-container');
+  const marker = map.locator('.leaflet-marker-icon');
+  await map.scrollIntoViewIfNeeded();
+  await expect(marker).toHaveCount(1);
+  await expect
+    .poll(async () => {
+      const [mapBox, markerBox] = await Promise.all([
+        map.boundingBox(),
+        marker.boundingBox(),
+      ]);
+      if (!mapBox || !markerBox) return false;
+
+      const markerCenter = {
+        x: markerBox.x + markerBox.width / 2,
+        y: markerBox.y + markerBox.height / 2,
+      };
+      return (
+        markerCenter.x >= mapBox.x &&
+        markerCenter.x <= mapBox.x + mapBox.width &&
+        markerCenter.y >= mapBox.y &&
+        markerCenter.y <= mapBox.y + mapBox.height
+      );
+    })
+    .toBe(true);
+}
 
 async function mockCallable(
   page: Page,
@@ -111,7 +139,7 @@ test.describe('Create and maintain personal bites', () => {
           placeId: `google-place-${runId}`,
           name: googleRestaurant,
           address: '1 Playwright Way, Munich',
-          position: POSITION,
+          position: GOOGLE_POSITION,
         },
       ],
       (data) =>
@@ -129,6 +157,7 @@ test.describe('Create and maintain personal bites', () => {
     await biteForm.uploadImage(IMAGE_FIXTURE);
     await biteForm.fillName(originalName);
     await biteForm.chooseGoogleRestaurant(googleSearch, googleRestaurant);
+    await expectPositionMarkerInsideMap(page);
     await biteForm.fillPrice('14.50');
     await biteForm.chooseRating(4);
     await biteForm.fillDescription('Crispy tofu with chili and lime.');
@@ -141,7 +170,7 @@ test.describe('Create and maintain personal bites', () => {
     await expectBiteFields(page, originalName, {
       place: googleRestaurant,
       restaurantId: '',
-      position: POSITION,
+      position: GOOGLE_POSITION,
       price: '14.50',
       rating: 4,
       description: 'Crispy tofu with chili and lime.',
@@ -171,6 +200,7 @@ test.describe('Create and maintain personal bites', () => {
     );
     await biteForm.addTag('sesame');
     await biteForm.chooseLocalRestaurant(verifiedRestaurant);
+    await expectPositionMarkerInsideMap(page);
     await biteForm.expectPostEnabled();
     await biteForm.submit();
 

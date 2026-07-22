@@ -52,7 +52,6 @@ describe(MapService.name, () => {
       selectedBucketlist: signal(mockBucketlist),
       gpsPosition: signal(mockGeopoint),
       userId: signal('user1'),
-      userHasSubscriptionTierOne: signal(false),
     };
 
     const biteTrailDataAccessMock = {

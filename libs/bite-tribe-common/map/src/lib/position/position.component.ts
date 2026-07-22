@@ -17,6 +17,7 @@ import { Geopoint } from 'model';
       [readonly]="readonly()"
       [dragging]="dragging()"
       [geopoints]="[value()!]"
+      refitOnGeopointChanges
       (clickOnMap)="setValue($event)"
     />
   `,

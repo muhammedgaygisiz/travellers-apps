@@ -13,7 +13,6 @@ class Mock {
   selectedBucketlist$ = of(null);
   isAuthenticated$ = of(false);
   position$ = of(null);
-  userHasSubscriptionTierOne$ = of(false);
   logout = (): null => null;
   submitLikeClick = (): null => null;
 }

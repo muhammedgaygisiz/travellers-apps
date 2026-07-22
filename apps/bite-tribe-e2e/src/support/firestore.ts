@@ -3,6 +3,22 @@ import { expect, Page } from '@playwright/test';
 export const FIRESTORE_EMULATOR_URL =
   'http://127.0.0.1:8080/v1/projects/bite-tribe/databases/(default)/documents';
 
+export const seedFirestoreDocument = async (
+  page: Page,
+  documentPath: string,
+  fields: Record<string, unknown>,
+): Promise<void> => {
+  const response = await page.request.patch(
+    `${FIRESTORE_EMULATOR_URL}/${documentPath}`,
+    {
+      headers: { Authorization: 'Bearer owner' },
+      data: { fields },
+    },
+  );
+
+  expect(response.ok(), await response.text()).toBeTruthy();
+};
+
 interface FirestoreValue {
   stringValue?: string;
   integerValue?: string;

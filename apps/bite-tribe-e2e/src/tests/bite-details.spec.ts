@@ -1,4 +1,4 @@
-import { expect, Page, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { geohashForLocation } from 'geofire-common';
 import { BiteDetailsPage } from '../pages/bite-details.page';
 import { HomePage } from '../pages/home.page';
@@ -6,8 +6,8 @@ import { loginAsTestUser } from '../support/auth';
 import { dismissCoachMarks } from '../support/coach-marks';
 import {
   expectFirestoreDocument,
-  FIRESTORE_EMULATOR_URL,
   getDocumentByStringField,
+  seedFirestoreDocument,
 } from '../support/firestore';
 import { completeOnboardingIfNeeded } from '../support/onboarding';
 import { TEST_USERS } from '../support/test-users';
@@ -18,22 +18,6 @@ interface ShareData {
   title?: string;
   text?: string;
   url?: string;
-}
-
-async function seedDocument(
-  page: Page,
-  documentPath: string,
-  fields: Record<string, unknown>,
-): Promise<void> {
-  const response = await page.request.patch(
-    `${FIRESTORE_EMULATOR_URL}/${documentPath}`,
-    {
-      headers: { Authorization: 'Bearer owner' },
-      data: { fields },
-    },
-  );
-
-  expect(response.ok(), await response.text()).toBeTruthy();
 }
 
 test.describe('Inspect Bite details', () => {
@@ -64,20 +48,20 @@ test.describe('Inspect Bite details', () => {
     });
 
     await Promise.all([
-      seedDocument(page, `users/${creatorId}`, {
+      seedFirestoreDocument(page, `users/${creatorId}`, {
         userId: { stringValue: creatorId },
         displayName: { stringValue: creatorName },
         public: { booleanValue: true },
         about: { stringValue: 'Creator profile used by the details E2E test.' },
       }),
-      seedDocument(page, `settings/${TEST_USERS.default.uid}`, {
+      seedFirestoreDocument(page, `settings/${TEST_USERS.default.uid}`, {
         currency: { stringValue: 'USD' },
       }),
-      seedDocument(page, 'meta/exchangeRates', {
+      seedFirestoreDocument(page, 'meta/exchangeRates', {
         EUR: { doubleValue: 1 },
         USD: { doubleValue: 2 },
       }),
-      seedDocument(page, `bucketlists/${bucketListId}`, {
+      seedFirestoreDocument(page, `bucketlists/${bucketListId}`, {
         userId: { stringValue: TEST_USERS.default.uid },
         name: { stringValue: bucketListName },
         biteIds: { arrayValue: { values: [] } },
@@ -86,7 +70,7 @@ test.describe('Inspect Bite details', () => {
       }),
     ]);
 
-    await seedDocument(page, `bites/${biteId}`, {
+    await seedFirestoreDocument(page, `bites/${biteId}`, {
       name: { stringValue: biteName },
       place: { stringValue: restaurant },
       description: {

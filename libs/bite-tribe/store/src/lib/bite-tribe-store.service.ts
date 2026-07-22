@@ -49,7 +49,6 @@ import {
   profileMetadata,
   publicUser,
   settings,
-  userHasSubscriptionTierOne,
 } from './app/selectors';
 import {
   bucketlistSorting,
@@ -133,7 +132,6 @@ export class BiteTribeStoreService implements StoreService {
   likes$ = this.store.select(likes);
   userId$ = this.store.select(fromAuth.selectUserId);
   user$ = this.store.select(fromAuth.selectUser);
-  userHasSubscriptionTierOne$ = this.store.select(userHasSubscriptionTierOne);
   settings$ = this.store.select(settings);
   isPublicProfile$ = this.store.select(isPublicProfile);
   publicUser$ = this.store.select(publicUser);

@@ -638,6 +638,27 @@ describe('MapComponent', () => {
       expect(fitMapToMarkersMock).not.toHaveBeenCalled();
     });
 
+    it('should refit the camera when configured to follow geopoint changes', () => {
+      componentRef.setInput('refitOnGeopointChanges', true);
+      componentRef.setInput('geopoints', [mockGeopoint]);
+      fixture.detectChanges();
+      jest.runAllTimers();
+
+      zoomToGeopointMock.mockClear();
+
+      const selectedRestaurantPosition = {
+        latitude: 48.137154,
+        longitude: 11.576124,
+      };
+      componentRef.setInput('geopoints', [selectedRestaurantPosition]);
+      fixture.detectChanges();
+
+      expect(zoomToGeopointMock).toHaveBeenCalledWith(
+        selectedRestaurantPosition,
+        expect.any(Object),
+      );
+    });
+
     it('should fit the camera again after geopoints are cleared and repopulated', () => {
       componentRef.setInput('geopoints', [mockGeopoint]);
       fixture.detectChanges();

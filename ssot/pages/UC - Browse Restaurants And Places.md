@@ -29,6 +29,8 @@ Users can understand the place or restaurant context around a Bite.
 - Shared restaurant selector.
 - `searchNearbyPlaces`
 - Restaurant Bites route.
+- Playwright coverage for Restaurant search, verified and unverified place
+  context, aggregate ratings and tags, associated Bites, and empty results.
 
 ## Related GitHub Scope
 

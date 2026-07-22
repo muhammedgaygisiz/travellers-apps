@@ -27,10 +27,6 @@ export class MapDataAccessService {
     requireSync: true,
   });
   gpsPosition = toSignal(this.storeService.position$);
-  userHasSubscriptionTierOne = toSignal(
-    this.storeService.userHasSubscriptionTierOne$,
-    { initialValue: false },
-  );
 
   logout(): void {
     this.storeService.logout();

@@ -16,7 +16,6 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       [isAuthenticated]="service.isAuthenticated()"
       [gpsPosition]="service.gpsPosition()"
       [userId]="service.userId()"
-      [enableZoom]="service.enableZoom()"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"

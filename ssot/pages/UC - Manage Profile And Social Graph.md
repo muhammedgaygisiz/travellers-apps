@@ -30,6 +30,8 @@ Users can maintain their identity and use profile/social context to build trust 
 - `followers/:userId/:type`
 - Profile API.
 - Public-user conversion.
+- Playwright coverage for profile editing, public-profile navigation,
+  follower/following lists, and follow/unfollow persistence.
 
 ## Related Domains
 

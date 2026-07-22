@@ -23,6 +23,11 @@ export class HomePage {
     return this.page.locator('bt-bite').filter({ hasText: name });
   }
 
+  async openBite(name: string): Promise<void> {
+    await this.biteCard(name).locator('ion-card-title').click();
+    await this.page.waitForURL(/\/bite\/[^/]+$/);
+  }
+
   /**
    * Opens the reaction popover on the named Bite and picks a reaction.
    * `like-chip` opens the popover; `like-option-<reaction>` lives in the

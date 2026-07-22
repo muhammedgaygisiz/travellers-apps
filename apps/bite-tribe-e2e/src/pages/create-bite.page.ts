@@ -18,6 +18,8 @@ export class CreateBitePage {
   readonly price: Locator;
   readonly currency: Locator;
   readonly invalidPriceMessage: Locator;
+  readonly description: Locator;
+  readonly tagsInput: Locator;
   readonly fromGps: Locator;
   readonly post: Locator;
 
@@ -36,6 +38,10 @@ export class CreateBitePage {
     this.invalidPriceMessage = page
       .locator('bt-price-input ion-text[color="danger"]')
       .filter({ hasText: 'Please enter a valid price' });
+    this.description = page.locator(
+      'ion-textarea[formcontrolname="description"] textarea',
+    );
+    this.tagsInput = page.locator('bt-tags-input ion-input input');
     this.fromGps = page.getByTestId('position-from-gps');
     this.post = page.getByTestId('post-bite');
   }
@@ -66,13 +72,72 @@ export class CreateBitePage {
    * Google Places callable.
    */
   async chooseCustomRestaurant(name: string): Promise<void> {
-    await this.setRestaurant.click();
+    await this.openRestaurantSelector();
     await this.restaurantSearch.fill(name);
     await this.restaurantCustomOption.click();
   }
 
+  async chooseGoogleRestaurant(
+    searchTerm: string,
+    restaurantName: string,
+  ): Promise<void> {
+    await this.openRestaurantSelector();
+    await this.restaurantSearch.fill(searchTerm);
+    await this.page
+      .locator('lib-restaurant-selector ion-item[button]')
+      .filter({ hasText: searchTerm })
+      .click();
+    await this.page
+      .locator('lib-restaurant-selector ion-item')
+      .filter({
+        has: this.page.getByRole('heading', {
+          name: restaurantName,
+          exact: true,
+        }),
+      })
+      .click();
+  }
+
+  async chooseLocalRestaurant(restaurantName: string): Promise<void> {
+    await this.openRestaurantSelector();
+    await this.restaurantSearch.fill(restaurantName);
+    await this.page
+      .locator('lib-restaurant-selector ion-item')
+      .filter({
+        has: this.page.getByRole('heading', {
+          name: restaurantName,
+          exact: true,
+        }),
+      })
+      .click();
+  }
+
+  private async openRestaurantSelector(): Promise<void> {
+    if (await this.setRestaurant.isVisible()) {
+      await this.setRestaurant.click();
+      return;
+    }
+
+    await this.page.getByRole('button', { name: 'Change restaurant' }).click();
+  }
+
   async fillPrice(price: string): Promise<void> {
     await this.price.fill(price);
+  }
+
+  async fillDescription(description: string): Promise<void> {
+    await this.description.fill(description);
+  }
+
+  async chooseRating(rating: number): Promise<void> {
+    await this.page
+      .locator('star-rating:not([readonly])')
+      .locator(`[aria-label="${rating} star"]`)
+      .click();
+  }
+
+  async addTag(tag: string): Promise<void> {
+    await this.tagsInput.fill(`${tag},`);
   }
 
   async expectCurrency(currencyName: string): Promise<void> {
@@ -96,7 +161,7 @@ export class CreateBitePage {
   }
 
   async expectNoInvalidPriceMessage(): Promise<void> {
-    await expect(this.invalidPriceMessage).not.toBeVisible();
+    await expect(this.invalidPriceMessage).toBeHidden();
   }
 
   async expectPostEnabled(): Promise<void> {

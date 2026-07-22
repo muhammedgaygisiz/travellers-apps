@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 
 /**
  * Page object for the create-bite form (route: /new-bite).
@@ -16,6 +16,8 @@ export class CreateBitePage {
   readonly restaurantSearch: Locator;
   readonly restaurantCustomOption: Locator;
   readonly price: Locator;
+  readonly currency: Locator;
+  readonly invalidPriceMessage: Locator;
   readonly fromGps: Locator;
   readonly post: Locator;
 
@@ -30,6 +32,10 @@ export class CreateBitePage {
       .locator('input');
     this.restaurantCustomOption = page.getByTestId('restaurant-custom-option');
     this.price = page.getByTestId('bite-price').locator('input');
+    this.currency = page.locator('#currency-selector-trigger-bite');
+    this.invalidPriceMessage = page
+      .locator('bt-price-input ion-text[color="danger"]')
+      .filter({ hasText: 'Please enter a valid price' });
     this.fromGps = page.getByTestId('position-from-gps');
     this.post = page.getByTestId('post-bite');
   }
@@ -67,6 +73,38 @@ export class CreateBitePage {
 
   async fillPrice(price: string): Promise<void> {
     await this.price.fill(price);
+  }
+
+  async expectCurrency(currencyName: string): Promise<void> {
+    await expect(this.currency).toContainText(currencyName);
+  }
+
+  async chooseCurrency(currencyCode: string): Promise<void> {
+    await this.currency.click();
+
+    const selector = this.page.locator('currency-selector');
+    await expect(selector).toBeVisible();
+    await selector.locator('ion-searchbar input').fill(currencyCode);
+    await selector
+      .locator('ion-item')
+      .filter({ hasText: new RegExp(`\\b${currencyCode}\\b`) })
+      .click();
+  }
+
+  async expectInvalidPriceMessage(): Promise<void> {
+    await expect(this.invalidPriceMessage).toBeVisible();
+  }
+
+  async expectNoInvalidPriceMessage(): Promise<void> {
+    await expect(this.invalidPriceMessage).not.toBeVisible();
+  }
+
+  async expectPostEnabled(): Promise<void> {
+    await expect(this.post).not.toHaveAttribute('aria-disabled', 'true');
+  }
+
+  async expectPostDisabled(): Promise<void> {
+    await expect(this.post).toHaveAttribute('aria-disabled', 'true');
   }
 
   /** Adopts the browser geolocation (set in playwright.config) as the bite position. */

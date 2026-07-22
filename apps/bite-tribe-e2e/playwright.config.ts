@@ -49,6 +49,10 @@ export default defineConfig({
       url: 'http://127.0.0.1:4000',
       reuseExistingServer: !process.env['CI'],
       timeout: 120_000,
+      // Firebase starts Java and Node child processes. Let its CLI handle SIGINT
+      // so those emulators exit too; Playwright's default SIGKILL can strand the
+      // UI while Auth is already gone, making the next run reuse a broken stack.
+      gracefulShutdown: { signal: 'SIGINT', timeout: 10_000 },
       stdout: 'pipe',
       stderr: 'pipe',
     },

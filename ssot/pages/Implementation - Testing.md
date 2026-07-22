@@ -102,6 +102,7 @@ Two boundary details keep direct Loki working against the Angular Storybook 10 h
 ## Related Pages
 
 - [[Architecture - Testing]]
+- [[Current State - E2E Coverage]]
 - [[Implementation - Firebase Functions]]
 - [[Implementation - Storybook]]
 - [[Current State - Nx And Dependency Migration Roadmap]]

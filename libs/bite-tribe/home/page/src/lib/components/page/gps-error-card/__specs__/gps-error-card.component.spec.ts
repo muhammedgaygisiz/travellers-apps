@@ -35,12 +35,17 @@ describe('GpsErrorCardComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  /** Selected by test id: the card's button order is not part of its contract. */
+  const click = (testId: string): void =>
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLElement>(`[data-testid="${testId}"]`)
+      ?.click();
+
   it('should emit retryClick when the retry button is clicked', () => {
     fixture.detectChanges();
     const emitSpy = jest.spyOn(component.retryClick, 'emit');
 
-    const buttons = fixture.nativeElement.querySelectorAll('ion-button');
-    buttons[0].click();
+    click('gps-error-retry');
 
     expect(emitSpy).toHaveBeenCalledTimes(1);
   });
@@ -49,8 +54,17 @@ describe('GpsErrorCardComponent', () => {
     fixture.detectChanges();
     const emitSpy = jest.spyOn(component.closeClick, 'emit');
 
-    const buttons = fixture.nativeElement.querySelectorAll('ion-button');
-    buttons[1].click();
+    click('gps-error-close');
+
+    expect(emitSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should emit enableLocationClick when the enable button is clicked', () => {
+    fixture.detectChanges();
+    const emitSpy = jest.spyOn(component.enableLocationClick, 'emit');
+
+    // Retry cannot fix a missing permission, so this is the recovery route.
+    click('gps-error-enable-location');
 
     expect(emitSpy).toHaveBeenCalledTimes(1);
   });

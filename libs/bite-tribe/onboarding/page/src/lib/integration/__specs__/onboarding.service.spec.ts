@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { LoadingController, NavController } from '@ionic/angular';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import {
@@ -25,7 +25,9 @@ describe('OnboardingService', () => {
   let saveSettings: jest.Mock;
   let applyLanguage: jest.Mock;
   let requestPushPermission: jest.Mock;
+  let hasPushPermission: jest.Mock;
   let requestLocationPermission: jest.Mock;
+  let hasLocationPermission: jest.Mock;
   let completeOnboarding: jest.Mock;
   let navigateRoot: jest.Mock;
   let logEvent: jest.Mock;
@@ -73,7 +75,11 @@ describe('OnboardingService', () => {
     saveSettings = jest.fn().mockResolvedValue(undefined);
     applyLanguage = jest.fn().mockResolvedValue(undefined);
     requestPushPermission = jest.fn().mockResolvedValue('granted');
+    // Default: the OS still allows push, so a stored grant stays trustworthy.
+    hasPushPermission = jest.fn().mockResolvedValue(true);
     requestLocationPermission = jest.fn().mockResolvedValue('granted');
+    // Default: the OS still allows reads, so a stored grant stays trustworthy.
+    hasLocationPermission = jest.fn().mockResolvedValue(true);
     completeOnboarding = jest.fn().mockResolvedValue(undefined);
     navigateRoot = jest.fn();
     logEvent = jest.fn();
@@ -99,7 +105,9 @@ describe('OnboardingService', () => {
             saveSettings,
             applyLanguage,
             requestPushPermission,
+            hasPushPermission,
             requestLocationPermission,
+            hasLocationPermission,
             completeOnboarding,
           },
         },
@@ -406,6 +414,48 @@ describe('OnboardingService', () => {
       );
       expect(loadingPresent).toHaveBeenCalledTimes(1);
       expect(loadingDismiss).toHaveBeenCalledTimes(1);
+      expect(service.currentStep().id).toBe('currency');
+    });
+
+    it('does not expose the next step until the overlay is dismissed', async () => {
+      setup(['identity']);
+      let resolveDismiss: () => void = () => undefined;
+      let signalDismissStarted: () => void = () => undefined;
+      const dismissStarted = new Promise<void>(
+        (resolve) => (signalDismissStarted = resolve),
+      );
+      loadingDismiss.mockImplementation(() => {
+        signalDismissStarted();
+        return new Promise<void>((resolve) => (resolveDismiss = resolve));
+      });
+      await service.initialize();
+      service.updateVisibility(true);
+
+      const advance = service.next();
+      await dismissStarted;
+
+      expect(loadingDismiss).toHaveBeenCalledTimes(1);
+      expect(service.currentStep().id).toBe('visibility');
+
+      resolveDismiss();
+      await advance;
+
+      expect(service.currentStep().id).toBe('currency');
+    });
+
+    it('releases the advance guard when the overlay cannot be opened', async () => {
+      setup(['identity']);
+      // A controller that fails to create must not wedge the guard: otherwise
+      // the first tap sets `advancing` and every later Next silently no-ops.
+      createLoading.mockRejectedValueOnce(new Error('overlay unavailable'));
+      await service.initialize();
+      service.updateVisibility(true);
+
+      await service.next().catch(() => undefined);
+      expect(service.currentStep().id).toBe('visibility');
+
+      // The guard is released, so a subsequent tap advances normally.
+      await service.next();
       expect(service.currentStep().id).toBe('currency');
     });
 
@@ -929,6 +979,23 @@ describe('OnboardingService', () => {
       expect(requestLocationPermission).not.toHaveBeenCalled();
     });
 
+    it('re-asks when a stored grant outlived the OS permission', async () => {
+      // Reinstalling (or revoking access in system settings) resets the OS
+      // grant while the Firestore flag survives. Trusting the flag alone showed
+      // a "granted" step that never prompted, leaving the app with no position.
+      setup(
+        ['identity', 'visibility', 'currency', 'language'],
+        {},
+        storedSettings({ location: true }),
+      );
+      hasLocationPermission.mockResolvedValue(false);
+
+      await service.initialize();
+
+      expect(service.locationPermission()).toBe('idle');
+      expect(service.canAdvance()).toBe(false);
+    });
+
     it('still offers the choice when nothing was ever recorded', async () => {
       // A stored `false` cannot be told apart from "never asked", so the step
       // asks rather than reporting a refusal the user never gave.
@@ -1074,6 +1141,23 @@ describe('OnboardingService', () => {
 
       expect(service.notificationPermission()).toBe('granted');
       expect(service.canAdvance()).toBe(true);
+    });
+
+    it('re-asks when a stored grant outlived the OS permission', async () => {
+      // Reinstalling, or switching notifications off in system settings, resets
+      // the OS grant while the Firestore flag survives. Trusting the flag alone
+      // showed a "granted" step that never prompted, leaving push dead.
+      setup(
+        ['identity', 'visibility', 'currency', 'language', 'location'],
+        {},
+        storedSettings({ pushNotifications: true }),
+      );
+      hasPushPermission.mockResolvedValue(false);
+
+      await service.initialize();
+
+      expect(service.notificationPermission()).toBe('idle');
+      expect(service.canAdvance()).toBe(false);
     });
   });
 });

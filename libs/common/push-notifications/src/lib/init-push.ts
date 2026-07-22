@@ -163,6 +163,38 @@ export const initPushListeners = async (
 };
 
 /**
+ * Whether the OS currently allows delivering push. Never prompts.
+ *
+ * A stored `settings.pushNotifications` flag records what the user once chose,
+ * not what the OS allows today: reinstalling the app or turning notifications
+ * off in system settings resets the OS grant while the stored preference
+ * survives. Callers must reconcile the two before treating push as enabled,
+ * otherwise they show a "granted" state for a permission that no longer exists.
+ *
+ * Off-device there is no OS grant to pre-check, so it reports `true` and leaves
+ * the outcome to {@link requestPushPermission}, which reports `unsupported`
+ * there. That keeps a stored preference from being second-guessed on a platform
+ * that cannot answer the question.
+ */
+export const hasPushPermission = async (
+  platform: Platform,
+): Promise<boolean> => {
+  if (!platform.is('capacitor')) {
+    return true;
+  }
+
+  try {
+    const permissions = await PushNotifications.checkPermissions();
+
+    return permissions.receive === 'granted';
+  } catch (error) {
+    console.warn('Push permission check failed: ', error);
+
+    return false;
+  }
+};
+
+/**
  * Shows the OS push permission prompt and registers for push when it is
  * granted. Call this only after the user has been told what notifications are
  * for; the OS shows its prompt once per install, so a cold ask is spent for

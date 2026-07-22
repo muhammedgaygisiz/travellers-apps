@@ -6,6 +6,21 @@ import type { Bite, Bucketlist, Like, LikeClick } from 'model';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { haversineDistance } from 'utils';
+import {
+  getLocationPermissionState,
+  openLocationSettings,
+  requestLocationPermission,
+} from 'geolocation';
+
+jest.mock('geolocation', () => ({
+  getLocationPermissionState: jest.fn(),
+  openLocationSettings: jest.fn(),
+  requestLocationPermission: jest.fn(),
+}));
+
+const getLocationPermissionStateMock = getLocationPermissionState as jest.Mock;
+const openLocationSettingsMock = openLocationSettings as jest.Mock;
+const requestLocationPermissionMock = requestLocationPermission as jest.Mock;
 
 const BITE_WITH_POSITION: Bite = {
   id: 'biteId',
@@ -66,6 +81,7 @@ class StoreMock {
   submitLikeClick = (): null => null;
   notifyLikesLoaded = jest.fn();
   submitDeleteBite = (): null => null;
+  saveEditedBite = (): null => null;
   setHomeSorting = (): null => null;
   setMyBitesSorting = (): null => null;
   setRestaurantBitesSorting = (): null => null;
@@ -154,6 +170,61 @@ describe('HomeDataAccessService', () => {
         );
         service.deleteBite({} as Bite);
         expect(submitDeleteBiteSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('updateBiteRating', () => {
+    it('should save the bite with the updated rating', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        const saveEditedBiteSpy = jest.spyOn(
+          biteTribeStoreService,
+          'saveEditedBite',
+        );
+
+        service.updateBiteRating({ bite: BITE_WITH_POSITION, rating: 4 });
+
+        expect(saveEditedBiteSpy).toHaveBeenCalledWith({
+          ...BITE_WITH_POSITION,
+          rating: 4,
+        });
+      },
+    ));
+  });
+
+  describe('location permissions', () => {
+    it('should delegate reading the permission state', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        getLocationPermissionStateMock.mockResolvedValue('prompt');
+
+        await expect(service.getLocationPermissionState()).resolves.toBe(
+          'prompt',
+        );
+        expect(getLocationPermissionStateMock).toHaveBeenCalledTimes(1);
+      },
+    ));
+
+    it('should delegate requesting location permission', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        requestLocationPermissionMock.mockResolvedValue('granted');
+
+        await expect(service.requestLocationPermission()).resolves.toBe(
+          'granted',
+        );
+        expect(requestLocationPermissionMock).toHaveBeenCalledTimes(1);
+      },
+    ));
+
+    it('should delegate opening location settings', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        openLocationSettingsMock.mockResolvedValue(true);
+
+        await expect(service.openLocationSettings()).resolves.toBe(true);
+        expect(openLocationSettingsMock).toHaveBeenCalledTimes(1);
       },
     ));
   });
@@ -347,6 +418,23 @@ describe('HomeDataAccessService', () => {
     ));
   });
 
+  describe('triedOutBiteIds', () => {
+    it('should return the bite ids marked as tried out', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        jest.spyOn(service, 'selectedBucketlist').mockReturnValue({
+          ...SELECTED_BUCKETLIST,
+          triedOutBites: [
+            { biteId: 'bite-1', date: '2026-04-20', timestamp: 1 },
+            { biteId: 'bite-2', date: '2026-04-21', timestamp: 2 },
+          ],
+        });
+
+        expect(service.triedOutBiteIds()).toEqual(['bite-1', 'bite-2']);
+      },
+    ));
+  });
+
   describe('restaurantBitesLoader', () => {
     it('should return empty array when no sourceBiteId', inject(
       [HomeDataAccessService],
@@ -477,6 +565,29 @@ describe('HomeDataAccessService', () => {
         );
 
         expect(ApiMock.loadLikesForBites).not.toHaveBeenCalled();
+      },
+    ));
+
+    it('should ignore errors while seeding likes', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.biteById.mockResolvedValue(BITE_WITH_POSITION);
+        ApiMock.bitesByPosition.mockResolvedValue([]);
+        ApiMock.loadLikesForBites.mockRejectedValue(new Error('network error'));
+
+        await expect(
+          service.restaurantBitesLoader(
+            createLoaderParams({
+              params: {
+                sourceBiteId: 'biteId',
+                restaurantIdOrName: undefined,
+              },
+            }),
+          ),
+        ).resolves.toEqual([BITE_WITH_POSITION]);
+        await Promise.resolve();
+
+        expect(biteTribeStoreService.notifyLikesLoaded).not.toHaveBeenCalled();
       },
     ));
 
@@ -724,5 +835,18 @@ describe('HomeDataAccessService', () => {
         },
       ));
     });
+  });
+
+  describe('restaurantBitesLoading', () => {
+    it('should reflect the resource loading state', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        jest
+          .spyOn(service.restaurantBitesResource, 'isLoading')
+          .mockReturnValue(true);
+
+        expect(service.restaurantBitesLoading()).toBe(true);
+      },
+    ));
   });
 });

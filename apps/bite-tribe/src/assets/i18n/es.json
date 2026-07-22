@@ -163,6 +163,7 @@
   "we-could-not-access-your-location": "No pudimos acceder a tu ubicación. La distancia a los Bites no se puede mostrar o no está actualizada.",
   "you-are-offline": "Parece que estás sin conexión. Por favor, revisa tu conexión a internet.",
   "retry": "REINTENTAR",
+  "enable-location": "ACTIVAR UBICACIÓN",
   "close": "CERRAR",
   "drag-and-drop-not-supported": "Arrastrar y soltar no es compatible. <br />Toca para subir o tomar una foto.",
   "tap-into-box": "Toca dentro del recuadro para subir <br />o tomar una foto.",

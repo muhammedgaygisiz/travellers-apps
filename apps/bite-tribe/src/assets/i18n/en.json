@@ -164,6 +164,7 @@
   "we-could-not-access-your-location": "We couldn’t access your location. The distance to the bites can’t be shown or is not up-to-date.",
   "you-are-offline": "It seems you are offline. Please check your internet connection.",
   "retry": "RETRY",
+  "enable-location": "ENABLE LOCATION",
   "close": "CLOSE",
   "drag-and-drop-not-supported": "Drag & drop is not supported. <br />Tap to upload or take a photo.",
   "tap-into-box": "Tap into the box to upload <br />or take a photo.",

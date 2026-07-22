@@ -45,4 +45,20 @@ export class SearchPage {
       this.results.getByRole('heading', { name: title, exact: true }),
     ).toBeVisible();
   }
+
+  result(title: string): Locator {
+    return this.results.locator('ion-item').filter({
+      has: this.page.getByRole('heading', { name: title, exact: true }),
+    });
+  }
+
+  async openResult(title: string): Promise<void> {
+    await this.result(title).click();
+  }
+
+  async expectEmpty(): Promise<void> {
+    await expect(this.page.getByTestId('search-empty')).toContainText(
+      'No search results found.',
+    );
+  }
 }

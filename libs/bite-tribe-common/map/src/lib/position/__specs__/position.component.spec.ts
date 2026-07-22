@@ -1,5 +1,7 @@
 import { PositionComponent } from '../position.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { MapComponent } from '../../map/map.component';
 
 describe(PositionComponent.name, () => {
   let component: PositionComponent;
@@ -12,6 +14,15 @@ describe(PositionComponent.name, () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should keep the camera focused when the form position changes', () => {
+    fixture.detectChanges();
+
+    const map = fixture.debugElement.query(By.directive(MapComponent))
+      .componentInstance as MapComponent;
+
+    expect(map.refitOnGeopointChanges()).toBe(true);
   });
 
   describe('writeValue', () => {

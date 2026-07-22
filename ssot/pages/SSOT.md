@@ -86,6 +86,7 @@
   - [[Analytics Operations]]
 - Current State
   - [[Current State - Roadmap]]
+  - [[Current State - E2E Coverage]]
   - [[Current State - Nx And Dependency Migration Roadmap]]
   - [[Current State - Known Issues]]
   - [[Current State - Open Questions]]

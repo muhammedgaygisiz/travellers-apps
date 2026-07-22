@@ -51,6 +51,7 @@ export class MapComponent implements OnDestroy {
   dragging = input(true, { transform: booleanAttribute });
   emitMarkerClick = input(false, { transform: booleanAttribute });
   enableZoom = input(true, { transform: booleanAttribute });
+  refitOnGeopointChanges = input(false, { transform: booleanAttribute });
   clickOnMap = output<Geopoint>();
   clickOnMarker = output<Geopoint | undefined>();
   gpsPosition = input<Geopoint | null | undefined>();
@@ -118,7 +119,7 @@ export class MapComponent implements OnDestroy {
     // Only fit the camera to the markers on the first data load. Subsequent
     // updates (e.g. a new bite arriving via the live stream) must leave the
     // camera untouched so the user keeps their current pan/zoom.
-    if (this.hasAutoFitted) {
+    if (this.hasAutoFitted && !this.refitOnGeopointChanges()) {
       return;
     }
 

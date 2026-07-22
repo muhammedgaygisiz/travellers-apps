@@ -86,7 +86,7 @@ export class ProfilePage {
   async confirmUnfollow(): Promise<void> {
     await this.stopFollowing.click();
     await this.page
-      .locator('profile-page:visible ion-alert')
+      .getByRole('alertdialog', { name: 'Stop following', exact: true })
       .getByRole('button', { name: 'Yes, unfollow', exact: true })
       .click();
   }

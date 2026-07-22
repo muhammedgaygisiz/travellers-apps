@@ -20,7 +20,7 @@ export class HomePage {
 
   /** The Bite card whose title contains the given name. */
   biteCard(name: string): Locator {
-    return this.page.locator('bt-bite').filter({ hasText: name });
+    return this.page.locator('bt-bite:visible').filter({ hasText: name });
   }
 
   async openBite(name: string): Promise<void> {

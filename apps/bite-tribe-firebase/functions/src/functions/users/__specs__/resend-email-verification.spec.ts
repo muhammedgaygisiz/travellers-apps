@@ -22,7 +22,15 @@ jest.mock('firebase-functions', () => ({
   logger: {
     info: jest.fn(),
     warn: jest.fn(),
+    error: jest.fn(),
   },
+}));
+
+jest.mock('firebase-functions/params', () => ({
+  defineSecret: jest.fn((name: string) => ({
+    name,
+    value: jest.fn(() => 'secret-value'),
+  })),
 }));
 
 jest.mock('firebase-functions/https', () => ({
@@ -107,5 +115,23 @@ describe('resendEmailVerificationForUser', () => {
     await expect(
       resendEmailVerificationForUser('user-1', jest.fn()),
     ).rejects.toMatchObject({ code: 'failed-precondition' });
+  });
+
+  it('surfaces a typed internal error when the sender fails', async () => {
+    const sender = jest
+      .fn()
+      .mockRejectedValue(
+        new Error('Google Workspace email configuration is missing.'),
+      );
+
+    await expect(
+      resendEmailVerificationForUser(
+        'user-1',
+        sender,
+        new Date('2026-07-01T08:00:00.000Z'),
+      ),
+    ).rejects.toMatchObject({ code: 'internal', message: 'send_failed' });
+
+    expect(setMock).not.toHaveBeenCalled();
   });
 });

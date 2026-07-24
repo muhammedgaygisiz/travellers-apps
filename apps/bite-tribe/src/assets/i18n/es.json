@@ -313,5 +313,6 @@
   "coach-leaderboard-body": "Mira quién comparte más Bites y sube en la clasificación compartiendo los tuyos.",
   "display-name-already-taken": "Ese nombre visible ya está en uso. Elige otro.",
   "display-name-invalid": "Introduce un nombre visible válido.",
-  "display-name-could-not-be-saved": "No pudimos guardar tu nombre visible. Inténtalo de nuevo."
+  "display-name-could-not-be-saved": "No pudimos guardar tu nombre visible. Inténtalo de nuevo.",
+  "my-position": "Mi ubicación"
 }

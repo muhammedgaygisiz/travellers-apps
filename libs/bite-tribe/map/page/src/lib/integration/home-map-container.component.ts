@@ -12,6 +12,7 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
   template: `
     <map-page
       class="ion-page"
+      [showMyPositionButton]="true"
       [bites]="service.bites()"
       [isAuthenticated]="service.isAuthenticated()"
       [gpsPosition]="service.gpsPosition()"
@@ -19,6 +20,7 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"
+      (myPositionClick)="service.refresh()"
     />
 
     <bt-coach-mark

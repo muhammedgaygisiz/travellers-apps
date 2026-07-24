@@ -680,6 +680,37 @@ describe('MapComponent', () => {
     });
   });
 
+  describe('recenterOnGps', () => {
+    const mockGpsPosition: Geopoint = { latitude: 48.137, longitude: 11.575 };
+
+    beforeEach(() => {
+      zoomToGpsOrDefaultMock.mockClear();
+    });
+
+    it('should do nothing when the map does not exist yet', () => {
+      component['map'] = undefined as unknown as L.Map;
+
+      component.recenterOnGps();
+
+      expect(zoomToGpsOrDefaultMock).not.toHaveBeenCalled();
+    });
+
+    it('should recenter on the current gps position when the map exists', () => {
+      component['map'] = mockMap as unknown as L.Map;
+      componentRef.setInput('gpsPosition', mockGpsPosition);
+      componentRef.setInput('geopoints', [mockGeopoint]);
+
+      component.recenterOnGps();
+
+      expect(zoomToGpsOrDefaultMock).toHaveBeenCalledWith(
+        mockGpsPosition,
+        expect.any(Array),
+        [mockGeopoint],
+        mockMap,
+      );
+    });
+  });
+
   describe('ngOnDestroy', () => {
     beforeEach(() => {
       mockMap.remove.mockClear();

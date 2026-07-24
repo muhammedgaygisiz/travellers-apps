@@ -26,6 +26,15 @@ export class MapService {
     this.dataAccess.logout();
   }
 
+  /**
+   * Reloads the GPS position, which re-fetches nearby bites. Mirrors the
+   * pull-to-refresh behavior on the home feed for the map's "my position"
+   * button.
+   */
+  refresh(): void {
+    this.dataAccess.reloadGPSPosition();
+  }
+
   likeButtonClicked(likeClick: LikeClick): void {
     this.dataAccess.submitLikeClick(likeClick);
   }

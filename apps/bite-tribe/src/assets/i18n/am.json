@@ -313,5 +313,6 @@
   "coach-leaderboard-body": "ማን በጣም ብዙ Bites እንደሚያጋራ ተመልከትና የራስህን በማጋራት በደረጃ ውጣ።",
   "display-name-already-taken": "ይህ የማሳያ ስም አስቀድሞ ተይዟል። እባክዎ ሌላ ይምረጡ።",
   "display-name-invalid": "እባክዎ ትክክለኛ የማሳያ ስም ያስገቡ።",
-  "display-name-could-not-be-saved": "የማሳያ ስምዎን ማስቀመጥ አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
+  "display-name-could-not-be-saved": "የማሳያ ስምዎን ማስቀመጥ አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+  "my-position": "የእኔ አካባቢ"
 }

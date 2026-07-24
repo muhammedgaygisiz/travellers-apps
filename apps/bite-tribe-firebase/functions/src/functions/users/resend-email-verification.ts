@@ -9,6 +9,7 @@ import {
   isManualResendRateLimited,
 } from './email-verification-utils';
 import {
+  googleWorkspaceEmailSecrets,
   sendGoogleWorkspaceVerificationEmail,
   SendVerificationEmailParams,
 } from './google-workspace-email';
@@ -56,10 +57,20 @@ export const resendEmailVerificationForUser = async (
     throw new HttpsError('resource-exhausted', 'rate_limited');
   }
 
-  const verificationLink = await getAuth()
-    .generateEmailVerificationLink(authUser.email);
+  try {
+    const verificationLink = await getAuth().generateEmailVerificationLink(
+      authUser.email,
+    );
 
-  await sender({ to: authUser.email, verificationLink });
+    await sender({ to: authUser.email, verificationLink });
+  } catch (error) {
+    logger.error('email verification manual resend failed', {
+      uid,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    throw new HttpsError('internal', 'send_failed');
+  }
 
   await userReference.set(
     {
@@ -79,7 +90,7 @@ export const resendEmailVerificationForUser = async (
 export const resendEmailVerification = onAppCheck<
   void,
   Promise<ResendEmailVerificationResult>
->(async (request) => {
+>({ secrets: googleWorkspaceEmailSecrets }, async (request) => {
   if (!request.auth) {
     throw new HttpsError(
       'unauthenticated',

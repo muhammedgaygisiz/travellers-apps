@@ -496,6 +496,33 @@ export class ProfileApiService {
     return followers.some((follower) => follower.id === user.uid);
   }
 
+  /**
+   * Checks whether the current user follows `userId` by reading the single
+   * follower relationship document instead of the whole followers subcollection.
+   *
+   * This is the cheap read path used once the aggregate follow counts are
+   * available on the user document, so the counts no longer require loading
+   * every follower to answer "does the current user follow this profile?".
+   */
+  async isFollowedByCurrentUser(userId: string): Promise<boolean> {
+    const user = this.authService.getUser();
+
+    if (!user?.uid) {
+      return false;
+    }
+
+    try {
+      const result = await FirebaseFirestore.getDocument({
+        reference: `${USERS_COLLECTION}/${userId}/followers/${user.uid}`,
+      });
+
+      return Boolean(result.snapshot?.data);
+    } catch (error) {
+      console.error('Error checking follow relationship:', error);
+      return false;
+    }
+  }
+
   async fetchFollowersWithDetails(userId: string): Promise<PublicUser[]> {
     try {
       const followers = await this.fetchFollowers(userId);

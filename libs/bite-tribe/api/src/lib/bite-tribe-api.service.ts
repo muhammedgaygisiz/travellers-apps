@@ -381,6 +381,28 @@ export class BiteTribeApiService {
     following: number;
     isFollowedByMe: boolean;
   }> {
+    // Prefer the aggregate counts stored on the user document over loading the
+    // whole followers/following subcollections, mirroring how `biteCount` is
+    // preferred on the profile. The subcollections are only read when the
+    // aggregates are missing (e.g. a user not yet backfilled).
+    const user = await this.profileApiService.getUserById(userId);
+    const followersCount = user?.followersCount;
+    const followingCount = user?.followingCount;
+
+    if (
+      typeof followersCount === 'number' &&
+      typeof followingCount === 'number'
+    ) {
+      const isFollowedByMe =
+        await this.profileApiService.isFollowedByCurrentUser(userId);
+
+      return {
+        followers: followersCount,
+        following: followingCount,
+        isFollowedByMe,
+      };
+    }
+
     const followers = await this.profileApiService.fetchFollowers(userId);
     const following = await this.profileApiService.fetchFollowing(userId);
     const isCurrentUserFollowing =

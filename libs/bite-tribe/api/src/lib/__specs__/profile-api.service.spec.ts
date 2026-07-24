@@ -1047,6 +1047,91 @@ describe(ProfileApiService.name, () => {
     });
   });
 
+  describe('isFollowedByCurrentUser', () => {
+    beforeEach(() => {
+      // Earlier tests in this file leave the shared MockedAuthService.getUser
+      // spied to return undefined; pin it back to a signed-in user here.
+      jest
+        .spyOn(MockedAuthService, 'getUser')
+        .mockReturnValue({ uid: '123', providerData: [] } as any);
+    });
+
+    it('should return true when the follower relationship document exists', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const getDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockResolvedValue({
+            snapshot: { id: '123', data: { followerUid: '123' } },
+          } as any);
+
+        const result = await service.isFollowedByCurrentUser('profile-user-id');
+
+        expect(getDocumentSpy).toHaveBeenCalledWith({
+          reference: 'users/profile-user-id/followers/123',
+        });
+        expect(result).toBe(true);
+      },
+    ));
+
+    it('should return false when the follower relationship document is missing', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockResolvedValue({ snapshot: { data: null } } as any);
+
+        const result = await service.isFollowedByCurrentUser('profile-user-id');
+
+        expect(result).toBe(false);
+      },
+    ));
+
+    describe('given current user is undefined', () => {
+      beforeEach(() => {
+        jest.spyOn(MockedAuthService, 'getUser').mockReturnValue(undefined);
+      });
+
+      it('should return false without reading Firestore', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const getDocumentSpy = jest.spyOn(FirebaseFirestore, 'getDocument');
+          getDocumentSpy.mockClear();
+
+          const result =
+            await service.isFollowedByCurrentUser('profile-user-id');
+
+          expect(result).toBe(false);
+          expect(getDocumentSpy).not.toHaveBeenCalled();
+        },
+      ));
+    });
+
+    describe('given an error', () => {
+      it('should handle the error and return false', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const consoleErrorSpy = jest
+            .spyOn(console, 'error')
+            .mockImplementation();
+          consoleErrorSpy.mockClear();
+          jest
+            .spyOn(FirebaseFirestore, 'getDocument')
+            .mockRejectedValue(new Error('Failed to read follow relationship'));
+
+          const result =
+            await service.isFollowedByCurrentUser('profile-user-id');
+
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error checking follow relationship:',
+            expect.any(Error),
+          );
+          expect(result).toBe(false);
+        },
+      ));
+    });
+  });
+
   describe('fetchFollowersWithDetails', () => {
     beforeEach(() => {
       jest.resetAllMocks();

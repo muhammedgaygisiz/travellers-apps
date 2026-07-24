@@ -313,5 +313,6 @@
   "coach-leaderboard-body": "Scopri chi condivide più Bite e scala la classifica condividendo i tuoi.",
   "display-name-already-taken": "Questo nome visualizzato è già in uso. Scegline un altro.",
   "display-name-invalid": "Inserisci un nome visualizzato valido.",
-  "display-name-could-not-be-saved": "Non è stato possibile salvare il tuo nome visualizzato. Riprova."
+  "display-name-could-not-be-saved": "Non è stato possibile salvare il tuo nome visualizzato. Riprova.",
+  "my-position": "La mia posizione"
 }

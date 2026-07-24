@@ -313,5 +313,6 @@
   "coach-leaderboard-body": "En çok Bite’ı kimin paylaştığını gör ve kendi paylaşımlarınla sıralamada yüksel.",
   "display-name-already-taken": "Bu görünen ad zaten kullanılıyor. Lütfen başka bir ad seçin.",
   "display-name-invalid": "Lütfen geçerli bir görünen ad girin.",
-  "display-name-could-not-be-saved": "Görünen adınız kaydedilemedi. Lütfen tekrar deneyin."
+  "display-name-could-not-be-saved": "Görünen adınız kaydedilemedi. Lütfen tekrar deneyin.",
+  "my-position": "Konumum"
 }

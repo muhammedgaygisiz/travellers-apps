@@ -15,6 +15,7 @@ class Mock {
   position$ = of(null);
   logout = (): null => null;
   submitLikeClick = (): null => null;
+  reloadGPSPosition = (): null => null;
 }
 
 describe(MapDataAccessService.name, () => {
@@ -45,6 +46,20 @@ describe(MapDataAccessService.name, () => {
         const logoutSpy = jest.spyOn(biteTribeStoreService, 'logout');
         service.logout();
         expect(logoutSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('reloadGPSPosition', () => {
+    it('should call reloadGPSPosition on BiteTribeStoreService', inject(
+      [MapDataAccessService],
+      (service: MapDataAccessService) => {
+        const reloadSpy = jest.spyOn(
+          biteTribeStoreService,
+          'reloadGPSPosition',
+        );
+        service.reloadGPSPosition();
+        expect(reloadSpy).toHaveBeenCalledTimes(1);
       },
     ));
   });

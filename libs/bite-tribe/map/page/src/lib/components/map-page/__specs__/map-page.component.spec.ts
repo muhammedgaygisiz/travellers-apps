@@ -94,6 +94,32 @@ describe('MapPageComponent', () => {
     });
   });
 
+  describe('onMyPositionClick', () => {
+    const setMap = (map: { recenterOnGps: jest.Mock } | undefined): void => {
+      (component as unknown as { map: () => unknown }).map = (): unknown => map;
+    };
+
+    it('should recenter the map on gps and emit myPositionClick', () => {
+      const recenterOnGps = jest.fn();
+      setMap({ recenterOnGps });
+      const emitSpy = jest.spyOn(component.myPositionClick, 'emit');
+
+      component.onMyPositionClick();
+
+      expect(recenterOnGps).toHaveBeenCalledTimes(1);
+      expect(emitSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should still emit myPositionClick when the map is not ready', () => {
+      setMap(undefined);
+      const emitSpy = jest.spyOn(component.myPositionClick, 'emit');
+
+      component.onMyPositionClick();
+
+      expect(emitSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('onGeopointSelection', () => {
     const bites = [createBite('1', 1, 2), createBite('2', 3, 4)];
 

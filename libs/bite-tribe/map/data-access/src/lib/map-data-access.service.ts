@@ -32,6 +32,10 @@ export class MapDataAccessService {
     this.storeService.logout();
   }
 
+  reloadGPSPosition(): void {
+    this.storeService.reloadGPSPosition();
+  }
+
   submitLikeClick(likeClick: LikeClick): void {
     this.storeService.submitLikeClick(likeClick);
   }

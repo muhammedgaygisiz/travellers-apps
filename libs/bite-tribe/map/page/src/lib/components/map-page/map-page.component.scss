@@ -39,4 +39,11 @@
       margin: 1rem;
     }
   }
+
+  .my-position-fab {
+    // Lift the control clear of the bottom safe area so it reads like the
+    // Google Maps "my location" button floating over the map.
+    margin-bottom: calc(1rem + env(safe-area-inset-bottom));
+    margin-inline-end: 0.5rem;
+  }
 }

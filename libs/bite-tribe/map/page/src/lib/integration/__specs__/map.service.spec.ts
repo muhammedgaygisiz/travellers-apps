@@ -46,6 +46,7 @@ describe(MapService.name, () => {
     const dataAccessMock = {
       logout: jest.fn(),
       submitLikeClick: jest.fn(),
+      reloadGPSPosition: jest.fn(),
       myBites: signal([mockBites[0], mockBites[2]]),
       bitesBySelectedBucketlist: signal([mockBites[0], mockBites[2]]),
       isAuthenticated: signal(true),
@@ -109,6 +110,14 @@ describe(MapService.name, () => {
       service.logout();
 
       expect(mockDataAccess.logout).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('refresh', () => {
+    it('should reload the gps position through dataAccess', () => {
+      service.refresh();
+
+      expect(mockDataAccess.reloadGPSPosition).toHaveBeenCalledTimes(1);
     });
   });
 

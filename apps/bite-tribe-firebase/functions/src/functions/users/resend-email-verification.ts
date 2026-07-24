@@ -64,7 +64,11 @@ export const resendEmailVerificationForUser = async (
 
     await sender({ to: authUser.email, verificationLink });
   } catch (error) {
-    logger.error('email verification manual resend failed', { uid, error });
+    logger.error('email verification manual resend failed', {
+      uid,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     throw new HttpsError('internal', 'send_failed');
   }
 

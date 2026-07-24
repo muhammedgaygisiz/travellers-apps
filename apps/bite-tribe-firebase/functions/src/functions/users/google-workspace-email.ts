@@ -138,6 +138,9 @@ export const sendGoogleWorkspaceVerificationEmail = async ({
   });
 
   if (!response.ok) {
-    throw new Error('Failed to send Google Workspace verification email.');
+    const body = await response.text().catch(() => '');
+    throw new Error(
+      `Failed to send Google Workspace verification email (${response.status}): ${body}`,
+    );
   }
 };

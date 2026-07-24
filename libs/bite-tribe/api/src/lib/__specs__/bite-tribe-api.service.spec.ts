@@ -61,6 +61,7 @@ class ProfileApiMock {
   fetchFollowers = jest.fn();
   fetchFollowing = jest.fn();
   isCurrentUserFollowing = jest.fn();
+  isFollowedByCurrentUser = jest.fn();
   fetchFollowersWithDetails = jest.fn();
   fetchFollowingWithDetails = jest.fn();
 }
@@ -781,12 +782,56 @@ describe(BiteTribeApiService.name, () => {
   });
 
   describe('fetchFollowMetadata', () => {
-    it('should call fetchFollowers, fetchFollowing and isCurrentUserFollowing on ProfileApiService and return the metadata', inject(
+    it('should prefer the aggregate counts on the user document when present', inject(
       [BiteTribeApiService, ProfileApiService],
       async (
         service: BiteTribeApiService,
         profileApiService: ProfileApiService,
       ) => {
+        const getUserByIdSpy = jest
+          .spyOn(profileApiService, 'getUserById')
+          .mockResolvedValue({
+            userId: 'user-id',
+            followersCount: 12,
+            followingCount: 4,
+          } as any);
+        const isFollowedByCurrentUserSpy = jest
+          .spyOn(profileApiService, 'isFollowedByCurrentUser')
+          .mockResolvedValue(true);
+        const fetchFollowersSpy = jest.spyOn(
+          profileApiService,
+          'fetchFollowers',
+        );
+        const fetchFollowingSpy = jest.spyOn(
+          profileApiService,
+          'fetchFollowing',
+        );
+
+        const userId = 'user-id';
+        const metadata = await service.fetchFollowMetadata(userId);
+
+        expect(metadata).toEqual({
+          followers: 12,
+          following: 4,
+          isFollowedByMe: true,
+        });
+        expect(getUserByIdSpy).toHaveBeenCalledWith(userId);
+        expect(isFollowedByCurrentUserSpy).toHaveBeenCalledWith(userId);
+        // The aggregate path must not load the whole subcollections.
+        expect(fetchFollowersSpy).not.toHaveBeenCalled();
+        expect(fetchFollowingSpy).not.toHaveBeenCalled();
+      },
+    ));
+
+    it('should fall back to counting the subcollections when the aggregates are missing', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        jest
+          .spyOn(profileApiService, 'getUserById')
+          .mockResolvedValue({ userId: 'user-id' } as any);
         const fetchFollowersSpy = jest
           .spyOn(profileApiService, 'fetchFollowers')
           .mockResolvedValue(['follower1', 'follower2'] as any);

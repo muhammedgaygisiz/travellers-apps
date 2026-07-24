@@ -11,40 +11,8 @@ const emojiMap: Record<LikeType, string> = {
 };
 
 @Component({
-  template: `
-    <div class="like-options-container">
-      @for (likeType of likeTypes; track likeType) {
-        <ion-chip
-          [attr.data-testid]="'like-option-' + likeType"
-          class="{{ likeType === userLikeType ? 'liked' : '' }}"
-          (click)="onSelect(likeType)"
-        >
-          {{ emojiMap[likeType] }}
-          @if (likeCounts[likeType] > 0) {
-            <ion-badge>{{ likeCounts[likeType] }}</ion-badge>
-          }
-        </ion-chip>
-      }
-    </div>
-  `,
-  styles: `
-    .like-options-container {
-      width: 100%;
-      padding: 8px;
-      display: flex;
-      justify-content: space-evenly;
-
-      ion-chip {
-        min-width: 65px;
-        justify-content: center;
-        margin: 0 4px;
-
-        ion-badge {
-          margin-left: 6px;
-        }
-      }
-    }
-  `,
+  templateUrl: './like-options-popover-menu.component.html',
+  styleUrl: './like-options-popover-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonChip, IonBadge],
 })

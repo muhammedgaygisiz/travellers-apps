@@ -1,0 +1,24 @@
+.like-options-container {
+  // Size to the chips (not a fixed 100% of the popover box) so the popover
+  // grows to fit all three reactions. Locking to 100% let the box resolve to
+  // its --min-width while the chips needed more, clipping the last chip when
+  // layout timing was unlucky (e.g. opening the details page from a
+  // notification). See issue #737.
+  width: max-content;
+  max-width: 100%;
+  padding: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+
+  ion-chip {
+    min-width: 65px;
+    justify-content: center;
+    margin: 0;
+    flex: 0 0 auto;
+
+    ion-badge {
+      margin-left: 6px;
+    }
+  }
+}

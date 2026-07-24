@@ -8,6 +8,7 @@ import {
   isAutomaticReminderDue,
 } from './email-verification-utils';
 import {
+  googleWorkspaceEmailSecrets,
   sendGoogleWorkspaceVerificationEmail,
   SendVerificationEmailParams,
 } from './google-workspace-email';
@@ -102,8 +103,9 @@ export const sendEmailVerificationRemindersForUsers = async (
       }
 
       try {
-        const verificationLink = await getAuth()
-          .generateEmailVerificationLink(authUser.email);
+        const verificationLink = await getAuth().generateEmailVerificationLink(
+          authUser.email,
+        );
 
         await sender({ to: authUser.email, verificationLink });
 
@@ -140,6 +142,7 @@ export const sendEmailVerificationReminders = onSchedule(
   {
     schedule: '0 10 1 * *',
     timeZone: 'Europe/Zurich',
+    secrets: googleWorkspaceEmailSecrets,
   },
   async () => {
     await sendEmailVerificationRemindersForUsers();

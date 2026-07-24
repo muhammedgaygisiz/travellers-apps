@@ -31,6 +31,13 @@ jest.mock('firebase-functions/scheduler', () => ({
   onSchedule: jest.fn((_options, handler) => handler),
 }));
 
+jest.mock('firebase-functions/params', () => ({
+  defineSecret: jest.fn((name: string) => ({
+    name,
+    value: jest.fn(() => 'secret-value'),
+  })),
+}));
+
 import { sendEmailVerificationRemindersForUsers } from '../send-email-verification-reminders';
 
 const authUser = (overrides: {

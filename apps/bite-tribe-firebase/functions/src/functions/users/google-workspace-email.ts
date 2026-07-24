@@ -1,4 +1,19 @@
 import { createSign } from 'crypto';
+import { defineSecret } from 'firebase-functions/params';
+
+const GOOGLE_WORKSPACE_PRIVATE_KEY_ENV = 'GOOGLE_WORKSPACE_PRIVATE_KEY';
+const GOOGLE_WORKSPACE_CLIENT_EMAIL_ENV = 'GOOGLE_WORKSPACE_CLIENT_EMAIL';
+const GOOGLE_WORKSPACE_DELEGATED_USER_ENV = 'GOOGLE_WORKSPACE_DELEGATED_USER';
+
+// Firebase Functions gen2 only injects a secret into a function's runtime when
+// that function declares it via `secrets: [...]`. Every function that sends a
+// verification email must spread this array into its options, otherwise these
+// values are undefined at runtime and `createJwt` throws.
+export const googleWorkspaceEmailSecrets = [
+  defineSecret(GOOGLE_WORKSPACE_PRIVATE_KEY_ENV),
+  defineSecret(GOOGLE_WORKSPACE_CLIENT_EMAIL_ENV),
+  defineSecret(GOOGLE_WORKSPACE_DELEGATED_USER_ENV),
+];
 
 interface GoogleWorkspaceTokenResponse {
   access_token?: string;
@@ -28,15 +43,15 @@ const base64Url = (value: string | Buffer): string => {
 };
 
 const getPrivateKey = (): string => {
-  return (process.env['GOOGLE_WORKSPACE_PRIVATE_KEY'] || '').replace(
+  return (process.env[GOOGLE_WORKSPACE_PRIVATE_KEY_ENV] || '').replace(
     /\\n/g,
     '\n',
   );
 };
 
 const createJwt = (nowSeconds: number): string => {
-  const clientEmail = process.env['GOOGLE_WORKSPACE_CLIENT_EMAIL'];
-  const delegatedUser = process.env['GOOGLE_WORKSPACE_DELEGATED_USER'];
+  const clientEmail = process.env[GOOGLE_WORKSPACE_CLIENT_EMAIL_ENV];
+  const delegatedUser = process.env[GOOGLE_WORKSPACE_DELEGATED_USER_ENV];
   const privateKey = getPrivateKey();
 
   if (!clientEmail || !delegatedUser || !privateKey) {
@@ -86,7 +101,7 @@ const fetchAccessToken = async (): Promise<string> => {
 };
 
 const createRawEmail = (to: string, verificationLink: string): string => {
-  const from = process.env['GOOGLE_WORKSPACE_DELEGATED_USER'];
+  const from = process.env[GOOGLE_WORKSPACE_DELEGATED_USER_ENV];
 
   if (!from) {
     throw new Error('Google Workspace delegated sender is missing.');

@@ -38,6 +38,12 @@ class RetryingReadinessService {
 export default {
   title: 'Components/App Check Gate',
   component: AppCheckGateComponent,
+  // Excluded from Loki visual regression: this gate is a static, fully
+  // localized text-and-button surface whose two states are covered by the
+  // component unit spec. Its reference images must be recorded by the
+  // dedicated "Loki References Update" workflow (Docker Chrome); drop this
+  // skip and run that workflow if pixel coverage is wanted later.
+  parameters: { loki: { skip: true } },
   decorators: [
     applicationConfig({
       providers: [

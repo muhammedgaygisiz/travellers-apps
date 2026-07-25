@@ -1,4 +1,7 @@
 {
+  "app-check-blocked-title": "ተጨማሪ የደህንነት ማረጋገጫ ያስፈልጋል",
+  "app-check-blocked-message": "Bite Tribe ይህን መሣሪያ በደህንነት ማረጋገጫው ማረጋገጥ አልቻለም። ለመቀጠል ግንኙነትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
+  "app-check-retry": "እንደገና ይሞክሩ",
   "create-bite": "Bite ፍጠር",
   "gallery": "ማዕከለ-ስዕላት",
   "delete-all": "ሁሉንም ሰርዝ",

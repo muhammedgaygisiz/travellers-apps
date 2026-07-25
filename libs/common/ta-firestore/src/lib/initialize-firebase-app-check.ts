@@ -12,9 +12,11 @@ import { Analytics, logEvent } from 'firebase/analytics';
 
 const APP_CHECK_SITE_KEY_ENV = 'NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY';
 const APP_CHECK_DEBUG_TOKEN_ENV = 'NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN';
+const APP_CHECK_ENFORCED_ENV = 'NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED';
 const IS_DEV_ENV = 'NX_APP_BITE_TRIBE_IS_DEV';
 const NATIVE_TOKEN_EXPIRY_FALLBACK_MS = 5 * 60 * 1000;
 const TRANSITIONAL_POLICY = 'continue_after_failure';
+const ENFORCED_POLICY = 'block_until_ready';
 
 export type FirebaseAppCheckRuntimeMode =
   'dev_simulator' | 'local_prod_firebase' | 'production';
@@ -35,12 +37,33 @@ type AppCheckStartupResult = {
   status: AppCheckStartupStatus;
 };
 
-let appCheckInitialization: Promise<void> | null = null;
+/**
+ * Readiness verdict returned to the startup gate.
+ *
+ * `ready` is the only field the caller must react to: when App Check
+ * enforcement is enabled and readiness is not achieved, the app must block
+ * protected Firebase traffic and show a retry state instead of partial broken
+ * Firebase screens (issue #933). When enforcement is off, `ready` is always
+ * true and startup continues exactly as before under the transitional policy.
+ */
+export type AppCheckReadiness = {
+  ready: boolean;
+  enforced: boolean;
+  status: AppCheckStartupStatus;
+  provider: AppCheckProvider;
+  platform: AppCheckPlatform;
+  reason?: string;
+};
+
+let appCheckInitialization: Promise<AppCheckReadiness> | null = null;
+
+export const isFirebaseAppCheckEnforced = (): boolean =>
+  process.env[APP_CHECK_ENFORCED_ENV] === 'true';
 
 export const initializeFirebaseAppCheck = (
   app: FirebaseApp,
   telemetryOptions?: FirebaseAppCheckTelemetryOptions,
-): Promise<void> => {
+): Promise<AppCheckReadiness> => {
   if (appCheckInitialization) {
     return appCheckInitialization;
   }
@@ -52,6 +75,50 @@ export const initializeFirebaseAppCheck = (
   return appCheckInitialization;
 };
 
+/**
+ * Re-checks App Check token readiness without re-registering the provider
+ * (registering twice throws). Used by the startup gate's retry path: the
+ * provider is already registered from the first attempt, so a retry only needs
+ * to confirm a token can now be obtained. In non-enforced mode this is a no-op
+ * that always reports ready.
+ */
+export const refreshFirebaseAppCheckReadiness = async (
+  telemetryOptions?: FirebaseAppCheckTelemetryOptions,
+): Promise<AppCheckReadiness> => {
+  const enforced = isFirebaseAppCheckEnforced();
+  const platform = getAppCheckPlatform();
+
+  if (!enforced) {
+    return {
+      ready: true,
+      enforced,
+      status: 'skipped',
+      provider: 'none',
+      platform,
+      reason: 'not_enforced',
+    };
+  }
+
+  const telemetry = createTelemetry(telemetryOptions);
+  const tokenReady = await preflightAppCheckToken(telemetry);
+
+  if (!tokenReady) {
+    telemetry.emit('app_check_enforced_blocked', {
+      platform,
+      reason: 'token_unavailable',
+    });
+  }
+
+  return {
+    ready: tokenReady,
+    enforced,
+    status: tokenReady ? 'completed' : 'failed',
+    provider: 'none',
+    platform,
+    reason: tokenReady ? undefined : 'token_unavailable',
+  };
+};
+
 export const resetFirebaseAppCheckInitializationForTesting = (): void => {
   appCheckInitialization = null;
 };
@@ -59,13 +126,23 @@ export const resetFirebaseAppCheckInitializationForTesting = (): void => {
 const initializeFirebaseAppCheckOnce = async (
   app: FirebaseApp,
   telemetryOptions?: FirebaseAppCheckTelemetryOptions,
-): Promise<void> => {
+): Promise<AppCheckReadiness> => {
   const telemetry = createTelemetry(telemetryOptions);
   const startedAt = Date.now();
   telemetry.emit('app_check_startup_started');
 
   const result = await initializeFirebaseAppCheckProvider(app, telemetry);
   const durationMs = Date.now() - startedAt;
+  const enforced = isFirebaseAppCheckEnforced();
+
+  // Only spend a token round-trip when enforcement actually needs the proof;
+  // non-enforced startup keeps its previous behavior and Firebase traffic.
+  const tokenReady =
+    enforced && result.status === 'completed'
+      ? await preflightAppCheckToken(telemetry)
+      : false;
+
+  const ready = isAppCheckReady(result, enforced, tokenReady);
 
   telemetry.emit(getTerminalEventName(result.status), {
     duration_ms: durationMs,
@@ -73,8 +150,70 @@ const initializeFirebaseAppCheckOnce = async (
     provider: result.provider,
     reason: result.reason,
     transitional_policy:
-      result.status === 'failed' ? TRANSITIONAL_POLICY : undefined,
+      !enforced && result.status === 'failed' ? TRANSITIONAL_POLICY : undefined,
+    enforced_policy: enforced ? ENFORCED_POLICY : undefined,
   });
+
+  if (enforced && !ready) {
+    telemetry.emit('app_check_enforced_blocked', {
+      platform: result.platform,
+      provider: result.provider,
+      reason: result.reason,
+    });
+  }
+
+  return {
+    ready,
+    enforced,
+    status: result.status,
+    provider: result.provider,
+    platform: result.platform,
+    reason: result.reason,
+  };
+};
+
+/**
+ * Enforced-mode readiness rules:
+ * - not enforced: always ready (transitional `continue_after_failure`).
+ * - completed: ready only when a token was actually obtained.
+ * - skipped for dev or an unsupported platform: ready, because enforcement
+ *   cannot apply there (dev simulator / SSR / non-app platform).
+ * - skipped for a missing site key, or a failed init: not ready. Enforced mode
+ *   fails closed so a misconfigured build blocks with a retry rather than
+ *   rendering Firebase screens that will fail against Console enforcement.
+ */
+const isAppCheckReady = (
+  result: AppCheckStartupResult,
+  enforced: boolean,
+  tokenReady: boolean,
+): boolean => {
+  if (!enforced) {
+    return true;
+  }
+
+  switch (result.status) {
+    case 'completed':
+      return tokenReady;
+    case 'skipped':
+      return (
+        result.reason === 'dev_mode' || result.reason === 'unsupported_platform'
+      );
+    case 'failed':
+    default:
+      return false;
+  }
+};
+
+const preflightAppCheckToken = async (
+  telemetry: AppCheckTelemetry,
+): Promise<boolean> => {
+  try {
+    const { token } = await FirebaseAppCheck.getToken({ forceRefresh: false });
+    return Boolean(token);
+  } catch (error) {
+    telemetry.warn('[AppCheck] App Check token preflight failed', error);
+    return false;
+  }
 };
 
 const initializeFirebaseAppCheckProvider = async (
@@ -235,6 +374,7 @@ const getAppCheckPlatform = (): AppCheckPlatform => {
 };
 
 type AppCheckTelemetryEvent =
+  | 'app_check_enforced_blocked'
   | 'app_check_initialization_failed'
   | 'app_check_skipped'
   | 'app_check_startup_completed'
@@ -249,6 +389,7 @@ type AppCheckTelemetryParams = {
   reason?: string;
   runtime_mode: FirebaseAppCheckRuntimeMode;
   transitional_policy?: typeof TRANSITIONAL_POLICY;
+  enforced_policy?: typeof ENFORCED_POLICY;
 };
 
 type AppCheckTelemetry = {

@@ -10,12 +10,14 @@
 
   Dates: 26 June 2026 to 17 July 2026.
 
-- ### Status as of 12 July 2026
+- ### Status as of 25 July 2026
 
-  BiteTribe is still in Phase 1 launch preparation, inside the Week 2 location and currency quality window.
+  BiteTribe has moved into Phase 2 (Product Intelligence), working toward the 31 July 2026 Release Candidate milestone. The launch-blocking backend work from Phase 1 is largely complete; the remaining launch-critical code item is issue 933 (App Check blocking behavior before enforcement).
 
-- Completed or landed toward this phase:
-  - Firebase App Check bootstrap and telemetry work is in place, but enforcement readiness still depends on monitoring verified request quality.
+- Completed or landed toward launch:
+  - Firebase App Check hardening (monitoring and remaining fixes) has landed through issue 908; the App Check bootstrap and telemetry are in place. The remaining gate is issue 933 (switch startup failure to blocking behavior before Console enforcement).
+  - The onboarding assistant has landed through [[epic-850]] (issue 850 closed 17 July 2026, all nine sub-issues complete).
+  - Intermittent Bite photo upload failures have been addressed through issue 927 (closed 13 July 2026).
   - Bite address enrichment and city search have landed through issue 974.
   - Location-based Bite currency prefill has landed through issue 909 / PR \#965.
   - Client-side suspicious price validation has landed through issue 967.
@@ -26,8 +28,9 @@
   - Mandatory Bite restaurant/place selection has landed through issue 943 / PR \#981.
   - Map live-update camera stability has landed through issue 982.
   - Playwright login, registration, and create-Bite E2E coverage has landed through issue 983.
-- Current gap to the 17 July 2026 milestone:
-  - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, Bite photo upload reliability, notification delivery, city search quality, issue 978 currency prefill and manual override, suspicious-price UX, restaurant/place picker behavior, map camera stability, Playwright E2E reliability, and restaurant candidate verification state transitions.
+- Current gap to the Release Candidate milestone:
+  - Issue 933 (App Check blocking behavior) has landed behind the `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` flag; enable Console enforcement and validate the enforced flag on devices.
+  - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, notification delivery, city search quality, issue 978 currency prefill and manual override, suspicious-price UX, restaurant/place picker behavior, map camera stability, Playwright E2E reliability, and restaurant candidate verification state transitions.
 - ### Week 1
 
   Focus: Firebase App Check.
@@ -76,11 +79,11 @@
 - Angular 22 is not a release-candidate prerequisite; it follows only after the Nx 23 workspace is stable and the Angular 22 dependency prerequisites are available.
 - ### Onboarding assistant
 
-  The onboarding assistant ([[epic-850]]) must land before the public launch so the first real users onboard through it.
+  The onboarding assistant ([[epic-850]]) has landed. Issue \#850 was closed as completed on 17 July 2026 with all nine sub-issues done, so the first real users onboard through it.
 
-- Blocking assistant after registration: unique display name, public/private decision, currency, language, notification priming (issues 1011 to 1015).
-- Completion flag plus must-dismiss feature coach marks (issue 1016).
-- Onboarding funnel analytics (issue 1017).
+- Blocking assistant after registration: unique display name, public/private decision, currency, language, notification priming (issues 1011 to 1015, 1023). Landed.
+- Completion flag plus must-dismiss feature coach marks (issue 1016). Landed.
+- Onboarding funnel analytics (issue 1017). Landed.
 - Existing users without the completion flag get the assistant once, prefilled.
 - ### Milestone
 

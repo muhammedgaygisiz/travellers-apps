@@ -19,3 +19,7 @@ export { startGuard } from './lib/start.guard';
 export { freshSessionGuard } from './lib/fresh-session.guard';
 
 export { AuthService } from './lib/auth.service';
+
+export { AppCheckReadinessService } from './lib/app-check-readiness.service';
+export { AppCheckGateComponent } from './lib/app-check-gate/app-check-gate.component';
+export { isFirebaseAppCheckEnforced } from './lib/initialize-firebase-app-check';

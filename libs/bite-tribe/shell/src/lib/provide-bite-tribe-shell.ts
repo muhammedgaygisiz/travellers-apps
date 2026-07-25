@@ -2,6 +2,7 @@ import {
   PreloadAllModules,
   provideRouter,
   RouteReuseStrategy,
+  withDisabledInitialNavigation,
   withPreloading,
 } from '@angular/router';
 import { ROUTES } from './routes';
@@ -18,7 +19,17 @@ import { EnvironmentProviders, Provider } from '@angular/core';
 export const provideBiteTribeShell = (
   environment: Environment,
 ): (EnvironmentProviders | Provider)[] => [
-  provideRouter(ROUTES, withPreloading(PreloadAllModules)),
+  // Initial navigation is disabled so the App Check startup gate controls when
+  // routing (and its Firebase-backed guards) begins. The startup initializer in
+  // `provideFirestoreUtils` calls `router.initialNavigation()` once readiness is
+  // proven; when enforcement blocks, navigation never starts and the retry gate
+  // is shown instead. In non-enforced mode readiness is immediate, so ordering
+  // is unchanged.
+  provideRouter(
+    ROUTES,
+    withPreloading(PreloadAllModules),
+    withDisabledInitialNavigation(),
+  ),
   {
     provide: RouteReuseStrategy,
     useClass: IonicRouteStrategy,

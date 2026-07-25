@@ -185,6 +185,13 @@ $BORDER_RADIUS: 24px;
     padding-bottom: var(--ion-safe-area-bottom, 0) !important;
   }
 
+  // Keeps scrollable page content clear of the Android/iOS system navigation
+  // bar. Use on an `ion-content.ion-padding` list/content page that has no
+  // bottom button container to carry `.safe-padding-bottom`.
+  ion-content.content-safe-padding-bottom {
+    --padding-bottom: calc(16px + var(--ion-safe-area-bottom, 0px));
+  }
+
   ion-radio {
     --color-checked: #{$SECONDARY_COLOR};
   }

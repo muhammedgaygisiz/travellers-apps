@@ -2,7 +2,7 @@
 
 - ## Status
 
-  Next to implement, specified through [[epic-850]].
+  Supported today. Delivered through [[epic-850]] (issue \#850 closed 17 July 2026; all nine sub-issues complete).
 
 - ## Goal
 

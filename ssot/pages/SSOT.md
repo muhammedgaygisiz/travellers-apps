@@ -37,9 +37,9 @@
     - [[UC - Maintain Restaurants In The Business App]]
     - [[UC - Create And Operate BiteTrails In The Business App]]
     - [[UC - Run Operational Migrations]]
+    - [[UC - Guide New Users After Registration]]
   - Next to implement
     collapsed:: true
-    - [[UC - Guide New Users After Registration]]
     - [[UC - Complete Universal Search]]
     - [[UC - Expand Restaurant Menus Into Actionable Menu Journeys]]
     - [[UC - Finish Restaurant Profile And Menu Completeness]]
@@ -51,6 +51,7 @@
 - Epics
   - [[epic-735]]
   - [[epic-738]]
+  - [[epic-850]]
   - [[epic-907]]
   - [[epic-1029]]
 - Architecture

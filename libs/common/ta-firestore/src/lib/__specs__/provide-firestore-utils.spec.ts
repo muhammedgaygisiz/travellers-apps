@@ -31,8 +31,27 @@ jest.mock('firebase/storage', () => ({
 }));
 
 jest.mock('@capacitor-firebase/analytics');
+
+const READY: appCheckUtils.AppCheckReadiness = {
+  ready: true,
+  enforced: false,
+  status: 'completed',
+  provider: 'recaptcha_enterprise',
+  platform: 'web',
+};
+
+const BLOCKED: appCheckUtils.AppCheckReadiness = {
+  ready: false,
+  enforced: true,
+  status: 'failed',
+  provider: 'recaptcha_enterprise',
+  platform: 'web',
+  reason: 'initialization_error',
+};
+
 jest.mock('../initialize-firebase-app-check', () => ({
-  initializeFirebaseAppCheck: jest.fn().mockResolvedValue(undefined),
+  initializeFirebaseAppCheck: jest.fn(),
+  refreshFirebaseAppCheckReadiness: jest.fn(),
 }));
 
 jest.mock('../provide-firestore-simulator', () => ({
@@ -54,7 +73,10 @@ describe(provideFirestoreUtils.name, () => {
       .mockImplementation(jest.fn());
     jest
       .mocked(appCheckUtils.initializeFirebaseAppCheck)
-      .mockResolvedValue(undefined);
+      .mockResolvedValue(READY);
+    jest
+      .mocked(appCheckUtils.refreshFirebaseAppCheckReadiness)
+      .mockResolvedValue(READY);
   });
 
   it('should create a Firebase startup initializer without calling App Check during provider construction', async () => {
@@ -82,29 +104,134 @@ describe(provideFirestoreUtils.name, () => {
     });
   });
 
-  it('should initialize App Check before restored auth startup', async () => {
+  const createGate = (): {
+    readiness: {
+      markReady: jest.Mock;
+      markBlocked: jest.Mock;
+      registerRetryHandler: jest.Mock;
+    };
+    startNavigation: jest.Mock;
+  } => ({
+    readiness: {
+      markReady: jest.fn(),
+      markBlocked: jest.fn(),
+      registerRetryHandler: jest.fn(),
+    },
+    startNavigation: jest.fn(),
+  });
+
+  it('should initialize App Check, then auth, then start navigation when ready', async () => {
     const calls: string[] = [];
     jest
       .mocked(appCheckUtils.initializeFirebaseAppCheck)
       .mockImplementationOnce(async () => {
         calls.push('app-check');
+        return READY;
       });
     const authService = {
       initialize: jest.fn(async () => {
         calls.push('auth');
       }),
     };
+    const gate = createGate();
+    gate.startNavigation.mockImplementation(() => calls.push('nav'));
 
     const initializer = createFirebaseStartupInitializer(
       firebaseApp,
       { production: true },
       {} as unknown as Analytics,
       authService,
+      gate,
     );
 
     await initializer();
 
-    expect(calls).toEqual(['app-check', 'auth']);
+    expect(calls).toEqual(['app-check', 'auth', 'nav']);
+    expect(gate.readiness.markReady).toHaveBeenCalled();
+    expect(gate.readiness.markBlocked).not.toHaveBeenCalled();
+  });
+
+  it('should block and skip auth/navigation when App Check is not ready', async () => {
+    jest
+      .mocked(appCheckUtils.initializeFirebaseAppCheck)
+      .mockResolvedValueOnce(BLOCKED);
+    const authService = { initialize: jest.fn() };
+    const gate = createGate();
+
+    const initializer = createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      null,
+      authService,
+      gate,
+    );
+
+    await initializer();
+
+    expect(gate.readiness.markBlocked).toHaveBeenCalled();
+    expect(gate.readiness.registerRetryHandler).toHaveBeenCalledWith(
+      expect.any(Function),
+    );
+    expect(authService.initialize).not.toHaveBeenCalled();
+    expect(gate.startNavigation).not.toHaveBeenCalled();
+    expect(gate.readiness.markReady).not.toHaveBeenCalled();
+  });
+
+  it('should resume auth and navigation when a retry proves readiness', async () => {
+    jest
+      .mocked(appCheckUtils.initializeFirebaseAppCheck)
+      .mockResolvedValueOnce(BLOCKED);
+    jest
+      .mocked(appCheckUtils.refreshFirebaseAppCheckReadiness)
+      .mockResolvedValueOnce(READY);
+    const authService = { initialize: jest.fn() };
+    const gate = createGate();
+
+    const initializer = createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      null,
+      authService,
+      gate,
+    );
+    await initializer();
+
+    const retryHandler = gate.readiness.registerRetryHandler.mock
+      .calls[0][0] as () => Promise<void>;
+    await retryHandler();
+
+    expect(appCheckUtils.refreshFirebaseAppCheckReadiness).toHaveBeenCalled();
+    expect(gate.readiness.markReady).toHaveBeenCalled();
+    expect(authService.initialize).toHaveBeenCalled();
+    expect(gate.startNavigation).toHaveBeenCalled();
+  });
+
+  it('should stay blocked when a retry still fails', async () => {
+    jest
+      .mocked(appCheckUtils.initializeFirebaseAppCheck)
+      .mockResolvedValueOnce(BLOCKED);
+    jest
+      .mocked(appCheckUtils.refreshFirebaseAppCheckReadiness)
+      .mockResolvedValueOnce(BLOCKED);
+    const authService = { initialize: jest.fn() };
+    const gate = createGate();
+
+    const initializer = createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      null,
+      authService,
+      gate,
+    );
+    await initializer();
+
+    const retryHandler = gate.readiness.registerRetryHandler.mock
+      .calls[0][0] as () => Promise<void>;
+    await retryHandler();
+
+    expect(gate.readiness.markReady).not.toHaveBeenCalled();
+    expect(authService.initialize).not.toHaveBeenCalled();
+    expect(gate.startNavigation).not.toHaveBeenCalled();
   });
 
   describe('given prod mode', () => {

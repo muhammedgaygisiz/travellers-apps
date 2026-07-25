@@ -1,4 +1,7 @@
 {
+  "app-check-blocked-title": "Zusätzliche Sicherheitsprüfung erforderlich",
+  "app-check-blocked-message": "Bite Tribe konnte dieses Gerät nicht über die Sicherheitsprüfung verifizieren. Prüfe deine Verbindung und versuche es erneut, um fortzufahren.",
+  "app-check-retry": "Erneut versuchen",
   "create-bite": "Bite erstellen",
   "gallery": "Galerie",
   "delete-all": "Alle löschen",

@@ -1,4 +1,7 @@
 {
+  "app-check-blocked-title": "Perlu pemeriksaan keamanan tambahan",
+  "app-check-blocked-message": "Bite Tribe tidak dapat memverifikasi perangkat ini dengan pemeriksaan keamanannya. Periksa koneksi Anda dan coba lagi untuk melanjutkan.",
+  "app-check-retry": "Coba lagi",
   "create-bite": "Buat Bite",
   "gallery": "Galeri",
   "delete-all": "Hapus semua",

@@ -85,6 +85,18 @@ describe(AppComponent.name, () => {
     expect(component).toBeDefined();
   });
 
+  describe('App Check gate', () => {
+    it('should not be blocked by default', () => {
+      expect(component.appCheckReadiness.isBlocked()).toBe(false);
+    });
+
+    it('should reflect the blocked state from the readiness service', () => {
+      component.appCheckReadiness.markBlocked();
+
+      expect(component.appCheckReadiness.isBlocked()).toBe(true);
+    });
+  });
+
   describe('backButtonHandler', () => {
     it('should call handleBackButton with correct canGoBack value', () => {
       const minimizeAppSpy = jest.spyOn(App, 'minimizeApp');

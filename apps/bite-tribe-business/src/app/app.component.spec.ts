@@ -19,4 +19,14 @@ describe('AppComponent', () => {
   it('should create component', () => {
     expect(component).toBeDefined();
   });
+
+  it('should not block the App Check gate by default', () => {
+    expect(component.appCheckReadiness.isBlocked()).toBe(false);
+  });
+
+  it('should reflect the blocked state from the readiness service', () => {
+    component.appCheckReadiness.markBlocked();
+
+    expect(component.appCheckReadiness.isBlocked()).toBe(true);
+  });
 });

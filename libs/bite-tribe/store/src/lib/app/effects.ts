@@ -281,7 +281,7 @@ export class AppEffect {
         tap(async ({ user }) => {
           await this.api.followUser(user);
 
-          this.store.dispatch(AppActions.reloadProfileMetadata());
+          this.store.dispatch(AppActions.followedUser());
         }),
       );
     },
@@ -296,7 +296,7 @@ export class AppEffect {
         tap(async ({ user }) => {
           await this.api.unfollowUser(user);
 
-          this.store.dispatch(AppActions.reloadProfileMetadata());
+          this.store.dispatch(AppActions.unfollowedUser());
         }),
       );
     },

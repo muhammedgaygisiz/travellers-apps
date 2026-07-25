@@ -301,4 +301,38 @@ describe('App Reducer', () => {
       expect(reducer(INITIAL_STATE, action)).toEqual(NEW_STATE);
     });
   });
+
+  describe('followedUser', () => {
+    it('should optimistically increment followers and mark as followed', () => {
+      const INITIAL_STATE = {
+        profileMetadata: { followers: 2, following: 5, isFollowedByMe: false },
+      } as AppSlice;
+
+      expect(reducer(INITIAL_STATE, AppActions.followedUser())).toEqual({
+        profileMetadata: { followers: 3, following: 5, isFollowedByMe: true },
+      } as AppSlice);
+    });
+  });
+
+  describe('unfollowedUser', () => {
+    it('should optimistically decrement followers and clear followed', () => {
+      const INITIAL_STATE = {
+        profileMetadata: { followers: 3, following: 5, isFollowedByMe: true },
+      } as AppSlice;
+
+      expect(reducer(INITIAL_STATE, AppActions.unfollowedUser())).toEqual({
+        profileMetadata: { followers: 2, following: 5, isFollowedByMe: false },
+      } as AppSlice);
+    });
+
+    it('should not decrement followers below zero', () => {
+      const INITIAL_STATE = {
+        profileMetadata: { followers: 0, following: 5, isFollowedByMe: false },
+      } as AppSlice;
+
+      expect(reducer(INITIAL_STATE, AppActions.unfollowedUser())).toEqual({
+        profileMetadata: { followers: 0, following: 5, isFollowedByMe: false },
+      } as AppSlice);
+    });
+  });
 });

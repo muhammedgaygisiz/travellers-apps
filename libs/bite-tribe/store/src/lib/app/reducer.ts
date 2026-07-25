@@ -151,6 +151,27 @@ export const reducer = createReducer<AppSlice>(
       },
     }),
   ),
+  // Optimistic follower-count updates for the viewed profile. The follow and
+  // unfollow buttons only exist on the viewed profile, so the acting user is
+  // always adjusting that profile's followers. Applying the delta here avoids
+  // reading the `followersCount` aggregate before its Firestore trigger has
+  // committed the change.
+  on(AppActions.followedUser, (state) => ({
+    ...state,
+    profileMetadata: {
+      ...state.profileMetadata,
+      followers: state.profileMetadata.followers + 1,
+      isFollowedByMe: true,
+    },
+  })),
+  on(AppActions.unfollowedUser, (state) => ({
+    ...state,
+    profileMetadata: {
+      ...state.profileMetadata,
+      followers: Math.max(state.profileMetadata.followers - 1, 0),
+      isFollowedByMe: false,
+    },
+  })),
   on(routerRequestAction, (state) => ({
     ...state,
     profileMetadata: { ...CLEAN_PROFILE_METADATA },

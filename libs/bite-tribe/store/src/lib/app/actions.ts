@@ -29,6 +29,13 @@ export const AppActions = createActionGroup({
     'Set public profile': props<{ profile: PublicUser }>(),
     'Follow user': props<{ user: PublicUser }>(),
     'Unfollow user': props<{ user: PublicUser }>(),
+    // Dispatched after the follow/unfollow write succeeds so the viewed
+    // profile's follower count updates immediately. The `followersCount`
+    // aggregate is maintained by a Firestore trigger that commits after the
+    // relationship write, so reloading it right away would read a stale value;
+    // the optimistic update is exact and reconciles on the next navigation.
+    'Followed user': emptyProps(),
+    'Unfollowed user': emptyProps(),
     'Loaded exchange rates from API': props<{
       exchangeRates: Record<string, number>;
     }>(),

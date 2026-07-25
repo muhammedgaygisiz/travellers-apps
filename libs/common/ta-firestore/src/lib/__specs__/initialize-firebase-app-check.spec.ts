@@ -10,6 +10,8 @@ import { FirebaseApp } from 'firebase/app';
 
 import {
   initializeFirebaseAppCheck,
+  isFirebaseAppCheckEnforced,
+  refreshFirebaseAppCheckReadiness,
   resetFirebaseAppCheckInitializationForTesting,
 } from '../initialize-firebase-app-check';
 import { Analytics, logEvent } from 'firebase/analytics';
@@ -50,16 +52,22 @@ describe(initializeFirebaseAppCheck.name, () => {
   const originalDebugToken =
     process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'];
   const originalIsDev = process.env['NX_APP_BITE_TRIBE_IS_DEV'];
+  const originalEnforced = process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'];
 
   beforeEach(() => {
     resetFirebaseAppCheckInitializationForTesting();
     jest.clearAllMocks();
     jest.spyOn(FirebaseAppCheck, 'initialize').mockResolvedValue(undefined);
+    jest.spyOn(FirebaseAppCheck, 'getToken').mockResolvedValue({
+      token: 'native-token',
+      expireTimeMillis: 123,
+    });
     jest.spyOn(FirebaseAnalytics, 'logEvent').mockResolvedValue(undefined);
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('web');
     delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'];
     delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'];
     delete process.env['NX_APP_BITE_TRIBE_IS_DEV'];
+    delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'];
   });
 
   afterAll(() => {
@@ -80,6 +88,12 @@ describe(initializeFirebaseAppCheck.name, () => {
       delete process.env['NX_APP_BITE_TRIBE_IS_DEV'];
     } else {
       process.env['NX_APP_BITE_TRIBE_IS_DEV'] = originalIsDev;
+    }
+
+    if (originalEnforced === undefined) {
+      delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'];
+    } else {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = originalEnforced;
     }
   });
 
@@ -393,7 +407,7 @@ describe(initializeFirebaseAppCheck.name, () => {
         analytics,
         runtimeMode: 'local_prod_firebase',
       }),
-    ).resolves.toBeUndefined();
+    ).resolves.toMatchObject({ ready: true, enforced: false, status: 'failed' });
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       '[AppCheck] Firebase App Check initialization failed; continuing under transitional policy',
@@ -427,7 +441,7 @@ describe(initializeFirebaseAppCheck.name, () => {
         analytics,
         runtimeMode: 'local_prod_firebase',
       }),
-    ).resolves.toBeUndefined();
+    ).resolves.toMatchObject({ ready: true, enforced: false, status: 'failed' });
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       '[AppCheck] Android Firebase App Check bridge initialization failed; continuing under transitional policy',
@@ -458,4 +472,138 @@ describe(initializeFirebaseAppCheck.name, () => {
       consoleWarnSpy.mockRestore();
     },
   );
+
+  describe('enforced mode', () => {
+    it('should report enforcement from the environment flag', () => {
+      expect(isFirebaseAppCheckEnforced()).toBe(false);
+
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+      expect(isFirebaseAppCheckEnforced()).toBe(true);
+    });
+
+    it('should be ready when the provider registers and a token is obtained', async () => {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
+
+      const readiness = await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+
+      expect(FirebaseAppCheck.getToken).toHaveBeenCalledWith({
+        forceRefresh: false,
+      });
+      expect(readiness).toMatchObject({
+        ready: true,
+        enforced: true,
+        status: 'completed',
+      });
+    });
+
+    it('should block when the token preflight returns no token', async () => {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
+      jest
+        .spyOn(FirebaseAppCheck, 'getToken')
+        .mockResolvedValueOnce({ token: '', expireTimeMillis: 0 });
+
+      const readiness = await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+
+      expect(readiness.ready).toBe(false);
+      expect(logEvent).toHaveBeenCalledWith(
+        analytics,
+        'app_check_enforced_blocked',
+        expect.objectContaining({ platform: 'web' }),
+      );
+    });
+
+    it('should block when the token preflight throws', async () => {
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
+      jest
+        .spyOn(FirebaseAppCheck, 'getToken')
+        .mockRejectedValueOnce(new Error('no token'));
+
+      const readiness = await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'local_prod_firebase',
+      });
+
+      expect(readiness.ready).toBe(false);
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should fail closed when the site key is missing under enforcement', async () => {
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+
+      const readiness = await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+
+      expect(FirebaseAppCheck.getToken).not.toHaveBeenCalled();
+      expect(readiness).toMatchObject({
+        ready: false,
+        enforced: true,
+        status: 'skipped',
+        reason: 'missing_site_key',
+      });
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should stay ready in dev simulator mode even when enforced', async () => {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'true';
+
+      const readiness = await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'dev_simulator',
+      });
+
+      expect(readiness).toMatchObject({ ready: true, status: 'skipped' });
+    });
+  });
+
+  describe('refreshFirebaseAppCheckReadiness', () => {
+    it('should always be ready when enforcement is off', async () => {
+      const readiness = await refreshFirebaseAppCheckReadiness();
+
+      expect(readiness.ready).toBe(true);
+      expect(FirebaseAppCheck.getToken).not.toHaveBeenCalled();
+    });
+
+    it('should be ready when enforced and a token is obtained', async () => {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+
+      const readiness = await refreshFirebaseAppCheckReadiness({
+        analytics,
+        runtimeMode: 'production',
+      });
+
+      expect(FirebaseAppCheck.getToken).toHaveBeenCalledWith({
+        forceRefresh: false,
+      });
+      expect(readiness.ready).toBe(true);
+    });
+
+    it('should stay blocked when enforced and the token is still unavailable', async () => {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+      jest
+        .spyOn(FirebaseAppCheck, 'getToken')
+        .mockRejectedValueOnce(new Error('still no token'));
+
+      const readiness = await refreshFirebaseAppCheckReadiness({
+        analytics,
+        runtimeMode: 'production',
+      });
+
+      expect(readiness.ready).toBe(false);
+    });
+  });
 });

@@ -2,6 +2,7 @@ import {
   PreloadAllModules,
   provideRouter,
   RouteReuseStrategy,
+  withDisabledInitialNavigation,
   withPreloading,
 } from '@angular/router';
 import { ROUTES } from './routes';
@@ -18,7 +19,14 @@ import { EnvironmentProviders, Provider } from '@angular/core';
 export const provideBiteTribeBusinessShell = (
   environment: Environment,
 ): (EnvironmentProviders | Provider)[] => [
-  provideRouter(ROUTES, withPreloading(PreloadAllModules)),
+  // Initial navigation is disabled so the shared App Check startup gate in
+  // `provideFirestoreUtils` controls when routing begins (see the consumer
+  // shell for the rationale).
+  provideRouter(
+    ROUTES,
+    withPreloading(PreloadAllModules),
+    withDisabledInitialNavigation(),
+  ),
   {
     provide: RouteReuseStrategy,
     useClass: IonicRouteStrategy,

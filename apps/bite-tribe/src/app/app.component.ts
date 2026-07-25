@@ -11,6 +11,7 @@ import {
   NavController,
   Platform,
 } from '@ionic/angular/standalone';
+import { AppCheckGateComponent, AppCheckReadinessService } from 'ta-firestore';
 import { addNecessaryIcons, AppForegroundService } from 'bite-tribe/shell';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
@@ -25,15 +26,20 @@ import { Preferences } from '@capacitor/preferences';
   selector: 'bt-root',
   template: `
     <ion-app>
-      <ion-router-outlet />
+      @if (appCheckReadiness.isBlocked()) {
+        <bite-app-check-gate />
+      } @else {
+        <ion-router-outlet />
+      }
     </ion-app>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonApp, IonRouterOutlet],
+  imports: [IonApp, IonRouterOutlet, AppCheckGateComponent],
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'bite-tribe';
 
+  readonly appCheckReadiness = inject(AppCheckReadinessService);
   platform = inject(Platform);
   navController = inject(NavController);
   private readonly router = inject(Router);

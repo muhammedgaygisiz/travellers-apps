@@ -1,4 +1,7 @@
 {
+  "app-check-blocked-title": "Extra security check needed",
+  "app-check-blocked-message": "Bite Tribe Business couldn't verify this device with its security check. Check your connection and try again to continue.",
+  "app-check-retry": "Try again",
   "create-bite": "Create Bite",
   "location-tap-map-to-move-location-manually": "Location (tap map to move location manually):",
   "find-it-try-it-share-it": "Find it. Try it. Share it.",

@@ -24,10 +24,14 @@ import {
   FIREBASE_ANALYTICS,
   provideFirestoreAnalytics,
 } from './analytics/provide-firestore-analytics';
+import { Router } from '@angular/router';
 import {
+  AppCheckReadiness,
   FirebaseAppCheckRuntimeMode,
   initializeFirebaseAppCheck,
+  refreshFirebaseAppCheckReadiness,
 } from './initialize-firebase-app-check';
+import { AppCheckReadinessService } from './app-check-readiness.service';
 import { provideFirestoreSimulator } from './provide-firestore-simulator';
 import { Emulators } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -88,6 +92,20 @@ export const provideFirestoreUtils = (
   ];
 };
 
+/**
+ * Coordinates the App Check startup gate: the readiness service the root
+ * component observes, and the callback that starts initial navigation once the
+ * app is allowed to proceed. Router initial navigation is disabled in both
+ * shells so this is the single place that releases it.
+ */
+export type AppCheckStartupGate = {
+  readiness: Pick<
+    AppCheckReadinessService,
+    'markReady' | 'markBlocked' | 'registerRetryHandler'
+  >;
+  startNavigation: () => void;
+};
+
 const provideFirebaseStartupInitializer = (
   app: ReturnType<typeof initializeApp>,
   runtimeContext?: FirebaseAppCheckRuntimeContext,
@@ -97,12 +115,18 @@ const provideFirebaseStartupInitializer = (
       optional: true,
     }) as Analytics | null;
     const authService = inject(AuthService);
+    const readiness = inject(AppCheckReadinessService);
+    const router = inject(Router);
 
     return createFirebaseStartupInitializer(
       app,
       runtimeContext,
       analytics,
       authService,
+      {
+        readiness,
+        startNavigation: () => router.initialNavigation(),
+      },
     )();
   });
 
@@ -112,18 +136,59 @@ export const createFirebaseStartupInitializer =
     runtimeContext: FirebaseAppCheckRuntimeContext | undefined,
     analytics: Analytics | null | undefined,
     authService: Pick<AuthService, 'initialize'>,
+    gate: AppCheckStartupGate,
   ): (() => Promise<void>) =>
   async () => {
-    await createFirebaseAppCheckInitializer(app, runtimeContext, analytics)();
-    await authService.initialize();
+    const readiness: AppCheckReadiness = await createFirebaseAppCheckInitializer(
+      app,
+      runtimeContext,
+      analytics,
+    )();
+
+    if (!readiness.ready) {
+      // Enforced mode with no usable App Check token: hold auth and navigation,
+      // show the retry gate, and only resume when a retry proves readiness.
+      gate.readiness.markBlocked();
+      gate.readiness.registerRetryHandler(() =>
+        retryStartup(runtimeContext, analytics, authService, gate),
+      );
+      return;
+    }
+
+    await resumeStartup(authService, gate);
   };
+
+const retryStartup = async (
+  runtimeContext: FirebaseAppCheckRuntimeContext | undefined,
+  analytics: Analytics | null | undefined,
+  authService: Pick<AuthService, 'initialize'>,
+  gate: AppCheckStartupGate,
+): Promise<void> => {
+  const refreshed = await refreshFirebaseAppCheckReadiness({
+    analytics,
+    runtimeMode: getAppCheckRuntimeMode(runtimeContext),
+  });
+
+  if (refreshed.ready) {
+    await resumeStartup(authService, gate);
+  }
+};
+
+const resumeStartup = async (
+  authService: Pick<AuthService, 'initialize'>,
+  gate: AppCheckStartupGate,
+): Promise<void> => {
+  gate.readiness.markReady();
+  await authService.initialize();
+  gate.startNavigation();
+};
 
 export const createFirebaseAppCheckInitializer =
   (
     app: ReturnType<typeof initializeApp>,
     runtimeContext?: FirebaseAppCheckRuntimeContext,
     analytics?: Analytics | null,
-  ): (() => Promise<void>) =>
+  ): (() => Promise<AppCheckReadiness>) =>
   () =>
     initializeFirebaseAppCheck(app, {
       analytics,

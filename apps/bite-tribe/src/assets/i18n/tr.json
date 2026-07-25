@@ -1,4 +1,7 @@
 {
+  "app-check-blocked-title": "Ek güvenlik doğrulaması gerekiyor",
+  "app-check-blocked-message": "Bite Tribe bu cihazı güvenlik kontrolüyle doğrulayamadı. Devam etmek için bağlantını kontrol edip tekrar dene.",
+  "app-check-retry": "Tekrar dene",
   "create-bite": "Bite Oluştur",
   "gallery": "Galeri",
   "delete-all": "Tümünü sil",

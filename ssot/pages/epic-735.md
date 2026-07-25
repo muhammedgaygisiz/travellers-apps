@@ -1,5 +1,133 @@
-- [epic: Menu Items should be linked to bites (meta-data ; bite fuctionality)](https://github.com/muhammedgaygisiz/travellers-apps/issues/735) (Issue \#735)
+- [epic: Restaurant Interaction Platform (floor plan, tables, QR ordering, Bites from orders)](https://github.com/muhammedgaygisiz/travellers-apps/issues/735) (Issue \#735)
 - Description
-  - This feature will enable users to use menu elements to process or steps like creating a bite, contact resturant, create reservations, plan vist to location etc. (This Task will consider sub-tasks and will be discussed futher in ref. sessions)
+  - \# Epic: Restaurant Interaction Platform
+  - Extend the restaurant area of BiteTribe from a static business profile into an operational restaurant-management experience: a structured 2D floor plan, live table management, QR-based table ordering, and Bites created from what guests actually ordered.
+  - This epic is the umbrella. It owns the vision, the shared model decisions, and the sequencing. Implementation happens in the stage epics listed under **Child epics**.
+  - \#\# Vision statement
+  - Enable restaurants to connect their physical dining space with BiteTribe by digitally configuring rooms and tables, creating the foundation for QR-based table experiences, live table management, and restaurant ordering.
+  - \#\# Long-term story
+  - A guest discovers a restaurant through BiteTribe, visits it, finds or receives an available table, scans the table QR code, browses the menu, orders food, pays, and publishes a Bite based on the dishes they actually ordered. The restaurant manages the complete interaction through the same BiteTribe presence.
+  - \#\# Strategic value
+  - This connects capabilities that exist or are planned but are currently unrelated:
+  - Restaurant profiles and restaurant candidate verification
+  - Restaurant-maintained business information
+  - Digital menus
+  - Physical restaurant tables
+  - QR-based guest entry
+  - Table ordering and payments
+  - Bite creation from real orders
+  - The floor plan is the structural connection between the restaurant's physical space and its digital BiteTribe presence.
+  - \#\# Corrections to the original vision
+  - The original vision assumed restaurants can already be **claimed**. They cannot.
+  - Verified facts in the codebase as of 25 July 2026:
+  - `Restaurant` (`libs/bite-tribe-common/model/src/lib/restaurant.ts`) has no owner, organisation, or claim field.
+  - There are no roles or custom claims anywhere in `apps/bite-tribe-firebase/functions/src`.
+  - `apps/bite-tribe-firebase/firestore.rules` grants **read and write on every document to every authenticated user**.
+  - `MenuItem` (`libs/bite-tribe-common/model/src/lib/menu.ts`) has no stable identifier. Items are array entries inside `Menu.categories[]`, addressable only by name and array index.
+  - Consequences for this epic:
+  - 1. Restaurant ownership, claiming, and authorization is a **blocking prerequisite**, not a footnote. Without it, any authenticated user could rewrite another restaurant's floor plan, flip table states, or submit orders. That work is the first stage epic.
+  - 2. Stable menu-item identity is a prerequisite for ordering, because an order line must reference a durable item and snapshot its price.
+  - 3. "Claimed restaurant" in the vision text should be read as "restaurant owned by a verified business account" for the rest of this epic.
+  - \#\# Sequencing
+  - This is post-launch work. It sits behind:
+  - \#907 (Launch Readiness) - public launch must not be delayed by this scope.
+  - \#1029 (Nx and dependency migration) - do not build a new editor surface on a workspace that is mid-migration.
+  - Stage order is strict for stages 0 to 2. Stage 3 depends on stage 2 for table state. Stage 4 depends on stage 3 for orders.
+  - Stage 0 - Ownership and authorization (blocker, security-relevant)
+  - Stage 1 - Floor plan and table configuration (owner-facing, no guest surface)
+  - Stage 2 - Staff table management (live state, staff-facing)
+  - Stage 3 - QR table menu and ordering (guest-facing)
+  - Stage 4 - Payment and Bite creation (closes the loop back to Bites)
+  - Stages 1 and 2 are independently valuable and shippable. A restaurant that only ever uses stage 1 and 2 gets a digital table plan and live occupancy view; that alone is a real product.
+  - \#\# Shared model decisions
+  - These decisions are owned by this umbrella epic. Stage epics must not diverge from them without changing this issue first.
+  - \#\#\# Separation of stable structure and live state
+  - Floor-plan data (room dimensions, walls, table position, size, capacity, number) is relatively stable and is written by owners. Live table state (available, reserved, occupied, ordering, awaiting payment, cleaning, disabled) changes constantly and is written by staff or by system events.
+  - They are stored separately. Operational updates must never rewrite the layout, and layout edits must never reset live state.
+  - \#\#\# Structured data, not an image
+  - The floor plan is stored as structured, individually addressable objects. Every table is a business entity with its own document, not a shape in a drawing. BiteTribe must be able to state that a given object is table 12, has four seats, and sits in the main dining room, and later attach availability, visits, orders, payments, and Bites to it.
+  - \#\#\# Coordinates
+  - Coordinates are stored in **room-relative millimetres**, integer, origin at the room's top-left corner, x to the right and y downward. Rotation is degrees clockwise, 0 to 359.
+  - Rationale: physical units survive device changes, make capacity and spacing plausible, and let a rendered plan match reality. Screen pixels are a rendering concern only. Rendering uses an SVG `viewBox` in millimetres so desktop, tablet, and mobile all scale from the same data.
+  - \#\#\# Proposed Firestore layout
+  - `/restaurants/{restaurantId}` - existing
+  - `/restaurants/{restaurantId}/rooms/{roomId}` - room dimensions and non-table geometry objects
+  - `/restaurants/{restaurantId}/tables/{tableId}` - table business entity, one document per table
+  - `/restaurants/{restaurantId}/tableStates/{tableId}` - live state, separate write path
+  - `/restaurants/{restaurantId}/visits/{visitId}` - table visit and guest session
+  - `/restaurants/{restaurantId}/visits/{visitId}/orders/{orderId}` - orders placed during the visit
+  - `/tableTokens/{token}` - opaque QR token to table resolution
+  - Non-table geometry (walls, doors, counters, bar, blocked areas, decoration) lives as an array inside its room document because it is always loaded and saved together. Tables are separate documents because they are business entities with independent lifecycles and are referenced by state, visits, and orders.
+  - \#\# Child epics
+  - \#1069 - Stage 0: Restaurant ownership, claiming and authorization (6 child issues)
+  - \#1070 - Stage 1: Restaurant floor plan and table configuration (11 child issues)
+  - \#1071 - Stage 2: Staff table management and live table state (8 child issues)
+  - \#1072 - Stage 3: QR table menu and table ordering (10 child issues)
+  - \#1073 - Stage 4: Table payment and Bite creation from orders (6 child issues)
+  - \#\# Expected user groups
+  - | Group | Uses |
+  - | --- | --- |
+  - | Restaurant owner | Creates and maintains rooms, tables, and QR codes |
+  - | Restaurant staff | Manages availability, guests, orders, and payments on the live plan |
+  - | Restaurant guest | Scans the table QR code, views the menu, places an order |
+  - | BiteTribe user | Creates Bites from dishes ordered during the visit |
+  - \#\# Key product questions
+  - These must be answered before the stage they affect starts. They are mirrored in the SSOT under `Current State - Open Questions`.
+  - Stage 2:
+  - Must staff confirm table occupancy, or can a guest scan occupy a table automatically?
+  - Can guests choose a table themselves?
+  - When is a table considered available again?
+  - Who can close or reopen a visit?
+  - Stage 3:
+  - Can multiple guests join the same table session?
+  - Is an order shared by the table or separated by guest?
+  - Can guests order without a BiteTribe account?
+  - How are duplicate or fraudulent scans handled?
+  - Can a QR code be used from outside the restaurant?
+  - When does a table session expire?
+  - How are table changes handled after ordering?
+  - How are unavailable menu items communicated?
+  - How are cancelled or incorrect orders corrected?
+  - How are staff notified about new orders?
+  - Stage 4:
+  - Which markets are in scope first, and which payment and receipt regulations apply there?
+  - Does BiteTribe hold funds, or is payment always settled by the restaurant?
+  - \#\# Product risks
+  - | Risk | Mitigation stage |
+  - | --- | --- |
+  - | Open Firestore rules let anyone write another restaurant's data | Stage 0, blocking |
+  - | Two parties claim the same table | Stage 2 state machine with single-writer transitions |
+  - | Multiple guests create conflicting sessions | Stage 3 session join semantics |
+  - | QR codes photographed and reused off-premise | Stage 3 opaque + rotatable tokens, session expiry, optional staff confirmation |
+  - | Orders assigned to the wrong table | Stage 3 token to table resolution with explicit guest confirmation screen |
+  - | Staff and guest table states diverge | Stage 2 single source of truth, stage 3 reads it and never writes layout |
+  - | Poor connectivity inside restaurants | Stage 2 and 3 offline tolerance, idempotent submission |
+  - | Restaurants have different service workflows | Keep stage 1 and 2 usable without stage 3 |
+  - | Ordering and payment regulation varies by market | Stage 4 starts with an evaluation spec, not an implementation |
+  - The visual editor is the technically tractable part. The operational model is where the risk is. That is why stage 1 is deliberately independent of the ordering workflow.
+  - \#\# Out of scope for this epic
+  - Delivery or takeaway ordering (see \#344, a different fulfilment model)
+  - Reservation management and booking windows
+  - Kitchen display systems and preparation workflows
+  - Staff scheduling, payroll, or POS replacement
+  - Architecturally exact construction plans, CAD import, or scale drawings
+  - \#\# Related issues
+  - \#345 - QR code at the table to order digitally (moved to the QR ordering stage)
+  - \#371 - business wants the menu accessible via QR code
+  - \#370 - user wants to access the menu without authentication
+  - \#288 - concept of restaurant as a business entity
+  - \#344 - orderable bites, JustEat-like (related, out of scope)
+  - \#452 - price suggestion from restaurant menu (benefits from stable menu item ids)
+  - \#\# SSOT
+  - `ssot/pages/Restaurant.md`
+  - `ssot/pages/Floor Plan.md`
+  - `ssot/pages/Table.md`
+  - `ssot/pages/Table Visit.md`
+  - `ssot/pages/UC - Configure Restaurant Floor Plans And Tables.md`
+  - `ssot/pages/UC - Order At The Table Through A QR Code.md`
 - Related issues
-  - [Kavi wants to offer QR Code at the table to order digitally bites]([[issue-345]]) (Issue \#345)
+  - [epic: Restaurant ownership, claiming and authorization]([[epic-1069]]) (Issue \#1069)
+  - [epic: Restaurant floor plan and table configuration]([[epic-1070]]) (Issue \#1070)
+  - [epic: Staff table management and live table state]([[epic-1071]]) (Issue \#1071)
+  - [epic: QR table menu and table ordering]([[epic-1072]]) (Issue \#1072)
+  - [epic: Table payment and Bite creation from orders]([[epic-1073]]) (Issue \#1073)

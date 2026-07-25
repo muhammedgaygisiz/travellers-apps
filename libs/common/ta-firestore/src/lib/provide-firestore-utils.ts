@@ -24,7 +24,15 @@ import {
   FIREBASE_ANALYTICS,
   provideFirestoreAnalytics,
 } from './analytics/provide-firestore-analytics';
-import { Router } from '@angular/router';
+import {
+  Event as RouterEvent,
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationSkipped,
+  Router,
+} from '@angular/router';
+import { filter, firstValueFrom } from 'rxjs';
 import {
   AppCheckReadiness,
   FirebaseAppCheckRuntimeMode,
@@ -103,7 +111,7 @@ export type AppCheckStartupGate = {
     AppCheckReadinessService,
     'markReady' | 'markBlocked' | 'registerRetryHandler'
   >;
-  startNavigation: () => void;
+  startNavigation: () => void | Promise<void>;
 };
 
 const provideFirebaseStartupInitializer = (
@@ -125,10 +133,31 @@ const provideFirebaseStartupInitializer = (
       authService,
       {
         readiness,
-        startNavigation: () => router.initialNavigation(),
+        startNavigation: () => runInitialNavigation(router),
       },
     )();
   });
+
+/**
+ * Triggers the router's initial navigation (disabled in the shells so the App
+ * Check gate controls when routing begins) and resolves only once that first
+ * navigation settles. Awaiting it keeps the app-initializer blocking until the
+ * first route has rendered, matching Angular's default enabled-blocking initial
+ * navigation, so startup timing is unchanged when App Check is not enforced.
+ */
+const runInitialNavigation = async (router: Router): Promise<void> => {
+  const settled = firstValueFrom(
+    router.events.pipe(filter(isNavigationSettled)),
+  );
+  router.initialNavigation();
+  await settled;
+};
+
+const isNavigationSettled = (event: RouterEvent): boolean =>
+  event instanceof NavigationEnd ||
+  event instanceof NavigationCancel ||
+  event instanceof NavigationError ||
+  event instanceof NavigationSkipped;
 
 export const createFirebaseStartupInitializer =
   (
@@ -180,7 +209,7 @@ const resumeStartup = async (
 ): Promise<void> => {
   gate.readiness.markReady();
   await authService.initialize();
-  gate.startNavigation();
+  await gate.startNavigation();
 };
 
 export const createFirebaseAppCheckInitializer =

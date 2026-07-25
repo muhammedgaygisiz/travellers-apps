@@ -10,6 +10,12 @@ import {
 import { completeOnboardingIfNeeded } from '../support/onboarding';
 import { TEST_USERS } from '../support/test-users';
 
+// Follower/following counts are aggregates maintained by a Firestore trigger, so
+// they update asynchronously after a follow/unfollow (or a seeded relationship)
+// write. Give those count assertions a generous timeout to absorb trigger
+// propagation lag instead of racing the default expect timeout.
+const AGGREGATE_PROPAGATION_TIMEOUT_MS = 15_000;
+
 async function seedPublicFollower(
   page: Page,
   user: { id: string; displayName: string },
@@ -74,7 +80,9 @@ test.describe('Manage Profile and Social Graph', () => {
       about,
     });
 
-    await expect(profile.socialCount('Followers')).not.toHaveText('0');
+    await expect(profile.socialCount('Followers')).not.toHaveText('0', {
+      timeout: AGGREGATE_PROPAGATION_TIMEOUT_MS,
+    });
     await profile.openSocialList('Followers');
     const otherUserRow = profile.socialListUser(otherUser.displayName);
     await expect(otherUserRow).toBeVisible();
@@ -86,12 +94,18 @@ test.describe('Manage Profile and Social Graph', () => {
     await expect(profile.about).toHaveText(
       'Always looking for the next memorable Bite.',
     );
-    await expect(profile.socialCount('Followers')).toHaveText('0');
-    await expect(profile.socialCount('Following')).toHaveText('1');
+    await expect(profile.socialCount('Followers')).toHaveText('0', {
+      timeout: AGGREGATE_PROPAGATION_TIMEOUT_MS,
+    });
+    await expect(profile.socialCount('Following')).toHaveText('1', {
+      timeout: AGGREGATE_PROPAGATION_TIMEOUT_MS,
+    });
 
     await profile.follow.click();
     await expect(profile.stopFollowing).toBeVisible();
-    await expect(profile.socialCount('Followers')).toHaveText('1');
+    await expect(profile.socialCount('Followers')).toHaveText('1', {
+      timeout: AGGREGATE_PROPAGATION_TIMEOUT_MS,
+    });
     await expectFirestoreDocument(
       page,
       `users/${otherUser.id}/followers/${TEST_USERS.default.uid}`,
@@ -119,7 +133,9 @@ test.describe('Manage Profile and Social Graph', () => {
 
     await profile.confirmUnfollow();
     await expect(profile.follow).toBeVisible();
-    await expect(profile.socialCount('Followers')).toHaveText('0');
+    await expect(profile.socialCount('Followers')).toHaveText('0', {
+      timeout: AGGREGATE_PROPAGATION_TIMEOUT_MS,
+    });
     await expect
       .poll(() =>
         getFirestoreDocument(

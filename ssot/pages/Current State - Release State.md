@@ -31,7 +31,8 @@ The product is not yet in public launch mode. The launch-blocking backend work f
 ## Recent Completed Work
 
 - Epic 850 landed the blocking onboarding assistant, must-dismiss feature coach marks, and the onboarding funnel analytics (issue 850 closed 17 July 2026, all nine sub-issues complete).
-- Issue 908 hardened Firebase App Check (verified request-ratio monitoring and remaining fixes) toward enforcement; the App Check blocking-behavior gate remains open as issue 933.
+- Issue 908 hardened Firebase App Check (verified request-ratio monitoring and remaining fixes) toward enforcement.
+- Issue 933 added the enforced-mode App Check startup gate: a token preflight, blocking behavior, and a full-screen retry gate, gated by the `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` flag (off by default). Enabling Console enforcement and device validation remain the operational go-live step.
 - Issue 927 addressed intermittent Bite photo upload failures so a posted Bite is not left silently without its intended photo.
 - Issue 967 added client-side suspicious price validation.
 - Issue 909 / PR \#965 added location-based currency prefill for Bite creation.

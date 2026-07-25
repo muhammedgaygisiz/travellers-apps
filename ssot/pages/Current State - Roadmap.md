@@ -29,7 +29,7 @@
   - Map live-update camera stability has landed through issue 982.
   - Playwright login, registration, and create-Bite E2E coverage has landed through issue 983.
 - Current gap to the Release Candidate milestone:
-  - Land issue 933 (App Check blocking behavior) so Console enforcement can be enabled safely.
+  - Issue 933 (App Check blocking behavior) has landed behind the `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` flag; enable Console enforcement and validate the enforced flag on devices.
   - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, notification delivery, city search quality, issue 978 currency prefill and manual override, suspicious-price UX, restaurant/place picker behavior, map camera stability, Playwright E2E reliability, and restaurant candidate verification state transitions.
 - ### Week 1
 

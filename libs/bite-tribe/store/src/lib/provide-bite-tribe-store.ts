@@ -58,7 +58,7 @@ const toFirebaseOptions = (environment: Environment): FirebaseOptions => ({
     : process.env['NX_APP_BITE_TRIBE_AUTH_DOMAIN'],
   projectId: process.env['NX_APP_BITE_TRIBE_PROJECT_ID'],
   storageBucket: process.env['NX_APP_BITE_TRIBE_STORAGE_BUCKET'],
-  messagingSenderId: process.env['NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID'],
+  messagingSenderId: process.env['NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID'],
   measurementId: process.env['NX_APP_BITE_TRIBE_MEASSUREMENT_ID'],
   appId: process.env['NX_APP_BITE_TRIBE_APP_ID'],
 });

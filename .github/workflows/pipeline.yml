@@ -195,7 +195,7 @@ jobs:
           NX_APP_BITE_TRIBE_API_KEY: demo-api-key
           NX_APP_BITE_TRIBE_AUTH_DOMAIN: bite-tribe.firebaseapp.com
           NX_APP_BITE_TRIBE_STORAGE_BUCKET: bite-tribe.appspot.com
-          NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID: '000000000000'
+          NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID: '000000000000'
           NX_APP_BITE_TRIBE_APP_ID: demo-app-id
 
       - name: Upload Playwright report

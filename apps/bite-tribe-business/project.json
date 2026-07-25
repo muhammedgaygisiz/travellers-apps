@@ -10,7 +10,7 @@
       "executor": "@nx/angular:browser-esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "plugins": ["apps/bite-tribe/env-var-plugin.js"],
+        "plugins": ["apps/bite-tribe-business/env-var-plugin.js"],
         "outputPath": "dist/apps/bite-tribe-business",
         "index": "apps/bite-tribe-business/src/index.html",
         "main": "apps/bite-tribe-business/src/main.ts",

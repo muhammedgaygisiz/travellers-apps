@@ -53,16 +53,35 @@
   | [[Bucket List]]  | [[UC - Save And Rate BiteTrails Through Bucket Lists]]                                                                            |
   | [[Bite Trail]]   | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Create And Operate BiteTrails In The Business App]]                       |
   | [[Market Place]] | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Mature BiteTrail Marketplace Packages]]                                   |
+  | [[Floor Plan]]   | [[UC - Configure Restaurant Floor Plans And Tables]]                                                                              |
+  | [[Table]]        | [[UC - Configure Restaurant Floor Plans And Tables]], [[UC - Manage Tables During Service]]                                       |
+  | [[Table Visit]]  | [[UC - Manage Tables During Service]], [[UC - Order At The Table Through A QR Code]]                                              |
 
 - ## Use Cases To Open P0 Epics
 
   | Use Case Area                       | Epic Links                                                                        |
   | ----------------------------------- | --------------------------------------------------------------------------------- |
   | Bite creation and quality           | [[epic-907]]                                                                      |
-  | Discovery, search, and navigation   | [[epic-735]], [[epic-738]]                                                        |
+  | Discovery, search, and navigation   | [[epic-738]]                                                                      |
   | Restaurant and menu context         | [[epic-734]]                                                                      |
   | Marketplace and BiteTrails          | [[epic-738]]                                                                      |
   | Platform readiness and data quality | [[epic-907]], [[Current State - Known Issues]], [[Current State - Release State]] |
+
+- ## Restaurant Interaction Platform (post-launch)
+
+  [[epic-735]] is the umbrella. It and its five stage epics are Priority P1, sequenced behind the P0 launch and migration work.
+
+  | Stage                           | Epic          | Use Case                                             | Domain                          |
+  | ------------------------------- | ------------- | ---------------------------------------------------- | ------------------------------- |
+  | 0 Ownership and authorization   | [[epic-1069]] | [[UC - Own And Claim Restaurants]]                   | [[Restaurant]], [[User]]        |
+  | 1 Floor plan and tables         | [[epic-1070]] | [[UC - Configure Restaurant Floor Plans And Tables]] | [[Floor Plan]], [[Table]]       |
+  | 2 Staff table management        | [[epic-1071]] | [[UC - Manage Tables During Service]]                | [[Table]], [[Table Visit]]      |
+  | 3 QR menu and ordering          | [[epic-1072]] | [[UC - Order At The Table Through A QR Code]]        | [[Table Visit]], [[Restaurant]] |
+  | 4 Payment and Bites from orders | [[epic-1073]] | [[UC - Order At The Table Through A QR Code]]        | [[Table Visit]], [[Bite]]       |
+
+  The 41 child issues (\#1074 to \#1114) have no `issue-*` pages. They are unstarted, and their specifications live on the GitHub issues; the durable product context is in the use-case and domain pages above.
+
+  Stage 0 blocks every later stage. Stages 1 and 2 are independently shippable.
 
 - ## Decisions To Constraints
 

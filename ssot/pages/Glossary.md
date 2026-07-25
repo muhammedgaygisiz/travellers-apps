@@ -64,3 +64,27 @@
 - Local food culture
   - Definition: The patterns, dishes, places, and stories that represent what people actually eat in a location.
   - Business relevance: Long-term strategic differentiator for BiteTribe compared with generic restaurant directories.
+- Restaurant claim
+  - Definition: A request by a business organisation to be recognised as the owner of an existing restaurant in BiteTribe, reviewed and approved before it takes effect.
+  - Business relevance: Establishes who is accountable for a restaurant's data and who is allowed to operate it. Every operational restaurant capability depends on it.
+- Floor plan
+  - Definition: A restaurant's structured two-dimensional representation of its dining area, made of rooms, tables, and geometry objects stored as data rather than as an image.
+  - Business relevance: Turns the physical restaurant into something BiteTribe can address, which is the foundation for table QR codes, occupancy, and ordering.
+- Room
+  - Definition: A named area of a restaurant with physical dimensions, containing tables and geometry such as walls, doors, and counters.
+  - Business relevance: Lets restaurants with several dining areas, floors, or terraces represent all of them.
+- Table
+  - Definition: A seating place in a restaurant, modelled as a business entity with a public number, a capacity, a position, and a QR token.
+  - Business relevance: The unit that connects the physical restaurant to visits, orders, payments, and eventually Bites.
+- Table state
+  - Definition: The live operational status of a table, such as available, reserved, occupied, ordering, awaiting payment, cleaning, or disabled, stored separately from the floor plan.
+  - Business relevance: Lets staff run service from the same plan the owner configured, without operational updates rewriting the layout.
+- Table visit
+  - Definition: A party at a table over a period of time, owning the orders placed and the payment made during it.
+  - Business relevance: Attaching orders to a visit rather than to a table lets a party move tables and still keeps a complete record for receipts and Bite creation.
+- Table QR token
+  - Definition: An opaque, non-guessable identifier printed as a QR code on a table, resolving to a restaurant, room, and table.
+  - Business relevance: The guest's entry point into table ordering. It identifies a table context and never proves physical presence.
+- Table ordering
+  - Definition: A guest scanning a table QR code, browsing the restaurant's menu, and placing an order from the table.
+  - Business relevance: Extends BiteTribe from food discovery into restaurant interaction, and produces the best-sourced Bites the product can get.

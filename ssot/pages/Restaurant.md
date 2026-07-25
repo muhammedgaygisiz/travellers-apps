@@ -26,6 +26,8 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - Verifying a Restaurant candidate creates the Restaurant through the backend, creates its empty Menu, updates all candidate Bites with the new `restaurantId`, and records the verification on the candidate.
 - Candidate-backed Restaurant creation should be idempotent: repeated verification of an already verified or merged candidate must return the existing verified Restaurant instead of creating another one.
 - Verified versus unverified restaurant behavior is an active product area.
+- A Restaurant has no owner today. Ownership, claiming, and authorization are specified in [[UC - Own And Claim Restaurants]] and are the prerequisite for every operational restaurant capability.
+- A Restaurant will be able to have one Floor Plan, containing Rooms and Tables. See [[Floor Plan]] and [[Table]].
 
 ## Required Data
 
@@ -59,7 +61,9 @@ Current model fields:
 Future or expanding data:
 
 - verification status
-- owner or organisation id
+- owner or organisation id, plus claim status and claim audit fields (issue \#1074)
+- floor plan rooms and tables (issue \#1080)
+- table-ordering enablement flag (issue \#1100)
 - derived tags from Bites
 - aggregate rating and rating count
 - menu-item-to-Bite links
@@ -75,6 +79,11 @@ Restaurant
 |-- Location
 |-- Social Links
 |-- Organisation or business maintainer (future/expanding)
+|-- Floor Plan (planned)
+    |-- Rooms
+        |-- Tables
+            |-- Table Visits
+                |-- Orders
 ```
 
 ## Lifecycle
@@ -139,6 +148,10 @@ Related future or expanding use cases:
 - Link menu items to Bites.
 - Show Restaurant tags derived from Bites.
 - Support availability, reservation, contact, or visit planning from menu items.
+- [[UC - Own And Claim Restaurants]]
+- [[UC - Configure Restaurant Floor Plans And Tables]]
+- [[UC - Manage Tables During Service]]
+- [[UC - Order At The Table Through A QR Code]]
 
 ## Related Epics
 
@@ -146,6 +159,7 @@ Related future or expanding use cases:
 - Menu items linked to Bites
 - Search
 - Organisation and BiteTrail packages
+- Issue \#735 - Restaurant Interaction Platform, the umbrella for ownership, floor plans, table management, QR ordering, and Bites from orders
 
 ## Technical Implementation
 
@@ -186,6 +200,8 @@ images/restaurants/{restaurantId}/{filename}
 
 ## Current Limitations
 
+- Restaurants cannot be claimed. `Restaurant` carries no owner, organisation, or claim field, no roles or custom claims exist in the Functions codebase, and `apps/bite-tribe-firebase/firestore.rules` allows every authenticated user to write every document. Product descriptions that assume a claimed restaurant describe a capability that does not exist yet. See [[UC - Own And Claim Restaurants]].
+- `MenuItem` has no stable identifier. Items are array entries inside `Menu.categories[]`, addressable only by name and index, so nothing can safely reference a menu item over time. See issue \#1099.
 - Verified versus unverified Restaurant rules are still evolving.
 - A Bite can use `place` without a `restaurantId`, so restaurant matching can be fuzzy or incomplete.
 - Restaurant ownership is not clearly represented in the Restaurant model.

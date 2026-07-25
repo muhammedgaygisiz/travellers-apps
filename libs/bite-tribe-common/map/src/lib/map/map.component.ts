@@ -101,6 +101,24 @@ export class MapComponent implements OnDestroy {
     return (this.geopoints() || []).filter((point) => !!point);
   }
 
+  /**
+   * Recenters the camera on the current GPS position and shows the pulsing
+   * user marker, mimicking the Google Maps "my location" button. Falls back to
+   * fitting the existing markers when no GPS fix is available.
+   */
+  recenterOnGps(): void {
+    if (!this.map) {
+      return;
+    }
+
+    zoomToGpsOrDefault(
+      this.gpsPosition(),
+      this.markers,
+      this.cleanUpPoints(),
+      this.map,
+    );
+  }
+
   setGeopointsEffect = effect(() => {
     const geopoints = this.geopoints();
 

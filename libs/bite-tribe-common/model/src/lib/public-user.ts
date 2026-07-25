@@ -9,6 +9,8 @@ export interface PublicUser {
   about?: string;
   public?: boolean;
   biteCount?: number;
+  followersCount?: number;
+  followingCount?: number;
   subscriptionTier?: number;
   isOrganisation?: boolean;
   isRestaurant?: boolean;

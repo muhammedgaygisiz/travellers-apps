@@ -17,6 +17,23 @@
         [gpsPosition]="gpsPosition()"
         (clickOnMarker)="onGeopointSelection($event)"
       />
+      @if (showMyPositionButton()) {
+        <ion-fab
+          class="my-position-fab"
+          slot="fixed"
+          vertical="bottom"
+          horizontal="end"
+        >
+          <ion-fab-button
+            data-testid="btn-my-position"
+            color="light"
+            [attr.aria-label]="'my-position' | transloco"
+            (click)="onMyPositionClick()"
+          >
+            <ion-icon name="locate-outline" />
+          </ion-fab-button>
+        </ion-fab>
+      }
       @if (selectedBite) {
         <bt-snap-drawer>
           <h4 class="bite-title">

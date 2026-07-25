@@ -313,5 +313,6 @@
   "coach-leaderboard-body": "شاهد من يشارك أكثر الـ Bites وارتقِ في الترتيب بمشاركة ما لديك.",
   "display-name-already-taken": "اسم العرض هذا مستخدم بالفعل. يرجى اختيار اسم آخر.",
   "display-name-invalid": "يرجى إدخال اسم عرض صالح.",
-  "display-name-could-not-be-saved": "تعذّر حفظ اسم العرض الخاص بك. يرجى المحاولة مرة أخرى."
+  "display-name-could-not-be-saved": "تعذّر حفظ اسم العرض الخاص بك. يرجى المحاولة مرة أخرى.",
+  "my-position": "موقعي"
 }

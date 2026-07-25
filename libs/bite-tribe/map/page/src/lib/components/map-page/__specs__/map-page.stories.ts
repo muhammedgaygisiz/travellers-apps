@@ -24,6 +24,7 @@ export const Empty: Story = {
   args: {
     isAuthenticated: true,
     enableZoom: false,
+    showMyPositionButton: true,
     gpsPosition: {
       latitude: 46.9422564444011,
       longitude: 7.457160053942448,

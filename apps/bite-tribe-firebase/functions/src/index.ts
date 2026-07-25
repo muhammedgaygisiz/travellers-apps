@@ -48,3 +48,10 @@ export {
   incrementBiteLikeCountOnLikeCreate,
   updateBiteLikeCountOnLikeUpdate,
 } from './functions/bites/update-bite-like-count-on-like-write';
+export {
+  decrementFollowersCountOnFollowerDelete,
+  decrementFollowingCountOnFollowingDelete,
+  incrementFollowersCountOnFollowerCreate,
+  incrementFollowingCountOnFollowingCreate,
+} from './functions/users/update-follow-counts-on-follow-write';
+export { resyncFollowCounts } from './functions/users/resync-follow-counts';

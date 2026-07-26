@@ -16,7 +16,7 @@ class Mock {
   userId$ = of('user-id');
   isPublicProfile$ = of(true);
   profileMetadata$ = of(true);
-  sortedMyBites$ = of(null);
+  myProfileBites$ = of(null);
   user = jest.fn();
   userIdFromUrl = jest.fn();
   logout = jest.fn();

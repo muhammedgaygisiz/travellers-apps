@@ -35,7 +35,12 @@ jest.mock('@ionic/angular', () => ({
   Platform: class {},
 }));
 jest.mock('utils', () => ({
-  PATH: { BITE: 'bite', PROFILE: 'profile', LEADERBOARD: 'leaderboard' },
+  PATH: {
+    BITE: 'bite',
+    PROFILE: 'profile',
+    LEADERBOARD: 'leaderboard',
+    WEEKLY_BITES: 'weekly-bites',
+  },
 }));
 
 /** Only `is()` is consulted, so the rest of Platform stays out of the way. */
@@ -283,6 +288,39 @@ describe('init-push', () => {
         expect(navController.navigateForward).toHaveBeenCalledWith([
           'leaderboard',
         ]);
+      });
+
+      it('opens the deep-linked week for a weekly bite summary', async () => {
+        const navController = await tap({
+          type: 'WEEKLY_BITE_SUMMARY',
+          biteCount: '12',
+          weekStart: '1752444000000',
+          weekEnd: '1753048799999',
+        });
+
+        expect(navController.navigateForward).toHaveBeenCalledWith(
+          ['weekly-bites'],
+          {
+            queryParams: {
+              weekStart: '1752444000000',
+              weekEnd: '1753048799999',
+            },
+          },
+        );
+      });
+
+      it('opens the weekly bites page without a range when the payload has none', async () => {
+        // Notifications sent before the range shipped still have to land on the
+        // page; it falls back to the previous week on its own.
+        const navController = await tap({
+          type: 'WEEKLY_BITE_SUMMARY',
+          biteCount: '12',
+        });
+
+        expect(navController.navigateForward).toHaveBeenCalledWith(
+          ['weekly-bites'],
+          undefined,
+        );
       });
 
       it('stays put for an unknown notification type', async () => {

@@ -52,6 +52,13 @@ const APP_ROUTES: Routes = [
     title: 'Leaderboard',
   },
   {
+    path: PATH.WEEKLY_BITES,
+    loadComponent: () =>
+      import('bite-tribe/home').then((m) => m.WeeklyBitesContainer),
+    canActivate: [authGuard],
+    title: 'Weekly Bites',
+  },
+  {
     path: PATH.NEW_BITE,
     loadComponent: () =>
       import('bite-tribe/bite').then((m) => m.CreateBiteContainer),

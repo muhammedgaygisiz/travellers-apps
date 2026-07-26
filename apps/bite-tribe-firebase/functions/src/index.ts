@@ -28,6 +28,7 @@ export { resendEmailVerification } from './functions/users/resend-email-verifica
 export { syncEmailVerificationStatus } from './functions/users/sync-email-verification-status';
 export { sendEmailVerificationReminders } from './functions/users/send-email-verification-reminders';
 export { loadBitesByLocation } from './functions/bites/load-bites-by-location';
+export { loadWeeklyBites } from './functions/bites/load-weekly-bites';
 export { getCurrencyByPosition } from './functions/location/get-currency-by-position';
 export { clusterRestaurantCandidateForBite } from './functions/restaurants/cluster-restaurant-candidate-for-bite';
 export { createRestaurantCandidateOnBiteCreate } from './functions/restaurants/create-restaurant-candidate-on-bite-create';

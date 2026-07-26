@@ -7,7 +7,14 @@ import {
 } from '@angular/core';
 import { BiteTribeStoreService, sortByCriteria } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import type { Bite, Like, LikeClick, Restaurant } from 'model';
+import type {
+  Bite,
+  Like,
+  LikeClick,
+  Restaurant,
+  WeekRange,
+  WeeklyBites,
+} from 'model';
 import { NetworkStatusService } from 'common/networkstatus';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { getSimilarityScore, haversineDistance, normalize } from 'utils';
@@ -25,6 +32,16 @@ interface RestaurantBitesParams {
   sourceBiteId: string | undefined;
   restaurantIdOrName: string | undefined;
 }
+
+interface WeeklyBitesParams {
+  range: WeekRange | undefined;
+}
+
+const EMPTY_WEEKLY_BITES: WeeklyBites = {
+  weekStart: 0,
+  weekEnd: 0,
+  bites: [],
+};
 
 @Injectable({ providedIn: 'root' })
 export class HomeDataAccessService {
@@ -45,6 +62,9 @@ export class HomeDataAccessService {
     initialValue: 'distance',
   });
   restaurantBitesSorting = toSignal(this.storeService.restaurantBitesSorting$, {
+    initialValue: 'createdAt',
+  });
+  weeklyBitesSorting = toSignal(this.storeService.weeklyBitesSorting$, {
     initialValue: 'createdAt',
   });
   bitesBySelectedBucketlist = toSignal(
@@ -260,6 +280,70 @@ export class HomeDataAccessService {
     this.restaurantBitesResource.isLoading(),
   );
 
+  weeklyBitesLoader: ResourceLoader<WeeklyBites, WeeklyBitesParams> = async ({
+    params,
+  }): Promise<WeeklyBites> => {
+    const result = await this.api.weeklyBites(params.range);
+
+    if (!result) {
+      return EMPTY_WEEKLY_BITES;
+    }
+
+    this.seedUserLikes(result.bites);
+
+    return result;
+  };
+
+  weeklyBitesResource = resource({
+    // The range is wrapped rather than passed straight through: a params signal
+    // that reads `undefined` would leave the resource idle, and no range is a
+    // valid request — the backend then answers with the previous calendar week.
+    params: (): WeeklyBitesParams => ({
+      range: this.storeService.weekRangeFromUrl(),
+    }),
+    loader: this.weeklyBitesLoader.bind(this),
+    defaultValue: EMPTY_WEEKLY_BITES,
+  });
+
+  weeklyBites = computed((): Bite[] => {
+    const likes = this.likes();
+    const gpsPosition = this.gpsPosition();
+    const bites = this.weeklyBitesResource.value().bites.map((bite) => ({
+      ...bite,
+      likes: likes.filter((like) => like.biteId === bite.id),
+      distance: haversineDistance(
+        bite.position?.latitude,
+        bite.position?.longitude,
+        gpsPosition?.latitude,
+        gpsPosition?.longitude,
+        'km',
+      ),
+    }));
+
+    return sortByCriteria(
+      bites,
+      this.weeklyBitesSorting(),
+      this.exchangeRates(),
+    );
+  });
+
+  weeklyBitesLoading = computed(() => this.weeklyBitesResource.isLoading());
+
+  /**
+   * The week the loaded bites belong to, as resolved by the backend. It is
+   * undefined until the first load answers, so callers can hold back a week
+   * label instead of showing a guessed range.
+   */
+  weeklyBitesRange = computed((): WeekRange | undefined => {
+    const { weekStart, weekEnd } = this.weeklyBitesResource.value();
+
+    if (weekStart === 0 && weekEnd === 0) {
+      return undefined;
+    }
+
+    return { weekStart, weekEnd };
+  });
+
   logout(): void {
     this.storeService.logout();
   }
@@ -286,6 +370,14 @@ export class HomeDataAccessService {
 
   setRestaurantBitesSorting(sorting: string): void {
     this.storeService.setRestaurantBitesSorting(sorting);
+  }
+
+  setWeeklyBitesSorting(sorting: string): void {
+    this.storeService.setWeeklyBitesSorting(sorting);
+  }
+
+  reloadWeeklyBites(): void {
+    this.weeklyBitesResource.reload();
   }
 
   setFilters(filters: {

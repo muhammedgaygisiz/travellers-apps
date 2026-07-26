@@ -1,0 +1,18 @@
+- [feat: bite in profile page are sorted by distance](https://github.com/muhammedgaygisiz/travellers-apps/issues/1118) (Issue \#1118)
+- Description
+  - The Bites on a profile page were ordered by distance to the current GPS position. A profile reads as a timeline of what someone ate, so the order should be fixed from the latest Bite to the oldest one.
+- Root Cause
+  - `bitesByUserIdWithMetadata` in `libs/bite-tribe/store/src/lib/bites/bites-by-id.selector.ts` enriches the `bitesByUserId` slice with likes and distance and sorts it with `byDistance`. `bitesByUser`, which feeds the public profile (`profile/:userId`), only filtered that list, so it inherited the distance order.
+  - The own profile (`my-profile`) read `sortedBitesByUser` through `sortedMyBites$`. That selector belongs to the my-bites page: it applies the my-bites tag, price, and nearby filters and the user-chosen my-bites sorting, which defaults to `distance`. The profile therefore also changed whenever the my-bites page was filtered or re-sorted.
+- Outcome
+  - `bitesByUser` sorts the filtered result with `sortBitesByCreatedAt`, so the public profile lists newest Bites first.
+  - The new `myProfileBites` selector sorts a copy of `bitesByUserIdWithMetadata` the same way, and `ProfileDataAccessService.myBites` reads it through the new `myProfileBites$` on `BiteTribeStoreService`. The own profile now shows every own Bite newest first and is no longer coupled to the my-bites filters and sorting.
+  - The my-bites page, the my-bites map, and the home feed keep `sortedMyBites$` and their distance default. Bite enrichment (likes, distance) is unchanged, so the distance still renders on the profile Bite cards.
+  - Ordering is a profile display decision, so it stays in the selector layer that already owns per-surface ordering instead of the page component.
+- Validation
+  - `NX_DAEMON=false npx nx run-many -t test -p bite-tribe/store,bite-tribe/profile-data-access --runInBand` - green. New cases in `libs/bite-tribe/store/src/lib/bites/__specs__/bites-by-id.selector.spec.ts` cover the newest-first order of both selectors and that `myProfileBites` does not mutate the slice.
+  - `NX_DAEMON=false npx nx run-many -t test -p bite-tribe/profile,bite-tribe/home-data-access,bite-tribe/map-data-access --runInBand` - green, which proves the surfaces that kept `sortedMyBites$` are untouched.
+  - `NX_DAEMON=false npx nx run-many -t lint -p bite-tribe/store,bite-tribe/profile-data-access,bite-tribe/profile` - clean.
+  - `NX_DAEMON=false npx nx build bite-tribe` - succeeds.
+  - `git diff --check` - clean.
+  - Not run: the manual pass in the running app against the Firebase emulator. Confirming the visible order on a profile with Bites of different ages still needs real data.

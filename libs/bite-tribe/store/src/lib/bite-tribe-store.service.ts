@@ -5,7 +5,11 @@ import { Store } from '@ngrx/store';
 import { BiteActions } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bites, sortedHomeBites } from './bites/home-bites.selector';
-import { bitesByUser, sortedBitesByUser } from './bites/bites-by-id.selector';
+import {
+  bitesByUser,
+  myProfileBites,
+  sortedBitesByUser,
+} from './bites/bites-by-id.selector';
 import {
   allTags,
   bite,
@@ -58,6 +62,7 @@ import {
   homeSorting,
   myBitesSorting,
   restaurantBitesSorting,
+  weeklyBitesSorting,
 } from './filtering-and-sorting/selectors';
 import { loadedLikesFromApi, removeLike, saveLike } from './likes/actions';
 import { likes } from './likes/selectors';
@@ -85,6 +90,7 @@ import {
   restaurantId as restaurantIdFromUrlSelector,
   userId as userIdFromUrl,
   organisationId as organisationIdFromUrlSelector,
+  weekRange as weekRangeFromUrlSelector,
 } from './router/selectors';
 
 @Injectable({
@@ -111,7 +117,9 @@ export class BiteTribeStoreService implements StoreService {
   myBitesSorting$ = this.store.select(myBitesSorting);
   sortedRestaurantBites$ = this.store.select(sortedBitesByRestaurant);
   restaurantBitesSorting$ = this.store.select(restaurantBitesSorting);
+  weeklyBitesSorting$ = this.store.select(weeklyBitesSorting);
   bitesByUser$ = this.store.select(bitesByUser);
+  myProfileBites$ = this.store.select(myProfileBites);
   bitesBySelectedBucketlist$ = this.store.select(bitesByBucketlist);
   allTags$ = this.store.select(allTags);
   bitesByRestaurant$ = this.store.select(bitesByRestaurant);
@@ -151,6 +159,7 @@ export class BiteTribeStoreService implements StoreService {
   restaurantIdFromUrl$ = this.store.select(restaurantIdFromUrlSelector);
   biteTrailIdFromUrl$ = this.store.select(biteTrailIdFromUrlSelector);
   organisationIdFromUrl$ = this.store.select(organisationIdFromUrlSelector);
+  weekRangeFromUrl$ = this.store.select(weekRangeFromUrlSelector);
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);
@@ -163,6 +172,7 @@ export class BiteTribeStoreService implements StoreService {
   restaurantIdFromUrl = toSignal(this.restaurantIdFromUrl$);
   biteTrailIdFromUrl = toSignal(this.biteTrailIdFromUrl$);
   organisationIdFromUrl = toSignal(this.organisationIdFromUrl$);
+  weekRangeFromUrl = toSignal(this.weekRangeFromUrl$);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());
@@ -330,6 +340,12 @@ export class BiteTribeStoreService implements StoreService {
   setRestaurantBitesSorting(sorting: string): void {
     this.store.dispatch(
       FilteringAndSortingActions.setRestaurantBitesSorting({ sorting }),
+    );
+  }
+
+  setWeeklyBitesSorting(sorting: string): void {
+    this.store.dispatch(
+      FilteringAndSortingActions.setWeeklyBitesSorting({ sorting }),
     );
   }
 

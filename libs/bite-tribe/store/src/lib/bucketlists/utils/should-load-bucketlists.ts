@@ -52,6 +52,12 @@ export const shouldLoadBucketlists = (): UnaryFunction<
         return true;
       }
 
+      if (
+        action.type === BucketlistActions.setBiteTriedOutStatusSucceeded.type
+      ) {
+        return true;
+      }
+
       return false;
     }),
   );

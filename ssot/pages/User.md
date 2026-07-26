@@ -109,6 +109,7 @@
 - Onboarding completion is stored on the public user document (`onboardingCompletedAt`, `onboardingCompletedAtTimestamp`, `onboardingVersion`). The absence of the flag routes an authenticated user into the blocking onboarding assistant; the finish step writes it. `onboardingVersion` leaves room for future re-onboarding.
 - An auth-scoped entry gate (`onboardingGuard`) redirects users without the completion flag to the onboarding route and blocks every other authenticated route until completion; `onboardingCompletedGuard` keeps completed users out of the route. See [[epic-850]].
 - Display names are unique, enforced case-insensitively (normalized by trim + lowercase; original casing preserved for display). A claim document `/displayNames/{normalizedDisplayName}` is written transactionally by the `claimDisplayName` callable so two users cannot take the same normalized name concurrently; renaming releases the old claim and takes the new one in the same transaction and keeps `/users/{uid}.displayName` plus `normalizedDisplayName` in sync. `checkDisplayNameAvailability` is a read-only advisory check. The profile edit flow claims the name before saving and shows a localized error when it is taken. `backfillDisplayNameClaimsCallable` claims existing users' names oldest-first (first-come keeps the name on a normalization collision) so enforcement can be switched on safely. See [[epic-850]].
+- `subscriptionTier` is currently written as `1` by `createUserOnAuthCreate` for every new account and is only read for display in the profile and settings pages. Nothing enforces it, and `firestore.rules` still allows any authenticated user to write any document, so it is not a trustworthy access signal today. [[epic-1122]] makes the entitlement server-owned and turns this field into a backend-written display mirror. See [[Subscription]].
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
 - ## Permissions
@@ -155,6 +156,7 @@
 - Marketplace
 - BiteTrail gamification
 - Organisation and BiteTrail packages
+- [[epic-1122]] entitlement foundation and Pro gating
 - ## Technical Implementation
 
   Firestore:

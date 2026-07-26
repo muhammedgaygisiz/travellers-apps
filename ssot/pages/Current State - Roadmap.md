@@ -127,6 +127,14 @@
 - Improve retention.
 - Watch analytics every day.
 - Talk to users.
+- ### Monetization preparation
+
+  [[Monetization]] is Priority P1 and post-launch. [[epic-1121]] is the umbrella over four stage epics covering the entitlement foundation, AdMob advertising, Pro subscriptions, and paid BiteTrails.
+
+- None of it blocks the public launch.
+- It is prepared during this phase rather than after it, because store products and review, RevenueCat setup, the consent flow, and creator payout onboarding all have lead time that cannot be compressed once the decision to monetize is made.
+- The ads channel can start first. It needs no purchase rails, no store products and no payout infrastructure, and only its "hide ads for Pro" child depends on the entitlement work.
+- The entitlement foundation ([[epic-1122]]) also corrects a live defect: `createUserOnAuthCreate` currently writes `subscriptionTier: 1` for every new account, which would grant Pro to the entire user base on the first release that enforces a gate.
 - ## Strategic Rule
 
   After launch, resist adding major new features until the product has enough real usage signals to show what people actually value.

@@ -64,6 +64,7 @@
       - Business app has organisation dashboard and BiteTrail creation route.
     - Next opportunities:
       - Complete marketplace packages, free BiteTrail access, assigned-user workflows, sold counters, ratings, badges, and creator-facing BiteTrail management.
+      - Selling paid BiteTrails and earning 80 percent of net proceeds, with payout onboarding and an earnings dashboard. See [[Monetization]] and [[epic-1125]].
   - Restaurant owner or business maintainer
     - Description: A person responsible for keeping restaurant, menu, and business information useful for discovery.
     - Goals:
@@ -96,6 +97,7 @@
       - Marketplace and BiteTrail consumer surfaces.
     - Next opportunities:
       - Assigned-user management, organisation profile refinement, existing BiteTrail list, selected-bite workflows, free BiteTrail content visibility, and package monetization.
+      - Pricing and publishing paid BiteTrails once identity verification and payout onboarding are complete. See [[Monetization]] and [[epic-1125]].
   - New user
     - Description: A person who has just registered and does not yet understand how to participate well.
     - Goals:

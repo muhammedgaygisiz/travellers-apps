@@ -23,6 +23,9 @@ It is the business-facing extension of BiteTribe's authentic discovery loop.
 - Sell counts are derived from BiteTrail sell records.
 - Marketplace value depends on creator, organisation, Bite, and BiteTrail trust.
 - The Market Place should not weaken the dish-first mission.
+- A paid BiteTrail sells through store in-app purchase, and its Bites stay locked until the purchase is verified. A non-buyer sees a preview only. See [[Monetization]] and [[epic-1125]].
+- Paid BiteTrail revenue is shared with the creator at 80 percent of net proceeds, meaning the amount remaining after the store commission. Gross-based wording must never be used.
+- Advertising and marketplace inventory stay separate. The Market Place exposes curated experiences, and ads live only in the home feed.
 
 ## Required Data
 
@@ -124,6 +127,7 @@ Related future or expanding use cases:
 - Marketplace
 - BiteTrail gamification
 - Search
+- [[epic-1125]] paid BiteTrails and creator revenue share
 
 ## Technical Implementation
 

@@ -1,0 +1,18 @@
+- [bugfix: disable pwa for native apps (keep it for web)](https://github.com/muhammedgaygisiz/travellers-apps/issues/1067) (Issue \#1067)
+- Description
+  - When an update is installed on Android, the user still sees the old resources (build number etc.). When he waits, kills and restarts the app, the new version is available.
+  - Research suggests that Capacitor's WebView builds on the PWA, so the same circumstances as for a PWA take effect in the native app, which causes confusion for the user.
+  - PWA for web is good, but for native the behavior is not wished.
+- Outcome
+  - The Angular service worker is now web-only. `isServiceWorkerEnabled` in `libs/bite-tribe/shell/src/lib/service-worker.ts` returns `!isDevMode() && !Capacitor.isNativePlatform()` and feeds `provideServiceWorker` in `libs/bite-tribe/shell/src/lib/app.config.ts`. Web keeps the PWA exactly as before: outside dev mode, `registerWhenStable:30000`.
+  - `apps/bite-tribe/project.json` keeps `serviceWorker: true` and `ngsw-config.json` is unchanged, so the build still emits `ngsw-worker.js`, `ngsw.json`, and `safety-worker.js` for the web deployment. Verified in `dist/apps/bite-tribe`.
+  - Skipping registration is not enough for installs that already have a worker, so `disableServiceWorkerOnNative` runs as a non-blocking app initializer on native: it unregisters every registration and deletes the `ngsw:` caches. The caches are dropped only once `serviceWorker.controller` is null, because a controlling worker answers lazy-chunk requests from exactly those caches; that makes the launch after the unregistration the safe moment. The cleanup never rejects.
+  - Existing native installs need one more app start before the cleanup can run: on the first start after the store update the old worker still serves the old bundle, so the new code is not executing yet. From then on no worker is registered and a native update shows the new build immediately.
+  - `libs/bite-tribe/store/src/lib/service-worker/effects.ts` was left as is. `SwUpdate.versionUpdates` is `NEVER` while the worker is disabled, so the update alert is inert on native regardless of its existing `hybrid` guard.
+  - The durable platform rule is recorded in [[Architecture - Capacitor]].
+- Validation
+  - `NX_DAEMON=false npx nx test bite-tribe-shell --runInBand` - 2 suites, 26 tests, green. New spec: `libs/bite-tribe/shell/src/lib/__specs__/service-worker.spec.ts`.
+  - `NX_DAEMON=false npx nx lint bite-tribe-shell` - clean.
+  - `NX_DAEMON=false npx nx build bite-tribe --configuration=development` - succeeds and still emits the service worker artifacts.
+  - `git diff --check` - clean.
+  - Not run: the native Android/iOS store-update path. Confirming that an installed update shows the new build number on first start needs a device build of both the previous and the new version.

@@ -270,5 +270,63 @@ describe('restaurant Selectors', () => {
         },
       ]);
     });
+
+    it('should return undefined when no restaurant has been selected yet', () => {
+      const result = restaurantToCreate.projector(undefined, []);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should keep the bites carried by the selection when the store has none', () => {
+      const candidateBite = {
+        id: 'b1',
+        name: 'Margherita',
+        place: 'New Restaurant',
+      };
+
+      const result = restaurantToCreate.projector(
+        {
+          id: '',
+          name: 'New Restaurant',
+          position: { latitude: 51.5074, longitude: -0.1278 },
+          restaurantCandidateId: 'candidate-1',
+          biteIds: ['b1'],
+          bites: [candidateBite],
+          unsaved: true,
+        },
+        [],
+      );
+
+      expect(result?.bites).toEqual([candidateBite]);
+    });
+
+    it('should drop bite ids that resolve to no bite at all', () => {
+      const result = restaurantToCreate.projector(
+        {
+          id: '',
+          name: 'New Restaurant',
+          position: { latitude: 51.5074, longitude: -0.1278 },
+          biteIds: ['b1', 'missing'],
+          bites: [{ id: 'b1', name: 'Margherita' }],
+        },
+        [],
+      );
+
+      expect(result?.bites).toEqual([{ id: 'b1', name: 'Margherita' }]);
+    });
+
+    it('should return an empty bite list when the selection has no bite ids', () => {
+      const result = restaurantToCreate.projector(
+        {
+          id: '',
+          name: 'New Restaurant',
+          position: { latitude: 51.5074, longitude: -0.1278 },
+          unsaved: true,
+        },
+        [],
+      );
+
+      expect(result?.bites).toEqual([]);
+    });
   });
 });

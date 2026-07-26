@@ -3,8 +3,9 @@ import type { Restaurant } from 'model';
 
 export const adapter = createEntityAdapter<Restaurant>();
 
-export const initialState: EntityState<Restaurant> = adapter.getInitialState();
-
 export interface RestaurantState extends EntityState<Restaurant> {
-  restaurantToCreate: Restaurant;
+  /** Undefined until a restaurant or restaurant candidate has been selected. */
+  restaurantToCreate?: Restaurant;
 }
+
+export const initialState: RestaurantState = adapter.getInitialState();

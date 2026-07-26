@@ -47,3 +47,4 @@ libs/bite-tribe/store/src/lib/app
 
 - Some newer feature data uses Angular resources directly, while older/shared flows use NgRx.
 - Store and resource boundaries should remain explicit so features do not duplicate remote state ownership.
+- Shared selectors must not assume both apps fill the same slices. The bites slice is only populated in the consumer app, so `restaurantToCreate` resolves Bite evidence from the store first and falls back to the Bites carried on the selection itself, which is how the business app passes restaurant-candidate evidence. See [[issue-1117]].

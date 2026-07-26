@@ -37,11 +37,20 @@
     - [[UC - Improve Localization Quality]]
     - [[UC - Strengthen Location Currency And Data Quality Guidance]]
     - [[UC - Harden Platform And Backend Trust]]
+    - [[UC - Own And Claim Restaurants]]
+    - [[UC - Configure Restaurant Floor Plans And Tables]]
+    - [[UC - Manage Tables During Service]]
+    - [[UC - Order At The Table Through A QR Code]]
 - Epics
   - [[epic-735]]
   - [[epic-738]]
   - [[epic-907]]
   - [[epic-1029]]
+  - [[epic-1069]]
+  - [[epic-1070]]
+  - [[epic-1071]]
+  - [[epic-1072]]
+  - [[epic-1073]]
 - Architecture
   collapsed:: true
   - [[Architecture - Overview]]

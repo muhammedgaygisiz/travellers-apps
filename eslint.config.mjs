@@ -14,7 +14,12 @@ export default [
         'error',
         {
           enforceBuildableLibDependency: true,
-          allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
+          allow: [
+            '^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$',
+            // Build-time esbuild plugin shared by both app builds. It runs in
+            // Node before bundling and never ends up in an app bundle.
+            '^.*/tools/env-var-plugin$',
+          ],
           depConstraints: [
             {
               sourceTag: 'type:app',

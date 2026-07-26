@@ -18,4 +18,5 @@ export type CoachMarkSurface =
   | 'bite-details-bucket-list'
   | 'map'
   | 'bucket-lists'
+  | 'bucket-list-swipe'
   | 'leaderboard';

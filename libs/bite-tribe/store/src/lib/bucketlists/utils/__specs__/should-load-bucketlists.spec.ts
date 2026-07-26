@@ -185,6 +185,29 @@ describe('shouldLoadBucketlists', () => {
     });
   });
 
+  describe('given a setBiteTriedOutStatusSucceeded', () => {
+    const ACTION = BucketlistActions.setBiteTriedOutStatusSucceeded();
+
+    it('should return true', () => {
+      scheduler.run(({ expectObservable, cold }) => {
+        const action$ = cold('--a--', {
+          a: ACTION,
+        });
+
+        const effect = createEffect(() => {
+          return action$.pipe(
+            ofType(BucketlistActions.setBiteTriedOutStatusSucceeded),
+            shouldLoadBucketlists(),
+          );
+        });
+
+        expectObservable(effect).toBe('--a--', {
+          a: ACTION,
+        });
+      });
+    });
+  });
+
   describe('given any other action', () => {
     const ACTION = { type: 'UNKNOWN_ACTION' };
 

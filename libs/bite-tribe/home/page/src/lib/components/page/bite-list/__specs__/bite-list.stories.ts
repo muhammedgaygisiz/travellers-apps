@@ -51,10 +51,10 @@ export const Empty: Story = {
   },
 };
 
-export const WithTriedOutCheckbox: Story = {
+export const WithTriedOutSwipe: Story = {
   args: {
     bites,
-    showTriedOutCheckbox: true,
+    enableTriedOutSwipe: true,
     triedOutBiteIds: ['bite1'],
   },
 };

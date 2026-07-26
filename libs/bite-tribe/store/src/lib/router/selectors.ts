@@ -1,7 +1,8 @@
 import * as fromRouter from '@ngrx/router-store';
 import { createSelector } from '@ngrx/store';
 
-const { selectRouteParams } = fromRouter.getRouterSelectors();
+const { selectRouteParams, selectQueryParams } =
+  fromRouter.getRouterSelectors();
 
 export const biteId = createSelector(
   selectRouteParams,
@@ -42,3 +43,19 @@ export const organisationId = createSelector(
   selectRouteParams,
   (params) => params?.['organisationId'],
 );
+
+/**
+ * The week a weekly bites deep link points at, as delivered by the summary
+ * notification. Both bounds are required: a half-filled range says nothing
+ * about which week to show, so consumers fall back to their own default.
+ */
+export const weekRange = createSelector(selectQueryParams, (params) => {
+  const weekStart = Number(params?.['weekStart']);
+  const weekEnd = Number(params?.['weekEnd']);
+
+  if (!Number.isFinite(weekStart) || !Number.isFinite(weekEnd)) {
+    return undefined;
+  }
+
+  return { weekStart, weekEnd };
+});

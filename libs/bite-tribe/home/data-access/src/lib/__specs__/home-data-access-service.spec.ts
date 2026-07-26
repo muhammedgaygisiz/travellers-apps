@@ -42,6 +42,18 @@ type RestaurantBitesLoaderParams = Parameters<
   HomeDataAccessService['restaurantBitesLoader']
 >[0];
 
+type WeeklyBitesLoaderParams = Parameters<
+  HomeDataAccessService['weeklyBitesLoader']
+>[0];
+
+const createWeeklyLoaderParams = (
+  range: { weekStart: number; weekEnd: number } | undefined,
+): WeeklyBitesLoaderParams => ({
+  params: { range },
+  abortSignal: new AbortController().signal,
+  previous: { status: 'idle' },
+});
+
 const createLoaderParams = (
   request: Pick<RestaurantBitesLoaderParams, 'params'>,
 ): RestaurantBitesLoaderParams => ({
@@ -59,6 +71,7 @@ class StoreMock {
   myBitesSorting$ = of('distance');
   sortedRestaurantBites$ = of([]);
   restaurantBitesSorting$ = of('createdAt');
+  weeklyBitesSorting$ = of('createdAt');
   bitesBySelectedBucketlist$ = of([]);
   allTags$ = of([]);
   homeFilters$ = of([]);
@@ -76,6 +89,8 @@ class StoreMock {
   position$ = of(undefined);
   biteIdFromUrl = (): string | undefined => undefined;
   restaurantIdFromUrl = (): string | undefined => undefined;
+  weekRangeFromUrl = (): { weekStart: number; weekEnd: number } | undefined =>
+    undefined;
   likes$ = of([]);
   logout = (): null => null;
   submitLikeClick = (): null => null;
@@ -85,6 +100,7 @@ class StoreMock {
   setHomeSorting = (): null => null;
   setMyBitesSorting = (): null => null;
   setRestaurantBitesSorting = (): null => null;
+  setWeeklyBitesSorting = (): null => null;
   setHomeFilters = (): null => null;
   clearHomeFilters = (): null => null;
   reloadGPSPosition = (): null => null;
@@ -98,6 +114,7 @@ const ApiMock = {
   bitesByPosition: jest.fn(),
   loadRestaurant: jest.fn(),
   loadLikesForBites: jest.fn(),
+  weeklyBites: jest.fn(),
 };
 
 describe('HomeDataAccessService', () => {
@@ -109,6 +126,7 @@ describe('HomeDataAccessService', () => {
     ApiMock.bitesByPosition.mockResolvedValue([]);
     ApiMock.loadRestaurant.mockResolvedValue(undefined);
     ApiMock.loadLikesForBites.mockResolvedValue([]);
+    ApiMock.weeklyBites.mockResolvedValue(undefined);
 
     TestBed.configureTestingModule({
       providers: [
@@ -846,6 +864,112 @@ describe('HomeDataAccessService', () => {
           .mockReturnValue(true);
 
         expect(service.restaurantBitesLoading()).toBe(true);
+      },
+    ));
+  });
+
+  describe('weeklyBitesLoader', () => {
+    const WEEK = { weekStart: 1752444000000, weekEnd: 1753048799999 };
+
+    it('should ask the api for the week the deep link carries', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.weeklyBites.mockResolvedValue({ ...WEEK, bites: [] });
+
+        await service.weeklyBitesLoader(createWeeklyLoaderParams(WEEK));
+
+        expect(ApiMock.weeklyBites).toHaveBeenCalledWith(WEEK);
+      },
+    ));
+
+    it('should ask without a range when the page was opened without one', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.weeklyBites.mockResolvedValue({ ...WEEK, bites: [] });
+
+        await service.weeklyBitesLoader(createWeeklyLoaderParams(undefined));
+
+        expect(ApiMock.weeklyBites).toHaveBeenCalledWith(undefined);
+      },
+    ));
+
+    it('should seed the likes of the loaded bites', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.weeklyBites.mockResolvedValue({
+          ...WEEK,
+          bites: [BITE_WITH_POSITION],
+        });
+
+        await service.weeklyBitesLoader(createWeeklyLoaderParams(WEEK));
+
+        expect(ApiMock.loadLikesForBites).toHaveBeenCalledWith(
+          [BITE_WITH_POSITION],
+          'test-user-id',
+        );
+      },
+    ));
+
+    it('should fall back to an empty week when the call fails', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.weeklyBites.mockResolvedValue(undefined);
+
+        const result = await service.weeklyBitesLoader(
+          createWeeklyLoaderParams(WEEK),
+        );
+
+        expect(result).toEqual({ weekStart: 0, weekEnd: 0, bites: [] });
+      },
+    ));
+  });
+
+  describe('weeklyBites', () => {
+    const WEEK = { weekStart: 1752444000000, weekEnd: 1753048799999 };
+
+    describe('given the current user liked a loaded bite', () => {
+      const like: Like = {
+        biteId: BITE_WITH_POSITION.id,
+        userId: 'test-user-id',
+        likeType: 'thumbup',
+        createdAt: '2026-01-01T00:00:00Z',
+      };
+
+      beforeEach(inject(
+        [BiteTribeStoreService],
+        (storeService: BiteTribeStoreService) => {
+          storeService.likes$ = of([like]);
+        },
+      ));
+
+      it('should decorate the loaded bites with likes', inject(
+        [HomeDataAccessService],
+        (service: HomeDataAccessService) => {
+          service.weeklyBitesResource.set({
+            ...WEEK,
+            bites: [BITE_WITH_POSITION],
+          });
+
+          expect(service.weeklyBites()[0].likes).toEqual([like]);
+        },
+      ));
+    });
+
+    it('should expose the week the backend resolved', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        service.weeklyBitesResource.set({ ...WEEK, bites: [] });
+
+        expect(service.weeklyBitesRange()).toEqual(WEEK);
+      },
+    ));
+
+    it('should report no week before the first load answered', inject(
+      [HomeDataAccessService],
+      (service: HomeDataAccessService) => {
+        // The default value carries no week, and labelling the page with a
+        // guessed range would be worse than showing none.
+        expect(service.weeklyBitesRange()).toBeUndefined();
       },
     ));
   });

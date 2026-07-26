@@ -22,6 +22,8 @@ import {
   Review,
   SaveToBucketListParams,
   Settings,
+  WeekRange,
+  WeeklyBites,
 } from 'model';
 import { MenuApiService } from './menu-api/menu-api.service';
 import { LikeApiService } from './like-api/like-api.service';
@@ -303,6 +305,10 @@ export class BiteTribeApiService {
 
   async bitesByUser(userUid: string): Promise<Bite[]> {
     return this.biteApiService.loadBitesByUser(userUid);
+  }
+
+  async weeklyBites(range?: WeekRange): Promise<WeeklyBites | undefined> {
+    return this.biteApiService.loadWeeklyBites(range);
   }
 
   async searchPlaces(

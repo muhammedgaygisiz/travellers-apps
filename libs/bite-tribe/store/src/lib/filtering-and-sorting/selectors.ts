@@ -50,6 +50,10 @@ export const restaurantBitesSorting = createSelector(slice, (slice) => {
   return slice?.sorting?.restaurantBites || 'createdAt';
 });
 
+export const weeklyBitesSorting = createSelector(slice, (slice) => {
+  return slice?.sorting?.weeklyBites || 'createdAt';
+});
+
 export const bucketlistSorting = createSelector(slice, (slice) => {
   return slice?.sorting?.bucketlists || 'name';
 });

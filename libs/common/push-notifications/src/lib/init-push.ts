@@ -75,6 +75,24 @@ const getFcmToken = async (): Promise<string | null> => {
 export type PushPermissionResult = 'granted' | 'denied' | 'unsupported';
 
 /**
+ * Turns the week bounds of a weekly summary payload into navigation query
+ * params. Push data arrives as strings, and a payload without a complete range
+ * yields no params at all so the page can pick its own default week.
+ */
+const toWeekRangeOptions = (
+  data: Record<string, string> | undefined,
+): { queryParams: { weekStart: string; weekEnd: string } } | undefined => {
+  const weekStart = data?.['weekStart'];
+  const weekEnd = data?.['weekEnd'];
+
+  if (!weekStart || !weekEnd) {
+    return undefined;
+  }
+
+  return { queryParams: { weekStart, weekEnd } };
+};
+
+/**
  * Registers push listeners and, when permission was already granted, refreshes
  * the FCM token. It never shows the OS permission prompt.
  *
@@ -145,6 +163,16 @@ export const initPushListeners = async (
 
         if (data?.type === 'LEADERBOARD_RANK_CHANGE') {
           navController.navigateForward([PATH.LEADERBOARD]);
+        }
+
+        if (data?.type === 'WEEKLY_BITE_SUMMARY') {
+          // The summary counts one specific week, so carry its bounds into the
+          // page instead of dropping the user on the home feed. Older payloads
+          // have no bounds; the page then falls back to the previous week.
+          navController.navigateForward(
+            [PATH.WEEKLY_BITES],
+            toWeekRangeOptions(data),
+          );
         }
       },
     );

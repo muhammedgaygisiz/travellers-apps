@@ -1,5 +1,40 @@
 # Changelog
 
+## build-87 (2026-07-26)
+
+<!-- changelog-start-rev: 8b6028b1 -->
+<!-- changelog-end-rev: 66b87bef -->
+
+### Features
+
+- **bite-tribe/home**: land weekly bite notification on a dedicated page (#1120) (b5f315ef)
+- **#933**: switch App Check startup failure to blocking behavior (#1066) (cf8cb97c)
+- **1055**: my position button in bitemap (#1063) (4b50d59e)
+
+### Bug Fixes
+
+- **bite-tribe/profile**: sort profile bites from newest to oldest (#1160) (2d76db0c)
+- **bite-tribe/store**: keep restaurant candidate bite evidence in the create flow (#1119) (feb86110)
+- **bite-tribe-shell**: disable the pwa service worker on native platforms (#1116) (5c3a0378)
+- **bite-tribe**: keep list pages clear of system navigation bar (#1065) (d087907f)
+- **#1061**: fix connection to google workspace and email verifiction functions (#1062) (38087410)
+- fix clipped reaction popover content (#1060) (ef1a915a)
+- fixs for build 85 (#1057) (ab61ed2a)
+
+### Refactoring
+
+- **806**: check sensitive vars and tidy up env binding (#1068) (b10b2c84)
+- **1059**: introduce aggregates for followers and following (#1064) (65ed5561)
+
+### Documentation
+
+- specify the three BiteTribe monetization channels (#1121) (#1159) (8baf38b9)
+- specify resto claim table and order system (#1115) (a14f731b)
+
+### Tests
+
+- add e2e tests for use cases (#1058) (c60165b9)
+
 ## build-86 (2026-07-21)
 
 <!-- changelog-start-rev: 6edf96f6 -->

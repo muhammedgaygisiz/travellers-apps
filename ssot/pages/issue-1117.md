@@ -1,0 +1,21 @@
+- [bugfix(business): click on restaurant candidate causes error and second click opens a broken page](https://github.com/muhammedgaygisiz/travellers-apps/issues/1117) (Issue \#1117)
+- Description
+  - The business dashboard lists pending restaurant candidates. Clicking one appeared to do nothing on the first tap; a further tap opened the new-restaurant page in a broken state. The report came from a mobile device, so the console error was not captured.
+- Root Cause
+  - `restaurantCandidateClicked` in `libs/bite-tribe-business/dashboard/page/src/lib/integration/dashboard.service.ts` selects a restaurant that already carries the candidate's `biteIds` **and** the resolved `bites`, because the business dashboard loads that evidence itself through an Angular `resource()`.
+  - The shared `restaurantToCreate` selector then discarded those Bites and re-resolved every `biteId` against the NgRx bites slice. That slice is only ever filled in the consumer app, so in the business app every lookup returned `undefined` and the selector emitted `bites: [undefined, ...]`.
+  - `new-restaurant-page.component.html` renders the evidence with `@for (bite of bites; track bite.id)`, which threw `Cannot read properties of undefined (reading 'id')` on the first change detection of the freshly activated page. The create-restaurant page therefore never rendered correctly, and the failing render made the Ionic page transition look like nothing had happened.
+  - Only the candidate path was affected. `placeClicked` selects a restaurant without `biteIds`, so the selector produced no Bite list and the page rendered.
+  - Two adjacent latent faults in the same slice were fixed with it: the selector dereferenced `restaurantToCreate` without a guard, although the restaurants `initialState` never defined that key (a direct hit on `/new-restaurant` threw `Cannot read properties of undefined (reading 'biteIds')`), and the `loadedRestaurantsFromApi` reducer rebuilt the slice from `initialState`, which would have dropped an in-flight selection.
+- Outcome
+  - `libs/bite-tribe/store/src/lib/restaurants/selectors.ts` returns `undefined` when nothing has been selected, resolves each `biteId` from the store first and falls back to the Bites carried on the selection, and drops ids that resolve to nothing so the page can never receive an undefined Bite.
+  - `libs/bite-tribe/store/src/lib/restaurants/adapter.ts` declares `restaurantToCreate` as optional and types `initialState` as `RestaurantState`, which matches what the reducer actually produces.
+  - `libs/bite-tribe/store/src/lib/restaurants/reducer.ts` uses `adapter.setAll(restaurants, state)` for `loadedRestaurantsFromApi`. Entity behavior is unchanged (the previous `upsertMany` into `initialState` was a replace-all), but the selected restaurant survives.
+  - Consumer-app behavior is unchanged: its bites slice resolves the ids, so the store still wins over anything carried on the selection.
+  - The durable rule is recorded in [[Architecture - State Management]].
+- Validation
+  - `npx nx run-many -t test -p bite-tribe/store,bite-tribe-business/restaurant,bite-tribe-business/restaurant-data-access,bite-tribe-business/dashboard,bite-tribe-business/dashboard-data-access` - green. New cases in `libs/bite-tribe/store/src/lib/restaurants/__specs__/selectors.spec.ts` and `libs/bite-tribe-business/restaurant/page/src/lib/components/page/__specs__/new-restaurant-page.component.spec.ts`.
+  - `npx nx run-many -t lint -p bite-tribe/store,bite-tribe-business/restaurant,bite-tribe-business/dashboard` - clean.
+  - `npx nx build bite-tribe-business` and `npx nx build bite-tribe` - both succeed, which typechecks the widened `Restaurant | undefined` selector result against both app templates.
+  - `git diff --check` - clean.
+  - Not run: the manual dashboard-to-create-restaurant pass against the Firebase emulator on a device. Confirming the tap behavior on mobile still needs a real candidate in `restaurantCandidates`.

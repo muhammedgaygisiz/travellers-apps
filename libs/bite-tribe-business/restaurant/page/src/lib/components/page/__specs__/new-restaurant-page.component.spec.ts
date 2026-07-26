@@ -345,6 +345,35 @@ describe('NewRestaurantPageComponent', () => {
     });
   });
 
+  describe('bite evidence list', () => {
+    it('should render one card per bite carried by a restaurant candidate', () => {
+      componentRef.setInput('restaurant', {
+        id: '',
+        name: 'Pizza Palace',
+        restaurantCandidateId: 'candidate-1',
+        biteIds: ['b1', 'b2'],
+        bites: [
+          { id: 'b1', name: 'Margherita', place: 'Pizza Palace' },
+          { id: 'b2', name: 'Calzone', place: 'Pizza Palace' },
+        ],
+      } as Restaurant);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelectorAll('bt-bite')).toHaveLength(2);
+    });
+
+    it('should render nothing when the restaurant carries no bites', () => {
+      componentRef.setInput('restaurant', {
+        id: '',
+        name: 'Pizza Palace',
+        bites: [],
+      } as unknown as Restaurant);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelectorAll('bt-bite')).toHaveLength(0);
+    });
+  });
+
   // Flush pending microtasks (the confirm-dialog promise chain) without
   // advancing timers, so the leaflet map redraw timer is not triggered.
   const flushMicrotasks = async (): Promise<void> => {

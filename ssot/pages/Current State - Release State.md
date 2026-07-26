@@ -46,6 +46,7 @@ The product is not yet in public launch mode. The launch-blocking backend work f
 - Issue 902 was closed as obsolete after issue 943 because selected places already patch the Bite position when a trusted place position is available.
 - Issue 982 fixed map camera jumps when live Bite marker updates arrive.
 - Issue 983 replaced the consumer E2E baseline with Playwright login, registration, and create-Bite coverage.
+- Issue 812 replaced the tried-out checkbox in the Bucket List detail view with a swipe-to-tick gesture on the Bite card and added a first-visit coach mark for it.
 
 ## Release Readiness Checklist
 

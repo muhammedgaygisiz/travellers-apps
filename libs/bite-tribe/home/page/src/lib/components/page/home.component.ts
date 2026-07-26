@@ -83,7 +83,7 @@ export class BiteTribeHomeComponent {
   showFilters = input(true, { transform: booleanAttribute });
   showSearchChip = input(false, { transform: booleanAttribute });
   showSearch = input(false, { transform: booleanAttribute });
-  showTriedOutCheckbox = input(false, { transform: booleanAttribute });
+  enableTriedOutSwipe = input(false, { transform: booleanAttribute });
   triedOutBiteIds = input<string[]>([]);
   showEmailVerificationPrompt = input(false, { transform: booleanAttribute });
 

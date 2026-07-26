@@ -21,6 +21,7 @@ Bucket Lists also bridge BiteTrails into a personal user journey.
 - A Bite can appear in multiple Bucket Lists.
 - A Bucket List can optionally originate from one BiteTrail.
 - A Bucket List can track tried-out Bites.
+- A tried-out Bite stays in the Bucket List. It is shown as done rather than removed, because the tried-out progress of the list depends on it.
 - Removing a Bite from a Bucket List also removes its tried-out status for that Bucket List.
 - Deleting a Bucket List deletes the list, not the Bites.
 - Saving a BiteTrail as a Bucket List writes a sell record for that BiteTrail.
@@ -107,7 +108,7 @@ Supported today:
 - Delete Bucket List.
 - View Bucket List.
 - View Bucket List on map.
-- Mark Bites as tried out.
+- Mark Bites as tried out by swiping a Bite in the Bucket List detail view and confirming the revealed check; swiping an already tried-out Bite undoes it.
 - Save BiteTrail as Bucket List.
 - Rate BiteTrail.
 - View tried-out progress per Bucket List (progress bar on the Bucket Lists page).

@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
+import { CoachMarkComponent } from 'bite-tribe/coach-mark';
 import { BiteTribeHomeComponent } from '../components/page/home.component';
 import { HomeService } from './home.service';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -13,7 +19,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [showHeaderMenu]="false"
       [showFooter]="false"
       [enableBackButton]="true"
-      [showTriedOutCheckbox]="true"
+      [enableTriedOutSwipe]="true"
       [triedOutBiteIds]="service.triedOutBiteIds()"
       [userId]="service.userId()"
       [isAuthenticated]="service.isAuthenticated()"
@@ -33,11 +39,27 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (triedOutChange)="service.toggleTriedOut($event)"
       (rateNowClick)="service.rateNowClicked($event)"
     />
+
+    <bt-coach-mark
+      surface="bucket-list-swipe"
+      titleKey="coach-bucket-list-swipe-title"
+      bodyKey="coach-bucket-list-swipe-body"
+      anchorTestId="bite-tried-out-swipe"
+      [enabled]="hasBites()"
+    />
   `,
-  imports: [BiteTribeHomeComponent],
+  imports: [BiteTribeHomeComponent, CoachMarkComponent],
 })
 export class BucketListContainer {
   service = inject(HomeService);
+
+  /**
+   * The swipe mark teaches a gesture that needs something to swipe, so it waits
+   * until the list actually has a Bite to anchor on.
+   */
+  protected readonly hasBites = computed(
+    () => this.service.bitesBySelectedBucketlist().length > 0,
+  );
 
   ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({

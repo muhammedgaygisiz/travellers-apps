@@ -2,27 +2,61 @@
   <bt-bite-skeleton-list />
 } @else {
   @for (bite of bites(); track bite.id) {
-    @if (showTriedOutCheckbox()) {
-      <ion-checkbox
-        labelPlacement="end"
-        class="ion-margin-start ion-margin-bottom"
-        [checked]="bite.id | isBiteTriedOut: triedOutBiteIds()"
-        (ionChange)="onTriedOutChange($event, bite.id)"
+    @if (enableTriedOutSwipe()) {
+      @let triedOut = bite.id | isBiteTriedOut: triedOutBiteIds();
+
+      <ion-item-sliding
+        #slidingItem
+        class="bite-sliding"
+        [class.tried-out]="triedOut"
+        [attr.data-testid]="$first ? 'bite-tried-out-swipe' : null"
       >
-        {{ 'mark-bite-as-tried-out' | transloco }}
-      </ion-checkbox>
+        <ion-item class="bite-sliding-item" lines="none">
+          <div class="bite-sliding-content">
+            <ng-container
+              [ngTemplateOutlet]="biteCard"
+              [ngTemplateOutletContext]="{ $implicit: bite }"
+            />
+
+            @if (triedOut) {
+              <ion-icon
+                class="tried-out-badge"
+                name="checkmark-circle-outline"
+                color="success"
+                [attr.aria-label]="'mark-bite-as-tried-out' | transloco"
+              />
+            }
+          </div>
+        </ion-item>
+
+        <ion-item-options
+          side="end"
+          (ionSwipe)="onTriedOutAction(bite.id, triedOut, slidingItem)"
+        >
+          <ion-item-option
+            expandable
+            [color]="triedOut ? 'medium' : 'success'"
+            [attr.aria-label]="
+              (triedOut
+                ? 'mark-bite-as-not-tried-out'
+                : 'mark-bite-as-tried-out'
+              ) | transloco
+            "
+            (click)="onTriedOutAction(bite.id, triedOut, slidingItem)"
+          >
+            <ion-icon
+              slot="icon-only"
+              [name]="triedOut ? 'close-outline' : 'checkmark-outline'"
+            />
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    } @else {
+      <ng-container
+        [ngTemplateOutlet]="biteCard"
+        [ngTemplateOutletContext]="{ $implicit: bite }"
+      />
     }
-    <bt-bite
-      [bite]="bite"
-      [userId]="userId()"
-      [showEditButton]="editableBites()"
-      [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
-      (biteClick)="biteClick.emit($event)"
-      (likeButtonClick)="likeButtonClick.emit($event)"
-      (gotoEdit)="gotoEdit.emit($event)"
-      (deleteBite)="deleteBite.emit($event)"
-      (rateNowClick)="rateNowClick.emit($event)"
-    />
   } @empty {
     <div class="ion-display-flex ion-justify-content-center ion-padding-top">
       <ion-text color="primary"> No bites found. Be the first one.</ion-text>
@@ -35,3 +69,17 @@
     </ion-infinite-scroll>
   }
 }
+
+<ng-template #biteCard let-bite>
+  <bt-bite
+    [bite]="bite"
+    [userId]="userId()"
+    [showEditButton]="editableBites()"
+    [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
+    (biteClick)="biteClick.emit($event)"
+    (likeButtonClick)="likeButtonClick.emit($event)"
+    (gotoEdit)="gotoEdit.emit($event)"
+    (deleteBite)="deleteBite.emit($event)"
+    (rateNowClick)="rateNowClick.emit($event)"
+  />
+</ng-template>

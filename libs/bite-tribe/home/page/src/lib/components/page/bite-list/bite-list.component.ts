@@ -4,10 +4,15 @@ import {
   input,
   output,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import {
-  IonCheckbox,
+  IonIcon,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  IonItem,
+  IonItemOption,
+  IonItemOptions,
+  IonItemSliding,
   IonText,
 } from '@ionic/angular/standalone';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
@@ -26,9 +31,14 @@ import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
   imports: [
     BiteComponent,
     BiteSkeletonListComponent,
-    IonCheckbox,
+    NgTemplateOutlet,
+    IonIcon,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
+    IonItem,
+    IonItemOption,
+    IonItemOptions,
+    IonItemSliding,
     IonText,
     TranslocoPipe,
     IsBiteTriedOutPipe,
@@ -40,7 +50,12 @@ export class BiteListComponent {
   userId = input<string>();
   editableBites = input(false);
   hasErrorLoadingGpsPosition = input(false);
-  showTriedOutCheckbox = input(false);
+  /**
+   * Turns each Bite into a sliding item that can be swiped to toggle its
+   * tried-out status. Only the bucket list detail view owns that status, so the
+   * rest of the feeds keep plain cards.
+   */
+  enableTriedOutSwipe = input(false);
   triedOutBiteIds = input<string[]>([]);
   hasMore = input(false);
   showSkeleton = input(false);
@@ -53,11 +68,18 @@ export class BiteListComponent {
   readonly triedOutChange = output<{ biteId: string; checked: boolean }>();
   readonly loadMore = output<void>();
 
-  onTriedOutChange(
-    event: { detail: { checked: boolean } },
+  /**
+   * Toggles the tried-out status, whether the user completed the swipe or
+   * tapped the revealed option. The item is closed afterwards so the card
+   * springs back and shows its new state.
+   */
+  onTriedOutAction(
     biteId: string,
+    triedOut: boolean,
+    slidingItem: IonItemSliding,
   ): void {
-    this.triedOutChange.emit({ biteId, checked: event.detail.checked });
+    this.triedOutChange.emit({ biteId, checked: !triedOut });
+    void slidingItem.close();
   }
 
   onIonInfinite(event: InfiniteScrollCustomEvent): void {

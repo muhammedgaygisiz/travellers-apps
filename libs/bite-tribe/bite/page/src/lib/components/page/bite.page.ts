@@ -8,6 +8,7 @@ import {
   linkedSignal,
   output,
   signal,
+  viewChild,
   WritableSignal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
@@ -107,6 +108,12 @@ export class BitePage {
 
   submitBite = output<typeof this.biteFormGroup.value>();
 
+  /**
+   * Emitted when the Bite is posted but the user stays on the form to create
+   * another Bite at the same place.
+   */
+  submitBiteAndAddAnother = output<typeof this.biteFormGroup.value>();
+
   placeChange = output<string>();
 
   searchGooglePlaces = output<string>();
@@ -118,6 +125,19 @@ export class BitePage {
   isWeb = signal(!this.platform.is('hybrid'));
 
   nearbyRestaurants = input<NearbyRestaurant[]>([]);
+
+  readonly ionContent = viewChild(IonContent);
+
+  /** Tags of the Bites already posted in this "add another Bite" session. */
+  private readonly previouslyPostedTags = signal<string[]>([]);
+
+  /**
+   * Suggestions offered by the tags input: the tags of the Bites just posted at
+   * this place first, then the place-based suggestions from the store.
+   */
+  readonly tagSuggestions = computed(() => [
+    ...new Set([...this.previouslyPostedTags(), ...this.suggestedTags()]),
+  ]);
 
   biteFormGroup = this.formBuilder.group(
     {
@@ -340,12 +360,65 @@ export class BitePage {
   });
 
   saveBite(): void {
-    if (this.biteFormGroup.valid) {
-      const newBite = this.biteFormGroup.value;
+    const newBite = this.toSubmittableBite();
 
-      newBite.price = normalizePriceForBackend(newBite.price);
-
+    if (newBite) {
       this.submitBite.emit(newBite);
+    }
+  }
+
+  /**
+   * Posts the Bite and keeps the user on the form so the next Bite at the same
+   * place can be entered right away. Restaurant, currency, and position stay,
+   * everything Bite-specific is cleared.
+   */
+  saveBiteAndAddAnother(): void {
+    const newBite = this.toSubmittableBite();
+
+    if (!newBite) {
+      return;
+    }
+
+    this.submitBiteAndAddAnother.emit(newBite);
+    this.resetForNextBite(newBite.tags || []);
+  }
+
+  private toSubmittableBite(): typeof this.biteFormGroup.value | undefined {
+    if (!this.biteFormGroup.valid) {
+      return undefined;
+    }
+
+    const newBite = this.biteFormGroup.value;
+
+    newBite.price = normalizePriceForBackend(newBite.price);
+
+    return newBite;
+  }
+
+  private resetForNextBite(postedTags: string[]): void {
+    this.previouslyPostedTags.update((tags) => [
+      ...new Set([...postedTags, ...tags]),
+    ]);
+
+    this.biteFormGroup.patchValue({
+      id: '',
+      image: '',
+      imagePath: '',
+      name: '',
+      description: '',
+      price: null,
+      rating: 0,
+      tags: [],
+    });
+    this.biteFormGroup.markAsPristine();
+    this.biteFormGroup.markAsUntouched();
+
+    this.imagePosition.set(undefined);
+
+    const ionContent = this.ionContent();
+
+    if (ionContent) {
+      ionContent.scrollToTop(300);
     }
   }
 

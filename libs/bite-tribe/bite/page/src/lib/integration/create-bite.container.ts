@@ -25,6 +25,7 @@ import type { Geopoint } from 'model';
       [nearbyGooglePlaces]="service.nearbyGooglePlaces()"
       [nearbyGooglePlacesLoading]="service.nearbyGooglePlacesLoading()"
       (submitBite)="service.submitNewBite($event)"
+      (submitBiteAndAddAnother)="service.submitNewBiteAndAddAnother($event)"
       (placeChange)="onPlaceChange($event)"
       (searchGooglePlaces)="service.searchGooglePlaces($event)"
       (requestNearbyGooglePlaces)="service.loadNearbyGooglePlaces($event)"

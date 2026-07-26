@@ -161,6 +161,7 @@
   "no-gps-position-error-message": "Aucune position GPS trouvée dans l'image. Choisis une position GPS sur la carte ou active la position GPS.",
   "chose-gps-position-error-message": "Choisis une position GPS sur la carte ou active la position GPS.",
   "post": "Publier",
+  "post-and-add-another-bite": "Publier et ajouter un autre Bite",
   "reviews-label": "Avis",
   "write-review-label": "Écrire un avis",
   "add-your-review": "Ajoute ton avis",

@@ -36,6 +36,24 @@ When adding or removing native plugins:
 
 Prefer Capacitor sync over hand-editing generated native dependency files.
 
+## Service Worker Rule
+
+The Angular service worker (`ngsw`) is web-only. `apps/bite-tribe` keeps building it (`serviceWorker: true`), so the PWA is unchanged, but the shell registers it only outside a native platform (issue \#1067).
+
+`libs/bite-tribe/shell/src/lib/service-worker.ts` splits this in two:
+
+- `isServiceWorkerEnabled` - returns `!isDevMode() && !Capacitor.isNativePlatform()` and feeds `provideServiceWorker` in `libs/bite-tribe/shell/src/lib/app.config.ts`.
+- `disableServiceWorkerOnNative` - wired as a non-blocking app initializer, unregisters a worker that an earlier native build registered and clears the `ngsw:` caches once no worker controls the document. It never rejects, so a failed cleanup cannot block startup.
+
+The native apps load the same web build from `dist/apps/bite-tribe` inside a WebView, so a registered worker answers from its own cache after a store update: the user still sees the previous build - old build number, old resources - until ngsw has fetched the new version and the WebView is restarted. The native update already ships and versions the web assets, so on native that caching layer only adds a stale window.
+
+Two consequences to keep in mind:
+
+- Do not gate this on the build configuration. Web and native ship the same bundle, so the decision has to stay a runtime platform check.
+- Existing native installs need one more app start before the cleanup runs. On the first start after the update the old worker still serves the old bundle, so the new code is not executing yet.
+
+The update alert in `libs/bite-tribe/store/src/lib/service-worker/effects.ts` keeps its `hybrid` guard. `SwUpdate.versionUpdates` is `NEVER` while the worker is disabled, so on native the effect is inert either way.
+
 ## Push Permission Rule
 
 The OS shows its push permission prompt once per install, so the ask is owned by exactly one surface: the onboarding notification step, which explains the value first (epic \#850, issue \#1015).
@@ -67,6 +85,7 @@ apps/bite-tribe-ios/capacitor.config.ts
 apps/bite-tribe-android/capacitor.config.ts
 apps/bite-tribe-ios/package.json
 apps/bite-tribe-android/package.json
+libs/bite-tribe/shell/src/lib/service-worker.ts
 libs/common/geolocation
 libs/common/push-notifications
 libs/common/networkstatus/feature

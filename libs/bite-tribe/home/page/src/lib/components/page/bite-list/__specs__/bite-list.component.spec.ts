@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import { IonItemSliding, provideIonicAngular } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { of } from 'rxjs';
@@ -78,13 +78,71 @@ describe('BiteListComponent', () => {
     expect(fixture.nativeElement.querySelector('bt-bite')).toBeNull();
   });
 
-  describe('onTriedOutChange', () => {
-    it('should emit triedOutChange with the bite id and checked state', () => {
-      const emitSpy = jest.spyOn(component.triedOutChange, 'emit');
+  it('should keep the bites unwrapped when the tried-out swipe is disabled', () => {
+    componentRef.setInput('bites', [createBite('bite-1', 'Burger')]);
+    fixture.detectChanges();
 
-      component.onTriedOutChange({ detail: { checked: true } }, 'bite-1');
+    expect(fixture.nativeElement.querySelector('ion-item-sliding')).toBeNull();
+  });
+
+  it('should wrap every bite in a sliding item when the tried-out swipe is enabled', () => {
+    componentRef.setInput('bites', [
+      createBite('bite-1', 'Burger'),
+      createBite('bite-2', 'Pizza'),
+    ]);
+    componentRef.setInput('enableTriedOutSwipe', true);
+    fixture.detectChanges();
+
+    const slidingItems =
+      fixture.nativeElement.querySelectorAll('ion-item-sliding');
+
+    expect(slidingItems.length).toBe(2);
+    expect(slidingItems[0].getAttribute('data-testid')).toBe(
+      'bite-tried-out-swipe',
+    );
+    expect(slidingItems[1].getAttribute('data-testid')).toBeNull();
+  });
+
+  it('should mark a tried-out bite so it reads as done in the list', () => {
+    componentRef.setInput('bites', [
+      createBite('bite-1', 'Burger'),
+      createBite('bite-2', 'Pizza'),
+    ]);
+    componentRef.setInput('enableTriedOutSwipe', true);
+    componentRef.setInput('triedOutBiteIds', ['bite-1']);
+    fixture.detectChanges();
+
+    const slidingItems =
+      fixture.nativeElement.querySelectorAll('ion-item-sliding');
+
+    expect(slidingItems[0].classList).toContain('tried-out');
+    expect(slidingItems[0].querySelector('.tried-out-badge')).toBeTruthy();
+    expect(slidingItems[1].classList).not.toContain('tried-out');
+    expect(slidingItems[1].querySelector('.tried-out-badge')).toBeNull();
+  });
+
+  describe('onTriedOutAction', () => {
+    it('should emit triedOutChange as checked for a bite that was not tried out', () => {
+      const emitSpy = jest.spyOn(component.triedOutChange, 'emit');
+      const slidingItem = { close: jest.fn() } as unknown as IonItemSliding;
+
+      component.onTriedOutAction('bite-1', false, slidingItem);
 
       expect(emitSpy).toHaveBeenCalledWith({ biteId: 'bite-1', checked: true });
+      expect(slidingItem.close).toHaveBeenCalled();
+    });
+
+    it('should emit triedOutChange as unchecked for a bite that was already tried out', () => {
+      const emitSpy = jest.spyOn(component.triedOutChange, 'emit');
+      const slidingItem = { close: jest.fn() } as unknown as IonItemSliding;
+
+      component.onTriedOutAction('bite-1', true, slidingItem);
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        biteId: 'bite-1',
+        checked: false,
+      });
+      expect(slidingItem.close).toHaveBeenCalled();
     });
   });
 

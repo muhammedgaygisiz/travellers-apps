@@ -18,6 +18,7 @@ Users can turn curated BiteTrail discovery into a personal Bucket List and rate 
 - User opens a BiteTrail.
 - User saves the BiteTrail as a Bucket List.
 - The app creates a Bucket List with the BiteTrail's Bites.
+- User opens the Bucket List and swipes a Bite to tick it off as tried out, or swipes an already ticked Bite to undo it. A first-visit coach mark teaches the gesture.
 - User can rate the BiteTrail through Bucket List-related flows.
 
 ## Supported Evidence

@@ -160,6 +160,7 @@
   "no-gps-position-error-message": "Nessuna posizione GPS trovata nell'immagine. Scegli una posizione GPS dalla mappa o abilita la posizione GPS.",
   "chose-gps-position-error-message": "Scegli una posizione GPS dalla mappa o abilita la posizione GPS.",
   "post": "Pubblica",
+  "post-and-add-another-bite": "Pubblica e aggiungi un altro Bite",
   "reviews-label": "Recensioni",
   "write-review-label": "Scrivi una recensione",
   "add-your-review": "Aggiungi la tua recensione",

@@ -161,6 +161,7 @@
   "no-gps-position-error-message": "በምስሉ ውስጥ የGPS ቦታ አልተገኘም። እባክህ ከካርታው የGPS ቦታ ምረጥ ወይም GPS ቦታን አንቃ።",
   "chose-gps-position-error-message": "እባክህ ከካርታው የGPS ቦታ ምረጥ ወይም GPS ቦታን አንቃ።",
   "post": "ፖስት",
+  "post-and-add-another-bite": "ፖስት አድርግና ሌላ Bite ጨምር",
   "reviews-label": "ግምገማዎች",
   "write-review-label": "ግምገማ ጻፍ",
   "add-your-review": "ግምገማህን ጨምር",

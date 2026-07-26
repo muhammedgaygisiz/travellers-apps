@@ -84,6 +84,27 @@ export class BiteService {
   }
 
   async submitNewBite(newBite: BiteFormValue): Promise<void> {
+    await this.createBite(newBite, () => {
+      void this.navController.navigateBack(['home']);
+
+      void this.showToast('bite-created-successfully');
+    });
+  }
+
+  /**
+   * Creates the Bite but keeps the user on the create form so the next Bite at
+   * the same place can be posted right away.
+   */
+  async submitNewBiteAndAddAnother(newBite: BiteFormValue): Promise<void> {
+    await this.createBite(newBite, () => {
+      void this.showToast('bite-created-successfully');
+    });
+  }
+
+  private async createBite(
+    newBite: BiteFormValue,
+    onCreated: () => void,
+  ): Promise<void> {
     const loading = await this.loadingController.create({
       message: this.transloco.translate('creating-bite'),
       backdropDismiss: false,
@@ -98,9 +119,7 @@ export class BiteService {
 
       this.analytics.logEvent(AnalyticsEvent.BiteCreated);
 
-      void this.navController.navigateBack(['home']);
-
-      void this.showToast('bite-created-successfully');
+      onCreated();
     } finally {
       await loading.dismiss();
     }

@@ -162,6 +162,7 @@
   "no-gps-position-error-message": "No GPS position found in the image. Please choose a GPS position from the map or enable GPS position.",
   "chose-gps-position-error-message": "Please choose a GPS position from the map or enable GPS position.",
   "post": "Post",
+  "post-and-add-another-bite": "Post and add another Bite",
   "reviews-label": "Reviews",
   "write-review-label": "Write a review",
   "add-your-review": "Add your Review",

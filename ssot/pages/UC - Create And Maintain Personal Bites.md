@@ -24,12 +24,14 @@ Users can create and maintain real dish-level food experiences.
 - User can still manually correct the currency before saving.
 - The app warns when the entered price looks suspiciously high.
 - The app stores the Bite and uploads the image.
+- User can post the Bite and stay on the form to add another Bite at the same place. Restaurant, currency, and position stay; image, dish name, price, rating, description, and tags reset, and the tags of the Bites already posted in that session become suggestions.
 - User can edit the Bite later.
 
 ## Supported Evidence
 
 - `new-bite`
 - `bite/:biteId/edit`
+- "Post and add another Bite" action on `new-bite`.
 - Bite API create, edit, upload, and image-path utilities.
 - `getCurrencyByPosition`
 - `searchNearbyPlaces`

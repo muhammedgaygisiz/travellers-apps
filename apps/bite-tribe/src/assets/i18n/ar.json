@@ -161,6 +161,7 @@
   "no-gps-position-error-message": "لم يتم العثور على موقع GPS في الصورة. يرجى اختيار موقع GPS من الخريطة أو تفعيل موقع GPS.",
   "chose-gps-position-error-message": "يرجى اختيار موقع GPS من الخريطة أو تفعيل موقع GPS.",
   "post": "نشر",
+  "post-and-add-another-bite": "نشر وإضافة وجبة أخرى",
   "reviews-label": "المراجعات",
   "write-review-label": "اكتب مراجعة",
   "add-your-review": "أضف مراجعتك",

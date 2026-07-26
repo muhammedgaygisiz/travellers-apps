@@ -161,6 +161,7 @@
   "no-gps-position-error-message": "Görselde GPS konumu bulunamadı. Lütfen haritadan bir GPS konumu seç veya GPS konumunu etkinleştir.",
   "chose-gps-position-error-message": "Lütfen haritadan bir GPS konumu seç veya GPS konumunu etkinleştir.",
   "post": "Paylaş",
+  "post-and-add-another-bite": "Paylaş ve başka bir Bite ekle",
   "reviews-label": "Yorumlar",
   "write-review-label": "Bir yorum yaz",
   "add-your-review": "Yorumunu ekle",

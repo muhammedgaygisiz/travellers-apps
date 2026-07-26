@@ -74,7 +74,7 @@
 
       <bt-tags-input
         [tags]="biteFormGroup.get('tags')?.value || []"
-        [suggestedTags]="suggestedTags()"
+        [suggestedTags]="tagSuggestions()"
         (tagChanges)="setTags($event)"
       />
 
@@ -125,6 +125,20 @@
         </ion-text>
         }
       </div>
+
+      @if (isNew()) {
+      <ion-button
+        expand="block"
+        color="primary"
+        fill="outline"
+        class="ion-margin-top"
+        [disabled]="isInvalid()"
+        (click)="saveBiteAndAddAnother()"
+        data-testid="post-bite-and-add-another"
+      >
+        {{ 'post-and-add-another-bite' | transloco }}
+      </ion-button>
+      }
 
       <ion-button
         expand="block"

@@ -89,6 +89,40 @@ describe('BiteService', () => {
     });
   });
 
+  describe('submitNewBiteAndAddAnother', () => {
+    it('should submit bite without id', async () => {
+      const newBite = { id: '123', name: 'Test Bite' };
+      await service.submitNewBiteAndAddAnother(newBite);
+
+      expect(Mock.submitNewBite).toHaveBeenCalledWith({ name: 'Test Bite' });
+    });
+
+    it('should stay on the create form', async () => {
+      const newBite = { id: '123', name: 'Test Bite' };
+      await service.submitNewBiteAndAddAnother(newBite);
+
+      expect(Mock.navigateBack).not.toHaveBeenCalled();
+    });
+
+    it('should confirm the creation with a toast', async () => {
+      const newBite = { id: '123', name: 'Test Bite' };
+      await service.submitNewBiteAndAddAnother(newBite);
+
+      expect(TranslocoMock.translate).toHaveBeenCalledWith(
+        'bite-created-successfully',
+      );
+    });
+
+    it('should log the bite_created analytics event', async () => {
+      const newBite = { id: '123', name: 'Test Bite' };
+      await service.submitNewBiteAndAddAnother(newBite);
+
+      expect(AnalyticsMock.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.BiteCreated,
+      );
+    });
+  });
+
   describe('submitEditedBite', () => {
     it('should submit edited bite', () => {
       const editedBite = { id: '123', name: 'Edited Bite' };

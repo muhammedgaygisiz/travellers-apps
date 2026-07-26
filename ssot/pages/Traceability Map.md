@@ -35,13 +35,14 @@
 
 - ## Product To Domain
 
-  | Product Source | Connects To                                                         | Meaning                                              |
-  | -------------- | ------------------------------------------------------------------- | ---------------------------------------------------- |
-  | [[Vision]]     | [[Bite]], [[Bite Trail]], [[Market Place]]                          | Defines the long-term product direction.             |
-  | [[Mission]]    | [[Bite]], [[User]], [[Restaurant]], [[Bucket List]], [[Bite Trail]] | Keeps the product centered on real food experiences. |
-  | [[Principles]] | [[ADR-0001 Dish First Product]]                                     | Turns product values into decision rules.            |
-  | [[Glossary]]   | All domain pages                                                    | Keeps business language consistent.                  |
-  | [[Personas]]   | Use Cases section in [[SSOT]]                                       | Explains who each supported workflow serves.         |
+  | Product Source   | Connects To                                                         | Meaning                                              |
+  | ---------------- | ------------------------------------------------------------------- | ---------------------------------------------------- |
+  | [[Vision]]       | [[Bite]], [[Bite Trail]], [[Market Place]]                          | Defines the long-term product direction.             |
+  | [[Mission]]      | [[Bite]], [[User]], [[Restaurant]], [[Bucket List]], [[Bite Trail]] | Keeps the product centered on real food experiences. |
+  | [[Principles]]   | [[ADR-0001 Dish First Product]]                                     | Turns product values into decision rules.            |
+  | [[Glossary]]     | All domain pages                                                    | Keeps business language consistent.                  |
+  | [[Personas]]     | Use Cases section in [[SSOT]]                                       | Explains who each supported workflow serves.         |
+  | [[Monetization]] | [[Subscription]], [[Bite Trail]], [[Market Place]], [[User]]        | Defines what is sold, what stays free, and why.      |
 
 - ## Domain To Use Cases
 
@@ -56,6 +57,7 @@
   | [[Floor Plan]]   | [[UC - Configure Restaurant Floor Plans And Tables]]                                                                              |
   | [[Table]]        | [[UC - Configure Restaurant Floor Plans And Tables]], [[UC - Manage Tables During Service]]                                       |
   | [[Table Visit]]  | [[UC - Manage Tables During Service]], [[UC - Order At The Table Through A QR Code]]                                              |
+  | [[Subscription]] | [[UC - Subscribe To BiteTribe Pro]], [[UC - See Ads As A Free User]], [[UC - Buy A Paid BiteTrail]]                               |
 
 - ## Use Cases To Open P0 Epics
 
@@ -82,6 +84,21 @@
   The 41 child issues (\#1074 to \#1114) have no `issue-*` pages. They are unstarted, and their specifications live on the GitHub issues; the durable product context is in the use-case and domain pages above.
 
   Stage 0 blocks every later stage. Stages 1 and 2 are independently shippable.
+
+- ## Monetization (post-launch)
+
+  [[epic-1121]] is the umbrella for the three revenue channels. It and its four stage epics are Priority P1, sequenced behind the public launch. [[Monetization]] holds the product decisions and the Free/Pro capability matrix.
+
+  | Stage                    | Epic          | Use Case                            | Domain                           |
+  | ------------------------ | ------------- | ----------------------------------- | -------------------------------- |
+  | 0 Entitlement foundation | [[epic-1122]] | [[UC - Subscribe To BiteTribe Pro]] | [[Subscription]], [[User]]       |
+  | 1 AdMob advertising      | [[epic-1123]] | [[UC - See Ads As A Free User]]     | [[Monetization]], [[Bite]]       |
+  | 2 Pro subscriptions      | [[epic-1124]] | [[UC - Subscribe To BiteTribe Pro]] | [[Subscription]], [[User]]       |
+  | 3 Paid BiteTrails        | [[epic-1125]] | [[UC - Buy A Paid BiteTrail]]       | [[Bite Trail]], [[Market Place]] |
+
+  The 34 child issues (\#542 and \#1126 to \#1158) have no `issue-*` pages. Their specifications live on the GitHub issues; the durable product context is in the pages above.
+
+  Stage 0 blocks stages 2 and 3. Stage 1 can run in parallel with stage 0, and only its "hide ads for Pro" child depends on it. Stage 3 additionally depends on [[epic-1069]] for the verified identity that creator payouts require.
 
 - ## Decisions To Constraints
 

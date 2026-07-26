@@ -88,3 +88,18 @@
 - Table ordering
   - Definition: A guest scanning a table QR code, browsing the restaurant's menu, and placing an order from the table.
   - Business relevance: Extends BiteTribe from food discovery into restaurant interaction, and produces the best-sourced Bites the product can get.
+- Free tier
+  - Definition: The unpaid BiteTribe experience, covering the 15 km radius around the user's current position with client-side search and filtering inside that result set, plus unrestricted creation, social and bucket-list capability.
+  - Business relevance: The product's give-away. It is deliberately the whole discovery loop within reach, so the paid tier sells range rather than function.
+- BiteTribe Pro
+  - Definition: The paid subscription tier that unlocks backend search, loading Bites at a position or city other than the current one, a radius beyond 15 km, and an ad-free app.
+  - Business relevance: The main recurring revenue channel. It prices reach beyond the user's surroundings, which is also where backend cost is incurred.
+- Entitlement
+  - Definition: The server-owned record of what a user's account is currently allowed to do, written only by the backend and carried to the client as an auth custom claim.
+  - Business relevance: Makes the paywall real. Without a server-owned entitlement, every gate is a suggestion the client can decline.
+- Paid BiteTrail
+  - Definition: A BiteTrail with a price above zero, sold through store in-app purchase, whose Bites stay locked until a purchase is verified.
+  - Business relevance: Turns curated local knowledge into a sellable product and is the mechanism by which creators earn from BiteTribe.
+- Net proceeds
+  - Definition: The amount remaining from a sale after the app store's commission. The creator's 80 percent share of a paid BiteTrail is calculated on this figure, never on the gross sale price.
+  - Business relevance: Prevents a revenue-share promise that cannot be honoured. Eighty percent of gross plus a store commission exceeds the sale price.

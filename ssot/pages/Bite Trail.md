@@ -25,6 +25,10 @@ BiteTrails turn isolated food discoveries into a guided sequence or collection w
 - A BiteTrail can have user ratings.
 - A BiteTrail should preserve the authenticity of its underlying Bites.
 - A BiteTrail should be useful as a journey, not just a loose list.
+- A paid BiteTrail is sold through store in-app purchase. Its Bites are readable only by the owner and by verified buyers, and a non-buyer sees a preview. See [[Monetization]] and [[epic-1125]].
+- A creator receives 80 percent and BiteTribe 20 percent of net proceeds, meaning the amount remaining after the store commission. Gross-based wording cannot be honoured and must never be used.
+- A creator cannot publish a paid BiteTrail before identity verification, payout onboarding and creator terms are complete.
+- Unpublishing a paid BiteTrail does not revoke access for existing buyers. A refund does.
 
 ## Required Data
 
@@ -140,6 +144,7 @@ Related future or expanding use cases:
 - Organisation and BiteTrail packages
 - Marketplace
 - BiteTrail gamification
+- [[epic-1125]] paid BiteTrails and creator revenue share
 
 ## Technical Implementation
 

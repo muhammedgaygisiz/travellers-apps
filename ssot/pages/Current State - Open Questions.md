@@ -49,6 +49,35 @@ Payment and Bites, stage 4, issue \#1073:
 - Can a guest create a Bite from an order without a BiteTribe account?
 - Are prices from a real order trusted without the suspicious-price validation from issue \#967?
 
+## Monetization Questions
+
+Post-launch. These belong to issue \#1121 and its stage epics. The proposals recorded on the epics are proposals, not decisions.
+
+Entitlement foundation, stage 0, issue \#1122:
+
+- What happens to existing accounts that currently carry `subscriptionTier: 1`? Treat them as Free at cutover, or grandfather them as a launch thank-you?
+- Should a free user see a locked preview of Pro results, or nothing at all?
+- How is a free user's "current position" established, given that a client can report any coordinates?
+
+Advertising, stage 1, issue \#1123:
+
+- What ad frequency? Issue \#542 proposes every 5 bites, the epic proposes every 8th card.
+- One consent prompt covering analytics and ads, or two? This has to be settled with issue \#989.
+- Which ad content categories must be excluded for a food product with dietary, religious and health sensitivities?
+
+Subscriptions, stage 2, issue \#1124:
+
+- What price point and which billing periods?
+- Is there a free trial or introductory offer, and does it apply per store or per account?
+- Does the PWA ever monetize, or does it stay a shop window for the native apps?
+
+Paid BiteTrails, stage 3, issue \#1125:
+
+- Are price points free-form or restricted to store price tiers?
+- What is the minimum payout threshold and payout schedule for creators?
+- Does a purchased BiteTrail stay accessible after a refund, and what happens to a Bucket List created from it?
+- Who is liable for VAT per launch market? Under store in-app purchase the store is usually the merchant of record, and that must be confirmed rather than assumed.
+
 ## Analytics Questions
 
 - Which events define activation?

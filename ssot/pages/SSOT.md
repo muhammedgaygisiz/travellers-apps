@@ -10,9 +10,11 @@
   - [[Principles]]
   - [[Glossary]]
   - [[Personas]]
+  - [[Monetization]]
 - Domain
   - [[Bite]]
   - [[User]]
+  - [[Subscription]]
   - [[Restaurant]]
   - [[Bucket List]]
   - [[Bite Trail]]
@@ -55,6 +57,9 @@
     - [[UC - Configure Restaurant Floor Plans And Tables]]
     - [[UC - Manage Tables During Service]]
     - [[UC - Order At The Table Through A QR Code]]
+    - [[UC - Subscribe To BiteTribe Pro]]
+    - [[UC - See Ads As A Free User]]
+    - [[UC - Buy A Paid BiteTrail]]
 - Epics
   - [[epic-735]]
   - [[epic-738]]
@@ -66,6 +71,11 @@
   - [[epic-1071]]
   - [[epic-1072]]
   - [[epic-1073]]
+  - [[epic-1121]]
+  - [[epic-1122]]
+  - [[epic-1123]]
+  - [[epic-1124]]
+  - [[epic-1125]]
 - Architecture
   - [[Architecture - Overview]]
   - [[Architecture - Firebase]]

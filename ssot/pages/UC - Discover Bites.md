@@ -22,6 +22,7 @@ Food lovers can discover real dishes nearby or in a broader feed before deciding
 - Map zoom controls and zoom gestures are available to every user regardless of subscription tier.
 - User can filter or search within the feed.
 - Nearby Bites can be loaded through backend-assisted location loading.
+- `loadBitesByLocation` loads a fixed 15 km radius around the reported position. This radius is the free tier. Loading a position other than the current one, or a radius beyond 15 km, becomes a Pro capability through [[epic-1122]]. See [[Monetization]].
 - When live Bite updates add markers, the map should preserve the user's current pan and zoom after the initial marker fit.
 
 ## Supported Evidence

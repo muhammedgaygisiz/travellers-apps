@@ -22,6 +22,7 @@ Users can find people, Bites, and restaurants quickly.
 - Search categories help separate result types.
 - User can search Bites by city when enriched location data exists.
 - Bite, restaurant, and city search results can switch between list and map views.
+- Backend search becomes a Pro capability through [[epic-1122]]. A free user keeps client-side search and filtering inside the 15 km result set they already loaded. See [[Monetization]].
 
 ## Supported Evidence
 

@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { key } from './key';
-import type { Restaurant } from 'model';
+import type { Bite, Restaurant } from 'model';
 import { restaurantId } from '../router/selectors';
 import { adapter, RestaurantState } from './adapter';
 import { gpsPosition } from '../app/selectors';
@@ -104,13 +104,27 @@ const selectedRestaurantToCreate = createSelector(
 export const restaurantToCreate = createSelector(
   selectedRestaurantToCreate,
   bites,
-  (restaurantToCreate, bites) => {
-    const bitesOfRestaurant = restaurantToCreate.biteIds?.map((biteId) =>
-      bites.find((b) => b.id === biteId),
-    );
+  (selectedRestaurant, bites) => {
+    if (!selectedRestaurant) {
+      return undefined;
+    }
+
+    // The consumer app resolves the Bite evidence from the store. The business
+    // app selects a restaurant candidate that already carries its Bites, and its
+    // store never holds them, so fall back to the selected restaurant. Ids that
+    // resolve to nothing are dropped, because the create-restaurant page cannot
+    // render an undefined Bite.
+    const selectedBites = selectedRestaurant.bites ?? [];
+    const bitesOfRestaurant = (selectedRestaurant.biteIds ?? [])
+      .map(
+        (biteId) =>
+          bites.find((bite) => bite.id === biteId) ??
+          selectedBites.find((bite) => bite?.id === biteId),
+      )
+      .filter((bite): bite is Bite => !!bite);
 
     return {
-      ...restaurantToCreate,
+      ...selectedRestaurant,
       bites: bitesOfRestaurant,
     } as Restaurant;
   },

@@ -5,7 +5,11 @@ import { Store } from '@ngrx/store';
 import { BiteActions } from './bites/actions';
 import { saveNewReview } from './reviews/actions';
 import { bites, sortedHomeBites } from './bites/home-bites.selector';
-import { bitesByUser, sortedBitesByUser } from './bites/bites-by-id.selector';
+import {
+  bitesByUser,
+  myProfileBites,
+  sortedBitesByUser,
+} from './bites/bites-by-id.selector';
 import {
   allTags,
   bite,
@@ -115,6 +119,7 @@ export class BiteTribeStoreService implements StoreService {
   restaurantBitesSorting$ = this.store.select(restaurantBitesSorting);
   weeklyBitesSorting$ = this.store.select(weeklyBitesSorting);
   bitesByUser$ = this.store.select(bitesByUser);
+  myProfileBites$ = this.store.select(myProfileBites);
   bitesBySelectedBucketlist$ = this.store.select(bitesByBucketlist);
   allTags$ = this.store.select(allTags);
   bitesByRestaurant$ = this.store.select(bitesByRestaurant);

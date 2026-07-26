@@ -3,6 +3,7 @@ import {
   bitesByUser,
   bitesByUserIdWithMetadata,
   mybites,
+  myProfileBites,
 } from '../bites-by-id.selector';
 
 describe('Bite by User ID Selectors', () => {
@@ -69,6 +70,73 @@ describe('Bite by User ID Selectors', () => {
           likes: [],
         },
       ]);
+    });
+
+    it('should sort the bites of the user from newest to oldest', () => {
+      const bites = [
+        {
+          ...mockBite1,
+          id: 'older',
+          createdAt: '2026-01-01T10:00:00.000Z',
+          likes: [],
+        },
+        {
+          ...mockBite1,
+          id: 'newer',
+          createdAt: '2026-02-01T10:00:00.000Z',
+          likes: [],
+        },
+      ] as Bite[];
+
+      const result = bitesByUser.projector(bites, 'user1');
+
+      expect(result.map((bite) => bite.id)).toEqual(['newer', 'older']);
+    });
+  });
+
+  describe('myProfileBites', () => {
+    it('should sort the bites from newest to oldest', () => {
+      const bites = [
+        {
+          ...mockBite1,
+          id: 'older',
+          createdAt: '2026-01-01T10:00:00.000Z',
+          distance: '1',
+          likes: [],
+        },
+        {
+          ...mockBite2,
+          id: 'newer',
+          createdAt: '2026-02-01T10:00:00.000Z',
+          distance: '5',
+          likes: [],
+        },
+      ] as Bite[];
+
+      const result = myProfileBites.projector(bites);
+
+      expect(result.map((bite) => bite.id)).toEqual(['newer', 'older']);
+    });
+
+    it('should not mutate the incoming bites', () => {
+      const bites = [
+        {
+          ...mockBite1,
+          id: 'older',
+          createdAt: '2026-01-01T10:00:00.000Z',
+          likes: [],
+        },
+        {
+          ...mockBite2,
+          id: 'newer',
+          createdAt: '2026-02-01T10:00:00.000Z',
+          likes: [],
+        },
+      ] as Bite[];
+
+      myProfileBites.projector(bites);
+
+      expect(bites.map((bite) => bite.id)).toEqual(['older', 'newer']);
     });
   });
 

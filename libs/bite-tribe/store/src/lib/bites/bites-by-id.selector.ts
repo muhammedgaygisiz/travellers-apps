@@ -22,6 +22,7 @@ import { handleMaxPriceFilter } from './utils/handle-max-price-filter';
 import { handleNearbyFilter } from './utils/handle-nearby-filter';
 import { handleTagFilters } from './utils/handle-tag-filters';
 import { sortByCriteria } from './utils/sort-by-criteria';
+import { sortBitesByCreatedAt } from './utils/sort-bites-by-created-at';
 
 const slice = createFeatureSelector<BitesState>(key);
 
@@ -55,8 +56,13 @@ export const bitesByUser = createSelector(
   bitesByUserIdWithMetadata,
   userId,
   (bites, userId) => {
-    return bites.filter((bite) => bite.userId === userId);
+    return sortBitesByCreatedAt(bites.filter((bite) => bite.userId === userId));
   },
+);
+
+export const myProfileBites = createSelector(
+  bitesByUserIdWithMetadata,
+  (bites) => sortBitesByCreatedAt([...bites]),
 );
 
 export const mybites = createSelector(

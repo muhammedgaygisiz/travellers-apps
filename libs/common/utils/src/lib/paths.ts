@@ -22,4 +22,5 @@ export const PATH = {
   SEARCH: 'search',
   GALLERY: 'gallery',
   LEADERBOARD: 'leaderboard',
+  WEEKLY_BITES: 'weekly-bites',
 };

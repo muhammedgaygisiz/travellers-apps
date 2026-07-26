@@ -25,3 +25,4 @@ export type * from './lib/place-details';
 export type * from './lib/search-result';
 export type * from './lib/google-place';
 export type * from './lib/nearby-restaurant';
+export type * from './lib/weekly-bites';

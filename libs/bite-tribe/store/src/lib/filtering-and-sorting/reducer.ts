@@ -7,6 +7,7 @@ const initialState: FilteringAndSortingSlice = {
     home: 'distance',
     myBites: 'distance',
     restaurantBites: 'createdAt',
+    weeklyBites: 'createdAt',
     bucketlists: 'distance',
   },
   filtering: {
@@ -63,6 +64,16 @@ export const reducer = createReducer(
       sorting: {
         ...state.sorting,
         restaurantBites: sorting,
+      },
+    }),
+  ),
+  on(
+    FilteringAndSortingActions.setWeeklyBitesSorting,
+    (state, { sorting }) => ({
+      ...state,
+      sorting: {
+        ...state.sorting,
+        weeklyBites: sorting,
       },
     }),
   ),

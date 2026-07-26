@@ -8,6 +8,8 @@ import {
   Geopoint,
   GooglePlace,
   PlaceDetails,
+  WeekRange,
+  WeeklyBites,
 } from 'model';
 import { Platform } from '@ionic/angular';
 import { loadBitesByLocation } from './utils/load-bites-by-location';
@@ -17,6 +19,7 @@ import { getPlaceDetails } from './utils/get-place-details';
 import { getCurrencyByPosition } from './utils/get-currency-by-position';
 import { BITE_COLLECTION } from '../utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
+import { loadWeeklyBites } from './utils/load-weekly-bites';
 import { createBite } from './utils/create-bite';
 import { saveEditedBite } from './utils/save-edited-bite';
 import { loadBiteById } from './utils/load-bite-by-id';
@@ -53,6 +56,12 @@ export class BiteApiService {
 
   public async loadBitesByUser(userUid: string): Promise<Bite[]> {
     return loadBitesByUser(userUid);
+  }
+
+  public async loadWeeklyBites(
+    range?: WeekRange,
+  ): Promise<WeeklyBites | undefined> {
+    return loadWeeklyBites(range);
   }
 
   public async searchPlaces(

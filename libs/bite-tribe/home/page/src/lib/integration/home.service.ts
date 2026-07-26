@@ -24,6 +24,10 @@ export class HomeService {
   restaurantBites = this.dataAccess.restaurantBites;
   restaurantBitesLoading = this.dataAccess.restaurantBitesLoading;
   restaurantBitesSorting = this.dataAccess.restaurantBitesSorting;
+  weeklyBites = this.dataAccess.weeklyBites;
+  weeklyBitesLoading = this.dataAccess.weeklyBitesLoading;
+  weeklyBitesSorting = this.dataAccess.weeklyBitesSorting;
+  weeklyBitesRange = this.dataAccess.weeklyBitesRange;
   bitesBySelectedBucketlist = this.dataAccess.bitesBySelectedBucketlist;
   allTags = this.dataAccess.allTags;
   homeFilters = this.dataAccess.homeFilters;
@@ -164,6 +168,14 @@ export class HomeService {
 
   restaurantBitesSortingChange(value: string): void {
     this.dataAccess.setRestaurantBitesSorting(value);
+  }
+
+  weeklyBitesSortingChange(value: string): void {
+    this.dataAccess.setWeeklyBitesSorting(value);
+  }
+
+  reloadWeeklyBites(): void {
+    this.dataAccess.reloadWeeklyBites();
   }
 
   filtersChanged(filters: {

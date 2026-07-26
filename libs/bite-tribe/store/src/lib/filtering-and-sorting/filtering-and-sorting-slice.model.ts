@@ -3,6 +3,7 @@ export type FilteringAndSortingSlice = {
     home?: string;
     myBites?: string;
     restaurantBites?: string;
+    weeklyBites?: string;
     bucketlists?: string;
   };
   filtering?: {

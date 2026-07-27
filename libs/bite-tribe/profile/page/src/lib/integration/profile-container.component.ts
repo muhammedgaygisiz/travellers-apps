@@ -9,6 +9,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <profile-page
       class="ion-page"
       [isAuthenticated]="service.isAuthenticated()"
+      [isLoading]="service.user.isLoading()"
       [user]="service.user.value()"
       [bites]="service.bitesByUser()"
       [biteTrails]="service.biteTrailsByUser.value()"

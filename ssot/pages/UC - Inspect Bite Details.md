@@ -24,6 +24,11 @@ Users can inspect one Bite deeply enough to decide whether the dish is relevant.
 - User can open directions to the Bite's place through the platform navigation experience.
 - User can save the Bite to an existing bucket list or create a new list for it.
 - User can understand creator/profile context, restaurant/place context, image, likes, reviews, and related data.
+- While the Bite loads, the share, navigation, and bucket-list actions are
+  replaced by skeleton placeholders rather than shown as tappable icons, so the
+  user cannot trigger an action against a Bite that is not there yet. The
+  first-visit coach marks for those actions are gated on the loaded Bite, so
+  they are unaffected. See GitHub issue #1166.
 
 ## Supported Evidence
 

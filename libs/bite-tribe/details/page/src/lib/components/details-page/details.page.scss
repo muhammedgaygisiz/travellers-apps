@@ -31,6 +31,18 @@
     cursor: pointer;
   }
 
+  // Placeholder for an action icon that is hidden while the Bite loads. Keeps
+  // the icon's footprint so the row does not shift once the Bite arrives.
+  .icon-skeleton {
+    display: inline-block;
+    width: 1.875rem;
+    height: 1.875rem;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-radius: 50%;
+    vertical-align: middle;
+  }
+
   .new-bite-container {
     position: relative;
 

@@ -120,6 +120,33 @@ export const LikedByMe: Story = {
   }),
 };
 
+// The like aggregates on the Bite document are written by a Firestore trigger,
+// so they can still be missing right after an own reaction or on an old Bite
+// that was never migrated. The counter must show the own reaction anyway
+// instead of falling back to the empty chip (issue #1165).
+export const LikedByMeWithLaggingAggregate: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...demoBiteBase,
+      thumbup: undefined,
+      likes: [
+        {
+          userId: '1',
+          likeType: 'thumbup',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          biteId: demoBiteBase.id,
+        },
+      ],
+    },
+    userId: '1',
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
 export const EditMode: Story = {
   args: {
     ...Bite.args,

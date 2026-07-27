@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -24,6 +25,7 @@ import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { BiteTrailComponent } from 'bite-trail';
 import { ProfileHeader } from './components/profile-header';
 import { CountryFlags } from './components/country-flags';
+import { ProfileSkeleton } from './components/profile-skeleton';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const UNFOLLOW = 'unfollow';
@@ -48,6 +50,7 @@ const PAGE_SIZE = 50;
     BiteTrailComponent,
     ProfileHeader,
     CountryFlags,
+    ProfileSkeleton,
     TranslocoPipe,
   ],
 })
@@ -55,6 +58,7 @@ export class ProfileComponent {
   transloco = inject(TranslocoService);
 
   isAuthenticated = input(false);
+  isLoading = input(false, { transform: booleanAttribute });
   user = input<PublicUser | undefined>();
   bites = input<Bite[]>();
   profileMetadata = input<ProfileMetaData>();
@@ -90,6 +94,12 @@ export class ProfileComponent {
 
   isOpen = signal(false);
   currentPage = signal<number>(1);
+
+  // Only skeletonize while there is nothing to show. A reload of an already
+  // rendered profile keeps the current content in place.
+  showSkeleton = computed((): boolean => {
+    return this.isLoading() && !this.user();
+  });
 
   confirmationButtons = [
     {

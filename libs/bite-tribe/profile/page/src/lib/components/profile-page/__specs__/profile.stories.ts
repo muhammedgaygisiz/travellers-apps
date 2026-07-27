@@ -74,6 +74,14 @@ const biteTrail: BiteTrail = {
   currency: 'CHF',
 };
 
+export const Loading: Story = {
+  args: {
+    isLoading: true,
+    user: undefined,
+    userId: currentUserId,
+  },
+};
+
 export const Default: Story = {
   args: {
     user: baseUser,

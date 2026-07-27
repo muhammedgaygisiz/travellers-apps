@@ -4,8 +4,18 @@ import { PageComponent } from '../page.component';
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 addNecessaryIcons();
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe('PageComponent', () => {
   let component: PageComponent;
@@ -17,6 +27,7 @@ describe('PageComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
     fixture = TestBed.createComponent(PageComponent);
@@ -112,6 +123,24 @@ describe('PageComponent', () => {
     });
   });
 
+  describe('loading', () => {
+    const getProgressBar = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]');
+
+    it('should not render the progress bar by default', async () => {
+      await fixture.whenStable();
+
+      expect(getProgressBar()).toBeNull();
+    });
+
+    it('should render an indeterminate progress bar while loading', async () => {
+      componentRef.setInput('loading', true);
+      await fixture.whenStable();
+
+      expect(getProgressBar()?.getAttribute('type')).toBe('indeterminate');
+    });
+  });
+
   describe('app title', () => {
     it('should return input title when provided', () => {
       componentRef.setInput('title', 'Test Title');
@@ -127,6 +156,7 @@ describe('PageComponent', () => {
           providers: [
             provideZonelessChangeDetection(),
             provideIonicAngular(getIonicConfig()),
+            { provide: TranslocoService, useValue: MockTranslocoService },
             { provide: APP_TITLE, useValue: mockAppTitle },
           ],
         });

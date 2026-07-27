@@ -322,5 +322,6 @@
   "display-name-already-taken": "Ce nom d'affichage est déjà pris. Veuillez en choisir un autre.",
   "display-name-invalid": "Veuillez saisir un nom d'affichage valide.",
   "display-name-could-not-be-saved": "Impossible d'enregistrer votre nom d'affichage. Veuillez réessayer.",
-  "my-position": "Ma position"
+  "my-position": "Ma position",
+  "loading": "Chargement"
 }

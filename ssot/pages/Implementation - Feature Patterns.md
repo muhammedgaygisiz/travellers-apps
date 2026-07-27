@@ -78,6 +78,23 @@ if (this.form.dirty) {
 
 **Reflect external state into the form through a validator, not `setErrors`.** A manual `setErrors` is wiped the next time the control's value updates, because Angular re-runs validation and finds no validators. A validator re-derives the error on every value change instead. Trigger it with `updateValueAndValidity({ emitEvent: false })` when the external state changes. This is how Ionic's native invalid styling is driven; see [[Implementation - Ionic Patterns]].
 
+## Header Loading Indication
+
+`ta-page` accepts a `loading` flag that reports a background load without taking content off the screen:
+
+```html
+<ta-page [loading]="isReloading()"></ta-page>
+```
+
+It renders an indeterminate `ion-progress-bar` over the toolbar's 3px bottom separator, so turning it on never changes the header height or reflows the content below it.
+
+Two details are easy to get wrong and both made the bar invisible during development:
+
+- `ion-toolbar` carries `z-index: 10` and its own box includes the separator, so the bar needs a higher `z-index` or the toolbar paints over it.
+- The separator is already `--ion-color-primary-shade`, so Ionic's default primary-on-primary bar disappears into it. The track keeps the separator colour and the moving segment uses `--bite-tribe-color`.
+
+This exists so that pages which reload content they are already showing — a leaderboard or gallery reloaded on `ionViewDidEnter`, a pull-to-refresh on the home feed — can report the reload here instead of replacing the content with a spinner or skeleton. Those pages are being switched over one at a time; the flag is the shared piece. See GitHub issue #1168.
+
 ## Image Pattern
 
 For Bite images, prefer this display fallback:

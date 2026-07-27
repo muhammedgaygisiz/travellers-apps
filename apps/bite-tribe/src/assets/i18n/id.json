@@ -322,5 +322,6 @@
   "display-name-already-taken": "Nama tampilan itu sudah digunakan. Silakan pilih yang lain.",
   "display-name-invalid": "Masukkan nama tampilan yang valid.",
   "display-name-could-not-be-saved": "Nama tampilan Anda tidak dapat disimpan. Silakan coba lagi.",
-  "my-position": "Posisi saya"
+  "my-position": "Posisi saya",
+  "loading": "Memuat"
 }

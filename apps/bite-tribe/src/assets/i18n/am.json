@@ -322,5 +322,6 @@
   "display-name-already-taken": "ይህ የማሳያ ስም አስቀድሞ ተይዟል። እባክዎ ሌላ ይምረጡ።",
   "display-name-invalid": "እባክዎ ትክክለኛ የማሳያ ስም ያስገቡ።",
   "display-name-could-not-be-saved": "የማሳያ ስምዎን ማስቀመጥ አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
-  "my-position": "የእኔ አካባቢ"
+  "my-position": "የእኔ አካባቢ",
+  "loading": "በመጫን ላይ"
 }

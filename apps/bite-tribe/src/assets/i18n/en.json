@@ -322,5 +322,6 @@
   "display-name-already-taken": "That display name is already taken. Please choose another.",
   "display-name-invalid": "Please enter a valid display name.",
   "display-name-could-not-be-saved": "We couldn't save your display name. Please try again.",
-  "my-position": "My position"
+  "my-position": "My position",
+  "loading": "Loading"
 }

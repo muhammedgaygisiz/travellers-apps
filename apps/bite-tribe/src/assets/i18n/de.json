@@ -322,5 +322,6 @@
   "display-name-already-taken": "Dieser Anzeigename ist bereits vergeben. Bitte wähle einen anderen.",
   "display-name-invalid": "Bitte gib einen gültigen Anzeigenamen ein.",
   "display-name-could-not-be-saved": "Dein Anzeigename konnte nicht gespeichert werden. Bitte versuche es erneut.",
-  "my-position": "Mein Standort"
+  "my-position": "Mein Standort",
+  "loading": "Wird geladen"
 }

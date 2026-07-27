@@ -29,6 +29,17 @@
       }
       <ng-content select="[header-end]"></ng-content>
     </ion-toolbar>
+
+    <!-- Sits on top of the toolbar's bottom separator instead of below it, so
+    a background refresh never reflows the page it is reporting on. -->
+    @if (loading()) {
+      <ion-progress-bar
+        class="header-progress-bar"
+        type="indeterminate"
+        data-testid="page-loading-bar"
+        [attr.aria-label]="'loading' | transloco"
+      />
+    }
   </ion-header>
 
   <ion-content>

@@ -322,5 +322,6 @@
   "display-name-already-taken": "Esse nome de exibição já está em uso. Escolha outro.",
   "display-name-invalid": "Insira um nome de exibição válido.",
   "display-name-could-not-be-saved": "Não foi possível salvar seu nome de exibição. Tente novamente.",
-  "my-position": "Minha posição"
+  "my-position": "Minha posição",
+  "loading": "Carregando"
 }

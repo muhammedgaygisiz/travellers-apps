@@ -16,6 +16,7 @@
     leaderboard: true,
   }"
   [isAuthenticated]="isAuthenticated()"
+  [loading]="showBiteSkeleton()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
   (menuNavigate)="menuNavigate.emit($event)"

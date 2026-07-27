@@ -9,6 +9,7 @@
     showFooter: false,
   }"
   [isAuthenticated]="isAuthenticated()"
+  [loading]="showSkeleton()"
   (logoutClick)="logoutClick.emit()"
   (menuNavigate)="menuNavigate.emit($event)"
 >

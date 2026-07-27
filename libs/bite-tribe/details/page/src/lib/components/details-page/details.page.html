@@ -2,6 +2,7 @@
 <ta-page
   [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
   [isAuthenticated]="isAuthenticated()"
+  [loading]="!biteData"
   (logoutClick)="logoutClick.emit()"
 >
   <ion-content>

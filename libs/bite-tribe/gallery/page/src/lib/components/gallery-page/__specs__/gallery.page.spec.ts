@@ -42,6 +42,16 @@ describe(GalleryPage.name, () => {
     expect(images[0].getAttribute('src')).toBe('local-photo-uri');
   });
 
+  it('runs the header progress bar while the spinner shows', () => {
+    fixture.componentRef.setInput('loading', true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('ion-spinner')).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+    ).toBeTruthy();
+  });
+
   it('emits deleteAll after destructive confirmation', async () => {
     const present = jest.fn();
     let destructiveHandler: (() => void) | undefined;

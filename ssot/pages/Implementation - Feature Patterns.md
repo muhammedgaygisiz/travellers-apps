@@ -88,12 +88,23 @@ if (this.form.dirty) {
 
 It renders an indeterminate `ion-progress-bar` over the toolbar's 3px bottom separator, so turning it on never changes the header height or reflows the content below it.
 
-Two details are easy to get wrong and both made the bar invisible during development:
+One detail is easy to get wrong and made the bar invisible during development: `ion-toolbar` carries `z-index: 10` and its own box includes the separator, so the bar needs a higher `z-index` or the toolbar paints over it and only the plain separator shows. Colours are Ionic's defaults, which resolve to the app's primary on a theme-adaptive track.
 
-- `ion-toolbar` carries `z-index: 10` and its own box includes the separator, so the bar needs a higher `z-index` or the toolbar paints over it.
-- The separator is already `--ion-color-primary-shade`, so Ionic's default primary-on-primary bar disappears into it. The track keeps the separator colour and the moving segment uses `--bite-tribe-color`.
+**A page that shows a skeleton or a spinner runs the header bar at the same time.** The bar is bound to the same condition as the placeholder, so the two appear and disappear together and the header always says whether the page is busy:
 
-This exists so that pages which reload content they are already showing — a leaderboard or gallery reloaded on `ionViewDidEnter`, a pull-to-refresh on the home feed — can report the reload here instead of replacing the content with a spinner or skeleton. Those pages are being switched over one at a time; the flag is the shared piece. See GitHub issue #1168.
+| Page         | Placeholder            | Bound condition      |
+| ------------ | ---------------------- | -------------------- |
+| Home feed    | Bite skeleton list     | `showBiteSkeleton()` |
+| Profile      | `profile-skeleton`     | `showSkeleton()`     |
+| Bite details | Inline skeleton fields | `!bite()`            |
+| Leaderboard  | Spinner                | `isLoading()`        |
+| Gallery      | Spinner                | `loading()`          |
+| Followers    | Spinner                | `isLoading()`        |
+| Search       | Spinner                | `isLoading()`        |
+
+This is deliberately additive: it does not change when a placeholder appears. Field-level indicators stay out of it — a deferred image placeholder, an upload spinner inside a form control, or a spinner inside a button report their own element, not the page.
+
+The end state is that a reload of content already on screen reports itself only through this bar instead of replacing that content with a placeholder. Adopting it is the first half of that move. See GitHub issue #1168.
 
 ## Image Pattern
 

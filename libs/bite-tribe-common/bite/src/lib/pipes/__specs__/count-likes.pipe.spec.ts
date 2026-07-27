@@ -36,7 +36,7 @@ describe(CountLikesPipe.name, () => {
   });
 
   describe('given bite with likes but no aggregate counts', () => {
-    it('should ignore likes and return 0', () => {
+    it('should fall back to the loaded likes', () => {
       expect(
         pipe.transform(
           createBite({
@@ -50,7 +50,7 @@ describe(CountLikesPipe.name, () => {
             ],
           }),
         ),
-      ).toBe(0);
+      ).toBe(1);
     });
   });
 });

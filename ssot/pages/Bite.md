@@ -255,6 +255,7 @@ images/bites/{biteId}/{filename}
 - Historical behavior for deleted Bites needs a clearer product rule.
 - Counter aggregates must stay symmetric across create/delete lifecycles. If a future aggregate increments when a Bite, like, review, or related counted document is created, add the matching decrement behavior when that counted document can be deleted.
 - Older Bite documents may not have like aggregate fields. Like-count triggers migrate missing `thumbup`, `drooling`, and `mindblown` fields by recomputing counts from the Bite's `likes` subcollection before applying ongoing delta maintenance.
+- The like aggregates are eventually consistent, so the client cannot treat them as the only source for the displayed reaction counter. A reaction the client already knows about - an own reaction written optimistically, or an old Bite whose aggregates were never migrated - is not yet reflected in `thumbup`, `drooling`, or `mindblown`, and issue \#1165 showed the counter dropping to the empty chip on the Bite details and restaurant pages while the reaction chip was already rendered as liked. `getLikeCount` in `libs/bite-tribe-common/bite/src/lib/utils/like-counts.ts` therefore takes the higher of the aggregate and the loaded `likes` per like type. Reading only the aggregate field is a regression.
 - Guest permissions and admin moderation are not clearly expressed as current Bite-domain capabilities.
 
 ## Future Ideas

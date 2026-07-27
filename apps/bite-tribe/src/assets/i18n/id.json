@@ -161,6 +161,7 @@
   "no-gps-position-error-message": "Tidak ada posisi GPS yang ditemukan pada gambar. Pilih posisi GPS dari peta atau aktifkan posisi GPS.",
   "chose-gps-position-error-message": "Pilih posisi GPS dari peta atau aktifkan posisi GPS.",
   "post": "Posting",
+  "post-and-add-another-bite": "Posting dan tambahkan Bite lain",
   "reviews-label": "Ulasan",
   "write-review-label": "Tulis ulasan",
   "add-your-review": "Tambahkan ulasanmu",

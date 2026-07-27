@@ -255,6 +255,124 @@ describe('BitePage', () => {
     });
   });
 
+  describe('saveBiteAndAddAnother', () => {
+    let scrollToTopSpy: jest.SpyInstance;
+
+    const validBite: BiteFormValue = {
+      id: '',
+      image: 'data:image/jpeg;base64,test',
+      imagePath: '',
+      description: 'Very tasty',
+      name: 'Test Burger',
+      place: 'Test Place',
+      tags: ['fish', 'healthy'],
+      price: '9.99',
+      rating: 4,
+      currency: 'CHF',
+      restaurantId: 'restaurant-1',
+      position: {
+        latitude: 10,
+        longitude: 20,
+      },
+    };
+
+    beforeEach(() => {
+      const ionContent = component.ionContent();
+
+      if (!ionContent) {
+        throw new Error('ion-content not found');
+      }
+
+      scrollToTopSpy = jest
+        .spyOn(ionContent, 'scrollToTop')
+        .mockResolvedValue(undefined);
+    });
+
+    it('should emit the form value when valid', () => {
+      const emitSpy = jest.spyOn(component.submitBiteAndAddAnother, 'emit');
+      component.biteFormGroup.patchValue(validBite);
+
+      component.saveBiteAndAddAnother();
+
+      expect(emitSpy).toHaveBeenCalledWith(validBite);
+    });
+
+    it('should not emit when the form is invalid', () => {
+      const emitSpy = jest.spyOn(component.submitBiteAndAddAnother, 'emit');
+
+      component.saveBiteAndAddAnother();
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should reset the bite specific fields', () => {
+      component.biteFormGroup.patchValue(validBite);
+
+      component.saveBiteAndAddAnother();
+
+      expect(component.biteFormGroup.getRawValue()).toEqual(
+        expect.objectContaining({
+          image: '',
+          imagePath: '',
+          name: '',
+          description: '',
+          price: null,
+          rating: 0,
+          tags: [],
+        }),
+      );
+    });
+
+    it('should keep restaurant, currency and position', () => {
+      component.biteFormGroup.patchValue(validBite);
+
+      component.saveBiteAndAddAnother();
+
+      expect(component.biteFormGroup.getRawValue()).toEqual(
+        expect.objectContaining({
+          place: 'Test Place',
+          restaurantId: 'restaurant-1',
+          currency: 'CHF',
+          position: { latitude: 10, longitude: 20 },
+        }),
+      );
+    });
+
+    it('should offer the tags of the posted bite as suggestions', () => {
+      componentRef.setInput('suggestedTags', ['vegan']);
+      component.biteFormGroup.patchValue(validBite);
+
+      component.saveBiteAndAddAnother();
+
+      expect(component.tagSuggestions()).toEqual(['fish', 'healthy', 'vegan']);
+    });
+
+    it('should forget the position taken from the previous image', () => {
+      component.imagePosition.set({ latitude: 10, longitude: 20 });
+      component.biteFormGroup.patchValue(validBite);
+
+      component.saveBiteAndAddAnother();
+
+      expect(component.imagePosition()).toBeUndefined();
+    });
+
+    it('should scroll the form back to the top', () => {
+      component.biteFormGroup.patchValue(validBite);
+
+      component.saveBiteAndAddAnother();
+
+      expect(scrollToTopSpy).toHaveBeenCalledWith(300);
+    });
+  });
+
+  describe('tagSuggestions', () => {
+    it('should return the suggestions from the input when nothing was posted yet', () => {
+      componentRef.setInput('suggestedTags', ['vegan', 'spicy']);
+
+      expect(component.tagSuggestions()).toEqual(['vegan', 'spicy']);
+    });
+  });
+
   describe('positionChange output', () => {
     it('should emit when the form position changes', () => {
       const emitSpy = jest.spyOn(component.positionChange, 'emit');

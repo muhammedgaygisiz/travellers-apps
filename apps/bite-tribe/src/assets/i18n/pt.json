@@ -162,6 +162,7 @@
   "no-gps-position-error-message": "Sem dados de GPS na imagem. Escolhe uma localização no mapa.",
   "chose-gps-position-error-message": "Escolhe uma posição no mapa ou ativa o GPS.",
   "post": "Publicar",
+  "post-and-add-another-bite": "Publicar e adicionar outro Bite",
   "reviews-label": "Avaliações",
   "write-review-label": "Escreve uma avaliação",
   "add-your-review": "Adiciona a tua avaliação",

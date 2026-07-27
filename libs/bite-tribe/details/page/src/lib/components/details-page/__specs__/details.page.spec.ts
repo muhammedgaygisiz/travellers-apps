@@ -95,28 +95,46 @@ describe('DetailsPage', () => {
   });
 
   describe('Bite Display', () => {
-    it('exposes the share action as a coach-mark anchor', () => {
+    const actionTestIds = [
+      'bite-details-share',
+      'bite-details-navigation',
+      'bite-details-bucket-list',
+    ];
+
+    const setLoadedBite = (): void => {
+      componentRef.setInput('bite', { id: '1', name: 'Pizza' } as Bite);
+      componentRef.changeDetectorRef.detectChanges();
+    };
+
+    it.each(actionTestIds)(
+      'exposes %s as a coach-mark anchor once the bite is loaded',
+      (testId) => {
+        setLoadedBite();
+
+        expect(
+          fixture.nativeElement.querySelector(`[data-testid="${testId}"]`),
+        ).toBeTruthy();
+      },
+    );
+
+    it.each(actionTestIds)('hides %s while the bite is loading', (testId) => {
       expect(
-        fixture.nativeElement.querySelector(
-          '[data-testid="bite-details-share"]',
-        ),
-      ).toBeTruthy();
+        fixture.nativeElement.querySelector(`[data-testid="${testId}"]`),
+      ).toBeFalsy();
     });
 
-    it('exposes the navigation action as a coach-mark anchor', () => {
-      expect(
-        fixture.nativeElement.querySelector(
-          '[data-testid="bite-details-navigation"]',
-        ),
-      ).toBeTruthy();
+    it('shows a placeholder for each hidden action while the bite is loading', () => {
+      const iconSkeletons = fixture.nativeElement.querySelectorAll(
+        'ion-skeleton-text.icon-skeleton',
+      );
+
+      expect(iconSkeletons.length).toBe(actionTestIds.length);
     });
 
-    it('exposes the bucket-list action as a coach-mark anchor', () => {
+    it('does not expose the restaurant link while the bite is loading', () => {
       expect(
-        fixture.nativeElement.querySelector(
-          '[data-testid="bite-details-bucket-list"]',
-        ),
-      ).toBeTruthy();
+        fixture.nativeElement.querySelector('.restaurant-distance .link'),
+      ).toBeFalsy();
     });
 
     it('should show a review field skeleton while bite is loading', () => {

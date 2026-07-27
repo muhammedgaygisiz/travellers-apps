@@ -1,0 +1,40 @@
+<div
+  class="profile-header-skeleton ion-display-flex ion-justify-content-between"
+  data-testid="profile-skeleton"
+>
+  <div class="photo-column">
+    <ion-skeleton-text class="avatar-skeleton" [animated]="true" />
+  </div>
+
+  @for (column of [1, 2, 3]; track column) {
+  <div
+    class="header-column ion-display-flex ion-flex-column ion-justify-content-center"
+  >
+    <ion-skeleton-text class="header-label-skeleton" [animated]="true" />
+    <ion-skeleton-text class="header-value-skeleton" [animated]="true" />
+  </div>
+  }
+</div>
+
+<div class="profile-summary-skeleton">
+  <div class="profile-info-skeleton">
+    <ion-skeleton-text class="name-skeleton" [animated]="true" />
+    <ion-skeleton-text class="meta-skeleton" [animated]="true" />
+  </div>
+
+  <ion-skeleton-text class="action-skeleton" [animated]="true" />
+</div>
+
+<ion-skeleton-text class="about-skeleton" [animated]="true" />
+
+<div class="flags-skeleton ion-display-flex">
+  @for (flag of [1, 2, 3, 4]; track flag) {
+  <ion-skeleton-text class="flag-skeleton" [animated]="true" />
+  }
+</div>
+
+<div class="bites-section-skeleton">
+  <ion-skeleton-text class="section-title-skeleton" [animated]="true" />
+
+  <bt-bite-skeleton-list />
+</div>

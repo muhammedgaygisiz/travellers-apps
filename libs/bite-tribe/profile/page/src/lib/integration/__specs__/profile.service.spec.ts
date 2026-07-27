@@ -34,7 +34,8 @@ class Mock {
     displayName: '',
     normalizedDisplayName: '',
   });
-  myUser = jest.fn(() => undefined);
+  myUser = jest.fn((): PublicUser | undefined => undefined);
+  isAuthenticated = jest.fn(() => false);
 }
 
 describe(ProfileService.name, () => {
@@ -65,6 +66,37 @@ describe(ProfileService.name, () => {
 
   it('should create the service', () => {
     expect(service).toBeTruthy();
+  });
+
+  describe('isMyProfileLoading', () => {
+    it('should be loading while an authenticated user has no profile yet', () => {
+      (profileDataAccessService.isAuthenticated as jest.Mock).mockReturnValue(
+        true,
+      );
+      (profileDataAccessService.myUser as jest.Mock).mockReturnValue(undefined);
+
+      expect(service.isMyProfileLoading()).toBe(true);
+    });
+
+    it('should not be loading once the profile arrived', () => {
+      (profileDataAccessService.isAuthenticated as jest.Mock).mockReturnValue(
+        true,
+      );
+      (profileDataAccessService.myUser as jest.Mock).mockReturnValue({
+        displayName: 'Mo',
+      } as PublicUser);
+
+      expect(service.isMyProfileLoading()).toBe(false);
+    });
+
+    it('should not be loading when the user is not authenticated', () => {
+      (profileDataAccessService.isAuthenticated as jest.Mock).mockReturnValue(
+        false,
+      );
+      (profileDataAccessService.myUser as jest.Mock).mockReturnValue(undefined);
+
+      expect(service.isMyProfileLoading()).toBe(false);
+    });
   });
 
   describe('logout', () => {

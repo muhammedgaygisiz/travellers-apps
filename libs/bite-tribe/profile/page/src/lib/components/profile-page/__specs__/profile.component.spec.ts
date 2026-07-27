@@ -89,6 +89,54 @@ describe('ProfileComponent', () => {
     });
   });
 
+  describe('showSkeleton', () => {
+    it('should show the skeleton while loading without a profile', () => {
+      compRef.setInput('isLoading', true);
+      compRef.setInput('user', undefined);
+
+      expect(component.showSkeleton()).toBe(true);
+    });
+
+    it('should keep the loaded profile visible while it reloads', () => {
+      compRef.setInput('isLoading', true);
+      compRef.setInput('user', { displayName: 'Mo' });
+
+      expect(component.showSkeleton()).toBe(false);
+    });
+
+    it('should not show the skeleton when loading finished without a profile', () => {
+      compRef.setInput('isLoading', false);
+      compRef.setInput('user', undefined);
+
+      expect(component.showSkeleton()).toBe(false);
+    });
+
+    it('should render the skeleton instead of the profile fields while loading', () => {
+      compRef.setInput('isLoading', true);
+      compRef.setInput('user', undefined);
+
+      fixture.detectChanges();
+
+      const nativeElement = fixture.nativeElement as HTMLElement;
+
+      expect(nativeElement.querySelector('profile-skeleton')).toBeTruthy();
+      expect(nativeElement.querySelector('.subscription-badge')).toBeFalsy();
+      expect(nativeElement.querySelector('.no-profile-message')).toBeFalsy();
+    });
+
+    it('should render the not-available message when loading finished without a profile', () => {
+      compRef.setInput('isLoading', false);
+      compRef.setInput('user', undefined);
+
+      fixture.detectChanges();
+
+      const nativeElement = fixture.nativeElement as HTMLElement;
+
+      expect(nativeElement.querySelector('profile-skeleton')).toBeFalsy();
+      expect(nativeElement.querySelector('.no-profile-message')).toBeTruthy();
+    });
+  });
+
   describe('biteCount', () => {
     it('should return 0 if bites is undefined', () => {
       compRef.setInput('bites', undefined);

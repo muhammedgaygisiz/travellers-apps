@@ -49,6 +49,10 @@
           }
 
           <h1 class="ion-margin-end">{{ biteData?.name }}</h1>
+
+          <!-- The action icons stay hidden until the Bite is loaded, so they
+          cannot be tapped while there is no Bite to act on. -->
+          @if (biteData) {
           <ion-icon
             data-testid="bite-details-share"
             name="share-social-outline"
@@ -57,9 +61,13 @@
             class="cursor-pointer"
             (click)="onShareBiteClicked(biteData)"
           />
+          } @else {
+          <ion-skeleton-text class="icon-skeleton" [animated]="true" />
+          }
         </div>
 
         <div class="ion-text-end">
+          @if (biteData) {
           <ion-icon
             data-testid="bite-details-navigation"
             name="navigate-outline"
@@ -68,6 +76,12 @@
             class="ion-margin-start cursor-pointer"
             (click)="openNavigation()"
           />
+          } @else {
+          <ion-skeleton-text
+            class="icon-skeleton ion-margin-start"
+            [animated]="true"
+          />
+          }
         </div>
       </div>
 
@@ -84,8 +98,7 @@
             [animated]="true"
             style="height: 20px; width: 124px"
           />
-          }
-
+          } @if (biteData) {
           <span
             class="link"
             role="button"
@@ -93,9 +106,9 @@
             (click)="onRestaurantClick(biteData)"
             (keydown.enter)="onRestaurantClick(biteData)"
           >
-            {{ biteData?.place }}
+            {{ biteData.place }}
           </span>
-          @let positionData = position(); @if (positionData) { · {{
+          } @let positionData = position(); @if (positionData) { · {{
           biteData?.position | calcDistance : positionData | roundDistance
           |toMetric }} }
         </span>
@@ -161,6 +174,7 @@
         </div>
         }
         <div class="ion-text-end ion-display-flex">
+          @if (biteData) {
           <ion-icon
             data-testid="bite-details-bucket-list"
             slot="icon-only"
@@ -170,7 +184,12 @@
             [name]="biteData | getBucketlistsIcon: bucketlists()"
             (click)="showBucketListsSelection($event)"
           />
-          @if (isBucketlistBite()) {
+          } @else {
+          <ion-skeleton-text
+            class="icon-skeleton ion-margin-start"
+            [animated]="true"
+          />
+          } @if (isBucketlistBite()) {
           <div class="new-bite-container">
             <ion-icon
               slot="icon-only"

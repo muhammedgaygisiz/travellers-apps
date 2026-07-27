@@ -1,0 +1,106 @@
+$avatar-ratio: 96px;
+
+// The measurements below mirror the loaded profile page so the skeleton keeps
+// the same shape and the content does not jump once the profile arrives.
+:host {
+  display: block;
+
+  ion-skeleton-text {
+    border-radius: 999px;
+  }
+
+  .profile-header-skeleton {
+    // The loaded header is slightly taller than the avatar, because the avatar
+    // is an inline icon that reserves descender space below itself.
+    min-height: $avatar-ratio + 4px;
+    margin: 0 auto;
+  }
+
+  .avatar-skeleton {
+    width: $avatar-ratio;
+    height: $avatar-ratio;
+    margin: 0;
+    border-radius: 50%;
+  }
+
+  .header-column {
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .header-label-skeleton {
+    width: 4.5rem;
+    height: 1.2rem;
+    margin: 0;
+  }
+
+  .header-value-skeleton {
+    width: 2rem;
+    height: 1.2rem;
+    margin: 0;
+  }
+
+  .profile-summary-skeleton {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: start;
+    margin-top: 1rem;
+  }
+
+  .profile-info-skeleton {
+    min-width: 0;
+  }
+
+  .name-skeleton {
+    width: 60%;
+    height: 1.5rem;
+    margin: 0;
+  }
+
+  .meta-skeleton {
+    width: 45%;
+    height: 1rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+  }
+
+  .action-skeleton {
+    width: 5rem;
+    height: 3.125rem;
+    margin: 0.25rem 0;
+    border-radius: 4px;
+  }
+
+  // The about text is a paragraph, so it carries a 1rem margin on both sides.
+  .about-skeleton {
+    width: 80%;
+    height: 1.25rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .flags-skeleton {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0;
+  }
+
+  .flag-skeleton {
+    width: 1.6rem;
+    height: 1.2rem;
+    margin: 0;
+    border-radius: 3px;
+  }
+
+  .bites-section-skeleton {
+    margin-top: 1.5rem;
+  }
+
+  .section-title-skeleton {
+    width: 4rem;
+    height: 1.3rem;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+}

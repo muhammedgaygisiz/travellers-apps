@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
@@ -38,6 +38,12 @@ export class ProfileService {
   isPublicProfile = this.dataAccess.isPublicProfile;
   profileMetadata = this.dataAccess.profileMetadata;
   emailVerificationPromptVisible = this.emailVerification.promptVisible;
+
+  // The own profile comes from the store instead of a resource, so it has no
+  // loading flag: an authenticated user without a profile yet is still loading.
+  isMyProfileLoading = computed((): boolean => {
+    return this.isAuthenticated() && !this.myUser();
+  });
 
   logout(): void {
     this.dataAccess.logout();

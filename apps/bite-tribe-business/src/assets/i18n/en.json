@@ -208,5 +208,7 @@
   "password-reset-requested-check-your-email": "If an account exists for this email, we've sent a password reset link.",
   "password-reset-request-failed-try-again": "We couldn't send the reset email. Please try again.",
   "back-to-log-in": "Back to log in",
-  "loading": "Loading"
+  "loading": "Loading",
+  "uploading-keep-app-open": "Uploading photo — keep the app open",
+  "image-upload-failed": "Photo couldn’t be uploaded"
 }

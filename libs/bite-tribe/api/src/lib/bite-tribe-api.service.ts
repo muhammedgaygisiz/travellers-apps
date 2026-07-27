@@ -211,6 +211,13 @@ export class BiteTribeApiService {
     return this.biteApiService.uploadImage(bite, callbackFn);
   }
 
+  setBiteImageStatus(
+    biteId: string,
+    imageStatus: Bite['imageStatus'],
+  ): Promise<void> {
+    return this.biteApiService.setImageStatus(biteId, imageStatus);
+  }
+
   uploadProfileImage(
     profile: PublicUser,
     callbackFn: (p: CreateAndUploadImageCallbackParams) => void,

@@ -6,10 +6,14 @@ import {
   moduleMetadata,
   StoryObj,
 } from '@storybook/angular';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { IonButton, provideIonicAngular } from '@ionic/angular/standalone';
 import { BiteSkeletonListComponent } from '../bite-skeleton-list/bite-skeleton-list.component';
 import { Bite as BiteModel } from 'model';
+
+// The app registers its icon set at bootstrap; Storybook has to do it itself or
+// ion-icon renders an empty box (e.g. the failed-upload state).
+addNecessaryIcons();
 
 // Local, bundled demo image served from the Storybook static build's /assets
 // dir. Visual-regression references must not depend on live third-party images
@@ -216,6 +220,27 @@ export const PendingUpload: Story = {
       imagePath: undefined,
       image: '',
       imageStatus: 'pending',
+    },
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
+/**
+ * The terminal state of an upload that never finished. Without it the card
+ * stays on PendingUpload forever — for every viewer, not only the poster.
+ * See GitHub issue #1168.
+ */
+export const FailedUpload: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...demoBiteBase,
+      imagePath: undefined,
+      image: '',
+      imageStatus: 'failed',
     },
   },
   render: (args) => ({

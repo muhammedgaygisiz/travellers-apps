@@ -24,6 +24,14 @@ Users can create and maintain real dish-level food experiences.
 - User can still manually correct the currency before saving.
 - The app warns when the entered price looks suspiciously high.
 - The app stores the Bite and uploads the image.
+- The image upload has three terminal states on the Bite document, and every
+  viewer sees the card accordingly: `pending` while it uploads, `uploaded` once
+  the storage trigger has the download URL, and `failed` when the upload errored.
+  The client writes `failed` itself, because `setBiteImagePathOnUpload` only ever
+  runs on a finalized object — without it the card kept telling every viewer
+  "uploading, keep the app open" forever. A failed upload shows that state even
+  to the poster, whose device still holds the local copy, so a lost photo is
+  never passed off as a successful post. See GitHub issue #1168.
 - User can post the Bite and stay on the form to add another Bite at the same place. Restaurant, currency, and position stay; image, dish name, price, rating, description, and tags reset, and the tags of the Bites already posted in that session become suggestions.
 - User can edit the Bite later.
 

@@ -92,6 +92,63 @@ describe('BiteComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('image status', () => {
+    const queryFailed = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="bite-image-failed"]');
+
+    it('should show the uploading overlay while the upload is pending', () => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        image: '',
+        imagePath: undefined,
+        imageStatus: 'pending',
+      });
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('ion-spinner')).toBeTruthy();
+      expect(queryFailed()).toBeNull();
+    });
+
+    it('should replace the uploading overlay once the upload failed', () => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        image: '',
+        imagePath: undefined,
+        imageStatus: 'failed',
+      });
+      fixture.detectChanges();
+
+      expect(queryFailed()).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('ion-spinner')).toBeNull();
+    });
+
+    it('should not pass a failed upload off as a photo the poster still holds locally', () => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        image: 'data:image/jpeg;base64,local-copy',
+        imagePath: undefined,
+        imageStatus: 'failed',
+      });
+      fixture.detectChanges();
+
+      expect(queryFailed()).toBeTruthy();
+      expect(
+        fixture.nativeElement.querySelector('img.cursor-pointer'),
+      ).toBeNull();
+    });
+
+    it('should show the image once the upload finished', () => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        imageStatus: 'uploaded',
+      });
+      fixture.detectChanges();
+
+      expect(queryFailed()).toBeNull();
+      expect(fixture.nativeElement.querySelector('ion-spinner')).toBeNull();
+    });
+  });
+
   it('should emit biteClick when bite is clicked', (done) => {
     component.biteClick.subscribe((emittedBite) => {
       expect(emittedBite).toEqual(mockBite);

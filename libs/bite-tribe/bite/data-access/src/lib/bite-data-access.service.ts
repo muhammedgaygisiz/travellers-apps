@@ -147,6 +147,14 @@ export class BiteDataAccessService {
             this.analytics.logEvent(AnalyticsEvent.BiteImageUploadFailed, {
               code: toUploadErrorCode(uploadError),
             });
+            // Leave the document on a terminal state. Only the finalize trigger
+            // clears 'pending', so without this the card shows "uploading" to
+            // every viewer forever.
+            void this.api.setBiteImageStatus(newBite.id, 'failed');
+            this.storeService.savedNewBite({
+              ...newBite,
+              imageStatus: 'failed',
+            });
             this.uploadProgress.set(null);
           } else if (isInProgress && p.uploadParams) {
             this.uploadProgress.set({

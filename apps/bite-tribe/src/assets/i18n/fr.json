@@ -208,6 +208,7 @@
   "bite-created-successfully": "Bite créé avec succès !",
   "image-uploaded-successfully": "Image téléchargée avec succès !",
   "uploading-keep-app-open": "Envoi de la photo — gardez l’application ouverte",
+  "image-upload-failed": "La photo n’a pas pu être envoyée",
   "bite-updated-successfully": "Bite mis à jour avec succès !",
   "bite-deleted-successfully": "Bite supprimé avec succès !",
   "creating-bite": "Création de ton Bite...",

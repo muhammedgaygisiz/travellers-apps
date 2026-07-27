@@ -208,6 +208,7 @@
   "bite-created-successfully": "تم إنشاء الوجبة بنجاح!",
   "image-uploaded-successfully": "تم رفع الصورة بنجاح!",
   "uploading-keep-app-open": "جارٍ رفع الصورة — أبقِ التطبيق مفتوحًا",
+  "image-upload-failed": "تعذّر رفع الصورة",
   "bite-updated-successfully": "تم تحديث الوجبة بنجاح!",
   "bite-deleted-successfully": "تم حذف الوجبة بنجاح!",
   "creating-bite": "جارٍ إنشاء الوجبة...",

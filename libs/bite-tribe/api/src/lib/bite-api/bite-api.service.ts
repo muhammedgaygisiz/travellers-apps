@@ -123,6 +123,31 @@ export class BiteApiService {
     });
   }
 
+  /**
+   * Records how the Bite's image upload ended.
+   *
+   * `setBiteImagePathOnUpload` only ever runs when an object finalizes, so a
+   * failed upload leaves the document on `'pending'` forever and every viewer
+   * keeps seeing the "uploading" overlay. The client owns the failure, so it
+   * writes the terminal state itself. See GitHub issue #1168.
+   */
+  public async setImageStatus(
+    biteId: string,
+    imageStatus: Bite['imageStatus'],
+  ): Promise<void> {
+    try {
+      await FirebaseFirestore.updateDocument({
+        reference: `${BITE_COLLECTION}/${biteId}`,
+        data: { imageStatus },
+      });
+    } catch (error) {
+      // Best effort: the upload already failed, and failing to record that must
+      // not surface a second error to the user.
+      console.error(`Error setting image status for bite ${biteId}:`, error);
+      this.errorHandler.handleError(error);
+    }
+  }
+
   public async updateImagePathInBite(
     bite: Bite,
     imagePath: string,

@@ -10,6 +10,19 @@
             {{ 'uploading-keep-app-open' | transloco }}
           </ion-text>
         </div>
+      } @else if (biteData.imageStatus === 'failed') {
+        <!-- Checked before the image branch: the poster still holds the local
+        base64 copy, and rendering it would suggest the upload succeeded. -->
+        <div
+          class="upload-failed"
+          role="status"
+          data-testid="bite-image-failed"
+        >
+          <ion-icon name="image-outline" aria-hidden="true" />
+          <ion-text class="upload-failed-text smalltext">
+            {{ 'image-upload-failed' | transloco }}
+          </ion-text>
+        </div>
       } @else if (biteData.image || biteData.imagePath) {
         <img
           alt="Dish"

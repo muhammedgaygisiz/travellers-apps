@@ -78,6 +78,7 @@ class BiteApiMock {
   getTotalNumberOfBites = jest.fn();
   uploadImage = jest.fn();
   updateImagePathInBite = jest.fn();
+  setImageStatus = jest.fn();
 }
 
 class SettingsApiMock {
@@ -158,6 +159,21 @@ describe(BiteTribeApiService.name, () => {
           .mockReturnValue(Promise.resolve({ USD: 1, EUR: 0.85 }));
         service.getExchangeRates();
         expect(getExchangeRatesSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('setBiteImageStatus', () => {
+    it('should call setImageStatus on BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const setImageStatusSpy = jest
+          .spyOn(biteApiService, 'setImageStatus')
+          .mockResolvedValue(undefined);
+
+        service.setBiteImageStatus('bite-id', 'failed');
+
+        expect(setImageStatusSpy).toHaveBeenCalledWith('bite-id', 'failed');
       },
     ));
   });

@@ -3,7 +3,7 @@
 <ion-card>
   <div class="card-content">
     <div class="card-image">
-      @if (biteData.imageStatus === 'pending') {
+      @if (imageStatus() === 'pending') {
         <div class="upload-progress" role="status" aria-live="polite">
           <ion-spinner name="crescent" />
           <ion-text
@@ -13,7 +13,7 @@
             {{ pendingImageTextKey() | transloco }}
           </ion-text>
         </div>
-      } @else if (biteData.imageStatus === 'failed') {
+      } @else if (imageStatus() === 'failed') {
         <!-- Checked before the image branch: the poster still holds the local
         base64 copy, and rendering it would suggest the upload succeeded. -->
         <div

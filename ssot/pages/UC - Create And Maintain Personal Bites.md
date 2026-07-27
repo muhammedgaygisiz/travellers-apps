@@ -31,6 +31,14 @@ Users can create and maintain real dish-level food experiences.
   holding the transfer, so they are asked to keep the app open; everyone else
   gets a neutral "loading photo" wait message, because they cannot influence
   someone else's upload.
+- A Bite still `pending` ten minutes after it was created reads as `failed` when
+  rendered, without its document changing. Neither terminal write is guaranteed:
+  the upload promise does not resolve when the device drops offline mid-transfer,
+  so the error branch never runs and the storage trigger never fires. The stored
+  status stays the source of truth; the age rule only stops a card from claiming
+  forever that a photo is on its way. A Bite with no usable creation timestamp
+  keeps its stored status, because an abandoned upload cannot be told apart from
+  a fresh one.
   The client writes `failed` itself, because `setBiteImagePathOnUpload` only ever
   runs on a finalized object — without it the card kept telling every viewer
   "uploading, keep the app open" forever. A failed upload shows that state even

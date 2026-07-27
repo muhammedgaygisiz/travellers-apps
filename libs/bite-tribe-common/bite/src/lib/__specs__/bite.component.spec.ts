@@ -14,6 +14,7 @@ import { OverlayEventDetail } from '@ionic/core';
 import { addNecessaryIcons } from 'utils';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
+import { STALE_PENDING_UPLOAD_MS } from '../utils/image-status';
 
 jest.mock('heic2any', () => jest.fn());
 
@@ -108,6 +109,7 @@ describe('BiteComponent', () => {
         image: '',
         imagePath: undefined,
         imageStatus: 'pending',
+        createdAtTimestamp: Date.now(),
       });
       fixture.detectChanges();
     };
@@ -138,6 +140,20 @@ describe('BiteComponent', () => {
       setPendingBite('someone-else');
 
       expect(pendingTextKey()).toBe('loading-photo');
+    });
+
+    it('should stop claiming an abandoned upload is still running', () => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        image: '',
+        imagePath: undefined,
+        imageStatus: 'pending',
+        createdAtTimestamp: Date.now() - STALE_PENDING_UPLOAD_MS,
+      });
+      fixture.detectChanges();
+
+      expect(queryFailed()).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('ion-spinner')).toBeNull();
     });
 
     it('should replace the uploading overlay once the upload failed', () => {

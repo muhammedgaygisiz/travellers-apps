@@ -30,6 +30,7 @@ import {
 import { Bite, LikeClick } from 'model';
 import { LikesComponent } from './likes/likes.component';
 import { getLikeCounts, getUserLikeType } from './utils/like-counts';
+import { getEffectiveImageStatus } from './utils/image-status';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
@@ -115,6 +116,16 @@ export class BiteComponent {
 
     this.previousImageStatus = status;
   });
+
+  /**
+   * The stored status, except that a long-abandoned `pending` upload reads as
+   * `failed`. Recomputed whenever the Bite changes rather than on a timer, so a
+   * card left open past the threshold flips on its next render (a feed refresh,
+   * a navigation, or a document update) instead of mid-view.
+   */
+  protected readonly imageStatus = computed(() =>
+    getEffectiveImageStatus(this.bite()),
+  );
 
   /**
    * Only the poster's device is doing the upload, so only the poster can act on

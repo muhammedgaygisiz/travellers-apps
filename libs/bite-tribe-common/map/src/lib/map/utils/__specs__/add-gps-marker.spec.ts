@@ -11,6 +11,11 @@ jest.mock('../geopoint-to-lat-lng', () => ({
   geopointToLatLng: (...args: unknown[]): void => geopointToLatLngMock(...args),
 }));
 
+const removeGpsMarkerMock = jest.fn();
+jest.mock('../remove-gps-marker', () => ({
+  removeGpsMarker: (...args: unknown[]): void => removeGpsMarkerMock(...args),
+}));
+
 type MockGpsMarker = GpsMarker & { addTo: jest.Mock };
 
 describe('addGpsMarker', () => {
@@ -29,6 +34,7 @@ describe('addGpsMarker', () => {
       .fn()
       .mockReturnValue(mockMarker);
     geopointToLatLngMock.mockReturnValue([51.505, -0.09]);
+    removeGpsMarkerMock.mockClear();
   });
 
   it('should not add a marker if gpsPosition is null', () => {
@@ -69,5 +75,21 @@ describe('addGpsMarker', () => {
     addGpsMarker(mockGeopoint, mockMap);
 
     expect(mockMarker[GPS_MARKER_TAG]).toBe(true);
+  });
+
+  it('should remove a previous GPS marker before adding the new one', () => {
+    addGpsMarker(mockGeopoint, mockMap);
+
+    expect(removeGpsMarkerMock).toHaveBeenCalledTimes(1);
+    expect(removeGpsMarkerMock).toHaveBeenCalledWith(mockMap);
+    expect(removeGpsMarkerMock.mock.invocationCallOrder[0]).toBeLessThan(
+      mockMarker.addTo.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('should not remove the previous GPS marker when there is no position', () => {
+    addGpsMarker(null, mockMap);
+
+    expect(removeGpsMarkerMock).not.toHaveBeenCalled();
   });
 });

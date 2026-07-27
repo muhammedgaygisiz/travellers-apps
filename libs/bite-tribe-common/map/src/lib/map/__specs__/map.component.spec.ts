@@ -69,6 +69,16 @@ jest.mock('../utils/focus-marker', () => ({
   focusMarker: (...args: unknown[]): void => focusMarkerMock(...args),
 }));
 
+const addGpsMarkerMock = jest.fn();
+jest.mock('../utils/add-gps-marker', () => ({
+  addGpsMarker: (...args: unknown[]): void => addGpsMarkerMock(...args),
+}));
+
+const removeGpsMarkerMock = jest.fn();
+jest.mock('../utils/remove-gps-marker', () => ({
+  removeGpsMarker: (...args: unknown[]): void => removeGpsMarkerMock(...args),
+}));
+
 describe('MapComponent', () => {
   let component: MapComponent;
   let fixture: ComponentFixture<MapComponent>;
@@ -677,6 +687,62 @@ describe('MapComponent', () => {
         mockGeopoint,
         expect.any(Object),
       );
+    });
+  });
+
+  describe('gpsMarkerEffect', () => {
+    const mockGpsPosition: Geopoint = { latitude: 48.137, longitude: 11.575 };
+    const movedGpsPosition: Geopoint = { latitude: 48.147, longitude: 11.585 };
+
+    beforeEach(() => {
+      const mapDiv = document.createElement('div');
+      mapDiv.setAttribute('data-testid', 'map');
+      fixture.nativeElement.appendChild(mapDiv);
+
+      addGpsMarkerMock.mockClear();
+      removeGpsMarkerMock.mockClear();
+    });
+
+    it('should add the gps marker once when a position is provided', () => {
+      componentRef.setInput('gpsPosition', mockGpsPosition);
+
+      fixture.detectChanges();
+
+      expect(addGpsMarkerMock).toHaveBeenCalledTimes(1);
+      expect(addGpsMarkerMock).toHaveBeenCalledWith(mockGpsPosition, mockMap);
+    });
+
+    it('should not add another marker while the position stays the same', () => {
+      componentRef.setInput('gpsPosition', mockGpsPosition);
+
+      fixture.detectChanges();
+      fixture.detectChanges();
+
+      expect(addGpsMarkerMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should move the marker when a fresh position arrives', () => {
+      componentRef.setInput('gpsPosition', mockGpsPosition);
+      fixture.detectChanges();
+
+      componentRef.setInput('gpsPosition', movedGpsPosition);
+      fixture.detectChanges();
+
+      expect(addGpsMarkerMock).toHaveBeenCalledTimes(2);
+      expect(addGpsMarkerMock).toHaveBeenLastCalledWith(
+        movedGpsPosition,
+        mockMap,
+      );
+    });
+
+    it('should remove the marker when the position is cleared', () => {
+      componentRef.setInput('gpsPosition', mockGpsPosition);
+      fixture.detectChanges();
+
+      componentRef.setInput('gpsPosition', null);
+      fixture.detectChanges();
+
+      expect(removeGpsMarkerMock).toHaveBeenCalledWith(mockMap);
     });
   });
 

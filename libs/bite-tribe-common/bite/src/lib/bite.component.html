@@ -3,29 +3,11 @@
 <ion-card>
   <div class="card-content">
     <div class="card-image">
-      @if (imageStatus() === 'pending') {
-        <div class="upload-progress" role="status" aria-live="polite">
-          <ion-spinner name="crescent" />
-          <ion-text
-            class="upload-progress-text smalltext"
-            data-testid="bite-image-pending-text"
-          >
-            {{ pendingImageTextKey() | transloco }}
-          </ion-text>
-        </div>
-      } @else if (imageStatus() === 'failed') {
-        <!-- Checked before the image branch: the poster still holds the local
-        base64 copy, and rendering it would suggest the upload succeeded. -->
-        <div
-          class="upload-failed"
-          role="status"
-          data-testid="bite-image-failed"
-        >
-          <ion-icon name="image-outline" aria-hidden="true" />
-          <ion-text class="upload-failed-text smalltext">
-            {{ 'image-upload-failed' | transloco }}
-          </ion-text>
-        </div>
+      <!-- Checked before the image branch: on a failed upload the poster still
+      holds the local base64 copy, and rendering it would suggest the upload
+      succeeded. -->
+      @if (imageStatus() === 'pending' || imageStatus() === 'failed') {
+        <bt-bite-image-status [bite]="biteData" [userId]="userId()" />
       } @else if (biteData.image || biteData.imagePath) {
         <img
           alt="Dish"

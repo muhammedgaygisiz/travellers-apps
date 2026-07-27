@@ -20,9 +20,7 @@ import {
   IonCardTitle,
   IonContent,
   IonHeader,
-  IonIcon,
   IonModal,
-  IonSpinner,
   IonText,
   IonTitle,
   IonToolbar,
@@ -31,6 +29,7 @@ import { Bite, LikeClick } from 'model';
 import { LikesComponent } from './likes/likes.component';
 import { getLikeCounts, getUserLikeType } from './utils/like-counts';
 import { getEffectiveImageStatus } from './utils/image-status';
+import { BiteImageStatusComponent } from './bite-image-status/bite-image-status.component';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
@@ -60,9 +59,7 @@ const CANCEL = 'cancel';
     WithFirstLetterUpperCasePipe,
     StarRatingComponent,
     IonAlert,
-    IonIcon,
     IonModal,
-    IonSpinner,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -70,6 +67,7 @@ const CANCEL = 'cancel';
     DistanceComponent,
     GetImagePipe,
     TranslocoPipe,
+    BiteImageStatusComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -118,27 +116,13 @@ export class BiteComponent {
   });
 
   /**
-   * The stored status, except that a long-abandoned `pending` upload reads as
-   * `failed`. Recomputed whenever the Bite changes rather than on a timer, so a
-   * card left open past the threshold flips on its next render (a feed refresh,
-   * a navigation, or a document update) instead of mid-view.
+   * Decides whether the photo box shows the photo or a placeholder. The
+   * placeholder itself, and the rule about who is told to keep their app open,
+   * live in {@link BiteImageStatusComponent}. See GitHub issue #1168.
    */
   protected readonly imageStatus = computed(() =>
     getEffectiveImageStatus(this.bite()),
   );
-
-  /**
-   * Only the poster's device is doing the upload, so only the poster can act on
-   * it. Everyone else gets a neutral wait message instead of being told to keep
-   * their app open for a transfer that is not theirs. See GitHub issue #1168.
-   */
-  protected readonly pendingImageTextKey = computed((): string => {
-    const userId = this.userId();
-
-    return !!userId && this.bite().userId === userId
-      ? 'uploading-keep-app-open'
-      : 'loading-photo';
-  });
 
   isOwnUnratedBite = computed(() => {
     const bite = this.bite();

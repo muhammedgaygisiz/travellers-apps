@@ -24,6 +24,8 @@ import { createMap } from './utils/create-map';
 import { TILE_LAYER_FACTORY } from './tile-layer.token';
 import { zoomToMarkers } from './utils/zoom-to-markers';
 import { focusMarker } from './utils/focus-marker';
+import { addGpsMarker } from './utils/add-gps-marker';
+import { removeGpsMarker } from './utils/remove-gps-marker';
 
 // Fix for marker icons
 const iconUrl = 'assets/leaflet/marker-icon.png';
@@ -95,6 +97,26 @@ export class MapComponent implements OnDestroy {
     this.addMapClickEvent();
 
     this.forceMapRedraw();
+  });
+
+  /**
+   * Keeps exactly one GPS marker on the map and moves it whenever a fresh
+   * position arrives. Runs after `createMapEffect` so the map already exists on
+   * the first pass.
+   */
+  gpsMarkerEffect = afterRenderEffect(() => {
+    const gpsPosition = this.gpsPosition();
+
+    if (!this.map) {
+      return;
+    }
+
+    if (!gpsPosition) {
+      removeGpsMarker(this.map);
+      return;
+    }
+
+    addGpsMarker(gpsPosition, this.map);
   });
 
   private cleanUpPoints(): Geopoint[] {

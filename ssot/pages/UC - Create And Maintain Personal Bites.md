@@ -24,9 +24,13 @@ Users can create and maintain real dish-level food experiences.
 - User can still manually correct the currency before saving.
 - The app warns when the entered price looks suspiciously high.
 - The app stores the Bite and uploads the image.
-- The image upload has three terminal states on the Bite document, and every
-  viewer sees the card accordingly: `pending` while it uploads, `uploaded` once
-  the storage trigger has the download URL, and `failed` when the upload errored.
+- The image upload has three states on the Bite document, and every viewer sees
+  the card accordingly: `pending` while it uploads, `uploaded` once the storage
+  trigger has the download URL, and `failed` when the upload errored.
+- The `pending` message is addressed to the poster only. Their device is the one
+  holding the transfer, so they are asked to keep the app open; everyone else
+  gets a neutral "loading photo" wait message, because they cannot influence
+  someone else's upload.
   The client writes `failed` itself, because `setBiteImagePathOnUpload` only ever
   runs on a finalized object — without it the card kept telling every viewer
   "uploading, keep the app open" forever. A failed upload shows that state even

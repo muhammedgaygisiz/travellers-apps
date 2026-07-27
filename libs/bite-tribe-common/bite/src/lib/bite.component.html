@@ -6,8 +6,11 @@
       @if (biteData.imageStatus === 'pending') {
         <div class="upload-progress" role="status" aria-live="polite">
           <ion-spinner name="crescent" />
-          <ion-text class="upload-progress-text smalltext">
-            {{ 'uploading-keep-app-open' | transloco }}
+          <ion-text
+            class="upload-progress-text smalltext"
+            data-testid="bite-image-pending-text"
+          >
+            {{ pendingImageTextKey() | transloco }}
           </ion-text>
         </div>
       } @else if (biteData.imageStatus === 'failed') {

@@ -21,6 +21,8 @@ addNecessaryIcons();
 // Loki docker Chrome and otherwise leave the card photo blank on a failed fetch.
 const PEACH_IMAGE = 'assets/demo/bite-demo.png';
 
+const OWNER_ID = '1';
+
 const demoBiteBase: BiteModel = {
   id: 'bite1',
   name: 'Peaches',
@@ -41,7 +43,7 @@ const demoBiteBase: BiteModel = {
   imports: [BiteComponent, IonButton],
   template: `
     <div class="ion-margin">
-      <bt-bite [bite]="bite()" />
+      <bt-bite [bite]="bite()" [userId]="OWNER_ID" />
       <ion-button expand="block" (click)="completeUpload()">
         Complete upload
       </ion-button>
@@ -49,8 +51,13 @@ const demoBiteBase: BiteModel = {
   `,
 })
 class BiteUploadDemoComponent {
+  // The demo walks through the poster's own upload, so the card is viewed as
+  // its owner and shows the "keep the app open" message.
+  readonly OWNER_ID = OWNER_ID;
+
   readonly bite = signal<BiteModel>({
     ...demoBiteBase,
+    userId: OWNER_ID,
     image: '',
     imagePath: undefined,
     imageStatus: 'pending',
@@ -59,6 +66,7 @@ class BiteUploadDemoComponent {
   completeUpload(): void {
     this.bite.set({
       ...demoBiteBase,
+      userId: OWNER_ID,
       image: '',
       imagePath: PEACH_IMAGE,
       imageStatus: 'uploaded',
@@ -212,6 +220,10 @@ export const QuickRatingForEditMode: Story = {
   }),
 };
 
+/**
+ * The poster's own upload. Only their device is transferring the photo, so only
+ * they are asked to keep the app open.
+ */
 export const PendingUpload: Story = {
   args: {
     ...Bite.args,
@@ -220,7 +232,31 @@ export const PendingUpload: Story = {
       imagePath: undefined,
       image: '',
       imageStatus: 'pending',
+      userId: '1',
     },
+    userId: '1',
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
+/**
+ * The same Bite seen by anyone else. They cannot influence someone else's
+ * upload, so they get a neutral wait message. See GitHub issue #1168.
+ */
+export const PendingUploadForViewer: Story = {
+  args: {
+    ...PendingUpload.args,
+    bite: {
+      ...demoBiteBase,
+      imagePath: undefined,
+      image: '',
+      imageStatus: 'pending',
+      userId: 'someone-else',
+    },
+    userId: '1',
   },
   render: (args) => ({
     props: { ...args },

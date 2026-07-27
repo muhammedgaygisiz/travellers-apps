@@ -210,5 +210,6 @@
   "back-to-log-in": "Back to log in",
   "loading": "Loading",
   "uploading-keep-app-open": "Uploading photo — keep the app open",
+  "loading-photo": "Loading photo…",
   "image-upload-failed": "Photo couldn’t be uploaded"
 }

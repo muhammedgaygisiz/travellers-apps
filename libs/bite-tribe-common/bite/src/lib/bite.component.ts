@@ -116,6 +116,19 @@ export class BiteComponent {
     this.previousImageStatus = status;
   });
 
+  /**
+   * Only the poster's device is doing the upload, so only the poster can act on
+   * it. Everyone else gets a neutral wait message instead of being told to keep
+   * their app open for a transfer that is not theirs. See GitHub issue #1168.
+   */
+  protected readonly pendingImageTextKey = computed((): string => {
+    const userId = this.userId();
+
+    return !!userId && this.bite().userId === userId
+      ? 'uploading-keep-app-open'
+      : 'loading-photo';
+  });
+
   isOwnUnratedBite = computed(() => {
     const bite = this.bite();
     const userId = this.userId();

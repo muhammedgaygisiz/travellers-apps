@@ -96,17 +96,48 @@ describe('BiteComponent', () => {
     const queryFailed = (): HTMLElement | null =>
       fixture.nativeElement.querySelector('[data-testid="bite-image-failed"]');
 
-    it('should show the uploading overlay while the upload is pending', () => {
+    // The template renders this through TranslocoPipe, which resolves to an
+    // empty string against the mocked service, so the key is asserted at the
+    // source instead of in the DOM.
+    const pendingTextKey = (): string => component['pendingImageTextKey']();
+
+    const setPendingBite = (biteUserId?: string): void => {
       componentRef.setInput('bite', {
         ...mockBite,
+        userId: biteUserId,
         image: '',
         imagePath: undefined,
         imageStatus: 'pending',
       });
       fixture.detectChanges();
+    };
+
+    it('should show the uploading overlay while the upload is pending', () => {
+      setPendingBite('user1');
 
       expect(fixture.nativeElement.querySelector('ion-spinner')).toBeTruthy();
       expect(queryFailed()).toBeNull();
+    });
+
+    it('should tell the poster to keep the app open', () => {
+      componentRef.setInput('userId', 'user1');
+      setPendingBite('user1');
+
+      expect(pendingTextKey()).toBe('uploading-keep-app-open');
+    });
+
+    it('should not tell other users to keep their app open for someone else’s upload', () => {
+      componentRef.setInput('userId', 'user1');
+      setPendingBite('someone-else');
+
+      expect(pendingTextKey()).toBe('loading-photo');
+    });
+
+    it('should show the neutral wait message to a signed-out viewer', () => {
+      componentRef.setInput('userId', undefined);
+      setPendingBite('someone-else');
+
+      expect(pendingTextKey()).toBe('loading-photo');
     });
 
     it('should replace the uploading overlay once the upload failed', () => {

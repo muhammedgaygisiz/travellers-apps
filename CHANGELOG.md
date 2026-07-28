@@ -1,5 +1,37 @@
 # Changelog
 
+## build-88 (2026-07-28)
+
+<!-- changelog-start-rev: 66b87bef -->
+<!-- changelog-end-rev: 2bf12a87 -->
+
+### Features
+
+- loading spinner in the header (#1173) (691fab5e)
+- loading skeleton for profile page (#1169) (c728afec)
+- add more bites at same place (#1163) (2fa6c06f)
+- **bite-tribe/bucketlist**: swipe a Bite in a bucket list to tick it off (#812) (#1162) (de738fde)
+
+### Bug Fixes
+
+- fix alignment and spacing for resto name and city in bite card (#1174) (45c6c269)
+- fix my position marker on every click (#1171) (ae884398)
+- use higher counter with garanty that own reaction counts (#1167) (2b891f18)
+
+### Documentation
+
+- outcome from test run 1 (#1191) (2bf12a87)
+- correct the build and Crashlytics premises in the test charter (08a3268d)
+- add the release candidate test charter (#1180) (e6836ca1)
+
+### Tests
+
+- extend e2e test suite (#1175) (bc121668)
+
+### Chores
+
+- bump version 87 (#1161) (2c8234d4)
+
 ## build-87 (2026-07-26)
 
 <!-- changelog-start-rev: 8b6028b1 -->

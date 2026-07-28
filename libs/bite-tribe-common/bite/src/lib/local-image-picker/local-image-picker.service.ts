@@ -1,4 +1,4 @@
-import { EventEmitter, inject, Injectable } from '@angular/core';
+import { EventEmitter, inject, Injectable, signal } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { Directory, FileInfo, Filesystem } from '@capacitor/filesystem';
 import { ModalController } from '@ionic/angular/standalone';
@@ -32,7 +32,11 @@ export class LocalImagePickerService {
     const modal = await this.modalController.create({
       component: LocalImagePickerComponent,
       componentProps: {
-        images: await this.loadImages(),
+        // Ionic assigns componentProps onto the instance with Object.assign, so
+        // a plain array would replace the component's input signal and the
+        // template's `images()` read would throw. Hand over a callable signal
+        // instead, the same way the app menu forwards its flags.
+        images: signal(await this.loadImages()),
         imageSelected,
         cancelled,
       },

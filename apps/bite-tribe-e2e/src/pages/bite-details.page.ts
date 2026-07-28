@@ -9,10 +9,16 @@ export class BiteDetailsPage {
   readonly bucketListButton: Locator;
   readonly review: Locator;
   readonly submitReviewButton: Locator;
+  readonly imageStatus: Locator;
+  readonly image: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.root = page.locator('details-page');
+    // The header photo and the placeholder that replaces it while the upload is
+    // pending or after it failed — the same component the feed card renders.
+    this.imageStatus = this.root.locator('bt-bite-image-status');
+    this.image = this.root.locator('img.dish-image');
     this.editButton = this.root
       .locator('ion-button')
       .filter({ hasText: 'Edit Bite' });

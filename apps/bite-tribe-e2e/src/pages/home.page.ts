@@ -23,6 +23,22 @@ export class HomePage {
     return this.page.locator('bt-bite:visible').filter({ hasText: name });
   }
 
+  /**
+   * The placeholder that stands in for the named Bite's photo while its upload
+   * is pending or after it failed. Absent once the photo is there.
+   */
+  imageStatus(name: string): Locator {
+    return this.biteCard(name).locator('bt-bite-image-status');
+  }
+
+  /**
+   * The named Bite's photo. Rendered only when the upload is neither pending nor
+   * failed, so its absence is what proves the placeholder won.
+   */
+  biteImage(name: string): Locator {
+    return this.biteCard(name).locator('.card-image img');
+  }
+
   async openBite(name: string): Promise<void> {
     await this.biteCard(name).locator('ion-card-title').click();
     await this.page.waitForURL(/\/bite\/[^/]+$/);

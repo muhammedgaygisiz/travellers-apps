@@ -19,6 +19,23 @@ export const seedFirestoreDocument = async (
   expect(response.ok(), await response.text()).toBeTruthy();
 };
 
+/**
+ * Removes a seeded document again. The emulator keeps every write for the whole
+ * run, so a spec whose fixtures would otherwise stay visible to later specs
+ * (a Bite in the shared nearby feed, say) can hand them back here.
+ */
+export const deleteFirestoreDocument = async (
+  page: Page,
+  documentPath: string,
+): Promise<void> => {
+  const response = await page.request.delete(
+    `${FIRESTORE_EMULATOR_URL}/${documentPath}`,
+    { headers: { Authorization: 'Bearer owner' } },
+  );
+
+  expect(response.ok(), await response.text()).toBeTruthy();
+};
+
 interface FirestoreValue {
   stringValue?: string;
   integerValue?: string;

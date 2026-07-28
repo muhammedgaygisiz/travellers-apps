@@ -70,6 +70,10 @@ Users can create and maintain real dish-level food experiences.
 - Shared restaurant selector.
 - Bite page suspicious price validation.
 - Playwright create-Bite E2E smoke coverage.
+- Playwright photo-upload-status E2E coverage: the poster-only wait message, the
+  failed state and its poster-only retry, the age threshold that leaves the
+  document untouched, and a blocked upload driven from the create flow through
+  the terminal `failed` write to a successful retry from the local copy.
 
 ## Related Domains
 

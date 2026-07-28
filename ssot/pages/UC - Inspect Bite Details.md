@@ -42,6 +42,9 @@ Users can inspect one Bite deeply enough to decide whether the dish is relevant.
 - Bite details page and data-access.
 - Like API.
 - Review API.
+- Playwright E2E coverage of the failed header photo: the reported state, the
+  photo that is withheld rather than shown, and the poster's retry falling back
+  to the local photo picker when this device holds no copy.
 
 ## Related Domains
 

@@ -160,6 +160,29 @@ export const LikedByMeWithLaggingAggregate: Story = {
   }),
 };
 
+/**
+ * A long place name next to a long city/country. Both columns keep their own
+ * share of the row and start at the top instead of colliding. See GitHub issue
+ * #1172.
+ */
+export const LongPlaceAndLocation: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...demoBiteBase,
+      name: 'Sorrentino de Cordero con Caprese',
+      place: 'Bungalows Venite a Casa',
+      distance: '9562',
+      city: 'Villa Serrana',
+      countryCode: 'UY',
+    },
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
 export const EditMode: Story = {
   args: {
     ...Bite.args,

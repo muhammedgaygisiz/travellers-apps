@@ -44,15 +44,29 @@
         border: var(--border-width) solid var(--ion-color-card-border);
         border-top: unset;
 
+        /* Place name and location each get a fixed share of the row with a
+        gutter between them, so a long name and a long city/country cannot run
+        into each other (issue #1172). Both start at the top of the row. */
         ion-card-subtitle.restaurant-name {
           padding-top: 0.5rem;
+
+          display: grid;
+          grid-template-columns: 45% 10% 45%;
+          align-items: start;
 
           ion-icon {
             margin-right: 4px;
           }
 
-          .distance {
-            margin-left: 1rem;
+          .place {
+            grid-column: 1;
+            overflow-wrap: anywhere;
+          }
+
+          .location {
+            grid-column: 3;
+            text-align: end;
+            overflow-wrap: anywhere;
           }
         }
 

@@ -208,6 +208,29 @@ describe('shouldLoadBucketlists', () => {
     });
   });
 
+  describe('given a savedBiteTrailAsBucketList', () => {
+    const ACTION = BucketlistActions.savedBiteTrailAsBucketList();
+
+    it('should return true', () => {
+      scheduler.run(({ expectObservable, cold }) => {
+        const action$ = cold('--a--', {
+          a: ACTION,
+        });
+
+        const effect = createEffect(() => {
+          return action$.pipe(
+            ofType(BucketlistActions.savedBiteTrailAsBucketList),
+            shouldLoadBucketlists(),
+          );
+        });
+
+        expectObservable(effect).toBe('--a--', {
+          a: ACTION,
+        });
+      });
+    });
+  });
+
   describe('given any other action', () => {
     const ACTION = { type: 'UNKNOWN_ACTION' };
 

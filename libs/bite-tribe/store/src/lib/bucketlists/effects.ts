@@ -29,6 +29,7 @@ export class BucketListEffect {
         BucketlistActions.createdBucketlist,
         BucketlistActions.deletedBucketlist,
         BucketlistActions.setBiteTriedOutStatusSucceeded,
+        BucketlistActions.savedBiteTrailAsBucketList,
       ),
       shouldLoadBucketlists(),
       switchMap(() => {

@@ -83,7 +83,8 @@
               <ng-container>{{ 'best-seller' | transloco }}</ng-container>
             </ion-badge>
             <ion-text>
-              {{ 'sold-times' | transloco: { count: biteTrailData.soldCount ?? 0 } }}
+              {{ 'sold-times' | transloco: { count: biteTrailData.soldCount ?? 0
+              } }}
             </ion-text>
           </div>
         </div>
@@ -109,7 +110,11 @@
             </ion-text>
             }
           </div>
-          <ion-button shape="round" (click)="viewBiteTrail.emit(biteTrailData)">
+          <ion-button
+            shape="round"
+            data-testid="bite-trail-view"
+            (click)="viewBiteTrail.emit(biteTrailData)"
+          >
             <ng-container>{{ 'view-bite-trail' | transloco }}</ng-container>
             <ion-icon name="arrow-forward-outline" />
           </ion-button>

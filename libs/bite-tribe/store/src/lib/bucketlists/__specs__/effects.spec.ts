@@ -123,6 +123,28 @@ describe('BucketListEffect', () => {
         expect(loadBucketlistsByUserIdSpy).toHaveBeenCalledWith('123');
       });
     });
+
+    describe('given a saved BiteTrail', () => {
+      it('should reload bucketlists so the trail page sees the new one', () => {
+        jest
+          .spyOn(apiService, 'loadBucketlistsByUserId')
+          .mockReturnValue(
+            of([]) as unknown as ReturnType<
+              BiteTribeApiService['loadBucketlistsByUserId']
+            >,
+          );
+
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BucketlistActions.savedBiteTrailAsBucketList(),
+          });
+
+          expectObservable(effects.loadMyBucketlists$).toBe('a', {
+            a: BucketlistActions.loadedFromAPI({ bucketlists: [] }),
+          });
+        });
+      });
+    });
   });
 
   describe('saveBiteIdToBucketListEffect$', () => {

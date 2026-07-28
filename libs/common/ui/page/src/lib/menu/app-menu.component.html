@@ -31,13 +31,19 @@
         </ion-item>
       }
       @if (showMyBucketlists()) {
-        <ion-item (click)="menuNavigate.emit('my-bucketlists')">
+        <ion-item
+          data-testid="menu-my-bucketlists"
+          (click)="menuNavigate.emit('my-bucketlists')"
+        >
           <ion-icon name="bookmark-outline" slot="start" />
           <ng-container>{{ 'my-bucket-lists' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showMarketPlaceButton()) {
-        <ion-item (click)="menuNavigate.emit('market-place')">
+        <ion-item
+          data-testid="menu-market-place"
+          (click)="menuNavigate.emit('market-place')"
+        >
           <ion-icon name="storefront-outline" slot="start" />
           <ng-container>{{ 'market-place' | transloco }}</ng-container>
         </ion-item>

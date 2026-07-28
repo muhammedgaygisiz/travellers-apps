@@ -96,4 +96,5 @@
   - [[Current State - Known Issues]]
   - [[Current State - Open Questions]]
   - [[Current State - Release State]]
+  - [[Current State - Release Candidate Test Charter]]
 - [[Changelog]]

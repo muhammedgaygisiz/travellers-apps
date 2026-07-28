@@ -208,6 +208,11 @@
   "bite-created-successfully": "Bite başarıyla oluşturuldu!",
   "image-uploaded-successfully": "Görsel başarıyla yüklendi!",
   "uploading-keep-app-open": "Fotoğraf yükleniyor — uygulamayı açık tutun",
+  "loading-photo": "Fotoğraf yükleniyor…",
+  "image-upload-failed": "Fotoğraf yüklenemedi",
+  "retry-upload": "Yüklemeyi yeniden dene",
+  "choose-photo": "Fotoğraf seç",
+  "image-upload-retry-failed": "Yükleme başlatılamadı. Lütfen tekrar deneyin.",
   "bite-updated-successfully": "Bite başarıyla güncellendi!",
   "bite-deleted-successfully": "Bite başarıyla silindi!",
   "creating-bite": "Bite oluşturuluyor...",
@@ -322,5 +327,6 @@
   "display-name-already-taken": "Bu görünen ad zaten kullanılıyor. Lütfen başka bir ad seçin.",
   "display-name-invalid": "Lütfen geçerli bir görünen ad girin.",
   "display-name-could-not-be-saved": "Görünen adınız kaydedilemedi. Lütfen tekrar deneyin.",
-  "my-position": "Konumum"
+  "my-position": "Konumum",
+  "loading": "Yükleniyor"
 }

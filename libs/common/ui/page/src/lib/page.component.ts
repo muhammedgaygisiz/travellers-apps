@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -14,6 +15,7 @@ import {
   IonFooter,
   IonHeader,
   IonIcon,
+  IonProgressBar,
   IonText,
   IonTitle,
   IonToolbar,
@@ -45,6 +47,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     IonButton,
     IonContent,
     IonFooter,
+    IonProgressBar,
     IonText,
     UpperCasePipe,
     TranslocoPipe,
@@ -61,6 +64,14 @@ export class PageComponent {
   menuConfig = input<PageMenuConfig>({});
 
   chrome = input<PageChromeConfig>({});
+
+  /**
+   * Reports a background load through an indeterminate progress bar in the
+   * header separator. Pages use it for a refresh that has content to keep on
+   * screen; a spinner or skeleton stays reserved for the first load, where
+   * there is nothing to show yet. See GitHub issue #1168.
+   */
+  loading = input(false, { transform: booleanAttribute });
 
   // Merge partial configs over the defaults so unspecified flags keep their
   // default value (Angular replaces the whole object on partial input).

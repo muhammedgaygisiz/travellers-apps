@@ -16,6 +16,7 @@
     leaderboard: true,
   }"
   [isAuthenticated]="isAuthenticated()"
+  [loading]="showBiteSkeleton()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
   (menuNavigate)="menuNavigate.emit($event)"
@@ -137,6 +138,8 @@
         [triedOutBiteIds]="triedOutBiteIds()"
         [hasMore]="hasMore()"
         [showSkeleton]="showBiteSkeleton()"
+        [enableImageRetry]="enableImageRetry()"
+        (retryImageUpload)="retryImageUpload.emit($event)"
         (biteClick)="biteClick.emit($event)"
         (likeButtonClick)="likeButtonClick.emit($event)"
         (gotoEdit)="gotoEdit.emit($event)"

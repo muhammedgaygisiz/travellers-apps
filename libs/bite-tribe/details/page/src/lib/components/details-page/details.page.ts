@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -40,7 +41,9 @@ import { MapComponent } from 'bite-tribe-common/map';
 import { BucketListSelectionComponent } from '../bucket-list-selection/bucket-list-selection.component';
 import { GetBucketlistsIconPipe } from '../../pipes/get-bucketlists-icon.pipe';
 import {
+  BiteImageStatusComponent,
   GetImagePipe,
+  getEffectiveImageStatus,
   getLikeCounts,
   getUserLikeType,
   LikesComponent,
@@ -87,6 +90,7 @@ import { getLocalizedRegionName } from 'bite-tribe-common/bite';
     GetImagePipe,
     IonSkeletonText,
     TranslocoPipe,
+    BiteImageStatusComponent,
   ],
 })
 export class DetailsPage {
@@ -99,6 +103,18 @@ export class DetailsPage {
   position = input<Position>();
   exchangeRates = input<Record<string, number>>();
   preferredCurrency = input<string>();
+  enableImageRetry = input(false, { transform: booleanAttribute });
+
+  /**
+   * Mirrors the feed card: a photo that is still uploading, or whose upload was
+   * abandoned, is reported instead of leaving an empty header. See GitHub issue
+   * #1168.
+   */
+  protected readonly imageStatus = computed(() => {
+    const bite = this.bite();
+
+    return bite ? getEffectiveImageStatus(bite) : undefined;
+  });
 
   selectList = output<Bucketlist>();
   shareBite = output<Bite>();
@@ -111,6 +127,7 @@ export class DetailsPage {
   readonly goToProfile = output<PublicUser>();
   readonly gotoEdit = output<Bite>();
   readonly gotoNew = output<Bite>();
+  readonly retryImageUpload = output<Bite>();
 
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);

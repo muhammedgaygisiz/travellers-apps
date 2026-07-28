@@ -208,6 +208,11 @@
   "bite-created-successfully": "¡Bite creado con éxito!",
   "image-uploaded-successfully": "¡Imagen subida con éxito!",
   "uploading-keep-app-open": "Subiendo la foto: mantén la app abierta",
+  "loading-photo": "Cargando la foto…",
+  "image-upload-failed": "No se pudo subir la foto",
+  "retry-upload": "Reintentar la subida",
+  "choose-photo": "Elegir una foto",
+  "image-upload-retry-failed": "No pudimos iniciar la subida. Inténtalo de nuevo.",
   "bite-updated-successfully": "¡Bite actualizado con éxito!",
   "bite-deleted-successfully": "¡Bite eliminado con éxito!",
   "creating-bite": "Creando tu Bite...",
@@ -322,5 +327,6 @@
   "display-name-already-taken": "Ese nombre visible ya está en uso. Elige otro.",
   "display-name-invalid": "Introduce un nombre visible válido.",
   "display-name-could-not-be-saved": "No pudimos guardar tu nombre visible. Inténtalo de nuevo.",
-  "my-position": "Mi ubicación"
+  "my-position": "Mi ubicación",
+  "loading": "Cargando"
 }

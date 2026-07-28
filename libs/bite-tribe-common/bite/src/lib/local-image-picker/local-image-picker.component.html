@@ -1,0 +1,36 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="cancelled.emit()">
+        {{ 'cancel' | transloco }}
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'choose-photo' | transloco }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  @if (loading()) {
+    <div class="picker-state">
+      <ion-spinner />
+    </div>
+  } @else if (images().length === 0) {
+    <ion-text class="picker-state" data-testid="local-image-picker-empty">
+      {{ 'no-local-images-found' | transloco }}
+    </ion-text>
+  } @else {
+    <div class="picker-grid" data-testid="local-image-picker-grid">
+      @for (image of images(); track image.name) {
+        <img
+          [src]="image.src"
+          [alt]="'locally-saved-image' | transloco"
+          loading="lazy"
+          role="button"
+          tabindex="0"
+          (click)="imageSelected.emit(image)"
+          (keydown.enter)="imageSelected.emit(image)"
+        />
+      }
+    </div>
+  }
+</ion-content>

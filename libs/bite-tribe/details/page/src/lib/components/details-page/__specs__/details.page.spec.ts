@@ -131,6 +131,18 @@ describe('DetailsPage', () => {
       expect(iconSkeletons.length).toBe(actionTestIds.length);
     });
 
+    it('runs the header progress bar while the skeletons show', () => {
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+      ).toBeTruthy();
+
+      setLoadedBite();
+
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+      ).toBeFalsy();
+    });
+
     it('does not expose the restaurant link while the bite is loading', () => {
       expect(
         fixture.nativeElement.querySelector('.restaurant-distance .link'),

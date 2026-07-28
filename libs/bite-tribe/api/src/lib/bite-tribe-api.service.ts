@@ -33,6 +33,7 @@ import { BiteApiService } from './bite-api/bite-api.service';
 import { SettingsApiService } from './settings-api/settings-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
 import { BiteTrailApiService } from './bite-trail-api/bite-trail-api.service';
+import type { LocalImageFile } from './utils/local-image-file';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -209,6 +210,29 @@ export class BiteTribeApiService {
     callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
   ): Promise<void> {
     return this.biteApiService.uploadImage(bite, callbackFn);
+  }
+
+  setBiteImageStatus(
+    biteId: string,
+    imageStatus: Bite['imageStatus'],
+  ): Promise<void> {
+    return this.biteApiService.setImageStatus(biteId, imageStatus);
+  }
+
+  findLocalBiteImage(biteId: string): Promise<LocalImageFile | undefined> {
+    return this.biteApiService.findLocalImage(biteId);
+  }
+
+  uploadBiteImageFromLocalFile(
+    biteId: string,
+    fileUri: string,
+    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
+  ): Promise<void> {
+    return this.biteApiService.uploadImageFromLocalFile(
+      biteId,
+      fileUri,
+      callbackFn,
+    );
   }
 
   uploadProfileImage(

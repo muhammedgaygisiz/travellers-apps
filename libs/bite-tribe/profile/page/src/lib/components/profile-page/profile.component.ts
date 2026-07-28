@@ -80,6 +80,7 @@ export class ProfileComponent {
     return this.user()?.city || this.transloco.translate('no-location');
   });
   biteTrails = input<BiteTrail[]>();
+  enableImageRetry = input(false, { transform: booleanAttribute });
 
   readonly logoutClick = output();
   readonly menuNavigate = output<PageMenuTarget>();
@@ -91,6 +92,7 @@ export class ProfileComponent {
   readonly unfollowButtonClick = output<PublicUser>();
   readonly followersClick = output<string>();
   readonly followingClick = output<string>();
+  readonly retryImageUpload = output<Bite>();
 
   isOpen = signal(false);
   currentPage = signal<number>(1);

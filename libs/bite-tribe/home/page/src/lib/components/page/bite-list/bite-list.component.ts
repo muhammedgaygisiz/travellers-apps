@@ -59,6 +59,7 @@ export class BiteListComponent {
   triedOutBiteIds = input<string[]>([]);
   hasMore = input(false);
   showSkeleton = input(false);
+  enableImageRetry = input(false);
 
   readonly biteClick = output<Bite>();
   readonly likeButtonClick = output<LikeClick>();
@@ -66,6 +67,7 @@ export class BiteListComponent {
   readonly deleteBite = output<Bite>();
   readonly rateNowClick = output<{ bite: Bite; rating: number }>();
   readonly triedOutChange = output<{ biteId: string; checked: boolean }>();
+  readonly retryImageUpload = output<Bite>();
   readonly loadMore = output<void>();
 
   /**

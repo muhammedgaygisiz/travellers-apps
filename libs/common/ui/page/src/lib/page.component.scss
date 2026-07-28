@@ -8,6 +8,26 @@
     --icon-margin-start: 1rem;
   }
 
+  ion-header {
+    position: relative;
+
+    .header-progress-bar {
+      position: absolute;
+      inset-inline: 0;
+      bottom: 0;
+
+      /* ion-toolbar carries z-index 10 and its own box includes the separator,
+       * so without a higher z-index the toolbar paints over the bar and only
+       * the plain separator shows. */
+      z-index: 11;
+
+      /* Covers the toolbar's 3px bottom separator (plus 1px of the toolbar for
+       * presence), so showing the bar neither changes the header height nor
+       * reflows the content below it. */
+      height: 4px;
+    }
+  }
+
   .title-container {
     ion-icon {
       font-size: 1.6rem;

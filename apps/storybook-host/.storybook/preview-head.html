@@ -28,33 +28,36 @@
   }
 </style>
 <script>
-  // Freeze ion-spinner animations for deterministic Loki captures.
+  // Freeze Ionic loading animations for deterministic Loki captures.
   //
-  // ion-spinner uses Shadow DOM (encapsulation: 'shadow') and animates its inner
-  // <svg> via `:host(...) svg { animation }` inside its shadow root. No
+  // ion-spinner and ion-progress-bar use Shadow DOM (encapsulation: 'shadow')
+  // and animate their inner elements from inside their shadow root - the
+  // spinner its <svg>, the indeterminate progress bar its two moving bars. No
   // document-level rule can reach across that boundary - not Storybook's, not
-  // Loki's built-in animation disabler - so the spinner is otherwise captured on
-  // a random rotation frame and every run produces a phantom diff. This pierces
-  // each spinner's shadow root and neutralises the animation, pinning it to a
-  // stable frame. Gated on Loki (window.loki.isRunning is set before the story
-  // loads) so manual Storybook keeps live spinners; a MutationObserver covers
-  // spinners rendered after initial load.
+  // Loki's built-in animation disabler - so they are otherwise captured on a
+  // random animation frame and every run produces a phantom diff. This pierces
+  // each shadow root and neutralises the animation, pinning it to a stable
+  // frame. Gated on Loki (window.loki.isRunning is set before the story loads)
+  // so manual Storybook keeps live animations; a MutationObserver covers
+  // elements rendered after initial load.
   (function () {
     if (!(window.loki && window.loki.isRunning)) {
       return;
     }
-    var freeze = function (spinner) {
-      if (!spinner.shadowRoot || spinner.__lokiFrozen) {
+    var ANIMATED_TAGS = ['ION-SPINNER', 'ION-PROGRESS-BAR'];
+    var SELECTOR = 'ion-spinner, ion-progress-bar';
+    var freeze = function (element) {
+      if (!element.shadowRoot || element.__lokiFrozen) {
         return;
       }
-      spinner.__lokiFrozen = true;
+      element.__lokiFrozen = true;
       var style = document.createElement('style');
       style.textContent = '* { animation: none !important; }';
-      spinner.shadowRoot.appendChild(style);
+      element.shadowRoot.appendChild(style);
     };
     var sweep = function (root) {
       if (root && root.querySelectorAll) {
-        root.querySelectorAll('ion-spinner').forEach(freeze);
+        root.querySelectorAll(SELECTOR).forEach(freeze);
       }
     };
     new MutationObserver(function (mutations) {
@@ -63,7 +66,7 @@
           if (node.nodeType !== 1) {
             return;
           }
-          if (node.tagName === 'ION-SPINNER') {
+          if (ANIMATED_TAGS.indexOf(node.tagName) !== -1) {
             freeze(node);
           } else {
             sweep(node);

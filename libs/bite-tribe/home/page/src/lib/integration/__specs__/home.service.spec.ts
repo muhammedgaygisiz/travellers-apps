@@ -5,6 +5,17 @@ import { NavController } from '@ionic/angular/standalone';
 import type { Bite, LikeClick } from 'model';
 import SpyInstance = jest.SpyInstance;
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
+import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
+import { LocalImagePickerService } from 'bite-tribe-common/bite';
+
+const biteDataAccessMock = {
+  findLocalImageForBite: jest.fn(),
+  retryImageUpload: jest.fn().mockResolvedValue(undefined),
+};
+
+const localImagePickerMock = {
+  pick: jest.fn(),
+};
 
 const emailVerificationMock = {
   promptVisible: jest.fn(() => false),
@@ -51,12 +62,21 @@ describe('HomeService', () => {
     emailVerificationMock.promptVisible.mockReturnValue(false);
     emailVerificationMock.trackPromptShown.mockReset();
     emailVerificationMock.resend.mockReset().mockResolvedValue(undefined);
+    biteDataAccessMock.findLocalImageForBite
+      .mockReset()
+      .mockResolvedValue(undefined);
+    biteDataAccessMock.retryImageUpload
+      .mockReset()
+      .mockResolvedValue(undefined);
+    localImagePickerMock.pick.mockReset().mockResolvedValue(undefined);
 
     TestBed.configureTestingModule({
       providers: [
         { provide: HomeDataAccessService, useClass: Mock },
         { provide: NavController, useClass: Mock },
         { provide: EmailVerificationService, useValue: emailVerificationMock },
+        { provide: BiteDataAccessService, useValue: biteDataAccessMock },
+        { provide: LocalImagePickerService, useValue: localImagePickerMock },
       ],
     }).compileComponents();
     homeDataAccessService = TestBed.inject(HomeDataAccessService);
@@ -697,6 +717,59 @@ describe('HomeService', () => {
         service.toggleTriedOut(params);
 
         expect(markBiteAsTriedOutSpy).toHaveBeenCalledWith(params);
+      },
+    ));
+  });
+
+  describe('retryBiteImageUpload', () => {
+    const failedBite = { id: 'bite1', name: 'Pizza' } as Bite;
+
+    it('should re-send the local copy without asking when the bite still has one', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        biteDataAccessMock.findLocalImageForBite.mockResolvedValue({
+          uri: 'file:///bites_bite1.jpg',
+          name: 'bites_bite1.jpg',
+        });
+
+        await service.retryBiteImageUpload(failedBite);
+
+        expect(localImagePickerMock.pick).not.toHaveBeenCalled();
+        expect(biteDataAccessMock.retryImageUpload).toHaveBeenCalledWith(
+          failedBite,
+          'file:///bites_bite1.jpg',
+        );
+      },
+    ));
+
+    it('should ask the user to pick a photo when the local copy is gone', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        biteDataAccessMock.findLocalImageForBite.mockResolvedValue(undefined);
+        localImagePickerMock.pick.mockResolvedValue({
+          uri: 'file:///picked.jpg',
+          name: 'picked.jpg',
+          src: 'picked',
+        });
+
+        await service.retryBiteImageUpload(failedBite);
+
+        expect(biteDataAccessMock.retryImageUpload).toHaveBeenCalledWith(
+          failedBite,
+          'file:///picked.jpg',
+        );
+      },
+    ));
+
+    it('should upload nothing when the user backs out of the picker', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        biteDataAccessMock.findLocalImageForBite.mockResolvedValue(undefined);
+        localImagePickerMock.pick.mockResolvedValue(undefined);
+
+        await service.retryBiteImageUpload(failedBite);
+
+        expect(biteDataAccessMock.retryImageUpload).not.toHaveBeenCalled();
       },
     ));
   });

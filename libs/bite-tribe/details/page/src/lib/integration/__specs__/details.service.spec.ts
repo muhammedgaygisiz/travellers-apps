@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { DetailsService } from '../details.service';
 import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
+import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
+import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { signal } from '@angular/core';
 import {
   Bite,
@@ -57,6 +59,15 @@ const createNavControllerMock = (): Partial<NavController> => ({
   navigateForward: jest.fn().mockResolvedValue(true),
 });
 
+const mockBiteDataAccessService = {
+  findLocalImageForBite: jest.fn().mockResolvedValue(undefined),
+  retryImageUpload: jest.fn().mockResolvedValue(undefined),
+};
+
+const mockLocalImagePicker = {
+  pick: jest.fn().mockResolvedValue(undefined),
+};
+
 describe('DetailsService', () => {
   let service: DetailsService;
   let mockDataAccessService: MockDetailsDataAccessService;
@@ -69,6 +80,14 @@ describe('DetailsService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        {
+          provide: BiteDataAccessService,
+          useValue: mockBiteDataAccessService,
+        },
+        {
+          provide: LocalImagePickerService,
+          useValue: mockLocalImagePicker,
+        },
         DetailsService,
         {
           provide: DetailsDataAccessService,
@@ -132,6 +151,14 @@ describe('DetailsService', () => {
 
       TestBed.configureTestingModule({
         providers: [
+          {
+            provide: BiteDataAccessService,
+            useValue: mockBiteDataAccessService,
+          },
+          {
+            provide: LocalImagePickerService,
+            useValue: mockLocalImagePicker,
+          },
           DetailsService,
           {
             provide: DetailsDataAccessService,
@@ -163,6 +190,14 @@ describe('DetailsService', () => {
 
       TestBed.configureTestingModule({
         providers: [
+          {
+            provide: BiteDataAccessService,
+            useValue: mockBiteDataAccessService,
+          },
+          {
+            provide: LocalImagePickerService,
+            useValue: mockLocalImagePicker,
+          },
           DetailsService,
           {
             provide: DetailsDataAccessService,
@@ -201,6 +236,14 @@ describe('DetailsService', () => {
 
       TestBed.configureTestingModule({
         providers: [
+          {
+            provide: BiteDataAccessService,
+            useValue: mockBiteDataAccessService,
+          },
+          {
+            provide: LocalImagePickerService,
+            useValue: mockLocalImagePicker,
+          },
           DetailsService,
           {
             provide: DetailsDataAccessService,
@@ -236,6 +279,14 @@ describe('DetailsService', () => {
 
       TestBed.configureTestingModule({
         providers: [
+          {
+            provide: BiteDataAccessService,
+            useValue: mockBiteDataAccessService,
+          },
+          {
+            provide: LocalImagePickerService,
+            useValue: mockLocalImagePicker,
+          },
           DetailsService,
           {
             provide: DetailsDataAccessService,
@@ -275,6 +326,14 @@ describe('DetailsService', () => {
 
       TestBed.configureTestingModule({
         providers: [
+          {
+            provide: BiteDataAccessService,
+            useValue: mockBiteDataAccessService,
+          },
+          {
+            provide: LocalImagePickerService,
+            useValue: mockLocalImagePicker,
+          },
           DetailsService,
           {
             provide: DetailsDataAccessService,

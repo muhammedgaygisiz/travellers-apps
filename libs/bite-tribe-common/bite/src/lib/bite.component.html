@@ -41,16 +41,15 @@
           </span>
         </ion-card-title>
 
-        <ion-card-subtitle
-          class="ion-display-flex ion-justify-content-between ion-align-items-center restaurant-name smalltext"
-        >
-          <ion-text color="secondary">
+        <ion-card-subtitle class="restaurant-name smalltext">
+          <ion-text color="secondary" class="place">
             {{ biteData?.place }}
           </ion-text>
 
-          <div class="ion-display-flex ion-flex-column ion-align-items-end">
+          <div
+            class="location ion-display-flex ion-flex-column ion-align-items-end"
+          >
             <bt-distance
-              class="distance"
               [distance]="biteData?.distance"
               [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
             />

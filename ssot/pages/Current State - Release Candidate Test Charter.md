@@ -13,7 +13,7 @@ It covers issue 1176 and belongs to issue 911 under [[epic-907]].
 | App identifier        | `com.bitetribe.app`                                                    |
 | Marketing version     | 1.0.1                                                                  |
 | Build number          | 88                                                                     |
-| Configuration         | Production, built by CI, never from a workstation                      |
+| Configuration         | Production configuration, produced as described below                  |
 | Backend               | Production Firebase project, not the emulator                          |
 | App Check             | `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` on for the enforced-mode checks |
 | Android minimum SDK   | 24                                                                     |
@@ -21,7 +21,20 @@ It covers issue 1176 and belongs to issue 911 under [[epic-907]].
 
 Record the actual version, build number and commit SHA used, because the numbers above change with every build increment.
 
-A workstation-built production bundle is not a valid subject for this pass. The environment plugin inlines whatever it is given at build time, and [[Current State - Known Issues]] records that a local build is exactly how a debug token would ship. Web verification against the emulator is a preparation step, not the pass.
+## How To Produce The Build
+
+`pipeline.yml` has no native job. CI runs setup, lint, stylelint, tests, loki, e2e and the two web app builds and deploys, and nothing in it touches Capacitor, Gradle or Xcode. There is therefore no CI-built Android or iOS artifact to test, and producing one is separate work tracked outside this charter.
+
+The native wrappers bundle `dist/apps/bite-tribe`, so the build is a local one and its safety comes from the production configuration plus an explicit check:
+
+1. `npx nx build bite-tribe --configuration=production`
+2. Confirm the bundle is clean before it is wrapped. The environment plugin strips `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN` and `NX_APP_BITE_TRIBE_IS_DEV` only when `NX_TASK_TARGET_CONFIGURATION` is `production`, so a build made through any other path keeps them. Grep the emitted JavaScript in `dist/apps/bite-tribe` for the debug token value and for `IS_DEV` and expect no match.
+3. `npx nx sync bite-tribe-ios` and `npx nx sync bite-tribe-android`.
+4. Archive and install from Xcode and Android Studio.
+
+Step 2 is not optional. A registered debug token bypasses App Check entirely, which would defeat the enforced-mode gate this pass is meant to verify.
+
+Web verification against the emulator is a preparation step, not the pass. The web half of the pass runs against a production-configuration build.
 
 ## Device Matrix
 
@@ -89,7 +102,7 @@ The business app has no Playwright coverage. Cover at minimum restaurant mainten
 
 ## Monitoring
 
-- Force a test crash per platform and confirm it reaches Crashlytics.
+- Confirm Crashlytics receives a report from each native platform. Note what the app actually sends: `FirebaseErrorHandlerService` calls `recordException`, which files a **non-fatal**, and it only runs on a native platform. A JavaScript error never crashes the native process, so there is no path that produces a fatal crash report from app code. Trigger an unhandled Angular error, restart the app so the report uploads, and expect it under Non-fatals rather than Crashes.
 - Verify the analytics events in DebugView from a real device, not only from the web build.
 - Confirm the key metrics dashboard exists and receives data.
 
@@ -97,7 +110,7 @@ The business app has no Playwright coverage. Cover at minimum restaurant mainten
 
 - Every check above is executed and recorded as pass, fail, or not applicable, with the reason.
 - No open defect that prevents registration, login, Bite creation with a photo, or app start.
-- Crashlytics and analytics receive data from every platform.
+- Crashlytics receives a non-fatal from each native platform, and analytics receives events from every platform.
 - No crash observed on a supported OS version during the pass.
 
 Anything else found is filed, triaged, and either fixed under issue 1177 or accepted as a known issue.

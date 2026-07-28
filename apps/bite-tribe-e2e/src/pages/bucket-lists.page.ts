@@ -13,13 +13,11 @@ export class BucketListsPage {
   readonly page: Page;
   readonly root: Locator;
   readonly items: Locator;
-  readonly backButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.root = page.locator('bucketlists-page');
     this.items = this.root.getByTestId('bucketlist-item');
-    this.backButton = this.root.locator('ion-back-button');
   }
 
   async open(): Promise<void> {

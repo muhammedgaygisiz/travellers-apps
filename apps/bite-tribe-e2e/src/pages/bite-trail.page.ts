@@ -49,8 +49,20 @@ export class BiteTrailPage {
   }
 
   /**
+   * What the page turns into once the trail is claimed: the claim is replaced by
+   * a shortcut into the new bucket list, and the hint card explains why.
+   */
+  async expectSaved(): Promise<void> {
+    await expect(this.savedHint).toContainText(
+      'You already saved this BiteTrail to your Bucket list.',
+    );
+    await expect(this.claimButton).toHaveText('Go to saved Bucket list');
+  }
+
+  /**
    * Follows the toast shortcut that the claim raises. It is the only in-app way
    * to the bucket list overview from here, since the trail page has no menu.
+   * It also dismisses the toast, which otherwise covers the footer button.
    */
   async openBucketListsFromToast(): Promise<void> {
     await this.page
@@ -58,11 +70,5 @@ export class BiteTrailPage {
       .getByRole('button', { name: 'Go to Bucket Lists' })
       .click();
     await this.page.waitForURL(/\/my-bucketlists$/);
-  }
-
-  async openSavedBucketList(): Promise<void> {
-    await expect(this.claimButton).toHaveText('Go to saved Bucket list');
-    await this.claimButton.click();
-    await this.page.waitForURL(/\/my-bucketlists\/[^/]+$/);
   }
 }

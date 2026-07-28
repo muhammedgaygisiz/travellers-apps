@@ -182,21 +182,17 @@ test.describe('Discover, save, and rate a BiteTrail', () => {
       )
       .toMatchObject([{ userId: TEST_USERS.default.uid }]);
 
+    // Without leaving the page: claiming reloads the bucket lists, so the trail
+    // knows it is saved right away. Claiming twice would buy the same trail
+    // twice, which is what the immediate flip prevents.
+    await biteTrail.expectSaved();
+
     const bucketLists = new BucketListsPage(page);
     await biteTrail.openBucketListsFromToast();
     await dismissCoachMarks(page);
     await bucketLists.expectList({ name: trailName, biteCount: 2 });
 
-    // Back on the trail, the claim has turned into a shortcut to the list. The
-    // store refreshes bucket lists on entering /my-bucketlists, so this state is
-    // only settled once that page has been visited.
-    await bucketLists.backButton.click();
-    await page.waitForURL(new RegExp(`/bite-trail/${trailId}$`));
-    await expect(biteTrail.savedHint).toContainText(
-      'You already saved this BiteTrail to your Bucket list.',
-    );
-
-    await biteTrail.openSavedBucketList();
+    await bucketLists.openDetails(trailName);
     await dismissCoachMarks(page);
 
     const home = new HomePage(page);

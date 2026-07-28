@@ -58,6 +58,10 @@ export const shouldLoadBucketlists = (): UnaryFunction<
         return true;
       }
 
+      if (action.type === BucketlistActions.savedBiteTrailAsBucketList.type) {
+        return true;
+      }
+
       return false;
     }),
   );

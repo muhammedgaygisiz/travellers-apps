@@ -5,7 +5,11 @@
     <h1 class="ion-margin-bottom">{{ bucketlist()?.name }}</h1>
 
     @if (existingRating()) {
-    <ion-text color="secondary" class="ion-margin-bottom ion-display-block">
+    <ion-text
+      color="secondary"
+      class="ion-margin-bottom ion-display-block"
+      data-testid="rate-bucketlist-existing"
+    >
       {{ 'you-already-rated-this-bite-trail' | transloco }}
     </ion-text>
     }
@@ -28,6 +32,7 @@
       <ion-button
         expand="block"
         class="ion-margin-top"
+        data-testid="rate-bucketlist-submit"
         (click)="onSubmit()"
         [disabled]="!ratingFormGroup.valid || !!existingRating() || isSubmitting()"
       >

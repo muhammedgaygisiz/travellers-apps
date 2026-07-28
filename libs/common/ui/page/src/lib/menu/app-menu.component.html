@@ -31,13 +31,19 @@
         </ion-item>
       }
       @if (showMyBucketlists()) {
-        <ion-item (click)="menuNavigate.emit('my-bucketlists')">
+        <ion-item
+          data-testid="menu-my-bucketlists"
+          (click)="menuNavigate.emit('my-bucketlists')"
+        >
           <ion-icon name="bookmark-outline" slot="start" />
           <ng-container>{{ 'my-bucket-lists' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showMarketPlaceButton()) {
-        <ion-item (click)="menuNavigate.emit('market-place')">
+        <ion-item
+          data-testid="menu-market-place"
+          (click)="menuNavigate.emit('market-place')"
+        >
           <ion-icon name="storefront-outline" slot="start" />
           <ng-container>{{ 'market-place' | transloco }}</ng-container>
         </ion-item>
@@ -49,13 +55,19 @@
         </ion-item>
       }
       @if (showLeaderboardButton()) {
-        <ion-item (click)="menuNavigate.emit('leaderboard')">
+        <ion-item
+          data-testid="menu-leaderboard"
+          (click)="menuNavigate.emit('leaderboard')"
+        >
           <ion-icon name="star-outline" slot="start" />
           <ng-container>{{ 'leaderboard' | transloco }}</ng-container>
         </ion-item>
       }
       @if (showSettingsButton()) {
-        <ion-item (click)="menuNavigate.emit('settings')">
+        <ion-item
+          data-testid="menu-settings"
+          (click)="menuNavigate.emit('settings')"
+        >
           <ion-icon name="settings-outline" slot="start" />
           <ng-container>{{ 'settings' | transloco }}</ng-container>
         </ion-item>

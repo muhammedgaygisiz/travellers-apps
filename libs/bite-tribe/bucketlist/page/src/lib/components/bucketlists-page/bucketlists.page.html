@@ -40,6 +40,7 @@
     >
       @for (bucketlist of bucketlists(); track bucketlist.id) {
       <ion-item
+        data-testid="bucketlist-item"
         [button]="true"
         (click)="gotoBucketlistDetails.emit(bucketlist.id)"
       >
@@ -76,6 +77,7 @@
             <ion-button
               size="small"
               color="tertiary"
+              data-testid="bucketlist-rate"
               (click)="onRateBucketlist(bucketlist.id, $event)"
             >
               {{ 'rating' | transloco }}

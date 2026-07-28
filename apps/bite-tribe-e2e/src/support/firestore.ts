@@ -114,6 +114,31 @@ export const getBiteByName = (
 ): Promise<Record<string, unknown> | undefined> =>
   getDocumentByStringField(page, 'bites', 'name', biteName);
 
+/**
+ * Every document of a collection or subcollection, decoded. Used where the
+ * assertion is about how many documents a flow wrote (a BiteTrail's `sells`
+ * entries, say) rather than about one known document path.
+ */
+export const listFirestoreCollection = async (
+  page: Page,
+  collectionPath: string,
+): Promise<Array<Record<string, unknown>>> => {
+  const response = await page.request.get(
+    `${FIRESTORE_EMULATOR_URL}/${collectionPath}`,
+    { headers: { Authorization: 'Bearer owner' } },
+  );
+
+  if (!response.ok()) throw new Error(await response.text());
+
+  const { documents } = (await response.json()) as {
+    documents?: FirestoreDocument[];
+  };
+
+  return (documents ?? []).map((document) =>
+    decodeFields(document.fields ?? {}),
+  );
+};
+
 export const getFirestoreDocument = async (
   page: Page,
   documentPath: string,

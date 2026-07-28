@@ -9,7 +9,7 @@
     <h1 class="ion-margin-bottom">{{ 'settings' | transloco }}</h1>
 
     @if (showEmailVerificationPrompt()) {
-      <ion-card>
+      <ion-card data-testid="settings-email-verification">
         <ion-card-content>
           <div class="ion-display-flex ion-flex-column">
             <div class="ion-display-flex ion-flex-row ion-align-items-center">
@@ -82,6 +82,7 @@
             <ion-label>{{ 'theme' | transloco }}</ion-label>
             <ion-select
               slot="end"
+              data-testid="settings-theme"
               placeholder="{{ 'light' | transloco }}"
               interface="popover"
               formControlName="theme"
@@ -95,14 +96,20 @@
               </ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-item (click)="currencyModal.present()">
+          <ion-item
+            data-testid="settings-currency"
+            (click)="currencyModal.present()"
+          >
             <ion-label>{{ 'preferred-currency' | transloco }}</ion-label>
             <ion-text slot="end">
               {{ selectedCurrencyName() }}
               <ion-icon name="chevron-expand-outline" />
             </ion-text>
           </ion-item>
-          <ion-item (click)="favoriteModal.present()">
+          <ion-item
+            data-testid="settings-favorite-currencies"
+            (click)="favoriteModal.present()"
+          >
             <ion-label>{{ 'favorite-currencies' | transloco }}</ion-label>
             <ion-text slot="end" class="favorite-currencies-value">
               <div
@@ -117,6 +124,7 @@
             <ion-label>{{ 'language' | transloco }}</ion-label>
             <ion-select
               slot="end"
+              data-testid="settings-language"
               placeholder="{{ 'english' | transloco }}"
               interface="modal"
               formControlName="language"
@@ -163,6 +171,7 @@
             >{{ 'logout' | transloco }}
           </ion-button>
           <ion-button
+            data-testid="settings-save"
             [disabled]="!settingsForm.valid || settingsForm.pristine"
             (click)="saveSettings()"
             >{{ 'save-changes' | transloco }}

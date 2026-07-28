@@ -23,30 +23,49 @@ Record the actual version, build number and commit SHA used, because the numbers
 
 ## How To Produce The Build
 
-`pipeline.yml` has no native job. CI runs setup, lint, stylelint, tests, loki, e2e and the two web app builds and deploys, and nothing in it touches Capacitor, Gradle or Xcode. There is therefore no CI-built Android or iOS artifact to test, and producing one is separate work tracked outside this charter.
+`pipeline.yml` has no native job. CI runs setup, lint, stylelint, tests, loki, e2e and the two web app builds and deploys, and nothing in it touches Capacitor, Gradle or Xcode. There is therefore no CI-built Android or iOS artifact to test. [Issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181) tracks signed, commit-traceable Android and iOS CI artifacts.
 
-The native wrappers bundle `dist/apps/bite-tribe`, so the build is a local one and its safety comes from the production configuration plus an explicit check:
+The release-candidate pass must use the same distribution route as testers:
+
+- iOS uses the named TestFlight build.
+- Android uses the named Google Play Open Testing release.
+- Web uses the deployed production-configuration build.
+
+The native wrappers bundle `dist/apps/bite-tribe`. Producing the store artifacts starts from a local production build, whose safety comes from the production configuration plus an explicit check:
 
 1. `npx nx build bite-tribe --configuration=production`
 2. Confirm the bundle is clean before it is wrapped. The environment plugin strips `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN` and `NX_APP_BITE_TRIBE_IS_DEV` only when `NX_TASK_TARGET_CONFIGURATION` is `production`, so a build made through any other path keeps them. Grep the emitted JavaScript in `dist/apps/bite-tribe` for the debug token value and for `IS_DEV` and expect no match.
 3. `npx nx sync bite-tribe-ios` and `npx nx sync bite-tribe-android`.
-4. Archive and install from Xcode and Android Studio.
+4. Archive/upload from Xcode and Android Studio, distribute through TestFlight and Google Play Open Testing, and test the resulting store-installed artifacts.
 
 Step 2 is not optional. A registered debug token bypasses App Check entirely, which would defeat the enforced-mode gate this pass is meant to verify.
 
+Until issue #1181 lands, every native release artifact is produced manually on a workstation. The explicit production-bundle check makes that acceptable for this release-candidate pass, but it does not make the process reproducible: the store artifact is not automatically tied to a commit, shared toolchain, signing job, or retained CI output. Record the source commit, local toolchain, signing route, and store upload manually for every tested native build.
+
 Web verification against the emulator is a preparation step, not the pass. The web half of the pass runs against a production-configuration build.
+
+## Store Distribution Baseline
+
+The first execution session found that the store artifacts still carried build 87 while the charter and current wrappers expected build 88. These records identify the old baseline; they are not the final release-candidate artifacts.
+
+| Platform | Distribution          | Version    | Status                                             | Store timestamp              |
+| -------- | --------------------- | ---------- | -------------------------------------------------- | ---------------------------- |
+| iOS      | TestFlight            | 1.0.1 (87) | Testing; internal and external tester groups       | Uploaded 26 July 2026, 18:13 |
+| Android  | Google Play Open Test | 1.0.1 (87) | Available to testers; full rollout, 12/177 regions | Released 26 July 2026, 19:00 |
+
+Build 87 predates the failed-photo state and retry workflow delivered in commit `691fab5e`. Build 88 or newer must be distributed before the release-candidate pass can be completed. Record the exact commit SHA used to produce that replacement artifact; the store consoles do not expose it.
 
 ## Device Matrix
 
 Fill in the actual hardware during execution. The minimum is one physical device per native platform; simulators and emulators do not count for permissions, notifications, camera or App Check.
 
-| Platform | Device | OS version | Physical or virtual | Notes                        |
-| -------- | ------ | ---------- | ------------------- | ---------------------------- |
-| iOS      |        |            | Physical            | Must be a real device        |
-| iOS      |        |            | Simulator           | Optional second OS version   |
-| Android  |        |            | Physical            | Must be a real device        |
-| Android  |        |            | Emulator            | Optional older API level     |
-| Web      |        |            |                     | Chrome, plus Safari on macOS |
+| Platform | Device         | OS version | Physical or virtual | Notes                                                        |
+| -------- | -------------- | ---------- | ------------------- | ------------------------------------------------------------ |
+| iOS      | iPhone 12 mini | 26.5.2     | Physical            | Preliminary TestFlight build 87 run; build 88 rerun required |
+| iOS      |                |            | Simulator           | Optional second OS version                                   |
+| Android  |                |            | Physical            | Must be a real device                                        |
+| Android  |                |            | Emulator            | Optional older API level                                     |
+| Web      |                |            |                     | Chrome, plus Safari on macOS                                 |
 
 Cover the oldest supported OS if a device is available. The lowest supported levels are Android API 24 and iOS 15.6, and neither has ever been exercised deliberately.
 
@@ -66,7 +85,7 @@ Cover the oldest supported OS if a device is available. The lowest supported lev
 
 ## Android
 
-Install the CI-built artifact on a physical device, then execute:
+Install the named Google Play Open Testing artifact on a physical device, then execute:
 
 1. Registration, the blocking onboarding assistant, and continuation to the home page.
 2. Login, logout, and session restore after a cold start.
@@ -119,9 +138,71 @@ Anything else found is filed, triaged, and either fixed under issue 1177 or acce
 
 Record one row per platform per execution. Keep previous rows when re-running after fixes.
 
-| Date | Platform | Build | Device | Result | Defects filed |
-| ---- | -------- | ----- | ------ | ------ | ------------- |
-|      |          |       |        |        |               |
+| Date         | Platform | Build                 | Device                     | Result                                                                                        | Defects filed                                                                                                                                               |
+| ------------ | -------- | --------------------- | -------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 28 July 2026 | iOS      | TestFlight 1.0.1 (87) | iPhone 12 mini, iOS 26.5.2 | Preliminary partial pass; not release-candidate evidence because build 88 was not distributed | Issues [#1182](https://github.com/muhammedgaygisiz/travellers-apps/issues/1182) to [#1190](https://github.com/muhammedgaygisiz/travellers-apps/issues/1190) |
+
+## Preliminary iOS Execution - Build 87
+
+### Scope And Outcome
+
+The 28 July 2026 session exercised the store-installed TestFlight build 87 on a physical iPhone 12 mini running iOS 26.5.2 against the production backend. It established a useful baseline but cannot satisfy issue 1176 because build 87 does not contain the failed-photo state and retry workflow required by the charter. Build 88 was present in the native wrapper version files but had not yet been uploaded to TestFlight or Google Play Open Testing.
+
+### Passed Checks
+
+- Cold start restored the existing session and reached the Home feed without an App Check gate or startup error.
+- A Bite was created with a gallery photo. The photo uploaded successfully, remained visible after reopening, and the selected restaurant, price, and EUR currency were correct.
+- Map position, marker selection, Bite drawer, pan/zoom stability, and Bite navigation worked without an unexpected camera jump.
+- Bite, restaurant, and city search each returned and opened the expected result.
+- A Bite could be added to a Bucket List, swiped to tried, undone, and reopened with the final state preserved.
+- The local gallery opened, contained the newly created Bite photo, and displayed it correctly.
+- A restaurant opened from a Bite, its menu and a menu item rendered, and back navigation returned to the Bite.
+- A shared `https://bite-tribe.web.app/bite/...` link opened the correct Bite in the native app.
+- Background/foreground restoration, force-quit restart, logout/login, Home feed reload, and restoration of the user's existing data worked.
+- Email/password registration succeeded and entered the blocking onboarding assistant.
+- Identity and profile photo, public visibility, currency override, favorite currency, language, location, notifications, and completion steps all persisted.
+- The verification email link worked, verified the account, and removed the in-app verification prompt without an app restart.
+- With iOS location permission set to Never, Bite creation remained usable: a restaurant could be selected manually and EUR was inferred from the selected restaurant.
+- A previous visit in Jordan could be selected through Google Places, an older photo could be chosen, and JOD was inferred from the restaurant location. The Bite was intentionally not saved, so the final posting-later write remains unverified.
+- The public `/privacy` and `/account-deletion` routes loaded in Safari.
+
+### Filed Findings To Triage
+
+1. **[#1182](https://github.com/muhammedgaygisiz/travellers-apps/issues/1182): Account deletion is not available end to end.** The native app exposes no visible Privacy Policy or Account Deletion entry. The public account-deletion page only instructs the user to send an email and does not delete the account. This is a release-candidate blocker candidate because the charter identifies account deletion as a store-review requirement.
+2. **[#1183](https://github.com/muhammedgaygisiz/travellers-apps/issues/1183): Location denial recovery is unclear.** After changing iOS location access to Never, the app did not explain the denial or open the iOS app-settings page. Manual recovery in iOS Settings worked and the position appeared afterward.
+3. **[#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184): Push notification settings cannot be changed.** iOS notifications and the stored app preference were on, but the Push Notifications toggle on the app Settings page was disabled. This conflicts with onboarding copy that says notifications can be changed later in Settings.
+4. **[#1185](https://github.com/muhammedgaygisiz/travellers-apps/issues/1185): Registration transition can look unresponsive.** Registration succeeded, but the transition into onboarding took long enough without visible feedback that the tester could not tell whether the tap had worked.
+5. **[#1186](https://github.com/muhammedgaygisiz/travellers-apps/issues/1186): Immediate language switching exposes a translation key.** English was initially selected. After choosing German, the UI did not change immediately and the transition briefly displayed `onboarding-advancing` rather than readable copy. The next Location step rendered in German.
+6. **[#1187](https://github.com/muhammedgaygisiz/travellers-apps/issues/1187): Favorite-currency selection is not self-explanatory.** Adding EUR required tapping a heart icon whose action was not initially understood.
+7. **[#1188](https://github.com/muhammedgaygisiz/travellers-apps/issues/1188): Profile visibility is not visible on the normal profile page.** The saved public state could only be confirmed by entering profile edit.
+8. **[#1189](https://github.com/muhammedgaygisiz/travellers-apps/issues/1189): Verification resend lacks visible confirmation.** The resend action showed no clear in-app success message. Two messages were present afterward, consistent with the initial registration email plus the manual resend, and the newer link worked.
+9. **[#1190](https://github.com/muhammedgaygisiz/travellers-apps/issues/1190): Profile deep links are not represented by the current product flow.** Bite sharing and native opening worked, but no profile-sharing link or corresponding native handler was available for the profile deep-link check named in the charter.
+
+### Not Executed Or Not Proven On Build 87
+
+- Failed image-upload state and retry with the retained local copy: build 87 does not contain the implementation.
+- Retry through the local-image picker when the original local copy is unavailable.
+- Ranking-change notification delivery.
+- A fresh iOS photo-permission prompt; photo access had already been granted and gallery selection worked.
+- A fresh iOS notification-permission prompt; the OS grant already existed.
+- Crashlytics non-fatal delivery, Analytics DebugView events, and the key metrics dashboard.
+- App Check enforced-mode refusal and retry gate. A normal production session started, but that does not prove the build carried `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true`.
+- Final save for the vacation/posting-later scenario.
+- Business app manual coverage.
+- Android and web execution.
+
+### Build 88 Resume Checklist
+
+After build 88 or newer is available in both stores:
+
+1. Record the exact version, build number, commit SHA, TestFlight upload, and Google Play release.
+2. Because [issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181) is still open, record the workstation toolchain and manual signing/upload route used for build 88.
+3. Repeat the iOS startup/login smoke and create a Bite with a successful photo upload.
+4. Force the photo upload offline, verify the failed state, restore connectivity, and verify retry with the retained local copy.
+5. Exercise the fallback retry path where the original local copy is unavailable and the app asks for an image from the local gallery.
+6. Recheck Bucket List swipe/undo, map position and camera stability, search, local gallery, restaurant menu, and Bite deep link because they are release-critical native journeys.
+7. Reproduce and triage or resolve each filed finding above; do not silently carry build-87 findings forward as passes.
+8. Complete notification delivery, Crashlytics, DebugView, dashboard, enforced App Check, posting-later save, Business app, Android, and web checks.
 
 ## Defect Handling
 
@@ -138,3 +219,4 @@ Record one row per platform per execution. Keep previous rows when re-running af
 - [[Implementation - Testing]]
 - [[Implementation - Release And Build Workflow]]
 - [[epic-907]]
+- [Issue #1181 - signed Android and iOS CI builds](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)

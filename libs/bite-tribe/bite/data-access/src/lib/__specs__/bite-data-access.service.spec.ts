@@ -4,9 +4,11 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { NetworkStatusService } from 'common/networkstatus';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type {
   Bite,
   CreateAndUploadImageCallbackParams,
+  Geopoint,
   UploadParams,
 } from 'model';
 import { of } from 'rxjs';
@@ -46,8 +48,16 @@ describe(BiteDataAccessService.name, () => {
     setBiteImageStatus: jest.Mock;
     findLocalBiteImage: jest.Mock;
     uploadBiteImageFromLocalFile: jest.Mock;
+    searchPlaces: jest.Mock;
+    searchNearbyPlaces: jest.Mock;
+    getCurrencyByPosition: jest.Mock;
   };
-  let store: { saveNewBite: jest.Mock; savedNewBite: jest.Mock };
+  let store: {
+    saveNewBite: jest.Mock;
+    savedNewBite: jest.Mock;
+    saveEditedBite: jest.Mock;
+    setEditingBite: jest.Mock;
+  };
   let analytics: { logEvent: jest.Mock };
 
   beforeEach(() => {
@@ -62,8 +72,16 @@ describe(BiteDataAccessService.name, () => {
       setBiteImageStatus: jest.fn().mockResolvedValue(undefined),
       findLocalBiteImage: jest.fn().mockResolvedValue(undefined),
       uploadBiteImageFromLocalFile: jest.fn().mockResolvedValue(undefined),
+      searchPlaces: jest.fn().mockResolvedValue([]),
+      searchNearbyPlaces: jest.fn().mockResolvedValue([]),
+      getCurrencyByPosition: jest.fn().mockResolvedValue(undefined),
     };
-    store = { saveNewBite: jest.fn(), savedNewBite: jest.fn() };
+    store = {
+      saveNewBite: jest.fn(),
+      savedNewBite: jest.fn(),
+      saveEditedBite: jest.fn(),
+      setEditingBite: jest.fn(),
+    };
     analytics = { logEvent: jest.fn() };
 
     TestBed.configureTestingModule({
@@ -93,6 +111,43 @@ describe(BiteDataAccessService.name, () => {
     });
 
     service = TestBed.inject(BiteDataAccessService);
+  });
+
+  describe('biteLoader', () => {
+    it('loads a bite document and preserves its id', async () => {
+      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        snapshot: {
+          id: 'bite-123',
+          data: { name: 'Pizza' },
+        },
+      } as Awaited<ReturnType<typeof FirebaseFirestore.getDocument>>);
+
+      await expect(
+        service.biteLoader({
+          params: { biteId: 'bite-123' },
+          abortSignal: new AbortController().signal,
+          previous: { status: 'idle' },
+        }),
+      ).resolves.toEqual({ id: 'bite-123', name: 'Pizza' });
+      expect(FirebaseFirestore.getDocument).toHaveBeenCalledWith({
+        reference: 'bites/bite-123',
+      });
+    });
+
+    it('does not read Firestore without a bite id', async () => {
+      const getDocument = jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockClear();
+
+      await expect(
+        service.biteLoader({
+          params: { biteId: undefined },
+          abortSignal: new AbortController().signal,
+          previous: { status: 'idle' },
+        }),
+      ).resolves.toBeUndefined();
+      expect(getDocument).not.toHaveBeenCalled();
+    });
   });
 
   describe('retryImageUpload', () => {
@@ -251,6 +306,48 @@ describe(BiteDataAccessService.name, () => {
         expect.not.objectContaining({ imageStatus: expect.anything() }),
       );
       expect(api.uploadImage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('editing and lookup commands', () => {
+    it('delegates an edited bite to the store', async () => {
+      const bite = biteWithImage();
+
+      await service.submitEditedBite(bite);
+
+      expect(store.saveEditedBite).toHaveBeenCalledWith(bite);
+    });
+
+    it('sets the bite being edited', () => {
+      const bite = { id: 'bite-123', name: 'Pizza' };
+
+      service.setEditingBite(bite);
+
+      expect(store.setEditingBite).toHaveBeenCalledWith(bite);
+    });
+
+    it('updates the Google place search text', () => {
+      service.searchGooglePlaces('pizza');
+
+      expect(service.googlePlaceSearchText()).toBe('pizza');
+    });
+
+    it('updates the nearby Google places position', () => {
+      const position = { latitude: 41.39, longitude: 2.17 } as Geopoint;
+
+      service.loadNearbyGooglePlaces(position);
+
+      expect(service.nearbyGooglePlacesPosition()).toBe(position);
+    });
+
+    it('delegates currency lookup to the API', async () => {
+      const position = { latitude: 41.39, longitude: 2.17 } as Geopoint;
+      api.getCurrencyByPosition.mockResolvedValue('EUR');
+
+      await expect(service.getCurrencyByPosition(position)).resolves.toBe(
+        'EUR',
+      );
+      expect(api.getCurrencyByPosition).toHaveBeenCalledWith(position);
     });
   });
 });

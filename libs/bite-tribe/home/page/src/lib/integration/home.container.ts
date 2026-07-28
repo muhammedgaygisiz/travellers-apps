@@ -31,6 +31,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
       [showFilters]="false"
       showSearchChip
+      enableImageRetry
+      (retryImageUpload)="service.retryBiteImageUpload($event)"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"

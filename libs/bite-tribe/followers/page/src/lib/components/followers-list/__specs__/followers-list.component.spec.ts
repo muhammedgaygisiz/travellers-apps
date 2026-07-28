@@ -38,6 +38,25 @@ describe(FollowersListComponent.name, () => {
     expect(component).toBeTruthy();
   });
 
+  it('should run the header progress bar while the spinner shows', () => {
+    componentRef.setInput('type', 'followers');
+    componentRef.setInput('users', []);
+    componentRef.setInput('isLoading', true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('ion-spinner')).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+    ).toBeTruthy();
+
+    componentRef.setInput('isLoading', false);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+    ).toBeFalsy();
+  });
+
   describe('toggleTitleText', () => {
     it('should return "Followers" when type is followers', () => {
       componentRef.setInput('type', 'followers');

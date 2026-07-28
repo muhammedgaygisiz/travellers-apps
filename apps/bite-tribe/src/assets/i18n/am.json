@@ -208,6 +208,11 @@
   "bite-created-successfully": "ባይት በተሳካ ሁኔታ ተፈጥሯል!",
   "image-uploaded-successfully": "ምስሉ በተሳካ ሁኔታ ተጭኗል!",
   "uploading-keep-app-open": "ፎቶ በመስቀል ላይ ነው — መተግበሪያውን ክፍት ያድርጉት",
+  "loading-photo": "ፎቶ በመጫን ላይ…",
+  "image-upload-failed": "ፎቶውን መጫን አልተቻለም",
+  "retry-upload": "ጭነትን እንደገና ሞክር",
+  "choose-photo": "ፎቶ ይምረጡ",
+  "image-upload-retry-failed": "ጭነቱን መጀመር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
   "bite-updated-successfully": "ባይቱ በተሳካ ሁኔታ ተዘምኗል!",
   "bite-deleted-successfully": "ባይቱ በተሳካ ሁኔታ ተሰርዟል!",
   "creating-bite": "ባይት እየተፈጠሩ ነው...",
@@ -322,5 +327,6 @@
   "display-name-already-taken": "ይህ የማሳያ ስም አስቀድሞ ተይዟል። እባክዎ ሌላ ይምረጡ።",
   "display-name-invalid": "እባክዎ ትክክለኛ የማሳያ ስም ያስገቡ።",
   "display-name-could-not-be-saved": "የማሳያ ስምዎን ማስቀመጥ አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
-  "my-position": "የእኔ አካባቢ"
+  "my-position": "የእኔ አካባቢ",
+  "loading": "በመጫን ላይ"
 }

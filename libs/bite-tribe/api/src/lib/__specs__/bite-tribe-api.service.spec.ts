@@ -78,6 +78,9 @@ class BiteApiMock {
   getTotalNumberOfBites = jest.fn();
   uploadImage = jest.fn();
   updateImagePathInBite = jest.fn();
+  setImageStatus = jest.fn();
+  findLocalImage = jest.fn();
+  uploadImageFromLocalFile = jest.fn();
 }
 
 class SettingsApiMock {
@@ -158,6 +161,56 @@ describe(BiteTribeApiService.name, () => {
           .mockReturnValue(Promise.resolve({ USD: 1, EUR: 0.85 }));
         service.getExchangeRates();
         expect(getExchangeRatesSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('findLocalBiteImage', () => {
+    it('should call findLocalImage on BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const spy = jest
+          .spyOn(biteApiService, 'findLocalImage')
+          .mockResolvedValue(undefined);
+
+        service.findLocalBiteImage('bite-id');
+
+        expect(spy).toHaveBeenCalledWith('bite-id');
+      },
+    ));
+  });
+
+  describe('uploadBiteImageFromLocalFile', () => {
+    it('should call uploadImageFromLocalFile on BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const spy = jest
+          .spyOn(biteApiService, 'uploadImageFromLocalFile')
+          .mockResolvedValue(undefined);
+        const callback = jest.fn();
+
+        service.uploadBiteImageFromLocalFile(
+          'bite-id',
+          'file:///x.jpg',
+          callback,
+        );
+
+        expect(spy).toHaveBeenCalledWith('bite-id', 'file:///x.jpg', callback);
+      },
+    ));
+  });
+
+  describe('setBiteImageStatus', () => {
+    it('should call setImageStatus on BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const setImageStatusSpy = jest
+          .spyOn(biteApiService, 'setImageStatus')
+          .mockResolvedValue(undefined);
+
+        service.setBiteImageStatus('bite-id', 'failed');
+
+        expect(setImageStatusSpy).toHaveBeenCalledWith('bite-id', 'failed');
       },
     ));
   });

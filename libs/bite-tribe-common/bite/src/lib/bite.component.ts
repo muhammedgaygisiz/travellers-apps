@@ -21,7 +21,6 @@ import {
   IonContent,
   IonHeader,
   IonModal,
-  IonSpinner,
   IonText,
   IonTitle,
   IonToolbar,
@@ -29,6 +28,8 @@ import {
 import { Bite, LikeClick } from 'model';
 import { LikesComponent } from './likes/likes.component';
 import { getLikeCounts, getUserLikeType } from './utils/like-counts';
+import { getEffectiveImageStatus } from './utils/image-status';
+import { BiteImageStatusComponent } from './bite-image-status/bite-image-status.component';
 import { WithFirstLetterUpperCasePipe } from './pipes/with-first-letter-upper-case.pipe';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
@@ -59,7 +60,6 @@ const CANCEL = 'cancel';
     StarRatingComponent,
     IonAlert,
     IonModal,
-    IonSpinner,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -67,6 +67,7 @@ const CANCEL = 'cancel';
     DistanceComponent,
     GetImagePipe,
     TranslocoPipe,
+    BiteImageStatusComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -81,12 +82,14 @@ export class BiteComponent {
   showEditButton = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
   readonly = input(false, { transform: booleanAttribute });
+  enableImageRetry = input(false, { transform: booleanAttribute });
 
   biteClick = output<Bite>();
   likeButtonClick = output<LikeClick>();
   gotoEdit = output<Bite>();
   deleteBite = output<Bite>();
   rateNowClick = output<{ bite: Bite; rating: number }>();
+  retryImageUpload = output<Bite>();
 
   likeCounts = computed(() => getLikeCounts(this.bite()));
   userLikeType = computed(() => getUserLikeType(this.bite(), this.userId()));
@@ -113,6 +116,15 @@ export class BiteComponent {
 
     this.previousImageStatus = status;
   });
+
+  /**
+   * Decides whether the photo box shows the photo or a placeholder. The
+   * placeholder itself, and the rule about who is told to keep their app open,
+   * live in {@link BiteImageStatusComponent}. See GitHub issue #1168.
+   */
+  protected readonly imageStatus = computed(() =>
+    getEffectiveImageStatus(this.bite()),
+  );
 
   isOwnUnratedBite = computed(() => {
     const bite = this.bite();

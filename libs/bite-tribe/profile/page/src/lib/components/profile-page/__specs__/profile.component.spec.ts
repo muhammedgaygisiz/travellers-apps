@@ -124,6 +124,20 @@ describe('ProfileComponent', () => {
       expect(nativeElement.querySelector('.no-profile-message')).toBeFalsy();
     });
 
+    it('should run the header progress bar while the skeleton shows', () => {
+      compRef.setInput('isLoading', true);
+      compRef.setInput('user', undefined);
+
+      fixture.detectChanges();
+
+      const nativeElement = fixture.nativeElement as HTMLElement;
+
+      expect(nativeElement.querySelector('profile-skeleton')).toBeTruthy();
+      expect(
+        nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+      ).toBeTruthy();
+    });
+
     it('should render the not-available message when loading finished without a profile', () => {
       compRef.setInput('isLoading', false);
       compRef.setInput('user', undefined);

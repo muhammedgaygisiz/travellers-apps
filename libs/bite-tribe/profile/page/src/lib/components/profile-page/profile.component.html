@@ -9,6 +9,7 @@
     showFooter: false,
   }"
   [isAuthenticated]="isAuthenticated()"
+  [loading]="showSkeleton()"
   (logoutClick)="logoutClick.emit()"
   (menuNavigate)="menuNavigate.emit($event)"
 >
@@ -99,6 +100,8 @@
                 [bite]="bite"
                 [userId]="currentUserId"
                 [showEditButton]="false"
+                [enableImageRetry]="enableImageRetry()"
+                (retryImageUpload)="retryImageUpload.emit($event)"
                 (biteClick)="biteClick.emit($event)"
                 (likeButtonClick)="likeButtonClick.emit($event)"
               />

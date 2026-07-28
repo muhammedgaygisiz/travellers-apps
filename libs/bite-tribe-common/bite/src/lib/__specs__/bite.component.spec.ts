@@ -14,6 +14,7 @@ import { OverlayEventDetail } from '@ionic/core';
 import { addNecessaryIcons } from 'utils';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
+import { STALE_PENDING_UPLOAD_MS } from '../utils/image-status';
 
 jest.mock('heic2any', () => jest.fn());
 
@@ -90,6 +91,83 @@ describe('BiteComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('image status', () => {
+    const queryFailed = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="bite-image-failed"]');
+
+    const setPendingBite = (biteUserId?: string): void => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        userId: biteUserId,
+        image: '',
+        imagePath: undefined,
+        imageStatus: 'pending',
+        createdAtTimestamp: Date.now(),
+      });
+      fixture.detectChanges();
+    };
+
+    it('should show the uploading overlay while the upload is pending', () => {
+      setPendingBite('user1');
+
+      expect(fixture.nativeElement.querySelector('ion-spinner')).toBeTruthy();
+      expect(queryFailed()).toBeNull();
+    });
+
+    it('should stop claiming an abandoned upload is still running', () => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        image: '',
+        imagePath: undefined,
+        imageStatus: 'pending',
+        createdAtTimestamp: Date.now() - STALE_PENDING_UPLOAD_MS,
+      });
+      fixture.detectChanges();
+
+      expect(queryFailed()).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('ion-spinner')).toBeNull();
+    });
+
+    it('should replace the uploading overlay once the upload failed', () => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        image: '',
+        imagePath: undefined,
+        imageStatus: 'failed',
+      });
+      fixture.detectChanges();
+
+      expect(queryFailed()).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('ion-spinner')).toBeNull();
+    });
+
+    it('should not pass a failed upload off as a photo the poster still holds locally', () => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        image: 'data:image/jpeg;base64,local-copy',
+        imagePath: undefined,
+        imageStatus: 'failed',
+      });
+      fixture.detectChanges();
+
+      expect(queryFailed()).toBeTruthy();
+      expect(
+        fixture.nativeElement.querySelector('img.cursor-pointer'),
+      ).toBeNull();
+    });
+
+    it('should show the image once the upload finished', () => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        imageStatus: 'uploaded',
+      });
+      fixture.detectChanges();
+
+      expect(queryFailed()).toBeNull();
+      expect(fixture.nativeElement.querySelector('ion-spinner')).toBeNull();
+    });
   });
 
   it('should emit biteClick when bite is clicked', (done) => {

@@ -102,3 +102,46 @@ export const noBite: Story = {
     bite: undefined,
   },
 };
+
+/**
+ * The photo has not arrived yet. The poster is the one holding the transfer, so
+ * only they are asked to keep the app open. See GitHub issue #1168.
+ */
+export const pendingImageForOwner: Story = {
+  args: {
+    ...Default.args,
+    userId: '1',
+    bite: {
+      id: 'botanic-breeze',
+      image: '',
+      imagePath: undefined,
+      imageStatus: 'pending',
+      userId: '1',
+      createdAtTimestamp: Date.now(),
+    } as unknown as Bite,
+  },
+};
+
+/** The same Bite seen by anyone else, who cannot influence that upload. */
+export const pendingImageForViewer: Story = {
+  args: {
+    ...pendingImageForOwner.args,
+    bite: {
+      ...(pendingImageForOwner.args?.bite as Bite),
+      userId: 'someone-else',
+    },
+  },
+};
+
+/** An upload that errored, or one abandoned long enough to count as failed. */
+export const failedImage: Story = {
+  args: {
+    ...Default.args,
+    bite: {
+      id: 'botanic-breeze',
+      image: '',
+      imagePath: undefined,
+      imageStatus: 'failed',
+    } as unknown as Bite,
+  },
+};

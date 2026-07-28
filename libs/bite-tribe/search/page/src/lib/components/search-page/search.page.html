@@ -1,5 +1,6 @@
 <ta-page
   [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
+  [loading]="isLoading()"
 >
   <ion-content [class.map-view]="viewMode() === 'map' && canShowMap()">
     <div class="search-controls ion-padding">

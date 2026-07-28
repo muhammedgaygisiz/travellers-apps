@@ -2,6 +2,7 @@
 <ta-page
   [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
   [isAuthenticated]="isAuthenticated()"
+  [loading]="!biteData"
   (logoutClick)="logoutClick.emit()"
 >
   <ion-content>
@@ -10,10 +11,22 @@
       [animated]="true"
       style="width: 100vw; height: 40vh; border-radius: 0; margin: 0"
     />
-    } @let imageSrc = biteData | getImage; @if (imageSrc) {
+    } @let imageSrc = biteData | getImage; @if (biteData) { @if (imageStatus()
+    === 'pending' || imageStatus() === 'failed') {
+    <!-- Same three-way answer as the feed card: on a failed upload the poster
+    still holds the local base64 copy, so the placeholder is checked before the
+    photo to avoid suggesting the upload succeeded. -->
+    <bt-bite-image-status
+      class="dish-image-state"
+      [bite]="biteData"
+      [userId]="userId()"
+      [enableRetry]="enableImageRetry()"
+      (retryImageUpload)="retryImageUpload.emit($event)"
+    />
+    } @else if (imageSrc) {
     <img [src]="imageSrc" class="dish-image" loading="lazy" alt="Dish Image" />
 
-    }
+    } }
 
     <div class="ion-padding">
       @if (biteCreatorData && biteCreatorData.public) {

@@ -41,3 +41,14 @@ export const Primary: Story = {
     },
   },
 };
+
+/**
+ * A background refresh of content that is already on screen. The indeterminate
+ * bar sits over the header separator, so the page it reports on does not move.
+ */
+export const Loading: Story = {
+  args: {
+    ...Primary.args,
+    loading: true,
+  },
+};

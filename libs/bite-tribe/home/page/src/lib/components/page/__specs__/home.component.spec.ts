@@ -140,6 +140,38 @@ describe('BiteTribeHomeComponent', () => {
     ).toBeTruthy();
   });
 
+  it('should run the header progress bar while the bite skeleton shows', () => {
+    componentRef.setInput('showSpinner', true);
+    componentRef.setInput('isBitesLoading', true);
+
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+    ).toBeTruthy();
+  });
+
+  it('should stop the header progress bar with the bite skeleton', () => {
+    componentRef.setInput('showSpinner', true);
+    componentRef.setInput('isBitesLoading', true);
+    fixture.detectChanges();
+
+    componentRef.setInput('isBitesLoading', false);
+    fixture.detectChanges();
+    jest.advanceTimersByTime(2000);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+    ).toBeNull();
+  });
+
   it('should call scrollToTop on ionContent when scrollToTop is called', () => {
     fixture.detectChanges();
     const ionContent = component.ionContent();

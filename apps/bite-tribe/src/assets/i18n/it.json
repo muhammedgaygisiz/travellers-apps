@@ -208,6 +208,11 @@
   "bite-created-successfully": "Bite creato con successo!",
   "image-uploaded-successfully": "Immagine caricata con successo!",
   "uploading-keep-app-open": "Caricamento della foto — tieni l’app aperta",
+  "loading-photo": "Caricamento della foto…",
+  "image-upload-failed": "Impossibile caricare la foto",
+  "retry-upload": "Riprova il caricamento",
+  "choose-photo": "Scegli una foto",
+  "image-upload-retry-failed": "Non è stato possibile avviare il caricamento. Riprova.",
   "bite-updated-successfully": "Bite aggiornato con successo!",
   "bite-deleted-successfully": "Bite eliminato con successo!",
   "creating-bite": "Creazione del tuo Bite...",
@@ -322,5 +327,6 @@
   "display-name-already-taken": "Questo nome visualizzato è già in uso. Scegline un altro.",
   "display-name-invalid": "Inserisci un nome visualizzato valido.",
   "display-name-could-not-be-saved": "Non è stato possibile salvare il tuo nome visualizzato. Riprova.",
-  "my-position": "La mia posizione"
+  "my-position": "La mia posizione",
+  "loading": "Caricamento"
 }

@@ -29,6 +29,12 @@ Users can inspect one Bite deeply enough to decide whether the dish is relevant.
   user cannot trigger an action against a Bite that is not there yet. The
   first-visit coach marks for those actions are gated on the loaded Bite, so
   they are unaffected. See GitHub issue #1166.
+- The header photo reports its upload state exactly as the feed card does: an
+  uploading Bite shows the wait message (addressed to the poster, neutral for
+  everyone else) and a failed or long-abandoned upload says so, instead of
+  leaving an unexplained empty header. Both surfaces render the same
+  `bt-bite-image-status` component so they cannot drift. See GitHub issue #1168
+  and [[UC - Create And Maintain Personal Bites]] for the status rules.
 
 ## Supported Evidence
 
@@ -36,6 +42,9 @@ Users can inspect one Bite deeply enough to decide whether the dish is relevant.
 - Bite details page and data-access.
 - Like API.
 - Review API.
+- Playwright E2E coverage of the failed header photo: the reported state, the
+  photo that is withheld rather than shown, and the poster's retry falling back
+  to the local photo picker when this device holds no copy.
 
 ## Related Domains
 

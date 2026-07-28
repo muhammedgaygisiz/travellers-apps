@@ -76,6 +76,8 @@
     [userId]="userId()"
     [showEditButton]="editableBites()"
     [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
+    [enableImageRetry]="enableImageRetry()"
+    (retryImageUpload)="retryImageUpload.emit($event)"
     (biteClick)="biteClick.emit($event)"
     (likeButtonClick)="likeButtonClick.emit($event)"
     (gotoEdit)="gotoEdit.emit($event)"

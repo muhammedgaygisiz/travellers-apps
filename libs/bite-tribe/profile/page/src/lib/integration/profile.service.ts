@@ -1,5 +1,7 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
+import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
+import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { NavController } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
@@ -21,6 +23,8 @@ const TOAST_DURATION_MS = 5000;
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private readonly dataAccess = inject(ProfileDataAccessService);
+  private readonly biteDataAccess = inject(BiteDataAccessService);
+  private readonly localImagePicker = inject(LocalImagePickerService);
   private readonly navController = inject(NavController);
   private readonly location = inject(Location);
   private readonly emailVerification = inject(EmailVerificationService);
@@ -165,5 +169,24 @@ export class ProfileService {
 
   resendEmailVerification(surface: EmailVerificationSurface): Promise<void> {
     return this.emailVerification.resend(surface);
+  }
+
+  /**
+   * Re-sends a Bite photo whose upload never made it, in one of two flows
+   * depending on whether this device still holds the Bite's own copy: a recent
+   * Bite posted from here is re-sent straight away, while an older one — or one
+   * posted from another device — asks the user to pick from the photos saved
+   * locally, the same set the gallery shows. Picking nothing cancels.
+   *
+   * Presenting the picker is a workflow decision, so it lives here rather than
+   * in the card that raised the request. See GitHub issue #1168.
+   */
+  async retryBiteImageUpload(bite: Bite): Promise<void> {
+    const localCopy = await this.biteDataAccess.findLocalImageForBite(bite.id);
+    const fileUri = localCopy?.uri ?? (await this.localImagePicker.pick())?.uri;
+
+    if (fileUri) {
+      await this.biteDataAccess.retryImageUpload(bite, fileUri);
+    }
   }
 }

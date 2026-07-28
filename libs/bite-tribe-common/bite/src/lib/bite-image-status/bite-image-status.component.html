@@ -1,0 +1,32 @@
+@switch (imageStatus()) {
+  @case ('pending') {
+    <div class="image-state" role="status" aria-live="polite">
+      <ion-spinner name="crescent" />
+      <ion-text
+        class="image-state-text smalltext"
+        data-testid="bite-image-pending-text"
+      >
+        {{ pendingTextKey() | transloco }}
+      </ion-text>
+    </div>
+  }
+  @case ('failed') {
+    <div class="image-state" role="status" data-testid="bite-image-failed">
+      <ion-icon name="image-outline" aria-hidden="true" />
+      <ion-text class="image-state-text smalltext">
+        {{ 'image-upload-failed' | transloco }}
+      </ion-text>
+
+      @if (canRetry()) {
+        <ion-button
+          fill="outline"
+          size="small"
+          data-testid="bite-image-retry"
+          (click)="retryImageUpload.emit(bite())"
+        >
+          {{ 'retry-upload' | transloco }}
+        </ion-button>
+      }
+    </div>
+  }
+}

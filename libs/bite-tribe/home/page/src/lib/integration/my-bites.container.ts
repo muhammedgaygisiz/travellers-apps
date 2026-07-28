@@ -23,6 +23,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
       [sorting]="service.myBitesSorting()"
       showSearch
       editableBites
+      enableImageRetry
+      (retryImageUpload)="service.retryBiteImageUpload($event)"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"

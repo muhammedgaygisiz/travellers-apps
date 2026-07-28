@@ -86,6 +86,7 @@ export class BiteTribeHomeComponent {
   enableTriedOutSwipe = input(false, { transform: booleanAttribute });
   triedOutBiteIds = input<string[]>([]);
   showEmailVerificationPrompt = input(false, { transform: booleanAttribute });
+  enableImageRetry = input(false, { transform: booleanAttribute });
 
   readonly logoutClick = output();
   readonly addButtonClick = output();
@@ -109,6 +110,7 @@ export class BiteTribeHomeComponent {
   readonly enableLocation = output<void>();
   readonly triedOutChange = output<{ biteId: string; checked: boolean }>();
   readonly resendEmailVerification = output<void>();
+  readonly retryImageUpload = output<Bite>();
 
   ionContent = viewChild(IonContent);
 

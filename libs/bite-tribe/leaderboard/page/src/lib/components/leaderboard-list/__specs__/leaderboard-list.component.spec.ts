@@ -95,6 +95,23 @@ describe(LeaderboardListComponent.name, () => {
     ]);
   });
 
+  it('should run the header progress bar while the spinner shows', () => {
+    componentRef.setInput('isLoading', true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('ion-spinner')).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+    ).toBeTruthy();
+
+    componentRef.setInput('isLoading', false);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+    ).toBeFalsy();
+  });
+
   it('should track image errors by user id', () => {
     component.onImageError('user-1');
 

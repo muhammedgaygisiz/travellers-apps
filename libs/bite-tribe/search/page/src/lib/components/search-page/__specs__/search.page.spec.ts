@@ -43,6 +43,22 @@ describe(SearchPage.name, () => {
     expect(component.hasSearched()).toBe(false);
   });
 
+  it('should run the header progress bar while a search is loading', () => {
+    componentRef.setInput('isLoading', true);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+    ).toBeTruthy();
+
+    componentRef.setInput('isLoading', false);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+    ).toBeFalsy();
+  });
+
   describe('category selection', () => {
     it('should emit the selected category', () => {
       const emitSpy = jest.spyOn(component.categoryChange, 'emit');

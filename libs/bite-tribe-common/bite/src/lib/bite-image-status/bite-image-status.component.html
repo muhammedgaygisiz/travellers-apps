@@ -16,6 +16,17 @@
       <ion-text class="image-state-text smalltext">
         {{ 'image-upload-failed' | transloco }}
       </ion-text>
+
+      @if (canRetry()) {
+        <ion-button
+          fill="outline"
+          size="small"
+          data-testid="bite-image-retry"
+          (click)="retryImageUpload.emit(bite())"
+        >
+          {{ 'retry-upload' | transloco }}
+        </ion-button>
+      }
     </div>
   }
 }

@@ -1,10 +1,17 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
   input,
+  output,
 } from '@angular/core';
-import { IonIcon, IonSpinner, IonText } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonIcon,
+  IonSpinner,
+  IonText,
+} from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { Bite } from 'model';
 import { getEffectiveImageStatus } from '../utils/image-status';
@@ -20,7 +27,7 @@ import { getEffectiveImageStatus } from '../utils/image-status';
  */
 @Component({
   selector: 'bt-bite-image-status',
-  imports: [IonIcon, IonSpinner, IonText, TranslocoPipe],
+  imports: [IonButton, IonIcon, IonSpinner, IonText, TranslocoPipe],
   templateUrl: 'bite-image-status.component.html',
   styleUrl: 'bite-image-status.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +37,15 @@ export class BiteImageStatusComponent {
 
   /** The signed-in user, used to decide who the pending message speaks to. */
   userId = input<string>();
+
+  /**
+   * Whether this surface can act on a retry. Off by default, so a surface that
+   * does not handle {@link retryImageUpload} shows no button to press.
+   */
+  enableRetry = input(false, { transform: booleanAttribute });
+
+  /** Asks the surface to re-send this Bite's photo. */
+  readonly retryImageUpload = output<Bite>();
 
   /**
    * The stored status, except that a long-abandoned `pending` upload reads as
@@ -45,10 +61,22 @@ export class BiteImageStatusComponent {
    * their app open for a transfer that is not theirs.
    */
   protected readonly pendingTextKey = computed((): string => {
+    return this.isOwnBite() ? 'uploading-keep-app-open' : 'loading-photo';
+  });
+
+  /**
+   * Only the poster is offered the retry: the photo lives on their device, so
+   * nobody else has anything to send.
+   */
+  protected readonly canRetry = computed((): boolean => {
+    return (
+      this.enableRetry() && this.imageStatus() === 'failed' && this.isOwnBite()
+    );
+  });
+
+  private readonly isOwnBite = computed((): boolean => {
     const userId = this.userId();
 
-    return !!userId && this.bite().userId === userId
-      ? 'uploading-keep-app-open'
-      : 'loading-photo';
+    return !!userId && this.bite().userId === userId;
   });
 }

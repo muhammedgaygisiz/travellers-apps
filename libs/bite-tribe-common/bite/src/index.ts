@@ -6,3 +6,5 @@ export * from './lib/utils/getLocalizedCityAndCountry';
 export * from './lib/utils/like-counts';
 export * from './lib/bite-image-status/bite-image-status.component';
 export * from './lib/utils/image-status';
+export * from './lib/local-image-picker/local-image-picker.component';
+export * from './lib/local-image-picker/local-image-picker.service';

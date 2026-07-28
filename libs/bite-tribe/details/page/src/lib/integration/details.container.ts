@@ -28,6 +28,8 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       (removeBiteFromBucketlist)="service.removeBiteFromBucketlist($event)"
       (newList)="service.saveBiteToBucketListWithNewList($event)"
       (likeButtonClick)="service.likeButtonClicked($event)"
+      enableImageRetry
+      (retryImageUpload)="service.retryBiteImageUpload($event)"
       (logoutClick)="service.logout()"
       (restaurantClick)="service.onRestaurantClick($event)"
       (goToProfile)="service.onGoToProfileClick($event)"

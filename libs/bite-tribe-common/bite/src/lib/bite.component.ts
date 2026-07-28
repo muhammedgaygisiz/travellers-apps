@@ -82,12 +82,14 @@ export class BiteComponent {
   showEditButton = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
   readonly = input(false, { transform: booleanAttribute });
+  enableImageRetry = input(false, { transform: booleanAttribute });
 
   biteClick = output<Bite>();
   likeButtonClick = output<LikeClick>();
   gotoEdit = output<Bite>();
   deleteBite = output<Bite>();
   rateNowClick = output<{ bite: Bite; rating: number }>();
+  retryImageUpload = output<Bite>();
 
   likeCounts = computed(() => getLikeCounts(this.bite()));
   userLikeType = computed(() => getUserLikeType(this.bite(), this.userId()));

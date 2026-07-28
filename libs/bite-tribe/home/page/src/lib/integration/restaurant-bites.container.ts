@@ -22,6 +22,8 @@ import { BiteTribeHomeComponent } from '../components/page/home.component';
       [sorting]="service.restaurantBitesSorting()"
       [showMap]="false"
       showSearch
+      enableImageRetry
+      (retryImageUpload)="service.retryBiteImageUpload($event)"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"

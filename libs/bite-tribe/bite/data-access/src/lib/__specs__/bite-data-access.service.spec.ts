@@ -44,6 +44,8 @@ describe(BiteDataAccessService.name, () => {
     saveNewBite: jest.Mock;
     uploadImage: jest.Mock;
     setBiteImageStatus: jest.Mock;
+    findLocalBiteImage: jest.Mock;
+    uploadBiteImageFromLocalFile: jest.Mock;
   };
   let store: { saveNewBite: jest.Mock; savedNewBite: jest.Mock };
   let analytics: { logEvent: jest.Mock };
@@ -58,6 +60,8 @@ describe(BiteDataAccessService.name, () => {
         })),
       uploadImage: jest.fn().mockResolvedValue(undefined),
       setBiteImageStatus: jest.fn().mockResolvedValue(undefined),
+      findLocalBiteImage: jest.fn().mockResolvedValue(undefined),
+      uploadBiteImageFromLocalFile: jest.fn().mockResolvedValue(undefined),
     };
     store = { saveNewBite: jest.fn(), savedNewBite: jest.fn() };
     analytics = { logEvent: jest.fn() };
@@ -89,6 +93,79 @@ describe(BiteDataAccessService.name, () => {
     });
 
     service = TestBed.inject(BiteDataAccessService);
+  });
+
+  describe('retryImageUpload', () => {
+    const failedBite = (): Bite =>
+      ({
+        ...biteWithImage(),
+        id: SAVED_BITE_ID,
+        imageStatus: 'failed',
+      }) as Bite;
+
+    it('should put the bite back to pending before re-sending', async () => {
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+
+      expect(api.setBiteImageStatus).toHaveBeenCalledWith(
+        SAVED_BITE_ID,
+        'pending',
+      );
+      expect(store.savedNewBite).toHaveBeenLastCalledWith(
+        expect.objectContaining({ imageStatus: 'pending' }),
+      );
+    });
+
+    it('should upload the chosen file', async () => {
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+
+      expect(api.uploadBiteImageFromLocalFile).toHaveBeenCalledWith(
+        SAVED_BITE_ID,
+        'file:///local.jpg',
+        expect.any(Function),
+      );
+    });
+
+    it('should record the retry for analytics', async () => {
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+
+      expect(analytics.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.BiteImageUploadRetried,
+      );
+    });
+
+    it('should mark the bite failed again when the retry errors', async () => {
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+      const callback = api.uploadBiteImageFromLocalFile.mock.calls[0][2];
+
+      callback({
+        uploadParams: { err: new Error('still offline') } as UploadParams,
+      } as CreateAndUploadImageCallbackParams);
+
+      expect(api.setBiteImageStatus).toHaveBeenLastCalledWith(
+        SAVED_BITE_ID,
+        'failed',
+      );
+    });
+  });
+
+  describe('findLocalImageForBite', () => {
+    it('should report the local copy this device kept', async () => {
+      api.findLocalBiteImage.mockResolvedValue({
+        uri: 'file:///bites_x.jpg',
+        name: 'bites_x.jpg',
+      });
+
+      await expect(service.findLocalImageForBite('x')).resolves.toEqual({
+        uri: 'file:///bites_x.jpg',
+        name: 'bites_x.jpg',
+      });
+    });
+
+    it('should report nothing when the copy is gone', async () => {
+      api.findLocalBiteImage.mockResolvedValue(undefined);
+
+      await expect(service.findLocalImageForBite('x')).resolves.toBeUndefined();
+    });
   });
 
   describe('submitNewBite', () => {

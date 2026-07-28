@@ -27,6 +27,10 @@ They should:
 - Route component outputs back into the integration service
 - Avoid owning business rules directly
 
+**A presentational component never consumes a service.** No data-access service, no injected handler token, no `ModalController`, no Capacitor plugin — not even indirectly through a provider the page component supplies. A `type:ui` component takes inputs and emits outputs; the container routes those outputs into the integration service, which owns the work. Two gate inputs make this workable for optional behavior: an `enable*` flag so a surface that does not handle an output shows no control for it, and the data itself as an input.
+
+The Bite photo retry is the reference example: `bt-bite-image-status` takes `bite`, `userId`, and `enableRetry`, and emits `retryImageUpload`; the card and the details page pass it through; the containers hand it to `HomeService`, `ProfileService`, or `DetailsService`, which find the local copy, present the picker when it is gone, and call data-access. Presenting a modal is a workflow decision and belongs to those services, never to the component that raised the request.
+
 ## Service Pattern
 
 Integration services should own workflow decisions such as:

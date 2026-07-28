@@ -44,6 +44,18 @@ Users can create and maintain real dish-level food experiences.
   "uploading, keep the app open" forever. A failed upload shows that state even
   to the poster, whose device still holds the local copy, so a lost photo is
   never passed off as a successful post. See GitHub issue #1168.
+- The poster, and only the poster, is offered a retry on a failed photo: the
+  photo lives on their device, so nobody else has anything to send. The retry
+  takes one of two flows. When this device still holds the Bite's own local copy
+  — found from the Bite id alone, see `findLocalUploadedImage` — it is re-sent
+  straight away. Otherwise, for an older Bite or one posted from another device,
+  the user picks from the photos saved locally, the same set the gallery shows.
+  A started retry puts the document back to `pending`, so every viewer sees the
+  new attempt. Picking nothing cancels and the Bite stays failed.
+- The retry is raised as an output by the card and the details page and carried
+  out by the owning integration service. Presentational components never reach
+  a service themselves: they take inputs and emit outputs, and the smart layer
+  decides what happens — including presenting the picker.
 - User can post the Bite and stay on the form to add another Bite at the same place. Restaurant, currency, and position stay; image, dish name, price, rating, description, and tags reset, and the tags of the Bites already posted in that session become suggestions.
 - User can edit the Bite later.
 

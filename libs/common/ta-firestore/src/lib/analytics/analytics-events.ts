@@ -23,6 +23,7 @@ export const AnalyticsEvent = {
   BiteCreated: 'bite_created',
   BiteImageUploaded: 'bite_image_uploaded',
   BiteImageUploadFailed: 'bite_image_upload_failed',
+  BiteImageUploadRetried: 'bite_image_upload_retried',
   BucketListCreated: 'bucketlist_created',
   BucketListRated: 'bucketlist_rated',
   // Discovery
@@ -72,6 +73,7 @@ export interface AnalyticsEventParamMap {
   [AnalyticsEvent.BiteCreated]: never;
   [AnalyticsEvent.BiteImageUploaded]: never;
   [AnalyticsEvent.BiteImageUploadFailed]: { code: string };
+  [AnalyticsEvent.BiteImageUploadRetried]: never;
   [AnalyticsEvent.BucketListCreated]: never;
   [AnalyticsEvent.BucketListRated]: { rating: number };
   [AnalyticsEvent.SearchPerformed]: never;

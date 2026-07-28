@@ -29,6 +29,11 @@ import { BehaviorSubject } from 'rxjs';
 import { toBite } from '../utils/to-bite';
 import { AddCollectionSnapshotListenerCallbackEvent } from '@capacitor-firebase/firestore/dist/esm/definitions';
 import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
+import {
+  findLocalUploadedImage,
+  type LocalImageFile,
+} from '../utils/local-image-file';
+import { readLocalImageAsDataUrl } from '../utils/read-local-image-as-data-url';
 import { updateBiteWithImagePathFromFirestorage } from './utils/update-bite-with-image-path-from-firestorage';
 
 @Injectable({ providedIn: 'root' })
@@ -146,6 +151,40 @@ export class BiteApiService {
       console.error(`Error setting image status for bite ${biteId}:`, error);
       this.errorHandler.handleError(error);
     }
+  }
+
+  /**
+   * The local copy this device kept of a Bite's photo, if it is still there.
+   *
+   * Only the device that posted the Bite has one, and only until the user
+   * clears their files, so an empty result is normal rather than an error.
+   */
+  public async findLocalImage(
+    biteId: string,
+  ): Promise<LocalImageFile | undefined> {
+    return findLocalUploadedImage(BITE_COLLECTION, biteId);
+  }
+
+  /**
+   * Re-uploads a Bite's photo from a file on this device.
+   *
+   * Same transfer as {@link uploadImage}, but starting from a stored file
+   * instead of the base64 the create form held in memory. See GitHub issue
+   * #1168.
+   */
+  public async uploadImageFromLocalFile(
+    biteId: string,
+    fileUri: string,
+    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
+  ): Promise<void> {
+    const base64 = await readLocalImageAsDataUrl(fileUri);
+
+    uploadBase64ToFirebaseStorage({
+      base64,
+      docId: biteId,
+      collection: BITE_COLLECTION,
+      callbackFn,
+    });
   }
 
   public async updateImagePathInBite(

@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { ProfileService } from '../profile.service';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
+import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
+import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { NavController } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
@@ -38,6 +40,15 @@ class Mock {
   isAuthenticated = jest.fn(() => false);
 }
 
+const mockBiteDataAccessService = {
+  findLocalImageForBite: jest.fn().mockResolvedValue(undefined),
+  retryImageUpload: jest.fn().mockResolvedValue(undefined),
+};
+
+const mockLocalImagePicker = {
+  pick: jest.fn().mockResolvedValue(undefined),
+};
+
 describe(ProfileService.name, () => {
   let service: ProfileService;
   let profileDataAccessService: ProfileDataAccessService;
@@ -51,6 +62,14 @@ describe(ProfileService.name, () => {
 
     TestBed.configureTestingModule({
       providers: [
+        {
+          provide: BiteDataAccessService,
+          useValue: mockBiteDataAccessService,
+        },
+        {
+          provide: LocalImagePickerService,
+          useValue: mockLocalImagePicker,
+        },
         ProfileService,
         NavController,
         { provide: ProfileDataAccessService, useClass: Mock },

@@ -95,6 +95,7 @@ const template = `
       [bite]="bite"
       [showEditButton]="showEditButton"
       [userId]="userId"
+      [enableImageRetry]="enableImageRetry"
     />
   </div>
 `;
@@ -278,6 +279,29 @@ export const FailedUpload: Story = {
       image: '',
       imageStatus: 'failed',
     },
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
+/**
+ * The same failure seen by the poster, who is offered a retry. The photo lives
+ * on their device, so nobody else is shown the button.
+ */
+export const FailedUploadForOwner: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...demoBiteBase,
+      imagePath: undefined,
+      image: '',
+      imageStatus: 'failed',
+      userId: OWNER_ID,
+    },
+    userId: OWNER_ID,
+    enableImageRetry: true,
   },
   render: (args) => ({
     props: { ...args },

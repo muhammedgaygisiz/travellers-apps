@@ -16,7 +16,7 @@ import type {
   Geopoint,
   UploadParams,
 } from 'model';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import { BiteTribeApiService, type LocalImageFile } from 'bite-tribe/api';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { withGooglePlaceDistance } from './utils/with-google-place-distance';
 import { toUploadErrorCode } from './utils/to-upload-error-code';
@@ -138,36 +138,70 @@ export class BiteDataAccessService {
       // will update the Firestore document with the download URL once complete.
       void this.api.uploadImage(
         { ...bite, id: newBite.id },
-        (p: CreateAndUploadImageCallbackParams): void => {
-          const uploadError = p.uploadParams?.err;
-          const isInProgress = p.uploadParams?.evt?.completed === false;
-          const finishedUpload = p.uploadParams?.evt?.completed === true;
-
-          if (uploadError) {
-            this.analytics.logEvent(AnalyticsEvent.BiteImageUploadFailed, {
-              code: toUploadErrorCode(uploadError),
-            });
-            // Leave the document on a terminal state. Only the finalize trigger
-            // clears 'pending', so without this the card shows "uploading" to
-            // every viewer forever.
-            void this.api.setBiteImageStatus(newBite.id, 'failed');
-            this.storeService.savedNewBite({
-              ...newBite,
-              imageStatus: 'failed',
-            });
-            this.uploadProgress.set(null);
-          } else if (isInProgress && p.uploadParams) {
-            this.uploadProgress.set({
-              biteId: newBite.id,
-              progress: p.uploadParams,
-            });
-          } else if (finishedUpload) {
-            this.analytics.logEvent(AnalyticsEvent.BiteImageUploaded);
-            this.uploadProgress.set(null);
-          }
-        },
+        this.handleUploadProgress(newBite),
       );
     }
+  }
+
+  /**
+   * Finds the photo this device kept for a Bite, so a retry can tell the two
+   * flows apart: re-send that copy, or ask the user to pick a photo because the
+   * copy is gone (an older Bite, or one posted from another device).
+   */
+  findLocalImageForBite(biteId: string): Promise<LocalImageFile | undefined> {
+    return this.api.findLocalBiteImage(biteId);
+  }
+
+  /**
+   * Re-uploads a Bite's photo from a file on this device.
+   *
+   * The document goes back to `pending` first, so every viewer sees the retry
+   * rather than a card that silently changes its mind later. See GitHub issue
+   * #1168.
+   */
+  async retryImageUpload(bite: Bite, fileUri: string): Promise<void> {
+    await this.api.setBiteImageStatus(bite.id, 'pending');
+    this.storeService.savedNewBite({ ...bite, imageStatus: 'pending' });
+
+    this.analytics.logEvent(AnalyticsEvent.BiteImageUploadRetried);
+
+    await this.api.uploadBiteImageFromLocalFile(
+      bite.id,
+      fileUri,
+      this.handleUploadProgress({ ...bite, imageStatus: 'pending' }),
+    );
+  }
+
+  /**
+   * Shared by the first upload and every retry: reports progress, and records a
+   * terminal `failed` on the document because only the storage finalize trigger
+   * clears `pending` and it never runs for an upload that errored.
+   */
+  private handleUploadProgress(
+    bite: Bite,
+  ): (p: CreateAndUploadImageCallbackParams) => void {
+    return (p: CreateAndUploadImageCallbackParams): void => {
+      const uploadError = p.uploadParams?.err;
+      const isInProgress = p.uploadParams?.evt?.completed === false;
+      const finishedUpload = p.uploadParams?.evt?.completed === true;
+
+      if (uploadError) {
+        this.analytics.logEvent(AnalyticsEvent.BiteImageUploadFailed, {
+          code: toUploadErrorCode(uploadError),
+        });
+        void this.api.setBiteImageStatus(bite.id, 'failed');
+        this.storeService.savedNewBite({ ...bite, imageStatus: 'failed' });
+        this.uploadProgress.set(null);
+      } else if (isInProgress && p.uploadParams) {
+        this.uploadProgress.set({
+          biteId: bite.id,
+          progress: p.uploadParams,
+        });
+      } else if (finishedUpload) {
+        this.analytics.logEvent(AnalyticsEvent.BiteImageUploaded);
+        this.uploadProgress.set(null);
+      }
+    };
   }
 
   async submitEditedBite(bite: Bite): Promise<void> {

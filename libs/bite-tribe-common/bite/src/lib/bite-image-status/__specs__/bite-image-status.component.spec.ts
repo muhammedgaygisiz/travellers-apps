@@ -52,6 +52,8 @@ describe(BiteImageStatusComponent.name, () => {
     fixture.nativeElement.querySelector('ion-spinner');
   const queryFailed = (): HTMLElement | null =>
     fixture.nativeElement.querySelector('[data-testid="bite-image-failed"]');
+  const queryRetryButton = (): HTMLElement | null =>
+    fixture.nativeElement.querySelector('[data-testid="bite-image-retry"]');
 
   // The template renders the message through TranslocoPipe, which resolves to
   // an empty string against the mocked service, so the key is asserted at the
@@ -119,6 +121,69 @@ describe(BiteImageStatusComponent.name, () => {
 
       expect(queryFailed()).toBeTruthy();
       expect(querySpinner()).toBeNull();
+    });
+  });
+
+  describe('retry', () => {
+    const setUpFailedOwnBite = (): void => {
+      componentRef.setInput(
+        'bite',
+        bite({ imageStatus: 'failed', userId: 'user1' }),
+      );
+      componentRef.setInput('userId', 'user1');
+      componentRef.setInput('enableRetry', true);
+      fixture.detectChanges();
+    };
+
+    it('should offer the retry to the poster', () => {
+      setUpFailedOwnBite();
+
+      expect(queryRetryButton()).toBeTruthy();
+    });
+
+    it('should ask the surface to retry rather than acting itself', () => {
+      setUpFailedOwnBite();
+      const emitted: Bite[] = [];
+      component.retryImageUpload.subscribe((value) => emitted.push(value));
+
+      queryRetryButton()?.click();
+
+      expect(emitted).toEqual([expect.objectContaining({ id: 'bite1' })]);
+    });
+
+    it('should not offer the retry where the surface cannot handle it', () => {
+      componentRef.setInput(
+        'bite',
+        bite({ imageStatus: 'failed', userId: 'user1' }),
+      );
+      componentRef.setInput('userId', 'user1');
+      fixture.detectChanges();
+
+      expect(queryRetryButton()).toBeNull();
+    });
+
+    it('should not offer the retry to another user', () => {
+      componentRef.setInput(
+        'bite',
+        bite({ imageStatus: 'failed', userId: 'someone-else' }),
+      );
+      componentRef.setInput('userId', 'user1');
+      componentRef.setInput('enableRetry', true);
+      fixture.detectChanges();
+
+      expect(queryRetryButton()).toBeNull();
+    });
+
+    it('should not offer the retry while the upload is still pending', () => {
+      componentRef.setInput(
+        'bite',
+        bite({ imageStatus: 'pending', userId: 'user1' }),
+      );
+      componentRef.setInput('userId', 'user1');
+      componentRef.setInput('enableRetry', true);
+      fixture.detectChanges();
+
+      expect(queryRetryButton()).toBeNull();
     });
   });
 

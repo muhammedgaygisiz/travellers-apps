@@ -37,6 +37,8 @@ import { HomeService } from './home.service';
       [showMap]="false"
       [showFilters]="false"
       showSearch
+      enableImageRetry
+      (retryImageUpload)="service.retryBiteImageUpload($event)"
       (logoutClick)="service.logout()"
       (likeButtonClick)="service.likeButtonClicked($event)"
       (biteClick)="service.biteClicked($event)"

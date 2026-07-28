@@ -7,7 +7,12 @@
       holds the local base64 copy, and rendering it would suggest the upload
       succeeded. -->
       @if (imageStatus() === 'pending' || imageStatus() === 'failed') {
-        <bt-bite-image-status [bite]="biteData" [userId]="userId()" />
+        <bt-bite-image-status
+          [bite]="biteData"
+          [userId]="userId()"
+          [enableRetry]="enableImageRetry()"
+          (retryImageUpload)="retryImageUpload.emit($event)"
+        />
       } @else if (biteData.image || biteData.imagePath) {
         <img
           alt="Dish"

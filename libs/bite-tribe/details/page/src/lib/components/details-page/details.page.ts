@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -102,6 +103,7 @@ export class DetailsPage {
   position = input<Position>();
   exchangeRates = input<Record<string, number>>();
   preferredCurrency = input<string>();
+  enableImageRetry = input(false, { transform: booleanAttribute });
 
   /**
    * Mirrors the feed card: a photo that is still uploading, or whose upload was
@@ -125,6 +127,7 @@ export class DetailsPage {
   readonly goToProfile = output<PublicUser>();
   readonly gotoEdit = output<Bite>();
   readonly gotoNew = output<Bite>();
+  readonly retryImageUpload = output<Bite>();
 
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);

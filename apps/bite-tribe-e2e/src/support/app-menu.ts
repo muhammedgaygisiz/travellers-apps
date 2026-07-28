@@ -4,7 +4,7 @@ import { Page } from '@playwright/test';
  * Destinations reachable from the header menu popover. The values match the
  * `data-testid` suffixes on the menu items in `common/ui/page`.
  */
-export type AppMenuTarget = 'market-place' | 'my-bucketlists';
+export type AppMenuTarget = 'market-place' | 'my-bucketlists' | 'settings';
 
 /**
  * Walks into a page through the header menu.

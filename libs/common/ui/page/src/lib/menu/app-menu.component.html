@@ -61,7 +61,10 @@
         </ion-item>
       }
       @if (showSettingsButton()) {
-        <ion-item (click)="menuNavigate.emit('settings')">
+        <ion-item
+          data-testid="menu-settings"
+          (click)="menuNavigate.emit('settings')"
+        >
           <ion-icon name="settings-outline" slot="start" />
           <ng-container>{{ 'settings' | transloco }}</ng-container>
         </ion-item>

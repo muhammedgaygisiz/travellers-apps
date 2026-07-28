@@ -95,5 +95,6 @@ Before public launch, the release should be stable enough to learn from real use
 - [[Current State - Roadmap]]
 - [[Current State - Known Issues]]
 - [[Current State - Open Questions]]
+- [[Current State - Release Candidate Test Charter]]
 - [[Implementation - Release And Build Workflow]]
 - [[Current State - Nx And Dependency Migration Roadmap]]

@@ -13,3 +13,8 @@
   - Release Candidate is ready.
   - Supported platforms have been tested.
   - Store assets are ready for publishing.
+- Sub-issues
+  - [01 - launch: run the platform test pass for web, Android and iOS](https://github.com/muhammedgaygisiz/travellers-apps/issues/1176) (Issue \#1176), specified in [[Current State - Release Candidate Test Charter]]
+  - [02 - launch: decide and close the remaining release-candidate blockers](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177) (Issue \#1177)
+  - [03 - launch: prepare App Store and Google Play assets](https://github.com/muhammedgaygisiz/travellers-apps/issues/1178) (Issue \#1178)
+  - [04 - launch: cut and distribute the release candidate build](https://github.com/muhammedgaygisiz/travellers-apps/issues/1179) (Issue \#1179)

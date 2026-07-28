@@ -55,7 +55,10 @@
         </ion-item>
       }
       @if (showLeaderboardButton()) {
-        <ion-item (click)="menuNavigate.emit('leaderboard')">
+        <ion-item
+          data-testid="menu-leaderboard"
+          (click)="menuNavigate.emit('leaderboard')"
+        >
           <ion-icon name="star-outline" slot="start" />
           <ng-container>{{ 'leaderboard' | transloco }}</ng-container>
         </ion-item>

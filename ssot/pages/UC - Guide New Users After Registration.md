@@ -14,6 +14,7 @@
 - Privacy-conscious participant
 - ## Target Flow
 - User registers or logs in without the onboarding completion flag.
+- Registration acknowledges the submit immediately and stays blocked until the assistant is on screen or a localized error is shown, because sign-up, the verification mail, and the onboarding gate are three round-trips that would otherwise look like a dropped tap (issue \#1185).
 - A blocking assistant guides the user through:
   - a unique display name (case-insensitive) with an optional profile photo
   - the public/private profile decision (private preselected, benefits of public explained)

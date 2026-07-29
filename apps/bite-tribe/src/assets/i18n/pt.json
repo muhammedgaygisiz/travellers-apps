@@ -198,6 +198,7 @@
   "day-sunday": "Domingo",
   "closed": "Fechado",
   "ok": "OK",
+  "registration-in-progress": "A criar a tua conta...",
   "registration-success-check-your-email-to-verify-account": "Conta criada! Verifica o teu e-mail para confirmar.",
   "registration-error-try-again": "Erro no registo. Tenta novamente.",
   "registration-unknown-error-try-again": "Ocorreu um erro inesperado. Tenta novamente.",

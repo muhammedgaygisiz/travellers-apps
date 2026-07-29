@@ -5,6 +5,7 @@
     showFooter: false,
   }"
   [menuConfig]="{ hideAuth: true }"
+  [loading]="pending()"
 >
   <ion-content class="ion-padding">
     <h1 class="ion-margin-bottom">{{ 'sign-up' | transloco }}</h1>
@@ -49,11 +50,22 @@
         <ion-button
           class="ion-margin-top"
           expand="block"
-          [disabled]="!registrationFormGroup.valid"
-          (click)="submitRegistration.emit(registrationFormGroup.value)"
+          [disabled]="!registrationFormGroup.valid || pending()"
+          (click)="onSubmit()"
           data-testid="submit"
-          >{{ 'sign-up' | transloco }}</ion-button
         >
+          @if (pending()) {
+            <ion-spinner
+              class="submit-spinner"
+              slot="start"
+              name="crescent"
+              data-testid="submit-spinner"
+            />
+            {{ 'registration-in-progress' | transloco }}
+          } @else {
+            {{ 'sign-up' | transloco }}
+          }
+        </ion-button>
 
         @if (registrationFormGroup.errors?.['mismatch']) {
           <div class="ion-margin-top">

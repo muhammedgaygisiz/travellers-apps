@@ -197,6 +197,7 @@
   "day-sunday": "እሑድ",
   "closed": "ዝግ",
   "ok": "እሺ",
+  "registration-in-progress": "መለያህ እየተፈጠረ ነው...",
   "registration-success-check-your-email-to-verify-account": "ምዝገባው ተሳክቷል! መለያህን ለማረጋገጥ ኢሜይልህን ተመልከት።",
   "registration-error-try-again": "በምዝገባ ጊዜ ስህተት ተፈጥሯል። እንደገና ሞክር።",
   "registration-unknown-error-try-again": "በምዝገባ ጊዜ ያልታወቀ ስህተት ተፈጥሯል። እንደገና ሞክር።",

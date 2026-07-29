@@ -197,6 +197,7 @@
   "day-sunday": "Minggu",
   "closed": "Tutup",
   "ok": "OK",
+  "registration-in-progress": "Membuat akunmu...",
   "registration-success-check-your-email-to-verify-account": "Pendaftaran berhasil! Cek emailmu untuk memverifikasi akunmu.",
   "registration-error-try-again": "Terjadi kesalahan saat pendaftaran. Coba lagi, ya.",
   "registration-unknown-error-try-again": "Terjadi kesalahan yang tidak diketahui saat pendaftaran. Coba lagi, ya.",

@@ -21,6 +21,7 @@ import {
   IonContent,
   IonInput,
   IonInputPasswordToggle,
+  IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
 import { Credentials } from '../../api/credentials.model';
@@ -45,12 +46,16 @@ interface RegistrationFields {
     IonButton,
     IonText,
     IonInputPasswordToggle,
+    IonSpinner,
     IonContent,
     TranslocoPipe,
   ],
 })
 export class RegistrationComponent {
   public readonly registrationError = input<string | null>('');
+
+  /** Keeps the form locked while registration is in flight (issue #1185). */
+  public readonly pending = input(false);
 
   public readonly submitRegistration = output<Credentials>();
 
@@ -74,4 +79,14 @@ export class RegistrationComponent {
       updateOn: 'change',
     },
   );
+
+  public onSubmit(): void {
+    // The disabled button already blocks this, but a queued tap can still land
+    // between the click and the pending flag turning on.
+    if (this.pending() || !this.registrationFormGroup.valid) {
+      return;
+    }
+
+    this.submitRegistration.emit(this.registrationFormGroup.value);
+  }
 }

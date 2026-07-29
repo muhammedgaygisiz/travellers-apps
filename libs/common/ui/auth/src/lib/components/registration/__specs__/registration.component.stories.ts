@@ -21,3 +21,14 @@ export default {
 type Story = StoryObj<RegistrationComponent>;
 
 export const Primary: Story = {};
+
+/**
+ * While registration is in flight the header progress bar runs and the submit
+ * button locks and reports progress, so a slow transition into onboarding
+ * cannot look like a dropped tap.
+ */
+export const Pending: Story = {
+  args: {
+    pending: true,
+  },
+};

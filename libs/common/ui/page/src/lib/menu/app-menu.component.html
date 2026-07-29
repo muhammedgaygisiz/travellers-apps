@@ -73,7 +73,7 @@
         </ion-item>
       }
       @if (showAboutButton()) {
-        <ion-item (click)="menuNavigate.emit('about')">
+        <ion-item data-testid="menu-about" (click)="menuNavigate.emit('about')">
           <ion-icon name="information-circle-outline" slot="start" />
           <ng-container>{{ 'about' | transloco }}</ng-container>
         </ion-item>

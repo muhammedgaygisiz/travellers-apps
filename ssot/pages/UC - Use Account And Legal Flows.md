@@ -45,6 +45,7 @@ The cascade also prunes the deleted user from `/meta/leaderboardDaily` and rebui
 - `resendEmailVerification`
 - `syncEmailVerificationStatus`
 - `sendEmailVerificationReminders`
+- `apps/bite-tribe-e2e/src/tests/account-and-legal.spec.ts` covers in-app privacy navigation, deletion cancellation, and the completed emulator-backed cascade with a retained anonymized Bite.
 
 ## Related Domains
 

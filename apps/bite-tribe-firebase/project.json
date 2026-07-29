@@ -5,6 +5,7 @@
   "targets": {
     "firebase-serve": {
       "executor": "nx:run-commands",
+      "dependsOn": ["firebase-build"],
       "options": {
         "cwd": "apps/bite-tribe-firebase",
         "command": "firebase emulators:start --only auth,firestore,storage,functions,pubsub --import .firebase-export"

@@ -19,6 +19,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (submitSettings)="service.saveSettings($event)"
       (logout)="service.logout()"
       (resendEmailVerification)="service.resendEmailVerification('settings')"
+      (deleteAccount)="service.goToDeleteAccount()"
     />
   `,
   imports: [PageSettings],

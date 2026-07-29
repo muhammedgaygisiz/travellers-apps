@@ -19,6 +19,10 @@ export const AnalyticsEvent = {
   EmailVerificationResendSucceeded: 'email_verification_resend_succeeded',
   EmailVerificationResendFailed: 'email_verification_resend_failed',
   EmailVerificationSynced: 'email_verification_synced',
+  // Account lifecycle
+  AccountDeletionStarted: 'account_deletion_started',
+  AccountDeletionCompleted: 'account_deletion_completed',
+  AccountDeletionFailed: 'account_deletion_failed',
   // Creation
   BiteCreated: 'bite_created',
   BiteImageUploaded: 'bite_image_uploaded',
@@ -69,6 +73,11 @@ export interface AnalyticsEventParamMap {
   [AnalyticsEvent.EmailVerificationSynced]: {
     verified: boolean;
     source: 'app_start' | 'app_resume' | 'profile_edit';
+  };
+  [AnalyticsEvent.AccountDeletionStarted]: never;
+  [AnalyticsEvent.AccountDeletionCompleted]: never;
+  [AnalyticsEvent.AccountDeletionFailed]: {
+    reason: 'reauth_required' | 'reauth_failed' | 'unknown';
   };
   [AnalyticsEvent.BiteCreated]: never;
   [AnalyticsEvent.BiteImageUploaded]: never;

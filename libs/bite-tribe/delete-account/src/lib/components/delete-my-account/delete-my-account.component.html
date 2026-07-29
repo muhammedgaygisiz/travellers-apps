@@ -1,0 +1,119 @@
+<ta-page
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
+>
+  <ion-content class="ion-padding">
+    <h1 class="ion-margin-bottom">{{ 'delete-account' | transloco }}</h1>
+
+    <ion-text color="danger">
+      <p data-testid="delete-account-warning">
+        <strong>{{ 'delete-account-irreversible' | transloco }}</strong>
+      </p>
+    </ion-text>
+
+    <p>{{ 'delete-account-intro' | transloco }}</p>
+
+    <section class="contract-section">
+      <h2>{{ 'delete-account-removed-title' | transloco }}</h2>
+      <ion-list lines="none" data-testid="delete-account-removed">
+        <ion-item>
+          <ion-icon name="close-circle-outline" color="danger" slot="start" />
+          <ion-label class="ion-text-wrap">
+            {{ 'delete-account-removed-profile' | transloco }}
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="close-circle-outline" color="danger" slot="start" />
+          <ion-label class="ion-text-wrap">
+            {{ 'delete-account-removed-reviews-and-likes' | transloco }}
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="close-circle-outline" color="danger" slot="start" />
+          <ion-label class="ion-text-wrap">
+            {{ 'delete-account-removed-bucket-lists' | transloco }}
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="close-circle-outline" color="danger" slot="start" />
+          <ion-label class="ion-text-wrap">
+            {{ 'delete-account-removed-followers' | transloco }}
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="close-circle-outline" color="danger" slot="start" />
+          <ion-label class="ion-text-wrap">
+            {{ 'delete-account-removed-settings' | transloco }}
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </section>
+
+    <section class="contract-section">
+      <h2>{{ 'delete-account-kept-title' | transloco }}</h2>
+      <ion-list lines="none" data-testid="delete-account-kept">
+        <ion-item>
+          <ion-icon
+            name="checkmark-circle-outline"
+            color="medium"
+            slot="start"
+          />
+          <ion-label class="ion-text-wrap">
+            {{ 'delete-account-kept-bites' | transloco }}
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            name="checkmark-circle-outline"
+            color="medium"
+            slot="start"
+          />
+          <ion-label class="ion-text-wrap">
+            {{ 'delete-account-kept-purchases' | transloco }}
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <p class="note">{{ 'delete-account-analytics-note' | transloco }}</p>
+    </section>
+
+    @if (failed()) {
+      <ion-text color="danger">
+        <p data-testid="delete-account-error">
+          {{ 'delete-account-failed' | transloco }}
+        </p>
+      </ion-text>
+    }
+
+    @if (deleting()) {
+      <div
+        class="ion-display-flex ion-flex-row ion-align-items-center ion-margin-vertical"
+        data-testid="delete-account-progress"
+      >
+        <ion-spinner name="crescent" />
+        <ion-text class="ion-padding-start">
+          {{ 'delete-account-in-progress' | transloco }}
+        </ion-text>
+      </div>
+    }
+
+    <div class="button-container safe-padding-bottom">
+      <ion-button
+        fill="outline"
+        [disabled]="deleting()"
+        (click)="cancelDelete.emit()"
+        >{{ 'cancel' | transloco }}
+      </ion-button>
+      <ion-button
+        data-testid="delete-account-submit"
+        color="danger"
+        [disabled]="deleting()"
+        (click)="confirmDelete()"
+        >{{ 'delete-account' | transloco }}
+      </ion-button>
+    </div>
+  </ion-content>
+</ta-page>

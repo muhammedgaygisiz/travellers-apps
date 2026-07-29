@@ -1,2 +1,11 @@
 :host {
+  .legal-section {
+    padding-top: 16px;
+    border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+
+    ion-item {
+      --padding-start: 0;
+      --inner-padding-end: 0;
+    }
+  }
 }

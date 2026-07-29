@@ -197,6 +197,41 @@ describe('DetailsPage', () => {
       expect(editButton).toBeTruthy();
       expect(MockTranslocoPipe.calls).toContain('edit-bite');
     });
+
+    // A Bite whose creator deleted their account keeps the Bite but has no
+    // creator, so it must render exactly like a private user's Bite: no author
+    // row, and no owner actions.
+    it('should hide the creator row and owner actions when the bite has no creator', () => {
+      componentRef.setInput('bite', { id: '1', name: 'Pizza' } as Bite);
+      componentRef.setInput('biteCreator', undefined);
+      componentRef.setInput('userId', 'user-1');
+      componentRef.changeDetectorRef.detectChanges();
+
+      const creatorRow = fixture.debugElement.nativeElement.querySelector(
+        '.bite-creator-container',
+      );
+      const editButton = fixture.debugElement.nativeElement.querySelector(
+        'ion-button.ion-margin-top.safe-padding-bottom',
+      );
+
+      expect(creatorRow).toBeFalsy();
+      expect(editButton).toBeFalsy();
+    });
+
+    it('should hide the creator row for a private creator', () => {
+      componentRef.setInput('bite', { id: '1', name: 'Pizza' } as Bite);
+      componentRef.setInput('biteCreator', {
+        userId: 'user-2',
+        public: false,
+      } as PublicUser);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(
+        fixture.debugElement.nativeElement.querySelector(
+          '.bite-creator-container',
+        ),
+      ).toBeFalsy();
+    });
   });
 
   describe('Review Form', () => {

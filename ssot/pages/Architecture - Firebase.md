@@ -58,6 +58,7 @@ notifyUserOnNewFollower
 sendWeeklyBiteNotification
 handleSharedLinkToBite
 createUserOnAuthCreate
+deleteOwnAccount
 ```
 
 ## Local Development

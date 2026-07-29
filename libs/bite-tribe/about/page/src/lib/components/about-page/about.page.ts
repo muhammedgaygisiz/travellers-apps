@@ -1,6 +1,17 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { IonContent, IonText } from '@ionic/angular/standalone';
+import {
+  IonContent,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonText,
+} from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 declare const process: {
@@ -15,7 +26,15 @@ declare const process: {
   styleUrl: 'about.page.scss',
   templateUrl: 'about.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageComponent, IonContent, IonText, TranslocoPipe],
+  imports: [
+    PageComponent,
+    IonContent,
+    IonText,
+    IonItem,
+    IonLabel,
+    IonIcon,
+    TranslocoPipe,
+  ],
 })
 export class AboutPage {
   protected readonly version = process.env['version'];
@@ -23,4 +42,6 @@ export class AboutPage {
 
   totalNumberBites = input<number>();
   totalNumberUsers = input<number>();
+
+  openPrivacyPolicy = output<void>();
 }

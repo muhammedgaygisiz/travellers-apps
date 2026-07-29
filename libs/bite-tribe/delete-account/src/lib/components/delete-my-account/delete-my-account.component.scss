@@ -1,0 +1,25 @@
+.contract-section {
+  margin-top: 1.5rem;
+
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+  }
+}
+
+.note {
+  color: var(--ion-color-medium);
+  font-size: 0.85rem;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}

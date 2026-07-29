@@ -113,6 +113,15 @@ const APP_ROUTES: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: PATH.DELETE_ACCOUNT,
+    loadComponent: () =>
+      import('bite-tribe/delete-account').then(
+        (m) => m.DeleteMyAccountContainer,
+      ),
+    title: 'Delete Account',
+    canActivate: [authGuard],
+  },
+  {
     path: PATH.MY_BITES,
     loadComponent: () =>
       import('bite-tribe/home').then((m) => m.MyBitesContainer),

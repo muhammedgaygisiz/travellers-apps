@@ -11,6 +11,7 @@ import { AboutService } from './about.service';
       class="ion-page"
       [totalNumberBites]="service.totalNumberBites.value()"
       [totalNumberUsers]="service.totalNumberUsers.value()"
+      (openPrivacyPolicy)="service.goToPrivacyPolicy()"
     />
   `,
   imports: [AboutPage],

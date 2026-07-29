@@ -6,6 +6,7 @@ import {
   EmailVerificationService,
   type EmailVerificationSurface,
 } from 'bite-tribe/email-verification-data-access';
+import { PATH } from 'utils';
 
 @Injectable({
   providedIn: 'root',
@@ -28,6 +29,10 @@ export class SettingsService {
 
   logout(): void {
     this.dataAccess.logout();
+  }
+
+  goToDeleteAccount(): void {
+    void this.navController.navigateForward([PATH.DELETE_ACCOUNT]);
   }
 
   trackEmailVerificationPromptShown(surface: EmailVerificationSurface): void {

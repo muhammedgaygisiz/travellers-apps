@@ -32,6 +32,19 @@
 
       <ion-text color="primary">{{totalNumberUsers()}}</ion-text>
     </div>
+    <div class="legal-section ion-margin-top">
+      <ion-item
+        data-testid="about-privacy-policy"
+        [button]="true"
+        [detail]="true"
+        lines="none"
+        (click)="openPrivacyPolicy.emit()"
+      >
+        <ion-icon name="shield-checkmark-outline" slot="start" />
+        <ion-label>{{ 'privacy-policy' | transloco }}</ion-label>
+      </ion-item>
+    </div>
+
     <div class="ion-text-center ion-margin-top">
       <img width="150" src="assets/icons/logo.svg" alt="logo" />
       <p>Version {{ version }} (Build {{ buildNumber }})</p>

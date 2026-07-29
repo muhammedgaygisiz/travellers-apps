@@ -31,6 +31,10 @@ import { BucketlistApiService } from './bucketlist-api/bucketlist-api.service';
 import { ProfileApiService } from './profile-api.service';
 import { BiteApiService } from './bite-api/bite-api.service';
 import { SettingsApiService } from './settings-api/settings-api.service';
+import {
+  AccountApiService,
+  type DeleteOwnAccountResult,
+} from './account-api/account-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
 import { BiteTrailApiService } from './bite-trail-api/bite-trail-api.service';
 import type { LocalImageFile } from './utils/local-image-file';
@@ -48,6 +52,7 @@ export class BiteTribeApiService {
   private readonly bucketlistApiService = inject(BucketlistApiService);
   private readonly profileApiService = inject(ProfileApiService);
   private readonly settingsApiService = inject(SettingsApiService);
+  private readonly accountApiService = inject(AccountApiService);
   private readonly exchangeRatesApiService = inject(ExchangeRatesApiService);
   private readonly biteTrailApiService = inject(BiteTrailApiService);
 
@@ -295,6 +300,10 @@ export class BiteTribeApiService {
 
   resendEmailVerification(): Promise<void> {
     return this.profileApiService.resendEmailVerification();
+  }
+
+  deleteOwnAccount(): Promise<DeleteOwnAccountResult> {
+    return this.accountApiService.deleteOwnAccount();
   }
 
   claimDisplayName(

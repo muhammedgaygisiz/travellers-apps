@@ -21,6 +21,7 @@ export class SettingsPage {
   readonly languageSelect: Locator;
   readonly emailVerificationPrompt: Locator;
   readonly currencySelector: Locator;
+  readonly deleteAccountRow: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -35,12 +36,18 @@ export class SettingsPage {
     this.emailVerificationPrompt = this.root.getByTestId(
       'settings-email-verification',
     );
+    this.deleteAccountRow = this.root.getByTestId('settings-delete-account');
     // The modals are appended to the body, so the selector lives outside `root`.
     this.currencySelector = page.locator('currency-selector:visible');
   }
 
   async open(): Promise<void> {
     await navigateFromAppMenu(this.page, 'settings');
+  }
+
+  async openDeleteAccount(): Promise<void> {
+    await this.deleteAccountRow.click();
+    await this.page.waitForURL(/\/settings\/delete-account$/);
   }
 
   /** The highlighted tier card. Free and PRO both render; only one is current. */

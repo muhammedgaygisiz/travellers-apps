@@ -95,6 +95,8 @@
   Follows, likes, reviews, saves, or curates
   |
   Last seen and contribution signals updated
+  |
+  Account deleted (profile removed, Bites survive without an author)
   ```
 
   Current implementation notes:
@@ -111,6 +113,7 @@
 - Display names are unique, enforced case-insensitively (normalized by trim + lowercase; original casing preserved for display). A claim document `/displayNames/{normalizedDisplayName}` is written transactionally by the `claimDisplayName` callable so two users cannot take the same normalized name concurrently; renaming releases the old claim and takes the new one in the same transaction and keeps `/users/{uid}.displayName` plus `normalizedDisplayName` in sync. `checkDisplayNameAvailability` is a read-only advisory check. The profile edit flow claims the name before saving and shows a localized error when it is taken. `backfillDisplayNameClaimsCallable` claims existing users' names oldest-first (first-come keeps the name on a normalization collision) so enforcement can be switched on safely. See [[epic-850]].
 - `subscriptionTier` is currently written as `1` by `createUserOnAuthCreate` for every new account and is only read for display in the profile and settings pages. Nothing enforces it, and `firestore.rules` still allows any authenticated user to write any document, so it is not a trustworthy access signal today. [[epic-1122]] makes the entitlement server-owned and turns this field into a backend-written display mirror. See [[Subscription]].
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
+- A User can delete their own account from the app. `deleteOwnAccount` removes the public user document, its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes, bucket lists, BiteTrail ratings and profile images, then deletes the Firebase Auth account last. Bites are kept with `userId` removed so the shared content graph survives, and a Bite without a `userId` renders like a private user's Bite. The full per-category contract is in [[UC - Use Account And Legal Flows]]; the reasoning is in [[issue-1182]].
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
 - ## Permissions
 - Guest
@@ -184,6 +187,7 @@
 
   ```text
   createUserOnAuthCreate
+  deleteOwnAccount
   claimDisplayName
   checkDisplayNameAvailability
   backfillDisplayNameClaimsCallable

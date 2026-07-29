@@ -44,6 +44,23 @@
     text-align: end;
   }
 
+  .account-section {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+
+    h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    ion-item {
+      --padding-start: 0;
+      --inner-padding-end: 0;
+    }
+  }
+
   .button-container {
     display: flex;
     justify-content: space-between;

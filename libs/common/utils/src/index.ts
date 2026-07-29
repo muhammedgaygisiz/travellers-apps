@@ -39,3 +39,7 @@ export {
   getDisplayNameFailureReason,
   type DisplayNameFailureReason,
 } from './lib/display-name-error-reason';
+export {
+  getAccountDeletionFailureReason,
+  type AccountDeletionFailureReason,
+} from './lib/account-deletion-error-reason';

@@ -3,60 +3,77 @@
 >
   <ion-content class="ion-padding">
     <main>
-      <h1>Delete Your BiteTribe Account</h1>
-      <p class="note">
-        This page explains how you can request deletion of your BiteTribe
-        account and associated data.
-      </p>
+      <h1>{{ 'delete-account-public-title' | transloco }}</h1>
+      <p class="note">{{ 'delete-account-public-intro' | transloco }}</p>
     </main>
 
     <main>
-      <p>
-        BiteTribe allows users to request deletion of their account and personal
-        data at any time.
-      </p>
+      <div class="box">
+        <h3>{{ 'delete-account-public-in-app-title' | transloco }}</h3>
+        <ol>
+          <li>{{ 'delete-account-public-in-app-step-open' | transloco }}</li>
+          <li>
+            {{ 'delete-account-public-in-app-step-settings' | transloco }}
+          </li>
+          <li>{{ 'delete-account-public-in-app-step-confirm' | transloco }}</li>
+        </ol>
+      </div>
+
+      <h3>{{ 'delete-account-removed-title' | transloco }}</h3>
+      <ul>
+        <li>{{ 'delete-account-removed-profile' | transloco }}</li>
+        <li>{{ 'delete-account-removed-reviews-and-likes' | transloco }}</li>
+        <li>{{ 'delete-account-removed-bucket-lists' | transloco }}</li>
+        <li>{{ 'delete-account-removed-followers' | transloco }}</li>
+        <li>{{ 'delete-account-removed-settings' | transloco }}</li>
+      </ul>
+
+      <h3>{{ 'delete-account-kept-title' | transloco }}</h3>
+      <ul>
+        <li>{{ 'delete-account-kept-bites' | transloco }}</li>
+        <li>{{ 'delete-account-kept-purchases' | transloco }}</li>
+      </ul>
+
+      <p class="note">{{ 'delete-account-analytics-note' | transloco }}</p>
 
       <div class="box">
-        <h3>How to request account deletion</h3>
+        <h3>{{ 'delete-account-public-fallback-title' | transloco }}</h3>
+        <p>{{ 'delete-account-public-fallback-intro' | transloco }}</p>
         <ol>
           <li>
-            Send an email to:
+            {{ 'delete-account-public-fallback-step-email' | transloco }}
 
             <div class="ion-margin-vertical">
               @if (!isContactClicked()) {
-              <ion-button fill="clear" (click)="contactClicked()"
-                >Contact</ion-button
-              >
-              } @if (isContactClicked()) {
+              <ion-button fill="clear" (click)="contactClicked()">
+                {{ 'contact' | transloco }}
+              </ion-button>
+              } @else {
               <ul>
-                <li><strong>Email:</strong> muhammed.gaygisiz&#64;gmail.com</li>
-                <li><strong>App name:</strong> BiteTribe</li>
+                <li>
+                  <strong>{{ 'email' | transloco }}:</strong>
+                  muhammed.gaygisiz&#64;gmail.com
+                </li>
+                <li>
+                  <strong>{{ 'app-name' | transloco }}:</strong> BiteTribe
+                </li>
               </ul>
               }
             </div>
           </li>
           <li>
-            Use the subject line:
-            <strong>“Delete my BiteTribe account”</strong>
+            {{ 'delete-account-public-fallback-step-subject' | transloco }}
           </li>
-          <li>Include the email address you used to sign in to BiteTribe</li>
+          <li>
+            {{ 'delete-account-public-fallback-step-account-email' | transloco
+            }}
+          </li>
         </ol>
       </div>
 
-      <p>
-        Once we receive your request, we will delete your account and associated
-        data within a reasonable timeframe, unless we are required to retain
-        certain information for legal or security reasons.
-      </p>
+      <p>{{ 'delete-account-public-timeframe' | transloco }}</p>
 
-      <p>
-        If you have questions about this process, you can contact us at the same
-        Email address provided above.
-      </p>
-
-      <p class="note">
-        This deletion request applies to your BiteTribe account and data only.
-      </p>
+      <p class="note">{{ 'delete-account-public-scope' | transloco }}</p>
     </main>
 
     <main>

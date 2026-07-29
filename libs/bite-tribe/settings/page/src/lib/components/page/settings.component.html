@@ -166,7 +166,7 @@
           </ion-item>
         </section>
 
-        <div class="button-container safe-padding-bottom">
+        <div class="button-container">
           <ion-button fill="outline" (click)="logout.emit()"
             >{{ 'logout' | transloco }}
           </ion-button>
@@ -179,6 +179,26 @@
         </div>
       </form>
     </div>
+
+    <!-- Account lifecycle sits in its own section, away from the save button:
+    account deletion is destructive and must never be a mis-tap next to a form
+    action. -->
+    <section class="account-section safe-padding-bottom">
+      <h2>{{ 'account' | transloco }}</h2>
+
+      <ion-item
+        data-testid="settings-delete-account"
+        [button]="true"
+        [detail]="true"
+        lines="none"
+        (click)="deleteAccount.emit()"
+      >
+        <ion-icon name="trash-outline" color="danger" slot="start" />
+        <ion-label color="danger">
+          {{ 'delete-account' | transloco }}
+        </ion-label>
+      </ion-item>
+    </section>
   </ion-content>
 </ta-page>
 

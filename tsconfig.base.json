@@ -54,6 +54,9 @@
       "bite-tribe/onboarding-data-access": [
         "libs/bite-tribe/onboarding/data-access/src/index.ts"
       ],
+      "bite-tribe/account-data-access": [
+        "libs/bite-tribe/account/data-access/src/index.ts"
+      ],
       "bite-tribe/bite": ["libs/bite-tribe/bite/page/src/index.ts"],
       "bite-tribe/bite-data-access": [
         "libs/bite-tribe/bite/data-access/src/index.ts"

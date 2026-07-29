@@ -1,0 +1,33 @@
+- [fix: add in-app privacy and account deletion flow](https://github.com/muhammedgaygisiz/travellers-apps/issues/1182) (Issue \#1182)
+- Description
+  - The preliminary iOS platform pass under [[Current State - Release Candidate Test Charter]] found that the native app exposed no visible Privacy Policy or Account Deletion entry. The public `/privacy` and `/account-deletion` routes loaded in Safari, but the deletion page only instructed the user to send an email, so there was no end-to-end deletion. Both are store-review requirements.
+- Decisions
+  - Bites survive account deletion with the author cleared, rather than being deleted. Other users' bucket lists and BiteTrails reference Bites by id, and the discovery surfaces are built from them, so hard-deleting would tear holes in the shared content graph. A Bite without a `userId` renders exactly like a private user's Bite: no author row, no owner actions.
+  - The cascade is server-owned. `firestore.rules` still allows any authenticated client to write any document, so a client-driven deletion would be neither fast nor verifiable, and a client that failed midway would have no token left to finish. See [[epic-1122]] for the rules work.
+  - The Firebase Auth account is deleted last. A failure therefore always leaves a signed-in user who can retry, never an orphaned data set nobody can reach.
+  - Re-authentication is proven from `request.auth.token.auth_time` rather than by Firebase's client-side recent-login rule, because the cascade runs with admin privileges. A stale sign-in returns `failed-precondition`/`reauth_required` and the app re-runs the account's own sign-in method, then retries once.
+  - Entry points: Delete Account in its own destructive section at the bottom of the settings page; Privacy Policy in the About page footer. The header menu was rejected for both, because it lives in `libs/common/ui/page` and is shared with the business app.
+  - The public `/account-deletion` route stays public and ungated for store review. It now leads with the in-app flow and keeps the email route as the fallback for users who can no longer sign in.
+- Deletion Contract
+  - Deleted: `/users/{uid}` and its `followers`, `following` and `pushTokens` subcollections; the mirrored follow edge on every other user; `/displayNames/{normalizedName}` (releases the name); `/settings/{uid}`; `/reviews` where `authorId == uid`; `/bucketlists` where `userId == uid`; `/bites/{biteId}/likes/{uid}`; `/biteTrails/{id}/ratings/{uid}`; Storage under `images/users/{uid}/`; the Firebase Auth account.
+  - Kept with the identifier cleared: `/bites` where `userId == uid` (the `userId` field is removed, the Bite and its image stay); `/biteTrails/{id}/sells` where `userId == uid` (the document stays so the seller's `soldCount` does not silently drop).
+  - Kept untouched: restaurants, menus and restaurant candidates, which are shared place data rather than user-owned.
+  - Cannot be removed in band: Firebase Analytics and Crashlytics data already keyed to the uid. The deletion copy states this rather than implying otherwise.
+- Root Cause Of The Leaderboard Step
+  - The leaderboard is a persisted document, not a live query. `rebuildLeaderboard` writes `/meta/leaderboard` with a `users` array whose entries carry `displayName`, `email` and `photoUrl`, and the only things that rebuild it are the Bite create and delete triggers.
+  - Because this flow keeps the Bites, no Bite trigger fires during a deletion. Without an explicit step a deleted user's personal data would sit in `/meta/leaderboard` until an unrelated user happened to post a Bite.
+  - The cascade therefore prunes the uid from `/meta/leaderboardDaily` and calls `rebuildLeaderboard` after the user document is gone, so the account drops out and everyone below shifts up. `biteCount` needs no correction: the surviving Bites carry no `userId`, so they are counted for nobody.
+- Outcome
+  - `apps/bite-tribe-firebase/functions/src/functions/users/delete-own-account.ts` adds the `deleteOwnAccount` callable: App Check plus auth guard, the `auth_time` recency check, an idempotent `/accountDeletions/{uid}` job document, the cascade above, and the auth deletion last. An already completed job returns immediately, so a retried call is a no-op.
+  - `libs/bite-tribe/account/data-access` is a new library owning `DeleteMyAccountService`: it calls the callable, maps `reauth_required` onto a fresh provider sign-in (Google, Apple, or a password prompt for email/password accounts), retries once, and signs the user out on success.
+  - `libs/bite-tribe/delete-account` gains the in-app page and container behind the authenticated `settings/delete-account` route, and its public page is rewritten and localized.
+  - `libs/bite-tribe/settings` gains the destructive Account section; `libs/bite-tribe/about` gains the Privacy Policy entry.
+  - `libs/common/utils` adds `getAccountDeletionFailureReason`, `PATH.DELETE_ACCOUNT` and the `closeCircleOutline` icon; `libs/common/ta-firestore` adds the `account_deletion_started`/`_completed`/`_failed` analytics events.
+  - 37 keys were added to all 11 locale files.
+- Validation
+  - `npx nx run-many -t test -p delete-account,bite-tribe/account-data-access,bite-tribe/settings,bite-tribe/about,bite-tribe/api,utils-common,ta-firestore,bite-tribe/details` - green.
+  - `npm test` in `apps/bite-tribe-firebase/functions` - 157 tests green, including 16 new cases for the cascade against an in-memory Firestore fake.
+  - `npx nx run-many -t lint` over the same projects plus `bite-tribe-shell` - clean.
+  - `npx nx build bite-tribe` - succeeds.
+  - `git diff --check` - clean.
+  - Not run: the physical iOS and Android pass with disposable accounts required by the issue's acceptance criteria, and no deploy of the new callable. Both are still open before this can be recorded under [[Current State - Release Candidate Test Charter]].

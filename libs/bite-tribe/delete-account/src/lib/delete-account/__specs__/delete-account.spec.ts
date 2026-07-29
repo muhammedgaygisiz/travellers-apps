@@ -3,8 +3,18 @@ import { DeleteAccount } from '../delete-account';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { TranslocoService } from '@jsverse/transloco';
+import { of } from 'rxjs';
 
 jest.mock('@capacitor-firebase/analytics');
+
+const MockTranslocoService = {
+  translate: jest.fn((key: string): string => key),
+  config: {
+    reRenderOnLangChange: jest.fn(),
+  },
+  langChanges$: of(),
+};
 
 describe(DeleteAccount.name, () => {
   let component: DeleteAccount;
@@ -12,7 +22,10 @@ describe(DeleteAccount.name, () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(getIonicConfig())],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DeleteAccount);

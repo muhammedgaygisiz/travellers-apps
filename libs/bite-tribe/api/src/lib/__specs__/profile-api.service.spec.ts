@@ -620,6 +620,26 @@ describe(ProfileApiService.name, () => {
       ));
     });
 
+    // A Bite whose creator deleted their account keeps the Bite but loses its
+    // `userId`. It must resolve to no creator so the details page renders it the
+    // way it renders a private user's Bite, rather than querying `users/undefined`.
+    describe('given a bite whose creator deleted their account', () => {
+      it('should resolve without a creator and without reading a user', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const getDocumentSpy = jest.spyOn(FirebaseFirestore, 'getDocument');
+
+          const result = await service.getUserByBiteId({
+            id: 'bite-1',
+            name: 'Ramen',
+          } as any);
+
+          expect(result).toBeUndefined();
+          expect(getDocumentSpy).not.toHaveBeenCalled();
+        },
+      ));
+    });
+
     describe('given a bite', () => {
       it('should call FirebaseFirestore.getDocument', inject(
         [ProfileApiService],

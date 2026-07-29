@@ -71,6 +71,7 @@ export class PageSettings {
   submitSettings = output<Settings>();
   logout = output<void>();
   resendEmailVerification = output<void>();
+  deleteAccount = output<void>();
 
   private readonly formBuilder = inject(FormBuilder);
 

@@ -16,7 +16,10 @@ export const PATH = {
   PLACE: 'place',
   MENU: 'menu',
   PRIVACY_POLICY: 'privacy',
+  // Public store-review URL. It explains the flow; it does not perform it.
   ACCOUNT_DELETION: 'account-deletion',
+  // Authenticated in-app flow that actually deletes the account.
+  DELETE_ACCOUNT: 'settings/delete-account',
   MARKET_PLACE: 'market-place',
   BITE_TRAIL: 'bite-trail',
   SEARCH: 'search',

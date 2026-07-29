@@ -197,6 +197,7 @@
   "day-sunday": "Sonntag",
   "closed": "Geschlossen",
   "ok": "OK",
+  "registration-in-progress": "Dein Konto wird erstellt...",
   "registration-success-check-your-email-to-verify-account": "Registrierung erfolgreich! Bitte überprüfe deine E-Mail, um dein Konto zu verifizieren.",
   "registration-error-try-again": "Bei der Registrierung ist ein Fehler aufgetreten. Bitte versuche es erneut.",
   "registration-unknown-error-try-again": "Bei der Registrierung ist ein unbekannter Fehler aufgetreten. Bitte versuche es erneut.",

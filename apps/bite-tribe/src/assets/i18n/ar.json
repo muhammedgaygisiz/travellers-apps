@@ -197,6 +197,7 @@
   "day-sunday": "الأحد",
   "closed": "مغلق",
   "ok": "حسنًا",
+  "registration-in-progress": "جارٍ إنشاء حسابك...",
   "registration-success-check-your-email-to-verify-account": "تم التسجيل بنجاح! تحقق من بريدك الإلكتروني لتأكيد حسابك.",
   "registration-error-try-again": "حدث خطأ أثناء التسجيل. حاول مرة أخرى.",
   "registration-unknown-error-try-again": "حدث خطأ غير معروف أثناء التسجيل. حاول مرة أخرى.",

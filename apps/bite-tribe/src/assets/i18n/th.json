@@ -197,6 +197,7 @@
   "day-sunday": "วันอาทิตย์",
   "closed": "ปิด",
   "ok": "ตกลง",
+  "registration-in-progress": "กำลังสร้างบัญชีของคุณ...",
   "registration-success-check-your-email-to-verify-account": "สมัครสมาชิกสำเร็จ! โปรดตรวจสอบอีเมลของคุณเพื่อยืนยันบัญชี",
   "registration-error-try-again": "เกิดข้อผิดพลาดระหว่างการสมัครสมาชิก โปรดลองอีกครั้ง",
   "registration-unknown-error-try-again": "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุระหว่างการสมัครสมาชิก โปรดลองอีกครั้ง",

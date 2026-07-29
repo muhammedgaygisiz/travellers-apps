@@ -25,11 +25,11 @@ export const Default: Story = {};
 export const Deleting: Story = {
   args: {
     deleting: true,
-  } as Partial<DeleteMyAccountComponent>,
+  },
 };
 
 export const Failed: Story = {
   args: {
     failed: true,
-  } as Partial<DeleteMyAccountComponent>,
+  },
 };

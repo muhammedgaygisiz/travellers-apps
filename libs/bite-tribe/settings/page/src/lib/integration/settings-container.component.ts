@@ -16,7 +16,13 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [publicUser]="service.publicUser()"
       [settings]="service.settings()"
       [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
+      [pushPermissionState]="service.pushPermissionState()"
+      [pushNotificationsPreference]="service.pushNotificationsPreference()"
+      [pushSettingsOpenFailed]="service.pushSettingsOpenFailed()"
       (submitSettings)="service.saveSettings($event)"
+      (pushNotificationsChange)="service.setPushNotifications($event)"
+      (openPushSettings)="service.openPushSettings()"
+      (refreshPushPermission)="service.refreshPushPermissionState()"
       (logout)="service.logout()"
       (resendEmailVerification)="service.resendEmailVerification('settings')"
       (deleteAccount)="service.goToDeleteAccount()"
@@ -44,6 +50,8 @@ export class SettingsContainer {
     if (this.service.emailVerificationPromptVisible()) {
       this.trackPromptShownOnce();
     }
+
+    void this.service.refreshPushPermissionState();
   }
 
   ionViewDidLeave(): void {

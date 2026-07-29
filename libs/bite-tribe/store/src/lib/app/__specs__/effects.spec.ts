@@ -15,10 +15,14 @@ import { Action, Store } from '@ngrx/store';
 import { getEffectsMetadata } from '@ngrx/effects';
 import SpyInstance = jest.SpyInstance;
 import { gpsPosition } from '../selectors';
+import { initPushListeners } from 'push-notifications';
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
   getCurrentPosition: (): void => getCurrentPositionMock(),
+}));
+jest.mock('push-notifications', () => ({
+  initPushListeners: jest.fn().mockResolvedValue(undefined),
 }));
 
 const assertDeepEqual = (actual: unknown, expected: unknown): void => {
@@ -102,6 +106,7 @@ describe(AppEffect.name, () => {
     beforeEach(() => {
       document.documentElement.classList.remove('dark');
       document.documentElement.classList.remove('light');
+      (initPushListeners as jest.Mock).mockClear();
     });
 
     describe('given settings with dark theme exist', () => {
@@ -139,6 +144,29 @@ describe(AppEffect.name, () => {
 
         expect(document.documentElement.classList.contains('dark')).toBe(true);
         expect(document.documentElement.classList.contains('light')).toBe(
+          false,
+        );
+      });
+
+      it('initializes push with the loaded product preference', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: fromAuth.AuthActions.loadedUser({
+              user: {
+                uid: 'user-1',
+              } as Parameters<
+                typeof fromAuth.AuthActions.loadedUser
+              >[0]['user'],
+            }),
+          });
+
+          expectObservable(effects.loadSettingsFromApi$);
+        });
+
+        expect(initPushListeners).toHaveBeenCalledWith(
+          PlatformMock,
+          'user-1',
+          NavControllerMock,
           false,
         );
       });

@@ -72,7 +72,60 @@
         <section class="settings-section">
           <ion-item>
             <ion-label>{{ 'push-notifications' | transloco }}</ion-label>
-            <ion-toggle slot="end" formControlName="pushNotifications" />
+            <ion-toggle
+              slot="end"
+              data-testid="settings-push-notifications"
+              formControlName="pushNotifications"
+              (ionChange)="pushNotificationsChange.emit($event.detail.checked)"
+            />
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label class="ion-text-wrap">
+              @switch (pushPermissionState()) {
+                @case ('checking') {
+                  <p>{{ 'notification-device-status-checking' | transloco }}</p>
+                }
+                @case ('granted') {
+                  <p>{{ 'notification-device-status-granted' | transloco }}</p>
+                }
+                @case ('prompt') {
+                  <p>{{ 'notification-device-status-prompt' | transloco }}</p>
+                }
+                @case ('denied') {
+                  <ion-text color="warning">
+                    <p>
+                      {{ 'notification-device-status-denied' | transloco }}
+                    </p>
+                  </ion-text>
+                  <ion-button
+                    fill="clear"
+                    data-testid="settings-open-notification-settings"
+                    (click)="openPushSettings.emit()"
+                  >
+                    {{ 'open-device-settings' | transloco }}
+                  </ion-button>
+                  <ion-button
+                    fill="clear"
+                    data-testid="settings-refresh-notification-permission"
+                    (click)="refreshPushPermission.emit()"
+                  >
+                    {{ 'check-again' | transloco }}
+                  </ion-button>
+                }
+                @case ('unsupported') {
+                  <p>
+                    {{ 'notification-device-status-unsupported' | transloco }}
+                  </p>
+                }
+              }
+              @if (pushSettingsOpenFailed()) {
+                <ion-text color="warning">
+                  <p>
+                    {{ 'notification-open-settings-manually' | transloco }}
+                  </p>
+                </ion-text>
+              }
+            </ion-label>
           </ion-item>
           <ion-item>
             <ion-label>{{ 'email-updates' | transloco }}</ion-label>
@@ -172,7 +225,11 @@
           </ion-button>
           <ion-button
             data-testid="settings-save"
-            [disabled]="!settingsForm.valid || settingsForm.pristine"
+            [disabled]="
+              !settingsForm.valid ||
+              settingsForm.pristine ||
+              pushPermissionState() === 'checking'
+            "
             (click)="saveSettings()"
             >{{ 'save-changes' | transloco }}
           </ion-button>

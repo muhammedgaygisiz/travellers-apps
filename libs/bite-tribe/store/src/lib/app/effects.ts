@@ -20,13 +20,12 @@ import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { isBase64String, PATH } from 'utils';
 import { stopIfUserIsUndefined } from './utils/stop-if-user-is-undefined';
 import { dispatchGpsPosition } from './utils/dispatch-gps-position';
-import { initPushNotifications } from './utils/init-push-notifications';
 import { Store } from '@ngrx/store';
-import { withUserFromAction } from './utils/with-user-from-action';
 import { isProfilePage } from './utils/is-profile-page';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { userId } from '../router/selectors';
 import { CreateAndUploadImageCallbackParams } from 'model';
+import { initPushListeners } from 'push-notifications';
 
 @Injectable()
 export class AppEffect {
@@ -43,7 +42,7 @@ export class AppEffect {
   loadSettingsFromApi$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),
-      switchMap(() =>
+      switchMap(({ user }) =>
         from(this.api.loadSettings()).pipe(
           tap((settings) => {
             const theme = settings?.theme;
@@ -58,6 +57,18 @@ export class AppEffect {
                 theme === 'light',
               );
             }
+
+            // The product preference is authoritative. A token is registered
+            // only after settings load, so an opted-out user is not silently
+            // re-enrolled on every login.
+            void initPushListeners(
+              this.platform,
+              user?.uid,
+              this.navController,
+              !!settings?.pushNotifications,
+            ).catch((error) => {
+              console.warn('Could not initialize push notifications: ', error);
+            });
           }),
           map((settings) => AppActions.loadedSettingsFromAPI({ settings })),
         ),
@@ -97,8 +108,6 @@ export class AppEffect {
         ofType(fromAuth.AuthActions.loadedUser),
         stopIfUserIsUndefined(),
         dispatchGpsPosition(this.store),
-        withUserFromAction(),
-        initPushNotifications(this.platform, this.navController),
       ),
     { dispatch: false },
   );

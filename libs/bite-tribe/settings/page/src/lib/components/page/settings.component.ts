@@ -34,6 +34,7 @@ import { currencyCodes } from 'utils';
 import { User } from '@capacitor-firebase/authentication';
 import { CardComponent } from 'common/ui/card';
 import { TranslocoPipe } from '@jsverse/transloco';
+import type { PushPermissionState } from 'push-notifications';
 
 @Component({
   selector: 'settings',
@@ -67,18 +68,24 @@ export class PageSettings {
   publicUser = input<PublicUser>();
   settings = input<Settings>();
   showEmailVerificationPrompt = input(false);
+  pushPermissionState = input<PushPermissionState>('checking');
+  pushNotificationsPreference = input<boolean>();
+  pushSettingsOpenFailed = input(false);
 
   submitSettings = output<Settings>();
   logout = output<void>();
   resendEmailVerification = output<void>();
   deleteAccount = output<void>();
+  pushNotificationsChange = output<boolean>();
+  openPushSettings = output<void>();
+  refreshPushPermission = output<void>();
 
   private readonly formBuilder = inject(FormBuilder);
 
   currencies = currencyCodes;
 
   settingsForm = this.formBuilder.nonNullable.group({
-    pushNotifications: [{ value: false, disabled: true }, Validators.required],
+    pushNotifications: [false, Validators.required],
     emailUpdates: [{ value: false, disabled: true }, Validators.required],
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
@@ -93,6 +100,18 @@ export class PageSettings {
       // patchValue ignores keys without a matching control (e.g. updatedAt).
       this.settingsForm.patchValue(settings);
     }
+  });
+
+  pushNotificationsPreferenceEffect = afterRenderEffect(() => {
+    const preference = this.pushNotificationsPreference();
+
+    if (preference === undefined) {
+      return;
+    }
+
+    const control = this.settingsForm.controls.pushNotifications;
+    control.setValue(preference, { emitEvent: false });
+    control.markAsDirty();
   });
 
   systemTheme = signal(

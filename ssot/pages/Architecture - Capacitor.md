@@ -58,12 +58,23 @@ The update alert in `libs/bite-tribe/store/src/lib/service-worker/effects.ts` ke
 
 The OS shows its push permission prompt once per install, so the ask is owned by exactly one surface: the onboarding notification step, which explains the value first (epic \#850, issue \#1015).
 
-`libs/common/push-notifications` splits this in two:
+`libs/common/push-notifications` splits this into explicit operations:
 
-- `initPushListeners` - registers listeners and refreshes the FCM token when permission was already granted. Runs on login (`initAfterLogin$` in the store app effects) and never prompts.
+- `initPushListeners` - registers listeners and refreshes the FCM token when permission was already granted and the stored product preference is on. It runs after settings load and never prompts.
 - `requestPushPermission` - shows the prompt and registers on grant. Called only from the onboarding notification step, and returns `granted` / `denied` / `unsupported` so the choice can be recorded in settings.
+- `enablePushNotifications` - owns the explicit Settings action: it registers an
+  existing grant, spends an unasked prompt, or returns a denied state without
+  retrying an OS prompt that can no longer appear.
+- `getPushPermissionState` and `openPushNotificationSettings` - expose the live
+  device state and iOS recovery route. Android retains translated manual
+  recovery guidance because App Launcher cannot open its notification-settings
+  intent.
 
 Do not call `requestPushPermission` from app startup or a login path. A cold ask there spends the single OS prompt before the user has any context, and the onboarding step can then never prompt.
+
+The stored setting is also checked by the Firebase Functions `getTokens`
+helper. An explicit `false` removes that user before any sender resolves device
+tokens, so opting out blocks delivery across old and current tokens.
 
 ## Location Permission Rule
 

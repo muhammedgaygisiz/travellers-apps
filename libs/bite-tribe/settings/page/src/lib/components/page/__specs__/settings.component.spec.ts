@@ -74,6 +74,24 @@ describe(PageSettings.name, () => {
     it('should mark form as pristine initially', () => {
       expect(component.settingsForm.pristine).toBe(true);
     });
+
+    it('keeps the push preference actionable', () => {
+      expect(component.settingsForm.controls.pushNotifications.enabled).toBe(
+        true,
+      );
+    });
+
+    it('applies a permission workflow correction and marks it for saving', () => {
+      compRef.setInput('pushNotificationsPreference', true);
+      fixture.detectChanges();
+
+      expect(component.settingsForm.controls.pushNotifications.value).toBe(
+        true,
+      );
+      expect(component.settingsForm.controls.pushNotifications.dirty).toBe(
+        true,
+      );
+    });
   });
 
   describe('saveSettings', () => {

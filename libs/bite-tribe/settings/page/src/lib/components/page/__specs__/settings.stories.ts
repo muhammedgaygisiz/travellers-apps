@@ -20,3 +20,33 @@ export default {
 
 type Story = StoryObj<PageSettings>;
 export const Default: Story = {};
+
+export const NotificationsAllowed: Story = {
+  args: {
+    settings: {
+      pushNotifications: true,
+      location: true,
+      emailUpdates: false,
+      theme: 'light',
+      currency: 'EUR',
+      favoriteCurrencies: [],
+      language: 'en',
+    },
+    pushPermissionState: 'granted',
+  },
+};
+
+export const NotificationsBlocked: Story = {
+  args: {
+    settings: {
+      pushNotifications: true,
+      location: true,
+      emailUpdates: false,
+      theme: 'light',
+      currency: 'EUR',
+      favoriteCurrencies: [],
+      language: 'en',
+    },
+    pushPermissionState: 'denied',
+  },
+};

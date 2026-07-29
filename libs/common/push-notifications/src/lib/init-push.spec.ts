@@ -1,10 +1,15 @@
 import { PushNotifications } from '@capacitor/push-notifications';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+import { AppLauncher } from '@capacitor/app-launcher';
+import { Capacitor } from '@capacitor/core';
 import type { NavController, Platform } from '@ionic/angular';
 import {
+  enablePushNotifications,
+  getPushPermissionState,
   hasPushPermission,
   initPushListeners,
+  openPushNotificationSettings,
   requestPushPermission,
 } from './init-push';
 
@@ -23,6 +28,9 @@ jest.mock('@capacitor/push-notifications', () => ({
 }));
 jest.mock('@capacitor/core', () => ({
   Capacitor: { getPlatform: jest.fn(() => 'ios') },
+}));
+jest.mock('@capacitor/app-launcher', () => ({
+  AppLauncher: { openUrl: jest.fn() },
 }));
 jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: { setDocument: jest.fn() },
@@ -115,6 +123,20 @@ describe('init-push', () => {
 
       expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(1);
       expect(PushNotifications.addListener).not.toHaveBeenCalled();
+      expect(PushNotifications.register).not.toHaveBeenCalled();
+    });
+
+    it('removes stale listeners but does not register when the product preference is off', async () => {
+      await initPushListeners(
+        platformStub(true),
+        'user-1',
+        navControllerStub(),
+        false,
+      );
+
+      expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(1);
+      expect(PushNotifications.addListener).not.toHaveBeenCalled();
+      expect(PushNotifications.checkPermissions).not.toHaveBeenCalled();
       expect(PushNotifications.register).not.toHaveBeenCalled();
     });
 
@@ -421,5 +443,104 @@ describe('init-push', () => {
       await expect(hasPushPermission(platformStub(false))).resolves.toBe(true);
       expect(PushNotifications.checkPermissions).not.toHaveBeenCalled();
     });
+  });
+
+  describe(getPushPermissionState.name, () => {
+    it.each([
+      ['granted', 'granted'],
+      ['denied', 'denied'],
+      ['prompt', 'prompt'],
+      ['prompt-with-rationale', 'prompt'],
+    ])('maps %s to %s', async (receive, expected) => {
+      grantPermission(receive);
+
+      await expect(getPushPermissionState(platformStub(true))).resolves.toBe(
+        expected,
+      );
+      expect(PushNotifications.requestPermissions).not.toHaveBeenCalled();
+    });
+
+    it('reports unsupported off native', async () => {
+      await expect(getPushPermissionState(platformStub(false))).resolves.toBe(
+        'unsupported',
+      );
+    });
+  });
+
+  describe(enablePushNotifications.name, () => {
+    it('registers immediately for an existing grant', async () => {
+      grantPermission('granted');
+
+      await expect(
+        enablePushNotifications(
+          platformStub(true),
+          'user-1',
+          navControllerStub(),
+        ),
+      ).resolves.toBe('granted');
+
+      expect(PushNotifications.addListener).toHaveBeenCalled();
+      expect(PushNotifications.register).toHaveBeenCalledTimes(1);
+      expect(PushNotifications.requestPermissions).not.toHaveBeenCalled();
+    });
+
+    it('spends an unasked prompt after listeners are ready', async () => {
+      grantPermission('prompt');
+      (PushNotifications.requestPermissions as jest.Mock).mockResolvedValue({
+        receive: 'granted',
+      });
+
+      await expect(
+        enablePushNotifications(
+          platformStub(true),
+          'user-1',
+          navControllerStub(),
+        ),
+      ).resolves.toBe('granted');
+
+      expect(PushNotifications.addListener).toHaveBeenCalled();
+      expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(1);
+      expect(PushNotifications.register).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns a denial without retrying the OS prompt', async () => {
+      grantPermission('denied');
+
+      await expect(
+        enablePushNotifications(
+          platformStub(true),
+          'user-1',
+          navControllerStub(),
+        ),
+      ).resolves.toBe('denied');
+
+      expect(PushNotifications.addListener).not.toHaveBeenCalled();
+      expect(PushNotifications.requestPermissions).not.toHaveBeenCalled();
+      expect(PushNotifications.register).not.toHaveBeenCalled();
+    });
+  });
+
+  describe(openPushNotificationSettings.name, () => {
+    it('opens the app settings page on iOS', async () => {
+      (Capacitor.getPlatform as jest.Mock).mockReturnValue('ios');
+      (AppLauncher.openUrl as jest.Mock).mockResolvedValue({
+        completed: true,
+      });
+
+      await expect(openPushNotificationSettings()).resolves.toBe(true);
+      expect(AppLauncher.openUrl).toHaveBeenCalledWith({
+        url: 'app-settings:',
+      });
+    });
+
+    it.each(['android', 'web'])(
+      'keeps manual recovery guidance on %s',
+      async (platform) => {
+        (Capacitor.getPlatform as jest.Mock).mockReturnValue(platform);
+
+        await expect(openPushNotificationSettings()).resolves.toBe(false);
+        expect(AppLauncher.openUrl).not.toHaveBeenCalled();
+      },
+    );
   });
 });

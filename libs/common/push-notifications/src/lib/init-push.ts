@@ -3,6 +3,7 @@ import { NavController, Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+import { AppLauncher } from '@capacitor/app-launcher';
 import { PATH } from 'utils';
 
 const upsertToken = async (
@@ -73,6 +74,7 @@ const getFcmToken = async (): Promise<string | null> => {
  * not record a refusal the user never made.
  */
 export type PushPermissionResult = 'granted' | 'denied' | 'unsupported';
+export type PushPermissionState = PushPermissionResult | 'prompt' | 'checking';
 
 /**
  * Turns the week bounds of a weekly summary payload into navigation query
@@ -105,6 +107,7 @@ export const initPushListeners = async (
   platform: Platform,
   userUid: string | undefined,
   navController: NavController,
+  enabled = true,
 ): Promise<void> => {
   if (platform.is('capacitor')) {
     try {
@@ -113,7 +116,7 @@ export const initPushListeners = async (
       console.warn('No previous PushNotifications listeners to remove');
     }
 
-    if (!userUid) {
+    if (!userUid || !enabled) {
       return;
     }
 
@@ -207,19 +210,83 @@ export const initPushListeners = async (
 export const hasPushPermission = async (
   platform: Platform,
 ): Promise<boolean> => {
+  const state = await getPushPermissionState(platform);
+
+  return state === 'granted' || state === 'unsupported';
+};
+
+/**
+ * Reads the OS push permission state without prompting. This lets Settings
+ * distinguish an unspent prompt from a denial that needs system recovery.
+ */
+export const getPushPermissionState = async (
+  platform: Platform,
+): Promise<Exclude<PushPermissionState, 'checking'>> => {
   if (!platform.is('capacitor')) {
-    return true;
+    return 'unsupported';
   }
 
   try {
-    const permissions = await PushNotifications.checkPermissions();
+    const { receive } = await PushNotifications.checkPermissions();
 
-    return permissions.receive === 'granted';
+    if (receive === 'granted') {
+      return 'granted';
+    }
+
+    return receive === 'denied' ? 'denied' : 'prompt';
   } catch (error) {
     console.warn('Push permission check failed: ', error);
 
+    return 'denied';
+  }
+};
+
+/**
+ * Opens this app's settings page on iOS, where a denied notification grant can
+ * be restored. App Launcher has no Android equivalent for the notification
+ * settings intent, so Android callers retain manual recovery guidance.
+ */
+export const openPushNotificationSettings = async (): Promise<boolean> => {
+  if (Capacitor.getPlatform() !== 'ios') {
     return false;
   }
+
+  try {
+    await AppLauncher.openUrl({ url: 'app-settings:' });
+
+    return true;
+  } catch (error) {
+    console.warn('Could not open push notification settings: ', error);
+
+    return false;
+  }
+};
+
+/**
+ * Enables push from an explicit user action in Settings.
+ *
+ * A granted device is registered immediately, an unspent prompt is shown only
+ * after listeners are ready to persist the resulting FCM token, and a denial
+ * is returned without making a request the OS will ignore.
+ */
+export const enablePushNotifications = async (
+  platform: Platform,
+  userUid: string | undefined,
+  navController: NavController,
+): Promise<PushPermissionResult> => {
+  const state = await getPushPermissionState(platform);
+
+  if (state === 'denied' || state === 'unsupported') {
+    return state;
+  }
+
+  await initPushListeners(platform, userUid, navController, true);
+
+  if (state === 'granted') {
+    return 'granted';
+  }
+
+  return requestPushPermission(platform);
 };
 
 /**

@@ -20,6 +20,10 @@ Users and creators can receive engagement signals around Bites and social activi
 - Backend functions can notify users about meaningful leaderboard ranking changes.
 - Notifications or shared-link behavior keep users connected to activity.
 - Tapping a notification opens the surface it talks about: the Bite, the follower profile, the leaderboard, or the weekly bites page.
+- Delivery requires the stored Push Notifications product preference to be on.
+  The live OS permission is shown separately in Settings, where an unspent
+  prompt can be requested and a denial receives device-settings recovery
+  guidance.
 - The weekly summary counts one calendar week (Monday to Sunday, Europe/Zurich) and carries those bounds, so its landing page lists the Bites of exactly that week even when the user opens it days later.
 
 ## Supported Evidence

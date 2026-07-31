@@ -11,6 +11,7 @@ import {
   inject,
   input,
   signal,
+  untracked,
   viewChild,
   viewChildren,
 } from '@angular/core';
@@ -334,14 +335,20 @@ export class RealUiSourceComponent {
 
   constructor() {
     effect(() => {
+      // Track ONLY coach / beat / flowId. resetBeatState → syncHomeSearch reads
+      // homePages(); without untracked, navigating home→details destroys bt-home,
+      // retriggers this effect, and snaps Discover back to home (~1 frame).
       const coach = this.coach();
-      if (coach) {
-        this.applyCoachState(coach);
-        return;
-      }
-      // Re-seed when beat or intentional flow changes.
-      void this.flowId();
-      this.resetBeatState(this.beat());
+      const beat = this.beat();
+      const flowId = this.flowId();
+      void flowId;
+      untracked(() => {
+        if (coach) {
+          this.applyCoachState(coach);
+          return;
+        }
+        this.resetBeatState(beat);
+      });
     });
 
     afterNextRender(() => {
@@ -395,7 +402,6 @@ export class RealUiSourceComponent {
             : '';
         if (biteId) {
           this.selectedBiteId.set(biteId);
-          this.cdr.detectChanges();
         }
         if (STAGE_SCREENS.has(screen)) {
           this.transitionTo(screen as IntroStageScreen);

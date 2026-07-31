@@ -64,19 +64,32 @@ export class IntroGestureLayerComponent {
   private player: SyncedGestureController | null = null;
   private runId = 0;
 
+  private lastPlayKey = '';
+
   constructor() {
     effect(() => {
       const beat = this.beat();
       const enabled = this.enabled();
       const steps = this.steps();
-      void this.stageRoot();
-      void beat;
-      void steps;
-      void this.loop();
-      this.stop();
+      const loop = this.loop();
+      const root = this.stageRoot();
+      // Key on meaning, not stageRoot identity — parent CD after navigate
+      // must not cancel the player mid-script.
+      const stepsKey = steps == null ? 'canon' : `override:${steps.length}`;
+      const key = `${beat}|${enabled}|${loop}|${stepsKey}|${root ? 'root' : 'none'}`;
       if (!enabled) {
+        this.lastPlayKey = '';
+        this.stop();
         return;
       }
+      if (!root) {
+        return;
+      }
+      if (key === this.lastPlayKey && this.player) {
+        return;
+      }
+      this.lastPlayKey = key;
+      this.stop();
       const id = ++this.runId;
       void this.start(id);
     });

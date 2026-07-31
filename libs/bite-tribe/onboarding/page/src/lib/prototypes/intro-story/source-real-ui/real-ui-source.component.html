@@ -5,6 +5,7 @@
   [attr.data-beat]="beat()"
   [attr.data-flow]="flowId()"
   [attr.data-selected-bite]="selectedBiteId()"
+  [attr.data-screen]="incoming()"
 >
   @if (badge()) {
     <p class="source__badge">{{ badge() }}</p>

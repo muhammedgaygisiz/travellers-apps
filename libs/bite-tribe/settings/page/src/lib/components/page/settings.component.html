@@ -209,6 +209,8 @@
             </ion-select>
           </ion-item>
           <ion-item
+            button
+            detail="false"
             data-testid="settings-currency"
             (click)="currencyModal.present()"
           >
@@ -219,6 +221,8 @@
             </ion-text>
           </ion-item>
           <ion-item
+            button
+            detail="false"
             data-testid="settings-favorite-currencies"
             (click)="favoriteModal.present()"
           >
@@ -318,9 +322,9 @@
   <ng-template>
     <currency-selector
       class="ion-page"
+      mode="preferred"
       [selectedCurrency]="settingsForm.get('currency')?.value || 'EUR'"
       [favoriteCurrencies]="settingsForm.get('favoriteCurrencies')?.value || []"
-      [disableFavChange]="true"
       (currencySelected)="onCurrencySelected($event, currencyModal)"
       (selectionCancel)="currencyModal.dismiss()"
     />
@@ -331,6 +335,7 @@
   <ng-template>
     <currency-selector
       class="ion-page"
+      mode="favorites"
       leftButtonLangCode="save"
       [favoriteCurrencies]="settingsForm.get('favoriteCurrencies')?.value || []"
       (favoriteCurrencyToggled)="onFavoriteCurrencyToggle($event)"

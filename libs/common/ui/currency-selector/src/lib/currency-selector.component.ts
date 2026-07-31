@@ -11,12 +11,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import {
   IonButton,
   IonButtons,
+  IonCheckbox,
   IonContent,
   IonHeader,
   IonIcon,
   IonItem,
   IonLabel,
   IonList,
+  IonNote,
   IonSearchbar,
   IonTitle,
   IonToolbar,
@@ -29,6 +31,13 @@ import {
 } from 'utils';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
+/**
+ * The two jobs this picker does. They are different selections, not one list
+ * with an extra icon: `preferred` picks exactly one currency and closes,
+ * `favorites` toggles any number of them and stays open.
+ */
+export type CurrencySelectorMode = 'preferred' | 'favorites';
+
 @Component({
   selector: 'currency-selector',
   templateUrl: './currency-selector.component.html',
@@ -36,12 +45,14 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
   imports: [
     IonButton,
     IonButtons,
+    IonCheckbox,
     IonContent,
     IonHeader,
     IonIcon,
     IonItem,
     IonLabel,
     IonList,
+    IonNote,
     IonSearchbar,
     IonTitle,
     IonToolbar,
@@ -54,7 +65,7 @@ export class CurrencySelectorComponent {
 
   selectedCurrency = input<string>('EUR');
   favoriteCurrencies = input<string[] | undefined>([]);
-  disableFavChange = input<boolean>(false);
+  mode = input<CurrencySelectorMode>('preferred');
 
   leftButtonLangCode = input<string>('cancel');
 
@@ -67,6 +78,18 @@ export class CurrencySelectorComponent {
   activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang?.() || 'en',
   });
+
+  isFavoritesMode = computed(() => this.mode() === 'favorites');
+
+  titleKey = computed(() =>
+    this.isFavoritesMode() ? 'select-favorite-currencies' : 'select-currency',
+  );
+
+  instructionKey = computed(() =>
+    this.isFavoritesMode()
+      ? 'favorite-currencies-instruction'
+      : 'preferred-currency-instruction',
+  );
 
   filteredCurrencies = computed(() => {
     const searchTerm = this.rawSearchTerm();
@@ -130,17 +153,46 @@ export class CurrencySelectorComponent {
     this.rawSearchTerm.set(target.value?.toLowerCase() || '');
   }
 
-  selectCurrency(code: string): void {
-    this.currencySelected.emit(code);
-  }
+  /**
+   * One row, one action. Which action it is depends on the mode, so the row is
+   * always the control and nothing hides behind a secondary icon button.
+   */
+  selectRow(code: string): void {
+    if (this.isFavoritesMode()) {
+      this.favoriteCurrencyToggled.emit(code);
 
-  toggleFavorite(event: Event, code: string): void {
-    event.stopPropagation();
-    this.favoriteCurrencyToggled.emit(code);
+      return;
+    }
+
+    this.currencySelected.emit(code);
   }
 
   isFavorite(currencyCode: string): boolean {
     return this.favoriteCurrencies()?.includes(currencyCode) || false;
+  }
+
+  /**
+   * The row is the accessible control, so its name has to carry both what the
+   * tap does and where the currency currently stands.
+   */
+  rowLabel(currency: (typeof currencyCodes)[number]): string {
+    const params = { currency: this.getCurrencyName(currency) };
+
+    if (this.isFavoritesMode()) {
+      return this.transloco.translate(
+        this.isFavorite(currency.code)
+          ? 'remove-currency-from-favorites'
+          : 'add-currency-to-favorites',
+        params,
+      );
+    }
+
+    return this.transloco.translate(
+      this.selectedCurrency() === currency.code
+        ? 'currency-selected'
+        : 'select-currency-option',
+      params,
+    );
   }
 
   cancel(): void {

@@ -37,7 +37,7 @@
   <ng-template>
     <currency-selector
       class="ion-page"
-      [disableFavChange]="true"
+      mode="preferred"
       [selectedCurrency]="form.get('currency')?.value || 'EUR'"
       [favoriteCurrencies]="favCurrencies()"
       (currencySelected)="onCurrencySelected($event, currencyModalBite)"

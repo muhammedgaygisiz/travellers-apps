@@ -1,1 +1,4 @@
-export { CurrencySelectorComponent } from './lib/currency-selector.component';
+export {
+  CurrencySelectorComponent,
+  type CurrencySelectorMode,
+} from './lib/currency-selector.component';

@@ -76,6 +76,9 @@ surface.
   called from the onboarding notification step or the explicit Settings setup
   action, and returns `granted` / `denied` / `unsupported` to drive that local
   workflow.
+- `enablePushOnThisDevice` - `requestPushPermission` followed by the token
+  write. Both contextual surfaces call this rather than the prompt alone, so a
+  grant always leaves a registered installation behind.
 
 Do not call `requestPushPermission` from app startup or a login path. A cold
 ask there spends the OS prompt before the user has any context for the
@@ -87,7 +90,7 @@ account-level notification preference.
 
 ## Push Installation Rule
 
-The target contract from issue #1184 separates installation identity, the FCM
+The contract from issue #1184 separates installation identity, the FCM
 delivery address, BiteTribe delivery state, and OS permission:
 
 - A random installation UUID is generated once and persisted with Capacitor
@@ -108,6 +111,22 @@ delivery address, BiteTribe delivery state, and OS permission:
 - OS permission is checked only for the current installation and displayed
   separately from the backend `enabled` state.
 - Permanent installation deletion or revocation is outside issue #1184.
+
+`libs/common/push-notifications` owns this contract:
+
+- `getInstallationId` / `describeCurrentInstallation` - installation identity
+  and the device metadata that labels it.
+- `registerPushInstallation` / `registerCurrentPushInstallation` - the
+  enabled-preserving upsert plus superseded-token cleanup.
+- `loadPushInstallations` / `setPushInstallationEnabled` - the Settings list and
+  its per-installation delivery switch.
+- `getPushPermissionState` / `openPushSettings` - the current device's OS state
+  and its recovery route.
+- `enablePushOnThisDevice` - the contextual setup action shared by onboarding
+  and Settings.
+
+Backend delivery filtering stays in `getTokens`, which skips a token whose
+`enabled` is `false` and keeps delivering to a legacy token that has no flag.
 
 ## Location Permission Rule
 

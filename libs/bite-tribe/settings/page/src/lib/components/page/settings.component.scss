@@ -44,6 +44,42 @@
     text-align: end;
   }
 
+  .notifications-section {
+    margin-bottom: 24px;
+
+    h2 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    &__copy,
+    &__empty {
+      margin: 0 0 12px;
+      color: var(--ion-color-medium);
+      font-size: 0.875rem;
+    }
+
+    // The OS-level block is stated next to the per-installation switches, so it
+    // reads as a second, independent reason delivery can stop.
+    &__blocked {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
+
+      ion-icon {
+        vertical-align: middle;
+        margin-inline-end: 4px;
+      }
+    }
+
+    ion-item {
+      --padding-start: 0;
+      --inner-padding-end: 0;
+    }
+  }
+
   .account-section {
     margin-top: 48px;
     padding-top: 16px;

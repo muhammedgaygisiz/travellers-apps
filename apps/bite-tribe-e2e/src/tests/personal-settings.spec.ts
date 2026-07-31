@@ -17,7 +17,6 @@ import { TEST_USERS } from '../support/test-users';
  */
 async function seedBaselineSettings(page: Page): Promise<void> {
   await seedFirestoreDocument(page, `settings/${TEST_USERS.default.uid}`, {
-    pushNotifications: { booleanValue: false },
     emailUpdates: { booleanValue: false },
     location: { booleanValue: true },
     theme: { stringValue: 'light' },
@@ -85,7 +84,6 @@ test.describe('Configure personal settings', () => {
       theme: 'dark',
       language: 'en',
       location: true,
-      pushNotifications: false,
       emailUpdates: false,
     });
 

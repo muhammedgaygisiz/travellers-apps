@@ -1,9 +1,34 @@
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
-import { PageSettings } from '../settings.component';
+import { PageSettings, PushInstallationView } from '../settings.component';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
+
+const thisDevice: PushInstallationView = {
+  token: 'token-this-device',
+  label: 'iPhone',
+  details: 'iOS 26.5 · 1.0.1 (88)',
+  enabled: true,
+  isCurrentDevice: true,
+};
+
+const otherDevice: PushInstallationView = {
+  token: 'token-other-device',
+  label: 'Pixel 7',
+  details: 'Android 14 · 1.0.1 (88)',
+  enabled: true,
+  isCurrentDevice: false,
+};
+
+/** A token registered before installation metadata existed (issue #1184). */
+const legacyDevice: PushInstallationView = {
+  token: 'token-legacy',
+  label: '',
+  details: 'iOS',
+  enabled: true,
+  isCurrentDevice: false,
+};
 
 export default {
   title: 'Pages/Settings',
@@ -20,3 +45,44 @@ export default {
 
 type Story = StoryObj<PageSettings>;
 export const Default: Story = {};
+
+/** This installation has no token yet, so setup is offered. */
+export const NotificationsNoCurrentDevice: Story = {
+  args: {
+    pushInstallations: [otherDevice],
+    pushPermission: 'prompt',
+  },
+};
+
+export const NotificationsRegisteredDevices: Story = {
+  args: {
+    pushInstallations: [thisDevice, otherDevice],
+    pushPermission: 'granted',
+  },
+};
+
+/** One installation opted out; the others keep delivering. */
+export const NotificationsDisabledDevice: Story = {
+  args: {
+    pushInstallations: [thisDevice, { ...otherDevice, enabled: false }],
+    pushPermission: 'granted',
+  },
+};
+
+export const NotificationsLegacyDevice: Story = {
+  args: {
+    pushInstallations: [thisDevice, legacyDevice],
+    pushPermission: 'granted',
+  },
+};
+
+/**
+ * The OS is dropping delivery for this device. The installation keeps its own
+ * switch, so both reasons delivery can stop stay visible and separate.
+ */
+export const NotificationsBlockedByOs: Story = {
+  args: {
+    pushInstallations: [thisDevice],
+    pushPermission: 'denied',
+  },
+};

@@ -19,10 +19,10 @@ Users can configure app-specific preferences that make discovery and creation mo
 - User opens settings.
 - User maintains preferences such as currency-related choices.
 
-## Planned Notification Correction
+## Notification Management
 
 Issue [#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184)
-replaces the disabled account-wide Push Notifications switch with
+replaced the disabled account-wide Push Notifications switch with
 installation-specific management:
 
 - Settings lists the user's registered app installations.

@@ -1,69 +1,9 @@
 import { PushNotifications } from '@capacitor/push-notifications';
 import { NavController, Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+import { AppLauncher } from '@capacitor/app-launcher';
 import { PATH } from 'utils';
-
-const upsertToken = async (
-  userUid: string,
-  tokenValue: string,
-): Promise<void> => {
-  const platform = Capacitor.getPlatform();
-  const appVersion = 'tbd-xxx';
-  const deviceId = 'tbd-xxx';
-
-  const userTokenRef = `users/${userUid}/pushTokens/${tokenValue}`;
-
-  const now = Date.now();
-  await FirebaseFirestore.setDocument({
-    reference: userTokenRef,
-    data: {
-      platform,
-      appVersion,
-      deviceId,
-      enabled: true,
-      createdAt: now,
-      lastSeenAt: now,
-    },
-    merge: true,
-  });
-
-  // reverse index
-  const indexRef = `pushTokens/${tokenValue}`;
-
-  await FirebaseFirestore.setDocument({
-    reference: indexRef,
-    data: {
-      userUid,
-      platform,
-      createdAt: now,
-      lastSeenAt: now,
-    },
-    merge: true,
-  });
-};
-
-const getFcmToken = async (): Promise<string | null> => {
-  const platform = Capacitor.getPlatform();
-
-  try {
-    const { token } = await FirebaseMessaging.getToken();
-
-    if (!token || token.trim().length === 0) {
-      console.warn('Firebase Messaging returned empty token');
-      return null;
-    }
-    return token;
-  } catch (e) {
-    console.error(
-      'Failed to get FCM token for Firebase Messaging on platform:',
-      platform,
-      e,
-    );
-    return null;
-  }
-};
+import { registerCurrentPushInstallation } from './push-installation';
 
 /**
  * Outcome of an in-context push permission request.
@@ -73,6 +13,16 @@ const getFcmToken = async (): Promise<string | null> => {
  * not record a refusal the user never made.
  */
 export type PushPermissionResult = 'granted' | 'denied' | 'unsupported';
+
+/**
+ * Current OS push permission, as reported without prompting.
+ *
+ * `prompt` still has an unspent OS prompt, so an explicit setup action can
+ * recover delivery. `denied` cannot: the OS ignores further requests and the
+ * only way back is the system settings page. Callers must branch on the two.
+ */
+export type PushPermissionState =
+  'granted' | 'denied' | 'prompt' | 'unsupported';
 
 /**
  * Turns the week bounds of a weekly summary payload into navigation query
@@ -118,14 +68,10 @@ export const initPushListeners = async (
     }
 
     PushNotifications.addListener('registration', async () => {
-      const fcmToken = await getFcmToken();
-
-      if (!fcmToken) {
-        console.error('No FCM token available, cannot upsert push token');
-        return;
-      }
-
-      await upsertToken(userUid, fcmToken);
+      // Refreshing the token must not resurrect a disabled installation, so the
+      // registration inherits the installation's existing `enabled` state
+      // (issue #1184).
+      await registerCurrentPushInstallation(userUid);
     });
 
     PushNotifications.addListener('registrationError', (error) => {
@@ -193,16 +139,16 @@ export const initPushListeners = async (
 /**
  * Whether the OS currently allows delivering push. Never prompts.
  *
- * A stored `settings.pushNotifications` flag records what the user once chose,
+ * A registered token records that this installation once asked for delivery,
  * not what the OS allows today: reinstalling the app or turning notifications
- * off in system settings resets the OS grant while the stored preference
- * survives. Callers must reconcile the two before treating push as enabled,
- * otherwise they show a "granted" state for a permission that no longer exists.
+ * off in system settings resets the OS grant while the token document survives.
+ * Callers must reconcile the two before treating push as live, otherwise they
+ * show a working installation whose delivery the OS is dropping.
  *
  * Off-device there is no OS grant to pre-check, so it reports `true` and leaves
  * the outcome to {@link requestPushPermission}, which reports `unsupported`
- * there. That keeps a stored preference from being second-guessed on a platform
- * that cannot answer the question.
+ * there. That keeps a registration from being second-guessed on a platform that
+ * cannot answer the question.
  */
 export const hasPushPermission = async (
   platform: Platform,
@@ -252,4 +198,87 @@ export const requestPushPermission = async (
     console.error('Push permission request failed: ', error);
     return 'denied';
   }
+};
+
+/**
+ * Reads the OS permission state without prompting, so a caller can tell a
+ * recoverable "never asked" apart from a "denied" that only the system settings
+ * page can undo.
+ *
+ * This describes the current device only. Another installation's delivery is
+ * governed by its own OS grant and its own token `enabled` flag, neither of
+ * which this device can see or change (issue #1184).
+ */
+export const getPushPermissionState = async (
+  platform: Platform,
+): Promise<PushPermissionState> => {
+  if (!platform.is('capacitor')) {
+    return 'unsupported';
+  }
+
+  try {
+    const { receive } = await PushNotifications.checkPermissions();
+
+    if (receive === 'granted') {
+      return 'granted';
+    }
+
+    // `prompt-with-rationale` is Android's "ask again with an explanation", so
+    // it still has a prompt left to spend.
+    return receive === 'denied' ? 'denied' : 'prompt';
+  } catch (error) {
+    console.warn('Push permission check failed: ', error);
+
+    return 'denied';
+  }
+};
+
+/**
+ * Opens the app's own page in the OS settings, the only route back once
+ * notifications were denied — the OS silently ignores further permission
+ * requests.
+ *
+ * Returns whether the settings page was actually opened, so the caller can keep
+ * guiding the user instead of appearing to do nothing. iOS exposes the app's
+ * settings under a URL scheme; Android has no equivalent that App Launcher can
+ * open, so it reports `false` there and needs a native settings plugin.
+ */
+export const openPushSettings = async (): Promise<boolean> => {
+  if (Capacitor.getPlatform() !== 'ios') {
+    return false;
+  }
+
+  try {
+    await AppLauncher.openUrl({ url: 'app-settings:' });
+
+    return true;
+  } catch (error) {
+    console.warn('Could not open notification settings: ', error);
+
+    return false;
+  }
+};
+
+/**
+ * Turns on notification delivery for the current installation: asks the OS when
+ * needed, then registers this installation's token.
+ *
+ * A grant that was already given returns without a prompt, so the same call
+ * covers the granted, never-asked, denied, and unsupported OS states. The token
+ * is written explicitly rather than left to the `registration` listener so the
+ * caller knows when the installation list is worth reloading.
+ */
+export const enablePushOnThisDevice = async (
+  platform: Platform,
+  userUid: string,
+): Promise<PushPermissionResult> => {
+  const result = await requestPushPermission(platform);
+
+  if (result !== 'granted') {
+    return result;
+  }
+
+  await registerCurrentPushInstallation(userUid);
+
+  return 'granted';
 };

@@ -25,7 +25,7 @@ describe('OnboardingService', () => {
   let saveSettings: jest.Mock;
   let applyLanguage: jest.Mock;
   let requestPushPermission: jest.Mock;
-  let hasPushPermission: jest.Mock;
+  let getPushPermissionState: jest.Mock;
   let requestLocationPermission: jest.Mock;
   let hasLocationPermission: jest.Mock;
   let completeOnboarding: jest.Mock;
@@ -75,8 +75,8 @@ describe('OnboardingService', () => {
     saveSettings = jest.fn().mockResolvedValue(undefined);
     applyLanguage = jest.fn().mockResolvedValue(undefined);
     requestPushPermission = jest.fn().mockResolvedValue('granted');
-    // Default: the OS still allows push, so a stored grant stays trustworthy.
-    hasPushPermission = jest.fn().mockResolvedValue(true);
+    // Default: this device has an unspent prompt, so the step still asks.
+    getPushPermissionState = jest.fn().mockResolvedValue('prompt');
     requestLocationPermission = jest.fn().mockResolvedValue('granted');
     // Default: the OS still allows reads, so a stored grant stays trustworthy.
     hasLocationPermission = jest.fn().mockResolvedValue(true);
@@ -105,7 +105,7 @@ describe('OnboardingService', () => {
             saveSettings,
             applyLanguage,
             requestPushPermission,
-            hasPushPermission,
+            getPushPermissionState,
             requestLocationPermission,
             hasLocationPermission,
             completeOnboarding,
@@ -692,7 +692,6 @@ describe('OnboardingService', () => {
   });
 
   const storedSettings = (overrides: Partial<Settings> = {}): Settings => ({
-    pushNotifications: false,
     location: false,
     emailUpdates: true,
     theme: 'dark',
@@ -1015,7 +1014,7 @@ describe('OnboardingService', () => {
       setup(
         ['identity', 'visibility', 'currency', 'language'],
         {},
-        storedSettings({ pushNotifications: true }),
+        storedSettings(),
       );
       await service.initialize();
 
@@ -1027,7 +1026,6 @@ describe('OnboardingService', () => {
       expect(saveSettings).toHaveBeenCalledWith(
         expect.objectContaining({
           location: true,
-          pushNotifications: true,
           emailUpdates: true,
           theme: 'dark',
           currency: 'CHF',
@@ -1063,9 +1061,9 @@ describe('OnboardingService', () => {
 
       await service.next();
 
-      expect(saveSettings).toHaveBeenCalledWith(
-        expect.objectContaining({ pushNotifications: true }),
-      );
+      // Delivery lives on this installation's push token; the step writes no
+      // account-level notification preference at all (issue #1184).
+      expect(saveSettings).not.toHaveBeenCalled();
       expect(service.currentStep().id).toBe('finish');
     });
 
@@ -1081,9 +1079,7 @@ describe('OnboardingService', () => {
 
       await service.next();
 
-      expect(saveSettings).toHaveBeenCalledWith(
-        expect.objectContaining({ pushNotifications: false }),
-      );
+      expect(saveSettings).not.toHaveBeenCalled();
       expect(service.currentStep().id).toBe('finish');
     });
 
@@ -1096,9 +1092,7 @@ describe('OnboardingService', () => {
       await service.next();
 
       expect(service.notificationPermission()).toBe('unsupported');
-      expect(saveSettings).toHaveBeenCalledWith(
-        expect.objectContaining({ pushNotifications: false }),
-      );
+      expect(saveSettings).not.toHaveBeenCalled();
     });
 
     it('treats skipping as an explicit no without opening the prompt', async () => {
@@ -1130,12 +1124,9 @@ describe('OnboardingService', () => {
       expect(requestPushPermission).toHaveBeenCalledTimes(1);
     });
 
-    it('prefills a stored grant so a returning user is not asked again', async () => {
-      setup(
-        ['identity', 'visibility', 'currency', 'language', 'location'],
-        {},
-        storedSettings({ pushNotifications: true }),
-      );
+    it('prefills a live OS grant so a returning user is not asked again', async () => {
+      setup(['identity', 'visibility', 'currency', 'language', 'location']);
+      getPushPermissionState.mockResolvedValue('granted');
 
       await service.initialize();
 
@@ -1143,21 +1134,20 @@ describe('OnboardingService', () => {
       expect(service.canAdvance()).toBe(true);
     });
 
-    it('re-asks when a stored grant outlived the OS permission', async () => {
-      // Reinstalling, or switching notifications off in system settings, resets
-      // the OS grant while the Firestore flag survives. Trusting the flag alone
-      // showed a "granted" step that never prompted, leaving push dead.
-      setup(
-        ['identity', 'visibility', 'currency', 'language', 'location'],
-        {},
-        storedSettings({ pushNotifications: true }),
-      );
-      hasPushPermission.mockResolvedValue(false);
+    it.each(['prompt', 'denied', 'unsupported'])(
+      'still asks when the OS reports %s',
+      async (state) => {
+        // There is no stored notification preference to fall back on any more
+        // (issue #1184), so anything short of a live grant leaves the step to
+        // be decided here.
+        setup(['identity', 'visibility', 'currency', 'language', 'location']);
+        getPushPermissionState.mockResolvedValue(state);
 
-      await service.initialize();
+        await service.initialize();
 
-      expect(service.notificationPermission()).toBe('idle');
-      expect(service.canAdvance()).toBe(false);
-    });
+        expect(service.notificationPermission()).toBe('idle');
+        expect(service.canAdvance()).toBe(false);
+      },
+    );
   });
 });

@@ -21,8 +21,10 @@ import {
   IonItem,
   IonLabel,
   IonModal,
+  IonNote,
   IonSelect,
   IonSelectOption,
+  IonSpinner,
   IonText,
   IonToggle,
 } from '@ionic/angular/standalone';
@@ -34,6 +36,25 @@ import { currencyCodes } from 'utils';
 import { User } from '@capacitor-firebase/authentication';
 import { CardComponent } from 'common/ui/card';
 import { TranslocoPipe } from '@jsverse/transloco';
+import type { PushPermissionState } from 'push-notifications';
+
+/**
+ * One registered app installation, as the settings list shows it.
+ *
+ * `label` and `details` are already resolved: the raw FCM token is a delivery
+ * address, not something a user can recognise, so it never reaches the UI as a
+ * label (issue #1184).
+ */
+export interface PushInstallationView {
+  /** FCM token; the identity the enable switch writes against. */
+  token: string;
+  /** Device label, or empty for a legacy token with no installation metadata. */
+  label: string;
+  /** Secondary line, e.g. `iOS 26.5 · 1.0.1 (88)`. */
+  details: string;
+  enabled: boolean;
+  isCurrentDevice: boolean;
+}
 
 @Component({
   selector: 'settings',
@@ -58,6 +79,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
     IonCardHeader,
     IonCardTitle,
     IonIcon,
+    IonNote,
+    IonSpinner,
     TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,17 +91,27 @@ export class PageSettings {
   settings = input<Settings>();
   showEmailVerificationPrompt = input(false);
 
+  /** Registered installations of the signed-in user, most recent first. */
+  pushInstallations = input<readonly PushInstallationView[]>([]);
+  /** OS notification permission of this device only. */
+  pushPermission = input<PushPermissionState>('prompt');
+  pushInstallationsLoading = input(false);
+  /** Whether the current-device setup action is waiting on the OS or Firestore. */
+  pushSetupRunning = input(false);
+
   submitSettings = output<Settings>();
   logout = output<void>();
   resendEmailVerification = output<void>();
   deleteAccount = output<void>();
+  togglePushInstallation = output<{ token: string; enabled: boolean }>();
+  enablePushOnThisDevice = output<void>();
+  openPushSettings = output<void>();
 
   private readonly formBuilder = inject(FormBuilder);
 
   currencies = currencyCodes;
 
   settingsForm = this.formBuilder.nonNullable.group({
-    pushNotifications: [{ value: false, disabled: true }, Validators.required],
     emailUpdates: [{ value: false, disabled: true }, Validators.required],
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
@@ -146,6 +179,34 @@ export class PageSettings {
   isFreeUser = computed(() => this.subscriptionTier() === 0);
   isProUser = computed(() => this.subscriptionTier() >= 1);
 
+  /** Whether this platform can receive push at all. */
+  pushSupported = computed(() => this.pushPermission() !== 'unsupported');
+
+  /**
+   * Whether the OS is dropping delivery for this device. Shown next to, not
+   * instead of, the installation's own switch: the two states are independent
+   * and a user who sees only one cannot tell which one to fix.
+   */
+  pushBlockedByOs = computed(() => this.pushPermission() === 'denied');
+
+  hasCurrentInstallation = computed(() =>
+    this.pushInstallations().some(
+      (installation) => installation.isCurrentDevice,
+    ),
+  );
+
+  /**
+   * The setup action only makes sense while this device has no token and the OS
+   * prompt can still be answered. Once denied, the only route back is the
+   * system settings page, so the recovery action takes its place.
+   */
+  showPushSetup = computed(
+    () =>
+      this.pushSupported() &&
+      !this.hasCurrentInstallation() &&
+      !this.pushBlockedByOs(),
+  );
+
   constructor() {
     // Watch for system theme changes
     this.registerSystemThemeChangeHandler();
@@ -168,7 +229,6 @@ export class PageSettings {
 
     this.submitSettings.emit({
       ...newSettings,
-      pushNotifications: !!newSettings.pushNotifications,
       // The location grant is recorded by onboarding and has no control on this
       // page. It is carried through explicitly because the settings write
       // replaces the document, so anything the form does not know about is lost.
@@ -219,6 +279,26 @@ export class PageSettings {
       favoriteCurrencies: newFavoriteCurrencies,
     });
     this.settingsForm.controls['favoriteCurrencies'].markAsDirty();
+  }
+
+  /**
+   * Flips one installation's delivery switch.
+   *
+   * Ionic also emits `ionChange` when the bound `checked` value is applied, so a
+   * value that already matches is dropped — otherwise reloading the list would
+   * write every row back to Firestore.
+   */
+  onPushInstallationToggle(
+    installation: PushInstallationView,
+    event: { detail: { checked: boolean } },
+  ): void {
+    const enabled = event?.detail?.checked;
+
+    if (enabled === undefined || enabled === installation.enabled) {
+      return;
+    }
+
+    this.togglePushInstallation.emit({ token: installation.token, enabled });
   }
 
   handleSystemThemeChange(e: MediaQueryListEvent): void {

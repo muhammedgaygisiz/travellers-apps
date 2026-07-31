@@ -26,6 +26,7 @@ import { BiteTrailComponent } from 'bite-trail';
 import { ProfileHeader } from './components/profile-header';
 import { CountryFlags } from './components/country-flags';
 import { ProfileSkeleton } from './components/profile-skeleton';
+import { ProfileVisibility } from './components/profile-visibility';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const UNFOLLOW = 'unfollow';
@@ -51,6 +52,7 @@ const PAGE_SIZE = 50;
     ProfileHeader,
     CountryFlags,
     ProfileSkeleton,
+    ProfileVisibility,
     TranslocoPipe,
   ],
 })
@@ -168,6 +170,20 @@ export class ProfileComponent {
     }
 
     return currentUserId !== profileOwner;
+  });
+
+  isOwnProfile = computed((): boolean => {
+    const currentUserId = this.userId();
+    const profileOwner = this.user()?.userId;
+
+    return !!currentUserId && currentUserId === profileOwner;
+  });
+
+  // The visibility status is a self-service privacy control, so it only belongs
+  // on the signed-in user's own personal profile. Organisation profiles have no
+  // visibility switch it could explain or lead to.
+  showVisibilityStatus = computed((): boolean => {
+    return this.isOwnProfile() && !this.user()?.isOrganisation;
   });
 
   onFollow(): void {

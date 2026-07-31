@@ -1,0 +1,56 @@
+:host {
+  display: block;
+
+  .profile-visibility {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.5rem 0.75rem;
+
+    border: 1px solid var(--ion-color-medium);
+    border-radius: 0.75rem;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    &.profile-visibility--public .profile-visibility__icon {
+      color: var(--ion-color-success);
+    }
+  }
+
+  .profile-visibility__icon {
+    flex: 0 0 auto;
+    font-size: 1.25rem;
+    color: var(--ion-color-medium);
+  }
+
+  .profile-visibility__text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .profile-visibility__status {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .profile-visibility__hint {
+    color: gray;
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+  }
+
+  .profile-visibility__action {
+    flex: 0 0 auto;
+    color: var(--ion-color-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}

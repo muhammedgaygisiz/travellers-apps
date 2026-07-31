@@ -318,6 +318,71 @@ describe('ProfileComponent', () => {
     });
   });
 
+  describe('profile visibility', () => {
+    const queryVisibility = (): HTMLElement | null => {
+      return fixture.nativeElement.querySelector('profile-visibility');
+    };
+
+    it('should show the visibility status on the own profile', () => {
+      compRef.setInput('user', { userId: 'user1', public: true });
+      compRef.setInput('userId', 'user1');
+
+      fixture.detectChanges();
+
+      expect(component.showVisibilityStatus()).toBe(true);
+      expect(queryVisibility()).toBeTruthy();
+    });
+
+    it('should not show the visibility status on another user profile', () => {
+      compRef.setInput('user', { userId: 'user1', public: true });
+      compRef.setInput('userId', 'user2');
+
+      fixture.detectChanges();
+
+      expect(component.showVisibilityStatus()).toBe(false);
+      expect(queryVisibility()).toBeNull();
+    });
+
+    it('should not show the visibility status for an organisation profile', () => {
+      compRef.setInput('user', {
+        userId: 'user1',
+        public: true,
+        isOrganisation: true,
+      });
+      compRef.setInput('userId', 'user1');
+
+      fixture.detectChanges();
+
+      expect(component.showVisibilityStatus()).toBe(false);
+      expect(queryVisibility()).toBeNull();
+    });
+
+    it('should not show the visibility status without a signed-in user', () => {
+      compRef.setInput('user', { userId: 'user1', public: true });
+      compRef.setInput('userId', undefined);
+
+      fixture.detectChanges();
+
+      expect(component.isOwnProfile()).toBe(false);
+      expect(queryVisibility()).toBeNull();
+    });
+
+    it('should emit gotoEditProfile when the visibility status is activated', () => {
+      compRef.setInput('user', { userId: 'user1', public: false });
+      compRef.setInput('userId', 'user1');
+      const gotoEditProfileSpy = jest.spyOn(component.gotoEditProfile, 'emit');
+
+      fixture.detectChanges();
+
+      const status = fixture.nativeElement.querySelector(
+        '[data-testid="profile-visibility"]',
+      ) as HTMLButtonElement;
+      status.click();
+
+      expect(gotoEditProfileSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('profile location', () => {
     it('should show displayName when present', () => {
       compRef.setInput('user', {

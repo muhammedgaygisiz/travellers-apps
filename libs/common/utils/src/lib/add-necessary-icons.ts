@@ -24,6 +24,7 @@ import {
   createOutline,
   cropOutline,
   downloadOutline,
+  earthOutline,
   filter,
   filterOutline,
   flameOutline,
@@ -40,6 +41,7 @@ import {
   listOutline,
   locateOutline,
   locationOutline,
+  lockClosedOutline,
   logInOutline,
   logoApple,
   logoFacebook,
@@ -132,5 +134,7 @@ export const addNecessaryIcons = (): void => {
     chevronForwardOutline,
     createOutline,
     construct,
+    earthOutline,
+    lockClosedOutline,
   });
 };

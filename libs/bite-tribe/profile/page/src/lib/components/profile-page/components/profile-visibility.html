@@ -1,0 +1,27 @@
+<button
+  type="button"
+  class="profile-visibility"
+  [class.profile-visibility--public]="isPublicProfile()"
+  data-testid="profile-visibility"
+  (click)="editClick.emit()"
+>
+  <ion-icon
+    class="profile-visibility__icon"
+    [name]="iconName()"
+    aria-hidden="true"
+  />
+
+  <span class="profile-visibility__text">
+    <span
+      class="profile-visibility__status"
+      data-testid="profile-visibility-status"
+    >
+      {{ statusKey() | transloco }}
+    </span>
+    <span class="profile-visibility__hint">{{ hintKey() | transloco }}</span>
+  </span>
+
+  <span class="profile-visibility__action">
+    {{ 'profile-visibility-change' | transloco }}
+  </span>
+</button>

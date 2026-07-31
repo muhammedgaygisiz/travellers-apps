@@ -374,5 +374,10 @@
   "delete-account-public-fallback-step-subject": "استخدم عنوان الرسالة «Delete my BiteTribe account».",
   "delete-account-public-fallback-step-account-email": "أدرج عنوان البريد الإلكتروني الذي تستخدمه لتسجيل الدخول إلى BiteTribe.",
   "delete-account-public-timeframe": "سنحذف حسابك خلال فترة زمنية معقولة، ما لم يُطلب منا الاحتفاظ ببعض المعلومات لأسباب قانونية أو أمنية.",
-  "delete-account-public-scope": "ينطبق طلب الحذف هذا على حساب BiteTribe وبياناته فقط."
+  "delete-account-public-scope": "ينطبق طلب الحذف هذا على حساب BiteTribe وبياناته فقط.",
+  "profile-visibility-public": "ملف شخصي عام",
+  "profile-visibility-private": "ملف شخصي خاص",
+  "profile-visibility-public-hint": "يمكن عرض اسمك وصورتك ومتابعيك ونشاط Bites في التطبيق.",
+  "profile-visibility-private-hint": "تظهر كمجهول وتبقى خارج المساحات الاجتماعية العامة.",
+  "profile-visibility-change": "تغيير"
 }

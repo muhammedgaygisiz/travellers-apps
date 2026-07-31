@@ -374,5 +374,10 @@
   "delete-account-public-fallback-step-subject": "«Delete my BiteTribe account» የሚለውን የመልእክት ርዕስ ይጠቀሙ።",
   "delete-account-public-fallback-step-account-email": "ወደ BiteTribe ለመግባት የተጠቀሙበትን የኢሜይል አድራሻ ያካትቱ።",
   "delete-account-public-timeframe": "በሕግ ወይም በደህንነት ምክንያቶች የተወሰኑ መረጃዎችን እንድንይዝ ካልተጠየቅን በስተቀር መለያዎን በተመጣጣኝ ጊዜ ውስጥ እንሰርዛለን።",
-  "delete-account-public-scope": "ይህ የስረዛ ጥያቄ የሚመለከተው የBiteTribe መለያዎን እና ውሂብዎን ብቻ ነው።"
+  "delete-account-public-scope": "ይህ የስረዛ ጥያቄ የሚመለከተው የBiteTribe መለያዎን እና ውሂብዎን ብቻ ነው።",
+  "profile-visibility-public": "ይፋዊ መገለጫ",
+  "profile-visibility-private": "የግል መገለጫ",
+  "profile-visibility-public-hint": "ስምህ፣ ፎቶህ፣ ተከታዮችህ እና የBite እንቅስቃሴህ በመተግበሪያው ሊታዩ ይችላሉ።",
+  "profile-visibility-private-hint": "እንደ ስም-አልባ ትታያለህ እና ከይፋዊ ማህበራዊ ቦታዎች ውጭ ትቆያለህ።",
+  "profile-visibility-change": "ቀይር"
 }

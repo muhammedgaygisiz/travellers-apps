@@ -1,5 +1,36 @@
 # Changelog
 
+## build-89 (2026-07-31)
+
+<!-- changelog-start-rev: 2bf12a87 -->
+<!-- changelog-end-rev: ad5d1c0c -->
+
+### Features
+
+- localize notification texts according users language (#1205) (b91b0231)
+- surface profile visibility on own profile page (#1202) (45ba1527)
+- **1184**: push notification handling in settings (#1199) (b6e65e25)
+- **#1182**: in-app privacy and account deletion flow (#1195) (59cc880d)
+- feedback and blocking state after registration (#1193) (b90126de)
+
+### Bug Fixes
+
+- make preferred currency and favorite currencies selection clear (#1207) (ad5d1c0c)
+- confirm verification email resend in the app (#1204) (5dd643de)
+- avoid raw translation keys after language switch while onboarding (#1201) (28f1756f)
+
+### Documentation
+
+- respecify notification and location permission handling (#1198) (383e798a)
+
+### Styles
+
+- adjust splash screen and assets to new design (#1206) (8c26bca4)
+
+### Chores
+
+- prepare build 1.0.1-88 release (#1192) (50f08726)
+
 ## build-88 (2026-07-28)
 
 <!-- changelog-start-rev: 66b87bef -->

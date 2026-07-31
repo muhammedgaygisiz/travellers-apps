@@ -9,96 +9,96 @@ import {
 import { Caption, PhoneShell } from '../components/PhoneShell';
 import { colors } from '../timing';
 
-/** Share — shutter flash, fields cascade, Share CTA settles. */
+/**
+ * Share — match real beat: create form → photo land → publish → thumbs-up cheer.
+ * Stylized fake UI (not Angular capture).
+ */
 export const FakeUiShare: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const shutter = spring({
+  const formIn = spring({
     frame,
     fps,
-    delay: Math.round(0.28 * fps),
-    config: { damping: 11, stiffness: 170, mass: 0.5 },
-  });
-
-  const flash = interpolate(
-    frame,
-    [
-      Math.round(0.48 * fps),
-      Math.round(0.55 * fps),
-      Math.round(0.72 * fps),
-    ],
-    [0, 0.6, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-
-  const fieldA = spring({
-    frame,
-    fps,
-    delay: Math.round(0.8 * fps),
     config: { damping: 200 },
     durationInFrames: Math.round(0.4 * fps),
   });
-  const fieldB = spring({
+
+  const photo = spring({
     frame,
     fps,
-    delay: Math.round(1.05 * fps),
-    config: { damping: 200 },
-    durationInFrames: Math.round(0.4 * fps),
-  });
-  const tags = spring({
-    frame,
-    fps,
-    delay: Math.round(1.3 * fps),
+    delay: Math.round(0.55 * fps),
     config: { damping: 14, stiffness: 130, mass: 0.65 },
   });
-  const save = spring({
+
+  const publish = spring({
     frame,
     fps,
-    delay: Math.round(1.65 * fps),
+    delay: Math.round(1.25 * fps),
     config: { damping: 14, stiffness: 135, mass: 0.6 },
+  });
+
+  const cheerStart = Math.round(2.05 * fps);
+  const cheer = spring({
+    frame,
+    fps,
+    delay: cheerStart,
+    config: { damping: 11, stiffness: 160, mass: 0.5 },
+  });
+
+  const sparks = Array.from({ length: 10 }, (_, i) => {
+    const ang = (i / 10) * Math.PI * 2;
+    const dist = interpolate(cheer, [0, 1], [0, 54 + (i % 3) * 10], {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+    });
+    return {
+      x: Math.cos(ang) * dist,
+      y: Math.sin(ang) * dist - 8,
+      hue: i % 3 === 0 ? '#ffe08a' : i % 3 === 1 ? '#ffb0c4' : '#9ad8f0',
+    };
   });
 
   return (
     <AbsoluteFill>
       <PhoneShell accentSoft={colors.softOrange}>
-        <div style={{ padding: 14, display: 'grid', gap: 12 }}>
+        <div
+          style={{
+            padding: 14,
+            display: 'grid',
+            gap: 12,
+            opacity: formIn,
+            height: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
           <div
             style={{
-              height: 188,
-              borderRadius: 20,
-              background: '#ece7de',
+              height: 160,
+              borderRadius: 18,
+              background:
+                photo > 0.2
+                  ? 'linear-gradient(145deg,#fec56b,#4a90d9 70%)'
+                  : '#ece7de',
               display: 'grid',
               placeItems: 'center',
-              gap: 8,
-              position: 'relative',
               overflow: 'hidden',
+              scale: interpolate(photo, [0, 1], [0.94, 1], {
+                extrapolateLeft: 'clamp',
+                extrapolateRight: 'clamp',
+                output: 'perceptual-scale',
+              }),
+              boxShadow:
+                photo > 0.5
+                  ? '0 12px 28px rgba(224,138,58,0.28)'
+                  : 'none',
             }}
           >
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: '#fff',
-                opacity: flash,
-              }}
-            />
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: '50%',
-                border: `3px solid ${colors.primary}`,
-                background: colors.white,
-                scale: interpolate(shutter, [0, 0.4, 1], [1, 0.76, 1.04], {
-                  extrapolateLeft: 'clamp',
-                  extrapolateRight: 'clamp',
-                }),
-              }}
-            />
-            <div style={{ fontSize: 13, color: colors.muted }}>
-              Tap to add a photo
-            </div>
+            {photo < 0.35 ? (
+              <div style={{ fontSize: 13, color: colors.muted }}>
+                Add a photo
+              </div>
+            ) : null}
           </div>
 
           <div
@@ -107,11 +107,6 @@ export const FakeUiShare: React.FC = () => {
               borderRadius: 14,
               background: colors.white,
               border: `2px solid ${colors.primary}`,
-              opacity: fieldA,
-              translate: `0 ${interpolate(fieldA, [0, 1], [10, 0], {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-              })}px`,
               fontSize: 14,
               fontWeight: 600,
             }}
@@ -124,11 +119,6 @@ export const FakeUiShare: React.FC = () => {
               borderRadius: 14,
               background: colors.white,
               border: '1px solid rgba(32,32,30,0.1)',
-              opacity: fieldB,
-              translate: `0 ${interpolate(fieldB, [0, 1], [10, 0], {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-              })}px`,
               fontSize: 14,
             }}
           >
@@ -137,45 +127,15 @@ export const FakeUiShare: React.FC = () => {
 
           <div
             style={{
-              display: 'flex',
-              gap: 8,
-              flexWrap: 'wrap',
-              opacity: tags,
-              scale: interpolate(tags, [0, 1], [0.88, 1], {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-                output: 'perceptual-scale',
-              }),
-            }}
-          >
-            {['bern', 'drink', '+ tag'].map((t) => (
-              <span
-                key={t}
-                style={{
-                  padding: '5px 10px',
-                  borderRadius: 999,
-                  background: colors.softBlue,
-                  color: '#2a5f96',
-                  fontSize: 12,
-                  fontWeight: 650,
-                }}
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-
-          <div
-            style={{
-              marginTop: 6,
+              marginTop: 'auto',
               padding: '14px 0',
               borderRadius: 999,
               background: colors.orange,
               color: '#fff',
               textAlign: 'center',
               fontWeight: 750,
-              opacity: save,
-              scale: interpolate(save, [0, 1], [0.9, 1], {
+              opacity: publish,
+              scale: interpolate(publish, [0, 1], [0.9, 1], {
                 extrapolateLeft: 'clamp',
                 extrapolateRight: 'clamp',
                 output: 'perceptual-scale',
@@ -186,10 +146,60 @@ export const FakeUiShare: React.FC = () => {
             Share Bite
           </div>
         </div>
+
+        {/* Thumbs-up celebration — matches real share beat resolve */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '42%',
+            width: 0,
+            height: 0,
+            opacity: cheer,
+            pointerEvents: 'none',
+          }}
+        >
+          {sparks.map((s, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                left: s.x,
+                top: s.y,
+                width: 10 + (i % 3) * 3,
+                height: 10 + (i % 3) * 3,
+                borderRadius: '50%',
+                background: s.hue,
+                boxShadow: `0 0 14px ${s.hue}`,
+                opacity: interpolate(cheer, [0.2, 1], [1, 0.15], {
+                  extrapolateLeft: 'clamp',
+                  extrapolateRight: 'clamp',
+                }),
+              }}
+            />
+          ))}
+          <div
+            style={{
+              position: 'absolute',
+              left: -28,
+              top: -36,
+              fontSize: 56,
+              scale: interpolate(cheer, [0, 1], [0.4, 1.25], {
+                extrapolateLeft: 'clamp',
+                extrapolateRight: 'clamp',
+                output: 'perceptual-scale',
+              }),
+              filter: 'drop-shadow(0 0 18px rgba(255,200,90,0.7))',
+            }}
+          >
+            👍
+          </div>
+        </div>
+
         <Caption
           headline="Share the find"
           line="Snap it. Tag it. Pass it on."
-          delayFrames={10}
+          delayFrames={8}
         />
       </PhoneShell>
     </AbsoluteFill>

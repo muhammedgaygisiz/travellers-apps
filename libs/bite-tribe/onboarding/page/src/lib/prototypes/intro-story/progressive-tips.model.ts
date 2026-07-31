@@ -39,12 +39,13 @@ export const PROGRESSIVE_TIPS: ProgressiveTip[] = [
     arc: 'discover',
     title: 'Feed cards',
     body: 'Real dishes from explorers near you.',
-    anchor: 'bt-bite',
+    anchor: `bt-bite[data-bite-id="${DISCOVER_TARGET_BITE_ID}"]`,
     fallbackPct: { x: 50, y: 48, w: 86, h: 28 },
     cue: {
       screen: 'home',
       selectedBiteId: DISCOVER_TARGET_BITE_ID,
       mapPinId: null,
+      scrollSelector: CARD,
     },
   },
   {
@@ -185,7 +186,7 @@ export const PROGRESSIVE_TIPS: ProgressiveTip[] = [
       screen: 'map',
       mapPinId: DISCOVER_TARGET_BITE_ID,
       selectedBiteId: DISCOVER_TARGET_BITE_ID,
-      directionsHighlight: true,
+      directionsHighlight: false,
     },
   },
 ];
@@ -240,9 +241,25 @@ export function measureTipInStage(
     const live =
       (stageEl.querySelector('.source__layer--in') as HTMLElement | null) ??
       stageEl;
-    target = live.querySelector(tip.anchor) as HTMLElement | null;
-    if (!target) {
-      target = stageEl.querySelector(tip.anchor) as HTMLElement | null;
+    let nodes = Array.from(live.querySelectorAll(tip.anchor)) as HTMLElement[];
+    if (!nodes.length) {
+      nodes = Array.from(stageEl.querySelectorAll(tip.anchor)) as HTMLElement[];
+    }
+    let bestArea = 0;
+    for (const el of nodes) {
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) {
+        continue;
+      }
+      const visW =
+        Math.min(r.right, stageRect.right) - Math.max(r.left, stageRect.left);
+      const visH =
+        Math.min(r.bottom, stageRect.bottom) - Math.max(r.top, stageRect.top);
+      const area = Math.max(0, visW) * Math.max(0, visH);
+      if (area > bestArea) {
+        bestArea = area;
+        target = el;
+      }
     }
   }
 

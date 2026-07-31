@@ -44,11 +44,11 @@ export const PHOTO_SELECT_HOLD_MS = 1100;
 /** Hold after the photo appears on the create form. */
 export const PHOTO_APPEAR_HOLD_MS = 2000;
 
-/** Thumbs-up / reaction burst — must stay visible ~2.5s+. */
-export const REACTION_HOLD_MS = 3200;
+/** Thumbs-up / reaction burst — big cheerful hold (~4s+ visible). */
+export const REACTION_HOLD_MS = 4200;
 
 /** Spacing between staggered reaction bursts (ms from first). */
-export const REACTION_BURST_GAP_MS = [0, 1000, 2000] as const;
+export const REACTION_BURST_GAP_MS = [0, 900, 1800, 2700] as const;
 
 /** Following toast / badge hold. */
 export const FOLLOW_HOLD_MS = 3200;
@@ -68,8 +68,8 @@ export const LOOP_GAP_MS = 600;
 /** Hold the success state after the last intentional action. */
 export const RESOLVE_HOLD_MS = 2400;
 
-/** Soft particle celebrate burst around the success element. */
-export const CELEBRATE_MS = 2000;
+/** Cheerful particle celebrate burst around the success element. */
+export const CELEBRATE_MS = 3200;
 
 /** Cheerful final frame settle before soft replay (single-beat). */
 export const REPLAY_SETTLE_MS = 2800;

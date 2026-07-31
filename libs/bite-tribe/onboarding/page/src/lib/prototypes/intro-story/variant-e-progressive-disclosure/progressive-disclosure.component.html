@@ -50,19 +50,17 @@
     />
 
     @if (tip(); as active) {
-      <div class="pd__coach" role="dialog" aria-modal="true" aria-live="polite">
-        @if (spotlightStyle(); as spot) {
-          <div
-            class="pd__spotlight"
-            aria-hidden="true"
-            [style.top]="spot.top"
-            [style.left]="spot.left"
-            [style.width]="spot.width"
-            [style.height]="spot.height"
-          ></div>
-        } @else {
-          <div class="pd__scrim" aria-hidden="true"></div>
-        }
+      <div
+        class="pd__coach"
+        role="dialog"
+        aria-modal="true"
+        aria-live="polite"
+        [style.--shine-x]="shineVars()['--shine-x']"
+        [style.--shine-y]="shineVars()['--shine-y']"
+        [style.--shine-w]="shineVars()['--shine-w']"
+        [style.--shine-h]="shineVars()['--shine-h']"
+      >
+        <div class="pd__veil" aria-hidden="true"></div>
 
         @if (arrowStyle(); as arrow) {
           <div

@@ -1,0 +1,49 @@
+<section class="wf" [class.wf--done]="finished()">
+  <header class="wf__top">
+    <div class="wf__titles">
+      <p class="wf__badge">{{ badge() }}</p>
+      <h1 class="wf__headline">{{ scene().headline }}</h1>
+    </div>
+
+    @if (showSkip() && !finished()) {
+      <button type="button" class="wf__skip" (click)="skipTour()">Skip</button>
+    }
+  </header>
+
+  <div class="wf__dots" aria-hidden="true">
+    @for (b of beats(); track b; let i = $index) {
+      <span
+        class="wf__dot"
+        [class.wf__dot--done]="!finished() && i < beatIndex()"
+        [class.wf__dot--active]="!finished() && i === beatIndex()"
+      ></span>
+    }
+  </div>
+
+  <div class="wf__stage">
+    @if (!finished()) {
+      <intro-real-ui-source
+        [beat]="beatId()"
+        [framed]="false"
+        [simulate]="true"
+        [advanceOnComplete]="true"
+        (beatCompleted)="onBeatCompleted()"
+      />
+
+      <div class="wf__whisper" role="status" aria-live="polite">
+        <span class="wf__whisper-glow" aria-hidden="true"></span>
+        <p class="wf__kicker">{{ scene().headline }}</p>
+        <p class="wf__title">{{ whisper().title }}</p>
+        <p class="wf__body">{{ whisper().body }}</p>
+      </div>
+    } @else {
+      <div class="wf__end">
+        <p class="wf__end-title">You're ready</p>
+        <p class="wf__end-body">Find bites. Share finds. Meet the tribe.</p>
+        <button type="button" class="wf__replay" (click)="replay()">
+          Watch again
+        </button>
+      </div>
+    }
+  </div>
+</section>

@@ -317,6 +317,8 @@ export class FocusShineComponent {
     this.measureTimers.push(window.setTimeout(run, 80));
     this.measureTimers.push(window.setTimeout(run, 280));
     this.measureTimers.push(window.setTimeout(run, 520));
+    this.measureTimers.push(window.setTimeout(run, 900));
+    this.measureTimers.push(window.setTimeout(run, 1400));
   }
 
   private measureFocus(): void {

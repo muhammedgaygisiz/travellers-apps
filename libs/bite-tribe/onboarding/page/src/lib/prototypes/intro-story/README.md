@@ -20,6 +20,7 @@ gestures, progressive disclosure coach-marks, and intentional flow variants.
 | **G Spotlight Quest**        | Checklist quest + vignette spotlight         |
 | **H Focus Shine**            | Grayscale fade; focal UI shines full color   |
 | **I Soft Whisper**           | Calm captions; ≤1 Skip; tap/auto advance     |
+| **J Whisper Flow**           | Soft Whisper chrome + animated real-UI beats |
 | **Flows / Find the bite**    | 10 intentional Find variants                 |
 | **Flows / Share the find**   | 10 intentional Share variants                |
 | **Flows / Join the tribe**   | 10 intentional Tribe variants                |

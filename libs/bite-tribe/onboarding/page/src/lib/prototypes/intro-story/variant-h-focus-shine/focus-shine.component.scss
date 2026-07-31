@@ -130,6 +130,9 @@
   min-height: 0;
   overflow: hidden;
   border-radius: 1.1rem;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
   scrollbar-width: none;
 }
 
@@ -142,6 +145,11 @@
   inset: 0;
   z-index: 6;
   pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
   --shine-x: 50%;
   --shine-y: 42%;
   --shine-w: 0px;
@@ -152,7 +160,8 @@
 }
 
 /*
- * Soft oval color-pop cutout. Rest is grayscale + dim — no blur, no blue glow.
+ * Soft oval color-pop: hole centered via gradient `at` (not mask-position).
+ * Rest = grayscale + dim — no blur, no blue glow.
  */
 .fs__veil {
   position: absolute;
@@ -161,51 +170,28 @@
   background: rgb(18 16 14 / 22%);
   backdrop-filter: grayscale(0.88) brightness(0.78) saturate(0.28);
   -webkit-backdrop-filter: grayscale(0.88) brightness(0.78) saturate(0.28);
-  -webkit-mask-image:
-    linear-gradient(#000 0 0),
-    radial-gradient(
-      ellipse closest-side at center,
-      #fff 0%,
-      #fff 48%,
-      rgb(255 255 255 / 70%) 68%,
-      rgb(255 255 255 / 28%) 86%,
-      transparent 100%
-    );
-  mask-image:
-    linear-gradient(#000 0 0),
-    radial-gradient(
-      ellipse closest-side at center,
-      #fff 0%,
-      #fff 48%,
-      rgb(255 255 255 / 70%) 68%,
-      rgb(255 255 255 / 28%) 86%,
-      transparent 100%
-    );
-  -webkit-mask-size:
-    100% 100%,
-    calc(var(--shine-w) * 1.35) calc(var(--shine-h) * 1.45);
-  mask-size:
-    100% 100%,
-    calc(var(--shine-w) * 1.35) calc(var(--shine-h) * 1.45);
-  -webkit-mask-position:
-    0 0,
-    calc(var(--shine-x) + var(--shine-w) * 0.5)
-      calc(var(--shine-y) + var(--shine-h) * 0.5);
-  mask-position:
-    0 0,
-    calc(var(--shine-x) + var(--shine-w) * 0.5)
-      calc(var(--shine-y) + var(--shine-h) * 0.5);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  -webkit-mask-image: radial-gradient(
+    ellipse calc(var(--shine-w) * 0.72) calc(var(--shine-h) * 0.72) at
+      calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5),
+    transparent 0%,
+    transparent 52%,
+    rgb(0 0 0 / 42%) 74%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    ellipse calc(var(--shine-w) * 0.72) calc(var(--shine-h) * 0.72) at
+      calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5),
+    transparent 0%,
+    transparent 52%,
+    rgb(0 0 0 / 42%) 74%,
+    #000 100%
+  );
   transition:
-    mask-size var(--morph-ms) var(--morph-ease),
-    mask-position var(--morph-ms) var(--morph-ease),
-    -webkit-mask-size var(--morph-ms) var(--morph-ease),
-    -webkit-mask-position var(--morph-ms) var(--morph-ease),
+    mask-image var(--morph-ms) var(--morph-ease),
+    -webkit-mask-image var(--morph-ms) var(--morph-ease),
     background var(--morph-ms) var(--morph-ease);
-  will-change: mask-position, mask-size;
 }
 
 .fs--morphing .fs__veil {
@@ -214,7 +200,7 @@
   -webkit-backdrop-filter: grayscale(0.94) brightness(0.74) saturate(0.2);
 }
 
-/* Floating text + quiet next — no glass card / shadow plate */
+/* Caption above veil — soft oval wash + blur (no isolation rect clip) */
 .fs__tip {
   --tip-top: auto;
   --tip-bottom: 1.15rem;
@@ -225,11 +211,12 @@
   right: auto;
   bottom: var(--tip-bottom);
   left: var(--tip-left);
-  z-index: 8;
+  z-index: 10;
   box-sizing: border-box;
   width: min(16.5rem, calc(100% - 1.75rem));
-  padding: 0;
+  padding: 1.15rem 1.25rem 1.2rem;
   border: 0;
+  filter: none;
   background: transparent;
   color: #fffaf3;
   box-shadow: none;
@@ -240,6 +227,42 @@
     top 340ms cubic-bezier(0.22, 1, 0.36, 1),
     left 340ms cubic-bezier(0.22, 1, 0.36, 1),
     bottom 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fs__tip::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: -1;
+  width: 132%;
+  height: 148%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 50% 46% at 50% 48%,
+    rgb(14 12 10 / 82%) 0%,
+    rgb(14 12 10 / 52%) 36%,
+    rgb(14 12 10 / 18%) 58%,
+    transparent 72%
+  );
+  backdrop-filter: blur(12px) saturate(1.05);
+  -webkit-backdrop-filter: blur(12px) saturate(1.05);
+  -webkit-mask-image: radial-gradient(
+    ellipse 48% 44% at 50% 48%,
+    #000 0%,
+    #000 34%,
+    rgb(0 0 0 / 55%) 52%,
+    transparent 70%
+  );
+  mask-image: radial-gradient(
+    ellipse 48% 44% at 50% 48%,
+    #000 0%,
+    #000 34%,
+    rgb(0 0 0 / 55%) 52%,
+    transparent 70%
+  );
+  pointer-events: none;
 }
 
 .fs__tip--above {

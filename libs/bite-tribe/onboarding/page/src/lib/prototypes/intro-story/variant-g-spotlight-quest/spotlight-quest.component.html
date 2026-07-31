@@ -65,19 +65,16 @@
     />
 
     @if (tip(); as active) {
-      <div class="sq__coach" role="dialog" aria-live="polite">
-        @if (spotlightStyle(); as spot) {
-          <div
-            class="sq__spot"
-            aria-hidden="true"
-            [style.top]="spot.top"
-            [style.left]="spot.left"
-            [style.width]="spot.width"
-            [style.height]="spot.height"
-          ></div>
-        } @else {
-          <div class="sq__vignette" aria-hidden="true"></div>
-        }
+      <div
+        class="sq__coach"
+        role="dialog"
+        aria-live="polite"
+        [style.--shine-x]="shineVars()['--shine-x']"
+        [style.--shine-y]="shineVars()['--shine-y']"
+        [style.--shine-w]="shineVars()['--shine-w']"
+        [style.--shine-h]="shineVars()['--shine-h']"
+      >
+        <div class="sq__veil" aria-hidden="true"></div>
 
         @for (_ of [animKey()]; track _) {
           <div

@@ -183,6 +183,9 @@
   min-height: 0;
   overflow: hidden;
   border-radius: 1.1rem;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
   scrollbar-width: none;
 }
 
@@ -195,31 +198,42 @@
   inset: 0;
   z-index: 6;
   pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
+  --shine-x: 50%;
+  --shine-y: 42%;
+  --shine-w: 0px;
+  --shine-h: 0px;
 }
 
-.sq__vignette {
+.sq__veil {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    ellipse at 50% 42%,
-    transparent 18%,
-    rgb(12 10 8 / 28%) 58%,
-    rgb(12 10 8 / 48%) 100%
+  z-index: 1;
+  background: rgb(12 10 8 / 46%);
+  -webkit-mask-image: radial-gradient(
+    ellipse calc(var(--shine-w) * 0.72) calc(var(--shine-h) * 0.72) at
+      calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5),
+    transparent 0%,
+    transparent 52%,
+    rgb(0 0 0 / 42%) 74%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    ellipse calc(var(--shine-w) * 0.72) calc(var(--shine-h) * 0.72) at
+      calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5),
+    transparent 0%,
+    transparent 52%,
+    rgb(0 0 0 / 42%) 74%,
+    #000 100%
   );
   animation: sq-fade 480ms ease both;
-}
-
-.sq__spot {
-  position: absolute;
-  z-index: 1;
-  border-radius: 1rem;
-  outline: none;
-  background: transparent;
-  /* Cutout dim + soft glow — no hard rect border */
-  box-shadow:
-    0 0 0 9999px rgb(12 10 8 / 46%),
-    0 0 32px 8px rgb(255 255 255 / 10%);
-  animation: sq-spot-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  pointer-events: none;
 }
 
 @keyframes sq-spot-in {

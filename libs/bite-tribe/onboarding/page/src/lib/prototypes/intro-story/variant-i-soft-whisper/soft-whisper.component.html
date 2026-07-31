@@ -39,31 +39,33 @@
     @if (tip(); as active) {
       <div
         class="sw__coach"
-        role="status"
-        aria-live="polite"
+        aria-hidden="true"
         [style.--shine-x]="shineVars()['--shine-x']"
         [style.--shine-y]="shineVars()['--shine-y']"
         [style.--shine-w]="shineVars()['--shine-w']"
         [style.--shine-h]="shineVars()['--shine-h']"
         [style.--shine-r]="shineVars()['--shine-r']"
       >
-        <div class="sw__veil" aria-hidden="true"></div>
-
-        @for (_ of [animKey()]; track _) {
-          <div
-            class="sw__whisper"
-            [class.sw__whisper--above]="tipAbove()"
-            [style.--tip-top]="tipStyle()['--tip-top']"
-            [style.--tip-bottom]="tipStyle()['--tip-bottom']"
-            [style.--tip-left]="tipStyle()['--tip-left']"
-            [style.--tip-y]="tipStyle()['--tip-y']"
-          >
-            <p class="sw__kicker">{{ scene().headline }}</p>
-            <p class="sw__title">{{ active.title }}</p>
-            <p class="sw__body">{{ active.body }}</p>
-          </div>
-        }
+        <div class="sw__veil"></div>
       </div>
+
+      @for (_ of [animKey()]; track _) {
+        <div
+          class="sw__whisper"
+          role="status"
+          aria-live="polite"
+          [class.sw__whisper--above]="tipAbove()"
+          [style.--tip-top]="tipStyle()['--tip-top']"
+          [style.--tip-bottom]="tipStyle()['--tip-bottom']"
+          [style.--tip-left]="tipStyle()['--tip-left']"
+          [style.--tip-y]="tipStyle()['--tip-y']"
+        >
+          <span class="sw__whisper-glow" aria-hidden="true"></span>
+          <p class="sw__kicker">{{ scene().headline }}</p>
+          <p class="sw__title">{{ active.title }}</p>
+          <p class="sw__body">{{ active.body }}</p>
+        </div>
+      }
     } @else if (dismissed()) {
       <p class="sw__resume" aria-live="polite">Tap to continue</p>
     }

@@ -51,35 +51,35 @@
     @if (tip(); as active) {
       <div
         class="fs__coach"
-        role="dialog"
-        aria-live="polite"
+        aria-hidden="true"
         [style.--shine-x]="shineVars()['--shine-x']"
         [style.--shine-y]="shineVars()['--shine-y']"
         [style.--shine-w]="shineVars()['--shine-w']"
         [style.--shine-h]="shineVars()['--shine-h']"
         [style.--shine-r]="shineVars()['--shine-r']"
       >
-        <!-- Grayscale + dim veil with soft oval cutout — no glow boxes -->
-        <div class="fs__veil" aria-hidden="true"></div>
-
-        @for (_ of [animKey()]; track _) {
-          <div
-            class="fs__tip"
-            [class.fs__tip--above]="tipAbove()"
-            [style.--tip-top]="tipStyle()['--tip-top']"
-            [style.--tip-bottom]="tipStyle()['--tip-bottom']"
-            [style.--tip-left]="tipStyle()['--tip-left']"
-            [style.--tip-y]="tipStyle()['--tip-y']"
-          >
-            <p class="fs__tip-kicker">{{ scene().headline }}</p>
-            <h2 class="fs__tip-title">{{ active.title }}</h2>
-            <p class="fs__tip-body">{{ active.body }}</p>
-            <button type="button" class="fs__next" (click)="nextTip($event)">
-              {{ isLast() ? 'Replay' : 'Next' }}
-            </button>
-          </div>
-        }
+        <div class="fs__veil"></div>
       </div>
+
+      @for (_ of [animKey()]; track _) {
+        <div
+          class="fs__tip"
+          role="dialog"
+          aria-live="polite"
+          [class.fs__tip--above]="tipAbove()"
+          [style.--tip-top]="tipStyle()['--tip-top']"
+          [style.--tip-bottom]="tipStyle()['--tip-bottom']"
+          [style.--tip-left]="tipStyle()['--tip-left']"
+          [style.--tip-y]="tipStyle()['--tip-y']"
+        >
+          <p class="fs__tip-kicker">{{ scene().headline }}</p>
+          <h2 class="fs__tip-title">{{ active.title }}</h2>
+          <p class="fs__tip-body">{{ active.body }}</p>
+          <button type="button" class="fs__next" (click)="nextTip($event)">
+            {{ isLast() ? 'Replay' : 'Next' }}
+          </button>
+        </div>
+      }
     }
   </div>
 </section>

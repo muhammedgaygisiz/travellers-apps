@@ -131,17 +131,35 @@ export class ProgressiveDisclosureComponent {
     };
   });
 
-  readonly spotlightStyle = computed(() => {
+  readonly shineVars = computed(() => {
     const rect = this.anchorLocal();
+    const stage = this.stage()?.nativeElement;
+    const sw = stage?.clientWidth || 390;
+    const sh = stage?.clientHeight || 700;
     if (!rect) {
-      return null;
+      return {
+        '--shine-x': `${sw * 0.5}px`,
+        '--shine-y': `${sh * 0.42}px`,
+        '--shine-w': '0px',
+        '--shine-h': '0px',
+      };
     }
-    const pad = 6;
+    const pad = Math.max(10, Math.min(16, rect.width * 0.05));
+    const w = rect.width + pad * 2;
+    let h = rect.height + pad * 2;
+    const x = rect.left - pad;
+    let y = rect.top - pad;
+    if (w / Math.max(1, h) > 2.1) {
+      const targetH = Math.min(w / 1.55, h + 56);
+      const dy = (targetH - h) / 2;
+      h = targetH;
+      y -= dy;
+    }
     return {
-      top: `${rect.top - pad}px`,
-      left: `${rect.left - pad}px`,
-      width: `${rect.width + pad * 2}px`,
-      height: `${rect.height + pad * 2}px`,
+      '--shine-x': `${x}px`,
+      '--shine-y': `${y}px`,
+      '--shine-w': `${w}px`,
+      '--shine-h': `${h}px`,
     };
   });
 

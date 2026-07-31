@@ -125,6 +125,9 @@
   min-height: 0;
   overflow: hidden;
   border-radius: 1.1rem;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
 }
 
 .pd__coach {
@@ -132,26 +135,50 @@
   inset: 0;
   z-index: 6;
   pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
+  --shine-x: 50%;
+  --shine-y: 42%;
+  --shine-w: 0px;
+  --shine-h: 0px;
 }
 
-.pd__scrim {
+/*
+ * Soft oval cutout contained by .pd__stage overflow — no 9999px box-shadow.
+ */
+.pd__veil {
   position: absolute;
   inset: 0;
-  background: rgb(12 12 10 / 38%);
-}
-
-.pd__spotlight {
-  position: absolute;
-  border-radius: 0.85rem;
-  /* Cutout dim only — no outline / focus rectangle */
-  box-shadow: 0 0 0 9999px rgb(12 12 10 / 42%);
-  outline: none;
+  z-index: 1;
+  background: rgb(12 12 10 / 28%);
+  backdrop-filter: grayscale(0.7) brightness(0.78) saturate(0.35);
+  -webkit-backdrop-filter: grayscale(0.7) brightness(0.78) saturate(0.35);
+  -webkit-mask-image: radial-gradient(
+    ellipse calc(var(--shine-w) * 0.78) calc(var(--shine-h) * 0.82) at
+      calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5),
+    transparent 0%,
+    transparent 48%,
+    rgb(0 0 0 / 35%) 72%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    ellipse calc(var(--shine-w) * 0.78) calc(var(--shine-h) * 0.82) at
+      calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5),
+    transparent 0%,
+    transparent 48%,
+    rgb(0 0 0 / 35%) 72%,
+    #000 100%
+  );
   pointer-events: none;
   transition:
-    top 640ms cubic-bezier(0.22, 1, 0.36, 1),
-    left 640ms cubic-bezier(0.22, 1, 0.36, 1),
-    width 640ms cubic-bezier(0.22, 1, 0.36, 1),
-    height 640ms cubic-bezier(0.22, 1, 0.36, 1);
+    mask-image 640ms cubic-bezier(0.22, 1, 0.36, 1),
+    -webkit-mask-image 640ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 640ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .pd__arrow {

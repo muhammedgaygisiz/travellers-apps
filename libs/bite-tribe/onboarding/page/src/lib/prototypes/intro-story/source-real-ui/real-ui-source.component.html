@@ -306,10 +306,10 @@
 
             @if (likeBurst() > 0 && incoming() === 'details') {
               <div class="source__react" aria-hidden="true">
-                @for (i of [1, 2, 3]; track i) {
+                @for (i of [1, 2, 3, 4, 5]; track i) {
                   <span
                     class="source__thumb"
-                    [style.animation-delay.ms]="i * 90"
+                    [style.animation-delay.ms]="i * 110"
                     >👍</span
                   >
                 }
@@ -428,25 +428,20 @@
               </div>
             }
 
-            @if (
-              directionsHighlight() &&
-              incoming() === 'details' &&
-              !walkingSuccess()
-            ) {
-              <div class="source__go-hint" aria-hidden="true">Directions</div>
-            }
-
             @if (celebrate(); as burst) {
               <div
                 class="source__celebrate"
                 aria-hidden="true"
                 [attr.data-key]="burst.key"
               >
-                @for (p of [0, 1, 2, 3, 4, 5, 6, 7]; track p) {
+                @for (
+                  p of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+                  track p
+                ) {
                   <span
                     class="source__spark"
                     [style.--i]="'' + p"
-                    [style.animation-delay.ms]="p * 70"
+                    [style.animation-delay.ms]="p * 55"
                   ></span>
                 }
               </div>

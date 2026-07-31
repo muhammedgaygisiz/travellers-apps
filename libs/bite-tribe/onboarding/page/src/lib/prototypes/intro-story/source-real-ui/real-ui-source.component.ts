@@ -469,21 +469,16 @@ export class RealUiSourceComponent {
       case 'reactLikes':
         this.publishedLikes.update((n) => n + 1);
         this.likeBurst.update((n) => n + 1);
-        // Staggered bursts — spaced so each thumbs-up is readable.
-        window.setTimeout(() => {
-          this.zone.run(() => {
-            this.publishedLikes.update((n) => n + 1);
-            this.likeBurst.update((n) => n + 1);
-            this.cdr.markForCheck();
-          });
-        }, 1000);
-        window.setTimeout(() => {
-          this.zone.run(() => {
-            this.publishedLikes.update((n) => n + 1);
-            this.likeBurst.update((n) => n + 1);
-            this.cdr.markForCheck();
-          });
-        }, 2000);
+        // Staggered bursts — spaced so each big thumbs-up reads clearly.
+        for (const gap of [900, 1800, 2700]) {
+          window.setTimeout(() => {
+            this.zone.run(() => {
+              this.publishedLikes.update((n) => n + 1);
+              this.likeBurst.update((n) => n + 1);
+              this.cdr.markForCheck();
+            });
+          }, gap);
+        }
         return;
       case 'follow':
         if (!this.followed()) {

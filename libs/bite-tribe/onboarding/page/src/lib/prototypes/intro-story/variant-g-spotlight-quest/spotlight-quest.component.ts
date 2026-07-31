@@ -121,17 +121,25 @@ export class SpotlightQuestComponent {
     () => this.checklist().filter((c) => c.done).length,
   );
 
-  readonly spotlightStyle = computed(() => {
+  readonly shineVars = computed(() => {
     const rect = this.anchorLocal();
+    const stage = this.stage()?.nativeElement;
+    const sw = stage?.clientWidth || 390;
+    const sh = stage?.clientHeight || 700;
     if (!rect) {
-      return null;
+      return {
+        '--shine-x': `${sw * 0.5}px`,
+        '--shine-y': `${sh * 0.42}px`,
+        '--shine-w': '0px',
+        '--shine-h': '0px',
+      };
     }
     const pad = 10;
     return {
-      top: `${rect.top - pad}px`,
-      left: `${rect.left - pad}px`,
-      width: `${rect.width + pad * 2}px`,
-      height: `${rect.height + pad * 2}px`,
+      '--shine-x': `${rect.left - pad}px`,
+      '--shine-y': `${rect.top - pad}px`,
+      '--shine-w': `${rect.width + pad * 2}px`,
+      '--shine-h': `${rect.height + pad * 2}px`,
     };
   });
 

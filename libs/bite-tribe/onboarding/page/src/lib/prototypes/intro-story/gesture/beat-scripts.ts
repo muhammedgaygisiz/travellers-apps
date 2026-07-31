@@ -173,7 +173,7 @@ export const INTRO_BEAT_SCRIPTS: Record<IntroStorySceneId, IntroBeatScript> = {
           emitOnPress: { type: 'highlightDirections' },
         })
         .wait(DIRECTIONS_HOLD_MS),
-      '.source__go-hint, [data-testid="bite-details-navigation"]',
+      '[data-testid="bite-details-navigation"], .stage-drawer__go',
     ).build(),
   },
 };

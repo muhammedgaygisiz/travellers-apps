@@ -26,8 +26,8 @@ import {
 } from '../progressive-tips.model';
 
 /** Calm dwell — long enough to read a whisper line. */
-const TIP_AUTO_MS = 4800;
-const FOCUS_MORPH_MS = 380;
+const TIP_AUTO_MS = 5400;
+const FOCUS_MORPH_MS = 480;
 
 type ArcFilter = IntroStorySceneId | 'all';
 
@@ -117,17 +117,31 @@ export class SoftWhisperComponent {
         '--shine-r': '0.85rem',
       };
     }
-    const pad = Math.max(10, Math.min(16, rect.width * 0.05));
-    const w = rect.width + pad * 2;
+    const pad = Math.max(16, Math.min(28, rect.width * 0.1));
+    let w = rect.width + pad * 2;
     let h = rect.height + pad * 2;
-    const x = rect.left - pad;
+    let x = rect.left - pad;
     let y = rect.top - pad;
-    // Wide CTAs: puff into a soft oval so the cutout doesn't read as a focus rect.
-    if (w / Math.max(1, h) > 2.1) {
-      const targetH = Math.min(w / 1.55, h + 56);
+    // Soft oval bias: widen short axes so cutouts never read as hard cards.
+    const ratio = w / Math.max(1, h);
+    if (ratio > 2.0) {
+      const targetH = Math.min(Math.max(h * 1.55, w / 1.85), h + 64);
       const dy = (targetH - h) / 2;
       h = targetH;
       y -= dy;
+    } else if (ratio < 0.85) {
+      const targetW = Math.min(w * 1.35, sw * 0.78);
+      const dx = (targetW - w) / 2;
+      w = targetW;
+      x -= dx;
+    } else {
+      // Mild oval puff for near-square targets (cards).
+      const growW = Math.min(36, w * 0.08);
+      const growH = Math.min(48, h * 0.1);
+      w += growW;
+      h += growH;
+      x -= growW / 2;
+      y -= growH / 2;
     }
     return {
       '--shine-x': `${x}px`,
@@ -145,41 +159,74 @@ export class SoftWhisperComponent {
     }
     const stage = this.stage()?.nativeElement;
     const h = stage?.clientHeight || 700;
-    return rect.top + rect.height / 2 > h * 0.55;
+    return rect.top + rect.height / 2 > h * 0.52;
   });
 
-  /** Caption position via CSS vars — compose with fade/slide keyframes. */
+  /** Caption position via CSS vars — never park text inside the shine hole. */
   readonly tipStyle = computed(() => {
     const rect = this.focusRect();
-    if (!rect) {
-      return {
-        '--tip-top': 'auto',
-        '--tip-bottom': '1.35rem',
-        '--tip-left': '50%',
-        '--tip-y': '0px',
-      };
-    }
     const stage = this.stage()?.nativeElement;
     const w = stage?.clientWidth || 390;
-    const tipW = Math.min(17 * 16, w - 32);
+    const h = stage?.clientHeight || 700;
+    const tipW = Math.min(17.5 * 16, w - 34);
+    const tipH = 124;
+    const safeBottom = {
+      '--tip-top': 'auto',
+      '--tip-bottom': '1.5rem',
+      '--tip-left': '50%',
+      '--tip-y': '0%',
+    };
+
+    if (!rect) {
+      return safeBottom;
+    }
+
     const cx = rect.left + rect.width / 2;
     const left = Math.min(Math.max(cx, tipW / 2 + 16), w - tipW / 2 - 16);
-    const gap = 18;
+    const gap = 26;
+    const holePad = 18;
+    const holeTop = rect.top - holePad;
+    const holeBottom = rect.top + rect.height + holePad;
 
-    if (this.tipAbove()) {
+    // Large card / wide targets: dock caption at bottom so the shine stays clean.
+    if (rect.height > h * 0.2 || rect.width > w * 0.65) {
+      return { ...safeBottom, '--tip-left': `${left}px` };
+    }
+
+    const placeAbove = (): Record<string, string> => {
+      const top = Math.max(12, holeTop - tipH - 4);
+      if (top < 8) {
+        return { ...safeBottom, '--tip-left': `${left}px` };
+      }
       return {
-        '--tip-top': `${Math.max(12, rect.top - gap)}px`,
+        '--tip-top': `${holeTop - 4}px`,
         '--tip-bottom': 'auto',
         '--tip-left': `${left}px`,
         '--tip-y': '-100%',
       };
-    }
-    return {
-      '--tip-top': `${rect.top + rect.height + gap}px`,
-      '--tip-bottom': 'auto',
-      '--tip-left': `${left}px`,
-      '--tip-y': '0%',
     };
+
+    const placeBelow = (): Record<string, string> => {
+      const top = holeBottom + gap;
+      if (top + tipH > h - 20) {
+        return placeAbove();
+      }
+      return {
+        '--tip-top': `${top}px`,
+        '--tip-bottom': 'auto',
+        '--tip-left': `${left}px`,
+        '--tip-y': '0%',
+      };
+    };
+
+    if (this.tipAbove()) {
+      const above = placeAbove();
+      if (above['--tip-bottom'] === 'auto') {
+        return above;
+      }
+      return placeBelow();
+    }
+    return placeBelow();
   });
 
   constructor() {
@@ -317,6 +364,8 @@ export class SoftWhisperComponent {
     this.measureTimers.push(window.setTimeout(run, 80));
     this.measureTimers.push(window.setTimeout(run, 280));
     this.measureTimers.push(window.setTimeout(run, 520));
+    this.measureTimers.push(window.setTimeout(run, 900));
+    this.measureTimers.push(window.setTimeout(run, 1400));
   }
 
   private measureFocus(): void {

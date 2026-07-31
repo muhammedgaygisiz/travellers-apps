@@ -168,11 +168,11 @@ export class SoftWhisperComponent {
     const stage = this.stage()?.nativeElement;
     const w = stage?.clientWidth || 390;
     const h = stage?.clientHeight || 700;
-    const tipW = Math.min(17.5 * 16, w - 34);
-    const tipH = 124;
+    const tipW = Math.min(15.25 * 16, w - 45);
+    const tipH = 96;
     const safeBottom = {
       '--tip-top': 'auto',
-      '--tip-bottom': '1.5rem',
+      '--tip-bottom': '9.5rem',
       '--tip-left': '50%',
       '--tip-y': '0%',
     };
@@ -187,11 +187,8 @@ export class SoftWhisperComponent {
     const holePad = 18;
     const holeTop = rect.top - holePad;
     const holeBottom = rect.top + rect.height + holePad;
-
-    // Large card / wide targets: dock caption at bottom so the shine stays clean.
-    if (rect.height > h * 0.2 || rect.width > w * 0.65) {
-      return { ...safeBottom, '--tip-left': `${left}px` };
-    }
+    // Leave room for ion-footer Create Bite (~115px) + margin.
+    const footerReserve = 150;
 
     const placeAbove = (): Record<string, string> => {
       const top = Math.max(12, holeTop - tipH - 4);
@@ -208,7 +205,7 @@ export class SoftWhisperComponent {
 
     const placeBelow = (): Record<string, string> => {
       const top = holeBottom + gap;
-      if (top + tipH > h - 20) {
+      if (top + tipH > h - footerReserve) {
         return placeAbove();
       }
       return {
@@ -218,6 +215,16 @@ export class SoftWhisperComponent {
         '--tip-y': '0%',
       };
     };
+
+    // Large card / wide targets: prefer above the hole (dimmed chrome),
+    // so cream captions aren't sitting inside the color-pop.
+    if (rect.height > h * 0.2 || rect.width > w * 0.65) {
+      const above = placeAbove();
+      if (above['--tip-bottom'] === 'auto') {
+        return above;
+      }
+      return { ...safeBottom, '--tip-left': `${left}px` };
+    }
 
     if (this.tipAbove()) {
       const above = placeAbove();

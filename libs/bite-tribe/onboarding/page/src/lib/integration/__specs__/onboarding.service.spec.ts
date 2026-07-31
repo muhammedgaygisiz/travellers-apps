@@ -862,6 +862,34 @@ describe('OnboardingService', () => {
       expect(service.currentStep().id).toBe('location');
     });
 
+    it('waits for the language switch before translating the overlay', async () => {
+      // The page fires the language change without awaiting it, so tapping
+      // Next right after picking a language could translate the overlay
+      // message into a language whose file is still loading - which renders
+      // the raw key (issue #1186).
+      setup(['identity', 'visibility', 'currency']);
+      await service.initialize();
+      let finishApply: () => void = () => undefined;
+      applyLanguage.mockReturnValue(
+        new Promise<void>((resolve) => (finishApply = resolve)),
+      );
+
+      const applying = service.updateLanguage('de');
+      const advance = service.next();
+      await Promise.resolve();
+
+      expect(createLoading).not.toHaveBeenCalled();
+
+      finishApply();
+      await applying;
+      await advance;
+
+      expect(createLoading).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'onboarding-advancing' }),
+      );
+      expect(service.currentStep().id).toBe('location');
+    });
+
     it('does not re-apply the language already active', async () => {
       setup(['identity', 'visibility', 'currency']);
       await service.initialize();

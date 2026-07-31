@@ -34,6 +34,15 @@ apps/bite-tribe-business/src/assets/i18n/en.json
 - Update every relevant locale when adding or changing user-facing copy.
 - Keep tone consistent inside each locale.
 - Avoid hardcoded visible English in templates, alerts, labels, button text, empty states, and error states.
+- Load a language before activating it when the switch happens in place, and let anything that translates synchronously - loading overlays, alerts, toasts - wait for that switch to settle.
+
+## Code Anchors
+
+```text
+libs/bite-tribe/shell/src/lib/app.config.ts
+libs/bite-tribe/onboarding/data-access/src/lib/onboarding-data-access.service.ts
+libs/bite-tribe/settings/data-access/src/lib/settings-data-access.service.ts
+```
 
 ## Validation
 

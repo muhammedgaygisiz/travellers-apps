@@ -10,6 +10,16 @@ Internationalization keeps BiteTribe usable across languages and travel contexts
 - App translations live in `apps/bite-tribe/src/assets/i18n/*.json`.
 - Business app translations live in `apps/bite-tribe-business/src/assets/i18n/*.json`.
 - New visible text should update every relevant locale, not only English.
+- The consumer app re-renders translated text when the active language changes, so a surface that switches language in place does not need a reload.
+
+## Switching Language
+
+There are two ways the app changes language:
+
+- The settings page writes the preference and reloads the document, so the whole app restarts in the new language.
+- The onboarding assistant switches in place, because a reload would tear down the in-progress flow.
+
+An in-place switch has to load the locale before activating it. `setActiveLang` only announces the new language, so a synchronous `translate` running before the file arrives renders the raw key (issue #1186). Rendered text follows the switch through `reRenderOnLangChange` in the consumer app's Transloco config.
 
 ## Current Locale Scope
 
